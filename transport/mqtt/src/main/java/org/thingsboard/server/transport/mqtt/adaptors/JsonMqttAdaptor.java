@@ -46,7 +46,13 @@ import java.util.UUID;
 import static org.thingsboard.server.common.data.device.profile.MqttTopics.DEVICE_SOFTWARE_FIRMWARE_RESPONSES_TOPIC_FORMAT;
 
 
+
 /**
+ * JSON 格式的 MQTT 适配器。
+ * 负责将 MQTT 负载中的 JSON 字符串转换为对应的 内部传输层（TB自定义的消息对象） Protobuf 消息（入站），
+ * 以及将 Protobuf 消息转换为 JSON 字符串并封装为 MQTT PUBLISH 消息（出站）。
+ * 是 ThingsBoard 默认的 MQTT 数据格式实现。
+ *
  * @author Andrew Shvayka
  */
 @Component

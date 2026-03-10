@@ -1,4 +1,4 @@
-package org.thingsboard.server.transport.tcp.util;
+package org.thingsboard.server.transport.tcp.demo;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.JsonObject;

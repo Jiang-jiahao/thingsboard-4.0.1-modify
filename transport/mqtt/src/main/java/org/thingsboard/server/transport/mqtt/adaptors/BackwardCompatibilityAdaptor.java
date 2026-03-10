@@ -27,6 +27,9 @@ import org.thingsboard.server.transport.mqtt.session.MqttDeviceAwareSessionConte
 
 import java.util.Optional;
 
+/**
+ * 向后兼容适配器，内部同时持有 Protobuf 和 JSON 两个适配器
+ */
 @Data
 @AllArgsConstructor
 @Slf4j

@@ -30,6 +30,9 @@ import org.thingsboard.server.queue.discovery.PartitionService;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * 对ruleEngineMsgProducer的包装
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j

@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thingsboard.server.transport.mqtt.limits;
+package org.thingsboard.server.common.data.device.profile;
 
 import lombok.Data;
+import org.thingsboard.server.common.data.TransportTcpDataType;
 
 /**
- * 网关会话限制对象，用于存储网关会话的速率限制信息，返回给设备端（处理设备端用于获取会话限制的rpc）。
+ * ascii的tcp传输数据
+ *
+ * @author jiahaozz
  */
 @Data
-public class GatewaySessionLimits extends SessionLimits {
+public class AsciiTransportTcpDataConfiguration implements TransportTcpDataTypeConfiguration {
 
-    private SessionRateLimits gatewayRateLimits;
 
+    @Override
+    public TransportTcpDataType getTransportTcpDataType() {
+        return TransportTcpDataType.ASCII;
+    }
 }

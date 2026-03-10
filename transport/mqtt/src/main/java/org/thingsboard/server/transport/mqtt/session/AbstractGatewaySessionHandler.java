@@ -95,11 +95,15 @@ import static org.thingsboard.server.transport.mqtt.util.sparkplug.SparkplugMess
 import static org.thingsboard.server.transport.mqtt.util.sparkplug.SparkplugMessageType.messageName;
 
 /**
+ * 抽象网关会话处理器，为MQTT网关管理子设备提供基础框架。
+ * 处理子设备的连接、断开、遥测、属性、RPC等操作。
+ * 支持JSON和Protobuf两种负载格式。
  * Created by ashvayka on 19.01.17.
  */
 @Slf4j
 public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDeviceSessionContext> {
 
+    // 常量定义，用于日志和错误消息
     private static final String CAN_T_PARSE_VALUE = "Can't parse value: ";
     private static final String DEVICE_PROPERTY = "device";
     public static final String TELEMETRY = "telemetry";
@@ -108,20 +112,66 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
     public static final String RPC_RESPONSE = "Rpc response";
     public static final String ATTRIBUTES_REQUEST = "attributes request";
 
+    /**
+     * MQTT传输上下文，包含配置和共享资源
+     */
     protected final MqttTransportContext context;
+
+    /**
+     * 传输服务，用于与后端通信
+     */
     protected final TransportService transportService;
+
+    /**
+     * 网关设备的信息
+     */
     protected final TransportDeviceInfo gateway;
+
+    /**
+     * 当前网关会话的唯一ID
+     */
     @Getter
     protected final UUID sessionId;
+
+    /**
+     * 用于防止并发创建设备会话的锁映射，使用弱引用避免内存泄漏
+     */
     private final ConcurrentMap<String, Lock> deviceCreationLockMap;
+
+    /**
+     * 已连接的子设备会话上下文映射，键为设备名
+     */
     private final ConcurrentMap<String, T> devices;
+
+    /**
+     * 正在创建中的设备会话Future映射，用于异步等待设备创建完成
+     */
     private final ConcurrentMap<String, ListenableFuture<T>> deviceFutures;
+
+    /**
+     * 订阅主题与QoS的映射
+     */
     protected final ConcurrentMap<MqttTopicMatcher, Integer> mqttQoSMap;
+
+    /**
+     *  Netty通道上下文，用于发送消息
+     */
     @Getter
     protected final ChannelHandlerContext channel;
+
+    /**
+     * 网关自身的会话上下文
+     */
     protected final DeviceSessionCtx deviceSessionCtx;
+
+    /**
+     * 网关指标服务，用于收集网关和子设备指标
+     */
     protected final GatewayMetricsService gatewayMetricsService;
 
+    /**
+     * 是否覆盖子设备的活动时间（通过网关心跳）
+     */
     @Getter
     @Setter
     private boolean overwriteDevicesActivity = false;
@@ -142,10 +192,18 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         this.gatewayMetricsService = deviceSessionCtx.getContext().getGatewayMetricsService();
     }
 
+    /**
+     * 创建弱引用映射，用于存储锁对象，防止内存泄漏
+     * @return ConcurrentReferenceHashMap
+     */
     ConcurrentReferenceHashMap<String, Lock> createWeakMap() {
         return new ConcurrentReferenceHashMap<>(16, ReferenceType.WEAK);
     }
 
+    /**
+     * 处理子设备断开连接的消息。
+     * 根据网关的负载类型（JSON或Protobuf）调用对应的处理方法。
+     */
     public void onDeviceDisconnect(MqttPublishMessage mqttMsg) throws AdaptorException {
         if (isJsonPayloadType()) {
             onDeviceDisconnectJson(mqttMsg);
@@ -154,6 +212,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 处理子设备认领（Claiming）的消息。
+     */
     public void onDeviceClaim(MqttPublishMessage mqttMsg) throws AdaptorException {
         int msgId = getMsgId(mqttMsg);
         ByteBuf payload = mqttMsg.payload();
@@ -164,6 +225,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 处理子设备属性上报的消息。
+     */
     public void onDeviceAttributes(MqttPublishMessage mqttMsg) throws AdaptorException {
         int msgId = getMsgId(mqttMsg);
         ByteBuf payload = mqttMsg.payload();
@@ -174,6 +238,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 处理子设备属性请求的消息（例如读取属性值）。
+     */
     public void onDeviceAttributesRequest(MqttPublishMessage mqttMsg) throws AdaptorException {
         if (isJsonPayloadType()) {
             onDeviceAttributesRequestJson(mqttMsg);
@@ -182,6 +249,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 处理子设备RPC响应的消息。
+     */
     public void onDeviceRpcResponse(MqttPublishMessage mqttMsg) throws AdaptorException {
         int msgId = getMsgId(mqttMsg);
         ByteBuf payload = mqttMsg.payload();
@@ -192,15 +262,24 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 处理网关的心跳消息（例如通过`/gateway/ping`主题）。
+     * 如果配置了覆盖子设备活动时间，则更新所有子设备的最后活动时间。
+     */
     public void onGatewayPing() {
         if (overwriteDevicesActivity) {
             devices.forEach((deviceName, deviceSessionCtx) -> transportService.recordActivity(deviceSessionCtx.getSessionInfo()));
         }
     }
 
+    /**
+     * 网关断开连接时调用，清理所有子设备会话。
+     * 等待正在创建中的设备Future完成，然后注销会话。
+     */
     public void onDevicesDisconnect() {
         log.debug("[{}] Gateway disconnect [{}]", gateway.getTenantId(), gateway.getDeviceId());
         try {
+            // 等待所有正在创建的设备完成后再注销
             deviceFutures.forEach((name, future) -> {
                 Futures.addCallback(future, new FutureCallback<T>() {
                     @Override
@@ -215,25 +294,37 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
                     }
                 }, MoreExecutors.directExecutor());
             });
-
+            // 注销所有已连接的设备
             devices.forEach(this::deregisterSession);
         } catch (Exception e) {
             log.error("Gateway disconnect failure", e);
         }
     }
 
+    /**
+     * 当子设备被删除时（例如从数据库删除），从网关会话中移除该设备。
+     */
     public void onDeviceDeleted(String deviceName) {
         deregisterSession(deviceName);
     }
 
+    /**
+     * 获取当前节点的ID（用于分布式部署）。
+     */
     public String getNodeId() {
         return context.getNodeId();
     }
 
+    /**
+     * 获取当前使用的负载适配器（JSON或Protobuf）。
+     */
     public MqttTransportAdaptor getPayloadAdaptor() {
         return deviceSessionCtx.getPayloadAdaptor();
     }
 
+    /**
+     * 根据设备名注销子设备会话。
+     */
     void deregisterSession(String deviceName) {
         MqttDeviceAwareSessionContext deviceSessionCtx = devices.remove(deviceName);
         if (deviceSessionCtx != null) {
@@ -243,18 +334,31 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 向客户端写入MQTT消息并冲刷。
+     */
     public ChannelFuture writeAndFlush(MqttMessage mqttMessage) {
         return channel.writeAndFlush(mqttMessage);
     }
 
+    /**
+     * 获取下一个可用的消息ID（用于MQTT报文标识）。
+     */
     int nextMsgId() {
         return deviceSessionCtx.nextMsgId();
     }
 
+    /**
+     * 判断网关使用的是否是JSON负载类型。
+     */
     protected boolean isJsonPayloadType() {
         return deviceSessionCtx.isJsonPayloadType();
     }
 
+    /**
+     * 处理子设备连接的通用逻辑。
+     * 调用onDeviceConnect异步获取设备上下文，成功后发送ACK，失败时记录日志。
+     */
     protected void processOnConnect(MqttPublishMessage msg, String deviceName, String deviceType) {
         log.trace("[{}][{}][{}] onDeviceConnect: [{}]", gateway.getTenantId(), gateway.getDeviceId(), sessionId, deviceName);
         process(onDeviceConnect(deviceName, deviceType),
@@ -265,6 +369,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
                 t -> logDeviceCreationError(t, deviceName));
     }
 
+    /**
+     * 当设备信息更新时调用（例如设备配置变化），可用于更新覆盖活动时间等属性。
+     */
     public void onDeviceUpdate(TransportProtos.SessionInfoProto sessionInfo, Device device, Optional<DeviceProfile> deviceProfileOpt) {
         log.trace("[{}][{}] onDeviceUpdate: [{}]", gateway.getTenantId(), gateway.getDeviceId(), device);
         JsonNode deviceAdditionalInfo = device.getAdditionalInfo();
@@ -273,14 +380,24 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 异步获取或创建子设备的会话上下文。
+     * 使用双重检查锁和Future机制避免重复创建。
+     *
+     * @param deviceName 设备名
+     * @param deviceType 设备类型
+     * @return ListenableFuture<设备会话上下文>
+     */
     ListenableFuture<T> onDeviceConnect(String deviceName, String deviceType) {
         T result = devices.get(deviceName);
         if (result == null) {
+            // 获取或创建针对该设备名的锁
             Lock deviceCreationLock = deviceCreationLockMap.computeIfAbsent(deviceName, s -> new ReentrantLock());
             deviceCreationLock.lock();
             try {
                 result = devices.get(deviceName);
                 if (result == null) {
+                    // 如果设备上下文还不存在，则发起异步创建请求
                     return getDeviceCreationFuture(deviceName, deviceType);
                 } else {
                     return Futures.immediateFuture(result);
@@ -293,13 +410,20 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 创建设备会话的异步Future。
+     * 向TransportService发送GetOrCreateDeviceFromGatewayRequest请求，
+     * 成功后创建设备上下文，注册会话，并设置Future结果。
+     */
     private ListenableFuture<T> getDeviceCreationFuture(String deviceName, String deviceType) {
         final SettableFuture<T> futureToSet = SettableFuture.create();
         ListenableFuture<T> future = deviceFutures.putIfAbsent(deviceName, futureToSet);
         if (future != null) {
+            // 已经有正在创建的Future，直接返回
             return future;
         }
         try {
+            // 构造请求消息，包含网关ID和设备信息
             transportService.process(gateway.getTenantId(),
                     GetOrCreateDeviceFromGatewayRequestMsg.newBuilder()
                             .setDeviceName(deviceName)
@@ -310,11 +434,14 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
                     new TransportServiceCallback<>() {
                         @Override
                         public void onSuccess(GetOrCreateDeviceFromGatewayResponse msg) {
+                            // 创建具体的设备会话上下文（由子类实现）
                             T deviceSessionCtx = newDeviceSessionCtx(msg);
                             if (devices.putIfAbsent(deviceName, deviceSessionCtx) == null) {
                                 log.trace("[{}][{}][{}] First got or created device [{}], type [{}] for the gateway session", gateway.getTenantId(), gateway.getDeviceId(), sessionId, deviceName, deviceType);
                                 SessionInfoProto deviceSessionInfo = deviceSessionCtx.getSessionInfo();
+                                // 向传输服务注册异步会话
                                 transportService.registerAsyncSession(deviceSessionInfo, deviceSessionCtx);
+                                // 发送会话开启事件，并订阅属性更新和RPC
                                 transportService.process(TransportProtos.TransportToDeviceActorMsg.newBuilder()
                                         .setSessionInfo(deviceSessionInfo)
                                         .setSessionEvent(SESSION_EVENT_MSG_OPEN)
@@ -322,6 +449,7 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
                                         .setSubscribeToRPC(SUBSCRIBE_TO_RPC_ASYNC_MSG)
                                         .build(), null);
                             }
+                            // 设置Future结果
                             futureToSet.set(devices.get(deviceName));
                             deviceFutures.remove(deviceName);
                         }
@@ -340,6 +468,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 记录设备创建失败的错误日志（区分达到设备数量上限的情况）。
+     */
     private void logDeviceCreationError(Throwable t, String deviceName) {
         if (DataConstants.MAXIMUM_NUMBER_OF_DEVICES_REACHED.equals(t.getMessage())) {
             log.info("[{}][{}][{}] Failed to process device connect command: [{}] due to [{}]", gateway.getTenantId(), gateway.getDeviceId(), sessionId, deviceName,
@@ -349,12 +480,21 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 创建新的子设备会话上下文，由子类实现。
+     */
     protected abstract T newDeviceSessionCtx(GetOrCreateDeviceFromGatewayResponse msg);
 
+    /**
+     * 从MQTT发布消息中获取报文ID（packetId）。
+     */
     protected int getMsgId(MqttPublishMessage mqttMsg) {
         return mqttMsg.variableHeader().packetId();
     }
 
+
+
+    // ==================== JSON负载处理方法 ====================
     protected void onDeviceConnectJson(MqttPublishMessage mqttMsg) throws AdaptorException {
         JsonElement json = getJson(mqttMsg);
         String deviceName = checkDeviceName(getDeviceName(json));
@@ -388,11 +528,18 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 处理设备断开连接的通用逻辑：从缓存中移除设备会话，并发送ACK。
+     */
     void processOnDisconnect(MqttPublishMessage msg, String deviceName) {
         deregisterSession(deviceName);
         ack(msg, MqttReasonCodes.PubAck.SUCCESS);
     }
 
+    /**
+     * 处理JSON格式的遥测数据。
+     * 格式：{ "deviceName": [ {ts:..., values:{...}} ] }
+     */
     protected void onDeviceTelemetryJson(int msgId, ByteBuf payload) throws AdaptorException {
         JsonElement json = JsonMqttAdaptor.validateJsonPayload(sessionId, payload);
         validateJsonObject(json);
@@ -402,11 +549,16 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
                 continue;
             }
             String deviceName = deviceEntry.getKey();
+            // 异步处理遥测，防止阻塞
             process(deviceName, deviceCtx -> processPostTelemetryMsg(deviceCtx, deviceEntry.getValue(), deviceName, msgId),
                     t -> failedToProcessLog(deviceName, TELEMETRY, t));
         }
     }
 
+    /**
+     * 将JSON遥测数据转换为Protobuf消息并发送给TransportService。
+     * 同时收集网关指标。
+     */
     private void processPostTelemetryMsg(T deviceCtx, JsonElement msg, String deviceName, int msgId) {
         try {
             long systemTs = System.currentTimeMillis();
@@ -442,6 +594,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 处理Protobuf格式的遥测数据（针对子设备）。
+     */
     protected void processPostTelemetryMsg(MqttDeviceAwareSessionContext deviceCtx, TransportProtos.PostTelemetryMsg msg, String deviceName, int msgId) {
         try {
             TransportProtos.PostTelemetryMsg postTelemetryMsg = ProtoConverter.validatePostTelemetryMsg(msg.toByteArray());
@@ -452,6 +607,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 创建一个包含单个KeyValue的PostTelemetryMsg（用于Sparkplug状态等）。
+     */
     public TransportProtos.PostTelemetryMsg postTelemetryMsgCreated(TransportProtos.KeyValueProto keyValueProto, long ts) {
         List<TransportProtos.KeyValueProto> result = new ArrayList<>();
         result.add(keyValueProto);
@@ -463,6 +621,7 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         return request.build();
     }
 
+    // ==================== 设备认领处理 ====================
     private void onDeviceClaimJson(int msgId, ByteBuf payload) throws AdaptorException {
         JsonElement json = JsonMqttAdaptor.validateJsonPayload(sessionId, payload);
         validateJsonObject(json);
@@ -519,6 +678,7 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    // ==================== 设备属性处理 ====================
     private void onDeviceAttributesJson(int msgId, ByteBuf payload) throws AdaptorException {
         JsonElement json = JsonMqttAdaptor.validateJsonPayload(sessionId, payload);
         validateJsonObject(json);
@@ -573,6 +733,7 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    // ==================== 设备属性请求处理 ====================
     private void onDeviceAttributesRequestJson(MqttPublishMessage msg) throws AdaptorException {
         JsonElement json = JsonMqttAdaptor.validateJsonPayload(sessionId, msg.payload());
         validateJsonObject(json);
@@ -609,6 +770,7 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    // ==================== 设备RPC响应处理 ====================
     private void onDeviceRpcResponseJson(int msgId, ByteBuf payload) throws AdaptorException {
         JsonElement json = JsonMqttAdaptor.validateJsonPayload(sessionId, payload);
         validateJsonObject(json);
@@ -648,6 +810,7 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         transportService.process(deviceCtx.getSessionInfo(), rpcResponseMsg, getPubAckCallback(channel, deviceName, msgId, rpcResponseMsg));
     }
 
+    // ==================== 通用处理辅助方法 ====================
     private void processGetAttributeRequestMessage(MqttPublishMessage mqttMsg, String deviceName, TransportProtos.GetAttributeRequestMsg requestMsg) {
         int msgId = getMsgId(mqttMsg);
         process(deviceName, deviceCtx -> processGetAttributeRequestMessage(deviceCtx, requestMsg, deviceName, msgId),
@@ -698,6 +861,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         return ProtoMqttAdaptor.toBytes(payload);
     }
 
+    /**
+     * 发送MQTT PUBACK确认消息。
+     */
     protected void ack(MqttPublishMessage msg, MqttReasonCodes.PubAck returnCode) {
         int msgId = getMsgId(msg);
         ack(msgId, returnCode);
@@ -709,6 +875,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 根据MQTT版本决定ACK或关闭连接（用于解析失败等情况）。
+     */
     protected void ackOrClose(int msgId) {
         if (MqttVersion.MQTT_5.equals(deviceSessionCtx.getMqttVersion())) {
             ack(msgId, MqttReasonCodes.PubAck.PAYLOAD_FORMAT_INVALID);
@@ -717,6 +886,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
     }
 
+    /**
+     * 注销子设备会话，发送关闭事件，并处理Sparkplug离线状态。
+     */
     private void deregisterSession(String deviceName, MqttDeviceAwareSessionContext deviceSessionCtx) {
         if (this.deviceSessionCtx.isSparkplug()) {
             sendSparkplugStateOnTelemetry(deviceSessionCtx.getSessionInfo(),
@@ -727,6 +899,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         log.debug("[{}][{}][{}] Removed device [{}] from the gateway session", gateway.getTenantId(), gateway.getDeviceId(), sessionId, deviceName);
     }
 
+    /**
+     * 发送Sparkplug连接状态作为遥测（用于出生/死亡消息）。
+     */
     public void sendSparkplugStateOnTelemetry(TransportProtos.SessionInfoProto sessionInfo, String deviceName, SparkplugConnectionState connectionState, long ts) {
         TransportProtos.KeyValueProto.Builder keyValueProtoBuilder = TransportProtos.KeyValueProto.newBuilder();
         keyValueProtoBuilder.setKey(messageName(STATE));
@@ -736,6 +911,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         transportService.process(sessionInfo, postTelemetryMsg, getPubAckCallback(channel, deviceName, -1, postTelemetryMsg));
     }
 
+    /**
+     * 获取PUBACK回调，用于处理消息发送成功或失败后的动作。
+     */
     private <T> TransportServiceCallback<Void> getPubAckCallback(final ChannelHandlerContext ctx, final String deviceName, final int msgId, final T msg) {
         return new TransportServiceCallback<Void>() {
             @Override
@@ -763,6 +941,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         };
     }
 
+    /**
+     * 处理设备消息的通用模板：先获取设备上下文，再执行成功回调，失败时执行失败回调。
+     */
     protected void process(String deviceName, Consumer<T> onSuccess, Consumer<Throwable> onFailure) {
         ListenableFuture<T> deviceCtxFuture = onDeviceConnect(deviceName, DEFAULT_DEVICE_TYPE);
         process(deviceCtxFuture, onSuccess, onFailure);
@@ -782,6 +963,9 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
     }
 
 
+    /**
+     * 关闭子设备会话（MQTT 5中可能发送DISCONNECT消息给网关）。
+     */
     private void closeDeviceSession(String deviceName, MqttReasonCodes.Disconnect returnCode) {
         try {
             if (MqttVersion.MQTT_5.equals(deviceSessionCtx.getMqttVersion())) {

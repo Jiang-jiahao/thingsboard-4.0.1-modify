@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thingsboard.server.transport.mqtt.limits;
+package org.thingsboard.server.transport.tcp;
 
-import lombok.Data;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 
-/**
- * 网关会话限制对象，用于存储网关会话的速率限制信息，返回给设备端（处理设备端用于获取会话限制的rpc）。
- */
-@Data
-public class GatewaySessionLimits extends SessionLimits {
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-    private SessionRateLimits gatewayRateLimits;
-
+@Retention(RetentionPolicy.RUNTIME)
+@ConditionalOnExpression("'${service.type:null}'=='tb-transport' || ('${service.type:null}'=='monolith' && '${transport.api_enabled:true}'=='true' && '${transport.tcp.enabled}'=='true')")
+public @interface TbTcpTransportComponent {
 }

@@ -1,4 +1,4 @@
-//package org.thingsboard.server.transport.tcp.handler;
+//package org.thingsboard.server.transport.tcp.adaptors;
 //
 //import io.netty.channel.ChannelHandlerContext;
 //import io.netty.channel.ChannelInboundHandlerAdapter;

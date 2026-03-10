@@ -111,6 +111,7 @@ public class TbKafkaProducerTemplate<T extends TbQueueMsg> implements TbQueuePro
                 addAnalyticHeaders(headers);
             }
             Integer partition = tpi.isUseInternalPartition() ? tpi.getPartition().orElse(null) : null;
+            // 如果未指定分区，则会根据该key的hash值进行分区路由
             record = new ProducerRecord<>(topic, partition, key, data, headers);
             producer.send(record, (metadata, exception) -> {
                 if (exception == null) {

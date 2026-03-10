@@ -145,29 +145,35 @@ public class DeviceProvisionServiceImpl implements DeviceProvisionService {
         if (StringUtils.isEmpty(provisionRequestKey) || StringUtils.isEmpty(provisionRequestSecret)) {
             throw new ProvisionFailedException(ProvisionResponseStatus.NOT_FOUND.name());
         }
-
+        // 根据provisionKey查询设备配置
         DeviceProfile targetProfile = deviceProfileService.findDeviceProfileByProvisionDeviceKey(provisionRequestKey);
 
         if (targetProfile == null || targetProfile.getProfileData().getProvisionConfiguration() == null ||
                 targetProfile.getProfileData().getProvisionConfiguration().getProvisionDeviceSecret() == null) {
             throw new ProvisionFailedException(ProvisionResponseStatus.NOT_FOUND.name());
         }
-
+        // 根据设备名称和租户id查询设备
         Device targetDevice = deviceService.findDeviceByTenantIdAndName(targetProfile.getTenantId(), provisionRequest.getDeviceName());
 
+        // 根据不同的预配置策略来创建设备
         switch (targetProfile.getProvisionType()) {
             case ALLOW_CREATE_NEW_DEVICES:
+                // 只要密钥名和密钥匹配，则自动创建设备
                 if (targetProfile.getProfileData().getProvisionConfiguration().getProvisionDeviceSecret().equals(provisionRequestSecret)) {
+                    // 表明预配置的密钥名和密钥匹配（也就是预配置的账号密码对了，可以进行自动创建设备了）
                     if (targetDevice != null) {
+                        // 表示设备已经存在
                         log.warn("[{}] The device is present and could not be provisioned once more!", targetDevice.getName());
                         notify(targetDevice, provisionRequest, TbMsgType.PROVISION_FAILURE, false);
                         throw new ProvisionFailedException(ProvisionResponseStatus.FAILURE.name());
                     } else {
+                        // 设备不存在，进行创建
                         return createDevice(provisionRequest, targetProfile);
                     }
                 }
                 break;
             case CHECK_PRE_PROVISIONED_DEVICES:
+                // 密钥名和密钥匹配，并且匹配的设备名的设备配置符合，则激活设备（不会自动创建设备，需要设备本身已经创建好）
                 if (targetProfile.getProfileData().getProvisionConfiguration().getProvisionDeviceSecret().equals(provisionRequestSecret)) {
                     if (targetDevice != null && targetDevice.getDeviceProfileId().equals(targetProfile.getId())) {
                         return processProvision(targetDevice, provisionRequest);

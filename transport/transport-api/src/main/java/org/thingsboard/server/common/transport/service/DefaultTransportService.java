@@ -128,6 +128,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
+ * 默认的传输服务实现类，负责处理设备会话生命周期、消息路由、速率限制、设备认证、RPC通信等核心功能。
+ * 它是ThingsBoard中传输层的核心组件，协调设备、规则引擎、核心服务之间的消息传递。
  * Created by ashvayka on 17.10.18.
  */
 @Slf4j
@@ -136,36 +138,59 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DefaultTransportService extends TransportActivityManager implements TransportService {
 
+    /** 预定义的会话打开事件消息 */
     public static final TransportProtos.SessionEventMsg SESSION_EVENT_MSG_OPEN = TransportProtos.SessionEventMsg.newBuilder()
             .setSessionType(TransportProtos.SessionType.ASYNC)
             .setEvent(TransportProtos.SessionEvent.OPEN).build();
+
+    /** 预定义的属性订阅消息（异步会话） */
     public static final TransportProtos.SubscribeToAttributeUpdatesMsg SUBSCRIBE_TO_ATTRIBUTE_UPDATES_ASYNC_MSG = TransportProtos.SubscribeToAttributeUpdatesMsg.newBuilder()
             .setSessionType(TransportProtos.SessionType.ASYNC).build();
+
+    /** 预定义的RPC订阅消息（异步会话） */
     public static final TransportProtos.SubscribeToRPCMsg SUBSCRIBE_TO_RPC_ASYNC_MSG = TransportProtos.SubscribeToRPCMsg.newBuilder()
             .setSessionType(TransportProtos.SessionType.ASYNC).build();
 
+    /** 用于生成日志时间戳的原子计数器 */
     private final AtomicInteger atomicTs = new AtomicInteger(0);
 
+    /** 是否启用传输日志 */
     @Value("${transport.log.enabled:true}")
     private boolean logEnabled;
+
+    /** 传输日志最大长度 */
     @Value("${transport.log.max_length:1024}")
     private int logMaxLength;
+
+    /** 客户端侧RPC超时时间（毫秒） */
     @Value("${transport.client_side_rpc.timeout:60000}")
     private long clientSideRpcTimeout;
+
+    /** 传输通知轮询间隔 */
     @Value("${queue.transport.poll_interval}")
     private int notificationsPollDuration;
+
+    /** 是否启用统计 */
     @Value("${transport.stats.enabled:false}")
     private boolean statsEnabled;
 
     @Autowired
     @Lazy
     private TbApiUsageReportClient apiUsageClient;
+
+    /** 用于定时打印统计信息的Map */
     private final Map<String, Number> statsMap = new LinkedHashMap<>();
 
     private final Gson gson = new Gson();
     private final PartitionService partitionService;
+
+    /** 传输服务所需要的队列工厂类，用来生产和其他服务通信的生产者和消费者 */
     private final TbTransportQueueFactory queueProvider;
+
+    /** 生产者提供器，实际依赖TbTransportQueueFactory */
     private final TbQueueProducerProvider producerProvider;
+
+    /** 规则引擎消息生产者服务-实际实现依赖下面的ruleEngineMsgProducer */
     private final TbRuleEngineProducerService ruleEngineProducerService;
 
     private final TopicService topicService;
@@ -181,18 +206,34 @@ public class DefaultTransportService extends TransportActivityManager implements
     private final NotificationRuleProcessor notificationRuleProcessor;
     private final EntityLimitsCache entityLimitsCache;
 
+    /** 传输API请求模板（用于与核心服务交互） */
     protected TbQueueRequestTemplate<TbProtoQueueMsg<TransportApiRequestMsg>, TbProtoQueueMsg<TransportApiResponseMsg>> transportApiRequestTemplate;
+
+    /** 规则引擎消息生产者 */
     protected TbQueueProducer<TbProtoQueueMsg<ToRuleEngineMsg>> ruleEngineMsgProducer;
+
+    /** 核心服务消息生产者 */
     protected TbQueueProducer<TbProtoQueueMsg<ToCoreMsg>> tbCoreMsgProducer;
+
+    /** 传输通知消费者管理器（处理来自核心的通知） */
     protected QueueConsumerManager<TbProtoQueueMsg<ToTransportMsg>> transportNotificationsConsumer;
 
+    /** 规则引擎消息统计 */
     protected MessagesStats ruleEngineProducerStats;
+
+    /** 核心服务消息统计 */
     protected MessagesStats tbCoreProducerStats;
+
+    /** 传输API消息统计 */
     protected MessagesStats transportApiStats;
 
+    /** 传输回调执行线程池 */
     protected ExecutorService transportCallbackExecutor;
+
+    /** 消费者线程池 */
     private ExecutorService consumerExecutor;
 
+    /** 存储待处理的从设备到服务器的RPC请求（requestId -> 元数据） */
     private final Map<String, RpcRequestMetadata> toServerRpcPendingMap = new ConcurrentHashMap<>();
 
     @PostConstruct
@@ -205,6 +246,7 @@ public class DefaultTransportService extends TransportActivityManager implements
         this.scheduler.scheduleAtFixedRate(this::invalidateRateLimits, new Random().nextInt((int) sessionReportTimeout), sessionReportTimeout, TimeUnit.MILLISECONDS);
         transportApiRequestTemplate = queueProvider.createTransportApiRequestTemplate();
         transportApiRequestTemplate.setMessagesStats(transportApiStats);
+
         ruleEngineMsgProducer = producerProvider.getRuleEngineMsgProducer();
         tbCoreMsgProducer = producerProvider.getTbCoreMsgProducer();
         transportApiRequestTemplate.init();

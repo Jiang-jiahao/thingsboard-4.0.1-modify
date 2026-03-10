@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
+ * 标准MQTT网关会话处理器，用于处理普通网关设备（非Sparkplug）的子设备管理。
  * Created by nickAS21 on 26.12.22
  */
 @Slf4j
@@ -38,6 +39,9 @@ public class GatewaySessionHandler extends AbstractGatewaySessionHandler<Gateway
         super(deviceSessionCtx, sessionId, overwriteDevicesActivity);
     }
 
+    /**
+     * 处理子设备连接请求（入口方法），根据负载类型分发到JSON或Protobuf具体处理。
+     */
     public void onDeviceConnect(MqttPublishMessage mqttMsg) throws AdaptorException {
         if (isJsonPayloadType()) {
             onDeviceConnectJson(mqttMsg);
@@ -46,6 +50,9 @@ public class GatewaySessionHandler extends AbstractGatewaySessionHandler<Gateway
         }
     }
 
+    /**
+     * 处理子设备遥测数据（入口方法），根据负载类型分发。
+     */
     public void onDeviceTelemetry(MqttPublishMessage mqttMsg) throws AdaptorException {
         int msgId = getMsgId(mqttMsg);
         ByteBuf payload = mqttMsg.payload();
@@ -56,16 +63,25 @@ public class GatewaySessionHandler extends AbstractGatewaySessionHandler<Gateway
         }
     }
 
+    /**
+     * 创建新的子设备会话上下文（GatewayDeviceSessionContext）。
+     */
     @Override
     protected GatewayDeviceSessionContext newDeviceSessionCtx(GetOrCreateDeviceFromGatewayResponse msg) {
         return new GatewayDeviceSessionContext(this, msg.getDeviceInfo(), msg.getDeviceProfile(), mqttQoSMap, transportService);
     }
 
+    /**
+     * 当网关设备本身信息更新时调用，更新覆盖活动时间的标志，并通知指标服务。
+     */
     public void onGatewayUpdate(TransportProtos.SessionInfoProto sessionInfo, Device device, Optional<DeviceProfile> deviceProfileOpt) {
         this.onDeviceUpdate(sessionInfo, device, deviceProfileOpt);
         gatewayMetricsService.onDeviceUpdate(sessionInfo, gateway.getDeviceId());
     }
 
+    /**
+     * 当网关设备被删除时调用，清理指标服务中的相关数据。
+     */
     public void onGatewayDelete(DeviceId deviceId) {
         gatewayMetricsService.onDeviceDelete(deviceId);
     }

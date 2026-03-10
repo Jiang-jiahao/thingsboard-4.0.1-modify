@@ -42,16 +42,47 @@ import org.thingsboard.server.transport.mqtt.session.MqttDeviceAwareSessionConte
 import java.util.Optional;
 
 /**
+ * 将 MQTT 消息转换为内部传输层（TB自定义的消息对象） Protobuf 消息，以及将内部 Protobuf 消息转换为 MQTT 消息的方法。
  * @author Andrew Shvayka
  */
 public interface MqttTransportAdaptor {
 
+    /**
+     * 全局共享的 ByteBuf 分配器，用于创建 Netty 缓冲区
+     */
     ByteBufAllocator ALLOCATOR = new UnpooledByteBufAllocator(false);
 
+
+    /**
+     * 将收到的 MQTT PUBLISH 消息转换为 PostTelemetryMsg（遥测数据）
+     *
+     * @param ctx      会话上下文
+     * @param inbound  收到的 MQTT 发布消息
+     * @return 转换后的遥测 Protobuf 消息
+     * @throws AdaptorException 转换异常
+     */
     PostTelemetryMsg convertToPostTelemetry(MqttDeviceAwareSessionContext ctx, MqttPublishMessage inbound) throws AdaptorException;
 
+    /**
+     * 将收到的 MQTT PUBLISH 消息转换为 PostAttributeMsg（属性数据）
+     *
+     * @param ctx      会话上下文
+     * @param inbound  收到的 MQTT 发布消息
+     * @return 转换后的属性 Protobuf 消息
+     * @throws AdaptorException 转换异常
+     */
     PostAttributeMsg convertToPostAttributes(MqttDeviceAwareSessionContext ctx, MqttPublishMessage inbound) throws AdaptorException;
 
+
+    /**
+     * 将收到的 MQTT PUBLISH 消息转换为 GetAttributeRequestMsg（获取属性请求）
+     *
+     * @param ctx       会话上下文
+     * @param inbound   收到的 MQTT 发布消息
+     * @param topicBase 主题基础部分（用于提取请求 ID）
+     * @return 转换后的获取属性请求 Protobuf 消息
+     * @throws AdaptorException 转换异常
+     */
     GetAttributeRequestMsg convertToGetAttributes(MqttDeviceAwareSessionContext ctx, MqttPublishMessage inbound, String topicBase) throws AdaptorException;
 
     ToDeviceRpcResponseMsg convertToDeviceRpcResponse(MqttDeviceAwareSessionContext ctx, MqttPublishMessage mqttMsg, String topicBase) throws AdaptorException;
@@ -60,10 +91,39 @@ public interface MqttTransportAdaptor {
 
     ClaimDeviceMsg convertToClaimDevice(MqttDeviceAwareSessionContext ctx, MqttPublishMessage inbound) throws AdaptorException;
 
+    /**
+     * 将 GetAttributeResponseMsg（获取属性响应）转换为可发送的 MQTT PUBLISH 消息（直连设备）
+     *
+     * @param ctx          会话上下文
+     * @param responseMsg  属性响应 Protobuf 消息
+     * @param topicBase    主题基础部分
+     * @return 包含 MQTT 消息的 Optional（如果请求 ID 无效则返回空）
+     * @throws AdaptorException 转换异常（如响应中包含错误）
+     */
     Optional<MqttMessage> convertToPublish(MqttDeviceAwareSessionContext ctx, GetAttributeResponseMsg responseMsg, String topicBase) throws AdaptorException;
 
+
+    /**
+     * 将 GetAttributeResponseMsg 转换为可发送的 MQTT PUBLISH 消息（网关场景，携带设备名称）
+     *
+     * @param ctx          会话上下文
+     * @param deviceName   目标子设备名称
+     * @param responseMsg  属性响应 Protobuf 消息
+     * @return 包含 MQTT 消息的 Optional
+     * @throws AdaptorException 转换异常
+     */
     Optional<MqttMessage> convertToGatewayPublish(MqttDeviceAwareSessionContext ctx, String deviceName, GetAttributeResponseMsg responseMsg) throws AdaptorException;
 
+
+    /**
+     * 将 AttributeUpdateNotificationMsg（属性更新通知）转换为可发送的 MQTT PUBLISH 消息（直连设备）
+     *
+     * @param ctx             会话上下文
+     * @param notificationMsg 属性更新通知 Protobuf 消息
+     * @param topic           目标主题
+     * @return 包含 MQTT 消息的 Optional
+     * @throws AdaptorException 转换异常
+     */
     Optional<MqttMessage> convertToPublish(MqttDeviceAwareSessionContext ctx, AttributeUpdateNotificationMsg notificationMsg, String topic) throws AdaptorException;
 
     Optional<MqttMessage> convertToGatewayPublish(MqttDeviceAwareSessionContext ctx, String deviceName, AttributeUpdateNotificationMsg notificationMsg) throws AdaptorException;
@@ -82,6 +142,14 @@ public interface MqttTransportAdaptor {
 
     Optional<MqttMessage> convertToGatewayDeviceDisconnectPublish(MqttDeviceAwareSessionContext ctx, String deviceName, int reasonCode) throws AdaptorException;
 
+    /**
+     * 默认方法：创建 MQTT PUBLISH 消息的便捷工具
+     *
+     * @param ctx              会话上下文
+     * @param topic            主题
+     * @param payloadInBytes   负载字节数组
+     * @return 构造好的 MqttPublishMessage 对象
+     */
     default MqttPublishMessage createMqttPublishMsg(MqttDeviceAwareSessionContext ctx, String topic, byte[] payloadInBytes) {
         MqttFixedHeader mqttFixedHeader =
                 new MqttFixedHeader(MqttMessageType.PUBLISH, false, ctx.getQoSForTopic(topic), false, 0);

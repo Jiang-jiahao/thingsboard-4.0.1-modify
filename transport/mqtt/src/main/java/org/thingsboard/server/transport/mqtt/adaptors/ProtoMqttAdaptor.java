@@ -40,6 +40,14 @@ import java.util.Optional;
 
 import static org.thingsboard.server.common.data.device.profile.MqttTopics.DEVICE_SOFTWARE_FIRMWARE_RESPONSES_TOPIC_FORMAT;
 
+/**
+ * Protobuf 格式的 MQTT 适配器。
+ * <p>
+ * 负责将 MQTT 负载中的二进制 Protobuf 数据转换为对应的 Protobuf 消息（入站），
+ * 以及将 Protobuf 消息序列化为二进制并封装为 MQTT PUBLISH 消息（出站）。
+ * 要求设备使用预定义的 Protobuf schema（通过设备配置下发）进行消息编码。
+ * 相比 JSON，Protobuf 格式更高效，适合资源受限或追求性能的设备。
+ */
 @Component
 @Slf4j
 public class ProtoMqttAdaptor implements MqttTransportAdaptor {

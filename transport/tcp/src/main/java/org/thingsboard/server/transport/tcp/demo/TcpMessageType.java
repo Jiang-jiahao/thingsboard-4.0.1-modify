@@ -1,4 +1,4 @@
-package org.thingsboard.server.transport.tcp.util;
+package org.thingsboard.server.transport.tcp.demo;
 
 /**
  * TCP传输层消息类型枚举

@@ -19,29 +19,27 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.thingsboard.server.common.data.DeviceTransportType;
+import org.thingsboard.server.common.data.TransportTcpDataType;
 
 import java.io.Serializable;
 
+/**
+ * TCP传输数据类型配置
+ *
+ * @author jiahaozz
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "type")
+        property = "transportTcpDataType")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = DefaultDeviceProfileTransportConfiguration.class, name = "DEFAULT"),
-        @JsonSubTypes.Type(value = MqttDeviceProfileTransportConfiguration.class, name = "MQTT"),
-        @JsonSubTypes.Type(value = TcpDeviceProfileTransportConfiguration.class, name = "TCP"),
-        @JsonSubTypes.Type(value = Lwm2mDeviceProfileTransportConfiguration.class, name = "LWM2M"),
-        @JsonSubTypes.Type(value = CoapDeviceProfileTransportConfiguration.class, name = "COAP"),
-        @JsonSubTypes.Type(value = SnmpDeviceProfileTransportConfiguration.class, name = "SNMP")
-})
-public interface DeviceProfileTransportConfiguration extends Serializable {
+        @JsonSubTypes.Type(value = JsonTransportTcpDataConfiguration.class, name = "JSON"),
+        @JsonSubTypes.Type(value = AsciiTransportTcpDataConfiguration.class, name = "ASCII"),
+        @JsonSubTypes.Type(value = HexTransportTcpDataConfiguration.class, name = "HEX")})
+public interface TransportTcpDataTypeConfiguration extends Serializable {
 
     @JsonIgnore
-    DeviceTransportType getType();
-
-    default void validate() {
-    }
+    TransportTcpDataType getTransportTcpDataType();
 
 }
