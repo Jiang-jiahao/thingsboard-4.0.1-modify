@@ -49,10 +49,10 @@ public class TcpTransportServerInitializer extends ChannelInitializer<SocketChan
 //        pipeline.addLast("decoder", new MqttDecoder(context.getMaxPayloadSize()));
 //        pipeline.addLast("encoder", MqttEncoder.INSTANCE);
 
-        TcpTransportHandler handler = new TcpTransportHandler(context);
-
-        pipeline.addLast(handler);
-        ch.closeFuture().addListener(handler);
+//        TcpTransportHandler handler = new TcpTransportHandler(context);
+//
+//        pipeline.addLast(handler);
+//        ch.closeFuture().addListener(handler);
     }
 
 }

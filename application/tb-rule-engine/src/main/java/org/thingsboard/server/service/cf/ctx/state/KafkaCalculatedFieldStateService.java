@@ -40,7 +40,7 @@ import org.thingsboard.server.queue.discovery.PartitionService;
 import org.thingsboard.server.queue.discovery.QueueKey;
 import org.thingsboard.server.queue.kafka.TbKafkaProducerTemplate;
 import org.thingsboard.server.queue.provider.TbRuleEngineQueueFactory;
-import org.thingsboard.server.service.cf.AbstractCalculatedFieldStateService;
+import org.thingsboard.server.service.cf.ctx.AbstractCalculatedFieldStateService;
 import org.thingsboard.server.service.cf.ctx.CalculatedFieldEntityCtxId;
 
 import java.util.concurrent.atomic.AtomicInteger;

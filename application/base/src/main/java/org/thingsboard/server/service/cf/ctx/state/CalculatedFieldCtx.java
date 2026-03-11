@@ -46,6 +46,24 @@ import java.util.Map;
 
 import static org.thingsboard.common.util.ExpressionFunctionsUtil.userDefinedFunctions;
 
+/**
+ * 计算字段上下文类，封装了单个计算字段在运行时的所有信息与状态。
+ * <p>
+ * 主要职责：
+ * <ul>
+ *   <li>存储计算字段的配置（参数、输出、表达式/脚本等）</li>
+ *   <li>管理参数与实体键（主实体/关联实体）的映射关系</li>
+ *   <li>初始化并持有表达式引擎（MVEL/exp4j）或 TBEL 脚本引擎</li>
+ *   <li>判断传入的数据（遥测/属性）是否与当前计算字段关心的参数匹配</li>
+ *   <li>记录租户级限制（如滚动窗口最大点数、状态大小等）</li>
+ * </ul>
+ * </p>
+ * <p>
+ * 每个计算字段实例对应一个 {@link CalculatedField}，并在运行时由 {@code CalculatedFieldService} 管理其生命周期。
+ * </p>
+ *
+ * @author Thingsboard
+ */
 @Data
 public class CalculatedFieldCtx {
 

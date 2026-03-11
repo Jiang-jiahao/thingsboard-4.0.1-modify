@@ -28,7 +28,7 @@ import org.thingsboard.server.queue.common.TbProtoQueueMsg;
 import org.thingsboard.server.queue.common.consumer.PartitionedQueueConsumerManager;
 import org.thingsboard.server.queue.common.state.DefaultQueueStateService;
 import org.thingsboard.server.queue.discovery.QueueKey;
-import org.thingsboard.server.service.cf.AbstractCalculatedFieldStateService;
+import org.thingsboard.server.service.cf.ctx.AbstractCalculatedFieldStateService;
 import org.thingsboard.server.service.cf.CfRocksDb;
 import org.thingsboard.server.service.cf.ctx.CalculatedFieldEntityCtxId;
 

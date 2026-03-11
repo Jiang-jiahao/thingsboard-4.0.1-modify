@@ -29,6 +29,9 @@ import javax.script.ScriptException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * 计算字段tbel脚本执行引擎
+ */
 @Slf4j
 public class CalculatedFieldTbelScriptEngine implements CalculatedFieldScriptEngine {
 

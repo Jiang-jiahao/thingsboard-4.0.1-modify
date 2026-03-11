@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thingsboard.server.service.cf;
+package org.thingsboard.server.service.cf.ctx;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.thingsboard.server.actors.ActorSystemContext;
@@ -26,7 +26,7 @@ import org.thingsboard.server.gen.transport.TransportProtos.ToCalculatedFieldMsg
 import org.thingsboard.server.queue.common.TbProtoQueueMsg;
 import org.thingsboard.server.queue.common.state.QueueStateService;
 import org.thingsboard.server.queue.discovery.QueueKey;
-import org.thingsboard.server.service.cf.ctx.CalculatedFieldEntityCtxId;
+import org.thingsboard.server.service.cf.CalculatedFieldStateService;
 import org.thingsboard.server.service.cf.ctx.state.CalculatedFieldState;
 
 import java.util.Collection;
