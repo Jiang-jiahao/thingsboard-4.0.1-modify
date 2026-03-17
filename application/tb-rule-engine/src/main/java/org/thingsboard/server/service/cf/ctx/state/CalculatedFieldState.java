@@ -26,6 +26,9 @@ import org.thingsboard.server.service.cf.ctx.CalculatedFieldEntityCtxId;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 计算字段状态接口
+ */
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,

@@ -27,6 +27,9 @@ import org.thingsboard.server.service.cf.ctx.state.CalculatedFieldState;
 
 import java.util.Set;
 
+/**
+ * 专注于计算字段状态的持久化管理
+ */
 public interface CalculatedFieldStateService {
 
     void init(PartitionedQueueConsumerManager<TbProtoQueueMsg<ToCalculatedFieldMsg>> eventConsumer);

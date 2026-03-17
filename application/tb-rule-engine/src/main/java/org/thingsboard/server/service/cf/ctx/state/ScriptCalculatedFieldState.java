@@ -30,29 +30,70 @@ import org.thingsboard.server.common.data.cf.configuration.Output;
 import org.thingsboard.server.service.cf.CalculatedFieldResult;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * TBEL 脚本计算字段的状态实现。
+ * <p>
+ * 此类对应 {@link CalculatedFieldType#SCRIPT} 类型的计算字段，使用 TBEL 脚本引擎执行计算。
+ * 它支持复杂的数据结构（如数组、对象），参数可以是单值或滚动窗口值，计算结果可以是任意 JSON 对象。
+ * </p>
+ *
+ * @author Thingsboard
+ * @see BaseCalculatedFieldState
+ * @see CalculatedFieldType#SCRIPT
+ */
 @Data
 @Slf4j
 @NoArgsConstructor
 public class ScriptCalculatedFieldState extends BaseCalculatedFieldState {
 
+    /**
+     * 使用必需的参数列表构造状态对象。
+     *
+     * @param requiredArguments 必需的参数名称列表
+     */
     public ScriptCalculatedFieldState(List<String> requiredArguments) {
         super(requiredArguments);
     }
 
+    /**
+     * 获取计算字段类型，固定返回 {@link CalculatedFieldType#SCRIPT}。
+     *
+     * @return 计算字段类型
+     */
     @Override
     public CalculatedFieldType getType() {
         return CalculatedFieldType.SCRIPT;
     }
 
+    /**
+     * 验证新条目：脚本类型允许任何参数类型（单值或滚动窗口），因此不做验证。
+     *
+     * @param newEntry 待验证的新参数条目
+     */
     @Override
     protected void validateNewEntry(ArgumentEntry newEntry) {
+        // 脚本类型不做额外验证
     }
 
+    /**
+     * 执行计算。
+     * <p>
+     * 步骤：
+     * <ol>
+     *   <li>构造 TBEL 脚本的参数列表，第一个元素为 {@link TbelCfCtx} 上下文对象，后续为各参数的值或对象。</li>
+     *   <li>将每个参数条目转换为 {@link TbelCfArg} 对象，单值参数提取其值放入参数列表，滚动窗口参数直接放入对象。</li>
+     *   <li>调用脚本引擎的 {@code executeJsonAsync} 方法异步执行脚本，返回 {@link JsonNode} 结果。</li>
+     *   <li>将结果封装为 {@link CalculatedFieldResult} 返回。</li>
+     * </ol>
+     * </p>
+     *
+     * @param ctx 计算字段上下文，包含脚本引擎、参数名称列表、输出配置等信息
+     * @return 包含计算结果的 {@link ListenableFuture}
+     */
     @Override
     public ListenableFuture<CalculatedFieldResult> performCalculation(CalculatedFieldCtx ctx) {
         Map<String, TbelCfArg> arguments = new LinkedHashMap<>();
@@ -76,6 +117,12 @@ public class ScriptCalculatedFieldState extends BaseCalculatedFieldState {
         );
     }
 
+    /**
+     * 将内部存储的参数条目转换为 TBEL 脚本引擎可识别的 {@link TbelCfArg} 对象。
+     *
+     * @param key 参数名称
+     * @return 对应的 TBEL 参数对象
+     */
     private TbelCfArg toTbelArgument(String key) {
         return arguments.get(key).toTbelCfArg();
     }

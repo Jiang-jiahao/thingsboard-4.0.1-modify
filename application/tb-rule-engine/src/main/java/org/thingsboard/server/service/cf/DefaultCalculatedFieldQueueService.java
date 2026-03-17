@@ -58,6 +58,9 @@ import java.util.function.Supplier;
 import static org.thingsboard.server.common.util.ProtoUtils.toTsKvProto;
 import static org.thingsboard.server.utils.CalculatedFieldUtils.toProto;
 
+/**
+ * 推送消息到计算字段服务
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor

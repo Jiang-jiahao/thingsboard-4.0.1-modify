@@ -30,6 +30,9 @@ import org.thingsboard.server.service.cf.ctx.state.CalculatedFieldState;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 提供计算字段的核心业务逻辑
+ */
 public interface CalculatedFieldProcessingService {
 
     ListenableFuture<CalculatedFieldState> fetchStateFromDb(CalculatedFieldCtx ctx, EntityId entityId);
