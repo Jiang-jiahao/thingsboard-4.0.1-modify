@@ -12,6 +12,7 @@
     <artifactId>application</artifactId>
     <packaging>pom</packaging>
     <modules>
+        <module>actors</module>
         <module>monolith</module>
         <module>tb-core</module>
         <module>tb-rule-engine</module>
