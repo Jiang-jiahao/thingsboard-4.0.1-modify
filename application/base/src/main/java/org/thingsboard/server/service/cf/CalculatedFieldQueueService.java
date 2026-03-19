@@ -25,17 +25,8 @@ import org.thingsboard.server.common.data.kv.TimeseriesSaveResult;
 
 import java.util.List;
 
-/**
- * 推送消息到计算字段服务
- */
 public interface CalculatedFieldQueueService extends RuleEngineCalculatedFieldQueueService {
 
-    /**
-     * Filter CFs based on the request entity. Push to the queue if any matching CF exist;
-     *
-     * @param request - telemetry save request;
-     * @param callback
-     */
     void pushRequestToQueue(TimeseriesSaveRequest request, TimeseriesSaveResult result, FutureCallback<Void> callback);
 
     void pushRequestToQueue(AttributesSaveRequest request, List<Long> result, FutureCallback<Void> callback);

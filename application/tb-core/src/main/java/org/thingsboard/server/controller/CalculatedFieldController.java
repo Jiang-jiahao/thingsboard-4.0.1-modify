@@ -37,6 +37,7 @@ import org.thingsboard.script.api.tbel.TbelCfArg;
 import org.thingsboard.script.api.tbel.TbelCfCtx;
 import org.thingsboard.script.api.tbel.TbelCfSingleValueArg;
 import org.thingsboard.script.api.tbel.TbelInvokeService;
+import org.thingsboard.script.api.ScriptType;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.EventInfo;
 import org.thingsboard.server.common.data.HasTenantId;
@@ -54,8 +55,6 @@ import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.config.annotations.ApiOperation;
 import org.thingsboard.server.dao.event.EventService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
-import org.thingsboard.server.service.cf.ctx.state.CalculatedFieldScriptEngine;
-import org.thingsboard.server.service.cf.ctx.state.CalculatedFieldTbelScriptEngine;
 import org.thingsboard.server.service.entitiy.cf.TbCalculatedFieldService;
 import org.thingsboard.server.service.security.model.SecurityUser;
 import org.thingsboard.server.service.security.permission.Operation;
@@ -67,7 +66,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 import static org.thingsboard.server.controller.ControllerConstants.CF_TEXT_SEARCH_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.ENTITY_ID_PARAM_DESCRIPTION;
@@ -235,14 +236,7 @@ public class CalculatedFieldController extends BaseController {
                 throw new IllegalArgumentException("TBEL script engine is disabled!");
             }
 
-            CalculatedFieldScriptEngine calculatedFieldScriptEngine = new CalculatedFieldTbelScriptEngine(
-                    getTenantId(),
-                    tbelInvokeService,
-                    expression,
-                    ctxAndArgNames.toArray(String[]::new)
-            );
-
-
+            UUID scriptId = compileScript(expression, ctxAndArgNames.toArray(String[]::new));
             Object[] args = new Object[ctxAndArgNames.size()];
             args[0] = new TbelCfCtx(arguments);
             for (int i = 1; i < ctxAndArgNames.size(); i++) {
@@ -254,7 +248,8 @@ public class CalculatedFieldController extends BaseController {
                 }
             }
 
-            JsonNode json = calculatedFieldScriptEngine.executeJsonAsync(args).get(TIMEOUT, TimeUnit.SECONDS);
+            Object rawResult = tbelInvokeService.invokeScript(getTenantId(), null, scriptId, args).get(TIMEOUT, TimeUnit.SECONDS);
+            JsonNode json = JacksonUtil.valueToTree(rawResult);
             output = JacksonUtil.toString(json);
         } catch (Exception e) {
             log.error("Error evaluating expression", e);
@@ -265,6 +260,18 @@ public class CalculatedFieldController extends BaseController {
         result.put("output", output);
         result.put("error", errorText);
         return result;
+    }
+
+    private UUID compileScript(String expression, String... argNames) {
+        try {
+            return tbelInvokeService.eval(getTenantId(), ScriptType.CALCULATED_FIELD_SCRIPT, expression, argNames).get();
+        } catch (Exception e) {
+            Throwable t = e;
+            if (e instanceof ExecutionException && e.getCause() != null) {
+                t = e.getCause();
+            }
+            throw new IllegalArgumentException("Can't compile script: " + t.getMessage(), t);
+        }
     }
 
     private <E extends HasId<I> & HasTenantId, I extends EntityId> void checkReferencedEntities(CalculatedFieldConfiguration calculatedFieldConfig, SecurityUser user) throws ThingsboardException {

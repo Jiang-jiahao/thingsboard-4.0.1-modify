@@ -147,14 +147,14 @@ public class DefaultCalculatedFieldQueueService implements CalculatedFieldQueueS
     private boolean checkEntityForCalculatedFields(TenantId tenantId, EntityId entityId, Predicate<CalculatedFieldCtx> filter, Predicate<CalculatedFieldCtx> linkedEntityFilter) {
         boolean send = false;
         if (supportedReferencedEntities.contains(entityId.getEntityType())) {
-            send = calculatedFieldCache.getCalculatedFieldCtxsByEntityId(entityId).stream().anyMatch(filter);
+            send = calculatedFieldCache.<CalculatedFieldCtx>getCalculatedFieldCtxsByEntityId(entityId).stream().anyMatch(filter);
             if (!send) {
-                send = calculatedFieldCache.getCalculatedFieldCtxsByEntityId(getProfileId(tenantId, entityId)).stream().anyMatch(filter);
+                send = calculatedFieldCache.<CalculatedFieldCtx>getCalculatedFieldCtxsByEntityId(getProfileId(tenantId, entityId)).stream().anyMatch(filter);
             }
             if (!send) {
                 send = calculatedFieldCache.getCalculatedFieldLinksByEntityId(entityId).stream()
                         .map(CalculatedFieldLink::getCalculatedFieldId)
-                        .map(calculatedFieldCache::getCalculatedFieldCtx)
+                        .map(id -> calculatedFieldCache.<CalculatedFieldCtx>getCalculatedFieldCtx(id))
                         .anyMatch(linkedEntityFilter);
             }
         }

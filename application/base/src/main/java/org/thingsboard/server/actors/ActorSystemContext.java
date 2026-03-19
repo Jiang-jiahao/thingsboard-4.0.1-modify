@@ -39,6 +39,8 @@ import org.thingsboard.rule.engine.api.sms.SmsSenderFactory;
 import org.thingsboard.script.api.js.JsInvokeService;
 import org.thingsboard.script.api.tbel.TbelInvokeService;
 import org.thingsboard.server.actors.service.ActorService;
+import org.thingsboard.server.actors.tenant.TenantDeviceActorSupport;
+import org.thingsboard.server.actors.tenant.TenantRuleEngineActorSupportFactory;
 import org.thingsboard.server.actors.tenant.DebugTbRateLimits;
 import org.thingsboard.server.cache.limits.RateLimitService;
 import org.thingsboard.server.cluster.TbClusterService;
@@ -108,10 +110,7 @@ import org.thingsboard.server.queue.discovery.PartitionService;
 import org.thingsboard.server.queue.discovery.TbServiceInfoProvider;
 import org.thingsboard.server.queue.settings.TbQueueCalculatedFieldSettings;
 import org.thingsboard.server.service.apiusage.TbApiUsageStateService;
-import org.thingsboard.server.service.cf.CalculatedFieldProcessingService;
 import org.thingsboard.server.service.cf.CalculatedFieldQueueService;
-import org.thingsboard.server.service.cf.CalculatedFieldStateService;
-import org.thingsboard.server.service.cf.ctx.state.ArgumentEntry;
 import org.thingsboard.server.service.component.ComponentDiscoveryService;
 import org.thingsboard.server.service.edge.rpc.EdgeRpcService;
 import org.thingsboard.server.service.entitiy.entityview.TbEntityViewService;
@@ -136,6 +135,8 @@ import org.thingsboard.server.utils.DebugModeRateLimitsConfig;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -143,7 +144,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * actor系统上下文，里面有些没有使用到的组件主要是为之后扩展使用
@@ -477,6 +477,14 @@ public class ActorSystemContext {
     @Getter
     private TbRuleEngineDeviceRpcService tbRuleEngineDeviceRpcService;
 
+    @Autowired(required = false)
+    @Getter
+    private TenantDeviceActorSupport tenantDeviceActorSupport;
+
+    @Autowired(required = false)
+    @Getter
+    private TenantRuleEngineActorSupportFactory tenantRuleEngineActorSupportFactory;
+
     /**
      * The following Service will be null if we operate in tb-rule-engine mode
      */
@@ -543,12 +551,12 @@ public class ActorSystemContext {
     @Lazy
     @Autowired(required = false)
     @Getter
-    private CalculatedFieldProcessingService calculatedFieldProcessingService;
+    private Object calculatedFieldProcessingService;
 
     @Lazy
     @Autowired(required = false)
     @Getter
-    private CalculatedFieldStateService calculatedFieldStateService;
+    private Object calculatedFieldStateService;
 
     @Lazy
     @Autowired(required = false)
@@ -804,7 +812,7 @@ public class ActorSystemContext {
         Futures.addCallback(future, RULE_CHAIN_DEBUG_EVENT_ERROR_CALLBACK, MoreExecutors.directExecutor());
     }
 
-    public void persistCalculatedFieldDebugEvent(TenantId tenantId, CalculatedFieldId calculatedFieldId, EntityId entityId, Map<String, ArgumentEntry> arguments, UUID tbMsgId, TbMsgType tbMsgType, String result, String errorMessage) {
+    public void persistCalculatedFieldDebugEvent(TenantId tenantId, CalculatedFieldId calculatedFieldId, EntityId entityId, Map<String, ?> arguments, UUID tbMsgId, TbMsgType tbMsgType, String result, String errorMessage) {
         if (checkLimits(tenantId)) {
             try {
                 CalculatedFieldDebugEvent.CalculatedFieldDebugEventBuilder eventBuilder = CalculatedFieldDebugEvent.builder()
@@ -820,10 +828,7 @@ public class ActorSystemContext {
                     eventBuilder.msgType(tbMsgType.name());
                 }
                 if (arguments != null) {
-                    eventBuilder.arguments(JacksonUtil.toString(
-                            arguments.entrySet().stream()
-                                    .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().toTbelCfArg()))
-                    ));
+                    eventBuilder.arguments(JacksonUtil.toString(normalizeCalculatedFieldArguments(arguments)));
                 }
                 if (result != null) {
                     eventBuilder.result(result);
@@ -837,6 +842,38 @@ public class ActorSystemContext {
             } catch (IllegalArgumentException ex) {
                 log.warn("Failed to persist calculated field debug message", ex);
             }
+        }
+    }
+
+    private Map<String, Object> normalizeCalculatedFieldArguments(Map<String, ?> arguments) {
+        Map<String, Object> normalized = new HashMap<>(arguments.size());
+        arguments.forEach((key, value) -> normalized.put(key, normalizeCalculatedFieldArgument(value)));
+        return normalized;
+    }
+
+    private Object normalizeCalculatedFieldArgument(Object value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            var toTbelCfArgMethod = value.getClass().getMethod("toTbelCfArg");
+            try {
+                return toTbelCfArgMethod.invoke(value);
+            } catch (InvocationTargetException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof RuntimeException runtimeException) {
+                    throw runtimeException;
+                } else if (cause instanceof Error error) {
+                    throw error;
+                } else {
+                    throw new IllegalArgumentException("Failed to convert calculated field argument using toTbelCfArg()", cause);
+                }
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalArgumentException("Failed to convert calculated field argument using toTbelCfArg()", e);
+            }
+        } catch (NoSuchMethodException e) {
+            // Keep backward compatibility when argument is not a calculated-field entry object.
+            return value;
         }
     }
 

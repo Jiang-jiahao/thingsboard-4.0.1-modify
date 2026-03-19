@@ -20,7 +20,6 @@ import org.thingsboard.server.common.data.cf.CalculatedFieldLink;
 import org.thingsboard.server.common.data.id.CalculatedFieldId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
-import org.thingsboard.server.service.cf.ctx.state.CalculatedFieldCtx;
 
 import java.util.List;
 
@@ -32,9 +31,9 @@ public interface CalculatedFieldCache {
 
     List<CalculatedFieldLink> getCalculatedFieldLinksByEntityId(EntityId entityId);
 
-    CalculatedFieldCtx getCalculatedFieldCtx(CalculatedFieldId calculatedFieldId);
+    <T> T getCalculatedFieldCtx(CalculatedFieldId calculatedFieldId);
 
-    List<CalculatedFieldCtx> getCalculatedFieldCtxsByEntityId(EntityId entityId);
+    <T> List<T> getCalculatedFieldCtxsByEntityId(EntityId entityId);
 
     void addCalculatedField(TenantId tenantId, CalculatedFieldId calculatedFieldId);
 

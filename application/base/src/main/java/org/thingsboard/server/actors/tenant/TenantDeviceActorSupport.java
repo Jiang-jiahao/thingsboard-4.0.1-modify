@@ -13,27 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.thingsboard.server.actors.device;
+package org.thingsboard.server.actors.tenant;
 
-import org.thingsboard.server.common.msg.MsgType;
-import org.thingsboard.server.common.msg.TbActorMsg;
+import org.thingsboard.server.actors.TbActorCtx;
+import org.thingsboard.server.actors.TbActorRef;
+import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.TenantId;
 
 /**
- * Created by ashvayka on 29.10.18.
+ * Provides device actor creation for tenant actor without hard dependency on tb-core module.
  */
-public class SessionTimeoutCheckMsg implements TbActorMsg {
+public interface TenantDeviceActorSupport {
 
-    private static final SessionTimeoutCheckMsg INSTANCE = new SessionTimeoutCheckMsg();
+    TbActorRef getOrCreateDeviceActor(TbActorCtx ctx, TenantId tenantId, DeviceId deviceId);
 
-    private SessionTimeoutCheckMsg() {
-    }
-
-    public static SessionTimeoutCheckMsg instance() {
-        return INSTANCE;
-    }
-
-    @Override
-    public MsgType getMsgType() {
-        return MsgType.SESSION_TIMEOUT_MSG;
-    }
 }

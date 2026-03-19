@@ -19,7 +19,6 @@ import org.thingsboard.server.actors.ActorSystemContext;
 import org.thingsboard.server.actors.TbActor;
 import org.thingsboard.server.actors.TbActorId;
 import org.thingsboard.server.actors.TbCalculatedFieldEntityActorId;
-import org.thingsboard.server.actors.device.DeviceActor;
 import org.thingsboard.server.actors.service.ContextBasedCreator;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
