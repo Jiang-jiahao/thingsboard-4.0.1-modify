@@ -132,7 +132,6 @@ public class TenantActor extends ContextAwareActor {
             ctx.stop(cfActor.getActorId());
             cfActor = null;
         }
-        destroyRuleChainsIfSupported();
     }
 
     @Override

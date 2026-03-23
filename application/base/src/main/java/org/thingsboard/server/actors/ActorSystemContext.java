@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright 濠曪拷 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import org.thingsboard.common.util.ExecutorProvider;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.rule.engine.api.DeviceStateManager;
 import org.thingsboard.rule.engine.api.MailService;
@@ -117,7 +118,6 @@ import org.thingsboard.server.service.entitiy.entityview.TbEntityViewService;
 import org.thingsboard.server.service.executors.DbCallbackExecutorService;
 import org.thingsboard.server.service.executors.ExternalCallExecutorService;
 import org.thingsboard.server.service.executors.NotificationExecutorService;
-import org.thingsboard.server.service.executors.PubSubRuleNodeExecutorProvider;
 import org.thingsboard.server.service.executors.SharedEventLoopGroupService;
 import org.thingsboard.server.service.mail.MailExecutorService;
 import org.thingsboard.server.service.profile.TbAssetProfileCache;
@@ -146,8 +146,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * actor系统上下文，里面有些没有使用到的组件主要是为之后扩展使用
- * 每个actor不需要去注入各种的类，只需要传入上下文，获取上下文中的组件对象即可
+ * actor缂侇垵宕电划鐑樼▔婵犱胶鐟撻柡鍌氭祫缁辨繈鏌屽畝鍕〃闁哄牆顦花鍝勨柦閳╁啯绠掑ù锝堟硶閺併倝宕氶幍顔界暠缂備礁瀚▎銏＄▔閺勫浚娲ｉ柡鍕靛灟鐠愮喐绋婄€ｎ亝鍊甸柟纰樻櫅閻秵鎷呯捄銊︽殢
+ * 婵絽绻嬮柌娓乧tor濞戞挸绉瑰〒鍓佹啺娴ｇǹ绠垫繛澶堝妼閸欏棝宕ラ崟顓ф綒闁汇劌瀚悮顐︽晬鐏炶棄娑ч梻鍥ｅ亾閻熸洑妞掔槐鍫曞礂閵夈倗鐟愬☉鎾愁儐閺嬪啴鏁嶅畝鍐ㄧ闁告瑦鐗旂粭鍌涚▔鐎ｎ偅鐎☉鎿冨幘濞堟垹绱掗崟顏咁偨閻庣數顢婇挅鍕础閸愭彃璁�
  */
 @Slf4j
 @Component
@@ -365,7 +365,7 @@ public class ActorSystemContext {
     @Lazy
     @Autowired
     @Getter
-    private PubSubRuleNodeExecutorProvider pubSubRuleNodeExecutorProvider;
+    private ExecutorProvider pubSubRuleNodeExecutorProvider;
 
     @Autowired
     @Getter
@@ -387,7 +387,7 @@ public class ActorSystemContext {
     @Getter
     private NotificationCenter notificationCenter;
 
-    @Autowired
+    @Autowired(required = false)
     @Getter
     private NotificationRuleProcessor notificationRuleProcessor;
 
@@ -423,7 +423,7 @@ public class ActorSystemContext {
     @Getter
     private MobileAppBundleService mobileAppBundleService;
 
-    @Autowired
+    @Autowired(required = false)
     @Getter
     private SlackService slackService;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright 婵犳洩鎷� 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsFirst;
 
 /**
- * 规则引擎遥测服务
+ * 闁荤喐鐟ョ€氼剟宕归姘煎殨闁哄洨鍠愰幆娑㈡⒑椤戞儳鍔滅紒浣规尦瀵潧顓奸崨顓ф匠
  * Created by ashvayka on 27.03.18.
  */
 @Service
@@ -87,11 +87,11 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
 
     private final AttributesService attrService;
     private final TimeseriesService tsService;
-    private final TbEntityViewService tbEntityViewService;
+    private final Optional<TbEntityViewService> tbEntityViewService;
     private final TbApiUsageReportClient apiUsageClient;
     private final TbApiUsageStateService apiUsageStateService;
     private final CalculatedFieldQueueService calculatedFieldQueueService;
-    private final DeviceStateManager deviceStateManager;
+    private final Optional<DeviceStateManager> deviceStateManager;
 
     private ExecutorService tsCallBackExecutor;
 
@@ -100,11 +100,11 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
 
     public DefaultTelemetrySubscriptionService(AttributesService attrService,
                                                TimeseriesService tsService,
-                                               @Lazy TbEntityViewService tbEntityViewService,
+                                               @Lazy Optional<TbEntityViewService> tbEntityViewService,
                                                TbApiUsageReportClient apiUsageClient,
                                                TbApiUsageStateService apiUsageStateService,
                                                CalculatedFieldQueueService calculatedFieldQueueService,
-                                               DeviceStateManager deviceStateManager) {
+                                               Optional<DeviceStateManager> deviceStateManager) {
         this.attrService = attrService;
         this.tsService = tsService;
         this.tbEntityViewService = tbEntityViewService;
@@ -219,9 +219,11 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
         }
 
         if (shouldCheckForInactivityTimeoutUpdates(request)) {
-            findNewInactivityTimeout(request.getEntries()).ifPresent(newInactivityTimeout ->
-                    addMainCallback(resultFuture, success -> deviceStateManager.onDeviceInactivityTimeoutUpdate(
-                            tenantId, new DeviceId(entityId.getId()), newInactivityTimeout, TbCallback.EMPTY)
+            deviceStateManager.ifPresent(dsm ->
+                    findNewInactivityTimeout(request.getEntries()).ifPresent(newInactivityTimeout ->
+                            addMainCallback(resultFuture, success -> dsm.onDeviceInactivityTimeoutUpdate(
+                                    tenantId, new DeviceId(entityId.getId()), newInactivityTimeout, TbCallback.EMPTY)
+                            )
                     )
             );
         }
@@ -282,8 +284,10 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
         }
 
         if (inactivityTimeoutDeleted(request)) {
-            addMainCallback(deleteFuture, success -> deviceStateManager.onDeviceInactivityTimeoutUpdate(
-                    tenantId, new DeviceId(entityId.getId()), 0L, TbCallback.EMPTY)
+            deviceStateManager.ifPresent(dsm ->
+                    addMainCallback(deleteFuture, success -> dsm.onDeviceInactivityTimeoutUpdate(
+                            tenantId, new DeviceId(entityId.getId()), 0L, TbCallback.EMPTY)
+                    )
             );
         }
 
@@ -334,7 +338,10 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
     }
 
     private void copyLatestToEntityViews(TenantId tenantId, EntityId entityId, List<TsKvEntry> ts) {
-        Futures.addCallback(tbEntityViewService.findEntityViewsByTenantIdAndEntityIdAsync(tenantId, entityId),
+        if (tbEntityViewService.isEmpty()) {
+            return;
+        }
+        Futures.addCallback(tbEntityViewService.get().findEntityViewsByTenantIdAndEntityIdAsync(tenantId, entityId),
                 new FutureCallback<>() {
                     @Override
                     public void onSuccess(@Nullable List<EntityView> result) {

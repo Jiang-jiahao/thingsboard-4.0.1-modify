@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright 濠曪拷 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,35 +134,35 @@ public class DefaultTbClusterService implements TbClusterService {
     private PartitionService partitionService;
 
     /**
-     * 实际提供生产者的对象
+     * 閻庡湱鍋ゅ顖炲箵閹邦亞杩旈柣銏㈠枍妤犲洭鎳撻崨顖涚暠閻庣數顢婇挅锟�
      */
     @Autowired
     @Lazy
     private TbQueueProducerProvider producerProvider;
 
     /**
-     * 封装了生产者的对象，外加一个分区选择的功能
+     * 閻忓繋娴囬ˉ濠冪閸℃瑦鏅稿ù婧犲棌鍋撻崨顖涚暠閻庣數顢婇挅鍕晬鐏炵瓔妯嗛柛鏃傚С缁斿瓨绋夐鍕€婚柛鏍ㄦそ閳ь剙顦扮€氥劑鎯冮崟顐㈩潬闁肩鎷�
      */
     @Autowired
     private TbRuleEngineProducerService ruleEngineProducerService;
 
-    @Autowired
+    @Autowired(required = false)
     @Lazy
     private OtaPackageStateService otaPackageStateService;
 
     private final TopicService topicService;
     private final TbDeviceProfileCache deviceProfileCache;
     private final TbAssetProfileCache assetProfileCache;
-    private final GatewayNotificationsService gatewayNotificationsService;
+    private final Optional<GatewayNotificationsService> gatewayNotificationsService;
     private final EdgeService edgeService;
     private final TbTransactionalCache<EdgeId, String> edgeIdServiceIdCache;
 
     /**
-     * 推送消息到core
-     * @param tenantId 租户id
-     * @param entityId 实体id
-     * @param msg 消息
-     * @param callback 回调函数
+     * 闁规亽鍔戦埀顑跨劍缁夌兘骞侀姘厒core
+     * @param tenantId 缂佸鍠愰崺娌琩
+     * @param entityId 閻庡湱鍋樼紞濯攄
+     * @param msg 婵炴垵鐗婃导锟�
+     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
      */
     @Override
     public void pushMsgToCore(TenantId tenantId, EntityId entityId, ToCoreMsg msg, TbQueueCallback callback) {
@@ -178,9 +178,9 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 推送ToDeviceActorNotification消息到core
+     * 闁规亽鍔戦埀顑跨畱oDeviceActorNotification婵炴垵鐗婃导鍛村礆閻х湐re
      * @param msg toDeviceActorNotification
-     * @param callback 回调函数
+     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
      */
     @Override
     public void pushMsgToCore(ToDeviceActorNotificationMsg msg, TbQueueCallback callback) {
@@ -195,12 +195,12 @@ public class DefaultTbClusterService implements TbClusterService {
     public void broadcastToCore(ToCoreNotificationMsg toCoreMsg) {
         UUID msgId = UUID.randomUUID();
         TbQueueProducer<TbProtoQueueMsg<ToCoreNotificationMsg>> toCoreNfProducer = producerProvider.getTbCoreNotificationsMsgProducer();
-        // 获取到所有的core节点服务器id
+        // 闁兼儳鍢茶ぐ鍥礆閻楀牆顣查柡鍫濐槺濞堟叾ore闁煎搫鍊婚崑锝夊嫉瀹ュ懎顫ら柛锝傛殣d
         Set<String> tbCoreServices = partitionService.getAllServiceIds(ServiceType.TB_CORE);
         for (String serviceId : tbCoreServices) {
-            // 计算该服务NotificationsTopic的分区信息
+            // 閻犱緤绱曢悾鑽ゆ嫚閵夛附绠涢柛鏃戞憘otificationsTopic闁汇劌瀚崹搴ㄥ礌鏉為绻嗛柟顓ㄦ嫹
             TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.TB_CORE, serviceId);
-            // 往对应的分区发送通知消息
+            // 鐎垫壋鍋撻悗鐢垫嚀缁ㄦ煡鎯冮崟顐㈢€婚柛鏍ф惈瑜板倿鏌呮笟鈧埀顒佹皑閻撯€斥槈閸喍绱�
             toCoreNfProducer.send(tpi, new TbProtoQueueMsg<>(msgId, toCoreMsg), null);
             toCoreNfs.incrementAndGet();
         }
@@ -385,10 +385,10 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 广播实体状态改变事件
-     * @param tenantId 租户id
-     * @param entityId 实体id
-     * @param state 状态
+     * 妤犵偞瀵ч幐杈┾偓鍦仒缂嶅鎮╅懜纰樺亾娴ｈ鏆柛娆惷肩花銊︾閿燂拷
+     * @param tenantId 缂佸鍠愰崺娌琩
+     * @param entityId 閻庡湱鍋樼紞濯攄
+     * @param state 闁绘ǹ鍩栭埀顒婃嫹
      */
     @Override
     public void broadcastEntityStateChangeEvent(TenantId tenantId, EntityId entityId, ComponentLifecycleEvent state) {
@@ -407,7 +407,9 @@ public class DefaultTbClusterService implements TbClusterService {
         broadcastEntityChangeToTransport(deviceProfile.getTenantId(), deviceProfile.getId(), deviceProfile, callback);
         broadcastEntityStateChangeEvent(deviceProfile.getTenantId(), deviceProfile.getId(),
                 oldDeviceProfile == null ? ComponentLifecycleEvent.CREATED : ComponentLifecycleEvent.UPDATED);
-        otaPackageStateService.update(deviceProfile, isFirmwareChanged, isSoftwareChanged);
+        if (otaPackageStateService != null) {
+            otaPackageStateService.update(deviceProfile, isFirmwareChanged, isSoftwareChanged);
+        }
     }
 
     @Override
@@ -444,7 +446,7 @@ public class DefaultTbClusterService implements TbClusterService {
     @Override
     public void onDeviceDeleted(TenantId tenantId, Device device, TbQueueCallback callback) {
         DeviceId deviceId = device.getId();
-        gatewayNotificationsService.onDeviceDeleted(device);
+        gatewayNotificationsService.ifPresent(s -> s.onDeviceDeleted(device));
         broadcastEntityDeleteToTransport(tenantId, deviceId, device.getName(), callback);
         sendDeviceStateServiceEvent(tenantId, deviceId, false, false, true);
         broadcastEntityStateChangeEvent(tenantId, deviceId, ComponentLifecycleEvent.DELETED);
@@ -494,12 +496,12 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 广播实体改变消息（EntityUpdateMsg）到transport服务
-     * @param tenantId 租户id
-     * @param entityid 实体id
-     * @param entity 新的实体对象
-     * @param callback 回调函数
-     * @param <T> 实体类型
+     * 妤犵偞瀵ч幐杈┾偓鍦仒缂嶅寮ㄩ悷鏉跨秮婵炴垵鐗婃导鍛存晬閸︽tityUpdateMsg闁挎稑顦崺瀹紃ansport闁哄牆绉存慨锟�
+     * @param tenantId 缂佸鍠愰崺娌琩
+     * @param entityid 閻庡湱鍋樼紞濯攄
+     * @param entity 闁哄倹澹嗗▓鎴犫偓鍦仒缂嶅鈧數顢婇挅锟�
+     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
+     * @param <T> 閻庡湱鍋樼紞瀣尵鐠囪尙鈧拷
      */
     private <T> void broadcastEntityChangeToTransport(TenantId tenantId, EntityId entityid, T entity, TbQueueCallback callback) {
         String entityName = (entity instanceof HasName) ? ((HasName) entity).getName() : entity.getClass().getName();
@@ -509,11 +511,11 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 广播实体删除消息（EntityDeleteMsg）到transport服务
-     * @param tenantId 租户id
-     * @param entityId 实体id
-     * @param name 设备名称
-     * @param callback 回调函数
+     * 妤犵偞瀵ч幐杈┾偓鍦仒缂嶅宕氶悩缁樼彑婵炴垵鐗婃导鍛存晬閸︽tityDeleteMsg闁挎稑顦崺瀹紃ansport闁哄牆绉存慨锟�
+     * @param tenantId 缂佸鍠愰崺娌琩
+     * @param entityId 閻庡湱鍋樼紞濯攄
+     * @param name 閻犱焦鍎抽ˇ顒勫触瀹ュ泦锟�
+     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
      */
     private void broadcastEntityDeleteToTransport(TenantId tenantId, EntityId entityId, String name, TbQueueCallback callback) {
         log.trace("[{}][{}][{}] Processing [{}] delete event", tenantId, entityId.getEntityType(), entityId.getId(), name);
@@ -527,9 +529,9 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 向所有的transport服务广播消息
-     * @param transportMsg 消息
-     * @param callback 回调函数
+     * 闁告碍鍨舵晶宥夊嫉婢跺本鐣眛ransport闁哄牆绉存慨鐔肩嵁閹稿孩灏℃繛鎴濈墛娴硷拷
+     * @param transportMsg 婵炴垵鐗婃导锟�
+     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
      */
     private void broadcast(ToTransportMsg transportMsg, TbQueueCallback callback) {
         Set<String> tbTransportServices = partitionService.getAllServiceIds(ServiceType.TB_TRANSPORT);
@@ -544,10 +546,10 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 向指定的transport服务广播消息
-     * @param transportMsg 消息
-     * @param tbTransportServices 指定的transport服务
-     * @param callback 回调函数
+     * 闁告碍鍨剁€垫氨鈧姘ㄥ▓鎲坮ansport闁哄牆绉存慨鐔肩嵁閹稿孩灏℃繛鎴濈墛娴硷拷
+     * @param transportMsg 婵炴垵鐗婃导锟�
+     * @param tbTransportServices 闁圭ǹ娲ら悾楣冩儍閸撳檺ansport闁哄牆绉存慨锟�
+     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
      */
     private void broadcast(ToTransportMsg transportMsg, Set<String> tbTransportServices, TbQueueCallback callback) {
         TbQueueProducer<TbProtoQueueMsg<ToTransportMsg>> toTransportNfProducer = producerProvider.getTransportNotificationsMsgProducer();
@@ -633,11 +635,11 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 向服务节点广播组件生命周期消息
+     * 闁告碍鍨跺﹢鍥礉闄囨俊顓㈡倷閻熸壆鐣柟缁㈠幘缁秵绂掗崜浣规櫢闁告稖妫勯幊鍡涘嫉閻斿摜啸闁诡叏鎷�
      * <p>
-     * 对于某些实体生命周期消息，需要同时通知Core服务和RuleEngine服务。
-     * 部分实体生命周期消息（例如设备实体的创建消息，因为设备刚创建一定是没缓存的，没必要失效），只通知RuleEngine服务。
-     * @param msg 组件生命周期消息
+     * 閻庣敻鈧稓鑹鹃柡灞惧姃缁ㄨ櫣鈧湱鍋樼紞瀣偨閻旈攱鍤掗柛娑栧妽濠€鈥斥槈閸喍绱栭柨娑樼焸濞撳墎鎲版担鍛婂€遍柡鍐ㄧ埣閳ь剚姘ㄩ悡顡塷re闁哄牆绉存慨鐔煎椽鐎涚椃leEngine闁哄牆绉存慨鐔煎Υ閿燂拷
+     * 闂侇喓鍔岄崹搴ｂ偓鍦仒缂嶅鎮介悢閿嬪殥闁告稏鍔嶅﹢鈥斥槈閸喍绱栭柨娑樼墔缁躲儲淇婇崒婵愬晭濠㈣泛娲ら悿鍕媴閹捐埖鐣遍柛鎺撶☉缂傛挸鈽夐崼鐔剁礀闁挎稑鑻ú婊勭▔妤︽鍟庡璺烘搐閸ㄤ即宕氬☉妯肩处濞戞挴鍋撻悗瑙勭濡茬ǹ鈻介敍鍕閻庢稒岣垮▓鎴︽晬鐏炲墽姊鹃煫鍥ф嚀椤╋附寰勬潏銊︽珡闁挎稑顧€缁辨繈宕ｉ鍫氬亾濮樿京鍙€RuleEngine闁哄牆绉存慨鐔煎Υ閿燂拷
+     * @param msg 缂備礁瀚▎銏ゆ偨閻旈攱鍤掗柛娑栧妽濠€鈥斥槈閸喍绱�
      */
     private void broadcast(ComponentLifecycleMsg msg) {
         ComponentLifecycleMsgProto componentLifecycleMsgProto = toProto(msg);
@@ -655,7 +657,7 @@ public class DefaultTbClusterService implements TbClusterService {
                 || entityType.equals(EntityType.NOTIFICATION_RULE)
                 || entityType.equals(EntityType.CALCULATED_FIELD)
         ) {
-            // 这些实体类型需要同时通知Core服务和RuleEngine服务
+            // 閺夆晜鐟ょ花铏光偓鍦仒缂嶅鐚剧拠鑼偓鐑芥閳ь剛鎲版担鍛婂€遍柡鍐ㄧ埣閳ь剚姘ㄩ悡顡塷re闁哄牆绉存慨鐔煎椽鐎涚椃leEngine闁哄牆绉存慨锟�
             TbQueueProducer<TbProtoQueueMsg<ToCoreNotificationMsg>> toCoreNfProducer = producerProvider.getTbCoreNotificationsMsgProducer();
             Set<String> tbCoreServices = partitionService.getAllServiceIds(ServiceType.TB_CORE);
             for (String serviceId : tbCoreServices) {
@@ -664,10 +666,10 @@ public class DefaultTbClusterService implements TbClusterService {
                 toCoreNfProducer.send(tpi, new TbProtoQueueMsg<>(msg.getEntityId().getId(), toCoreMsg), null);
                 toCoreNfs.incrementAndGet();
             }
-            // 不需要两次推送通知（有可能存在两个服务部署在一个服务器）
+            // 濞戞挸绉瑰〒鍓佹啺娴ｇ柉鈷堟繛鍡忓墲鐢綊鏌呮笟鈧埀顒佹皑閻擄繝鏁嶉崼鐔哥畳闁告瑯鍨甸崗妯尖偓娑櫭﹢顏呯▔閵堝嫰鍤嬮柡鍫濈Т婵喖鏌堥妸褑顔夐柛锔哄妺缁斿瓨绋夐鍛疀闁告柡鈧櫕鐝ら柨娑虫嫹
             tbRuleEngineServices.removeAll(tbCoreServices);
         }
-        // 向剩余的RuleEngine服务节点发送通知
+        // 闁告碍鍨垫晶鎸庢媴濞嗘垶鐣盧uleEngine闁哄牆绉存慨鐔兼嚍閸屾粌浠柛娆愬灴閳ь兛绶氶埀顒佹皑閻擄拷
         for (String serviceId : tbRuleEngineServices) {
             TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.TB_RULE_ENGINE, serviceId);
             ToRuleEngineNotificationMsg toRuleEngineMsg = ToRuleEngineNotificationMsg.newBuilder().setComponentLifecycle(componentLifecycleMsgProto).build();
@@ -703,21 +705,21 @@ public class DefaultTbClusterService implements TbClusterService {
         builder.setUpdated(updated);
         builder.setDeleted(deleted);
         DeviceStateServiceMsgProto msg = builder.build();
-        // 发送设备状态服务消息到core
+        // 闁告瑦鍨块埀顑挎祰椤旀洘寰勯崶鈺佇﹂柟顑跨劍濠€鍥礉閳╁啰啸闁诡収鍨伴崺瀹憃re
         pushMsgToCore(tenantId, deviceId, ToCoreMsg.newBuilder().setDeviceStateServiceMsg(msg).build(), null);
     }
 
     /**
-     * 处理设备更新
-     * @param entity 新设备对象
-     * @param old 旧设备对象
+     * 濠㈣泛瀚幃濠勬媼閹屾У闁哄洤鐡ㄩ弻锟�
+     * @param entity 闁哄倹濯介鏇熷緞閸パ屽殸閻犵儑鎷�
+     * @param old 闁哄唲鍡╁晭濠㈣泛娲ら顔炬寬閿燂拷
      */
     @Override
     public void onDeviceUpdated(Device entity, Device old) {
         var created = old == null;
-        // 不管是更新还是创建，都广播实体改变消息到transfer服务
+        // 濞戞挸绉堕鎼佸及椤栨稒绾柡鍌涘缁绘洟寮伴姘仭鐎点倗灏ㄧ槐婵嬫焾閽樺鐣柟缁㈠幖閻ゅ嫭鎷呴幘瀛樻毉闁告瑦蓱缁夌兘骞侀姘厒transfer闁哄牆绉存慨锟�
         broadcastEntityChangeToTransport(entity.getTenantId(), entity.getId(), entity, null);
-        // 创建组件生命周期消息
+        // 闁告帗绋戠紓鎾剁磼閸曨亝顐介柣銏㈠枎閹筹繝宕ㄩ妸锔藉焸婵炴垵鐗婃导锟�
         var msg = ComponentLifecycleMsg.builder()
                 .tenantId(entity.getTenantId())
                 .entityId(entity.getId())
@@ -728,23 +730,25 @@ public class DefaultTbClusterService implements TbClusterService {
         } else {
             boolean deviceNameChanged = !entity.getName().equals(old.getName());
             if (deviceNameChanged) {
-                // 设备名字改变，发送
-                gatewayNotificationsService.onDeviceUpdated(entity, old);
+                // 閻犱焦鍎抽ˇ顒勫触瀹ュ懐鎽熼柡鈧悷鏉跨秮闁挎稑鑻ぐ鍌炴焻閿燂拷
+                gatewayNotificationsService.ifPresent(s -> s.onDeviceUpdated(entity, old));
             }
             boolean deviceProfileChanged = !entity.getDeviceProfileId().equals(old.getDeviceProfileId());
             if (deviceNameChanged || deviceProfileChanged) {
-                // 设备名字或者设备配置id改变，发送到负责该设备的core服务上，用于actor的更新
+                // 閻犱焦鍎抽ˇ顒勫触瀹ュ懐鎽熼柟瀛樼墳閳ь剙鎳撻鏇熷緞閸ヮ剙甯崇紓鍐暪d闁衡偓閻熸澘缍侀柨娑樿嫰瑜板倿鏌呮担绋跨厒閻犳劗鍠曢惌妤冩嫚閵夘煈鍟庡璺烘川濞堟叾ore闁哄牆绉存慨鐔哥▔婵犲繒绀夐柣鈧妺缁ㄧ悾ctor闁汇劌瀚ú鍧楀棘閿燂拷
                 pushMsgToCore(new DeviceNameOrTypeUpdateMsg(entity.getTenantId(), entity.getId(), entity.getName(), entity.getType()), null);
             }
             msg.event(ComponentLifecycleEvent.UPDATED)
                     .oldProfileId(old.getDeviceProfileId())
                     .oldName(old.getName());
         }
-        // 广播组件生命周期事件（主要是失效设备的缓存数据）
+        // 妤犵偞瀵ч幐杈╃磼閸曨亝顐介柣銏㈠枎閹筹繝宕ㄩ妸锔藉焸濞存粌顑勫▎銏ゆ晬閸粌鐦滈悷鏇氱劍濡插憡寰勬潏銊︽珡閻犱焦鍎抽ˇ顒勬儍閸曨厾澶勯悗娑櫳戦弳鐔煎箲椤曞棛绀�
         broadcast(msg.build());
-        // 发送设备状态服务消息到core（用于设备更新状态）
+        // 闁告瑦鍨块埀顑挎祰椤旀洘寰勯崶鈺佇﹂柟顑跨劍濠€鍥礉閳╁啰啸闁诡収鍨伴崺瀹憃re闁挎稑鐗忛弫銈嗙鎼淬値鍟庡璺烘处濞插潡寮幍顔夹﹂柟顑跨筏缁憋拷
         sendDeviceStateServiceEvent(entity.getTenantId(), entity.getId(), created, !created, false);
-        otaPackageStateService.update(entity, old);
+        if (otaPackageStateService != null) {
+            otaPackageStateService.update(entity, old);
+        }
     }
 
     @Override

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright 婕� 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package org.thingsboard.server.service.notification.channels;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.thingsboard.rule.engine.api.notification.SlackService;
+
+import java.util.Optional;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.notification.NotificationDeliveryMethod;
 import org.thingsboard.server.common.data.notification.settings.NotificationSettings;
@@ -31,13 +33,14 @@ import org.thingsboard.server.service.notification.NotificationProcessingContext
 @RequiredArgsConstructor
 public class SlackNotificationChannel implements NotificationChannel<SlackConversation, SlackDeliveryMethodNotificationTemplate> {
 
-    private final SlackService slackService;
+    private final Optional<SlackService> slackService;
     private final NotificationSettingsService notificationSettingsService;
 
     @Override
     public void sendNotification(SlackConversation conversation, SlackDeliveryMethodNotificationTemplate processedTemplate, NotificationProcessingContext ctx) throws Exception {
         SlackNotificationDeliveryMethodConfig config = ctx.getDeliveryMethodConfig(NotificationDeliveryMethod.SLACK);
-        slackService.sendMessage(ctx.getTenantId(), config.getBotToken(), conversation.getId(), processedTemplate.getBody());
+        slackService.orElseThrow(() -> new IllegalStateException("SlackService is not available"))
+                .sendMessage(ctx.getTenantId(), config.getBotToken(), conversation.getId(), processedTemplate.getBody());
     }
 
     @Override

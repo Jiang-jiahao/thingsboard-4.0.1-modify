@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright 漏 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +96,8 @@ import org.thingsboard.server.service.resource.TbImageService;
 import org.thingsboard.server.service.rpc.TbCoreDeviceRpcService;
 import org.thingsboard.server.service.ruleengine.RuleEngineCallService;
 import org.thingsboard.server.service.security.auth.jwt.settings.JwtSettingsService;
+
+import java.util.Optional;
 import org.thingsboard.server.service.state.DeviceStateService;
 import org.thingsboard.server.service.subscription.SubscriptionManagerService;
 import org.thingsboard.server.service.subscription.TbLocalSubscriptionService;
@@ -150,13 +152,13 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     private final EdqsService edqsService;
     private final TbCoreConsumerStats stats;
 
-    // 核心消息消费者
+    // 鏍稿績娑堟伅娑堣垂鑰�
     private MainQueueConsumerManager<TbProtoQueueMsg<ToCoreMsg>, QueueConfig> mainConsumer;
 
-    // 统计信息消费者
+    // 缁熻淇℃伅娑堣垂鑰�
     private QueueConsumerManager<TbProtoQueueMsg<ToUsageStatsServiceMsg>> usageStatsConsumer;
 
-    // 固件状态消费者
+    // 鍥轰欢鐘舵€佹秷璐硅€�
     private QueueConsumerManager<TbProtoQueueMsg<ToOtaPackageStateServiceMsg>> firmwareStatesConsumer;
 
     private volatile ListeningExecutorService deviceActivityEventsExecutor;
@@ -177,7 +179,7 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                                         GitVersionControlQueueService vcQueueService,
                                         PartitionService partitionService,
                                         ApplicationEventPublisher eventPublisher,
-                                        JwtSettingsService jwtSettingsService,
+                                        Optional<JwtSettingsService> jwtSettingsService,
                                         NotificationSchedulerService notificationSchedulerService,
                                         NotificationRuleProcessor notificationRuleProcessor,
                                         TbImageService imageService,
@@ -205,10 +207,10 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     @PostConstruct
     public void init() {
         super.init("tb-core");
-        // 设备活跃事件执行器
+        // 璁惧娲昏穬浜嬩欢鎵ц鍣�
         this.deviceActivityEventsExecutor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor(ThingsBoardThreadFactory.forName("tb-core-device-activity-events-executor")));
 
-        // 构建核心消息消费者（处理设备状态/RPC/订阅等消息）
+        // 鏋勫缓鏍稿績娑堟伅娑堣垂鑰咃紙澶勭悊璁惧鐘舵€�/RPC/璁㈤槄绛夋秷鎭級
         this.mainConsumer = MainQueueConsumerManager.<TbProtoQueueMsg<ToCoreMsg>, QueueConfig>builder()
                 .queueKey(new QueueKey(ServiceType.TB_CORE))
                 .config(QueueConfig.of(consumerPerPartition, pollInterval))
@@ -246,25 +248,25 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
 
     @Override
     protected void startConsumers() {
-        // 启动通知消息消费者
+        // 鍚姩閫氱煡娑堟伅娑堣垂鑰�
         super.startConsumers();
-        // 启动固件状态消费者
+        // 鍚姩鍥轰欢鐘舵€佹秷璐硅€�
         firmwareStatesConsumer.subscribe();
         firmwareStatesConsumer.launch();
-        // 启动统计信息消费者
+        // 鍚姩缁熻淇℃伅娑堣垂鑰�
         usageStatsConsumer.launch();
     }
 
     /**
-     * 当分区发生改变时触发
+     * 褰撳垎鍖哄彂鐢熸敼鍙樻椂瑙﹀彂
      * @param event
      */
     @Override
     protected void onTbApplicationEvent(PartitionChangeEvent event) {
         log.debug("Subscribing to partitions: {}", event.getCorePartitions());
-        // 这里获取该服务器实例的核心订阅分区并订阅topic
+        // 杩欓噷鑾峰彇璇ユ湇鍔″櫒瀹炰緥鐨勬牳蹇冭闃呭垎鍖哄苟璁㈤槄topic
         mainConsumer.update(event.getCorePartitions());
-        // 更新统计消费者分区
+        // 鏇存柊缁熻娑堣垂鑰呭垎鍖�
         usageStatsConsumer.subscribe(event.getCorePartitions()
                 .stream()
                 .map(tpi -> tpi.newByTopic(usageStatsConsumer.getConsumer().getTopic()))
@@ -272,7 +274,7 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 消息处理实际逻辑
+     * 娑堟伅澶勭悊瀹為檯閫昏緫
      * @param msgs
      * @param consumer
      * @param config
@@ -295,63 +297,63 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                 try {
                     ToCoreMsg toCoreMsg = msg.getValue();
                     pendingMsgHolder.setMsg(toCoreMsg);
-                    // 消息路由 - 根据消息类型分发到不同服务
+                    // 娑堟伅璺敱 - 鏍规嵁娑堟伅绫诲瀷鍒嗗彂鍒颁笉鍚屾湇鍔�
                     if (toCoreMsg.hasToSubscriptionMgrMsg()) {
-                        // 订阅管理服务消息
+                        // 璁㈤槄绠＄悊鏈嶅姟娑堟伅
                         log.trace("[{}] Forwarding message to subscription manager service {}", id, toCoreMsg.getToSubscriptionMgrMsg());
                         forwardToSubMgrService(toCoreMsg.getToSubscriptionMgrMsg(), callback);
                     } else if (toCoreMsg.hasToDeviceActorMsg()) {
-                        // 设备actor消息
+                        // 璁惧actor娑堟伅
                         log.trace("[{}] Forwarding message to device actor {}", id, toCoreMsg.getToDeviceActorMsg());
                         forwardToDeviceActor(toCoreMsg.getToDeviceActorMsg(), callback);
                     } else if (toCoreMsg.hasDeviceStateServiceMsg()) {
-                        // 设备状态服务消息
+                        // 璁惧鐘舵€佹湇鍔℃秷鎭�
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceStateServiceMsg());
                         forwardToStateService(toCoreMsg.getDeviceStateServiceMsg(), callback);
                     } else if (toCoreMsg.hasDeviceConnectMsg()) {
-                        // 设备连接事件
+                        // 璁惧杩炴帴浜嬩欢
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceConnectMsg());
                         forwardToStateService(toCoreMsg.getDeviceConnectMsg(), callback);
                     } else if (toCoreMsg.hasDeviceActivityMsg()) {
-                        // 设备活动事件
+                        // 璁惧娲诲姩浜嬩欢
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceActivityMsg());
                         forwardToStateService(toCoreMsg.getDeviceActivityMsg(), callback);
                     } else if (toCoreMsg.hasDeviceDisconnectMsg()) {
-                        // 设备断开连接事件
+                        // 璁惧鏂紑杩炴帴浜嬩欢
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceDisconnectMsg());
                         forwardToStateService(toCoreMsg.getDeviceDisconnectMsg(), callback);
                     } else if (toCoreMsg.hasDeviceInactivityMsg()) {
-                        // 设备不活动事件
+                        // 璁惧涓嶆椿鍔ㄤ簨浠�
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceInactivityMsg());
                         forwardToStateService(toCoreMsg.getDeviceInactivityMsg(), callback);
                     } else if (toCoreMsg.hasDeviceInactivityTimeoutUpdateMsg()) {
-                        // 设备不活动超时更新
+                        // 璁惧涓嶆椿鍔ㄨ秴鏃舵洿鏂�
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceInactivityTimeoutUpdateMsg());
                         forwardToStateService(toCoreMsg.getDeviceInactivityTimeoutUpdateMsg(), callback);
                     } else if (toCoreMsg.hasToDeviceActorNotification()) {
-                        // 设备Actor通知（如RPC请求）
+                        // 璁惧Actor閫氱煡锛堝RPC璇锋眰锛�
                         TbActorMsg actorMsg = ProtoUtils.fromProto(toCoreMsg.getToDeviceActorNotification());
                         if (actorMsg != null) {
                             if (actorMsg.getMsgType().equals(MsgType.DEVICE_RPC_REQUEST_TO_DEVICE_ACTOR_MSG)) {
-                                // 处理设备RPC请求
+                                // 澶勭悊璁惧RPC璇锋眰
                                 tbCoreDeviceRpcService.forwardRpcRequestToDeviceActor((ToDeviceRpcRequestActorMsg) actorMsg);
                             } else {
-                                // 处理其它
+                                // 澶勭悊鍏跺畠
                                 log.trace("[{}] Forwarding message to App Actor {}", id, actorMsg);
                                 actorContext.tell(actorMsg);
                             }
                         }
                         callback.onSuccess();
                     } else if (toCoreMsg.hasNotificationSchedulerServiceMsg()) {
-                        // 通知调度服务消息
+                        // 閫氱煡璋冨害鏈嶅姟娑堟伅
                         TransportProtos.NotificationSchedulerServiceMsg notificationSchedulerServiceMsg = toCoreMsg.getNotificationSchedulerServiceMsg();
                         log.trace("[{}] Forwarding message to notification scheduler service {}", id, toCoreMsg.getNotificationSchedulerServiceMsg());
                         forwardToNotificationSchedulerService(notificationSchedulerServiceMsg, callback);
                     } else if (toCoreMsg.hasErrorEventMsg()) {
-                        // 错误事件
+                        // 閿欒浜嬩欢
                         forwardToEventService(toCoreMsg.getErrorEventMsg(), callback);
                     } else if (toCoreMsg.hasLifecycleEventMsg()) {
-                        // 生命周期事件
+                        // 鐢熷懡鍛ㄦ湡浜嬩欢
                         forwardToEventService(toCoreMsg.getLifecycleEventMsg(), callback);
                     }
                 } catch (Throwable e) {
@@ -399,74 +401,74 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 处理通知消息 - 来自其他服务的通知
-     * @param id 消息ID
-     * @param msg 协议消息
-     * @param callback 回调接口
+     * 澶勭悊閫氱煡娑堟伅 - 鏉ヨ嚜鍏朵粬鏈嶅姟鐨勯€氱煡
+     * @param id 娑堟伅ID
+     * @param msg 鍗忚娑堟伅
+     * @param callback 鍥炶皟鎺ュ彛
      */
     @Override
     protected void handleNotification(UUID id, TbProtoQueueMsg<ToCoreNotificationMsg> msg, TbCallback callback) {
         ToCoreNotificationMsg toCoreNotification = msg.getValue();
-        // 根据消息类型路由到不同处理器
+        // 鏍规嵁娑堟伅绫诲瀷璺敱鍒颁笉鍚屽鐞嗗櫒
         if (toCoreNotification.hasToLocalSubscriptionServiceMsg()) {
-            // 本地订阅服务消息
+            // 鏈湴璁㈤槄鏈嶅姟娑堟伅
             log.trace("[{}] Forwarding message to local subscription service {}", id, toCoreNotification.getToLocalSubscriptionServiceMsg());
             forwardToLocalSubMgrService(toCoreNotification.getToLocalSubscriptionServiceMsg(), callback);
         } else if (toCoreNotification.hasCoreStartupMsg()) {
-            // core启动消息（用于core启动多个时，重新分配订阅）
+            // core鍚姩娑堟伅锛堢敤浜巆ore鍚姩澶氫釜鏃讹紝閲嶆柊鍒嗛厤璁㈤槄锛�
             log.trace("[{}] Forwarding message to local subscription service {}", id, toCoreNotification.getCoreStartupMsg());
             forwardCoreStartupMsg(toCoreNotification.getCoreStartupMsg(), callback);
         } else if (toCoreNotification.hasFromDeviceRpcResponse()) {
-            // 设备RPC响应
+            // 璁惧RPC鍝嶅簲
             log.trace("[{}] Forwarding message to RPC service {}", id, toCoreNotification.getFromDeviceRpcResponse());
             forwardToCoreRpcService(toCoreNotification.getFromDeviceRpcResponse(), callback);
         } else if (toCoreNotification.hasRestApiCallResponseMsg()) {
-            // REST API调用响应
+            // REST API璋冪敤鍝嶅簲
             log.trace("[{}] Forwarding message to RuleEngineCallService service {}", id, toCoreNotification.getRestApiCallResponseMsg());
             forwardToRuleEngineCallService(toCoreNotification.getRestApiCallResponseMsg(), callback);
         } else if (toCoreNotification.hasComponentLifecycle()) {
-            // 组件生命周期消息
+            // 缁勪欢鐢熷懡鍛ㄦ湡娑堟伅
             handleComponentLifecycleMsg(id, ProtoUtils.fromProto(toCoreNotification.getComponentLifecycle()));
             callback.onSuccess();
         } else if (toCoreNotification.getQueueUpdateMsgsCount() > 0) {
-            // 队列更新消息
+            // 闃熷垪鏇存柊娑堟伅
             partitionService.updateQueues(toCoreNotification.getQueueUpdateMsgsList());
             callback.onSuccess();
         } else if (toCoreNotification.getQueueDeleteMsgsCount() > 0) {
-            // 队列删除消息
+            // 闃熷垪鍒犻櫎娑堟伅
             partitionService.removeQueues(toCoreNotification.getQueueDeleteMsgsList());
             callback.onSuccess();
         } else if (toCoreNotification.hasVcResponseMsg()) {
-            // 版本控制响应
+            // 鐗堟湰鎺у埗鍝嶅簲
             vcQueueService.processResponse(toCoreNotification.getVcResponseMsg());
             callback.onSuccess();
         } else if (toCoreNotification.hasToSubscriptionMgrMsg()) {
-            // 订阅管理服务消息
+            // 璁㈤槄绠＄悊鏈嶅姟娑堟伅
             forwardToSubMgrService(toCoreNotification.getToSubscriptionMgrMsg(), callback);
         } else if (toCoreNotification.hasNotificationRuleProcessorMsg()) {
-            // 通知规则处理
+            // 閫氱煡瑙勫垯澶勭悊
             NotificationRuleTrigger notificationRuleTrigger =
                     JavaSerDesUtil.decode(toCoreNotification.getNotificationRuleProcessorMsg().getTrigger().toByteArray());
             notificationRuleProcessor.process(notificationRuleTrigger);
             callback.onSuccess();
         } else if (toCoreNotification.hasResourceCacheInvalidateMsg()) {
-            // 资源缓存失效
+            // 璧勬簮缂撳瓨澶辨晥
             forwardToResourceService(toCoreNotification.getResourceCacheInvalidateMsg(), callback);
         } else if (toCoreNotification.hasToEdqsCoreServiceMsg()) {
-            // EDQS系统消息（edqs数据同步）
+            // EDQS绯荤粺娑堟伅锛坋dqs鏁版嵁鍚屾锛�
             edqsService.processSystemMsg(JacksonUtil.fromBytes(toCoreNotification.getToEdqsCoreServiceMsg().getValue().toByteArray(), ToCoreEdqsMsg.class));
             callback.onSuccess();
         }
-        // 统计记录
+        // 缁熻璁板綍
         if (statsEnabled) {
             stats.log(toCoreNotification);
         }
     }
 
     /**
-     * 处理使用统计消息
-     * @param msgs 消息批次
-     * @param consumer 消费者
+     * 澶勭悊浣跨敤缁熻娑堟伅
+     * @param msgs 娑堟伅鎵规
+     * @param consumer 娑堣垂鑰�
      */
     private void processUsageStatsMsg(List<TbProtoQueueMsg<ToUsageStatsServiceMsg>> msgs, TbQueueConsumer<TbProtoQueueMsg<ToUsageStatsServiceMsg>> consumer) throws Exception {
         ConcurrentMap<UUID, TbProtoQueueMsg<ToUsageStatsServiceMsg>> pendingMap = msgs.stream().collect(
@@ -493,9 +495,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 处理固件状态消息
-     * @param msgs 消息批次
-     * @param consumer 消费者
+     * 澶勭悊鍥轰欢鐘舵€佹秷鎭�
+     * @param msgs 娑堟伅鎵规
+     * @param consumer 娑堣垂鑰�
      */
     private void processFirmwareMsgs(List<TbProtoQueueMsg<ToOtaPackageStateServiceMsg>> msgs, TbQueueConsumer<TbProtoQueueMsg<ToOtaPackageStateServiceMsg>> consumer) {
         long maxProcessingTimeoutPerRecord = firmwarePackInterval / firmwarePackSize;
@@ -549,9 +551,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 转发来自订阅管理服务的消息到本地订阅服务
-     * @param msg 本地订阅服务协议消息
-     * @param callback 回调接口
+     * 杞彂鏉ヨ嚜璁㈤槄绠＄悊鏈嶅姟鐨勬秷鎭埌鏈湴璁㈤槄鏈嶅姟
+     * @param msg 鏈湴璁㈤槄鏈嶅姟鍗忚娑堟伅
+     * @param callback 鍥炶皟鎺ュ彛
      */
     private void forwardToLocalSubMgrService(LocalSubscriptionServiceMsgProto msg, TbCallback callback) {
         if (msg.hasSubEventCallback()) {
@@ -573,9 +575,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 转发核心启动消息
-     * @param coreStartupMsg 核心启动协议消息
-     * @param callback 回调接口
+     * 杞彂鏍稿績鍚姩娑堟伅
+     * @param coreStartupMsg 鏍稿績鍚姩鍗忚娑堟伅
+     * @param callback 鍥炶皟鎺ュ彛
      */
     private void forwardCoreStartupMsg(TransportProtos.CoreStartupMsg coreStartupMsg, TbCallback callback) {
         log.info("[{}] Processing core startup with partitions: {}", coreStartupMsg.getServiceId(), coreStartupMsg.getPartitionsList());
@@ -584,9 +586,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 转发到资源服务（处理图片缓存失效）
-     * @param msg 资源缓存失效协议消息
-     * @param callback 回调接口
+     * 杞彂鍒拌祫婧愭湇鍔★紙澶勭悊鍥剧墖缂撳瓨澶辨晥锛�
+     * @param msg 璧勬簮缂撳瓨澶辨晥鍗忚娑堟伅
+     * @param callback 鍥炶皟鎺ュ彛
      */
     private void forwardToResourceService(TransportProtos.ResourceCacheInvalidateMsg msg, TbCallback callback) {
         var tenantId = TenantId.fromUUID(new UUID(msg.getTenantIdMSB(), msg.getTenantIdLSB()));
@@ -601,13 +603,13 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 转发到订阅管理服务
-     * @param msg 订阅管理协议消息
-     * @param callback 回调接口
+     * 杞彂鍒拌闃呯鐞嗘湇鍔�
+     * @param msg 璁㈤槄绠＄悊鍗忚娑堟伅
+     * @param callback 鍥炶皟鎺ュ彛
      */
     private void forwardToSubMgrService(SubscriptionMgrMsgProto msg, TbCallback callback) {
         if (msg.hasSubEvent()) {
-            // 订阅事件处理，去订阅该实体
+            // 璁㈤槄浜嬩欢澶勭悊锛屽幓璁㈤槄璇ュ疄浣�
             TbEntitySubEventProto subEvent = msg.getSubEvent();
             subscriptionManagerService.onSubEvent(subEvent.getServiceId(), TbSubscriptionUtils.fromProto(subEvent), callback);
         } else if (msg.hasTelemetrySub()) {
@@ -626,7 +628,7 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
             callback.onSuccess();
             // Deprecated, for removal; Left intentionally to avoid throwNotHandled
         } else if (msg.hasTsUpdate()) {
-            // 时序数据更新
+            // 鏃跺簭鏁版嵁鏇存柊
             TbTimeSeriesUpdateProto proto = msg.getTsUpdate();
             long tenantIdMSB = proto.getTenantIdMSB();
             long tenantIdLSB = proto.getTenantIdLSB();
@@ -635,14 +637,14 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                     TbSubscriptionUtils.toEntityId(proto.getEntityType(), proto.getEntityIdMSB(), proto.getEntityIdLSB()),
                     KvProtoUtil.fromTsKvProtoList(proto.getDataList()), callback);
         } else if (msg.hasAttrUpdate()) {
-            // 属性更新
+            // 灞炴€ф洿鏂�
             TbAttributeUpdateProto proto = msg.getAttrUpdate();
             subscriptionManagerService.onAttributesUpdate(
                     toTenantId(proto.getTenantIdMSB(), proto.getTenantIdLSB()),
                     TbSubscriptionUtils.toEntityId(proto.getEntityType(), proto.getEntityIdMSB(), proto.getEntityIdLSB()),
                     proto.getScope(), KvProtoUtil.toAttributeKvList(proto.getDataList()), callback);
         } else if (msg.hasAttrDelete()) {
-            // 属性更新
+            // 灞炴€ф洿鏂�
             TbAttributeDeleteProto proto = msg.getAttrDelete();
             if (proto.hasNotifyDevice()) {
                 // handles old messages with deprecated 'notifyDevice'
@@ -658,14 +660,14 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                         proto.getScope(), proto.getKeysList(), callback);
             }
         } else if (msg.hasTsDelete()) {
-            // 时序数据删除
+            // 鏃跺簭鏁版嵁鍒犻櫎
             TbTimeSeriesDeleteProto proto = msg.getTsDelete();
             subscriptionManagerService.onTimeSeriesDelete(
                     toTenantId(proto.getTenantIdMSB(), proto.getTenantIdLSB()),
                     TbSubscriptionUtils.toEntityId(proto.getEntityType(), proto.getEntityIdMSB(), proto.getEntityIdLSB()),
                     proto.getKeysList(), callback);
         } else if (msg.hasAlarmUpdate()) {
-            // 告警更新
+            // 鍛婅鏇存柊
             TbAlarmUpdateProto proto = msg.getAlarmUpdate();
             subscriptionManagerService.onAlarmUpdate(
                     toTenantId(proto.getTenantIdMSB(), proto.getTenantIdLSB()),
@@ -673,30 +675,30 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                     JacksonUtil.fromString(proto.getAlarm(), AlarmInfo.class),
                     callback);
         } else if (msg.hasAlarmDelete()) {
-            // 告警删除
+            // 鍛婅鍒犻櫎
             TbAlarmDeleteProto proto = msg.getAlarmDelete();
             subscriptionManagerService.onAlarmDeleted(
                     toTenantId(proto.getTenantIdMSB(), proto.getTenantIdLSB()),
                     TbSubscriptionUtils.toEntityId(proto.getEntityType(), proto.getEntityIdMSB(), proto.getEntityIdLSB()),
                     JacksonUtil.fromString(proto.getAlarm(), AlarmInfo.class), callback);
         } else if (msg.hasNotificationUpdate()) {
-            // 通知更新
+            // 閫氱煡鏇存柊
             TransportProtos.NotificationUpdateProto updateProto = msg.getNotificationUpdate();
             TenantId tenantId = toTenantId(updateProto.getTenantIdMSB(), updateProto.getTenantIdLSB());
             UserId recipientId = new UserId(new UUID(updateProto.getRecipientIdMSB(), updateProto.getRecipientIdLSB()));
             NotificationUpdate update = JacksonUtil.fromString(updateProto.getUpdate(), NotificationUpdate.class);
             subscriptionManagerService.onNotificationUpdate(tenantId, recipientId, update, callback);
         } else if (msg.hasNotificationRequestUpdate()) {
-            // 通知请求更新
+            // 閫氱煡璇锋眰鏇存柊
             TransportProtos.NotificationRequestUpdateProto updateProto = msg.getNotificationRequestUpdate();
             TenantId tenantId = toTenantId(updateProto.getTenantIdMSB(), updateProto.getTenantIdLSB());
             NotificationRequestUpdate update = JacksonUtil.fromString(updateProto.getUpdate(), NotificationRequestUpdate.class);
             localSubscriptionService.onNotificationRequestUpdate(tenantId, update, callback);
         } else {
-            // 未处理的消息类型
+            // 鏈鐞嗙殑娑堟伅绫诲瀷
             throwNotHandled(msg, callback);
         }
-        // 统计记录
+        // 缁熻璁板綍
         if (statsEnabled) {
             stats.log(msg);
         }

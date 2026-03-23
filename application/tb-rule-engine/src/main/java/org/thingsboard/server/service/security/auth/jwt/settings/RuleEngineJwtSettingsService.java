@@ -1,0 +1,114 @@
+/**
+ * Copyright 漏 2016-2025 The Thingsboard Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.thingsboard.server.service.security.auth.jwt.settings;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Service;
+import org.thingsboard.common.util.JacksonUtil;
+import org.thingsboard.server.cluster.TbClusterService;
+import org.thingsboard.server.common.data.AdminSettings;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.plugin.ComponentLifecycleEvent;
+import org.thingsboard.server.common.data.security.model.JwtSettings;
+import org.thingsboard.server.dao.settings.AdminSettingsService;
+
+import java.util.Base64;
+import java.util.Objects;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+@ConditionalOnExpression("'${service.type:null}'=='tb-rule-engine'")
+public class RuleEngineJwtSettingsService implements JwtSettingsService {
+
+    private static final int KEY_LENGTH = 512;
+
+    private final AdminSettingsService adminSettingsService;
+    private final Optional<TbClusterService> tbClusterService;
+    private final JwtSettingsValidator jwtSettingsValidator;
+
+    private volatile JwtSettings jwtSettings = null;
+
+    @Override
+    public JwtSettings saveJwtSettings(JwtSettings jwtSettings) {
+        jwtSettingsValidator.validate(jwtSettings);
+        final AdminSettings adminJwtSettings = mapJwtToAdminSettings(jwtSettings);
+        final AdminSettings existedSettings = adminSettingsService.findAdminSettingsByKey(TenantId.SYS_TENANT_ID, ADMIN_SETTINGS_JWT_KEY);
+        if (existedSettings != null) {
+            adminJwtSettings.setId(existedSettings.getId());
+        }
+
+        log.info("Saving new JWT admin settings. From this moment, the JWT parameters from YAML and ENV will be ignored");
+        adminSettingsService.saveAdminSettings(TenantId.SYS_TENANT_ID, adminJwtSettings);
+
+        tbClusterService.ifPresent(cs -> cs.broadcastEntityStateChangeEvent(TenantId.SYS_TENANT_ID, TenantId.SYS_TENANT_ID, ComponentLifecycleEvent.UPDATED));
+        return reloadJwtSettings();
+    }
+
+    @Override
+    public JwtSettings reloadJwtSettings() {
+        log.trace("Executing reloadJwtSettings");
+        return getJwtSettings(true);
+    }
+
+    @Override
+    public JwtSettings getJwtSettings() {
+        log.trace("Executing getJwtSettings");
+        return getJwtSettings(false);
+    }
+
+    public JwtSettings getJwtSettings(boolean forceReload) {
+        if (this.jwtSettings == null || forceReload) {
+            synchronized (this) {
+                if (this.jwtSettings == null || forceReload) {
+                    jwtSettings = getJwtSettingsFromDb();
+                }
+            }
+        }
+        return this.jwtSettings;
+    }
+
+    private JwtSettings getJwtSettingsFromDb() {
+        AdminSettings adminJwtSettings = adminSettingsService.findAdminSettingsByKey(TenantId.SYS_TENANT_ID, ADMIN_SETTINGS_JWT_KEY);
+        return adminJwtSettings != null ? mapAdminToJwtSettings(adminJwtSettings) : null;
+    }
+
+    private JwtSettings mapAdminToJwtSettings(AdminSettings adminSettings) {
+        Objects.requireNonNull(adminSettings, "adminSettings for JWT is null");
+        return JacksonUtil.treeToValue(adminSettings.getJsonValue(), JwtSettings.class);
+    }
+
+    private AdminSettings mapJwtToAdminSettings(JwtSettings jwtSettings) {
+        Objects.requireNonNull(jwtSettings, "jwtSettings is null");
+        AdminSettings adminJwtSettings = new AdminSettings();
+        adminJwtSettings.setTenantId(TenantId.SYS_TENANT_ID);
+        adminJwtSettings.setKey(ADMIN_SETTINGS_JWT_KEY);
+        adminJwtSettings.setJsonValue(JacksonUtil.valueToTree(jwtSettings));
+        return adminJwtSettings;
+    }
+
+    public static boolean isSigningKeyDefault(JwtSettings settings) {
+        return TOKEN_SIGNING_KEY_DEFAULT.equals(settings.getTokenSigningKey());
+    }
+
+    public static boolean validateKeyLength(String key) {
+        return Base64.getDecoder().decode(key).length * Byte.SIZE >= KEY_LENGTH;
+    }
+
+}

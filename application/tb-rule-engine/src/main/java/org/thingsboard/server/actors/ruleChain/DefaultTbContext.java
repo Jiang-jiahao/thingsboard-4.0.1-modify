@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.netty.channel.EventLoopGroup;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.Arrays;
+import org.thingsboard.common.util.ExecutorProvider;
 import org.thingsboard.common.util.DebugModeUtil;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.common.util.ListeningExecutor;
@@ -115,7 +116,6 @@ import org.thingsboard.server.dao.widget.WidgetsBundleService;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.queue.TbQueueCallback;
 import org.thingsboard.server.queue.common.SimpleTbQueueCallback;
-import org.thingsboard.server.service.executors.PubSubRuleNodeExecutorProvider;
 import org.thingsboard.server.service.script.RuleNodeJsScriptEngine;
 import org.thingsboard.server.service.script.RuleNodeTbelScriptEngine;
 
@@ -615,7 +615,7 @@ public class DefaultTbContext implements TbContext {
     }
 
     @Override
-    public PubSubRuleNodeExecutorProvider getPubSubRuleNodeExecutorProvider() {
+    public ExecutorProvider getPubSubRuleNodeExecutorProvider() {
         return mainCtx.getPubSubRuleNodeExecutorProvider();
     }
 

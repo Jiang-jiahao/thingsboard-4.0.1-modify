@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright 濠曪拷 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.thingsboard.server.service.entitiy.alarm.TbAlarmCommentService;
 import org.thingsboard.server.service.subscription.TbSubscriptionUtils;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Created by ashvayka on 27.03.18.
@@ -53,10 +54,10 @@ import java.util.Collection;
 public class DefaultAlarmSubscriptionService extends AbstractSubscriptionService implements AlarmSubscriptionService {
 
     private final AlarmService alarmService;
-    private final TbAlarmCommentService alarmCommentService;
+    private final Optional<TbAlarmCommentService> alarmCommentService;
     private final TbApiUsageReportClient apiUsageClient;
     private final TbApiUsageStateService apiUsageStateService;
-    private final NotificationRuleProcessor notificationRuleProcessor;
+    private final Optional<NotificationRuleProcessor> notificationRuleProcessor;
 
     @Override
     protected String getExecutorPrefix() {
@@ -175,10 +176,10 @@ public class DefaultAlarmSubscriptionService extends AbstractSubscriptionService
                         }, () -> TbSubscriptionUtils.toAlarmUpdateProto(tenantId, entityId, alarm)
                 );
             }
-            notificationRuleProcessor.process(AlarmTrigger.builder()
+            notificationRuleProcessor.ifPresent(p -> p.process(AlarmTrigger.builder()
                     .tenantId(tenantId)
                     .alarmUpdate(result)
-                    .build());
+                    .build()));
         });
     }
 
@@ -193,10 +194,10 @@ public class DefaultAlarmSubscriptionService extends AbstractSubscriptionService
                     return TbSubscriptionUtils.toAlarmDeletedProto(tenantId, entityId, alarm);
                 });
             }
-            notificationRuleProcessor.process(AlarmTrigger.builder()
+            notificationRuleProcessor.ifPresent(p -> p.process(AlarmTrigger.builder()
                     .tenantId(tenantId)
                     .alarmUpdate(result)
-                    .build());
+                    .build()));
         });
     }
 
@@ -229,11 +230,13 @@ public class DefaultAlarmSubscriptionService extends AbstractSubscriptionService
                 if (request != null && request.getUserId() != null) {
                     alarmComment.userId(request.getUserId());
                 }
-                try {
-                    alarmCommentService.saveAlarmComment(alarm, alarmComment.build(), null);
-                } catch (ThingsboardException e) {
-                    log.error("Failed to save alarm comment", e);
-                }
+                alarmCommentService.ifPresent(service -> {
+                    try {
+                        service.saveAlarmComment(alarm, alarmComment.build(), null);
+                    } catch (ThingsboardException e) {
+                        log.error("Failed to save alarm comment", e);
+                    }
+                });
             }
         }
         return result;

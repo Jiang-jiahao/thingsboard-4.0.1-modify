@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright 漏 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,6 +57,8 @@ import org.thingsboard.server.service.queue.processing.AbstractPartitionBasedCon
 import org.thingsboard.server.service.queue.processing.IdMsgPair;
 import org.thingsboard.server.service.security.auth.jwt.settings.JwtSettingsService;
 
+import java.util.Optional;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -87,7 +89,7 @@ public class DefaultTbCalculatedFieldConsumerService extends AbstractPartitionBa
                                                    TbApiUsageStateService apiUsageStateService,
                                                    PartitionService partitionService,
                                                    ApplicationEventPublisher eventPublisher,
-                                                   JwtSettingsService jwtSettingsService,
+                                                   Optional<JwtSettingsService> jwtSettingsService,
                                                    CalculatedFieldCache calculatedFieldCache,
                                                    CalculatedFieldStateService stateService) {
         super(actorContext, tenantProfileCache, deviceProfileCache, assetProfileCache, calculatedFieldCache, apiUsageStateService, partitionService,

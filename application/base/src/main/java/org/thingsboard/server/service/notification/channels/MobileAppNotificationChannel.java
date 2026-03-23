@@ -53,7 +53,7 @@ import static org.thingsboard.server.common.data.notification.NotificationDelive
 @Slf4j
 public class MobileAppNotificationChannel implements NotificationChannel<User, MobileAppDeliveryMethodNotificationTemplate> {
 
-    private final FirebaseService firebaseService;
+    private final Optional<FirebaseService> firebaseService;
     private final UserService userService;
     private final NotificationService notificationService;
     private final NotificationSettingsService notificationSettingsService;
@@ -102,7 +102,8 @@ public class MobileAppNotificationChannel implements NotificationChannel<User, M
         int unreadCount = notificationService.countUnreadNotificationsByRecipientId(ctx.getTenantId(), MOBILE_APP, recipient.getId());
         for (String token : mobileSessions.keySet()) {
             try {
-                firebaseService.sendMessage(ctx.getTenantId(), credentials, token, subject, body, data, unreadCount);
+                firebaseService.orElseThrow(() -> new IllegalStateException("FirebaseService is not available"))
+                        .sendMessage(ctx.getTenantId(), credentials, token, subject, body, data, unreadCount);
             } catch (FirebaseMessagingException e) {
                 MessagingErrorCode errorCode = e.getMessagingErrorCode();
                 if (errorCode == MessagingErrorCode.UNREGISTERED || errorCode == MessagingErrorCode.INVALID_ARGUMENT || errorCode == MessagingErrorCode.SENDER_ID_MISMATCH) {

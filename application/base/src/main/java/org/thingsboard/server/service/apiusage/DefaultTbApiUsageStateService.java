@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright 婕� 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +77,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -99,7 +100,7 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
     private final ApiUsageStateService apiUsageStateService;
     private final TbTenantProfileCache tenantProfileCache;
     private final MailService mailService;
-    private final NotificationRuleProcessor notificationRuleProcessor;
+    private final Optional<NotificationRuleProcessor> notificationRuleProcessor;
     private final DbCallbackExecutorService dbExecutor;
     private final MailExecutorService mailExecutor;
 
@@ -146,9 +147,9 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
     }
 
     /**
-     * core服务接收并处理来自其他微服务（如规则引擎、传输层）上报的API使用数据
-     * @param msgPack api使用数据
-     * @param callback 回调函数
+     * core閺堝秴濮熼幒銉︽暪楠炶泛顦╅悶鍡樻降閼奉亜鍙炬禒鏍т簳閺堝秴濮熼敍鍫濐洤鐟欏嫬鍨鏇熸惛閵嗕椒绱舵潏鎾崇湴閿涘绗傞幎銉ф畱API娴ｈ法鏁ら弫鐗堝祦
+     * @param msgPack api娴ｈ法鏁ら弫鐗堝祦
+     * @param callback 閸ョ偠鐨熼崙鑺ユ殶
      */
     @Override
     public void process(TbProtoQueueMsg<ToUsageStatsServiceMsg> msgPack, TbCallback callback) {
@@ -159,7 +160,7 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
 
         //For backward compatibility, remove after release
         if (serviceMsg.getMsgsList().isEmpty()) {
-            // 新版本的消息体，构建旧的消息体
+            // 閺傛壆澧楅張顒傛畱濞戝牊浼呮担鎿勭礉閺嬪嫬缂撻弮褏娈戝☉鍫熶紖娴ｏ拷
             TransportProtos.UsageStatsServiceMsg oldMsg = TransportProtos.UsageStatsServiceMsg.newBuilder()
                     .setTenantIdMSB(serviceMsg.getTenantIdMSB())
                     .setTenantIdLSB(serviceMsg.getTenantIdLSB())
@@ -172,51 +173,51 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
 
             msgs = List.of(oldMsg);
         } else {
-            // 表示是旧版本的消息
+            // 鐞涖劎銇氶弰顖涙＋閻楀牊婀伴惃鍕Х閹拷
             msgs = serviceMsg.getMsgsList();
         }
 
         msgs.forEach(msg -> {
             TenantId tenantId = TenantId.fromUUID(new UUID(msg.getTenantIdMSB(), msg.getTenantIdLSB()));
             EntityId ownerId;
-            // 判断是客户还是租户
+            // 閸掋倖鏌囬弰顖氼吂閹寸柉绻曢弰顖滎潳閹达拷
             if (msg.getCustomerIdMSB() != 0 && msg.getCustomerIdLSB() != 0) {
                 ownerId = new CustomerId(new UUID(msg.getCustomerIdMSB(), msg.getCustomerIdLSB()));
             } else {
                 ownerId = tenantId;
             }
-            // 处理实体的API使用统计数据
+            // 婢跺嫮鎮婄€圭偘缍嬮惃鍑橮I娴ｈ法鏁ょ紒鐔活吀閺佺増宓�
             processEntityUsageStats(tenantId, ownerId, msg.getValuesList(), serviceId);
         });
         callback.onSuccess();
     }
 
     /**
-     * 1、获取对应的实体api使用统计对象并恢复对应数据（恢复的统计数据来源于数据库存储的数据）
-     * 2、判断统计对象数据是否发生改变，如果发生改变，则更新数据库
-     * @param tenantId 租户ID
-     * @param ownerId 所有者ID（租户ID或客户ID）
-     * @param values API使用统计键值对列表
-     * @param serviceId 上报服务实例ID
+     * 1閵嗕浇骞忛崣鏍ь嚠鎼存梻娈戠€圭偘缍媋pi娴ｈ法鏁ょ紒鐔活吀鐎电钖勯獮鑸典划婢跺秴顕惔鏃€鏆熼幑顕嗙礄閹垹顦查惃鍕埠鐠佲剝鏆熼幑顔芥降濠ф劒绨弫鐗堝祦鎼存挸鐡ㄩ崒銊ф畱閺佺増宓侀敍锟�
+     * 2閵嗕礁鍨介弬顓犵埠鐠佲€愁嚠鐠炩剝鏆熼幑顔芥Ц閸氾箑褰傞悽鐔告暭閸欐﹫绱濇俊鍌涚亯閸欐垹鏁撻弨鐟板綁閿涘苯鍨弴瀛樻煀閺佺増宓佹惔锟�
+     * @param tenantId 缁夌喐鍩汭D
+     * @param ownerId 閹碘偓閺堝鈧將D閿涘牏顫ら幋绋〥閹存牕顓归幋绋〥閿涳拷
+     * @param values API娴ｈ法鏁ょ紒鐔活吀闁款喖鈧厧顕崚妤勩€�
+     * @param serviceId 娑撳﹥濮ら張宥呭鐎圭偘绶D
      */
     private void processEntityUsageStats(TenantId tenantId, EntityId ownerId, List<UsageStatsKVProto> values, String serviceId) {
-        // 跳过已删除的实体
+        // 鐠哄疇绻冨鎻掑灩闂勩倗娈戠€圭偘缍�
         if (deletedEntities.contains(ownerId)) return;
 
         BaseApiUsageState usageState;
-        // 需要更新的时序数据
+        // 闂団偓鐟曚焦娲块弬鎵畱閺冭泛绨弫鐗堝祦
         List<TsKvEntry> updatedEntries;
         Map<ApiFeature, ApiUsageStateValue> result;
-        // 加锁确保状态更新的线程安全
+        // 閸旂娀鏀ｇ涵顔荤箽閻樿埖鈧焦娲块弬鎵畱缁捐法鈻肩€瑰鍙�
         updateLock.lock();
         try {
-            // 获取或创建对应实体的API使用统计对象
+            // 閼惧嘲褰囬幋鏍у灡瀵ゅ搫顕惔鏂跨杽娴ｆ挾娈慉PI娴ｈ法鏁ょ紒鐔活吀鐎电钖�
             usageState = getOrFetchState(tenantId, ownerId);
             long ts = usageState.getCurrentCycleTs();
             long hourTs = usageState.getCurrentHourTs();
             long newHourTs = SchedulerUtils.getStartOfCurrentHour();
             if (newHourTs != hourTs) {
-                // 如果现在的小时和原来的不是同一个小时了，那么直接更新小时
+                // 婵″倹鐏夐悳鏉挎躬閻ㄥ嫬鐨弮璺烘嫲閸樼喐娼甸惃鍕瑝閺勵垰鎮撴稉鈧稉顏勭毈閺冩湹绨￠敍宀勫亝娑斿牏娲块幒銉︽纯閺傛澘鐨弮锟�
                 usageState.setHour(newHourTs);
             }
             if (log.isTraceEnabled()) {
@@ -234,15 +235,15 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
                     recordKey = ProtoUtils.fromProto(statsItem.getRecordKey());
                 }
 
-                // 根据其他服务实例给定的kv，来计算新的统计值
+                // 閺嶈宓侀崗鏈电铂閺堝秴濮熺€圭偘绶ョ紒娆忕暰閻ㄥ埍v閿涘本娼电拋锛勭暬閺傛壆娈戠紒鐔活吀閸婏拷
                 StatsCalculationResult calculationResult = usageState.calculate(recordKey, statsItem.getValue(), serviceId);
                 if (calculationResult.isValueChanged()) {
-                    // 如果周期性数据发生改变了，则添加到需要更新的时序数据中
+                    // 婵″倹鐏夐崨銊︽埂閹勬殶閹诡喖褰傞悽鐔告暭閸欐ü绨￠敍灞藉灟濞ｈ濮為崚浼存付鐟曚焦娲块弬鎵畱閺冭泛绨弫鐗堝祦娑擄拷
                     long newValue = calculationResult.getNewValue();
                     updatedEntries.add(new BasicTsKvEntry(ts, new LongDataEntry(recordKey.getApiCountKey(), newValue)));
                 }
                 if (calculationResult.isHourlyValueChanged()) {
-                    // 如果小时数据发生改变了，则添加到需要更新的时序数据中
+                    // 婵″倹鐏夌亸蹇旀閺佺増宓侀崣鎴犳晸閺€鐟板綁娴滃棴绱濋崚娆愬潑閸旂姴鍩岄棁鈧憰浣规纯閺傛壆娈戦弮璺虹碍閺佺増宓佹稉锟�
                     long newHourlyValue = calculationResult.getNewHourlyValue();
                     updatedEntries.add(new BasicTsKvEntry(newHourTs, new LongDataEntry(recordKey.getApiCountKey() + HOURLY, newHourlyValue)));
                 }
@@ -250,8 +251,8 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
                     apiFeatures.add(recordKey.getApiFeature());
                 }
             }
-            // 检查租户状态是否需要更新（达到阈值）
-            // 注意：系统租户（SYS_TENANT_ID）不做限制
+            // 濡偓閺屻儳顫ら幋椋庡Ц閹焦妲搁崥锕傛付鐟曚焦娲块弬甯礄鏉堟儳鍩岄梼鍫濃偓纭风礆
+            // 濞夈劍鍓伴敍姘遍兇缂佺喓顫ら幋鍑ょ礄SYS_TENANT_ID閿涘绗夐崑姘舵閸掞拷
             if (usageState.getEntityType() == EntityType.TENANT && !usageState.getEntityId().equals(TenantId.SYS_TENANT_ID)) {
                 result = ((TenantApiUsageState) usageState).checkStateUpdatedDueToThreshold(apiFeatures);
             } else {
@@ -261,13 +262,13 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
             updateLock.unlock();
         }
         log.trace("[{}][{}] Saving new stats: {}", tenantId, ownerId, updatedEntries);
-        // 更新数据库中的时序数据
+        // 閺囧瓨鏌婇弫鐗堝祦鎼存挷鑵戦惃鍕鎼村繑鏆熼幑锟�
         tsWsService.saveTimeseriesInternal(TimeseriesSaveRequest.builder()
                 .tenantId(tenantId)
                 .entityId(usageState.getApiUsageState().getId())
                 .entries(updatedEntries)
                 .build());
-        // 如果有状态变更（如达到警告或限制阈值），发送通知
+        // 婵″倹鐏夐張澶屽Ц閹礁褰夐弴杈剧礄婵″倽鎻崚鎷岊劅閸涘﹥鍨ㄩ梽鎰煑闂冨牆鈧》绱氶敍灞藉絺闁線鈧氨鐓�
         if (!result.isEmpty()) {
             persistAndNotify(usageState, result);
         }
@@ -301,7 +302,7 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
 
     @Override
     public void onApiUsageStateUpdate(TenantId tenantId) {
-        // 当api使用统计被更新的时候，从缓存中删除该租户的api使用统计
+        // 瑜版彸pi娴ｈ法鏁ょ紒鐔活吀鐞氼偅娲块弬鎵畱閺冭泛鈧瑱绱濇禒搴ｇ处鐎涙ü鑵戦崚鐘绘珟鐠囥儳顫ら幋椋庢畱api娴ｈ法鏁ょ紒鐔活吀
         otherUsageStates.remove(tenantId);
     }
 
@@ -352,9 +353,9 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
     }
 
     /**
-     * 将实体状态添加到本服务器的管理集合中
-     * @param tpi 主题分区信息
-     * @param state API使用状态
+     * 鐏忓棗鐤勬担鎾跺Ц閹焦鍧婇崝鐘插煂閺堫剚婀囬崝鈥虫珤閻ㄥ嫮顓搁悶鍡涙肠閸氬牅鑵�
+     * @param tpi 娑撳顣介崚鍡楀隘娣団剝浼�
+     * @param state API娴ｈ法鏁ら悩鑸碘偓锟�
      */
     private void addEntityState(TopicPartitionInfo tpi, BaseApiUsageState state) {
         EntityId entityId = state.getEntityId();
@@ -425,11 +426,11 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
                 if (recordState == null) {
                     return;
                 }
-                notificationRuleProcessor.process(ApiUsageLimitTrigger.builder()
+                notificationRuleProcessor.ifPresent(p -> p.process(ApiUsageLimitTrigger.builder()
                         .tenantId(state.getTenantId())
                         .state(recordState)
                         .status(stateValue)
-                        .build());
+                        .build()));
                 if (StringUtils.isNotEmpty(email)) {
                     mailExecutor.submit(() -> {
                         try {
@@ -500,9 +501,9 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
     }
 
     /**
-     * 保存新的统计计数（重置为0）
-     * @param state API使用状态
-     * @param keys 要重置的API使用记录键列表
+     * 娣囨繂鐡ㄩ弬鎵畱缂佺喕顓哥拋鈩冩殶閿涘牓鍣哥純顔昏礋0閿涳拷
+     * @param state API娴ｈ法鏁ら悩鑸碘偓锟�
+     * @param keys 鐟曚線鍣哥純顔炬畱API娴ｈ法鏁ょ拋鏉跨秿闁款喖鍨悰锟�
      */
     private void saveNewCounts(BaseApiUsageState state, List<ApiUsageRecordKey> keys) {
         List<TsKvEntry> counts = keys.stream()
@@ -517,38 +518,38 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
     }
 
     /**
-     * 获取或创建对应实体的API使用统计对象
-     * @param tenantId 租户ID
-     * @param ownerId 所有者ID（租户ID或客户ID）
-     * @return API使用状态
+     * 閼惧嘲褰囬幋鏍у灡瀵ゅ搫顕惔鏂跨杽娴ｆ挾娈慉PI娴ｈ法鏁ょ紒鐔活吀鐎电钖�
+     * @param tenantId 缁夌喐鍩汭D
+     * @param ownerId 閹碘偓閺堝鈧將D閿涘牏顫ら幋绋〥閹存牕顓归幋绋〥閿涳拷
+     * @return API娴ｈ法鏁ら悩鑸碘偓锟�
      */
     BaseApiUsageState getOrFetchState(TenantId tenantId, EntityId ownerId) {
         if (ownerId == null || ownerId.isNullUid()) {
             ownerId = tenantId;
         }
-        // 首先从本地缓存查找
+        // 妫ｆ牕鍘涙禒搴㈡拱閸︽壆绱︾€涙ɑ鐓￠幍锟�
         BaseApiUsageState state = myUsageStates.get(ownerId);
         if (state != null) {
             return state;
         }
 
-        // 从数据库加载状态
+        // 娴犲孩鏆熼幑顔肩氨閸旂姾娴囬悩鑸碘偓锟�
         ApiUsageState storedState = apiUsageStateService.findApiUsageStateByEntityId(ownerId);
         if (storedState == null) {
             try {
-                // 创建默认的API使用状态
+                // 閸掓稑缂撴妯款吇閻ㄥ嚈PI娴ｈ法鏁ら悩鑸碘偓锟�
                 storedState = apiUsageStateService.createDefaultApiUsageState(tenantId, ownerId);
             } catch (Exception e) {
-                // 如果创建失败，再次尝试从数据库查找
+                // 婵″倹鐏夐崚娑樼紦婢惰精瑙﹂敍灞藉晙濞嗏€崇毦鐠囨洑绮犻弫鐗堝祦鎼存挻鐓￠幍锟�
                 storedState = apiUsageStateService.findApiUsageStateByEntityId(ownerId);
             }
         }
-        // 根据实体类型创建相应的状态对象
+        // 閺嶈宓佺€圭偘缍嬬猾璇茬€烽崚娑樼紦閻╃ǹ绨查惃鍕Ц閹礁顕挒锟�
         if (ownerId.getEntityType() == EntityType.TENANT) {
             if (!ownerId.equals(TenantId.SYS_TENANT_ID)) {
                 state = new TenantApiUsageState(tenantProfileCache.get((TenantId) ownerId), storedState);
             } else {
-                // 系统租户
+                // 缁崵绮虹粔鐔稿煕
                 state = new TenantApiUsageState(storedState);
             }
         } else {
@@ -557,47 +558,47 @@ public class DefaultTbApiUsageStateService extends AbstractPartitionBasedService
 
         List<ApiUsageRecordKey> newCounts = new ArrayList<>();
         try {
-            // 从时间序列数据库加载最新的历史统计值，判断是否需要
+            // 娴犲孩妞傞梻鏉戠碍閸掓鏆熼幑顔肩氨閸旂姾娴囬張鈧弬鎵畱閸樺棗褰剁紒鐔活吀閸婄》绱濋崚銈嗘焽閺勵垰鎯侀棁鈧憰锟�
             List<TsKvEntry> dbValues = tsService.findAllLatest(tenantId, storedState.getId()).get();
             for (ApiUsageRecordKey key : ApiUsageRecordKey.values()) {
-                // 周期统计是否存在
+                // 閸涖劍婀＄紒鐔活吀閺勵垰鎯佺€涙ê婀�
                 boolean cycleEntryFound = false;
-                // 小时统计是否存在
+                // 鐏忓繑妞傜紒鐔活吀閺勵垰鎯佺€涙ê婀�
                 boolean hourlyEntryFound = false;
                 for (TsKvEntry tsKvEntry : dbValues) {
-                    // 查找周期统计值
+                    // 閺屻儲澹橀崨銊︽埂缂佺喕顓搁崐锟�
                     if (tsKvEntry.getKey().equals(key.getApiCountKey())) {
                         cycleEntryFound = true;
 
-                        // 检查是否为当前周期（也就是是否是本月或者本周）的统计值
+                        // 濡偓閺屻儲妲搁崥锔胯礋瑜版挸澧犻崨銊︽埂閿涘牅绡冪亸杈ㄦЦ閺勵垰鎯侀弰顖涙拱閺堝牊鍨ㄩ懓鍛拱閸涱煉绱氶惃鍕埠鐠佲€斥偓锟�
                         boolean oldCount = tsKvEntry.getTs() == state.getCurrentCycleTs();
                         state.set(key, oldCount ? tsKvEntry.getLongValue().get() : 0L);
 
                         if (!oldCount) {
-                            // 表示不是当前周期的数据，放入需要重置的键
+                            // 鐞涖劎銇氭稉宥嗘Ц瑜版挸澧犻崨銊︽埂閻ㄥ嫭鏆熼幑顕嗙礉閺€鎯у弳闂団偓鐟曚線鍣哥純顔炬畱闁匡拷
                             newCounts.add(key);
                         }
                     } else if (tsKvEntry.getKey().equals(key.getApiCountKey() + HOURLY)) {
-                        // 查找小时统计值
+                        // 閺屻儲澹樼亸蹇旀缂佺喕顓搁崐锟�
                         hourlyEntryFound = true;
                         state.setHourly(key, tsKvEntry.getTs() == state.getCurrentHourTs() ? tsKvEntry.getLongValue().get() : 0L);
                     }
                     if (cycleEntryFound && hourlyEntryFound) {
-                        // 当一种api使用统计值都已经找到，则跳出循环
+                        // 瑜版挷绔寸粔宄歱i娴ｈ法鏁ょ紒鐔活吀閸婂ジ鍏樺鑼病閹垫儳鍩岄敍灞藉灟鐠哄啿鍤顏嗗箚
                         break;
                     }
                 }
             }
             state.setGaugeReportInterval(gaugeReportInterval);
             log.debug("[{}][{}] Initialized state: {}", tenantId, ownerId, state);
-            // 添加到本地缓存
+            // 濞ｈ濮為崚鐗堟拱閸︽壆绱︾€涳拷
             TopicPartitionInfo tpi = partitionService.resolve(ServiceType.TB_CORE, tenantId, ownerId);
             if (tpi.isMyPartition()) {
                 addEntityState(tpi, state);
             } else {
                 otherUsageStates.put(ownerId, state.getApiUsageState());
             }
-            // 保存需要重置的统计值
+            // 娣囨繂鐡ㄩ棁鈧憰渚€鍣哥純顔炬畱缂佺喕顓搁崐锟�
             saveNewCounts(state, newCounts);
         } catch (InterruptedException | ExecutionException e) {
             log.warn("[{}] Failed to fetch api usage state from db.", tenantId, e);

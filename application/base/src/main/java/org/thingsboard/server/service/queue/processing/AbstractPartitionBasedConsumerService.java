@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright 漏 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.thingsboard.server.service.security.auth.jwt.settings.JwtSettingsServ
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -47,7 +48,7 @@ public abstract class AbstractPartitionBasedConsumerService<N extends com.google
                                                  TbApiUsageStateService apiUsageStateService,
                                                  PartitionService partitionService,
                                                  ApplicationEventPublisher eventPublisher,
-                                                 JwtSettingsService jwtSettingsService) {
+                                                 Optional<JwtSettingsService> jwtSettingsService) {
         super(actorContext, tenantProfileCache, deviceProfileCache, assetProfileCache, calculatedFieldCache, apiUsageStateService, partitionService, eventPublisher, jwtSettingsService);
     }
 
@@ -57,13 +58,13 @@ public abstract class AbstractPartitionBasedConsumerService<N extends com.google
     }
 
     /**
-     * 系统启动完成后处理（AfterStartUp阶段）
+     * 绯荤粺鍚姩瀹屾垚鍚庡鐞嗭紙AfterStartUp闃舵锛�
      *
-     * 执行流程：
-     * 1. 调用父类启动逻辑
-     * 2. 触发子类自定义启动逻辑(onStartUp)
-     * 3. 安全处理缓冲的分区事件
-     * 4. 标记服务已启动
+     * 鎵ц娴佺▼锛�
+     * 1. 璋冪敤鐖剁被鍚姩閫昏緫
+     * 2. 瑙﹀彂瀛愮被鑷畾涔夊惎鍔ㄩ€昏緫(onStartUp)
+     * 3. 瀹夊叏澶勭悊缂撳啿鐨勫垎鍖轰簨浠�
+     * 4. 鏍囪鏈嶅姟宸插惎鍔�
      */
     @AfterStartUp(order = AfterStartUp.REGULAR_SERVICE)
     @Override
@@ -88,11 +89,11 @@ public abstract class AbstractPartitionBasedConsumerService<N extends com.google
     }
 
     /**
-     * 分区变更事件处理（重写父类）
+     * 鍒嗗尯鍙樻洿浜嬩欢澶勭悊锛堥噸鍐欑埗绫伙級
      *
-     * 处理策略：
-     * - 若服务未启动：事件存入缓冲区
-     * - 若服务已启动：立即委托给子类处理
+     * 澶勭悊绛栫暐锛�
+     * - 鑻ユ湇鍔℃湭鍚姩锛氫簨浠跺瓨鍏ョ紦鍐插尯
+     * - 鑻ユ湇鍔″凡鍚姩锛氱珛鍗冲鎵樼粰瀛愮被澶勭悊
      */
     @Override
     protected void onTbApplicationEvent(PartitionChangeEvent event) {

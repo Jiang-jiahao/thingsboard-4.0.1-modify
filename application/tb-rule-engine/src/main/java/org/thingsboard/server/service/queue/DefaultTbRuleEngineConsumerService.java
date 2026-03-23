@@ -1,5 +1,5 @@
 /**
- * Copyright © 2016-2025 The Thingsboard Authors
+ * Copyright 漏 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,8 @@ import org.thingsboard.server.service.queue.ruleengine.TbRuleEngineQueueConsumer
 import org.thingsboard.server.service.rpc.TbRuleEngineDeviceRpcService;
 import org.thingsboard.server.service.security.auth.jwt.settings.JwtSettingsService;
 
+import java.util.Optional;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -71,7 +73,7 @@ public class DefaultTbRuleEngineConsumerService extends AbstractPartitionBasedCo
     private final TbRuleEngineDeviceRpcService tbDeviceRpcService;
 
     /**
-     * 执行引擎存在多个队列的情况，所以这里定义map进行存储
+     * 鎵ц寮曟搸瀛樺湪澶氫釜闃熷垪鐨勬儏鍐碉紝鎵€浠ヨ繖閲屽畾涔塵ap杩涜瀛樺偍
      */
     private final ConcurrentMap<QueueKey, TbRuleEngineQueueConsumerManager> consumers = new ConcurrentHashMap<>();
 
@@ -85,7 +87,7 @@ public class DefaultTbRuleEngineConsumerService extends AbstractPartitionBasedCo
                                               TbApiUsageStateService apiUsageStateService,
                                               PartitionService partitionService,
                                               ApplicationEventPublisher eventPublisher,
-                                              JwtSettingsService jwtSettingsService,
+                                              Optional<JwtSettingsService> jwtSettingsService,
                                               CalculatedFieldCache calculatedFieldCache) {
         super(actorContext, tenantProfileCache, deviceProfileCache, assetProfileCache, calculatedFieldCache, apiUsageStateService, partitionService, eventPublisher, jwtSettingsService);
         this.ctx = ctx;
@@ -107,14 +109,14 @@ public class DefaultTbRuleEngineConsumerService extends AbstractPartitionBasedCo
     @Override
     protected void onPartitionChangeEvent(PartitionChangeEvent event) {
         event.getNewPartitions().forEach((queueKey, partitions) -> {
-            // 如果是计算字段队列，则不处理
+            // 濡傛灉鏄绠楀瓧娈甸槦鍒楋紝鍒欎笉澶勭悊
             if (DataConstants.CF_QUEUE_NAME.equals(queueKey.getQueueName()) || DataConstants.CF_STATES_QUEUE_NAME.equals(queueKey.getQueueName())) {
                 return;
             }
-            // 判断该租户是否由当前服务管理负责
+            // 鍒ゆ柇璇ョ鎴锋槸鍚︾敱褰撳墠鏈嶅姟绠＄悊璐熻矗
             if (partitionService.isManagedByCurrentService(queueKey.getTenantId())) {
                 var consumer = getConsumer(queueKey).orElseGet(() -> {
-                    // 如果consumerManager不存在，则这里进行创建
+                    // 濡傛灉consumerManager涓嶅瓨鍦紝鍒欒繖閲岃繘琛屽垱寤�
                     Queue config = queueService.findQueueByTenantIdAndName(queueKey.getTenantId(), queueKey.getQueueName());
                     if (config == null) {
                         if (!partitions.isEmpty()) {
@@ -122,16 +124,16 @@ public class DefaultTbRuleEngineConsumerService extends AbstractPartitionBasedCo
                         }
                         return null;
                     }
-                    // 创建consumerManager
+                    // 鍒涘缓consumerManager
                     return createConsumer(queueKey, config);
                 });
-                // 队列存在，则更新分区信息
+                // 闃熷垪瀛樺湪锛屽垯鏇存柊鍒嗗尯淇℃伅
                 if (consumer != null) {
                     consumer.update(partitions);
                 }
             }
         });
-        // 清除不属于当前服务负责的队列
+        // 娓呴櫎涓嶅睘浜庡綋鍓嶆湇鍔¤礋璐ｇ殑闃熷垪
         consumers.keySet().stream()
                 .collect(Collectors.groupingBy(QueueKey::getTenantId))
                 .forEach((tenantId, queueKeys) -> {
@@ -181,20 +183,20 @@ public class DefaultTbRuleEngineConsumerService extends AbstractPartitionBasedCo
     }
 
     /**
-     * 处理通知信息
-     * @param id 通知信息uuid
-     * @param msg 信息内容
-     * @param callback 回调函数
+     * 澶勭悊閫氱煡淇℃伅
+     * @param id 閫氱煡淇℃伅uuid
+     * @param msg 淇℃伅鍐呭
+     * @param callback 鍥炶皟鍑芥暟
      */
     @Override
     protected void handleNotification(UUID id, TbProtoQueueMsg<ToRuleEngineNotificationMsg> msg, TbCallback callback) {
         ToRuleEngineNotificationMsg nfMsg = msg.getValue();
         if (nfMsg.hasComponentLifecycle()) {
-            // 处理组件生命周期消息
+            // 澶勭悊缁勪欢鐢熷懡鍛ㄦ湡娑堟伅
             handleComponentLifecycleMsg(id, ProtoUtils.fromProto(nfMsg.getComponentLifecycle()));
             callback.onSuccess();
         } else if (nfMsg.hasFromDeviceRpcResponse()) {
-            // 处理设备RPC响应消息
+            // 澶勭悊璁惧RPC鍝嶅簲娑堟伅
             TransportProtos.FromDeviceRPCResponseProto proto = nfMsg.getFromDeviceRpcResponse();
             RpcError error = proto.getError() > 0 ? RpcError.values()[proto.getError()] : null;
             FromDeviceRpcResponse response = new FromDeviceRpcResponse(new UUID(proto.getRequestIdMSB(), proto.getRequestIdLSB())
@@ -202,15 +204,15 @@ public class DefaultTbRuleEngineConsumerService extends AbstractPartitionBasedCo
             tbDeviceRpcService.processRpcResponseFromDevice(response);
             callback.onSuccess();
         } else if (nfMsg.getQueueUpdateMsgsCount() > 0) {
-            // 处理队列更新消息
+            // 澶勭悊闃熷垪鏇存柊娑堟伅
             updateQueues(nfMsg.getQueueUpdateMsgsList());
             callback.onSuccess();
         } else if (nfMsg.getQueueDeleteMsgsCount() > 0) {
-            // 处理队列删除消息
+            // 澶勭悊闃熷垪鍒犻櫎娑堟伅
             deleteQueues(nfMsg.getQueueDeleteMsgsList());
             callback.onSuccess();
         } else {
-            // 未知消息类型
+            // 鏈煡娑堟伅绫诲瀷
             log.trace("Received notification with missing handler");
             callback.onSuccess();
         }
