@@ -1025,6 +1025,22 @@ transport:
     max_wrong_credentials_per_ip: "${TB_TRANSPORT_MAX_WRONG_CREDENTIALS_PER_IP:10}"
     # Timeout (in milliseconds) to expire block IP addresses
     ip_block_timeout: "${TB_TRANSPORT_IP_BLOCK_TIMEOUT:60000}"
+  tcp:
+    enabled: "${TCP_TRANSPORT_ENABLED:true}"
+    server:
+      enabled: "${TCP_SERVER_ENABLED:true}"
+      # SERVER 入站首帧分帧（鉴权）。鉴权成功后切换为设备配置文件中的 tcpTransportFramingMode。
+      auth_framing_mode: "${TCP_SERVER_AUTH_FRAMING_MODE:LINE}"
+      auth_fixed_frame_length: "${TCP_SERVER_AUTH_FIXED_FRAME_LENGTH:512}"
+    # 默认监听端口；设备还可在传输配置中指定 serverBindPort 以额外 bind 专用端口（一设备一端口）。
+    bind_address: "${TCP_BIND_ADDRESS:0.0.0.0}"
+    bind_port: "${TCP_BIND_PORT:5683}"
+    netty:
+      leak_detector_level: "${TCP_NETTY_LEAK_DETECTOR_LEVEL:PARANOID}"
+      boss_group_thread_count: "${TCP_NETTY_BOSS_GROUP_THREADS:1}"
+      worker_group_thread_count: "${TCP_NETTY_WORKER_GROUP_THREADS:0}"
+      so_keep_alive: "${TCP_NETTY_SO_KEEPALIVE:true}"
+      max_frame_length: "${TCP_NETTY_MAX_FRAME_LENGTH:65536}"
   # Local HTTP transport parameters
   http:
     # Enable/Disable local HTTP transport protocol

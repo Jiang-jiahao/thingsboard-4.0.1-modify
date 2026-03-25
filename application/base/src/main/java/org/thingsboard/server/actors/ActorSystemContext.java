@@ -24,7 +24,9 @@ import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -548,15 +550,17 @@ public class ActorSystemContext {
     @Getter
     private EntityService entityService;
 
-    @Lazy
     @Autowired(required = false)
-    @Getter
-    private Object calculatedFieldProcessingService;
+    @Qualifier("defaultCalculatedFieldProcessingService")
+    private ObjectProvider<Object> calculatedFieldProcessingServiceProvider;
 
-    @Lazy
     @Autowired(required = false)
-    @Getter
-    private Object calculatedFieldStateService;
+    @Qualifier("kafkaCalculatedFieldStateService")
+    private ObjectProvider<Object> kafkaCalculatedFieldStateServiceProvider;
+
+    @Autowired(required = false)
+    @Qualifier("rocksDBCalculatedFieldStateService")
+    private ObjectProvider<Object> rocksDBCalculatedFieldStateServiceProvider;
 
     @Lazy
     @Autowired(required = false)
@@ -910,6 +914,18 @@ public class ActorSystemContext {
         } else {
             ctx.tell(msg);
         }
+    }
+
+
+    public Object getCalculatedFieldProcessingService() {
+        return calculatedFieldProcessingServiceProvider.getIfAvailable();
+    }
+    public Object getCalculatedFieldStateService() {
+        Object kafka = kafkaCalculatedFieldStateServiceProvider.getIfAvailable();
+        if (kafka != null) {
+            return kafka;
+        }
+        return rocksDBCalculatedFieldStateServiceProvider.getIfAvailable();
     }
 
 }

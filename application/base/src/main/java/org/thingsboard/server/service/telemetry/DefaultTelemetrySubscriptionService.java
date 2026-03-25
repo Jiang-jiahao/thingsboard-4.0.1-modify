@@ -25,7 +25,6 @@ import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.DonAsynchron;
 import org.thingsboard.common.util.ThingsBoardThreadFactory;
@@ -100,7 +99,7 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
 
     public DefaultTelemetrySubscriptionService(AttributesService attrService,
                                                TimeseriesService tsService,
-                                               @Lazy Optional<TbEntityViewService> tbEntityViewService,
+                                               Optional<TbEntityViewService> tbEntityViewService,
                                                TbApiUsageReportClient apiUsageClient,
                                                TbApiUsageStateService apiUsageStateService,
                                                CalculatedFieldQueueService calculatedFieldQueueService,

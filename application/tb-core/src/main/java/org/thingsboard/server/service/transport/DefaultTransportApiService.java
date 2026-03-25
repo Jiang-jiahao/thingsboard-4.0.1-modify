@@ -92,6 +92,8 @@ import org.thingsboard.server.gen.transport.TransportProtos.GetOrCreateDeviceFro
 import org.thingsboard.server.gen.transport.TransportProtos.GetResourceRequestMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.GetSnmpDevicesRequestMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.GetSnmpDevicesResponseMsg;
+import org.thingsboard.server.gen.transport.TransportProtos.GetTcpDevicesRequestMsg;
+import org.thingsboard.server.gen.transport.TransportProtos.GetTcpDevicesResponseMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ProvisionDeviceRequestMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.TransportApiRequestMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.TransportApiResponseMsg;
@@ -204,6 +206,8 @@ public class DefaultTransportApiService implements TransportApiService {
             return handle(transportApiRequestMsg.getResourceRequestMsg());
         } else if (transportApiRequestMsg.hasSnmpDevicesRequestMsg()) {
             return handle(transportApiRequestMsg.getSnmpDevicesRequestMsg());
+        } else if (transportApiRequestMsg.hasTcpDevicesRequestMsg()) {
+            return handle(transportApiRequestMsg.getTcpDevicesRequestMsg());
         } else if (transportApiRequestMsg.hasDeviceRequestMsg()) {
             return handle(transportApiRequestMsg.getDeviceRequestMsg());
         } else if (transportApiRequestMsg.hasDeviceCredentialsRequestMsg()) {
@@ -537,6 +541,21 @@ public class DefaultTransportApiService implements TransportApiService {
 
         return TransportApiResponseMsg.newBuilder()
                 .setSnmpDevicesResponseMsg(responseMsg)
+                .build();
+    }
+
+
+    private TransportApiResponseMsg handle(GetTcpDevicesRequestMsg requestMsg) {
+        PageLink pageLink = new PageLink(requestMsg.getPageSize(), requestMsg.getPage());
+        PageData<UUID> result = deviceService.findDevicesIdsByDeviceProfileTransportType(DeviceTransportType.TCP, pageLink);
+        GetTcpDevicesResponseMsg responseMsg = GetTcpDevicesResponseMsg.newBuilder()
+                .addAllIds(result.getData().stream()
+                        .map(UUID::toString)
+                        .collect(Collectors.toList()))
+                .setHasNextPage(result.hasNext())
+                .build();
+        return TransportApiResponseMsg.newBuilder()
+                .setTcpDevicesResponseMsg(responseMsg)
                 .build();
     }
 

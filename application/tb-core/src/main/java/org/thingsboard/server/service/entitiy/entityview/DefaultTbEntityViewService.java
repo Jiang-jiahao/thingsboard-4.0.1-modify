@@ -21,7 +21,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
 import jakarta.annotation.Nullable;
-import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ConcurrentReferenceHashMap;
@@ -67,7 +67,6 @@ import java.util.stream.Collectors;
 import static org.thingsboard.server.common.data.StringUtils.isBlank;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 public class DefaultTbEntityViewService extends AbstractTbEntityService implements TbEntityViewService {
 
@@ -78,6 +77,15 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
 
     final Map<TenantId, Map<EntityId, List<EntityView>>> localCache = new ConcurrentHashMap<>();
 
+    public DefaultTbEntityViewService(EntityViewService entityViewService,
+                                      AttributesService attributesService,
+                                      @Lazy TelemetrySubscriptionService tsSubService,
+                                      TimeseriesService tsService) {
+        this.entityViewService = entityViewService;
+        this.attributesService = attributesService;
+        this.tsSubService = tsSubService;
+        this.tsService = tsService;
+    }
     @Override
     public EntityView save(EntityView entityView, EntityView existingEntityView, User user) throws Exception {
         ActionType actionType = entityView.getId() == null ? ActionType.ADDED : ActionType.UPDATED;

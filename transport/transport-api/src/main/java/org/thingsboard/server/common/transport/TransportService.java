@@ -41,6 +41,8 @@ import org.thingsboard.server.gen.transport.TransportProtos.GetResourceRequestMs
 import org.thingsboard.server.gen.transport.TransportProtos.GetResourceResponseMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.GetSnmpDevicesRequestMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.GetSnmpDevicesResponseMsg;
+import org.thingsboard.server.gen.transport.TransportProtos.GetTcpDevicesRequestMsg;
+import org.thingsboard.server.gen.transport.TransportProtos.GetTcpDevicesResponseMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.LwM2MRequestMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.LwM2MResponseMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.PostAttributeMsg;
@@ -106,6 +108,11 @@ public interface TransportService {
      * @return SNMP 设备响应消息，包含设备 ID 列表
      */
     GetSnmpDevicesResponseMsg getSnmpDevicesIds(GetSnmpDevicesRequestMsg requestMsg);
+
+    /**
+     * 获取使用 TCP 传输类型的设备 ID 列表（用于 CLIENT 模式主动建连等）。
+     */
+    GetTcpDevicesResponseMsg getTcpDevicesIds(GetTcpDevicesRequestMsg requestMsg);
 
     /**
      * 获取设备信息。

@@ -1,0 +1,69 @@
+<!--
+    Copyright © 2016-2025 The Thingsboard Authors
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+        http://www.apache.org/licenses/LICENSE-2.0
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<form [formGroup]="tcpDeviceProfileTransportConfigurationFormGroup" class="flex flex-col gap-2 pb-4">
+    <div class="tb-hint mat-body-2" style="margin: 0 0 8px; padding: 12px 14px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);">
+        <span translate>device-profile.tcp.profile-network-notice</span>
+    </div>
+    <div class="flex flex-row gap-2 xs:flex-col">
+      <mat-form-field class="flex-1">
+        <mat-label translate>device-profile.tcp.connect-mode</mat-label>
+        <mat-select formControlName="tcpTransportConnectMode" required>
+            <mat-option [value]="'SERVER'">{{ 'device-profile.tcp.connect-mode-server' | translate }}</mat-option>
+            <mat-option [value]="'CLIENT'">{{ 'device-profile.tcp.connect-mode-client' | translate }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="flex-1">
+        <mat-label translate>device-profile.tcp.wire-auth</mat-label>
+        <mat-select formControlName="tcpWireAuthenticationMode" required>
+            <mat-option [value]="'TOKEN'">{{ 'device-profile.tcp.wire-auth-token' | translate }}</mat-option>
+            <mat-option [value]="'NONE'">{{ 'device-profile.tcp.wire-auth-none' | translate }}</mat-option>
+        </mat-select>
+        <mat-hint translate>device-profile.tcp.wire-auth-hint</mat-hint>
+      </mat-form-field>
+    </div>
+    <div class="flex flex-row gap-2 xs:flex-col">
+      <mat-form-field class="flex-1">
+        <mat-label translate>device-profile.tcp.framing-mode</mat-label>
+        <mat-select formControlName="tcpTransportFramingMode" required>
+          <mat-option *ngFor="let m of tcpTransportFramingModes" [value]="m">{{ m }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="flex-1" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpTransportFramingMode').value === 'FIXED_LENGTH'">
+        <mat-label translate>device-profile.tcp.fixed-frame-length</mat-label>
+        <input matInput formControlName="tcpFixedFrameLength" type="number" min="1" required>
+        <mat-error *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpFixedFrameLength').hasError('required')">
+          {{ 'device-profile.tcp.fixed-frame-length-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div class="flex flex-row gap-2 xs:flex-col">
+      <mat-form-field class="flex-1">
+        <mat-label translate>device-profile.tcp.payload-type</mat-label>
+        <mat-select formControlName="dataType" required>
+          <mat-option *ngFor="let t of transportTcpDataTypes" [value]="t">{{ t }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="flex-1">
+        <mat-label translate>device-profile.tcp.json-without-method</mat-label>
+        <mat-select formControlName="tcpJsonWithoutMethodMode" required>
+            <mat-option [value]="'TELEMETRY_FLAT'">{{ 'device-profile.tcp.json-mode-telemetry-flat' | translate }}</mat-option>
+            <mat-option [value]="'OPAQUE_FOR_RULE_ENGINE'">{{ 'device-profile.tcp.json-mode-opaque' | translate }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <mat-form-field class="mat-block" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpJsonWithoutMethodMode').value === 'OPAQUE_FOR_RULE_ENGINE'">
+      <mat-label translate>device-profile.tcp.opaque-key</mat-label>
+      <input matInput formControlName="tcpOpaqueRuleEngineKey">
+      <mat-hint translate>device-profile.tcp.opaque-key-hint</mat-hint>
+    </mat-form-field>
+  </form>

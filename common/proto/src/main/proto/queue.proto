@@ -1615,6 +1615,7 @@ message TransportApiRequestMsg {
   GetDeviceCredentialsRequestMsg deviceCredentialsRequestMsg = 13;
   GetAllQueueRoutingInfoRequestMsg getAllQueueRoutingInfoRequestMsg = 14;
   ValidateOrCreateDeviceX509CertRequestMsg validateOrCreateX509CertRequestMsg = 15;
+  GetTcpDevicesRequestMsg tcpDevicesRequestMsg = 16;
 }
 
 /* Response from ThingsBoard Core Service to Transport Service */
@@ -1630,6 +1631,7 @@ message TransportApiResponseMsg {
   GetDeviceResponseMsg deviceResponseMsg = 9;
   GetDeviceCredentialsResponseMsg deviceCredentialsResponseMsg = 10;
   repeated GetQueueRoutingInfoResponseMsg getQueueRoutingInfoResponseMsgs = 11;
+  GetTcpDevicesResponseMsg tcpDevicesResponseMsg = 12;
 }
 
 /* Messages that are handled by ThingsBoard Core Service */
@@ -1845,4 +1847,13 @@ message EdqsRequestMsg {
 
 message EdqsResponseMsg {
   string value = 1;
+}
+message GetTcpDevicesRequestMsg {
+  int32 page = 1;
+  int32 pageSize = 2;
+}
+
+message GetTcpDevicesResponseMsg {
+  repeated string ids = 1;
+  bool hasNextPage = 2;
 }

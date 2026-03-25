@@ -355,6 +355,22 @@ public class DefaultTransportService extends TransportActivityManager implements
         }
     }
 
+
+    @Override
+    public TransportProtos.GetTcpDevicesResponseMsg getTcpDevicesIds(TransportProtos.GetTcpDevicesRequestMsg requestMsg) {
+        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+                UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
+                .setTcpDevicesRequestMsg(requestMsg)
+                .build()
+        );
+        try {
+            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            return response.getValue().getTcpDevicesResponseMsg();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public TransportProtos.GetDeviceResponseMsg getDevice(TransportProtos.GetDeviceRequestMsg requestMsg) {
         TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
