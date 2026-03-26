@@ -38,6 +38,19 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
     private TcpWireAuthenticationMode tcpWireAuthenticationMode;
 
     /**
+     * CLIENT：断线或建连失败后，间隔多少秒再次尝试 outbound 建连；{@code null} 默认 30；{@code 0} 表示不重连。
+     */
+    private Integer tcpOutboundReconnectIntervalSec;
+    /**
+     * CLIENT：最大连续重连次数（每次断线或失败后计一次），{@code null} 或 {@code 0} 表示不限制。
+     */
+    private Integer tcpOutboundReconnectMaxAttempts;
+    /**
+     * CLIENT/SERVER：超过该秒数未从对端收到任何字节则关闭连接；{@code null} 或 {@code 0} 表示不启用读空闲断开。
+     */
+    private Integer tcpReadIdleTimeoutSec;
+
+    /**
      * 无 {@code method} 的 JSON 上行如何入库；{@link TcpJsonWithoutMethodMode#OPAQUE_FOR_RULE_ENGINE} 时写入单键遥测供规则引擎脚本解析。
      */
     private TcpJsonWithoutMethodMode tcpJsonWithoutMethodMode;
@@ -79,6 +92,53 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
     }
     public String getTcpOpaqueRuleEngineKey() {
         return Objects.requireNonNullElse(tcpOpaqueRuleEngineKey, "tcpOpaquePayload");
+    }
+
+    /**
+     * {@code null} 视为 30 秒；{@code 0} 表示禁用自动重连。
+     */
+    public int getEffectiveTcpOutboundReconnectIntervalSec() {
+        if (tcpOutboundReconnectIntervalSec == null) {
+            return 30;
+        }
+        return tcpOutboundReconnectIntervalSec;
+    }
+
+    public boolean isTcpOutboundReconnectDisabled() {
+        return tcpOutboundReconnectIntervalSec != null && tcpOutboundReconnectIntervalSec == 0;
+    }
+
+    /**
+     * {@code null} 或 {@code 0}：不限制重连次数。
+     */
+    public int getEffectiveTcpOutboundReconnectMaxAttempts() {
+        if (tcpOutboundReconnectMaxAttempts == null || tcpOutboundReconnectMaxAttempts <= 0) {
+            return 0;
+        }
+        return tcpOutboundReconnectMaxAttempts;
+    }
+
+    /**
+     * {@code null} 或 {@code 0}：不启用读空闲断开。
+     */
+    public int getEffectiveTcpReadIdleTimeoutSec() {
+        if (tcpReadIdleTimeoutSec == null || tcpReadIdleTimeoutSec <= 0) {
+            return 0;
+        }
+        return tcpReadIdleTimeoutSec;
+    }
+
+    @Override
+    public void validate() {
+        if (tcpOutboundReconnectIntervalSec != null && tcpOutboundReconnectIntervalSec < 0) {
+            throw new IllegalArgumentException("tcpOutboundReconnectIntervalSec must be >= 0");
+        }
+        if (tcpOutboundReconnectMaxAttempts != null && tcpOutboundReconnectMaxAttempts < 0) {
+            throw new IllegalArgumentException("tcpOutboundReconnectMaxAttempts must be >= 0");
+        }
+        if (tcpReadIdleTimeoutSec != null && tcpReadIdleTimeoutSec < 0) {
+            throw new IllegalArgumentException("tcpReadIdleTimeoutSec must be >= 0");
+        }
     }
 
 }

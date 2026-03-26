@@ -345,6 +345,12 @@ export interface TcpDeviceProfileTransportConfiguration {
   tcpTransportFramingMode?: TcpTransportFramingMode;
   tcpFixedFrameLength?: number;
   tcpWireAuthenticationMode?: TcpWireAuthenticationMode;
+  /** CLIENT：断线/建连失败后重连间隔（秒）；空=后端默认 30；0=不重连 */
+  tcpOutboundReconnectIntervalSec?: number;
+  /** CLIENT：最大重连次数；空或 0=不限制 */
+  tcpOutboundReconnectMaxAttempts?: number;
+  /** CLIENT/SERVER：超过该秒数无上行数据则断开；空或 0=不启用 */
+  tcpReadIdleTimeoutSec?: number;
   tcpJsonWithoutMethodMode?: TcpJsonWithoutMethodMode;
   tcpOpaqueRuleEngineKey?: string;
   transportTcpDataTypeConfiguration?: TransportTcpDataTypeConfiguration;

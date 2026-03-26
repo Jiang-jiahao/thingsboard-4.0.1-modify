@@ -26,6 +26,7 @@ import { RenameKeysConfigComponent } from './rename-keys-config.component';
 import { NodeJsonPathConfigComponent } from './node-json-path-config.component';
 import { DeleteKeysConfigComponent } from './delete-keys-config.component';
 import { DeduplicationConfigComponent } from './deduplication-config.component';
+import { HexProtocolParserConfigComponent } from './hex-protocol-parser-config.component';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { DeduplicationConfigComponent } from './deduplication-config.component';
     RenameKeysConfigComponent,
     NodeJsonPathConfigComponent,
     DeleteKeysConfigComponent,
-    DeduplicationConfigComponent
+    DeduplicationConfigComponent,
+    HexProtocolParserConfigComponent
   ],
   imports: [
     CommonModule,
@@ -51,7 +53,8 @@ import { DeduplicationConfigComponent } from './deduplication-config.component';
     RenameKeysConfigComponent,
     NodeJsonPathConfigComponent,
     DeleteKeysConfigComponent,
-    DeduplicationConfigComponent
+    DeduplicationConfigComponent,
+    HexProtocolParserConfigComponent
   ]
 })
 export class TransformationRuleNodeConfigModule {

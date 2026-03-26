@@ -69,6 +69,9 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       tcpTransportFramingMode: [TcpTransportFramingMode.LINE, Validators.required],
       tcpFixedFrameLength: [null],
       tcpWireAuthenticationMode: [TcpWireAuthenticationMode.TOKEN, Validators.required],
+      tcpOutboundReconnectIntervalSec: [null, [Validators.min(0)]],
+      tcpOutboundReconnectMaxAttempts: [null, [Validators.min(0)]],
+      tcpReadIdleTimeoutSec: [null, [Validators.min(0)]],
       tcpJsonWithoutMethodMode: [TcpJsonWithoutMethodMode.TELEMETRY_FLAT, Validators.required],
       tcpOpaqueRuleEngineKey: ['tcpOpaquePayload'],
       dataType: [TransportTcpDataType.JSON, Validators.required]
@@ -116,6 +119,9 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         tcpTransportFramingMode: value.tcpTransportFramingMode,
         tcpFixedFrameLength: value.tcpFixedFrameLength,
         tcpWireAuthenticationMode: value.tcpWireAuthenticationMode,
+        tcpOutboundReconnectIntervalSec: value.tcpOutboundReconnectIntervalSec,
+        tcpOutboundReconnectMaxAttempts: value.tcpOutboundReconnectMaxAttempts,
+        tcpReadIdleTimeoutSec: value.tcpReadIdleTimeoutSec,
         tcpJsonWithoutMethodMode: value.tcpJsonWithoutMethodMode,
         tcpOpaqueRuleEngineKey: value.tcpOpaqueRuleEngineKey || 'tcpOpaquePayload',
         dataType
@@ -147,6 +153,15 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       configuration.tcpFixedFrameLength = v.tcpFixedFrameLength;
     } else {
       configuration.tcpFixedFrameLength = null;
+    }
+    if (v.tcpOutboundReconnectIntervalSec != null && v.tcpOutboundReconnectIntervalSec !== '') {
+      configuration.tcpOutboundReconnectIntervalSec = Number(v.tcpOutboundReconnectIntervalSec);
+    }
+    if (v.tcpOutboundReconnectMaxAttempts != null && v.tcpOutboundReconnectMaxAttempts !== '') {
+      configuration.tcpOutboundReconnectMaxAttempts = Number(v.tcpOutboundReconnectMaxAttempts);
+    }
+    if (v.tcpReadIdleTimeoutSec != null && v.tcpReadIdleTimeoutSec !== '') {
+      configuration.tcpReadIdleTimeoutSec = Number(v.tcpReadIdleTimeoutSec);
     }
     this.propagateChange(configuration);
   }

@@ -24,9 +24,11 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.transport.tcp.netty.TcpPipelineBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.thingsboard.server.queue.scheduler.SchedulerComponent;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
@@ -63,6 +65,9 @@ import org.thingsboard.server.transport.tcp.session.TcpDeviceSession;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 @TbTcpTransportComponent
 @Component
 @Slf4j
@@ -80,6 +85,11 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
 
     private final Map<DeviceId, TcpDeviceSession> clientSessions = new ConcurrentHashMap<>();
     private final Collection<DeviceId> allTcpDeviceIds = new ConcurrentLinkedDeque<>();
+    private final Map<DeviceId, AtomicInteger> clientReconnectFailureCount = new ConcurrentHashMap<>();
+    private final Map<DeviceId, ScheduledFuture<?>> clientReconnectTasks = new ConcurrentHashMap<>();
+
+    @Autowired
+    private SchedulerComponent scheduler;
 
 
     public TcpTransportContext(TransportDeviceProfileCache deviceProfileCache,
@@ -144,13 +154,32 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
         }
         completeSessionRegistration(session, msg);
         session.endServerAuth();
-        ctx.channel().eventLoop().execute(() -> TcpPipelineBuilder.replaceFramingIfNeeded(ctx.pipeline(),
-                session.getInboundPipelineFramingMode() != null ? session.getInboundPipelineFramingMode() : tcpTransportService.getServerAuthFramingMode(),
-                session.getInboundPipelineFramingMode() != null ? session.getInboundPipelineFixedFrameLength() : tcpTransportService.getServerAuthFixedFrameLength(),
-                session.getTcpTransportFramingMode(),
-                session.getTcpFixedFrameLengthForFraming(),
-                tcpTransportService.getMaxFrameLength()));
+        int readIdleSec = readIdleSecFromProfile(session.getDeviceProfile());
+        ctx.channel().eventLoop().execute(() -> {
+            TcpPipelineBuilder.replaceFramingIfNeeded(ctx.pipeline(),
+                    session.getInboundPipelineFramingMode() != null ? session.getInboundPipelineFramingMode() : tcpTransportService.getServerAuthFramingMode(),
+                    session.getInboundPipelineFramingMode() != null ? session.getInboundPipelineFixedFrameLength() : tcpTransportService.getServerAuthFixedFrameLength(),
+                    session.getTcpTransportFramingMode(),
+                    session.getTcpFixedFrameLengthForFraming(),
+                    tcpTransportService.getMaxFrameLength());
+            TcpPipelineBuilder.installReadIdleHandlerFirst(ctx.pipeline(), readIdleSec);
+        });
     }
+    /**
+     * 出站 CLIENT：在 TCP 已激活后向 Core 注册会话并加入 {@link #clientSessions}。
+     */
+    public void finishOutboundTcpClientRegistration(TcpDeviceSession session) {
+        if (!session.isOutboundClient() || session.getSessionInfo() != null) {
+            return;
+        }
+        ValidateDeviceCredentialsResponse msg = session.takePendingOutboundCredentials();
+        if (msg == null || !msg.hasDeviceInfo()) {
+            return;
+        }
+        completeSessionRegistration(session, msg);
+        clientSessions.put(session.getDeviceId(), session);
+    }
+
     private void completeSessionRegistration(TcpDeviceSession session, ValidateDeviceCredentialsResponse msg) {
         TransportProtos.SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, session.getSessionId());
         transportService.registerAsyncSession(sessionInfo, session);
@@ -171,6 +200,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
         if (device == null) {
             return;
         }
+        cancelClientReconnectTask(device.getId());
         log.info("Establishing TCP CLIENT session for device {}", device.getId());
         DeviceProfile deviceProfile = deviceProfileCache.get(device.getDeviceProfileId());
         DeviceCredentials credentials = protoEntityService.getDeviceCredentialsByDeviceId(device.getId());
@@ -178,7 +208,6 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
             log.warn("[{}] Expected ACCESS_TOKEN credentials", device.getId());
             return;
         }
-        TcpDeviceProfileTransportConfiguration profileCfg = (TcpDeviceProfileTransportConfiguration) deviceProfile.getProfileData().getTransportConfiguration();
         TcpDeviceTransportConfiguration deviceCfg = (TcpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
         TcpDeviceSession session = new TcpDeviceSession(UUID.randomUUID(), this, true);
         session.setDeviceProfile(deviceProfile);
@@ -188,9 +217,10 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
                     @Override
                     public void onSuccess(ValidateDeviceCredentialsResponse msg) {
                         if (msg.hasDeviceInfo()) {
-                            completeSessionRegistration(session, msg);
-                            openOutboundConnection(session, deviceCfg.getHost(), deviceCfg.getPort());
-                            clientSessions.put(device.getId(), session);
+                            session.setDeviceInfo(msg.getDeviceInfo());
+                            session.setDeviceProfile(msg.getDeviceProfile());
+                            session.stashPendingOutboundCredentials(msg);
+                            openOutboundConnection(device.getId(), session, deviceCfg.getHost(), deviceCfg.getPort());
                         } else {
                             log.warn("[{}] TCP client auth failed", device.getId());
                         }
@@ -202,7 +232,8 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
                     }
                 });
     }
-    private void openOutboundConnection(TcpDeviceSession session, String host, int port) {
+    private void openOutboundConnection(DeviceId deviceId, TcpDeviceSession session, String host, int port) {
+        int readIdleSec = readIdleSecFromProfile(session.getDeviceProfile());
         Bootstrap b = new Bootstrap();
         b.group(tcpTransportService.getWorkerGroup())
                 .channel(NioSocketChannel.class)
@@ -211,6 +242,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
+                        TcpPipelineBuilder.installReadIdleHandlerFirst(ch.pipeline(), readIdleSec);
                         TcpPipelineBuilder.addFramingFirst(ch.pipeline(),
                                 session.getTcpTransportFramingMode(),
                                 tcpTransportService.getMaxFrameLength(),
@@ -221,21 +253,94 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
                 });
         b.connect(host, port).addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {
-                log.error("[{}] Outbound TCP connect failed to {}:{}", session.getDeviceId(), host, port, future.cause());
-                transportService.errorEvent(session.getTenantId(), session.getDeviceId(), "tcpClientConnect", future.cause());
+                log.error("[{}] Outbound TCP connect failed to {}:{}", deviceId, host, port, future.cause());
+                transportService.errorEvent(session.getTenantId(), deviceId, "tcpClientConnect", future.cause());
+                onChannelClosed(session);
             }
         });
     }
+
+    private static int readIdleSecFromProfile(DeviceProfile profile) {
+        if (profile == null || profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration)) {
+            return 0;
+        }
+        return ((TcpDeviceProfileTransportConfiguration) profile.getProfileData().getTransportConfiguration())
+                .getEffectiveTcpReadIdleTimeoutSec();
+    }
+
+    public void resetClientReconnectFailureCount(DeviceId deviceId) {
+        clientReconnectFailureCount.remove(deviceId);
+    }
+
+    private void cancelClientReconnectTask(DeviceId deviceId) {
+        ScheduledFuture<?> f = clientReconnectTasks.remove(deviceId);
+        if (f != null) {
+            f.cancel(false);
+        }
+    }
+
+    private void scheduleClientReconnect(DeviceId deviceId) {
+        if (!balancingService.isManagedByCurrentTransport(deviceId.getId())) {
+            return;
+        }
+        Device device = protoEntityService.getDeviceById(deviceId);
+        if (device == null) {
+            return;
+        }
+        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
+        if (profile == null || profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration)) {
+            return;
+        }
+        TcpDeviceProfileTransportConfiguration cfg = (TcpDeviceProfileTransportConfiguration) profile.getProfileData().getTransportConfiguration();
+        if (cfg.getTcpTransportConnectMode() != TcpTransportConnectMode.CLIENT) {
+            return;
+        }
+        if (cfg.isTcpOutboundReconnectDisabled()) {
+            return;
+        }
+        int maxAttempts = cfg.getEffectiveTcpOutboundReconnectMaxAttempts();
+        if (maxAttempts > 0) {
+            int n = clientReconnectFailureCount.computeIfAbsent(deviceId, d -> new AtomicInteger(0)).incrementAndGet();
+            if (n > maxAttempts) {
+                log.warn("[{}] TCP outbound reconnect stopped after {} failure(s) (max {})", deviceId, n, maxAttempts);
+                clientReconnectFailureCount.remove(deviceId);
+                return;
+            }
+        }
+        int intervalSec = cfg.getEffectiveTcpOutboundReconnectIntervalSec();
+        cancelClientReconnectTask(deviceId);
+        ScheduledFuture<?> scheduled = scheduler.schedule(() -> {
+            try {
+                Device reloaded = protoEntityService.getDeviceById(deviceId);
+                if (reloaded != null && isClientProfile(reloaded)) {
+                    establishClientDeviceSession(reloaded);
+                }
+            } catch (Exception e) {
+                log.warn("[{}] TCP outbound reconnect task failed", deviceId, e);
+            } finally {
+                clientReconnectTasks.remove(deviceId);
+            }
+        }, intervalSec, TimeUnit.SECONDS);
+        clientReconnectTasks.put(deviceId, scheduled);
+        log.info("[{}] Scheduled TCP outbound reconnect in {} s", deviceId, intervalSec);
+    }
+
     public void onChannelClosed(TcpDeviceSession session) {
-        if (session.getSessionInfo() != null) {
-            transportService.deregisterSession(session.getSessionInfo());
+        TransportProtos.SessionInfoProto sessionInfo = session.getSessionInfo();
+        if (sessionInfo != null) {
+            transportService.deregisterSession(sessionInfo);
+            transportService.lifecycleEvent(session.getTenantId(), session.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
         }
         if (session.getDeviceId() != null) {
             clientSessions.remove(session.getDeviceId());
-            transportService.lifecycleEvent(session.getTenantId(), session.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
         }
         session.setConnected(false);
         session.endServerAuth();
+        if (session.isOutboundClient() && session.getDeviceId() != null) {
+            scheduleClientReconnect(session.getDeviceId());
+        }
     }
     public void onTcpSessionDeviceDeleted(TcpDeviceSession session) {
         session.close();

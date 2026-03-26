@@ -17,11 +17,14 @@ package org.thingsboard.server.transport.tcp.netty;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.handler.codec.FixedLengthFrameDecoder;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.common.data.device.profile.TcpTransportFramingMode;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * 按设备/服务端配置安装或替换 TCP 分帧解码器（与 StringDecoder 解耦，下游统一为 {@link io.netty.buffer.ByteBuf}）。
@@ -30,6 +33,7 @@ import org.thingsboard.server.common.data.device.profile.TcpTransportFramingMode
 public final class TcpPipelineBuilder {
     public static final String FRAMING_HANDLER_NAME = "tcpFraming";
     public static final String INBOUND_HANDLER_NAME = "tcpInbound";
+    public static final String READ_IDLE_HANDLER_NAME = "tcpReadIdle";
 
     private TcpPipelineBuilder() {
     }
@@ -86,5 +90,24 @@ public final class TcpPipelineBuilder {
             return false;
         }
         return a != TcpTransportFramingMode.FIXED_LENGTH || aFixed == bFixed;
+    }
+
+    /**
+     * 在 pipeline 最前安装读空闲检测；秒数 &lt;= 0 时移除已有 handler。
+     */
+    public static void installReadIdleHandlerFirst(ChannelPipeline pipeline, int readIdleSeconds) {
+        if (readIdleSeconds <= 0) {
+            ChannelHandler existing = pipeline.get(READ_IDLE_HANDLER_NAME);
+            if (existing != null) {
+                pipeline.remove(READ_IDLE_HANDLER_NAME);
+            }
+            return;
+        }
+        ChannelHandler idle = new IdleStateHandler(readIdleSeconds, 0, 0, TimeUnit.SECONDS);
+        if (pipeline.get(READ_IDLE_HANDLER_NAME) != null) {
+            pipeline.replace(READ_IDLE_HANDLER_NAME, READ_IDLE_HANDLER_NAME, idle);
+        } else {
+            pipeline.addFirst(READ_IDLE_HANDLER_NAME, idle);
+        }
     }
 }

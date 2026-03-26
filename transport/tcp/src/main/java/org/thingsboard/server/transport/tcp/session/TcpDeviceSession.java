@@ -33,6 +33,7 @@ import org.thingsboard.server.common.data.device.profile.TcpDeviceProfileTranspo
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.transport.SessionMsgListener;
 import org.thingsboard.server.common.transport.TransportService;
+import org.thingsboard.server.common.transport.auth.ValidateDeviceCredentialsResponse;
 import org.thingsboard.server.common.transport.session.DeviceAwareSessionContext;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode;
@@ -45,6 +46,7 @@ import org.thingsboard.server.gen.transport.TransportProtos.ToTransportUpdateCre
 import org.thingsboard.server.transport.tcp.TcpTransportContext;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.nio.charset.StandardCharsets;
 
 import io.netty.buffer.Unpooled;
@@ -64,11 +66,24 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
     @Setter
     private volatile Channel channel;
     /**
-     * 平台已向 Core 完成鉴权并注册会话（CLIENT 在 TCP 建连前即为 true；SERVER 在收到首行 token 后为 true）。
+     * 平台已向 Core 完成鉴权并注册会话（CLIENT 在出站 TCP 建连成功且 {@code channelActive} 中注册后为 true；SERVER 在收到首行 token 后为 true）。
      */
     @Getter
     @Setter
     private volatile boolean coreSessionReady;
+
+    /**
+     * CLIENT：令牌校验通过后暂存，在 Netty {@code channelActive} 时再向 Core 注册，避免未建连即显示在线。
+     */
+    private final AtomicReference<ValidateDeviceCredentialsResponse> pendingOutboundCredentials = new AtomicReference<>();
+
+    public void stashPendingOutboundCredentials(ValidateDeviceCredentialsResponse msg) {
+        pendingOutboundCredentials.set(msg);
+    }
+
+    public ValidateDeviceCredentialsResponse takePendingOutboundCredentials() {
+        return pendingOutboundCredentials.getAndSet(null);
+    }
     /**
      * SERVER 模式下设备已通过首行 token 完成接入认证。
      */

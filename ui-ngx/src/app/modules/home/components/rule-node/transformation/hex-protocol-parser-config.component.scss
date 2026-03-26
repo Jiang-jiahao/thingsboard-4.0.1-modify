@@ -1,0 +1,115 @@
+.hex-parser-config {
+  .hex-parser-protocols-header {
+    margin: 12px 0 8px;
+  }
+
+  .hex-config-capability {
+    margin: 0 0 12px;
+    padding: 8px 10px;
+    line-height: 1.5;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .hex-example-json-block {
+    margin: 0 0 16px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .hex-example-json-textarea {
+    width: 100%;
+    min-height: 200px;
+    font-size: 12px;
+    line-height: 1.35;
+    margin-top: 8px;
+    resize: vertical;
+  }
+
+  .hex-example-three-desc,
+  .hex-example-three-footnote {
+    margin: 6px 0 0;
+    line-height: 1.45;
+    opacity: 0.9;
+  }
+
+  .hex-frame-templates-doc {
+    margin: 0 0 8px;
+    line-height: 1.45;
+    opacity: 0.9;
+  }
+
+  .hex-frame-template-list > div {
+    margin-bottom: 12px;
+  }
+
+  .hex-template-header-hint,
+  .hex-template-checksum-hint,
+  .hex-protocol-checksum-hint {
+    margin: 4px 0 8px;
+    line-height: 1.45;
+    opacity: 0.9;
+  }
+
+  .hex-protocol-list > div {
+    margin-bottom: 12px;
+  }
+
+  .hex-protocol-card-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-right: 8px;
+    box-sizing: border-box;
+  }
+
+  .hex-protocol-panel-body {
+    padding-top: 8px;
+  }
+
+  .hex-section-label {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .hex-checkbox {
+    margin: 8px 0;
+  }
+
+  .hex-checksum-block {
+    margin-bottom: 12px;
+  }
+
+  .hex-fields-doc {
+    margin: 0 0 8px;
+    line-height: 1.45;
+    opacity: 0.9;
+  }
+
+  .hex-fields-header {
+    margin: 8px 0 8px;
+  }
+
+  .hex-field-row {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+  }
+
+  .hex-json-toggle {
+    margin-top: 16px;
+  }
+
+  .hex-list-item-fields {
+    margin-top: 8px;
+  }
+
+  .hex-list-nested-level {
+    margin-left: 4px;
+    padding-left: 12px;
+    border-left: 2px solid rgba(0, 0, 0, 0.1);
+  }
+}

@@ -19,6 +19,8 @@ import com.google.gson.JsonParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.transport.tcp.session.TcpDeviceSession;
@@ -35,8 +37,27 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
      */
     private final boolean outboundClient;
     @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+        if (evt instanceof IdleStateEvent) {
+            IdleStateEvent e = (IdleStateEvent) evt;
+            if (e.state() == IdleState.READER_IDLE) {
+                log.info("[{}] TCP read idle timeout, closing channel", session.getSessionId());
+                ctx.close();
+                return;
+            }
+        }
+        ctx.fireUserEventTriggered(evt);
+    }
+
+    @Override
     public void channelActive(ChannelHandlerContext ctx) {
         session.setChannel(ctx.channel());
+        if (outboundClient) {
+            tcpTransportContext.finishOutboundTcpClientRegistration(session);
+        }
+        if (outboundClient && session.getDeviceId() != null) {
+            tcpTransportContext.resetClientReconnectFailureCount(session.getDeviceId());
+        }
         if (!outboundClient) {
             ctx.channel().config().setAutoRead(false);
             if (!tcpTransportContext.startServerWireAuth(ctx, session)) {

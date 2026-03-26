@@ -1,0 +1,540 @@
+<!--
+  Copyright © 2016-2025 The Thingsboard Authors
+  Licensed under the Apache License, Version 2.0
+-->
+<section [formGroup]="hexProtocolParserConfigForm" class="hex-parser-config">
+  <mat-form-field subscriptSizing="dynamic" class="mat-block">
+    <mat-label>{{ 'rule-node-config.hex-input-key' | translate }}</mat-label>
+    <input matInput formControlName="hexInputKey" required/>
+    <mat-hint>{{ 'rule-node-config.hex-input-key-hint' | translate }}</mat-hint>
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic" class="mat-block">
+    <mat-label>{{ 'rule-node-config.hex-protocol-id-key' | translate }}</mat-label>
+    <input matInput formControlName="protocolIdKey"/>
+    <mat-hint>{{ 'rule-node-config.hex-protocol-id-key-hint' | translate }}</mat-hint>
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic" class="mat-block">
+    <mat-label>{{ 'rule-node-config.hex-result-object-key' | translate }}</mat-label>
+    <input matInput formControlName="resultObjectKey"/>
+    <mat-hint>{{ 'rule-node-config.hex-result-object-key-hint' | translate }}</mat-hint>
+  </mat-form-field>
+  <mat-form-field subscriptSizing="dynamic" class="mat-block">
+    <mat-label>{{ 'rule-node-config.hex-output-prefix' | translate }}</mat-label>
+    <input matInput formControlName="outputKeyPrefix"/>
+  </mat-form-field>
+
+  <p class="mat-caption hex-config-capability">{{ 'rule-node-config.hex-config-capability-note' | translate }}</p>
+
+  <div class="hex-example-json-block">
+    <span class="mat-body-2">{{ 'rule-node-config.hex-example-three-title' | translate }}</span>
+    <p class="mat-caption hex-example-three-desc">{{ 'rule-node-config.hex-example-three-desc' | translate }}</p>
+    <textarea matInput readonly rows="22" class="tb-monospace hex-example-json-textarea"
+              [value]="threeProtocolExampleJson"></textarea>
+    <p class="mat-caption hex-example-three-footnote">{{ 'rule-node-config.hex-example-three-hint' | translate }}</p>
+  </div>
+
+  <div class="tb-form-row space-between align-center hex-parser-protocols-header">
+    <span class="mat-body-1">{{ 'rule-node-config.hex-frame-templates-title' | translate }}</span>
+    <button mat-stroked-button color="primary" type="button" (click)="addFrameTemplate()">
+      <mat-icon>add</mat-icon>
+      {{ 'rule-node-config.hex-add-frame-template' | translate }}
+    </button>
+  </div>
+  <p class="mat-caption hex-frame-templates-doc">{{ 'rule-node-config.hex-frame-templates-doc' | translate }}</p>
+  <div formArrayName="frameTemplates" class="hex-frame-template-list">
+    <div *ngFor="let ctrl of frameTemplatesFormArray.controls; let ti = index" [formGroupName]="ti">
+      <mat-card class="hex-protocol-card">
+        <mat-card-header class="hex-protocol-card-header">
+          <mat-card-title class="mat-body-1">
+            {{ 'rule-node-config.hex-frame-template-card' | translate }} #{{ ti + 1 }} — {{ frameTemplatesFormArray.at(ti).get('id')?.value || '—' }}
+          </mat-card-title>
+          <button mat-icon-button type="button" color="warn"
+                  *ngIf="frameTemplatesFormArray.length > 1"
+                  (click)="removeFrameTemplate(ti)"
+                  [matTooltip]="'rule-node-config.hex-remove-frame-template' | translate">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content class="hex-protocol-panel-body">
+          <mat-form-field subscriptSizing="dynamic" class="mat-block">
+            <mat-label>{{ 'rule-node-config.hex-frame-template-id' | translate }}</mat-label>
+            <input matInput formControlName="id" [attr.placeholder]="'rule-node-config.hex-placeholder-template-id' | translate"/>
+            <mat-hint>{{ 'rule-node-config.hex-frame-template-id-hint' | translate }}</mat-hint>
+          </mat-form-field>
+          <mat-form-field subscriptSizing="dynamic" class="mat-block">
+            <mat-label>{{ 'rule-node-config.hex-min-bytes' | translate }}</mat-label>
+            <input matInput type="number" min="0" formControlName="minBytes"/>
+            <mat-hint>{{ 'rule-node-config.hex-min-bytes-template-only-hint' | translate }}</mat-hint>
+          </mat-form-field>
+        <span class="mat-body-2 hex-section-label">{{ 'rule-node-config.hex-frame-template-custom-header' | translate }}</span>
+        <p class="mat-caption hex-template-custom-header-doc">{{ 'rule-node-config.hex-template-custom-header-doc' | translate }}</p>
+        <div class="tb-form-row space-between align-center hex-fields-header">
+          <span class="mat-caption">{{ 'rule-node-config.hex-template-header-fields' | translate }}</span>
+          <button mat-stroked-button type="button" (click)="addTemplateHeaderField(ti)">
+            <mat-icon>add</mat-icon>
+            {{ 'rule-node-config.hex-add-template-header-field' | translate }}
+          </button>
+        </div>
+        <div formArrayName="headerFields">
+          <div *ngFor="let hfc of templateHeaderFieldsFormArray(ti).controls; let fi = index" [formGroupName]="fi"
+               class="hex-field-row mat-elevation-z1">
+            <div class="tb-form-row gap-2 xs:flex-col align-start">
+              <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-name' | translate }}</mat-label>
+                <input matInput formControlName="name" required/>
+              </mat-form-field>
+              <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-offset' | translate }}</mat-label>
+                <input matInput type="number" formControlName="offset" required/>
+                <mat-hint>{{ 'rule-node-config.hex-field-offset-frame-hint' | translate }}</mat-hint>
+              </mat-form-field>
+              <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-type' | translate }}</mat-label>
+                <mat-select formControlName="type">
+                  <mat-option *ngFor="let ft of fieldTypes" [value]="ft">{{ ('rule-node-config.hex-field-type-' + ft) | translate }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button mat-icon-button type="button" color="warn"
+                      *ngIf="templateHeaderFieldsFormArray(ti).length > 0"
+                      (click)="removeTemplateHeaderField(ti, fi)"
+                      [matTooltip]="'rule-node-config.hex-remove-field' | translate">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <ng-container *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'HEX_SLICE'">
+              <mat-form-field subscriptSizing="dynamic" class="mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-length' | translate }}</mat-label>
+                <input matInput type="number" min="0" formControlName="length"/>
+                <mat-hint>{{ 'rule-node-config.hex-field-length-hint' | translate }}</mat-hint>
+              </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'HEX_SLICE_LEN_U16LE'">
+              <mat-form-field subscriptSizing="dynamic" class="mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-length-field-offset' | translate }}</mat-label>
+                <input matInput type="number" min="0" formControlName="lengthFieldOffset"/>
+                <mat-hint>{{ 'rule-node-config.hex-field-length-field-offset-hint' | translate }}</mat-hint>
+              </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'BOOL_BIT'">
+              <mat-form-field subscriptSizing="dynamic" class="mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-bit-index' | translate }}</mat-label>
+                <input matInput type="number" min="0" max="7" formControlName="bitIndex"/>
+              </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="fieldTypeIsListOrUnitList(templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value)">
+              <div class="tb-form-row gap-2 xs:flex-col">
+                <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                  <mat-label>{{ 'rule-node-config.hex-list-end' | translate }}</mat-label>
+                  <input matInput type="number" formControlName="toOffsetExclusive"/>
+                  <mat-hint>{{ 'rule-node-config.hex-list-end-hint' | translate }}</mat-hint>
+                </mat-form-field>
+              </div>
+              <ng-container *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'UNIT_LIST'">
+                <div class="tb-form-row gap-2 xs:flex-col">
+                  <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                    <mat-label>{{ 'rule-node-config.hex-unit-list-length-offset' | translate }}</mat-label>
+                    <input matInput type="number" min="0" formControlName="unitLengthFieldOffset"/>
+                    <mat-hint>{{ 'rule-node-config.hex-unit-list-length-offset-hint' | translate }}</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                    <mat-label>{{ 'rule-node-config.hex-unit-list-id-bytes' | translate }}</mat-label>
+                    <input matInput type="number" min="1" formControlName="unitIdByteLength"/>
+                    <mat-hint>{{ 'rule-node-config.hex-unit-list-id-bytes-hint' | translate }}</mat-hint>
+                  </mat-form-field>
+                </div>
+                <div class="tb-form-row gap-2 xs:flex-col">
+                  <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                    <mat-label>{{ 'rule-node-config.hex-unit-list-data-key' | translate }}</mat-label>
+                    <input matInput formControlName="unitDataOutputName"/>
+                    <mat-hint>{{ 'rule-node-config.hex-unit-list-data-key-hint' | translate }}</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                    <mat-label>{{ 'rule-node-config.hex-unit-list-number-key' | translate }}</mat-label>
+                    <input matInput formControlName="unitNumberOutputName"/>
+                    <mat-hint>{{ 'rule-node-config.hex-unit-list-number-key-hint' | translate }}</mat-hint>
+                  </mat-form-field>
+                </div>
+              </ng-container>
+              <p *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-list-format-note' | translate }}</p>
+              <p *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'UNIT_LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-unit-list-format-note' | translate }}</p>
+              <div class="hex-list-item-fields mat-block" formArrayName="listItemFields">
+                <div class="tb-form-row space-between align-center">
+                  <span class="mat-caption">{{ 'rule-node-config.hex-list-under-fields-title' | translate }}</span>
+                  <button mat-stroked-button type="button" (click)="addListItemFieldTemplate(ti, fi)">
+                    <mat-icon>add</mat-icon>
+                    {{ 'rule-node-config.hex-add-list-field' | translate }}
+                  </button>
+                </div>
+                <p *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'LIST'" class="mat-caption hex-list-under-fields-hint">{{ 'rule-node-config.hex-list-under-fields-hint' | translate }}</p>
+                <p *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'UNIT_LIST'" class="mat-caption hex-list-under-fields-hint">{{ 'rule-node-config.hex-list-under-fields-hint-unit' | translate }}</p>
+                <ng-container *ngTemplateOutlet="listItemFieldsRecursive; context: { $implicit: listItemFieldsTemplate(ti, fi) }"></ng-container>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+          <div class="tb-form-row gap-2 xs:flex-col">
+            <mat-form-field subscriptSizing="dynamic" class="flex-1">
+              <mat-label>{{ 'rule-node-config.hex-command-match-offset' | translate }}</mat-label>
+              <input matInput type="number" min="0" formControlName="commandMatchOffset"/>
+              <mat-hint>{{ 'rule-node-config.hex-command-match-offset-hint' | translate }}</mat-hint>
+            </mat-form-field>
+            <mat-form-field subscriptSizing="dynamic" class="flex-1">
+              <mat-label>{{ 'rule-node-config.hex-param-len-offset' | translate }}</mat-label>
+              <input matInput type="number" formControlName="paramLenFieldOffset"/>
+              <mat-hint>{{ 'rule-node-config.hex-param-len-offset-hint' | translate }}</mat-hint>
+            </mat-form-field>
+            <mat-form-field subscriptSizing="dynamic" class="flex-1">
+              <mat-label>{{ 'rule-node-config.hex-param-start-offset' | translate }}</mat-label>
+              <input matInput type="number" formControlName="paramStartOffset"/>
+            </mat-form-field>
+          </div>
+          <mat-checkbox formControlName="useChecksum" class="mat-block hex-checkbox">
+            {{ 'rule-node-config.hex-use-checksum' | translate }}
+          </mat-checkbox>
+          <p class="mat-caption hex-template-checksum-hint">{{ 'rule-node-config.hex-template-checksum-fallback-hint' | translate }}</p>
+          <div *ngIf="frameTemplatesFormArray.at(ti).get('useChecksum')?.value" class="hex-checksum-block">
+            <div class="tb-form-row gap-2 xs:flex-col">
+              <mat-form-field subscriptSizing="dynamic" class="flex-1">
+                <mat-label>{{ 'rule-node-config.hex-checksum-type' | translate }}</mat-label>
+                <mat-select formControlName="checksumType">
+                  <mat-option *ngFor="let t of checksumTypes" [value]="t">{{ ('rule-node-config.hex-checksum-algo-' + t) | translate }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field subscriptSizing="dynamic" class="flex-1">
+                <mat-label>{{ 'rule-node-config.hex-checksum-from' | translate }}</mat-label>
+                <input matInput type="number" formControlName="checksumFromByte"/>
+              </mat-form-field>
+              <mat-form-field subscriptSizing="dynamic" class="flex-1">
+                <mat-label>{{ 'rule-node-config.hex-checksum-to-exc' | translate }}</mat-label>
+                <input matInput type="number" formControlName="checksumToExclusive"/>
+              </mat-form-field>
+              <mat-form-field subscriptSizing="dynamic" class="flex-1">
+                <mat-label>{{ 'rule-node-config.hex-checksum-at' | translate }}</mat-label>
+                <input matInput type="number" formControlName="checksumByteIndex"/>
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <div class="tb-form-row space-between align-center hex-parser-protocols-header">
+    <span class="mat-body-1">{{ 'rule-node-config.hex-protocols-title' | translate }}</span>
+    <button mat-stroked-button color="primary" type="button" (click)="addProtocol()">
+      <mat-icon>add</mat-icon>
+      {{ 'rule-node-config.hex-add-protocol' | translate }}
+    </button>
+  </div>
+
+  <div formArrayName="protocols" class="hex-protocol-list">
+    <div *ngFor="let ctrl of protocolsFormArray.controls; let pi = index" [formGroupName]="pi">
+    <mat-card class="hex-protocol-card">
+      <mat-card-header class="hex-protocol-card-header">
+        <mat-card-title class="mat-body-1">
+          #{{ pi + 1 }} — {{ protocolsFormArray.at(pi).get('id')?.value || '—' }}
+        </mat-card-title>
+        <button mat-icon-button type="button" color="warn"
+                *ngIf="protocolsFormArray.length > 1"
+                (click)="removeProtocol(pi)"
+                [matTooltip]="'rule-node-config.hex-remove-protocol' | translate">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-card-content class="hex-protocol-panel-body">
+        <span class="mat-body-2 hex-section-label">{{ 'rule-node-config.hex-protocol-match' | translate }}</span>
+        <mat-form-field subscriptSizing="dynamic" class="mat-block">
+          <mat-label>{{ 'rule-node-config.hex-protocol-id' | translate }}</mat-label>
+          <input matInput formControlName="id" required/>
+          <mat-hint>{{ 'rule-node-config.hex-protocol-id-hint' | translate }}</mat-hint>
+        </mat-form-field>
+        <mat-form-field subscriptSizing="dynamic" class="mat-block">
+          <mat-label>{{ 'rule-node-config.hex-protocol-template-id' | translate }}</mat-label>
+          <input matInput formControlName="templateId" [attr.placeholder]="'rule-node-config.hex-placeholder-template-id' | translate"/>
+          <mat-hint>{{ 'rule-node-config.hex-protocol-template-id-hint' | translate }}</mat-hint>
+        </mat-form-field>
+        <mat-checkbox formControlName="payloadOffsetsRelative" class="mat-block hex-checkbox">
+          {{ 'rule-node-config.hex-payload-offsets-relative' | translate }}
+        </mat-checkbox>
+        <div *ngIf="!protocolsFormArray.at(pi).get('templateId')?.value" class="tb-form-row gap-2 xs:flex-col">
+          <mat-form-field subscriptSizing="dynamic" class="flex-1">
+            <mat-label>{{ 'rule-node-config.hex-min-bytes' | translate }}</mat-label>
+            <input matInput type="number" min="0" formControlName="minBytes"/>
+            <mat-hint>{{ 'rule-node-config.hex-min-bytes-no-template-hint' | translate }}</mat-hint>
+          </mat-form-field>
+        </div>
+        <div *ngIf="protocolsFormArray.at(pi).get('templateId')?.value" class="tb-form-row gap-2 xs:flex-col">
+          <mat-form-field subscriptSizing="dynamic" class="flex-1">
+            <mat-label>{{ 'rule-node-config.hex-min-bytes' | translate }}</mat-label>
+            <input matInput type="number" min="0" formControlName="minBytes"/>
+            <mat-hint>{{ 'rule-node-config.hex-min-bytes-template-hint' | translate }}</mat-hint>
+          </mat-form-field>
+        </div>
+        <div class="tb-form-row gap-2 xs:flex-col">
+          <mat-form-field subscriptSizing="dynamic" class="flex-1">
+            <mat-label>{{ 'rule-node-config.hex-command-byte-offset' | translate }}</mat-label>
+            <input matInput type="number" min="0" formControlName="commandByteOffset"/>
+            <mat-hint>{{ 'rule-node-config.hex-command-byte-offset-hint' | translate }}</mat-hint>
+          </mat-form-field>
+          <mat-form-field subscriptSizing="dynamic" class="flex-1">
+            <mat-label>{{ 'rule-node-config.hex-command-value' | translate }}</mat-label>
+            <input matInput type="number" min="0" formControlName="commandValue"/>
+            <mat-hint>{{ 'rule-node-config.hex-command-value-hint' | translate }}</mat-hint>
+          </mat-form-field>
+          <mat-form-field subscriptSizing="dynamic" class="flex-1">
+            <mat-label>{{ 'rule-node-config.hex-command-match-width' | translate }}</mat-label>
+            <mat-select formControlName="commandMatchWidth">
+              <mat-option [value]="1">{{ 'rule-node-config.hex-command-match-width-1' | translate }}</mat-option>
+              <mat-option [value]="4">{{ 'rule-node-config.hex-command-match-width-4' | translate }}</mat-option>
+            </mat-select>
+            <mat-hint>{{ 'rule-node-config.hex-command-match-width-hint' | translate }}</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <mat-checkbox formControlName="useChecksum" class="mat-block hex-checkbox">
+          {{ 'rule-node-config.hex-use-checksum' | translate }}
+        </mat-checkbox>
+        <p *ngIf="protocolsFormArray.at(pi).get('templateId')?.value" class="mat-caption hex-protocol-checksum-hint">
+          {{ 'rule-node-config.hex-use-checksum-override-hint' | translate }}
+        </p>
+        <div *ngIf="protocolsFormArray.at(pi).get('useChecksum')?.value" class="hex-checksum-block">
+          <div class="tb-form-row gap-2 xs:flex-col">
+            <mat-form-field subscriptSizing="dynamic" class="flex-1">
+              <mat-label>{{ 'rule-node-config.hex-checksum-type' | translate }}</mat-label>
+              <mat-select formControlName="checksumType">
+                <mat-option *ngFor="let t of checksumTypes" [value]="t">{{ t }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field subscriptSizing="dynamic" class="flex-1">
+              <mat-label>{{ 'rule-node-config.hex-checksum-from' | translate }}</mat-label>
+              <input matInput type="number" formControlName="checksumFromByte"/>
+            </mat-form-field>
+            <mat-form-field subscriptSizing="dynamic" class="flex-1">
+              <mat-label>{{ 'rule-node-config.hex-checksum-to-exc' | translate }}</mat-label>
+              <input matInput type="number" formControlName="checksumToExclusive"/>
+            </mat-form-field>
+            <mat-form-field subscriptSizing="dynamic" class="flex-1">
+              <mat-label>{{ 'rule-node-config.hex-checksum-at' | translate }}</mat-label>
+              <input matInput type="number" formControlName="checksumByteIndex"/>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <p class="mat-caption hex-fields-doc">{{ 'rule-node-config.hex-fields-doc' | translate }}</p>
+        <div class="tb-form-row space-between align-center hex-fields-header">
+          <span class="mat-body-2">{{ 'rule-node-config.hex-fields-title' | translate }}</span>
+          <button mat-stroked-button type="button" (click)="addField(pi)">
+            <mat-icon>add</mat-icon>
+            {{ 'rule-node-config.hex-add-field' | translate }}
+          </button>
+        </div>
+        <div formArrayName="fields">
+          <div *ngFor="let fc of fieldsFormArray(pi).controls; let fi = index" [formGroupName]="fi"
+               class="hex-field-row mat-elevation-z1">
+            <div class="tb-form-row gap-2 xs:flex-col align-start">
+              <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-name' | translate }}</mat-label>
+                <input matInput formControlName="name" required/>
+              </mat-form-field>
+              <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-offset' | translate }}</mat-label>
+                <input matInput type="number" formControlName="offset" required/>
+                <mat-hint *ngIf="protocolsFormArray.at(pi).get('templateId')?.value && protocolsFormArray.at(pi).get('payloadOffsetsRelative')?.value">
+                  {{ 'rule-node-config.hex-field-offset-payload-hint' | translate }}
+                </mat-hint>
+              </mat-form-field>
+              <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-type' | translate }}</mat-label>
+                <mat-select formControlName="type">
+                  <mat-option *ngFor="let t of fieldTypes" [value]="t">{{ ('rule-node-config.hex-field-type-' + t) | translate }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button mat-icon-button type="button" color="warn"
+                      *ngIf="fieldsFormArray(pi).length > 1 || (protocolsFormArray.at(pi).get('templateId')?.value && fieldsFormArray(pi).length > 0)"
+                      (click)="removeField(pi, fi)"
+                      [matTooltip]="'rule-node-config.hex-remove-field' | translate">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <ng-container *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'HEX_SLICE'">
+              <mat-form-field subscriptSizing="dynamic" class="mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-length' | translate }}</mat-label>
+                <input matInput type="number" min="0" formControlName="length"/>
+                <mat-hint>{{ 'rule-node-config.hex-field-length-hint' | translate }}</mat-hint>
+              </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'HEX_SLICE_LEN_U16LE'">
+              <mat-form-field subscriptSizing="dynamic" class="mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-length-field-offset' | translate }}</mat-label>
+                <input matInput type="number" min="0" formControlName="lengthFieldOffset"/>
+                <mat-hint>{{ 'rule-node-config.hex-field-length-field-offset-hint' | translate }}</mat-hint>
+              </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'BOOL_BIT'">
+              <mat-form-field subscriptSizing="dynamic" class="mat-block">
+                <mat-label>{{ 'rule-node-config.hex-field-bit-index' | translate }}</mat-label>
+                <input matInput type="number" min="0" max="7" formControlName="bitIndex"/>
+              </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="fieldTypeIsListOrUnitList(fieldsFormArray(pi).at(fi).get('type')?.value)">
+              <div class="tb-form-row gap-2 xs:flex-col">
+                <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                  <mat-label>{{ 'rule-node-config.hex-list-end' | translate }}</mat-label>
+                  <input matInput type="number" formControlName="toOffsetExclusive"/>
+                  <mat-hint>{{ 'rule-node-config.hex-list-end-hint' | translate }}</mat-hint>
+                </mat-form-field>
+              </div>
+              <ng-container *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'UNIT_LIST'">
+                <div class="tb-form-row gap-2 xs:flex-col">
+                  <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                    <mat-label>{{ 'rule-node-config.hex-unit-list-length-offset' | translate }}</mat-label>
+                    <input matInput type="number" min="0" formControlName="unitLengthFieldOffset"/>
+                    <mat-hint>{{ 'rule-node-config.hex-unit-list-length-offset-hint' | translate }}</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                    <mat-label>{{ 'rule-node-config.hex-unit-list-id-bytes' | translate }}</mat-label>
+                    <input matInput type="number" min="1" formControlName="unitIdByteLength"/>
+                    <mat-hint>{{ 'rule-node-config.hex-unit-list-id-bytes-hint' | translate }}</mat-hint>
+                  </mat-form-field>
+                </div>
+                <div class="tb-form-row gap-2 xs:flex-col">
+                  <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                    <mat-label>{{ 'rule-node-config.hex-unit-list-data-key' | translate }}</mat-label>
+                    <input matInput formControlName="unitDataOutputName"/>
+                    <mat-hint>{{ 'rule-node-config.hex-unit-list-data-key-hint' | translate }}</mat-hint>
+                  </mat-form-field>
+                  <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                    <mat-label>{{ 'rule-node-config.hex-unit-list-number-key' | translate }}</mat-label>
+                    <input matInput formControlName="unitNumberOutputName"/>
+                    <mat-hint>{{ 'rule-node-config.hex-unit-list-number-key-hint' | translate }}</mat-hint>
+                  </mat-form-field>
+                </div>
+              </ng-container>
+              <p *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-list-format-note' | translate }}</p>
+              <p *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'UNIT_LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-unit-list-format-note' | translate }}</p>
+              <div class="hex-list-item-fields mat-block" formArrayName="listItemFields">
+                <div class="tb-form-row space-between align-center">
+                  <span class="mat-caption">{{ 'rule-node-config.hex-list-under-fields-title' | translate }}</span>
+                  <button mat-stroked-button type="button" (click)="addListItemFieldProtocol(pi, fi)">
+                    <mat-icon>add</mat-icon>
+                    {{ 'rule-node-config.hex-add-list-field' | translate }}
+                  </button>
+                </div>
+                <p *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'LIST'" class="mat-caption hex-list-under-fields-hint">{{ 'rule-node-config.hex-list-under-fields-hint' | translate }}</p>
+                <p *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'UNIT_LIST'" class="mat-caption hex-list-under-fields-hint">{{ 'rule-node-config.hex-list-under-fields-hint-unit' | translate }}</p>
+                <ng-container *ngTemplateOutlet="listItemFieldsRecursive; context: { $implicit: listItemFieldsProtocol(pi, fi) }"></ng-container>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    </div>
+  </div>
+
+  <mat-checkbox [(ngModel)]="showGeneratedJson" [ngModelOptions]="{standalone: true}" class="mat-block hex-json-toggle">
+    {{ 'rule-node-config.hex-show-json' | translate }}
+  </mat-checkbox>
+  <mat-form-field *ngIf="showGeneratedJson" subscriptSizing="dynamic" class="mat-block">
+    <mat-label>{{ 'rule-node-config.hex-generated-json' | translate }}</mat-label>
+    <textarea matInput readonly rows="10" class="tb-monospace" [value]="generatedProtocolsJson"></textarea>
+    <mat-hint>{{ 'rule-node-config.hex-generated-json-hint' | translate }}</mat-hint>
+  </mat-form-field>
+
+  <ng-template #listItemFieldsRecursive let-fa>
+    <ng-container *ngFor="let ctrl of fa.controls; let idx = index">
+      <div [formGroupName]="idx" class="hex-field-row mat-elevation-z1 hex-list-item-field-row hex-list-nested-level">
+        <div class="tb-form-row gap-2 xs:flex-col align-start">
+          <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+            <mat-label>{{ 'rule-node-config.hex-field-name' | translate }}</mat-label>
+            <input matInput formControlName="name" required/>
+          </mat-form-field>
+          <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+            <mat-label>{{ 'rule-node-config.hex-field-offset-value' | translate }}</mat-label>
+            <input matInput type="number" formControlName="offset" required/>
+            <mat-hint>{{ 'rule-node-config.hex-field-offset-inner-value-hint' | translate }}</mat-hint>
+          </mat-form-field>
+          <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+            <mat-label>{{ 'rule-node-config.hex-field-type' | translate }}</mat-label>
+            <mat-select formControlName="type">
+              <mat-option *ngFor="let ft of fieldTypes" [value]="ft">{{ ('rule-node-config.hex-field-type-' + ft) | translate }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button mat-icon-button type="button" color="warn"
+                  *ngIf="fa.length > 0"
+                  (click)="removeListItemFromArray(fa, idx)"
+                  [matTooltip]="'rule-node-config.hex-remove-field' | translate">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <ng-container *ngIf="fa.at(idx).get('type')?.value === 'HEX_SLICE'">
+          <mat-form-field subscriptSizing="dynamic" class="mat-block">
+            <mat-label>{{ 'rule-node-config.hex-field-length' | translate }}</mat-label>
+            <input matInput type="number" min="0" formControlName="length"/>
+          </mat-form-field>
+        </ng-container>
+        <ng-container *ngIf="fa.at(idx).get('type')?.value === 'HEX_SLICE_LEN_U16LE'">
+          <mat-form-field subscriptSizing="dynamic" class="mat-block">
+            <mat-label>{{ 'rule-node-config.hex-field-length-field-offset' | translate }}</mat-label>
+            <input matInput type="number" min="0" formControlName="lengthFieldOffset"/>
+          </mat-form-field>
+        </ng-container>
+        <ng-container *ngIf="fa.at(idx).get('type')?.value === 'BOOL_BIT'">
+          <mat-form-field subscriptSizing="dynamic" class="mat-block">
+            <mat-label>{{ 'rule-node-config.hex-field-bit-index' | translate }}</mat-label>
+            <input matInput type="number" min="0" max="7" formControlName="bitIndex"/>
+          </mat-form-field>
+        </ng-container>
+        <ng-container *ngIf="fieldTypeIsListOrUnitList(fa.at(idx).get('type')?.value)">
+          <div class="tb-form-row gap-2 xs:flex-col">
+            <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+              <mat-label>{{ 'rule-node-config.hex-list-end' | translate }}</mat-label>
+              <input matInput type="number" formControlName="toOffsetExclusive"/>
+              <mat-hint>{{ 'rule-node-config.hex-list-end-hint' | translate }}</mat-hint>
+            </mat-form-field>
+          </div>
+          <ng-container *ngIf="fa.at(idx).get('type')?.value === 'UNIT_LIST'">
+            <div class="tb-form-row gap-2 xs:flex-col">
+              <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                <mat-label>{{ 'rule-node-config.hex-unit-list-length-offset' | translate }}</mat-label>
+                <input matInput type="number" min="0" formControlName="unitLengthFieldOffset"/>
+                <mat-hint>{{ 'rule-node-config.hex-unit-list-length-offset-hint' | translate }}</mat-hint>
+              </mat-form-field>
+              <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                <mat-label>{{ 'rule-node-config.hex-unit-list-id-bytes' | translate }}</mat-label>
+                <input matInput type="number" min="1" formControlName="unitIdByteLength"/>
+                <mat-hint>{{ 'rule-node-config.hex-unit-list-id-bytes-hint' | translate }}</mat-hint>
+              </mat-form-field>
+            </div>
+            <div class="tb-form-row gap-2 xs:flex-col">
+              <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                <mat-label>{{ 'rule-node-config.hex-unit-list-data-key' | translate }}</mat-label>
+                <input matInput formControlName="unitDataOutputName"/>
+                <mat-hint>{{ 'rule-node-config.hex-unit-list-data-key-hint' | translate }}</mat-hint>
+              </mat-form-field>
+              <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
+                <mat-label>{{ 'rule-node-config.hex-unit-list-number-key' | translate }}</mat-label>
+                <input matInput formControlName="unitNumberOutputName"/>
+                <mat-hint>{{ 'rule-node-config.hex-unit-list-number-key-hint' | translate }}</mat-hint>
+              </mat-form-field>
+            </div>
+          </ng-container>
+          <p *ngIf="fa.at(idx).get('type')?.value === 'LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-list-format-note' | translate }}</p>
+          <p *ngIf="fa.at(idx).get('type')?.value === 'UNIT_LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-unit-list-format-note' | translate }}</p>
+          <div class="hex-list-item-fields mat-block" formArrayName="listItemFields">
+            <div class="tb-form-row space-between align-center">
+              <span class="mat-caption">{{ 'rule-node-config.hex-list-under-fields-title' | translate }}</span>
+              <button mat-stroked-button type="button" (click)="addListItemToArray(asFormArray(fa.at(idx).get('listItemFields')))">
+                <mat-icon>add</mat-icon>
+                {{ 'rule-node-config.hex-add-list-field' | translate }}
+              </button>
+            </div>
+            <p *ngIf="fa.at(idx).get('type')?.value === 'LIST'" class="mat-caption hex-list-under-fields-hint">{{ 'rule-node-config.hex-list-under-fields-hint' | translate }}</p>
+            <p *ngIf="fa.at(idx).get('type')?.value === 'UNIT_LIST'" class="mat-caption hex-list-under-fields-hint">{{ 'rule-node-config.hex-list-under-fields-hint-unit' | translate }}</p>
+            <ng-container *ngTemplateOutlet="listItemFieldsRecursive; context: { $implicit: asFormArray(fa.at(idx).get('listItemFields')) }"></ng-container>
+          </div>
+        </ng-container>
+      </div>
+    </ng-container>
+  </ng-template>
+</section>
