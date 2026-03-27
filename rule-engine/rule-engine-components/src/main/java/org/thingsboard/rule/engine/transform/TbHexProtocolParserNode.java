@@ -37,14 +37,14 @@ import java.util.Optional;
         configClazz = TbHexProtocolParserNodeConfiguration.class,
         nodeDescription = "Parses binary payloads from a continuous hex string using configurable protocol definitions.",
         nodeDetails = "Reads <code>hexInputKey</code> from incoming JSON message body. " +
-                "Optional <code>frameTemplates</code>: sync (may be empty), <code>headerFields</code>, optional default checksum; protocols set <code>templateId</code>, payload fields, checksum per command. " +
-                "Everything is driven by the node configuration UI—no code changes. " +
-                "Selects protocol by <code>syncHex</code> (or template sync) and optional <code>commandByteOffset</code> + <code>commandValue</code> (or <code>commandMatchWidth</code>=4 for uint32 LE), " +
-                "or when there is no sync, by command + <code>minBytes</code>. " +
-                "If <code>protocolIdKey</code> is set and the message contains a matching protocol <code>id</code>, that entry is used only when the buffer also matches that definition; otherwise auto-detection runs. " +
-                "Writes parsed fields under <code>resultObjectKey</code> (default <code>parsed</code>) or merges with prefix. " +
-                "Field types: UINT8, UINT16_LE/BE, UINT32_LE/BE, FLOAT32_LE/BE, FLOAT64_LE/BE, HEX_SLICE, HEX_SLICE_LEN_U16LE, BOOL_BIT, TLV_LIST (optional tlvNestedRules per paramId). " +
-                "Checksum: SUM8, CRC16_MODBUS (2 bytes LE at index), CRC16_CCITT (2 bytes BE at index), CRC32 (4 bytes LE at index).<br/><br/>" +
+                "Frame templates define sync, header fields, payload layout hints, optional default checksum; each protocol variant picks a <code>templateId</code> and defines response-specific payload fields (or full layout without template). " +
+                "Match: <code>syncHex</code> (or from template), optional <code>commandByteOffset</code> + <code>commandValue</code> (<code>commandMatchWidth</code>=4 for uint32 LE), or headless by command + <code>minBytes</code>. " +
+                "If <code>protocolIdKey</code> is set, that <code>id</code> is used only when the buffer also matches; otherwise auto-detection. " +
+                "Output under <code>resultObjectKey</code> (default <code>parsed</code>) or merge with prefix. " +
+                "Scalar / slice types: UINT8, UINT16_LE/BE, UINT32_LE/BE, FLOAT32/64 LE/BE, HEX_SLICE, HEX_SLICE_LEN_U16LE, BOOL_BIT. " +
+                "Composable: STRUCT (nested <code>nestedFields</code>, offsets relative to struct start), TLV_LIST (UI label LIST), UNIT_LIST, " +
+                "GENERIC_LIST (region + count mode FIXED | FROM_FIELD | UNTIL_END, item length FIXED or PREFIX_UINT8/UINT16/UINT32, <code>listItemFields</code> as sub-protocol per element). " +
+                "Checksum: SUM8, CRC16_MODBUS, CRC16_CCITT, CRC32, NONE.<br/><br/>" +
                 "Output: <code>Success</code> / <code>Failure</code>.",
         configDirective = "tbTransformationNodeHexProtocolParserConfig",
         icon = "developer_board"

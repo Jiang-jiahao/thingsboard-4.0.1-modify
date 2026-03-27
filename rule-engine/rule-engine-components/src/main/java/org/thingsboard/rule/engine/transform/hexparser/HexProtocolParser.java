@@ -293,6 +293,12 @@ public final class HexProtocolParser {
                 checkBounds(buf, f.getOffset(), 1);
                 out.put(name, ((buf[f.getOffset()] >> bi) & 1) == 1);
                 break;
+            case "STRUCT":
+                putStruct(out, f, buf);
+                break;
+            case "GENERIC_LIST":
+                putGenericList(out, f, buf);
+                break;
             case "TLV_LIST":
                 int tlvStart = f.getOffset();
                 int tlvEnd = f.getToOffsetExclusive() != null && f.getToOffsetExclusive() != 0
@@ -397,6 +403,210 @@ public final class HexProtocolParser {
                 break;
             default:
                 throw new IllegalArgumentException("Unknown field type: " + f.getType());
+        }
+    }
+
+    private static void putStruct(ObjectNode out, HexFieldDefinition f, byte[] buf) {
+        int start = f.getOffset();
+        if (start < 0 || start > buf.length) {
+            throw new IllegalArgumentException("STRUCT: offset out of range");
+        }
+        int end;
+        if (f.getLength() != null && f.getLength() > 0) {
+            end = Math.min(buf.length, start + f.getLength());
+        } else if (f.getToOffsetExclusive() != null && f.getToOffsetExclusive() != 0) {
+            end = resolveIndex(buf, f.getToOffsetExclusive());
+        } else {
+            end = buf.length;
+        }
+        if (end < start || end > buf.length) {
+            throw new IllegalArgumentException("STRUCT: invalid byte range");
+        }
+        byte[] sub = Arrays.copyOfRange(buf, start, end);
+        ObjectNode structNode = JacksonUtil.newObjectNode();
+        List<HexFieldDefinition> nested = f.getNestedFields();
+        if (nested != null) {
+            for (HexFieldDefinition nf : nested) {
+                putField(structNode, nf, sub);
+            }
+        }
+        out.set(f.getName(), structNode);
+    }
+
+    private static final class GenericElement {
+        final int payloadStart;
+        final int payloadLen;
+        final int nextPos;
+
+        GenericElement(int payloadStart, int payloadLen, int nextPos) {
+            this.payloadStart = payloadStart;
+            this.payloadLen = payloadLen;
+            this.nextPos = nextPos;
+        }
+    }
+
+    private static void putGenericList(ObjectNode out, HexFieldDefinition f, byte[] buf) {
+        int regionStart = f.getOffset();
+        int regionEnd = f.getToOffsetExclusive() != null && f.getToOffsetExclusive() != 0
+                ? resolveIndex(buf, f.getToOffsetExclusive())
+                : buf.length;
+        if (regionStart < 0 || regionStart > regionEnd || regionEnd > buf.length) {
+            throw new IllegalArgumentException("GENERIC_LIST: invalid region");
+        }
+        String countMode = f.getListCountMode() != null ? f.getListCountMode().toUpperCase() : "UNTIL_END";
+        String lenMode = f.getListItemLengthMode() != null ? f.getListItemLengthMode().toUpperCase() : "PREFIX_UINT8";
+
+        int count = -1;
+        switch (countMode) {
+            case "FIXED":
+                if (f.getListCount() == null || f.getListCount() < 0) {
+                    throw new IllegalArgumentException("GENERIC_LIST FIXED requires listCount >= 0");
+                }
+                count = f.getListCount();
+                break;
+            case "FROM_FIELD":
+                if (f.getListCountFieldOffset() == null) {
+                    throw new IllegalArgumentException("GENERIC_LIST FROM_FIELD requires listCountFieldOffset");
+                }
+                count = readUIntAt(buf, f.getListCountFieldOffset(), f.getListCountFieldType());
+                break;
+            case "UNTIL_END":
+                count = -1;
+                break;
+            default:
+                throw new IllegalArgumentException("GENERIC_LIST unknown listCountMode: " + countMode);
+        }
+
+        ArrayNode arr = JacksonUtil.newArrayNode();
+        int pos = regionStart;
+        if (count >= 0) {
+            for (int i = 0; i < count; i++) {
+                GenericElement el = readGenericElement(buf, pos, regionEnd, lenMode, f.getListItemFixedLength());
+                if (el == null) {
+                    throw new IllegalArgumentException("GENERIC_LIST: truncated item " + i);
+                }
+                arr.add(buildGenericListItem(buf, el, f));
+                pos = el.nextPos;
+            }
+        } else {
+            while (pos < regionEnd) {
+                GenericElement el = readGenericElement(buf, pos, regionEnd, lenMode, f.getListItemFixedLength());
+                if (el == null) {
+                    break;
+                }
+                arr.add(buildGenericListItem(buf, el, f));
+                pos = el.nextPos;
+            }
+        }
+        out.set(f.getName(), arr);
+    }
+
+    private static GenericElement readGenericElement(byte[] buf, int pos, int regionEnd, String lenMode, Integer fixedLen) {
+        if (pos > regionEnd) {
+            return null;
+        }
+        if (pos == regionEnd) {
+            return null;
+        }
+        if ("FIXED".equals(lenMode)) {
+            int fl = fixedLen != null ? fixedLen : 0;
+            if (fl <= 0) {
+                throw new IllegalArgumentException("GENERIC_LIST listItemLengthMode FIXED requires listItemFixedLength > 0");
+            }
+            if (pos + fl > regionEnd) {
+                return null;
+            }
+            return new GenericElement(pos, fl, pos + fl);
+        }
+        int bodyStart;
+        long lenLong;
+        switch (lenMode) {
+            case "PREFIX_UINT8":
+                if (pos + 1 > regionEnd) {
+                    return null;
+                }
+                lenLong = buf[pos] & 0xFFL;
+                bodyStart = pos + 1;
+                break;
+            case "PREFIX_UINT16_LE":
+                if (pos + 2 > regionEnd) {
+                    return null;
+                }
+                lenLong = (buf[pos] & 0xFFL) | ((buf[pos + 1] & 0xFFL) << 8);
+                bodyStart = pos + 2;
+                break;
+            case "PREFIX_UINT16_BE":
+                if (pos + 2 > regionEnd) {
+                    return null;
+                }
+                lenLong = ((buf[pos] & 0xFFL) << 8) | (buf[pos + 1] & 0xFFL);
+                bodyStart = pos + 2;
+                break;
+            case "PREFIX_UINT32_LE":
+                if (pos + 4 > regionEnd) {
+                    return null;
+                }
+                lenLong = readU32LE(buf, pos) & 0xFFFFFFFFL;
+                bodyStart = pos + 4;
+                break;
+            default:
+                throw new IllegalArgumentException("GENERIC_LIST unknown listItemLengthMode: " + lenMode);
+        }
+        if (lenLong < 0 || lenLong > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("GENERIC_LIST invalid item length");
+        }
+        int L = (int) lenLong;
+        if (bodyStart + L > regionEnd) {
+            return null;
+        }
+        return new GenericElement(bodyStart, L, bodyStart + L);
+    }
+
+    private static ObjectNode buildGenericListItem(byte[] buf, GenericElement el, HexFieldDefinition f) {
+        byte[] payload = Arrays.copyOfRange(buf, el.payloadStart, el.payloadStart + el.payloadLen);
+        ObjectNode item = JacksonUtil.newObjectNode();
+        List<HexFieldDefinition> itemFields = f.getListItemFields();
+        if (itemFields != null && !itemFields.isEmpty()) {
+            for (HexFieldDefinition nf : itemFields) {
+                putField(item, nf, payload);
+            }
+        } else {
+            item.put("itemRawHex", hexSlice(payload, 0, payload.length));
+        }
+        return item;
+    }
+
+    private static int readUIntAt(byte[] buf, int off, String type) {
+        String t = type != null ? type.toUpperCase() : "UINT8";
+        switch (t) {
+            case "UINT8":
+                checkBounds(buf, off, 1);
+                return buf[off] & 0xFF;
+            case "UINT16_LE":
+                checkBounds(buf, off, 2);
+                return (buf[off] & 0xFF) | ((buf[off + 1] & 0xFF) << 8);
+            case "UINT16_BE":
+                checkBounds(buf, off, 2);
+                return ((buf[off] & 0xFF) << 8) | (buf[off + 1] & 0xFF);
+            case "UINT32_LE":
+                checkBounds(buf, off, 4);
+                long v = readU32LE(buf, off) & 0xFFFFFFFFL;
+                if (v > Integer.MAX_VALUE) {
+                    throw new IllegalArgumentException("GENERIC_LIST count exceeds int range");
+                }
+                return (int) v;
+            case "UINT32_BE":
+                checkBounds(buf, off, 4);
+                long vb = ((long) (buf[off] & 0xFF) << 24)
+                        | ((buf[off + 1] & 0xFFL) << 16)
+                        | ((buf[off + 2] & 0xFFL) << 8)
+                        | (buf[off + 3] & 0xFFL);
+                if (vb > Integer.MAX_VALUE) {
+                    throw new IllegalArgumentException("GENERIC_LIST count exceeds int range");
+                }
+                return (int) vb;
+            default:
+                throw new IllegalArgumentException("Unknown listCountFieldType: " + t);
         }
     }
 

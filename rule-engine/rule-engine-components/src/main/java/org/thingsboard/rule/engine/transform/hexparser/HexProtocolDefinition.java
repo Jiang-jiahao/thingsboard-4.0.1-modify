@@ -17,8 +17,10 @@ import java.util.List;
  * Default match is 1 byte (0–255). Set {@link #commandMatchWidth} to {@code 4} for uint32 little-endian
  * (e.g. monitoring UDP command at offset 12).
  * <p>
- * Optional {@link #templateId}: merge with {@link HexFrameTemplate} — define only payload fields;
- * offsets are relative to template {@code paramStartOffset} when {@link #payloadOffsetsRelative} is true.
+ * Optional {@link #templateId}: merge with {@link HexFrameTemplate} — header and shared payload layout come from the
+ * template ({@link HexFrameTemplate#getPayloadFields()}); this row adds command matching and optional
+ * {@link #getFields()} for command-specific extras. Offsets in {@code fields} are relative to template
+ * {@code paramStartOffset} when {@link #payloadOffsetsRelative} is true.
  */
 @Data
 public class HexProtocolDefinition {

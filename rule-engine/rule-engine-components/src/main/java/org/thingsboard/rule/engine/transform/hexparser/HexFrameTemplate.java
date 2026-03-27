@@ -36,5 +36,11 @@ public class HexFrameTemplate {
     private HexChecksumDefinition checksum;
     /** Header fields: names, offsets, types — required for any header bytes before payload */
     private List<HexFieldDefinition> headerFields;
+    /**
+     * Sub-command body / parameter area layout (offsets relative to {@link #paramStartOffset} when merged).
+     * Shared by all protocols referencing this template; use {@link HexProtocolDefinition#getFields()} only for
+     * command-specific extras.
+     */
+    private List<HexFieldDefinition> payloadFields;
 
 }

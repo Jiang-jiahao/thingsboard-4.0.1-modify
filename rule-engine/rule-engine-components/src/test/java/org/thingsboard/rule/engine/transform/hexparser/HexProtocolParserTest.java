@@ -14,14 +14,87 @@ import java.util.List;
 
 public class HexProtocolParserTest {
 
+    private static List<HexFrameTemplate> jammerFrameTemplates() {
+        HexFrameTemplate jammerFrame = new HexFrameTemplate();
+        jammerFrame.setId("jammer_a55a_frame");
+        jammerFrame.setSyncHex("A55A");
+        jammerFrame.setSyncOffset(0);
+        jammerFrame.setMinBytes(8);
+        jammerFrame.setParamLenFieldOffset(5);
+        jammerFrame.setParamStartOffset(7);
+        jammerFrame.setCommandMatchOffset(4);
+        List<HexFieldDefinition> jammerHeader = new ArrayList<>();
+        addHeaderField(jammerHeader, "srcAddr", 2, "UINT8");
+        addHeaderField(jammerHeader, "dstAddr", 3, "UINT8");
+        addHeaderField(jammerHeader, "command", 4, "UINT8");
+        addHeaderField(jammerHeader, "paramLen", 5, "UINT16_LE");
+        jammerFrame.setHeaderFields(jammerHeader);
+        return List.of(jammerFrame);
+    }
+
+    private static List<HexProtocolDefinition> jammerTable63Protocols() {
+        List<HexProtocolDefinition> list = new ArrayList<>();
+        HexProtocolDefinition table63 = new HexProtocolDefinition();
+        table63.setId("table63_cmdA2");
+        table63.setTemplateId("jammer_a55a_frame");
+        table63.setMinBytes(29);
+        table63.setCommandByteOffset(4);
+        table63.setCommandValue(0xA2);
+        table63.setChecksum(sum8Jammer());
+        List<HexFieldDefinition> f63 = new ArrayList<>();
+        addHeaderField(f63, "subType", 0, "UINT8");
+        HexFieldDefinition param1 = new HexFieldDefinition();
+        param1.setName("param1Hex");
+        param1.setOffset(1);
+        param1.setType("HEX_SLICE");
+        param1.setLength(20);
+        f63.add(param1);
+        table63.setFields(f63);
+        list.add(table63);
+        HexProtocolDefinition jammer21 = new HexProtocolDefinition();
+        jammer21.setId("jammer_cmd_0x21");
+        jammer21.setTemplateId("jammer_a55a_frame");
+        jammer21.setMinBytes(9);
+        jammer21.setCommandByteOffset(4);
+        jammer21.setCommandValue(0x21);
+        jammer21.setChecksum(sum8Jammer());
+        jammer21.setFields(List.of(simpleField("paramByte0", 0, "UINT8")));
+        list.add(jammer21);
+        return list;
+    }
+
+    private static void addHeaderField(List<HexFieldDefinition> list, String name, int off, String type) {
+        HexFieldDefinition f = new HexFieldDefinition();
+        f.setName(name);
+        f.setOffset(off);
+        f.setType(type);
+        list.add(f);
+    }
+
+    private static HexFieldDefinition simpleField(String name, int off, String type) {
+        HexFieldDefinition f = new HexFieldDefinition();
+        f.setName(name);
+        f.setOffset(off);
+        f.setType(type);
+        return f;
+    }
+
+    private static HexChecksumDefinition sum8Jammer() {
+        HexChecksumDefinition sum = new HexChecksumDefinition();
+        sum.setType("SUM8");
+        sum.setFromByte(2);
+        sum.setToExclusive(-1);
+        sum.setChecksumByteIndex(-1);
+        return sum;
+    }
+
     @Test
     public void findProtocolWhenProtocolIdWrongFallsBackToAutoMatch() {
-        TbHexProtocolParserNodeConfiguration cfg = new TbHexProtocolParserNodeConfiguration().defaultConfiguration();
         byte[] jammer21 = new byte[]{
                 (byte) 0xA5, 0x5A, 0x10, 0x10, 0x21, 0x01, 0x00, 0x55, (byte) 0x97
         };
-        HexProtocolDefinition d = HexProtocolParser.findProtocol(cfg.getProtocols(), "table63_cmdA2", jammer21,
-                cfg.getFrameTemplates());
+        HexProtocolDefinition d = HexProtocolParser.findProtocol(jammerTable63Protocols(), "table63_cmdA2", jammer21,
+                jammerFrameTemplates());
         Assertions.assertEquals("jammer_cmd_0x21", d.getId());
     }
 
@@ -52,7 +125,6 @@ public class HexProtocolParserTest {
 
     @Test
     public void findProtocolResolvesSyncFromFrameTemplate() {
-        TbHexProtocolParserNodeConfiguration cfg = new TbHexProtocolParserNodeConfiguration().defaultConfiguration();
         byte[] buf = new byte[29];
         buf[0] = (byte) 0xA5;
         buf[1] = 0x5A;
@@ -67,7 +139,7 @@ public class HexProtocolParserTest {
             sum = (sum + (buf[i] & 0xFF)) & 0xFF;
         }
         buf[28] = (byte) sum;
-        HexProtocolDefinition d = HexProtocolParser.findProtocol(cfg.getProtocols(), "", buf, cfg.getFrameTemplates());
+        HexProtocolDefinition d = HexProtocolParser.findProtocol(jammerTable63Protocols(), "", buf, jammerFrameTemplates());
         Assertions.assertEquals("table63_cmdA2", d.getId());
     }
 
@@ -120,35 +192,88 @@ public class HexProtocolParserTest {
     }
 
     @Test
-    public void defaultConfigTable63ParsesSubTypeAndParam1() {
+    public void defaultConfigurationParsesDeviceDatagramLayout() {
         TbHexProtocolParserNodeConfiguration cfg = new TbHexProtocolParserNodeConfiguration().defaultConfiguration();
         HexProtocolDefinition def = HexProtocolExpander.expand(cfg.getProtocols().get(0), cfg.getFrameTemplates());
-        byte[] buf = new byte[29];
-        buf[0] = (byte) 0xA5;
-        buf[1] = 0x5A;
-        buf[2] = 0x10;
-        buf[3] = 0x10;
-        buf[4] = (byte) 0xA2;
-        buf[5] = 0x15;
-        buf[6] = 0x00;
-        buf[7] = 0x41;
-        for (int i = 8; i <= 27; i++) {
-            buf[i] = (byte) (i & 0xFF);
-        }
-        int sum = 0;
-        for (int i = 2; i <= 27; i++) {
-            sum = (sum + (buf[i] & 0xFF)) & 0xFF;
-        }
-        buf[28] = (byte) sum;
+        // 34 bytes: 16 header + subLen(4) + numberBlock(4) + unit(uint32 6 + id4 + data2)
+        byte[] buf = new byte[34];
+        buf[0] = 34;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+        buf[4] = 0x11;
+        buf[5] = 0;
+        buf[6] = 0;
+        buf[7] = 0;
+        buf[8] = 0;
+        buf[9] = 0;
+        buf[10] = 0;
+        buf[11] = 0;
+        buf[12] = 1;
+        buf[13] = 0;
+        buf[14] = 0;
+        buf[15] = 0;
+        buf[16] = 14;
+        buf[17] = 0;
+        buf[18] = 0;
+        buf[19] = 0;
+        buf[20] = 0x12;
+        buf[21] = 0x34;
+        buf[22] = 5;
+        buf[23] = 6;
+        buf[24] = 6;
+        buf[25] = 0;
+        buf[26] = 0;
+        buf[27] = 0;
+        buf[28] = 1;
+        buf[29] = 0;
+        buf[30] = 3;
+        buf[31] = 4;
+        buf[32] = (byte) 0xDE;
+        buf[33] = (byte) 0xFA;
         ObjectNode out = HexProtocolParser.parse(def, buf);
-        Assertions.assertEquals("table63_cmdA2", out.get("protocolId").asText());
-        Assertions.assertEquals(0x41, out.get("subType").asInt());
-        Assertions.assertEquals(40, out.get("param1Hex").asText().length());
+        Assertions.assertEquals("device_datagram_subcmd", out.get("protocolId").asText());
+        Assertions.assertEquals(14, out.get("subCommandPayloadLen").asInt());
+        Assertions.assertEquals(0x3412, out.get("numberBlock").get("moduleField").asInt());
+        Assertions.assertEquals(5, out.get("numberBlock").get("currentModuleNo").asInt());
+        Assertions.assertEquals(6, out.get("numberBlock").get("moduleType").asInt());
+        Assertions.assertEquals(1, out.get("dataItems").size());
+        Assertions.assertEquals(6, out.get("dataItems").get(0).get("payloadLength").asInt());
+        Assertions.assertEquals(1, out.get("dataItems").get(0).get("itemNumber").get("moduleField").asInt());
+        Assertions.assertEquals("DEFA", out.get("dataItems").get(0).get("dataContentHex").asText());
     }
 
     @Test
     public void findProtocolHeadlessMatchesU32CommandAtOffset12() {
-        TbHexProtocolParserNodeConfiguration cfg = new TbHexProtocolParserNodeConfiguration().defaultConfiguration();
+        HexFrameTemplate t = new HexFrameTemplate();
+        t.setId("mon_udp");
+        t.setSyncHex("");
+        t.setSyncOffset(0);
+        t.setMinBytes(16);
+        t.setParamStartOffset(16);
+        t.setParamLenFieldOffset(0);
+        t.setCommandMatchOffset(12);
+        List<HexFieldDefinition> mh = new ArrayList<>();
+        addHeaderField(mh, "packetLen", 0, "UINT32_LE");
+        addHeaderField(mh, "deviceId", 4, "UINT32_LE");
+        addHeaderField(mh, "category", 8, "UINT32_LE");
+        addHeaderField(mh, "commandNumber", 12, "UINT32_LE");
+        t.setHeaderFields(mh);
+        HexProtocolDefinition p = new HexProtocolDefinition();
+        p.setId("mon_cmd_2");
+        p.setTemplateId("mon_udp");
+        p.setMinBytes(16);
+        p.setCommandByteOffset(12);
+        p.setCommandValue(2);
+        p.setCommandMatchWidth(4);
+        HexChecksumDefinition none = new HexChecksumDefinition();
+        none.setType("NONE");
+        p.setChecksum(none);
+        HexFieldDefinition body = new HexFieldDefinition();
+        body.setName("subCommandBodyHex");
+        body.setOffset(0);
+        body.setType("HEX_SLICE");
+        p.setFields(List.of(body));
         byte[] buf = new byte[20];
         buf[0] = 0x14;
         buf[1] = 0x00;
@@ -160,29 +285,73 @@ public class HexProtocolParserTest {
         buf[17] = (byte) 0xBB;
         buf[18] = (byte) 0xCC;
         buf[19] = (byte) 0xDD;
-        HexProtocolDefinition d = HexProtocolParser.findProtocol(cfg.getProtocols(), "", buf, cfg.getFrameTemplates());
-        Assertions.assertEquals("monitor_udp_cmd_2", d.getId());
-        HexProtocolDefinition def = HexProtocolExpander.expand(d, cfg.getFrameTemplates());
+        HexProtocolDefinition d = HexProtocolParser.findProtocol(List.of(p), "", buf, List.of(t));
+        Assertions.assertEquals("mon_cmd_2", d.getId());
+        HexProtocolDefinition def = HexProtocolExpander.expand(d, List.of(t));
         ObjectNode out = HexProtocolParser.parse(def, buf);
         Assertions.assertEquals("AABBCCDD", out.get("subCommandBodyHex").asText());
     }
 
     @Test
     public void jammerCmd0x21ParsesParamByte() {
-        TbHexProtocolParserNodeConfiguration cfg = new TbHexProtocolParserNodeConfiguration().defaultConfiguration();
         byte[] buf = new byte[]{
                 (byte) 0xA5, 0x5A, 0x10, 0x10, 0x21, 0x01, 0x00, 0x55, (byte) 0x97
         };
-        HexProtocolDefinition d = HexProtocolParser.findProtocol(cfg.getProtocols(), "", buf, cfg.getFrameTemplates());
+        HexProtocolDefinition d = HexProtocolParser.findProtocol(jammerTable63Protocols(), "", buf, jammerFrameTemplates());
         Assertions.assertEquals("jammer_cmd_0x21", d.getId());
-        HexProtocolDefinition def = HexProtocolExpander.expand(d, cfg.getFrameTemplates());
+        HexProtocolDefinition def = HexProtocolExpander.expand(d, jammerFrameTemplates());
         ObjectNode out = HexProtocolParser.parse(def, buf);
         Assertions.assertEquals(0x55, out.get("paramByte0").asInt());
     }
 
     @Test
     public void findProtocolHeadlessMatchesFunctionCode() {
-        TbHexProtocolParserNodeConfiguration cfg = new TbHexProtocolParserNodeConfiguration().defaultConfiguration();
+        HexFrameTemplate devFrame = new HexFrameTemplate();
+        devFrame.setId("device_response_frame");
+        devFrame.setSyncHex("");
+        devFrame.setSyncOffset(0);
+        devFrame.setMinBytes(6);
+        devFrame.setParamStartOffset(4);
+        devFrame.setParamLenFieldOffset(2);
+        devFrame.setCommandMatchOffset(1);
+        List<HexFieldDefinition> dh = new ArrayList<>();
+        addHeaderField(dh, "deviceType", 0, "UINT8");
+        addHeaderField(dh, "functionCode", 1, "UINT8");
+        addHeaderField(dh, "dataLen", 2, "UINT16_LE");
+        devFrame.setHeaderFields(dh);
+        List<HexFrameTemplate> tpl = List.of(devFrame);
+
+        HexProtocolDefinition readResp = new HexProtocolDefinition();
+        readResp.setId("resp_read_cmd_0x03");
+        readResp.setTemplateId("device_response_frame");
+        readResp.setMinBytes(6);
+        readResp.setCommandByteOffset(1);
+        readResp.setCommandValue(0x03);
+        readResp.setChecksum(crc16CcittEnd());
+        HexFieldDefinition tlv = new HexFieldDefinition();
+        tlv.setName("params");
+        tlv.setOffset(0);
+        tlv.setType("TLV_LIST");
+        tlv.setToOffsetExclusive(-2);
+        tlv.setTlvIdSize(2);
+        tlv.setTlvIdEndian("BE");
+        readResp.setFields(List.of(tlv));
+
+        HexProtocolDefinition writeResp = new HexProtocolDefinition();
+        writeResp.setId("resp_write_cmd_0x10");
+        writeResp.setTemplateId("device_response_frame");
+        writeResp.setMinBytes(6);
+        writeResp.setCommandByteOffset(1);
+        writeResp.setCommandValue(0x10);
+        writeResp.setChecksum(crc16CcittEnd());
+        HexFieldDefinition paramBlock = new HexFieldDefinition();
+        paramBlock.setName("paramSectionHex");
+        paramBlock.setOffset(0);
+        paramBlock.setType("HEX_SLICE_LEN_U16LE");
+        writeResp.setFields(List.of(paramBlock));
+
+        List<HexProtocolDefinition> protos = List.of(readResp, writeResp);
+
         byte[] read = new byte[10];
         read[0] = 0x01;
         read[1] = 0x03;
@@ -196,7 +365,7 @@ public class HexProtocolParserTest {
         read[8] = (byte) ((cr >> 8) & 0xFF);
         read[9] = (byte) (cr & 0xFF);
         Assertions.assertEquals("resp_read_cmd_0x03",
-                HexProtocolParser.findProtocol(cfg.getProtocols(), "", read, cfg.getFrameTemplates()).getId());
+                HexProtocolParser.findProtocol(protos, "", read, tpl).getId());
 
         byte[] write = new byte[8];
         write[0] = 0x01;
@@ -209,7 +378,16 @@ public class HexProtocolParserTest {
         write[6] = (byte) ((cw >> 8) & 0xFF);
         write[7] = (byte) (cw & 0xFF);
         Assertions.assertEquals("resp_write_cmd_0x10",
-                HexProtocolParser.findProtocol(cfg.getProtocols(), "", write, cfg.getFrameTemplates()).getId());
+                HexProtocolParser.findProtocol(protos, "", write, tpl).getId());
+    }
+
+    private static HexChecksumDefinition crc16CcittEnd() {
+        HexChecksumDefinition cs = new HexChecksumDefinition();
+        cs.setType("CRC16_CCITT");
+        cs.setFromByte(0);
+        cs.setToExclusive(-2);
+        cs.setChecksumByteIndex(-2);
+        return cs;
     }
 
     @Test
@@ -381,6 +559,120 @@ public class HexProtocolParserTest {
         ObjectNode out = HexProtocolParser.parse(def, buf);
         Assertions.assertEquals(1.0, out.get("vLe").asDouble(), 1e-9);
         Assertions.assertEquals(1.0, out.get("vBe").asDouble(), 1e-9);
+    }
+
+    @Test
+    public void structParsesNestedOffsetsRelativeToSegment() {
+        HexProtocolDefinition def = new HexProtocolDefinition();
+        def.setId("struct_demo");
+        def.setMinBytes(5);
+        HexFieldDefinition st = new HexFieldDefinition();
+        st.setName("body");
+        st.setOffset(0);
+        st.setType("STRUCT");
+        st.setLength(5);
+        HexFieldDefinition a = new HexFieldDefinition();
+        a.setName("a");
+        a.setOffset(0);
+        a.setType("UINT8");
+        HexFieldDefinition b = new HexFieldDefinition();
+        b.setName("b");
+        b.setOffset(1);
+        b.setType("UINT16_LE");
+        st.setNestedFields(List.of(a, b));
+        def.setFields(List.of(st));
+        byte[] buf = new byte[]{0x10, 0x34, 0x12, 0x00, 0x00};
+        ObjectNode out = HexProtocolParser.parse(def, buf);
+        Assertions.assertTrue(out.get("body").isObject());
+        Assertions.assertEquals(0x10, out.get("body").get("a").asInt());
+        Assertions.assertEquals(0x1234, out.get("body").get("b").asInt());
+    }
+
+    @Test
+    public void genericListUntilEndWithUint8Prefix() {
+        HexProtocolDefinition def = new HexProtocolDefinition();
+        def.setId("gen_list");
+        def.setMinBytes(8);
+        HexFieldDefinition gl = new HexFieldDefinition();
+        gl.setName("items");
+        gl.setOffset(0);
+        gl.setType("GENERIC_LIST");
+        gl.setToOffsetExclusive(8);
+        gl.setListCountMode("UNTIL_END");
+        gl.setListItemLengthMode("PREFIX_UINT8");
+        HexFieldDefinition x = new HexFieldDefinition();
+        x.setName("x");
+        x.setOffset(0);
+        x.setType("UINT8");
+        gl.setListItemFields(List.of(x));
+        def.setFields(List.of(gl));
+        // 01 AA | 02 BB CC
+        byte[] buf = new byte[]{0x01, (byte) 0xAA, 0x02, (byte) 0xBB, (byte) 0xCC, 0x00, 0x00, 0x00};
+        ObjectNode out = HexProtocolParser.parse(def, buf);
+        Assertions.assertEquals(2, out.get("items").size());
+        Assertions.assertEquals(0xAA, out.get("items").get(0).get("x").asInt());
+        Assertions.assertEquals(0xBB, out.get("items").get(1).get("x").asInt());
+    }
+
+    @Test
+    public void genericListFixedCountAndFixedElementLength() {
+        HexProtocolDefinition def = new HexProtocolDefinition();
+        def.setId("gen_fixed");
+        def.setMinBytes(6);
+        HexFieldDefinition gl = new HexFieldDefinition();
+        gl.setName("recs");
+        gl.setOffset(0);
+        gl.setType("GENERIC_LIST");
+        gl.setToOffsetExclusive(6);
+        gl.setListCountMode("FIXED");
+        gl.setListCount(2);
+        gl.setListItemLengthMode("FIXED");
+        gl.setListItemFixedLength(3);
+        HexFieldDefinition id = new HexFieldDefinition();
+        id.setName("id");
+        id.setOffset(0);
+        id.setType("UINT8");
+        HexFieldDefinition val = new HexFieldDefinition();
+        val.setName("val");
+        val.setOffset(1);
+        val.setType("UINT16_BE");
+        gl.setListItemFields(List.of(id, val));
+        def.setFields(List.of(gl));
+        byte[] buf = new byte[]{0x01, 0x00, 0x7B, 0x02, 0x01, (byte) 0xCD};
+        ObjectNode out = HexProtocolParser.parse(def, buf);
+        Assertions.assertEquals(2, out.get("recs").size());
+        Assertions.assertEquals(1, out.get("recs").get(0).get("id").asInt());
+        Assertions.assertEquals(0x007B, out.get("recs").get(0).get("val").asInt());
+        Assertions.assertEquals(2, out.get("recs").get(1).get("id").asInt());
+        Assertions.assertEquals(0x01CD, out.get("recs").get(1).get("val").asInt());
+    }
+
+    @Test
+    public void genericListCountFromField() {
+        HexProtocolDefinition def = new HexProtocolDefinition();
+        def.setId("gen_from_field");
+        def.setMinBytes(5);
+        HexFieldDefinition gl = new HexFieldDefinition();
+        gl.setName("rows");
+        gl.setOffset(1);
+        gl.setType("GENERIC_LIST");
+        gl.setToOffsetExclusive(5);
+        gl.setListCountMode("FROM_FIELD");
+        gl.setListCountFieldOffset(0);
+        gl.setListCountFieldType("UINT8");
+        gl.setListItemLengthMode("FIXED");
+        gl.setListItemFixedLength(1);
+        HexFieldDefinition v = new HexFieldDefinition();
+        v.setName("v");
+        v.setOffset(0);
+        v.setType("UINT8");
+        gl.setListItemFields(List.of(v));
+        def.setFields(List.of(gl));
+        byte[] buf = new byte[]{0x02, 0x11, 0x22, 0x33, 0x44};
+        ObjectNode out = HexProtocolParser.parse(def, buf);
+        Assertions.assertEquals(2, out.get("rows").size());
+        Assertions.assertEquals(0x11, out.get("rows").get(0).get("v").asInt());
+        Assertions.assertEquals(0x22, out.get("rows").get(1).get("v").asInt());
     }
 
     @Test

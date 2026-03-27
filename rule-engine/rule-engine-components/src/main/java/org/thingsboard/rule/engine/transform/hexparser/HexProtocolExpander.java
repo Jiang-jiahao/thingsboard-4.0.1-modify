@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Merges {@link HexFrameTemplate} with a variant {@link HexProtocolDefinition} that lists only payload fields.
+ * Merges {@link HexFrameTemplate} header + template {@link HexFrameTemplate#getPayloadFields()} with
+ * optional {@link HexProtocolDefinition#getFields()} (command-specific payload extras).
  */
 public final class HexProtocolExpander {
 
@@ -30,7 +31,7 @@ public final class HexProtocolExpander {
 
     /**
      * If {@code raw.getTemplateId()} is set, builds a full definition: header fields from template +
-     * payload fields (offsets optionally shifted by {@code paramStartOffset}).
+     * template {@code payloadFields} + protocol {@code fields} (offsets optionally shifted by {@code paramStartOffset}).
      * Otherwise returns {@code raw} unchanged.
      */
     public static HexProtocolDefinition expand(HexProtocolDefinition raw, List<HexFrameTemplate> templates) {
@@ -61,6 +62,12 @@ public final class HexProtocolExpander {
         if (t.getHeaderFields() != null) {
             for (HexFieldDefinition hf : t.getHeaderFields()) {
                 merged.add(copyField(hf));
+            }
+        }
+
+        if (t.getPayloadFields() != null) {
+            for (HexFieldDefinition pf : t.getPayloadFields()) {
+                merged.add(shiftPayloadField(pf, t, relative, base, lenOff));
             }
         }
 
@@ -103,6 +110,19 @@ public final class HexProtocolExpander {
             }
             if ("UNIT_LIST".equalsIgnoreCase(pf.getType()) && pf.getToOffsetExclusive() != null && pf.getToOffsetExclusive() > 0) {
                 c.setToOffsetExclusive(pf.getToOffsetExclusive() + base);
+            }
+            if ("STRUCT".equalsIgnoreCase(pf.getType())) {
+                if (pf.getToOffsetExclusive() != null && pf.getToOffsetExclusive() > 0) {
+                    c.setToOffsetExclusive(pf.getToOffsetExclusive() + base);
+                }
+            }
+            if ("GENERIC_LIST".equalsIgnoreCase(pf.getType())) {
+                if (pf.getToOffsetExclusive() != null && pf.getToOffsetExclusive() > 0) {
+                    c.setToOffsetExclusive(pf.getToOffsetExclusive() + base);
+                }
+                if (pf.getListCountFieldOffset() != null) {
+                    c.setListCountFieldOffset(pf.getListCountFieldOffset() + base);
+                }
             }
         } else if ("HEX_SLICE_LEN_U16LE".equalsIgnoreCase(pf.getType()) && c.getLengthFieldOffset() == null) {
             c.setLengthFieldOffset(lenOff);
@@ -148,6 +168,19 @@ public final class HexProtocolExpander {
         c.setUnitIdByteLength(pf.getUnitIdByteLength());
         c.setUnitDataOutputName(pf.getUnitDataOutputName());
         c.setUnitNumberOutputName(pf.getUnitNumberOutputName());
+        if (pf.getNestedFields() != null) {
+            List<HexFieldDefinition> nested = new ArrayList<>();
+            for (HexFieldDefinition nf : pf.getNestedFields()) {
+                nested.add(copyField(nf));
+            }
+            c.setNestedFields(nested);
+        }
+        c.setListCountMode(pf.getListCountMode());
+        c.setListCount(pf.getListCount());
+        c.setListCountFieldOffset(pf.getListCountFieldOffset());
+        c.setListCountFieldType(pf.getListCountFieldType());
+        c.setListItemLengthMode(pf.getListItemLengthMode());
+        c.setListItemFixedLength(pf.getListItemFixedLength());
         return c;
     }
 

@@ -7,7 +7,7 @@
 import { Component } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
-import { HEX_PARSER_THREE_PROTOCOL_EXAMPLE } from './hex-protocol-parser-example.config';
+import { HEX_PARSER_DEFAULT_PROTOCOL_EXAMPLE } from './hex-protocol-parser-example.config';
 
 export const HEX_FIELD_TYPES = [
   'UINT8',
@@ -23,10 +23,22 @@ export const HEX_FIELD_TYPES = [
   'HEX_SLICE_LEN_U16LE',
   'BOOL_BIT',
   'LIST',
-  'UNIT_LIST'
+  'UNIT_LIST',
+  'STRUCT',
+  'GENERIC_LIST'
 ] as const;
 
 export const HEX_CHECKSUM_TYPES = ['NONE', 'SUM8', 'CRC16_MODBUS', 'CRC16_CCITT', 'CRC32'] as const;
+
+export const HEX_GENERIC_LIST_COUNT_MODES = ['UNTIL_END', 'FIXED', 'FROM_FIELD'] as const;
+export const HEX_GENERIC_LIST_LENGTH_MODES = [
+  'FIXED',
+  'PREFIX_UINT8',
+  'PREFIX_UINT16_LE',
+  'PREFIX_UINT16_BE',
+  'PREFIX_UINT32_LE'
+] as const;
+export const HEX_COUNT_FIELD_TYPES = ['UINT8', 'UINT16_LE', 'UINT16_BE', 'UINT32_LE', 'UINT32_BE'] as const;
 
 @Component({
   selector: 'tb-transformation-node-hex-protocol-parser-config',
@@ -38,11 +50,14 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
   hexProtocolParserConfigForm: FormGroup;
   fieldTypes = [...HEX_FIELD_TYPES];
   checksumTypes = [...HEX_CHECKSUM_TYPES];
+  genericListCountModes = [...HEX_GENERIC_LIST_COUNT_MODES];
+  genericListLengthModes = [...HEX_GENERIC_LIST_LENGTH_MODES];
+  countFieldTypes = [...HEX_COUNT_FIELD_TYPES];
   showGeneratedJson = false;
 
   /** 与后端默认配置一致，供对照或复制 */
-  get threeProtocolExampleJson(): string {
-    return JSON.stringify(HEX_PARSER_THREE_PROTOCOL_EXAMPLE, null, 2);
+  get hexDefaultProtocolExampleJson(): string {
+    return JSON.stringify(HEX_PARSER_DEFAULT_PROTOCOL_EXAMPLE, null, 2);
   }
 
   constructor(private fb: FormBuilder) {
@@ -68,6 +83,11 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
   /** Custom header fields inside a frame template (frame header layout) */
   templateHeaderFieldsFormArray(ti: number): FormArray {
     return this.frameTemplatesFormArray.at(ti).get('headerFields') as FormArray;
+  }
+
+  /** 帧模板：子命令体 / 参数区（与协议中的命令匹配配合；偏移相对 paramStartOffset） */
+  templatePayloadFieldsFormArray(ti: number): FormArray {
+    return this.frameTemplatesFormArray.at(ti).get('payloadFields') as FormArray;
   }
 
   protected onConfigurationSet(configuration: RuleNodeConfiguration) {
@@ -138,6 +158,9 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
       checksumByteIndex: [cs?.checksumByteIndex ?? -1],
       headerFields: this.fb.array(
         (t?.headerFields?.length ? t.headerFields : []).map((f: any) => this.createFieldGroup(f))
+      ),
+      payloadFields: this.fb.array(
+        (t?.payloadFields?.length ? t.payloadFields : []).map((f: any) => this.createFieldGroup(f))
       )
     });
   }
@@ -198,8 +221,17 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
       unitIdByteLength: [f?.unitIdByteLength ?? 4],
       unitDataOutputName: [f?.unitDataOutputName ?? ''],
       unitNumberOutputName: [f?.unitNumberOutputName ?? ''],
+      listCountMode: [f?.listCountMode ?? 'UNTIL_END'],
+      listCount: [f?.listCount ?? ''],
+      listCountFieldOffset: [f?.listCountFieldOffset ?? ''],
+      listCountFieldType: [f?.listCountFieldType ?? 'UINT8'],
+      listItemLengthMode: [f?.listItemLengthMode ?? 'PREFIX_UINT8'],
+      listItemFixedLength: [f?.listItemFixedLength ?? ''],
       listItemFields: this.fb.array(
         this.listItemFieldsFromConfig(f).map((x: any) => this.createFieldGroup(x))
+      ),
+      nestedFields: this.fb.array(
+        (f?.nestedFields?.length ? f.nestedFields : []).map((x: any) => this.createFieldGroup(x))
       )
     });
   }
@@ -210,6 +242,34 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
 
   listItemFieldsTemplate(ti: number, fi: number): FormArray {
     return this.templateHeaderFieldsFormArray(ti).at(fi).get('listItemFields') as FormArray;
+  }
+
+  listItemFieldsTemplatePayload(ti: number, fi: number): FormArray {
+    return this.templatePayloadFieldsFormArray(ti).at(fi).get('listItemFields') as FormArray;
+  }
+
+  nestedFieldsProtocol(pi: number, fi: number): FormArray {
+    return this.fieldsFormArray(pi).at(fi).get('nestedFields') as FormArray;
+  }
+
+  nestedFieldsTemplate(ti: number, fi: number): FormArray {
+    return this.templateHeaderFieldsFormArray(ti).at(fi).get('nestedFields') as FormArray;
+  }
+
+  nestedFieldsTemplatePayload(ti: number, fi: number): FormArray {
+    return this.templatePayloadFieldsFormArray(ti).at(fi).get('nestedFields') as FormArray;
+  }
+
+  addNestedFieldProtocol(pi: number, fi: number) {
+    this.nestedFieldsProtocol(pi, fi).push(this.createFieldGroup());
+  }
+
+  addNestedFieldTemplate(ti: number, fi: number) {
+    this.nestedFieldsTemplate(ti, fi).push(this.createFieldGroup());
+  }
+
+  addNestedFieldTemplatePayload(ti: number, fi: number) {
+    this.nestedFieldsTemplatePayload(ti, fi).push(this.createFieldGroup());
   }
 
   addListItemFieldProtocol(pi: number, fi: number) {
@@ -224,13 +284,39 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
     this.listItemFieldsTemplate(ti, fi).push(this.createFieldGroup());
   }
 
+  addListItemFieldTemplatePayload(ti: number, fi: number) {
+    this.listItemFieldsTemplatePayload(ti, fi).push(this.createFieldGroup());
+  }
+
   removeListItemFieldTemplate(ti: number, fi: number, li: number) {
     this.listItemFieldsTemplate(ti, fi).removeAt(li);
+  }
+
+  removeListItemFieldTemplatePayload(ti: number, fi: number, li: number) {
+    this.listItemFieldsTemplatePayload(ti, fi).removeAt(li);
+  }
+
+  addTemplatePayloadField(ti: number) {
+    this.templatePayloadFieldsFormArray(ti).push(this.createFieldGroup());
+  }
+
+  removeTemplatePayloadField(ti: number, fi: number) {
+    const fa = this.templatePayloadFieldsFormArray(ti);
+    if (fa.length > 1) {
+      fa.removeAt(fi);
+    } else if (fa.length === 1) {
+      fa.removeAt(0);
+    }
   }
 
   /** 递归列表子字段：任意深度嵌套「列表」 */
   asFormArray(c: AbstractControl | null | undefined): FormArray {
     return c as FormArray;
+  }
+
+  /** 与 FormArray 子项用 [formGroup] 绑定，避免 ng-template/ngTemplateOutlet 下 formGroupName 索引解析失败 */
+  asFormGroup(c: AbstractControl | null | undefined): FormGroup {
+    return c as FormGroup;
   }
 
   addListItemToArray(fa: FormArray | null | undefined): void {
@@ -246,6 +332,22 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
 
   fieldTypeIsListOrUnitList(t: string | null | undefined): boolean {
     return t === 'LIST' || t === 'UNIT_LIST';
+  }
+
+  /** LIST / UNIT_LIST / GENERIC_LIST：区间结束 + 子字段（及通用列表的计数/长度模式） */
+  fieldTypeShowsRepeatBlock(t: string | null | undefined): boolean {
+    return t === 'LIST' || t === 'UNIT_LIST' || t === 'GENERIC_LIST';
+  }
+
+  fieldTypeIsStruct(t: string | null | undefined): boolean {
+    return t === 'STRUCT';
+  }
+
+  addNestedFieldToArray(fa: FormArray | null | undefined): void {
+    if (!fa) {
+      return;
+    }
+    fa.push(this.createFieldGroup());
   }
 
   addFrameTemplate() {
@@ -336,6 +438,12 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
       if (headerFields.length) {
         o.headerFields = headerFields;
       }
+      const payloadFields = (t.payloadFields || [])
+        .filter((f: any) => (f.name || '').toString().trim())
+        .map((f: any) => this.serializeFieldDefinition(f));
+      if (payloadFields.length) {
+        o.payloadFields = payloadFields;
+      }
       return o;
     });
   }
@@ -388,6 +496,21 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
       offset: this.num(f.offset, 0),
       type: wireType
     };
+    if (f.type === 'STRUCT') {
+      if (f.length !== '' && f.length != null && !isNaN(Number(f.length)) && Number(f.length) > 0) {
+        fld.length = Number(f.length);
+      }
+      if (f.toOffsetExclusive !== '' && f.toOffsetExclusive != null && !isNaN(Number(f.toOffsetExclusive))) {
+        fld.toOffsetExclusive = Number(f.toOffsetExclusive);
+      }
+      const nested = (f.nestedFields || [])
+        .filter((nf: any) => (nf.name || '').toString().trim())
+        .map((nf: any) => this.serializeFieldDefinition(nf));
+      if (nested.length) {
+        fld.nestedFields = nested;
+      }
+      return fld;
+    }
     if (f.type === 'HEX_SLICE' && f.length !== '' && f.length != null && !isNaN(Number(f.length))) {
       const n = Number(f.length);
       if (n > 0) {
@@ -437,6 +560,35 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
       const uno = (f.unitNumberOutputName || '').toString().trim();
       if (uno) {
         fld.unitNumberOutputName = uno;
+      }
+    }
+    if (f.type === 'GENERIC_LIST') {
+      fld.listCountMode = (f.listCountMode || 'UNTIL_END').toString().toUpperCase();
+      if (fld.listCountMode === 'FIXED' && f.listCount !== '' && f.listCount != null && !isNaN(Number(f.listCount))) {
+        fld.listCount = Number(f.listCount);
+      }
+      if (fld.listCountMode === 'FROM_FIELD') {
+        const cOff = f.listCountFieldOffset;
+        if (cOff !== '' && cOff != null && !isNaN(Number(cOff))) {
+          fld.listCountFieldOffset = Number(cOff);
+        }
+        if (f.listCountFieldType) {
+          fld.listCountFieldType = f.listCountFieldType;
+        }
+      }
+      fld.listItemLengthMode = (f.listItemLengthMode || 'PREFIX_UINT8').toString().toUpperCase();
+      if (fld.listItemLengthMode === 'FIXED' && f.listItemFixedLength !== '' && f.listItemFixedLength != null
+          && !isNaN(Number(f.listItemFixedLength))) {
+        fld.listItemFixedLength = Number(f.listItemFixedLength);
+      }
+      if (f.toOffsetExclusive !== '' && f.toOffsetExclusive != null && !isNaN(Number(f.toOffsetExclusive))) {
+        fld.toOffsetExclusive = Number(f.toOffsetExclusive);
+      }
+      const gItems = (f.listItemFields || [])
+        .filter((nf: any) => (nf.name || '').toString().trim())
+        .map((nf: any) => this.serializeFieldDefinition(nf));
+      if (gItems.length) {
+        fld.listItemFields = gItems;
       }
     }
     return fld;

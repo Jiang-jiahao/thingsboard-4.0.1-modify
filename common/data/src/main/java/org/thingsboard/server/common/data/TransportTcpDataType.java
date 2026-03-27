@@ -17,6 +17,9 @@ package org.thingsboard.server.common.data;
 
 public enum TransportTcpDataType {
     JSON,
+    /**
+     * 一帧负载为<strong>原始字节</strong>；传输层将其直接格式化为十六进制并包成 JSON（键名 {@code hex}），不再把帧当作 ASCII 十六进制文本去还原内层 UTF-8。
+     */
     HEX,
     ASCII
 }

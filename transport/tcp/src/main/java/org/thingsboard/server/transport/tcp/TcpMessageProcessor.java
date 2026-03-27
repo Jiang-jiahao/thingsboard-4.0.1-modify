@@ -30,6 +30,7 @@ import org.thingsboard.server.common.transport.auth.ValidateDeviceCredentialsRes
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.queue.util.TbTcpTransportComponent;
 import org.thingsboard.server.transport.tcp.session.TcpDeviceSession;
+import org.thingsboard.server.transport.tcp.util.TcpPayloadUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -89,7 +90,7 @@ public class TcpMessageProcessor {
         }
         if (session.getTcpJsonWithoutMethodMode() == TcpJsonWithoutMethodMode.OPAQUE_FOR_RULE_ENGINE) {
             JsonObject wrap = new JsonObject();
-            wrap.addProperty(session.getTcpOpaqueRuleEngineKey(), payload.toString());
+            wrap.addProperty(session.getTcpOpaqueRuleEngineKey(), opaquePayloadForRuleEngine(payload));
             transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(wrap),
                     TransportServiceCallback.EMPTY);
             return;
@@ -101,6 +102,26 @@ public class TcpMessageProcessor {
         transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(payload),
                 TransportServiceCallback.EMPTY);
     }
+    /**
+     * OPAQUE 模式下单键遥测的字符串内容：避免整段 JSON 再被 toString 套一层引号；
+     * TCP HEX 上行若为 {@code {"hex":"..."}} 则只保留十六进制串。
+     */
+    private static String opaquePayloadForRuleEngine(JsonElement payload) {
+        if (payload.isJsonPrimitive() && payload.getAsJsonPrimitive().isString()) {
+            return payload.getAsString();
+        }
+        if (payload.isJsonObject()) {
+            JsonObject o = payload.getAsJsonObject();
+            if (o.size() == 1 && o.has(TcpPayloadUtil.TCP_HEX_FRAME_JSON_KEY)) {
+                JsonElement hexEl = o.get(TcpPayloadUtil.TCP_HEX_FRAME_JSON_KEY);
+                if (hexEl != null && hexEl.isJsonPrimitive() && hexEl.getAsJsonPrimitive().isString()) {
+                    return hexEl.getAsString();
+                }
+            }
+        }
+        return payload.toString();
+    }
+
     private void processTelemetry(TcpDeviceSession session, JsonObject root) {
         JsonElement body = root.get("body");
         if (body == null) {
