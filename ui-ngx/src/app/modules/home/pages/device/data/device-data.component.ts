@@ -31,6 +31,7 @@ import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import {
   DeviceData,
   DeviceProfileInfo,
+  DeviceTransportType,
   deviceProfileTypeConfigurationInfoMap,
   deviceTransportTypeConfigurationInfoMap
 } from '@shared/models/device.models';
@@ -60,6 +61,11 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   
   @Input()
   deviceProfile: DeviceProfileInfo;
+
+  /** 来自设备详情页：tenant | customer | customer_user | edge | edge_customer_user */
+  @Input()
+  deviceScope: string;
+
   private lastWrittenValue: DeviceData | null = null;
 
   private requiredValue: boolean;
@@ -76,6 +82,11 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
 
   displayDeviceConfiguration: boolean;
   displayTransportConfiguration: boolean;
+
+  /** 当前所选设备配置文件为 TCP 时，展示协议模板库入口（模板负载在配置文件中维护） */
+  get showTcpProtocolTemplateHelp(): boolean {
+    return this.deviceProfile?.transportType === DeviceTransportType.TCP;
+  }
 
   private propagateChange = (v: any) => { };
 

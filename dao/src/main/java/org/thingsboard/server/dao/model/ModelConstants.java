@@ -718,6 +718,15 @@ public class ModelConstants {
     public static final String QR_CODE_SETTINGS_CONFIG_PROPERTY = "qr_code_config";
 
     /**
+     * Protocol template bundles (tenant-scoped). Physical table {@code protocol_template_bundle}
+     * (legacy name {@code monitoring_protocol_bundle} migrated on upgrade).
+     */
+    public static final String PROTOCOL_TEMPLATE_BUNDLE_TABLE_NAME = "protocol_template_bundle";
+    public static final String PROTOCOL_TEMPLATE_BUNDLE_NAME_PROPERTY = "name";
+    public static final String PROTOCOL_TEMPLATE_BUNDLE_DATA_PROPERTY = "bundle_data";
+    public static final String PROTOCOL_TEMPLATE_BUNDLE_VERSION_PROPERTY = "version";
+
+    /**
      * Calculated fields constants.
      */
     public static final String CALCULATED_FIELD_TABLE_NAME = "calculated_field";

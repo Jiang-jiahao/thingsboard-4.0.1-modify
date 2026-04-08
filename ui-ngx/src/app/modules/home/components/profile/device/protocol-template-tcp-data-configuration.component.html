@@ -1,0 +1,378 @@
+<div class="flex flex-col gap-3 protocol-template-panel"
+     [class.mat-elevation-z1]="layoutMode === 'full'"
+     *ngIf="templatesArray && commandsArray">
+  <div *ngIf="layoutMode === 'full'" class="tb-hint mat-body-2" style="margin: 0; padding: 10px 12px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);">
+    <span translate>device-profile.tcp.protocol-template-intro</span>
+  </div>
+  <div *ngIf="layoutMode === 'templatesOnly'" class="tb-hint mat-caption" style="margin: 0;" translate>profiles.protocol-templates-dialog-tab-templates-hint</div>
+  <div *ngIf="layoutMode === 'commandsOnly'" class="tb-hint mat-caption" style="margin: 0;" translate>profiles.protocol-templates-dialog-tab-commands-hint</div>
+
+  <ng-container *ngIf="layoutMode === 'full' || layoutMode === 'templatesOnly'">
+    <div class="mat-body-2" translate>device-profile.tcp.protocol-template-templates-title</div>
+    <div class="tb-hint mat-caption" translate>device-profile.tcp.protocol-template-templates-hint-single</div>
+
+    <div *ngIf="!templatesArray.length" class="tb-hint mat-caption" translate>device-profile.tcp.protocol-template-form-loading</div>
+
+    <div *ngIf="templatesArray.length > 0" class="flex flex-col gap-3 mat-elevation-z1" style="padding: 12px; border-radius: 4px;"
+         [formGroup]="asFormGroup(templatesArray.at(0))">
+      <input type="hidden" formControlName="id">
+
+      <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.tcp.protocol-template-default-fields-title</div>
+      <div class="tb-hint mat-body-2 protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-variable-payload-hint</div>
+      <div formArrayName="hexProtocolFields" class="flex flex-col gap-3">
+        <div *ngFor="let row of getTemplateFieldsArray(0).controls; let fi = index" [formGroupName]="fi"
+             class="flex flex-row flex-wrap gap-2 items-start">
+          <mat-form-field class="flex-1" style="min-width: 120px;" subscriptSizing="dynamic">
+            <mat-label translate>device-profile.tcp.hex-field-key</mat-label>
+            <input matInput formControlName="key">
+          </mat-form-field>
+          <mat-form-field style="width: 100px;" subscriptSizing="dynamic">
+            <mat-label translate>device-profile.tcp.hex-field-offset</mat-label>
+            <input matInput type="number" min="0" formControlName="byteOffset" required>
+          </mat-form-field>
+          <mat-form-field class="flex-1" style="min-width: 160px;" subscriptSizing="dynamic">
+            <mat-label translate>device-profile.tcp.hex-field-type</mat-label>
+            <mat-select formControlName="valueType" required>
+              <mat-option *ngFor="let t of tcpHexValueTypes" [value]="t">{{ t }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <ng-container *ngIf="isBytesAsHexTemplate(0, fi)">
+            <mat-form-field class="flex-1" style="min-width: 200px;" subscriptSizing="dynamic">
+              <mat-label translate>device-profile.tcp.hex-field-length-mode</mat-label>
+              <mat-select [value]="getHexFieldLengthModeTemplate(0, fi)"
+                          (selectionChange)="onHexFieldLengthModeTemplate(0, fi, $event.value)">
+                <mat-option value="fixed">{{ 'device-profile.tcp.hex-field-length-mode-fixed' | translate }}</mat-option>
+                <mat-option value="fromFrame">{{ 'device-profile.tcp.hex-field-length-mode-from-frame' | translate }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <ng-container *ngIf="getHexFieldLengthModeTemplate(0, fi) === 'fixed'">
+              <mat-form-field style="width: 120px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.hex-field-byte-length</mat-label>
+                <input matInput type="number" min="1" formControlName="byteLength">
+              </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="getHexFieldLengthModeTemplate(0, fi) === 'fromFrame'">
+              <mat-form-field style="width: 130px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.hex-field-len-from-offset</mat-label>
+                <input matInput type="number" min="0" formControlName="byteLengthFromByteOffset">
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.hex-field-len-from-type</mat-label>
+                <mat-select formControlName="byteLengthFromValueType">
+                  <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </ng-container>
+          </ng-container>
+          <div *ngIf="isBytesAsHexTemplate(0, fi)" class="w-full basis-full tb-hint mat-caption protocol-template-inline-hint">
+            <span translate>device-profile.tcp.hex-field-length-mode-hint</span>
+          </div>
+          <button mat-icon-button type="button" color="warn" class="protocol-template-field-row-delete"
+                  matTooltip="{{ 'device-profile.tcp.hex-remove-field' | translate }}"
+                  (click)="removeTemplateField.emit({ templateIndex: 0, fieldIndex: fi })">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+      <button mat-stroked-button color="primary" type="button" (click)="addTemplateField.emit(0)">
+        <mat-icon>add</mat-icon>
+        <span translate>device-profile.tcp.hex-add-field</span>
+      </button>
+
+      <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.tcp.protocol-template-checksum-title</div>
+      <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-checksum-hint</div>
+      <div class="flex flex-row flex-wrap gap-2 items-start">
+        <mat-form-field class="flex-1" style="min-width: 200px;" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.tcp.protocol-template-checksum-type</mat-label>
+          <mat-select formControlName="checksumType">
+            <mat-option value="NONE">{{ 'device-profile.tcp.protocol-template-checksum-none' | translate }}</mat-option>
+            <mat-option value="SUM8">SUM8</mat-option>
+            <mat-option value="CRC16_MODBUS">CRC16_MODBUS</mat-option>
+            <mat-option value="CRC16_CCITT">CRC16_CCITT</mat-option>
+            <mat-option value="CRC32">CRC32</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div *ngIf="asFormGroup(templatesArray.at(0)).get('checksumType')?.value && asFormGroup(templatesArray.at(0)).get('checksumType')?.value !== 'NONE'"
+           class="flex flex-row flex-wrap gap-2 items-start">
+        <mat-form-field style="width: 110px;" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.tcp.protocol-template-checksum-from</mat-label>
+          <input matInput type="number" formControlName="checksumFromByte">
+        </mat-form-field>
+        <mat-form-field style="width: 120px;" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.tcp.protocol-template-checksum-to-exc</mat-label>
+          <input matInput type="number" formControlName="checksumToExclusive">
+        </mat-form-field>
+        <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.tcp.protocol-template-checksum-at</mat-label>
+          <input matInput type="number" formControlName="checksumByteIndex">
+          <mat-hint translate>device-profile.tcp.protocol-template-checksum-at-hint</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <mat-expansion-panel class="mat-elevation-z0" style="border: 1px solid rgba(0,0,0,.12);">
+        <mat-expansion-panel-header>
+          <mat-panel-title translate>device-profile.tcp.hex-ltv-section-title</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="tb-hint mat-body-2" style="margin-bottom: 12px;" translate>device-profile.tcp.hex-ltv-section-hint</div>
+        <mat-slide-toggle formControlName="hexLtvEnabled" color="primary" class="mb-3">
+          <span translate>device-profile.tcp.hex-ltv-enable</span>
+        </mat-slide-toggle>
+        <div *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value" class="flex flex-col gap-3">
+          <div class="flex flex-row flex-wrap gap-2">
+            <mat-form-field style="width: 110px;">
+              <mat-label translate>device-profile.tcp.hex-ltv-start</mat-label>
+              <input matInput type="number" min="0" formControlName="hexLtvStartOffset" required>
+            </mat-form-field>
+            <mat-form-field class="flex-1" style="min-width: 140px;">
+              <mat-label translate>device-profile.tcp.hex-ltv-length-type</mat-label>
+              <mat-select formControlName="hexLtvLengthType" required>
+                <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class="flex-1" style="min-width: 140px;">
+              <mat-label translate>device-profile.tcp.hex-ltv-tag-type</mat-label>
+              <mat-select formControlName="hexLtvTagType" required>
+                <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field style="width: 120px;">
+              <mat-label translate>device-profile.tcp.hex-ltv-order</mat-label>
+              <mat-select formControlName="hexLtvChunkOrder" required>
+                <mat-option [value]="TcpHexLtvChunkOrder.LTV">LTV</mat-option>
+                <mat-option [value]="TcpHexLtvChunkOrder.TLV">TLV</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field style="width: 100px;">
+              <mat-label translate>device-profile.tcp.hex-ltv-max</mat-label>
+              <input matInput type="number" min="1" formControlName="hexLtvMaxItems">
+            </mat-form-field>
+            <mat-form-field style="width: 100px;">
+              <mat-label translate>device-profile.tcp.hex-ltv-prefix</mat-label>
+              <input matInput formControlName="hexLtvKeyPrefix">
+            </mat-form-field>
+            <mat-form-field class="flex-1" style="min-width: 160px;">
+              <mat-label translate>device-profile.tcp.hex-ltv-unknown</mat-label>
+              <mat-select formControlName="hexLtvUnknownMode" required>
+                <mat-option [value]="TcpHexUnknownTagMode.SKIP">{{ TcpHexUnknownTagMode.SKIP }}</mat-option>
+                <mat-option [value]="TcpHexUnknownTagMode.EMIT_HEX">{{ TcpHexUnknownTagMode.EMIT_HEX }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="mat-body-2" translate>device-profile.tcp.hex-ltv-mappings-title</div>
+          <div formArrayName="hexLtvTagMappings" class="flex flex-col gap-2">
+            <div *ngFor="let row of getTemplateLtvTagMappingsArray(0).controls; let li = index" [formGroupName]="li"
+                 class="flex flex-row flex-wrap gap-2 items-start">
+              <mat-form-field style="width: 100px;">
+                <mat-label translate>device-profile.tcp.hex-ltv-tag-value</mat-label>
+                <input matInput type="number" formControlName="tagValue" required>
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 120px;">
+                <mat-label translate>device-profile.tcp.hex-ltv-telemetry-key</mat-label>
+                <input matInput formControlName="telemetryKey" required>
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 140px;">
+                <mat-label translate>device-profile.tcp.hex-field-type</mat-label>
+                <mat-select formControlName="valueType" required>
+                  <mat-option *ngFor="let t of tcpHexValueTypes" [value]="t">{{ t }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field style="width: 100px;" *ngIf="isBytesAsHexLtvTemplateTag(0, li)">
+                <mat-label translate>device-profile.tcp.hex-field-byte-length</mat-label>
+                <input matInput type="number" min="1" formControlName="byteLength">
+              </mat-form-field>
+              <button mat-icon-button type="button" color="primary"
+                      matTooltip="{{ 'device-profile.tcp.hex-remove-field' | translate }}"
+                      (click)="removeTemplateLtvMapping.emit({ templateIndex: 0, index: li })">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <button mat-stroked-button color="primary" type="button" (click)="addTemplateLtvMapping.emit(0)">
+            <mat-icon>add</mat-icon>
+            <span translate>device-profile.tcp.hex-ltv-add-mapping</span>
+          </button>
+        </div>
+      </mat-expansion-panel>
+    </div>
+  </ng-container>
+
+  <mat-divider *ngIf="layoutMode === 'full'"></mat-divider>
+
+  <ng-container *ngIf="layoutMode === 'full' || layoutMode === 'commandsOnly'">
+    <div class="mat-body-2" translate>device-profile.tcp.protocol-template-commands-title</div>
+    <div class="tb-hint mat-caption" translate>device-profile.tcp.protocol-template-commands-hint</div>
+
+    <div *ngIf="templatesArray?.length" class="flex flex-col gap-2 protocol-template-cmd-row-block protocol-template-global-cmd-match">
+      <div class="mat-body-2" translate>device-profile.tcp.protocol-template-cmd-match-section-title</div>
+      <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-match-section-hint</div>
+      <div class="flex flex-row flex-wrap gap-2 items-start">
+        <mat-form-field class="protocol-template-cmd-offset-field" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.tcp.protocol-template-cmd-offset</mat-label>
+          <input matInput type="number" min="0" [formControl]="firstTemplateGroup().get('commandByteOffset')">
+        </mat-form-field>
+        <mat-form-field class="protocol-template-cmd-width-field" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.tcp.protocol-template-cmd-width</mat-label>
+          <mat-select [formControl]="firstTemplateGroup().get('commandMatchWidth')">
+            <mat-option [value]="1">1</mat-option>
+            <mat-option [value]="4">4</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-offset-hint</div>
+    </div>
+
+    <mat-accordion multi="true">
+      <mat-expansion-panel *ngFor="let cCtrl of commandsArray.controls; let ci = index" class="mat-elevation-z1" style="margin-bottom: 8px;">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ 'device-profile.tcp.protocol-template-command' | translate }} {{ ci + 1 }}
+            <span *ngIf="asFormGroup(cCtrl).get('name')?.value"> — {{ asFormGroup(cCtrl).get('name')?.value }}</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div [formGroup]="asFormGroup(cCtrl)" class="flex flex-col gap-3">
+          <div class="flex flex-col gap-2 protocol-template-command-meta">
+            <div class="flex flex-row flex-wrap gap-2 items-start">
+              <mat-form-field *ngIf="singleTemplateMode" class="flex-1" style="min-width: 160px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.protocol-template-cmd-template</mat-label>
+                <input matInput formControlName="templateId" readonly>
+              </mat-form-field>
+              <mat-form-field *ngIf="!singleTemplateMode" class="flex-1" style="min-width: 160px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.protocol-template-cmd-template</mat-label>
+                <mat-select formControlName="templateId" required>
+                  <mat-option *ngFor="let tid of templateIdOptions()" [value]="tid">{{ tid }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 120px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.hex-cmd-name</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+              <mat-form-field class="protocol-template-cmd-value-field" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.protocol-template-cmd-value</mat-label>
+                <input matInput type="text" formControlName="commandValue" required autocomplete="off"
+                       [placeholder]="'device-profile.tcp.protocol-template-cmd-value-placeholder' | translate">
+                <mat-hint translate>device-profile.tcp.protocol-template-cmd-value-hint</mat-hint>
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.hex-cmd-value-type</mat-label>
+                <mat-select formControlName="matchValueType" required>
+                  <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 160px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.protocol-template-direction</mat-label>
+                <mat-select formControlName="direction" required>
+                  <mat-option [value]="ProtocolTemplateCommandDirection.UPLINK">{{ 'device-profile.tcp.protocol-template-dir-uplink' | translate }}</mat-option>
+                  <mat-option [value]="ProtocolTemplateCommandDirection.DOWNLINK">{{ 'device-profile.tcp.protocol-template-dir-downlink' | translate }}</mat-option>
+                  <mat-option [value]="ProtocolTemplateCommandDirection.BOTH">{{ 'device-profile.tcp.protocol-template-dir-both' | translate }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="mat-body-2" translate>device-profile.tcp.protocol-template-secondary-title</div>
+            <div class="flex flex-row flex-wrap gap-2 items-start">
+              <mat-form-field style="width: 110px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.protocol-template-secondary-offset</mat-label>
+                <input matInput type="number" min="0" formControlName="secondaryMatchByteOffset">
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.protocol-template-secondary-type</mat-label>
+                <mat-select formControlName="secondaryMatchValueType">
+                  <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field class="protocol-template-cmd-value-field" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.protocol-template-secondary-value</mat-label>
+                <input matInput type="text" formControlName="secondaryMatchValue" autocomplete="off"
+                       [placeholder]="'device-profile.tcp.protocol-template-cmd-value-placeholder' | translate">
+              </mat-form-field>
+            </div>
+            <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-secondary-hint</div>
+            <div *ngIf="singleTemplateMode" class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-template-single-hint</div>
+            <div *ngIf="!singleTemplateMode" class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-template-hint</div>
+          </div>
+
+          <ng-container [ngSwitch]="asFormGroup(cCtrl).get('direction')?.value">
+            <ng-container *ngSwitchCase="ProtocolTemplateCommandDirection.DOWNLINK">
+              <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.tcp.protocol-template-cmd-override-title-downlink</div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-override-hint-downlink</div>
+            </ng-container>
+            <ng-container *ngSwitchCase="ProtocolTemplateCommandDirection.BOTH">
+              <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.tcp.protocol-template-cmd-override-title-both</div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-override-hint-both</div>
+            </ng-container>
+            <ng-container *ngSwitchDefault>
+              <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.tcp.protocol-template-cmd-override-title-uplink</div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-override-hint-uplink</div>
+            </ng-container>
+          </ng-container>
+          <div formArrayName="overrideFields" class="flex flex-col gap-3">
+            <div *ngFor="let row of getCommandOverrideFieldsArray(ci).controls; let fi = index" [formGroupName]="fi"
+                 class="flex flex-row flex-wrap gap-2 items-start">
+              <mat-form-field class="flex-1" style="min-width: 120px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.hex-field-key</mat-label>
+                <input matInput formControlName="key">
+              </mat-form-field>
+              <mat-form-field style="width: 100px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.hex-field-offset</mat-label>
+                <input matInput type="number" min="0" formControlName="byteOffset" required>
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 160px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.hex-field-type</mat-label>
+                <mat-select formControlName="valueType" required>
+                  <mat-option *ngFor="let t of tcpHexValueTypes" [value]="t">{{ t }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <ng-container *ngIf="isBytesAsHexOverride(ci, fi)">
+                <mat-form-field class="flex-1" style="min-width: 200px;" subscriptSizing="dynamic">
+                  <mat-label translate>device-profile.tcp.hex-field-length-mode</mat-label>
+                  <mat-select [value]="getHexFieldLengthModeOverride(ci, fi)"
+                              (selectionChange)="onHexFieldLengthModeOverride(ci, fi, $event.value)">
+                    <mat-option value="fixed">{{ 'device-profile.tcp.hex-field-length-mode-fixed' | translate }}</mat-option>
+                    <mat-option value="fromFrame">{{ 'device-profile.tcp.hex-field-length-mode-from-frame' | translate }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <ng-container *ngIf="getHexFieldLengthModeOverride(ci, fi) === 'fixed'">
+                  <mat-form-field style="width: 120px;" subscriptSizing="dynamic">
+                    <mat-label translate>device-profile.tcp.hex-field-byte-length</mat-label>
+                    <input matInput type="number" min="1" formControlName="byteLength">
+                  </mat-form-field>
+                </ng-container>
+                <ng-container *ngIf="getHexFieldLengthModeOverride(ci, fi) === 'fromFrame'">
+                  <mat-form-field style="width: 130px;" subscriptSizing="dynamic">
+                    <mat-label translate>device-profile.tcp.hex-field-len-from-offset</mat-label>
+                    <input matInput type="number" min="0" formControlName="byteLengthFromByteOffset">
+                  </mat-form-field>
+                  <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
+                    <mat-label translate>device-profile.tcp.hex-field-len-from-type</mat-label>
+                    <mat-select formControlName="byteLengthFromValueType">
+                      <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </ng-container>
+              </ng-container>
+              <div *ngIf="isBytesAsHexOverride(ci, fi)" class="w-full basis-full tb-hint mat-caption protocol-template-inline-hint">
+                <span translate>device-profile.tcp.hex-field-length-mode-hint</span>
+              </div>
+              <button mat-icon-button type="button" color="warn" class="protocol-template-field-row-delete"
+                      (click)="removeOverrideField.emit({ commandIndex: ci, fieldIndex: fi })">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <button mat-stroked-button color="primary" type="button" (click)="addOverrideField.emit(ci)">
+            <mat-icon>add</mat-icon>
+            <span translate>device-profile.tcp.protocol-template-add-override-field</span>
+          </button>
+          <button mat-button type="button" color="warn" (click)="removeCommand.emit(ci)">
+            <mat-icon>remove_circle_outline</mat-icon>
+            <span translate>device-profile.tcp.protocol-template-remove-command</span>
+          </button>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+    <button mat-stroked-button color="primary" type="button" (click)="addCommand.emit()">
+      <mat-icon>playlist_add</mat-icon>
+      <span translate>device-profile.tcp.protocol-template-add-command</span>
+    </button>
+  </ng-container>
+</div>

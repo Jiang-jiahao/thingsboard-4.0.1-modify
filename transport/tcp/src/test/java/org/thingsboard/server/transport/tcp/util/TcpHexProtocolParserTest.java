@@ -1,0 +1,185 @@
+/**
+ * Copyright © 2016-2025 The Thingsboard Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ */
+package org.thingsboard.server.transport.tcp.util;
+
+import com.google.gson.JsonParser;
+import org.junit.jupiter.api.Test;
+import org.thingsboard.server.common.data.device.profile.TcpHexCommandProfile;
+import org.thingsboard.server.common.data.device.profile.TcpHexFieldDefinition;
+import org.thingsboard.server.common.data.device.profile.TcpHexLtvChunkOrder;
+import org.thingsboard.server.common.data.device.profile.TcpHexLtvRepeatingConfig;
+import org.thingsboard.server.common.data.device.profile.TcpHexLtvTagMapping;
+import org.thingsboard.server.common.data.device.profile.TcpHexUnknownTagMode;
+import org.thingsboard.server.common.data.device.profile.TcpHexValueType;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class TcpHexProtocolParserTest {
+
+    @Test
+    void parsesUint16BeAndFloatBe() {
+        String hex = "006440480fdb";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexFieldDefinition a = new TcpHexFieldDefinition();
+        a.setKey("count");
+        a.setByteOffset(0);
+        a.setValueType(TcpHexValueType.UINT16_BE);
+        TcpHexFieldDefinition b = new TcpHexFieldDefinition();
+        b.setKey("pi");
+        b.setByteOffset(2);
+        b.setValueType(TcpHexValueType.FLOAT_BE);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a, b), null, null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("count").getAsInt()).isEqualTo(100);
+        assertThat(out.get().get("pi").getAsDouble()).isBetween(3.13, 3.15);
+    }
+
+    @Test
+    void scaleAndMask() {
+        String hex = "ff00";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexFieldDefinition a = new TcpHexFieldDefinition();
+        a.setKey("lo");
+        a.setByteOffset(0);
+        a.setValueType(TcpHexValueType.UINT16_BE);
+        a.setBitMask(0xFFL);
+        a.setScale(0.1);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("lo").getAsDouble()).isEqualTo(0.0);
+        a.setBitMask(0xFFFFL);
+        out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        assertThat(out.get().get("lo").getAsDouble()).isCloseTo(6528.0, org.assertj.core.data.Offset.offset(1e-6));
+    }
+
+    @Test
+    void bytesAsHexSlice() {
+        var payload = JsonParser.parseString("{\"hex\":\"aabbccdd\"}");
+        TcpHexFieldDefinition a = new TcpHexFieldDefinition();
+        a.setKey("head");
+        a.setByteOffset(0);
+        a.setValueType(TcpHexValueType.BYTES_AS_HEX);
+        a.setByteLength(2);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("head").getAsString()).isEqualTo("aabb");
+    }
+
+    @Test
+    void commandProfileMatchesBeforeDefaultFields() {
+        String hex = "a55a10a0a4ff";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexCommandProfile cmd = new TcpHexCommandProfile();
+        cmd.setName("heartbeat");
+        cmd.setMatchByteOffset(4);
+        cmd.setMatchValueType(TcpHexValueType.UINT8);
+        cmd.setMatchValue(0xA4);
+        TcpHexFieldDefinition f = new TcpHexFieldDefinition();
+        f.setKey("afterCmd");
+        f.setByteOffset(5);
+        f.setValueType(TcpHexValueType.UINT8);
+        cmd.setFields(List.of(f));
+        TcpHexFieldDefinition def = new TcpHexFieldDefinition();
+        def.setKey("b0");
+        def.setByteOffset(0);
+        def.setValueType(TcpHexValueType.UINT8);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, List.of(cmd), List.of(def), null, null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("afterCmd").getAsInt()).isEqualTo(0xFF);
+        assertThat(out.get().get("hexCmdProfile").getAsString()).isEqualTo("heartbeat");
+        assertThat(out.get().has("b0")).isFalse();
+    }
+
+    @Test
+    void fallbackToDefaultWhenCommandMismatch() {
+        String hex = "a55a10a0a4ff";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexCommandProfile cmd = new TcpHexCommandProfile();
+        cmd.setName("other");
+        cmd.setMatchByteOffset(4);
+        cmd.setMatchValueType(TcpHexValueType.UINT8);
+        cmd.setMatchValue(0x21);
+        TcpHexFieldDefinition f = new TcpHexFieldDefinition();
+        f.setKey("never");
+        f.setByteOffset(5);
+        f.setValueType(TcpHexValueType.UINT8);
+        cmd.setFields(List.of(f));
+        TcpHexFieldDefinition def = new TcpHexFieldDefinition();
+        def.setKey("b0");
+        def.setByteOffset(0);
+        def.setValueType(TcpHexValueType.UINT8);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, List.of(cmd), List.of(def), null, null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("b0").getAsInt()).isEqualTo(0xA5);
+        assertThat(out.get().has("hexCmdProfile")).isFalse();
+    }
+
+    /** 主命令相同（如 0xA2）时，用第二匹配字节区分规则 */
+    @Test
+    void commandProfileSecondaryMatchDistinguishesSamePrimary() {
+        String hex = "a55a0101a200022100";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexCommandProfile cmd21 = new TcpHexCommandProfile();
+        cmd21.setName("ack_echo_21");
+        cmd21.setMatchByteOffset(4);
+        cmd21.setMatchValueType(TcpHexValueType.UINT8);
+        cmd21.setMatchValue(0xA2);
+        cmd21.setSecondaryMatchByteOffset(7);
+        cmd21.setSecondaryMatchValueType(TcpHexValueType.UINT8);
+        cmd21.setSecondaryMatchValue(0x21L);
+        TcpHexFieldDefinition f21 = new TcpHexFieldDefinition();
+        f21.setKey("paramEcho");
+        f21.setByteOffset(7);
+        f21.setValueType(TcpHexValueType.UINT8);
+        cmd21.setFields(List.of(f21));
+
+        TcpHexCommandProfile cmd06 = new TcpHexCommandProfile();
+        cmd06.setName("ack_echo_06");
+        cmd06.setMatchByteOffset(4);
+        cmd06.setMatchValueType(TcpHexValueType.UINT8);
+        cmd06.setMatchValue(0xA2);
+        cmd06.setSecondaryMatchByteOffset(7);
+        cmd06.setSecondaryMatchValueType(TcpHexValueType.UINT8);
+        cmd06.setSecondaryMatchValue(0x06L);
+        TcpHexFieldDefinition f06 = new TcpHexFieldDefinition();
+        f06.setKey("wrong");
+        f06.setByteOffset(7);
+        f06.setValueType(TcpHexValueType.UINT8);
+        cmd06.setFields(List.of(f06));
+
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload,
+                List.of(cmd21, cmd06), List.of(), null, null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("hexCmdProfile").getAsString()).isEqualTo("ack_echo_21");
+        assertThat(out.get().get("paramEcho").getAsInt()).isEqualTo(0x21);
+    }
+
+    /** LTV: len=2, tag=1, value=11 22 → UINT16_BE = 0x1122 */
+    @Test
+    void ltvRepeatingParsesChunks() {
+        String hex = "02011122";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexLtvRepeatingConfig ltv = new TcpHexLtvRepeatingConfig();
+        ltv.setStartByteOffset(0);
+        ltv.setLengthFieldType(TcpHexValueType.UINT8);
+        ltv.setTagFieldType(TcpHexValueType.UINT8);
+        ltv.setChunkOrder(TcpHexLtvChunkOrder.LTV);
+        ltv.setKeyPrefix("p");
+        TcpHexLtvTagMapping m = new TcpHexLtvTagMapping();
+        m.setTagValue(1);
+        m.setTelemetryKey("val");
+        m.setValueType(TcpHexValueType.UINT16_BE);
+        ltv.setTagMappings(List.of(m));
+        ltv.setUnknownTagMode(TcpHexUnknownTagMode.SKIP);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, null, ltv, null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("p_0_val").getAsInt()).isEqualTo(0x1122);
+    }
+}

@@ -20,6 +20,7 @@ import { NgModule } from '@angular/core';
 import { deviceProfilesRoutes } from '@home/pages/device-profile/device-profile-routing.module';
 import { assetProfilesRoutes } from '@home/pages/asset-profile/asset-profile-routing.module';
 import { MenuId } from '@core/services/menu.models';
+import { ProtocolTemplateBundlesPageComponent } from './protocol-template-bundles-page.component';
 
 const routes: Routes = [
   {
@@ -37,6 +38,27 @@ const routes: Routes = [
         data: {
           auth: [Authority.TENANT_ADMIN],
           redirectTo: '/profiles/deviceProfiles'
+        }
+      },
+      {
+        path: 'monitoringProtocolTemplates',
+        redirectTo: 'protocolTemplates',
+        pathMatch: 'full'
+      },
+      {
+        path: 'protocolHexParse',
+        redirectTo: 'protocolTemplates',
+        pathMatch: 'full'
+      },
+      {
+        path: 'protocolTemplates',
+        component: ProtocolTemplateBundlesPageComponent,
+        data: {
+          auth: [Authority.TENANT_ADMIN],
+          breadcrumb: {
+            menuId: MenuId.protocol_templates
+          },
+          title: 'profiles.protocol-templates'
         }
       },
       ...deviceProfilesRoutes,

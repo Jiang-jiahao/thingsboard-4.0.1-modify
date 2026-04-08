@@ -1,0 +1,266 @@
+///
+/// Copyright © 2016-2025 The Thingsboard Authors
+///
+import { Component, Input, OnDestroy } from '@angular/core';
+import {
+  UntypedFormArray,
+  UntypedFormBuilder,
+  UntypedFormGroup,
+  Validators
+} from '@angular/forms';
+import {
+  ProtocolTemplateCommandDefinition,
+  ProtocolTemplateCommandDirection,
+  ProtocolTemplateDefinition,
+  TcpHexChecksumDefinition,
+  TcpHexFieldDefinition,
+  TcpHexLtvChunkOrder,
+  TcpHexLtvTagMapping,
+  TcpHexUnknownTagMode,
+  TcpHexValueType
+} from '@shared/models/device.models';
+import { Subscription } from 'rxjs';
+
+@Component({
+  selector: 'tb-protocol-template-bundle-editor',
+  templateUrl: './protocol-template-bundle-editor.component.html',
+  styleUrls: ['./protocol-template-bundle-editor.component.scss']
+})
+export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
+
+  @Input()
+  protocolTemplateFormGroup: UntypedFormGroup;
+
+  @Input()
+  disabled: boolean;
+
+  @Input()
+  layoutMode: 'full' | 'templatesOnly' | 'commandsOnly' = 'full';
+
+  readonly TcpHexValueType = TcpHexValueType;
+
+  tcpHexValueTypes = Object.values(TcpHexValueType);
+
+  private templateIdSubscription?: Subscription;
+
+  constructor(
+    private fb: UntypedFormBuilder
+  ) {
+  }
+
+  ngOnDestroy(): void {
+    this.templateIdSubscription?.unsubscribe();
+  }
+
+  /**
+   * 与对话框顶部「名称」同步：作为唯一展示名，并写入隐藏字段 id，供命令 templateId 关联。
+   */
+  applyBundleDisplayNameAsTemplateId(displayName: string): void {
+    const tid = String(displayName ?? '').trim();
+    const g = this.protocolTemplatesArray?.at(0) as UntypedFormGroup;
+    if (!g) {
+      return;
+    }
+    g.get('id')?.patchValue(tid, { emitEvent: true });
+  }
+
+  get protocolTemplatesArray(): UntypedFormArray {
+    return this.protocolTemplateFormGroup?.get('protocolTemplates') as UntypedFormArray;
+  }
+
+  get protocolCommandsArray(): UntypedFormArray {
+    return this.protocolTemplateFormGroup?.get('protocolCommands') as UntypedFormArray;
+  }
+
+  addProtocolTemplateLtvMapping(templateIndex: number): void {
+    const tpl = this.protocolTemplatesArray.at(templateIndex) as UntypedFormGroup;
+    (tpl.get('hexLtvTagMappings') as UntypedFormArray).push(this.createLtvTagMappingGroup());
+  }
+
+  removeProtocolTemplateLtvMapping(payload: { templateIndex: number; index: number }): void {
+    const tpl = this.protocolTemplatesArray.at(payload.templateIndex) as UntypedFormGroup;
+    (tpl.get('hexLtvTagMappings') as UntypedFormArray).removeAt(payload.index);
+  }
+
+  addFieldToProtocolTemplate(templateIndex: number) {
+    this.getProtocolTemplateFieldsArray(templateIndex).push(this.createHexFieldGroup());
+  }
+
+  removeFieldFromProtocolTemplate(payload: { templateIndex: number; fieldIndex: number }) {
+    this.getProtocolTemplateFieldsArray(payload.templateIndex).removeAt(payload.fieldIndex);
+  }
+
+  getProtocolTemplateFieldsArray(templateIndex: number): UntypedFormArray {
+    return (this.protocolTemplatesArray.at(templateIndex) as UntypedFormGroup).get('hexProtocolFields') as UntypedFormArray;
+  }
+
+  addProtocolCommand() {
+    this.protocolCommandsArray.push(this.createProtocolCommandGroup());
+    this.syncCommandTemplateIdsFromFirstTemplate();
+  }
+
+  removeProtocolCommand(index: number) {
+    this.protocolCommandsArray.removeAt(index);
+  }
+
+  addOverrideFieldToCommand(commandIndex: number) {
+    this.getProtocolCommandOverrideFieldsArray(commandIndex).push(this.createHexFieldGroup());
+  }
+
+  removeOverrideFieldFromCommand(payload: { commandIndex: number; fieldIndex: number }) {
+    this.getProtocolCommandOverrideFieldsArray(payload.commandIndex).removeAt(payload.fieldIndex);
+  }
+
+  getProtocolCommandOverrideFieldsArray(commandIndex: number): UntypedFormArray {
+    return (this.protocolCommandsArray.at(commandIndex) as UntypedFormGroup).get('overrideFields') as UntypedFormArray;
+  }
+
+  private createHexFieldGroup(f?: TcpHexFieldDefinition): UntypedFormGroup {
+    const fromFrame = f?.byteLengthFromByteOffset != null && f.byteLengthFromByteOffset >= 0;
+    return this.fb.group({
+      key: [f?.key ?? '', [Validators.maxLength(255)]],
+      byteOffset: [f?.byteOffset ?? 0, [Validators.required, Validators.min(0)]],
+      valueType: [f?.valueType ?? TcpHexValueType.UINT8, Validators.required],
+      hexFieldLengthMode: [fromFrame ? 'fromFrame' : 'fixed'],
+      byteLength: [f?.byteLength ?? null, [Validators.min(1)]],
+      byteLengthFromByteOffset: [f?.byteLengthFromByteOffset ?? null, [Validators.min(0)]],
+      byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required]
+    });
+  }
+
+  private createLtvTagMappingGroup(m?: TcpHexLtvTagMapping): UntypedFormGroup {
+    return this.fb.group({
+      tagValue: [m?.tagValue ?? 0, Validators.required],
+      telemetryKey: [m?.telemetryKey ?? '', [Validators.maxLength(255)]],
+      valueType: [m?.valueType ?? TcpHexValueType.UINT8, Validators.required],
+      byteLength: [m?.byteLength ?? null, [Validators.min(1)]]
+    });
+  }
+
+  private createProtocolTemplateGroup(t?: ProtocolTemplateDefinition): UntypedFormGroup {
+    const fieldsArr = this.fb.array([] as UntypedFormGroup[]);
+    if (t?.hexProtocolFields?.length) {
+      for (const f of t.hexProtocolFields) {
+        fieldsArr.push(this.createHexFieldGroup(f));
+      }
+    }
+    const ltvArr = this.fb.array([] as UntypedFormGroup[]);
+    const ltv = t?.hexLtvRepeating;
+    if (ltv?.tagMappings?.length) {
+      for (const m of ltv.tagMappings) {
+        ltvArr.push(this.createLtvTagMappingGroup(m));
+      }
+    }
+    const cs: TcpHexChecksumDefinition | undefined = t?.checksum;
+    const csType = cs?.type && String(cs.type).trim() && String(cs.type).toUpperCase() !== 'NONE'
+      ? String(cs.type).trim()
+      : 'NONE';
+    return this.fb.group({
+      id: [t?.id ?? '', [Validators.required, Validators.maxLength(255)]],
+      commandByteOffset: [t?.commandByteOffset ?? 12, [Validators.required, Validators.min(0)]],
+      commandMatchWidth: [t?.commandMatchWidth === 1 ? 1 : 4],
+      checksumType: [csType],
+      checksumFromByte: [cs?.fromByte ?? 0],
+      checksumToExclusive: [cs?.toExclusive ?? 0],
+      checksumByteIndex: [cs?.checksumByteIndex ?? -2],
+      hexProtocolFields: fieldsArr,
+      hexLtvEnabled: [!!ltv],
+      hexLtvStartOffset: [ltv?.startByteOffset ?? 0, [Validators.required, Validators.min(0)]],
+      hexLtvLengthType: [ltv?.lengthFieldType ?? TcpHexValueType.UINT8, Validators.required],
+      hexLtvTagType: [ltv?.tagFieldType ?? TcpHexValueType.UINT8, Validators.required],
+      hexLtvChunkOrder: [ltv?.chunkOrder ?? TcpHexLtvChunkOrder.LTV, Validators.required],
+      hexLtvMaxItems: [ltv?.maxItems ?? 32, [Validators.min(1)]],
+      hexLtvKeyPrefix: [ltv?.keyPrefix ?? 'ltv'],
+      hexLtvUnknownMode: [ltv?.unknownTagMode ?? TcpHexUnknownTagMode.SKIP, Validators.required],
+      hexLtvTagMappings: ltvArr
+    });
+  }
+
+  private createProtocolCommandGroup(c?: ProtocolTemplateCommandDefinition): UntypedFormGroup {
+    const overrideArr = this.fb.array([] as UntypedFormGroup[]);
+    if (c?.fields?.length) {
+      for (const f of c.fields) {
+        overrideArr.push(this.createHexFieldGroup(f));
+      }
+    }
+    return this.fb.group({
+      templateId: [c?.templateId ?? '', Validators.required],
+      name: [c?.name ?? '', [Validators.maxLength(255)]],
+      commandValue: [this.formatCommandValueForForm(c?.commandValue), Validators.required],
+      matchValueType: [c?.matchValueType ?? TcpHexValueType.UINT32_LE, Validators.required],
+      secondaryMatchByteOffset: [c?.secondaryMatchByteOffset ?? null],
+      secondaryMatchValueType: [c?.secondaryMatchValueType ?? TcpHexValueType.UINT8],
+      secondaryMatchValue: [
+        c?.secondaryMatchValue != null ? this.formatCommandValueForForm(c.secondaryMatchValue) : ''
+      ],
+      direction: [c?.direction ?? ProtocolTemplateCommandDirection.UPLINK, Validators.required],
+      overrideFields: overrideArr
+    });
+  }
+
+  patchProtocolTemplatesFromModel(templates: ProtocolTemplateDefinition[]) {
+    const arr = this.protocolTemplatesArray;
+    while (arr.length) {
+      arr.removeAt(0, { emitEvent: false });
+    }
+    const t = templates?.length ? templates[0] : undefined;
+    arr.push(this.createProtocolTemplateGroup(t), { emitEvent: false });
+    this.wireTemplateIdSync();
+    this.syncCommandTemplateIdsFromFirstTemplate();
+  }
+
+  patchProtocolCommandsFromModel(commands: ProtocolTemplateCommandDefinition[]) {
+    const arr = this.protocolCommandsArray;
+    while (arr.length) {
+      arr.removeAt(0, { emitEvent: false });
+    }
+    const defaultTid = this.protocolTemplatesArray?.length
+      ? String((this.protocolTemplatesArray.at(0) as UntypedFormGroup).get('id')?.value ?? '').trim()
+      : '';
+    if (commands?.length) {
+      for (const c of commands) {
+        const merged: ProtocolTemplateCommandDefinition = {
+          ...c,
+          templateId: (c.templateId && String(c.templateId).trim()) ? c.templateId : defaultTid
+        };
+        arr.push(this.createProtocolCommandGroup(merged), { emitEvent: false });
+      }
+    }
+    this.syncCommandTemplateIdsFromFirstTemplate();
+  }
+
+  private wireTemplateIdSync(): void {
+    this.templateIdSubscription?.unsubscribe();
+    const idCtrl = this.protocolTemplatesArray?.at(0)?.get('id');
+    if (!idCtrl) {
+      return;
+    }
+    this.templateIdSubscription = idCtrl.valueChanges.subscribe(v => {
+      const tid = String(v ?? '').trim();
+      if (!tid) {
+        return;
+      }
+      for (let i = 0; i < this.protocolCommandsArray.length; i++) {
+        (this.protocolCommandsArray.at(i) as UntypedFormGroup).get('templateId')?.patchValue(tid, { emitEvent: false });
+      }
+    });
+  }
+
+  private formatCommandValueForForm(v: number | undefined | null): string {
+    if (v === undefined || v === null || !Number.isFinite(Number(v))) {
+      return '0';
+    }
+    return String(Math.trunc(Number(v)));
+  }
+
+  private syncCommandTemplateIdsFromFirstTemplate(): void {
+    const idCtrl = this.protocolTemplatesArray?.at(0)?.get('id');
+    const tid = idCtrl ? String(idCtrl.value ?? '').trim() : '';
+    if (!tid) {
+      return;
+    }
+    for (let i = 0; i < this.protocolCommandsArray.length; i++) {
+      (this.protocolCommandsArray.at(i) as UntypedFormGroup).get('templateId')?.patchValue(tid, { emitEvent: false });
+    }
+  }
+}

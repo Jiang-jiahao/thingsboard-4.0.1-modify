@@ -1,0 +1,48 @@
+.protocol-template-panel {
+  padding: 12px;
+  border-radius: 4px;
+}
+
+/* 独立成行，避免窄 mat-form-field 内 mat-hint 与下方标题/控件叠在一起 */
+.protocol-template-inline-hint {
+  display: block;
+  line-height: 1.45;
+  max-width: 100%;
+}
+
+.protocol-template-section-subtitle {
+  margin-top: 2px;
+}
+
+.protocol-template-cmd-row-block {
+  min-width: 0;
+}
+
+.protocol-template-global-cmd-match {
+  margin-bottom: 4px;
+}
+
+.protocol-template-cmd-offset-field {
+  min-width: 140px;
+  flex: 0 1 160px;
+}
+
+.protocol-template-cmd-width-field {
+  min-width: 150px;
+  flex: 0 1 200px;
+}
+
+.protocol-template-cmd-value-field {
+  min-width: 180px;
+  flex: 1 1 220px;
+  max-width: 100%;
+}
+
+.protocol-template-field-row-delete {
+  align-self: center;
+  margin-top: 4px;
+}
+
+.protocol-template-command-meta {
+  min-width: 0;
+}

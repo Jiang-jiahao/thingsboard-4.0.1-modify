@@ -29,6 +29,8 @@ import org.thingsboard.server.common.data.device.profile.TcpTransportFramingMode
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.TransportTcpDataType;
+import org.thingsboard.server.common.data.device.profile.HexTransportTcpDataConfiguration;
+import org.thingsboard.server.common.data.device.profile.ProtocolTemplateTransportTcpDataConfiguration;
 import org.thingsboard.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.transport.SessionMsgListener;
@@ -126,6 +128,27 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
             return tcpCfg.getTransportTcpDataTypeConfiguration().getTransportTcpDataType();
         }
         return TransportTcpDataType.JSON;
+    }
+
+    /**
+     * 当前 TCP 传输为 HEX 且已配置 {@link HexTransportTcpDataConfiguration} 时返回该配置，否则 {@code null}。
+     */
+    public HexTransportTcpDataConfiguration getHexTcpDataConfiguration() {
+        DeviceProfile profile = getDeviceProfile();
+        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
+            return null;
+        }
+        var tc = profile.getProfileData().getTransportConfiguration();
+        if (tc instanceof TcpDeviceProfileTransportConfiguration tcpCfg) {
+            var dataCfg = tcpCfg.getTransportTcpDataTypeConfiguration();
+            if (dataCfg instanceof HexTransportTcpDataConfiguration hexCfg) {
+                return hexCfg;
+            }
+            if (dataCfg instanceof ProtocolTemplateTransportTcpDataConfiguration ptCfg) {
+                return ptCfg.expandToHexTransportTcpDataConfiguration();
+            }
+        }
+        return null;
     }
 
     public TcpTransportFramingMode getTcpTransportFramingMode() {

@@ -94,6 +94,7 @@ export enum MenuId {
   gateways = 'gateways',
   profiles = 'profiles',
   device_profiles = 'device_profiles',
+  protocol_templates = 'protocol_templates',
   asset_profiles = 'asset_profiles',
   customers = 'customers',
   rule_chains = 'rule_chains',
@@ -573,6 +574,16 @@ export const menuSectionMap = new Map<MenuId, MenuSection>([
     }
   ],
   [
+    MenuId.protocol_templates,
+    {
+      id: MenuId.protocol_templates,
+      name: 'profiles.protocol-templates',
+      type: 'link',
+      path: '/profiles/protocolTemplates',
+      icon: 'mdi:file-document-edit-outline'
+    }
+  ],
+  [
     MenuId.asset_profiles,
     {
       id: MenuId.asset_profiles,
@@ -784,6 +795,7 @@ const defaultUserMenuMap = new Map<Authority, MenuReference[]>([
         id: MenuId.profiles,
         pages: [
           {id: MenuId.device_profiles},
+          {id: MenuId.protocol_templates},
           {id: MenuId.asset_profiles}
         ]
       },
@@ -922,7 +934,7 @@ const defaultHomeSectionMap = new Map<Authority, HomeSectionReference[]>([
       },
       {
         name: 'device.management',
-        places: [MenuId.devices, MenuId.device_profiles, MenuId.otaUpdates]
+        places: [MenuId.devices, MenuId.device_profiles, MenuId.protocol_templates, MenuId.otaUpdates]
       },
       {
         name: 'entity-view.management',

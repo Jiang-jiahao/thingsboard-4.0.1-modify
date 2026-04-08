@@ -1,0 +1,18 @@
+<div class="flex flex-col gap-3" *ngIf="protocolTemplateFormGroup">
+  <tb-protocol-template-tcp-data-configuration
+    [layoutMode]="layoutMode"
+    [templatesArray]="protocolTemplatesArray"
+    [commandsArray]="protocolCommandsArray"
+    [tcpHexValueTypes]="tcpHexValueTypes"
+    [disabled]="disabled"
+    [singleTemplateMode]="true"
+    (addTemplateField)="addFieldToProtocolTemplate($event)"
+    (removeTemplateField)="removeFieldFromProtocolTemplate($event)"
+    (addTemplateLtvMapping)="addProtocolTemplateLtvMapping($event)"
+    (removeTemplateLtvMapping)="removeProtocolTemplateLtvMapping($event)"
+    (addCommand)="addProtocolCommand()"
+    (removeCommand)="removeProtocolCommand($event)"
+    (addOverrideField)="addOverrideFieldToCommand($event)"
+    (removeOverrideField)="removeOverrideFieldFromCommand($event)">
+  </tb-protocol-template-tcp-data-configuration>
+</div>

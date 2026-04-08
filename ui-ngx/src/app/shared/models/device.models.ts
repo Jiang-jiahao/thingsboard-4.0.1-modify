@@ -334,10 +334,210 @@ export enum TcpJsonWithoutMethodMode {
 export enum TransportTcpDataType {
   JSON = 'JSON',
   HEX = 'HEX',
+  /**
+   * 与 HEX 链路上一致；配置为「协议模板」（帧模板 + 上行/下行命令），后端展开为 HEX 解析。
+   */
+  PROTOCOL_TEMPLATE = 'PROTOCOL_TEMPLATE',
   ASCII = 'ASCII'
 }
+
+/** 将历史字符串 MONITORING_PROTOCOL 规范为 PROTOCOL_TEMPLATE */
+export function normalizeTransportTcpDataType(
+  v: string | TransportTcpDataType | undefined | null
+): TransportTcpDataType | undefined {
+  if (v == null || v === '') {
+    return undefined;
+  }
+  if (v === 'MONITORING_PROTOCOL') {
+    return TransportTcpDataType.PROTOCOL_TEMPLATE;
+  }
+  return v as TransportTcpDataType;
+}
+
+/** 协议模板命令方向（与后端 ProtocolTemplateCommandDirection 一致） */
+export enum ProtocolTemplateCommandDirection {
+  UPLINK = 'UPLINK',
+  DOWNLINK = 'DOWNLINK',
+  BOTH = 'BOTH'
+}
+
+/** 与 TCP HEX 解析器一致的可选整帧校验 */
+export interface TcpHexChecksumDefinition {
+  type: string;
+  fromByte: number;
+  toExclusive: number;
+  checksumByteIndex: number;
+}
+
+/** 帧模板：命令偏移、默认字段等 */
+export interface ProtocolTemplateDefinition {
+  id: string;
+  name?: string;
+  commandByteOffset?: number;
+  commandMatchWidth?: number;
+  validateTotalLengthU32Le?: boolean;
+  /** 可选：整帧校验（先于字段解析） */
+  checksum?: TcpHexChecksumDefinition;
+  hexProtocolFields?: TcpHexFieldDefinition[];
+  hexLtvRepeating?: TcpHexLtvRepeatingConfig;
+}
+
+/** 在模板下按命令字配置方向与可选字段覆盖 */
+export interface ProtocolTemplateCommandDefinition {
+  templateId: string;
+  name?: string;
+  commandValue: number;
+  matchValueType?: TcpHexValueType;
+  /** 可选：第二匹配偏移（整帧 0 起），与命令字节配合区分 0xA2 类应答（如第 7 字节回显原命令） */
+  secondaryMatchByteOffset?: number;
+  secondaryMatchValueType?: TcpHexValueType;
+  secondaryMatchValue?: number;
+  direction: ProtocolTemplateCommandDirection;
+  /**
+   * 上行/双向：与帧模板合并后用于从设备上报帧中按偏移解析（遥测键）。
+   * 下行：描述组帧时参区应写入的参数布局（键名/类型/偏移作编码契约），需由 RPC、规则链等按此构造字节；TCP 侧不解析下行。
+   * 合并规则：与模板字段按字节区间合并，重叠以本命令为准。
+   */
+  fields?: TcpHexFieldDefinition[];
+  ltvRepeating?: TcpHexLtvRepeatingConfig;
+}
+
+/** 租户级协议模板包（持久化于 protocol_template_bundle 表；旧版可曾存于 Tenant.additionalInfo，由后端迁移） */
+export interface ProtocolTemplateBundle {
+  id: string;
+  /** 创建时间（毫秒），列表展示 */
+  createdTime?: number;
+  name?: string;
+  protocolTemplates: ProtocolTemplateDefinition[];
+  protocolCommands: ProtocolTemplateCommandDefinition[];
+  /** 历史 JSON 字段名（仅读取兼容） */
+  monitoringTemplates?: ProtocolTemplateDefinition[];
+  monitoringCommands?: ProtocolTemplateCommandDefinition[];
+}
+
+export const PROTOCOL_TEMPLATE_BUNDLES_ADDITIONAL_INFO_KEY = 'protocolTemplateBundles';
+
+/** 旧版 tenant.additionalInfo 键名（迁移兼容） */
+export const LEGACY_PROTOCOL_TEMPLATE_BUNDLES_ADDITIONAL_INFO_KEY = 'monitoringProtocolBundles';
+
+/** TCP HEX 帧内字段类型（与后端 TcpHexValueType 一致） */
+export enum TcpHexValueType {
+  UINT8 = 'UINT8',
+  INT8 = 'INT8',
+  UINT16_BE = 'UINT16_BE',
+  UINT16_LE = 'UINT16_LE',
+  INT16_BE = 'INT16_BE',
+  INT16_LE = 'INT16_LE',
+  UINT32_BE = 'UINT32_BE',
+  UINT32_LE = 'UINT32_LE',
+  INT32_BE = 'INT32_BE',
+  INT32_LE = 'INT32_LE',
+  FLOAT_BE = 'FLOAT_BE',
+  FLOAT_LE = 'FLOAT_LE',
+  DOUBLE_BE = 'DOUBLE_BE',
+  DOUBLE_LE = 'DOUBLE_LE',
+  BYTES_AS_HEX = 'BYTES_AS_HEX'
+}
+
+export interface TcpHexFieldDefinition {
+  key: string;
+  byteOffset: number;
+  valueType: TcpHexValueType;
+  /** BYTES_AS_HEX：固定字节数（与 byteLengthFromByteOffset 二选一） */
+  byteLength?: number;
+  /** BYTES_AS_HEX：从整帧该字节偏移处按 byteLengthFromValueType 读出长度，再截取相应字节（非「引用别名字段」） */
+  byteLengthFromByteOffset?: number;
+  /** 读取动态长度时的整型类型，默认 UINT8 */
+  byteLengthFromValueType?: TcpHexValueType;
+  /** @deprecated UI 已移除；后端仍兼容旧配置 */
+  scale?: number;
+  /** @deprecated UI 已移除；后端仍兼容旧配置 */
+  bitMask?: number;
+}
+
+export enum TcpHexLtvChunkOrder {
+  LTV = 'LTV',
+  TLV = 'TLV'
+}
+
+export enum TcpHexUnknownTagMode {
+  SKIP = 'SKIP',
+  EMIT_HEX = 'EMIT_HEX'
+}
+
+export interface TcpHexLtvTagMapping {
+  tagValue: number;
+  telemetryKey: string;
+  valueType: TcpHexValueType;
+  byteLength?: number;
+  /** @deprecated UI 已移除 */
+  scale?: number;
+  /** @deprecated UI 已移除 */
+  bitMask?: number;
+}
+
+export interface TcpHexLtvRepeatingConfig {
+  startByteOffset: number;
+  lengthFieldType: TcpHexValueType;
+  tagFieldType: TcpHexValueType;
+  chunkOrder?: TcpHexLtvChunkOrder;
+  maxItems?: number;
+  keyPrefix?: string;
+  unknownTagMode?: TcpHexUnknownTagMode;
+  tagMappings?: TcpHexLtvTagMapping[];
+}
+
+/** 按命令字匹配的一套解析（与后端 TcpHexCommandProfile 一致） */
+export interface TcpHexCommandProfile {
+  /** 可选，匹配成功后会写入遥测键 hexCmdProfile */
+  name?: string;
+  matchByteOffset: number;
+  /** 仅整型，用于从帧中读出命令字再与 matchValue 比较 */
+  matchValueType: TcpHexValueType;
+  matchValue: number;
+  secondaryMatchByteOffset?: number;
+  secondaryMatchValueType?: TcpHexValueType;
+  secondaryMatchValue?: number;
+  /** 与 ltvRepeating 至少配置其一（由后端校验） */
+  fields?: TcpHexFieldDefinition[];
+  /** 可选：参数字段内为 LTV/TLV 列表时使用 */
+  ltvRepeating?: TcpHexLtvRepeatingConfig;
+}
+
+/** 命令匹配下拉：不允许 FLOAT/DOUBLE/BYTES_AS_HEX */
+export const TCP_HEX_MATCH_VALUE_TYPES: TcpHexValueType[] = [
+  TcpHexValueType.UINT8,
+  TcpHexValueType.INT8,
+  TcpHexValueType.UINT16_BE,
+  TcpHexValueType.UINT16_LE,
+  TcpHexValueType.INT16_BE,
+  TcpHexValueType.INT16_LE,
+  TcpHexValueType.UINT32_BE,
+  TcpHexValueType.UINT32_LE,
+  TcpHexValueType.INT32_BE,
+  TcpHexValueType.INT32_LE
+];
+
 export interface TransportTcpDataTypeConfiguration {
   transportTcpDataType?: TransportTcpDataType;
+  /** 仅当 transportTcpDataType 为 HEX：按顺序匹配命令规则 */
+  hexCommandProfiles?: TcpHexCommandProfile[];
+  /** 未匹配任何命令时的回退字段解析 */
+  hexProtocolFields?: TcpHexFieldDefinition[];
+  /** 未匹配命令时，在固定字段之后解析的 LTV/TLV 重复段 */
+  hexLtvRepeating?: TcpHexLtvRepeatingConfig;
+  validateTotalLengthU32Le?: boolean;
+  /** 手动 HEX：可选整帧校验 */
+  checksum?: TcpHexChecksumDefinition;
+  /** 协议模板负载：先配模板再配命令 */
+  protocolTemplates?: ProtocolTemplateDefinition[];
+  protocolCommands?: ProtocolTemplateCommandDefinition[];
+  /** 可选：所选协议模板包 ID（租户「协议模板」库），便于 UI 回显 */
+  protocolTemplateBundleId?: string;
+  /** 历史 JSON 字段名（仅读取兼容） */
+  monitoringTemplates?: ProtocolTemplateDefinition[];
+  monitoringCommands?: ProtocolTemplateCommandDefinition[];
+  monitoringProtocolBundleId?: string;
 }
 export interface TcpDeviceProfileTransportConfiguration {
   type?: DeviceTransportType;

@@ -130,6 +130,12 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
 
     @Override
     public void validate() {
+        if (getTransportTcpDataTypeConfiguration() instanceof HexTransportTcpDataConfiguration hexCfg) {
+            hexCfg.validateHexProtocolFields();
+        }
+        if (getTransportTcpDataTypeConfiguration() instanceof ProtocolTemplateTransportTcpDataConfiguration ptCfg) {
+            ptCfg.validateProtocolTemplate();
+        }
         if (tcpOutboundReconnectIntervalSec != null && tcpOutboundReconnectIntervalSec < 0) {
             throw new IllegalArgumentException("tcpOutboundReconnectIntervalSec must be >= 0");
         }

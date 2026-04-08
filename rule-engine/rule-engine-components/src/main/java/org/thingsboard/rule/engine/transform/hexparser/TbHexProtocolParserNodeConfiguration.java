@@ -36,8 +36,12 @@ public class TbHexProtocolParserNodeConfiguration implements NodeConfiguration<T
         c.setOutputKeyPrefix("");
 
         /*
-         * 帧模板：无同步头。包头固定 16 字节 UINT32 LE：
-         * 长度(0) 设备ID(4) 设备类别(8) 命令编号(12)；子命令体从字节 16 起。
+         * 监控类 UDP 报文（与「长度+设备ID+类别+命令+子命令体」一致，小端）：
+         * 无同步头；前 16 字节 UINT32 LE：总长(0，含本字段)、设备ID(4)、设备类别(8)、命令编号(12)；
+         * 子命令体从 16 起：总长(相对子区)+编号 STRUCT(模块字段 UINT16 LE + 当前模块号 UINT8 + 模块类型 UINT8)+
+         * UNIT_LIST 信息单元（每项：uint32 LE 长度 + 4 字节编号 + 数据，编号解析同 STRUCT）。
+         * 命令字示例：0x01 状态获取、0x02 设置、0x03 状态上报、0x05 监控列表查询、0x07 关闭、0x08 重启、
+         * 0x0A/0x0B 返航/迫降、0x12 设置回复、0x15 监控列表回复、0x18 重启回复等（解析布局相同，由 commandNumber 字段区分）。
          */
         HexFrameTemplate frame = new HexFrameTemplate();
         frame.setId("device_datagram_frame");
@@ -85,12 +89,13 @@ public class TbHexProtocolParserNodeConfiguration implements NodeConfiguration<T
         c.setFrameTemplates(List.of(frame));
 
         HexProtocolDefinition proto = new HexProtocolDefinition();
-        proto.setId("device_datagram_subcmd");
+        proto.setId("monitor_udp_datagram");
         proto.setTemplateId("device_datagram_frame");
         proto.setMinBytes(16);
         proto.setCommandByteOffset(12);
-        proto.setCommandValue(1);
+        proto.setCommandValue(null);
         proto.setCommandMatchWidth(4);
+        proto.setValidateTotalLengthU32Le(true);
         HexChecksumDefinition none = new HexChecksumDefinition();
         none.setType("NONE");
         proto.setChecksum(none);

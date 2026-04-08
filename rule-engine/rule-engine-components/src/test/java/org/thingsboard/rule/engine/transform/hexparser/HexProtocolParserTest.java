@@ -232,7 +232,7 @@ public class HexProtocolParserTest {
         buf[32] = (byte) 0xDE;
         buf[33] = (byte) 0xFA;
         ObjectNode out = HexProtocolParser.parse(def, buf);
-        Assertions.assertEquals("device_datagram_subcmd", out.get("protocolId").asText());
+        Assertions.assertEquals("monitor_udp_datagram", out.get("protocolId").asText());
         Assertions.assertEquals(14, out.get("subCommandPayloadLen").asInt());
         Assertions.assertEquals(0x3412, out.get("numberBlock").get("moduleField").asInt());
         Assertions.assertEquals(5, out.get("numberBlock").get("currentModuleNo").asInt());
@@ -241,6 +241,18 @@ public class HexProtocolParserTest {
         Assertions.assertEquals(6, out.get("dataItems").get(0).get("payloadLength").asInt());
         Assertions.assertEquals(1, out.get("dataItems").get(0).get("itemNumber").get("moduleField").asInt());
         Assertions.assertEquals("DEFA", out.get("dataItems").get(0).get("dataContentHex").asText());
+    }
+
+    @Test
+    public void validateTotalLengthU32LeMismatchThrows() {
+        TbHexProtocolParserNodeConfiguration cfg = new TbHexProtocolParserNodeConfiguration().defaultConfiguration();
+        HexProtocolDefinition def = HexProtocolExpander.expand(cfg.getProtocols().get(0), cfg.getFrameTemplates());
+        byte[] buf = new byte[10];
+        buf[0] = 0x20;
+        buf[1] = 0;
+        buf[2] = 0;
+        buf[3] = 0;
+        Assertions.assertThrows(IllegalArgumentException.class, () -> HexProtocolParser.parse(def, buf));
     }
 
     @Test

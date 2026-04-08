@@ -54,6 +54,7 @@ public final class HexProtocolExpander {
         out.setCommandByteOffset(raw.getCommandByteOffset());
         out.setCommandValue(raw.getCommandValue());
         out.setCommandMatchWidth(raw.getCommandMatchWidth());
+        out.setValidateTotalLengthU32Le(raw.getValidateTotalLengthU32Le());
 
         int min = Math.max(raw.getMinBytes(), t.getMinBytes());
         out.setMinBytes(min);

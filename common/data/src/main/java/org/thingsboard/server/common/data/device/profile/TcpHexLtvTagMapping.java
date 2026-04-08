@@ -1,0 +1,49 @@
+/**
+ * Copyright © 2016-2025 The Thingsboard Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ */
+package org.thingsboard.server.common.data.device.profile;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
+
+import java.io.Serializable;
+
+/**
+ * LTV/TLV 中某一 Tag 与遥测键、Value 解析方式的映射。
+ */
+@Data
+public class TcpHexLtvTagMapping implements Serializable {
+
+    /** Tag 的整型值（与读出的无符号/有符号一致，如 0x0A 填 10） */
+    private long tagValue;
+    private String telemetryKey;
+    private TcpHexValueType valueType;
+    /** 仅 {@link TcpHexValueType#BYTES_AS_HEX} 时使用；否则按 valueType 固定宽度从 Value 缓冲区读取 */
+    private Integer byteLength;
+    private Double scale;
+    private Long bitMask;
+
+    @JsonIgnore
+    public double getEffectiveScale() {
+        if (scale == null || scale == 0.0) {
+            return 1.0;
+        }
+        return scale;
+    }
+
+    public void validate() {
+        if (telemetryKey == null || telemetryKey.isBlank()) {
+            throw new IllegalArgumentException("LTV tag mapping telemetryKey must not be blank");
+        }
+        if (valueType == null) {
+            throw new IllegalArgumentException("LTV tag mapping valueType is required");
+        }
+        if (valueType == TcpHexValueType.BYTES_AS_HEX) {
+            if (byteLength == null || byteLength <= 0) {
+                throw new IllegalArgumentException("LTV BYTES_AS_HEX mapping requires byteLength > 0");
+            }
+        }
+    }
+}

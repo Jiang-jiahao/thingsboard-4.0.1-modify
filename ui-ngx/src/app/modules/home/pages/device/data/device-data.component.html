@@ -16,6 +16,12 @@
 
 -->
 <div [formGroup]="deviceDataFormGroup" style="padding-bottom: 16px;">
+  <div *ngIf="displayTransportConfiguration && showTcpProtocolTemplateHelp"
+       class="tb-hint mat-body-2 flex flex-col gap-1"
+       style="margin-bottom: 12px; padding: 10px 12px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);">
+    <span translate>device.protocol-template-device-panel-hint</span>
+    <a routerLink="/profiles/protocolTemplates" class="tb-link">{{ 'device-profile.tcp.protocol-template-library-link' | translate }}</a>
+  </div>
   <mat-accordion multi="true">
     <mat-expansion-panel *ngIf="displayDeviceConfiguration" [expanded]="true">
       <mat-expansion-panel-header>

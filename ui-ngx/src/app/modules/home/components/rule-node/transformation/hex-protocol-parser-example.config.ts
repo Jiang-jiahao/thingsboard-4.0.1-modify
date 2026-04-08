@@ -5,8 +5,8 @@
 ///
 
 /**
- * 与 TbHexProtocolParserNodeConfiguration.defaultConfiguration() 一致，供规则节点界面只读对照。
- * 子命令体（参数区）在 frameTemplates[].payloadFields；协议行仅命令匹配，不承载信息单元结构。
+ * 与 TbHexProtocolParserNodeConfiguration.defaultConfiguration() 一致（监控类 UDP 报文：总长/设备ID/类别/命令 UINT32 LE，
+ * 子命令体内 STRUCT+UNIT_LIST）。协议行 commandValue 为空表示匹配任意命令编号；validateTotalLengthU32Le 校验首 4 字节总长。
  */
 export const HEX_PARSER_DEFAULT_PROTOCOL_EXAMPLE = {
   frameTemplates: [
@@ -55,12 +55,12 @@ export const HEX_PARSER_DEFAULT_PROTOCOL_EXAMPLE = {
   ],
   protocols: [
     {
-      id: 'device_datagram_subcmd',
+      id: 'monitor_udp_datagram',
       templateId: 'device_datagram_frame',
       minBytes: 16,
       commandByteOffset: 12,
-      commandValue: 1,
       commandMatchWidth: 4,
+      validateTotalLengthU32Le: true,
       checksum: { type: 'NONE' },
       fields: []
     }

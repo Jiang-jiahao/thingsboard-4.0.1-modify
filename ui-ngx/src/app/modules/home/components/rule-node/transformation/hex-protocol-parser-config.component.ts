@@ -178,6 +178,7 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
       commandByteOffset: [p?.commandByteOffset ?? ''],
       commandValue: [p?.commandValue ?? ''],
       commandMatchWidth: [p?.commandMatchWidth === 4 ? 4 : 1],
+      validateTotalLengthU32Le: [p?.validateTotalLengthU32Le === true],
       useChecksum: [!!cs],
       checksumType: [cs?.type ?? 'SUM8'],
       checksumFromByte: [cs?.fromByte ?? 0],
@@ -468,13 +469,17 @@ export class HexProtocolParserConfigComponent extends RuleNodeConfigurationCompo
       }
       const cmdOff = p.commandByteOffset;
       const cmdVal = p.commandValue;
-      if (cmdOff !== '' && cmdOff != null && !isNaN(Number(cmdOff))
-          && cmdVal !== '' && cmdVal != null && !isNaN(Number(cmdVal))) {
+      if (cmdOff !== '' && cmdOff != null && !isNaN(Number(cmdOff))) {
         proto.commandByteOffset = Number(cmdOff);
+      }
+      if (cmdVal !== '' && cmdVal != null && !isNaN(Number(cmdVal))) {
         proto.commandValue = Number(cmdVal);
       }
       if (Number(p.commandMatchWidth) === 4) {
         proto.commandMatchWidth = 4;
+      }
+      if (p.validateTotalLengthU32Le === true) {
+        proto.validateTotalLengthU32Le = true;
       }
       if (p.useChecksum && p.checksumType && p.checksumType !== 'NONE') {
         proto.checksum = {

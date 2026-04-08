@@ -21,6 +21,10 @@ import java.util.List;
  * template ({@link HexFrameTemplate#getPayloadFields()}); this row adds command matching and optional
  * {@link #getFields()} for command-specific extras. Offsets in {@code fields} are relative to template
  * {@code paramStartOffset} when {@link #payloadOffsetsRelative} is true.
+ * <p>
+ * Headless frames (no {@code syncHex}): if {@link #commandValue} is {@code null}, any command dword matches
+ * (monitoring UDP datagram style: same layout for all command numbers).
+ * Optional {@link #validateTotalLengthU32Le}: first four bytes UINT32 LE must equal the buffer length (inclusive length field).
  */
 @Data
 public class HexProtocolDefinition {
@@ -36,11 +40,16 @@ public class HexProtocolDefinition {
     private int minBytes;
     /** If set with {@link #commandValue}, bytes at this index must match (see {@link #commandMatchWidth}) */
     private Integer commandByteOffset;
-    /** Expected value: single byte 0–255, or uint32 LE when {@link #commandMatchWidth} is 4 */
+    /**
+     * Expected value: single byte 0–255, or uint32 LE when {@link #commandMatchWidth} is 4.
+     * When {@code null} on a headless (no sync) definition, any command is accepted.
+     */
     private Integer commandValue;
     /** 1 (default) = compare one byte; 4 = compare uint32 LE at commandByteOffset */
     private Integer commandMatchWidth;
     private HexChecksumDefinition checksum;
     private List<HexFieldDefinition> fields;
+    /** If true, bytes 0–3 as UINT32 LE must equal {@code buf.length} (total packet size including length field). */
+    private Boolean validateTotalLengthU32Le;
 
 }

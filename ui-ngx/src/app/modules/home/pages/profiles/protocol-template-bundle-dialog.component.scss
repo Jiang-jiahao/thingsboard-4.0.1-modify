@@ -1,0 +1,18 @@
+.protocol-template-bundle-dialog-content {
+  min-width: min(920px, 92vw);
+  max-width: 100%;
+  padding-top: 4px;
+}
+
+.protocol-template-bundle-tabs {
+  ::ng-deep .mat-mdc-tab-body-content {
+    overflow: hidden;
+  }
+}
+
+.tab-scroll {
+  max-height: min(560px, calc(90vh - 220px));
+  overflow: auto;
+  padding-top: 12px;
+  min-width: 0;
+}

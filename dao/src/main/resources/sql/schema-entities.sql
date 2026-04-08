@@ -948,3 +948,13 @@ CREATE TABLE IF NOT EXISTS cf_debug_event (
     e_result varchar,
     e_error varchar
 ) PARTITION BY RANGE (ts);
+
+CREATE TABLE IF NOT EXISTS protocol_template_bundle (
+    id uuid NOT NULL CONSTRAINT protocol_template_bundle_pkey PRIMARY KEY,
+    created_time bigint NOT NULL,
+    tenant_id uuid NOT NULL,
+    name varchar(255),
+    bundle_data jsonb NOT NULL,
+    version BIGINT DEFAULT 1,
+    CONSTRAINT protocol_template_bundle_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES tenant(id) ON DELETE CASCADE
+);

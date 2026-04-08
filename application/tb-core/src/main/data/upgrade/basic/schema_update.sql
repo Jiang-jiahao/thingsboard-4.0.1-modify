@@ -93,3 +93,18 @@ WHERE
     OR (profile_data->'configuration'->>'maxDebugModeDurationMinutes')::int = 0;
 
 -- UPDATE TENANT PROFILE DEBUG DURATION END
+
+-- PROTOCOL TEMPLATE BUNDLE TABLE START
+-- 若存量库曾使用旧表名，请手工将表重命名为 protocol_template_bundle 后再升级。
+
+CREATE TABLE IF NOT EXISTS protocol_template_bundle (
+    id uuid NOT NULL CONSTRAINT protocol_template_bundle_pkey PRIMARY KEY,
+    created_time bigint NOT NULL,
+    tenant_id uuid NOT NULL,
+    name varchar(255),
+    bundle_data jsonb NOT NULL,
+    version BIGINT DEFAULT 1,
+    CONSTRAINT protocol_template_bundle_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES tenant(id) ON DELETE CASCADE
+);
+
+-- PROTOCOL TEMPLATE BUNDLE TABLE END

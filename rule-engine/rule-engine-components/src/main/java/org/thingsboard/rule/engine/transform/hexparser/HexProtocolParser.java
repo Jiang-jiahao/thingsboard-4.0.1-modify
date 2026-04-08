@@ -48,6 +48,15 @@ public final class HexProtocolParser {
         if (def.getMinBytes() > 0 && buf.length < def.getMinBytes()) {
             throw new IllegalArgumentException("Buffer too short: " + buf.length + " < " + def.getMinBytes());
         }
+        if (Boolean.TRUE.equals(def.getValidateTotalLengthU32Le())) {
+            if (buf.length < 4) {
+                throw new IllegalArgumentException("Need 4 bytes for total length field");
+            }
+            int declared = readU32LE(buf, 0);
+            if (declared != buf.length) {
+                throw new IllegalArgumentException("Packet length field " + declared + " != buffer length " + buf.length);
+            }
+        }
         if (def.getSyncHex() != null && !def.getSyncHex().isEmpty()) {
             byte[] sync = parseHexString(def.getSyncHex());
             int off = def.getSyncOffset();
@@ -706,7 +715,8 @@ public final class HexProtocolParser {
      */
     private static boolean commandMatchesHeadless(HexProtocolDefinition d, byte[] buf, List<HexFrameTemplate> templates) {
         if (d.getCommandValue() == null) {
-            return false;
+            // Same layout for every command (e.g. monitoring UDP datagram)
+            return true;
         }
         Integer cOff = resolveCommandOffset(d, templates);
         if (cOff == null) {

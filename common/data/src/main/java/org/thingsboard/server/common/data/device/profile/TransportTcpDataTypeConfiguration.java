@@ -36,7 +36,9 @@ import java.io.Serializable;
 @JsonSubTypes({
         @JsonSubTypes.Type(value = JsonTransportTcpDataConfiguration.class, name = "JSON"),
         @JsonSubTypes.Type(value = AsciiTransportTcpDataConfiguration.class, name = "ASCII"),
-        @JsonSubTypes.Type(value = HexTransportTcpDataConfiguration.class, name = "HEX")})
+        @JsonSubTypes.Type(value = HexTransportTcpDataConfiguration.class, name = "HEX"),
+        @JsonSubTypes.Type(value = ProtocolTemplateTransportTcpDataConfiguration.class, name = "PROTOCOL_TEMPLATE"),
+        @JsonSubTypes.Type(value = ProtocolTemplateTransportTcpDataConfiguration.class, name = "MONITORING_PROTOCOL")})
 public interface TransportTcpDataTypeConfiguration extends Serializable {
 
     @JsonIgnore

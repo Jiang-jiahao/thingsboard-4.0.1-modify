@@ -1,0 +1,73 @@
+:host {
+  display: block;
+  position: relative;
+  min-width: 0;
+}
+
+h2[mat-dialog-title] {
+  padding-right: 40px;
+}
+
+.tb-dialog-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+}
+
+.tb-protocol-hex-test-dialog-content {
+  max-height: 72vh;
+  overflow: auto;
+  padding-top: 4px;
+}
+
+.tb-protocol-hex-test-intro {
+  margin-bottom: 12px;
+}
+
+.tb-protocol-hex-test-bundle-field {
+  max-width: 100%;
+}
+
+.tb-protocol-hex-test-accordion {
+  margin-top: 8px;
+}
+
+.tb-protocol-hex-test-actions {
+  margin: 8px 0 12px;
+}
+
+.tb-protocol-hex-test-result {
+  margin-top: 12px;
+}
+
+.tb-protocol-hex-test-pre {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+.tb-error-text {
+  color: var(--mdc-theme-error, #f44336);
+  margin-top: 8px;
+}
+
+.text-muted {
+  opacity: 0.6;
+}
+
+.button-spinner {
+  vertical-align: middle;
+  margin-right: 4px;
+  animation: tb-protocol-hex-spin 1.2s linear infinite;
+}
+
+@keyframes tb-protocol-hex-spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}

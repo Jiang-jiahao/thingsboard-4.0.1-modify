@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.device.profile.TcpJsonWithoutMethodMode;
 import org.thingsboard.server.common.adaptor.JsonConverter;
 import org.thingsboard.server.common.data.DeviceTransportType;
+import org.thingsboard.server.common.data.TransportTcpDataType;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.transport.TransportServiceCallback;
@@ -30,9 +31,11 @@ import org.thingsboard.server.common.transport.auth.ValidateDeviceCredentialsRes
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.queue.util.TbTcpTransportComponent;
 import org.thingsboard.server.transport.tcp.session.TcpDeviceSession;
+import org.thingsboard.server.transport.tcp.util.TcpHexProtocolParser;
 import org.thingsboard.server.transport.tcp.util.TcpPayloadUtil;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 @TbTcpTransportComponent
@@ -87,6 +90,21 @@ public class TcpMessageProcessor {
         if (!session.isCoreSessionReady()) {
             log.warn("[{}] Session not ready", session.getSessionId());
             return;
+        }
+        if (session.getPayloadDataType() == TransportTcpDataType.HEX
+                || session.getPayloadDataType() == TransportTcpDataType.PROTOCOL_TEMPLATE) {
+            var hexCfg = session.getHexTcpDataConfiguration();
+            var parsedOpt = hexCfg != null
+                    ? TcpHexProtocolParser.tryParseTelemetryFromHexPayload(
+                    payload, hexCfg.getHexCommandProfiles(), hexCfg.getHexProtocolFields(),
+                    hexCfg.getHexLtvRepeating(), hexCfg.getValidateTotalLengthU32Le(), hexCfg.getChecksum(),
+                    session.getSessionId())
+                    : Optional.<JsonObject>empty();
+            if (parsedOpt.isPresent()) {
+                transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(parsedOpt.get()),
+                        TransportServiceCallback.EMPTY);
+                return;
+            }
         }
         if (session.getTcpJsonWithoutMethodMode() == TcpJsonWithoutMethodMode.OPAQUE_FOR_RULE_ENGINE) {
             JsonObject wrap = new JsonObject();

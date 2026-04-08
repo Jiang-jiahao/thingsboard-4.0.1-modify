@@ -85,6 +85,8 @@ import { DeviceProfileAutocompleteComponent } from '@home/components/profile/dev
 import { MqttDeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/mqtt-device-profile-transport-configuration.component';
 import { CoapDeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/coap-device-profile-transport-configuration.component';
 import { TcpDeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/tcp-device-profile-transport-configuration.component';
+import { ProtocolTemplateTcpDataConfigurationComponent } from '@home/components/profile/device/protocol-template-tcp-data-configuration.component';
+import { ProtocolTemplateBundleEditorComponent } from '@home/components/profile/device/protocol-template-bundle-editor.component';
 import { DeviceProfileAlarmsComponent } from '@home/components/profile/alarm/device-profile-alarms.component';
 import { DeviceProfileAlarmComponent } from '@home/components/profile/alarm/device-profile-alarm.component';
 import { CreateAlarmRulesComponent } from '@home/components/profile/alarm/create-alarm-rules.component';
@@ -285,6 +287,8 @@ import {
       CoapDeviceProfileTransportConfigurationComponent,
       DeviceProfileTransportConfigurationComponent,
       TcpDeviceProfileTransportConfigurationComponent,
+      ProtocolTemplateTcpDataConfigurationComponent,
+      ProtocolTemplateBundleEditorComponent,
       CreateAlarmRulesComponent,
       AlarmRuleComponent,
       AlarmRuleConditionDialogComponent,
@@ -430,7 +434,8 @@ import {
     MqttDeviceProfileTransportConfigurationComponent,
     CoapDeviceProfileTransportConfigurationComponent,
     TcpDeviceProfileTransportConfigurationComponent,
-    TcpDeviceProfileTransportConfigurationComponent,
+    ProtocolTemplateTcpDataConfigurationComponent,
+    ProtocolTemplateBundleEditorComponent,
     DeviceProfileTransportConfigurationComponent,
     CreateAlarmRulesComponent,
     AlarmRuleComponent,

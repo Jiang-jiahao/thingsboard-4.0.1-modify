@@ -48,13 +48,14 @@ public final class TcpPayloadUtil {
     public static String decodePayloadLine(TransportTcpDataType type, String line) {
         String trimmed = line.trim();
         if (trimmed.isEmpty()) {
-            if (type == TransportTcpDataType.HEX) {
+            if (type == TransportTcpDataType.HEX || type == TransportTcpDataType.PROTOCOL_TEMPLATE) {
                 return jsonFromRawFrameAsHex(new byte[0]);
             }
             return "";
         }
         switch (type) {
             case HEX:
+            case PROTOCOL_TEMPLATE:
                 return jsonFromRawFrameAsHex(trimmed.getBytes(StandardCharsets.UTF_8));
             case ASCII:
             case JSON:
@@ -66,6 +67,7 @@ public final class TcpPayloadUtil {
     public static String encodePayloadLine(TransportTcpDataType type, String jsonUtf8) {
         switch (type) {
             case HEX:
+            case PROTOCOL_TEMPLATE:
                 return HexFormat.of().formatHex(bodyBytesForDataType(TransportTcpDataType.HEX, jsonUtf8)) + "\n";
             case ASCII:
             case JSON:
@@ -81,13 +83,14 @@ public final class TcpPayloadUtil {
      */
     public static String decodePayloadBytes(TransportTcpDataType type, byte[] frameBody) {
         if (frameBody == null || frameBody.length == 0) {
-            if (type == TransportTcpDataType.HEX) {
+            if (type == TransportTcpDataType.HEX || type == TransportTcpDataType.PROTOCOL_TEMPLATE) {
                 return jsonFromRawFrameAsHex(new byte[0]);
             }
             return "";
         }
         switch (type) {
             case HEX:
+            case PROTOCOL_TEMPLATE:
                 return jsonFromRawFrameAsHex(frameBody);
             case ASCII:
             case JSON:
@@ -102,6 +105,7 @@ public final class TcpPayloadUtil {
     public static byte[] bodyBytesForDataType(TransportTcpDataType dataType, String jsonUtf8) {
         switch (dataType) {
             case HEX:
+            case PROTOCOL_TEMPLATE:
                 return rawBytesFromJsonHexDownlink(jsonUtf8);
             case ASCII:
             case JSON:
