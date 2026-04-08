@@ -10,6 +10,7 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 在某一帧模板下，按命令字配置上行/下行及可选字段覆盖。
@@ -50,6 +51,15 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
      * 非空时覆盖模板中的 hexLtvRepeating。
      */
     private TcpHexLtvRepeatingConfig ltvRepeating;
+    /**
+     * 为 true 且方向为下行/双向时：下行组帧将 {@link #downlinkPayloadLengthFieldKey} 指明的整型字段写为参长，
+     * 值为命令覆盖字段中 {@link TcpHexFieldDefinition#getIncludeInDownlinkPayloadLength()} 为 true 的各字段在合并结果中的<strong>字节宽度之和</strong>（须在合并结果中存在）。
+     */
+    private Boolean downlinkPayloadLengthAuto;
+    /**
+     * 作为参长写入的遥测键名，须与模板+命令合并后的某整型字段 key 一致。
+     */
+    private String downlinkPayloadLengthFieldKey;
 
     public void validate() {
         if (templateId == null || templateId.isBlank()) {
@@ -82,6 +92,34 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
             }
             if (secondaryMatchValue == null) {
                 throw new IllegalArgumentException("protocol template command secondaryMatchValue is required when secondaryMatchByteOffset is set");
+            }
+        }
+        if (Boolean.TRUE.equals(downlinkPayloadLengthAuto)) {
+            if (direction != ProtocolTemplateCommandDirection.DOWNLINK && direction != ProtocolTemplateCommandDirection.BOTH) {
+                throw new IllegalArgumentException("downlinkPayloadLengthAuto requires DOWNLINK or BOTH direction");
+            }
+            if (downlinkPayloadLengthFieldKey == null || downlinkPayloadLengthFieldKey.isBlank()) {
+                throw new IllegalArgumentException("downlinkPayloadLengthFieldKey is required when downlinkPayloadLengthAuto is true");
+            }
+            boolean anyContributor = false;
+            if (fields != null) {
+                for (TcpHexFieldDefinition f : fields) {
+                    if (f != null && Boolean.TRUE.equals(f.getIncludeInDownlinkPayloadLength())) {
+                        anyContributor = true;
+                        break;
+                    }
+                }
+            }
+            if (!anyContributor) {
+                throw new IllegalArgumentException(
+                        "downlinkPayloadLengthAuto requires at least one command field with includeInDownlinkPayloadLength");
+            }
+            String lk = downlinkPayloadLengthFieldKey.trim();
+            for (TcpHexFieldDefinition f : fields != null ? fields : List.<TcpHexFieldDefinition>of()) {
+                if (f != null && Boolean.TRUE.equals(f.getIncludeInDownlinkPayloadLength())
+                        && f.getKey() != null && Objects.equals(f.getKey().trim(), lk)) {
+                    throw new IllegalArgumentException("length field key must not be included in payload length contributors");
+                }
             }
         }
     }

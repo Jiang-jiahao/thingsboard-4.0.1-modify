@@ -23,10 +23,12 @@ import org.thingsboard.server.transport.tcp.util.TcpHexProtocolParser;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -133,6 +135,7 @@ public class ProtocolTemplateHexBuildService {
             return out;
         }
         int cmdOff = tpl.getCommandByteOffset() != null ? tpl.getCommandByteOffset() : 12;
+        int cmdW = integralTypeWidth(matchVt);
 
         TcpHexChecksumDefinition checksum = tpl.getChecksum();
         boolean validateLen = Boolean.TRUE.equals(tpl.getValidateTotalLengthU32Le());
@@ -148,15 +151,27 @@ public class ProtocolTemplateHexBuildService {
         byte[] buf = new byte[frameLen];
         Map<String, Object> values = request.getValues() != null ? request.getValues() : Map.of();
 
+        boolean cmdLenAuto = commandLevelDownlinkPayloadLengthAuto(cmd);
         try {
             for (TcpHexFieldDefinition f : merged) {
                 if (f == null) {
                     continue;
                 }
                 f.validate();
+                if (cmdLenAuto && cmd.getDownlinkPayloadLengthFieldKey() != null
+                        && cmd.getDownlinkPayloadLengthFieldKey().trim().equals(f.getKey())) {
+                    continue;
+                }
+                if (writesAutoDownlinkPayloadLength(f)) {
+                    continue;
+                }
+                if (fieldOverlapsCommandSpan(f, cmdOff, cmdW)) {
+                    continue;
+                }
                 writeFieldFromValues(buf, f, values);
             }
-            if (cmd.getSecondaryMatchByteOffset() != null) {
+            if (cmd.getDirection() != ProtocolTemplateCommandDirection.DOWNLINK
+                    && cmd.getSecondaryMatchByteOffset() != null) {
                 TcpHexValueType st = cmd.getSecondaryMatchValueType() != null
                         ? cmd.getSecondaryMatchValueType()
                         : TcpHexValueType.UINT8;
@@ -178,6 +193,7 @@ public class ProtocolTemplateHexBuildService {
                 TcpHexProtocolParser.writeIntegralAt(buf, secOff, st, sec);
             }
             TcpHexProtocolParser.writeIntegralAt(buf, cmdOff, matchVt, cmd.getCommandValue());
+            writeAutoDownlinkPayloadLengthFields(buf, merged, cmd, cmdOff, cmdW);
             if (validateLen) {
                 if (buf.length < 4) {
                     throw new IllegalArgumentException("frame too short for validateTotalLengthU32Le");
@@ -239,6 +255,228 @@ public class ProtocolTemplateHexBuildService {
             case UINT16_BE, UINT16_LE, INT16_BE, INT16_LE -> 2;
             case UINT32_BE, UINT32_LE, INT32_BE, INT32_LE -> 4;
             default -> throw new IllegalArgumentException("not an integral width: " + vt);
+        };
+    }
+
+    private static boolean fieldOverlapsCommandSpan(TcpHexFieldDefinition f, int cmdOff, int cmdW) {
+        int fw = fieldWidthForBuild(f);
+        return spansOverlap(f.getByteOffset(), fw, cmdOff, cmdW);
+    }
+
+    /** 与 {@link ProtocolTemplateTransportTcpDataConfiguration#hexFieldSpansOverlap} 区间规则一致。 */
+    private static boolean spansOverlap(int a0, int aLen, int b0, int bLen) {
+        if (aLen <= 0 || bLen <= 0) {
+            return a0 == b0;
+        }
+        int a1 = a0 + aLen;
+        int b1 = b0 + bLen;
+        return a0 < b1 && b0 < a1;
+    }
+
+    /** 本字段在下行组帧时由系统写入参长（非 JSON）。 */
+    private static boolean writesAutoDownlinkPayloadLength(TcpHexFieldDefinition f) {
+        if (f == null) {
+            return false;
+        }
+        if (f.hasDownlinkPayloadLengthMemberKeys()) {
+            return true;
+        }
+        return Boolean.TRUE.equals(f.getAutoDownlinkPayloadLength());
+    }
+
+    private static boolean commandLevelDownlinkPayloadLengthAuto(ProtocolTemplateCommandDefinition cmd) {
+        if (cmd == null || !Boolean.TRUE.equals(cmd.getDownlinkPayloadLengthAuto())) {
+            return false;
+        }
+        if (cmd.getDirection() != ProtocolTemplateCommandDirection.DOWNLINK
+                && cmd.getDirection() != ProtocolTemplateCommandDirection.BOTH) {
+            return false;
+        }
+        return cmd.getDownlinkPayloadLengthFieldKey() != null && !cmd.getDownlinkPayloadLengthFieldKey().isBlank();
+    }
+
+    private static Set<String> contributorKeysFromCommandFields(ProtocolTemplateCommandDefinition cmd) {
+        Set<String> s = new HashSet<>();
+        if (cmd.getFields() == null) {
+            return s;
+        }
+        for (TcpHexFieldDefinition f : cmd.getFields()) {
+            if (f != null && Boolean.TRUE.equals(f.getIncludeInDownlinkPayloadLength()) && f.getKey() != null) {
+                String k = f.getKey().trim();
+                if (!k.isEmpty()) {
+                    s.add(k);
+                }
+            }
+        }
+        return s;
+    }
+
+    private static void writeCommandLevelDownlinkPayloadLength(byte[] buf, List<TcpHexFieldDefinition> merged,
+                                                                 ProtocolTemplateCommandDefinition cmd) {
+        cmd.validate();
+        String lenKey = cmd.getDownlinkPayloadLengthFieldKey().trim();
+        TcpHexFieldDefinition lengthField = null;
+        for (TcpHexFieldDefinition m : merged) {
+            if (m != null && lenKey.equals(m.getKey())) {
+                lengthField = m;
+                break;
+            }
+        }
+        if (lengthField == null) {
+            throw new IllegalArgumentException("downlinkPayloadLengthFieldKey: no merged field \"" + lenKey + "\"");
+        }
+        lengthField.validate();
+        if (lengthField.getValueType() == null || lengthField.getValueType().isBytesAsHex()
+                || !TcpHexCommandProfile.isIntegralMatchType(lengthField.getValueType())) {
+            throw new IllegalArgumentException("Length field [" + lenKey + "] must use an integral valueType");
+        }
+        Set<String> want = contributorKeysFromCommandFields(cmd);
+        for (String wk : want) {
+            boolean found = false;
+            for (TcpHexFieldDefinition g : merged) {
+                if (g != null && wk.equals(g.getKey())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new IllegalArgumentException("includeInDownlinkPayloadLength: merged field not found for key \"" + wk + "\"");
+            }
+        }
+        long len = 0;
+        for (TcpHexFieldDefinition g : merged) {
+            if (g == null || lenKey.equals(g.getKey())) {
+                continue;
+            }
+            if (writesAutoDownlinkPayloadLength(g)) {
+                continue;
+            }
+            if (!want.contains(g.getKey())) {
+                continue;
+            }
+            len += fieldWidthForBuild(g);
+        }
+        long maxWire = maxUnsignedIntegralForType(lengthField.getValueType());
+        if (len < 0 || len > maxWire) {
+            throw new IllegalArgumentException(
+                    "Field [" + lenKey + "]: auto payload length " + len + " out of range for " + lengthField.getValueType());
+        }
+        TcpHexProtocolParser.writeIntegralAt(buf, lengthField.getByteOffset(), lengthField.getValueType(), len);
+    }
+
+    private static void writeAutoDownlinkPayloadLengthFields(byte[] buf, List<TcpHexFieldDefinition> merged,
+                                                             ProtocolTemplateCommandDefinition cmd,
+                                                             int cmdOff, int cmdW) {
+        if (commandLevelDownlinkPayloadLengthAuto(cmd)) {
+            writeCommandLevelDownlinkPayloadLength(buf, merged, cmd);
+        }
+        for (TcpHexFieldDefinition f : merged) {
+            if (f == null || !writesAutoDownlinkPayloadLength(f)) {
+                continue;
+            }
+            if (commandLevelDownlinkPayloadLengthAuto(cmd) && cmd.getDownlinkPayloadLengthFieldKey() != null
+                    && cmd.getDownlinkPayloadLengthFieldKey().trim().equals(f.getKey())) {
+                continue;
+            }
+            f.validate();
+            if (f.hasDownlinkPayloadLengthMemberKeys()) {
+                validateDownlinkPayloadLengthMemberKeysResolve(merged, f);
+            }
+            int impliedStart = f.getByteOffset() + fieldWidthForBuild(f);
+            int pStart = f.getDownlinkPayloadStartByteOffset() != null ? f.getDownlinkPayloadStartByteOffset() : impliedStart;
+            if (pStart < 0 || pStart > buf.length) {
+                throw new IllegalArgumentException("Field [" + f.getKey() + "]: invalid payload start offset " + pStart);
+            }
+            Integer pEndEx = f.getDownlinkPayloadEndExclusiveByteOffset();
+            long len = computeDownlinkPayloadByteCount(merged, f, pStart, pEndEx, cmdOff, cmdW);
+            long maxWire = maxUnsignedIntegralForType(f.getValueType());
+            if (len < 0 || len > maxWire) {
+                throw new IllegalArgumentException(
+                        "Field [" + f.getKey() + "]: auto payload length " + len + " out of range for " + f.getValueType());
+            }
+            TcpHexProtocolParser.writeIntegralAt(buf, f.getByteOffset(), f.getValueType(), len);
+        }
+    }
+
+    private static void validateDownlinkPayloadLengthMemberKeysResolve(List<TcpHexFieldDefinition> merged,
+                                                                       TcpHexFieldDefinition lengthField) {
+        for (String raw : lengthField.getDownlinkPayloadLengthMemberKeys()) {
+            if (raw == null || raw.isBlank()) {
+                continue;
+            }
+            String want = raw.trim();
+            boolean found = false;
+            for (TcpHexFieldDefinition g : merged) {
+                if (g != null && want.equals(g.getKey())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new IllegalArgumentException(
+                        "Field [" + lengthField.getKey() + "]: downlinkPayloadLengthMemberKeys has no merged field \"" + want + "\"");
+            }
+        }
+    }
+
+    private static long computeDownlinkPayloadByteCount(List<TcpHexFieldDefinition> merged, TcpHexFieldDefinition lengthField,
+                                                        int payloadStart, Integer payloadEndExclusive, int cmdOff, int cmdW) {
+        if (lengthField.hasDownlinkPayloadLengthMemberKeys()) {
+            Set<String> want = new HashSet<>();
+            for (String k : lengthField.getDownlinkPayloadLengthMemberKeys()) {
+                if (k != null && !k.isBlank()) {
+                    want.add(k.trim());
+                }
+            }
+            int maxExclusive = payloadStart;
+            for (TcpHexFieldDefinition g : merged) {
+                if (g == null || g == lengthField) {
+                    continue;
+                }
+                if (writesAutoDownlinkPayloadLength(g)) {
+                    continue;
+                }
+                if (!want.contains(g.getKey())) {
+                    continue;
+                }
+                int go = g.getByteOffset();
+                if (go < payloadStart) {
+                    continue;
+                }
+                maxExclusive = Math.max(maxExclusive, go + fieldWidthForBuild(g));
+            }
+            return (long) maxExclusive - payloadStart;
+        }
+        int pEnd = payloadEndExclusive != null ? payloadEndExclusive : Integer.MAX_VALUE;
+        int maxExclusive = payloadStart;
+        for (TcpHexFieldDefinition g : merged) {
+            if (g == null || g == lengthField) {
+                continue;
+            }
+            if (writesAutoDownlinkPayloadLength(g)) {
+                continue;
+            }
+            int go = g.getByteOffset();
+            if (go < payloadStart || go >= pEnd) {
+                continue;
+            }
+            int fieldEnd = go + fieldWidthForBuild(g);
+            int cappedEnd = Math.min(fieldEnd, pEnd);
+            maxExclusive = Math.max(maxExclusive, cappedEnd);
+        }
+        if (cmdOff >= payloadStart && cmdOff < pEnd) {
+            maxExclusive = Math.max(maxExclusive, Math.min(cmdOff + cmdW, pEnd));
+        }
+        return (long) maxExclusive - payloadStart;
+    }
+
+    /** 按线格式写入的无符号上限（参长按字节计数，按无符号写入 wire）。 */
+    private static long maxUnsignedIntegralForType(TcpHexValueType vt) {
+        return switch (vt) {
+            case UINT8, INT8 -> 0xFFL;
+            case UINT16_BE, UINT16_LE, INT16_BE, INT16_LE -> 0xFFFFL;
+            case UINT32_BE, UINT32_LE, INT32_BE, INT32_LE -> 0xFFFFFFFFL;
+            default -> throw new IllegalArgumentException("unsupported integral type for auto payload length: " + vt);
         };
     }
 

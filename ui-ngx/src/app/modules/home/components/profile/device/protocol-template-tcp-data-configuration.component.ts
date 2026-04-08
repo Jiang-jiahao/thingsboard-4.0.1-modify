@@ -152,4 +152,33 @@ export class ProtocolTemplateTcpDataConfigurationComponent {
       g.patchValue({ byteLength: null }, { emitEvent: false });
     }
   }
+
+  isDownlinkOrBothForCommand(ci: number): boolean {
+    const g = this.commandsArray?.at(ci) as UntypedFormGroup;
+    const d = g?.get('direction')?.value;
+    return d === ProtocolTemplateCommandDirection.DOWNLINK || d === ProtocolTemplateCommandDirection.BOTH;
+  }
+
+  /** 可选作「长度字段」的整型 key：首帧模板 + 本命令覆盖行 */
+  downlinkLengthFieldKeyOptions(ci: number): string[] {
+    const keys = new Set<string>();
+    const addIntegral = (fg: UntypedFormGroup) => {
+      const k = String(fg.get('key')?.value ?? '').trim();
+      const vt = fg.get('valueType')?.value as TcpHexValueType;
+      if (k && this.tcpHexMatchValueTypes.includes(vt)) {
+        keys.add(k);
+      }
+    };
+    if (this.templatesArray?.length) {
+      const fa = this.getTemplateFieldsArray(0);
+      for (let i = 0; i < fa.length; i++) {
+        addIntegral(fa.at(i) as UntypedFormGroup);
+      }
+    }
+    const oa = this.getCommandOverrideFieldsArray(ci);
+    for (let i = 0; i < oa.length; i++) {
+      addIntegral(oa.at(i) as UntypedFormGroup);
+    }
+    return Array.from(keys).sort();
+  }
 }

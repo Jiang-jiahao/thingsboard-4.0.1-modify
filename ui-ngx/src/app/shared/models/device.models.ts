@@ -400,6 +400,10 @@ export interface ProtocolTemplateCommandDefinition {
    */
   fields?: TcpHexFieldDefinition[];
   ltvRepeating?: TcpHexLtvRepeatingConfig;
+  /** 下行/双向：勾选后在组帧时自动向「长度字段」写入参区字节数 */
+  downlinkPayloadLengthAuto?: boolean;
+  /** 作为参长写入的字段 key（须在模板+命令合并结果中存在，且为整型） */
+  downlinkPayloadLengthFieldKey?: string;
 }
 
 /** 租户级协议模板包（持久化于 protocol_template_bundle 表；旧版可曾存于 Tenant.additionalInfo，由后端迁移） */
@@ -443,6 +447,17 @@ export interface TcpHexFieldDefinition {
   key: string;
   byteOffset: number;
   valueType: TcpHexValueType;
+  /** 仅命令覆盖行：勾选表示该参数参与下行「自动参长」的字节统计 */
+  includeInDownlinkPayloadLength?: boolean;
+  /** @deprecated 旧版；请用命令级 downlinkPayloadLengthAuto + 勾选参与参长 */
+  downlinkPayloadLengthMemberKeys?: string[];
+  /** 参长字段上：参区从整帧该字节偏移起算；未设则从本字段结束字节之后起算 */
+  /** @deprecated 仅旧版字段级自动参长；命令级参长为勾选字段字节宽度之和，不再使用 */
+  downlinkPayloadStartByteOffset?: number;
+  /** @deprecated 旧版 */
+  autoDownlinkPayloadLength?: boolean;
+  /** @deprecated 旧版 */
+  downlinkPayloadEndExclusiveByteOffset?: number;
   /** BYTES_AS_HEX：固定字节数（与 byteLengthFromByteOffset 二选一） */
   byteLength?: number;
   /** BYTES_AS_HEX：从整帧该字节偏移处按 byteLengthFromValueType 读出长度，再截取相应字节（非「引用别名字段」） */

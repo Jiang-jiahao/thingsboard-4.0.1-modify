@@ -124,7 +124,8 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       hexFieldLengthMode: [fromFrame ? 'fromFrame' : 'fixed'],
       byteLength: [f?.byteLength ?? null, [Validators.min(1)]],
       byteLengthFromByteOffset: [f?.byteLengthFromByteOffset ?? null, [Validators.min(0)]],
-      byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required]
+      byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required],
+      includeInDownlinkPayloadLength: [!!f?.includeInDownlinkPayloadLength]
     });
   }
 
@@ -159,6 +160,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       id: [t?.id ?? '', [Validators.required, Validators.maxLength(255)]],
       commandByteOffset: [t?.commandByteOffset ?? 12, [Validators.required, Validators.min(0)]],
       commandMatchWidth: [t?.commandMatchWidth === 1 ? 1 : 4],
+      validateTotalLengthU32Le: [t?.validateTotalLengthU32Le === true],
       checksumType: [csType],
       checksumFromByte: [cs?.fromByte ?? 0],
       checksumToExclusive: [cs?.toExclusive ?? 0],
@@ -194,6 +196,8 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
         c?.secondaryMatchValue != null ? this.formatCommandValueForForm(c.secondaryMatchValue) : ''
       ],
       direction: [c?.direction ?? ProtocolTemplateCommandDirection.UPLINK, Validators.required],
+      downlinkPayloadLengthAuto: [!!c?.downlinkPayloadLengthAuto],
+      downlinkPayloadLengthFieldKey: [c?.downlinkPayloadLengthFieldKey ?? ''],
       overrideFields: overrideArr
     });
   }

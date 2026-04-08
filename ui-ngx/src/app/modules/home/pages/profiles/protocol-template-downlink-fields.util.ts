@@ -1,7 +1,11 @@
 ///
 /// Copyright © 2016-2025 The Thingsboard Authors
 ///
-import { TcpHexFieldDefinition, TcpHexValueType } from '@shared/models/device.models';
+import {
+  ProtocolTemplateCommandDefinition,
+  TcpHexFieldDefinition,
+  TcpHexValueType
+} from '@shared/models/device.models';
 
 /** 与 ProtocolTemplateTransportTcpDataConfiguration#fixedFieldByteLength 一致 */
 function fixedFieldByteLength(f: TcpHexFieldDefinition): number {
@@ -39,6 +43,37 @@ function tcpHexFixedTypeWidth(vt: TcpHexValueType): number {
       return 8;
     default:
       return 0;
+  }
+}
+
+/** 与下行组帧命令字区间 [cmdOff, cmdOff+cmdW) 是否相交 */
+export function fieldOverlapsCommandSpan(f: TcpHexFieldDefinition, cmdOff: number, cmdW: number): boolean {
+  const fw = fixedFieldByteLength(f);
+  if (fw <= 0 || cmdW <= 0) {
+    return f.byteOffset === cmdOff;
+  }
+  const f1 = f.byteOffset + fw;
+  const c1 = cmdOff + cmdW;
+  return f.byteOffset < c1 && cmdOff < f1;
+}
+
+export function tcpHexMatchValueTypeWidth(vt: TcpHexValueType | undefined): number {
+  switch (vt) {
+    case TcpHexValueType.UINT8:
+    case TcpHexValueType.INT8:
+      return 1;
+    case TcpHexValueType.UINT16_BE:
+    case TcpHexValueType.UINT16_LE:
+    case TcpHexValueType.INT16_BE:
+    case TcpHexValueType.INT16_LE:
+      return 2;
+    case TcpHexValueType.UINT32_BE:
+    case TcpHexValueType.UINT32_LE:
+    case TcpHexValueType.INT32_BE:
+    case TcpHexValueType.INT32_LE:
+      return 4;
+    default:
+      return 4;
   }
 }
 
@@ -125,14 +160,51 @@ export function defaultJsonValueForHexField(f: TcpHexFieldDefinition): unknown |
   }
 }
 
+/** 与后端下行组帧：参长由系统写入、JSON 可省略 */
+export function writesAutoDownlinkPayloadLength(
+  f: TcpHexFieldDefinition,
+  cmd?: ProtocolTemplateCommandDefinition
+): boolean {
+  if (cmd?.downlinkPayloadLengthAuto) {
+    const lk = cmd.downlinkPayloadLengthFieldKey?.trim();
+    if (lk && f.key === lk) {
+      return true;
+    }
+  }
+  if (f.downlinkPayloadLengthMemberKeys?.length) {
+    return true;
+  }
+  return f.autoDownlinkPayloadLength === true;
+}
+
+export interface DownlinkSkeletonOptions {
+  /** 模板命令字偏移 */
+  commandByteOffset: number;
+  /** 命令匹配类型宽度（与 matchValueType 一致） */
+  commandMatchValueType?: TcpHexValueType;
+  /** 当前下行命令（命令级自动参长时用于省略长度键） */
+  command?: ProtocolTemplateCommandDefinition;
+}
+
 /** 按合并后字段生成对象（按 byteOffset、key 排序，便于对照帧布局） */
-export function buildDownlinkFieldValuesSkeleton(merged: TcpHexFieldDefinition[]): Record<string, unknown> {
+export function buildDownlinkFieldValuesSkeleton(
+  merged: TcpHexFieldDefinition[],
+  opts?: DownlinkSkeletonOptions
+): Record<string, unknown> {
+  const cmdOff = opts?.commandByteOffset;
+  const cmdW = opts ? tcpHexMatchValueTypeWidth(opts.commandMatchValueType) : 4;
   const sorted = merged
     .filter(f => f && f.key && String(f.key).trim())
     .slice()
     .sort((a, b) => a.byteOffset - b.byteOffset || String(a.key).localeCompare(String(b.key)));
   const out: Record<string, unknown> = {};
   for (const f of sorted) {
+    if (writesAutoDownlinkPayloadLength(f, opts?.command)) {
+      continue;
+    }
+    if (cmdOff != null && fieldOverlapsCommandSpan(f, cmdOff, cmdW)) {
+      continue;
+    }
     const v = defaultJsonValueForHexField(f);
     if (v !== undefined) {
       out[f.key] = v;

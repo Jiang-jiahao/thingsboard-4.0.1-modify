@@ -1,8 +1,8 @@
 ///
 /// Copyright © 2016-2025 The Thingsboard Authors
 ///
-import { AfterViewInit, Component, Inject, ViewChild } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
+import { AfterViewInit, Component, Inject, QueryList, ViewChildren } from '@angular/core';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -38,8 +38,9 @@ export interface ProtocolTemplateBundleDialogData {
 })
 export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
 
-  @ViewChild(ProtocolTemplateBundleEditorComponent)
-  bundleEditor: ProtocolTemplateBundleEditorComponent;
+  /** 对话框内「帧模板 / 命令」各有一个编辑器实例，共享同一 bundleContentForm；序列化必须读父表单，不能依赖某一个子组件引用。 */
+  @ViewChildren(ProtocolTemplateBundleEditorComponent)
+  private bundleEditorRefs!: QueryList<ProtocolTemplateBundleEditorComponent>;
 
   readonly isNew: boolean;
   bundleId: string;
@@ -70,20 +71,36 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    const patch = () => {
-      if (!this.bundleEditor) {
-        return;
+    /** 仅做一次：避免切换 Tab 时第二个编辑器挂载触发 changes 再次 patch，把用户已改内容刷回打开对话框时的快照 */
+    let initialPatchDone = false;
+    const patchFromDialogData = (): boolean => {
+      if (initialPatchDone) {
+        return true;
+      }
+      const editor = this.bundleEditorRefs?.first;
+      if (!editor) {
+        return false;
       }
       const b = this.data.bundle;
       if (b) {
-        this.bundleEditor.patchProtocolTemplatesFromModel(deepClone(b.protocolTemplates ?? b.monitoringTemplates ?? []));
-        this.bundleEditor.patchProtocolCommandsFromModel(deepClone(b.protocolCommands ?? b.monitoringCommands ?? []));
+        editor.patchProtocolTemplatesFromModel(deepClone(b.protocolTemplates ?? b.monitoringTemplates ?? []));
+        editor.patchProtocolCommandsFromModel(deepClone(b.protocolCommands ?? b.monitoringCommands ?? []));
       } else {
-        this.bundleEditor.patchProtocolTemplatesFromModel([]);
-        this.bundleEditor.patchProtocolCommandsFromModel([]);
+        editor.patchProtocolTemplatesFromModel([]);
+        editor.patchProtocolCommandsFromModel([]);
+      }
+      initialPatchDone = true;
+      return true;
+    };
+    const tryPatch = (attempt: number) => {
+      if (patchFromDialogData()) {
+        return;
+      }
+      if (attempt < 20) {
+        setTimeout(() => tryPatch(attempt + 1), 0);
       }
     };
-    setTimeout(patch, 0);
+    setTimeout(() => tryPatch(0), 0);
   }
 
   cancel(): void {
@@ -95,16 +112,21 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
     const name = String(this.bundleMetaForm.get('name')?.value ?? '').trim() || 'J3000+';
     const preset = buildHuanuoJ3000PresetBundle(name);
     this.bundleMetaForm.patchValue({ name: preset.name ?? name }, { emitEvent: false });
-    const patch = () => {
-      if (!this.bundleEditor) {
-        return;
+    const patch = (): boolean => {
+      const editor = this.bundleEditorRefs?.first;
+      if (!editor) {
+        return false;
       }
-      this.bundleEditor.patchProtocolTemplatesFromModel(deepClone(preset.protocolTemplates));
-      this.bundleEditor.patchProtocolCommandsFromModel(deepClone(preset.protocolCommands));
+      editor.patchProtocolTemplatesFromModel(deepClone(preset.protocolTemplates));
+      editor.patchProtocolCommandsFromModel(deepClone(preset.protocolCommands));
+      return true;
     };
-    patch();
-    if (!this.bundleEditor) {
-      setTimeout(patch, 0);
+    if (!patch()) {
+      setTimeout(() => {
+        if (!patch()) {
+          setTimeout(() => patch(), 0);
+        }
+      }, 0);
     }
   }
 
@@ -145,12 +167,14 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
 
   private serializeTemplates(): ProtocolTemplateDefinition[] {
     const displayName = String(this.bundleMetaForm.get('name')?.value ?? '').trim();
-    const tplRows = (this.bundleEditor?.protocolTemplatesArray?.getRawValue() ?? []) as Array<Record<string, unknown>>;
+    const tplArr = this.bundleContentForm.get('protocolTemplates') as UntypedFormArray;
+    const tplRows = (tplArr?.getRawValue() ?? []) as Array<Record<string, unknown>>;
     const row = tplRows[0];
     if (!row) {
       return [];
     }
-    const templateId = displayName || String(row['id'] ?? '').trim();
+    /** 与命令行 templateId 一致：优先表单隐藏字段 id，避免仅改展示名时与命令引用错位 */
+    const templateId = String(row['id'] ?? '').trim() || displayName;
     if (!templateId) {
       return [];
     }
@@ -160,7 +184,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
       id: templateId,
       commandByteOffset: Number(row['commandByteOffset']) ?? 12,
       commandMatchWidth: Number(row['commandMatchWidth']) === 1 ? 1 : 4,
-      validateTotalLengthU32Le: false
+      validateTotalLengthU32Le: this.isFormBooleanTrue(row['validateTotalLengthU32Le'])
     };
     const csType = String(row['checksumType'] ?? 'NONE').trim();
     if (csType && csType.toUpperCase() !== 'NONE') {
@@ -180,7 +204,8 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
 
   private serializeCommands(): ProtocolTemplateCommandDefinition[] {
     const commands: ProtocolTemplateCommandDefinition[] = [];
-    const cmdRows = (this.bundleEditor?.protocolCommandsArray?.getRawValue() ?? []) as Array<Record<string, unknown>>;
+    const cmdArr = this.bundleContentForm.get('protocolCommands') as UntypedFormArray;
+    const cmdRows = (cmdArr?.getRawValue() ?? []) as Array<Record<string, unknown>>;
     for (const row of cmdRows) {
       const tid = String(row['templateId'] ?? '').trim();
       if (!tid) {
@@ -192,15 +217,24 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
         matchValueType: row['matchValueType'] as TcpHexValueType,
         direction: row['direction'] as ProtocolTemplateCommandDirection
       };
-      const secOff = this.optionalFormNumber(row['secondaryMatchByteOffset']);
-      if (secOff !== undefined && secOff >= 0) {
-        cmd.secondaryMatchByteOffset = secOff;
-        cmd.secondaryMatchValueType = (row['secondaryMatchValueType'] as TcpHexValueType) ?? TcpHexValueType.UINT8;
-        cmd.secondaryMatchValue = this.parseCommandValue(row['secondaryMatchValue']);
+      if (cmd.direction !== ProtocolTemplateCommandDirection.DOWNLINK) {
+        const secOff = this.optionalFormNumber(row['secondaryMatchByteOffset']);
+        if (secOff !== undefined && secOff >= 0) {
+          cmd.secondaryMatchByteOffset = secOff;
+          cmd.secondaryMatchValueType = (row['secondaryMatchValueType'] as TcpHexValueType) ?? TcpHexValueType.UINT8;
+          cmd.secondaryMatchValue = this.parseCommandValue(row['secondaryMatchValue']);
+        }
       }
       const cn = String(row['name'] ?? '').trim();
       if (cn) {
         cmd.name = cn;
+      }
+      if (this.isFormBooleanTrue(row['downlinkPayloadLengthAuto'])) {
+        cmd.downlinkPayloadLengthAuto = true;
+      }
+      const lenFk = String(row['downlinkPayloadLengthFieldKey'] ?? '').trim();
+      if (lenFk) {
+        cmd.downlinkPayloadLengthFieldKey = lenFk;
       }
       const overrideRows = (row['overrideFields'] as Array<Record<string, unknown>>) ?? [];
       const overrides = this.fieldsFromHexRows(overrideRows);
@@ -239,6 +273,20 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
             }
           }
         }
+        if (this.isFormBooleanTrue(r['includeInDownlinkPayloadLength'])) {
+          def.includeInDownlinkPayloadLength = true;
+        }
+        const mks = this.parseDownlinkPayloadLengthMemberKeys(r);
+        if (mks?.length) {
+          def.downlinkPayloadLengthMemberKeys = mks;
+        }
+        if (this.isFormBooleanTrue(r['autoDownlinkPayloadLength'])) {
+          def.autoDownlinkPayloadLength = true;
+        }
+        const dpe = this.optionalFormNumber(r['downlinkPayloadEndExclusiveByteOffset']);
+        if (dpe !== undefined) {
+          def.downlinkPayloadEndExclusiveByteOffset = dpe;
+        }
         return def;
       });
   }
@@ -269,11 +317,30 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
     return Number.isFinite(n) ? Math.trunc(n) : 0;
   }
 
+  /** mat-checkbox / 部分控件在 getRawValue 中可能为 true 或非严格类型 */
+  private isFormBooleanTrue(value: unknown): boolean {
+    return value === true || value === 'true' || value === 1 || value === '1';
+  }
+
   private optionalFormNumber(value: unknown): number | undefined {
     if (value === null || value === undefined || value === '') {
       return undefined;
     }
     const n = Number(value);
     return Number.isFinite(n) ? n : undefined;
+  }
+
+  private parseDownlinkPayloadLengthMemberKeys(r: Record<string, unknown>): string[] | undefined {
+    const direct = r['downlinkPayloadLengthMemberKeys'];
+    if (Array.isArray(direct)) {
+      const out = direct.map(x => String(x).trim()).filter(Boolean);
+      return out.length ? out.slice(0, 64) : undefined;
+    }
+    const text = String(r['downlinkPayloadLengthMemberKeysText'] ?? '').trim();
+    if (!text) {
+      return undefined;
+    }
+    const parts = text.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+    return parts.length ? parts.slice(0, 64) : undefined;
   }
 }

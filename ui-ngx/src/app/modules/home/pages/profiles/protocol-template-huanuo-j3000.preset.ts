@@ -10,8 +10,10 @@
  * 字节 7（Param1）为回显原命令（对 0x21 应答则为 0x21）；字节 8–17 为 5 路功放当前状态（与下行同 2 字节/路结构）。
  * 校验和在字节 18。识别「应答哪条指令」用第二匹配：偏移 7 = 原命令码。
  *
- * 说明：协议模板里「下行」命令的字段用于组帧/对照；平台实际 RPC 下发需自行拼 HEX（或规则链）使长度=10、地址与文档一致。
- * 命令「覆盖字段」可与帧模板合并：只填与模板不同的参数段即可，与模板字节重叠的模板字段会被覆盖（后端合并）。
+ * **下行 0x21 示例（表 5-1）**：命令勾选自动参长、长度字段选 `paramLen`；各 `pa*_word` 勾选「参与参长」；
+ * 组帧时 N = 5×UINT16 = 10（各勾选字段字节宽度之和），JSON 不必填 paramLen/cmd。
+ * 其它下行命令（0x1F 等）若未覆盖 paramLen，仍用手填参长或后续在命令上增加字段/自动参长覆盖。
+ * 命令「覆盖字段」可与帧模板合并：重叠区间以命令字段为准（见 mergeTemplateAndCommandFields）。
  * 帧模板默认只含公共头（至 paramLen），**paramFirst 仅配在上行命令**；下行不从模板继承 paramFirst。
  *
  * **字段语义**：上行命令下的覆盖字段 = 从设备上报帧中**解析**出的遥测项；下行命令下的覆盖字段 = 平台下发时需**按偏移与类型填入**的参数字典（组帧契约，TCP 层不据此自动编码）。
@@ -34,15 +36,17 @@ type CmdOptions = {
   direction?: ProtocolTemplateCommandDirection;
   /** 与帧模板按字节合并；仅填本命令多出的字段即可（见后端 mergeTemplateAndCommandFields） */
   fields?: TcpHexFieldDefinition[];
+  downlinkPayloadLengthAuto?: boolean;
+  downlinkPayloadLengthFieldKey?: string;
 };
 
-/** 表 5-1：仅参数区 10 字节；与模板头 src/dst/cmd/paramLen 合并后即为完整下行语义 */
+/** 表 5-1：下行自动参长由命令勾选 + 各参数字段勾选参与（paramLen 在帧模板中已定义） */
 const FIELDS_DOWNLINK_JAM_21: TcpHexFieldDefinition[] = [
-  { key: 'pa1_word', byteOffset: 7, valueType: TcpHexValueType.UINT16_BE },
-  { key: 'pa2_word', byteOffset: 9, valueType: TcpHexValueType.UINT16_BE },
-  { key: 'pa3_word', byteOffset: 11, valueType: TcpHexValueType.UINT16_BE },
-  { key: 'pa4_word', byteOffset: 13, valueType: TcpHexValueType.UINT16_BE },
-  { key: 'pa5_word', byteOffset: 15, valueType: TcpHexValueType.UINT16_BE }
+  { key: 'pa1_word', byteOffset: 7, valueType: TcpHexValueType.UINT16_BE, includeInDownlinkPayloadLength: true },
+  { key: 'pa2_word', byteOffset: 9, valueType: TcpHexValueType.UINT16_BE, includeInDownlinkPayloadLength: true },
+  { key: 'pa3_word', byteOffset: 11, valueType: TcpHexValueType.UINT16_BE, includeInDownlinkPayloadLength: true },
+  { key: 'pa4_word', byteOffset: 13, valueType: TcpHexValueType.UINT16_BE, includeInDownlinkPayloadLength: true },
+  { key: 'pa5_word', byteOffset: 15, valueType: TcpHexValueType.UINT16_BE, includeInDownlinkPayloadLength: true }
 ];
 
 /** 仅解析参区首字节（上行通用，下行勿用） */
@@ -64,6 +68,8 @@ function cmd(name: string, commandValue: number, secondaryEchoOrOpts?: number | 
   let secondaryEcho: number | undefined;
   let direction = ProtocolTemplateCommandDirection.UPLINK;
   let fields: TcpHexFieldDefinition[] | undefined;
+  let downlinkPayloadLengthAuto: boolean | undefined;
+  let downlinkPayloadLengthFieldKey: string | undefined;
   if (secondaryEchoOrOpts !== undefined && typeof secondaryEchoOrOpts === 'object') {
     secondaryEcho = secondaryEchoOrOpts.secondaryEcho;
     if (secondaryEchoOrOpts.direction != null) {
@@ -71,6 +77,13 @@ function cmd(name: string, commandValue: number, secondaryEchoOrOpts?: number | 
     }
     if (secondaryEchoOrOpts.fields?.length) {
       fields = secondaryEchoOrOpts.fields;
+    }
+    if (secondaryEchoOrOpts.downlinkPayloadLengthAuto) {
+      downlinkPayloadLengthAuto = true;
+      const fk = String(secondaryEchoOrOpts.downlinkPayloadLengthFieldKey ?? '').trim();
+      if (fk) {
+        downlinkPayloadLengthFieldKey = fk;
+      }
     }
   } else if (typeof secondaryEchoOrOpts === 'number') {
     secondaryEcho = secondaryEchoOrOpts;
@@ -90,6 +103,12 @@ function cmd(name: string, commandValue: number, secondaryEchoOrOpts?: number | 
   }
   if (fields?.length) {
     c.fields = fields;
+  }
+  if (downlinkPayloadLengthAuto) {
+    c.downlinkPayloadLengthAuto = true;
+    if (downlinkPayloadLengthFieldKey) {
+      c.downlinkPayloadLengthFieldKey = downlinkPayloadLengthFieldKey;
+    }
   }
   return c;
 }
@@ -120,6 +139,8 @@ export function buildHuanuoJ3000PresetBundle(displayName: string): ProtocolTempl
     // 下行（平台→设备）：表 5-1 参数占位；组帧时 pa*_word 按位填 bit0~3（见表 5-2）
     cmd('下发 干扰启停 0x21', 0x21, {
       direction: ProtocolTemplateCommandDirection.DOWNLINK,
+      downlinkPayloadLengthAuto: true,
+      downlinkPayloadLengthFieldKey: 'paramLen',
       fields: FIELDS_DOWNLINK_JAM_21
     }),
     cmd('下发 干扰参数配置 0x1F', 0x1f, { direction: ProtocolTemplateCommandDirection.DOWNLINK }),

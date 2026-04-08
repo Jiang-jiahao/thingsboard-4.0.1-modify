@@ -17,6 +17,11 @@
          [formGroup]="asFormGroup(templatesArray.at(0))">
       <input type="hidden" formControlName="id">
 
+      <mat-checkbox *ngIf="layoutMode === 'full' || layoutMode === 'templatesOnly'"
+                    formControlName="validateTotalLengthU32Le" color="primary" class="mat-block">
+        <span class="mat-caption" translate>device-profile.tcp.protocol-template-validate-total-len</span>
+      </mat-checkbox>
+
       <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.tcp.protocol-template-default-fields-title</div>
       <div class="tb-hint mat-body-2 protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-variable-payload-hint</div>
       <div formArrayName="hexProtocolFields" class="flex flex-col gap-3">
@@ -268,25 +273,43 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <div class="mat-body-2" translate>device-profile.tcp.protocol-template-secondary-title</div>
-            <div class="flex flex-row flex-wrap gap-2 items-start">
-              <mat-form-field style="width: 110px;" subscriptSizing="dynamic">
-                <mat-label translate>device-profile.tcp.protocol-template-secondary-offset</mat-label>
-                <input matInput type="number" min="0" formControlName="secondaryMatchByteOffset">
-              </mat-form-field>
-              <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
-                <mat-label translate>device-profile.tcp.protocol-template-secondary-type</mat-label>
-                <mat-select formControlName="secondaryMatchValueType">
-                  <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+            <ng-container *ngIf="asFormGroup(cCtrl).get('direction')?.value !== ProtocolTemplateCommandDirection.DOWNLINK">
+              <div class="mat-body-2" translate>device-profile.tcp.protocol-template-secondary-title</div>
+              <div class="flex flex-row flex-wrap gap-2 items-start">
+                <mat-form-field style="width: 110px;" subscriptSizing="dynamic">
+                  <mat-label translate>device-profile.tcp.protocol-template-secondary-offset</mat-label>
+                  <input matInput type="number" min="0" formControlName="secondaryMatchByteOffset">
+                </mat-form-field>
+                <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
+                  <mat-label translate>device-profile.tcp.protocol-template-secondary-type</mat-label>
+                  <mat-select formControlName="secondaryMatchValueType">
+                    <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field class="protocol-template-cmd-value-field" subscriptSizing="dynamic">
+                  <mat-label translate>device-profile.tcp.protocol-template-secondary-value</mat-label>
+                  <input matInput type="text" formControlName="secondaryMatchValue" autocomplete="off"
+                         [placeholder]="'device-profile.tcp.protocol-template-cmd-value-placeholder' | translate">
+                </mat-form-field>
+              </div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-secondary-hint</div>
+            </ng-container>
+            <div *ngIf="asFormGroup(cCtrl).get('direction')?.value === ProtocolTemplateCommandDirection.DOWNLINK"
+                 class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-secondary-hidden-downlink</div>
+            <div *ngIf="isDownlinkOrBothForCommand(ci)" class="flex flex-col gap-2 protocol-template-downlink-len-auto">
+              <mat-checkbox formControlName="downlinkPayloadLengthAuto" color="primary">
+                <span class="mat-caption" translate>device-profile.tcp.protocol-template-downlink-len-auto</span>
+              </mat-checkbox>
+              <mat-form-field *ngIf="asFormGroup(cCtrl).get('downlinkPayloadLengthAuto')?.value"
+                              class="flex-1" style="max-width: 360px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.tcp.protocol-template-downlink-len-field</mat-label>
+                <mat-select formControlName="downlinkPayloadLengthFieldKey">
+                  <mat-option value="">{{ 'device-profile.tcp.protocol-template-downlink-len-field-empty' | translate }}</mat-option>
+                  <mat-option *ngFor="let k of downlinkLengthFieldKeyOptions(ci)" [value]="k">{{ k }}</mat-option>
                 </mat-select>
-              </mat-form-field>
-              <mat-form-field class="protocol-template-cmd-value-field" subscriptSizing="dynamic">
-                <mat-label translate>device-profile.tcp.protocol-template-secondary-value</mat-label>
-                <input matInput type="text" formControlName="secondaryMatchValue" autocomplete="off"
-                       [placeholder]="'device-profile.tcp.protocol-template-cmd-value-placeholder' | translate">
+                <mat-hint translate>device-profile.tcp.protocol-template-downlink-len-field-hint</mat-hint>
               </mat-form-field>
             </div>
-            <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-secondary-hint</div>
             <div *ngIf="singleTemplateMode" class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-template-single-hint</div>
             <div *ngIf="!singleTemplateMode" class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-template-hint</div>
           </div>
@@ -322,6 +345,9 @@
                   <mat-option *ngFor="let t of tcpHexValueTypes" [value]="t">{{ t }}</mat-option>
                 </mat-select>
               </mat-form-field>
+              <mat-checkbox *ngIf="isDownlinkOrBothForCommand(ci)" formControlName="includeInDownlinkPayloadLength" color="primary" class="self-center">
+                <span class="mat-caption" translate>device-profile.tcp.hex-field-include-downlink-payload-len</span>
+              </mat-checkbox>
               <ng-container *ngIf="isBytesAsHexOverride(ci, fi)">
                 <mat-form-field class="flex-1" style="min-width: 200px;" subscriptSizing="dynamic">
                   <mat-label translate>device-profile.tcp.hex-field-length-mode</mat-label>

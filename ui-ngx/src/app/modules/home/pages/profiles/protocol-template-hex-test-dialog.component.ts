@@ -15,7 +15,8 @@ import { TranslateService } from '@ngx-translate/core';
 import {
   ProtocolTemplateBundle,
   ProtocolTemplateCommandDefinition,
-  ProtocolTemplateCommandDirection
+  ProtocolTemplateCommandDirection,
+  TcpHexValueType
 } from '@shared/models/device.models';
 import {
   buildDownlinkFieldValuesSkeleton,
@@ -103,7 +104,12 @@ export class ProtocolTemplateHexTestDialogComponent {
       return;
     }
     const merged = mergeTemplateAndCommandFields(tpl.hexProtocolFields, cmd.fields);
-    const skeleton = buildDownlinkFieldValuesSkeleton(merged);
+    const cmdOff = tpl.commandByteOffset ?? 12;
+    const skeleton = buildDownlinkFieldValuesSkeleton(merged, {
+      commandByteOffset: cmdOff,
+      commandMatchValueType: cmd.matchValueType ?? TcpHexValueType.UINT32_LE,
+      command: cmd
+    });
     this.hexTestBuildValuesJson = Object.keys(skeleton).length
       ? JSON.stringify(skeleton, null, 2)
       : '{}';
