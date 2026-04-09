@@ -73,6 +73,46 @@ class TcpHexProtocolParserTest {
     }
 
     @Test
+    void fixedIntegralMatchEmitsTelemetry() {
+        var payload = JsonParser.parseString("{\"hex\":\"a5\"}");
+        TcpHexFieldDefinition a = new TcpHexFieldDefinition();
+        a.setKey("h");
+        a.setByteOffset(0);
+        a.setValueType(TcpHexValueType.UINT8);
+        a.setFixedWireIntegralValue(165L);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("h").getAsInt()).isEqualTo(165);
+    }
+
+    @Test
+    void fixedIntegralMismatchSkipsField() {
+        var payload = JsonParser.parseString("{\"hex\":\"00\"}");
+        TcpHexFieldDefinition a = new TcpHexFieldDefinition();
+        a.setKey("h");
+        a.setByteOffset(0);
+        a.setValueType(TcpHexValueType.UINT8);
+        a.setFixedWireIntegralValue(165L);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().has("h")).isFalse();
+    }
+
+    @Test
+    void fixedBytesHexMatchEmitsTelemetry() {
+        var payload = JsonParser.parseString("{\"hex\":\"a55a\"}");
+        TcpHexFieldDefinition a = new TcpHexFieldDefinition();
+        a.setKey("magic");
+        a.setByteOffset(0);
+        a.setValueType(TcpHexValueType.BYTES_AS_HEX);
+        a.setByteLength(2);
+        a.setFixedBytesHex("A55A");
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("magic").getAsString()).isEqualTo("a55a");
+    }
+
+    @Test
     void commandProfileMatchesBeforeDefaultFields() {
         String hex = "a55a10a0a4ff";
         var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");

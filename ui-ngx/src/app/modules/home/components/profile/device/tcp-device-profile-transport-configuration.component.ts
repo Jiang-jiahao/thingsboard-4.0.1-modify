@@ -368,7 +368,13 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       hexFieldLengthMode: [fromFrame ? 'fromFrame' : 'fixed'],
       byteLength: [f?.byteLength ?? null, [Validators.min(1)]],
       byteLengthFromByteOffset: [f?.byteLengthFromByteOffset ?? null, [Validators.min(0)]],
-      byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required]
+      byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required],
+      fixedWireIntegralValueText: [
+        f?.fixedWireIntegralValue != null && Number.isFinite(Number(f.fixedWireIntegralValue))
+          ? String(Math.trunc(Number(f.fixedWireIntegralValue)))
+          : ''
+      ],
+      fixedBytesHex: [f?.fixedBytesHex ?? '']
     });
   }
 
@@ -961,8 +967,33 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
             }
           }
         }
+        const fixInt = this.parseOptionalIntegralWireText(r['fixedWireIntegralValueText']);
+        if (fixInt !== undefined) {
+          def.fixedWireIntegralValue = fixInt;
+        }
+        const fixHex = String(r['fixedBytesHex'] ?? '').replace(/\s+/g, '');
+        if (fixHex) {
+          def.fixedBytesHex = fixHex;
+        }
         return def;
       });
+  }
+
+  private parseOptionalIntegralWireText(raw: unknown): number | undefined {
+    const s = String(raw ?? '').trim();
+    if (!s) {
+      return undefined;
+    }
+    if (/^0x[0-9a-fA-F]+$/i.test(s)) {
+      const n = parseInt(s.slice(2), 16);
+      return Number.isFinite(n) ? n : undefined;
+    }
+    if (/^[0-9a-fA-F]+$/.test(s) && /[a-f]/i.test(s)) {
+      const n = parseInt(s, 16);
+      return Number.isFinite(n) ? n : undefined;
+    }
+    const n = Number(s);
+    return Number.isFinite(n) ? Math.trunc(n) : undefined;
   }
 
   validate(): ValidationErrors | null {

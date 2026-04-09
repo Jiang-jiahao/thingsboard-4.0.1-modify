@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HexFormat;
 import java.util.List;
 
 /**
@@ -50,6 +51,16 @@ public class TcpHexFieldDefinition implements Serializable {
      * @deprecated 旧版区间结束。
      */
     private Integer downlinkPayloadEndExclusiveByteOffset;
+    /**
+     * 非空且 {@link #valueType} 为整型时：上行解析要求线型整数码与该值一致（经与 {@code writeIntegralAt}/{@code readIntegralAt} 相同的宽度/端序归一化后比较）；
+     * 下行组帧直接写入该线型值，调用方 JSON 可省略此键（与 scale 无关，即为线上原始整数码，如 UINT8 的 0xA5 填 165）。
+     */
+    private Long fixedWireIntegralValue;
+    /**
+     * 非空且 {@link #valueType} 为 {@link TcpHexValueType#BYTES_AS_HEX}（固定 {@link #byteLength}）时：上行要求该段原始字节与解析后的 hex 完全一致（忽略空白、大小写）；
+     * 下行组帧直接写入该 hex，JSON 可省略此键。
+     */
+    private String fixedBytesHex;
 
     @JsonIgnore
     public double getEffectiveScale() {
@@ -126,6 +137,35 @@ public class TcpHexFieldDefinition implements Serializable {
                     throw new IllegalArgumentException(
                             "downlinkPayloadEndExclusiveByteOffset must be greater than effective payload start (" + start + ")");
                 }
+            }
+        }
+        if (fixedWireIntegralValue != null && fixedBytesHex != null && !fixedBytesHex.isBlank()) {
+            throw new IllegalArgumentException("TCP hex field cannot set both fixedWireIntegralValue and fixedBytesHex");
+        }
+        if (fixedWireIntegralValue != null) {
+            if (valueType == null || valueType.isBytesAsHex() || !TcpHexCommandProfile.isIntegralMatchType(valueType)) {
+                throw new IllegalArgumentException("fixedWireIntegralValue requires an integral valueType (not BYTES_AS_HEX/float/double)");
+            }
+        }
+        if (fixedBytesHex != null && !fixedBytesHex.isBlank()) {
+            if (valueType == null || !valueType.isBytesAsHex()) {
+                throw new IllegalArgumentException("fixedBytesHex requires BYTES_AS_HEX valueType");
+            }
+            if (byteLength == null || byteLength <= 0) {
+                throw new IllegalArgumentException("fixedBytesHex requires fixed byteLength > 0 on BYTES_AS_HEX");
+            }
+            String clean = fixedBytesHex.replaceAll("\\s+", "");
+            if (clean.isEmpty() || (clean.length() & 1) == 1) {
+                throw new IllegalArgumentException("fixedBytesHex must be non-empty even-length hex");
+            }
+            try {
+                byte[] parsed = HexFormat.of().parseHex(clean);
+                if (parsed.length != byteLength) {
+                    throw new IllegalArgumentException(
+                            "fixedBytesHex decodes to " + parsed.length + " bytes but byteLength is " + byteLength);
+                }
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("fixedBytesHex: invalid hex: " + e.getMessage());
             }
         }
     }

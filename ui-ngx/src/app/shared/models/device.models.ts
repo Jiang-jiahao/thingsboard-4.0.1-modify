@@ -468,6 +468,14 @@ export interface TcpHexFieldDefinition {
   scale?: number;
   /** @deprecated UI 已移除；后端仍兼容旧配置 */
   bitMask?: number;
+  /**
+   * 整型：线型整数码（与帧内字节一致，如 UINT8 的 0xA5 为 165）。上行校验、下行自动写入，JSON 可省略。
+   */
+  fixedWireIntegralValue?: number;
+  /**
+   * BYTES_AS_HEX（固定 byteLength）：固定内容 hex 串。上行校验、下行自动写入，JSON 可省略。
+   */
+  fixedBytesHex?: string;
 }
 
 export enum TcpHexLtvChunkOrder {

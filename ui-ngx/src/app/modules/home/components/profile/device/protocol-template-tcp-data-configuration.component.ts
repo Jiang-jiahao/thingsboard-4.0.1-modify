@@ -77,6 +77,23 @@ export class ProtocolTemplateTcpDataConfigurationComponent {
     return (this.commandsArray.at(ci) as UntypedFormGroup).get('overrideFields') as UntypedFormArray;
   }
 
+  isIntegralHexValueType(vt: TcpHexValueType | null | undefined): boolean {
+    if (vt == null) {
+      return false;
+    }
+    return this.tcpHexMatchValueTypes.includes(vt);
+  }
+
+  isIntegralHexFieldTemplateRow(fi: number): boolean {
+    const g = this.getTemplateFieldsArray(0).at(fi) as UntypedFormGroup;
+    return this.isIntegralHexValueType(g.get('valueType')?.value as TcpHexValueType);
+  }
+
+  isIntegralHexFieldOverrideRow(ci: number, fi: number): boolean {
+    const g = this.getCommandOverrideFieldsArray(ci).at(fi) as UntypedFormGroup;
+    return this.isIntegralHexValueType(g.get('valueType')?.value as TcpHexValueType);
+  }
+
   isBytesAsHexTemplate(ti: number, fi: number): boolean {
     const g = this.getTemplateFieldsArray(ti).at(fi) as UntypedFormGroup;
     return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX;

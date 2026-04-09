@@ -352,6 +352,7 @@ public final class TcpHexProtocolParser {
         if (def.getByteOffset() + len > frame.length) {
             throw new IllegalArgumentException("field out of bounds: offset=" + def.getByteOffset() + " len=" + len + " frame=" + frame.length);
         }
+        validateFixedFieldWireValue(frame, def, len);
         ByteBuffer buf = ByteBuffer.wrap(frame, def.getByteOffset(), len);
         TcpHexValueType vt = def.getValueType();
         double scale = def.getEffectiveScale();
@@ -427,6 +428,36 @@ public final class TcpHexProtocolParser {
                 out.addProperty(def.getKey(), HexFormat.of().formatHex(slice));
             }
             default -> throw new IllegalArgumentException("unsupported value type: " + vt);
+        }
+    }
+
+    /**
+     * 配置了 {@link TcpHexFieldDefinition#getFixedWireIntegralValue()} 或 {@link TcpHexFieldDefinition#getFixedBytesHex()} 时，
+     * 校验帧内实际字节与固定值一致（与下行组帧写入语义对称）。
+     */
+    private static void validateFixedFieldWireValue(byte[] frame, TcpHexFieldDefinition def, int resolvedLen) {
+        if (def.getFixedWireIntegralValue() != null) {
+            TcpHexValueType vt = def.getValueType();
+            long actual = readIntegralAt(frame, def.getByteOffset(), vt);
+            byte[] tmp = new byte[8];
+            writeIntegralAt(tmp, 0, vt, def.getFixedWireIntegralValue());
+            long expected = readIntegralAt(tmp, 0, vt);
+            if (actual != expected) {
+                throw new IllegalArgumentException(
+                        "fixed integral mismatch for [" + def.getKey() + "]: wire " + actual + " expected " + expected);
+            }
+        }
+        if (def.getFixedBytesHex() != null && !def.getFixedBytesHex().isBlank()) {
+            byte[] expected = parseHexString(def.getFixedBytesHex());
+            if (expected == null || expected.length != resolvedLen) {
+                throw new IllegalArgumentException(
+                        "fixedBytesHex length mismatch for [" + def.getKey() + "]: need " + resolvedLen + " bytes");
+            }
+            for (int i = 0; i < resolvedLen; i++) {
+                if (frame[def.getByteOffset() + i] != expected[i]) {
+                    throw new IllegalArgumentException("fixed bytes mismatch for [" + def.getKey() + "]");
+                }
+            }
         }
     }
 

@@ -493,11 +493,36 @@ public class ProtocolTemplateHexBuildService {
     }
 
     private static void writeFieldFromValues(byte[] buf, TcpHexFieldDefinition f, Map<String, Object> values) {
-        Object raw = values.get(f.getKey());
         TcpHexValueType vt = f.getValueType();
         int off = f.getByteOffset();
         double scale = f.getEffectiveScale();
 
+        if (f.getFixedWireIntegralValue() != null) {
+            if (vt == null || vt.isBytesAsHex() || !TcpHexCommandProfile.isIntegralMatchType(vt)) {
+                throw new IllegalArgumentException("Field [" + f.getKey() + "]: fixedWireIntegralValue requires integral type");
+            }
+            TcpHexProtocolParser.writeIntegralAt(buf, off, vt, f.getFixedWireIntegralValue());
+            return;
+        }
+        if (f.getFixedBytesHex() != null && !f.getFixedBytesHex().isBlank()) {
+            if (vt == null || !vt.isBytesAsHex()) {
+                throw new IllegalArgumentException("Field [" + f.getKey() + "]: fixedBytesHex requires BYTES_AS_HEX");
+            }
+            int len = fieldWidthForBuild(f);
+            String clean = f.getFixedBytesHex().replaceAll("\\s+", "");
+            if (clean.isEmpty() || (clean.length() & 1) == 1) {
+                throw new IllegalArgumentException("Field [" + f.getKey() + "]: invalid fixedBytesHex");
+            }
+            byte[] parsed = HexFormat.of().parseHex(clean);
+            if (parsed.length != len) {
+                throw new IllegalArgumentException(
+                        "Field [" + f.getKey() + "]: fixedBytesHex must be " + len + " bytes");
+            }
+            System.arraycopy(parsed, 0, buf, off, len);
+            return;
+        }
+
+        Object raw = values.get(f.getKey());
         if (vt.isBytesAsHex()) {
             int len = fieldWidthForBuild(f);
             byte[] slice = new byte[len];

@@ -283,6 +283,14 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
         if (this.isFormBooleanTrue(r['autoDownlinkPayloadLength'])) {
           def.autoDownlinkPayloadLength = true;
         }
+        const fixIntTxt = String(r['fixedWireIntegralValueText'] ?? '').trim();
+        if (fixIntTxt) {
+          def.fixedWireIntegralValue = this.parseIntegralWireText(fixIntTxt);
+        }
+        const fixHex = String(r['fixedBytesHex'] ?? '').replace(/\s+/g, '');
+        if (fixHex) {
+          def.fixedBytesHex = fixHex;
+        }
         const dpe = this.optionalFormNumber(r['downlinkPayloadEndExclusiveByteOffset']);
         if (dpe !== undefined) {
           def.downlinkPayloadEndExclusiveByteOffset = dpe;
@@ -294,6 +302,15 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
   /**
    * 支持十进制、0x 前缀十六进制；纯十六进制数字串（含 A–F）按十六进制解析；纯数字串按十进制。
    */
+  /** 十进制、0x 十六进制；与 parseCommandValue 一致，结果为可放入 Java long 的整数 */
+  private parseIntegralWireText(raw: string): number {
+    const n = this.parseCommandValue(raw);
+    if (!Number.isFinite(n)) {
+      return 0;
+    }
+    return Math.trunc(n);
+  }
+
   private parseCommandValue(raw: unknown): number {
     if (raw === null || raw === undefined) {
       return 0;

@@ -125,7 +125,13 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       byteLength: [f?.byteLength ?? null, [Validators.min(1)]],
       byteLengthFromByteOffset: [f?.byteLengthFromByteOffset ?? null, [Validators.min(0)]],
       byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required],
-      includeInDownlinkPayloadLength: [!!f?.includeInDownlinkPayloadLength]
+      includeInDownlinkPayloadLength: [!!f?.includeInDownlinkPayloadLength],
+      fixedWireIntegralValueText: [
+        f?.fixedWireIntegralValue != null && Number.isFinite(Number(f.fixedWireIntegralValue))
+          ? String(Math.trunc(Number(f.fixedWireIntegralValue)))
+          : ''
+      ],
+      fixedBytesHex: [f?.fixedBytesHex ?? '']
     });
   }
 

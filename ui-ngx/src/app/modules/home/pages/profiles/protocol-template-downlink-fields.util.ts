@@ -160,6 +160,17 @@ export function defaultJsonValueForHexField(f: TcpHexFieldDefinition): unknown |
   }
 }
 
+/** 配置了固定线值/固定 hex 时下行组帧可不传 JSON（与后端 TcpHexFieldDefinition 一致） */
+export function hexFieldHasFixedValue(f: TcpHexFieldDefinition | null | undefined): boolean {
+  if (!f) {
+    return false;
+  }
+  if (f.fixedWireIntegralValue != null && Number.isFinite(Number(f.fixedWireIntegralValue))) {
+    return true;
+  }
+  return !!String(f.fixedBytesHex ?? '').trim();
+}
+
 /** 与后端下行组帧：参长由系统写入、JSON 可省略 */
 export function writesAutoDownlinkPayloadLength(
   f: TcpHexFieldDefinition,
@@ -200,6 +211,9 @@ export function buildDownlinkFieldValuesSkeleton(
   const out: Record<string, unknown> = {};
   for (const f of sorted) {
     if (writesAutoDownlinkPayloadLength(f, opts?.command)) {
+      continue;
+    }
+    if (hexFieldHasFixedValue(f)) {
       continue;
     }
     if (cmdOff != null && fieldOverlapsCommandSpan(f, cmdOff, cmdW)) {
