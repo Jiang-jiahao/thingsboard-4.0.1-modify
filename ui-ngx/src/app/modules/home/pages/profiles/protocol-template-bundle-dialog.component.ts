@@ -25,6 +25,7 @@ import {
 } from '@shared/models/device.models';
 import { ProtocolTemplateBundleEditorComponent } from '@home/components/profile/device/protocol-template-bundle-editor.component';
 import { buildHuanuoJ3000PresetBundle } from '@home/pages/profiles/protocol-template-huanuo-j3000.preset';
+import { parseIntegralWireTextToNumber } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 
 export interface ProtocolTemplateBundleDialogData {
   bundle: ProtocolTemplateBundle | null;
@@ -303,11 +304,8 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
    */
   /** 十进制、0x 十六进制；与 parseCommandValue 一致，结果为可放入 Java long 的整数 */
   private parseIntegralWireText(raw: string): number {
-    const n = this.parseCommandValue(raw);
-    if (!Number.isFinite(n)) {
-      return 0;
-    }
-    return Math.trunc(n);
+    const n = parseIntegralWireTextToNumber(raw);
+    return n !== undefined && Number.isFinite(n) ? Math.trunc(n) : 0;
   }
 
   private parseCommandValue(raw: unknown): number {

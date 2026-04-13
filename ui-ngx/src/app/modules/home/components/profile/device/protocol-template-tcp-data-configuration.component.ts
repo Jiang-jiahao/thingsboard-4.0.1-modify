@@ -2,7 +2,7 @@
 /// Copyright © 2016-2025 The Thingsboard Authors
 ///
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { UntypedFormArray, UntypedFormGroup } from '@angular/forms';
+import { AbstractControl, UntypedFormArray, UntypedFormGroup } from '@angular/forms';
 import {
   ProtocolTemplateCommandDirection,
   TcpHexLtvChunkOrder,
@@ -10,6 +10,10 @@ import {
   TcpHexValueType,
   TransportTcpDataType
 } from '@shared/models/device.models';
+import {
+  formatIntegralWireTextEcho,
+  parseIntegralWireTextToNumber
+} from '@home/pages/profiles/protocol-template-downlink-fields.util';
 
 @Component({
   selector: 'tb-protocol-template-tcp-data-configuration',
@@ -177,6 +181,22 @@ export class ProtocolTemplateTcpDataConfigurationComponent {
   }
 
   /** 可选作「长度字段」的整型 key：首帧模板 + 本命令覆盖行 */
+  /** 固定线值：失焦后按 0x→十六进制、否则十进制归一化回显 */
+  onFixedWireIntegralBlur(ctrl: AbstractControl | null): void {
+    if (!ctrl || this.disabled) {
+      return;
+    }
+    const t = String(ctrl.value ?? '');
+    if (!t.trim()) {
+      return;
+    }
+    const n = parseIntegralWireTextToNumber(t);
+    if (n === undefined) {
+      return;
+    }
+    ctrl.patchValue(formatIntegralWireTextEcho(t, n), { emitEvent: false });
+  }
+
   downlinkLengthFieldKeyOptions(ci: number): string[] {
     const keys = new Set<string>();
     const addIntegral = (fg: UntypedFormGroup) => {

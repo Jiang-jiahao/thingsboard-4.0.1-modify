@@ -322,27 +322,32 @@ function integralDecimalDisplayString(vt: TcpHexValueType, n: number): string {
 
 function integralWireHexNoPrefix(vt: TcpHexValueType, n: number): string {
   let u: number;
+  let pad: number;
   switch (vt) {
     case TcpHexValueType.UINT8:
     case TcpHexValueType.INT8:
       u = (((Math.trunc(n) % 256) + 256) % 256);
+      pad = 2;
       break;
     case TcpHexValueType.UINT16_BE:
     case TcpHexValueType.UINT16_LE:
     case TcpHexValueType.INT16_BE:
     case TcpHexValueType.INT16_LE:
       u = (((Math.trunc(n) % 65536) + 65536) % 65536);
+      pad = 4;
       break;
     case TcpHexValueType.UINT32_BE:
     case TcpHexValueType.UINT32_LE:
     case TcpHexValueType.INT32_BE:
     case TcpHexValueType.INT32_LE:
       u = Math.trunc(n) >>> 0;
+      pad = 8;
       break;
     default:
       u = 0;
+      pad = 2;
   }
-  return u.toString(16);
+  return u.toString(16).padStart(pad, '0');
 }
 
 function floatDoubleWireHex(vt: TcpHexValueType, v: number): string {
@@ -430,14 +435,14 @@ function parseDownlinkFieldFromHexDigits(
   if (d.length > 0 && !/^[0-9a-fA-F]+$/.test(d)) {
     return { ok: false, error: 'invalid hex' };
   }
-  if (d.length % 2 === 1) {
-    return { ok: false, error: 'odd hex length' };
-  }
 
   if (vt === TcpHexValueType.BYTES_AS_HEX) {
     const n = byteLength;
     if (n == null || n <= 0) {
       return { ok: false, error: 'BYTES_AS_HEX needs fixed byteLength' };
+    }
+    if (d.length > 0 && d.length % 2 === 1) {
+      return { ok: false, error: 'odd hex length' };
     }
     const want = n * 2;
     const use = d.length ? d : '00'.repeat(n);
@@ -499,6 +504,9 @@ function parseDownlinkFieldFromHexDigits(
     }
     case TcpHexValueType.FLOAT_BE:
     case TcpHexValueType.FLOAT_LE: {
+      if (d.length > 0 && d.length % 2 === 1) {
+        return { ok: false, error: 'odd hex length' };
+      }
       const want = 8;
       const use = d.length ? d : '0'.repeat(want);
       if (use.length !== want) {
@@ -514,6 +522,9 @@ function parseDownlinkFieldFromHexDigits(
     }
     case TcpHexValueType.DOUBLE_BE:
     case TcpHexValueType.DOUBLE_LE: {
+      if (d.length > 0 && d.length % 2 === 1) {
+        return { ok: false, error: 'odd hex length' };
+      }
       const want = 16;
       const use = d.length ? d : '0'.repeat(want);
       if (use.length !== want) {
@@ -696,4 +707,60 @@ export function buildDownlinkFieldValuesSkeleton(
     }
   }
   return out;
+}
+
+/**
+ * 固定线值整型 / 命令值：与协议模板对话框解析一致。
+ * `0x` 前缀为十六进制；否则十进制；纯字母 A–F 的偶数位串按十六进制。
+ */
+export function parseIntegralWireTextToNumber(raw: unknown): number | undefined {
+  if (raw === null || raw === undefined) {
+    return undefined;
+  }
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    return Math.trunc(raw);
+  }
+  const s = String(raw).trim();
+  if (!s) {
+    return undefined;
+  }
+  if (/^0x[0-9a-fA-F]+$/i.test(s)) {
+    const n = parseInt(s.slice(2), 16);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  if (/^[0-9a-fA-F]+$/.test(s) && /[a-f]/i.test(s)) {
+    const n = parseInt(s, 16);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  const n = Number(s);
+  return Number.isFinite(n) ? Math.trunc(n) : undefined;
+}
+
+/** 从 API 载入：与命令值回显一致，`0x` + 小写十六进制 */
+export function formatFixedWireIntegralFromModel(v: number | undefined | null): string {
+  if (v === undefined || v === null || !Number.isFinite(Number(v))) {
+    return '';
+  }
+  const n = Math.trunc(Number(v));
+  const u = n >= 0 ? n : n >>> 0;
+  return '0x' + u.toString(16);
+}
+
+/**
+ * 失焦归一化：若以 `0x`/`0X` 输入则回显小写十六进制，否则回显十进制（与组帧 HEX 测试字段一致）。
+ */
+export function formatIntegralWireTextEcho(rawInput: string, numericValue: number): string {
+  const trimmed = String(rawInput ?? '').trim();
+  if (trimmed === '') {
+    return '';
+  }
+  if (!Number.isFinite(numericValue)) {
+    return trimmed;
+  }
+  if (/^0x/i.test(trimmed)) {
+    const n = Math.trunc(numericValue);
+    const u = n >= 0 ? n : n >>> 0;
+    return '0x' + u.toString(16);
+  }
+  return String(Math.trunc(numericValue));
 }

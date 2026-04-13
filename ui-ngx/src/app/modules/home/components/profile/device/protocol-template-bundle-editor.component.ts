@@ -20,6 +20,7 @@ import {
   TcpHexValueType
 } from '@shared/models/device.models';
 import { Subscription } from 'rxjs';
+import { formatFixedWireIntegralFromModel } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 
 @Component({
   selector: 'tb-protocol-template-bundle-editor',
@@ -126,11 +127,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       byteLengthFromByteOffset: [f?.byteLengthFromByteOffset ?? null, [Validators.min(0)]],
       byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required],
       includeInDownlinkPayloadLength: [!!f?.includeInDownlinkPayloadLength],
-      fixedWireIntegralValueText: [
-        f?.fixedWireIntegralValue != null && Number.isFinite(Number(f.fixedWireIntegralValue))
-          ? String(Math.trunc(Number(f.fixedWireIntegralValue)))
-          : ''
-      ],
+      fixedWireIntegralValueText: [formatFixedWireIntegralFromModel(f?.fixedWireIntegralValue)],
       fixedBytesHex: [f?.fixedBytesHex ?? '']
     });
   }
