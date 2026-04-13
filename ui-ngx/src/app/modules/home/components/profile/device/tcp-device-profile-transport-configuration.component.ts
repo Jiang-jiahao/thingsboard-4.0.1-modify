@@ -233,6 +233,26 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     return this.tcpDeviceProfileTransportConfigurationFormGroup.get('hexProtocolFields') as UntypedFormArray;
   }
 
+  /** 手动 HEX 默认字段区：按字节偏移升序展示；下标仍为 FormArray 真实索引 */
+  hexProtocolFieldIndicesSortedByByteOffset(): number[] {
+    const fa = this.hexProtocolFieldsArray;
+    const n = fa.length;
+    return Array.from({ length: n }, (_, i) => i).sort((a, b) => {
+      const da = this.hexFieldByteOffsetAt(fa, a);
+      const db = this.hexFieldByteOffsetAt(fa, b);
+      if (da !== db) {
+        return da - db;
+      }
+      return a - b;
+    });
+  }
+
+  private hexFieldByteOffsetAt(fa: UntypedFormArray, i: number): number {
+    const v = (fa.at(i) as UntypedFormGroup).get('byteOffset')?.value;
+    const num = Number(v);
+    return Number.isFinite(num) ? num : Number.MAX_SAFE_INTEGER;
+  }
+
   get hexCommandProfilesArray(): UntypedFormArray {
     return this.tcpDeviceProfileTransportConfigurationFormGroup.get('hexCommandProfiles') as UntypedFormArray;
   }
@@ -962,13 +982,17 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
             }
           }
         }
-        const fixInt = this.parseOptionalIntegralWireText(r['fixedWireIntegralValueText']);
-        if (fixInt !== undefined) {
-          def.fixedWireIntegralValue = fixInt;
-        }
-        const fixHex = String(r['fixedBytesHex'] ?? '').replace(/\s+/g, '');
-        if (fixHex) {
-          def.fixedBytesHex = fixHex;
+        // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与 BYTES_AS_HEX 固定 hex 不能同时存在
+        if (vt === TcpHexValueType.BYTES_AS_HEX) {
+          const fixHex = String(r['fixedBytesHex'] ?? '').replace(/\s+/g, '');
+          if (fixHex) {
+            def.fixedBytesHex = fixHex;
+          }
+        } else {
+          const fixInt = this.parseOptionalIntegralWireText(r['fixedWireIntegralValueText']);
+          if (fixInt !== undefined) {
+            def.fixedWireIntegralValue = fixInt;
+          }
         }
         return def;
       });

@@ -86,7 +86,7 @@ class TcpHexProtocolParserTest {
     }
 
     @Test
-    void fixedIntegralMismatchSkipsField() {
+    void fixedIntegralMismatchSkipsFieldWhenUsingDefaultTemplate() {
         var payload = JsonParser.parseString("{\"hex\":\"00\"}");
         TcpHexFieldDefinition a = new TcpHexFieldDefinition();
         a.setKey("h");
@@ -96,6 +96,66 @@ class TcpHexProtocolParserTest {
         var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().has("h")).isFalse();
+    }
+
+    /** 命令字已匹配但固定线值与帧不符：该规则作废，继续默认字段 */
+    @Test
+    void fixedIntegralMismatchOnCommandRuleFallsThroughToDefaultFields() {
+        String hex = "a55a10a0a4ff";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexCommandProfile cmd = new TcpHexCommandProfile();
+        cmd.setName("needs_magic_a5");
+        cmd.setMatchByteOffset(4);
+        cmd.setMatchValueType(TcpHexValueType.UINT8);
+        cmd.setMatchValue(0xA4);
+        TcpHexFieldDefinition f = new TcpHexFieldDefinition();
+        f.setKey("h");
+        f.setByteOffset(0);
+        f.setValueType(TcpHexValueType.UINT8);
+        f.setFixedWireIntegralValue(0L);
+        cmd.setFields(List.of(f));
+        TcpHexFieldDefinition def = new TcpHexFieldDefinition();
+        def.setKey("b0");
+        def.setByteOffset(0);
+        def.setValueType(TcpHexValueType.UINT8);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, List.of(cmd), List.of(def), null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().has("hexCmdProfile")).isFalse();
+        assertThat(out.get().get("b0").getAsInt()).isEqualTo(0xA5);
+    }
+
+    /** 第一条规则固定值失败，第二条仍可按命令字匹配 */
+    @Test
+    void fixedMismatchSkipsFirstCommandRuleSecondStillMatches() {
+        String hex = "a55a10a0a4ff";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexCommandProfile bad = new TcpHexCommandProfile();
+        bad.setName("bad_fixed");
+        bad.setMatchByteOffset(4);
+        bad.setMatchValueType(TcpHexValueType.UINT8);
+        bad.setMatchValue(0xA4);
+        TcpHexFieldDefinition badF = new TcpHexFieldDefinition();
+        badF.setKey("x");
+        badF.setByteOffset(0);
+        badF.setValueType(TcpHexValueType.UINT8);
+        badF.setFixedWireIntegralValue(0L);
+        bad.setFields(List.of(badF));
+
+        TcpHexCommandProfile good = new TcpHexCommandProfile();
+        good.setName("ok");
+        good.setMatchByteOffset(4);
+        good.setMatchValueType(TcpHexValueType.UINT8);
+        good.setMatchValue(0xA4);
+        TcpHexFieldDefinition goodF = new TcpHexFieldDefinition();
+        goodF.setKey("afterCmd");
+        goodF.setByteOffset(5);
+        goodF.setValueType(TcpHexValueType.UINT8);
+        good.setFields(List.of(goodF));
+
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, List.of(bad, good), List.of(), null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("hexCmdProfile").getAsString()).isEqualTo("ok");
+        assertThat(out.get().get("afterCmd").getAsInt()).isEqualTo(0xFF);
     }
 
     @Test

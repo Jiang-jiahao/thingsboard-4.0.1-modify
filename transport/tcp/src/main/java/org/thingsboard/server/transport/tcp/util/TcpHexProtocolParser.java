@@ -67,23 +67,33 @@ public final class TcpHexProtocolParser {
                 }
                 if (matchesCommand(frame, rule, sessionId)) {
                     String tag = rule.getName();
-                    JsonObject out = buildTelemetryForRule(frame, rule.getFields(), rule.getLtvRepeating(),
-                            tag != null && !tag.isBlank() ? tag : null, sessionId);
-                    if (out.size() > 0) {
-                        return Optional.of(out);
+                    try {
+                        JsonObject out = buildTelemetryForRule(frame, rule.getFields(), rule.getLtvRepeating(),
+                                tag != null && !tag.isBlank() ? tag : null, sessionId, true);
+                        if (out.size() > 0) {
+                            return Optional.of(out);
+                        }
+                    } catch (TcpHexFixedFieldMismatchException e) {
+                        log.debug("[{}] Hex command rule [{}] rejected (fixed field): {}",
+                                sessionId, rule.getName(), e.getMessage());
                     }
                 }
             }
         }
-        JsonObject out = buildTelemetryForRule(frame, defaultFields, defaultLtvRepeating, null, sessionId);
+        JsonObject out = buildTelemetryForRule(frame, defaultFields, defaultLtvRepeating, null, sessionId, false);
         if (out.size() > 0) {
             return Optional.of(out);
         }
         return Optional.empty();
     }
 
+    /**
+     * @param failRuleOnFixedFieldMismatch {@code true}：固定线值/固定 hex 与帧不一致时抛出 {@link TcpHexFixedFieldMismatchException}，
+     *                                     表示当前命令规则整体不匹配；{@code false}：仅跳过该字段（默认模板字段行为）。
+     */
     private static JsonObject buildTelemetryForRule(byte[] frame, List<TcpHexFieldDefinition> fields,
-                                                    TcpHexLtvRepeatingConfig ltv, String profileNameForTag, UUID sessionId) {
+                                                    TcpHexLtvRepeatingConfig ltv, String profileNameForTag, UUID sessionId,
+                                                    boolean failRuleOnFixedFieldMismatch) {
         JsonObject out = new JsonObject();
         if (profileNameForTag != null) {
             out.addProperty("hexCmdProfile", profileNameForTag);
@@ -101,6 +111,11 @@ public final class TcpHexProtocolParser {
                 }
                 try {
                     appendField(out, frame, def);
+                } catch (TcpHexFixedFieldMismatchException e) {
+                    if (failRuleOnFixedFieldMismatch) {
+                        throw e;
+                    }
+                    log.warn("[{}] Skip hex field [{}]: {}", sessionId, def.getKey(), e.getMessage());
                 } catch (Exception e) {
                     log.warn("[{}] Skip hex field [{}]: {}", sessionId, def.getKey(), e.getMessage());
                 }
@@ -109,7 +124,9 @@ public final class TcpHexProtocolParser {
         if (ltv != null) {
             try {
                 ltv.validate();
-                appendLtvRepeating(out, frame, ltv, sessionId);
+                appendLtvRepeating(out, frame, ltv, sessionId, failRuleOnFixedFieldMismatch);
+            } catch (TcpHexFixedFieldMismatchException e) {
+                throw e;
             } catch (Exception e) {
                 log.warn("[{}] LTV section failed: {}", sessionId, e.getMessage());
             }
@@ -117,7 +134,8 @@ public final class TcpHexProtocolParser {
         return out;
     }
 
-    private static void appendLtvRepeating(JsonObject out, byte[] frame, TcpHexLtvRepeatingConfig cfg, UUID sessionId) {
+    private static void appendLtvRepeating(JsonObject out, byte[] frame, TcpHexLtvRepeatingConfig cfg, UUID sessionId,
+                                           boolean failRuleOnFixedFieldMismatch) {
         int pos = cfg.getStartByteOffset();
         int lenW = integralTypeWidth(cfg.getLengthFieldType());
         int tagW = integralTypeWidth(cfg.getTagFieldType());
@@ -157,12 +175,12 @@ public final class TcpHexProtocolParser {
             }
             byte[] v = Arrays.copyOfRange(frame, pos, pos + vLen);
             pos += vLen;
-            emitLtvItem(out, cfg, tagVal, v, item, prefix, sessionId);
+            emitLtvItem(out, cfg, tagVal, v, item, prefix, sessionId, failRuleOnFixedFieldMismatch);
         }
     }
 
     private static void emitLtvItem(JsonObject out, TcpHexLtvRepeatingConfig cfg, long tagVal, byte[] v,
-                                    int item, String prefix, UUID sessionId) {
+                                    int item, String prefix, UUID sessionId, boolean failRuleOnFixedFieldMismatch) {
         TcpHexLtvTagMapping mapping = findTagMapping(cfg.getTagMappings(), tagVal);
         String fullKey = prefix + "_" + item + "_";
         if (mapping != null) {
@@ -176,6 +194,11 @@ public final class TcpHexProtocolParser {
             TcpHexFieldDefinition synthetic = ltvMappingToField(mapping, fullKey);
             try {
                 appendField(out, v, synthetic);
+            } catch (TcpHexFixedFieldMismatchException e) {
+                if (failRuleOnFixedFieldMismatch) {
+                    throw e;
+                }
+                log.warn("[{}] LTV value decode failed for tag {}: {}", sessionId, tagVal, e.getMessage());
             } catch (Exception e) {
                 log.warn("[{}] LTV value decode failed for tag {}: {}", sessionId, tagVal, e.getMessage());
             }
@@ -434,19 +457,19 @@ public final class TcpHexProtocolParser {
             writeIntegralAt(tmp, 0, vt, def.getFixedWireIntegralValue());
             long expected = readIntegralAt(tmp, 0, vt);
             if (actual != expected) {
-                throw new IllegalArgumentException(
+                throw new TcpHexFixedFieldMismatchException(
                         "fixed integral mismatch for [" + def.getKey() + "]: wire " + actual + " expected " + expected);
             }
         }
         if (def.getFixedBytesHex() != null && !def.getFixedBytesHex().isBlank()) {
             byte[] expected = parseHexString(def.getFixedBytesHex());
             if (expected == null || expected.length != resolvedLen) {
-                throw new IllegalArgumentException(
+                throw new TcpHexFixedFieldMismatchException(
                         "fixedBytesHex length mismatch for [" + def.getKey() + "]: need " + resolvedLen + " bytes");
             }
             for (int i = 0; i < resolvedLen; i++) {
                 if (frame[def.getByteOffset() + i] != expected[i]) {
-                    throw new IllegalArgumentException("fixed bytes mismatch for [" + def.getKey() + "]");
+                    throw new TcpHexFixedFieldMismatchException("fixed bytes mismatch for [" + def.getKey() + "]");
                 }
             }
         }

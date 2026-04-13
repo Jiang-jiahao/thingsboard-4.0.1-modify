@@ -38,9 +38,128 @@
   max-width: 100%;
 }
 
-.protocol-template-field-row-delete {
-  align-self: center;
+/* 列表一眼扫：首行键名+偏移+类型横排，扩展项次行横排折行，无大卡片 */
+.protocol-template-hex-field-list {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.protocol-template-hex-field-compact {
+  padding: 8px 0 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.protocol-template-hex-field-compact__primary,
+.protocol-template-hex-field-compact__row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.protocol-template-hex-field-compact__row {
+  margin-top: 6px;
+  padding-left: 30px;
+}
+
+.protocol-template-hex-field-compact__row--tight {
+  align-items: center;
+}
+
+.protocol-template-hex-field-compact__idx {
+  flex: 0 0 22px;
+  width: 22px;
+  margin-top: 12px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.45);
+  line-height: 1;
+}
+
+.protocol-template-hex-field-compact__key {
+  flex: 1 1 140px;
+  min-width: 100px;
+  max-width: 280px;
+}
+
+.protocol-template-hex-field-compact__off {
+  flex: 0 0 92px;
+  width: 92px;
+}
+
+.protocol-template-hex-field-compact__type {
+  flex: 1 1 160px;
+  min-width: 140px;
+  max-width: 220px;
+}
+
+.protocol-template-hex-field-compact__del {
+  flex: 0 0 auto;
   margin-top: 4px;
+}
+
+.protocol-template-hex-field-compact__fixed-int {
+  flex: 1 1 220px;
+  min-width: 180px;
+  max-width: 360px;
+}
+
+.protocol-template-hex-field-compact__checkbox {
+  flex: 1 1 200px;
+  min-width: 160px;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.protocol-template-hex-field-compact__bytes {
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 6px 8px 4px 30px;
+  margin-top: 4px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.protocol-template-hex-field-compact__len-mode {
+  flex: 1 1 200px;
+  min-width: 160px;
+  max-width: 260px;
+}
+
+.protocol-template-hex-field-compact__byte-len {
+  flex: 0 0 108px;
+  width: 108px;
+}
+
+.protocol-template-hex-field-compact__fixed-hex {
+  flex: 1 1 200px;
+  min-width: 160px;
+  max-width: 320px;
+}
+
+.protocol-template-hex-field-compact__len-off {
+  flex: 0 0 118px;
+  width: 118px;
+}
+
+.protocol-template-hex-field-compact__len-vt {
+  flex: 1 1 140px;
+  min-width: 130px;
+  max-width: 200px;
+}
+
+.protocol-template-hex-field-compact__bytes-hint {
+  flex: 1 0 100%;
+  margin: 0;
+  padding-top: 2px;
+}
+
+.protocol-template-hex-field-compact .mat-mdc-form-field,
+.protocol-template-hex-field-compact mat-form-field {
+  margin-bottom: 0;
 }
 
 .protocol-template-command-meta {

@@ -23,30 +23,32 @@
         <mat-expansion-panel-header>
           <mat-panel-title translate>profiles.protocol-hex-test-uplink</mat-panel-title>
         </mat-expansion-panel-header>
-        <mat-form-field class="w-full" subscriptSizing="dynamic" appearance="outline">
-          <mat-label translate>profiles.protocol-hex-parse-hex</mat-label>
-          <textarea matInput rows="4" name="hexDlgHexInput" [(ngModel)]="hexTestHexInput"
-                    [placeholder]="'profiles.protocol-hex-parse-hex-placeholder' | translate"></textarea>
-          <mat-hint translate>profiles.protocol-hex-parse-hex-hint</mat-hint>
-        </mat-form-field>
-        <div class="tb-protocol-hex-test-actions">
-          <button mat-raised-button color="primary" type="button"
-                  [disabled]="hexTestParsing || !hexTestBundleId?.trim() || !hexTestHexInput.trim()"
-                  (click)="runHexTestParse()">
-            <mat-icon *ngIf="hexTestParsing" class="button-spinner">hourglass_empty</mat-icon>
-            <span translate>profiles.protocol-hex-parse-run</span>
-          </button>
-        </div>
-        <div *ngIf="hexTestParseResult" class="tb-protocol-hex-test-result">
-          <div class="mat-subtitle-2" translate>profiles.protocol-hex-parse-result-title</div>
-          <div *ngIf="!hexTestParseResult.success" class="tb-error-text">{{ hexTestParseResult.errorMessage }}</div>
-          <ng-container *ngIf="hexTestParseResult.success">
-            <div *ngIf="hexTestParseResult.matchedHexCommandProfile" class="mat-caption">
-              <strong translate>profiles.protocol-hex-parse-matched</strong> {{ hexTestParseResult.matchedHexCommandProfile }}
-            </div>
-            <div class="mat-caption" translate>profiles.protocol-hex-parse-telemetry</div>
-            <pre class="tb-protocol-hex-test-pre">{{ hexTestTelemetryJson() }}</pre>
-          </ng-container>
+        <div class="tb-protocol-hex-test-panel-stack">
+          <mat-form-field class="w-full" subscriptSizing="dynamic" appearance="outline">
+            <mat-label translate>profiles.protocol-hex-parse-hex</mat-label>
+            <textarea matInput rows="4" name="hexDlgHexInput" [(ngModel)]="hexTestHexInput"
+                      [placeholder]="'profiles.protocol-hex-parse-hex-placeholder' | translate"></textarea>
+            <mat-hint translate>profiles.protocol-hex-parse-hex-hint</mat-hint>
+          </mat-form-field>
+          <div class="tb-protocol-hex-test-actions">
+            <button mat-raised-button color="primary" type="button"
+                    [disabled]="hexTestParsing || !hexTestBundleId?.trim() || !hexTestHexInput.trim()"
+                    (click)="runHexTestParse()">
+              <mat-icon *ngIf="hexTestParsing" class="button-spinner">hourglass_empty</mat-icon>
+              <span translate>profiles.protocol-hex-parse-run</span>
+            </button>
+          </div>
+          <div *ngIf="hexTestParseResult" class="tb-protocol-hex-test-result">
+            <div class="mat-subtitle-2" translate>profiles.protocol-hex-parse-result-title</div>
+            <div *ngIf="!hexTestParseResult.success" class="tb-error-text">{{ hexTestParseResult.errorMessage }}</div>
+            <ng-container *ngIf="hexTestParseResult.success">
+              <div *ngIf="hexTestParseResult.matchedHexCommandProfile" class="mat-caption tb-protocol-hex-test-result-line">
+                <strong translate>profiles.protocol-hex-parse-matched</strong> {{ hexTestParseResult.matchedHexCommandProfile }}
+              </div>
+              <div class="mat-caption tb-protocol-hex-test-result-line" translate>profiles.protocol-hex-parse-telemetry</div>
+              <pre class="tb-protocol-hex-test-pre">{{ hexTestTelemetryJson() }}</pre>
+            </ng-container>
+          </div>
         </div>
       </mat-expansion-panel>
 
@@ -54,60 +56,51 @@
         <mat-expansion-panel-header>
           <mat-panel-title translate>profiles.protocol-hex-test-downlink</mat-panel-title>
         </mat-expansion-panel-header>
-        <p class="mat-caption text-muted" translate>profiles.protocol-hex-test-downlink-hint</p>
-        <mat-form-field class="w-full" subscriptSizing="dynamic" appearance="outline">
-          <mat-label translate>profiles.protocol-hex-test-build-cmd</mat-label>
-          <mat-select [(ngModel)]="hexTestBuildCommand" [compareWith]="sameDownlinkCmd"
-                      (ngModelChange)="onHexTestBuildCommandChange()"
-                      name="hexDlgBuildCmd" [disabled]="!hexTestBundleId || !downlinkCommandsForHexTest().length">
-            <mat-option *ngFor="let c of downlinkCommandsForHexTest()" [value]="c">
-              {{ c.name || ('cmd ' + formatCommandHex(c.commandValue)) }} · {{ c.templateId }} · {{ formatCommandHex(c.commandValue) }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+        <div class="tb-protocol-hex-test-panel-stack">
+          <p class="mat-caption text-muted tb-protocol-hex-test-downlink-hint" translate>profiles.protocol-hex-test-downlink-hint</p>
+          <mat-form-field class="w-full" subscriptSizing="dynamic" appearance="outline">
+            <mat-label translate>profiles.protocol-hex-test-build-cmd</mat-label>
+            <mat-select [(ngModel)]="hexTestBuildCommand" [compareWith]="sameDownlinkCmd"
+                        (ngModelChange)="onHexTestBuildCommandChange()"
+                        name="hexDlgBuildCmd" [disabled]="!hexTestBundleId || !downlinkCommandsForHexTest().length">
+              <mat-option *ngFor="let c of downlinkCommandsForHexTest()" [value]="c">
+                {{ c.name || ('cmd ' + formatCommandHex(c.commandValue)) }} · {{ c.templateId }} · {{ formatCommandHex(c.commandValue) }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-        <ng-container *ngIf="hexTestUsesFieldInputs">
-          <p class="mat-caption text-muted" translate>profiles.protocol-hex-test-values-fields-hint</p>
-          <div class="tb-protocol-hex-test-fields-grid">
-            <mat-form-field *ngFor="let row of hexTestBuildFieldRows; trackBy: trackByBuildFieldKey"
-                            class="tb-protocol-hex-test-field-input w-full" subscriptSizing="dynamic" appearance="outline">
-              <mat-label>{{ row.key }} ({{ row.valueType }})</mat-label>
-              <input matInput type="text" [name]="'hexDlgField_' + row.key" [(ngModel)]="row.inputText"
-                     spellcheck="false" autocomplete="off"
-                     [placeholder]="'profiles.protocol-hex-test-field-value-placeholder' | translate">
-            </mat-form-field>
+          <div *ngIf="hexTestUsesFieldInputs" class="tb-protocol-hex-test-field-inputs-block">
+            <p class="mat-caption text-muted tb-protocol-hex-test-fields-hint" translate>profiles.protocol-hex-test-values-fields-hint</p>
+            <div class="tb-protocol-hex-test-fields-grid">
+              <mat-form-field *ngFor="let row of hexTestBuildFieldRows; trackBy: trackByBuildFieldKey"
+                              class="tb-protocol-hex-test-field-input" subscriptSizing="dynamic" appearance="outline">
+                <mat-label>{{ row.key }} ({{ row.valueType }})</mat-label>
+                <input matInput type="text" [name]="'hexDlgField_' + row.key" [(ngModel)]="row.inputText"
+                       spellcheck="false" autocomplete="off"
+                       [placeholder]="'profiles.protocol-hex-test-field-value-placeholder' | translate">
+              </mat-form-field>
+            </div>
           </div>
-          <mat-expansion-panel class="tb-protocol-hex-test-extra-json-panel mat-elevation-z0">
-            <mat-expansion-panel-header>
-              <mat-panel-title translate>profiles.protocol-hex-test-values-extra-json</mat-panel-title>
-            </mat-expansion-panel-header>
-            <mat-form-field class="w-full" subscriptSizing="dynamic" appearance="outline">
-              <mat-label translate>profiles.protocol-hex-test-values-extra-json</mat-label>
-              <textarea matInput rows="4" name="hexDlgExtraJson" [(ngModel)]="hexTestBuildExtraJson"
-                        spellcheck="false"></textarea>
-              <mat-hint translate>profiles.protocol-hex-test-extra-json-hint</mat-hint>
-            </mat-form-field>
-          </mat-expansion-panel>
-        </ng-container>
 
-        <mat-form-field *ngIf="!hexTestUsesFieldInputs" class="w-full" subscriptSizing="dynamic" appearance="outline">
-          <mat-label translate>profiles.protocol-hex-test-values-json</mat-label>
-          <textarea matInput rows="6" name="hexDlgValuesJson" [(ngModel)]="hexTestBuildValuesJson"
-                    spellcheck="false"></textarea>
-          <mat-hint translate>profiles.protocol-hex-test-values-json-only-hint</mat-hint>
-        </mat-form-field>
-        <div class="tb-protocol-hex-test-actions">
-          <button mat-raised-button color="primary" type="button"
-                  [disabled]="hexTestBuilding || !hexTestBundleId?.trim() || !hexTestBuildCommand"
-                  (click)="runHexTestBuild()">
-            <mat-icon *ngIf="hexTestBuilding" class="button-spinner">hourglass_empty</mat-icon>
-            <span translate>profiles.protocol-hex-test-build-run</span>
-          </button>
-        </div>
-        <div *ngIf="hexTestBuildResult" class="tb-protocol-hex-test-result">
-          <div class="mat-subtitle-2" translate>profiles.protocol-hex-test-build-result</div>
-          <div *ngIf="!hexTestBuildResult.success" class="tb-error-text">{{ hexTestBuildResult.errorMessage }}</div>
-          <pre *ngIf="hexTestBuildResult.success && hexTestBuildResult.hex" class="tb-protocol-hex-test-pre">{{ hexTestBuildResult.hex }}</pre>
+          <mat-form-field *ngIf="!hexTestUsesFieldInputs" class="w-full" subscriptSizing="dynamic" appearance="outline">
+            <mat-label translate>profiles.protocol-hex-test-values-json</mat-label>
+            <textarea matInput rows="6" name="hexDlgValuesJson" [(ngModel)]="hexTestBuildValuesJson"
+                      spellcheck="false"></textarea>
+            <mat-hint translate>profiles.protocol-hex-test-values-json-only-hint</mat-hint>
+          </mat-form-field>
+          <div class="tb-protocol-hex-test-actions">
+            <button mat-raised-button color="primary" type="button"
+                    [disabled]="hexTestBuilding || !hexTestBundleId?.trim() || !hexTestBuildCommand"
+                    (click)="runHexTestBuild()">
+              <mat-icon *ngIf="hexTestBuilding" class="button-spinner">hourglass_empty</mat-icon>
+              <span translate>profiles.protocol-hex-test-build-run</span>
+            </button>
+          </div>
+          <div *ngIf="hexTestBuildResult" class="tb-protocol-hex-test-result">
+            <div class="mat-subtitle-2" translate>profiles.protocol-hex-test-build-result</div>
+            <div *ngIf="!hexTestBuildResult.success" class="tb-error-text">{{ hexTestBuildResult.errorMessage }}</div>
+            <pre *ngIf="hexTestBuildResult.success && hexTestBuildResult.hex" class="tb-protocol-hex-test-pre">{{ hexTestBuildResult.hex }}</pre>
+          </div>
         </div>
       </mat-expansion-panel>
     </mat-accordion>

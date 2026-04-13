@@ -235,7 +235,7 @@
       <div class="mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-default-section-title</div>
       <div class="tb-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-default-section-hint</div>
       <div formArrayName="hexProtocolFields" class="flex flex-col gap-3">
-        <div *ngFor="let row of hexProtocolFieldsArray.controls; let i = index" [formGroupName]="i"
+        <div *ngFor="let i of hexProtocolFieldIndicesSortedByByteOffset()" [formGroupName]="i"
              class="flex flex-row flex-wrap gap-2 items-end">
           <mat-form-field class="flex-1" style="min-width: 120px;">
             <mat-label translate>device-profile.tcp.hex-field-key</mat-label>

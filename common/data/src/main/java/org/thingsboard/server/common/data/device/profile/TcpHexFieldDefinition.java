@@ -75,6 +75,23 @@ public class TcpHexFieldDefinition implements Serializable {
         return downlinkPayloadLengthMemberKeys != null && !downlinkPayloadLengthMemberKeys.isEmpty();
     }
 
+    /**
+     * 整型固定线值与 BYTES_AS_HEX 固定内容互斥。历史 JSON / 未走 UI 互斥保存时可能两者同在，按 {@link #valueType} 保留其一并清空另一项，避免校验失败。
+     */
+    public void normalizeMutuallyExclusiveFixedFields() {
+        if (fixedWireIntegralValue == null) {
+            return;
+        }
+        if (fixedBytesHex == null || fixedBytesHex.isBlank()) {
+            return;
+        }
+        if (valueType != null && valueType.isBytesAsHex()) {
+            fixedWireIntegralValue = null;
+        } else {
+            fixedBytesHex = null;
+        }
+    }
+
     public void validate() {
         if (key == null || key.isBlank()) {
             throw new IllegalArgumentException("TCP hex protocol field key must not be blank");
@@ -85,6 +102,7 @@ public class TcpHexFieldDefinition implements Serializable {
         if (valueType == null) {
             throw new IllegalArgumentException("TCP hex protocol field valueType is required");
         }
+        normalizeMutuallyExclusiveFixedFields();
         if (valueType.isBytesAsHex()) {
             boolean fixed = byteLength != null && byteLength > 0;
             boolean fromFrame = byteLengthFromByteOffset != null && byteLengthFromByteOffset >= 0;
@@ -138,9 +156,6 @@ public class TcpHexFieldDefinition implements Serializable {
                             "downlinkPayloadEndExclusiveByteOffset must be greater than effective payload start (" + start + ")");
                 }
             }
-        }
-        if (fixedWireIntegralValue != null && fixedBytesHex != null && !fixedBytesHex.isBlank()) {
-            throw new IllegalArgumentException("TCP hex field cannot set both fixedWireIntegralValue and fixedBytesHex");
         }
         if (fixedWireIntegralValue != null) {
             if (valueType == null || valueType.isBytesAsHex() || !TcpHexCommandProfile.isIntegralMatchType(valueType)) {

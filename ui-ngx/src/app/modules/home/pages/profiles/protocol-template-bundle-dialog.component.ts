@@ -283,13 +283,17 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
         if (this.isFormBooleanTrue(r['autoDownlinkPayloadLength'])) {
           def.autoDownlinkPayloadLength = true;
         }
-        const fixIntTxt = String(r['fixedWireIntegralValueText'] ?? '').trim();
-        if (fixIntTxt) {
-          def.fixedWireIntegralValue = this.parseIntegralWireText(fixIntTxt);
-        }
-        const fixHex = String(r['fixedBytesHex'] ?? '').replace(/\s+/g, '');
-        if (fixHex) {
-          def.fixedBytesHex = fixHex;
+        // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与 BYTES_AS_HEX 固定 hex 不能同时存在
+        if (vt === TcpHexValueType.BYTES_AS_HEX) {
+          const fixHex = String(r['fixedBytesHex'] ?? '').replace(/\s+/g, '');
+          if (fixHex) {
+            def.fixedBytesHex = fixHex;
+          }
+        } else {
+          const fixIntTxt = String(r['fixedWireIntegralValueText'] ?? '').trim();
+          if (fixIntTxt) {
+            def.fixedWireIntegralValue = this.parseIntegralWireText(fixIntTxt);
+          }
         }
         const dpe = this.optionalFormNumber(r['downlinkPayloadEndExclusiveByteOffset']);
         if (dpe !== undefined) {

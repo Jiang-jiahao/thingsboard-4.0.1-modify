@@ -73,6 +73,33 @@ export class ProtocolTemplateTcpDataConfigurationComponent {
     return (this.templatesArray.at(ti) as UntypedFormGroup).get('hexProtocolFields') as UntypedFormArray;
   }
 
+  /** 列表按字节偏移升序展示；下标仍为 FormArray 真实索引，便于绑定与删除 */
+  templateFieldIndicesSortedByByteOffset(ti: number): number[] {
+    return this.sortedHexFieldIndicesByByteOffset(this.getTemplateFieldsArray(ti));
+  }
+
+  overrideFieldIndicesSortedByByteOffset(ci: number): number[] {
+    return this.sortedHexFieldIndicesByByteOffset(this.getCommandOverrideFieldsArray(ci));
+  }
+
+  private sortedHexFieldIndicesByByteOffset(fa: UntypedFormArray): number[] {
+    const n = fa.length;
+    return Array.from({ length: n }, (_, i) => i).sort((a, b) => {
+      const da = this.byteOffsetAtFormIndex(fa, a);
+      const db = this.byteOffsetAtFormIndex(fa, b);
+      if (da !== db) {
+        return da - db;
+      }
+      return a - b;
+    });
+  }
+
+  private byteOffsetAtFormIndex(fa: UntypedFormArray, i: number): number {
+    const v = (fa.at(i) as UntypedFormGroup).get('byteOffset')?.value;
+    const num = Number(v);
+    return Number.isFinite(num) ? num : Number.MAX_SAFE_INTEGER;
+  }
+
   getTemplateLtvTagMappingsArray(ti: number): UntypedFormArray {
     return (this.templatesArray.at(ti) as UntypedFormGroup).get('hexLtvTagMappings') as UntypedFormArray;
   }

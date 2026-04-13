@@ -53,8 +53,6 @@ export class ProtocolTemplateHexTestDialogComponent {
   hexTestBuildCommand: ProtocolTemplateCommandDefinition | null = null;
   /** 无可编辑字段时的完整 JSON（十进制等，与旧版一致） */
   hexTestBuildValuesJson = '{}';
-  /** 有字段表单时与各行合并 */
-  hexTestBuildExtraJson = '{}';
   hexTestBuildFieldRows: HexTestBuildFieldRow[] = [];
   hexTestBuilding = false;
   hexTestBuildResult: ProtocolTemplateHexBuildResult | null = null;
@@ -130,7 +128,6 @@ export class ProtocolTemplateHexTestDialogComponent {
     const bundle = this.bundles.find(x => x.id === this.hexTestBundleId);
     const cmd = this.hexTestBuildCommand;
     this.hexTestBuildFieldRows = [];
-    this.hexTestBuildExtraJson = '{}';
     if (!bundle || !cmd) {
       this.hexTestBuildValuesJson = '{}';
       return;
@@ -246,19 +243,7 @@ export class ProtocolTemplateHexTestDialogComponent {
         built[row.key] = parsed.value;
         row.inputText = formatDownlinkFieldEcho(parsed.value, row.valueType, parsed.echoMode, row.byteLength);
       }
-      let extra: Record<string, unknown> = {};
-      try {
-        const parsed = JSON.parse(this.hexTestBuildExtraJson || '{}');
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-          extra = parsed as Record<string, unknown>;
-        } else {
-          throw new Error('not an object');
-        }
-      } catch {
-        this.showBuildError(this.translate.instant('profiles.protocol-hex-test-extra-json-invalid'));
-        return;
-      }
-      values = { ...built, ...extra };
+      values = built;
     } else {
       try {
         const parsed = JSON.parse(this.hexTestBuildValuesJson || '{}');

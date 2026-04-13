@@ -18,50 +18,92 @@ h2[mat-dialog-title] {
 .tb-protocol-hex-test-dialog-content {
   max-height: 72vh;
   overflow: auto;
-  padding-top: 4px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 .tb-protocol-hex-test-intro {
-  margin-bottom: 12px;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 
 .tb-protocol-hex-test-bundle-field {
   max-width: 100%;
+  margin-bottom: 8px;
 }
 
 .tb-protocol-hex-test-accordion {
-  margin-top: 8px;
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tb-protocol-hex-test-panel-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-top: 4px;
+  padding-bottom: 8px;
+}
+
+.tb-protocol-hex-test-field-inputs-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .tb-protocol-hex-test-actions {
-  margin: 8px 0 12px;
+  margin: 0;
 }
 
 .tb-protocol-hex-test-result {
-  margin-top: 12px;
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tb-protocol-hex-test-result-line {
+  margin: 0;
+  line-height: 1.45;
 }
 
 .tb-protocol-hex-test-pre {
-  margin: 8px 0 0;
-  padding: 8px 12px;
+  margin: 4px 0 0;
+  padding: 12px 14px;
   background: rgba(0, 0, 0, 0.04);
-  border-radius: 4px;
+  border-radius: 6px;
   overflow-x: auto;
   font-size: 12px;
+  line-height: 1.5;
   word-break: break-all;
 }
 
+.tb-protocol-hex-test-downlink-hint {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.tb-protocol-hex-test-fields-hint {
+  margin: 0;
+  line-height: 1.45;
+}
+
+/** 参数字段单列自上而下，不排多列 */
 .tb-protocol-hex-test-fields-grid {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  margin-bottom: 8px;
+  gap: 12px;
+  align-items: stretch;
 }
 
-.tb-protocol-hex-test-extra-json-panel {
-  margin-bottom: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 4px;
+.tb-protocol-hex-test-field-input {
+  width: 100%;
+}
+
+:host ::ng-deep .tb-protocol-hex-test-accordion .mat-expansion-panel-body {
+  padding-bottom: 20px;
 }
 
 .tb-error-text {
