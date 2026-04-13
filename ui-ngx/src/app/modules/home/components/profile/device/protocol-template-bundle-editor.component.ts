@@ -166,7 +166,6 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       id: [t?.id ?? '', [Validators.required, Validators.maxLength(255)]],
       commandByteOffset: [t?.commandByteOffset ?? 12, [Validators.required, Validators.min(0)]],
       commandMatchWidth: [t?.commandMatchWidth === 1 ? 1 : 4],
-      validateTotalLengthU32Le: [t?.validateTotalLengthU32Le === true],
       checksumType: [csType],
       checksumFromByte: [cs?.fromByte ?? 0],
       checksumToExclusive: [cs?.toExclusive ?? 0],
@@ -258,9 +257,11 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
 
   private formatCommandValueForForm(v: number | undefined | null): string {
     if (v === undefined || v === null || !Number.isFinite(Number(v))) {
-      return '0';
+      return '0x0';
     }
-    return String(Math.trunc(Number(v)));
+    const n = Math.trunc(Number(v));
+    const u = n >= 0 ? n : n >>> 0;
+    return '0x' + u.toString(16);
   }
 
   private syncCommandTemplateIdsFromFirstTemplate(): void {

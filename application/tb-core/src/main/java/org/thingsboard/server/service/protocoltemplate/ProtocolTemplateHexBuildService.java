@@ -20,8 +20,6 @@ import org.thingsboard.server.common.data.device.profile.TcpHexValueType;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.transport.tcp.util.TcpHexProtocolParser;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,11 +33,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 按首帧模板 + 下行/双向命令合并字段组帧，并写入命令字、总长度（若启用）、校验和。
+ * 按首帧模板 + 下行/双向命令合并字段组帧，并写入命令字与校验和。
  */
 @Service
 @RequiredArgsConstructor
 public class ProtocolTemplateHexBuildService {
+
+    private static final Pattern PA_WORD_FIELD_KEY = Pattern.compile("^pa(\\d+)_word$");
 
     private final DefaultProtocolTemplateBundleService bundleService;
 
@@ -141,11 +141,10 @@ public class ProtocolTemplateHexBuildService {
         int cmdW = integralTypeWidth(matchVt);
 
         TcpHexChecksumDefinition checksum = tpl.getChecksum();
-        boolean validateLen = Boolean.TRUE.equals(tpl.getValidateTotalLengthU32Le());
 
         int frameLen;
         try {
-            frameLen = computeFrameLength(merged, checksum, validateLen, cmdOff, matchVt);
+            frameLen = computeFrameLength(merged, checksum, cmdOff, matchVt);
         } catch (IllegalArgumentException e) {
             out.setErrorMessage(e.getMessage());
             return out;
@@ -175,6 +174,9 @@ public class ProtocolTemplateHexBuildService {
                 if (fieldOverlapsCommandSpan(f, cmdOff, cmdW)) {
                     continue;
                 }
+                if (isRedundantPaWordField(f, merged)) {
+                    continue;
+                }
                 writeFieldFromValues(buf, f, values);
             }
             if (cmd.getDirection() != ProtocolTemplateCommandDirection.DOWNLINK
@@ -201,13 +203,6 @@ public class ProtocolTemplateHexBuildService {
             }
             TcpHexProtocolParser.writeIntegralAt(buf, cmdOff, matchVt, cmd.getCommandValue());
             writeAutoDownlinkPayloadLengthFields(buf, merged, cmd, cmdOff, cmdW);
-            if (validateLen) {
-                if (buf.length < 4) {
-                    throw new IllegalArgumentException("frame too short for validateTotalLengthU32Le");
-                }
-                ByteBuffer lb = ByteBuffer.wrap(buf, 0, 4).order(ByteOrder.LITTLE_ENDIAN);
-                lb.putInt(buf.length);
-            }
             TcpHexProtocolParser.applyChecksumToFrame(checksum, buf);
         } catch (IllegalArgumentException | ArithmeticException e) {
             out.setErrorMessage(e.getMessage());
@@ -220,12 +215,8 @@ public class ProtocolTemplateHexBuildService {
     }
 
     private static int computeFrameLength(List<TcpHexFieldDefinition> merged, TcpHexChecksumDefinition cs,
-                                          boolean validateLen32, int cmdOff, TcpHexValueType cmdVt) {
-        int maxEnd = 0;
-        if (validateLen32) {
-            maxEnd = Math.max(maxEnd, 4);
-        }
-        maxEnd = Math.max(maxEnd, cmdOff + integralTypeWidth(cmdVt));
+                                          int cmdOff, TcpHexValueType cmdVt) {
+        int maxEnd = cmdOff + integralTypeWidth(cmdVt);
         for (TcpHexFieldDefinition f : merged) {
             if (f == null) {
                 continue;
@@ -359,6 +350,9 @@ public class ProtocolTemplateHexBuildService {
                 continue;
             }
             if (!want.contains(g.getKey())) {
+                continue;
+            }
+            if (isRedundantPaWordField(g, merged)) {
                 continue;
             }
             len += fieldWidthForBuild(g);
@@ -500,6 +494,40 @@ public class ProtocolTemplateHexBuildService {
     }
 
     /**
+     * 合并列表里若已有 {@code paN_hi} 与 {@code paN_lo}，则 {@code paN_word} 与二者占用同一 2 字节；
+     * 再按 word 写字会与 hi/lo 叠加，典型错位为多出一个 {@code 0x00}。此时 word 仅作 JSON 别名（见 {@link #expandPaWordHiLoAliases}），不应再作为独立字段写入。
+     */
+    static boolean isRedundantPaWordField(TcpHexFieldDefinition f, List<TcpHexFieldDefinition> merged) {
+        if (f == null || f.getKey() == null || merged == null) {
+            return false;
+        }
+        Matcher wm = PA_WORD_FIELD_KEY.matcher(f.getKey().trim());
+        if (!wm.matches()) {
+            return false;
+        }
+        String n = wm.group(1);
+        String hiKey = "pa" + n + "_hi";
+        String loKey = "pa" + n + "_lo";
+        boolean hasHi = false;
+        boolean hasLo = false;
+        for (TcpHexFieldDefinition g : merged) {
+            if (g == null || g.getKey() == null) {
+                continue;
+            }
+            String k = g.getKey().trim();
+            if (hiKey.equals(k)) {
+                hasHi = true;
+            } else if (loKey.equals(k)) {
+                hasLo = true;
+            }
+            if (hasHi && hasLo) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * 兼容「整格 UINT16」与「高/低字节 UINT8」两种下发键名：若存在 {@code paN_word} 且未单独提供 {@code paN_hi}/{@code paN_lo}，
      * 则按大端拆成 hi、lo（16 位线值掩码 0xFFFF）。已显式给出的 hi/lo 不会被覆盖。
      */
@@ -507,7 +535,7 @@ public class ProtocolTemplateHexBuildService {
         if (values == null || values.isEmpty()) {
             return;
         }
-        Pattern p = Pattern.compile("^pa(\\d+)_word$");
+        Pattern p = PA_WORD_FIELD_KEY;
         for (String key : List.copyOf(values.keySet())) {
             if (key == null) {
                 continue;

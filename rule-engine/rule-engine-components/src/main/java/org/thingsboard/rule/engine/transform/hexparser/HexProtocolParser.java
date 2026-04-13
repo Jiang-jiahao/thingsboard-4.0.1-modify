@@ -48,15 +48,6 @@ public final class HexProtocolParser {
         if (def.getMinBytes() > 0 && buf.length < def.getMinBytes()) {
             throw new IllegalArgumentException("Buffer too short: " + buf.length + " < " + def.getMinBytes());
         }
-        if (Boolean.TRUE.equals(def.getValidateTotalLengthU32Le())) {
-            if (buf.length < 4) {
-                throw new IllegalArgumentException("Need 4 bytes for total length field");
-            }
-            int declared = readU32LE(buf, 0);
-            if (declared != buf.length) {
-                throw new IllegalArgumentException("Packet length field " + declared + " != buffer length " + buf.length);
-            }
-        }
         if (def.getSyncHex() != null && !def.getSyncHex().isEmpty()) {
             byte[] sync = parseHexString(def.getSyncHex());
             int off = def.getSyncOffset();

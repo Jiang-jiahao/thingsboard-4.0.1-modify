@@ -38,7 +38,7 @@ import java.util.Optional;
         nodeDescription = "Parses binary payloads from a continuous hex string using configurable protocol definitions.",
         nodeDetails = "Reads <code>hexInputKey</code> from incoming JSON message body. " +
                 "Frame templates define sync, header fields, payload layout hints, optional default checksum; each protocol variant picks a <code>templateId</code> and defines response-specific payload fields (or full layout without template). " +
-                "Match: <code>syncHex</code> (or from template), optional <code>commandByteOffset</code> + <code>commandValue</code> (<code>commandMatchWidth</code>=4 for uint32 LE); headless with <code>commandValue</code> omitted matches any command (shared layout). Optional <code>validateTotalLengthU32Le</code>: first uint32 LE must equal buffer length. " +
+                "Match: <code>syncHex</code> (or from template), optional <code>commandByteOffset</code> + <code>commandValue</code> (<code>commandMatchWidth</code>=4 for uint32 LE); headless with <code>commandValue</code> omitted matches any command (shared layout). " +
                 "If <code>protocolIdKey</code> is set, that <code>id</code> is used only when the buffer also matches; otherwise auto-detection. " +
                 "Output under <code>resultObjectKey</code> (default <code>parsed</code>) or merge with prefix. " +
                 "Scalar / slice types: UINT8, UINT16_LE/BE, UINT32_LE/BE, FLOAT32/64 LE/BE, HEX_SLICE, HEX_SLICE_LEN_U16LE, BOOL_BIT. " +

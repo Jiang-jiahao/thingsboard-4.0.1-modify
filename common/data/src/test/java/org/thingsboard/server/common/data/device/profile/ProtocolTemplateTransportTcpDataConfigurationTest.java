@@ -23,7 +23,6 @@ class ProtocolTemplateTransportTcpDataConfigurationTest {
         f.setByteOffset(0);
         f.setValueType(TcpHexValueType.UINT32_LE);
         tpl.setHexProtocolFields(List.of(f));
-        tpl.setValidateTotalLengthU32Le(true);
 
         ProtocolTemplateCommandDefinition up = new ProtocolTemplateCommandDefinition();
         up.setTemplateId("t1");
@@ -45,7 +44,6 @@ class ProtocolTemplateTransportTcpDataConfigurationTest {
         HexTransportTcpDataConfiguration hex = cfg.expandToHexTransportTcpDataConfiguration();
         assertThat(hex.getHexCommandProfiles()).hasSize(1);
         assertThat(hex.getHexCommandProfiles().get(0).getMatchValue()).isEqualTo(3);
-        assertThat(hex.getValidateTotalLengthU32Le()).isTrue();
     }
 
     @Test

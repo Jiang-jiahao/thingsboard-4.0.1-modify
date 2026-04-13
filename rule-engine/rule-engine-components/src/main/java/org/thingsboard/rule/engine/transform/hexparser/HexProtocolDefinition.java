@@ -24,7 +24,6 @@ import java.util.List;
  * <p>
  * Headless frames (no {@code syncHex}): if {@link #commandValue} is {@code null}, any command dword matches
  * (monitoring UDP datagram style: same layout for all command numbers).
- * Optional {@link #validateTotalLengthU32Le}: first four bytes UINT32 LE must equal the buffer length (inclusive length field).
  */
 @Data
 public class HexProtocolDefinition {
@@ -49,7 +48,5 @@ public class HexProtocolDefinition {
     private Integer commandMatchWidth;
     private HexChecksumDefinition checksum;
     private List<HexFieldDefinition> fields;
-    /** If true, bytes 0–3 as UINT32 LE must equal {@code buf.length} (total packet size including length field). */
-    private Boolean validateTotalLengthU32Le;
 
 }

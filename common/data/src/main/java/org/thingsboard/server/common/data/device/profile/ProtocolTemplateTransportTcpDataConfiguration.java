@@ -53,7 +53,6 @@ public class ProtocolTemplateTransportTcpDataConfiguration implements TransportT
             ProtocolTemplateDefinition first = templates.get(0);
             hex.setHexProtocolFields(copyFieldList(first.getHexProtocolFields()));
             hex.setHexLtvRepeating(first.getHexLtvRepeating());
-            hex.setValidateTotalLengthU32Le(first.getValidateTotalLengthU32Le());
             hex.setChecksum(first.getChecksum());
         }
         List<TcpHexCommandProfile> profiles = new ArrayList<>();

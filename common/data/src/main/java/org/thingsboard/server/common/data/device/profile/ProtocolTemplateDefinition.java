@@ -5,6 +5,7 @@
  */
 package org.thingsboard.server.common.data.device.profile;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,6 +16,7 @@ import java.util.List;
  * 协议模板中的「帧模板」：同一模板下共享命令字节偏移、默认字段与可选 LTV；具体命令号在 {@link ProtocolTemplateCommandDefinition} 中配置。
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProtocolTemplateDefinition implements Serializable {
 
     /**
@@ -33,10 +35,6 @@ public class ProtocolTemplateDefinition implements Serializable {
      * 1 或 4；4 表示 uint32 小端与命令值比较。
      */
     private Integer commandMatchWidth;
-    /**
-     * 为 true 时要求帧首 4 字节（小端 uint32）等于实际帧长。
-     */
-    private Boolean validateTotalLengthU32Le;
     /**
      * 可选：整帧校验和（先于字段解析执行）。
      */

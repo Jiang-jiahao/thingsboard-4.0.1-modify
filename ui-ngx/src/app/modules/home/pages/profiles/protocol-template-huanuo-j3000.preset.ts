@@ -127,7 +127,6 @@ export function buildHuanuoJ3000PresetBundle(displayName: string): ProtocolTempl
     id,
     commandByteOffset: 4,
     commandMatchWidth: 1,
-    validateTotalLengthU32Le: false,
     checksum: {
       type: 'SUM8',
       fromByte: 2,

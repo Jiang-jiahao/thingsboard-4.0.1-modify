@@ -51,6 +51,19 @@ h2[mat-dialog-title] {
   word-break: break-all;
 }
 
+.tb-protocol-hex-test-fields-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.tb-protocol-hex-test-extra-json-panel {
+  margin-bottom: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+}
+
 .tb-error-text {
   color: var(--mdc-theme-error, #f44336);
   margin-top: 8px;

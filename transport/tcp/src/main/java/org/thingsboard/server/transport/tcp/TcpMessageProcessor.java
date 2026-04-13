@@ -97,7 +97,7 @@ public class TcpMessageProcessor {
             var parsedOpt = hexCfg != null
                     ? TcpHexProtocolParser.tryParseTelemetryFromHexPayload(
                     payload, hexCfg.getHexCommandProfiles(), hexCfg.getHexProtocolFields(),
-                    hexCfg.getHexLtvRepeating(), hexCfg.getValidateTotalLengthU32Le(), hexCfg.getChecksum(),
+                    hexCfg.getHexLtvRepeating(), hexCfg.getChecksum(),
                     session.getSessionId())
                     : Optional.<JsonObject>empty();
             if (parsedOpt.isPresent()) {

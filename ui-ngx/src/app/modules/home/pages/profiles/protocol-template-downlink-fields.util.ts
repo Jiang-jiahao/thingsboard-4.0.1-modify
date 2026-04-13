@@ -21,7 +21,7 @@ function fixedFieldByteLength(f: TcpHexFieldDefinition): number {
   return tcpHexFixedTypeWidth(f.valueType);
 }
 
-function tcpHexFixedTypeWidth(vt: TcpHexValueType): number {
+export function tcpHexFixedTypeWidth(vt: TcpHexValueType): number {
   switch (vt) {
     case TcpHexValueType.UINT8:
     case TcpHexValueType.INT8:
@@ -75,6 +75,41 @@ export function tcpHexMatchValueTypeWidth(vt: TcpHexValueType | undefined): numb
     default:
       return 4;
   }
+}
+
+/**
+ * 与后端 {@code ProtocolTemplateHexBuildService.isRedundantPaWordField} 一致：
+ * 已定义 paN_hi + paN_lo 时，paN_word 不应再作为独立可编辑/写入字段（否则与 hi/lo 叠写会多字节）。
+ */
+function isRedundantPaWordFieldInMerged(f: TcpHexFieldDefinition, merged: TcpHexFieldDefinition[]): boolean {
+  const key = f?.key?.trim();
+  if (!key) {
+    return false;
+  }
+  const m = /^pa(\d+)_word$/.exec(key);
+  if (!m) {
+    return false;
+  }
+  const n = m[1];
+  const hk = `pa${n}_hi`;
+  const lk = `pa${n}_lo`;
+  let hi = false;
+  let lo = false;
+  for (const g of merged ?? []) {
+    const k = g?.key?.trim();
+    if (!k) {
+      continue;
+    }
+    if (k === hk) {
+      hi = true;
+    } else if (k === lk) {
+      lo = true;
+    }
+    if (hi && lo) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function hexFieldSpansOverlap(a: TcpHexFieldDefinition, b: TcpHexFieldDefinition): boolean {
@@ -197,18 +232,20 @@ export interface DownlinkSkeletonOptions {
   command?: ProtocolTemplateCommandDefinition;
 }
 
-/** 按合并后字段生成对象（按 byteOffset、key 排序，便于对照帧布局） */
-export function buildDownlinkFieldValuesSkeleton(
+/**
+ * 下行组帧需用户填值的字段（与 {@link buildDownlinkFieldValuesSkeleton} 规则一致，不含自动参长/固定线值/与命令字重叠等）。
+ */
+export function listDownlinkEditableHexFields(
   merged: TcpHexFieldDefinition[],
   opts?: DownlinkSkeletonOptions
-): Record<string, unknown> {
+): TcpHexFieldDefinition[] {
   const cmdOff = opts?.commandByteOffset;
   const cmdW = opts ? tcpHexMatchValueTypeWidth(opts.commandMatchValueType) : 4;
   const sorted = merged
     .filter(f => f && f.key && String(f.key).trim())
     .slice()
     .sort((a, b) => a.byteOffset - b.byteOffset || String(a.key).localeCompare(String(b.key)));
-  const out: Record<string, unknown> = {};
+  const out: TcpHexFieldDefinition[] = [];
   for (const f of sorted) {
     if (writesAutoDownlinkPayloadLength(f, opts?.command)) {
       continue;
@@ -219,6 +256,440 @@ export function buildDownlinkFieldValuesSkeleton(
     if (cmdOff != null && fieldOverlapsCommandSpan(f, cmdOff, cmdW)) {
       continue;
     }
+    if (defaultJsonValueForHexField(f) === undefined) {
+      continue;
+    }
+    if (isRedundantPaWordFieldInMerged(f, sorted)) {
+      continue;
+    }
+    out.push(f);
+  }
+  return out;
+}
+
+/** 组帧表单初始展示：整型/浮点为十进制；BYTES_AS_HEX 为连续小写 hex（无 0x） */
+export function defaultDownlinkFieldInputText(
+  f: TcpHexFieldDefinition,
+  defaultJson: unknown
+): string {
+  const vt = f.valueType;
+  if (vt === TcpHexValueType.BYTES_AS_HEX && typeof defaultJson === 'string') {
+    return String(defaultJson).replace(/\s+/g, '').toLowerCase();
+  }
+  if (
+    vt === TcpHexValueType.FLOAT_BE ||
+    vt === TcpHexValueType.FLOAT_LE ||
+    vt === TcpHexValueType.DOUBLE_BE ||
+    vt === TcpHexValueType.DOUBLE_LE
+  ) {
+    if (typeof defaultJson === 'number' && Number.isFinite(defaultJson)) {
+      return String(defaultJson);
+    }
+    return '0';
+  }
+  if (typeof defaultJson === 'number' && Number.isFinite(defaultJson)) {
+    return integralDecimalDisplayString(vt, Math.trunc(defaultJson));
+  }
+  return '0';
+}
+
+function integralDecimalDisplayString(vt: TcpHexValueType, n: number): string {
+  switch (vt) {
+    case TcpHexValueType.UINT8:
+      return String((((n % 256) + 256) % 256));
+    case TcpHexValueType.INT8: {
+      const b = (((n % 256) + 256) % 256);
+      return String(b > 127 ? b - 256 : b);
+    }
+    case TcpHexValueType.UINT16_BE:
+    case TcpHexValueType.UINT16_LE:
+      return String((((n % 65536) + 65536) % 65536));
+    case TcpHexValueType.INT16_BE:
+    case TcpHexValueType.INT16_LE: {
+      const w = (((n % 65536) + 65536) % 65536);
+      return String(w > 32767 ? w - 65536 : w);
+    }
+    case TcpHexValueType.UINT32_BE:
+    case TcpHexValueType.UINT32_LE:
+      return String(n >>> 0);
+    case TcpHexValueType.INT32_BE:
+    case TcpHexValueType.INT32_LE:
+      return String(n | 0);
+    default:
+      return '0';
+  }
+}
+
+function integralWireHexNoPrefix(vt: TcpHexValueType, n: number): string {
+  let u: number;
+  switch (vt) {
+    case TcpHexValueType.UINT8:
+    case TcpHexValueType.INT8:
+      u = (((Math.trunc(n) % 256) + 256) % 256);
+      break;
+    case TcpHexValueType.UINT16_BE:
+    case TcpHexValueType.UINT16_LE:
+    case TcpHexValueType.INT16_BE:
+    case TcpHexValueType.INT16_LE:
+      u = (((Math.trunc(n) % 65536) + 65536) % 65536);
+      break;
+    case TcpHexValueType.UINT32_BE:
+    case TcpHexValueType.UINT32_LE:
+    case TcpHexValueType.INT32_BE:
+    case TcpHexValueType.INT32_LE:
+      u = Math.trunc(n) >>> 0;
+      break;
+    default:
+      u = 0;
+  }
+  return u.toString(16);
+}
+
+function floatDoubleWireHex(vt: TcpHexValueType, v: number): string {
+  const nBytes = tcpHexFixedTypeWidth(vt);
+  const buf = new ArrayBuffer(nBytes);
+  const view = new DataView(buf);
+  const le = vt === TcpHexValueType.FLOAT_LE || vt === TcpHexValueType.DOUBLE_LE;
+  if (nBytes === 4) {
+    view.setFloat32(0, v, le);
+  } else {
+    view.setFloat64(0, v, le);
+  }
+  let s = '';
+  for (let i = 0; i < nBytes; i++) {
+    s += view.getUint8(i).toString(16).padStart(2, '0');
+  }
+  return s;
+}
+
+/** 与输入规则一致：0x 前缀 → 0x+hex 回显；否则十进制或纯 hex 字节串 */
+export type DownlinkFieldEchoMode = 'dec' | 'hex0x' | 'bytesPlain';
+
+export type DownlinkFieldParseResult =
+  | { ok: true; value: unknown; echoMode: DownlinkFieldEchoMode }
+  | { ok: false; error: string };
+
+export function formatDownlinkFieldEcho(
+  value: unknown,
+  vt: TcpHexValueType,
+  echoMode: DownlinkFieldEchoMode,
+  byteLength?: number
+): string {
+  if (vt === TcpHexValueType.BYTES_AS_HEX && typeof value === 'string') {
+    const h = value.replace(/\s+/g, '').toLowerCase();
+    if (echoMode === 'hex0x') {
+      return '0x' + h;
+    }
+    if (echoMode === 'bytesPlain') {
+      return h;
+    }
+    try {
+      return BigInt('0x' + (h || '0')).toString(10);
+    } catch {
+      return h;
+    }
+  }
+  if (
+    vt === TcpHexValueType.FLOAT_BE ||
+    vt === TcpHexValueType.FLOAT_LE ||
+    vt === TcpHexValueType.DOUBLE_BE ||
+    vt === TcpHexValueType.DOUBLE_LE
+  ) {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      if (echoMode === 'hex0x') {
+        return '0x' + floatDoubleWireHex(vt, value);
+      }
+      return String(value);
+    }
+    return '0';
+  }
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    if (echoMode === 'hex0x') {
+      return '0x' + integralWireHexNoPrefix(vt, value);
+    }
+    return integralDecimalDisplayString(vt, Math.trunc(value));
+  }
+  return '0';
+}
+
+const hexToUInt = (hex: string, maxBits: number): bigint => {
+  if (!hex.length) {
+    return 0n;
+  }
+  const bi = BigInt('0x' + hex);
+  const mask = (1n << BigInt(maxBits)) - 1n;
+  return bi & mask;
+};
+
+function parseDownlinkFieldFromHexDigits(
+  digits: string,
+  vt: TcpHexValueType,
+  byteLength: number | undefined
+): DownlinkFieldParseResult {
+  const d = digits.replace(/\s+/g, '');
+  if (d.length > 0 && !/^[0-9a-fA-F]+$/.test(d)) {
+    return { ok: false, error: 'invalid hex' };
+  }
+  if (d.length % 2 === 1) {
+    return { ok: false, error: 'odd hex length' };
+  }
+
+  if (vt === TcpHexValueType.BYTES_AS_HEX) {
+    const n = byteLength;
+    if (n == null || n <= 0) {
+      return { ok: false, error: 'BYTES_AS_HEX needs fixed byteLength' };
+    }
+    const want = n * 2;
+    const use = d.length ? d : '00'.repeat(n);
+    if (use.length !== want) {
+      return { ok: false, error: `need ${want} hex digits (${n} bytes)` };
+    }
+    return { ok: true, value: use.toLowerCase(), echoMode: 'hex0x' };
+  }
+
+  switch (vt) {
+    case TcpHexValueType.UINT8:
+    case TcpHexValueType.INT8: {
+      const u = d.length ? hexToUInt(d, 8) : 0n;
+      if (u > 0xffn) {
+        return { ok: false, error: 'max 2 hex digits (1 byte)' };
+      }
+      if (vt === TcpHexValueType.UINT8) {
+        return { ok: true, value: Number(u), echoMode: 'hex0x' };
+      }
+      const n = Number(u);
+      const s8 = n > 127 ? n - 256 : n;
+      return { ok: true, value: s8, echoMode: 'hex0x' };
+    }
+    case TcpHexValueType.UINT16_BE:
+    case TcpHexValueType.UINT16_LE:
+    case TcpHexValueType.INT16_BE:
+    case TcpHexValueType.INT16_LE: {
+      const u = d.length ? hexToUInt(d, 16) : 0n;
+      if (u > 0xffffn) {
+        return { ok: false, error: 'max 4 hex digits (2 bytes)' };
+      }
+      if (
+        vt === TcpHexValueType.UINT16_BE ||
+        vt === TcpHexValueType.UINT16_LE
+      ) {
+        return { ok: true, value: Number(u), echoMode: 'hex0x' };
+      }
+      const n = Number(u);
+      const s16 = n > 32767 ? n - 65536 : n;
+      return { ok: true, value: s16, echoMode: 'hex0x' };
+    }
+    case TcpHexValueType.UINT32_BE:
+    case TcpHexValueType.UINT32_LE:
+    case TcpHexValueType.INT32_BE:
+    case TcpHexValueType.INT32_LE: {
+      const u = d.length ? hexToUInt(d, 32) : 0n;
+      if (u > 0xffffffffn) {
+        return { ok: false, error: 'max 8 hex digits (4 bytes)' };
+      }
+      if (
+        vt === TcpHexValueType.UINT32_BE ||
+        vt === TcpHexValueType.UINT32_LE
+      ) {
+        return { ok: true, value: Number(u), echoMode: 'hex0x' };
+      }
+      const n = Number(u);
+      const s32 = n | 0;
+      return { ok: true, value: s32, echoMode: 'hex0x' };
+    }
+    case TcpHexValueType.FLOAT_BE:
+    case TcpHexValueType.FLOAT_LE: {
+      const want = 8;
+      const use = d.length ? d : '0'.repeat(want);
+      if (use.length !== want) {
+        return { ok: false, error: 'need 8 hex digits (4 bytes)' };
+      }
+      const buf = new ArrayBuffer(4);
+      const view = new DataView(buf);
+      const le = vt === TcpHexValueType.FLOAT_LE;
+      for (let i = 0; i < 4; i++) {
+        view.setUint8(i, Number.parseInt(use.slice(i * 2, i * 2 + 2), 16));
+      }
+      return { ok: true, value: view.getFloat32(0, le), echoMode: 'hex0x' };
+    }
+    case TcpHexValueType.DOUBLE_BE:
+    case TcpHexValueType.DOUBLE_LE: {
+      const want = 16;
+      const use = d.length ? d : '0'.repeat(want);
+      if (use.length !== want) {
+        return { ok: false, error: 'need 16 hex digits (8 bytes)' };
+      }
+      const buf = new ArrayBuffer(8);
+      const view = new DataView(buf);
+      const le = vt === TcpHexValueType.DOUBLE_LE;
+      for (let i = 0; i < 8; i++) {
+        view.setUint8(i, Number.parseInt(use.slice(i * 2, i * 2 + 2), 16));
+      }
+      return { ok: true, value: view.getFloat64(0, le), echoMode: 'hex0x' };
+    }
+    default:
+      return { ok: false, error: 'unsupported type' };
+  }
+}
+
+function decimalUintToFixedBytesBe(n: bigint, nBytes: number): string {
+  const max = 1n << BigInt(8 * nBytes);
+  if (n < 0n || n >= max) {
+    return '';
+  }
+  let s = '';
+  for (let i = nBytes - 1; i >= 0; i--) {
+    s += Number((n >> BigInt(8 * i)) & 0xffn)
+      .toString(16)
+      .padStart(2, '0');
+  }
+  return s;
+}
+
+function parseDownlinkFieldFromDecimalText(
+  trimmed: string,
+  vt: TcpHexValueType,
+  byteLength: number | undefined
+): DownlinkFieldParseResult {
+  const collapsed = trimmed.replace(/\s+/g, '');
+
+  if (vt === TcpHexValueType.BYTES_AS_HEX) {
+    const nB = byteLength;
+    if (nB == null || nB <= 0) {
+      return { ok: false, error: 'BYTES_AS_HEX needs fixed byteLength' };
+    }
+    if (/^\d+$/.test(collapsed)) {
+      try {
+        const bi = BigInt(collapsed);
+        const hex = decimalUintToFixedBytesBe(bi, nB);
+        if (!hex) {
+          return { ok: false, error: `decimal out of range for ${nB} bytes` };
+        }
+        return { ok: true, value: hex, echoMode: 'dec' };
+      } catch {
+        return { ok: false, error: 'invalid decimal' };
+      }
+    }
+    if (/^[0-9a-fA-F]+$/.test(collapsed)) {
+      if (collapsed.length % 2 === 1) {
+        return { ok: false, error: 'odd hex length' };
+      }
+      const want = nB * 2;
+      if (collapsed.length !== want) {
+        return { ok: false, error: `need ${want} hex digits (${nB} bytes)` };
+      }
+      return { ok: true, value: collapsed.toLowerCase(), echoMode: 'bytesPlain' };
+    }
+    return { ok: false, error: 'use decimal digits or even-length hex (no 0x)' };
+  }
+
+  if (
+    vt === TcpHexValueType.FLOAT_BE ||
+    vt === TcpHexValueType.FLOAT_LE ||
+    vt === TcpHexValueType.DOUBLE_BE ||
+    vt === TcpHexValueType.DOUBLE_LE
+  ) {
+    const x = Number(trimmed);
+    if (!Number.isFinite(x)) {
+      return { ok: false, error: 'invalid number' };
+    }
+    return { ok: true, value: x, echoMode: 'dec' };
+  }
+
+  const t = Number(trimmed);
+  if (!Number.isFinite(t) || !Number.isInteger(t)) {
+    return { ok: false, error: 'use decimal integer or 0x hex' };
+  }
+
+  switch (vt) {
+    case TcpHexValueType.UINT8:
+      if (t < 0 || t > 255) {
+        return { ok: false, error: 'UINT8 range 0..255' };
+      }
+      return { ok: true, value: t, echoMode: 'dec' };
+    case TcpHexValueType.INT8:
+      if (t < -128 || t > 127) {
+        return { ok: false, error: 'INT8 range -128..127' };
+      }
+      return { ok: true, value: t, echoMode: 'dec' };
+    case TcpHexValueType.UINT16_BE:
+    case TcpHexValueType.UINT16_LE:
+      if (t < 0 || t > 65535) {
+        return { ok: false, error: 'UINT16 range 0..65535' };
+      }
+      return { ok: true, value: t, echoMode: 'dec' };
+    case TcpHexValueType.INT16_BE:
+    case TcpHexValueType.INT16_LE:
+      if (t < -32768 || t > 32767) {
+        return { ok: false, error: 'INT16 range -32768..32767' };
+      }
+      return { ok: true, value: t, echoMode: 'dec' };
+    case TcpHexValueType.UINT32_BE:
+    case TcpHexValueType.UINT32_LE:
+      if (t < 0 || t > 4294967295) {
+        return { ok: false, error: 'UINT32 range 0..4294967295' };
+      }
+      return { ok: true, value: t, echoMode: 'dec' };
+    case TcpHexValueType.INT32_BE:
+    case TcpHexValueType.INT32_LE:
+      if (t < -2147483648 || t > 2147483647) {
+        return { ok: false, error: 'INT32 range' };
+      }
+      return { ok: true, value: t | 0, echoMode: 'dec' };
+    default:
+      return { ok: false, error: 'unsupported type' };
+  }
+}
+
+function emptyDefaultDownlinkFieldParse(
+  vt: TcpHexValueType,
+  byteLength: number | undefined
+): DownlinkFieldParseResult {
+  if (vt === TcpHexValueType.BYTES_AS_HEX) {
+    const n = byteLength;
+    if (n == null || n <= 0) {
+      return { ok: false, error: 'BYTES_AS_HEX needs fixed byteLength' };
+    }
+    return { ok: true, value: '00'.repeat(n), echoMode: 'dec' };
+  }
+  if (
+    vt === TcpHexValueType.FLOAT_BE ||
+    vt === TcpHexValueType.FLOAT_LE ||
+    vt === TcpHexValueType.DOUBLE_BE ||
+    vt === TcpHexValueType.DOUBLE_LE
+  ) {
+    return { ok: true, value: 0, echoMode: 'dec' };
+  }
+  return { ok: true, value: 0, echoMode: 'dec' };
+}
+
+/**
+ * 以 0x / 0X 开头按十六进制解析；否则按十进制（整型/浮点）。
+ * BYTES_AS_HEX：0x 后为线型 hex；否则纯数字按无符号十进制大端编码，或偶数位纯 hex 字串（无 0x）。
+ */
+export function parseDownlinkFieldInput(
+  rawInput: string,
+  vt: TcpHexValueType,
+  byteLength?: number
+): DownlinkFieldParseResult {
+  const trimmed = String(rawInput ?? '').trim();
+  if (trimmed === '') {
+    return emptyDefaultDownlinkFieldParse(vt, byteLength);
+  }
+  if (/^0x/i.test(trimmed)) {
+    const digits = trimmed.replace(/^0x/i, '').replace(/\s+/g, '');
+    return parseDownlinkFieldFromHexDigits(digits, vt, byteLength);
+  }
+  return parseDownlinkFieldFromDecimalText(trimmed, vt, byteLength);
+}
+
+/** 按合并后字段生成对象（按 byteOffset、key 排序，便于对照帧布局） */
+export function buildDownlinkFieldValuesSkeleton(
+  merged: TcpHexFieldDefinition[],
+  opts?: DownlinkSkeletonOptions
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const f of listDownlinkEditableHexFields(merged, opts)) {
     const v = defaultJsonValueForHexField(f);
     if (v !== undefined) {
       out[f.key] = v;

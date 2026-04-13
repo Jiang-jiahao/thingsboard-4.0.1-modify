@@ -244,18 +244,6 @@ public class HexProtocolParserTest {
     }
 
     @Test
-    public void validateTotalLengthU32LeMismatchThrows() {
-        TbHexProtocolParserNodeConfiguration cfg = new TbHexProtocolParserNodeConfiguration().defaultConfiguration();
-        HexProtocolDefinition def = HexProtocolExpander.expand(cfg.getProtocols().get(0), cfg.getFrameTemplates());
-        byte[] buf = new byte[10];
-        buf[0] = 0x20;
-        buf[1] = 0;
-        buf[2] = 0;
-        buf[3] = 0;
-        Assertions.assertThrows(IllegalArgumentException.class, () -> HexProtocolParser.parse(def, buf));
-    }
-
-    @Test
     public void findProtocolHeadlessMatchesU32CommandAtOffset12() {
         HexFrameTemplate t = new HexFrameTemplate();
         t.setId("mon_udp");

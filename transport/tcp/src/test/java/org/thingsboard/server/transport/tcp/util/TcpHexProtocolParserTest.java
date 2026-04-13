@@ -35,7 +35,7 @@ class TcpHexProtocolParserTest {
         b.setKey("pi");
         b.setByteOffset(2);
         b.setValueType(TcpHexValueType.FLOAT_BE);
-        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a, b), null, null, null, UUID.randomUUID());
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a, b), null, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().get("count").getAsInt()).isEqualTo(100);
         assertThat(out.get().get("pi").getAsDouble()).isBetween(3.13, 3.15);
@@ -51,11 +51,11 @@ class TcpHexProtocolParserTest {
         a.setValueType(TcpHexValueType.UINT16_BE);
         a.setBitMask(0xFFL);
         a.setScale(0.1);
-        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().get("lo").getAsDouble()).isEqualTo(0.0);
         a.setBitMask(0xFFFFL);
-        out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, UUID.randomUUID());
         assertThat(out.get().get("lo").getAsDouble()).isCloseTo(6528.0, org.assertj.core.data.Offset.offset(1e-6));
     }
 
@@ -67,7 +67,7 @@ class TcpHexProtocolParserTest {
         a.setByteOffset(0);
         a.setValueType(TcpHexValueType.BYTES_AS_HEX);
         a.setByteLength(2);
-        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().get("head").getAsString()).isEqualTo("aabb");
     }
@@ -80,7 +80,7 @@ class TcpHexProtocolParserTest {
         a.setByteOffset(0);
         a.setValueType(TcpHexValueType.UINT8);
         a.setFixedWireIntegralValue(165L);
-        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().get("h").getAsInt()).isEqualTo(165);
     }
@@ -93,7 +93,7 @@ class TcpHexProtocolParserTest {
         a.setByteOffset(0);
         a.setValueType(TcpHexValueType.UINT8);
         a.setFixedWireIntegralValue(165L);
-        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().has("h")).isFalse();
     }
@@ -107,7 +107,7 @@ class TcpHexProtocolParserTest {
         a.setValueType(TcpHexValueType.BYTES_AS_HEX);
         a.setByteLength(2);
         a.setFixedBytesHex("A55A");
-        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, null, UUID.randomUUID());
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().get("magic").getAsString()).isEqualTo("a55a");
     }
@@ -130,7 +130,7 @@ class TcpHexProtocolParserTest {
         def.setKey("b0");
         def.setByteOffset(0);
         def.setValueType(TcpHexValueType.UINT8);
-        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, List.of(cmd), List.of(def), null, null, null, UUID.randomUUID());
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, List.of(cmd), List.of(def), null, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().get("afterCmd").getAsInt()).isEqualTo(0xFF);
         assertThat(out.get().get("hexCmdProfile").getAsString()).isEqualTo("heartbeat");
@@ -155,7 +155,7 @@ class TcpHexProtocolParserTest {
         def.setKey("b0");
         def.setByteOffset(0);
         def.setValueType(TcpHexValueType.UINT8);
-        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, List.of(cmd), List.of(def), null, null, null, UUID.randomUUID());
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, List.of(cmd), List.of(def), null, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().get("b0").getAsInt()).isEqualTo(0xA5);
         assertThat(out.get().has("hexCmdProfile")).isFalse();
@@ -195,7 +195,7 @@ class TcpHexProtocolParserTest {
         cmd06.setFields(List.of(f06));
 
         var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload,
-                List.of(cmd21, cmd06), List.of(), null, null, null, UUID.randomUUID());
+                List.of(cmd21, cmd06), List.of(), null, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().get("hexCmdProfile").getAsString()).isEqualTo("ack_echo_21");
         assertThat(out.get().get("paramEcho").getAsInt()).isEqualTo(0x21);
@@ -218,7 +218,7 @@ class TcpHexProtocolParserTest {
         m.setValueType(TcpHexValueType.UINT16_BE);
         ltv.setTagMappings(List.of(m));
         ltv.setUnknownTagMode(TcpHexUnknownTagMode.SKIP);
-        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, null, ltv, null, null, UUID.randomUUID());
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, null, ltv, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().get("p_0_val").getAsInt()).isEqualTo(0x1122);
     }

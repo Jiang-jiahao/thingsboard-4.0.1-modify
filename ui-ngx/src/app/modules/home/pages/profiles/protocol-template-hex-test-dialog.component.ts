@@ -20,11 +20,23 @@ import {
 } from '@shared/models/device.models';
 import {
   buildDownlinkFieldValuesSkeleton,
-  mergeTemplateAndCommandFields
+  defaultDownlinkFieldInputText,
+  defaultJsonValueForHexField,
+  formatDownlinkFieldEcho,
+  listDownlinkEditableHexFields,
+  mergeTemplateAndCommandFields,
+  parseDownlinkFieldInput
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 
 export interface ProtocolTemplateHexTestDialogData {
   bundles: ProtocolTemplateBundle[];
+}
+
+export interface HexTestBuildFieldRow {
+  key: string;
+  valueType: TcpHexValueType;
+  byteLength?: number;
+  inputText: string;
 }
 
 @Component({
@@ -39,9 +51,15 @@ export class ProtocolTemplateHexTestDialogComponent {
   hexTestParsing = false;
   hexTestParseResult: ProtocolTemplateHexParseResult | null = null;
   hexTestBuildCommand: ProtocolTemplateCommandDefinition | null = null;
+  /** 无可编辑字段时的完整 JSON（十进制等，与旧版一致） */
   hexTestBuildValuesJson = '{}';
+  /** 有字段表单时与各行合并 */
+  hexTestBuildExtraJson = '{}';
+  hexTestBuildFieldRows: HexTestBuildFieldRow[] = [];
   hexTestBuilding = false;
   hexTestBuildResult: ProtocolTemplateHexBuildResult | null = null;
+
+  readonly TcpHexValueType = TcpHexValueType;
 
   readonly sameDownlinkCmd = (a: ProtocolTemplateCommandDefinition | null, b: ProtocolTemplateCommandDefinition | null): boolean =>
     !!(a && b && a.templateId === b.templateId && a.commandValue === b.commandValue && a.direction === b.direction);
@@ -66,6 +84,10 @@ export class ProtocolTemplateHexTestDialogComponent {
     this.dialogRef.close();
   }
 
+  get hexTestUsesFieldInputs(): boolean {
+    return this.hexTestBuildFieldRows.length > 0;
+  }
+
   hexTestBundleLabel(b: ProtocolTemplateBundle): string {
     const name = b.name?.trim();
     if (name) {
@@ -73,6 +95,20 @@ export class ProtocolTemplateHexTestDialogComponent {
     }
     const tid = b.protocolTemplates?.[0]?.id ?? b.monitoringTemplates?.[0]?.id;
     return tid ? `${tid} (${b.id})` : b.id;
+  }
+
+  /** 与协议模板编辑器命令值回显一致：0x 小写十六进制 */
+  formatCommandHex(v: number | null | undefined): string {
+    if (v === undefined || v === null || !Number.isFinite(Number(v))) {
+      return '0x0';
+    }
+    const n = Math.trunc(Number(v));
+    const u = n >= 0 ? n : n >>> 0;
+    return '0x' + u.toString(16);
+  }
+
+  trackByBuildFieldKey(_index: number, row: HexTestBuildFieldRow): string {
+    return row.key;
   }
 
   onHexTestBundleChange(): void {
@@ -93,6 +129,8 @@ export class ProtocolTemplateHexTestDialogComponent {
   private applyBuildValuesSkeleton(): void {
     const bundle = this.bundles.find(x => x.id === this.hexTestBundleId);
     const cmd = this.hexTestBuildCommand;
+    this.hexTestBuildFieldRows = [];
+    this.hexTestBuildExtraJson = '{}';
     if (!bundle || !cmd) {
       this.hexTestBuildValuesJson = '{}';
       return;
@@ -105,14 +143,32 @@ export class ProtocolTemplateHexTestDialogComponent {
     }
     const merged = mergeTemplateAndCommandFields(tpl.hexProtocolFields, cmd.fields);
     const cmdOff = tpl.commandByteOffset ?? 12;
-    const skeleton = buildDownlinkFieldValuesSkeleton(merged, {
+    const opts = {
       commandByteOffset: cmdOff,
       commandMatchValueType: cmd.matchValueType ?? TcpHexValueType.UINT32_LE,
       command: cmd
-    });
-    this.hexTestBuildValuesJson = Object.keys(skeleton).length
-      ? JSON.stringify(skeleton, null, 2)
-      : '{}';
+    };
+    const fields = listDownlinkEditableHexFields(merged, opts);
+    const skeleton = buildDownlinkFieldValuesSkeleton(merged, opts);
+    for (const f of fields) {
+      const dj = defaultJsonValueForHexField(f);
+      if (dj === undefined) {
+        continue;
+      }
+      this.hexTestBuildFieldRows.push({
+        key: f.key!,
+        valueType: f.valueType,
+        byteLength: f.byteLength,
+        inputText: defaultDownlinkFieldInputText(f, dj)
+      });
+    }
+    if (this.hexTestBuildFieldRows.length === 0) {
+      this.hexTestBuildValuesJson = Object.keys(skeleton).length
+        ? JSON.stringify(skeleton, null, 2)
+        : '{}';
+    } else {
+      this.hexTestBuildValuesJson = '{}';
+    }
   }
 
   downlinkCommandsForHexTest(): ProtocolTemplateCommandDefinition[] {
@@ -159,29 +215,62 @@ export class ProtocolTemplateHexTestDialogComponent {
     }
   }
 
+  private showBuildError(message: string): void {
+    this.store.dispatch(new ActionNotificationShow({
+      message,
+      type: 'error',
+      duration: 4500,
+      verticalPosition: 'top',
+      horizontalPosition: 'right'
+    }));
+  }
+
   runHexTestBuild(): void {
     const id = this.hexTestBundleId?.trim();
     const cmd = this.hexTestBuildCommand;
     if (!id || !cmd) {
       return;
     }
-    let values: Record<string, unknown> = {};
-    try {
-      const parsed = JSON.parse(this.hexTestBuildValuesJson || '{}');
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        values = parsed as Record<string, unknown>;
-      } else {
-        throw new Error('not an object');
+    let values: Record<string, unknown>;
+    if (this.hexTestUsesFieldInputs) {
+      const built: Record<string, unknown> = {};
+      for (const row of this.hexTestBuildFieldRows) {
+        const parsed = parseDownlinkFieldInput(row.inputText, row.valueType, row.byteLength);
+        if (parsed.ok !== true) {
+          this.showBuildError(this.translate.instant('profiles.protocol-hex-test-field-parse-error', {
+            key: row.key,
+            detail: parsed.error
+          }));
+          return;
+        }
+        built[row.key] = parsed.value;
+        row.inputText = formatDownlinkFieldEcho(parsed.value, row.valueType, parsed.echoMode, row.byteLength);
       }
-    } catch {
-      this.store.dispatch(new ActionNotificationShow({
-        message: this.translate.instant('profiles.protocol-hex-test-values-json-invalid'),
-        type: 'error',
-        duration: 4000,
-        verticalPosition: 'top',
-        horizontalPosition: 'right'
-      }));
-      return;
+      let extra: Record<string, unknown> = {};
+      try {
+        const parsed = JSON.parse(this.hexTestBuildExtraJson || '{}');
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          extra = parsed as Record<string, unknown>;
+        } else {
+          throw new Error('not an object');
+        }
+      } catch {
+        this.showBuildError(this.translate.instant('profiles.protocol-hex-test-extra-json-invalid'));
+        return;
+      }
+      values = { ...built, ...extra };
+    } else {
+      try {
+        const parsed = JSON.parse(this.hexTestBuildValuesJson || '{}');
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          values = parsed as Record<string, unknown>;
+        } else {
+          throw new Error('not an object');
+        }
+      } catch {
+        this.showBuildError(this.translate.instant('profiles.protocol-hex-test-values-json-invalid'));
+        return;
+      }
     }
     this.hexTestBuilding = true;
     this.hexTestBuildResult = null;

@@ -61,15 +61,40 @@
                       (ngModelChange)="onHexTestBuildCommandChange()"
                       name="hexDlgBuildCmd" [disabled]="!hexTestBundleId || !downlinkCommandsForHexTest().length">
             <mat-option *ngFor="let c of downlinkCommandsForHexTest()" [value]="c">
-              {{ c.name || ('cmd ' + c.commandValue) }} · {{ c.templateId }} · {{ c.commandValue }}
+              {{ c.name || ('cmd ' + formatCommandHex(c.commandValue)) }} · {{ c.templateId }} · {{ formatCommandHex(c.commandValue) }}
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <mat-form-field class="w-full" subscriptSizing="dynamic" appearance="outline">
+
+        <ng-container *ngIf="hexTestUsesFieldInputs">
+          <p class="mat-caption text-muted" translate>profiles.protocol-hex-test-values-fields-hint</p>
+          <div class="tb-protocol-hex-test-fields-grid">
+            <mat-form-field *ngFor="let row of hexTestBuildFieldRows; trackBy: trackByBuildFieldKey"
+                            class="tb-protocol-hex-test-field-input w-full" subscriptSizing="dynamic" appearance="outline">
+              <mat-label>{{ row.key }} ({{ row.valueType }})</mat-label>
+              <input matInput type="text" [name]="'hexDlgField_' + row.key" [(ngModel)]="row.inputText"
+                     spellcheck="false" autocomplete="off"
+                     [placeholder]="'profiles.protocol-hex-test-field-value-placeholder' | translate">
+            </mat-form-field>
+          </div>
+          <mat-expansion-panel class="tb-protocol-hex-test-extra-json-panel mat-elevation-z0">
+            <mat-expansion-panel-header>
+              <mat-panel-title translate>profiles.protocol-hex-test-values-extra-json</mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-form-field class="w-full" subscriptSizing="dynamic" appearance="outline">
+              <mat-label translate>profiles.protocol-hex-test-values-extra-json</mat-label>
+              <textarea matInput rows="4" name="hexDlgExtraJson" [(ngModel)]="hexTestBuildExtraJson"
+                        spellcheck="false"></textarea>
+              <mat-hint translate>profiles.protocol-hex-test-extra-json-hint</mat-hint>
+            </mat-form-field>
+          </mat-expansion-panel>
+        </ng-container>
+
+        <mat-form-field *ngIf="!hexTestUsesFieldInputs" class="w-full" subscriptSizing="dynamic" appearance="outline">
           <mat-label translate>profiles.protocol-hex-test-values-json</mat-label>
           <textarea matInput rows="6" name="hexDlgValuesJson" [(ngModel)]="hexTestBuildValuesJson"
                     spellcheck="false"></textarea>
-          <mat-hint translate>profiles.protocol-hex-test-values-hint</mat-hint>
+          <mat-hint translate>profiles.protocol-hex-test-values-json-only-hint</mat-hint>
         </mat-form-field>
         <div class="tb-protocol-hex-test-actions">
           <button mat-raised-button color="primary" type="button"

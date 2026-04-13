@@ -375,7 +375,6 @@ export interface ProtocolTemplateDefinition {
   name?: string;
   commandByteOffset?: number;
   commandMatchWidth?: number;
-  validateTotalLengthU32Le?: boolean;
   /** 可选：整帧校验（先于字段解析） */
   checksum?: TcpHexChecksumDefinition;
   hexProtocolFields?: TcpHexFieldDefinition[];
@@ -549,7 +548,6 @@ export interface TransportTcpDataTypeConfiguration {
   hexProtocolFields?: TcpHexFieldDefinition[];
   /** 未匹配命令时，在固定字段之后解析的 LTV/TLV 重复段 */
   hexLtvRepeating?: TcpHexLtvRepeatingConfig;
-  validateTotalLengthU32Le?: boolean;
   /** 手动 HEX：可选整帧校验 */
   checksum?: TcpHexChecksumDefinition;
   /** 协议模板负载：先配模板再配命令 */

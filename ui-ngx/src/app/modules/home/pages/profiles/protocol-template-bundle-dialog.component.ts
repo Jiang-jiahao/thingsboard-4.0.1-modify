@@ -183,8 +183,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
     const t: ProtocolTemplateDefinition = {
       id: templateId,
       commandByteOffset: Number(row['commandByteOffset']) ?? 12,
-      commandMatchWidth: Number(row['commandMatchWidth']) === 1 ? 1 : 4,
-      validateTotalLengthU32Le: this.isFormBooleanTrue(row['validateTotalLengthU32Le'])
+      commandMatchWidth: Number(row['commandMatchWidth']) === 1 ? 1 : 4
     };
     const csType = String(row['checksumType'] ?? 'NONE').trim();
     if (csType && csType.toUpperCase() !== 'NONE') {

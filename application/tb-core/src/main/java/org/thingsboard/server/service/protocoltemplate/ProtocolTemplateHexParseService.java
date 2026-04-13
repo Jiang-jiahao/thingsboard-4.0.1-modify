@@ -86,12 +86,11 @@ public class ProtocolTemplateHexParseService {
                 hexCfg.getHexCommandProfiles(),
                 hexCfg.getHexProtocolFields(),
                 hexCfg.getHexLtvRepeating(),
-                hexCfg.getValidateTotalLengthU32Le(),
                 hexCfg.getChecksum(),
                 UUID.randomUUID());
 
         if (parsed.isEmpty()) {
-            out.setErrorMessage("No telemetry produced (checksum mismatch, length check failed, no matching command, or no parseable fields)");
+            out.setErrorMessage("No telemetry produced (checksum mismatch, no matching command, or no parseable fields)");
             return out;
         }
 

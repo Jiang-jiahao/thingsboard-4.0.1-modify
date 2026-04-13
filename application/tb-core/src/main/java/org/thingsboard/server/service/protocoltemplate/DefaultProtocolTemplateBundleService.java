@@ -171,28 +171,55 @@ public class DefaultProtocolTemplateBundleService {
         b.setName(e.getName());
         JsonNode data = e.getBundleData();
         if (data != null && data.isObject()) {
-            if (data.hasNonNull("protocolTemplates")) {
-                b.setProtocolTemplates(JacksonUtil.convertValue(data.get("protocolTemplates"),
-                        new TypeReference<List<ProtocolTemplateDefinition>>() {}));
-            } else if (data.hasNonNull("monitoringTemplates")) {
-                b.setProtocolTemplates(JacksonUtil.convertValue(data.get("monitoringTemplates"),
-                        new TypeReference<List<ProtocolTemplateDefinition>>() {}));
-            } else {
-                b.setProtocolTemplates(new ArrayList<>());
-            }
-            if (data.hasNonNull("protocolCommands")) {
-                b.setProtocolCommands(JacksonUtil.convertValue(data.get("protocolCommands"),
-                        new TypeReference<List<ProtocolTemplateCommandDefinition>>() {}));
-            } else if (data.hasNonNull("monitoringCommands")) {
-                b.setProtocolCommands(JacksonUtil.convertValue(data.get("monitoringCommands"),
-                        new TypeReference<List<ProtocolTemplateCommandDefinition>>() {}));
-            } else {
-                b.setProtocolCommands(new ArrayList<>());
-            }
+            b.setProtocolTemplates(readBundleList(
+                    firstNonNull(data, "protocolTemplates", "monitoringTemplates"),
+                    new TypeReference<List<ProtocolTemplateDefinition>>() {}));
+            b.setProtocolCommands(readBundleList(
+                    firstNonNull(data, "protocolCommands", "monitoringCommands"),
+                    new TypeReference<List<ProtocolTemplateCommandDefinition>>() {}));
+        } else if (data != null && data.isArray()) {
+            // 兼容误将「仅帧模板数组」写入 bundle_data 根的情况
+            b.setProtocolTemplates(readBundleList(data, new TypeReference<List<ProtocolTemplateDefinition>>() {}));
+            b.setProtocolCommands(new ArrayList<>());
         } else {
             b.setProtocolTemplates(new ArrayList<>());
             b.setProtocolCommands(new ArrayList<>());
         }
         return b;
+    }
+
+    private static JsonNode firstNonNull(JsonNode obj, String a, String b) {
+        if (obj != null && obj.hasNonNull(a)) {
+            return obj.get(a);
+        }
+        if (obj != null && obj.hasNonNull(b)) {
+            return obj.get(b);
+        }
+        return null;
+    }
+
+    /**
+     * bundle_data 中列表可能为 JSON 数组，也可能被错误存成字符串；反序列化时忽略未知字段（如历史版本中的 validateTotalLengthU32Le）。
+     */
+    private static <T> List<T> readBundleList(JsonNode raw, TypeReference<List<T>> typeRef) {
+        JsonNode node = unwrapJsonStringToNode(raw);
+        if (node == null || !node.isArray()) {
+            return new ArrayList<>();
+        }
+        return JacksonUtil.IGNORE_UNKNOWN_PROPERTIES_JSON_MAPPER.convertValue(node, typeRef);
+    }
+
+    private static JsonNode unwrapJsonStringToNode(JsonNode raw) {
+        if (raw == null || raw.isNull()) {
+            return null;
+        }
+        if (raw.isTextual()) {
+            String t = raw.asText();
+            if (t == null || t.isBlank()) {
+                return JacksonUtil.newArrayNode();
+            }
+            return JacksonUtil.toJsonNode(t.trim());
+        }
+        return raw;
     }
 }

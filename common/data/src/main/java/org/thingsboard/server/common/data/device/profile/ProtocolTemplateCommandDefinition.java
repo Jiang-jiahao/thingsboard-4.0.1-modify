@@ -5,6 +5,7 @@
  */
 package org.thingsboard.server.common.data.device.profile;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -16,6 +17,7 @@ import java.util.Objects;
  * 在某一帧模板下，按命令字配置上行/下行及可选字段覆盖。
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProtocolTemplateCommandDefinition implements Serializable {
 
     private String templateId;

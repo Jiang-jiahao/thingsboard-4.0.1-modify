@@ -95,7 +95,6 @@ public class TbHexProtocolParserNodeConfiguration implements NodeConfiguration<T
         proto.setCommandByteOffset(12);
         proto.setCommandValue(null);
         proto.setCommandMatchWidth(4);
-        proto.setValidateTotalLengthU32Le(true);
         HexChecksumDefinition none = new HexChecksumDefinition();
         none.setType("NONE");
         proto.setChecksum(none);

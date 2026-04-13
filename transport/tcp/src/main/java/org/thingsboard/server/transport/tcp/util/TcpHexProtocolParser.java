@@ -42,20 +42,11 @@ public final class TcpHexProtocolParser {
                                                                        List<TcpHexCommandProfile> commandProfiles,
                                                                        List<TcpHexFieldDefinition> defaultFields,
                                                                        TcpHexLtvRepeatingConfig defaultLtvRepeating,
-                                                                       Boolean validateTotalLengthU32Le,
                                                                        TcpHexChecksumDefinition checksum,
                                                                        UUID sessionId) {
         byte[] frame = extractFrameBytes(payload);
         if (frame == null) {
             return Optional.empty();
-        }
-        if (Boolean.TRUE.equals(validateTotalLengthU32Le) && frame.length >= 4) {
-            ByteBuffer bb = ByteBuffer.wrap(frame, 0, 4).order(ByteOrder.LITTLE_ENDIAN);
-            long declared = Integer.toUnsignedLong(bb.getInt());
-            if (declared != frame.length) {
-                log.debug("[{}] Hex frame length mismatch: declared {} actual {}", sessionId, declared, frame.length);
-                return Optional.empty();
-            }
         }
         try {
             validateFrameChecksum(checksum, frame);

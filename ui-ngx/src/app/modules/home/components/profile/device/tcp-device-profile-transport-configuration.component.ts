@@ -419,7 +419,6 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       name: [t?.name ?? '', [Validators.maxLength(255)]],
       commandByteOffset: [t?.commandByteOffset ?? 12, [Validators.required, Validators.min(0)]],
       commandMatchWidth: [t?.commandMatchWidth === 1 ? 1 : 4],
-      validateTotalLengthU32Le: [t?.validateTotalLengthU32Le === true],
       hexProtocolFields: fieldsArr,
       hexLtvEnabled: [!!ltv],
       hexLtvStartOffset: [ltv?.startByteOffset ?? 0, [Validators.required, Validators.min(0)]],
@@ -731,8 +730,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
             const t: ProtocolTemplateDefinition = {
               id,
               commandByteOffset: Number(row['commandByteOffset']) ?? 12,
-              commandMatchWidth: Number(row['commandMatchWidth']) === 1 ? 1 : 4,
-              validateTotalLengthU32Le: row['validateTotalLengthU32Le'] === true
+              commandMatchWidth: Number(row['commandMatchWidth']) === 1 ? 1 : 4
             };
             const csType = String(row['checksumType'] ?? 'NONE').trim();
             if (csType && csType.toUpperCase() !== 'NONE') {

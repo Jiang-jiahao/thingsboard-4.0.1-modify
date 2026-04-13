@@ -47,10 +47,6 @@ public class HexTransportTcpDataConfiguration implements TransportTcpDataTypeCon
      */
     private TcpHexLtvRepeatingConfig hexLtvRepeating;
     /**
-     * 为 true 时要求帧首 4 字节（小端 uint32）等于实际帧字节长度。
-     */
-    private Boolean validateTotalLengthU32Le;
-    /**
      * 可选：整帧校验（NONE 或未设置则跳过）。
      */
     private TcpHexChecksumDefinition checksum;
