@@ -23,6 +23,7 @@ import org.thingsboard.server.transport.tcp.util.TcpHexProtocolParser;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
@@ -30,6 +31,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 按首帧模板 + 下行/双向命令合并字段组帧，并写入命令字、总长度（若启用）、校验和。
@@ -149,7 +152,11 @@ public class ProtocolTemplateHexBuildService {
         }
 
         byte[] buf = new byte[frameLen];
-        Map<String, Object> values = request.getValues() != null ? request.getValues() : Map.of();
+        Map<String, Object> values = new HashMap<>();
+        if (request.getValues() != null) {
+            values.putAll(request.getValues());
+        }
+        expandPaWordHiLoAliases(values);
 
         boolean cmdLenAuto = commandLevelDownlinkPayloadLengthAuto(cmd);
         try {
@@ -490,6 +497,47 @@ public class ProtocolTemplateHexBuildService {
                     "Field [" + f.getKey() + "]: BYTES_AS_HEX for build requires fixed byteLength (dynamic length unsupported)");
         }
         return vt.getFixedByteLength();
+    }
+
+    /**
+     * 兼容「整格 UINT16」与「高/低字节 UINT8」两种下发键名：若存在 {@code paN_word} 且未单独提供 {@code paN_hi}/{@code paN_lo}，
+     * 则按大端拆成 hi、lo（16 位线值掩码 0xFFFF）。已显式给出的 hi/lo 不会被覆盖。
+     */
+    static void expandPaWordHiLoAliases(Map<String, Object> values) {
+        if (values == null || values.isEmpty()) {
+            return;
+        }
+        Pattern p = Pattern.compile("^pa(\\d+)_word$");
+        for (String key : List.copyOf(values.keySet())) {
+            if (key == null) {
+                continue;
+            }
+            String trimmed = key.trim();
+            Matcher m = p.matcher(trimmed);
+            if (!m.matches()) {
+                continue;
+            }
+            Object w = values.get(key);
+            if (w == null) {
+                continue;
+            }
+            long word;
+            try {
+                word = toLongForIntegral(w, trimmed);
+            } catch (IllegalArgumentException | ArithmeticException e) {
+                continue;
+            }
+            word &= 0xFFFFL;
+            String n = m.group(1);
+            String hk = "pa" + n + "_hi";
+            String lk = "pa" + n + "_lo";
+            if (!values.containsKey(hk)) {
+                values.put(hk, (int) ((word >>> 8) & 0xFF));
+            }
+            if (!values.containsKey(lk)) {
+                values.put(lk, (int) (word & 0xFF));
+            }
+        }
     }
 
     private static void writeFieldFromValues(byte[] buf, TcpHexFieldDefinition f, Map<String, Object> values) {

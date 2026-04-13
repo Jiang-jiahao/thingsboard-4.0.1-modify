@@ -52,13 +52,15 @@ class ProtocolTemplateTransportTcpDataConfigurationTest {
     void mergeTemplateAndCommandFieldsKeepsNonOverlappingTemplateAndDropsOverlapped() {
         TcpHexFieldDefinition src = field("srcAddr", 2, TcpHexValueType.UINT8);
         TcpHexFieldDefinition paramLo = field("paramFirst", 7, TcpHexValueType.UINT8);
-        TcpHexFieldDefinition pa1 = field("pa1_word", 7, TcpHexValueType.UINT16_BE);
+        TcpHexFieldDefinition pa1Hi = field("pa1_hi", 7, TcpHexValueType.UINT8);
+        TcpHexFieldDefinition pa1Lo = field("pa1_lo", 8, TcpHexValueType.UINT8);
 
         List<TcpHexFieldDefinition> merged = ProtocolTemplateTransportTcpDataConfiguration.mergeTemplateAndCommandFields(
-                List.of(src, paramLo), List.of(pa1));
-        assertThat(merged).hasSize(2);
+                List.of(src, paramLo), List.of(pa1Hi, pa1Lo));
+        assertThat(merged).hasSize(3);
         assertThat(merged.get(0).getKey()).isEqualTo("srcAddr");
-        assertThat(merged.get(1).getKey()).isEqualTo("pa1_word");
+        assertThat(merged.get(1).getKey()).isEqualTo("pa1_hi");
+        assertThat(merged.get(2).getKey()).isEqualTo("pa1_lo");
     }
 
     @Test

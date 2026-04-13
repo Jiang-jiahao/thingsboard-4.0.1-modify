@@ -3,15 +3,17 @@
  * - 公共：0-1 帧头 A5 5A；2-3 源/目的；4 命令；5-6 参数长度 UINT16 LE；7 起参数；末字节 SUM8（从源地址起至参数末）。
  *
  * **表 5-1 下行（PC→干扰器）0x21**：典型 Src=0x10(PC)、Dst=0xA0(干扰器)；参数长度 N=10（0x0A 0x00）；
- * 参数区字节 7–16 为 5 路功放各 2 字节（表 5-2：高字节 7 保留、低字节 8 的 bit0~3 对应 C1/5.8G、S1/2.4G、L1/GPS L1、900M 等开关）。
- * 校验和在字节 17（整帧 18 字节，索引 0–17）。组帧时按位拼好每个 UINT16 再下发。
+ * 参数区字节 7–16 为 5 路功放各 2 字节（表 5-2：高字节保留、低字节 bit0~3 对应 C1/5.8G、S1/2.4G、L1/GPS L1、900M 等开关）。
+ * 下行组帧字段为每路 `paN_hi` + `paN_lo`（UINT8），便于只配低字节位图；若 JSON 仍传 `paN_word`（UINT16 线值），服务端会按大端拆成 hi/lo（显式 hi/lo 优先）。
+ * 校验和在字节 17（整帧 18 字节，索引 0–17）。
  *
  * **表 5-3 上行（干扰器→PC）应答**：命令字节为 0xA2；参数长度 N=11（0x0B 0x00）；
  * 字节 7（Param1）为回显原命令（对 0x21 应答则为 0x21）；字节 8–17 为 5 路功放当前状态（与下行同 2 字节/路结构）。
  * 校验和在字节 18。识别「应答哪条指令」用第二匹配：偏移 7 = 原命令码。
  *
- * **下行 0x21 示例（表 5-1）**：命令勾选自动参长、长度字段选 `paramLen`；各 `pa*_word` 勾选「参与参长」；
- * 组帧时 N = 5×UINT16 = 10（各勾选字段字节宽度之和），JSON 不必填 paramLen/cmd。
+ * **下行 0x21 示例（表 5-1）**：命令勾选自动参长、长度字段选 `paramLen`；10 行 `pa1_hi`/`pa1_lo`…`pa5_lo` 均勾选「参与参长」。
+ * 组帧 JSON 推荐（高字节一般为 0 可省略键，由组帧填 0）：`{"pa1_lo":15,"pa2_lo":0,"pa3_lo":0,"pa4_lo":0,"pa5_lo":0}`。
+ * 亦可写满 10 键；**仍兼容**旧键 `pa1_word`…`pa5_word`（UINT16 线值），由服务端拆成 hi/lo。
  * 其它下行命令（0x1F 等）若未覆盖 paramLen，仍用手填参长或后续在命令上增加字段/自动参长覆盖。
  * 命令「覆盖字段」可与帧模板合并：重叠区间以命令字段为准（见 mergeTemplateAndCommandFields）。
  * 帧模板默认只含公共头（至 paramLen），**paramFirst 仅配在上行命令**；下行不从模板继承 paramFirst。
@@ -40,13 +42,18 @@ type CmdOptions = {
   downlinkPayloadLengthFieldKey?: string;
 };
 
-/** 表 5-1：下行自动参长由命令勾选 + 各参数字段勾选参与（paramLen 在帧模板中已定义） */
+/** 表 5-1：每路 2×UINT8，与 `paN_word` 线值兼容由服务端展开 */
 const FIELDS_DOWNLINK_JAM_21: TcpHexFieldDefinition[] = [
-  { key: 'pa1_word', byteOffset: 7, valueType: TcpHexValueType.UINT16_BE, includeInDownlinkPayloadLength: true },
-  { key: 'pa2_word', byteOffset: 9, valueType: TcpHexValueType.UINT16_BE, includeInDownlinkPayloadLength: true },
-  { key: 'pa3_word', byteOffset: 11, valueType: TcpHexValueType.UINT16_BE, includeInDownlinkPayloadLength: true },
-  { key: 'pa4_word', byteOffset: 13, valueType: TcpHexValueType.UINT16_BE, includeInDownlinkPayloadLength: true },
-  { key: 'pa5_word', byteOffset: 15, valueType: TcpHexValueType.UINT16_BE, includeInDownlinkPayloadLength: true }
+  { key: 'pa1_hi', byteOffset: 7, valueType: TcpHexValueType.UINT8, includeInDownlinkPayloadLength: true },
+  { key: 'pa1_lo', byteOffset: 8, valueType: TcpHexValueType.UINT8, includeInDownlinkPayloadLength: true },
+  { key: 'pa2_hi', byteOffset: 9, valueType: TcpHexValueType.UINT8, includeInDownlinkPayloadLength: true },
+  { key: 'pa2_lo', byteOffset: 10, valueType: TcpHexValueType.UINT8, includeInDownlinkPayloadLength: true },
+  { key: 'pa3_hi', byteOffset: 11, valueType: TcpHexValueType.UINT8, includeInDownlinkPayloadLength: true },
+  { key: 'pa3_lo', byteOffset: 12, valueType: TcpHexValueType.UINT8, includeInDownlinkPayloadLength: true },
+  { key: 'pa4_hi', byteOffset: 13, valueType: TcpHexValueType.UINT8, includeInDownlinkPayloadLength: true },
+  { key: 'pa4_lo', byteOffset: 14, valueType: TcpHexValueType.UINT8, includeInDownlinkPayloadLength: true },
+  { key: 'pa5_hi', byteOffset: 15, valueType: TcpHexValueType.UINT8, includeInDownlinkPayloadLength: true },
+  { key: 'pa5_lo', byteOffset: 16, valueType: TcpHexValueType.UINT8, includeInDownlinkPayloadLength: true }
 ];
 
 /** 仅解析参区首字节（上行通用，下行勿用） */
@@ -136,7 +143,7 @@ export function buildHuanuoJ3000PresetBundle(displayName: string): ProtocolTempl
   };
 
   const commands: ProtocolTemplateCommandDefinition[] = [
-    // 下行（平台→设备）：表 5-1 参数占位；组帧时 pa*_word 按位填 bit0~3（见表 5-2）
+    // 下行（平台→设备）：表 5-1；pa*_lo 按位填 bit0~3（表 5-2），或传 pa*_word 由服务端拆字节
     cmd('下发 干扰启停 0x21', 0x21, {
       direction: ProtocolTemplateCommandDirection.DOWNLINK,
       downlinkPayloadLengthAuto: true,

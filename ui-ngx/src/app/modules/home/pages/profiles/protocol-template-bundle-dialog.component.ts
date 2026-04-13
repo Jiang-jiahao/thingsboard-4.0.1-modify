@@ -107,7 +107,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
     this.dialogRef.close(undefined);
   }
 
-  /** 载入华诺 J3000+ 示例帧模板与命令（含 0xA2 应答的第二匹配） */
+  /** 载入华诺 J3000+ 示例帧模板与命令（0x21 下行参区为 paN_hi/paN_lo；兼容 paN_word；含 0xA2 第二匹配） */
   applyHuanuoJ3000Preset(): void {
     const name = String(this.bundleMetaForm.get('name')?.value ?? '').trim() || 'J3000+';
     const preset = buildHuanuoJ3000PresetBundle(name);
