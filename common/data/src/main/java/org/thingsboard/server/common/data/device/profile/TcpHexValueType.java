@@ -22,6 +22,22 @@ public enum TcpHexValueType {
     UINT32_LE(4),
     INT32_BE(4),
     INT32_LE(4),
+    /**
+     * 仅用于 LTV Tag→遥测映射：无符号整数，小端；实际宽度由本段 Value 字节数在 1/2/4 中择一（与 {@link TcpHexValueType#UINT8}/{@link #UINT16_LE}/{@link #UINT32_LE} 等价）。
+     */
+    UINT_AUTO_LE(0),
+    /**
+     * 仅用于 LTV Tag→遥测映射：无符号整数，大端；宽度 1/2/4 字节。
+     */
+    UINT_AUTO_BE(0),
+    /**
+     * 仅用于 LTV Tag→遥测映射：有符号整数，小端；宽度 1/2/4 字节。
+     */
+    INT_AUTO_LE(0),
+    /**
+     * 仅用于 LTV Tag→遥测映射：有符号整数，大端；宽度 1/2/4 字节。
+     */
+    INT_AUTO_BE(0),
     FLOAT_BE(4),
     FLOAT_LE(4),
     DOUBLE_BE(8),
@@ -46,5 +62,10 @@ public enum TcpHexValueType {
 
     public boolean isBytesAsHex() {
         return this == BYTES_AS_HEX;
+    }
+
+    /** 是否仅用于 LTV 映射的「按本段字节数」整型（非固定宽度枚举）。 */
+    public boolean isLtvAutoWidthIntegral() {
+        return this == UINT_AUTO_LE || this == UINT_AUTO_BE || this == INT_AUTO_LE || this == INT_AUTO_BE;
     }
 }

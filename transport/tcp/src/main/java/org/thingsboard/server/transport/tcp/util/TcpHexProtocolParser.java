@@ -169,6 +169,9 @@ public final class TcpHexProtocolParser {
                 pos += lenW;
             }
             int vLen = (int) lenVal;
+            if (Boolean.TRUE.equals(cfg.getLengthIncludesTag())) {
+                vLen = vLen - tagW;
+            }
             if (vLen < 0 || pos + vLen > frame.length) {
                 log.warn("[{}] LTV invalid value length {} at offset {}", sessionId, vLen, pos);
                 break;
@@ -192,8 +195,13 @@ public final class TcpHexProtocolParser {
             }
             fullKey += mapping.getTelemetryKey();
             TcpHexFieldDefinition synthetic = ltvMappingToField(mapping, fullKey);
+            TcpHexValueType mvt = synthetic.getValueType();
+            if (mvt != null && mvt.isLtvAutoWidthIntegral()) {
+                synthetic.setValueType(mapLtvAutoIntegralToConcrete(mvt, v.length));
+            }
             try {
-                appendField(out, v, synthetic);
+                int vLen = resolveLtvValueByteLength(v, synthetic);
+                appendFieldWithResolvedLength(out, v, synthetic, vLen);
             } catch (TcpHexFixedFieldMismatchException e) {
                 if (failRuleOnFixedFieldMismatch) {
                     throw e;
@@ -224,10 +232,65 @@ public final class TcpHexProtocolParser {
         d.setKey(key);
         d.setByteOffset(0);
         d.setValueType(m.getValueType());
-        d.setByteLength(m.getByteLength());
+        // Value 字节数由 LTV 的 Length 字段切出，不沿用映射上的 byteLength（历史字段可忽略）
+        d.setByteLength(null);
         d.setScale(m.getScale());
         d.setBitMask(m.getBitMask());
         return d;
+    }
+
+    /**
+     * 将 LTV 专用「按本段宽度」整型映射为具体 UINT8、UINT16、UINT32 线型类型（仅支持 Value 长 1、2 或 4 字节）。
+     */
+    static TcpHexValueType mapLtvAutoIntegralToConcrete(TcpHexValueType autoVt, int valueLen) {
+        return switch (autoVt) {
+            case UINT_AUTO_LE -> switch (valueLen) {
+                case 1 -> TcpHexValueType.UINT8;
+                case 2 -> TcpHexValueType.UINT16_LE;
+                case 4 -> TcpHexValueType.UINT32_LE;
+                default -> throw new IllegalArgumentException(
+                        "unsigned integer (LE) LTV value: expected 1, 2, or 4 bytes, got " + valueLen);
+            };
+            case UINT_AUTO_BE -> switch (valueLen) {
+                case 1 -> TcpHexValueType.UINT8;
+                case 2 -> TcpHexValueType.UINT16_BE;
+                case 4 -> TcpHexValueType.UINT32_BE;
+                default -> throw new IllegalArgumentException(
+                        "unsigned integer (BE) LTV value: expected 1, 2, or 4 bytes, got " + valueLen);
+            };
+            case INT_AUTO_LE -> switch (valueLen) {
+                case 1 -> TcpHexValueType.INT8;
+                case 2 -> TcpHexValueType.INT16_LE;
+                case 4 -> TcpHexValueType.INT32_LE;
+                default -> throw new IllegalArgumentException(
+                        "signed integer (LE) LTV value: expected 1, 2, or 4 bytes, got " + valueLen);
+            };
+            case INT_AUTO_BE -> switch (valueLen) {
+                case 1 -> TcpHexValueType.INT8;
+                case 2 -> TcpHexValueType.INT16_BE;
+                case 4 -> TcpHexValueType.INT32_BE;
+                default -> throw new IllegalArgumentException(
+                        "signed integer (BE) LTV value: expected 1, 2, or 4 bytes, got " + valueLen);
+            };
+            default -> throw new IllegalArgumentException("not an LTV auto integral type: " + autoVt);
+        };
+    }
+
+    /**
+     * LTV 段内 Value 缓冲区的长度来自报文 Length（及 lengthIncludesTag 推导），
+     * 与 {@link TcpHexValueType#getFixedByteLength()} 独立；此处校验「线长」与所选解码类型是否一致。
+     */
+    private static int resolveLtvValueByteLength(byte[] v, TcpHexFieldDefinition def) {
+        TcpHexValueType vt = def.getValueType();
+        if (vt.isBytesAsHex()) {
+            return v.length;
+        }
+        int need = vt.getFixedByteLength();
+        if (v.length != need) {
+            throw new IllegalArgumentException(
+                    "LTV value length " + v.length + " bytes does not match " + vt + " (requires " + need + " bytes)");
+        }
+        return need;
     }
 
     private static int integralTypeWidth(TcpHexValueType vt) {
@@ -363,6 +426,10 @@ public final class TcpHexProtocolParser {
 
     private static void appendField(JsonObject out, byte[] frame, TcpHexFieldDefinition def) {
         int len = resolveFieldByteLength(frame, def);
+        appendFieldWithResolvedLength(out, frame, def, len);
+    }
+
+    private static void appendFieldWithResolvedLength(JsonObject out, byte[] frame, TcpHexFieldDefinition def, int len) {
         if (def.getByteOffset() + len > frame.length) {
             throw new IllegalArgumentException("field out of bounds: offset=" + def.getByteOffset() + " len=" + len + " frame=" + frame.length);
         }
@@ -480,6 +547,9 @@ public final class TcpHexProtocolParser {
      */
     static int resolveFieldByteLength(byte[] frame, TcpHexFieldDefinition def) {
         TcpHexValueType vt = def.getValueType();
+        if (vt.isLtvAutoWidthIntegral()) {
+            throw new IllegalArgumentException("LTV auto-width integral types are only valid in LTV tag mappings");
+        }
         if (!vt.isBytesAsHex()) {
             return vt.getFixedByteLength();
         }

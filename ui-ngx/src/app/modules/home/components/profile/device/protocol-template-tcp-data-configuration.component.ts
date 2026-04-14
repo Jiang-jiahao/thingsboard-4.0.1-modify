@@ -1,26 +1,37 @@
 ///
 /// Copyright © 2016-2025 The Thingsboard Authors
 ///
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, AfterViewInit, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { AbstractControl, UntypedFormArray, UntypedFormGroup } from '@angular/forms';
 import {
   ProtocolTemplateCommandDirection,
   TcpHexLtvChunkOrder,
   TcpHexUnknownTagMode,
   TcpHexValueType,
+  TCP_HEX_LTV_TAG_VALUE_OPTIONS,
+  TcpHexLtvTagValueOption,
   TransportTcpDataType
 } from '@shared/models/device.models';
 import {
   formatIntegralWireTextEcho,
-  parseIntegralWireTextToNumber
+  formatTcpHexMatchValueHexHint,
+  parseIntegralWireTextToNumber,
+  parseLtvTagWireTextToNumber
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
+import { Subject, Subscription } from 'rxjs';
+import { startWith, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'tb-protocol-template-tcp-data-configuration',
   templateUrl: './protocol-template-tcp-data-configuration.component.html',
   styleUrls: ['./protocol-template-tcp-data-configuration.component.scss']
 })
-export class ProtocolTemplateTcpDataConfigurationComponent {
+export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges, AfterViewInit, OnDestroy {
+  /** 帧模板内 LTV/TLV 段折叠面板：已启用 LTV 时打开界面默认展开 */
+  templateHexLtvPanelExpanded = false;
+
+  private readonly destroy$ = new Subject<void>();
+  private templatesArraySub?: Subscription;
   readonly TransportTcpDataType = TransportTcpDataType;
   readonly ProtocolTemplateCommandDirection = ProtocolTemplateCommandDirection;
   readonly TcpHexValueType = TcpHexValueType;
@@ -45,6 +56,9 @@ export class ProtocolTemplateTcpDataConfigurationComponent {
   commandsArray: UntypedFormArray;
   @Input()
   tcpHexValueTypes: TcpHexValueType[];
+  /** LTV Tag→遥测映射：与帧内固定字段的 tcpHexValueTypes 分离 */
+  @Input()
+  tcpHexLtvTagValueOptions: TcpHexLtvTagValueOption[] = TCP_HEX_LTV_TAG_VALUE_OPTIONS;
   @Input()
   disabled: boolean;
 
@@ -64,6 +78,67 @@ export class ProtocolTemplateTcpDataConfigurationComponent {
   @Output() removeCommand = new EventEmitter<number>();
   @Output() addOverrideField = new EventEmitter<number>();
   @Output() removeOverrideField = new EventEmitter<{ commandIndex: number; fieldIndex: number }>();
+
+  constructor(private cdr: ChangeDetectorRef) {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['templatesArray']) {
+      this.wireTemplateLtvPanelSync();
+      this.scheduleExpandTemplateLtvPanel();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.wireTemplateLtvPanelSync();
+    this.scheduleExpandTemplateLtvPanel();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.templatesArraySub?.unsubscribe();
+  }
+
+  /**
+   * templatesArray 多为同一 FormArray 引用原地更新，ngOnChanges 不一定触发；
+   * 父级 patch 常带 emitEvent:false，valueChanges 也可能不触发——需订阅 valueChanges（含 startWith）并延迟再读当前值。
+   */
+  private wireTemplateLtvPanelSync(): void {
+    this.templatesArraySub?.unsubscribe();
+    if (!this.templatesArray) {
+      return;
+    }
+    this.templatesArraySub = this.templatesArray.valueChanges.pipe(
+      startWith(this.templatesArray.value),
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.expandTemplateLtvPanelIfEnabled());
+  }
+
+  private scheduleExpandTemplateLtvPanel(): void {
+    const run = () => this.expandTemplateLtvPanelIfEnabled();
+    queueMicrotask(run);
+    setTimeout(run, 0);
+    setTimeout(run, 50);
+  }
+
+  private expandTemplateLtvPanelIfEnabled(): void {
+    if (!this.templatesArray?.length) {
+      return;
+    }
+    const g = this.templatesArray.at(0) as UntypedFormGroup;
+    if (g?.get('hexLtvEnabled')?.value === true) {
+      this.templateHexLtvPanelExpanded = true;
+      this.cdr.markForCheck();
+    }
+  }
+
+  onTemplateHexLtvEnabledChange(checked: boolean): void {
+    if (checked) {
+      this.templateHexLtvPanelExpanded = true;
+      this.cdr.markForCheck();
+    }
+  }
 
   asFormGroup(ctrl: unknown): UntypedFormGroup {
     return ctrl as UntypedFormGroup;
@@ -135,9 +210,23 @@ export class ProtocolTemplateTcpDataConfigurationComponent {
     return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX;
   }
 
-  isBytesAsHexLtvTemplateTag(ti: number, li: number): boolean {
+  onLtvTagValueBlur(ti: number, li: number): void {
+    if (this.disabled) {
+      return;
+    }
+    const tpl = this.templatesArray.at(ti) as UntypedFormGroup;
+    const vt = (tpl.get('hexLtvTagType')?.value ?? TcpHexValueType.UINT8) as TcpHexValueType;
     const g = this.getTemplateLtvTagMappingsArray(ti).at(li) as UntypedFormGroup;
-    return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX;
+    const ctrl = g.get('tagValue');
+    const t = String(ctrl?.value ?? '');
+    if (!t.trim()) {
+      return;
+    }
+    const n = parseLtvTagWireTextToNumber(t);
+    if (n === undefined) {
+      return;
+    }
+    ctrl?.patchValue(formatTcpHexMatchValueHexHint(n, vt), { emitEvent: false });
   }
 
   firstTemplateId(): string {

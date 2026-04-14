@@ -78,6 +78,56 @@ export function tcpHexMatchValueTypeWidth(vt: TcpHexValueType | undefined): numb
 }
 
 /**
+ * LTV/命令匹配等「整型 Tag 值」输入框旁的十六进制回显（按字段宽度掩码，与线上整型语义一致）。
+ */
+export function formatTcpHexMatchValueHexHint(n: number | null | undefined, vt: TcpHexValueType | null | undefined): string {
+  if (vt == null) {
+    return '';
+  }
+  const byteW = tcpHexMatchValueTypeWidth(vt);
+  if (byteW <= 0) {
+    return '';
+  }
+  const num = Number(n);
+  if (!Number.isFinite(num)) {
+    return '';
+  }
+  const bits = BigInt(byteW * 8);
+  const mask = (1n << bits) - 1n;
+  const v = BigInt(Math.trunc(num)) & mask;
+  return '0x' + v.toString(16).toLowerCase().padStart(byteW * 2, '0');
+}
+
+/** 从 API/模型载入 LTV Tag 输入框：按 Tag 字段类型宽度的 `0x` 十六进制 */
+export function ltvTagWireTextFromModel(
+  n: number | undefined | null,
+  tagFieldType?: TcpHexValueType | null
+): string {
+  return formatTcpHexMatchValueHexHint(n, tagFieldType ?? TcpHexValueType.UINT8);
+}
+
+/**
+ * LTV Tag 输入：仅允许 `0x`/`0X` 前缀的十六进制（不允许纯十进制）。
+ */
+export function parseLtvTagWireTextToNumber(raw: unknown): number | undefined {
+  if (raw === null || raw === undefined) {
+    return undefined;
+  }
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    return Math.trunc(raw);
+  }
+  const s = String(raw).trim().replace(/\s+/g, '');
+  if (!s) {
+    return undefined;
+  }
+  if (!/^0x[0-9a-fA-F]+$/i.test(s)) {
+    return undefined;
+  }
+  const n = parseInt(s.slice(2), 16);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+/**
  * 与后端 {@code ProtocolTemplateHexBuildService.isRedundantPaWordField} 一致：
  * 已定义 paN_hi + paN_lo 时，paN_word 不应再作为独立可编辑/写入字段（否则与 hi/lo 叠写会多字节）。
  */

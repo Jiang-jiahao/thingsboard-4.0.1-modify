@@ -3,9 +3,11 @@
 ///
 import { Component, Input, OnDestroy } from '@angular/core';
 import {
+  AbstractControl,
   UntypedFormArray,
   UntypedFormBuilder,
   UntypedFormGroup,
+  ValidationErrors,
   Validators
 } from '@angular/forms';
 import {
@@ -17,10 +19,16 @@ import {
   TcpHexLtvChunkOrder,
   TcpHexLtvTagMapping,
   TcpHexUnknownTagMode,
-  TcpHexValueType
+  TcpHexValueType,
+  TCP_HEX_LTV_TAG_VALUE_OPTIONS,
+  migrateLegacyLtvTagValueType
 } from '@shared/models/device.models';
 import { Subscription } from 'rxjs';
-import { formatFixedWireIntegralFromModel } from '@home/pages/profiles/protocol-template-downlink-fields.util';
+import {
+  formatFixedWireIntegralFromModel,
+  ltvTagWireTextFromModel,
+  parseLtvTagWireTextToNumber
+} from '@home/pages/profiles/protocol-template-downlink-fields.util';
 
 @Component({
   selector: 'tb-protocol-template-bundle-editor',
@@ -41,8 +49,14 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
   readonly TcpHexValueType = TcpHexValueType;
 
   tcpHexValueTypes = Object.values(TcpHexValueType);
+  tcpHexLtvTagValueOptions = TCP_HEX_LTV_TAG_VALUE_OPTIONS;
 
   private templateIdSubscription?: Subscription;
+
+  private readonly ltvTagWireTextValidator = (control: AbstractControl): ValidationErrors | null => {
+    const v = parseLtvTagWireTextToNumber(control.value);
+    return v === undefined ? { ltvTagInvalid: true } : null;
+  };
 
   constructor(
     private fb: UntypedFormBuilder
@@ -75,7 +89,8 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
 
   addProtocolTemplateLtvMapping(templateIndex: number): void {
     const tpl = this.protocolTemplatesArray.at(templateIndex) as UntypedFormGroup;
-    (tpl.get('hexLtvTagMappings') as UntypedFormArray).push(this.createLtvTagMappingGroup());
+    const vt = tpl.get('hexLtvTagType')?.value as TcpHexValueType;
+    (tpl.get('hexLtvTagMappings') as UntypedFormArray).push(this.createLtvTagMappingGroup(undefined, vt));
   }
 
   removeProtocolTemplateLtvMapping(payload: { templateIndex: number; index: number }): void {
@@ -132,12 +147,12 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     });
   }
 
-  private createLtvTagMappingGroup(m?: TcpHexLtvTagMapping): UntypedFormGroup {
+  private createLtvTagMappingGroup(m?: TcpHexLtvTagMapping, tagFieldType?: TcpHexValueType): UntypedFormGroup {
+    const vt = tagFieldType ?? TcpHexValueType.UINT8;
     return this.fb.group({
-      tagValue: [m?.tagValue ?? 0, Validators.required],
+      tagValue: [ltvTagWireTextFromModel(m?.tagValue, vt), [Validators.required, this.ltvTagWireTextValidator]],
       telemetryKey: [m?.telemetryKey ?? '', [Validators.maxLength(255)]],
-      valueType: [m?.valueType ?? TcpHexValueType.UINT8, Validators.required],
-      byteLength: [m?.byteLength ?? null, [Validators.min(1)]]
+      valueType: [migrateLegacyLtvTagValueType(m?.valueType), Validators.required]
     });
   }
 
@@ -150,9 +165,10 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     }
     const ltvArr = this.fb.array([] as UntypedFormGroup[]);
     const ltv = t?.hexLtvRepeating;
+    const ltvTagFt = ltv?.tagFieldType ?? TcpHexValueType.UINT8;
     if (ltv?.tagMappings?.length) {
       for (const m of ltv.tagMappings) {
-        ltvArr.push(this.createLtvTagMappingGroup(m));
+        ltvArr.push(this.createLtvTagMappingGroup(m, ltvTagFt));
       }
     }
     const cs: TcpHexChecksumDefinition | undefined = t?.checksum;
@@ -176,6 +192,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       hexLtvMaxItems: [ltv?.maxItems ?? 32, [Validators.min(1)]],
       hexLtvKeyPrefix: [ltv?.keyPrefix ?? 'ltv'],
       hexLtvUnknownMode: [ltv?.unknownTagMode ?? TcpHexUnknownTagMode.SKIP, Validators.required],
+      hexLtvLengthIncludesTag: [!!ltv?.lengthIncludesTag],
       hexLtvTagMappings: ltvArr
     });
   }

@@ -114,11 +114,6 @@ public class ProtocolTemplateHexBuildService {
             return out;
         }
 
-        if (cmd.getLtvRepeating() != null || tpl.getHexLtvRepeating() != null) {
-            out.setErrorMessage("Downlink HEX build does not support LTV; clear hexLtvRepeating for this template/command");
-            return out;
-        }
-
         List<TcpHexFieldDefinition> merged;
         try {
             merged = ProtocolTemplateTransportTcpDataConfiguration.mergeTemplateAndCommandFields(
@@ -483,6 +478,10 @@ public class ProtocolTemplateHexBuildService {
 
     private static int fieldWidthForBuild(TcpHexFieldDefinition f) {
         TcpHexValueType vt = f.getValueType();
+        if (vt.isLtvAutoWidthIntegral()) {
+            throw new IllegalArgumentException(
+                    "Field [" + f.getKey() + "]: LTV auto integral types are not supported for downlink hex build");
+        }
         if (vt.isBytesAsHex()) {
             if (f.getByteLength() != null && f.getByteLength() > 0) {
                 return f.getByteLength();

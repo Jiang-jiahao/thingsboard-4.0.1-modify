@@ -13,7 +13,7 @@
 /// See the License for the specific language governing permissions and
 /// limitations under the License.
 ///
-import { Component, forwardRef, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, forwardRef, Input, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { selectAuthUser, selectIsUserLoaded } from '@core/auth/auth.selectors';
@@ -25,12 +25,19 @@ import {
 import { combineLatest } from 'rxjs';
 import { filter, switchMap, take } from 'rxjs/operators';
 import { deepClone } from '@core/utils';
-import { formatFixedWireIntegralFromModel, parseIntegralWireTextToNumber } from '@home/pages/profiles/protocol-template-downlink-fields.util';
+import {
+  formatFixedWireIntegralFromModel,
+  formatTcpHexMatchValueHexHint,
+  ltvTagWireTextFromModel,
+  parseIntegralWireTextToNumber,
+  parseLtvTagWireTextToNumber
+} from '@home/pages/profiles/protocol-template-downlink-fields.util';
 import {
   ControlValueAccessor,
   NG_VALIDATORS,
   NG_VALUE_ACCESSOR,
   UntypedFormArray,
+  AbstractControl,
   UntypedFormBuilder,
   UntypedFormGroup,
   ValidationErrors,
@@ -52,6 +59,8 @@ import {
   TcpHexLtvTagMapping,
   TcpHexUnknownTagMode,
   TcpHexValueType,
+  TCP_HEX_LTV_TAG_VALUE_OPTIONS,
+  migrateLegacyLtvTagValueType,
   TcpJsonWithoutMethodMode,
   TcpTransportConnectMode,
   TcpTransportFramingMode,
@@ -78,7 +87,10 @@ import { takeUntil } from 'rxjs/operators';
       multi: true
     }]
 })
-export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, OnDestroy, ControlValueAccessor, Validator {
+export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, AfterViewInit, OnDestroy, ControlValueAccessor, Validator {
+  /** 手动 HEX 下「LTV/TLV 重复段」折叠面板：已配置 LTV 或用户勾选启用时默认展开 */
+  hexLtvDefaultPathPanelExpanded = false;
+
   tcpTransportFramingModes = Object.values(TcpTransportFramingMode);
   /** 显式列出，避免部分环境下 Object.values(enum) 与下拉展示不一致 */
   transportTcpDataTypes: TransportTcpDataType[] = [
@@ -87,6 +99,8 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     TransportTcpDataType.ASCII
   ];
   tcpHexValueTypes = Object.values(TcpHexValueType);
+  /** LTV Tag→遥测映射下拉（静态 labelKey，供 translate 使用） */
+  tcpHexLtvTagValueOptions = TCP_HEX_LTV_TAG_VALUE_OPTIONS;
   tcpHexMatchValueTypes = TCP_HEX_MATCH_VALUE_TYPES;
   readonly TransportTcpDataType = TransportTcpDataType;
   readonly TcpHexValueType = TcpHexValueType;
@@ -94,6 +108,10 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
   readonly TcpHexUnknownTagMode = TcpHexUnknownTagMode;
   tcpDeviceProfileTransportConfigurationFormGroup: UntypedFormGroup;
   private destroy$ = new Subject<void>();
+  private readonly ltvTagWireTextValidator = (control: AbstractControl): ValidationErrors | null => {
+    const v = parseLtvTagWireTextToNumber(control.value);
+    return v === undefined ? { ltvTagInvalid: true } : null;
+  };
   @Input()
   disabled: boolean;
 
@@ -105,9 +123,28 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
   constructor(
     private fb: UntypedFormBuilder,
     private store: Store<AppState>,
-    private protocolTemplateBundleService: ProtocolTemplateBundleService
+    private protocolTemplateBundleService: ProtocolTemplateBundleService,
+    private cdr: ChangeDetectorRef
   ) {
   }
+
+  ngAfterViewInit(): void {
+    this.scheduleSyncHexLtvPanelExpanded();
+  }
+
+  /** 手动 HEX 区可能晚于 writeValue 才渲染（*ngIf）；延迟再同步一次展开状态 */
+  private scheduleSyncHexLtvPanelExpanded(): void {
+    const sync = () => {
+      if (this.tcpDeviceProfileTransportConfigurationFormGroup?.get('hexLtvEnabled')?.value) {
+        this.hexLtvDefaultPathPanelExpanded = true;
+        this.cdr.markForCheck();
+      }
+    };
+    queueMicrotask(sync);
+    setTimeout(sync, 0);
+    setTimeout(sync, 50);
+  }
+
   ngOnInit(): void {
     combineLatest([
       this.store.select(selectIsUserLoaded),
@@ -142,6 +179,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       hexLtvMaxItems: [32, [Validators.min(1)]],
       hexLtvKeyPrefix: ['ltv'],
       hexLtvUnknownMode: [TcpHexUnknownTagMode.SKIP, Validators.required],
+      hexLtvLengthIncludesTag: [false],
       hexLtvTagMappings: this.fb.array([]),
       protocolTemplateBundleId: [null],
       protocolTemplates: this.fb.array([]),
@@ -182,6 +220,19 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         this.patchHexFieldsFromModel([]);
         this.patchHexLtvDisabled();
       }
+    });
+    this.tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled').valueChanges.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((en: boolean) => {
+      if (en) {
+        this.hexLtvDefaultPathPanelExpanded = true;
+        this.cdr.markForCheck();
+      }
+    });
+    this.tcpDeviceProfileTransportConfigurationFormGroup.get('protocolTemplateBundleId').valueChanges.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.scheduleSyncHexLtvPanelExpanded();
     });
   }
 
@@ -324,12 +375,12 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     this.updateModel();
   }
 
-  private createLtvTagMappingGroup(m?: TcpHexLtvTagMapping): UntypedFormGroup {
+  private createLtvTagMappingGroup(m?: TcpHexLtvTagMapping, tagFieldType?: TcpHexValueType): UntypedFormGroup {
+    const vt = tagFieldType ?? TcpHexValueType.UINT8;
     return this.fb.group({
-      tagValue: [m?.tagValue ?? 0, Validators.required],
+      tagValue: [ltvTagWireTextFromModel(m?.tagValue, vt), [Validators.required, this.ltvTagWireTextValidator]],
       telemetryKey: [m?.telemetryKey ?? '', [Validators.maxLength(255)]],
-      valueType: [m?.valueType ?? TcpHexValueType.UINT8, Validators.required],
-      byteLength: [m?.byteLength ?? null, [Validators.min(1)]]
+      valueType: [migrateLegacyLtvTagValueType(m?.valueType), Validators.required]
     });
   }
 
@@ -338,10 +389,14 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     while (arr.length) {
       arr.removeAt(0, {emitEvent: false});
     }
+    const tagFt = cfg?.tagFieldType ?? TcpHexValueType.UINT8;
     if (cfg?.tagMappings?.length) {
       for (const m of cfg.tagMappings) {
-        arr.push(this.createLtvTagMappingGroup(m), {emitEvent: false});
+        arr.push(this.createLtvTagMappingGroup(m, tagFt), {emitEvent: false});
       }
+    }
+    if (cfg) {
+      this.hexLtvDefaultPathPanelExpanded = true;
     }
     this.tcpDeviceProfileTransportConfigurationFormGroup.patchValue({
       hexLtvEnabled: !!cfg,
@@ -351,17 +406,20 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       hexLtvChunkOrder: cfg?.chunkOrder ?? TcpHexLtvChunkOrder.LTV,
       hexLtvMaxItems: cfg?.maxItems ?? 32,
       hexLtvKeyPrefix: cfg?.keyPrefix ?? 'ltv',
-      hexLtvUnknownMode: cfg?.unknownTagMode ?? TcpHexUnknownTagMode.SKIP
+      hexLtvUnknownMode: cfg?.unknownTagMode ?? TcpHexUnknownTagMode.SKIP,
+      hexLtvLengthIncludesTag: !!cfg?.lengthIncludesTag
     }, {emitEvent: false});
   }
 
   private patchHexLtvDisabled() {
     this.patchHexLtvFromModel(undefined);
     this.tcpDeviceProfileTransportConfigurationFormGroup.patchValue({hexLtvEnabled: false}, {emitEvent: false});
+    this.hexLtvDefaultPathPanelExpanded = false;
   }
 
   addHexLtvTagMappingRow() {
-    this.hexLtvTagMappingsArray.push(this.createLtvTagMappingGroup());
+    const vt = this.tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvTagType')?.value as TcpHexValueType;
+    this.hexLtvTagMappingsArray.push(this.createLtvTagMappingGroup(undefined, vt));
     this.updateModel();
   }
 
@@ -370,9 +428,25 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     this.updateModel();
   }
 
-  isBytesAsHexLtvTagRow(index: number): boolean {
-    const g = this.hexLtvTagMappingsArray.at(index) as UntypedFormGroup;
-    return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX;
+  /** 仅十六进制（须 `0x` 前缀）；失焦后按 Tag 字段类型宽度规范为 `0x` 小写 */
+  onLtvTagValueBlur(li: number): void {
+    if (this.disabled) {
+      return;
+    }
+    const g = this.hexLtvTagMappingsArray.at(li) as UntypedFormGroup;
+    const ctrl = g.get('tagValue');
+    const t = String(ctrl?.value ?? '');
+    if (!t.trim()) {
+      return;
+    }
+    const n = parseLtvTagWireTextToNumber(t);
+    if (n === undefined) {
+      return;
+    }
+    const vt = (this.tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvTagType')?.value ??
+      TcpHexValueType.UINT8) as TcpHexValueType;
+    ctrl?.patchValue(formatTcpHexMatchValueHexHint(n, vt), { emitEvent: false });
+    this.updateModel();
   }
 
   isBytesAsHexCommandRow(commandIndex: number, fieldIndex: number): boolean {
@@ -426,9 +500,10 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     }
     const ltvArr = this.fb.array([] as UntypedFormGroup[]);
     const ltv = t?.hexLtvRepeating;
+    const ltvTagFt = ltv?.tagFieldType ?? TcpHexValueType.UINT8;
     if (ltv?.tagMappings?.length) {
       for (const m of ltv.tagMappings) {
-        ltvArr.push(this.createLtvTagMappingGroup(m));
+        ltvArr.push(this.createLtvTagMappingGroup(m, ltvTagFt));
       }
     }
     return this.fb.group({
@@ -445,6 +520,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       hexLtvMaxItems: [ltv?.maxItems ?? 32, [Validators.min(1)]],
       hexLtvKeyPrefix: [ltv?.keyPrefix ?? 'ltv'],
       hexLtvUnknownMode: [ltv?.unknownTagMode ?? TcpHexUnknownTagMode.SKIP, Validators.required],
+      hexLtvLengthIncludesTag: [!!ltv?.lengthIncludesTag],
       hexLtvTagMappings: ltvArr
     });
   }
@@ -543,7 +619,8 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
 
   addProtocolTemplateLtvMapping(templateIndex: number) {
     const tpl = this.protocolTemplatesArray.at(templateIndex) as UntypedFormGroup;
-    (tpl.get('hexLtvTagMappings') as UntypedFormArray).push(this.createLtvTagMappingGroup());
+    const vt = tpl.get('hexLtvTagType')?.value as TcpHexValueType;
+    (tpl.get('hexLtvTagMappings') as UntypedFormArray).push(this.createLtvTagMappingGroup(undefined, vt));
     this.updateModel();
   }
 
@@ -726,6 +803,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         fixedCtrl.clearValidators();
       }
       fixedCtrl.updateValueAndValidity({emitEvent: false});
+      this.scheduleSyncHexLtvPanelExpanded();
     }
   }
   private updateModel() {
@@ -779,6 +857,9 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
               const maxItems = this.optionalFormNumber(row['hexLtvMaxItems']);
               if (maxItems !== undefined) {
                 ltv.maxItems = maxItems;
+              }
+              if (row['hexLtvLengthIncludesTag'] === true || row['hexLtvLengthIncludesTag'] === 'true' || row['hexLtvLengthIncludesTag'] === 1) {
+                ltv.lengthIncludesTag = true;
               }
               if (tagMappings.length) {
                 ltv.tagMappings = tagMappings;
@@ -885,6 +966,9 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           if (maxItems !== undefined) {
             ltv.maxItems = maxItems;
           }
+          if (v.hexLtvLengthIncludesTag === true || v.hexLtvLengthIncludesTag === 'true' || v.hexLtvLengthIncludesTag === 1) {
+            ltv.lengthIncludesTag = true;
+          }
           if (tagMappings.length) {
             ltv.tagMappings = tagMappings;
           }
@@ -943,14 +1027,10 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       .filter(r => r['telemetryKey'] && String(r['telemetryKey']).trim())
       .map(r => {
         const m: TcpHexLtvTagMapping = {
-          tagValue: Number(r['tagValue']) || 0,
+          tagValue: parseLtvTagWireTextToNumber(r['tagValue']) ?? 0,
           telemetryKey: String(r['telemetryKey']).trim(),
-          valueType: r['valueType'] as TcpHexValueType
+          valueType: migrateLegacyLtvTagValueType(r['valueType'] as TcpHexValueType)
         };
-        const byteLength = this.optionalFormNumber(r['byteLength']);
-        if (byteLength !== undefined) {
-          m.byteLength = byteLength;
-        }
         return m;
       });
   }
@@ -1048,21 +1128,6 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           }
         }
       }
-      if (this.tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled')?.value) {
-        for (let li = 0; li < this.hexLtvTagMappingsArray.length; li++) {
-          const g = this.hexLtvTagMappingsArray.at(li) as UntypedFormGroup;
-          const tk = g.get('telemetryKey')?.value;
-          if (!tk || !String(tk).trim()) {
-            continue;
-          }
-          if (g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX) {
-            const bl = g.get('byteLength')?.value;
-            if (bl == null || bl === '' || Number(bl) < 1) {
-              return {tcpHexLtvByteLength: true};
-            }
-          }
-        }
-      }
     }
     if (dataType === TransportTcpDataType.HEX && usePt) {
       const checkBytesAsHex = (g: UntypedFormGroup) => {
@@ -1094,23 +1159,6 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           const err = checkBytesAsHex(fieldsArr.at(fi) as UntypedFormGroup);
           if (err) {
             return err;
-          }
-        }
-        const tpl = this.protocolTemplatesArray.at(ti) as UntypedFormGroup;
-        if (tpl.get('hexLtvEnabled')?.value) {
-          const ltvArr = tpl.get('hexLtvTagMappings') as UntypedFormArray;
-          for (let li = 0; li < ltvArr.length; li++) {
-            const g = ltvArr.at(li) as UntypedFormGroup;
-            const tk = g.get('telemetryKey')?.value;
-            if (!tk || !String(tk).trim()) {
-              continue;
-            }
-            if (g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX) {
-              const bl = g.get('byteLength')?.value;
-              if (bl == null || bl === '' || Number(bl) < 1) {
-                return {tcpHexLtvByteLength: true};
-              }
-            }
           }
         }
       }

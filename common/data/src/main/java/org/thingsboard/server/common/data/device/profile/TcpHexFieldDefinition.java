@@ -102,6 +102,10 @@ public class TcpHexFieldDefinition implements Serializable {
         if (valueType == null) {
             throw new IllegalArgumentException("TCP hex protocol field valueType is required");
         }
+        if (valueType.isLtvAutoWidthIntegral()) {
+            throw new IllegalArgumentException(
+                    "TCP hex field valueType must not use LTV-only auto integral types: " + valueType);
+        }
         normalizeMutuallyExclusiveFixedFields();
         if (valueType.isBytesAsHex()) {
             boolean fixed = byteLength != null && byteLength > 0;

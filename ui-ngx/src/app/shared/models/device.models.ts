@@ -435,6 +435,11 @@ export enum TcpHexValueType {
   UINT32_LE = 'UINT32_LE',
   INT32_BE = 'INT32_BE',
   INT32_LE = 'INT32_LE',
+  /** 仅 LTV Tag 映射：无符号小端整型，宽度由本段 Value 字节数（1/2/4）决定 */
+  UINT_AUTO_LE = 'UINT_AUTO_LE',
+  UINT_AUTO_BE = 'UINT_AUTO_BE',
+  INT_AUTO_LE = 'INT_AUTO_LE',
+  INT_AUTO_BE = 'INT_AUTO_BE',
   FLOAT_BE = 'FLOAT_BE',
   FLOAT_LE = 'FLOAT_LE',
   DOUBLE_BE = 'DOUBLE_BE',
@@ -491,6 +496,7 @@ export interface TcpHexLtvTagMapping {
   tagValue: number;
   telemetryKey: string;
   valueType: TcpHexValueType;
+  /** @deprecated 由 LTV Length 切出的 Value 长度决定；保存时可省略 */
   byteLength?: number;
   /** @deprecated UI 已移除 */
   scale?: number;
@@ -507,6 +513,10 @@ export interface TcpHexLtvRepeatingConfig {
   keyPrefix?: string;
   unknownTagMode?: TcpHexUnknownTagMode;
   tagMappings?: TcpHexLtvTagMapping[];
+  /**
+   * 灵信类：线型 Length = Tag 线宽 + Value 线宽（编号+数据）。默认 false 时 Length 仅为 Value 长度（历史行为）。
+   */
+  lengthIncludesTag?: boolean;
 }
 
 /** 按命令字匹配的一套解析（与后端 TcpHexCommandProfile 一致） */
@@ -539,6 +549,52 @@ export const TCP_HEX_MATCH_VALUE_TYPES: TcpHexValueType[] = [
   TcpHexValueType.INT32_BE,
   TcpHexValueType.INT32_LE
 ];
+
+/** LTV Tag→遥测下拉：每项带静态 i18n 键，避免 mat-option 内动态拼接键无法被 translate 解析 */
+export interface TcpHexLtvTagValueOption {
+  value: TcpHexValueType;
+  labelKey: string;
+}
+
+export const TCP_HEX_LTV_TAG_VALUE_OPTIONS: TcpHexLtvTagValueOption[] = [
+  { value: TcpHexValueType.UINT_AUTO_LE, labelKey: 'device-profile.tcp.hex-ltv-vt-UINT_AUTO_LE' },
+  { value: TcpHexValueType.UINT_AUTO_BE, labelKey: 'device-profile.tcp.hex-ltv-vt-UINT_AUTO_BE' },
+  { value: TcpHexValueType.INT_AUTO_LE, labelKey: 'device-profile.tcp.hex-ltv-vt-INT_AUTO_LE' },
+  { value: TcpHexValueType.INT_AUTO_BE, labelKey: 'device-profile.tcp.hex-ltv-vt-INT_AUTO_BE' },
+  { value: TcpHexValueType.FLOAT_BE, labelKey: 'device-profile.tcp.hex-ltv-vt-FLOAT_BE' },
+  { value: TcpHexValueType.FLOAT_LE, labelKey: 'device-profile.tcp.hex-ltv-vt-FLOAT_LE' },
+  { value: TcpHexValueType.DOUBLE_BE, labelKey: 'device-profile.tcp.hex-ltv-vt-DOUBLE_BE' },
+  { value: TcpHexValueType.DOUBLE_LE, labelKey: 'device-profile.tcp.hex-ltv-vt-DOUBLE_LE' },
+  { value: TcpHexValueType.BYTES_AS_HEX, labelKey: 'device-profile.tcp.hex-ltv-vt-BYTES_AS_HEX' }
+];
+
+/** LTV Tag→遥测映射可选类型值列表（与 {@link TCP_HEX_LTV_TAG_VALUE_OPTIONS} 顺序一致） */
+export const TCP_HEX_LTV_TAG_VALUE_TYPES: TcpHexValueType[] = TCP_HEX_LTV_TAG_VALUE_OPTIONS.map((o) => o.value);
+
+/** 将旧版映射中的固定位宽整型折成 AUTO，便于界面只展示「宽度随本段」选项 */
+export function migrateLegacyLtvTagValueType(vt: TcpHexValueType | null | undefined): TcpHexValueType {
+  if (vt == null) {
+    return TcpHexValueType.UINT_AUTO_LE;
+  }
+  switch (vt) {
+    case TcpHexValueType.UINT8:
+    case TcpHexValueType.UINT16_LE:
+    case TcpHexValueType.UINT32_LE:
+      return TcpHexValueType.UINT_AUTO_LE;
+    case TcpHexValueType.UINT16_BE:
+    case TcpHexValueType.UINT32_BE:
+      return TcpHexValueType.UINT_AUTO_BE;
+    case TcpHexValueType.INT8:
+    case TcpHexValueType.INT16_LE:
+    case TcpHexValueType.INT32_LE:
+      return TcpHexValueType.INT_AUTO_LE;
+    case TcpHexValueType.INT16_BE:
+    case TcpHexValueType.INT32_BE:
+      return TcpHexValueType.INT_AUTO_BE;
+    default:
+      return vt;
+  }
+}
 
 export interface TransportTcpDataTypeConfiguration {
   transportTcpDataType?: TransportTcpDataType;

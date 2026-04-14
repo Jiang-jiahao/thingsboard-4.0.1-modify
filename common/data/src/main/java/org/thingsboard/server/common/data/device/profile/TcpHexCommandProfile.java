@@ -15,8 +15,8 @@ import java.util.List;
 /**
  * 按帧内某偏移处的<strong>命令字</strong>（整数）匹配成功后，使用该规则下的字段列表解析遥测。
  * <p>
- * 典型用法（如华诺协议）：起始码后第 4 字节为命令，则 {@code matchByteOffset=4}、{@code matchValueType=UINT8}、
- * {@code matchValue=0xA4}（十进制 164）等；参数字段偏移从帧头 0 起算（例如参数从字节 7 开始则 offset=7）。
+ * 典型用法：单字节命令在偏移 4 时 {@code matchByteOffset=4}、{@code matchValueType=UINT8}；灵信类监控协议在偏移 12 的 UINT32 LE
+ * 命令号时 {@code matchByteOffset=12}、{@code matchValueType=UINT32_LE}。参数字段偏移均相对帧头 0。
  */
 @Data
 public class TcpHexCommandProfile implements Serializable {
@@ -38,8 +38,8 @@ public class TcpHexCommandProfile implements Serializable {
      */
     private long matchValue;
     /**
-     * 可选第二匹配：主匹配成功后，再在该偏移读取整型并与 {@link #secondaryMatchValue} 相等（如华诺应答帧命令 0xA2，
-     * 第 7 字节为回显的原命令）。未设置 {@link #secondaryMatchByteOffset} 时仅主匹配。
+     * 可选第二匹配：主匹配成功后，再在该偏移读取整型并与 {@link #secondaryMatchValue} 相等（如应答帧共用同一命令码、需用第二字段区分原命令时）。
+     * 未设置 {@link #secondaryMatchByteOffset} 时仅主匹配。
      */
     private Integer secondaryMatchByteOffset;
     private TcpHexValueType secondaryMatchValueType;
@@ -98,6 +98,7 @@ public class TcpHexCommandProfile implements Serializable {
         }
         return switch (t) {
             case FLOAT_BE, FLOAT_LE, DOUBLE_BE, DOUBLE_LE, BYTES_AS_HEX -> false;
+            case UINT_AUTO_LE, UINT_AUTO_BE, INT_AUTO_LE, INT_AUTO_BE -> false;
             default -> true;
         };
     }

@@ -20,7 +20,10 @@ public class TcpHexLtvTagMapping implements Serializable {
     private long tagValue;
     private String telemetryKey;
     private TcpHexValueType valueType;
-    /** 仅 {@link TcpHexValueType#BYTES_AS_HEX} 时使用；否则按 valueType 固定宽度从 Value 缓冲区读取 */
+    /**
+     * 已废弃：LTV 段 Value 字节数由报文 Length 字段决定，{@link TcpHexValueType#BYTES_AS_HEX} 亦取整段 Value。
+     * 保留仅用于反序列化旧配置。
+     */
     private Integer byteLength;
     private Double scale;
     private Long bitMask;
@@ -40,10 +43,6 @@ public class TcpHexLtvTagMapping implements Serializable {
         if (valueType == null) {
             throw new IllegalArgumentException("LTV tag mapping valueType is required");
         }
-        if (valueType == TcpHexValueType.BYTES_AS_HEX) {
-            if (byteLength == null || byteLength <= 0) {
-                throw new IllegalArgumentException("LTV BYTES_AS_HEX mapping requires byteLength > 0");
-            }
-        }
+        // BYTES_AS_HEX：长度以 LTV Length 切出的 Value 为准，不再要求 byteLength
     }
 }

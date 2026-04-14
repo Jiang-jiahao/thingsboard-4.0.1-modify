@@ -21,11 +21,15 @@ import {
   TcpHexLtvRepeatingConfig,
   TcpHexLtvTagMapping,
   TcpHexUnknownTagMode,
-  TcpHexValueType
+  TcpHexValueType,
+  migrateLegacyLtvTagValueType
 } from '@shared/models/device.models';
 import { ProtocolTemplateBundleEditorComponent } from '@home/components/profile/device/protocol-template-bundle-editor.component';
-import { buildHuanuoJ3000PresetBundle } from '@home/pages/profiles/protocol-template-huanuo-j3000.preset';
-import { parseIntegralWireTextToNumber } from '@home/pages/profiles/protocol-template-downlink-fields.util';
+import { buildLingxinV2MonitorPresetBundle } from '@home/pages/profiles/protocol-template-lingxin-v2-monitor.preset';
+import {
+  parseIntegralWireTextToNumber,
+  parseLtvTagWireTextToNumber
+} from '@home/pages/profiles/protocol-template-downlink-fields.util';
 
 export interface ProtocolTemplateBundleDialogData {
   bundle: ProtocolTemplateBundle | null;
@@ -108,10 +112,10 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
     this.dialogRef.close(undefined);
   }
 
-  /** 载入华诺 J3000+ 示例帧模板与命令（0x21 下行参区为 paN_hi/paN_lo；兼容 paN_word；含 0xA2 第二匹配） */
-  applyHuanuoJ3000Preset(): void {
-    const name = String(this.bundleMetaForm.get('name')?.value ?? '').trim() || 'J3000+';
-    const preset = buildHuanuoJ3000PresetBundle(name);
+  /** 载入灵信定向 V2 亚冬版监控协议示例（UDP 头四 UINT32 LE；命令偏移 12；单子命令体单元 + subUnitLen 自动参长） */
+  applyLingxinV2MonitorPreset(): void {
+    const name = String(this.bundleMetaForm.get('name')?.value ?? '').trim() || '灵信V2监控';
+    const preset = buildLingxinV2MonitorPresetBundle(name);
     this.bundleMetaForm.patchValue({ name: preset.name ?? name }, { emitEvent: false });
     const patch = (): boolean => {
       const editor = this.bundleEditorRefs?.first;
@@ -199,7 +203,43 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
     if (fields.length) {
       t.hexProtocolFields = fields;
     }
+    if (this.isFormBooleanTrue(row['hexLtvEnabled'])) {
+      const ltvTagRows = (row['hexLtvTagMappings'] as Array<Record<string, unknown>>) ?? [];
+      const tagMappings = this.ltvTagMappingsFromRows(ltvTagRows);
+      const ltv: TcpHexLtvRepeatingConfig = {
+        startByteOffset: Number(row['hexLtvStartOffset']) || 0,
+        lengthFieldType: row['hexLtvLengthType'] as TcpHexValueType,
+        tagFieldType: row['hexLtvTagType'] as TcpHexValueType,
+        chunkOrder: (row['hexLtvChunkOrder'] as TcpHexLtvChunkOrder) ?? TcpHexLtvChunkOrder.LTV,
+        keyPrefix: String(row['hexLtvKeyPrefix'] || 'ltv').trim() || 'ltv',
+        unknownTagMode: (row['hexLtvUnknownMode'] as TcpHexUnknownTagMode) ?? TcpHexUnknownTagMode.SKIP
+      };
+      const maxItems = this.optionalFormNumber(row['hexLtvMaxItems']);
+      if (maxItems !== undefined) {
+        ltv.maxItems = maxItems;
+      }
+      if (this.isFormBooleanTrue(row['hexLtvLengthIncludesTag'])) {
+        ltv.lengthIncludesTag = true;
+      }
+      if (tagMappings.length) {
+        ltv.tagMappings = tagMappings;
+      }
+      t.hexLtvRepeating = ltv;
+    }
     return [t];
+  }
+
+  private ltvTagMappingsFromRows(rows: Array<Record<string, unknown>>): TcpHexLtvTagMapping[] {
+    return rows
+      .filter(r => r['telemetryKey'] && String(r['telemetryKey']).trim())
+      .map(r => {
+        const m: TcpHexLtvTagMapping = {
+          tagValue: parseLtvTagWireTextToNumber(r['tagValue']) ?? 0,
+          telemetryKey: String(r['telemetryKey']).trim(),
+          valueType: migrateLegacyLtvTagValueType(r['valueType'] as TcpHexValueType)
+        };
+        return m;
+      });
   }
 
   private serializeCommands(): ProtocolTemplateCommandDefinition[] {
