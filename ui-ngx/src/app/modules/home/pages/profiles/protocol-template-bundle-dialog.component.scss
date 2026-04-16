@@ -5,13 +5,23 @@
 }
 
 .protocol-template-bundle-tabs {
+  /* mat-tab 在对话框 flex 布局下若未占高度，tab-body 会为 0 高，表现为「只有幕布/空白」 */
+  min-height: 320px;
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    min-height: 260px;
+  }
+
   ::ng-deep .mat-mdc-tab-body-content {
-    overflow: hidden;
+    /* 避免在高度未计算完成时把内容裁成不可见；横向/滚动由 .tab-scroll 承担 */
+    overflow-x: hidden;
+    overflow-y: visible;
   }
 }
 
 .tab-scroll {
   max-height: min(560px, calc(90vh - 220px));
+  min-height: 200px;
   overflow: auto;
   padding-top: 12px;
   min-width: 0;

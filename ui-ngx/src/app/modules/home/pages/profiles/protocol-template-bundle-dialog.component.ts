@@ -1,7 +1,7 @@
 ///
 /// Copyright © 2016-2025 The Thingsboard Authors
 ///
-import { AfterViewInit, Component, Inject, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, Inject, OnDestroy, QueryList, ViewChildren } from '@angular/core';
 import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
@@ -30,6 +30,7 @@ import {
   parseIntegralWireTextToNumber,
   parseLtvTagWireTextToNumber
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
+import { Subscription } from 'rxjs';
 
 export interface ProtocolTemplateBundleDialogData {
   bundle: ProtocolTemplateBundle | null;
@@ -41,11 +42,13 @@ export interface ProtocolTemplateBundleDialogData {
   templateUrl: './protocol-template-bundle-dialog.component.html',
   styleUrls: ['./protocol-template-bundle-dialog.component.scss']
 })
-export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
+export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnDestroy {
 
   /** 对话框内「帧模板 / 命令」各有一个编辑器实例，共享同一 bundleContentForm；序列化必须读父表单，不能依赖某一个子组件引用。 */
   @ViewChildren(ProtocolTemplateBundleEditorComponent)
   private bundleEditorRefs!: QueryList<ProtocolTemplateBundleEditorComponent>;
+
+  private bundleEditorsChangesSub?: Subscription;
 
   readonly isNew: boolean;
   bundleId: string;
@@ -95,17 +98,31 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
         editor.patchProtocolCommandsFromModel([]);
       }
       initialPatchDone = true;
+      this.bundleEditorsChangesSub?.unsubscribe();
+      this.bundleEditorsChangesSub = undefined;
       return true;
     };
-    const tryPatch = (attempt: number) => {
+    if (patchFromDialogData()) {
+      return;
+    }
+    /** mat-tab 懒加载时子组件可能晚于 ngAfterViewInit 才挂载，需订阅 QueryList.changes */
+    this.bundleEditorsChangesSub = this.bundleEditorRefs.changes.subscribe(() => {
+      patchFromDialogData();
+    });
+    let attempt = 0;
+    const tryPatch = () => {
       if (patchFromDialogData()) {
         return;
       }
-      if (attempt < 20) {
-        setTimeout(() => tryPatch(attempt + 1), 0);
+      if (attempt++ < 60) {
+        setTimeout(tryPatch, 0);
       }
     };
-    setTimeout(() => tryPatch(0), 0);
+    setTimeout(tryPatch, 0);
+  }
+
+  ngOnDestroy(): void {
+    this.bundleEditorsChangesSub?.unsubscribe();
   }
 
   cancel(): void {
