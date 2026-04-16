@@ -129,7 +129,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
     this.dialogRef.close(undefined);
   }
 
-  /** 载入灵信定向 V2 亚冬版监控协议示例（UDP 头四 UINT32 LE；命令偏移 12；单子命令体单元 + subUnitLen 自动参长） */
+  /** 载入灵信定向 V2 亚冬版监控协议示例（UDP 头四 UINT32 LE；命令偏移 12；packetLen 整包总长自动 + 单子单元 subUnitLen 自动参长） */
   applyLingxinV2MonitorPreset(): void {
     const name = String(this.bundleMetaForm.get('name')?.value ?? '').trim() || '灵信V2监控';
     const preset = buildLingxinV2MonitorPresetBundle(name);
@@ -335,6 +335,12 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
         }
         if (this.isFormBooleanTrue(r['includeInDownlinkPayloadLength'])) {
           def.includeInDownlinkPayloadLength = true;
+        }
+        if (this.isFormBooleanTrue(r['autoDownlinkTotalFrameLength'])) {
+          def.autoDownlinkTotalFrameLength = true;
+        }
+        if (this.isFormBooleanTrue(r['downlinkTotalFrameLengthExcludesLengthFieldBytes'])) {
+          def.downlinkTotalFrameLengthExcludesLengthFieldBytes = true;
         }
         const mks = this.parseDownlinkPayloadLengthMemberKeys(r);
         if (mks?.length) {

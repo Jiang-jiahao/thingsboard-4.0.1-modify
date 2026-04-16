@@ -11,8 +11,8 @@
  * **上行子命令体**：帧模板启用 LTV，起始 16；`lengthIncludesTag=true`（Length 数值不含自身，= 编号(4)+数据 字节数，如 0x0C=12→数据 8 字节）。
  * Length UINT32_LE，编号整格 **UINT32_BE**（线型 `01 00 01 01`→0x01000101）。示例映射：`gf1StrikeStatus`/`gf2StrikeStatus`（UINT_AUTO_LE；Value 8 字节时上行解析为 HEX 串）。
  * 未映射的单元在 `unknownTagMode=EMIT_HEX` 下输出 `lx_序号_unk_t{tag}`。
- * **下行**：仍用覆盖字段单子单元 + `subUnitLen` 自动参长；JSON 须含 **`packetLen`**，例如
- * `{"packetLen":28,"deviceId":1,"category":1,"moduleField":1,"currentModuleNo":1,"moduleType":1,"dataU32":1}`（功放开关 1 开 0 关）。
+ * **下行**：`packetLen` 在帧模板上勾选「下行自动整包总长」后由服务写入最终帧长，JSON 可省略；仍用单子单元 + `subUnitLen` 自动参长，例如
+ * `{"deviceId":1,"category":1,"moduleField":1,"currentModuleNo":1,"moduleType":1,"dataU32":1}`（功放开关 1 开 0 关）。
  */
 import {
   ProtocolTemplateBundle,
@@ -115,7 +115,7 @@ export function buildLingxinV2MonitorPresetBundle(displayName: string): Protocol
     commandByteOffset: 12,
     commandMatchWidth: 4,
     hexProtocolFields: [
-      { key: 'packetLen', byteOffset: 0, valueType: TcpHexValueType.UINT32_LE },
+      { key: 'packetLen', byteOffset: 0, valueType: TcpHexValueType.UINT32_LE, autoDownlinkTotalFrameLength: true },
       { key: 'deviceId', byteOffset: 4, valueType: TcpHexValueType.UINT32_LE },
       { key: 'category', byteOffset: 8, valueType: TcpHexValueType.UINT32_LE },
       { key: 'commandNumber', byteOffset: 12, valueType: TcpHexValueType.UINT32_LE }

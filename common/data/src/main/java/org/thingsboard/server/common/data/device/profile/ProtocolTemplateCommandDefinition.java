@@ -75,10 +75,17 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
             throw new IllegalArgumentException("protocol template command matchValueType must be integral");
         }
         if (fields != null) {
+            int autoTotalFrame = 0;
             for (TcpHexFieldDefinition f : new ArrayList<>(fields)) {
                 if (f != null) {
                     f.validate();
+                    if (Boolean.TRUE.equals(f.getAutoDownlinkTotalFrameLength())) {
+                        autoTotalFrame++;
+                    }
                 }
+            }
+            if (autoTotalFrame > 1) {
+                throw new IllegalArgumentException("at most one command override field may set autoDownlinkTotalFrameLength");
             }
         }
         if (ltvRepeating != null) {
@@ -121,6 +128,11 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
                 if (f != null && Boolean.TRUE.equals(f.getIncludeInDownlinkPayloadLength())
                         && f.getKey() != null && Objects.equals(f.getKey().trim(), lk)) {
                     throw new IllegalArgumentException("length field key must not be included in payload length contributors");
+                }
+                if (f != null && f.getKey() != null && Objects.equals(f.getKey().trim(), lk)
+                        && Boolean.TRUE.equals(f.getAutoDownlinkTotalFrameLength())) {
+                    throw new IllegalArgumentException(
+                            "downlinkPayloadLengthFieldKey must not refer to a field with autoDownlinkTotalFrameLength");
                 }
             }
         }

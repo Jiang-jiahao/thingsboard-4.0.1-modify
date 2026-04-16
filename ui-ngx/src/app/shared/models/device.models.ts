@@ -461,6 +461,15 @@ export interface TcpHexFieldDefinition {
   valueType: TcpHexValueType;
   /** 仅命令覆盖行：勾选表示该参数参与下行「自动参长」的字节统计 */
   includeInDownlinkPayloadLength?: boolean;
+  /**
+   * 为 true 时：下行组帧自动写入整包总长（默认等于最终帧字节数，含本字段；灵信类「总长含本字段」）。
+   * JSON 可省略该键。合并字段中至多一个字段勾选。
+   */
+  autoDownlinkTotalFrameLength?: boolean;
+  /**
+   * 仅当 autoDownlinkTotalFrameLength 为 true：为 true 时总长不含本字段线宽（写入 buf.length - 本字段字节数）。
+   */
+  downlinkTotalFrameLengthExcludesLengthFieldBytes?: boolean;
   /** @deprecated 旧版；请用命令级 downlinkPayloadLengthAuto + 勾选参与参长 */
   downlinkPayloadLengthMemberKeys?: string[];
   /** 参长字段上：参区从整帧该字节偏移起算；未设则从本字段结束字节之后起算 */

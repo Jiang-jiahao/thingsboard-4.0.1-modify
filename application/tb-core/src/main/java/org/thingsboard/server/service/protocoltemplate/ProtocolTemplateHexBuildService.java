@@ -166,6 +166,9 @@ public class ProtocolTemplateHexBuildService {
                 if (writesAutoDownlinkPayloadLength(f)) {
                     continue;
                 }
+                if (writesAutoDownlinkTotalFrameLength(f)) {
+                    continue;
+                }
                 if (fieldOverlapsCommandSpan(f, cmdOff, cmdW)) {
                     continue;
                 }
@@ -198,6 +201,7 @@ public class ProtocolTemplateHexBuildService {
             }
             TcpHexProtocolParser.writeIntegralAt(buf, cmdOff, matchVt, cmd.getCommandValue());
             writeAutoDownlinkPayloadLengthFields(buf, merged, cmd, cmdOff, cmdW);
+            writeAutoDownlinkTotalFrameLengthFields(buf, merged);
             TcpHexProtocolParser.applyChecksumToFrame(checksum, buf);
         } catch (IllegalArgumentException | ArithmeticException e) {
             out.setErrorMessage(e.getMessage());
@@ -275,6 +279,11 @@ public class ProtocolTemplateHexBuildService {
             return true;
         }
         return Boolean.TRUE.equals(f.getAutoDownlinkPayloadLength());
+    }
+
+    /** 本字段在下行组帧时由系统写入整包总长（非 JSON）。 */
+    private static boolean writesAutoDownlinkTotalFrameLength(TcpHexFieldDefinition f) {
+        return f != null && Boolean.TRUE.equals(f.getAutoDownlinkTotalFrameLength());
     }
 
     private static boolean commandLevelDownlinkPayloadLengthAuto(ProtocolTemplateCommandDefinition cmd) {
@@ -394,6 +403,45 @@ public class ProtocolTemplateHexBuildService {
         }
     }
 
+    /**
+     * 写入「整包总长」类字段：在参长与命令字已就绪后、校验和前写入，以便校验范围可包含该字段。
+     * 合并字段中至多一个 {@link TcpHexFieldDefinition#getAutoDownlinkTotalFrameLength()}。
+     */
+    private static void writeAutoDownlinkTotalFrameLengthFields(byte[] buf, List<TcpHexFieldDefinition> merged) {
+        TcpHexFieldDefinition only = null;
+        for (TcpHexFieldDefinition f : merged) {
+            if (f == null || !writesAutoDownlinkTotalFrameLength(f)) {
+                continue;
+            }
+            if (only != null) {
+                throw new IllegalArgumentException(
+                        "At most one field may set autoDownlinkTotalFrameLength (found: "
+                                + only.getKey() + " and " + f.getKey() + ")");
+            }
+            only = f;
+        }
+        if (only == null) {
+            return;
+        }
+        only.validate();
+        long len = buf.length;
+        int selfW = fieldWidthForBuild(only);
+        if (Boolean.TRUE.equals(only.getDownlinkTotalFrameLengthExcludesLengthFieldBytes())) {
+            len -= (long) selfW;
+        }
+        if (len < 0) {
+            throw new IllegalArgumentException(
+                    "Field [" + only.getKey() + "]: auto total frame length negative after excludes self");
+        }
+        long maxWire = maxUnsignedIntegralForType(only.getValueType());
+        if (len > maxWire) {
+            throw new IllegalArgumentException(
+                    "Field [" + only.getKey() + "]: auto total frame length " + len + " out of range for "
+                            + only.getValueType());
+        }
+        TcpHexProtocolParser.writeIntegralAt(buf, only.getByteOffset(), only.getValueType(), len);
+    }
+
     private static void validateDownlinkPayloadLengthMemberKeysResolve(List<TcpHexFieldDefinition> merged,
                                                                        TcpHexFieldDefinition lengthField) {
         for (String raw : lengthField.getDownlinkPayloadLengthMemberKeys()) {
@@ -432,6 +480,9 @@ public class ProtocolTemplateHexBuildService {
                 if (writesAutoDownlinkPayloadLength(g)) {
                     continue;
                 }
+                if (writesAutoDownlinkTotalFrameLength(g)) {
+                    continue;
+                }
                 if (!want.contains(g.getKey())) {
                     continue;
                 }
@@ -450,6 +501,9 @@ public class ProtocolTemplateHexBuildService {
                 continue;
             }
             if (writesAutoDownlinkPayloadLength(g)) {
+                continue;
+            }
+            if (writesAutoDownlinkTotalFrameLength(g)) {
                 continue;
             }
             int go = g.getByteOffset();

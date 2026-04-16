@@ -273,6 +273,11 @@ export function writesAutoDownlinkPayloadLength(
   return f.autoDownlinkPayloadLength === true;
 }
 
+/** 与后端下行组帧：整包总长由系统写入、JSON 可省略 */
+export function writesAutoDownlinkTotalFrameLength(f: TcpHexFieldDefinition | null | undefined): boolean {
+  return f?.autoDownlinkTotalFrameLength === true;
+}
+
 export interface DownlinkSkeletonOptions {
   /** 模板命令字偏移 */
   commandByteOffset: number;
@@ -298,6 +303,9 @@ export function listDownlinkEditableHexFields(
   const out: TcpHexFieldDefinition[] = [];
   for (const f of sorted) {
     if (writesAutoDownlinkPayloadLength(f, opts?.command)) {
+      continue;
+    }
+    if (writesAutoDownlinkTotalFrameLength(f)) {
       continue;
     }
     if (hexFieldHasFixedValue(f)) {

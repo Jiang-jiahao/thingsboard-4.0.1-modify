@@ -335,4 +335,46 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     }
     return Array.from(keys).sort();
   }
+
+  /**
+   * 合并后至多一个「下行自动整包总长」：勾选本行时取消帧模板内其它行的勾选。
+   */
+  onTemplateAutoTotalFrameLengthChange(templateIndex: number, fieldIndex: number, checked: boolean): void {
+    if (!checked || this.disabled) {
+      return;
+    }
+    const fa = this.getTemplateFieldsArray(templateIndex);
+    for (let i = 0; i < fa.length; i++) {
+      if (i === fieldIndex) {
+        continue;
+      }
+      (fa.at(i) as UntypedFormGroup).patchValue(
+        {
+          autoDownlinkTotalFrameLength: false,
+          downlinkTotalFrameLengthExcludesLengthFieldBytes: false
+        },
+        { emitEvent: false }
+      );
+    }
+  }
+
+  /** 同一命令覆盖区内至多一个自动总长 */
+  onOverrideAutoTotalFrameLengthChange(commandIndex: number, fieldIndex: number, checked: boolean): void {
+    if (!checked || this.disabled) {
+      return;
+    }
+    const fa = this.getCommandOverrideFieldsArray(commandIndex);
+    for (let i = 0; i < fa.length; i++) {
+      if (i === fieldIndex) {
+        continue;
+      }
+      (fa.at(i) as UntypedFormGroup).patchValue(
+        {
+          autoDownlinkTotalFrameLength: false,
+          downlinkTotalFrameLengthExcludesLengthFieldBytes: false
+        },
+        { emitEvent: false }
+      );
+    }
+  }
 }

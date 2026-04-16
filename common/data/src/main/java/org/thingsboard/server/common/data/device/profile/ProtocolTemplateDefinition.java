@@ -59,10 +59,17 @@ public class ProtocolTemplateDefinition implements Serializable {
             throw new IllegalArgumentException("protocol template commandMatchWidth must be 1 or 4");
         }
         if (hexProtocolFields != null) {
+            int autoTotalFrame = 0;
             for (TcpHexFieldDefinition f : new ArrayList<>(hexProtocolFields)) {
                 if (f != null) {
                     f.validate();
+                    if (Boolean.TRUE.equals(f.getAutoDownlinkTotalFrameLength())) {
+                        autoTotalFrame++;
+                    }
                 }
+            }
+            if (autoTotalFrame > 1) {
+                throw new IllegalArgumentException("at most one template field may set autoDownlinkTotalFrameLength");
             }
         }
         if (hexLtvRepeating != null) {

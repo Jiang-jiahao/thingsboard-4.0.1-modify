@@ -35,6 +35,16 @@ public class TcpHexFieldDefinition implements Serializable {
      */
     private Boolean includeInDownlinkPayloadLength;
     /**
+     * 为 true 时：下行组帧在写完其余字段与命令级自动参长之后、写入校验和之前，将本整型字段写为最终帧长。
+     * 默认与灵信「总长含本字段」一致：写入值为 {@code buf.length}（整包字节数，含本字段与末尾校验等）。
+     * 调用方 JSON 可省略此键。
+     */
+    private Boolean autoDownlinkTotalFrameLength;
+    /**
+     * 仅当 {@link #autoDownlinkTotalFrameLength} 为 true 时有效：为 true 时写入值为 {@code buf.length} 减去本字段线宽（总长不含本字段所占字节）。
+     */
+    private Boolean downlinkTotalFrameLengthExcludesLengthFieldBytes;
+    /**
      * @deprecated 旧版：参长字段上直接列成员键；请改用命令级 {@link ProtocolTemplateCommandDefinition#getDownlinkPayloadLengthAuto()}。
      */
     private List<String> downlinkPayloadLengthMemberKeys;
@@ -186,6 +196,30 @@ public class TcpHexFieldDefinition implements Serializable {
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("fixedBytesHex: invalid hex: " + e.getMessage());
             }
+        }
+        if (Boolean.TRUE.equals(autoDownlinkTotalFrameLength)) {
+            if (valueType == null || valueType.isBytesAsHex() || !TcpHexCommandProfile.isIntegralMatchType(valueType)) {
+                throw new IllegalArgumentException(
+                        "autoDownlinkTotalFrameLength requires an integral valueType (not BYTES_AS_HEX/float/double)");
+            }
+            if (fixedWireIntegralValue != null) {
+                throw new IllegalArgumentException("autoDownlinkTotalFrameLength is incompatible with fixedWireIntegralValue");
+            }
+            if (Boolean.TRUE.equals(includeInDownlinkPayloadLength)) {
+                throw new IllegalArgumentException(
+                        "autoDownlinkTotalFrameLength is incompatible with includeInDownlinkPayloadLength on the same field");
+            }
+            if (hasDownlinkPayloadLengthMemberKeys()) {
+                throw new IllegalArgumentException(
+                        "autoDownlinkTotalFrameLength is incompatible with downlinkPayloadLengthMemberKeys");
+            }
+            if (Boolean.TRUE.equals(autoDownlinkPayloadLength)) {
+                throw new IllegalArgumentException(
+                        "autoDownlinkTotalFrameLength is incompatible with autoDownlinkPayloadLength on the same field");
+            }
+        } else if (Boolean.TRUE.equals(downlinkTotalFrameLengthExcludesLengthFieldBytes)) {
+            throw new IllegalArgumentException(
+                    "downlinkTotalFrameLengthExcludesLengthFieldBytes requires autoDownlinkTotalFrameLength");
         }
     }
 }

@@ -55,6 +55,19 @@
                      (blur)="onFixedWireIntegralBlur(getTemplateFieldsArray(0).at(fi).get('fixedWireIntegralValueText'))">
             </mat-form-field>
           </div>
+          <div *ngIf="isIntegralHexFieldTemplateRow(fi)"
+               class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__row--tight">
+            <mat-checkbox formControlName="autoDownlinkTotalFrameLength" color="primary"
+                          class="protocol-template-hex-field-compact__checkbox"
+                          (change)="onTemplateAutoTotalFrameLengthChange(0, fi, $event.checked)">
+              <span class="mat-caption" translate>device-profile.tcp.hex-field-auto-downlink-total-frame-len</span>
+            </mat-checkbox>
+            <mat-checkbox *ngIf="asFormGroup(getTemplateFieldsArray(0).at(fi)).get('autoDownlinkTotalFrameLength')?.value"
+                          formControlName="downlinkTotalFrameLengthExcludesLengthFieldBytes" color="primary"
+                          class="protocol-template-hex-field-compact__checkbox">
+              <span class="mat-caption" translate>device-profile.tcp.hex-field-total-frame-len-excludes-self</span>
+            </mat-checkbox>
+          </div>
           <div *ngIf="isBytesAsHexTemplate(0, fi)" class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__bytes">
             <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="outline">
               <mat-label translate>device-profile.tcp.hex-field-length-mode</mat-label>
@@ -392,6 +405,16 @@
                 <mat-checkbox *ngIf="isDownlinkOrBothForCommand(ci)" formControlName="includeInDownlinkPayloadLength" color="primary"
                               class="protocol-template-hex-field-compact__checkbox">
                   <span class="mat-caption" translate>device-profile.tcp.hex-field-include-downlink-payload-len</span>
+                </mat-checkbox>
+                <mat-checkbox *ngIf="isIntegralHexFieldOverrideRow(ci, fi)" formControlName="autoDownlinkTotalFrameLength" color="primary"
+                              class="protocol-template-hex-field-compact__checkbox"
+                              (change)="onOverrideAutoTotalFrameLengthChange(ci, fi, $event.checked)">
+                  <span class="mat-caption" translate>device-profile.tcp.hex-field-auto-downlink-total-frame-len</span>
+                </mat-checkbox>
+                <mat-checkbox *ngIf="isIntegralHexFieldOverrideRow(ci, fi) && asFormGroup(getCommandOverrideFieldsArray(ci).at(fi)).get('autoDownlinkTotalFrameLength')?.value"
+                              formControlName="downlinkTotalFrameLengthExcludesLengthFieldBytes" color="primary"
+                              class="protocol-template-hex-field-compact__checkbox">
+                  <span class="mat-caption" translate>device-profile.tcp.hex-field-total-frame-len-excludes-self</span>
                 </mat-checkbox>
               </div>
               <div *ngIf="isBytesAsHexOverride(ci, fi)" class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__bytes">
