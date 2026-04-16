@@ -143,6 +143,11 @@
           <span translate>device-profile.tcp.hex-ltv-length-includes-tag</span>
         </mat-slide-toggle>
         <div *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value" class="tb-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-length-includes-tag-hint</div>
+        <mat-slide-toggle *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value"
+                          formControlName="hexLtvLengthIncludesLengthField" color="primary" class="mb-2">
+          <span translate>device-profile.tcp.hex-ltv-length-includes-length-field</span>
+        </mat-slide-toggle>
+        <div *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value" class="tb-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-length-includes-length-field-hint</div>
         <div *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value" class="flex flex-col gap-3">
           <div class="flex flex-row flex-wrap gap-2">
             <mat-form-field style="width: 110px;">

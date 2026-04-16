@@ -8,6 +8,7 @@ import {
   TcpHexLtvChunkOrder,
   TcpHexUnknownTagMode,
   TcpHexValueType,
+  TCP_HEX_FRAME_FIELD_VALUE_TYPES,
   TCP_HEX_LTV_TAG_VALUE_OPTIONS,
   TcpHexLtvTagValueOption,
   TransportTcpDataType
@@ -55,7 +56,7 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
   @Input()
   commandsArray: UntypedFormArray;
   @Input()
-  tcpHexValueTypes: TcpHexValueType[];
+  tcpHexValueTypes: TcpHexValueType[] = TCP_HEX_FRAME_FIELD_VALUE_TYPES;
   /** LTV Tag→遥测映射：与帧内固定字段的 tcpHexValueTypes 分离 */
   @Input()
   tcpHexLtvTagValueOptions: TcpHexLtvTagValueOption[] = TCP_HEX_LTV_TAG_VALUE_OPTIONS;

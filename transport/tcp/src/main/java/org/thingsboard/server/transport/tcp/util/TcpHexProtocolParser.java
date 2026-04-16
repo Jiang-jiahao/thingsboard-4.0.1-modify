@@ -8,6 +8,7 @@ package org.thingsboard.server.transport.tcp.util;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.common.data.device.profile.TcpHexChecksumDefinition;
 import org.thingsboard.server.common.data.device.profile.TcpHexCommandProfile;
@@ -18,6 +19,7 @@ import org.thingsboard.server.common.data.device.profile.TcpHexLtvTagMapping;
 import org.thingsboard.server.common.data.device.profile.TcpHexUnknownTagMode;
 import org.thingsboard.server.common.data.device.profile.TcpHexValueType;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -134,6 +136,20 @@ public final class TcpHexProtocolParser {
         return out;
     }
 
+    /**
+     * 由报文 Length 数值与配置推导本段 Value 字节数。
+     */
+    static int resolveLtvValueLength(long lenVal, int lenW, int tagW, TcpHexLtvRepeatingConfig cfg) {
+        int vLen = (int) lenVal;
+        if (Boolean.TRUE.equals(cfg.getLengthIncludesLengthField())) {
+            return vLen - lenW - tagW;
+        }
+        if (Boolean.TRUE.equals(cfg.getLengthIncludesTag())) {
+            return vLen - tagW;
+        }
+        return vLen;
+    }
+
     private static void appendLtvRepeating(JsonObject out, byte[] frame, TcpHexLtvRepeatingConfig cfg, UUID sessionId,
                                            boolean failRuleOnFixedFieldMismatch) {
         int pos = cfg.getStartByteOffset();
@@ -168,10 +184,7 @@ public final class TcpHexProtocolParser {
                 lenVal = readIntegralAt(frame, pos, cfg.getLengthFieldType());
                 pos += lenW;
             }
-            int vLen = (int) lenVal;
-            if (Boolean.TRUE.equals(cfg.getLengthIncludesTag())) {
-                vLen = vLen - tagW;
-            }
+            int vLen = resolveLtvValueLength(lenVal, lenW, tagW, cfg);
             if (vLen < 0 || pos + vLen > frame.length) {
                 log.warn("[{}] LTV invalid value length {} at offset {}", sessionId, vLen, pos);
                 break;
@@ -240,7 +253,7 @@ public final class TcpHexProtocolParser {
     }
 
     /**
-     * 将 LTV 专用「按本段宽度」整型映射为具体 UINT8、UINT16、UINT32 线型类型（仅支持 Value 长 1、2 或 4 字节）。
+     * 将 LTV 专用「按本段宽度」整型映射为具体线型类型（1/2/4/8 字节为整型；其它长度无对应整型宽时用 {@link TcpHexValueType#BYTES_AS_HEX}）。
      */
     static TcpHexValueType mapLtvAutoIntegralToConcrete(TcpHexValueType autoVt, int valueLen) {
         return switch (autoVt) {
@@ -248,36 +261,44 @@ public final class TcpHexProtocolParser {
                 case 1 -> TcpHexValueType.UINT8;
                 case 2 -> TcpHexValueType.UINT16_LE;
                 case 4 -> TcpHexValueType.UINT32_LE;
-                default -> throw new IllegalArgumentException(
-                        "unsigned integer (LE) LTV value: expected 1, 2, or 4 bytes, got " + valueLen);
+                case 8 -> TcpHexValueType.UINT64_LE;
+                default -> fallbackAutoIntegralToHex(valueLen);
             };
             case UINT_AUTO_BE -> switch (valueLen) {
                 case 1 -> TcpHexValueType.UINT8;
                 case 2 -> TcpHexValueType.UINT16_BE;
                 case 4 -> TcpHexValueType.UINT32_BE;
-                default -> throw new IllegalArgumentException(
-                        "unsigned integer (BE) LTV value: expected 1, 2, or 4 bytes, got " + valueLen);
+                case 8 -> TcpHexValueType.UINT64_BE;
+                default -> fallbackAutoIntegralToHex(valueLen);
             };
             case INT_AUTO_LE -> switch (valueLen) {
                 case 1 -> TcpHexValueType.INT8;
                 case 2 -> TcpHexValueType.INT16_LE;
                 case 4 -> TcpHexValueType.INT32_LE;
-                default -> throw new IllegalArgumentException(
-                        "signed integer (LE) LTV value: expected 1, 2, or 4 bytes, got " + valueLen);
+                case 8 -> TcpHexValueType.INT64_LE;
+                default -> fallbackAutoIntegralToHex(valueLen);
             };
             case INT_AUTO_BE -> switch (valueLen) {
                 case 1 -> TcpHexValueType.INT8;
                 case 2 -> TcpHexValueType.INT16_BE;
                 case 4 -> TcpHexValueType.INT32_BE;
-                default -> throw new IllegalArgumentException(
-                        "signed integer (BE) LTV value: expected 1, 2, or 4 bytes, got " + valueLen);
+                case 8 -> TcpHexValueType.INT64_BE;
+                default -> fallbackAutoIntegralToHex(valueLen);
             };
             default -> throw new IllegalArgumentException("not an LTV auto integral type: " + autoVt);
         };
     }
 
+    private static TcpHexValueType fallbackAutoIntegralToHex(int valueLen) {
+        if (valueLen <= 0) {
+            throw new IllegalArgumentException("LTV auto integral: invalid value length " + valueLen);
+        }
+        return TcpHexValueType.BYTES_AS_HEX;
+    }
+
     /**
-     * LTV 段内 Value 缓冲区的长度来自报文 Length（及 lengthIncludesTag 推导），
+     * LTV 段内 Value 缓冲区的长度来自报文 Length（及 {@link TcpHexLtvRepeatingConfig#getLengthIncludesLengthField()} /
+     * {@link TcpHexLtvRepeatingConfig#getLengthIncludesTag()} 推导），
      * 与 {@link TcpHexValueType#getFixedByteLength()} 独立；此处校验「线长」与所选解码类型是否一致。
      */
     private static int resolveLtvValueByteLength(byte[] v, TcpHexFieldDefinition def) {
@@ -298,6 +319,7 @@ public final class TcpHexProtocolParser {
             case UINT8, INT8 -> 1;
             case UINT16_BE, UINT16_LE, INT16_BE, INT16_LE -> 2;
             case UINT32_BE, UINT32_LE, INT32_BE, INT32_LE -> 4;
+            case UINT64_BE, UINT64_LE, INT64_BE, INT64_LE -> 8;
             default -> throw new IllegalArgumentException("not an integral width: " + vt);
         };
     }
@@ -340,6 +362,7 @@ public final class TcpHexProtocolParser {
             case UINT8, INT8 -> 1;
             case UINT16_BE, UINT16_LE, INT16_BE, INT16_LE -> 2;
             case UINT32_BE, UINT32_LE, INT32_BE, INT32_LE -> 4;
+            case UINT64_BE, UINT64_LE, INT64_BE, INT64_LE -> 8;
             default -> throw new IllegalArgumentException("not an integral type: " + vt);
         };
         if (offset < 0 || offset + len > frame.length) {
@@ -380,6 +403,22 @@ public final class TcpHexProtocolParser {
             case INT32_LE -> {
                 buf.order(ByteOrder.LITTLE_ENDIAN);
                 yield buf.getInt();
+            }
+            case UINT64_LE -> {
+                buf.order(ByteOrder.LITTLE_ENDIAN);
+                yield buf.getLong();
+            }
+            case UINT64_BE -> {
+                buf.order(ByteOrder.BIG_ENDIAN);
+                yield buf.getLong();
+            }
+            case INT64_LE -> {
+                buf.order(ByteOrder.LITTLE_ENDIAN);
+                yield buf.getLong();
+            }
+            case INT64_BE -> {
+                buf.order(ByteOrder.BIG_ENDIAN);
+                yield buf.getLong();
             }
             default -> throw new IllegalArgumentException("not an integral type: " + vt);
         };
@@ -487,6 +526,28 @@ public final class TcpHexProtocolParser {
                 long v = buf.getInt();
                 addScaledIntegral(out, def.getKey(), applyMask(v, def), scale);
             }
+            case UINT64_LE -> {
+                buf.order(ByteOrder.LITTLE_ENDIAN);
+                byte[] le = new byte[8];
+                buf.get(le);
+                addUnsigned64ToJson(out, def.getKey(), le, true, def, scale);
+            }
+            case UINT64_BE -> {
+                buf.order(ByteOrder.BIG_ENDIAN);
+                byte[] be = new byte[8];
+                buf.get(be);
+                addUnsigned64ToJson(out, def.getKey(), be, false, def, scale);
+            }
+            case INT64_LE -> {
+                buf.order(ByteOrder.LITTLE_ENDIAN);
+                long v = buf.getLong();
+                addScaledIntegral(out, def.getKey(), applyMask(v, def), scale);
+            }
+            case INT64_BE -> {
+                buf.order(ByteOrder.BIG_ENDIAN);
+                long v = buf.getLong();
+                addScaledIntegral(out, def.getKey(), applyMask(v, def), scale);
+            }
             case FLOAT_BE -> {
                 buf.order(ByteOrder.BIG_ENDIAN);
                 out.addProperty(def.getKey(), buf.getFloat() * scale);
@@ -592,6 +653,43 @@ public final class TcpHexProtocolParser {
         } else {
             out.addProperty(key, scaled);
         }
+    }
+
+    /**
+     * 无符号 64 位写入 JSON：超过 {@link Long#MAX_VALUE} 时用 {@link BigInteger}，避免退化为 HEX 串。
+     */
+    private static void addUnsigned64ToJson(JsonObject out, String key, byte[] eight, boolean littleEndian,
+                                            TcpHexFieldDefinition def, double scale) {
+        BigInteger u = littleEndian ? unsignedLittleEndian64(eight) : new BigInteger(1, eight.clone());
+        Long m = def.getBitMask();
+        if (m != null) {
+            u = u.and(unsignedMaskBits64(m));
+        }
+        if (Math.abs(scale - 1.0) < 1e-9) {
+            out.add(key, new JsonPrimitive(u));
+        } else {
+            out.addProperty(key, u.doubleValue() * scale);
+        }
+    }
+
+    private static BigInteger unsignedLittleEndian64(byte[] le) {
+        if (le.length != 8) {
+            throw new IllegalArgumentException("need 8 bytes, got " + le.length);
+        }
+        BigInteger r = BigInteger.ZERO;
+        for (int i = 0; i < 8; i++) {
+            r = r.or(BigInteger.valueOf(le[i] & 0xFFL).shiftLeft(8 * i));
+        }
+        return r;
+    }
+
+    /** 将 {@code long} 的 64 个比特视为无符号掩码。 */
+    private static BigInteger unsignedMaskBits64(long mask) {
+        byte[] mag = new byte[8];
+        for (int i = 0; i < 8; i++) {
+            mag[7 - i] = (byte) ((mask >>> (8 * i)) & 0xFFL);
+        }
+        return new BigInteger(1, mag);
     }
 
     private static int resolveIndex(byte[] buf, int idx) {
@@ -726,6 +824,7 @@ public final class TcpHexProtocolParser {
             case UINT8, INT8 -> 1;
             case UINT16_BE, UINT16_LE, INT16_BE, INT16_LE -> 2;
             case UINT32_BE, UINT32_LE, INT32_BE, INT32_LE -> 4;
+            case UINT64_BE, UINT64_LE, INT64_BE, INT64_LE -> 8;
             default -> throw new IllegalArgumentException("not an integral type: " + vt);
         };
         if (offset < 0 || offset + len > buf.length) {
@@ -766,6 +865,22 @@ public final class TcpHexProtocolParser {
             case INT32_LE -> {
                 b.order(ByteOrder.LITTLE_ENDIAN);
                 b.putInt((int) value);
+            }
+            case UINT64_BE -> {
+                b.order(ByteOrder.BIG_ENDIAN);
+                b.putLong(value);
+            }
+            case UINT64_LE -> {
+                b.order(ByteOrder.LITTLE_ENDIAN);
+                b.putLong(value);
+            }
+            case INT64_BE -> {
+                b.order(ByteOrder.BIG_ENDIAN);
+                b.putLong(value);
+            }
+            case INT64_LE -> {
+                b.order(ByteOrder.LITTLE_ENDIAN);
+                b.putLong(value);
             }
             default -> throw new IllegalArgumentException("not an integral type: " + vt);
         }

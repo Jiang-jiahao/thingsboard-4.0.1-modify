@@ -43,6 +43,11 @@ public class TcpHexLtvTagMapping implements Serializable {
         if (valueType == null) {
             throw new IllegalArgumentException("LTV tag mapping valueType is required");
         }
+        if (valueType == TcpHexValueType.UINT64_LE || valueType == TcpHexValueType.UINT64_BE
+                || valueType == TcpHexValueType.INT64_LE || valueType == TcpHexValueType.INT64_BE) {
+            throw new IllegalArgumentException(
+                    "LTV tag mapping must not use UINT64_*/INT64_*; use UINT_AUTO_* / INT_AUTO_* (8-byte values are decoded as 64-bit automatically)");
+        }
         // BYTES_AS_HEX：长度以 LTV Length 切出的 Value 为准，不再要求 byteLength
     }
 }

@@ -22,20 +22,28 @@ public enum TcpHexValueType {
     UINT32_LE(4),
     INT32_BE(4),
     INT32_LE(4),
+    /** 无符号 64 位小端（8 字节）。解析器内部由 {@link #UINT_AUTO_LE} 在 Value 为 8 字节时选用；勿写入 LTV Tag 映射。 */
+    UINT64_LE(8),
+    /** 无符号 64 位大端（8 字节）。内部由 {@link #UINT_AUTO_BE} 选用；勿写入 LTV Tag 映射。 */
+    UINT64_BE(8),
+    /** 有符号 64 位小端（8 字节）。内部由 {@link #INT_AUTO_LE} 选用；勿写入 LTV Tag 映射。 */
+    INT64_LE(8),
+    /** 有符号 64 位大端（8 字节）。内部由 {@link #INT_AUTO_BE} 选用；勿写入 LTV Tag 映射。 */
+    INT64_BE(8),
     /**
-     * 仅用于 LTV Tag→遥测映射：无符号整数，小端；实际宽度由本段 Value 字节数在 1/2/4 中择一（与 {@link TcpHexValueType#UINT8}/{@link #UINT16_LE}/{@link #UINT32_LE} 等价）。
+     * 仅用于 LTV Tag→遥测映射：无符号整数，小端；本段 Value 为 1/2/4 字节时择宽；8 字节映射为 {@link #UINT64_LE}；其它长度退化为 {@link #BYTES_AS_HEX}。
      */
     UINT_AUTO_LE(0),
     /**
-     * 仅用于 LTV Tag→遥测映射：无符号整数，大端；宽度 1/2/4 字节。
+     * 仅用于 LTV Tag→遥测映射：无符号整数，大端；1/2/4 字节择宽；8 字节映射为 {@link #UINT64_BE}；其它长度退化为 {@link #BYTES_AS_HEX}。
      */
     UINT_AUTO_BE(0),
     /**
-     * 仅用于 LTV Tag→遥测映射：有符号整数，小端；宽度 1/2/4 字节。
+     * 仅用于 LTV Tag→遥测映射：有符号整数，小端；1/2/4 字节择宽；8 字节映射为 {@link #INT64_LE}；其它长度退化为 {@link #BYTES_AS_HEX}。
      */
     INT_AUTO_LE(0),
     /**
-     * 仅用于 LTV Tag→遥测映射：有符号整数，大端；宽度 1/2/4 字节。
+     * 仅用于 LTV Tag→遥测映射：有符号整数，大端；1/2/4 字节择宽；8 字节映射为 {@link #INT64_BE}；其它长度退化为 {@link #BYTES_AS_HEX}。
      */
     INT_AUTO_BE(0),
     FLOAT_BE(4),

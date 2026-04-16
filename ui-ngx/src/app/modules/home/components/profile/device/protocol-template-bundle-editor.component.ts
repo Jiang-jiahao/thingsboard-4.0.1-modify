@@ -20,6 +20,7 @@ import {
   TcpHexLtvTagMapping,
   TcpHexUnknownTagMode,
   TcpHexValueType,
+  TCP_HEX_FRAME_FIELD_VALUE_TYPES,
   TCP_HEX_LTV_TAG_VALUE_OPTIONS,
   migrateLegacyLtvTagValueType
 } from '@shared/models/device.models';
@@ -48,7 +49,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
 
   readonly TcpHexValueType = TcpHexValueType;
 
-  tcpHexValueTypes = Object.values(TcpHexValueType);
+  tcpHexValueTypes = TCP_HEX_FRAME_FIELD_VALUE_TYPES;
   tcpHexLtvTagValueOptions = TCP_HEX_LTV_TAG_VALUE_OPTIONS;
 
   private templateIdSubscription?: Subscription;
@@ -193,6 +194,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       hexLtvKeyPrefix: [ltv?.keyPrefix ?? 'ltv'],
       hexLtvUnknownMode: [ltv?.unknownTagMode ?? TcpHexUnknownTagMode.SKIP, Validators.required],
       hexLtvLengthIncludesTag: [!!ltv?.lengthIncludesTag],
+      hexLtvLengthIncludesLengthField: [!!ltv?.lengthIncludesLengthField],
       hexLtvTagMappings: ltvArr
     });
   }

@@ -309,6 +309,60 @@ class TcpHexProtocolParserTest {
         assertThat(out.get().get("lx_0_val").getAsInt()).isEqualTo(0x1122);
     }
 
+    /** UINT_AUTO_LE：Value 为 8 字节时映射为 {@link TcpHexValueType#UINT64_LE}，输出数值（非 HEX 串）。 */
+    @Test
+    void ltvAutoIntegralMapsEightByteValueToUint64Le() {
+        String hex = "0c00000001000101000000000c000000";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexLtvRepeatingConfig ltv = new TcpHexLtvRepeatingConfig();
+        ltv.setStartByteOffset(0);
+        ltv.setLengthFieldType(TcpHexValueType.UINT32_LE);
+        ltv.setTagFieldType(TcpHexValueType.UINT32_BE);
+        ltv.setChunkOrder(TcpHexLtvChunkOrder.LTV);
+        ltv.setLengthIncludesTag(true);
+        ltv.setKeyPrefix("p");
+        TcpHexLtvTagMapping m = new TcpHexLtvTagMapping();
+        m.setTagValue(0x01000101);
+        m.setTelemetryKey("v");
+        m.setValueType(TcpHexValueType.UINT_AUTO_LE);
+        ltv.setTagMappings(List.of(m));
+        ltv.setUnknownTagMode(TcpHexUnknownTagMode.SKIP);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, null, ltv, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        // 000000000c000000 LE → 0x0c00000000
+        assertThat(out.get().get("p_0_v").getAsLong()).isEqualTo(0x0c00000000L);
+    }
+
+    /**
+     * 灵信式：Length 数值 = Length 字段 + Tag + Value 总字节数（如 0x0C = 12 = 4+4+4）。
+     */
+    @Test
+    void ltvRepeatingLengthIncludesLengthFieldParsesFourByteValue() {
+        String hex = "0c00000001000101000000000c0000000100020100000000";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexLtvRepeatingConfig ltv = new TcpHexLtvRepeatingConfig();
+        ltv.setStartByteOffset(0);
+        ltv.setLengthFieldType(TcpHexValueType.UINT32_LE);
+        ltv.setTagFieldType(TcpHexValueType.UINT32_BE);
+        ltv.setChunkOrder(TcpHexLtvChunkOrder.LTV);
+        ltv.setLengthIncludesLengthField(true);
+        ltv.setKeyPrefix("lx");
+        TcpHexLtvTagMapping m1 = new TcpHexLtvTagMapping();
+        m1.setTagValue(0x01000101);
+        m1.setTelemetryKey("a");
+        m1.setValueType(TcpHexValueType.UINT32_LE);
+        TcpHexLtvTagMapping m2 = new TcpHexLtvTagMapping();
+        m2.setTagValue(0x01000201);
+        m2.setTelemetryKey("b");
+        m2.setValueType(TcpHexValueType.UINT32_LE);
+        ltv.setTagMappings(List.of(m1, m2));
+        ltv.setUnknownTagMode(TcpHexUnknownTagMode.SKIP);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, null, ltv, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("lx_0_a").getAsInt()).isEqualTo(0);
+        assertThat(out.get().get("lx_1_b").getAsInt()).isEqualTo(0);
+    }
+
     /** LTV Tag 映射 BYTES_AS_HEX：长度完全由 Length 切出的 Value 决定，不另填 byteLength */
     @Test
     void ltvTagMappingBytesAsHexUsesWireValueLength() {

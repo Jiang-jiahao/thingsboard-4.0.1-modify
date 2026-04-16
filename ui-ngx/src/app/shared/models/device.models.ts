@@ -435,7 +435,15 @@ export enum TcpHexValueType {
   UINT32_LE = 'UINT32_LE',
   INT32_BE = 'INT32_BE',
   INT32_LE = 'INT32_LE',
-  /** 仅 LTV Tag 映射：无符号小端整型，宽度由本段 Value 字节数（1/2/4）决定 */
+  /** 与后端一致；仅解析链路等内部使用。LTV Tag 映射请用 UINT_AUTO_LE（8 字节按 64 位解码）。 */
+  UINT64_LE = 'UINT64_LE',
+  /** @internal 勿用于 LTV Tag 映射 */
+  UINT64_BE = 'UINT64_BE',
+  /** @internal 勿用于 LTV Tag 映射 */
+  INT64_LE = 'INT64_LE',
+  /** @internal 勿用于 LTV Tag 映射 */
+  INT64_BE = 'INT64_BE',
+  /** 仅 LTV Tag 映射：无符号小端整型，宽度由本段 Value 字节数（1/2/4/8）决定 */
   UINT_AUTO_LE = 'UINT_AUTO_LE',
   UINT_AUTO_BE = 'UINT_AUTO_BE',
   INT_AUTO_LE = 'INT_AUTO_LE',
@@ -514,9 +522,13 @@ export interface TcpHexLtvRepeatingConfig {
   unknownTagMode?: TcpHexUnknownTagMode;
   tagMappings?: TcpHexLtvTagMapping[];
   /**
-   * 灵信类：线型 Length = Tag 线宽 + Value 线宽（编号+数据）。默认 false 时 Length 仅为 Value 长度（历史行为）。
+   * 为 true 时，Length 数值（仍不含 Length 字段自身）= Tag + Value 总字节数。默认 false 时 Length 仅为 Value 长度。
    */
   lengthIncludesTag?: boolean;
+  /**
+   * 例外：为 true 时，Length 数值把 Length 字段自身也算入（整段 L+T+V）。与常规「Length 不含自身」不同；解析优先于 lengthIncludesTag。
+   */
+  lengthIncludesLengthField?: boolean;
 }
 
 /** 按命令字匹配的一套解析（与后端 TcpHexCommandProfile 一致） */
@@ -550,7 +562,32 @@ export const TCP_HEX_MATCH_VALUE_TYPES: TcpHexValueType[] = [
   TcpHexValueType.INT32_LE
 ];
 
-/** LTV Tag→遥测下拉：每项带静态 i18n 键，避免 mat-option 内动态拼接键无法被 translate 解析 */
+/**
+ * 帧内按字节偏移解析的字段可选类型（与后端 TcpHexFieldDefinition.validate 一致）。
+ * 不含 UINT_AUTO_* / INT_AUTO_*（仅用于 LTV Tag→遥测映射）。
+ */
+export const TCP_HEX_FRAME_FIELD_VALUE_TYPES: TcpHexValueType[] = [
+  TcpHexValueType.UINT8,
+  TcpHexValueType.INT8,
+  TcpHexValueType.UINT16_BE,
+  TcpHexValueType.UINT16_LE,
+  TcpHexValueType.INT16_BE,
+  TcpHexValueType.INT16_LE,
+  TcpHexValueType.UINT32_BE,
+  TcpHexValueType.UINT32_LE,
+  TcpHexValueType.INT32_BE,
+  TcpHexValueType.INT32_LE,
+  TcpHexValueType.FLOAT_BE,
+  TcpHexValueType.FLOAT_LE,
+  TcpHexValueType.DOUBLE_BE,
+  TcpHexValueType.DOUBLE_LE,
+  TcpHexValueType.BYTES_AS_HEX
+];
+
+/**
+ * LTV tag mapping dropdown options: each row uses a static i18n labelKey (so mat-option can translate).
+ * Types: AUTO integers, floats, HEX only; no explicit UINT64 or INT64 enums (8-byte integers use AUTO; server decodes as 64-bit).
+ */
 export interface TcpHexLtvTagValueOption {
   value: TcpHexValueType;
   labelKey: string;
@@ -568,7 +605,7 @@ export const TCP_HEX_LTV_TAG_VALUE_OPTIONS: TcpHexLtvTagValueOption[] = [
   { value: TcpHexValueType.BYTES_AS_HEX, labelKey: 'device-profile.tcp.hex-ltv-vt-BYTES_AS_HEX' }
 ];
 
-/** LTV Tag→遥测映射可选类型值列表（与 {@link TCP_HEX_LTV_TAG_VALUE_OPTIONS} 顺序一致） */
+/** Values from {@link TCP_HEX_LTV_TAG_VALUE_OPTIONS}, same order. */
 export const TCP_HEX_LTV_TAG_VALUE_TYPES: TcpHexValueType[] = TCP_HEX_LTV_TAG_VALUE_OPTIONS.map((o) => o.value);
 
 /** 将旧版映射中的固定位宽整型折成 AUTO，便于界面只展示「宽度随本段」选项 */
@@ -590,6 +627,14 @@ export function migrateLegacyLtvTagValueType(vt: TcpHexValueType | null | undefi
       return TcpHexValueType.INT_AUTO_LE;
     case TcpHexValueType.INT16_BE:
     case TcpHexValueType.INT32_BE:
+      return TcpHexValueType.INT_AUTO_BE;
+    case TcpHexValueType.UINT64_LE:
+      return TcpHexValueType.UINT_AUTO_LE;
+    case TcpHexValueType.UINT64_BE:
+      return TcpHexValueType.UINT_AUTO_BE;
+    case TcpHexValueType.INT64_LE:
+      return TcpHexValueType.INT_AUTO_LE;
+    case TcpHexValueType.INT64_BE:
       return TcpHexValueType.INT_AUTO_BE;
     default:
       return vt;

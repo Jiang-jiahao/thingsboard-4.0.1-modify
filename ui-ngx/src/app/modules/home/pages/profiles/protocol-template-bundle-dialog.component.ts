@@ -221,6 +221,9 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit {
       if (this.isFormBooleanTrue(row['hexLtvLengthIncludesTag'])) {
         ltv.lengthIncludesTag = true;
       }
+      if (this.isFormBooleanTrue(row['hexLtvLengthIncludesLengthField'])) {
+        ltv.lengthIncludesLengthField = true;
+      }
       if (tagMappings.length) {
         ltv.tagMappings = tagMappings;
       }

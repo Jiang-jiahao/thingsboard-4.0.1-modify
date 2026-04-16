@@ -8,8 +8,9 @@
  *   编号布局：模块字段(UINT16 LE) + 当前模块编号(UINT8) + 模块类型(UINT8)；功放模块类型 0x01，云台 0x05，整机参数 0x06。
  *
  * **本预设**：命令匹配偏移 12、宽度 4、类型 UINT32_LE；无校验。帧模板含头四字段。
- * **上行子命令体**：帧模板启用 LTV，起始 16，`lengthIncludesTag=true`（长度=编号+数据），UINT32_LE 长度与 4 字节编号（整格 Tag 映射）；
- * 未映射的单元在 `unknownTagMode=EMIT_HEX` 下输出 `lx_序号_unk_t{tag}`。示例 Tag：模块字段 0x0001、模块号 1、类型 0x01 → 线型值 16842753，映射键 `paSwitchU32`（UINT32 数据）。
+ * **上行子命令体**：帧模板启用 LTV，起始 16；`lengthIncludesTag=true`（Length 数值不含自身，= 编号(4)+数据 字节数，如 0x0C=12→数据 8 字节）。
+ * Length UINT32_LE，编号整格 **UINT32_BE**（线型 `01 00 01 01`→0x01000101）。示例映射：`gf1StrikeStatus`/`gf2StrikeStatus`（UINT_AUTO_LE；Value 8 字节时上行解析为 HEX 串）。
+ * 未映射的单元在 `unknownTagMode=EMIT_HEX` 下输出 `lx_序号_unk_t{tag}`。
  * **下行**：仍用覆盖字段单子单元 + `subUnitLen` 自动参长；JSON 须含 **`packetLen`**，例如
  * `{"packetLen":28,"deviceId":1,"category":1,"moduleField":1,"currentModuleNo":1,"moduleType":1,"dataU32":1}`（功放开关 1 开 0 关）。
  */
@@ -61,11 +62,11 @@ const FIELDS_DOWNLINK_ONE_SUBUNIT: TcpHexFieldDefinition[] = [
   }
 ];
 
-/** 灵信子命令体 LTV：长度含 4 字节编号 + 数据；编号整格 UINT32 LE 作 Tag */
+/** 灵信子命令体 LTV：Length=编号+数据总长（不含 Length 自身）；编号整格 UINT32_BE 作 Tag */
 const LINGXIN_SUB_HEX_LTV: TcpHexLtvRepeatingConfig = {
   startByteOffset: 16,
   lengthFieldType: TcpHexValueType.UINT32_LE,
-  tagFieldType: TcpHexValueType.UINT32_LE,
+  tagFieldType: TcpHexValueType.UINT32_BE,
   chunkOrder: TcpHexLtvChunkOrder.LTV,
   lengthIncludesTag: true,
   keyPrefix: 'lx',
@@ -73,8 +74,13 @@ const LINGXIN_SUB_HEX_LTV: TcpHexLtvRepeatingConfig = {
   maxItems: 32,
   tagMappings: [
     {
-      tagValue: 16842753,
-      telemetryKey: 'paSwitchU32',
+      tagValue: 0x01000101,
+      telemetryKey: 'gf1StrikeStatus',
+      valueType: TcpHexValueType.UINT_AUTO_LE
+    },
+    {
+      tagValue: 0x01000201,
+      telemetryKey: 'gf2StrikeStatus',
       valueType: TcpHexValueType.UINT_AUTO_LE
     }
   ]

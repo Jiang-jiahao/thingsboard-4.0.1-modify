@@ -51,6 +51,7 @@ import {
   ProtocolTemplateDefinition,
   TcpHexChecksumDefinition,
   TcpDeviceProfileTransportConfiguration,
+  TCP_HEX_FRAME_FIELD_VALUE_TYPES,
   TCP_HEX_MATCH_VALUE_TYPES,
   TcpHexCommandProfile,
   TcpHexFieldDefinition,
@@ -98,7 +99,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     TransportTcpDataType.HEX,
     TransportTcpDataType.ASCII
   ];
-  tcpHexValueTypes = Object.values(TcpHexValueType);
+  tcpHexValueTypes = TCP_HEX_FRAME_FIELD_VALUE_TYPES;
   /** LTV Tag→遥测映射下拉（静态 labelKey，供 translate 使用） */
   tcpHexLtvTagValueOptions = TCP_HEX_LTV_TAG_VALUE_OPTIONS;
   tcpHexMatchValueTypes = TCP_HEX_MATCH_VALUE_TYPES;
@@ -180,6 +181,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       hexLtvKeyPrefix: ['ltv'],
       hexLtvUnknownMode: [TcpHexUnknownTagMode.SKIP, Validators.required],
       hexLtvLengthIncludesTag: [false],
+      hexLtvLengthIncludesLengthField: [false],
       hexLtvTagMappings: this.fb.array([]),
       protocolTemplateBundleId: [null],
       protocolTemplates: this.fb.array([]),
@@ -407,7 +409,8 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       hexLtvMaxItems: cfg?.maxItems ?? 32,
       hexLtvKeyPrefix: cfg?.keyPrefix ?? 'ltv',
       hexLtvUnknownMode: cfg?.unknownTagMode ?? TcpHexUnknownTagMode.SKIP,
-      hexLtvLengthIncludesTag: !!cfg?.lengthIncludesTag
+      hexLtvLengthIncludesTag: !!cfg?.lengthIncludesTag,
+      hexLtvLengthIncludesLengthField: !!cfg?.lengthIncludesLengthField
     }, {emitEvent: false});
   }
 
@@ -521,6 +524,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       hexLtvKeyPrefix: [ltv?.keyPrefix ?? 'ltv'],
       hexLtvUnknownMode: [ltv?.unknownTagMode ?? TcpHexUnknownTagMode.SKIP, Validators.required],
       hexLtvLengthIncludesTag: [!!ltv?.lengthIncludesTag],
+      hexLtvLengthIncludesLengthField: [!!ltv?.lengthIncludesLengthField],
       hexLtvTagMappings: ltvArr
     });
   }
@@ -861,6 +865,9 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
               if (row['hexLtvLengthIncludesTag'] === true || row['hexLtvLengthIncludesTag'] === 'true' || row['hexLtvLengthIncludesTag'] === 1) {
                 ltv.lengthIncludesTag = true;
               }
+              if (row['hexLtvLengthIncludesLengthField'] === true || row['hexLtvLengthIncludesLengthField'] === 'true' || row['hexLtvLengthIncludesLengthField'] === 1) {
+                ltv.lengthIncludesLengthField = true;
+              }
               if (tagMappings.length) {
                 ltv.tagMappings = tagMappings;
               }
@@ -968,6 +975,9 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           }
           if (v.hexLtvLengthIncludesTag === true || v.hexLtvLengthIncludesTag === 'true' || v.hexLtvLengthIncludesTag === 1) {
             ltv.lengthIncludesTag = true;
+          }
+          if (v.hexLtvLengthIncludesLengthField === true || v.hexLtvLengthIncludesLengthField === 'true' || v.hexLtvLengthIncludesLengthField === 1) {
+            ltv.lengthIncludesLengthField = true;
           }
           if (tagMappings.length) {
             ltv.tagMappings = tagMappings;

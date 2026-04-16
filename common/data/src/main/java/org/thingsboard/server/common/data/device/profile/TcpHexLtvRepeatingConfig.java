@@ -17,9 +17,12 @@ import java.util.Objects;
 /**
  * 从帧内某偏移起，按 LTV 或 TLV 重复解析多段。
  * <p>
- * 默认（{@link #lengthIncludesTag} 为 false）：Length 仅表示 <b>Value</b> 的字节数（不含长度字段与 Tag），与历史行为一致。
- * 灵信类协议（{@link #lengthIncludesTag} 为 true）：Length 表示 <b>Tag + Value</b> 的字节数之和（编号+数据），
- * 实际读取的 Value 长度为 {@code lengthField - tagWidth}。
+ * 默认（{@link #lengthIncludesTag} 为 false）：Length 数值仅表示 <b>Value</b> 的字节数；Length 字段自身<strong>从不</strong>计入该数值。
+ * {@link #lengthIncludesTag} 为 {@code true} 时：Length 数值仍<strong>不含</strong> Length 字段自身，仅表示其后紧跟的 <b>Tag + Value</b> 总字节数，
+ * Value 长度 = {@code lengthField - tagWidth}。
+ * <p>
+ * {@link #lengthIncludesLengthField} 为少数线型：Length 数值把 <strong>Length 字段自身也计入</strong>（整段 L+T+V 的总字节数），
+ * 此时 Value 长度 = {@code length - lenWidth - tagWidth}。解析时优先于 {@link #lengthIncludesTag}。
  */
 @Data
 public class TcpHexLtvRepeatingConfig implements Serializable {
@@ -29,9 +32,13 @@ public class TcpHexLtvRepeatingConfig implements Serializable {
     private TcpHexValueType tagFieldType;
     private TcpHexLtvChunkOrder chunkOrder;
     /**
-     * 为 {@code true} 时，线型 Length 字段 = Tag 线宽 + Value 线宽（灵信子命令体「编号+数据」总长度）。
+     * 为 {@code true} 时，Length 数值（仍不含 Length 字段自身）= Tag 线宽 + Value 线宽。
      */
     private Boolean lengthIncludesTag;
+    /**
+     * 为 {@code true} 时，Length 数值 = Length 字段 + Tag + Value（整段总字节数，少数设备/帧格式）。
+     */
+    private Boolean lengthIncludesLengthField;
     /**
      * 最多解析条数；{@code null} 或 {@code 0} 表示使用内置上限（256）。
      */
