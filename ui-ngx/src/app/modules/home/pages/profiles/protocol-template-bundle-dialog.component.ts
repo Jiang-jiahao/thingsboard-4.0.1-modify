@@ -27,6 +27,7 @@ import {
 import { ProtocolTemplateBundleEditorComponent } from '@home/components/profile/device/protocol-template-bundle-editor.component';
 import { buildLingxinV2MonitorPresetBundle } from '@home/pages/profiles/protocol-template-lingxin-v2-monitor.preset';
 import {
+  normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
   parseLtvTagWireTextToNumber
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
@@ -351,7 +352,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
         }
         // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与 BYTES_AS_HEX 固定 hex 不能同时存在
         if (vt === TcpHexValueType.BYTES_AS_HEX) {
-          const fixHex = String(r['fixedBytesHex'] ?? '').replace(/\s+/g, '');
+          const fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
           if (fixHex) {
             def.fixedBytesHex = fixHex;
           }
@@ -369,10 +370,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
       });
   }
 
-  /**
-   * 支持十进制、0x 前缀十六进制；纯十六进制数字串（含 A–F）按十六进制解析；纯数字串按十进制。
-   */
-  /** 十进制、0x 十六进制；与 parseCommandValue 一致，结果为可放入 Java long 的整数 */
+  /** 固定线值整型：十进制解析（与 {@link parseIntegralWireTextToNumber} 一致）。 */
   private parseIntegralWireText(raw: string): number {
     const n = parseIntegralWireTextToNumber(raw);
     return n !== undefined && Number.isFinite(n) ? Math.trunc(n) : 0;

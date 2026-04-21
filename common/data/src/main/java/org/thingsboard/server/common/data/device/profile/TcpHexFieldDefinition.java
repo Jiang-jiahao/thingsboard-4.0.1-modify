@@ -11,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.HexFormat;
 import java.util.List;
 
 /**
@@ -32,6 +31,7 @@ public class TcpHexFieldDefinition implements Serializable {
     /**
      * 仅用于<strong>命令覆盖字段</strong>：为 true 时参与该命令「下行自动参长」的字节统计（须与
      * {@link ProtocolTemplateCommandDefinition#getDownlinkPayloadLengthFieldKey()} 等配合）。
+     * 可与参长字段为同一 key：此时参长写入值含本字段线宽（见 {@link ProtocolTemplateCommandDefinition#getDownlinkPayloadLengthAuto()}）。
      */
     private Boolean includeInDownlinkPayloadLength;
     /**
@@ -183,18 +183,10 @@ public class TcpHexFieldDefinition implements Serializable {
             if (byteLength == null || byteLength <= 0) {
                 throw new IllegalArgumentException("fixedBytesHex requires fixed byteLength > 0 on BYTES_AS_HEX");
             }
-            String clean = fixedBytesHex.replaceAll("\\s+", "");
-            if (clean.isEmpty() || (clean.length() & 1) == 1) {
-                throw new IllegalArgumentException("fixedBytesHex must be non-empty even-length hex");
-            }
             try {
-                byte[] parsed = HexFormat.of().parseHex(clean);
-                if (parsed.length != byteLength) {
-                    throw new IllegalArgumentException(
-                            "fixedBytesHex decodes to " + parsed.length + " bytes but byteLength is " + byteLength);
-                }
+                TcpHexFixedBytesUtil.parseHexToByteLength(fixedBytesHex, byteLength);
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("fixedBytesHex: invalid hex: " + e.getMessage());
+                throw new IllegalArgumentException("fixedBytesHex: " + e.getMessage());
             }
         }
         if (Boolean.TRUE.equals(autoDownlinkTotalFrameLength)) {

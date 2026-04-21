@@ -16,6 +16,7 @@ import {
 import {
   formatIntegralWireTextEcho,
   formatTcpHexMatchValueHexHint,
+  normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
   parseLtvTagWireTextToNumber
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
@@ -312,6 +313,21 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
       return;
     }
     ctrl.patchValue(formatIntegralWireTextEcho(t, n), { emitEvent: false });
+  }
+
+  /** 固定 HEX：仅去掉空白，不按数值解析，保留前导 0。 */
+  onFixedBytesHexBlur(fieldGroup: UntypedFormGroup | null): void {
+    if (!fieldGroup || this.disabled) {
+      return;
+    }
+    const ctrl = fieldGroup.get('fixedBytesHex');
+    if (!ctrl) {
+      return;
+    }
+    const normalized = normalizeFixedBytesHexWhitespace(ctrl.value);
+    if (normalized !== String(ctrl.value ?? '')) {
+      ctrl.patchValue(normalized, { emitEvent: false });
+    }
   }
 
   downlinkLengthFieldKeyOptions(ci: number): string[] {

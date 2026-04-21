@@ -26,6 +26,7 @@ import {
 } from '@shared/models/device.models';
 import { Subscription } from 'rxjs';
 import {
+  fixedBytesHexModelToFormControl,
   formatFixedWireIntegralFromModel,
   ltvTagWireTextFromModel,
   parseLtvTagWireTextToNumber
@@ -146,7 +147,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       autoDownlinkTotalFrameLength: [!!f?.autoDownlinkTotalFrameLength],
       downlinkTotalFrameLengthExcludesLengthFieldBytes: [!!f?.downlinkTotalFrameLengthExcludesLengthFieldBytes],
       fixedWireIntegralValueText: [formatFixedWireIntegralFromModel(f?.fixedWireIntegralValue)],
-      fixedBytesHex: [f?.fixedBytesHex ?? '']
+      fixedBytesHex: [fixedBytesHexModelToFormControl(f)]
     });
   }
 

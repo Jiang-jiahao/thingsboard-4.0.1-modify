@@ -56,6 +56,7 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
     /**
      * 为 true 且方向为下行/双向时：下行组帧将 {@link #downlinkPayloadLengthFieldKey} 指明的整型字段写为参长，
      * 值为命令覆盖字段中 {@link TcpHexFieldDefinition#getIncludeInDownlinkPayloadLength()} 为 true 的各字段在合并结果中的<strong>字节宽度之和</strong>（须在合并结果中存在）。
+     * 若参长字段本身也勾选「参与参长」，则其线宽一并计入（适用于「长度 = 本字段 + 后续数据」等语义）。
      */
     private Boolean downlinkPayloadLengthAuto;
     /**
@@ -125,10 +126,6 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
             }
             String lk = downlinkPayloadLengthFieldKey.trim();
             for (TcpHexFieldDefinition f : fields != null ? fields : List.<TcpHexFieldDefinition>of()) {
-                if (f != null && Boolean.TRUE.equals(f.getIncludeInDownlinkPayloadLength())
-                        && f.getKey() != null && Objects.equals(f.getKey().trim(), lk)) {
-                    throw new IllegalArgumentException("length field key must not be included in payload length contributors");
-                }
                 if (f != null && f.getKey() != null && Objects.equals(f.getKey().trim(), lk)
                         && Boolean.TRUE.equals(f.getAutoDownlinkTotalFrameLength())) {
                     throw new IllegalArgumentException(

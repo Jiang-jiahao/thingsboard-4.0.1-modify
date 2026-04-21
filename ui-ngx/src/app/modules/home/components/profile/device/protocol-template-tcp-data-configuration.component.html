@@ -87,7 +87,8 @@
                               matTooltipPosition="above" matTooltipShowDelay="400">
                 <mat-label translate>device-profile.tcp.hex-field-fixed-bytes-hex</mat-label>
                 <input matInput formControlName="fixedBytesHex" autocomplete="off"
-                       [placeholder]="'device-profile.tcp.hex-field-fixed-bytes-hex-placeholder' | translate">
+                       [placeholder]="'device-profile.tcp.hex-field-fixed-bytes-hex-placeholder' | translate"
+                       (blur)="onFixedBytesHexBlur(asFormGroup(getTemplateFieldsArray(0).at(fi)))">
               </mat-form-field>
             </ng-container>
             <ng-container *ngIf="getHexFieldLengthModeTemplate(0, fi) === 'fromFrame'">
@@ -436,7 +437,8 @@
                                   matTooltipPosition="above" matTooltipShowDelay="400">
                     <mat-label translate>device-profile.tcp.hex-field-fixed-bytes-hex</mat-label>
                     <input matInput formControlName="fixedBytesHex" autocomplete="off"
-                           [placeholder]="'device-profile.tcp.hex-field-fixed-bytes-hex-placeholder' | translate">
+                           [placeholder]="'device-profile.tcp.hex-field-fixed-bytes-hex-placeholder' | translate"
+                           (blur)="onFixedBytesHexBlur(asFormGroup(getCommandOverrideFieldsArray(ci).at(fi)))">
                   </mat-form-field>
                 </ng-container>
                 <ng-container *ngIf="getHexFieldLengthModeOverride(ci, fi) === 'fromFrame'">

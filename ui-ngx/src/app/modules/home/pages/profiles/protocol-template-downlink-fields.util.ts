@@ -768,8 +768,7 @@ export function buildDownlinkFieldValuesSkeleton(
 }
 
 /**
- * 固定线值整型 / 命令值：与协议模板对话框解析一致。
- * `0x` 前缀为十六进制；否则十进制；纯字母 A–F 的偶数位串按十六进制。
+ * 固定线值整型：仅按十进制解析（与所选整型类型的线值一致，不用 0x/十六进制串规则）。
  */
 export function parseIntegralWireTextToNumber(raw: unknown): number | undefined {
   if (raw === null || raw === undefined) {
@@ -782,31 +781,19 @@ export function parseIntegralWireTextToNumber(raw: unknown): number | undefined 
   if (!s) {
     return undefined;
   }
-  if (/^0x[0-9a-fA-F]+$/i.test(s)) {
-    const n = parseInt(s.slice(2), 16);
-    return Number.isFinite(n) ? n : undefined;
-  }
-  if (/^[0-9a-fA-F]+$/.test(s) && /[a-f]/i.test(s)) {
-    const n = parseInt(s, 16);
-    return Number.isFinite(n) ? n : undefined;
-  }
   const n = Number(s);
   return Number.isFinite(n) ? Math.trunc(n) : undefined;
 }
 
-/** 从 API 载入：与命令值回显一致，`0x` + 小写十六进制 */
+/** 从 API 载入：十进制回显。 */
 export function formatFixedWireIntegralFromModel(v: number | undefined | null): string {
   if (v === undefined || v === null || !Number.isFinite(Number(v))) {
     return '';
   }
-  const n = Math.trunc(Number(v));
-  const u = n >= 0 ? n : n >>> 0;
-  return '0x' + u.toString(16);
+  return String(Math.trunc(Number(v)));
 }
 
-/**
- * 失焦归一化：若以 `0x`/`0X` 输入则回显小写十六进制，否则回显十进制（与组帧 HEX 测试字段一致）。
- */
+/** 失焦归一化：十进制回显。 */
 export function formatIntegralWireTextEcho(rawInput: string, numericValue: number): string {
   const trimmed = String(rawInput ?? '').trim();
   if (trimmed === '') {
@@ -815,10 +802,35 @@ export function formatIntegralWireTextEcho(rawInput: string, numericValue: numbe
   if (!Number.isFinite(numericValue)) {
     return trimmed;
   }
-  if (/^0x/i.test(trimmed)) {
-    const n = Math.trunc(numericValue);
-    const u = n >= 0 ? n : n >>> 0;
-    return '0x' + u.toString(16);
-  }
   return String(Math.trunc(numericValue));
+}
+
+/**
+ * BYTES_AS_HEX 固定内容：仅去掉空白，不按数值解析，以保留前导 0 与用户输入的字母大小写。
+ */
+export function normalizeFixedBytesHexWhitespace(raw: unknown): string {
+  return String(raw ?? '').replace(/\s+/g, '');
+}
+
+/**
+ * 从模型写入表单：字符串原样（去空白）；若历史 JSON 误存为数字则按 byteLength 左补到 2×byteLength 位 hex（仅用于恢复展示）。
+ */
+export function fixedBytesHexModelToFormControl(f?: TcpHexFieldDefinition): string {
+  if (!f) {
+    return '';
+  }
+  const raw: unknown = (f as { fixedBytesHex?: unknown }).fixedBytesHex;
+  if (raw === null || raw === undefined || raw === '') {
+    return '';
+  }
+  if (typeof raw === 'number' && Number.isFinite(raw)) {
+    const bl = f.byteLength;
+    if (bl != null && bl > 0) {
+      const n = Math.trunc(raw);
+      const u = n >= 0 ? n : n >>> 0;
+      return u.toString(16).padStart(bl * 2, '0');
+    }
+    return String(raw);
+  }
+  return normalizeFixedBytesHexWhitespace(raw);
 }

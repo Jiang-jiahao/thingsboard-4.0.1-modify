@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.device.profile.ProtocolTemplateCommand
 import org.thingsboard.server.common.data.device.profile.ProtocolTemplateCommandDirection;
 import org.thingsboard.server.common.data.device.profile.ProtocolTemplateDefinition;
 import org.thingsboard.server.common.data.device.profile.ProtocolTemplateTransportTcpDataConfiguration;
+import org.thingsboard.server.common.data.device.profile.TcpHexFixedBytesUtil;
 import org.thingsboard.server.common.data.device.profile.TcpHexChecksumDefinition;
 import org.thingsboard.server.common.data.device.profile.TcpHexCommandProfile;
 import org.thingsboard.server.common.data.device.profile.TcpHexFieldDefinition;
@@ -347,13 +348,18 @@ public class ProtocolTemplateHexBuildService {
         }
         long len = 0;
         for (TcpHexFieldDefinition g : merged) {
-            if (g == null || lenKey.equals(g.getKey())) {
+            if (g == null) {
+                continue;
+            }
+            String gk = g.getKey() != null ? g.getKey().trim() : "";
+            // 参长字段默认不计入；若该字段也勾选「参与参长」，则把自身线宽计入（如：长度 = 本字段 + 后续字段）。
+            if (lenKey.equals(gk) && !want.contains(lenKey)) {
                 continue;
             }
             if (writesAutoDownlinkPayloadLength(g)) {
                 continue;
             }
-            if (!want.contains(g.getKey())) {
+            if (!want.contains(gk)) {
                 continue;
             }
             if (isRedundantPaWordField(g, merged)) {
@@ -638,16 +644,12 @@ public class ProtocolTemplateHexBuildService {
                 throw new IllegalArgumentException("Field [" + f.getKey() + "]: fixedBytesHex requires BYTES_AS_HEX");
             }
             int len = fieldWidthForBuild(f);
-            String clean = f.getFixedBytesHex().replaceAll("\\s+", "");
-            if (clean.isEmpty() || (clean.length() & 1) == 1) {
-                throw new IllegalArgumentException("Field [" + f.getKey() + "]: invalid fixedBytesHex");
+            try {
+                byte[] parsed = TcpHexFixedBytesUtil.parseHexToByteLength(f.getFixedBytesHex(), len);
+                System.arraycopy(parsed, 0, buf, off, len);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Field [" + f.getKey() + "]: " + e.getMessage());
             }
-            byte[] parsed = HexFormat.of().parseHex(clean);
-            if (parsed.length != len) {
-                throw new IllegalArgumentException(
-                        "Field [" + f.getKey() + "]: fixedBytesHex must be " + len + " bytes");
-            }
-            System.arraycopy(parsed, 0, buf, off, len);
             return;
         }
 
@@ -656,15 +658,12 @@ public class ProtocolTemplateHexBuildService {
             int len = fieldWidthForBuild(f);
             byte[] slice = new byte[len];
             if (raw != null) {
-                String hex = raw.toString().replaceAll("\\s+", "");
-                if ((hex.length() & 1) == 1) {
-                    throw new IllegalArgumentException("Field [" + f.getKey() + "]: invalid hex string length");
+                try {
+                    byte[] parsed = TcpHexFixedBytesUtil.parseHexToByteLength(raw.toString(), len);
+                    System.arraycopy(parsed, 0, slice, 0, len);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Field [" + f.getKey() + "]: " + e.getMessage());
                 }
-                byte[] parsed = HexFormat.of().parseHex(hex);
-                if (parsed.length != len) {
-                    throw new IllegalArgumentException("Field [" + f.getKey() + "]: hex length must be " + len + " bytes");
-                }
-                System.arraycopy(parsed, 0, slice, 0, len);
             }
             System.arraycopy(slice, 0, buf, off, len);
             return;

@@ -26,9 +26,11 @@ import { combineLatest } from 'rxjs';
 import { filter, switchMap, take } from 'rxjs/operators';
 import { deepClone } from '@core/utils';
 import {
+  fixedBytesHexModelToFormControl,
   formatFixedWireIntegralFromModel,
   formatTcpHexMatchValueHexHint,
   ltvTagWireTextFromModel,
+  normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
   parseLtvTagWireTextToNumber
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
@@ -468,7 +470,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       byteLengthFromByteOffset: [f?.byteLengthFromByteOffset ?? null, [Validators.min(0)]],
       byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required],
       fixedWireIntegralValueText: [formatFixedWireIntegralFromModel(f?.fixedWireIntegralValue)],
-      fixedBytesHex: [f?.fixedBytesHex ?? '']
+      fixedBytesHex: [fixedBytesHexModelToFormControl(f)]
     });
   }
 
@@ -1074,7 +1076,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         }
         // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与 BYTES_AS_HEX 固定 hex 不能同时存在
         if (vt === TcpHexValueType.BYTES_AS_HEX) {
-          const fixHex = String(r['fixedBytesHex'] ?? '').replace(/\s+/g, '');
+          const fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
           if (fixHex) {
             def.fixedBytesHex = fixHex;
           }
