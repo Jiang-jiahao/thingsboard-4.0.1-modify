@@ -28,7 +28,7 @@ import { Subscription } from 'rxjs';
 import {
   fixedBytesHexModelToFormControl,
   formatFixedWireIntegralFromModel,
-  ltvTagWireTextFromModel,
+  ltvTagWireTextForMapping,
   parseLtvTagWireTextToNumber
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 
@@ -151,10 +151,15 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     });
   }
 
-  private createLtvTagMappingGroup(m?: TcpHexLtvTagMapping, tagFieldType?: TcpHexValueType): UntypedFormGroup {
+  private createLtvTagMappingGroup(
+    m?: TcpHexLtvTagMapping,
+    tagFieldType?: TcpHexValueType,
+    sectionUnknownTagTelemetryKeyHexLiteral?: boolean | null
+  ): UntypedFormGroup {
     const vt = tagFieldType ?? TcpHexValueType.UINT8;
     return this.fb.group({
-      tagValue: [ltvTagWireTextFromModel(m?.tagValue, vt), [Validators.required, this.ltvTagWireTextValidator]],
+      tagValue: [ltvTagWireTextForMapping(m, vt, sectionUnknownTagTelemetryKeyHexLiteral),
+        [Validators.required, this.ltvTagWireTextValidator]],
       telemetryKey: [m?.telemetryKey ?? '', [Validators.maxLength(255)]],
       valueType: [migrateLegacyLtvTagValueType(m?.valueType), Validators.required]
     });
@@ -172,7 +177,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     const ltvTagFt = ltv?.tagFieldType ?? TcpHexValueType.UINT8;
     if (ltv?.tagMappings?.length) {
       for (const m of ltv.tagMappings) {
-        ltvArr.push(this.createLtvTagMappingGroup(m, ltvTagFt));
+        ltvArr.push(this.createLtvTagMappingGroup(m, ltvTagFt, ltv?.unknownTagTelemetryKeyHexLiteral));
       }
     }
     const cs: TcpHexChecksumDefinition | undefined = t?.checksum;

@@ -4,6 +4,7 @@
 import {
   ProtocolTemplateCommandDefinition,
   TcpHexFieldDefinition,
+  TcpHexLtvTagMapping,
   TcpHexValueType
 } from '@shared/models/device.models';
 
@@ -107,7 +108,41 @@ export function ltvTagWireTextFromModel(
 }
 
 /**
- * LTV Tag 输入：仅允许 `0x`/`0X` 前缀的十六进制（不允许纯十进制）。
+ * 从模型载入单行 LTV Tag：tagValueLiterallyHex 为 true/false 时强制对应 0x/十进制回显；
+ * 未写入该字段的旧数据则回退到节级 unknownTagTelemetryKeyHexLiteral === true 时用 0x，否则十进制。
+ */
+export function ltvTagWireTextForMapping(
+  m: Pick<TcpHexLtvTagMapping, 'tagValue' | 'tagValueLiterallyHex'> | undefined | null,
+  tagFieldType: TcpHexValueType | null | undefined,
+  sectionUnknownTagTelemetryKeyHexLiteral: boolean | undefined | null
+): string {
+  if (tagFieldType == null) {
+    return '';
+  }
+  const n = m?.tagValue;
+  if (n == null || !Number.isFinite(Number(n))) {
+    return '';
+  }
+  const tri = m?.tagValueLiterallyHex;
+  if (tri === true) {
+    return formatTcpHexMatchValueHexHint(Number(n), tagFieldType);
+  }
+  if (tri === false) {
+    return String(Math.trunc(Number(n)));
+  }
+  if (sectionUnknownTagTelemetryKeyHexLiteral === true) {
+    return formatTcpHexMatchValueHexHint(Number(n), tagFieldType);
+  }
+  return String(Math.trunc(Number(n)));
+}
+
+/** 与保存时 LTV 节级 unknownTagTelemetryKeyHexLiteral 一致：任一行映射以 0x 字面保存则为 true。 */
+export function unknownTagTelemetryKeyHexLiteralFromMappings(tagMappings: TcpHexLtvTagMapping[]): boolean {
+  return tagMappings.some(m => m.tagValueLiterallyHex === true);
+}
+
+/**
+ * LTV Tag 输入：允许 `0x`/`0X` 前缀十六进制，或（可选）纯十进制整数。
  */
 export function parseLtvTagWireTextToNumber(raw: unknown): number | undefined {
   if (raw === null || raw === undefined) {
@@ -120,10 +155,14 @@ export function parseLtvTagWireTextToNumber(raw: unknown): number | undefined {
   if (!s) {
     return undefined;
   }
+  if (/^-?\d+$/.test(s)) {
+    const n = Number.parseInt(s, 10);
+    return Number.isFinite(n) ? n : undefined;
+  }
   if (!/^0x[0-9a-fA-F]+$/i.test(s)) {
     return undefined;
   }
-  const n = parseInt(s.slice(2), 16);
+  const n = Number.parseInt(s.slice(2), 16);
   return Number.isFinite(n) ? n : undefined;
 }
 

@@ -10,7 +10,7 @@
  * **本预设**：命令匹配偏移 12、宽度 4、类型 UINT32_LE；无校验。帧模板含头四字段。
  * **上行子命令体**：帧模板启用 LTV，起始 16；`lengthIncludesTag=true`（Length 数值不含自身，= 编号(4)+数据 字节数，如 0x0C=12→数据 8 字节）。
  * Length UINT32_LE，编号整格 **UINT32_BE**（线型 `01 00 01 01`→0x01000101）。示例映射：`gf1StrikeStatus`/`gf2StrikeStatus`（UINT_AUTO_LE；Value 8 字节时上行解析为 HEX 串）。
- * 未映射的单元在 `unknownTagMode=EMIT_HEX` 下输出 `lx_序号_unk_t{tag}`。
+ * 未映射的单元在 `unknownTagMode=EMIT_HEX` 下输出 `lx_序号_unk_t{tag}`；任一行 `tagValueLiterallyHex=true` 或节级 `unknownTagTelemetryKeyHexLiteral=true` 时 `_t` 后为 `0x` 十六进制。
  * **下行**：`packetLen` 在帧模板上勾选「下行自动整包总长」后由服务写入最终帧长，JSON 可省略；仍用单子单元 + `subUnitLen` 自动参长，例如
  * `{"deviceId":1,"category":1,"moduleField":1,"currentModuleNo":1,"moduleType":1,"dataU32":1}`（功放开关 1 开 0 关）。
  */
@@ -75,11 +75,13 @@ const LINGXIN_SUB_HEX_LTV: TcpHexLtvRepeatingConfig = {
   tagMappings: [
     {
       tagValue: 0x01000101,
+      tagValueLiterallyHex: true,
       telemetryKey: 'gf1StrikeStatus',
       valueType: TcpHexValueType.UINT_AUTO_LE
     },
     {
       tagValue: 0x01000201,
+      tagValueLiterallyHex: true,
       telemetryKey: 'gf2StrikeStatus',
       valueType: TcpHexValueType.UINT_AUTO_LE
     }

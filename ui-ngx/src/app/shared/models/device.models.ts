@@ -511,6 +511,8 @@ export enum TcpHexUnknownTagMode {
 
 export interface TcpHexLtvTagMapping {
   tagValue: number;
+  /** 该行 Tag 是否以 0x 字面保存；决定回显与未映射 _t 后缀是否参与十六进制模式 */
+  tagValueLiterallyHex?: boolean;
   telemetryKey: string;
   valueType: TcpHexValueType;
   /** @deprecated 由 LTV Length 切出的 Value 长度决定；保存时可省略 */
@@ -538,6 +540,11 @@ export interface TcpHexLtvRepeatingConfig {
    * 例外：为 true 时，Length 数值把 Length 字段自身也算入（整段 L+T+V）。与常规「Length 不含自身」不同；解析优先于 lengthIncludesTag。
    */
   lengthIncludesLengthField?: boolean;
+  /**
+   * 未映射 Tag 且 unknownTagMode=EMIT_HEX 时，遥测键 _t 后缀是否用 0x：节级 true，或任一行 tagValueLiterallyHex 为 true 时生效。
+   * 保存时由 UI 根据各映射行是否以 0x 输入自动写入（与任一行 tagValueLiterallyHex 一致）。
+   */
+  unknownTagTelemetryKeyHexLiteral?: boolean;
 }
 
 /** 按命令字匹配的一套解析（与后端 TcpHexCommandProfile 一致） */

@@ -25,6 +25,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -195,6 +196,23 @@ public final class TcpHexProtocolParser {
         }
     }
 
+    /** 未映射 Tag 键名后缀是否用 {@code 0x}：节级开关为 true，或任一行映射以十六进制字面保存。 */
+    static boolean effectiveUnknownTagTelemetryKeyHexLiteral(TcpHexLtvRepeatingConfig cfg) {
+        if (Boolean.TRUE.equals(cfg.getUnknownTagTelemetryKeyHexLiteral())) {
+            return true;
+        }
+        List<TcpHexLtvTagMapping> list = cfg.getTagMappings();
+        if (list == null) {
+            return false;
+        }
+        for (TcpHexLtvTagMapping m : list) {
+            if (m != null && Boolean.TRUE.equals(m.getTagValueLiterallyHex())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void emitLtvItem(JsonObject out, TcpHexLtvRepeatingConfig cfg, long tagVal, byte[] v,
                                     int item, String prefix, UUID sessionId, boolean failRuleOnFixedFieldMismatch) {
         TcpHexLtvTagMapping mapping = findTagMapping(cfg.getTagMappings(), tagVal);
@@ -224,8 +242,31 @@ public final class TcpHexProtocolParser {
                 log.warn("[{}] LTV value decode failed for tag {}: {}", sessionId, tagVal, e.getMessage());
             }
         } else if (cfg.getUnknownTagMode() == TcpHexUnknownTagMode.EMIT_HEX) {
-            out.addProperty(prefix + "_unk_" + item + "_t" + tagVal, HexFormat.of().formatHex(v));
+            String tagSuffix = formatUnknownLtvTelemetryTagSuffix(tagVal, cfg.getTagFieldType(),
+                    effectiveUnknownTagTelemetryKeyHexLiteral(cfg));
+            out.addProperty(prefix + "_unk_" + item + "_t" + tagSuffix, HexFormat.of().formatHex(v));
         }
+    }
+
+    private static long unsignedMaskForTagBytes(int tagBytes) {
+        if (tagBytes >= 8) {
+            return ~0L;
+        }
+        return (1L << (tagBytes * 8)) - 1;
+    }
+
+    /** 与前端 {@code formatTcpHexMatchValueHexHint} 一致：按线宽掩码，用于 {@code 0x} 后缀。 */
+    private static long wireTagValueAsUnsignedBits(long tagVal, int tagBytes) {
+        return tagVal & unsignedMaskForTagBytes(tagBytes);
+    }
+
+    private static String formatUnknownLtvTelemetryTagSuffix(long tagVal, TcpHexValueType tagVt, boolean hexLiteral) {
+        int tagBytes = integralTypeWidth(tagVt);
+        if (!hexLiteral) {
+            return Long.toString(tagVal);
+        }
+        long u = wireTagValueAsUnsignedBits(tagVal, tagBytes);
+        return "0x" + String.format(Locale.ROOT, "%0" + (tagBytes * 2) + "x", u);
     }
 
     private static TcpHexLtvTagMapping findTagMapping(List<TcpHexLtvTagMapping> list, long tagVal) {

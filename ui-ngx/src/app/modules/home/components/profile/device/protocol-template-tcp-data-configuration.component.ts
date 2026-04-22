@@ -221,14 +221,19 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     const g = this.getTemplateLtvTagMappingsArray(ti).at(li) as UntypedFormGroup;
     const ctrl = g.get('tagValue');
     const t = String(ctrl?.value ?? '');
-    if (!t.trim()) {
+    const trimmed = t.trim().replace(/\s+/g, '');
+    if (!trimmed) {
       return;
     }
     const n = parseLtvTagWireTextToNumber(t);
     if (n === undefined) {
       return;
     }
-    ctrl?.patchValue(formatTcpHexMatchValueHexHint(n, vt), { emitEvent: false });
+    if (/^0x/i.test(trimmed)) {
+      ctrl?.patchValue(formatTcpHexMatchValueHexHint(n, vt), { emitEvent: false });
+    } else {
+      ctrl?.patchValue(String(n), { emitEvent: false });
+    }
   }
 
   firstTemplateId(): string {

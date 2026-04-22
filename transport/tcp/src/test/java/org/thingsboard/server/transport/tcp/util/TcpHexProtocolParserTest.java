@@ -16,6 +16,7 @@ import org.thingsboard.server.common.data.device.profile.TcpHexLtvTagMapping;
 import org.thingsboard.server.common.data.device.profile.TcpHexUnknownTagMode;
 import org.thingsboard.server.common.data.device.profile.TcpHexValueType;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -364,6 +365,69 @@ class TcpHexProtocolParserTest {
     }
 
     /** LTV Tag 映射 BYTES_AS_HEX：长度完全由 Length 切出的 Value 决定，不另填 byteLength */
+    @Test
+    void ltvUnknownTagEmitHexUsesDecimalTagSuffixByDefault() {
+        // TLV: UINT32_BE tag 0x07000301, UINT8 len 4, 4-byte value — no mapping → EMIT_HEX
+        String hex = "070003010411223344";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexLtvRepeatingConfig ltv = new TcpHexLtvRepeatingConfig();
+        ltv.setStartByteOffset(0);
+        ltv.setLengthFieldType(TcpHexValueType.UINT8);
+        ltv.setTagFieldType(TcpHexValueType.UINT32_BE);
+        ltv.setChunkOrder(TcpHexLtvChunkOrder.TLV);
+        ltv.setKeyPrefix("lx");
+        ltv.setTagMappings(Collections.emptyList());
+        ltv.setUnknownTagMode(TcpHexUnknownTagMode.EMIT_HEX);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, null, ltv, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().has("lx_unk_0_t117441281")).isTrue();
+        assertThat(out.get().get("lx_unk_0_t117441281").getAsString()).isEqualTo("11223344");
+    }
+
+    @Test
+    void ltvUnknownTagEmitHexUsesHexLiteralTagSuffixWhenConfigured() {
+        String hex = "070003010411223344";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexLtvRepeatingConfig ltv = new TcpHexLtvRepeatingConfig();
+        ltv.setStartByteOffset(0);
+        ltv.setLengthFieldType(TcpHexValueType.UINT8);
+        ltv.setTagFieldType(TcpHexValueType.UINT32_BE);
+        ltv.setChunkOrder(TcpHexLtvChunkOrder.TLV);
+        ltv.setKeyPrefix("lx");
+        ltv.setTagMappings(Collections.emptyList());
+        ltv.setUnknownTagMode(TcpHexUnknownTagMode.EMIT_HEX);
+        ltv.setUnknownTagTelemetryKeyHexLiteral(true);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, null, ltv, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().has("lx_unk_0_t0x07000301")).isTrue();
+        assertThat(out.get().get("lx_unk_0_t0x07000301").getAsString()).isEqualTo("11223344");
+    }
+
+    /** 节级 false 时，任一行映射 tagValueLiterallyHex=true 仍启用未知 Tag 键的 0x 后缀（与灵信式「混填」一致）。 */
+    @Test
+    void ltvUnknownTagEmitHexUsesHexSuffixFromMappingTagValueLiterallyHex() {
+        String hex = "070003010411223344";
+        var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
+        TcpHexLtvRepeatingConfig ltv = new TcpHexLtvRepeatingConfig();
+        ltv.setStartByteOffset(0);
+        ltv.setLengthFieldType(TcpHexValueType.UINT8);
+        ltv.setTagFieldType(TcpHexValueType.UINT32_BE);
+        ltv.setChunkOrder(TcpHexLtvChunkOrder.TLV);
+        ltv.setKeyPrefix("lx");
+        TcpHexLtvTagMapping decoy = new TcpHexLtvTagMapping();
+        decoy.setTagValue(0x01000101);
+        decoy.setTelemetryKey("other");
+        decoy.setValueType(TcpHexValueType.UINT32_LE);
+        decoy.setTagValueLiterallyHex(true);
+        ltv.setTagMappings(List.of(decoy));
+        ltv.setUnknownTagMode(TcpHexUnknownTagMode.EMIT_HEX);
+        ltv.setUnknownTagTelemetryKeyHexLiteral(false);
+        assertThat(TcpHexProtocolParser.effectiveUnknownTagTelemetryKeyHexLiteral(ltv)).isTrue();
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, null, ltv, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().has("lx_unk_0_t0x07000301")).isTrue();
+    }
+
     @Test
     void ltvTagMappingBytesAsHexUsesWireValueLength() {
         String hex = "0301aabbcc";

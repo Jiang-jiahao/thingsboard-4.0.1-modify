@@ -48,6 +48,11 @@ public class TcpHexLtvRepeatingConfig implements Serializable {
      */
     private String keyPrefix;
     private TcpHexUnknownTagMode unknownTagMode;
+    /**
+     * 未命中 Tag 映射且 {@link TcpHexUnknownTagMode#EMIT_HEX} 时，遥测键名中 {@code _t} 后缀是否为 {@code 0x} 十六进制：
+     * 本字段为 {@code true}，或任一行 {@link TcpHexLtvTagMapping#getTagValueLiterallyHex()} 为 {@code true} 时采用十六进制；否则十进制。
+     */
+    private Boolean unknownTagTelemetryKeyHexLiteral;
     private List<TcpHexLtvTagMapping> tagMappings;
 
     public TcpHexLtvChunkOrder getChunkOrder() {

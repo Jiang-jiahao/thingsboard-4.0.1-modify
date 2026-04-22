@@ -18,6 +18,8 @@ public class TcpHexLtvTagMapping implements Serializable {
 
     /** Tag 的整型值（与读出的无符号/有符号一致，如 0x0A 填 10） */
     private long tagValue;
+    /** 界面保存时 Tag 是否以 {@code 0x} 字面填写；影响该行回显及未映射 {@code _t} 后缀是否采用十六进制。 */
+    private Boolean tagValueLiterallyHex;
     private String telemetryKey;
     private TcpHexValueType valueType;
     /**

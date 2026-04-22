@@ -29,10 +29,11 @@ import {
   fixedBytesHexModelToFormControl,
   formatFixedWireIntegralFromModel,
   formatTcpHexMatchValueHexHint,
-  ltvTagWireTextFromModel,
+  ltvTagWireTextForMapping,
   normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
-  parseLtvTagWireTextToNumber
+  parseLtvTagWireTextToNumber,
+  unknownTagTelemetryKeyHexLiteralFromMappings
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 import {
   ControlValueAccessor,
@@ -379,10 +380,15 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     this.updateModel();
   }
 
-  private createLtvTagMappingGroup(m?: TcpHexLtvTagMapping, tagFieldType?: TcpHexValueType): UntypedFormGroup {
+  private createLtvTagMappingGroup(
+    m?: TcpHexLtvTagMapping,
+    tagFieldType?: TcpHexValueType,
+    sectionUnknownTagTelemetryKeyHexLiteral?: boolean | null
+  ): UntypedFormGroup {
     const vt = tagFieldType ?? TcpHexValueType.UINT8;
     return this.fb.group({
-      tagValue: [ltvTagWireTextFromModel(m?.tagValue, vt), [Validators.required, this.ltvTagWireTextValidator]],
+      tagValue: [ltvTagWireTextForMapping(m, vt, sectionUnknownTagTelemetryKeyHexLiteral),
+        [Validators.required, this.ltvTagWireTextValidator]],
       telemetryKey: [m?.telemetryKey ?? '', [Validators.maxLength(255)]],
       valueType: [migrateLegacyLtvTagValueType(m?.valueType), Validators.required]
     });
@@ -396,7 +402,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     const tagFt = cfg?.tagFieldType ?? TcpHexValueType.UINT8;
     if (cfg?.tagMappings?.length) {
       for (const m of cfg.tagMappings) {
-        arr.push(this.createLtvTagMappingGroup(m, tagFt), {emitEvent: false});
+        arr.push(this.createLtvTagMappingGroup(m, tagFt, cfg?.unknownTagTelemetryKeyHexLiteral), {emitEvent: false});
       }
     }
     if (cfg) {
@@ -433,7 +439,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     this.updateModel();
   }
 
-  /** 仅十六进制（须 `0x` 前缀）；失焦后按 Tag 字段类型宽度规范为 `0x` 小写 */
+  /** 支持 `0x` 或十进制；失焦后按输入风格规范为 `0x` 小写或十进制字符串 */
   onLtvTagValueBlur(li: number): void {
     if (this.disabled) {
       return;
@@ -441,7 +447,8 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     const g = this.hexLtvTagMappingsArray.at(li) as UntypedFormGroup;
     const ctrl = g.get('tagValue');
     const t = String(ctrl?.value ?? '');
-    if (!t.trim()) {
+    const trimmed = t.trim().replace(/\s+/g, '');
+    if (!trimmed) {
       return;
     }
     const n = parseLtvTagWireTextToNumber(t);
@@ -450,7 +457,11 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     }
     const vt = (this.tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvTagType')?.value ??
       TcpHexValueType.UINT8) as TcpHexValueType;
-    ctrl?.patchValue(formatTcpHexMatchValueHexHint(n, vt), { emitEvent: false });
+    if (/^0x/i.test(trimmed)) {
+      ctrl?.patchValue(formatTcpHexMatchValueHexHint(n, vt), { emitEvent: false });
+    } else {
+      ctrl?.patchValue(String(n), { emitEvent: false });
+    }
     this.updateModel();
   }
 
@@ -508,7 +519,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     const ltvTagFt = ltv?.tagFieldType ?? TcpHexValueType.UINT8;
     if (ltv?.tagMappings?.length) {
       for (const m of ltv.tagMappings) {
-        ltvArr.push(this.createLtvTagMappingGroup(m, ltvTagFt));
+        ltvArr.push(this.createLtvTagMappingGroup(m, ltvTagFt, ltv?.unknownTagTelemetryKeyHexLiteral));
       }
     }
     return this.fb.group({
@@ -873,6 +884,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
               if (tagMappings.length) {
                 ltv.tagMappings = tagMappings;
               }
+              ltv.unknownTagTelemetryKeyHexLiteral = unknownTagTelemetryKeyHexLiteralFromMappings(tagMappings);
               t.hexLtvRepeating = ltv;
             }
             templates.push(t);
@@ -984,6 +996,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           if (tagMappings.length) {
             ltv.tagMappings = tagMappings;
           }
+          ltv.unknownTagTelemetryKeyHexLiteral = unknownTagTelemetryKeyHexLiteralFromMappings(tagMappings);
           transportTcpDataTypeConfiguration.hexLtvRepeating = ltv;
         }
         const manualCs = String(v.hexChecksumType ?? 'NONE').trim();
@@ -1040,6 +1053,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       .map(r => {
         const m: TcpHexLtvTagMapping = {
           tagValue: parseLtvTagWireTextToNumber(r['tagValue']) ?? 0,
+          tagValueLiterallyHex: /^0x/i.test(String(r['tagValue'] ?? '').trim()),
           telemetryKey: String(r['telemetryKey']).trim(),
           valueType: migrateLegacyLtvTagValueType(r['valueType'] as TcpHexValueType)
         };

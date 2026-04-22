@@ -29,7 +29,8 @@ import { buildLingxinV2MonitorPresetBundle } from '@home/pages/profiles/protocol
 import {
   normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
-  parseLtvTagWireTextToNumber
+  parseLtvTagWireTextToNumber,
+  unknownTagTelemetryKeyHexLiteralFromMappings
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 import { Subscription } from 'rxjs';
 
@@ -245,6 +246,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
       if (tagMappings.length) {
         ltv.tagMappings = tagMappings;
       }
+      ltv.unknownTagTelemetryKeyHexLiteral = unknownTagTelemetryKeyHexLiteralFromMappings(tagMappings);
       t.hexLtvRepeating = ltv;
     }
     return [t];
@@ -256,6 +258,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
       .map(r => {
         const m: TcpHexLtvTagMapping = {
           tagValue: parseLtvTagWireTextToNumber(r['tagValue']) ?? 0,
+          tagValueLiterallyHex: /^0x/i.test(String(r['tagValue'] ?? '').trim()),
           telemetryKey: String(r['telemetryKey']).trim(),
           valueType: migrateLegacyLtvTagValueType(r['valueType'] as TcpHexValueType)
         };
