@@ -17,12 +17,14 @@ import org.thingsboard.server.common.data.device.profile.TcpHexFixedBytesUtil;
 import org.thingsboard.server.common.data.device.profile.TcpHexChecksumDefinition;
 import org.thingsboard.server.common.data.device.profile.TcpHexCommandProfile;
 import org.thingsboard.server.common.data.device.profile.TcpHexFieldDefinition;
+import org.thingsboard.server.common.data.device.profile.TcpHexFixedBytesUtil;
 import org.thingsboard.server.common.data.device.profile.TcpHexValueType;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.transport.tcp.util.TcpHexProtocolParser;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.HexFormat;
@@ -56,8 +58,9 @@ public class ProtocolTemplateHexBuildService {
             out.setErrorMessage("bundleId is required");
             return out;
         }
-        if (request.getCommandValue() == null) {
-            out.setErrorMessage("commandValue is required");
+        if (request.getCommandValue() == null
+                && (request.getCommandMatchBytesHex() == null || request.getCommandMatchBytesHex().isBlank())) {
+            out.setErrorMessage("commandValue or commandMatchBytesHex is required");
             return out;
         }
         UUID bundleId;
@@ -77,7 +80,7 @@ public class ProtocolTemplateHexBuildService {
         List<ProtocolTemplateCommandDefinition> cmds = bundle.getProtocolCommands() != null
                 ? bundle.getProtocolCommands()
                 : List.of();
-        long cv = request.getCommandValue();
+        Long cv = request.getCommandValue();
         String tidFilter = request.getTemplateId() != null ? request.getTemplateId().trim() : null;
         List<ProtocolTemplateCommandDefinition> matches = new ArrayList<>();
         for (ProtocolTemplateCommandDefinition c : cmds) {
@@ -88,8 +91,26 @@ public class ProtocolTemplateHexBuildService {
                     && c.getDirection() != ProtocolTemplateCommandDirection.BOTH) {
                 continue;
             }
-            if (c.getCommandValue() != cv) {
-                continue;
+            TcpHexValueType mvt = c.getMatchValueType() != null ? c.getMatchValueType() : TcpHexValueType.UINT32_LE;
+            if (TcpHexCommandProfile.isByteSliceCommandMatchType(mvt)) {
+                ProtocolTemplateDefinition tpl0 = findTemplateInBundle(bundle, c.getTemplateId());
+                if (tpl0 == null) {
+                    continue;
+                }
+                int w = tpl0.getCommandMatchWidth() != null && tpl0.getCommandMatchWidth() == 1 ? 1 : 4;
+                try {
+                    byte[] reqB = TcpHexFixedBytesUtil.parseHexExactWireBytes(request.getCommandMatchBytesHex(), w);
+                    byte[] defB = TcpHexFixedBytesUtil.parseHexExactWireBytes(c.getCommandMatchBytesHex(), w);
+                    if (!Arrays.equals(reqB, defB)) {
+                        continue;
+                    }
+                } catch (IllegalArgumentException e) {
+                    continue;
+                }
+            } else {
+                if (cv == null || c.getCommandValue() != cv) {
+                    continue;
+                }
             }
             if (tidFilter != null && !tidFilter.equals(c.getTemplateId())) {
                 continue;
@@ -130,18 +151,16 @@ public class ProtocolTemplateHexBuildService {
         }
 
         TcpHexValueType matchVt = cmd.getMatchValueType() != null ? cmd.getMatchValueType() : TcpHexValueType.UINT32_LE;
-        if (!TcpHexCommandProfile.isIntegralMatchType(matchVt)) {
-            out.setErrorMessage("command matchValueType must be integral for HEX build");
-            return out;
-        }
         int cmdOff = tpl.getCommandByteOffset() != null ? tpl.getCommandByteOffset() : 12;
-        int cmdW = integralTypeWidth(matchVt);
+        int cmdW = TcpHexCommandProfile.isByteSliceCommandMatchType(matchVt)
+                ? (tpl.getCommandMatchWidth() != null && tpl.getCommandMatchWidth() == 1 ? 1 : 4)
+                : integralTypeWidth(matchVt);
 
         TcpHexChecksumDefinition checksum = tpl.getChecksum();
 
         int frameLen;
         try {
-            frameLen = computeFrameLength(merged, checksum, cmdOff, matchVt);
+            frameLen = computeFrameLength(merged, checksum, cmdOff, cmdW);
         } catch (IllegalArgumentException e) {
             out.setErrorMessage(e.getMessage());
             return out;
@@ -201,7 +220,12 @@ public class ProtocolTemplateHexBuildService {
                 }
                 TcpHexProtocolParser.writeIntegralAt(buf, secOff, st, sec);
             }
-            TcpHexProtocolParser.writeIntegralAt(buf, cmdOff, matchVt, cmd.getCommandValue());
+            if (TcpHexCommandProfile.isByteSliceCommandMatchType(matchVt)) {
+                byte[] cmdBytes = TcpHexFixedBytesUtil.parseHexExactWireBytes(cmd.getCommandMatchBytesHex(), cmdW);
+                System.arraycopy(cmdBytes, 0, buf, cmdOff, cmdW);
+            } else {
+                TcpHexProtocolParser.writeIntegralAt(buf, cmdOff, matchVt, cmd.getCommandValue());
+            }
             writeAutoDownlinkPayloadLengthFields(buf, merged, cmd, cmdOff, cmdW);
             writeAutoDownlinkTotalFrameLengthFields(buf, merged);
             TcpHexProtocolParser.applyChecksumToFrame(checksum, buf);
@@ -216,8 +240,8 @@ public class ProtocolTemplateHexBuildService {
     }
 
     private static int computeFrameLength(List<TcpHexFieldDefinition> merged, TcpHexChecksumDefinition cs,
-                                          int cmdOff, TcpHexValueType cmdVt) {
-        int maxEnd = cmdOff + integralTypeWidth(cmdVt);
+                                          int cmdOff, int cmdWireBytes) {
+        int maxEnd = cmdOff + cmdWireBytes;
         for (TcpHexFieldDefinition f : merged) {
             if (f == null) {
                 continue;
@@ -646,7 +670,9 @@ public class ProtocolTemplateHexBuildService {
             }
             int len = fieldWidthForBuild(f);
             try {
-                byte[] parsed = TcpHexFixedBytesUtil.parseHexToByteLength(f.getFixedBytesHex(), len);
+                byte[] parsed = vt == TcpHexValueType.BYTES_AS_UTF8
+                        ? TcpHexFixedBytesUtil.utf8FixedWireAfterUnescape(f.getFixedBytesHex(), len)
+                        : TcpHexFixedBytesUtil.parseHexToByteLength(f.getFixedBytesHex(), len);
                 System.arraycopy(parsed, 0, buf, off, len);
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Field [" + f.getKey() + "]: " + e.getMessage());
@@ -728,5 +754,17 @@ public class ProtocolTemplateHexBuildService {
             return Double.parseDouble(s.trim());
         }
         throw new IllegalArgumentException("Field [" + key + "]: expected number for float/double type");
+    }
+
+    private static ProtocolTemplateDefinition findTemplateInBundle(ProtocolTemplateBundle bundle, String templateId) {
+        if (templateId == null || bundle.getProtocolTemplates() == null) {
+            return null;
+        }
+        for (ProtocolTemplateDefinition t : bundle.getProtocolTemplates()) {
+            if (t != null && templateId.equals(t.getId())) {
+                return t;
+            }
+        }
+        return null;
     }
 }

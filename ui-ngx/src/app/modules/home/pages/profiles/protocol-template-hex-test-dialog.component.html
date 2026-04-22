@@ -64,7 +64,7 @@
                         (ngModelChange)="onHexTestBuildCommandChange()"
                         name="hexDlgBuildCmd" [disabled]="!hexTestBundleId || !downlinkCommandsForHexTest().length">
               <mat-option *ngFor="let c of downlinkCommandsForHexTest()" [value]="c">
-                {{ c.name || ('cmd ' + formatCommandHex(c.commandValue)) }} · {{ c.templateId }} · {{ formatCommandHex(c.commandValue) }}
+                {{ c.name || ('cmd ' + formatProtocolCmdWireSummary(c)) }} · {{ c.templateId }} · {{ formatProtocolCmdWireSummary(c) }}
               </mat-option>
             </mat-select>
           </mat-form-field>

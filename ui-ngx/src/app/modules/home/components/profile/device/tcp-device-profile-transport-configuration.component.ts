@@ -33,6 +33,7 @@ import {
   normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
   parseLtvTagWireTextToNumber,
+  unescapeCStyleForFixedUtf8String,
   unknownTagTelemetryKeyHexLiteralFromMappings
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 import {
@@ -56,6 +57,7 @@ import {
   TcpDeviceProfileTransportConfiguration,
   TCP_HEX_FRAME_FIELD_VALUE_TYPES,
   TCP_HEX_MATCH_VALUE_TYPES,
+  TCP_HEX_PROTOCOL_TEMPLATE_COMMAND_MATCH_TYPES,
   TcpHexCommandProfile,
   TcpHexFieldDefinition,
   TcpHexLtvChunkOrder,
@@ -107,6 +109,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
   /** LTV Tag→遥测映射下拉（静态 labelKey，供 translate 使用） */
   tcpHexLtvTagValueOptions = TCP_HEX_LTV_TAG_VALUE_OPTIONS;
   tcpHexMatchValueTypes = TCP_HEX_MATCH_VALUE_TYPES;
+  tcpHexCommandMatchValueTypes = TCP_HEX_PROTOCOL_TEMPLATE_COMMAND_MATCH_TYPES;
   readonly TransportTcpDataType = TransportTcpDataType;
   readonly TcpHexValueType = TcpHexValueType;
   readonly TcpHexLtvChunkOrder = TcpHexLtvChunkOrder;
@@ -551,17 +554,27 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         overrideArr.push(this.createHexFieldGroup(f));
       }
     }
+    const matchVt = c?.matchValueType ?? TcpHexValueType.UINT32_LE;
+    const primaryWire = isTcpHexVariableByteSlice(matchVt)
+      ? (c?.commandMatchBytesHex ? normalizeFixedBytesHexWhitespace(c.commandMatchBytesHex) : '')
+      : this.formatProtocolCommandIntegralForForm(c?.commandValue);
     return this.fb.group({
       templateId: [c?.templateId ?? '', Validators.required],
       name: [c?.name ?? '', [Validators.maxLength(255)]],
-      commandValue: [c?.commandValue ?? 0, Validators.required],
-      matchValueType: [c?.matchValueType ?? TcpHexValueType.UINT32_LE, Validators.required],
+      commandValue: [primaryWire, Validators.required],
+      matchValueType: [matchVt, Validators.required],
       secondaryMatchByteOffset: [c?.secondaryMatchByteOffset ?? null],
       secondaryMatchValueType: [c?.secondaryMatchValueType ?? TcpHexValueType.UINT8],
       secondaryMatchValue: [c?.secondaryMatchValue ?? null],
       direction: [c?.direction ?? ProtocolTemplateCommandDirection.UPLINK, Validators.required],
       overrideFields: overrideArr
     });
+  }
+
+  /** 与帧模板「固定线值整型」一致：十进制回显 */
+  private formatProtocolCommandIntegralForForm(v: number | undefined | null): string {
+    const s = formatFixedWireIntegralFromModel(v);
+    return s === '' ? '0' : s;
   }
 
   private patchProtocolTemplatesFromModel(templates: ProtocolTemplateDefinition[]) {
@@ -908,12 +921,20 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           if (!tid) {
             continue;
           }
+          const matchVt = row['matchValueType'] as TcpHexValueType;
+          const intCmd = parseIntegralWireTextToNumber(String(row['commandValue'] ?? ''));
           const cmd: ProtocolTemplateCommandDefinition = {
             templateId: tid,
-            commandValue: Number(row['commandValue']) || 0,
-            matchValueType: row['matchValueType'] as TcpHexValueType,
+            commandValue: isTcpHexVariableByteSlice(matchVt) ? 0 : (intCmd !== undefined ? Math.trunc(intCmd) : 0),
+            matchValueType: matchVt,
             direction: row['direction'] as ProtocolTemplateCommandDirection
           };
+          if (isTcpHexVariableByteSlice(matchVt)) {
+            const hx = normalizeFixedBytesHexWhitespace(row['commandValue']);
+            if (hx) {
+              cmd.commandMatchBytesHex = hx;
+            }
+          }
           const secOff = this.optionalFormNumber(row['secondaryMatchByteOffset']);
           if (secOff !== undefined && secOff >= 0) {
             cmd.secondaryMatchByteOffset = secOff;
@@ -1100,7 +1121,12 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         }
         // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与变长字节切片固定 hex 不能同时存在
         if (isTcpHexVariableByteSlice(vt)) {
-          const fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
+          let fixHex: string;
+          if (vt === TcpHexValueType.BYTES_AS_UTF8) {
+            fixHex = unescapeCStyleForFixedUtf8String(String(r['fixedBytesHex'] ?? '').trim());
+          } else {
+            fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
+          }
           if (fixHex) {
             def.fixedBytesHex = fixHex;
           }

@@ -10,6 +10,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,11 +27,17 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
      */
     private String name;
     /**
-     * 与模板 commandByteOffset 处读出的命令值比较（十进制；UINT32_LE 时常用命令号如 3）。
+     * 整型匹配：与模板 commandByteOffset 处按 {@link #matchValueType} 读出的整型命令值比较。
+     * 字节切片匹配（BYTES_AS_HEX / BYTES_AS_UTF8）时可为 0，期望值见 {@link #commandMatchBytesHex}。
      */
     private long commandValue;
     /**
-     * 默认 UINT32_LE；须为整型类型。
+     * 当 {@link #matchValueType} 为 BYTES_AS_HEX / BYTES_AS_UTF8 时：期望线字节（十六进制串），
+     * 位数须与帧模板 {@link ProtocolTemplateDefinition#getCommandMatchWidth()}（1 或 4 字节）一致。
+     */
+    private String commandMatchBytesHex;
+    /**
+     * 默认 UINT32_LE；整型或 BYTES_AS_HEX / BYTES_AS_UTF8（定长原始字节，与帧模板一致）。
      */
     private TcpHexValueType matchValueType;
     /**
@@ -72,8 +79,24 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
             throw new IllegalArgumentException("protocol template command direction is required");
         }
         TcpHexValueType t = matchValueType != null ? matchValueType : TcpHexValueType.UINT32_LE;
-        if (!TcpHexCommandProfile.isIntegralMatchType(t)) {
-            throw new IllegalArgumentException("protocol template command matchValueType must be integral");
+        if (TcpHexCommandProfile.isByteSliceCommandMatchType(t)) {
+            if (commandMatchBytesHex == null || commandMatchBytesHex.isBlank()) {
+                throw new IllegalArgumentException("protocol template command commandMatchBytesHex is required for BYTES_AS_HEX/BYTES_AS_UTF8 match");
+            }
+            try {
+                String c = commandMatchBytesHex.replaceAll("\\s+", "");
+                if (c.regionMatches(true, 0, "0x", 0, 2)) {
+                    c = c.substring(2);
+                }
+                if (c.length() % 2 != 0) {
+                    throw new IllegalArgumentException("commandMatchBytesHex must have an even number of hex digits");
+                }
+                HexFormat.of().parseHex(c);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("protocol template command commandMatchBytesHex: " + e.getMessage());
+            }
+        } else if (!TcpHexCommandProfile.isIntegralMatchType(t)) {
+            throw new IllegalArgumentException("protocol template command matchValueType must be integral or BYTES_AS_HEX/BYTES_AS_UTF8");
         }
         if (fields != null) {
             int autoTotalFrame = 0;

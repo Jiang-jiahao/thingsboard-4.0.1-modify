@@ -10,6 +10,7 @@ import {
   TcpHexValueType,
   isTcpHexVariableByteSlice,
   TCP_HEX_FRAME_FIELD_VALUE_TYPES,
+  TCP_HEX_PROTOCOL_TEMPLATE_COMMAND_MATCH_TYPES,
   TCP_HEX_LTV_TAG_VALUE_OPTIONS,
   TcpHexLtvTagValueOption,
   TransportTcpDataType
@@ -19,7 +20,8 @@ import {
   formatTcpHexMatchValueHexHint,
   normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
-  parseLtvTagWireTextToNumber
+  parseLtvTagWireTextToNumber,
+  unescapeCStyleForFixedUtf8String
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 import { Subject, Subscription } from 'rxjs';
 import { startWith, takeUntil } from 'rxjs/operators';
@@ -52,6 +54,9 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     TcpHexValueType.INT32_BE,
     TcpHexValueType.INT32_LE
   ];
+
+  /** 协议模板命令「读取类型」：含 BYTES_AS_HEX / BYTES_AS_UTF8（与帧模板一致） */
+  readonly tcpHexCommandMatchValueTypes = TCP_HEX_PROTOCOL_TEMPLATE_COMMAND_MATCH_TYPES;
 
   @Input()
   templatesArray: UntypedFormArray;
@@ -213,6 +218,20 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     return isTcpHexVariableByteSlice(g.get('valueType')?.value as TcpHexValueType);
   }
 
+  isBytesAsUtf8Template(ti: number, fi: number): boolean {
+    const g = this.getTemplateFieldsArray(ti).at(fi) as UntypedFormGroup;
+    return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_UTF8;
+  }
+
+  isBytesAsUtf8Override(ci: number, fi: number): boolean {
+    const g = this.getCommandOverrideFieldsArray(ci).at(fi) as UntypedFormGroup;
+    return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_UTF8;
+  }
+
+  isCommandMatchUtf8(cCtrl: UntypedFormGroup): boolean {
+    return cCtrl.get('matchValueType')?.value === TcpHexValueType.BYTES_AS_UTF8;
+  }
+
   onLtvTagValueBlur(ti: number, li: number): void {
     if (this.disabled) {
       return;
@@ -308,6 +327,33 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     return d === ProtocolTemplateCommandDirection.DOWNLINK || d === ProtocolTemplateCommandDirection.BOTH;
   }
 
+  isCommandMatchByteSlice(cCtrl: UntypedFormGroup): boolean {
+    return isTcpHexVariableByteSlice(cCtrl.get('matchValueType')?.value as TcpHexValueType);
+  }
+
+  /** 命令值：与帧模板「固定线值整型 / 固定 HEX」一致 */
+  onCommandPrimaryValueBlur(cCtrl: UntypedFormGroup | null): void {
+    if (!cCtrl || this.disabled) {
+      return;
+    }
+    const vt = cCtrl.get('matchValueType')?.value as TcpHexValueType;
+    const ctrl = cCtrl.get('commandValue');
+    if (!ctrl) {
+      return;
+    }
+    if (isTcpHexVariableByteSlice(vt)) {
+      const raw = String(ctrl.value ?? '');
+      const normalized = vt === TcpHexValueType.BYTES_AS_UTF8
+        ? unescapeCStyleForFixedUtf8String(raw.trim())
+        : normalizeFixedBytesHexWhitespace(ctrl.value);
+      if (normalized !== raw) {
+        ctrl.patchValue(normalized, { emitEvent: false });
+      }
+      return;
+    }
+    this.onFixedWireIntegralBlur(ctrl);
+  }
+
   /** 可选作「长度字段」的整型 key：首帧模板 + 本命令覆盖行 */
   /** 固定线值：失焦后按 0x→十六进制、否则十进制归一化回显 */
   onFixedWireIntegralBlur(ctrl: AbstractControl | null): void {
@@ -325,7 +371,7 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     ctrl.patchValue(formatIntegralWireTextEcho(t, n), { emitEvent: false });
   }
 
-  /** 固定 HEX：仅去掉空白，不按数值解析，保留前导 0。 */
+  /** 固定 BYTES_AS_HEX：去空白；BYTES_AS_UTF8：首尾 trim + 解析 \\r\\n 等为控制字符（与后端一致）。 */
   onFixedBytesHexBlur(fieldGroup: UntypedFormGroup | null): void {
     if (!fieldGroup || this.disabled) {
       return;
@@ -334,8 +380,12 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     if (!ctrl) {
       return;
     }
-    const normalized = normalizeFixedBytesHexWhitespace(ctrl.value);
-    if (normalized !== String(ctrl.value ?? '')) {
+    const vt = fieldGroup.get('valueType')?.value as TcpHexValueType;
+    const raw = String(ctrl.value ?? '');
+    const normalized = vt === TcpHexValueType.BYTES_AS_UTF8
+      ? unescapeCStyleForFixedUtf8String(raw.trim())
+      : normalizeFixedBytesHexWhitespace(ctrl.value);
+    if (normalized !== raw) {
       ctrl.patchValue(normalized, { emitEvent: false });
     }
   }

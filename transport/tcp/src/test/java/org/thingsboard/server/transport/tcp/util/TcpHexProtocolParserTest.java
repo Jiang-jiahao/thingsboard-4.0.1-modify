@@ -204,6 +204,21 @@ class TcpHexProtocolParserTest {
         assertThat(out.get().get("magic").getAsString()).isEqualTo("a55a");
     }
 
+    /** 固定 BYTES_AS_UTF8：fixedBytesHex 存明文字符串，与线上一致则解析出遥测 */
+    @Test
+    void fixedBytesUtf8MatchEmitsTelemetry() {
+        var payload = JsonParser.parseString("{\"hex\":\"e4b8ad616200\"}");
+        TcpHexFieldDefinition a = new TcpHexFieldDefinition();
+        a.setKey("head");
+        a.setByteOffset(0);
+        a.setValueType(TcpHexValueType.BYTES_AS_UTF8);
+        a.setByteLength(6);
+        a.setFixedBytesHex("中ab");
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("head").getAsString()).isEqualTo("中ab\u0000");
+    }
+
     @Test
     void commandProfileMatchesBeforeDefaultFields() {
         String hex = "a55a10a0a4ff";

@@ -17,9 +17,13 @@ public class ProtocolTemplateHexBuildRequest {
 
     private String bundleId;
     /**
-     * 与 {@link org.thingsboard.server.common.data.device.profile.ProtocolTemplateCommandDefinition#getCommandValue()} 一致。
+     * 与 {@link org.thingsboard.server.common.data.device.profile.ProtocolTemplateCommandDefinition#getCommandValue()} 一致（整型匹配）。
      */
     private Long commandValue;
+    /**
+     * 字节切片匹配时与 {@link org.thingsboard.server.common.data.device.profile.ProtocolTemplateCommandDefinition#getCommandMatchBytesHex()} 一致。
+     */
+    private String commandMatchBytesHex;
     /**
      * 当同一 commandValue 在包内出现多次时必填，用于唯一定位命令行。
      */

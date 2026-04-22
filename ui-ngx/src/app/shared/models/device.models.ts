@@ -386,6 +386,8 @@ export interface ProtocolTemplateCommandDefinition {
   templateId: string;
   name?: string;
   commandValue: number;
+  /** 命令读取类型为 BYTES_AS_HEX / BYTES_AS_UTF8 时的定长线期望值（十六进制串，位数 = 帧模板命令匹配宽度×2） */
+  commandMatchBytesHex?: string;
   matchValueType?: TcpHexValueType;
   /** 可选：第二匹配偏移（整帧 0 起），与命令字节配合区分 0xA2 类应答（如第 7 字节回显原命令） */
   secondaryMatchByteOffset?: number;
@@ -564,9 +566,11 @@ export interface TcpHexCommandProfile {
   /** 可选，匹配成功后会写入遥测键 hexCmdProfile */
   name?: string;
   matchByteOffset: number;
-  /** 仅整型，用于从帧中读出命令字再与 matchValue 比较 */
+  /** 整型或 BYTES_AS_HEX / BYTES_AS_UTF8（定长线字节与 matchBytesHex 比较） */
   matchValueType: TcpHexValueType;
   matchValue: number;
+  commandMatchWidth?: number;
+  matchBytesHex?: string;
   secondaryMatchByteOffset?: number;
   secondaryMatchValueType?: TcpHexValueType;
   secondaryMatchValue?: number;
@@ -576,7 +580,7 @@ export interface TcpHexCommandProfile {
   ltvRepeating?: TcpHexLtvRepeatingConfig;
 }
 
-/** 命令匹配下拉：不允许 FLOAT/DOUBLE/BYTES_AS_HEX */
+/** 命令匹配下拉：不允许 FLOAT/DOUBLE/BYTES（用于 LTV 长度来源等仍为整型处） */
 export const TCP_HEX_MATCH_VALUE_TYPES: TcpHexValueType[] = [
   TcpHexValueType.UINT8,
   TcpHexValueType.INT8,
@@ -588,6 +592,13 @@ export const TCP_HEX_MATCH_VALUE_TYPES: TcpHexValueType[] = [
   TcpHexValueType.UINT32_LE,
   TcpHexValueType.INT32_BE,
   TcpHexValueType.INT32_LE
+];
+
+/** 协议模板「命令读取类型」：整型 + 定长原始字节（与帧模板字段类型一致） */
+export const TCP_HEX_PROTOCOL_TEMPLATE_COMMAND_MATCH_TYPES: TcpHexValueType[] = [
+  ...TCP_HEX_MATCH_VALUE_TYPES,
+  TcpHexValueType.BYTES_AS_HEX,
+  TcpHexValueType.BYTES_AS_UTF8
 ];
 
 /**

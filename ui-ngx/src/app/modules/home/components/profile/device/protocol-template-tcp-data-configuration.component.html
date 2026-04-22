@@ -83,11 +83,16 @@
                 <input matInput type="number" min="1" formControlName="byteLength">
               </mat-form-field>
               <mat-form-field class="protocol-template-hex-field-compact__fixed-hex" subscriptSizing="fixed" appearance="outline"
-                              [matTooltip]="'device-profile.tcp.hex-field-fixed-bytes-hex-hint' | translate"
+                              [matTooltip]="(isBytesAsUtf8Template(0, fi)
+                                ? 'device-profile.tcp.hex-field-fixed-bytes-utf8-hint'
+                                : 'device-profile.tcp.hex-field-fixed-bytes-hex-hint') | translate"
                               matTooltipPosition="above" matTooltipShowDelay="400">
-                <mat-label translate>device-profile.tcp.hex-field-fixed-bytes-hex</mat-label>
+                <mat-label *ngIf="isBytesAsUtf8Template(0, fi)" translate>device-profile.tcp.hex-field-fixed-bytes-utf8</mat-label>
+                <mat-label *ngIf="!isBytesAsUtf8Template(0, fi)" translate>device-profile.tcp.hex-field-fixed-bytes-hex</mat-label>
                 <input matInput formControlName="fixedBytesHex" autocomplete="off"
-                       [placeholder]="'device-profile.tcp.hex-field-fixed-bytes-hex-placeholder' | translate"
+                       [placeholder]="(isBytesAsUtf8Template(0, fi)
+                         ? 'device-profile.tcp.hex-field-fixed-bytes-utf8-placeholder'
+                         : 'device-profile.tcp.hex-field-fixed-bytes-hex-placeholder') | translate"
                        (blur)="onFixedBytesHexBlur(asFormGroup(getTemplateFieldsArray(0).at(fi)))">
               </mat-form-field>
             </ng-container>
@@ -299,13 +304,23 @@
               <mat-form-field class="protocol-template-cmd-value-field" subscriptSizing="dynamic">
                 <mat-label translate>device-profile.tcp.protocol-template-cmd-value</mat-label>
                 <input matInput type="text" formControlName="commandValue" required autocomplete="off"
-                       [placeholder]="'device-profile.tcp.protocol-template-cmd-value-placeholder' | translate">
-                <mat-hint translate>device-profile.tcp.protocol-template-cmd-value-hint</mat-hint>
+                       [placeholder]="(isCommandMatchByteSlice(asFormGroup(cCtrl))
+                         ? (isCommandMatchUtf8(asFormGroup(cCtrl))
+                           ? 'device-profile.tcp.hex-field-fixed-bytes-utf8-placeholder'
+                           : 'device-profile.tcp.hex-field-fixed-bytes-hex-placeholder')
+                         : 'device-profile.tcp.hex-field-fixed-integral-placeholder') | translate"
+                       (blur)="onCommandPrimaryValueBlur(asFormGroup(cCtrl))">
+                <mat-hint *ngIf="isCommandMatchByteSlice(asFormGroup(cCtrl)) && isCommandMatchUtf8(asFormGroup(cCtrl))"
+                          translate>device-profile.tcp.protocol-template-cmd-value-hint-bytes-utf8</mat-hint>
+                <mat-hint *ngIf="isCommandMatchByteSlice(asFormGroup(cCtrl)) && !isCommandMatchUtf8(asFormGroup(cCtrl))"
+                          translate>device-profile.tcp.protocol-template-cmd-value-hint-bytes</mat-hint>
+                <mat-hint *ngIf="!isCommandMatchByteSlice(asFormGroup(cCtrl))"
+                          translate>device-profile.tcp.protocol-template-cmd-value-hint-integral</mat-hint>
               </mat-form-field>
               <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
                 <mat-label translate>device-profile.tcp.hex-cmd-value-type</mat-label>
                 <mat-select formControlName="matchValueType" required>
-                  <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+                  <mat-option *ngFor="let t of tcpHexCommandMatchValueTypes" [value]="t">{{ t }}</mat-option>
                 </mat-select>
               </mat-form-field>
               <mat-form-field class="flex-1" style="min-width: 160px;" subscriptSizing="dynamic">
@@ -438,11 +453,16 @@
                     <input matInput type="number" min="1" formControlName="byteLength">
                   </mat-form-field>
                   <mat-form-field class="protocol-template-hex-field-compact__fixed-hex" subscriptSizing="fixed" appearance="outline"
-                                  [matTooltip]="'device-profile.tcp.hex-field-fixed-bytes-hex-hint' | translate"
+                                  [matTooltip]="(isBytesAsUtf8Override(ci, fi)
+                                    ? 'device-profile.tcp.hex-field-fixed-bytes-utf8-hint'
+                                    : 'device-profile.tcp.hex-field-fixed-bytes-hex-hint') | translate"
                                   matTooltipPosition="above" matTooltipShowDelay="400">
-                    <mat-label translate>device-profile.tcp.hex-field-fixed-bytes-hex</mat-label>
+                    <mat-label *ngIf="isBytesAsUtf8Override(ci, fi)" translate>device-profile.tcp.hex-field-fixed-bytes-utf8</mat-label>
+                    <mat-label *ngIf="!isBytesAsUtf8Override(ci, fi)" translate>device-profile.tcp.hex-field-fixed-bytes-hex</mat-label>
                     <input matInput formControlName="fixedBytesHex" autocomplete="off"
-                           [placeholder]="'device-profile.tcp.hex-field-fixed-bytes-hex-placeholder' | translate"
+                           [placeholder]="(isBytesAsUtf8Override(ci, fi)
+                             ? 'device-profile.tcp.hex-field-fixed-bytes-utf8-placeholder'
+                             : 'device-profile.tcp.hex-field-fixed-bytes-hex-placeholder') | translate"
                            (blur)="onFixedBytesHexBlur(asFormGroup(getCommandOverrideFieldsArray(ci).at(fi)))">
                   </mat-form-field>
                 </ng-container>

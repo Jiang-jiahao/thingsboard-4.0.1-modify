@@ -22,14 +22,17 @@ import {
   TcpHexValueType,
   TCP_HEX_FRAME_FIELD_VALUE_TYPES,
   TCP_HEX_LTV_TAG_VALUE_OPTIONS,
-  migrateLegacyLtvTagValueType
+  migrateLegacyLtvTagValueType,
+  isTcpHexVariableByteSlice
 } from '@shared/models/device.models';
 import { Subscription } from 'rxjs';
 import {
   fixedBytesHexModelToFormControl,
   formatFixedWireIntegralFromModel,
   ltvTagWireTextForMapping,
-  parseLtvTagWireTextToNumber
+  parseLtvTagWireTextToNumber,
+  normalizeFixedBytesHexWhitespace,
+  parseIntegralWireTextToNumber
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 
 @Component({
@@ -215,11 +218,15 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
         overrideArr.push(this.createHexFieldGroup(f));
       }
     }
+    const matchVt = c?.matchValueType ?? TcpHexValueType.UINT32_LE;
+    const primaryWire = isTcpHexVariableByteSlice(matchVt)
+      ? (c?.commandMatchBytesHex ? normalizeFixedBytesHexWhitespace(c.commandMatchBytesHex) : '')
+      : this.formatCommandValueForForm(c?.commandValue);
     return this.fb.group({
       templateId: [c?.templateId ?? '', Validators.required],
       name: [c?.name ?? '', [Validators.maxLength(255)]],
-      commandValue: [this.formatCommandValueForForm(c?.commandValue), Validators.required],
-      matchValueType: [c?.matchValueType ?? TcpHexValueType.UINT32_LE, Validators.required],
+      commandValue: [primaryWire, Validators.required],
+      matchValueType: [matchVt, Validators.required],
       secondaryMatchByteOffset: [c?.secondaryMatchByteOffset ?? null],
       secondaryMatchValueType: [c?.secondaryMatchValueType ?? TcpHexValueType.UINT8],
       secondaryMatchValue: [
@@ -229,8 +236,27 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       downlinkPayloadLengthAuto: [!!c?.downlinkPayloadLengthAuto],
       downlinkPayloadLengthFieldKey: [c?.downlinkPayloadLengthFieldKey ?? ''],
       overrideFields: overrideArr
-    });
+    }, { validators: [this.protocolCommandPrimaryWireValidator] });
   }
+
+  private readonly protocolCommandPrimaryWireValidator = (group: AbstractControl): ValidationErrors | null => {
+    const g = group as UntypedFormGroup;
+    const vt = g.get('matchValueType')?.value as TcpHexValueType;
+    const raw = g.get('commandValue')?.value;
+    const s = String(raw ?? '').trim();
+    if (!s) {
+      return { cmdPrimaryWireRequired: true };
+    }
+    if (isTcpHexVariableByteSlice(vt)) {
+      const h = normalizeFixedBytesHexWhitespace(s).replace(/^0x/i, '');
+      if (!h || !/^[0-9a-fA-F]+$/.test(h) || (h.length & 1) === 1) {
+        return { cmdPrimaryWireHexInvalid: true };
+      }
+      return null;
+    }
+    const n = parseIntegralWireTextToNumber(s);
+    return n === undefined ? { cmdPrimaryWireIntegralInvalid: true } : null;
+  };
 
   patchProtocolTemplatesFromModel(templates: ProtocolTemplateDefinition[]) {
     const arr = this.protocolTemplatesArray;
@@ -280,13 +306,10 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     });
   }
 
+  /** 与帧模板「固定线值整型」一致：从模型载入时用十进制回显，避免把 201 显示成 0xc9。 */
   private formatCommandValueForForm(v: number | undefined | null): string {
-    if (v === undefined || v === null || !Number.isFinite(Number(v))) {
-      return '0x0';
-    }
-    const n = Math.trunc(Number(v));
-    const u = n >= 0 ? n : n >>> 0;
-    return '0x' + u.toString(16);
+    const s = formatFixedWireIntegralFromModel(v);
+    return s === '' ? '0' : s;
   }
 
   private syncCommandTemplateIdsFromFirstTemplate(): void {

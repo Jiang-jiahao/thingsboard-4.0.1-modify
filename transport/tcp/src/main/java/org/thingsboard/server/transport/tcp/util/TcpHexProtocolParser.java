@@ -12,6 +12,7 @@ import com.google.gson.JsonPrimitive;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.common.data.device.profile.TcpHexChecksumDefinition;
 import org.thingsboard.server.common.data.device.profile.TcpHexCommandProfile;
+import org.thingsboard.server.common.data.device.profile.TcpHexFixedBytesUtil;
 import org.thingsboard.server.common.data.device.profile.TcpHexFieldDefinition;
 import org.thingsboard.server.common.data.device.profile.TcpHexLtvChunkOrder;
 import org.thingsboard.server.common.data.device.profile.TcpHexLtvRepeatingConfig;
@@ -368,9 +369,24 @@ public final class TcpHexProtocolParser {
 
     private static boolean matchesCommand(byte[] frame, TcpHexCommandProfile rule, UUID sessionId) {
         try {
-            long actual = readIntegralAt(frame, rule.getMatchByteOffset(), rule.getMatchValueType());
-            if (actual != rule.getMatchValue()) {
-                return false;
+            TcpHexValueType mvt = rule.getMatchValueType();
+            if (TcpHexCommandProfile.isByteSliceCommandMatchType(mvt)) {
+                int w = rule.getCommandMatchWidth() != null && rule.getCommandMatchWidth() == 1 ? 1 : 4;
+                int off = rule.getMatchByteOffset();
+                if (off < 0 || off + w > frame.length) {
+                    return false;
+                }
+                byte[] expected = TcpHexFixedBytesUtil.parseHexExactWireBytes(rule.getMatchBytesHex(), w);
+                for (int i = 0; i < w; i++) {
+                    if (frame[off + i] != expected[i]) {
+                        return false;
+                    }
+                }
+            } else {
+                long actual = readIntegralAt(frame, rule.getMatchByteOffset(), mvt);
+                if (actual != rule.getMatchValue()) {
+                    return false;
+                }
             }
             if (rule.getSecondaryMatchByteOffset() != null) {
                 TcpHexValueType st = rule.getSecondaryMatchValueType() != null
@@ -386,8 +402,14 @@ public final class TcpHexProtocolParser {
                 return secOk;
             }
             if (log.isTraceEnabled()) {
-                log.trace("[{}] Hex cmd match offset={} type={} actual={} expected={} -> true",
-                        sessionId, rule.getMatchByteOffset(), rule.getMatchValueType(), actual, rule.getMatchValue());
+                if (TcpHexCommandProfile.isByteSliceCommandMatchType(mvt)) {
+                    log.trace("[{}] Hex cmd byte-slice match offset={} type={} -> true",
+                            sessionId, rule.getMatchByteOffset(), mvt);
+                } else {
+                    long actual = readIntegralAt(frame, rule.getMatchByteOffset(), mvt);
+                    log.trace("[{}] Hex cmd match offset={} type={} actual={} expected={} -> true",
+                            sessionId, rule.getMatchByteOffset(), mvt, actual, rule.getMatchValue());
+                }
             }
             return true;
         } catch (Exception e) {
@@ -638,10 +660,15 @@ public final class TcpHexProtocolParser {
             }
         }
         if (def.getFixedBytesHex() != null && !def.getFixedBytesHex().isBlank()) {
-            byte[] expected = parseHexString(def.getFixedBytesHex());
-            if (expected == null || expected.length != resolvedLen) {
-                throw new TcpHexFixedFieldMismatchException(
-                        "fixedBytesHex length mismatch for [" + def.getKey() + "]: need " + resolvedLen + " bytes");
+            byte[] expected;
+            if (def.getValueType() == TcpHexValueType.BYTES_AS_UTF8) {
+                expected = TcpHexFixedBytesUtil.utf8FixedWireAfterUnescape(def.getFixedBytesHex(), resolvedLen);
+            } else {
+                expected = parseHexString(def.getFixedBytesHex());
+                if (expected == null || expected.length != resolvedLen) {
+                    throw new TcpHexFixedFieldMismatchException(
+                            "fixedBytesHex length mismatch for [" + def.getKey() + "]: need " + resolvedLen + " bytes");
+                }
             }
             for (int i = 0; i < resolvedLen; i++) {
                 if (frame[def.getByteOffset() + i] != expected[i]) {

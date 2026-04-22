@@ -16,13 +16,15 @@ import {
   ProtocolTemplateBundle,
   ProtocolTemplateCommandDefinition,
   ProtocolTemplateCommandDirection,
-  TcpHexValueType
+  TcpHexValueType,
+  isTcpHexVariableByteSlice
 } from '@shared/models/device.models';
 import {
   buildDownlinkFieldValuesSkeleton,
   defaultDownlinkFieldInputText,
   defaultJsonValueForHexField,
   formatDownlinkFieldEcho,
+  formatFixedWireIntegralFromModel,
   listDownlinkEditableHexFields,
   mergeTemplateAndCommandFields,
   parseDownlinkFieldInput
@@ -95,14 +97,13 @@ export class ProtocolTemplateHexTestDialogComponent {
     return tid ? `${tid} (${b.id})` : b.id;
   }
 
-  /** 与协议模板编辑器命令值回显一致：0x 小写十六进制 */
-  formatCommandHex(v: number | null | undefined): string {
-    if (v === undefined || v === null || !Number.isFinite(Number(v))) {
-      return '0x0';
+  /** 与协议模板编辑器一致：整型十进制；字节匹配为 hex 串 */
+  formatProtocolCmdWireSummary(c: ProtocolTemplateCommandDefinition): string {
+    const vt = c.matchValueType ?? TcpHexValueType.UINT32_LE;
+    if (isTcpHexVariableByteSlice(vt)) {
+      return (c.commandMatchBytesHex ?? '').replace(/\s+/g, '') || '0';
     }
-    const n = Math.trunc(Number(v));
-    const u = n >= 0 ? n : n >>> 0;
-    return '0x' + u.toString(16);
+    return formatFixedWireIntegralFromModel(c.commandValue) || '0';
   }
 
   trackByBuildFieldKey(_index: number, row: HexTestBuildFieldRow): string {
@@ -140,9 +141,12 @@ export class ProtocolTemplateHexTestDialogComponent {
     }
     const merged = mergeTemplateAndCommandFields(tpl.hexProtocolFields, cmd.fields);
     const cmdOff = tpl.commandByteOffset ?? 12;
+    const matchVt = cmd.matchValueType ?? TcpHexValueType.UINT32_LE;
+    const tplCmdW = tpl.commandMatchWidth === 1 ? 1 : 4;
     const opts = {
       commandByteOffset: cmdOff,
-      commandMatchValueType: cmd.matchValueType ?? TcpHexValueType.UINT32_LE,
+      commandMatchValueType: matchVt,
+      commandMatchWireByteWidth: isTcpHexVariableByteSlice(matchVt) ? tplCmdW : undefined,
       command: cmd
     };
     const fields = listDownlinkEditableHexFields(merged, opts);
@@ -259,12 +263,18 @@ export class ProtocolTemplateHexTestDialogComponent {
     }
     this.hexTestBuilding = true;
     this.hexTestBuildResult = null;
-    this.bundleService.buildHex({
+    const matchVt = cmd.matchValueType ?? TcpHexValueType.UINT32_LE;
+    const buildBody: Parameters<ProtocolTemplateBundleService['buildHex']>[0] = {
       bundleId: id,
-      commandValue: cmd.commandValue,
       templateId: cmd.templateId,
       values
-    }).subscribe({
+    };
+    if (isTcpHexVariableByteSlice(matchVt)) {
+      buildBody.commandMatchBytesHex = cmd.commandMatchBytesHex ?? '';
+    } else {
+      buildBody.commandValue = cmd.commandValue;
+    }
+    this.bundleService.buildHex(buildBody).subscribe({
       next: (r) => {
         this.hexTestBuildResult = r;
         this.hexTestBuilding = false;

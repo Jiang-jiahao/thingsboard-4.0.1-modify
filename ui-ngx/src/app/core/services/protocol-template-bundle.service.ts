@@ -96,7 +96,13 @@ export class ProtocolTemplateBundleService {
   }
 
   buildHex(
-    body: { bundleId: string; commandValue: number; templateId?: string; values?: Record<string, unknown> },
+    body: {
+      bundleId: string;
+      commandValue?: number | null;
+      commandMatchBytesHex?: string | null;
+      templateId?: string;
+      values?: Record<string, unknown>;
+    },
     config?: RequestConfig
   ): Observable<ProtocolTemplateHexBuildResult> {
     return this.http.post<ProtocolTemplateHexBuildResult>(

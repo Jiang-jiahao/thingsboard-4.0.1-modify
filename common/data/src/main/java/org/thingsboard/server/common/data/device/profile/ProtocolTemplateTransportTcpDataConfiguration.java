@@ -98,7 +98,15 @@ public class ProtocolTemplateTransportTcpDataConfiguration implements TransportT
         p.setMatchByteOffset(off);
         TcpHexValueType vt = cmd.getMatchValueType() != null ? cmd.getMatchValueType() : TcpHexValueType.UINT32_LE;
         p.setMatchValueType(vt);
-        p.setMatchValue(cmd.getCommandValue());
+        int cmw = tpl.getCommandMatchWidth() != null && tpl.getCommandMatchWidth() == 1 ? 1 : 4;
+        p.setCommandMatchWidth(cmw);
+        if (TcpHexCommandProfile.isByteSliceCommandMatchType(vt)) {
+            p.setMatchBytesHex(cmd.getCommandMatchBytesHex());
+            p.setMatchValue(0L);
+        } else {
+            p.setMatchBytesHex(null);
+            p.setMatchValue(cmd.getCommandValue());
+        }
         if (cmd.getSecondaryMatchByteOffset() != null) {
             p.setSecondaryMatchByteOffset(cmd.getSecondaryMatchByteOffset());
             p.setSecondaryMatchValueType(cmd.getSecondaryMatchValueType() != null ? cmd.getSecondaryMatchValueType()
@@ -214,6 +222,12 @@ public class ProtocolTemplateTransportTcpDataConfiguration implements TransportT
             c.validate();
             if (findTemplate(c.getTemplateId()) == null) {
                 throw new IllegalArgumentException("protocol template command references unknown templateId: " + c.getTemplateId());
+            }
+            ProtocolTemplateDefinition tplForCmd = findTemplate(c.getTemplateId());
+            TcpHexValueType mvt = c.getMatchValueType() != null ? c.getMatchValueType() : TcpHexValueType.UINT32_LE;
+            if (TcpHexCommandProfile.isByteSliceCommandMatchType(mvt)) {
+                int w = tplForCmd.getCommandMatchWidth() != null && tplForCmd.getCommandMatchWidth() == 1 ? 1 : 4;
+                TcpHexFixedBytesUtil.parseHexExactWireBytes(c.getCommandMatchBytesHex(), w);
             }
             if (c.getDirection() == ProtocolTemplateCommandDirection.DOWNLINK) {
                 continue;

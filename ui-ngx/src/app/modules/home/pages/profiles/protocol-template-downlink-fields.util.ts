@@ -339,6 +339,11 @@ export interface DownlinkSkeletonOptions {
   commandByteOffset: number;
   /** 命令匹配类型宽度（与 matchValueType 一致） */
   commandMatchValueType?: TcpHexValueType;
+  /**
+   * 命令区线宽字节数（1 或 4）。字节切片命令匹配时应与帧模板 commandMatchWidth 一致；
+   * 未设置时由 {@link #commandMatchValueType} 通过 tcpHexMatchValueTypeWidth 推导。
+   */
+  commandMatchWireByteWidth?: number;
   /** 当前下行命令（命令级自动参长时用于省略长度键） */
   command?: ProtocolTemplateCommandDefinition;
 }
@@ -351,7 +356,9 @@ export function listDownlinkEditableHexFields(
   opts?: DownlinkSkeletonOptions
 ): TcpHexFieldDefinition[] {
   const cmdOff = opts?.commandByteOffset;
-  const cmdW = opts ? tcpHexMatchValueTypeWidth(opts.commandMatchValueType) : 4;
+  const cmdW = opts?.commandMatchWireByteWidth != null
+    ? opts.commandMatchWireByteWidth
+    : (opts ? tcpHexMatchValueTypeWidth(opts.commandMatchValueType) : 4);
   const sorted = merged
     .filter(f => f && f.key && String(f.key).trim())
     .slice()
@@ -895,7 +902,9 @@ export function formatFixedWireIntegralFromModel(v: number | undefined | null): 
   return String(Math.trunc(Number(v)));
 }
 
-/** 失焦归一化：十进制回显。 */
+/**
+ * 失焦归一化：若以 0x 输入则回显小写十六进制；否则十进制（与命令值/帧模板整型框一致）。
+ */
 export function formatIntegralWireTextEcho(rawInput: string, numericValue: number): string {
   const trimmed = String(rawInput ?? '').trim();
   if (trimmed === '') {
@@ -904,7 +913,12 @@ export function formatIntegralWireTextEcho(rawInput: string, numericValue: numbe
   if (!Number.isFinite(numericValue)) {
     return trimmed;
   }
-  return String(Math.trunc(numericValue));
+  const nt = Math.trunc(numericValue);
+  if (/^0x/i.test(trimmed)) {
+    const u = nt >= 0 ? nt : nt >>> 0;
+    return '0x' + u.toString(16);
+  }
+  return String(nt);
 }
 
 /**
@@ -912,6 +926,48 @@ export function formatIntegralWireTextEcho(rawInput: string, numericValue: numbe
  */
 export function normalizeFixedBytesHexWhitespace(raw: unknown): string {
   return String(raw ?? '').replace(/\s+/g, '');
+}
+
+/**
+ * BYTES_AS_UTF8 固定：把字面量 \\r \\n 等转成控制字符（与 Java TcpHexFixedBytesUtil.unescapeCStyleForFixedUtf8 一致）。
+ */
+export function unescapeCStyleForFixedUtf8String(raw: unknown): string {
+  const input = String(raw ?? '');
+  const parts: string[] = [];
+  for (let i = 0; i < input.length; i++) {
+    const c = input.charCodeAt(i);
+    if (c === 0x5c && i + 1 < input.length) {
+      const e = input.charAt(i + 1);
+      switch (e) {
+        case 'r':
+          parts.push('\r');
+          i++;
+          break;
+        case 'n':
+          parts.push('\n');
+          i++;
+          break;
+        case 't':
+          parts.push('\t');
+          i++;
+          break;
+        case '\\':
+          parts.push('\\');
+          i++;
+          break;
+        case '0':
+          parts.push('\0');
+          i++;
+          break;
+        default:
+          parts.push('\\');
+          break;
+      }
+    } else {
+      parts.push(String.fromCharCode(c));
+    }
+  }
+  return parts.join('');
 }
 
 /**
@@ -933,6 +989,9 @@ export function fixedBytesHexModelToFormControl(f?: TcpHexFieldDefinition): stri
       return u.toString(16).padStart(bl * 2, '0');
     }
     return String(raw);
+  }
+  if (f.valueType === TcpHexValueType.BYTES_AS_UTF8) {
+    return String(raw).trim();
   }
   return normalizeFixedBytesHexWhitespace(raw);
 }

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 按帧内某偏移处的<strong>命令字</strong>（整数）匹配成功后，使用该规则下的字段列表解析遥测。
+ * 按帧内某偏移处的<strong>命令字</strong>（整型或定长原始字节）匹配成功后，使用该规则下的字段列表解析遥测。
  * <p>
  * 典型用法：单字节命令在偏移 4 时 {@code matchByteOffset=4}、{@code matchValueType=UINT8}；灵信类监控协议在偏移 12 的 UINT32 LE
  * 命令号时 {@code matchByteOffset=12}、{@code matchValueType=UINT32_LE}。参数字段偏移均相对帧头 0。
@@ -30,13 +30,23 @@ public class TcpHexCommandProfile implements Serializable {
      */
     private int matchByteOffset;
     /**
-     * 命令字的二进制类型（仅允许整型，不允许 FLOAT/DOUBLE/BYTES_AS_HEX）。
+     * 命令字的二进制类型：整型标量，或定长原始字节 BYTES_AS_HEX 与 BYTES_AS_UTF8（与帧模板语义一致）。
      */
     private TcpHexValueType matchValueType;
     /**
-     * 期望的命令值；无符号类型按无符号比较（例如 UINT8 的 255 即 255L）。
+     * 整型匹配时期望的命令值；无符号类型按无符号比较（例如 UINT8 的 255 即 255L）。
+     * 字节切片匹配时可为 0，实际期望值见 {@link #matchBytesHex}。
      */
     private long matchValue;
+    /**
+     * 与帧模板 {@link ProtocolTemplateDefinition#getCommandMatchWidth()} 一致：命令区线宽 1 或 4 字节；
+     * 字节切片匹配时必填，整型匹配时可选（由展开逻辑写入）。
+     */
+    private Integer commandMatchWidth;
+    /**
+     * 当 {@link #matchValueType} 为 BYTES_AS_HEX 或 BYTES_AS_UTF8 时：期望的线字节（十六进制串，位数须为线宽的两倍）。
+     */
+    private String matchBytesHex;
     /**
      * 可选第二匹配：主匹配成功后，再在该偏移读取整型并与 {@link #secondaryMatchValue} 相等（如应答帧共用同一命令码、需用第二字段区分原命令时）。
      * 未设置 {@link #secondaryMatchByteOffset} 时仅主匹配。
@@ -60,8 +70,14 @@ public class TcpHexCommandProfile implements Serializable {
         if (matchValueType == null) {
             throw new IllegalArgumentException("TCP hex command profile matchValueType is required");
         }
-        if (!TcpHexCommandProfile.isIntegralMatchType(matchValueType)) {
-            throw new IllegalArgumentException("TCP hex command matchValueType must be an integral type, got " + matchValueType);
+        if (isByteSliceCommandMatchType(matchValueType)) {
+            int w = commandMatchWidth != null && commandMatchWidth == 1 ? 1 : 4;
+            if (commandMatchWidth != null && commandMatchWidth != 1 && commandMatchWidth != 4) {
+                throw new IllegalArgumentException("TCP hex command profile commandMatchWidth must be 1 or 4");
+            }
+            TcpHexFixedBytesUtil.parseHexExactWireBytes(matchBytesHex, w);
+        } else if (!TcpHexCommandProfile.isIntegralMatchType(matchValueType)) {
+            throw new IllegalArgumentException("TCP hex command matchValueType must be integral or BYTES_AS_HEX/BYTES_AS_UTF8, got " + matchValueType);
         }
         boolean hasFields = fields != null && !fields.isEmpty();
         boolean hasLtv = ltvRepeating != null;
@@ -101,5 +117,9 @@ public class TcpHexCommandProfile implements Serializable {
             case UINT_AUTO_LE, UINT_AUTO_BE, INT_AUTO_LE, INT_AUTO_BE -> false;
             default -> true;
         };
+    }
+
+    public static boolean isByteSliceCommandMatchType(TcpHexValueType t) {
+        return t == TcpHexValueType.BYTES_AS_HEX || t == TcpHexValueType.BYTES_AS_UTF8;
     }
 }

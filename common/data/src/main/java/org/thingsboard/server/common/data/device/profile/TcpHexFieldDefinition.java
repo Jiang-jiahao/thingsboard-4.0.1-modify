@@ -200,7 +200,11 @@ public class TcpHexFieldDefinition implements Serializable {
                 throw new IllegalArgumentException("fixedBytesHex requires fixed byteLength > 0");
             }
             try {
-                TcpHexFixedBytesUtil.parseHexToByteLength(fixedBytesHex, byteLength);
+                if (valueType == TcpHexValueType.BYTES_AS_UTF8) {
+                    TcpHexFixedBytesUtil.utf8FixedWireAfterUnescape(fixedBytesHex, byteLength);
+                } else {
+                    TcpHexFixedBytesUtil.parseHexToByteLength(fixedBytesHex, byteLength);
+                }
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("fixedBytesHex: " + e.getMessage());
             }

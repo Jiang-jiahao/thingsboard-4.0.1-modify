@@ -32,6 +32,7 @@ import {
   normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
   parseLtvTagWireTextToNumber,
+  unescapeCStyleForFixedUtf8String,
   unknownTagTelemetryKeyHexLiteralFromMappings
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 import { Subscription } from 'rxjs';
@@ -300,12 +301,19 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
       if (!tid) {
         continue;
       }
+      const matchVt = row['matchValueType'] as TcpHexValueType;
       const cmd: ProtocolTemplateCommandDefinition = {
         templateId: tid,
-        commandValue: this.parseCommandValue(row['commandValue']),
-        matchValueType: row['matchValueType'] as TcpHexValueType,
+        commandValue: isTcpHexVariableByteSlice(matchVt) ? 0 : this.parseCommandValue(row['commandValue']),
+        matchValueType: matchVt,
         direction: row['direction'] as ProtocolTemplateCommandDirection
       };
+      if (isTcpHexVariableByteSlice(matchVt)) {
+        const hx = normalizeFixedBytesHexWhitespace(row['commandValue']);
+        if (hx) {
+          cmd.commandMatchBytesHex = hx;
+        }
+      }
       if (cmd.direction !== ProtocolTemplateCommandDirection.DOWNLINK) {
         const secOff = this.optionalFormNumber(row['secondaryMatchByteOffset']);
         if (secOff !== undefined && secOff >= 0) {
@@ -384,7 +392,12 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
         }
         // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与变长字节切片固定 hex 不能同时存在
         if (isTcpHexVariableByteSlice(vt)) {
-          const fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
+          let fixHex: string;
+          if (vt === TcpHexValueType.BYTES_AS_UTF8) {
+            fixHex = unescapeCStyleForFixedUtf8String(String(r['fixedBytesHex'] ?? '').trim());
+          } else {
+            fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
+          }
           if (fixHex) {
             def.fixedBytesHex = fixHex;
           }
