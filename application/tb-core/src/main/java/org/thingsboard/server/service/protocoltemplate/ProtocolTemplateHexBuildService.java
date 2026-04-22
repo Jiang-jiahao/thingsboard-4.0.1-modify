@@ -21,6 +21,7 @@ import org.thingsboard.server.common.data.device.profile.TcpHexValueType;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.transport.tcp.util.TcpHexProtocolParser;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -329,7 +330,7 @@ public class ProtocolTemplateHexBuildService {
             throw new IllegalArgumentException("downlinkPayloadLengthFieldKey: no merged field \"" + lenKey + "\"");
         }
         lengthField.validate();
-        if (lengthField.getValueType() == null || lengthField.getValueType().isBytesAsHex()
+        if (lengthField.getValueType() == null || lengthField.getValueType().isVariableByteSlice()
                 || !TcpHexCommandProfile.isIntegralMatchType(lengthField.getValueType())) {
             throw new IllegalArgumentException("Length field [" + lenKey + "] must use an integral valueType");
         }
@@ -542,12 +543,12 @@ public class ProtocolTemplateHexBuildService {
             throw new IllegalArgumentException(
                     "Field [" + f.getKey() + "]: LTV auto integral types are not supported for downlink hex build");
         }
-        if (vt.isBytesAsHex()) {
+        if (vt.isVariableByteSlice()) {
             if (f.getByteLength() != null && f.getByteLength() > 0) {
                 return f.getByteLength();
             }
             throw new IllegalArgumentException(
-                    "Field [" + f.getKey() + "]: BYTES_AS_HEX for build requires fixed byteLength (dynamic length unsupported)");
+                    "Field [" + f.getKey() + "]: BYTES_AS_HEX/BYTES_AS_UTF8 for build requires fixed byteLength (dynamic length unsupported)");
         }
         return vt.getFixedByteLength();
     }
@@ -633,15 +634,15 @@ public class ProtocolTemplateHexBuildService {
         double scale = f.getEffectiveScale();
 
         if (f.getFixedWireIntegralValue() != null) {
-            if (vt == null || vt.isBytesAsHex() || !TcpHexCommandProfile.isIntegralMatchType(vt)) {
+            if (vt == null || vt.isVariableByteSlice() || !TcpHexCommandProfile.isIntegralMatchType(vt)) {
                 throw new IllegalArgumentException("Field [" + f.getKey() + "]: fixedWireIntegralValue requires integral type");
             }
             TcpHexProtocolParser.writeIntegralAt(buf, off, vt, f.getFixedWireIntegralValue());
             return;
         }
         if (f.getFixedBytesHex() != null && !f.getFixedBytesHex().isBlank()) {
-            if (vt == null || !vt.isBytesAsHex()) {
-                throw new IllegalArgumentException("Field [" + f.getKey() + "]: fixedBytesHex requires BYTES_AS_HEX");
+            if (vt == null || !vt.isVariableByteSlice()) {
+                throw new IllegalArgumentException("Field [" + f.getKey() + "]: fixedBytesHex requires BYTES_AS_HEX or BYTES_AS_UTF8");
             }
             int len = fieldWidthForBuild(f);
             try {
@@ -654,13 +655,22 @@ public class ProtocolTemplateHexBuildService {
         }
 
         Object raw = values.get(f.getKey());
-        if (vt.isBytesAsHex()) {
+        if (vt.isVariableByteSlice()) {
             int len = fieldWidthForBuild(f);
             byte[] slice = new byte[len];
             if (raw != null) {
                 try {
-                    byte[] parsed = TcpHexFixedBytesUtil.parseHexToByteLength(raw.toString(), len);
-                    System.arraycopy(parsed, 0, slice, 0, len);
+                    if (vt == TcpHexValueType.BYTES_AS_HEX) {
+                        byte[] parsed = TcpHexFixedBytesUtil.parseHexToByteLength(raw.toString(), len);
+                        System.arraycopy(parsed, 0, slice, 0, len);
+                    } else {
+                        byte[] enc = raw.toString().getBytes(StandardCharsets.UTF_8);
+                        if (enc.length > len) {
+                            throw new IllegalArgumentException("Field [" + f.getKey() + "]: UTF-8 text encodes to " + enc.length
+                                    + " bytes, max " + len);
+                        }
+                        System.arraycopy(enc, 0, slice, 0, enc.length);
+                    }
                 } catch (IllegalArgumentException e) {
                     throw new IllegalArgumentException("Field [" + f.getKey() + "]: " + e.getMessage());
                 }

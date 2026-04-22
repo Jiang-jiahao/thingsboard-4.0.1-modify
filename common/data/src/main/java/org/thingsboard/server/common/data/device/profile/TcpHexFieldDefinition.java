@@ -26,6 +26,11 @@ public class TcpHexFieldDefinition implements Serializable {
     private Integer byteLength;
     private Integer byteLengthFromByteOffset;
     private TcpHexValueType byteLengthFromValueType;
+    /**
+     * 仅与 {@link #byteLengthFromByteOffset} 联用：动态长度 = 从帧读出的整型值减去本常量（≥0）。
+     * 典型场景：报文长度字段表示「Length+opcode+Random(12)+JSON」，而 BYTES_AS_HEX 从 JSON 起点截取时应减 12。
+     */
+    private Integer byteLengthFromIntegralSubtract;
     private Double scale;
     private Long bitMask;
     /**
@@ -95,7 +100,7 @@ public class TcpHexFieldDefinition implements Serializable {
         if (fixedBytesHex == null || fixedBytesHex.isBlank()) {
             return;
         }
-        if (valueType != null && valueType.isBytesAsHex()) {
+        if (valueType != null && valueType.isVariableByteSlice()) {
             fixedWireIntegralValue = null;
         } else {
             fixedBytesHex = null;
@@ -116,13 +121,16 @@ public class TcpHexFieldDefinition implements Serializable {
             throw new IllegalArgumentException(
                     "TCP hex field valueType must not use LTV-only auto integral types: " + valueType);
         }
+        if (byteLengthFromIntegralSubtract != null && (valueType == null || !valueType.isVariableByteSlice())) {
+            throw new IllegalArgumentException("byteLengthFromIntegralSubtract requires BYTES_AS_HEX or BYTES_AS_UTF8 valueType");
+        }
         normalizeMutuallyExclusiveFixedFields();
-        if (valueType.isBytesAsHex()) {
+        if (valueType.isVariableByteSlice()) {
             boolean fixed = byteLength != null && byteLength > 0;
             boolean fromFrame = byteLengthFromByteOffset != null && byteLengthFromByteOffset >= 0;
             if (fixed == fromFrame) {
                 throw new IllegalArgumentException(
-                        "TCP hex BYTES_AS_HEX requires exactly one of: byteLength>0, or byteLengthFromByteOffset with integral byteLengthFromValueType");
+                        "TCP hex variable byte slice requires exactly one of: byteLength>0, or byteLengthFromByteOffset with integral byteLengthFromValueType");
             }
             if (fromFrame) {
                 TcpHexValueType vt = byteLengthFromValueType != null ? byteLengthFromValueType : TcpHexValueType.UINT8;
@@ -130,9 +138,17 @@ public class TcpHexFieldDefinition implements Serializable {
                     throw new IllegalArgumentException("byteLengthFromValueType must be integral");
                 }
             }
+            if (byteLengthFromIntegralSubtract != null) {
+                if (!fromFrame) {
+                    throw new IllegalArgumentException("byteLengthFromIntegralSubtract requires byteLengthFromByteOffset");
+                }
+                if (byteLengthFromIntegralSubtract < 0) {
+                    throw new IllegalArgumentException("byteLengthFromIntegralSubtract must be >= 0");
+                }
+            }
         }
         if (hasDownlinkPayloadLengthMemberKeys()) {
-            if (valueType == null || valueType.isBytesAsHex()) {
+            if (valueType == null || valueType.isVariableByteSlice()) {
                 throw new IllegalArgumentException("downlinkPayloadLengthMemberKeys requires an integral valueType");
             }
             if (!TcpHexCommandProfile.isIntegralMatchType(valueType)) {
@@ -153,7 +169,7 @@ public class TcpHexFieldDefinition implements Serializable {
                 throw new IllegalArgumentException("downlinkPayloadStartByteOffset must be >= 0");
             }
         } else if (Boolean.TRUE.equals(autoDownlinkPayloadLength)) {
-            if (valueType == null || valueType.isBytesAsHex()) {
+            if (valueType == null || valueType.isVariableByteSlice()) {
                 throw new IllegalArgumentException("autoDownlinkPayloadLength requires an integral valueType");
             }
             if (!TcpHexCommandProfile.isIntegralMatchType(valueType)) {
@@ -172,16 +188,16 @@ public class TcpHexFieldDefinition implements Serializable {
             }
         }
         if (fixedWireIntegralValue != null) {
-            if (valueType == null || valueType.isBytesAsHex() || !TcpHexCommandProfile.isIntegralMatchType(valueType)) {
+            if (valueType == null || valueType.isVariableByteSlice() || !TcpHexCommandProfile.isIntegralMatchType(valueType)) {
                 throw new IllegalArgumentException("fixedWireIntegralValue requires an integral valueType (not BYTES_AS_HEX/float/double)");
             }
         }
         if (fixedBytesHex != null && !fixedBytesHex.isBlank()) {
-            if (valueType == null || !valueType.isBytesAsHex()) {
-                throw new IllegalArgumentException("fixedBytesHex requires BYTES_AS_HEX valueType");
+            if (valueType == null || !valueType.isVariableByteSlice()) {
+                throw new IllegalArgumentException("fixedBytesHex requires BYTES_AS_HEX or BYTES_AS_UTF8 valueType");
             }
             if (byteLength == null || byteLength <= 0) {
-                throw new IllegalArgumentException("fixedBytesHex requires fixed byteLength > 0 on BYTES_AS_HEX");
+                throw new IllegalArgumentException("fixedBytesHex requires fixed byteLength > 0");
             }
             try {
                 TcpHexFixedBytesUtil.parseHexToByteLength(fixedBytesHex, byteLength);
@@ -190,7 +206,7 @@ public class TcpHexFieldDefinition implements Serializable {
             }
         }
         if (Boolean.TRUE.equals(autoDownlinkTotalFrameLength)) {
-            if (valueType == null || valueType.isBytesAsHex() || !TcpHexCommandProfile.isIntegralMatchType(valueType)) {
+            if (valueType == null || valueType.isVariableByteSlice() || !TcpHexCommandProfile.isIntegralMatchType(valueType)) {
                 throw new IllegalArgumentException(
                         "autoDownlinkTotalFrameLength requires an integral valueType (not BYTES_AS_HEX/float/double)");
             }

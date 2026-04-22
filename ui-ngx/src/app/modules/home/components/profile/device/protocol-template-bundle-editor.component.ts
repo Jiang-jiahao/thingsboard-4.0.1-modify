@@ -143,6 +143,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       byteLength: [f?.byteLength ?? null, [Validators.min(1)]],
       byteLengthFromByteOffset: [f?.byteLengthFromByteOffset ?? null, [Validators.min(0)]],
       byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required],
+      byteLengthFromIntegralSubtract: [f?.byteLengthFromIntegralSubtract ?? null, [Validators.min(0)]],
       includeInDownlinkPayloadLength: [!!f?.includeInDownlinkPayloadLength],
       autoDownlinkTotalFrameLength: [!!f?.autoDownlinkTotalFrameLength],
       downlinkTotalFrameLengthExcludesLengthFieldBytes: [!!f?.downlinkTotalFrameLengthExcludesLengthFieldBytes],

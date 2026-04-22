@@ -51,6 +51,11 @@ public enum TcpHexValueType {
     DOUBLE_BE(8),
     DOUBLE_LE(8),
     /**
+     * 原始字节切片按 UTF-8 解码为字符串写入遥测；线宽与 {@link #BYTES_AS_HEX} 相同（{@link TcpHexFieldDefinition#getByteLength()}
+     * 或从帧内偏移读长度）。非法序列按 Unicode 替换字符解码。
+     */
+    BYTES_AS_UTF8(0),
+    /**
      * 原始字节切片格式化为连续十六进制字符串（小写），长度由 {@link TcpHexFieldDefinition#getByteLength()} 指定。
      */
     BYTES_AS_HEX(0);
@@ -62,7 +67,7 @@ public enum TcpHexValueType {
     }
 
     /**
-     * 固定宽度类型的字节数；{@link #BYTES_AS_HEX} 为 0，须使用字段上的 byteLength。
+     * 固定宽度类型的字节数；{@link #BYTES_AS_HEX}、{@link #BYTES_AS_UTF8} 为 0，须使用字段上的 byteLength 或动态长度配置。
      */
     public int getFixedByteLength() {
         return fixedByteLength;
@@ -70,6 +75,13 @@ public enum TcpHexValueType {
 
     public boolean isBytesAsHex() {
         return this == BYTES_AS_HEX;
+    }
+
+    /**
+     * 变长字节切片：连续 hex 或 UTF-8 文本（共享 {@link TcpHexFieldDefinition} 的 byteLength / byteLengthFromByteOffset 语义）。
+     */
+    public boolean isVariableByteSlice() {
+        return this == BYTES_AS_HEX || this == BYTES_AS_UTF8;
     }
 
     /** 是否仅用于 LTV 映射的「按本段字节数」整型（非固定宽度枚举）。 */

@@ -5,15 +5,25 @@ import {
   ProtocolTemplateCommandDefinition,
   TcpHexFieldDefinition,
   TcpHexLtvTagMapping,
-  TcpHexValueType
+  TcpHexValueType,
+  isTcpHexVariableByteSlice
 } from '@shared/models/device.models';
+
+function hexDigitsToBytes(hex: string): Uint8Array {
+  const d = hex.replace(/\s+/g, '');
+  const out = new Uint8Array(d.length / 2);
+  for (let i = 0; i < out.length; i++) {
+    out[i] = Number.parseInt(d.slice(i * 2, i * 2 + 2), 16);
+  }
+  return out;
+}
 
 /** 与 ProtocolTemplateTransportTcpDataConfiguration#fixedFieldByteLength 一致 */
 function fixedFieldByteLength(f: TcpHexFieldDefinition): number {
   if (!f?.valueType) {
     return 0;
   }
-  if (f.valueType === TcpHexValueType.BYTES_AS_HEX) {
+  if (isTcpHexVariableByteSlice(f.valueType)) {
     if (f.byteLength != null && f.byteLength > 0) {
       return f.byteLength;
     }
@@ -248,13 +258,20 @@ export function mergeTemplateAndCommandFields(
 
 /**
  * 组帧 JSON 默认值（遥测语义：已乘 scale；0 表示「原始 0」）。
- * BYTES_AS_HEX 仅生成固定 byteLength 的全零十六进制；动态长度字段跳过（需手写）。
+ * BYTES_AS_HEX 仅生成固定 byteLength 的全零十六进制；BYTES_AS_UTF8 用空串（组帧左侧补零）；动态长度字段跳过（需手写）。
  */
 export function defaultJsonValueForHexField(f: TcpHexFieldDefinition): unknown | undefined {
   if (!f?.key?.trim()) {
     return undefined;
   }
   const vt = f.valueType;
+  if (vt === TcpHexValueType.BYTES_AS_UTF8) {
+    const n = f.byteLength;
+    if (n != null && n > 0) {
+      return '';
+    }
+    return undefined;
+  }
   if (vt === TcpHexValueType.BYTES_AS_HEX) {
     const n = f.byteLength;
     if (n != null && n > 0) {
@@ -364,12 +381,15 @@ export function listDownlinkEditableHexFields(
   return out;
 }
 
-/** 组帧表单初始展示：整型/浮点为十进制；BYTES_AS_HEX 为连续小写 hex（无 0x） */
+/** 组帧表单初始展示：整型/浮点为十进制；BYTES_AS_HEX 为连续小写 hex（无 0x）；BYTES_AS_UTF8 为原文 */
 export function defaultDownlinkFieldInputText(
   f: TcpHexFieldDefinition,
   defaultJson: unknown
 ): string {
   const vt = f.valueType;
+  if (vt === TcpHexValueType.BYTES_AS_UTF8 && typeof defaultJson === 'string') {
+    return String(defaultJson);
+  }
   if (vt === TcpHexValueType.BYTES_AS_HEX && typeof defaultJson === 'string') {
     return String(defaultJson).replace(/\s+/g, '').toLowerCase();
   }
@@ -477,6 +497,9 @@ export function formatDownlinkFieldEcho(
   echoMode: DownlinkFieldEchoMode,
   byteLength?: number
 ): string {
+  if (vt === TcpHexValueType.BYTES_AS_UTF8 && typeof value === 'string') {
+    return value;
+  }
   if (vt === TcpHexValueType.BYTES_AS_HEX && typeof value === 'string') {
     const h = value.replace(/\s+/g, '').toLowerCase();
     if (echoMode === 'hex0x') {
@@ -531,6 +554,23 @@ function parseDownlinkFieldFromHexDigits(
   const d = digits.replace(/\s+/g, '');
   if (d.length > 0 && !/^[0-9a-fA-F]+$/.test(d)) {
     return { ok: false, error: 'invalid hex' };
+  }
+
+  if (vt === TcpHexValueType.BYTES_AS_UTF8) {
+    const n = byteLength;
+    if (n == null || n <= 0) {
+      return { ok: false, error: 'BYTES_AS_UTF8 needs fixed byteLength' };
+    }
+    if (d.length > 0 && d.length % 2 === 1) {
+      return { ok: false, error: 'odd hex length' };
+    }
+    const want = n * 2;
+    const use = d.length ? d : '00'.repeat(n);
+    if (use.length !== want) {
+      return { ok: false, error: `need ${want} hex digits (${n} bytes)` };
+    }
+    const dec = new TextDecoder('utf-8', { fatal: false });
+    return { ok: true, value: dec.decode(hexDigitsToBytes(use)), echoMode: 'bytesPlain' };
   }
 
   if (vt === TcpHexValueType.BYTES_AS_HEX) {
@@ -661,6 +701,22 @@ function parseDownlinkFieldFromDecimalText(
 ): DownlinkFieldParseResult {
   const collapsed = trimmed.replace(/\s+/g, '');
 
+  if (vt === TcpHexValueType.BYTES_AS_UTF8) {
+    const nB = byteLength;
+    if (nB == null || nB <= 0) {
+      return { ok: false, error: 'BYTES_AS_UTF8 needs fixed byteLength' };
+    }
+    if (/^[0-9a-fA-F]+$/.test(collapsed) && collapsed.length % 2 === 0 && collapsed.length === nB * 2) {
+      const dec = new TextDecoder('utf-8', { fatal: false });
+      return { ok: true, value: dec.decode(hexDigitsToBytes(collapsed)), echoMode: 'bytesPlain' };
+    }
+    const enc = new TextEncoder().encode(trimmed);
+    if (enc.length > nB) {
+      return { ok: false, error: `UTF-8 encodes to ${enc.length} bytes, max ${nB}` };
+    }
+    return { ok: true, value: trimmed, echoMode: 'dec' };
+  }
+
   if (vt === TcpHexValueType.BYTES_AS_HEX) {
     const nB = byteLength;
     if (nB == null || nB <= 0) {
@@ -753,6 +809,13 @@ function emptyDefaultDownlinkFieldParse(
   vt: TcpHexValueType,
   byteLength: number | undefined
 ): DownlinkFieldParseResult {
+  if (vt === TcpHexValueType.BYTES_AS_UTF8) {
+    const n = byteLength;
+    if (n == null || n <= 0) {
+      return { ok: false, error: 'BYTES_AS_UTF8 needs fixed byteLength' };
+    }
+    return { ok: true, value: '', echoMode: 'dec' };
+  }
   if (vt === TcpHexValueType.BYTES_AS_HEX) {
     const n = byteLength;
     if (n == null || n <= 0) {

@@ -205,6 +205,11 @@
                           <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
                         </mat-select>
                       </mat-form-field>
+                      <mat-form-field style="width: 130px;" *ngIf="getHexFieldLengthModeCommand(ci, fi) === 'fromFrame'">
+                        <mat-label translate>device-profile.tcp.hex-field-len-subtract</mat-label>
+                        <input matInput type="number" min="0" formControlName="byteLengthFromIntegralSubtract">
+                        <mat-hint translate>device-profile.tcp.hex-field-len-subtract-hint</mat-hint>
+                      </mat-form-field>
                     </ng-container>
                     <button mat-icon-button type="button" color="primary"
                             matTooltip="{{ 'device-profile.tcp.hex-remove-field' | translate }}"
@@ -274,6 +279,11 @@
               <mat-select formControlName="byteLengthFromValueType">
                 <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
               </mat-select>
+            </mat-form-field>
+            <mat-form-field style="width: 130px;" *ngIf="getHexFieldLengthModeDefault(i) === 'fromFrame'">
+              <mat-label translate>device-profile.tcp.hex-field-len-subtract</mat-label>
+              <input matInput type="number" min="0" formControlName="byteLengthFromIntegralSubtract">
+              <mat-hint translate>device-profile.tcp.hex-field-len-subtract-hint</mat-hint>
             </mat-form-field>
           </ng-container>
           <button mat-icon-button type="button" color="primary"

@@ -180,7 +180,7 @@ public class ProtocolTemplateTransportTcpDataConfiguration implements TransportT
         if (f == null || f.getValueType() == null) {
             return 0;
         }
-        if (f.getValueType().isBytesAsHex()) {
+        if (f.getValueType().isVariableByteSlice()) {
             if (f.getByteLength() != null && f.getByteLength() > 0) {
                 return f.getByteLength();
             }

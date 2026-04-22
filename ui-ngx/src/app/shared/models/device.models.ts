@@ -452,7 +452,14 @@ export enum TcpHexValueType {
   FLOAT_LE = 'FLOAT_LE',
   DOUBLE_BE = 'DOUBLE_BE',
   DOUBLE_LE = 'DOUBLE_LE',
+  /** 原始字节按 UTF-8 解码为字符串（与 BYTES_AS_HEX 共享变长/固定长度配置） */
+  BYTES_AS_UTF8 = 'BYTES_AS_UTF8',
   BYTES_AS_HEX = 'BYTES_AS_HEX'
+}
+
+/** BYTES_AS_HEX / BYTES_AS_UTF8：变长字节切片（共享 byteLength、从帧读长度等） */
+export function isTcpHexVariableByteSlice(vt: TcpHexValueType | null | undefined): boolean {
+  return vt === TcpHexValueType.BYTES_AS_HEX || vt === TcpHexValueType.BYTES_AS_UTF8;
 }
 
 export interface TcpHexFieldDefinition {
@@ -479,12 +486,17 @@ export interface TcpHexFieldDefinition {
   autoDownlinkPayloadLength?: boolean;
   /** @deprecated 旧版 */
   downlinkPayloadEndExclusiveByteOffset?: number;
-  /** BYTES_AS_HEX：固定字节数（与 byteLengthFromByteOffset 二选一） */
+  /** BYTES_AS_HEX / BYTES_AS_UTF8：固定字节数（与 byteLengthFromByteOffset 二选一） */
   byteLength?: number;
-  /** BYTES_AS_HEX：从整帧该字节偏移处按 byteLengthFromValueType 读出长度，再截取相应字节（非「引用别名字段」） */
+  /** BYTES_AS_HEX / BYTES_AS_UTF8：从整帧该字节偏移处按 byteLengthFromValueType 读出长度，再截取相应字节（非「引用别名字段」） */
   byteLengthFromByteOffset?: number;
   /** 读取动态长度时的整型类型，默认 UINT8 */
   byteLengthFromValueType?: TcpHexValueType;
+  /**
+   * 与 byteLengthFromByteOffset 联用：截取长度 = 读出的整型值减去该常量（≥0）。
+   * 例：报文长度 = 12 + JSON 字节数时，正文起点固定偏移 16，此处填 12。
+   */
+  byteLengthFromIntegralSubtract?: number;
   /** @deprecated UI 已移除；后端仍兼容旧配置 */
   scale?: number;
   /** @deprecated UI 已移除；后端仍兼容旧配置 */
@@ -494,7 +506,7 @@ export interface TcpHexFieldDefinition {
    */
   fixedWireIntegralValue?: number;
   /**
-   * BYTES_AS_HEX（固定 byteLength）：固定内容 hex 串。上行校验、下行自动写入，JSON 可省略。
+   * BYTES_AS_HEX / BYTES_AS_UTF8（固定 byteLength）：固定线型字节以 hex 串表示。上行按字节比对；下行写入。
    */
   fixedBytesHex?: string;
 }
@@ -597,6 +609,7 @@ export const TCP_HEX_FRAME_FIELD_VALUE_TYPES: TcpHexValueType[] = [
   TcpHexValueType.FLOAT_LE,
   TcpHexValueType.DOUBLE_BE,
   TcpHexValueType.DOUBLE_LE,
+  TcpHexValueType.BYTES_AS_UTF8,
   TcpHexValueType.BYTES_AS_HEX
 ];
 
@@ -618,6 +631,7 @@ export const TCP_HEX_LTV_TAG_VALUE_OPTIONS: TcpHexLtvTagValueOption[] = [
   { value: TcpHexValueType.FLOAT_LE, labelKey: 'device-profile.tcp.hex-ltv-vt-FLOAT_LE' },
   { value: TcpHexValueType.DOUBLE_BE, labelKey: 'device-profile.tcp.hex-ltv-vt-DOUBLE_BE' },
   { value: TcpHexValueType.DOUBLE_LE, labelKey: 'device-profile.tcp.hex-ltv-vt-DOUBLE_LE' },
+  { value: TcpHexValueType.BYTES_AS_UTF8, labelKey: 'device-profile.tcp.hex-ltv-vt-BYTES_AS_UTF8' },
   { value: TcpHexValueType.BYTES_AS_HEX, labelKey: 'device-profile.tcp.hex-ltv-vt-BYTES_AS_HEX' }
 ];
 
@@ -652,6 +666,8 @@ export function migrateLegacyLtvTagValueType(vt: TcpHexValueType | null | undefi
       return TcpHexValueType.INT_AUTO_LE;
     case TcpHexValueType.INT64_BE:
       return TcpHexValueType.INT_AUTO_BE;
+    case TcpHexValueType.BYTES_AS_UTF8:
+      return TcpHexValueType.BYTES_AS_UTF8;
     default:
       return vt;
   }

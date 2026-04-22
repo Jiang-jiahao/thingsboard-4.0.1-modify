@@ -8,6 +8,7 @@ import {
   TcpHexLtvChunkOrder,
   TcpHexUnknownTagMode,
   TcpHexValueType,
+  isTcpHexVariableByteSlice,
   TCP_HEX_FRAME_FIELD_VALUE_TYPES,
   TCP_HEX_LTV_TAG_VALUE_OPTIONS,
   TcpHexLtvTagValueOption,
@@ -204,12 +205,12 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
 
   isBytesAsHexTemplate(ti: number, fi: number): boolean {
     const g = this.getTemplateFieldsArray(ti).at(fi) as UntypedFormGroup;
-    return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX;
+    return isTcpHexVariableByteSlice(g.get('valueType')?.value as TcpHexValueType);
   }
 
   isBytesAsHexOverride(ci: number, fi: number): boolean {
     const g = this.getCommandOverrideFieldsArray(ci).at(fi) as UntypedFormGroup;
-    return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX;
+    return isTcpHexVariableByteSlice(g.get('valueType')?.value as TcpHexValueType);
   }
 
   onLtvTagValueBlur(ti: number, li: number): void {
@@ -291,7 +292,11 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
   private applyHexFieldLengthMode(g: UntypedFormGroup, mode: 'fixed' | 'fromFrame'): void {
     g.get('hexFieldLengthMode')?.patchValue(mode, { emitEvent: false });
     if (mode === 'fixed') {
-      g.patchValue({ byteLengthFromByteOffset: null, byteLengthFromValueType: TcpHexValueType.UINT8 }, { emitEvent: false });
+      g.patchValue({
+        byteLengthFromByteOffset: null,
+        byteLengthFromValueType: TcpHexValueType.UINT8,
+        byteLengthFromIntegralSubtract: null
+      }, { emitEvent: false });
     } else {
       g.patchValue({ byteLength: null }, { emitEvent: false });
     }

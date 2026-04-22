@@ -63,6 +63,7 @@ import {
   TcpHexLtvTagMapping,
   TcpHexUnknownTagMode,
   TcpHexValueType,
+  isTcpHexVariableByteSlice,
   TCP_HEX_LTV_TAG_VALUE_OPTIONS,
   migrateLegacyLtvTagValueType,
   TcpJsonWithoutMethodMode,
@@ -467,7 +468,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
 
   isBytesAsHexCommandRow(commandIndex: number, fieldIndex: number): boolean {
     const g = this.getCommandFieldsArray(commandIndex).at(fieldIndex) as UntypedFormGroup;
-    return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX;
+    return isTcpHexVariableByteSlice(g.get('valueType')?.value as TcpHexValueType);
   }
 
   private createHexFieldGroup(f?: TcpHexFieldDefinition): UntypedFormGroup {
@@ -480,6 +481,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       byteLength: [f?.byteLength ?? null, [Validators.min(1)]],
       byteLengthFromByteOffset: [f?.byteLengthFromByteOffset ?? null, [Validators.min(0)]],
       byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required],
+      byteLengthFromIntegralSubtract: [f?.byteLengthFromIntegralSubtract ?? null, [Validators.min(0)]],
       fixedWireIntegralValueText: [formatFixedWireIntegralFromModel(f?.fixedWireIntegralValue)],
       fixedBytesHex: [fixedBytesHexModelToFormControl(f)]
     });
@@ -681,7 +683,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
 
   isBytesAsHexRow(index: number): boolean {
     const g = this.hexProtocolFieldsArray.at(index) as UntypedFormGroup;
-    return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX;
+    return isTcpHexVariableByteSlice(g.get('valueType')?.value as TcpHexValueType);
   }
 
   getHexFieldLengthModeDefault(i: number): 'fixed' | 'fromFrame' {
@@ -712,7 +714,11 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
   private applyHexFieldLengthMode(g: UntypedFormGroup, mode: 'fixed' | 'fromFrame'): void {
     g.get('hexFieldLengthMode')?.patchValue(mode, { emitEvent: false });
     if (mode === 'fixed') {
-      g.patchValue({ byteLengthFromByteOffset: null, byteLengthFromValueType: TcpHexValueType.UINT8 }, { emitEvent: false });
+      g.patchValue({
+        byteLengthFromByteOffset: null,
+        byteLengthFromValueType: TcpHexValueType.UINT8,
+        byteLengthFromIntegralSubtract: null
+      }, { emitEvent: false });
     } else {
       g.patchValue({ byteLength: null }, { emitEvent: false });
     }
@@ -1071,7 +1077,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           valueType: r['valueType'] as TcpHexValueType
         };
         const vt = def.valueType;
-        if (vt === TcpHexValueType.BYTES_AS_HEX) {
+        if (isTcpHexVariableByteSlice(vt)) {
           const mode = String(r['hexFieldLengthMode'] ?? 'fixed').trim();
           if (mode === 'fromFrame') {
             const blFrom = this.optionalFormNumber(r['byteLengthFromByteOffset']);
@@ -1081,6 +1087,10 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
             if (r['byteLengthFromValueType']) {
               def.byteLengthFromValueType = r['byteLengthFromValueType'] as TcpHexValueType;
             }
+            const subLen = this.optionalFormNumber(r['byteLengthFromIntegralSubtract']);
+            if (subLen !== undefined && subLen >= 0) {
+              def.byteLengthFromIntegralSubtract = subLen;
+            }
           } else {
             const bl = this.optionalFormNumber(r['byteLength']);
             if (bl !== undefined) {
@@ -1088,8 +1098,8 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
             }
           }
         }
-        // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与 BYTES_AS_HEX 固定 hex 不能同时存在
-        if (vt === TcpHexValueType.BYTES_AS_HEX) {
+        // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与变长字节切片固定 hex 不能同时存在
+        if (isTcpHexVariableByteSlice(vt)) {
           const fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
           if (fixHex) {
             def.fixedBytesHex = fixHex;
@@ -1121,7 +1131,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         if (!key || !String(key).trim()) {
           return null;
         }
-        if (g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX) {
+        if (isTcpHexVariableByteSlice(g.get('valueType')?.value as TcpHexValueType)) {
           const mode = String(g.get('hexFieldLengthMode')?.value ?? 'fixed').trim();
           if (mode === 'fromFrame') {
             const fromOff = g.get('byteLengthFromByteOffset')?.value;
@@ -1161,7 +1171,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         if (!key || !String(key).trim()) {
           return null;
         }
-        if (g.get('valueType')?.value === TcpHexValueType.BYTES_AS_HEX) {
+        if (isTcpHexVariableByteSlice(g.get('valueType')?.value as TcpHexValueType)) {
           const mode = String(g.get('hexFieldLengthMode')?.value ?? 'fixed').trim();
           if (mode === 'fromFrame') {
             const fromOff = g.get('byteLengthFromByteOffset')?.value;

@@ -74,6 +74,37 @@ class TcpHexProtocolParserTest {
     }
 
     @Test
+    void bytesAsUtf8Payload() {
+        // UTF-8: E4 B8 AD = 中, then 61 62 = ab
+        var payload = JsonParser.parseString("{\"hex\":\"e4b8ad6162\"}");
+        TcpHexFieldDefinition f = new TcpHexFieldDefinition();
+        f.setKey("msg");
+        f.setByteOffset(0);
+        f.setValueType(TcpHexValueType.BYTES_AS_UTF8);
+        f.setByteLength(5);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(f), null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("msg").getAsString()).isEqualTo("中ab");
+    }
+
+    /** 动态长度 = 帧内 UINT32_BE 减去常量（报文长度 = 12 + 正文 类协议） */
+    @Test
+    void bytesAsHexDynamicLengthWithIntegralSubtract() {
+        // UINT32_BE at 0 = 14 (= 12 + 2 payload bytes); payload "ab" at offset 4
+        var payload = JsonParser.parseString("{\"hex\":\"0000000e6162\"}");
+        TcpHexFieldDefinition body = new TcpHexFieldDefinition();
+        body.setKey("body");
+        body.setByteOffset(4);
+        body.setValueType(TcpHexValueType.BYTES_AS_HEX);
+        body.setByteLengthFromByteOffset(0);
+        body.setByteLengthFromValueType(TcpHexValueType.UINT32_BE);
+        body.setByteLengthFromIntegralSubtract(12);
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(body), null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("body").getAsString()).isEqualTo("6162");
+    }
+
+    @Test
     void fixedIntegralMatchEmitsTelemetry() {
         var payload = JsonParser.parseString("{\"hex\":\"a5\"}");
         TcpHexFieldDefinition a = new TcpHexFieldDefinition();

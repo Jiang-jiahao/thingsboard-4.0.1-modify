@@ -22,6 +22,7 @@ import org.thingsboard.server.common.data.device.profile.TcpHexValueType;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.List;
@@ -344,7 +345,7 @@ public final class TcpHexProtocolParser {
      */
     private static int resolveLtvValueByteLength(byte[] v, TcpHexFieldDefinition def) {
         TcpHexValueType vt = def.getValueType();
-        if (vt.isBytesAsHex()) {
+        if (vt.isVariableByteSlice()) {
             return v.length;
         }
         int need = vt.getFixedByteLength();
@@ -610,6 +611,12 @@ public final class TcpHexProtocolParser {
                 buf.get(slice);
                 out.addProperty(def.getKey(), HexFormat.of().formatHex(slice));
             }
+            case BYTES_AS_UTF8 -> {
+                byte[] slice = new byte[len];
+                buf.get(slice);
+                // Charset.decode(ByteBuffer)：非法/不可映射序列替换为 U+FFFD，且不向外抛出受检 CharacterCodingException
+                out.addProperty(def.getKey(), StandardCharsets.UTF_8.decode(ByteBuffer.wrap(slice)).toString());
+            }
             default -> throw new IllegalArgumentException("unsupported value type: " + vt);
         }
     }
@@ -652,17 +659,21 @@ public final class TcpHexProtocolParser {
         if (vt.isLtvAutoWidthIntegral()) {
             throw new IllegalArgumentException("LTV auto-width integral types are only valid in LTV tag mappings");
         }
-        if (!vt.isBytesAsHex()) {
+        if (!vt.isVariableByteSlice()) {
             return vt.getFixedByteLength();
         }
         if (def.getByteLength() != null && def.getByteLength() > 0) {
             return def.getByteLength();
         }
         if (def.getByteLengthFromByteOffset() == null) {
-            throw new IllegalArgumentException("BYTES_AS_HEX requires byteLength or byteLengthFromByteOffset");
+            throw new IllegalArgumentException("variable byte slice requires byteLength or byteLengthFromByteOffset");
         }
         TcpHexValueType lenVt = def.getByteLengthFromValueType() != null ? def.getByteLengthFromValueType() : TcpHexValueType.UINT8;
         long lenLong = readIntegralAt(frame, def.getByteLengthFromByteOffset(), lenVt);
+        Integer sub = def.getByteLengthFromIntegralSubtract();
+        if (sub != null) {
+            lenLong -= sub;
+        }
         if (lenLong < 0 || lenLong > frame.length) {
             throw new IllegalArgumentException("invalid dynamic byte length: " + lenLong);
         }

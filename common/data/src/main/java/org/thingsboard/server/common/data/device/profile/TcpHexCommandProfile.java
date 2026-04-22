@@ -97,7 +97,7 @@ public class TcpHexCommandProfile implements Serializable {
             return false;
         }
         return switch (t) {
-            case FLOAT_BE, FLOAT_LE, DOUBLE_BE, DOUBLE_LE, BYTES_AS_HEX -> false;
+            case FLOAT_BE, FLOAT_LE, DOUBLE_BE, DOUBLE_LE, BYTES_AS_HEX, BYTES_AS_UTF8 -> false;
             case UINT_AUTO_LE, UINT_AUTO_BE, INT_AUTO_LE, INT_AUTO_BE -> false;
             default -> true;
         };

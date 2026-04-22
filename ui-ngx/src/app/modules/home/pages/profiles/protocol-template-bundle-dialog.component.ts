@@ -22,10 +22,12 @@ import {
   TcpHexLtvTagMapping,
   TcpHexUnknownTagMode,
   TcpHexValueType,
+  isTcpHexVariableByteSlice,
   migrateLegacyLtvTagValueType
 } from '@shared/models/device.models';
 import { ProtocolTemplateBundleEditorComponent } from '@home/components/profile/device/protocol-template-bundle-editor.component';
 import { buildLingxinV2MonitorPresetBundle } from '@home/pages/profiles/protocol-template-lingxin-v2-monitor.preset';
+import { buildCrlfJsonHeaderPresetBundle } from '@home/pages/profiles/protocol-template-crlf-json-header.preset';
 import {
   normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
@@ -132,6 +134,29 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
   }
 
   /** 载入灵信定向 V2 亚冬版监控协议示例（UDP 头四 UINT32 LE；命令偏移 12；packetLen 整包总长自动 + 单子单元 subUnitLen 自动参长） */
+  /** 载入 CRLF + 大端头 + JSON 正文协议（报文长度 = 12 + JSON；正文见 jsonPayloadHex） */
+  applyCrlfJsonHeaderPreset(): void {
+    const name = String(this.bundleMetaForm.get('name')?.value ?? '').trim() || 'CRLF+JSON 协议';
+    const preset = buildCrlfJsonHeaderPresetBundle(name);
+    this.bundleMetaForm.patchValue({ name: preset.name ?? name }, { emitEvent: false });
+    const patch = (): boolean => {
+      const editor = this.bundleEditorRefs?.first;
+      if (!editor) {
+        return false;
+      }
+      editor.patchProtocolTemplatesFromModel(deepClone(preset.protocolTemplates));
+      editor.patchProtocolCommandsFromModel(deepClone(preset.protocolCommands));
+      return true;
+    };
+    if (!patch()) {
+      setTimeout(() => {
+        if (!patch()) {
+          setTimeout(() => patch(), 0);
+        }
+      }, 0);
+    }
+  }
+
   applyLingxinV2MonitorPreset(): void {
     const name = String(this.bundleMetaForm.get('name')?.value ?? '').trim() || '灵信V2监控';
     const preset = buildLingxinV2MonitorPresetBundle(name);
@@ -320,7 +345,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
           valueType: r['valueType'] as TcpHexValueType
         };
         const vt = def.valueType;
-        if (vt === TcpHexValueType.BYTES_AS_HEX) {
+        if (isTcpHexVariableByteSlice(vt)) {
           const mode = String(r['hexFieldLengthMode'] ?? 'fixed').trim();
           if (mode === 'fromFrame') {
             const blFrom = this.optionalFormNumber(r['byteLengthFromByteOffset']);
@@ -329,6 +354,10 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
             }
             if (r['byteLengthFromValueType']) {
               def.byteLengthFromValueType = r['byteLengthFromValueType'] as TcpHexValueType;
+            }
+            const subLen = this.optionalFormNumber(r['byteLengthFromIntegralSubtract']);
+            if (subLen !== undefined && subLen >= 0) {
+              def.byteLengthFromIntegralSubtract = subLen;
             }
           } else {
             const bl = this.optionalFormNumber(r['byteLength']);
@@ -353,8 +382,8 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
         if (this.isFormBooleanTrue(r['autoDownlinkPayloadLength'])) {
           def.autoDownlinkPayloadLength = true;
         }
-        // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与 BYTES_AS_HEX 固定 hex 不能同时存在
-        if (vt === TcpHexValueType.BYTES_AS_HEX) {
+        // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与变长字节切片固定 hex 不能同时存在
+        if (isTcpHexVariableByteSlice(vt)) {
           const fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
           if (fixHex) {
             def.fixedBytesHex = fixHex;
