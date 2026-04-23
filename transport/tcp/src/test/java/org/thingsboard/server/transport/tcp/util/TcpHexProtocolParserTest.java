@@ -219,6 +219,21 @@ class TcpHexProtocolParserTest {
         assertThat(out.get().get("head").getAsString()).isEqualTo("中ab\u0000");
     }
 
+    /** fixedBytesHex 存字面量 \\r\\n（四字符）时与线 0d0a 比对应通过 */
+    @Test
+    void fixedBytesUtf8LiteralEscapesMatchCrlfWire() {
+        var payload = JsonParser.parseString("{\"hex\":\"0d0a\"}");
+        TcpHexFieldDefinition a = new TcpHexFieldDefinition();
+        a.setKey("frameStart");
+        a.setByteOffset(0);
+        a.setValueType(TcpHexValueType.BYTES_AS_UTF8);
+        a.setByteLength(2);
+        a.setFixedBytesHex("\\r\\n");
+        var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, UUID.randomUUID());
+        assertThat(out).isPresent();
+        assertThat(out.get().get("frameStart").getAsString()).isEqualTo("\r\n");
+    }
+
     @Test
     void commandProfileMatchesBeforeDefaultFields() {
         String hex = "a55a10a0a4ff";
