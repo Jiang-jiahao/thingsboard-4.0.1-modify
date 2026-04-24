@@ -258,7 +258,7 @@ export function mergeTemplateAndCommandFields(
 
 /**
  * 组帧 JSON 默认值（遥测语义：已乘 scale；0 表示「原始 0」）。
- * BYTES_AS_HEX 仅生成固定 byteLength 的全零十六进制；BYTES_AS_UTF8 用空串（组帧左侧补零）；动态长度字段跳过（需手写）。
+ * BYTES_AS_HEX 仅生成固定 byteLength 的全零十六进制；BYTES_AS_UTF8 用空串（固定宽度组帧左侧补零；变长则正文由 values 决定）。
  */
 export function defaultJsonValueForHexField(f: TcpHexFieldDefinition): unknown | undefined {
   if (!f?.key?.trim()) {
@@ -270,7 +270,7 @@ export function defaultJsonValueForHexField(f: TcpHexFieldDefinition): unknown |
     if (n != null && n > 0) {
       return '';
     }
-    return undefined;
+    return '';
   }
   if (vt === TcpHexValueType.BYTES_AS_HEX) {
     const n = f.byteLength;
@@ -309,7 +309,7 @@ export function hexFieldHasFixedValue(f: TcpHexFieldDefinition | null | undefine
   if (f.fixedWireIntegralValue != null && Number.isFinite(Number(f.fixedWireIntegralValue))) {
     return true;
   }
-  return !!String(f.fixedBytesHex ?? '').trim();
+  return trimAsciiSpaceTabEdges(String(f.fixedBytesHex ?? '')).length > 0;
 }
 
 /** 与后端下行组帧：参长由系统写入、JSON 可省略 */
@@ -350,6 +350,7 @@ export interface DownlinkSkeletonOptions {
 
 /**
  * 下行组帧需用户填值的字段（与 {@link buildDownlinkFieldValuesSkeleton} 规则一致，不含自动参长/固定线值/与命令字重叠等）。
+ * 变长 BYTES_AS_UTF8（无 byteLength）亦列出，默认空串，与 HEX 测试逐行输入及组帧 values 一致。
  */
 export function listDownlinkEditableHexFields(
   merged: TcpHexFieldDefinition[],
@@ -566,7 +567,12 @@ function parseDownlinkFieldFromHexDigits(
   if (vt === TcpHexValueType.BYTES_AS_UTF8) {
     const n = byteLength;
     if (n == null || n <= 0) {
-      return { ok: false, error: 'BYTES_AS_UTF8 needs fixed byteLength' };
+      if (d.length > 0 && d.length % 2 === 1) {
+        return { ok: false, error: 'odd hex length' };
+      }
+      const dec = new TextDecoder('utf-8', { fatal: false });
+      const use = d.length ? d : '';
+      return { ok: true, value: dec.decode(hexDigitsToBytes(use)), echoMode: 'bytesPlain' };
     }
     if (d.length > 0 && d.length % 2 === 1) {
       return { ok: false, error: 'odd hex length' };
@@ -711,7 +717,7 @@ function parseDownlinkFieldFromDecimalText(
   if (vt === TcpHexValueType.BYTES_AS_UTF8) {
     const nB = byteLength;
     if (nB == null || nB <= 0) {
-      return { ok: false, error: 'BYTES_AS_UTF8 needs fixed byteLength' };
+      return { ok: true, value: trimmed, echoMode: 'dec' };
     }
     if (/^[0-9a-fA-F]+$/.test(collapsed) && collapsed.length % 2 === 0 && collapsed.length === nB * 2) {
       const dec = new TextDecoder('utf-8', { fatal: false });
@@ -817,10 +823,6 @@ function emptyDefaultDownlinkFieldParse(
   byteLength: number | undefined
 ): DownlinkFieldParseResult {
   if (vt === TcpHexValueType.BYTES_AS_UTF8) {
-    const n = byteLength;
-    if (n == null || n <= 0) {
-      return { ok: false, error: 'BYTES_AS_UTF8 needs fixed byteLength' };
-    }
     return { ok: true, value: '', echoMode: 'dec' };
   }
   if (vt === TcpHexValueType.BYTES_AS_HEX) {
@@ -929,10 +931,21 @@ export function normalizeFixedBytesHexWhitespace(raw: unknown): string {
 }
 
 /**
+ * 仅去掉首尾普通空格 U+0020 与制表符。勿用 {@link String#trim}：ES 会把 \\r、\\n 当作空白，
+ * 定界符已是真实 CRLF（两字节）时会被整串删光，导致保存丢 fixedBytesHex、回显空白。
+ */
+export function trimAsciiSpaceTabEdges(s: string): string {
+  return s.replace(/^[ \t]+|[ \t]+$/g, '');
+}
+
+/**
  * BYTES_AS_UTF8 固定：把字面量 \\r \\n 等转成控制字符（与 Java TcpHexFixedBytesUtil.unescapeCStyleForFixedUtf8 一致）。
  */
 export function unescapeCStyleForFixedUtf8String(raw: unknown): string {
-  const input = String(raw ?? '');
+  const input = trimAsciiSpaceTabEdges(String(raw ?? ''));
+  if (/^\/r\/n$/i.test(input)) {
+    return '\r\n';
+  }
   const parts: string[] = [];
   for (let i = 0; i < input.length; i++) {
     const c = input.charCodeAt(i);
@@ -971,6 +984,51 @@ export function unescapeCStyleForFixedUtf8String(raw: unknown): string {
 }
 
 /**
+ * 将线型上的真实控制字符写成 \\r \\n 等再存 JSON/API。
+ * 避免单行文本框与 HTTP JSON 对裸 CR/LF 处理不一致导致保存后「没数据」；与 Java TcpHexFixedBytesUtil.unescapeCStyleForFixedUtf8 对仗。
+ */
+export function escapeCStyleForFixedUtf8Storage(text: string): string {
+  let out = '';
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    switch (c) {
+      case 0x0d:
+        out += '\\r';
+        break;
+      case 0x0a:
+        out += '\\n';
+        break;
+      case 0x09:
+        out += '\\t';
+        break;
+      case 0x5c:
+        out += '\\\\';
+        break;
+      case 0x00:
+        out += '\\0';
+        break;
+      default:
+        out += String.fromCharCode(c);
+    }
+  }
+  return out;
+}
+
+/**
+ * 表单/保存共用：先按字面量 unescape 得到线型语义，再 escape 成稳定可存字符串（CRLF → 字面量 \\r\\n）。
+ */
+export function utf8FixedBytesFormValueToStoredFixedHex(raw: string): string {
+  return escapeCStyleForFixedUtf8Storage(unescapeCStyleForFixedUtf8String(trimAsciiSpaceTabEdges(raw)));
+}
+
+/**
+ * 从模型写入表单：UTF-8 固定线型一律显示为 \\r\\n 等可编辑字面量（避免 input 里看不见/被吃掉）。
+ */
+export function utf8FixedBytesStoredToFormDisplay(raw: string): string {
+  return utf8FixedBytesFormValueToStoredFixedHex(raw);
+}
+
+/**
  * 从模型写入表单：字符串原样（去空白）；若历史 JSON 误存为数字则按 byteLength 左补到 2×byteLength 位 hex（仅用于恢复展示）。
  */
 export function fixedBytesHexModelToFormControl(f?: TcpHexFieldDefinition): string {
@@ -991,7 +1049,7 @@ export function fixedBytesHexModelToFormControl(f?: TcpHexFieldDefinition): stri
     return String(raw);
   }
   if (f.valueType === TcpHexValueType.BYTES_AS_UTF8) {
-    return String(raw).trim();
+    return utf8FixedBytesStoredToFormDisplay(String(raw));
   }
   return normalizeFixedBytesHexWhitespace(raw);
 }

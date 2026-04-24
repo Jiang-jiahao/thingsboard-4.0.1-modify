@@ -229,6 +229,18 @@ public class ProtocolTemplateTransportTcpDataConfiguration implements TransportT
                 int w = tplForCmd.getCommandMatchWidth() != null && tplForCmd.getCommandMatchWidth() == 1 ? 1 : 4;
                 TcpHexFixedBytesUtil.parseHexExactWireBytes(c.getCommandMatchBytesHex(), w);
             }
+            if (c.getDirection() == ProtocolTemplateCommandDirection.DOWNLINK
+                    || c.getDirection() == ProtocolTemplateCommandDirection.BOTH) {
+                if (Boolean.TRUE.equals(c.getDownlinkPayloadLengthAuto())) {
+                    List<TcpHexFieldDefinition> mfDown = mergeTemplateAndCommandFields(
+                            tplForCmd.getHexProtocolFields(), c.getFields());
+                    if (ProtocolTemplateCommandDefinition.resolveDownlinkPayloadContributorKeys(mfDown).isEmpty()) {
+                        throw new IllegalArgumentException(
+                                "downlinkPayloadLengthAuto requires includeInDownlinkPayloadLength on template fields "
+                                        + "or on command override fields: " + c.getName());
+                    }
+                }
+            }
             if (c.getDirection() == ProtocolTemplateCommandDirection.DOWNLINK) {
                 continue;
             }

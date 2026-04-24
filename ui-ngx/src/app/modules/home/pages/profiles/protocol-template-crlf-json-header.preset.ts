@@ -1,10 +1,11 @@
 /**
- * 二进制帧：`\r\n` + 报文长度(4, BE) + opcode(4, BE) + 随机数(4, BE) + `\r\n` + JSON 字符串(UTF-8)。
- * 报文长度 = 12 + JSON 字节数（含 length、opcode、random 三字段共 12 字节 + 消息内容）。
- * 命令匹配：opcode 位于整帧字节偏移 6，宽度 4，UINT32_BE。
+ * 二进制帧：`0d0a` + 报文长度(4, BE) + opcode(4, BE) + 随机数(4, BE) + `0d0a` + JSON 字符串(UTF-8)。
+ * 报文长度语义：length = messageLength(4) + opcode(4) + random(4) + jsonPayload 字节数 = 12 + JSON 字节数。
  *
- * JSON 正文以 `jsonPayload` 输出（BYTES_AS_UTF8：UTF-8 解码后的字符串），可直接 JSON.parse（建议在规则链 try/catch）。
- * 上行使用占位命令字 `0xDEADBEEF`（永不匹配），解析走帧模板默认字段，便于任意 opcode 共用同一套头字段。
+ * 上行：示例命令「设备心跳」按偏移 6、UINT32_BE、opcode=201 匹配。
+ * 下行：示例命令「设备反制」UINT32_LE=105；仅配置 `downlinkPayloadLengthAuto` + `downlinkPayloadLengthFieldKey`；
+ * 参与参长的键在**帧模板字段**上勾选 `includeInDownlinkPayloadLength`（无需在命令里重复写字段）。
+ * 下行组帧时 `jsonPayload` 无固定 byteLength：按 RPC `values.jsonPayload` 的 **UTF-8 实际字节数** 写正文并计入 messageLength。
  */
 import {
   ProtocolTemplateBundle,
@@ -28,17 +29,20 @@ const FRAME_FIELDS: TcpHexFieldDefinition[] = [
   {
     key: 'messageLength',
     byteOffset: 2,
-    valueType: TcpHexValueType.UINT32_BE
+    valueType: TcpHexValueType.UINT32_BE,
+    includeInDownlinkPayloadLength: true
   },
   {
     key: 'opcode',
     byteOffset: 6,
-    valueType: TcpHexValueType.UINT32_BE
+    valueType: TcpHexValueType.UINT32_BE,
+    includeInDownlinkPayloadLength: true
   },
   {
     key: 'random',
     byteOffset: 10,
-    valueType: TcpHexValueType.UINT32_BE
+    valueType: TcpHexValueType.UINT32_BE,
+    includeInDownlinkPayloadLength: true
   },
   {
     key: 'separator',
@@ -53,7 +57,8 @@ const FRAME_FIELDS: TcpHexFieldDefinition[] = [
     valueType: TcpHexValueType.BYTES_AS_UTF8,
     byteLengthFromByteOffset: 2,
     byteLengthFromValueType: TcpHexValueType.UINT32_BE,
-    byteLengthFromIntegralSubtract: 12
+    byteLengthFromIntegralSubtract: 12,
+    includeInDownlinkPayloadLength: true
   }
 ];
 
@@ -67,18 +72,28 @@ export function buildCrlfJsonHeaderPresetBundle(displayName: string): ProtocolTe
     hexProtocolFields: FRAME_FIELDS
   };
 
-  const placeholder: ProtocolTemplateCommandDefinition = {
+  const uplinkHeartbeat: ProtocolTemplateCommandDefinition = {
     templateId: TEMPLATE_ID,
-    name: '占位（0xDEADBEEF 不匹配，走默认帧模板）',
-    commandValue: 0xdeadbeef,
+    name: '设备心跳（示例：opcode UINT32_BE = 201）',
+    commandValue: 201,
     matchValueType: TcpHexValueType.UINT32_BE,
     direction: ProtocolTemplateCommandDirection.UPLINK
+  };
+
+  const downlinkCountermeasure: ProtocolTemplateCommandDefinition = {
+    templateId: TEMPLATE_ID,
+    name: '设备反制（示例：下行自动写 messageLength；UINT32_LE=105；参长在帧模板勾选）',
+    commandValue: 105,
+    matchValueType: TcpHexValueType.UINT32_LE,
+    direction: ProtocolTemplateCommandDirection.DOWNLINK,
+    downlinkPayloadLengthAuto: true,
+    downlinkPayloadLengthFieldKey: 'messageLength'
   };
 
   return {
     id: '',
     name,
     protocolTemplates: [template],
-    protocolCommands: [placeholder]
+    protocolCommands: [uplinkHeartbeat, downlinkCountermeasure]
   };
 }

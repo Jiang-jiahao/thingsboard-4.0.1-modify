@@ -115,6 +115,12 @@
             </ng-container>
             <p class="mat-caption text-muted protocol-template-hex-field-compact__bytes-hint protocol-template-inline-hint" translate>device-profile.tcp.hex-field-length-mode-hint</p>
           </div>
+          <div class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__row--tight">
+            <mat-checkbox formControlName="includeInDownlinkPayloadLength" color="primary"
+                          class="protocol-template-hex-field-compact__checkbox">
+              <span class="mat-caption" translate>device-profile.tcp.hex-field-include-downlink-payload-len</span>
+            </mat-checkbox>
+          </div>
         </div>
       </div>
       <button mat-stroked-button color="primary" type="button" (click)="addTemplateField.emit(0)">
@@ -259,6 +265,9 @@
   <ng-container *ngIf="layoutMode === 'full' || layoutMode === 'commandsOnly'">
     <div class="mat-body-2" translate>device-profile.tcp.protocol-template-commands-title</div>
     <div class="tb-hint mat-caption" translate>device-profile.tcp.protocol-template-commands-hint</div>
+    <div *ngIf="layoutMode === 'commandsOnly'" class="tb-hint mat-caption protocol-template-inline-hint"
+         style="margin: 6px 0 10px; padding: 8px 12px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);"
+         translate>device-profile.tcp.protocol-template-commands-only-bytes-hint</div>
 
     <div *ngIf="templatesArray?.length" class="flex flex-col gap-2 protocol-template-cmd-row-block protocol-template-global-cmd-match">
       <div class="mat-body-2" translate>device-profile.tcp.protocol-template-cmd-match-section-title</div>
@@ -376,10 +385,12 @@
             <ng-container *ngSwitchCase="ProtocolTemplateCommandDirection.DOWNLINK">
               <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.tcp.protocol-template-cmd-override-title-downlink</div>
               <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-override-hint-downlink</div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-downlink-override-bytes-hint</div>
             </ng-container>
             <ng-container *ngSwitchCase="ProtocolTemplateCommandDirection.BOTH">
               <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.tcp.protocol-template-cmd-override-title-both</div>
               <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-override-hint-both</div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-downlink-override-bytes-hint</div>
             </ng-container>
             <ng-container *ngSwitchDefault>
               <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.tcp.protocol-template-cmd-override-title-uplink</div>

@@ -21,7 +21,7 @@ import {
   normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
   parseLtvTagWireTextToNumber,
-  unescapeCStyleForFixedUtf8String
+  utf8FixedBytesFormValueToStoredFixedHex
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 import { Subject, Subscription } from 'rxjs';
 import { startWith, takeUntil } from 'rxjs/operators';
@@ -317,7 +317,7 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
         byteLengthFromIntegralSubtract: null
       }, { emitEvent: false });
     } else {
-      g.patchValue({ byteLength: null }, { emitEvent: false });
+      g.patchValue({ byteLength: null, fixedBytesHex: '' }, { emitEvent: false });
     }
   }
 
@@ -344,7 +344,7 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     if (isTcpHexVariableByteSlice(vt)) {
       const raw = String(ctrl.value ?? '');
       const normalized = vt === TcpHexValueType.BYTES_AS_UTF8
-        ? unescapeCStyleForFixedUtf8String(raw.trim())
+        ? utf8FixedBytesFormValueToStoredFixedHex(raw)
         : normalizeFixedBytesHexWhitespace(ctrl.value);
       if (normalized !== raw) {
         ctrl.patchValue(normalized, { emitEvent: false });
@@ -371,7 +371,7 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     ctrl.patchValue(formatIntegralWireTextEcho(t, n), { emitEvent: false });
   }
 
-  /** 固定 BYTES_AS_HEX：去空白；BYTES_AS_UTF8：首尾 trim + 解析 \\r\\n 等为控制字符（与后端一致）。 */
+  /** 固定 BYTES_AS_HEX：去空白；BYTES_AS_UTF8：仅去首尾空格/Tab + 解析 \\r\\n 等为控制字符（与后端一致；勿用 String#trim 以免吃掉真实 CRLF）。 */
   onFixedBytesHexBlur(fieldGroup: UntypedFormGroup | null): void {
     if (!fieldGroup || this.disabled) {
       return;
@@ -383,7 +383,7 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     const vt = fieldGroup.get('valueType')?.value as TcpHexValueType;
     const raw = String(ctrl.value ?? '');
     const normalized = vt === TcpHexValueType.BYTES_AS_UTF8
-      ? unescapeCStyleForFixedUtf8String(raw.trim())
+      ? utf8FixedBytesFormValueToStoredFixedHex(raw)
       : normalizeFixedBytesHexWhitespace(ctrl.value);
     if (normalized !== raw) {
       ctrl.patchValue(normalized, { emitEvent: false });

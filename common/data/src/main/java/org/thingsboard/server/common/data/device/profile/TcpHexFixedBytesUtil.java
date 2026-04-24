@@ -15,6 +15,18 @@ public final class TcpHexFixedBytesUtil {
     }
 
     /**
+     * 是否含有「固定线型」字节内容。勿用 {@link String#isBlank()}：Java 将 U+000D/U+000A 视为空白，
+     * 仅含 CRLF 的定界符会被误判为空，导致校验/组帧跳过 {@code fixedBytesHex}。
+     */
+    public static boolean hasFixedBytesWireText(String s) {
+        if (s == null) {
+            return false;
+        }
+        String t = s.replaceAll("^[ \\t]+|[ \\t]+$", "");
+        return !t.isEmpty();
+    }
+
+    /**
      * @param hex        可含空白；奇数位时在最前补半个十六进制位 {@code 0}
      * @param byteLength 目标字节数
      * @return 恰好 {@code byteLength} 字节
@@ -54,6 +66,27 @@ public final class TcpHexFixedBytesUtil {
     /**
      * 命令字等「定长线」匹配：十六进制位数必须恰好为 {@code byteLength * 2}（可含空白；可选 {@code 0x} 前缀）。
      */
+    /**
+     * 下行参长等：将 hex 串解码为字节（去空白；奇数位前补半个十六进制 0），不做定长左侧补零。
+     */
+    public static byte[] parseHexLooseToBytes(String hex) {
+        if (hex == null) {
+            return new byte[0];
+        }
+        String clean = hex.replaceAll("\\s+", "");
+        if (clean.isEmpty()) {
+            return new byte[0];
+        }
+        if ((clean.length() & 1) == 1) {
+            clean = "0" + clean;
+        }
+        try {
+            return HexFormat.of().parseHex(clean);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("invalid hex: " + e.getMessage());
+        }
+    }
+
     public static byte[] parseHexExactWireBytes(String hex, int byteLength) {
         if (byteLength <= 0) {
             throw new IllegalArgumentException("byteLength must be positive");
@@ -83,6 +116,10 @@ public final class TcpHexFixedBytesUtil {
     public static String unescapeCStyleForFixedUtf8(String raw) {
         if (raw == null || raw.isEmpty()) {
             return raw;
+        }
+        // 常见误写：把「反斜杠+r+n」打成了「正斜杠 /r/n」，四字符 UTF-8 为 4 字节，易触发定长 2 校验失败
+        if ("/r/n".equalsIgnoreCase(raw.trim())) {
+            return "\r\n";
         }
         StringBuilder sb = new StringBuilder(raw.length());
         for (int i = 0; i < raw.length(); i++) {
@@ -124,6 +161,37 @@ public final class TcpHexFixedBytesUtil {
      */
     public static byte[] utf8FixedWireAfterUnescape(String raw, int byteLength) {
         return utf8ToZeroPaddedByteArray(unescapeCStyleForFixedUtf8(raw), byteLength);
+    }
+
+    /**
+     * 与 {@link #utf8FixedWireAfterUnescape} 相同，但若 UTF-8 编码后超过 {@code byteLength}，再尝试将输入视为<strong>纯十六进制线型</strong>
+     * （去空白后仅含 {@code 0-9a-fA-F}，可选 {@code 0x} 前缀），按 {@link #parseHexToByteLength} 解码。
+     * 典型误配：定界符写成 {@code 0d0a} 却选了 {@code BYTES_AS_UTF8}（四字符 UTF-8 为 4 字节，超过宽度 2）。
+     */
+    public static byte[] utf8FixedWireAfterUnescapeOrHexLiteral(String raw, int byteLength) {
+        try {
+            return utf8FixedWireAfterUnescape(raw, byteLength);
+        } catch (IllegalArgumentException utf8Fail) {
+            String msg = utf8Fail.getMessage();
+            if (msg == null || !msg.contains("UTF-8 encodes to") || !msg.contains("exceeds fixed length")) {
+                throw utf8Fail;
+            }
+            if (raw == null || raw.isBlank()) {
+                throw utf8Fail;
+            }
+            try {
+                String clean = raw.replaceAll("\\s+", "");
+                if (clean.regionMatches(true, 0, "0x", 0, 2)) {
+                    clean = clean.substring(2);
+                }
+                if (!clean.matches("^[0-9a-fA-F]+$")) {
+                    throw utf8Fail;
+                }
+                return parseHexToByteLength(clean, byteLength);
+            } catch (IllegalArgumentException ignored) {
+                throw utf8Fail;
+            }
+        }
     }
 
     /**

@@ -50,7 +50,43 @@ class TcpHexFixedBytesUtilTest {
     }
 
     @Test
+    void utf8OrHexLiteral_acceptsHexDigitsWhenUtf8WouldExceed() {
+        assertThat(TcpHexFixedBytesUtil.utf8FixedWireAfterUnescapeOrHexLiteral("0d0a", 2))
+                .isEqualTo(new byte[] {0x0d, 0x0a});
+        assertThat(TcpHexFixedBytesUtil.utf8FixedWireAfterUnescapeOrHexLiteral("0x0d 0a", 2))
+                .isEqualTo(new byte[] {0x0d, 0x0a});
+    }
+
+    @Test
+    void utf8OrHexLiteral_stillPrefersUtf8WhenFits() {
+        assertThat(TcpHexFixedBytesUtil.utf8FixedWireAfterUnescapeOrHexLiteral("ab", 4))
+                .isEqualTo(new byte[] {'a', 'b', 0, 0});
+    }
+
+    @Test
     void alreadyRawCrLfUnchanged() {
         assertThat(TcpHexFixedBytesUtil.unescapeCStyleForFixedUtf8("\r\n")).isEqualTo("\r\n");
+    }
+
+    @Test
+    void typoForwardSlashRnBecomesCrLf() {
+        assertThat(TcpHexFixedBytesUtil.unescapeCStyleForFixedUtf8("/r/n")).isEqualTo("\r\n");
+        assertThat(TcpHexFixedBytesUtil.unescapeCStyleForFixedUtf8(" /R/N ")).isEqualTo("\r\n");
+        assertThat(TcpHexFixedBytesUtil.utf8FixedWireAfterUnescape("/r/n", 2)).isEqualTo(new byte[] {0x0d, 0x0a});
+    }
+
+    @Test
+    void parseHexLooseToBytesOddNibble() {
+        assertThat(TcpHexFixedBytesUtil.parseHexLooseToBytes("a")).isEqualTo(new byte[] {0x0a});
+        assertThat(TcpHexFixedBytesUtil.parseHexLooseToBytes("0d0a")).isEqualTo(new byte[] {0x0d, 0x0a});
+    }
+
+    @Test
+    void hasFixedBytesWireText_crlfIsNotTreatedAsBlank() {
+        assertThat(TcpHexFixedBytesUtil.hasFixedBytesWireText("\r\n")).isTrue();
+        assertThat(TcpHexFixedBytesUtil.hasFixedBytesWireText(" \t\r\n\t ")).isTrue();
+        assertThat(TcpHexFixedBytesUtil.hasFixedBytesWireText("   ")).isFalse();
+        assertThat(TcpHexFixedBytesUtil.hasFixedBytesWireText("")).isFalse();
+        assertThat(TcpHexFixedBytesUtil.hasFixedBytesWireText(null)).isFalse();
     }
 }

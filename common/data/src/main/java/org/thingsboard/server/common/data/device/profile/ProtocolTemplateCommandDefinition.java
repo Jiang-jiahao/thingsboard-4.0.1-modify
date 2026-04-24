@@ -10,9 +10,11 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * 在某一帧模板下，按命令字配置上行/下行及可选字段覆盖。
@@ -62,8 +64,8 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
     private TcpHexLtvRepeatingConfig ltvRepeating;
     /**
      * 为 true 且方向为下行/双向时：下行组帧将 {@link #downlinkPayloadLengthFieldKey} 指明的整型字段写为参长，
-     * 值为命令覆盖字段中 {@link TcpHexFieldDefinition#getIncludeInDownlinkPayloadLength()} 为 true 的各字段在合并结果中的<strong>字节宽度之和</strong>（须在合并结果中存在）。
-     * 若参长字段本身也勾选「参与参长」，则其线宽一并计入（适用于「长度 = 本字段 + 后续数据」等语义）。
+     * 值为模板与命令合并后，各字段上 {@link TcpHexFieldDefinition#getIncludeInDownlinkPayloadLength()} 为 true 的<strong>线宽字节数之和</strong>（见 {@link #resolveDownlinkPayloadContributorKeys(java.util.List)}）。
+     * 无固定 {@code byteLength} 的 BYTES 切片按组帧 {@code values} 中该键的实际字节数计入；若参长字段本身也勾选「参与参长」，则含本字段线宽。
      */
     private Boolean downlinkPayloadLengthAuto;
     /**
@@ -134,19 +136,6 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
             if (downlinkPayloadLengthFieldKey == null || downlinkPayloadLengthFieldKey.isBlank()) {
                 throw new IllegalArgumentException("downlinkPayloadLengthFieldKey is required when downlinkPayloadLengthAuto is true");
             }
-            boolean anyContributor = false;
-            if (fields != null) {
-                for (TcpHexFieldDefinition f : fields) {
-                    if (f != null && Boolean.TRUE.equals(f.getIncludeInDownlinkPayloadLength())) {
-                        anyContributor = true;
-                        break;
-                    }
-                }
-            }
-            if (!anyContributor) {
-                throw new IllegalArgumentException(
-                        "downlinkPayloadLengthAuto requires at least one command field with includeInDownlinkPayloadLength");
-            }
             String lk = downlinkPayloadLengthFieldKey.trim();
             for (TcpHexFieldDefinition f : fields != null ? fields : List.<TcpHexFieldDefinition>of()) {
                 if (f != null && f.getKey() != null && Objects.equals(f.getKey().trim(), lk)
@@ -156,5 +145,25 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
                 }
             }
         }
+    }
+
+    /**
+     * 下行自动参长：参与字节统计的键名集合（取模板与命令合并后的字段上 {@link TcpHexFieldDefinition#getIncludeInDownlinkPayloadLength()}）。
+     * 命令覆盖与模板同区间时以命令字段为准，请在覆盖行上保留需要的勾选。
+     */
+    public static Set<String> resolveDownlinkPayloadContributorKeys(List<TcpHexFieldDefinition> merged) {
+        Set<String> s = new HashSet<>();
+        if (merged == null) {
+            return s;
+        }
+        for (TcpHexFieldDefinition f : merged) {
+            if (f != null && Boolean.TRUE.equals(f.getIncludeInDownlinkPayloadLength()) && f.getKey() != null) {
+                String k = f.getKey().trim();
+                if (!k.isEmpty()) {
+                    s.add(k);
+                }
+            }
+        }
+        return s;
     }
 }

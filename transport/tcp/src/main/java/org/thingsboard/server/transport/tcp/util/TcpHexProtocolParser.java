@@ -659,10 +659,10 @@ public final class TcpHexProtocolParser {
                         "fixed integral mismatch for [" + def.getKey() + "]: wire " + actual + " expected " + expected);
             }
         }
-        if (def.getFixedBytesHex() != null && !def.getFixedBytesHex().isBlank()) {
+        if (def.getFixedBytesHex() != null && TcpHexFixedBytesUtil.hasFixedBytesWireText(def.getFixedBytesHex())) {
             byte[] expected;
             if (def.getValueType() == TcpHexValueType.BYTES_AS_UTF8) {
-                expected = TcpHexFixedBytesUtil.utf8FixedWireAfterUnescape(def.getFixedBytesHex(), resolvedLen);
+                expected = TcpHexFixedBytesUtil.utf8FixedWireAfterUnescapeOrHexLiteral(def.getFixedBytesHex(), resolvedLen);
             } else {
                 expected = parseHexString(def.getFixedBytesHex());
                 if (expected == null || expected.length != resolvedLen) {

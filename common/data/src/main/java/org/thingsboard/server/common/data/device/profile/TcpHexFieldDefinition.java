@@ -34,9 +34,9 @@ public class TcpHexFieldDefinition implements Serializable {
     private Double scale;
     private Long bitMask;
     /**
-     * 仅用于<strong>命令覆盖字段</strong>：为 true 时参与该命令「下行自动参长」的字节统计（须与
-     * {@link ProtocolTemplateCommandDefinition#getDownlinkPayloadLengthFieldKey()} 等配合）。
-     * 可与参长字段为同一 key：此时参长写入值含本字段线宽（见 {@link ProtocolTemplateCommandDefinition#getDownlinkPayloadLengthAuto()}）。
+     * 为 true 时参与「下行自动参长」字节统计（须与 {@link ProtocolTemplateCommandDefinition#getDownlinkPayloadLengthFieldKey()} 等配合）。
+     * 可配置在<strong>帧模板字段</strong>上；模板与命令字段合并后，以合并结果中本标志为准（同字节区间被命令覆盖时，请在覆盖行保留勾选）。
+     * 可与参长字段为同一 key：此时参长写入值含本字段线宽。
      */
     private Boolean includeInDownlinkPayloadLength;
     /**
@@ -97,7 +97,7 @@ public class TcpHexFieldDefinition implements Serializable {
         if (fixedWireIntegralValue == null) {
             return;
         }
-        if (fixedBytesHex == null || fixedBytesHex.isBlank()) {
+        if (fixedBytesHex == null || !TcpHexFixedBytesUtil.hasFixedBytesWireText(fixedBytesHex)) {
             return;
         }
         if (valueType != null && valueType.isVariableByteSlice()) {
@@ -125,6 +125,11 @@ public class TcpHexFieldDefinition implements Serializable {
             throw new IllegalArgumentException("byteLengthFromIntegralSubtract requires BYTES_AS_HEX or BYTES_AS_UTF8 valueType");
         }
         normalizeMutuallyExclusiveFixedFields();
+        // 长度来自帧内偏移时正文为变长，fixedBytesHex 仅适用于固定 byteLength；清空以免 UI/导入残留触发定长校验
+        if (valueType != null && valueType.isVariableByteSlice()
+                && byteLengthFromByteOffset != null && byteLengthFromByteOffset >= 0) {
+            fixedBytesHex = null;
+        }
         if (valueType.isVariableByteSlice()) {
             boolean fixed = byteLength != null && byteLength > 0;
             boolean fromFrame = byteLengthFromByteOffset != null && byteLengthFromByteOffset >= 0;
@@ -192,7 +197,7 @@ public class TcpHexFieldDefinition implements Serializable {
                 throw new IllegalArgumentException("fixedWireIntegralValue requires an integral valueType (not BYTES_AS_HEX/float/double)");
             }
         }
-        if (fixedBytesHex != null && !fixedBytesHex.isBlank()) {
+        if (fixedBytesHex != null && TcpHexFixedBytesUtil.hasFixedBytesWireText(fixedBytesHex)) {
             if (valueType == null || !valueType.isVariableByteSlice()) {
                 throw new IllegalArgumentException("fixedBytesHex requires BYTES_AS_HEX or BYTES_AS_UTF8 valueType");
             }
@@ -201,7 +206,7 @@ public class TcpHexFieldDefinition implements Serializable {
             }
             try {
                 if (valueType == TcpHexValueType.BYTES_AS_UTF8) {
-                    TcpHexFixedBytesUtil.utf8FixedWireAfterUnescape(fixedBytesHex, byteLength);
+                    TcpHexFixedBytesUtil.utf8FixedWireAfterUnescapeOrHexLiteral(fixedBytesHex, byteLength);
                 } else {
                     TcpHexFixedBytesUtil.parseHexToByteLength(fixedBytesHex, byteLength);
                 }

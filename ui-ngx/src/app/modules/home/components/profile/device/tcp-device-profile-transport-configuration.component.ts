@@ -33,7 +33,7 @@ import {
   normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
   parseLtvTagWireTextToNumber,
-  unescapeCStyleForFixedUtf8String,
+  utf8FixedBytesFormValueToStoredFixedHex,
   unknownTagTelemetryKeyHexLiteralFromMappings
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 import {
@@ -733,7 +733,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         byteLengthFromIntegralSubtract: null
       }, { emitEvent: false });
     } else {
-      g.patchValue({ byteLength: null }, { emitEvent: false });
+      g.patchValue({ byteLength: null, fixedBytesHex: '' }, { emitEvent: false });
     }
   }
 
@@ -1118,17 +1118,17 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
               def.byteLength = bl;
             }
           }
-        }
-        // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与变长字节切片固定 hex 不能同时存在
-        if (isTcpHexVariableByteSlice(vt)) {
-          let fixHex: string;
-          if (vt === TcpHexValueType.BYTES_AS_UTF8) {
-            fixHex = unescapeCStyleForFixedUtf8String(String(r['fixedBytesHex'] ?? '').trim());
-          } else {
-            fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
-          }
-          if (fixHex) {
-            def.fixedBytesHex = fixHex;
+          // fixedBytesHex 仅用于「固定 byteLength」；从帧内读长度时正文变长，不传（避免与残留表单冲突）
+          if (mode === 'fixed') {
+            let fixHex: string;
+            if (vt === TcpHexValueType.BYTES_AS_UTF8) {
+              fixHex = utf8FixedBytesFormValueToStoredFixedHex(String(r['fixedBytesHex'] ?? ''));
+            } else {
+              fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
+            }
+            if (fixHex) {
+              def.fixedBytesHex = fixHex;
+            }
           }
         } else {
           const fixInt = this.parseOptionalIntegralWireText(r['fixedWireIntegralValueText']);

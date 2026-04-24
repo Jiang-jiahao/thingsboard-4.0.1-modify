@@ -32,7 +32,7 @@ import {
   normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
   parseLtvTagWireTextToNumber,
-  unescapeCStyleForFixedUtf8String,
+  utf8FixedBytesFormValueToStoredFixedHex,
   unknownTagTelemetryKeyHexLiteralFromMappings
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 import { Subscription } from 'rxjs';
@@ -373,6 +373,17 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
               def.byteLength = bl;
             }
           }
+          if (mode === 'fixed') {
+            let fixHex: string;
+            if (vt === TcpHexValueType.BYTES_AS_UTF8) {
+              fixHex = utf8FixedBytesFormValueToStoredFixedHex(String(r['fixedBytesHex'] ?? ''));
+            } else {
+              fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
+            }
+            if (fixHex) {
+              def.fixedBytesHex = fixHex;
+            }
+          }
         }
         if (this.isFormBooleanTrue(r['includeInDownlinkPayloadLength'])) {
           def.includeInDownlinkPayloadLength = true;
@@ -390,18 +401,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
         if (this.isFormBooleanTrue(r['autoDownlinkPayloadLength'])) {
           def.autoDownlinkPayloadLength = true;
         }
-        // 与 TcpHexFieldDefinition.validate 一致：整型固定线值与变长字节切片固定 hex 不能同时存在
-        if (isTcpHexVariableByteSlice(vt)) {
-          let fixHex: string;
-          if (vt === TcpHexValueType.BYTES_AS_UTF8) {
-            fixHex = unescapeCStyleForFixedUtf8String(String(r['fixedBytesHex'] ?? '').trim());
-          } else {
-            fixHex = normalizeFixedBytesHexWhitespace(r['fixedBytesHex']);
-          }
-          if (fixHex) {
-            def.fixedBytesHex = fixHex;
-          }
-        } else {
+        if (!isTcpHexVariableByteSlice(vt)) {
           const fixIntTxt = String(r['fixedWireIntegralValueText'] ?? '').trim();
           if (fixIntTxt) {
             def.fixedWireIntegralValue = this.parseIntegralWireText(fixIntTxt);

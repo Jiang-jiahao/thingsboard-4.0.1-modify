@@ -8,6 +8,7 @@ package org.thingsboard.server.common.data.device.profile;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -93,6 +94,45 @@ class ProtocolTemplateTransportTcpDataConfigurationTest {
         assertThat(p.getFields()).hasSize(3);
         assertThat(p.getFields().stream().map(TcpHexFieldDefinition::getKey)).containsExactly(
                 "srcAddr", "originalCmdEcho", "pa1_statusWord");
+    }
+
+    @Test
+    void resolveDownlinkPayloadContributorKeysUsesTemplateWhenCommandFieldsEmpty() {
+        TcpHexFieldDefinition ml = field("messageLength", 2, TcpHexValueType.UINT32_BE);
+        ml.setIncludeInDownlinkPayloadLength(true);
+        TcpHexFieldDefinition jp = field("jsonPayload", 16, TcpHexValueType.BYTES_AS_UTF8);
+        jp.setIncludeInDownlinkPayloadLength(true);
+        List<TcpHexFieldDefinition> merged = List.of(ml, jp);
+        Set<String> keys = ProtocolTemplateCommandDefinition.resolveDownlinkPayloadContributorKeys(merged);
+        assertThat(keys).containsExactlyInAnyOrder("messageLength", "jsonPayload");
+    }
+
+    @Test
+    void downlinkPayloadLengthAutoValidatesWithTemplateContributorsOnly() {
+        ProtocolTemplateDefinition tpl = new ProtocolTemplateDefinition();
+        tpl.setId("t1");
+        tpl.setCommandByteOffset(6);
+        TcpHexFieldDefinition ml = field("messageLength", 2, TcpHexValueType.UINT32_BE);
+        ml.setIncludeInDownlinkPayloadLength(true);
+        TcpHexFieldDefinition jp = field("jsonPayload", 16, TcpHexValueType.BYTES_AS_UTF8);
+        jp.setByteLengthFromByteOffset(2);
+        jp.setByteLengthFromValueType(TcpHexValueType.UINT32_BE);
+        jp.setByteLengthFromIntegralSubtract(12);
+        jp.setIncludeInDownlinkPayloadLength(true);
+        tpl.setHexProtocolFields(List.of(ml, jp));
+
+        ProtocolTemplateCommandDefinition down = new ProtocolTemplateCommandDefinition();
+        down.setTemplateId("t1");
+        down.setCommandValue(1);
+        down.setMatchValueType(TcpHexValueType.UINT32_LE);
+        down.setDirection(ProtocolTemplateCommandDirection.DOWNLINK);
+        down.setDownlinkPayloadLengthAuto(true);
+        down.setDownlinkPayloadLengthFieldKey("messageLength");
+
+        ProtocolTemplateTransportTcpDataConfiguration cfg = new ProtocolTemplateTransportTcpDataConfiguration();
+        cfg.setProtocolTemplates(List.of(tpl));
+        cfg.setProtocolCommands(List.of(down));
+        cfg.validateProtocolTemplate();
     }
 
     private static TcpHexFieldDefinition field(String key, int off, TcpHexValueType vt) {
