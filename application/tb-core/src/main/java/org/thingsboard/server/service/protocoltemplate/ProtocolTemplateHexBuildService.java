@@ -203,22 +203,27 @@ public class ProtocolTemplateHexBuildService {
                 TcpHexValueType st = cmd.getSecondaryMatchValueType() != null
                         ? cmd.getSecondaryMatchValueType()
                         : TcpHexValueType.UINT8;
-                if (!TcpHexCommandProfile.isIntegralMatchType(st)) {
-                    throw new IllegalArgumentException("secondaryMatchValueType must be integral");
-                }
                 int secOff = cmd.getSecondaryMatchByteOffset();
-                Long secDef = cmd.getSecondaryMatchValue();
-                long sec = secDef != null ? secDef : 0L;
-                for (TcpHexFieldDefinition f : merged) {
-                    if (f != null && f.getByteOffset() == secOff) {
-                        Object v = values.get(f.getKey());
-                        if (v != null) {
-                            sec = toLongForIntegral(v, f.getKey());
-                        }
-                        break;
+                if (TcpHexCommandProfile.isByteSliceCommandMatchType(st)) {
+                    byte[] secBytes = TcpHexFixedBytesUtil.parseHexExactWireBytes(cmd.getSecondaryMatchBytesHex(), cmdW);
+                    System.arraycopy(secBytes, 0, buf, secOff, cmdW);
+                } else {
+                    if (!TcpHexCommandProfile.isIntegralMatchType(st)) {
+                        throw new IllegalArgumentException("secondaryMatchValueType must be integral or BYTES_AS_HEX/BYTES_AS_UTF8");
                     }
+                    Long secDef = cmd.getSecondaryMatchValue();
+                    long sec = secDef != null ? secDef : 0L;
+                    for (TcpHexFieldDefinition f : merged) {
+                        if (f != null && f.getByteOffset() == secOff) {
+                            Object v = values.get(f.getKey());
+                            if (v != null) {
+                                sec = toLongForIntegral(v, f.getKey());
+                            }
+                            break;
+                        }
+                    }
+                    TcpHexProtocolParser.writeIntegralAt(buf, secOff, st, sec);
                 }
-                TcpHexProtocolParser.writeIntegralAt(buf, secOff, st, sec);
             }
             if (TcpHexCommandProfile.isByteSliceCommandMatchType(matchVt)) {
                 byte[] cmdBytes = TcpHexFixedBytesUtil.parseHexExactWireBytes(cmd.getCommandMatchBytesHex(), cmdW);

@@ -102,9 +102,31 @@ CREATE TABLE IF NOT EXISTS protocol_template_bundle (
     created_time bigint NOT NULL,
     tenant_id uuid NOT NULL,
     name varchar(255),
+    description varchar(512),
     bundle_data jsonb NOT NULL,
     version BIGINT DEFAULT 1,
     CONSTRAINT protocol_template_bundle_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES tenant(id) ON DELETE CASCADE
 );
+
+-- 存量库：说明单独列；并从 bundle_data 迁出历史 description 键，避免与协议 JSON 混存
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'protocol_template_bundle' AND column_name = 'description'
+    ) THEN
+        ALTER TABLE protocol_template_bundle ADD COLUMN description varchar(512);
+    END IF;
+END$$;
+
+UPDATE protocol_template_bundle
+SET description = LEFT(TRIM(bundle_data->>'description'), 512)
+WHERE (description IS NULL OR TRIM(description) = '')
+  AND bundle_data ? 'description'
+  AND NULLIF(TRIM(bundle_data->>'description'), '') IS NOT NULL;
+
+UPDATE protocol_template_bundle
+SET bundle_data = bundle_data - 'description'
+WHERE bundle_data ? 'description';
 
 -- PROTOCOL TEMPLATE BUNDLE TABLE END

@@ -4,12 +4,11 @@
   <div *ngIf="layoutMode === 'full'" class="tb-hint mat-body-2" style="margin: 0; padding: 10px 12px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);">
     <span translate>device-profile.tcp.protocol-template-intro</span>
   </div>
-  <div *ngIf="layoutMode === 'templatesOnly'" class="tb-hint mat-caption" style="margin: 0;" translate>profiles.protocol-templates-dialog-tab-templates-hint</div>
-  <div *ngIf="layoutMode === 'commandsOnly'" class="tb-hint mat-caption" style="margin: 0;" translate>profiles.protocol-templates-dialog-tab-commands-hint</div>
+  <div *ngIf="layoutMode === 'commandsOnly'" class="tb-hint mat-caption protocol-template-hint-compact" style="margin: 0;" translate>profiles.protocol-templates-dialog-tab-commands-hint</div>
 
   <ng-container *ngIf="layoutMode === 'full' || layoutMode === 'templatesOnly'">
     <div class="mat-body-2" translate>device-profile.tcp.protocol-template-templates-title</div>
-    <div class="tb-hint mat-caption" translate>device-profile.tcp.protocol-template-templates-hint-single</div>
+    <div class="tb-hint mat-caption protocol-template-hint-compact" translate>device-profile.tcp.protocol-template-templates-hint-single</div>
 
     <div *ngIf="!templatesArray.length" class="tb-hint mat-caption" translate>device-profile.tcp.protocol-template-form-loading</div>
 
@@ -18,7 +17,7 @@
       <input type="hidden" formControlName="id">
 
       <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.tcp.protocol-template-default-fields-title</div>
-      <div class="tb-hint mat-body-2 protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-variable-payload-hint</div>
+      <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-variable-payload-hint</div>
       <div formArrayName="hexProtocolFields" class="protocol-template-hex-field-list">
         <div *ngFor="let fi of templateFieldIndicesSortedByByteOffset(0); let pos = index" [formGroupName]="fi"
              class="protocol-template-hex-field-compact">
@@ -69,7 +68,10 @@
             </mat-checkbox>
           </div>
           <div *ngIf="isBytesAsHexTemplate(0, fi)" class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__bytes">
-            <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="outline">
+            <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="outline"
+                            [matTooltip]="'device-profile.tcp.hex-field-length-mode-hint-detail' | translate"
+                            matTooltipShowDelay="400"
+                            matTooltipClass="tb-tooltip-multiline">
               <mat-label translate>device-profile.tcp.hex-field-length-mode</mat-label>
               <mat-select [value]="getHexFieldLengthModeTemplate(0, fi)"
                           (selectionChange)="onHexFieldLengthModeTemplate(0, fi, $event.value)">
@@ -113,7 +115,7 @@
                 <mat-hint translate>device-profile.tcp.hex-field-len-subtract-hint</mat-hint>
               </mat-form-field>
             </ng-container>
-            <p class="mat-caption text-muted protocol-template-hex-field-compact__bytes-hint protocol-template-inline-hint" translate>device-profile.tcp.hex-field-length-mode-hint</p>
+            <p class="mat-caption text-muted protocol-template-hex-field-compact__bytes-hint protocol-template-inline-hint protocol-template-hint-compact" translate>device-profile.tcp.hex-field-length-mode-hint</p>
           </div>
           <div class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__row--tight">
             <mat-checkbox formControlName="includeInDownlinkPayloadLength" color="primary"
@@ -129,7 +131,7 @@
       </button>
 
       <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.tcp.protocol-template-checksum-title</div>
-      <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-checksum-hint</div>
+      <div class="tb-hint mat-caption protocol-template-inline-hint protocol-template-hint-compact" translate>device-profile.tcp.protocol-template-checksum-hint</div>
       <div class="flex flex-row flex-wrap gap-2 items-start">
         <mat-form-field class="flex-1" style="min-width: 200px;" subscriptSizing="dynamic">
           <mat-label translate>device-profile.tcp.protocol-template-checksum-type</mat-label>
@@ -163,21 +165,30 @@
         <mat-expansion-panel-header>
           <mat-panel-title translate>device-profile.tcp.hex-ltv-section-title</mat-panel-title>
         </mat-expansion-panel-header>
-        <div class="tb-hint mat-body-2" style="margin-bottom: 12px;" translate>device-profile.tcp.hex-ltv-section-hint</div>
-        <mat-slide-toggle formControlName="hexLtvEnabled" color="primary" class="mb-3"
-                          (change)="onTemplateHexLtvEnabledChange($event.checked)">
-          <span translate>device-profile.tcp.hex-ltv-enable</span>
-        </mat-slide-toggle>
-        <mat-slide-toggle *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value"
-                          formControlName="hexLtvLengthIncludesTag" color="primary" class="mb-2">
-          <span translate>device-profile.tcp.hex-ltv-length-includes-tag</span>
-        </mat-slide-toggle>
-        <div *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value" class="tb-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-length-includes-tag-hint</div>
-        <mat-slide-toggle *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value"
-                          formControlName="hexLtvLengthIncludesLengthField" color="primary" class="mb-2">
-          <span translate>device-profile.tcp.hex-ltv-length-includes-length-field</span>
-        </mat-slide-toggle>
-        <div *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value" class="tb-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-length-includes-length-field-hint</div>
+        <div class="tb-hint mat-caption protocol-template-hint-compact" style="margin-bottom: 8px;" translate>device-profile.tcp.hex-ltv-section-hint</div>
+        <div class="protocol-template-ltv-toggle-block">
+          <mat-slide-toggle formControlName="hexLtvEnabled" color="primary"
+                            (change)="onTemplateHexLtvEnabledChange($event.checked)">
+            <span translate>device-profile.tcp.hex-ltv-enable</span>
+          </mat-slide-toggle>
+          <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.tcp.hex-ltv-enable-supplement-hint</div>
+        </div>
+        <ng-container *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value">
+          <div class="protocol-template-ltv-toggle-block">
+            <mat-slide-toggle formControlName="hexLtvLengthIncludesTag" color="primary"
+                              (change)="onTemplateHexLtvLengthIncludesTagChange($event.checked)">
+              <span translate>device-profile.tcp.hex-ltv-length-includes-tag</span>
+            </mat-slide-toggle>
+            <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.tcp.hex-ltv-length-includes-tag-hint</div>
+          </div>
+          <div class="protocol-template-ltv-toggle-block">
+            <mat-slide-toggle formControlName="hexLtvLengthIncludesLengthField" color="primary"
+                              (change)="onTemplateHexLtvLengthIncludesLengthFieldChange($event.checked)">
+              <span translate>device-profile.tcp.hex-ltv-length-includes-length-field</span>
+            </mat-slide-toggle>
+            <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.tcp.hex-ltv-length-includes-length-field-hint</div>
+          </div>
+        </ng-container>
         <div *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value" class="flex flex-col gap-3">
           <div class="flex flex-row flex-wrap gap-2">
             <mat-form-field style="width: 110px;">
@@ -234,9 +245,7 @@
                 <mat-label translate>device-profile.tcp.hex-ltv-telemetry-key</mat-label>
                 <input matInput formControlName="telemetryKey" required>
               </mat-form-field>
-              <mat-form-field class="flex-1" style="min-width: 140px;"
-                              [matTooltip]="'device-profile.tcp.hex-ltv-value-type-tooltip' | translate"
-                              matTooltipPosition="above" matTooltipShowDelay="300">
+              <mat-form-field class="flex-1" style="min-width: 140px;">
                 <mat-label translate>device-profile.tcp.hex-field-type</mat-label>
                 <mat-select formControlName="valueType" required>
                   <mat-option *ngFor="let opt of tcpHexLtvTagValueOptions" [value]="opt.value">
@@ -263,11 +272,10 @@
   <mat-divider *ngIf="layoutMode === 'full'"></mat-divider>
 
   <ng-container *ngIf="layoutMode === 'full' || layoutMode === 'commandsOnly'">
-    <div class="mat-body-2" translate>device-profile.tcp.protocol-template-commands-title</div>
-    <div class="tb-hint mat-caption" translate>device-profile.tcp.protocol-template-commands-hint</div>
-    <div *ngIf="layoutMode === 'commandsOnly'" class="tb-hint mat-caption protocol-template-inline-hint"
-         style="margin: 6px 0 10px; padding: 8px 12px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);"
-         translate>device-profile.tcp.protocol-template-commands-only-bytes-hint</div>
+    <div class="flex flex-wrap items-baseline gap-1">
+      <span class="mat-body-2" translate>device-profile.tcp.protocol-template-commands-title</span>
+    </div>
+    <div class="tb-hint mat-caption protocol-template-hint-compact" translate>device-profile.tcp.protocol-template-commands-hint</div>
 
     <div *ngIf="templatesArray?.length" class="flex flex-col gap-2 protocol-template-cmd-row-block protocol-template-global-cmd-match">
       <div class="mat-body-2" translate>device-profile.tcp.protocol-template-cmd-match-section-title</div>
@@ -285,7 +293,6 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-offset-hint</div>
     </div>
 
     <mat-accordion multi="true">
@@ -323,8 +330,6 @@
                           translate>device-profile.tcp.protocol-template-cmd-value-hint-bytes-utf8</mat-hint>
                 <mat-hint *ngIf="isCommandMatchByteSlice(asFormGroup(cCtrl)) && !isCommandMatchUtf8(asFormGroup(cCtrl))"
                           translate>device-profile.tcp.protocol-template-cmd-value-hint-bytes</mat-hint>
-                <mat-hint *ngIf="!isCommandMatchByteSlice(asFormGroup(cCtrl))"
-                          translate>device-profile.tcp.protocol-template-cmd-value-hint-integral</mat-hint>
               </mat-form-field>
               <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
                 <mat-label translate>device-profile.tcp.hex-cmd-value-type</mat-label>
@@ -344,20 +349,29 @@
             <ng-container *ngIf="asFormGroup(cCtrl).get('direction')?.value !== ProtocolTemplateCommandDirection.DOWNLINK">
               <div class="mat-body-2" translate>device-profile.tcp.protocol-template-secondary-title</div>
               <div class="flex flex-row flex-wrap gap-2 items-start">
-                <mat-form-field style="width: 110px;" subscriptSizing="dynamic">
+                <mat-form-field class="protocol-template-secondary-offset-field" subscriptSizing="dynamic">
                   <mat-label translate>device-profile.tcp.protocol-template-secondary-offset</mat-label>
                   <input matInput type="number" min="0" formControlName="secondaryMatchByteOffset">
                 </mat-form-field>
                 <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
                   <mat-label translate>device-profile.tcp.protocol-template-secondary-type</mat-label>
                   <mat-select formControlName="secondaryMatchValueType">
-                    <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+                    <mat-option *ngFor="let t of tcpHexCommandMatchValueTypes" [value]="t">{{ t }}</mat-option>
                   </mat-select>
                 </mat-form-field>
                 <mat-form-field class="protocol-template-cmd-value-field" subscriptSizing="dynamic">
                   <mat-label translate>device-profile.tcp.protocol-template-secondary-value</mat-label>
                   <input matInput type="text" formControlName="secondaryMatchValue" autocomplete="off"
-                         [placeholder]="'device-profile.tcp.protocol-template-cmd-value-placeholder' | translate">
+                         [placeholder]="(isSecondaryMatchByteSlice(asFormGroup(cCtrl))
+                           ? (isSecondaryMatchUtf8(asFormGroup(cCtrl))
+                             ? 'device-profile.tcp.hex-field-fixed-bytes-utf8-placeholder'
+                             : 'device-profile.tcp.hex-field-fixed-bytes-hex-placeholder')
+                           : 'device-profile.tcp.hex-field-fixed-integral-placeholder') | translate"
+                         (blur)="onCommandSecondaryValueBlur(asFormGroup(cCtrl))">
+                  <mat-hint *ngIf="isSecondaryMatchByteSlice(asFormGroup(cCtrl)) && isSecondaryMatchUtf8(asFormGroup(cCtrl))"
+                            translate>device-profile.tcp.protocol-template-cmd-value-hint-bytes-utf8</mat-hint>
+                  <mat-hint *ngIf="isSecondaryMatchByteSlice(asFormGroup(cCtrl)) && !isSecondaryMatchUtf8(asFormGroup(cCtrl))"
+                            translate>device-profile.tcp.protocol-template-cmd-value-hint-bytes</mat-hint>
                 </mat-form-field>
               </div>
               <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-secondary-hint</div>
@@ -450,7 +464,10 @@
                 </mat-checkbox>
               </div>
               <div *ngIf="isBytesAsHexOverride(ci, fi)" class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__bytes">
-                <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="outline">
+                <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="outline"
+                                [matTooltip]="'device-profile.tcp.hex-field-length-mode-hint-detail' | translate"
+                                matTooltipShowDelay="400"
+                                matTooltipClass="tb-tooltip-multiline">
                   <mat-label translate>device-profile.tcp.hex-field-length-mode</mat-label>
                   <mat-select [value]="getHexFieldLengthModeOverride(ci, fi)"
                               (selectionChange)="onHexFieldLengthModeOverride(ci, fi, $event.value)">
@@ -494,7 +511,7 @@
                     <mat-hint translate>device-profile.tcp.hex-field-len-subtract-hint</mat-hint>
                   </mat-form-field>
                 </ng-container>
-                <p class="mat-caption text-muted protocol-template-hex-field-compact__bytes-hint protocol-template-inline-hint" translate>device-profile.tcp.hex-field-length-mode-hint</p>
+                <p class="mat-caption text-muted protocol-template-hex-field-compact__bytes-hint protocol-template-inline-hint protocol-template-hint-compact" translate>device-profile.tcp.hex-field-length-mode-hint</p>
               </div>
             </div>
           </div>

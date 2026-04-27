@@ -392,14 +392,31 @@ public final class TcpHexProtocolParser {
                 TcpHexValueType st = rule.getSecondaryMatchValueType() != null
                         ? rule.getSecondaryMatchValueType()
                         : TcpHexValueType.UINT8;
-                long secActual = readIntegralAt(frame, rule.getSecondaryMatchByteOffset(), st);
-                long secExp = rule.getSecondaryMatchValue();
-                boolean secOk = secActual == secExp;
-                if (log.isTraceEnabled()) {
-                    log.trace("[{}] Hex cmd secondary offset={} type={} actual={} expected={} -> {}",
-                            sessionId, rule.getSecondaryMatchByteOffset(), st, secActual, secExp, secOk);
+                int w = rule.getCommandMatchWidth() != null && rule.getCommandMatchWidth() == 1 ? 1 : 4;
+                int secOff = rule.getSecondaryMatchByteOffset();
+                if (TcpHexCommandProfile.isByteSliceCommandMatchType(st)) {
+                    if (secOff < 0 || secOff + w > frame.length) {
+                        return false;
+                    }
+                    byte[] secExpected = TcpHexFixedBytesUtil.parseHexExactWireBytes(rule.getSecondaryMatchBytesHex(), w);
+                    for (int i = 0; i < w; i++) {
+                        if (frame[secOff + i] != secExpected[i]) {
+                            return false;
+                        }
+                    }
+                } else {
+                    long secActual = readIntegralAt(frame, secOff, st);
+                    long secExp = rule.getSecondaryMatchValue();
+                    boolean secOk = secActual == secExp;
+                    if (log.isTraceEnabled()) {
+                        log.trace("[{}] Hex cmd secondary offset={} type={} actual={} expected={} -> {}",
+                                sessionId, secOff, st, secActual, secExp, secOk);
+                    }
+                    if (!secOk) {
+                        return false;
+                    }
                 }
-                return secOk;
+                return true;
             }
             if (log.isTraceEnabled()) {
                 if (TcpHexCommandProfile.isByteSliceCommandMatchType(mvt)) {

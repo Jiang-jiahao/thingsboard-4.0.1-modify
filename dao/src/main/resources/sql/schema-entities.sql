@@ -954,6 +954,7 @@ CREATE TABLE IF NOT EXISTS protocol_template_bundle (
     created_time bigint NOT NULL,
     tenant_id uuid NOT NULL,
     name varchar(255),
+    description varchar(512),
     bundle_data jsonb NOT NULL,
     version BIGINT DEFAULT 1,
     CONSTRAINT protocol_template_bundle_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES tenant(id) ON DELETE CASCADE

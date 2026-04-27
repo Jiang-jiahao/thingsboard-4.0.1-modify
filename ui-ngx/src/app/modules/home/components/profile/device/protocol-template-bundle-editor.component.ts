@@ -205,8 +205,8 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       hexLtvMaxItems: [ltv?.maxItems ?? 32, [Validators.min(1)]],
       hexLtvKeyPrefix: [ltv?.keyPrefix ?? 'ltv'],
       hexLtvUnknownMode: [ltv?.unknownTagMode ?? TcpHexUnknownTagMode.SKIP, Validators.required],
-      hexLtvLengthIncludesTag: [!!ltv?.lengthIncludesTag],
       hexLtvLengthIncludesLengthField: [!!ltv?.lengthIncludesLengthField],
+      hexLtvLengthIncludesTag: [!!ltv?.lengthIncludesLengthField ? false : !!ltv?.lengthIncludesTag],
       hexLtvTagMappings: ltvArr
     });
   }
@@ -222,21 +222,23 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     const primaryWire = isTcpHexVariableByteSlice(matchVt)
       ? (c?.commandMatchBytesHex ? normalizeFixedBytesHexWhitespace(c.commandMatchBytesHex) : '')
       : this.formatCommandValueForForm(c?.commandValue);
+    const secVt = c?.secondaryMatchValueType ?? TcpHexValueType.UINT8;
+    const secWire = isTcpHexVariableByteSlice(secVt)
+      ? (c?.secondaryMatchBytesHex ? normalizeFixedBytesHexWhitespace(c.secondaryMatchBytesHex) : '')
+      : (c?.secondaryMatchValue != null ? this.formatCommandValueForForm(c.secondaryMatchValue) : '');
     return this.fb.group({
       templateId: [c?.templateId ?? '', Validators.required],
       name: [c?.name ?? '', [Validators.maxLength(255)]],
       commandValue: [primaryWire, Validators.required],
       matchValueType: [matchVt, Validators.required],
       secondaryMatchByteOffset: [c?.secondaryMatchByteOffset ?? null],
-      secondaryMatchValueType: [c?.secondaryMatchValueType ?? TcpHexValueType.UINT8],
-      secondaryMatchValue: [
-        c?.secondaryMatchValue != null ? this.formatCommandValueForForm(c.secondaryMatchValue) : ''
-      ],
+      secondaryMatchValueType: [secVt],
+      secondaryMatchValue: [secWire],
       direction: [c?.direction ?? ProtocolTemplateCommandDirection.UPLINK, Validators.required],
       downlinkPayloadLengthAuto: [!!c?.downlinkPayloadLengthAuto],
       downlinkPayloadLengthFieldKey: [c?.downlinkPayloadLengthFieldKey ?? ''],
       overrideFields: overrideArr
-    }, { validators: [this.protocolCommandPrimaryWireValidator] });
+    }, { validators: [this.protocolCommandPrimaryWireValidator, this.protocolCommandSecondaryWireValidator] });
   }
 
   private readonly protocolCommandPrimaryWireValidator = (group: AbstractControl): ValidationErrors | null => {
@@ -256,6 +258,33 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     }
     const n = parseIntegralWireTextToNumber(s);
     return n === undefined ? { cmdPrimaryWireIntegralInvalid: true } : null;
+  };
+
+  private readonly protocolCommandSecondaryWireValidator = (group: AbstractControl): ValidationErrors | null => {
+    const g = group as UntypedFormGroup;
+    const rawOff = g.get('secondaryMatchByteOffset')?.value;
+    if (rawOff === null || rawOff === undefined || rawOff === '') {
+      return null;
+    }
+    const offNum = Number(rawOff);
+    if (!Number.isFinite(offNum) || offNum < 0) {
+      return null;
+    }
+    const secVt = g.get('secondaryMatchValueType')?.value as TcpHexValueType;
+    const raw = g.get('secondaryMatchValue')?.value;
+    const s = String(raw ?? '').trim();
+    if (!s) {
+      return { cmdSecondaryWireRequired: true };
+    }
+    if (isTcpHexVariableByteSlice(secVt)) {
+      const h = normalizeFixedBytesHexWhitespace(s).replace(/^0x/i, '');
+      if (!h || !/^[0-9a-fA-F]+$/.test(h) || (h.length & 1) === 1) {
+        return { cmdSecondaryWireHexInvalid: true };
+      }
+      return null;
+    }
+    const n = parseIntegralWireTextToNumber(s);
+    return n === undefined ? { cmdSecondaryWireIntegralInvalid: true } : null;
   };
 
   patchProtocolTemplatesFromModel(templates: ProtocolTemplateDefinition[]) {

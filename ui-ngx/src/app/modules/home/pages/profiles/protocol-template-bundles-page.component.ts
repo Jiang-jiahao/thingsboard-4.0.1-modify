@@ -44,7 +44,7 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
   dataSource = new MatTableDataSource<ProtocolTemplateBundle>([]);
   selection = new SelectionModel<ProtocolTemplateBundle>(true, [], true, (a, b) => a.id === b.id);
 
-  displayedColumns: string[] = ['select', 'createdTime', 'name', 'bundleType', 'transport', 'description', 'actions'];
+  displayedColumns: string[] = ['select', 'createdTime', 'name', 'description', 'actions'];
 
   constructor(
     private store: Store<AppState>,
@@ -61,7 +61,8 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
       const name = (data.name || '').toLowerCase();
       const tid = String(this.primaryTemplateId(data)).toLowerCase();
       const id = (data.id || '').toLowerCase();
-      return name.includes(q) || tid.includes(q) || id.includes(q);
+      const desc = (data.description != null ? String(data.description).trim() : '').toLowerCase();
+      return name.includes(q) || tid.includes(q) || id.includes(q) || desc.includes(q);
     };
   }
 
@@ -78,7 +79,7 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         case 'name':
           return (item.name || this.primaryTemplateId(item) || '').toLowerCase();
         case 'description':
-          return this.rowDescriptionText(item).toLowerCase();
+          return (item.description != null ? String(item.description).trim() : '').toLowerCase();
         default:
           return '';
       }
@@ -158,12 +159,10 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
     return t && String(t).trim() ? String(t).trim() : '—';
   }
 
+  /** 列表「说明」列：仅展示库表 description（接口字段），与帧模板内容无关；未填显示 — */
   rowDescriptionText(row: ProtocolTemplateBundle): string {
-    return this.translate.instant('profiles.protocol-templates-desc-summary', {
-      tid: this.primaryTemplateId(row),
-      tc: this.templateCount(row),
-      cc: this.commandCount(row)
-    });
+    const d = row.description != null ? String(row.description).trim() : '';
+    return d !== '' ? d : '—';
   }
 
   openHexTestDialog(): void {

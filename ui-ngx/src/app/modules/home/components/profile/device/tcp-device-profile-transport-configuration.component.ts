@@ -412,6 +412,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     if (cfg) {
       this.hexLtvDefaultPathPanelExpanded = true;
     }
+    const lenIncLenField = !!cfg?.lengthIncludesLengthField;
     this.tcpDeviceProfileTransportConfigurationFormGroup.patchValue({
       hexLtvEnabled: !!cfg,
       hexLtvStartOffset: cfg?.startByteOffset ?? 0,
@@ -421,9 +422,24 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       hexLtvMaxItems: cfg?.maxItems ?? 32,
       hexLtvKeyPrefix: cfg?.keyPrefix ?? 'ltv',
       hexLtvUnknownMode: cfg?.unknownTagMode ?? TcpHexUnknownTagMode.SKIP,
-      hexLtvLengthIncludesTag: !!cfg?.lengthIncludesTag,
-      hexLtvLengthIncludesLengthField: !!cfg?.lengthIncludesLengthField
+      hexLtvLengthIncludesLengthField: lenIncLenField,
+      hexLtvLengthIncludesTag: lenIncLenField ? false : !!cfg?.lengthIncludesTag
     }, {emitEvent: false});
+  }
+
+  /** 「长度含 Tag」与「Length 数值含本字段」互斥 */
+  onTcpHexLtvLengthIncludesTagChange(checked: boolean): void {
+    if (checked) {
+      this.tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvLengthIncludesLengthField')?.setValue(false, { emitEvent: false });
+      this.updateModel();
+    }
+  }
+
+  onTcpHexLtvLengthIncludesLengthFieldChange(checked: boolean): void {
+    if (checked) {
+      this.tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvLengthIncludesTag')?.setValue(false, { emitEvent: false });
+      this.updateModel();
+    }
   }
 
   private patchHexLtvDisabled() {
@@ -527,6 +543,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         ltvArr.push(this.createLtvTagMappingGroup(m, ltvTagFt, ltv?.unknownTagTelemetryKeyHexLiteral));
       }
     }
+    const lenIncLenField = !!ltv?.lengthIncludesLengthField;
     return this.fb.group({
       id: [t?.id ?? '', [Validators.required, Validators.maxLength(255)]],
       name: [t?.name ?? '', [Validators.maxLength(255)]],
@@ -541,8 +558,8 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       hexLtvMaxItems: [ltv?.maxItems ?? 32, [Validators.min(1)]],
       hexLtvKeyPrefix: [ltv?.keyPrefix ?? 'ltv'],
       hexLtvUnknownMode: [ltv?.unknownTagMode ?? TcpHexUnknownTagMode.SKIP, Validators.required],
-      hexLtvLengthIncludesTag: [!!ltv?.lengthIncludesTag],
-      hexLtvLengthIncludesLengthField: [!!ltv?.lengthIncludesLengthField],
+      hexLtvLengthIncludesLengthField: [lenIncLenField],
+      hexLtvLengthIncludesTag: [lenIncLenField ? false : !!ltv?.lengthIncludesTag],
       hexLtvTagMappings: ltvArr
     });
   }
@@ -558,14 +575,18 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     const primaryWire = isTcpHexVariableByteSlice(matchVt)
       ? (c?.commandMatchBytesHex ? normalizeFixedBytesHexWhitespace(c.commandMatchBytesHex) : '')
       : this.formatProtocolCommandIntegralForForm(c?.commandValue);
+    const secVt = c?.secondaryMatchValueType ?? TcpHexValueType.UINT8;
+    const secWire = isTcpHexVariableByteSlice(secVt)
+      ? (c?.secondaryMatchBytesHex ? normalizeFixedBytesHexWhitespace(c.secondaryMatchBytesHex) : '')
+      : (c?.secondaryMatchValue != null ? this.formatProtocolCommandIntegralForForm(c.secondaryMatchValue) : '');
     return this.fb.group({
       templateId: [c?.templateId ?? '', Validators.required],
       name: [c?.name ?? '', [Validators.maxLength(255)]],
       commandValue: [primaryWire, Validators.required],
       matchValueType: [matchVt, Validators.required],
       secondaryMatchByteOffset: [c?.secondaryMatchByteOffset ?? null],
-      secondaryMatchValueType: [c?.secondaryMatchValueType ?? TcpHexValueType.UINT8],
-      secondaryMatchValue: [c?.secondaryMatchValue ?? null],
+      secondaryMatchValueType: [secVt],
+      secondaryMatchValue: [secWire],
       direction: [c?.direction ?? ProtocolTemplateCommandDirection.UPLINK, Validators.required],
       overrideFields: overrideArr
     });
@@ -938,10 +959,19 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           const secOff = this.optionalFormNumber(row['secondaryMatchByteOffset']);
           if (secOff !== undefined && secOff >= 0) {
             cmd.secondaryMatchByteOffset = secOff;
-            cmd.secondaryMatchValueType = (row['secondaryMatchValueType'] as TcpHexValueType) ?? TcpHexValueType.UINT8;
-            const sm = this.optionalFormNumber(row['secondaryMatchValue']);
-            if (sm !== undefined) {
-              cmd.secondaryMatchValue = sm;
+            const secVt = (row['secondaryMatchValueType'] as TcpHexValueType) ?? TcpHexValueType.UINT8;
+            cmd.secondaryMatchValueType = secVt;
+            if (isTcpHexVariableByteSlice(secVt)) {
+              cmd.secondaryMatchValue = 0;
+              const shx = normalizeFixedBytesHexWhitespace(row['secondaryMatchValue']);
+              if (shx) {
+                cmd.secondaryMatchBytesHex = shx;
+              }
+            } else {
+              const sm = parseIntegralWireTextToNumber(row['secondaryMatchValue']);
+              if (sm !== undefined) {
+                cmd.secondaryMatchValue = sm;
+              }
             }
           }
           const cn = String(row['name'] ?? '').trim();

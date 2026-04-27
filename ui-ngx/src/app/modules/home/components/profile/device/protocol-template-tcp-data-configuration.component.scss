@@ -3,6 +3,23 @@
   border-radius: 4px;
 }
 
+.protocol-template-hint-compact {
+  line-height: 1.35;
+  margin: 0;
+}
+
+.protocol-template-ltv-toggle-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.protocol-template-ltv-toggle-hint {
+  margin: 0 0 0 48px;
+  max-width: calc(100% - 48px);
+}
+
 /* 独立成行，避免窄 mat-form-field 内 mat-hint 与下方标题/控件叠在一起 */
 .protocol-template-inline-hint {
   display: block;
@@ -36,6 +53,11 @@
   min-width: 180px;
   flex: 1 1 220px;
   max-width: 100%;
+}
+
+.protocol-template-secondary-offset-field {
+  min-width: 220px;
+  flex: 0 1 200px;
 }
 
 /* 列表一眼扫：首行键名+偏移+类型横排，扩展项次行横排折行，无大卡片 */

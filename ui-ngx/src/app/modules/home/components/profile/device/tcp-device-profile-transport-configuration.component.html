@@ -339,12 +339,14 @@
           <span translate>device-profile.tcp.hex-ltv-enable</span>
         </mat-slide-toggle>
         <mat-slide-toggle *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled').value"
-                          formControlName="hexLtvLengthIncludesTag" color="primary" class="mb-2">
+                          formControlName="hexLtvLengthIncludesTag" color="primary" class="mb-2"
+                          (change)="onTcpHexLtvLengthIncludesTagChange($event.checked)">
           <span translate>device-profile.tcp.hex-ltv-length-includes-tag</span>
         </mat-slide-toggle>
         <div *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled').value" class="tb-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-length-includes-tag-hint</div>
         <mat-slide-toggle *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled').value"
-                          formControlName="hexLtvLengthIncludesLengthField" color="primary" class="mb-2">
+                          formControlName="hexLtvLengthIncludesLengthField" color="primary" class="mb-2"
+                          (change)="onTcpHexLtvLengthIncludesLengthFieldChange($event.checked)">
           <span translate>device-profile.tcp.hex-ltv-length-includes-length-field</span>
         </mat-slide-toggle>
         <div *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled').value" class="tb-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-length-includes-length-field-hint</div>
@@ -404,9 +406,7 @@
                 <mat-label translate>device-profile.tcp.hex-ltv-telemetry-key</mat-label>
                 <input matInput formControlName="telemetryKey" required>
               </mat-form-field>
-              <mat-form-field class="flex-1" style="min-width: 140px;"
-                              [matTooltip]="'device-profile.tcp.hex-ltv-value-type-tooltip' | translate"
-                              matTooltipPosition="above" matTooltipShowDelay="300">
+              <mat-form-field class="flex-1" style="min-width: 140px;">
                 <mat-label translate>device-profile.tcp.hex-field-type</mat-label>
                 <mat-select formControlName="valueType" required>
                   <mat-option *ngFor="let opt of tcpHexLtvTagValueOptions" [value]="opt.value">

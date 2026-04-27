@@ -47,7 +47,16 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
      */
     private Integer secondaryMatchByteOffset;
     private TcpHexValueType secondaryMatchValueType;
+    /**
+     * 整型第二匹配：与帧中按 {@link #secondaryMatchValueType} 读出的值比较。
+     * 字节切片第二匹配（BYTES_AS_HEX / BYTES_AS_UTF8）时可为 0，期望值见 {@link #secondaryMatchBytesHex}。
+     */
     private Long secondaryMatchValue;
+    /**
+     * 当 {@link #secondaryMatchValueType} 为 BYTES_AS_HEX / BYTES_AS_UTF8 时：期望线字节（十六进制串），
+     * 位数须与帧模板 {@link ProtocolTemplateDefinition#getCommandMatchWidth()}（1 或 4 字节）一致。
+     */
+    private String secondaryMatchBytesHex;
     private ProtocolTemplateCommandDirection direction;
     /**
      * 语义随 {@link #direction} 不同：
@@ -122,10 +131,25 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
                 throw new IllegalArgumentException("protocol template command secondaryMatchByteOffset must be >= 0");
             }
             TcpHexValueType st = secondaryMatchValueType != null ? secondaryMatchValueType : TcpHexValueType.UINT8;
-            if (!TcpHexCommandProfile.isIntegralMatchType(st)) {
-                throw new IllegalArgumentException("protocol template command secondaryMatchValueType must be integral");
-            }
-            if (secondaryMatchValue == null) {
+            if (TcpHexCommandProfile.isByteSliceCommandMatchType(st)) {
+                if (secondaryMatchBytesHex == null || secondaryMatchBytesHex.isBlank()) {
+                    throw new IllegalArgumentException("protocol template command secondaryMatchBytesHex is required for BYTES_AS_HEX/BYTES_AS_UTF8 secondary match");
+                }
+                try {
+                    String c = secondaryMatchBytesHex.replaceAll("\\s+", "");
+                    if (c.regionMatches(true, 0, "0x", 0, 2)) {
+                        c = c.substring(2);
+                    }
+                    if (c.length() % 2 != 0) {
+                        throw new IllegalArgumentException("secondaryMatchBytesHex must have an even number of hex digits");
+                    }
+                    HexFormat.of().parseHex(c);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("protocol template command secondaryMatchBytesHex: " + e.getMessage());
+                }
+            } else if (!TcpHexCommandProfile.isIntegralMatchType(st)) {
+                throw new IllegalArgumentException("protocol template command secondaryMatchValueType must be integral or BYTES_AS_HEX/BYTES_AS_UTF8");
+            } else if (secondaryMatchValue == null) {
                 throw new IllegalArgumentException("protocol template command secondaryMatchValue is required when secondaryMatchByteOffset is set");
             }
         }

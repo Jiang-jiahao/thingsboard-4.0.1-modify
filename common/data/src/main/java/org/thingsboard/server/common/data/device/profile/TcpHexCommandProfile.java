@@ -48,12 +48,14 @@ public class TcpHexCommandProfile implements Serializable {
      */
     private String matchBytesHex;
     /**
-     * 可选第二匹配：主匹配成功后，再在该偏移读取整型并与 {@link #secondaryMatchValue} 相等（如应答帧共用同一命令码、需用第二字段区分原命令时）。
+     * 可选第二匹配：主匹配成功后，再在该偏移按 {@link #secondaryMatchValueType} 读值并与期望值比较（整型见 {@link #secondaryMatchValue}，定长字节见 {@link #secondaryMatchBytesHex}）。
      * 未设置 {@link #secondaryMatchByteOffset} 时仅主匹配。
      */
     private Integer secondaryMatchByteOffset;
     private TcpHexValueType secondaryMatchValueType;
     private Long secondaryMatchValue;
+    /** BYTES_AS_HEX / BYTES_AS_UTF8 第二匹配时的期望线字节（十六进制串，位数 = commandMatchWidth×2）。 */
+    private String secondaryMatchBytesHex;
     /**
      * 匹配成功后用于解析的字段列表（可与 {@link #ltvRepeating} 二选一或同时使用）。
      */
@@ -99,10 +101,12 @@ public class TcpHexCommandProfile implements Serializable {
                 throw new IllegalArgumentException("TCP hex command profile secondaryMatchByteOffset must be >= 0");
             }
             TcpHexValueType st = secondaryMatchValueType != null ? secondaryMatchValueType : TcpHexValueType.UINT8;
-            if (!isIntegralMatchType(st)) {
-                throw new IllegalArgumentException("TCP hex command secondaryMatchValueType must be integral");
-            }
-            if (secondaryMatchValue == null) {
+            int w = commandMatchWidth != null && commandMatchWidth == 1 ? 1 : 4;
+            if (isByteSliceCommandMatchType(st)) {
+                TcpHexFixedBytesUtil.parseHexExactWireBytes(secondaryMatchBytesHex, w);
+            } else if (!isIntegralMatchType(st)) {
+                throw new IllegalArgumentException("TCP hex command secondaryMatchValueType must be integral or BYTES_AS_HEX/BYTES_AS_UTF8");
+            } else if (secondaryMatchValue == null) {
                 throw new IllegalArgumentException("TCP hex command profile secondaryMatchValue is required when secondaryMatchByteOffset is set");
             }
         }

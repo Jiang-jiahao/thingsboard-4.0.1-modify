@@ -75,6 +75,8 @@ public class DefaultProtocolTemplateBundleService {
             entity.setCreatedTime(entity.getCreatedTime());
         }
         entity.setName(bundle.getName());
+        String desc = bundle.getDescription() != null ? bundle.getDescription().trim() : "";
+        entity.setDescription(desc.isEmpty() ? null : desc);
         entity.setBundleData(toBundleDataJson(bundle));
 
         ProtocolTemplateBundleEntity saved = bundleRepository.save(entity);
@@ -124,6 +126,8 @@ public class DefaultProtocolTemplateBundleService {
                 entity.setCreatedTime(System.currentTimeMillis());
                 entity.setTenantId(tenantId.getId());
                 entity.setName(b.getName());
+                String md = b.getDescription() != null ? b.getDescription().trim() : "";
+                entity.setDescription(md.isEmpty() ? null : md);
                 entity.setBundleData(toBundleDataJson(b));
                 bundleRepository.save(entity);
             } catch (Exception e) {
@@ -145,6 +149,12 @@ public class DefaultProtocolTemplateBundleService {
         }
         if (t.isEmpty() || c.isEmpty()) {
             throw new IllegalArgumentException("Protocol template bundle must have both templates and commands, or neither.");
+        }
+        if (bundle.getDescription() != null) {
+            String d = bundle.getDescription().trim();
+            if (d.length() > 512) {
+                throw new IllegalArgumentException("Protocol template bundle description must be at most 512 characters");
+            }
         }
     }
 
@@ -169,6 +179,12 @@ public class DefaultProtocolTemplateBundleService {
         b.setId(e.getId().toString());
         b.setCreatedTime(e.getCreatedTime());
         b.setName(e.getName());
+        if (e.getDescription() != null) {
+            String col = e.getDescription().trim();
+            if (!col.isEmpty()) {
+                b.setDescription(col);
+            }
+        }
         JsonNode data = e.getBundleData();
         if (data != null && data.isObject()) {
             b.setProtocolTemplates(readBundleList(
@@ -177,6 +193,15 @@ public class DefaultProtocolTemplateBundleService {
             b.setProtocolCommands(readBundleList(
                     firstNonNull(data, "protocolCommands", "monitoringCommands"),
                     new TypeReference<List<ProtocolTemplateCommandDefinition>>() {}));
+            if (b.getDescription() == null && data.has("description") && !data.get("description").isNull()) {
+                JsonNode dn = data.get("description");
+                if (dn.isTextual()) {
+                    String d = dn.asText().trim();
+                    if (!d.isEmpty()) {
+                        b.setDescription(d);
+                    }
+                }
+            }
         } else if (data != null && data.isArray()) {
             // 兼容误将「仅帧模板数组」写入 bundle_data 根的情况
             b.setProtocolTemplates(readBundleList(data, new TypeReference<List<ProtocolTemplateDefinition>>() {}));

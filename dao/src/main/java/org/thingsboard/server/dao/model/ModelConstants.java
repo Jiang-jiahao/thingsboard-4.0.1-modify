@@ -723,6 +723,7 @@ public class ModelConstants {
      */
     public static final String PROTOCOL_TEMPLATE_BUNDLE_TABLE_NAME = "protocol_template_bundle";
     public static final String PROTOCOL_TEMPLATE_BUNDLE_NAME_PROPERTY = "name";
+    public static final String PROTOCOL_TEMPLATE_BUNDLE_DESCRIPTION_PROPERTY = "description";
     public static final String PROTOCOL_TEMPLATE_BUNDLE_DATA_PROPERTY = "bundle_data";
     public static final String PROTOCOL_TEMPLATE_BUNDLE_VERSION_PROPERTY = "version";
 

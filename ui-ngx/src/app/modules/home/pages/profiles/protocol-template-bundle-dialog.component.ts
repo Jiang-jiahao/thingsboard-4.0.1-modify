@@ -26,8 +26,6 @@ import {
   migrateLegacyLtvTagValueType
 } from '@shared/models/device.models';
 import { ProtocolTemplateBundleEditorComponent } from '@home/components/profile/device/protocol-template-bundle-editor.component';
-import { buildLingxinV2MonitorPresetBundle } from '@home/pages/profiles/protocol-template-lingxin-v2-monitor.preset';
-import { buildCrlfJsonHeaderPresetBundle } from '@home/pages/profiles/protocol-template-crlf-json-header.preset';
 import {
   normalizeFixedBytesHexWhitespace,
   parseIntegralWireTextToNumber,
@@ -61,6 +59,11 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
   bundleMetaForm: UntypedFormGroup;
   bundleContentForm: UntypedFormGroup;
 
+  /** 悬停「说明」字段时展示字数限制 */
+  get descriptionDialogFullTooltip(): string {
+    return this.translate.instant('profiles.protocol-templates-bundle-description-hint');
+  }
+
   constructor(
     private fb: UntypedFormBuilder,
     private dialogRef: MatDialogRef<ProtocolTemplateBundleDialogComponent, ProtocolTemplateBundle | undefined>,
@@ -72,14 +75,18 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
     this.isNew = data.isNew;
     this.bundleId = data.bundle?.id ?? this.bundleService.newBundleId();
     this.bundleMetaForm = this.fb.group({
-      name: ['', [Validators.maxLength(255)]]
+      name: ['', [Validators.maxLength(255)]],
+      description: ['', [Validators.maxLength(512)]]
     });
     this.bundleContentForm = this.fb.group({
       protocolTemplates: this.fb.array([]),
       protocolCommands: this.fb.array([])
     });
     if (data.bundle) {
-      this.bundleMetaForm.patchValue({ name: data.bundle.name ?? '' });
+      this.bundleMetaForm.patchValue({
+        name: data.bundle.name ?? '',
+        description: data.bundle.description ?? ''
+      });
     }
   }
 
@@ -134,52 +141,6 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
     this.dialogRef.close(undefined);
   }
 
-  /** 载入灵信定向 V2 亚冬版监控协议示例（UDP 头四 UINT32 LE；命令偏移 12；packetLen 整包总长自动 + 单子单元 subUnitLen 自动参长） */
-  /** 载入 CRLF + 大端头 + JSON 正文协议（报文长度 = 12 + JSON；正文见 jsonPayloadHex） */
-  applyCrlfJsonHeaderPreset(): void {
-    const name = String(this.bundleMetaForm.get('name')?.value ?? '').trim() || 'CRLF+JSON 协议';
-    const preset = buildCrlfJsonHeaderPresetBundle(name);
-    this.bundleMetaForm.patchValue({ name: preset.name ?? name }, { emitEvent: false });
-    const patch = (): boolean => {
-      const editor = this.bundleEditorRefs?.first;
-      if (!editor) {
-        return false;
-      }
-      editor.patchProtocolTemplatesFromModel(deepClone(preset.protocolTemplates));
-      editor.patchProtocolCommandsFromModel(deepClone(preset.protocolCommands));
-      return true;
-    };
-    if (!patch()) {
-      setTimeout(() => {
-        if (!patch()) {
-          setTimeout(() => patch(), 0);
-        }
-      }, 0);
-    }
-  }
-
-  applyLingxinV2MonitorPreset(): void {
-    const name = String(this.bundleMetaForm.get('name')?.value ?? '').trim() || '灵信V2监控';
-    const preset = buildLingxinV2MonitorPresetBundle(name);
-    this.bundleMetaForm.patchValue({ name: preset.name ?? name }, { emitEvent: false });
-    const patch = (): boolean => {
-      const editor = this.bundleEditorRefs?.first;
-      if (!editor) {
-        return false;
-      }
-      editor.patchProtocolTemplatesFromModel(deepClone(preset.protocolTemplates));
-      editor.patchProtocolCommandsFromModel(deepClone(preset.protocolCommands));
-      return true;
-    };
-    if (!patch()) {
-      setTimeout(() => {
-        if (!patch()) {
-          setTimeout(() => patch(), 0);
-        }
-      }, 0);
-    }
-  }
-
   save(): void {
     const displayName = String(this.bundleMetaForm.get('name')?.value ?? '').trim();
     const templates = this.serializeTemplates();
@@ -206,12 +167,26 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
       }));
       return;
     }
+    if (this.bundleMetaForm.get('description')?.invalid) {
+      this.store.dispatch(new ActionNotificationShow({
+        message: this.translate.instant('profiles.protocol-templates-description-invalid'),
+        type: 'warn',
+        duration: 4000,
+        verticalPosition: 'top',
+        horizontalPosition: 'right'
+      }));
+      return;
+    }
+    const desc = String(this.bundleMetaForm.get('description')?.value ?? '').trim();
     const bundle: ProtocolTemplateBundle = {
       id: this.bundleId,
       name: displayName || undefined,
       protocolTemplates: templates,
       protocolCommands: commands
     };
+    if (desc) {
+      bundle.description = desc;
+    }
     this.dialogRef.close(bundle);
   }
 
@@ -318,8 +293,17 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
         const secOff = this.optionalFormNumber(row['secondaryMatchByteOffset']);
         if (secOff !== undefined && secOff >= 0) {
           cmd.secondaryMatchByteOffset = secOff;
-          cmd.secondaryMatchValueType = (row['secondaryMatchValueType'] as TcpHexValueType) ?? TcpHexValueType.UINT8;
-          cmd.secondaryMatchValue = this.parseCommandValue(row['secondaryMatchValue']);
+          const secVt = (row['secondaryMatchValueType'] as TcpHexValueType) ?? TcpHexValueType.UINT8;
+          cmd.secondaryMatchValueType = secVt;
+          if (isTcpHexVariableByteSlice(secVt)) {
+            cmd.secondaryMatchValue = 0;
+            const shx = normalizeFixedBytesHexWhitespace(row['secondaryMatchValue']);
+            if (shx) {
+              cmd.secondaryMatchBytesHex = shx;
+            }
+          } else {
+            cmd.secondaryMatchValue = this.parseCommandValue(row['secondaryMatchValue']);
+          }
         }
       }
       const cn = String(row['name'] ?? '').trim();
@@ -421,6 +405,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
     return n !== undefined && Number.isFinite(n) ? Math.trunc(n) : 0;
   }
 
+  /** 命令主/次匹配期望值（整型类型）：仅十进制；字节切片匹配走 commandMatchBytesHex，不用本函数。 */
   private parseCommandValue(raw: unknown): number {
     if (raw === null || raw === undefined) {
       return 0;
@@ -428,20 +413,8 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
     if (typeof raw === 'number' && Number.isFinite(raw)) {
       return Math.trunc(raw);
     }
-    const s = String(raw).trim();
-    if (!s) {
-      return 0;
-    }
-    if (/^0x[0-9a-fA-F]+$/i.test(s)) {
-      const n = parseInt(s.slice(2), 16);
-      return Number.isFinite(n) ? n : 0;
-    }
-    if (/^[0-9a-fA-F]+$/.test(s) && /[a-f]/i.test(s)) {
-      const n = parseInt(s, 16);
-      return Number.isFinite(n) ? n : 0;
-    }
-    const n = Number(s);
-    return Number.isFinite(n) ? Math.trunc(n) : 0;
+    const n = parseIntegralWireTextToNumber(raw);
+    return n !== undefined ? n : 0;
   }
 
   /** mat-checkbox / 部分控件在 getRawValue 中可能为 true 或非严格类型 */

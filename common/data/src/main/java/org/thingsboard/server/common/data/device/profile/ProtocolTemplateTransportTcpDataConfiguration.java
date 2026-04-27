@@ -109,9 +109,16 @@ public class ProtocolTemplateTransportTcpDataConfiguration implements TransportT
         }
         if (cmd.getSecondaryMatchByteOffset() != null) {
             p.setSecondaryMatchByteOffset(cmd.getSecondaryMatchByteOffset());
-            p.setSecondaryMatchValueType(cmd.getSecondaryMatchValueType() != null ? cmd.getSecondaryMatchValueType()
-                    : TcpHexValueType.UINT8);
-            p.setSecondaryMatchValue(cmd.getSecondaryMatchValue());
+            TcpHexValueType st = cmd.getSecondaryMatchValueType() != null ? cmd.getSecondaryMatchValueType()
+                    : TcpHexValueType.UINT8;
+            p.setSecondaryMatchValueType(st);
+            if (TcpHexCommandProfile.isByteSliceCommandMatchType(st)) {
+                p.setSecondaryMatchBytesHex(cmd.getSecondaryMatchBytesHex());
+                p.setSecondaryMatchValue(0L);
+            } else {
+                p.setSecondaryMatchBytesHex(null);
+                p.setSecondaryMatchValue(cmd.getSecondaryMatchValue());
+            }
         }
 
         p.setFields(mergeTemplateAndCommandFields(tpl.getHexProtocolFields(), cmd.getFields()));

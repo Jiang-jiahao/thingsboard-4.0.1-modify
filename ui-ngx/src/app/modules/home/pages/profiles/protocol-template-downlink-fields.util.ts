@@ -879,7 +879,8 @@ export function buildDownlinkFieldValuesSkeleton(
 }
 
 /**
- * 固定线值整型：仅按十进制解析（与所选整型类型的线值一致，不用 0x/十六进制串规则）。
+ * 固定线值整型 / 命令匹配整型：仅接受十进制整数字符串（可选 leading +/-）。
+ * 不接受 0x 前缀、纯十六进制字母串等；十六进制字节匹配请使用 BYTES_AS_HEX 等类型。
  */
 export function parseIntegralWireTextToNumber(raw: unknown): number | undefined {
   if (raw === null || raw === undefined) {
@@ -890,6 +891,9 @@ export function parseIntegralWireTextToNumber(raw: unknown): number | undefined 
   }
   const s = String(raw).trim();
   if (!s) {
+    return undefined;
+  }
+  if (!/^[-+]?\d+$/.test(s)) {
     return undefined;
   }
   const n = Number(s);
@@ -904,23 +908,12 @@ export function formatFixedWireIntegralFromModel(v: number | undefined | null): 
   return String(Math.trunc(Number(v)));
 }
 
-/**
- * 失焦归一化：若以 0x 输入则回显小写十六进制；否则十进制（与命令值/帧模板整型框一致）。
- */
-export function formatIntegralWireTextEcho(rawInput: string, numericValue: number): string {
-  const trimmed = String(rawInput ?? '').trim();
-  if (trimmed === '') {
+/** 失焦归一化：整型线值/命令值一律十进制回显（与 {@link parseIntegralWireTextToNumber} 一致）。 */
+export function formatIntegralWireTextEcho(_rawInput: string, numericValue: number): string {
+  if (!Number.isFinite(numericValue)) {
     return '';
   }
-  if (!Number.isFinite(numericValue)) {
-    return trimmed;
-  }
-  const nt = Math.trunc(numericValue);
-  if (/^0x/i.test(trimmed)) {
-    const u = nt >= 0 ? nt : nt >>> 0;
-    return '0x' + u.toString(16);
-  }
-  return String(nt);
+  return String(Math.trunc(numericValue));
 }
 
 /**

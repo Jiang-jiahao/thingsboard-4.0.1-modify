@@ -389,10 +389,12 @@ export interface ProtocolTemplateCommandDefinition {
   /** 命令读取类型为 BYTES_AS_HEX / BYTES_AS_UTF8 时的定长线期望值（十六进制串，位数 = 帧模板命令匹配宽度×2） */
   commandMatchBytesHex?: string;
   matchValueType?: TcpHexValueType;
-  /** 可选：第二匹配偏移（整帧 0 起），与命令字节配合区分 0xA2 类应答（如第 7 字节回显原命令） */
+  /** 可选：第二匹配偏移（整帧 0 起）；类型可为整型或 BYTES_AS_HEX / BYTES_AS_UTF8（与主命令一致） */
   secondaryMatchByteOffset?: number;
   secondaryMatchValueType?: TcpHexValueType;
   secondaryMatchValue?: number;
+  /** 第二匹配为 BYTES_AS_HEX / BYTES_AS_UTF8 时的定长线期望值（十六进制串） */
+  secondaryMatchBytesHex?: string;
   direction: ProtocolTemplateCommandDirection;
   /**
    * 上行/双向：与帧模板合并后用于从设备上报帧中按偏移解析（遥测键）。
@@ -413,6 +415,8 @@ export interface ProtocolTemplateBundle {
   /** 创建时间（毫秒），列表展示 */
   createdTime?: number;
   name?: string;
+  /** 列表「说明」；对应库表 description，未填时列表显示 — */
+  description?: string;
   protocolTemplates: ProtocolTemplateDefinition[];
   protocolCommands: ProtocolTemplateCommandDefinition[];
   /** 历史 JSON 字段名（仅读取兼容） */
@@ -574,6 +578,7 @@ export interface TcpHexCommandProfile {
   secondaryMatchByteOffset?: number;
   secondaryMatchValueType?: TcpHexValueType;
   secondaryMatchValue?: number;
+  secondaryMatchBytesHex?: string;
   /** 与 ltvRepeating 至少配置其一（由后端校验） */
   fields?: TcpHexFieldDefinition[];
   /** 可选：参数字段内为 LTV/TLV 列表时使用 */

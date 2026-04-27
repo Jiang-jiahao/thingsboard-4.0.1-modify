@@ -57,6 +57,7 @@ export class ProtocolTemplateBundleService {
       out.push({
         id: b.id,
         name: typeof b.name === 'string' ? b.name : undefined,
+        description: typeof b.description === 'string' ? b.description : undefined,
         protocolTemplates: Array.isArray(tpl) ? tpl : [],
         protocolCommands: Array.isArray(cmd) ? cmd : []
       });

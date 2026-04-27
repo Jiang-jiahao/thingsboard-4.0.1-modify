@@ -27,6 +27,8 @@ public class ProtocolTemplateBundle implements Serializable {
     /** 创建时间（毫秒），来自库表；列表展示与排序用 */
     private Long createdTime;
     private String name;
+    /** 列表「说明」列；为空时由前端按名称与模板/命令数量生成摘要 */
+    private String description;
 
     @JsonProperty("protocolTemplates")
     @JsonAlias({"monitoringTemplates"})

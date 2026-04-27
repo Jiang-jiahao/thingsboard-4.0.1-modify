@@ -38,6 +38,9 @@ public class ProtocolTemplateBundleEntity {
     @Column(name = ModelConstants.PROTOCOL_TEMPLATE_BUNDLE_NAME_PROPERTY)
     private String name;
 
+    @Column(name = ModelConstants.PROTOCOL_TEMPLATE_BUNDLE_DESCRIPTION_PROPERTY, length = 512)
+    private String description;
+
     @Convert(converter = JsonConverter.class)
     @JdbcType(PostgreSQLJsonPGObjectJsonbType.class)
     @Column(name = ModelConstants.PROTOCOL_TEMPLATE_BUNDLE_DATA_PROPERTY, columnDefinition = "jsonb")

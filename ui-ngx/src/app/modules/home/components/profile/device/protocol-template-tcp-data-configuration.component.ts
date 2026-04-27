@@ -148,6 +148,25 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     }
   }
 
+  /** 「长度含 Tag」与「Length 数值含本字段」互斥：开其一则关另一 */
+  onTemplateHexLtvLengthIncludesTagChange(checked: boolean): void {
+    if (!checked || !this.templatesArray?.length) {
+      return;
+    }
+    const g = this.templatesArray.at(0) as UntypedFormGroup;
+    g.get('hexLtvLengthIncludesLengthField')?.setValue(false, { emitEvent: false });
+    this.cdr.markForCheck();
+  }
+
+  onTemplateHexLtvLengthIncludesLengthFieldChange(checked: boolean): void {
+    if (!checked || !this.templatesArray?.length) {
+      return;
+    }
+    const g = this.templatesArray.at(0) as UntypedFormGroup;
+    g.get('hexLtvLengthIncludesTag')?.setValue(false, { emitEvent: false });
+    this.cdr.markForCheck();
+  }
+
   asFormGroup(ctrl: unknown): UntypedFormGroup {
     return ctrl as UntypedFormGroup;
   }
@@ -329,6 +348,37 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
 
   isCommandMatchByteSlice(cCtrl: UntypedFormGroup): boolean {
     return isTcpHexVariableByteSlice(cCtrl.get('matchValueType')?.value as TcpHexValueType);
+  }
+
+  isSecondaryMatchByteSlice(cCtrl: UntypedFormGroup): boolean {
+    return isTcpHexVariableByteSlice(cCtrl.get('secondaryMatchValueType')?.value as TcpHexValueType);
+  }
+
+  isSecondaryMatchUtf8(cCtrl: UntypedFormGroup): boolean {
+    return cCtrl.get('secondaryMatchValueType')?.value === TcpHexValueType.BYTES_AS_UTF8;
+  }
+
+  /** 第二匹配期望值：与主命令值规则一致（整型十进制；BYTES_AS_HEX / UTF8 为定长线字节） */
+  onCommandSecondaryValueBlur(cCtrl: UntypedFormGroup | null): void {
+    if (!cCtrl || this.disabled) {
+      return;
+    }
+    const vt = cCtrl.get('secondaryMatchValueType')?.value as TcpHexValueType;
+    const ctrl = cCtrl.get('secondaryMatchValue');
+    if (!ctrl) {
+      return;
+    }
+    if (isTcpHexVariableByteSlice(vt)) {
+      const raw = String(ctrl.value ?? '');
+      const normalized = vt === TcpHexValueType.BYTES_AS_UTF8
+        ? utf8FixedBytesFormValueToStoredFixedHex(raw)
+        : normalizeFixedBytesHexWhitespace(ctrl.value);
+      if (normalized !== raw) {
+        ctrl.patchValue(normalized, { emitEvent: false });
+      }
+      return;
+    }
+    this.onFixedWireIntegralBlur(ctrl);
   }
 
   /** 命令值：与帧模板「固定线值整型 / 固定 HEX」一致 */
