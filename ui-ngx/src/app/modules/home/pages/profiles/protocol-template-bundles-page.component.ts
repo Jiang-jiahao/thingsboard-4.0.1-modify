@@ -2,7 +2,7 @@
 /// Copyright © 2016-2025 The Thingsboard Authors
 ///
 import { SelectionModel } from '@angular/cdk/collections';
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -23,6 +23,7 @@ import {
   ProtocolTemplateHexTestDialogComponent,
   ProtocolTemplateHexTestDialogData
 } from '@home/pages/profiles/protocol-template-hex-test-dialog.component';
+import { parseProtocolTemplateBundlesFromImportedJson } from '@home/pages/profiles/protocol-template-bundle-import.util';
 import { combineLatest, forkJoin } from 'rxjs';
 import { filter, switchMap, take } from 'rxjs/operators';
 
@@ -34,6 +35,7 @@ import { filter, switchMap, take } from 'rxjs/operators';
 export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewInit {
 
   @ViewChild(MatSort) sort: MatSort;
+  @ViewChild('importJsonFileInput') importJsonFileInput!: ElementRef<HTMLInputElement>;
 
   isLoading = true;
   textSearchMode = false;
@@ -165,6 +167,18 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
     return d !== '' ? d : '—';
   }
 
+  /** 悬停提示全文（说明列 line-clamp 时） */
+  rowDescriptionTooltipText(row: ProtocolTemplateBundle): string {
+    const d = row.description != null ? String(row.description).trim() : '';
+    return d;
+  }
+
+  /** 名称列悬停全文（长标题截断时） */
+  bundleNameTooltipText(row: ProtocolTemplateBundle): string {
+    const s = this.primaryTemplateId(row);
+    return s !== '—' ? s : '';
+  }
+
   openHexTestDialog(): void {
     this.dialog.open<ProtocolTemplateHexTestDialogComponent, ProtocolTemplateHexTestDialogData, void>(
       ProtocolTemplateHexTestDialogComponent,
@@ -196,6 +210,88 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
     ref.afterClosed().subscribe(result => {
       if (result) {
         this.persistBundle(result);
+      }
+    });
+  }
+
+  triggerImportJson(): void {
+    this.importJsonFileInput?.nativeElement?.click();
+  }
+
+  onImportJsonFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result ?? '');
+      const parsed = parseProtocolTemplateBundlesFromImportedJson(text);
+      if (parsed.ok === false) {
+        const ek = parsed.errorKey;
+        const key =
+          ek === 'invalid-json'
+            ? 'profiles.protocol-templates-import-invalid-json'
+            : ek === 'incomplete-bundle'
+              ? 'profiles.protocol-templates-import-incomplete-bundle'
+              : 'profiles.protocol-templates-import-no-bundle';
+        this.store.dispatch(new ActionNotificationShow({
+          message: this.translate.instant(key),
+          type: 'warn',
+          duration: 5000,
+          verticalPosition: 'top',
+          horizontalPosition: 'right'
+        }));
+      } else {
+        const list = parsed.bundles;
+        if (list.length > 1) {
+          this.store.dispatch(new ActionNotificationShow({
+            message: this.translate.instant('profiles.protocol-templates-import-multiple-notice', { count: list.length }),
+            type: 'info',
+            duration: 6000,
+            verticalPosition: 'bottom',
+            horizontalPosition: 'right'
+          }));
+        }
+        this.openImportBundleDialog(list[0]);
+      }
+    };
+    reader.onerror = () => {
+      this.store.dispatch(new ActionNotificationShow({
+        message: this.translate.instant('action.operation-failed'),
+        type: 'error',
+        duration: 3500,
+        verticalPosition: 'top',
+        horizontalPosition: 'right'
+      }));
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  private openImportBundleDialog(bundle: ProtocolTemplateBundle): void {
+    const payload: Omit<ProtocolTemplateBundle, 'id'> & { id?: string } = {
+      name: bundle.name,
+      description: bundle.description,
+      protocolTemplates: bundle.protocolTemplates ?? bundle.monitoringTemplates ?? [],
+      protocolCommands: bundle.protocolCommands ?? bundle.monitoringCommands ?? []
+    };
+    const ref = this.dialog.open<ProtocolTemplateBundleDialogComponent, ProtocolTemplateBundleDialogData, ProtocolTemplateBundle | undefined>(
+      ProtocolTemplateBundleDialogComponent,
+      {
+        width: '980px',
+        maxWidth: '96vw',
+        maxHeight: '92vh',
+        autoFocus: false,
+        restoreFocus: false,
+        panelClass: ['tb-dialog', 'tb-protocol-template-bundle-dialog'],
+        data: { bundle: payload as ProtocolTemplateBundle, isNew: true }
+      }
+    );
+    ref.afterClosed().subscribe(res => {
+      if (res) {
+        this.persistBundle(res);
       }
     });
   }

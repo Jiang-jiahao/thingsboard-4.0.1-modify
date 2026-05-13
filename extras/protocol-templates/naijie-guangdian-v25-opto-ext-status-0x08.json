@@ -1,0 +1,154 @@
+{
+  "name": "耐杰光电 V2.5 — 光电设备状态扩展信息包(0x08) 外带数据",
+  "description": "《耐杰光电光电指控协议 V2.5》2.10/2.10.1~2.10.3：命令字 0x08，按工作状态(0 空闲/1 搜索/2 跟踪) 用第二匹配解析外带数据。帧头与 1.3 一致：起始4+协议4+包长4+命令4+时间戳8+信息内容N+序列号4+校验4+结束4。信息内容中 Index16=工作状态 对应本模板绝对字节偏移 40(4+4+4+4+8+16)。检验和为 4 字节，平台当前仅支持 SUM8/CRC 等，未配置自动校验，请在规则链中按需验证。",
+  "protocolTemplates": [
+    {
+      "id": "naijie_opto_v25_ext_0x08",
+      "name": "耐杰 0x08 公共帧头 + 外带长度",
+      "commandByteOffset": 12,
+      "commandMatchWidth": 4,
+      "hexProtocolFields": [
+        {
+          "key": "frameStart",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "8889808a"
+        },
+        {
+          "key": "protocolVersion",
+          "byteOffset": 4,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "packetPayloadLen",
+          "byteOffset": 8,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "cmdWord",
+          "byteOffset": 12,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "frameTimestamp",
+          "byteOffset": 16,
+          "valueType": "INT64_LE"
+        },
+        {
+          "key": "optoelectronicId",
+          "byteOffset": 24,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "payloadTimestamp",
+          "byteOffset": 28,
+          "valueType": "INT64_LE"
+        },
+        {
+          "key": "payloadReserved12",
+          "byteOffset": 36,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "workState",
+          "byteOffset": 40,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "extDataLen",
+          "byteOffset": 44,
+          "valueType": "UINT32_LE"
+        }
+      ]
+    }
+  ],
+  "protocolCommands": [
+    {
+      "templateId": "naijie_opto_v25_ext_0x08",
+      "name": "0x08 空闲 — 外带数据(2.10.1)",
+      "commandValue": 8,
+      "matchValueType": "UINT32_LE",
+      "secondaryMatchByteOffset": 40,
+      "secondaryMatchValueType": "UINT32_LE",
+      "secondaryMatchValue": 0,
+      "direction": "UPLINK",
+      "fields": [
+        {
+          "key": "idleDurationMs",
+          "byteOffset": 48,
+          "valueType": "UINT32_LE"
+        }
+      ]
+    },
+    {
+      "templateId": "naijie_opto_v25_ext_0x08",
+      "name": "0x08 搜索 — 外带数据(2.10.2)",
+      "commandValue": 8,
+      "matchValueType": "UINT32_LE",
+      "secondaryMatchByteOffset": 40,
+      "secondaryMatchValueType": "UINT32_LE",
+      "secondaryMatchValue": 1,
+      "direction": "UPLINK",
+      "fields": [
+        {
+          "key": "searchDurationMs",
+          "byteOffset": 48,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "searchedTargetCount",
+          "byteOffset": 52,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "searchFollowDataLen",
+          "byteOffset": 56,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "searchTargetsPayloadHex",
+          "byteOffset": 60,
+          "valueType": "BYTES_AS_HEX",
+          "byteLengthFromByteOffset": 56,
+          "byteLengthFromValueType": "UINT32_LE"
+        }
+      ]
+    },
+    {
+      "templateId": "naijie_opto_v25_ext_0x08",
+      "name": "0x08 跟踪 — 外带数据(2.10.3)",
+      "commandValue": 8,
+      "matchValueType": "UINT32_LE",
+      "secondaryMatchByteOffset": 40,
+      "secondaryMatchValueType": "UINT32_LE",
+      "secondaryMatchValue": 2,
+      "direction": "UPLINK",
+      "fields": [
+        {
+          "key": "trackDurationMs",
+          "byteOffset": 48,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "trackUserId",
+          "byteOffset": 52,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "targetLockState",
+          "byteOffset": 54,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "trackTargetInfoPayloadHex",
+          "byteOffset": 56,
+          "valueType": "BYTES_AS_HEX",
+          "byteLengthFromByteOffset": 44,
+          "byteLengthFromValueType": "UINT32_LE",
+          "byteLengthFromIntegralSubtract": 8
+        }
+      ]
+    }
+  ]
+}
