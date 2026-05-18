@@ -40,6 +40,8 @@ public final class TcpPipelineBuilder {
 
     public static ChannelHandler createFramingHandler(TcpTransportFramingMode mode, int maxFrameLength, int fixedFrameLength) {
         switch (mode) {
+            case NONE:
+                return null;
             case LINE:
                 return new LineBasedFrameDecoder(maxFrameLength, true, true);
             case LENGTH_PREFIX_4:
@@ -60,7 +62,10 @@ public final class TcpPipelineBuilder {
      * 首次安装：pipeline 中尚不存在 {@link #FRAMING_HANDLER_NAME}。
      */
     public static void addFramingFirst(ChannelPipeline pipeline, TcpTransportFramingMode mode, int maxFrameLength, int fixedFrameLength) {
-        pipeline.addLast(FRAMING_HANDLER_NAME, createFramingHandler(mode, maxFrameLength, fixedFrameLength));
+        ChannelHandler handler = createFramingHandler(mode, maxFrameLength, fixedFrameLength);
+        if (handler != null) {
+            pipeline.addLast(FRAMING_HANDLER_NAME, handler);
+        }
     }
 
     /**
@@ -81,8 +86,19 @@ public final class TcpPipelineBuilder {
         }
         log.debug("Replacing TCP framing: {} -> {}", authMode, profileMode);
         int fixed = profileMode == TcpTransportFramingMode.FIXED_LENGTH ? profileFixedLength : authFixedLength;
-        pipeline.replace(FRAMING_HANDLER_NAME, FRAMING_HANDLER_NAME,
-                createFramingHandler(profileMode, maxFrameLength, fixed));
+        ChannelHandler newHandler = createFramingHandler(profileMode, maxFrameLength, fixed);
+        ChannelHandler current = pipeline.get(FRAMING_HANDLER_NAME);
+        if (newHandler == null) {
+            if (current != null) {
+                pipeline.remove(FRAMING_HANDLER_NAME);
+            }
+            return;
+        }
+        if (current != null) {
+            pipeline.replace(FRAMING_HANDLER_NAME, FRAMING_HANDLER_NAME, newHandler);
+        } else {
+            pipeline.addLast(FRAMING_HANDLER_NAME, newHandler);
+        }
     }
 
     private static boolean framingEquals(TcpTransportFramingMode a, int aFixed, TcpTransportFramingMode b, int bFixed) {

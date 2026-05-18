@@ -25,10 +25,10 @@ import java.util.HexFormat;
 public final class TcpPayloadUtil {
 
     /**
-     * {@link TransportTcpDataType#HEX}（界面「原始字节」）：上行把<strong>整帧原始字节</strong>格式化为小写十六进制写入该键（不再把帧当作 ASCII 十六进制文本再 parseHex）。
+     * {@link TransportTcpDataType#HEX}（界面「原始字节」）：上行把整段原始字节格式化为小写十六进制写入该键。
      * 下行：若 JSON 含此键且值为合法十六进制，则发往设备的负载为 decode 后的原始字节；否则为整段 JSON 的 UTF-8 字节。
      */
-    public static final String TCP_HEX_FRAME_JSON_KEY = "hex";
+    public static final String TCP_HEX_PAYLOAD_JSON_KEY = "hex";
 
     private static final byte[] CRLF = "\n".getBytes(StandardCharsets.UTF_8);
     private TcpPayloadUtil() {
@@ -48,17 +48,17 @@ public final class TcpPayloadUtil {
     public static String decodePayloadLine(TransportTcpDataType type, String line) {
         String trimmed = line.trim();
         if (trimmed.isEmpty()) {
-            if (type == TransportTcpDataType.HEX || type == TransportTcpDataType.PROTOCOL_TEMPLATE) {
-                return jsonFromRawFrameAsHex(new byte[0]);
+            if (type == TransportTcpDataType.RAW_BYTES || type == TransportTcpDataType.PROTOCOL_TEMPLATE) {
+                return jsonFromRawPayloadAsHex(new byte[0]);
             }
             return "";
         }
         switch (type) {
-            case HEX:
+            case RAW_BYTES:
             case PROTOCOL_TEMPLATE:
-                return jsonFromRawFrameAsHex(trimmed.getBytes(StandardCharsets.UTF_8));
+                return jsonFromRawPayloadAsHex(trimmed.getBytes(StandardCharsets.UTF_8));
             case ASCII:
-            case JSON:
+            case UTF8:
                 return trimmed;
             default:
                 return trimmed;
@@ -66,11 +66,11 @@ public final class TcpPayloadUtil {
     }
     public static String encodePayloadLine(TransportTcpDataType type, String jsonUtf8) {
         switch (type) {
-            case HEX:
+            case RAW_BYTES:
             case PROTOCOL_TEMPLATE:
-                return HexFormat.of().formatHex(bodyBytesForDataType(TransportTcpDataType.HEX, jsonUtf8)) + "\n";
+                return HexFormat.of().formatHex(bodyBytesForDataType(TransportTcpDataType.RAW_BYTES, jsonUtf8)) + "\n";
             case ASCII:
-            case JSON:
+            case UTF8:
                 return jsonUtf8 + "\n";
             default:
                 return jsonUtf8 + "\n";
@@ -79,51 +79,51 @@ public final class TcpPayloadUtil {
 
 
     /**
-     * 一帧原始字节 → JSON 文本：
+     * 一次读取到的负载字节 → JSON 文本：
      * {@link TransportTcpDataType#JSON} 按 UTF-8 解码，
      * {@link TransportTcpDataType#ASCII} 按 US-ASCII 解码，
      * {@link TransportTcpDataType#HEX} / {@link TransportTcpDataType#PROTOCOL_TEMPLATE} 保留为原始字节并包成 {@code hex} 键。
      */
-    public static String decodePayloadBytes(TransportTcpDataType type, byte[] frameBody) {
-        if (frameBody == null || frameBody.length == 0) {
-            if (type == TransportTcpDataType.HEX || type == TransportTcpDataType.PROTOCOL_TEMPLATE) {
-                return jsonFromRawFrameAsHex(new byte[0]);
+    public static String decodePayloadBytes(TransportTcpDataType type, byte[] payloadBytes) {
+        if (payloadBytes == null || payloadBytes.length == 0) {
+            if (type == TransportTcpDataType.RAW_BYTES || type == TransportTcpDataType.PROTOCOL_TEMPLATE) {
+                return jsonFromRawPayloadAsHex(new byte[0]);
             }
             return "";
         }
         switch (type) {
-            case HEX:
+            case RAW_BYTES:
             case PROTOCOL_TEMPLATE:
-                return jsonFromRawFrameAsHex(frameBody);
+                return jsonFromRawPayloadAsHex(payloadBytes);
             case ASCII:
-                return new String(frameBody, StandardCharsets.US_ASCII).trim();
-            case JSON:
+                return new String(payloadBytes, StandardCharsets.US_ASCII).trim();
+            case UTF8:
             default:
-                return new String(frameBody, StandardCharsets.UTF_8).trim();
+                return new String(payloadBytes, StandardCharsets.UTF_8).trim();
         }
     }
 
     /**
-     * 业务 JSON → 负载字节（HEX 时为原始字节：优先从 {@value #TCP_HEX_FRAME_JSON_KEY} 字段 parseHex，否则为整段 JSON 的 UTF-8）。
+     * 业务 JSON → 负载字节（HEX 时为原始字节：优先从 {@value #TCP_HEX_PAYLOAD_JSON_KEY} 字段 parseHex，否则为整段 JSON 的 UTF-8）。
      */
     public static byte[] bodyBytesForDataType(TransportTcpDataType dataType, String jsonUtf8) {
         switch (dataType) {
-            case HEX:
+            case RAW_BYTES:
             case PROTOCOL_TEMPLATE:
-                return rawBytesFromJsonHexDownlink(jsonUtf8);
+                return payloadBytesFromJsonHexDownlink(jsonUtf8);
             case ASCII:
                 return jsonUtf8.getBytes(StandardCharsets.US_ASCII);
-            case JSON:
+            case UTF8:
             default:
                 return jsonUtf8.getBytes(StandardCharsets.UTF_8);
         }
     }
     /**
-     * 鉴权 JSON 始终按 UTF-8 文本编码（与 transportTcpDataType 无关）。
+     * 鉴权首包固定为 UTF-8 JSON 文本，不参与业务分帧（LINE/LENGTH_PREFIX/FIXED_LENGTH）。
      */
-    public static ByteBuf encodeAuthFrame(TcpTransportFramingMode framing, int fixedFrameLength, String token) {
+    public static ByteBuf encodeAuthFrame(String token) {
         byte[] inner = encodeAuthLine(token).getBytes(StandardCharsets.UTF_8);
-        return wrapFraming(framing, inner, fixedFrameLength);
+        return Unpooled.wrappedBuffer(inner);
     }
     /**
      * 下行业务消息：先按数据类型得到负载字节，再按分帧方式封装。
@@ -164,16 +164,16 @@ public final class TcpPayloadUtil {
         }
     }
 
-    private static String jsonFromRawFrameAsHex(byte[] frameBody) {
-        String hex = HexFormat.of().formatHex(frameBody);
-        return "{\"" + TCP_HEX_FRAME_JSON_KEY + "\":\"" + hex + "\"}";
+    private static String jsonFromRawPayloadAsHex(byte[] payloadBytes) {
+        String hex = HexFormat.of().formatHex(payloadBytes);
+        return "{\"" + TCP_HEX_PAYLOAD_JSON_KEY + "\":\"" + hex + "\"}";
     }
 
-    private static byte[] rawBytesFromJsonHexDownlink(String jsonUtf8) {
+    private static byte[] payloadBytesFromJsonHexDownlink(String jsonUtf8) {
         if (jsonUtf8 == null) {
             return new byte[0];
         }
-        int keyPos = jsonUtf8.indexOf("\"" + TCP_HEX_FRAME_JSON_KEY + "\"");
+        int keyPos = jsonUtf8.indexOf("\"" + TCP_HEX_PAYLOAD_JSON_KEY + "\"");
         if (keyPos < 0) {
             return jsonUtf8.getBytes(StandardCharsets.UTF_8);
         }

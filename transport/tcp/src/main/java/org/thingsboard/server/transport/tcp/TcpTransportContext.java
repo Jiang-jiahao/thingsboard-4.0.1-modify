@@ -183,6 +183,8 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
     private void completeSessionRegistration(TcpDeviceSession session, ValidateDeviceCredentialsResponse msg) {
         TransportProtos.SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, session.getSessionId());
         transportService.registerAsyncSession(sessionInfo, session);
+        // TCP 会话一旦连上即记录一次活动，避免“刚连接就显示 inactive”。
+        transportService.recordActivity(sessionInfo);
         transportService.process(sessionInfo, TransportProtos.SubscribeToAttributeUpdatesMsg.newBuilder()
                 .setSessionType(TransportProtos.SessionType.ASYNC)
                 .build(), TransportServiceCallback.EMPTY);

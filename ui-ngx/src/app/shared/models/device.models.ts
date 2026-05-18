@@ -318,6 +318,7 @@ export enum TcpTransportConnectMode {
   CLIENT = 'CLIENT'
 }
 export enum TcpTransportFramingMode {
+  NONE = 'NONE',
   LINE = 'LINE',
   LENGTH_PREFIX_4 = 'LENGTH_PREFIX_4',
   LENGTH_PREFIX_2 = 'LENGTH_PREFIX_2',
@@ -333,11 +334,11 @@ export enum TcpJsonWithoutMethodMode {
 }
 export enum TransportTcpDataType {
   /** 界面展示为 UTF-8；链路上为 UTF-8 文本行并按 JSON 解析 */
-  JSON = 'JSON',
+  UTF8 = 'UTF8',
   /** 界面展示为「原始字节」；链路上为原始字节帧，再包成 {\"hex\":\"...\"} 供解析 */
-  HEX = 'HEX',
+  RAW_BYTES = 'RAW_BYTES',
   /**
-   * 与 HEX 链路上一致；配置为「协议模板」（帧模板 + 上行/下行命令），后端展开为 HEX 解析。
+   * 与 RAW_BYTES 链路上一致；配置为「协议模板」（帧模板 + 上行/下行命令），后端展开为原始字节解析。
    */
   PROTOCOL_TEMPLATE = 'PROTOCOL_TEMPLATE',
   ASCII = 'ASCII'
@@ -693,13 +694,13 @@ export function migrateLegacyLtvTagValueType(vt: TcpHexValueType | null | undefi
 
 export interface TransportTcpDataTypeConfiguration {
   transportTcpDataType?: TransportTcpDataType;
-  /** 仅当 transportTcpDataType 为 HEX：按顺序匹配命令规则 */
+  /** 仅当 transportTcpDataType 为 RAW_BYTES：按顺序匹配命令规则 */
   hexCommandProfiles?: TcpHexCommandProfile[];
   /** 未匹配任何命令时的回退字段解析 */
   hexProtocolFields?: TcpHexFieldDefinition[];
   /** 未匹配命令时，在固定字段之后解析的 LTV/TLV 重复段 */
   hexLtvRepeating?: TcpHexLtvRepeatingConfig;
-  /** 手动 HEX：可选整帧校验 */
+  /** 手动 RAW_BYTES：可选整帧校验 */
   checksum?: TcpHexChecksumDefinition;
   /** 协议模板负载：先配模板再配命令 */
   protocolTemplates?: ProtocolTemplateDefinition[];
@@ -855,7 +856,7 @@ export const createDeviceProfileTransportConfiguration = (type: DeviceTransportT
           tcpJsonWithoutMethodMode: TcpJsonWithoutMethodMode.TELEMETRY_FLAT,
           tcpOpaqueRuleEngineKey: 'tcpOpaquePayload',
           transportTcpDataTypeConfiguration: {
-            transportTcpDataType: TransportTcpDataType.JSON
+            transportTcpDataType: TransportTcpDataType.UTF8
           }
         };
         transportConfiguration = {...tcpTransportConfiguration, type: DeviceTransportType.TCP};

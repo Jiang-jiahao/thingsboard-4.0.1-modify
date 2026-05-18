@@ -81,8 +81,8 @@ public class TcpMessageProcessor {
         }
     }
     /**
-     * 无 {@code method} 的上行：UTF-8（{@link TransportTcpDataType#JSON}）/ ASCII 整帧写入单一可配置遥测键；
-     * 原始字节（{@link TransportTcpDataType#HEX}）/ 协议模板仅走 {@link TcpHexProtocolParser}，解析失败则丢弃。
+     * 无 {@code method} 的上行：UTF-8（{@link TransportTcpDataType#UTF8}）/ ASCII 整帧写入单一可配置遥测键；
+     * 原始字节（{@link TransportTcpDataType#RAW_BYTES}）/ 协议模板仅走 {@link TcpHexProtocolParser}，解析失败则丢弃。
      */
     public void processUplinkWithoutMethod(TcpDeviceSession session, JsonElement payload) {
         if (!session.isCoreSessionReady()) {
@@ -90,7 +90,8 @@ public class TcpMessageProcessor {
             return;
         }
         TransportTcpDataType payloadType = session.getPayloadDataType();
-        if (payloadType == TransportTcpDataType.HEX || payloadType == TransportTcpDataType.PROTOCOL_TEMPLATE) {
+        if (payloadType == TransportTcpDataType.RAW_BYTES
+                || payloadType == TransportTcpDataType.PROTOCOL_TEMPLATE) {
             var hexCfg = session.getHexTcpDataConfiguration();
             if (hexCfg == null) {
                 log.warn("[{}] HEX/PROTOCOL_TEMPLATE uplink but profile has no HEX/protocol-template configuration",
@@ -110,7 +111,8 @@ public class TcpMessageProcessor {
                     TransportServiceCallback.EMPTY);
             return;
         }
-        if (payloadType == TransportTcpDataType.JSON || payloadType == TransportTcpDataType.ASCII) {
+        if (payloadType == TransportTcpDataType.UTF8
+                || payloadType == TransportTcpDataType.ASCII) {
             String telemetryKey = session.getTcpOpaqueRuleEngineKey();
             if (telemetryKey == null || telemetryKey.isBlank()) {
                 telemetryKey = "tcpOpaquePayload";

@@ -121,14 +121,14 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
     public TransportTcpDataType getPayloadDataType() {
         DeviceProfile profile = getDeviceProfile();
         if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
-            return TransportTcpDataType.JSON;
+            return TransportTcpDataType.UTF8;
         }
         var tc = profile.getProfileData().getTransportConfiguration();
         if (tc instanceof TcpDeviceProfileTransportConfiguration) {
             TcpDeviceProfileTransportConfiguration tcpCfg = (TcpDeviceProfileTransportConfiguration) tc;
             return tcpCfg.getTransportTcpDataTypeConfiguration().getTransportTcpDataType();
         }
-        return TransportTcpDataType.JSON;
+        return TransportTcpDataType.UTF8;
     }
 
     /**
@@ -181,14 +181,13 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
     }
 
     public void sendAuthFrame(String token) {
-        int fixed = getTcpFixedFrameLengthForFraming();
-        ByteBuf buf = TcpPayloadUtil.encodeAuthFrame(getTcpTransportFramingMode(), fixed, token);
+        ByteBuf buf = TcpPayloadUtil.encodeAuthFrame(token);
         writeByteBuf(buf);
     }
 
     public void sendJsonPayload(JsonObject json) {
-        int fixed = getTcpFixedFrameLengthForFraming();
-        ByteBuf buf = TcpPayloadUtil.encodeBusinessFrame(getPayloadDataType(), getTcpTransportFramingMode(), fixed, json.toString());
+        byte[] body = TcpPayloadUtil.bodyBytesForDataType(getPayloadDataType(), json.toString());
+        ByteBuf buf = Unpooled.wrappedBuffer(body);
         writeByteBuf(buf);
     }
 
@@ -247,6 +246,8 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
         msg.addProperty("reason", sessionCloseNotification.getReason().name());
         msg.addProperty("message", sessionCloseNotification.getMessage());
         sendJsonPayload(msg);
+        // Core 要求关闭会话时，主动断开 TCP 通道，确保 CLIENT 能按现有策略重连。
+        close();
     }
 
     @Override
@@ -298,7 +299,7 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
             JsonElement el = JsonParser.parseString(jsonLine);
             if (el.isJsonObject()) {
                 tcpTransportContext.getTcpMessageProcessor().processUplinkJson(this, el.getAsJsonObject());
-            } else if (getPayloadDataType() == TransportTcpDataType.JSON
+            } else if (getPayloadDataType() == TransportTcpDataType.UTF8
                     || getPayloadDataType() == TransportTcpDataType.ASCII) {
                 tcpTransportContext.getTcpMessageProcessor().processUplinkWithoutMethod(this, el);
             } else {
@@ -306,7 +307,8 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
             }
         } catch (Exception e) {
             TransportTcpDataType payloadType = getPayloadDataType();
-            if (payloadType == TransportTcpDataType.JSON || payloadType == TransportTcpDataType.ASCII) {
+            if (payloadType == TransportTcpDataType.UTF8
+                    || payloadType == TransportTcpDataType.ASCII) {
                 try {
                     JsonPrimitive fallback = new JsonPrimitive(jsonLine == null ? "" : jsonLine);
                     tcpTransportContext.getTcpMessageProcessor().processUplinkWithoutMethod(this, fallback);

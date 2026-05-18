@@ -172,7 +172,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       tcpOutboundReconnectMaxAttempts: [null, [Validators.min(0)]],
       tcpReadIdleTimeoutSec: [null, [Validators.min(0)]],
       tcpOpaqueRuleEngineKey: ['tcpOpaquePayload'],
-      dataType: [TransportTcpDataType.JSON, Validators.required],
+      dataType: [TransportTcpDataType.UTF8, Validators.required],
       hexCommandProfiles: this.fb.array([]),
       hexProtocolFields: this.fb.array([]),
       hexLtvEnabled: [false],
@@ -219,7 +219,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       takeUntil(this.destroy$)
     ).subscribe((dt: TransportTcpDataType) => {
       this.applyTcpOpaqueKeyValidators(dt);
-      if (dt !== TransportTcpDataType.HEX) {
+      if (dt !== TransportTcpDataType.RAW_BYTES) {
         this.patchProtocolTemplatesFromModel([]);
         this.patchProtocolCommandsFromModel([]);
         this.tcpDeviceProfileTransportConfigurationFormGroup.patchValue(
@@ -249,7 +249,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
 
   /** 在负载类型为 HEX 时，是否按「协议模板包」保存（序列化为 PROTOCOL_TEMPLATE） */
   private usesProtocolTemplatePayload(v: Record<string, unknown>): boolean {
-    if (v['dataType'] !== TransportTcpDataType.HEX) {
+    if (v['dataType'] !== TransportTcpDataType.RAW_BYTES) {
       return false;
     }
     if (this.hasManualHexConfiguration()) {
@@ -764,7 +764,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
 
   private applyTcpOpaqueKeyValidators(dt: TransportTcpDataType) {
     const keyCtrl = this.tcpDeviceProfileTransportConfigurationFormGroup.get('tcpOpaqueRuleEngineKey');
-    if (dt === TransportTcpDataType.JSON || dt === TransportTcpDataType.ASCII) {
+    if (dt === TransportTcpDataType.UTF8 || dt === TransportTcpDataType.ASCII) {
       const normalized = String(keyCtrl.value ?? '').trim();
       keyCtrl.patchValue(normalized || 'tcpOpaquePayload', { emitEvent: false });
       keyCtrl.setValidators([Validators.required]);
@@ -781,7 +781,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
 
   hexRequiresProtocolTemplateBundleHint(): boolean {
     const v = this.tcpDeviceProfileTransportConfigurationFormGroup?.getRawValue();
-    if (!v || v.dataType !== TransportTcpDataType.HEX) {
+    if (!v || v.dataType !== TransportTcpDataType.RAW_BYTES) {
       return false;
     }
     return !this.usesProtocolTemplatePayload(v as Record<string, unknown>) && !this.hasManualHexConfiguration();
@@ -811,9 +811,9 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     if (isDefinedAndNotNull(value)) {
       const rawType = normalizeTransportTcpDataType(
         value.transportTcpDataTypeConfiguration?.transportTcpDataType
-      ) || TransportTcpDataType.JSON;
+      ) || TransportTcpDataType.UTF8;
       const formDataType = rawType === TransportTcpDataType.PROTOCOL_TEMPLATE
-        ? TransportTcpDataType.HEX
+        ? TransportTcpDataType.RAW_BYTES
         : rawType;
       this.tcpDeviceProfileTransportConfigurationFormGroup.patchValue({
         tcpTransportConnectMode: value.tcpTransportConnectMode,
@@ -846,7 +846,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           hexChecksumToExclusive: 0,
           hexChecksumByteIndex: -2
         }, {emitEvent: false});
-      } else if (rawType === TransportTcpDataType.HEX && hcfg) {
+      } else if (rawType === TransportTcpDataType.RAW_BYTES && hcfg) {
         this.patchHexCommandProfilesFromModel(hcfg.hexCommandProfiles);
         if (hcfg.hexProtocolFields?.length) {
           this.patchHexFieldsFromModel(hcfg.hexProtocolFields);
@@ -900,7 +900,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     const v = this.tcpDeviceProfileTransportConfigurationFormGroup.getRawValue();
     const transportTcpDataTypeConfiguration: TcpDeviceProfileTransportConfiguration['transportTcpDataTypeConfiguration'] = {};
 
-    if (v.dataType === TransportTcpDataType.HEX) {
+    if (v.dataType === TransportTcpDataType.RAW_BYTES) {
       const usePt = this.usesProtocolTemplatePayload(v);
       if (usePt) {
         transportTcpDataTypeConfiguration.transportTcpDataType = TransportTcpDataType.PROTOCOL_TEMPLATE;
@@ -1026,7 +1026,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           transportTcpDataTypeConfiguration.protocolTemplateBundleId = bundleId;
         }
       } else {
-        transportTcpDataTypeConfiguration.transportTcpDataType = TransportTcpDataType.HEX;
+        transportTcpDataTypeConfiguration.transportTcpDataType = TransportTcpDataType.RAW_BYTES;
         const cmdRows = (this.hexCommandProfilesArray?.getRawValue() ?? []) as Array<Record<string, unknown>>;
         const profiles: TcpHexCommandProfile[] = [];
         for (const row of cmdRows) {
@@ -1102,7 +1102,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     } else {
       transportTcpDataTypeConfiguration.transportTcpDataType = v.dataType;
     }
-    const textLikePayload = v.dataType === TransportTcpDataType.JSON || v.dataType === TransportTcpDataType.ASCII;
+    const textLikePayload = v.dataType === TransportTcpDataType.UTF8 || v.dataType === TransportTcpDataType.ASCII;
     const configuration: TcpDeviceProfileTransportConfiguration = {
       tcpTransportConnectMode: v.tcpTransportConnectMode,
       tcpTransportFramingMode: v.tcpTransportFramingMode,
@@ -1217,10 +1217,10 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     const v = this.tcpDeviceProfileTransportConfigurationFormGroup.getRawValue();
     const dataType = v.dataType;
     const usePt = this.usesProtocolTemplatePayload(v as Record<string, unknown>);
-    if (dataType === TransportTcpDataType.HEX && !usePt && !this.hasManualHexConfiguration()) {
+    if (dataType === TransportTcpDataType.RAW_BYTES && !usePt && !this.hasManualHexConfiguration()) {
       return {tcpHexRequiresProtocolTemplateBundle: true};
     }
-    if (dataType === TransportTcpDataType.HEX && !usePt) {
+    if (dataType === TransportTcpDataType.RAW_BYTES && !usePt) {
       const checkBytesAsHex = (g: UntypedFormGroup) => {
         const key = g.get('key')?.value;
         if (!key || !String(key).trim()) {
@@ -1260,7 +1260,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         }
       }
     }
-    if (dataType === TransportTcpDataType.HEX && usePt) {
+    if (dataType === TransportTcpDataType.RAW_BYTES && usePt) {
       const checkBytesAsHex = (g: UntypedFormGroup) => {
         const key = g.get('key')?.value;
         if (!key || !String(key).trim()) {

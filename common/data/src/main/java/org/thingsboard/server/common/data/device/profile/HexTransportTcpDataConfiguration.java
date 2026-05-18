@@ -53,7 +53,7 @@ public class HexTransportTcpDataConfiguration implements TransportTcpDataTypeCon
 
     @Override
     public TransportTcpDataType getTransportTcpDataType() {
-        return TransportTcpDataType.HEX;
+        return TransportTcpDataType.RAW_BYTES;
     }
 
     public void validateHexProtocolFields() {

@@ -511,10 +511,10 @@ public final class TcpHexProtocolParser {
         }
         if (payload.isJsonObject()) {
             JsonObject o = payload.getAsJsonObject();
-            if (!o.has(TcpPayloadUtil.TCP_HEX_FRAME_JSON_KEY)) {
+            if (!o.has(TcpPayloadUtil.TCP_HEX_PAYLOAD_JSON_KEY)) {
                 return null;
             }
-            JsonElement hexEl = o.get(TcpPayloadUtil.TCP_HEX_FRAME_JSON_KEY);
+            JsonElement hexEl = o.get(TcpPayloadUtil.TCP_HEX_PAYLOAD_JSON_KEY);
             if (hexEl == null || !hexEl.isJsonPrimitive()) {
                 return null;
             }

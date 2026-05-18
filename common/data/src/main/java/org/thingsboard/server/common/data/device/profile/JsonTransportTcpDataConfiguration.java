@@ -27,6 +27,6 @@ public class JsonTransportTcpDataConfiguration implements TransportTcpDataTypeCo
 
     @Override
     public TransportTcpDataType getTransportTcpDataType() {
-        return TransportTcpDataType.JSON;
+        return TransportTcpDataType.UTF8;
     }
 }

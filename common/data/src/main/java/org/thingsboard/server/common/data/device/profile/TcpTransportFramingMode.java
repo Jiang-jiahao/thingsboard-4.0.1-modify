@@ -19,6 +19,10 @@ package org.thingsboard.server.common.data.device.profile;
  */
 public enum TcpTransportFramingMode {
     /**
+     * 不做分帧处理：socket 读取到的字节块直接交给负载解码。
+     */
+    NONE,
+    /**
      * 换行符（\n 或 \r\n）分帧，适合文本协议。
      */
     LINE,
