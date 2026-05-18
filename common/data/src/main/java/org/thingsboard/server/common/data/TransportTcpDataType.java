@@ -19,9 +19,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum TransportTcpDataType {
+    /**
+     * 一帧负载为 UTF-8 文本行（界面称「UTF-8」；历史枚举名 {@code JSON}）；按行解析为 JSON 值后走业务处理。
+     */
     JSON,
     /**
-     * 一帧负载为<strong>原始字节</strong>；传输层将其直接格式化为十六进制并包成 JSON（键名 {@code hex}），不再把帧当作 ASCII 十六进制文本去还原内层 UTF-8。
+     * 一帧负载为<strong>原始字节</strong>（界面称「原始字节」；历史枚举名 {@code HEX}）；
+     * 传输层将其直接格式化为十六进制并包成 JSON（键名 {@code hex}），不再把帧当作 ASCII 十六进制文本再 parseHex。
      */
     HEX,
     /**

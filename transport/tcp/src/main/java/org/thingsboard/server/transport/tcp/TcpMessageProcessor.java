@@ -20,7 +20,6 @@ import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.thingsboard.server.common.data.device.profile.TcpJsonWithoutMethodMode;
 import org.thingsboard.server.common.adaptor.JsonConverter;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.TransportTcpDataType;
@@ -32,10 +31,8 @@ import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.queue.util.TbTcpTransportComponent;
 import org.thingsboard.server.transport.tcp.session.TcpDeviceSession;
 import org.thingsboard.server.transport.tcp.util.TcpHexProtocolParser;
-import org.thingsboard.server.transport.tcp.util.TcpPayloadUtil;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 @TbTcpTransportComponent
@@ -84,60 +81,47 @@ public class TcpMessageProcessor {
         }
     }
     /**
-     * 无 {@code method} 的上行：按设备配置文件 {@link TcpJsonWithoutMethodMode} 扁平写遥测或整包写入单键供规则引擎解析。
+     * 无 {@code method} 的上行：UTF-8（{@link TransportTcpDataType#JSON}）/ ASCII 整帧写入单一可配置遥测键；
+     * 原始字节（{@link TransportTcpDataType#HEX}）/ 协议模板仅走 {@link TcpHexProtocolParser}，解析失败则丢弃。
      */
     public void processUplinkWithoutMethod(TcpDeviceSession session, JsonElement payload) {
         if (!session.isCoreSessionReady()) {
             log.warn("[{}] Session not ready", session.getSessionId());
             return;
         }
-        if (session.getPayloadDataType() == TransportTcpDataType.HEX
-                || session.getPayloadDataType() == TransportTcpDataType.PROTOCOL_TEMPLATE) {
+        TransportTcpDataType payloadType = session.getPayloadDataType();
+        if (payloadType == TransportTcpDataType.HEX || payloadType == TransportTcpDataType.PROTOCOL_TEMPLATE) {
             var hexCfg = session.getHexTcpDataConfiguration();
-            var parsedOpt = hexCfg != null
-                    ? TcpHexProtocolParser.tryParseTelemetryFromHexPayload(
-                    payload, hexCfg.getHexCommandProfiles(), hexCfg.getHexProtocolFields(),
-                    hexCfg.getHexLtvRepeating(), hexCfg.getChecksum(),
-                    session.getSessionId())
-                    : Optional.<JsonObject>empty();
-            if (parsedOpt.isPresent()) {
-                transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(parsedOpt.get()),
-                        TransportServiceCallback.EMPTY);
+            if (hexCfg == null) {
+                log.warn("[{}] HEX/PROTOCOL_TEMPLATE uplink but profile has no HEX/protocol-template configuration",
+                        session.getSessionId());
                 return;
             }
+            var parsedOpt = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(
+                    payload, hexCfg.getHexCommandProfiles(), hexCfg.getHexProtocolFields(),
+                    hexCfg.getHexLtvRepeating(), hexCfg.getChecksum(),
+                    session.getSessionId());
+            if (parsedOpt.isEmpty()) {
+                log.warn("[{}] HEX/PROTOCOL_TEMPLATE frame did not match parser rules (no telemetry emitted)",
+                        session.getSessionId());
+                return;
+            }
+            transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(parsedOpt.get()),
+                    TransportServiceCallback.EMPTY);
+            return;
         }
-        if (session.getTcpJsonWithoutMethodMode() == TcpJsonWithoutMethodMode.OPAQUE_FOR_RULE_ENGINE) {
+        if (payloadType == TransportTcpDataType.JSON || payloadType == TransportTcpDataType.ASCII) {
+            String telemetryKey = session.getTcpOpaqueRuleEngineKey();
+            if (telemetryKey == null || telemetryKey.isBlank()) {
+                telemetryKey = "tcpOpaquePayload";
+            }
             JsonObject wrap = new JsonObject();
-            wrap.addProperty(session.getTcpOpaqueRuleEngineKey(), opaquePayloadForRuleEngine(payload));
+            wrap.add(telemetryKey, payload);
             transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(wrap),
                     TransportServiceCallback.EMPTY);
             return;
         }
-        if (!payload.isJsonObject()) {
-            log.warn("[{}] TELEMETRY_FLAT requires JSON object root, got {}", session.getSessionId(), payload.getClass().getSimpleName());
-            return;
-        }
-        transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(payload),
-                TransportServiceCallback.EMPTY);
-    }
-    /**
-     * OPAQUE 模式下单键遥测的字符串内容：避免整段 JSON 再被 toString 套一层引号；
-     * TCP HEX 上行若为 {@code {"hex":"..."}} 则只保留十六进制串。
-     */
-    private static String opaquePayloadForRuleEngine(JsonElement payload) {
-        if (payload.isJsonPrimitive() && payload.getAsJsonPrimitive().isString()) {
-            return payload.getAsString();
-        }
-        if (payload.isJsonObject()) {
-            JsonObject o = payload.getAsJsonObject();
-            if (o.size() == 1 && o.has(TcpPayloadUtil.TCP_HEX_FRAME_JSON_KEY)) {
-                JsonElement hexEl = o.get(TcpPayloadUtil.TCP_HEX_FRAME_JSON_KEY);
-                if (hexEl != null && hexEl.isJsonPrimitive() && hexEl.getAsJsonPrimitive().isString()) {
-                    return hexEl.getAsString();
-                }
-            }
-        }
-        return payload.toString();
+        log.warn("[{}] Uplink without method not supported for payload type {}", session.getSessionId(), payloadType);
     }
 
     private void processTelemetry(TcpDeviceSession session, JsonObject root) {

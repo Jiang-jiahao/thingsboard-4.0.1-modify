@@ -99,12 +99,6 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
   hexLtvDefaultPathPanelExpanded = false;
 
   tcpTransportFramingModes = Object.values(TcpTransportFramingMode);
-  /** 显式列出，避免部分环境下 Object.values(enum) 与下拉展示不一致 */
-  transportTcpDataTypes: TransportTcpDataType[] = [
-    TransportTcpDataType.JSON,
-    TransportTcpDataType.HEX,
-    TransportTcpDataType.ASCII
-  ];
   tcpHexValueTypes = TCP_HEX_FRAME_FIELD_VALUE_TYPES;
   /** LTV Tag→遥测映射下拉（静态 labelKey，供 translate 使用） */
   tcpHexLtvTagValueOptions = TCP_HEX_LTV_TAG_VALUE_OPTIONS;
@@ -127,6 +121,9 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
   protocolTemplateBundles: ProtocolTemplateBundle[] = [];
 
   private propagateChange = (v: any) => {
+  };
+  /** 通知父级 FormControl 重新执行本组件提供的 Validator（仅靠 valueChanges 不足以在「仅校验器变化」时刷新） */
+  private onValidatorChange = () => {
   };
   constructor(
     private fb: UntypedFormBuilder,
@@ -174,7 +171,6 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       tcpOutboundReconnectIntervalSec: [null, [Validators.min(0)]],
       tcpOutboundReconnectMaxAttempts: [null, [Validators.min(0)]],
       tcpReadIdleTimeoutSec: [null, [Validators.min(0)]],
-      tcpJsonWithoutMethodMode: [TcpJsonWithoutMethodMode.TELEMETRY_FLAT, Validators.required],
       tcpOpaqueRuleEngineKey: ['tcpOpaquePayload'],
       dataType: [TransportTcpDataType.JSON, Validators.required],
       hexCommandProfiles: this.fb.array([]),
@@ -209,7 +205,11 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         fixedCtrl.patchValue(null, {emitEvent: false});
       }
       fixedCtrl.updateValueAndValidity({emitEvent: false});
+      this.notifyValidatorChange();
     });
+    this.tcpDeviceProfileTransportConfigurationFormGroup.statusChanges.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.notifyValidatorChange());
     this.tcpDeviceProfileTransportConfigurationFormGroup.valueChanges.pipe(
       takeUntil(this.destroy$)
     ).subscribe(() => {
@@ -218,6 +218,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     this.tcpDeviceProfileTransportConfigurationFormGroup.get('dataType').valueChanges.pipe(
       takeUntil(this.destroy$)
     ).subscribe((dt: TransportTcpDataType) => {
+      this.applyTcpOpaqueKeyValidators(dt);
       if (dt !== TransportTcpDataType.HEX) {
         this.patchProtocolTemplatesFromModel([]);
         this.patchProtocolCommandsFromModel([]);
@@ -243,6 +244,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     ).subscribe(() => {
       this.scheduleSyncHexLtvPanelExpanded();
     });
+    this.applyTcpOpaqueKeyValidators(this.tcpDeviceProfileTransportConfigurationFormGroup.get('dataType').value);
   }
 
   /** 在负载类型为 HEX 时，是否按「协议模板包」保存（序列化为 PROTOCOL_TEMPLATE） */
@@ -604,7 +606,9 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       arr.removeAt(0, {emitEvent: false});
     }
     const t = templates?.length ? templates[0] : undefined;
-    arr.push(this.createProtocolTemplateGroup(t), {emitEvent: false});
+    if (t) {
+      arr.push(this.createProtocolTemplateGroup(t), {emitEvent: false});
+    }
   }
 
   private patchProtocolCommandsFromModel(commands: ProtocolTemplateCommandDefinition[]) {
@@ -758,12 +762,40 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     }
   }
 
+  private applyTcpOpaqueKeyValidators(dt: TransportTcpDataType) {
+    const keyCtrl = this.tcpDeviceProfileTransportConfigurationFormGroup.get('tcpOpaqueRuleEngineKey');
+    if (dt === TransportTcpDataType.JSON || dt === TransportTcpDataType.ASCII) {
+      const normalized = String(keyCtrl.value ?? '').trim();
+      keyCtrl.patchValue(normalized || 'tcpOpaquePayload', { emitEvent: false });
+      keyCtrl.setValidators([Validators.required]);
+    } else {
+      keyCtrl.clearValidators();
+    }
+    keyCtrl.updateValueAndValidity({ emitEvent: false });
+    this.notifyValidatorChange();
+  }
+
+  private notifyValidatorChange(): void {
+    this.onValidatorChange();
+  }
+
+  hexRequiresProtocolTemplateBundleHint(): boolean {
+    const v = this.tcpDeviceProfileTransportConfigurationFormGroup?.getRawValue();
+    if (!v || v.dataType !== TransportTcpDataType.HEX) {
+      return false;
+    }
+    return !this.usesProtocolTemplatePayload(v as Record<string, unknown>) && !this.hasManualHexConfiguration();
+  }
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
   registerOnChange(fn: any): void {
     this.propagateChange = fn;
+  }
+  registerOnValidatorChange(fn: () => void): void {
+    this.onValidatorChange = fn;
   }
   registerOnTouched(fn: any): void {
   }
@@ -791,7 +823,6 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         tcpOutboundReconnectIntervalSec: value.tcpOutboundReconnectIntervalSec,
         tcpOutboundReconnectMaxAttempts: value.tcpOutboundReconnectMaxAttempts,
         tcpReadIdleTimeoutSec: value.tcpReadIdleTimeoutSec,
-        tcpJsonWithoutMethodMode: value.tcpJsonWithoutMethodMode,
         tcpOpaqueRuleEngineKey: value.tcpOpaqueRuleEngineKey || 'tcpOpaquePayload',
         dataType: formDataType
       }, {emitEvent: false});
@@ -860,7 +891,9 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         fixedCtrl.clearValidators();
       }
       fixedCtrl.updateValueAndValidity({emitEvent: false});
+      this.applyTcpOpaqueKeyValidators(formDataType);
       this.scheduleSyncHexLtvPanelExpanded();
+      this.notifyValidatorChange();
     }
   }
   private updateModel() {
@@ -1069,12 +1102,15 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     } else {
       transportTcpDataTypeConfiguration.transportTcpDataType = v.dataType;
     }
+    const textLikePayload = v.dataType === TransportTcpDataType.JSON || v.dataType === TransportTcpDataType.ASCII;
     const configuration: TcpDeviceProfileTransportConfiguration = {
       tcpTransportConnectMode: v.tcpTransportConnectMode,
       tcpTransportFramingMode: v.tcpTransportFramingMode,
       tcpWireAuthenticationMode: v.tcpWireAuthenticationMode,
-      tcpJsonWithoutMethodMode: v.tcpJsonWithoutMethodMode,
-      tcpOpaqueRuleEngineKey: v.tcpOpaqueRuleEngineKey,
+      tcpJsonWithoutMethodMode: TcpJsonWithoutMethodMode.TELEMETRY_FLAT,
+      tcpOpaqueRuleEngineKey: textLikePayload
+        ? (String(v.tcpOpaqueRuleEngineKey ?? '').trim() || 'tcpOpaquePayload')
+        : undefined,
       transportTcpDataTypeConfiguration,
       type: DeviceTransportType.TCP
     };
@@ -1181,6 +1217,9 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     const v = this.tcpDeviceProfileTransportConfigurationFormGroup.getRawValue();
     const dataType = v.dataType;
     const usePt = this.usesProtocolTemplatePayload(v as Record<string, unknown>);
+    if (dataType === TransportTcpDataType.HEX && !usePt && !this.hasManualHexConfiguration()) {
+      return {tcpHexRequiresProtocolTemplateBundle: true};
+    }
     if (dataType === TransportTcpDataType.HEX && !usePt) {
       const checkBytesAsHex = (g: UntypedFormGroup) => {
         const key = g.get('key')?.value;

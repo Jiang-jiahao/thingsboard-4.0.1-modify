@@ -15,11 +15,8 @@
  */
 package org.thingsboard.server.common.data.device.profile;
 /**
- * TCP 上行 JSON 无 {@code method} 字段时的处理方式。
- * <ul>
- *   <li>{@link #TELEMETRY_FLAT}：根对象各键作为遥测时序写入（历史行为）。</li>
- *   <li>{@link #OPAQUE_FOR_RULE_ENGINE}：整帧 JSON 序列化后写入单个遥测键，由规则链脚本解析并分流到遥测/属性等。</li>
- * </ul>
+ * TCP 设备配置中的历史枚举：UTF-8/ASCII 无 {@code method} 上行已统一为「单一遥测键」（见 {@link TcpDeviceProfileTransportConfiguration#getTcpOpaqueRuleEngineKey()}）。
+ * 本枚举仍用于 JSON 反序列化兼容。
  */
 public enum TcpJsonWithoutMethodMode {
     TELEMETRY_FLAT,

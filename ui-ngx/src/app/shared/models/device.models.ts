@@ -332,7 +332,9 @@ export enum TcpJsonWithoutMethodMode {
   OPAQUE_FOR_RULE_ENGINE = 'OPAQUE_FOR_RULE_ENGINE'
 }
 export enum TransportTcpDataType {
+  /** 界面展示为 UTF-8；链路上为 UTF-8 文本行并按 JSON 解析 */
   JSON = 'JSON',
+  /** 界面展示为「原始字节」；链路上为原始字节帧，再包成 {\"hex\":\"...\"} 供解析 */
   HEX = 'HEX',
   /**
    * 与 HEX 链路上一致；配置为「协议模板」（帧模板 + 上行/下行命令），后端展开为 HEX 解析。

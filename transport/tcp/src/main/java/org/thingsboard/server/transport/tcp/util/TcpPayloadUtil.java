@@ -25,7 +25,7 @@ import java.util.HexFormat;
 public final class TcpPayloadUtil {
 
     /**
-     * {@link TransportTcpDataType#HEX}：上行把<strong>整帧原始字节</strong>格式化为小写十六进制写入该键（不再把帧当作 ASCII 十六进制文本再 parseHex）。
+     * {@link TransportTcpDataType#HEX}（界面「原始字节」）：上行把<strong>整帧原始字节</strong>格式化为小写十六进制写入该键（不再把帧当作 ASCII 十六进制文本再 parseHex）。
      * 下行：若 JSON 含此键且值为合法十六进制，则发往设备的负载为 decode 后的原始字节；否则为整段 JSON 的 UTF-8 字节。
      */
     public static final String TCP_HEX_FRAME_JSON_KEY = "hex";
@@ -79,7 +79,10 @@ public final class TcpPayloadUtil {
 
 
     /**
-     * 一帧原始字节 → JSON 文本（按 TransportTcpDataType 解析，再供 Gson 解析）。
+     * 一帧原始字节 → JSON 文本：
+     * {@link TransportTcpDataType#JSON} 按 UTF-8 解码，
+     * {@link TransportTcpDataType#ASCII} 按 US-ASCII 解码，
+     * {@link TransportTcpDataType#HEX} / {@link TransportTcpDataType#PROTOCOL_TEMPLATE} 保留为原始字节并包成 {@code hex} 键。
      */
     public static String decodePayloadBytes(TransportTcpDataType type, byte[] frameBody) {
         if (frameBody == null || frameBody.length == 0) {
@@ -93,6 +96,7 @@ public final class TcpPayloadUtil {
             case PROTOCOL_TEMPLATE:
                 return jsonFromRawFrameAsHex(frameBody);
             case ASCII:
+                return new String(frameBody, StandardCharsets.US_ASCII).trim();
             case JSON:
             default:
                 return new String(frameBody, StandardCharsets.UTF_8).trim();
@@ -108,6 +112,7 @@ public final class TcpPayloadUtil {
             case PROTOCOL_TEMPLATE:
                 return rawBytesFromJsonHexDownlink(jsonUtf8);
             case ASCII:
+                return jsonUtf8.getBytes(StandardCharsets.US_ASCII);
             case JSON:
             default:
                 return jsonUtf8.getBytes(StandardCharsets.UTF_8);

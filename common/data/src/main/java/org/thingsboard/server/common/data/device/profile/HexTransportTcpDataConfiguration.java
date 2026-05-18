@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * hex的tcp传输数据
+ * 原始字节（历史枚举名 {@link org.thingsboard.server.common.data.TransportTcpDataType#HEX}）的 TCP 传输数据配置。
  *
  * @author jiahaozz
  * <p>

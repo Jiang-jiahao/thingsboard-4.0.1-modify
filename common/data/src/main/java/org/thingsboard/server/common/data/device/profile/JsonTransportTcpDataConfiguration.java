@@ -19,9 +19,7 @@ import lombok.Data;
 import org.thingsboard.server.common.data.TransportTcpDataType;
 
 /**
- * json的tcp传输数据
- *
- * @author jiahaozz
+ * UTF-8 文本行负载（历史枚举名 {@link org.thingsboard.server.common.data.TransportTcpDataType#JSON}）。
  */
 @Data
 public class JsonTransportTcpDataConfiguration implements TransportTcpDataTypeConfiguration {

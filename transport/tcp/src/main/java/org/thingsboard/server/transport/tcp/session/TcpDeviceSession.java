@@ -17,6 +17,7 @@ package org.thingsboard.server.transport.tcp.session;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import io.netty.channel.Channel;
 import lombok.Getter;
 import lombok.Setter;
@@ -297,12 +298,23 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
             JsonElement el = JsonParser.parseString(jsonLine);
             if (el.isJsonObject()) {
                 tcpTransportContext.getTcpMessageProcessor().processUplinkJson(this, el.getAsJsonObject());
-            } else if (getTcpJsonWithoutMethodMode() == TcpJsonWithoutMethodMode.OPAQUE_FOR_RULE_ENGINE) {
+            } else if (getPayloadDataType() == TransportTcpDataType.JSON
+                    || getPayloadDataType() == TransportTcpDataType.ASCII) {
                 tcpTransportContext.getTcpMessageProcessor().processUplinkWithoutMethod(this, el);
             } else {
-                log.warn("[{}] Expected JSON object line for TELEMETRY_FLAT mode", getSessionId());
+                log.warn("[{}] Expected JSON object line for payload type {}", getSessionId(), getPayloadDataType());
             }
         } catch (Exception e) {
+            TransportTcpDataType payloadType = getPayloadDataType();
+            if (payloadType == TransportTcpDataType.JSON || payloadType == TransportTcpDataType.ASCII) {
+                try {
+                    JsonPrimitive fallback = new JsonPrimitive(jsonLine == null ? "" : jsonLine);
+                    tcpTransportContext.getTcpMessageProcessor().processUplinkWithoutMethod(this, fallback);
+                    return;
+                } catch (Exception inner) {
+                    log.warn("[{}] Failed fallback non-JSON text processing: {}", getSessionId(), jsonLine, inner);
+                }
+            }
             log.warn("[{}] Failed to process TCP JSON line: {}", getSessionId(), jsonLine, e);
             transportService.errorEvent(getTenantId(), getDeviceId(), "tcpUplink", e);
         }

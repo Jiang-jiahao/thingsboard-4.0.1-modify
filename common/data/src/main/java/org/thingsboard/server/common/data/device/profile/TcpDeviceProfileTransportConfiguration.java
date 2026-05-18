@@ -9,7 +9,7 @@ import java.util.Objects;
  * tcp服务端传输配置
  *
  * @author jiahaozz
- * TCP 传输配置：接入模式（平台作服务端或客户端）、分帧解码、负载编码（JSON/HEX/ASCII）、链路上鉴权等。
+ * TCP 传输配置：接入模式（平台作服务端或客户端）、分帧解码、负载编码（UTF-8 文本 / 原始字节 / ASCII）、链路上鉴权等。
  * <p>
  * 设备在传输配置中指定 {@link org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration#getServerBindPort() serverBindPort}
  * 时，该端口上的入站连接从<strong>首帧</strong>起使用本配置中的分帧与负载类型（无需依赖全局 {@code transport.tcp.server.auth_framing_mode}）。
@@ -51,11 +51,11 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
     private Integer tcpReadIdleTimeoutSec;
 
     /**
-     * 无 {@code method} 的 JSON 上行如何入库；{@link TcpJsonWithoutMethodMode#OPAQUE_FOR_RULE_ENGINE} 时写入单键遥测供规则引擎脚本解析。
+     * 历史字段；当前 TCP 在 UTF-8/ASCII 下无 {@code method} 时统一写入 {@link #tcpOpaqueRuleEngineKey} 单键。反序列化兼容保留。
      */
     private TcpJsonWithoutMethodMode tcpJsonWithoutMethodMode;
     /**
-     * {@link TcpJsonWithoutMethodMode#OPAQUE_FOR_RULE_ENGINE} 时使用的遥测键名，默认 {@code tcpOpaquePayload}。
+     * 无 {@code method} 的 UTF-8/ASCII 上行写入的<strong>单一遥测键名</strong>（默认 {@code tcpOpaquePayload}，与历史字段名一致）。
      */
     private String tcpOpaqueRuleEngineKey;
 

@@ -69,26 +69,32 @@
       <mat-form-field class="flex-1">
         <mat-label translate>device-profile.tcp.payload-type</mat-label>
         <mat-select formControlName="dataType" required>
-          <mat-option *ngFor="let t of transportTcpDataTypes" [value]="t">{{ t }}</mat-option>
+          <mat-option [value]="TransportTcpDataType.JSON">{{ 'device-profile.tcp.payload-type-utf8' | translate }}</mat-option>
+          <mat-option [value]="TransportTcpDataType.HEX">{{ 'device-profile.tcp.payload-type-raw-bytes' | translate }}</mat-option>
+          <mat-option [value]="TransportTcpDataType.ASCII">{{ 'device-profile.tcp.payload-type-ascii' | translate }}</mat-option>
         </mat-select>
         <mat-hint translate>device-profile.tcp.payload-type-location-hint</mat-hint>
       </mat-form-field>
+    </div>
+    <div class="flex flex-row gap-2 xs:flex-col" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('dataType').value === TransportTcpDataType.JSON
+        || tcpDeviceProfileTransportConfigurationFormGroup.get('dataType').value === TransportTcpDataType.ASCII">
       <mat-form-field class="flex-1">
-        <mat-label translate>device-profile.tcp.json-without-method</mat-label>
-        <mat-select formControlName="tcpJsonWithoutMethodMode" required>
-            <mat-option [value]="'TELEMETRY_FLAT'">{{ 'device-profile.tcp.json-mode-telemetry-flat' | translate }}</mat-option>
-            <mat-option [value]="'OPAQUE_FOR_RULE_ENGINE'">{{ 'device-profile.tcp.json-mode-opaque' | translate }}</mat-option>
-        </mat-select>
+        <mat-label translate>device-profile.tcp.fixed-telemetry-key</mat-label>
+        <input matInput formControlName="tcpOpaqueRuleEngineKey" autocomplete="off">
+        <mat-hint translate>device-profile.tcp.fixed-telemetry-key-hint</mat-hint>
+        <mat-error *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpOpaqueRuleEngineKey').hasError('required')">
+          {{ 'device-profile.tcp.fixed-telemetry-key-required' | translate }}
+        </mat-error>
+        <mat-error *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpOpaqueRuleEngineKey').hasError('pattern')">
+          {{ 'device-profile.tcp.fixed-telemetry-key-pattern' | translate }}
+        </mat-error>
       </mat-form-field>
     </div>
-    <mat-form-field class="mat-block" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpJsonWithoutMethodMode').value === 'OPAQUE_FOR_RULE_ENGINE'">
-      <mat-label translate>device-profile.tcp.opaque-key</mat-label>
-      <input matInput formControlName="tcpOpaqueRuleEngineKey">
-      <mat-hint translate>device-profile.tcp.opaque-key-hint</mat-hint>
-    </mat-form-field>
     <div *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('dataType').value === TransportTcpDataType.HEX"
          class="flex flex-col gap-3 mat-elevation-z1" style="padding: 12px; border-radius: 4px;">
       <div class="tb-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.protocol-template-bundle-hint</div>
+      <div *ngIf="hexRequiresProtocolTemplateBundleHint()" class="tb-hint mat-body-2" style="margin: 0; color: var(--tb-warn-color, #f57c00);"
+           translate>device-profile.tcp.hex-requires-protocol-template-bundle</div>
       <mat-form-field class="mat-block" subscriptSizing="dynamic">
         <mat-label translate>device-profile.tcp.protocol-template-bundle</mat-label>
         <mat-select formControlName="protocolTemplateBundleId"
