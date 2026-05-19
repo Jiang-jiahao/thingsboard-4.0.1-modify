@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.adaptor.JsonConverter;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.TransportTcpDataType;
+import org.thingsboard.server.common.data.device.profile.ProtocolTemplateUplinkDataDestination;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.transport.TransportServiceCallback;
@@ -98,7 +99,7 @@ public class TcpMessageProcessor {
                         session.getSessionId());
                 return;
             }
-            var parsedOpt = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(
+            var parsedOpt = TcpHexProtocolParser.tryParseUplinkPayloadFromHex(
                     payload, hexCfg.getHexCommandProfiles(), hexCfg.getHexProtocolFields(),
                     hexCfg.getHexLtvRepeating(), hexCfg.getChecksum(),
                     session.getSessionId());
@@ -107,8 +108,19 @@ public class TcpMessageProcessor {
                         session.getSessionId());
                 return;
             }
-            transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(parsedOpt.get()),
-                    TransportServiceCallback.EMPTY);
+            var parsed = parsedOpt.get();
+            String matchedProfile = parsed.getPayload().has("hexCmdProfile")
+                    ? parsed.getPayload().get("hexCmdProfile").getAsString()
+                    : "<default-template-fallback>";
+            log.info("[{}] HEX uplink route decision: profile={}, destination={}",
+                    session.getSessionId(), matchedProfile, parsed.getDestination());
+            if (parsed.getDestination() == ProtocolTemplateUplinkDataDestination.ATTRIBUTES) {
+                transportService.process(session.getSessionInfo(), JsonConverter.convertToAttributesProto(parsed.getPayload()),
+                        TransportServiceCallback.EMPTY);
+            } else {
+                transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(parsed.getPayload()),
+                        TransportServiceCallback.EMPTY);
+            }
             return;
         }
         if (payloadType == TransportTcpDataType.UTF8

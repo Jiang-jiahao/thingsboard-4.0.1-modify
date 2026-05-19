@@ -13,17 +13,24 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thingsboard.common.util.JacksonUtil;
+import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.device.profile.ProtocolTemplateBundle;
 import org.thingsboard.server.common.data.device.profile.ProtocolTemplateCommandDefinition;
 import org.thingsboard.server.common.data.device.profile.ProtocolTemplateDefinition;
+import org.thingsboard.server.common.data.device.profile.ProtocolTemplateTransportTcpDataConfiguration;
+import org.thingsboard.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.dao.model.sql.ProtocolTemplateBundleEntity;
 import org.thingsboard.server.dao.sql.protocoltemplate.ProtocolTemplateBundleRepository;
 import org.thingsboard.server.dao.tenant.TenantService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -38,9 +45,14 @@ public class DefaultProtocolTemplateBundleService {
 
     /** 旧版 tenant.additionalInfo 键名（迁移时读取） */
     private static final String LEGACY_PROTOCOL_TEMPLATE_BUNDLES_ADDITIONAL_INFO_KEY = "monitoringProtocolBundles";
+    private static final TypeReference<List<ProtocolTemplateDefinition>> TEMPLATE_LIST_TYPE =
+            new TypeReference<>() {};
+    private static final TypeReference<List<ProtocolTemplateCommandDefinition>> COMMAND_LIST_TYPE =
+            new TypeReference<>() {};
 
     private final ProtocolTemplateBundleRepository bundleRepository;
     private final TenantService tenantService;
+    private final DeviceProfileService deviceProfileService;
 
     @Transactional(readOnly = true)
     public Optional<ProtocolTemplateBundle> findById(TenantId tenantId, UUID id) {
@@ -80,7 +92,9 @@ public class DefaultProtocolTemplateBundleService {
         entity.setBundleData(toBundleDataJson(bundle));
 
         ProtocolTemplateBundleEntity saved = bundleRepository.save(entity);
-        return toDto(saved);
+        ProtocolTemplateBundle savedDto = toDto(saved);
+        refreshReferencedDeviceProfiles(tenantId, savedDto);
+        return savedDto;
     }
 
     @Transactional
@@ -163,6 +177,56 @@ public class DefaultProtocolTemplateBundleService {
             return UUID.randomUUID();
         }
         return UUID.fromString(idStr.trim());
+    }
+
+    private void refreshReferencedDeviceProfiles(TenantId tenantId, ProtocolTemplateBundle savedBundle) {
+        if (savedBundle.getId() == null || savedBundle.getId().isBlank()) {
+            return;
+        }
+        PageLink pageLink = new PageLink(100);
+        PageData<DeviceProfile> pageData;
+        int refreshed = 0;
+        do {
+            pageData = deviceProfileService.findDeviceProfiles(tenantId, pageLink);
+            for (DeviceProfile profile : pageData.getData()) {
+                if (updateProtocolTemplateSnapshot(profile, savedBundle)) {
+                    deviceProfileService.saveDeviceProfile(profile, true, true);
+                    refreshed++;
+                }
+            }
+            pageLink = pageLink.nextPageLink();
+        } while (pageData.hasNext());
+        if (refreshed > 0) {
+            log.info("Refreshed {} device profiles for protocol template bundle {}", refreshed, savedBundle.getId());
+        }
+    }
+
+    private static boolean updateProtocolTemplateSnapshot(DeviceProfile profile, ProtocolTemplateBundle savedBundle) {
+        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
+            return false;
+        }
+        if (!(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration tcpTransportCfg)) {
+            return false;
+        }
+        if (!(tcpTransportCfg.getTransportTcpDataTypeConfiguration() instanceof ProtocolTemplateTransportTcpDataConfiguration ptCfg)) {
+            return false;
+        }
+        if (!Objects.equals(savedBundle.getId(), ptCfg.getProtocolTemplateBundleId())) {
+            return false;
+        }
+
+        List<ProtocolTemplateDefinition> newTemplates = savedBundle.getProtocolTemplates() != null
+                ? JacksonUtil.convertValue(savedBundle.getProtocolTemplates(), TEMPLATE_LIST_TYPE) : new ArrayList<>();
+        List<ProtocolTemplateCommandDefinition> newCommands = savedBundle.getProtocolCommands() != null
+                ? JacksonUtil.convertValue(savedBundle.getProtocolCommands(), COMMAND_LIST_TYPE) : new ArrayList<>();
+        if (Objects.equals(ptCfg.getProtocolTemplates(), newTemplates)
+                && Objects.equals(ptCfg.getProtocolCommands(), newCommands)) {
+            return false;
+        }
+        ptCfg.setProtocolTemplates(newTemplates);
+        ptCfg.setProtocolCommands(newCommands);
+        profile.setProfileData(profile.getProfileData());
+        return true;
     }
 
     private JsonNode toBundleDataJson(ProtocolTemplateBundle bundle) {

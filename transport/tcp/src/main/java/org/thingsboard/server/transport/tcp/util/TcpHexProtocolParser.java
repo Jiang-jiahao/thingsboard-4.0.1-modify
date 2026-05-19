@@ -19,6 +19,7 @@ import org.thingsboard.server.common.data.device.profile.TcpHexLtvRepeatingConfi
 import org.thingsboard.server.common.data.device.profile.TcpHexLtvTagMapping;
 import org.thingsboard.server.common.data.device.profile.TcpHexUnknownTagMode;
 import org.thingsboard.server.common.data.device.profile.TcpHexValueType;
+import org.thingsboard.server.common.data.device.profile.ProtocolTemplateUplinkDataDestination;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -37,18 +38,36 @@ import java.util.UUID;
 @Slf4j
 public final class TcpHexProtocolParser {
 
+    public static final class ParsedUplinkPayload {
+        private final JsonObject payload;
+        private final ProtocolTemplateUplinkDataDestination destination;
+
+        public ParsedUplinkPayload(JsonObject payload, ProtocolTemplateUplinkDataDestination destination) {
+            this.payload = payload;
+            this.destination = destination;
+        }
+
+        public JsonObject getPayload() {
+            return payload;
+        }
+
+        public ProtocolTemplateUplinkDataDestination getDestination() {
+            return destination;
+        }
+    }
+
     private TcpHexProtocolParser() {
     }
 
     /**
      * 先匹配命令规则（含固定字段 + 可选 LTV），再否则使用默认字段 + 可选默认 LTV。
      */
-    public static Optional<JsonObject> tryParseTelemetryFromHexPayload(JsonElement payload,
-                                                                       List<TcpHexCommandProfile> commandProfiles,
-                                                                       List<TcpHexFieldDefinition> defaultFields,
-                                                                       TcpHexLtvRepeatingConfig defaultLtvRepeating,
-                                                                       TcpHexChecksumDefinition checksum,
-                                                                       UUID sessionId) {
+    public static Optional<ParsedUplinkPayload> tryParseUplinkPayloadFromHex(JsonElement payload,
+                                                                              List<TcpHexCommandProfile> commandProfiles,
+                                                                              List<TcpHexFieldDefinition> defaultFields,
+                                                                              TcpHexLtvRepeatingConfig defaultLtvRepeating,
+                                                                              TcpHexChecksumDefinition checksum,
+                                                                              UUID sessionId) {
         byte[] frame = extractFrameBytes(payload);
         if (frame == null) {
             return Optional.empty();
@@ -76,7 +95,10 @@ public final class TcpHexProtocolParser {
                         JsonObject out = buildTelemetryForRule(frame, rule.getFields(), rule.getLtvRepeating(),
                                 tag != null && !tag.isBlank() ? tag : null, sessionId, true);
                         if (out.size() > 0) {
-                            return Optional.of(out);
+                            ProtocolTemplateUplinkDataDestination destination = rule.getUplinkDataDestination() != null
+                                    ? rule.getUplinkDataDestination()
+                                    : ProtocolTemplateUplinkDataDestination.TELEMETRY;
+                            return Optional.of(new ParsedUplinkPayload(out, destination));
                         }
                     } catch (TcpHexFixedFieldMismatchException e) {
                         log.debug("[{}] Hex command rule [{}] rejected (fixed field): {}",
@@ -87,9 +109,19 @@ public final class TcpHexProtocolParser {
         }
         JsonObject out = buildTelemetryForRule(frame, defaultFields, defaultLtvRepeating, null, sessionId, false);
         if (out.size() > 0) {
-            return Optional.of(out);
+            return Optional.of(new ParsedUplinkPayload(out, ProtocolTemplateUplinkDataDestination.TELEMETRY));
         }
         return Optional.empty();
+    }
+
+    public static Optional<JsonObject> tryParseTelemetryFromHexPayload(JsonElement payload,
+                                                                       List<TcpHexCommandProfile> commandProfiles,
+                                                                       List<TcpHexFieldDefinition> defaultFields,
+                                                                       TcpHexLtvRepeatingConfig defaultLtvRepeating,
+                                                                       TcpHexChecksumDefinition checksum,
+                                                                       UUID sessionId) {
+        return tryParseUplinkPayloadFromHex(payload, commandProfiles, defaultFields, defaultLtvRepeating, checksum, sessionId)
+                .map(ParsedUplinkPayload::getPayload);
     }
 
     /**

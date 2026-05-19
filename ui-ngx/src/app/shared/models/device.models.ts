@@ -364,6 +364,11 @@ export enum ProtocolTemplateCommandDirection {
   BOTH = 'BOTH'
 }
 
+export enum ProtocolTemplateUplinkDataDestination {
+  TELEMETRY = 'TELEMETRY',
+  ATTRIBUTES = 'ATTRIBUTES'
+}
+
 /** 与 TCP HEX 解析器一致的可选整帧校验 */
 export interface TcpHexChecksumDefinition {
   type: string;
@@ -392,6 +397,8 @@ export interface ProtocolTemplateCommandDefinition {
   /** 命令读取类型为 BYTES_AS_HEX / BYTES_AS_UTF8 时的定长线期望值（十六进制串，位数 = 帧模板命令匹配宽度×2） */
   commandMatchBytesHex?: string;
   matchValueType?: TcpHexValueType;
+  /** 仅 UPLINK/BOTH 生效：命中后上行结果写入遥测或属性。 */
+  uplinkDataDestination?: ProtocolTemplateUplinkDataDestination;
   /** 可选：第二匹配偏移（整帧 0 起）；类型可为整型或 BYTES_AS_HEX / BYTES_AS_UTF8（与主命令一致） */
   secondaryMatchByteOffset?: number;
   secondaryMatchValueType?: TcpHexValueType;

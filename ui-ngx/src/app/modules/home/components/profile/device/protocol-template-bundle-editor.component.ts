@@ -13,6 +13,7 @@ import {
 import {
   ProtocolTemplateCommandDefinition,
   ProtocolTemplateCommandDirection,
+  ProtocolTemplateUplinkDataDestination,
   ProtocolTemplateDefinition,
   TcpHexChecksumDefinition,
   TcpHexFieldDefinition,
@@ -52,6 +53,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
   layoutMode: 'full' | 'templatesOnly' | 'commandsOnly' = 'full';
 
   readonly TcpHexValueType = TcpHexValueType;
+  readonly ProtocolTemplateUplinkDataDestination = ProtocolTemplateUplinkDataDestination;
 
   tcpHexValueTypes = TCP_HEX_FRAME_FIELD_VALUE_TYPES;
   tcpHexLtvTagValueOptions = TCP_HEX_LTV_TAG_VALUE_OPTIONS;
@@ -235,6 +237,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       secondaryMatchValueType: [secVt],
       secondaryMatchValue: [secWire],
       direction: [c?.direction ?? ProtocolTemplateCommandDirection.UPLINK, Validators.required],
+      uplinkDataDestination: [c?.uplinkDataDestination ?? ProtocolTemplateUplinkDataDestination.TELEMETRY],
       downlinkPayloadLengthAuto: [!!c?.downlinkPayloadLengthAuto],
       downlinkPayloadLengthFieldKey: [c?.downlinkPayloadLengthFieldKey ?? ''],
       overrideFields: overrideArr

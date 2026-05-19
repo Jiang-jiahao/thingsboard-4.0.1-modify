@@ -64,6 +64,10 @@ public class TcpHexCommandProfile implements Serializable {
      * 可选：从指定偏移起按 LTV/TLV 重复解析（适用于参数字段内为 Tag-Length-Value 列表的协议）。
      */
     private TcpHexLtvRepeatingConfig ltvRepeating;
+    /**
+     * 仅协议模板上行命令展开时使用：命中后解析结果写入遥测或属性。
+     */
+    private ProtocolTemplateUplinkDataDestination uplinkDataDestination;
 
     public void validate() {
         if (matchByteOffset < 0) {

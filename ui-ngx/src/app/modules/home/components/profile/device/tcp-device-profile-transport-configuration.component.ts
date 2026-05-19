@@ -52,6 +52,7 @@ import {
   DeviceTransportType,
   ProtocolTemplateCommandDefinition,
   ProtocolTemplateCommandDirection,
+  ProtocolTemplateUplinkDataDestination,
   ProtocolTemplateDefinition,
   TcpHexChecksumDefinition,
   TcpDeviceProfileTransportConfiguration,
@@ -590,6 +591,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       secondaryMatchValueType: [secVt],
       secondaryMatchValue: [secWire],
       direction: [c?.direction ?? ProtocolTemplateCommandDirection.UPLINK, Validators.required],
+      uplinkDataDestination: [c?.uplinkDataDestination ?? ProtocolTemplateUplinkDataDestination.TELEMETRY],
       overrideFields: overrideArr
     });
   }
@@ -983,6 +985,10 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
             matchValueType: matchVt,
             direction: row['direction'] as ProtocolTemplateCommandDirection
           };
+          if (cmd.direction !== ProtocolTemplateCommandDirection.DOWNLINK) {
+            cmd.uplinkDataDestination = (row['uplinkDataDestination'] as ProtocolTemplateUplinkDataDestination)
+              ?? ProtocolTemplateUplinkDataDestination.TELEMETRY;
+          }
           if (isTcpHexVariableByteSlice(matchVt)) {
             const hx = normalizeFixedBytesHexWhitespace(row['commandValue']);
             if (hx) {

@@ -14,6 +14,7 @@ import {
   ProtocolTemplateBundle,
   ProtocolTemplateCommandDefinition,
   ProtocolTemplateCommandDirection,
+  ProtocolTemplateUplinkDataDestination,
   ProtocolTemplateDefinition,
   TcpHexChecksumDefinition,
   TcpHexFieldDefinition,
@@ -283,6 +284,10 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
         matchValueType: matchVt,
         direction: row['direction'] as ProtocolTemplateCommandDirection
       };
+      if (cmd.direction !== ProtocolTemplateCommandDirection.DOWNLINK) {
+        cmd.uplinkDataDestination = (row['uplinkDataDestination'] as ProtocolTemplateUplinkDataDestination)
+          ?? ProtocolTemplateUplinkDataDestination.TELEMETRY;
+      }
       if (isTcpHexVariableByteSlice(matchVt)) {
         const hx = normalizeFixedBytesHexWhitespace(row['commandValue']);
         if (hx) {

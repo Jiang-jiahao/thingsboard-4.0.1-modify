@@ -59,6 +59,10 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
     private String secondaryMatchBytesHex;
     private ProtocolTemplateCommandDirection direction;
     /**
+     * 仅上行/双向命令生效：命中后解析结果写入遥测或属性。
+     */
+    private ProtocolTemplateUplinkDataDestination uplinkDataDestination;
+    /**
      * 语义随 {@link #direction} 不同：
      * <ul>
      *   <li><b>上行 / 双向</b>：与帧模板字段按字节区间合并后，供 TCP HEX <b>解析</b> 使用（从设备上报帧中按偏移读出并写入遥测键）。</li>
@@ -88,6 +92,11 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
         }
         if (direction == null) {
             throw new IllegalArgumentException("protocol template command direction is required");
+        }
+        if (direction == ProtocolTemplateCommandDirection.DOWNLINK) {
+            uplinkDataDestination = null;
+        } else if (uplinkDataDestination == null) {
+            uplinkDataDestination = ProtocolTemplateUplinkDataDestination.TELEMETRY;
         }
         TcpHexValueType t = matchValueType != null ? matchValueType : TcpHexValueType.UINT32_LE;
         if (TcpHexCommandProfile.isByteSliceCommandMatchType(t)) {

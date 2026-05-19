@@ -5,6 +5,7 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, AfterViewInit, OnCha
 import { AbstractControl, UntypedFormArray, UntypedFormGroup } from '@angular/forms';
 import {
   ProtocolTemplateCommandDirection,
+  ProtocolTemplateUplinkDataDestination,
   TcpHexLtvChunkOrder,
   TcpHexUnknownTagMode,
   TcpHexValueType,
@@ -39,6 +40,7 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
   private templatesArraySub?: Subscription;
   readonly TransportTcpDataType = TransportTcpDataType;
   readonly ProtocolTemplateCommandDirection = ProtocolTemplateCommandDirection;
+  readonly ProtocolTemplateUplinkDataDestination = ProtocolTemplateUplinkDataDestination;
   readonly TcpHexValueType = TcpHexValueType;
   readonly TcpHexLtvChunkOrder = TcpHexLtvChunkOrder;
   readonly TcpHexUnknownTagMode = TcpHexUnknownTagMode;

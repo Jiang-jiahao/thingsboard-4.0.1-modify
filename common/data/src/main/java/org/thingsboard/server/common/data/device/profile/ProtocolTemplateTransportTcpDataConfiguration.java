@@ -125,6 +125,9 @@ public class ProtocolTemplateTransportTcpDataConfiguration implements TransportT
 
         TcpHexLtvRepeatingConfig ltv = cmd.getLtvRepeating() != null ? cmd.getLtvRepeating() : tpl.getHexLtvRepeating();
         p.setLtvRepeating(ltv);
+        p.setUplinkDataDestination(cmd.getUplinkDataDestination() != null
+                ? cmd.getUplinkDataDestination()
+                : ProtocolTemplateUplinkDataDestination.TELEMETRY);
         return p;
     }
 
