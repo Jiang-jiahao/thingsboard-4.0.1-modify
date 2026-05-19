@@ -90,6 +90,7 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
                         msg -> tcpTransportContext.afterSuccessfulAuth(ctx, session, msg));
                 return;
             }
+            tcpTransportContext.recordUplinkFrameActivity(session);
             String jsonPayload = TcpPayloadUtil.decodePayloadBytes(session.getPayloadDataType(), data);
             session.processIncomingJsonLine(jsonPayload);
         } catch (Exception e) {

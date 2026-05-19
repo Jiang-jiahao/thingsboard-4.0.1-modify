@@ -56,6 +56,7 @@ import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.transport.TransportServiceCallback;
 import org.thingsboard.server.common.transport.auth.SessionInfoCreator;
 import org.thingsboard.server.common.transport.auth.ValidateDeviceCredentialsResponse;
+import org.thingsboard.server.common.transport.service.DefaultTransportService;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.queue.util.AfterStartUp;
 import org.thingsboard.server.queue.util.TbTcpTransportComponent;
@@ -84,6 +85,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
     private final TcpTransportService tcpTransportService;
 
     private final Map<DeviceId, TcpDeviceSession> clientSessions = new ConcurrentHashMap<>();
+    private final Map<DeviceId, TcpDeviceSession> serverSessions = new ConcurrentHashMap<>();
     private final Collection<DeviceId> allTcpDeviceIds = new ConcurrentLinkedDeque<>();
     private final Map<DeviceId, AtomicInteger> clientReconnectFailureCount = new ConcurrentHashMap<>();
     private final Map<DeviceId, ScheduledFuture<?>> clientReconnectTasks = new ConcurrentHashMap<>();
@@ -153,6 +155,13 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
             return;
         }
         completeSessionRegistration(session, msg);
+        if (!session.isOutboundClient() && session.getDeviceId() != null) {
+            TcpDeviceSession oldSession = serverSessions.put(session.getDeviceId(), session);
+            if (oldSession != null && oldSession != session) {
+                log.info("[{}] Closing previous server session due to new inbound connection", session.getDeviceId());
+                oldSession.close();
+            }
+        }
         session.endServerAuth();
         int readIdleSec = readIdleSecFromProfile(session.getDeviceProfile());
         ctx.channel().eventLoop().execute(() -> {
@@ -183,6 +192,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
     private void completeSessionRegistration(TcpDeviceSession session, ValidateDeviceCredentialsResponse msg) {
         TransportProtos.SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, session.getSessionId());
         transportService.registerAsyncSession(sessionInfo, session);
+        transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_OPEN, null);
         // TCP 会话一旦连上即记录一次活动，避免“刚连接就显示 inactive”。
         transportService.recordActivity(sessionInfo);
         transportService.process(sessionInfo, TransportProtos.SubscribeToAttributeUpdatesMsg.newBuilder()
@@ -332,11 +342,13 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
     public void onChannelClosed(TcpDeviceSession session) {
         TransportProtos.SessionInfoProto sessionInfo = session.getSessionInfo();
         if (sessionInfo != null) {
+            transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_CLOSED, null);
             transportService.deregisterSession(sessionInfo);
             transportService.lifecycleEvent(session.getTenantId(), session.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
         }
         if (session.getDeviceId() != null) {
             clientSessions.remove(session.getDeviceId());
+            serverSessions.remove(session.getDeviceId(), session);
         }
         session.setConnected(false);
         session.endServerAuth();
@@ -352,6 +364,14 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
     }
     public void onTcpDeviceUpdated(TcpDeviceSession session, Device device, Optional<DeviceProfile> deviceProfileOpt) {
         deviceProfileOpt.ifPresent(session::setDeviceProfile);
+    }
+
+    private void closeServerSessionIfExists(DeviceId deviceId) {
+        TcpDeviceSession serverSession = serverSessions.remove(deviceId);
+        if (serverSession != null) {
+            log.info("[{}] Closing server session due to device/profile update", deviceId);
+            serverSession.close();
+        }
     }
     @EventListener(DeviceUpdatedEvent.class)
     public void onDeviceUpdatedOrCreated(DeviceUpdatedEvent event) {
@@ -381,6 +401,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
                     clientSessions.remove(device.getId());
                 }
             }
+            closeServerSessionIfExists(device.getId());
         }
     }
 
@@ -404,6 +425,20 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
         }
         allTcpDeviceIds.removeAll(deleted);
     }
+    /**
+     * 每收到一帧已分帧的业务数据即记活动，与 JSON/模板解析是否成功无关。
+     * 否则 RAW_BYTES / 协议模板未命中时不会走 {@code transportService.process(...)}，设备会一直不活跃。
+     */
+    public void recordUplinkFrameActivity(TcpDeviceSession session) {
+        if (session == null || !session.isCoreSessionReady()) {
+            return;
+        }
+        TransportProtos.SessionInfoProto sessionInfo = session.getSessionInfo();
+        if (sessionInfo != null) {
+            transportService.recordActivity(sessionInfo);
+        }
+    }
+
     public TcpProtoTransportEntityService getProtoEntityService() {
         return protoEntityService;
     }
