@@ -346,7 +346,16 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
      * CLIENT 建连后是否在链路上发送 {@code {"token":"..."}} 帧。
      */
     public boolean shouldSendWireAuthPayload() {
-        return getTcpWireAuthenticationMode() != TcpWireAuthenticationMode.NONE;
+        return getTcpWireAuthenticationMode() == TcpWireAuthenticationMode.TOKEN;
+    }
+
+    /**
+     * SERVER：链路上鉴权为从业务负载解析身份后再向 Core 注册（ACCESS_TOKEN 或 协议设备 ID 模式）。
+     */
+    public boolean isDeferredPayloadWireAuth() {
+        TcpWireAuthenticationMode m = getTcpWireAuthenticationMode();
+        return m == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
+                || m == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID;
     }
 
 

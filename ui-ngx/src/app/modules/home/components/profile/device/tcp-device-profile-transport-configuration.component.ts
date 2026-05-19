@@ -169,6 +169,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       tcpTransportFramingMode: [TcpTransportFramingMode.LINE, Validators.required],
       tcpFixedFrameLength: [null],
       tcpWireAuthenticationMode: [TcpWireAuthenticationMode.TOKEN, Validators.required],
+      tcpDeferredWireAuthTokenJsonKey: [''],
       tcpOutboundReconnectIntervalSec: [null, [Validators.min(0)]],
       tcpOutboundReconnectMaxAttempts: [null, [Validators.min(0)]],
       tcpReadIdleTimeoutSec: [null, [Validators.min(0)]],
@@ -206,6 +207,12 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         fixedCtrl.patchValue(null, {emitEvent: false});
       }
       fixedCtrl.updateValueAndValidity({emitEvent: false});
+      this.notifyValidatorChange();
+    });
+    this.tcpDeviceProfileTransportConfigurationFormGroup.get('tcpWireAuthenticationMode').valueChanges.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((mode: TcpWireAuthenticationMode) => {
+      this.applyDeferredWireAuthTokenKeyValidators(mode);
       this.notifyValidatorChange();
     });
     this.tcpDeviceProfileTransportConfigurationFormGroup.statusChanges.pipe(
@@ -246,9 +253,24 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       this.scheduleSyncHexLtvPanelExpanded();
     });
     this.applyTcpOpaqueKeyValidators(this.tcpDeviceProfileTransportConfigurationFormGroup.get('dataType').value);
+    this.applyDeferredWireAuthTokenKeyValidators(
+      this.tcpDeviceProfileTransportConfigurationFormGroup.get('tcpWireAuthenticationMode').value
+    );
   }
 
-  /** 在负载类型为 HEX 时，是否按「协议模板包」保存（序列化为 PROTOCOL_TEMPLATE） */
+  private applyDeferredWireAuthTokenKeyValidators(mode: TcpWireAuthenticationMode): void {
+    const keyCtrl = this.tcpDeviceProfileTransportConfigurationFormGroup.get('tcpDeferredWireAuthTokenJsonKey');
+    if (!keyCtrl) {
+      return;
+    }
+    if (mode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
+        || mode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+      keyCtrl.setValidators([Validators.required, Validators.pattern(/\S+/)]);
+    } else {
+      keyCtrl.clearValidators();
+    }
+    keyCtrl.updateValueAndValidity({emitEvent: false});
+  }
   private usesProtocolTemplatePayload(v: Record<string, unknown>): boolean {
     if (v['dataType'] !== TransportTcpDataType.RAW_BYTES) {
       return false;
@@ -822,6 +844,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         tcpTransportFramingMode: value.tcpTransportFramingMode,
         tcpFixedFrameLength: value.tcpFixedFrameLength,
         tcpWireAuthenticationMode: value.tcpWireAuthenticationMode,
+        tcpDeferredWireAuthTokenJsonKey: value.tcpDeferredWireAuthTokenJsonKey ?? '',
         tcpOutboundReconnectIntervalSec: value.tcpOutboundReconnectIntervalSec,
         tcpOutboundReconnectMaxAttempts: value.tcpOutboundReconnectMaxAttempts,
         tcpReadIdleTimeoutSec: value.tcpReadIdleTimeoutSec,
@@ -894,6 +917,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       }
       fixedCtrl.updateValueAndValidity({emitEvent: false});
       this.applyTcpOpaqueKeyValidators(formDataType);
+      this.applyDeferredWireAuthTokenKeyValidators(value.tcpWireAuthenticationMode);
       this.scheduleSyncHexLtvPanelExpanded();
       this.notifyValidatorChange();
     }
@@ -1133,6 +1157,13 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     }
     if (v.tcpReadIdleTimeoutSec != null && v.tcpReadIdleTimeoutSec !== '') {
       configuration.tcpReadIdleTimeoutSec = Number(v.tcpReadIdleTimeoutSec);
+    }
+    if (v.tcpWireAuthenticationMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
+        || v.tcpWireAuthenticationMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+      const dk = String(v.tcpDeferredWireAuthTokenJsonKey ?? '').trim();
+      if (dk.length > 0) {
+        configuration.tcpDeferredWireAuthTokenJsonKey = dk;
+      }
     }
     this.propagateChange(configuration);
   }

@@ -80,6 +80,10 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
                     log.warn("[{}] Client session not ready on read", session.getSessionId());
                     return;
                 }
+                if (session.isDeferredPayloadWireAuth()) {
+                    tcpTransportContext.completeDeferredWireAuthServerAuth(ctx, session, data);
+                    return;
+                }
                 if (!session.tryBeginServerAuth()) {
                     ctx.close();
                     return;

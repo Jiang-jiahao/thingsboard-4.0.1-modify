@@ -72,7 +72,8 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
       host: ['127.0.0.1'],
       port: [5025, [Validators.min(1), Validators.max(65535)]],
       sourceHost: [''],
-      serverBindPort: [null, [Validators.min(1), Validators.max(65535)]]
+      serverBindPort: [null, [Validators.min(1), Validators.max(65535)]],
+      tcpWireAuthPayloadDeviceId: ['']
     });
     this.tcpDeviceTransportConfigurationFormGroup.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
@@ -94,7 +95,8 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
         host: value.host,
         port: value.port,
         sourceHost: value.sourceHost || '',
-        serverBindPort: value.serverBindPort
+        serverBindPort: value.serverBindPort,
+        tcpWireAuthPayloadDeviceId: value.tcpWireAuthPayloadDeviceId || ''
       }, {emitEvent: false});
     }
   }
@@ -118,7 +120,11 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
       }
       if (v.serverBindPort != null && v.serverBindPort !== '') {
         configuration.serverBindPort = Number(v.serverBindPort);
-    }
-    this.propagateChange(configuration);
+      }
+      const pid = v.tcpWireAuthPayloadDeviceId?.trim();
+      if (pid) {
+        configuration.tcpWireAuthPayloadDeviceId = pid;
+      }
+      this.propagateChange(configuration);
   }
 }

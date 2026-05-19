@@ -326,7 +326,9 @@ export enum TcpTransportFramingMode {
 }
 export enum TcpWireAuthenticationMode {
   TOKEN = 'TOKEN',
-  NONE = 'NONE'
+  NONE = 'NONE',
+  DEFERRED_PAYLOAD_TOKEN = 'DEFERRED_PAYLOAD_TOKEN',
+  DEFERRED_PAYLOAD_DEVICE_ID = 'DEFERRED_PAYLOAD_DEVICE_ID'
 }
 export enum TcpJsonWithoutMethodMode {
   TELEMETRY_FLAT = 'TELEMETRY_FLAT',
@@ -725,6 +727,8 @@ export interface TcpDeviceProfileTransportConfiguration {
   tcpTransportFramingMode?: TcpTransportFramingMode;
   tcpFixedFrameLength?: number;
   tcpWireAuthenticationMode?: TcpWireAuthenticationMode;
+  /** DEFERRED：解析后 JSON 中身份字段名（TOKEN 模式为 ACCESS_TOKEN；DEVICE_ID 模式为协议设备 ID） */
+  tcpDeferredWireAuthTokenJsonKey?: string;
   /** CLIENT：断线/建连失败后重连间隔（秒）；空=后端默认 30；0=不重连 */
   tcpOutboundReconnectIntervalSec?: number;
   /** CLIENT：最大重连次数；空或 0=不限制 */
@@ -1159,6 +1163,8 @@ export interface TcpDeviceTransportConfiguration {
   port?: number;
   sourceHost?: string;
   serverBindPort?: number;
+  /** DEFERRED_PAYLOAD_DEVICE_ID：与负载 JSON 中档案配置的字段值一致，用于同端口多设备区分（可与其它端口使用相同字符串） */
+  tcpWireAuthPayloadDeviceId?: string;
 }
 
 export type DeviceTransportConfigurations = DefaultDeviceTransportConfiguration &

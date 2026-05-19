@@ -46,7 +46,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 /**
  * SERVER 模式下 {@link TcpDeviceTransportConfiguration#getServerBindPort()}：同一端口可对应多台设备，但必须共用同一设备配置文件；
- * 无线上鉴权 NONE 且多台共享端口时须靠互异的 {@link TcpDeviceTransportConfiguration#getSourceHost()} 区分。
+ * 无线上鉴权 NONE 且多台共享端口时须靠互异的 {@link TcpDeviceTransportConfiguration#getSourceHost()} 区分；
+ * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 且多台共享端口时须靠互异的 {@link TcpDeviceTransportConfiguration#getTcpWireAuthPayloadDeviceId()} 区分。
  */
 @TbTcpTransportComponent
 @Service
@@ -145,6 +146,40 @@ public class TcpDedicatedListenPortService {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * {@link org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID}：
+     * 本地监听端口 + 负载中的协议设备 ID → ThingsBoard 设备（同端口多设备时须在设备传输配置中配置互异的 ID）。
+     */
+    public Optional<DeviceId> findDeviceIdByListenPortAndProtocolDeviceId(int localPort, String protocolDeviceId) {
+        if (StringUtils.isBlank(protocolDeviceId)) {
+            return Optional.empty();
+        }
+        String needle = protocolDeviceId.trim();
+        Set<DeviceId> ids = listenPortToDeviceIds.get(localPort);
+        if (ids == null || ids.isEmpty()) {
+            return Optional.empty();
+        }
+        DeviceId matched = null;
+        for (DeviceId id : ids) {
+            Device device = protoEntityService.getDeviceById(id);
+            if (device == null || device.getDeviceData() == null
+                    || !(device.getDeviceData().getTransportConfiguration() instanceof TcpDeviceTransportConfiguration dt)) {
+                continue;
+            }
+            if (StringUtils.isBlank(dt.getTcpWireAuthPayloadDeviceId())) {
+                continue;
+            }
+            if (needle.equals(dt.getTcpWireAuthPayloadDeviceId().trim())) {
+                if (matched != null && !matched.equals(id)) {
+                    log.warn("Ambiguous TCP protocol device id [{}] on local port {} (multiple device records match)", needle, localPort);
+                    return Optional.empty();
+                }
+                matched = id;
+            }
+        }
+        return Optional.ofNullable(matched);
     }
     public Set<Integer> collectDedicatedPorts() {
         return Collections.unmodifiableSet(listenPortToDeviceIds.keySet());

@@ -2280,7 +2280,12 @@
             "wire-auth": "Wire authentication",
             "wire-auth-token": "Token (first frame / client sends token)",
             "wire-auth-none": "None (bind by port / source IP)",
-            "wire-auth-hint": "With None, devices are distinguished by source IP and/or dedicated port on the device record. Those fields are under Device → Transport configuration, not here.",
+            "wire-auth-deferred-token": "Deferred (ACCESS_TOKEN in payload JSON)",
+            "wire-auth-deferred-device-id": "Deferred (protocol device id in payload JSON)",
+            "wire-auth-hint": "TOKEN: first frame is {\"token\":\"...\"}. NONE: bind by source IP and/or dedicated listen port on the device record. DEFERRED (ACCESS_TOKEN): JSON field value is the device ACCESS_TOKEN. DEFERRED (protocol device id): JSON field value is your protocol device id; TB device is resolved by local listen port + each device's configured protocol id (same id string may repeat on different ports). Until registered, frames without the field are ignored; after registration the field is stripped from uplink copies. Requires dedicated serverBindPort.",
+            "deferred-token-json-key": "Payload identity JSON key (deferred modes)",
+            "deferred-token-json-key-hint": "JSON object key for the value read before Core registration. DEFERRED (ACCESS_TOKEN): string must be credentialsId. DEFERRED (protocol device id): string must match this device's tcpWireAuthPayloadDeviceId on the same listen port. After registration the key is removed from parsed payloads.",
+            "deferred-token-json-key-required": "Please enter the JSON key for the payload identity field.",
             "framing-mode": "Framing / decoder",
             "fixed-frame-length": "Fixed frame length (bytes)",
             "fixed-frame-length-required": "Fixed length is required for FIXED_LENGTH framing.",
@@ -2461,7 +2466,9 @@
             "source-host": "Expected source IP (SERVER)",
             "source-host-hint": "If set, must match the socket remote address. With NONE and multiple devices on the same serverBindPort, each device needs a distinct valid source IP.",
             "server-bind-port": "Dedicated listen port",
-            "server-bind-port-hint": "If set, the transport binds this port; the local port must match for auth. Sharing one port across devices requires the same device profile; with NONE, each device needs a distinct sourceHost."
+            "server-bind-port-hint": "If set, the transport binds this port; the local port must match for auth. Sharing one port across devices requires the same device profile; with NONE, each device needs a distinct sourceHost; with DEFERRED (protocol device id), each device needs a distinct tcpWireAuthPayloadDeviceId on that port.",
+            "payload-device-id": "Protocol device id (for DEFERRED device-id profile)",
+            "payload-device-id-hint": "Must exactly match the JSON field value on uplinks for this listen port. The same string may be used on another serverBindPort for a different ThingsBoard device."
         }
     },
     "dialog": {

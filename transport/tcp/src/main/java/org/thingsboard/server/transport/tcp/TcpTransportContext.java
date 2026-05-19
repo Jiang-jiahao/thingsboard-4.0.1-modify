@@ -508,6 +508,105 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
         return true;
     }
 
+    /**
+     * SERVER {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} / {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID}：
+     * 在 Core 会话注册前对每一帧按档案解析；本帧无身份字段则丢弃并等待；有字段则提交 Core 注册（TOKEN 模式字段值为 ACCESS_TOKEN；
+     * DEVICE_ID 模式字段值为协议设备 ID，由监听端口 + 设备传输配置 {@code tcpWireAuthPayloadDeviceId} 定位 TB 设备后以该设备 ACCESS_TOKEN 注册）。
+     */
+    public void completeDeferredWireAuthServerAuth(ChannelHandlerContext ctx, TcpDeviceSession session, byte[] rawFrame) {
+        DeviceProfile profile = session.getDeviceProfile();
+        if (profile == null || profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration ptc)) {
+            log.warn("[{}] Deferred payload wire auth requires inbound session bound to device profile (use serverBindPort dedicated listen)",
+                    session.getSessionId());
+            session.endServerAuth();
+            ctx.close();
+            return;
+        }
+        TcpWireAuthenticationMode mode = ptc.getTcpWireAuthenticationMode();
+        if (mode != TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
+                && mode != TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+            log.warn("[{}] inbound handler expected deferred payload wire auth mode", session.getSessionId());
+            session.endServerAuth();
+            ctx.close();
+            return;
+        }
+        Optional<String> fieldValueOpt = tcpMessageProcessor.extractDeferredWireAuthAccessToken(profile, session, rawFrame);
+        if (fieldValueOpt.isEmpty() || StringUtils.isBlank(fieldValueOpt.get())) {
+            log.debug("[{}] Deferred wire auth: identity field absent in this frame, waiting for next frame", session.getSessionId());
+            return;
+        }
+        if (!session.tryBeginServerAuth()) {
+            log.debug("[{}] Deferred wire auth: validation already in progress, skip this frame", session.getSessionId());
+            return;
+        }
+        String fieldValue = fieldValueOpt.get().trim();
+        if (mode == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN) {
+            submitDeferredAccessTokenValidation(ctx, session, rawFrame, fieldValue);
+            return;
+        }
+        int localPort = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
+        Optional<DeviceId> deviceIdOpt = tcpDedicatedListenPortService.findDeviceIdByListenPortAndProtocolDeviceId(localPort, fieldValue);
+        if (deviceIdOpt.isEmpty()) {
+            log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: no TB device for local port {} and payload device id [{}]",
+                    session.getSessionId(), localPort, fieldValue);
+            session.endServerAuth();
+            ctx.close();
+            return;
+        }
+        Device device = protoEntityService.getDeviceById(deviceIdOpt.get());
+        if (device == null) {
+            log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: resolved device id {} not found", session.getSessionId(), deviceIdOpt.get());
+            session.endServerAuth();
+            ctx.close();
+            return;
+        }
+        if (!sourceHostMatchesIfRequired(device, ctx.channel().remoteAddress())) {
+            log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: sourceHost mismatch for device {}", session.getSessionId(), device.getId());
+            session.endServerAuth();
+            ctx.close();
+            return;
+        }
+        DeviceCredentials cred = protoEntityService.getDeviceCredentialsByDeviceId(device.getId());
+        if (cred.getCredentialsType() != DeviceCredentialsType.ACCESS_TOKEN) {
+            log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: device {} has no ACCESS_TOKEN credentials", session.getSessionId(), device.getId());
+            session.endServerAuth();
+            ctx.close();
+            return;
+        }
+        submitDeferredAccessTokenValidation(ctx, session, rawFrame, cred.getCredentialsId());
+    }
+
+    private void submitDeferredAccessTokenValidation(ChannelHandlerContext ctx, TcpDeviceSession session, byte[] rawFrame, String accessToken) {
+        transportService.process(DeviceTransportType.TCP,
+                TransportProtos.ValidateDeviceTokenRequestMsg.newBuilder().setToken(accessToken).build(),
+                new TransportServiceCallback<>() {
+                    @Override
+                    public void onSuccess(ValidateDeviceCredentialsResponse msg) {
+                        if (!msg.hasDeviceInfo()) {
+                            log.warn("[{}] Deferred wire auth: Core rejected credentials", session.getSessionId());
+                            session.endServerAuth();
+                            ctx.close();
+                            return;
+                        }
+                        ctx.channel().eventLoop().execute(() -> {
+                            session.setDeviceInfo(msg.getDeviceInfo());
+                            session.setDeviceProfile(msg.getDeviceProfile());
+                            session.setDeviceWireAuthenticated(true);
+                            afterSuccessfulAuth(ctx, session, msg);
+                            tcpMessageProcessor.replayDeferredUplinkAfterAuth(session, rawFrame);
+                            recordUplinkFrameActivity(session);
+                        });
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        log.warn("[{}] Deferred wire auth: validate error", session.getSessionId(), e);
+                        session.endServerAuth();
+                        ctx.close();
+                    }
+                });
+    }
 
     private boolean validateDedicatedListenPortIfConfigured(ChannelHandlerContext ctx, ValidateDeviceCredentialsResponse msg) {
         if (!msg.hasDeviceInfo()) {

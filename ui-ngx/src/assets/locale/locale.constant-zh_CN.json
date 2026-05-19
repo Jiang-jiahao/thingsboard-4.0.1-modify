@@ -2183,7 +2183,12 @@
             "wire-auth": "链路上鉴权",
             "wire-auth-token": "Token（首帧/客户端发 token）",
             "wire-auth-none": "无（按端口/源 IP 绑定）",
-            "wire-auth-hint": "TOKEN：首帧鉴权。NONE：服务端场景常在设备传输配置中填期望源 IP；多设备共用同一专用监听端口且为 NONE 时，每台须互异源 IP（见设备传输配置）。",
+            "wire-auth-deferred-token": "延迟（负载 JSON 中为 ACCESS_TOKEN）",
+            "wire-auth-deferred-device-id": "延迟（负载 JSON 中为协议设备 ID）",
+            "wire-auth-hint": "TOKEN：首帧为 {\"token\":\"...\"}。NONE：按源 IP 与/或设备上的专用监听端口绑定。延迟（ACCESS_TOKEN）：某 JSON 键的值为设备访问令牌。延迟（协议设备 ID）：某 JSON 键的值为协议侧设备标识，由当前 Socket 本地端口 + 各设备传输配置中的「协议设备 ID」联合映射到 TB 设备（同一字符串可在不同 serverBindPort 下对应不同设备）。注册前无该键的帧忽略；注册后每帧会从副本中去掉该键。须配置 serverBindPort。",
+            "deferred-token-json-key": "负载身份 JSON 键名（延迟模式）",
+            "deferred-token-json-key-hint": "解析后 JSON 对象中的键名。ACCESS_TOKEN 延迟：值为 credentialsId。协议设备 ID 延迟：值须与本设备在相同监听端口上配置的 tcpWireAuthPayloadDeviceId 一致。注册后该键会从解析副本中移除。",
+            "deferred-token-json-key-required": "请填写负载身份字段的 JSON 键名。",
             "framing-mode": "分帧/解码",
             "fixed-frame-length": "定长帧字节数",
             "fixed-frame-length-required": "定长分帧时必须填写正整数。",
@@ -2364,7 +2369,9 @@
             "source-host": "期望源 IP（SERVER）",
             "source-host-hint": "非空则与 Socket 远端 IP 一致。NONE 且多设备共用同一 serverBindPort 时，每台须配置不同且合法的源 IP。",
             "server-bind-port": "专用监听端口",
-            "server-bind-port-hint": "非空时传输服务额外 bind 该端口，连接本地端口须与此一致方可鉴权。多设备共用同一端口须同一设备配置文件；NONE 时多台须互异 sourceHost。"
+            "server-bind-port-hint": "非空时传输服务额外 bind 该端口，连接本地端口须与此一致方可鉴权。多设备共用同一端口须同一设备配置文件；NONE 时多台须互异 sourceHost；协议设备 ID 延迟模式时同端口各设备须互异 tcpWireAuthPayloadDeviceId。",
+            "payload-device-id": "协议设备 ID（协议设备 ID 延迟档案时使用）",
+            "payload-device-id-hint": "须与上行 JSON 中档案所配键的值在「本监听端口」下完全一致；同一字符串可在另一 serverBindPort 下绑定另一台 TB 设备。"
         }
     },
     "dialog": {
