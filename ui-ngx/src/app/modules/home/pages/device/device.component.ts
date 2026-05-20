@@ -24,18 +24,24 @@ import {
   createDeviceTransportConfiguration, DeviceCredentials,
   DeviceData,
   DeviceInfo,
+  DeviceProfile,
   DeviceProfileInfo,
   DeviceProfileType,
-  DeviceTransportType
+  DeviceTransportType,
+  TcpDeviceProfileTransportConfiguration,
+  TcpTransportConnectMode,
+  TcpWireAuthenticationMode
 } from '@shared/models/device.models';
+import { DeviceProfileService } from '@core/http/device-profile.service';
+import { distinctUntilChanged, startWith } from 'rxjs/operators';
 import { EntityType } from '@shared/models/entity-type.models';
+import { DeviceProfileId } from '@shared/models/id/device-profile-id';
 import { NULL_UUID } from '@shared/models/id/has-uuid';
 import { ActionNotificationShow } from '@core/notification/notification.actions';
 import { TranslateService } from '@ngx-translate/core';
 import { EntityTableConfig } from '@home/models/entity/entities-table-config.models';
 import { Subject } from 'rxjs';
 import { OtaUpdateType } from '@shared/models/ota-package.models';
-import { distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -53,13 +59,20 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
 
   otaUpdateType = OtaUpdateType;
 
+  /** 当前所选设备档案的 TCP 链路上鉴权模式（拉取完整档案后填充） */
+  tcpProfileWireAuthMode: TcpWireAuthenticationMode | null = null;
+
+  /** 当前所选设备档案的 TCP 连接模式（CLIENT/SERVER），用于设备传输页表单项显隐 */
+  tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
+
   constructor(protected store: Store<AppState>,
               protected translate: TranslateService,
               @Inject('entity') protected entityValue: DeviceInfo,
               @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<DeviceInfo>,
               public fb: UntypedFormBuilder,
               protected cd: ChangeDetectorRef,
-              private destroyRef: DestroyRef) {
+              private destroyRef: DestroyRef,
+              private deviceProfileService: DeviceProfileService) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
   }
 
@@ -67,6 +80,11 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     this.deviceScope = this.entitiesTableConfig.componentsData.deviceScope;
     this.deviceCredentials$ = this.entitiesTableConfigValue.componentsData.deviceCredentials$;
     super.ngOnInit();
+    this.entityForm.get('deviceProfileId').valueChanges.pipe(
+      startWith(this.entityForm.get('deviceProfileId').value),
+      distinctUntilChanged((a, b) => this.resolveDeviceProfileUuid(a) === this.resolveDeviceProfileUuid(b)),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(profileInfo => this.refreshTcpProfileWireAuth(profileInfo));
   }
 
   hideDelete() {
@@ -127,6 +145,8 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
         description: entity.additionalInfo ? entity.additionalInfo.description : ''
       }
     });
+    // 自动完成返回的 deviceProfile 可能缺少 transportType；与 valueChanges 互补，避免链路上鉴权模式不刷新
+    this.refreshTcpProfileWireAuth(this.entityForm.get('deviceProfileId').value);
   }
 
 
@@ -174,5 +194,65 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
         }
       }
     }
+  }
+
+  /**
+   * deviceProfileId 控件可能是自动完成的 DeviceProfileInfo（id 为 EntityId），
+   * 也可能是编辑态从实体带入的 DeviceProfileId（id 为 UUID 字符串）；需统一解析。
+   */
+  private resolveDeviceProfileUuid(profileRef: DeviceProfileInfo | DeviceProfileId | null | undefined): string | null {
+    if (profileRef == null || profileRef.id == null) {
+      return null;
+    }
+    const idField = profileRef.id as string | { id?: string };
+    if (typeof idField === 'string') {
+      return idField.length ? idField : null;
+    }
+    if (typeof idField === 'object' && typeof idField.id === 'string' && idField.id.length) {
+      return idField.id;
+    }
+    return null;
+  }
+
+  private refreshTcpProfileWireAuth(profileInfo: DeviceProfileInfo | DeviceProfileId | null): void {
+    const deviceProfileUuid = this.resolveDeviceProfileUuid(profileInfo);
+    if (!deviceProfileUuid) {
+      this.tcpProfileWireAuthMode = null;
+      this.tcpProfileTransportConnectMode = null;
+      this.cd.markForCheck();
+      return;
+    }
+    // 勿依赖 profileInfo.transportType：设备页自动完成可能只带 id/name，transportType 为空会导致永远不拉档案
+    const transportType = profileInfo && 'transportType' in profileInfo ? profileInfo.transportType : undefined;
+    if (transportType && transportType !== DeviceTransportType.TCP) {
+      this.tcpProfileWireAuthMode = null;
+      this.tcpProfileTransportConnectMode = null;
+      this.cd.markForCheck();
+      return;
+    }
+    this.deviceProfileService.getDeviceProfile(deviceProfileUuid).subscribe({
+      next: (dp: DeviceProfile) => {
+        if (dp?.transportType !== DeviceTransportType.TCP) {
+          this.tcpProfileWireAuthMode = null;
+          this.tcpProfileTransportConnectMode = null;
+          this.cd.markForCheck();
+          return;
+        }
+        const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;
+        if (raw && (raw.type === DeviceTransportType.TCP || raw.type == null || raw.type === undefined)) {
+          this.tcpProfileWireAuthMode = raw.tcpWireAuthenticationMode ?? null;
+          this.tcpProfileTransportConnectMode = raw.tcpTransportConnectMode ?? null;
+        } else {
+          this.tcpProfileWireAuthMode = null;
+          this.tcpProfileTransportConnectMode = null;
+        }
+        this.cd.markForCheck();
+      },
+      error: () => {
+        this.tcpProfileWireAuthMode = null;
+        this.tcpProfileTransportConnectMode = null;
+        this.cd.markForCheck();
+      }
+    });
   }
 }

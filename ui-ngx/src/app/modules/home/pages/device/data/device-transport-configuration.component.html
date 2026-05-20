@@ -50,6 +50,8 @@
     <ng-template [ngSwitchCase]="deviceTransportType.TCP">
       <tb-tcp-device-transport-configuration
         [required]="required"
+        [tcpWireAuthenticationMode]="tcpWireAuthenticationMode"
+        [tcpProfileTransportConnectMode]="tcpProfileTransportConnectMode"
         formControlName="configuration">
       </tb-tcp-device-transport-configuration>
     </ng-template>

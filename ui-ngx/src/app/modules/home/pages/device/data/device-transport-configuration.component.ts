@@ -28,7 +28,12 @@ import {
 import { Store } from '@ngrx/store';
 import { AppState } from '@app/core/core.state';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
-import { DeviceTransportConfiguration, DeviceTransportType } from '@shared/models/device.models';
+import {
+  DeviceTransportConfiguration,
+  DeviceTransportType,
+  TcpTransportConnectMode,
+  TcpWireAuthenticationMode
+} from '@shared/models/device.models';
 import { deepClone } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -67,6 +72,13 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
   disabled: boolean;
 
   transportType: DeviceTransportType;
+
+  /** 当前设备档案的 TCP 链路上鉴权模式（仅 TCP 设备传输子组件使用） */
+  @Input()
+  tcpWireAuthenticationMode: TcpWireAuthenticationMode | null = null;
+
+  @Input()
+  tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
 
   private propagateChange = (v: any) => { };
 

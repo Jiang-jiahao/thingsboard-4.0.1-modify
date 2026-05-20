@@ -32,6 +32,8 @@ import {
   DeviceData,
   DeviceProfileInfo,
   DeviceTransportType,
+  TcpTransportConnectMode,
+  TcpWireAuthenticationMode,
   deviceProfileTypeConfigurationInfoMap,
   deviceTransportTypeConfigurationInfoMap
 } from '@shared/models/device.models';
@@ -61,6 +63,14 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   
   @Input()
   deviceProfile: DeviceProfileInfo;
+
+  /** 来自设备页：当前设备档案的 TCP 链路上鉴权模式（用于 TCP 设备传输表单项显隐） */
+  @Input()
+  tcpWireAuthenticationMode: TcpWireAuthenticationMode | null = null;
+
+  /** 来自设备页：当前设备档案的 TCP CLIENT/SERVER（用于隐藏 SERVER 档案下无意义的 CLIENT 对端表单项） */
+  @Input()
+  tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
 
   /** 来自设备详情页：tenant | customer | customer_user | edge | edge_customer_user */
   @Input()

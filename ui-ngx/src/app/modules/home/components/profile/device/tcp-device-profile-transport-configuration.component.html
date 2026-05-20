@@ -30,7 +30,6 @@
             <mat-option [value]="'DEFERRED_PAYLOAD_TOKEN'">{{ 'device-profile.tcp.wire-auth-deferred-token' | translate }}</mat-option>
             <mat-option [value]="'DEFERRED_PAYLOAD_DEVICE_ID'">{{ 'device-profile.tcp.wire-auth-deferred-device-id' | translate }}</mat-option>
         </mat-select>
-        <mat-hint translate>device-profile.tcp.wire-auth-hint</mat-hint>
       </mat-form-field>
     </div>
     <div class="flex flex-row gap-2 xs:flex-col" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpWireAuthenticationMode').value === 'DEFERRED_PAYLOAD_TOKEN'

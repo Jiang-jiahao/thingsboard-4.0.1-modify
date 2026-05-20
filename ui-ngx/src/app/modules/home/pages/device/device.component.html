@@ -137,6 +137,8 @@
       <tb-device-data
         formControlName="deviceData"
         [deviceProfile]="entityForm.get('deviceProfileId').value"
+        [tcpWireAuthenticationMode]="tcpProfileWireAuthMode"
+        [tcpProfileTransportConnectMode]="tcpProfileTransportConnectMode"
         [deviceScope]="deviceScope"
         required>
       </tb-device-data>

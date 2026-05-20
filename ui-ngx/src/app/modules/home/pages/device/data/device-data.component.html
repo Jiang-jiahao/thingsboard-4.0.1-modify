@@ -42,6 +42,8 @@
       </mat-expansion-panel-header>
       <tb-device-transport-configuration
         formControlName="transportConfiguration"
+        [tcpWireAuthenticationMode]="tcpWireAuthenticationMode"
+        [tcpProfileTransportConnectMode]="tcpProfileTransportConnectMode"
         required>
       </tb-device-transport-configuration>
     </mat-expansion-panel>
