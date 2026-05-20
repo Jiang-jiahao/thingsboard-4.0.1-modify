@@ -32,6 +32,16 @@
         </mat-select>
       </mat-form-field>
     </div>
+    <div class="flex flex-row gap-2 xs:flex-col" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpTransportConnectMode').value === 'SERVER'">
+      <mat-form-field class="flex-1">
+        <mat-label translate>device-profile.tcp.tcp-profile-server-bind-port</mat-label>
+        <input matInput type="number" min="1" max="65535" formControlName="tcpProfileServerBindPort">
+        <mat-hint translate>device-profile.tcp.tcp-profile-server-bind-port-hint</mat-hint>
+        <mat-error *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpProfileServerBindPort').hasError('required')">
+          {{ 'device-profile.tcp.tcp-profile-server-bind-port-required' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </div>
     <div class="flex flex-row gap-2 xs:flex-col" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpWireAuthenticationMode').value === 'DEFERRED_PAYLOAD_TOKEN'
         || tcpDeviceProfileTransportConfigurationFormGroup.get('tcpWireAuthenticationMode').value === 'DEFERRED_PAYLOAD_DEVICE_ID'">
       <mat-form-field class="flex-1">

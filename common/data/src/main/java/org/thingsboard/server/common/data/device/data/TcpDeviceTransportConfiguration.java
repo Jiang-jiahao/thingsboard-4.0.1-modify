@@ -24,11 +24,11 @@ import org.thingsboard.server.common.data.StringUtils;
  * <p>
  * SERVER 模式：
  * <ul>
- *   <li>可配置 {@link #serverBindPort}：平台在该监听端口上只接受映射到本设备的连接（一设备一端口）。</li>
+ *   <li>优先在设备档案配置 {@code tcpProfileServerBindPort}；未配置档案端口时可在此配置 {@link #serverBindPort}（兼容旧数据）。</li>
  *   <li>无线上鉴权 {@link org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode#NONE} 时还可配置
  *   {@link #sourceHost} 与对端 IP 匹配（可与专用端口组合使用）。</li>
  *   <li>链路上鉴权 {@link org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时须配置
- *   {@link #tcpWireAuthPayloadDeviceId}：与负载 JSON 中档案所配字段值一致，且在同一 {@link #serverBindPort} 下多设备时值须互异。</li>
+ *   {@link #tcpWireAuthPayloadDeviceId}：与负载 JSON 中档案所配字段值一致，且在同一专用监听端口下多设备时值须互异。</li>
  * </ul>
  */
 @Data
@@ -46,13 +46,12 @@ public class TcpDeviceTransportConfiguration implements DeviceTransportConfigura
 
     /**
      * 当设备档案为 {@link org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：
-     * 与上行解析 JSON 中「协议设备 ID」字段值一致，用于在共用 {@link #serverBindPort} 下区分 TB 设备（可与其它端口下设备使用相同字符串）。
+     * 与上行解析 JSON 中「协议设备 ID」字段值一致，用于在共用专用监听端口下区分 TB 设备（可与其它端口下设备使用相同字符串）。
      */
     private String tcpWireAuthPayloadDeviceId;
 
     /**
-     * 专用服务端监听端口（1–65535）。非空时传输进程会额外 bind 该端口；同一端口可绑定多台设备，但须共用同一设备配置文件。
-     * 若多台设备且链路上鉴权为 NONE，每台须配置互异的 {@link #sourceHost}。
+     * 兼容旧版：设备级专用监听端口。若设备档案已配置 {@code tcpProfileServerBindPort}，此处须留空，由档案统一指定入口端口。
      */
     private Integer serverBindPort;
 

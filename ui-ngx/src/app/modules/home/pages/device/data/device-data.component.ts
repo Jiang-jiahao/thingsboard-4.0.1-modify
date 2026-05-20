@@ -148,12 +148,11 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   }
 
   private applyVisibilityFromValue(value: DeviceData | null): void {
-    const profileType = value?.configuration?.type
-      ?? (value != null ? this.deviceProfile?.type : undefined);
+    /* 新建设备时 value 可能仍为 null，但已选设备档案；须用档案类型决定是否展示传输配置，否则会隐藏 TCP 面板导致未提交 TcpDeviceTransportConfiguration，后端报 DEFERRED_PAYLOAD_DEVICE_ID requires device transport configuration。 */
+    const profileType = value?.configuration?.type ?? this.deviceProfile?.type;
     const profileInfo = profileType && deviceProfileTypeConfigurationInfoMap.get(profileType);
     this.displayDeviceConfiguration = !!(profileInfo?.hasDeviceConfiguration);
-    const transportType = value?.transportConfiguration?.type
-    ?? (value != null ? this.deviceProfile?.transportType : undefined);
+    const transportType = value?.transportConfiguration?.type ?? this.deviceProfile?.transportType;
     const transportInfo = transportType && deviceTransportTypeConfigurationInfoMap.get(transportType);
     this.displayTransportConfiguration = !!(transportInfo?.hasDeviceConfiguration);
   }

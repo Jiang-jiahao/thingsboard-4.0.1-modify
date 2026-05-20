@@ -2282,6 +2282,9 @@
             "wire-auth-none": "None (bind by port / source IP)",
             "wire-auth-deferred-token": "Deferred (ACCESS_TOKEN in payload JSON)",
             "wire-auth-deferred-device-id": "Deferred (JSON key name in payload)",
+            "tcp-profile-server-bind-port": "Dedicated listen port (profile)",
+            "tcp-profile-server-bind-port-hint": "All devices using this profile share this inbound TCP port. Required in SERVER connect mode for every wire authentication mode. Do not set a dedicated listen port on individual devices.",
+            "tcp-profile-server-bind-port-required": "Please enter the profile dedicated listen port.",
             "deferred-token-json-key": "Payload identity JSON key (deferred modes)",
             "deferred-token-json-key-hint": "JSON object key for the value read before Core registration. DEFERRED (ACCESS_TOKEN): string must be credentialsId. DEFERRED (protocol device id): string must match this device's tcpWireAuthPayloadDeviceId on the same listen port. After registration the key is removed from parsed payloads.",
             "deferred-token-json-key-required": "Please enter the JSON key for the payload identity field.",
@@ -2467,7 +2470,8 @@
             "server-bind-port": "Dedicated listen port",
             "server-bind-port-hint": "If set, the transport binds this port; the local port must match for auth. Sharing one port across devices requires the same device profile; with NONE, each device needs a distinct sourceHost; with DEFERRED (protocol device id), each device needs a distinct tcpWireAuthPayloadDeviceId on that port.",
             "payload-device-id": "Protocol device id (for DEFERRED device-id profile)",
-            "payload-device-id-hint": "Must exactly match the JSON field value on uplinks for this listen port. The same string may be used on another serverBindPort for a different ThingsBoard device."
+            "payload-device-id-hint": "Must exactly match the JSON field value on uplinks for this listen port. The same string may be used on another serverBindPort for a different ThingsBoard device.",
+            "payload-device-id-required": "Protocol device id is required for this device profile."
         }
     },
     "dialog": {

@@ -64,6 +64,14 @@
             formControlName="deviceProfileId"
             (deviceProfileChanged)="deviceProfileChanged($event)">
           </tb-device-profile-autocomplete>
+          <tb-device-data
+            formControlName="deviceData"
+            [deviceProfile]="deviceWizardFormGroup.get('deviceProfileId').value"
+            [tcpWireAuthenticationMode]="tcpProfileWireAuthMode"
+            [tcpProfileTransportConnectMode]="tcpProfileTransportConnectMode"
+            [deviceScope]="deviceWizardDeviceScope"
+            required>
+          </tb-device-data>
           <div class="toggle-group">
             <mat-slide-toggle formControlName="gateway" style="min-width: 165px">
               {{ 'device.is-gateway' | translate }}

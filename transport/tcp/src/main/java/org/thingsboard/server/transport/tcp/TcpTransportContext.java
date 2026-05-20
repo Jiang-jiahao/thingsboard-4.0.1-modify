@@ -15,6 +15,7 @@
  */
 package org.thingsboard.server.transport.tcp;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
@@ -40,6 +41,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import org.thingsboard.server.common.data.device.data.DeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration;
+import org.thingsboard.server.common.data.device.data.TcpEffectiveServerBindPort;
 import org.thingsboard.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode;
 import org.thingsboard.server.transport.tcp.service.TcpProtoTransportEntityService;
@@ -50,6 +52,7 @@ import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.plugin.ComponentLifecycleEvent;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.data.security.DeviceCredentialsType;
+import org.thingsboard.server.common.transport.DeviceProfileUpdatedEvent;
 import org.thingsboard.server.common.transport.DeviceUpdatedEvent;
 import org.thingsboard.server.common.transport.TransportDeviceProfileCache;
 import org.thingsboard.server.common.transport.TransportService;
@@ -89,6 +92,12 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
     private final Collection<DeviceId> allTcpDeviceIds = new ConcurrentLinkedDeque<>();
     private final Map<DeviceId, AtomicInteger> clientReconnectFailureCount = new ConcurrentHashMap<>();
     private final Map<DeviceId, ScheduledFuture<?>> clientReconnectTasks = new ConcurrentHashMap<>();
+
+    /**
+     * 所有入站（SERVER）会话：含尚未写入 {@link #serverSessions} 的鉴权中连接。
+     * 用于在专用监听端口解绑或设备/档案变更时主动断开；仅关闭 Netty 的 ServerChannel 不会自动关闭已接受的子 TCP 连接。
+     */
+    private final Set<TcpDeviceSession> inboundSessions = ConcurrentHashMap.newKeySet();
 
     @Autowired
     private SchedulerComponent scheduler;
@@ -340,6 +349,9 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
     }
 
     public void onChannelClosed(TcpDeviceSession session) {
+        if (!session.isOutboundClient()) {
+            untrackInboundSession(session);
+        }
         TransportProtos.SessionInfoProto sessionInfo = session.getSessionInfo();
         if (sessionInfo != null) {
             transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_CLOSED, null);
@@ -373,6 +385,80 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
             serverSession.close();
         }
     }
+
+    /**
+     * 登记入站会话（含鉴权完成前），便于在端口解绑或配置变更时主动 {@link TcpDeviceSession#close()}。
+     */
+    public void trackInboundSession(TcpDeviceSession session) {
+        inboundSessions.add(session);
+    }
+
+    public void untrackInboundSession(TcpDeviceSession session) {
+        inboundSessions.remove(session);
+    }
+
+    /**
+     * 解绑专用本地端口之前调用：Netty 关闭 {@code ServerChannel} 后，已 accept 的子 TCP 连接仍可能保持打开。
+     */
+    public void closeInboundSessionsOnLocalPort(int localPort) {
+        for (TcpDeviceSession s : new ArrayList<>(inboundSessions)) {
+            Channel ch = s.getChannel();
+            if (ch == null || !ch.isOpen()) {
+                continue;
+            }
+            SocketAddress la = ch.localAddress();
+            if (la instanceof InetSocketAddress isa && isa.getPort() == localPort) {
+                log.info("[{}] Closing inbound TCP on local port {} (dedicated listen stopping)", s.getSessionId(), localPort);
+                s.close();
+            }
+        }
+    }
+
+    private void closeInboundSessionsForDeviceProfile(DeviceProfile profile) {
+        if (profile == null || profile.getId() == null) {
+            return;
+        }
+        for (TcpDeviceSession s : new ArrayList<>(inboundSessions)) {
+            DeviceProfile sp = s.getDeviceProfile();
+            if (sp != null && profile.getId().equals(sp.getId())) {
+                log.info("[{}] Closing inbound TCP due to device profile update ({})", s.getSessionId(), profile.getId());
+                s.close();
+            }
+        }
+    }
+
+    private void closeInboundSessionsAffectedByDeviceUpdate(Device device) {
+        if (device.getDeviceData() == null
+                || !(device.getDeviceData().getTransportConfiguration() instanceof TcpDeviceTransportConfiguration)) {
+            return;
+        }
+        var deviceProfileId = device.getDeviceProfileId();
+        if (deviceProfileId == null) {
+            return;
+        }
+        for (TcpDeviceSession s : new ArrayList<>(inboundSessions)) {
+            if (s.getDeviceId() != null && s.getDeviceId().equals(device.getId())) {
+                log.info("[{}] Closing inbound TCP due to device update", s.getSessionId());
+                s.close();
+                continue;
+            }
+            DeviceProfile sp = s.getDeviceProfile();
+            if (sp != null && !deviceProfileId.equals(sp.getId())) {
+                log.info("[{}] Closing inbound TCP (stale profile vs device after update)", s.getSessionId());
+                s.close();
+            }
+        }
+    }
+
+    @EventListener(DeviceProfileUpdatedEvent.class)
+    public void onDeviceProfileUpdatedForInbound(DeviceProfileUpdatedEvent event) {
+        DeviceProfile p = event.getDeviceProfile();
+        if (p == null || p.getTransportType() != DeviceTransportType.TCP) {
+            return;
+        }
+        closeInboundSessionsForDeviceProfile(p);
+    }
+
     @EventListener(DeviceUpdatedEvent.class)
     public void onDeviceUpdatedOrCreated(DeviceUpdatedEvent event) {
         Device device = event.getDevice();
@@ -402,6 +488,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
                 }
             }
             closeServerSessionIfExists(device.getId());
+            closeInboundSessionsAffectedByDeviceUpdate(device);
         }
     }
 
@@ -561,12 +648,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
             ctx.close();
             return;
         }
-        if (!sourceHostMatchesIfRequired(device, ctx.channel().remoteAddress())) {
-            log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: sourceHost mismatch for device {}", session.getSessionId(), device.getId());
-            session.endServerAuth();
-            ctx.close();
-            return;
-        }
+        // 身份已由监听端口 + 负载协议设备 ID 确定，不再校验 sourceHost（NONE 多机同端口仍靠 IP 区分）。
         DeviceCredentials cred = protoEntityService.getDeviceCredentialsByDeviceId(device.getId());
         if (cred.getCredentialsType() != DeviceCredentialsType.ACCESS_TOKEN) {
             log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: device {} has no ACCESS_TOKEN credentials", session.getSessionId(), device.getId());
@@ -623,12 +705,14 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
             return true;
         }
         TcpDeviceTransportConfiguration dtc = (TcpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
-        if (dtc.getServerBindPort() == null) {
+        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
+        Integer expectedPort = TcpEffectiveServerBindPort.resolve(profile, dtc);
+        if (expectedPort == null) {
             return true;
         }
         int localPort = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
-        if (localPort != dtc.getServerBindPort()) {
-            log.warn("[{}] TCP auth rejected: expect listen port {} but socket local port is {}", deviceId, dtc.getServerBindPort(), localPort);
+        if (localPort != expectedPort) {
+            log.warn("[{}] TCP auth rejected: expect listen port {} but socket local port is {}", deviceId, expectedPort, localPort);
             return false;
         }
         return true;

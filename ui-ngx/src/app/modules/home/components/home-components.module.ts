@@ -137,6 +137,7 @@ import {
 import { SnmpDeviceProfileTransportModule } from '@home/components/profile/device/snmp/snmp-device-profile-transport.module';
 import { DeviceCredentialsModule } from '@home/components/device/device-credentials.module';
 import { DeviceProfileCommonModule } from '@home/components/profile/device/common/device-profile-common.module';
+import { DeviceDataFormsModule } from '@home/pages/device/device-data-forms.module';
 import {
   COMPLEX_FILTER_PREDICATE_DIALOG_COMPONENT_TOKEN,
   DASHBOARD_PAGE_COMPONENT_TOKEN,
@@ -372,6 +373,7 @@ import {
     StatesControllerModule,
     DeviceCredentialsModule,
     DeviceProfileCommonModule,
+    DeviceDataFormsModule,
     EntityDebugSettingsButtonComponent
   ],
   exports: [

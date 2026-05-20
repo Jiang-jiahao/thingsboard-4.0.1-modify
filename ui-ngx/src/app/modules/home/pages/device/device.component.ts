@@ -166,34 +166,64 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   }
 
   onDeviceProfileChanged(deviceProfile: DeviceProfileInfo) {
-    if (deviceProfile && (this.isEdit || this.isAdd)) {
-      const deviceProfileType: DeviceProfileType = deviceProfile.type;
-      const deviceTransportType: DeviceTransportType = deviceProfile.transportType;
-      const prev: DeviceData = this.entityForm.getRawValue().deviceData;
+    if (!deviceProfile || (!this.isEdit && !this.isAdd)) {
+      return;
+    }
+    const prev: DeviceData = this.entityForm.getRawValue().deviceData;
+    const apply = (profileType: DeviceProfileType, transportType: DeviceTransportType) => {
+      if (!transportType) {
+        return;
+      }
       if (!prev) {
         const deviceData: DeviceData = {
-          configuration: createDeviceConfiguration(deviceProfileType),
-          transportConfiguration: createDeviceTransportConfiguration(deviceTransportType)
+          configuration: createDeviceConfiguration(profileType),
+          transportConfiguration: createDeviceTransportConfiguration(transportType)
         };
         this.entityForm.patchValue({deviceData});
         this.entityForm.markAsDirty();
-      } else {
-        let next: DeviceData = prev;
-        if (prev.configuration.type !== deviceProfileType) {
-          next = {...next, configuration: createDeviceConfiguration(deviceProfileType)};
-        }
-        if (prev.transportConfiguration.type !== deviceTransportType) {
-          next = {
-            ...next,
-            transportConfiguration: createDeviceTransportConfiguration(deviceTransportType)
-          };
-        }
-        if (next !== prev) {
-          this.entityForm.patchValue({deviceData: next});
-          this.entityForm.markAsDirty();
-        }
+        return;
       }
+      let next: DeviceData = prev;
+      if (prev.configuration?.type !== profileType) {
+        next = {...next, configuration: createDeviceConfiguration(profileType)};
+      }
+      if (prev.transportConfiguration?.type !== transportType) {
+        next = {
+          ...next,
+          transportConfiguration: createDeviceTransportConfiguration(transportType)
+        };
+      }
+      if (next !== prev) {
+        this.entityForm.patchValue({deviceData: next});
+        this.entityForm.markAsDirty();
+      }
+    };
+    const profileType = deviceProfile.type;
+    const transportTypeFromAutocomplete = deviceProfile.transportType;
+    const uuid = this.resolveDeviceProfileUuid(deviceProfile);
+    if (!uuid) {
+      this.applyTcpProfileWireAuthFromDeviceProfile(null);
+      apply(profileType, transportTypeFromAutocomplete);
+      return;
     }
+    /*
+     * 始终拉取完整档案：自动完成可能仅有 id/name，或仅有 transportType 而无链路上鉴权模式。
+     * 须先于 apply() 写入 tcpProfileWireAuthMode，否则 TCP 传输子组件在 DEFERRED_PAYLOAD_DEVICE_ID 下不展示协议设备 ID 输入框。
+     */
+    this.deviceProfileService.getDeviceProfile(uuid).subscribe({
+      next: (dp: DeviceProfile) => {
+        this.applyTcpProfileWireAuthFromDeviceProfile(dp);
+        const resolvedProfileType = dp?.type ?? profileType;
+        const resolvedTransportType = dp?.transportType ?? transportTypeFromAutocomplete;
+        apply(resolvedProfileType, resolvedTransportType);
+        this.cd.markForCheck();
+      },
+      error: () => {
+        this.applyTcpProfileWireAuthFromDeviceProfile(null);
+        apply(profileType, transportTypeFromAutocomplete);
+        this.cd.markForCheck();
+      }
+    });
   }
 
   /**
@@ -217,42 +247,42 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   private refreshTcpProfileWireAuth(profileInfo: DeviceProfileInfo | DeviceProfileId | null): void {
     const deviceProfileUuid = this.resolveDeviceProfileUuid(profileInfo);
     if (!deviceProfileUuid) {
-      this.tcpProfileWireAuthMode = null;
-      this.tcpProfileTransportConnectMode = null;
+      this.applyTcpProfileWireAuthFromDeviceProfile(null);
       this.cd.markForCheck();
       return;
     }
     // 勿依赖 profileInfo.transportType：设备页自动完成可能只带 id/name，transportType 为空会导致永远不拉档案
     const transportType = profileInfo && 'transportType' in profileInfo ? profileInfo.transportType : undefined;
     if (transportType && transportType !== DeviceTransportType.TCP) {
-      this.tcpProfileWireAuthMode = null;
-      this.tcpProfileTransportConnectMode = null;
+      this.applyTcpProfileWireAuthFromDeviceProfile(null);
       this.cd.markForCheck();
       return;
     }
     this.deviceProfileService.getDeviceProfile(deviceProfileUuid).subscribe({
       next: (dp: DeviceProfile) => {
-        if (dp?.transportType !== DeviceTransportType.TCP) {
-          this.tcpProfileWireAuthMode = null;
-          this.tcpProfileTransportConnectMode = null;
-          this.cd.markForCheck();
-          return;
-        }
-        const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;
-        if (raw && (raw.type === DeviceTransportType.TCP || raw.type == null || raw.type === undefined)) {
-          this.tcpProfileWireAuthMode = raw.tcpWireAuthenticationMode ?? null;
-          this.tcpProfileTransportConnectMode = raw.tcpTransportConnectMode ?? null;
-        } else {
-          this.tcpProfileWireAuthMode = null;
-          this.tcpProfileTransportConnectMode = null;
-        }
+        this.applyTcpProfileWireAuthFromDeviceProfile(dp);
         this.cd.markForCheck();
       },
       error: () => {
-        this.tcpProfileWireAuthMode = null;
-        this.tcpProfileTransportConnectMode = null;
+        this.applyTcpProfileWireAuthFromDeviceProfile(null);
         this.cd.markForCheck();
       }
     });
+  }
+
+  private applyTcpProfileWireAuthFromDeviceProfile(dp: DeviceProfile | null): void {
+    if (!dp || dp.transportType !== DeviceTransportType.TCP) {
+      this.tcpProfileWireAuthMode = null;
+      this.tcpProfileTransportConnectMode = null;
+      return;
+    }
+    const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;
+    if (raw && (raw.type === DeviceTransportType.TCP || raw.type == null || raw.type === undefined)) {
+      this.tcpProfileWireAuthMode = raw.tcpWireAuthenticationMode ?? null;
+      this.tcpProfileTransportConnectMode = raw.tcpTransportConnectMode ?? null;
+    } else {
+      this.tcpProfileWireAuthMode = null;
+      this.tcpProfileTransportConnectMode = null;
+    }
   }
 }

@@ -84,6 +84,7 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
         { emitEvent: true }
       );
     }
+    this.applyDeferredPayloadDeviceIdValidators();
   }
 
   get showTcpWireAuthPayloadDeviceId(): boolean {
@@ -94,6 +95,14 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
   @Input()
   set tcpProfileTransportConnectMode(mode: TcpTransportConnectMode | null) {
     this.tcpProfileTransportConnectModeValue = mode;
+    if (this.tcpDeviceTransportConfigurationFormGroup
+        && mode === TcpTransportConnectMode.CLIENT) {
+      this.tcpDeviceTransportConfigurationFormGroup.patchValue(
+        { sourceHost: '', serverBindPort: null },
+        { emitEvent: true }
+      );
+    }
+    this.applyServerBindPortControlState();
   }
 
   /** 延迟 TOKEN / 延迟协议设备 ID +（SERVER 或未带 connectMode）：按入站场景，不展示 CLIENT 对端主机/端口 */
@@ -108,16 +117,15 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
     return !this.isDeferredPayloadWireAuthInboundMode();
   }
 
+  /**
+   * 期望源 IP 仅用于档案为 SERVER 且链路上鉴权为 NONE（多设备共端口按源 IP 区分）等入站场景；
+   * 档案为 CLIENT（平台主动连设备）时不展示。
+   */
   get showTcpSourceHostField(): boolean {
-    return !this.isDeferredPayloadWireAuthInboundMode();
-  }
-
-  /** 延迟链路上鉴权且设备为出站 CLIENT 时通常无专用监听端口；其余情况保留（含入站监听端口） */
-  get showTcpServerBindPortField(): boolean {
-    if (this.isDeferredPayloadWireAuthMode()) {
-      return this.tcpProfileTransportConnectModeValue !== TcpTransportConnectMode.CLIENT;
+    if (this.tcpProfileTransportConnectModeValue !== TcpTransportConnectMode.SERVER) {
+      return false;
     }
-    return true;
+    return !this.isDeferredPayloadWireAuthInboundMode();
   }
 
   /** DEFERRED_PAYLOAD_TOKEN / DEFERRED_PAYLOAD_DEVICE_ID（链路上延迟解析身份） */
@@ -147,7 +155,8 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
       host: ['127.0.0.1'],
       port: [5025, [Validators.min(1), Validators.max(65535)]],
       sourceHost: [''],
-      serverBindPort: [null, [Validators.min(1), Validators.max(65535)]],
+      /* 勿对 null 加 min(1)：档案 connectMode 异步到达前 tcpProfileTransportConnectMode 为 null，会误使整个表单 invalid，deviceData 变成 null 提交 */
+      serverBindPort: [null],
       tcpWireAuthPayloadDeviceId: ['']
     });
     this.tcpDeviceTransportConfigurationFormGroup.valueChanges.pipe(
@@ -155,6 +164,42 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
     ).subscribe(() => {
       this.updateModel();
     });
+    this.applyServerBindPortControlState();
+    this.applyDeferredPayloadDeviceIdValidators();
+  }
+
+  /** 协议设备 ID 延迟档案：新增设备时须能填写且须非空，否则无法保存且易在共端口下产生脏数据。 */
+  private applyDeferredPayloadDeviceIdValidators(): void {
+    const grp = this.tcpDeviceTransportConfigurationFormGroup;
+    if (!grp) {
+      return;
+    }
+    const pidCtrl = grp.get('tcpWireAuthPayloadDeviceId');
+    if (this.tcpWireAuthMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+      pidCtrl.setValidators([(c) => {
+        const v = c.value;
+        return v != null && String(v).trim().length ? null : { required: true };
+      }]);
+    } else {
+      pidCtrl.clearValidators();
+    }
+    pidCtrl.updateValueAndValidity({ emitEvent: true });
+  }
+
+  /** 设备侧不再提交 serverBindPort（监听端口在档案）；清空控件与校验避免残留旧数据 */
+  private applyServerBindPortControlState(): void {
+    const grp = this.tcpDeviceTransportConfigurationFormGroup;
+    if (!grp) {
+      return;
+    }
+    const ctrl = grp.get('serverBindPort');
+    if (!ctrl) {
+      return;
+    }
+    ctrl.reset(null, { emitEvent: false });
+    ctrl.clearValidators();
+    ctrl.updateValueAndValidity({ emitEvent: false });
+    this.updateModel();
   }
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
@@ -174,6 +219,7 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
         tcpWireAuthPayloadDeviceId: value.tcpWireAuthPayloadDeviceId || ''
       }, {emitEvent: false});
     }
+    this.applyServerBindPortControlState();
   }
   validate(): ValidationErrors | null {
     return this.tcpDeviceTransportConfigurationFormGroup.valid ? null : {tcpDeviceTransport: false};
@@ -189,12 +235,11 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
         host: v.host,
         port: v.port
       };
-      const sh = v.sourceHost?.trim();
-      if (sh) {
-        configuration.sourceHost = sh;
-      }
-      if (v.serverBindPort != null && v.serverBindPort !== '') {
-        configuration.serverBindPort = Number(v.serverBindPort);
+      if (this.tcpProfileTransportConnectModeValue === TcpTransportConnectMode.SERVER) {
+        const sh = v.sourceHost?.trim();
+        if (sh) {
+          configuration.sourceHost = sh;
+        }
       }
       const pid = v.tcpWireAuthPayloadDeviceId?.trim();
       if (pid) {

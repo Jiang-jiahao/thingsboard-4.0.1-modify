@@ -52,6 +52,9 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         session.setChannel(ctx.channel());
+        if (!outboundClient) {
+            tcpTransportContext.trackInboundSession(session);
+        }
         if (outboundClient) {
             tcpTransportContext.finishOutboundTcpClientRegistration(session);
         }

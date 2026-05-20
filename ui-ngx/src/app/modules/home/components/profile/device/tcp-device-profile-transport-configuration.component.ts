@@ -169,6 +169,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       tcpTransportFramingMode: [TcpTransportFramingMode.LINE, Validators.required],
       tcpFixedFrameLength: [null],
       tcpWireAuthenticationMode: [TcpWireAuthenticationMode.TOKEN, Validators.required],
+      tcpProfileServerBindPort: [null, [Validators.min(1), Validators.max(65535)]],
       tcpDeferredWireAuthTokenJsonKey: [''],
       tcpOutboundReconnectIntervalSec: [null, [Validators.min(0)]],
       tcpOutboundReconnectMaxAttempts: [null, [Validators.min(0)]],
@@ -213,6 +214,19 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       takeUntil(this.destroy$)
     ).subscribe((mode: TcpWireAuthenticationMode) => {
       this.applyDeferredWireAuthTokenKeyValidators(mode);
+      this.applyTcpProfileServerBindPortValidators();
+      this.notifyValidatorChange();
+    });
+    this.tcpDeviceProfileTransportConfigurationFormGroup.get('tcpTransportConnectMode').valueChanges.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe((cm: TcpTransportConnectMode) => {
+      if (cm === TcpTransportConnectMode.CLIENT) {
+        this.tcpDeviceProfileTransportConfigurationFormGroup.patchValue(
+          { tcpProfileServerBindPort: null },
+          { emitEvent: false }
+        );
+      }
+      this.applyTcpProfileServerBindPortValidators();
       this.notifyValidatorChange();
     });
     this.tcpDeviceProfileTransportConfigurationFormGroup.statusChanges.pipe(
@@ -256,6 +270,21 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     this.applyDeferredWireAuthTokenKeyValidators(
       this.tcpDeviceProfileTransportConfigurationFormGroup.get('tcpWireAuthenticationMode').value
     );
+    this.applyTcpProfileServerBindPortValidators();
+  }
+
+  private applyTcpProfileServerBindPortValidators(): void {
+    const portCtrl = this.tcpDeviceProfileTransportConfigurationFormGroup.get('tcpProfileServerBindPort');
+    if (!portCtrl) {
+      return;
+    }
+    const connect = this.tcpDeviceProfileTransportConfigurationFormGroup.get('tcpTransportConnectMode').value;
+    if (connect === TcpTransportConnectMode.SERVER) {
+      portCtrl.setValidators([Validators.required, Validators.min(1), Validators.max(65535)]);
+    } else {
+      portCtrl.clearValidators();
+    }
+    portCtrl.updateValueAndValidity({ emitEvent: false });
   }
 
   private applyDeferredWireAuthTokenKeyValidators(mode: TcpWireAuthenticationMode): void {
@@ -270,6 +299,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       keyCtrl.clearValidators();
     }
     keyCtrl.updateValueAndValidity({emitEvent: false});
+    this.applyTcpProfileServerBindPortValidators();
   }
   private usesProtocolTemplatePayload(v: Record<string, unknown>): boolean {
     if (v['dataType'] !== TransportTcpDataType.RAW_BYTES) {
@@ -844,6 +874,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         tcpTransportFramingMode: value.tcpTransportFramingMode,
         tcpFixedFrameLength: value.tcpFixedFrameLength,
         tcpWireAuthenticationMode: value.tcpWireAuthenticationMode,
+        tcpProfileServerBindPort: value.tcpProfileServerBindPort ?? null,
         tcpDeferredWireAuthTokenJsonKey: value.tcpDeferredWireAuthTokenJsonKey ?? '',
         tcpOutboundReconnectIntervalSec: value.tcpOutboundReconnectIntervalSec,
         tcpOutboundReconnectMaxAttempts: value.tcpOutboundReconnectMaxAttempts,
@@ -918,6 +949,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       fixedCtrl.updateValueAndValidity({emitEvent: false});
       this.applyTcpOpaqueKeyValidators(formDataType);
       this.applyDeferredWireAuthTokenKeyValidators(value.tcpWireAuthenticationMode);
+      this.applyTcpProfileServerBindPortValidators();
       this.scheduleSyncHexLtvPanelExpanded();
       this.notifyValidatorChange();
     }
@@ -1157,6 +1189,15 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     }
     if (v.tcpReadIdleTimeoutSec != null && v.tcpReadIdleTimeoutSec !== '') {
       configuration.tcpReadIdleTimeoutSec = Number(v.tcpReadIdleTimeoutSec);
+    }
+    if (v.tcpTransportConnectMode === TcpTransportConnectMode.SERVER) {
+      const pbp = v.tcpProfileServerBindPort;
+      if (pbp != null && pbp !== '') {
+        const n = Number(pbp);
+        if (Number.isFinite(n)) {
+          configuration.tcpProfileServerBindPort = n;
+        }
+      }
     }
     if (v.tcpWireAuthenticationMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
         || v.tcpWireAuthenticationMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {

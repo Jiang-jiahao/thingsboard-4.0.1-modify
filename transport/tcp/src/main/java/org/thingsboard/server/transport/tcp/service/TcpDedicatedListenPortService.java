@@ -23,6 +23,7 @@ import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.data.DeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration;
+import org.thingsboard.server.common.data.device.data.TcpEffectiveServerBindPort;
 import org.thingsboard.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode;
 import java.net.InetAddress;
@@ -30,6 +31,7 @@ import java.net.UnknownHostException;
 import org.thingsboard.server.common.data.device.profile.TcpTransportConnectMode;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.transport.DeviceDeletedEvent;
+import org.thingsboard.server.common.transport.DeviceProfileUpdatedEvent;
 import org.thingsboard.server.common.transport.DeviceUpdatedEvent;
 import org.thingsboard.server.common.transport.TransportDeviceProfileCache;
 import org.thingsboard.server.gen.transport.TransportProtos;
@@ -40,12 +42,14 @@ import org.thingsboard.server.transport.tcp.TcpTransportService;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 /**
- * SERVER 模式下 {@link TcpDeviceTransportConfiguration#getServerBindPort()}：同一端口可对应多台设备，但必须共用同一设备配置文件；
+ * SERVER 模式下专用监听端口：优先设备档案 {@link TcpDeviceProfileTransportConfiguration#getTcpProfileServerBindPort()}，
+ * 否则设备传输 {@link TcpDeviceTransportConfiguration#getServerBindPort()}（兼容旧数据）。同一端口可对应多台设备，但必须共用同一设备配置文件；
  * 无线上鉴权 NONE 且多台共享端口时须靠互异的 {@link TcpDeviceTransportConfiguration#getSourceHost()} 区分；
  * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 且多台共享端口时须靠互异的 {@link TcpDeviceTransportConfiguration#getTcpWireAuthPayloadDeviceId()} 区分。
  */
@@ -94,6 +98,37 @@ public class TcpDedicatedListenPortService {
     @EventListener(DeviceDeletedEvent.class)
     public void onDeviceDeleted(DeviceDeletedEvent event) {
         remove(event.getDeviceId());
+        syncPortsWithTransport();
+    }
+
+    @EventListener(DeviceProfileUpdatedEvent.class)
+    public void onDeviceProfileUpdated(DeviceProfileUpdatedEvent event) {
+        DeviceProfile p = event.getDeviceProfile();
+        if (p == null || p.getTransportType() != DeviceTransportType.TCP) {
+            return;
+        }
+        UUID profileUuid = p.getId().getId();
+        for (DeviceId did : new HashSet<>(deviceIdToListenPort.keySet())) {
+            Device d = protoEntityService.getDeviceById(did);
+            if (d != null && d.getDeviceProfileId().getId().equals(profileUuid)) {
+                remove(did);
+            }
+        }
+        int page = 0;
+        int pageSize = 512;
+        boolean hasNext;
+        do {
+            TransportProtos.GetTcpDevicesResponseMsg response = protoEntityService.getTcpDevicesIds(page, pageSize);
+            for (String id : response.getIdsList()) {
+                DeviceId did = new DeviceId(UUID.fromString(id));
+                Device d = protoEntityService.getDeviceById(did);
+                if (d != null && d.getDeviceProfileId().getId().equals(profileUuid)) {
+                    upsert(d);
+                }
+            }
+            hasNext = response.getHasNextPage();
+            page++;
+        } while (hasNext);
         syncPortsWithTransport();
     }
     /**
@@ -206,14 +241,6 @@ public class TcpDedicatedListenPortService {
             return;
         }
         TcpDeviceTransportConfiguration dt = (TcpDeviceTransportConfiguration) tc;
-        if (dt.getServerBindPort() == null) {
-            return;
-        }
-        int bindPort = dt.getServerBindPort();
-        if (bindPort < 1 || bindPort > 65535) {
-            log.warn("[{}] Ignoring invalid serverBindPort {}", device.getId(), bindPort);
-            return;
-        }
         DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
         if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
             return;
@@ -225,13 +252,26 @@ public class TcpDedicatedListenPortService {
         if (ptc.getTcpTransportConnectMode() != TcpTransportConnectMode.SERVER) {
             return;
         }
+        Integer bindPort = TcpEffectiveServerBindPort.resolve(profile, dt);
+        if (bindPort == null) {
+            return;
+        }
+        if (bindPort < 1 || bindPort > 65535) {
+            log.warn("[{}] Ignoring invalid effective TCP listen port {}", device.getId(), bindPort);
+            return;
+        }
         listenPortToDeviceIds.computeIfAbsent(bindPort, k -> ConcurrentHashMap.newKeySet()).add(device.getId());
         deviceIdToListenPort.put(device.getId(), bindPort);
     }
     private boolean sourceHostMatchesIfConfigured(Device device, SocketAddress remote) {
+        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
         TcpDeviceTransportConfiguration dt = (TcpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
         if (StringUtils.isBlank(dt.getSourceHost())) {
-            Set<DeviceId> onPort = listenPortToDeviceIds.get(dt.getServerBindPort());
+            Integer effPort = TcpEffectiveServerBindPort.resolve(profile, dt);
+            if (effPort == null) {
+                return true;
+            }
+            Set<DeviceId> onPort = listenPortToDeviceIds.get(effPort);
             if (onPort != null && onPort.size() > 1) {
                 return false;
             }

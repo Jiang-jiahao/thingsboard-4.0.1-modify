@@ -727,6 +727,8 @@ export interface TcpDeviceProfileTransportConfiguration {
   tcpTransportFramingMode?: TcpTransportFramingMode;
   tcpFixedFrameLength?: number;
   tcpWireAuthenticationMode?: TcpWireAuthenticationMode;
+  /** SERVER：档案级专用监听端口；与延迟链路上鉴权配套时设备侧勿再填 serverBindPort */
+  tcpProfileServerBindPort?: number;
   /** DEFERRED：解析后 JSON 中身份字段名（TOKEN 模式为 ACCESS_TOKEN；DEVICE_ID 模式为协议设备 ID） */
   tcpDeferredWireAuthTokenJsonKey?: string;
   /** CLIENT：断线/建连失败后重连间隔（秒）；空=后端默认 30；0=不重连 */

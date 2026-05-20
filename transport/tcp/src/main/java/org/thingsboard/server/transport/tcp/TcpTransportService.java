@@ -113,6 +113,7 @@ public class TcpTransportService implements TbTransportService {
                 Channel ch = dedicatedListenChannels.remove(boundPort);
                 if (ch != null) {
                     try {
+                        context.closeInboundSessionsOnLocalPort(boundPort);
                         ch.close().sync();
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
@@ -155,6 +156,9 @@ public class TcpTransportService implements TbTransportService {
         try {
             for (Channel ch : dedicatedListenChannels.values()) {
                 try {
+                    if (ch.localAddress() instanceof InetSocketAddress isa) {
+                        context.closeInboundSessionsOnLocalPort(isa.getPort());
+                    }
                     ch.close().sync();
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();

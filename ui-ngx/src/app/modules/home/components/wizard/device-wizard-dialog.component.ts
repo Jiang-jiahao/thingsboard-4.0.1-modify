@@ -14,14 +14,26 @@
 /// limitations under the License.
 ///
 
-import { Component, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DialogComponent } from '@shared/components/dialog.component';
 import { Router } from '@angular/router';
-import { Device, DeviceProfileInfo, DeviceTransportType } from '@shared/models/device.models';
+import {
+  createDeviceConfiguration,
+  createDeviceTransportConfiguration,
+  Device,
+  DeviceData,
+  DeviceProfile,
+  DeviceProfileInfo,
+  DeviceProfileType,
+  DeviceTransportType,
+  TcpDeviceProfileTransportConfiguration,
+  TcpTransportConnectMode,
+  TcpWireAuthenticationMode
+} from '@shared/models/device.models';
 import { MatStepper, StepperOrientation } from '@angular/material/stepper';
 import { EntityType } from '@shared/models/entity-type.models';
 import { Observable, throwError } from 'rxjs';
@@ -33,6 +45,8 @@ import { MediaBreakpoints } from '@shared/models/constants';
 import { deepTrim } from '@core/utils';
 import { CustomerId } from '@shared/models/id/customer-id';
 import { HttpErrorResponse } from '@angular/common/http';
+import { DeviceProfileService } from '@core/http/device-profile.service';
+import { DeviceProfileId } from '@shared/models/id/device-profile-id';
 
 @Component({
   selector: 'tb-device-wizard',
@@ -61,12 +75,21 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
 
   private currentDeviceProfileTransportType = DeviceTransportType.DEFAULT;
 
+  /** 与设备详情页一致，供 tb-device-data 展示传输配置（含 TCP 协议设备 ID） */
+  tcpProfileWireAuthMode: TcpWireAuthenticationMode | null = null;
+
+  tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
+
+  readonly deviceWizardDeviceScope: 'tenant' = 'tenant';
+
   constructor(protected store: Store<AppState>,
               protected router: Router,
               public dialogRef: MatDialogRef<DeviceWizardDialogComponent, Device>,
               private deviceService: DeviceService,
               private breakpointObserver: BreakpointObserver,
-              private fb: FormBuilder) {
+              private fb: FormBuilder,
+              private deviceProfileService: DeviceProfileService,
+              private cd: ChangeDetectorRef) {
     super(store, router, dialogRef);
 
     this.stepperOrientation = this.breakpointObserver.observe(MediaBreakpoints['gt-sm'])
@@ -80,8 +103,9 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
         label: ['', Validators.maxLength(255)],
         gateway: [false],
         overwriteActivityTime: [false],
-        customerId: [null],
+        customerId: [null as CustomerId | null],
         deviceProfileId: [null, Validators.required],
+        deviceData: [null as DeviceData | null, Validators.required],
         description: ['']
       }
     );
@@ -129,10 +153,104 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
     return this.currentDeviceProfileTransportType;
   }
 
-  deviceProfileChanged(deviceProfile: DeviceProfileInfo) {
-    if (deviceProfile) {
-      this.currentDeviceProfileTransportType = deviceProfile.transportType;
+  /**
+   * 与设备详情页 onDeviceProfileChanged 对齐：拉取完整档案以得到 transportType 与 TCP 链路上鉴权模式，
+   * 并初始化 deviceData（添加设备向导原先不采集 deviceData，导致 TCP DEFERRED 等无法配置）。
+   */
+  deviceProfileChanged(deviceProfile: DeviceProfileInfo | null): void {
+    if (!deviceProfile) {
+      this.applyTcpProfileWireAuthFromDeviceProfile(null);
+      this.currentDeviceProfileTransportType = DeviceTransportType.DEFAULT;
+      this.credentialsOptionalStep = true;
+      this.deviceWizardFormGroup.patchValue({ deviceData: null }, { emitEvent: false });
+      this.cd.markForCheck();
+      return;
+    }
+    const prev: DeviceData = this.deviceWizardFormGroup.getRawValue().deviceData;
+    const apply = (profileType: DeviceProfileType, transportType: DeviceTransportType) => {
+      if (!transportType) {
+        return;
+      }
+      if (!prev) {
+        const deviceData: DeviceData = {
+          configuration: createDeviceConfiguration(profileType),
+          transportConfiguration: createDeviceTransportConfiguration(transportType)
+        };
+        this.deviceWizardFormGroup.patchValue({ deviceData });
+        return;
+      }
+      let next: DeviceData = prev;
+      if (prev.configuration?.type !== profileType) {
+        next = {...next, configuration: createDeviceConfiguration(profileType)};
+      }
+      if (prev.transportConfiguration?.type !== transportType) {
+        next = {
+          ...next,
+          transportConfiguration: createDeviceTransportConfiguration(transportType)
+        };
+      }
+      if (next !== prev) {
+        this.deviceWizardFormGroup.patchValue({ deviceData: next });
+      }
+    };
+    const profileType = deviceProfile.type;
+    const transportTypeFromAutocomplete = deviceProfile.transportType;
+    const uuid = this.resolveDeviceProfileUuid(deviceProfile);
+    if (!uuid) {
+      this.applyTcpProfileWireAuthFromDeviceProfile(null);
+      apply(profileType, transportTypeFromAutocomplete);
+      this.currentDeviceProfileTransportType = transportTypeFromAutocomplete ?? DeviceTransportType.DEFAULT;
       this.credentialsOptionalStep = this.currentDeviceProfileTransportType !== DeviceTransportType.LWM2M;
+      this.cd.markForCheck();
+      return;
+    }
+    this.deviceProfileService.getDeviceProfile(uuid).subscribe({
+      next: (dp: DeviceProfile) => {
+        this.applyTcpProfileWireAuthFromDeviceProfile(dp);
+        const resolvedProfileType = dp?.type ?? profileType;
+        const resolvedTransportType = dp?.transportType ?? transportTypeFromAutocomplete;
+        apply(resolvedProfileType, resolvedTransportType);
+        this.currentDeviceProfileTransportType = resolvedTransportType ?? DeviceTransportType.DEFAULT;
+        this.credentialsOptionalStep = this.currentDeviceProfileTransportType !== DeviceTransportType.LWM2M;
+        this.cd.markForCheck();
+      },
+      error: () => {
+        this.applyTcpProfileWireAuthFromDeviceProfile(null);
+        apply(profileType, transportTypeFromAutocomplete);
+        this.currentDeviceProfileTransportType = transportTypeFromAutocomplete ?? DeviceTransportType.DEFAULT;
+        this.credentialsOptionalStep = this.currentDeviceProfileTransportType !== DeviceTransportType.LWM2M;
+        this.cd.markForCheck();
+      }
+    });
+  }
+
+  private resolveDeviceProfileUuid(profileRef: DeviceProfileInfo | DeviceProfileId | null | undefined): string | null {
+    if (profileRef == null || profileRef.id == null) {
+      return null;
+    }
+    const idField = profileRef.id as string | { id?: string };
+    if (typeof idField === 'string') {
+      return idField.length ? idField : null;
+    }
+    if (typeof idField === 'object' && typeof idField.id === 'string' && idField.id.length) {
+      return idField.id;
+    }
+    return null;
+  }
+
+  private applyTcpProfileWireAuthFromDeviceProfile(dp: DeviceProfile | null): void {
+    if (!dp || dp.transportType !== DeviceTransportType.TCP) {
+      this.tcpProfileWireAuthMode = null;
+      this.tcpProfileTransportConnectMode = null;
+      return;
+    }
+    const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;
+    if (raw && (raw.type === DeviceTransportType.TCP || raw.type == null || raw.type === undefined)) {
+      this.tcpProfileWireAuthMode = raw.tcpWireAuthenticationMode ?? null;
+      this.tcpProfileTransportConnectMode = raw.tcpTransportConnectMode ?? null;
+    } else {
+      this.tcpProfileWireAuthMode = null;
+      this.tcpProfileTransportConnectMode = null;
     }
   }
 
@@ -141,6 +259,7 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
       name: this.deviceWizardFormGroup.get('name').value,
       label: this.deviceWizardFormGroup.get('label').value,
       deviceProfileId: this.deviceWizardFormGroup.get('deviceProfileId').value,
+      deviceData: this.deviceWizardFormGroup.get('deviceData').value,
       additionalInfo: {
         gateway: this.deviceWizardFormGroup.get('gateway').value,
         overwriteActivityTime: this.deviceWizardFormGroup.get('overwriteActivityTime').value,
