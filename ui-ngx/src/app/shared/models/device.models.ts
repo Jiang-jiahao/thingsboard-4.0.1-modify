@@ -1039,11 +1039,34 @@ export const deviceProfileAlarmValidator = (control: AbstractControl): Validatio
 };
 
 
+export enum DeviceProfileRpcBindingType {
+  TCP_TEMPLATE = 'TCP_TEMPLATE',
+  NATIVE = 'NATIVE'
+}
+
+/** 设备档案：平台 RPC 方法目录（对外统一 id，按绑定映射到 TCP 组帧或原生 RPC） */
+export interface DeviceProfileRpcMethod {
+  id: string;
+  displayName?: string;
+  oneWay?: boolean;
+  timeoutMs?: number;
+  bindingType: DeviceProfileRpcBindingType;
+  /** TCP_TEMPLATE */
+  templateCommandName?: string;
+  commandValue?: number;
+  templateId?: string;
+  paramMap?: Record<string, string>;
+  /** NATIVE */
+  deviceMethod?: string;
+  paramsTemplateJson?: string;
+}
+
 export interface DeviceProfileData {
   configuration: DeviceProfileConfiguration;
   transportConfiguration: DeviceProfileTransportConfiguration;
   alarms?: Array<DeviceProfileAlarm>;
   provisionConfiguration?: DeviceProvisionConfiguration;
+  rpcMethods?: DeviceProfileRpcMethod[];
 }
 
 export interface DeviceProfile extends BaseData<DeviceProfileId>, HasTenantId, HasVersion, ExportableEntity<DeviceProfileId> {

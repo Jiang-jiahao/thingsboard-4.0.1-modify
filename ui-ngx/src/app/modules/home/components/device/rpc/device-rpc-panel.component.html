@@ -1,0 +1,86 @@
+<!--
+    Copyright © 2016-2025 The Thingsboard Authors
+-->
+<div class="tb-device-rpc-panel mat-padding">
+  <div *ngIf="loading" class="flex items-center justify-center" style="min-height: 120px;">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!loading">
+    <div *ngIf="!hasCatalog" class="tb-prompt flex flex-col items-center" style="min-height: 120px;">
+      <span translate>device.rpc.no-catalog</span>
+    </div>
+
+    <ng-container *ngIf="hasCatalog">
+      <div class="tb-hint mat-body-2" style="margin-bottom: 12px;" translate>device.rpc.hint</div>
+
+      <form [formGroup]="invokeForm" class="flex flex-col gap-2">
+        <mat-form-field class="mat-block">
+          <mat-label translate>device.rpc.select-method</mat-label>
+          <mat-select formControlName="methodId">
+            <mat-option *ngFor="let m of catalogMethods" [value]="m.id">
+              {{ methodOptionLabel(m) }} ({{ m.id }})
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <ng-container *ngIf="selectedMethod?.bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE">
+          <ng-container *ngIf="usesFieldInputs">
+            <div class="mat-subtitle-2" translate>device.rpc.params</div>
+            <div class="tb-device-rpc-field-grid">
+              <mat-form-field *ngFor="let row of fieldRows" class="mat-block">
+                <mat-label>{{ row.platformKey }}</mat-label>
+                <input matInput [(ngModel)]="row.inputText" [ngModelOptions]="{standalone: true}"/>
+              </mat-form-field>
+            </div>
+          </ng-container>
+          <mat-form-field *ngIf="!usesFieldInputs" class="mat-block">
+            <mat-label translate>device.rpc.params-json</mat-label>
+            <textarea matInput rows="6" [(ngModel)]="valuesJson" [ngModelOptions]="{standalone: true}"></textarea>
+            <mat-hint translate>profiles.protocol-hex-test-values-hint</mat-hint>
+          </mat-form-field>
+        </ng-container>
+
+        <ng-container *ngIf="selectedMethod?.bindingType === DeviceProfileRpcBindingType.NATIVE">
+          <mat-form-field class="mat-block">
+            <mat-label translate>device.rpc.params-json</mat-label>
+            <textarea matInput rows="8" [(ngModel)]="nativeParamsJson" [ngModelOptions]="{standalone: true}"></textarea>
+            <mat-hint translate>device.rpc.native-params-hint</mat-hint>
+          </mat-form-field>
+          <div class="mat-caption" *ngIf="selectedMethod?.deviceMethod">
+            <span translate>device-profile.rpc-device-method</span>:
+            <code>{{ selectedMethod.deviceMethod }}</code>
+          </div>
+        </ng-container>
+
+        <div class="flex flex-row gap-2 items-center tb-device-rpc-actions">
+          <button mat-raised-button color="primary" type="button"
+                  [disabled]="sending || !invokeForm.valid"
+                  (click)="sendRpc()">
+            <mat-icon *ngIf="!sending">send</mat-icon>
+            <mat-spinner *ngIf="sending" diameter="20"></mat-spinner>
+            <span translate>device.rpc.send</span>
+          </button>
+          <span class="tb-device-rpc-mode mat-body-2" *ngIf="selectedMethod">
+            <span class="tb-device-rpc-mode-label" translate>device.rpc.mode-label</span>
+            <span class="tb-device-rpc-mode-chip"
+                  [class.tb-device-rpc-mode-chip-oneway]="selectedMethod.oneWay !== false"
+                  [class.tb-device-rpc-mode-chip-twoway]="selectedMethod.oneWay === false">
+              {{ (selectedMethod.oneWay !== false ? 'device.rpc.one-way' : 'device.rpc.two-way') | translate }}
+            </span>
+          </span>
+        </div>
+      </form>
+
+      <div *ngIf="lastBuiltHex" class="tb-device-rpc-result">
+        <div class="mat-subtitle-2" translate>device.rpc.last-hex</div>
+        <pre class="tb-device-rpc-pre">{{ lastBuiltHex }}</pre>
+      </div>
+      <div *ngIf="lastResponse != null && selectedMethod?.oneWay === false" class="tb-device-rpc-result">
+        <div class="mat-subtitle-2" translate>device.rpc.last-response</div>
+        <pre class="tb-device-rpc-pre">{{ lastResponse | json }}</pre>
+      </div>
+      <div *ngIf="lastError" class="tb-device-rpc-error mat-caption">{{ lastError }}</div>
+    </ng-container>
+  </ng-container>
+</div>

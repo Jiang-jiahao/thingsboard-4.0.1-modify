@@ -1,0 +1,12 @@
+.tb-device-profile-rpc-method-panel {
+  margin-bottom: 8px;
+}
+
+.tb-device-profile-rpc-method-fields {
+  padding-top: 8px;
+
+  &.tb-rpc-method-locked {
+    pointer-events: none;
+    opacity: 0.72;
+  }
+}

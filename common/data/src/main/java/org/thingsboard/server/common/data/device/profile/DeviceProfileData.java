@@ -38,5 +38,8 @@ public class DeviceProfileData implements Serializable {
     @Valid
     @Schema(description = "JSON array of alarm rules configuration per device profile")
     private List<DeviceProfileAlarm> alarms;
+    @Valid
+    @Schema(description = "Platform RPC method catalog: unified method id with per-transport binding (TCP template downlink or native device RPC)")
+    private List<DeviceProfileRpcMethod> rpcMethods;
 
 }

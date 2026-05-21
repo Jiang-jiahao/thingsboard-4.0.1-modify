@@ -106,6 +106,15 @@ public final class TcpPayloadUtil {
     /**
      * 业务 JSON → 负载字节（HEX 时为原始字节：优先从 {@value #TCP_HEX_PAYLOAD_JSON_KEY} 字段 parseHex，否则为整段 JSON 的 UTF-8）。
      */
+    /**
+     * RPC {@code params} 是否为模板/原始字节下行（含 {@value #TCP_HEX_PAYLOAD_JSON_KEY} 键，由平台组帧后投递）。
+     */
+    public static boolean isHexTemplateRpcParams(String rpcParamsJson) {
+        return rpcParamsJson != null
+                && !rpcParamsJson.isBlank()
+                && rpcParamsJson.contains("\"" + TCP_HEX_PAYLOAD_JSON_KEY + "\"");
+    }
+
     public static byte[] bodyBytesForDataType(TransportTcpDataType dataType, String jsonUtf8) {
         switch (dataType) {
             case RAW_BYTES:
@@ -135,6 +144,8 @@ public final class TcpPayloadUtil {
     }
     public static ByteBuf wrapFraming(TcpTransportFramingMode framing, byte[] payload, int fixedFrameLength) {
         switch (framing) {
+            case NONE:
+                return Unpooled.wrappedBuffer(payload);
             case LINE:
                 return Unpooled.wrappedBuffer(payload, CRLF);
             case LENGTH_PREFIX_4:
@@ -160,7 +171,7 @@ public final class TcpPayloadUtil {
                 byte[] padded = Arrays.copyOf(payload, fixedFrameLength);
                 return Unpooled.wrappedBuffer(padded);
             default:
-                return Unpooled.wrappedBuffer(payload, CRLF);
+                throw new IllegalArgumentException("Unsupported TCP framing mode: " + framing);
         }
     }
 

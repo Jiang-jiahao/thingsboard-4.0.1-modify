@@ -37,6 +37,10 @@
   <tb-calculated-fields-table [active]="calculatedFieldsTab.isActive" [entityId]="entity.id"/>
 </mat-tab>
 <mat-tab *ngIf="entity"
+         label="{{ 'device.rpc.tab' | translate }}" #rpcTab="matTab">
+  <tb-device-rpc-panel [active]="rpcTab.isActive" [device]="entity"></tb-device-rpc-panel>
+</mat-tab>
+<mat-tab *ngIf="entity"
          label="{{ 'alarm.alarms' | translate }}" #alarmsTab="matTab">
   <tb-alarm-table [active]="alarmsTab.isActive" [entityId]="entity.id"></tb-alarm-table>
 </mat-tab>

@@ -120,6 +120,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
           configuration: [entity && !this.isAdd ? entity.profileData?.configuration : {}, Validators.required],
           transportConfiguration: [entity && !this.isAdd ? entity.profileData?.transportConfiguration : {}, Validators.required],
           alarms: [entity && !this.isAdd ? entity.profileData?.alarms : []],
+          rpcMethods: [entity && !this.isAdd ? entity.profileData?.rpcMethods : []],
           provisionConfiguration: [deviceProvisionConfiguration, Validators.required]
         }),
         defaultRuleChainId: [entity && entity.defaultRuleChainId ? entity.defaultRuleChainId.id : null, []],
@@ -207,6 +208,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
       configuration: entity.profileData?.configuration,
       transportConfiguration: entity.profileData?.transportConfiguration,
       alarms: entity.profileData?.alarms,
+      rpcMethods: entity.profileData?.rpcMethods,
       provisionConfiguration: deviceProvisionConfiguration
     }}, {emitEvent: false});
     this.entityForm.patchValue({defaultRuleChainId: entity.defaultRuleChainId ? entity.defaultRuleChainId.id : null}, {emitEvent: false});

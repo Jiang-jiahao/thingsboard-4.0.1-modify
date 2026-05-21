@@ -1,0 +1,27 @@
+<!--
+    Copyright © 2016-2025 The Thingsboard Authors
+-->
+<div class="tb-device-profile-rpc-methods" [formGroup]="deviceProfileRpcMethodsFormGroup">
+  <div class="tb-hint mat-body-2 tb-device-profile-rpc-methods-intro" translate>device-profile.rpc-methods-hint</div>
+  <mat-error *ngIf="hasDuplicateMethodIds()" translate>device-profile.rpc-method-id-unique</mat-error>
+  <div *ngFor="let rpcControl of rpcMethodsFormArray.controls; trackBy: trackByIndex;
+               let $index = index; last as isLast;"
+       class="flex flex-col" [class.pb-2]="!isLast">
+    <tb-device-profile-rpc-method [formControl]="rpcControl"
+                                  [expanded]="$index === 0"
+                                  [readOnly]="disabled"
+                                  [transportType]="transportType"
+                                  [downlinkCommands]="downlinkCommands"
+                                  [protocolTemplateBundleSelected]="protocolTemplateBundleSelected"
+                                  (removeRpcMethod)="removeRpcMethod($index)">
+    </tb-device-profile-rpc-method>
+  </div>
+  <div *ngIf="!rpcMethodsFormArray.controls.length">
+    <span class="tb-prompt flex items-center justify-center" translate>device-profile.no-rpc-methods</span>
+  </div>
+  <div *ngIf="!disabled" class="tb-device-profile-rpc-methods-actions">
+    <button mat-raised-button color="primary" type="button" (click)="addRpcMethod()">
+      <span translate>device-profile.add-rpc-method</span>
+    </button>
+  </div>
+</div>

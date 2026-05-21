@@ -1,0 +1,84 @@
+<!--
+    Copyright © 2016-2025 The Thingsboard Authors
+-->
+<mat-expansion-panel class="tb-device-profile-rpc-method-panel" [expanded]="expanded">
+  <mat-expansion-panel-header>
+    <mat-panel-title>
+      {{ rpcMethodFormGroup.get('displayName').value || rpcMethodFormGroup.get('id').value || ('device-profile.edit-rpc-method' | translate) }}
+    </mat-panel-title>
+    <mat-panel-description *ngIf="rpcMethodFormGroup.get('id').value as mid">
+      <span class="mat-caption">{{ mid }}</span>
+      <span class="mat-caption" *ngIf="tcpBindingOnly" translate>device-profile.rpc-binding-tcp-template</span>
+      <span class="mat-caption" *ngIf="nativeBindingOnly" translate>device-profile.rpc-binding-native</span>
+    </mat-panel-description>
+  </mat-expansion-panel-header>
+  <div [formGroup]="rpcMethodFormGroup" class="tb-device-profile-rpc-method-fields"
+       [class.tb-rpc-method-locked]="isLocked">
+    <div class="flex flex-row gap-2 items-start">
+      <mat-form-field class="mat-block flex-1">
+        <mat-label translate>device-profile.rpc-method-id</mat-label>
+        <input matInput formControlName="id" required/>
+        <mat-error *ngIf="rpcMethodFormGroup.get('id').hasError('required')" translate>device-profile.rpc-method-id-required</mat-error>
+        <mat-error *ngIf="rpcMethodFormGroup.get('id').hasError('pattern')" translate>device-profile.rpc-method-id-pattern</mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block flex-1">
+        <mat-label translate>device-profile.rpc-method-display-name</mat-label>
+        <input matInput formControlName="displayName"/>
+      </mat-form-field>
+      <button mat-icon-button type="button" color="warn"
+              [disabled]="disabled"
+              *ngIf="!disabled && !readOnly"
+              (click)="onRemove(); $event.stopPropagation()"
+              matTooltip="{{ 'action.delete' | translate }}">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="flex flex-row gap-2 flex-wrap">
+      <mat-checkbox formControlName="oneWay" color="primary">
+        <span translate>device-profile.rpc-method-one-way</span>
+      </mat-checkbox>
+      <mat-form-field style="max-width: 160px;">
+        <mat-label translate>device-profile.rpc-method-timeout-ms</mat-label>
+        <input matInput type="number" formControlName="timeoutMs" min="0"/>
+      </mat-form-field>
+    </div>
+
+    <ng-container *ngIf="tcpBindingOnly">
+      <div class="tb-hint mat-body-2" *ngIf="!protocolTemplateBundleSelected" style="color: var(--tb-warn-color, #f57c00);"
+           translate>device-profile.rpc-template-bundle-missing</div>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-template-command</mat-label>
+        <mat-select formControlName="templateCommandRef"
+                    [disabled]="isLocked || !downlinkCommands.length">
+          <mat-option value="">{{ 'device-profile.rpc-template-command-select' | translate }}</mat-option>
+          <mat-option *ngFor="let c of downlinkCommands" [value]="commandRef(c)">
+            {{ commandLabel(c) }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="rpcMethodFormGroup.get('templateCommandRef').hasError('required')" translate>
+          device-profile.rpc-template-command-required
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-param-map</mat-label>
+        <textarea matInput formControlName="paramMapJson" rows="2"></textarea>
+        <mat-hint translate>device-profile.rpc-param-map-hint</mat-hint>
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="nativeBindingOnly">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-device-method</mat-label>
+        <input matInput formControlName="deviceMethod" required/>
+        <mat-error *ngIf="rpcMethodFormGroup.get('deviceMethod').hasError('required')" translate>
+          device-profile.rpc-device-method-required
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-params-template</mat-label>
+        <textarea matInput formControlName="paramsTemplateJson" rows="3"></textarea>
+        <mat-hint translate>device-profile.rpc-params-template-hint</mat-hint>
+      </mat-form-field>
+    </ng-container>
+  </div>
+</mat-expansion-panel>

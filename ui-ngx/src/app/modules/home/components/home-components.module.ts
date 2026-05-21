@@ -89,6 +89,9 @@ import { ProtocolTemplateTcpDataConfigurationComponent } from '@home/components/
 import { ProtocolTemplateBundleEditorComponent } from '@home/components/profile/device/protocol-template-bundle-editor.component';
 import { DeviceProfileAlarmsComponent } from '@home/components/profile/alarm/device-profile-alarms.component';
 import { DeviceProfileAlarmComponent } from '@home/components/profile/alarm/device-profile-alarm.component';
+import { DeviceProfileRpcMethodsComponent } from '@home/components/profile/rpc/device-profile-rpc-methods.component';
+import { DeviceProfileRpcMethodComponent } from '@home/components/profile/rpc/device-profile-rpc-method.component';
+import { DeviceRpcPanelComponent } from '@home/components/device/rpc/device-rpc-panel.component';
 import { CreateAlarmRulesComponent } from '@home/components/profile/alarm/create-alarm-rules.component';
 import { AlarmRuleComponent } from '@home/components/profile/alarm/alarm-rule.component';
 import { AlarmRuleConditionComponent } from '@home/components/profile/alarm/alarm-rule-condition.component';
@@ -296,6 +299,9 @@ import {
       AlarmRuleConditionComponent,
       DeviceProfileAlarmComponent,
       DeviceProfileAlarmsComponent,
+      DeviceProfileRpcMethodComponent,
+      DeviceProfileRpcMethodsComponent,
+      DeviceRpcPanelComponent,
       DeviceProfileComponent,
       DeviceProfileDialogComponent,
       AddDeviceProfileDialogComponent,
@@ -445,6 +451,9 @@ import {
     AlarmRuleConditionComponent,
     DeviceProfileAlarmComponent,
     DeviceProfileAlarmsComponent,
+    DeviceProfileRpcMethodComponent,
+    DeviceProfileRpcMethodsComponent,
+    DeviceRpcPanelComponent,
     DeviceProfileComponent,
     DeviceProfileDialogComponent,
     AddDeviceProfileDialogComponent,

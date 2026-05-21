@@ -252,11 +252,24 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
 
     @Override
     public void onToDeviceRpcRequest(UUID sessionId, ToDeviceRpcRequestMsg rpcRequest) {
+        String params = rpcRequest.getParams();
+        TransportTcpDataType dataType = getPayloadDataType();
+        // 协议模板 / 原始字节：params.hex 已由 UI buildHex 组好，线上只发 decode 后的原始字节，不再包 RPC 信封 JSON。
+        if ((dataType == TransportTcpDataType.RAW_BYTES || dataType == TransportTcpDataType.PROTOCOL_TEMPLATE)
+                && TcpPayloadUtil.isHexTemplateRpcParams(params)) {
+            ByteBuf buf = TcpPayloadUtil.encodeBusinessFrame(
+                    dataType,
+                    getTcpTransportFramingMode(),
+                    getTcpFixedFrameLengthForFraming(),
+                    params);
+            writeByteBuf(buf);
+            return;
+        }
         JsonObject msg = new JsonObject();
         msg.addProperty("method", "rpc");
         msg.addProperty("requestId", rpcRequest.getRequestId());
         msg.addProperty("name", rpcRequest.getMethodName());
-        msg.addProperty("params", rpcRequest.getParams());
+        msg.addProperty("params", params);
         msg.addProperty("expirationTime", rpcRequest.getExpirationTime());
         msg.addProperty("oneway", rpcRequest.getOneway());
         sendJsonPayload(msg);

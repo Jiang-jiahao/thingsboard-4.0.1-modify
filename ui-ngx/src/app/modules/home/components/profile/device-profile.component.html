@@ -157,6 +157,23 @@
           <mat-expansion-panel [expanded]="false">
             <mat-expansion-panel-header>
               <mat-panel-title>
+                <div>{{'device-profile.rpc-methods-with-count' | translate:
+                  {count: entityForm.get('profileData.rpcMethods').value ?
+                      entityForm.get('profileData.rpcMethods').value.length : 0} }}</div>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <ng-template matExpansionPanelContent>
+              <tb-device-profile-rpc-methods
+                formControlName="rpcMethods"
+                [readOnly]="!isEdit"
+                [transportType]="entityForm.get('transportType').value"
+                [transportConfiguration]="entityForm.get('profileData.transportConfiguration').value">
+              </tb-device-profile-rpc-methods>
+            </ng-template>
+          </mat-expansion-panel>
+          <mat-expansion-panel [expanded]="false">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
                 <div>{{'device-profile.alarm-rules-with-count' | translate:
                   {count: entityForm.get('profileData.alarms').value ?
                       entityForm.get('profileData.alarms').value.length : 0} }}</div>
