@@ -1,86 +1,301 @@
 <!--
+
     Copyright © 2016-2025 The Thingsboard Authors
+
 -->
+
 <div class="tb-device-rpc-panel mat-padding">
+
   <div *ngIf="loading" class="flex items-center justify-center" style="min-height: 120px;">
+
     <mat-spinner diameter="32"></mat-spinner>
+
   </div>
 
+
+
   <ng-container *ngIf="!loading">
+
     <div *ngIf="!hasCatalog" class="tb-prompt flex flex-col items-center" style="min-height: 120px;">
+
       <span translate>device.rpc.no-catalog</span>
+
     </div>
 
+
+
     <ng-container *ngIf="hasCatalog">
+
       <div class="tb-hint mat-body-2" style="margin-bottom: 12px;" translate>device.rpc.hint</div>
 
+
+
       <form [formGroup]="invokeForm" class="flex flex-col gap-2">
+
         <mat-form-field class="mat-block">
+
           <mat-label translate>device.rpc.select-method</mat-label>
+
           <mat-select formControlName="methodId">
+
             <mat-option *ngFor="let m of catalogMethods" [value]="m.id">
+
               {{ methodOptionLabel(m) }} ({{ m.id }})
+
             </mat-option>
+
           </mat-select>
+
         </mat-form-field>
 
-        <ng-container *ngIf="selectedMethod?.bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE">
-          <ng-container *ngIf="usesFieldInputs">
-            <div class="mat-subtitle-2" translate>device.rpc.params</div>
-            <div class="tb-device-rpc-field-grid">
-              <mat-form-field *ngFor="let row of fieldRows" class="mat-block">
-                <mat-label>{{ row.platformKey }}</mat-label>
-                <input matInput [(ngModel)]="row.inputText" [ngModelOptions]="{standalone: true}"/>
-              </mat-form-field>
+
+
+        <ng-container *ngIf="selectedMethod">
+
+          <mat-expansion-panel class="tb-device-rpc-fixed-editor" [expanded]="true">
+
+            <mat-expansion-panel-header>
+
+              <mat-panel-title translate>device.rpc.edit-fixed-params</mat-panel-title>
+
+              <mat-panel-description *ngIf="fixedParamSummary.length">
+
+                {{ fixedParamSummary.join(', ') }}
+
+              </mat-panel-description>
+
+            </mat-expansion-panel-header>
+
+            <div class="tb-hint mat-body-2" style="margin-bottom: 8px;" translate>device.rpc.fixed-per-method-hint</div>
+            <div class="tb-hint mat-caption" style="margin-bottom: 8px;" translate>device.rpc.fixed-save-hint</div>
+
+
+
+            <div *ngIf="methodFixedEntries.length" class="tb-device-rpc-fixed-list flex flex-col gap-2" style="margin-bottom: 12px;">
+
+              <div *ngFor="let entry of methodFixedEntries" class="flex flex-row gap-2 items-center">
+
+                <mat-form-field class="mat-block" style="flex: 1; max-width: 200px;">
+
+                  <mat-label translate>device.rpc.fixed-field</mat-label>
+
+                  <input matInput [value]="templateFieldLabel(entry.platformKey)" disabled/>
+                  <mat-hint *ngIf="hasPlatformAlias(entry.platformKey)">
+                    <span translate>device.rpc.platform-param-name</span>: {{ entry.platformKey }}
+                  </mat-hint>
+
+                </mat-form-field>
+
+                <mat-form-field class="mat-block" style="flex: 2;">
+
+                  <mat-label translate>device.rpc.fixed-value</mat-label>
+
+                  <input matInput [(ngModel)]="entry.valueText" [ngModelOptions]="{standalone: true}"/>
+
+                </mat-form-field>
+
+                <button mat-icon-button type="button" color="warn"
+
+                        (click)="removeFixedParamEntry(entry.platformKey)"
+
+                        [attr.aria-label]="'action.delete' | translate">
+
+                  <mat-icon>close</mat-icon>
+
+                </button>
+
+              </div>
+
             </div>
+
+
+
+            <div *ngIf="availableKeysToAdd.length" class="flex flex-row gap-2 items-start flex-wrap" style="margin-bottom: 12px;">
+
+              <mat-form-field style="flex: 1; min-width: 140px; max-width: 200px;">
+
+                <mat-label translate>device.rpc.add-fixed-field</mat-label>
+
+                <mat-select [(ngModel)]="newFixedKey" [ngModelOptions]="{standalone: true}">
+
+                  <mat-option *ngFor="let k of availableKeysToAdd" [value]="k">
+                    {{ templateFieldLabel(k) }}<ng-container *ngIf="hasPlatformAlias(k)"> ({{ k }})</ng-container>
+                  </mat-option>
+
+                </mat-select>
+
+              </mat-form-field>
+
+              <mat-form-field style="flex: 2; min-width: 160px;">
+
+                <mat-label translate>device.rpc.fixed-value</mat-label>
+
+                <input matInput [(ngModel)]="newFixedValue" [ngModelOptions]="{standalone: true}"/>
+
+              </mat-form-field>
+
+              <button mat-stroked-button type="button"
+
+                      [disabled]="!newFixedKey"
+
+                      (click)="addFixedParamEntry()">
+
+                <mat-icon>add</mat-icon>
+
+                <span translate>device.rpc.add-fixed</span>
+
+              </button>
+
+            </div>
+
+            <div *ngIf="!methodPlatformKeys.length" class="tb-hint mat-caption" translate>device.rpc.no-method-fields</div>
+
+
+
+            <button mat-stroked-button color="primary" type="button"
+
+                    [disabled]="savingFixedParams"
+
+                    (click)="saveFixedParams()">
+
+              <mat-spinner *ngIf="savingFixedParams" diameter="18"></mat-spinner>
+
+              <mat-icon *ngIf="!savingFixedParams">save</mat-icon>
+
+              <span translate>device.rpc.save-fixed-params</span>
+
+            </button>
+
+          </mat-expansion-panel>
+
+
+
+          <ng-container *ngIf="selectedMethod.bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE">
+
+            <ng-container *ngIf="usesFieldInputs">
+
+              <div class="mat-subtitle-2" translate>device.rpc.params</div>
+
+              <div *ngIf="!fieldRows.length" class="tb-hint mat-body-2" translate>device.rpc.all-params-fixed</div>
+
+              <div class="tb-device-rpc-field-grid">
+
+                <mat-form-field *ngFor="let row of fieldRows" class="mat-block">
+
+                  <mat-label>{{ row.templateFieldKey }}</mat-label>
+
+                  <input matInput [(ngModel)]="row.inputText" [ngModelOptions]="{standalone: true}"/>
+
+                  <mat-hint *ngIf="row.platformKey !== row.templateFieldKey">
+                    <span translate>device.rpc.platform-param-name</span>: {{ row.platformKey }}
+                  </mat-hint>
+
+                </mat-form-field>
+
+              </div>
+
+            </ng-container>
+
+            <mat-form-field *ngIf="!usesFieldInputs" class="mat-block">
+
+              <mat-label translate>device.rpc.params-json</mat-label>
+
+              <textarea matInput rows="6" [(ngModel)]="valuesJson" [ngModelOptions]="{standalone: true}"></textarea>
+
+              <mat-hint translate>profiles.protocol-hex-test-values-hint</mat-hint>
+
+            </mat-form-field>
+
           </ng-container>
-          <mat-form-field *ngIf="!usesFieldInputs" class="mat-block">
-            <mat-label translate>device.rpc.params-json</mat-label>
-            <textarea matInput rows="6" [(ngModel)]="valuesJson" [ngModelOptions]="{standalone: true}"></textarea>
-            <mat-hint translate>profiles.protocol-hex-test-values-hint</mat-hint>
-          </mat-form-field>
-        </ng-container>
 
-        <ng-container *ngIf="selectedMethod?.bindingType === DeviceProfileRpcBindingType.NATIVE">
-          <mat-form-field class="mat-block">
-            <mat-label translate>device.rpc.params-json</mat-label>
-            <textarea matInput rows="8" [(ngModel)]="nativeParamsJson" [ngModelOptions]="{standalone: true}"></textarea>
-            <mat-hint translate>device.rpc.native-params-hint</mat-hint>
-          </mat-form-field>
-          <div class="mat-caption" *ngIf="selectedMethod?.deviceMethod">
-            <span translate>device-profile.rpc-device-method</span>:
-            <code>{{ selectedMethod.deviceMethod }}</code>
-          </div>
-        </ng-container>
 
-        <div class="flex flex-row gap-2 items-center tb-device-rpc-actions">
-          <button mat-raised-button color="primary" type="button"
-                  [disabled]="sending || !invokeForm.valid"
-                  (click)="sendRpc()">
-            <mat-icon *ngIf="!sending">send</mat-icon>
-            <mat-spinner *ngIf="sending" diameter="20"></mat-spinner>
-            <span translate>device.rpc.send</span>
-          </button>
-          <span class="tb-device-rpc-mode mat-body-2" *ngIf="selectedMethod">
-            <span class="tb-device-rpc-mode-label" translate>device.rpc.mode-label</span>
-            <span class="tb-device-rpc-mode-chip"
-                  [class.tb-device-rpc-mode-chip-oneway]="selectedMethod.oneWay !== false"
-                  [class.tb-device-rpc-mode-chip-twoway]="selectedMethod.oneWay === false">
-              {{ (selectedMethod.oneWay !== false ? 'device.rpc.one-way' : 'device.rpc.two-way') | translate }}
+
+          <ng-container *ngIf="selectedMethod.bindingType === DeviceProfileRpcBindingType.NATIVE">
+
+            <mat-form-field class="mat-block">
+
+              <mat-label translate>device.rpc.params-json</mat-label>
+
+              <textarea matInput rows="8" [(ngModel)]="nativeParamsJson" [ngModelOptions]="{standalone: true}"></textarea>
+
+              <mat-hint translate>device.rpc.native-params-hint</mat-hint>
+
+            </mat-form-field>
+
+            <div class="mat-caption" *ngIf="selectedMethod.deviceMethod">
+
+              <span translate>device-profile.rpc-device-method</span>:
+
+              <code>{{ selectedMethod.deviceMethod }}</code>
+
+            </div>
+
+          </ng-container>
+
+
+
+          <div class="flex flex-row gap-2 items-center tb-device-rpc-actions">
+
+            <button mat-raised-button color="primary" type="button"
+
+                    [disabled]="sending || !invokeForm.valid"
+
+                    (click)="sendRpc()">
+
+              <mat-icon *ngIf="!sending">send</mat-icon>
+
+              <mat-spinner *ngIf="sending" diameter="20"></mat-spinner>
+
+              <span translate>device.rpc.send</span>
+
+            </button>
+
+            <span class="tb-device-rpc-mode mat-body-2">
+
+              <span class="tb-device-rpc-mode-label" translate>device.rpc.mode-label</span>
+
+              <span class="tb-device-rpc-mode-chip"
+
+                    [class.tb-device-rpc-mode-chip-oneway]="selectedMethod.oneWay !== false"
+
+                    [class.tb-device-rpc-mode-chip-twoway]="selectedMethod.oneWay === false">
+
+                {{ (selectedMethod.oneWay !== false ? 'device.rpc.one-way' : 'device.rpc.two-way') | translate }}
+
+              </span>
+
             </span>
-          </span>
-        </div>
+
+          </div>
+
+        </ng-container>
+
       </form>
 
+
+
       <div *ngIf="lastBuiltHex" class="tb-device-rpc-result">
+
         <div class="mat-subtitle-2" translate>device.rpc.last-hex</div>
+
         <pre class="tb-device-rpc-pre">{{ lastBuiltHex }}</pre>
+
       </div>
+
       <div *ngIf="lastResponse != null && selectedMethod?.oneWay === false" class="tb-device-rpc-result">
+
         <div class="mat-subtitle-2" translate>device.rpc.last-response</div>
+
         <pre class="tb-device-rpc-pre">{{ lastResponse | json }}</pre>
+
       </div>
+
       <div *ngIf="lastError" class="tb-device-rpc-error mat-caption">{{ lastError }}</div>
+
     </ng-container>
+
   </ng-container>
+
 </div>
+
+

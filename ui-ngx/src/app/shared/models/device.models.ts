@@ -1206,6 +1206,10 @@ export interface DeviceTransportConfiguration extends DeviceTransportConfigurati
 export interface DeviceData {
   configuration: DeviceConfiguration;
   transportConfiguration: DeviceTransportConfiguration;
+  /** @deprecated 旧版全局固定参数；请用 rpcParamDefaultsByMethod */
+  rpcParamDefaults?: Record<string, unknown>;
+  /** 按 RPC 方法 id 分组的固定参数 */
+  rpcParamDefaultsByMethod?: Record<string, Record<string, unknown>>;
 }
 
 export interface Device extends BaseData<DeviceId>, HasTenantId, HasVersion, ExportableEntity<DeviceId> {

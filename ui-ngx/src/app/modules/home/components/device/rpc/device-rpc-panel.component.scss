@@ -59,3 +59,19 @@
 .tb-device-rpc-result {
   margin-top: 16px;
 }
+
+.tb-device-rpc-fixed-editor {
+  .mat-expansion-panel-body {
+    padding-top: 8px;
+  }
+
+  button mat-spinner {
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+}
+
+.tb-device-rpc-fixed-list {
+  padding: 4px 0;
+}

@@ -166,7 +166,13 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   private updateModel() {
     let deviceData: DeviceData = null;
     if (this.deviceDataFormGroup.valid) {
-      deviceData = this.deviceDataFormGroup.getRawValue();
+      const raw = this.deviceDataFormGroup.getRawValue();
+      deviceData = {
+        configuration: raw.configuration,
+        transportConfiguration: raw.transportConfiguration,
+        rpcParamDefaults: this.lastWrittenValue?.rpcParamDefaults,
+        rpcParamDefaultsByMethod: this.lastWrittenValue?.rpcParamDefaultsByMethod
+      };
     }
     this.propagateChange(deviceData);
   }
