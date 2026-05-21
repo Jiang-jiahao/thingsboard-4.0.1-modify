@@ -115,6 +115,15 @@ public interface TransportService {
     GetTcpDevicesResponseMsg getTcpDevicesIds(GetTcpDevicesRequestMsg requestMsg);
 
     /**
+     * 获取使用 UDP 传输类型的设备 ID 列表。
+     */
+    TransportProtos.GetUdpDevicesResponseMsg getUdpDevicesIds(TransportProtos.GetUdpDevicesRequestMsg requestMsg);
+
+    TransportProtos.GetTcpProfilesResponseMsg getTcpProfileIds(TransportProtos.GetTcpProfilesRequestMsg requestMsg);
+
+    TransportProtos.GetUdpProfilesResponseMsg getUdpProfileIds(TransportProtos.GetUdpProfilesRequestMsg requestMsg);
+
+    /**
      * 获取设备信息。
      * 这是一个同步请求。
      *

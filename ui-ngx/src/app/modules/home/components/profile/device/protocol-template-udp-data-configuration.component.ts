@@ -1,0 +1,609 @@
+///
+/// Copyright © 2016-2025 The Thingsboard Authors
+///
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  AfterViewInit,
+  OnChanges,
+  OnDestroy,
+  Output,
+  SimpleChanges
+} from '@angular/core';
+import { AbstractControl, UntypedFormArray, UntypedFormGroup } from '@angular/forms';
+import {
+  ProtocolTemplateCommandDirection,
+  ProtocolTemplateUplinkDataDestination,
+  TcpHexLtvChunkOrder,
+  TcpHexUnknownTagMode,
+  TcpHexValueType,
+  isTcpHexVariableByteSlice,
+  UDP_HEX_FRAME_FIELD_VALUE_TYPES,
+  UDP_HEX_PROTOCOL_TEMPLATE_COMMAND_MATCH_TYPES,
+  UDP_HEX_LTV_TAG_VALUE_OPTIONS,
+  TcpHexLtvTagValueOption,
+  TransportUdpDataType
+} from '@shared/models/device.models';
+import {
+  formatIntegralWireTextEcho,
+  formatTcpHexMatchValueHexHint,
+  normalizeFixedBytesHexWhitespace,
+  parseIntegralWireTextToNumber,
+  parseLtvTagWireTextToNumber,
+  utf8FixedBytesFormValueToStoredFixedHex
+} from '@home/pages/profiles/protocol-template-downlink-fields.util';
+import { merge, Subject, Subscription } from 'rxjs';
+import { debounceTime, startWith, takeUntil } from 'rxjs/operators';
+
+interface HexFieldSortCacheEntry {
+  fingerprint: string;
+  indices: number[];
+}
+
+@Component({
+  selector: 'tb-protocol-template-udp-data-configuration',
+  templateUrl: './protocol-template-udp-data-configuration.component.html',
+  styleUrls: ['./protocol-template-udp-data-configuration.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges, AfterViewInit, OnDestroy {
+  /** 帧模板内 LTV/TLV 段折叠面板：已启用 LTV 时打开界面默认展开 */
+  templateHexLtvPanelExpanded = false;
+
+  private readonly destroy$ = new Subject<void>();
+  private templatesArraySub?: Subscription;
+  private formArraysSub?: Subscription;
+
+  private templateFieldSortCache: HexFieldSortCacheEntry | null = null;
+  private commandFieldSortCache = new Map<number, HexFieldSortCacheEntry>();
+  private downlinkLenKeyCache = new Map<number, { fingerprint: string; keys: string[] }>();
+  readonly TransportUdpDataType = TransportUdpDataType;
+  readonly ProtocolTemplateCommandDirection = ProtocolTemplateCommandDirection;
+  readonly ProtocolTemplateUplinkDataDestination = ProtocolTemplateUplinkDataDestination;
+  readonly TcpHexValueType = TcpHexValueType;
+  readonly TcpHexLtvChunkOrder = TcpHexLtvChunkOrder;
+  readonly TcpHexUnknownTagMode = TcpHexUnknownTagMode;
+  readonly tcpHexMatchValueTypes = [
+    TcpHexValueType.UINT8,
+    TcpHexValueType.INT8,
+    TcpHexValueType.UINT16_BE,
+    TcpHexValueType.UINT16_LE,
+    TcpHexValueType.INT16_BE,
+    TcpHexValueType.INT16_LE,
+    TcpHexValueType.UINT32_BE,
+    TcpHexValueType.UINT32_LE,
+    TcpHexValueType.INT32_BE,
+    TcpHexValueType.INT32_LE
+  ];
+
+  /** 协议模板命令「读取类型」：含 BYTES_AS_HEX / BYTES_AS_UTF8（与帧模板一致） */
+  readonly tcpHexCommandMatchValueTypes = UDP_HEX_PROTOCOL_TEMPLATE_COMMAND_MATCH_TYPES;
+
+  @Input()
+  templatesArray: UntypedFormArray;
+  @Input()
+  commandsArray: UntypedFormArray;
+  @Input()
+  tcpHexValueTypes: TcpHexValueType[] = UDP_HEX_FRAME_FIELD_VALUE_TYPES;
+  /** LTV Tag→遥测映射：与帧内固定字段的 tcpHexValueTypes 分离 */
+  @Input()
+  tcpHexLtvTagValueOptions: TcpHexLtvTagValueOption[] = UDP_HEX_LTV_TAG_VALUE_OPTIONS;
+  @Input()
+  disabled: boolean;
+
+  /** full：模板+命令同页；分段用于对话框 Tab */
+  @Input()
+  layoutMode: 'full' | 'templatesOnly' | 'commandsOnly' = 'full';
+
+  /** 仅允许一个帧模板（协议模板库与监控协议负载均使用） */
+  @Input()
+  singleTemplateMode = true;
+
+  @Output() addTemplateField = new EventEmitter<number>();
+  @Output() removeTemplateField = new EventEmitter<{ templateIndex: number; fieldIndex: number }>();
+  @Output() addTemplateLtvMapping = new EventEmitter<number>();
+  @Output() removeTemplateLtvMapping = new EventEmitter<{ templateIndex: number; index: number }>();
+  @Output() addCommand = new EventEmitter<void>();
+  @Output() removeCommand = new EventEmitter<number>();
+  @Output() addOverrideField = new EventEmitter<number>();
+  @Output() removeOverrideField = new EventEmitter<{ commandIndex: number; fieldIndex: number }>();
+
+  constructor(private cdr: ChangeDetectorRef) {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['templatesArray']) {
+      this.invalidateFieldSortCaches();
+      this.wireTemplateLtvPanelSync();
+      this.scheduleExpandTemplateLtvPanel();
+    }
+    if (changes['commandsArray']) {
+      this.invalidateFieldSortCaches();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.wireTemplateLtvPanelSync();
+    this.wireFormArrayChangeDetection();
+    this.scheduleExpandTemplateLtvPanel();
+    this.cdr.markForCheck();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.templatesArraySub?.unsubscribe();
+    this.formArraysSub?.unsubscribe();
+  }
+
+  trackCommandIndex = (index: number): number => index;
+
+  trackFieldIndex = (_index: number, fi: number): number => fi;
+
+  private invalidateFieldSortCaches(): void {
+    this.templateFieldSortCache = null;
+    this.commandFieldSortCache.clear();
+    this.downlinkLenKeyCache.clear();
+  }
+
+  private wireFormArrayChangeDetection(): void {
+    this.formArraysSub?.unsubscribe();
+    const sources = [this.templatesArray?.valueChanges, this.commandsArray?.valueChanges].filter(Boolean);
+    if (!sources.length) {
+      return;
+    }
+    this.formArraysSub = merge(...sources).pipe(
+      debounceTime(80),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.invalidateFieldSortCaches();
+      this.cdr.markForCheck();
+    });
+  }
+
+  private hexFieldsFingerprint(fa: UntypedFormArray): string {
+    const parts: string[] = [String(fa?.length ?? 0)];
+    if (!fa?.length) {
+      return parts.join(':');
+    }
+    for (let i = 0; i < fa.length; i++) {
+      const g = fa.at(i) as UntypedFormGroup;
+      parts.push(String(g.get('byteOffset')?.value ?? ''));
+      parts.push(String(g.get('key')?.value ?? ''));
+      parts.push(String(g.get('valueType')?.value ?? ''));
+    }
+    return parts.join('|');
+  }
+
+  private getTemplateFieldsFingerprint(): string {
+    if (!this.templatesArray?.length) {
+      return '';
+    }
+    return this.hexFieldsFingerprint(this.getTemplateFieldsArray(0));
+  }
+
+  /**
+   * templatesArray 多为同一 FormArray 引用原地更新，ngOnChanges 不一定触发；
+   * 父级 patch 常带 emitEvent:false，valueChanges 也可能不触发——需订阅 valueChanges（含 startWith）并延迟再读当前值。
+   */
+  private wireTemplateLtvPanelSync(): void {
+    this.templatesArraySub?.unsubscribe();
+    if (!this.templatesArray) {
+      return;
+    }
+    this.templatesArraySub = this.templatesArray.valueChanges.pipe(
+      startWith(this.templatesArray.value),
+      takeUntil(this.destroy$)
+    ).subscribe(() => this.expandTemplateLtvPanelIfEnabled());
+  }
+
+  private scheduleExpandTemplateLtvPanel(): void {
+    const run = () => this.expandTemplateLtvPanelIfEnabled();
+    queueMicrotask(run);
+    setTimeout(run, 0);
+    setTimeout(run, 50);
+  }
+
+  private expandTemplateLtvPanelIfEnabled(): void {
+    if (!this.templatesArray?.length) {
+      return;
+    }
+    const g = this.templatesArray.at(0) as UntypedFormGroup;
+    if (g?.get('hexLtvEnabled')?.value === true) {
+      this.templateHexLtvPanelExpanded = true;
+      this.cdr.markForCheck();
+    }
+  }
+
+  onTemplateHexLtvEnabledChange(checked: boolean): void {
+    if (checked) {
+      this.templateHexLtvPanelExpanded = true;
+      this.cdr.markForCheck();
+    }
+  }
+
+  /** 「长度含 Tag」与「Length 数值含本字段」互斥：开其一则关另一 */
+  onTemplateHexLtvLengthIncludesTagChange(checked: boolean): void {
+    if (!checked || !this.templatesArray?.length) {
+      return;
+    }
+    const g = this.templatesArray.at(0) as UntypedFormGroup;
+    g.get('hexLtvLengthIncludesLengthField')?.setValue(false, { emitEvent: false });
+    this.cdr.markForCheck();
+  }
+
+  onTemplateHexLtvLengthIncludesLengthFieldChange(checked: boolean): void {
+    if (!checked || !this.templatesArray?.length) {
+      return;
+    }
+    const g = this.templatesArray.at(0) as UntypedFormGroup;
+    g.get('hexLtvLengthIncludesTag')?.setValue(false, { emitEvent: false });
+    this.cdr.markForCheck();
+  }
+
+  asFormGroup(ctrl: unknown): UntypedFormGroup {
+    return ctrl as UntypedFormGroup;
+  }
+
+  getTemplateFieldsArray(ti: number): UntypedFormArray {
+    return (this.templatesArray.at(ti) as UntypedFormGroup).get('hexProtocolFields') as UntypedFormArray;
+  }
+
+  /** 列表按字节偏移升序展示；下标仍为 FormArray 真实索引，便于绑定与删除 */
+  templateFieldIndicesSortedByByteOffset(ti: number): number[] {
+    if (ti !== 0) {
+      return this.sortedHexFieldIndicesByByteOffset(this.getTemplateFieldsArray(ti));
+    }
+    const fp = this.hexFieldsFingerprint(this.getTemplateFieldsArray(0));
+    if (this.templateFieldSortCache?.fingerprint === fp) {
+      return this.templateFieldSortCache.indices;
+    }
+    const indices = this.sortedHexFieldIndicesByByteOffset(this.getTemplateFieldsArray(0));
+    this.templateFieldSortCache = { fingerprint: fp, indices };
+    return indices;
+  }
+
+  overrideFieldIndicesSortedByByteOffset(ci: number): number[] {
+    const fa = this.getCommandOverrideFieldsArray(ci);
+    const fp = this.hexFieldsFingerprint(fa);
+    const cached = this.commandFieldSortCache.get(ci);
+    if (cached?.fingerprint === fp) {
+      return cached.indices;
+    }
+    const indices = this.sortedHexFieldIndicesByByteOffset(fa);
+    this.commandFieldSortCache.set(ci, { fingerprint: fp, indices });
+    return indices;
+  }
+
+  private sortedHexFieldIndicesByByteOffset(fa: UntypedFormArray): number[] {
+    const n = fa.length;
+    return Array.from({ length: n }, (_, i) => i).sort((a, b) => {
+      const da = this.byteOffsetAtFormIndex(fa, a);
+      const db = this.byteOffsetAtFormIndex(fa, b);
+      if (da !== db) {
+        return da - db;
+      }
+      return a - b;
+    });
+  }
+
+  private byteOffsetAtFormIndex(fa: UntypedFormArray, i: number): number {
+    const v = (fa.at(i) as UntypedFormGroup).get('byteOffset')?.value;
+    const num = Number(v);
+    return Number.isFinite(num) ? num : Number.MAX_SAFE_INTEGER;
+  }
+
+  getTemplateLtvTagMappingsArray(ti: number): UntypedFormArray {
+    return (this.templatesArray.at(ti) as UntypedFormGroup).get('hexLtvTagMappings') as UntypedFormArray;
+  }
+
+  getCommandOverrideFieldsArray(ci: number): UntypedFormArray {
+    return (this.commandsArray.at(ci) as UntypedFormGroup).get('overrideFields') as UntypedFormArray;
+  }
+
+  isIntegralHexValueType(vt: TcpHexValueType | null | undefined): boolean {
+    if (vt == null) {
+      return false;
+    }
+    return this.tcpHexMatchValueTypes.includes(vt);
+  }
+
+  isIntegralHexFieldTemplateRow(fi: number): boolean {
+    const g = this.getTemplateFieldsArray(0).at(fi) as UntypedFormGroup;
+    return this.isIntegralHexValueType(g.get('valueType')?.value as TcpHexValueType);
+  }
+
+  isIntegralHexFieldOverrideRow(ci: number, fi: number): boolean {
+    const g = this.getCommandOverrideFieldsArray(ci).at(fi) as UntypedFormGroup;
+    return this.isIntegralHexValueType(g.get('valueType')?.value as TcpHexValueType);
+  }
+
+  isBytesAsHexTemplate(ti: number, fi: number): boolean {
+    const g = this.getTemplateFieldsArray(ti).at(fi) as UntypedFormGroup;
+    return isTcpHexVariableByteSlice(g.get('valueType')?.value as TcpHexValueType);
+  }
+
+  isBytesAsHexOverride(ci: number, fi: number): boolean {
+    const g = this.getCommandOverrideFieldsArray(ci).at(fi) as UntypedFormGroup;
+    return isTcpHexVariableByteSlice(g.get('valueType')?.value as TcpHexValueType);
+  }
+
+  isBytesAsUtf8Template(ti: number, fi: number): boolean {
+    const g = this.getTemplateFieldsArray(ti).at(fi) as UntypedFormGroup;
+    return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_UTF8;
+  }
+
+  isBytesAsUtf8Override(ci: number, fi: number): boolean {
+    const g = this.getCommandOverrideFieldsArray(ci).at(fi) as UntypedFormGroup;
+    return g.get('valueType')?.value === TcpHexValueType.BYTES_AS_UTF8;
+  }
+
+  isCommandMatchUtf8(cCtrl: UntypedFormGroup): boolean {
+    return cCtrl.get('matchValueType')?.value === TcpHexValueType.BYTES_AS_UTF8;
+  }
+
+  onLtvTagValueBlur(ti: number, li: number): void {
+    if (this.disabled) {
+      return;
+    }
+    const tpl = this.templatesArray.at(ti) as UntypedFormGroup;
+    const vt = (tpl.get('hexLtvTagType')?.value ?? TcpHexValueType.UINT8) as TcpHexValueType;
+    const g = this.getTemplateLtvTagMappingsArray(ti).at(li) as UntypedFormGroup;
+    const ctrl = g.get('tagValue');
+    const t = String(ctrl?.value ?? '');
+    const trimmed = t.trim().replace(/\s+/g, '');
+    if (!trimmed) {
+      return;
+    }
+    const n = parseLtvTagWireTextToNumber(t);
+    if (n === undefined) {
+      return;
+    }
+    if (/^0x/i.test(trimmed)) {
+      ctrl?.patchValue(formatTcpHexMatchValueHexHint(n, vt), { emitEvent: false });
+    } else {
+      ctrl?.patchValue(String(n), { emitEvent: false });
+    }
+  }
+
+  firstTemplateId(): string {
+    if (!this.templatesArray?.length) {
+      return '';
+    }
+    const id = (this.templatesArray.at(0) as UntypedFormGroup).get('id')?.value;
+    return id ? String(id).trim() : '';
+  }
+
+  templateIdOptions(): string[] {
+    if (!this.templatesArray?.length) {
+      return [];
+    }
+    const ids: string[] = [];
+    for (let i = 0; i < this.templatesArray.length; i++) {
+      const id = (this.templatesArray.at(i) as UntypedFormGroup).get('id')?.value;
+      if (id && String(id).trim()) {
+        ids.push(String(id).trim());
+      }
+    }
+    return ids;
+  }
+
+  /** 「上下行命令」Tab 中与首帧模板共享命令偏移/宽度，避免与帧模板 Tab 重复嵌套 [formGroup] */
+  firstTemplateGroup(): UntypedFormGroup {
+    return this.templatesArray.at(0) as UntypedFormGroup;
+  }
+
+  getHexFieldLengthModeTemplate(ti: number, fi: number): 'fixed' | 'fromFrame' {
+    return this.hexFieldLengthModeFromGroup(this.getTemplateFieldsArray(ti).at(fi) as UntypedFormGroup);
+  }
+
+  getHexFieldLengthModeOverride(ci: number, fi: number): 'fixed' | 'fromFrame' {
+    return this.hexFieldLengthModeFromGroup(this.getCommandOverrideFieldsArray(ci).at(fi) as UntypedFormGroup);
+  }
+
+  private hexFieldLengthModeFromGroup(g: UntypedFormGroup): 'fixed' | 'fromFrame' {
+    const m = g.get('hexFieldLengthMode')?.value;
+    if (m === 'fromFrame' || m === 'fixed') {
+      return m;
+    }
+    const fromOff = g.get('byteLengthFromByteOffset')?.value;
+    return fromOff !== null && fromOff !== undefined && fromOff !== '' ? 'fromFrame' : 'fixed';
+  }
+
+  onHexFieldLengthModeTemplate(ti: number, fi: number, mode: 'fixed' | 'fromFrame'): void {
+    this.applyHexFieldLengthMode(this.getTemplateFieldsArray(ti).at(fi) as UntypedFormGroup, mode);
+  }
+
+  onHexFieldLengthModeOverride(ci: number, fi: number, mode: 'fixed' | 'fromFrame'): void {
+    this.applyHexFieldLengthMode(this.getCommandOverrideFieldsArray(ci).at(fi) as UntypedFormGroup, mode);
+  }
+
+  private applyHexFieldLengthMode(g: UntypedFormGroup, mode: 'fixed' | 'fromFrame'): void {
+    g.get('hexFieldLengthMode')?.patchValue(mode, { emitEvent: false });
+    if (mode === 'fixed') {
+      g.patchValue({
+        byteLengthFromByteOffset: null,
+        byteLengthFromValueType: TcpHexValueType.UINT8,
+        byteLengthFromIntegralSubtract: null
+      }, { emitEvent: false });
+    } else {
+      g.patchValue({ byteLength: null, fixedBytesHex: '' }, { emitEvent: false });
+    }
+  }
+
+  isDownlinkOrBothForCommand(ci: number): boolean {
+    const g = this.commandsArray?.at(ci) as UntypedFormGroup;
+    const d = g?.get('direction')?.value;
+    return d === ProtocolTemplateCommandDirection.DOWNLINK || d === ProtocolTemplateCommandDirection.BOTH;
+  }
+
+  isCommandMatchByteSlice(cCtrl: UntypedFormGroup): boolean {
+    return isTcpHexVariableByteSlice(cCtrl.get('matchValueType')?.value as TcpHexValueType);
+  }
+
+  isSecondaryMatchByteSlice(cCtrl: UntypedFormGroup): boolean {
+    return isTcpHexVariableByteSlice(cCtrl.get('secondaryMatchValueType')?.value as TcpHexValueType);
+  }
+
+  isSecondaryMatchUtf8(cCtrl: UntypedFormGroup): boolean {
+    return cCtrl.get('secondaryMatchValueType')?.value === TcpHexValueType.BYTES_AS_UTF8;
+  }
+
+  /** 第二匹配期望值：与主命令值规则一致（整型十进制；BYTES_AS_HEX / UTF8 为定长线字节） */
+  onCommandSecondaryValueBlur(cCtrl: UntypedFormGroup | null): void {
+    if (!cCtrl || this.disabled) {
+      return;
+    }
+    const vt = cCtrl.get('secondaryMatchValueType')?.value as TcpHexValueType;
+    const ctrl = cCtrl.get('secondaryMatchValue');
+    if (!ctrl) {
+      return;
+    }
+    if (isTcpHexVariableByteSlice(vt)) {
+      const raw = String(ctrl.value ?? '');
+      const normalized = vt === TcpHexValueType.BYTES_AS_UTF8
+        ? utf8FixedBytesFormValueToStoredFixedHex(raw)
+        : normalizeFixedBytesHexWhitespace(ctrl.value);
+      if (normalized !== raw) {
+        ctrl.patchValue(normalized, { emitEvent: false });
+      }
+      return;
+    }
+    this.onFixedWireIntegralBlur(ctrl);
+  }
+
+  /** 命令值：与帧模板「固定线值整型 / 固定 HEX」一致 */
+  onCommandPrimaryValueBlur(cCtrl: UntypedFormGroup | null): void {
+    if (!cCtrl || this.disabled) {
+      return;
+    }
+    const vt = cCtrl.get('matchValueType')?.value as TcpHexValueType;
+    const ctrl = cCtrl.get('commandValue');
+    if (!ctrl) {
+      return;
+    }
+    if (isTcpHexVariableByteSlice(vt)) {
+      const raw = String(ctrl.value ?? '');
+      const normalized = vt === TcpHexValueType.BYTES_AS_UTF8
+        ? utf8FixedBytesFormValueToStoredFixedHex(raw)
+        : normalizeFixedBytesHexWhitespace(ctrl.value);
+      if (normalized !== raw) {
+        ctrl.patchValue(normalized, { emitEvent: false });
+      }
+      return;
+    }
+    this.onFixedWireIntegralBlur(ctrl);
+  }
+
+  /** 可选作「长度字段」的整型 key：首帧模板 + 本命令覆盖行 */
+  /** 固定线值：失焦后按 0x→十六进制、否则十进制归一化回显 */
+  onFixedWireIntegralBlur(ctrl: AbstractControl | null): void {
+    if (!ctrl || this.disabled) {
+      return;
+    }
+    const t = String(ctrl.value ?? '');
+    if (!t.trim()) {
+      return;
+    }
+    const n = parseIntegralWireTextToNumber(t);
+    if (n === undefined) {
+      return;
+    }
+    ctrl.patchValue(formatIntegralWireTextEcho(t, n), { emitEvent: false });
+  }
+
+  /** 固定 BYTES_AS_HEX：去空白；BYTES_AS_UTF8：仅去首尾空格/Tab + 解析 \\r\\n 等为控制字符（与后端一致；勿用 String#trim 以免吃掉真实 CRLF）。 */
+  onFixedBytesHexBlur(fieldGroup: UntypedFormGroup | null): void {
+    if (!fieldGroup || this.disabled) {
+      return;
+    }
+    const ctrl = fieldGroup.get('fixedBytesHex');
+    if (!ctrl) {
+      return;
+    }
+    const vt = fieldGroup.get('valueType')?.value as TcpHexValueType;
+    const raw = String(ctrl.value ?? '');
+    const normalized = vt === TcpHexValueType.BYTES_AS_UTF8
+      ? utf8FixedBytesFormValueToStoredFixedHex(raw)
+      : normalizeFixedBytesHexWhitespace(ctrl.value);
+    if (normalized !== raw) {
+      ctrl.patchValue(normalized, { emitEvent: false });
+    }
+  }
+
+  downlinkLengthFieldKeyOptions(ci: number): string[] {
+    const tplFp = this.getTemplateFieldsFingerprint();
+    const cmdFp = this.hexFieldsFingerprint(this.getCommandOverrideFieldsArray(ci));
+    const fp = `${tplFp}::${cmdFp}`;
+    const cached = this.downlinkLenKeyCache.get(ci);
+    if (cached?.fingerprint === fp) {
+      return cached.keys;
+    }
+    const keys = new Set<string>();
+    const addIntegral = (fg: UntypedFormGroup) => {
+      const k = String(fg.get('key')?.value ?? '').trim();
+      const vt = fg.get('valueType')?.value as TcpHexValueType;
+      if (k && this.tcpHexMatchValueTypes.includes(vt)) {
+        keys.add(k);
+      }
+    };
+    if (this.templatesArray?.length) {
+      const fa = this.getTemplateFieldsArray(0);
+      for (let i = 0; i < fa.length; i++) {
+        addIntegral(fa.at(i) as UntypedFormGroup);
+      }
+    }
+    const oa = this.getCommandOverrideFieldsArray(ci);
+    for (let i = 0; i < oa.length; i++) {
+      addIntegral(oa.at(i) as UntypedFormGroup);
+    }
+    const sorted = Array.from(keys).sort();
+    this.downlinkLenKeyCache.set(ci, { fingerprint: fp, keys: sorted });
+    return sorted;
+  }
+
+  /**
+   * 合并后至多一个「下行自动整包总长」：勾选本行时取消帧模板内其它行的勾选。
+   */
+  onTemplateAutoTotalFrameLengthChange(templateIndex: number, fieldIndex: number, checked: boolean): void {
+    if (!checked || this.disabled) {
+      return;
+    }
+    const fa = this.getTemplateFieldsArray(templateIndex);
+    for (let i = 0; i < fa.length; i++) {
+      if (i === fieldIndex) {
+        continue;
+      }
+      (fa.at(i) as UntypedFormGroup).patchValue(
+        {
+          autoDownlinkTotalFrameLength: false,
+          downlinkTotalFrameLengthExcludesLengthFieldBytes: false
+        },
+        { emitEvent: false }
+      );
+    }
+  }
+
+  /** 同一命令覆盖区内至多一个自动总长 */
+  onOverrideAutoTotalFrameLengthChange(commandIndex: number, fieldIndex: number, checked: boolean): void {
+    if (!checked || this.disabled) {
+      return;
+    }
+    const fa = this.getCommandOverrideFieldsArray(commandIndex);
+    for (let i = 0; i < fa.length; i++) {
+      if (i === fieldIndex) {
+        continue;
+      }
+      (fa.at(i) as UntypedFormGroup).patchValue(
+        {
+          autoDownlinkTotalFrameLength: false,
+          downlinkTotalFrameLengthExcludesLengthFieldBytes: false
+        },
+        { emitEvent: false }
+      );
+    }
+  }
+}

@@ -44,7 +44,9 @@ import {
 
   ProtocolTemplateBundle,
 
-  TcpDeviceProfileTransportConfiguration
+  TcpDeviceProfileTransportConfiguration,
+  UdpDeviceProfileTransportConfiguration,
+  isProtocolTemplateWireTransport
 
 } from '@shared/models/device.models';
 
@@ -81,6 +83,8 @@ import {
   parseNativeParamsJson,
 
   protocolTemplateBundleIdFromTcpProfile,
+  protocolTemplateBundleIdFromWireProfile,
+  isProtocolTemplateRpcBinding,
 
   resolveMethodRpcDefaults,
 
@@ -139,6 +143,10 @@ export class DeviceRpcPanelComponent implements OnChanges {
   invokeForm: UntypedFormGroup;
 
   selectedMethod: DeviceProfileRpcMethod | null = null;
+
+  get selectedMethodUsesProtocolTemplate(): boolean {
+    return isProtocolTemplateRpcBinding(this.selectedMethod?.bindingType);
+  }
 
   allFieldRows: DeviceRpcInvokeFieldRow[] = [];
 
@@ -480,7 +488,7 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
 
 
-    if (this.selectedMethod.bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE) {
+    if (isProtocolTemplateRpcBinding(this.selectedMethod.bindingType)) {
 
       this.sendTcpTemplate(deviceId, oneWay, timeout);
 
@@ -498,7 +506,7 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
     const m = this.selectedMethod!;
 
-    if (m.bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE && this.bundle) {
+    if (isProtocolTemplateRpcBinding(m.bindingType) && this.bundle) {
 
       const built = buildInvokeFieldRows(this.bundle, m);
 
@@ -939,11 +947,10 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
       switchMap(profile => {
 
-        if (profile.transportType === DeviceTransportType.TCP && profile.profileData?.transportConfiguration) {
+        if (isProtocolTemplateWireTransport(profile.transportType) && profile.profileData?.transportConfiguration) {
 
-          const tcp = profile.profileData.transportConfiguration as TcpDeviceProfileTransportConfiguration;
-
-          const bid = protocolTemplateBundleIdFromTcpProfile(tcp);
+          const bid = protocolTemplateBundleIdFromWireProfile(
+            profile.profileData.transportConfiguration as TcpDeviceProfileTransportConfiguration | UdpDeviceProfileTransportConfiguration);
 
           if (bid) {
 

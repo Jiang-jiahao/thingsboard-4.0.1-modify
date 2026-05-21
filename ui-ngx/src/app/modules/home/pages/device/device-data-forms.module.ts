@@ -28,6 +28,7 @@ import { CoapDeviceTransportConfigurationComponent } from './data/coap-device-tr
 import { Lwm2mDeviceTransportConfigurationComponent } from './data/lwm2m-device-transport-configuration.component';
 import { SnmpDeviceTransportConfigurationComponent } from './data/snmp-device-transport-configuration.component';
 import { TcpDeviceTransportConfigurationComponent } from './data/tcp-device-transport-configuration.component';
+import { UdpDeviceTransportConfigurationComponent } from './data/udp-device-transport-configuration.component';
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import { TcpDeviceTransportConfigurationComponent } from './data/tcp-device-tran
     Lwm2mDeviceTransportConfigurationComponent,
     SnmpDeviceTransportConfigurationComponent,
     TcpDeviceTransportConfigurationComponent,
+    UdpDeviceTransportConfigurationComponent,
     DeviceTransportConfigurationComponent,
     DeviceDataComponent
   ],

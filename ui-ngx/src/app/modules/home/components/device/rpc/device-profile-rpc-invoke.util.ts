@@ -20,8 +20,14 @@ import {
   ProtocolTemplateDefinition,
   TcpHexFieldDefinition,
   TcpHexValueType,
-  TcpDeviceProfileTransportConfiguration
+  TcpDeviceProfileTransportConfiguration,
+  UdpDeviceProfileTransportConfiguration,
+  isProtocolTemplateWireTransport,
+  isProtocolTemplateRpcBinding,
+  wireProfileProtocolTemplateBundleId
 } from '@shared/models/device.models';
+
+export { isProtocolTemplateRpcBinding };
 
 export interface DeviceRpcInvokeFieldRow {
   /** 协议模板字段 key（模块侧） */
@@ -44,6 +50,12 @@ export function protocolTemplateBundleIdFromTcpProfile(
   const id = tcp?.transportTcpDataTypeConfiguration?.protocolTemplateBundleId
     ?? tcp?.transportTcpDataTypeConfiguration?.monitoringProtocolBundleId;
   return id?.trim() || null;
+}
+
+export function protocolTemplateBundleIdFromWireProfile(
+  cfg: TcpDeviceProfileTransportConfiguration | UdpDeviceProfileTransportConfiguration | null | undefined
+): string | null {
+  return wireProfileProtocolTemplateBundleId(cfg);
 }
 
 export function findBundleCommand(
@@ -197,7 +209,7 @@ export function catalogMethodPlatformKeys(
   bundle: ProtocolTemplateBundle | null,
   method: DeviceProfileRpcMethod
 ): string[] {
-  if (method.bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE && bundle) {
+  if (isProtocolTemplateRpcBinding(method.bindingType) && bundle) {
     const built = buildInvokeFieldRows(bundle, method);
     if (built.usesFieldInputs) {
       return built.rows.map(r => r.platformKey);
@@ -214,7 +226,7 @@ export function catalogMethodFieldMetaMap(
   method: DeviceProfileRpcMethod
 ): Record<string, DeviceRpcMethodFieldMeta> {
   const meta: Record<string, DeviceRpcMethodFieldMeta> = {};
-  if (method.bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE && bundle) {
+  if (isProtocolTemplateRpcBinding(method.bindingType) && bundle) {
     const built = buildInvokeFieldRows(bundle, method);
     for (const row of built.rows) {
       meta[row.platformKey] = { valueType: row.valueType, byteLength: row.byteLength };
@@ -364,5 +376,5 @@ export function catalogMethodLabel(m: DeviceProfileRpcMethod): string {
 }
 
 export function isTcpTemplateBinding(m: DeviceProfileRpcMethod): boolean {
-  return m.bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE;
+  return isProtocolTemplateRpcBinding(m.bindingType);
 }

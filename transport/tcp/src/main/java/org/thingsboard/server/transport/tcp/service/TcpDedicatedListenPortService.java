@@ -24,6 +24,7 @@ import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.data.DeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.TcpEffectiveServerBindPort;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode;
 import java.net.InetAddress;
@@ -67,9 +68,13 @@ public class TcpDedicatedListenPortService {
     private final ConcurrentHashMap<Integer, Set<DeviceId>> listenPortToDeviceIds = new ConcurrentHashMap<>();
 
     private final ConcurrentHashMap<DeviceId, Integer> deviceIdToListenPort = new ConcurrentHashMap<>();
+    /** 设备档案 SERVER + tcpProfileServerBindPort → 监听端口（无设备时也需监听） */
+    private final ConcurrentHashMap<UUID, Integer> profileIdToListenPort = new ConcurrentHashMap<>();
+
     @AfterStartUp(order = AfterStartUp.REGULAR_SERVICE)
     public void loadAll() {
         log.info("Loading TCP dedicated listen port bindings");
+        loadProfileListenPorts();
         int page = 0;
         int pageSize = 512;
         boolean hasNext;
@@ -104,7 +109,9 @@ public class TcpDedicatedListenPortService {
     @EventListener(DeviceProfileUpdatedEvent.class)
     public void onDeviceProfileUpdated(DeviceProfileUpdatedEvent event) {
         DeviceProfile p = event.getDeviceProfile();
+        refreshProfileListenPort(p);
         if (p == null || p.getTransportType() != DeviceTransportType.TCP) {
+            syncPortsWithTransport();
             return;
         }
         UUID profileUuid = p.getId().getId();
@@ -219,6 +226,44 @@ public class TcpDedicatedListenPortService {
     public Set<Integer> collectDedicatedPorts() {
         return Collections.unmodifiableSet(listenPortToDeviceIds.keySet());
     }
+
+    private void loadProfileListenPorts() {
+        profileIdToListenPort.clear();
+        int page = 0;
+        int pageSize = 512;
+        boolean hasNext;
+        do {
+            TransportProtos.GetTcpProfilesResponseMsg response = protoEntityService.getTcpProfileIds(page, pageSize);
+            for (String id : response.getIdsList()) {
+                DeviceProfile profile = deviceProfileCache.get(new DeviceProfileId(UUID.fromString(id)));
+                refreshProfileListenPort(profile);
+            }
+            hasNext = response.getHasNextPage();
+            page++;
+        } while (hasNext);
+        log.info("TCP profile listen ports loaded: {} port(s)", profileIdToListenPort.size());
+    }
+
+    private void refreshProfileListenPort(DeviceProfile profile) {
+        if (profile == null || profile.getId() == null) {
+            return;
+        }
+        UUID profileUuid = profile.getId().getId();
+        profileIdToListenPort.remove(profileUuid);
+        if (profile.getTransportType() != DeviceTransportType.TCP) {
+            return;
+        }
+        Integer port = TcpEffectiveServerBindPort.resolveProfileServerListenPort(profile);
+        if (port != null) {
+            profileIdToListenPort.put(profileUuid, port);
+        }
+    }
+
+    private Set<Integer> collectAllListenPorts() {
+        Set<Integer> ports = new HashSet<>(listenPortToDeviceIds.keySet());
+        ports.addAll(profileIdToListenPort.values());
+        return ports;
+    }
     private void remove(DeviceId deviceId) {
         Integer p = deviceIdToListenPort.remove(deviceId);
         if (p == null) {
@@ -291,6 +336,6 @@ public class TcpDedicatedListenPortService {
     }
 
     private void syncPortsWithTransport() {
-        tcpTransportService.syncDedicatedPorts(Set.copyOf(listenPortToDeviceIds.keySet()));
+        tcpTransportService.syncDedicatedPorts(collectAllListenPorts());
     }
 }

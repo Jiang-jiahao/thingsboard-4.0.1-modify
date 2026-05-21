@@ -372,6 +372,51 @@ public class DefaultTransportService extends TransportActivityManager implements
     }
 
     @Override
+    public TransportProtos.GetUdpDevicesResponseMsg getUdpDevicesIds(TransportProtos.GetUdpDevicesRequestMsg requestMsg) {
+        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+                UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
+                .setUdpDevicesRequestMsg(requestMsg)
+                .build()
+        );
+        try {
+            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            return response.getValue().getUdpDevicesResponseMsg();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public TransportProtos.GetTcpProfilesResponseMsg getTcpProfileIds(TransportProtos.GetTcpProfilesRequestMsg requestMsg) {
+        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+                UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
+                .setTcpProfilesRequestMsg(requestMsg)
+                .build()
+        );
+        try {
+            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            return response.getValue().getTcpProfilesResponseMsg();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public TransportProtos.GetUdpProfilesResponseMsg getUdpProfileIds(TransportProtos.GetUdpProfilesRequestMsg requestMsg) {
+        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+                UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
+                .setUdpProfilesRequestMsg(requestMsg)
+                .build()
+        );
+        try {
+            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            return response.getValue().getUdpProfilesResponseMsg();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public TransportProtos.GetDeviceResponseMsg getDevice(TransportProtos.GetDeviceRequestMsg requestMsg) {
         TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()

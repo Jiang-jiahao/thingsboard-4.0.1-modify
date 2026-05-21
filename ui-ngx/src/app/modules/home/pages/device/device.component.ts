@@ -29,6 +29,8 @@ import {
   DeviceProfileType,
   DeviceTransportType,
   TcpDeviceProfileTransportConfiguration,
+  UdpDeviceProfileTransportConfiguration,
+  UdpWireAuthenticationMode,
   TcpTransportConnectMode,
   TcpWireAuthenticationMode
 } from '@shared/models/device.models';
@@ -61,6 +63,7 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
 
   /** 当前所选设备档案的 TCP 链路上鉴权模式（拉取完整档案后填充） */
   tcpProfileWireAuthMode: TcpWireAuthenticationMode | null = null;
+  udpProfileWireAuthMode: UdpWireAuthenticationMode | null = null;
 
   /** 当前所选设备档案的 TCP 连接模式（CLIENT/SERVER），用于设备传输页表单项显隐 */
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
@@ -253,7 +256,7 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     }
     // 勿依赖 profileInfo.transportType：设备页自动完成可能只带 id/name，transportType 为空会导致永远不拉档案
     const transportType = profileInfo && 'transportType' in profileInfo ? profileInfo.transportType : undefined;
-    if (transportType && transportType !== DeviceTransportType.TCP) {
+    if (transportType && transportType !== DeviceTransportType.TCP && transportType !== DeviceTransportType.UDP) {
       this.applyTcpProfileWireAuthFromDeviceProfile(null);
       this.cd.markForCheck();
       return;
@@ -271,18 +274,25 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   }
 
   private applyTcpProfileWireAuthFromDeviceProfile(dp: DeviceProfile | null): void {
-    if (!dp || dp.transportType !== DeviceTransportType.TCP) {
-      this.tcpProfileWireAuthMode = null;
-      this.tcpProfileTransportConnectMode = null;
+    this.tcpProfileWireAuthMode = null;
+    this.tcpProfileTransportConnectMode = null;
+    this.udpProfileWireAuthMode = null;
+    if (!dp) {
       return;
     }
-    const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;
-    if (raw && (raw.type === DeviceTransportType.TCP || raw.type == null || raw.type === undefined)) {
-      this.tcpProfileWireAuthMode = raw.tcpWireAuthenticationMode ?? null;
-      this.tcpProfileTransportConnectMode = raw.tcpTransportConnectMode ?? null;
-    } else {
-      this.tcpProfileWireAuthMode = null;
-      this.tcpProfileTransportConnectMode = null;
+    if (dp.transportType === DeviceTransportType.TCP) {
+      const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;
+      if (raw && (raw.type === DeviceTransportType.TCP || raw.type == null || raw.type === undefined)) {
+        this.tcpProfileWireAuthMode = raw.tcpWireAuthenticationMode ?? null;
+        this.tcpProfileTransportConnectMode = raw.tcpTransportConnectMode ?? null;
+      }
+      return;
+    }
+    if (dp.transportType === DeviceTransportType.UDP) {
+      const raw = dp.profileData?.transportConfiguration as UdpDeviceProfileTransportConfiguration | undefined;
+      if (raw && (raw.type === DeviceTransportType.UDP || raw.type == null || raw.type === undefined)) {
+        this.udpProfileWireAuthMode = raw.udpWireAuthenticationMode ?? null;
+      }
     }
   }
 }

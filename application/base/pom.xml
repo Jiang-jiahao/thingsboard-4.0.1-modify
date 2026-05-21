@@ -85,6 +85,10 @@
             <artifactId>tcp</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.thingsboard.transport</groupId>
+            <artifactId>udp</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.thingsboard</groupId>
             <artifactId>dao</artifactId>
         </dependency>

@@ -208,6 +208,12 @@ public class DefaultTransportApiService implements TransportApiService {
             return handle(transportApiRequestMsg.getSnmpDevicesRequestMsg());
         } else if (transportApiRequestMsg.hasTcpDevicesRequestMsg()) {
             return handle(transportApiRequestMsg.getTcpDevicesRequestMsg());
+        } else if (transportApiRequestMsg.hasUdpDevicesRequestMsg()) {
+            return handle(transportApiRequestMsg.getUdpDevicesRequestMsg());
+        } else if (transportApiRequestMsg.hasTcpProfilesRequestMsg()) {
+            return handle(transportApiRequestMsg.getTcpProfilesRequestMsg());
+        } else if (transportApiRequestMsg.hasUdpProfilesRequestMsg()) {
+            return handle(transportApiRequestMsg.getUdpProfilesRequestMsg());
         } else if (transportApiRequestMsg.hasDeviceRequestMsg()) {
             return handle(transportApiRequestMsg.getDeviceRequestMsg());
         } else if (transportApiRequestMsg.hasDeviceCredentialsRequestMsg()) {
@@ -557,6 +563,40 @@ public class DefaultTransportApiService implements TransportApiService {
         return TransportApiResponseMsg.newBuilder()
                 .setTcpDevicesResponseMsg(responseMsg)
                 .build();
+    }
+
+    private TransportApiResponseMsg handle(TransportProtos.GetUdpDevicesRequestMsg requestMsg) {
+        PageLink pageLink = new PageLink(requestMsg.getPageSize(), requestMsg.getPage());
+        PageData<UUID> result = deviceService.findDevicesIdsByDeviceProfileTransportType(DeviceTransportType.UDP, pageLink);
+        TransportProtos.GetUdpDevicesResponseMsg responseMsg = TransportProtos.GetUdpDevicesResponseMsg.newBuilder()
+                .addAllIds(result.getData().stream()
+                        .map(UUID::toString)
+                        .collect(Collectors.toList()))
+                .setHasNextPage(result.hasNext())
+                .build();
+        return TransportApiResponseMsg.newBuilder()
+                .setUdpDevicesResponseMsg(responseMsg)
+                .build();
+    }
+
+    private TransportApiResponseMsg handle(TransportProtos.GetTcpProfilesRequestMsg requestMsg) {
+        PageLink pageLink = new PageLink(requestMsg.getPageSize(), requestMsg.getPage());
+        PageData<UUID> result = deviceProfileService.findProfileIdsByTransportType(DeviceTransportType.TCP, pageLink);
+        TransportProtos.GetTcpProfilesResponseMsg responseMsg = TransportProtos.GetTcpProfilesResponseMsg.newBuilder()
+                .addAllIds(result.getData().stream().map(UUID::toString).collect(Collectors.toList()))
+                .setHasNextPage(result.hasNext())
+                .build();
+        return TransportApiResponseMsg.newBuilder().setTcpProfilesResponseMsg(responseMsg).build();
+    }
+
+    private TransportApiResponseMsg handle(TransportProtos.GetUdpProfilesRequestMsg requestMsg) {
+        PageLink pageLink = new PageLink(requestMsg.getPageSize(), requestMsg.getPage());
+        PageData<UUID> result = deviceProfileService.findProfileIdsByTransportType(DeviceTransportType.UDP, pageLink);
+        TransportProtos.GetUdpProfilesResponseMsg responseMsg = TransportProtos.GetUdpProfilesResponseMsg.newBuilder()
+                .addAllIds(result.getData().stream().map(UUID::toString).collect(Collectors.toList()))
+                .setHasNextPage(result.hasNext())
+                .build();
+        return TransportApiResponseMsg.newBuilder().setUdpProfilesResponseMsg(responseMsg).build();
     }
 
     TransportApiResponseMsg getDeviceInfo(DeviceCredentials credentials) {

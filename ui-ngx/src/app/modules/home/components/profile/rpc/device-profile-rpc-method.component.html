@@ -8,7 +8,7 @@
     </mat-panel-title>
     <mat-panel-description *ngIf="rpcMethodFormGroup.get('id').value as mid">
       <span class="mat-caption">{{ mid }}</span>
-      <span class="mat-caption" *ngIf="tcpBindingOnly" translate>device-profile.rpc-binding-tcp-template</span>
+      <span class="mat-caption" *ngIf="templateBindingOnly" translate>device-profile.rpc-binding-tcp-template</span>
       <span class="mat-caption" *ngIf="nativeBindingOnly" translate>device-profile.rpc-binding-native</span>
     </mat-panel-description>
   </mat-expansion-panel-header>
@@ -43,7 +43,7 @@
       </mat-form-field>
     </div>
 
-    <ng-container *ngIf="tcpBindingOnly">
+    <ng-container *ngIf="templateBindingOnly">
       <div class="tb-hint mat-body-2" *ngIf="!protocolTemplateBundleSelected" style="color: var(--tb-warn-color, #f57c00);"
            translate>device-profile.rpc-template-bundle-missing</div>
       <mat-form-field class="mat-block">

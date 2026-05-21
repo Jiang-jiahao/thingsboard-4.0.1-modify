@@ -48,5 +48,10 @@
         formControlName="configuration">
       </tb-tcp-device-profile-transport-configuration>
     </ng-template>
+    <ng-template [ngSwitchCase]="deviceTransportType.UDP">
+      <tb-udp-device-profile-transport-configuration
+        formControlName="configuration">
+      </tb-udp-device-profile-transport-configuration>
+    </ng-template>
   </div>
 </div>

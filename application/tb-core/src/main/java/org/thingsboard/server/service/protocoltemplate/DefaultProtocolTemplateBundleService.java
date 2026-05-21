@@ -19,7 +19,9 @@ import org.thingsboard.server.common.data.device.profile.ProtocolTemplateBundle;
 import org.thingsboard.server.common.data.device.profile.ProtocolTemplateCommandDefinition;
 import org.thingsboard.server.common.data.device.profile.ProtocolTemplateDefinition;
 import org.thingsboard.server.common.data.device.profile.ProtocolTemplateTransportTcpDataConfiguration;
+import org.thingsboard.server.common.data.device.profile.ProtocolTemplateTransportUdpDataConfiguration;
 import org.thingsboard.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
+import org.thingsboard.server.common.data.device.profile.UdpDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -205,13 +207,37 @@ public class DefaultProtocolTemplateBundleService {
         if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
             return false;
         }
-        if (!(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration tcpTransportCfg)) {
+        var transportCfg = profile.getProfileData().getTransportConfiguration();
+        if (transportCfg instanceof TcpDeviceProfileTransportConfiguration tcpTransportCfg) {
+            return refreshProtocolTemplateSnapshot(
+                    tcpTransportCfg.getTransportTcpDataTypeConfiguration(), savedBundle, profile);
+        }
+        if (transportCfg instanceof UdpDeviceProfileTransportConfiguration udpTransportCfg) {
+            return refreshProtocolTemplateSnapshot(
+                    udpTransportCfg.getTransportUdpDataTypeConfiguration(), savedBundle, profile);
+        }
+        return false;
+    }
+
+    private static boolean refreshProtocolTemplateSnapshot(
+            Object dataTypeCfg,
+            ProtocolTemplateBundle savedBundle,
+            DeviceProfile profile) {
+        String bundleId;
+        List<ProtocolTemplateDefinition> existingTemplates;
+        List<ProtocolTemplateCommandDefinition> existingCommands;
+        if (dataTypeCfg instanceof ProtocolTemplateTransportTcpDataConfiguration ptCfg) {
+            bundleId = ptCfg.getProtocolTemplateBundleId();
+            existingTemplates = ptCfg.getProtocolTemplates();
+            existingCommands = ptCfg.getProtocolCommands();
+        } else if (dataTypeCfg instanceof ProtocolTemplateTransportUdpDataConfiguration ptCfg) {
+            bundleId = ptCfg.getProtocolTemplateBundleId();
+            existingTemplates = ptCfg.getProtocolTemplates();
+            existingCommands = ptCfg.getProtocolCommands();
+        } else {
             return false;
         }
-        if (!(tcpTransportCfg.getTransportTcpDataTypeConfiguration() instanceof ProtocolTemplateTransportTcpDataConfiguration ptCfg)) {
-            return false;
-        }
-        if (!Objects.equals(savedBundle.getId(), ptCfg.getProtocolTemplateBundleId())) {
+        if (!Objects.equals(savedBundle.getId(), bundleId)) {
             return false;
         }
 
@@ -219,12 +245,17 @@ public class DefaultProtocolTemplateBundleService {
                 ? JacksonUtil.convertValue(savedBundle.getProtocolTemplates(), TEMPLATE_LIST_TYPE) : new ArrayList<>();
         List<ProtocolTemplateCommandDefinition> newCommands = savedBundle.getProtocolCommands() != null
                 ? JacksonUtil.convertValue(savedBundle.getProtocolCommands(), COMMAND_LIST_TYPE) : new ArrayList<>();
-        if (Objects.equals(ptCfg.getProtocolTemplates(), newTemplates)
-                && Objects.equals(ptCfg.getProtocolCommands(), newCommands)) {
+        if (Objects.equals(existingTemplates, newTemplates)
+                && Objects.equals(existingCommands, newCommands)) {
             return false;
         }
-        ptCfg.setProtocolTemplates(newTemplates);
-        ptCfg.setProtocolCommands(newCommands);
+        if (dataTypeCfg instanceof ProtocolTemplateTransportTcpDataConfiguration ptCfg) {
+            ptCfg.setProtocolTemplates(newTemplates);
+            ptCfg.setProtocolCommands(newCommands);
+        } else {
+            ((ProtocolTemplateTransportUdpDataConfiguration) dataTypeCfg).setProtocolTemplates(newTemplates);
+            ((ProtocolTemplateTransportUdpDataConfiguration) dataTypeCfg).setProtocolCommands(newCommands);
+        }
         profile.setProfileData(profile.getProfileData());
         return true;
     }

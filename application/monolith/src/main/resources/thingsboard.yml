@@ -1032,7 +1032,7 @@ transport:
       # SERVER 入站首帧分帧（鉴权）。鉴权成功后切换为设备配置文件中的 tcpTransportFramingMode。
       auth_framing_mode: "${TCP_SERVER_AUTH_FRAMING_MODE:LINE}"
       auth_fixed_frame_length: "${TCP_SERVER_AUTH_FIXED_FRAME_LENGTH:512}"
-    # 默认监听端口；设备还可在传输配置中指定 serverBindPort 以额外 bind 专用端口（一设备一端口）。
+    # 绑定地址；监听端口仅由设备档案 SERVER 模式下的 tcpProfileServerBindPort 决定（不再默认占用 5683）。
     bind_address: "${TCP_BIND_ADDRESS:0.0.0.0}"
     bind_port: "${TCP_BIND_PORT:5683}"
     netty:
@@ -1041,6 +1041,19 @@ transport:
       worker_group_thread_count: "${TCP_NETTY_WORKER_GROUP_THREADS:0}"
       so_keep_alive: "${TCP_NETTY_SO_KEEPALIVE:true}"
       max_frame_length: "${TCP_NETTY_MAX_FRAME_LENGTH:65536}"
+  udp:
+    enabled: "${UDP_TRANSPORT_ENABLED:true}"
+    server:
+      enabled: "${UDP_SERVER_ENABLED:true}"
+      auth_framing_mode: "${UDP_SERVER_AUTH_FRAMING_MODE:NONE}"
+      auth_fixed_frame_length: "${UDP_SERVER_AUTH_FIXED_FRAME_LENGTH:512}"
+    # 绑定地址；监听端口仅由设备档案 SERVER 模式下的 udpProfileServerBindPort 决定（不再默认占用 5684，避免与 CoAP DTLS 冲突）。
+    bind_address: "${UDP_BIND_ADDRESS:0.0.0.0}"
+    bind_port: "${UDP_BIND_PORT:5684}"
+    netty:
+      leak_detector_level: "${UDP_NETTY_LEAK_DETECTOR_LEVEL:PARANOID}"
+      worker_group_thread_count: "${UDP_NETTY_WORKER_GROUP_THREADS:0}"
+      max_datagram_length: "${UDP_NETTY_MAX_DATAGRAM_LENGTH:65536}"
   # Local HTTP transport parameters
   http:
     # Enable/Disable local HTTP transport protocol

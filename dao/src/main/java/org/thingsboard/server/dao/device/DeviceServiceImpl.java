@@ -314,6 +314,9 @@ public class DeviceServiceImpl extends CachedVersionedEntityService<DeviceCacheK
                 case TCP:
                     deviceData.setTransportConfiguration(new TcpDeviceTransportConfiguration());
                     break;
+                case UDP:
+                    deviceData.setTransportConfiguration(new UdpDeviceTransportConfiguration());
+                    break;
             }
         }
         return deviceData;

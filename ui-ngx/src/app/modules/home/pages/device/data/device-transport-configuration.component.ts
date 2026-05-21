@@ -32,7 +32,8 @@ import {
   DeviceTransportConfiguration,
   DeviceTransportType,
   TcpTransportConnectMode,
-  TcpWireAuthenticationMode
+  TcpWireAuthenticationMode,
+  UdpWireAuthenticationMode
 } from '@shared/models/device.models';
 import { deepClone } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -79,6 +80,9 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
 
   @Input()
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
+
+  @Input()
+  udpWireAuthenticationMode: UdpWireAuthenticationMode | null = null;
 
   private propagateChange = (v: any) => { };
 

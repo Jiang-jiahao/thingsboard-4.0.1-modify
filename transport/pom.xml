@@ -41,6 +41,7 @@
         <module>lwm2m</module>
         <module>snmp</module>
         <module>tcp</module>
+        <module>udp</module>
     </modules>
 
 </project>

@@ -26,7 +26,12 @@ import {
   ProtocolTemplateCommandDefinition,
   ProtocolTemplateCommandDirection,
   TcpDeviceProfileTransportConfiguration,
-  TransportTcpDataType
+  UdpDeviceProfileTransportConfiguration,
+  TransportTcpDataType,
+  TransportUdpDataType,
+  isProtocolTemplateWireTransport,
+  wireProfileProtocolTemplateBundleId,
+  wireProfileTransportPayloadType
 } from '@shared/models/device.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { guid } from '@core/utils';
@@ -134,7 +139,7 @@ export class DeviceProfileRpcMethodsComponent implements ControlValueAccessor, O
   }
 
   addRpcMethod(): void {
-    const binding = this.transportType === DeviceTransportType.TCP
+    const binding = isProtocolTemplateWireTransport(this.transportType)
       ? DeviceProfileRpcBindingType.TCP_TEMPLATE
       : DeviceProfileRpcBindingType.NATIVE;
     const draft: DeviceProfileRpcMethod = {
@@ -204,19 +209,20 @@ export class DeviceProfileRpcMethodsComponent implements ControlValueAccessor, O
   private refreshTemplateCommands(): void {
     this.downlinkCommands = [];
     this.protocolTemplateBundleSelected = false;
-    if (this.transportType !== DeviceTransportType.TCP || !this.transportConfiguration) {
+    if (!isProtocolTemplateWireTransport(this.transportType) || !this.transportConfiguration) {
       return;
     }
-    const tcp = this.transportConfiguration as TcpDeviceProfileTransportConfiguration;
-    const dataCfg = tcp.transportTcpDataTypeConfiguration;
-    const bundleId = dataCfg?.protocolTemplateBundleId
-      ?? dataCfg?.monitoringProtocolBundleId;
+    const bundleId = wireProfileProtocolTemplateBundleId(
+      this.transportConfiguration as TcpDeviceProfileTransportConfiguration | UdpDeviceProfileTransportConfiguration);
     if (!bundleId) {
       return;
     }
-    const payloadType = dataCfg?.transportTcpDataType;
+    const payloadType = wireProfileTransportPayloadType(
+      this.transportConfiguration as TcpDeviceProfileTransportConfiguration | UdpDeviceProfileTransportConfiguration);
     if (payloadType !== TransportTcpDataType.RAW_BYTES
-      && payloadType !== TransportTcpDataType.PROTOCOL_TEMPLATE) {
+      && payloadType !== TransportTcpDataType.PROTOCOL_TEMPLATE
+      && payloadType !== TransportUdpDataType.RAW_BYTES
+      && payloadType !== TransportUdpDataType.PROTOCOL_TEMPLATE) {
       return;
     }
     this.protocolTemplateBundleSelected = true;

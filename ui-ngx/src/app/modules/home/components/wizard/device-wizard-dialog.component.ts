@@ -31,8 +31,10 @@ import {
   DeviceProfileType,
   DeviceTransportType,
   TcpDeviceProfileTransportConfiguration,
+  UdpDeviceProfileTransportConfiguration,
   TcpTransportConnectMode,
-  TcpWireAuthenticationMode
+  TcpWireAuthenticationMode,
+  UdpWireAuthenticationMode
 } from '@shared/models/device.models';
 import { MatStepper, StepperOrientation } from '@angular/material/stepper';
 import { EntityType } from '@shared/models/entity-type.models';
@@ -79,6 +81,8 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
   tcpProfileWireAuthMode: TcpWireAuthenticationMode | null = null;
 
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
+
+  udpProfileWireAuthMode: UdpWireAuthenticationMode | null = null;
 
   readonly deviceWizardDeviceScope: 'tenant' = 'tenant';
 
@@ -239,18 +243,25 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
   }
 
   private applyTcpProfileWireAuthFromDeviceProfile(dp: DeviceProfile | null): void {
-    if (!dp || dp.transportType !== DeviceTransportType.TCP) {
-      this.tcpProfileWireAuthMode = null;
-      this.tcpProfileTransportConnectMode = null;
+    this.tcpProfileWireAuthMode = null;
+    this.tcpProfileTransportConnectMode = null;
+    this.udpProfileWireAuthMode = null;
+    if (!dp) {
       return;
     }
-    const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;
-    if (raw && (raw.type === DeviceTransportType.TCP || raw.type == null || raw.type === undefined)) {
-      this.tcpProfileWireAuthMode = raw.tcpWireAuthenticationMode ?? null;
-      this.tcpProfileTransportConnectMode = raw.tcpTransportConnectMode ?? null;
-    } else {
-      this.tcpProfileWireAuthMode = null;
-      this.tcpProfileTransportConnectMode = null;
+    if (dp.transportType === DeviceTransportType.TCP) {
+      const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;
+      if (raw && (raw.type === DeviceTransportType.TCP || raw.type == null || raw.type === undefined)) {
+        this.tcpProfileWireAuthMode = raw.tcpWireAuthenticationMode ?? null;
+        this.tcpProfileTransportConnectMode = raw.tcpTransportConnectMode ?? null;
+      }
+      return;
+    }
+    if (dp.transportType === DeviceTransportType.UDP) {
+      const raw = dp.profileData?.transportConfiguration as UdpDeviceProfileTransportConfiguration | undefined;
+      if (raw && (raw.type === DeviceTransportType.UDP || raw.type == null || raw.type === undefined)) {
+        this.udpProfileWireAuthMode = raw.udpWireAuthenticationMode ?? null;
+      }
     }
   }
 

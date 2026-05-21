@@ -66,12 +66,12 @@ public class DeviceProfileRpcMethod implements Serializable {
                     + " does not match transport expectation " + expectedForTransport);
         }
         switch (bindingType) {
-            case TCP_TEMPLATE -> {
+            case TCP_TEMPLATE, UDP_TEMPLATE -> {
                 if (templateId == null || templateId.isBlank()) {
-                    throw new IllegalArgumentException("TCP_TEMPLATE RPC method requires templateId: " + id);
+                    throw new IllegalArgumentException("Protocol template RPC method requires templateId: " + id);
                 }
                 if (commandValue == null) {
-                    throw new IllegalArgumentException("TCP_TEMPLATE RPC method requires commandValue: " + id);
+                    throw new IllegalArgumentException("Protocol template RPC method requires commandValue: " + id);
                 }
             }
             case NATIVE -> {

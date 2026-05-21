@@ -85,6 +85,9 @@ public interface DeviceProfileRepository extends JpaRepository<DeviceProfileEnti
 
     Page<DeviceProfileEntity> findAllByImageNotNull(Pageable pageable);
 
+    @Query("SELECT d.id FROM DeviceProfileEntity d WHERE d.transportType = :transportType")
+    Page<UUID> findIdsByTransportType(@Param("transportType") DeviceTransportType transportType, Pageable pageable);
+
     @Query("SELECT new org.thingsboard.server.common.data.EntityInfo(dp.id, 'DEVICE_PROFILE', dp.name) " +
             "FROM DeviceProfileEntity dp WHERE dp.tenantId = :tenantId AND EXISTS " +
             "(SELECT 1 FROM DeviceEntity dv WHERE dv.tenantId = :tenantId AND dv.deviceProfileId = dp.id)")

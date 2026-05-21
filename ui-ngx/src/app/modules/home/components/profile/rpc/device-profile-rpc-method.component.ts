@@ -18,6 +18,8 @@ import {
   DeviceProfileRpcBindingType,
   DeviceProfileRpcMethod,
   DeviceTransportType,
+  isProtocolTemplateWireTransport,
+  isProtocolTemplateRpcBinding,
   ProtocolTemplateCommandDefinition,
   ProtocolTemplateCommandDirection
 } from '@shared/models/device.models';
@@ -83,12 +85,12 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
               private destroyRef: DestroyRef) {
   }
 
-  get tcpBindingOnly(): boolean {
-    return this.transportType === DeviceTransportType.TCP;
+  get templateBindingOnly(): boolean {
+    return isProtocolTemplateWireTransport(this.transportType);
   }
 
   get nativeBindingOnly(): boolean {
-    return this.transportType !== DeviceTransportType.TCP;
+    return !isProtocolTemplateWireTransport(this.transportType);
   }
 
   /** 查看模式或表单 CVA 禁用 */
@@ -122,7 +124,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
   }
 
   ngOnInit(): void {
-    const defaultBinding = this.tcpBindingOnly
+    const defaultBinding = this.templateBindingOnly
       ? DeviceProfileRpcBindingType.TCP_TEMPLATE
       : DeviceProfileRpcBindingType.NATIVE;
 
@@ -138,7 +140,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       paramsTemplateJson: ['']
     });
 
-    if (this.tcpBindingOnly) {
+    if (this.templateBindingOnly) {
       this.rpcMethodFormGroup.get('templateCommandRef').setValidators([Validators.required]);
       this.rpcMethodFormGroup.get('deviceMethod').disable({ emitEvent: false });
       this.rpcMethodFormGroup.get('paramsTemplateJson').disable({ emitEvent: false });
@@ -168,7 +170,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     }
     this.rpcMethodFormGroup.enable({ emitEvent: false });
     this.rpcMethodFormGroup.get('bindingType').disable({ emitEvent: false });
-    if (this.tcpBindingOnly) {
+    if (this.templateBindingOnly) {
       this.rpcMethodFormGroup.get('deviceMethod').disable({ emitEvent: false });
       this.rpcMethodFormGroup.get('paramsTemplateJson').disable({ emitEvent: false });
       this.rpcMethodFormGroup.get('templateCommandRef').enable({ emitEvent: false });
@@ -201,7 +203,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       displayName: value.displayName ?? '',
       oneWay: value.oneWay !== false,
       timeoutMs: value.timeoutMs ?? null,
-      bindingType: value.bindingType ?? (this.tcpBindingOnly ? DeviceProfileRpcBindingType.TCP_TEMPLATE : DeviceProfileRpcBindingType.NATIVE),
+      bindingType: value.bindingType ?? (this.templateBindingOnly ? DeviceProfileRpcBindingType.TCP_TEMPLATE : DeviceProfileRpcBindingType.NATIVE),
       templateCommandRef: ref,
       paramMapJson,
       deviceMethod: value.deviceMethod ?? '',
@@ -212,7 +214,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
 
   private updateModel(): void {
     const raw = this.rpcMethodFormGroup.getRawValue();
-    const bindingType = this.tcpBindingOnly
+    const bindingType = this.templateBindingOnly
       ? DeviceProfileRpcBindingType.TCP_TEMPLATE
       : DeviceProfileRpcBindingType.NATIVE;
 
@@ -224,7 +226,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       bindingType
     };
 
-    if (bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE) {
+    if (isProtocolTemplateRpcBinding(bindingType)) {
       const parsed = parseProtocolTemplateCommandRef(raw.templateCommandRef);
       if (parsed) {
         out.templateId = parsed.templateId;
@@ -252,7 +254,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       return { rpcMethod: { valid: false } };
     }
     const raw = this.rpcMethodFormGroup.getRawValue();
-    if (this.tcpBindingOnly) {
+    if (this.templateBindingOnly) {
       if (parseJsonObject(raw.paramMapJson) === null && (raw.paramMapJson as string)?.trim()) {
         return { paramMapJson: true };
       }

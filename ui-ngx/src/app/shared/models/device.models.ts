@@ -50,7 +50,8 @@ export enum DeviceTransportType {
   COAP = 'COAP',
   LWM2M = 'LWM2M',
   SNMP = 'SNMP',
-  TCP = 'TCP'
+  TCP = 'TCP',
+  UDP = 'UDP'
 }
 
 export enum BasicTransportType {
@@ -114,6 +115,7 @@ export const deviceTransportTypeTranslationMap = new Map<TransportType, string>(
     [DeviceTransportType.LWM2M, 'device-profile.transport-type-lwm2m'],
     [DeviceTransportType.SNMP, 'device-profile.transport-type-snmp'],
     [DeviceTransportType.TCP, 'device-profile.transport-type-tcp'],
+    [DeviceTransportType.UDP, 'device-profile.transport-type-udp'],
     [BasicTransportType.HTTP, 'device-profile.transport-type-http']
   ]
 );
@@ -136,6 +138,7 @@ export const deviceTransportTypeHintMap = new Map<TransportType, string>(
     [DeviceTransportType.LWM2M, 'device-profile.transport-type-lwm2m-hint'],
     [DeviceTransportType.SNMP, 'device-profile.transport-type-snmp-hint'],
     [DeviceTransportType.TCP, 'device-profile.transport-type-tcp-hint'],
+    [DeviceTransportType.UDP, 'device-profile.transport-type-udp-hint'],
     [BasicTransportType.HTTP, '']
   ]
 );
@@ -240,6 +243,13 @@ export const deviceTransportTypeConfigurationInfoMap = new Map<DeviceTransportTy
     ],
     [
       DeviceTransportType.TCP,
+      {
+        hasProfileConfiguration: true,
+        hasDeviceConfiguration: true
+      }
+    ],
+    [
+      DeviceTransportType.UDP,
       {
         hasProfileConfiguration: true,
         hasDeviceConfiguration: true
@@ -357,6 +367,22 @@ export function normalizeTransportTcpDataType(
     return TransportTcpDataType.PROTOCOL_TEMPLATE;
   }
   return v as TransportTcpDataType;
+}
+
+export function normalizeTransportUdpDataType(
+  v: string | TransportUdpDataType | undefined | null
+): TransportUdpDataType | undefined {
+  if (v == null || v === '') {
+    return undefined;
+  }
+  if (v === 'MONITORING_PROTOCOL') {
+    return TransportUdpDataType.PROTOCOL_TEMPLATE;
+  }
+  const s = String(v);
+  if ((Object.values(TransportUdpDataType) as string[]).includes(s)) {
+    return s as TransportUdpDataType;
+  }
+  return undefined;
 }
 
 /** 协议模板命令方向（与后端 ProtocolTemplateCommandDirection 一致） */
@@ -748,6 +774,100 @@ export interface TcpDeviceProfileTransportConfiguration {
   transportTcpDataTypeConfiguration?: TransportTcpDataTypeConfiguration;
 }
 
+/** UDP 与 TCP 共用 HEX/协议模板结构；类型别名便于表单与后端 JSON 字段名区分 */
+export type UdpHexValueType = TcpHexValueType;
+export type UdpHexFieldDefinition = TcpHexFieldDefinition;
+export type UdpHexLtvChunkOrder = TcpHexLtvChunkOrder;
+export type UdpHexUnknownTagMode = TcpHexUnknownTagMode;
+export type UdpHexLtvTagMapping = TcpHexLtvTagMapping;
+export type UdpHexLtvRepeatingConfig = TcpHexLtvRepeatingConfig;
+export type UdpHexCommandProfile = TcpHexCommandProfile;
+export type UdpHexChecksumDefinition = TcpHexChecksumDefinition;
+export const UDP_HEX_MATCH_VALUE_TYPES = TCP_HEX_MATCH_VALUE_TYPES;
+export const UDP_HEX_PROTOCOL_TEMPLATE_COMMAND_MATCH_TYPES = TCP_HEX_PROTOCOL_TEMPLATE_COMMAND_MATCH_TYPES;
+export const UDP_HEX_FRAME_FIELD_VALUE_TYPES = TCP_HEX_FRAME_FIELD_VALUE_TYPES;
+export const UDP_HEX_LTV_TAG_VALUE_OPTIONS = TCP_HEX_LTV_TAG_VALUE_OPTIONS;
+export const UDP_HEX_LTV_TAG_VALUE_TYPES = TCP_HEX_LTV_TAG_VALUE_TYPES;
+export const isUdpHexVariableByteSlice = isTcpHexVariableByteSlice;
+export const migrateLegacyLtvTagValueTypeUdp = migrateLegacyLtvTagValueType;
+
+/** @deprecated 历史 JSON；UDP 仅设备向平台监听端口发数据报，无 CLIENT/SERVER 建连 */
+export enum UdpTransportConnectMode {
+  SERVER = 'SERVER',
+  CLIENT = 'CLIENT'
+}
+
+export enum UdpTransportFramingMode {
+  NONE = 'NONE',
+  LINE = 'LINE',
+  LENGTH_PREFIX_4 = 'LENGTH_PREFIX_4',
+  LENGTH_PREFIX_2 = 'LENGTH_PREFIX_2',
+  FIXED_LENGTH = 'FIXED_LENGTH'
+}
+
+export enum UdpWireAuthenticationMode {
+  NONE = 'NONE',
+  TOKEN = 'TOKEN',
+  DEFERRED_PAYLOAD_TOKEN = 'DEFERRED_PAYLOAD_TOKEN',
+  DEFERRED_PAYLOAD_DEVICE_ID = 'DEFERRED_PAYLOAD_DEVICE_ID'
+}
+
+export enum UdpJsonWithoutMethodMode {
+  TELEMETRY_FLAT = 'TELEMETRY_FLAT',
+  ATTRIBUTES_FLAT = 'ATTRIBUTES_FLAT'
+}
+
+export enum TransportUdpDataType {
+  UTF8 = 'UTF8',
+  ASCII = 'ASCII',
+  RAW_BYTES = 'RAW_BYTES',
+  PROTOCOL_TEMPLATE = 'PROTOCOL_TEMPLATE'
+}
+
+export interface TransportUdpDataTypeConfiguration {
+  transportUdpDataType?: TransportUdpDataType;
+  hexCommandProfiles?: UdpHexCommandProfile[];
+  hexProtocolFields?: UdpHexFieldDefinition[];
+  hexLtvRepeating?: UdpHexLtvRepeatingConfig;
+  checksum?: UdpHexChecksumDefinition;
+  protocolTemplates?: ProtocolTemplateDefinition[];
+  protocolCommands?: ProtocolTemplateCommandDefinition[];
+  protocolTemplateBundleId?: string;
+  /** 历史 JSON 字段名（仅读取兼容） */
+  monitoringTemplates?: ProtocolTemplateDefinition[];
+  monitoringCommands?: ProtocolTemplateCommandDefinition[];
+  monitoringProtocolBundleId?: string;
+}
+
+export interface UdpDeviceProfileTransportConfiguration {
+  type?: DeviceTransportType;
+  /** @deprecated 历史字段，保存时固定为 NONE */
+  udpTransportConnectMode?: UdpTransportConnectMode;
+  /** @deprecated 历史字段，保存时固定为 NONE */
+  udpTransportFramingMode?: UdpTransportFramingMode;
+  udpFixedFrameLength?: number;
+  udpWireAuthenticationMode?: UdpWireAuthenticationMode;
+  udpProfileServerBindPort?: number;
+  udpDeferredWireAuthTokenJsonKey?: string;
+  udpOutboundReconnectIntervalSec?: number;
+  udpOutboundReconnectMaxAttempts?: number;
+  udpReadIdleTimeoutSec?: number;
+  udpJsonWithoutMethodMode?: UdpJsonWithoutMethodMode;
+  udpOpaqueRuleEngineKey?: string;
+  transportUdpDataTypeConfiguration?: TransportUdpDataTypeConfiguration;
+}
+
+export interface UdpDeviceTransportConfiguration {
+  type?: DeviceTransportType;
+  /** @deprecated 历史 CLIENT 模式字段 */
+  host?: string;
+  /** @deprecated 历史 CLIENT 模式字段 */
+  port?: number;
+  sourceHost?: string;
+  serverBindPort?: number;
+  udpWireAuthPayloadDeviceId?: string;
+}
+
 export const SnmpSpecTypeTranslationMap = new Map<SnmpSpecType, string>([
   [SnmpSpecType.TELEMETRY_QUERYING, ' Telemetry (SNMP GET)'],
   [SnmpSpecType.CLIENT_ATTRIBUTES_QUERYING, 'Client attributes (SNMP GET)'],
@@ -773,7 +893,8 @@ export type DeviceProfileTransportConfigurations = DefaultDeviceProfileTransport
                                                    CoapDeviceProfileTransportConfiguration &
                                                    Lwm2mDeviceProfileTransportConfiguration &
                                                    SnmpDeviceProfileTransportConfiguration &
-                                                   TcpDeviceProfileTransportConfiguration;
+                                                   TcpDeviceProfileTransportConfiguration &
+                                                   UdpDeviceProfileTransportConfiguration;
 
 export interface DeviceProfileTransportConfiguration extends DeviceProfileTransportConfigurations {
   type: DeviceTransportType;
@@ -880,6 +1001,19 @@ export const createDeviceProfileTransportConfiguration = (type: DeviceTransportT
         };
         transportConfiguration = {...tcpTransportConfiguration, type: DeviceTransportType.TCP};
         break;
+      case DeviceTransportType.UDP:
+        const udpTransportConfiguration: UdpDeviceProfileTransportConfiguration = {
+          udpTransportFramingMode: UdpTransportFramingMode.NONE,
+          udpFixedFrameLength: null,
+          udpWireAuthenticationMode: UdpWireAuthenticationMode.TOKEN,
+          udpJsonWithoutMethodMode: UdpJsonWithoutMethodMode.TELEMETRY_FLAT,
+          udpOpaqueRuleEngineKey: 'udpOpaquePayload',
+          transportUdpDataTypeConfiguration: {
+            transportUdpDataType: TransportUdpDataType.UTF8
+          }
+        };
+        transportConfiguration = {...udpTransportConfiguration, type: DeviceTransportType.UDP};
+        break;
     }
   }
   return transportConfiguration;
@@ -924,6 +1058,12 @@ export const createDeviceTransportConfiguration = (type: DeviceTransportType): D
           port: 5025
         };
         transportConfiguration = {...tcpDeviceTransportConfiguration, type: DeviceTransportType.TCP};
+        break;
+      case DeviceTransportType.UDP:
+        const udpDeviceTransportConfiguration: UdpDeviceTransportConfiguration = {
+          sourceHost: '127.0.0.1'
+        };
+        transportConfiguration = {...udpDeviceTransportConfiguration, type: DeviceTransportType.UDP};
         break;
     }
   }
@@ -1046,8 +1186,49 @@ export const deviceProfileAlarmValidator = (control: AbstractControl): Validatio
 
 
 export enum DeviceProfileRpcBindingType {
+  /** TCP/UDP 共用同一协议模板包与下行组帧（params.hex） */
   TCP_TEMPLATE = 'TCP_TEMPLATE',
+  /** 与 {@link TCP_TEMPLATE} 等价，保存时统一为 TCP_TEMPLATE */
+  UDP_TEMPLATE = 'UDP_TEMPLATE',
   NATIVE = 'NATIVE'
+}
+
+/** 支持协议模板（原始字节 / PROTOCOL_TEMPLATE）的传输类型 */
+export function isProtocolTemplateWireTransport(type: DeviceTransportType | null | undefined): boolean {
+  return type === DeviceTransportType.TCP || type === DeviceTransportType.UDP;
+}
+
+/** TCP/UDP 档案 RPC：协议模板绑定（共用 TCP_TEMPLATE；UDP_TEMPLATE 与之等价） */
+export function isProtocolTemplateRpcBinding(bindingType: DeviceProfileRpcBindingType | null | undefined): boolean {
+  return bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE
+    || bindingType === DeviceProfileRpcBindingType.UDP_TEMPLATE;
+}
+
+export function wireProfileProtocolTemplateBundleId(
+  cfg: TcpDeviceProfileTransportConfiguration | UdpDeviceProfileTransportConfiguration | null | undefined
+): string | null {
+  if (!cfg) {
+    return null;
+  }
+  const tcpCfg = cfg as TcpDeviceProfileTransportConfiguration;
+  const udpCfg = cfg as UdpDeviceProfileTransportConfiguration;
+  const tcpData = tcpCfg.transportTcpDataTypeConfiguration;
+  const udpData = udpCfg.transportUdpDataTypeConfiguration;
+  const id = tcpData?.protocolTemplateBundleId ?? tcpData?.monitoringProtocolBundleId
+    ?? udpData?.protocolTemplateBundleId ?? udpData?.monitoringProtocolBundleId;
+  return id?.trim() || null;
+}
+
+export function wireProfileTransportPayloadType(
+  cfg: TcpDeviceProfileTransportConfiguration | UdpDeviceProfileTransportConfiguration | null | undefined
+): TransportTcpDataType | TransportUdpDataType | undefined {
+  if (!cfg) {
+    return undefined;
+  }
+  const tcpCfg = cfg as TcpDeviceProfileTransportConfiguration;
+  const udpCfg = cfg as UdpDeviceProfileTransportConfiguration;
+  return tcpCfg.transportTcpDataTypeConfiguration?.transportTcpDataType
+    ?? udpCfg.transportUdpDataTypeConfiguration?.transportUdpDataType;
 }
 
 /** 设备档案：平台 RPC 方法目录（对外统一 id，按绑定映射到 TCP 组帧或原生 RPC） */
@@ -1203,7 +1384,8 @@ export type DeviceTransportConfigurations = DefaultDeviceTransportConfiguration 
   CoapDeviceTransportConfiguration &
   Lwm2mDeviceTransportConfiguration &
   SnmpDeviceTransportConfiguration &
-  TcpDeviceTransportConfiguration;
+  TcpDeviceTransportConfiguration &
+  UdpDeviceTransportConfiguration;
 
 export interface DeviceTransportConfiguration extends DeviceTransportConfigurations {
   type: DeviceTransportType;
@@ -1305,7 +1487,8 @@ export const credentialTypesByTransportType = new Map<DeviceTransportType, Devic
     [DeviceTransportType.COAP, [DeviceCredentialsType.ACCESS_TOKEN, DeviceCredentialsType.X509_CERTIFICATE]],
     [DeviceTransportType.LWM2M, [DeviceCredentialsType.LWM2M_CREDENTIALS]],
     [DeviceTransportType.SNMP, [DeviceCredentialsType.ACCESS_TOKEN]],
-    [DeviceTransportType.TCP, [DeviceCredentialsType.ACCESS_TOKEN]]
+    [DeviceTransportType.TCP, [DeviceCredentialsType.ACCESS_TOKEN]],
+    [DeviceTransportType.UDP, [DeviceCredentialsType.ACCESS_TOKEN]]
   ]
 );
 

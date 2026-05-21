@@ -17,6 +17,7 @@ package org.thingsboard.server.dao.device;
 
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceProfileInfo;
+import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.EntityInfo;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -38,6 +39,8 @@ public interface DeviceProfileDao extends Dao<DeviceProfile>, ExportableEntityDa
     DeviceProfile saveAndFlush(TenantId tenantId, DeviceProfile deviceProfile);
 
     PageData<DeviceProfile> findDeviceProfiles(TenantId tenantId, PageLink pageLink);
+
+    PageData<UUID> findProfileIdsByTransportType(DeviceTransportType transportType, PageLink pageLink);
 
     PageData<DeviceProfileInfo> findDeviceProfileInfos(TenantId tenantId, PageLink pageLink, String transportType);
 

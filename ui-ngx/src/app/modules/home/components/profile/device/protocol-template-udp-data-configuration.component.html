@@ -1,0 +1,549 @@
+<div class="flex flex-col gap-3 protocol-template-panel"
+     [class.mat-elevation-z1]="layoutMode === 'full'"
+     *ngIf="templatesArray && commandsArray">
+  <div *ngIf="layoutMode === 'full'" class="tb-hint mat-body-2" style="margin: 0; padding: 10px 12px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);">
+    <span translate>device-profile.udp.protocol-template-intro</span>
+  </div>
+  <div *ngIf="layoutMode === 'commandsOnly'" class="tb-hint mat-caption protocol-template-hint-compact" style="margin: 0;" translate>profiles.protocol-templates-dialog-tab-commands-hint</div>
+
+  <ng-container *ngIf="layoutMode === 'full' || layoutMode === 'templatesOnly'">
+    <div class="mat-body-2" translate>device-profile.udp.protocol-template-templates-title</div>
+    <div class="tb-hint mat-caption protocol-template-hint-compact" translate>device-profile.udp.protocol-template-templates-hint-single</div>
+
+    <div *ngIf="!templatesArray.length" class="tb-hint mat-caption" translate>device-profile.udp.protocol-template-form-loading</div>
+
+    <div *ngIf="templatesArray.length > 0" class="flex flex-col gap-3 mat-elevation-z1" style="padding: 12px; border-radius: 4px;"
+         [formGroup]="asFormGroup(templatesArray.at(0))">
+      <input type="hidden" formControlName="id">
+
+      <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.udp.protocol-template-default-fields-title</div>
+      <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-inline-hint" translate>device-profile.udp.protocol-template-variable-payload-hint</div>
+      <div formArrayName="hexProtocolFields" class="protocol-template-hex-field-list">
+        <div *ngFor="let fi of templateFieldIndicesSortedByByteOffset(0); let pos = index; trackBy: trackFieldIndex" [formGroupName]="fi"
+             class="protocol-template-hex-field-compact">
+          <div class="protocol-template-hex-field-compact__primary">
+            <span class="protocol-template-hex-field-compact__idx"
+                  [matTooltip]="'device-profile.udp.hex-field-card-title' | translate: { index: pos + 1 }">{{ pos + 1 }}</span>
+            <mat-form-field class="protocol-template-hex-field-compact__key" subscriptSizing="fixed" appearance="outline">
+              <mat-label translate>device-profile.udp.hex-field-key</mat-label>
+              <input matInput formControlName="key">
+            </mat-form-field>
+            <mat-form-field class="protocol-template-hex-field-compact__off" subscriptSizing="fixed" appearance="outline">
+              <mat-label translate>device-profile.udp.hex-field-offset</mat-label>
+              <input matInput type="number" min="0" formControlName="byteOffset" required>
+            </mat-form-field>
+            <mat-form-field class="protocol-template-hex-field-compact__type" subscriptSizing="fixed" appearance="outline">
+              <mat-label translate>device-profile.udp.hex-field-type</mat-label>
+              <mat-select formControlName="valueType" required>
+                <mat-option *ngFor="let t of tcpHexValueTypes" [value]="t">{{ t }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <button mat-icon-button type="button" color="warn" class="protocol-template-hex-field-compact__del"
+                    matTooltip="{{ 'device-profile.udp.hex-remove-field' | translate }}"
+                    (click)="removeTemplateField.emit({ templateIndex: 0, fieldIndex: fi })">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+          <div *ngIf="isIntegralHexFieldTemplateRow(fi)" class="protocol-template-hex-field-compact__row">
+            <mat-form-field class="protocol-template-hex-field-compact__fixed-int" subscriptSizing="fixed" appearance="outline"
+                            [matTooltip]="'device-profile.udp.hex-field-fixed-integral-hint' | translate"
+                            matTooltipPosition="above" matTooltipShowDelay="400">
+              <mat-label translate>device-profile.udp.hex-field-fixed-integral</mat-label>
+              <input matInput formControlName="fixedWireIntegralValueText" autocomplete="off"
+                     [placeholder]="'device-profile.udp.hex-field-fixed-integral-placeholder' | translate"
+                     (blur)="onFixedWireIntegralBlur(getTemplateFieldsArray(0).at(fi).get('fixedWireIntegralValueText'))">
+            </mat-form-field>
+          </div>
+          <div *ngIf="isIntegralHexFieldTemplateRow(fi)"
+               class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__row--tight">
+            <mat-checkbox formControlName="autoDownlinkTotalFrameLength" color="primary"
+                          class="protocol-template-hex-field-compact__checkbox"
+                          (change)="onTemplateAutoTotalFrameLengthChange(0, fi, $event.checked)">
+              <span class="mat-caption" translate>device-profile.udp.hex-field-auto-downlink-total-frame-len</span>
+            </mat-checkbox>
+            <mat-checkbox *ngIf="asFormGroup(getTemplateFieldsArray(0).at(fi)).get('autoDownlinkTotalFrameLength')?.value"
+                          formControlName="downlinkTotalFrameLengthExcludesLengthFieldBytes" color="primary"
+                          class="protocol-template-hex-field-compact__checkbox">
+              <span class="mat-caption" translate>device-profile.udp.hex-field-total-frame-len-excludes-self</span>
+            </mat-checkbox>
+          </div>
+          <div *ngIf="isBytesAsHexTemplate(0, fi)" class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__bytes">
+            <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="outline"
+                            [matTooltip]="'device-profile.udp.hex-field-length-mode-hint-detail' | translate"
+                            matTooltipShowDelay="400"
+                            matTooltipClass="tb-tooltip-multiline">
+              <mat-label translate>device-profile.udp.hex-field-length-mode</mat-label>
+              <mat-select [value]="getHexFieldLengthModeTemplate(0, fi)"
+                          (selectionChange)="onHexFieldLengthModeTemplate(0, fi, $event.value)">
+                <mat-option value="fixed">{{ 'device-profile.udp.hex-field-length-mode-fixed' | translate }}</mat-option>
+                <mat-option value="fromFrame">{{ 'device-profile.udp.hex-field-length-mode-from-frame' | translate }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <ng-container *ngIf="getHexFieldLengthModeTemplate(0, fi) === 'fixed'">
+              <mat-form-field class="protocol-template-hex-field-compact__byte-len" subscriptSizing="fixed" appearance="outline">
+                <mat-label translate>device-profile.udp.hex-field-byte-length</mat-label>
+                <input matInput type="number" min="1" formControlName="byteLength">
+              </mat-form-field>
+              <mat-form-field class="protocol-template-hex-field-compact__fixed-hex" subscriptSizing="fixed" appearance="outline"
+                              [matTooltip]="(isBytesAsUtf8Template(0, fi)
+                                ? 'device-profile.udp.hex-field-fixed-bytes-utf8-hint'
+                                : 'device-profile.udp.hex-field-fixed-bytes-hex-hint') | translate"
+                              matTooltipPosition="above" matTooltipShowDelay="400">
+                <mat-label *ngIf="isBytesAsUtf8Template(0, fi)" translate>device-profile.udp.hex-field-fixed-bytes-utf8</mat-label>
+                <mat-label *ngIf="!isBytesAsUtf8Template(0, fi)" translate>device-profile.udp.hex-field-fixed-bytes-hex</mat-label>
+                <input matInput formControlName="fixedBytesHex" autocomplete="off"
+                       [placeholder]="(isBytesAsUtf8Template(0, fi)
+                         ? 'device-profile.udp.hex-field-fixed-bytes-utf8-placeholder'
+                         : 'device-profile.udp.hex-field-fixed-bytes-hex-placeholder') | translate"
+                       (blur)="onFixedBytesHexBlur(asFormGroup(getTemplateFieldsArray(0).at(fi)))">
+              </mat-form-field>
+            </ng-container>
+            <ng-container *ngIf="getHexFieldLengthModeTemplate(0, fi) === 'fromFrame'">
+              <mat-form-field class="protocol-template-hex-field-compact__len-off" subscriptSizing="fixed" appearance="outline">
+                <mat-label translate>device-profile.udp.hex-field-len-from-offset</mat-label>
+                <input matInput type="number" min="0" formControlName="byteLengthFromByteOffset">
+              </mat-form-field>
+              <mat-form-field class="protocol-template-hex-field-compact__len-vt" subscriptSizing="fixed" appearance="outline">
+                <mat-label translate>device-profile.udp.hex-field-len-from-type</mat-label>
+                <mat-select formControlName="byteLengthFromValueType">
+                  <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field class="protocol-template-hex-field-compact__len-sub" subscriptSizing="fixed" appearance="outline">
+                <mat-label translate>device-profile.udp.hex-field-len-subtract</mat-label>
+                <input matInput type="number" min="0" formControlName="byteLengthFromIntegralSubtract">
+                <mat-hint translate>device-profile.udp.hex-field-len-subtract-hint</mat-hint>
+              </mat-form-field>
+            </ng-container>
+            <p class="mat-caption text-muted protocol-template-hex-field-compact__bytes-hint protocol-template-inline-hint protocol-template-hint-compact" translate>device-profile.udp.hex-field-length-mode-hint</p>
+          </div>
+          <div class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__row--tight">
+            <mat-checkbox formControlName="includeInDownlinkPayloadLength" color="primary"
+                          class="protocol-template-hex-field-compact__checkbox">
+              <span class="mat-caption" translate>device-profile.udp.hex-field-include-downlink-payload-len</span>
+            </mat-checkbox>
+          </div>
+        </div>
+      </div>
+      <button mat-stroked-button color="primary" type="button" (click)="addTemplateField.emit(0)">
+        <mat-icon>add</mat-icon>
+        <span translate>device-profile.udp.hex-add-field</span>
+      </button>
+
+      <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.udp.protocol-template-checksum-title</div>
+      <div class="tb-hint mat-caption protocol-template-inline-hint protocol-template-hint-compact" translate>device-profile.udp.protocol-template-checksum-hint</div>
+      <div class="flex flex-row flex-wrap gap-2 items-start">
+        <mat-form-field class="flex-1" style="min-width: 200px;" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.udp.protocol-template-checksum-type</mat-label>
+          <mat-select formControlName="checksumType">
+            <mat-option value="NONE">{{ 'device-profile.udp.protocol-template-checksum-none' | translate }}</mat-option>
+            <mat-option value="SUM8">SUM8</mat-option>
+            <mat-option value="CRC16_MODBUS">CRC16_MODBUS</mat-option>
+            <mat-option value="CRC16_CCITT">CRC16_CCITT</mat-option>
+            <mat-option value="CRC32">CRC32</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div *ngIf="asFormGroup(templatesArray.at(0)).get('checksumType')?.value && asFormGroup(templatesArray.at(0)).get('checksumType')?.value !== 'NONE'"
+           class="flex flex-row flex-wrap gap-2 items-start">
+        <mat-form-field style="width: 110px;" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.udp.protocol-template-checksum-from</mat-label>
+          <input matInput type="number" formControlName="checksumFromByte">
+        </mat-form-field>
+        <mat-form-field style="width: 120px;" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.udp.protocol-template-checksum-to-exc</mat-label>
+          <input matInput type="number" formControlName="checksumToExclusive">
+        </mat-form-field>
+        <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.udp.protocol-template-checksum-at</mat-label>
+          <input matInput type="number" formControlName="checksumByteIndex">
+          <mat-hint translate>device-profile.udp.protocol-template-checksum-at-hint</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <mat-expansion-panel class="mat-elevation-z0" style="border: 1px solid rgba(0,0,0,.12);" [(expanded)]="templateHexLtvPanelExpanded">
+        <mat-expansion-panel-header>
+          <mat-panel-title translate>device-profile.udp.hex-ltv-section-title</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="tb-hint mat-caption protocol-template-hint-compact" style="margin-bottom: 8px;" translate>device-profile.udp.hex-ltv-section-hint</div>
+        <div class="protocol-template-ltv-toggle-block">
+          <mat-slide-toggle formControlName="hexLtvEnabled" color="primary"
+                            (change)="onTemplateHexLtvEnabledChange($event.checked)">
+            <span translate>device-profile.udp.hex-ltv-enable</span>
+          </mat-slide-toggle>
+          <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.udp.hex-ltv-enable-supplement-hint</div>
+        </div>
+        <ng-container *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value">
+          <div class="protocol-template-ltv-toggle-block">
+            <mat-slide-toggle formControlName="hexLtvLengthIncludesTag" color="primary"
+                              (change)="onTemplateHexLtvLengthIncludesTagChange($event.checked)">
+              <span translate>device-profile.udp.hex-ltv-length-includes-tag</span>
+            </mat-slide-toggle>
+            <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.udp.hex-ltv-length-includes-tag-hint</div>
+          </div>
+          <div class="protocol-template-ltv-toggle-block">
+            <mat-slide-toggle formControlName="hexLtvLengthIncludesLengthField" color="primary"
+                              (change)="onTemplateHexLtvLengthIncludesLengthFieldChange($event.checked)">
+              <span translate>device-profile.udp.hex-ltv-length-includes-length-field</span>
+            </mat-slide-toggle>
+            <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.udp.hex-ltv-length-includes-length-field-hint</div>
+          </div>
+        </ng-container>
+        <div *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value" class="flex flex-col gap-3">
+          <div class="flex flex-row flex-wrap gap-2">
+            <mat-form-field style="width: 110px;">
+              <mat-label translate>device-profile.udp.hex-ltv-start</mat-label>
+              <input matInput type="number" min="0" formControlName="hexLtvStartOffset" required>
+            </mat-form-field>
+            <mat-form-field class="flex-1" style="min-width: 140px;">
+              <mat-label translate>device-profile.udp.hex-ltv-length-type</mat-label>
+              <mat-select formControlName="hexLtvLengthType" required>
+                <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field class="flex-1" style="min-width: 140px;">
+              <mat-label translate>device-profile.udp.hex-ltv-tag-type</mat-label>
+              <mat-select formControlName="hexLtvTagType" required>
+                <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field style="width: 120px;">
+              <mat-label translate>device-profile.udp.hex-ltv-order</mat-label>
+              <mat-select formControlName="hexLtvChunkOrder" required>
+                <mat-option [value]="TcpHexLtvChunkOrder.LTV">LTV</mat-option>
+                <mat-option [value]="TcpHexLtvChunkOrder.TLV">TLV</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field style="width: 100px;">
+              <mat-label translate>device-profile.udp.hex-ltv-max</mat-label>
+              <input matInput type="number" min="1" formControlName="hexLtvMaxItems">
+            </mat-form-field>
+            <mat-form-field style="width: 100px;">
+              <mat-label translate>device-profile.udp.hex-ltv-prefix</mat-label>
+              <input matInput formControlName="hexLtvKeyPrefix">
+            </mat-form-field>
+            <mat-form-field class="flex-1" style="min-width: 160px;">
+              <mat-label translate>device-profile.udp.hex-ltv-unknown</mat-label>
+              <mat-select formControlName="hexLtvUnknownMode" required>
+                <mat-option [value]="TcpHexUnknownTagMode.SKIP">{{ TcpHexUnknownTagMode.SKIP }}</mat-option>
+                <mat-option [value]="TcpHexUnknownTagMode.EMIT_HEX">{{ TcpHexUnknownTagMode.EMIT_HEX }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="mat-body-2" translate>device-profile.udp.hex-ltv-mappings-title</div>
+          <div class="tb-hint mat-caption mb-2" translate>device-profile.udp.hex-ltv-mappings-hint</div>
+          <div formArrayName="hexLtvTagMappings" class="flex flex-col gap-2">
+            <div *ngFor="let row of getTemplateLtvTagMappingsArray(0).controls; let li = index" [formGroupName]="li"
+                 class="flex flex-row flex-wrap gap-2 items-start">
+              <mat-form-field style="width: 180px;">
+                <mat-label translate>device-profile.udp.hex-ltv-tag-value</mat-label>
+                <input matInput type="text" autocomplete="off" formControlName="tagValue" required
+                       [placeholder]="'device-profile.udp.hex-ltv-tag-value-placeholder' | translate"
+                       (blur)="onLtvTagValueBlur(0, li)">
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 120px;">
+                <mat-label translate>device-profile.udp.hex-ltv-telemetry-key</mat-label>
+                <input matInput formControlName="telemetryKey" required>
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 140px;">
+                <mat-label translate>device-profile.udp.hex-field-type</mat-label>
+                <mat-select formControlName="valueType" required>
+                  <mat-option *ngFor="let opt of tcpHexLtvTagValueOptions" [value]="opt.value">
+                    {{ opt.labelKey | translate }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button mat-icon-button type="button" color="primary"
+                      matTooltip="{{ 'device-profile.udp.hex-remove-field' | translate }}"
+                      (click)="removeTemplateLtvMapping.emit({ templateIndex: 0, index: li })">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <button mat-stroked-button color="primary" type="button" (click)="addTemplateLtvMapping.emit(0)">
+            <mat-icon>add</mat-icon>
+            <span translate>device-profile.udp.hex-ltv-add-mapping</span>
+          </button>
+        </div>
+      </mat-expansion-panel>
+    </div>
+  </ng-container>
+
+  <mat-divider *ngIf="layoutMode === 'full'"></mat-divider>
+
+  <ng-container *ngIf="layoutMode === 'full' || layoutMode === 'commandsOnly'">
+    <div class="flex flex-wrap items-baseline gap-1">
+      <span class="mat-body-2" translate>device-profile.udp.protocol-template-commands-title</span>
+    </div>
+    <div class="tb-hint mat-caption protocol-template-hint-compact" translate>device-profile.udp.protocol-template-commands-hint</div>
+
+    <div *ngIf="templatesArray?.length" class="flex flex-col gap-2 protocol-template-cmd-row-block protocol-template-global-cmd-match">
+      <div class="mat-body-2" translate>device-profile.udp.protocol-template-cmd-match-section-title</div>
+      <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-match-section-hint</div>
+      <div class="flex flex-row flex-wrap gap-2 items-start">
+        <mat-form-field class="protocol-template-cmd-offset-field" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.udp.protocol-template-cmd-offset</mat-label>
+          <input matInput type="number" min="0" [formControl]="firstTemplateGroup().get('commandByteOffset')">
+        </mat-form-field>
+        <mat-form-field class="protocol-template-cmd-width-field" subscriptSizing="dynamic">
+          <mat-label translate>device-profile.udp.protocol-template-cmd-width</mat-label>
+          <mat-select [formControl]="firstTemplateGroup().get('commandMatchWidth')">
+            <mat-option [value]="1">1</mat-option>
+            <mat-option [value]="4">4</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-commands-count-hint"
+         *ngIf="commandsArray.length > 0">
+      {{ 'device-profile.udp.protocol-template-commands-count' | translate:{ count: commandsArray.length } }}
+    </div>
+    <mat-accordion multi="true">
+      <mat-expansion-panel *ngFor="let cCtrl of commandsArray.controls; let ci = index; trackBy: trackCommandIndex"
+                           class="mat-elevation-z1" style="margin-bottom: 8px;">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ 'device-profile.udp.protocol-template-command' | translate }} {{ ci + 1 }}
+            <span *ngIf="asFormGroup(cCtrl).get('name')?.value"> — {{ asFormGroup(cCtrl).get('name')?.value }}</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <ng-template matExpansionPanelContent>
+        <div [formGroup]="asFormGroup(cCtrl)" class="flex flex-col gap-3">
+          <div class="flex flex-col gap-2 protocol-template-command-meta">
+            <input *ngIf="singleTemplateMode" type="hidden" formControlName="templateId">
+            <div class="flex flex-row flex-wrap gap-2 items-start">
+              <mat-form-field *ngIf="!singleTemplateMode" class="flex-1" style="min-width: 160px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.udp.protocol-template-cmd-template</mat-label>
+                <mat-select formControlName="templateId" required>
+                  <mat-option *ngFor="let tid of templateIdOptions()" [value]="tid">{{ tid }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 120px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.udp.hex-cmd-name</mat-label>
+                <input matInput formControlName="name">
+              </mat-form-field>
+              <mat-form-field class="protocol-template-cmd-value-field" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.udp.protocol-template-cmd-value</mat-label>
+                <input matInput type="text" formControlName="commandValue" required autocomplete="off"
+                       [placeholder]="(isCommandMatchByteSlice(asFormGroup(cCtrl))
+                         ? (isCommandMatchUtf8(asFormGroup(cCtrl))
+                           ? 'device-profile.udp.hex-field-fixed-bytes-utf8-placeholder'
+                           : 'device-profile.udp.hex-field-fixed-bytes-hex-placeholder')
+                         : 'device-profile.udp.hex-field-fixed-integral-placeholder') | translate"
+                       (blur)="onCommandPrimaryValueBlur(asFormGroup(cCtrl))">
+                <mat-hint *ngIf="isCommandMatchByteSlice(asFormGroup(cCtrl)) && isCommandMatchUtf8(asFormGroup(cCtrl))"
+                          translate>device-profile.udp.protocol-template-cmd-value-hint-bytes-utf8</mat-hint>
+                <mat-hint *ngIf="isCommandMatchByteSlice(asFormGroup(cCtrl)) && !isCommandMatchUtf8(asFormGroup(cCtrl))"
+                          translate>device-profile.udp.protocol-template-cmd-value-hint-bytes</mat-hint>
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.udp.hex-cmd-value-type</mat-label>
+                <mat-select formControlName="matchValueType" required>
+                  <mat-option *ngFor="let t of tcpHexCommandMatchValueTypes" [value]="t">{{ t }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field class="flex-1" style="min-width: 160px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.udp.protocol-template-direction</mat-label>
+                <mat-select formControlName="direction" required>
+                  <mat-option [value]="ProtocolTemplateCommandDirection.UPLINK">{{ 'device-profile.udp.protocol-template-dir-uplink' | translate }}</mat-option>
+                  <mat-option [value]="ProtocolTemplateCommandDirection.DOWNLINK">{{ 'device-profile.udp.protocol-template-dir-downlink' | translate }}</mat-option>
+                  <mat-option [value]="ProtocolTemplateCommandDirection.BOTH">{{ 'device-profile.udp.protocol-template-dir-both' | translate }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field *ngIf="asFormGroup(cCtrl).get('direction')?.value !== ProtocolTemplateCommandDirection.DOWNLINK"
+                              class="flex-1" style="min-width: 160px;" subscriptSizing="dynamic">
+                <mat-label>上行数据流转</mat-label>
+                <mat-select formControlName="uplinkDataDestination">
+                  <mat-option [value]="ProtocolTemplateUplinkDataDestination.TELEMETRY">遥测数据</mat-option>
+                  <mat-option [value]="ProtocolTemplateUplinkDataDestination.ATTRIBUTES">属性数据</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <ng-container *ngIf="asFormGroup(cCtrl).get('direction')?.value !== ProtocolTemplateCommandDirection.DOWNLINK">
+              <div class="mat-body-2" translate>device-profile.udp.protocol-template-secondary-title</div>
+              <div class="flex flex-row flex-wrap gap-2 items-start">
+                <mat-form-field class="protocol-template-secondary-offset-field" subscriptSizing="dynamic">
+                  <mat-label translate>device-profile.udp.protocol-template-secondary-offset</mat-label>
+                  <input matInput type="number" min="0" formControlName="secondaryMatchByteOffset">
+                </mat-form-field>
+                <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
+                  <mat-label translate>device-profile.udp.protocol-template-secondary-type</mat-label>
+                  <mat-select formControlName="secondaryMatchValueType">
+                    <mat-option *ngFor="let t of tcpHexCommandMatchValueTypes" [value]="t">{{ t }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field class="protocol-template-cmd-value-field" subscriptSizing="dynamic">
+                  <mat-label translate>device-profile.udp.protocol-template-secondary-value</mat-label>
+                  <input matInput type="text" formControlName="secondaryMatchValue" autocomplete="off"
+                         [placeholder]="(isSecondaryMatchByteSlice(asFormGroup(cCtrl))
+                           ? (isSecondaryMatchUtf8(asFormGroup(cCtrl))
+                             ? 'device-profile.udp.hex-field-fixed-bytes-utf8-placeholder'
+                             : 'device-profile.udp.hex-field-fixed-bytes-hex-placeholder')
+                           : 'device-profile.udp.hex-field-fixed-integral-placeholder') | translate"
+                         (blur)="onCommandSecondaryValueBlur(asFormGroup(cCtrl))">
+                  <mat-hint *ngIf="isSecondaryMatchByteSlice(asFormGroup(cCtrl)) && isSecondaryMatchUtf8(asFormGroup(cCtrl))"
+                            translate>device-profile.udp.protocol-template-cmd-value-hint-bytes-utf8</mat-hint>
+                  <mat-hint *ngIf="isSecondaryMatchByteSlice(asFormGroup(cCtrl)) && !isSecondaryMatchUtf8(asFormGroup(cCtrl))"
+                            translate>device-profile.udp.protocol-template-cmd-value-hint-bytes</mat-hint>
+                </mat-form-field>
+              </div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-secondary-hint</div>
+            </ng-container>
+            <div *ngIf="asFormGroup(cCtrl).get('direction')?.value === ProtocolTemplateCommandDirection.DOWNLINK"
+                 class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-secondary-hidden-downlink</div>
+            <div *ngIf="isDownlinkOrBothForCommand(ci)" class="flex flex-col gap-2 protocol-template-downlink-len-auto">
+              <mat-checkbox formControlName="downlinkPayloadLengthAuto" color="primary">
+                <span class="mat-caption" translate>device-profile.udp.protocol-template-downlink-len-auto</span>
+              </mat-checkbox>
+              <mat-form-field *ngIf="asFormGroup(cCtrl).get('downlinkPayloadLengthAuto')?.value"
+                              class="flex-1" style="max-width: 360px;" subscriptSizing="dynamic">
+                <mat-label translate>device-profile.udp.protocol-template-downlink-len-field</mat-label>
+                <mat-select formControlName="downlinkPayloadLengthFieldKey">
+                  <mat-option value="">{{ 'device-profile.udp.protocol-template-downlink-len-field-empty' | translate }}</mat-option>
+                  <mat-option *ngFor="let k of downlinkLengthFieldKeyOptions(ci)" [value]="k">{{ k }}</mat-option>
+                </mat-select>
+                <mat-hint translate>device-profile.udp.protocol-template-downlink-len-field-hint</mat-hint>
+              </mat-form-field>
+            </div>
+            <div *ngIf="!singleTemplateMode" class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-template-hint</div>
+          </div>
+
+          <ng-container [ngSwitch]="asFormGroup(cCtrl).get('direction')?.value">
+            <ng-container *ngSwitchCase="ProtocolTemplateCommandDirection.DOWNLINK">
+              <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.udp.protocol-template-cmd-override-title-downlink</div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-override-hint-downlink</div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-downlink-override-bytes-hint</div>
+            </ng-container>
+            <ng-container *ngSwitchCase="ProtocolTemplateCommandDirection.BOTH">
+              <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.udp.protocol-template-cmd-override-title-both</div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-override-hint-both</div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-downlink-override-bytes-hint</div>
+            </ng-container>
+            <ng-container *ngSwitchDefault>
+              <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.udp.protocol-template-cmd-override-title-uplink</div>
+              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-override-hint-uplink</div>
+            </ng-container>
+          </ng-container>
+          <div formArrayName="overrideFields" class="protocol-template-hex-field-list">
+            <div *ngFor="let fi of overrideFieldIndicesSortedByByteOffset(ci); let pos = index; trackBy: trackFieldIndex" [formGroupName]="fi"
+                 class="protocol-template-hex-field-compact">
+              <div class="protocol-template-hex-field-compact__primary">
+                <span class="protocol-template-hex-field-compact__idx"
+                      [matTooltip]="'device-profile.udp.hex-field-card-title' | translate: { index: pos + 1 }">{{ pos + 1 }}</span>
+                <mat-form-field class="protocol-template-hex-field-compact__key" subscriptSizing="fixed" appearance="outline">
+                  <mat-label translate>device-profile.udp.hex-field-key</mat-label>
+                  <input matInput formControlName="key">
+                </mat-form-field>
+                <mat-form-field class="protocol-template-hex-field-compact__off" subscriptSizing="fixed" appearance="outline">
+                  <mat-label translate>device-profile.udp.hex-field-offset</mat-label>
+                  <input matInput type="number" min="0" formControlName="byteOffset" required>
+                </mat-form-field>
+                <mat-form-field class="protocol-template-hex-field-compact__type" subscriptSizing="fixed" appearance="outline">
+                  <mat-label translate>device-profile.udp.hex-field-type</mat-label>
+                  <mat-select formControlName="valueType" required>
+                    <mat-option *ngFor="let t of tcpHexValueTypes" [value]="t">{{ t }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <button mat-icon-button type="button" color="warn" class="protocol-template-hex-field-compact__del"
+                        matTooltip="{{ 'device-profile.udp.hex-remove-field' | translate }}"
+                        (click)="removeOverrideField.emit({ commandIndex: ci, fieldIndex: fi })">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+              <div *ngIf="isIntegralHexFieldOverrideRow(ci, fi) || isDownlinkOrBothForCommand(ci)"
+                   class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__row--tight">
+                <mat-form-field *ngIf="isIntegralHexFieldOverrideRow(ci, fi)" class="protocol-template-hex-field-compact__fixed-int"
+                                subscriptSizing="fixed" appearance="outline"
+                                [matTooltip]="'device-profile.udp.hex-field-fixed-integral-hint' | translate"
+                                matTooltipPosition="above" matTooltipShowDelay="400">
+                  <mat-label translate>device-profile.udp.hex-field-fixed-integral</mat-label>
+                  <input matInput formControlName="fixedWireIntegralValueText" autocomplete="off"
+                         [placeholder]="'device-profile.udp.hex-field-fixed-integral-placeholder' | translate"
+                         (blur)="onFixedWireIntegralBlur(getCommandOverrideFieldsArray(ci).at(fi).get('fixedWireIntegralValueText'))">
+                </mat-form-field>
+                <mat-checkbox *ngIf="isDownlinkOrBothForCommand(ci)" formControlName="includeInDownlinkPayloadLength" color="primary"
+                              class="protocol-template-hex-field-compact__checkbox">
+                  <span class="mat-caption" translate>device-profile.udp.hex-field-include-downlink-payload-len</span>
+                </mat-checkbox>
+                <mat-checkbox *ngIf="isIntegralHexFieldOverrideRow(ci, fi)" formControlName="autoDownlinkTotalFrameLength" color="primary"
+                              class="protocol-template-hex-field-compact__checkbox"
+                              (change)="onOverrideAutoTotalFrameLengthChange(ci, fi, $event.checked)">
+                  <span class="mat-caption" translate>device-profile.udp.hex-field-auto-downlink-total-frame-len</span>
+                </mat-checkbox>
+                <mat-checkbox *ngIf="isIntegralHexFieldOverrideRow(ci, fi) && asFormGroup(getCommandOverrideFieldsArray(ci).at(fi)).get('autoDownlinkTotalFrameLength')?.value"
+                              formControlName="downlinkTotalFrameLengthExcludesLengthFieldBytes" color="primary"
+                              class="protocol-template-hex-field-compact__checkbox">
+                  <span class="mat-caption" translate>device-profile.udp.hex-field-total-frame-len-excludes-self</span>
+                </mat-checkbox>
+              </div>
+              <div *ngIf="isBytesAsHexOverride(ci, fi)" class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__bytes">
+                <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="outline"
+                                [matTooltip]="'device-profile.udp.hex-field-length-mode-hint-detail' | translate"
+                                matTooltipShowDelay="400"
+                                matTooltipClass="tb-tooltip-multiline">
+                  <mat-label translate>device-profile.udp.hex-field-length-mode</mat-label>
+                  <mat-select [value]="getHexFieldLengthModeOverride(ci, fi)"
+                              (selectionChange)="onHexFieldLengthModeOverride(ci, fi, $event.value)">
+                    <mat-option value="fixed">{{ 'device-profile.udp.hex-field-length-mode-fixed' | translate }}</mat-option>
+                    <mat-option value="fromFrame">{{ 'device-profile.udp.hex-field-length-mode-from-frame' | translate }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <ng-container *ngIf="getHexFieldLengthModeOverride(ci, fi) === 'fixed'">
+                  <mat-form-field class="protocol-template-hex-field-compact__byte-len" subscriptSizing="fixed" appearance="outline">
+                    <mat-label translate>device-profile.udp.hex-field-byte-length</mat-label>
+                    <input matInput type="number" min="1" formControlName="byteLength">
+                  </mat-form-field>
+                  <mat-form-field class="protocol-template-hex-field-compact__fixed-hex" subscriptSizing="fixed" appearance="outline"
+                                  [matTooltip]="(isBytesAsUtf8Override(ci, fi)
+                                    ? 'device-profile.udp.hex-field-fixed-bytes-utf8-hint'
+                                    : 'device-profile.udp.hex-field-fixed-bytes-hex-hint') | translate"
+                                  matTooltipPosition="above" matTooltipShowDelay="400">
+                    <mat-label *ngIf="isBytesAsUtf8Override(ci, fi)" translate>device-profile.udp.hex-field-fixed-bytes-utf8</mat-label>
+                    <mat-label *ngIf="!isBytesAsUtf8Override(ci, fi)" translate>device-profile.udp.hex-field-fixed-bytes-hex</mat-label>
+                    <input matInput formControlName="fixedBytesHex" autocomplete="off"
+                           [placeholder]="(isBytesAsUtf8Override(ci, fi)
+                             ? 'device-profile.udp.hex-field-fixed-bytes-utf8-placeholder'
+                             : 'device-profile.udp.hex-field-fixed-bytes-hex-placeholder') | translate"
+                           (blur)="onFixedBytesHexBlur(asFormGroup(getCommandOverrideFieldsArray(ci).at(fi)))">
+                  </mat-form-field>
+                </ng-container>
+                <ng-container *ngIf="getHexFieldLengthModeOverride(ci, fi) === 'fromFrame'">
+                  <mat-form-field class="protocol-template-hex-field-compact__len-off" subscriptSizing="fixed" appearance="outline">
+                    <mat-label translate>device-profile.udp.hex-field-len-from-offset</mat-label>
+                    <input matInput type="number" min="0" formControlName="byteLengthFromByteOffset">
+                  </mat-form-field>
+                  <mat-form-field class="protocol-template-hex-field-compact__len-vt" subscriptSizing="fixed" appearance="outline">
+                    <mat-label translate>device-profile.udp.hex-field-len-from-type</mat-label>
+                    <mat-select formControlName="byteLengthFromValueType">
+                      <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field class="protocol-template-hex-field-compact__len-sub" subscriptSizing="fixed" appearance="outline">
+                    <mat-label translate>device-profile.udp.hex-field-len-subtract</mat-label>
+                    <input matInput type="number" min="0" formControlName="byteLengthFromIntegralSubtract">
+                    <mat-hint translate>device-profile.udp.hex-field-len-subtract-hint</mat-hint>
+                  </mat-form-field>
+                </ng-container>
+                <p class="mat-caption text-muted protocol-template-hex-field-compact__bytes-hint protocol-template-inline-hint protocol-template-hint-compact" translate>device-profile.udp.hex-field-length-mode-hint</p>
+              </div>
+            </div>
+          </div>
+          <button mat-stroked-button color="primary" type="button" (click)="addOverrideField.emit(ci)">
+            <mat-icon>add</mat-icon>
+            <span translate>device-profile.udp.protocol-template-add-override-field</span>
+          </button>
+          <button mat-button type="button" color="warn" (click)="removeCommand.emit(ci)">
+            <mat-icon>remove_circle_outline</mat-icon>
+            <span translate>device-profile.udp.protocol-template-remove-command</span>
+          </button>
+        </div>
+        </ng-template>
+      </mat-expansion-panel>
+    </mat-accordion>
+    <button mat-stroked-button color="primary" type="button" (click)="addCommand.emit()">
+      <mat-icon>playlist_add</mat-icon>
+      <span translate>device-profile.udp.protocol-template-add-command</span>
+    </button>
+  </ng-container>
+</div>

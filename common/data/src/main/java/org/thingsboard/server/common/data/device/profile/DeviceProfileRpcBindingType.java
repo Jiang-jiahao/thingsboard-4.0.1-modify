@@ -12,6 +12,10 @@ public enum DeviceProfileRpcBindingType {
      */
     TCP_TEMPLATE,
     /**
+     * UDP 协议模板：与 TCP_TEMPLATE 相同，经 UDP 传输下发 {@code params.hex} 原始字节。
+     */
+    UDP_TEMPLATE,
+    /**
      * 原生 RPC：{@code method} / {@code params} 按设备固件约定透传（MQTT 等）。
      */
     NATIVE

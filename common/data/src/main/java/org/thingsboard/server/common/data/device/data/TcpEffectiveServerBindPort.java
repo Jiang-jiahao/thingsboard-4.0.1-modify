@@ -17,6 +17,7 @@ package org.thingsboard.server.common.data.device.data;
 
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
+import org.thingsboard.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.TcpTransportConnectMode;
 
 /**
@@ -40,5 +41,26 @@ public final class TcpEffectiveServerBindPort {
             return null;
         }
         return ptc.getTcpProfileServerBindPort();
+    }
+
+    /**
+     * 设备档案 SERVER 模式且已配置 {@code tcpProfileServerBindPort} 时返回监听端口，否则 {@code null}。
+     */
+    public static Integer resolveProfileServerListenPort(DeviceProfile profile) {
+        if (profile == null || profile.getProfileData() == null) {
+            return null;
+        }
+        var tcx = profile.getProfileData().getTransportConfiguration();
+        if (!(tcx instanceof TcpDeviceProfileTransportConfiguration ptc)) {
+            return null;
+        }
+        if (ptc.getTcpTransportConnectMode() != TcpTransportConnectMode.SERVER) {
+            return null;
+        }
+        Integer port = ptc.getTcpProfileServerBindPort();
+        if (port == null || port < 1 || port > 65535) {
+            return null;
+        }
+        return port;
     }
 }

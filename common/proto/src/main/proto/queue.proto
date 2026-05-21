@@ -1616,6 +1616,9 @@ message TransportApiRequestMsg {
   GetAllQueueRoutingInfoRequestMsg getAllQueueRoutingInfoRequestMsg = 14;
   ValidateOrCreateDeviceX509CertRequestMsg validateOrCreateX509CertRequestMsg = 15;
   GetTcpDevicesRequestMsg tcpDevicesRequestMsg = 16;
+  GetUdpDevicesRequestMsg udpDevicesRequestMsg = 17;
+  GetTcpProfilesRequestMsg tcpProfilesRequestMsg = 18;
+  GetUdpProfilesRequestMsg udpProfilesRequestMsg = 19;
 }
 
 /* Response from ThingsBoard Core Service to Transport Service */
@@ -1632,6 +1635,9 @@ message TransportApiResponseMsg {
   GetDeviceCredentialsResponseMsg deviceCredentialsResponseMsg = 10;
   repeated GetQueueRoutingInfoResponseMsg getQueueRoutingInfoResponseMsgs = 11;
   GetTcpDevicesResponseMsg tcpDevicesResponseMsg = 12;
+  GetUdpDevicesResponseMsg udpDevicesResponseMsg = 13;
+  GetTcpProfilesResponseMsg tcpProfilesResponseMsg = 14;
+  GetUdpProfilesResponseMsg udpProfilesResponseMsg = 15;
 }
 
 /* Messages that are handled by ThingsBoard Core Service */
@@ -1854,6 +1860,36 @@ message GetTcpDevicesRequestMsg {
 }
 
 message GetTcpDevicesResponseMsg {
+  repeated string ids = 1;
+  bool hasNextPage = 2;
+}
+
+message GetUdpDevicesRequestMsg {
+  int32 page = 1;
+  int32 pageSize = 2;
+}
+
+message GetUdpDevicesResponseMsg {
+  repeated string ids = 1;
+  bool hasNextPage = 2;
+}
+
+message GetTcpProfilesRequestMsg {
+  int32 page = 1;
+  int32 pageSize = 2;
+}
+
+message GetTcpProfilesResponseMsg {
+  repeated string ids = 1;
+  bool hasNextPage = 2;
+}
+
+message GetUdpProfilesRequestMsg {
+  int32 page = 1;
+  int32 pageSize = 2;
+}
+
+message GetUdpProfilesResponseMsg {
   repeated string ids = 1;
   bool hasNextPage = 2;
 }

@@ -17,6 +17,7 @@
         <module>lwm2m</module>
         <module>snmp</module>
         <module>tcp</module>
+        <module>udp</module>
         <module>mqtt</module>
         <module>transport-aggregate</module>
         <module>transport-base</module>

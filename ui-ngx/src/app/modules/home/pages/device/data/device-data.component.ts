@@ -34,6 +34,7 @@ import {
   DeviceTransportType,
   TcpTransportConnectMode,
   TcpWireAuthenticationMode,
+  UdpWireAuthenticationMode,
   deviceProfileTypeConfigurationInfoMap,
   deviceTransportTypeConfigurationInfoMap
 } from '@shared/models/device.models';
@@ -68,6 +69,9 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   @Input()
   tcpWireAuthenticationMode: TcpWireAuthenticationMode | null = null;
 
+  @Input()
+  udpWireAuthenticationMode: UdpWireAuthenticationMode | null = null;
+
   /** 来自设备页：当前设备档案的 TCP CLIENT/SERVER（用于隐藏 SERVER 档案下无意义的 CLIENT 对端表单项） */
   @Input()
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
@@ -95,7 +99,8 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
 
   /** 当前所选设备配置文件为 TCP 时，展示协议模板库入口（模板负载在配置文件中维护） */
   get showTcpProtocolTemplateHelp(): boolean {
-    return this.deviceProfile?.transportType === DeviceTransportType.TCP;
+    return this.deviceProfile?.transportType === DeviceTransportType.TCP
+      || this.deviceProfile?.transportType === DeviceTransportType.UDP;
   }
 
   private propagateChange = (v: any) => { };

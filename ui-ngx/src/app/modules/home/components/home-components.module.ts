@@ -85,7 +85,9 @@ import { DeviceProfileAutocompleteComponent } from '@home/components/profile/dev
 import { MqttDeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/mqtt-device-profile-transport-configuration.component';
 import { CoapDeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/coap-device-profile-transport-configuration.component';
 import { TcpDeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/tcp-device-profile-transport-configuration.component';
+import { UdpDeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/udp-device-profile-transport-configuration.component';
 import { ProtocolTemplateTcpDataConfigurationComponent } from '@home/components/profile/device/protocol-template-tcp-data-configuration.component';
+import { ProtocolTemplateUdpDataConfigurationComponent } from '@home/components/profile/device/protocol-template-udp-data-configuration.component';
 import { ProtocolTemplateBundleEditorComponent } from '@home/components/profile/device/protocol-template-bundle-editor.component';
 import { DeviceProfileAlarmsComponent } from '@home/components/profile/alarm/device-profile-alarms.component';
 import { DeviceProfileAlarmComponent } from '@home/components/profile/alarm/device-profile-alarm.component';
@@ -291,7 +293,9 @@ import {
       CoapDeviceProfileTransportConfigurationComponent,
       DeviceProfileTransportConfigurationComponent,
       TcpDeviceProfileTransportConfigurationComponent,
+      UdpDeviceProfileTransportConfigurationComponent,
       ProtocolTemplateTcpDataConfigurationComponent,
+      ProtocolTemplateUdpDataConfigurationComponent,
       ProtocolTemplateBundleEditorComponent,
       CreateAlarmRulesComponent,
       AlarmRuleComponent,
@@ -442,7 +446,9 @@ import {
     MqttDeviceProfileTransportConfigurationComponent,
     CoapDeviceProfileTransportConfigurationComponent,
     TcpDeviceProfileTransportConfigurationComponent,
+    UdpDeviceProfileTransportConfigurationComponent,
     ProtocolTemplateTcpDataConfigurationComponent,
+    ProtocolTemplateUdpDataConfigurationComponent,
     ProtocolTemplateBundleEditorComponent,
     DeviceProfileTransportConfigurationComponent,
     CreateAlarmRulesComponent,

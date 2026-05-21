@@ -1060,6 +1060,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.thingsboard.transport</groupId>
+                <artifactId>udp</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.thingsboard.common</groupId>
                 <artifactId>edge-api</artifactId>
                 <version>${project.version}</version>

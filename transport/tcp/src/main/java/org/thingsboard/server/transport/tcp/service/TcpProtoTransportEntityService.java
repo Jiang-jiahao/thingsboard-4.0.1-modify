@@ -74,4 +74,12 @@ public class TcpProtoTransportEntityService {
                 .build();
         return transportService.getTcpDevicesIds(requestMsg);
     }
+
+    public TransportProtos.GetTcpProfilesResponseMsg getTcpProfileIds(int page, int pageSize) {
+        TransportProtos.GetTcpProfilesRequestMsg requestMsg = TransportProtos.GetTcpProfilesRequestMsg.newBuilder()
+                .setPage(page)
+                .setPageSize(pageSize)
+                .build();
+        return transportService.getTcpProfileIds(requestMsg);
+    }
 }

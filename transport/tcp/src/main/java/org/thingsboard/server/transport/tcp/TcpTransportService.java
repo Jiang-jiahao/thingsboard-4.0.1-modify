@@ -94,9 +94,7 @@ public class TcpTransportService implements TbTransportService {
             log.info("TCP server is disabled (transport.tcp.server.enabled=false)");
             return;
         }
-        log.info("Starting TCP transport server on {}:{} ...", host, port);
-        serverChannel = bindListenSocket(port);
-        log.info("TCP transport server listening on {}", serverChannel.localAddress());
+        log.info("TCP transport ready; listen ports open only when TCP device profiles configure SERVER tcpProfileServerBindPort");
     }
 
     /**
@@ -107,7 +105,6 @@ public class TcpTransportService implements TbTransportService {
             return;
         }
         Set<Integer> desired = new HashSet<>(devicePorts);
-        desired.remove(port);
         for (Integer boundPort : new HashSet<>(dedicatedListenChannels.keySet())) {
             if (!desired.contains(boundPort)) {
                 Channel ch = dedicatedListenChannels.remove(boundPort);

@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -263,6 +264,13 @@ public class DeviceProfileServiceImpl extends CachedVersionedEntityService<Devic
         validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
         Validator.validatePageLink(pageLink);
         return deviceProfileDao.findDeviceProfileInfos(tenantId, pageLink, transportType);
+    }
+
+    @Override
+    public PageData<UUID> findProfileIdsByTransportType(DeviceTransportType transportType, PageLink pageLink) {
+        log.trace("Executing findProfileIdsByTransportType transportType [{}], pageLink [{}]", transportType, pageLink);
+        Validator.validatePageLink(pageLink);
+        return deviceProfileDao.findProfileIdsByTransportType(transportType, pageLink);
     }
 
     @Override
