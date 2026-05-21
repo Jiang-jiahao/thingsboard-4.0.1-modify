@@ -31,6 +31,12 @@ public class TcpHexFieldDefinition implements Serializable {
      * 典型场景：报文长度字段表示「Length+opcode+Random(12)+JSON」，而 BYTES_AS_HEX 从 JSON 起点截取时应减 12。
      */
     private Integer byteLengthFromIntegralSubtract;
+    /**
+     * 仅与 {@link TcpHexValueType#BYTES_AS_HEX} / {@link TcpHexValueType#BYTES_AS_UTF8} 联用：
+     * 变长切片长度 = {@code frame.length - byteOffset - byteLengthEndTrim}（≥0）。
+     * 典型：{@code @}JSON{@code $} 线包在 offset 1 取 JSON 正文且 endTrim=1 去掉末尾 {@code $}。
+     */
+    private Integer byteLengthEndTrim;
     private Double scale;
     private Long bitMask;
     /**
@@ -133,9 +139,14 @@ public class TcpHexFieldDefinition implements Serializable {
         if (valueType.isVariableByteSlice()) {
             boolean fixed = byteLength != null && byteLength > 0;
             boolean fromFrame = byteLengthFromByteOffset != null && byteLengthFromByteOffset >= 0;
-            if (fixed == fromFrame) {
+            boolean toEnd = byteLengthEndTrim != null && byteLengthEndTrim >= 0;
+            int modes = (fixed ? 1 : 0) + (fromFrame ? 1 : 0) + (toEnd ? 1 : 0);
+            if (modes != 1) {
                 throw new IllegalArgumentException(
-                        "TCP hex variable byte slice requires exactly one of: byteLength>0, or byteLengthFromByteOffset with integral byteLengthFromValueType");
+                        "TCP hex variable byte slice requires exactly one of: byteLength>0, byteLengthFromByteOffset, or byteLengthEndTrim");
+            }
+            if (toEnd && byteOffset + byteLengthEndTrim > Integer.MAX_VALUE / 2) {
+                throw new IllegalArgumentException("byteLengthEndTrim too large for byteOffset");
             }
             if (fromFrame) {
                 TcpHexValueType vt = byteLengthFromValueType != null ? byteLengthFromValueType : TcpHexValueType.UINT8;

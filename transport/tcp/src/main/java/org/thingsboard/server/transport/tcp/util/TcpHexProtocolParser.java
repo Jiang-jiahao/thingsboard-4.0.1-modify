@@ -741,8 +741,23 @@ public final class TcpHexProtocolParser {
         if (def.getByteLength() != null && def.getByteLength() > 0) {
             return def.getByteLength();
         }
+        if (def.getByteLengthEndTrim() != null) {
+            int trim = def.getByteLengthEndTrim();
+            if (trim < 0) {
+                throw new IllegalArgumentException("byteLengthEndTrim must be >= 0");
+            }
+            int off = def.getByteOffset();
+            if (off < 0 || off > frame.length) {
+                throw new IllegalArgumentException("byteOffset out of frame for byteLengthEndTrim");
+            }
+            int len = frame.length - off - trim;
+            if (len < 0) {
+                throw new IllegalArgumentException("byteLengthEndTrim exceeds frame size");
+            }
+            return len;
+        }
         if (def.getByteLengthFromByteOffset() == null) {
-            throw new IllegalArgumentException("variable byte slice requires byteLength or byteLengthFromByteOffset");
+            throw new IllegalArgumentException("variable byte slice requires byteLength, byteLengthFromByteOffset, or byteLengthEndTrim");
         }
         TcpHexValueType lenVt = def.getByteLengthFromValueType() != null ? def.getByteLengthFromValueType() : TcpHexValueType.UINT8;
         long lenLong = readIntegralAt(frame, def.getByteLengthFromByteOffset(), lenVt);

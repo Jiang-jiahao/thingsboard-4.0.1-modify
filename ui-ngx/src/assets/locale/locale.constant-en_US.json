@@ -2401,6 +2401,7 @@
             "protocol-template-add-template": "Add protocol template",
             "protocol-template-commands-title": "Uplink / downlink commands",
             "protocol-template-commands-hint": "Set match offset/width and values; uplink parses; downlink framing; both may use optional overrides.",
+            "protocol-template-commands-count": "{{count}} command(s); panel bodies load on expand only.",
             "protocol-template-command": "Command",
             "protocol-template-cmd-template": "Template",
             "protocol-template-cmd-template-hint": "Create templates and IDs first",

@@ -9,22 +9,26 @@
   <div class="protocol-template-bundle-tabs-shell">
     <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms" class="protocol-template-bundle-tabs">
       <mat-tab [label]="'profiles.protocol-templates-tab-templates' | translate">
-        <div class="tab-scroll">
-          <tb-protocol-template-bundle-editor
-            [layoutMode]="'templatesOnly'"
-            [protocolTemplateFormGroup]="bundleContentForm"
-            [disabled]="false">
-          </tb-protocol-template-bundle-editor>
-        </div>
+        <ng-template matTabContent>
+          <div class="tab-scroll">
+            <tb-protocol-template-bundle-editor
+              [layoutMode]="'templatesOnly'"
+              [protocolTemplateFormGroup]="bundleContentForm"
+              [disabled]="false">
+            </tb-protocol-template-bundle-editor>
+          </div>
+        </ng-template>
       </mat-tab>
       <mat-tab [label]="'profiles.protocol-templates-tab-commands' | translate">
-        <div class="tab-scroll">
-          <tb-protocol-template-bundle-editor
-            [layoutMode]="'commandsOnly'"
-            [protocolTemplateFormGroup]="bundleContentForm"
-            [disabled]="false">
-          </tb-protocol-template-bundle-editor>
-        </div>
+        <ng-template matTabContent>
+          <div class="tab-scroll">
+            <tb-protocol-template-bundle-editor
+              [layoutMode]="'commandsOnly'"
+              [protocolTemplateFormGroup]="bundleContentForm"
+              [disabled]="false">
+            </tb-protocol-template-bundle-editor>
+          </div>
+        </ng-template>
       </mat-tab>
     </mat-tab-group>
   </div>

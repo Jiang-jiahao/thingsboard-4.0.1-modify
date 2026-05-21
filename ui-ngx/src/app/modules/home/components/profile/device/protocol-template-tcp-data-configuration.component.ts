@@ -1,7 +1,18 @@
 ///
 /// Copyright © 2016-2025 The Thingsboard Authors
 ///
-import { ChangeDetectorRef, Component, EventEmitter, Input, AfterViewInit, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  AfterViewInit,
+  OnChanges,
+  OnDestroy,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import { AbstractControl, UntypedFormArray, UntypedFormGroup } from '@angular/forms';
 import {
   ProtocolTemplateCommandDirection,
@@ -24,13 +35,19 @@ import {
   parseLtvTagWireTextToNumber,
   utf8FixedBytesFormValueToStoredFixedHex
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
-import { Subject, Subscription } from 'rxjs';
-import { startWith, takeUntil } from 'rxjs/operators';
+import { merge, Subject, Subscription } from 'rxjs';
+import { debounceTime, startWith, takeUntil } from 'rxjs/operators';
+
+interface HexFieldSortCacheEntry {
+  fingerprint: string;
+  indices: number[];
+}
 
 @Component({
   selector: 'tb-protocol-template-tcp-data-configuration',
   templateUrl: './protocol-template-tcp-data-configuration.component.html',
-  styleUrls: ['./protocol-template-tcp-data-configuration.component.scss']
+  styleUrls: ['./protocol-template-tcp-data-configuration.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges, AfterViewInit, OnDestroy {
   /** 帧模板内 LTV/TLV 段折叠面板：已启用 LTV 时打开界面默认展开 */
@@ -38,6 +55,11 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
 
   private readonly destroy$ = new Subject<void>();
   private templatesArraySub?: Subscription;
+  private formArraysSub?: Subscription;
+
+  private templateFieldSortCache: HexFieldSortCacheEntry | null = null;
+  private commandFieldSortCache = new Map<number, HexFieldSortCacheEntry>();
+  private downlinkLenKeyCache = new Map<number, { fingerprint: string; keys: string[] }>();
   readonly TransportTcpDataType = TransportTcpDataType;
   readonly ProtocolTemplateCommandDirection = ProtocolTemplateCommandDirection;
   readonly ProtocolTemplateUplinkDataDestination = ProtocolTemplateUplinkDataDestination;
@@ -94,20 +116,73 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['templatesArray']) {
+      this.invalidateFieldSortCaches();
       this.wireTemplateLtvPanelSync();
       this.scheduleExpandTemplateLtvPanel();
+    }
+    if (changes['commandsArray']) {
+      this.invalidateFieldSortCaches();
     }
   }
 
   ngAfterViewInit(): void {
     this.wireTemplateLtvPanelSync();
+    this.wireFormArrayChangeDetection();
     this.scheduleExpandTemplateLtvPanel();
+    this.cdr.markForCheck();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     this.templatesArraySub?.unsubscribe();
+    this.formArraysSub?.unsubscribe();
+  }
+
+  trackCommandIndex = (index: number): number => index;
+
+  trackFieldIndex = (_index: number, fi: number): number => fi;
+
+  private invalidateFieldSortCaches(): void {
+    this.templateFieldSortCache = null;
+    this.commandFieldSortCache.clear();
+    this.downlinkLenKeyCache.clear();
+  }
+
+  private wireFormArrayChangeDetection(): void {
+    this.formArraysSub?.unsubscribe();
+    const sources = [this.templatesArray?.valueChanges, this.commandsArray?.valueChanges].filter(Boolean);
+    if (!sources.length) {
+      return;
+    }
+    this.formArraysSub = merge(...sources).pipe(
+      debounceTime(80),
+      takeUntil(this.destroy$)
+    ).subscribe(() => {
+      this.invalidateFieldSortCaches();
+      this.cdr.markForCheck();
+    });
+  }
+
+  private hexFieldsFingerprint(fa: UntypedFormArray): string {
+    const parts: string[] = [String(fa?.length ?? 0)];
+    if (!fa?.length) {
+      return parts.join(':');
+    }
+    for (let i = 0; i < fa.length; i++) {
+      const g = fa.at(i) as UntypedFormGroup;
+      parts.push(String(g.get('byteOffset')?.value ?? ''));
+      parts.push(String(g.get('key')?.value ?? ''));
+      parts.push(String(g.get('valueType')?.value ?? ''));
+    }
+    return parts.join('|');
+  }
+
+  private getTemplateFieldsFingerprint(): string {
+    if (!this.templatesArray?.length) {
+      return '';
+    }
+    return this.hexFieldsFingerprint(this.getTemplateFieldsArray(0));
   }
 
   /**
@@ -179,11 +254,28 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
 
   /** 列表按字节偏移升序展示；下标仍为 FormArray 真实索引，便于绑定与删除 */
   templateFieldIndicesSortedByByteOffset(ti: number): number[] {
-    return this.sortedHexFieldIndicesByByteOffset(this.getTemplateFieldsArray(ti));
+    if (ti !== 0) {
+      return this.sortedHexFieldIndicesByByteOffset(this.getTemplateFieldsArray(ti));
+    }
+    const fp = this.hexFieldsFingerprint(this.getTemplateFieldsArray(0));
+    if (this.templateFieldSortCache?.fingerprint === fp) {
+      return this.templateFieldSortCache.indices;
+    }
+    const indices = this.sortedHexFieldIndicesByByteOffset(this.getTemplateFieldsArray(0));
+    this.templateFieldSortCache = { fingerprint: fp, indices };
+    return indices;
   }
 
   overrideFieldIndicesSortedByByteOffset(ci: number): number[] {
-    return this.sortedHexFieldIndicesByByteOffset(this.getCommandOverrideFieldsArray(ci));
+    const fa = this.getCommandOverrideFieldsArray(ci);
+    const fp = this.hexFieldsFingerprint(fa);
+    const cached = this.commandFieldSortCache.get(ci);
+    if (cached?.fingerprint === fp) {
+      return cached.indices;
+    }
+    const indices = this.sortedHexFieldIndicesByByteOffset(fa);
+    this.commandFieldSortCache.set(ci, { fingerprint: fp, indices });
+    return indices;
   }
 
   private sortedHexFieldIndicesByByteOffset(fa: UntypedFormArray): number[] {
@@ -443,6 +535,13 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
   }
 
   downlinkLengthFieldKeyOptions(ci: number): string[] {
+    const tplFp = this.getTemplateFieldsFingerprint();
+    const cmdFp = this.hexFieldsFingerprint(this.getCommandOverrideFieldsArray(ci));
+    const fp = `${tplFp}::${cmdFp}`;
+    const cached = this.downlinkLenKeyCache.get(ci);
+    if (cached?.fingerprint === fp) {
+      return cached.keys;
+    }
     const keys = new Set<string>();
     const addIntegral = (fg: UntypedFormGroup) => {
       const k = String(fg.get('key')?.value ?? '').trim();
@@ -461,7 +560,9 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     for (let i = 0; i < oa.length; i++) {
       addIntegral(oa.at(i) as UntypedFormGroup);
     }
-    return Array.from(keys).sort();
+    const sorted = Array.from(keys).sort();
+    this.downlinkLenKeyCache.set(ci, { fingerprint: fp, keys: sorted });
+    return sorted;
   }
 
   /**

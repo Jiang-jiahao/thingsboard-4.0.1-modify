@@ -299,6 +299,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     arr.push(this.createProtocolTemplateGroup(t), { emitEvent: false });
     this.wireTemplateIdSync();
     this.syncCommandTemplateIdsFromFirstTemplate();
+    this.protocolTemplateFormGroup?.updateValueAndValidity({ emitEvent: true });
   }
 
   patchProtocolCommandsFromModel(commands: ProtocolTemplateCommandDefinition[]) {
@@ -319,6 +320,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       }
     }
     this.syncCommandTemplateIdsFromFirstTemplate();
+    this.protocolTemplateFormGroup?.updateValueAndValidity({ emitEvent: true });
   }
 
   private wireTemplateIdSync(): void {

@@ -2304,6 +2304,7 @@
             "protocol-template-add-template": "添加协议模板",
             "protocol-template-commands-title": "上行 / 下行命令",
             "protocol-template-commands-hint": "先配命令匹配（偏移/宽度）与命令值；上行解析；下行组帧；都可添加覆盖字段。",
+            "protocol-template-commands-count": "共 {{count}} 条命令；折叠面板内容按需加载，仅展开时渲染字段表单。",
             "protocol-template-command": "命令",
             "protocol-template-cmd-template": "所属模板",
             "protocol-template-cmd-template-hint": "请先创建模板并填写模板 ID",

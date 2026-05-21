@@ -515,6 +515,8 @@ export interface TcpHexFieldDefinition {
    * 例：报文长度 = 12 + JSON 字节数时，正文起点固定偏移 16，此处填 12。
    */
   byteLengthFromIntegralSubtract?: number;
+  /** BYTES_AS_HEX/UTF8：长度 = 整帧长 - byteOffset - byteLengthEndTrim（如 @JSON$ 取中间 JSON） */
+  byteLengthEndTrim?: number;
   /** @deprecated UI 已移除；后端仍兼容旧配置 */
   scale?: number;
   /** @deprecated UI 已移除；后端仍兼容旧配置 */
