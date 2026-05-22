@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@import '../../../scss/constants';
+
 :host {
   display: flex;
   width: 100%;
@@ -20,51 +22,90 @@
 
   mat-sidenav-container {
     flex: 1;
+    background: #f1f5f9;
   }
+
   mat-sidenav.tb-site-sidenav {
-    width: 250px;
+    width: 280px;
+    border-right: none !important;
+    box-shadow: 4px 0 24px rgba(15, 23, 42, 0.08);
+
     @media (max-width:456px) {
       width: calc(100% - 56px);
     }
+
     .tb-nav-header {
       z-index: 2;
       flex-shrink: 0;
       white-space: nowrap;
+
       .tb-nav-header-toolbar {
-        min-height: 64px;
+        min-height: 84px;
         height: inherit;
-        padding: 0;
+        padding: 8px 14px;
         z-index: 2;
         flex-shrink: 0;
         white-space: nowrap;
-        border-bottom: 1px solid rgba(0, 0, 0, .12);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        background:
+          radial-gradient(ellipse 120% 80% at 0% 0%, rgba(255, 255, 255, 0.12) 0%, transparent 55%),
+          linear-gradient(135deg, darken($tb-primary-color, 6%) 0%, $tb-primary-color 45%, $tb-secondary-color 100%);
+        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
+
         & > div {
-          height: 64px;
-          .tb-logo-title {
-            width: auto;
-            max-width: 100%;
-            height: 36px;
-            max-height: 100%;
-            margin: auto;
-          }
+          display: flex;
+          align-items: center;
+          min-height: 68px;
+          height: auto;
         }
       }
     }
+
     .tb-side-menu-toolbar {
       overflow-y: auto;
       height: inherit;
-      padding: 0;
+      padding: 8px 0 16px;
+      background: linear-gradient(180deg, $tb-primary-color 0%, darken($tb-primary-color, 6%) 100%);
     }
   }
+
   .tb-primary-toolbar {
     z-index: 2;
+    min-height: 56px;
+    padding: 0 8px 0 4px;
+    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.06), 0 4px 16px rgba(15, 23, 42, 0.06);
+    background: linear-gradient(90deg, darken($tb-primary-color, 2%) 0%, $tb-primary-color 40%, $tb-secondary-color 100%) !important;
+
     h1 {
-      font-size: 24px !important;
-      font-weight: 400 !important;
+      font-size: 20px !important;
+      font-weight: 500 !important;
+      letter-spacing: 0.02em;
+      opacity: 0.96;
+    }
+
+    .mat-mdc-icon-button {
+      border-radius: 10px;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
     }
   }
+
   .tb-main-content {
     overflow: auto;
     position: relative;
+    background: linear-gradient(180deg, #eef2f7 0%, #f1f5f9 120px, #f1f5f9 100%);
+
+    // Routed page components are siblings of router-outlet and need flex height.
+    > :not(router-outlet) {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
   }
 }

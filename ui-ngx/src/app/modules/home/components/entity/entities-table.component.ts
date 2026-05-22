@@ -21,6 +21,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  HostListener,
   Input, NgZone,
   OnChanges,
   OnDestroy,
@@ -155,6 +156,7 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
         takeUntil(this.destroy$)
       ).subscribe((data) => {
           this.init(data.entitiesTableConfig);
+          this.cd.markForCheck();
       });
     }
     this.widgetResize$ = new ResizeObserver(() => {
@@ -170,6 +172,9 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
   }
 
   ngOnDestroy() {
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = '';
+    }
     if (this.widgetResize$) {
       this.widgetResize$.disconnect();
     }
@@ -190,15 +195,9 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
 
   private init(entitiesTableConfig: EntityTableConfig<BaseData<HasId>>) {
     this.isDetailsOpen = false;
+    this.syncDetailsBodyScroll();
     this.entitiesTableConfig = entitiesTableConfig;
     this.pageMode = this.entitiesTableConfig.pageMode;
-    if (this.entitiesTableConfig.headerComponent) {
-      const viewContainerRef = this.entityTableHeaderAnchor.viewContainerRef;
-      viewContainerRef.clear();
-      const componentRef = viewContainerRef.createComponent(this.entitiesTableConfig.headerComponent);
-      const headerComponent = componentRef.instance;
-      headerComponent.entitiesTableConfig = this.entitiesTableConfig;
-    }
 
     this.entitiesTableConfig.setTable(this);
     this.translations = this.entitiesTableConfig.entityTranslations;
@@ -290,8 +289,12 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
     }
     if (this.viewInited) {
       setTimeout(() => {
+        this.setupHeaderComponent();
         this.updatePaginationSubscriptions();
+        this.cd.markForCheck();
       }, 0);
+    } else {
+      this.cd.markForCheck();
     }
     if (this.pageMode) {
       if (initialAction) {
@@ -325,19 +328,19 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
         this.updatedRouterParamsAndData(queryParams);
       } else {
         this.pageLink.textSearch = isNotEmptyStr(value) ? value.trim() : null;
-        if (this.displayPagination) {
+        if (this.displayPagination && this.paginator) {
           this.paginator.pageIndex = 0;
         }
         this.updateData();
       }
     });
 
-    if (this.pageMode) {
+    if (this.pageMode && this.sort) {
       this.route.queryParams.pipe(
         skip(1),
         takeUntil(this.destroy$)
       ).subscribe((params: PageQueryParam) => {
-        if (this.displayPagination) {
+        if (this.displayPagination && this.paginator) {
           this.paginator.pageIndex = Number(params.page) || 0;
           this.paginator.pageSize = Number(params.pageSize) || this.defaultPageSize;
         }
@@ -357,11 +360,26 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
       });
     }
 
-    this.updatePaginationSubscriptions();
     this.viewInited = true;
+    this.setupHeaderComponent();
+    this.updatePaginationSubscriptions();
+  }
+
+  private setupHeaderComponent() {
+    if (!this.entitiesTableConfig?.headerComponent || !this.entityTableHeaderAnchor?.viewContainerRef) {
+      return;
+    }
+    const viewContainerRef = this.entityTableHeaderAnchor.viewContainerRef;
+    viewContainerRef.clear();
+    const componentRef = viewContainerRef.createComponent(this.entitiesTableConfig.headerComponent);
+    const headerComponent = componentRef.instance;
+    headerComponent.entitiesTableConfig = this.entitiesTableConfig;
   }
 
   private updatePaginationSubscriptions() {
+    if (!this.sort) {
+      return;
+    }
     if (this.updateDataSubscription) {
       this.updateDataSubscription.unsubscribe();
       this.updateDataSubscription = null;
@@ -374,7 +392,7 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
           direction: (this.entitiesTableConfig?.defaultSortOrder?.direction === direction ? null : direction) as Direction,
           property: this.entitiesTableConfig?.defaultSortOrder?.property === data.active ? null : data.active
         };
-        if (this.displayPagination) {
+        if (this.displayPagination && this.paginator) {
           queryParams.page = null;
           this.paginator.pageIndex = 0;
         }
@@ -382,6 +400,9 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
       })
     );
     if (this.displayPagination) {
+      if (!this.paginator) {
+        return;
+      }
       paginatorSubscription$ = this.paginator.page.asObservable().pipe(
         map((data) => ({
           page: data.pageIndex === 0 ? null : data.pageIndex,
@@ -485,7 +506,35 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
     } else {
       this.isDetailsOpen = !this.isDetailsOpen;
     }
+    this.syncDetailsBodyScroll();
     this.detailsPanelOpened.emit(this.isDetailsOpen);
+    this.cd.markForCheck();
+  }
+
+  closeEntityDetails() {
+    this.isDetailsOpen = false;
+    this.syncDetailsBodyScroll();
+    this.detailsPanelOpened.emit(this.isDetailsOpen);
+    this.cd.markForCheck();
+  }
+
+  private syncDetailsBodyScroll() {
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = this.isDetailsOpen ? 'hidden' : '';
+    }
+  }
+
+  closeDetailsOnBackdrop($event: MouseEvent) {
+    if ($event.target === $event.currentTarget) {
+      this.closeEntityDetails();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
+    if (this.isDetailsOpen && this.entitiesTableConfig?.detailsPanelEnabled) {
+      this.closeEntityDetails();
+    }
   }
 
   addEntity($event: Event) {

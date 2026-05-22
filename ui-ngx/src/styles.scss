@@ -22,6 +22,7 @@
 @import './scss/animations';
 @import './scss/mixins';
 @import './scss/fonts';
+@import './scss/ui-refinements';
 
 body, html {
   height: 100%;
@@ -40,7 +41,7 @@ body, html {
 body {
   margin: 0;
   padding: 0;
-  background-color: #eee;
+  background-color: #f1f5f9;
   overflow: hidden;
 }
 
@@ -79,18 +80,18 @@ body {
 }
 
 a:not(.mat-mdc-button-base, .mdc-tab) {
-  font-weight: 400;
-  color: #106cc8;
+  font-weight: 500;
+  color: #2563eb;
   text-decoration: none;
-  border-bottom: 1px solid rgba(64, 84, 178, .25);
-
-  transition: border-bottom .35s;
+  border-bottom: 1px solid rgba(37, 99, 235, .25);
+  transition: color .2s ease, border-bottom-color .2s ease;
 }
 
 a:hover,
 a:focus {
   &:not(.mat-mdc-button-base, .mdc-tab) {
-    border-bottom: 1px solid #4054b2;
+    color: #1d4ed8;
+    border-bottom: 1px solid #2563eb;
   }
 }
 
@@ -491,8 +492,8 @@ pre.tb-highlight {
   mat-label {
     &.tb-title {
       font-size: 13px;
-      font-weight: 400;
-      color: #666;
+      font-weight: 500;
+      color: #64748b;
       pointer-events: none;
 
       &.no-padding {
@@ -1057,6 +1058,14 @@ pre.tb-highlight {
       .mdc-dialog__surface {
         display: block;
       }
+    }
+  }
+
+  .tb-protocol-template-bundle-dialog {
+    .mat-mdc-dialog-container .mdc-dialog__surface {
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18), 0 8px 16px rgba(15, 23, 42, 0.08);
     }
   }
 

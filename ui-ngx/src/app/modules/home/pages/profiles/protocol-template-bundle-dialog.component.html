@@ -1,13 +1,13 @@
-<h2 mat-dialog-title>{{ (isNew ? 'profiles.protocol-templates-dialog-add-title' : 'profiles.protocol-templates-dialog-edit-title') | translate }}</h2>
+<h2 mat-dialog-title class="protocol-template-dialog-title">{{ (isNew ? 'profiles.protocol-templates-dialog-add-title' : 'profiles.protocol-templates-dialog-edit-title') | translate }}</h2>
 
-<div mat-dialog-content class="protocol-template-bundle-dialog-content flex flex-col gap-2">
-  <mat-form-field class="mat-block w-full flex-none" subscriptSizing="fixed" [formGroup]="bundleMetaForm">
+<div mat-dialog-content class="protocol-template-bundle-dialog-content flex flex-col gap-3">
+  <mat-form-field class="mat-block w-full flex-none" appearance="fill" subscriptSizing="fixed" [formGroup]="bundleMetaForm">
     <mat-label translate>profiles.protocol-templates-bundle-display-name</mat-label>
     <input matInput formControlName="name" autocomplete="off">
   </mat-form-field>
 
   <div class="protocol-template-bundle-tabs-shell">
-    <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms" class="protocol-template-bundle-tabs">
+    <mat-tab-group mat-stretch-tabs="false" animationDuration="0ms" class="protocol-template-bundle-tabs tb-tabs-fade">
       <mat-tab [label]="'profiles.protocol-templates-tab-templates' | translate">
         <ng-template matTabContent>
           <div class="tab-scroll">
@@ -35,13 +35,14 @@
 
   <div class="protocol-template-bundle-dialog-footer">
     <mat-form-field class="mat-block w-full bundle-meta-description-field"
+                    appearance="fill"
                     subscriptSizing="fixed"
                     [formGroup]="bundleMetaForm"
                     [matTooltip]="descriptionDialogFullTooltip"
                     matTooltipShowDelay="400"
                     matTooltipMaxWidth="360px">
       <mat-label translate>profiles.protocol-templates-bundle-description</mat-label>
-      <textarea matInput formControlName="description" rows="1" autocomplete="off"></textarea>
+      <textarea matInput formControlName="description" rows="3" autocomplete="off"></textarea>
       <mat-hint translate>profiles.protocol-templates-bundle-description-hint-inline</mat-hint>
     </mat-form-field>
   </div>

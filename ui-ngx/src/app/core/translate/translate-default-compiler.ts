@@ -63,13 +63,14 @@ export class TranslateDefaultCompiler extends TranslateMessageFormatCompiler {
   }
 
   private checkIsPlural(src: string): boolean {
+    if (!src?.includes('{') || !/,\s*(plural|select)\s*,/.test(src)) {
+      return false;
+    }
     let tokens: any[];
     try {
       tokens = parse(src.replace(/\{\{/g, '{').replace(/\}\}/g, '}'),
         {cardinal: [], ordinal: []});
     } catch (e) {
-      console.warn(`Failed to parse source: ${src}`);
-      console.error(e);
       return false;
     }
     const res = tokens.filter(

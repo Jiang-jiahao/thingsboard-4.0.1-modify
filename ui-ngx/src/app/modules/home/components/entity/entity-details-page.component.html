@@ -52,7 +52,11 @@
     </div>
   </mat-toolbar>
   <mat-card-content class="flex-full">
-    <mat-tab-group mat-stretch-tabs="false" class="tb-absolute-fill size-full" [class.tb-headless]="hideDetailsTabs()" [(selectedIndex)]="selectedTab">
+    <mat-tab-group mat-stretch-tabs="false"
+                   animationDuration="0ms"
+                   class="tb-absolute-fill size-full tb-tabs-fade"
+                   [class.tb-headless]="hideDetailsTabs()"
+                   [(selectedIndex)]="selectedTab">
       <mat-tab label="{{ 'details.details' | translate }}">
         <tb-anchor #entityDetailsForm></tb-anchor>
       </mat-tab>

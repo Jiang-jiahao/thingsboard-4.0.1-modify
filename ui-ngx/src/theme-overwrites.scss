@@ -33,29 +33,34 @@
         left: 0;
         top: 0;
         background-color: mat.m2-get-color-from-palette($primary);
+        border-radius: 10px 10px 0 0;
       }
       background-color: transparent;
     }
     .mdc-text-field--filled {
+      border-radius: 10px 10px 0 0;
       &:before {
-        opacity: 0.03;
+        opacity: 0.04;
       }
       &:not(.mdc-text-field--disabled) {
         &:before {
-          opacity: 0.06;
+          opacity: 0.07;
         }
         background-color: transparent;
+        &:hover:before {
+          opacity: 0.1;
+        }
       }
     }
     .mat-mdc-form-field-focus-overlay {
       &:before {
-        opacity: 0.87;
+        opacity: 0.12;
       }
     }
   }
   .mat-mdc-form-field {
     .mat-mdc-form-field-hint-wrapper {
-      color: rgba(0, 0, 0, 0.6);
+      color: #64748b;
     }
   }
 }

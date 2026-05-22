@@ -172,6 +172,7 @@ import { MultipleImageInputComponent } from '@shared/components/multiple-image-i
 import { BranchAutocompleteComponent } from '@shared/components/vc/branch-autocomplete.component';
 import { PhoneInputComponent } from '@shared/components/phone-input.component';
 import { CustomDateAdapter } from '@shared/adapter/custom-datatime-adapter';
+import { tbMatDateLocaleFactory } from '@shared/adapter/mat-date-locale.factory';
 import { CustomPaginatorIntl } from '@shared/services/custom-paginator-intl';
 import { TbScriptLangComponent } from '@shared/components/script-lang.component';
 import { NotificationComponent } from '@shared/components/notification/notification.component';
@@ -256,7 +257,7 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     },
     {
       provide: MAT_DATE_LOCALE,
-      useValue: 'en-GB'
+      useFactory: tbMatDateLocaleFactory
     },
     { provide: DatetimeAdapter, useClass: CustomDateAdapter },
     { provide: HELP_MARKDOWN_COMPONENT_TOKEN, useValue: HelpMarkdownComponent },

@@ -27,7 +27,11 @@
   <div class="details-buttons">
     <div [tb-help]="helpLinkId()"></div>
   </div>
-  <mat-tab-group mat-stretch-tabs="false" class="tb-absolute-fill flex-1" [class.tb-headless]="hideDetailsTabs()" [(selectedIndex)]="selectedTab">
+  <mat-tab-group mat-stretch-tabs="false"
+                 animationDuration="0ms"
+                 class="tb-absolute-fill flex-1 tb-tabs-fade"
+                 [class.tb-headless]="hideDetailsTabs()"
+                 [(selectedIndex)]="selectedTab">
     <mat-tab label="{{ 'details.details' | translate }}">
       <tb-anchor #entityDetailsForm></tb-anchor>
     </mat-tab>

@@ -15,7 +15,8 @@
 ///
 
 export const environment = {
-  appTitle: 'ThingsBoard',
+  appTitle: '杰能科世物联网平台',
+  brandName: 'JnksIOT',
   production: true,
 // @ts-ignore
   tbVersion: TB_VERSION,

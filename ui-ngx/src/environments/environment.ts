@@ -19,7 +19,8 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  appTitle: 'ThingsBoard',
+  appTitle: '杰能科世物联网平台',
+  brandName: 'JnksIOT',
   production: false,
 // @ts-ignore
   tbVersion: TB_VERSION,

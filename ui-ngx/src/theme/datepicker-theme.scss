@@ -68,3 +68,68 @@ $mat-datetimepicker-selected-today-box-shadow-width: 1px;
     }
   }
 }
+
+// Datepicker popup is rendered in cdk-overlay (outside .tb-default) — keep calendar grid layout intact.
+.cdk-overlay-pane {
+  &:has(.mat-datetimepicker-content) {
+    z-index: 1300;
+  }
+
+  .mat-datetimepicker-content {
+    min-width: 296px;
+  }
+
+  .mat-datetimepicker-calendar {
+    width: 296px;
+    min-width: 296px;
+  }
+
+  .mat-datetimepicker-calendar[mode='landscape'],
+  .mat-datetimepicker-calendar[mode='auto'] {
+    width: 446px;
+    min-width: 446px;
+  }
+
+  .mat-datetimepicker-calendar-content {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .mat-datetimepicker-calendar-table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .mat-datetimepicker-calendar-body {
+    font-size: 13px;
+
+    .mat-datetimepicker-calendar-body-cell {
+      position: relative;
+      width: 14.2857142857%;
+      height: 0;
+      line-height: 0;
+      padding: 7.1428571429% 0;
+      font-size: 13px;
+    }
+
+    .mat-datetimepicker-calendar-body-label {
+      height: 0;
+      line-height: 0;
+    }
+
+    .mat-datetimepicker-calendar-body-cell-content {
+      position: absolute;
+      top: 5%;
+      left: 5%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: 90%;
+      height: 90%;
+      font-size: 13px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+  }
+}

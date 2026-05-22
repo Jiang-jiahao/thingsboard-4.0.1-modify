@@ -1,3 +1,5 @@
+@import '../../../../scss/constants';
+
 /**
  * Copyright © 2016-2025 The Thingsboard Authors
  *
@@ -20,36 +22,62 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+
+  header {
+    flex-shrink: 0;
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+  }
+
   .mat-toolbar.details-toolbar {
     padding: 0;
+    background: linear-gradient(135deg, $tb-primary-color 0%, $tb-secondary-color 100%) !important;
+    box-shadow: none;
+  }
+
+  .mat-content {
+    background: #f8fafc !important;
   }
 }
 
 :host ::ng-deep {
   .mat-toolbar-tools {
     height: 100%;
-    min-height: 60px;
-    max-height: 120px;
+    min-height: 56px;
+    max-height: 88px;
+    padding-right: 4px;
+
     &.tb-details-title-header {
       min-width: 0;
-      padding: 0 16px 0 8px;
+      padding: 0 12px 0 16px;
     }
   }
+
+  .tb-details-action-btn,
+  .tb-details-close-btn {
+    margin: 0 2px;
+  }
+
+  .tb-details-close-btn .mat-icon {
+    font-size: 22px;
+  }
+
   .tb-details-title {
     width: inherit;
-    margin: 20px 8px 0 0;
-    font-size: 1rem;
-    font-weight: 400;
+    margin: 12px 8px 0 0;
+    font-size: 1.05rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
 
     @media #{$mat-gt-sm} {
-      font-size: 1.5rem;
+      font-size: 1.35rem;
     }
   }
 
   .tb-details-subtitle {
-    margin: 10px 0;
-    font-size: 1rem;
-    opacity: .8;
+    margin: 4px 0 10px;
+    font-size: 0.85rem;
+    opacity: 0.85;
   }
 
   .tb-details-title-text, .tb-details-subtitle {

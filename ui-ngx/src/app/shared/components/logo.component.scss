@@ -13,17 +13,142 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-:host-context(.login-logo) {
-  img.tb-logo-title {
-    width: 280px;
-    height: 60px;
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
-    transform: none;
+@import '../../../scss/constants';
 
-    &:focus {
-      outline: 0;
-    }
+:host {
+  display: flex;
+  min-width: 0;
+}
+
+.tb-brand-logo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  color: #fff;
+}
+
+.tb-logo-icon-wrap {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.tb-logo-icon {
+  height: 30px;
+  width: 30px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.12));
+}
+
+.tb-logo-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.tb-logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.88) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tb-logo-subtitle {
+  display: none;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.82);
+  white-space: normal;
+  word-break: keep-all;
+}
+
+:host-context(.login-logo) {
+  .tb-brand-logo {
+    color: $tb-primary-color;
+    gap: 16px;
+  }
+
+  .tb-logo-icon-wrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, rgba($tb-primary-color, 0.08) 0%, rgba($tb-secondary-color, 0.14) 100%);
+    border-color: rgba($tb-primary-color, 0.18);
+    box-shadow: 0 6px 20px rgba($tb-primary-color, 0.15);
+  }
+
+  .tb-logo-icon {
+    height: 36px;
+    width: 36px;
+    filter: none;
+  }
+
+  .tb-logo-text {
+    font-size: 32px;
+    letter-spacing: 0.12em;
+    background: linear-gradient(135deg, darken($tb-primary-color, 6%) 0%, $tb-secondary-color 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .tb-logo-subtitle {
+    display: block;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    color: rgba($tb-primary-color, 0.75);
+    text-align: center;
+  }
+
+  .tb-logo-copy {
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+:host-context(.tb-nav-logo) {
+  width: 100%;
+
+  .tb-brand-logo {
+    width: 100%;
+    align-items: flex-start;
+    padding: 4px 0 4px 2px;
+  }
+
+  .tb-logo-icon-wrap {
+    margin-top: 2px;
+  }
+
+  .tb-logo-subtitle {
+    display: block;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+  }
+
+  .tb-logo-text {
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    color: #fff;
   }
 }

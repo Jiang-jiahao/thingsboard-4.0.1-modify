@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-3 protocol-template-panel"
      [class.mat-elevation-z1]="layoutMode === 'full'"
      *ngIf="templatesArray && commandsArray">
-  <div *ngIf="layoutMode === 'full'" class="tb-hint mat-body-2" style="margin: 0; padding: 10px 12px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);">
+  <div *ngIf="layoutMode === 'full'" class="tb-hint mat-body-2 protocol-template-intro-banner">
     <span translate>device-profile.tcp.protocol-template-intro</span>
   </div>
   <div *ngIf="layoutMode === 'commandsOnly'" class="tb-hint mat-caption protocol-template-hint-compact" style="margin: 0;" translate>profiles.protocol-templates-dialog-tab-commands-hint</div>
@@ -12,7 +12,7 @@
 
     <div *ngIf="!templatesArray.length" class="tb-hint mat-caption" translate>device-profile.tcp.protocol-template-form-loading</div>
 
-    <div *ngIf="templatesArray.length > 0" class="flex flex-col gap-3 mat-elevation-z1" style="padding: 12px; border-radius: 4px;"
+    <div *ngIf="templatesArray.length > 0" class="protocol-template-editor-card flex flex-col gap-3"
          [formGroup]="asFormGroup(templatesArray.at(0))">
       <input type="hidden" formControlName="id">
 
@@ -24,15 +24,15 @@
           <div class="protocol-template-hex-field-compact__primary">
             <span class="protocol-template-hex-field-compact__idx"
                   [matTooltip]="'device-profile.tcp.hex-field-card-title' | translate: { index: pos + 1 }">{{ pos + 1 }}</span>
-            <mat-form-field class="protocol-template-hex-field-compact__key" subscriptSizing="fixed" appearance="outline">
+            <mat-form-field class="protocol-template-hex-field-compact__key" subscriptSizing="fixed" appearance="fill">
               <mat-label translate>device-profile.tcp.hex-field-key</mat-label>
               <input matInput formControlName="key">
             </mat-form-field>
-            <mat-form-field class="protocol-template-hex-field-compact__off" subscriptSizing="fixed" appearance="outline">
+            <mat-form-field class="protocol-template-hex-field-compact__off" subscriptSizing="fixed" appearance="fill">
               <mat-label translate>device-profile.tcp.hex-field-offset</mat-label>
               <input matInput type="number" min="0" formControlName="byteOffset" required>
             </mat-form-field>
-            <mat-form-field class="protocol-template-hex-field-compact__type" subscriptSizing="fixed" appearance="outline">
+            <mat-form-field class="protocol-template-hex-field-compact__type" subscriptSizing="fixed" appearance="fill">
               <mat-label translate>device-profile.tcp.hex-field-type</mat-label>
               <mat-select formControlName="valueType" required>
                 <mat-option *ngFor="let t of tcpHexValueTypes" [value]="t">{{ t }}</mat-option>
@@ -45,7 +45,7 @@
             </button>
           </div>
           <div *ngIf="isIntegralHexFieldTemplateRow(fi)" class="protocol-template-hex-field-compact__row">
-            <mat-form-field class="protocol-template-hex-field-compact__fixed-int" subscriptSizing="fixed" appearance="outline"
+            <mat-form-field class="protocol-template-hex-field-compact__fixed-int" subscriptSizing="fixed" appearance="fill"
                             [matTooltip]="'device-profile.tcp.hex-field-fixed-integral-hint' | translate"
                             matTooltipPosition="above" matTooltipShowDelay="400">
               <mat-label translate>device-profile.tcp.hex-field-fixed-integral</mat-label>
@@ -68,7 +68,7 @@
             </mat-checkbox>
           </div>
           <div *ngIf="isBytesAsHexTemplate(0, fi)" class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__bytes">
-            <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="outline"
+            <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="fill"
                             [matTooltip]="'device-profile.tcp.hex-field-length-mode-hint-detail' | translate"
                             matTooltipShowDelay="400"
                             matTooltipClass="tb-tooltip-multiline">
@@ -80,11 +80,11 @@
               </mat-select>
             </mat-form-field>
             <ng-container *ngIf="getHexFieldLengthModeTemplate(0, fi) === 'fixed'">
-              <mat-form-field class="protocol-template-hex-field-compact__byte-len" subscriptSizing="fixed" appearance="outline">
+              <mat-form-field class="protocol-template-hex-field-compact__byte-len" subscriptSizing="fixed" appearance="fill">
                 <mat-label translate>device-profile.tcp.hex-field-byte-length</mat-label>
                 <input matInput type="number" min="1" formControlName="byteLength">
               </mat-form-field>
-              <mat-form-field class="protocol-template-hex-field-compact__fixed-hex" subscriptSizing="fixed" appearance="outline"
+              <mat-form-field class="protocol-template-hex-field-compact__fixed-hex" subscriptSizing="fixed" appearance="fill"
                               [matTooltip]="(isBytesAsUtf8Template(0, fi)
                                 ? 'device-profile.tcp.hex-field-fixed-bytes-utf8-hint'
                                 : 'device-profile.tcp.hex-field-fixed-bytes-hex-hint') | translate"
@@ -99,17 +99,17 @@
               </mat-form-field>
             </ng-container>
             <ng-container *ngIf="getHexFieldLengthModeTemplate(0, fi) === 'fromFrame'">
-              <mat-form-field class="protocol-template-hex-field-compact__len-off" subscriptSizing="fixed" appearance="outline">
+              <mat-form-field class="protocol-template-hex-field-compact__len-off" subscriptSizing="fixed" appearance="fill">
                 <mat-label translate>device-profile.tcp.hex-field-len-from-offset</mat-label>
                 <input matInput type="number" min="0" formControlName="byteLengthFromByteOffset">
               </mat-form-field>
-              <mat-form-field class="protocol-template-hex-field-compact__len-vt" subscriptSizing="fixed" appearance="outline">
+              <mat-form-field class="protocol-template-hex-field-compact__len-vt" subscriptSizing="fixed" appearance="fill">
                 <mat-label translate>device-profile.tcp.hex-field-len-from-type</mat-label>
                 <mat-select formControlName="byteLengthFromValueType">
                   <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
                 </mat-select>
               </mat-form-field>
-              <mat-form-field class="protocol-template-hex-field-compact__len-sub" subscriptSizing="fixed" appearance="outline">
+              <mat-form-field class="protocol-template-hex-field-compact__len-sub" subscriptSizing="fixed" appearance="fill">
                 <mat-label translate>device-profile.tcp.hex-field-len-subtract</mat-label>
                 <input matInput type="number" min="0" formControlName="byteLengthFromIntegralSubtract">
                 <mat-hint translate>device-profile.tcp.hex-field-len-subtract-hint</mat-hint>
@@ -431,15 +431,15 @@
               <div class="protocol-template-hex-field-compact__primary">
                 <span class="protocol-template-hex-field-compact__idx"
                       [matTooltip]="'device-profile.tcp.hex-field-card-title' | translate: { index: pos + 1 }">{{ pos + 1 }}</span>
-                <mat-form-field class="protocol-template-hex-field-compact__key" subscriptSizing="fixed" appearance="outline">
+                <mat-form-field class="protocol-template-hex-field-compact__key" subscriptSizing="fixed" appearance="fill">
                   <mat-label translate>device-profile.tcp.hex-field-key</mat-label>
                   <input matInput formControlName="key">
                 </mat-form-field>
-                <mat-form-field class="protocol-template-hex-field-compact__off" subscriptSizing="fixed" appearance="outline">
+                <mat-form-field class="protocol-template-hex-field-compact__off" subscriptSizing="fixed" appearance="fill">
                   <mat-label translate>device-profile.tcp.hex-field-offset</mat-label>
                   <input matInput type="number" min="0" formControlName="byteOffset" required>
                 </mat-form-field>
-                <mat-form-field class="protocol-template-hex-field-compact__type" subscriptSizing="fixed" appearance="outline">
+                <mat-form-field class="protocol-template-hex-field-compact__type" subscriptSizing="fixed" appearance="fill">
                   <mat-label translate>device-profile.tcp.hex-field-type</mat-label>
                   <mat-select formControlName="valueType" required>
                     <mat-option *ngFor="let t of tcpHexValueTypes" [value]="t">{{ t }}</mat-option>
@@ -454,7 +454,7 @@
               <div *ngIf="isIntegralHexFieldOverrideRow(ci, fi) || isDownlinkOrBothForCommand(ci)"
                    class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__row--tight">
                 <mat-form-field *ngIf="isIntegralHexFieldOverrideRow(ci, fi)" class="protocol-template-hex-field-compact__fixed-int"
-                                subscriptSizing="fixed" appearance="outline"
+                                subscriptSizing="fixed" appearance="fill"
                                 [matTooltip]="'device-profile.tcp.hex-field-fixed-integral-hint' | translate"
                                 matTooltipPosition="above" matTooltipShowDelay="400">
                   <mat-label translate>device-profile.tcp.hex-field-fixed-integral</mat-label>
@@ -478,7 +478,7 @@
                 </mat-checkbox>
               </div>
               <div *ngIf="isBytesAsHexOverride(ci, fi)" class="protocol-template-hex-field-compact__row protocol-template-hex-field-compact__bytes">
-                <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="outline"
+                <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="fill"
                                 [matTooltip]="'device-profile.tcp.hex-field-length-mode-hint-detail' | translate"
                                 matTooltipShowDelay="400"
                                 matTooltipClass="tb-tooltip-multiline">
@@ -490,11 +490,11 @@
                   </mat-select>
                 </mat-form-field>
                 <ng-container *ngIf="getHexFieldLengthModeOverride(ci, fi) === 'fixed'">
-                  <mat-form-field class="protocol-template-hex-field-compact__byte-len" subscriptSizing="fixed" appearance="outline">
+                  <mat-form-field class="protocol-template-hex-field-compact__byte-len" subscriptSizing="fixed" appearance="fill">
                     <mat-label translate>device-profile.tcp.hex-field-byte-length</mat-label>
                     <input matInput type="number" min="1" formControlName="byteLength">
                   </mat-form-field>
-                  <mat-form-field class="protocol-template-hex-field-compact__fixed-hex" subscriptSizing="fixed" appearance="outline"
+                  <mat-form-field class="protocol-template-hex-field-compact__fixed-hex" subscriptSizing="fixed" appearance="fill"
                                   [matTooltip]="(isBytesAsUtf8Override(ci, fi)
                                     ? 'device-profile.tcp.hex-field-fixed-bytes-utf8-hint'
                                     : 'device-profile.tcp.hex-field-fixed-bytes-hex-hint') | translate"
@@ -509,17 +509,17 @@
                   </mat-form-field>
                 </ng-container>
                 <ng-container *ngIf="getHexFieldLengthModeOverride(ci, fi) === 'fromFrame'">
-                  <mat-form-field class="protocol-template-hex-field-compact__len-off" subscriptSizing="fixed" appearance="outline">
+                  <mat-form-field class="protocol-template-hex-field-compact__len-off" subscriptSizing="fixed" appearance="fill">
                     <mat-label translate>device-profile.tcp.hex-field-len-from-offset</mat-label>
                     <input matInput type="number" min="0" formControlName="byteLengthFromByteOffset">
                   </mat-form-field>
-                  <mat-form-field class="protocol-template-hex-field-compact__len-vt" subscriptSizing="fixed" appearance="outline">
+                  <mat-form-field class="protocol-template-hex-field-compact__len-vt" subscriptSizing="fixed" appearance="fill">
                     <mat-label translate>device-profile.tcp.hex-field-len-from-type</mat-label>
                     <mat-select formControlName="byteLengthFromValueType">
                       <mat-option *ngFor="let t of tcpHexMatchValueTypes" [value]="t">{{ t }}</mat-option>
                     </mat-select>
                   </mat-form-field>
-                  <mat-form-field class="protocol-template-hex-field-compact__len-sub" subscriptSizing="fixed" appearance="outline">
+                  <mat-form-field class="protocol-template-hex-field-compact__len-sub" subscriptSizing="fixed" appearance="fill">
                     <mat-label translate>device-profile.tcp.hex-field-len-subtract</mat-label>
                     <input matInput type="number" min="0" formControlName="byteLengthFromIntegralSubtract">
                     <mat-hint translate>device-profile.tcp.hex-field-len-subtract-hint</mat-hint>

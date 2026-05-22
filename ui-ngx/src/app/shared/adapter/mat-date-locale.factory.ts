@@ -14,18 +14,15 @@
 /// limitations under the License.
 ///
 
-import { Component } from '@angular/core';
-import { environment as env } from '@env/environment';
-
-@Component({
-  selector: 'tb-logo',
-  templateUrl: './logo.component.html',
-  styleUrls: ['./logo.component.scss']
-})
-export class LogoComponent {
-
-  logoIcon = 'assets/logo_white.svg';
-  brandName = env.brandName;
-  brandSubtitle = env.appTitle;
-
+export function tbMatDateLocaleFactory(): string {
+  try {
+    const lang = (document.documentElement?.lang || '').toLowerCase();
+    if (lang.startsWith('zh')) {
+      return 'zh-CN';
+    }
+    if (lang.startsWith('en')) {
+      return 'en-US';
+    }
+  } catch (_) { /* SSR / tests */ }
+  return 'zh-CN';
 }

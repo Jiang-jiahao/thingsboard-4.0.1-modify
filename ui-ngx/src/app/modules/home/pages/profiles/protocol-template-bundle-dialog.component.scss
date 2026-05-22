@@ -1,12 +1,33 @@
+@import '../../../../../scss/constants';
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+}
+
+h2.protocol-template-dialog-title {
+  margin: 0;
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: #fff;
+  background: linear-gradient(90deg, $tb-primary-color 0%, $tb-secondary-color 100%);
+  border-bottom: none;
+}
+
 .protocol-template-bundle-dialog-content {
   min-width: min(920px, 92vw);
   max-width: 100%;
-  padding-top: 4px;
+  padding: 16px 20px 12px !important;
   display: flex;
   flex-direction: column;
-  max-height: min(86vh, 840px);
+  max-height: min(78vh, 760px);
   min-height: 0;
   box-sizing: border-box;
+  background: #f8fafc;
 }
 
 .protocol-template-bundle-tabs-shell {
@@ -14,6 +35,10 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .protocol-template-bundle-tabs {
@@ -29,9 +54,21 @@
     flex-direction: column;
   }
 
+  ::ng-deep .mat-mdc-tab-header {
+    background: #fff;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    padding: 0 8px;
+  }
+
+  ::ng-deep .mat-mdc-tab {
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
   ::ng-deep .mat-mdc-tab-body-wrapper {
     flex: 1 1 auto;
     min-height: 0;
+    background: #f8fafc;
   }
 
   ::ng-deep .mat-mdc-tab-body.mat-mdc-tab-body-active {
@@ -52,23 +89,56 @@
   max-height: 100%;
   min-height: 0;
   overflow: auto;
-  padding-top: 12px;
+  padding: 16px;
   min-width: 0;
 }
 
 .protocol-template-bundle-dialog-footer {
   flex: 0 0 auto;
-  padding-top: 2px;
+  padding-top: 12px;
 }
 
 .bundle-meta-description-field {
   margin-bottom: 0;
+  width: 100%;
 }
 
 .bundle-meta-description-field textarea {
-  max-height: 2.5rem;
-  min-height: 2.25rem;
+  min-height: 72px;
+  max-height: 160px;
   resize: vertical;
-  line-height: 1.35;
+  line-height: 1.5;
   overflow-y: auto;
+}
+
+:host ::ng-deep {
+  .protocol-template-bundle-dialog-content > .mat-mdc-form-field {
+    .mdc-text-field--filled {
+      border-radius: 10px 10px 0 0;
+    }
+  }
+
+  .bundle-meta-description-field .mat-mdc-form-field-hint {
+    color: #64748b;
+    line-height: 1.45;
+  }
+}
+
+div[mat-dialog-actions] {
+  padding: 12px 20px 16px !important;
+  margin: 0;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+  gap: 8px;
+}
+
+@keyframes tbProtocolTabFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+:host ::ng-deep .protocol-template-bundle-tabs.tb-tabs-fade {
+  .mat-mdc-tab-body.mat-mdc-tab-body-active .mat-mdc-tab-body-content {
+    animation: tbProtocolTabFadeIn 0.2s ease-out;
+  }
 }

@@ -15,5 +15,12 @@
     limitations under the License.
 
 -->
-<img (click)="gotoThingsboard()" [src]="logo"
-         aria-label="logo" class="tb-logo-title flex-1"/>
+<div class="tb-brand-logo" aria-label="logo">
+  <div class="tb-logo-icon-wrap">
+    <img [src]="logoIcon" alt="" class="tb-logo-icon"/>
+  </div>
+  <div class="tb-logo-copy">
+    <span class="tb-logo-text">{{ brandName }}</span>
+    <span class="tb-logo-subtitle">{{ brandSubtitle }}</span>
+  </div>
+</div>

@@ -18,25 +18,79 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 :host ::ng-deep {
   tb-details-panel {
+    min-height: 0;
+
     > .mat-content {
+      background: #f8fafc !important;
+
       > .mat-mdc-tab-group {
+        &.tb-tabs-fade {
+          .mat-mdc-tab-body.mat-mdc-tab-body-active .mat-mdc-tab-body-content {
+            animation: tbTabFadeIn 0.2s ease-out;
+          }
+        }
+
+        > .mat-mdc-tab-header {
+          background: #fff;
+          border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+          padding: 0 8px;
+
+          .mat-mdc-tab {
+            min-width: 48px;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+          }
+        }
+
         > .mat-mdc-tab-body-wrapper {
           position: absolute;
           top: 49px;
           left: 0;
           right: 0;
           bottom: 0;
-        }
-        > .mat-mdc-tab-header {
-          .mat-mdc-tab {
-            min-width: 40px;
-          }
+          background: #f8fafc;
         }
       }
     }
+  }
+
+  .details-buttons {
+    display: flex;
+    align-items: center;
+  }
+
+  .tb-details-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 16px;
+    margin: 0;
+    background: #fff;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+
+    .mat-mdc-raised-button {
+      border-radius: 8px !important;
+      box-shadow: none !important;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+  }
+
+  .mat-mdc-tab-body-content {
+    padding: 0 4px 8px;
+  }
+}
+
+@keyframes tbTabFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

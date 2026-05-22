@@ -1,0 +1,167 @@
+/**
+ * Global UI refinements — modern IoT admin aesthetic.
+ */
+@import './constants';
+
+.tb-default {
+  --tb-surface: #f1f5f9;
+  --tb-surface-elevated: #ffffff;
+  --tb-border: rgba(15, 23, 42, 0.08);
+  --tb-border-strong: rgba(15, 23, 42, 0.12);
+  --tb-text-muted: #64748b;
+  --tb-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --tb-shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
+  --tb-shadow-lg: 0 8px 30px rgba(15, 23, 42, 0.1);
+  --tb-radius: 10px;
+  --tb-radius-lg: 14px;
+  --tb-radius-pill: 999px;
+  --tb-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Cards & panels
+  .mat-mdc-card {
+    border-radius: var(--tb-radius-lg) !important;
+    border: 1px solid var(--tb-border);
+    box-shadow: var(--tb-shadow-sm) !important;
+    transition: box-shadow var(--tb-transition), border-color var(--tb-transition);
+
+    &:hover {
+      box-shadow: var(--tb-shadow-md) !important;
+    }
+  }
+
+  .mat-expansion-panel {
+    border-radius: var(--tb-radius) !important;
+    border: 1px solid var(--tb-border);
+    box-shadow: none !important;
+    margin-bottom: 8px;
+    overflow: hidden;
+
+    &:not(.mat-expanded) {
+      .mat-expansion-panel-header:hover {
+        background: rgba($tb-primary-color, 0.04);
+      }
+    }
+  }
+
+  // Tables
+  .mat-mdc-table {
+    border-radius: var(--tb-radius-lg);
+    overflow: hidden;
+    background: var(--tb-surface-elevated);
+    box-shadow: var(--tb-shadow-sm);
+
+    .mat-mdc-header-row {
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+
+      .mat-mdc-header-cell {
+        color: var(--tb-text-muted);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        border-bottom-color: var(--tb-border);
+      }
+    }
+
+    .mat-mdc-row {
+      transition: background-color var(--tb-transition);
+
+      &:hover {
+        background-color: rgba($tb-secondary-color, 0.06);
+      }
+
+      .mat-mdc-cell {
+        font-size: 13px;
+        color: #334155;
+        border-bottom-color: rgba(15, 23, 42, 0.05);
+      }
+    }
+  }
+
+  // Entity list pages (devices, profiles, etc.)
+  .tb-entity-table {
+    .mat-mdc-paginator {
+      background: #f8fafc;
+      border-top: 1px solid var(--tb-border);
+    }
+
+    .mat-mdc-paginator-container {
+      padding: 4px 12px;
+      min-height: 52px;
+    }
+  }
+
+  .mat-toolbar.mat-mdc-table-toolbar:not(.mat-primary) {
+    background: var(--tb-surface-elevated) !important;
+    border-bottom: 1px solid var(--tb-border);
+    border-radius: var(--tb-radius-lg) var(--tb-radius-lg) 0 0;
+  }
+
+  // Buttons
+  .mat-mdc-raised-button.mat-primary,
+  .mat-mdc-unelevated-button.mat-primary {
+    border-radius: var(--tb-radius) !important;
+    box-shadow: 0 2px 8px rgba($tb-primary-color, 0.25) !important;
+    letter-spacing: 0.02em;
+    transition: transform var(--tb-transition), box-shadow var(--tb-transition);
+
+    &:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba($tb-primary-color, 0.32) !important;
+    }
+  }
+
+  .mat-mdc-outlined-button,
+  .mat-mdc-stroked-button {
+    border-radius: var(--tb-radius) !important;
+  }
+
+  .mat-mdc-icon-button {
+    border-radius: var(--tb-radius) !important;
+    transition: background-color var(--tb-transition);
+  }
+
+  // Tabs
+  .mat-mdc-tab-group {
+    .mat-mdc-tab {
+      letter-spacing: 0.02em;
+    }
+
+    .mdc-tab-indicator__content--underline {
+      border-radius: 2px 2px 0 0;
+      height: 3px;
+    }
+  }
+
+  // Dialogs
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    border-radius: var(--tb-radius-lg) !important;
+    box-shadow: var(--tb-shadow-lg) !important;
+  }
+
+  // Chips & status badges
+  .mat-mdc-chip {
+    border-radius: var(--tb-radius-pill) !important;
+  }
+
+  // Main content area
+  .tb-main-content {
+    background: var(--tb-surface);
+  }
+
+  // Entity details
+  .tb-entity-details-panel,
+  .tb-details-panel {
+    .mat-mdc-card {
+      background: var(--tb-surface-elevated);
+    }
+  }
+
+  // Timewindow date inputs — slightly wider for yyyy-MM-dd HH:mm
+  .tb-timewindow-form,
+  .tb-form-row {
+    .tb-datetime-field.mat-mdc-form-field {
+      min-width: 200px;
+    }
+  }
+}

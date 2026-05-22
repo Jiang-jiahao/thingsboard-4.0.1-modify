@@ -55,9 +55,9 @@ $tb-mat-indigo: (
 );
 
 $tb-primary: mat.m2-define-palette($tb-mat-indigo);
-$tb-accent: mat.m2-define-palette(mat.$m2-deep-orange-palette);
+$tb-accent: mat.m2-define-palette(mat.$m2-cyan-palette, 700, 500, 900);
 
-$background: (background: map_get(mat.$m2-grey-palette, 200));
+$background: (background: #f1f5f9);
 
 $tb-theme-background: map_merge(mat.$m2-light-theme-background-palette, $background);
 
@@ -248,9 +248,10 @@ $tb-dark-theme: map_merge($tb-dark-theme, $color);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(203, 203, 203, 0.8);
+    background: rgba($tb-primary-color, 0.22);
+    border-radius: 6px;
     &:hover {
-      background: rgba(165, 165, 165, 0.65);
+      background: rgba($tb-primary-color, 0.38);
     }
   }
 }
