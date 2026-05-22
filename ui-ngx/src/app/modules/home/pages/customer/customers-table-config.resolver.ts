@@ -32,6 +32,7 @@ import { CustomerService } from '@app/core/http/customer.service';
 import { CustomerComponent } from '@modules/home/pages/customer/customer.component';
 import { CustomerTabsComponent } from '@home/pages/customer/customer-tabs.component';
 import { getCurrentAuthState } from '@core/auth/auth.selectors';
+import { EDGE_UI_ENABLED } from '@shared/models/device.models';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { HomeDialogsService } from '@home/dialogs/home-dialogs.service';
@@ -102,7 +103,7 @@ export class CustomersTableConfigResolver  {
         isEnabled: (customer) => true,
         onAction: ($event, entity) => this.manageCustomerDashboards($event, entity)
       });
-    if (authState.edgesSupportEnabled) {
+    if (EDGE_UI_ENABLED && authState.edgesSupportEnabled) {
       this.config.cellActionDescriptors.push(
         {
           name: this.translate.instant('customer.manage-customer-edges'),

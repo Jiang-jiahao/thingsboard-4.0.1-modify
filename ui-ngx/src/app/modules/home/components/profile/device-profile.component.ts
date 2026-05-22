@@ -25,6 +25,8 @@ import { EntityComponent } from '../entity/entity.component';
 import {
   createDeviceProfileConfiguration,
   createDeviceProfileTransportConfiguration,
+  createDisabledDeviceProvisionConfiguration,
+  DEVICE_PROVISIONING_UI_ENABLED,
   DeviceProfile,
   DeviceProfileData,
   DeviceProfileType,
@@ -75,6 +77,8 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
 
   edgeRuleChainType = RuleChainType.EDGE;
 
+  readonly deviceProvisioningUiEnabled = DEVICE_PROVISIONING_UI_ENABLED;
+
   deviceProfileId: EntityId;
 
   otaUpdateType = OtaUpdateType;
@@ -103,13 +107,13 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
       deviceProfileTypeConfigurationInfoMap.get(entity.type).hasProfileConfiguration;
     this.displayTransportConfiguration = entity && entity.transportType &&
       deviceTransportTypeConfigurationInfoMap.get(entity.transportType).hasProfileConfiguration;
-    const deviceProvisionConfiguration: DeviceProvisionConfiguration = {
+    const deviceProvisionConfiguration: DeviceProvisionConfiguration = DEVICE_PROVISIONING_UI_ENABLED ? {
       type: entity?.provisionType ? entity.provisionType : DeviceProvisionType.DISABLED,
       provisionDeviceKey: entity?.provisionDeviceKey,
       provisionDeviceSecret: entity?.profileData?.provisionConfiguration?.provisionDeviceSecret,
       certificateRegExPattern: entity?.profileData?.provisionConfiguration?.certificateRegExPattern,
       allowCreateNewDevicesByX509Certificate: entity?.profileData?.provisionConfiguration?.allowCreateNewDevicesByX509Certificate
-    };
+    } : createDisabledDeviceProvisionConfiguration();
     const form = this.fb.group(
       {
         name: [entity ? entity.name : '', [Validators.required, Validators.maxLength(255)]],
@@ -230,9 +234,12 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     if (formValue.defaultEdgeRuleChainId) {
       formValue.defaultEdgeRuleChainId = new RuleChainId(formValue.defaultEdgeRuleChainId);
     }
-    const deviceProvisionConfiguration: DeviceProvisionConfiguration = formValue.profileData.provisionConfiguration;
+    const deviceProvisionConfiguration: DeviceProvisionConfiguration = DEVICE_PROVISIONING_UI_ENABLED
+      ? formValue.profileData.provisionConfiguration
+      : createDisabledDeviceProvisionConfiguration();
     formValue.provisionType = deviceProvisionConfiguration.type;
-    formValue.provisionDeviceKey = deviceProvisionConfiguration.provisionDeviceKey;
+    formValue.provisionDeviceKey = deviceProvisionConfiguration.provisionDeviceKey ?? null;
+    formValue.profileData.provisionConfiguration = deviceProvisionConfiguration;
     delete deviceProvisionConfiguration.provisionDeviceKey;
     return super.prepareFormValue(formValue);
   }

@@ -34,7 +34,8 @@ import {
   UdpDeviceProfileTransportConfiguration,
   TcpTransportConnectMode,
   TcpWireAuthenticationMode,
-  UdpWireAuthenticationMode
+  UdpWireAuthenticationMode,
+  GATEWAY_UI_ENABLED
 } from '@shared/models/device.models';
 import { MatStepper, StepperOrientation } from '@angular/material/stepper';
 import { EntityType } from '@shared/models/entity-type.models';
@@ -85,6 +86,8 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
   udpProfileWireAuthMode: UdpWireAuthenticationMode | null = null;
 
   readonly deviceWizardDeviceScope: 'tenant' = 'tenant';
+
+  readonly gatewayUiEnabled = GATEWAY_UI_ENABLED;
 
   constructor(protected store: Store<AppState>,
               protected router: Router,

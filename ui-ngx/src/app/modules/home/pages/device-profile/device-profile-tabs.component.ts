@@ -20,6 +20,7 @@ import { AppState } from '@core/core.state';
 import { EntityTabsComponent } from '../../components/entity/entity-tabs.component';
 import {
   DeviceProfile,
+  DEVICE_PROVISIONING_UI_ENABLED,
   DeviceTransportType,
   deviceTransportTypeHintMap,
   deviceTransportTypeTranslationMap
@@ -40,6 +41,8 @@ export class DeviceProfileTabsComponent extends EntityTabsComponent<DeviceProfil
   deviceTransportTypeHints = deviceTransportTypeHintMap;
 
   isTransportTypeChanged = false;
+
+  readonly deviceProvisioningUiEnabled = DEVICE_PROVISIONING_UI_ENABLED;
 
   constructor(protected store: Store<AppState>,
               private destroyRef: DestroyRef) {

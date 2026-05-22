@@ -1,0 +1,25 @@
+{
+  "gateway": {
+    "gateway-list": "网关列表",
+    "gateways": "网关",
+    "connectors": "连接器",
+    "configuration": "配置",
+    "connectors-table-enabled": "已启用",
+    "connectors-table-name": "名称",
+    "connectors-table-type": "类型",
+    "connectors-table-status": "状态",
+    "connectors-table-actions": "操作",
+    "select-connector": "请选择连接器以显示配置",
+    "add-connector": "添加连接器",
+    "type": "类型",
+    "name": "名称",
+    "remote-logging-level": "日志级别",
+    "fill-connector-defaults": "使用默认值填充配置",
+    "send-change-data": "仅在数据变化时发送",
+    "sync": "已同步",
+    "out-of-sync": "未同步",
+    "broker": {
+      "connection": "连接 Broker"
+    }
+  }
+}

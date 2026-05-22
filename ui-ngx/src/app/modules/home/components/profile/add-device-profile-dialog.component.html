@@ -123,7 +123,7 @@
         </tb-device-profile-alarms>
       </form>
     </mat-step>
-    <mat-step [stepControl]="provisionConfigFormGroup" [optional]="true">
+    <mat-step *ngIf="deviceProvisioningUiEnabled" [stepControl]="provisionConfigFormGroup" [optional]="true">
       <form [formGroup]="provisionConfigFormGroup" style="padding-bottom: 16px;">
         <ng-template matStepLabel>{{ 'device-profile.device-provisioning' | translate }}</ng-template>
         <tb-device-profile-provision-configuration

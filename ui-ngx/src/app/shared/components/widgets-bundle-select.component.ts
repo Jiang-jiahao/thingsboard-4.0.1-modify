@@ -34,6 +34,7 @@ import { WidgetService } from '@core/http/widget.service';
 import { isDefined } from '@core/utils';
 import { NULL_UUID } from '@shared/models/id/has-uuid';
 import { getCurrentAuthState } from '@core/auth/auth.selectors';
+import { EDGE_UI_ENABLED } from '@shared/models/device.models';
 import { coerceBoolean } from '@shared/decorators/coercion';
 import { MatDialog } from '@angular/material/dialog';
 import {
@@ -105,7 +106,7 @@ export class WidgetsBundleSelectComponent implements ControlValueAccessor, OnIni
     this.widgetsBundles$ = this.getWidgetsBundles().pipe(
       map((widgetsBundles) => {
         const authState = getCurrentAuthState(this.store);
-        if (!authState.edgesSupportEnabled) {
+        if (!EDGE_UI_ENABLED || !authState.edgesSupportEnabled) {
           widgetsBundles = widgetsBundles.filter(widgetsBundle => widgetsBundle.alias !== 'edge_widgets');
         }
         return widgetsBundles;

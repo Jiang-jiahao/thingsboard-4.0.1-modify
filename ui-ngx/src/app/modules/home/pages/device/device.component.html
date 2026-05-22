@@ -144,7 +144,7 @@
         required>
       </tb-device-data>
       <div formGroupName="additionalInfo" class="flex flex-col">
-        <div class="toggle-group">
+        <div *ngIf="gatewayUiEnabled" class="toggle-group">
           <mat-slide-toggle formControlName="gateway" style="min-width: 165px">
             {{ 'device.is-gateway' | translate }}
           </mat-slide-toggle>

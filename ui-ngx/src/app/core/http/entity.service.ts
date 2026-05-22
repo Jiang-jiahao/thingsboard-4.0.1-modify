@@ -32,6 +32,7 @@ import { getCurrentAuthState, getCurrentAuthUser } from '@core/auth/auth.selecto
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { Authority } from '@shared/models/authority.enum';
+import { EDGE_UI_ENABLED } from '@shared/models/device.models';
 import { Tenant } from '@shared/models/tenant.model';
 import { catchError, concatMap, expand, map, mergeMap, toArray } from 'rxjs/operators';
 import { Customer } from '@app/shared/models/customer.model';
@@ -623,7 +624,7 @@ export class EntityService {
   public getAliasFilterTypesByEntityTypes(entityTypes: Array<EntityType | AliasEntityType>): Array<AliasFilterType> {
     const authState = getCurrentAuthState(this.store);
     let allAliasFilterTypes: Array<AliasFilterType> = Object.values(AliasFilterType);
-    if (!authState.edgesSupportEnabled) {
+    if (!EDGE_UI_ENABLED || !authState.edgesSupportEnabled) {
       allAliasFilterTypes = allAliasFilterTypes.filter(aliasFilterType => !edgeAliasFilterTypes.includes(aliasFilterType));
     }
     if (!entityTypes || !entityTypes.length) {
@@ -757,7 +758,7 @@ export class EntityService {
         entityTypes.push(EntityType.CUSTOMER);
         entityTypes.push(EntityType.USER);
         entityTypes.push(EntityType.DASHBOARD);
-        if (authState.edgesSupportEnabled) {
+        if (EDGE_UI_ENABLED && authState.edgesSupportEnabled) {
           entityTypes.push(EntityType.EDGE);
         }
         if (useAliasEntityTypes) {
@@ -774,7 +775,7 @@ export class EntityService {
         entityTypes.push(EntityType.CUSTOMER);
         entityTypes.push(EntityType.USER);
         entityTypes.push(EntityType.DASHBOARD);
-        if (authState.edgesSupportEnabled) {
+        if (EDGE_UI_ENABLED && authState.edgesSupportEnabled) {
           entityTypes.push(EntityType.EDGE);
         }
         if (useAliasEntityTypes) {

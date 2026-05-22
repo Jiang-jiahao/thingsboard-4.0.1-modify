@@ -27,6 +27,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { getCurrentAuthState } from '@core/auth/auth.selectors';
 import { AuthState } from '@core/auth/auth.models';
 import { CountryData } from '@shared/models/country.models';
+import { EDGE_UI_ENABLED } from '@shared/models/device.models';
 
 @Component({
   selector: 'tb-customer',
@@ -38,6 +39,8 @@ export class CustomerComponent extends ContactBasedComponent<Customer> {
   isPublic = false;
 
   authState: AuthState = getCurrentAuthState(this.store);
+
+  readonly edgeUiEnabled = EDGE_UI_ENABLED;
 
   constructor(protected store: Store<AppState>,
               protected translate: TranslateService,
@@ -96,6 +99,6 @@ export class CustomerComponent extends ContactBasedComponent<Customer> {
   }
 
   edgesSupportEnabled() {
-    return this.authState.edgesSupportEnabled;
+    return this.authState.edgesSupportEnabled && this.edgeUiEnabled;
   }
 }

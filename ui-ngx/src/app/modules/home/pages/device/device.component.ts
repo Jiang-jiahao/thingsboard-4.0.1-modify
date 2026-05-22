@@ -32,7 +32,8 @@ import {
   UdpDeviceProfileTransportConfiguration,
   UdpWireAuthenticationMode,
   TcpTransportConnectMode,
-  TcpWireAuthenticationMode
+  TcpWireAuthenticationMode,
+  GATEWAY_UI_ENABLED
 } from '@shared/models/device.models';
 import { DeviceProfileService } from '@core/http/device-profile.service';
 import { distinctUntilChanged, startWith } from 'rxjs/operators';
@@ -67,6 +68,8 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
 
   /** 当前所选设备档案的 TCP 连接模式（CLIENT/SERVER），用于设备传输页表单项显隐 */
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
+
+  readonly gatewayUiEnabled = GATEWAY_UI_ENABLED;
 
   constructor(protected store: Store<AppState>,
               protected translate: TranslateService,

@@ -35,7 +35,8 @@ import {
   DeviceCredentials,
   DeviceInfo,
   DeviceInfoFilter,
-  DeviceInfoQuery
+  DeviceInfoQuery,
+  GATEWAY_UI_ENABLED
 } from '@app/shared/models/device.models';
 import { DeviceComponent } from '@modules/home/pages/device/device.component';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
@@ -232,10 +233,12 @@ export class DevicesTableConfigResolver  {
           entity => checkBoxCell(entity.customerIsPublic), () => ({})),
       );
     }
-    columns.push(
-      new EntityTableColumn<DeviceInfo>('gateway', 'device.is-gateway', '60px',
-        entity => checkBoxCell(entity.additionalInfo && entity.additionalInfo.gateway), () => ({}), false)
-    );
+    if (GATEWAY_UI_ENABLED) {
+      columns.push(
+        new EntityTableColumn<DeviceInfo>('gateway', 'device.is-gateway', '60px',
+          entity => checkBoxCell(entity.additionalInfo && entity.additionalInfo.gateway), () => ({}), false)
+      );
+    }
     return columns;
   }
 

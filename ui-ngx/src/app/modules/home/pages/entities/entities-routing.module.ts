@@ -21,6 +21,7 @@ import { deviceRoutes } from '@home/pages/device/device-routing.module';
 import { assetRoutes } from '@home/pages/asset/asset-routing.module';
 import { entityViewRoutes } from '@home/pages/entity-view/entity-view-routing.module';
 import { gatewaysRoutes } from '@home/pages/gateways/gateways-routing.module';
+import { GATEWAY_UI_ENABLED } from '@shared/models/device.models';
 
 const routes: Routes = [
   {
@@ -43,7 +44,7 @@ const routes: Routes = [
       ...deviceRoutes,
       ...assetRoutes,
       ...entityViewRoutes,
-      ...gatewaysRoutes
+      ...(GATEWAY_UI_ENABLED ? gatewaysRoutes : [])
     ]
   }
 ];

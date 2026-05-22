@@ -19,17 +19,22 @@ import { ActivatedRouteSnapshot, ResolveFn, RouterModule, RouterStateSnapshot, R
 import { Authority } from '@shared/models/authority.enum';
 import { Dashboard } from '@shared/models/dashboard.models';
 import { ResourcesService } from '@core/services/resources.service';
-import { Observable } from 'rxjs';
+import { GatewayLocaleMergeService } from '@core/translate/gateway-locale-merge.service';
+import { Observable, tap } from 'rxjs';
 import { MenuId } from '@core/services/menu.models';
 import { DashboardViewComponent } from '@home/components/dashboard-view/dashboard-view.component';
 
-const gatewaysDashboardJson = '/api/resource/dashboard/system/gateways_dashboard.json';
+/** Bundled dashboard (zh/i18n); avoids stale English copy in DB system resource */
+const gatewaysDashboardJson = '/assets/dashboards/gateways_dashboard.json';
 
 export const gatewaysDashboardResolver: ResolveFn<Dashboard> = (
   route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot,
-  resourcesService = inject(ResourcesService)
-): Observable<Dashboard> => resourcesService.loadJsonResource(gatewaysDashboardJson);
+  resourcesService = inject(ResourcesService),
+  gatewayLocaleMerge = inject(GatewayLocaleMergeService)
+): Observable<Dashboard> => resourcesService.loadJsonResource(gatewaysDashboardJson).pipe(
+  tap(() => gatewayLocaleMerge.applyWithRetry())
+);
 
 export const gatewaysRoutes: Routes = [
   {

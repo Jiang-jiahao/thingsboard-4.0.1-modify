@@ -77,6 +77,15 @@ export enum DeviceProvisionType {
   X509_CERTIFICATE_CHAIN = 'X509_CERTIFICATE_CHAIN'
 }
 
+/** Set to true to show device provisioning in device profile UI. */
+export const DEVICE_PROVISIONING_UI_ENABLED = false;
+
+/** Set to true to show gateway management UI (menu, routes, device gateway options). */
+export const GATEWAY_UI_ENABLED = false;
+
+/** Set to true to show edge management UI (menu, routes, customer edge actions). */
+export const EDGE_UI_ENABLED = false;
+
 export interface DeviceConfigurationFormInfo {
   hasProfileConfiguration: boolean;
   hasDeviceConfiguration: boolean;
@@ -907,6 +916,10 @@ export interface DeviceProvisionConfiguration {
   certificateValue?: string;
   certificateRegExPattern?: string;
   allowCreateNewDevicesByX509Certificate?: boolean;
+}
+
+export function createDisabledDeviceProvisionConfiguration(): DeviceProvisionConfiguration {
+  return { type: DeviceProvisionType.DISABLED };
 }
 
 export const createDeviceProfileConfiguration = (type: DeviceProfileType): DeviceProfileConfiguration => {

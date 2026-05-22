@@ -27,6 +27,8 @@ import {
   DeviceProfile,
   DeviceProfileType,
   deviceProfileTypeTranslationMap,
+  createDisabledDeviceProvisionConfiguration,
+  DEVICE_PROVISIONING_UI_ENABLED,
   DeviceProvisionConfiguration,
   DeviceProvisionType,
   DeviceTransportType,
@@ -92,6 +94,8 @@ export class AddDeviceProfileDialogComponent extends
   serviceType = ServiceType.TB_RULE_ENGINE;
 
   edgeRuleChainType = RuleChainType.EDGE;
+
+  readonly deviceProvisioningUiEnabled = DEVICE_PROVISIONING_UI_ENABLED;
 
   constructor(protected store: Store<AppState>,
               protected router: Router,
@@ -162,7 +166,7 @@ export class AddDeviceProfileDialogComponent extends
   }
 
   nextStep() {
-    if (this.selectedIndex < 3) {
+    if (this.selectedIndex < this.maxStepperIndex) {
       this.addDeviceProfileStepper.next();
     } else {
       this.add();
@@ -184,7 +188,9 @@ export class AddDeviceProfileDialogComponent extends
 
   add(): void {
     if (this.allValid()) {
-      const deviceProvisionConfiguration: DeviceProvisionConfiguration = this.provisionConfigFormGroup.get('provisionConfiguration').value;
+      const deviceProvisionConfiguration: DeviceProvisionConfiguration = this.deviceProvisioningUiEnabled
+        ? this.provisionConfigFormGroup.get('provisionConfiguration').value
+        : createDisabledDeviceProvisionConfiguration();
       const provisionDeviceKey = deviceProvisionConfiguration.provisionDeviceKey;
       delete deviceProvisionConfiguration.provisionDeviceKey;
       const deviceProfile: DeviceProfile = {
@@ -230,6 +236,8 @@ export class AddDeviceProfileDialogComponent extends
         return 'device-profile.alarm-rules';
       case 3:
         return 'device-profile.device-provisioning';
+      default:
+        return 'device-profile.alarm-rules';
     }
   }
 

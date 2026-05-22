@@ -28,6 +28,8 @@ import { AppState } from '@app/core/core.state';
 import { LocalStorageService } from '@app/core/local-storage/local-storage.service';
 import { TitleService } from '@app/core/services/title.service';
 import { updateUserLang } from '@app/core/settings/settings.utils';
+import { GatewayLocaleMergeService } from '@core/translate/gateway-locale-merge.service';
+import { GATEWAY_UI_ENABLED } from '@shared/models/device.models';
 import { UtilsService } from '@core/services/utils.service';
 import { getCurrentAuthUser } from '@core/auth/auth.selectors';
 import { ActionAuthUpdateLastPublicDashboardId } from '../auth/auth.actions';
@@ -45,6 +47,7 @@ export class SettingsEffects {
     private localStorageService: LocalStorageService,
     private titleService: TitleService,
     private translate: TranslateService,
+    private gatewayLocaleMerge: GatewayLocaleMergeService,
     @Inject(DOCUMENT) private document: Document,
   ) {
   }
@@ -58,7 +61,11 @@ export class SettingsEffects {
     distinctUntilChanged((a, b) => a?.userLang === b?.userLang),
     tap(setting => {
       this.localStorageService.setItem(SETTINGS_KEY, setting);
-      updateUserLang(this.translate, this.document, setting.userLang);
+      updateUserLang(this.translate, this.document, setting.userLang).subscribe(() => {
+        if (GATEWAY_UI_ENABLED) {
+          this.gatewayLocaleMerge.applyWithRetry(setting.userLang);
+        }
+      });
     })
   ), {dispatch: false});
 

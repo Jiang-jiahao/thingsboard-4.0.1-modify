@@ -73,7 +73,7 @@
             [deviceScope]="deviceWizardDeviceScope"
             required>
           </tb-device-data>
-          <div class="toggle-group">
+          <div *ngIf="gatewayUiEnabled" class="toggle-group">
             <mat-slide-toggle formControlName="gateway" style="min-width: 165px">
               {{ 'device.is-gateway' | translate }}
             </mat-slide-toggle>
