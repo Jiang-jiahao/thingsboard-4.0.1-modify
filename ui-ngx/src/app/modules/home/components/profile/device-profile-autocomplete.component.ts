@@ -389,7 +389,9 @@ export class DeviceProfileAutocompleteComponent implements ControlValueAccessor,
       deviceProfileObservable = this.dialog.open<AddDeviceProfileDialogComponent, AddDeviceProfileDialogData,
         DeviceProfile>(AddDeviceProfileDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['tb-dialog', 'tb-fullscreen-dialog', 'tb-add-device-profile-dialog'],
+        width: '900px',
+        maxWidth: '95vw',
         data: {
           deviceProfileName: deviceProfile.name,
           transportType: deviceProfile.transportType

@@ -91,6 +91,7 @@ import { DebugEventType, DebugRuleNodeEventBody, EventType } from '@shared/model
 import { MatMiniFabButton } from '@angular/material/button';
 import { TbPopoverService } from '@shared/components/popover.service';
 import { VersionControlComponent } from '@home/components/vc/version-control.component';
+import { VERSION_CONTROL_UI_ENABLED } from '@shared/models/device.models';
 import { ComponentClusteringMode } from '@shared/models/component-descriptor.models';
 import { MatDrawer } from '@angular/material/sidenav';
 import { HttpStatusCode } from '@angular/common/http';
@@ -130,6 +131,8 @@ export class RuleChainPageComponent extends PageComponent
   eventTypes = EventType;
 
   debugEventTypes = DebugEventType;
+
+  readonly versionControlUiEnabled = VERSION_CONTROL_UI_ENABLED;
 
   ruleChainMenuPosition = { x: '0px', y: '0px' };
 

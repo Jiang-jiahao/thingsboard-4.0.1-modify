@@ -83,20 +83,22 @@
         [ruleChainType]="edgeRuleChainType">
         <span tb-hint>{{'device-profile.default-edge-rule-chain-hint' | translate}}</span>
       </tb-rule-chain-autocomplete>
-      <tb-ota-package-autocomplete
-        [useFullEntityId]="true"
-        [showDetailsPageLink]="true"
-        [type]="otaUpdateType.FIRMWARE"
-        [deviceProfileId]="deviceProfileId?.id"
-        formControlName="firmwareId">
-      </tb-ota-package-autocomplete>
-      <tb-ota-package-autocomplete
-        [useFullEntityId]="true"
-        [showDetailsPageLink]="true"
-        [type]="otaUpdateType.SOFTWARE"
-        [deviceProfileId]="deviceProfileId?.id"
-        formControlName="softwareId">
-      </tb-ota-package-autocomplete>
+      <ng-container *ngIf="otaUiEnabled">
+        <tb-ota-package-autocomplete
+          [useFullEntityId]="true"
+          [showDetailsPageLink]="true"
+          [type]="otaUpdateType.FIRMWARE"
+          [deviceProfileId]="deviceProfileId?.id"
+          formControlName="firmwareId">
+        </tb-ota-package-autocomplete>
+        <tb-ota-package-autocomplete
+          [useFullEntityId]="true"
+          [showDetailsPageLink]="true"
+          [type]="otaUpdateType.SOFTWARE"
+          [deviceProfileId]="deviceProfileId?.id"
+          formControlName="softwareId">
+        </tb-ota-package-autocomplete>
+      </ng-container>
       <mat-form-field class="mat-block !hidden">
         <mat-label translate>device-profile.type</mat-label>
         <mat-select formControlName="type" required>

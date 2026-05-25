@@ -35,8 +35,7 @@
             "tsConfig": "src/tsconfig.app.json",
             "aot": true,
             "assets": [
-              "src/jnks-favicon.ico",
-              "src/thingsboard.ico",
+              "src/favicon.ico",
               "src/assets",
               {
                 "glob": "*.svg",

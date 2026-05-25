@@ -86,6 +86,12 @@ export const GATEWAY_UI_ENABLED = false;
 /** Set to true to show edge management UI (menu, routes, customer edge actions). */
 export const EDGE_UI_ENABLED = false;
 
+/** Set to true to show OTA updates UI (advanced features menu, device/profile firmware & software). */
+export const OTA_UI_ENABLED = false;
+
+/** Set to true to show version control UI (advanced features menu, entity tabs, settings, editors). */
+export const VERSION_CONTROL_UI_ENABLED = false;
+
 export interface DeviceConfigurationFormInfo {
   hasProfileConfiguration: boolean;
   hasDeviceConfiguration: boolean;

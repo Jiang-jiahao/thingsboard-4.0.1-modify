@@ -16,7 +16,7 @@
 
 import { AuthState } from '@core/auth/auth.models';
 import { Authority } from '@shared/models/authority.enum';
-import { EDGE_UI_ENABLED, GATEWAY_UI_ENABLED } from '@shared/models/device.models';
+import { EDGE_UI_ENABLED, GATEWAY_UI_ENABLED, OTA_UI_ENABLED, VERSION_CONTROL_UI_ENABLED } from '@shared/models/device.models';
 import { deepClone } from '@core/utils';
 
 export declare type MenuSectionType = 'link' | 'toggle';
@@ -714,6 +714,21 @@ const menuFilters = new Map<MenuId, MenuFilter>([
   ],
   [
     MenuId.edge_instances, (authState) => EDGE_UI_ENABLED && authState.edgesSupportEnabled
+  ],
+  [
+    MenuId.features, () => OTA_UI_ENABLED || VERSION_CONTROL_UI_ENABLED
+  ],
+  [
+    MenuId.otaUpdates, () => OTA_UI_ENABLED
+  ],
+  [
+    MenuId.version_control, () => VERSION_CONTROL_UI_ENABLED
+  ],
+  [
+    MenuId.repository_settings, () => VERSION_CONTROL_UI_ENABLED
+  ],
+  [
+    MenuId.auto_commit_settings, () => VERSION_CONTROL_UI_ENABLED
   ]
 ]);
 

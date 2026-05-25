@@ -31,22 +31,27 @@ $mat-md-lg: "screen and (min-width: 960px) and (max-width: 1819px)";
 
 $primary-hue-3: rgb(207, 216, 220) !default;
 
-// JnksIOT brand — deep navy shell + teal accent
-$tb-primary-color: #0c4a6e;
-$tb-secondary-color: #0d9488;
-$tb-accent-color: #14b8a6;
-$tb-hue3-color: #5eead4;
+// JnksIOT — premium navy / steel blue (no bright teal)
+$tb-primary-color: #0c2340;
+$tb-secondary-color: #1e4976;
+$tb-accent-color: #3b6ea8;
+$tb-hue3-color: #94b8e0;
 
-$tb-dark-primary-color: #2dd4bf;
+$tb-dark-primary-color: #5b9bd5;
 
 $tb-sidebar-bg: #060f18;
 $tb-sidebar-header-bg: #0a1624;
 $tb-sidebar-text: rgba(255, 255, 255, 0.88);
 $tb-sidebar-text-muted: rgba(255, 255, 255, 0.55);
-$tb-sidebar-active-bg: rgba(20, 184, 166, 0.16);
-$tb-sidebar-border: rgba(94, 234, 212, 0.14);
+$tb-sidebar-active-bg: rgba(59, 111, 168, 0.2);
+$tb-sidebar-border: rgba(148, 163, 184, 0.14);
 
 $tb-topbar-bg: #ffffff;
 $tb-topbar-text: #0f172a;
 $tb-topbar-muted: #64748b;
-$tb-surface-page: #eef4f8;
+$tb-surface-page: #eef2f7;
+
+// Entity details / dialogs
+$tb-details-header-start: #0a1624;
+$tb-details-header-mid: #0c2340;
+$tb-details-header-end: #1a3d66;

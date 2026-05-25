@@ -20,8 +20,14 @@ import { NgModule } from '@angular/core';
 import { otaUpdatesRoutes } from '@home/pages/ota-update/ota-update-routing.module';
 import { vcRoutes } from '@home/pages/vc/vc-routing.module';
 import { MenuId } from '@core/services/menu.models';
+import { OTA_UI_ENABLED, VERSION_CONTROL_UI_ENABLED } from '@shared/models/device.models';
 
-const routes: Routes = [
+const featureChildren: Routes = [
+  ...(OTA_UI_ENABLED ? otaUpdatesRoutes : []),
+  ...(VERSION_CONTROL_UI_ENABLED ? vcRoutes : [])
+];
+
+const routes: Routes = (OTA_UI_ENABLED || VERSION_CONTROL_UI_ENABLED) ? [
   {
     path: 'features',
     data: {
@@ -36,14 +42,13 @@ const routes: Routes = [
         children: [],
         data: {
           auth: [Authority.TENANT_ADMIN],
-          redirectTo: '/features/otaUpdates'
+          redirectTo: OTA_UI_ENABLED ? '/features/otaUpdates' : '/features/vc'
         }
       },
-      ...otaUpdatesRoutes,
-      ...vcRoutes
+      ...featureChildren
     ]
   }
-];
+] : [];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

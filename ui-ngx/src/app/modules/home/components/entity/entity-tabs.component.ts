@@ -32,6 +32,7 @@ import { AttributeScope, LatestTelemetry } from '@shared/models/telemetry/teleme
 import { NULL_UUID } from '@shared/models/id/has-uuid';
 import { UntypedFormGroup } from '@angular/forms';
 import { PageLink } from '@shared/models/page/page-link';
+import { VERSION_CONTROL_UI_ENABLED } from '@shared/models/device.models';
 
 @Directive()
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
@@ -57,6 +58,8 @@ export abstract class EntityTabsComponent<T extends BaseData<HasId>,
   authUser: AuthUser;
 
   nullUid = NULL_UUID;
+
+  readonly versionControlUiEnabled = VERSION_CONTROL_UI_ENABLED;
 
   entityValue: T;
 

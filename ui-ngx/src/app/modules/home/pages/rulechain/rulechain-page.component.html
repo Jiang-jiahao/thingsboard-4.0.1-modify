@@ -168,7 +168,7 @@
             <mat-icon class="tb-library-node-btn-icon" [class.tb-library-node-btn-icon-toggled]="drawer.opened">chevron_right</mat-icon>
           </button>
           <button #versionControlButton
-                  *ngIf="!isImport"
+                  *ngIf="!isImport && versionControlUiEnabled"
                   color="primary"
                   type="button"
                   mat-mini-fab class="version-control-button"

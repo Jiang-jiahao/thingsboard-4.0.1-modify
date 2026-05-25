@@ -31,8 +31,13 @@
 
   .mat-toolbar.details-toolbar {
     padding: 0;
-    background: linear-gradient(135deg, $tb-primary-color 0%, $tb-secondary-color 100%) !important;
-    box-shadow: none;
+    background: linear-gradient(
+      125deg,
+      $tb-details-header-start 0%,
+      $tb-details-header-mid 48%,
+      $tb-details-header-end 100%
+    ) !important;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
   }
 
   .mat-content {

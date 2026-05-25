@@ -20,6 +20,7 @@ import { ConfirmOnExitGuard } from '@core/guards/confirm-on-exit.guard';
 import { Authority } from '@shared/models/authority.enum';
 import { VersionControlComponent } from '@home/components/vc/version-control.component';
 import { MenuId } from '@core/services/menu.models';
+import { VERSION_CONTROL_UI_ENABLED } from '@shared/models/device.models';
 
 export const vcRoutes: Routes = [
   {
@@ -36,12 +37,12 @@ export const vcRoutes: Routes = [
   }
 ];
 
-const routes: Routes = [
+const routes: Routes = VERSION_CONTROL_UI_ENABLED ? [
   {
     path: 'vc',
     redirectTo: '/features/vc'
   }
-];
+] : [];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

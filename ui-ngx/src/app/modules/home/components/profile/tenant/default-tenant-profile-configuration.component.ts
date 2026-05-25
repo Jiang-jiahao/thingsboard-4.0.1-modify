@@ -20,6 +20,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@app/core/core.state';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { DefaultTenantProfileConfiguration, TenantProfileConfiguration } from '@shared/models/tenant.model';
+import { OTA_UI_ENABLED } from '@shared/models/device.models';
 import { isDefinedAndNotNull } from '@core/utils';
 import { RateLimitsType } from './rate-limits/rate-limits.models';
 import { takeUntil } from 'rxjs/operators';
@@ -53,6 +54,8 @@ export class DefaultTenantProfileConfigurationComponent implements ControlValueA
   disabled: boolean;
 
   rateLimitsType = RateLimitsType;
+
+  readonly otaUiEnabled = OTA_UI_ENABLED;
 
   private propagateChange = (v: any) => { };
 
@@ -139,6 +142,13 @@ export class DefaultTenantProfileConfigurationComponent implements ControlValueA
     ).subscribe(() => {
       this.updateModel();
     });
+
+    if (!this.otaUiEnabled) {
+      const maxOtaControl = this.defaultTenantProfileConfigurationFormGroup.get('maxOtaPackagesInBytes');
+      maxOtaControl.clearValidators();
+      maxOtaControl.setValue(0, {emitEvent: false});
+      maxOtaControl.updateValueAndValidity({emitEvent: false});
+    }
   }
 
   private maxSmsValidation(smsEnabled: boolean) {

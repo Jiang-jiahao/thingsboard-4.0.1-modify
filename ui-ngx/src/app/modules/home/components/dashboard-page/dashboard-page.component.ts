@@ -146,6 +146,7 @@ import { DOCUMENT } from '@angular/common';
 import { IAliasController } from '@core/api/widget-api.models';
 import { MatButton } from '@angular/material/button';
 import { VersionControlComponent } from '@home/components/vc/version-control.component';
+import { VERSION_CONTROL_UI_ENABLED } from '@shared/models/device.models';
 import { TbPopoverService } from '@shared/components/popover.service';
 import { catchError, distinctUntilChanged, map, skip, tap } from 'rxjs/operators';
 import { LayoutFixedSize, LayoutWidthType } from '@home/components/dashboard-page/layout/layout.models';
@@ -184,6 +185,8 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
   authState: AuthState = getCurrentAuthState(this.store);
 
   authUser: AuthUser = this.authState.authUser;
+
+  readonly versionControlUiEnabled = VERSION_CONTROL_UI_ENABLED;
 
   @HostBinding('class')
   dashboardPageClass: string;

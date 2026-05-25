@@ -1,3 +1,5 @@
+@import '../../../../../scss/constants';
+
 /**
  * Copyright © 2016-2025 The Thingsboard Authors
  *
@@ -45,6 +47,16 @@
             font-weight: 500;
             letter-spacing: 0.01em;
           }
+
+          .mat-mdc-tab.mat-mdc-tab-active {
+            color: $tb-primary-color;
+          }
+
+          .mdc-tab-indicator__content--underline {
+            background: linear-gradient(90deg, $tb-secondary-color 0%, $tb-accent-color 100%);
+            height: 3px;
+            border-radius: 3px 3px 0 0;
+          }
         }
 
         > .mat-mdc-tab-body-wrapper {
@@ -73,7 +85,19 @@
     background: #fff;
     border-bottom: 1px solid rgba(15, 23, 42, 0.06);
 
-    .mat-mdc-raised-button {
+    .mat-mdc-raised-button.mat-primary {
+      border-radius: 8px !important;
+      background: $tb-primary-color !important;
+      box-shadow: 0 1px 4px rgba(12, 35, 64, 0.18) !important;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+
+      &:not(:disabled):hover {
+        background: $tb-secondary-color !important;
+      }
+    }
+
+    .mat-mdc-raised-button:not(.mat-primary) {
       border-radius: 8px !important;
       box-shadow: none !important;
       font-weight: 500;

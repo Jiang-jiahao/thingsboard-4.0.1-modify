@@ -55,17 +55,17 @@ $tb-mat-indigo: (
 );
 
 $tb-primary: mat.m2-define-palette($tb-mat-indigo);
-$tb-mat-teal: (
-  50: #f0fdfa,
-  100: #ccfbf1,
-  200: #99f6e4,
-  300: #5eead4,
-  400: #2dd4bf,
+$tb-mat-steel: (
+  50: #f0f4f8,
+  100: #dbe4ef,
+  200: #b8c9de,
+  300: #94b8e0,
+  400: #5b8fc4,
   500: $tb-secondary-color,
   600: $tb-accent-color,
-  700: #0f766e,
-  800: #115e59,
-  900: #134e4a,
+  700: #1a3d66,
+  800: #0c2340,
+  900: #060f18,
   contrast: (
     50: rgba(black, 0.87),
     100: rgba(black, 0.87),
@@ -80,7 +80,7 @@ $tb-mat-teal: (
   )
 );
 
-$tb-accent: mat.m2-define-palette($tb-mat-teal);
+$tb-accent: mat.m2-define-palette($tb-mat-steel);
 
 $background: (background: $tb-surface-page);
 

@@ -27,12 +27,12 @@ import { CustomerService } from '@core/http/customer.service';
 import { UserService } from './user.service';
 import { DashboardService } from '@core/http/dashboard.service';
 import { Direction } from '@shared/models/page/sort-order';
-import { PageData } from '@shared/models/page/page-data';
+import { emptyPageData, PageData } from '@shared/models/page/page-data';
 import { getCurrentAuthState, getCurrentAuthUser } from '@core/auth/auth.selectors';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { Authority } from '@shared/models/authority.enum';
-import { EDGE_UI_ENABLED } from '@shared/models/device.models';
+import { EDGE_UI_ENABLED, OTA_UI_ENABLED } from '@shared/models/device.models';
 import { Tenant } from '@shared/models/tenant.model';
 import { catchError, concatMap, expand, map, mergeMap, toArray } from 'rxjs/operators';
 import { Customer } from '@app/shared/models/customer.model';
@@ -170,7 +170,7 @@ export class EntityService {
         observable = this.alarmService.getAlarm(entityId, config);
         break;
       case EntityType.OTA_PACKAGE:
-        observable = this.otaPackageService.getOtaPackageInfo(entityId, config);
+        observable = OTA_UI_ENABLED ? this.otaPackageService.getOtaPackageInfo(entityId, config) : of(null);
         break;
       case EntityType.QUEUE:
         observable = this.queueService.getQueueById(entityId, config);
@@ -432,7 +432,7 @@ export class EntityService {
         break;
       case EntityType.OTA_PACKAGE:
         pageLink.sortOrder.property = 'title';
-        entitiesObservable = this.otaPackageService.getOtaPackages(pageLink, config);
+        entitiesObservable = OTA_UI_ENABLED ? this.otaPackageService.getOtaPackages(pageLink, config) : of(emptyPageData());
         break;
       case EntityType.DEVICE_PROFILE:
         pageLink.sortOrder.property = 'name';

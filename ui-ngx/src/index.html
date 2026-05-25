@@ -23,7 +23,8 @@
   <base href="/">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="jnks-favicon.ico">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="preload" href="assets/jnks-brand-emblem.png" as="image" type="image/png"/>
   <link rel="icon" type="image/png" sizes="32x32" href="assets/jnks-favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/jnks-favicon-16.png">
   <link rel="apple-touch-icon" sizes="48x48" href="assets/jnks-favicon-48.png">
@@ -38,77 +39,144 @@
     body, html {
       height: 100%;
       overflow: hidden;
-      background-color: #eee;
+      margin: 0;
+      background: linear-gradient(165deg, #eef2f7 0%, #e8eef6 45%, #f4f7fb 100%);
+      font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
     }
 
     .tb-loading-spinner {
-      margin: auto;
-      z-index: 1;
+      z-index: 9999;
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+
+    .tb-app-loader-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      padding: 36px 40px 32px;
+      border-radius: 16px;
+      background: #fff;
+      border: 1px solid rgba(12, 35, 64, 0.08);
+      box-shadow:
+        0 4px 24px rgba(12, 35, 64, 0.08),
+        0 1px 3px rgba(15, 23, 42, 0.06);
+      min-width: 220px;
+      animation: tb-loader-fade-in 0.35s ease-out both;
+    }
+
+    .tb-app-loader-emblem-wrap {
+      position: relative;
+      width: 72px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tb-app-loader-ring {
       position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      width: 136px;
-      height: 30px;
-      text-align: center;
+      inset: 0;
+      border-radius: 50%;
+      border: 3px solid rgba(30, 73, 118, 0.12);
+      border-top-color: #1e4976;
+      border-right-color: #3b6ea8;
+      animation: tb-loader-spin 0.9s linear infinite;
     }
 
-    .tb-loading-spinner > div {
-      width: 30px;
-      height: 30px;
-      margin-right: 10px;
-      background-color: rgb(43,160,199);
-
-      border-radius: 100%;
-      display: inline-block;
-      -webkit-animation: tb-bouncedelay 1.4s infinite ease-in-out both;
-      -moz-animation: tb-bouncedelay 1.4s infinite ease-in-out both;
-      animation: tb-bouncedelay 1.4s infinite ease-in-out both;
+    .tb-app-loader-emblem {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      overflow: hidden;
+      background: #060f18;
+      border: 2px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 2px 12px rgba(12, 35, 64, 0.2);
+      animation: tb-loader-emblem-pulse 2s ease-in-out infinite;
     }
 
-    .tb-loading-spinner .tb-bounce1 {
-      -webkit-animation-delay: -0.32s;
-      -moz-animation-delay: -0.32s;
-      animation-delay: -0.32s;
+    .tb-app-loader-emblem img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: left center;
     }
 
-    .tb-loading-spinner .tb-bounce2 {
-      -webkit-animation-delay: -0.16s;
-      -moz-animation-delay: -0.16s;
-      animation-delay: -0.16s;
+    .tb-app-loader-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #0c2340;
     }
 
-    @-webkit-keyframes tb-bouncedelay {
-      0%, 80%, 100% { -webkit-transform: scale(0) }
-      40% { -webkit-transform: scale(1.0) }
+    .tb-app-loader-subtitle {
+      margin: -14px 0 0;
+      font-size: 12px;
+      font-weight: 500;
+      color: #64748b;
     }
 
-    @-moz-keyframes tb-bouncedelay {
-      0%, 80%, 100% { -moz-transform: scale(0) }
-      40% { -moz-transform: scale(1.0) }
+    .tb-app-loader-track {
+      width: 168px;
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(30, 73, 118, 0.12);
+      overflow: hidden;
     }
 
-    @keyframes tb-bouncedelay {
-      0%, 80%, 100% {
-        -webkit-transform: scale(0);
-        -moz-transform: scale(0);
-        transform: scale(0);
-      } 40% {
-          -webkit-transform: scale(1.0);
-          -moz-transform: scale(1.0);
-          transform: scale(1.0);
-        }
+    .tb-app-loader-bar {
+      width: 42%;
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #0c2340, #1e4976 55%, #3b6ea8);
+      animation: tb-loader-slide 1.2s ease-in-out infinite;
+    }
+
+    @keyframes tb-loader-fade-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes tb-loader-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes tb-loader-emblem-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    @keyframes tb-loader-slide {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(320%); }
     }
 
   </style>
 </head>
 <body class="tb-default">
   <tb-root></tb-root>
-  <div id="tb-loading-spinner" class="tb-loading-spinner">
-    <div class="tb-bounce1"></div>
-    <div class="tb-bounce2"></div>
-    <div class="tb-bounce3"></div>
+  <div id="tb-loading-spinner" class="tb-loading-spinner" role="status" aria-live="polite" aria-label="正在加载">
+    <div class="tb-app-loader-card">
+      <div class="tb-app-loader-emblem-wrap">
+        <div class="tb-app-loader-ring" aria-hidden="true"></div>
+        <div class="tb-app-loader-emblem">
+          <img src="assets/jnks-brand-emblem.png" alt="" width="56" height="56"/>
+        </div>
+      </div>
+      <p class="tb-app-loader-title">JnksIOT</p>
+      <p class="tb-app-loader-subtitle">杰能科世物联网平台</p>
+      <div class="tb-app-loader-track" aria-hidden="true">
+        <div class="tb-app-loader-bar"></div>
+      </div>
+    </div>
   </div>
 </body>
 </html>

@@ -36,6 +36,7 @@ import { getEntityDetailsPageURL, isDefinedAndNotNull } from '@core/utils';
 import { AuthUser } from '@shared/models/user.model';
 import { getCurrentAuthUser } from '@core/auth/auth.selectors';
 import { Authority } from '@shared/models/authority.enum';
+import { OTA_UI_ENABLED } from '@shared/models/device.models';
 
 @Component({
   selector: 'tb-ota-package-autocomplete',
@@ -48,6 +49,8 @@ import { Authority } from '@shared/models/authority.enum';
   }]
 })
 export class OtaPackageAutocompleteComponent implements ControlValueAccessor, OnInit, OnDestroy {
+
+  readonly otaUiEnabled = OTA_UI_ENABLED;
 
   otaPackageFormGroup: UntypedFormGroup;
 

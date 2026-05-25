@@ -24,6 +24,7 @@ import { ConfirmOnExitGuard } from '@core/guards/confirm-on-exit.guard';
 import { entityDetailsPageBreadcrumbLabelFunction } from '@home/pages/home-pages.models';
 import { BreadCrumbConfig } from '@shared/components/breadcrumb';
 import { MenuId } from '@core/services/menu.models';
+import { OTA_UI_ENABLED } from '@shared/models/device.models';
 
 export const otaUpdatesRoutes: Routes = [
   {
@@ -65,7 +66,7 @@ export const otaUpdatesRoutes: Routes = [
   }
 ];
 
-const routes: Routes = [
+const routes: Routes = OTA_UI_ENABLED ? [
   {
     path: 'otaUpdates',
     pathMatch: 'full',
@@ -75,7 +76,7 @@ const routes: Routes = [
     path: 'otaUpdates/:entityId',
     redirectTo: '/features/otaUpdates/:entityId'
   }
-];
+] : [];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],

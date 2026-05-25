@@ -21,6 +21,7 @@ import { DataKey, Datasource, DatasourceData, FormattedData, ReplaceInfo } from 
 import { EntityId } from '@shared/models/id/entity-id';
 import { NULL_UUID } from '@shared/models/id/has-uuid';
 import { baseDetailsPageByEntityType, EntityType } from '@shared/models/entity-type.models';
+import { OTA_UI_ENABLED } from '@shared/models/device.models';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
 import { serverErrorCodesTranslations } from '@shared/models/constants';
@@ -805,6 +806,9 @@ export function randomAlphanumeric(length: number): string {
 }
 
 export function getEntityDetailsPageURL(id: string, entityType: EntityType): string {
+  if (!OTA_UI_ENABLED && entityType === EntityType.OTA_PACKAGE) {
+    return '';
+  }
   return baseDetailsPageByEntityType.has(entityType) ? `${baseDetailsPageByEntityType.get(entityType)}/${id}` : '';
 }
 

@@ -15,7 +15,7 @@
     limitations under the License.
 
 -->
-<mat-tab *ngIf="isTenantWidgetType() && authUser.authority === authorities.TENANT_ADMIN"
+<mat-tab *ngIf="isTenantWidgetType() && authUser.authority === authorities.TENANT_ADMIN && versionControlUiEnabled"
          label="{{ 'version-control.version-control' | translate }}" #versionControlTab="matTab">
   <tb-version-control detailsMode="true" singleEntityMode="true"
                       (versionRestored)="entitiesTableConfig.updateData()"

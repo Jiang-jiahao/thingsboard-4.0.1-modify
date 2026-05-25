@@ -44,6 +44,7 @@ import { ScadaSymbolComponent } from '@home/pages/scada-symbol/scada-symbol.comp
 import { ImageService } from '@core/http/image.service';
 import { ScadaSymbolData } from '@home/pages/scada-symbol/scada-symbol-editor.models';
 import { MenuId } from '@core/services/menu.models';
+import { VERSION_CONTROL_UI_ENABLED } from '@shared/models/device.models';
 import { catchError } from 'rxjs/operators';
 import { JsLibraryTableConfigResolver } from '@home/pages/admin/resource/js-library-table-config.resolver';
 
@@ -325,30 +326,32 @@ const routes: Routes = [
           }
         }
       },
-      {
-        path: 'repository',
-        component: RepositoryAdminSettingsComponent,
-        canDeactivate: [ConfirmOnExitGuard],
-        data: {
-          auth: [Authority.TENANT_ADMIN],
-          title: 'admin.repository-settings',
-          breadcrumb: {
-            menuId: MenuId.repository_settings
+      ...(VERSION_CONTROL_UI_ENABLED ? [
+        {
+          path: 'repository',
+          component: RepositoryAdminSettingsComponent,
+          canDeactivate: [ConfirmOnExitGuard],
+          data: {
+            auth: [Authority.TENANT_ADMIN],
+            title: 'admin.repository-settings',
+            breadcrumb: {
+              menuId: MenuId.repository_settings
+            }
+          }
+        },
+        {
+          path: 'auto-commit',
+          component: AutoCommitAdminSettingsComponent,
+          canDeactivate: [ConfirmOnExitGuard],
+          data: {
+            auth: [Authority.TENANT_ADMIN],
+            title: 'admin.auto-commit-settings',
+            breadcrumb: {
+              menuId: MenuId.auto_commit_settings
+            }
           }
         }
-      },
-      {
-        path: 'auto-commit',
-        component: AutoCommitAdminSettingsComponent,
-        canDeactivate: [ConfirmOnExitGuard],
-        data: {
-          auth: [Authority.TENANT_ADMIN],
-          title: 'admin.auto-commit-settings',
-          breadcrumb: {
-            menuId: MenuId.auto_commit_settings
-          }
-        }
-      },
+      ] as Routes : []),
       {
         path: 'security-settings',
         redirectTo: '/security-settings/general'

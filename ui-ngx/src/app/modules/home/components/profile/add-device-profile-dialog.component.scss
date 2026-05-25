@@ -18,6 +18,15 @@
 :host {
   height: 100%;
   display: grid;
+  width: 100%;
+
+  @media #{$mat-gt-xs} {
+    min-width: 760px;
+  }
+
+  @media #{$mat-gt-md} {
+    min-width: 880px;
+  }
 
   .dialog-actions-row {
     padding: 8px;
@@ -49,12 +58,27 @@
       .mat-horizontal-content-container {
         height: 680px;
         max-height: 100%;
-        width: 100%;;
+        width: 100%;
         overflow-y: auto;
         scrollbar-gutter: stable;
+        box-sizing: border-box;
+        padding: 8px 28px 20px;
+
         @media #{$mat-gt-sm} {
-          min-width: 500px;
+          min-width: 720px;
         }
+
+        @media #{$mat-gt-md} {
+          min-width: 820px;
+        }
+
+        fieldset {
+          max-width: 100%;
+        }
+      }
+
+      .mat-horizontal-stepper-header-container {
+        padding: 0 12px;
       }
     }
   }
