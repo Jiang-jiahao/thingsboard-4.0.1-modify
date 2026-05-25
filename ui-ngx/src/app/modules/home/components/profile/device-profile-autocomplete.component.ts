@@ -43,7 +43,7 @@ import { DeviceProfileId } from '@shared/models/id/device-profile-id';
 import { DeviceProfile, DeviceProfileInfo, DeviceProfileType, DeviceTransportType } from '@shared/models/device.models';
 import { DeviceProfileService } from '@core/http/device-profile.service';
 import { DeviceProfileDialogComponent, DeviceProfileDialogData } from './device-profile-dialog.component';
-import { MatAutocomplete } from '@angular/material/autocomplete';
+import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { AddDeviceProfileDialogComponent, AddDeviceProfileDialogData } from './add-device-profile-dialog.component';
 import { emptyPageData } from '@shared/models/page/page-data';
 import { getEntityDetailsPageURL } from '@core/utils';
@@ -113,6 +113,9 @@ export class DeviceProfileAutocompleteComponent implements ControlValueAccessor,
   deviceProfileChanged = new EventEmitter<DeviceProfileInfo>();
 
   @ViewChild('deviceProfileInput', {static: true}) deviceProfileInput: ElementRef;
+
+  @ViewChild('deviceProfileInput', {read: MatAutocompleteTrigger, static: true})
+  deviceProfileAutocompleteTrigger: MatAutocompleteTrigger;
 
   @ViewChild('deviceProfileAutocomplete', {static: true}) deviceProfileAutocomplete: MatAutocomplete;
 
@@ -247,6 +250,8 @@ export class DeviceProfileAutocompleteComponent implements ControlValueAccessor,
     this.disabled = isDisabled;
     if (this.disabled) {
       this.selectDeviceProfileFormGroup.disable({emitEvent: false});
+      this.deviceProfileAutocompleteTrigger?.closePanel();
+      this.deviceProfileInput?.nativeElement?.blur();
     } else {
       this.selectDeviceProfileFormGroup.enable({emitEvent: false});
     }

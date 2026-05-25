@@ -109,8 +109,21 @@ export abstract class EntityComponent<T extends BaseData<HasId>,
         this.entityForm.enable({emitEvent: false});
       } else {
         this.entityForm.disable({emitEvent: false});
+        this.dismissOpenAutocompletePanels();
       }
     }
+  }
+
+  private dismissOpenAutocompletePanels(): void {
+    const active = document.activeElement as HTMLElement | null;
+    if (active?.blur) {
+      active.blur();
+    }
+    setTimeout(() => {
+      document.querySelectorAll('input[aria-expanded="true"], textarea[aria-expanded="true"]').forEach((el) => {
+        (el as HTMLElement).blur();
+      });
+    }, 0);
   }
 
   entityFormValue() {

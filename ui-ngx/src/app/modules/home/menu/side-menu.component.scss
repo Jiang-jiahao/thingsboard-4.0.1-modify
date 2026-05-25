@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@import '../../../../scss/constants';
+
 :host {
   width: 100%;
 }
@@ -21,33 +23,36 @@
 
   .tb-side-menu,
   .tb-side-menu ul {
-    padding: 0 12px;
-    margin-top: 4px;
+    padding: 0 14px;
+    margin-top: 6px;
     list-style: none;
   }
 
   .tb-side-menu > li {
     border-bottom: none;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
 
   a.mat-mdc-button.mat-mdc-button-base {
     display: inline-flex;
     width: 100%;
-    height: 42px;
+    height: 44px;
     align-items: center;
     overflow: hidden;
-    line-height: 42px;
-    border-radius: 10px;
+    line-height: 44px;
+    border-radius: 11px;
     padding: 0 14px;
     margin: 1px 0;
+    font-size: 14px;
     font-weight: 400;
-    letter-spacing: 0.01em;
-    transition: background-color 0.2s ease, transform 0.15s ease;
+    letter-spacing: 0.02em;
+    color: $tb-sidebar-text-muted !important;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 
     &:hover {
       border-bottom: none;
-      background-color: rgba(255, 255, 255, 0.1);
+      color: $tb-sidebar-text !important;
+      background-color: rgba(255, 255, 255, 0.06);
     }
 
     &:focus {
@@ -55,17 +60,19 @@
     }
 
     &.tb-active {
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.1) 100%);
-      box-shadow: inset 3px 0 0 #fff, 0 2px 8px rgba(0, 0, 0, 0.08);
+      color: #fff !important;
+      background: $tb-sidebar-active-bg;
+      box-shadow: inset 3px 0 0 $tb-accent-color, 0 4px 16px rgba(0, 0, 0, 0.2);
       font-weight: 500;
     }
 
     .mat-icon {
-      margin-right: 10px;
+      margin-right: 12px;
       margin-left: 0;
       min-width: 1.25rem;
       min-height: 1.25rem;
-      opacity: 0.92;
+      opacity: 0.85;
+      color: inherit;
     }
 
     span.mdc-button__label {
@@ -87,12 +94,15 @@
     }
   }
 
-  // Nested menu items
   .tb-side-menu ul a.mat-mdc-button.mat-mdc-button-base {
-    height: 38px;
-    line-height: 38px;
-    padding-left: 20px;
+    height: 40px;
+    line-height: 40px;
+    padding-left: 22px;
     font-size: 13px;
-    opacity: 0.95;
+    border-radius: 9px;
+
+    &.tb-active {
+      box-shadow: inset 3px 0 0 rgba($tb-accent-color, 0.85);
+    }
   }
 }

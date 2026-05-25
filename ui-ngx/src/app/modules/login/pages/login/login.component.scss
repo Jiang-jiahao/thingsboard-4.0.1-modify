@@ -27,7 +27,16 @@
   .tb-login-content {
     margin-top: 36px;
     margin-bottom: 76px;
-    background-color: #eee;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba($tb-secondary-color, 0.18) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 50% at 90% 90%, rgba($tb-primary-color, 0.12) 0%, transparent 50%),
+      linear-gradient(160deg, #e8f4f8 0%, #eef4f8 45%, #e2e8f0 100%);
+
+    mat-card {
+      border-radius: 20px !important;
+      border: 1px solid rgba($tb-secondary-color, 0.15) !important;
+      box-shadow: 0 12px 40px rgba(15, 23, 42, 0.1), 0 4px 12px rgba($tb-secondary-color, 0.08) !important;
+    }
     .tb-login-form {
       @media #{$mat-gt-xs} {
         width: 550px !important;

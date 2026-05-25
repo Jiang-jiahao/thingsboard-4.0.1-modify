@@ -58,6 +58,8 @@ export class RuleChainSelectComponent implements ControlValueAccessor {
 
   panelOpened = false;
 
+  private overlayRef: OverlayRef;
+
   private propagateChange = (v: any) => { };
 
   constructor(private overlay: Overlay,
@@ -73,6 +75,17 @@ export class RuleChainSelectComponent implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
+    if (isDisabled) {
+      this.closePanel();
+    }
+  }
+
+  private closePanel(): void {
+    if (this.overlayRef) {
+      this.overlayRef.dispose();
+      this.overlayRef = null;
+    }
+    this.panelOpened = false;
   }
 
   writeValue(value: RuleChain): void {
@@ -100,9 +113,11 @@ export class RuleChainSelectComponent implements ControlValueAccessor {
       config.positionStrategy = this.overlay.position()
         .flexibleConnectedTo(target as HTMLElement)
         .withPositions([POSITION_MAP.bottom]);
+      this.closePanel();
       const overlayRef = this.overlay.create(config);
+      this.overlayRef = overlayRef;
       overlayRef.backdropClick().subscribe(() => {
-        overlayRef.dispose();
+        this.closePanel();
       });
       const providers: StaticProvider[] = [
         {
@@ -122,6 +137,7 @@ export class RuleChainSelectComponent implements ControlValueAccessor {
         this.viewContainerRef, injector));
       this.panelOpened = true;
       componentRef.onDestroy(() => {
+        this.overlayRef = null;
         this.panelOpened = false;
         if (componentRef.instance.ruleChainSelected) {
           this.ruleChain = componentRef.instance.result;

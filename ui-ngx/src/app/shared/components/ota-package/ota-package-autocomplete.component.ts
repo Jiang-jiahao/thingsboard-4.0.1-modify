@@ -15,6 +15,7 @@
 ///
 
 import { Component, ElementRef, forwardRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { catchError, debounceTime, map, share, switchMap, tap } from 'rxjs/operators';
@@ -108,6 +109,9 @@ export class OtaPackageAutocompleteComponent implements ControlValueAccessor, On
 
   @ViewChild('packageInput', {static: true}) packageInput: ElementRef;
 
+  @ViewChild('packageInput', {read: MatAutocompleteTrigger, static: true})
+  packageAutocompleteTrigger: MatAutocompleteTrigger;
+
   filteredPackages: Observable<Array<OtaPackageInfo>>;
 
   searchText = '';
@@ -186,6 +190,8 @@ export class OtaPackageAutocompleteComponent implements ControlValueAccessor, On
     this.disabled = isDisabled;
     if (this.disabled) {
       this.otaPackageFormGroup.disable({emitEvent: false});
+      this.packageAutocompleteTrigger?.closePanel();
+      this.packageInput?.nativeElement?.blur();
     } else {
       this.otaPackageFormGroup.enable({emitEvent: false});
     }

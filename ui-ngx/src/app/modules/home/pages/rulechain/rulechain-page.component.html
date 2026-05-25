@@ -20,16 +20,16 @@
   <tb-hotkeys-cheatsheet #cheatSheetComponent></tb-hotkeys-cheatsheet>
   <section class="tb-rulechain-container flex flex-1 flex-col">
     <div class="tb-rulechain-layout flex flex-1 flex-row">
-      <mat-drawer-container class="size-full">
+      <mat-drawer-container class="tb-rulechain-drawer-container">
         <mat-drawer class="tb-rulechain-library mat-elevation-z4 flex flex-col"
                     disableClose="true"
                     mode="side"
                     #drawer
                     opened
                     position="start">
-          <mat-toolbar color="primary" class="tb-dark">
+          <mat-toolbar class="tb-rulechain-header-toolbar">
             <tb-rule-chain-select
-              class="flex-1"
+              class="tb-rulechain-header-select flex-1"
               *ngIf="!isImport"
               [ruleChainType]="ruleChainType"
               [disabled]="isDirtyValue"
@@ -37,7 +37,7 @@
               (ngModelChange)="currentRuleChainIdChanged(ruleChain.id?.id)">
             </tb-rule-chain-select>
           </mat-toolbar>
-          <mat-toolbar>
+          <mat-toolbar class="tb-rulechain-search-toolbar">
             <div class="mat-toolbar-tools">
               <mat-form-field class="tb-appearance-transparent flex-1">
                 <button mat-icon-button matPrefix class="tb-small"

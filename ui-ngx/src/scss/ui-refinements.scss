@@ -1,21 +1,24 @@
 /**
- * Global UI refinements — modern IoT admin aesthetic.
+ * Global UI refinements — JnksIOT brand shell
  */
 @import './constants';
 
 .tb-default {
-  --tb-surface: #f1f5f9;
+  --tb-surface: #{$tb-surface-page};
   --tb-surface-elevated: #ffffff;
-  --tb-border: rgba(15, 23, 42, 0.08);
-  --tb-border-strong: rgba(15, 23, 42, 0.12);
+  --tb-border: rgba(15, 23, 42, 0.07);
+  --tb-border-strong: rgba(15, 23, 42, 0.11);
   --tb-text-muted: #64748b;
-  --tb-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --tb-shadow-md: 0 4px 16px rgba(15, 23, 42, 0.08);
-  --tb-shadow-lg: 0 8px 30px rgba(15, 23, 42, 0.1);
+  --tb-text: #0f172a;
+  --tb-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --tb-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.09);
+  --tb-shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
   --tb-radius: 10px;
-  --tb-radius-lg: 14px;
+  --tb-radius-lg: 16px;
   --tb-radius-pill: 999px;
   --tb-transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  font-family: "Plus Jakarta Sans", "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
 
   // Cards & panels
   .mat-mdc-card {
@@ -38,77 +41,112 @@
 
     &:not(.mat-expanded) {
       .mat-expansion-panel-header:hover {
-        background: rgba($tb-primary-color, 0.04);
+        background: rgba($tb-secondary-color, 0.06);
       }
+    }
+  }
+
+  // Form fields
+  .mat-mdc-form-field {
+    .mdc-text-field--outlined .mdc-notched-outline__leading,
+    .mdc-text-field--outlined .mdc-notched-outline__notch,
+    .mdc-text-field--outlined .mdc-notched-outline__trailing {
+      border-radius: var(--tb-radius);
+    }
+
+    &.mat-focused .mdc-notched-outline__leading,
+    &.mat-focused .mdc-notched-outline__notch,
+    &.mat-focused .mdc-notched-outline__trailing {
+      border-color: $tb-secondary-color !important;
     }
   }
 
   // Tables
   .mat-mdc-table {
-    border-radius: var(--tb-radius-lg);
+    border-radius: 0;
     overflow: hidden;
     background: var(--tb-surface-elevated);
-    box-shadow: var(--tb-shadow-sm);
 
     .mat-mdc-header-row {
-      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      min-height: 56px;
+      background: #f8fafc;
+      border-bottom: 2px solid rgba($tb-secondary-color, 0.15);
 
       .mat-mdc-header-cell {
-        color: var(--tb-text-muted);
-        font-size: 12px;
+        color: #334155;
+        font-size: 15px;
         font-weight: 600;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        border-bottom-color: var(--tb-border);
+        letter-spacing: 0.02em;
+        text-transform: none;
+        border-bottom: none;
+        padding-top: 16px;
+        padding-bottom: 16px;
+        line-height: 1.4;
+
+        .mat-sort-header-container,
+        .mat-sort-header-content,
+        button.mat-sort-header-button {
+          font-size: 15px;
+          font-weight: 600;
+        }
       }
     }
 
     .mat-mdc-row {
       transition: background-color var(--tb-transition);
 
+      &:nth-child(even) {
+        background: rgba(248, 250, 252, 0.7);
+      }
+
       &:hover {
-        background-color: rgba($tb-secondary-color, 0.06);
+        background-color: rgba($tb-secondary-color, 0.08) !important;
       }
 
       .mat-mdc-cell {
         font-size: 13px;
         color: #334155;
-        border-bottom-color: rgba(15, 23, 42, 0.05);
+        border-bottom-color: rgba(15, 23, 42, 0.04);
       }
     }
   }
 
-  // Entity list pages (devices, profiles, etc.)
   .tb-entity-table {
     .mat-mdc-paginator {
-      background: #f8fafc;
+      background: linear-gradient(180deg, #fafcfd 0%, #f1f5f9 100%);
       border-top: 1px solid var(--tb-border);
     }
 
     .mat-mdc-paginator-container {
-      padding: 4px 12px;
-      min-height: 52px;
+      padding: 6px 16px;
+      min-height: 54px;
     }
   }
 
   .mat-toolbar.mat-mdc-table-toolbar:not(.mat-primary) {
     background: var(--tb-surface-elevated) !important;
     border-bottom: 1px solid var(--tb-border);
-    border-radius: var(--tb-radius-lg) var(--tb-radius-lg) 0 0;
   }
 
   // Buttons
   .mat-mdc-raised-button.mat-primary,
   .mat-mdc-unelevated-button.mat-primary {
     border-radius: var(--tb-radius) !important;
-    box-shadow: 0 2px 8px rgba($tb-primary-color, 0.25) !important;
-    letter-spacing: 0.02em;
+    background: linear-gradient(135deg, $tb-primary-color 0%, $tb-secondary-color 100%) !important;
+    box-shadow: 0 4px 14px rgba($tb-secondary-color, 0.35) !important;
+    letter-spacing: 0.03em;
     transition: transform var(--tb-transition), box-shadow var(--tb-transition);
 
     &:not(:disabled):hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba($tb-primary-color, 0.32) !important;
+      box-shadow: 0 6px 20px rgba($tb-secondary-color, 0.42) !important;
     }
+  }
+
+  .mat-mdc-outlined-button.mat-primary {
+    border-color: rgba($tb-secondary-color, 0.55) !important;
+    color: $tb-primary-color !important;
+    border-radius: var(--tb-radius) !important;
   }
 
   .mat-mdc-outlined-button,
@@ -118,18 +156,20 @@
 
   .mat-mdc-icon-button {
     border-radius: var(--tb-radius) !important;
-    transition: background-color var(--tb-transition);
+    transition: background-color var(--tb-transition), color var(--tb-transition);
   }
 
   // Tabs
   .mat-mdc-tab-group {
-    .mat-mdc-tab {
-      letter-spacing: 0.02em;
+    .mat-mdc-tab.mat-mdc-tab-active {
+      color: $tb-primary-color;
+      font-weight: 600;
     }
 
     .mdc-tab-indicator__content--underline {
-      border-radius: 2px 2px 0 0;
+      border-radius: 3px 3px 0 0;
       height: 3px;
+      background: linear-gradient(90deg, $tb-secondary-color, $tb-accent-color);
     }
   }
 
@@ -137,19 +177,18 @@
   .mat-mdc-dialog-container .mdc-dialog__surface {
     border-radius: var(--tb-radius-lg) !important;
     box-shadow: var(--tb-shadow-lg) !important;
+    border: 1px solid var(--tb-border);
   }
 
-  // Chips & status badges
+  // Chips
   .mat-mdc-chip {
     border-radius: var(--tb-radius-pill) !important;
   }
 
-  // Main content area
   .tb-main-content {
     background: var(--tb-surface);
   }
 
-  // Entity details
   .tb-entity-details-panel,
   .tb-details-panel {
     .mat-mdc-card {
@@ -157,11 +196,15 @@
     }
   }
 
-  // Timewindow date inputs — slightly wider for yyyy-MM-dd HH:mm
   .tb-timewindow-form,
   .tb-form-row {
     .tb-datetime-field.mat-mdc-form-field {
       min-width: 200px;
     }
+  }
+
+  // Progress
+  .mat-mdc-progress-bar {
+    --mdc-linear-progress-active-indicator-color: #{$tb-secondary-color};
   }
 }

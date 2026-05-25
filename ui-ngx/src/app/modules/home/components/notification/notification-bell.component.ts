@@ -37,6 +37,7 @@ import { AppState } from '@core/core.state';
 @Component({
   selector: 'tb-notification-bell',
   templateUrl: './notification-bell.component.html',
+  styleUrls: ['./notification-bell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotificationBellComponent implements OnDestroy {

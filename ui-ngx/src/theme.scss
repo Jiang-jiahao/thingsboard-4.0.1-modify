@@ -55,9 +55,34 @@ $tb-mat-indigo: (
 );
 
 $tb-primary: mat.m2-define-palette($tb-mat-indigo);
-$tb-accent: mat.m2-define-palette(mat.$m2-cyan-palette, 700, 500, 900);
+$tb-mat-teal: (
+  50: #f0fdfa,
+  100: #ccfbf1,
+  200: #99f6e4,
+  300: #5eead4,
+  400: #2dd4bf,
+  500: $tb-secondary-color,
+  600: $tb-accent-color,
+  700: #0f766e,
+  800: #115e59,
+  900: #134e4a,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+  )
+);
 
-$background: (background: #f1f5f9);
+$tb-accent: mat.m2-define-palette($tb-mat-teal);
+
+$background: (background: $tb-surface-page);
 
 $tb-theme-background: map_merge(mat.$m2-light-theme-background-palette, $background);
 

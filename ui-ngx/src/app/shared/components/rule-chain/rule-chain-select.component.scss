@@ -13,10 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+@import '../../../../scss/constants';
+
 :host {
   min-width: 52px;
   width: 100%;
   padding: 0;
+
   .tb-rule-select {
     width: 100%;
 
@@ -31,7 +34,31 @@
       }
     }
   }
+
   .disabled {
     opacity: 0.5;
+  }
+}
+
+:host-context(.tb-rulechain-header-select) {
+  .tb-rule-select input {
+    color: #fff;
+  }
+}
+
+:host:not(:host-context(.tb-rulechain-header-select)) {
+  .tb-rule-select {
+    .mat-mdc-text-field-wrapper {
+      border-radius: 10px;
+      background-color: #f1f5f9;
+    }
+
+    input {
+      color: $tb-topbar-text;
+    }
+
+    .mat-icon {
+      color: $tb-secondary-color;
+    }
   }
 }
