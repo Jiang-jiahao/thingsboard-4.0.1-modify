@@ -109,6 +109,12 @@ public interface TransportService {
      */
     GetSnmpDevicesResponseMsg getSnmpDevicesIds(GetSnmpDevicesRequestMsg requestMsg);
 
+    TransportProtos.GetHttpPullDevicesResponseMsg getHttpPullDevicesIds(TransportProtos.GetHttpPullDevicesRequestMsg requestMsg);
+
+    TransportProtos.GetDeviceByTenantIdAndNameResponseMsg getDeviceByTenantIdAndName(TransportProtos.GetDeviceByTenantIdAndNameRequestMsg requestMsg);
+
+    TransportProtos.GetHttpPullRoutingTargetsResponseMsg getHttpPullRoutingTargets(TransportProtos.GetHttpPullRoutingTargetsRequestMsg requestMsg);
+
     /**
      * 获取使用 TCP 传输类型的设备 ID 列表（用于 CLIENT 模式主动建连等）。
      */

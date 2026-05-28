@@ -27,7 +27,13 @@ import {
 } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@app/core/core.state';
-import { DeviceProfileTransportConfiguration, DeviceTransportType } from '@shared/models/device.models';
+import {
+  BasicTransportType,
+  DeviceProfileTransportConfiguration,
+  DeviceTransportType,
+  toUiTransportType,
+  TransportType
+} from '@shared/models/device.models';
 import { deepClone } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -51,6 +57,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class DeviceProfileTransportConfigurationComponent implements ControlValueAccessor, OnInit, Validator {
 
   deviceTransportType = DeviceTransportType;
+  basicTransportType = BasicTransportType;
 
   deviceProfileTransportConfigurationFormGroup: UntypedFormGroup;
 
@@ -60,9 +67,17 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
   @Input()
   isAdd: boolean;
 
-  transportType: DeviceTransportType;
+  /** 设备配置页选择的传输类型（优先；与 configuration.type 解耦，避免 HTTP 被动模式切走 HTTP 面板） */
+  @Input()
+  selectedTransportType: TransportType;
+
+  private configurationTransportType: TransportType;
 
   private propagateChange = (v: any) => { };
+
+  get activeTransportType(): TransportType | null {
+    return toUiTransportType((this.selectedTransportType ?? this.configurationTransportType) as DeviceTransportType);
+  }
 
   constructor(private store: Store<AppState>,
               private fb: UntypedFormBuilder,
@@ -97,7 +112,9 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
   }
 
   writeValue(value: DeviceProfileTransportConfiguration | null): void {
-    this.transportType = value?.type;
+    if (value?.type) {
+      this.configurationTransportType = value.type;
+    }
     const configuration = deepClone(value);
     if (configuration) {
       delete configuration.type;
@@ -109,7 +126,6 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
 
   private updateModel() {
     const configuration = this.deviceProfileTransportConfigurationFormGroup.getRawValue().configuration;
-    configuration.type = this.transportType;
     this.propagateChange(configuration);
   }
 

@@ -1,0 +1,56 @@
+.http-routing-help-content {
+  max-width: 520px;
+  line-height: 1.5;
+}
+
+.help-block {
+  margin-top: 16px;
+}
+
+.help-block-title {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.help-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th,
+  td {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    padding: 8px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background: rgba(0, 0, 0, 0.04);
+    font-weight: 500;
+  }
+
+  code {
+    font-size: 12px;
+  }
+}
+
+.sample-json {
+  margin: 0;
+  padding: 12px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 12px;
+  line-height: 1.45;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.help-list {
+  margin: 0;
+  padding-left: 20px;
+
+  li + li {
+    margin-top: 6px;
+  }
+}

@@ -1,0 +1,32 @@
+.http-transport-form {
+  padding: 8px 0 16px;
+}
+
+.http-mode-section {
+  margin-bottom: 16px;
+}
+
+.http-passive-panel {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.04);
+  margin-bottom: 8px;
+}
+
+.http-passive-icon {
+  color: rgba(0, 0, 0, 0.54);
+  flex-shrink: 0;
+}
+
+.http-passive-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.http-passive-endpoints {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}

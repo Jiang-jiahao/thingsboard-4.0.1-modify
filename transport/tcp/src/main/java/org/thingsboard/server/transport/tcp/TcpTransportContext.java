@@ -276,7 +276,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
             if (!future.isSuccess()) {
                 log.error("[{}] Outbound TCP connect failed to {}:{}", deviceId, host, port, future.cause());
                 transportService.errorEvent(session.getTenantId(), deviceId, "tcpClientConnect", future.cause());
-                onChannelClosed(session);
+                onChannelClosed(session, future.cause());
             }
         });
     }
@@ -348,15 +348,20 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
         log.info("[{}] Scheduled TCP outbound reconnect in {} s", deviceId, intervalSec);
     }
 
-    public void onChannelClosed(TcpDeviceSession session) {
+    public void onChannelClosed(TcpDeviceSession session, Throwable cause) {
+        if (!session.beginCloseHandling()) {
+            return;
+        }
         if (!session.isOutboundClient()) {
             untrackInboundSession(session);
         }
+        recordTcpSessionEndEvent(session, cause);
         TransportProtos.SessionInfoProto sessionInfo = session.getSessionInfo();
         if (sessionInfo != null) {
             transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_CLOSED, null);
             transportService.deregisterSession(sessionInfo);
-            transportService.lifecycleEvent(session.getTenantId(), session.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
+            transportService.lifecycleEvent(session.getTenantId(), session.getDeviceId(), ComponentLifecycleEvent.STOPPED, true,
+                    cause != null ? cause : null);
         }
         if (session.getDeviceId() != null) {
             clientSessions.remove(session.getDeviceId());
@@ -368,6 +373,15 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
             scheduleClientReconnect(session.getDeviceId());
         }
     }
+
+    /** 仅在实际异常时写入 ERROR；正常断开由 lifecycle STOPPED 记录。 */
+    private void recordTcpSessionEndEvent(TcpDeviceSession session, Throwable cause) {
+        if (cause == null || session.getDeviceId() == null || session.getTenantId() == null) {
+            return;
+        }
+        transportService.errorEvent(session.getTenantId(), session.getDeviceId(), "tcpChannelError", cause);
+    }
+
     public void onTcpSessionDeviceDeleted(TcpDeviceSession session) {
         session.close();
     }

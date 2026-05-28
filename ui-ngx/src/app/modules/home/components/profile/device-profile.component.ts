@@ -35,8 +35,14 @@ import {
   DeviceProvisionConfiguration,
   DeviceProvisionType,
   DeviceTransportType,
+  deviceProfileTransportTypeOptions,
   deviceTransportTypeConfigurationInfoMap,
-  deviceTransportTypeTranslationMap
+  deviceTransportTypeHintMap,
+  deviceTransportTypeTranslationMap,
+  hasDeviceProfileTransportConfiguration,
+  resolveTransportTypeForSave,
+  toUiTransportType,
+  TransportType
 } from '@shared/models/device.models';
 import { EntityType } from '@shared/models/entity-type.models';
 import { RuleChainId } from '@shared/models/id/rule-chain-id';
@@ -63,9 +69,11 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
 
   deviceProfileTypeTranslations = deviceProfileTypeTranslationMap;
 
-  deviceTransportTypes = Object.values(DeviceTransportType);
+  deviceTransportTypes = deviceProfileTransportTypeOptions;
 
   deviceTransportTypeTranslations = deviceTransportTypeTranslationMap;
+
+  deviceTransportTypeHints = deviceTransportTypeHintMap;
 
   displayProfileConfiguration: boolean;
 
@@ -106,7 +114,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     this.displayProfileConfiguration = entity && entity.type &&
       deviceProfileTypeConfigurationInfoMap.get(entity.type).hasProfileConfiguration;
     this.displayTransportConfiguration = entity && entity.transportType &&
-      deviceTransportTypeConfigurationInfoMap.get(entity.transportType).hasProfileConfiguration;
+      hasDeviceProfileTransportConfiguration(toUiTransportType(entity.transportType));
     const deviceProvisionConfiguration: DeviceProvisionConfiguration = DEVICE_PROVISIONING_UI_ENABLED ? {
       type: entity?.provisionType ? entity.provisionType : DeviceProvisionType.DISABLED,
       provisionDeviceKey: entity?.provisionDeviceKey,
@@ -119,7 +127,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
         name: [entity ? entity.name : '', [Validators.required, Validators.maxLength(255)]],
         type: [entity ? entity.type : null, [Validators.required]],
         image: [entity ? entity.image : null],
-        transportType: [entity ? entity.transportType : null, [Validators.required]],
+        transportType: [entity ? toUiTransportType(entity.transportType) : null, [Validators.required]],
         profileData: this.fb.group({
           configuration: [entity && !this.isAdd ? entity.profileData?.configuration : {}, Validators.required],
           transportConfiguration: [entity && !this.isAdd ? entity.profileData?.transportConfiguration : {}, Validators.required],
@@ -174,9 +182,9 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
   }
 
   private deviceProfileTransportTypeChanged(form: UntypedFormGroup) {
-    const deviceTransportType: DeviceTransportType = form.get('transportType').value;
+    const deviceTransportType: TransportType = form.get('transportType').value;
     this.displayTransportConfiguration = deviceTransportType &&
-      deviceTransportTypeConfigurationInfoMap.get(deviceTransportType).hasProfileConfiguration;
+      hasDeviceProfileTransportConfiguration(deviceTransportType);
     this.isTransportTypeChanged = true;
     let profileData: DeviceProfileData = form.getRawValue().profileData;
     if (!profileData) {
@@ -194,7 +202,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     this.displayProfileConfiguration = entity.type &&
       deviceProfileTypeConfigurationInfoMap.get(entity.type).hasProfileConfiguration;
     this.displayTransportConfiguration = entity.transportType &&
-      deviceTransportTypeConfigurationInfoMap.get(entity.transportType).hasProfileConfiguration;
+      hasDeviceProfileTransportConfiguration(toUiTransportType(entity.transportType));
     const deviceProvisionConfiguration: DeviceProvisionConfiguration = {
       type: entity?.provisionType ? entity.provisionType : DeviceProvisionType.DISABLED,
       provisionDeviceKey: entity?.provisionDeviceKey,
@@ -205,7 +213,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     this.entityForm.patchValue({name: entity.name});
     this.entityForm.patchValue({type: entity.type}, {emitEvent: false});
     this.entityForm.patchValue({image: entity.image}, {emitEvent: false});
-    this.entityForm.patchValue({transportType: entity.transportType}, {emitEvent: false});
+    this.entityForm.patchValue({transportType: toUiTransportType(entity.transportType)}, {emitEvent: false});
     this.entityForm.patchValue({provisionType: entity.provisionType}, {emitEvent: false});
     this.entityForm.patchValue({provisionDeviceKey: entity.provisionDeviceKey}, {emitEvent: false});
     this.entityForm.patchValue({profileData: {
@@ -241,6 +249,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     formValue.provisionDeviceKey = deviceProvisionConfiguration.provisionDeviceKey ?? null;
     formValue.profileData.provisionConfiguration = deviceProvisionConfiguration;
     delete deviceProvisionConfiguration.provisionDeviceKey;
+    formValue.transportType = resolveTransportTypeForSave(formValue.transportType, formValue.profileData?.transportConfiguration);
     return super.prepareFormValue(formValue);
   }
 

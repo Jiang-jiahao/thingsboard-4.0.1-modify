@@ -42,9 +42,12 @@
       </mat-expansion-panel-header>
       <tb-device-transport-configuration
         formControlName="transportConfiguration"
+        [profileTransportType]="profileUiTransportType"
         [tcpWireAuthenticationMode]="tcpWireAuthenticationMode"
         [tcpProfileTransportConnectMode]="tcpProfileTransportConnectMode"
         [udpWireAuthenticationMode]="udpWireAuthenticationMode"
+        [httpPullRoutingMode]="httpPullRoutingMode"
+        [httpPullProfilePollUrl]="httpPullProfilePollUrl"
         required>
       </tb-device-transport-configuration>
     </mat-expansion-panel>

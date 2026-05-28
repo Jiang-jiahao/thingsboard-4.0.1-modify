@@ -14,7 +14,7 @@
 /// limitations under the License.
 ///
 
-import { Component, DestroyRef, forwardRef, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, forwardRef, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import {
   ControlValueAccessor,
   NG_VALIDATORS,
@@ -29,10 +29,14 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@app/core/core.state';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import {
+  BasicTransportType,
   DeviceTransportConfiguration,
   DeviceTransportType,
+  HttpPullRoutingMode,
   TcpTransportConnectMode,
   TcpWireAuthenticationMode,
+  toUiTransportType,
+  TransportType,
   UdpWireAuthenticationMode
 } from '@shared/models/device.models';
 import { deepClone } from '@core/utils';
@@ -54,9 +58,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
       multi: true
     }]
 })
-export class DeviceTransportConfigurationComponent implements ControlValueAccessor, OnInit, Validator {
+export class DeviceTransportConfigurationComponent implements ControlValueAccessor, OnInit, OnChanges, Validator {
 
   deviceTransportType = DeviceTransportType;
+  basicTransportType = BasicTransportType;
 
   deviceTransportConfigurationFormGroup: UntypedFormGroup;
 
@@ -72,8 +77,6 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
   @Input()
   disabled: boolean;
 
-  transportType: DeviceTransportType;
-
   /** 当前设备档案的 TCP 链路上鉴权模式（仅 TCP 设备传输子组件使用） */
   @Input()
   tcpWireAuthenticationMode: TcpWireAuthenticationMode | null = null;
@@ -84,11 +87,35 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
   @Input()
   udpWireAuthenticationMode: UdpWireAuthenticationMode | null = null;
 
+  @Input()
+  httpPullRoutingMode: HttpPullRoutingMode | null = null;
+
+  @Input()
+  httpPullProfilePollUrl: string | null = null;
+
+  /** 设备档案传输类型（优先；HTTP 档案为 UI 类型 HTTP） */
+  @Input()
+  profileTransportType: TransportType;
+
+  /** 来自已保存的 transportConfiguration.type，档案信息未就绪时兜底 */
+  private configurationTransportType: TransportType;
+
   private propagateChange = (v: any) => { };
+
+  get activeTransportType(): TransportType | null {
+    return toUiTransportType((this.profileTransportType ?? this.configurationTransportType) as DeviceTransportType);
+  }
 
   constructor(private store: Store<AppState>,
               private fb: UntypedFormBuilder,
-              private destroyRef: DestroyRef) {
+              private destroyRef: DestroyRef,
+              private cd: ChangeDetectorRef) {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.profileTransportType || changes['profileTransportType']) {
+      this.cd.markForCheck();
+    }
   }
 
   registerOnChange(fn: any): void {
@@ -119,12 +146,15 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
   }
 
   writeValue(value: DeviceTransportConfiguration | null): void {
-    this.transportType = value?.type;
+    if (value?.type) {
+      this.configurationTransportType = value.type;
+    }
     const configuration = deepClone(value);
     if (configuration) {
       delete configuration.type;
     }
     this.deviceTransportConfigurationFormGroup.patchValue({configuration}, {emitEvent: false});
+    this.cd.markForCheck();
   }
 
   validate(): ValidationErrors | null {
@@ -137,7 +167,6 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
     let configuration: DeviceTransportConfiguration = null;
     if (this.deviceTransportConfigurationFormGroup.valid) {
       configuration = this.deviceTransportConfigurationFormGroup.getRawValue().configuration;
-      configuration.type = this.transportType;
     }
     this.propagateChange(configuration);
   }

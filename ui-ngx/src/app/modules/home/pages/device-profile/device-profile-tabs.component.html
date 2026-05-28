@@ -35,6 +35,7 @@
     <div formGroupName="profileData">
       <tb-device-profile-transport-configuration
         formControlName="transportConfiguration"
+        [selectedTransportType]="detailsForm.get('transportType').value"
         [isAdd]="isTransportTypeChanged">
       </tb-device-profile-transport-configuration>
     </div>

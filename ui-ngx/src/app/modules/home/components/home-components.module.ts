@@ -140,6 +140,7 @@ import {
   WidgetContainerComponent
 } from '@home/components/widget/widget-container.component';
 import { SnmpDeviceProfileTransportModule } from '@home/components/profile/device/snmp/snmp-device-profile-transport.module';
+import { HttpPullDeviceProfileTransportModule } from '@home/components/profile/device/http-pull/http-pull-device-profile-transport.module';
 import { DeviceCredentialsModule } from '@home/components/device/device-credentials.module';
 import { DeviceProfileCommonModule } from '@home/components/profile/device/common/device-profile-common.module';
 import { DeviceDataFormsModule } from '@home/pages/device/device-data-forms.module';
@@ -380,6 +381,7 @@ import {
     BasicWidgetConfigModule,
     Lwm2mProfileComponentsModule,
     SnmpDeviceProfileTransportModule,
+    HttpPullDeviceProfileTransportModule,
     StatesControllerModule,
     DeviceCredentialsModule,
     DeviceProfileCommonModule,

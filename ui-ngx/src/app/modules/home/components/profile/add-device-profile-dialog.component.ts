@@ -29,11 +29,15 @@ import {
   deviceProfileTypeTranslationMap,
   createDisabledDeviceProvisionConfiguration,
   DEVICE_PROVISIONING_UI_ENABLED,
+  EDGE_UI_ENABLED,
+  MOBILE_UI_ENABLED,
   DeviceProvisionConfiguration,
   DeviceProvisionType,
   DeviceTransportType,
+  deviceProfileTransportTypeOptions,
   deviceTransportTypeHintMap,
-  deviceTransportTypeTranslationMap
+  deviceTransportTypeTranslationMap,
+  resolveTransportTypeForSave
 } from '@shared/models/device.models';
 import { DeviceProfileService } from '@core/http/device-profile.service';
 import { EntityType } from '@shared/models/entity-type.models';
@@ -79,7 +83,7 @@ export class AddDeviceProfileDialogComponent extends
 
   deviceTransportTypeHints = deviceTransportTypeHintMap;
 
-  deviceTransportTypes = Object.values(DeviceTransportType);
+  deviceTransportTypes = deviceProfileTransportTypeOptions;
 
   deviceTransportTypeTranslations = deviceTransportTypeTranslationMap;
 
@@ -96,6 +100,10 @@ export class AddDeviceProfileDialogComponent extends
   edgeRuleChainType = RuleChainType.EDGE;
 
   readonly deviceProvisioningUiEnabled = DEVICE_PROVISIONING_UI_ENABLED;
+
+  readonly mobileUiEnabled = MOBILE_UI_ENABLED;
+
+  readonly edgeUiEnabled = EDGE_UI_ENABLED;
 
   constructor(protected store: Store<AppState>,
               protected router: Router,
@@ -152,7 +160,7 @@ export class AddDeviceProfileDialogComponent extends
   }
 
   private deviceProfileTransportTypeChanged() {
-    const deviceTransportType: DeviceTransportType = this.transportConfigFormGroup.get('transportType').value;
+    const deviceTransportType = this.transportConfigFormGroup.get('transportType').value;
     this.transportConfigFormGroup.patchValue(
       {transportConfiguration: createDeviceProfileTransportConfiguration(deviceTransportType)});
   }
@@ -198,7 +206,10 @@ export class AddDeviceProfileDialogComponent extends
         type: this.deviceProfileDetailsFormGroup.get('type').value,
         image: this.deviceProfileDetailsFormGroup.get('image').value,
         defaultQueueName: this.deviceProfileDetailsFormGroup.get('defaultQueueName').value,
-        transportType: this.transportConfigFormGroup.get('transportType').value,
+        transportType: resolveTransportTypeForSave(
+          this.transportConfigFormGroup.get('transportType').value,
+          this.transportConfigFormGroup.get('transportConfiguration').value
+        ),
         provisionType: deviceProvisionConfiguration.type,
         provisionDeviceKey,
         description: this.deviceProfileDetailsFormGroup.get('description').value,

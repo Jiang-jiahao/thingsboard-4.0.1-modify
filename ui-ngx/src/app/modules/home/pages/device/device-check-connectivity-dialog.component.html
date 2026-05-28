@@ -16,7 +16,7 @@
 
 -->
 <mat-toolbar color="primary">
-  <h2 translate>{{ dialogTitle }}</h2>
+  <h2>{{ dialogTitle | translate }}</h2>
   <span class="flex-1"></span>
 <!--  <div [tb-help]="'check-connectivity'"></div>-->
   <button mat-icon-button
@@ -33,6 +33,11 @@
                       useSelectOnMdLg="false"
                       appearance="fill"
                       [class.!hidden]="allowTransportType.size < 2">
+      <tb-toggle-option
+        *ngIf="allowTransportType.has(DeviceTransportType.HTTP_PULL)"
+        [value]="DeviceTransportType.HTTP_PULL">
+        {{ 'device-profile.http.mode-pull' | translate }}
+      </tb-toggle-option>
       <tb-toggle-option
         *ngIf="allowTransportType.has(BasicTransportType.HTTP)"
         [value]="BasicTransportType.HTTP">
@@ -61,8 +66,13 @@
     </tb-toggle-header>
     <div class="tb-form-panel no-padding no-border" [class.!hidden]="!allowTransportType.size">
       <ng-container [ngSwitch]="transportProtocol.value">
+        <ng-template [ngSwitchCase]="DeviceTransportType.HTTP_PULL">
+          <div class="tb-form-panel stroked">
+            <p class="tb-hint tb-font-14">{{ 'device.connectivity.http-pull-check-connectivity-hint' | translate }}</p>
+          </div>
+        </ng-template>
         <ng-template [ngSwitchCase]="BasicTransportType.HTTP">
-          <div class="tb-no-data-text" translate>device.connectivity.use-following-instructions</div>
+          <div class="tb-no-data-text">{{ 'device.connectivity.use-following-instructions' | translate }}</div>
           <mat-tab-group [(selectedIndex)]="httpTabIndex">
             <mat-tab>
               <ng-template mat-tab-label>
@@ -72,8 +82,8 @@
               <ng-template matTabContent>
                 <div class="tb-form-panel no-padding no-border tb-tab-body">
                   <div class="tb-form-panel stroked">
-                    <div class="tb-form-panel-title" translate>device.connectivity.install-necessary-client-tools</div>
-                    <div class="tb-install-instruction-text" translate>device.connectivity.install-curl-windows</div>
+                    <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
+                    <div class="tb-install-instruction-text">{{ 'device.connectivity.install-curl-windows' | translate }}</div>
                   </div>
                   <ng-container
                     *ngTemplateOutlet="executeCommand; context: {cmd: {
@@ -92,8 +102,8 @@
               <ng-template matTabContent>
                 <div class="tb-form-panel no-padding no-border tb-tab-body">
                   <div class="tb-form-panel stroked">
-                    <div class="tb-form-panel-title" translate>device.connectivity.install-necessary-client-tools</div>
-                    <div class="tb-install-instruction-text" translate>device.connectivity.install-curl-macos</div>
+                    <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
+                    <div class="tb-install-instruction-text">{{ 'device.connectivity.install-curl-macos' | translate }}</div>
                   </div>
                   <ng-container
                     *ngTemplateOutlet="executeCommand; context: {cmd: {
@@ -112,7 +122,7 @@
               <ng-template matTabContent>
                 <div class="tb-form-panel no-padding no-border tb-tab-body">
                   <div class="tb-form-panel stroked">
-                    <div class="tb-form-panel-title" translate>device.connectivity.install-necessary-client-tools</div>
+                    <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
                     <tb-markdown usePlainMarkdown containerClass="tb-command-code"
                                  [data]='createMarkDownCommand("sudo apt-get install curl")'></tb-markdown>
                   </div>
@@ -135,7 +145,7 @@
             </ng-container>
           </div>
           <ng-template #mqttCommands>
-            <div class="tb-no-data-text" translate>device.connectivity.use-following-instructions</div>
+            <div class="tb-no-data-text">{{ 'device.connectivity.use-following-instructions' | translate }}</div>
             <mat-tab-group [(selectedIndex)]="mqttTabIndex">
               <mat-tab>
                 <ng-template mat-tab-label>
@@ -145,7 +155,7 @@
                 <ng-template matTabContent>
                   <div class="tb-form-panel no-padding no-border tb-tab-body">
                     <div class="tb-form-panel stroked">
-                      <div class="tb-form-panel-title" translate>device.connectivity.install-necessary-client-tools</div>
+                      <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
                       <div class="tb-install-instruction-text">
                         <ng-container *ngTemplateOutlet="seeDocumentation; context:
                         {doc: {text: 'device.connectivity.install-mqtt-windows',
@@ -170,7 +180,7 @@
                 <ng-template matTabContent>
                   <div class="tb-form-panel no-padding no-border tb-tab-body">
                     <div class="tb-form-panel stroked">
-                      <div class="tb-form-panel-title" translate>device.connectivity.install-necessary-client-tools</div>
+                      <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
                       <tb-markdown usePlainMarkdown containerClass="tb-command-code"
                                    [data]='createMarkDownCommand("brew install mosquitto")'></tb-markdown>
                     </div>
@@ -191,7 +201,7 @@
                 <ng-template matTabContent>
                   <div class="tb-form-panel no-padding no-border tb-tab-body">
                     <div class="tb-form-panel stroked">
-                      <div class="tb-form-panel-title" translate>device.connectivity.install-necessary-client-tools</div>
+                      <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
                       <tb-markdown usePlainMarkdown containerClass="tb-command-code"
                                    [data]='createMarkDownCommand("sudo apt-get install curl mosquitto-clients")'></tb-markdown>
                     </div>
@@ -224,7 +234,7 @@
           </ng-template>
         </ng-template>
         <ng-template [ngSwitchCase]="DeviceTransportType.COAP">
-          <div class="tb-no-data-text" translate>device.connectivity.use-following-instructions</div>
+          <div class="tb-no-data-text">{{ 'device.connectivity.use-following-instructions' | translate }}</div>
           <mat-tab-group [(selectedIndex)]="coapTabIndex">
             <mat-tab>
               <ng-template mat-tab-label>
@@ -234,7 +244,7 @@
               <ng-template matTabContent>
                 <div class="tb-form-panel no-padding no-border tb-tab-body">
                   <div class="tb-form-panel stroked" *ngIf="commands.coap.coaps !== 'Check documentation'">
-                    <div class="tb-form-panel-title" translate>device.connectivity.install-necessary-client-tools</div>
+                    <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
                     <div class="tb-install-instruction-text">
                       <ng-container *ngTemplateOutlet="seeDocumentation; context:
                         {doc: {text: 'device.connectivity.install-coap-client',
@@ -289,17 +299,17 @@
     </div>
     <div class="tb-form-panel stroked">
       <div class="flex flex-1 flex-row">
-        <div class="tb-form-panel-title" translate>device.state</div>
+        <div class="tb-form-panel-title">{{ 'device.state' | translate }}</div>
         <div class="status" [class.inactive]="!status" [class.hide]="status === undefined">
           {{ (status ? 'device.active' : 'device.inactive') | translate }}
         </div>
       </div>
-      <div class="tb-form-panel-hint tb-font-14" translate>attribute.latest-telemetry</div>
+      <div class="tb-form-panel-hint tb-font-14">{{ 'attribute.latest-telemetry' | translate }}</div>
       <div class="tb-form-table">
         <div class="tb-form-table-header">
-          <div class="tb-form-table-header-cell flex-1" translate>device.time</div>
-          <div class="tb-form-table-header-cell flex-1" translate>attribute.key</div>
-          <div class="tb-form-table-header-cell flex-1" translate>attribute.value</div>
+          <div class="tb-form-table-header-cell flex-1">{{ 'device.time' | translate }}</div>
+          <div class="tb-form-table-header-cell flex-1">{{ 'attribute.key' | translate }}</div>
+          <div class="tb-form-table-header-cell flex-1">{{ 'attribute.value' | translate }}</div>
         </div>
         <div *ngIf="latestTelemetry.length; else noData" class="tb-form-table-body">
           <div class="tb-form-table-row" *ngFor="let telemetry of latestTelemetry">
@@ -330,14 +340,14 @@
 <ng-template #noData>
   <div class="tb-no-data-available">
     <div class="tb-no-data-bg"></div>
-    <div class="tb-no-data-text" translate>attribute.no-latest-telemetry</div>
+    <div class="tb-no-data-text">{{ 'attribute.no-latest-telemetry' | translate }}</div>
   </div>
 </ng-template>
 
 <ng-template #executeCommand let-cmd="cmd">
   <div class="tb-form-panel stroked">
     <div class="flex flex-row items-center justify-between" [class.!hidden]="!(cmd.noSec || cmd.sec !== 'Check documentation')">
-      <div class="tb-form-panel-title" translate>device.connectivity.execute-following-command</div>
+      <div class="tb-form-panel-title">{{ 'device.connectivity.execute-following-command' | translate }}</div>
       <tb-toggle-header #protocolType value="{{ cmd.noSec ? 'noSec' : 'sec'}}" name="protocolType" useSelectOnMdLg="false"
                         [class.!hidden]="!cmd.noSec || !cmd.sec">
         <tb-toggle-option value="noSec">{{ cmd.noSecLabel }}</tb-toggle-option>

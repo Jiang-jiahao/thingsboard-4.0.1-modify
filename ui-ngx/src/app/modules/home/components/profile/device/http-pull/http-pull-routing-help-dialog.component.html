@@ -1,0 +1,52 @@
+<h2 mat-dialog-title translate>device-profile.http-pull.routing-example-title</h2>
+<div mat-dialog-content class="http-routing-help-content">
+  <p class="tb-hint" translate>device-profile.http-pull.routing-example-intro</p>
+
+  <div class="help-block">
+    <div class="help-block-title" translate>device-profile.http-pull.routing-example-modes-title</div>
+    <table class="help-table">
+      <tr>
+        <th translate>device-profile.http-pull.routing-example-mode-col</th>
+        <th translate>device-profile.http-pull.routing-example-when-col</th>
+      </tr>
+      <tr>
+        <td><code>SINGLE_DEVICE</code></td>
+        <td translate>device-profile.http-pull.routing-example-single-when</td>
+      </tr>
+      <tr>
+        <td><code>MULTI_DEVICE</code></td>
+        <td translate>device-profile.http-pull.routing-example-multi-when</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="help-block">
+    <div class="help-block-title" translate>device-profile.http-pull.routing-example-json-title</div>
+    <pre class="sample-json">{{ sampleJson }}</pre>
+  </div>
+
+  <div class="help-block">
+    <div class="help-block-title" translate>device-profile.http-pull.routing-example-fill-title</div>
+    <ul class="help-list">
+      <li translate>device-profile.http-pull.routing-example-fill-mode</li>
+      <li translate>device-profile.http-pull.routing-example-fill-array</li>
+      <li translate>device-profile.http-pull.routing-example-fill-id</li>
+      <li translate>device-profile.http-pull.routing-example-fill-match</li>
+      <li translate>device-profile.http-pull.routing-example-fill-profile</li>
+      <li translate>device-profile.http-pull.routing-example-fill-key</li>
+    </ul>
+  </div>
+
+  <div class="help-block">
+    <div class="help-block-title" translate>device-profile.http-pull.routing-example-devices-title</div>
+    <ul class="help-list">
+      <li translate>device-profile.http-pull.routing-example-device-collector</li>
+      <li translate>device-profile.http-pull.routing-example-device-target</li>
+    </ul>
+  </div>
+</div>
+<div mat-dialog-actions class="flex items-center justify-end">
+  <button mat-button color="primary" [mat-dialog-close]="true" cdkFocusInitial>
+    {{ 'action.close' | translate }}
+  </button>
+</div>

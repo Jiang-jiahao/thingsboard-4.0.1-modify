@@ -53,6 +53,7 @@
             formControlName="defaultRuleChainId">
           </tb-rule-chain-autocomplete>
           <tb-dashboard-autocomplete
+            *ngIf="mobileUiEnabled"
             label="{{'device-profile.mobile-dashboard' | translate}}"
             formControlName="defaultDashboardId">
             <span tb-hint>{{'device-profile.mobile-dashboard-hint' | translate}}</span>
@@ -62,6 +63,7 @@
             formControlName="defaultQueueName">
           </tb-queue-autocomplete>
           <tb-rule-chain-autocomplete
+            *ngIf="edgeUiEnabled"
             labelText="device-profile.default-edge-rule-chain"
             formControlName="defaultEdgeRuleChainId"
             [ruleChainType]="edgeRuleChainType">
@@ -108,6 +110,7 @@
         </mat-form-field>
         <tb-device-profile-transport-configuration
           formControlName="transportConfiguration"
+          [selectedTransportType]="transportConfigFormGroup.get('transportType').value"
           isAdd="true">
         </tb-device-profile-transport-configuration>
       </form>

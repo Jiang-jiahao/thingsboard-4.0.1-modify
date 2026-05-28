@@ -32,7 +32,7 @@ import { EntitiesTableComponent } from '@home/components/entity/entities-table.c
 import { EventTableConfig } from './event-table-config';
 import { EventService } from '@core/http/event.service';
 import { DialogService } from '@core/services/dialog.service';
-import { DebugEventType, EventBody, EventType } from '@shared/models/event.models';
+import { DebugEventType, EventBody, EventType, eventTypeTranslations } from '@shared/models/event.models';
 import { Overlay } from '@angular/cdk/overlay';
 import { Subscription } from 'rxjs';
 import { isNotEmptyStr } from '@core/utils';
@@ -45,6 +45,8 @@ import { AppState } from '@core/core.state';
   styleUrls: ['./event-table.component.scss']
 })
 export class EventTableComponent implements OnInit, AfterViewInit, OnDestroy {
+
+  eventTypeTranslationsMap = eventTypeTranslations;
 
   @Input()
   tenantId: string;
@@ -159,6 +161,14 @@ export class EventTableComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isEmptyData$) {
       this.isEmptyData$.unsubscribe();
     }
+  }
+
+  onEventTypeChanged(eventType: EventType | DebugEventType): void {
+    if (!this.eventTableConfig || this.eventTableConfig.eventType === eventType) {
+      return;
+    }
+    this.eventTableConfig.eventType = eventType;
+    this.entitiesTable.resetSortAndFilter(this.activeValue);
   }
 
 }

@@ -222,6 +222,12 @@ public class DefaultTransportApiService implements TransportApiService {
             return handle(transportApiRequestMsg.getOtaPackageRequestMsg());
         } else if (transportApiRequestMsg.hasGetAllQueueRoutingInfoRequestMsg()) {
             return handle(transportApiRequestMsg.getGetAllQueueRoutingInfoRequestMsg());
+        } else if (transportApiRequestMsg.hasHttpPullDevicesRequestMsg()) {
+            return handle(transportApiRequestMsg.getHttpPullDevicesRequestMsg());
+        } else if (transportApiRequestMsg.hasDeviceByTenantIdAndNameRequestMsg()) {
+            return handle(transportApiRequestMsg.getDeviceByTenantIdAndNameRequestMsg());
+        } else if (transportApiRequestMsg.hasHttpPullRoutingTargetsRequestMsg()) {
+            return handle(transportApiRequestMsg.getHttpPullRoutingTargetsRequestMsg());
         }
         return getEmptyTransportApiResponse();
     }
@@ -548,6 +554,66 @@ public class DefaultTransportApiService implements TransportApiService {
         return TransportApiResponseMsg.newBuilder()
                 .setSnmpDevicesResponseMsg(responseMsg)
                 .build();
+    }
+
+    private TransportApiResponseMsg handle(TransportProtos.GetHttpPullDevicesRequestMsg requestMsg) {
+        PageLink pageLink = new PageLink(requestMsg.getPageSize(), requestMsg.getPage());
+        PageData<UUID> result = deviceService.findDevicesIdsByDeviceProfileTransportType(DeviceTransportType.HTTP_PULL, pageLink);
+        TransportProtos.GetHttpPullDevicesResponseMsg responseMsg = TransportProtos.GetHttpPullDevicesResponseMsg.newBuilder()
+                .addAllIds(result.getData().stream().map(UUID::toString).collect(Collectors.toList()))
+                .setHasNextPage(result.hasNext())
+                .build();
+        return TransportApiResponseMsg.newBuilder().setHttpPullDevicesResponseMsg(responseMsg).build();
+    }
+
+    private TransportApiResponseMsg handle(TransportProtos.GetDeviceByTenantIdAndNameRequestMsg requestMsg) {
+        TenantId tenantId = TenantId.fromUUID(new UUID(requestMsg.getTenantIdMSB(), requestMsg.getTenantIdLSB()));
+        Device device = deviceService.findDeviceByTenantIdAndName(tenantId, requestMsg.getName());
+        if (device == null) {
+            return TransportApiResponseMsg.getDefaultInstance();
+        }
+        UUID deviceProfileId = device.getDeviceProfileId().getId();
+        TransportProtos.GetDeviceByTenantIdAndNameResponseMsg response = TransportProtos.GetDeviceByTenantIdAndNameResponseMsg.newBuilder()
+                .setDeviceIdMSB(device.getId().getId().getMostSignificantBits())
+                .setDeviceIdLSB(device.getId().getId().getLeastSignificantBits())
+                .setDeviceProfileIdMSB(deviceProfileId.getMostSignificantBits())
+                .setDeviceProfileIdLSB(deviceProfileId.getLeastSignificantBits())
+                .setDeviceTransportConfiguration(ByteString.copyFrom(
+                        JacksonUtil.writeValueAsBytes(device.getDeviceData().getTransportConfiguration())))
+                .setName(device.getName() != null ? device.getName() : "")
+                .setLabel(device.getLabel() != null ? device.getLabel() : "")
+                .build();
+        return TransportApiResponseMsg.newBuilder().setDeviceByTenantIdAndNameResponseMsg(response).build();
+    }
+
+    private TransportApiResponseMsg handle(TransportProtos.GetHttpPullRoutingTargetsRequestMsg requestMsg) {
+        TenantId tenantId = TenantId.fromUUID(new UUID(requestMsg.getTenantIdMSB(), requestMsg.getTenantIdLSB()));
+        DeviceProfileId profileId = new DeviceProfileId(new UUID(requestMsg.getDeviceProfileIdMSB(), requestMsg.getDeviceProfileIdLSB()));
+        PageLink pageLink = new PageLink(requestMsg.getPageSize(), requestMsg.getPage());
+        PageData<DeviceId> deviceIds = deviceService.findDeviceIdsByTenantIdAndDeviceProfileId(tenantId, profileId, pageLink);
+        TransportProtos.GetHttpPullRoutingTargetsResponseMsg.Builder builder = TransportProtos.GetHttpPullRoutingTargetsResponseMsg.newBuilder();
+        for (DeviceId deviceId : deviceIds.getData()) {
+            Device device = deviceService.findDeviceById(tenantId, deviceId);
+            if (device == null) {
+                continue;
+            }
+            String externalDeviceId = "";
+            if (device.getDeviceData() != null && device.getDeviceData().getTransportConfiguration() != null) {
+                var tc = device.getDeviceData().getTransportConfiguration();
+                if (tc instanceof org.thingsboard.server.common.data.device.data.HttpPullDeviceTransportConfiguration httpPull) {
+                    externalDeviceId = httpPull.getExternalDeviceId() != null ? httpPull.getExternalDeviceId() : "";
+                }
+            }
+            builder.addTargets(TransportProtos.HttpPullRoutingTargetProto.newBuilder()
+                    .setDeviceIdMSB(deviceId.getId().getMostSignificantBits())
+                    .setDeviceIdLSB(deviceId.getId().getLeastSignificantBits())
+                    .setName(device.getName() != null ? device.getName() : "")
+                    .setLabel(device.getLabel() != null ? device.getLabel() : "")
+                    .setExternalDeviceId(externalDeviceId)
+                    .build());
+        }
+        builder.setHasNextPage(deviceIds.hasNext());
+        return TransportApiResponseMsg.newBuilder().setHttpPullRoutingTargetsResponseMsg(builder.build()).build();
     }
 
 

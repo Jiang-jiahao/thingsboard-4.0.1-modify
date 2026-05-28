@@ -16,7 +16,7 @@
 
 -->
 <div [formGroup]="deviceProfileTransportConfigurationFormGroup">
-  <div [ngSwitch]="transportType">
+  <div [ngSwitch]="activeTransportType">
     <ng-template [ngSwitchCase]="deviceTransportType.DEFAULT">
       <tb-default-device-profile-transport-configuration
         formControlName="configuration">
@@ -42,6 +42,16 @@
       <tb-snmp-device-profile-transport-configuration
         formControlName="configuration">
       </tb-snmp-device-profile-transport-configuration>
+    </ng-template>
+    <ng-template [ngSwitchCase]="basicTransportType.HTTP">
+      <tb-http-device-profile-transport-configuration
+        formControlName="configuration">
+      </tb-http-device-profile-transport-configuration>
+    </ng-template>
+    <ng-template [ngSwitchCase]="deviceTransportType.HTTP_PULL">
+      <tb-http-device-profile-transport-configuration
+        formControlName="configuration">
+      </tb-http-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.TCP">
       <tb-tcp-device-profile-transport-configuration

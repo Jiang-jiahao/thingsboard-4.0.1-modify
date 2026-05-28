@@ -100,6 +100,12 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
 
     private final AtomicBoolean serverAuthInFlight = new AtomicBoolean(false);
 
+    private final AtomicBoolean channelCloseHandled = new AtomicBoolean(false);
+
+    @Getter
+    @Setter
+    private volatile Throwable pendingDisconnectCause;
+
 
     /**
      * 入站 SERVER 连接在 Netty pipeline 首段实际使用的分帧（专用端口时等于设备配置文件，否则等于全局鉴权分帧）。
@@ -341,6 +347,16 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
 
     public void endServerAuth() {
         serverAuthInFlight.set(false);
+    }
+
+    public boolean beginCloseHandling() {
+        return channelCloseHandled.compareAndSet(false, true);
+    }
+
+    public Throwable takePendingDisconnectCause() {
+        Throwable cause = pendingDisconnectCause;
+        pendingDisconnectCause = null;
+        return cause;
     }
 
 

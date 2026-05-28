@@ -25,7 +25,7 @@ import {
   Validator,
   Validators
 } from '@angular/forms';
-import { DeviceProfileAlarmRule } from '@shared/models/device.models';
+import { DeviceProfileAlarmRule, MOBILE_UI_ENABLED } from '@shared/models/device.models';
 import { MatDialog } from '@angular/material/dialog';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { isDefinedAndNotNull } from '@core/utils';
@@ -56,6 +56,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   ]
 })
 export class AlarmRuleComponent implements ControlValueAccessor, OnInit, Validator {
+
+  readonly mobileUiEnabled = MOBILE_UI_ENABLED;
 
   @Input()
   disabled: boolean;

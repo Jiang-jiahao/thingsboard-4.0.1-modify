@@ -357,6 +357,51 @@ public class DefaultTransportService extends TransportActivityManager implements
 
 
     @Override
+    public TransportProtos.GetHttpPullDevicesResponseMsg getHttpPullDevicesIds(TransportProtos.GetHttpPullDevicesRequestMsg requestMsg) {
+        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+                UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
+                .setHttpPullDevicesRequestMsg(requestMsg)
+                .build()
+        );
+        try {
+            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            return response.getValue().getHttpPullDevicesResponseMsg();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public TransportProtos.GetDeviceByTenantIdAndNameResponseMsg getDeviceByTenantIdAndName(TransportProtos.GetDeviceByTenantIdAndNameRequestMsg requestMsg) {
+        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+                UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
+                .setDeviceByTenantIdAndNameRequestMsg(requestMsg)
+                .build()
+        );
+        try {
+            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            return response.getValue().getDeviceByTenantIdAndNameResponseMsg();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public TransportProtos.GetHttpPullRoutingTargetsResponseMsg getHttpPullRoutingTargets(TransportProtos.GetHttpPullRoutingTargetsRequestMsg requestMsg) {
+        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+                UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
+                .setHttpPullRoutingTargetsRequestMsg(requestMsg)
+                .build()
+        );
+        try {
+            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            return response.getValue().getHttpPullRoutingTargetsResponseMsg();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public TransportProtos.GetTcpDevicesResponseMsg getTcpDevicesIds(TransportProtos.GetTcpDevicesRequestMsg requestMsg) {
         TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
@@ -856,7 +901,7 @@ public class DefaultTransportService extends TransportActivityManager implements
                         .setServiceId(serviceInfoProvider.getServiceId())
                         .setLcEventType(eventType.name())
                         .setSuccess(success)
-                        .setError(error != null ? ExceptionUtils.getStackTrace(error) : ""))
+                        .setError(error != null ? org.thingsboard.server.common.transport.util.TransportThrowableFormatter.format(error) : ""))
                 .build();
         try {
             sendToCore(tenantId, deviceId, msg, deviceId.getId(), TransportServiceCallback.EMPTY);
@@ -875,7 +920,7 @@ public class DefaultTransportService extends TransportActivityManager implements
                         .setEntityIdLSB(deviceId.getId().getLeastSignificantBits())
                         .setServiceId(serviceInfoProvider.getServiceId())
                         .setMethod(method)
-                        .setError(ExceptionUtils.getRootCauseMessage(error)))
+                        .setError(org.thingsboard.server.common.transport.util.TransportThrowableFormatter.format(error)))
                 .build();
         try {
             sendToCore(tenantId, deviceId, msg, deviceId.getId(), TransportServiceCallback.EMPTY);

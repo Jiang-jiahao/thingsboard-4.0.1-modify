@@ -29,14 +29,18 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@app/core/core.state';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import {
+  createDeviceTransportConfiguration,
   DeviceData,
   DeviceProfileInfo,
   DeviceTransportType,
+  HttpPullRoutingMode,
+  hasDeviceTransportConfiguration,
   TcpTransportConnectMode,
   TcpWireAuthenticationMode,
+  toUiTransportType,
+  TransportType,
   UdpWireAuthenticationMode,
-  deviceProfileTypeConfigurationInfoMap,
-  deviceTransportTypeConfigurationInfoMap
+  deviceProfileTypeConfigurationInfoMap
 } from '@shared/models/device.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -76,6 +80,12 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   @Input()
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
 
+  @Input()
+  httpPullRoutingMode: HttpPullRoutingMode | null = null;
+
+  @Input()
+  httpPullProfilePollUrl: string | null = null;
+
   /** 来自设备详情页：tenant | customer | customer_user | edge | edge_customer_user */
   @Input()
   deviceScope: string;
@@ -101,6 +111,15 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   get showTcpProtocolTemplateHelp(): boolean {
     return this.deviceProfile?.transportType === DeviceTransportType.TCP
       || this.deviceProfile?.transportType === DeviceTransportType.UDP;
+  }
+
+  get profileUiTransportType(): TransportType | null {
+    const fromProfile = this.deviceProfile?.transportType;
+    if (fromProfile) {
+      return toUiTransportType(fromProfile);
+    }
+    const fromConfig = this.deviceDataFormGroup?.get('transportConfiguration')?.value?.type;
+    return toUiTransportType(fromConfig);
   }
 
   private propagateChange = (v: any) => { };
@@ -142,6 +161,23 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.deviceProfile && this.deviceDataFormGroup) {
       this.applyVisibilityFromValue(this.lastWrittenValue);
+      this.ensureTransportConfigurationForProfile();
+    }
+  }
+
+  /** 添加设备向导等场景：档案已选但 deviceData 尚未写入时，先初始化传输配置 */
+  private ensureTransportConfigurationForProfile(): void {
+    const transportType = this.deviceProfile?.transportType;
+    if (!transportType || !this.deviceDataFormGroup) {
+      return;
+    }
+    if (!hasDeviceTransportConfiguration(toUiTransportType(transportType))) {
+      return;
+    }
+    const ctrl = this.deviceDataFormGroup.get('transportConfiguration');
+    const current = ctrl?.value;
+    if (!current?.type || current.type !== transportType) {
+      ctrl.patchValue(createDeviceTransportConfiguration(transportType), { emitEvent: false });
     }
   }
 
@@ -158,8 +194,8 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
     const profileInfo = profileType && deviceProfileTypeConfigurationInfoMap.get(profileType);
     this.displayDeviceConfiguration = !!(profileInfo?.hasDeviceConfiguration);
     const transportType = value?.transportConfiguration?.type ?? this.deviceProfile?.transportType;
-    const transportInfo = transportType && deviceTransportTypeConfigurationInfoMap.get(transportType);
-    this.displayTransportConfiguration = !!(transportInfo?.hasDeviceConfiguration);
+    this.displayTransportConfiguration = transportType &&
+      hasDeviceTransportConfiguration(toUiTransportType(transportType as DeviceTransportType));
   }
 
   validate(): ValidationErrors | null {

@@ -72,6 +72,7 @@ import static org.thingsboard.server.utils.LwM2mObjectModelUtils.toLwm2mResource
 public class InstallScripts {
 
     public static final String APP_DIR = "application";
+    public static final String TB_CORE_DIR = "tb-core";
     public static final String SRC_DIR = "src";
     public static final String MAIN_DIR = "main";
     public static final String DATA_DIR = "data";
@@ -138,16 +139,29 @@ public class InstallScripts {
             return dataDir;
         } else {
             String workDir = System.getProperty("user.dir");
-            if (workDir.endsWith("application")) {
+            if (workDir.endsWith(TB_CORE_DIR)) {
                 return Paths.get(workDir, SRC_DIR, MAIN_DIR, DATA_DIR).toString();
+            }
+            if (workDir.endsWith(APP_DIR)) {
+                Path legacyDataDir = Paths.get(workDir, SRC_DIR, MAIN_DIR, DATA_DIR);
+                if (Files.exists(legacyDataDir)) {
+                    return legacyDataDir.toString();
+                }
+                Path tbCoreDataDir = Paths.get(workDir, TB_CORE_DIR, SRC_DIR, MAIN_DIR, DATA_DIR);
+                if (Files.exists(tbCoreDataDir)) {
+                    return tbCoreDataDir.toString();
+                }
             } else {
+                Path tbCoreDataDirPath = Paths.get(workDir, APP_DIR, TB_CORE_DIR, SRC_DIR, MAIN_DIR, DATA_DIR);
+                if (Files.exists(tbCoreDataDirPath)) {
+                    return tbCoreDataDirPath.toString();
+                }
                 Path dataDirPath = Paths.get(workDir, APP_DIR, SRC_DIR, MAIN_DIR, DATA_DIR);
                 if (Files.exists(dataDirPath)) {
                     return dataDirPath.toString();
-                } else {
-                    throw new RuntimeException("Not valid working directory: " + workDir + ". Please use either root project directory, application module directory or specify valid \"install.data_dir\" ENV variable to avoid automatic data directory lookup!");
                 }
             }
+            throw new RuntimeException("Not valid working directory: " + workDir + ". Please use either root project directory, application module directory or specify valid \"install.data_dir\" ENV variable to avoid automatic data directory lookup!");
         }
     }
 

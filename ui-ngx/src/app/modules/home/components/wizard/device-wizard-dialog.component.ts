@@ -30,6 +30,8 @@ import {
   DeviceProfileInfo,
   DeviceProfileType,
   DeviceTransportType,
+  extractHttpPullProfileContext,
+  HttpPullRoutingMode,
   TcpDeviceProfileTransportConfiguration,
   UdpDeviceProfileTransportConfiguration,
   TcpTransportConnectMode,
@@ -84,6 +86,10 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
 
   udpProfileWireAuthMode: UdpWireAuthenticationMode | null = null;
+
+  httpPullProfileRoutingMode: HttpPullRoutingMode | null = null;
+
+  httpPullProfilePollUrl: string | null = null;
 
   readonly deviceWizardDeviceScope: 'tenant' = 'tenant';
 
@@ -183,7 +189,8 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
           configuration: createDeviceConfiguration(profileType),
           transportConfiguration: createDeviceTransportConfiguration(transportType)
         };
-        this.deviceWizardFormGroup.patchValue({ deviceData });
+        this.deviceWizardFormGroup.patchValue({ deviceData }, { emitEvent: true });
+        this.cd.markForCheck();
         return;
       }
       let next: DeviceData = prev;
@@ -197,7 +204,8 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
         };
       }
       if (next !== prev) {
-        this.deviceWizardFormGroup.patchValue({ deviceData: next });
+        this.deviceWizardFormGroup.patchValue({ deviceData: next }, { emitEvent: true });
+        this.cd.markForCheck();
       }
     };
     const profileType = deviceProfile.type;
@@ -249,8 +257,15 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
     this.tcpProfileWireAuthMode = null;
     this.tcpProfileTransportConnectMode = null;
     this.udpProfileWireAuthMode = null;
+    this.httpPullProfileRoutingMode = null;
+    this.httpPullProfilePollUrl = null;
     if (!dp) {
       return;
+    }
+    const httpPullCtx = extractHttpPullProfileContext(dp);
+    if (httpPullCtx) {
+      this.httpPullProfileRoutingMode = httpPullCtx.routingMode;
+      this.httpPullProfilePollUrl = httpPullCtx.pollUrl;
     }
     if (dp.transportType === DeviceTransportType.TCP) {
       const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;

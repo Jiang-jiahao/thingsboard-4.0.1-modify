@@ -1,0 +1,182 @@
+<form [formGroup]="form" class="http-pull-form">
+  <div class="tb-small section-title" translate>device-profile.http-pull.section-poll</div>
+  <section class="flex flex-row gap-2 xs:flex-col">
+    <mat-form-field class="flex-1 mat-block">
+      <mat-label translate>device-profile.http-pull.poll-url</mat-label>
+      <input matInput formControlName="pollUrl" required placeholder="http://192.168.1.10:8080/api/data">
+      <mat-hint translate>device-profile.http-pull.poll-url-hint</mat-hint>
+    </mat-form-field>
+    <mat-form-field class="flex-1 mat-block">
+      <mat-label translate>device-profile.http-pull.poll-method</mat-label>
+      <mat-select formControlName="pollMethod">
+        <mat-option value="GET">GET</mat-option>
+        <mat-option value="POST">POST</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </section>
+  <section class="flex flex-row gap-2 xs:flex-col">
+    <mat-form-field class="flex-1 mat-block">
+      <mat-label translate>device-profile.http-pull.querying-frequency-ms</mat-label>
+      <input matInput type="number" formControlName="queryingFrequencyMs" required>
+    </mat-form-field>
+    <mat-form-field class="flex-1 mat-block">
+      <mat-label translate>device-profile.http-pull.timeout-ms</mat-label>
+      <input matInput type="number" formControlName="timeoutMs" required>
+    </mat-form-field>
+    <mat-form-field class="flex-1 mat-block">
+      <mat-label translate>device-profile.http-pull.read-timeout-ms</mat-label>
+      <input matInput type="number" formControlName="readTimeoutMs" required>
+    </mat-form-field>
+  </section>
+  <mat-form-field class="mat-block" *ngIf="form.get('pollMethod').value === 'POST'">
+    <mat-label translate>device-profile.http-pull.poll-body</mat-label>
+    <textarea matInput formControlName="pollBody" rows="3"></textarea>
+  </mat-form-field>
+
+  <mat-expansion-panel class="http-pull-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title translate>device-profile.http-pull.section-auth</mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-form-field class="mat-block">
+      <mat-label translate>device-profile.http-pull.auth-type</mat-label>
+      <mat-select formControlName="authType">
+        <mat-option *ngFor="let t of authTypes" [value]="t">{{ t }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <ng-container [ngSwitch]="form.get('authType').value">
+      <section *ngSwitchCase="'API_KEY'" class="flex flex-row gap-2 xs:flex-col">
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label translate>device-profile.http-pull.api-key-header</mat-label>
+          <input matInput formControlName="apiKeyHeader">
+        </mat-form-field>
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label translate>device-profile.http-pull.api-key</mat-label>
+          <input matInput formControlName="apiKeyValue">
+        </mat-form-field>
+        <mat-slide-toggle formControlName="apiKeyInQuery" class="flex-1">
+          {{ 'device-profile.http-pull.api-key-in-query' | translate }}
+        </mat-slide-toggle>
+      </section>
+      <section *ngSwitchCase="'BASIC'" class="flex flex-row gap-2 xs:flex-col">
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label translate>device-profile.http-pull.username</mat-label>
+          <input matInput formControlName="username">
+        </mat-form-field>
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label translate>device-profile.http-pull.password</mat-label>
+          <input matInput type="password" formControlName="password">
+        </mat-form-field>
+      </section>
+      <mat-form-field *ngSwitchCase="'BEARER_STATIC'" class="mat-block">
+        <mat-label translate>device-profile.http-pull.bearer-token</mat-label>
+        <input matInput formControlName="bearerToken">
+      </mat-form-field>
+      <ng-container *ngSwitchCase="'LOGIN_TOKEN'">
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-profile.http-pull.login-url</mat-label>
+          <input matInput formControlName="loginUrl">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-profile.http-pull.login-body</mat-label>
+          <textarea matInput formControlName="loginBody" rows="3"></textarea>
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-profile.http-pull.token-json-path</mat-label>
+          <input matInput formControlName="accessTokenJsonPath">
+        </mat-form-field>
+      </ng-container>
+      <ng-container *ngSwitchCase="'OAUTH2_CLIENT_CREDENTIALS'">
+        <section class="flex flex-row gap-2 xs:flex-col">
+          <mat-form-field class="flex-2 mat-block">
+            <mat-label translate>device-profile.http-pull.token-url</mat-label>
+            <input matInput formControlName="tokenUrl">
+          </mat-form-field>
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.http-pull.client-id</mat-label>
+            <input matInput formControlName="clientId">
+          </mat-form-field>
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.http-pull.client-secret</mat-label>
+            <input matInput type="password" formControlName="clientSecret">
+          </mat-form-field>
+        </section>
+      </ng-container>
+      <ng-container *ngSwitchCase="'OAUTH2_PASSWORD'">
+        <section class="flex flex-row gap-2 xs:flex-col">
+          <mat-form-field class="flex-2 mat-block">
+            <mat-label translate>device-profile.http-pull.token-url</mat-label>
+            <input matInput formControlName="tokenUrl">
+          </mat-form-field>
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.http-pull.client-id</mat-label>
+            <input matInput formControlName="clientId">
+          </mat-form-field>
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.http-pull.client-secret</mat-label>
+            <input matInput type="password" formControlName="clientSecret">
+          </mat-form-field>
+        </section>
+        <section class="flex flex-row gap-2 xs:flex-col">
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.http-pull.username</mat-label>
+            <input matInput formControlName="oauthUsername">
+          </mat-form-field>
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.http-pull.password</mat-label>
+            <input matInput type="password" formControlName="oauthPassword">
+          </mat-form-field>
+        </section>
+      </ng-container>
+    </ng-container>
+  </mat-expansion-panel>
+
+  <mat-expansion-panel class="http-pull-panel" expanded>
+    <mat-expansion-panel-header>
+      <mat-panel-title class="routing-panel-title">
+        <span translate>device-profile.http-pull.section-routing</span>
+        <button type="button" mat-stroked-button color="primary" class="routing-example-btn"
+                (click)="openRoutingExample($event)">
+          {{ 'device-profile.http-pull.routing-example-btn' | translate }}
+        </button>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-form-field class="mat-block">
+      <mat-label translate>device-profile.http-pull.routing-mode</mat-label>
+      <mat-select formControlName="routingMode">
+        <mat-option *ngFor="let m of routingModes" [value]="m">{{ m }}</mat-option>
+      </mat-select>
+      <mat-hint translate>device-profile.http-pull.routing-mode-hint</mat-hint>
+    </mat-form-field>
+    <ng-container *ngIf="form.get('routingMode').value === 'MULTI_DEVICE'">
+      <section class="flex flex-row gap-2 xs:flex-col">
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label translate>device-profile.http-pull.response-array-path</mat-label>
+          <input matInput formControlName="responseArrayJsonPath" placeholder="$.data.items">
+        </mat-form-field>
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label translate>device-profile.http-pull.device-id-path</mat-label>
+          <input matInput formControlName="deviceIdJsonPath" required>
+          <mat-hint translate>device-profile.http-pull.device-id-path-hint</mat-hint>
+        </mat-form-field>
+      </section>
+      <section class="flex flex-row gap-2 xs:flex-col">
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label translate>device-profile.http-pull.match-strategy</mat-label>
+          <mat-select formControlName="deviceIdMatchStrategy">
+            <mat-option *ngFor="let s of matchStrategies" [value]="s">{{ s }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label translate>device-profile.http-pull.target-profile-id</mat-label>
+          <input matInput formControlName="targetDeviceProfileId">
+          <mat-hint translate>device-profile.http-pull.target-profile-id-hint</mat-hint>
+        </mat-form-field>
+      </section>
+    </ng-container>
+    <mat-form-field class="mat-block">
+      <mat-label translate>device-profile.http-pull.telemetry-key</mat-label>
+      <input matInput formControlName="telemetryPayloadKey">
+      <mat-hint translate>device-profile.http-pull.telemetry-key-hint</mat-hint>
+    </mat-form-field>
+  </mat-expansion-panel>
+</form>

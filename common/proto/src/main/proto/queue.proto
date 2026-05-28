@@ -625,6 +625,54 @@ message GetSnmpDevicesResponseMsg {
   bool hasNextPage = 2;
 }
 
+message GetHttpPullDevicesRequestMsg {
+  int32 page = 1;
+  int32 pageSize = 2;
+}
+
+message GetHttpPullDevicesResponseMsg {
+  repeated string ids = 1;
+  bool hasNextPage = 2;
+}
+
+message GetDeviceByTenantIdAndNameRequestMsg {
+  int64 tenantIdMSB = 1;
+  int64 tenantIdLSB = 2;
+  string name = 3;
+}
+
+message GetDeviceByTenantIdAndNameResponseMsg {
+  int64 deviceIdMSB = 1;
+  int64 deviceIdLSB = 2;
+  int64 deviceProfileIdMSB = 3;
+  int64 deviceProfileIdLSB = 4;
+  bytes deviceTransportConfiguration = 5;
+  string label = 6;
+  string name = 7;
+}
+
+message GetHttpPullRoutingTargetsRequestMsg {
+  int64 tenantIdMSB = 1;
+  int64 tenantIdLSB = 2;
+  int64 deviceProfileIdMSB = 3;
+  int64 deviceProfileIdLSB = 4;
+  int32 page = 5;
+  int32 pageSize = 6;
+}
+
+message HttpPullRoutingTargetProto {
+  int64 deviceIdMSB = 1;
+  int64 deviceIdLSB = 2;
+  string name = 3;
+  string label = 4;
+  string externalDeviceId = 5;
+}
+
+message GetHttpPullRoutingTargetsResponseMsg {
+  repeated HttpPullRoutingTargetProto targets = 1;
+  bool hasNextPage = 2;
+}
+
 message EntityUpdateMsg {
   oneof entityUpdate {
     TenantProto tenant = 1;
@@ -1619,6 +1667,9 @@ message TransportApiRequestMsg {
   GetUdpDevicesRequestMsg udpDevicesRequestMsg = 17;
   GetTcpProfilesRequestMsg tcpProfilesRequestMsg = 18;
   GetUdpProfilesRequestMsg udpProfilesRequestMsg = 19;
+  GetHttpPullDevicesRequestMsg httpPullDevicesRequestMsg = 20;
+  GetDeviceByTenantIdAndNameRequestMsg deviceByTenantIdAndNameRequestMsg = 21;
+  GetHttpPullRoutingTargetsRequestMsg httpPullRoutingTargetsRequestMsg = 22;
 }
 
 /* Response from ThingsBoard Core Service to Transport Service */
@@ -1638,6 +1689,9 @@ message TransportApiResponseMsg {
   GetUdpDevicesResponseMsg udpDevicesResponseMsg = 13;
   GetTcpProfilesResponseMsg tcpProfilesResponseMsg = 14;
   GetUdpProfilesResponseMsg udpProfilesResponseMsg = 15;
+  GetHttpPullDevicesResponseMsg httpPullDevicesResponseMsg = 16;
+  GetDeviceByTenantIdAndNameResponseMsg deviceByTenantIdAndNameResponseMsg = 17;
+  GetHttpPullRoutingTargetsResponseMsg httpPullRoutingTargetsResponseMsg = 18;
 }
 
 /* Messages that are handled by ThingsBoard Core Service */

@@ -29,6 +29,7 @@ import { Lwm2mDeviceTransportConfigurationComponent } from './data/lwm2m-device-
 import { SnmpDeviceTransportConfigurationComponent } from './data/snmp-device-transport-configuration.component';
 import { TcpDeviceTransportConfigurationComponent } from './data/tcp-device-transport-configuration.component';
 import { UdpDeviceTransportConfigurationComponent } from './data/udp-device-transport-configuration.component';
+import { HttpPullDeviceProfileTransportModule } from '@home/components/profile/device/http-pull/http-pull-device-profile-transport.module';
 
 @NgModule({
   declarations: [
@@ -47,7 +48,8 @@ import { UdpDeviceTransportConfigurationComponent } from './data/udp-device-tran
   imports: [
     CommonModule,
     SharedModule,
-    DeviceProfileCommonModule
+    DeviceProfileCommonModule,
+    HttpPullDeviceProfileTransportModule
   ],
   exports: [
     DeviceDataComponent

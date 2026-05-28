@@ -28,6 +28,8 @@ import {
   DeviceProfileInfo,
   DeviceProfileType,
   DeviceTransportType,
+  extractHttpPullProfileContext,
+  HttpPullRoutingMode,
   TcpDeviceProfileTransportConfiguration,
   UdpDeviceProfileTransportConfiguration,
   UdpWireAuthenticationMode,
@@ -68,6 +70,10 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
 
   /** 当前所选设备档案的 TCP 连接模式（CLIENT/SERVER），用于设备传输页表单项显隐 */
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
+
+  httpPullProfileRoutingMode: HttpPullRoutingMode | null = null;
+
+  httpPullProfilePollUrl: string | null = null;
 
   readonly gatewayUiEnabled = GATEWAY_UI_ENABLED;
 
@@ -259,7 +265,11 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     }
     // 勿依赖 profileInfo.transportType：设备页自动完成可能只带 id/name，transportType 为空会导致永远不拉档案
     const transportType = profileInfo && 'transportType' in profileInfo ? profileInfo.transportType : undefined;
-    if (transportType && transportType !== DeviceTransportType.TCP && transportType !== DeviceTransportType.UDP) {
+    const needsFullProfile = !transportType
+      || transportType === DeviceTransportType.TCP
+      || transportType === DeviceTransportType.UDP
+      || transportType === DeviceTransportType.HTTP_PULL;
+    if (!needsFullProfile) {
       this.applyTcpProfileWireAuthFromDeviceProfile(null);
       this.cd.markForCheck();
       return;
@@ -280,8 +290,15 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     this.tcpProfileWireAuthMode = null;
     this.tcpProfileTransportConnectMode = null;
     this.udpProfileWireAuthMode = null;
+    this.httpPullProfileRoutingMode = null;
+    this.httpPullProfilePollUrl = null;
     if (!dp) {
       return;
+    }
+    const httpPullCtx = extractHttpPullProfileContext(dp);
+    if (httpPullCtx) {
+      this.httpPullProfileRoutingMode = httpPullCtx.routingMode;
+      this.httpPullProfilePollUrl = httpPullCtx.pollUrl;
     }
     if (dp.transportType === DeviceTransportType.TCP) {
       const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;

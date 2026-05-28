@@ -1,0 +1,47 @@
+<form [formGroup]="form" class="http-pull-device-form">
+  <ng-container *ngIf="singleDeviceMode">
+    <p class="tb-hint" translate>device-profile.http-pull.single-device-device-hint</p>
+    <p *ngIf="httpPullProfilePollUrl" class="tb-hint profile-poll-url-ref">
+      <span translate>device-profile.http-pull.profile-poll-url</span>：{{ httpPullProfilePollUrl }}
+    </p>
+    <p *ngIf="effectivePollUrl" class="tb-hint effective-poll-url-ref">
+      <span translate>device-profile.http-pull.effective-poll-url</span>：{{ effectivePollUrl }}
+    </p>
+    <mat-form-field class="mat-block">
+      <mat-label translate>device-profile.http-pull.poll-url-override</mat-label>
+      <input matInput formControlName="pollUrlOverride" placeholder="192.168.1.10:8080">
+      <mat-hint translate>device-profile.http-pull.poll-url-override-single-hint</mat-hint>
+    </mat-form-field>
+  </ng-container>
+  <ng-container *ngIf="!singleDeviceMode">
+    <mat-slide-toggle formControlName="collector" class="collector-toggle">
+      {{ 'device-profile.http-pull.collector' | translate }}
+    </mat-slide-toggle>
+    <p *ngIf="form.get('collector').value" class="tb-hint collector-only-hint" translate>
+      device-profile.http-pull.collector-only-hint
+    </p>
+    <p *ngIf="!form.get('collector').value" class="tb-hint" translate>
+      device-profile.http-pull.target-device-hint
+    </p>
+    <section *ngIf="form.get('collector').value" class="target-fields">
+      <p *ngIf="httpPullProfilePollUrl" class="tb-hint profile-poll-url-ref">
+        <span translate>device-profile.http-pull.profile-poll-url</span>：{{ httpPullProfilePollUrl }}
+      </p>
+      <p *ngIf="effectivePollUrl" class="tb-hint effective-poll-url-ref">
+        <span translate>device-profile.http-pull.effective-poll-url</span>：{{ effectivePollUrl }}
+      </p>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.http-pull.poll-url-override</mat-label>
+        <input matInput formControlName="pollUrlOverride" placeholder="192.168.1.10:8080">
+        <mat-hint translate>device-profile.http-pull.poll-url-override-collector-hint</mat-hint>
+      </mat-form-field>
+    </section>
+    <section *ngIf="!form.get('collector').value" class="flex flex-row gap-2 xs:flex-col target-fields">
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.http-pull.external-device-id</mat-label>
+        <input matInput formControlName="externalDeviceId">
+        <mat-hint translate>device-profile.http-pull.external-device-id-hint</mat-hint>
+      </mat-form-field>
+    </section>
+  </ng-container>
+</form>

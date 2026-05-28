@@ -81,6 +81,9 @@ export class DeviceCheckConnectivityDialogComponent extends
   mqttTabIndex = 0;
   coapTabIndex = 0;
 
+  /** 后端返回 HTTP_PULL 协议键（非被动 HTTP curl） */
+  httpPullConnectivity = false;
+
   private telemetrySubscriber: TelemetrySubscriber;
 
   private currentTime = Date.now();
@@ -147,17 +150,32 @@ export class DeviceCheckConnectivityDialogComponent extends
       commands => {
         this.commands = commands;
         const commandsProtocols = Object.keys(commands);
+        this.httpPullConnectivity = commandsProtocols.some(k => k.toUpperCase() === DeviceTransportType.HTTP_PULL);
         this.transportTypes.forEach(transport => {
-          const findCommand = commandsProtocols.find(item => item.toUpperCase().startsWith(transport));
+          const findCommand = commandsProtocols.find(item => this.commandMatchesTransport(item, transport));
           if (findCommand) {
             this.allowTransportType.add(transport);
           }
         });
+        if (this.httpPullConnectivity) {
+          this.allowTransportType.delete(BasicTransportType.HTTP);
+          this.allowTransportType.add(DeviceTransportType.HTTP_PULL);
+        }
         this.selectTransportType = this.allowTransportType.values().next().value;
         this.selectTabIndexForUserOS();
         this.loadedCommand = true;
       }
     );
+  }
+
+  /** HTTP 仅匹配被动 HTTP；避免 HTTP_PULL 被误判为 HTTP 并展示 curl 说明 */
+  private commandMatchesTransport(commandKey: string, transport: NetworkTransportType): boolean {
+    const key = commandKey.toUpperCase();
+    const t = String(transport).toUpperCase();
+    if (t === BasicTransportType.HTTP) {
+      return key === 'HTTP';
+    }
+    return key === t;
   }
 
   private subscribeToLatestTelemetry() {

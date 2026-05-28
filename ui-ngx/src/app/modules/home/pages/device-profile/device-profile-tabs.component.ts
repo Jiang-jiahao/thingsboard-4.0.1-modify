@@ -21,7 +21,7 @@ import { EntityTabsComponent } from '../../components/entity/entity-tabs.compone
 import {
   DeviceProfile,
   DEVICE_PROVISIONING_UI_ENABLED,
-  DeviceTransportType,
+  deviceProfileTransportTypeOptions,
   deviceTransportTypeHintMap,
   deviceTransportTypeTranslationMap
 } from '@shared/models/device.models';
@@ -34,7 +34,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class DeviceProfileTabsComponent extends EntityTabsComponent<DeviceProfile> {
 
-  deviceTransportTypes = Object.values(DeviceTransportType);
+  deviceTransportTypes = deviceProfileTransportTypeOptions;
 
   deviceTransportTypeTranslations = deviceTransportTypeTranslationMap;
 

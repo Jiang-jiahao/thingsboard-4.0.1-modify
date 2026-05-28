@@ -29,7 +29,9 @@ import { EntityType, entityTypeResources, entityTypeTranslations } from '@shared
 import { EntityAction } from '@home/models/entity/entity-component.models';
 import { DialogService } from '@core/services/dialog.service';
 import {
+  BasicTransportType,
   DeviceProfile,
+  DeviceTransportType,
   deviceProfileTypeTranslationMap,
   deviceTransportTypeTranslationMap
 } from '@shared/models/device.models';
@@ -75,7 +77,10 @@ export class DeviceProfilesTableConfigResolver  {
         return this.translate.instant(deviceProfileTypeTranslationMap.get(deviceProfile.type));
       }),
       new EntityTableColumn<DeviceProfile>('transportType', 'device-profile.transport-type', '20%', (deviceProfile) => {
-        return this.translate.instant(deviceTransportTypeTranslationMap.get(deviceProfile.transportType));
+        const uiType = deviceProfile.transportType === DeviceTransportType.HTTP_PULL
+          ? BasicTransportType.HTTP
+          : deviceProfile.transportType;
+        return this.translate.instant(deviceTransportTypeTranslationMap.get(uiType));
       }),
       new EntityTableColumn<DeviceProfile>('description', 'device-profile.description', '40%',
           entity => this.customTranslate.transform(entity.description || '')),

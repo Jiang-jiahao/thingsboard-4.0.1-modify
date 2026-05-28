@@ -22,5 +22,6 @@ public enum DeviceTransportType {
     UDP,
     COAP,
     LWM2M,
-    SNMP
+    SNMP,
+    HTTP_PULL
 }

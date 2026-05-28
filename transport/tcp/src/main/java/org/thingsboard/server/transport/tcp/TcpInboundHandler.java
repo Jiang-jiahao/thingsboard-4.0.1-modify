@@ -107,11 +107,12 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
     }
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        tcpTransportContext.onChannelClosed(session);
+        tcpTransportContext.onChannelClosed(session, session.takePendingDisconnectCause());
     }
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         log.warn("[{}] TCP exception", session.getSessionId(), cause);
+        session.setPendingDisconnectCause(cause);
         ctx.close();
     }
 }

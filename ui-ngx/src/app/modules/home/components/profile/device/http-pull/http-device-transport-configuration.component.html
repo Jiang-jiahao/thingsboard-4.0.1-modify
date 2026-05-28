@@ -1,0 +1,29 @@
+<form [formGroup]="form" class="http-transport-form">
+  <section class="http-mode-section">
+    <mat-form-field class="mat-block">
+      <mat-label translate>device-profile.http.mode</mat-label>
+      <mat-select formControlName="httpMode">
+        <mat-option [value]="httpTransportMode.PASSIVE">
+          {{ 'device-profile.http.mode-passive' | translate }}
+        </mat-option>
+        <mat-option [value]="httpTransportMode.PULL">
+          {{ 'device-profile.http.mode-pull' | translate }}
+        </mat-option>
+      </mat-select>
+      <mat-hint translate>device-profile.http.mode-hint</mat-hint>
+    </mat-form-field>
+  </section>
+
+  <section *ngIf="form.get('httpMode').value === httpTransportMode.PASSIVE" class="http-passive-panel">
+    <mat-icon class="http-passive-icon">info</mat-icon>
+    <div class="http-passive-text">
+      <div class="tb-hint" translate>device-profile.http.passive-device-hint</div>
+    </div>
+  </section>
+
+  <div [hidden]="form.get('httpMode').value !== httpTransportMode.PULL">
+    <tb-http-pull-device-transport-configuration
+      formControlName="pullConfiguration">
+    </tb-http-pull-device-transport-configuration>
+  </div>
+</form>

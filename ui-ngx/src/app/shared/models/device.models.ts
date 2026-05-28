@@ -51,12 +51,20 @@ export enum DeviceTransportType {
   LWM2M = 'LWM2M',
   SNMP = 'SNMP',
   TCP = 'TCP',
-  UDP = 'UDP'
+  UDP = 'UDP',
+  HTTP_PULL = 'HTTP_PULL'
 }
 
 export enum BasicTransportType {
   HTTP = 'HTTP'
 }
+
+/** HTTP 传输在 UI 中的工作模式（保存时映射为 DEFAULT 或 HTTP_PULL） */
+export enum HttpTransportMode {
+  PASSIVE = 'PASSIVE',
+  PULL = 'PULL'
+}
+
 export type TransportType =  BasicTransportType | DeviceTransportType;
 export type NetworkTransportType =  BasicTransportType | Exclude<DeviceTransportType, DeviceTransportType.DEFAULT>;
 
@@ -85,6 +93,9 @@ export const GATEWAY_UI_ENABLED = false;
 
 /** Set to true to show edge management UI (menu, routes, customer edge actions). */
 export const EDGE_UI_ENABLED = false;
+
+/** Set to true to show mobile center UI (menu, routes, device/asset profile mobile dashboard). */
+export const MOBILE_UI_ENABLED = false;
 
 /** Set to true to show OTA updates UI (advanced features menu, device/profile firmware & software). */
 export const OTA_UI_ENABLED = false;
@@ -135,6 +146,18 @@ export const deviceTransportTypeTranslationMap = new Map<TransportType, string>(
   ]
 );
 
+/** 设备配置向导/编辑页传输类型下拉选项（HTTP 合并主动/被动，不单独展示 HTTP_PULL） */
+export const deviceProfileTransportTypeOptions: TransportType[] = [
+  DeviceTransportType.DEFAULT,
+  DeviceTransportType.MQTT,
+  DeviceTransportType.COAP,
+  DeviceTransportType.LWM2M,
+  DeviceTransportType.SNMP,
+  BasicTransportType.HTTP,
+  DeviceTransportType.TCP,
+  DeviceTransportType.UDP
+];
+
 
 export const deviceProvisionTypeTranslationMap = new Map<DeviceProvisionType, string>(
   [
@@ -154,9 +177,44 @@ export const deviceTransportTypeHintMap = new Map<TransportType, string>(
     [DeviceTransportType.SNMP, 'device-profile.transport-type-snmp-hint'],
     [DeviceTransportType.TCP, 'device-profile.transport-type-tcp-hint'],
     [DeviceTransportType.UDP, 'device-profile.transport-type-udp-hint'],
-    [BasicTransportType.HTTP, '']
+    [BasicTransportType.HTTP, 'device-profile.transport-type-http-hint']
   ]
 );
+
+export function isHttpTransportType(transportType: TransportType | DeviceTransportType | null | undefined): boolean {
+  return transportType === DeviceTransportType.HTTP_PULL || transportType === BasicTransportType.HTTP;
+}
+
+export function toUiTransportType(transportType: DeviceTransportType | TransportType | null | undefined): TransportType | null {
+  if (!transportType) {
+    return null;
+  }
+  return isHttpTransportType(transportType) ? BasicTransportType.HTTP : transportType as TransportType;
+}
+
+export function resolveTransportTypeForSave(uiTransportType: TransportType,
+                                           transportConfiguration?: { type?: DeviceTransportType }): DeviceTransportType {
+  if (uiTransportType === BasicTransportType.HTTP) {
+    return transportConfiguration?.type === DeviceTransportType.HTTP_PULL
+      ? DeviceTransportType.HTTP_PULL
+      : DeviceTransportType.DEFAULT;
+  }
+  return uiTransportType as DeviceTransportType;
+}
+
+export function hasDeviceProfileTransportConfiguration(transportType: TransportType): boolean {
+  if (transportType === BasicTransportType.HTTP) {
+    return true;
+  }
+  return deviceTransportTypeConfigurationInfoMap.get(transportType as DeviceTransportType)?.hasProfileConfiguration ?? false;
+}
+
+export function hasDeviceTransportConfiguration(transportType: TransportType): boolean {
+  if (transportType === BasicTransportType.HTTP) {
+    return true;
+  }
+  return deviceTransportTypeConfigurationInfoMap.get(transportType as DeviceTransportType)?.hasDeviceConfiguration ?? false;
+}
 
 export const transportPayloadTypeTranslationMap = new Map<TransportPayloadType, string>(
   [
@@ -257,6 +315,13 @@ export const deviceTransportTypeConfigurationInfoMap = new Map<DeviceTransportTy
       }
     ],
     [
+      DeviceTransportType.HTTP_PULL,
+      {
+        hasProfileConfiguration: true,
+        hasDeviceConfiguration: true
+      }
+    ],
+    [
       DeviceTransportType.TCP,
       {
         hasProfileConfiguration: true,
@@ -327,6 +392,190 @@ export interface SnmpDeviceProfileTransportConfiguration {
   timeoutMs?: number;
   retries?: number;
   communicationConfigs?: SnmpCommunicationConfig[];
+}
+
+export enum HttpPullAuthType {
+  NONE = 'NONE',
+  API_KEY = 'API_KEY',
+  BASIC = 'BASIC',
+  BEARER_STATIC = 'BEARER_STATIC',
+  LOGIN_TOKEN = 'LOGIN_TOKEN',
+  OAUTH2_CLIENT_CREDENTIALS = 'OAUTH2_CLIENT_CREDENTIALS',
+  OAUTH2_PASSWORD = 'OAUTH2_PASSWORD'
+}
+
+export enum HttpPullRoutingMode {
+  SINGLE_DEVICE = 'SINGLE_DEVICE',
+  MULTI_DEVICE = 'MULTI_DEVICE'
+}
+
+export enum HttpPullDeviceIdMatchStrategy {
+  DEVICE_NAME = 'DEVICE_NAME',
+  DEVICE_LABEL = 'DEVICE_LABEL',
+  EXTERNAL_DEVICE_ID = 'EXTERNAL_DEVICE_ID'
+}
+
+export interface HttpPullAuthConfiguration {
+  authType?: HttpPullAuthType;
+  apiKeyHeader?: string;
+  apiKeyValue?: string;
+  apiKeyInQuery?: boolean;
+  apiKeyQueryParam?: string;
+  username?: string;
+  password?: string;
+  bearerToken?: string;
+  loginUrl?: string;
+  loginMethod?: string;
+  loginBody?: string;
+  loginHeaders?: { [key: string]: string };
+  accessTokenJsonPath?: string;
+  tokenHeader?: string;
+  tokenPrefix?: string;
+  expiresInJsonPath?: string;
+  defaultTokenTtlSec?: number;
+  refreshTokenJsonPath?: string;
+  refreshUrl?: string;
+  refreshMethod?: string;
+  refreshBodyTemplate?: string;
+  tokenUrl?: string;
+  clientId?: string;
+  clientSecret?: string;
+  scope?: string;
+  oauthUsername?: string;
+  oauthPassword?: string;
+}
+
+export interface HttpPullDeviceRoutingConfiguration {
+  routingMode?: HttpPullRoutingMode;
+  responseArrayJsonPath?: string;
+  deviceIdJsonPath?: string;
+  deviceIdMatchStrategy?: HttpPullDeviceIdMatchStrategy;
+  targetDeviceProfileId?: string;
+  telemetryPayloadKey?: string;
+}
+
+export interface HttpPullDeviceProfileTransportConfiguration {
+  timeoutMs?: number;
+  readTimeoutMs?: number;
+  queryingFrequencyMs?: number;
+  pollUrl?: string;
+  pollMethod?: string;
+  pollBody?: string;
+  pollHeaders?: { [key: string]: string };
+  auth?: HttpPullAuthConfiguration;
+  routing?: HttpPullDeviceRoutingConfiguration;
+}
+
+export interface HttpPullDeviceTransportConfiguration {
+  collector?: boolean;
+  externalDeviceId?: string;
+  pollUrlOverride?: string;
+}
+
+export interface HttpPullProfileContext {
+  routingMode: HttpPullRoutingMode;
+  pollUrl: string | null;
+}
+
+/** 从完整设备档案解析 HTTP 主动采集的路由模式与档案级拉取 URL */
+export function extractHttpPullProfileContext(dp: DeviceProfile | null | undefined): HttpPullProfileContext | null {
+  if (!dp || dp.transportType !== DeviceTransportType.HTTP_PULL) {
+    return null;
+  }
+  const raw = dp.profileData?.transportConfiguration as HttpPullDeviceProfileTransportConfiguration | undefined;
+  if (!raw) {
+    return null;
+  }
+  return {
+    routingMode: raw.routing?.routingMode ?? HttpPullRoutingMode.SINGLE_DEVICE,
+    pollUrl: raw.pollUrl ?? null
+  };
+}
+
+const HTTP_PULL_HOST_PORT_PATTERN = /^[\w.\-]+:\d+$/;
+
+function parseHttpPullOverrideUrl(raw: string): URL | null {
+  try {
+    const withScheme = /^https?:\/\//i.test(raw) || raw.includes('://') ? raw : `http://${raw}`;
+    return new URL(withScheme);
+  } catch {
+    return null;
+  }
+}
+
+/** 仅主机:端口或仅有 origin（无路径）时，拉取时与档案 URL 合并路径 */
+export function shouldMergeHttpPullPollUrlWithProfile(raw: string | undefined | null): boolean {
+  const trimmed = raw?.trim();
+  if (!trimmed) {
+    return false;
+  }
+  if (HTTP_PULL_HOST_PORT_PATTERN.test(trimmed)) {
+    return true;
+  }
+  const parsed = parseHttpPullOverrideUrl(trimmed);
+  if (!parsed) {
+    return false;
+  }
+  const path = parsed.pathname;
+  return path === '' || path === '/';
+}
+
+/**
+ * 运行时有效拉取 URL（与后端 HttpPullPollUrlResolver 一致）。
+ */
+export function resolveHttpPullPollUrlOverride(
+  raw: string | undefined | null,
+  profilePollUrl: string | null | undefined
+): string | undefined {
+  const trimmed = raw?.trim();
+  if (!trimmed) {
+    return profilePollUrl || undefined;
+  }
+  if (!shouldMergeHttpPullPollUrlWithProfile(trimmed)) {
+    return trimmed;
+  }
+  if (!profilePollUrl) {
+    return parseHttpPullOverrideUrl(trimmed)?.origin.replace(/\/$/, '') || trimmed;
+  }
+  try {
+    const profile = new URL(profilePollUrl);
+    const override = parseHttpPullOverrideUrl(trimmed);
+    if (!override) {
+      return trimmed;
+    }
+    return `${override.protocol}//${override.host}${profile.pathname}${profile.search}`;
+  } catch {
+    return trimmed;
+  }
+}
+
+/**
+ * 表单展示：若已存 URL 的路径与当前档案一致，仅显示主机:端口，便于档案改路径后仍生效。
+ */
+export function formatHttpPullPollUrlOverrideForDisplay(
+  stored: string | undefined | null,
+  profilePollUrl: string | null | undefined
+): string {
+  const trimmed = stored?.trim();
+  if (!trimmed) {
+    return '';
+  }
+  if (HTTP_PULL_HOST_PORT_PATTERN.test(trimmed)) {
+    return trimmed;
+  }
+  if (!profilePollUrl) {
+    return trimmed;
+  }
+  try {
+    const profile = new URL(profilePollUrl);
+    const override = parseHttpPullOverrideUrl(trimmed);
+    if (override && override.pathname === profile.pathname && override.search === profile.search) {
+      return override.host;
+    }
+  } catch {
+    /* keep trimmed */
+  }
+  return trimmed;
 }
 
 export enum SnmpSpecType {
@@ -908,6 +1157,7 @@ export type DeviceProfileTransportConfigurations = DefaultDeviceProfileTransport
                                                    CoapDeviceProfileTransportConfiguration &
                                                    Lwm2mDeviceProfileTransportConfiguration &
                                                    SnmpDeviceProfileTransportConfiguration &
+                                                   HttpPullDeviceProfileTransportConfiguration &
                                                    TcpDeviceProfileTransportConfiguration &
                                                    UdpDeviceProfileTransportConfiguration;
 
@@ -954,7 +1204,7 @@ export const createDeviceConfiguration = (type: DeviceProfileType): DeviceConfig
   return configuration;
 };
 
-export const createDeviceProfileTransportConfiguration = (type: DeviceTransportType): DeviceProfileTransportConfiguration => {
+export const createDeviceProfileTransportConfiguration = (type: TransportType): DeviceProfileTransportConfiguration => {
   let transportConfiguration: DeviceProfileTransportConfiguration = null;
   if (type) {
     switch (type) {
@@ -1006,6 +1256,22 @@ export const createDeviceProfileTransportConfiguration = (type: DeviceTransportT
         };
         transportConfiguration = {...snmpTransportConfiguration, type: DeviceTransportType.SNMP};
         break;
+      case BasicTransportType.HTTP:
+      case DeviceTransportType.HTTP_PULL:
+        const httpPullTransportConfiguration: HttpPullDeviceProfileTransportConfiguration = {
+          timeoutMs: 10000,
+          readTimeoutMs: 10000,
+          queryingFrequencyMs: 30000,
+          pollUrl: 'https://api.example.com/data',
+          pollMethod: 'GET',
+          auth: { authType: HttpPullAuthType.NONE },
+          routing: {
+            routingMode: HttpPullRoutingMode.SINGLE_DEVICE,
+            telemetryPayloadKey: 'httpPullPayload'
+          }
+        };
+        transportConfiguration = {...httpPullTransportConfiguration, type: DeviceTransportType.HTTP_PULL};
+        break;
       case DeviceTransportType.TCP:
         const tcpTransportConfiguration: TcpDeviceProfileTransportConfiguration = {
           tcpTransportConnectMode: TcpTransportConnectMode.SERVER,
@@ -1038,7 +1304,7 @@ export const createDeviceProfileTransportConfiguration = (type: DeviceTransportT
   return transportConfiguration;
 };
 
-export const createDeviceTransportConfiguration = (type: DeviceTransportType): DeviceTransportConfiguration => {
+export const createDeviceTransportConfiguration = (type: TransportType): DeviceTransportConfiguration => {
   let transportConfiguration: DeviceTransportConfiguration = null;
   if (type) {
     switch (type) {
@@ -1070,6 +1336,14 @@ export const createDeviceTransportConfiguration = (type: DeviceTransportType): D
           community: 'public'
         };
         transportConfiguration = {...snmpTransportConfiguration, type: DeviceTransportType.SNMP};
+        break;
+      case BasicTransportType.HTTP:
+      case DeviceTransportType.HTTP_PULL:
+        const httpPullDeviceTransportConfiguration: HttpPullDeviceTransportConfiguration = {
+          collector: true,
+          externalDeviceId: null
+        };
+        transportConfiguration = {...httpPullDeviceTransportConfiguration, type: DeviceTransportType.HTTP_PULL};
         break;
       case DeviceTransportType.TCP:
         const tcpDeviceTransportConfiguration: TcpDeviceTransportConfiguration = {
@@ -1403,6 +1677,7 @@ export type DeviceTransportConfigurations = DefaultDeviceTransportConfiguration 
   CoapDeviceTransportConfiguration &
   Lwm2mDeviceTransportConfiguration &
   SnmpDeviceTransportConfiguration &
+  HttpPullDeviceTransportConfiguration &
   TcpDeviceTransportConfiguration &
   UdpDeviceTransportConfiguration;
 
@@ -1506,6 +1781,7 @@ export const credentialTypesByTransportType = new Map<DeviceTransportType, Devic
     [DeviceTransportType.COAP, [DeviceCredentialsType.ACCESS_TOKEN, DeviceCredentialsType.X509_CERTIFICATE]],
     [DeviceTransportType.LWM2M, [DeviceCredentialsType.LWM2M_CREDENTIALS]],
     [DeviceTransportType.SNMP, [DeviceCredentialsType.ACCESS_TOKEN]],
+    [DeviceTransportType.HTTP_PULL, [DeviceCredentialsType.ACCESS_TOKEN]],
     [DeviceTransportType.TCP, [DeviceCredentialsType.ACCESS_TOKEN]],
     [DeviceTransportType.UDP, [DeviceCredentialsType.ACCESS_TOKEN]]
   ]
