@@ -45,12 +45,16 @@
     </ng-template>
     <ng-template [ngSwitchCase]="basicTransportType.HTTP">
       <tb-http-device-profile-transport-configuration
-        formControlName="configuration">
+        formControlName="configuration"
+        [entityTransportType]="entityTransportType"
+        [httpPullActive]="httpPullActive">
       </tb-http-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.HTTP_PULL">
       <tb-http-device-profile-transport-configuration
-        formControlName="configuration">
+        formControlName="configuration"
+        [entityTransportType]="entityTransportType"
+        [httpPullActive]="httpPullActive">
       </tb-http-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.TCP">

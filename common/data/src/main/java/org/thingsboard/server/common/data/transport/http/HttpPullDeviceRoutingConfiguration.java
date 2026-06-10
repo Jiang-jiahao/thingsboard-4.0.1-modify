@@ -62,5 +62,8 @@ public class HttpPullDeviceRoutingConfiguration implements Serializable {
         if (routingMode == HttpPullRoutingMode.MULTI_DEVICE && StringUtils.isBlank(deviceIdJsonPath)) {
             throw new IllegalArgumentException("HTTP pull multi-device routing requires deviceIdJsonPath");
         }
+        if (routingMode == HttpPullRoutingMode.AUTO && StringUtils.isBlank(deviceIdJsonPath)) {
+            throw new IllegalArgumentException("HTTP pull auto routing requires deviceIdJsonPath");
+        }
     }
 }

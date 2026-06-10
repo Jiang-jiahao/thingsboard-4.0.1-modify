@@ -37,6 +37,7 @@ import {
   deviceProfileTransportTypeOptions,
   deviceTransportTypeHintMap,
   deviceTransportTypeTranslationMap,
+  normalizeHttpProfileTransportConfigurationForSave,
   resolveTransportTypeForSave
 } from '@shared/models/device.models';
 import { DeviceProfileService } from '@core/http/device-profile.service';
@@ -201,21 +202,26 @@ export class AddDeviceProfileDialogComponent extends
         : createDisabledDeviceProvisionConfiguration();
       const provisionDeviceKey = deviceProvisionConfiguration.provisionDeviceKey;
       delete deviceProvisionConfiguration.provisionDeviceKey;
+      const transportType = resolveTransportTypeForSave(
+        this.transportConfigFormGroup.get('transportType').value,
+        this.transportConfigFormGroup.get('transportConfiguration').value
+      );
+      const transportConfiguration = normalizeHttpProfileTransportConfigurationForSave(
+        transportType,
+        this.transportConfigFormGroup.get('transportConfiguration').value
+      );
       const deviceProfile: DeviceProfile = {
         name: this.deviceProfileDetailsFormGroup.get('name').value,
         type: this.deviceProfileDetailsFormGroup.get('type').value,
         image: this.deviceProfileDetailsFormGroup.get('image').value,
         defaultQueueName: this.deviceProfileDetailsFormGroup.get('defaultQueueName').value,
-        transportType: resolveTransportTypeForSave(
-          this.transportConfigFormGroup.get('transportType').value,
-          this.transportConfigFormGroup.get('transportConfiguration').value
-        ),
+        transportType,
         provisionType: deviceProvisionConfiguration.type,
         provisionDeviceKey,
         description: this.deviceProfileDetailsFormGroup.get('description').value,
         profileData: {
           configuration: createDeviceProfileConfiguration(DeviceProfileType.DEFAULT),
-          transportConfiguration: this.transportConfigFormGroup.get('transportConfiguration').value,
+          transportConfiguration,
           alarms: this.alarmRulesFormGroup.get('alarms').value,
           provisionConfiguration: deviceProvisionConfiguration
         }

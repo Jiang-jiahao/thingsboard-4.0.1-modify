@@ -158,6 +158,7 @@
               <tb-device-profile-transport-configuration
                 formControlName="transportConfiguration"
                 [selectedTransportType]="entityForm.get('transportType').value"
+                [entityTransportType]="entity?.transportType"
                 [isAdd] = "isTransportTypeChanged">
               </tb-device-profile-transport-configuration>
             </ng-template>

@@ -15,6 +15,7 @@ import {
   createDeviceTransportConfiguration,
   DeviceTransportConfiguration,
   DeviceTransportType,
+  HttpPullRoutingMode,
   HttpTransportMode
 } from '@shared/models/device.models';
 import { Subject } from 'rxjs';
@@ -40,6 +41,7 @@ import { filter, takeUntil } from 'rxjs/operators';
 export class HttpDeviceTransportConfigurationComponent implements OnInit, OnDestroy, ControlValueAccessor, Validator {
 
   @Input() disabled: boolean;
+  @Input() httpPushRoutingMode: HttpPullRoutingMode | null = null;
 
   form: UntypedFormGroup;
   httpTransportMode = HttpTransportMode;

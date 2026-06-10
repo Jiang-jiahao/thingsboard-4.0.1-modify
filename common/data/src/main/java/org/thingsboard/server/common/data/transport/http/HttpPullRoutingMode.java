@@ -6,8 +6,12 @@
 package org.thingsboard.server.common.data.transport.http;
 
 public enum HttpPullRoutingMode {
-    /** 整段响应 JSON 写入采集器设备遥测 */
+    /** 整包写入采集器 */
     SINGLE_DEVICE,
-    /** 按数组元素中的设备 ID 字段路由到租户内活跃目标设备 */
-    MULTI_DEVICE
+    /** 按本请求配置的路径拆分并路由 */
+    MULTI_DEVICE,
+    /**
+     * 自动：响应为多条记录（数组或列表）时按设备 ID 路由，否则整包写入采集器。
+     */
+    AUTO
 }

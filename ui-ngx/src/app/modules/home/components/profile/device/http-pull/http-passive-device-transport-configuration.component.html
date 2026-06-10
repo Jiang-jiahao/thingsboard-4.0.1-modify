@@ -1,0 +1,23 @@
+<form [formGroup]="form" class="http-passive-device-form">
+  <ng-container *ngIf="singleDeviceMode">
+    <p class="tb-hint" translate>device-profile.http.passive-device-hint</p>
+  </ng-container>
+  <ng-container *ngIf="!singleDeviceMode">
+    <mat-slide-toggle formControlName="gateway" class="gateway-toggle">
+      {{ 'device-profile.http-push.gateway' | translate }}
+    </mat-slide-toggle>
+    <p *ngIf="form.get('gateway').value" class="tb-hint" translate>
+      device-profile.http-push.gateway-only-hint
+    </p>
+    <p *ngIf="!form.get('gateway').value" class="tb-hint" translate>
+      device-profile.http-push.target-device-hint
+    </p>
+    <section *ngIf="!form.get('gateway').value" class="flex flex-row gap-2 xs:flex-col target-fields">
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.http-push.external-device-id</mat-label>
+        <input matInput formControlName="externalDeviceId">
+        <mat-hint translate>device-profile.http-push.external-device-id-hint</mat-hint>
+      </mat-form-field>
+    </section>
+  </ng-container>
+</form>

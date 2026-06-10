@@ -9,6 +9,10 @@ import { HttpPullDeviceTransportConfigurationComponent } from './http-pull-devic
 import { HttpDeviceProfileTransportConfigurationComponent } from './http-device-profile-transport-configuration.component';
 import { HttpDeviceTransportConfigurationComponent } from './http-device-transport-configuration.component';
 import { HttpPullRoutingHelpDialogComponent } from './http-pull-routing-help-dialog.component';
+import { HttpDeviceRoutingConfigurationComponent } from './http-device-routing-configuration.component';
+import { HttpPassiveDeviceProfileTransportConfigurationComponent } from './http-passive-device-profile-transport-configuration.component';
+import { HttpPassiveDeviceTransportConfigurationComponent } from './http-passive-device-transport-configuration.component';
+import { HttpPullPollRequestsConfigComponent } from './http-pull-poll-requests-config.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +20,11 @@ import { HttpPullRoutingHelpDialogComponent } from './http-pull-routing-help-dia
     HttpPullDeviceTransportConfigurationComponent,
     HttpDeviceProfileTransportConfigurationComponent,
     HttpDeviceTransportConfigurationComponent,
-    HttpPullRoutingHelpDialogComponent
+    HttpPullRoutingHelpDialogComponent,
+    HttpDeviceRoutingConfigurationComponent,
+    HttpPassiveDeviceProfileTransportConfigurationComponent,
+    HttpPassiveDeviceTransportConfigurationComponent,
+    HttpPullPollRequestsConfigComponent
   ],
   imports: [
     CommonModule,
@@ -26,7 +34,9 @@ import { HttpPullRoutingHelpDialogComponent } from './http-pull-routing-help-dia
     HttpPullDeviceProfileTransportConfigurationComponent,
     HttpPullDeviceTransportConfigurationComponent,
     HttpDeviceProfileTransportConfigurationComponent,
-    HttpDeviceTransportConfigurationComponent
+    HttpDeviceTransportConfigurationComponent,
+    HttpPassiveDeviceProfileTransportConfigurationComponent,
+    HttpPassiveDeviceTransportConfigurationComponent
   ]
 })
 export class HttpPullDeviceProfileTransportModule { }

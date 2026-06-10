@@ -23,7 +23,9 @@ import {
   DEVICE_PROVISIONING_UI_ENABLED,
   deviceProfileTransportTypeOptions,
   deviceTransportTypeHintMap,
-  deviceTransportTypeTranslationMap
+  deviceTransportTypeTranslationMap,
+  DeviceTransportType,
+  resolveHttpProfileTransportTypeForDisplay
 } from '@shared/models/device.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -56,6 +58,12 @@ export class DeviceProfileTabsComponent extends EntityTabsComponent<DeviceProfil
     ).subscribe(() => {
       this.isTransportTypeChanged = true;
     });
+  }
+
+  /** HTTP 工作模式回显：结合已保存配置，不单独依赖 entity.transportType */
+  get httpEntityTransportType(): DeviceTransportType {
+    const cfg = this.detailsForm?.get('profileData.transportConfiguration')?.value;
+    return resolveHttpProfileTransportTypeForDisplay(this.entity?.transportType, cfg);
   }
 
 }

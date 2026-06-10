@@ -91,6 +91,9 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
   httpPullRoutingMode: HttpPullRoutingMode | null = null;
 
   @Input()
+  httpPushRoutingMode: HttpPullRoutingMode | null = null;
+
+  @Input()
   httpPullProfilePollUrl: string | null = null;
 
   /** 设备档案传输类型（优先；HTTP 档案为 UI 类型 HTTP） */

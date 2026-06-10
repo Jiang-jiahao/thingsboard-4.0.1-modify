@@ -1,0 +1,18 @@
+<form [formGroup]="form" class="http-passive-profile-form">
+  <section class="http-passive-panel">
+    <mat-icon class="http-passive-icon">cloud_upload</mat-icon>
+    <div class="http-passive-text">
+      <div class="tb-small" translate>device-profile.http.passive-title</div>
+      <div class="tb-hint" translate>device-profile.http.passive-description</div>
+      <ul class="http-passive-endpoints tb-hint">
+        <li translate>device-profile.http.passive-endpoint-telemetry</li>
+        <li translate>device-profile.http.passive-endpoint-attributes</li>
+        <li translate>device-profile.http.passive-endpoint-rpc</li>
+      </ul>
+    </div>
+  </section>
+  <tb-http-device-routing-configuration
+    formControlName="routing"
+    translationPrefix="device-profile.http-push">
+  </tb-http-device-routing-configuration>
+</form>

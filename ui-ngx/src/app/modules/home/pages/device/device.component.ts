@@ -29,6 +29,7 @@ import {
   DeviceProfileType,
   DeviceTransportType,
   extractHttpPullProfileContext,
+  extractHttpPushProfileContext,
   HttpPullRoutingMode,
   TcpDeviceProfileTransportConfiguration,
   UdpDeviceProfileTransportConfiguration,
@@ -72,6 +73,8 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
 
   httpPullProfileRoutingMode: HttpPullRoutingMode | null = null;
+
+  httpPushProfileRoutingMode: HttpPullRoutingMode | null = null;
 
   httpPullProfilePollUrl: string | null = null;
 
@@ -291,6 +294,7 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     this.tcpProfileTransportConnectMode = null;
     this.udpProfileWireAuthMode = null;
     this.httpPullProfileRoutingMode = null;
+    this.httpPushProfileRoutingMode = null;
     this.httpPullProfilePollUrl = null;
     if (!dp) {
       return;
@@ -299,6 +303,10 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     if (httpPullCtx) {
       this.httpPullProfileRoutingMode = httpPullCtx.routingMode;
       this.httpPullProfilePollUrl = httpPullCtx.pollUrl;
+    }
+    const httpPushCtx = extractHttpPushProfileContext(dp);
+    if (httpPushCtx) {
+      this.httpPushProfileRoutingMode = httpPushCtx.routingMode;
     }
     if (dp.transportType === DeviceTransportType.TCP) {
       const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;

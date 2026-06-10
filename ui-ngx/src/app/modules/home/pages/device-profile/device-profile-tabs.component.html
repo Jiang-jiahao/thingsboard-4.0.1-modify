@@ -17,7 +17,7 @@
 -->
 <mat-tab *ngIf="entity" #transportType="matTab"
          label="{{ 'device-profile.transport-configuration' | translate }}">
-  <div class="mat-padding" [formGroup]="detailsForm" *ngIf="transportType.isActive">
+  <div class="mat-padding" [formGroup]="detailsForm">
     <mat-form-field class="mat-block">
       <mat-label translate>device-profile.transport-type</mat-label>
       <mat-select formControlName="transportType" required>
@@ -36,6 +36,7 @@
       <tb-device-profile-transport-configuration
         formControlName="transportConfiguration"
         [selectedTransportType]="detailsForm.get('transportType').value"
+        [entityTransportType]="entity?.transportType"
         [isAdd]="isTransportTypeChanged">
       </tb-device-profile-transport-configuration>
     </div>

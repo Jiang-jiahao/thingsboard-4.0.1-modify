@@ -40,6 +40,9 @@ import {
   deviceTransportTypeHintMap,
   deviceTransportTypeTranslationMap,
   hasDeviceProfileTransportConfiguration,
+  normalizeHttpProfileTransportConfigurationForDisplay,
+  normalizeHttpProfileTransportConfigurationForSave,
+  resolveHttpProfileTransportTypeForDisplay,
   resolveTransportTypeForSave,
   toUiTransportType,
   TransportType
@@ -87,6 +90,12 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
 
   readonly deviceProvisioningUiEnabled = DEVICE_PROVISIONING_UI_ENABLED;
 
+  /** HTTP 工作模式回显：结合表单中的 transportConfiguration */
+  get httpEntityTransportType(): DeviceTransportType {
+    const cfg = this.entityForm?.get('profileData.transportConfiguration')?.value;
+    return resolveHttpProfileTransportTypeForDisplay(this.entity?.transportType, cfg);
+  }
+
   deviceProfileId: EntityId;
 
   otaUpdateType = OtaUpdateType;
@@ -130,7 +139,12 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
         transportType: [entity ? toUiTransportType(entity.transportType) : null, [Validators.required]],
         profileData: this.fb.group({
           configuration: [entity && !this.isAdd ? entity.profileData?.configuration : {}, Validators.required],
-          transportConfiguration: [entity && !this.isAdd ? entity.profileData?.transportConfiguration : {}, Validators.required],
+          transportConfiguration: [entity && !this.isAdd
+            ? normalizeHttpProfileTransportConfigurationForDisplay(
+              entity.transportType,
+              entity.profileData?.transportConfiguration as Record<string, unknown>
+            )
+            : null, Validators.required],
           alarms: [entity && !this.isAdd ? entity.profileData?.alarms : []],
           rpcMethods: [entity && !this.isAdd ? entity.profileData?.rpcMethods : []],
           provisionConfiguration: [deviceProvisionConfiguration, Validators.required]
@@ -216,9 +230,13 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     this.entityForm.patchValue({transportType: toUiTransportType(entity.transportType)}, {emitEvent: false});
     this.entityForm.patchValue({provisionType: entity.provisionType}, {emitEvent: false});
     this.entityForm.patchValue({provisionDeviceKey: entity.provisionDeviceKey}, {emitEvent: false});
+    const transportConfiguration = normalizeHttpProfileTransportConfigurationForDisplay(
+      entity.transportType,
+      entity.profileData?.transportConfiguration as Record<string, unknown>
+    );
     this.entityForm.patchValue({profileData: {
       configuration: entity.profileData?.configuration,
-      transportConfiguration: entity.profileData?.transportConfiguration,
+      transportConfiguration,
       alarms: entity.profileData?.alarms,
       rpcMethods: entity.profileData?.rpcMethods,
       provisionConfiguration: deviceProvisionConfiguration
@@ -250,6 +268,10 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     formValue.profileData.provisionConfiguration = deviceProvisionConfiguration;
     delete deviceProvisionConfiguration.provisionDeviceKey;
     formValue.transportType = resolveTransportTypeForSave(formValue.transportType, formValue.profileData?.transportConfiguration);
+    formValue.profileData.transportConfiguration = normalizeHttpProfileTransportConfigurationForSave(
+      formValue.transportType,
+      formValue.profileData?.transportConfiguration
+    );
     return super.prepareFormValue(formValue);
   }
 

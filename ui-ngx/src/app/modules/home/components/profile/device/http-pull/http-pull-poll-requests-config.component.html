@@ -1,0 +1,105 @@
+<div [formGroup]="form" class="http-pull-poll-requests">
+  <div *ngFor="let req of pollRequestsArray.controls; let i = index"
+       class="poll-request-card" [formGroup]="req">
+    <div class="poll-request-header flex flex-row items-center justify-between gap-2">
+      <mat-form-field class="flex-1 mat-block poll-name-field">
+        <mat-label translate>device-profile.http-pull.poll-request-name</mat-label>
+        <input matInput formControlName="name">
+      </mat-form-field>
+      <mat-slide-toggle formControlName="enabled" class="poll-enabled-toggle">
+        {{ 'device-profile.http-pull.poll-request-enabled' | translate }}
+      </mat-slide-toggle>
+      <button *ngIf="!disabled && pollRequestsArray.length > 1"
+              type="button" mat-icon-button color="primary"
+              (click)="removePollRequest(i)"
+              matTooltip="{{ 'action.remove' | translate }}">
+        <mat-icon>remove_circle_outline</mat-icon>
+      </button>
+    </div>
+    <section class="flex flex-row gap-2 xs:flex-col">
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.http-pull.poll-url</mat-label>
+        <input matInput formControlName="pollUrl" required placeholder="http://192.168.1.10:8080/api/data">
+      </mat-form-field>
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.http-pull.poll-data-type</mat-label>
+        <mat-select formControlName="dataType">
+          <mat-option *ngFor="let t of dataTypes" [value]="t">
+            {{ ('device-profile.http-pull.poll-data-type-' + t) | translate }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.http-pull.poll-method</mat-label>
+        <mat-select formControlName="pollMethod">
+          <mat-option value="GET">GET</mat-option>
+          <mat-option value="POST">POST</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </section>
+    <section class="flex flex-row gap-2 xs:flex-col items-center">
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.http-pull.poll-request-frequency-ms</mat-label>
+        <input matInput type="number" formControlName="queryingFrequencyMs"
+               [placeholder]="defaultQueryingFrequencyMs">
+        <mat-hint translate>device-profile.http-pull.poll-request-frequency-hint</mat-hint>
+      </mat-form-field>
+      <mat-slide-toggle formControlName="requiresAuth" class="requires-auth-toggle">
+        {{ 'device-profile.http-pull.poll-requires-auth' | translate }}
+      </mat-slide-toggle>
+    </section>
+    <p class="tb-hint poll-requires-auth-hint" translate>device-profile.http-pull.poll-requires-auth-hint</p>
+    <mat-form-field class="mat-block" *ngIf="req.get('pollMethod').value === 'POST'">
+      <mat-label translate>device-profile.http-pull.poll-body</mat-label>
+      <textarea matInput formControlName="pollBody" rows="2"></textarea>
+    </mat-form-field>
+
+    <mat-expansion-panel class="http-pull-panel request-routing-panel" expanded>
+      <mat-expansion-panel-header>
+        <mat-panel-title translate>device-profile.http-pull.request-routing-title</mat-panel-title>
+      </mat-expansion-panel-header>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.http-pull.routing-mode</mat-label>
+        <mat-select formControlName="routingMode">
+          <mat-option *ngFor="let m of routingModes" [value]="m">{{ m }}</mat-option>
+        </mat-select>
+        <mat-hint translate>device-profile.http-pull.routing-mode-per-request-hint</mat-hint>
+      </mat-form-field>
+      <ng-container *ngIf="showRoutingFields(req)">
+        <section class="flex flex-row gap-2 xs:flex-col">
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.http-pull.response-array-path</mat-label>
+            <input matInput formControlName="responseArrayJsonPath" placeholder="$.data.list">
+          </mat-form-field>
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.http-pull.device-id-path</mat-label>
+            <input matInput formControlName="deviceIdJsonPath">
+            <mat-hint translate>device-profile.http-pull.device-id-path-hint</mat-hint>
+          </mat-form-field>
+        </section>
+        <section class="flex flex-row gap-2 xs:flex-col">
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.http-pull.match-strategy</mat-label>
+            <mat-select formControlName="deviceIdMatchStrategy">
+              <mat-option *ngFor="let s of matchStrategies" [value]="s">{{ s }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.http-pull.target-profile-id</mat-label>
+            <input matInput formControlName="targetDeviceProfileId">
+          </mat-form-field>
+        </section>
+      </ng-container>
+      <mat-form-field class="mat-block" *ngIf="showTelemetryKey(req)">
+        <mat-label translate>device-profile.http-pull.telemetry-key</mat-label>
+        <input matInput formControlName="telemetryPayloadKey">
+        <mat-hint translate>device-profile.http-pull.telemetry-key-hint</mat-hint>
+      </mat-form-field>
+    </mat-expansion-panel>
+  </div>
+  <button *ngIf="!disabled" type="button" mat-stroked-button color="primary" class="add-poll-btn"
+          (click)="addPollRequest()">
+    <mat-icon>add_circle_outline</mat-icon>
+    {{ 'device-profile.http-pull.add-poll-request' | translate }}
+  </button>
+</div>

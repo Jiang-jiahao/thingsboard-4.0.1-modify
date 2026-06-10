@@ -17,9 +17,10 @@ import {
 import {
   DeviceTransportType,
   HttpPullAuthType,
-  HttpPullDeviceIdMatchStrategy,
   HttpPullDeviceProfileTransportConfiguration,
-  HttpPullRoutingMode
+  HttpPullPollDataType,
+  HttpPullPollRequest,
+  HttpTransportMode
 } from '@shared/models/device.models';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -46,11 +47,7 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
 
   form: UntypedFormGroup;
   httpPullAuthType = HttpPullAuthType;
-  httpPullRoutingMode = HttpPullRoutingMode;
-  httpPullMatchStrategy = HttpPullDeviceIdMatchStrategy;
   authTypes = Object.keys(HttpPullAuthType);
-  routingModes = Object.keys(HttpPullRoutingMode);
-  matchStrategies = Object.keys(HttpPullDeviceIdMatchStrategy);
 
   private destroy$ = new Subject<void>();
   private propagateChange: (v: HttpPullDeviceProfileTransportConfiguration) => void = () => {};
@@ -63,9 +60,7 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
       timeoutMs: [10000, [Validators.required, Validators.min(0)]],
       readTimeoutMs: [10000, [Validators.required, Validators.min(0)]],
       queryingFrequencyMs: [30000, [Validators.required, Validators.min(1000)]],
-      pollUrl: ['', Validators.required],
-      pollMethod: ['GET', Validators.required],
-      pollBody: [''],
+      pollRequests: [[] as HttpPullPollRequest[], Validators.required],
       authType: [HttpPullAuthType.NONE],
       apiKeyHeader: ['X-API-Key'],
       apiKeyValue: [''],
@@ -80,13 +75,7 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
       clientId: [''],
       clientSecret: [''],
       oauthUsername: [''],
-      oauthPassword: [''],
-      routingMode: [HttpPullRoutingMode.SINGLE_DEVICE],
-      responseArrayJsonPath: [''],
-      deviceIdJsonPath: ['deviceId'],
-      deviceIdMatchStrategy: [HttpPullDeviceIdMatchStrategy.DEVICE_NAME],
-      targetDeviceProfileId: [''],
-      telemetryPayloadKey: ['httpPullPayload']
+      oauthPassword: ['']
     });
     this.form.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => this.updateModel());
   }
@@ -115,14 +104,26 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
       return;
     }
     const auth = value.auth || {};
-    const routing = value.routing || {};
+    let pollRequests = value.pollRequests;
+    if (!pollRequests?.length && value.pollUrl) {
+      pollRequests = [{
+        id: 'legacy',
+        name: 'poll-1',
+        enabled: true,
+        pollUrl: value.pollUrl,
+        pollMethod: value.pollMethod || 'GET',
+        pollBody: value.pollBody,
+        queryingFrequencyMs: value.queryingFrequencyMs,
+        dataType: HttpPullPollDataType.TELEMETRY,
+        requiresAuth: true,
+        routing: value.routing
+      }];
+    }
     this.form.patchValue({
       timeoutMs: value.timeoutMs,
       readTimeoutMs: value.readTimeoutMs,
       queryingFrequencyMs: value.queryingFrequencyMs,
-      pollUrl: value.pollUrl,
-      pollMethod: value.pollMethod,
-      pollBody: value.pollBody,
+      pollRequests: pollRequests?.length ? pollRequests : undefined,
       authType: auth.authType || HttpPullAuthType.NONE,
       apiKeyHeader: auth.apiKeyHeader,
       apiKeyValue: auth.apiKeyValue,
@@ -137,13 +138,7 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
       clientId: auth.clientId,
       clientSecret: auth.clientSecret,
       oauthUsername: auth.oauthUsername,
-      oauthPassword: auth.oauthPassword,
-      routingMode: routing.routingMode || HttpPullRoutingMode.SINGLE_DEVICE,
-      responseArrayJsonPath: routing.responseArrayJsonPath,
-      deviceIdJsonPath: routing.deviceIdJsonPath,
-      deviceIdMatchStrategy: routing.deviceIdMatchStrategy,
-      targetDeviceProfileId: routing.targetDeviceProfileId,
-      telemetryPayloadKey: routing.telemetryPayloadKey
+      oauthPassword: auth.oauthPassword
     }, { emitEvent: false });
   }
 
@@ -151,16 +146,25 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
     return this.form.valid ? null : { httpPull: true };
   }
 
+  openRoutingExample(event: Event): void {
+    event.stopPropagation();
+    this.dialog.open(HttpPullRoutingHelpDialogComponent, {
+      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      autoFocus: false,
+      width: '560px',
+      maxWidth: '95vw'
+    });
+  }
+
   private updateModel(): void {
     const v = this.form.value;
     const model: HttpPullDeviceProfileTransportConfiguration & { type: DeviceTransportType } = {
       type: DeviceTransportType.HTTP_PULL,
+      httpTransportMode: HttpTransportMode.PULL,
       timeoutMs: v.timeoutMs,
       readTimeoutMs: v.readTimeoutMs,
       queryingFrequencyMs: v.queryingFrequencyMs,
-      pollUrl: v.pollUrl,
-      pollMethod: v.pollMethod,
-      pollBody: v.pollBody || undefined,
+      pollRequests: v.pollRequests,
       auth: {
         authType: v.authType,
         apiKeyHeader: v.apiKeyHeader,
@@ -177,26 +181,8 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
         clientSecret: v.clientSecret,
         oauthUsername: v.oauthUsername,
         oauthPassword: v.oauthPassword
-      },
-      routing: {
-        routingMode: v.routingMode,
-        responseArrayJsonPath: v.responseArrayJsonPath || undefined,
-        deviceIdJsonPath: v.deviceIdJsonPath,
-        deviceIdMatchStrategy: v.deviceIdMatchStrategy,
-        targetDeviceProfileId: v.targetDeviceProfileId || undefined,
-        telemetryPayloadKey: v.telemetryPayloadKey
       }
     };
     this.propagateChange(model);
-  }
-
-  openRoutingExample(event: Event): void {
-    event.stopPropagation();
-    this.dialog.open(HttpPullRoutingHelpDialogComponent, {
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
-      autoFocus: false,
-      width: '560px',
-      maxWidth: '95vw'
-    });
   }
 }

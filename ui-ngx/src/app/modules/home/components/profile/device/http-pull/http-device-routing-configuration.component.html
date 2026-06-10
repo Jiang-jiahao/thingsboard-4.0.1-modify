@@ -1,0 +1,46 @@
+<form [formGroup]="form" class="http-routing-form">
+  <mat-expansion-panel class="http-pull-panel" expanded>
+    <mat-expansion-panel-header>
+      <mat-panel-title class="routing-panel-title">
+        <span [translate]="translationPrefix + '.section-routing'"></span>
+        <button type="button" mat-stroked-button color="primary" class="routing-example-btn"
+                (click)="openRoutingExample($event)">
+          {{ (translationPrefix + '.routing-example-btn') | translate }}
+        </button>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <mat-form-field class="mat-block">
+      <mat-label [translate]="translationPrefix + '.routing-mode'"></mat-label>
+      <mat-select formControlName="routingMode">
+        <mat-option *ngFor="let m of routingModes" [value]="m">{{ m }}</mat-option>
+      </mat-select>
+      <mat-hint [translate]="translationPrefix + '.routing-mode-hint'"></mat-hint>
+    </mat-form-field>
+    <ng-container *ngIf="form.get('routingMode').value === 'MULTI_DEVICE'">
+      <section class="flex flex-row gap-2 xs:flex-col">
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label [translate]="translationPrefix + '.response-array-path'"></mat-label>
+          <input matInput formControlName="responseArrayJsonPath" placeholder="$.data.items">
+        </mat-form-field>
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label [translate]="translationPrefix + '.device-id-path'"></mat-label>
+          <input matInput formControlName="deviceIdJsonPath" required>
+          <mat-hint [translate]="translationPrefix + '.device-id-path-hint'"></mat-hint>
+        </mat-form-field>
+      </section>
+      <section class="flex flex-row gap-2 xs:flex-col">
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label [translate]="translationPrefix + '.match-strategy'"></mat-label>
+          <mat-select formControlName="deviceIdMatchStrategy">
+            <mat-option *ngFor="let s of matchStrategies" [value]="s">{{ s }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field class="flex-1 mat-block">
+          <mat-label [translate]="translationPrefix + '.target-profile-id'"></mat-label>
+          <input matInput formControlName="targetDeviceProfileId">
+          <mat-hint [translate]="translationPrefix + '.target-profile-id-hint'"></mat-hint>
+        </mat-form-field>
+      </section>
+    </ng-container>
+  </mat-expansion-panel>
+</form>

@@ -45,6 +45,8 @@ import org.thingsboard.server.common.adaptor.JsonConverter;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.transport.http.HttpPullDeviceRoutingConfiguration;
+import org.thingsboard.server.common.data.transport.http.HttpPullRoutingMode;
 import org.thingsboard.server.common.data.TbTransportService;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
@@ -70,6 +72,9 @@ import org.thingsboard.server.gen.transport.TransportProtos.ToDeviceRpcResponseM
 import org.thingsboard.server.gen.transport.TransportProtos.ToServerRpcRequestMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToServerRpcResponseMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ValidateDeviceTokenRequestMsg;
+import org.thingsboard.server.transport.http.push.HttpPushRoutingService;
+import org.thingsboard.server.transport.http.push.HttpPushTransportContext;
+import org.thingsboard.server.transport.http.push.session.HttpPushGatewaySessionContext;
 
 import java.util.Arrays;
 import java.util.List;
@@ -131,6 +136,12 @@ public class DeviceApiController implements TbTransportService {
 
     @Autowired
     private HttpTransportContext transportContext;
+
+    @Autowired(required = false)
+    private HttpPushTransportContext httpPushTransportContext;
+
+    @Autowired(required = false)
+    private HttpPushRoutingService httpPushRoutingService;
 
     @Operation(summary = "Get attributes (getDeviceAttributes)",
             description = "Returns all attributes that belong to device. "
@@ -205,11 +216,35 @@ public class DeviceApiController implements TbTransportService {
         DeferredResult<ResponseEntity> responseWriter = new DeferredResult<ResponseEntity>();
         transportContext.getTransportService().process(DeviceTransportType.DEFAULT, ValidateDeviceTokenRequestMsg.newBuilder().setToken(deviceToken).build(),
                 new DeviceAuthCallback(transportContext, responseWriter, sessionInfo -> {
+                    if (tryDispatchHttpPushRouting(sessionInfo, json, responseWriter)) {
+                        return;
+                    }
                     TransportService transportService = transportContext.getTransportService();
                     transportService.process(sessionInfo, JsonConverter.convertToTelemetryProto(JsonParser.parseString(json)),
                             new HttpOkCallback(responseWriter));
                 }));
         return responseWriter;
+    }
+
+    private boolean tryDispatchHttpPushRouting(SessionInfoProto sessionInfo, String json,
+                                               DeferredResult<ResponseEntity> responseWriter) {
+        if (httpPushTransportContext == null || httpPushRoutingService == null) {
+            return false;
+        }
+        DeviceId gatewayDeviceId = new DeviceId(new UUID(sessionInfo.getDeviceIdMSB(), sessionInfo.getDeviceIdLSB()));
+        HttpPushGatewaySessionContext gatewayCtx = httpPushTransportContext.getOrCreateGatewayContext(gatewayDeviceId, sessionInfo);
+        if (gatewayCtx == null || gatewayCtx.getProfileTransportConfiguration() == null) {
+            return false;
+        }
+        HttpPullDeviceRoutingConfiguration routing = gatewayCtx.getProfileTransportConfiguration().getRouting();
+        if (routing == null) {
+            return false;
+        }
+        if (routing.getRoutingMode() == HttpPullRoutingMode.MULTI_DEVICE) {
+            httpPushRoutingService.dispatchTelemetry(gatewayCtx, json, new HttpOkCallback(responseWriter));
+            return true;
+        }
+        return false;
     }
 
     @Operation(summary = "Save claiming information (claimDevice)",

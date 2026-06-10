@@ -192,14 +192,118 @@ export function toUiTransportType(transportType: DeviceTransportType | Transport
   return isHttpTransportType(transportType) ? BasicTransportType.HTTP : transportType as TransportType;
 }
 
+/** 判断档案传输配置是否为 HTTP 主动拉取（不依赖 type 字段，父表单会剥离 type） */
+export function isHttpPullProfileTransportConfiguration(
+  transportConfiguration?: { type?: DeviceTransportType; httpTransportMode?: HttpTransportMode } | HttpPullDeviceProfileTransportConfiguration | null
+): boolean {
+  if (!transportConfiguration) {
+    return false;
+  }
+  if (transportConfiguration.httpTransportMode === HttpTransportMode.PULL) {
+    return true;
+  }
+  if (transportConfiguration.httpTransportMode === HttpTransportMode.PASSIVE) {
+    return false;
+  }
+  if ('type' in transportConfiguration && transportConfiguration.type === DeviceTransportType.HTTP_PULL) {
+    return true;
+  }
+  const cfg = transportConfiguration as HttpPullDeviceProfileTransportConfiguration;
+  if (cfg.pollRequests?.length) {
+    return true;
+  }
+  if (cfg.pollUrl) {
+    return true;
+  }
+  if (cfg.queryingFrequencyMs != null && cfg.auth != null) {
+    return true;
+  }
+  return false;
+}
+
 export function resolveTransportTypeForSave(uiTransportType: TransportType,
-                                           transportConfiguration?: { type?: DeviceTransportType }): DeviceTransportType {
+                                           transportConfiguration?: { type?: DeviceTransportType; httpTransportMode?: HttpTransportMode }): DeviceTransportType {
   if (uiTransportType === BasicTransportType.HTTP) {
-    return transportConfiguration?.type === DeviceTransportType.HTTP_PULL
+    return isHttpPullProfileTransportConfiguration(transportConfiguration)
       ? DeviceTransportType.HTTP_PULL
       : DeviceTransportType.DEFAULT;
   }
   return uiTransportType as DeviceTransportType;
+}
+
+/**
+ * 解析档案 HTTP 传输类型（回显用）：优先 transportConfiguration 中的工作模式标记，
+ * 避免 entity.transportType 仍为 DEFAULT 时把已保存的主动拉取误判为被动上报。
+ */
+export function resolveHttpProfileTransportTypeForDisplay(
+  entityTransportType: DeviceTransportType | string | null | undefined,
+  transportConfiguration?: { type?: DeviceTransportType; httpTransportMode?: HttpTransportMode } | null
+): DeviceTransportType {
+  if (transportConfiguration?.httpTransportMode === HttpTransportMode.PULL) {
+    return DeviceTransportType.HTTP_PULL;
+  }
+  if (transportConfiguration?.httpTransportMode === HttpTransportMode.PASSIVE) {
+    return DeviceTransportType.DEFAULT;
+  }
+  if (transportConfiguration?.type === DeviceTransportType.HTTP_PULL) {
+    return DeviceTransportType.HTTP_PULL;
+  }
+  if (transportConfiguration && isHttpPullProfileTransportConfiguration(transportConfiguration)) {
+    return DeviceTransportType.HTTP_PULL;
+  }
+  return (entityTransportType as DeviceTransportType) ?? DeviceTransportType.DEFAULT;
+}
+
+/** 从 API 加载后补齐工作模式，保证编辑页回显「主动拉取」 */
+export function normalizeHttpProfileTransportConfigurationForDisplay(
+  transportType: DeviceTransportType | string | null | undefined,
+  transportConfiguration: DeviceProfileTransportConfiguration | Record<string, unknown> | null | undefined
+): DeviceProfileTransportConfiguration | null | undefined {
+  if (!transportConfiguration) {
+    return transportConfiguration as null | undefined;
+  }
+  const effectiveTransportType = resolveHttpProfileTransportTypeForDisplay(transportType, transportConfiguration);
+  const isPull = effectiveTransportType === DeviceTransportType.HTTP_PULL;
+  if (!isPull) {
+    return {
+      ...transportConfiguration,
+      type: DeviceTransportType.DEFAULT,
+      httpTransportMode: HttpTransportMode.PASSIVE
+    } as DeviceProfileTransportConfiguration;
+  }
+  return {
+    ...transportConfiguration,
+    type: DeviceTransportType.HTTP_PULL,
+    httpTransportMode: transportConfiguration.httpTransportMode || HttpTransportMode.PULL
+  } as DeviceProfileTransportConfiguration;
+}
+
+/** 保存前补齐 JSON 多态 type 与工作模式，避免后端按 DEFAULT 解析 */
+export function normalizeHttpProfileTransportConfigurationForSave(
+  transportType: DeviceTransportType,
+  transportConfiguration: DeviceProfileTransportConfiguration | Record<string, unknown> | null | undefined
+): DeviceProfileTransportConfiguration | null | undefined {
+  if (!transportConfiguration) {
+    return transportConfiguration as null | undefined;
+  }
+  const isPull = transportType === DeviceTransportType.HTTP_PULL
+    || isHttpPullProfileTransportConfiguration(transportConfiguration as HttpPullDeviceProfileTransportConfiguration);
+  const mode = isPull ? HttpTransportMode.PULL : HttpTransportMode.PASSIVE;
+  if (isPull) {
+    return {
+      ...transportConfiguration,
+      type: DeviceTransportType.HTTP_PULL,
+      httpTransportMode: mode
+    } as DeviceProfileTransportConfiguration;
+  }
+  const passive: DeviceProfileTransportConfiguration = {
+    type: DeviceTransportType.DEFAULT,
+    httpTransportMode: mode
+  };
+  if (transportConfiguration.routing) {
+    passive.routing = transportConfiguration.routing;
+  }
+  return passive;
 }
 
 export function hasDeviceProfileTransportConfiguration(transportType: TransportType): boolean {
@@ -349,6 +453,7 @@ export interface DeviceProfileConfiguration extends DeviceProfileConfigurations 
 }
 
 export interface DefaultDeviceProfileTransportConfiguration {
+  routing?: HttpPullDeviceRoutingConfiguration;
   [key: string]: any;
 }
 
@@ -406,7 +511,8 @@ export enum HttpPullAuthType {
 
 export enum HttpPullRoutingMode {
   SINGLE_DEVICE = 'SINGLE_DEVICE',
-  MULTI_DEVICE = 'MULTI_DEVICE'
+  MULTI_DEVICE = 'MULTI_DEVICE',
+  AUTO = 'AUTO'
 }
 
 export enum HttpPullDeviceIdMatchStrategy {
@@ -454,10 +560,36 @@ export interface HttpPullDeviceRoutingConfiguration {
   telemetryPayloadKey?: string;
 }
 
+export enum HttpPullPollDataType {
+  TELEMETRY = 'TELEMETRY',
+  CLIENT_ATTRIBUTES = 'CLIENT_ATTRIBUTES',
+  SHARED_ATTRIBUTES = 'SHARED_ATTRIBUTES'
+}
+
+export interface HttpPullPollRequest {
+  id?: string;
+  name?: string;
+  enabled?: boolean;
+  pollUrl?: string;
+  pollMethod?: string;
+  pollBody?: string;
+  pollHeaders?: { [key: string]: string };
+  /** 为空时使用档案默认轮询间隔 */
+  queryingFrequencyMs?: number;
+  dataType?: HttpPullPollDataType;
+  /** false：本请求无需携带登录凭证（如登录接口） */
+  requiresAuth?: boolean;
+  routing?: HttpPullDeviceRoutingConfiguration;
+}
+
 export interface HttpPullDeviceProfileTransportConfiguration {
+  /** 保存/回显用：PULL=主动拉取，PASSIVE=被动上报 */
+  httpTransportMode?: HttpTransportMode;
   timeoutMs?: number;
   readTimeoutMs?: number;
   queryingFrequencyMs?: number;
+  pollRequests?: HttpPullPollRequest[];
+  /** @deprecated 请使用 pollRequests */
   pollUrl?: string;
   pollMethod?: string;
   pollBody?: string;
@@ -486,9 +618,31 @@ export function extractHttpPullProfileContext(dp: DeviceProfile | null | undefin
   if (!raw) {
     return null;
   }
+  const firstPoll = raw.pollRequests?.[0];
   return {
     routingMode: raw.routing?.routingMode ?? HttpPullRoutingMode.SINGLE_DEVICE,
-    pollUrl: raw.pollUrl ?? null
+    pollUrl: firstPoll?.pollUrl ?? raw.pollUrl ?? null
+  };
+}
+
+/** 从 HTTP 档案（被动上报 / DEFAULT 传输）解析数据路由模式 */
+export function extractHttpPushProfileContext(dp: DeviceProfile | null | undefined): { routingMode: HttpPullRoutingMode } | null {
+  if (!dp || dp.transportType === DeviceTransportType.HTTP_PULL) {
+    return null;
+  }
+  if (toUiTransportType(dp.transportType) !== BasicTransportType.HTTP) {
+    return null;
+  }
+  const raw = dp.profileData?.transportConfiguration as DefaultDeviceProfileTransportConfiguration | undefined;
+  if (!raw) {
+    return { routingMode: HttpPullRoutingMode.SINGLE_DEVICE };
+  }
+  const pullCfg = raw as HttpPullDeviceProfileTransportConfiguration;
+  if (pullCfg.pollUrl != null) {
+    return null;
+  }
+  return {
+    routingMode: raw.routing?.routingMode ?? HttpPullRoutingMode.SINGLE_DEVICE
   };
 }
 
@@ -1262,13 +1416,20 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
           timeoutMs: 10000,
           readTimeoutMs: 10000,
           queryingFrequencyMs: 30000,
-          pollUrl: 'https://api.example.com/data',
-          pollMethod: 'GET',
-          auth: { authType: HttpPullAuthType.NONE },
-          routing: {
-            routingMode: HttpPullRoutingMode.SINGLE_DEVICE,
-            telemetryPayloadKey: 'httpPullPayload'
-          }
+          pollRequests: [{
+            name: 'poll-1',
+            enabled: true,
+            pollUrl: 'https://api.example.com/data',
+            pollMethod: 'GET',
+            dataType: HttpPullPollDataType.TELEMETRY,
+            requiresAuth: true,
+            routing: {
+              routingMode: HttpPullRoutingMode.AUTO,
+              deviceIdJsonPath: 'deviceId',
+              telemetryPayloadKey: 'httpPullPayload'
+            }
+          }],
+          auth: { authType: HttpPullAuthType.NONE }
         };
         transportConfiguration = {...httpPullTransportConfiguration, type: DeviceTransportType.HTTP_PULL};
         break;
@@ -1587,6 +1748,8 @@ export interface DeviceConfiguration extends DeviceConfigurations {
 }
 
 export interface DefaultDeviceTransportConfiguration {
+  gateway?: boolean;
+  externalDeviceId?: string;
   [key: string]: any;
 }
 

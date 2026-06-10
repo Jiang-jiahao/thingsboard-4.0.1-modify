@@ -1,7 +1,7 @@
 ///
 /// Copyright © 2016-2025 The Thingsboard Authors
 ///
-import { Component, forwardRef, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import {
   ControlValueAccessor,
   NG_VALIDATORS,
@@ -15,7 +15,9 @@ import {
   createDeviceProfileTransportConfiguration,
   DeviceProfileTransportConfiguration,
   DeviceTransportType,
-  HttpTransportMode
+  HttpTransportMode,
+  isHttpPullProfileTransportConfiguration,
+  resolveHttpProfileTransportTypeForDisplay
 } from '@shared/models/device.models';
 import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
@@ -37,15 +39,21 @@ import { filter, takeUntil } from 'rxjs/operators';
     }
   ]
 })
-export class HttpDeviceProfileTransportConfigurationComponent implements OnInit, OnDestroy, ControlValueAccessor, Validator {
+export class HttpDeviceProfileTransportConfigurationComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor, Validator {
 
   @Input() disabled: boolean;
+  /** 档案已保存的 transportType，用于配置 JSON 缺少 type 时恢复工作模式 */
+  @Input() entityTransportType: DeviceTransportType;
+  /** 父级判定：必须为 HTTP Pull 档案时强制展示主动拉取面板 */
+  @Input() httpPullActive = false;
 
   form: UntypedFormGroup;
   httpTransportMode = HttpTransportMode;
 
   private destroy$ = new Subject<void>();
   private propagateChange: (v: DeviceProfileTransportConfiguration) => void = () => {};
+  private pendingValue: DeviceProfileTransportConfiguration | null = null;
+  private formReady = false;
 
   constructor(private fb: UntypedFormBuilder) {}
 
@@ -64,6 +72,14 @@ export class HttpDeviceProfileTransportConfigurationComponent implements OnInit,
       takeUntil(this.destroy$),
       filter(() => this.form.get('httpMode').value === HttpTransportMode.PASSIVE)
     ).subscribe(() => this.updateModel());
+    this.formReady = true;
+    this.applyPendingValue();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.entityTransportType || changes.httpPullActive) {
+      this.applyPendingValue();
+    }
   }
 
   ngOnDestroy(): void {
@@ -89,8 +105,21 @@ export class HttpDeviceProfileTransportConfigurationComponent implements OnInit,
     if (!value) {
       return;
     }
-    const isPull = value.type === DeviceTransportType.HTTP_PULL
-      || (value as { pollUrl?: string }).pollUrl != null;
+    this.pendingValue = value;
+    this.applyPendingValue();
+    // 嵌套 CVA（pull/passive 子面板）可能尚未挂载，延迟再应用一次避免误显示被动接收
+    setTimeout(() => this.applyPendingValue(), 0);
+  }
+
+  private applyPendingValue(): void {
+    if (!this.formReady || !this.form || !this.pendingValue) {
+      return;
+    }
+    const value = this.pendingValue;
+    const isPull = this.httpPullActive
+      || isHttpPullProfileTransportConfiguration(value)
+      || resolveHttpProfileTransportTypeForDisplay(this.entityTransportType, value as Record<string, unknown>)
+        === DeviceTransportType.HTTP_PULL;
     this.form.patchValue({
       httpMode: isPull ? HttpTransportMode.PULL : HttpTransportMode.PASSIVE,
       pullConfiguration: isPull ? value : createDeviceProfileTransportConfiguration(DeviceTransportType.HTTP_PULL),
@@ -108,10 +137,19 @@ export class HttpDeviceProfileTransportConfigurationComponent implements OnInit,
   private updateModel(): void {
     const mode = this.form.get('httpMode').value;
     if (mode === HttpTransportMode.PULL) {
-      this.propagateChange(this.form.get('pullConfiguration').value);
+      const pull = this.form.get('pullConfiguration').value || {};
+      this.propagateChange({
+        ...pull,
+        type: DeviceTransportType.HTTP_PULL,
+        httpTransportMode: HttpTransportMode.PULL
+      });
     } else {
       const passive = this.form.get('passiveConfiguration').value || {};
-      this.propagateChange({ ...passive, type: DeviceTransportType.DEFAULT });
+      this.propagateChange({
+        type: DeviceTransportType.DEFAULT,
+        httpTransportMode: HttpTransportMode.PASSIVE,
+        routing: passive.routing
+      });
     }
   }
 }

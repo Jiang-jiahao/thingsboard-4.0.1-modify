@@ -31,6 +31,8 @@ import {
   BasicTransportType,
   DeviceProfileTransportConfiguration,
   DeviceTransportType,
+  normalizeHttpProfileTransportConfigurationForDisplay,
+  resolveHttpProfileTransportTypeForDisplay,
   toUiTransportType,
   TransportType
 } from '@shared/models/device.models';
@@ -71,12 +73,22 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
   @Input()
   selectedTransportType: TransportType;
 
+  /** 已保存的档案 transportType（HTTP 回显工作模式） */
+  @Input()
+  entityTransportType: DeviceTransportType;
+
   private configurationTransportType: TransportType;
 
   private propagateChange = (v: any) => { };
 
   get activeTransportType(): TransportType | null {
     return toUiTransportType((this.selectedTransportType ?? this.configurationTransportType) as DeviceTransportType);
+  }
+
+  /** 档案 transportType=HTTP_PULL 或配置标记为主动拉取时强制展示主动拉取面板 */
+  get httpPullActive(): boolean {
+    const cfg = this.deviceProfileTransportConfigurationFormGroup?.getRawValue()?.configuration;
+    return resolveHttpProfileTransportTypeForDisplay(this.entityTransportType, cfg) === DeviceTransportType.HTTP_PULL;
   }
 
   constructor(private store: Store<AppState>,
@@ -112,20 +124,33 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
   }
 
   writeValue(value: DeviceProfileTransportConfiguration | null): void {
-    if (value?.type) {
-      this.configurationTransportType = value.type;
+    if (!value) {
+      return;
     }
-    const configuration = deepClone(value);
-    if (configuration) {
-      delete configuration.type;
-    }
-    setTimeout(() => {
-      this.deviceProfileTransportConfigurationFormGroup.patchValue({configuration}, {emitEvent: false});
-    }, 0);
+    const effectiveTransportType = resolveHttpProfileTransportTypeForDisplay(
+      this.entityTransportType,
+      value as Record<string, unknown>
+    );
+    this.configurationTransportType = effectiveTransportType;
+    const configuration = normalizeHttpProfileTransportConfigurationForDisplay(
+      effectiveTransportType,
+      deepClone(value) as Record<string, unknown>
+    );
+    const patchConfiguration = () => {
+      if (this.deviceProfileTransportConfigurationFormGroup) {
+        this.deviceProfileTransportConfigurationFormGroup.patchValue({configuration}, {emitEvent: false});
+      }
+    };
+    patchConfiguration();
+    // HTTP 子组件在 ngSwitch 下晚于首次 writeValue 挂载，补一次写入
+    setTimeout(() => patchConfiguration(), 0);
   }
 
   private updateModel() {
     const configuration = this.deviceProfileTransportConfigurationFormGroup.getRawValue().configuration;
+    if (configuration == null) {
+      return;
+    }
     this.propagateChange(configuration);
   }
 

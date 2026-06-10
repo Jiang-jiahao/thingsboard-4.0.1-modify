@@ -31,8 +31,9 @@ public class HttpPullAuthService {
     private final HttpPullHttpClient sharedHttpClient = new HttpPullHttpClient(10000);
     private final Map<DeviceId, TokenState> tokenCache = new ConcurrentHashMap<>();
 
-    public AuthRequestContext prepareAuth(DeviceId collectorId, HttpPullAuthConfiguration auth, String pollUrl) throws Exception {
-        if (auth == null || auth.getAuthType() == null || auth.getAuthType() == HttpPullAuthType.NONE) {
+    public AuthRequestContext prepareAuth(DeviceId collectorId, HttpPullAuthConfiguration auth, String pollUrl,
+                                          boolean requiresAuth) throws Exception {
+        if (!requiresAuth || auth == null || auth.getAuthType() == null || auth.getAuthType() == HttpPullAuthType.NONE) {
             return AuthRequestContext.builder().url(pollUrl).headers(new HashMap<>()).build();
         }
         Map<String, String> headers = new HashMap<>();
@@ -194,9 +195,10 @@ public class HttpPullAuthService {
     }
 
     private void applyTokenFromBody(HttpPullAuthConfiguration auth, String body, TokenState state) {
-        String token = HttpPullJsonHelper.readJsonPath(body, auth.getAccessTokenJsonPath());
+        String path = StringUtils.isNotBlank(auth.getAccessTokenJsonPath()) ? auth.getAccessTokenJsonPath() : "$.token";
+        String token = HttpPullJsonHelper.readJsonPath(body, path);
         if (StringUtils.isBlank(token)) {
-            throw new IllegalStateException("HTTP pull login did not return access token at " + auth.getAccessTokenJsonPath());
+            throw new IllegalStateException("HTTP pull login did not return credential at JSONPath " + path);
         }
         state.accessToken = token;
         if (StringUtils.isNotBlank(auth.getRefreshTokenJsonPath())) {

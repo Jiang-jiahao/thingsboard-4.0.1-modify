@@ -84,6 +84,9 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   httpPullRoutingMode: HttpPullRoutingMode | null = null;
 
   @Input()
+  httpPushRoutingMode: HttpPullRoutingMode | null = null;
+
+  @Input()
   httpPullProfilePollUrl: string | null = null;
 
   /** 来自设备详情页：tenant | customer | customer_user | edge | edge_customer_user */
