@@ -33,6 +33,7 @@ import {
   DeviceTransportConfiguration,
   DeviceTransportType,
   HttpPullRoutingMode,
+  normalizeHttpDeviceTransportConfigurationForSave,
   TcpTransportConnectMode,
   TcpWireAuthenticationMode,
   toUiTransportType,
@@ -95,6 +96,12 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
 
   @Input()
   httpPullProfilePollUrl: string | null = null;
+
+  @Input()
+  deviceProfileId: string | null = null;
+
+  @Input()
+  editingDeviceId: string | null = null;
 
   /** 设备档案传输类型（优先；HTTP 档案为 UI 类型 HTTP） */
   @Input()
@@ -177,9 +184,12 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
     if (this.deviceTransportConfigurationFormGroup.valid) {
       configuration = this.deviceTransportConfigurationFormGroup.getRawValue().configuration;
       const transportType = configuration?.type ?? this.configurationTransportType ?? this.profileTransportType;
-      if (configuration && transportType) {
-        configuration = { ...configuration, type: transportType as DeviceTransportType };
-      }
+      const httpPullProfileActive = this.httpPullProfilePollUrl != null;
+      configuration = normalizeHttpDeviceTransportConfigurationForSave(
+        transportType,
+        configuration,
+        httpPullProfileActive
+      );
     }
     this.propagateChange(configuration);
   }

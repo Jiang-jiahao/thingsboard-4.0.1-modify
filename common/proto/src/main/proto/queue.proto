@@ -666,6 +666,7 @@ message HttpPullRoutingTargetProto {
   string name = 3;
   string label = 4;
   string externalDeviceId = 5;
+  string collectorDeviceId = 6;
 }
 
 message GetHttpPullRoutingTargetsResponseMsg {

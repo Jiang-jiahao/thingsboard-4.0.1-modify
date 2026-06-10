@@ -89,6 +89,12 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   @Input()
   httpPullProfilePollUrl: string | null = null;
 
+  @Input()
+  deviceProfileId: string | null = null;
+
+  @Input()
+  editingDeviceId: string | null = null;
+
   /** 来自设备详情页：tenant | customer | customer_user | edge | edge_customer_user */
   @Input()
   deviceScope: string;

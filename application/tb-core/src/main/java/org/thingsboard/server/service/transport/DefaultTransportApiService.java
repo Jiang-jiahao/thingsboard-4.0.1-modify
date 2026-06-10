@@ -598,6 +598,7 @@ public class DefaultTransportApiService implements TransportApiService {
                 continue;
             }
             String externalDeviceId = "";
+            String collectorDeviceId = "";
             if (device.getDeviceData() != null && device.getDeviceData().getTransportConfiguration() != null) {
                 var tc = device.getDeviceData().getTransportConfiguration();
                 if (tc instanceof org.thingsboard.server.common.data.device.data.HttpPullDeviceTransportConfiguration httpPull) {
@@ -605,6 +606,7 @@ public class DefaultTransportApiService implements TransportApiService {
                         continue;
                     }
                     externalDeviceId = httpPull.getExternalDeviceId() != null ? httpPull.getExternalDeviceId() : "";
+                    collectorDeviceId = httpPull.getCollectorDeviceId() != null ? httpPull.getCollectorDeviceId() : "";
                 } else if (tc instanceof org.thingsboard.server.common.data.device.data.DefaultDeviceTransportConfiguration httpPush) {
                     externalDeviceId = httpPush.getExternalDeviceId() != null ? httpPush.getExternalDeviceId() : "";
                 }
@@ -615,6 +617,7 @@ public class DefaultTransportApiService implements TransportApiService {
                     .setName(device.getName() != null ? device.getName() : "")
                     .setLabel(device.getLabel() != null ? device.getLabel() : "")
                     .setExternalDeviceId(externalDeviceId)
+                    .setCollectorDeviceId(collectorDeviceId)
                     .build());
         }
         builder.setHasNextPage(deviceIds.hasNext());

@@ -52,6 +52,8 @@
         <tb-http-pull-device-transport-configuration
           [httpPullRoutingMode]="httpPullRoutingMode"
           [httpPullProfilePollUrl]="httpPullProfilePollUrl"
+          [deviceProfileId]="deviceProfileId"
+          [editingDeviceId]="editingDeviceId"
           formControlName="configuration">
         </tb-http-pull-device-transport-configuration>
       </ng-container>
@@ -66,6 +68,8 @@
       <tb-http-pull-device-transport-configuration
         [httpPullRoutingMode]="httpPullRoutingMode"
         [httpPullProfilePollUrl]="httpPullProfilePollUrl"
+        [deviceProfileId]="deviceProfileId"
+        [editingDeviceId]="editingDeviceId"
         formControlName="configuration">
       </tb-http-pull-device-transport-configuration>
     </ng-template>

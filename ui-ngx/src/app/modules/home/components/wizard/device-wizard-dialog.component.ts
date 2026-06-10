@@ -98,6 +98,10 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
 
   readonly gatewayUiEnabled = GATEWAY_UI_ENABLED;
 
+  get httpPullDeviceProfileId(): string | null {
+    return this.resolveDeviceProfileUuid(this.deviceWizardFormGroup?.get('deviceProfileId')?.value);
+  }
+
   constructor(protected store: Store<AppState>,
               protected router: Router,
               public dialogRef: MatDialogRef<DeviceWizardDialogComponent, Device>,

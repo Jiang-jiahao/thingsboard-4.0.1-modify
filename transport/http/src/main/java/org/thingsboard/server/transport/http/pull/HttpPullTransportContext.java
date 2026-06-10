@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @ConditionalOnExpression("'${service.type:null}'=='tb-transport' || ('${service.type:null}'=='monolith' && '${transport.api_enabled:true}'=='true' && '${transport.http.enabled}'=='true')")
@@ -63,6 +64,7 @@ public class HttpPullTransportContext extends TransportContext {
     private final HttpPullProtoEntityService protoEntityService;
 
     private final Map<DeviceId, HttpPullCollectorSessionContext> collectorSessions = new ConcurrentHashMap<>();
+    private final Map<DeviceProfileId, Integer> collectorCountByProfile = new ConcurrentHashMap<>();
 
     @AfterStartUp(order = AfterStartUp.AFTER_TRANSPORT_SERVICE)
     public void fetchCollectorsAndEstablishSessions() {
@@ -165,7 +167,11 @@ public class HttpPullTransportContext extends TransportContext {
             do {
                 TransportProtos.GetHttpPullRoutingTargetsResponseMsg resp = protoEntityService.getRoutingTargets(
                         collectorCtx.getTenantId(), targetProfileId, page, 512);
+                int collectorsOnProfile = resolveCollectorCountForProfile(targetProfileId);
                 for (TransportProtos.HttpPullRoutingTargetProto target : resp.getTargetsList()) {
+                    if (!shouldBindTargetToCollector(collectorCtx, target, collectorsOnProfile)) {
+                        continue;
+                    }
                     String matchKey = HttpPullTransportService.buildMatchKey(strategy, target);
                     if (StringUtils.isBlank(matchKey)) {
                         continue;
@@ -178,6 +184,55 @@ public class HttpPullTransportContext extends TransportContext {
             } while (next);
         }
         log.info("[{}] HTTP pull active targets loaded: {}", collectorCtx.getDeviceId(), collectorCtx.getActiveTargets().size());
+    }
+
+    private boolean shouldBindTargetToCollector(HttpPullCollectorSessionContext collectorCtx,
+                                                TransportProtos.HttpPullRoutingTargetProto target,
+                                                int collectorsOnProfile) {
+        String assignedCollectorId = target.getCollectorDeviceId() != null ? target.getCollectorDeviceId().trim() : "";
+        if (StringUtils.isNotBlank(assignedCollectorId)) {
+            return collectorCtx.getDeviceId().getId().toString().equals(assignedCollectorId);
+        }
+        if (collectorsOnProfile > 1) {
+            log.debug("[{}] Skip target without collectorDeviceId — profile {} has {} collector(s)",
+                    collectorCtx.getDeviceId(), collectorCtx.getDeviceProfile().getId(), collectorsOnProfile);
+            return false;
+        }
+        return true;
+    }
+
+    private int resolveCollectorCountForProfile(DeviceProfileId profileId) {
+        return collectorCountByProfile.computeIfAbsent(profileId, this::countCollectorsForProfile);
+    }
+
+    private int countCollectorsForProfile(DeviceProfileId profileId) {
+        AtomicInteger count = new AtomicInteger();
+        int batchIndex = 0;
+        int batchSize = 512;
+        boolean next;
+        do {
+            TransportProtos.GetHttpPullDevicesResponseMsg response = protoEntityService.getHttpPullDevicesIds(batchIndex, batchSize);
+            response.getIdsList().forEach(idStr -> {
+                Device device = protoEntityService.getDeviceById(new DeviceId(UUID.fromString(idStr)));
+                if (device == null || !profileId.equals(device.getDeviceProfileId())) {
+                    return;
+                }
+                if (device.getDeviceData() != null
+                        && device.getDeviceData().getTransportConfiguration() instanceof HttpPullDeviceTransportConfiguration httpPull
+                        && httpPull.isCollector()) {
+                    count.incrementAndGet();
+                }
+            });
+            next = response.getHasNextPage();
+            batchIndex++;
+        } while (next);
+        return count.get();
+    }
+
+    private void invalidateCollectorCountCache(DeviceProfileId profileId) {
+        if (profileId != null) {
+            collectorCountByProfile.remove(profileId);
+        }
     }
 
     private void registerTargetSession(HttpPullCollectorSessionContext collectorCtx, DeviceId targetId, String matchKey) {
@@ -239,6 +294,7 @@ public class HttpPullTransportContext extends TransportContext {
             return;
         }
         DeviceProfileId profileId = device.getDeviceProfileId();
+        invalidateCollectorCountCache(profileId);
         for (HttpPullCollectorSessionContext ctx : new ArrayList<>(collectorSessions.values())) {
             if (!ctx.getDeviceProfile().getId().equals(profileId)) {
                 continue;
@@ -303,6 +359,7 @@ public class HttpPullTransportContext extends TransportContext {
         if (device == null) {
             return;
         }
+        invalidateCollectorCountCache(device.getDeviceProfileId());
         DeviceId deviceId = device.getId();
         HttpPullCollectorSessionContext existing = collectorSessions.get(deviceId);
         if (existing != null) {

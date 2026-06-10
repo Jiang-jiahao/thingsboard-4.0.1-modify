@@ -15,6 +15,7 @@ import org.thingsboard.server.common.data.StringUtils;
  * <ul>
  *   <li>{@link #collector}：为 true 时该设备作为采集器，按档案周期发起 HTTP 请求。</li>
  *   <li>{@link #externalDeviceId}：多设备路由时，与响应中设备 ID 字段匹配（见档案 routing）。</li>
+ *   <li>{@link #collectorDeviceId}：目标设备归属的采集器设备 ID；多采集器且外部 ID 可能重复时必填。</li>
  *   <li>{@link #pollUrlOverride}：覆盖档案中的 pollUrl。</li>
  * </ul>
  */
@@ -32,6 +33,11 @@ public class HttpPullDeviceTransportConfiguration implements DeviceTransportConf
     private String externalDeviceId;
 
     /**
+     * 目标设备所归属的采集器 {@link org.thingsboard.server.common.data.id.DeviceId}（UUID 字符串）。
+     */
+    private String collectorDeviceId;
+
+    /**
      * 可选：覆盖设备档案中的 pollUrl。
      */
     private String pollUrlOverride;
@@ -46,6 +52,12 @@ public class HttpPullDeviceTransportConfiguration implements DeviceTransportConf
         if (StringUtils.isNotBlank(externalDeviceId)) {
             collector = false;
             pollUrlOverride = null;
+        } else if (StringUtils.isNotBlank(collectorDeviceId)) {
+            collector = false;
+            pollUrlOverride = null;
+        } else if (Boolean.TRUE.equals(collector)) {
+            collectorDeviceId = null;
+            externalDeviceId = null;
         }
         if (collector == null) {
             collector = true;

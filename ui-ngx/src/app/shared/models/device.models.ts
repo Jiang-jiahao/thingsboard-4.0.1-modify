@@ -613,6 +613,8 @@ export interface HttpPullDeviceProfileTransportConfiguration {
 export interface HttpPullDeviceTransportConfiguration {
   collector?: boolean;
   externalDeviceId?: string;
+  /** 目标设备归属的采集器设备 ID（UUID） */
+  collectorDeviceId?: string;
   pollUrlOverride?: string;
 }
 
@@ -627,6 +629,68 @@ export function resolveHttpPullDeviceIsCollector(
     return false;
   }
   return cfg.collector !== false;
+}
+
+/** 档案下同配置下可作为「归属采集器」的候选设备：未配置外部设备 ID */
+export function isHttpPullCollectorCandidate(
+  cfg: Pick<HttpPullDeviceTransportConfiguration, 'externalDeviceId'> | null | undefined
+): boolean {
+  return !(cfg?.externalDeviceId || '').trim();
+}
+
+/** 根据字段形态判断是否为 HTTP 主动拉取设备传输配置（与 Default 被动上报区分） */
+export function isHttpPullDeviceTransportConfigurationShape(
+  cfg: Record<string, unknown> | null | undefined
+): boolean {
+  if (!cfg) {
+    return false;
+  }
+  return 'collector' in cfg || 'pollUrlOverride' in cfg || 'collectorDeviceId' in cfg;
+}
+
+/** 保存设备时解析传输 JSON 多态 type，避免误存为 DEFAULT 导致 collectorDeviceId 等字段丢失 */
+export function resolveHttpDeviceTransportTypeForSave(
+  transportType: DeviceTransportType | TransportType | null | undefined,
+  configuration: Record<string, unknown> | null | undefined,
+  httpPullProfileActive = false
+): DeviceTransportType {
+  if (configuration?.type === DeviceTransportType.HTTP_PULL) {
+    return DeviceTransportType.HTTP_PULL;
+  }
+  if (httpPullProfileActive || isHttpPullDeviceTransportConfigurationShape(configuration)) {
+    return DeviceTransportType.HTTP_PULL;
+  }
+  if (transportType === BasicTransportType.HTTP) {
+    return DeviceTransportType.DEFAULT;
+  }
+  return (transportType as DeviceTransportType) ?? DeviceTransportType.DEFAULT;
+}
+
+/** 保存前规范化 HTTP Pull 设备传输配置，确保 type 与字段与后端 {@link HttpPullDeviceTransportConfiguration} 一致 */
+export function normalizeHttpDeviceTransportConfigurationForSave(
+  transportType: DeviceTransportType | TransportType | null | undefined,
+  configuration: DeviceTransportConfiguration | Record<string, unknown> | null | undefined,
+  httpPullProfileActive = false
+): DeviceTransportConfiguration | null | undefined {
+  if (!configuration) {
+    return configuration as null | undefined;
+  }
+  const resolvedType = resolveHttpDeviceTransportTypeForSave(transportType, configuration as Record<string, unknown>, httpPullProfileActive);
+  if (resolvedType !== DeviceTransportType.HTTP_PULL) {
+    return { ...configuration, type: resolvedType } as DeviceTransportConfiguration;
+  }
+  const raw = configuration as HttpPullDeviceTransportConfiguration;
+  const collector = resolveHttpPullDeviceIsCollector(raw);
+  const externalDeviceId = (raw.externalDeviceId || '').trim() || undefined;
+  const collectorDeviceId = (raw.collectorDeviceId || '').trim() || undefined;
+  const pollUrlOverride = (raw.pollUrlOverride || '').trim() || undefined;
+  return {
+    type: DeviceTransportType.HTTP_PULL,
+    collector,
+    externalDeviceId: collector ? undefined : externalDeviceId,
+    collectorDeviceId: collector ? undefined : collectorDeviceId,
+    pollUrlOverride: collector ? pollUrlOverride : undefined
+  };
 }
 
 export interface HttpPullProfileContext {

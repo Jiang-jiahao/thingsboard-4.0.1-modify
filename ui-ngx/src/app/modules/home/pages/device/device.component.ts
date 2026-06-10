@@ -80,6 +80,10 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
 
   readonly gatewayUiEnabled = GATEWAY_UI_ENABLED;
 
+  get httpPullDeviceProfileId(): string | null {
+    return this.resolveDeviceProfileUuid(this.entityForm?.get('deviceProfileId')?.value);
+  }
+
   constructor(protected store: Store<AppState>,
               protected translate: TranslateService,
               @Inject('entity') protected entityValue: DeviceInfo,

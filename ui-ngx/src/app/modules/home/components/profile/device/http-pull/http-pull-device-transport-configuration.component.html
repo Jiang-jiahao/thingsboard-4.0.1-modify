@@ -36,8 +36,17 @@
         <mat-hint translate>device-profile.http-pull.poll-url-override-collector-hint</mat-hint>
       </mat-form-field>
     </section>
-    <section *ngIf="!isCollectorOn()" class="flex flex-row gap-2 xs:flex-col target-fields">
-      <mat-form-field class="flex-1 mat-block">
+    <section *ngIf="!isCollectorOn()" class="flex flex-col gap-2 target-fields">
+      <mat-form-field *ngIf="showCollectorSelect" class="mat-block">
+        <mat-label translate>device-profile.http-pull.collector-device</mat-label>
+        <mat-select formControlName="collectorDeviceId" required>
+          <mat-option *ngFor="let c of collectorOptions" [value]="c.id.id">
+            {{ c.name }}{{ c.label ? ' (' + c.label + ')' : '' }}
+          </mat-option>
+        </mat-select>
+        <mat-hint translate>device-profile.http-pull.collector-device-hint</mat-hint>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
         <mat-label translate>device-profile.http-pull.external-device-id</mat-label>
         <input matInput formControlName="externalDeviceId">
         <mat-hint translate>device-profile.http-pull.external-device-id-hint</mat-hint>
