@@ -150,9 +150,9 @@ public class HttpPullTransportService {
 
     private void dispatchTelemetry(HttpPullCollectorSessionContext sessionContext, String body,
                                    HttpPullDeviceRoutingConfiguration routing) {
+        String telemetryKey = routing != null ? routing.getTelemetryPayloadKey() : "httpPullPayload";
         if (!HttpPullRoutingHelper.shouldRouteToMultipleDevices(routing, body)) {
-            postTelemetry(sessionContext.getSessionInfo(), body,
-                    routing != null ? routing.getTelemetryPayloadKey() : "httpPullPayload");
+            postTelemetry(sessionContext.getSessionInfo(), body, telemetryKey);
             return;
         }
         List<Object> elements = HttpPullJsonHelper.readArrayElements(body, routing.getResponseArrayJsonPath());
@@ -167,8 +167,9 @@ public class HttpPullTransportService {
                 continue;
             }
             String payloadJson = HttpPullJsonHelper.elementToJsonString(element);
-            postTelemetry(target.getSessionInfo(), payloadJson, routing.getTelemetryPayloadKey());
+            postTelemetry(target.getSessionInfo(), payloadJson, telemetryKey);
         }
+        postTelemetry(sessionContext.getSessionInfo(), body, telemetryKey);
     }
 
     private void dispatchAttributes(HttpPullCollectorSessionContext sessionContext, String body, boolean shared,
@@ -190,6 +191,7 @@ public class HttpPullTransportService {
             String payloadJson = HttpPullJsonHelper.elementToJsonString(element);
             postAttributes(target.getSessionInfo(), payloadJson, shared);
         }
+        postAttributes(sessionContext.getSessionInfo(), body, shared);
     }
 
     private void postTelemetry(TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, String telemetryKey) {

@@ -17,13 +17,13 @@
     <mat-slide-toggle formControlName="collector" class="collector-toggle">
       {{ 'device-profile.http-pull.collector' | translate }}
     </mat-slide-toggle>
-    <p *ngIf="form.get('collector').value" class="tb-hint collector-only-hint" translate>
+    <p *ngIf="isCollectorOn()" class="tb-hint collector-only-hint" translate>
       device-profile.http-pull.collector-only-hint
     </p>
-    <p *ngIf="!form.get('collector').value" class="tb-hint" translate>
+    <p *ngIf="!isCollectorOn()" class="tb-hint" translate>
       device-profile.http-pull.target-device-hint
     </p>
-    <section *ngIf="form.get('collector').value" class="target-fields">
+    <section *ngIf="isCollectorOn()" class="target-fields">
       <p *ngIf="httpPullProfilePollUrl" class="tb-hint profile-poll-url-ref">
         <span translate>device-profile.http-pull.profile-poll-url</span>：{{ httpPullProfilePollUrl }}
       </p>
@@ -36,7 +36,7 @@
         <mat-hint translate>device-profile.http-pull.poll-url-override-collector-hint</mat-hint>
       </mat-form-field>
     </section>
-    <section *ngIf="!form.get('collector').value" class="flex flex-row gap-2 xs:flex-col target-fields">
+    <section *ngIf="!isCollectorOn()" class="flex flex-row gap-2 xs:flex-col target-fields">
       <mat-form-field class="flex-1 mat-block">
         <mat-label translate>device-profile.http-pull.external-device-id</mat-label>
         <input matInput formControlName="externalDeviceId">

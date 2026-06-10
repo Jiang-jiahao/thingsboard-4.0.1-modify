@@ -12,9 +12,11 @@ import {
   Validators
 } from '@angular/forms';
 import {
+  HTTP_PULL_ROUTING_MODE_OPTIONS,
   HttpPullDeviceIdMatchStrategy,
   HttpPullDeviceRoutingConfiguration,
-  HttpPullRoutingMode
+  HttpPullRoutingMode,
+  normalizeHttpPullRoutingMode
 } from '@shared/models/device.models';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -38,7 +40,7 @@ export class HttpDeviceRoutingConfigurationComponent implements OnInit, OnDestro
 
   form: UntypedFormGroup;
   httpPullRoutingMode = HttpPullRoutingMode;
-  routingModes = Object.keys(HttpPullRoutingMode);
+  routingModes = HTTP_PULL_ROUTING_MODE_OPTIONS;
   matchStrategies = Object.keys(HttpPullDeviceIdMatchStrategy);
 
   private destroy$ = new Subject<void>();
@@ -80,7 +82,7 @@ export class HttpDeviceRoutingConfigurationComponent implements OnInit, OnDestro
   writeValue(value: HttpPullDeviceRoutingConfiguration | null): void {
     const routing = value || {};
     this.form.patchValue({
-      routingMode: routing.routingMode || HttpPullRoutingMode.SINGLE_DEVICE,
+      routingMode: normalizeHttpPullRoutingMode(routing.routingMode),
       responseArrayJsonPath: routing.responseArrayJsonPath || '',
       deviceIdJsonPath: routing.deviceIdJsonPath || 'deviceId',
       deviceIdMatchStrategy: routing.deviceIdMatchStrategy || HttpPullDeviceIdMatchStrategy.DEVICE_NAME,

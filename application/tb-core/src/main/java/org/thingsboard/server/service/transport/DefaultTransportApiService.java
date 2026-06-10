@@ -601,6 +601,9 @@ public class DefaultTransportApiService implements TransportApiService {
             if (device.getDeviceData() != null && device.getDeviceData().getTransportConfiguration() != null) {
                 var tc = device.getDeviceData().getTransportConfiguration();
                 if (tc instanceof org.thingsboard.server.common.data.device.data.HttpPullDeviceTransportConfiguration httpPull) {
+                    if (httpPull.isCollector()) {
+                        continue;
+                    }
                     externalDeviceId = httpPull.getExternalDeviceId() != null ? httpPull.getExternalDeviceId() : "";
                 } else if (tc instanceof org.thingsboard.server.common.data.device.data.DefaultDeviceTransportConfiguration httpPush) {
                     externalDeviceId = httpPush.getExternalDeviceId() != null ? httpPush.getExternalDeviceId() : "";

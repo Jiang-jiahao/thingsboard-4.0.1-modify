@@ -229,7 +229,28 @@ public class HttpPullTransportContext extends TransportContext {
         if (!isHttpPullEnabled()) {
             return;
         }
-        refreshCollectorDevice(event.getDevice());
+        Device device = event.getDevice();
+        refreshCollectorDevice(device);
+        reloadActiveTargetsForProfile(device);
+    }
+
+    private void reloadActiveTargetsForProfile(Device device) {
+        if (device == null || device.getDeviceProfileId() == null) {
+            return;
+        }
+        DeviceProfileId profileId = device.getDeviceProfileId();
+        for (HttpPullCollectorSessionContext ctx : new ArrayList<>(collectorSessions.values())) {
+            if (!ctx.getDeviceProfile().getId().equals(profileId)) {
+                continue;
+            }
+            ctx.getActiveTargets().values().forEach(t -> {
+                if (t.getSessionInfo() != null) {
+                    transportService.deregisterSession(t.getSessionInfo());
+                }
+            });
+            ctx.getActiveTargets().clear();
+            preloadActiveTargets(ctx);
+        }
     }
 
     @EventListener(DeviceDeletedEvent.class)

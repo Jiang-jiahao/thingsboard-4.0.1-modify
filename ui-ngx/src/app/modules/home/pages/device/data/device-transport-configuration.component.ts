@@ -104,6 +104,7 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
   private configurationTransportType: TransportType;
 
   private propagateChange = (v: any) => { };
+  private suppressModelUpdate = false;
 
   get activeTransportType(): TransportType | null {
     return toUiTransportType((this.profileTransportType ?? this.configurationTransportType) as DeviceTransportType);
@@ -156,7 +157,9 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
     if (configuration) {
       delete configuration.type;
     }
+    this.suppressModelUpdate = true;
     this.deviceTransportConfigurationFormGroup.patchValue({configuration}, {emitEvent: false});
+    this.suppressModelUpdate = false;
     this.cd.markForCheck();
   }
 
@@ -167,9 +170,16 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
   }
 
   private updateModel() {
+    if (this.suppressModelUpdate) {
+      return;
+    }
     let configuration: DeviceTransportConfiguration = null;
     if (this.deviceTransportConfigurationFormGroup.valid) {
       configuration = this.deviceTransportConfigurationFormGroup.getRawValue().configuration;
+      const transportType = configuration?.type ?? this.configurationTransportType ?? this.profileTransportType;
+      if (configuration && transportType) {
+        configuration = { ...configuration, type: transportType as DeviceTransportType };
+      }
     }
     this.propagateChange(configuration);
   }

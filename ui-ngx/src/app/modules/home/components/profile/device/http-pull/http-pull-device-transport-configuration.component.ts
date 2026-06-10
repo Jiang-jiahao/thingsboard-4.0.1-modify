@@ -1,7 +1,7 @@
 ///
 /// Copyright © 2016-2025 The Thingsboard Authors
 ///
-import { Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import {
   ControlValueAccessor,
   NG_VALIDATORS,
@@ -15,7 +15,9 @@ import {
   DeviceTransportConfiguration,
   DeviceTransportType,
   formatHttpPullPollUrlOverrideForDisplay,
+  HttpPullDeviceTransportConfiguration,
   HttpPullRoutingMode,
+  resolveHttpPullDeviceIsCollector,
   resolveHttpPullPollUrlOverride
 } from '@shared/models/device.models';
 import { Subject } from 'rxjs';
@@ -48,10 +50,11 @@ export class HttpPullDeviceTransportConfigurationComponent implements OnInit, On
   form: UntypedFormGroup;
   private destroy$ = new Subject<void>();
   private propagateChange: (v: DeviceTransportConfiguration) => void = () => {};
+  private pendingValue: HttpPullDeviceTransportConfiguration | null = null;
+  private valueReady = false;
 
   get singleDeviceMode(): boolean {
-    return this.httpPullRoutingMode === HttpPullRoutingMode.SINGLE_DEVICE
-      || this.httpPullRoutingMode == null;
+    return this.httpPullRoutingMode === HttpPullRoutingMode.SINGLE_DEVICE;
   }
 
   get effectivePollUrl(): string | null {
@@ -63,7 +66,15 @@ export class HttpPullDeviceTransportConfigurationComponent implements OnInit, On
     return resolved || this.httpPullProfilePollUrl || null;
   }
 
-  constructor(private fb: UntypedFormBuilder) {}
+  constructor(private fb: UntypedFormBuilder,
+              private cd: ChangeDetectorRef) {}
+
+  isCollectorOn(): boolean {
+    if (!this.form) {
+      return true;
+    }
+    return resolveHttpPullDeviceIsCollector(this.form.getRawValue());
+  }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -71,14 +82,20 @@ export class HttpPullDeviceTransportConfigurationComponent implements OnInit, On
       externalDeviceId: [''],
       pollUrlOverride: ['']
     });
-    this.form.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => this.updateModel());
+    this.form.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (this.valueReady) {
+        this.updateModel();
+      }
+    });
     this.form.get('collector').valueChanges.pipe(takeUntil(this.destroy$)).subscribe((collector: boolean) => {
       if (collector) {
         this.form.patchValue({ externalDeviceId: '' }, { emitEvent: false });
       }
-      this.updateModel();
+      if (this.valueReady) {
+        this.updateModel();
+      }
     });
-    this.applyRoutingModeToForm();
+    this.applyPendingValue();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -86,8 +103,7 @@ export class HttpPullDeviceTransportConfigurationComponent implements OnInit, On
       return;
     }
     if (changes.httpPullRoutingMode) {
-      this.applyRoutingModeToForm();
-      this.updateModel();
+      this.applyPendingValue();
     }
     if (changes.httpPullProfilePollUrl) {
       this.refreshPollUrlOverrideDisplay();
@@ -104,25 +120,41 @@ export class HttpPullDeviceTransportConfigurationComponent implements OnInit, On
     }, { emitEvent: false });
   }
 
-  private applyRoutingModeToForm(): void {
-    if (!this.form) {
+  private applyPendingValue(): void {
+    if (!this.form || !this.pendingValue) {
       return;
     }
-    if (this.singleDeviceMode) {
-      this.form.patchValue({ collector: true, externalDeviceId: '' }, { emitEvent: false });
-      this.form.get('collector').disable({ emitEvent: false });
+    const deviceConfig = this.pendingValue;
+    const singleDevice = this.singleDeviceMode;
+    const collector = singleDevice ? true : resolveHttpPullDeviceIsCollector(deviceConfig);
+    this.valueReady = false;
+    this.form.patchValue({
+      collector,
+      externalDeviceId: singleDevice ? '' : (deviceConfig.externalDeviceId || ''),
+      pollUrlOverride: collector ? formatHttpPullPollUrlOverrideForDisplay(
+        deviceConfig.pollUrlOverride,
+        this.httpPullProfilePollUrl
+      ) : ''
+    }, { emitEvent: false });
+    const collectorCtrl = this.form.get('collector');
+    if (singleDevice) {
+      collectorCtrl?.disable({ emitEvent: false });
     } else {
-      this.form.get('collector').enable({ emitEvent: false });
+      collectorCtrl?.enable({ emitEvent: false });
     }
+    this.valueReady = true;
+    this.cd.markForCheck();
   }
 
   private updateModel(): void {
     const v = this.form.getRawValue();
-    const collector = this.singleDeviceMode ? true : !!v.collector;
+    const singleDevice = this.singleDeviceMode;
+    const collector = singleDevice ? true : !!v.collector;
     const pollOverrideRaw = (v.pollUrlOverride || '').trim();
+    const externalDeviceId = (v.externalDeviceId || '').trim();
     this.propagateChange({
       collector,
-      externalDeviceId: (!collector && !this.singleDeviceMode) ? (v.externalDeviceId || undefined) : undefined,
+      externalDeviceId: !singleDevice && !collector ? (externalDeviceId || undefined) : undefined,
       pollUrlOverride: collector && pollOverrideRaw ? pollOverrideRaw : undefined,
       type: DeviceTransportType.HTTP_PULL
     });
@@ -140,10 +172,14 @@ export class HttpPullDeviceTransportConfigurationComponent implements OnInit, On
   registerOnTouched(_fn: any): void {}
 
   setDisabledState(isDisabled: boolean): void {
+    if (!this.form) {
+      return;
+    }
     if (isDisabled) {
       this.form.disable({ emitEvent: false });
     } else {
       this.form.enable({ emitEvent: false });
+      this.applyPendingValue();
     }
   }
 
@@ -151,14 +187,14 @@ export class HttpPullDeviceTransportConfigurationComponent implements OnInit, On
     if (!value) {
       return;
     }
-    const { type, ...deviceConfig } = value;
-    this.form.patchValue({
-      ...deviceConfig,
-      pollUrlOverride: formatHttpPullPollUrlOverrideForDisplay(
-        deviceConfig.pollUrlOverride,
-        this.httpPullProfilePollUrl
-      )
-    }, { emitEvent: false });
+    const cfg = value as HttpPullDeviceTransportConfiguration;
+    this.pendingValue = {
+      ...cfg,
+      collector: resolveHttpPullDeviceIsCollector(cfg),
+      externalDeviceId: (cfg.externalDeviceId || '').trim() || undefined,
+      pollUrlOverride: resolveHttpPullDeviceIsCollector(cfg) ? cfg.pollUrlOverride : undefined
+    };
+    this.applyPendingValue();
   }
 
   validate(): ValidationErrors | null {

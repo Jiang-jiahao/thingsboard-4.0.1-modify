@@ -43,6 +43,10 @@ public class HttpPullDeviceTransportConfiguration implements DeviceTransportConf
 
     @Override
     public void validate() {
+        if (StringUtils.isNotBlank(externalDeviceId)) {
+            collector = false;
+            pollUrlOverride = null;
+        }
         if (collector == null) {
             collector = true;
         }
@@ -50,6 +54,9 @@ public class HttpPullDeviceTransportConfiguration implements DeviceTransportConf
 
     @JsonIgnore
     public boolean isCollector() {
-        return collector == null || collector;
+        if (StringUtils.isNotBlank(externalDeviceId)) {
+            return false;
+        }
+        return !Boolean.FALSE.equals(collector);
     }
 }

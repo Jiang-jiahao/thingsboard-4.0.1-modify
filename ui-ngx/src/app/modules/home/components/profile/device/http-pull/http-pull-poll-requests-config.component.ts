@@ -14,10 +14,12 @@ import {
   Validators
 } from '@angular/forms';
 import {
+  HTTP_PULL_ROUTING_MODE_OPTIONS,
   HttpPullDeviceIdMatchStrategy,
   HttpPullPollDataType,
   HttpPullPollRequest,
-  HttpPullRoutingMode
+  HttpPullRoutingMode,
+  normalizeHttpPullRoutingMode
 } from '@shared/models/device.models';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -47,7 +49,7 @@ export class HttpPullPollRequestsConfigComponent implements OnInit, OnDestroy, C
   form: UntypedFormGroup;
   dataTypes = Object.keys(HttpPullPollDataType);
   httpPullPollDataType = HttpPullPollDataType;
-  routingModes = Object.keys(HttpPullRoutingMode);
+  routingModes = HTTP_PULL_ROUTING_MODE_OPTIONS;
   matchStrategies = Object.keys(HttpPullDeviceIdMatchStrategy);
   httpPullRoutingMode = HttpPullRoutingMode;
 
@@ -79,17 +81,18 @@ export class HttpPullPollRequestsConfigComponent implements OnInit, OnDestroy, C
   registerOnTouched(_fn: any): void {}
 
   setDisabledState(isDisabled: boolean): void {
-    if (isDisabled) {
-      this.form.disable({ emitEvent: false });
-    } else {
-      this.form.enable({ emitEvent: false });
-    }
+    this.disabled = isDisabled;
+    this.applyDisabledState();
   }
 
   writeValue(value: HttpPullPollRequest[] | null): void {
+    if (!this.form) {
+      return;
+    }
     this.pollRequestsArray.clear({ emitEvent: false });
     const requests = value?.length ? value : [this.createDefaultRequest()];
     requests.forEach(r => this.pollRequestsArray.push(this.createRequestGroup(r), { emitEvent: false }));
+    this.applyDisabledState();
   }
 
   validate(): ValidationErrors | null {
@@ -108,7 +111,7 @@ export class HttpPullPollRequestsConfigComponent implements OnInit, OnDestroy, C
 
   showRoutingFields(req: UntypedFormGroup): boolean {
     const mode = req.get('routingMode')?.value;
-    return mode === HttpPullRoutingMode.MULTI_DEVICE || mode === HttpPullRoutingMode.AUTO;
+    return mode === HttpPullRoutingMode.MULTI_DEVICE;
   }
 
   showTelemetryKey(req: UntypedFormGroup): boolean {
@@ -127,7 +130,7 @@ export class HttpPullPollRequestsConfigComponent implements OnInit, OnDestroy, C
       dataType: HttpPullPollDataType.TELEMETRY,
       requiresAuth: true,
       routing: {
-        routingMode: HttpPullRoutingMode.AUTO,
+        routingMode: HttpPullRoutingMode.MULTI_DEVICE,
         deviceIdJsonPath: 'deviceId',
         deviceIdMatchStrategy: HttpPullDeviceIdMatchStrategy.DEVICE_NAME,
         telemetryPayloadKey: 'httpPullPayload'
@@ -147,7 +150,7 @@ export class HttpPullPollRequestsConfigComponent implements OnInit, OnDestroy, C
       pollBody: [r.pollBody || ''],
       queryingFrequencyMs: [r.queryingFrequencyMs ?? null, [Validators.min(1000)]],
       dataType: [r.dataType || HttpPullPollDataType.TELEMETRY, Validators.required],
-      routingMode: [routing.routingMode || HttpPullRoutingMode.SINGLE_DEVICE],
+      routingMode: [normalizeHttpPullRoutingMode(routing.routingMode)],
       responseArrayJsonPath: [routing.responseArrayJsonPath || ''],
       deviceIdJsonPath: [routing.deviceIdJsonPath || 'deviceId'],
       deviceIdMatchStrategy: [routing.deviceIdMatchStrategy || HttpPullDeviceIdMatchStrategy.DEVICE_NAME],
@@ -177,6 +180,17 @@ export class HttpPullPollRequestsConfigComponent implements OnInit, OnDestroy, C
       }
     }));
     this.propagateChange(requests);
+  }
+
+  private applyDisabledState(): void {
+    if (!this.form) {
+      return;
+    }
+    if (this.disabled) {
+      this.form.disable({ emitEvent: false });
+    } else {
+      this.form.enable({ emitEvent: false });
+    }
   }
 
   private newId(): string {

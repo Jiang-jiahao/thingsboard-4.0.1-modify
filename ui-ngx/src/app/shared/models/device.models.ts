@@ -515,6 +515,18 @@ export enum HttpPullRoutingMode {
   AUTO = 'AUTO'
 }
 
+/** 界面可选的路由模式（不含已废弃的 AUTO） */
+export const HTTP_PULL_ROUTING_MODE_OPTIONS = [
+  HttpPullRoutingMode.SINGLE_DEVICE,
+  HttpPullRoutingMode.MULTI_DEVICE
+];
+
+export function normalizeHttpPullRoutingMode(mode?: HttpPullRoutingMode | null): HttpPullRoutingMode {
+  return mode === HttpPullRoutingMode.MULTI_DEVICE || mode === HttpPullRoutingMode.AUTO
+    ? HttpPullRoutingMode.MULTI_DEVICE
+    : HttpPullRoutingMode.SINGLE_DEVICE;
+}
+
 export enum HttpPullDeviceIdMatchStrategy {
   DEVICE_NAME = 'DEVICE_NAME',
   DEVICE_LABEL = 'DEVICE_LABEL',
@@ -604,9 +616,42 @@ export interface HttpPullDeviceTransportConfiguration {
   pollUrlOverride?: string;
 }
 
+/** 与后端 {@code HttpPullDeviceTransportConfiguration#isCollector()} 一致 */
+export function resolveHttpPullDeviceIsCollector(
+  cfg: Pick<HttpPullDeviceTransportConfiguration, 'collector' | 'externalDeviceId'> | null | undefined
+): boolean {
+  if (!cfg) {
+    return true;
+  }
+  if ((cfg.externalDeviceId || '').trim()) {
+    return false;
+  }
+  return cfg.collector !== false;
+}
+
 export interface HttpPullProfileContext {
   routingMode: HttpPullRoutingMode;
   pollUrl: string | null;
+}
+
+/** 从档案传输配置解析路由模式（优先各拉取请求上的 routing，兼容旧版档案级 routing） */
+export function resolveHttpPullProfileRoutingMode(
+  raw: HttpPullDeviceProfileTransportConfiguration | null | undefined
+): HttpPullRoutingMode {
+  if (!raw) {
+    return HttpPullRoutingMode.SINGLE_DEVICE;
+  }
+  const pollRequests = raw.pollRequests;
+  if (pollRequests?.length) {
+    for (const req of pollRequests) {
+      const mode = req.routing?.routingMode ?? raw.routing?.routingMode;
+      if (mode === HttpPullRoutingMode.MULTI_DEVICE || mode === HttpPullRoutingMode.AUTO) {
+        return HttpPullRoutingMode.MULTI_DEVICE;
+      }
+    }
+    return normalizeHttpPullRoutingMode(pollRequests[0]?.routing?.routingMode ?? raw.routing?.routingMode);
+  }
+  return normalizeHttpPullRoutingMode(raw.routing?.routingMode);
 }
 
 /** 从完整设备档案解析 HTTP 主动采集的路由模式与档案级拉取 URL */
@@ -620,7 +665,7 @@ export function extractHttpPullProfileContext(dp: DeviceProfile | null | undefin
   }
   const firstPoll = raw.pollRequests?.[0];
   return {
-    routingMode: raw.routing?.routingMode ?? HttpPullRoutingMode.SINGLE_DEVICE,
+    routingMode: resolveHttpPullProfileRoutingMode(raw),
     pollUrl: firstPoll?.pollUrl ?? raw.pollUrl ?? null
   };
 }
@@ -1424,7 +1469,7 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
             dataType: HttpPullPollDataType.TELEMETRY,
             requiresAuth: true,
             routing: {
-              routingMode: HttpPullRoutingMode.AUTO,
+              routingMode: HttpPullRoutingMode.MULTI_DEVICE,
               deviceIdJsonPath: 'deviceId',
               telemetryPayloadKey: 'httpPullPayload'
             }
