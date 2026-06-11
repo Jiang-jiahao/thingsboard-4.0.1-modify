@@ -10,7 +10,8 @@
     <tb-device-profile-rpc-method [formControl]="rpcControl"
                                   [expanded]="$index === 0"
                                   [readOnly]="disabled"
-                                  [transportType]="transportType"
+                                  [transportType]="effectiveTransportType"
+                                  [transportConfiguration]="transportConfiguration"
                                   [downlinkCommands]="downlinkCommands"
                                   [protocolTemplateBundleSelected]="protocolTemplateBundleSelected"
                                   (removeRpcMethod)="removeRpcMethod($index)">

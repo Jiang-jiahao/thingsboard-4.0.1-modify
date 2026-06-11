@@ -22,12 +22,13 @@ import {
   TcpHexValueType,
   TcpDeviceProfileTransportConfiguration,
   UdpDeviceProfileTransportConfiguration,
+  isHttpOutboundRpcBinding,
   isProtocolTemplateWireTransport,
   isProtocolTemplateRpcBinding,
   wireProfileProtocolTemplateBundleId
 } from '@shared/models/device.models';
 
-export { isProtocolTemplateRpcBinding };
+export { isProtocolTemplateRpcBinding, isHttpOutboundRpcBinding };
 
 export interface DeviceRpcInvokeFieldRow {
   /** 协议模板字段 key（模块侧） */
@@ -217,8 +218,28 @@ export function catalogMethodPlatformKeys(
     const sk = parseNativeParamsJson(built.valuesJsonFallback) ?? {};
     return Object.keys(sk);
   }
+  if (isHttpOutboundRpcBinding(method.bindingType)) {
+    return extractHttpTemplateParamKeys(method.httpUrl, method.httpBody);
+  }
   const profile = parseNativeParamsJson(method.paramsTemplateJson ?? '') ?? {};
   return Object.keys(profile);
+}
+
+const HTTP_TEMPLATE_PARAM = /\$\{params\.([a-zA-Z0-9_]+)}/g;
+
+function extractHttpTemplateParamKeys(...templates: Array<string | undefined>): string[] {
+  const keys = new Set<string>();
+  for (const tpl of templates) {
+    if (!tpl) {
+      continue;
+    }
+    let m: RegExpExecArray | null;
+    const re = new RegExp(HTTP_TEMPLATE_PARAM.source, 'g');
+    while ((m = re.exec(tpl)) !== null) {
+      keys.add(m[1]);
+    }
+  }
+  return [...keys];
 }
 
 export function catalogMethodFieldMetaMap(
@@ -372,6 +393,10 @@ export function mergeNativeParams(
 }
 
 export function catalogMethodLabel(m: DeviceProfileRpcMethod): string {
+  if (isHttpOutboundRpcBinding(m.bindingType)) {
+    const label = m.displayName?.trim() || m.id;
+    return m.httpMethod ? `${label} (${m.httpMethod})` : label;
+  }
   return m.displayName?.trim() || m.id;
 }
 

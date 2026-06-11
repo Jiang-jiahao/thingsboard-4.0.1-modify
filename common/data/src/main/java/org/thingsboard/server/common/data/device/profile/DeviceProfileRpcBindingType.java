@@ -16,7 +16,11 @@ public enum DeviceProfileRpcBindingType {
      */
     UDP_TEMPLATE,
     /**
-     * 原生 RPC：{@code method} / {@code params} 按设备固件约定透传（MQTT 等）。
+     * 原生 RPC：{@code method} / {@code params} 按设备固件约定透传（MQTT、HTTP 被动长轮询等）。
      */
-    NATIVE
+    NATIVE,
+    /**
+     * HTTP 主动出站：平台按档案中配置的 HTTP 接口调用厂家服务端（与 HTTP Pull 共用鉴权）。
+     */
+    HTTP_OUTBOUND
 }

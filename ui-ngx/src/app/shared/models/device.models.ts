@@ -1753,7 +1753,9 @@ export enum DeviceProfileRpcBindingType {
   TCP_TEMPLATE = 'TCP_TEMPLATE',
   /** 与 {@link TCP_TEMPLATE} 等价，保存时统一为 TCP_TEMPLATE */
   UDP_TEMPLATE = 'UDP_TEMPLATE',
-  NATIVE = 'NATIVE'
+  NATIVE = 'NATIVE',
+  /** HTTP Pull：平台主动调用厂家 HTTP 接口（与拉取共用鉴权） */
+  HTTP_OUTBOUND = 'HTTP_OUTBOUND'
 }
 
 /** 支持协议模板（原始字节 / PROTOCOL_TEMPLATE）的传输类型 */
@@ -1765,6 +1767,17 @@ export function isProtocolTemplateWireTransport(type: DeviceTransportType | null
 export function isProtocolTemplateRpcBinding(bindingType: DeviceProfileRpcBindingType | null | undefined): boolean {
   return bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE
     || bindingType === DeviceProfileRpcBindingType.UDP_TEMPLATE;
+}
+
+export function isHttpPullProfileTransport(
+  type: DeviceTransportType | string | null | undefined,
+  transportConfiguration?: { type?: DeviceTransportType; httpTransportMode?: HttpTransportMode } | null
+): boolean {
+  return resolveHttpProfileTransportTypeForDisplay(type, transportConfiguration) === DeviceTransportType.HTTP_PULL;
+}
+
+export function isHttpOutboundRpcBinding(bindingType: DeviceProfileRpcBindingType | null | undefined): boolean {
+  return bindingType === DeviceProfileRpcBindingType.HTTP_OUTBOUND;
 }
 
 export function wireProfileProtocolTemplateBundleId(
@@ -1809,6 +1822,12 @@ export interface DeviceProfileRpcMethod {
   /** NATIVE */
   deviceMethod?: string;
   paramsTemplateJson?: string;
+  /** HTTP_OUTBOUND */
+  httpUrl?: string;
+  httpMethod?: string;
+  httpBody?: string;
+  httpHeaders?: Record<string, string>;
+  requiresAuth?: boolean;
 }
 
 export interface DeviceProfileData {

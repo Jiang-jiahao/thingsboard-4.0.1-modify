@@ -40,8 +40,8 @@ import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.gen.transport.TransportProtos.SessionInfoProto;
 import org.thingsboard.server.queue.util.AfterStartUp;
 import org.thingsboard.server.transport.http.pull.service.HttpPullProtoEntityService;
-import org.thingsboard.server.transport.http.pull.session.HttpPullNoOpSessionListener;
 import org.thingsboard.server.transport.http.pull.session.HttpPullCollectorSessionContext;
+import org.thingsboard.server.transport.http.pull.session.HttpPullRpcSessionListener;
 import org.thingsboard.server.transport.http.pull.session.HttpPullTargetSession;
 
 import java.util.ArrayList;
@@ -59,6 +59,7 @@ public class HttpPullTransportContext extends TransportContext {
 
     @Getter
     private final HttpPullTransportService httpPullTransportService;
+    private final HttpPullRpcService httpPullRpcService;
     private final TransportDeviceProfileCache deviceProfileCache;
     private final TransportService transportService;
     private final HttpPullProtoEntityService protoEntityService;
@@ -132,7 +133,7 @@ public class HttpPullTransportContext extends TransportContext {
                 return;
             }
             SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, UUID.randomUUID());
-            transportService.registerAsyncSession(sessionInfo, HttpPullNoOpSessionListener.INSTANCE);
+            transportService.registerAsyncSession(sessionInfo, createRpcSessionListener(ctx, null, sessionInfo));
             ctx.setSessionInfo(sessionInfo);
             collectorSessions.put(device.getId(), ctx);
             preloadActiveTargets(ctx);
@@ -246,7 +247,8 @@ public class HttpPullTransportContext extends TransportContext {
                             return;
                         }
                         SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, HttpPullTransportContext.this, UUID.randomUUID());
-                        transportService.registerAsyncSession(sessionInfo, HttpPullNoOpSessionListener.INSTANCE);
+                        transportService.registerAsyncSession(sessionInfo,
+                                createRpcSessionListener(collectorCtx, targetId, sessionInfo));
                         HttpPullTargetSession targetSession = HttpPullTargetSession.builder()
                                 .deviceId(targetId)
                                 .matchKey(matchKey)
@@ -380,6 +382,12 @@ public class HttpPullTransportContext extends TransportContext {
                     collectorCtx.getDeviceId(), targetId);
             return true;
         });
+    }
+
+    private HttpPullRpcSessionListener createRpcSessionListener(HttpPullCollectorSessionContext collectorCtx,
+                                                                DeviceId targetDeviceId,
+                                                                SessionInfoProto sessionInfo) {
+        return new HttpPullRpcSessionListener(httpPullRpcService, protoEntityService, collectorCtx, targetDeviceId, sessionInfo);
     }
 
     private void destroyCollector(HttpPullCollectorSessionContext ctx) {

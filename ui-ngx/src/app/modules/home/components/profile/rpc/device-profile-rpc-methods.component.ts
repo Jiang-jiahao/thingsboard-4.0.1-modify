@@ -29,7 +29,9 @@ import {
   UdpDeviceProfileTransportConfiguration,
   TransportTcpDataType,
   TransportUdpDataType,
+  isHttpPullProfileTransport,
   isProtocolTemplateWireTransport,
+  resolveHttpProfileTransportTypeForDisplay,
   wireProfileProtocolTemplateBundleId,
   wireProfileTransportPayloadType
 } from '@shared/models/device.models';
@@ -68,6 +70,10 @@ export class DeviceProfileRpcMethodsComponent implements ControlValueAccessor, O
 
   private propagateChange: (v: DeviceProfileRpcMethod[]) => void = () => undefined;
   private cvaDisabled = false;
+
+  get effectiveTransportType(): DeviceTransportType {
+    return resolveHttpProfileTransportTypeForDisplay(this.transportType, this.transportConfiguration);
+  }
 
   constructor(private store: Store<AppState>,
               private fb: UntypedFormBuilder,
@@ -139,9 +145,11 @@ export class DeviceProfileRpcMethodsComponent implements ControlValueAccessor, O
   }
 
   addRpcMethod(): void {
-    const binding = isProtocolTemplateWireTransport(this.transportType)
+    const binding = isProtocolTemplateWireTransport(this.effectiveTransportType)
       ? DeviceProfileRpcBindingType.TCP_TEMPLATE
-      : DeviceProfileRpcBindingType.NATIVE;
+      : (isHttpPullProfileTransport(this.transportType, this.transportConfiguration)
+        ? DeviceProfileRpcBindingType.HTTP_OUTBOUND
+        : DeviceProfileRpcBindingType.NATIVE);
     const draft: DeviceProfileRpcMethod = {
       id: `cmd_${guid().substring(0, 8)}`,
       oneWay: true,
@@ -209,7 +217,7 @@ export class DeviceProfileRpcMethodsComponent implements ControlValueAccessor, O
   private refreshTemplateCommands(): void {
     this.downlinkCommands = [];
     this.protocolTemplateBundleSelected = false;
-    if (!isProtocolTemplateWireTransport(this.transportType) || !this.transportConfiguration) {
+    if (!isProtocolTemplateWireTransport(this.effectiveTransportType) || !this.transportConfiguration) {
       return;
     }
     const bundleId = wireProfileProtocolTemplateBundleId(

@@ -9,6 +9,7 @@
     <mat-panel-description *ngIf="rpcMethodFormGroup.get('id').value as mid">
       <span class="mat-caption">{{ mid }}</span>
       <span class="mat-caption" *ngIf="templateBindingOnly" translate>device-profile.rpc-binding-tcp-template</span>
+      <span class="mat-caption" *ngIf="httpOutboundBinding" translate>device-profile.rpc-binding-http-outbound</span>
       <span class="mat-caption" *ngIf="nativeBindingOnly" translate>device-profile.rpc-binding-native</span>
     </mat-panel-description>
   </mat-expansion-panel-header>
@@ -43,6 +44,18 @@
       </mat-form-field>
     </div>
 
+    <ng-container *ngIf="httpPullRpcTransport">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-binding-type</mat-label>
+        <mat-select formControlName="bindingType" [disabled]="isLocked">
+          <mat-option *ngFor="let bt of httpPullRpcBindingTypes" [value]="bt">
+            <span *ngIf="bt === 'HTTP_OUTBOUND'" translate>device-profile.rpc-binding-http-outbound</span>
+            <span *ngIf="bt === 'NATIVE'" translate>device-profile.rpc-binding-native</span>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
+
     <ng-container *ngIf="templateBindingOnly">
       <div class="tb-hint mat-body-2" *ngIf="!protocolTemplateBundleSelected" style="color: var(--tb-warn-color, #f57c00);"
            translate>device-profile.rpc-template-bundle-missing</div>
@@ -66,10 +79,48 @@
       </mat-form-field>
     </ng-container>
 
+    <ng-container *ngIf="httpOutboundBinding">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-http-url</mat-label>
+        <input matInput formControlName="httpUrl" required placeholder="http://host/api/control"/>
+        <mat-hint translate>device-profile.rpc-http-url-hint</mat-hint>
+        <mat-error *ngIf="rpcMethodFormGroup.get('httpUrl').hasError('required')" translate>
+          device-profile.rpc-http-url-required
+        </mat-error>
+      </mat-form-field>
+      <div class="flex flex-row gap-2 flex-wrap">
+        <mat-form-field class="flex-1" style="min-width: 120px;">
+          <mat-label translate>device-profile.rpc-http-method</mat-label>
+          <mat-select formControlName="httpMethod">
+            <mat-option value="GET">GET</mat-option>
+            <mat-option value="POST">POST</mat-option>
+            <mat-option value="PUT">PUT</mat-option>
+            <mat-option value="PATCH">PATCH</mat-option>
+            <mat-option value="DELETE">DELETE</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-checkbox formControlName="requiresAuth" [indeterminate]="rpcMethodFormGroup.get('requiresAuth').value === null" color="primary">
+          <span translate>device-profile.rpc-http-requires-auth</span>
+        </mat-checkbox>
+      </div>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-http-headers</mat-label>
+        <textarea matInput formControlName="httpHeadersJson" rows="2"></textarea>
+        <mat-hint translate>device-profile.rpc-http-headers-hint</mat-hint>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-http-body</mat-label>
+        <textarea matInput formControlName="httpBody" rows="4"
+                  placeholder='{"deviceId":"${device.externalDeviceId}","cmd":"${params.command}"}'></textarea>
+        <mat-hint translate>device-profile.rpc-http-body-hint</mat-hint>
+      </mat-form-field>
+    </ng-container>
+
     <ng-container *ngIf="nativeBindingOnly">
       <mat-form-field class="mat-block">
         <mat-label translate>device-profile.rpc-device-method</mat-label>
         <input matInput formControlName="deviceMethod" required/>
+        <mat-hint *ngIf="httpPullRpcTransport" translate>device-profile.rpc-device-method-http-passive-hint</mat-hint>
         <mat-error *ngIf="rpcMethodFormGroup.get('deviceMethod').hasError('required')" translate>
           device-profile.rpc-device-method-required
         </mat-error>

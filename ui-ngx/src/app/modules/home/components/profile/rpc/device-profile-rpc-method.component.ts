@@ -17,11 +17,15 @@ import {
 import {
   DeviceProfileRpcBindingType,
   DeviceProfileRpcMethod,
+  DeviceProfileTransportConfiguration,
   DeviceTransportType,
+  isHttpOutboundRpcBinding,
+  isHttpPullProfileTransport,
   isProtocolTemplateWireTransport,
   isProtocolTemplateRpcBinding,
   ProtocolTemplateCommandDefinition,
-  ProtocolTemplateCommandDirection
+  ProtocolTemplateCommandDirection,
+  resolveHttpProfileTransportTypeForDisplay
 } from '@shared/models/device.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -72,6 +76,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
   @Input() readOnly = false;
   @Input() expanded = false;
   @Input() transportType: DeviceTransportType;
+  @Input() transportConfiguration: DeviceProfileTransportConfiguration | null;
   @Input() downlinkCommands: ProtocolTemplateCommandDefinition[] = [];
   @Input() protocolTemplateBundleSelected = false;
 
@@ -86,14 +91,38 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
   }
 
   get templateBindingOnly(): boolean {
-    return isProtocolTemplateWireTransport(this.transportType);
+    return isProtocolTemplateWireTransport(this.effectiveTransportType);
+  }
+
+  get effectiveTransportType(): DeviceTransportType {
+    return resolveHttpProfileTransportTypeForDisplay(this.transportType, this.transportConfiguration);
+  }
+
+  get httpPullRpcTransport(): boolean {
+    return isHttpPullProfileTransport(this.transportType, this.transportConfiguration);
+  }
+
+  get httpOutboundBinding(): boolean {
+    const bt = this.rpcMethodFormGroup?.get('bindingType')?.value as DeviceProfileRpcBindingType;
+    return this.httpPullRpcTransport && isHttpOutboundRpcBinding(bt);
   }
 
   get nativeBindingOnly(): boolean {
-    return !isProtocolTemplateWireTransport(this.transportType);
+    if (this.templateBindingOnly) {
+      return false;
+    }
+    if (this.httpPullRpcTransport) {
+      const bt = this.rpcMethodFormGroup?.get('bindingType')?.value as DeviceProfileRpcBindingType;
+      return bt === DeviceProfileRpcBindingType.NATIVE;
+    }
+    return true;
   }
 
-  /** 查看模式或表单 CVA 禁用 */
+  readonly httpPullRpcBindingTypes = [
+    DeviceProfileRpcBindingType.HTTP_OUTBOUND,
+    DeviceProfileRpcBindingType.NATIVE
+  ];
+
   get isLocked(): boolean {
     return !!this.disabled || this.readOnly;
   }
@@ -118,37 +147,41 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.readOnly && this.rpcMethodFormGroup) {
+    if ((changes.readOnly || changes.transportType || changes.transportConfiguration) && this.rpcMethodFormGroup) {
       this.applyFormDisabledState();
+      if (changes.transportType || changes.transportConfiguration) {
+        const bt = this.rpcMethodFormGroup.get('bindingType').value as DeviceProfileRpcBindingType;
+        this.applyBindingFieldState(bt);
+      }
     }
   }
 
   ngOnInit(): void {
     const defaultBinding = this.templateBindingOnly
       ? DeviceProfileRpcBindingType.TCP_TEMPLATE
-      : DeviceProfileRpcBindingType.NATIVE;
+      : (this.httpPullRpcTransport ? DeviceProfileRpcBindingType.HTTP_OUTBOUND : DeviceProfileRpcBindingType.NATIVE);
 
     this.rpcMethodFormGroup = this.fb.group({
       id: ['', [Validators.required, Validators.pattern(/^[a-zA-Z][a-zA-Z0-9_]*$/)]],
       displayName: [''],
       oneWay: [true],
       timeoutMs: [null as number | null],
-      bindingType: [{ value: defaultBinding, disabled: true }],
+      bindingType: [defaultBinding],
       templateCommandRef: [''],
       paramMapJson: ['{}'],
       deviceMethod: [''],
-      paramsTemplateJson: ['']
+      paramsTemplateJson: [''],
+      httpUrl: [''],
+      httpMethod: ['POST'],
+      httpBody: [''],
+      httpHeadersJson: ['{}'],
+      requiresAuth: [null as boolean | null]
     });
 
-    if (this.templateBindingOnly) {
-      this.rpcMethodFormGroup.get('templateCommandRef').setValidators([Validators.required]);
-      this.rpcMethodFormGroup.get('deviceMethod').disable({ emitEvent: false });
-      this.rpcMethodFormGroup.get('paramsTemplateJson').disable({ emitEvent: false });
-    } else {
-      this.rpcMethodFormGroup.get('deviceMethod').setValidators([Validators.required]);
-      this.rpcMethodFormGroup.get('templateCommandRef').disable({ emitEvent: false });
-      this.rpcMethodFormGroup.get('paramMapJson').disable({ emitEvent: false });
-    }
+    this.applyBindingFieldState(defaultBinding);
+
+    this.rpcMethodFormGroup.get('bindingType').valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((bt: DeviceProfileRpcBindingType) => this.applyBindingFieldState(bt));
 
     this.rpcMethodFormGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateModel());
     this.applyFormDisabledState();
@@ -169,18 +202,46 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       return;
     }
     this.rpcMethodFormGroup.enable({ emitEvent: false });
-    this.rpcMethodFormGroup.get('bindingType').disable({ emitEvent: false });
-    if (this.templateBindingOnly) {
-      this.rpcMethodFormGroup.get('deviceMethod').disable({ emitEvent: false });
-      this.rpcMethodFormGroup.get('paramsTemplateJson').disable({ emitEvent: false });
-      this.rpcMethodFormGroup.get('templateCommandRef').enable({ emitEvent: false });
-      this.rpcMethodFormGroup.get('paramMapJson').enable({ emitEvent: false });
-    } else {
-      this.rpcMethodFormGroup.get('templateCommandRef').disable({ emitEvent: false });
-      this.rpcMethodFormGroup.get('paramMapJson').disable({ emitEvent: false });
-      this.rpcMethodFormGroup.get('deviceMethod').enable({ emitEvent: false });
-      this.rpcMethodFormGroup.get('paramsTemplateJson').enable({ emitEvent: false });
+    if (!this.httpPullRpcTransport) {
+      this.rpcMethodFormGroup.get('bindingType').disable({ emitEvent: false });
     }
+    const bt = this.rpcMethodFormGroup.get('bindingType').value as DeviceProfileRpcBindingType;
+    this.applyBindingFieldState(bt);
+  }
+
+  private applyBindingFieldState(bindingType: DeviceProfileRpcBindingType): void {
+    if (!this.rpcMethodFormGroup) {
+      return;
+    }
+    const httpFields = ['httpUrl', 'httpMethod', 'httpBody', 'httpHeadersJson', 'requiresAuth'];
+    const nativeFields = ['deviceMethod', 'paramsTemplateJson'];
+    const templateFields = ['templateCommandRef', 'paramMapJson'];
+
+    const disableAll = (fields: string[]) => fields.forEach(f => this.rpcMethodFormGroup.get(f)?.disable({ emitEvent: false }));
+    const enableAll = (fields: string[]) => fields.forEach(f => this.rpcMethodFormGroup.get(f)?.enable({ emitEvent: false }));
+
+    disableAll([...httpFields, ...nativeFields, ...templateFields]);
+
+    if (this.templateBindingOnly) {
+      enableAll(templateFields);
+      this.rpcMethodFormGroup.get('templateCommandRef').setValidators([Validators.required]);
+      this.rpcMethodFormGroup.get('deviceMethod').clearValidators();
+      this.rpcMethodFormGroup.get('httpUrl').clearValidators();
+    } else if (this.httpPullRpcTransport && isHttpOutboundRpcBinding(bindingType)) {
+      enableAll(httpFields);
+      this.rpcMethodFormGroup.get('httpUrl').setValidators([Validators.required]);
+      this.rpcMethodFormGroup.get('httpMethod').setValidators([Validators.required]);
+      this.rpcMethodFormGroup.get('deviceMethod').clearValidators();
+    } else {
+      enableAll(nativeFields);
+      this.rpcMethodFormGroup.get('deviceMethod').setValidators([Validators.required]);
+      this.rpcMethodFormGroup.get('httpUrl').clearValidators();
+      this.rpcMethodFormGroup.get('httpMethod').clearValidators();
+    }
+    this.rpcMethodFormGroup.get('deviceMethod').updateValueAndValidity({ emitEvent: false });
+    this.rpcMethodFormGroup.get('httpUrl').updateValueAndValidity({ emitEvent: false });
+    this.rpcMethodFormGroup.get('httpMethod').updateValueAndValidity({ emitEvent: false });
+    this.rpcMethodFormGroup.get('templateCommandRef').updateValueAndValidity({ emitEvent: false });
   }
 
   writeValue(value: DeviceProfileRpcMethod | null): void {
@@ -198,25 +259,39 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     if (value.paramMap && Object.keys(value.paramMap).length) {
       paramMapJson = JSON.stringify(value.paramMap);
     }
+    let httpHeadersJson = '{}';
+    if (value.httpHeaders && Object.keys(value.httpHeaders).length) {
+      httpHeadersJson = JSON.stringify(value.httpHeaders);
+    }
     this.rpcMethodFormGroup.patchValue({
       id: value.id ?? '',
       displayName: value.displayName ?? '',
       oneWay: value.oneWay !== false,
       timeoutMs: value.timeoutMs ?? null,
-      bindingType: value.bindingType ?? (this.templateBindingOnly ? DeviceProfileRpcBindingType.TCP_TEMPLATE : DeviceProfileRpcBindingType.NATIVE),
+      bindingType: value.bindingType ?? (this.templateBindingOnly
+        ? DeviceProfileRpcBindingType.TCP_TEMPLATE
+        : (this.httpPullRpcTransport ? DeviceProfileRpcBindingType.HTTP_OUTBOUND : DeviceProfileRpcBindingType.NATIVE)),
       templateCommandRef: ref,
       paramMapJson,
       deviceMethod: value.deviceMethod ?? '',
-      paramsTemplateJson: value.paramsTemplateJson ?? ''
+      paramsTemplateJson: value.paramsTemplateJson ?? '',
+      httpUrl: value.httpUrl ?? '',
+      httpMethod: value.httpMethod ?? 'POST',
+      httpBody: value.httpBody ?? '',
+      httpHeadersJson,
+      requiresAuth: value.requiresAuth ?? null
     }, { emitEvent: false });
     this.applyFormDisabledState();
   }
 
   private updateModel(): void {
     const raw = this.rpcMethodFormGroup.getRawValue();
-    const bindingType = this.templateBindingOnly
-      ? DeviceProfileRpcBindingType.TCP_TEMPLATE
-      : DeviceProfileRpcBindingType.NATIVE;
+    let bindingType = raw.bindingType as DeviceProfileRpcBindingType;
+    if (this.templateBindingOnly) {
+      bindingType = DeviceProfileRpcBindingType.TCP_TEMPLATE;
+    } else if (!this.httpPullRpcTransport) {
+      bindingType = DeviceProfileRpcBindingType.NATIVE;
+    }
 
     const out: DeviceProfileRpcMethod = {
       id: (raw.id as string)?.trim(),
@@ -236,6 +311,18 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       const pm = parseJsonObject(raw.paramMapJson);
       if (pm) {
         out.paramMap = pm;
+      }
+    } else if (isHttpOutboundRpcBinding(bindingType)) {
+      out.httpUrl = (raw.httpUrl as string)?.trim();
+      out.httpMethod = (raw.httpMethod as string)?.trim() || 'POST';
+      const body = (raw.httpBody as string)?.trim();
+      out.httpBody = body || undefined;
+      const headers = parseJsonObject(raw.httpHeadersJson);
+      if (headers && Object.keys(headers).length) {
+        out.httpHeaders = headers;
+      }
+      if (raw.requiresAuth === true || raw.requiresAuth === false) {
+        out.requiresAuth = raw.requiresAuth;
       }
     } else {
       out.deviceMethod = (raw.deviceMethod as string)?.trim();
@@ -257,6 +344,10 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     if (this.templateBindingOnly) {
       if (parseJsonObject(raw.paramMapJson) === null && (raw.paramMapJson as string)?.trim()) {
         return { paramMapJson: true };
+      }
+    } else if (this.httpOutboundBinding) {
+      if (parseJsonObject(raw.httpHeadersJson) === null && (raw.httpHeadersJson as string)?.trim()) {
+        return { httpHeadersJson: true };
       }
     } else {
       const pt = (raw.paramsTemplateJson as string)?.trim();

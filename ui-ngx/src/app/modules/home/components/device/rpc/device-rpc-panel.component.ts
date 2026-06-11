@@ -84,6 +84,7 @@ import {
 
   protocolTemplateBundleIdFromTcpProfile,
   protocolTemplateBundleIdFromWireProfile,
+  isHttpOutboundRpcBinding,
   isProtocolTemplateRpcBinding,
 
   resolveMethodRpcDefaults,
@@ -146,6 +147,15 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
   get selectedMethodUsesProtocolTemplate(): boolean {
     return isProtocolTemplateRpcBinding(this.selectedMethod?.bindingType);
+  }
+
+  get selectedMethodUsesHttpOutbound(): boolean {
+    return isHttpOutboundRpcBinding(this.selectedMethod?.bindingType);
+  }
+
+  get editableInvokeKeys(): string[] {
+    const fixed = new Set(this.methodFixedEntries.map(e => e.platformKey));
+    return this.methodPlatformKeys.filter(k => !fixed.has(k));
   }
 
   allFieldRows: DeviceRpcInvokeFieldRow[] = [];
@@ -261,7 +271,31 @@ export class DeviceRpcPanelComponent implements OnChanges {
     return this.templateFieldLabel(platformKey) !== platformKey;
   }
 
+  getInvokeParamValue(platformKey: string): string {
+    const parsed = parseNativeParamsJson(this.nativeParamsJson) ?? {};
+    const v = parsed[platformKey];
+    if (v === null || v === undefined) {
+      return '';
+    }
+    return typeof v === 'object' ? JSON.stringify(v) : String(v);
+  }
 
+  setInvokeParamValue(platformKey: string, valueText: string): void {
+    const parsed = parseNativeParamsJson(this.nativeParamsJson) ?? {};
+    const trimmed = (valueText ?? '').trim();
+    if (trimmed === '') {
+      delete parsed[platformKey];
+    } else if (/^-?\d+$/.test(trimmed)) {
+      parsed[platformKey] = Number(trimmed);
+    } else if (/^-?\d+\.\d+$/.test(trimmed)) {
+      parsed[platformKey] = parseFloat(trimmed);
+    } else if (trimmed === 'true' || trimmed === 'false') {
+      parsed[platformKey] = trimmed === 'true';
+    } else {
+      parsed[platformKey] = trimmed;
+    }
+    this.nativeParamsJson = Object.keys(parsed).length ? JSON.stringify(parsed, null, 2) : '{}';
+  }
 
   onMethodSelected(methodId: string): void {
 
@@ -492,6 +526,10 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
       this.sendTcpTemplate(deviceId, oneWay, timeout);
 
+    } else if (isHttpOutboundRpcBinding(this.selectedMethod.bindingType)) {
+
+      this.sendHttpOutbound(deviceId, oneWay, timeout);
+
     } else {
 
       this.sendNative(deviceId, oneWay, timeout);
@@ -544,6 +582,28 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
       }
 
+    } else if (isHttpOutboundRpcBinding(m.bindingType)) {
+
+      const keys = catalogMethodPlatformKeys(null, m);
+
+      const editableOnly: Record<string, unknown> = {};
+
+      for (const k of keys) {
+
+        if (!Object.prototype.hasOwnProperty.call(this.deviceRpcParamDefaults, k)) {
+
+          editableOnly[k] = '';
+
+        }
+
+      }
+
+      this.nativeParamsJson = Object.keys(editableOnly).length ? JSON.stringify(editableOnly, null, 2) : '{}';
+
+      this.fixedParamSummary = Object.entries(this.deviceRpcParamDefaults)
+
+        .map(([k, v]) => `${k}=${v}`);
+
     } else {
 
       const profileDefaults = parseNativeParamsJson(m.paramsTemplateJson ?? '') ?? {};
@@ -567,6 +627,93 @@ export class DeviceRpcPanelComponent implements OnChanges {
         .map(([k, v]) => `${k}=${v}`);
 
     }
+
+  }
+
+
+
+  private sendHttpOutbound(deviceId: string, oneWay: boolean, timeout: number): void {
+
+    const m = this.selectedMethod!;
+
+    const userParams = parseNativeParamsJson(this.nativeParamsJson);
+
+    if (userParams === null) {
+
+      this.notifyError('device.rpc.params-invalid');
+
+      return;
+
+    }
+
+    const missing = this.editableInvokeKeys.filter(k => {
+      const v = userParams[k];
+      return v === null || v === undefined || v === '';
+    });
+    if (missing.length) {
+      this.notifyError('device.rpc.missing-invoke-params', { fields: missing.join(', ') });
+      return;
+    }
+
+    const mergedUser = mergeRpcPlatformValues(this.deviceRpcParamDefaults, userParams);
+
+    const requestBody = {
+
+      method: m.id,
+
+      params: mergedUser,
+
+      timeout
+
+    };
+
+    this.sending = true;
+
+    this.lastError = null;
+
+    this.lastResponse = null;
+
+    this.cd.markForCheck();
+
+    const call = oneWay
+
+      ? this.deviceService.sendOneWayRpcCommand(deviceId, requestBody)
+
+      : this.deviceService.sendTwoWayRpcCommand(deviceId, requestBody);
+
+    call.pipe(
+
+      defaultIfEmpty(null),
+
+      finalize(() => {
+
+        this.sending = false;
+
+        this.cd.markForCheck();
+
+      }),
+
+      takeUntilDestroyed(this.destroyRef)
+
+    ).subscribe({
+
+      next: (res) => {
+
+        this.lastResponse = res;
+
+        this.notifySuccess('device.rpc.send-success');
+
+      },
+
+      error: (err) => {
+
+        this.lastError = err?.error?.message || err?.message || String(err);
+
+        this.notifyError('device.rpc.send-failed', { detail: this.lastError });
+
+      }
+
+    });
 
   }
 

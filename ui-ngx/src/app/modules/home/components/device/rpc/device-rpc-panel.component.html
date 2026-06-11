@@ -210,6 +210,33 @@
 
 
 
+          <ng-container *ngIf="selectedMethodUsesHttpOutbound">
+
+            <div class="mat-subtitle-2" translate>device.rpc.params</div>
+
+            <div class="tb-hint mat-body-2" style="margin-bottom: 8px;" translate>device.rpc.http-outbound-params-hint</div>
+
+            <div *ngIf="!editableInvokeKeys.length" class="tb-hint mat-body-2" translate>device.rpc.all-params-fixed</div>
+
+            <div *ngIf="editableInvokeKeys.length" class="tb-device-rpc-field-grid">
+
+              <mat-form-field *ngFor="let k of editableInvokeKeys" class="mat-block">
+
+                <mat-label>{{ k }}</mat-label>
+
+                <input matInput
+                       [ngModel]="getInvokeParamValue(k)"
+                       (ngModelChange)="setInvokeParamValue(k, $event)"
+                       [ngModelOptions]="{standalone: true}"/>
+
+              </mat-form-field>
+
+            </div>
+
+          </ng-container>
+
+
+
           <ng-container *ngIf="selectedMethod.bindingType === DeviceProfileRpcBindingType.NATIVE">
 
             <mat-form-field class="mat-block">

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -51,6 +52,14 @@ public class DeviceProfileRpcMethod implements Serializable {
      */
     private String paramsTemplateJson;
 
+    // --- HTTP_OUTBOUND（平台调用厂家 HTTP 接口）---
+
+    private String httpUrl;
+    private String httpMethod = "POST";
+    private String httpBody;
+    private Map<String, String> httpHeaders = new HashMap<>();
+    private Boolean requiresAuth;
+
     public void validate(DeviceProfileRpcBindingType expectedForTransport) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("device profile RPC method id is required");
@@ -77,6 +86,14 @@ public class DeviceProfileRpcMethod implements Serializable {
             case NATIVE -> {
                 if (deviceMethod == null || deviceMethod.isBlank()) {
                     throw new IllegalArgumentException("NATIVE RPC method requires deviceMethod: " + id);
+                }
+            }
+            case HTTP_OUTBOUND -> {
+                if (httpUrl == null || httpUrl.isBlank()) {
+                    throw new IllegalArgumentException("HTTP_OUTBOUND RPC method requires httpUrl: " + id);
+                }
+                if (httpMethod == null || httpMethod.isBlank()) {
+                    throw new IllegalArgumentException("HTTP_OUTBOUND RPC method requires httpMethod: " + id);
                 }
             }
         }
