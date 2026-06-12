@@ -33,6 +33,8 @@ import org.thingsboard.server.common.transport.TransportContext;
 import org.thingsboard.server.common.transport.TransportDeviceProfileCache;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.transport.TransportServiceCallback;
+import org.thingsboard.server.common.transport.SessionMsgListener;
+import org.thingsboard.server.common.transport.service.DefaultTransportService;
 import org.thingsboard.server.common.transport.auth.SessionInfoCreator;
 import org.thingsboard.server.common.transport.auth.ValidateDeviceCredentialsResponse;
 import org.thingsboard.server.common.data.StringUtils;
@@ -133,7 +135,7 @@ public class HttpPullTransportContext extends TransportContext {
                 return;
             }
             SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, UUID.randomUUID());
-            transportService.registerAsyncSession(sessionInfo, createRpcSessionListener(ctx, null, sessionInfo));
+            completeHttpPullSessionRegistration(sessionInfo, createRpcSessionListener(ctx, null, sessionInfo));
             ctx.setSessionInfo(sessionInfo);
             collectorSessions.put(device.getId(), ctx);
             preloadActiveTargets(ctx);
@@ -247,7 +249,7 @@ public class HttpPullTransportContext extends TransportContext {
                             return;
                         }
                         SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, HttpPullTransportContext.this, UUID.randomUUID());
-                        transportService.registerAsyncSession(sessionInfo,
+                        completeHttpPullSessionRegistration(sessionInfo,
                                 createRpcSessionListener(collectorCtx, targetId, sessionInfo));
                         HttpPullTargetSession targetSession = HttpPullTargetSession.builder()
                                 .deviceId(targetId)
@@ -382,6 +384,16 @@ public class HttpPullTransportContext extends TransportContext {
                     collectorCtx.getDeviceId(), targetId);
             return true;
         });
+    }
+
+    /**
+     * 注册传输会话并向设备 Actor 订阅 RPC；否则平台认为设备无连接，RPC 在 REST 层等到 504，
+     * 不会执行档案中配置的 HTTP 出站地址。
+     */
+    private void completeHttpPullSessionRegistration(SessionInfoProto sessionInfo, SessionMsgListener listener) {
+        transportService.registerAsyncSession(sessionInfo, listener);
+        transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_OPEN, null);
+        transportService.process(sessionInfo, DefaultTransportService.SUBSCRIBE_TO_RPC_ASYNC_MSG, TransportServiceCallback.EMPTY);
     }
 
     private HttpPullRpcSessionListener createRpcSessionListener(HttpPullCollectorSessionContext collectorCtx,
