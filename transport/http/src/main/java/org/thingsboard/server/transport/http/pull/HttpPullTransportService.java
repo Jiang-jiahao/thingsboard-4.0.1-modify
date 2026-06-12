@@ -83,16 +83,17 @@ public class HttpPullTransportService {
         try {
             HttpPullDeviceProfileTransportConfiguration profile = sessionContext.getProfileTransportConfiguration();
             String pollUrl = resolvePollUrl(sessionContext, pollRequest);
+            String urlOverride = resolvePollUrlOverride(sessionContext);
             boolean requiresAuth = pollRequest.isRequiresAuth(profile.getAuth());
             HttpPullAuthService.AuthRequestContext authCtx = authService.prepareAuth(
-                    sessionContext.getDeviceId(), profile.getAuth(), pollUrl, requiresAuth);
+                    sessionContext.getDeviceId(), profile.getAuth(), pollUrl, requiresAuth, urlOverride);
 
             HttpPullHttpClient.HttpPullResponse response = executeHttpRequest(sessionContext, pollRequest, profile, authCtx);
 
             if (response.getStatusCode() == 401 && requiresAuth) {
                 log.info("[{}] HTTP pull [{}] 401, refreshing login token", sessionContext.getDeviceId(), pollRequest.getName());
                 authService.invalidate(sessionContext.getDeviceId());
-                authCtx = authService.prepareAuth(sessionContext.getDeviceId(), profile.getAuth(), pollUrl, true);
+                authCtx = authService.prepareAuth(sessionContext.getDeviceId(), profile.getAuth(), pollUrl, true, urlOverride);
                 response = executeHttpRequest(sessionContext, pollRequest, profile, authCtx);
             }
 
@@ -152,7 +153,7 @@ public class HttpPullTransportService {
                                    HttpPullDeviceRoutingConfiguration routing) {
         String telemetryKey = routing != null ? routing.getTelemetryPayloadKey() : "httpPullPayload";
         if (!HttpPullRoutingHelper.shouldRouteToMultipleDevices(routing, body)) {
-            postTelemetry(sessionContext.getSessionInfo(), body, telemetryKey);
+            postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, telemetryKey);
             return;
         }
         List<Object> elements = HttpPullJsonHelper.readArrayElements(body, routing.getResponseArrayJsonPath());
@@ -167,15 +168,15 @@ public class HttpPullTransportService {
                 continue;
             }
             String payloadJson = HttpPullJsonHelper.elementToJsonString(element);
-            postTelemetry(target.getSessionInfo(), payloadJson, telemetryKey);
+            postTelemetry(sessionContext, target.getSessionInfo(), payloadJson, telemetryKey);
         }
-        postTelemetry(sessionContext.getSessionInfo(), body, telemetryKey);
+        postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, telemetryKey);
     }
 
     private void dispatchAttributes(HttpPullCollectorSessionContext sessionContext, String body, boolean shared,
                                     HttpPullDeviceRoutingConfiguration routing) {
         if (!HttpPullRoutingHelper.shouldRouteToMultipleDevices(routing, body)) {
-            postAttributes(sessionContext.getSessionInfo(), body, shared);
+            postAttributes(sessionContext, sessionContext.getSessionInfo(), body, shared);
             return;
         }
         List<Object> elements = HttpPullJsonHelper.readArrayElements(body, routing.getResponseArrayJsonPath());
@@ -189,12 +190,16 @@ public class HttpPullTransportService {
                 continue;
             }
             String payloadJson = HttpPullJsonHelper.elementToJsonString(element);
-            postAttributes(target.getSessionInfo(), payloadJson, shared);
+            postAttributes(sessionContext, target.getSessionInfo(), payloadJson, shared);
         }
-        postAttributes(sessionContext.getSessionInfo(), body, shared);
+        postAttributes(sessionContext, sessionContext.getSessionInfo(), body, shared);
     }
 
-    private void postTelemetry(TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, String telemetryKey) {
+    private void postTelemetry(HttpPullCollectorSessionContext collectorCtx,
+                               TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, String telemetryKey) {
+        if (collectorCtx.getTransportContext() != null) {
+            collectorCtx.getTransportContext().activateHttpPullDeviceSession(sessionInfo, collectorCtx.getDeviceId());
+        }
         String key = StringUtils.isNotBlank(telemetryKey) ? telemetryKey : "httpPullPayload";
         JsonObject wrapper = new JsonObject();
         try {
@@ -206,7 +211,11 @@ public class HttpPullTransportService {
         transportService.process(sessionInfo, msg, null);
     }
 
-    private void postAttributes(TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, boolean shared) {
+    private void postAttributes(HttpPullCollectorSessionContext collectorCtx,
+                                TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, boolean shared) {
+        if (collectorCtx.getTransportContext() != null) {
+            collectorCtx.getTransportContext().activateHttpPullDeviceSession(sessionInfo, collectorCtx.getDeviceId());
+        }
         JsonElement parsed = JsonParser.parseString(jsonPayload);
         if (!parsed.isJsonObject()) {
             log.warn("HTTP pull attributes response is not a JSON object, skipping");
@@ -218,9 +227,12 @@ public class HttpPullTransportService {
     }
 
     private String resolvePollUrl(HttpPullCollectorSessionContext ctx, HttpPullPollRequest pollRequest) {
-        String override = ctx.getDeviceTransportConfiguration() != null
+        return HttpPullPollUrlResolver.resolve(pollRequest.getPollUrl(), resolvePollUrlOverride(ctx));
+    }
+
+    private String resolvePollUrlOverride(HttpPullCollectorSessionContext ctx) {
+        return ctx.getDeviceTransportConfiguration() != null
                 ? ctx.getDeviceTransportConfiguration().getPollUrlOverride() : null;
-        return HttpPullPollUrlResolver.resolve(pollRequest.getPollUrl(), override);
     }
 
     public static String buildMatchKey(org.thingsboard.server.common.data.transport.http.HttpPullDeviceIdMatchStrategy strategy,

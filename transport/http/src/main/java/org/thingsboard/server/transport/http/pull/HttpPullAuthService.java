@@ -33,6 +33,16 @@ public class HttpPullAuthService {
 
     public AuthRequestContext prepareAuth(DeviceId collectorId, HttpPullAuthConfiguration auth, String pollUrl,
                                           boolean requiresAuth) throws Exception {
+        return prepareAuth(collectorId, auth, pollUrl, requiresAuth, null);
+    }
+
+    public AuthRequestContext prepareAuth(DeviceId collectorId, HttpPullAuthConfiguration auth, String pollUrl,
+                                          boolean requiresAuth, String urlOverride) throws Exception {
+        return prepareAuth(collectorId, auth, pollUrl, requiresAuth, urlOverride, null);
+    }
+
+    public AuthRequestContext prepareAuth(DeviceId collectorId, HttpPullAuthConfiguration auth, String pollUrl,
+                                          boolean requiresAuth, String urlOverride, Integer readTimeoutMs) throws Exception {
         if (!requiresAuth || auth == null || auth.getAuthType() == null || auth.getAuthType() == HttpPullAuthType.NONE) {
             return AuthRequestContext.builder().url(pollUrl).headers(new HashMap<>()).build();
         }
@@ -44,8 +54,8 @@ public class HttpPullAuthService {
             case BASIC -> headers.put("Authorization", basicHeader(auth.getUsername(), auth.getPassword()));
             case BEARER_STATIC -> headers.put(auth.getTokenHeader() != null ? auth.getTokenHeader() : "Authorization",
                     prefix(auth.getTokenPrefix(), "Bearer ") + auth.getBearerToken());
-            case LOGIN_TOKEN -> applyLoginToken(collectorId, auth, headers);
-            case OAUTH2_CLIENT_CREDENTIALS, OAUTH2_PASSWORD -> applyOAuth2(collectorId, auth, headers);
+            case LOGIN_TOKEN -> applyLoginToken(collectorId, auth, headers, urlOverride, readTimeoutMs);
+            case OAUTH2_CLIENT_CREDENTIALS, OAUTH2_PASSWORD -> applyOAuth2(collectorId, auth, headers, urlOverride, readTimeoutMs);
             default -> {
             }
         }
@@ -63,18 +73,21 @@ public class HttpPullAuthService {
         }
     }
 
-    private void applyLoginToken(DeviceId collectorId, HttpPullAuthConfiguration auth, Map<String, String> headers) throws Exception {
-        String token = resolveToken(collectorId, auth, false);
+    private void applyLoginToken(DeviceId collectorId, HttpPullAuthConfiguration auth, Map<String, String> headers,
+                                 String urlOverride, Integer readTimeoutMs) throws Exception {
+        String token = resolveToken(collectorId, auth, false, urlOverride, readTimeoutMs);
         headers.put(auth.getTokenHeader() != null ? auth.getTokenHeader() : "Authorization",
                 prefix(auth.getTokenPrefix(), "Bearer ") + token);
     }
 
-    private void applyOAuth2(DeviceId collectorId, HttpPullAuthConfiguration auth, Map<String, String> headers) throws Exception {
-        String token = resolveToken(collectorId, auth, true);
+    private void applyOAuth2(DeviceId collectorId, HttpPullAuthConfiguration auth, Map<String, String> headers,
+                             String urlOverride, Integer readTimeoutMs) throws Exception {
+        String token = resolveToken(collectorId, auth, true, urlOverride, readTimeoutMs);
         headers.put("Authorization", "Bearer " + token);
     }
 
-    private String resolveToken(DeviceId collectorId, HttpPullAuthConfiguration auth, boolean oauth) throws Exception {
+    private String resolveToken(DeviceId collectorId, HttpPullAuthConfiguration auth, boolean oauth,
+                                String urlOverride, Integer readTimeoutMs) throws Exception {
         TokenState state = tokenCache.get(collectorId);
         long now = System.currentTimeMillis();
         if (state != null && state.expiresAtMs > now + 5000) {
@@ -86,29 +99,31 @@ public class HttpPullAuthService {
                 return state.accessToken;
             }
             if (!oauth && StringUtils.isNotBlank(state.refreshToken) && StringUtils.isNotBlank(auth.getRefreshUrl())) {
-                refreshLoginToken(collectorId, auth, state);
+                refreshLoginToken(collectorId, auth, state, urlOverride, readTimeoutMs);
             } else if (oauth && StringUtils.isNotBlank(state.refreshToken)) {
-                refreshOAuthToken(collectorId, auth, state);
+                refreshOAuthToken(collectorId, auth, state, urlOverride, readTimeoutMs);
             } else {
-                fetchNewToken(collectorId, auth, oauth, state);
+                fetchNewToken(collectorId, auth, oauth, state, urlOverride, readTimeoutMs);
             }
             return state.accessToken;
         }
     }
 
-    private void fetchNewToken(DeviceId collectorId, HttpPullAuthConfiguration auth, boolean oauth, TokenState state) throws Exception {
+    private void fetchNewToken(DeviceId collectorId, HttpPullAuthConfiguration auth, boolean oauth, TokenState state,
+                               String urlOverride, Integer readTimeoutMs) throws Exception {
         if (state == null) {
             state = new TokenState();
             tokenCache.put(collectorId, state);
         }
         if (oauth) {
-            fetchOAuthToken(auth, state);
+            fetchOAuthToken(auth, state, urlOverride, readTimeoutMs);
         } else {
-            fetchLoginToken(auth, state);
+            fetchLoginToken(auth, state, urlOverride, readTimeoutMs);
         }
     }
 
-    private void fetchLoginToken(HttpPullAuthConfiguration auth, TokenState state) throws Exception {
+    private void fetchLoginToken(HttpPullAuthConfiguration auth, TokenState state, String urlOverride,
+                                 Integer readTimeoutMs) throws Exception {
         Map<String, String> headers = new HashMap<>();
         if (auth.getLoginHeaders() != null) {
             headers.putAll(auth.getLoginHeaders());
@@ -117,16 +132,17 @@ public class HttpPullAuthService {
             headers.put("Content-Type", "application/json");
         }
         HttpPullHttpClient.HttpPullResponse response = sharedHttpClient.execute(HttpPullHttpClient.HttpPullRequest.builder()
-                .url(auth.getLoginUrl())
+                .url(resolveAuthUrl(auth.getLoginUrl(), urlOverride))
                 .method(auth.getLoginMethod())
                 .body(auth.getLoginBody())
                 .headers(headers)
-                .readTimeoutMs(10000)
+                .readTimeoutMs(resolveReadTimeoutMs(readTimeoutMs))
                 .build());
         applyTokenFromBody(auth, response.getBody(), state);
     }
 
-    private void refreshLoginToken(DeviceId collectorId, HttpPullAuthConfiguration auth, TokenState state) throws Exception {
+    private void refreshLoginToken(DeviceId collectorId, HttpPullAuthConfiguration auth, TokenState state,
+                                   String urlOverride, Integer readTimeoutMs) throws Exception {
         String body = auth.getRefreshBodyTemplate();
         if (StringUtils.isBlank(body)) {
             JsonObject o = new JsonObject();
@@ -138,40 +154,53 @@ public class HttpPullAuthService {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
         HttpPullHttpClient.HttpPullResponse response = sharedHttpClient.execute(HttpPullHttpClient.HttpPullRequest.builder()
-                .url(auth.getRefreshUrl())
+                .url(resolveAuthUrl(auth.getRefreshUrl(), urlOverride))
                 .method(auth.getRefreshMethod() != null ? auth.getRefreshMethod() : "POST")
                 .body(body)
                 .headers(headers)
-                .readTimeoutMs(10000)
+                .readTimeoutMs(resolveReadTimeoutMs(readTimeoutMs))
                 .build());
         applyTokenFromBody(auth, response.getBody(), state);
     }
 
-    private void fetchOAuthToken(HttpPullAuthConfiguration auth, TokenState state) throws Exception {
+    private void fetchOAuthToken(HttpPullAuthConfiguration auth, TokenState state, String urlOverride,
+                                 Integer readTimeoutMs) throws Exception {
         String body = buildOAuthBody(auth, false);
         Map<String, String> headers = Map.of("Content-Type", "application/x-www-form-urlencoded");
         HttpPullHttpClient.HttpPullResponse response = sharedHttpClient.execute(HttpPullHttpClient.HttpPullRequest.builder()
-                .url(auth.getTokenUrl())
+                .url(resolveAuthUrl(auth.getTokenUrl(), urlOverride))
                 .method("POST")
                 .body(body)
                 .headers(headers)
-                .readTimeoutMs(10000)
+                .readTimeoutMs(resolveReadTimeoutMs(readTimeoutMs))
                 .build());
         applyOAuthFromBody(auth, response.getBody(), state);
     }
 
-    private void refreshOAuthToken(DeviceId collectorId, HttpPullAuthConfiguration auth, TokenState state) throws Exception {
+    private void refreshOAuthToken(DeviceId collectorId, HttpPullAuthConfiguration auth, TokenState state,
+                                   String urlOverride, Integer readTimeoutMs) throws Exception {
         String body = "grant_type=refresh_token&refresh_token=" + urlEncode(state.refreshToken)
                 + "&client_id=" + urlEncode(auth.getClientId())
                 + "&client_secret=" + urlEncode(auth.getClientSecret());
         HttpPullHttpClient.HttpPullResponse response = sharedHttpClient.execute(HttpPullHttpClient.HttpPullRequest.builder()
-                .url(auth.getTokenUrl())
+                .url(resolveAuthUrl(auth.getTokenUrl(), urlOverride))
                 .method("POST")
                 .body(body)
                 .headers(Map.of("Content-Type", "application/x-www-form-urlencoded"))
-                .readTimeoutMs(10000)
+                .readTimeoutMs(resolveReadTimeoutMs(readTimeoutMs))
                 .build());
         applyOAuthFromBody(auth, response.getBody(), state);
+    }
+
+    private static int resolveReadTimeoutMs(Integer readTimeoutMs) {
+        if (readTimeoutMs == null || readTimeoutMs <= 0) {
+            return 10000;
+        }
+        return readTimeoutMs;
+    }
+
+    private static String resolveAuthUrl(String profileUrl, String urlOverride) {
+        return HttpPullPollUrlResolver.resolve(profileUrl, urlOverride);
     }
 
     private static String buildOAuthBody(HttpPullAuthConfiguration auth, boolean refresh) {

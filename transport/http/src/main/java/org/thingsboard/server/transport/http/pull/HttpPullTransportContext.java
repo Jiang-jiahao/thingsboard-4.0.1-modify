@@ -49,6 +49,7 @@ import org.thingsboard.server.transport.http.pull.session.HttpPullTargetSession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -68,6 +69,8 @@ public class HttpPullTransportContext extends TransportContext {
 
     private final Map<DeviceId, HttpPullCollectorSessionContext> collectorSessions = new ConcurrentHashMap<>();
     private final Map<DeviceProfileId, Integer> collectorCountByProfile = new ConcurrentHashMap<>();
+    /** 已向 Core 上报 OPEN/RPC 订阅的会话；仅在实际连通并同步数据后才加入 */
+    private final Set<UUID> activatedTransportSessions = ConcurrentHashMap.newKeySet();
 
     @AfterStartUp(order = AfterStartUp.AFTER_TRANSPORT_SERVICE)
     public void fetchCollectorsAndEstablishSessions() {
@@ -135,13 +138,12 @@ public class HttpPullTransportContext extends TransportContext {
                 return;
             }
             SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, UUID.randomUUID());
-            completeHttpPullSessionRegistration(sessionInfo, createRpcSessionListener(ctx, null, sessionInfo));
+            registerHttpPullTransportSession(sessionInfo, createRpcSessionListener(ctx, null, sessionInfo));
             ctx.setSessionInfo(sessionInfo);
             collectorSessions.put(device.getId(), ctx);
             preloadActiveTargets(ctx);
             httpPullTransportService.createQueryingTasks(ctx);
-            transportService.lifecycleEvent(ctx.getTenantId(), ctx.getDeviceId(), ComponentLifecycleEvent.STARTED, true, null);
-            log.info("Established HTTP pull collector session for {}", device.getId());
+            log.info("Established HTTP pull collector session for {} (inactive until first successful poll)", device.getId());
         });
     }
 
@@ -249,7 +251,7 @@ public class HttpPullTransportContext extends TransportContext {
                             return;
                         }
                         SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, HttpPullTransportContext.this, UUID.randomUUID());
-                        completeHttpPullSessionRegistration(sessionInfo,
+                        registerHttpPullTransportSession(sessionInfo,
                                 createRpcSessionListener(collectorCtx, targetId, sessionInfo));
                         HttpPullTargetSession targetSession = HttpPullTargetSession.builder()
                                 .deviceId(targetId)
@@ -305,6 +307,7 @@ public class HttpPullTransportContext extends TransportContext {
             }
             ctx.getActiveTargets().values().forEach(t -> {
                 if (t.getSessionInfo() != null) {
+                    forgetActivatedTransportSession(t.getSessionInfo());
                     transportService.deregisterSession(t.getSessionInfo());
                 }
             });
@@ -378,6 +381,7 @@ public class HttpPullTransportContext extends TransportContext {
                 return false;
             }
             if (entry.getValue().getSessionInfo() != null) {
+                forgetActivatedTransportSession(entry.getValue().getSessionInfo());
                 transportService.deregisterSession(entry.getValue().getSessionInfo());
             }
             log.debug("[{}] Removed HTTP pull target {} after device deletion",
@@ -386,14 +390,37 @@ public class HttpPullTransportContext extends TransportContext {
         });
     }
 
-    /**
-     * 注册传输会话并向设备 Actor 订阅 RPC；否则平台认为设备无连接，RPC 在 REST 层等到 504，
-     * 不会执行档案中配置的 HTTP 出站地址。
-     */
-    private void completeHttpPullSessionRegistration(SessionInfoProto sessionInfo, SessionMsgListener listener) {
+    private void registerHttpPullTransportSession(SessionInfoProto sessionInfo, SessionMsgListener listener) {
         transportService.registerAsyncSession(sessionInfo, listener);
+    }
+
+    /**
+     * 首次成功拉取/出站 RPC 后激活会话：向 Core 上报 OPEN 并订阅 RPC。
+     * 避免仅注册传输会话、厂家实际不通时设备仍显示「活跃」。
+     */
+    public void activateHttpPullDeviceSession(SessionInfoProto sessionInfo, DeviceId collectorDeviceId) {
+        if (sessionInfo == null) {
+            return;
+        }
+        UUID sessionId = new UUID(sessionInfo.getSessionIdMSB(), sessionInfo.getSessionIdLSB());
+        if (!activatedTransportSessions.add(sessionId)) {
+            return;
+        }
         transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_OPEN, null);
         transportService.process(sessionInfo, DefaultTransportService.SUBSCRIBE_TO_RPC_ASYNC_MSG, TransportServiceCallback.EMPTY);
+        DeviceId deviceId = new DeviceId(new UUID(sessionInfo.getDeviceIdMSB(), sessionInfo.getDeviceIdLSB()));
+        if (collectorDeviceId != null && collectorDeviceId.equals(deviceId)) {
+            TenantId tenantId = new TenantId(new UUID(sessionInfo.getTenantIdMSB(), sessionInfo.getTenantIdLSB()));
+            transportService.lifecycleEvent(tenantId, deviceId, ComponentLifecycleEvent.STARTED, true, null);
+        }
+        log.debug("Activated HTTP pull session for device {}", deviceId);
+    }
+
+    private void forgetActivatedTransportSession(SessionInfoProto sessionInfo) {
+        if (sessionInfo == null) {
+            return;
+        }
+        activatedTransportSessions.remove(new UUID(sessionInfo.getSessionIdMSB(), sessionInfo.getSessionIdLSB()));
     }
 
     private HttpPullRpcSessionListener createRpcSessionListener(HttpPullCollectorSessionContext collectorCtx,
@@ -408,10 +435,12 @@ public class HttpPullTransportContext extends TransportContext {
         }
         ctx.getActiveTargets().values().forEach(t -> {
             if (t.getSessionInfo() != null) {
+                forgetActivatedTransportSession(t.getSessionInfo());
                 transportService.deregisterSession(t.getSessionInfo());
             }
         });
         if (ctx.getSessionInfo() != null) {
+            forgetActivatedTransportSession(ctx.getSessionInfo());
             transportService.deregisterSession(ctx.getSessionInfo());
         }
         httpPullTransportService.cancelQueryingTasks(ctx);
