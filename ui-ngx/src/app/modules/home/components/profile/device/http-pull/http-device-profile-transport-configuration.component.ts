@@ -116,15 +116,26 @@ export class HttpDeviceProfileTransportConfigurationComponent implements OnInit,
       return;
     }
     const value = this.pendingValue;
-    const isPull = this.httpPullActive
-      || isHttpPullProfileTransportConfiguration(value)
-      || resolveHttpProfileTransportTypeForDisplay(this.entityTransportType, value as Record<string, unknown>)
-        === DeviceTransportType.HTTP_PULL;
+    const isPull = this.resolveIsPullMode(value);
     this.form.patchValue({
       httpMode: isPull ? HttpTransportMode.PULL : HttpTransportMode.PASSIVE,
       pullConfiguration: isPull ? value : createDeviceProfileTransportConfiguration(DeviceTransportType.HTTP_PULL),
       passiveConfiguration: !isPull ? value : createDeviceProfileTransportConfiguration(DeviceTransportType.DEFAULT)
     }, { emitEvent: false });
+  }
+
+  /** 优先使用配置中的工作模式标记，避免 pendingValue 滞后时误判为主动采集 */
+  private resolveIsPullMode(value: DeviceProfileTransportConfiguration): boolean {
+    if (value.httpTransportMode === HttpTransportMode.PULL) {
+      return true;
+    }
+    if (value.httpTransportMode === HttpTransportMode.PASSIVE) {
+      return false;
+    }
+    return this.httpPullActive
+      || isHttpPullProfileTransportConfiguration(value)
+      || resolveHttpProfileTransportTypeForDisplay(this.entityTransportType, value as Record<string, unknown>)
+        === DeviceTransportType.HTTP_PULL;
   }
 
   validate(): ValidationErrors | null {
@@ -138,18 +149,22 @@ export class HttpDeviceProfileTransportConfigurationComponent implements OnInit,
     const mode = this.form.get('httpMode').value;
     if (mode === HttpTransportMode.PULL) {
       const pull = this.form.get('pullConfiguration').value || {};
-      this.propagateChange({
+      const configuration: DeviceProfileTransportConfiguration = {
         ...pull,
         type: DeviceTransportType.HTTP_PULL,
         httpTransportMode: HttpTransportMode.PULL
-      });
+      };
+      this.pendingValue = configuration;
+      this.propagateChange(configuration);
     } else {
       const passive = this.form.get('passiveConfiguration').value || {};
-      this.propagateChange({
+      const configuration: DeviceProfileTransportConfiguration = {
         type: DeviceTransportType.DEFAULT,
         httpTransportMode: HttpTransportMode.PASSIVE,
         routing: passive.routing
-      });
+      };
+      this.pendingValue = configuration;
+      this.propagateChange(configuration);
     }
   }
 }

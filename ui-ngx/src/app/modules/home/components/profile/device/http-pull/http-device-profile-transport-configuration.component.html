@@ -14,13 +14,13 @@
     </mat-form-field>
   </section>
 
-  <div *ngIf="form.get('httpMode').value === httpTransportMode.PASSIVE">
+  <div [hidden]="form.get('httpMode').value !== httpTransportMode.PASSIVE">
     <tb-http-passive-device-profile-transport-configuration
       formControlName="passiveConfiguration">
     </tb-http-passive-device-profile-transport-configuration>
   </div>
 
-  <div *ngIf="form.get('httpMode').value === httpTransportMode.PULL">
+  <div [hidden]="form.get('httpMode').value !== httpTransportMode.PULL">
     <tb-http-pull-device-profile-transport-configuration
       formControlName="pullConfiguration">
     </tb-http-pull-device-profile-transport-configuration>
