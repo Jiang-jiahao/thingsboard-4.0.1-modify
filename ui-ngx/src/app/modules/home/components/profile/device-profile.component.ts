@@ -40,8 +40,8 @@ import {
   deviceTransportTypeHintMap,
   deviceTransportTypeTranslationMap,
   hasDeviceProfileTransportConfiguration,
-  normalizeHttpProfileTransportConfigurationForDisplay,
-  normalizeHttpProfileTransportConfigurationForSave,
+  normalizeProfileTransportConfigurationForDisplay,
+  normalizeProfileTransportConfigurationForSave,
   resolveHttpProfileTransportTypeForDisplay,
   resolveTransportTypeForSave,
   toUiTransportType,
@@ -140,7 +140,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
         profileData: this.fb.group({
           configuration: [entity && !this.isAdd ? entity.profileData?.configuration : {}, Validators.required],
           transportConfiguration: [entity && !this.isAdd
-            ? normalizeHttpProfileTransportConfigurationForDisplay(
+            ? normalizeProfileTransportConfigurationForDisplay(
               entity.transportType,
               entity.profileData?.transportConfiguration as Record<string, unknown>
             )
@@ -230,7 +230,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     this.entityForm.patchValue({transportType: toUiTransportType(entity.transportType)}, {emitEvent: false});
     this.entityForm.patchValue({provisionType: entity.provisionType}, {emitEvent: false});
     this.entityForm.patchValue({provisionDeviceKey: entity.provisionDeviceKey}, {emitEvent: false});
-    const transportConfiguration = normalizeHttpProfileTransportConfigurationForDisplay(
+    const transportConfiguration = normalizeProfileTransportConfigurationForDisplay(
       entity.transportType,
       entity.profileData?.transportConfiguration as Record<string, unknown>
     );
@@ -268,7 +268,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     formValue.profileData.provisionConfiguration = deviceProvisionConfiguration;
     delete deviceProvisionConfiguration.provisionDeviceKey;
     formValue.transportType = resolveTransportTypeForSave(formValue.transportType, formValue.profileData?.transportConfiguration);
-    formValue.profileData.transportConfiguration = normalizeHttpProfileTransportConfigurationForSave(
+    formValue.profileData.transportConfiguration = normalizeProfileTransportConfigurationForSave(
       formValue.transportType,
       formValue.profileData?.transportConfiguration
     );

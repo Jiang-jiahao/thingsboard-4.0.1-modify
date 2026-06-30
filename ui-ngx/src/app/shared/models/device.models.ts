@@ -52,15 +52,23 @@ export enum DeviceTransportType {
   SNMP = 'SNMP',
   TCP = 'TCP',
   UDP = 'UDP',
-  HTTP_PULL = 'HTTP_PULL'
+  HTTP_PULL = 'HTTP_PULL',
+  MQTT_PULL = 'MQTT_PULL'
 }
 
 export enum BasicTransportType {
-  HTTP = 'HTTP'
+  HTTP = 'HTTP',
+  MQTT = 'MQTT'
 }
 
 /** HTTP 传输在 UI 中的工作模式（保存时映射为 DEFAULT 或 HTTP_PULL） */
 export enum HttpTransportMode {
+  PASSIVE = 'PASSIVE',
+  PULL = 'PULL'
+}
+
+/** MQTT 传输在 UI 中的工作模式（保存时映射为 MQTT 或 MQTT_PULL） */
+export enum MqttTransportMode {
   PASSIVE = 'PASSIVE',
   PULL = 'PULL'
 }
@@ -185,11 +193,22 @@ export function isHttpTransportType(transportType: TransportType | DeviceTranspo
   return transportType === DeviceTransportType.HTTP_PULL || transportType === BasicTransportType.HTTP;
 }
 
+export function isMqttTransportType(transportType: TransportType | DeviceTransportType | null | undefined): boolean {
+  return transportType === DeviceTransportType.MQTT_PULL || transportType === BasicTransportType.MQTT
+    || transportType === DeviceTransportType.MQTT;
+}
+
 export function toUiTransportType(transportType: DeviceTransportType | TransportType | null | undefined): TransportType | null {
   if (!transportType) {
     return null;
   }
-  return isHttpTransportType(transportType) ? BasicTransportType.HTTP : transportType as TransportType;
+  if (isHttpTransportType(transportType)) {
+    return BasicTransportType.HTTP;
+  }
+  if (isMqttTransportType(transportType)) {
+    return BasicTransportType.MQTT;
+  }
+  return transportType as TransportType;
 }
 
 /** 判断档案传输配置是否为 HTTP 主动拉取（不依赖 type 字段，父表单会剥离 type） */
@@ -222,11 +241,20 @@ export function isHttpPullProfileTransportConfiguration(
 }
 
 export function resolveTransportTypeForSave(uiTransportType: TransportType,
-                                           transportConfiguration?: { type?: DeviceTransportType; httpTransportMode?: HttpTransportMode }): DeviceTransportType {
+                                           transportConfiguration?: {
+                                             type?: DeviceTransportType;
+                                             httpTransportMode?: HttpTransportMode;
+                                             mqttTransportMode?: MqttTransportMode;
+                                           }): DeviceTransportType {
   if (uiTransportType === BasicTransportType.HTTP) {
     return isHttpPullProfileTransportConfiguration(transportConfiguration)
       ? DeviceTransportType.HTTP_PULL
       : DeviceTransportType.DEFAULT;
+  }
+  if (uiTransportType === BasicTransportType.MQTT) {
+    return isMqttPullProfileTransportConfiguration(transportConfiguration)
+      ? DeviceTransportType.MQTT_PULL
+      : DeviceTransportType.MQTT;
   }
   return uiTransportType as DeviceTransportType;
 }
@@ -307,14 +335,14 @@ export function normalizeHttpProfileTransportConfigurationForSave(
 }
 
 export function hasDeviceProfileTransportConfiguration(transportType: TransportType): boolean {
-  if (transportType === BasicTransportType.HTTP) {
+  if (transportType === BasicTransportType.HTTP || transportType === BasicTransportType.MQTT) {
     return true;
   }
   return deviceTransportTypeConfigurationInfoMap.get(transportType as DeviceTransportType)?.hasProfileConfiguration ?? false;
 }
 
 export function hasDeviceTransportConfiguration(transportType: TransportType): boolean {
-  if (transportType === BasicTransportType.HTTP) {
+  if (transportType === BasicTransportType.HTTP || transportType === BasicTransportType.MQTT) {
     return true;
   }
   return deviceTransportTypeConfigurationInfoMap.get(transportType as DeviceTransportType)?.hasDeviceConfiguration ?? false;
@@ -511,6 +539,8 @@ export enum HttpPullAuthType {
 
 export enum HttpPullRoutingMode {
   SINGLE_DEVICE = 'SINGLE_DEVICE',
+  /** 每条 MQTT 消息对应一个设备（通配订阅、分时上报） */
+  PER_MESSAGE = 'PER_MESSAGE',
   MULTI_DEVICE = 'MULTI_DEVICE',
   AUTO = 'AUTO'
 }
@@ -521,10 +551,24 @@ export const HTTP_PULL_ROUTING_MODE_OPTIONS = [
   HttpPullRoutingMode.MULTI_DEVICE
 ];
 
+/** MQTT Pull 订阅请求可选路由模式 */
+export const MQTT_PULL_ROUTING_MODE_OPTIONS = [
+  HttpPullRoutingMode.SINGLE_DEVICE,
+  HttpPullRoutingMode.PER_MESSAGE,
+  HttpPullRoutingMode.MULTI_DEVICE
+];
+
 export function normalizeHttpPullRoutingMode(mode?: HttpPullRoutingMode | null): HttpPullRoutingMode {
   return mode === HttpPullRoutingMode.MULTI_DEVICE || mode === HttpPullRoutingMode.AUTO
     ? HttpPullRoutingMode.MULTI_DEVICE
     : HttpPullRoutingMode.SINGLE_DEVICE;
+}
+
+export function normalizeMqttPullRoutingMode(mode?: HttpPullRoutingMode | null): HttpPullRoutingMode {
+  if (mode === HttpPullRoutingMode.PER_MESSAGE) {
+    return HttpPullRoutingMode.PER_MESSAGE;
+  }
+  return normalizeHttpPullRoutingMode(mode);
 }
 
 export enum HttpPullDeviceIdMatchStrategy {
@@ -567,6 +611,8 @@ export interface HttpPullDeviceRoutingConfiguration {
   routingMode?: HttpPullRoutingMode;
   responseArrayJsonPath?: string;
   deviceIdJsonPath?: string;
+  /** MQTT：从主题路径分段取设备 ID（0 起）；-1 为最后一段 */
+  deviceIdTopicSegmentIndex?: number;
   deviceIdMatchStrategy?: HttpPullDeviceIdMatchStrategy;
   targetDeviceProfileId?: string;
   telemetryPayloadKey?: string;
@@ -839,6 +885,398 @@ export function formatHttpPullPollUrlOverrideForDisplay(
     /* keep trimmed */
   }
   return trimmed;
+}
+
+export enum MqttPullAuthType {
+  NONE = 'NONE',
+  USERNAME_PASSWORD = 'USERNAME_PASSWORD'
+}
+
+export interface MqttPullAuthConfiguration {
+  authType?: MqttPullAuthType;
+  username?: string;
+  password?: string;
+}
+
+export interface MqttPullSubscribeRequest {
+  id?: string;
+  name?: string;
+  enabled?: boolean;
+  topic?: string;
+  qos?: number;
+  dataType?: HttpPullPollDataType;
+  routing?: HttpPullDeviceRoutingConfiguration;
+}
+
+export interface MqttPullDeviceProfileTransportConfiguration {
+  mqttTransportMode?: MqttTransportMode;
+  brokerUrl?: string;
+  connectTimeoutMs?: number;
+  keepAliveSec?: number;
+  cleanSession?: boolean;
+  reconnectIntervalMs?: number;
+  clientIdPrefix?: string;
+  subscribeRequests?: MqttPullSubscribeRequest[];
+  auth?: MqttPullAuthConfiguration;
+}
+
+export interface MqttPullDeviceTransportConfiguration {
+  collector?: boolean;
+  externalDeviceId?: string;
+  collectorDeviceId?: string;
+  brokerUrlOverride?: string;
+}
+
+/** 判断档案传输配置是否为 MQTT 主动拉取（不依赖 type 字段，父表单会剥离 type） */
+export function isMqttPullProfileTransportConfiguration(
+  transportConfiguration?: { type?: DeviceTransportType; mqttTransportMode?: MqttTransportMode } | MqttPullDeviceProfileTransportConfiguration | null
+): boolean {
+  if (!transportConfiguration) {
+    return false;
+  }
+  if (transportConfiguration.mqttTransportMode === MqttTransportMode.PULL) {
+    return true;
+  }
+  if (transportConfiguration.mqttTransportMode === MqttTransportMode.PASSIVE) {
+    return false;
+  }
+  if ('type' in transportConfiguration && transportConfiguration.type === DeviceTransportType.MQTT_PULL) {
+    return true;
+  }
+  const cfg = transportConfiguration as MqttPullDeviceProfileTransportConfiguration;
+  if (cfg.subscribeRequests?.length) {
+    return true;
+  }
+  if (cfg.brokerUrl) {
+    return true;
+  }
+  if (cfg.connectTimeoutMs != null && cfg.auth != null) {
+    return true;
+  }
+  return false;
+}
+
+export function resolveMqttProfileTransportTypeForDisplay(
+  entityTransportType: DeviceTransportType | string | null | undefined,
+  transportConfiguration?: { type?: DeviceTransportType; mqttTransportMode?: MqttTransportMode } | null
+): DeviceTransportType {
+  if (transportConfiguration?.mqttTransportMode === MqttTransportMode.PULL) {
+    return DeviceTransportType.MQTT_PULL;
+  }
+  if (transportConfiguration?.mqttTransportMode === MqttTransportMode.PASSIVE) {
+    return DeviceTransportType.MQTT;
+  }
+  if (transportConfiguration?.type === DeviceTransportType.MQTT_PULL) {
+    return DeviceTransportType.MQTT_PULL;
+  }
+  if (transportConfiguration && isMqttPullProfileTransportConfiguration(transportConfiguration)) {
+    return DeviceTransportType.MQTT_PULL;
+  }
+  return (entityTransportType as DeviceTransportType) ?? DeviceTransportType.MQTT;
+}
+
+export function normalizeMqttProfileTransportConfigurationForDisplay(
+  transportType: DeviceTransportType | string | null | undefined,
+  transportConfiguration: DeviceProfileTransportConfiguration | Record<string, unknown> | null | undefined
+): DeviceProfileTransportConfiguration | null | undefined {
+  if (!transportConfiguration) {
+    return transportConfiguration as null | undefined;
+  }
+  const effectiveTransportType = resolveMqttProfileTransportTypeForDisplay(transportType, transportConfiguration);
+  const isPull = effectiveTransportType === DeviceTransportType.MQTT_PULL;
+  if (!isPull) {
+    return {
+      ...transportConfiguration,
+      type: DeviceTransportType.MQTT,
+      mqttTransportMode: MqttTransportMode.PASSIVE
+    } as DeviceProfileTransportConfiguration;
+  }
+  return {
+    ...transportConfiguration,
+    type: DeviceTransportType.MQTT_PULL,
+    mqttTransportMode: transportConfiguration.mqttTransportMode || MqttTransportMode.PULL
+  } as DeviceProfileTransportConfiguration;
+}
+
+export function normalizeMqttProfileTransportConfigurationForSave(
+  transportType: DeviceTransportType,
+  transportConfiguration: DeviceProfileTransportConfiguration | Record<string, unknown> | null | undefined
+): DeviceProfileTransportConfiguration | null | undefined {
+  if (!transportConfiguration) {
+    return transportConfiguration as null | undefined;
+  }
+  const isPull = transportType === DeviceTransportType.MQTT_PULL
+    || isMqttPullProfileTransportConfiguration(transportConfiguration as MqttPullDeviceProfileTransportConfiguration);
+  const mode = isPull ? MqttTransportMode.PULL : MqttTransportMode.PASSIVE;
+  if (isPull) {
+    return {
+      ...transportConfiguration,
+      type: DeviceTransportType.MQTT_PULL,
+      mqttTransportMode: mode
+    } as DeviceProfileTransportConfiguration;
+  }
+  return {
+    ...transportConfiguration,
+    type: DeviceTransportType.MQTT,
+    mqttTransportMode: mode
+  } as DeviceProfileTransportConfiguration;
+}
+
+export function normalizeProfileTransportConfigurationForDisplay(
+  transportType: DeviceTransportType | string | null | undefined,
+  transportConfiguration: DeviceProfileTransportConfiguration | Record<string, unknown> | null | undefined
+): DeviceProfileTransportConfiguration | null | undefined {
+  if (!transportConfiguration) {
+    return transportConfiguration as null | undefined;
+  }
+  const uiType = toUiTransportType(transportType as DeviceTransportType);
+  if (uiType === BasicTransportType.HTTP) {
+    return normalizeHttpProfileTransportConfigurationForDisplay(transportType, transportConfiguration);
+  }
+  if (uiType === BasicTransportType.MQTT) {
+    return normalizeMqttProfileTransportConfigurationForDisplay(transportType, transportConfiguration);
+  }
+  return transportConfiguration as DeviceProfileTransportConfiguration;
+}
+
+export function normalizeProfileTransportConfigurationForSave(
+  transportType: DeviceTransportType,
+  transportConfiguration: DeviceProfileTransportConfiguration | Record<string, unknown> | null | undefined
+): DeviceProfileTransportConfiguration | null | undefined {
+  if (!transportConfiguration) {
+    return transportConfiguration as null | undefined;
+  }
+  const uiType = toUiTransportType(transportType);
+  if (uiType === BasicTransportType.HTTP) {
+    return normalizeHttpProfileTransportConfigurationForSave(transportType, transportConfiguration);
+  }
+  if (uiType === BasicTransportType.MQTT) {
+    return normalizeMqttProfileTransportConfigurationForSave(transportType, transportConfiguration);
+  }
+  return transportConfiguration as DeviceProfileTransportConfiguration;
+}
+
+export function resolveMqttPullDeviceIsCollector(
+  cfg: Pick<MqttPullDeviceTransportConfiguration, 'collector' | 'externalDeviceId'> | null | undefined
+): boolean {
+  if (!cfg) {
+    return true;
+  }
+  if ((cfg.externalDeviceId || '').trim()) {
+    return false;
+  }
+  return cfg.collector !== false;
+}
+
+export function isMqttPullCollectorCandidate(
+  cfg: Pick<MqttPullDeviceTransportConfiguration, 'externalDeviceId'> | null | undefined
+): boolean {
+  return !(cfg?.externalDeviceId || '').trim();
+}
+
+export function isMqttPullDeviceTransportConfigurationShape(
+  cfg: Record<string, unknown> | null | undefined
+): boolean {
+  if (!cfg) {
+    return false;
+  }
+  return 'collector' in cfg || 'brokerUrlOverride' in cfg || 'collectorDeviceId' in cfg;
+}
+
+export function resolveMqttDeviceTransportTypeForSave(
+  transportType: DeviceTransportType | TransportType | null | undefined,
+  configuration: Record<string, unknown> | null | undefined,
+  mqttPullProfileActive = false
+): DeviceTransportType {
+  if (configuration?.type === DeviceTransportType.MQTT_PULL) {
+    return DeviceTransportType.MQTT_PULL;
+  }
+  if (mqttPullProfileActive || isMqttPullDeviceTransportConfigurationShape(configuration)) {
+    return DeviceTransportType.MQTT_PULL;
+  }
+  if (transportType === BasicTransportType.MQTT) {
+    return DeviceTransportType.MQTT;
+  }
+  return (transportType as DeviceTransportType) ?? DeviceTransportType.MQTT;
+}
+
+export function normalizeMqttDeviceTransportConfigurationForSave(
+  transportType: DeviceTransportType | TransportType | null | undefined,
+  configuration: DeviceTransportConfiguration | Record<string, unknown> | null | undefined,
+  mqttPullProfileActive = false
+): DeviceTransportConfiguration | null | undefined {
+  if (!configuration) {
+    return configuration as null | undefined;
+  }
+  const resolvedType = resolveMqttDeviceTransportTypeForSave(transportType, configuration as Record<string, unknown>, mqttPullProfileActive);
+  if (resolvedType !== DeviceTransportType.MQTT_PULL) {
+    return { ...configuration, type: resolvedType } as DeviceTransportConfiguration;
+  }
+  const raw = configuration as MqttPullDeviceTransportConfiguration;
+  const collector = resolveMqttPullDeviceIsCollector(raw);
+  const externalDeviceId = (raw.externalDeviceId || '').trim() || undefined;
+  const collectorDeviceId = (raw.collectorDeviceId || '').trim() || undefined;
+  const brokerUrlOverride = (raw.brokerUrlOverride || '').trim() || undefined;
+  return {
+    type: DeviceTransportType.MQTT_PULL,
+    collector,
+    externalDeviceId: collector ? undefined : externalDeviceId,
+    collectorDeviceId: collector ? undefined : collectorDeviceId,
+    brokerUrlOverride: collector ? brokerUrlOverride : undefined
+  };
+}
+
+export interface MqttPullProfileContext {
+  routingMode: HttpPullRoutingMode;
+  brokerUrl: string | null;
+}
+
+export function resolveMqttPullProfileRoutingMode(
+  raw: MqttPullDeviceProfileTransportConfiguration | null | undefined
+): HttpPullRoutingMode {
+  if (!raw) {
+    return HttpPullRoutingMode.SINGLE_DEVICE;
+  }
+  const subscribeRequests = raw.subscribeRequests;
+  if (subscribeRequests?.length) {
+    for (const req of subscribeRequests) {
+      const mode = req.routing?.routingMode;
+      if (mode === HttpPullRoutingMode.MULTI_DEVICE || mode === HttpPullRoutingMode.PER_MESSAGE
+          || mode === HttpPullRoutingMode.AUTO) {
+        return mode === HttpPullRoutingMode.AUTO ? HttpPullRoutingMode.MULTI_DEVICE : mode;
+      }
+    }
+    return normalizeMqttPullRoutingMode(subscribeRequests[0]?.routing?.routingMode);
+  }
+  return HttpPullRoutingMode.SINGLE_DEVICE;
+}
+
+export function extractMqttPullProfileContext(dp: DeviceProfile | null | undefined): MqttPullProfileContext | null {
+  if (!dp || dp.transportType !== DeviceTransportType.MQTT_PULL) {
+    return null;
+  }
+  const raw = dp.profileData?.transportConfiguration as unknown as MqttPullDeviceProfileTransportConfiguration | undefined;
+  if (!raw) {
+    return null;
+  }
+  return {
+    routingMode: resolveMqttPullProfileRoutingMode(raw),
+    brokerUrl: raw.brokerUrl ?? null
+  };
+}
+
+const MQTT_PULL_HOST_PORT_PATTERN = /^[\w.\-]+:\d+$/;
+
+function parseMqttPullOverrideUrl(raw: string): URL | null {
+  try {
+    const withScheme = /^(tcp|ssl|mqtt|mqtts):\/\//i.test(raw) || raw.includes('://') ? raw : `tcp://${raw}`;
+    return new URL(withScheme);
+  } catch {
+    return null;
+  }
+}
+
+export function shouldMergeMqttPullBrokerUrlWithProfile(raw: string | undefined | null): boolean {
+  const trimmed = raw?.trim();
+  if (!trimmed) {
+    return false;
+  }
+  if (MQTT_PULL_HOST_PORT_PATTERN.test(trimmed)) {
+    return true;
+  }
+  const parsed = parseMqttPullOverrideUrl(trimmed);
+  if (!parsed) {
+    return false;
+  }
+  return !parsed.pathname || parsed.pathname === '/';
+}
+
+export function resolveMqttPullBrokerUrlOverride(
+  raw: string | undefined | null,
+  profileBrokerUrl: string | null | undefined
+): string | undefined {
+  const trimmed = raw?.trim();
+  if (!trimmed) {
+    return profileBrokerUrl || undefined;
+  }
+  if (!shouldMergeMqttPullBrokerUrlWithProfile(trimmed)) {
+    return trimmed;
+  }
+  if (!profileBrokerUrl) {
+    const parsed = parseMqttPullOverrideUrl(trimmed);
+    if (!parsed) {
+      return trimmed;
+    }
+    const scheme = parsed.protocol.replace(':', '') || 'tcp';
+    const port = parsed.port ? `:${parsed.port}` : '';
+    return `${scheme}://${parsed.hostname}${port}`;
+  }
+  try {
+    const profile = parseMqttPullOverrideUrl(profileBrokerUrl);
+    const override = parseMqttPullOverrideUrl(trimmed);
+    if (!profile || !override) {
+      return trimmed;
+    }
+    const scheme = profile.protocol.replace(':', '') || 'tcp';
+    const port = override.port || profile.port;
+    return `${scheme}://${override.hostname}${port ? `:${port}` : ''}`;
+  } catch {
+    return trimmed;
+  }
+}
+
+export function formatMqttPullBrokerUrlOverrideForDisplay(
+  stored: string | undefined | null,
+  profileBrokerUrl: string | null | undefined
+): string {
+  const trimmed = stored?.trim();
+  if (!trimmed) {
+    return '';
+  }
+  if (MQTT_PULL_HOST_PORT_PATTERN.test(trimmed)) {
+    return trimmed;
+  }
+  if (!profileBrokerUrl) {
+    return trimmed;
+  }
+  try {
+    const profile = parseMqttPullOverrideUrl(profileBrokerUrl);
+    const override = parseMqttPullOverrideUrl(trimmed);
+    if (profile && override && override.hostname === profile.hostname
+      && (override.port || '') === (profile.port || '')) {
+      return override.port ? `${override.hostname}:${override.port}` : override.hostname;
+    }
+  } catch {
+    /* keep trimmed */
+  }
+  return trimmed;
+}
+
+export function normalizeDeviceTransportConfigurationForSave(
+  transportType: DeviceTransportType | TransportType | null | undefined,
+  configuration: DeviceTransportConfiguration | Record<string, unknown> | null | undefined,
+  pullProfileContext?: { httpPullActive?: boolean; mqttPullActive?: boolean }
+): DeviceTransportConfiguration | null | undefined {
+  if (!configuration) {
+    return configuration as null | undefined;
+  }
+  const effectiveType = (configuration?.type ?? transportType) as DeviceTransportType;
+  const uiType = toUiTransportType(effectiveType);
+  if (uiType === BasicTransportType.HTTP || pullProfileContext?.httpPullActive) {
+    return normalizeHttpDeviceTransportConfigurationForSave(
+      transportType,
+      configuration,
+      pullProfileContext?.httpPullActive
+    );
+  }
+  if (uiType === BasicTransportType.MQTT || pullProfileContext?.mqttPullActive) {
+    return normalizeMqttDeviceTransportConfigurationForSave(
+      transportType,
+      configuration,
+      pullProfileContext?.mqttPullActive
+    );
+  }
+  return { ...configuration, type: effectiveType } as DeviceTransportConfiguration;
 }
 
 export enum SnmpSpecType {
@@ -1542,6 +1980,32 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
         };
         transportConfiguration = {...httpPullTransportConfiguration, type: DeviceTransportType.HTTP_PULL};
         break;
+      case BasicTransportType.MQTT:
+      case DeviceTransportType.MQTT_PULL:
+        const mqttPullTransportConfiguration: MqttPullDeviceProfileTransportConfiguration = {
+          brokerUrl: 'tcp://192.168.1.10:1883',
+          connectTimeoutMs: 10000,
+          keepAliveSec: 60,
+          cleanSession: true,
+          reconnectIntervalMs: 5000,
+          subscribeRequests: [{
+            name: 'subscribe-1',
+            enabled: true,
+            topic: 'devices/+/telemetry',
+            qos: 1,
+            dataType: HttpPullPollDataType.TELEMETRY,
+            routing: {
+              routingMode: HttpPullRoutingMode.PER_MESSAGE,
+              deviceIdJsonPath: 'deviceId',
+              deviceIdTopicSegmentIndex: -1,
+              deviceIdMatchStrategy: HttpPullDeviceIdMatchStrategy.EXTERNAL_DEVICE_ID,
+              telemetryPayloadKey: 'mqttPullPayload'
+            }
+          }],
+          auth: { authType: MqttPullAuthType.NONE }
+        };
+        transportConfiguration = {...mqttPullTransportConfiguration, type: DeviceTransportType.MQTT_PULL} as unknown as DeviceProfileTransportConfiguration;
+        break;
       case DeviceTransportType.TCP:
         const tcpTransportConfiguration: TcpDeviceProfileTransportConfiguration = {
           tcpTransportConnectMode: TcpTransportConnectMode.SERVER,
@@ -1614,6 +2078,14 @@ export const createDeviceTransportConfiguration = (type: TransportType): DeviceT
           externalDeviceId: null
         };
         transportConfiguration = {...httpPullDeviceTransportConfiguration, type: DeviceTransportType.HTTP_PULL};
+        break;
+      case BasicTransportType.MQTT:
+      case DeviceTransportType.MQTT_PULL:
+        const mqttPullDeviceTransportConfiguration: MqttPullDeviceTransportConfiguration = {
+          collector: true,
+          externalDeviceId: null
+        };
+        transportConfiguration = {...mqttPullDeviceTransportConfiguration, type: DeviceTransportType.MQTT_PULL};
         break;
       case DeviceTransportType.TCP:
         const tcpDeviceTransportConfiguration: TcpDeviceTransportConfiguration = {
@@ -1969,6 +2441,7 @@ export type DeviceTransportConfigurations = DefaultDeviceTransportConfiguration 
   Lwm2mDeviceTransportConfiguration &
   SnmpDeviceTransportConfiguration &
   HttpPullDeviceTransportConfiguration &
+  MqttPullDeviceTransportConfiguration &
   TcpDeviceTransportConfiguration &
   UdpDeviceTransportConfiguration;
 

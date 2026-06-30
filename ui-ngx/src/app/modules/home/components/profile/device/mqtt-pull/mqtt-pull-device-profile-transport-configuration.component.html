@@ -1,0 +1,65 @@
+<form [formGroup]="form" class="mqtt-pull-form">
+  <div class="tb-small section-title" translate>device-profile.mqtt-pull.section-broker</div>
+  <section class="flex flex-row gap-2 xs:flex-col">
+    <mat-form-field class="flex-1 mat-block">
+      <mat-label translate>device-profile.mqtt-pull.broker-url</mat-label>
+      <input matInput formControlName="brokerUrl" required placeholder="tcp://192.168.1.10:1883">
+    </mat-form-field>
+    <mat-form-field class="flex-1 mat-block">
+      <mat-label translate>device-profile.mqtt-pull.client-id-prefix</mat-label>
+      <input matInput formControlName="clientIdPrefix">
+      <mat-hint translate>device-profile.mqtt-pull.client-id-prefix-hint</mat-hint>
+    </mat-form-field>
+  </section>
+  <section class="flex flex-row gap-2 xs:flex-col global-timing">
+    <mat-form-field class="flex-1 mat-block">
+      <mat-label translate>device-profile.mqtt-pull.connect-timeout-ms</mat-label>
+      <input matInput type="number" formControlName="connectTimeoutMs" required>
+    </mat-form-field>
+    <mat-form-field class="flex-1 mat-block">
+      <mat-label translate>device-profile.mqtt-pull.keep-alive-sec</mat-label>
+      <input matInput type="number" formControlName="keepAliveSec" required>
+    </mat-form-field>
+    <mat-form-field class="flex-1 mat-block">
+      <mat-label translate>device-profile.mqtt-pull.reconnect-interval-ms</mat-label>
+      <input matInput type="number" formControlName="reconnectIntervalMs" required>
+    </mat-form-field>
+  </section>
+  <mat-checkbox formControlName="cleanSession">
+    {{ 'device-profile.mqtt-pull.clean-session' | translate }}
+  </mat-checkbox>
+
+  <tb-mqtt-pull-subscribe-requests-config
+    formControlName="subscribeRequests">
+  </tb-mqtt-pull-subscribe-requests-config>
+
+  <mat-expansion-panel class="mqtt-pull-panel">
+    <mat-expansion-panel-header>
+      <mat-panel-title translate>device-profile.mqtt-pull.section-auth</mat-panel-title>
+    </mat-expansion-panel-header>
+    <p class="tb-hint auth-section-hint" translate>device-profile.mqtt-pull.auth-section-hint</p>
+    <mat-form-field class="mat-block">
+      <mat-label translate>device-profile.mqtt-pull.auth-type</mat-label>
+      <mat-select formControlName="authType">
+        <mat-option *ngFor="let t of authTypes" [value]="t">{{ t }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <section *ngIf="form.get('authType').value === 'USERNAME_PASSWORD'" class="flex flex-row gap-2 xs:flex-col">
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.mqtt-pull.username</mat-label>
+        <input matInput formControlName="username">
+      </mat-form-field>
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.mqtt-pull.password</mat-label>
+        <input matInput type="password" formControlName="password">
+      </mat-form-field>
+    </section>
+  </mat-expansion-panel>
+
+  <div class="routing-help-row">
+    <button type="button" mat-stroked-button color="primary"
+            (click)="openRoutingExample($event)">
+      {{ 'device-profile.mqtt-pull.routing-example-btn' | translate }}
+    </button>
+  </div>
+</form>

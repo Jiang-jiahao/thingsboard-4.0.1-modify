@@ -30,6 +30,7 @@ import {
   DeviceTransportType,
   extractHttpPullProfileContext,
   extractHttpPushProfileContext,
+  extractMqttPullProfileContext,
   HttpPullRoutingMode,
   TcpDeviceProfileTransportConfiguration,
   UdpDeviceProfileTransportConfiguration,
@@ -78,9 +79,17 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
 
   httpPullProfilePollUrl: string | null = null;
 
+  mqttPullProfileRoutingMode: HttpPullRoutingMode | null = null;
+
+  mqttPullProfileBrokerUrl: string | null = null;
+
   readonly gatewayUiEnabled = GATEWAY_UI_ENABLED;
 
   get httpPullDeviceProfileId(): string | null {
+    return this.resolveDeviceProfileUuid(this.entityForm?.get('deviceProfileId')?.value);
+  }
+
+  get mqttPullDeviceProfileId(): string | null {
     return this.resolveDeviceProfileUuid(this.entityForm?.get('deviceProfileId')?.value);
   }
 
@@ -300,6 +309,8 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     this.httpPullProfileRoutingMode = null;
     this.httpPushProfileRoutingMode = null;
     this.httpPullProfilePollUrl = null;
+    this.mqttPullProfileRoutingMode = null;
+    this.mqttPullProfileBrokerUrl = null;
     if (!dp) {
       return;
     }
@@ -307,6 +318,11 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     if (httpPullCtx) {
       this.httpPullProfileRoutingMode = httpPullCtx.routingMode;
       this.httpPullProfilePollUrl = httpPullCtx.pollUrl;
+    }
+    const mqttPullCtx = extractMqttPullProfileContext(dp);
+    if (mqttPullCtx) {
+      this.mqttPullProfileRoutingMode = mqttPullCtx.routingMode;
+      this.mqttPullProfileBrokerUrl = mqttPullCtx.brokerUrl;
     }
     const httpPushCtx = extractHttpPushProfileContext(dp);
     if (httpPushCtx) {

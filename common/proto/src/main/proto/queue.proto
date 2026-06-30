@@ -674,6 +674,30 @@ message GetHttpPullRoutingTargetsResponseMsg {
   bool hasNextPage = 2;
 }
 
+message GetMqttPullDevicesRequestMsg {
+  int32 page = 1;
+  int32 pageSize = 2;
+}
+
+message GetMqttPullDevicesResponseMsg {
+  repeated string ids = 1;
+  bool hasNextPage = 2;
+}
+
+message GetMqttPullRoutingTargetsRequestMsg {
+  int64 tenantIdMSB = 1;
+  int64 tenantIdLSB = 2;
+  int64 deviceProfileIdMSB = 3;
+  int64 deviceProfileIdLSB = 4;
+  int32 page = 5;
+  int32 pageSize = 6;
+}
+
+message GetMqttPullRoutingTargetsResponseMsg {
+  repeated HttpPullRoutingTargetProto targets = 1;
+  bool hasNextPage = 2;
+}
+
 message EntityUpdateMsg {
   oneof entityUpdate {
     TenantProto tenant = 1;
@@ -1671,6 +1695,8 @@ message TransportApiRequestMsg {
   GetHttpPullDevicesRequestMsg httpPullDevicesRequestMsg = 20;
   GetDeviceByTenantIdAndNameRequestMsg deviceByTenantIdAndNameRequestMsg = 21;
   GetHttpPullRoutingTargetsRequestMsg httpPullRoutingTargetsRequestMsg = 22;
+  GetMqttPullDevicesRequestMsg mqttPullDevicesRequestMsg = 23;
+  GetMqttPullRoutingTargetsRequestMsg mqttPullRoutingTargetsRequestMsg = 24;
 }
 
 /* Response from ThingsBoard Core Service to Transport Service */
@@ -1693,6 +1719,8 @@ message TransportApiResponseMsg {
   GetHttpPullDevicesResponseMsg httpPullDevicesResponseMsg = 16;
   GetDeviceByTenantIdAndNameResponseMsg deviceByTenantIdAndNameResponseMsg = 17;
   GetHttpPullRoutingTargetsResponseMsg httpPullRoutingTargetsResponseMsg = 18;
+  GetMqttPullDevicesResponseMsg mqttPullDevicesResponseMsg = 19;
+  GetMqttPullRoutingTargetsResponseMsg mqttPullRoutingTargetsResponseMsg = 20;
 }
 
 /* Messages that are handled by ThingsBoard Core Service */

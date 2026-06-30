@@ -1,0 +1,28 @@
+<form [formGroup]="form" class="mqtt-transport-form">
+  <section class="mqtt-mode-section">
+    <mat-form-field class="mat-block">
+      <mat-label translate>device-profile.mqtt.mode</mat-label>
+      <mat-select formControlName="mqttMode">
+        <mat-option [value]="mqttTransportMode.PASSIVE">
+          {{ 'device-profile.mqtt.mode-passive' | translate }}
+        </mat-option>
+        <mat-option [value]="mqttTransportMode.PULL">
+          {{ 'device-profile.mqtt.mode-pull' | translate }}
+        </mat-option>
+      </mat-select>
+      <mat-hint translate>device-profile.mqtt.mode-hint</mat-hint>
+    </mat-form-field>
+  </section>
+
+  <div [hidden]="form.get('mqttMode').value !== mqttTransportMode.PASSIVE">
+    <tb-mqtt-passive-device-profile-transport-configuration
+      formControlName="passiveConfiguration">
+    </tb-mqtt-passive-device-profile-transport-configuration>
+  </div>
+
+  <div [hidden]="form.get('mqttMode').value !== mqttTransportMode.PULL">
+    <tb-mqtt-pull-device-profile-transport-configuration
+      formControlName="pullConfiguration">
+    </tb-mqtt-pull-device-profile-transport-configuration>
+  </div>
+</form>

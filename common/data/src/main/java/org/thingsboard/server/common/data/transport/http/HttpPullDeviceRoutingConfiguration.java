@@ -33,9 +33,15 @@ public class HttpPullDeviceRoutingConfiguration implements Serializable {
 
     /**
      * 每个数组元素内设备 ID 的 JSONPath（相对元素），如 {@code deviceId} 或 {@code id}。
-     * {@link HttpPullRoutingMode#MULTI_DEVICE} 时必填。
+     * {@link HttpPullRoutingMode#MULTI_DEVICE} / {@link HttpPullRoutingMode#PER_MESSAGE} 时至少与 topic 分段二选一。
      */
     private String deviceIdJsonPath;
+
+    /**
+     * 从 MQTT 主题路径分段提取设备 ID（0-based）；{@code -1} 表示最后一段。
+     * 例如 {@code bridge/.../device/rid/SR001260300261} 取 {@code -1} 得 {@code SR001260300261}。
+     */
+    private Integer deviceIdTopicSegmentIndex;
 
     private HttpPullDeviceIdMatchStrategy deviceIdMatchStrategy = HttpPullDeviceIdMatchStrategy.DEVICE_NAME;
 
@@ -61,6 +67,10 @@ public class HttpPullDeviceRoutingConfiguration implements Serializable {
         }
         if (routingMode == HttpPullRoutingMode.MULTI_DEVICE && StringUtils.isBlank(deviceIdJsonPath)) {
             throw new IllegalArgumentException("HTTP pull multi-device routing requires deviceIdJsonPath");
+        }
+        if (routingMode == HttpPullRoutingMode.PER_MESSAGE
+                && StringUtils.isBlank(deviceIdJsonPath) && deviceIdTopicSegmentIndex == null) {
+            throw new IllegalArgumentException("Per-message routing requires deviceIdJsonPath or deviceIdTopicSegmentIndex");
         }
         if (routingMode == HttpPullRoutingMode.AUTO && StringUtils.isBlank(deviceIdJsonPath)) {
             throw new IllegalArgumentException("HTTP pull auto routing requires deviceIdJsonPath");

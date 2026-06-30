@@ -36,7 +36,8 @@ import { HttpPullPollRequestsConfigComponent } from './http-pull-poll-requests-c
     HttpDeviceProfileTransportConfigurationComponent,
     HttpDeviceTransportConfigurationComponent,
     HttpPassiveDeviceProfileTransportConfigurationComponent,
-    HttpPassiveDeviceTransportConfigurationComponent
+    HttpPassiveDeviceTransportConfigurationComponent,
+    HttpPullRoutingHelpDialogComponent
   ]
 })
 export class HttpPullDeviceProfileTransportModule { }

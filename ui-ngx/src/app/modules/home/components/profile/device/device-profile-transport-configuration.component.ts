@@ -31,8 +31,9 @@ import {
   BasicTransportType,
   DeviceProfileTransportConfiguration,
   DeviceTransportType,
-  normalizeHttpProfileTransportConfigurationForDisplay,
+  normalizeProfileTransportConfigurationForDisplay,
   resolveHttpProfileTransportTypeForDisplay,
+  resolveMqttProfileTransportTypeForDisplay,
   toUiTransportType,
   TransportType
 } from '@shared/models/device.models';
@@ -91,6 +92,12 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
     return resolveHttpProfileTransportTypeForDisplay(this.entityTransportType, cfg) === DeviceTransportType.HTTP_PULL;
   }
 
+  /** 档案 transportType=MQTT_PULL 或配置标记为主动拉取时强制展示主动拉取面板 */
+  get mqttPullActive(): boolean {
+    const cfg = this.deviceProfileTransportConfigurationFormGroup?.getRawValue()?.configuration;
+    return resolveMqttProfileTransportTypeForDisplay(this.entityTransportType, cfg) === DeviceTransportType.MQTT_PULL;
+  }
+
   constructor(private store: Store<AppState>,
               private fb: UntypedFormBuilder,
               private destroyRef: DestroyRef) {
@@ -131,9 +138,12 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
       this.entityTransportType,
       value as Record<string, unknown>
     );
-    this.configurationTransportType = effectiveTransportType;
-    const configuration = normalizeHttpProfileTransportConfigurationForDisplay(
+    this.configurationTransportType = resolveMqttProfileTransportTypeForDisplay(
       effectiveTransportType,
+      value as Record<string, unknown>
+    );
+    const configuration = normalizeProfileTransportConfigurationForDisplay(
+      this.configurationTransportType,
       deepClone(value) as Record<string, unknown>
     );
     const patchConfiguration = () => {

@@ -1,0 +1,56 @@
+<form [formGroup]="form" class="mqtt-pull-device-form">
+  <ng-container *ngIf="singleDeviceMode">
+    <p class="tb-hint" translate>device-profile.mqtt-pull.single-device-device-hint</p>
+    <p *ngIf="mqttPullProfileBrokerUrl" class="tb-hint profile-broker-url-ref">
+      <span translate>device-profile.mqtt-pull.profile-broker-url</span>：{{ mqttPullProfileBrokerUrl }}
+    </p>
+    <p *ngIf="effectiveBrokerUrl" class="tb-hint effective-broker-url-ref">
+      <span translate>device-profile.mqtt-pull.effective-broker-url</span>：{{ effectiveBrokerUrl }}
+    </p>
+    <mat-form-field class="mat-block">
+      <mat-label translate>device-profile.mqtt-pull.broker-url-override</mat-label>
+      <input matInput formControlName="brokerUrlOverride" placeholder="192.168.1.10:1883">
+      <mat-hint translate>device-profile.mqtt-pull.broker-url-override-single-hint</mat-hint>
+    </mat-form-field>
+  </ng-container>
+  <ng-container *ngIf="!singleDeviceMode">
+    <mat-slide-toggle formControlName="collector" class="collector-toggle">
+      {{ 'device-profile.mqtt-pull.collector' | translate }}
+    </mat-slide-toggle>
+    <p *ngIf="isCollectorOn()" class="tb-hint collector-only-hint" translate>
+      device-profile.mqtt-pull.collector-only-hint
+    </p>
+    <p *ngIf="!isCollectorOn()" class="tb-hint" translate>
+      device-profile.mqtt-pull.target-device-hint
+    </p>
+    <section *ngIf="isCollectorOn()" class="target-fields">
+      <p *ngIf="mqttPullProfileBrokerUrl" class="tb-hint profile-broker-url-ref">
+        <span translate>device-profile.mqtt-pull.profile-broker-url</span>：{{ mqttPullProfileBrokerUrl }}
+      </p>
+      <p *ngIf="effectiveBrokerUrl" class="tb-hint effective-broker-url-ref">
+        <span translate>device-profile.mqtt-pull.effective-broker-url</span>：{{ effectiveBrokerUrl }}
+      </p>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.mqtt-pull.broker-url-override</mat-label>
+        <input matInput formControlName="brokerUrlOverride" placeholder="192.168.1.10:1883">
+        <mat-hint translate>device-profile.mqtt-pull.broker-url-override-collector-hint</mat-hint>
+      </mat-form-field>
+    </section>
+    <section *ngIf="!isCollectorOn()" class="flex flex-col gap-2 target-fields">
+      <mat-form-field *ngIf="showCollectorSelect" class="mat-block">
+        <mat-label translate>device-profile.mqtt-pull.collector-device</mat-label>
+        <mat-select formControlName="collectorDeviceId" required>
+          <mat-option *ngFor="let c of collectorOptions" [value]="c.id.id">
+            {{ c.name }}{{ c.label ? ' (' + c.label + ')' : '' }}
+          </mat-option>
+        </mat-select>
+        <mat-hint translate>device-profile.mqtt-pull.collector-device-hint</mat-hint>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.mqtt-pull.external-device-id</mat-label>
+        <input matInput formControlName="externalDeviceId">
+        <mat-hint translate>device-profile.mqtt-pull.external-device-id-hint</mat-hint>
+      </mat-form-field>
+    </section>
+  </ng-container>
+</form>

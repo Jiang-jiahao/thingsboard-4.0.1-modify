@@ -33,7 +33,7 @@ import {
   DeviceTransportConfiguration,
   DeviceTransportType,
   HttpPullRoutingMode,
-  normalizeHttpDeviceTransportConfigurationForSave,
+  normalizeDeviceTransportConfigurationForSave,
   TcpTransportConnectMode,
   TcpWireAuthenticationMode,
   toUiTransportType,
@@ -96,6 +96,12 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
 
   @Input()
   httpPullProfilePollUrl: string | null = null;
+
+  @Input()
+  mqttPullRoutingMode: HttpPullRoutingMode | null = null;
+
+  @Input()
+  mqttPullProfileBrokerUrl: string | null = null;
 
   @Input()
   deviceProfileId: string | null = null;
@@ -185,10 +191,11 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
       configuration = this.deviceTransportConfigurationFormGroup.getRawValue().configuration;
       const transportType = configuration?.type ?? this.configurationTransportType ?? this.profileTransportType;
       const httpPullProfileActive = this.httpPullProfilePollUrl != null;
-      configuration = normalizeHttpDeviceTransportConfigurationForSave(
+      const mqttPullProfileActive = this.mqttPullProfileBrokerUrl != null;
+      configuration = normalizeDeviceTransportConfigurationForSave(
         transportType,
         configuration,
-        httpPullProfileActive
+        { httpPullActive: httpPullProfileActive, mqttPullActive: mqttPullProfileActive }
       );
     }
     this.propagateChange(configuration);

@@ -1,0 +1,99 @@
+<div [formGroup]="form" class="mqtt-pull-subscribe-requests">
+  <div *ngFor="let req of subscribeRequestsArray.controls; let i = index"
+       class="subscribe-request-card" [formGroup]="req">
+    <div class="subscribe-request-header flex flex-row items-center justify-between gap-2">
+      <mat-form-field class="flex-1 mat-block subscribe-name-field">
+        <mat-label translate>device-profile.mqtt-pull.subscribe-request-name</mat-label>
+        <input matInput formControlName="name">
+      </mat-form-field>
+      <mat-slide-toggle formControlName="enabled" class="subscribe-enabled-toggle">
+        {{ 'device-profile.mqtt-pull.subscribe-request-enabled' | translate }}
+      </mat-slide-toggle>
+      <button *ngIf="!disabled && subscribeRequestsArray.length > 1"
+              type="button" mat-icon-button color="primary"
+              (click)="removeSubscribeRequest(i)"
+              matTooltip="{{ 'action.remove' | translate }}">
+        <mat-icon>remove_circle_outline</mat-icon>
+      </button>
+    </div>
+    <section class="flex flex-row gap-2 xs:flex-col">
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.mqtt-pull.topic</mat-label>
+        <input matInput formControlName="topic" required placeholder="devices/+/telemetry">
+      </mat-form-field>
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.mqtt-pull.qos</mat-label>
+        <mat-select formControlName="qos">
+          <mat-option *ngFor="let q of qosOptions" [value]="q">{{ q }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.mqtt-pull.data-type</mat-label>
+        <mat-select formControlName="dataType">
+          <mat-option *ngFor="let t of dataTypes" [value]="t">
+            {{ ('device-profile.mqtt-pull.data-type-' + t) | translate }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </section>
+
+    <mat-expansion-panel class="mqtt-pull-panel request-routing-panel" expanded>
+      <mat-expansion-panel-header>
+        <mat-panel-title translate>device-profile.mqtt-pull.request-routing-title</mat-panel-title>
+      </mat-expansion-panel-header>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.mqtt-pull.routing-mode</mat-label>
+        <mat-select formControlName="routingMode">
+          <mat-option *ngFor="let m of routingModes" [value]="m">
+            {{ ('device-profile.mqtt-pull.routing-mode-' + m) | translate }}
+          </mat-option>
+        </mat-select>
+        <mat-hint translate>device-profile.mqtt-pull.routing-mode-per-request-hint</mat-hint>
+      </mat-form-field>
+      <ng-container *ngIf="showRoutingFields(req)">
+        <section *ngIf="showArrayPath(req)" class="flex flex-row gap-2 xs:flex-col">
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.mqtt-pull.response-array-path</mat-label>
+            <input matInput formControlName="responseArrayJsonPath" placeholder="$.data.list">
+          </mat-form-field>
+        </section>
+        <section class="flex flex-row gap-2 xs:flex-col">
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.mqtt-pull.device-id-path</mat-label>
+            <input matInput formControlName="deviceIdJsonPath">
+            <mat-hint translate>device-profile.mqtt-pull.device-id-path-hint</mat-hint>
+          </mat-form-field>
+          <mat-form-field *ngIf="showTopicSegmentIndex(req)" class="flex-1 mat-block">
+            <mat-label translate>device-profile.mqtt-pull.device-id-topic-segment</mat-label>
+            <input matInput type="number" formControlName="deviceIdTopicSegmentIndex" placeholder="-1">
+            <mat-hint translate>device-profile.mqtt-pull.device-id-topic-segment-hint</mat-hint>
+          </mat-form-field>
+        </section>
+        <section class="flex flex-row gap-2 xs:flex-col">
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.mqtt-pull.match-strategy</mat-label>
+            <mat-select formControlName="deviceIdMatchStrategy">
+              <mat-option *ngFor="let s of matchStrategies" [value]="s">{{ s }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field class="flex-1 mat-block">
+            <mat-label translate>device-profile.mqtt-pull.target-profile-id</mat-label>
+            <input matInput formControlName="targetDeviceProfileId"
+                   [placeholder]="'device-profile.mqtt-pull.target-profile-id-placeholder' | translate">
+            <mat-hint translate>device-profile.mqtt-pull.target-profile-id-hint</mat-hint>
+          </mat-form-field>
+        </section>
+      </ng-container>
+      <mat-form-field class="mat-block" *ngIf="showTelemetryKey(req)">
+        <mat-label translate>device-profile.mqtt-pull.telemetry-key</mat-label>
+        <input matInput formControlName="telemetryPayloadKey">
+        <mat-hint translate>device-profile.mqtt-pull.telemetry-key-hint</mat-hint>
+      </mat-form-field>
+    </mat-expansion-panel>
+  </div>
+  <button *ngIf="!disabled" type="button" mat-stroked-button color="primary" class="add-subscribe-btn"
+          (click)="addSubscribeRequest()">
+    <mat-icon>add_circle_outline</mat-icon>
+    {{ 'device-profile.mqtt-pull.add-subscribe-request' | translate }}
+  </button>
+</div>

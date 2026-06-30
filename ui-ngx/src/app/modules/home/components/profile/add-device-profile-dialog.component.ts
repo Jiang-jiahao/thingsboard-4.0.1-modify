@@ -37,7 +37,7 @@ import {
   deviceProfileTransportTypeOptions,
   deviceTransportTypeHintMap,
   deviceTransportTypeTranslationMap,
-  normalizeHttpProfileTransportConfigurationForSave,
+  normalizeProfileTransportConfigurationForSave,
   resolveTransportTypeForSave
 } from '@shared/models/device.models';
 import { DeviceProfileService } from '@core/http/device-profile.service';
@@ -206,7 +206,7 @@ export class AddDeviceProfileDialogComponent extends
         this.transportConfigFormGroup.get('transportType').value,
         this.transportConfigFormGroup.get('transportConfiguration').value
       );
-      const transportConfiguration = normalizeHttpProfileTransportConfigurationForSave(
+      const transportConfiguration = normalizeProfileTransportConfigurationForSave(
         transportType,
         this.transportConfigFormGroup.get('transportConfiguration').value
       );

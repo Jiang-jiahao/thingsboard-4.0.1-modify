@@ -23,11 +23,22 @@
         formControlName="configuration">
       </tb-default-device-transport-configuration>
     </ng-template>
-    <ng-template [ngSwitchCase]="deviceTransportType.MQTT">
-      <tb-mqtt-device-transport-configuration
-        [required]="required"
-        formControlName="configuration">
-      </tb-mqtt-device-transport-configuration>
+    <ng-template [ngSwitchCase]="basicTransportType.MQTT">
+      <ng-container *ngIf="mqttPullProfileBrokerUrl; else mqttPassiveDeviceTransport">
+        <tb-mqtt-pull-device-transport-configuration
+          [mqttPullRoutingMode]="mqttPullRoutingMode"
+          [mqttPullProfileBrokerUrl]="mqttPullProfileBrokerUrl"
+          [deviceProfileId]="deviceProfileId"
+          [editingDeviceId]="editingDeviceId"
+          formControlName="configuration">
+        </tb-mqtt-pull-device-transport-configuration>
+      </ng-container>
+      <ng-template #mqttPassiveDeviceTransport>
+        <tb-mqtt-device-transport-configuration
+          [required]="required"
+          formControlName="configuration">
+        </tb-mqtt-device-transport-configuration>
+      </ng-template>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.LWM2M">
       <tb-lwm2m-device-transport-configuration
@@ -72,6 +83,15 @@
         [editingDeviceId]="editingDeviceId"
         formControlName="configuration">
       </tb-http-pull-device-transport-configuration>
+    </ng-template>
+    <ng-template [ngSwitchCase]="deviceTransportType.MQTT_PULL">
+      <tb-mqtt-pull-device-transport-configuration
+        [mqttPullRoutingMode]="mqttPullRoutingMode"
+        [mqttPullProfileBrokerUrl]="mqttPullProfileBrokerUrl"
+        [deviceProfileId]="deviceProfileId"
+        [editingDeviceId]="editingDeviceId"
+        formControlName="configuration">
+      </tb-mqtt-pull-device-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.TCP">
       <tb-tcp-device-transport-configuration

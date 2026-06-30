@@ -23,5 +23,6 @@ public enum DeviceTransportType {
     COAP,
     LWM2M,
     SNMP,
-    HTTP_PULL
+    HTTP_PULL,
+    MQTT_PULL
 }

@@ -145,7 +145,9 @@
         [httpPullRoutingMode]="httpPullProfileRoutingMode"
         [httpPushRoutingMode]="httpPushProfileRoutingMode"
         [httpPullProfilePollUrl]="httpPullProfilePollUrl"
-        [deviceProfileId]="httpPullDeviceProfileId"
+        [mqttPullRoutingMode]="mqttPullProfileRoutingMode"
+        [mqttPullProfileBrokerUrl]="mqttPullProfileBrokerUrl"
+        [deviceProfileId]="httpPullDeviceProfileId || mqttPullDeviceProfileId"
         [editingDeviceId]="entity?.id?.id"
         [deviceScope]="deviceScope"
         required>

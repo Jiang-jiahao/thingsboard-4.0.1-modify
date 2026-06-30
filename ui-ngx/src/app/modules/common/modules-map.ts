@@ -285,7 +285,7 @@ import * as DefaultDeviceProfileTransportConfigurationComponent from '@home/comp
 import * as DeviceProfileTransportConfigurationComponent from '@home/components/profile/device/device-profile-transport-configuration.component';
 import * as DeviceProfileDialogComponent from '@home/components/profile/device-profile-dialog.component';
 import * as DeviceProfileAutocompleteComponent from '@home/components/profile/device-profile-autocomplete.component';
-import * as MqttDeviceProfileTransportConfigurationComponent from '@home/components/profile/device/mqtt-device-profile-transport-configuration.component';
+import * as MqttDeviceProfileTransportConfigurationComponent from '@home/components/profile/device/mqtt-pull/mqtt-device-profile-transport-configuration.component';
 import * as CoapDeviceProfileTransportConfigurationComponent from '@home/components/profile/device/coap-device-profile-transport-configuration.component';
 import * as DeviceProfileAlarmsComponent from '@home/components/profile/alarm/device-profile-alarms.component';
 import * as DeviceProfileAlarmComponent from '@home/components/profile/alarm/device-profile-alarm.component';
@@ -623,7 +623,7 @@ class ModulesMap implements IModulesMap {
     '@home/components/profile/device/device-profile-transport-configuration.component': DeviceProfileTransportConfigurationComponent,
     '@home/components/profile/device-profile-dialog.component': DeviceProfileDialogComponent,
     '@home/components/profile/device-profile-autocomplete.component': DeviceProfileAutocompleteComponent,
-    '@home/components/profile/device/mqtt-device-profile-transport-configuration.component':
+    '@home/components/profile/device/mqtt-pull/mqtt-device-profile-transport-configuration.component':
     MqttDeviceProfileTransportConfigurationComponent,
     '@home/components/profile/device/coap-device-profile-transport-configuration.component':
     CoapDeviceProfileTransportConfigurationComponent,

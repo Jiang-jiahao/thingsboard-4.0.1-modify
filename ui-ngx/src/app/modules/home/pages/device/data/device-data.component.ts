@@ -90,6 +90,12 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   httpPullProfilePollUrl: string | null = null;
 
   @Input()
+  mqttPullRoutingMode: HttpPullRoutingMode | null = null;
+
+  @Input()
+  mqttPullProfileBrokerUrl: string | null = null;
+
+  @Input()
   deviceProfileId: string | null = null;
 
   @Input()

@@ -32,6 +32,7 @@ import {
   DeviceTransportType,
   extractHttpPullProfileContext,
   extractHttpPushProfileContext,
+  extractMqttPullProfileContext,
   HttpPullRoutingMode,
   TcpDeviceProfileTransportConfiguration,
   UdpDeviceProfileTransportConfiguration,
@@ -93,6 +94,10 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
   httpPushProfileRoutingMode: HttpPullRoutingMode | null = null;
 
   httpPullProfilePollUrl: string | null = null;
+
+  mqttPullProfileRoutingMode: HttpPullRoutingMode | null = null;
+
+  mqttPullProfileBrokerUrl: string | null = null;
 
   readonly deviceWizardDeviceScope: 'tenant' = 'tenant';
 
@@ -267,6 +272,8 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
     this.httpPullProfileRoutingMode = null;
     this.httpPushProfileRoutingMode = null;
     this.httpPullProfilePollUrl = null;
+    this.mqttPullProfileRoutingMode = null;
+    this.mqttPullProfileBrokerUrl = null;
     if (!dp) {
       return;
     }
@@ -274,6 +281,11 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
     if (httpPullCtx) {
       this.httpPullProfileRoutingMode = httpPullCtx.routingMode;
       this.httpPullProfilePollUrl = httpPullCtx.pollUrl;
+    }
+    const mqttPullCtx = extractMqttPullProfileContext(dp);
+    if (mqttPullCtx) {
+      this.mqttPullProfileRoutingMode = mqttPullCtx.routingMode;
+      this.mqttPullProfileBrokerUrl = mqttPullCtx.brokerUrl;
     }
     const httpPushCtx = extractHttpPushProfileContext(dp);
     if (httpPushCtx) {

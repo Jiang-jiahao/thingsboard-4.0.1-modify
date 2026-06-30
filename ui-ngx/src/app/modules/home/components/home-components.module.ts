@@ -82,7 +82,7 @@ import { DefaultDeviceProfileTransportConfigurationComponent } from '@home/compo
 import { DeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/device-profile-transport-configuration.component';
 import { DeviceProfileDialogComponent } from '@home/components/profile/device-profile-dialog.component';
 import { DeviceProfileAutocompleteComponent } from '@home/components/profile/device-profile-autocomplete.component';
-import { MqttDeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/mqtt-device-profile-transport-configuration.component';
+import { MqttPullDeviceProfileTransportModule } from '@home/components/profile/device/mqtt-pull/mqtt-pull-device-profile-transport.module';
 import { CoapDeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/coap-device-profile-transport-configuration.component';
 import { TcpDeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/tcp-device-profile-transport-configuration.component';
 import { UdpDeviceProfileTransportConfigurationComponent } from '@home/components/profile/device/udp-device-profile-transport-configuration.component';
@@ -290,7 +290,6 @@ import {
       DefaultDeviceProfileConfigurationComponent,
       DeviceProfileConfigurationComponent,
       DefaultDeviceProfileTransportConfigurationComponent,
-      MqttDeviceProfileTransportConfigurationComponent,
       CoapDeviceProfileTransportConfigurationComponent,
       DeviceProfileTransportConfigurationComponent,
       TcpDeviceProfileTransportConfigurationComponent,
@@ -382,6 +381,7 @@ import {
     Lwm2mProfileComponentsModule,
     SnmpDeviceProfileTransportModule,
     HttpPullDeviceProfileTransportModule,
+    MqttPullDeviceProfileTransportModule,
     StatesControllerModule,
     DeviceCredentialsModule,
     DeviceProfileCommonModule,
@@ -445,7 +445,6 @@ import {
     DefaultDeviceProfileConfigurationComponent,
     DeviceProfileConfigurationComponent,
     DefaultDeviceProfileTransportConfigurationComponent,
-    MqttDeviceProfileTransportConfigurationComponent,
     CoapDeviceProfileTransportConfigurationComponent,
     TcpDeviceProfileTransportConfigurationComponent,
     UdpDeviceProfileTransportConfigurationComponent,

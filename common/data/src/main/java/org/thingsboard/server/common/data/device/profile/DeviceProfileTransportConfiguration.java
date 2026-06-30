@@ -36,7 +36,8 @@ import java.io.Serializable;
         @JsonSubTypes.Type(value = Lwm2mDeviceProfileTransportConfiguration.class, name = "LWM2M"),
         @JsonSubTypes.Type(value = CoapDeviceProfileTransportConfiguration.class, name = "COAP"),
         @JsonSubTypes.Type(value = SnmpDeviceProfileTransportConfiguration.class, name = "SNMP"),
-        @JsonSubTypes.Type(value = HttpPullDeviceProfileTransportConfiguration.class, name = "HTTP_PULL")})
+        @JsonSubTypes.Type(value = HttpPullDeviceProfileTransportConfiguration.class, name = "HTTP_PULL"),
+        @JsonSubTypes.Type(value = MqttPullDeviceProfileTransportConfiguration.class, name = "MQTT_PULL")})
 public interface DeviceProfileTransportConfiguration extends Serializable {
 
     @JsonIgnore

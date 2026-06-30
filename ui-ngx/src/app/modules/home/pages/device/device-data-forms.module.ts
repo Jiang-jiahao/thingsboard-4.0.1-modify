@@ -30,6 +30,7 @@ import { SnmpDeviceTransportConfigurationComponent } from './data/snmp-device-tr
 import { TcpDeviceTransportConfigurationComponent } from './data/tcp-device-transport-configuration.component';
 import { UdpDeviceTransportConfigurationComponent } from './data/udp-device-transport-configuration.component';
 import { HttpPullDeviceProfileTransportModule } from '@home/components/profile/device/http-pull/http-pull-device-profile-transport.module';
+import { MqttPullDeviceProfileTransportModule } from '@home/components/profile/device/mqtt-pull/mqtt-pull-device-profile-transport.module';
 
 @NgModule({
   declarations: [
@@ -49,7 +50,8 @@ import { HttpPullDeviceProfileTransportModule } from '@home/components/profile/d
     CommonModule,
     SharedModule,
     DeviceProfileCommonModule,
-    HttpPullDeviceProfileTransportModule
+    HttpPullDeviceProfileTransportModule,
+    MqttPullDeviceProfileTransportModule
   ],
   exports: [
     DeviceDataComponent

@@ -22,9 +22,11 @@
         formControlName="configuration">
       </tb-default-device-profile-transport-configuration>
     </ng-template>
-    <ng-template [ngSwitchCase]="deviceTransportType.MQTT">
+    <ng-template [ngSwitchCase]="basicTransportType.MQTT">
       <tb-mqtt-device-profile-transport-configuration
-        formControlName="configuration">
+        formControlName="configuration"
+        [entityTransportType]="entityTransportType"
+        [mqttPullActive]="mqttPullActive">
       </tb-mqtt-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.COAP">
@@ -56,6 +58,13 @@
         [entityTransportType]="entityTransportType"
         [httpPullActive]="httpPullActive">
       </tb-http-device-profile-transport-configuration>
+    </ng-template>
+    <ng-template [ngSwitchCase]="deviceTransportType.MQTT_PULL">
+      <tb-mqtt-device-profile-transport-configuration
+        formControlName="configuration"
+        [entityTransportType]="entityTransportType"
+        [mqttPullActive]="mqttPullActive">
+      </tb-mqtt-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.TCP">
       <tb-tcp-device-profile-transport-configuration
