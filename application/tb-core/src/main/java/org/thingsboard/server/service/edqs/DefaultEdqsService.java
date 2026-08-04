@@ -67,6 +67,17 @@ import org.thingsboard.server.queue.util.AfterStartUp;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Core / Monolith 侧 EDQS 写路径默认实现。
+ * <p>
+ * 职责包括：
+ * <ul>
+ *   <li>实体增删改事件写入 EDQS 事件队列</li>
+ *   <li>启动时按需触发全量同步</li>
+ *   <li>集群内广播同步请求与 API 启停指令</li>
+ * </ul>
+ * 仅在 {@code queue.edqs.sync.enabled=true} 时生效。
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -87,8 +98,11 @@ public class DefaultEdqsService implements EdqsService {
     @Autowired @Lazy
     private HashPartitionService hashPartitionService;
 
+    /** 向 EDQS 发送实体变更事件的生产者 */
     private EdqsProducer eventsProducer;
+    /** 异步处理事件与系统消息的线程池 */
     private ExecutorService executor;
+    /** 保证集群内同一时刻只有一个节点执行全量同步 */
     private DistributedLock syncLock;
 
     @PostConstruct
@@ -101,27 +115,25 @@ public class DefaultEdqsService implements EdqsService {
         syncLock = distributedLockService.getLock("edqs_sync");
     }
 
+    /**
+     * 服务启动后初始化 EDQS：
+     * 若需要全量同步则由系统分区负责人发起；否则在自动启用开启时直接打开 API。
+     */
     @AfterStartUp(order = AfterStartUp.REGULAR_SERVICE)
     public void onStartUp() {
         if (!serviceInfoProvider.isService(ServiceType.TB_CORE)) {
             return;
         }
-        // 只有core类型的服务才需要执行edqs初始化
         executor.submit(() -> {
             try {
                 EdqsSyncState syncState = getSyncState();
-                //  同步服务认为需要同步 或者 没有找到同步状态记录（首次启动） 或者 上次同步未完成或失败 才需要进行同步
                 if (edqsSyncService.isSyncNeeded() || syncState == null || syncState.getStatus() != EdqsSyncStatus.FINISHED) {
-                    // 确保只有负责系统分区的核心节点才能发起同步
                     if (hashPartitionService.isSystemPartitionMine(ServiceType.TB_CORE)) {
-                        // 发起同步请求
                         processSystemRequest(ToCoreEdqsRequest.builder()
                                 .syncRequest(new EdqsSyncRequest())
                                 .build());
                     }
                 } else if (edqsApiService.isSupported() && edqsApiService.isAutoEnable()) {
-                    // 同步已完成且API支持自动启用，则启用API
-                    // only if topic/RocksDB is not empty and sync is finished
                     edqsApiService.setEnabled(true);
                 }
             } catch (Throwable e) {
@@ -131,11 +143,7 @@ public class DefaultEdqsService implements EdqsService {
     }
 
     /**
-     * 处理系统同步请求
-     * 1. 记录同步请求状态
-     * 2. 广播请求到所有核心节点
-     *
-     * @param request 同步请求
+     * 处理系统级同步请求：先落库同步状态为 REQUESTED，再广播给所有 Core 节点。
      */
     @Override
     public void processSystemRequest(ToCoreEdqsRequest request) {
@@ -147,48 +155,40 @@ public class DefaultEdqsService implements EdqsService {
     }
 
     /**
-     * 处理来自其他core节点的系统消息
-     * 主要处理：
-     * 1. API启用/禁用指令
-     * 2. 同步请求
-     *
-     * @param msg 系统消息
+     * 处理集群广播过来的 EDQS 系统消息。
+     * <p>
+     * 支持两类指令：
+     * <ul>
+     *   <li>API 启用/禁用</li>
+     *   <li>全量同步请求（分布式锁保护，仅一个节点执行）</li>
+     * </ul>
      */
     @Override
     public void processSystemMsg(ToCoreEdqsMsg msg) {
         executor.submit(() -> {
             log.info("Processing system msg {}", msg);
             try {
-                // 处理API启用/禁用指令
                 if (msg.getApiEnabled() != null) {
                     edqsApiService.setEnabled(msg.getApiEnabled());
                 }
 
                 if (msg.getSyncRequest() != null) {
-                    // 获取分布式锁，确保只有一个节点执行同步
                     syncLock.lock();
                     try {
-                        // 检查当前同步状态
                         EdqsSyncState syncState = getSyncState();
                         if (syncState != null) {
                             EdqsSyncStatus status = syncState.getStatus();
-                            // 如果同步已完成或失败，忽略新请求
                             if (status == EdqsSyncStatus.FINISHED || status == EdqsSyncStatus.FAILED) {
                                 log.info("EDQS sync is already " + status + ", ignoring the msg");
                                 return;
                             }
                         }
-                        // 开始同步，更新状态
                         saveSyncState(EdqsSyncStatus.STARTED);
-                        // 执行实际同步逻辑
                         edqsSyncService.sync();
-                        // 同步完成，更新状态
                         saveSyncState(EdqsSyncStatus.FINISHED);
 
-                        // 同步完成后处理API状态
                         if (edqsApiService.isSupported())
                             if (edqsApiService.isAutoEnable()) {
-                                // 自动启用API，并广播启用指令
                                 log.info("EDQS sync is finished, auto-enabling API");
                                 broadcast(ToCoreEdqsMsg.builder()
                                         .apiEnabled(Boolean.TRUE)
@@ -198,10 +198,8 @@ public class DefaultEdqsService implements EdqsService {
                             }
                     } catch (Exception e) {
                         log.error("Failed to complete sync", e);
-                        // 同步失败，记录失败状态
                         saveSyncState(EdqsSyncStatus.FAILED);
                     } finally {
-                        // 释放锁
                         syncLock.unlock();
                     }
                 }
@@ -212,35 +210,21 @@ public class DefaultEdqsService implements EdqsService {
     }
 
     /**
-     * 处理实体更新事件
-     * 1. 将实体类型转换为ObjectType
-     * 2. 检查是否为EDQS支持的实体类型
-     * 3. 调用具体的更新处理方法
-     *
-     * @param tenantId 租户ID
-     * @param entityId 实体ID
-     * @param entity 实体对象
+     * 实体更新入口：校验类型后转换为 EDQS 对象并投递 UPDATED 事件。
      */
     @Override
     public void onUpdate(TenantId tenantId, EntityId entityId, Object entity) {
         EntityType entityType = entityId.getEntityType();
         ObjectType objectType = ObjectType.fromEntityType(entityType);
-        // 检查是否为EDQS支持的实体类型
         if (!isEdqsType(tenantId, objectType)) {
             log.trace("[{}][{}] Ignoring update event, type {} not supported", tenantId, entityId, entityType);
             return;
         }
-        // 将实体转换为EDQS对象并处理
         onUpdate(tenantId, objectType, edqsConverter.toEntity(entityType, entity));
     }
 
     /**
-     * 处理EDQS对象更新事件
-     * 将更新事件发送到EDQS消息队列
-     *
-     * @param tenantId 租户ID
-     * @param objectType 对象类型
-     * @param object EDQS对象
+     * 直接投递 EDQS 对象的更新事件。
      */
     @Override
     public void onUpdate(TenantId tenantId, ObjectType objectType, EdqsObject object) {
@@ -248,13 +232,7 @@ public class DefaultEdqsService implements EdqsService {
     }
 
     /**
-     * 处理实体删除事件
-     * 1. 将实体类型转换为ObjectType
-     * 2. 检查是否为EDQS支持的实体类型
-     * 3. 创建删除实体对象并处理
-     *
-     * @param tenantId 租户ID
-     * @param entityId 实体ID
+     * 实体删除入口：校验类型后构造删除对象并投递 DELETED 事件。
      */
     @Override
     public void onDelete(TenantId tenantId, EntityId entityId) {
@@ -264,17 +242,12 @@ public class DefaultEdqsService implements EdqsService {
             log.trace("[{}][{}] Ignoring deletion event, type {} not supported", tenantId, entityId, entityType);
             return;
         }
-        // 创建删除实体对象（版本设置为Long.MAX_VALUE表示删除）
+        // 版本设为 Long.MAX_VALUE，表示删除语义
         onDelete(tenantId, objectType, new Entity(entityType, entityId.getId(), Long.MAX_VALUE));
     }
 
     /**
-     * 处理EDQS对象删除事件
-     * 将删除事件发送到EDQS消息队列
-     *
-     * @param tenantId 租户ID
-     * @param objectType 对象类型
-     * @param object EDQS对象
+     * 直接投递 EDQS 对象的删除事件。
      */
     @Override
     public void onDelete(TenantId tenantId, ObjectType objectType, EdqsObject object) {
@@ -282,15 +255,7 @@ public class DefaultEdqsService implements EdqsService {
     }
 
     /**
-     * 处理EDQS事件的核心方法
-     * 1. 异步构建EDQS事件消息
-     * 2. 发送到EDQS消息队列
-     * 3. 异常处理确保服务稳定性
-     *
-     * @param tenantId 租户ID
-     * @param objectType 对象类型
-     * @param eventType 事件类型（更新/删除）
-     * @param object EDQS对象
+     * 将 EDQS 事件序列化后异步发送到事件队列。
      */
     protected void processEvent(TenantId tenantId, ObjectType objectType, EdqsEventType eventType, EdqsObject object) {
         executor.submit(() -> {
@@ -302,11 +267,9 @@ public class DefaultEdqsService implements EdqsService {
                         .setObjectType(objectType.name())
                         .setData(ByteString.copyFrom(edqsConverter.serialize(objectType, object)))
                         .setEventType(eventType.name());
-                // 如果对象有版本号，设置版本号
                 if (version != null) {
                     eventMsg.setVersion(version);
                 }
-                // 发送到EDQS消息队列
                 eventsProducer.send(tenantId, objectType, key, ToEdqsMsg.newBuilder()
                         .setTenantIdMSB(tenantId.getId().getMostSignificantBits())
                         .setTenantIdLSB(tenantId.getId().getLeastSignificantBits())
@@ -320,12 +283,8 @@ public class DefaultEdqsService implements EdqsService {
     }
 
     /**
-     * 检查是否为EDQS支持的实体类型
-     * 根据租户类型（系统租户/普通租户）检查不同的支持类型集合
-     *
-     * @param tenantId 租户ID
-     * @param objectType 对象类型
-     * @return true表示支持，false表示不支持
+     * 判断对象类型是否由 EDQS 索引。
+     * 系统租户与普通租户使用不同的类型集合。
      */
     private boolean isEdqsType(TenantId tenantId, ObjectType objectType) {
         if (objectType == null) {
@@ -338,6 +297,7 @@ public class DefaultEdqsService implements EdqsService {
         }
     }
 
+    /** 向所有 Core 节点广播 EDQS 系统消息 */
     private void broadcast(ToCoreEdqsMsg msg) {
         clusterService.broadcastToCore(ToCoreNotificationMsg.newBuilder()
                 .setToEdqsCoreServiceMsg(ToEdqsCoreServiceMsg.newBuilder()
@@ -346,10 +306,9 @@ public class DefaultEdqsService implements EdqsService {
     }
 
     /**
-     * 获取EDQS同步状态
-     * 从服务端属性中读取同步状态信息
+     * 从系统租户服务端属性读取 EDQS 同步状态。
      *
-     * @return 同步状态对象，如果没有记录则返回null
+     * @return 同步状态；无记录时返回 null
      */
     @SneakyThrows
     private EdqsSyncState getSyncState() {
@@ -362,10 +321,7 @@ public class DefaultEdqsService implements EdqsService {
     }
 
     /**
-     * 保存EDQS同步状态
-     * 将同步状态保存到服务端属性中
-     *
-     * @param status 要保存的同步状态
+     * 将同步状态写入系统租户服务端属性。
      */
     @SneakyThrows
     private void saveSyncState(EdqsSyncStatus status) {
@@ -382,10 +338,7 @@ public class DefaultEdqsService implements EdqsService {
         eventsProducer.stop();
     }
 
-    /**
-     * EDQS同步状态内部类
-     * 用于序列化保存同步状态
-     */
+    /** 持久化用的同步状态载体 */
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -393,15 +346,12 @@ public class DefaultEdqsService implements EdqsService {
         private EdqsSyncStatus status;
     }
 
-    /**
-     * EDQS同步状态枚举
-     * 定义同步过程的各种状态
-     */
+    /** 全量同步生命周期状态 */
     private enum EdqsSyncStatus {
-        REQUESTED, // 已请求同步
-        STARTED, // 同步已开始
-        FINISHED, // 同步已完成
-        FAILED // 同步失败
+        REQUESTED, // 已请求
+        STARTED,   // 执行中
+        FINISHED,  // 成功完成
+        FAILED     // 失败
     }
 
 }

@@ -20,6 +20,12 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.edqs.util.EdqsRocksDb;
 
+/**
+ * 内存队列（in-memory）场景下的 EDQS 全量同步实现。
+ * <p>
+ * 以本地 RocksDB 是否为新建库作为是否需要同步的依据：库为空则需要全量灌数。
+ * 生效条件：{@code queue.edqs.sync.enabled=true} 且 {@code queue.type=in-memory}。
+ */
 @Service
 @RequiredArgsConstructor
 @ConditionalOnExpression("'${queue.edqs.sync.enabled:true}' == 'true' && '${queue.type:null}' == 'in-memory'")
@@ -27,6 +33,9 @@ public class LocalEdqsSyncService extends EdqsSyncService {
 
     private final EdqsRocksDb db;
 
+    /**
+     * RocksDB 为新建（空库）时需要全量同步。
+     */
     @Override
     public boolean isSyncNeeded() {
         return db.isNew();

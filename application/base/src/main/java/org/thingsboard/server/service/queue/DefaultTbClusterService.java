@@ -1,5 +1,5 @@
 /**
- * Copyright 濠曪拷 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,58 +111,80 @@ import java.util.stream.Collectors;
 
 import static org.thingsboard.server.common.util.ProtoUtils.toProto;
 
+/**
+ * {@link TbClusterService} 的默认实现，作为集群消息分发的统一门面。
+ * <p>
+ * 通过 {@link PartitionService} 解析目标分区，再经 {@link TbQueueProducerProvider} 将消息投递到对应队列。
+ * 涵盖向 Core、Rule Engine、Transport、Edge、Version Control、Calculated Field 等服务的推送，
+ * 以及组件生命周期、队列变更的广播，和设备/租户配置变更通知。
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DefaultTbClusterService implements TbClusterService {
 
+    /** 是否启用集群消息统计输出 */
     @Value("${cluster.stats.enabled:false}")
     private boolean statsEnabled;
+    /** 是否启用 Edge 功能 */
     @Value("${edges.enabled:true}")
     protected boolean edgesEnabled;
 
+    /** 发往 Core 的业务消息计数 */
     private final AtomicInteger toCoreMsgs = new AtomicInteger(0);
+    /** 发往 Core 的通知消息计数 */
     private final AtomicInteger toCoreNfs = new AtomicInteger(0);
+    /** 发往 Rule Engine 的业务消息计数 */
     private final AtomicInteger toRuleEngineMsgs = new AtomicInteger(0);
+    /** 发往 Rule Engine 的通知消息计数 */
     private final AtomicInteger toRuleEngineNfs = new AtomicInteger(0);
+    /** 发往 Transport 的通知消息计数 */
     private final AtomicInteger toTransportNfs = new AtomicInteger(0);
+    /** 发往 Edge 的业务消息计数 */
     private final AtomicInteger toEdgeMsgs = new AtomicInteger(0);
+    /** 发往 Edge 的通知消息计数 */
     private final AtomicInteger toEdgeNfs = new AtomicInteger(0);
 
+    /** 分区解析服务，用于确定消息目标 Topic 分区 */
     @Autowired
     @Lazy
     private PartitionService partitionService;
 
-    /**
-     * 閻庡湱鍋ゅ顖炲箵閹邦亞杩旈柣銏㈠枍妤犲洭鎳撻崨顖涚暠閻庣數顢婇挅锟�
-     */
+    /** 队列生产者提供者，按服务类型获取对应 Producer */
     @Autowired
     @Lazy
     private TbQueueProducerProvider producerProvider;
 
-    /**
-     * 閻忓繋娴囬ˉ濠冪閸℃瑦鏅稿ù婧犲棌鍋撻崨顖涚暠閻庣數顢婇挅鍕晬鐏炵瓔妯嗛柛鏃傚С缁斿瓨绋夐鍕€婚柛鏍ㄦそ閳ь剙顦扮€氥劑鎯冮崟顐㈩潬闁肩鎷�
-     */
+    /** Rule Engine 专用生产者服务，封装 TbMsg 发送逻辑 */
     @Autowired
     private TbRuleEngineProducerService ruleEngineProducerService;
 
+    /** OTA 包状态服务（可选，单体部署时可能不存在） */
     @Autowired(required = false)
     @Lazy
     private OtaPackageStateService otaPackageStateService;
 
+    /** Topic 名称解析服务 */
     private final TopicService topicService;
+    /** 设备配置缓存，用于解析 Rule Engine 路由 */
     private final TbDeviceProfileCache deviceProfileCache;
+    /** 资产配置缓存，用于解析 Rule Engine 路由 */
     private final TbAssetProfileCache assetProfileCache;
+    /** 网关设备通知服务（可选） */
     private final Optional<GatewayNotificationsService> gatewayNotificationsService;
+    /** Edge 数据访问服务 */
     private final EdgeService edgeService;
+    /** Edge 与 Core 服务实例 ID 的映射缓存 */
     private final TbTransactionalCache<EdgeId, String> edgeIdServiceIdCache;
 
     /**
-     * 闁规亽鍔戦埀顑跨劍缁夌兘骞侀姘厒core
-     * @param tenantId 缂佸鍠愰崺娌琩
-     * @param entityId 閻庡湱鍋樼紞濯攄
-     * @param msg 婵炴垵鐗婃导锟�
-     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
+     * 向 Core 服务推送业务消息。
+     * 路由目标：根据 tenantId + entityId 解析 TB_CORE 分区。
+     *
+     * @param tenantId 租户 ID
+     * @param entityId 实体 ID（用于分区哈希）
+     * @param msg      Core 消息体
+     * @param callback 发送完成回调
      */
     @Override
     public void pushMsgToCore(TenantId tenantId, EntityId entityId, ToCoreMsg msg, TbQueueCallback callback) {
@@ -171,6 +193,10 @@ public class DefaultTbClusterService implements TbClusterService {
         toCoreMsgs.incrementAndGet();
     }
 
+    /**
+     * 向指定 Core 分区推送业务消息（调用方已解析分区）。
+     * 路由目标：传入的 TopicPartitionInfo。
+     */
     @Override
     public void pushMsgToCore(TopicPartitionInfo tpi, UUID msgId, ToCoreMsg msg, TbQueueCallback callback) {
         producerProvider.getTbCoreMsgProducer().send(tpi, new TbProtoQueueMsg<>(msgId, msg), callback);
@@ -178,9 +204,11 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 闁规亽鍔戦埀顑跨畱oDeviceActorNotification婵炴垵鐗婃导鍛村礆閻х湐re
-     * @param msg toDeviceActorNotification
-     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
+     * 向 Core 推送设备 Actor 通知消息。
+     * 路由目标：按 deviceId 解析 TB_CORE 分区。
+     *
+     * @param msg      设备 Actor 通知
+     * @param callback 发送完成回调
      */
     @Override
     public void pushMsgToCore(ToDeviceActorNotificationMsg msg, TbQueueCallback callback) {
@@ -191,21 +219,26 @@ public class DefaultTbClusterService implements TbClusterService {
         toCoreMsgs.incrementAndGet();
     }
 
+    /**
+     * 向所有 Core 实例广播通知消息。
+     * 路由目标：每个 TB_CORE 服务实例的 notifications Topic。
+     */
     @Override
     public void broadcastToCore(ToCoreNotificationMsg toCoreMsg) {
         UUID msgId = UUID.randomUUID();
         TbQueueProducer<TbProtoQueueMsg<ToCoreNotificationMsg>> toCoreNfProducer = producerProvider.getTbCoreNotificationsMsgProducer();
-        // 闁兼儳鍢茶ぐ鍥礆閻楀牆顣查柡鍫濐槺濞堟叾ore闁煎搫鍊婚崑锝夊嫉瀹ュ懎顫ら柛锝傛殣d
         Set<String> tbCoreServices = partitionService.getAllServiceIds(ServiceType.TB_CORE);
         for (String serviceId : tbCoreServices) {
-            // 閻犱緤绱曢悾鑽ゆ嫚閵夛附绠涢柛鏃戞憘otificationsTopic闁汇劌瀚崹搴ㄥ礌鏉為绻嗛柟顓ㄦ嫹
             TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.TB_CORE, serviceId);
-            // 鐎垫壋鍋撻悗鐢垫嚀缁ㄦ煡鎯冮崟顐㈢€婚柛鏍ф惈瑜板倿鏌呮笟鈧埀顒佹皑閻撯€斥槈閸喍绱�
             toCoreNfProducer.send(tpi, new TbProtoQueueMsg<>(msgId, toCoreMsg), null);
             toCoreNfs.incrementAndGet();
         }
     }
 
+    /**
+     * 向所有 Rule Engine 实例广播 Calculated Field 通知。
+     * 路由目标：每个 TB_RULE_ENGINE 服务实例的 CF notifications Topic。
+     */
     @Override
     public void broadcastToCalculatedFields(ToCalculatedFieldNotificationMsg toCfMsg, TbQueueCallback callback) {
         UUID msgId = UUID.randomUUID();
@@ -219,6 +252,10 @@ public class DefaultTbClusterService implements TbClusterService {
         }
     }
 
+    /**
+     * 向 Version Control 服务推送消息。
+     * 路由目标：TB_VC_EXECUTOR 分区（按 tenantId 哈希）。
+     */
     @Override
     public void pushMsgToVersionControl(TenantId tenantId, ToVersionControlServiceMsg msg, TbQueueCallback callback) {
         TopicPartitionInfo tpi = partitionService.resolve(ServiceType.TB_VC_EXECUTOR, TenantId.SYS_TENANT_ID, tenantId);
@@ -228,6 +265,10 @@ public class DefaultTbClusterService implements TbClusterService {
         toCoreMsgs.incrementAndGet();
     }
 
+    /**
+     * 向指定 Core 实例推送设备 RPC 响应通知。
+     * 路由目标：指定 serviceId 的 TB_CORE notifications Topic。
+     */
     @Override
     public void pushNotificationToCore(String serviceId, FromDeviceRpcResponse response, TbQueueCallback callback) {
         TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.TB_CORE, serviceId);
@@ -242,6 +283,10 @@ public class DefaultTbClusterService implements TbClusterService {
         toCoreNfs.incrementAndGet();
     }
 
+    /**
+     * 向指定 Core 实例推送 REST API 调用响应通知。
+     * 路由目标：指定 targetServiceId 的 TB_CORE notifications Topic。
+     */
     @Override
     public void pushNotificationToCore(String targetServiceId, TransportProtos.RestApiCallResponseMsgProto responseMsgProto, TbQueueCallback callback) {
         TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.TB_CORE, targetServiceId);
@@ -250,6 +295,10 @@ public class DefaultTbClusterService implements TbClusterService {
         toCoreNfs.incrementAndGet();
     }
 
+    /**
+     * 向指定 Rule Engine 分区推送业务消息（调用方已解析分区）。
+     * 路由目标：传入的 TopicPartitionInfo。
+     */
     @Override
     public void pushMsgToRuleEngine(TopicPartitionInfo tpi, UUID msgId, ToRuleEngineMsg msg, TbQueueCallback callback) {
         log.trace("PUSHING msg: {} to:{}", msg, tpi);
@@ -257,11 +306,19 @@ public class DefaultTbClusterService implements TbClusterService {
         toRuleEngineMsgs.incrementAndGet();
     }
 
+    /**
+     * 向 Rule Engine 推送 TbMsg（使用实体 Profile 中的默认队列与规则链）。
+     * 路由目标：由 ruleEngineProducerService 按 tenantId + TbMsg 解析 TB_RULE_ENGINE 分区。
+     */
     @Override
     public void pushMsgToRuleEngine(TenantId tenantId, EntityId entityId, TbMsg tbMsg, TbQueueCallback callback) {
         pushMsgToRuleEngine(tenantId, entityId, tbMsg, false, callback);
     }
 
+    /**
+     * 向 Rule Engine 推送 TbMsg，可选是否沿用 TbMsg 自带的队列名。
+     * 路由目标：由 ruleEngineProducerService 按 tenantId + TbMsg 解析 TB_RULE_ENGINE 分区。
+     */
     @Override
     public void pushMsgToRuleEngine(TenantId tenantId, EntityId entityId, TbMsg tbMsg, boolean useQueueFromTbMsg, TbQueueCallback callback) {
         if (tenantId == null || tenantId.isNullUid()) {
@@ -279,6 +336,10 @@ public class DefaultTbClusterService implements TbClusterService {
         toRuleEngineMsgs.incrementAndGet();
     }
 
+    /**
+     * 根据实体类型获取 Rule Engine Profile（默认规则链与队列）。
+     * 删除事件时从消息体反序列化实体以获取 Profile ID。
+     */
     HasRuleEngineProfile getRuleEngineProfileForEntityOrElseNull(TenantId tenantId, EntityId entityId, TbMsg tbMsg) {
         if (entityId.getEntityType().equals(EntityType.DEVICE)) {
             if (TbMsgType.ENTITY_DELETED.equals(tbMsg.getInternalType())) {
@@ -318,6 +379,9 @@ public class DefaultTbClusterService implements TbClusterService {
         return null;
     }
 
+    /**
+     * 按 Profile 将 TbMsg 重定向到默认规则链和/或默认队列。
+     */
     private TbMsg transformMsg(TbMsg tbMsg, HasRuleEngineProfile ruleEngineProfile, boolean useQueueFromTbMsg) {
         if (ruleEngineProfile != null) {
             RuleChainId targetRuleChainId = ruleEngineProfile.getDefaultRuleChainId();
@@ -342,6 +406,10 @@ public class DefaultTbClusterService implements TbClusterService {
         return tbMsg;
     }
 
+    /**
+     * 向指定 Rule Engine 实例推送设备 RPC 响应通知。
+     * 路由目标：指定 serviceId 的 TB_RULE_ENGINE notifications Topic。
+     */
     @Override
     public void pushNotificationToRuleEngine(String serviceId, FromDeviceRpcResponse response, TbQueueCallback callback) {
         TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.TB_RULE_ENGINE, serviceId);
@@ -356,12 +424,16 @@ public class DefaultTbClusterService implements TbClusterService {
         toRuleEngineNfs.incrementAndGet();
     }
 
+    /**
+     * 向指定 Transport 实例推送通知消息。
+     * 路由目标：指定 serviceId 的 TB_TRANSPORT notifications Topic。
+     */
     @Override
     public void pushNotificationToTransport(String serviceId, ToTransportMsg response, TbQueueCallback callback) {
         if (serviceId == null || serviceId.isEmpty()) {
             log.trace("pushNotificationToTransport: skipping message without serviceId [{}], (ToTransportMsg) response [{}]", serviceId, response);
             if (callback != null) {
-                callback.onSuccess(null); //callback that message already sent, no useful payload expected
+                callback.onSuccess(null); // 无有效 serviceId 时视为已发送，回调无有效载荷
             }
             return;
         }
@@ -371,24 +443,33 @@ public class DefaultTbClusterService implements TbClusterService {
         toTransportNfs.incrementAndGet();
     }
 
+    /**
+     * 向 Calculated Field 队列推送消息。
+     * 路由目标：TB_RULE_ENGINE 的 CF 专用队列分区。
+     */
     @Override
     public void pushMsgToCalculatedFields(TenantId tenantId, EntityId entityId, ToCalculatedFieldMsg msg, TbQueueCallback callback) {
         TopicPartitionInfo tpi = partitionService.resolve(ServiceType.TB_RULE_ENGINE, DataConstants.CF_QUEUE_NAME, tenantId, entityId);
         pushMsgToCalculatedFields(tpi, UUID.randomUUID(), msg, callback);
     }
 
+    /**
+     * 向指定 Calculated Field 分区推送消息（调用方已解析分区）。
+     * 路由目标：传入的 TopicPartitionInfo。
+     */
     @Override
     public void pushMsgToCalculatedFields(TopicPartitionInfo tpi, UUID msgId, ToCalculatedFieldMsg msg, TbQueueCallback callback) {
         log.trace("PUSHING msg: {} to:{}", msg, tpi);
         producerProvider.getCalculatedFieldsMsgProducer().send(tpi, new TbProtoQueueMsg<>(msgId, msg), callback);
-        toRuleEngineMsgs.incrementAndGet(); // TODO: add separate counter when we will have new ServiceType.CALCULATED_FIELDS
+        toRuleEngineMsgs.incrementAndGet(); // TODO: 待 ServiceType.CALCULATED_FIELDS 独立后增加单独计数器
     }
 
     /**
-     * 妤犵偞瀵ч幐杈┾偓鍦仒缂嶅鎮╅懜纰樺亾娴ｈ鏆柛娆惷肩花銊︾閿燂拷
-     * @param tenantId 缂佸鍠愰崺娌琩
-     * @param entityId 閻庡湱鍋樼紞濯攄
-     * @param state 闁绘ǹ鍩栭埀顒婃嫹
+     * 广播实体生命周期状态变更事件（Core + Rule Engine）。
+     *
+     * @param tenantId 租户 ID
+     * @param entityId 实体 ID
+     * @param state    生命周期事件类型
      */
     @Override
     public void broadcastEntityStateChangeEvent(TenantId tenantId, EntityId entityId, ComponentLifecycleEvent state) {
@@ -396,6 +477,9 @@ public class DefaultTbClusterService implements TbClusterService {
         broadcast(new ComponentLifecycleMsg(tenantId, entityId, state));
     }
 
+    /**
+     * 设备配置变更：通知 Transport、广播生命周期，并更新 OTA 状态。
+     */
     @Override
     public void onDeviceProfileChange(DeviceProfile deviceProfile, DeviceProfile oldDeviceProfile, TbQueueCallback callback) {
         boolean isFirmwareChanged = false;
@@ -412,37 +496,44 @@ public class DefaultTbClusterService implements TbClusterService {
         }
     }
 
+    /** 租户配置变更：广播 EntityUpdateMsg 至 Transport。 */
     @Override
     public void onTenantProfileChange(TenantProfile tenantProfile, TbQueueCallback callback) {
         broadcastEntityChangeToTransport(TenantId.SYS_TENANT_ID, tenantProfile.getId(), tenantProfile, callback);
     }
 
+    /** 租户变更：广播 EntityUpdateMsg 至 Transport。 */
     @Override
     public void onTenantChange(Tenant tenant, TbQueueCallback callback) {
         broadcastEntityChangeToTransport(TenantId.SYS_TENANT_ID, tenant.getId(), tenant, callback);
     }
 
+    /** API 用量状态变更：通知 Transport 并广播生命周期事件。 */
     @Override
     public void onApiStateChange(ApiUsageState apiUsageState, TbQueueCallback callback) {
         broadcastEntityChangeToTransport(apiUsageState.getTenantId(), apiUsageState.getId(), apiUsageState, callback);
         broadcast(new ComponentLifecycleMsg(apiUsageState.getTenantId(), apiUsageState.getId(), ComponentLifecycleEvent.UPDATED));
     }
 
+    /** 设备配置删除：广播 EntityDeleteMsg 至 Transport。 */
     @Override
     public void onDeviceProfileDelete(DeviceProfile entity, TbQueueCallback callback) {
         broadcastEntityDeleteToTransport(entity.getTenantId(), entity.getId(), entity.getName(), callback);
     }
 
+    /** 租户配置删除：广播 EntityDeleteMsg 至 Transport。 */
     @Override
     public void onTenantProfileDelete(TenantProfile entity, TbQueueCallback callback) {
         broadcastEntityDeleteToTransport(TenantId.SYS_TENANT_ID, entity.getId(), entity.getName(), callback);
     }
 
+    /** 租户删除：广播 EntityDeleteMsg 至 Transport。 */
     @Override
     public void onTenantDelete(Tenant entity, TbQueueCallback callback) {
         broadcastEntityDeleteToTransport(TenantId.SYS_TENANT_ID, entity.getId(), entity.getName(), callback);
     }
 
+    /** 设备删除：通知网关、Transport、设备状态服务，并广播生命周期 DELETED 事件。 */
     @Override
     public void onDeviceDeleted(TenantId tenantId, Device device, TbQueueCallback callback) {
         DeviceId deviceId = device.getId();
@@ -452,18 +543,21 @@ public class DefaultTbClusterService implements TbClusterService {
         broadcastEntityStateChangeEvent(tenantId, deviceId, ComponentLifecycleEvent.DELETED);
     }
 
+    /** 资产删除：广播生命周期 DELETED 事件。 */
     @Override
     public void onAssetDeleted(TenantId tenantId, Asset asset, TbQueueCallback callback) {
         AssetId assetId = asset.getId();
         broadcastEntityStateChangeEvent(tenantId, assetId, ComponentLifecycleEvent.DELETED);
     }
 
+    /** 设备跨租户分配：在旧租户侧执行删除流程，在新租户侧注册设备状态。 */
     @Override
     public void onDeviceAssignedToTenant(TenantId oldTenantId, Device device) {
         onDeviceDeleted(oldTenantId, device, null);
         sendDeviceStateServiceEvent(device.getTenantId(), device.getId(), true, false, false);
     }
 
+    /** LWM2M 模型资源变更：广播 ResourceUpdateMsg 至 LWM2M Transport 实例。 */
     @Override
     public void onResourceChange(TbResourceInfo resource, TbQueueCallback callback) {
         if (resource.getResourceType() == ResourceType.LWM2M_MODEL) {
@@ -480,6 +574,7 @@ public class DefaultTbClusterService implements TbClusterService {
         }
     }
 
+    /** LWM2M 模型资源删除：广播 ResourceDeleteMsg 至 LWM2M Transport 实例。 */
     @Override
     public void onResourceDeleted(TbResourceInfo resource, TbQueueCallback callback) {
         if (resource.getResourceType() == ResourceType.LWM2M_MODEL) {
@@ -496,12 +591,12 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 妤犵偞瀵ч幐杈┾偓鍦仒缂嶅寮ㄩ悷鏉跨秮婵炴垵鐗婃导鍛存晬閸︽tityUpdateMsg闁挎稑顦崺瀹紃ansport闁哄牆绉存慨锟�
-     * @param tenantId 缂佸鍠愰崺娌琩
-     * @param entityid 閻庡湱鍋樼紞濯攄
-     * @param entity 闁哄倹澹嗗▓鎴犫偓鍦仒缂嶅鈧數顢婇挅锟�
-     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
-     * @param <T> 閻庡湱鍋樼紞瀣尵鐠囪尙鈧拷
+     * 广播实体变更（EntityUpdateMsg）至所有 Transport 实例。
+     *
+     * @param tenantId 租户 ID
+     * @param entityid 实体 ID
+     * @param entity   变更后的实体对象
+     * @param callback 发送完成回调
      */
     private <T> void broadcastEntityChangeToTransport(TenantId tenantId, EntityId entityid, T entity, TbQueueCallback callback) {
         String entityName = (entity instanceof HasName) ? ((HasName) entity).getName() : entity.getClass().getName();
@@ -511,11 +606,12 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 妤犵偞瀵ч幐杈┾偓鍦仒缂嶅宕氶悩缁樼彑婵炴垵鐗婃导鍛存晬閸︽tityDeleteMsg闁挎稑顦崺瀹紃ansport闁哄牆绉存慨锟�
-     * @param tenantId 缂佸鍠愰崺娌琩
-     * @param entityId 閻庡湱鍋樼紞濯攄
-     * @param name 閻犱焦鍎抽ˇ顒勫触瀹ュ泦锟�
-     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
+     * 广播实体删除（EntityDeleteMsg）至所有 Transport 实例。
+     *
+     * @param tenantId 租户 ID
+     * @param entityId 实体 ID
+     * @param name     实体名称
+     * @param callback 发送完成回调
      */
     private void broadcastEntityDeleteToTransport(TenantId tenantId, EntityId entityId, String name, TbQueueCallback callback) {
         log.trace("[{}][{}][{}] Processing [{}] delete event", tenantId, entityId.getEntityType(), entityId.getId(), name);
@@ -529,15 +625,16 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 闁告碍鍨舵晶宥夊嫉婢跺本鐣眛ransport闁哄牆绉存慨鐔肩嵁閹稿孩灏℃繛鎴濈墛娴硷拷
-     * @param transportMsg 婵炴垵鐗婃导锟�
-     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
+     * 向所有 Transport 实例广播通知消息。
      */
     private void broadcast(ToTransportMsg transportMsg, TbQueueCallback callback) {
         Set<String> tbTransportServices = partitionService.getAllServiceIds(ServiceType.TB_TRANSPORT);
         broadcast(transportMsg, tbTransportServices, callback);
     }
 
+    /**
+     * 向支持指定 Transport 类型的实例广播通知消息。
+     */
     private void broadcast(ToTransportMsg transportMsg, String transportType, TbQueueCallback callback) {
         Set<String> tbTransportServices = partitionService.getAllServices(ServiceType.TB_TRANSPORT).stream()
                 .filter(info -> info.getTransportsList().contains(transportType))
@@ -546,10 +643,11 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 闁告碍鍨剁€垫氨鈧姘ㄥ▓鎲坮ansport闁哄牆绉存慨鐔肩嵁閹稿孩灏℃繛鎴濈墛娴硷拷
-     * @param transportMsg 婵炴垵鐗婃导锟�
-     * @param tbTransportServices 闁圭ǹ娲ら悾楣冩儍閸撳檺ansport闁哄牆绉存慨锟�
-     * @param callback 闁搞儳鍋犻惃鐔煎礄閼恒儲娈�
+     * 向给定 Transport 服务 ID 集合广播通知消息。
+     *
+     * @param transportMsg          Transport 消息体
+     * @param tbTransportServices   目标 Transport 服务 ID 集合
+     * @param callback              发送完成回调（多实例时用 MultipleTbQueueCallbackWrapper 聚合）
      */
     private void broadcast(ToTransportMsg transportMsg, Set<String> tbTransportServices, TbQueueCallback callback) {
         TbQueueProducer<TbProtoQueueMsg<ToTransportMsg>> toTransportNfProducer = producerProvider.getTransportNotificationsMsgProducer();
@@ -561,6 +659,10 @@ public class DefaultTbClusterService implements TbClusterService {
         }
     }
 
+    /**
+     * 向 Edge 队列推送业务消息。
+     * 路由目标：TB_CORE 的 Edge 专用队列分区。
+     */
     @Override
     public void pushMsgToEdge(TenantId tenantId, EntityId entityId, ToEdgeMsg msg, TbQueueCallback callback) {
         TopicPartitionInfo tpi = partitionService.resolve(ServiceType.TB_CORE, DataConstants.EDGE_QUEUE_NAME, tenantId, entityId);
@@ -569,6 +671,9 @@ public class DefaultTbClusterService implements TbClusterService {
         toEdgeMsgs.incrementAndGet();
     }
 
+    /**
+     * 处理 Edge 高优先级事件，推送至 Edge notifications Topic。
+     */
     @Override
     public void onEdgeHighPriorityMsg(EdgeHighPriorityMsg msg) {
         log.trace("[{}] Processing edge event for edgeId: {}", msg.getTenantId(), msg.getEdgeEvent().getEdgeId());
@@ -576,6 +681,9 @@ public class DefaultTbClusterService implements TbClusterService {
         processEdgeNotification(msg.getEdgeEvent().getEdgeId(), toEdgeNotificationMsg);
     }
 
+    /**
+     * 处理 Edge 事件更新通知，推送至 Edge notifications Topic。
+     */
     @Override
     public void onEdgeEventUpdate(EdgeEventUpdateMsg msg) {
         log.trace("[{}] Processing edge event update for edgeId: {}", msg.getTenantId(), msg.getEdgeId());
@@ -583,6 +691,9 @@ public class DefaultTbClusterService implements TbClusterService {
         processEdgeNotification(msg.getEdgeId(), toEdgeNotificationMsg);
     }
 
+    /**
+     * 处理 Edge 生命周期状态变更，推送至 Edge notifications Topic。
+     */
     @Override
     public void onEdgeStateChangeEvent(ComponentLifecycleMsg msg) {
         log.trace("[{}] Processing {} state change event: {}", msg.getTenantId(), EntityType.EDGE, msg.getEvent());
@@ -591,6 +702,9 @@ public class DefaultTbClusterService implements TbClusterService {
         processEdgeNotification((EdgeId) msg.getEntityId(), toEdgeNotificationMsg);
     }
 
+    /**
+     * 向 Edge 推送同步请求通知。
+     */
     @Override
     public void pushEdgeSyncRequestToEdge(ToEdgeSyncRequest request) {
         log.trace("[{}] Processing edge sync request for edgeId: {}", request.getTenantId(), request.getEdgeId());
@@ -598,6 +712,9 @@ public class DefaultTbClusterService implements TbClusterService {
         processEdgeNotification(request.getEdgeId(), toEdgeNotificationMsg);
     }
 
+    /**
+     * 将 Edge 同步响应推送回发起请求的 Core 实例。
+     */
     @Override
     public void pushEdgeSyncResponseToCore(FromEdgeSyncResponse response, String requestServiceId) {
         log.trace("[{}] Processing edge sync response for edgeId: {}", response.getTenantId(), response.getEdgeId());
@@ -605,6 +722,9 @@ public class DefaultTbClusterService implements TbClusterService {
         pushMsgToEdgeNotification(toEdgeNotificationMsg, requestServiceId);
     }
 
+    /**
+     * 分发 Edge 通知：优先按 edgeId 缓存定位 Core 实例；未命中则广播至所有 Core。
+     */
     private void processEdgeNotification(EdgeId edgeId, ToEdgeNotificationMsg toEdgeNotificationMsg) {
         if (edgesEnabled) {
             var serviceIdOpt = Optional.ofNullable(edgeIdServiceIdCache.get(edgeId));
@@ -617,6 +737,9 @@ public class DefaultTbClusterService implements TbClusterService {
         }
     }
 
+    /**
+     * 向指定 Core 实例的 Edge notifications Topic 推送通知。
+     */
     private void pushMsgToEdgeNotification(ToEdgeNotificationMsg toEdgeNotificationMsg, String serviceId) {
         TopicPartitionInfo tpi = topicService.getEdgeNotificationsTopic(serviceId);
         TbQueueProducer<TbProtoQueueMsg<ToEdgeNotificationMsg>> toEdgeNotificationProducer = producerProvider.getTbEdgeNotificationsMsgProducer();
@@ -624,6 +747,9 @@ public class DefaultTbClusterService implements TbClusterService {
         toEdgeNfs.incrementAndGet();
     }
 
+    /**
+     * 向所有 Core 实例广播 Edge 通知（缓存未命中时的兜底策略）。
+     */
     private void broadcastEdgeNotification(EdgeId edgeId, ToEdgeNotificationMsg toEdgeNotificationMsg) {
         TbQueueProducer<TbProtoQueueMsg<ToEdgeNotificationMsg>> toEdgeNotificationProducer = producerProvider.getTbEdgeNotificationsMsgProducer();
         Set<String> serviceIds = partitionService.getAllServiceIds(ServiceType.TB_CORE);
@@ -635,11 +761,12 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 闁告碍鍨跺﹢鍥礉闄囨俊顓㈡倷閻熸壆鐣柟缁㈠幘缁秵绂掗崜浣规櫢闁告稖妫勯幊鍡涘嫉閻斿摜啸闁诡叏鎷�
+     * 广播组件生命周期消息。
      * <p>
-     * 閻庣敻鈧稓鑹鹃柡灞惧姃缁ㄨ櫣鈧湱鍋樼紞瀣偨閻旈攱鍤掗柛娑栧妽濠€鈥斥槈閸喍绱栭柨娑樼焸濞撳墎鎲版担鍛婂€遍柡鍐ㄧ埣閳ь剚姘ㄩ悡顡塷re闁哄牆绉存慨鐔煎椽鐎涚椃leEngine闁哄牆绉存慨鐔煎Υ閿燂拷
-     * 闂侇喓鍔岄崹搴ｂ偓鍦仒缂嶅鎮介悢閿嬪殥闁告稏鍔嶅﹢鈥斥槈閸喍绱栭柨娑樼墔缁躲儲淇婇崒婵愬晭濠㈣泛娲ら悿鍕媴閹捐埖鐣遍柛鎺撶☉缂傛挸鈽夐崼鐔剁礀闁挎稑鑻ú婊勭▔妤︽鍟庡璺烘搐閸ㄤ即宕氬☉妯肩处濞戞挴鍋撻悗瑙勭濡茬ǹ鈻介敍鍕閻庢稒岣垮▓鎴︽晬鐏炲墽姊鹃煫鍥ф嚀椤╋附寰勬潏銊︽珡闁挎稑顧€缁辨繈宕ｉ鍫氬亾濮樿京鍙€RuleEngine闁哄牆绉存慨鐔煎Υ閿燂拷
-     * @param msg 缂備礁瀚▎銏ゆ偨閻旈攱鍤掗柛娑栧妽濠€鈥斥槈閸喍绱�
+     * 对租户/配置/设备等特定实体类型，同时通知 Core 与 Rule Engine；
+     * 单体部署时 Core 与 Rule Engine 共用同一 serviceId，需 removeAll 避免重复投递。
+     *
+     * @param msg 组件生命周期消息
      */
     private void broadcast(ComponentLifecycleMsg msg) {
         ComponentLifecycleMsgProto componentLifecycleMsgProto = toProto(msg);
@@ -657,7 +784,7 @@ public class DefaultTbClusterService implements TbClusterService {
                 || entityType.equals(EntityType.NOTIFICATION_RULE)
                 || entityType.equals(EntityType.CALCULATED_FIELD)
         ) {
-            // 閺夆晜鐟ょ花铏光偓鍦仒缂嶅鐚剧拠鑼偓鐑芥閳ь剛鎲版担鍛婂€遍柡鍐ㄧ埣閳ь剚姘ㄩ悡顡塷re闁哄牆绉存慨鐔煎椽鐎涚椃leEngine闁哄牆绉存慨锟�
+            // 同时广播至 Core 与 Rule Engine
             TbQueueProducer<TbProtoQueueMsg<ToCoreNotificationMsg>> toCoreNfProducer = producerProvider.getTbCoreNotificationsMsgProducer();
             Set<String> tbCoreServices = partitionService.getAllServiceIds(ServiceType.TB_CORE);
             for (String serviceId : tbCoreServices) {
@@ -666,10 +793,10 @@ public class DefaultTbClusterService implements TbClusterService {
                 toCoreNfProducer.send(tpi, new TbProtoQueueMsg<>(msg.getEntityId().getId(), toCoreMsg), null);
                 toCoreNfs.incrementAndGet();
             }
-            // 濞戞挸绉瑰〒鍓佹啺娴ｇ柉鈷堟繛鍡忓墲鐢綊鏌呮笟鈧埀顒佹皑閻擄繝鏁嶉崼鐔哥畳闁告瑯鍨甸崗妯尖偓娑櫭﹢顏呯▔閵堝嫰鍤嬮柡鍫濈Т婵喖鏌堥妸褑顔夐柛锔哄妺缁斿瓨绋夐鍛疀闁告柡鈧櫕鐝ら柨娑虫嫹
+            // 单体模式下 Core 与 RE 共用 serviceId，从 RE 集合中移除以避免重复通知
             tbRuleEngineServices.removeAll(tbCoreServices);
         }
-        // 闁告碍鍨垫晶鎸庢媴濞嗘垶鐣盧uleEngine闁哄牆绉存慨鐔兼嚍閸屾粌浠柛娆愬灴閳ь兛绶氶埀顒佹皑閻擄拷
+        // 广播至剩余 Rule Engine 实例
         for (String serviceId : tbRuleEngineServices) {
             TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.TB_RULE_ENGINE, serviceId);
             ToRuleEngineNotificationMsg toRuleEngineMsg = ToRuleEngineNotificationMsg.newBuilder().setComponentLifecycle(componentLifecycleMsgProto).build();
@@ -678,6 +805,7 @@ public class DefaultTbClusterService implements TbClusterService {
         }
     }
 
+    /** 定时打印并重置各队列消息计数（需 statsEnabled=true）。 */
     @Scheduled(fixedDelayString = "${cluster.stats.print_interval_ms}")
     public void printStats() {
         if (statsEnabled) {
@@ -695,6 +823,9 @@ public class DefaultTbClusterService implements TbClusterService {
         }
     }
 
+    /**
+     * 向 Core 推送设备状态服务事件（新增/更新/删除）。
+     */
     private void sendDeviceStateServiceEvent(TenantId tenantId, DeviceId deviceId, boolean added, boolean updated, boolean deleted) {
         DeviceStateServiceMsgProto.Builder builder = DeviceStateServiceMsgProto.newBuilder();
         builder.setTenantIdMSB(tenantId.getId().getMostSignificantBits());
@@ -705,21 +836,20 @@ public class DefaultTbClusterService implements TbClusterService {
         builder.setUpdated(updated);
         builder.setDeleted(deleted);
         DeviceStateServiceMsgProto msg = builder.build();
-        // 闁告瑦鍨块埀顑挎祰椤旀洘寰勯崶鈺佇﹂柟顑跨劍濠€鍥礉閳╁啰啸闁诡収鍨伴崺瀹憃re
         pushMsgToCore(tenantId, deviceId, ToCoreMsg.newBuilder().setDeviceStateServiceMsg(msg).build(), null);
     }
 
     /**
-     * 濠㈣泛瀚幃濠勬媼閹屾У闁哄洤鐡ㄩ弻锟�
-     * @param entity 闁哄倹濯介鏇熷緞閸パ屽殸閻犵儑鎷�
-     * @param old 闁哄唲鍡╁晭濠㈣泛娲ら顔炬寬閿燂拷
+     * 设备创建或更新：通知 Transport、网关、Core Actor，并广播生命周期事件。
+     *
+     * @param entity 当前设备
+     * @param old    更新前的设备（创建时为 null）
      */
     @Override
     public void onDeviceUpdated(Device entity, Device old) {
         var created = old == null;
-        // 濞戞挸绉堕鎼佸及椤栨稒绾柡鍌涘缁绘洟寮伴姘仭鐎点倗灏ㄧ槐婵嬫焾閽樺鐣柟缁㈠幖閻ゅ嫭鎷呴幘瀛樻毉闁告瑦蓱缁夌兘骞侀姘厒transfer闁哄牆绉存慨锟�
+        // 设备实体变更需同步至 Transport，以便连接层刷新本地缓存
         broadcastEntityChangeToTransport(entity.getTenantId(), entity.getId(), entity, null);
-        // 闁告帗绋戠紓鎾剁磼閸曨亝顐介柣銏㈠枎閹筹繝宕ㄩ妸锔藉焸婵炴垵鐗婃导锟�
         var msg = ComponentLifecycleMsg.builder()
                 .tenantId(entity.getTenantId())
                 .entityId(entity.getId())
@@ -730,27 +860,25 @@ public class DefaultTbClusterService implements TbClusterService {
         } else {
             boolean deviceNameChanged = !entity.getName().equals(old.getName());
             if (deviceNameChanged) {
-                // 閻犱焦鍎抽ˇ顒勫触瀹ュ懐鎽熼柡鈧悷鏉跨秮闁挎稑鑻ぐ鍌炴焻閿燂拷
                 gatewayNotificationsService.ifPresent(s -> s.onDeviceUpdated(entity, old));
             }
             boolean deviceProfileChanged = !entity.getDeviceProfileId().equals(old.getDeviceProfileId());
             if (deviceNameChanged || deviceProfileChanged) {
-                // 閻犱焦鍎抽ˇ顒勫触瀹ュ懐鎽熼柟瀛樼墳閳ь剙鎳撻鏇熷緞閸ヮ剙甯崇紓鍐暪d闁衡偓閻熸澘缍侀柨娑樿嫰瑜板倿鏌呮担绋跨厒閻犳劗鍠曢惌妤冩嫚閵夘煈鍟庡璺烘川濞堟叾ore闁哄牆绉存慨鐔哥▔婵犲繒绀夐柣鈧妺缁ㄧ悾ctor闁汇劌瀚ú鍧楀棘閿燂拷
+                // 名称或类型变更时通知 Core 设备 Actor 刷新元数据
                 pushMsgToCore(new DeviceNameOrTypeUpdateMsg(entity.getTenantId(), entity.getId(), entity.getName(), entity.getType()), null);
             }
             msg.event(ComponentLifecycleEvent.UPDATED)
                     .oldProfileId(old.getDeviceProfileId())
                     .oldName(old.getName());
         }
-        // 妤犵偞瀵ч幐杈╃磼閸曨亝顐介柣銏㈠枎閹筹繝宕ㄩ妸锔藉焸濞存粌顑勫▎銏ゆ晬閸粌鐦滈悷鏇氱劍濡插憡寰勬潏銊︽珡閻犱焦鍎抽ˇ顒勬儍閸曨厾澶勯悗娑櫳戦弳鐔煎箲椤曞棛绀�
         broadcast(msg.build());
-        // 闁告瑦鍨块埀顑挎祰椤旀洘寰勯崶鈺佇﹂柟顑跨劍濠€鍥礉閳╁啰啸闁诡収鍨伴崺瀹憃re闁挎稑鐗忛弫銈嗙鎼淬値鍟庡璺烘处濞插潡寮幍顔夹﹂柟顑跨筏缁憋拷
         sendDeviceStateServiceEvent(entity.getTenantId(), entity.getId(), created, !created, false);
         if (otaPackageStateService != null) {
             otaPackageStateService.update(entity, old);
         }
     }
 
+    /** 资产创建或更新：广播生命周期 CREATED/UPDATED 事件。 */
     @Override
     public void onAssetUpdated(Asset entity, Asset old) {
         var created = old == null;
@@ -769,16 +897,22 @@ public class DefaultTbClusterService implements TbClusterService {
         broadcast(msg.build());
     }
 
+    /** 计算字段创建或更新：广播生命周期事件。 */
     @Override
     public void onCalculatedFieldUpdated(CalculatedField calculatedField, CalculatedField oldCalculatedField, TbQueueCallback callback) {
         broadcastEntityStateChangeEvent(calculatedField.getTenantId(), calculatedField.getId(), oldCalculatedField == null ? ComponentLifecycleEvent.CREATED : ComponentLifecycleEvent.UPDATED);
     }
 
+    /** 计算字段删除：广播生命周期 DELETED 事件。 */
     @Override
     public void onCalculatedFieldDeleted(CalculatedField calculatedField, TbQueueCallback callback) {
         broadcastEntityStateChangeEvent(calculatedField.getTenantId(), calculatedField.getId(), ComponentLifecycleEvent.DELETED);
     }
 
+    /**
+     * 向 Edge 服务发送实体变更通知消息。
+     * 路由目标：TB_CORE Edge 队列；设备实体还会额外通知 Core 设备 Actor。
+     */
     @Override
     public void sendNotificationMsgToEdge(TenantId tenantId, EdgeId edgeId, EntityId entityId, String body, EdgeEventType type, EdgeEventActionType action, EdgeId originatorEdgeId) {
         if (!edgesEnabled) {
@@ -826,6 +960,9 @@ public class DefaultTbClusterService implements TbClusterService {
         }
     }
 
+    /**
+     * 设备与 Edge 关联关系变更时，通知 Core 设备 Actor 更新 Edge 绑定。
+     */
     private void pushDeviceUpdateMessage(TenantId tenantId, EdgeId edgeId, EntityId entityId, EdgeEventActionType action) {
         log.trace("{} Going to send edge update notification for device actor, device id {}, edge id {}", tenantId, entityId, edgeId);
         switch (action) {
@@ -837,11 +974,15 @@ public class DefaultTbClusterService implements TbClusterService {
         }
     }
 
+    /** 查询实体仍关联的 Edge ID（取消分配时用于确定新的绑定关系）。 */
     private EdgeId findRelatedEdgeIdIfAny(TenantId tenantId, EntityId entityId) {
         PageData<EdgeId> pageData = edgeService.findRelatedEdgeIdsByEntityId(tenantId, entityId, new PageLink(1));
         return Optional.ofNullable(pageData).filter(pd -> pd.getTotalElements() > 0).map(pd -> pd.getData().get(0)).orElse(null);
     }
 
+    /**
+     * 队列配置更新：广播 QueueUpdateMsg 至 Rule Engine、Core、Transport。
+     */
     @Override
     public void onQueuesUpdate(List<Queue> queues) {
         List<QueueUpdateMsg> queueUpdateMsgs = queues.stream()
@@ -863,6 +1004,9 @@ public class DefaultTbClusterService implements TbClusterService {
         doSendQueueNotifications(ruleEngineMsg, coreMsg, transportMsg);
     }
 
+    /**
+     * 队列配置删除：广播 QueueDeleteMsg 至 Rule Engine、Core、Transport。
+     */
     @Override
     public void onQueuesDelete(List<Queue> queues) {
         List<QueueDeleteMsg> queueDeleteMsgs = queues.stream()
@@ -881,11 +1025,14 @@ public class DefaultTbClusterService implements TbClusterService {
         doSendQueueNotifications(ruleEngineMsg, coreMsg, transportMsg);
     }
 
+    /**
+     * 分发队列变更通知，removeAll 避免单体部署下同一 serviceId 重复投递。
+     */
     private void doSendQueueNotifications(ToRuleEngineNotificationMsg ruleEngineMsg, ToCoreNotificationMsg coreMsg, ToTransportMsg transportMsg) {
         Set<String> tbRuleEngineServices = partitionService.getAllServiceIds(ServiceType.TB_RULE_ENGINE);
         Set<String> tbCoreServices = partitionService.getAllServiceIds(ServiceType.TB_CORE);
         Set<String> tbTransportServices = partitionService.getAllServiceIds(ServiceType.TB_TRANSPORT);
-        // No need to push notifications twice
+        // 单体模式下各服务共用 serviceId，去重以避免重复推送
         tbTransportServices.removeAll(tbCoreServices);
         tbCoreServices.removeAll(tbRuleEngineServices);
 

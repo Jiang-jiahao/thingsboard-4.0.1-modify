@@ -55,11 +55,19 @@ import static org.thingsboard.server.common.data.ObjectType.LATEST_TS_KV;
 import static org.thingsboard.server.common.data.ObjectType.RELATION;
 import static org.thingsboard.server.common.data.ObjectType.edqsTenantTypes;
 
+/**
+ * EDQS 全量同步抽象基类。
+ * <p>
+ * 从关系库分批读取实体、关系、属性、最新时序，转换为 UPDATED 事件写入 EDQS。
+ * 是否需要同步由子类根据存储介质（本地 RocksDB / Kafka Topic）判断。
+ */
 @Slf4j
 public abstract class EdqsSyncService {
 
+    /** 实体/关系批次大小 */
     @Value("${queue.edqs.sync.entity_batch_size:10000}")
     private int entityBatchSize;
+    /** 属性/时序批次大小 */
     @Value("${queue.edqs.sync.ts_batch_size:10000}")
     private int tsBatchSize;
     @Autowired
@@ -76,13 +84,23 @@ public abstract class EdqsSyncService {
     @Lazy
     private DefaultEdqsService edqsService;
 
+    /** 实体 UUID -> 类型与租户，供属性/时序/关系反查 */
     private final ConcurrentHashMap<UUID, EntityIdInfo> entityInfoMap = new ConcurrentHashMap<>();
+    /** 键字典：keyId -> 字符串 key */
     private final ConcurrentHashMap<Integer, String> keys = new ConcurrentHashMap<>();
 
+    /** 各类对象已处理数量，用于进度日志 */
     private final Map<ObjectType, AtomicInteger> counters = new ConcurrentHashMap<>();
 
+    /**
+     * 当前环境是否需要执行全量同步。
+     * 由 {@link LocalEdqsSyncService} / {@link KafkaEdqsSyncService} 实现。
+     */
     public abstract boolean isSyncNeeded();
 
+    /**
+     * 执行全量同步：实体 → 关系 → 键字典 → 属性 → 最新时序。
+     */
     public void sync() {
         log.info("Synchronizing data to EDQS");
         long startTs = System.currentTimeMillis();
@@ -98,6 +116,7 @@ public abstract class EdqsSyncService {
         log.info("Finishing synchronizing data to EDQS in {} ms", (System.currentTimeMillis() - startTs));
     }
 
+    /** 统计进度并将对象以 UPDATED 事件写入 EDQS */
     private void process(TenantId tenantId, ObjectType type, EdqsObject object) {
         AtomicInteger counter = counters.computeIfAbsent(type, t -> new AtomicInteger());
         if (counter.incrementAndGet() % 10000 == 0) {
@@ -106,6 +125,7 @@ public abstract class EdqsSyncService {
         edqsService.processEvent(tenantId, type, EdqsEventType.UPDATED, object);
     }
 
+    /** 按 EDQS 租户实体类型分批同步全部实体 */
     private void syncTenantEntities() {
         for (ObjectType type : edqsTenantTypes) {
             log.info("Synchronizing {} entities to EDQS", type);
@@ -130,6 +150,7 @@ public abstract class EdqsSyncService {
         }
     }
 
+    /** 分批同步 COMMON 类型关系 */
     private void syncRelations() {
         log.info("Synchronizing relations to EDQS");
         long ts = System.currentTimeMillis();
@@ -159,6 +180,7 @@ public abstract class EdqsSyncService {
         log.info("Finished synchronizing relations to EDQS in {} ms", (System.currentTimeMillis() - ts));
     }
 
+    /** 处理关系批次：仅同步 COMMON 组，且 from 实体须已在 entityInfoMap 中 */
     private void processRelationBatch(List<RelationEntity> relations) {
         for (RelationEntity relation : relations) {
             try {
@@ -176,6 +198,7 @@ public abstract class EdqsSyncService {
         }
     }
 
+    /** 预加载键字典，供属性与最新时序解析字符串 key */
     private void loadKeyDictionary() {
         log.info("Loading key dictionary");
         long ts = System.currentTimeMillis();
@@ -186,6 +209,7 @@ public abstract class EdqsSyncService {
         log.info("Finished loading key dictionary in {} ms", (System.currentTimeMillis() - ts));
     }
 
+    /** 分批同步全部属性 */
     private void syncAttributes() {
         log.info("Synchronizing attributes to EDQS");
         long ts = System.currentTimeMillis();
@@ -209,6 +233,7 @@ public abstract class EdqsSyncService {
         log.info("Finished synchronizing attributes to EDQS in {} ms", (System.currentTimeMillis() - ts));
     }
 
+    /** 将属性批次转为 AttributeKv 并写入 EDQS；找不到归属实体则跳过 */
     private void processAttributeBatch(List<AttributeKvEntity> batch) {
         for (AttributeKvEntity attribute : batch) {
             try {
@@ -231,6 +256,7 @@ public abstract class EdqsSyncService {
         }
     }
 
+    /** 分批同步最新时序（latest TS） */
     private void syncLatestTimeseries() {
         log.info("Synchronizing latest timeseries to EDQS");
         long ts = System.currentTimeMillis();
@@ -251,6 +277,7 @@ public abstract class EdqsSyncService {
         log.info("Finished synchronizing latest timeseries to EDQS in {} ms", (System.currentTimeMillis() - ts));
     }
 
+    /** 将最新时序批次转为 LatestTsKv 并写入 EDQS */
     private void processTsKvLatestBatch(List<TsKvLatestEntity> tsKvLatestEntities) {
         for (TsKvLatestEntity tsKvLatestEntity : tsKvLatestEntities) {
             try {
@@ -273,6 +300,9 @@ public abstract class EdqsSyncService {
         }
     }
 
+    /**
+     * 按 keyId 解析字符串 key：先查内存缓存，未命中再查库并回填缓存。
+     */
     private String getStrKeyOrFetchFromDb(int key) {
         String strKey = keys.get(key);
         if (strKey != null) {
@@ -286,6 +316,7 @@ public abstract class EdqsSyncService {
         return strKey;
     }
 
+    /** 实体 ID 对应的类型与租户信息 */
     public record EntityIdInfo(EntityType entityType, TenantId tenantId) {
     }
 
