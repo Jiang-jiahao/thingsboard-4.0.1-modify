@@ -34,6 +34,8 @@ public class TopicPartitionInfo {
 
     // 分区索引
     private final Integer partition;
+
+    // 使用内部分区法（不然就在topic后面拼上分区号）
     @Getter
     private final boolean useInternalPartition;
     @Getter

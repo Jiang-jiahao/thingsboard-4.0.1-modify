@@ -154,7 +154,7 @@ public class HashPartitionService implements PartitionService {
     private final Map<String, List<ServiceInfo>> tbTransportServicesByType = new HashMap<>();
 
     /**
-     * TenantProfileId → 「专管该 Profile 的 Rule Engine 实例」列表。
+     * TenantProfileId → 「专管该 租户Profile 的 Rule Engine 实例」列表。
      * 无专管实例时，隔离租户可能回落到「未绑定任何 Profile 的常规 RE」。
      */
     private volatile Map<TenantProfileId, List<ServiceInfo>> responsibleServices = Collections.emptyMap();
@@ -562,7 +562,7 @@ public class HashPartitionService implements PartitionService {
 
         // QueueKey → 可参与该队列分区竞选的服务实例
         Map<QueueKey, List<ServiceInfo>> queueServicesMap = new HashMap<>();
-        // TenantProfileId → 专管该 Profile 的 RE 实例
+        // TenantProfileId → 专管该 Profile 的 RE 服务实例
         Map<TenantProfileId, List<ServiceInfo>> responsibleServices = new HashMap<>();
 
         addNode(currentService, queueServicesMap, responsibleServices);
@@ -615,7 +615,7 @@ public class HashPartitionService implements PartitionService {
             changedPartitionsMap.put(queueKey, Collections.emptySet());
         });
 
-        // 分区列表相对旧值有变化 → 记入 changed / old 两份 map，供事件对比
+        // 分区列表相对旧值有变化 → 记入 changed / old 两份 map，供事件对比（用于构造发布分区改变事件）
         myPartitions.forEach((queueKey, partitions) -> {
             if (!partitions.equals(oldPartitions.get(queueKey))) {
                 changedPartitionsMap.put(queueKey, toTpiList(queueKey, partitions));
@@ -627,6 +627,8 @@ public class HashPartitionService implements PartitionService {
             changedPartitionsMap.entrySet().stream()
                     .collect(Collectors.groupingBy(entry -> entry.getKey().getType(), Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
                     .forEach((serviceType, partitionsMap) -> {
+                        // partitionsMap：本 ServiceType 下发生变化的 QueueKey → 新分区集合（含「本机不再负责」的空集合，以及分区列表有增减的）
+                        // oldPartitionsMap：仅分区列表发生变化的 QueueKey → 变更前的旧分区集合（整队列被移除的不在此 map 中，只在 partitionsMap 里以 emptySet 表示）
                         publishPartitionChangeEvent(serviceType, partitionsMap, oldPartitionsMap);
                     });
         }
@@ -658,6 +660,7 @@ public class HashPartitionService implements PartitionService {
                 });
             }
         }
+        // 主要用于通知transport服务，用于对应设备的负载均衡
         applicationEventPublisher.publishEvent(new ServiceListChangedEvent(otherServices, currentService));
     }
 
