@@ -27,25 +27,59 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.relation.EntityRelation;
 import org.thingsboard.server.service.action.EntityActionService;
 
+/**
+ * {@link TbLogEntityActionService} 的默认实现：将各重载收敛到完整参数形式，
+ * 再按「是否有用户 / 是否有异常」分支委托 {@link EntityActionService}。
+ * <p>
+ * 分支策略：
+ * <ul>
+ *   <li>{@code user != null}：走 {@link EntityActionService#logEntityAction}，
+ *       写审计日志；若无异常还会推送到规则引擎；</li>
+ *   <li>{@code user == null} 且 {@code e == null}：仅
+ *       {@link EntityActionService#pushEntityActionToRuleEngine}，
+ *       用于无用户上下文的成功系统操作；</li>
+ *   <li>{@code user == null} 且存在异常：不记审计、不推规则引擎。</li>
+ * </ul>
+ * 关系操作会对 from / to 两端各调用一次实体动作记录。
+ *
+ * @see TbLogEntityActionService
+ * @see EntityActionService
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DefaultTbLogEntityActionService implements TbLogEntityActionService {
 
+    /** 实际写审计日志、组装 TbMsg 并推规则引擎 / 通知规则的组件 */
     private final EntityActionService entityActionService;
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * 无实体、无客户，转完整重载。
+     */
     @Override
     public <I extends EntityId> void logEntityAction(TenantId tenantId, I entityId, ActionType actionType,
                                                      User user, Exception e, Object... additionalInfo) {
         logEntityAction(tenantId, entityId, null, null, actionType, user, e, additionalInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * 无客户、无异常，转完整重载。
+     */
     @Override
     public <E extends HasName, I extends EntityId> void logEntityAction(TenantId tenantId, I entityId, E entity,
                                                                         ActionType actionType, User user, Object... additionalInfo) {
         logEntityAction(tenantId, entityId, entity, null, actionType, user, null, additionalInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * 无客户，转完整重载。
+     */
     @Override
     public <E extends HasName, I extends EntityId> void logEntityAction(TenantId tenantId, I entityId, E entity,
                                                                         ActionType actionType, User user, Exception e,
@@ -53,12 +87,22 @@ public class DefaultTbLogEntityActionService implements TbLogEntityActionService
         logEntityAction(tenantId, entityId, entity, null, actionType, user, e, additionalInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * 无异常，转完整重载。
+     */
     @Override
     public <E extends HasName, I extends EntityId> void logEntityAction(TenantId tenantId, I entityId, E entity, CustomerId customerId,
                                                                         ActionType actionType, User user, Object... additionalInfo) {
         logEntityAction(tenantId, entityId, entity, customerId, actionType, user, null, additionalInfo);
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * 按用户/异常分支委托 {@link EntityActionService}，见类级说明。
+     */
     @Override
     public <E extends HasName, I extends EntityId> void logEntityAction(TenantId tenantId, I entityId, E entity,
                                                                         CustomerId customerId, ActionType actionType,
@@ -70,6 +114,11 @@ public class DefaultTbLogEntityActionService implements TbLogEntityActionService
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * 对关系两端实体各记一条动作。
+     */
     @Override
     public void logEntityRelationAction(TenantId tenantId, CustomerId customerId, EntityRelation relation, User user,
                                         ActionType actionType, Exception e, Object... additionalInfo) {

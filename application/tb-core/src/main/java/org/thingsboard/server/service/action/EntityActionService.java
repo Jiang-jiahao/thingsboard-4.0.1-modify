@@ -50,14 +50,57 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * 实体动作的落库与规则引擎推送实现。
+ * <p>
+ * 由 {@link org.thingsboard.server.service.entitiy.DefaultTbLogEntityActionService} 调用，负责两件事：
+ * <ul>
+ *   <li>{@link #logEntityAction}：有用户上下文时写审计日志；成功时还会推规则引擎；</li>
+ *   <li>{@link #pushEntityActionToRuleEngine}：把动作组装为 {@link TbMsg} 推到 Rule Engine，
+ *       并按动作类型触发通知规则（实体限额、实体动作、告警分配、告警评论等）。</li>
+ * </ul>
+ * {@code additionalInfo} 按 {@link ActionType} 约定下标取值（客户/租户/Edge 分配、属性与时序变更、关系对象等），
+ * 通过 {@link #extractParameter} 安全提取；无法映射到规则引擎消息类型的动作会直接跳过推送。
+ *
+ * @see org.thingsboard.server.service.entitiy.TbLogEntityActionService
+ * @see AuditLogService
+ * @see NotificationRuleProcessor
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class EntityActionService {
+
+    /** 将 TbMsg 推入规则引擎（按租户与实体分区路由） */
     private final TbClusterService tbClusterService;
+    /** 持久化审计日志 */
     private final AuditLogService auditLogService;
+    /** 处理通知规则触发器 */
     private final NotificationRuleProcessor notificationRuleProcessor;
 
+    /**
+     * 将实体动作推送到规则引擎，并在适用时触发通知规则。
+     * <p>
+     * 仅当 {@link ActionType#getRuleEngineMsgType()} 有对应 {@link TbMsgType} 时执行。
+     * 处理步骤概要：
+     * <ol>
+     *   <li>组装元数据（用户、客户、各类 ASSIGNED_* / 评论等）；</li>
+     *   <li>将实体序列化为 JSON 节点；无实体快照时按动作类型从 {@code additionalInfo}
+     *       填充属性、时序或关系内容（仪表板会清空 configuration 字段以减小消息体）；</li>
+     *   <li>补全 tenantId（可从实现了 {@link HasTenantId} 的实体读取）；</li>
+     *   <li>非系统租户时调用 {@link #processNotificationRules}；</li>
+     *   <li>构造 {@link TbMsg} 并 {@link TbClusterService#pushMsgToRuleEngine}。</li>
+     * </ol>
+     * 组装或推送失败只记警告日志，不向外抛出，避免拖垮上层业务事务。
+     *
+     * @param entityId       动作主体实体 ID（亦作 TbMsg originator）
+     * @param entity         实体快照；可为 {@code null}（属性/时序/关系等场景用 additionalInfo）
+     * @param tenantId       租户；可为 {@code null}，随后尝试从实体补全
+     * @param customerId     客户；空或 nullUid 时不写入元数据
+     * @param actionType     动作类型
+     * @param user           操作用户；系统调用可为 {@code null}
+     * @param additionalInfo 随动作类型变化的附加参数
+     */
     public void pushEntityActionToRuleEngine(EntityId entityId, HasName entity, TenantId tenantId, CustomerId customerId,
                                              ActionType actionType, User user, Object... additionalInfo) {
         Optional<TbMsgType> msgType = actionType.getRuleEngineMsgType();
@@ -182,6 +225,19 @@ public class EntityActionService {
         }
     }
 
+    /**
+     * 按动作类型向 {@link NotificationRuleProcessor} 投递对应触发器。
+     * <p>
+     * {@code ADDED} 会先触发实体数量限额检查，再落入与 UPDATED/DELETED 相同的实体动作通知；
+     * 告警分配 / 评论类动作要求实体分别为 {@link AlarmInfo} / {@link Alarm}，否则记警告并跳过。
+     *
+     * @param tenantId       租户（非系统租户）
+     * @param originatorId   消息源实体 ID；若 {@code entity} 实现了 {@link HasId} 则优先用实体自身 ID
+     * @param entity         实体快照
+     * @param actionType     动作类型
+     * @param user           操作用户，可为 {@code null}
+     * @param additionalInfo 告警评论等附加参数
+     */
     private void processNotificationRules(TenantId tenantId, EntityId originatorId, HasName entity, ActionType actionType, User user, Object... additionalInfo) {
         EntityId entityId = entity instanceof HasId ? ((HasId<? extends EntityId>) entity).getId() : originatorId;
         switch (actionType) {
@@ -230,6 +286,21 @@ public class EntityActionService {
         }
     }
 
+    /**
+     * 有用户上下文时的标准落点：成功则先推规则引擎，再无论成败都写审计日志。
+     * <p>
+     * 若传入的 {@code customerId} 为空或 nullUid，则回落到 {@code user.getCustomerId()}。
+     *
+     * @param user           操作用户，不可为 {@code null}
+     * @param entityId       实体 ID
+     * @param entity         实体快照，可为 {@code null}
+     * @param customerId     客户；空则用用户所属客户
+     * @param actionType     动作类型
+     * @param e              业务异常；{@code null} 表示成功并会推规则引擎
+     * @param additionalInfo 附加参数，原样传给审计与规则引擎推送
+     * @param <E>            实体类型
+     * @param <I>            实体 ID 类型
+     */
     public <E extends HasName, I extends EntityId> void logEntityAction(User user, I entityId, E entity, CustomerId customerId,
                                                                         ActionType actionType, Exception e, Object... additionalInfo) {
         if (customerId == null || customerId.isNullUid()) {
@@ -241,6 +312,15 @@ public class EntityActionService {
         auditLogService.logEntityAction(user.getTenantId(), customerId, user.getId(), user.getName(), entityId, entity, actionType, e, additionalInfo);
     }
 
+    /**
+     * 从可变参数中按类型与下标安全取出参数；越界、类型不符时返回 {@code null}。
+     *
+     * @param clazz          期望类型
+     * @param index          下标（从 0 开始）
+     * @param additionalInfo 附加参数数组
+     * @param <T>            返回类型
+     * @return 匹配的参数，否则 {@code null}
+     */
     private <T> T extractParameter(Class<T> clazz, int index, Object... additionalInfo) {
         T result = null;
         if (additionalInfo != null && additionalInfo.length > index) {
@@ -252,6 +332,13 @@ public class EntityActionService {
         return result;
     }
 
+    /**
+     * 将时序条目按时间戳分组写入实体 JSON 的 {@code timeseries} 数组，
+     * 每组形如 {@code { "ts": ..., "values": { key: value, ... } }}。
+     *
+     * @param entityNode 目标 JSON 节点
+     * @param timeseries 时序键值列表；空或 null 时不写入
+     */
     private void addTimeseries(ObjectNode entityNode, List<TsKvEntry> timeseries) {
         if (timeseries != null && !timeseries.isEmpty()) {
             ArrayNode result = entityNode.putArray("timeseries");

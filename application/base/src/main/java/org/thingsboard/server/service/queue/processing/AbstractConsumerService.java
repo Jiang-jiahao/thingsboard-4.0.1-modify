@@ -1,5 +1,5 @@
 /**
- * Copyright 濠曪拷 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,75 +65,124 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * 婵炴垵鐗愰崹鍌炴嚀閸涱喗绠涢柛鏃撶磿濞堟垿宕洪搹纭咁潶
- * @param <N>
+ * 各服务节点「通知队列」消费与公共基础设施的抽象基类。
+ * <p>
+ * 本类不负责主业务队列（如 Core 的 {@code ToCoreMsg}、Rule Engine 的规则队列）的分区消费，
+ * 那些由子类自行用 {@link org.thingsboard.server.queue.common.consumer.MainQueueConsumerManager}
+ * 等组件管理。本类统一提供：
+ * <ul>
+ *   <li>消费/管理/调度三类线程池；</li>
+ *   <li>本节点专属的通知 Topic 消费者 {@link #nfConsumer}（消息类型由泛型 {@code N} 决定）；</li>
+ *   <li>通知消息的批处理框架（pending map + 超时 latch + commit）；</li>
+ *   <li>对 {@link PartitionChangeEvent} 的监听基座（按 {@link #getServiceType()} 过滤）；</li>
+ *   <li>组件生命周期消息的公共缓存失效与 Actor 转发逻辑。</li>
+ * </ul>
+ * 典型子类：{@code DefaultTbCoreConsumerService}、{@code DefaultTbRuleEngineConsumerService} 等。
+ * 生命周期：子类 {@code @PostConstruct} 调用 {@link #init(String)} → 应用就绪后
+ * {@link #afterStartUp()} 启动通知消费者 → {@link #destroy()} 停止并关闭线程池。
+ * 分区变更的具体订阅更新由子类覆盖 {@code onTbApplicationEvent} 完成。
+ *
+ * @param <N> 通知队列中的 Protobuf 消息类型（如 {@code ToCoreNotificationMsg}）
+ * @see QueueConsumerManager
+ * @see PartitionChangeEvent
  */
 @RequiredArgsConstructor
 public abstract class AbstractConsumerService<N extends com.google.protobuf.GeneratedMessageV3> extends TbApplicationEventListener<PartitionChangeEvent> {
 
+    /** 使用运行时子类名作为 logger 名，便于区分 Core / RE 等实现的日志 */
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
-    // Actor缂侇垵宕电划鐑樼▔婵犱胶鐟撻柡鍌︽嫹
+    /** Actor 系统上下文：转发高优先级生命周期消息、访问 EntityView 等扩展服务 */
     protected final ActorSystemContext actorContext;
 
-    // 缂佸鍠愰崺娑㈡煀瀹ュ洨鏋傜紓鍌涙尭閻★拷
+    /** 租户配置缓存：租户/租户配置变更时驱逐 */
     protected final TbTenantProfileCache tenantProfileCache;
 
-    // 閻犱焦鍎抽ˇ顒勬煀瀹ュ洨鏋傜紓鍌涙尭閻★拷
+    /** 设备配置缓存：设备或设备配置变更时驱逐 */
     protected final TbDeviceProfileCache deviceProfileCache;
 
-    // 閻犙冨妤犲洭鏌婂鍥╂瀭缂傚倹鎸搁悺锟�
+    /** 资产配置缓存：资产或资产配置变更时驱逐 */
     protected final TbAssetProfileCache assetProfileCache;
 
-    // 閻犱緤绱曢悾鑽も偓娑欘殕椤斿瞼绱撻幘宕囨憼
+    /** 计算字段缓存：计算字段增删改时同步维护 */
     protected final CalculatedFieldCache calculatedFieldCache;
 
-    // API濞达綀娉曢弫銈夋偐閼哥鍋撴担瑙勭疀闁告棑鎷�
+    /** API 用量状态：租户/配置/客户变更时刷新或清理用量相关状态 */
     protected final TbApiUsageStateService apiUsageStateService;
 
-    // 闁告帒妫楃亸顖滅不閿涘嫭鍊為柡鍫濈Т婵拷
+    /** 分区与租户路由服务：驱逐租户路由、删除租户分区信息等 */
     protected final PartitionService partitionService;
 
-    // 閹煎瓨姊婚弫銈嗙鐎ｂ晜顐介柛娆愬灥缁旂兘宕抽敓锟�
+    /** Spring 事件发布器：将组件生命周期消息再广播给本进程内其它监听者 */
     protected final ApplicationEventPublisher eventPublisher;
 
+    /**
+     * JWT 设置服务（可选）。
+     * <p>
+     * 系统租户上的租户实体生命周期事件会触发重新加载 JWT 配置；
+     * 未启用 JWT 动态配置时为空。
+     */
     protected final Optional<JwtSettingsService> jwtSettingsService;
 
-    // 闂侇偅姘ㄩ悡鈥斥槈閸喍绱栨繛鎴濈墣閸ㄥ倿鎳撻崨顖ｅ悁闁荤偛妫楀▍锟�
+    /**
+     * 本服务类型的通知队列消费者管理器。
+     * <p>
+     * 订阅的是「按 serviceId 区分的通知 Topic」（点对点通知），与按实体哈希分区的主业务 Topic 不同。
+     * 在 {@link #init(String)} 中构建，在 {@link #startConsumers()} 中 subscribe + launch。
+     */
     protected QueueConsumerManager<TbProtoQueueMsg<N>> nfConsumer;
 
-    // 婵炴垵鐗愰崹鍌炴嚀閸涱垰娈犵紒瀣儐閻粓鏁嶉崼婵喰楅柟顑跨閵囧洨浜歌箛銉х
+    /**
+     * 消息消费与批内提交逻辑使用的线程池（CachedThreadPool）。
+     * <p>
+     * 同时作为通知消费者的 {@code consumerExecutor}；子类主通道消费者通常也复用此池。
+     */
     protected ExecutorService consumersExecutor;
 
-    // 缂佺媴绱曢幃濠勭棯鐠恒劉鏌ゆ慨鍦缁辨瑩宕堕崫鍕毎濠㈠爢鍐瘓闁挎冻鎷�
+    /**
+     * 管理类任务线程池（WorkStealingPool）。
+     * <p>
+     * 供子类交给 {@code MainQueueConsumerManager} 的 {@code taskExecutor}，
+     * 用于处理配置/分区等管理任务，与 poll 循环线程分离。大小由 {@link #getMgmtThreadPoolSize()} 决定。
+     */
     protected ExecutorService mgmtExecutor;
 
-    // 閻犲鍟€瑰磭鐥捄銊㈡煠婵湱濯寸槐娆撳础閺囩姴娈犵紒瀣儜缁憋拷
+    /**
+     * 单线程调度器。
+     * <p>
+     * 供子类消费者管理器在抢锁失败时延迟重试等场景使用。
+     */
     protected ScheduledExecutorService scheduler;
 
     /**
-     * 闁哄牆绉存慨鐔煎礆濠靛棭娼楅柛鏍ㄧ壄缁辨瑩妫侀埀顒勫捶閵娿儳鎽嶇紒顐ょ帛閻庮垶鏌呴悩鍙夊€甸悹瀣暟閺併倝鏁嶉敓锟�
-     * @param prefix 缂佹崘娉曢埢濂稿触瀹ュ懎顤呯紓鍌楀亾闁挎稑鐗忛弫銈嗙鎼淬垻鍨奸悹鍥ф濠€鍥礉閿涘嫯顫﹂柛銊ヮ儜缁憋拷
+     * 初始化公共线程池与通知消费者管理器。
+     * <p>
+     * 由子类在 {@code @PostConstruct} 中调用。此处只 build 消费者，不启动；
+     * 真正 subscribe/launch 在 {@link #afterStartUp()} → {@link #startConsumers()}。
+     *
+     * @param prefix 线程名前缀（如 {@code "tb-core"}），实际线程名形如 {@code prefix-consumer} /
+     *               {@code prefix-mgmt} / {@code prefix-consumer-scheduler}
      */
     public void init(String prefix) {
-        // 闁告帗绋戠紓鎾剁棯鐠恒劉鏌ゆ慨鍦缁辨瑩宕ㄩ挊澶嬪€抽悷娆忓鐎垫牠鏁嶉敓锟�<prefix>-<role>闁挎冻鎷�
         this.consumersExecutor = Executors.newCachedThreadPool(ThingsBoardThreadFactory.forName(prefix + "-consumer"));
         this.mgmtExecutor = ThingsBoardExecutors.newWorkStealingPool(getMgmtThreadPoolSize(), prefix + "-mgmt");
         this.scheduler = ThingsBoardExecutors.newSingleThreadScheduledExecutor(prefix + "-consumer-scheduler");
 
-        // 闁哄秷顫夊畵浣衡偓娑欏姉鐞氼偊寮靛鍛潳缂侇偉顕ч悗鐑藉级閵夛妇鈧垰顕欏ú顏佸亾濮樿京鍙€婵炴垵鐗愰崹鍌炴嚀閸涱垼鍚€闁荤偛妫楀▍锟�
         this.nfConsumer = QueueConsumerManager.<TbProtoQueueMsg<N>>builder()
                 .name(getServiceType().getLabel() + " Notifications")
-                .msgPackProcessor(this::processNotifications) // 缂備焦鍨甸悾鎯р槈閸喍绱栧璺哄閹﹪宕欓懞銉︽
-                .pollInterval(getNotificationPollDuration()) // 闂佹澘绉堕悿鍡樻姜椤旀鍤勯梻鍌涙尦濞堬拷
-                .consumerCreator(this::createNotificationsConsumer) // 缂備焦鍨甸悾鎯р槈閸絽鐎柤鏉挎噹閸ㄥ崬顕欓崫鍕彜
-                .consumerExecutor(consumersExecutor) // 闁圭ǹ娲ら悾楣冨箥瑜戦、鎴犵棯鐠恒劉鏌ゆ慨鐧告嫹
-                .threadPrefix("notifications") // 闁告劕鎳橀崕瀵哥棯鐠恒劉鏌ら柛鎾崇Ф缁憋拷
+                .msgPackProcessor(this::processNotifications)
+                .pollInterval(getNotificationPollDuration())
+                .consumerCreator(this::createNotificationsConsumer)
+                .consumerExecutor(consumersExecutor)
+                .threadPrefix("notifications")
                 .build();
     }
 
     /**
-     * 缂侇垵宕电划娲触椤栨艾袟闁告艾楠搁崹鍨叏鐎ｎ亜顕ф繛鎴濈墣閸ㄥ倿鎳撻崪鍐闂侇偅淇虹换鍎傽link AfterStartUp}婵炲鍔忚闁硅矇鍐ㄧ厬闁圭瑳鍡╂斀濡炪倕鎼花顓㈡晬閿燂拷
+     * 应用启动完成后启动消费者。
+     * <p>
+     * 使用 {@link AfterStartUp#REGULAR_SERVICE} 顺序，保证分区发现等更靠前的启动阶段已完成后再拉通知队列。
+     * 子类可覆盖 {@link #startConsumers()} 在调用 {@code super} 之外再启动主通道、用量统计等消费者。
      */
     @AfterStartUp(order = AfterStartUp.REGULAR_SERVICE)
     public void afterStartUp() {
@@ -141,52 +190,91 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
     }
 
     /**
-     * 闁告凹鍨版慨鈺呭箥閳ь剟寮垫径瀣ラ悹鎰攰閳ь剨鎷�
+     * 启动通知消费者：先订阅通知 Topic，再启动 poll 循环。
+     * <p>
+     * 默认只处理 {@link #nfConsumer}。子类通常 override 并 {@code super.startConsumers()} 后
+     * 再启动自身其它 {@code QueueConsumerManager}。
      */
     protected void startConsumers() {
-        // 閻犱降鍨藉Σ鍕槈閸喍绱栧☉鎾愁煼椤ｏ拷
         nfConsumer.subscribe();
-        // 闁告凹鍨版慨鈺佲槈閸絽鐎紒鎹愭硶閳伙拷
         nfConsumer.launch();
     }
 
     /**
-     * 闁告帒妫楃亸顖炲矗濡粯绾ù婊冾儎濞嗐垺娼婚崶銊﹀Б闁挎稑鐗呯划搴㈠緞閸曨厽鍊為柡鍫墯濠€鍥礉閿涘嫯顫﹂柛銊ヮ儑濞堟垿宕ｅΟ缁樼函闁挎冻鎷�
+     * 只处理与本服务类型匹配的分区变更事件。
+     * <p>
+     * 例如 Core 子类 {@code getServiceType() == TB_CORE} 时，忽略 Rule Engine 的
+     * {@link PartitionChangeEvent}，避免无关重订阅。
+     *
+     * @param event 分区变更事件
+     * @return {@code true} 表示事件应交给本监听器后续处理
      */
     @Override
     protected boolean filterTbApplicationEvent(PartitionChangeEvent event) {
         return event.getServiceType() == getServiceType();
     }
 
+    /**
+     * @return 本消费者服务所属的服务类型，用于过滤分区事件、命名通知消费者等
+     */
     protected abstract ServiceType getServiceType();
 
+    /**
+     * 停止通知消费者。
+     * <p>
+     * 子类 override 时应先或后调用 {@code super.stopConsumers()}，并停止自身持有的其它消费者。
+     */
     protected void stopConsumers() {
         nfConsumer.stop();
     }
 
+    /**
+     * @return 通知队列 poll 间隔（毫秒）
+     */
     protected abstract long getNotificationPollDuration();
 
+    /**
+     * @return 单批通知消息处理的最长等待时间（毫秒）；超时后仍会 commit offset
+     */
     protected abstract long getNotificationPackProcessingTimeout();
 
+    /**
+     * @return {@link #mgmtExecutor} 的并行度
+     */
     protected abstract int getMgmtThreadPoolSize();
 
+    /**
+     * 创建底层通知队列消费者实例（Topic / group 由各服务的 QueueFactory 决定）。
+     *
+     * @return 可被 {@link QueueConsumerManager} 托管的消费者
+     */
     protected abstract TbQueueConsumer<TbProtoQueueMsg<N>> createNotificationsConsumer();
 
     /**
-     * 濠㈣泛瀚幃濠囨焻濮樿京鍙€婵炴垵鐗婃导鍛村礌閸滃啰绀勯柡宥嚽圭缓鎯规担琛℃煠闁挎冻鎷�
-     * @param msgs 闁告ḿ鍠庨～鎰槈閸喍绱栭柛鎺擃殙閵嗭拷
-     * @param consumer 婵炴垵鐗愰崹鍌炴嚀閸涱厾鏉藉〒姘儜缁辨瑩鎮介妸銈囪壘闁圭粯鍔掑锕傚磻韫囨泤鈺呮煂韫囥儳绀�
+     * 通知队列一批消息的通用处理模板。
+     * <p>
+     * 流程：
+     * <ol>
+     *   <li>为每条消息分配 UUID，构建 pending 映射与 {@link TbPackProcessingContext}；</li>
+     *   <li>逐条调用 {@link #handleNotification}，通过 {@link TbPackCallback} 汇总成功/失败；</li>
+     *   <li>等待整批完成，最长 {@link #getNotificationPackProcessingTimeout()}；</li>
+     *   <li>超时则打印仍未完成或已失败的消息；</li>
+     *   <li>无论是否超时，最后 {@code consumer.commit()}。</li>
+     * </ol>
+     * 与主通道批处理的区别：此处在当前消费线程内同步提交各条通知，不再另起
+     * {@code consumersExecutor.submit} 包一层（具体异步由子类 {@code handleNotification} 自行决定）。
+     *
+     * @param msgs     本批通知消息
+     * @param consumer 拉取本批消息的消费者，用于 commit
+     * @throws Exception 等待 latch 被中断等场景可能抛出
      */
     protected void processNotifications(List<TbProtoQueueMsg<N>> msgs, TbQueueConsumer<TbProtoQueueMsg<N>> consumer) throws Exception {
-        // 1. 婵炴垵鐗婃导鍛村礌閸涢偊妫呴柨娑樼墔鐠愮喎袙韫囨梹钂嬫繛鎴濈墛娴煎懘宕氶崱娑樺赋闁哥儐鍨粩纰擠闁挎冻鎷�
         List<IdMsgPair<N>> orderedMsgList = msgs.stream().map(msg -> new IdMsgPair<>(UUID.randomUUID(), msg)).toList();
         ConcurrentMap<UUID, TbProtoQueueMsg<N>> pendingMap = orderedMsgList.stream().collect(
                 Collectors.toConcurrentMap(IdMsgPair::getUuid, IdMsgPair::getMsg));
         CountDownLatch processingTimeoutLatch = new CountDownLatch(1);
-        // 2. 闁哄瀚紓鎾村緞閸曨厽鍊炲☉鎾筹梗缁楀懘寮敓锟�
         TbPackProcessingContext<TbProtoQueueMsg<N>> ctx = new TbPackProcessingContext<>(
                 processingTimeoutLatch, pendingMap, new ConcurrentHashMap<>());
-        // 3. 妤犵偞鍎奸、鎴炲緞閸曨厽鍊炴繛鎴濈墛娴硷拷
         orderedMsgList.forEach(element -> {
             UUID id = element.getUuid();
             TbProtoQueueMsg<N> msg = element.getMsg();
@@ -199,82 +287,74 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
                 callback.onFailure(e);
             }
         });
-        // 4. 缂佹稑顦欢鐔稿緞閸曨厽鍊為悗鐟版湰閸ㄦ岸鏁嶉崼锝囆㈤柡鍐煐濠р偓闁告帟顔愮槐锟�
         if (!processingTimeoutLatch.await(getNotificationPackProcessingTimeout(), TimeUnit.MILLISECONDS)) {
-            // 閻犱焦婢樼紞宥囨惥閸涱喗顦ф繛鎴濈墛娴硷拷
             ctx.getAckMap().forEach((id, msg) -> log.warn("[{}] Timeout to process notification: {}", id, msg.getValue()));
             ctx.getFailedMap().forEach((id, msg) -> log.warn("[{}] Failed to process notification: {}", id, msg.getValue()));
         }
-        // 5. 闁圭粯鍔掑锕€鈽夐崼锝呯€柛瀣箳浜涢梺璇ф嫹
         consumer.commit();
     }
 
     /**
-     * 濠㈣泛瀚幃濠勭磼閸曨亝顐介柣銏㈠枎閹筹繝宕ㄩ妸锔藉焸濞存粌顑勫▎銏ゆ儍閸曨剛澹嬮煫鍥у暢閻箖鎮介柆宥佸亾閺勫繒甯�
-     * 闁哄秷顫夊畵浣圭▔瀹ュ懏鍊遍柣銊ュ閻ゅ嫭鎷呴幘鎯邦潶闁搞劌顑嗘晶鐣屾偘瀹€鈧ù澶嬫償閺冨倹鐣辩紓鍌涙尭閻°劍寰勬潏銊︽珡闁告粌鐬兼慨鎼佸箑娴ｈ绾柡鍌滃閹奸攱鎷呴敓锟�
-     * @param id 婵炴垵鐗婃导鍛崉閻斿鍤婭D闁挎稑鐗忛弫銈嗙鎼淬垺锛夐煫鍥殙閹风兘鐓搴ｇ
-     * @param componentLifecycleMsg 闁汇垻鍠庨幊锟犲川閵婏附鍩傚ù婊冾儎濞嗐垹鈽夐崼鐔剁礀
+     * 处理组件生命周期消息：按实体类型刷新本地缓存 / 用量状态 / 分区租户信息，
+     * 再对本进程发布 Spring 事件，并以高优先级投递到 App Actor。
+     * <p>
+     * 各实体类型要点：
+     * <ul>
+     *   <li>租户配置：驱逐缓存；UPDATED 时通知 API 用量；</li>
+     *   <li>系统租户实体：重新加载 JWT 设置后直接返回（不再走后续 Actor 转发前的租户分支逻辑）；</li>
+     *   <li>普通租户：驱逐配置与路由缓存；UPDATED/DELETED 时更新或删除用量，DELETED 时移除租户分区信息；</li>
+     *   <li>设备/资产及其 Profile：驱逐对应缓存；</li>
+     *   <li>Entity View：委托 {@code TbEntityViewService}（若存在）；</li>
+     *   <li>API 用量状态、客户删除、计算字段增删改：更新对应服务或缓存。</li>
+     * </ul>
+     * 子类在 {@link #handleNotification} 中解析出生命周期协议后，通常调用本方法完成公共副作用。
+     *
+     * @param id                     当前通知处理 ID（日志关联）
+     * @param componentLifecycleMsg  已反序列化的生命周期消息
      */
     protected final void handleComponentLifecycleMsg(UUID id, ComponentLifecycleMsg componentLifecycleMsg) {
         TenantId tenantId = componentLifecycleMsg.getTenantId();
         log.debug("[{}][{}][{}] Received Lifecycle event: {}", tenantId, componentLifecycleMsg.getEntityId().getEntityType(),
                 componentLifecycleMsg.getEntityId(), componentLifecycleMsg.getEvent());
-        // 闁圭ǹ顦悿鍕媴閹炬儼顫﹂柛銊ヮ儓閻箖鎮介崡鐑嗘П闁荤儑鎷�
         if (EntityType.TENANT_PROFILE.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            // 缂佸鍠愰崺娑㈡煀瀹ュ洨鏋傞柛娆惿戝ú鎸庡緞閸曨厽鍊�
             TenantProfileId tenantProfileId = new TenantProfileId(componentLifecycleMsg.getEntityId().getId());
-            // 濠㈡儼椴搁弲銉х矓閻旂ǹ鐓曢梺鏉跨Ф閻ゅ棛绱撻幘宕囨憼
             tenantProfileCache.evict(tenantProfileId);
-            // 濠碘€冲€归悘澶愬及椤栨粠娼抽柟瀵稿厴閸樸倗绱旈鐓庣秮闁哄洩鎻槐婵嬬嵁閼稿灚绾柡鍌滄PI濞达綀娉曢弫銈夋偐閼哥鍋撴笟濠勭闁搞儳濮崇拹鐔虹矓閻旂ǹ鐓曢梺鏉跨Ф閻ゅ棝宕€瑰窋i濞达綀娉曢弫銈夋⒔閹邦厾銈︾紒娑橆槺濞村宕楃粵鍦
             if (componentLifecycleMsg.getEvent().equals(ComponentLifecycleEvent.UPDATED)) {
                 apiUsageStateService.onTenantProfileUpdate(tenantProfileId);
             }
         } else if (EntityType.TENANT.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            // 缂佸鍠愰崺娑㈠矗濡粯绾璺哄閹拷
             if (TenantId.SYS_TENANT_ID.equals(tenantId)) {
-                // 濠碘€冲€归悘澶愬矗濡粯绾柣銊ュ濡插摜鍖栭懡銈囧煚缂佸鍠愰崺娑㈡晬鐏炶棄鐏熼梺鎻掔У閺屽﹪宕濋悩鐑樼グJWT閻犱礁澧介悿锟�
                 jwtSettingsService.ifPresent(JwtSettingsService::reloadJwtSettings);
                 return;
             } else {
-                // 闁哄拋鍣ｉ埀顒佹皑椤倝骞嬮崙銈囩獥濠㈡儼椴搁弲銉х矓閻旂ǹ鐓曠紓鍌涙尭閻°劑鐛捄鎭掍杭闁轰礁鐗嗛崹搴ㄥ礌鏉炴媽鍘柣銊ュ椤倝骞嬫搴ｅ閻庢冻鎷�
                 tenantProfileCache.evict(tenantId);
                 partitionService.evictTenantInfo(tenantId);
                 if (componentLifecycleMsg.getEvent().equals(ComponentLifecycleEvent.UPDATED)) {
-                    // 濠碘€冲€归悘澶愬及椤栨粠娼抽柟鏉戝槻瑜板寮存潏鍓х闁告帗鐟﹀ú鍧楀棘閻у摉I濞达綀娉曢弫銈夋偐閼哥鍋撻敓锟�
                     apiUsageStateService.onTenantUpdate(tenantId);
                 } else if (componentLifecycleMsg.getEvent().equals(ComponentLifecycleEvent.DELETED)) {
-                    // 濠碘€冲€归悘澶愬及椤栨粠娼抽柟鏉戝槻閸ㄥ綊姊介妶蹇曠闁告帗鐟ラ崹褰掓⒔椤ヮ湒I濞达綀娉曢弫銈夋偐閼哥鍋撴担姝屽珯闁告帞濞€濞呭酣宕氶崱妤€闅樼紒澶屽枑閸╂稒绌遍埄鍐х礀缂傚倹鎸搁悺锟�
                     apiUsageStateService.onTenantDelete(tenantId);
                     partitionService.removeTenant(tenantId);
                 }
             }
         } else if (EntityType.DEVICE_PROFILE.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            // 閻犱焦鍎抽ˇ顒勬煀瀹ュ洨鏋傞柛娆惿戝ú鍧楁晬濮橆兙浜奸柡浣哥墣椤旀洘寰勯崶顒€甯崇紓鍐惧枤缁憋妇鈧冻鎷�
             deviceProfileCache.evict(tenantId, new DeviceProfileId(componentLifecycleMsg.getEntityId().getId()));
         } else if (EntityType.DEVICE.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            // 閻犱焦鍎抽ˇ顒勫矗濡粯绾柨娑欒壘閵囨垿寮崼锝庡晭濠㈣泛娲ㄥù澶愬礂瀹曞洨澶勯悗娑虫嫹
             deviceProfileCache.evict(tenantId, new DeviceId(componentLifecycleMsg.getEntityId().getId()));
         } else if (EntityType.ASSET_PROFILE.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            // 閻犙冨妤犲洭鏌婂鍥╂瀭闁告瑦蓱濞插潡鏁嶅顑句杭闁轰礁鐗愮粊顐ｇ瑜旈崢銈囩磾椤斿墽澶勯悗娑虫嫹
             assetProfileCache.evict(tenantId, new AssetProfileId(componentLifecycleMsg.getEntityId().getId()));
         } else if (EntityType.ASSET.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            // 閻犙冨妤犲洭宕ｅΟ缁樼函闁挎稒鑹鹃妵鎴﹀极閸絿銈ù婧犲懏绁查柛蹇撶－缁憋妇鈧冻鎷�
             assetProfileCache.evict(tenantId, new AssetId(componentLifecycleMsg.getEntityId().getId()));
         } else if (EntityType.ENTITY_VIEW.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            // 閻庡湱鍋樼紞瀣喆閸℃绂堥柛娆惿戝ú鍧楁晬濮樿櫕绁柛娆愬灩缁壆鈧湱鍋樼紞瀣喆閸℃绂堥柡鍫濈Т婵喐寰勯崟顓熷€�
             if (actorContext.getTbEntityViewService() != null) {
                 actorContext.getTbEntityViewService().onComponentLifecycleMsg(componentLifecycleMsg);
             }
         } else if (EntityType.API_USAGE_STATE.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            // API濞达綀娉曢弫銈夋偐閼哥鍋撴担绋跨秮闁哄洩鎻槐浼村即鐎涙ɑ鐓€API濞达綀娉曢弫銈夋偐閼哥鍋撻敓锟�
             apiUsageStateService.onApiUsageStateUpdate(tenantId);
         } else if (EntityType.CUSTOMER.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            // 閻庡箍鍨洪崺娑㈠礆閻樼粯鐝熼柨娑欑缁斿鎮堕崱娆愮ゲ闁稿繒鐓I濞达綀娉曢弫銈夋偐閼哥鍋撻敓锟�
             if (componentLifecycleMsg.getEvent() == ComponentLifecycleEvent.DELETED) {
                 apiUsageStateService.onCustomerDelete((CustomerId) componentLifecycleMsg.getEntityId());
             }
         } else if (EntityType.CALCULATED_FIELD.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            // 閻犱緤绱曢悾鑽も偓娑欘殕椤斿矂宕ｅΟ缁樼函闁挎稒纰嶅ú鍧楀棘閹峰矈鍚€缂佺姵顨呴悺褍鈻撻悽鐢靛閻庢冻鎷�
             if (componentLifecycleMsg.getEvent() == ComponentLifecycleEvent.CREATED) {
                 calculatedFieldCache.addCalculatedField(tenantId, (CalculatedFieldId) componentLifecycleMsg.getEntityId());
             } else if (componentLifecycleMsg.getEvent() == ComponentLifecycleEvent.UPDATED) {
@@ -283,15 +363,26 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
                 calculatedFieldCache.evict((CalculatedFieldId) componentLifecycleMsg.getEntityId());
             }
         }
-        // 闁告瑦鍨电粩閿嬬鐎ｂ晜顐介柨娑樼墣琚濋柛娆愬灥閸欑偓绂掗弽顐ｇ＇闁告凹鍓欏▍鎺楁晬閿燂拷
         eventPublisher.publishEvent(componentLifecycleMsg);
         log.trace("[{}] Forwarding component lifecycle message to App Actor {}", id, componentLifecycleMsg);
-        // 閺夌儐鍓欒ぐ鍌滅磼濮楁紲tor缂侇垵宕电划鐑樺緞閸曨厽鍊�
         actorContext.tellWithHighPriority(componentLifecycleMsg);
     }
 
+    /**
+     * 由子类实现：将单条通知消息路由到具体业务处理，并在适当时机触发 {@code callback}。
+     *
+     * @param id       本条消息在批处理中的关联 ID
+     * @param msg      队列封装的通知协议消息
+     * @param callback 成功/失败回调，驱动 {@link TbPackProcessingContext} 完成计数
+     * @throws Exception 处理失败且未自行调用 {@code callback.onFailure} 时可由框架捕获
+     */
     protected abstract void handleNotification(UUID id, TbProtoQueueMsg<N> msg, TbCallback callback) throws Exception;
 
+    /**
+     * Bean 销毁：停止通知消费者并立即关闭三类线程池。
+     * <p>
+     * 子类若持有额外消费者，应覆盖本方法或确保其 {@link #stopConsumers()} 实现中已全部停止。
+     */
     @PreDestroy
     public void destroy() {
         stopConsumers();

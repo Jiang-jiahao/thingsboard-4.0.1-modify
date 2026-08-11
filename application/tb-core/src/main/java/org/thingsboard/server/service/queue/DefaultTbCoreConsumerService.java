@@ -1,5 +1,5 @@
 /**
- * Copyright 漏 2016-2025 The Thingsboard Authors
+ * Copyright © 2016-2025 The Thingsboard Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,51 +118,134 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * TB Core 节点的默认队列消费服务实现。
+ * <p>
+ * 本类是 Core 服务侧「从消息队列取消息并分发到业务组件」的中枢：在分区发现就绪后订阅本节点负责的 Topic 分区，
+ * 将各类协议消息路由到设备状态、订阅管理、RPC、OTA、用量统计、通知调度、EDQS 等服务。
+ * <p>
+ * 消费通道一览：
+ * <ul>
+ *   <li>{@link #mainConsumer}：主通道，消费 {@link ToCoreMsg}
+ *       （订阅管理、设备 Actor、设备在线/活跃、通知调度、错误/生命周期事件等），
+ *       由 {@link MainQueueConsumerManager} 管理，支持按分区创建消费者；</li>
+ *   <li>通知通道：继承自 {@link AbstractConsumerService}，消费 {@link ToCoreNotificationMsg}
+ *       （本机订阅推送、Core 启动协调、设备 RPC 响应、队列变更、版本控制响应、资源缓存失效等）；</li>
+ *   <li>{@link #usageStatsConsumer}：API / 用量统计消息；</li>
+ *   <li>{@link #firmwareStatesConsumer}：OTA 包状态更新（带限速，避免短时间打爆下游）。</li>
+ * </ul>
+ * 分区变更时通过 {@link #onTbApplicationEvent(PartitionChangeEvent)} 更新主消费与用量统计订阅；
+ * 一批消息采用「提交处理 + 超时等待回调」模式，超时后仍会 {@code commit}，由上层重试/幂等策略兜底。
+ *
+ * @see TbCoreConsumerService
+ * @see AbstractConsumerService
+ * @see MainQueueConsumerManager
+ */
 @Service
 @Slf4j
 @TbCoreComponent
 public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCoreNotificationMsg> implements TbCoreConsumerService {
 
+    /** 主队列 / 通知队列的 poll 间隔（毫秒），对应配置 {@code queue.core.poll-interval} */
     @Value("${queue.core.poll-interval}")
     private long pollInterval;
+
+    /**
+     * 单批消息处理的最长等待时间（毫秒）。
+     * <p>
+     * 批次内每条消息通过 {@link TbPackCallback} 在成功或失败时减少待处理计数；
+     * 若在超时前未全部完成，会取消尚未提交完的提交任务并记录超时/失败明细，然后仍提交 offset。
+     */
     @Value("${queue.core.pack-processing-timeout}")
     private long packProcessingTimeout;
+
+    /**
+     * 主通道是否「每分区一个消费者」。
+     * <p>
+     * {@code true} 时隔离性更好、分区故障不易互相拖累；{@code false} 时单消费者订阅全部分区，资源占用更少。
+     */
     @Value("${queue.core.consumer-per-partition:true}")
     private boolean consumerPerPartition;
+
+    /** 是否启用本服务内的消费统计（路由类型计数等），并由定时任务打印 */
     @Value("${queue.core.stats.enabled:false}")
     private boolean statsEnabled;
 
+    /**
+     * OTA 状态消息整批处理的时间预算窗口（毫秒）。
+     * <p>
+     * 与 {@link #firmwarePackSize} 一起决定「单条成功处理后建议休眠多久」，用于平滑推送节奏。
+     */
     @Value("${queue.core.ota.pack-interval-ms:60000}")
     private long firmwarePackInterval;
+
+    /**
+     * 在 {@link #firmwarePackInterval} 时间窗内期望处理的 OTA 记录条数上限（用于计算单条间隔）。
+     */
     @Value("${queue.core.ota.pack-size:100}")
     private int firmwarePackSize;
 
+    /** 设备连接/活跃/断开/不活跃等状态服务 */
     private final DeviceStateService stateService;
+    /** 租户 API 用量与配额相关统计处理 */
     private final TbApiUsageStateService statsService;
+    /** 本机 WebSocket / 本地订阅推送服务 */
     private final TbLocalSubscriptionService localSubscriptionService;
+    /** 跨节点订阅管理（实体订阅、遥测/属性/告警变更分发） */
     private final SubscriptionManagerService subscriptionManagerService;
+    /** Core 侧设备 RPC：向设备 Actor 转发请求、处理规则引擎侧响应 */
     private final TbCoreDeviceRpcService tbCoreDeviceRpcService;
+    /** OTA 包状态机处理 */
     private final OtaPackageStateService firmwareStateService;
+    /** Git 版本控制队列响应处理 */
     private final GitVersionControlQueueService vcQueueService;
+    /** 通知请求调度（按时间触发发送） */
     private final NotificationSchedulerService notificationSchedulerService;
+    /** 通知规则触发器处理 */
     private final NotificationRuleProcessor notificationRuleProcessor;
+    /** 创建各类 Core 队列消费者的工厂 */
     private final TbCoreQueueFactory queueFactory;
+    /** 图片等资源 ETag / 缓存失效 */
     private final TbImageService imageService;
+    /** REST API 经规则引擎调用后的响应回调 */
     private final RuleEngineCallService ruleEngineCallService;
+    /** EDQS（实体数据查询服务）系统消息处理 */
     private final EdqsService edqsService;
+    /** 本服务消费路径上的统计计数器 */
     private final TbCoreConsumerStats stats;
 
-    // 鏍稿績娑堟伅娑堣垂鑰�
+    /**
+     * 主消息消费者管理器：订阅 TB_CORE 主 Topic，按分区消费 {@link ToCoreMsg}。
+     * <p>
+     * 分区集合由 {@link PartitionChangeEvent#getCorePartitions()} 驱动更新；
+     * 消息批处理入口为 {@link #processMsgs}。
+     */
     private MainQueueConsumerManager<TbProtoQueueMsg<ToCoreMsg>, QueueConfig> mainConsumer;
 
-    // 缁熻淇℃伅娑堣垂鑰�
+    /**
+     * 用量统计消费者：Topic 随 Core 分区变化而重映射（同分区号、不同 Topic 名）。
+     */
     private QueueConsumerManager<TbProtoQueueMsg<ToUsageStatsServiceMsg>> usageStatsConsumer;
 
-    // 鍥轰欢鐘舵€佹秷璐硅€�
+    /**
+     * OTA 包状态消费者：启动时全局订阅并 launch，不随分区事件在本类中反复 update
+     * （其分区语义由底层消费者/工厂决定）。
+     */
     private QueueConsumerManager<TbProtoQueueMsg<ToOtaPackageStateServiceMsg>> firmwareStatesConsumer;
 
+    /**
+     * 设备活跃类事件的单线程执行器。
+     * <p>
+     * 连接、活跃、断开、不活跃、不活跃超时更新等消息先入队到此线程再调 {@link DeviceStateService}，
+     * 避免在消费线程上阻塞，并保证同类状态更新串行，降低竞态。
+     */
     private volatile ListeningExecutorService deviceActivityEventsExecutor;
 
+    /**
+     * 组装 Core 消费所需的全部协作服务，并初始化父类中的分区/档案缓存等基础设施。
+     * <p>
+     * 消费者实例本身在 {@link #init()} 中创建，构造阶段只保存依赖。
+     */
     public DefaultTbCoreConsumerService(TbCoreQueueFactory tbCoreQueueFactory,
                                         ActorSystemContext actorContext,
                                         DeviceStateService stateService,
@@ -204,13 +287,18 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
         this.edqsService = edqsService;
     }
 
+    /**
+     * Bean 初始化：调用父类 {@code init("tb-core")} 准备公共线程池与通知消费者，
+     * 再创建设备活跃事件执行器以及主通道、用量统计、OTA 三类消费者管理器。
+     * <p>
+     * 注意：此处只 build / 配置消费者，真正 subscribe / launch 在
+     * {@link #startConsumers()}（以及父类通知消费者启动逻辑）中完成。
+     */
     @PostConstruct
     public void init() {
         super.init("tb-core");
-        // 璁惧娲昏穬浜嬩欢鎵ц鍣�
         this.deviceActivityEventsExecutor = MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor(ThingsBoardThreadFactory.forName("tb-core-device-activity-events-executor")));
 
-        // 鏋勫缓鏍稿績娑堟伅娑堣垂鑰咃紙澶勭悊璁惧鐘舵€�/RPC/璁㈤槄绛夋秷鎭級
         this.mainConsumer = MainQueueConsumerManager.<TbProtoQueueMsg<ToCoreMsg>, QueueConfig>builder()
                 .queueKey(new QueueKey(ServiceType.TB_CORE))
                 .config(QueueConfig.of(consumerPerPartition, pollInterval))
@@ -238,6 +326,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                 .build();
     }
 
+    /**
+     * Bean 销毁：先走父类销毁（停公共资源），再强制关闭设备活跃事件线程池。
+     */
     @PreDestroy
     public void destroy() {
         super.destroy();
@@ -246,27 +337,34 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
         }
     }
 
+    /**
+     * 启动各消费通道。
+     * <p>
+     * 顺序：父类启动通知消费者 → OTA 订阅并 launch → 用量统计 launch。
+     * 主通道 {@link #mainConsumer} 不在此处 launch 空跑，而是等分区事件
+     * {@link #onTbApplicationEvent} 带上分区后再 {@code update}，由
+     * {@link MainQueueConsumerManager} 按分区创建并启动消费者。
+     */
     @Override
     protected void startConsumers() {
-        // 鍚姩閫氱煡娑堟伅娑堣垂鑰�
         super.startConsumers();
-        // 鍚姩鍥轰欢鐘舵€佹秷璐硅€�
         firmwareStatesConsumer.subscribe();
         firmwareStatesConsumer.launch();
-        // 鍚姩缁熻淇℃伅娑堣垂鑰�
         usageStatsConsumer.launch();
     }
 
     /**
-     * 褰撳垎鍖哄彂鐢熸敼鍙樻椂瑙﹀彂
-     * @param event
+     * 本节点 Core 分区集合发生变化时的回调。
+     * <p>
+     * 将最新 Core 分区交给 {@link #mainConsumer}；用量统计 Topic 则按「相同分区信息、
+     * 替换为 usage-stats Topic」重新 subscribe，保证与主分区归属一致。
+     *
+     * @param event 分区变更事件，其中 {@link PartitionChangeEvent#getCorePartitions()} 为本节点应负责的 Core 分区
      */
     @Override
     protected void onTbApplicationEvent(PartitionChangeEvent event) {
         log.debug("Subscribing to partitions: {}", event.getCorePartitions());
-        // 杩欓噷鑾峰彇璇ユ湇鍔″櫒瀹炰緥鐨勬牳蹇冭闃呭垎鍖哄苟璁㈤槄topic
         mainConsumer.update(event.getCorePartitions());
-        // 鏇存柊缁熻娑堣垂鑰呭垎鍖�
         usageStatsConsumer.subscribe(event.getCorePartitions()
                 .stream()
                 .map(tpi -> tpi.newByTopic(usageStatsConsumer.getConsumer().getTopic()))
@@ -274,11 +372,24 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 娑堟伅澶勭悊瀹為檯閫昏緫
-     * @param msgs
-     * @param consumer
-     * @param config
-     * @throws Exception
+     * 主通道一批 {@link ToCoreMsg} 的处理入口。
+     * <p>
+     * 处理模型：
+     * <ol>
+     *   <li>为每条消息生成随机 UUID，放入 pending 映射；</li>
+     *   <li>在 {@code consumersExecutor} 中串行提交每条消息的路由逻辑，成功/失败通过
+     *       {@link TbPackCallback} 更新 {@link TbPackProcessingContext}；</li>
+     *   <li>当前线程用 {@link CountDownLatch} 等待整批完成，最长 {@link #packProcessingTimeout}；</li>
+     *   <li>超时则尝试取消提交 Future，打印仍未 ack 或已失败的消息；</li>
+     *   <li>无论是否超时，最后对当前消费者 {@code commit} offset。</li>
+     * </ol>
+     * 路由目标包括：订阅管理、设备 Actor、设备状态（含连接/活跃等）、设备 Actor 通知（含 RPC）、
+     * 通知调度、错误事件、生命周期事件等。
+     *
+     * @param msgs     本批协议消息，由 {@link MainQueueConsumerManager} 的 poll 循环传入
+     * @param consumer 拉取到本批消息的底层消费者，用于 commit
+     * @param config   当前队列配置（本方法未直接使用，满足处理器签名）
+     * @throws Exception 等待超时 latch 被中断等场景可能抛出
      */
     private void processMsgs(List<TbProtoQueueMsg<ToCoreMsg>> msgs, TbQueueConsumer<TbProtoQueueMsg<ToCoreMsg>> consumer, QueueConfig config) throws Exception {
         List<IdMsgPair<ToCoreMsg>> orderedMsgList = msgs.stream().map(msg -> new IdMsgPair<>(UUID.randomUUID(), msg)).toList();
@@ -297,63 +408,48 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                 try {
                     ToCoreMsg toCoreMsg = msg.getValue();
                     pendingMsgHolder.setMsg(toCoreMsg);
-                    // 娑堟伅璺敱 - 鏍规嵁娑堟伅绫诲瀷鍒嗗彂鍒颁笉鍚屾湇鍔�
                     if (toCoreMsg.hasToSubscriptionMgrMsg()) {
-                        // 璁㈤槄绠＄悊鏈嶅姟娑堟伅
                         log.trace("[{}] Forwarding message to subscription manager service {}", id, toCoreMsg.getToSubscriptionMgrMsg());
                         forwardToSubMgrService(toCoreMsg.getToSubscriptionMgrMsg(), callback);
                     } else if (toCoreMsg.hasToDeviceActorMsg()) {
-                        // 璁惧actor娑堟伅
                         log.trace("[{}] Forwarding message to device actor {}", id, toCoreMsg.getToDeviceActorMsg());
                         forwardToDeviceActor(toCoreMsg.getToDeviceActorMsg(), callback);
                     } else if (toCoreMsg.hasDeviceStateServiceMsg()) {
-                        // 璁惧鐘舵€佹湇鍔℃秷鎭�
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceStateServiceMsg());
                         forwardToStateService(toCoreMsg.getDeviceStateServiceMsg(), callback);
                     } else if (toCoreMsg.hasDeviceConnectMsg()) {
-                        // 璁惧杩炴帴浜嬩欢
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceConnectMsg());
                         forwardToStateService(toCoreMsg.getDeviceConnectMsg(), callback);
                     } else if (toCoreMsg.hasDeviceActivityMsg()) {
-                        // 璁惧娲诲姩浜嬩欢
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceActivityMsg());
                         forwardToStateService(toCoreMsg.getDeviceActivityMsg(), callback);
                     } else if (toCoreMsg.hasDeviceDisconnectMsg()) {
-                        // 璁惧鏂紑杩炴帴浜嬩欢
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceDisconnectMsg());
                         forwardToStateService(toCoreMsg.getDeviceDisconnectMsg(), callback);
                     } else if (toCoreMsg.hasDeviceInactivityMsg()) {
-                        // 璁惧涓嶆椿鍔ㄤ簨浠�
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceInactivityMsg());
                         forwardToStateService(toCoreMsg.getDeviceInactivityMsg(), callback);
                     } else if (toCoreMsg.hasDeviceInactivityTimeoutUpdateMsg()) {
-                        // 璁惧涓嶆椿鍔ㄨ秴鏃舵洿鏂�
                         log.trace("[{}] Forwarding message to device state service {}", id, toCoreMsg.getDeviceInactivityTimeoutUpdateMsg());
                         forwardToStateService(toCoreMsg.getDeviceInactivityTimeoutUpdateMsg(), callback);
                     } else if (toCoreMsg.hasToDeviceActorNotification()) {
-                        // 璁惧Actor閫氱煡锛堝RPC璇锋眰锛�
                         TbActorMsg actorMsg = ProtoUtils.fromProto(toCoreMsg.getToDeviceActorNotification());
                         if (actorMsg != null) {
                             if (actorMsg.getMsgType().equals(MsgType.DEVICE_RPC_REQUEST_TO_DEVICE_ACTOR_MSG)) {
-                                // 澶勭悊璁惧RPC璇锋眰
                                 tbCoreDeviceRpcService.forwardRpcRequestToDeviceActor((ToDeviceRpcRequestActorMsg) actorMsg);
                             } else {
-                                // 澶勭悊鍏跺畠
                                 log.trace("[{}] Forwarding message to App Actor {}", id, actorMsg);
                                 actorContext.tell(actorMsg);
                             }
                         }
                         callback.onSuccess();
                     } else if (toCoreMsg.hasNotificationSchedulerServiceMsg()) {
-                        // 閫氱煡璋冨害鏈嶅姟娑堟伅
                         TransportProtos.NotificationSchedulerServiceMsg notificationSchedulerServiceMsg = toCoreMsg.getNotificationSchedulerServiceMsg();
                         log.trace("[{}] Forwarding message to notification scheduler service {}", id, toCoreMsg.getNotificationSchedulerServiceMsg());
                         forwardToNotificationSchedulerService(notificationSchedulerServiceMsg, callback);
                     } else if (toCoreMsg.hasErrorEventMsg()) {
-                        // 閿欒浜嬩欢
                         forwardToEventService(toCoreMsg.getErrorEventMsg(), callback);
                     } else if (toCoreMsg.hasLifecycleEventMsg()) {
-                        // 鐢熷懡鍛ㄦ湡浜嬩欢
                         forwardToEventService(toCoreMsg.getLifecycleEventMsg(), callback);
                     }
                 } catch (Throwable e) {
@@ -375,100 +471,112 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
         consumer.commit();
     }
 
+    /**
+     * @return 固定为 {@link ServiceType#TB_CORE}，供父类分区与通知逻辑识别服务类型
+     */
     @Override
     protected ServiceType getServiceType() {
         return ServiceType.TB_CORE;
     }
 
+    /**
+     * @return 通知队列 poll 间隔，与主队列共用 {@link #pollInterval}
+     */
     @Override
     protected long getNotificationPollDuration() {
         return pollInterval;
     }
 
+    /**
+     * @return 通知批处理超时，与主队列共用 {@link #packProcessingTimeout}
+     */
     @Override
     protected long getNotificationPackProcessingTimeout() {
         return packProcessingTimeout;
     }
 
+    /**
+     * 管理任务线程池大小：至少 4，且不小于 CPU 核数。
+     * <p>
+     * 该池由父类创建，并作为 {@link #mainConsumer} 的 {@code taskExecutor}，
+     * 用于处理配置/分区等管理任务，而非消息 poll 循环本身。
+     */
     @Override
     protected int getMgmtThreadPoolSize() {
         return Math.max(Runtime.getRuntime().availableProcessors(), 4);
     }
 
+    /**
+     * 创建 Core 通知队列消费者，供父类通知消费循环使用。
+     */
     @Override
     protected TbQueueConsumer<TbProtoQueueMsg<ToCoreNotificationMsg>> createNotificationsConsumer() {
         return queueFactory.createToCoreNotificationsMsgConsumer();
     }
 
     /**
-     * 澶勭悊閫氱煡娑堟伅 - 鏉ヨ嚜鍏朵粬鏈嶅姟鐨勯€氱煡
-     * @param id 娑堟伅ID
-     * @param msg 鍗忚娑堟伅
-     * @param callback 鍥炶皟鎺ュ彛
+     * 处理单条 {@link ToCoreNotificationMsg}（由父类通知消费框架调用）。
+     * <p>
+     * 按 oneof 字段路由到：本机订阅服务、Core 启动协调、设备 RPC 响应、规则引擎 REST 回调、
+     * 组件生命周期、队列增删、版本控制响应、订阅管理、通知规则、资源缓存失效、EDQS 等。
+     * 在 {@link #statsEnabled} 时记录通知统计。
+     *
+     * @param id       父类为该消息分配的处理 ID（日志关联）
+     * @param msg      队列封装后的协议消息
+     * @param callback 处理完成回调；多数分支在转发结束后调用成功/失败
      */
     @Override
     protected void handleNotification(UUID id, TbProtoQueueMsg<ToCoreNotificationMsg> msg, TbCallback callback) {
         ToCoreNotificationMsg toCoreNotification = msg.getValue();
-        // 鏍规嵁娑堟伅绫诲瀷璺敱鍒颁笉鍚屽鐞嗗櫒
         if (toCoreNotification.hasToLocalSubscriptionServiceMsg()) {
-            // 鏈湴璁㈤槄鏈嶅姟娑堟伅
             log.trace("[{}] Forwarding message to local subscription service {}", id, toCoreNotification.getToLocalSubscriptionServiceMsg());
             forwardToLocalSubMgrService(toCoreNotification.getToLocalSubscriptionServiceMsg(), callback);
         } else if (toCoreNotification.hasCoreStartupMsg()) {
-            // core鍚姩娑堟伅锛堢敤浜巆ore鍚姩澶氫釜鏃讹紝閲嶆柊鍒嗛厤璁㈤槄锛�
             log.trace("[{}] Forwarding message to local subscription service {}", id, toCoreNotification.getCoreStartupMsg());
             forwardCoreStartupMsg(toCoreNotification.getCoreStartupMsg(), callback);
         } else if (toCoreNotification.hasFromDeviceRpcResponse()) {
-            // 璁惧RPC鍝嶅簲
             log.trace("[{}] Forwarding message to RPC service {}", id, toCoreNotification.getFromDeviceRpcResponse());
             forwardToCoreRpcService(toCoreNotification.getFromDeviceRpcResponse(), callback);
         } else if (toCoreNotification.hasRestApiCallResponseMsg()) {
-            // REST API璋冪敤鍝嶅簲
             log.trace("[{}] Forwarding message to RuleEngineCallService service {}", id, toCoreNotification.getRestApiCallResponseMsg());
             forwardToRuleEngineCallService(toCoreNotification.getRestApiCallResponseMsg(), callback);
         } else if (toCoreNotification.hasComponentLifecycle()) {
-            // 缁勪欢鐢熷懡鍛ㄦ湡娑堟伅
             handleComponentLifecycleMsg(id, ProtoUtils.fromProto(toCoreNotification.getComponentLifecycle()));
             callback.onSuccess();
         } else if (toCoreNotification.getQueueUpdateMsgsCount() > 0) {
-            // 闃熷垪鏇存柊娑堟伅
             partitionService.updateQueues(toCoreNotification.getQueueUpdateMsgsList());
             callback.onSuccess();
         } else if (toCoreNotification.getQueueDeleteMsgsCount() > 0) {
-            // 闃熷垪鍒犻櫎娑堟伅
             partitionService.removeQueues(toCoreNotification.getQueueDeleteMsgsList());
             callback.onSuccess();
         } else if (toCoreNotification.hasVcResponseMsg()) {
-            // 鐗堟湰鎺у埗鍝嶅簲
             vcQueueService.processResponse(toCoreNotification.getVcResponseMsg());
             callback.onSuccess();
         } else if (toCoreNotification.hasToSubscriptionMgrMsg()) {
-            // 璁㈤槄绠＄悊鏈嶅姟娑堟伅
             forwardToSubMgrService(toCoreNotification.getToSubscriptionMgrMsg(), callback);
         } else if (toCoreNotification.hasNotificationRuleProcessorMsg()) {
-            // 閫氱煡瑙勫垯澶勭悊
             NotificationRuleTrigger notificationRuleTrigger =
                     JavaSerDesUtil.decode(toCoreNotification.getNotificationRuleProcessorMsg().getTrigger().toByteArray());
             notificationRuleProcessor.process(notificationRuleTrigger);
             callback.onSuccess();
         } else if (toCoreNotification.hasResourceCacheInvalidateMsg()) {
-            // 璧勬簮缂撳瓨澶辨晥
             forwardToResourceService(toCoreNotification.getResourceCacheInvalidateMsg(), callback);
         } else if (toCoreNotification.hasToEdqsCoreServiceMsg()) {
-            // EDQS绯荤粺娑堟伅锛坋dqs鏁版嵁鍚屾锛�
             edqsService.processSystemMsg(JacksonUtil.fromBytes(toCoreNotification.getToEdqsCoreServiceMsg().getValue().toByteArray(), ToCoreEdqsMsg.class));
             callback.onSuccess();
         }
-        // 缁熻璁板綍
         if (statsEnabled) {
             stats.log(toCoreNotification);
         }
     }
 
     /**
-     * 澶勭悊浣跨敤缁熻娑堟伅
-     * @param msgs 娑堟伅鎵规
-     * @param consumer 娑堣垂鑰�
+     * 处理一批用量统计消息：为每条消息建立 pack 回调上下文，调用 {@link #handleUsageStats}，
+     * 等待整批完成或超时后 commit。
+     *
+     * @param msgs     用量统计协议消息列表
+     * @param consumer 对应队列消费者
+     * @throws Exception latch 等待被中断时抛出
      */
     private void processUsageStatsMsg(List<TbProtoQueueMsg<ToUsageStatsServiceMsg>> msgs, TbQueueConsumer<TbProtoQueueMsg<ToUsageStatsServiceMsg>> consumer) throws Exception {
         ConcurrentMap<UUID, TbProtoQueueMsg<ToUsageStatsServiceMsg>> pendingMap = msgs.stream().collect(
@@ -495,9 +603,14 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 澶勭悊鍥轰欢鐘舵€佹秷鎭�
-     * @param msgs 娑堟伅鎵规
-     * @param consumer 娑堣垂鑰�
+     * 处理一批 OTA 包状态消息，并按配置做节流。
+     * <p>
+     * 单条「理想间隔」为 {@code firmwarePackInterval / firmwarePackSize}。
+     * 仅当 {@link #handleOtaPackageUpdates} 返回成功更新时，才会按剩余时间预算 sleep，
+     * 避免无效消息也占用限速额度。线程中断时直接结束本批循环（不抛出让调用方感知中断意图）。
+     *
+     * @param msgs     OTA 状态消息列表
+     * @param consumer 对应队列消费者，批末 commit
      */
     private void processFirmwareMsgs(List<TbProtoQueueMsg<ToOtaPackageStateServiceMsg>> msgs, TbQueueConsumer<TbProtoQueueMsg<ToOtaPackageStateServiceMsg>> consumer) {
         long maxProcessingTimeoutPerRecord = firmwarePackInterval / firmwarePackSize;
@@ -526,14 +639,26 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
         consumer.commit();
     }
 
+    /**
+     * 将用量统计消息交给 {@link TbApiUsageStateService}，由其在适当时机触发 callback。
+     */
     private void handleUsageStats(TbProtoQueueMsg<ToUsageStatsServiceMsg> msg, TbCallback callback) {
         statsService.process(msg, callback);
     }
 
+    /**
+     * 将 OTA 状态协议消息交给 {@link OtaPackageStateService}。
+     *
+     * @return 是否发生了成功的状态更新（用于限速逻辑）
+     */
     private boolean handleOtaPackageUpdates(TbProtoQueueMsg<ToOtaPackageStateServiceMsg> msg) {
         return firmwareStateService.process(msg.getValue());
     }
 
+    /**
+     * 将规则引擎侧返回的设备 RPC 响应转成 {@link FromDeviceRpcResponse}，
+     * 交给 {@link TbCoreDeviceRpcService} 继续完成调用方等待逻辑。
+     */
     private void forwardToCoreRpcService(FromDeviceRPCResponseProto proto, TbCallback callback) {
         RpcError error = proto.getError() > 0 ? RpcError.values()[proto.getError()] : null;
         FromDeviceRpcResponse response = new FromDeviceRpcResponse(new UUID(proto.getRequestIdMSB(), proto.getRequestIdLSB())
@@ -542,6 +667,10 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
         callback.onSuccess();
     }
 
+    /**
+     * 定时打印并重置消费统计，间隔由 {@code queue.core.stats.print-interval-ms} 控制。
+     * 仅在 {@link #statsEnabled} 为 true 时实际输出。
+     */
     @Scheduled(fixedDelayString = "${queue.core.stats.print-interval-ms}")
     public void printStats() {
         if (statsEnabled) {
@@ -551,9 +680,13 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 杞彂鏉ヨ嚜璁㈤槄绠＄悊鏈嶅姟鐨勬秷鎭埌鏈湴璁㈤槄鏈嶅姟
-     * @param msg 鏈湴璁㈤槄鏈嶅姟鍗忚娑堟伅
-     * @param callback 鍥炶皟鎺ュ彛
+     * 将「面向本机订阅服务」的通知消息分发给 {@link TbLocalSubscriptionService}。
+     * <p>
+     * 支持：订阅事件回调、时序/属性/告警更新、通知更新；若干旧版 subUpdate 字段仅 ack 成功、不做处理。
+     * 无法识别的消息走 {@link #throwNotHandled}。
+     *
+     * @param msg      本机订阅服务协议体
+     * @param callback 完成回调
      */
     private void forwardToLocalSubMgrService(LocalSubscriptionServiceMsgProto msg, TbCallback callback) {
         if (msg.hasSubEventCallback()) {
@@ -575,9 +708,12 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 杞彂鏍稿績鍚姩娑堟伅
-     * @param coreStartupMsg 鏍稿績鍚姩鍗忚娑堟伅
-     * @param callback 鍥炶皟鎺ュ彛
+     * 处理其它 Core 节点启动时发来的协调消息：刷新本机订阅与分区相关状态。
+     * <p>
+     * 多 Core 实例场景下，新节点启动后需要让已有节点重新对齐订阅分发目标。
+     *
+     * @param coreStartupMsg 含 serviceId 与分区列表
+     * @param callback       完成回调
      */
     private void forwardCoreStartupMsg(TransportProtos.CoreStartupMsg coreStartupMsg, TbCallback callback) {
         log.info("[{}] Processing core startup with partitions: {}", coreStartupMsg.getServiceId(), coreStartupMsg.getPartitionsList());
@@ -586,9 +722,10 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 杞彂鍒拌祫婧愭湇鍔★紙澶勭悊鍥剧墖缂撳瓨澶辨晥锛�
-     * @param msg 璧勬簮缂撳瓨澶辨晥鍗忚娑堟伅
-     * @param callback 鍥炶皟鎺ュ彛
+     * 根据资源缓存失效消息，驱逐对应图片的 ETag 缓存（租户图片或公开图片）。
+     *
+     * @param msg      失效键列表协议
+     * @param callback 完成回调
      */
     private void forwardToResourceService(TransportProtos.ResourceCacheInvalidateMsg msg, TbCallback callback) {
         var tenantId = TenantId.fromUUID(new UUID(msg.getTenantIdMSB(), msg.getTenantIdLSB()));
@@ -603,13 +740,22 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
     }
 
     /**
-     * 杞彂鍒拌闃呯鐞嗘湇鍔�
-     * @param msg 璁㈤槄绠＄悊鍗忚娑堟伅
-     * @param callback 鍥炶皟鎺ュ彛
+     * 将订阅管理协议消息路由到 {@link SubscriptionManagerService}（或个别分支到本机订阅服务）。
+     * <p>
+     * 主要分支：
+     * <ul>
+     *   <li>实体订阅事件 {@code subEvent}；</li>
+     *   <li>时序/属性更新与删除、告警更新与删除；</li>
+     *   <li>通知更新、通知请求更新；</li>
+     *   <li>若干已废弃的 telemetry/alarm/notifications 订阅字段：仅成功回调，避免旧消息打挂消费。</li>
+     * </ul>
+     * 属性删除需兼容仍携带废弃字段 {@code notifyDevice} 的旧消息。
+     *
+     * @param msg      订阅管理协议体
+     * @param callback 完成回调
      */
     private void forwardToSubMgrService(SubscriptionMgrMsgProto msg, TbCallback callback) {
         if (msg.hasSubEvent()) {
-            // 璁㈤槄浜嬩欢澶勭悊锛屽幓璁㈤槄璇ュ疄浣�
             TbEntitySubEventProto subEvent = msg.getSubEvent();
             subscriptionManagerService.onSubEvent(subEvent.getServiceId(), TbSubscriptionUtils.fromProto(subEvent), callback);
         } else if (msg.hasTelemetrySub()) {
@@ -628,7 +774,6 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
             callback.onSuccess();
             // Deprecated, for removal; Left intentionally to avoid throwNotHandled
         } else if (msg.hasTsUpdate()) {
-            // 鏃跺簭鏁版嵁鏇存柊
             TbTimeSeriesUpdateProto proto = msg.getTsUpdate();
             long tenantIdMSB = proto.getTenantIdMSB();
             long tenantIdLSB = proto.getTenantIdLSB();
@@ -637,14 +782,12 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                     TbSubscriptionUtils.toEntityId(proto.getEntityType(), proto.getEntityIdMSB(), proto.getEntityIdLSB()),
                     KvProtoUtil.fromTsKvProtoList(proto.getDataList()), callback);
         } else if (msg.hasAttrUpdate()) {
-            // 灞炴€ф洿鏂�
             TbAttributeUpdateProto proto = msg.getAttrUpdate();
             subscriptionManagerService.onAttributesUpdate(
                     toTenantId(proto.getTenantIdMSB(), proto.getTenantIdLSB()),
                     TbSubscriptionUtils.toEntityId(proto.getEntityType(), proto.getEntityIdMSB(), proto.getEntityIdLSB()),
                     proto.getScope(), KvProtoUtil.toAttributeKvList(proto.getDataList()), callback);
         } else if (msg.hasAttrDelete()) {
-            // 灞炴€ф洿鏂�
             TbAttributeDeleteProto proto = msg.getAttrDelete();
             if (proto.hasNotifyDevice()) {
                 // handles old messages with deprecated 'notifyDevice'
@@ -660,14 +803,12 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                         proto.getScope(), proto.getKeysList(), callback);
             }
         } else if (msg.hasTsDelete()) {
-            // 鏃跺簭鏁版嵁鍒犻櫎
             TbTimeSeriesDeleteProto proto = msg.getTsDelete();
             subscriptionManagerService.onTimeSeriesDelete(
                     toTenantId(proto.getTenantIdMSB(), proto.getTenantIdLSB()),
                     TbSubscriptionUtils.toEntityId(proto.getEntityType(), proto.getEntityIdMSB(), proto.getEntityIdLSB()),
                     proto.getKeysList(), callback);
         } else if (msg.hasAlarmUpdate()) {
-            // 鍛婅鏇存柊
             TbAlarmUpdateProto proto = msg.getAlarmUpdate();
             subscriptionManagerService.onAlarmUpdate(
                     toTenantId(proto.getTenantIdMSB(), proto.getTenantIdLSB()),
@@ -675,36 +816,34 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                     JacksonUtil.fromString(proto.getAlarm(), AlarmInfo.class),
                     callback);
         } else if (msg.hasAlarmDelete()) {
-            // 鍛婅鍒犻櫎
             TbAlarmDeleteProto proto = msg.getAlarmDelete();
             subscriptionManagerService.onAlarmDeleted(
                     toTenantId(proto.getTenantIdMSB(), proto.getTenantIdLSB()),
                     TbSubscriptionUtils.toEntityId(proto.getEntityType(), proto.getEntityIdMSB(), proto.getEntityIdLSB()),
                     JacksonUtil.fromString(proto.getAlarm(), AlarmInfo.class), callback);
         } else if (msg.hasNotificationUpdate()) {
-            // 閫氱煡鏇存柊
             TransportProtos.NotificationUpdateProto updateProto = msg.getNotificationUpdate();
             TenantId tenantId = toTenantId(updateProto.getTenantIdMSB(), updateProto.getTenantIdLSB());
             UserId recipientId = new UserId(new UUID(updateProto.getRecipientIdMSB(), updateProto.getRecipientIdLSB()));
             NotificationUpdate update = JacksonUtil.fromString(updateProto.getUpdate(), NotificationUpdate.class);
             subscriptionManagerService.onNotificationUpdate(tenantId, recipientId, update, callback);
         } else if (msg.hasNotificationRequestUpdate()) {
-            // 閫氱煡璇锋眰鏇存柊
             TransportProtos.NotificationRequestUpdateProto updateProto = msg.getNotificationRequestUpdate();
             TenantId tenantId = toTenantId(updateProto.getTenantIdMSB(), updateProto.getTenantIdLSB());
             NotificationRequestUpdate update = JacksonUtil.fromString(updateProto.getUpdate(), NotificationRequestUpdate.class);
             localSubscriptionService.onNotificationRequestUpdate(tenantId, update, callback);
         } else {
-            // 鏈鐞嗙殑娑堟伅绫诲瀷
             throwNotHandled(msg, callback);
         }
-        // 缁熻璁板綍
         if (statsEnabled) {
             stats.log(msg);
         }
     }
 
 
+    /**
+     * 将通用设备状态队列消息同步交给 {@link DeviceStateService}（由其负责 callback）。
+     */
     void forwardToStateService(DeviceStateServiceMsgProto deviceStateServiceMsg, TbCallback callback) {
         if (statsEnabled) {
             stats.log(deviceStateServiceMsg);
@@ -712,6 +851,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
         stateService.onQueueMsg(deviceStateServiceMsg, callback);
     }
 
+    /**
+     * 异步处理设备连接事件：提交到 {@link #deviceActivityEventsExecutor}，完成后映射到 pack callback。
+     */
     void forwardToStateService(TransportProtos.DeviceConnectProto deviceConnectMsg, TbCallback callback) {
         if (statsEnabled) {
             stats.log(deviceConnectMsg);
@@ -727,6 +869,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                 });
     }
 
+    /**
+     * 异步处理设备活跃心跳/活动时间更新。
+     */
     void forwardToStateService(TransportProtos.DeviceActivityProto deviceActivityMsg, TbCallback callback) {
         if (statsEnabled) {
             stats.log(deviceActivityMsg);
@@ -742,6 +887,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                 });
     }
 
+    /**
+     * 异步处理设备断开连接事件。
+     */
     void forwardToStateService(TransportProtos.DeviceDisconnectProto deviceDisconnectMsg, TbCallback callback) {
         if (statsEnabled) {
             stats.log(deviceDisconnectMsg);
@@ -757,6 +905,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                 });
     }
 
+    /**
+     * 异步处理设备进入不活跃状态的事件。
+     */
     void forwardToStateService(TransportProtos.DeviceInactivityProto deviceInactivityMsg, TbCallback callback) {
         if (statsEnabled) {
             stats.log(deviceInactivityMsg);
@@ -772,6 +923,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                 });
     }
 
+    /**
+     * 异步处理设备不活跃超时阈值变更（例如设备配置调整后的超时时间更新）。
+     */
     void forwardToStateService(TransportProtos.DeviceInactivityTimeoutUpdateProto deviceInactivityTimeoutUpdateMsg, TbCallback callback) {
         if (statsEnabled) {
             stats.log(deviceInactivityTimeoutUpdateMsg);
@@ -787,6 +941,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                 });
     }
 
+    /**
+     * 将通知调度请求交给 {@link NotificationSchedulerService}；调度失败时以失败回调结束本条消息。
+     */
     private void forwardToNotificationSchedulerService(TransportProtos.NotificationSchedulerServiceMsg msg, TbCallback callback) {
         TenantId tenantId = toTenantId(msg.getTenantIdMSB(), msg.getTenantIdLSB());
         NotificationRequestId notificationRequestId = new NotificationRequestId(new UUID(msg.getRequestIdMSB(), msg.getRequestIdLSB()));
@@ -798,6 +955,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
         }
     }
 
+    /**
+     * 将传输层到设备 Actor 的消息包装后投入 Actor 系统；callback 随 wrapper 传递，由 Actor 处理路径触发。
+     */
     private void forwardToDeviceActor(TransportToDeviceActorMsg toDeviceActorMsg, TbCallback callback) {
         if (statsEnabled) {
             stats.log(toDeviceActorMsg);
@@ -805,6 +965,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
         actorContext.tell(new TransportToDeviceActorMsgWrapper(toDeviceActorMsg, callback));
     }
 
+    /**
+     * 将错误事件协议转为 {@link ErrorEvent} 并异步落库。
+     */
     private void forwardToEventService(ErrorEventProto eventProto, TbCallback callback) {
         Event event = ErrorEvent.builder()
                 .tenantId(toTenantId(eventProto.getTenantIdMSB(), eventProto.getTenantIdLSB()))
@@ -817,6 +980,9 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
         forwardToEventService(event, callback);
     }
 
+    /**
+     * 将生命周期事件协议转为 {@link LifecycleEvent} 并异步落库。
+     */
     private void forwardToEventService(LifecycleEventProto eventProto, TbCallback callback) {
         Event event = LifecycleEvent.builder()
                 .tenantId(toTenantId(eventProto.getTenantIdMSB(), eventProto.getTenantIdLSB()))
@@ -830,6 +996,10 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
         forwardToEventService(event, callback);
     }
 
+    /**
+     * 通过 {@link ActorSystemContext#getEventService()} 异步保存事件，
+     * 成功/失败映射到队列消息 callback；DB 回调在 {@code dbCallbackExecutor} 上执行。
+     */
     private void forwardToEventService(Event event, TbCallback callback) {
         DonAsynchron.withCallback(actorContext.getEventService().saveAsync(event),
                 result -> callback.onSuccess(),
@@ -837,19 +1007,33 @@ public class DefaultTbCoreConsumerService extends AbstractConsumerService<ToCore
                 actorContext.getDbCallbackExecutor());
     }
 
+    /**
+     * 将 REST API 经规则引擎执行后的响应交给 {@link RuleEngineCallService}，解除调用方等待。
+     */
     void forwardToRuleEngineCallService(TransportProtos.RestApiCallResponseMsgProto restApiCallResponseMsg, TbCallback callback) {
         ruleEngineCallService.onQueueMsg(restApiCallResponseMsg, callback);
     }
 
+    /**
+     * 无法识别的消息类型：记警告日志并以失败回调结束，避免静默丢弃导致难以排查。
+     */
     private void throwNotHandled(Object msg, TbCallback callback) {
         log.warn("Message not handled: {}", msg);
         callback.onFailure(new RuntimeException("Message not handled!"));
     }
 
+    /**
+     * 由 MSB/LSB 构造 {@link TenantId} 的便捷方法。
+     */
     private TenantId toTenantId(long tenantIdMSB, long tenantIdLSB) {
         return TenantId.fromUUID(new UUID(tenantIdMSB, tenantIdLSB));
     }
 
+    /**
+     * 停止本服务拥有的全部消费者。
+     * <p>
+     * 先停父类通知消费者，再停主通道（发停止信号并 await），最后停用量统计与 OTA 消费者。
+     */
     @Override
     protected void stopConsumers() {
         super.stopConsumers();
