@@ -56,50 +56,108 @@ import static org.thingsboard.server.common.data.ObjectType.RELATION;
 import static org.thingsboard.server.common.data.ObjectType.edqsTenantTypes;
 
 /**
- * EDQS 全量同步抽象基类。
+ * EDQS 全量同步抽象基类：从关系型数据库<strong>分批扫描</strong>存量数据，
+ * 转成 UPDATED 事件，经 {@link DefaultEdqsService} 写入 EDQS 事件队列。
  * <p>
- * 从关系库分批读取实体、关系、属性、最新时序，转换为 UPDATED 事件写入 EDQS。
- * 是否需要同步由子类根据存储介质（本地 RocksDB / Kafka Topic）判断。
+ * 调用方是 {@link DefaultEdqsService#processSystemMsg}：集群内抢到
+ * {@code edqs_sync} 锁的 Core 节点在状态为非 FINISHED/FAILED 时执行 {@link #sync()}。
+ * 同步本身只负责「灌事件」；是否打开查询 API、同步状态机落库，由
+ * {@link DefaultEdqsService} 负责。
+ * <p>
+ * <b>同步顺序（有依赖，不可随意调换）：</b>
+ * <ol>
+ *   <li>{@link #syncTenantEntities()}：按 {@link ObjectType#edqsTenantTypes} 扫实体，
+ *       并填充 {@link #entityInfoMap}（后续关系/属性/时序靠它反查租户与类型）；</li>
+ *   <li>{@link #syncRelations()}：仅 COMMON 关系组；from 必须已在 entityInfoMap；</li>
+ *   <li>{@link #loadKeyDictionary()}：预加载 keyId → 字符串，供属性/最新时序解析；</li>
+ *   <li>{@link #syncAttributes()}：全表属性批次；</li>
+ *   <li>{@link #syncLatestTimeseries()}：最新时序批次。</li>
+ * </ol>
+ * <p>
+ * <b>子类职责：</b>仅实现 {@link #isSyncNeeded()}，根据存储介质判断「冷启动是否还要灌数」：
+ * <ul>
+ *   <li>{@link KafkaEdqsSyncService}：events Topic 全部分区为空 → 需要；</li>
+ *   <li>{@link LocalEdqsSyncService}：本地 RocksDB 为新建空库 → 需要。</li>
+ * </ul>
+ * 即使 {@link #isSyncNeeded()} 为 false，若系统属性 {@code edqsSyncState} 未 FINISHED，
+ * {@link DefaultEdqsService} 仍可能再次触发 {@link #sync()}（以状态机为准）。
+ * <p>
+ * 批次大小由配置 {@code queue.edqs.sync.entity_batch_size} /
+ * {@code queue.edqs.sync.ts_batch_size} 控制；单条失败只记日志，不中断整批。
+ *
+ * @see DefaultEdqsService
+ * @see KafkaEdqsSyncService
+ * @see LocalEdqsSyncService
  */
 @Slf4j
 public abstract class EdqsSyncService {
 
-    /** 实体/关系批次大小 */
+    /**
+     * 实体与关系扫描的每批条数。
+     * 配置项：{@code queue.edqs.sync.entity_batch_size}，默认 10000。
+     */
     @Value("${queue.edqs.sync.entity_batch_size:10000}")
     private int entityBatchSize;
-    /** 属性/时序批次大小 */
+    /**
+     * 属性与最新时序扫描的每批条数（通常行数更大，可与实体批次分开调）。
+     * 配置项：{@code queue.edqs.sync.ts_batch_size}，默认 10000。
+     */
     @Value("${queue.edqs.sync.ts_batch_size:10000}")
     private int tsBatchSize;
+    /** 按 {@link EntityType} 取对应 Dao，用于 {@code findNextBatch} 游标扫描。 */
     @Autowired
     private EntityDaoRegistry entityDaoRegistry;
     @Autowired
     private AttributesDao attributesDao;
+    /** 键字典：属性/时序在库中存 keyId，发往 EDQS 前需还原为字符串 key。 */
     @Autowired
     private KeyDictionaryDao keyDictionaryDao;
     @Autowired
     private RelationRepository relationRepository;
     @Autowired
     private TsKvLatestRepository tsKvLatestRepository;
+    /**
+     * 事件写出入口；延迟注入避免与 {@link DefaultEdqsService}（持有本抽象类子类）循环依赖。
+     * 同步路径直接调 {@link DefaultEdqsService#processEvent}，不经 onUpdate 类型再过滤。
+     */
     @Autowired
     @Lazy
     private DefaultEdqsService edqsService;
 
-    /** 实体 UUID -> 类型与租户，供属性/时序/关系反查 */
+    /**
+     * 实体 UUID → 类型与租户。
+     * <p>
+     * 在 {@link #syncTenantEntities()} 中填充；关系/属性/最新时序批次靠此映射
+     * 补全 {@link TenantId} 与 {@link EntityType}（库表往往只存 entity UUID）。
+     * 找不到映射的行会跳过（脏数据或实体类型不在 edqsTenantTypes）。
+     */
     private final ConcurrentHashMap<UUID, EntityIdInfo> entityInfoMap = new ConcurrentHashMap<>();
-    /** 键字典：keyId -> 字符串 key */
+    /**
+     * 键字典缓存：keyId → 字符串 key。
+     * {@link #loadKeyDictionary()} 预热，{@link #getStrKeyOrFetchFromDb} 未命中再回源。
+     */
     private final ConcurrentHashMap<Integer, String> keys = new ConcurrentHashMap<>();
 
-    /** 各类对象已处理数量，用于进度日志 */
+    /** 按 {@link ObjectType} 统计已处理条数，每 10000 条打一条 info 进度日志。 */
     private final Map<ObjectType, AtomicInteger> counters = new ConcurrentHashMap<>();
 
     /**
-     * 当前环境是否需要执行全量同步。
-     * 由 {@link LocalEdqsSyncService} / {@link KafkaEdqsSyncService} 实现。
+     * 当前部署介质是否「看起来」还需要做一次冷启动全量灌数。
+     * <p>
+     * 由子类在构造或首次判断时根据 Kafka topic / RocksDB 是否为空实现。
+     * 结果供 {@link DefaultEdqsService#onStartUp} 与状态机一起决定是否发起同步。
+     *
+     * @return {@code true} 表示建议执行全量同步
      */
     public abstract boolean isSyncNeeded();
 
     /**
-     * 执行全量同步：实体 → 关系 → 键字典 → 属性 → 最新时序。
+     * 执行一轮全量同步：清空进度计数后，按固定顺序扫库并写出 UPDATED 事件。
+     * <p>
+     * 本方法假设调用方已持有集群锁且已将状态标为 STARTED；方法内不做加锁、
+     * 不修改 {@code edqsSyncState}、不启停 API。结束后清空 {@link #counters}
+     *（{@link #entityInfoMap} / {@link #keys} 本次同步过程中会占用较多内存，
+     * 随对象生命周期回收；若多次 sync，map 会累积，当前实现按单次全量设计）。
      */
     public void sync() {
         log.info("Synchronizing data to EDQS");
@@ -116,7 +174,14 @@ public abstract class EdqsSyncService {
         log.info("Finishing synchronizing data to EDQS in {} ms", (System.currentTimeMillis() - startTs));
     }
 
-    /** 统计进度并将对象以 UPDATED 事件写入 EDQS */
+    /**
+     * 进度计数 + 将对象以 {@link EdqsEventType#UPDATED} 交给
+     * {@link DefaultEdqsService#processEvent} 异步发往 events 队列。
+     *
+     * @param tenantId 租户（事件信封必填）
+     * @param type     EDQS 对象类型
+     * @param object   已构造好的 {@link EdqsObject}
+     */
     private void process(TenantId tenantId, ObjectType type, EdqsObject object) {
         AtomicInteger counter = counters.computeIfAbsent(type, t -> new AtomicInteger());
         if (counter.incrementAndGet() % 10000 == 0) {
@@ -125,7 +190,13 @@ public abstract class EdqsSyncService {
         edqsService.processEvent(tenantId, type, EdqsEventType.UPDATED, object);
     }
 
-    /** 按 EDQS 租户实体类型分批同步全部实体 */
+    /**
+     * 按 {@link ObjectType#edqsTenantTypes} 逐类型全表游标扫描实体。
+     * <p>
+     * 使用 Dao {@code findNextBatch(lastId, batchSize)}，从零 UUID 起向后翻页，
+     * 直到某批为空。每条写入 {@link #entityInfoMap}，并构造 {@link Entity}
+     * 发 UPDATED。耗时按类型分别打日志。
+     */
     private void syncTenantEntities() {
         for (ObjectType type : edqsTenantTypes) {
             log.info("Synchronizing {} entities to EDQS", type);
@@ -150,7 +221,13 @@ public abstract class EdqsSyncService {
         }
     }
 
-    /** 分批同步 COMMON 类型关系 */
+    /**
+     * 分批同步关系表中的 {@link RelationTypeGroup#COMMON} 关系。
+     * <p>
+     * 游标键为关系复合主键各字段（from / typeGroup / type / to），
+     * 通过 {@link RelationRepository#findNextBatch} 翻页；具体过滤在
+     * {@link #processRelationBatch} 中完成。
+     */
     private void syncRelations() {
         log.info("Synchronizing relations to EDQS");
         long ts = System.currentTimeMillis();
@@ -180,7 +257,14 @@ public abstract class EdqsSyncService {
         log.info("Finished synchronizing relations to EDQS in {} ms", (System.currentTimeMillis() - ts));
     }
 
-    /** 处理关系批次：仅同步 COMMON 组，且 from 实体须已在 entityInfoMap 中 */
+    /**
+     * 处理一批关系：仅 COMMON 组；{@code fromId} 必须能在 {@link #entityInfoMap} 中解析出租户。
+     * <p>
+     * from 不存在时打 info（常见于 from 实体类型未纳入 EDQS 或数据不一致）；
+     * 单条异常 catch 后继续，避免整批中断。
+     *
+     * @param relations 当前页关系实体
+     */
     private void processRelationBatch(List<RelationEntity> relations) {
         for (RelationEntity relation : relations) {
             try {
@@ -198,7 +282,12 @@ public abstract class EdqsSyncService {
         }
     }
 
-    /** 预加载键字典，供属性与最新时序解析字符串 key */
+    /**
+     * 预加载全部键字典到 {@link #keys}，减少属性/时序同步时逐条查库。
+     * <p>
+     * 使用 {@link PageDataIterable} 分页拉取；后续 {@link #getStrKeyOrFetchFromDb}
+     * 仍可对遗漏 key 回源补齐。
+     */
     private void loadKeyDictionary() {
         log.info("Loading key dictionary");
         long ts = System.currentTimeMillis();
@@ -209,7 +298,11 @@ public abstract class EdqsSyncService {
         log.info("Finished loading key dictionary in {} ms", (System.currentTimeMillis() - ts));
     }
 
-    /** 分批同步全部属性 */
+    /**
+     * 分批同步全部属性 KV。
+     * <p>
+     * 游标：(entityId, attributeType, attributeKey)；批次大小为 {@link #tsBatchSize}。
+     */
     private void syncAttributes() {
         log.info("Synchronizing attributes to EDQS");
         long ts = System.currentTimeMillis();
@@ -233,7 +326,16 @@ public abstract class EdqsSyncService {
         log.info("Finished synchronizing attributes to EDQS in {} ms", (System.currentTimeMillis() - ts));
     }
 
-    /** 将属性批次转为 AttributeKv 并写入 EDQS；找不到归属实体则跳过 */
+    /**
+     * 将属性批次转为 {@link AttributeKv} 并写出。
+     * <ul>
+     *   <li>用 {@link #getStrKeyOrFetchFromDb} 还原字符串 key；</li>
+     *   <li>用 {@link #entityInfoMap} 还原实体类型与租户，缺失则 debug 跳过；</li>
+     *   <li>scope 来自 attributeType 枚举序值。</li>
+     * </ul>
+     *
+     * @param batch 当前页属性实体
+     */
     private void processAttributeBatch(List<AttributeKvEntity> batch) {
         for (AttributeKvEntity attribute : batch) {
             try {
@@ -256,7 +358,9 @@ public abstract class EdqsSyncService {
         }
     }
 
-    /** 分批同步最新时序（latest TS） */
+    /**
+     * 分批同步最新时序（ts_kv_latest），游标为 (entityId, keyId)。
+     */
     private void syncLatestTimeseries() {
         log.info("Synchronizing latest timeseries to EDQS");
         long ts = System.currentTimeMillis();
@@ -277,7 +381,13 @@ public abstract class EdqsSyncService {
         log.info("Finished synchronizing latest timeseries to EDQS in {} ms", (System.currentTimeMillis() - ts));
     }
 
-    /** 将最新时序批次转为 LatestTsKv 并写入 EDQS */
+    /**
+     * 将最新时序批次转为 {@link LatestTsKv} 并写出。
+     * <p>
+     * 字典中无字符串 key、或实体不在 {@link #entityInfoMap} 时跳过该行。
+     *
+     * @param tsKvLatestEntities 当前页最新时序实体
+     */
     private void processTsKvLatestBatch(List<TsKvLatestEntity> tsKvLatestEntities) {
         for (TsKvLatestEntity tsKvLatestEntity : tsKvLatestEntities) {
             try {
@@ -301,7 +411,11 @@ public abstract class EdqsSyncService {
     }
 
     /**
-     * 按 keyId 解析字符串 key：先查内存缓存，未命中再查库并回填缓存。
+     * 按数值 keyId 解析字符串 key：先查 {@link #keys}，未命中再查
+     * {@link KeyDictionaryDao#getKey} 并回填缓存；库中也不存在则返回 {@code null}。
+     *
+     * @param key 键字典 ID
+     * @return 字符串 key；无法解析时为 null
      */
     private String getStrKeyOrFetchFromDb(int key) {
         String strKey = keys.get(key);
@@ -316,7 +430,14 @@ public abstract class EdqsSyncService {
         return strKey;
     }
 
-    /** 实体 ID 对应的类型与租户信息 */
+    /**
+     * 实体 UUID 在同步过程中的附属信息：实体类型 + 所属租户。
+     * <p>
+     * 供关系 / 属性 / 最新时序在只有 UUID 时补全事件信封与 {@link EntityId}。
+     *
+     * @param entityType 实体类型
+     * @param tenantId   所属租户
+     */
     public record EntityIdInfo(EntityType entityType, TenantId tenantId) {
     }
 

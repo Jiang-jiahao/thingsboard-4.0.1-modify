@@ -406,7 +406,7 @@ public class EdqsProcessor implements TbQueueHandler<TbProtoQueueMsg<ToEdqsMsg>,
             EdqsEventType eventType = EdqsEventType.valueOf(eventMsg.getEventType());
             String key = eventMsg.getKey();
             Long version = eventMsg.hasVersion() ? eventMsg.getVersion() : null;
-
+            // Kafka/网络可能乱序或重复投递，避免旧事件把内存索引盖成旧数据。这边需要根据版本判断
             if (version != null) {
                 if (!versionsStore.isNew(key, version)) {
                     return;

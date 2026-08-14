@@ -22,7 +22,7 @@ import org.thingsboard.server.queue.TbQueueRequestTemplate;
 import org.thingsboard.server.queue.common.TbProtoQueueMsg;
 
 /**
- * 边缘计算
+ * edqs客户端查询工厂
  */
 public interface EdqsClientQueueFactory {
 
