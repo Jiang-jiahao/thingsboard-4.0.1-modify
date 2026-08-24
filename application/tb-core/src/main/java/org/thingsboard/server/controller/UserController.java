@@ -106,6 +106,13 @@ import static org.thingsboard.server.controller.ControllerConstants.USER_TEXT_SE
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 import static org.thingsboard.server.dao.entity.BaseEntityService.NULL_CUSTOMER_ID;
 
+/**
+ * 用户、凭据、激活、用户设置与移动会话 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。系统管理员管理租户管理员；
+ * 租户管理员管理本租户用户；客户用户仅能操作本客户范围内实体。
+ * 另提供模拟登录 Token、用户 JSON 设置、最近/收藏仪表盘、移动端会话。
+ */
 @RequiredArgsConstructor
 @RestController
 @TbCoreComponent
@@ -127,6 +134,9 @@ public class UserController extends BaseController {
     private final EntityQueryService entityQueryService;
     private final EntityService entityService;
 
+    /**
+     * 按用户 ID 读取用户对象（按调用方角色校验归属）。
+     */
     @ApiOperation(value = "Get User (getUserById)",
             notes = "Fetch the User object based on the provided User Id. " +
                     "If the user has the authority of 'SYS_ADMIN', the server does not perform additional checks. " +
@@ -145,6 +155,9 @@ public class UserController extends BaseController {
         return user;
     }
 
+    /**
+     * 查询系统是否允许管理员模拟其他用户登录。
+     */
     @ApiOperation(value = "Check Token Access Enabled (isUserTokenAccessEnabled)",
             notes = "Checks that the system is configured to allow administrators to impersonate themself as other users. " +
                     "If the user who performs the request has the authority of 'SYS_ADMIN', it is possible to login as any tenant administrator. " +
@@ -156,6 +169,9 @@ public class UserController extends BaseController {
         return userTokenAccessEnabled;
     }
 
+    /**
+     * 获取指定用户的 JWT，用于管理员模拟登录。
+     */
     @ApiOperation(value = "Get User Token (getUserToken)",
             notes = "Returns the token of the User based on the provided User Id. " +
                     "If the user who performs the request has the authority of 'SYS_ADMIN', it is possible to get the token of any tenant administrator. " +
@@ -180,6 +196,9 @@ public class UserController extends BaseController {
         return tokenFactory.createTokenPair(securityUser);
     }
 
+    /**
+     * 创建或更新用户；邮箱全平台唯一，可选发送激活邮件。
+     */
     @ApiOperation(value = "Save Or update User (saveUser)",
             notes = "Create or update the User. When creating user, platform generates User Id as " + UUID_WIKI_LINK +
                     "The newly created User Id will be present in the response. " +
@@ -203,6 +222,9 @@ public class UserController extends BaseController {
         return tbUserService.save(getTenantId(), getCurrentUser().getCustomerId(), user, sendActivationMail, request, getCurrentUser());
     }
 
+    /**
+     * 向指定邮箱强制重发激活邮件。
+     */
     @ApiOperation(value = "Send or re-send the activation email",
             notes = "Force send the activation email to the user. Useful to resend the email if user has accidentally deleted it. " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -224,6 +246,9 @@ public class UserController extends BaseController {
         }
     }
 
+    /**
+     * 返回用户激活链接文本。
+     */
     @ApiOperation(value = "Get activation link (getActivationLink)",
             notes = "Get the activation link for the user. " +
                     "The base url for activation link is configurable in the general settings of system administrator. " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -236,6 +261,9 @@ public class UserController extends BaseController {
         return getActivationLinkInfo(strUserId, request).value();
     }
 
+    /**
+     * 返回用户激活链接及 TTL 等信息。
+     */
     @ApiOperation(value = "Get activation link info (getActivationLinkInfo)",
             notes = "Get the activation link info for the user. " +
                     "The base url for activation link is configurable in the general settings of system administrator. " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -251,6 +279,9 @@ public class UserController extends BaseController {
         return tbUserService.getActivationLink(securityUser.getTenantId(), securityUser.getCustomerId(), userId, request);
     }
 
+    /**
+     * 删除用户及其凭据、关联关系；系统管理员不可删自己。
+     */
     @ApiOperation(value = "Delete User (deleteUser)",
             notes = "Deletes the User, it's credentials and all the relations (from and to the User). " +
                     "Referencing non-existing User Id will cause an error. " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -269,6 +300,9 @@ public class UserController extends BaseController {
         tbUserService.delete(getTenantId(), getCurrentUser().getCustomerId(), user, getCurrentUser());
     }
 
+    /**
+     * 分页查询当前租户或客户下的用户。
+     */
     @ApiOperation(value = "Get Users (getUsers)",
             notes = "Returns a page of users owned by tenant or customer. The scope depends on authority of the user that performs the request." +
                     PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -295,6 +329,9 @@ public class UserController extends BaseController {
         }
     }
 
+    /**
+     * 按邮箱、姓名模糊查询用户摘要。
+     */
     @ApiOperation(value = "Find users by query (findUsersByQuery)",
             notes = "Returns page of user data objects. Search is been executed by email, firstName and " +
                     "lastName fields. " + PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -333,6 +370,9 @@ public class UserController extends BaseController {
         });
     }
 
+    /**
+     * 分页查询指定租户下的租户管理员。
+     */
     @ApiOperation(value = "Get Tenant Users (getTenantAdmins)",
             notes = "Returns a page of users owned by tenant. " + PAGE_DATA_PARAMETERS + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
@@ -357,6 +397,9 @@ public class UserController extends BaseController {
         return checkNotNull(userService.findTenantAdmins(tenantId, pageLink));
     }
 
+    /**
+     * 分页查询指定客户下的用户。
+     */
     @ApiOperation(value = "Get Customer Users (getCustomerUsers)",
             notes = "Returns a page of users owned by customer. " + PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -383,6 +426,9 @@ public class UserController extends BaseController {
         return checkNotNull(userService.findCustomerUsers(tenantId, customerId, pageLink));
     }
 
+    /**
+     * 启用或禁用用户凭据（封禁账号但不删除）。
+     */
     @ApiOperation(value = "Enable/Disable User credentials (setUserCredentialsEnabled)",
             notes = "Enables or Disables user credentials. Useful when you would like to block user account without deleting it. " + PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -404,6 +450,9 @@ public class UserController extends BaseController {
         }
     }
 
+    /**
+     * 分页查询可指派给指定告警的用户。
+     */
     @ApiOperation(value = "Get usersForAssign (getUsersForAssign)",
             notes = "Returns page of user data objects that can be assigned to provided alarmId. " +
                     "Search is been executed by email, firstName and lastName fields. " +
@@ -448,6 +497,9 @@ public class UserController extends BaseController {
         return pageData.mapData(user -> new UserEmailInfo(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName()));
     }
 
+    /**
+     * 整份覆盖保存当前用户的 GENERAL 设置。
+     */
     @ApiOperation(value = "Save user settings (saveUserSettings)",
             notes = "Save user settings represented in json format for authorized user. ")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -462,6 +514,9 @@ public class UserController extends BaseController {
         return userSettingsService.saveUserSettings(currentUser.getTenantId(), userSettings).getSettings();
     }
 
+    /**
+     * 部分更新当前用户的 GENERAL 设置（仅覆盖指定 JSON 路径）。
+     */
     @ApiOperation(value = "Update user settings (saveUserSettings)",
             notes = "Update user settings for authorized user. Only specified json elements will be updated." +
                     "Example: you have such settings: {A:5, B:{C:10, D:20}}. Updating it with {B:{C:10, D:30}} will result in" +
@@ -473,6 +528,9 @@ public class UserController extends BaseController {
         userSettingsService.updateUserSettings(currentUser.getTenantId(), currentUser.getId(), UserSettingsType.GENERAL, settings);
     }
 
+    /**
+     * 读取当前用户的 GENERAL 设置。
+     */
     @ApiOperation(value = "Get user settings (getUserSettings)",
             notes = "Fetch the User settings based on authorized user. ")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -484,6 +542,9 @@ public class UserController extends BaseController {
         return userSettings == null ? JacksonUtil.newObjectNode() : userSettings.getSettings();
     }
 
+    /**
+     * 按 JSON 路径删除当前用户 GENERAL 设置中的字段。
+     */
     @ApiOperation(value = "Delete user settings (deleteUserSettings)",
             notes = "Delete user settings by specifying list of json element xpaths. \n " +
                     "Example: to delete B and C element in { \"A\": {\"B\": 5}, \"C\": 15} send A.B,C in jsonPaths request parameter")
@@ -497,6 +558,9 @@ public class UserController extends BaseController {
         userSettingsService.deleteUserSettings(currentUser.getTenantId(), currentUser.getId(), UserSettingsType.GENERAL, Arrays.asList(paths.split(",")));
     }
 
+    /**
+     * 部分更新当前用户指定类型的设置（非保留类型）。
+     */
     @ApiOperation(value = "Update user settings (saveUserSettings)",
             notes = "Update user settings for authorized user. Only specified json elements will be updated." +
                     "Example: you have such settings: {A:5, B:{C:10, D:20}}. Updating it with {B:{C:10, D:30}} will result in" +
@@ -511,6 +575,9 @@ public class UserController extends BaseController {
         userSettingsService.updateUserSettings(currentUser.getTenantId(), currentUser.getId(), type, settings);
     }
 
+    /**
+     * 读取当前用户指定类型的设置。
+     */
     @ApiOperation(value = "Get user settings (getUserSettings)",
             notes = "Fetch the User settings based on authorized user. ")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -524,6 +591,9 @@ public class UserController extends BaseController {
         return userSettings == null ? JacksonUtil.newObjectNode() : userSettings.getSettings();
     }
 
+    /**
+     * 按 JSON 路径删除当前用户指定类型设置中的字段。
+     */
     @ApiOperation(value = "Delete user settings (deleteUserSettings)",
             notes = "Delete user settings by specifying list of json element xpaths. \n " +
                     "Example: to delete B and C element in { \"A\": {\"B\": 5}, \"C\": 15} send A.B,C in jsonPaths request parameter")
@@ -540,6 +610,9 @@ public class UserController extends BaseController {
         userSettingsService.deleteUserSettings(currentUser.getTenantId(), currentUser.getId(), type, Arrays.asList(paths.split(",")));
     }
 
+    /**
+     * 读取当前用户最近访问与收藏的仪表盘（各最多 10 条）。
+     */
     @ApiOperation(value = "Get information about last visited and starred dashboards (getLastVisitedDashboards)",
             notes = "Fetch the list of last visited and starred dashboards. Both lists are limited to 10 items." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -549,6 +622,9 @@ public class UserController extends BaseController {
         return userSettingsService.findUserDashboardsInfo(currentUser.getTenantId(), currentUser.getId());
     }
 
+    /**
+     * 上报用户对仪表盘的访问 / 收藏 / 取消收藏操作。
+     */
     @ApiOperation(value = "Report action of User over the dashboard (reportUserDashboardAction)",
             notes = "Report action of User over the dashboard. " + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -568,6 +644,9 @@ public class UserController extends BaseController {
         return userSettingsService.reportUserDashboardAction(currentUser.getTenantId(), currentUser.getId(), dashboardId, action);
     }
 
+    /**
+     * 按移动端 Token 读取当前用户的移动会话。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @GetMapping("/user/mobile/session")
     public MobileSessionInfo getMobileSession(@RequestHeader(MOBILE_TOKEN_HEADER) String mobileToken,
@@ -575,6 +654,9 @@ public class UserController extends BaseController {
         return userService.findMobileSession(user.getTenantId(), user.getId(), mobileToken);
     }
 
+    /**
+     * 保存或更新当前用户的移动会话。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @PostMapping("/user/mobile/session")
     public void saveMobileSession(@RequestBody MobileSessionInfo sessionInfo,
@@ -583,6 +665,9 @@ public class UserController extends BaseController {
         userService.saveMobileSession(user.getTenantId(), user.getId(), mobileToken, sessionInfo);
     }
 
+    /**
+     * 按移动端 Token 删除当前用户的移动会话。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @DeleteMapping("/user/mobile/session")
     public void removeMobileSession(@RequestHeader(MOBILE_TOKEN_HEADER) String mobileToken,

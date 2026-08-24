@@ -47,6 +47,12 @@ import java.util.stream.Collectors;
 
 import static org.thingsboard.server.controller.ControllerConstants.NEW_LINE;
 
+/**
+ * 双因素认证的账号级配置与平台级策略 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。普通用户管理自己的 2FA 提供方；
+ * 系统管理员维护平台允许使用的提供方、限流与锁定策略。
+ */
 @RestController
 @RequestMapping("/api/2fa")
 @TbCoreComponent
@@ -57,6 +63,9 @@ public class TwoFactorAuthConfigController extends BaseController {
     private final TwoFactorAuthService twoFactorAuthService;
 
 
+    /**
+     * 读取当前用户已配置的各 2FA 提供方账号设置。
+     */
     @ApiOperation(value = "Get account 2FA settings (getAccountTwoFaSettings)",
             notes = "Get user's account 2FA configuration. Configuration contains configs for different 2FA providers." + NEW_LINE +
                     "Example:\n" +
@@ -74,6 +83,9 @@ public class TwoFactorAuthConfigController extends BaseController {
     }
 
 
+    /**
+     * 为指定提供方生成账号配置模板（TOTP 含随机密钥 URL）。
+     */
     @ApiOperation(value = "Generate 2FA account config (generateTwoFaAccountConfig)",
             notes = "Generate new 2FA account config template for specified provider type. " + NEW_LINE +
                     "For TOTP, this will return a corresponding account config template " +
@@ -106,6 +118,9 @@ public class TwoFactorAuthConfigController extends BaseController {
         return twoFactorAuthService.generateNewAccountConfig(user, providerType);
     }
 
+    /**
+     * 提交待验证的 2FA 账号配置（邮件/短信会先发验证码；TOTP 无操作）。
+     */
     @ApiOperation(value = "Submit 2FA account config (submitTwoFaAccountConfig)",
             notes = "Submit 2FA account config to prepare for a future verification. " +
                     "Basically, this method will send a verification code for a given account config, if this has " +
@@ -133,6 +148,9 @@ public class TwoFactorAuthConfigController extends BaseController {
         twoFactorAuthService.prepareVerificationCode(user, accountConfig, false);
     }
 
+    /**
+     * 校验验证码后保存 2FA 账号配置；同一提供方不可重复配置。
+     */
     @ApiOperation(value = "Verify and save 2FA account config (verifyAndSaveTwoFaAccountConfig)",
             notes = "Checks the verification code for submitted config, and if it is correct, saves the provided account config. " + NEW_LINE +
                     "Returns whole account's 2FA settings object.\n" +
@@ -160,6 +178,9 @@ public class TwoFactorAuthConfigController extends BaseController {
         }
     }
 
+    /**
+     * 更新指定提供方的账号配置（如是否作为默认方式）。
+     */
     @ApiOperation(value = "Update 2FA account config (updateTwoFaAccountConfig)", notes =
             "Update config for a given provider type. \n" +
                     "Update request example:\n" +
@@ -178,6 +199,9 @@ public class TwoFactorAuthConfigController extends BaseController {
         return twoFaConfigManager.saveTwoFaAccountConfig(user.getTenantId(), user.getId(), accountConfig);
     }
 
+    /**
+     * 删除指定提供方的 2FA 账号配置。
+     */
     @ApiOperation(value = "Delete 2FA account config (deleteTwoFaAccountConfig)", notes =
             "Delete 2FA config for a given 2FA provider type. \n" +
                     "Returns whole account's 2FA settings object.\n" +
@@ -190,6 +214,9 @@ public class TwoFactorAuthConfigController extends BaseController {
     }
 
 
+    /**
+     * 返回平台已启用、当前用户可用的 2FA 提供方类型列表。
+     */
     @ApiOperation(value = "Get available 2FA providers (getAvailableTwoFaProviders)", notes =
             "Get the list of provider types available for user to use (the ones configured by tenant or sysadmin).\n" +
                     "Example of response:\n" +
@@ -206,6 +233,9 @@ public class TwoFactorAuthConfigController extends BaseController {
     }
 
 
+    /**
+     * 读取平台级 2FA 策略（提供方、限流、锁定等）；未配置则返回空。
+     */
     @ApiOperation(value = "Get platform 2FA settings (getPlatformTwoFaSettings)",
             notes = "Get platform settings for 2FA. The settings are described for savePlatformTwoFaSettings API method. " +
                     "If 2FA is not configured, then an empty response will be returned." +
@@ -216,6 +246,9 @@ public class TwoFactorAuthConfigController extends BaseController {
         return twoFaConfigManager.getPlatformTwoFaSettings(getTenantId(), false).orElse(null);
     }
 
+    /**
+     * 保存平台级 2FA 策略（允许的提供方、验证码限流与失败锁定）。
+     */
     @ApiOperation(value = "Save platform 2FA settings (savePlatformTwoFaSettings)",
             notes = "Save 2FA settings for platform. The settings have following properties:\n" +
                     "- `providers` - the list of 2FA providers' configs. Users will only be allowed to use 2FA providers from this list. \n\n" +

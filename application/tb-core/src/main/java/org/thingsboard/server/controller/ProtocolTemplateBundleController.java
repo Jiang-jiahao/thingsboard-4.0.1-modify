@@ -32,6 +32,20 @@ import org.thingsboard.server.service.protocoltemplate.ProtocolTemplateHexParseS
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * 协议模板包 REST 入口（自定义扩展）。
+ * <p>
+ * <b>职责：</b>管理当前租户的协议模板包（CRUD），以及与 TCP HEX 传输一致的上行 HEX 解析、
+ * 下行 HEX 组帧。
+ * <p>
+ * <b>URL：</b>{@code /api/protocolTemplateBundle*}、{@code /api/protocolTemplateBundles}
+ * <p>
+ * <b>权限：</b>写/删仅 {@code TENANT_ADMIN}；列表与 HEX 解析/组帧 {@code TENANT_ADMIN} 或 {@code CUSTOMER_USER}。
+ * 客户用户列表时只返回对其可见的包。
+ * <p>
+ * <b>下游：</b>{@link DefaultProtocolTemplateBundleService}、
+ * {@link ProtocolTemplateHexParseService}、{@link ProtocolTemplateHexBuildService}
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -42,6 +56,11 @@ public class ProtocolTemplateBundleController extends BaseController {
     private final ProtocolTemplateHexParseService protocolTemplateHexParseService;
     private final ProtocolTemplateHexBuildService protocolTemplateHexBuildService;
 
+    /**
+     * 列出当前租户可见的协议模板包。租户管理员看全部，客户用户按可见范围过滤。
+     * <p>
+     * 权限：{@code TENANT_ADMIN} 或 {@code CUSTOMER_USER}。下游 {@link DefaultProtocolTemplateBundleService#findAllForTenant}。
+     */
     @ApiOperation(value = "List protocol template bundles for current tenant")
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @GetMapping("/protocolTemplateBundles")
@@ -52,6 +71,11 @@ public class ProtocolTemplateBundleController extends BaseController {
         return protocolTemplateBundleService.findAllForTenant(tenantId, tenantAdmin);
     }
 
+    /**
+     * 创建或更新协议模板包。参数非法时转为平台异常。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@link DefaultProtocolTemplateBundleService#save}。
+     */
     @ApiOperation(value = "Create or update protocol template bundle")
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @PostMapping("/protocolTemplateBundle")
@@ -65,6 +89,11 @@ public class ProtocolTemplateBundleController extends BaseController {
         }
     }
 
+    /**
+     * 按 id 删除协议模板包。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@link DefaultProtocolTemplateBundleService#delete}。
+     */
     @ApiOperation(value = "Delete protocol template bundle by id")
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @DeleteMapping("/protocolTemplateBundle/{id}")
@@ -75,6 +104,11 @@ public class ProtocolTemplateBundleController extends BaseController {
         protocolTemplateBundleService.delete(getTenantId(), id);
     }
 
+    /**
+     * 用协议模板包解析 HEX 上行帧，规则与 TCP HEX 传输侧一致。
+     * <p>
+     * 权限：{@code TENANT_ADMIN} 或 {@code CUSTOMER_USER}。下游 {@link ProtocolTemplateHexParseService#parse}。
+     */
     @ApiOperation(value = "Parse HEX uplink using a protocol template bundle (same as TCP HEX transport)")
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @PostMapping("/protocolTemplateBundle/parseHex")
@@ -84,6 +118,11 @@ public class ProtocolTemplateBundleController extends BaseController {
         return protocolTemplateHexParseService.parse(getTenantId(), request.getBundleId(), request.getHex());
     }
 
+    /**
+     * 按协议模板包组下行 HEX 帧（DOWNLINK/BOTH 命令 + 合并字段）。
+     * <p>
+     * 权限：{@code TENANT_ADMIN} 或 {@code CUSTOMER_USER}。下游 {@link ProtocolTemplateHexBuildService#build}。
+     */
     @ApiOperation(value = "Build HEX downlink frame from protocol template bundle (DOWNLINK/BOTH command + merged fields)")
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN','CUSTOMER_USER')")
     @PostMapping("/protocolTemplateBundle/buildHex")

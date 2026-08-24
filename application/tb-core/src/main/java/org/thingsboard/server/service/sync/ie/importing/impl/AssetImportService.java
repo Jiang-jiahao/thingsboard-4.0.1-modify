@@ -26,6 +26,11 @@ import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.sync.vc.data.EntitiesImportCtx;
 
+/**
+ * 针对 {@link Asset} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 还原客户与资产 Profile 内部 ID；最终轮次导入计算字段。空客户 UID 比较时视为未分配。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -33,18 +38,21 @@ public class AssetImportService extends BaseEntityImportService<AssetId, Asset, 
 
     private final AssetService assetService;
 
+    /** 绑定租户，并将客户 externalId 映射为内部 ID。 */
     @Override
     protected void setOwner(TenantId tenantId, Asset asset, IdProvider idProvider) {
         asset.setTenantId(tenantId);
         asset.setCustomerId(idProvider.getInternalId(asset.getCustomerId()));
     }
 
+    /** 映射资产 Profile 为当前环境内部 ID。 */
     @Override
     protected Asset prepare(EntitiesImportCtx ctx, Asset asset, Asset old, EntityExportData<Asset> exportData, IdProvider idProvider) {
         asset.setAssetProfileId(idProvider.getInternalId(asset.getAssetProfileId()));
         return asset;
     }
 
+    /** 保存资产，并在最终导入轮次写入计算字段。 */
     @Override
     protected Asset saveOrUpdate(EntitiesImportCtx ctx, Asset asset, EntityExportData<Asset> exportData, IdProvider idProvider) {
         Asset savedAsset = assetService.saveAsset(asset);

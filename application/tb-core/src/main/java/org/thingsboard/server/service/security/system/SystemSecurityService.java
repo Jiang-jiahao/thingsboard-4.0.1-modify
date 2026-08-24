@@ -27,6 +27,13 @@ import org.thingsboard.server.common.data.security.model.mfa.PlatformTwoFaSettin
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
+/**
+ * 平台系统安全策略服务。
+ * <p>
+ * 登录链路校验密码策略、凭证、双因子失败锁定，并记录登录审计；同时提供租户级站点 Base URL。
+ *
+ * @see DefaultSystemSecurityService
+ */
 public interface SystemSecurityService {
 
     /**
@@ -46,10 +53,19 @@ public interface SystemSecurityService {
      */
     void validateUserCredentials(TenantId tenantId, UserCredentials userCredentials, String username, String password) throws AuthenticationException;
 
+    /**
+     * 登录后校验双因子结果，失败次数超限则锁定账号。
+     */
     void validateTwoFaVerification(SecurityUser securityUser, boolean verificationSuccess, PlatformTwoFaSettings twoFaSettings);
 
+    /**
+     * 修改密码时校验新密码策略及是否与历史重复。
+     */
     void validatePassword(String password, UserCredentials userCredentials) throws DataValidationException;
 
+    /**
+     * 解析邮件/重置链接等场景使用的站点 Base URL。
+     */
     String getBaseUrl(TenantId tenantId, CustomerId customerId, HttpServletRequest httpServletRequest);
 
     /**
@@ -61,6 +77,9 @@ public interface SystemSecurityService {
      */
     void logLoginAction(User user, Object authenticationDetails, ActionType actionType, Exception e);
 
+    /**
+     * 记录登录动作（可带 OAuth 等 provider 标识）。
+     */
     void logLoginAction(User user, Object authenticationDetails, ActionType actionType, String provider, Exception e);
 
 }

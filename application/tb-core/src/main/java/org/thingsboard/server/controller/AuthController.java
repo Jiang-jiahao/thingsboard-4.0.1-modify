@@ -59,7 +59,23 @@ import org.thingsboard.server.service.security.model.token.JwtTokenFactory;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
 
 /**
- * 用于登出和用户修改密码授权相关接口
+ * 认证与账号生命周期 REST：当前用户、登出、改密、激活、找回密码。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。路径分两组：
+ * <ul>
+ *   <li>{@code /api/auth/*}：需登录，查当前用户、登出审计、修改密码；</li>
+ *   <li>{@code /api/noauth/*}：公开，激活 / 重置密码 token 校验与提交、密码策略。</li>
+ * </ul>
+ * 登录本身走 Spring Security 的 {@code /api/auth/login}，不在本类。
+ * 改密 / 重置后会发 {@code UserCredentialsInvalidationEvent} 使旧 JWT 失效；
+ * 登出会记审计并作废当前 session。
+ * <p>
+ * 协作：{@link JwtTokenFactory} 发 token，{@link MailService} 发激活/重置邮件，
+ * {@link SystemSecurityService} 校验密码策略并记登录审计，{@link RateLimitService} 限制重置尝试。
+ *
+ * @see JwtTokenFactory
+ * @see SystemSecurityService
+ * @see MailService
  */
 @RestController
 @TbCoreComponent
@@ -68,6 +84,7 @@ import org.thingsboard.server.service.security.system.SystemSecurityService;
 @RequiredArgsConstructor
 public class AuthController extends BaseController {
 
+    /** 每个用户重置密码的默认限流配置（次数:秒），例如 5:3600。 */
     @Value("${server.rest.rate_limits.reset_password_per_user:5:3600}")
     private String defaultLimitsConfiguration;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -79,6 +96,9 @@ public class AuthController extends BaseController {
     private final ApplicationEventPublisher eventPublisher;
 
 
+    /**
+     * 返回当前 JWT 对应用户资料，并校验 additionalInfo 里的仪表盘 ID 是否仍存在。
+     */
     @ApiOperation(value = "Get current User (getUser)",
             notes = "Get the information about the User which credentials are used to perform this REST API call.")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -90,6 +110,9 @@ public class AuthController extends BaseController {
         return user;
     }
 
+    /**
+     * 服务端登出：写审计日志并作废当前 session。客户端仍需自行丢弃 JWT。
+     */
     @ApiOperation(value = "Logout (logout)",
             notes = "Special API call to record the 'logout' of the user to the Audit Logs. Since platform uses [JWT](https://jwt.io/), the actual logout is the procedure of clearing the [JWT](https://jwt.io/) token on the client side. ")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -98,6 +121,9 @@ public class AuthController extends BaseController {
         logLogoutAction(request);
     }
 
+    /**
+     * 当前用户改密：校验旧密码与密码策略后更新凭据，并作废该用户全部 JWT，返回新 token 对。
+     */
     @ApiOperation(value = "Change password for current User (changePassword)",
             notes = "Change the password for the User which credentials are used to perform this REST API call. Be aware that previously generated [JWT](https://jwt.io/) tokens will be still valid until they expire.")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -122,6 +148,9 @@ public class AuthController extends BaseController {
         return tokenFactory.createTokenPair(securityUser);
     }
 
+    /**
+     * 公开接口：返回系统密码策略，供激活 / 重置密码表单做前端校验。
+     */
     @ApiOperation(value = "Get the current User password policy (getUserPasswordPolicy)",
             notes = "API call to get the password policy for the password validation form(s).")
     @GetMapping(value = "/noauth/userPasswordPolicy")
@@ -130,6 +159,9 @@ public class AuthController extends BaseController {
         return securitySettings.getPasswordPolicy();
     }
 
+    /**
+     * 校验激活 token：有效则 303 到创建密码页；过期跳错误页；无效返回 409。
+     */
     @ApiOperation(value = "Check Activate User Token (checkActivateToken)",
             notes = "Checks the activation token and forwards user to 'Create Password' page. " +
                     "If token is valid, returns '303 See Other' (redirect) response code with the correct address of 'Create Password' page and same 'activateToken' specified in the URL parameters. " +
@@ -148,6 +180,9 @@ public class AuthController extends BaseController {
         return redirectTo("/login/createPassword?activateToken=" + activateToken);
     }
 
+    /**
+     * 按邮箱发重置密码邮件。无论邮箱是否存在都返回 200，避免枚举账号。
+     */
     @ApiOperation(value = "Request reset password email (requestResetPasswordByEmail)",
             notes = "Request to send the reset password email if the user with specified email address is present in the database. " +
                     "Always return '200 OK' status for security purposes.")
@@ -170,6 +205,9 @@ public class AuthController extends BaseController {
         }
     }
 
+    /**
+     * 校验重置密码 token：有效则 303 到重置页；过期跳错误页；无效 409；超限流 429。
+     */
     @ApiOperation(value = "Check password reset token (checkResetToken)",
             notes = "Checks the password reset token and forwards user to 'Reset Password' page. " +
                     "If token is valid, returns '303 See Other' (redirect) response code with the correct address of 'Reset Password' page and same 'resetToken' specified in the URL parameters. " +
@@ -191,6 +229,9 @@ public class AuthController extends BaseController {
         return redirectTo("/login/resetPassword?resetToken=" + resetToken);
     }
 
+    /**
+     * 用激活 token 设置密码并启用账号；成功后直接返回 JWT，并可发「账号已激活」邮件。
+     */
     @ApiOperation(value = "Activate User",
             notes = "Checks the activation token and updates corresponding user password in the database. " +
                     "Now the user may start using his password to login. " +
@@ -229,6 +270,9 @@ public class AuthController extends BaseController {
         return tokenPair;
     }
 
+    /**
+     * 用重置 token 更新密码并作废旧 JWT；成功后发「密码已重置」邮件。
+     */
     @ApiOperation(value = "Reset password (resetPassword)",
             notes = "Checks the password reset token and updates the password. " +
                     "If token is not valid, returns '400 Bad Request'.")

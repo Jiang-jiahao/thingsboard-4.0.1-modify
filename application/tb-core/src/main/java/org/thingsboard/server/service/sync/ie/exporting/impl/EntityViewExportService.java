@@ -25,10 +25,16 @@ import org.thingsboard.server.service.sync.vc.data.EntitiesExportCtx;
 
 import java.util.Set;
 
+/**
+ * 针对 {@link EntityView} 的导出服务，继承 {@link BaseEntityExportService}。
+ * <p>
+ * 将关联实体与客户替换为 externalId。
+ */
 @Service
 @TbCoreComponent
 public class EntityViewExportService extends BaseEntityExportService<EntityViewId, EntityView, EntityExportData<EntityView>> {
 
+    /** 将关联实体与客户 ID 替换为 externalId。 */
     @Override
     protected void setRelatedEntities(EntitiesExportCtx<?> ctx, EntityView entityView, EntityExportData<EntityView> exportData) {
         entityView.setEntityId(getExternalIdOrElseInternal(ctx, entityView.getEntityId()));

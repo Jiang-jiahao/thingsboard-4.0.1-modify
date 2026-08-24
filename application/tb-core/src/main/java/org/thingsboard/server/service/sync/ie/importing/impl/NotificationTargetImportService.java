@@ -41,6 +41,12 @@ import org.thingsboard.server.service.sync.vc.data.EntitiesImportCtx;
 
 import java.util.List;
 
+/**
+ * 针对 {@link NotificationTarget} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 客户用户过滤器映射内部 customerId；用户列表替换为当前导入用户（VC 不支持 User 实体）；
+ * 拒绝带租户/租户 Profile 过滤的租户管理员目标以及系统管理员目标。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -53,6 +59,9 @@ public class NotificationTargetImportService extends BaseEntityImportService<Not
         notificationTarget.setTenantId(tenantId);
     }
 
+    /**
+     * 映射客户过滤器；用户列表改为当前用户；拒绝跨租户或系统管理员目标。
+     */
     @Override
     protected NotificationTarget prepare(EntitiesImportCtx ctx, NotificationTarget notificationTarget, NotificationTarget oldNotificationTarget, EntityExportData<NotificationTarget> exportData, IdProvider idProvider) {
         if (notificationTarget.getConfiguration().getType() == NotificationTargetType.PLATFORM_USERS) {
@@ -79,6 +88,7 @@ public class NotificationTargetImportService extends BaseEntityImportService<Not
         return notificationTarget;
     }
 
+    /** 校验字段后保存通知目标。 */
     @Override
     protected NotificationTarget saveOrUpdate(EntitiesImportCtx ctx, NotificationTarget notificationTarget, EntityExportData<NotificationTarget> exportData, IdProvider idProvider) {
         ConstraintValidator.validateFields(notificationTarget);

@@ -98,6 +98,21 @@ import java.util.function.Function;
 import static com.google.common.util.concurrent.Futures.transform;
 import static org.thingsboard.server.common.data.sync.vc.VcUtils.checkBranchName;
 
+/**
+ * {@link EntitiesVersionControlService} 默认实现，编排「导出 JSON → Git 队列提交」与「从 Git 加载 → 导入冲突处理」。
+ * <p>
+ * <b>创建版本：</b>{@link GitVersionControlQueueService#prepareCommit} 后，
+ * 单实体或按类型批量调用 {@link EntitiesExportImportService#exportEntity} 得到 JSON，
+ * 再 {@code addToCommit} / {@code push}。支持 MERGE / OVERWRITE 同步策略。
+ * <p>
+ * <b>加载版本：</b>从 Git 取实体 JSON，按 {@link EntityImportSettings}
+ * （关系、属性、凭证、计算字段、按名称匹配）导入。
+ * 批量时先按依赖顺序导入，对未解析完的外部 ID 做最终 reimport，
+ * 可选删除版本中不存在的实体，最后统一保存引用和关系。
+ * {@code rollbackOnError} 时整批放在事务中，事件延后提交。
+ * <p>
+ * <b>自动提交：</b>租户配置了仓库且非只读、且该实体类型开启 auto-commit 时，保存实体后自动创建版本。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -114,6 +129,9 @@ public class DefaultEntitiesVersionControlService implements EntitiesVersionCont
     private final TbTransactionalCache<UUID, VersionControlTaskCacheEntry> taskCache;
     private final VersionControlExecutor executor;
 
+    /**
+     * 异步准备 Git 提交：导出实体 JSON 并加入 commit，完成后 push。返回任务 ID 供查询进度。
+     */
     @SuppressWarnings("UnstableApiUsage")
     @Override
     public ListenableFuture<UUID> saveEntitiesVersion(User user, VersionCreateRequest request) throws Exception {
@@ -239,6 +257,9 @@ public class DefaultEntitiesVersionControlService implements EntitiesVersionCont
         return gitServiceQueue.listEntitiesAtVersion(tenantId, versionId);
     }
 
+    /**
+     * 从指定 Git 版本加载实体：单实体走事务回滚；按类型批量则按依赖顺序导入、reimport、可选删除多余实体。
+     */
     @SuppressWarnings({"rawtypes"})
     @Override
     public UUID loadEntitiesVersion(User user, VersionLoadRequest request) throws Exception {
@@ -322,6 +343,9 @@ public class DefaultEntitiesVersionControlService implements EntitiesVersionCont
         }
     }
 
+    /**
+     * 按依赖顺序导入各类型实体，reimport 未解析引用，可选删除多余实体，最后保存关系。
+     */
     @SneakyThrows
     private VersionLoadResult loadMultipleEntities(EntitiesImportCtx ctx, EntityTypeVersionLoadRequest request) {
         var sw = TbStopWatch.create("before");
@@ -404,6 +428,9 @@ public class DefaultEntitiesVersionControlService implements EntitiesVersionCont
         } while (entityDataList.size() == limit);
     }
 
+    /**
+     * 最终轮次重新导入尚未解析完外部 ID 的实体。
+     */
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void reimport(EntitiesImportCtx ctx) {
         ctx.setFinalImportAttempt(true);
@@ -422,6 +449,9 @@ public class DefaultEntitiesVersionControlService implements EntitiesVersionCont
         });
     }
 
+    /**
+     * 删除当前租户中未出现在本次导入结果里的实体（removeOtherEntities）。
+     */
     private void removeOtherEntities(EntitiesImportCtx ctx, EntityType entityType) {
         var entities = new PageDataIterable<>(link -> exportableEntitiesService.findEntitiesIdsByTenantId(ctx.getTenantId(), entityType, link), 100);
         Set<EntityId> toRemove = new HashSet<>();
@@ -545,6 +575,9 @@ public class DefaultEntitiesVersionControlService implements EntitiesVersionCont
         }
     }
 
+    /**
+     * 租户若配置了仓库且该实体类型开启 auto-commit，则以单实体请求自动创建版本。
+     */
     @Override
     public ListenableFuture<UUID> autoCommit(User user, EntityId entityId) throws Exception {
         var repositorySettings = repositorySettingsService.get(user.getTenantId());

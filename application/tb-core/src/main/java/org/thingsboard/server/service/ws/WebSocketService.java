@@ -22,7 +22,11 @@ import org.thingsboard.server.service.ws.telemetry.cmd.v2.CmdUpdate;
 import org.thingsboard.server.service.ws.telemetry.sub.TelemetrySubscriptionUpdate;
 
 /**
- * Created by ashvayka on 27.03.18.
+ * Core WebSocket 服务门面。
+ * <p>
+ * UI 实时通道入口：会话生命周期、命令路由、订阅更新下发与错误/关闭。
+ *
+ * @see DefaultWebSocketService
  */
 public interface WebSocketService {
 
@@ -42,14 +46,29 @@ public interface WebSocketService {
      */
     void handleCommands(WebSocketSessionRef sessionRef, WsCommandsWrapper commandsWrapper);
 
+    /**
+     * 向会话推送旧版遥测订阅更新。
+     */
     void sendUpdate(String sessionId, int cmdId, TelemetrySubscriptionUpdate update);
 
+    /**
+     * 向会话推送 v2 命令更新。
+     */
     void sendUpdate(String sessionId, CmdUpdate update);
 
+    /**
+     * 向会话发送订阅错误。
+     */
     void sendError(WebSocketSessionRef sessionRef, int subId, SubscriptionErrorCode errorCode, String errorMsg);
 
+    /**
+     * 关闭指定会话。
+     */
     void close(String sessionId, CloseStatus status);
 
+    /**
+     * 底层连接已断开时清理陈旧会话资源。
+     */
     void cleanupIfStale(TenantId tenantId, String sessionId);
 
 }

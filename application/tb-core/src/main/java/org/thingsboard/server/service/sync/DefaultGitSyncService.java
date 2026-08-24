@@ -35,6 +35,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * {@link GitSyncService} 的默认实现。
+ * <p>
+ * 在本地目录打开或 clone 仓库，用单线程调度器周期性 fetch；fetch 成功后触发注册时的 {@code onUpdate} 回调。
+ * 若本地目录被删除会重新初始化。
+ */
 @TbCoreComponent
 @Service
 @Slf4j
@@ -47,6 +53,9 @@ public class DefaultGitSyncService implements GitSyncService {
     private final Map<String, GitRepository> repositories = new ConcurrentHashMap<>();
     private final Map<String, Runnable> updateListeners = new ConcurrentHashMap<>();
 
+    /**
+     * 注册仓库并立即初始化，再按间隔 fetch；有更新时回调 onUpdate。
+     */
     @Override
     public void registerSync(String key, String repoUri, String branch, long fetchFrequencyMs, Runnable onUpdate) {
         RepositorySettings settings = new RepositorySettings();
@@ -121,6 +130,9 @@ public class DefaultGitSyncService implements GitSyncService {
         return repository;
     }
 
+    /**
+     * 打开或 clone 仓库到本地目录，并触发更新回调。
+     */
     private void initRepository(String key, RepositorySettings settings) {
         try {
             repositories.remove(key);

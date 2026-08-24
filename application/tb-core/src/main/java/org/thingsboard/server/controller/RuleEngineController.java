@@ -55,6 +55,20 @@ import java.util.concurrent.TimeoutException;
 import static org.thingsboard.server.controller.ControllerConstants.ENTITY_ID_PARAM_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.ENTITY_TYPE_PARAM_DESCRIPTION;
 
+/**
+ * REST 调规则引擎入口。
+ * <p>
+ * <b>职责：</b>把请求体封装为类型 {@code REST_API_REQUEST} 的规则引擎消息并等待回复。
+ * 元数据含 {@code serviceId}、{@code requestUUID}、{@code expirationTime}；
+ * 规则链中用 {@code rest call reply} 节点把结果写回本 HTTP 响应。默认超时 10 秒。
+ * <p>
+ * <b>URL：</b>{@code /api/rule-engine/}（{@link TbUrlConstants#RULE_ENGINE_URL_PREFIX}）
+ * <p>
+ * <b>权限：</b>{@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}，
+ * 并对消息发起者实体做 {@code WRITE} 校验。未指定实体时以当前用户为 originator。
+ * <p>
+ * <b>下游：</b>{@link RuleEngineCallService}、{@link AccessValidator}
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping(TbUrlConstants.RULE_ENGINE_URL_PREFIX)
@@ -73,6 +87,11 @@ public class RuleEngineController extends BaseController {
     @Autowired
     private AccessValidator accessValidator;
 
+    /**
+     * 以当前用户为 originator，把请求体推入规则引擎，默认超时 10 秒。
+     * <p>
+     * 权限：{@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}，实体 WRITE。
+     */
     @ApiOperation(value = "Push user message to the rule engine (handleRuleEngineRequest)",
             notes = MSG_DESCRIPTION_PREFIX +
                     "Uses current User Id ( the one which credentials is used to perform the request) as the Rule Engine message originator. " +
@@ -88,6 +107,11 @@ public class RuleEngineController extends BaseController {
         return handleRuleEngineRequest(null, null, null, DEFAULT_TIMEOUT, requestBody);
     }
 
+    /**
+     * 以指定实体为 originator，把请求体推入规则引擎，默认超时 10 秒。
+     * <p>
+     * 权限：{@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}，实体 WRITE。
+     */
     @ApiOperation(value = "Push entity message to the rule engine (handleRuleEngineRequest)",
             notes = MSG_DESCRIPTION_PREFIX +
                     "Uses specified Entity Id as the Rule Engine message originator. " +
@@ -107,6 +131,11 @@ public class RuleEngineController extends BaseController {
         return handleRuleEngineRequest(entityType, entityIdStr, null, DEFAULT_TIMEOUT, requestBody);
     }
 
+    /**
+     * 以指定实体为 originator，把请求体推入规则引擎，超时由路径参数指定（毫秒）。
+     * <p>
+     * 权限：{@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}，实体 WRITE。
+     */
     @ApiOperation(value = "Push entity message with timeout to the rule engine (handleRuleEngineRequest)",
             notes = MSG_DESCRIPTION_PREFIX +
                     "Uses specified Entity Id as the Rule Engine message originator. " +
@@ -128,6 +157,14 @@ public class RuleEngineController extends BaseController {
         return handleRuleEngineRequest(entityType, entityIdStr, null, timeout, requestBody);
     }
 
+    /**
+     * 以指定实体为 originator，指定队列名与超时，把请求体推入规则引擎。
+     * <p>
+     * 对设备/资产及其配置文件，指定队列会覆盖配置文件中的默认队列。
+     * 本重载是实际投递实现，其余重载都转发到这里。
+     * 权限：{@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}，实体 WRITE。
+     * 下游 {@link RuleEngineCallService#processRestApiCallToRuleEngine}。
+     */
     @ApiOperation(value = "Push entity message with timeout and specified queue to the rule engine (handleRuleEngineRequest)",
             notes = MSG_DESCRIPTION_PREFIX +
                     "Uses specified Entity Id as the Rule Engine message originator. " +

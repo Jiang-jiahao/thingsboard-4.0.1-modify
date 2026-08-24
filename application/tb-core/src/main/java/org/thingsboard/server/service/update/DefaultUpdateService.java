@@ -46,6 +46,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 平台更新检查服务：定时向 ThingsBoard 更新服务器查询新版本，并刷新 Edge 安装/升级说明。
+ * <p>
+ * <b>职责：</b>上报 instanceId/platform/version；发现新版本时触发
+ * {@code NewPlatformVersion} 通知；同步 Edge 安装版本与升级映射。
+ * <p>
+ * <b>触发方式：</b>启动后每小时一次（{@code updates.enabled=true}）。
+ * <p>
+ * <b>通知对象：</b>配置了新版本规则的通知目标。
+ */
 @Service
 @TbCoreComponent
 @Slf4j
@@ -84,6 +94,7 @@ public class DefaultUpdateService implements UpdateService {
     private String version;
     private UUID instanceId = null;
 
+    /** 启动后开始定时检查更新。 */
     @AfterStartUp(order = AfterStartUp.REGULAR_SERVICE)
     public void init() {
         version = buildProperties != null ? buildProperties.getVersion() : "unknown";
@@ -164,6 +175,7 @@ public class DefaultUpdateService implements UpdateService {
         }
     };
 
+    /** 返回缓存的最新更新消息。 */
     @Override
     public UpdateMessage checkUpdates() {
         return updateMessage;

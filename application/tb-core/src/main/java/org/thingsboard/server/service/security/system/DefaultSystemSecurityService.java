@@ -66,6 +66,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * {@link SystemSecurityService} 默认实现。
+ * <p>
+ * 登录鉴权链路核心：BCrypt 校验、失败锁定、密码过期、Passay 策略、双因子失败计数，以及登录审计日志。
+ *
+ * @see SystemSecurityService
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -78,6 +85,9 @@ public class DefaultSystemSecurityService implements SystemSecurityService {
     private final AuditLogService auditLogService;
     private final SecuritySettingsService securitySettingsService;
 
+    /**
+     * 校验密码哈希、失败锁定、账号启用状态与密码过期。
+     */
     @Override
     public void validateUserCredentials(TenantId tenantId, UserCredentials userCredentials, String username, String password) throws AuthenticationException {
         if (!encoder.matches(password, userCredentials.getPassword())) {
@@ -109,6 +119,9 @@ public class DefaultSystemSecurityService implements SystemSecurityService {
         }
     }
 
+    /**
+     * 双因子校验失败计数；成功则清零，超限锁定。
+     */
     @Override
     public void validateTwoFaVerification(SecurityUser securityUser, boolean verificationSuccess, PlatformTwoFaSettings twoFaSettings) {
         TenantId tenantId = securityUser.getTenantId();
@@ -143,6 +156,9 @@ public class DefaultSystemSecurityService implements SystemSecurityService {
         }
     }
 
+    /**
+     * 修改密码时校验策略及历史重复。
+     */
     @Override
     public void validatePassword(String password, UserCredentials userCredentials) throws DataValidationException {
         SecuritySettings securitySettings = securitySettingsService.getSecuritySettings();
@@ -165,6 +181,9 @@ public class DefaultSystemSecurityService implements SystemSecurityService {
         }
     }
 
+    /**
+     * 按 Passay 规则校验密码复杂度。
+     */
     @Override
     public void validatePasswordByPolicy(String password, UserPasswordPolicy passwordPolicy) {
         List<Rule> passwordRules = new ArrayList<>();
@@ -198,6 +217,9 @@ public class DefaultSystemSecurityService implements SystemSecurityService {
         }
     }
 
+    /**
+     * 优先使用请求头/通用设置中的 Base URL。
+     */
     @Override
     public String getBaseUrl(TenantId tenantId, CustomerId customerId, HttpServletRequest httpServletRequest) {
         String baseUrl = null;
@@ -216,11 +238,17 @@ public class DefaultSystemSecurityService implements SystemSecurityService {
         return baseUrl;
     }
 
+    /**
+     * 记录登录动作（无 provider）。
+     */
     @Override
     public void logLoginAction(User user, Object authenticationDetails, ActionType actionType, Exception e) {
         logLoginAction(user, authenticationDetails, actionType, null, e);
     }
 
+    /**
+     * 记录登录动作并附带认证提供方。
+     */
     @Override
     public void logLoginAction(User user, Object authenticationDetails, ActionType actionType, String provider, Exception e) {
         String clientAddress = "Unknown";

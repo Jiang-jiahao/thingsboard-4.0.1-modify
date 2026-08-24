@@ -28,6 +28,13 @@ import java.util.concurrent.TimeUnit;
 
 import static org.thingsboard.server.dao.model.ModelConstants.AUDIT_LOG_TABLE_NAME;
 
+/**
+ * 审计日志 TTL 清理服务：删除过期审计日志分区。
+ * <p>
+ * <b>触发方式：</b>定时 TTL（{@code sql.ttl.audit_logs.checking_interval_ms}）。
+ * <p>
+ * <b>清理对象：</b>audit_log 过期数据；非本系统分区则只清本地分区缓存。
+ */
 @Service
 @ConditionalOnExpression("${sql.ttl.audit_logs.enabled:true} && ${sql.ttl.audit_logs.ttl:0} > 0")
 @Slf4j
@@ -47,6 +54,7 @@ public class AuditLogsCleanUpService extends AbstractCleanUpService {
         this.partitioningRepository = partitioningRepository;
     }
 
+    /** 按 TTL 清理过期审计日志。 */
     @Scheduled(initialDelayString = "#{T(org.apache.commons.lang3.RandomUtils).nextLong(0, ${sql.ttl.audit_logs.checking_interval_ms})}",
             fixedDelayString = "${sql.ttl.audit_logs.checking_interval_ms}")
     public void cleanUp() {
@@ -59,6 +67,7 @@ public class AuditLogsCleanUpService extends AbstractCleanUpService {
         }
     }
 
+    /** 返回当前毫秒时间戳（便于测试替换）。 */
     public long getCurrentTimeMillis() {
         return System.currentTimeMillis();
     }

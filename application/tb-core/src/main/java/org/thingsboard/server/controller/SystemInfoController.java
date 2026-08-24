@@ -53,6 +53,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * 系统构建信息与前端启动参数 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。{@code /system/info}
+ * 返回版本号；{@code /system/params} 按当前用户角色组装 UI 所需开关与配额。
+ */
 @Hidden
 @RestController
 @TbCoreComponent
@@ -93,6 +99,9 @@ public class SystemInfoController extends BaseController {
         log.info("System build info: {}", info);
     }
 
+    /**
+     * 返回当前构建版本、构件名与发行类型（CE）。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/system/info", method = RequestMethod.GET)
     @ResponseBody
@@ -100,6 +109,12 @@ public class SystemInfoController extends BaseController {
         return buildInfoObject();
     }
 
+    /**
+     * 按当前用户权限组装前端启动参数。
+     * <p>
+     * 含 Token 模拟开关、全屏仪表盘白名单、版本控制仓库、TBEL、设备状态落库、
+     * 用户菜单、遥测点数上限、资源/调试配额、移动端二维码等。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/system/params", method = RequestMethod.GET)
     @ResponseBody

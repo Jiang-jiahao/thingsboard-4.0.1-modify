@@ -94,6 +94,22 @@ import java.util.Optional;
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHORITY_PARAGRAPH;
 
+/**
+ * 系统 / 租户级管理设置 REST。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径前缀 {@code /api/admin}。
+ * <ul>
+ *   <li><b>SYS_ADMIN：</b>管理设置、安全策略、JWT、发测邮件/短信、系统信息、发件箱 OAuth2；</li>
+ *   <li><b>TENANT_ADMIN：</b>版本控制 Git 仓库与自动提交设置。</li>
+ * </ul>
+ * 管理设置走 {@link AdminSettingsService}；邮件/短信保存后会刷新 {@link MailService} / {@link SmsService}；
+ * JWT 保存后立即给当前用户签发新 token 对。版本控制走 {@link EntitiesVersionControlService}，
+ * 自动提交走 {@link TbAutoCommitSettingsService}。
+ *
+ * @see AdminSettingsService
+ * @see EntitiesVersionControlService
+ * @see JwtSettingsService
+ */
 @RestController
 @TbCoreComponent
 @Slf4j
@@ -122,6 +138,9 @@ public class AdminController extends BaseController {
     @Value("${queue.vc.request-timeout:180000}")
     private int vcRequestTimeout;
 
+    /**
+     * 按 key（如 general / mail）取系统管理设置。mail 会去掉 password、refreshToken 再返回。
+     */
     @ApiOperation(value = "Get the Administration Settings object using key (getAdminSettings)",
             notes = "Get the Administration Settings object using specified string key. Referencing non-existing key will cause an error." + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
@@ -139,6 +158,9 @@ public class AdminController extends BaseController {
         return adminSettings;
     }
 
+    /**
+     * 创建或更新系统管理设置。key=mail/sms 时会立即刷新对应服务配置。
+     */
     @ApiOperation(value = "Creates or Updates the Administration Settings (saveAdminSettings)",
             notes = "Creates or Updates the Administration Settings. Platform generates random Administration Settings Id during settings creation. " +
                     "The Administration Settings Id will be present in the response. Specify the Administration Settings Id when you would like to update the Administration Settings. " +
@@ -162,6 +184,9 @@ public class AdminController extends BaseController {
         return adminSettings;
     }
 
+    /**
+     * 取安全设置（密码策略等）。
+     */
     @ApiOperation(value = "Get the Security Settings object (getSecuritySettings)",
             notes = "Get the Security Settings object that contains password policy, etc." + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
@@ -172,6 +197,9 @@ public class AdminController extends BaseController {
         return checkNotNull(securitySettingsService.getSecuritySettings());
     }
 
+    /**
+     * 更新安全设置（密码策略等）。
+     */
     @ApiOperation(value = "Update Security Settings (saveSecuritySettings)",
             notes = "Updates the Security Settings object that contains password policy, etc." + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
@@ -185,6 +213,9 @@ public class AdminController extends BaseController {
         return securitySettings;
     }
 
+    /**
+     * 取 JWT 签发策略。
+     */
     @ApiOperation(value = "Get the JWT Settings object (getJwtSettings)",
             notes = "Get the JWT Settings object that contains JWT token policy, etc. " + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
@@ -195,6 +226,9 @@ public class AdminController extends BaseController {
         return checkNotNull(jwtSettingsService.getJwtSettings());
     }
 
+    /**
+     * 更新 JWT 策略后，立即为当前系统管理员签发新的 access/refresh token 对。
+     */
     @ApiOperation(value = "Update JWT Settings (saveJwtSettings)",
             notes = "Updates the JWT Settings object that contains JWT token policy, etc. The tokenSigningKey field is a Base64 encoded string." + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
@@ -209,6 +243,9 @@ public class AdminController extends BaseController {
         return tokenFactory.createTokenPair(securityUser);
     }
 
+    /**
+     * 用请求体中的邮件设置给当前系统管理员发一封测试邮件。OAuth2 场景会补上已保存的 refreshToken。
+     */
     @ApiOperation(value = "Send test email (sendTestMail)",
             notes = "Attempts to send test email to the System Administrator User using Mail Settings provided as a parameter. " +
                     "You may change the 'To' email in the user profile of the System Administrator. " + SYSTEM_AUTHORITY_PARAGRAPH)
@@ -247,6 +284,9 @@ public class AdminController extends BaseController {
         }
     }
 
+    /**
+     * 按请求中的短信配置和目标号码发测试短信，并写审计日志。
+     */
     @ApiOperation(value = "Send test sms (sendTestSms)",
             notes = "Attempts to send test sms to the System Administrator User using SMS Settings and phone number provided as a parameters of the request. "
                     + SYSTEM_AUTHORITY_PARAGRAPH)
@@ -266,6 +306,9 @@ public class AdminController extends BaseController {
         }
     }
 
+    /**
+     * 取当前租户 Git 仓库设置；返回前去掉 password / 私钥。
+     */
     @ApiOperation(value = "Get repository settings (getRepositorySettings)",
             notes = "Get the repository settings object. " + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -279,6 +322,9 @@ public class AdminController extends BaseController {
         return versionControlSettings;
     }
 
+    /**
+     * 当前租户是否已配置版本控制仓库。
+     */
     @ApiOperation(value = "Check repository settings exists (repositorySettingsExists)",
             notes = "Check whether the repository settings exists. " + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -288,6 +334,9 @@ public class AdminController extends BaseController {
         return versionControlService.getVersionControlSettings(getTenantId()) != null;
     }
 
+    /**
+     * 返回仓库是否已配置、是否只读（不含密钥）。
+     */
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @GetMapping("/repositorySettings/info")
     public RepositorySettingsInfo getRepositorySettingsInfo() throws Exception {
@@ -305,6 +354,9 @@ public class AdminController extends BaseController {
         }
     }
 
+    /**
+     * 保存租户 Git 仓库设置（异步，超时见 queue.vc.request-timeout）。
+     */
     @ApiOperation(value = "Creates or Updates the repository settings (saveRepositorySettings)",
             notes = "Creates or Updates the repository settings object. " + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -321,6 +373,9 @@ public class AdminController extends BaseController {
         }, MoreExecutors.directExecutor()), vcRequestTimeout);
     }
 
+    /**
+     * 删除当前租户的 Git 仓库设置。
+     */
     @ApiOperation(value = "Delete repository settings (deleteRepositorySettings)",
             notes = "Deletes the repository settings."
                     + TENANT_AUTHORITY_PARAGRAPH)
@@ -332,6 +387,9 @@ public class AdminController extends BaseController {
         return wrapFuture(versionControlService.deleteVersionControlSettings(getTenantId()), vcRequestTimeout);
     }
 
+    /**
+     * 用给定设置探测仓库连通性，不落库。
+     */
     @ApiOperation(value = "Check repository access (checkRepositoryAccess)",
             notes = "Attempts to check repository access. " + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -344,6 +402,9 @@ public class AdminController extends BaseController {
         return wrapFuture(versionControlService.checkVersionControlAccess(getTenantId(), settings), vcRequestTimeout);
     }
 
+    /**
+     * 取当前租户实体自动提交 Git 的配置。
+     */
     @ApiOperation(value = "Get auto commit settings (getAutoCommitSettings)",
             notes = "Get the auto commit settings object. " + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -353,6 +414,9 @@ public class AdminController extends BaseController {
         return checkNotNull(autoCommitSettingsService.get(getTenantId()));
     }
 
+    /**
+     * 当前租户是否已配置自动提交。
+     */
     @ApiOperation(value = "Check auto commit settings exists (autoCommitSettingsExists)",
             notes = "Check whether the auto commit settings exists. " + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -362,6 +426,9 @@ public class AdminController extends BaseController {
         return autoCommitSettingsService.get(getTenantId()) != null;
     }
 
+    /**
+     * 保存自动提交配置；会校验分支名合法。
+     */
     @ApiOperation(value = "Creates or Updates the auto commit settings (saveAutoCommitSettings)",
             notes = "Creates or Updates the auto commit settings object. " + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -372,6 +439,9 @@ public class AdminController extends BaseController {
         return autoCommitSettingsService.save(getTenantId(), settings);
     }
 
+    /**
+     * 删除当前租户的自动提交配置。
+     */
     @ApiOperation(value = "Delete auto commit settings (deleteAutoCommitSettings)",
             notes = "Deletes the auto commit settings."
                     + TENANT_AUTHORITY_PARAGRAPH)
@@ -383,6 +453,9 @@ public class AdminController extends BaseController {
         autoCommitSettingsService.delete(getTenantId());
     }
 
+    /**
+     * 检查平台是否有新版本发布通知。
+     */
     @ApiOperation(value = "Check for new Platform Releases (checkUpdates)",
             notes = "Check notifications about new platform releases. "
                     + SYSTEM_AUTHORITY_PARAGRAPH)
@@ -393,6 +466,9 @@ public class AdminController extends BaseController {
         return updateService.checkUpdates();
     }
 
+    /**
+     * 取系统运行信息（版本、各节点等）。
+     */
     @ApiOperation(value = "Get system info (getSystemInfo)",
             notes = "Get main information about system. "
                     + SYSTEM_AUTHORITY_PARAGRAPH)
@@ -403,6 +479,9 @@ public class AdminController extends BaseController {
         return systemInfoService.getSystemInfo();
     }
 
+    /**
+     * 取各功能模块启用状态。
+     */
     @ApiOperation(value = "Get features info (getFeaturesInfo)",
             notes = "Get information about enabled/disabled features. "
                     + SYSTEM_AUTHORITY_PARAGRAPH)
@@ -413,6 +492,9 @@ public class AdminController extends BaseController {
         return systemInfoService.getFeaturesInfo();
     }
 
+    /**
+     * 返回发件箱 OAuth2 回调路径（带引号的 {@code /api/admin/mail/oauth2/code}）。
+     */
     @ApiOperation(value = "Get OAuth2 log in processing URL (getMailProcessingUrl)", notes = "Returns the URL enclosed in " +
             "double quotes. After successful authentication with OAuth2 provider and user consent for requested scope, it makes a redirect to this path so that the platform can do " +
             "further log in processing and generating access tokens. " + SYSTEM_AUTHORITY_PARAGRAPH)
@@ -424,6 +506,9 @@ public class AdminController extends BaseController {
         return "\"/api/admin/mail/oauth2/code\"";
     }
 
+    /**
+     * 拼出发件箱 OAuth2 授权 URL，并写入 state / prevUri cookie，供前端跳转邮件服务商登录。
+     */
     @ApiOperation(value = "Redirect user to mail provider login page. ", notes = "After user logged in and provided access" +
             "provider sends authorization code to specified redirect uri.)")
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
@@ -452,6 +537,9 @@ public class AdminController extends BaseController {
                 .build() + "\"";
     }
 
+    /**
+     * OAuth2 回调：用 code 换 refreshToken 写入 mail 设置，再重定向回原先设置页。
+     */
     @RequestMapping(value = "/mail/oauth2/code", params = {"code", "state"}, method = RequestMethod.GET)
     public void codeProcessingUrl(
             @RequestParam(value = "code") String code, @RequestParam(value = "state") String state,

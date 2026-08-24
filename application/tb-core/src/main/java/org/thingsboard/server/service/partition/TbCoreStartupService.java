@@ -28,6 +28,13 @@ import org.thingsboard.server.queue.discovery.TbServiceInfoProvider;
 import org.thingsboard.server.queue.util.AfterStartUp;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+/**
+ * tb-core 启动广播服务：本节点就绪后，向集群其他 Core 广播自身负责的主队列分区。
+ * <p>
+ * <b>职责：</b>读取本实例 TB_CORE 分区，封装 {@code CoreStartupMsg} 并 {@code broadcastToCore}。
+ * <p>
+ * <b>触发方式：</b>应用启动（{@code @AfterStartUp} / {@link ApplicationReadyEvent}）。
+ */
 @Slf4j
 @TbCoreComponent
 @Service
@@ -38,6 +45,7 @@ public class TbCoreStartupService {
     private final TbServiceInfoProvider serviceInfoProvider;
     private final TbClusterService clusterService;
 
+    /** 启动完成后向其他 Core 广播本节点分区。 */
     @AfterStartUp(order = AfterStartUp.STARTUP_SERVICE)
     public void onApplicationEvent(ApplicationReadyEvent event) {
         // 获取当前服务实例负责的核心主队列分区

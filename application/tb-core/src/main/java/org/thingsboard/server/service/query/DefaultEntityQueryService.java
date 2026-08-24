@@ -75,6 +75,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * {@link EntityQueryService} 的默认实现。
+ * <p>
+ * 位于 Core REST / Dashboard 查询路径：先解析过滤器中「当前租户/客户/用户」动态属性，再委托 DAO 执行实体与告警查询。
+ * 键集合接口走异步 {@link DeferredResult}，分别拉取时序键与属性键后合并 JSON 响应。
+ *
+ * @see EntityQueryService
+ */
 @Service
 @Slf4j
 @TbCoreComponent
@@ -98,11 +106,17 @@ public class DefaultEntityQueryService implements EntityQueryService {
     @Autowired
     private AttributesService attributesService;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long countEntitiesByQuery(SecurityUser securityUser, EntityCountQuery query) {
         return entityService.countEntitiesByQuery(securityUser.getTenantId(), securityUser.getCustomerId(), query);
     }
 
+    /**
+     * 查询前解析 {@link KeyFilter} 中的动态值，再委托 DAO 分页查询。
+     */
     @Override
     public PageData<EntityData> findEntityDataByQuery(SecurityUser securityUser, EntityDataQuery query) {
         if (query.getKeyFilters() != null) {
@@ -180,6 +194,9 @@ public class DefaultEntityQueryService implements EntityQueryService {
         }
     }
 
+    /**
+     * 先查出告警关联实体（受 {@code server.ws.max_entities_per_alarm_subscription} 限制），再按实体集合查告警并合并 latest。
+     */
     @Override
     public PageData<AlarmData> findAlarmDataByQuery(SecurityUser securityUser, AlarmDataQuery query) {
         EntityDataQuery entityDataQuery = this.buildEntityDataQuery(query);
@@ -206,6 +223,9 @@ public class DefaultEntityQueryService implements EntityQueryService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public long countAlarmsByQuery(SecurityUser securityUser, AlarmCountQuery query) {
         return alarmService.countAlarmsByQuery(securityUser.getTenantId(), securityUser.getCustomerId(), query);
@@ -223,6 +243,9 @@ public class DefaultEntityQueryService implements EntityQueryService {
         return new EntityDataQuery(query.getEntityFilter(), edpl, query.getEntityFields(), query.getLatestValues(), query.getKeyFilters());
     }
 
+    /**
+     * 按查询命中实体异步收集时序键与/或指定 scope 属性键，返回 {@code entityTypes/timeseries/attribute} JSON。
+     */
     @Override
     public DeferredResult<ResponseEntity> getKeysByQuery(SecurityUser securityUser, TenantId tenantId, EntityDataQuery query,
                                                          boolean isTimeseries, boolean isAttributes, String attributesScope) {

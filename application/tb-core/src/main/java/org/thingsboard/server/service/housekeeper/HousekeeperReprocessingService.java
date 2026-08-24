@@ -41,6 +41,16 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Housekeeper 失败任务重处理服务：将处理失败的任务延迟后再投递并消费。
+ * <p>
+ * <b>职责：</b>把失败任务写入重处理 Topic（单分区，集群内仅一个 Core 消费），
+ * 延迟后再次调用 {@link HousekeeperService#processTask}。
+ * <p>
+ * <b>触发方式：</b>启动后订阅重处理队列；失败时由主服务调用 {@link #submitForReprocessing}。
+ * <p>
+ * <b>清理对象：</b>与主服务相同的 Housekeeper 任务。
+ */
 @TbCoreComponent
 @Service
 @Slf4j
@@ -70,6 +80,7 @@ public class HousekeeperReprocessingService {
         this.submitTpi = TopicPartitionInfo.builder().topic(producer.getDefaultTopic()).build();
     }
 
+    /** 启动后订阅并拉起重处理队列消费者。 */
     @AfterStartUp(order = AfterStartUp.REGULAR_SERVICE)
     public void afterStartUp() {
         consumer.subscribe(); // Kafka topic for tasks reprocessing has only 1 partition, so only one TB Core will reprocess tasks
@@ -93,6 +104,7 @@ public class HousekeeperReprocessingService {
         consumer.commit();
     }
 
+    /** 将失败任务递增尝试次数并附带错误栈后重新投递。 */
     public void submitForReprocessing(ToHousekeeperServiceMsg msg, Throwable error) {
         HousekeeperTaskProto task = msg.getTask();
         Set<String> errors = new LinkedHashSet<>(task.getErrorsList());

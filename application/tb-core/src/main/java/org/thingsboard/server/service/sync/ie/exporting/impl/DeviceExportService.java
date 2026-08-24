@@ -27,6 +27,11 @@ import org.thingsboard.server.service.sync.vc.data.EntitiesExportCtx;
 
 import java.util.Set;
 
+/**
+ * 针对 {@link Device} 的导出服务，继承 {@link BaseEntityExportService}。
+ * <p>
+ * 将客户、设备 Profile 替换为 externalId；在开启 {@code exportCredentials} 时附带设备凭证（去掉凭证 ID 与设备 ID）。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -34,6 +39,9 @@ public class DeviceExportService extends BaseEntityExportService<DeviceId, Devic
 
     private final DeviceCredentialsService deviceCredentialsService;
 
+    /**
+     * 替换客户与 Profile 的 ID；按设置导出设备凭证。
+     */
     @Override
     protected void setRelatedEntities(EntitiesExportCtx<?> ctx, Device device, DeviceExportData exportData) {
         device.setCustomerId(getExternalIdOrElseInternal(ctx, device.getCustomerId()));

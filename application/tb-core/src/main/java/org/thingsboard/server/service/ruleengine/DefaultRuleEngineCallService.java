@@ -34,6 +34,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+/**
+ * {@link RuleEngineCallService} 默认实现。
+ * <p>
+ * 本机用 {@link ConcurrentHashMap} 保存 requestId → 消费者；超时调度线程按消息元数据 expirationTime 清理陈旧等待。
+ *
+ * @see RuleEngineCallService
+ */
 @Service
 @Slf4j
 public class DefaultRuleEngineCallService implements RuleEngineCallService {
@@ -48,11 +55,17 @@ public class DefaultRuleEngineCallService implements RuleEngineCallService {
         this.clusterService = clusterService;
     }
 
+    /**
+     * 启动 REST 回调超时调度线程。
+     */
     @PostConstruct
     public void initExecutor() {
         executor = ThingsBoardExecutors.newSingleThreadScheduledExecutor("re-rest-callback");
     }
 
+    /**
+     * 关闭超时调度线程。
+     */
     @PreDestroy
     public void shutdownExecutor() {
         if (executor != null) {
@@ -60,6 +73,9 @@ public class DefaultRuleEngineCallService implements RuleEngineCallService {
         }
     }
 
+    /**
+     * 登记回调、推入规则引擎并调度超时。
+     */
     @Override
     public void processRestApiCallToRuleEngine(TenantId tenantId, UUID requestId, TbMsg request, boolean useQueueFromTbMsg, Consumer<TbMsg> responseConsumer) {
         log.trace("[{}] Processing REST API call to rule engine: [{}] for entity: [{}]", tenantId, requestId, request.getOriginator());
@@ -68,6 +84,9 @@ public class DefaultRuleEngineCallService implements RuleEngineCallService {
         scheduleTimeout(request, requestId, requests);
     }
 
+    /**
+     * 匹配本机等待的 REST 回调并 ack 队列消息。
+     */
     @Override
     public void onQueueMsg(TransportProtos.RestApiCallResponseMsgProto restApiCallResponseMsg, TbCallback callback) {
         UUID requestId = new UUID(restApiCallResponseMsg.getRequestIdMSB(), restApiCallResponseMsg.getRequestIdLSB());

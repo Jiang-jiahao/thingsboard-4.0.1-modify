@@ -37,12 +37,29 @@ import java.util.UUID;
 import static org.thingsboard.server.controller.ControllerConstants.DEVICE_ID_PARAM_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 
+/**
+ * 设备服务端 RPC v1 REST 入口（已废弃，请用 {@link RpcV2Controller}）。
+ * <p>
+ * <b>职责：</b>向设备发送单向 / 双向 RPC。超时返回 408，无活动连接返回 409。
+ * <p>
+ * <b>URL：</b>{@code /api/plugins/rpc}（{@link TbUrlConstants#RPC_V1_URL_PREFIX}）
+ * <p>
+ * <b>权限：</b>{@code SYS_ADMIN}、{@code TENANT_ADMIN} 或 {@code CUSTOMER_USER}。
+ * 实际发送前由父类校验设备 {@code RPC_CALL} 权限。
+ * <p>
+ * <b>下游：</b>{@link AbstractRpcController#handleDeviceRPCRequest} → {@code TbCoreDeviceRpcService}
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping(TbUrlConstants.RPC_V1_URL_PREFIX)
 @Slf4j
 public class RpcV1Controller extends AbstractRpcController {
 
+    /**
+     * 向设备发送单向 RPC（不等待设备响应）。已废弃，请用 v2。
+     * <p>
+     * 权限：{@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}。
+     */
     @ApiOperation(value = "Send one-way RPC request (handleOneWayDeviceRPCRequest)", notes = "Deprecated. See 'Rpc V 2 Controller' instead." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/oneway/{deviceId}", method = RequestMethod.POST)
@@ -55,6 +72,11 @@ public class RpcV1Controller extends AbstractRpcController {
         return handleDeviceRPCRequest(true, new DeviceId(UUID.fromString(deviceIdStr)), requestBody, HttpStatus.REQUEST_TIMEOUT, HttpStatus.CONFLICT);
     }
 
+    /**
+     * 向设备发送双向 RPC（等待设备响应）。已废弃，请用 v2。
+     * <p>
+     * 权限：{@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}。
+     */
     @ApiOperation(value = "Send two-way RPC request (handleTwoWayDeviceRPCRequest)", notes = "Deprecated. See 'Rpc V 2 Controller' instead." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/twoway/{deviceId}", method = RequestMethod.POST)

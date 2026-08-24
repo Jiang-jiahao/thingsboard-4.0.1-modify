@@ -26,12 +26,20 @@ import org.thingsboard.server.common.data.oauth2.OAuth2Client;
 import org.thingsboard.server.dao.oauth2.OAuth2ClientService;
 import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 
+/**
+ * {@link TbOauth2ClientService} 的默认实现。
+ * <p>
+ * 由 OAuth2ClientController 调用，委托 {@link OAuth2ClientService} 落库并写审计日志。
+ *
+ * @see TbOauth2ClientService
+ */
 @Service
 @AllArgsConstructor
 public class DefaultTbOauth2ClientService extends AbstractTbEntityService implements TbOauth2ClientService {
 
     private final OAuth2ClientService oAuth2ClientService;
 
+    /** 保存 OAuth2 客户端并写审计。 */
     @Override
     public OAuth2Client save(OAuth2Client oAuth2Client, User user) throws Exception {
         ActionType actionType = oAuth2Client.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -46,6 +54,7 @@ public class DefaultTbOauth2ClientService extends AbstractTbEntityService implem
         }
     }
 
+    /** 删除 OAuth2 客户端并写 DELETED 审计。 */
     @Override
     public void delete(OAuth2Client oAuth2Client, User user) {
         ActionType actionType = ActionType.DELETED;

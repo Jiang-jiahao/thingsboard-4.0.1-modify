@@ -31,10 +31,18 @@ import java.util.Set;
 
 import static org.thingsboard.server.service.sync.ie.importing.impl.DashboardImportService.WIDGET_CONFIG_PROCESSED_FIELDS_PATTERN;
 
+/**
+ * 针对 {@link Dashboard} 的导出服务，继承 {@link BaseEntityExportService}。
+ * <p>
+ * 将已分配客户替换为 externalId；递归替换实体别名及 widget 动作配置中的 UUID，保证跨环境可导入。
+ */
 @Service
 @TbCoreComponent
 public class DashboardExportService extends BaseEntityExportService<DashboardId, Dashboard, EntityExportData<Dashboard>> {
 
+    /**
+     * 替换已分配客户 ID，以及别名/widget 动作配置里的实体 UUID。
+     */
     @Override
     protected void setRelatedEntities(EntitiesExportCtx<?> ctx, Dashboard dashboard, EntityExportData<Dashboard> exportData) {
         if (CollectionUtils.isNotEmpty(dashboard.getAssignedCustomers())) {

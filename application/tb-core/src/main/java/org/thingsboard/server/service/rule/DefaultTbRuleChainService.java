@@ -62,6 +62,13 @@ import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * {@link TbRuleChainService} 默认实现。
+ * <p>
+ * Core REST 规则链管理入口：保存后自动提交版本控制、广播组件生命周期，并处理 Output 标签重命名对关联链的影响。
+ *
+ * @see TbRuleChainService
+ */
 @RequiredArgsConstructor
 @Service
 @TbCoreComponent
@@ -73,6 +80,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
     private final InstallScripts installScripts;
     private final ComponentDiscoveryService componentDiscoveryService;
 
+    /**
+     * 收集规则链中 Output 节点名称。
+     */
     @Override
     public Set<String> getRuleChainOutputLabels(TenantId tenantId, RuleChainId ruleChainId) {
         RuleChainMetaData metaData = ruleChainService.loadRuleChainMetaData(tenantId, ruleChainId);
@@ -85,6 +95,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         return outputLabels;
     }
 
+    /**
+     * 查找引用本链的 Input 节点及其连线标签。
+     */
     @Override
     public List<RuleChainOutputLabelsUsage> getOutputLabelUsage(TenantId tenantId, RuleChainId ruleChainId) {
         List<RuleNode> ruleNodes = ruleChainService.findRuleNodesByTenantIdAndType(tenantId, TbRuleChainInputNode.class.getName(), ruleChainId.getId().toString());
@@ -125,6 +138,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Output 标签变更后更新关联规则链连线；冲突重命名不自动映射。
+     */
     @Override
     public List<RuleChain> updateRelatedRuleChains(TenantId tenantId, RuleChainId ruleChainId, RuleChainUpdateResult result) {
         Set<RuleChainId> ruleChainIds = new HashSet<>();
@@ -170,6 +186,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         return ruleChainIds.stream().map(id -> ruleChainService.findRuleChainById(tenantId, id)).collect(Collectors.toList());
     }
 
+    /**
+     * 保存规则链并自动提交版本控制。
+     */
     @Override
     public RuleChain save(RuleChain ruleChain, SecurityUser user) throws Exception {
         ActionType actionType = ruleChain.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -185,6 +204,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         }
     }
 
+    /**
+     * 删除规则链并记录审计。
+     */
     @Override
     public void delete(RuleChain ruleChain, User user) {
         TenantId tenantId = ruleChain.getTenantId();
@@ -199,6 +221,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         }
     }
 
+    /**
+     * 按安装脚本创建默认规则链。
+     */
     @Override
     public RuleChain saveDefaultByName(TenantId tenantId, DefaultRuleChainCreateRequest request, User user) throws Exception {
         try {
@@ -215,6 +240,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         }
     }
 
+    /**
+     * 切换租户根规则链，并审计新旧根链。
+     */
     @Override
     public RuleChain setRootRuleChain(TenantId tenantId, RuleChain ruleChain, User user) {
         RuleChainId ruleChainId = ruleChain.getId();
@@ -237,6 +265,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         }
     }
 
+    /**
+     * 保存节点图；可选同步关联链并广播 Core 规则链生命周期。
+     */
     @Override
     public RuleChainMetaData saveRuleChainMetaData(TenantId tenantId, RuleChain ruleChain, RuleChainMetaData ruleChainMetaData,
                                                    boolean updateRelated, User user) throws Exception {
@@ -286,6 +317,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         }
     }
 
+    /**
+     * 将规则链分配到 Edge。
+     */
     @Override
     public RuleChain assignRuleChainToEdge(TenantId tenantId, RuleChain ruleChain, Edge edge, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_EDGE;
@@ -303,6 +337,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         }
     }
 
+    /**
+     * 取消规则链与 Edge 的分配。
+     */
     @Override
     public RuleChain unassignRuleChainFromEdge(TenantId tenantId, RuleChain ruleChain, Edge edge, User user) throws ThingsboardException {
         ActionType actionType = ActionType.UNASSIGNED_FROM_EDGE;
@@ -320,6 +357,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         }
     }
 
+    /**
+     * 设为 Edge 模板根规则链。
+     */
     @Override
     public RuleChain setEdgeTemplateRootRuleChain(TenantId tenantId, RuleChain ruleChain, User user) throws ThingsboardException {
         RuleChainId ruleChainId = ruleChain.getId();
@@ -334,6 +374,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         }
     }
 
+    /**
+     * 标记新建 Edge 时自动分配该规则链。
+     */
     @Override
     public RuleChain setAutoAssignToEdgeRuleChain(TenantId tenantId, RuleChain ruleChain, User user) throws ThingsboardException {
         RuleChainId ruleChainId = ruleChain.getId();
@@ -348,6 +391,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         }
     }
 
+    /**
+     * 取消新建 Edge 自动分配。
+     */
     @Override
     public RuleChain unsetAutoAssignToEdgeRuleChain(TenantId tenantId, RuleChain ruleChain, User user) throws ThingsboardException {
         RuleChainId ruleChainId = ruleChain.getId();
@@ -362,6 +408,9 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         }
     }
 
+    /**
+     * 按组件版本升级规则节点配置。
+     */
     @Override
     public RuleNode updateRuleNodeConfiguration(RuleNode node) {
         var ruleChainId = node.getRuleChainId();

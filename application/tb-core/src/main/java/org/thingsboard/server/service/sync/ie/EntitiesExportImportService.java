@@ -26,14 +26,33 @@ import org.thingsboard.server.service.sync.vc.data.EntitiesImportCtx;
 
 import java.util.Comparator;
 
+/**
+ * 实体导入/导出门面。
+ * <p>
+ * 按实体类型分发到对应的 {@link org.thingsboard.server.service.sync.ie.exporting.EntityExportService}
+ * / {@link org.thingsboard.server.service.sync.ie.importing.EntityImportService}；
+ * 版本控制从 Git 取出 JSON 后也走本接口完成落库与关联修复。
+ */
 public interface EntitiesExportImportService {
 
+    /**
+     * 将指定实体导出为可序列化的 {@link EntityExportData}（含关联、属性、计算字段等可选数据）。
+     */
     <E extends ExportableEntity<I>, I extends EntityId> EntityExportData<E> exportEntity(EntitiesExportCtx<?> ctx, I entityId) throws ThingsboardException;
 
+    /**
+     * 按冲突策略导入一条导出数据：匹配已有实体则更新，否则新建；并登记外部 ID 到内部 ID 的映射。
+     */
     <E extends ExportableEntity<I>, I extends EntityId> EntityImportResult<E> importEntity(EntitiesImportCtx ctx, EntityExportData<E> exportData) throws ThingsboardException;
 
+    /**
+     * 在全部实体导入完成后，统一执行引用回调并保存关系。
+     */
     void saveReferencesAndRelations(EntitiesImportCtx ctx) throws ThingsboardException;
 
+    /**
+     * 导入时实体类型的依赖排序（先客户/规则链/资源，后设备/仪表板等）。
+     */
     Comparator<EntityType> getEntityTypeComparatorForImport();
 
 }

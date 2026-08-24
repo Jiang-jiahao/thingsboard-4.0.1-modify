@@ -50,6 +50,11 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * 针对 {@link NotificationRule} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 还原模板、设备/Profile/规则链、接收方 Target 的内部 ID；拒绝非租户级触发类型；Edge 配置同样清空 edges。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -62,6 +67,9 @@ public class NotificationRuleImportService extends BaseEntityImportService<Notif
         notificationRule.setTenantId(tenantId);
     }
 
+    /**
+     * 映射模板与触发/接收配置中的实体 ID，并校验触发类型对租户可用。
+     */
     @Override
     protected NotificationRule prepare(EntitiesImportCtx ctx, NotificationRule notificationRule, NotificationRule oldNotificationRule, EntityExportData<NotificationRule> exportData, IdProvider idProvider) {
         notificationRule.setTemplateId(idProvider.getInternalId(notificationRule.getTemplateId()));
@@ -134,6 +142,7 @@ public class NotificationRuleImportService extends BaseEntityImportService<Notif
         return notificationRule;
     }
 
+    /** 校验字段后保存通知规则。 */
     @Override
     protected NotificationRule saveOrUpdate(EntitiesImportCtx ctx, NotificationRule notificationRule, EntityExportData<NotificationRule> exportData, IdProvider idProvider) {
         ConstraintValidator.validateFields(notificationRule);

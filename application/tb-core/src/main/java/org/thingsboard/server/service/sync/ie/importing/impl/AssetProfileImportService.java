@@ -28,6 +28,11 @@ import org.thingsboard.server.dao.asset.AssetProfileService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.sync.vc.data.EntitiesImportCtx;
 
+/**
+ * 针对 {@link AssetProfile} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 还原默认规则链、仪表板、Edge 规则链内部 ID；最终轮次导入计算字段。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -40,6 +45,7 @@ public class AssetProfileImportService extends BaseEntityImportService<AssetProf
         assetProfile.setTenantId(tenantId);
     }
 
+    /** 映射默认规则链与仪表板为当前环境内部 ID。 */
     @Override
     protected AssetProfile prepare(EntitiesImportCtx ctx, AssetProfile assetProfile, AssetProfile old, EntityExportData<AssetProfile> exportData, IdProvider idProvider) {
         assetProfile.setDefaultRuleChainId(idProvider.getInternalId(assetProfile.getDefaultRuleChainId()));
@@ -48,6 +54,7 @@ public class AssetProfileImportService extends BaseEntityImportService<AssetProf
         return assetProfile;
     }
 
+    /** 保存资产 Profile，并在最终导入轮次写入计算字段。 */
     @Override
     protected AssetProfile saveOrUpdate(EntitiesImportCtx ctx, AssetProfile assetProfile, EntityExportData<AssetProfile> exportData, IdProvider idProvider) {
         AssetProfile saved = assetProfileService.saveAssetProfile(assetProfile);
@@ -68,6 +75,7 @@ public class AssetProfileImportService extends BaseEntityImportService<AssetProf
         return new AssetProfile(assetProfile);
     }
 
+    /** 模板覆盖：比较前的清理沿用基类。 */
     @Override
     protected void cleanupForComparison(AssetProfile assetProfile) {
         super.cleanupForComparison(assetProfile);

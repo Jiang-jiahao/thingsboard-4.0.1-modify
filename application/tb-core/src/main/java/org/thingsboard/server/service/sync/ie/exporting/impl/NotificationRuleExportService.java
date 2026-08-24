@@ -44,10 +44,19 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * 针对 {@link NotificationRule} 的导出服务，继承 {@link BaseEntityExportService}。
+ * <p>
+ * 将模板、触发配置中的设备/Profile/规则链、以及接收方 NotificationTarget 替换为 externalId；
+ * Edge 相关触发配置清空 edges（Edge 实体不纳入版本控制）。
+ */
 @Service
 @TbCoreComponent
 public class NotificationRuleExportService<I extends EntityId, E extends ExportableEntity<I>, D extends EntityExportData<E>> extends BaseEntityExportService<NotificationRuleId, NotificationRule, EntityExportData<NotificationRule>> {
 
+    /**
+     * 替换模板、触发对象与接收方 ID；Edge 触发配置去掉 edges 列表。
+     */
     @Override
     protected void setRelatedEntities(EntitiesExportCtx<?> ctx, NotificationRule notificationRule, EntityExportData<NotificationRule> exportData) {
         notificationRule.setTemplateId(getExternalIdOrElseInternal(ctx, notificationRule.getTemplateId()));

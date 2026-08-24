@@ -69,6 +69,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static org.eclipse.leshan.core.LwM2m.Version.V1_0;
 
+/**
+ * CSV 设备批量导入实现。
+ * <p>
+ * 由导入相关 Controller 调用，按列填充设备字段与传输配置（SNMP / MQTT / X.509 / LwM2M 等），
+ * 组装凭据后委托 {@link TbDeviceService#saveDeviceWithCredentials} 落库（含审计日志）。
+ * 查找已有设备走 {@link DeviceService} DAO；LwM2M 导入会按需创建或改写设备配置。
+ *
+ * @see AbstractBulkImportService
+ * @see TbDeviceService
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -80,6 +90,7 @@ public class DeviceBulkImportService extends AbstractBulkImportService<Device> {
 
     private final Lock findOrCreateDeviceProfileLock = new ReentrantLock();
 
+    /** 将 CSV 列映射到设备名称、类型、标签、描述与网关标记，并配置 SNMP 等传输参数。 */
     @Override
     protected void setEntityFields(Device device, Map<BulkImportColumnType, String> fields) {
         ObjectNode additionalInfo = getOrCreateAdditionalInfoObj(device);
@@ -106,6 +117,7 @@ public class DeviceBulkImportService extends AbstractBulkImportService<Device> {
         setUpDeviceConfiguration(device, fields);
     }
 
+    /** 解析凭据与设备配置后经 {@link TbDeviceService} 保存（含审计副作用）。 */
     @Override
     @SneakyThrows
     protected Device saveEntity(SecurityUser user, Device device, Map<BulkImportColumnType, String> fields) {
@@ -130,12 +142,14 @@ public class DeviceBulkImportService extends AbstractBulkImportService<Device> {
         return tbDeviceService.saveDeviceWithCredentials(device, deviceCredentials, user);
     }
 
+    /** 按租户与名称查找设备，不存在则返回空对象供后续填充。 */
     @Override
     protected Device findOrCreateEntity(TenantId tenantId, String name) {
         return Optional.ofNullable(deviceService.findDeviceByTenantIdAndName(tenantId, name))
                 .orElseGet(Device::new);
     }
 
+    /** 将导入用户的租户与客户写到设备上。 */
     @Override
     protected void setOwners(Device entity, SecurityUser user) {
         entity.setTenantId(user.getTenantId());
@@ -286,6 +300,7 @@ public class DeviceBulkImportService extends AbstractBulkImportService<Device> {
         }
     }
 
+    /** 声明本导入器处理的实体类型为设备。 */
     @Override
     protected EntityType getEntityType() {
         return EntityType.DEVICE;

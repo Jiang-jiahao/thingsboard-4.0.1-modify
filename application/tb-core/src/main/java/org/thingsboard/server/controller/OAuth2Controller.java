@@ -59,6 +59,20 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_ORDER_D
 import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERTY_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 
+/**
+ * OAuth2 客户端 REST 入口。
+ * <p>
+ * <b>职责：</b>维护租户/系统级 OAuth2 客户端（增删改查、分页、按 id 批量查），
+ * 以及登录页所需的可用客户端列表和登录回调处理 URL。
+ * <p>
+ * <b>URL：</b>{@code /api}（登录列表走 {@code /api/noauth/oauth2Clients}，其余走 {@code /api/oauth2/*}）
+ * <p>
+ * <b>权限：</b>{@code /noauth/oauth2Clients} 无需登录；其余 {@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。
+ * 写/删会校验资源 {@code OAUTH2_CLIENT}。
+ * <p>
+ * <b>下游：</b>{@link TbOauth2ClientService}、{@code oAuth2ClientService}（{@link BaseController}）、
+ * {@link OAuth2Configuration}
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -71,6 +85,12 @@ public class OAuth2Controller extends BaseController {
     private final TbOauth2ClientService tbOauth2ClientService;
 
 
+    /**
+     * 按当前请求域名（或移动包名 + 平台）返回可用于登录的 OAuth2 客户端列表。
+     * <p>
+     * 无需登录。协议/端口可被 {@code x-forwarded-proto}、{@code x-forwarded-port} 覆盖。
+     * 下游 {@code oAuth2ClientService}。
+     */
     @ApiOperation(value = "获取OAuth2客户端 (getOAuth2Clients)", notes = "获取可用于登录的 OAuth2 客户端列表，" +
             "其适用的域名协议为 HTTP 或 HTTPS（若请求头中包含 x-forwarded-proto，则协议以该头信息为准），" +
             "同时需匹配对应的域名及端口（端口可通过 x-forwarded-port 请求头获取）")
@@ -102,6 +122,12 @@ public class OAuth2Controller extends BaseController {
         }
     }
 
+    /**
+     * 创建或更新 OAuth2 客户端，并绑定当前租户。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}；资源 {@code OAUTH2_CLIENT}。
+     * 下游 {@link TbOauth2ClientService#save}。
+     */
     @ApiOperation(value = "Save OAuth2 Client (saveOAuth2Client)", notes = SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PostMapping(value = "/oauth2/client")
@@ -112,6 +138,11 @@ public class OAuth2Controller extends BaseController {
         return tbOauth2ClientService.save(oAuth2Client, getCurrentUser());
     }
 
+    /**
+     * 分页查询当前租户的 OAuth2 客户端摘要（标题模糊过滤、排序）。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。下游 {@code oAuth2ClientService}。
+     */
     @ApiOperation(value = "Get OAuth2 Client infos (findTenantOAuth2ClientInfos)", notes = SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/oauth2/client/infos")
@@ -129,6 +160,11 @@ public class OAuth2Controller extends BaseController {
         return oAuth2ClientService.findOAuth2ClientInfosByTenantId(getTenantId(), pageLink);
     }
 
+    /**
+     * 按 id 列表批量查询当前租户的 OAuth2 客户端摘要。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。下游 {@code oAuth2ClientService}。
+     */
     @ApiOperation(value = "Get OAuth2 Client infos By Ids (findTenantOAuth2ClientInfosByIds)",
             notes = "Fetch OAuth2 Client info objects based on the provided ids. " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -140,6 +176,11 @@ public class OAuth2Controller extends BaseController {
         return oAuth2ClientService.findOAuth2ClientInfosByIds(getTenantId(), oAuth2ClientIds);
     }
 
+    /**
+     * 按 id 查询完整 OAuth2 客户端配置。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}；实体 READ。
+     */
     @ApiOperation(value = "Get OAuth2 Client by id (getOAuth2ClientById)", notes = SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/oauth2/client/{id}")
@@ -148,6 +189,12 @@ public class OAuth2Controller extends BaseController {
         return checkEntityId(oAuth2ClientId, oAuth2ClientService::findOAuth2ClientById, Operation.READ);
     }
 
+    /**
+     * 按 id 删除 OAuth2 客户端。不存在的 id 会报错。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}；实体 DELETE。
+     * 下游 {@link TbOauth2ClientService#delete}。
+     */
     @ApiOperation(value = "Delete oauth2 client (deleteOauth2Client)",
             notes = "Deletes the oauth2 client. Referencing non-existing oauth2 client Id will cause an error." + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -158,6 +205,12 @@ public class OAuth2Controller extends BaseController {
         tbOauth2ClientService.delete(oAuth2Client, getCurrentUser());
     }
 
+    /**
+     * 返回 OAuth2 登录成功后的平台回调处理路径（带双引号）。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。
+     * 来自配置 {@code security.oauth2.loginProcessingUrl}，默认 {@code /login/oauth2/code/}。
+     */
     @ApiOperation(value = "Get OAuth2 log in processing URL (getLoginProcessingUrl)", notes = "Returns the URL enclosed in " +
             "double quotes. After successful authentication with OAuth2 provider, it makes a redirect to this path so that the platform can do " +
             "further log in processing. This URL may be configured as 'security.oauth2.loginProcessingUrl' property in yml configuration file, or " +

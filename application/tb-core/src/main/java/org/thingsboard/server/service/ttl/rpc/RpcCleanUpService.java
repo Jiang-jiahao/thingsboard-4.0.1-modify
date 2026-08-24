@@ -35,6 +35,13 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * RPC TTL 清理服务：按租户配置删除过期的设备 RPC 记录。
+ * <p>
+ * <b>触发方式：</b>定时 TTL（{@code sql.ttl.rpc.checking_interval}）。
+ * <p>
+ * <b>清理对象：</b>超过租户 {@code rpcTtlDays} 的 RPC；仅处理本节点负责的租户分区。
+ */
 @TbCoreComponent
 @Service
 @Slf4j
@@ -48,6 +55,7 @@ public class RpcCleanUpService {
     private final TbTenantProfileCache tenantProfileCache;
     private final RpcDao rpcDao;
 
+    /** 按租户 RPC TTL 删除过期请求。 */
     @Scheduled(initialDelayString = "#{T(org.apache.commons.lang3.RandomUtils).nextLong(0, ${sql.ttl.rpc.checking_interval})}", fixedDelayString = "${sql.ttl.rpc.checking_interval}")
     public void cleanUp() {
         if (ttlTaskExecutionEnabled) {

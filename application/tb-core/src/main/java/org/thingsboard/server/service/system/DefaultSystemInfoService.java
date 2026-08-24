@@ -66,6 +66,17 @@ import static org.thingsboard.common.util.SystemUtil.getMemoryUsage;
 import static org.thingsboard.common.util.SystemUtil.getTotalDiscSpace;
 import static org.thingsboard.common.util.SystemUtil.getTotalMemory;
 
+/**
+ * 系统信息服务：采集并持久化本节点/集群 CPU、内存、磁盘指标，并汇总功能开关。
+ * <p>
+ * <b>职责：</b>持有系统租户 Core 分区的节点定时把系统指标写入系统 API 用量实体时序；
+ * 查询时组装 {@link SystemInfo} / {@link FeaturesInfo}。
+ * <p>
+ * <b>触发方式：</b>分区变更后启动定时任务（{@code metrics.system_info.persist_frequency}）；
+ * REST 查询调用。
+ * <p>
+ * <b>清理对象：</b>系统信息时序带 TTL（{@code metrics.system_info.ttl} 天）。
+ */
 @TbCoreComponent
 @Service
 @RequiredArgsConstructor
@@ -116,6 +127,7 @@ public class DefaultSystemInfoService extends TbApplicationEventListener<Partiti
         }
     }
 
+    /** 组装当前系统信息（单机或集群）。 */
     @Override
     public SystemInfo getSystemInfo() {
         SystemInfo systemInfo = new SystemInfo();
@@ -138,6 +150,7 @@ public class DefaultSystemInfoService extends TbApplicationEventListener<Partiti
         }
     }
 
+    /** 检测邮件/短信/OAuth2/2FA/Slack 是否已启用。 */
     @Override
     public FeaturesInfo getFeaturesInfo() {
         FeaturesInfo featuresInfo = new FeaturesInfo();

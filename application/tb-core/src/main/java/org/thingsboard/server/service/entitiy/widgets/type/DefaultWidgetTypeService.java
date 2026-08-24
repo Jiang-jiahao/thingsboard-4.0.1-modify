@@ -31,6 +31,14 @@ import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 import org.thingsboard.server.service.resource.TbResourceService;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
+/**
+ * {@link TbWidgetTypeService} 的默认实现。
+ * <p>
+ * 由 WidgetTypeController 调用，委托 {@link WidgetTypeService} 落库；可导入关联资源，
+ * 写审计日志，保存时 autoCommit。
+ *
+ * @see TbWidgetTypeService
+ */
 @Service
 @TbCoreComponent
 @AllArgsConstructor
@@ -39,11 +47,13 @@ public class DefaultWidgetTypeService extends AbstractTbEntityService implements
     private final WidgetTypeService widgetTypeService;
     private final TbResourceService tbResourceService;
 
+    /** 保存部件类型（不按 FQN 覆盖），委托带标志的重载。 */
     @Override
     public WidgetTypeDetails save(WidgetTypeDetails entity, SecurityUser user) throws Exception {
         return this.save(entity, false, user);
     }
 
+    /** 保存部件类型；可按 FQN 覆盖已有记录，并写审计。 */
     @Override
     public WidgetTypeDetails save(WidgetTypeDetails widgetTypeDetails, boolean updateExistingByFqn, SecurityUser user) throws Exception {
         TenantId tenantId = widgetTypeDetails.getTenantId();
@@ -70,6 +80,7 @@ public class DefaultWidgetTypeService extends AbstractTbEntityService implements
         }
     }
 
+    /** 删除部件类型并写 DELETED 审计。 */
     @Override
     public void delete(WidgetTypeDetails widgetTypeDetails, User user) {
         ActionType actionType = ActionType.DELETED;

@@ -40,6 +40,15 @@ import java.util.concurrent.TimeUnit;
 
 import static org.thingsboard.server.common.data.mail.MailOauth2Provider.OFFICE_365;
 
+/**
+ * 邮件 OAuth2 刷新令牌过期检查服务：定时检查并续期 Office 365 邮件刷新令牌。
+ * <p>
+ * <b>职责：</b>读取系统 mail 管理设置；令牌已过期则清空；剩余不足 7 天则刷新并回写。
+ * <p>
+ * <b>触发方式：</b>定时任务（{@code mail.oauth2.refreshTokenCheckingInterval}）。
+ * <p>
+ * <b>清理/更新对象：</b>系统租户 AdminSettings 中的 mail OAuth2 刷新令牌。
+ */
 @TbCoreComponent
 @Service
 @Slf4j
@@ -47,6 +56,7 @@ import static org.thingsboard.server.common.data.mail.MailOauth2Provider.OFFICE_
 public class RefreshTokenExpCheckService {
     private final AdminSettingsService adminSettingsService;
 
+    /** 检查 Office 365 刷新令牌：过期则清空，临近过期则续期。 */
     @Scheduled(initialDelayString = "#{T(org.apache.commons.lang3.RandomUtils).nextLong(0, ${mail.oauth2.refreshTokenCheckingInterval})}",
             fixedDelayString = "${mail.oauth2.refreshTokenCheckingInterval}",
             timeUnit = TimeUnit.SECONDS)

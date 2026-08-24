@@ -15,5 +15,12 @@
  */
 package org.thingsboard.server.service.queue;
 
+/**
+ * Edge 队列消费服务标记接口。
+ * <p>
+ * 实现类在 Core 节点消费 {@code ToEdgeMsg} 与 Edge 通知，将实体变更推送到边缘网关会话。
+ *
+ * @see DefaultTbEdgeConsumerService
+ */
 public interface TbEdgeConsumerService {
 }

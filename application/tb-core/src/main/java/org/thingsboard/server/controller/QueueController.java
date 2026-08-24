@@ -53,6 +53,19 @@ import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_AUTHO
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 消息队列 REST 入口。
+ * <p>
+ * <b>职责：</b>管理平台注册的队列（目前仅 {@code TB-RULE-ENGINE} 类型有实现：分页、按 id/名称查询、创建更新、删除）。
+ * 队列名在系统管理员范围内唯一。
+ * <p>
+ * <b>URL：</b>{@code /api/queues}
+ * <p>
+ * <b>权限：</b>写/删仅 {@code SYS_ADMIN}；查询 {@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。
+ * 写/删会校验资源 {@code QUEUE}。
+ * <p>
+ * <b>下游：</b>{@link TbQueueService}、{@code queueService}（{@link BaseController}）
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -61,6 +74,11 @@ public class QueueController extends BaseController {
 
     private final TbQueueService tbQueueService;
 
+    /**
+     * 按服务类型分页查询队列。目前仅 {@code TB-RULE-ENGINE} 返回数据，其余类型为空页。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。下游 {@code queueService}。
+     */
     @ApiOperation(value = "Get Queues (getTenantQueuesByServiceType)",
             notes = "Returns a page of queues registered in the platform. " +
                     PAGE_DATA_PARAMETERS + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -90,6 +108,11 @@ public class QueueController extends BaseController {
         }
     }
 
+    /**
+     * 按 id 查询队列，并校验当前用户对该队列的 READ 权限。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。下游 {@code queueService}。
+     */
     @ApiOperation(value = "Get Queue (getQueueById)",
             notes = "Fetch the Queue object based on the provided Queue Id. " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -103,6 +126,11 @@ public class QueueController extends BaseController {
         return checkNotNull(queueService.findQueueById(getTenantId(), queueId));
     }
 
+    /**
+     * 按名称查询当前租户下的队列。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。下游 {@code queueService}。
+     */
     @ApiOperation(value = "Get Queue (getQueueByName)",
             notes = "Fetch the Queue object based on the provided Queue name. " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -114,6 +142,11 @@ public class QueueController extends BaseController {
         return checkNotNull(queueService.findQueueByTenantIdAndName(getTenantId(), queueName));
     }
 
+    /**
+     * 创建或更新队列。新建时平台生成 id；目前仅 {@code TB-RULE-ENGINE} 类型会真正保存，其余返回 null。
+     * <p>
+     * 权限：{@code SYS_ADMIN}；资源 {@code QUEUE}。下游 {@link TbQueueService#saveQueue}。
+     */
     @ApiOperation(value = "Create Or Update Queue (saveQueue)",
             notes = "Create or update the Queue. When creating queue, platform generates Queue Id as " + UUID_WIKI_LINK +
                     "Specify existing Queue id to update the queue. " +
@@ -145,6 +178,11 @@ public class QueueController extends BaseController {
         }
     }
 
+    /**
+     * 按 id 删除队列。
+     * <p>
+     * 权限：{@code SYS_ADMIN}；实体 DELETE。下游 {@link TbQueueService#deleteQueue}。
+     */
     @ApiOperation(value = "Delete Queue (deleteQueue)", notes = "Deletes the Queue. " + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/queues/{queueId}", method = RequestMethod.DELETE)

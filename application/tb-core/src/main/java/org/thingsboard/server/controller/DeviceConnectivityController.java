@@ -54,6 +54,17 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CU
 import static org.thingsboard.server.dao.util.DeviceConnectivityUtil.CA_ROOT_CERT_PEM;
 import static org.thingsboard.server.dao.util.DeviceConnectivityUtil.DOCKER_COMPOSE_YML;
 
+/**
+ * 设备接入指引 REST：按设备档案生成遥测上报命令，并下载证书 / 网关 docker-compose。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径前缀 {@code /api/device-connectivity}。
+ * 命令与网关 compose 需 TENANT_ADMIN / CUSTOMER_USER，且对设备有 READ_CREDENTIALS；
+ * 证书下载不要求登录（设备侧拉取 CA）。
+ * 业务交给 {@link DeviceConnectivityService}；站点根 URL 由 {@link SystemSecurityService} 按请求计算。
+ *
+ * @see DeviceConnectivityService
+ * @see SystemSecurityService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -64,6 +75,9 @@ public class DeviceConnectivityController extends BaseController {
     private final DeviceConnectivityService deviceConnectivityService;
     private final SystemSecurityService systemSecurityService;
 
+    /**
+     * 按设备档案生成 HTTP / MQTT / CoAP 等上报遥测示例命令。
+     */
     @ApiOperation(value = "Get commands to publish device telemetry (getDevicePublishTelemetryCommands)",
             notes = "Fetch the list of commands to publish device telemetry based on device profile " +
                     "If the user has the authority of 'Tenant Administrator', the server checks that the device is owned by the same tenant. " +
@@ -105,6 +119,9 @@ public class DeviceConnectivityController extends BaseController {
         return deviceConnectivityService.findDevicePublishTelemetryCommands(baseUrl, device);
     }
 
+    /**
+     * 下载指定协议（mqtt/coap 等）在 connectivity 配置里的服务端 PEM 证书。无需登录。
+     */
     @ApiOperation(value = "Download server certificate using file path defined in device.connectivity properties (downloadServerCertificate)", notes = "Download server certificate.")
     @RequestMapping(value = "/device-connectivity/{protocol}/certificate/download", method = RequestMethod.GET)
     @ResponseBody
@@ -122,6 +139,9 @@ public class DeviceConnectivityController extends BaseController {
                 .body(pemCert);
     }
 
+    /**
+     * 为网关设备生成并下载 docker-compose.yml；非网关设备会报错。
+     */
     @ApiOperation(value = "Download generated docker-compose.yml file for gateway (downloadGatewayDockerCompose)", notes = "Download generated docker-compose.yml for gateway.")
     @RequestMapping(value = "/device-connectivity/gateway-launch/{deviceId}/docker-compose/download", method = RequestMethod.GET)
     @ResponseBody

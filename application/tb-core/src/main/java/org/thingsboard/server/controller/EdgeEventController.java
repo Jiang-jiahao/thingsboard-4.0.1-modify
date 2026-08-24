@@ -43,6 +43,20 @@ import static org.thingsboard.server.controller.ControllerConstants.PAGE_SIZE_DE
 import static org.thingsboard.server.controller.ControllerConstants.SORT_ORDER_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERTY_DESCRIPTION;
 
+/**
+ * Edge 同步事件查询 REST 入口。
+ * <p>
+ * 列出某台 Edge 已产生/待下发的 {@link EdgeEvent}，用于排查云边同步。
+ * 仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL：</b>{@code GET /api/edge/{edgeId}/events}。
+ * <p>
+ * <b>权限：</b>仅 TENANT_ADMIN；并校验 Edge 属于当前租户。
+ * <p>
+ * <b>下游：</b>{@link EdgeEventService}。
+ *
+ * @see EdgeEventService
+ */
 @Slf4j
 @RestController
 @TbCoreComponent
@@ -54,6 +68,9 @@ public class EdgeEventController extends BaseController {
 
     public static final String EDGE_ID = "edgeId";
 
+    /**
+     * 分页查询指定 Edge 的同步事件，可按时间范围、类型关键字过滤。
+     */
     @ApiOperation(value = "Get Edge Events (getEdgeEvents)",
             notes = "Returns a page of edge events for the requested edge. " +
                     PAGE_DATA_PARAMETERS)

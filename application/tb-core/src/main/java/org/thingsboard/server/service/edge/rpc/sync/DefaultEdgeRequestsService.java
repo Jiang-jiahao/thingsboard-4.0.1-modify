@@ -77,6 +77,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * {@link EdgeRequestsService} 的默认实现。
+ * <p>
+ * 由 Edge gRPC 会话在收到云端同步请求时调用：读 {@link AttributesService} / {@link TimeseriesService} /
+ * {@link RelationService} 等 DAO，把结果封装为 {@link EdgeEvent} 经 {@link EdgeEventService} 入队，
+ * 再由会话下行到 Edge。不直接写审计日志。
+ *
+ * @see EdgeRequestsService
+ */
 @Service
 @TbCoreComponent
 @Slf4j
@@ -107,6 +116,7 @@ public class DefaultEdgeRequestsService implements EdgeRequestsService {
     @Autowired
     private DbCallbackExecutorService dbCallbackExecutorService;
 
+    /** 将规则链元数据请求转为 ADDED 事件入队。 */
     @Override
     public ListenableFuture<Void> processRuleChainMetadataRequestMsg(TenantId tenantId, Edge edge, RuleChainMetadataRequestMsg ruleChainMetadataRequestMsg) {
         log.trace("[{}] processRuleChainMetadataRequestMsg [{}][{}]", tenantId, edge.getName(), ruleChainMetadataRequestMsg);
@@ -117,6 +127,7 @@ public class DefaultEdgeRequestsService implements EdgeRequestsService {
         return saveEdgeEvent(tenantId, edge.getId(), EdgeEventType.RULE_CHAIN_METADATA, EdgeEventActionType.ADDED, ruleChainId, null);
     }
 
+    /** 查询属性并附带最新时序，作为更新事件入队。 */
     @Override
     public ListenableFuture<Void> processAttributesRequestMsg(TenantId tenantId, Edge edge, AttributesRequestMsg attributesRequestMsg) {
         log.trace("[{}] processAttributesRequestMsg [{}][{}]", tenantId, edge.getName(), attributesRequestMsg);
@@ -215,6 +226,7 @@ public class DefaultEdgeRequestsService implements EdgeRequestsService {
         }, dbCallbackExecutorService);
     }
 
+    /** 查询实体双向关系并入队（排除与 Edge 自身的关系）。 */
     @Override
     public ListenableFuture<Void> processRelationRequestMsg(TenantId tenantId, Edge edge, RelationRequestMsg relationRequestMsg) {
         log.trace("[{}] processRelationRequestMsg [{}][{}]", tenantId, edge.getName(), relationRequestMsg);
@@ -299,6 +311,7 @@ public class DefaultEdgeRequestsService implements EdgeRequestsService {
         return relationService.findByQuery(tenantId, query);
     }
 
+    /** 将设备凭据更新请求入队。 */
     @Override
     public ListenableFuture<Void> processDeviceCredentialsRequestMsg(TenantId tenantId, Edge edge, DeviceCredentialsRequestMsg deviceCredentialsRequestMsg) {
         log.trace("[{}] processDeviceCredentialsRequestMsg [{}][{}]", tenantId, edge.getName(), deviceCredentialsRequestMsg);
@@ -310,6 +323,7 @@ public class DefaultEdgeRequestsService implements EdgeRequestsService {
                 EdgeEventActionType.CREDENTIALS_UPDATED, deviceId, null);
     }
 
+    /** 将用户凭据更新请求入队。 */
     @Override
     public ListenableFuture<Void> processUserCredentialsRequestMsg(TenantId tenantId, Edge edge, UserCredentialsRequestMsg userCredentialsRequestMsg) {
         log.trace("[{}] processUserCredentialsRequestMsg [{}][{}]", tenantId, edge.getName(), userCredentialsRequestMsg);
@@ -321,6 +335,7 @@ public class DefaultEdgeRequestsService implements EdgeRequestsService {
                 EdgeEventActionType.CREDENTIALS_UPDATED, userId, null);
     }
 
+    /** 将部件包内各部件类型作为 ADDED 事件入队。 */
     @Override
     public ListenableFuture<Void> processWidgetBundleTypesRequestMsg(TenantId tenantId, Edge edge,
                                                                      WidgetBundleTypesRequestMsg widgetBundleTypesRequestMsg) {
@@ -340,6 +355,7 @@ public class DefaultEdgeRequestsService implements EdgeRequestsService {
         return Futures.transform(Futures.allAsList(futures), voids -> null, dbCallbackExecutorService);
     }
 
+    /** 查找已分配给该 Edge 的实体视图并入队。 */
     @Override
     public ListenableFuture<Void> processEntityViewsRequestMsg(TenantId tenantId, Edge edge, EntityViewsRequestMsg entityViewsRequestMsg) {
         log.trace("[{}] processEntityViewsRequestMsg [{}][{}]", tenantId, edge.getName(), entityViewsRequestMsg);

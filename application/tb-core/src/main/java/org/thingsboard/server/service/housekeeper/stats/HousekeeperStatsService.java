@@ -27,6 +27,13 @@ import org.thingsboard.server.gen.transport.TransportProtos.ToHousekeeperService
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Housekeeper 任务统计服务：按任务类型累计成功/失败次数与处理耗时，并定时打印。
+ * <p>
+ * <b>职责：</b>记录 processed / reprocessed / failed 计数与平均处理时间。
+ * <p>
+ * <b>触发方式：</b>主服务处理完成后回调；定时任务打印并重置计数。
+ */
 @Service
 @Slf4j
 @ConditionalOnProperty(name = "queue.core.housekeeper.stats.enabled", havingValue = "true", matchIfMissing = true)
@@ -61,6 +68,7 @@ public class HousekeeperStatsService {
         }
     }
 
+    /** 记录一次成功处理（含重处理成功）及耗时。 */
     public void reportProcessed(HousekeeperTaskType taskType, ToHousekeeperServiceMsg msg, long timing) {
         HousekeeperStats stats = this.stats.get(taskType);
         if (msg.getTask().getErrorsCount() == 0) {
@@ -71,6 +79,7 @@ public class HousekeeperStatsService {
         stats.getProcessingTimer().record(timing);
     }
 
+    /** 记录一次处理或重处理失败。 */
     public void reportFailure(HousekeeperTaskType taskType, ToHousekeeperServiceMsg msg) {
         HousekeeperStats stats = this.stats.get(taskType);
         if (msg.getTask().getErrorsCount() == 0) {

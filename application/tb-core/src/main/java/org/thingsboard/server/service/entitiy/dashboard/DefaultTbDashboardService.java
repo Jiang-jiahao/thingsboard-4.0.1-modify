@@ -39,6 +39,14 @@ import org.thingsboard.server.service.security.model.SecurityUser;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * {@link TbDashboardService} 的默认实现。
+ * <p>
+ * 由 DashboardController 调用，委托 {@link DashboardService} 落库；写审计日志，保存时 autoCommit，
+ * 分配客户/Edge 会触发规则引擎与 Edge 同步。
+ *
+ * @see TbDashboardService
+ */
 @Service
 @TbCoreComponent
 @AllArgsConstructor
@@ -47,6 +55,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
     private final DashboardService dashboardService;
     private final TbResourceService tbResourceService;
 
+    /** 保存仪表板（含关联资源导入），写审计并尝试 autoCommit。 */
     @Override
     public Dashboard save(Dashboard dashboard, SecurityUser user) throws Exception {
         ActionType actionType = dashboard.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -68,6 +77,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
         }
     }
 
+    /** 删除仪表板并写 DELETED 审计。 */
     @Override
     public void delete(Dashboard dashboard, User user) {
         ActionType actionType = ActionType.DELETED;
@@ -82,6 +92,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
         }
     }
 
+    /** 将仪表板分配给客户并写审计。 */
     @Override
     public Dashboard assignDashboardToCustomer(Dashboard dashboard, Customer customer, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
@@ -100,6 +111,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
         }
     }
 
+    /** 将仪表板分配给公开客户并写审计。 */
     @Override
     public Dashboard assignDashboardToPublicCustomer(Dashboard dashboard, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
@@ -117,6 +129,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
         }
     }
 
+    /** 取消仪表板与公开客户的分配并写审计。 */
     @Override
     public Dashboard unassignDashboardFromPublicCustomer(Dashboard dashboard, User user) throws ThingsboardException {
         ActionType actionType = ActionType.UNASSIGNED_FROM_CUSTOMER;
@@ -134,6 +147,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
         }
     }
 
+    /** 整体替换仪表板的客户分配并写审计。 */
     @Override
     public Dashboard updateDashboardCustomers(Dashboard dashboard, Set<CustomerId> customerIds, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
@@ -182,6 +196,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
         }
     }
 
+    /** 为仪表板追加客户分配并写审计。 */
     @Override
     public Dashboard addDashboardCustomers(Dashboard dashboard, Set<CustomerId> customerIds, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
@@ -212,6 +227,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
         }
     }
 
+    /** 从仪表板移除若干客户分配并写审计。 */
     @Override
     public Dashboard removeDashboardCustomers(Dashboard dashboard, Set<CustomerId> customerIds, User user) throws ThingsboardException {
         ActionType actionType = ActionType.UNASSIGNED_FROM_CUSTOMER;
@@ -242,6 +258,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
         }
     }
 
+    /** 将仪表板分配给 Edge 并写审计。 */
     @Override
     public Dashboard asignDashboardToEdge(TenantId tenantId, DashboardId dashboardId, Edge edge, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_EDGE;
@@ -258,6 +275,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
         }
     }
 
+    /** 取消仪表板与 Edge 的分配并写审计。 */
     @Override
     public Dashboard unassignDashboardFromEdge(Dashboard dashboard, Edge edge, User user) throws ThingsboardException {
         ActionType actionType = ActionType.UNASSIGNED_FROM_EDGE;
@@ -276,6 +294,7 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
         }
     }
 
+    /** 取消仪表板与指定客户的分配并写审计。 */
     @Override
     public Dashboard unassignDashboardFromCustomer(Dashboard dashboard, Customer customer, User user) throws ThingsboardException {
         ActionType actionType = ActionType.UNASSIGNED_FROM_CUSTOMER;

@@ -46,6 +46,14 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * {@link TbUserSettingsService} 的默认实现。
+ * <p>
+ * 由用户设置相关 Controller 调用，通用设置直接委托 {@link UserSettingsService} DAO；
+ * 最近访问/收藏仪表板会刷新标题并限制列表长度。无审计日志。
+ *
+ * @see TbUserSettingsService
+ */
 @Service
 @TbCoreComponent
 @AllArgsConstructor
@@ -58,26 +66,31 @@ public class DefaultTbUserSettingsService implements TbUserSettingsService {
     private final UserSettingsService settingsService;
     private final DashboardService dashboardService;
 
+    /** 整份保存用户设置。 */
     @Override
     public UserSettings saveUserSettings(TenantId tenantId, UserSettings userSettings) {
         return settingsService.saveUserSettings(tenantId, userSettings);
     }
 
+    /** 合并更新指定类型的用户设置。 */
     @Override
     public void updateUserSettings(TenantId tenantId, UserId userId, UserSettingsType type, JsonNode settings) {
         settingsService.updateUserSettings(tenantId, userId, type, settings);
     }
 
+    /** 按类型查询用户设置。 */
     @Override
     public UserSettings findUserSettings(TenantId tenantId, UserId userId, UserSettingsType type) {
         return settingsService.findUserSettings(tenantId, userId, type);
     }
 
+    /** 按 JSON Path 删除用户设置中的字段。 */
     @Override
     public void deleteUserSettings(TenantId tenantId, UserId userId, UserSettingsType type, List<String> jsonPaths) {
         settingsService.deleteUserSettings(tenantId, userId, type, jsonPaths);
     }
 
+    /** 查询最近访问/收藏仪表板并刷新标题。 */
     @Override
     public UserDashboardsInfo findUserDashboardsInfo(TenantId tenantId, UserId id) {
         UserSettings us = findUserSettings(tenantId, id, UserSettingsType.VISITED_DASHBOARDS);
@@ -88,6 +101,7 @@ public class DefaultTbUserSettingsService implements TbUserSettingsService {
         return refreshDashboardTitles(tenantId, stored);
     }
 
+    /** 记录访问/收藏动作后回写设置。 */
     @Override
     public UserDashboardsInfo reportUserDashboardAction(TenantId tenantId, UserId id, DashboardId dashboardId, UserDashboardAction action) {
         UserSettings us = findUserSettings(tenantId, id, UserSettingsType.VISITED_DASHBOARDS);

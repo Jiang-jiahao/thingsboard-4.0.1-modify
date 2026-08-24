@@ -118,7 +118,12 @@ import static org.thingsboard.server.service.transport.BasicCredentialsValidatio
 import static org.thingsboard.server.service.transport.BasicCredentialsValidationResult.VALID;
 
 /**
- * Created by ashvayka on 05.10.18.
+ * Transport API 请求处理器。
+ * <p>
+ * Core 作为设备权威源，处理 Transport 发来的凭证校验、网关创建设备、档案/资源/OTA/队列查询、设备开通等，
+ * 在独立线程池中执行后返回 {@link TransportApiResponseMsg}。
+ *
+ * @see TransportApiService
  */
 @Slf4j
 @Service
@@ -153,11 +158,17 @@ public class DefaultTransportApiService implements TransportApiService {
         return credentials != null && DeviceCredentialsType.MQTT_BASIC.equals(credentials.getCredentialsType());
     }
 
+    /**
+     * 启动 Transport API 处理线程池。
+     */
     @PostConstruct
     public void init() {
         handlerExecutor = MoreExecutors.listeningDecorator(ThingsBoardExecutors.newWorkStealingPool(maxCoreHandlerThreads, "transport-api-service-core-handler"));
     }
 
+    /**
+     * 关闭处理线程池。
+     */
     @PreDestroy
     public void destroy() {
         if (handlerExecutor != null) {
@@ -165,6 +176,9 @@ public class DefaultTransportApiService implements TransportApiService {
         }
     }
 
+    /**
+     * 将请求提交到处理线程池，按 oneof 路由到凭证校验、设备查询、OTA 等分支。
+     */
     @Override
     public ListenableFuture<TbProtoQueueMsg<TransportApiResponseMsg>> handle(TbProtoQueueMsg<TransportApiRequestMsg> tbProtoQueueMsg) {
         TransportApiRequestMsg transportApiRequestMsg = tbProtoQueueMsg.getValue();
@@ -272,6 +286,9 @@ public class DefaultTransportApiService implements TransportApiService {
         }
     }
 
+    /**
+     * 按证书链校验已有 X509 凭证，或按设备档案开通规则创建设备。
+     */
     protected TransportApiResponseMsg validateOrCreateDeviceX509Certificate(String certificateChain) {
         List<String> chain = X509_CERTIFICATE_TRIM_CHAIN_PATTERN.matcher(certificateChain).results().map(match ->
                 EncryptionUtil.certTrimNewLines(match.group())).collect(Collectors.toList());

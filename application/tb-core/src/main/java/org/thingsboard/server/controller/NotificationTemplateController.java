@@ -65,6 +65,23 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.service.security.permission.Resource.NOTIFICATION;
 
+/**
+ * 通知模板（Notification Template）REST 入口，并附带 Slack 会话列表。
+ * <p>
+ * 模板按投递方式（WEB / EMAIL / SMS / SLACK 等）配置标题与正文。仅在
+ * {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api/notification}。路径如 {@code /template}、{@code /templates}、
+ * {@code /slack/conversations}。
+ * <p>
+ * <b>权限：</b>全部接口 SYS_ADMIN、TENANT_ADMIN。
+ * <p>
+ * <b>下游：</b>{@link NotificationTemplateService}；Slack 会话走 {@link SlackService}，
+ * token 缺省时从 {@link NotificationSettingsService} 读系统 Slack 配置。
+ *
+ * @see NotificationTemplateService
+ * @see SlackService
+ */
 @RestController
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -75,6 +92,9 @@ public class NotificationTemplateController extends BaseController {
     private final NotificationSettingsService notificationSettingsService;
     private final SlackService slackService;
 
+    /**
+     * 创建或更新通知模板（各投递方式的标题/正文配置）。
+     */
     @ApiOperation(value = "Save notification template (saveNotificationTemplate)",
             notes = "Creates or updates notification template." + NEW_LINE +
                     "Here is an example of template to send notification via Web, SMS and Slack:\n" +
@@ -123,6 +143,9 @@ public class NotificationTemplateController extends BaseController {
         return doSaveAndLog(EntityType.NOTIFICATION_TEMPLATE, notificationTemplate, notificationTemplateService::saveNotificationTemplate);
     }
 
+    /**
+     * 按 Id 读取通知模板。
+     */
     @ApiOperation(value = "Get notification template by id (getNotificationTemplateById)",
             notes = "Fetches notification template by id." +
                     SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -133,6 +156,9 @@ public class NotificationTemplateController extends BaseController {
         return checkEntityId(notificationTemplateId, notificationTemplateService::findNotificationTemplateById, Operation.READ);
     }
 
+    /**
+     * 分页列出模板，可按通知类型过滤；未指定类型时返回全部类型。
+     */
     @ApiOperation(value = "Get notification templates (getNotificationTemplates)",
             notes = "Returns the page of notification templates owned by sysadmin or tenant." + NEW_LINE +
                     PAGE_DATA_PARAMETERS +
@@ -161,6 +187,9 @@ public class NotificationTemplateController extends BaseController {
                 List.of(notificationTypes), pageLink);
     }
 
+    /**
+     * 按 Id 删除模板。仍被定时请求或规则引用时不能删。
+     */
     @ApiOperation(value = "Delete notification template by id (deleteNotificationTemplateById",
             notes = "Deletes notification template by its id." + NEW_LINE +
                     "This template cannot be referenced by existing scheduled notification requests or any notification rules." +
@@ -173,6 +202,9 @@ public class NotificationTemplateController extends BaseController {
         doDeleteAndLog(EntityType.NOTIFICATION_TEMPLATE, notificationTemplate, notificationTemplateService::deleteNotificationTemplateById);
     }
 
+    /**
+     * 按会话类型列出可用 Slack 会话。未传 token 时使用系统通知设置里的 bot token。
+     */
     @ApiOperation(value = "List Slack conversations (listSlackConversations)",
             notes = "List available Slack conversations by type." +
                     SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)

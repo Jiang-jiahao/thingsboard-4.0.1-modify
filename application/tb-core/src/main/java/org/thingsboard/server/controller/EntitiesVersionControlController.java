@@ -75,6 +75,21 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHO
 import static org.thingsboard.server.controller.ControllerConstants.VC_REQUEST_ID_PARAM_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.VERSION_ID_PARAM_DESCRIPTION;
 
+/**
+ * 实体版本控制（Git VC）REST 入口。
+ * <p>
+ * 把租户实体提交到远程 Git、按分支/类型列版本、对比差异、从某版本加载回来。
+ * 创建/加载是异步任务，用 requestId 轮询状态。仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api/entities/vc}。路径如 {@code /version}、{@code /entity}、
+ * {@code /branches}、{@code /diff/...}。
+ * <p>
+ * <b>权限：</b>类级 {@code TENANT_ADMIN}；加载前还会校验各实体的 CREATE/WRITE。
+ * <p>
+ * <b>下游：</b>{@link EntitiesVersionControlService}。
+ *
+ * @see EntitiesVersionControlService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/entities/vc")
@@ -87,6 +102,9 @@ public class EntitiesVersionControlController extends BaseController {
     @Value("${queue.vc.request-timeout:180000}")
     private int vcRequestTimeout;
 
+    /**
+     * 把实体提交到 Git，立即返回异步 requestId。
+     */
     @ApiOperation(value = "Save entities version (saveEntitiesVersion)", notes = "" +
             "Creates a new version of entities (or a single entity) by request.\n" +
             "Supported entity types: CUSTOMER, ASSET, RULE_CHAIN, DASHBOARD, DEVICE_PROFILE, DEVICE, ENTITY_VIEW, WIDGETS_BUNDLE." + NEW_LINE +
@@ -165,6 +183,9 @@ public class EntitiesVersionControlController extends BaseController {
         return wrapFuture(versionControlService.saveEntitiesVersion(user, request));
     }
 
+    /**
+     * 查询创建版本异步任务的状态与结果。
+     */
     @ApiOperation(value = "Get version create request status (getVersionCreateRequestStatus)", notes = "" +
             "Returns the status of previously made version create request. " + NEW_LINE +
             "This status contains following properties:\n" +
@@ -198,6 +219,9 @@ public class EntitiesVersionControlController extends BaseController {
         return versionControlService.getVersionCreateStatus(getCurrentUser(), requestId);
     }
 
+    /**
+     * 列出某外部实体 UUID 在指定分支上的历史版本。
+     */
     @ApiOperation(value = "List entity versions (listEntityVersions)", notes = "" +
             "Returns list of versions for a specific entity in a concrete branch. \n" +
             "You need to specify external id of an entity to list versions for. This is `externalId` property of an entity, " +
@@ -257,6 +281,9 @@ public class EntitiesVersionControlController extends BaseController {
         return wrapFuture(versionControlService.listEntityVersions(getTenantId(), branch, externalEntityId, pageLink));
     }
 
+    /**
+     * 列出某实体类型在指定分支上的全部版本。
+     */
     @ApiOperation(value = "List entity type versions (listEntityTypeVersions)", notes = "" +
             "Returns list of versions of an entity type in a branch. This is a collected list of versions that were created " +
             "for entities of this type in a remote branch. \n" +
@@ -283,6 +310,9 @@ public class EntitiesVersionControlController extends BaseController {
         return wrapFuture(versionControlService.listEntityTypeVersions(getTenantId(), branch, entityType, pageLink));
     }
 
+    /**
+     * 列出指定分支上的全部版本（不限实体类型）。
+     */
     @ApiOperation(value = "List all versions (listVersions)", notes = "" +
             "Lists all available versions in a branch for all entity types. \n" +
             "If specified branch does not exist - empty page data will be returned. " +
@@ -307,6 +337,9 @@ public class EntitiesVersionControlController extends BaseController {
     }
 
 
+    /**
+     * 列出某版本中指定类型的实体清单。
+     */
     @ApiOperation(value = "List entities at version (listEntitiesAtVersion)", notes = "" +
             "Returns a list of remote entities of a specific entity type that are available at a concrete version. \n" +
             "Each entity item in the result has `externalId` property. " +
@@ -321,6 +354,9 @@ public class EntitiesVersionControlController extends BaseController {
         return wrapFuture(versionControlService.listEntitiesAtVersion(getTenantId(), versionId, entityType));
     }
 
+    /**
+     * 列出某版本中的全部实体清单。
+     */
     @ApiOperation(value = "List all entities at version (listAllEntitiesAtVersion)", notes = "" +
             "Returns a list of all remote entities available in a specific version. " +
             "Response type is the same as for listAllEntitiesAtVersion API method. \n" +
@@ -333,6 +369,9 @@ public class EntitiesVersionControlController extends BaseController {
         return wrapFuture(versionControlService.listAllEntitiesAtVersion(getTenantId(), versionId));
     }
 
+    /**
+     * 读取某版本中指定实体的数据摘要（是否含关系/属性等）。
+     */
     @ApiOperation(value = "Get entity data info (getEntityDataInfo)", notes = "" +
             "Retrieves short info about the remote entity by external id at a concrete version. \n" +
             "Returned entity data info contains following properties: " +
@@ -351,6 +390,9 @@ public class EntitiesVersionControlController extends BaseController {
         return wrapFuture(versionControlService.getEntityDataInfo(getCurrentUser(), entityId, versionId));
     }
 
+    /**
+     * 对比当前实体与指定版本的差异。
+     */
     @ApiOperation(value = "Compare entity data to version (compareEntityDataToVersion)", notes = "" +
             "Returns an object with current entity data and the one at a specific version. " +
             "Entity data structure is the same as stored in a repository. " +
@@ -367,6 +409,9 @@ public class EntitiesVersionControlController extends BaseController {
         return wrapFuture(versionControlService.compareEntityDataToVersion(getCurrentUser(), entityId, versionId));
     }
 
+    /**
+     * 从 Git 版本加载实体到当前租户，立即返回异步 requestId。
+     */
     @ApiOperation(value = "Load entities version (loadEntitiesVersion)", notes = "" +
             "Loads specific version of remote entities (or single entity) by request. " +
             "Supported entity types: CUSTOMER, ASSET, RULE_CHAIN, DASHBOARD, DEVICE_PROFILE, DEVICE, ENTITY_VIEW, WIDGETS_BUNDLE." + NEW_LINE +
@@ -433,6 +478,9 @@ public class EntitiesVersionControlController extends BaseController {
         return versionControlService.loadEntitiesVersion(user, request);
     }
 
+    /**
+     * 查询加载版本异步任务的状态与结果。
+     */
     @ApiOperation(value = "Get version load request status (getVersionLoadRequestStatus)", notes = "" +
             "Returns the status of previously made version load request. " +
             "The structure contains following parameters:\n" +
@@ -476,6 +524,9 @@ public class EntitiesVersionControlController extends BaseController {
     }
 
 
+    /**
+     * 列出远程仓库可用分支。
+     */
     @ApiOperation(value = "List branches (listBranches)", notes = "" +
             "Lists branches available in the remote repository. \n\n" +
             "Response example: \n" +

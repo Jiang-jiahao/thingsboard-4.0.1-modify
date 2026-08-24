@@ -63,6 +63,16 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHO
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 资产档案（Asset Profile）CRUD REST。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径 {@code /api/assetProfile*}。
+ * 写操作仅 TENANT_ADMIN；Info / 名称列表对 CUSTOMER_USER 只读开放。
+ * 写路径走 {@link TbAssetProfileService}；查询走基类 {@code assetProfileService}。
+ * 删除前须无资产引用该档案；租户内名称唯一，且只能有一个 default。
+ *
+ * @see TbAssetProfileService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -73,6 +83,9 @@ public class AssetProfileController extends BaseController {
     private final TbAssetProfileService tbAssetProfileService;
     private final ImageService imageService;
 
+    /**
+     * 按 ID 取完整资产档案；{@code inlineImages=true} 时把图片内联进 JSON。
+     */
     @ApiOperation(value = "Get Asset Profile (getAssetProfileById)",
             notes = "Fetch the Asset Profile object based on the provided Asset Profile Id. " +
                     "The server checks that the asset profile is owned by the same tenant. " + TENANT_AUTHORITY_PARAGRAPH)
@@ -93,6 +106,9 @@ public class AssetProfileController extends BaseController {
         return result;
     }
 
+    /**
+     * 按 ID 取资产档案轻量 Info（不含完整配置）。
+     */
     @ApiOperation(value = "Get Asset Profile Info (getAssetProfileInfoById)",
             notes = "Fetch the Asset Profile Info object based on the provided Asset Profile Id. "
                     + ASSET_PROFILE_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -107,6 +123,9 @@ public class AssetProfileController extends BaseController {
         return new AssetProfileInfo(checkAssetProfileId(assetProfileId, Operation.READ));
     }
 
+    /**
+     * 取当前租户默认资产档案的 Info。
+     */
     @ApiOperation(value = "Get Default Asset Profile (getDefaultAssetProfileInfo)",
             notes = "Fetch the Default Asset Profile Info object. " +
                     ASSET_PROFILE_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -117,6 +136,9 @@ public class AssetProfileController extends BaseController {
         return checkNotNull(assetProfileService.findDefaultAssetProfileInfo(getTenantId()));
     }
 
+    /**
+     * 创建或更新资产档案。租户内名称唯一；同一租户只能有一个 default。
+     */
     @ApiOperation(value = "Create Or Update Asset Profile (saveAssetProfile)",
             notes = "Create or update the Asset Profile. When creating asset profile, platform generates asset profile id as " + UUID_WIKI_LINK +
                     "The newly created asset profile id will be present in the response. " +
@@ -136,6 +158,9 @@ public class AssetProfileController extends BaseController {
         return tbAssetProfileService.save(assetProfile, getCurrentUser());
     }
 
+    /**
+     * 删除资产档案。仍被资产引用时会失败。
+     */
     @ApiOperation(value = "Delete asset profile (deleteAssetProfile)",
             notes = "Deletes the asset profile. Referencing non-existing asset profile Id will cause an error. " +
                     "Can't delete the asset profile if it is referenced by existing assets." + TENANT_AUTHORITY_PARAGRAPH)
@@ -151,6 +176,9 @@ public class AssetProfileController extends BaseController {
         tbAssetProfileService.delete(assetProfile, getCurrentUser());
     }
 
+    /**
+     * 把该档案设为租户默认档案（会替换原先的 default）。
+     */
     @ApiOperation(value = "Make Asset Profile Default (setDefaultAssetProfile)",
             notes = "Marks asset profile as default within a tenant scope." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
@@ -166,6 +194,9 @@ public class AssetProfileController extends BaseController {
         return tbAssetProfileService.setDefaultAssetProfile(assetProfile, previousDefaultAssetProfile, getCurrentUser());
     }
 
+    /**
+     * 分页列出当前租户的完整资产档案。
+     */
     @ApiOperation(value = "Get Asset Profiles (getAssetProfiles)",
             notes = "Returns a page of asset profile objects owned by tenant. " +
                     PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
@@ -187,6 +218,9 @@ public class AssetProfileController extends BaseController {
         return checkNotNull(assetProfileService.findAssetProfiles(getTenantId(), pageLink));
     }
 
+    /**
+     * 分页列出当前租户的资产档案 Info。
+     */
     @ApiOperation(value = "Get Asset Profile infos (getAssetProfileInfos)",
             notes = "Returns a page of asset profile info objects owned by tenant. " +
                     PAGE_DATA_PARAMETERS + ASSET_PROFILE_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -208,6 +242,9 @@ public class AssetProfileController extends BaseController {
         return checkNotNull(assetProfileService.findAssetProfileInfos(getTenantId(), pageLink));
     }
 
+    /**
+     * 列出租户内资产档案名称。{@code activeOnly=true} 时只返回已被资产引用的档案。
+     */
     @ApiOperation(value = "Get Asset Profile names (getAssetProfileNames)",
             notes = "Returns a set of unique asset profile names owned by the tenant."
                     + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)

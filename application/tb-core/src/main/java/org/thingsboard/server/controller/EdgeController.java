@@ -88,6 +88,25 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHO
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * Edge（边缘实例）REST 入口。
+ * <p>
+ * 覆盖 Edge CRUD、客户/公开分配、根规则链、云边全量同步、安装/升级说明和 CSV 批量导入。
+ * 仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api}。路径如 {@code /edge}、{@code /edges}、{@code /tenant/edges}、
+ * {@code /customer/{customerId}/edges}、{@code /edge/sync/{edgeId}}。
+ * <p>
+ * <b>权限：</b>读对 TENANT_ADMIN、CUSTOMER_USER 开放；写/删除/分配/同步/导入仅 TENANT_ADMIN。
+ * {@code /edges/enabled} 对 SYS_ADMIN 也开放。
+ * <p>
+ * <b>下游：</b>写路径 {@link TbEdgeService}；同步 {@link EdgeRpcService}；
+ * 安装/升级说明 {@link EdgeInstallInstructionsService} / {@link EdgeUpgradeInstructionsService}；
+ * 批量导入 {@link EdgeBulkImportService}。
+ *
+ * @see TbEdgeService
+ * @see EdgeRpcService
+ */
 @RestController
 @TbCoreComponent
 @Slf4j
@@ -105,6 +124,9 @@ public class EdgeController extends BaseController {
     public static final String EDGE_SECURITY_CHECK = "If the user has the authority of 'Tenant Administrator', the server checks that the edge is owned by the same tenant. " +
             "If the user has the authority of 'Customer User', the server checks that the edge is assigned to the same customer.";
 
+    /**
+     * 查询当前服务是否启用 Edge 功能（配置项 {@code edges.enabled}）。
+     */
     @ApiOperation(value = "Is edges support enabled (isEdgesSupportEnabled)",
             notes = "Returns 'true' if edges support enabled on server, 'false' - otherwise.")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -113,6 +135,9 @@ public class EdgeController extends BaseController {
         return edgesEnabled;
     }
 
+    /**
+     * 按 Id 读取完整 Edge 对象。
+     */
     @ApiOperation(value = "Get Edge (getEdgeById)",
             notes = "Get the Edge object based on the provided Edge Id. " + EDGE_SECURITY_CHECK + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -124,6 +149,9 @@ public class EdgeController extends BaseController {
         return checkEdgeId(edgeId, Operation.READ);
     }
 
+    /**
+     * 按 Id 读取 Edge 摘要（含客户标题等）。
+     */
     @ApiOperation(value = "Get Edge Info (getEdgeInfoById)",
             notes = "Get the Edge Info object based on the provided Edge Id. " + EDGE_SECURITY_CHECK + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -135,6 +163,9 @@ public class EdgeController extends BaseController {
         return checkEdgeInfoId(edgeId, Operation.READ);
     }
 
+    /**
+     * 创建或更新 Edge。无 {@code id} 为新建（平台生成 UUID）。
+     */
     @ApiOperation(value = "Create Or Update Edge (saveEdge)",
             notes = "Create or update the Edge. When creating edge, platform generates Edge Id as " + UUID_WIKI_LINK +
                     "The newly created edge id will be present in the response. " +
@@ -166,6 +197,9 @@ public class EdgeController extends BaseController {
         return tbEdgeService.save(edge, edgeTemplateRootRuleChain, getCurrentUser());
     }
 
+    /**
+     * 按 Id 删除 Edge。
+     */
     @ApiOperation(value = "Delete edge (deleteEdge)",
             notes = "Deletes the edge. Referencing non-existing edge Id will cause an error." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -178,6 +212,9 @@ public class EdgeController extends BaseController {
         tbEdgeService.delete(edge, getCurrentUser());
     }
 
+    /**
+     * 分页列出当前租户的 Edge（按 pageSize/page，无类型过滤）。
+     */
     @ApiOperation(value = "Get Tenant Edges (getEdges)",
             notes = "Returns a page of edges owned by tenant. " +
                     PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
@@ -198,6 +235,9 @@ public class EdgeController extends BaseController {
         return checkNotNull(edgeService.findEdgesByTenantId(tenantId, pageLink));
     }
 
+    /**
+     * 把 Edge 分配给客户，之后该客户可查询此 Edge。
+     */
     @ApiOperation(value = "Assign edge to customer (assignEdgeToCustomer)",
             notes = "Creates assignment of the edge to customer. Customer will be able to query edge afterwards." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -215,6 +255,9 @@ public class EdgeController extends BaseController {
         return tbEdgeService.assignEdgeToCustomer(getTenantId(), edgeId, customer, getCurrentUser());
     }
 
+    /**
+     * 取消 Edge 与客户的分配。
+     */
     @ApiOperation(value = "Unassign edge from customer (unassignEdgeFromCustomer)",
             notes = "Clears assignment of the edge to customer. Customer will not be able to query edge afterwards." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -232,6 +275,9 @@ public class EdgeController extends BaseController {
         return tbEdgeService.unassignEdgeFromCustomer(edge, customer, getCurrentUser());
     }
 
+    /**
+     * 把 Edge 分配给公开客户，未登录用户也可访问。
+     */
     @ApiOperation(value = "Make edge publicly available (assignEdgeToPublicCustomer)",
             notes = "Edge will be available for non-authorized (not logged-in) users. " +
                     "This is useful to create dashboards that you plan to share/embed on a publicly available website. " +
@@ -246,6 +292,9 @@ public class EdgeController extends BaseController {
         return tbEdgeService.assignEdgeToPublicCustomer(getTenantId(), edgeId, getCurrentUser());
     }
 
+    /**
+     * 分页列出当前租户的 Edge，可按类型过滤。
+     */
     @ApiOperation(value = "Get Tenant Edges (getTenantEdges)",
             notes = "Returns a page of edges owned by tenant. " +
                     PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
@@ -273,6 +322,9 @@ public class EdgeController extends BaseController {
         }
     }
 
+    /**
+     * 分页列出当前租户的 Edge 摘要。
+     */
     @ApiOperation(value = "Get Tenant Edge Infos (getTenantEdgeInfos)",
             notes = "Returns a page of edges info objects owned by tenant. " +
                     PAGE_DATA_PARAMETERS + EDGE_INFO_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
@@ -300,6 +352,9 @@ public class EdgeController extends BaseController {
         }
     }
 
+    /**
+     * 按唯一名称读取当前租户的 Edge。
+     */
     @ApiOperation(value = "Get Tenant Edge (getTenantEdge)",
             notes = "Requested edge must be owned by tenant or customer that the user belongs to. " +
                     "Edge name is an unique property of edge. So it can be used to identify the edge." + TENANT_AUTHORITY_PARAGRAPH)
@@ -311,6 +366,9 @@ public class EdgeController extends BaseController {
         return checkNotNull(edgeService.findEdgeByTenantIdAndName(tenantId, edgeName));
     }
 
+    /**
+     * 设置指定 Edge 的根规则链。
+     */
     @ApiOperation(value = "Set root rule chain for provided edge (setEdgeRootRuleChain)",
             notes = "Change root rule chain of the edge to the new provided rule chain. \n" +
                     "This operation will send a notification to update root rule chain on remote edge service." + TENANT_AUTHORITY_PARAGRAPH)
@@ -330,6 +388,9 @@ public class EdgeController extends BaseController {
         return tbEdgeService.setEdgeRootRuleChain(edge, ruleChainId, getCurrentUser());
     }
 
+    /**
+     * 分页列出分配给指定客户的 Edge。
+     */
     @ApiOperation(value = "Get Customer Edges (getCustomerEdges)",
             notes = "Returns a page of edges objects assigned to customer. " +
                     PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -365,6 +426,9 @@ public class EdgeController extends BaseController {
         return checkNotNull(result);
     }
 
+    /**
+     * 分页列出分配给指定客户的 Edge 摘要。
+     */
     @ApiOperation(value = "Get Customer Edge Infos (getCustomerEdgeInfos)",
             notes = "Returns a page of edges info objects assigned to customer. " +
                     PAGE_DATA_PARAMETERS + EDGE_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -400,6 +464,9 @@ public class EdgeController extends BaseController {
         return checkNotNull(result);
     }
 
+    /**
+     * 按一组 Id 批量读取 Edge。
+     */
     @ApiOperation(value = "Get Edges By Ids (getEdgesByIds)",
             notes = "Requested edges must be owned by tenant or assigned to customer which user is performing the request." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -425,6 +492,9 @@ public class EdgeController extends BaseController {
         return checkNotNull(edges);
     }
 
+    /**
+     * 按 {@link EdgeSearchQuery} 查找与某实体相关的 Edge，结果再按 READ 过滤。
+     */
     @ApiOperation(value = "Find related edges (findByQuery)",
             notes = "Returns all edges that are related to the specific entity. " +
                     "The entity id, relation type, edge types, depth of the search, and other query parameters defined using complex 'EdgeSearchQuery' object. " +
@@ -450,6 +520,9 @@ public class EdgeController extends BaseController {
         return edges;
     }
 
+    /**
+     * 返回当前租户下已使用的 Edge 类型集合。
+     */
     @ApiOperation(value = "Get Edge Types (getEdgeTypes)",
             notes = "Returns a set of unique edge types based on edges that are either owned by the tenant or assigned to the customer which user is performing the request."
                     + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -462,6 +535,9 @@ public class EdgeController extends BaseController {
         return checkNotNull(edgeTypes.get());
     }
 
+    /**
+     * 触发对指定 Edge 的全量同步（异步 DeferredResult）。
+     */
     @ApiOperation(value = "Sync edge (syncEdge)",
             notes = "Starts synchronization process between edge and cloud. \n" +
                     "All entities that are assigned to particular edge are going to be send to remote edge service." + TENANT_AUTHORITY_PARAGRAPH)
@@ -491,6 +567,9 @@ public class EdgeController extends BaseController {
         }
     }
 
+    /**
+     * 查找该 Edge 上缺失、但被已分配规则链引用的关联规则链。
+     */
     @ApiOperation(value = "Find missing rule chains (findMissingToRelatedRuleChains)",
             notes = "Returns list of rule chains ids that are not assigned to particular edge, but these rule chains are present in the already assigned rule chains to edge." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -504,6 +583,9 @@ public class EdgeController extends BaseController {
         return edgeService.findMissingToRelatedRuleChains(tenantId, edgeId, TbRuleChainInputNode.class.getName());
     }
 
+    /**
+     * CSV 批量导入 Edge。
+     */
     @ApiOperation(value = "Import the bulk of edges (processEdgesBulkImport)",
             notes = "There's an ability to import the bulk of edges using the only .csv file." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
@@ -518,6 +600,9 @@ public class EdgeController extends BaseController {
         return edgeBulkImportService.processBulkImport(request, user);
     }
 
+    /**
+     * 按安装方式返回指定 Edge 的安装说明。
+     */
     @ApiOperation(value = "Get Edge Install Instructions (getEdgeInstallInstructions)",
             notes = "Get an install instructions for provided edge id." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
@@ -538,6 +623,9 @@ public class EdgeController extends BaseController {
         }
     }
 
+    /**
+     * 按目标版本和方式返回 Edge 升级说明。
+     */
     @ApiOperation(value = "Get Edge Upgrade Instructions (getEdgeUpgradeInstructions)",
             notes = "Get an upgrade instructions for provided edge version." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
@@ -554,6 +642,9 @@ public class EdgeController extends BaseController {
         }
     }
 
+    /**
+     * 查询指定 Edge 是否有可用升级。
+     */
     @ApiOperation(value = "Is edge upgrade enabled (isEdgeUpgradeAvailable)",
             notes = "Returns 'true' if upgrade available for connected edge, 'false' - otherwise.")
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")

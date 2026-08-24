@@ -26,6 +26,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Edge 安装/升级说明文档的公共基类。
+ * <p>
+ * 从安装脚本数据目录读取 Markdown 模板，提供版本号规范化与路径解析。
+ * 子类决定子目录（install / upgrade）并填充 Edge 路由密钥、RPC 端口等占位符。
+ *
+ * @see EdgeInstallInstructionsService
+ * @see EdgeUpgradeInstructionsService
+ */
 @Slf4j
 @RequiredArgsConstructor
 public abstract class BaseEdgeInstallUpgradeInstructionsService {

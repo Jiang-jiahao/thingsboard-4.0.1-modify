@@ -39,6 +39,12 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * 针对 {@link Dashboard} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 递归把别名和 widget 动作中的 UUID 映射为内部 ID；按标题兜底匹配已有仪表板；
+ * 保存时同步客户分配（assign/unassign）；配置 JSON 变化也会触发更新。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -54,6 +60,9 @@ public class DashboardImportService extends BaseEntityImportService<DashboardId,
         dashboard.setTenantId(tenantId);
     }
 
+    /**
+     * 基类匹配失败且允许按名称查找时，再用标题在租户下查找已有仪表板。
+     */
     @Override
     protected Dashboard findExistingEntity(EntitiesImportCtx ctx, Dashboard dashboard, IdProvider idProvider) {
         Dashboard existingDashboard = super.findExistingEntity(ctx, dashboard, idProvider);
@@ -63,6 +72,9 @@ public class DashboardImportService extends BaseEntityImportService<DashboardId,
         return existingDashboard;
     }
 
+    /**
+     * 将实体别名与 widget 动作配置中的 UUID 替换为当前环境内部 ID。
+     */
     @Override
     protected Dashboard prepare(EntitiesImportCtx ctx, Dashboard dashboard, Dashboard old, EntityExportData<Dashboard> exportData, IdProvider idProvider) {
         for (JsonNode entityAlias : dashboard.getEntityAliasesConfig()) {
@@ -74,6 +86,9 @@ public class DashboardImportService extends BaseEntityImportService<DashboardId,
         return dashboard;
     }
 
+    /**
+     * 新建时分配客户；更新时对客户做差量 assign/unassign 后再保存。
+     */
     @Override
     protected Dashboard saveOrUpdate(EntitiesImportCtx ctx, Dashboard dashboard, EntityExportData<Dashboard> exportData, IdProvider idProvider) {
         var tenantId = ctx.getTenantId();
@@ -115,6 +130,7 @@ public class DashboardImportService extends BaseEntityImportService<DashboardId,
         return new Dashboard(dashboard);
     }
 
+    /** 实体字段相同但 configuration JSON 不同时仍视为需要更新。 */
     @Override
     protected boolean compare(EntitiesImportCtx ctx, EntityExportData<Dashboard> exportData, Dashboard prepared, Dashboard existing) {
         return super.compare(ctx, exportData, prepared, existing) || !prepared.getConfiguration().equals(existing.getConfiguration());

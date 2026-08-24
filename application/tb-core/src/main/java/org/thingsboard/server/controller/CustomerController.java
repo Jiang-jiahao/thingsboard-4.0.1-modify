@@ -56,6 +56,15 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHO
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 客户（Customer）CRUD REST。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径 {@code /api/customer*}。
+ * 写操作仅 TENANT_ADMIN；读操作 TENANT_ADMIN / CUSTOMER_USER（客户用户只能看自己所属客户）。
+ * 写路径走 {@link TbCustomerService}。删除客户会同时删其用户，已分配的设备/资产/仪表盘只解绑不删。
+ *
+ * @see TbCustomerService
+ */
 @RestController
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -68,6 +77,9 @@ public class CustomerController extends BaseController {
     public static final String CUSTOMER_SECURITY_CHECK = "If the user has the authority of 'Tenant Administrator', the server checks that the customer is owned by the same tenant. " +
             "If the user has the authority of 'Customer User', the server checks that the user belongs to the customer.";
 
+    /**
+     * 按 ID 取客户；会校验 additionalInfo 中的首页仪表盘是否仍存在。
+     */
     @ApiOperation(value = "Get Customer (getCustomerById)",
             notes = "Get the Customer object based on the provided Customer Id. "
                     + CUSTOMER_SECURITY_CHECK + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -85,6 +97,9 @@ public class CustomerController extends BaseController {
     }
 
 
+    /**
+     * 只返回客户标题和是否 public 客户。
+     */
     @ApiOperation(value = "Get short Customer info (getShortCustomerInfoById)",
             notes = "Get the short customer object that contains only the title and 'isPublic' flag. "
                     + CUSTOMER_SECURITY_CHECK + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -103,6 +118,9 @@ public class CustomerController extends BaseController {
         return infoObject;
     }
 
+    /**
+     * 按 ID 取客户标题（纯文本）。
+     */
     @ApiOperation(value = "Get Customer Title (getCustomerTitleById)",
             notes = "Get the title of the customer. "
                     + CUSTOMER_SECURITY_CHECK + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -118,6 +136,9 @@ public class CustomerController extends BaseController {
         return customer.getTitle();
     }
 
+    /**
+     * 创建或更新客户。
+     */
     @ApiOperation(value = "Create or update Customer (saveCustomer)",
             notes = "Creates or Updates the Customer. When creating customer, platform generates Customer Id as " + UUID_WIKI_LINK +
                     "The newly created Customer Id will be present in the response. " +
@@ -134,6 +155,9 @@ public class CustomerController extends BaseController {
         return tbCustomerService.save(customer, getCurrentUser());
     }
 
+    /**
+     * 删除客户及其用户；已分配的设备/资产/仪表盘只解绑不删。
+     */
     @ApiOperation(value = "Delete Customer (deleteCustomer)",
             notes = "Deletes the Customer and all customer Users. " +
                     "All assigned Dashboards, Assets, Devices, etc. will be unassigned but not deleted. " +
@@ -149,6 +173,9 @@ public class CustomerController extends BaseController {
         tbCustomerService.delete(customer, getCurrentUser());
     }
 
+    /**
+     * 分页列出当前租户下的客户。
+     */
     @ApiOperation(value = "Get Tenant Customers (getCustomers)",
             notes = "Returns a page of customers owned by tenant. " +
                     PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
@@ -171,6 +198,9 @@ public class CustomerController extends BaseController {
         return checkNotNull(customerService.findCustomersByTenantId(tenantId, pageLink));
     }
 
+    /**
+     * 按客户标题精确查找当前租户下的客户。
+     */
     @ApiOperation(value = "Get Tenant Customer by Customer title (getTenantCustomer)",
             notes = "Get the Customer using Customer Title. " + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")

@@ -35,6 +35,13 @@ import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 
 import java.nio.ByteBuffer;
 
+/**
+ * {@link TbOtaPackageService} 的默认实现。
+ * <p>
+ * 由 OtaPackageController 调用，委托 {@link OtaPackageService} 落库元数据与二进制，并写审计日志。
+ *
+ * @see TbOtaPackageService
+ */
 @Service
 @TbCoreComponent
 @AllArgsConstructor
@@ -43,6 +50,7 @@ public class DefaultTbOtaPackageService extends AbstractTbEntityService implemen
 
     private final OtaPackageService otaPackageService;
 
+    /** 保存 OTA 包元信息并写审计。 */
     @Override
     public OtaPackageInfo save(SaveOtaPackageInfoRequest saveOtaPackageInfoRequest, User user) throws ThingsboardException {
         ActionType actionType = saveOtaPackageInfoRequest.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -61,6 +69,7 @@ public class DefaultTbOtaPackageService extends AbstractTbEntityService implemen
         }
     }
 
+    /** 保存 OTA 包二进制数据与校验和并写审计。 */
     @Override
     public OtaPackageInfo saveOtaPackageData(OtaPackageInfo otaPackageInfo, String checksum, ChecksumAlgorithm checksumAlgorithm,
                                              byte[] data, String filename, String contentType, User user) throws ThingsboardException {
@@ -95,6 +104,7 @@ public class DefaultTbOtaPackageService extends AbstractTbEntityService implemen
         }
     }
 
+    /** 删除 OTA 包并写 DELETED 审计。 */
     @Override
     public void delete(OtaPackageInfo otaPackageInfo, User user) throws ThingsboardException {
         ActionType actionType = ActionType.DELETED;

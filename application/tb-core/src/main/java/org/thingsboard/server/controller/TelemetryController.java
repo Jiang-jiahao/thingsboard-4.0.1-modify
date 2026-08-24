@@ -141,7 +141,11 @@ import static org.thingsboard.server.controller.ControllerConstants.TS_STRICT_DA
 
 
 /**
- * Created by ashvayka on 22.03.18.
+ * 实体属性与时序遥测 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。读路径先经 {@link AccessValidator}
+ * 校验权限再查 {@link TimeseriesService} / 属性服务；写路径走规则引擎遥测服务，
+ * 并产生审计与规则引擎消息。属性分 SERVER / CLIENT / SHARED 作用域。
  */
 @RestController
 @TbCoreComponent
@@ -172,6 +176,9 @@ public class TelemetryController extends BaseController {
         }
     }
 
+    /**
+     * 返回实体全部作用域下的属性 key 并集。
+     */
     @ApiOperation(value = "Get all attribute keys (getAttributeKeys)",
             notes = "Returns a set of unique attribute key names for the selected entity. " +
                     "The response will include merged key names set for all attribute scopes:" +
@@ -188,6 +195,9 @@ public class TelemetryController extends BaseController {
         return accessValidator.validateEntityAndCallback(getCurrentUser(), Operation.READ_ATTRIBUTES, entityType, entityIdStr, this::getAttributeKeysCallback);
     }
 
+    /**
+     * 返回实体指定作用域下的属性 key。
+     */
     @ApiOperation(value = "Get all attribute keys by scope (getAttributeKeysByScope)",
             notes = "Returns a set of unique attribute key names for the selected entity and attributes scope: " +
                     "\n\n * SERVER_SCOPE - supported for all entity types;" +
@@ -205,6 +215,9 @@ public class TelemetryController extends BaseController {
                 (result, tenantId, entityId) -> getAttributeKeysCallback(result, tenantId, entityId, scope));
     }
 
+    /**
+     * 读取实体全部作用域的属性值；可按 keys 过滤。
+     */
     @ApiOperation(value = "Get attributes (getAttributes)",
             notes = "Returns all attributes that belong to specified entity. Use optional 'keys' parameter to return specific attributes."
                     + "\n Example of the result: \n\n"
@@ -225,6 +238,9 @@ public class TelemetryController extends BaseController {
     }
 
 
+    /**
+     * 读取实体指定作用域的属性值；可按 keys 过滤。
+     */
     @ApiOperation(value = "Get attributes by scope (getAttributesByScope)",
             notes = "Returns all attributes of a specified scope that belong to specified entity." +
                     ENTITY_GET_ATTRIBUTE_SCOPES +
@@ -247,6 +263,9 @@ public class TelemetryController extends BaseController {
                 (result, tenantId, entityId) -> getAttributeValuesCallback(result, user, entityId, scope, keysStr));
     }
 
+    /**
+     * 返回实体已有时序数据的 key 列表。
+     */
     @ApiOperation(value = "Get time series keys (getTimeseriesKeys)",
             notes = "Returns a set of unique time series key names for the selected entity. " +
                     "\n\n" + INVALID_ENTITY_ID_OR_ENTITY_TYPE_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -260,6 +279,9 @@ public class TelemetryController extends BaseController {
                 (result, tenantId, entityId) -> Futures.addCallback(tsService.findAllLatest(tenantId, entityId), getTsKeysToResponseCallback(result), MoreExecutors.directExecutor()));
     }
 
+    /**
+     * 读取实体最新时序值；可按 keys 过滤，可选严格类型。
+     */
     @ApiOperation(value = "Get latest time series value (getLatestTimeseries)",
             notes = "Returns all time series that belong to specified entity. Use optional 'keys' parameter to return specific time series." +
                     " The result is a JSON object. The format of the values depends on the 'useStrictDataTypes' parameter." +
@@ -286,6 +308,9 @@ public class TelemetryController extends BaseController {
                 (result, tenantId, entityId) -> getLatestTimeseriesValuesCallback(result, user, entityId, keysStr, useStrictDataTypes));
     }
 
+    /**
+     * 按时间范围查询时序数据；可服务端聚合（agg + interval）。
+     */
     @ApiOperation(value = "Get time series data (getTimeseries)",
             notes = "Returns a range of time series values for specified entity. " +
                     "Returns not aggregated data by default. " +
@@ -339,6 +364,9 @@ public class TelemetryController extends BaseController {
                 });
     }
 
+    /**
+     * 按设备 ID 与作用域保存/更新设备属性。
+     */
     @ApiOperation(value = "Save device attributes (saveDeviceAttributes)",
             notes = "Creates or updates the device attributes based on device id and specified attribute scope. " +
                     SAVE_ATTRIBUTES_REQUEST_PAYLOAD
@@ -363,6 +391,9 @@ public class TelemetryController extends BaseController {
         return saveAttributes(getTenantId(), entityId, scope, request);
     }
 
+    /**
+     * 按实体 ID 与作用域保存/更新属性（V1 路径）。
+     */
     @ApiOperation(value = "Save entity attributes (saveEntityAttributesV1)",
             notes = "Creates or updates the entity attributes based on Entity Id and the specified attribute scope. " +
                     ENTITY_SAVE_ATTRIBUTE_SCOPES +
@@ -386,6 +417,9 @@ public class TelemetryController extends BaseController {
         return saveAttributes(getTenantId(), entityId, scope, request);
     }
 
+    /**
+     * 按实体 ID 与作用域保存/更新属性（V2 路径）。
+     */
     @ApiOperation(value = "Save entity attributes (saveEntityAttributesV2)",
             notes = "Creates or updates the entity attributes based on Entity Id and the specified attribute scope. " +
                     ENTITY_SAVE_ATTRIBUTE_SCOPES +
@@ -410,6 +444,9 @@ public class TelemetryController extends BaseController {
     }
 
 
+    /**
+     * 保存或更新实体时序数据。
+     */
     @ApiOperation(value = "Save or update time series data (saveEntityTelemetry)",
             notes = "Creates or updates the entity time series data based on the Entity Id and request payload." +
                     SAVE_TIMESERIES_REQUEST_PAYLOAD +
@@ -433,6 +470,9 @@ public class TelemetryController extends BaseController {
         return saveTelemetry(getTenantId(), entityId, requestBody, 0L);
     }
 
+    /**
+     * 保存或更新实体时序数据，并指定 TTL（主要对 Cassandra 生效）。
+     */
     @ApiOperation(value = "Save or update time series data with TTL (saveEntityTelemetryWithTTL)",
             notes = "Creates or updates the entity time series data based on the Entity Id and request payload." +
                     SAVE_TIMESERIES_REQUEST_PAYLOAD +
@@ -458,6 +498,9 @@ public class TelemetryController extends BaseController {
         return saveTelemetry(getTenantId(), entityId, requestBody, ttl);
     }
 
+    /**
+     * 按 key 删除实体时序；可删全部或时间范围内数据，并可改写 latest。
+     */
     @ApiOperation(value = "Delete entity time series data (deleteEntityTimeseries)",
             notes = "Delete time series for selected entity based on entity id, entity type and keys." +
                     " Use 'deleteAllDataForKeys' to delete all time series data." +
@@ -544,6 +587,9 @@ public class TelemetryController extends BaseController {
         });
     }
 
+    /**
+     * 按设备 ID、作用域与 keys 删除设备属性。
+     */
     @ApiOperation(value = "Delete device attributes (deleteDeviceAttributes)",
             notes = "Delete device attributes using provided Device Id, scope and a list of keys. " +
                     "Referencing a non-existing Device Id will cause an error" + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -566,6 +612,9 @@ public class TelemetryController extends BaseController {
         return deleteAttributes(entityId, scope, keysStr);
     }
 
+    /**
+     * 按实体 ID、作用域与 keys 删除实体属性。
+     */
     @ApiOperation(value = "Delete entity attributes (deleteEntityAttributes)",
             notes = "Delete entity attributes using provided Entity Id, scope and a list of keys. " +
                     INVALID_ENTITY_ID_OR_ENTITY_TYPE_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)

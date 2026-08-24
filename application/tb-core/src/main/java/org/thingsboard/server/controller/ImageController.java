@@ -74,6 +74,24 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_ORDER_D
 import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERTY_DESCRIPTION;
 import static org.thingsboard.server.dao.util.ImageUtils.mediaTypeToFileExtension;
 
+/**
+ * 图片资源 REST 入口（仪表盘背景、SCADA 符号等）。
+ * <p>
+ * 图片按租户（{@code tenant}）或系统（{@code system}）隔离，支持上传、更新、公开链接、
+ * 预览、导出/导入、分页列表和删除。无类级 {@code @RequestMapping}，路径写在方法上。
+ * 仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL：</b>{@code /api/image}、{@code /api/images}、{@code /api/images/{type}/{key}}、
+ * {@code /api/images/public/{publicResourceKey}}。
+ * <p>
+ * <b>权限：</b>写/列/导出/导入 SYS_ADMIN、TENANT_ADMIN；下载原图与预览对 CUSTOMER_USER 开放；
+ * 公开图无需认证。
+ * <p>
+ * <b>下游：</b>写/删/ETag {@link TbImageService}；读数据/列表 {@link ImageService}。
+ *
+ * @see TbImageService
+ * @see ImageService
+ */
 @Slf4j
 @RestController
 @TbCoreComponent
@@ -97,6 +115,9 @@ public class ImageController extends BaseController {
     private static final String IMAGE_TYPE_PARAM_ALLOWABLE_VALUES = "tenant, system";
     private static final String IMAGE_KEY_PARAM_DESCRIPTION = "Image resource key, for example thermostats_dashboard_background.jpeg";
 
+    /**
+     * 上传新图片（multipart）。可指定标题和子类型（IMAGE / SCADA_SYMBOL 等），默认公开。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PostMapping(value = "/api/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public TbResourceInfo uploadImage(@RequestPart MultipartFile file,
@@ -130,6 +151,9 @@ public class ImageController extends BaseController {
         return tbImageService.save(image, user);
     }
 
+    /**
+     * 用新文件覆盖已有图片的二进制内容与媒体类型。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PutMapping(value = IMAGE_URL, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public TbResourceInfo updateImage(@Parameter(description = IMAGE_TYPE_PARAM_DESCRIPTION, schema = @Schema(allowableValues = {"tenant", "system"}), required = true)
@@ -150,6 +174,9 @@ public class ImageController extends BaseController {
         return tbImageService.save(image, getCurrentUser());
     }
 
+    /**
+     * 更新图片元信息（目前主要是标题）。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PutMapping(IMAGE_URL + "/info")
     public TbResourceInfo updateImageInfo(@Parameter(description = IMAGE_TYPE_PARAM_DESCRIPTION, schema = @Schema(allowableValues = {"tenant", "system"}), required = true)
@@ -163,6 +190,9 @@ public class ImageController extends BaseController {
         return tbImageService.save(newImageInfo, imageInfo, getCurrentUser());
     }
 
+    /**
+     * 设置图片是否可通过公开链接访问。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PutMapping(IMAGE_URL + "/public/{isPublic}")
     public TbResourceInfo updateImagePublicStatus(@Parameter(description = IMAGE_TYPE_PARAM_DESCRIPTION, schema = @Schema(allowableValues = {"tenant", "system"}), required = true)
@@ -176,6 +206,9 @@ public class ImageController extends BaseController {
         return tbImageService.save(newImageInfo, imageInfo, getCurrentUser());
     }
 
+    /**
+     * 下载图片原图。支持 If-None-Match / gzip（SVG）；未改动时返回 304。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @GetMapping(value = IMAGE_URL, produces = "image/*")
     public ResponseEntity<ByteArrayResource> downloadImage(@Parameter(description = IMAGE_TYPE_PARAM_DESCRIPTION, schema = @Schema(allowableValues = {"tenant", "system"}), required = true)
@@ -187,6 +220,9 @@ public class ImageController extends BaseController {
         return downloadIfChanged(type, key, etag, acceptEncodingHeader, false);
     }
 
+    /**
+     * 通过公开 key 下载图片，无需登录。
+     */
     @GetMapping(value = "/api/images/public/{publicResourceKey}", produces = "image/*")
     public ResponseEntity<ByteArrayResource> downloadPublicImage(@PathVariable String publicResourceKey,
                                                                  @RequestHeader(name = HttpHeaders.IF_NONE_MATCH, required = false) String etag,
@@ -195,6 +231,9 @@ public class ImageController extends BaseController {
         return downloadIfChanged(cacheKey, etag, acceptEncodingHeader, () -> imageService.getPublicImageInfoByKey(publicResourceKey));
     }
 
+    /**
+     * 导出图片为可再导入的 {@link ResourceExportData}。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = IMAGE_URL + "/export")
     public ResourceExportData exportImage(@Parameter(description = IMAGE_TYPE_PARAM_DESCRIPTION, schema = @Schema(allowableValues = {"tenant", "system"}), required = true)
@@ -205,6 +244,9 @@ public class ImageController extends BaseController {
         return imageService.exportImage(imageInfo);
     }
 
+    /**
+     * 从导出数据导入图片。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @PutMapping("/api/image/import")
     public TbResourceInfo importImage(@RequestBody ResourceExportData imageData) throws Exception {
@@ -212,6 +254,9 @@ public class ImageController extends BaseController {
         return tbImageService.importImage(imageData, false, user);
     }
 
+    /**
+     * 下载图片预览（PNG 缩略图），同样支持 ETag。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @GetMapping(value = IMAGE_URL + "/preview", produces = "image/png")
     public ResponseEntity<ByteArrayResource> downloadImagePreview(@Parameter(description = IMAGE_TYPE_PARAM_DESCRIPTION, schema = @Schema(allowableValues = {"tenant", "system"}), required = true)
@@ -223,6 +268,9 @@ public class ImageController extends BaseController {
         return downloadIfChanged(type, key, etag, acceptEncodingHeader, true);
     }
 
+    /**
+     * 读取图片元信息（不含二进制）。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(IMAGE_URL + "/info")
     public TbResourceInfo getImageInfo(@Parameter(description = IMAGE_TYPE_PARAM_DESCRIPTION, schema = @Schema(allowableValues = {"tenant", "system"}), required = true)
@@ -232,6 +280,9 @@ public class ImageController extends BaseController {
         return checkImageInfo(type, key, Operation.READ);
     }
 
+    /**
+     * 分页列出图片。租户管理员可选择是否包含系统图片。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping("/api/images")
     public PageData<TbResourceInfo> getImages(@Parameter(description = PAGE_SIZE_DESCRIPTION, required = true)
@@ -262,6 +313,9 @@ public class ImageController extends BaseController {
         }
     }
 
+    /**
+     * 删除图片。{@code force=true} 时即使仍被引用也强制删除。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @DeleteMapping(IMAGE_URL)
     public ResponseEntity<TbImageDeleteResult> deleteImage(@Parameter(description = IMAGE_TYPE_PARAM_DESCRIPTION, schema = @Schema(allowableValues = {"tenant", "system"}), required = true)

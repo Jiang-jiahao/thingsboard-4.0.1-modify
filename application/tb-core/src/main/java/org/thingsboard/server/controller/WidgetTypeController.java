@@ -71,6 +71,12 @@ import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LI
 import static org.thingsboard.server.controller.ControllerConstants.WIDGET_TYPE_ID_PARAM_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.WIDGET_TYPE_TEXT_SEARCH_DESCRIPTION;
 
+/**
+ * 部件类型（模板）CRUD 及按部件包查询 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。Widget Type 相当于 OOP 中的类，
+ * 仪表盘上的 Widget 是其实例；FQN 在系统或租户范围内唯一。
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -91,6 +97,9 @@ public class WidgetTypeController extends AutoCommitController {
     private static final String UPDATE_EXISTING_BY_FQN_PARAM_DESCRIPTION = "Optional boolean parameter indicating whether to update existing widget type by FQN if present instead of creating new one";
     private static final String WIDGET_TYPE_ARRAY_DESCRIPTION = "A list of string values separated by comma ',' representing one of the widget type value";
 
+    /**
+     * 按 ID 读取部件类型详情（含描述、图片；可选导出依赖资源）。
+     */
     @ApiOperation(value = "Get Widget Type Details (getWidgetTypeById)",
             notes = "Get the Widget Type Details based on the provided Widget Type Id. " + WIDGET_TYPE_DETAILS_DESCRIPTION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -108,6 +117,9 @@ public class WidgetTypeController extends AutoCommitController {
         return widgetTypeDetails;
     }
 
+    /**
+     * 按 ID 读取部件类型摘要（不含重量级 descriptor JSON）。
+     */
     @ApiOperation(value = "Get Widget Type Info (getWidgetTypeInfoById)",
             notes = "Get the Widget Type Info based on the provided Widget Type Id. " + WIDGET_TYPE_DETAILS_DESCRIPTION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -121,6 +133,9 @@ public class WidgetTypeController extends AutoCommitController {
         return checkWidgetTypeInfoId(widgetTypeId, Operation.READ);
     }
 
+    /**
+     * 创建或更新部件类型；FQN 在系统或租户范围内唯一。
+     */
     @ApiOperation(value = "Create Or Update Widget Type (saveWidgetType)",
             notes = "Create or update the Widget Type. " + WIDGET_TYPE_DESCRIPTION + " " +
                     "When creating the Widget Type, platform generates Widget Type Id as " + UUID_WIKI_LINK +
@@ -150,6 +165,9 @@ public class WidgetTypeController extends AutoCommitController {
         return tbWidgetTypeService.save(widgetTypeDetails, updateExistingByFqn != null && updateExistingByFqn, currentUser);
     }
 
+    /**
+     * 删除部件类型。
+     */
     @ApiOperation(value = "Delete widget type (deleteWidgetType)",
             notes = "Deletes the  Widget Type. Referencing non-existing Widget Type Id will cause an error." + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -164,6 +182,9 @@ public class WidgetTypeController extends AutoCommitController {
         tbWidgetTypeService.delete(wtd, getCurrentUser());
     }
 
+    /**
+     * 分页查询当前用户可见的部件类型。
+     */
     @ApiOperation(value = "Get Widget Types (getWidgetTypes)",
             notes = "Returns a page of Widget Type objects available for current user. " + WIDGET_TYPE_DESCRIPTION + " " +
                     PAGE_DATA_PARAMETERS + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
@@ -212,6 +233,9 @@ public class WidgetTypeController extends AutoCommitController {
         }
     }
 
+    /**
+     * 按部件包 alias 列出部件类型（已废弃，请改用 widgetsBundleId）。
+     */
     @ApiOperation(value = "Get all Widget types for specified Bundle (getBundleWidgetTypesByBundleAlias) (Deprecated)",
             notes = "Returns an array of Widget Type objects that belong to specified Widget Bundle." + WIDGET_TYPE_DESCRIPTION + " " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -233,6 +257,9 @@ public class WidgetTypeController extends AutoCommitController {
         return checkNotNull(widgetTypeService.findWidgetTypesByWidgetsBundleId(getTenantId(), widgetsBundle.getId()));
     }
 
+    /**
+     * 按部件包 ID 列出部件类型。
+     */
     @ApiOperation(value = "Get all Widget types for specified Bundle (getBundleWidgetTypes)",
             notes = "Returns an array of Widget Type objects that belong to specified Widget Bundle." + WIDGET_TYPE_DESCRIPTION + " " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -245,6 +272,9 @@ public class WidgetTypeController extends AutoCommitController {
         return checkNotNull(widgetTypeService.findWidgetTypesByWidgetsBundleId(getTenantId(), widgetsBundleId));
     }
 
+    /**
+     * 按部件包 alias 列出部件类型详情（已废弃）。
+     */
     @ApiOperation(value = "Get all Widget types details for specified Bundle (getBundleWidgetTypesDetailsByBundleAlias) (Deprecated)",
             notes = "Returns an array of Widget Type Details objects that belong to specified Widget Bundle." + WIDGET_TYPE_DETAILS_DESCRIPTION + " " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -266,6 +296,9 @@ public class WidgetTypeController extends AutoCommitController {
         return checkNotNull(widgetTypeService.findWidgetTypesDetailsByWidgetsBundleId(getTenantId(), widgetsBundle.getId()));
     }
 
+    /**
+     * 按部件包 ID 列出部件类型详情（可选导出依赖资源）。
+     */
     @ApiOperation(value = "Get all Widget types details for specified Bundle (getBundleWidgetTypesDetails)",
             notes = "Returns an array of Widget Type Details objects that belong to specified Widget Bundle." + WIDGET_TYPE_DETAILS_DESCRIPTION + " " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -288,6 +321,9 @@ public class WidgetTypeController extends AutoCommitController {
         return result;
     }
 
+    /**
+     * 按部件包 ID 列出部件类型 FQN。
+     */
     @ApiOperation(value = "Get all Widget type fqns for specified Bundle (getBundleWidgetTypeFqns)",
             notes = "Returns an array of Widget Type fqns that belong to specified Widget Bundle." + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -300,6 +336,9 @@ public class WidgetTypeController extends AutoCommitController {
         return checkNotNull(widgetTypeService.findWidgetFqnsByWidgetsBundleId(getTenantId(), widgetsBundleId));
     }
 
+    /**
+     * 按部件包 alias 列出部件类型摘要（已废弃）。
+     */
     @ApiOperation(value = "Get Widget Type Info objects (getBundleWidgetTypesInfosByBundleAlias) (Deprecated)",
             notes = "Get the Widget Type Info objects based on the provided parameters. " + WIDGET_TYPE_INFO_DESCRIPTION + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -322,6 +361,9 @@ public class WidgetTypeController extends AutoCommitController {
                 null, new PageLink(1024))).getData();
     }
 
+    /**
+     * 分页查询指定部件包内的部件类型摘要。
+     */
     @ApiOperation(value = "Get Widget Type Info objects (getBundleWidgetTypesInfos)",
             notes = "Get the Widget Type Info objects based on the provided parameters. " + WIDGET_TYPE_INFO_DESCRIPTION + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -354,6 +396,9 @@ public class WidgetTypeController extends AutoCommitController {
                 widgetTypeDeprecatedFilter, widgetTypes, pageLink));
     }
 
+    /**
+     * 按部件包 alias 与类型 alias 读取部件类型（已废弃，请改用 FQN）。
+     */
     @ApiOperation(value = "Get Widget Type (getWidgetTypeByBundleAliasAndTypeAlias) (Deprecated)",
             notes = "Get the Widget Type based on the provided parameters. " + WIDGET_TYPE_DESCRIPTION + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -379,6 +424,9 @@ public class WidgetTypeController extends AutoCommitController {
         return widgetType;
     }
 
+    /**
+     * 按 FQN（system.|tenant. 前缀）读取部件类型。
+     */
     @ApiOperation(value = "Get Widget Type (getWidgetType)",
             notes = "Get the Widget Type by FQN. " + WIDGET_TYPE_DESCRIPTION + AVAILABLE_FOR_ANY_AUTHORIZED_USER, hidden = true)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")

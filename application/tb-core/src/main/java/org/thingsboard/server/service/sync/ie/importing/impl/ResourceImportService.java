@@ -30,6 +30,12 @@ import org.thingsboard.server.dao.resource.ResourceService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.sync.vc.data.EntitiesImportCtx;
 
+/**
+ * 针对 {@link TbResource} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 可按资源类型+key 兜底匹配；图片走 {@code ImageService}，其它资源走 {@code ResourceService}。
+ * {@link #compare} 始终返回 true；保存后通知集群资源变更。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -43,11 +49,15 @@ public class ResourceImportService extends BaseEntityImportService<TbResourceId,
         resource.setTenantId(tenantId);
     }
 
+    /** 模板覆盖：资源无额外关联 ID 需要映射。 */
     @Override
     protected TbResource prepare(EntitiesImportCtx ctx, TbResource resource, TbResource oldResource, EntityExportData<TbResource> exportData, IdProvider idProvider) {
         return resource;
     }
 
+    /**
+     * 基类匹配失败且允许按名称查找时，按资源类型与 key 查找已有资源。
+     */
     @Override
     protected TbResource findExistingEntity(EntitiesImportCtx ctx, TbResource resource, IdProvider idProvider) {
         TbResource existingResource = super.findExistingEntity(ctx, resource, idProvider);
@@ -57,6 +67,7 @@ public class ResourceImportService extends BaseEntityImportService<TbResourceId,
         return existingResource;
     }
 
+    /** 始终视为有变更，每次导入都覆盖保存。 */
     @Override
     protected boolean compare(EntitiesImportCtx ctx, EntityExportData<TbResource> exportData, TbResource prepared, TbResource existing) {
         return true;
@@ -67,6 +78,9 @@ public class ResourceImportService extends BaseEntityImportService<TbResourceId,
         return new TbResource(resource);
     }
 
+    /**
+     * 图片走 ImageService；其它资源保存后清空 data/preview 以减小返回体。
+     */
     @Override
     protected TbResource saveOrUpdate(EntitiesImportCtx ctx, TbResource resource, EntityExportData<TbResource> exportData, IdProvider idProvider) {
         if (resource.getResourceType() == ResourceType.IMAGE) {
@@ -79,6 +93,7 @@ public class ResourceImportService extends BaseEntityImportService<TbResourceId,
         }
     }
 
+    /** 记审计日志后广播资源变更，供集群其它节点刷新。 */
     @Override
     protected void onEntitySaved(User user, TbResource savedResource, TbResource oldResource) throws ThingsboardException {
         super.onEntitySaved(user, savedResource, oldResource);

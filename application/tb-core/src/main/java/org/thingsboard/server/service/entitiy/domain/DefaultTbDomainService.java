@@ -30,12 +30,20 @@ import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 
 import java.util.List;
 
+/**
+ * {@link TbDomainService} 的默认实现。
+ * <p>
+ * 由 DomainController 调用，委托 {@link DomainService} 落库并写审计日志。
+ *
+ * @see TbDomainService
+ */
 @Service
 @AllArgsConstructor
 public class DefaultTbDomainService extends AbstractTbEntityService implements TbDomainService {
 
     private final DomainService domainService;
 
+    /** 保存域名并可绑定 OAuth2 客户端，写审计。 */
     @Override
     public Domain save(Domain domain, List<OAuth2ClientId> oAuth2Clients, User user) throws Exception {
         ActionType actionType = domain.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -53,6 +61,7 @@ public class DefaultTbDomainService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 更新域名绑定的 OAuth2 客户端并写 UPDATED 审计。 */
     @Override
     public void updateOauth2Clients(Domain domain, List<OAuth2ClientId> oAuth2ClientIds, User user) {
         ActionType actionType = ActionType.UPDATED;
@@ -67,6 +76,7 @@ public class DefaultTbDomainService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 删除域名并写 DELETED 审计。 */
     @Override
     public void delete(Domain domain, User user) {
         ActionType actionType = ActionType.DELETED;

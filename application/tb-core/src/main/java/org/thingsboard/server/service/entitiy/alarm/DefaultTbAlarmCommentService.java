@@ -30,6 +30,14 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.dao.alarm.AlarmCommentService;
 import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 
+/**
+ * {@link TbAlarmCommentService} 的默认实现。
+ * <p>
+ * 由告警评论 Controller / {@link DefaultTbAlarmService} 调用，委托 {@link AlarmCommentService} 落库。
+ * 用户评论删除会改写成系统评论并写审计；系统评论不可删。
+ *
+ * @see TbAlarmCommentService
+ */
 @Service
 @AllArgsConstructor
 public class DefaultTbAlarmCommentService extends AbstractTbEntityService implements TbAlarmCommentService{
@@ -37,6 +45,7 @@ public class DefaultTbAlarmCommentService extends AbstractTbEntityService implem
     @Autowired
     private AlarmCommentService alarmCommentService;
 
+    /** 保存告警评论并写 ADDED/UPDATED_COMMENT 审计。 */
     @Override
     public AlarmComment saveAlarmComment(Alarm alarm, AlarmComment alarmComment, User user) throws ThingsboardException {
         ActionType actionType = alarmComment.getId() == null ? ActionType.ADDED_COMMENT : ActionType.UPDATED_COMMENT;
@@ -54,6 +63,7 @@ public class DefaultTbAlarmCommentService extends AbstractTbEntityService implem
         }
     }
 
+    /** 将用户评论改写为系统删除说明；系统评论则拒绝删除。 */
     @Override
     public void deleteAlarmComment(Alarm alarm, AlarmComment alarmComment, User user) throws ThingsboardException {
         if (alarmComment.getType() == AlarmCommentType.OTHER) {

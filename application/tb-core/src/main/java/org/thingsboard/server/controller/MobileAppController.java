@@ -68,6 +68,23 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 移动端应用（Mobile App）REST 入口。
+ * <p>
+ * 覆盖登录前信息（OAuth2 / 商店 / 版本）、登录后首页仪表盘与可见页面，以及
+ * 系统/租户对 Android、iOS 应用的 CRUD。仅在 {@link TbCoreComponent} 中生效。
+ * 包名 + 平台类型在整个平台范围内唯一。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api}。路径如 {@code /noauth/mobile}、{@code /mobile}、
+ * {@code /mobile/app}。
+ * <p>
+ * <b>权限：</b>登录前接口无需认证；用户信息接口任意已登录角色；CRUD 仅 SYS_ADMIN、TENANT_ADMIN。
+ * <p>
+ * <b>下游：</b>写路径 {@link TbMobileAppService}；查询走基类 {@code mobileAppService}、
+ * {@code mobileAppBundleService}、{@code oAuth2ClientService}、{@code userService}。
+ *
+ * @see TbMobileAppService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -77,6 +94,9 @@ public class MobileAppController extends BaseController {
 
     private final TbMobileAppService tbMobileAppService;
 
+    /**
+     * 登录前：按包名和平台返回 OAuth2 客户端、应用商店信息、版本约束。无需认证。
+     */
     @ApiOperation(value = "Get mobile app login info (getLoginMobileInfo)")
     @GetMapping(value = "/noauth/mobile")
     public LoginMobileInfo getLoginMobileInfo(@Parameter(description = "Mobile application package name")
@@ -90,6 +110,9 @@ public class MobileAppController extends BaseController {
         return new LoginMobileInfo(oauth2Clients, storeInfo, versionInfo);
     }
 
+    /**
+     * 登录后：返回当前用户、首页仪表盘、商店/版本信息，以及 Bundle 中可见的移动端页面。
+     */
     @ApiOperation(value = "Get user mobile app basic info (getUserMobileInfo)", notes = AVAILABLE_FOR_ANY_AUTHORIZED_USER)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN','TENANT_ADMIN', 'CUSTOMER_USER')")
     @GetMapping(value = "/mobile")
@@ -107,6 +130,9 @@ public class MobileAppController extends BaseController {
         return new UserMobileInfo(user, storeInfo, versionInfo, homeDashboardInfo, getVisiblePages(mobileAppBundle));
     }
 
+    /**
+     * 创建或更新移动端应用。无 {@code id} 为新建；包名 + 平台类型全局唯一。
+     */
     @ApiOperation(value = "Save Or update Mobile app (saveMobileApp)",
             notes = "Create or update the Mobile app. When creating mobile app, platform generates Mobile App Id as " + UUID_WIKI_LINK +
                     "The newly created Mobile App Id will be present in the response. " +
@@ -123,6 +149,9 @@ public class MobileAppController extends BaseController {
         return tbMobileAppService.save(mobileApp, getCurrentUser());
     }
 
+    /**
+     * 分页列出当前租户的移动端应用，可按 ANDROID / IOS 过滤。
+     */
     @ApiOperation(value = "Get mobile app infos (getTenantMobileAppInfos)", notes = SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/mobile/app")
@@ -142,6 +171,9 @@ public class MobileAppController extends BaseController {
         return mobileAppService.findMobileAppsByTenantId(getTenantId(), platformType, pageLink);
     }
 
+    /**
+     * 按 Id 读取移动端应用。
+     */
     @ApiOperation(value = "Get mobile info by id (getMobileAppInfoById)", notes = SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/mobile/app/{id}")
@@ -150,6 +182,9 @@ public class MobileAppController extends BaseController {
         return checkEntityId(mobileAppId, mobileAppService::findMobileAppById, Operation.READ);
     }
 
+    /**
+     * 按 Id 删除移动端应用。引用不存在的 Id 会报错。
+     */
     @ApiOperation(value = "Delete Mobile App by ID (deleteMobileApp)",
             notes = "Deletes Mobile App by ID. Referencing non-existing mobile app Id will cause an error." + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")

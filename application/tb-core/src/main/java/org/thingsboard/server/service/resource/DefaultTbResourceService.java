@@ -56,6 +56,14 @@ import static org.thingsboard.server.dao.service.Validator.validateId;
 import static org.thingsboard.server.utils.LwM2mObjectModelUtils.toLwM2mObject;
 import static org.thingsboard.server.utils.LwM2mObjectModelUtils.toLwm2mResource;
 
+/**
+ * {@link TbResourceService} 默认实现。
+ * <p>
+ * 处理非图片资源的增删与 LwM2M 模型查询；仪表板/部件导出导入时校验 {@link AccessControlService} 权限，
+ * 图片委托 {@link TbImageService}。
+ *
+ * @see TbResourceService
+ */
 @Slf4j
 @Service
 @TbCoreComponent
@@ -67,6 +75,9 @@ public class DefaultTbResourceService extends AbstractTbEntityService implements
     private final TbImageService tbImageService;
     private final AccessControlService accessControlService;
 
+    /**
+     * 保存非图片资源；LwM2M 模型会先解析对象结构。
+     */
     @Override
     public TbResourceInfo save(TbResource resource, SecurityUser user) throws ThingsboardException {
         if (resource.getResourceType() == ResourceType.IMAGE) {
@@ -89,6 +100,9 @@ public class DefaultTbResourceService extends AbstractTbEntityService implements
         }
     }
 
+    /**
+     * 删除非图片资源并记录审计。
+     */
     @Override
     public TbResourceDeleteResult delete(TbResourceInfo tbResource, boolean force, User user) {
         if (tbResource.getResourceType() == ResourceType.IMAGE) {
@@ -111,6 +125,9 @@ public class DefaultTbResourceService extends AbstractTbEntityService implements
         }
     }
 
+    /**
+     * 按 objectId 查询 LwM2M 模型并按名称或 id 排序。
+     */
     @Override
     public List<LwM2mObject> findLwM2mObject(TenantId tenantId, String sortOrder, String sortProperty, String[] objectIds) {
         log.trace("Executing findByTenantId [{}]", tenantId);
@@ -123,6 +140,9 @@ public class DefaultTbResourceService extends AbstractTbEntityService implements
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 分页查询租户 LwM2M 模型。
+     */
     @Override
     public List<LwM2mObject> findLwM2mObjectPage(TenantId tenantId, String sortProperty, String sortOrder, PageLink pageLink) {
         log.trace("Executing findByTenantId [{}]", tenantId);
@@ -134,16 +154,25 @@ public class DefaultTbResourceService extends AbstractTbEntityService implements
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 导出仪表板使用的图片与其它资源。
+     */
     @Override
     public List<ResourceExportData> exportResources(Dashboard dashboard, SecurityUser user) throws ThingsboardException {
         return exportResources(() -> imageService.getUsedImages(dashboard), () -> resourceService.getUsedResources(user.getTenantId(), dashboard), user);
     }
 
+    /**
+     * 导出部件类型使用的图片与其它资源。
+     */
     @Override
     public List<ResourceExportData> exportResources(WidgetTypeDetails widgetTypeDetails, SecurityUser user) throws ThingsboardException {
         return exportResources(() -> imageService.getUsedImages(widgetTypeDetails), () -> resourceService.getUsedResources(user.getTenantId(), widgetTypeDetails), user);
     }
 
+    /**
+     * 逐条导入资源并回写新链接。
+     */
     @Override
     public void importResources(List<ResourceExportData> resources, SecurityUser user) throws Exception {
         for (ResourceExportData resourceData : resources) {

@@ -55,6 +55,23 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * 各实体专用导入服务的抽象基类，实现 {@link EntityImportService} 的通用导入流水线。
+ * <p>
+ * <b>导入流程：</b>
+ * <ol>
+ *   <li>把导出数据中的 ID 视为 externalId，按 externalId → 内部 ID → 名称 → 默认实体 匹配已有记录；</li>
+ *   <li>{@link #setOwner} 绑定租户/客户；{@link #prepare} 把关联 ID 从外部 ID 映射为当前环境内部 ID；</li>
+ *   <li>{@link #compare} 判断是否需要落库；需要则 {@link #saveOrUpdate}，否则仅更新关联数据；</li>
+ *   <li>{@link #processAfterSaved} 登记事件、关系、属性回调。</li>
+ * </ol>
+ * <b>冲突策略：</b>已存在则更新（保留内部 ID 与创建时间），不存在则新建。
+ * 关联实体尚未导入时 {@link IdProvider} 可延迟解析，由版本控制服务二次 reimport。
+ *
+ * @param <I> 实体 ID 类型
+ * @param <E> 可导出实体类型
+ * @param <D> 导出数据包类型
+ */
 @Slf4j
 public abstract class BaseEntityImportService<I extends EntityId, E extends ExportableEntity<I>, D extends EntityExportData<E>> implements EntityImportService<I, E, D> {
 
@@ -76,6 +93,9 @@ public abstract class BaseEntityImportService<I extends EntityId, E extends Expo
     @Autowired
     protected TbLogEntityActionService logEntityActionService;
 
+    /**
+     * 导入主流程：匹配已有实体、准备关联 ID、比较后创建或更新，并登记事后回调。
+     */
     @Override
     public EntityImportResult<E> importEntity(EntitiesImportCtx ctx, D exportData) throws ThingsboardException {
         EntityImportResult<E> importResult = new EntityImportResult<>();
@@ -130,6 +150,9 @@ public abstract class BaseEntityImportService<I extends EntityId, E extends Expo
 
     protected abstract E prepare(EntitiesImportCtx ctx, E entity, E oldEntity, D exportData, IdProvider idProvider);
 
+    /**
+     * 深拷贝后忽略租户、创建时间、version，判断导入数据与已有实体是否实质不同。
+     */
     protected boolean compare(EntitiesImportCtx ctx, D exportData, E prepared, E existing) {
         var newCopy = deepCopy(prepared);
         var existingCopy = deepCopy(existing);
@@ -157,6 +180,9 @@ public abstract class BaseEntityImportService<I extends EntityId, E extends Expo
     protected abstract E saveOrUpdate(EntitiesImportCtx ctx, E entity, D exportData, IdProvider idProvider);
 
 
+    /**
+     * 保存后登记审计事件，并按设置导入关系与属性。
+     */
     protected void processAfterSaved(EntitiesImportCtx ctx, EntityImportResult<E> importResult, D exportData, IdProvider idProvider) throws ThingsboardException {
         E savedEntity = importResult.getSavedEntity();
         E oldEntity = importResult.getOldEntity();
@@ -317,6 +343,9 @@ public abstract class BaseEntityImportService<I extends EntityId, E extends Expo
                 oldEntity == null ? ActionType.ADDED : ActionType.UPDATED, user);
     }
 
+    /**
+     * 按 externalId、内部 ID、名称（可选）、默认实体依次查找当前租户下已存在的实体。
+     */
     @SuppressWarnings("unchecked")
     protected E findExistingEntity(EntitiesImportCtx ctx, E entity, IdProvider idProvider) {
         return (E) Optional.ofNullable(entitiesService.findEntityByTenantIdAndExternalId(ctx.getTenantId(), entity.getId()))
@@ -346,6 +375,9 @@ public abstract class BaseEntityImportService<I extends EntityId, E extends Expo
                 .orElseThrow(() -> new MissingEntityException(externalId));
     }
 
+    /**
+     * 将导出数据中的外部实体 ID 解析为当前环境内部 ID；解析失败时可选择抛异常或标记需二次导入。
+     */
     @SuppressWarnings("unchecked")
     @RequiredArgsConstructor
     protected class IdProvider {

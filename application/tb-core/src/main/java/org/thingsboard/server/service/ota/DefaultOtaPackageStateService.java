@@ -77,6 +77,16 @@ import static org.thingsboard.server.common.data.ota.OtaPackageUtil.getAttribute
 import static org.thingsboard.server.common.data.ota.OtaPackageUtil.getTargetTelemetryKey;
 import static org.thingsboard.server.common.data.ota.OtaPackageUtil.getTelemetryKey;
 
+/**
+ * OTA 包状态服务：设备/设备配置的固件或软件变更时，下发目标包信息并维护升级状态。
+ * <p>
+ * <b>职责：</b>将目标 OTA 写入共享属性与时序状态；无包时删除相关属性；
+ * 经队列投递 {@code ToOtaPackageStateServiceMsg}，由 {@link #process} 消费落地。
+ * <p>
+ * <b>触发方式：</b>设备/设备配置保存时调用；队列消费 {@link #process}。
+ * <p>
+ * <b>通知对象：</b>目标设备（共享属性 + 遥测状态）。
+ */
 @Slf4j
 @Service
 public class DefaultOtaPackageStateService implements OtaPackageStateService {
@@ -107,6 +117,7 @@ public class DefaultOtaPackageStateService implements OtaPackageStateService {
         }
     }
 
+    /** 设备固件/软件变更时发送或清除 OTA 状态。 */
     @Override
     public void update(Device device, Device oldDevice) {
         updateFirmware(device, oldDevice);
@@ -167,6 +178,7 @@ public class DefaultOtaPackageStateService implements OtaPackageStateService {
         }
     }
 
+    /** 设备配置固件/软件变更时，批量更新未单独指定 OTA 的设备。 */
     @Override
     public void update(DeviceProfile deviceProfile, boolean isFirmwareChanged, boolean isSoftwareChanged) {
         TenantId tenantId = deviceProfile.getTenantId();
@@ -202,6 +214,7 @@ public class DefaultOtaPackageStateService implements OtaPackageStateService {
         } while (pageData.hasNext());
     }
 
+    /** 消费 OTA 状态消息：校验目标包仍有效后写入设备属性与时序。 */
     @Override
     public boolean process(ToOtaPackageStateServiceMsg msg) {
         boolean isSuccess = false;

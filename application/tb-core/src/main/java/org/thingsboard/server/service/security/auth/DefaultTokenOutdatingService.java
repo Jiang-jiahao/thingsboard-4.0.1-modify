@@ -29,6 +29,14 @@ import java.util.Optional;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+/**
+ * {@link TokenOutdatingService} 默认实现。
+ * <p>
+ * 监听 {@link UserAuthDataChangedEvent}，把用户/会话 ID 与作废时间写入缓存；
+ * 校验时比较 JWT issuedAt 与缓存时间戳（秒级）。
+ *
+ * @see TokenOutdatingService
+ */
 @Service
 public class DefaultTokenOutdatingService implements TokenOutdatingService {
 
@@ -40,6 +48,9 @@ public class DefaultTokenOutdatingService implements TokenOutdatingService {
         this.tokenFactory = tokenFactory;
     }
 
+    /**
+     * 用户认证数据变更时写入作废时间戳。
+     */
     @EventListener(classes = UserAuthDataChangedEvent.class)
     public void onUserAuthDataChanged(UserAuthDataChangedEvent event) {
         if (StringUtils.hasText(event.getId())) {
@@ -47,6 +58,9 @@ public class DefaultTokenOutdatingService implements TokenOutdatingService {
         }
     }
 
+    /**
+     * 先按用户 ID、再按 JWT sessionId 判断令牌是否已作废。
+     */
     @Override
     public boolean isOutdated(String token, UserId userId) {
         Claims claims = tokenFactory.parseTokenClaims(token).getBody();

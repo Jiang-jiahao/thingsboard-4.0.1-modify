@@ -100,6 +100,20 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 规则链 REST 入口。
+ * <p>
+ * <b>职责：</b>管理租户规则链及其元数据（节点与连线）：CRUD、设根、脚本试跑、导入导出，
+ * 以及 Edge 规则链的分配、模板根链、新建 Edge 自动分配列表。
+ * 规则链对象本身较轻，节点拓扑在 metadata 中。
+ * <p>
+ * <b>URL：</b>{@code /api}（{@code /ruleChain*}、{@code /ruleChains*}、{@code /ruleNode/*}、{@code /edge/*}{@code /ruleChain*}）
+ * <p>
+ * <b>权限：</b>全部接口 {@code TENANT_ADMIN}。写/删会校验资源 {@code RULE_CHAIN}。
+ * <p>
+ * <b>下游：</b>{@link TbRuleChainService}、{@code ruleChainService}（{@link BaseController}）、
+ * {@link EventService}、{@link JsInvokeService}、{@link TbelInvokeService}
+ */
 @Slf4j
 @RestController
 @TbCoreComponent
@@ -153,6 +167,11 @@ public class RuleChainController extends BaseController {
     @Value("${tbel.enabled:true}")
     private boolean tbelEnabled;
 
+    /**
+     * 按 id 查询规则链基本信息（不含节点拓扑）。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 READ。
+     */
     @ApiOperation(value = "Get Rule Chain (getRuleChainById)",
             notes = "Fetch the Rule Chain object based on the provided Rule Chain Id. " + RULE_CHAIN_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
@@ -166,6 +185,11 @@ public class RuleChainController extends BaseController {
         return checkRuleChain(ruleChainId, Operation.READ);
     }
 
+    /**
+     * 查询该规则链内「output」节点的去重标签集合。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 READ。下游 {@link TbRuleChainService#getRuleChainOutputLabels}。
+     */
     @ApiOperation(value = "Get Rule Chain output labels (getRuleChainOutputLabels)",
             notes = "Fetch the unique labels for the \"output\" Rule Nodes that belong to the Rule Chain based on the provided Rule Chain Id. "
                     + RULE_CHAIN_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
@@ -181,6 +205,11 @@ public class RuleChainController extends BaseController {
         return tbRuleChainService.getRuleChainOutputLabels(getTenantId(), ruleChainId);
     }
 
+    /**
+     * 查询哪些规则链、以何种关系类型消费本链的 output 标签。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 READ。下游 {@link TbRuleChainService#getOutputLabelUsage}。
+     */
     @ApiOperation(value = "Get output labels usage (getRuleChainOutputLabelsUsage)",
             notes = "Fetch the list of rule chains and the relation types (labels) they use to process output of the current rule chain based on the provided Rule Chain Id. "
                     + RULE_CHAIN_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
@@ -196,6 +225,11 @@ public class RuleChainController extends BaseController {
         return tbRuleChainService.getOutputLabelUsage(getCurrentUser().getTenantId(), ruleChainId);
     }
 
+    /**
+     * 按 id 查询规则链元数据（节点与连线）。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 READ。下游 {@code ruleChainService}。
+     */
     @ApiOperation(value = "Get Rule Chain (getRuleChainById)",
             notes = "Fetch the Rule Chain Metadata object based on the provided Rule Chain Id. " + RULE_CHAIN_METADATA_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
@@ -210,6 +244,11 @@ public class RuleChainController extends BaseController {
         return ruleChainService.loadRuleChainMetaData(getTenantId(), ruleChainId);
     }
 
+    /**
+     * 创建或更新规则链基本信息。新建时平台生成 id。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；资源 {@code RULE_CHAIN}。下游 {@link TbRuleChainService#save}。
+     */
     @ApiOperation(value = "Create Or Update Rule Chain (saveRuleChain)",
             notes = "Create or update the Rule Chain. When creating Rule Chain, platform generates Rule Chain Id as " + UUID_WIKI_LINK +
                     "The newly created Rule Chain Id will be present in the response. " +
@@ -229,6 +268,11 @@ public class RuleChainController extends BaseController {
         return tbRuleChainService.save(ruleChain, getCurrentUser());
     }
 
+    /**
+     * 按请求中的名称，用创建根规则链的同一模板生成一条新规则链。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@link TbRuleChainService#saveDefaultByName}。
+     */
     @ApiOperation(value = "Create Default Rule Chain",
             notes = "Create rule chain from template, based on the specified name in the request. " +
                     "Creates the rule chain based on the template that is used to create root rule chain. " + TENANT_AUTHORITY_PARAGRAPH)
@@ -243,6 +287,11 @@ public class RuleChainController extends BaseController {
         return tbRuleChainService.saveDefaultByName(getTenantId(), request, getCurrentUser());
     }
 
+    /**
+     * 将指定规则链设为租户根规则链，并更新原根链。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 WRITE。下游 {@link TbRuleChainService#setRootRuleChain}。
+     */
     @ApiOperation(value = "Set Root Rule Chain (setRootRuleChain)",
             notes = "Makes the rule chain to be root rule chain. Updates previous root rule chain as well. " + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
@@ -257,6 +306,12 @@ public class RuleChainController extends BaseController {
         return tbRuleChainService.setRootRuleChain(getTenantId(), ruleChain, getCurrentUser());
     }
 
+    /**
+     * 保存规则链元数据（节点与连线）。可选同步更新关联规则节点。
+     * 若开启了租户级调试限流，保存前会清掉该租户的调试计数。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 WRITE。下游 {@link TbRuleChainService#saveRuleChainMetaData}。
+     */
     @ApiOperation(value = "Update Rule Chain Metadata",
             notes = "Updates the rule chain metadata. " + RULE_CHAIN_METADATA_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
@@ -281,6 +336,11 @@ public class RuleChainController extends BaseController {
         return tbRuleChainService.saveRuleChainMetaData(tenantId, ruleChain, ruleChainMetaData, updateRelated, getCurrentUser());
     }
 
+    /**
+     * 分页查询租户规则链，可按类型 CORE/EDGE 过滤。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@code ruleChainService}。
+     */
     @ApiOperation(value = "Get Rule Chains (getRuleChains)",
             notes = "Returns a page of Rule Chains owned by tenant. " + RULE_CHAIN_DESCRIPTION + PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -308,6 +368,11 @@ public class RuleChainController extends BaseController {
         return checkNotNull(ruleChainService.findTenantRuleChainsByType(tenantId, type, pageLink));
     }
 
+    /**
+     * 删除规则链。id 不存在或仍被设备配置文件引用会报错。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 DELETE。下游 {@link TbRuleChainService#delete}。
+     */
     @ApiOperation(value = "Delete rule chain (deleteRuleChain)",
             notes = "Deletes the rule chain. Referencing non-existing rule chain Id will cause an error. " +
                     "Referencing rule chain that is used in the device profiles will cause an error." + TENANT_AUTHORITY_PARAGRAPH)
@@ -323,6 +388,11 @@ public class RuleChainController extends BaseController {
         tbRuleChainService.delete(ruleChain, getCurrentUser());
     }
 
+    /**
+     * 取指定规则节点最近一次调试输入消息，用于脚本试跑预填。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；节点 READ。下游 {@link EventService#findLatestDebugRuleNodeInEvent}。
+     */
     @ApiOperation(value = "Get latest input message (getLatestRuleNodeDebugInput)",
             notes = "Gets the input message from the debug events for specified Rule Chain Id. " +
                     "Referencing non-existing rule chain Id will cause an error. " + TENANT_AUTHORITY_PARAGRAPH)
@@ -340,6 +410,11 @@ public class RuleChainController extends BaseController {
                 .map(EventInfo::getBody).orElse(null);
     }
 
+    /**
+     * 返回当前节点是否启用 TBEL 脚本引擎。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。读配置 {@code tbel.enabled}。
+     */
     @ApiOperation(value = "Is TBEL script executor enabled",
             notes = "Returns 'True' if the TBEL script execution is enabled" + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -349,6 +424,11 @@ public class RuleChainController extends BaseController {
         return tbelEnabled;
     }
 
+    /**
+     * 试跑规则节点脚本（JS 或 TBEL），类型含 update/generate/filter/switch/json/string。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@link JsInvokeService} 或 {@link TbelInvokeService}。
+     */
     @ApiOperation(value = "Test Script function",
             notes = TEST_SCRIPT_FUNCTION + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -429,6 +509,11 @@ public class RuleChainController extends BaseController {
         return result;
     }
 
+    /**
+     * 导出当前租户规则链为一份 JSON，数量由 {@code limit} 限制。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@code ruleChainService}。
+     */
     @ApiOperation(value = "Export Rule Chains", notes = "Exports all tenant rule chains as one JSON." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @RequestMapping(value = "/ruleChains/export", params = {"limit"}, method = RequestMethod.GET)
@@ -441,6 +526,11 @@ public class RuleChainController extends BaseController {
         return checkNotNull(ruleChainService.exportTenantRuleChains(tenantId, pageLink));
     }
 
+    /**
+     * 从 JSON 导入租户规则链；{@code overwrite} 为 true 时覆盖同名链。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@code ruleChainService}。
+     */
     @ApiOperation(value = "Import Rule Chains", notes = "Imports all tenant rule chains as one JSON." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @RequestMapping(value = "/ruleChains/import", method = RequestMethod.POST)
@@ -484,6 +574,11 @@ public class RuleChainController extends BaseController {
         return msgData;
     }
 
+    /**
+     * 将 EDGE 类型规则链分配到指定 Edge，随后异步下发到边缘侧本地执行。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。Edge WRITE、规则链 READ。下游 {@link TbRuleChainService#assignRuleChainToEdge}。
+     */
     @ApiOperation(value = "Assign rule chain to edge (assignRuleChainToEdge)",
             notes = "Creates assignment of an existing rule chain to an instance of The Edge. " +
                     EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
@@ -507,6 +602,11 @@ public class RuleChainController extends BaseController {
         return tbRuleChainService.assignRuleChainToEdge(getTenantId(), ruleChain, edge, getCurrentUser());
     }
 
+    /**
+     * 解除规则链与 Edge 的分配，并异步通知边缘侧删除本地副本。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。Edge WRITE、规则链 READ。下游 {@link TbRuleChainService#unassignRuleChainFromEdge}。
+     */
     @ApiOperation(value = "Unassign rule chain from edge (unassignRuleChainFromEdge)",
             notes = "Clears assignment of the rule chain to the edge. " +
                     EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
@@ -528,6 +628,11 @@ public class RuleChainController extends BaseController {
         return tbRuleChainService.unassignRuleChainFromEdge(getTenantId(), ruleChain, edge, getCurrentUser());
     }
 
+    /**
+     * 分页查询已分配给指定 Edge 的规则链。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；Edge READ。下游 {@code ruleChainService}。
+     */
     @ApiOperation(value = "Get Edge Rule Chains (getEdgeRuleChains)",
             notes = "Returns a page of Rule Chains assigned to the specified edge. " + RULE_CHAIN_DESCRIPTION + PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
@@ -554,6 +659,11 @@ public class RuleChainController extends BaseController {
         return checkNotNull(ruleChainService.findRuleChainsByTenantIdAndEdgeId(tenantId, edgeId, pageLink));
     }
 
+    /**
+     * 将指定规则链设为新建 Edge 的模板根链。不影响已创建的 Edge。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 WRITE。下游 {@link TbRuleChainService#setEdgeTemplateRootRuleChain}。
+     */
     @ApiOperation(value = "Set Edge Template Root Rule Chain (setEdgeTemplateRootRuleChain)",
             notes = "Makes the rule chain to be root rule chain for any new edge that will be created. " +
                     "Does not update root rule chain for already created edges. " + TENANT_AUTHORITY_PARAGRAPH)
@@ -568,6 +678,11 @@ public class RuleChainController extends BaseController {
         return tbRuleChainService.setEdgeTemplateRootRuleChain(getTenantId(), ruleChain, getCurrentUser());
     }
 
+    /**
+     * 将指定规则链加入「新建 Edge 自动分配」列表。不影响已创建的 Edge。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 WRITE。下游 {@link TbRuleChainService#setAutoAssignToEdgeRuleChain}。
+     */
     @ApiOperation(value = "Set Auto Assign To Edge Rule Chain (setAutoAssignToEdgeRuleChain)",
             notes = "Makes the rule chain to be automatically assigned for any new edge that will be created. " +
                     "Does not assign this rule chain for already created edges. " + TENANT_AUTHORITY_PARAGRAPH)
@@ -582,6 +697,11 @@ public class RuleChainController extends BaseController {
         return tbRuleChainService.setAutoAssignToEdgeRuleChain(getTenantId(), ruleChain, getCurrentUser());
     }
 
+    /**
+     * 从「新建 Edge 自动分配」列表移除该规则链。不解除已分配 Edge 上的绑定。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 WRITE。下游 {@link TbRuleChainService#unsetAutoAssignToEdgeRuleChain}。
+     */
     @ApiOperation(value = "Unset Auto Assign To Edge Rule Chain (unsetAutoAssignToEdgeRuleChain)",
             notes = "Removes the rule chain from the list of rule chains that are going to be automatically assigned for any new edge that will be created. " +
                     "Does not unassign this rule chain for already assigned edges. " + TENANT_AUTHORITY_PARAGRAPH)
@@ -597,6 +717,11 @@ public class RuleChainController extends BaseController {
     }
 
     // TODO: @voba refactor this - add new config to edge rule chain to set it as auto-assign
+    /**
+     * 列出将自动分配给新建 Edge 的规则链。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@code ruleChainService}。
+     */
     @ApiOperation(value = "Get Auto Assign To Edge Rule Chains (getAutoAssignToEdgeRuleChains)",
             notes = "Returns a list of Rule Chains that will be assigned to a newly created edge. " + RULE_CHAIN_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")

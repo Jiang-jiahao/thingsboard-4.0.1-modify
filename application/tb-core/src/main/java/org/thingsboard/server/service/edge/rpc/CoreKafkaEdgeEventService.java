@@ -32,6 +32,15 @@ import org.thingsboard.server.queue.provider.TbQueueProducerProvider;
 
 import java.util.UUID;
 
+/**
+ * Kafka 队列下的 Edge 事件写入实现。
+ * <p>
+ * 在 {@code queue.type=kafka} 且服务为 monolith / tb-core 时替代默认 DAO 落库路径，
+ * 将 {@link EdgeEvent} 序列化后发到 Edge 事件通知 Topic，由对应分区的 Core 消费并下发。
+ * 不直接写数据库，因此也没有审计日志副作用。
+ *
+ * @see org.thingsboard.server.dao.edge.BaseEdgeEventService
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -41,6 +50,7 @@ public class CoreKafkaEdgeEventService extends BaseEdgeEventService {
     private final TopicService topicService;
     private final TbQueueProducerProvider producerProvider;
 
+    /** 校验后把 Edge 事件发到 Kafka 通知 Topic，立即返回。 */
     @Override
     public ListenableFuture<Void> saveAsync(EdgeEvent edgeEvent) {
         validateEdgeEvent(edgeEvent);

@@ -29,6 +29,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * {@link AccessControlService} 默认实现。
+ * <p>
+ * 将三种 {@link Authority} 映射到对应 {@link Permissions} Bean，委托 {@link PermissionChecker} 判定。
+ *
+ * @see AccessControlService
+ */
 @Service
 @Slf4j
 public class DefaultAccessControlService implements AccessControlService {
@@ -38,6 +45,9 @@ public class DefaultAccessControlService implements AccessControlService {
 
     private final Map<Authority, Permissions> authorityPermissions = new HashMap<>();
 
+    /**
+     * 按角色注册系统管理员、租户管理员、客户用户权限表。
+     */
     public DefaultAccessControlService(
             @Qualifier("sysAdminPermissions") Permissions sysAdminPermissions,
             @Qualifier("tenantAdminPermissions") Permissions tenantAdminPermissions,
@@ -47,6 +57,9 @@ public class DefaultAccessControlService implements AccessControlService {
         authorityPermissions.put(Authority.CUSTOMER_USER, customerUserPermissions);
     }
 
+    /**
+     * 校验资源级操作权限。
+     */
     @Override
     public void checkPermission(SecurityUser user, Resource resource, Operation operation) throws ThingsboardException {
         PermissionChecker permissionChecker = getPermissionChecker(user.getAuthority(), resource);
@@ -55,6 +68,9 @@ public class DefaultAccessControlService implements AccessControlService {
         }
     }
 
+    /**
+     * 校验实体级操作权限。
+     */
     @Override
     @SuppressWarnings("unchecked")
     public <I extends EntityId, T extends HasTenantId> void checkPermission(SecurityUser user, Resource resource,

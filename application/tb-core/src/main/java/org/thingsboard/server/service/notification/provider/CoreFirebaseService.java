@@ -41,6 +41,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Core 侧 Firebase Cloud Messaging 实现：向移动端推送通知。
+ * <p>
+ * <b>职责：</b>按租户缓存 FirebaseApp，使用 FCM token 发送标题/正文/附加数据。
+ * <p>
+ * <b>触发方式：</b>通知渠道发送调用，非定时、非队列消费。
+ * <p>
+ * <b>通知对象：</b>移动端设备（FCM token）。
+ * <p>
+ * <b>生效条件：</b>monolith 或 tb-core。
+ */
 @Service
 @Slf4j
 @ConditionalOnExpression("'${service.type:null}'=='monolith' || '${service.type:null}'=='tb-core'")
@@ -55,6 +66,7 @@ public class CoreFirebaseService implements FirebaseService {
             })
             .build();
 
+    /** 向指定 FCM token 发送推送（含 Android 高优先级与 APNs 角标）。 */
     @Override
     public void sendMessage(TenantId tenantId, String credentials, String fcmToken, String title, String body,
                             Map<String, String> data, Integer badge) throws FirebaseMessagingException {

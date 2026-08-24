@@ -46,6 +46,21 @@ import org.thingsboard.server.service.sync.vc.data.EntitiesImportCtx;
 
 import java.util.*;
 
+/**
+ * {@link EntitiesExportImportService} 的默认实现，是导入/导出的调度中心。
+ * <p>
+ * <b>导出流程：</b>限流校验 → 按 {@link EntityType} 找到 {@link EntityExportService} →
+ * 生成 JSON 结构的 {@link EntityExportData}（内部 ID 替换为 externalId）。
+ * 未注册专用导出服务的类型回落到 {@link DefaultEntityExportService}。
+ * <p>
+ * <b>导入流程：</b>限流与数据校验 → 按类型找到 {@link EntityImportService} →
+ * 匹配已有实体（externalId / id / 名称 / 默认实体）后创建或更新 →
+ * 记录外部 ID 映射，并登记引用回调。
+ * {@code rollbackOnError} 为 true 时事件回调延后到事务提交后执行。
+ * <p>
+ * <b>冲突与依赖：</b>导入顺序由 {@link #SUPPORTED_ENTITY_TYPES} 决定（客户、规则链、资源先于设备/仪表板）；
+ * 全部实体导入后再调用 {@link #saveReferencesAndRelations} 补齐跨实体引用和关系。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -67,6 +82,9 @@ public class DefaultEntitiesExportImportService implements EntitiesExportImportS
             EntityType.NOTIFICATION_TEMPLATE, EntityType.NOTIFICATION_TARGET, EntityType.NOTIFICATION_RULE
     );
 
+    /**
+     * 按类型分发导出，并做租户导出限流。
+     */
     @Override
     public <E extends ExportableEntity<I>, I extends EntityId> EntityExportData<E> exportEntity(EntitiesExportCtx<?> ctx, I entityId) throws ThingsboardException {
         if (!rateLimitService.checkRateLimit(LimitedApi.ENTITY_EXPORT, ctx.getTenantId())) {
@@ -79,6 +97,9 @@ public class DefaultEntitiesExportImportService implements EntitiesExportImportS
         return exportService.getExportData(ctx, entityId);
     }
 
+    /**
+     * 按类型分发导入：写入内部 ID 映射，登记引用回调；非回滚模式立即发送事件。
+     */
     @Override
     public <E extends ExportableEntity<I>, I extends EntityId> EntityImportResult<E> importEntity(EntitiesImportCtx ctx, EntityExportData<E> exportData) throws ThingsboardException {
         if (!rateLimitService.checkRateLimit(LimitedApi.ENTITY_IMPORT, ctx.getTenantId())) {
@@ -103,6 +124,9 @@ public class DefaultEntitiesExportImportService implements EntitiesExportImportS
         return importResult;
     }
 
+    /**
+     * 执行导入阶段登记的引用回调，再批量保存关系并记审计日志。缺失关联实体时抛出 {@link LoadEntityException}。
+     */
     @Override
     public void saveReferencesAndRelations(EntitiesImportCtx ctx) throws ThingsboardException {
         for (Map.Entry<EntityId, ThrowingRunnable> callbackEntry : ctx.getReferenceCallbacks().entrySet()) {
@@ -146,6 +170,9 @@ public class DefaultEntitiesExportImportService implements EntitiesExportImportS
         return (EntityImportService<I, E, D>) importService;
     }
 
+    /**
+     * 收集 Spring 中的导出服务：专用服务按支持类型数量降序注册，未覆盖类型使用默认导出服务。
+     */
     @Autowired
     private void setExportServices(DefaultEntityExportService<?, ?, ?> defaultExportService,
                                    Collection<BaseEntityExportService<?, ?, ?>> exportServices) {

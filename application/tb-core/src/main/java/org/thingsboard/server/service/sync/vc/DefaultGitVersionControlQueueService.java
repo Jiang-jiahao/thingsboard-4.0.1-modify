@@ -89,6 +89,13 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * {@link GitVersionControlQueueService} 默认实现。
+ * <p>
+ * 将 commit/list/get 等操作编码为 {@code ToVersionControlServiceMsg} 推入集群队列，
+ * 用 {@code pendingRequestMap} 等待响应；实体 JSON 按 {@code msg-chunk-size} 分片，
+ * 响应侧再拼接。超时由调度器取消未完成请求。
+ */
 @TbCoreComponent
 @Service
 @Slf4j
@@ -129,6 +136,9 @@ public class DefaultGitVersionControlQueueService implements GitVersionControlQu
         return Futures.transform(future, f -> commit, executor);
     }
 
+    /**
+     * 将实体导出 JSON 按路径 {@code {entityType}/{externalId}.json} 分块加入当前 commit。
+     */
     @SneakyThrows
     @Override
     public ListenableFuture<Void> addToCommit(CommitGitRequest commit, EntityExportData<ExportableEntity<EntityId>> entityData) {
@@ -370,6 +380,9 @@ public class DefaultGitVersionControlQueueService implements GitVersionControlQu
         return sendRequest(request, builder -> builder.setClearRepositoryRequest(GenericRepositoryRequestMsg.getDefaultInstance()));
     }
 
+    /**
+     * 处理 VC 服务响应：完成对应 Future，或将分块 JSON 拼成完整 {@link EntityExportData}。
+     */
     @Override
     public void processResponse(VersionControlResponseMsg vcResponseMsg) {
         UUID requestId = new UUID(vcResponseMsg.getRequestIdMSB(), vcResponseMsg.getRequestIdLSB());

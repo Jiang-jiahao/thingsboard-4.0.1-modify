@@ -44,6 +44,15 @@ import org.thingsboard.server.dao.device.claim.ReclaimResult;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 
+/**
+ * {@link TbDeviceService} 的默认实现。
+ * <p>
+ * 由 DeviceController 调用，委托 {@link DeviceService} / {@link DeviceCredentialsService} /
+ * {@link ClaimDevicesService} 落库；成功或失败均写审计日志，保存时尝试版本控制 autoCommit。
+ * 分配到客户/Edge 会触发规则引擎与 Edge 同步（经 {@link org.thingsboard.server.service.entitiy.TbLogEntityActionService}）。
+ *
+ * @see TbDeviceService
+ */
 @AllArgsConstructor
 @TbCoreComponent
 @Service
@@ -54,6 +63,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
     private final DeviceCredentialsService deviceCredentialsService;
     private final ClaimDevicesService claimDevicesService;
 
+    /** 保存设备（可带 access token），写审计并尝试 autoCommit。 */
     @Override
     public Device save(Device device, String accessToken, User user) throws Exception {
         ActionType actionType = device.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -72,6 +82,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 保存设备及其凭据并写审计。 */
     @Override
     public Device saveDeviceWithCredentials(Device device, DeviceCredentials credentials, User user) throws ThingsboardException {
         ActionType actionType = device.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -88,6 +99,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 删除设备并写 DELETED 审计。 */
     @Override
     @Transactional
     public void delete(Device device, User user) {
@@ -105,6 +117,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 将设备分配给客户并写审计。 */
     @Override
     public Device assignDeviceToCustomer(TenantId tenantId, DeviceId deviceId, Customer customer, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
@@ -122,6 +135,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 取消设备与客户的分配并写审计。 */
     @Override
     public Device unassignDeviceFromCustomer(Device device, Customer customer, User user) throws ThingsboardException {
         ActionType actionType = ActionType.UNASSIGNED_FROM_CUSTOMER;
@@ -142,6 +156,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 将设备分配给公开客户并写审计。 */
     @Override
     public Device assignDeviceToPublicCustomer(TenantId tenantId, DeviceId deviceId, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
@@ -160,6 +175,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 读取设备凭据并记 CREDENTIALS_READ 审计。 */
     @Override
     public DeviceCredentials getDeviceCredentialsByDeviceId(Device device, User user) throws ThingsboardException {
         TenantId tenantId = device.getTenantId();
@@ -176,6 +192,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 更新设备凭据并写审计。 */
     @Override
     public DeviceCredentials updateDeviceCredentials(Device device, DeviceCredentials deviceCredentials, User user) throws ThingsboardException {
         ActionType actionType = ActionType.CREDENTIALS_UPDATED;
@@ -193,6 +210,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 认领成功后记 ASSIGNED_TO_CUSTOMER 审计。 */
     @Override
     public ListenableFuture<ClaimResult> claimDevice(TenantId tenantId, Device device, CustomerId customerId, String secretKey, User user) {
         ListenableFuture<ClaimResult> future = claimDevicesService.claimDevice(device, customerId, secretKey);
@@ -207,6 +225,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }, MoreExecutors.directExecutor());
     }
 
+    /** 回收成功后记 UNASSIGNED_FROM_CUSTOMER 审计。 */
     @Override
     public ListenableFuture<ReclaimResult> reclaimDevice(TenantId tenantId, Device device, User user) {
         ListenableFuture<ReclaimResult> future = claimDevicesService.reClaimDevice(tenantId, device);
@@ -222,6 +241,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }, MoreExecutors.directExecutor());
     }
 
+    /** 将设备转移到另一租户并写审计。 */
     @Override
     public Device assignDeviceToTenant(Device device, Tenant newTenant, User user) {
         ActionType actionType = ActionType.ASSIGNED_TO_TENANT;
@@ -242,6 +262,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 将设备分配给 Edge 并写审计。 */
     @Override
     public Device assignDeviceToEdge(TenantId tenantId, DeviceId deviceId, Edge edge, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_EDGE;
@@ -259,6 +280,7 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         }
     }
 
+    /** 取消设备与 Edge 的分配并写审计。 */
     @Override
     public Device unassignDeviceFromEdge(Device device, Edge edge, User user) throws ThingsboardException {
         ActionType actionType = ActionType.UNASSIGNED_FROM_EDGE;

@@ -44,6 +44,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * tb-core 实体业务服务的抽象基类。
+ * <p>
+ * {@code DefaultTb*} 实现继承本类，由 Controller 调用后再委托对应 DAO。
+ * 提供空值校验、空实体 ID、版本控制自动提交，以及审计（{@link TbLogEntityActionService}）、
+ * 告警、客户、Edge、集群通知等公共依赖。规则引擎进程中部分依赖可能为 {@code null}。
+ */
 @Slf4j
 public abstract class AbstractTbEntityService {
 

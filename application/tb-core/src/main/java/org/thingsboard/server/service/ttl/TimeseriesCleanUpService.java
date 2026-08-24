@@ -23,6 +23,13 @@ import org.thingsboard.server.dao.timeseries.TimeseriesService;
 import org.thingsboard.server.queue.discovery.PartitionService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+/**
+ * 时序 TTL 清理服务：按系统配置清理过期时序数据。
+ * <p>
+ * <b>触发方式：</b>定时 TTL（{@code sql.ttl.ts.execution_interval_ms}）。
+ * <p>
+ * <b>清理对象：</b>超过 {@code sql.ttl.ts.ts_key_value_ttl} 的时序；仅系统分区节点执行。
+ */
 @TbCoreComponent
 @Slf4j
 @Service
@@ -41,6 +48,7 @@ public class TimeseriesCleanUpService extends AbstractCleanUpService {
         this.timeseriesService = timeseriesService;
     }
 
+    /** 按系统 TTL 清理过期时序。 */
     @Scheduled(initialDelayString = "${sql.ttl.ts.execution_interval_ms}", fixedDelayString = "${sql.ttl.ts.execution_interval_ms}")
     public void cleanUp() {
         if (ttlTaskExecutionEnabled && isSystemTenantPartitionMine()) {

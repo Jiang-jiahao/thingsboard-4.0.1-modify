@@ -30,12 +30,20 @@ import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 
 import java.util.List;
 
+/**
+ * {@link TbMobileAppBundleService} 的默认实现。
+ * <p>
+ * 由 MobileAppBundleController 调用，委托 {@link MobileAppBundleService} 落库并写审计日志。
+ *
+ * @see TbMobileAppBundleService
+ */
 @Service
 @AllArgsConstructor
 public class DefaultTbMobileAppBundleService extends AbstractTbEntityService implements TbMobileAppBundleService {
 
     private final MobileAppBundleService mobileAppBundleService;
 
+    /** 保存移动应用包并可绑定 OAuth2 客户端，写审计。 */
     @Override
     public MobileAppBundle save(MobileAppBundle mobileAppBundle, List<OAuth2ClientId> oauth2Clients, User user) throws Exception {
         ActionType actionType = mobileAppBundle.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -53,6 +61,7 @@ public class DefaultTbMobileAppBundleService extends AbstractTbEntityService imp
         }
     }
 
+    /** 更新绑定的 OAuth2 客户端并写 UPDATED 审计。 */
     @Override
     public void updateOauth2Clients(MobileAppBundle mobileAppBundle, List<OAuth2ClientId> oAuth2ClientIds, User user) {
         ActionType actionType = ActionType.UPDATED;
@@ -67,6 +76,7 @@ public class DefaultTbMobileAppBundleService extends AbstractTbEntityService imp
         }
     }
 
+    /** 删除移动应用包并写 DELETED 审计。 */
     @Override
     public void delete(MobileAppBundle mobileAppBundle, User user) {
         ActionType actionType = ActionType.DELETED;

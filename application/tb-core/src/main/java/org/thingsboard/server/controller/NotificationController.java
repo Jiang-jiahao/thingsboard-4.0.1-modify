@@ -92,6 +92,24 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.service.security.permission.Resource.NOTIFICATION;
 
+/**
+ * 通知中心 REST 入口：用户收件箱、手动发送请求、租户/系统投递配置、用户个人偏好。
+ * <p>
+ * 收件箱走 {@link NotificationService}；发送/已读/删除走 {@link NotificationCenter}；
+ * 请求记录 {@link NotificationRequestService}；预览会用到模板/目标服务。
+ * 仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api}。路径如 {@code /notifications}、{@code /notification/request}、
+ * {@code /notification/settings}。
+ * <p>
+ * <b>权限：</b>收件箱/已读/删除/个人设置对 SYS_ADMIN、TENANT_ADMIN、CUSTOMER_USER 开放；
+ * 创建发送请求与租户级设置仅 SYS_ADMIN、TENANT_ADMIN。
+ *
+ * @see NotificationCenter
+ * @see NotificationService
+ * @see NotificationRequestService
+ * @see NotificationSettingsService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -106,6 +124,9 @@ public class NotificationController extends BaseController {
     private final NotificationCenter notificationCenter;
     private final NotificationSettingsService notificationSettingsService;
 
+    /**
+     * 分页列出当前用户的通知；可只看未读，并按 WEB / MOBILE_APP 投递方式过滤。
+     */
     @ApiOperation(value = "Get notifications (getNotifications)",
             notes = "Returns the page of notifications for current user." + NEW_LINE +
                     PAGE_DATA_PARAMETERS +
@@ -181,6 +202,9 @@ public class NotificationController extends BaseController {
         return notificationService.findNotificationsByRecipientIdAndReadStatus(user.getTenantId(), deliveryMethod, user.getId(), unreadOnly, pageLink);
     }
 
+    /**
+     * 当前用户指定投递方式下的未读条数。
+     */
     @ApiOperation(value = "Get unread notifications count (getUnreadNotificationsCount)",
             notes = "Returns unread notifications count for chosen delivery method." +
                     AVAILABLE_FOR_ANY_AUTHORIZED_USER)
@@ -192,6 +216,9 @@ public class NotificationController extends BaseController {
         return notificationService.countUnreadNotificationsByRecipientId(user.getTenantId(), deliveryMethod, user.getId());
     }
 
+    /**
+     * 将一条通知标为已读。
+     */
     @ApiOperation(value = "Mark notification as read (markNotificationAsRead)",
             notes = "Marks notification as read by its id." +
                     AVAILABLE_FOR_ANY_AUTHORIZED_USER)
@@ -204,6 +231,9 @@ public class NotificationController extends BaseController {
         notificationCenter.markNotificationAsRead(user.getTenantId(), user.getId(), notificationId);
     }
 
+    /**
+     * 将当前用户指定投递方式下的全部未读标为已读。
+     */
     @ApiOperation(value = "Mark all notifications as read (markAllNotificationsAsRead)",
             notes = "Marks all unread notifications as read." +
                     AVAILABLE_FOR_ANY_AUTHORIZED_USER)
@@ -216,6 +246,9 @@ public class NotificationController extends BaseController {
         notificationCenter.markAllNotificationsAsRead(user.getTenantId(), deliveryMethod, user.getId());
     }
 
+    /**
+     * 删除当前用户的一条通知。
+     */
     @ApiOperation(value = "Delete notification (deleteNotification)",
             notes = "Deletes notification by its id." +
                     AVAILABLE_FOR_ANY_AUTHORIZED_USER)
@@ -228,6 +261,9 @@ public class NotificationController extends BaseController {
         notificationCenter.deleteNotification(user.getTenantId(), user.getId(), notificationId);
     }
 
+    /**
+     * 提交一次手动发送请求（立即或延迟）。请求本身不可更新，只能取消/删除；发送异步进行。
+     */
     @ApiOperation(value = "Create notification request (createNotificationRequest)",
             notes = "Processes notification request.\n" +
                     "Mandatory request properties are `targets` (list of targets ids to send notification to), " +
@@ -282,6 +318,9 @@ public class NotificationController extends BaseController {
         return doSaveAndLog(EntityType.NOTIFICATION_REQUEST, notificationRequest, (tenantId, request) -> notificationCenter.processNotificationRequest(tenantId, request, null));
     }
 
+    /**
+     * 预览发送效果：接收人样例、各目标人数、各投递方式渲染后的模板。
+     */
     @ApiOperation(value = "Get notification request preview (getNotificationRequestPreview)",
             notes = "Returns preview for notification request." + NEW_LINE +
                     "`processedTemplates` shows how the notifications for each delivery method will look like " +
@@ -390,6 +429,9 @@ public class NotificationController extends BaseController {
         return preview;
     }
 
+    /**
+     * 按 Id 读取发送请求信息（状态、统计等）。
+     */
     @ApiOperation(value = "Get notification request by id (getNotificationRequestById)",
             notes = "Fetches notification request info by request id." +
                     SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -400,6 +442,9 @@ public class NotificationController extends BaseController {
         return checkEntityId(notificationRequestId, notificationRequestService::findNotificationRequestInfoById, Operation.READ);
     }
 
+    /**
+     * 分页列出本租户用户提交的发送请求。
+     */
     @ApiOperation(value = "Get notification requests (getNotificationRequests)",
             notes = "Returns the page of notification requests submitted by users of this tenant or sysadmins." + NEW_LINE +
                     PAGE_DATA_PARAMETERS +
@@ -422,6 +467,9 @@ public class NotificationController extends BaseController {
         return notificationRequestService.findNotificationRequestsInfosByTenantIdAndOriginatorType(user.getTenantId(), EntityType.USER, pageLink);
     }
 
+    /**
+     * 删除发送请求：已 SENT 则删掉已发通知，SCHEDULED 则取消。
+     */
     @ApiOperation(value = "Delete notification request (deleteNotificationRequest)",
             notes = "Deletes notification request by its id." + NEW_LINE +
                     "If the request has status `SENT` - all sent notifications for this request will be deleted. " +
@@ -436,6 +484,9 @@ public class NotificationController extends BaseController {
     }
 
 
+    /**
+     * 保存租户或系统级通知设置（各投递方式配置，如 Slack bot token）。
+     */
     @ApiOperation(value = "Save notification settings (saveNotificationSettings)",
             notes = "Saves notification settings for this tenant or sysadmin.\n" +
                     "`deliveryMethodsConfigs` of the settings must be specified." + NEW_LINE +
@@ -461,6 +512,9 @@ public class NotificationController extends BaseController {
         return notificationSettings;
     }
 
+    /**
+     * 读取租户或系统级通知设置。
+     */
     @ApiOperation(value = "Get notification settings (getNotificationSettings)",
             notes = "Retrieves notification settings for this tenant or sysadmin." +
                     SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -472,6 +526,9 @@ public class NotificationController extends BaseController {
         return notificationSettingsService.findNotificationSettings(tenantId);
     }
 
+    /**
+     * 返回当前租户已正确配置、可用于发送的投递方式列表。
+     */
     @ApiOperation(value = "Get available delivery methods (getAvailableDeliveryMethods)",
             notes = "Returns the list of delivery methods that are properly configured and are allowed to be used for sending notifications." +
                     SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -482,6 +539,9 @@ public class NotificationController extends BaseController {
     }
 
 
+    /**
+     * 保存当前用户的通知偏好（各类型/渠道开关）。
+     */
     @PostMapping("/notification/settings/user")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     public UserNotificationSettings saveUserNotificationSettings(@RequestBody @Valid UserNotificationSettings settings,
@@ -489,6 +549,9 @@ public class NotificationController extends BaseController {
         return notificationSettingsService.saveUserNotificationSettings(user.getTenantId(), user.getId(), settings);
     }
 
+    /**
+     * 读取当前用户的通知偏好。
+     */
     @GetMapping("/notification/settings/user")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     public UserNotificationSettings getUserNotificationSettings(@AuthenticationPrincipal SecurityUser user) {

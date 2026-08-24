@@ -36,6 +36,17 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 网关设备通知服务：子设备重命名或删除时，向其最近连接的网关下发 RPC。
+ * <p>
+ * <b>职责：</b>读取设备 additionalInfo 中的 {@code lastConnectedGateway}，
+ * 构造 {@code gateway_device_renamed} / {@code gateway_device_deleted} RPC，
+ * 经 {@link TbCoreDeviceRpcService} 发给网关。
+ * <p>
+ * <b>触发方式：</b>设备保存/删除流程回调，非定时、非队列消费。
+ * <p>
+ * <b>通知对象：</b>网关设备（子设备最近一次连接的网关）。
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -48,6 +59,7 @@ public class DefaultGatewayNotificationsService implements GatewayNotificationsS
     @Autowired
     private TbCoreDeviceRpcService deviceRpcService;
 
+    /** 子设备重命名后，通知其网关更新设备名。 */
     @Override
     public void onDeviceUpdated(Device device, Device oldDevice) {
         Optional<DeviceId> gatewayDeviceId = getGatewayDeviceIdFromAdditionalInfoInDevice(device);
@@ -62,6 +74,7 @@ public class DefaultGatewayNotificationsService implements GatewayNotificationsS
         }
     }
 
+    /** 子设备删除后，通知其网关移除该设备。 */
     @Override
     public void onDeviceDeleted(Device device) {
         Optional<DeviceId> gatewayDeviceId = getGatewayDeviceIdFromAdditionalInfoInDevice(device);

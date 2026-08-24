@@ -20,6 +20,9 @@ import lombok.Data;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * 查询型订阅的调用次数与耗时统计。
+ */
 @Data
 public class SubscriptionServiceStatistics {
     private AtomicInteger alarmQueryInvocationCnt = new AtomicInteger();

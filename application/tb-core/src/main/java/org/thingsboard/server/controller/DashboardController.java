@@ -95,6 +95,17 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_ID_PA
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 仪表盘 CRUD、客户/Edge 分配、首页仪表盘 REST。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径 {@code /api/dashboard*}、{@code /api/tenant/dashboards}、
+ * {@code /api/customer/{id}/dashboards}、{@code /api/edge/{id}/dashboard*}。
+ * 写操作 TENANT_ADMIN；读操作含 CUSTOMER_USER（须已分配）。SYS_ADMIN 可按租户列仪表盘。
+ * 写路径走 {@link TbDashboardService}；取完整配置时可通过 {@link TbResourceService} 内联图片资源。
+ * 首页仪表盘按 User → Customer → Tenant 的 additionalInfo 逐级回退。
+ *
+ * @see TbDashboardService
+ */
 @RestController
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -114,6 +125,9 @@ public class DashboardController extends BaseController {
     @Value("${ui.dashboard.max_datapoints_limit}")
     private long maxDatapointsLimit;
 
+    /**
+     * 返回服务器当前时间（毫秒），供仪表盘校正浏览器与服务器时差。
+     */
     @ApiOperation(value = "Get server time (getServerTime)",
             notes = "Get the server time (milliseconds since January 1, 1970 UTC). " +
                     "Used to adjust view of the dashboards according to the difference between browser and server time.")
@@ -124,6 +138,9 @@ public class DashboardController extends BaseController {
         return System.currentTimeMillis();
     }
 
+    /**
+     * 返回单次订阅允许拉取的最大数据点数（影响仪表盘时间窗口）。
+     */
     @ApiOperation(value = "Get max data points limit (getMaxDatapointsLimit)",
             notes = "Get the maximum number of data points that dashboard may request from the server per in a single subscription command. " +
                     "This value impacts the time window behavior. It impacts 'Max values' parameter in case user selects 'None' as 'Data aggregation function'. " +
@@ -136,6 +153,9 @@ public class DashboardController extends BaseController {
         return maxDatapointsLimit;
     }
 
+    /**
+     * 按 ID 取仪表盘轻量 Info（不含 widgets 配置 JSON）。
+     */
     @ApiOperation(value = "Get Dashboard Info (getDashboardInfoById)",
             notes = "Get the information about the dashboard based on 'dashboardId' parameter. " + DASHBOARD_INFO_DEFINITION)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -148,6 +168,9 @@ public class DashboardController extends BaseController {
         return checkDashboardInfoId(dashboardId, Operation.READ);
     }
 
+    /**
+     * 按 ID 取完整仪表盘（含 widgets 配置）。可选内联图片资源，并按 Accept-Encoding 做 gzip。
+     */
     @ApiOperation(value = "Get Dashboard (getDashboardById)",
             notes = "Get the dashboard based on 'dashboardId' parameter. " + DASHBOARD_DEFINITION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH
     )
@@ -169,6 +192,9 @@ public class DashboardController extends BaseController {
         compressResponseWithGzipIFAccepted(acceptEncodingHeader, response, JacksonUtil.writeValueAsBytes(dashboard));
     }
 
+    /**
+     * 创建或更新仪表盘。
+     */
     @ApiOperation(value = "Create Or Update Dashboard (saveDashboard)",
             notes = "Create or update the Dashboard. When creating dashboard, platform generates Dashboard Id as " + UUID_WIKI_LINK +
                     "The newly created Dashboard id will be present in the response. " +
@@ -189,6 +215,9 @@ public class DashboardController extends BaseController {
         compressResponseWithGzipIFAccepted(acceptEncodingHeader, response, JacksonUtil.writeValueAsBytes(savedDashboard));
     }
 
+    /**
+     * 删除仪表盘。
+     */
     @ApiOperation(value = "Delete the Dashboard (deleteDashboard)",
             notes = "Delete the Dashboard." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -201,6 +230,9 @@ public class DashboardController extends BaseController {
         tbDashboardService.delete(dashboard, getCurrentUser());
     }
 
+    /**
+     * 把仪表盘分配给指定客户。
+     */
     @ApiOperation(value = "Assign the Dashboard (assignDashboardToCustomer)",
             notes = "Assign the Dashboard to specified Customer or do nothing if the Dashboard is already assigned to that Customer. " +
                     "Returns the Dashboard object." + TENANT_AUTHORITY_PARAGRAPH)
@@ -222,6 +254,9 @@ public class DashboardController extends BaseController {
         return tbDashboardService.assignDashboardToCustomer(dashboard, customer, getCurrentUser());
     }
 
+    /**
+     * 取消仪表盘与指定客户的分配。
+     */
     @ApiOperation(value = "Unassign the Dashboard (unassignDashboardFromCustomer)",
             notes = "Unassign the Dashboard from specified Customer or do nothing if the Dashboard is already assigned to that Customer. " +
                     "Returns the Dashboard object." + TENANT_AUTHORITY_PARAGRAPH)
@@ -241,6 +276,9 @@ public class DashboardController extends BaseController {
         return tbDashboardService.unassignDashboardFromCustomer(dashboard, customer, getCurrentUser());
     }
 
+    /**
+     * 用给定客户 ID 集合整体替换仪表盘的客户分配（覆盖写）。
+     */
     @ApiOperation(value = "Update the Dashboard Customers (updateDashboardCustomers)",
             notes = "Updates the list of Customers that this Dashboard is assigned to. Removes previous assignments to customers that are not in the provided list. " +
                     "Returns the Dashboard object. " + TENANT_AUTHORITY_PARAGRAPH)
@@ -259,6 +297,9 @@ public class DashboardController extends BaseController {
         return tbDashboardService.updateDashboardCustomers(dashboard, customerIds, getCurrentUser());
     }
 
+    /**
+     * 给仪表盘追加一批客户分配（不移除已有）。
+     */
     @ApiOperation(value = "Adds the Dashboard Customers (addDashboardCustomers)",
             notes = "Adds the list of Customers to the existing list of assignments for the Dashboard. Keeps previous assignments to customers that are not in the provided list. " +
                     "Returns the Dashboard object." + TENANT_AUTHORITY_PARAGRAPH)
@@ -276,6 +317,9 @@ public class DashboardController extends BaseController {
         return tbDashboardService.addDashboardCustomers(dashboard, customerIds, getCurrentUser());
     }
 
+    /**
+     * 从仪表盘移除一批客户分配。
+     */
     @ApiOperation(value = "Remove the Dashboard Customers (removeDashboardCustomers)",
             notes = "Removes the list of Customers from the existing list of assignments for the Dashboard. Keeps other assignments to customers that are not in the provided list. " +
                     "Returns the Dashboard object." + TENANT_AUTHORITY_PARAGRAPH)
@@ -293,6 +337,9 @@ public class DashboardController extends BaseController {
         return tbDashboardService.removeDashboardCustomers(dashboard, customerIds, getCurrentUser());
     }
 
+    /**
+     * 把仪表盘分给 public 客户，使其公开可见。
+     */
     @ApiOperation(value = "Assign the Dashboard to Public Customer (assignDashboardToPublicCustomer)",
             notes = "Assigns the dashboard to a special, auto-generated 'Public' Customer. Once assigned, unauthenticated users may browse the dashboard. " +
                     "This method is useful if you like to embed the dashboard on public web pages to be available for users that are not logged in. " +
@@ -312,6 +359,9 @@ public class DashboardController extends BaseController {
         return tbDashboardService.assignDashboardToPublicCustomer(dashboard, getCurrentUser());
     }
 
+    /**
+     * 取消仪表盘的公开分配。
+     */
     @ApiOperation(value = "Unassign the Dashboard from Public Customer (unassignDashboardFromPublicCustomer)",
             notes = "Unassigns the dashboard from a special, auto-generated 'Public' Customer. Once unassigned, unauthenticated users may no longer browse the dashboard. " +
                     "Returns the Dashboard object." + TENANT_AUTHORITY_PARAGRAPH)
@@ -327,6 +377,9 @@ public class DashboardController extends BaseController {
         return tbDashboardService.unassignDashboardFromPublicCustomer(dashboard, getCurrentUser());
     }
 
+    /**
+     * SYS_ADMIN：按租户 ID 分页列该租户的仪表盘 Info。
+     */
     @ApiOperation(value = "Get Tenant Dashboards by System Administrator (getTenantDashboards)",
             notes = "Returns a page of dashboard info objects owned by tenant. " + DASHBOARD_INFO_DEFINITION + " " + PAGE_DATA_PARAMETERS +
                     SYSTEM_AUTHORITY_PARAGRAPH)
@@ -352,6 +405,9 @@ public class DashboardController extends BaseController {
         return checkNotNull(dashboardService.findDashboardsByTenantId(tenantId, pageLink));
     }
 
+    /**
+     * TENANT_ADMIN：分页列当前租户的仪表盘 Info。
+     */
     @ApiOperation(value = "Get Tenant Dashboards (getTenantDashboards)",
             notes = "Returns a page of dashboard info objects owned by the tenant of a current user. "
                     + DASHBOARD_INFO_DEFINITION + " " + PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
@@ -380,6 +436,9 @@ public class DashboardController extends BaseController {
         }
     }
 
+    /**
+     * 分页列指定客户已分配的仪表盘。
+     */
     @ApiOperation(value = "Get Customer Dashboards (getCustomerDashboards)",
             notes = "Returns a page of dashboard info objects owned by the specified customer. "
                     + DASHBOARD_INFO_DEFINITION + " " + PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -413,6 +472,9 @@ public class DashboardController extends BaseController {
         }
     }
 
+    /**
+     * 取当前用户首页仪表盘（User → Customer → Tenant 逐级回退）。系统管理员无首页。
+     */
     @ApiOperation(value = "Get Home Dashboard (getHomeDashboard)",
             notes = "Returns the home dashboard object that is configured as 'homeDashboardId' parameter in the 'additionalInfo' of the User. " +
                     "If 'homeDashboardId' parameter is not set on the User level and the User has authority 'CUSTOMER_USER', check the same parameter for the corresponding Customer. " +
@@ -448,6 +510,9 @@ public class DashboardController extends BaseController {
         }
     }
 
+    /**
+     * 取当前用户首页仪表盘 Info（仅 ID 与是否隐藏工具栏）。
+     */
     @ApiOperation(value = "Get Home Dashboard Info (getHomeDashboardInfo)",
             notes = "Returns the home dashboard info object that is configured as 'homeDashboardId' parameter in the 'additionalInfo' of the User. " +
                     "If 'homeDashboardId' parameter is not set on the User level and the User has authority 'CUSTOMER_USER', check the same parameter for the corresponding Customer. " +
@@ -466,6 +531,9 @@ public class DashboardController extends BaseController {
         return getHomeDashboardInfo(securityUser, additionalInfo);
     }
 
+    /**
+     * 取租户级默认首页仪表盘 Info。
+     */
     @ApiOperation(value = "Get Tenant Home Dashboard Info (getTenantHomeDashboardInfo)",
             notes = "Returns the home dashboard info object that is configured as 'homeDashboardId' parameter in the 'additionalInfo' of the corresponding tenant. " +
                     TENANT_AUTHORITY_PARAGRAPH)
@@ -487,6 +555,9 @@ public class DashboardController extends BaseController {
         return new HomeDashboardInfo(dashboardId, hideDashboardToolbar);
     }
 
+    /**
+     * 更新租户级默认首页仪表盘（写入租户 additionalInfo）。
+     */
     @ApiOperation(value = "Update Tenant Home Dashboard Info (getTenantHomeDashboardInfo)",
             notes = "Update the home dashboard assignment for the current tenant. " +
                     TENANT_AUTHORITY_PARAGRAPH)
@@ -532,6 +603,9 @@ public class DashboardController extends BaseController {
         return null;
     }
 
+    /**
+     * 把仪表盘分配给 Edge，并异步下发到远端。
+     */
     @ApiOperation(value = "Assign dashboard to edge (assignDashboardToEdge)",
             notes = "Creates assignment of an existing dashboard to an instance of The Edge. " +
                     EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
@@ -555,6 +629,9 @@ public class DashboardController extends BaseController {
         return tbDashboardService.asignDashboardToEdge(getTenantId(), dashboardId, edge, getCurrentUser());
     }
 
+    /**
+     * 取消仪表盘与 Edge 的分配，并异步通知远端删除。
+     */
     @ApiOperation(value = "Unassign dashboard from edge (unassignDashboardFromEdge)",
             notes = "Clears assignment of the dashboard to the edge. " +
                     EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
@@ -579,6 +656,9 @@ public class DashboardController extends BaseController {
         return tbDashboardService.unassignDashboardFromEdge(dashboard, edge, getCurrentUser());
     }
 
+    /**
+     * 分页列出已分配给指定 Edge 的仪表盘。
+     */
     @ApiOperation(value = "Get Edge Dashboards (getEdgeDashboards)",
             notes = "Returns a page of dashboard info objects assigned to the specified edge. "
                     + DASHBOARD_INFO_DEFINITION + " " + PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)

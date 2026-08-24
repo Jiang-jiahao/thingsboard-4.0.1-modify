@@ -69,7 +69,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
+/**
+ * 设备预配置（Provision）实现：按设备配置中的策略校验密钥并创建设备或激活已有设备。
+ * <p>
+ * 由 Transport API 等入口调用，通过 {@link DeviceProfileService} / {@link DeviceService} DAO 查找配置与设备。
+ * 成功或失败都会写 {@link AuditLogService} 审计，并向规则引擎推送 {@code PROVISION_SUCCESS}/{@code PROVISION_FAILURE}
+ * （新建设备时还会推 {@code ENTITY_CREATED}）；服务器作用域属性 {@code provisionState} 标记已预配置。
+ *
+ * @see DeviceProvisionService
+ */
 @Service
 @Slf4j
 @TbCoreComponent
@@ -97,6 +105,7 @@ public class DeviceProvisionServiceImpl implements DeviceProvisionService {
         this.partitionService = partitionService;
     }
 
+    /** 按 X.509 证书链策略解析 CN 作为设备名，已存在则更新证书，否则按配置决定是否新建。 */
     @Override
     public ProvisionResponse provisionDeviceViaX509Chain(DeviceProfile targetProfile, ProvisionRequest provisionRequest) throws ProvisionFailedException {
         if (targetProfile == null) {
@@ -130,6 +139,7 @@ public class DeviceProvisionServiceImpl implements DeviceProvisionService {
         }
     }
 
+    /** 按 provisionKey/Secret 匹配设备配置，再按策略新建或激活预置设备。 */
     @Override
     public ProvisionResponse provisionDevice(ProvisionRequest provisionRequest) {
         String provisionRequestKey = provisionRequest.getCredentials().getProvisionDeviceKey();
@@ -316,6 +326,7 @@ public class DeviceProvisionServiceImpl implements DeviceProvisionService {
         }
     }
 
+    /** 用正则从证书 CN 中提取设备名；匹配失败则抛出预配置失败。 */
     public String extractDeviceNameFromCNByRegEx(DeviceProfile profile, String commonName, String regex) throws ProvisionFailedException {
         try {
             log.trace("Extract device name from CN [{}] by regex pattern [{}]", commonName, regex);

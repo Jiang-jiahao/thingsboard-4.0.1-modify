@@ -37,7 +37,14 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * 资产导入服务
+ * CSV 资产批量导入实现。
+ * <p>
+ * 由导入相关 Controller 调用，按列映射填充 {@link Asset}，解析或创建资产配置（Asset Profile），
+ * 再委托 {@link TbAssetService} 落库。后者会写审计日志并触发规则引擎 / Edge 同步。
+ * 按名称查找已有资产走 {@link AssetService} DAO；找不到则新建。
+ *
+ * @see AbstractBulkImportService
+ * @see TbAssetService
  */
 @Service
 @TbCoreComponent
@@ -47,6 +54,7 @@ public class AssetBulkImportService extends AbstractBulkImportService<Asset> {
     private final TbAssetService tbAssetService;
     private final AssetProfileService assetProfileService;
 
+    /** 将 CSV 列映射到资产名称、类型、标签与描述。 */
     @Override
     protected void setEntityFields(Asset entity, Map<BulkImportColumnType, String> fields) {
         ObjectNode additionalInfo = getOrCreateAdditionalInfoObj(entity);
@@ -69,6 +77,7 @@ public class AssetBulkImportService extends AbstractBulkImportService<Asset> {
         entity.setAdditionalInfo(additionalInfo);
     }
 
+    /** 绑定资产配置后经 {@link TbAssetService} 保存（含审计与同步副作用）。 */
     @Override
     @SneakyThrows
     protected Asset saveEntity(SecurityUser user, Asset entity, Map<BulkImportColumnType, String> fields) {
@@ -82,18 +91,21 @@ public class AssetBulkImportService extends AbstractBulkImportService<Asset> {
         return tbAssetService.save(entity, user);
     }
 
+    /** 按租户与名称查找资产，不存在则返回空对象供后续填充。 */
     @Override
     protected Asset findOrCreateEntity(TenantId tenantId, String name) {
         return Optional.ofNullable(assetService.findAssetByTenantIdAndName(tenantId, name))
                 .orElseGet(Asset::new);
     }
 
+    /** 将导入用户的租户与客户写到资产上。 */
     @Override
     protected void setOwners(Asset entity, SecurityUser user) {
         entity.setTenantId(user.getTenantId());
         entity.setCustomerId(user.getCustomerId());
     }
 
+    /** 声明本导入器处理的实体类型为资产。 */
     @Override
     protected EntityType getEntityType() {
         return EntityType.ASSET;

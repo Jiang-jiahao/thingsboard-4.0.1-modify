@@ -26,10 +26,19 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
+/**
+ * {@link TbCustomerService} 的默认实现。
+ * <p>
+ * 由 CustomerController 调用，经基类注入的 {@code customerService} DAO 落库；
+ * 保存时 autoCommit，成功或失败都写审计日志。
+ *
+ * @see TbCustomerService
+ */
 @Service
 @AllArgsConstructor
 public class DefaultTbCustomerService extends AbstractTbEntityService implements TbCustomerService {
 
+    /** 保存客户，写审计并尝试 autoCommit。 */
     @Override
     public Customer save(Customer customer, SecurityUser user) throws Exception {
         ActionType actionType = customer.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -45,6 +54,7 @@ public class DefaultTbCustomerService extends AbstractTbEntityService implements
         }
     }
 
+    /** 删除客户并写 DELETED 审计。 */
     @Override
     public void delete(Customer customer, User user) {
         ActionType actionType = ActionType.DELETED;

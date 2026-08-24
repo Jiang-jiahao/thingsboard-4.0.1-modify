@@ -30,6 +30,11 @@ import org.thingsboard.server.dao.service.ConstraintValidator;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.sync.vc.data.EntitiesImportCtx;
 
+/**
+ * 针对 {@link NotificationTemplate} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 无额外关联映射，校验字段后按租户保存模板。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -42,11 +47,13 @@ public class NotificationTemplateImportService extends BaseEntityImportService<N
         notificationTemplate.setTenantId(tenantId);
     }
 
+    /** 模板覆盖：通知模板无额外关联 ID 需要映射。 */
     @Override
     protected NotificationTemplate prepare(EntitiesImportCtx ctx, NotificationTemplate notificationTemplate, NotificationTemplate oldEntity, EntityExportData<NotificationTemplate> exportData, IdProvider idProvider) {
         return notificationTemplate;
     }
 
+    /** 校验字段后保存通知模板。 */
     @Override
     protected NotificationTemplate saveOrUpdate(EntitiesImportCtx ctx, NotificationTemplate notificationTemplate, EntityExportData<NotificationTemplate> exportData, IdProvider idProvider) {
         ConstraintValidator.validateFields(notificationTemplate);

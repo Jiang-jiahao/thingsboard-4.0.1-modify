@@ -64,10 +64,12 @@ import java.util.stream.Collectors;
 
 
 /**
- * 默认订阅管理服务实现
+ * 分区级订阅管理服务。
  * <p>
- * 作为订阅信息的管理中心，负责处理客户端的订阅请求（如订阅某个设备的属性变化）、
- * 维护所有活跃订阅的注册表，并将数据更新事件分发给正确的订阅者。
+ * 作为实体订阅注册中心：本节点只维护自己分区上的远程订阅表，将遥测/属性/告警/通知变更
+ * 转发到订阅所在 Core（本机走 {@link TbLocalSubscriptionService}，跨节点走通知队列）。
+ *
+ * @see SubscriptionManagerService
  */
 @Slf4j
 @TbCoreComponent
@@ -106,6 +108,9 @@ public class DefaultSubscriptionManagerService extends TbApplicationEventListene
 
     private long initTs;
 
+    /**
+     * 初始化通知生产者与实体更新缓存清理任务。
+     */
     @PostConstruct
     public void initExecutor() {
         serviceId = serviceInfoProvider.getServiceId();
@@ -187,6 +192,9 @@ public class DefaultSubscriptionManagerService extends TbApplicationEventListene
         }
     }
 
+    /**
+     * 分区变更时移除不再属于本节点的实体订阅。
+     */
     @Override
     protected void onTbApplicationEvent(PartitionChangeEvent partitionChangeEvent) {
         if (ServiceType.TB_CORE.equals(partitionChangeEvent.getServiceType())) {
@@ -195,12 +203,18 @@ public class DefaultSubscriptionManagerService extends TbApplicationEventListene
         }
     }
 
+    /**
+     * 时序更新：记录时间戳并按订阅键过滤后转发。
+     */
     @Override
     public void onTimeSeriesUpdate(TenantId tenantId, EntityId entityId, List<TsKvEntry> ts, TbCallback callback) {
         onTimeSeriesUpdate(entityId, ts);
         callback.onSuccess();
     }
 
+    /**
+     * 时序删除：以空值更新通知订阅方。
+     */
     @Override
     public void onTimeSeriesDelete(TenantId tenantId, EntityId entityId, List<String> keys, TbCallback callback) {
         onTimeSeriesUpdate(entityId,
@@ -236,6 +250,9 @@ public class DefaultSubscriptionManagerService extends TbApplicationEventListene
         }
     }
 
+    /**
+     * 属性更新：记录时间戳并按订阅键过滤后转发。
+     */
     @Override
     public void onAttributesUpdate(TenantId tenantId, EntityId entityId, String scope, List<AttributeKvEntry> attributes, TbCallback callback) {
         getEntityUpdatesInfo(entityId).attributesUpdateTs = System.currentTimeMillis();
@@ -243,11 +260,17 @@ public class DefaultSubscriptionManagerService extends TbApplicationEventListene
         callback.onSuccess();
     }
 
+    /**
+     * 属性删除（默认不通知设备）。
+     */
     @Override
     public void onAttributesDelete(TenantId tenantId, EntityId entityId, String scope, List<String> keys, TbCallback callback) {
         onAttributesDelete(tenantId, entityId, scope, keys, false, callback);
     }
 
+    /**
+     * 属性删除；共享属性且 {@code notifyDevice} 时同时通知设备 Actor。
+     */
     @Override
     public void onAttributesDelete(TenantId tenantId, EntityId entityId, String scope, List<String> keys, boolean notifyDevice, TbCallback callback) {
         processAttributesUpdate(entityId, scope,
@@ -286,11 +309,17 @@ public class DefaultSubscriptionManagerService extends TbApplicationEventListene
         }
     }
 
+    /**
+     * 告警更新转发给订阅了告警的 Core 节点。
+     */
     @Override
     public void onAlarmUpdate(TenantId tenantId, EntityId entityId, AlarmInfo alarm, TbCallback callback) {
         onAlarmSubUpdate(tenantId, entityId, alarm, false, callback);
     }
 
+    /**
+     * 告警删除转发给订阅了告警的 Core 节点。
+     */
     @Override
     public void onAlarmDeleted(TenantId tenantId, EntityId entityId, AlarmInfo alarm, TbCallback callback) {
         onAlarmSubUpdate(tenantId, entityId, alarm, true, callback);
@@ -330,6 +359,9 @@ public class DefaultSubscriptionManagerService extends TbApplicationEventListene
         toCoreNotificationsProducer.send(tpi, queueMsg, null);
     }
 
+    /**
+     * 用户通知更新转发给订阅了通知的 Core 节点。
+     */
     @Override
     public void onNotificationUpdate(TenantId tenantId, UserId entityId, NotificationUpdate notificationUpdate, TbCallback callback) {
         TbEntityRemoteSubsInfo subInfo = entitySubscriptions.get(entityId);

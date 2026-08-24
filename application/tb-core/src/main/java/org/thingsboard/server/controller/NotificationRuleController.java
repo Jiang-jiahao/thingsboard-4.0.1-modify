@@ -56,6 +56,22 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.service.security.permission.Resource.NOTIFICATION;
 
+/**
+ * 通知规则（Notification Rule）REST 入口。
+ * <p>
+ * 规则把触发条件（告警、实体动作、设备活跃、用量限额等）与模板、接收人绑定。
+ * 租户与系统管理员可用的 {@code triggerType} 不同，保存时会校验。仅在
+ * {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api/notification}。路径如 {@code /rule}、{@code /rules}。
+ * <p>
+ * <b>权限：</b>全部接口 SYS_ADMIN、TENANT_ADMIN。
+ * <p>
+ * <b>下游：</b>{@link NotificationRuleService}；写/删经 {@code doSaveAndLog} /
+ * {@code doDeleteAndLog}，删除时会取消相关定时通知请求。
+ *
+ * @see NotificationRuleService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/notification")
@@ -65,6 +81,9 @@ public class NotificationRuleController extends BaseController {
 
     private final NotificationRuleService notificationRuleService;
 
+    /**
+     * 创建或更新通知规则。{@code triggerType} 创建后不可改；租户/系统管理员各自只能用对应级别的触发类型。
+     */
     @ApiOperation(value = "Save notification rule (saveNotificationRule)",
             notes = "Creates or updates notification rule. " + NEW_LINE +
                     "Mandatory properties are `name`, `templateId` (of a template with `notificationType` matching to rule's `triggerType`), " +
@@ -127,6 +146,9 @@ public class NotificationRuleController extends BaseController {
         return doSaveAndLog(EntityType.NOTIFICATION_RULE, notificationRule, notificationRuleService::saveNotificationRule);
     }
 
+    /**
+     * 按 Id 读取规则信息，额外包含 {@code templateName} 和 {@code deliveryMethods}。
+     */
     @ApiOperation(value = "Get notification rule by id (getNotificationRuleById)",
             notes = "Fetches notification rule info by rule's id.\n" +
                     "In addition to regular notification rule fields, " +
@@ -139,6 +161,9 @@ public class NotificationRuleController extends BaseController {
         return checkEntityId(notificationRuleId, notificationRuleService::findNotificationRuleInfoById, Operation.READ);
     }
 
+    /**
+     * 分页列出当前租户（或系统租户）的通知规则。
+     */
     @ApiOperation(value = "Get notification rules (getNotificationRules)",
             notes = "Returns the page of notification rules." + NEW_LINE +
                     PAGE_DATA_PARAMETERS +
@@ -161,6 +186,9 @@ public class NotificationRuleController extends BaseController {
         return notificationRuleService.findNotificationRulesInfosByTenantId(user.getTenantId(), pageLink);
     }
 
+    /**
+     * 按 Id 删除规则，并取消因升级表等原因产生的定时通知请求。
+     */
     @ApiOperation(value = "Delete notification rule (deleteNotificationRule)",
             notes = "Deletes notification rule by id.\n" +
                     "Cancels all related scheduled notification requests (e.g. due to escalation table)" +

@@ -36,7 +36,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 按首帧模板 + 下行/双向命令合并字段组帧，并写入命令字与校验和。
+ * 协议模板 HEX 组帧服务：按首帧模板 + 下行/双向命令合并字段组帧，并写入命令字与校验和。
+ * <p>
+ * <b>职责：</b>匹配 DOWNLINK/BOTH 命令，合并模板与命令字段，写入参长/总长/命令字/校验和。
+ * <p>
+ * <b>触发方式：</b>管理端下行组帧 API 调用，非定时、非队列。
  */
 @Service
 @RequiredArgsConstructor
@@ -46,6 +50,7 @@ public class ProtocolTemplateHexBuildService {
 
     private final DefaultProtocolTemplateBundleService bundleService;
 
+    /** 按请求组一帧下行 HEX。 */
     @Transactional(readOnly = true)
     public ProtocolTemplateHexBuildResult build(TenantId tenantId, ProtocolTemplateHexBuildRequest request) {
         ProtocolTemplateHexBuildResult out = new ProtocolTemplateHexBuildResult();

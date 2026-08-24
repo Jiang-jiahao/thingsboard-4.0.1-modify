@@ -35,7 +35,12 @@ import java.util.Optional;
 import static org.thingsboard.server.service.security.model.token.JwtTokenFactory.KEY_LENGTH;
 
 /**
- * jwt配置服务
+ * Core 节点 JWT 设置服务。
+ * <p>
+ * 将签发密钥、过期时间等持久化到系统租户 AdminSettings；保存后广播租户生命周期，使集群内 {@link JwtTokenFactory} 重新加载。
+ * 仅 monolith / tb-core 生效。YAML/ENV 中的 JWT 参数在库中有记录后被忽略。
+ *
+ * @see JwtSettingsService
  */
 @Service
 @RequiredArgsConstructor
@@ -50,6 +55,9 @@ public class CoreJwtSettingsService implements JwtSettingsService {
 
     private volatile JwtSettings jwtSettings = null; //lazy init
 
+    /**
+     * 校验并保存 JWT 设置，广播集群刷新后返回最新值。
+     */
     @Override
     public JwtSettings saveJwtSettings(JwtSettings jwtSettings) {
         jwtSettingsValidator.validate(jwtSettings);
@@ -66,6 +74,9 @@ public class CoreJwtSettingsService implements JwtSettingsService {
         return reloadJwtSettings();
     }
 
+    /**
+     * 强制从库重载并刷新 {@link JwtTokenFactory}。
+     */
     @Override
     public JwtSettings reloadJwtSettings() {
         log.trace("Executing reloadJwtSettings");
@@ -74,12 +85,18 @@ public class CoreJwtSettingsService implements JwtSettingsService {
         return settings;
     }
 
+    /**
+     * 返回缓存的 JWT 设置（懒加载）。
+     */
     @Override
     public JwtSettings getJwtSettings() {
         log.trace("Executing getJwtSettings");
         return getJwtSettings(false);
     }
 
+    /**
+     * 读取 JWT 设置；{@code forceReload} 为 true 时无视缓存。
+     */
     public JwtSettings getJwtSettings(boolean forceReload) {
         if (this.jwtSettings == null || forceReload) {
             synchronized (this) {
@@ -110,10 +127,16 @@ public class CoreJwtSettingsService implements JwtSettingsService {
         return adminJwtSettings;
     }
 
+    /**
+     * 判断是否仍使用默认签发密钥。
+     */
     public static boolean isSigningKeyDefault(JwtSettings settings) {
         return TOKEN_SIGNING_KEY_DEFAULT.equals(settings.getTokenSigningKey());
     }
 
+    /**
+     * 校验 Base64 签发密钥解码后位数是否达到 {@link JwtTokenFactory#KEY_LENGTH}。
+     */
     public static boolean validateKeyLength(String key) {
         return Base64.getDecoder().decode(key).length * Byte.SIZE >= KEY_LENGTH;
     }

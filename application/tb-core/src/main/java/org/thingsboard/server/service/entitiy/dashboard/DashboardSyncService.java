@@ -41,6 +41,12 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+/**
+ * 网关仪表板 Git 同步服务。
+ * <p>
+ * 在 {@code transport.gateway.dashboard.sync.enabled=true} 时，启动后按配置仓库/分支周期性拉取，
+ * 将系统资源、图片、部件包与网关仪表板 JSON 写入 DAO。仅当前节点持有 SYS_TENANT 分区时执行更新。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -65,6 +71,7 @@ public class DashboardSyncService {
     private static final String REPO_KEY = "gateways-dashboard";
     private static final String GATEWAYS_DASHBOARD_KEY = "gateways_dashboard.json";
 
+    /** 注册 Git 同步任务，按配置频率拉取仓库。 */
     @AfterStartUp(order = AfterStartUp.REGULAR_SERVICE)
     public void init() throws Exception {
         if (StringUtils.isBlank(branch)) {

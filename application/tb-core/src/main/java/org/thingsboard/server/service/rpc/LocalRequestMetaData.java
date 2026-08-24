@@ -22,7 +22,7 @@ import org.thingsboard.server.common.msg.rpc.ToDeviceRpcRequest;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
 /**
- * Created by ashvayka on 16.04.18.
+ * 本机 REST RPC 请求上下文：原始请求、当前用户与异步 HTTP 结果写入器。
  */
 @Data
 public class LocalRequestMetaData {

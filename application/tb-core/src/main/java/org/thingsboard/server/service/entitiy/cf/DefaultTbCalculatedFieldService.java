@@ -35,6 +35,13 @@ import org.thingsboard.server.service.security.model.SecurityUser;
 
 import java.util.Optional;
 
+/**
+ * {@link TbCalculatedFieldService} 的默认实现。
+ * <p>
+ * 由 CalculatedFieldController 调用，委托 {@link CalculatedFieldService} 落库；增删改写审计日志。
+ *
+ * @see TbCalculatedFieldService
+ */
 @TbCoreComponent
 @Service
 @Slf4j
@@ -43,6 +50,7 @@ public class DefaultTbCalculatedFieldService extends AbstractTbEntityService imp
 
     private final CalculatedFieldService calculatedFieldService;
 
+    /** 保存计算字段并写审计。 */
     @Override
     public CalculatedField save(CalculatedField calculatedField, SecurityUser user) throws ThingsboardException {
         ActionType actionType = calculatedField.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -62,11 +70,13 @@ public class DefaultTbCalculatedFieldService extends AbstractTbEntityService imp
         }
     }
 
+    /** 按 ID 查询计算字段。 */
     @Override
     public CalculatedField findById(CalculatedFieldId calculatedFieldId, SecurityUser user) {
         return calculatedFieldService.findById(user.getTenantId(), calculatedFieldId);
     }
 
+    /** 分页查询某实体上的计算字段。 */
     @Override
     public PageData<CalculatedField> findAllByTenantIdAndEntityId(EntityId entityId, SecurityUser user, PageLink pageLink) {
         TenantId tenantId = user.getTenantId();
@@ -74,6 +84,7 @@ public class DefaultTbCalculatedFieldService extends AbstractTbEntityService imp
         return calculatedFieldService.findAllCalculatedFieldsByEntityId(tenantId, entityId, pageLink);
     }
 
+    /** 删除计算字段并写 DELETED 审计。 */
     @Override
     @Transactional
     public void delete(CalculatedField calculatedField, SecurityUser user) {

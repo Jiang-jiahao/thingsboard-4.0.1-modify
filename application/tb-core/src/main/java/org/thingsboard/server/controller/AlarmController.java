@@ -76,6 +76,16 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 告警 CRUD 与生命周期 REST：确认、清除、指派，以及按实体 / 租户分页查询。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径 {@code /api/alarm*}、{@code /api/alarms}、{@code /api/v2/alarm*}。
+ * TENANT_ADMIN / CUSTOMER_USER 可调（部分列表含 SYS_ADMIN）。
+ * 写路径（保存、删除、ack、clear、assign）走 {@link TbAlarmService}，会触发规则链事件；
+ * 查询走基类 {@code alarmService}。同一 originator + type 的活动告警会去重更新而非新建。
+ *
+ * @see TbAlarmService
+ */
 @RestController
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -101,6 +111,9 @@ public class AlarmController extends BaseController {
     private static final String ALARM_QUERY_FETCH_ORIGINATOR_DESCRIPTION = "A boolean value to specify if the alarm originator name will be " +
             "filled in the AlarmInfo object  field: 'originatorName' or will returns as null.";
 
+    /**
+     * 按 ID 取告警。租户管理员校验 originator 同租户；客户用户校验 originator 属于该客户。
+     */
     @ApiOperation(value = "Get Alarm (getAlarmById)",
             notes = "Fetch the Alarm object based on the provided Alarm Id. " + ALARM_SECURITY_CHECK)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -113,6 +126,9 @@ public class AlarmController extends BaseController {
         return checkAlarmId(alarmId, Operation.READ);
     }
 
+    /**
+     * 按 ID 取告警 Info（含 originator 名称等展示字段）。
+     */
     @ApiOperation(value = "Get Alarm Info (getAlarmInfoById)",
             notes = "Fetch the Alarm Info object based on the provided Alarm Id. " +
                     ALARM_SECURITY_CHECK + ALARM_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -126,6 +142,10 @@ public class AlarmController extends BaseController {
         return checkAlarmInfoId(alarmId, Operation.READ);
     }
 
+    /**
+     * 创建或更新告警。同一 originator + type 的活动告警会去重（更新 end_ts）而非新建；
+     * 若指定 assignee 会先校验对该用户有 READ。
+     */
     @ApiOperation(value = "Create or Update Alarm (saveAlarm)",
             notes = "Creates or Updates the Alarm. " +
                     "When creating alarm, platform generates Alarm Id as " + UUID_WIKI_LINK +
@@ -152,6 +172,9 @@ public class AlarmController extends BaseController {
         return tbAlarmService.save(alarm, getCurrentUser());
     }
 
+    /**
+     * 删除告警。
+     */
     @ApiOperation(value = "Delete Alarm (deleteAlarm)",
             notes = "Deletes the Alarm. Referencing non-existing Alarm Id will cause an error." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -164,6 +187,9 @@ public class AlarmController extends BaseController {
         return tbAlarmService.delete(alarm, getCurrentUser());
     }
 
+    /**
+     * 确认告警：写 ack_ts 并产生规则链事件 ALARM_ACK。
+     */
     @ApiOperation(value = "Acknowledge Alarm (ackAlarm)",
             notes = "Acknowledge the Alarm. " +
                     "Once acknowledged, the 'ack_ts' field will be set to current timestamp and special rule chain event 'ALARM_ACK' will be generated. " +
@@ -179,6 +205,9 @@ public class AlarmController extends BaseController {
         return tbAlarmService.ack(alarm, getCurrentUser());
     }
 
+    /**
+     * 清除告警：写 clear_ts 并产生规则链事件 ALARM_CLEAR。清除后同 type 可再新建。
+     */
     @ApiOperation(value = "Clear Alarm (clearAlarm)",
             notes = "Clear the Alarm. " +
                     "Once cleared, the 'clear_ts' field will be set to current timestamp and special rule chain event 'ALARM_CLEAR' will be generated. " +
@@ -194,6 +223,9 @@ public class AlarmController extends BaseController {
         return tbAlarmService.clear(alarm, getCurrentUser());
     }
 
+    /**
+     * 把告警指派给用户：写 assign_ts，产生 ALARM_ASSIGNED / ALARM_REASSIGNED。会校验对目标用户有 READ。
+     */
     @ApiOperation(value = "Assign/Reassign Alarm (assignAlarm)",
             notes = "Assign the Alarm. " +
                     "Once assigned, the 'assign_ts' field will be set to current timestamp and special rule chain event 'ALARM_ASSIGNED' " +
@@ -216,6 +248,9 @@ public class AlarmController extends BaseController {
         return tbAlarmService.assign(alarm, assigneeId, System.currentTimeMillis(), getCurrentUser());
     }
 
+    /**
+     * 取消告警指派：写 assign_ts 并产生 ALARM_UNASSIGNED。
+     */
     @ApiOperation(value = "Unassign Alarm (unassignAlarm)",
             notes = "Unassign the Alarm. " +
                     "Once unassigned, the 'assign_ts' field will be set to current timestamp and special rule chain event 'ALARM_UNASSIGNED' will be generated. " +
@@ -232,6 +267,9 @@ public class AlarmController extends BaseController {
         return tbAlarmService.unassign(alarm, System.currentTimeMillis(), getCurrentUser());
     }
 
+    /**
+     * 分页查某实体上的告警。{@code searchStatus} 与 {@code status} 不能同时传。
+     */
     @ApiOperation(value = "Get Alarms (getAlarms)",
             notes = "Returns a page of alarms for the selected entity. Specifying both parameters 'searchStatus' and 'status' at the same time will cause an error. " +
                     PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -285,6 +323,10 @@ public class AlarmController extends BaseController {
         return checkNotNull(alarmService.findAlarms(getCurrentUser().getTenantId(), new AlarmQuery(entityId, pageLink, alarmSearchStatus, alarmStatus, assigneeUserId, fetchOriginator)));
     }
 
+    /**
+     * 分页查当前用户范围内全部告警（租户管理员看租户，客户用户看所属客户）。
+     * {@code searchStatus} 与 {@code status} 不能同时传。
+     */
     @ApiOperation(value = "Get All Alarms (getAllAlarms)",
             notes = "Returns a page of alarms that belongs to the current user owner. " +
                     "If the user has the authority of 'Tenant Administrator', the server returns alarms that belongs to the tenant of current user. " +
@@ -337,6 +379,9 @@ public class AlarmController extends BaseController {
         }
     }
 
+    /**
+     * V2：按实体分页查告警，支持多状态 / 严重级别 / 类型过滤。
+     */
     @ApiOperation(value = "Get Alarms (getAlarmsV2)",
             notes = "Returns a page of alarms for the selected entity. " +
                     PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -401,6 +446,9 @@ public class AlarmController extends BaseController {
         return checkNotNull(alarmService.findAlarmsV2(getCurrentUser().getTenantId(), new AlarmQueryV2(entityId, pageLink, alarmTypeList, alarmStatusList, alarmSeverityList, assigneeUserId)));
     }
 
+    /**
+     * V2：分页查当前用户范围内全部告警，支持多状态 / 严重级别 / 类型过滤。
+     */
     @ApiOperation(value = "Get All Alarms (getAllAlarmsV2)",
             notes = "Returns a page of alarms that belongs to the current user owner. " +
                     "If the user has the authority of 'Tenant Administrator', the server returns alarms that belongs to the tenant of current user. " +
@@ -463,6 +511,9 @@ public class AlarmController extends BaseController {
         }
     }
 
+    /**
+     * 按 originator 及可选状态过滤，返回最高告警严重级别。{@code searchStatus} 与 {@code status} 不能同时传。
+     */
     @ApiOperation(value = "Get Highest Alarm Severity (getHighestAlarmSeverity)",
             notes = "Search the alarms by originator ('entityType' and entityId') and optional 'status' or 'searchStatus' filters and returns the highest AlarmSeverity(CRITICAL, MAJOR, MINOR, WARNING or INDETERMINATE). " +
                     "Specifying both parameters 'searchStatus' and 'status' at the same time will cause an error." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH
@@ -496,6 +547,9 @@ public class AlarmController extends BaseController {
                 alarmStatus, assigneeId);
     }
 
+    /**
+     * 分页返回当前租户（或客户可见范围内）出现过的告警类型。
+     */
     @ApiOperation(value = "Get Alarm Types (getAlarmTypes)",
             notes = "Returns a set of unique alarm types based on alarms that are either owned by the tenant or assigned to the customer which user is performing the request.")
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")

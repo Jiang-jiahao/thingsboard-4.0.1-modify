@@ -26,7 +26,11 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import java.util.Collections;
 
 /**
- * Created by ashvayka on 29.10.18.
+ * 设备传输会话缓存服务。
+ * <p>
+ * Core 侧缓存设备当前 Transport 会话列表，供会话查询与集群协调；底层为事务缓存。
+ *
+ * @see DeviceSessionCacheService
  */
 @Service
 @TbCoreComponent
@@ -36,6 +40,9 @@ public class DefaultDeviceSessionCacheService implements DeviceSessionCacheServi
     @Autowired
     protected TbTransactionalCache<DeviceId, DeviceSessionsCacheEntry> cache;
 
+    /**
+     * 读取会话缓存；未命中则写入空会话列表。
+     */
     @Override
     public DeviceSessionsCacheEntry get(DeviceId deviceId) {
         log.debug("[{}] Fetching session data from cache", deviceId);
@@ -43,6 +50,9 @@ public class DefaultDeviceSessionCacheService implements DeviceSessionCacheServi
                 DeviceSessionsCacheEntry.newBuilder().addAllSessions(Collections.emptyList()).build(), false);
     }
 
+    /**
+     * 覆盖写入设备会话列表。
+     */
     @Override
     public DeviceSessionsCacheEntry put(DeviceId deviceId, DeviceSessionsCacheEntry sessions) {
         log.debug("[{}] Pushing session data to cache: {}", deviceId, sessions);

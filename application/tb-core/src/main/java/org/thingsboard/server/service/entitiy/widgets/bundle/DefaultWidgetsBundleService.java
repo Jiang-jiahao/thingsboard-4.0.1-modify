@@ -33,6 +33,13 @@ import org.thingsboard.server.service.security.model.SecurityUser;
 
 import java.util.List;
 
+/**
+ * {@link TbWidgetsBundleService} 的默认实现。
+ * <p>
+ * 由 WidgetsBundleController 调用，委托 {@link WidgetsBundleService} 落库；写审计日志，保存/更新内容时 autoCommit。
+ *
+ * @see TbWidgetsBundleService
+ */
 @Service
 @TbCoreComponent
 @AllArgsConstructor
@@ -42,6 +49,7 @@ public class DefaultWidgetsBundleService extends AbstractTbEntityService impleme
     private final WidgetsBundleService widgetsBundleService;
     private final WidgetTypeService widgetTypeService;
 
+    /** 保存部件包，写审计并尝试 autoCommit。 */
     @Override
     public WidgetsBundle save(WidgetsBundle widgetsBundle, SecurityUser user) throws Exception {
         ActionType actionType = widgetsBundle.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -58,6 +66,7 @@ public class DefaultWidgetsBundleService extends AbstractTbEntityService impleme
         }
     }
 
+    /** 删除部件包并写 DELETED 审计。 */
     @Override
     public void delete(WidgetsBundle widgetsBundle, User user) {
         ActionType actionType = ActionType.DELETED;
@@ -71,12 +80,14 @@ public class DefaultWidgetsBundleService extends AbstractTbEntityService impleme
         }
     }
 
+    /** 按部件类型 ID 更新包内容并 autoCommit。 */
     @Override
     public void updateWidgetsBundleWidgetTypes(WidgetsBundleId widgetsBundleId, List<WidgetTypeId> widgetTypeIds, User user) throws Exception {
         widgetTypeService.updateWidgetsBundleWidgetTypes(user.getTenantId(), widgetsBundleId, widgetTypeIds);
         autoCommit(user, widgetsBundleId);
     }
 
+    /** 按部件 FQN 更新包内容并 autoCommit。 */
     @Override
     public void updateWidgetsBundleWidgetFqns(WidgetsBundleId widgetsBundleId, List<String> widgetFqns, User user) throws Exception {
         widgetTypeService.updateWidgetsBundleWidgetFqns(user.getTenantId(), widgetsBundleId, widgetFqns);

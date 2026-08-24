@@ -68,6 +68,21 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 
+/**
+ * 设备服务端 RPC v2 REST 入口。
+ * <p>
+ * <b>职责：</b>向设备发送单向/双向 RPC（轻量或持久化），查询持久化 RPC 状态与按设备分页列表，删除持久化 RPC。
+ * 超时/离线统一返回 504。删除时可能向 Core Actor 发移除通知，并向规则引擎推 {@code RPC_DELETED}。
+ * <p>
+ * <b>URL：</b>{@code /api/rpc}（{@link TbUrlConstants#RPC_V2_URL_PREFIX}）
+ * <p>
+ * <b>权限：</b>发送 {@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}；
+ * 查询 {@code TENANT_ADMIN} / {@code CUSTOMER_USER}；删除仅 {@code TENANT_ADMIN}。
+ * 发送前校验设备 {@code RPC_CALL}。
+ * <p>
+ * <b>下游：</b>{@link AbstractRpcController#handleDeviceRPCRequest}、{@code rpcService}、
+ * {@code tbClusterService}（均来自父类/{@link BaseController}）
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping(TbUrlConstants.RPC_V2_URL_PREFIX)
@@ -113,6 +128,11 @@ public class RpcV2Controller extends AbstractRpcController {
 
     private static final String TWO_WAY_RPC_REQUEST_DESCRIPTION = "Sends the two-way remote-procedure call (RPC) request to device. " + RPC_REQUEST_DESCRIPTION + TWO_WAY_RPC_RESULT + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 
+    /**
+     * 向设备发送单向 RPC。持久化请求返回 rpcId；轻量请求仅确认已送达设备。
+     * <p>
+     * 权限：{@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}。
+     */
     @ApiOperation(value = "Send one-way RPC request", notes = ONE_WAY_RPC_REQUEST_DESCRIPTION)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Persistent RPC request was saved to the database or lightweight RPC request was sent to the device."),
@@ -132,6 +152,11 @@ public class RpcV2Controller extends AbstractRpcController {
         return handleDeviceRPCRequest(true, new DeviceId(UUID.fromString(deviceIdStr)), requestBody, HttpStatus.GATEWAY_TIMEOUT, HttpStatus.GATEWAY_TIMEOUT);
     }
 
+    /**
+     * 向设备发送双向 RPC。持久化请求返回 rpcId；轻量请求返回设备响应。
+     * <p>
+     * 权限：{@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}。
+     */
     @ApiOperation(value = "Send two-way RPC request", notes = TWO_WAY_RPC_REQUEST_DESCRIPTION)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Persistent RPC request was saved to the database or lightweight RPC response received."),
@@ -151,6 +176,11 @@ public class RpcV2Controller extends AbstractRpcController {
         return handleDeviceRPCRequest(false, new DeviceId(UUID.fromString(deviceIdStr)), requestBody, HttpStatus.GATEWAY_TIMEOUT, HttpStatus.GATEWAY_TIMEOUT);
     }
 
+    /**
+     * 按 id 查询持久化 RPC 的状态与内容。
+     * <p>
+     * 权限：{@code TENANT_ADMIN} 或 {@code CUSTOMER_USER}；实体 READ。
+     */
     @ApiOperation(value = "Get persistent RPC request", notes = "Get information about the status of the RPC call." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/persistent/{rpcId}", method = RequestMethod.GET)
@@ -163,6 +193,12 @@ public class RpcV2Controller extends AbstractRpcController {
         return checkRpcId(rpcId, Operation.READ);
     }
 
+    /**
+     * 按设备分页查询持久化 RPC，可按状态过滤。{@code DELETED} 状态非法，返回 400。
+     * <p>
+     * 权限：{@code TENANT_ADMIN} 或 {@code CUSTOMER_USER}；先校验设备 {@code RPC_CALL}。
+     * 下游 {@code rpcService}。
+     */
     @ApiOperation(value = "Get persistent RPC requests", notes = "Allows to query RPC calls for specific device using pagination." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/persistent/device/{deviceId}", method = RequestMethod.GET)
@@ -218,6 +254,11 @@ public class RpcV2Controller extends AbstractRpcController {
         return response;
     }
 
+    /**
+     * 删除持久化 RPC。必要时通知 Core Actor 移除进行中的调用，并向规则引擎推 {@code RPC_DELETED}。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 DELETE。下游 {@code rpcService}、{@code tbClusterService}。
+     */
     @ApiOperation(value = "Delete persistent RPC", notes = "Deletes the persistent RPC request." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
     @RequestMapping(value = "/persistent/{rpcId}", method = RequestMethod.DELETE)

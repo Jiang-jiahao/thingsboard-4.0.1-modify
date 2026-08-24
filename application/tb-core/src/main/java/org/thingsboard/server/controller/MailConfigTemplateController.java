@@ -34,6 +34,20 @@ import java.io.IOException;
 
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 
+/**
+ * 邮件服务器配置模板 REST 入口。
+ * <p>
+ * 返回各邮件服务商的默认 SMTP 模板，供管理后台「邮件设置」表单预填。
+ * 仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api/mail/config/template}。
+ * <p>
+ * <b>权限：</b>SYS_ADMIN、TENANT_ADMIN；并校验 {@code ADMIN_SETTINGS} 的 READ。
+ * <p>
+ * <b>下游：</b>{@link TbMailConfigTemplateService}。
+ *
+ * @see TbMailConfigTemplateService
+ */
 @RestController
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -43,6 +57,9 @@ public class MailConfigTemplateController extends BaseController {
     private static final String MAIL_CONFIG_TEMPLATE_DEFINITION = "Mail configuration template is set of default smtp settings for mail server that specific provider supports";
     private final TbMailConfigTemplateService mailConfigTemplateService;
 
+    /**
+     * 列出全部邮件配置模板（各服务商默认 SMTP 参数）。
+     */
     @ApiOperation(value = "Get the list of all OAuth2 client registration templates (getClientRegistrationTemplates)" + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH,
             notes = MAIL_CONFIG_TEMPLATE_DEFINITION)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")

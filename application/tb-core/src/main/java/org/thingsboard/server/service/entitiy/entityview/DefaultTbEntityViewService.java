@@ -66,6 +66,14 @@ import java.util.stream.Collectors;
 
 import static org.thingsboard.server.common.data.StringUtils.isBlank;
 
+/**
+ * {@link TbEntityViewService} 的默认实现。
+ * <p>
+ * 由 EntityViewController 调用，委托 {@link EntityViewService} 落库；写审计日志，
+ * 并按视图时间窗口从源实体复制属性/时序。生命周期消息会维护本地缓存并同步遥测。
+ *
+ * @see TbEntityViewService
+ */
 @Service
 @Slf4j
 public class DefaultTbEntityViewService extends AbstractTbEntityService implements TbEntityViewService {
@@ -86,6 +94,7 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         this.tsSubService = tsSubService;
         this.tsService = tsService;
     }
+    /** 保存实体视图，写审计并按窗口复制源实体遥测。 */
     @Override
     public EntityView save(EntityView entityView, EntityView existingEntityView, User user) throws Exception {
         ActionType actionType = entityView.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -104,6 +113,7 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         }
     }
 
+    /** 按新旧视图差异增删属性/时序副本。 */
     @Override
     public void updateEntityViewAttributes(TenantId tenantId, EntityView savedEntityView, EntityView oldEntityView, User user) throws ThingsboardException {
         List<ListenableFuture<?>> futures = new ArrayList<>();
@@ -135,6 +145,7 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         }
     }
 
+    /** 删除实体视图并写 DELETED 审计。 */
     @Override
     public void delete(EntityView entityView, User user) throws ThingsboardException {
         TenantId tenantId = entityView.getTenantId();
@@ -152,6 +163,7 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         }
     }
 
+    /** 将实体视图分配给客户并写审计。 */
     @Override
     public EntityView assignEntityViewToCustomer(TenantId tenantId, EntityViewId entityViewId, Customer customer, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
@@ -168,6 +180,7 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         }
     }
 
+    /** 取消实体视图与客户的分配并写审计。 */
     @Override
     public EntityView unassignEntityViewFromCustomer(TenantId tenantId, EntityViewId entityViewId, Customer customer, User user) throws ThingsboardException {
         ActionType actionType = ActionType.UNASSIGNED_FROM_CUSTOMER;
@@ -183,6 +196,7 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         }
     }
 
+    /** 将实体视图分配给公开客户并写审计。 */
     @Override
     public EntityView assignEntityViewToPublicCustomer(TenantId tenantId, EntityViewId entityViewId, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
@@ -200,6 +214,7 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         }
     }
 
+    /** 将实体视图分配给 Edge 并写审计。 */
     @Override
     public EntityView assignEntityViewToEdge(TenantId tenantId, CustomerId customerId, EntityViewId entityViewId, Edge edge, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_EDGE;
@@ -216,6 +231,7 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         }
     }
 
+    /** 取消实体视图与 Edge 的分配并写审计。 */
     @Override
     public EntityView unassignEntityViewFromEdge(TenantId tenantId, CustomerId customerId, EntityView entityView,
                                                  Edge edge, User user) throws ThingsboardException {
@@ -234,6 +250,7 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         }
     }
 
+    /** 异步查询绑定到指定实体的全部实体视图。 */
     @Override
     public ListenableFuture<List<EntityView>> findEntityViewsByTenantIdAndEntityIdAsync(TenantId tenantId, EntityId entityId) {
         Map<EntityId, List<EntityView>> localCacheByTenant = localCache.computeIfAbsent(tenantId, (k) -> new ConcurrentReferenceHashMap<>());
@@ -250,6 +267,7 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         }, MoreExecutors.directExecutor());
     }
 
+    /** 处理实体视图组件生命周期：维护缓存并同步/清理遥测。 */
     @Override
     public void onComponentLifecycleMsg(ComponentLifecycleMsg componentLifecycleMsg) {
         Map<EntityId, List<EntityView>> localCacheByTenant = localCache.computeIfAbsent(componentLifecycleMsg.getTenantId(), (k) -> new ConcurrentReferenceHashMap<>());
@@ -454,6 +472,7 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         logEntityActionService.logEntityAction(tenantId, entityId, ActionType.TIMESERIES_DELETED, user, toException(e), keys);
     }
 
+    /** 将 Throwable 转为 Exception，已是 Exception 则原样返回。 */
     public static Exception toException(Throwable error) {
         return error != null ? (Exception.class.isInstance(error) ? (Exception) error : new Exception(error)) : null;
     }

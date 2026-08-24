@@ -30,10 +30,18 @@ import org.thingsboard.server.service.sync.vc.data.EntitiesExportCtx;
 
 import java.util.Set;
 
+/**
+ * 针对 {@link NotificationTarget} 的导出服务，继承 {@link BaseEntityExportService}。
+ * <p>
+ * PLATFORM_USERS 下的客户用户过滤器会把 customerId 换成 externalId；用户列表保持原样（导入时替换为当前用户，因 User 不纳入 VC）。
+ */
 @Service
 @TbCoreComponent
 public class NotificationTargetExportService extends BaseEntityExportService<NotificationTargetId, NotificationTarget, EntityExportData<NotificationTarget>> {
 
+    /**
+     * 客户用户过滤器替换 customerId；用户列表故意不改，导入时再替换。
+     */
     @Override
     protected void setRelatedEntities(EntitiesExportCtx<?> ctx, NotificationTarget notificationTarget, EntityExportData<NotificationTarget> exportData) {
         if (notificationTarget.getConfiguration().getType() == NotificationTargetType.PLATFORM_USERS) {

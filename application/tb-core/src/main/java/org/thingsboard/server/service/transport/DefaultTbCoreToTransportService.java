@@ -33,6 +33,13 @@ import java.util.function.Consumer;
 
 import static org.thingsboard.server.dao.model.ModelConstants.NULL_UUID;
 
+/**
+ * Core 向 Transport 节点推送通知。
+ * <p>
+ * 将会话相关消息（凭证更新、设备删除、属性下发等）发到指定 Transport 节点的通知 Topic。
+ *
+ * @see TbCoreToTransportService
+ */
 @Slf4j
 @Service
 @TbCoreComponent
@@ -46,11 +53,17 @@ public class DefaultTbCoreToTransportService implements TbCoreToTransportService
         this.tbTransportProducer = tbQueueProducerProvider.getTransportNotificationsMsgProducer();
     }
 
+    /**
+     * 向指定 Transport 节点推送消息（无回调）。
+     */
     @Override
     public void process(String nodeId, ToTransportMsg msg) {
         process(nodeId, msg, null, null);
     }
 
+    /**
+     * 向指定 Transport 节点推送消息；{@code nodeId} 为空则跳过。
+     */
     @Override
     public void process(String nodeId, ToTransportMsg msg, Runnable onSuccess, Consumer<Throwable> onFailure) {
         if (nodeId == null || nodeId.isEmpty()) {

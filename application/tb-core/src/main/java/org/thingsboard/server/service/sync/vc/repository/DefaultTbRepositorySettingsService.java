@@ -24,6 +24,11 @@ import org.thingsboard.server.dao.settings.AdminSettingsService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.sync.vc.TbAbstractVersionControlSettingsService;
 
+/**
+ * {@link TbRepositorySettingsService} 实现，设置键为 {@code entitiesVersionControl}。
+ * <p>
+ * {@link #restore} 在更新时若未提交密码/私钥，则从已存储设置中回填，避免覆盖密钥。
+ */
 @Service
 @TbCoreComponent
 public class DefaultTbRepositorySettingsService extends TbAbstractVersionControlSettingsService<RepositorySettings> implements TbRepositorySettingsService {
@@ -34,6 +39,9 @@ public class DefaultTbRepositorySettingsService extends TbAbstractVersionControl
         super(adminSettingsService, cache, RepositorySettings.class, SETTINGS_KEY);
     }
 
+    /**
+     * 更新仓库设置时回填未提交的密码或私钥，避免把已存密钥清空。
+     */
     @Override
     public RepositorySettings restore(TenantId tenantId, RepositorySettings settings) {
         RepositorySettings storedSettings = get(tenantId);

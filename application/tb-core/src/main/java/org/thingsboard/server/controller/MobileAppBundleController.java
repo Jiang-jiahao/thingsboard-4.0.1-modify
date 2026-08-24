@@ -54,6 +54,21 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 移动端应用包（Mobile App Bundle）REST 入口。
+ * <p>
+ * Bundle 把 Android / iOS 应用成对管理，并保存 OAuth2 客户端、自注册和布局配置。
+ * 仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api}。路径如 {@code /mobile/bundle}、{@code /mobile/bundle/infos}、
+ * {@code /mobile/bundle/{id}/oauth2Clients}。
+ * <p>
+ * <b>权限：</b>全部接口 SYS_ADMIN、TENANT_ADMIN。
+ * <p>
+ * <b>下游：</b>写路径 {@link TbMobileAppBundleService}；查询走基类 {@code mobileAppBundleService}。
+ *
+ * @see TbMobileAppBundleService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -63,6 +78,9 @@ public class MobileAppBundleController extends BaseController {
 
     private final TbMobileAppBundleService tbMobileAppBundleService;
 
+    /**
+     * 创建或更新移动端 Bundle，并可同时绑定 OAuth2 客户端。
+     */
     @ApiOperation(value = "Save Or update Mobile app bundle (saveMobileAppBundle)",
             notes = "Create or update the Mobile app bundle that represents tha pair of ANDROID and IOS app and " +
                     "mobile settings like oauth2 clients, self-registration and layout configuration." +
@@ -81,6 +99,9 @@ public class MobileAppBundleController extends BaseController {
         return tbMobileAppBundleService.save(mobileAppBundle, getOAuth2ClientIds(ids), getCurrentUser());
     }
 
+    /**
+     * 替换指定 Bundle 绑定的 OAuth2 客户端列表。
+     */
     @ApiOperation(value = "Update oauth2 clients (updateOauth2Clients)",
             notes = "Update oauth2 clients of the specified mobile app bundle." + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -93,6 +114,9 @@ public class MobileAppBundleController extends BaseController {
         tbMobileAppBundleService.updateOauth2Clients(mobileAppBundle, oAuth2ClientIds, getCurrentUser());
     }
 
+    /**
+     * 分页列出当前租户的 Bundle 信息。
+     */
     @ApiOperation(value = "Get mobile app bundle infos (getTenantMobileAppBundleInfos)", notes = SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/mobile/bundle/infos")
@@ -110,6 +134,9 @@ public class MobileAppBundleController extends BaseController {
         return mobileAppBundleService.findMobileAppBundleInfosByTenantId(getTenantId(), pageLink);
     }
 
+    /**
+     * 按 Id 读取 Bundle 详情。
+     */
     @ApiOperation(value = "Get mobile app bundle info by id (getMobileAppBundleInfoById)", notes = SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/mobile/bundle/info/{id}")
@@ -118,6 +145,9 @@ public class MobileAppBundleController extends BaseController {
         return checkEntityId(mobileAppBundleId, mobileAppBundleService::findMobileAppBundleInfoById, Operation.READ);
     }
 
+    /**
+     * 按 Id 删除 Bundle。引用不存在的 Id 会报错。
+     */
     @ApiOperation(value = "Delete Mobile App Bundle by ID (deleteMobileAppBundle)",
             notes = "Deletes Mobile App Bundle by ID. Referencing non-existing mobile app bundle Id will cause an error." + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")

@@ -62,6 +62,12 @@ import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LI
 import static org.thingsboard.server.controller.ControllerConstants.WIDGET_BUNDLE_ID_PARAM_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.WIDGET_BUNDLE_TEXT_SEARCH_DESCRIPTION;
 
+/**
+ * 部件包（Widget Bundle）CRUD 与部件列表维护 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。系统管理员维护系统级部件包；
+ * 租户管理员维护本租户部件包。部件包按类型或场景分组部件。
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -76,6 +82,9 @@ public class WidgetsBundleController extends BaseController {
     private static final String SCADA_FIRST_PARAM_DESCRIPTION = "Optional boolean parameter indicating whether to fetch widgets bundles with SCADA symbols first. Works only when fullSearch parameter is enabled";
     private static final String TENANT_BUNDLES_ONLY_DESCRIPTION = "Optional boolean parameter to include only tenant-level bundles without system";
 
+    /**
+     * 按 ID 读取部件包；可选内联图片。
+     */
     @ApiOperation(value = "Get Widget Bundle (getWidgetsBundleById)",
             notes = "Get the Widget Bundle based on the provided Widget Bundle Id. " + WIDGET_BUNDLE_DESCRIPTION + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -95,6 +104,9 @@ public class WidgetsBundleController extends BaseController {
         return result;
     }
 
+    /**
+     * 创建或更新部件包；同一租户下 alias 唯一。
+     */
     @ApiOperation(value = "Create Or Update Widget Bundle (saveWidgetsBundle)",
             notes = "Create or update the Widget Bundle. " + WIDGET_BUNDLE_DESCRIPTION + " " +
                     "When creating the bundle, platform generates Widget Bundle Id as " + UUID_WIKI_LINK +
@@ -123,6 +135,9 @@ public class WidgetsBundleController extends BaseController {
         return tbWidgetsBundleService.save(widgetsBundle, currentUser);
     }
 
+    /**
+     * 按部件类型 ID 有序列表更新部件包内的部件。
+     */
     @ApiOperation(value = "Update widgets bundle widgets types list (updateWidgetsBundleWidgetTypes)",
             notes = "Updates widgets bundle widgets list." + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -149,6 +164,9 @@ public class WidgetsBundleController extends BaseController {
         tbWidgetsBundleService.updateWidgetsBundleWidgetTypes(widgetsBundleId, new ArrayList<>(widgetTypeIds), currentUser);
     }
 
+    /**
+     * 按部件类型 FQN 有序列表更新部件包内的部件。
+     */
     @ApiOperation(value = "Update widgets bundle widgets list from widget type FQNs list (updateWidgetsBundleWidgetFqns)",
             notes = "Updates widgets bundle widgets list from widget type FQNs list." + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -166,6 +184,9 @@ public class WidgetsBundleController extends BaseController {
         tbWidgetsBundleService.updateWidgetsBundleWidgetFqns(widgetsBundleId, widgetTypeFqns, currentUser);
     }
 
+    /**
+     * 删除部件包。
+     */
     @ApiOperation(value = "Delete widgets bundle (deleteWidgetsBundle)",
             notes = "Deletes the widget bundle. Referencing non-existing Widget Bundle Id will cause an error." + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -180,6 +201,9 @@ public class WidgetsBundleController extends BaseController {
         tbWidgetsBundleService.delete(widgetsBundle, getCurrentUser());
     }
 
+    /**
+     * 分页查询当前用户可见的部件包。
+     */
     @ApiOperation(value = "Get Widget Bundles (getWidgetsBundles)",
             notes = "Returns a page of Widget Bundle objects available for current user. " + WIDGET_BUNDLE_DESCRIPTION + " " +
                     PAGE_DATA_PARAMETERS + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
@@ -220,6 +244,9 @@ public class WidgetsBundleController extends BaseController {
         }
     }
 
+    /**
+     * 返回当前用户可见的全部部件包（不分页）。
+     */
     @ApiOperation(value = "Get all Widget Bundles (getWidgetsBundles)",
             notes = "Returns an array of Widget Bundle objects that are available for current user." + WIDGET_BUNDLE_DESCRIPTION + " " + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")

@@ -23,6 +23,11 @@ import org.thingsboard.server.dao.settings.AdminSettingsService;
 
 import java.io.Serializable;
 
+/**
+ * 版本控制相关租户设置的抽象存储：以 {@link AdminSettings} JSON 持久化，外加事务缓存。
+ *
+ * @param <T> 设置对象类型
+ */
 public abstract class TbAbstractVersionControlSettingsService<T extends Serializable> {
 
     private final String settingsKey;
@@ -37,6 +42,9 @@ public abstract class TbAbstractVersionControlSettingsService<T extends Serializ
         this.settingsKey = settingsKey;
     }
 
+    /**
+     * 按租户读取设置（先缓存，未命中则从 AdminSettings 反序列化）。
+     */
     public T get(TenantId tenantId) {
         return cache.getAndPutInTransaction(tenantId, () -> {
             AdminSettings adminSettings = adminSettingsService.findAdminSettingsByTenantIdAndKey(tenantId, settingsKey);
@@ -51,6 +59,9 @@ public abstract class TbAbstractVersionControlSettingsService<T extends Serializ
         }, true);
     }
 
+    /**
+     * 将设置序列化写入 AdminSettings 并失效缓存。
+     */
     public T save(TenantId tenantId, T settings) {
         AdminSettings adminSettings = adminSettingsService.findAdminSettingsByTenantIdAndKey(tenantId, settingsKey);
         if (adminSettings == null) {
@@ -71,6 +82,9 @@ public abstract class TbAbstractVersionControlSettingsService<T extends Serializ
         return savedSettings;
     }
 
+    /**
+     * 按租户删除设置并失效缓存。
+     */
     public boolean delete(TenantId tenantId) {
         boolean result = adminSettingsService.deleteAdminSettingsByTenantIdAndKey(tenantId, settingsKey);
         cache.evict(tenantId);

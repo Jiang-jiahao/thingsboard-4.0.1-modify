@@ -47,6 +47,18 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 
+/**
+ * Kafka Edge 事件 Topic TTL 清理服务：删除长期未连接或已删除 Edge 的空通知 Topic。
+ * <p>
+ * <b>职责：</b>扫描 Edge 事件通知 Topic，按 lastConnectTime 与 TTL 判断过期；
+ * Topic 为空才删除，并删除对应消费者组。租户不存在则直接删 Topic。
+ * <p>
+ * <b>触发方式：</b>定时 TTL（与 Edge 事件 TTL 同一间隔）。
+ * <p>
+ * <b>清理对象：</b>Kafka 上 {@code tb_edge_event.notifications} 前缀的空 Topic。
+ * <p>
+ * <b>生效条件：</b>{@code queue.type=kafka} 且 edges.enabled 且 edge_events_ttl &gt; 0。
+ */
 @Slf4j
 @Service
 @TbCoreComponent
@@ -76,6 +88,7 @@ public class KafkaEdgeTopicsCleanUpService extends AbstractCleanUpService {
         this.kafkaAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getEdgeEventConfigs());
     }
 
+    /** 清理过期或孤立的 Edge Kafka Topic。 */
     @Scheduled(initialDelayString = "#{T(org.apache.commons.lang3.RandomUtils).nextLong(0, ${sql.ttl.edge_events.execution_interval_ms})}", fixedDelayString = "${sql.ttl.edge_events.execution_interval_ms}")
     public void cleanUp() {
         if (!isSystemTenantPartitionMine()) {

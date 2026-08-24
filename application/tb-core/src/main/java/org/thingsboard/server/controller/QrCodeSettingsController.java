@@ -53,6 +53,22 @@ import static org.thingsboard.server.common.data.oauth2.PlatformType.IOS;
 import static org.thingsboard.server.controller.ControllerConstants.AVAILABLE_FOR_ANY_AUTHORIZED_USER;
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_AUTHORITY_PARAGRAPH;
 
+/**
+ * 移动应用二维码 / 深链 REST 入口。
+ * <p>
+ * <b>职责：</b>维护系统级二维码设置（Android/iOS 商店信息、是否启用默认 App），
+ * 对外提供 Digital Asset Links / Apple App Site Association、深链、用短期 secret 换 JWT，
+ * 以及按 User-Agent 跳转应用商店。
+ * <p>
+ * <b>URL：</b>无统一类级前缀。公开路径 {@code /.well-known/*}、{@code /api/noauth/qr*}；
+ * 鉴权路径 {@code /api/mobile/qr/*}。
+ * <p>
+ * <b>权限：</b>Asset Links / AASA / noauth 换 token / 商店跳转无需登录；
+ * 写设置仅 {@code SYS_ADMIN}；读设置与深链 {@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}。
+ * 设置读写会校验资源 {@code MOBILE_APP_SETTINGS}。
+ * <p>
+ * <b>下游：</b>{@link QrCodeSettingService}、{@link MobileAppSecretService}、{@link SystemSecurityService}
+ */
 @RequiredArgsConstructor
 @RestController
 @TbCoreComponent
@@ -93,6 +109,11 @@ public class QrCodeSettingsController extends BaseController {
     private final MobileAppSecretService mobileAppSecretService;
     private final QrCodeSettingService qrCodeSettingService;
 
+    /**
+     * 返回 Android Digital Asset Links（{@code /.well-known/assetlinks.json}），供系统关联 App。
+     * <p>
+     * 无需登录。未配置包名或 SHA256 指纹时返回 404。下游 {@link QrCodeSettingService}。
+     */
     @ApiOperation(value = "Get associated android applications (getAssetLinks)")
     @GetMapping(value = "/.well-known/assetlinks.json")
     public ResponseEntity<JsonNode> getAssetLinks() {
@@ -105,6 +126,11 @@ public class QrCodeSettingsController extends BaseController {
         }
     }
 
+    /**
+     * 返回 iOS Apple App Site Association，供 Universal Link 关联 App。
+     * <p>
+     * 无需登录。未配置 App Id 时返回 404。下游 {@link QrCodeSettingService}。
+     */
     @ApiOperation(value = "Get associated ios applications (getAppleAppSiteAssociation)")
     @GetMapping(value = "/.well-known/apple-app-site-association")
     public ResponseEntity<JsonNode> getAppleAppSiteAssociation() {
@@ -117,6 +143,11 @@ public class QrCodeSettingsController extends BaseController {
         }
     }
 
+    /**
+     * 创建或更新系统级移动二维码设置（Android/iOS 配置与二维码组件）。
+     * <p>
+     * 权限：{@code SYS_ADMIN}；资源 {@code MOBILE_APP_SETTINGS} WRITE。下游 {@link QrCodeSettingService#saveQrCodeSettings}。
+     */
     @ApiOperation(value = "Create Or Update the Mobile application settings (saveMobileAppSettings)",
             notes = "The request payload contains configuration for android/iOS applications and platform qr code widget settings." + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
@@ -129,6 +160,11 @@ public class QrCodeSettingsController extends BaseController {
         return qrCodeSettingService.saveQrCodeSettings(currentUser.getTenantId(), qrCodeSettings);
     }
 
+    /**
+     * 读取系统级移动二维码设置。
+     * <p>
+     * 权限：任意已登录用户。资源 {@code MOBILE_APP_SETTINGS} READ。下游 {@link QrCodeSettingService#findQrCodeSettings}。
+     */
     @ApiOperation(value = "Get Mobile application settings (getMobileAppSettings)",
             notes = "The response payload contains configuration for android/iOS applications and platform qr code widget settings." + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -139,6 +175,12 @@ public class QrCodeSettingsController extends BaseController {
         return qrCodeSettingService.findQrCodeSettings(TenantId.SYS_TENANT_ID);
     }
 
+    /**
+     * 生成当前用户的移动深链（含短期 secret 与 TTL）。使用默认 App 时域名取配置，否则取平台 host。
+     * <p>
+     * 权限：任意已登录用户。下游 {@link MobileAppSecretService#generateMobileAppSecret}、
+     * {@link SystemSecurityService#getBaseUrl}。
+     */
     @ApiOperation(value = "Get the deep link to the associated mobile application (getMobileAppDeepLink)",
             notes = "Fetch the url that takes user to linked mobile application " + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -156,6 +198,11 @@ public class QrCodeSettingsController extends BaseController {
         return "\"" + deepLink + "\"";
     }
 
+    /**
+     * 用短期 secret 换取对应用户的 JWT 对，供移动端扫码登录。
+     * <p>
+     * 无需登录。下游 {@link MobileAppSecretService#getJwtPair}。
+     */
     @ApiOperation(value = "Get User Token (getUserTokenByMobileSecret)",
             notes = "Returns the token of the User based on the provided secret key.")
     @GetMapping(value = "/api/noauth/qr/{secret}")
@@ -165,6 +212,11 @@ public class QrCodeSettingsController extends BaseController {
         return mobileAppSecretService.getJwtPair(secret);
     }
 
+    /**
+     * 按 User-Agent 将扫码请求 302 到 Google Play 或 App Store；无法匹配则 404。
+     * <p>
+     * 无需登录。下游 {@link QrCodeSettingService#findQrCodeSettings}。
+     */
     @GetMapping(value = "/api/noauth/qr")
     public ResponseEntity<?> getApplicationRedirect(@RequestHeader(value = "User-Agent") String userAgent) {
         QrCodeSettings qrCodeSettings = qrCodeSettingService.findQrCodeSettings(TenantId.SYS_TENANT_ID);

@@ -35,6 +35,14 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 import org.thingsboard.server.service.security.system.SystemSecurityService;
 
+/**
+ * {@link TbUserService} 的默认实现。
+ * <p>
+ * 由 UserController 调用，委托 {@link UserService} 落库并写审计日志；
+ * 新建用户可选发送激活邮件，失败会回滚删除该用户。
+ *
+ * @see TbUserService
+ */
 @Service
 @TbCoreComponent
 @AllArgsConstructor
@@ -45,6 +53,7 @@ public class DefaultUserService extends AbstractTbEntityService implements TbUse
     private final MailService mailService;
     private final SystemSecurityService systemSecurityService;
 
+    /** 保存用户；新建且需要时发送激活邮件，并写审计。 */
     @Override
     public User save(TenantId tenantId, CustomerId customerId, User tbUser, boolean sendActivationMail,
                      HttpServletRequest request, User user) throws ThingsboardException {
@@ -69,6 +78,7 @@ public class DefaultUserService extends AbstractTbEntityService implements TbUse
         }
     }
 
+    /** 删除用户并写 DELETED 审计。 */
     @Override
     public void delete(TenantId tenantId, CustomerId customerId, User user, User responsibleUser) throws ThingsboardException {
         ActionType actionType = ActionType.DELETED;
@@ -84,6 +94,7 @@ public class DefaultUserService extends AbstractTbEntityService implements TbUse
         }
     }
 
+    /** 为未激活用户生成激活链接。 */
     @Override
     public UserActivationLink getActivationLink(TenantId tenantId, CustomerId customerId, UserId userId, HttpServletRequest request) throws ThingsboardException {
         UserCredentials userCredentials = userService.findUserCredentialsByUserId(tenantId, userId);

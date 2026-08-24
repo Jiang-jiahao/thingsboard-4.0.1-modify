@@ -51,7 +51,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
- * Created by ashvayka on 27.03.18.
+ * Core 侧设备 RPC 编排服务。
+ * <p>
+ * REST 发起的服务端 RPC 先入规则引擎（{@code RPC_CALL_FROM_SERVER_TO_DEVICE}），
+ * 规则引擎再把请求转到负责该设备的 Core 节点上的 Device Actor；响应经通知队列回到本机回调。
+ * 本机维护两张请求映射：REST→规则引擎、规则引擎→设备 Actor，并按过期时间调度超时。
+ *
+ * @see TbCoreDeviceRpcService
  */
 @Service
 @Slf4j
@@ -78,17 +84,26 @@ public class DefaultTbCoreDeviceRpcService implements TbCoreDeviceRpcService {
         this.actorContext = actorContext;
     }
 
+    /**
+     * 可选注入规则引擎侧 RPC 服务（monolith 同进程时本地回传响应）。
+     */
     @Autowired(required = false)
     public void setTbRuleEngineRpcService(Optional<TbRuleEngineDeviceRpcService> tbRuleEngineRpcService) {
         this.tbRuleEngineRpcService = tbRuleEngineRpcService;
     }
 
+    /**
+     * 启动 RPC 超时调度线程并缓存本节点 serviceId。
+     */
     @PostConstruct
     public void initExecutor() {
         scheduler = ThingsBoardExecutors.newSingleThreadScheduledExecutor("tb-core-rpc-scheduler");
         serviceId = serviceInfoProvider.getServiceId();
     }
 
+    /**
+     * 关闭超时调度线程。
+     */
     @PreDestroy
     public void shutdownExecutor() {
         if (scheduler != null) {
@@ -96,6 +111,9 @@ public class DefaultTbCoreDeviceRpcService implements TbCoreDeviceRpcService {
         }
     }
 
+    /**
+     * 处理 REST API 发起的设备 RPC：登记回调、推入规则引擎并调度超时。
+     */
     @Override
     public void processRestApiRpcRequest(ToDeviceRpcRequest request, Consumer<FromDeviceRpcResponse> responseConsumer, SecurityUser currentUser) {
         log.trace("[{}][{}] Processing REST API call to rule engine [{}]", request.getTenantId(), request.getId(), request.getDeviceId());
@@ -105,6 +123,9 @@ public class DefaultTbCoreDeviceRpcService implements TbCoreDeviceRpcService {
         scheduleToRuleEngineTimeout(request, requestId);
     }
 
+    /**
+     * 规则引擎返回的 RPC 响应：匹配本机等待的 REST 回调。
+     */
     @Override
     public void processRpcResponseFromRuleEngine(FromDeviceRpcResponse response) {
         log.trace("[{}] Received response to server-side RPC request from rule engine: [{}]", response.getId(), response);
@@ -117,6 +138,9 @@ public class DefaultTbCoreDeviceRpcService implements TbCoreDeviceRpcService {
         }
     }
 
+    /**
+     * 将规则引擎转发来的 RPC 交给本机 Device Actor，并登记待设备响应。
+     */
     @Override
     public void forwardRpcRequestToDeviceActor(ToDeviceRpcRequestActorMsg rpcMsg) {
         ToDeviceRpcRequest request = rpcMsg.getMsg();
@@ -127,6 +151,9 @@ public class DefaultTbCoreDeviceRpcService implements TbCoreDeviceRpcService {
         scheduleToDeviceTimeout(request, requestId);
     }
 
+    /**
+     * Device Actor 收到设备应答后，回传给发起请求的规则引擎节点。
+     */
     @Override
     public void processRpcResponseFromDeviceActor(FromDeviceRpcResponse response) {
         log.trace("[{}] Received response to server-side RPC request from device actor.", response.getId());
@@ -139,6 +166,9 @@ public class DefaultTbCoreDeviceRpcService implements TbCoreDeviceRpcService {
         }
     }
 
+    /**
+     * 通知 Device Actor 移除尚未完成的持久化 RPC。
+     */
     @Override
     public void processRemoveRpc(RemoveRpcActorMsg removeRpcMsg) {
         log.trace("[{}][{}] Processing remove RPC [{}]", removeRpcMsg.getTenantId(), removeRpcMsg.getRequestId(), removeRpcMsg.getDeviceId());

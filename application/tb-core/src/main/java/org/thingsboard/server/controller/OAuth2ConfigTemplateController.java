@@ -39,6 +39,19 @@ import java.util.List;
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 
+/**
+ * OAuth2 客户端注册模板 REST 入口。
+ * <p>
+ * <b>职责：</b>维护各 OAuth2 提供商的默认客户端注册模板（授权/令牌端点、scope、属性映射等），
+ * 供配置新 OAuth2 客户端时作为预填模板。
+ * <p>
+ * <b>URL：</b>{@code /api/oauth2/config/template}
+ * <p>
+ * <b>权限：</b>写/删仅 {@code SYS_ADMIN}；列表查询 {@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。
+ * 方法内再校验资源 {@code OAUTH2_CONFIGURATION_TEMPLATE}。
+ * <p>
+ * <b>下游：</b>{@code oAuth2ConfigTemplateService}（继承自 {@link BaseController}）
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/oauth2/config/template")
@@ -48,6 +61,11 @@ public class OAuth2ConfigTemplateController extends BaseController {
 
     private static final String OAUTH2_CLIENT_REGISTRATION_TEMPLATE_DEFINITION = "Client registration template is OAuth2 provider configuration template with default settings for registering new OAuth2 clients";
 
+    /**
+     * 创建或更新 OAuth2 客户端注册模板。
+     * <p>
+     * 权限：{@code SYS_ADMIN}；资源 {@code OAUTH2_CONFIGURATION_TEMPLATE} WRITE。
+     */
     @ApiOperation(value = "Create or update OAuth2 client registration template (saveClientRegistrationTemplate)" + SYSTEM_AUTHORITY_PARAGRAPH,
             notes = OAUTH2_CLIENT_REGISTRATION_TEMPLATE_DEFINITION)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
@@ -58,6 +76,11 @@ public class OAuth2ConfigTemplateController extends BaseController {
         return oAuth2ConfigTemplateService.saveClientRegistrationTemplate(clientRegistrationTemplate);
     }
 
+    /**
+     * 按 id 删除 OAuth2 客户端注册模板。
+     * <p>
+     * 权限：{@code SYS_ADMIN}；资源 {@code OAUTH2_CONFIGURATION_TEMPLATE} DELETE。
+     */
     @ApiOperation(value = "Delete OAuth2 client registration template by id (deleteClientRegistrationTemplate)" + SYSTEM_AUTHORITY_PARAGRAPH,
             notes = OAUTH2_CLIENT_REGISTRATION_TEMPLATE_DEFINITION)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
@@ -71,6 +94,11 @@ public class OAuth2ConfigTemplateController extends BaseController {
         oAuth2ConfigTemplateService.deleteClientRegistrationTemplateById(clientRegistrationTemplateId);
     }
 
+    /**
+     * 列出全部 OAuth2 客户端注册模板。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}；资源 {@code OAUTH2_CONFIGURATION_TEMPLATE} READ。
+     */
     @ApiOperation(value = "Get the list of all OAuth2 client registration templates (getClientRegistrationTemplates)" + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH,
             notes = OAUTH2_CLIENT_REGISTRATION_TEMPLATE_DEFINITION)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")

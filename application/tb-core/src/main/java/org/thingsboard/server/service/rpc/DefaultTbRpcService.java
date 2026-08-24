@@ -34,6 +34,13 @@ import org.thingsboard.server.common.msg.TbMsgMetaData;
 import org.thingsboard.server.dao.rpc.RpcService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+/**
+ * 持久化 RPC 实体服务。
+ * <p>
+ * 保存或更新 RPC 状态后，向规则引擎推送 {@code RPC_{STATUS}} 消息，供规则链感知调用进度。
+ *
+ * @see TbRpcService
+ */
 @TbCoreComponent
 @Service
 @RequiredArgsConstructor
@@ -42,6 +49,9 @@ public class DefaultTbRpcService implements TbRpcService {
     private final RpcService rpcService;
     private final TbClusterService tbClusterService;
 
+    /**
+     * 保存 RPC 记录并推送状态消息到规则引擎。
+     */
     @Override
     public Rpc save(TenantId tenantId, Rpc rpc) {
         Rpc saved = rpcService.save(rpc);
@@ -49,6 +59,9 @@ public class DefaultTbRpcService implements TbRpcService {
         return saved;
     }
 
+    /**
+     * 更新 RPC 状态与可选响应体；记录已删除则仅打警告。
+     */
     @Override
     public void save(TenantId tenantId, RpcId rpcId, RpcStatus newStatus, JsonNode response) {
         Rpc foundRpc = rpcService.findById(tenantId, rpcId);
@@ -74,11 +87,17 @@ public class DefaultTbRpcService implements TbRpcService {
         tbClusterService.pushMsgToRuleEngine(tenantId, rpc.getDeviceId(), msg, null);
     }
 
+    /**
+     * 按 ID 查询 RPC。
+     */
     @Override
     public Rpc findRpcById(TenantId tenantId, RpcId rpcId) {
         return rpcService.findById(tenantId, rpcId);
     }
 
+    /**
+     * 按设备与状态分页查询 RPC。
+     */
     @Override
     public PageData<Rpc> findAllByDeviceIdAndStatus(TenantId tenantId, DeviceId deviceId, RpcStatus rpcStatus, PageLink pageLink) {
         return rpcService.findAllByDeviceIdAndStatus(tenantId, deviceId, rpcStatus, pageLink);

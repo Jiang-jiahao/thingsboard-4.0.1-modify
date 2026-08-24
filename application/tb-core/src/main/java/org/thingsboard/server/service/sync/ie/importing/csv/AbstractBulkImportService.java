@@ -70,8 +70,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * 用于数据导入使用
- * @param <E>
+ * CSV 批量导入抽象基类。
+ * <p>
+ * 解析 CSV（可选表头、列映射），按名称查找或新建实体，写入字段后并发落库，
+ * 并可同步写入服务端/共享属性与遥测。子类实现具体实体的查找、赋权与保存。
+ *
+ * @param <E> 导入的实体类型
  */
 public abstract class AbstractBulkImportService<E extends HasId<? extends EntityId> & HasTenantId> {
     @Autowired
@@ -92,6 +96,9 @@ public abstract class AbstractBulkImportService<E extends HasId<? extends Entity
         executor = ThingsBoardExecutors.newLimitedTasksExecutor(Runtime.getRuntime().availableProcessors(), 150_000, "bulk-import");
     }
 
+    /**
+     * 解析 CSV 并并发导入全部行，汇总创建/更新/错误计数。
+     */
     public final BulkImportResult<E> processBulkImport(BulkImportRequest request, SecurityUser user) throws Exception {
         List<EntityData> entitiesData = parseData(request);
 

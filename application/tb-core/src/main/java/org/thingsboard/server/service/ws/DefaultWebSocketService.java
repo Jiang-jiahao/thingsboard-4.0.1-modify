@@ -108,13 +108,12 @@ import java.util.stream.Collectors;
 import static org.thingsboard.server.common.data.DataConstants.LATEST_TELEMETRY_SCOPE;
 
 /**
- * ThingsBoard WebSocket 服务实现类
+ * {@link WebSocketService} 默认实现。
  * <p>
- * 作为WebSocket通信的总入口，负责管理客户端连接的生命周期（建立、维持、关闭）、
- * 验证会话、以及作为消息在服务器与前端间双向转发的枢纽。
+ * Core UI 实时通道：管理会话、按命令类型路由到遥测/实体数据/通知处理器，
+ * 将订阅更新编码后经 {@code WebSocketMsgEndpoint} 推回前端，并用 Ping 保活。
  *
- * @author ashvayka
- * @since 27.03.18
+ * @see WebSocketService
  */
 @Service
 @TbCoreComponent
@@ -287,6 +286,9 @@ public class DefaultWebSocketService implements WebSocketService {
         cmdsHandlers.put(WsCmdType.NOTIFICATIONS_UNSUBSCRIBE, newCmdHandler(notificationCmdsHandler::handleUnsubCmd));
     }
 
+    /**
+     * 关闭 Ping 与命令处理线程池。
+     */
     @PreDestroy
     public void shutdownExecutor() {
         if (pingExecutor != null) {
@@ -395,17 +397,26 @@ public class DefaultWebSocketService implements WebSocketService {
         }
     }
 
+    /**
+     * 推送旧版遥测更新（将 subscriptionId 替换为 cmdId）。
+     */
     @Override
     public void sendUpdate(String sessionId, int cmdId, TelemetrySubscriptionUpdate update) {
         // We substitute the subscriptionId with cmdId for old-style subscriptions.
         doSendUpdate(sessionId, cmdId, update.copyWithNewSubscriptionId(cmdId));
     }
 
+    /**
+     * 推送 v2 命令更新。
+     */
     @Override
     public void sendUpdate(String sessionId, CmdUpdate update) {
         doSendUpdate(sessionId, update.getCmdId(), update);
     }
 
+    /**
+     * 向会话发送订阅错误。
+     */
     @Override
     public void sendError(WebSocketSessionRef sessionRef, int subId, SubscriptionErrorCode errorCode, String errorMsg) {
         TelemetrySubscriptionUpdate update = new TelemetrySubscriptionUpdate(subId, errorCode, errorMsg);
@@ -419,6 +430,9 @@ public class DefaultWebSocketService implements WebSocketService {
         }
     }
 
+    /**
+     * 关闭指定 WebSocket 会话。
+     */
     @Override
     public void close(String sessionId, CloseStatus status) {
         WsSessionMetaData md = wsSessionsMap.get(sessionId);
@@ -431,6 +445,9 @@ public class DefaultWebSocketService implements WebSocketService {
         }
     }
 
+    /**
+     * 底层连接已断开时清理陈旧会话。
+     */
     @Override
     public void cleanupIfStale(TenantId tenantId, String sessionId) {
         if (!msgEndpoint.isOpen(sessionId)) {
@@ -1128,6 +1145,9 @@ public class DefaultWebSocketService implements WebSocketService {
     }
 
 
+    /**
+     * 解析聚合类型字符串，空值回退为 NONE。
+     */
     public static Aggregation getAggregation(String agg) {
         return StringUtils.isEmpty(agg) ? DEFAULT_AGGREGATION : Aggregation.valueOf(agg);
     }
@@ -1141,16 +1161,25 @@ public class DefaultWebSocketService implements WebSocketService {
                 .map(TenantProfile::getDefaultProfileConfiguration).orElse(null);
     }
 
+    /**
+     * 将 BiConsumer 包装为类型安全的命令处理器。
+     */
     public static <C extends WsCmd> WsCmdHandler<C> newCmdHandler(BiConsumer<WebSocketSessionRef, C> handler) {
         return new WsCmdHandler<>(handler);
     }
 
+    /**
+     * WebSocket 命令处理器：把 {@link WsCmd} 转型后交给具体处理函数。
+     */
     @RequiredArgsConstructor
     @Getter
     @SuppressWarnings("unchecked")
     public static class WsCmdHandler<C extends WsCmd> {
         protected final BiConsumer<WebSocketSessionRef, C> handler;
 
+        /**
+         * 处理一条命令。
+         */
         public void handle(WebSocketSessionRef sessionRef, WsCmd cmd) {
             handler.accept(sessionRef, (C) cmd);
         }

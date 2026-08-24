@@ -86,6 +86,18 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CU
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 import static org.thingsboard.server.controller.EdgeController.EDGE_ID;
 
+/**
+ * 资产 CRUD、客户/Edge 分配、关系查询与 CSV 批量导入 REST。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径 {@code /api/asset*}、{@code /api/tenant/assets}、
+ * {@code /api/customer/{id}/assets}、{@code /api/edge/{id}/asset*}。
+ * TENANT_ADMIN 可写；CUSTOMER_USER 可读自己客户下的资产。
+ * 写路径走 {@link TbAssetService}；CSV 导入走 {@link AssetBulkImportService}。
+ * 分给 public 客户等于公开资产；分配到 Edge 是异步下发。
+ *
+ * @see TbAssetService
+ * @see AssetBulkImportService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -97,6 +109,9 @@ public class AssetController extends BaseController {
 
     public static final String ASSET_ID = "assetId";
 
+    /**
+     * 按 ID 取资产。租户管理员校验同租户；客户用户校验已分配给该客户。
+     */
     @ApiOperation(value = "Get Asset (getAssetById)",
             notes = "Fetch the Asset object based on the provided Asset Id. " +
                     "If the user has the authority of 'Tenant Administrator', the server checks that the asset is owned by the same tenant. " +
@@ -112,6 +127,9 @@ public class AssetController extends BaseController {
         return checkAssetId(assetId, Operation.READ);
     }
 
+    /**
+     * 按 ID 取资产 Info（含客户标题等展示字段）。
+     */
     @ApiOperation(value = "Get Asset Info (getAssetInfoById)",
             notes = "Fetch the Asset Info object based on the provided Asset Id. " +
                     "If the user has the authority of 'Tenant Administrator', the server checks that the asset is owned by the same tenant. " +
@@ -127,6 +145,9 @@ public class AssetController extends BaseController {
         return checkAssetInfoId(assetId, Operation.READ);
     }
 
+    /**
+     * 创建或更新资产。租户内名称唯一。
+     */
     @ApiOperation(value = "Create Or Update Asset (saveAsset)",
             notes = "Creates or Updates the Asset. When creating asset, platform generates Asset Id as " + UUID_WIKI_LINK +
                     "The newly created Asset id will be present in the response. " +
@@ -143,6 +164,9 @@ public class AssetController extends BaseController {
         return tbAssetService.save(asset, getCurrentUser());
     }
 
+    /**
+     * 删除资产。
+     */
     @ApiOperation(value = "Delete asset (deleteAsset)",
             notes = "Deletes the asset and all the relations (from and to the asset). Referencing non-existing asset Id will cause an error." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -155,6 +179,9 @@ public class AssetController extends BaseController {
         tbAssetService.delete(asset, getCurrentUser());
     }
 
+    /**
+     * 把资产分配给指定客户。
+     */
     @ApiOperation(value = "Assign asset to customer (assignAssetToCustomer)",
             notes = "Creates assignment of the asset to customer. Customer will be able to query asset afterwards." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -171,6 +198,9 @@ public class AssetController extends BaseController {
         return tbAssetService.assignAssetToCustomer(getTenantId(), assetId, customer, getCurrentUser());
     }
 
+    /**
+     * 取消资产与客户的分配。
+     */
     @ApiOperation(value = "Unassign asset from customer (unassignAssetFromCustomer)",
             notes = "Clears assignment of the asset to customer. Customer will not be able to query asset afterwards." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -187,6 +217,9 @@ public class AssetController extends BaseController {
         return tbAssetService.unassignAssetToCustomer(getTenantId(), assetId, customer, getCurrentUser());
     }
 
+    /**
+     * 把资产分给租户的 public 客户，使其公开可见。
+     */
     @ApiOperation(value = "Make asset publicly available (assignAssetToPublicCustomer)",
             notes = "Asset will be available for non-authorized (not logged-in) users. " +
                     "This is useful to create dashboards that you plan to share/embed on a publicly available website. " +
@@ -201,6 +234,9 @@ public class AssetController extends BaseController {
         return tbAssetService.assignAssetToPublicCustomer(getTenantId(), assetId, getCurrentUser());
     }
 
+    /**
+     * 分页列出当前租户的资产，可按类型过滤。
+     */
     @ApiOperation(value = "Get Tenant Assets (getTenantAssets)",
             notes = "Returns a page of assets owned by tenant. " +
                     PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
@@ -229,6 +265,9 @@ public class AssetController extends BaseController {
         }
     }
 
+    /**
+     * 分页列出当前租户的资产 Info。
+     */
     @ApiOperation(value = "Get Tenant Asset Infos (getTenantAssetInfos)",
             notes = "Returns a page of assets info objects owned by tenant. " +
                     PAGE_DATA_PARAMETERS + ASSET_INFO_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
@@ -262,6 +301,9 @@ public class AssetController extends BaseController {
         }
     }
 
+    /**
+     * 按名称精确查找当前租户下的资产。
+     */
     @ApiOperation(value = "Get Tenant Asset (getTenantAsset)",
             notes = "Requested asset must be owned by tenant that the user belongs to. " +
                     "Asset name is an unique property of asset. So it can be used to identify the asset." + TENANT_AUTHORITY_PARAGRAPH)
@@ -275,6 +317,9 @@ public class AssetController extends BaseController {
         return checkNotNull(assetService.findAssetByTenantIdAndName(tenantId, assetName));
     }
 
+    /**
+     * 分页列出指定客户下的资产。
+     */
     @ApiOperation(value = "Get Customer Assets (getCustomerAssets)",
             notes = "Returns a page of assets objects assigned to customer. " +
                     PAGE_DATA_PARAMETERS)
@@ -308,6 +353,9 @@ public class AssetController extends BaseController {
         }
     }
 
+    /**
+     * 分页列出指定客户下的资产 Info。
+     */
     @ApiOperation(value = "Get Customer Asset Infos (getCustomerAssetInfos)",
             notes = "Returns a page of assets info objects assigned to customer. " +
                     PAGE_DATA_PARAMETERS + ASSET_INFO_DESCRIPTION)
@@ -346,6 +394,9 @@ public class AssetController extends BaseController {
         }
     }
 
+    /**
+     * 按一组资产 ID 批量查询（当前用户可见范围内）。
+     */
     @ApiOperation(value = "Get Assets By Ids (getAssetsByIds)",
             notes = "Requested assets must be owned by tenant or assigned to customer which user is performing the request. ")
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -371,6 +422,9 @@ public class AssetController extends BaseController {
         return checkNotNull(assets.get());
     }
 
+    /**
+     * 按关系查询找出与某实体关联的资产。
+     */
     @ApiOperation(value = "Find related assets (findByQuery)",
             notes = "Returns all assets that are related to the specific entity. " +
                     "The entity id, relation type, asset types, depth of the search, and other query parameters defined using complex 'AssetSearchQuery' object. " +
@@ -395,6 +449,9 @@ public class AssetController extends BaseController {
         return assets;
     }
 
+    /**
+     * 已废弃：列出租户内资产类型。请改用资产档案的 {@code getAssetProfileNames}。
+     */
     @ApiOperation(value = "Get Asset Types (getAssetTypes)",
             notes = "Deprecated. See 'getAssetProfileNames' API from Asset Profile Controller instead." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -408,6 +465,9 @@ public class AssetController extends BaseController {
         return checkNotNull(assetTypes.get());
     }
 
+    /**
+     * 把资产分配给 Edge；云端先落库，再异步下发到远端 Edge。
+     */
     @ApiOperation(value = "Assign asset to edge (assignAssetToEdge)",
             notes = "Creates assignment of an existing asset to an instance of The Edge. " +
                     EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
@@ -431,6 +491,9 @@ public class AssetController extends BaseController {
         return tbAssetService.assignAssetToEdge(getTenantId(), assetId, edge, getCurrentUser());
     }
 
+    /**
+     * 取消资产与 Edge 的分配，并异步通知远端删除本地副本。
+     */
     @ApiOperation(value = "Unassign asset from edge (unassignAssetFromEdge)",
             notes = "Clears assignment of the asset to the edge. " +
                     EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
@@ -453,6 +516,9 @@ public class AssetController extends BaseController {
         return tbAssetService.unassignAssetFromEdge(getTenantId(), asset, edge, getCurrentUser());
     }
 
+    /**
+     * 分页列出已分配给指定 Edge 的资产。
+     */
     @ApiOperation(value = "Get assets assigned to edge (getEdgeAssets)",
             notes = "Returns a page of assets assigned to edge. " +
                     PAGE_DATA_PARAMETERS)
@@ -504,6 +570,9 @@ public class AssetController extends BaseController {
         return checkNotNull(filteredResult);
     }
 
+    /**
+     * 用 CSV 批量导入资产。仅 TENANT_ADMIN。
+     */
     @ApiOperation(value = "Import the bulk of assets (processAssetsBulkImport)",
             notes = "There's an ability to import the bulk of assets using the only .csv file.")
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")

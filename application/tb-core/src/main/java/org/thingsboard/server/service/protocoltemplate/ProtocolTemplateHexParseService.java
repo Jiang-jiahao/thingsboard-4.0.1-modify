@@ -22,7 +22,11 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
- * 使用租户协议模板包配置对 HEX 帧做与 TCP 上行相同的解析测试。
+ * 协议模板 HEX 解析测试服务：用租户协议模板包配置，对 HEX 帧做与 TCP 上行相同的解析。
+ * <p>
+ * <b>职责：</b>加载模板包、规范化 HEX、按命令字匹配并解析遥测字段。
+ * <p>
+ * <b>触发方式：</b>管理端解析测试 API 调用，非定时、非队列。
  */
 @Service
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class ProtocolTemplateHexParseService {
 
     private final DefaultProtocolTemplateBundleService bundleService;
 
+    /** 按模板包解析 HEX 帧，返回匹配命令与遥测。 */
     @Transactional(readOnly = true)
     public ProtocolTemplateHexParseResult parse(TenantId tenantId, String bundleIdStr, String rawHex) {
         ProtocolTemplateHexParseResult out = new ProtocolTemplateHexParseResult();

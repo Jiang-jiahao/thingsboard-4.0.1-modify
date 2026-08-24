@@ -28,6 +28,11 @@ import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.sync.vc.data.EntitiesImportCtx;
 
+/**
+ * 针对 {@link DeviceProfile} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 还原默认规则链、Edge 规则链、仪表板内部 ID；固件/软件沿用已有 Profile，比较时忽略二者以免误更新。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -35,11 +40,15 @@ public class DeviceProfileImportService extends BaseEntityImportService<DevicePr
 
     private final DeviceProfileService deviceProfileService;
 
+    /** 模板覆盖：仅绑定租户。 */
     @Override
     protected void setOwner(TenantId tenantId, DeviceProfile deviceProfile, IdProvider idProvider) {
         deviceProfile.setTenantId(tenantId);
     }
 
+    /**
+     * 映射默认规则链/仪表板，并保留已有固件、软件 ID。
+     */
     @Override
     protected DeviceProfile prepare(EntitiesImportCtx ctx, DeviceProfile deviceProfile, DeviceProfile old, EntityExportData<DeviceProfile> exportData, IdProvider idProvider) {
         deviceProfile.setDefaultRuleChainId(idProvider.getInternalId(deviceProfile.getDefaultRuleChainId()));
@@ -50,6 +59,7 @@ public class DeviceProfileImportService extends BaseEntityImportService<DevicePr
         return deviceProfile;
     }
 
+    /** 保存设备 Profile，并在最终导入轮次写入计算字段。 */
     @Override
     protected DeviceProfile saveOrUpdate(EntitiesImportCtx ctx, DeviceProfile deviceProfile, EntityExportData<DeviceProfile> exportData, IdProvider idProvider) {
         DeviceProfile saved = deviceProfileService.saveDeviceProfile(deviceProfile);
@@ -70,6 +80,7 @@ public class DeviceProfileImportService extends BaseEntityImportService<DevicePr
         return new DeviceProfile(deviceProfile);
     }
 
+    /** 比较时忽略固件/软件 ID，避免资源未纳入版本控制时产生虚假差异。 */
     @Override
     protected void cleanupForComparison(DeviceProfile deviceProfile) {
         super.cleanupForComparison(deviceProfile);

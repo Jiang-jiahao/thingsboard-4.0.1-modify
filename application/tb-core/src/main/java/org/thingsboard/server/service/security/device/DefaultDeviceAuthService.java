@@ -25,6 +25,13 @@ import org.thingsboard.server.dao.device.DeviceCredentialsService;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+/**
+ * Transport API 使用的设备凭证校验服务。
+ * <p>
+ * Core 作为权威源：按凭证 ID 查库，匹配 ACCESS_TOKEN / X509 / LwM2M 类型后返回设备 ID。
+ *
+ * @see DeviceAuthService
+ */
 @Service
 @TbCoreComponent
 @Slf4j
@@ -39,6 +46,9 @@ public class DefaultDeviceAuthService implements DeviceAuthService {
         this.deviceCredentialsService = deviceCredentialsService;
     }
 
+    /**
+     * 按凭证过滤器查找并校验类型，成功则返回设备 ID。
+     */
     @Override
     public DeviceAuthResult process(DeviceCredentialsFilter credentialsFilter) {
         log.trace("Lookup device credentials using filter {}", credentialsFilter);

@@ -32,6 +32,12 @@ import java.util.Set;
 
 import static org.thingsboard.server.service.sync.ie.importing.impl.RuleChainImportService.PROCESSED_CONFIG_FIELDS_PATTERN;
 
+/**
+ * 针对 {@link RuleChain} 的导出服务，继承 {@link BaseEntityExportService}。
+ * <p>
+ * 导出完整规则链元数据：节点 ID 换成 externalId，递归替换节点配置中的实体 UUID，
+ * 规则链连接的目标链也替换为 externalId。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -39,6 +45,9 @@ public class RuleChainExportService extends BaseEntityExportService<RuleChainId,
 
     private final RuleChainService ruleChainService;
 
+    /**
+     * 导出节点与连接：节点 ID 及配置内 UUID、目标规则链均替换为 externalId。
+     */
     @Override
     protected void setRelatedEntities(EntitiesExportCtx<?> ctx, RuleChain ruleChain, RuleChainExportData exportData) {
         RuleChainMetaData metaData = ruleChainService.loadRuleChainMetaData(ctx.getTenantId(), ruleChain.getId());

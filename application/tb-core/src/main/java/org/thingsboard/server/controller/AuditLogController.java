@@ -53,6 +53,15 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_ORDER_D
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.USER_ID_PARAM_DESCRIPTION;
 
+/**
+ * 审计日志查询 REST。只读，不写日志。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径前缀 {@code /api/audit/logs}。
+ * 仅 TENANT_ADMIN，范围限当前租户。可按客户、用户、实体或全租户分页，并按时间 / 动作类型过滤。
+ * 查询走基类注入的 {@code auditLogService}。
+ *
+ * @see org.thingsboard.server.dao.audit.AuditLogService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -68,6 +77,9 @@ public class AuditLogController extends BaseController {
             "Note: entityType sort property is not defined in the AuditLog class, however, it can be used to sort audit logs by types of entities that were logged.";
 
 
+    /**
+     * 分页查指定客户相关实体及该客户用户操作的审计日志。
+     */
     @ApiOperation(value = "Get audit logs by customer id (getAuditLogsByCustomerId)",
             notes = "Returns a page of audit logs related to the targeted customer entities (devices, assets, etc.), " +
                     "and users actions (login, logout, etc.) that belong to this customer. " +
@@ -101,6 +113,9 @@ public class AuditLogController extends BaseController {
         return checkNotNull(auditLogService.findAuditLogsByTenantIdAndCustomerId(tenantId, new CustomerId(UUID.fromString(strCustomerId)), actionTypes, pageLink));
     }
 
+    /**
+     * 分页查指定用户的操作审计日志。
+     */
     @ApiOperation(value = "Get audit logs by user id (getAuditLogsByUserId)",
             notes = "Returns a page of audit logs related to the actions of targeted user. " +
                     "For example, RPC call to a particular device, or alarm acknowledgment for a specific device, etc. " +
@@ -134,6 +149,9 @@ public class AuditLogController extends BaseController {
         return checkNotNull(auditLogService.findAuditLogsByTenantIdAndUserId(tenantId, new UserId(UUID.fromString(strUserId)), actionTypes, pageLink));
     }
 
+    /**
+     * 分页查某实体全生命周期相关审计日志（创建、更新、分配、删除等）。
+     */
     @ApiOperation(value = "Get audit logs by entity id (getAuditLogsByEntityId)",
             notes = "Returns a page of audit logs related to the actions on the targeted entity. " +
                     "Basically, this API call is used to get the full lifecycle of some specific entity. " +
@@ -171,6 +189,9 @@ public class AuditLogController extends BaseController {
         return checkNotNull(auditLogService.findAuditLogsByTenantIdAndEntityId(tenantId, EntityIdFactory.getByTypeAndId(strEntityType, strEntityId), actionTypes, pageLink));
     }
 
+    /**
+     * 分页查当前租户下全部审计日志。
+     */
     @ApiOperation(value = "Get all audit logs (getAuditLogs)",
             notes = "Returns a page of audit logs related to all entities in the scope of the current user's Tenant. " +
                     PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)

@@ -42,6 +42,12 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * 针对 {@link RuleChain} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 按名称兜底匹配；把节点 ID/配置 UUID、规则链连接目标映射为内部 ID。
+ * 非最终轮次只保存链本身，最终轮次再写入元数据（节点图），避免关联实体尚未导入。
+ */
 @Slf4j
 @Service
 @TbCoreComponent
@@ -60,6 +66,9 @@ public class RuleChainImportService extends BaseEntityImportService<RuleChainId,
         ruleChain.setTenantId(tenantId);
     }
 
+    /**
+     * 基类匹配失败且允许按名称查找时，按类型+名称查找已有规则链。
+     */
     @Override
     protected RuleChain findExistingEntity(EntitiesImportCtx ctx, RuleChain ruleChain, IdProvider idProvider) {
         RuleChain existingRuleChain = super.findExistingEntity(ctx, ruleChain, idProvider);
@@ -69,6 +78,9 @@ public class RuleChainImportService extends BaseEntityImportService<RuleChainId,
         return existingRuleChain;
     }
 
+    /**
+     * 恢复已有节点内部 ID，递归替换节点配置与规则链连接中的实体 ID。
+     */
     @Override
     protected RuleChain prepare(EntitiesImportCtx ctx, RuleChain ruleChain, RuleChain old, RuleChainExportData exportData, IdProvider idProvider) {
         RuleChainMetaData metaData = exportData.getMetaData();
@@ -102,6 +114,9 @@ public class RuleChainImportService extends BaseEntityImportService<RuleChainId,
         return ruleChain;
     }
 
+    /**
+     * 先保存规则链；仅最终导入轮次才写入节点元数据。
+     */
     @Override
     protected RuleChain saveOrUpdate(EntitiesImportCtx ctx, RuleChain ruleChain, RuleChainExportData exportData, IdProvider idProvider) {
         ruleChain = ruleChainService.saveRuleChain(ruleChain);
@@ -114,6 +129,7 @@ public class RuleChainImportService extends BaseEntityImportService<RuleChainId,
         }
     }
 
+    /** 链本身相同仍比较元数据（节点图），节点变化也视为需要更新。 */
     @Override
     protected boolean compare(EntitiesImportCtx ctx, RuleChainExportData exportData, RuleChain prepared, RuleChain existing) {
         boolean different = super.compare(ctx, exportData, prepared, existing);

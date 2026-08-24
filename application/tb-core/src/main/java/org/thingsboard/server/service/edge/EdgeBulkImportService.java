@@ -35,6 +35,16 @@ import org.thingsboard.server.service.sync.ie.importing.csv.AbstractBulkImportSe
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * CSV Edge 批量导入实现。
+ * <p>
+ * 由导入相关 Controller 调用，映射名称、类型、路由密钥等字段后，取租户的 Edge 根规则链模板，
+ * 再委托 {@link TbEdgeService#save} 落库（含审计日志与 Edge 相关副作用）。
+ * 按名称查找已有 Edge 走 {@link EdgeService} DAO。
+ *
+ * @see AbstractBulkImportService
+ * @see TbEdgeService
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -43,6 +53,7 @@ public class EdgeBulkImportService extends AbstractBulkImportService<Edge> {
     private final TbEdgeService tbEdgeService;
     private final RuleChainService ruleChainService;
 
+    /** 将 CSV 列映射到 Edge 名称、类型、标签、描述、路由密钥与密钥。 */
     @Override
     protected void setEntityFields(Edge entity, Map<BulkImportColumnType, String> fields) {
         ObjectNode additionalInfo = getOrCreateAdditionalInfoObj(entity);
@@ -71,6 +82,7 @@ public class EdgeBulkImportService extends AbstractBulkImportService<Edge> {
         entity.setAdditionalInfo(additionalInfo);
     }
 
+    /** 绑定 Edge 根规则链模板后经 {@link TbEdgeService} 保存。 */
     @SneakyThrows
     @Override
     protected Edge saveEntity(SecurityUser user, Edge entity, Map<BulkImportColumnType, String> fields) {
@@ -78,18 +90,21 @@ public class EdgeBulkImportService extends AbstractBulkImportService<Edge> {
         return tbEdgeService.save(entity, edgeTemplateRootRuleChain, user);
     }
 
+    /** 按租户与名称查找 Edge，不存在则返回空对象供后续填充。 */
     @Override
     protected Edge findOrCreateEntity(TenantId tenantId, String name) {
         return Optional.ofNullable(edgeService.findEdgeByTenantIdAndName(tenantId, name))
                 .orElseGet(Edge::new);
     }
 
+    /** 将导入用户的租户与客户写到 Edge 上。 */
     @Override
     protected void setOwners(Edge entity, SecurityUser user) {
         entity.setTenantId(user.getTenantId());
         entity.setCustomerId(user.getCustomerId());
     }
 
+    /** 声明本导入器处理的实体类型为 Edge。 */
     @Override
     protected EntityType getEntityType() {
         return EntityType.EDGE;

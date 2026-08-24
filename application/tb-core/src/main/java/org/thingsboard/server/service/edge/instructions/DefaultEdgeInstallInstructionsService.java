@@ -26,6 +26,12 @@ import org.thingsboard.server.dao.util.DeviceConnectivityUtil;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.install.InstallScripts;
 
+/**
+ * {@link EdgeInstallInstructionsService} 的默认实现：读取 install 目录下的 Markdown 模板，
+ * 替换云端地址、路由密钥、RPC 端口与 SSL 开关后返回。仅在 {@code edges.enabled=true} 时生效。
+ *
+ * @see BaseEdgeInstallUpgradeInstructionsService
+ */
 @Service
 @Slf4j
 @ConditionalOnProperty(prefix = "edges", value = "enabled", havingValue = "true")
@@ -44,6 +50,7 @@ public class DefaultEdgeInstallInstructionsService extends BaseEdgeInstallUpgrad
         super(installScripts);
     }
 
+    /** 按 docker / ubuntu / centos 选择模板并填充该 Edge 的连接参数。 */
     @Override
     public EdgeInstructions getInstallInstructions(Edge edge, String installationMethod, HttpServletRequest request) {
         return switch (installationMethod.toLowerCase()) {

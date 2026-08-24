@@ -60,6 +60,11 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_PROFI
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_PROFILE_TEXT_SEARCH_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 租户配置（配额、限流、默认配置）管理 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。更新配置会立即重算受影响租户的 API 限额。
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -71,6 +76,9 @@ public class TenantProfileController extends BaseController {
 
     private final TbTenantProfileService tbTenantProfileService;
 
+    /**
+     * 按 ID 读取完整租户配置。
+     */
     @ApiOperation(value = "Get Tenant Profile (getTenantProfileById)",
             notes = "Fetch the Tenant Profile object based on the provided Tenant Profile Id. " + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
@@ -84,6 +92,9 @@ public class TenantProfileController extends BaseController {
         return checkTenantProfileId(tenantProfileId, Operation.READ);
     }
 
+    /**
+     * 按 ID 读取租户配置摘要（仅 id 与名称）。
+     */
     @ApiOperation(value = "Get Tenant Profile Info (getTenantProfileInfoById)",
             notes = "Fetch the Tenant Profile Info object based on the provided Tenant Profile Id. " + TENANT_PROFILE_INFO_DESCRIPTION + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
@@ -97,6 +108,9 @@ public class TenantProfileController extends BaseController {
         return checkNotNull(tenantProfileService.findTenantProfileInfoById(getTenantId(), tenantProfileId));
     }
 
+    /**
+     * 读取平台默认租户配置摘要。
+     */
     @ApiOperation(value = "Get default Tenant Profile Info (getDefaultTenantProfileInfo)",
             notes = "Fetch the default Tenant Profile Info object based. " + TENANT_PROFILE_INFO_DESCRIPTION + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
@@ -106,6 +120,9 @@ public class TenantProfileController extends BaseController {
         return checkNotNull(tenantProfileService.findDefaultTenantProfileInfo(getTenantId()));
     }
 
+    /**
+     * 创建或更新租户配置；更新会立即重算受影响租户的 API 限额。
+     */
     @ApiOperation(value = "Create Or update Tenant Profile (saveTenantProfile)",
             notes = "Create or update the Tenant Profile. When creating tenant profile, platform generates Tenant Profile Id as " + UUID_WIKI_LINK +
                     "The newly created Tenant Profile Id will be present in the response. " +
@@ -190,6 +207,9 @@ public class TenantProfileController extends BaseController {
         return tbTenantProfileService.save(getTenantId(), tenantProfile, oldProfile);
     }
 
+    /**
+     * 删除租户配置；仍被租户引用时会失败。
+     */
     @ApiOperation(value = "Delete Tenant Profile (deleteTenantProfile)",
             notes = "Deletes the tenant profile. Referencing non-existing tenant profile Id will cause an error. Referencing profile that is used by the tenants will cause an error. " + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
@@ -203,6 +223,9 @@ public class TenantProfileController extends BaseController {
         tbTenantProfileService.delete(getTenantId(), profile);
     }
 
+    /**
+     * 将指定租户配置设为平台默认。
+     */
     @ApiOperation(value = "Make tenant profile default (setDefaultTenantProfile)",
             notes = "Makes specified tenant profile to be default. Referencing non-existing tenant profile Id will cause an error. " + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
@@ -218,6 +241,9 @@ public class TenantProfileController extends BaseController {
         return tenantProfile;
     }
 
+    /**
+     * 分页查询租户配置列表。
+     */
     @ApiOperation(value = "Get Tenant Profiles (getTenantProfiles)", notes = "Returns a page of tenant profiles registered in the platform. " + PAGE_DATA_PARAMETERS + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/tenantProfiles", params = {"pageSize", "page"}, method = RequestMethod.GET)
@@ -237,6 +263,9 @@ public class TenantProfileController extends BaseController {
         return checkNotNull(tenantProfileService.findTenantProfiles(getTenantId(), pageLink));
     }
 
+    /**
+     * 分页查询租户配置摘要列表。
+     */
     @ApiOperation(value = "Get Tenant Profiles Info (getTenantProfileInfos)", notes = "Returns a page of tenant profile info objects registered in the platform. "
             + TENANT_PROFILE_INFO_DESCRIPTION + PAGE_DATA_PARAMETERS + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
@@ -257,6 +286,9 @@ public class TenantProfileController extends BaseController {
         return checkNotNull(tenantProfileService.findTenantProfileInfos(getTenantId(), pageLink));
     }
 
+    /**
+     * 按 ID 列表批量读取租户配置。
+     */
     @GetMapping(value = "/tenantProfiles", params = {"ids"})
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
     public List<TenantProfile> getTenantProfilesByIds(@Parameter(description = "Comma-separated list of tenant profile ids", array = @ArraySchema(schema = @Schema(type = "string")))

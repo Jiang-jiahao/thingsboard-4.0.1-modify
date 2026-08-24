@@ -47,6 +47,17 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_ORDER_D
 import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERTY_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 
+/**
+ * 队列统计实体 REST 入口。
+ * <p>
+ * <b>职责：</b>只读查询各服务采集的队列统计（分页、按 id、按 id 列表）。不提供写接口。
+ * <p>
+ * <b>URL：</b>{@code /api/queueStats}
+ * <p>
+ * <b>权限：</b>{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。
+ * <p>
+ * <b>下游：</b>{@link QueueStatsService}
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -55,6 +66,11 @@ public class QueueStatsController extends BaseController {
 
     private final QueueStatsService queueStatsService;
 
+    /**
+     * 分页查询当前租户的队列统计实体（可按文本过滤、按创建时间排序）。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。下游 {@link QueueStatsService#findByTenantId}。
+     */
     @ApiOperation(value = "Get Queue Stats entities (getTenantQueueStats)",
             notes = "Returns a page of queue stats objects that are designed to collect queue statistics for every service. " +
                     PAGE_DATA_PARAMETERS + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -74,6 +90,11 @@ public class QueueStatsController extends BaseController {
         return queueStatsService.findByTenantId(getTenantId(), pageLink);
     }
 
+    /**
+     * 按 id 查询单条队列统计。不存在则抛出异常。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。下游 {@link QueueStatsService#findQueueStatsById}。
+     */
     @ApiOperation(value = "Get Queue stats entity by id (getQueueStatsById)",
             notes = "Fetch the Queue stats object based on the provided Queue stats id. " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -85,6 +106,11 @@ public class QueueStatsController extends BaseController {
         return checkNotNull(queueStatsService.findQueueStatsById(getTenantId(), queueStatsId));
     }
 
+    /**
+     * 按 id 列表批量查询队列统计。
+     * <p>
+     * 权限：{@code SYS_ADMIN} 或 {@code TENANT_ADMIN}。下游 {@link QueueStatsService#findQueueStatsByIds}。
+     */
     @ApiOperation(value = "Get QueueStats By Ids (getQueueStatsByIds)",
             notes = "Fetch the Queue stats objects based on the provided ids. ")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")

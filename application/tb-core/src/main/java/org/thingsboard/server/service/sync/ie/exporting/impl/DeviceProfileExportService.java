@@ -25,10 +25,18 @@ import org.thingsboard.server.service.sync.vc.data.EntitiesExportCtx;
 
 import java.util.Set;
 
+/**
+ * 针对 {@link DeviceProfile} 的导出服务，继承 {@link BaseEntityExportService}。
+ * <p>
+ * 将默认仪表板、默认规则链、默认 Edge 规则链替换为 externalId。
+ */
 @Service
 @TbCoreComponent
 public class DeviceProfileExportService extends BaseEntityExportService<DeviceProfileId, DeviceProfile, EntityExportData<DeviceProfile>> {
 
+    /**
+     * 将默认仪表板与规则链 ID 替换为 externalId。
+     */
     @Override
     protected void setRelatedEntities(EntitiesExportCtx<?> ctx, DeviceProfile deviceProfile, EntityExportData<DeviceProfile> exportData) {
         deviceProfile.setDefaultDashboardId(getExternalIdOrElseInternal(ctx, deviceProfile.getDefaultDashboardId()));

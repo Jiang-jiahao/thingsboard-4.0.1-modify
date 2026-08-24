@@ -32,6 +32,14 @@ import org.thingsboard.server.service.sync.vc.EntitiesVersionControlService;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * {@link TbTenantService} 的默认实现。
+ * <p>
+ * 由 TenantController 调用，委托 {@link TenantService} 落库；新建时安装默认规则链/Edge 规则链/仪表板，
+ * 刷新租户配置缓存，并按配置同步队列。删除时清缓存并删除版本控制设置。
+ *
+ * @see TbTenantService
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -44,6 +52,7 @@ public class DefaultTbTenantService extends AbstractTbEntityService implements T
     private final TenantProfileService tenantProfileService;
     private final EntitiesVersionControlService versionControlService;
 
+    /** 保存租户；新建时安装默认规则链与仪表板，并同步队列。 */
     @Override
     public Tenant save(Tenant tenant) throws Exception {
         boolean created = tenant.getId() == null;
@@ -64,6 +73,7 @@ public class DefaultTbTenantService extends AbstractTbEntityService implements T
         return savedTenant;
     }
 
+    /** 删除租户、配置缓存与版本控制设置。 */
     @Override
     public void delete(Tenant tenant) throws Exception {
         TenantId tenantId = tenant.getId();

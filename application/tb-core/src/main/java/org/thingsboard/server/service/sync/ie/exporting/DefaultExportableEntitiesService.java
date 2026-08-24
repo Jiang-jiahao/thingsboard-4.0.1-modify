@@ -38,6 +38,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * {@link ExportableEntitiesService} 默认实现。按 {@link EntityType} 路由到对应 {@link Dao}，
+ * 并校验实体属于当前租户后才返回。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor

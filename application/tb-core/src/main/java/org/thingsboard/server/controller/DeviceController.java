@@ -120,6 +120,20 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CU
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 import static org.thingsboard.server.controller.EdgeController.EDGE_ID;
 
+/**
+ * 设备 CRUD、凭据、客户/租户/Edge 分配、认领（claim）与 CSV 批量导入 REST。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径 {@code /api/device*}、{@code /api/tenant/devices}、
+ * {@code /api/customer/{id}/device*}、{@code /api/edge/{id}/device*}。
+ * TENANT_ADMIN 可写；CUSTOMER_USER 可读已分配设备，并可 claim。
+ * 写路径走 {@link TbDeviceService}；CSV 导入走 {@link DeviceBulkImportService}。
+ * <p>
+ * 特殊副作用：{@code claim} 用密钥把未分配设备归到当前客户；{@code reclaim} 解绑以便再次认领；
+ * {@code assignDeviceToTenant} 把设备迁到另一租户；Edge 分配异步下发。
+ *
+ * @see TbDeviceService
+ * @see DeviceBulkImportService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -133,6 +147,9 @@ public class DeviceController extends BaseController {
 
     private final TbDeviceService tbDeviceService;
 
+    /**
+     * 按 ID 取设备。租户管理员校验同租户；客户用户校验已分配给该客户。
+     */
     @ApiOperation(value = "Get Device (getDeviceById)",
             notes = "Fetch the Device object based on the provided Device Id. " +
                     "If the user has the authority of 'TENANT_ADMIN', the server checks that the device is owned by the same tenant. " +
@@ -148,6 +165,9 @@ public class DeviceController extends BaseController {
         return checkDeviceId(deviceId, Operation.READ);
     }
 
+    /**
+     * 按 ID 取设备 Info（含客户标题、active 等展示字段）。
+     */
     @ApiOperation(value = "Get Device Info (getDeviceInfoById)",
             notes = "Fetch the Device Info object based on the provided Device Id. " +
                     "If the user has the authority of 'Tenant Administrator', the server checks that the device is owned by the same tenant. " +
@@ -163,6 +183,9 @@ public class DeviceController extends BaseController {
         return checkDeviceInfoId(deviceId, Operation.READ);
     }
 
+    /**
+     * 创建或更新设备。未提供 accessToken 时平台会生成凭据。租户内名称唯一。
+     */
     @ApiOperation(value = "Create Or Update Device (saveDevice)",
             notes = "Create or update the Device. When creating device, platform generates Device Id as " + UUID_WIKI_LINK +
                     "Device credentials are also generated if not provided in the 'accessToken' request parameter. " +
@@ -188,6 +211,9 @@ public class DeviceController extends BaseController {
         return tbDeviceService.save(device, accessToken, getCurrentUser());
     }
 
+    /**
+     * 创建设备并同时指定凭据（Access Token / MQTT / X.509 / LwM2M 等）。
+     */
     @ApiOperation(value = "Create Device (saveDevice) with credentials ",
             notes = "Create or update the Device. When creating device, platform generates Device Id as " + UUID_WIKI_LINK +
                     "Requires to provide the Device Credentials object as well as an existing device profile ID or use \"default\".\n" +
@@ -218,6 +244,9 @@ public class DeviceController extends BaseController {
         return tbDeviceService.saveDeviceWithCredentials(device, credentials, getCurrentUser());
     }
 
+    /**
+     * 删除设备。
+     */
     @ApiOperation(value = "Delete device (deleteDevice)",
             notes = "Deletes the device, it's credentials and all the relations (from and to the device). Referencing non-existing device Id will cause an error." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -231,6 +260,9 @@ public class DeviceController extends BaseController {
         tbDeviceService.delete(device, getCurrentUser());
     }
 
+    /**
+     * 把设备分配给指定客户。
+     */
     @ApiOperation(value = "Assign device to customer (assignDeviceToCustomer)",
             notes = "Creates assignment of the device to customer. Customer will be able to query device afterwards." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -249,6 +281,9 @@ public class DeviceController extends BaseController {
         return tbDeviceService.assignDeviceToCustomer(getTenantId(), deviceId, customer, getCurrentUser());
     }
 
+    /**
+     * 取消设备与客户的分配。
+     */
     @ApiOperation(value = "Unassign device from customer (unassignDeviceFromCustomer)",
             notes = "Clears assignment of the device to customer. Customer will not be able to query device afterwards." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -268,6 +303,9 @@ public class DeviceController extends BaseController {
         return tbDeviceService.unassignDeviceFromCustomer(device, customer, getCurrentUser());
     }
 
+    /**
+     * 把设备分给 public 客户，使其公开可见。
+     */
     @ApiOperation(value = "Make device publicly available (assignDeviceToPublicCustomer)",
             notes = "Device will be available for non-authorized (not logged-in) users. " +
                     "This is useful to create dashboards that you plan to share/embed on a publicly available website. " +
@@ -283,6 +321,9 @@ public class DeviceController extends BaseController {
         return tbDeviceService.assignDeviceToPublicCustomer(getTenantId(), deviceId, getCurrentUser());
     }
 
+    /**
+     * 按设备 ID 取当前凭据（需 READ_CREDENTIALS）。
+     */
     @ApiOperation(value = "Get Device Credentials (getDeviceCredentialsByDeviceId)",
             notes = "If during device creation there wasn't specified any credentials, platform generates random 'ACCESS_TOKEN' credentials." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -296,6 +337,9 @@ public class DeviceController extends BaseController {
         return tbDeviceService.getDeviceCredentialsByDeviceId(device, getCurrentUser());
     }
 
+    /**
+     * 更新设备凭据（Access Token / MQTT / X.509 / LwM2M 等），会使旧凭据立即失效。
+     */
     @ApiOperation(value = "Update device credentials (updateDeviceCredentials)",
             notes = "During device creation, platform generates random 'ACCESS_TOKEN' credentials. \" +\n" +
                     "Use this method to update the device credentials. First use 'getDeviceCredentialsByDeviceId' to get the credentials id and value.\n" +
@@ -328,6 +372,9 @@ public class DeviceController extends BaseController {
         return tbDeviceService.updateDeviceCredentials(device, deviceCredentials, getCurrentUser());
     }
 
+    /**
+     * 分页列出当前租户的设备，可按类型过滤。
+     */
     @ApiOperation(value = "Get Tenant Devices (getTenantDevices)",
             notes = "Returns a page of devices owned by tenant. " +
                     PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
@@ -356,6 +403,9 @@ public class DeviceController extends BaseController {
         }
     }
 
+    /**
+     * 分页列出当前租户的设备 Info。
+     */
     @ApiOperation(value = "Get Tenant Device Infos (getTenantDeviceInfos)",
             notes = "Returns a page of devices info objects owned by tenant. " +
                     PAGE_DATA_PARAMETERS + DEVICE_INFO_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
@@ -393,6 +443,9 @@ public class DeviceController extends BaseController {
         return checkNotNull(deviceService.findDeviceInfosByFilter(filter.build(), pageLink));
     }
 
+    /**
+     * 按名称精确查找当前租户下的设备。
+     */
     @ApiOperation(value = "Get Tenant Device (getTenantDevice)",
             notes = "Requested device must be owned by tenant that the user belongs to. " +
                     "Device name is an unique property of device. So it can be used to identify the device." + TENANT_AUTHORITY_PARAGRAPH)
@@ -406,6 +459,9 @@ public class DeviceController extends BaseController {
         return checkNotNull(deviceService.findDeviceByTenantIdAndName(tenantId, deviceName));
     }
 
+    /**
+     * 分页列出指定客户下的设备。
+     */
     @ApiOperation(value = "Get Customer Devices (getCustomerDevices)",
             notes = "Returns a page of devices objects assigned to customer. " +
                     PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -439,6 +495,9 @@ public class DeviceController extends BaseController {
         }
     }
 
+    /**
+     * 分页列出指定客户下的设备 Info。
+     */
     @ApiOperation(value = "Get Customer Device Infos (getCustomerDeviceInfos)",
             notes = "Returns a page of devices info objects assigned to customer. " +
                     PAGE_DATA_PARAMETERS + DEVICE_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -481,6 +540,9 @@ public class DeviceController extends BaseController {
         return checkNotNull(deviceService.findDeviceInfosByFilter(filter.build(), pageLink));
     }
 
+    /**
+     * 按一组设备 ID 批量查询（当前用户可见范围内）。
+     */
     @ApiOperation(value = "Get Devices By Ids (getDevicesByIds)",
             notes = "Requested devices must be owned by tenant or assigned to customer which user is performing the request. " + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -506,6 +568,9 @@ public class DeviceController extends BaseController {
         return checkNotNull(devices.get());
     }
 
+    /**
+     * 按关系查询找出与某实体关联的设备。
+     */
     @ApiOperation(value = "Find related devices (findByQuery)",
             notes = "Returns all devices that are related to the specific entity. " +
                     "The entity id, relation type, device types, depth of the search, and other query parameters defined using complex 'DeviceSearchQuery' object. " +
@@ -532,6 +597,9 @@ public class DeviceController extends BaseController {
         return devices;
     }
 
+    /**
+     * 已废弃：列出租户内设备类型。请改用设备档案的 {@code getDeviceProfileNames}。
+     */
     @ApiOperation(value = "Get Device Types (getDeviceTypes)",
             notes = "Deprecated. See 'getDeviceProfileNames' API from Device Profile Controller instead." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -545,6 +613,9 @@ public class DeviceController extends BaseController {
         return checkNotNull(deviceTypes.get());
     }
 
+    /**
+     * 客户用户认领设备：校验 CLAIM_DEVICES 后按密钥把设备分配给当前客户。
+     */
     @ApiOperation(value = "Claim device (claimDevice)",
             notes = "Claiming makes it possible to assign a device to the specific customer using device/server side claiming data (in the form of secret key)." +
                     "To make this happen you have to provide unique device name and optional claiming data (it is needed only for device-side claiming)." +
@@ -598,6 +669,9 @@ public class DeviceController extends BaseController {
         return deferredResult;
     }
 
+    /**
+     * 解除认领：设备从客户解绑，可再次被认领。
+     */
     @ApiOperation(value = "Reclaim device (reClaimDevice)",
             notes = "Reclaiming means the device will be unassigned from the customer and the device will be available for claiming again."
                     + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -639,6 +713,9 @@ public class DeviceController extends BaseController {
         return DataConstants.DEFAULT_SECRET_KEY;
     }
 
+    /**
+     * 把设备迁到另一租户（需 ASSIGN_TO_TENANT）。目标租户须存在。
+     */
     @ApiOperation(value = "Assign device to tenant (assignDeviceToTenant)",
             notes = "Creates assignment of the device to tenant. Thereafter tenant will be able to reassign the device to a customer." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -661,6 +738,9 @@ public class DeviceController extends BaseController {
         return tbDeviceService.assignDeviceToTenant(device, newTenant, getCurrentUser());
     }
 
+    /**
+     * 把设备分配给 Edge，并异步下发到远端。
+     */
     @ApiOperation(value = "Assign device to edge (assignDeviceToEdge)",
             notes = "Creates assignment of an existing device to an instance of The Edge. " +
                     EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
@@ -685,6 +765,9 @@ public class DeviceController extends BaseController {
         return tbDeviceService.assignDeviceToEdge(getTenantId(), deviceId, edge, getCurrentUser());
     }
 
+    /**
+     * 取消设备与 Edge 的分配，并异步通知远端删除本地副本。
+     */
     @ApiOperation(value = "Unassign device from edge (unassignDeviceFromEdge)",
             notes = "Clears assignment of the device to the edge. " +
                     EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
@@ -708,6 +791,9 @@ public class DeviceController extends BaseController {
         return tbDeviceService.unassignDeviceFromEdge(device, edge, getCurrentUser());
     }
 
+    /**
+     * 分页列出已分配给指定 Edge 的设备。
+     */
     @ApiOperation(value = "Get devices assigned to edge (getEdgeDevices)",
             notes = "Returns a page of devices assigned to edge. " +
                     PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -754,6 +840,9 @@ public class DeviceController extends BaseController {
         return checkNotNull(deviceService.findDeviceInfosByFilter(filter.build(), pageLink));
     }
 
+    /**
+     * 统计指定设备档案下、尚未单独设置设备级 OTA 包的设备数（用于预估 OTA 影响面）。
+     */
     @ApiOperation(value = "Count devices by device profile  (countByDeviceProfileAndEmptyOtaPackage)",
             notes = "The platform gives an ability to load OTA (over-the-air) packages to devices. " +
                     "It can be done in two different ways: device scope or device profile scope." +
@@ -775,6 +864,9 @@ public class DeviceController extends BaseController {
                 OtaPackageType.valueOf(otaPackageType));
     }
 
+    /**
+     * 用 CSV 批量导入设备。仅 TENANT_ADMIN。
+     */
     @ApiOperation(value = "Import the bulk of devices (processDevicesBulkImport)",
             notes = "There's an ability to import the bulk of devices using the only .csv file." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")

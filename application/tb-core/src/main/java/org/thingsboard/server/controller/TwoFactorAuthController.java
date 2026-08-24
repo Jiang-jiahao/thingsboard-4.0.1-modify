@@ -52,6 +52,12 @@ import java.util.stream.Collectors;
 
 import static org.thingsboard.server.controller.ControllerConstants.NEW_LINE;
 
+/**
+ * 登录过程中的双因素认证 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。调用方须持有
+ * {@code PRE_VERIFICATION_TOKEN}（用户名密码通过后、2FA 完成前签发）。
+ */
 @RestController
 @RequestMapping("/api/auth/2fa")
 @TbCoreComponent
@@ -65,6 +71,9 @@ public class TwoFactorAuthController extends BaseController {
     private final UserService userService;
 
 
+    /**
+     * 按指定 2FA 提供方发送验证码（受平台限流约束）。
+     */
     @ApiOperation(value = "Request 2FA verification code (requestTwoFaVerificationCode)",
             notes = "Request 2FA verification code." + NEW_LINE +
                     "To make a request to this endpoint, you need an access token with the scope of PRE_VERIFICATION_TOKEN, " +
@@ -79,6 +88,9 @@ public class TwoFactorAuthController extends BaseController {
         twoFactorAuthService.prepareVerificationCode(user, providerType, true);
     }
 
+    /**
+     * 校验验证码；成功则签发正式 JWT，失败记登录审计。
+     */
     @ApiOperation(value = "Check 2FA verification code (checkTwoFaVerificationCode)",
             notes = "Checks 2FA verification code, and if it is correct the method returns a regular access and refresh token pair." + NEW_LINE +
                     "The API method is rate limited (using rate limit config from TwoFactorAuthSettings), and also will block a user " +
@@ -103,6 +115,9 @@ public class TwoFactorAuthController extends BaseController {
     }
 
 
+    /**
+     * 返回当前用户已配置且可用的 2FA 提供方列表（联系方式脱敏）。
+     */
     @ApiOperation(value = "Get available 2FA providers (getAvailableTwoFaProviders)", notes =
             "Get the list of 2FA provider infos available for user to use. Example:\n" +
                     "```\n[\n" +

@@ -30,6 +30,13 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
+/**
+ * {@link TbDeviceProfileService} 的默认实现。
+ * <p>
+ * 由 DeviceProfileController 调用，委托 {@link DeviceProfileService} 落库；写审计日志，保存时 autoCommit。
+ *
+ * @see TbDeviceProfileService
+ */
 @Service
 @TbCoreComponent
 @AllArgsConstructor
@@ -38,6 +45,7 @@ public class DefaultTbDeviceProfileService extends AbstractTbEntityService imple
 
     private final DeviceProfileService deviceProfileService;
 
+    /** 保存设备配置，写审计并尝试 autoCommit。 */
     @Override
     public DeviceProfile save(DeviceProfile deviceProfile, SecurityUser user) throws Exception {
         ActionType actionType = deviceProfile.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -55,6 +63,7 @@ public class DefaultTbDeviceProfileService extends AbstractTbEntityService imple
         }
     }
 
+    /** 删除设备配置并写 DELETED 审计。 */
     @Override
     public void delete(DeviceProfile deviceProfile, User user) {
         ActionType actionType = ActionType.DELETED;
@@ -72,6 +81,7 @@ public class DefaultTbDeviceProfileService extends AbstractTbEntityService imple
         }
     }
 
+    /** 设为默认设备配置，并对新旧配置写 UPDATED 审计。 */
     @Override
     public DeviceProfile setDefaultDeviceProfile(DeviceProfile deviceProfile, DeviceProfile previousDefaultDeviceProfile, User user) throws ThingsboardException {
         TenantId tenantId = deviceProfile.getTenantId();

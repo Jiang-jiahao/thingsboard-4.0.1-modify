@@ -211,6 +211,19 @@ import static org.thingsboard.server.controller.ControllerConstants.HOME_DASHBOA
 import static org.thingsboard.server.controller.UserController.YOU_DON_T_HAVE_PERMISSION_TO_PERFORM_THIS_OPERATION;
 import static org.thingsboard.server.dao.service.Validator.validateId;
 
+/**
+ * tb-core REST Controller 的公共基类：当前用户、租户、实体权限校验、分页参数、异常映射。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。本身不暴露业务 URL；子类经 {@link #getCurrentUser()}
+ * 取登录用户，经 {@code checkXxxId} / {@link #checkEntityId} 做存在性 + ACL，
+ * 再调用各自的 {@code TbXxxService}。
+ * <p>
+ * 权限判定委托 {@link AccessControlService}（按 {@link Resource} + {@link Operation}）。
+ * DAO 服务通过字段注入，供校验方法和少数直接查询复用。
+ *
+ * @see AccessControlService
+ * @see org.thingsboard.server.service.security.model.SecurityUser
+ */
 @TbCoreComponent
 public abstract class BaseController {
 
@@ -226,6 +239,7 @@ public abstract class BaseController {
     @Autowired
     private ThingsboardErrorResponseHandler errorResponseHandler;
 
+    /** ACL 入口：按 Resource + Operation 校验当前用户能否操作某实体。 */
     @Autowired
     protected AccessControlService accessControlService;
 
@@ -381,6 +395,9 @@ public abstract class BaseController {
     @Getter
     protected boolean edgesEnabled;
 
+    /**
+     * 未声明的异常统一转成 {@link ThingsboardException} 再写 HTTP 错误响应。
+     */
     @ExceptionHandler(Exception.class)
     public void handleControllerException(Exception e, HttpServletResponse response) {
         ThingsboardException thingsboardException = handleException(e);
@@ -393,6 +410,9 @@ public abstract class BaseController {
         errorResponseHandler.handle(e, response);
     }
 
+    /**
+     * 直接把 {@link ThingsboardException} 写成 HTTP 错误响应。
+     */
     @ExceptionHandler(ThingsboardException.class)
     public void handleThingsboardException(ThingsboardException ex, HttpServletResponse response) {
         errorResponseHandler.handle(ex, response);
@@ -452,8 +472,8 @@ public abstract class BaseController {
     }
 
     /**
-     * Handles validation error for controller method arguments annotated with @{@link jakarta.validation.Valid}
-     * */
+     * 处理 {@code @Valid} 参数校验失败，拼错误信息后按 400 返回。
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public void handleValidationError(MethodArgumentNotValidException validationError, HttpServletResponse response) {
         List<ConstraintViolation<Object>> constraintsViolations = validationError.getFieldErrors().stream()
@@ -472,6 +492,7 @@ public abstract class BaseController {
         handleControllerException(thingsboardException, response);
     }
 
+    /** 引用为 null 则抛 ITEM_NOT_FOUND。 */
     <T> T checkNotNull(T reference) throws ThingsboardException {
         return checkNotNull(reference, "Requested item wasn't found!");
     }
@@ -495,6 +516,7 @@ public abstract class BaseController {
         }
     }
 
+    /** 路径/查询参数为空则抛 BAD_REQUEST。 */
     void checkParameter(String name, String param) throws ThingsboardException {
         if (StringUtils.isEmpty(param)) {
             throw new ThingsboardException("Parameter '" + name + "' can't be empty!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
@@ -511,6 +533,7 @@ public abstract class BaseController {
         }
     }
 
+    /** 把字符串转成枚举；非法值抛 BAD_REQUEST。 */
     protected <T> T checkEnumParameter(String name, String param, Function<String, T> valueOf) throws ThingsboardException {
         try {
             return valueOf.apply(param.toUpperCase());
@@ -553,6 +576,9 @@ public abstract class BaseController {
         return new TimePageLink(pageLink, startTime, endTime);
     }
 
+    /**
+     * 从 SecurityContext 取当前登录用户；未认证则抛 AUTHENTICATION。
+     */
     protected SecurityUser getCurrentUser() throws ThingsboardException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof SecurityUser) {
@@ -562,6 +588,7 @@ public abstract class BaseController {
         }
     }
 
+    /** 加载租户并校验当前用户对该租户有指定操作权限。 */
     Tenant checkTenantId(TenantId tenantId, Operation operation) throws ThingsboardException {
         return checkEntityId(tenantId, (t, i) -> tenantService.findTenantById(tenantId), operation);
     }
@@ -570,6 +597,7 @@ public abstract class BaseController {
         return checkEntityId(tenantId, (t, i) -> tenantService.findTenantInfoById(tenantId), operation);
     }
 
+    /** 加载租户档案；权限按 TENANT_PROFILE 资源校验（不按单条实体）。 */
     TenantProfile checkTenantProfileId(TenantProfileId tenantProfileId, Operation operation) throws ThingsboardException {
         try {
             validateId(tenantProfileId, id -> "Incorrect tenantProfileId " + id);
@@ -582,18 +610,24 @@ public abstract class BaseController {
         }
     }
 
+    /** 当前登录用户所属租户 ID。 */
     protected TenantId getTenantId() throws ThingsboardException {
         return getCurrentUser().getTenantId();
     }
 
+    /** 加载客户并校验权限。 */
     Customer checkCustomerId(CustomerId customerId, Operation operation) throws ThingsboardException {
         return checkEntityId(customerId, customerService::findCustomerById, operation);
     }
 
+    /** 加载用户并校验权限。 */
     User checkUserId(UserId userId, Operation operation) throws ThingsboardException {
         return checkEntityId(userId, userService::findUserById, operation);
     }
 
+    /**
+     * 保存前权限：无 ID 走 CREATE，有 ID 走 WRITE（先加载实体再 ACL）。
+     */
     protected <I extends EntityId, T extends HasTenantId> void checkEntity(I entityId, T entity, Resource resource) throws ThingsboardException {
         if (entityId == null) {
             accessControlService.checkPermission(getCurrentUser(), resource, Operation.CREATE, null, entity);
@@ -602,6 +636,9 @@ public abstract class BaseController {
         }
     }
 
+    /**
+     * 按实体类型分发到对应 {@code checkXxxId}，完成存在性与 ACL。
+     */
     protected void checkEntityId(EntityId entityId, Operation operation) throws ThingsboardException {
         try {
             if (entityId == null) {
@@ -689,6 +726,9 @@ public abstract class BaseController {
         }
     }
 
+    /**
+     * 用 findingFunction 按当前租户加载实体，再交给 {@link #checkEntity(SecurityUser, HasId, Operation)}。
+     */
     protected <E extends HasId<I> & HasTenantId, I extends EntityId> E checkEntityId(I entityId, ThrowingBiFunction<TenantId, I, E> findingFunction, Operation operation) throws ThingsboardException {
         try {
             validateId((UUIDBased) entityId, "Invalid entity id");
@@ -701,24 +741,31 @@ public abstract class BaseController {
         }
     }
 
+    /**
+     * 对已加载实体做 ACL：{@link AccessControlService#checkPermission}。
+     */
     protected <E extends HasId<I> & HasTenantId, I extends EntityId> E checkEntity(SecurityUser user, E entity, Operation operation) throws ThingsboardException {
         checkNotNull(entity, "Entity not found");
         accessControlService.checkPermission(user, Resource.of(entity.getId().getEntityType()), operation, entity.getId(), entity);
         return entity;
     }
 
+    /** 加载设备并校验权限。 */
     Device checkDeviceId(DeviceId deviceId, Operation operation) throws ThingsboardException {
         return checkEntityId(deviceId, deviceService::findDeviceById, operation);
     }
 
+    /** 加载设备 Info 并校验权限。 */
     DeviceInfo checkDeviceInfoId(DeviceId deviceId, Operation operation) throws ThingsboardException {
         return checkEntityId(deviceId, deviceService::findDeviceInfoById, operation);
     }
 
+    /** 加载设备档案并校验权限。 */
     DeviceProfile checkDeviceProfileId(DeviceProfileId deviceProfileId, Operation operation) throws ThingsboardException {
         return checkEntityId(deviceProfileId, deviceProfileService::findDeviceProfileById, operation);
     }
 
+    /** 加载实体视图并校验权限。 */
     protected EntityView checkEntityViewId(EntityViewId entityViewId, Operation operation) throws ThingsboardException {
         return checkEntityId(entityViewId, entityViewService::findEntityViewById, operation);
     }
@@ -727,26 +774,34 @@ public abstract class BaseController {
         return checkEntityId(entityViewId, entityViewService::findEntityViewInfoById, operation);
     }
 
+    /** 加载资产并校验权限。 */
     Asset checkAssetId(AssetId assetId, Operation operation) throws ThingsboardException {
         return checkEntityId(assetId, assetService::findAssetById, operation);
     }
 
+    /** 加载资产 Info 并校验权限。 */
     AssetInfo checkAssetInfoId(AssetId assetId, Operation operation) throws ThingsboardException {
         return checkEntityId(assetId, assetService::findAssetInfoById, operation);
     }
 
+    /** 加载资产档案并校验权限。 */
     AssetProfile checkAssetProfileId(AssetProfileId assetProfileId, Operation operation) throws ThingsboardException {
         return checkEntityId(assetProfileId, assetProfileService::findAssetProfileById, operation);
     }
 
+    /** 加载告警并校验权限（originator 归属）。 */
     Alarm checkAlarmId(AlarmId alarmId, Operation operation) throws ThingsboardException {
         return checkEntityId(alarmId, alarmService::findAlarmById, operation);
     }
 
+    /** 加载告警 Info 并校验权限。 */
     AlarmInfo checkAlarmInfoId(AlarmId alarmId, Operation operation) throws ThingsboardException {
         return checkEntityId(alarmId, alarmService::findAlarmInfoById, operation);
     }
 
+    /**
+     * 加载告警评论，并校验其 alarmId 与路径上的告警一致。
+     */
     AlarmComment checkAlarmCommentId(AlarmCommentId alarmCommentId, AlarmId alarmId) throws ThingsboardException {
         try {
             validateId(alarmCommentId, id -> "Incorrect alarmCommentId " + id);
@@ -773,10 +828,12 @@ public abstract class BaseController {
         return checkEntityId(widgetTypeId, widgetTypeService::findWidgetTypeInfoById, operation);
     }
 
+    /** 加载仪表盘并校验权限。 */
     Dashboard checkDashboardId(DashboardId dashboardId, Operation operation) throws ThingsboardException {
         return checkEntityId(dashboardId, dashboardService::findDashboardById, operation);
     }
 
+    /** 加载 Edge 并校验权限。 */
     Edge checkEdgeId(EdgeId edgeId, Operation operation) throws ThingsboardException {
         return checkEntityId(edgeId, edgeService::findEdgeById, operation);
     }
@@ -785,10 +842,12 @@ public abstract class BaseController {
         return checkEntityId(edgeId, edgeService::findEdgeInfoById, operation);
     }
 
+    /** 加载仪表盘 Info 并校验权限。 */
     DashboardInfo checkDashboardInfoId(DashboardId dashboardId, Operation operation) throws ThingsboardException {
         return checkEntityId(dashboardId, dashboardService::findDashboardInfoById, operation);
     }
 
+    /** 按规则节点类名加载组件描述符。 */
     ComponentDescriptor checkComponentDescriptorByClazz(String clazz) throws ThingsboardException {
         try {
             log.debug("[{}] Lookup component descriptor", clazz);
@@ -816,10 +875,14 @@ public abstract class BaseController {
         }
     }
 
+    /** 加载规则链并校验权限。 */
     protected RuleChain checkRuleChain(RuleChainId ruleChainId, Operation operation) throws ThingsboardException {
         return checkEntityId(ruleChainId, ruleChainService::findRuleChainById, operation);
     }
 
+    /**
+     * 加载规则节点，权限按所属规则链校验。
+     */
     protected RuleNode checkRuleNode(RuleNodeId ruleNodeId, Operation operation) throws ThingsboardException {
         validateId(ruleNodeId, id -> "Incorrect ruleNodeId " + id);
         RuleNode ruleNode = ruleChainService.findRuleNodeById(getTenantId(), ruleNodeId);
@@ -848,6 +911,9 @@ public abstract class BaseController {
         return checkEntityId(rpcId, rpcService::findById, operation);
     }
 
+    /**
+     * 加载队列并校验权限。系统队列在租户开启独立规则引擎时对普通租户拒绝。
+     */
     protected Queue checkQueueId(QueueId queueId, Operation operation) throws ThingsboardException {
         Queue queue = checkEntityId(queueId, queueService::findQueueById, operation);
         TenantId tenantId = getTenantId();
@@ -901,6 +967,9 @@ public abstract class BaseController {
         }
     }
 
+    /**
+     * 保存实体并写审计：成功记 ADDED/UPDATED，失败也记一条带异常的日志。
+     */
     protected <E extends HasName & HasId<? extends EntityId>> E doSaveAndLog(EntityType entityType, E entity, BiFunction<TenantId, E, E> savingFunction) throws Exception {
         ActionType actionType = entity.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
         SecurityUser user = getCurrentUser();
@@ -914,6 +983,9 @@ public abstract class BaseController {
         }
     }
 
+    /**
+     * 删除实体并写审计（含失败路径）。
+     */
     protected <E extends HasName & HasId<I>, I extends EntityId> void doDeleteAndLog(EntityType entityType, E entity, BiConsumer<TenantId, I> deleteFunction) throws Exception {
         SecurityUser user = getCurrentUser();
         try {
@@ -925,6 +997,9 @@ public abstract class BaseController {
         }
     }
 
+    /**
+     * 补全用户 additionalInfo（凭据是否启用/已激活/上次登录），并校验其中仪表盘 ID。
+     */
     protected void checkUserInfo(User user) throws ThingsboardException {
         ObjectNode info;
         if (user.getAdditionalInfo() instanceof ObjectNode additionalInfo) {
@@ -941,6 +1016,9 @@ public abstract class BaseController {
         info.put("lastLoginTs", userCredentials.getLastLoginTs());
     }
 
+    /**
+     * 若 additionalInfo 里的仪表盘 ID 已不存在则从 JSON 中删掉该字段。
+     */
     protected void checkDashboardInfo(JsonNode additionalInfo) throws ThingsboardException {
         checkDashboardInfo(additionalInfo, DEFAULT_DASHBOARD);
         checkDashboardInfo(additionalInfo, HOME_DASHBOARD);
@@ -964,10 +1042,14 @@ public abstract class BaseController {
         }
     }
 
+    /** 加载计算字段并校验权限。 */
     protected CalculatedField checkCalculatedFieldId(CalculatedFieldId calculatedFieldId, Operation operation) throws ThingsboardException {
         return checkEntityId(calculatedFieldId, calculatedFieldService::findById, operation);
     }
 
+    /**
+     * 解析首页仪表盘：先用户 additionalInfo，客户用户再看客户，最后看租户。
+     */
     protected HomeDashboardInfo getHomeDashboardInfo(SecurityUser securityUser, JsonNode additionalInfo) {
         HomeDashboardInfo homeDashboardInfo = extractHomeDashboardInfoFromAdditionalInfo(additionalInfo);
         if (homeDashboardInfo == null) {
@@ -1008,6 +1090,7 @@ public abstract class BaseController {
         }
     }
 
+    /** 把 ListenableFuture 接到 Spring {@link DeferredResult}（用 MVC 默认异步超时）。 */
     protected <T> DeferredResult<T> wrapFuture(ListenableFuture<T> future) {
         DeferredResult<T> deferredResult = new DeferredResult<>(); // Timeout of spring.mvc.async.request-timeout is used
         DonAsynchron.withCallback(future, deferredResult::setResult, deferredResult::setErrorResult);
@@ -1066,6 +1149,9 @@ public abstract class BaseController {
                 .build();
     }
 
+    /**
+     * 校验一组 OAuth2 客户端 ID 均存在且当前用户可读。
+     */
     protected List<OAuth2ClientId> getOAuth2ClientIds(UUID[] ids) throws ThingsboardException {
         if (ids == null) {
             return Collections.emptyList();

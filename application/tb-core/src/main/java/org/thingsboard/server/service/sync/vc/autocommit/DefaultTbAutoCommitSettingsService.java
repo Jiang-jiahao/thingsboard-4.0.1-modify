@@ -23,6 +23,9 @@ import org.thingsboard.server.dao.settings.AdminSettingsService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.sync.vc.TbAbstractVersionControlSettingsService;
 
+/**
+ * {@link TbAutoCommitSettingsService} 实现，设置键为 {@code autoCommitSettings}。
+ */
 @Service
 @TbCoreComponent
 public class DefaultTbAutoCommitSettingsService extends TbAbstractVersionControlSettingsService<AutoCommitSettings> implements TbAutoCommitSettingsService {

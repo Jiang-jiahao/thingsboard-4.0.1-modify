@@ -47,6 +47,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+/**
+ * Housekeeper 主服务：消费清理任务队列，按类型分发给处理器做实体级联清理。
+ * <p>
+ * <b>职责：</b>拉取 Housekeeper 任务（删除时序、属性、告警、事件等），
+ * 超时控制、失败重投；超过最大尝试次数后触发 {@code TaskProcessingFailure} 通知。
+ * <p>
+ * <b>触发方式：</b>启动后订阅队列并持续消费（{@code @AfterStartUp}）。
+ * <p>
+ * <b>清理对象：</b>由 {@link HousekeeperTaskType} 决定，如实体遥测、属性、告警、事件等。
+ */
 @TbCoreComponent
 @Service
 @Slf4j
@@ -83,6 +93,7 @@ public class HousekeeperService {
         this.taskProcessors = taskProcessors.stream().collect(Collectors.toMap(HousekeeperTaskProcessor::getTaskType, p -> p));
     }
 
+    /** 启动后订阅并拉起 Housekeeper 队列消费者。 */
     @AfterStartUp(order = AfterStartUp.REGULAR_SERVICE)
     public void afterStartUp() {
         consumer.subscribe();

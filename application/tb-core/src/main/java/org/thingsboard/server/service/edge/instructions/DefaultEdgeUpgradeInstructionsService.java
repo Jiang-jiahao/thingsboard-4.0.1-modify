@@ -33,6 +33,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * {@link EdgeUpgradeInstructionsService} 的默认实现：按版本升级路径拼接 Docker/Linux 说明，
+ * 并依据服务器作用域属性 {@code edgeVersion} 判断是否可升级。仅在 {@code edges.enabled=true} 时生效。
+ *
+ * @see BaseEdgeInstallUpgradeInstructionsService
+ */
 @Service
 @Slf4j
 @ConditionalOnProperty(prefix = "edges", value = "enabled", havingValue = "true")
@@ -50,6 +56,7 @@ public class DefaultEdgeUpgradeInstructionsService extends BaseEdgeInstallUpgrad
         this.attributesService = attributesService;
     }
 
+    /** 按 docker / ubuntu / centos 拼接从当前 Edge 版本到云端版本的升级步骤。 */
     @Override
     public EdgeInstructions getUpgradeInstructions(String edgeVersion, String upgradeMethod) {
         String tbVersion = appVersion.replace("-SNAPSHOT", "");
@@ -62,6 +69,7 @@ public class DefaultEdgeUpgradeInstructionsService extends BaseEdgeInstallUpgrad
         };
     }
 
+    /** 将外部提供的版本升级路径写入内存表。 */
     @Override
     public void updateInstructionMap(Map<String, EdgeUpgradeInfo> map) {
         for (String key : map.keySet()) {
@@ -69,6 +77,7 @@ public class DefaultEdgeUpgradeInstructionsService extends BaseEdgeInstallUpgrad
         }
     }
 
+    /** 读取 Edge 版本属性，判断是否介于 3.6.0 与当前云端版本之间。 */
     @Override
     public boolean isUpgradeAvailable(TenantId tenantId, EdgeId edgeId) throws Exception {
         Optional<AttributeKvEntry> attributeKvEntryOpt = attributesService.find(tenantId, edgeId, AttributeScope.SERVER_SCOPE, DataConstants.EDGE_VERSION_ATTR_KEY).get();

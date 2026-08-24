@@ -156,6 +156,9 @@ public class DefaultTbLocalSubscriptionService implements TbLocalSubscriptionSer
      */
     private final ConcurrentReferenceHashMap<TenantId, Lock> locks = new ConcurrentReferenceHashMap<>(16, ConcurrentReferenceHashMap.ReferenceType.SOFT);
 
+    /**
+     * 启动订阅推送线程池与过期会话清理任务。
+     */
     @PostConstruct
     public void initExecutor() {
         // 创建工作窃取线程池处理订阅更新
@@ -169,6 +172,9 @@ public class DefaultTbLocalSubscriptionService implements TbLocalSubscriptionSer
         staleSessionCleanupExecutor.scheduleWithFixedDelay(this::cleanupStaleSessions, 60, 60, TimeUnit.SECONDS);
     }
 
+    /**
+     * 关闭订阅推送与清理线程。
+     */
     @PreDestroy
     public void shutdownExecutor() {
         if (subscriptionUpdateExecutor != null) {
@@ -344,6 +350,9 @@ public class DefaultTbLocalSubscriptionService implements TbLocalSubscriptionSer
         callback.onSuccess();
     }
 
+    /**
+     * 取消会话中指定订阅并推送移除事件。
+     */
     @Override
     public void cancelSubscription(TenantId tenantId, String sessionId, int subscriptionId) {
         log.debug("[{}][{}][{}] Going to remove subscription.", tenantId, sessionId, subscriptionId);
@@ -373,6 +382,9 @@ public class DefaultTbLocalSubscriptionService implements TbLocalSubscriptionSer
         }
     }
 
+    /**
+     * 取消会话全部订阅。
+     */
     @Override
     public void cancelAllSessionSubscriptions(TenantId tenantId, String sessionId) {
         log.debug("[{}][{}] Going to remove session subscriptions.", tenantId, sessionId);
@@ -398,12 +410,18 @@ public class DefaultTbLocalSubscriptionService implements TbLocalSubscriptionSer
         }
     }
 
+    /**
+     * 处理时序更新（协议版本）。
+     */
     @Override
     public void onTimeSeriesUpdate(TransportProtos.TbSubUpdateProto proto, TbCallback callback) {
         //TODO: optimize to avoid re-wrapping from TsValueListProto -> List<KV> -> Map<String, List<Object>>. Low priority.
         onTimeSeriesUpdate(new UUID(proto.getEntityIdMSB(), proto.getEntityIdLSB()), TbSubscriptionUtils.fromProto(proto), callback);
     }
 
+    /**
+     * 将时序更新分发给匹配的本机订阅。
+     */
     @Override
     public void onTimeSeriesUpdate(EntityId entityId, List<TsKvEntry> data, TbCallback callback) {
         onTimeSeriesUpdate(entityId.getId(), data, callback);
@@ -452,11 +470,17 @@ public class DefaultTbLocalSubscriptionService implements TbLocalSubscriptionSer
                 }, callback);
     }
 
+    /**
+     * 处理属性更新（协议版本）。
+     */
     @Override
     public void onAttributesUpdate(TransportProtos.TbSubUpdateProto proto, TbCallback callback) {
         onAttributesUpdate(new UUID(proto.getEntityIdMSB(), proto.getEntityIdLSB()), proto.getScope(), TbSubscriptionUtils.fromProto(proto), callback);
     }
 
+    /**
+     * 将属性更新分发给匹配 scope/键的本机订阅。
+     */
     @Override
     public void onAttributesUpdate(EntityId entityId, String scope, List<TsKvEntry> data, TbCallback callback) {
         onAttributesUpdate(entityId.getId(), scope, data, callback);
@@ -491,11 +515,17 @@ public class DefaultTbLocalSubscriptionService implements TbLocalSubscriptionSer
                 }, callback);
     }
 
+    /**
+     * 处理告警更新（协议版本）。
+     */
     @Override
     public void onAlarmUpdate(TransportProtos.TbAlarmSubUpdateProto proto, TbCallback callback) {
         onAlarmUpdate(new UUID(proto.getEntityIdMSB(), proto.getEntityIdLSB()), TbSubscriptionUtils.fromProto(proto), callback);
     }
 
+    /**
+     * 将告警更新分发给本机告警订阅。
+     */
     @Override
     public void onAlarmUpdate(EntityId entityId, AlarmInfo alarm, boolean deleted, TbCallback callback) {
         onAlarmUpdate(entityId.getId(), new AlarmSubscriptionUpdate(alarm, deleted), callback);
@@ -507,11 +537,17 @@ public class DefaultTbLocalSubscriptionService implements TbLocalSubscriptionSer
                 update, callback);
     }
 
+    /**
+     * 处理通知更新（协议版本）。
+     */
     @Override
     public void onNotificationUpdate(TransportProtos.NotificationsSubUpdateProto proto, TbCallback callback) {
         onNotificationUpdate(new UUID(proto.getEntityIdMSB(), proto.getEntityIdLSB()), TbSubscriptionUtils.fromProto(proto), callback);
     }
 
+    /**
+     * 将通知更新分发给本机通知订阅。
+     */
     @Override
     public void onNotificationUpdate(EntityId entityId, NotificationsSubscriptionUpdate update, TbCallback callback) {
         onNotificationUpdate(entityId.getId(), update, callback);
@@ -523,6 +559,9 @@ public class DefaultTbLocalSubscriptionService implements TbLocalSubscriptionSer
                 update, callback);
     }
 
+    /**
+     * 通知请求更新广播给租户下用户通知订阅。
+     */
     @Override
     @SuppressWarnings("unchecked")
     public void onNotificationRequestUpdate(TenantId tenantId, NotificationRequestUpdate update, TbCallback callback) {

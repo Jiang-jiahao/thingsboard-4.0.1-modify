@@ -30,6 +30,14 @@ import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 
+/**
+ * {@link TbEntityRelationService} 的默认实现。
+ * <p>
+ * 由 EntityRelationController 调用，委托 {@link RelationService} 落库；
+ * 对关系两端各记一次审计（经 {@code logEntityRelationAction}）。
+ *
+ * @see TbEntityRelationService
+ */
 @Service
 @TbCoreComponent
 @AllArgsConstructor
@@ -38,6 +46,7 @@ public class DefaultTbEntityRelationService extends AbstractTbEntityService impl
 
     private final RelationService relationService;
 
+    /** 保存实体关系并对两端写审计。 */
     @Override
     public EntityRelation save(TenantId tenantId, CustomerId customerId, EntityRelation relation, User user) throws ThingsboardException {
         ActionType actionType = ActionType.RELATION_ADD_OR_UPDATE;
@@ -53,6 +62,7 @@ public class DefaultTbEntityRelationService extends AbstractTbEntityService impl
         }
     }
 
+    /** 删除单条实体关系并对两端写审计。 */
     @Override
     public EntityRelation delete(TenantId tenantId, CustomerId customerId, EntityRelation relation, User user) throws ThingsboardException {
         ActionType actionType = ActionType.RELATION_DELETED;
@@ -70,6 +80,7 @@ public class DefaultTbEntityRelationService extends AbstractTbEntityService impl
         }
     }
 
+    /** 删除某实体上所有 COMMON 关系并写审计。 */
     @Override
     public void deleteCommonRelations(TenantId tenantId, CustomerId customerId, EntityId entityId, User user) throws ThingsboardException {
         try {

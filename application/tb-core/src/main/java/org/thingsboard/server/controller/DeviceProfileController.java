@@ -68,6 +68,26 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHO
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 设备配置文件（Device Profile）REST 入口。
+ * <p>
+ * 配置文件定义传输协议、默认规则链、告警规则、配置描述等，同一租户下名称唯一，
+ * 且只能有一个 default。仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api}。完整资源路径如 {@code /deviceProfile}、
+ * {@code /deviceProfiles}、{@code /deviceProfileInfo}、{@code /deviceProfile/names}。
+ * <p>
+ * <b>权限：</b>写操作（保存/删除/设默认）仅 TENANT_ADMIN；读 Info / 名称列表
+ * 对 TENANT_ADMIN、CUSTOMER_USER 开放。
+ * <p>
+ * <b>下游：</b>{@link TbDeviceProfileService} 负责写路径；查询走基类
+ * {@code deviceProfileService}。可选把图片内联进响应（{@link ImageService}），
+ * 以及按配置文件收集遥测/属性 key（{@link TimeseriesService} / {@code attributesService}）。
+ *
+ * @see TbDeviceProfileService
+ * @see ImageService
+ * @see TimeseriesService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -81,6 +101,11 @@ public class DeviceProfileController extends BaseController {
     @Autowired
     private TimeseriesService timeseriesService;
 
+    /**
+     * 按 Id 读取完整设备配置文件。
+     * <p>
+     * 校验当前租户拥有该配置文件。{@code inlineImages=true} 时把描述里的图片资源内联进 JSON。
+     */
     @ApiOperation(value = "Get Device Profile (getDeviceProfileById)",
             notes = "Fetch the Device Profile object based on the provided Device Profile Id. " +
                     "The server checks that the device profile is owned by the same tenant. " + TENANT_AUTHORITY_PARAGRAPH)
@@ -101,6 +126,9 @@ public class DeviceProfileController extends BaseController {
         return result;
     }
 
+    /**
+     * 按 Id 读取设备配置文件摘要（{@link DeviceProfileInfo}），不含完整配置体。
+     */
     @ApiOperation(value = "Get Device Profile Info (getDeviceProfileInfoById)",
             notes = "Fetch the Device Profile Info object based on the provided Device Profile Id. "
                     + DEVICE_PROFILE_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -115,6 +143,9 @@ public class DeviceProfileController extends BaseController {
         return new DeviceProfileInfo(checkDeviceProfileId(deviceProfileId, Operation.READ));
     }
 
+    /**
+     * 读取当前租户的默认设备配置文件摘要。
+     */
     @ApiOperation(value = "Get Default Device Profile (getDefaultDeviceProfileInfo)",
             notes = "Fetch the Default Device Profile Info object. " +
                     DEVICE_PROFILE_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -125,6 +156,11 @@ public class DeviceProfileController extends BaseController {
         return checkNotNull(deviceProfileService.findDefaultDeviceProfileInfo(getTenantId()));
     }
 
+    /**
+     * 收集指定配置文件下设备用过的遥测 key，供 UI 自动补全。
+     * <p>
+     * 未传 {@code deviceProfileId} 时在全租户范围内去重。实现会限制参与扫描的设备数量。
+     */
     @ApiOperation(value = "Get time series keys (getTimeseriesKeys)",
             notes = "Get a set of unique time series keys used by devices that belong to specified profile. " +
                     "If profile is not set returns a list of unique keys among all profiles. " +
@@ -148,6 +184,11 @@ public class DeviceProfileController extends BaseController {
         return timeseriesService.findAllKeysByDeviceProfileId(getTenantId(), deviceProfileId);
     }
 
+    /**
+     * 收集指定配置文件下设备用过的属性 key，供 UI 自动补全。
+     * <p>
+     * 未传 {@code deviceProfileId} 时在全租户范围内去重。
+     */
     @ApiOperation(value = "Get attribute keys (getAttributesKeys)",
             notes = "Get a set of unique attribute keys used by devices that belong to specified profile. " +
                     "If profile is not set returns a list of unique keys among all profiles. " +
@@ -171,6 +212,12 @@ public class DeviceProfileController extends BaseController {
         return attributesService.findAllKeysByDeviceProfileId(getTenantId(), deviceProfileId);
     }
 
+    /**
+     * 创建或更新设备配置文件。
+     * <p>
+     * 无 {@code id} 为新建（平台生成 UUID）；指定已有 id 则更新。名称在租户内唯一，
+     * 每个租户只能有一个 default。
+     */
     @ApiOperation(value = "Create Or Update Device Profile (saveDeviceProfile)",
             notes = "Create or update the Device Profile. When creating device profile, platform generates device profile id as " + UUID_WIKI_LINK +
                     "The newly created device profile id will be present in the response. " +
@@ -190,6 +237,11 @@ public class DeviceProfileController extends BaseController {
         return tbDeviceProfileService.save(deviceProfile, getCurrentUser());
     }
 
+    /**
+     * 删除设备配置文件。
+     * <p>
+     * 仍被设备引用时不能删。
+     */
     @ApiOperation(value = "Delete device profile (deleteDeviceProfile)",
             notes = "Deletes the device profile. Referencing non-existing device profile Id will cause an error. " +
                     "Can't delete the device profile if it is referenced by existing devices." + TENANT_AUTHORITY_PARAGRAPH)
@@ -205,6 +257,9 @@ public class DeviceProfileController extends BaseController {
         tbDeviceProfileService.delete(deviceProfile, getCurrentUser());
     }
 
+    /**
+     * 把指定配置文件设为租户默认，同时取消原先的 default 标记。
+     */
     @ApiOperation(value = "Make Device Profile Default (setDefaultDeviceProfile)",
             notes = "Marks device profile as default within a tenant scope." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
@@ -220,6 +275,9 @@ public class DeviceProfileController extends BaseController {
         return tbDeviceProfileService.setDefaultDeviceProfile(deviceProfile, previousDefaultDeviceProfile, getCurrentUser());
     }
 
+    /**
+     * 分页列出当前租户的完整设备配置文件。
+     */
     @ApiOperation(value = "Get Device Profiles (getDeviceProfiles)",
             notes = "Returns a page of devices profile objects owned by tenant. " +
                     PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
@@ -241,6 +299,9 @@ public class DeviceProfileController extends BaseController {
         return checkNotNull(deviceProfileService.findDeviceProfiles(getTenantId(), pageLink));
     }
 
+    /**
+     * 分页列出设备配置文件摘要，可按传输类型（DEFAULT / MQTT / COAP / LWM2M / SNMP）过滤。
+     */
     @ApiOperation(value = "Get Device Profiles for transport type (getDeviceProfileInfos)",
             notes = "Returns a page of devices profile info objects owned by tenant. " +
                     PAGE_DATA_PARAMETERS + DEVICE_PROFILE_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -264,6 +325,11 @@ public class DeviceProfileController extends BaseController {
         return checkNotNull(deviceProfileService.findDeviceProfileInfos(getTenantId(), pageLink, transportType));
     }
 
+    /**
+     * 返回当前租户下设备配置文件名称列表。
+     * <p>
+     * {@code activeOnly=true} 时只返回已被设备引用的配置文件名。
+     */
     @ApiOperation(value = "Get Device Profile names (getDeviceProfileNames)",
             notes = "Returns a set of unique device profile names owned by the tenant."
                     + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)

@@ -37,6 +37,14 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * 协议模板包服务：租户协议模板包的增删改查，并同步到引用该包的设备配置。
+ * <p>
+ * <b>职责：</b>持久化模板/命令；首次访问时从 tenant.additionalInfo 迁移旧数据；
+ * 保存后刷新引用该包的 TCP/UDP 设备配置快照。
+ * <p>
+ * <b>触发方式：</b>REST/业务调用；保存时级联刷新设备配置。
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -56,11 +64,13 @@ public class DefaultProtocolTemplateBundleService {
     private final TenantService tenantService;
     private final DeviceProfileService deviceProfileService;
 
+    /** 按 ID 查询租户模板包。 */
     @Transactional(readOnly = true)
     public Optional<ProtocolTemplateBundle> findById(TenantId tenantId, UUID id) {
         return bundleRepository.findByTenantIdAndId(tenantId.getId(), id).map(this::toDto);
     }
 
+    /** 列出租户全部模板包，可选从 additionalInfo 迁移旧数据。 */
     @Transactional
     public List<ProtocolTemplateBundle> findAllForTenant(TenantId tenantId, boolean migrateFromAdditionalInfo) {
         if (migrateFromAdditionalInfo) {
@@ -71,6 +81,7 @@ public class DefaultProtocolTemplateBundleService {
                 .collect(Collectors.toList());
     }
 
+    /** 校验并保存模板包，刷新引用它的设备配置。 */
     @Transactional
     public ProtocolTemplateBundle save(TenantId tenantId, ProtocolTemplateBundle bundle) {
         validateBundleContent(bundle);
@@ -99,6 +110,7 @@ public class DefaultProtocolTemplateBundleService {
         return savedDto;
     }
 
+    /** 删除租户下指定模板包。 */
     @Transactional
     public void delete(TenantId tenantId, UUID id) {
         bundleRepository.deleteByTenantIdAndId(tenantId.getId(), id);

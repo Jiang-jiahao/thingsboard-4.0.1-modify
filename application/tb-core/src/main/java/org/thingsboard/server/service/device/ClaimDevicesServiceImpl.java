@@ -58,6 +58,16 @@ import java.util.Optional;
 
 import static org.thingsboard.server.common.data.CacheConstants.CLAIM_DEVICES_CACHE;
 
+/**
+ * 设备认领（Claim）实现：把未归属客户的设备划给指定客户，或反向回收。
+ * <p>
+ * 由 {@link org.thingsboard.server.service.entitiy.device.DefaultTbDeviceService} 等业务层调用，
+ * 认领数据优先走 {@code CLAIM_DEVICES_CACHE}，必要时读服务器作用域属性 {@code claimingAllowed}/{@code claimingData}。
+ * 成功认领会改设备的客户归属并清掉认领缓存/属性；回收时可能回写 {@code claimingAllowed}，
+ * 审计日志由上层 {@code TbDeviceService} 记录。
+ *
+ * @see ClaimDevicesService
+ */
 @Service
 @Slf4j
 @TbCoreComponent
@@ -83,6 +93,7 @@ public class ClaimDevicesServiceImpl implements ClaimDevicesService {
     @Value("${security.claim.duration}")
     private long systemDurationMs;
 
+    /** 登记设备认领密钥与有效期到缓存；已认领或未允许认领则失败。 */
     @Override
     public ListenableFuture<Void> registerClaimingInfo(TenantId tenantId, DeviceId deviceId, String secretKey, long durationMs) {
         Device device = deviceService.findDeviceById(tenantId, deviceId);
@@ -131,6 +142,7 @@ public class ClaimDevicesServiceImpl implements ClaimDevicesService {
         }
     }
 
+    /** 校验密钥与超时后将设备分配给客户，并清理认领数据。 */
     @Override
     public ListenableFuture<ClaimResult> claimDevice(Device device, CustomerId customerId, String secretKey) {
         Cache cache = cacheManager.getCache(CLAIM_DEVICES_CACHE);
@@ -168,6 +180,7 @@ public class ClaimDevicesServiceImpl implements ClaimDevicesService {
         return (StringUtils.isEmpty(secretKeyA) && StringUtils.isEmpty(secretKeyB)) || secretKeyA.equals(secretKeyB);
     }
 
+    /** 解除设备的客户归属，必要时重新允许认领。 */
     @Override
     public ListenableFuture<ReclaimResult> reClaimDevice(TenantId tenantId, Device device) {
         if (!device.getCustomerId().getId().equals(ModelConstants.NULL_UUID)) {

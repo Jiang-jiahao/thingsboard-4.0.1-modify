@@ -42,6 +42,13 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+/**
+ * 通用实体导出服务（{@code @Primary}），无专用 {@link BaseEntityExportService} 子类时的回落实现。
+ * <p>
+ * 导出 JSON 包的标准步骤：加载实体 → 可选导出关系/属性/计算字段 → 清空 version →
+ * 将内部 ID 替换为 externalId（无 externalId 则用自身 ID）并去掉 tenantId。
+ * 设备额外导出 SHARED_SCOPE 属性；关系两端 ID 同样替换为 externalId。
+ */
 @Service
 @Primary
 public class DefaultEntityExportService<I extends EntityId, E extends ExportableEntity<I>, D extends EntityExportData<E>> implements EntityExportService<I, E, D> {
@@ -56,6 +63,9 @@ public class DefaultEntityExportService<I extends EntityId, E extends Exportable
     @Autowired
     private CalculatedFieldService calculatedFieldService;
 
+    /**
+     * 组装导出数据包：加载实体、附加关系/属性/计算字段，并将内部 ID 替换为 externalId。
+     */
     @Override
     public final D getExportData(EntitiesExportCtx<?> ctx, I entityId) throws ThingsboardException {
         D exportData = newExportData();
@@ -80,6 +90,9 @@ public class DefaultEntityExportService<I extends EntityId, E extends Exportable
         return exportData;
     }
 
+    /**
+     * 按导出设置附加关系、属性、计算字段，两端 ID 替换为 externalId。
+     */
     protected void setAdditionalExportData(EntitiesExportCtx<?> ctx, E entity, D exportData) throws ThingsboardException {
         var exportSettings = ctx.getSettings();
         if (exportSettings.isExportRelations()) {

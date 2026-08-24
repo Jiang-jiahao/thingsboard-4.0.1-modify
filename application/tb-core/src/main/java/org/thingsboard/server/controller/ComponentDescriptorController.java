@@ -39,6 +39,15 @@ import java.util.Set;
 
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 
+/**
+ * 规则节点组件描述符查询 REST，给规则链 UI 渲染配置表单用。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径 {@code /api/component*}。
+ * SYS_ADMIN / TENANT_ADMIN 可调。描述符在启动时扫描 {@code @RuleNode} 后入库，
+ * 本类经 {@link BaseController} 的 {@code componentDescriptorService} 按类名或类型查询。
+ *
+ * @see org.thingsboard.server.dao.component.ComponentDescriptorService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -49,6 +58,9 @@ public class ComponentDescriptorController extends BaseController {
             "The Component Descriptors are discovered at runtime by scanning the class path and searching for @RuleNode annotation. " +
             "Once discovered, the up to date list of descriptors is persisted to the database.";
 
+    /**
+     * 按规则节点实现类全名取一条组件描述符。
+     */
     @ApiOperation(value = "Get Component Descriptor (getComponentDescriptorByClazz)",
             notes = "Gets the Component Descriptor object using class name from the path parameters. " +
                     COMPONENT_DESCRIPTOR_DEFINITION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -62,6 +74,9 @@ public class ComponentDescriptorController extends BaseController {
         return checkComponentDescriptorByClazz(strComponentDescriptorClazz);
     }
 
+    /**
+     * 按规则节点类型（FILTER / ACTION 等）列出描述符，可再按规则链类型 CORE/EDGE 过滤。
+     */
     @ApiOperation(value = "Get Component Descriptors (getComponentDescriptorsByType)",
             notes = "Gets the Component Descriptors using rule node type and optional rule chain type request parameters. " +
                     COMPONENT_DESCRIPTOR_DEFINITION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -77,6 +92,9 @@ public class ComponentDescriptorController extends BaseController {
         return checkComponentDescriptorsByType(ComponentType.valueOf(strComponentType), getRuleChainType(strRuleChainType));
     }
 
+    /**
+     * 按多个规则节点类型一次性列出描述符。
+     */
     @ApiOperation(value = "Get Component Descriptors (getComponentDescriptorsByTypes)",
             notes = "Gets the Component Descriptors using coma separated list of rule node types and optional rule chain type request parameters. " +
                     COMPONENT_DESCRIPTOR_DEFINITION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)

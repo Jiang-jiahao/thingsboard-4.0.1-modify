@@ -31,14 +31,31 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * 各实体专用导出服务的抽象基类，继承 {@link DefaultEntityExportService}。
+ * <p>
+ * 在通用导出（实体本体、关系、属性、计算字段）之后，通过 {@link #setRelatedEntities} 把关联 ID
+ * （客户、profile、规则链、仪表板等）替换为 externalId，保证跨租户/跨环境导入可重放。
+ * 子类只需声明支持的 {@link EntityType}，并覆盖关联替换逻辑。
+ *
+ * @param <I> 实体 ID 类型
+ * @param <E> 可导出实体类型
+ * @param <D> 导出数据包类型
+ */
 public abstract class BaseEntityExportService<I extends EntityId, E extends ExportableEntity<I>, D extends EntityExportData<E>> extends DefaultEntityExportService<I, E, D> {
 
+    /**
+     * 在通用导出之后调用 {@link #setRelatedEntities} 做关联 ID 替换。
+     */
     @Override
     protected void setAdditionalExportData(EntitiesExportCtx<?> ctx, E entity, D exportData) throws ThingsboardException {
         setRelatedEntities(ctx, entity, (D) exportData);
         super.setAdditionalExportData(ctx, entity, exportData);
     }
 
+    /**
+     * 将实体上的关联 ID 替换为 externalId；默认空实现，子类按实体类型覆盖。
+     */
     protected void setRelatedEntities(EntitiesExportCtx<?> ctx, E mainEntity, D exportData) {
     }
 
@@ -46,6 +63,9 @@ public abstract class BaseEntityExportService<I extends EntityId, E extends Expo
         return (D) new EntityExportData<E>();
     }
 
+    /**
+     * 本服务负责导出的实体类型集合。
+     */
     public abstract Set<EntityType> getSupportedEntityTypes();
 
     protected void replaceUuidsRecursively(EntitiesExportCtx<?> ctx, JsonNode node, Set<String> skippedRootFields, Pattern includedFieldsPattern) {

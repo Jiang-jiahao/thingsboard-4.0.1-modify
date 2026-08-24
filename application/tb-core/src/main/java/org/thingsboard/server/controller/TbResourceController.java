@@ -81,6 +81,12 @@ import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TE
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 通用资源（JS 模块、证书、LwM2M 模型等）上传、下载与管理 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。系统级资源与租户级资源分 scope；
+ * 下载支持 If-None-Match / ETag 304。
+ */
 @Slf4j
 @RestController
 @TbCoreComponent
@@ -93,6 +99,9 @@ public class TbResourceController extends BaseController {
 
     public static final String RESOURCE_ID = "resourceId";
 
+    /**
+     * 按资源 ID 下载完整资源文件。
+     */
     @ApiOperation(value = "Download Resource (downloadResource)", notes = "Download Resource based on the provided Resource Id." + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/resource/{resourceId}/download")
@@ -111,6 +120,9 @@ public class TbResourceController extends BaseController {
                 .body(resource);
     }
 
+    /**
+     * 按类型、作用域与 key 下载资源；ETag 未变则返回 304。
+     */
     @ApiOperation(value = "Download resource (downloadResource)",
             notes = "Download resource with a given type and key for the given scope" + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -127,6 +139,9 @@ public class TbResourceController extends BaseController {
         return downloadResourceIfChanged(() -> checkResourceInfo(scope, resourceType, key, Operation.READ), etag);
     }
 
+    /**
+     * 按 ID 下载 LwM2M 模型（XML）；未变更则 304。
+     */
     @ApiOperation(value = "Download LWM2M Resource (downloadLwm2mResourceIfChanged)", notes = DOWNLOAD_RESOURCE_IF_NOT_CHANGED + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @GetMapping(value = "/resource/lwm2m/{resourceId}/download", produces = "application/xml")
@@ -136,6 +151,9 @@ public class TbResourceController extends BaseController {
         return downloadResourceIfChanged(strResourceId, etag);
     }
 
+    /**
+     * 按 ID 下载 PKCS#12 证书；未变更则 304。
+     */
     @ApiOperation(value = "Download PKCS_12 Resource (downloadPkcs12ResourceIfChanged)", notes = DOWNLOAD_RESOURCE_IF_NOT_CHANGED + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
     @RequestMapping(value = "/resource/pkcs12/{resourceId}/download", method = RequestMethod.GET, produces = "application/x-pkcs12")
@@ -145,6 +163,9 @@ public class TbResourceController extends BaseController {
         return downloadResourceIfChanged(strResourceId, etag);
     }
 
+    /**
+     * 按 ID 下载 JKS 密钥库；未变更则 304。
+     */
     @ApiOperation(value = "Download JKS Resource (downloadJksResourceIfChanged)",
             notes = DOWNLOAD_RESOURCE_IF_NOT_CHANGED + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -155,6 +176,9 @@ public class TbResourceController extends BaseController {
         return downloadResourceIfChanged(strResourceId, etag);
     }
 
+    /**
+     * 按 ID 下载 JS 模块；未变更则 304。
+     */
     @ApiOperation(value = "Download JS Resource (downloadJsResourceIfChanged)", notes = DOWNLOAD_RESOURCE_IF_NOT_CHANGED + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @GetMapping(value = "/resource/js/{resourceId}/download", produces = "application/javascript")
@@ -164,6 +188,9 @@ public class TbResourceController extends BaseController {
         return downloadResourceIfChanged(strResourceId, etag);
     }
 
+    /**
+     * 按资源 ID 读取资源元信息（不含二进制内容）。
+     */
     @ApiOperation(value = "Get Resource Info (getResourceInfoById)",
             notes = "Fetch the Resource Info object based on the provided Resource Id. " +
                     RESOURCE_INFO_DESCRIPTION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -176,6 +203,9 @@ public class TbResourceController extends BaseController {
         return checkResourceInfoId(resourceId, Operation.READ);
     }
 
+    /**
+     * 按类型、作用域与 key 读取资源元信息。
+     */
     @ApiOperation(value = "Get resource info (getResourceInfo)",
             notes = "Get info for the resource with the given type, scope and key. " +
                     RESOURCE_INFO_DESCRIPTION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -191,6 +221,9 @@ public class TbResourceController extends BaseController {
         return checkResourceInfo(scope, resourceType, key, Operation.READ);
     }
 
+    /**
+     * 按 ID 读取完整资源对象（已废弃，请改用下载接口）。
+     */
     @ApiOperation(value = "Get Resource (getResourceById)",
             notes = "Fetch the Resource object based on the provided Resource Id. " +
                     RESOURCE_DESCRIPTION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH, hidden = true)
@@ -204,6 +237,9 @@ public class TbResourceController extends BaseController {
         return checkResourceId(resourceId, Operation.READ);
     }
 
+    /**
+     * 创建或更新资源；同一租户下标题+key 唯一。
+     */
     @ApiOperation(value = "Create Or Update Resource (saveResource)",
             notes = "Create or update the Resource. When creating the Resource, platform generates Resource id as " + UUID_WIKI_LINK +
                     "The newly created Resource id will be present in the response. " +
@@ -221,6 +257,9 @@ public class TbResourceController extends BaseController {
         return tbResourceService.save(resource, getCurrentUser());
     }
 
+    /**
+     * 分页查询当前租户或系统可见的资源元信息。
+     */
     @ApiOperation(value = "Get Resource Infos (getResources)",
             notes = "Returns a page of Resource Info objects owned by tenant or sysadmin. " +
                     PAGE_DATA_PARAMETERS + RESOURCE_INFO_DESCRIPTION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -263,6 +302,9 @@ public class TbResourceController extends BaseController {
         }
     }
 
+    /**
+     * 分页查询本租户自有资源元信息（不含系统级）。
+     */
     @ApiOperation(value = "Get All Resource Infos (getAllResources)",
             notes = "Returns a page of Resource Info objects owned by tenant. " +
                     PAGE_DATA_PARAMETERS + RESOURCE_INFO_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
@@ -286,6 +328,9 @@ public class TbResourceController extends BaseController {
         return checkNotNull(resourceService.findTenantResourcesByTenantId(filter, pageLink));
     }
 
+    /**
+     * 分页列出从 LWM2M_MODEL 资源解析出的 LwM2M 对象。
+     */
     @ApiOperation(value = "Get LwM2M Objects (getLwm2mListObjectsPage)",
             notes = "Returns a page of LwM2M objects parsed from Resources with type 'LWM2M_MODEL' owned by tenant or sysadmin. " +
                     PAGE_DATA_PARAMETERS + LWM2M_OBJECT_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
@@ -305,6 +350,9 @@ public class TbResourceController extends BaseController {
         return checkNotNull(tbResourceService.findLwM2mObjectPage(getTenantId(), sortProperty, sortOrder, pageLink));
     }
 
+    /**
+     * 按对象 ID 过滤列出 LwM2M 对象。
+     */
     @ApiOperation(value = "Get LwM2M Objects (getLwm2mListObjects)",
             notes = "Returns a page of LwM2M objects parsed from Resources with type 'LWM2M_MODEL' owned by tenant or sysadmin. " +
                     "You can specify parameters to filter the results. " + LWM2M_OBJECT_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
@@ -319,6 +367,9 @@ public class TbResourceController extends BaseController {
         return checkNotNull(tbResourceService.findLwM2mObject(getTenantId(), sortOrder, sortProperty, objectIds));
     }
 
+    /**
+     * 删除资源；force=true 时强制删除仍被引用的资源。
+     */
     @ApiOperation(value = "Delete Resource (deleteResource)",
             notes = "Deletes the Resource. Referencing non-existing Resource Id will cause an error." + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")

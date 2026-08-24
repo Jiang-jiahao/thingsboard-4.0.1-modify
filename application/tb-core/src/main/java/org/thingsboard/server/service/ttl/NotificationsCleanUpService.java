@@ -29,6 +29,14 @@ import java.util.concurrent.TimeUnit;
 
 import static org.thingsboard.server.dao.model.ModelConstants.NOTIFICATION_TABLE_NAME;
 
+/**
+ * 通知 TTL 清理服务：删除过期通知分区，并清理对应的通知请求。
+ * <p>
+ * <b>触发方式：</b>定时 TTL（{@code sql.ttl.notifications.checking_interval_ms}）。
+ * <p>
+ * <b>清理对象：</b>notification 表过期分区及过期 {@code NotificationRequest}。
+ * 非系统分区节点仅清理本地分区缓存。
+ */
 @Service
 @ConditionalOnExpression("${sql.ttl.notifications.enabled:true} && ${sql.ttl.notifications.ttl:0} > 0")
 @Slf4j
@@ -49,6 +57,7 @@ public class NotificationsCleanUpService extends AbstractCleanUpService {
         this.notificationRequestDao = notificationRequestDao;
     }
 
+    /** 丢弃过期通知分区并删除对应通知请求。 */
     @Scheduled(initialDelayString = "#{T(org.apache.commons.lang3.RandomUtils).nextLong(0, ${sql.ttl.notifications.checking_interval_ms:86400000})}",
             fixedDelayString = "${sql.ttl.notifications.checking_interval_ms:86400000}")
     public void cleanUp() {

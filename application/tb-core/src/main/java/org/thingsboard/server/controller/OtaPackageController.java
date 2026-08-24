@@ -66,6 +66,19 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHO
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * OTA 固件 / 软件包 REST 入口。
+ * <p>
+ * <b>职责：</b>管理租户下 OTA 包信息与二进制（创建信息、上传数据、下载、分页、按设备配置文件过滤、删除）。
+ * 标题 + 版本在租户内唯一；被设备或设备配置文件引用时不可删除。
+ * <p>
+ * <b>URL：</b>{@code /api}（{@code /otaPackage*}、{@code /otaPackages*}）
+ * <p>
+ * <b>权限：</b>写/删/下载仅 {@code TENANT_ADMIN}；info 查询 {@code TENANT_ADMIN} 或 {@code CUSTOMER_USER}。
+ * 写/删会校验资源 {@code OTA_PACKAGE}。
+ * <p>
+ * <b>下游：</b>{@link TbOtaPackageService}、{@code otaPackageService}（{@link BaseController}）
+ */
 @Slf4j
 @RestController
 @TbCoreComponent
@@ -78,6 +91,11 @@ public class OtaPackageController extends BaseController {
     public static final String OTA_PACKAGE_ID = "otaPackageId";
     public static final String CHECKSUM_ALGORITHM = "checksumAlgorithm";
 
+    /**
+     * 按 id 下载 OTA 包二进制。URL 型包（无本地数据）返回 400。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 READ。
+     */
     @ApiOperation(value = "Download OTA Package (downloadOtaPackage)", notes = "Download OTA Package based on the provided OTA Package Id." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority( 'TENANT_ADMIN')")
     @RequestMapping(value = "/otaPackage/{otaPackageId}/download", method = RequestMethod.GET)
@@ -101,6 +119,11 @@ public class OtaPackageController extends BaseController {
                 .body(resource);
     }
 
+    /**
+     * 按 id 查询 OTA 包信息（不含二进制）。
+     * <p>
+     * 权限：{@code TENANT_ADMIN} 或 {@code CUSTOMER_USER}。下游 {@code otaPackageService}。
+     */
     @ApiOperation(value = "Get OTA Package Info (getOtaPackageInfoById)",
             notes = "Fetch the OTA Package Info object based on the provided OTA Package Id. " +
                     OTA_PACKAGE_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -114,6 +137,11 @@ public class OtaPackageController extends BaseController {
         return checkNotNull(otaPackageService.findOtaPackageInfoById(getTenantId(), otaPackageId));
     }
 
+    /**
+     * 按 id 查询完整 OTA 包（含数据）。校验归属当前租户。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 READ。
+     */
     @ApiOperation(value = "Get OTA Package (getOtaPackageById)",
             notes = "Fetch the OTA Package object based on the provided OTA Package Id. " +
                     "The server checks that the OTA Package is owned by the same tenant. " + OTA_PACKAGE_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
@@ -127,6 +155,11 @@ public class OtaPackageController extends BaseController {
         return checkOtaPackageId(otaPackageId, Operation.READ);
     }
 
+    /**
+     * 创建或更新 OTA 包信息。新建时平台生成 id；标题 + 版本在租户内唯一。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；资源 {@code OTA_PACKAGE}。下游 {@link TbOtaPackageService#save}。
+     */
     @ApiOperation(value = "Create Or Update OTA Package Info (saveOtaPackageInfo)",
             notes = "Create or update the OTA Package Info. When creating OTA Package Info, platform generates OTA Package id as " + UUID_WIKI_LINK +
                     "The newly created OTA Package id will be present in the response. " +
@@ -144,6 +177,11 @@ public class OtaPackageController extends BaseController {
         return tbOtaPackageService.save(otaPackageInfo, getCurrentUser());
     }
 
+    /**
+     * 为已有 OTA 包信息上传二进制数据（multipart），并按指定算法计算/校验 checksum。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@link TbOtaPackageService#saveOtaPackageData}。
+     */
     @ApiOperation(value = "Save OTA Package data (saveOtaPackageData)",
             notes = "Update the OTA Package. Adds the date to the existing OTA Package Info" + TENANT_AUTHORITY_PARAGRAPH,
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(mediaType = MULTIPART_FORM_DATA_VALUE)))
@@ -168,6 +206,11 @@ public class OtaPackageController extends BaseController {
                 data, file.getOriginalFilename(), file.getContentType(), getCurrentUser());
     }
 
+    /**
+     * 分页查询当前租户全部 OTA 包信息。
+     * <p>
+     * 权限：{@code TENANT_ADMIN} 或 {@code CUSTOMER_USER}。下游 {@code otaPackageService}。
+     */
     @ApiOperation(value = "Get OTA Package Infos (getOtaPackages)",
             notes = "Returns a page of OTA Package Info objects owned by tenant. " +
                     PAGE_DATA_PARAMETERS + OTA_PACKAGE_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -188,6 +231,11 @@ public class OtaPackageController extends BaseController {
         return checkNotNull(otaPackageService.findTenantOtaPackagesByTenantId(getTenantId(), pageLink));
     }
 
+    /**
+     * 按设备配置文件与类型（固件/软件）分页查询已有数据的 OTA 包信息。
+     * <p>
+     * 权限：{@code TENANT_ADMIN} 或 {@code CUSTOMER_USER}。下游 {@code otaPackageService}。
+     */
     @ApiOperation(value = "Get OTA Package Infos (getOtaPackages)",
             notes = "Returns a page of OTA Package Info objects owned by tenant. " +
                     PAGE_DATA_PARAMETERS + OTA_PACKAGE_INFO_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -215,6 +263,11 @@ public class OtaPackageController extends BaseController {
                 new DeviceProfileId(toUUID(strDeviceProfileId)), OtaPackageType.valueOf(strType), pageLink));
     }
 
+    /**
+     * 删除 OTA 包。id 不存在或仍被设备/设备配置文件引用会报错。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 DELETE。下游 {@link TbOtaPackageService#delete}。
+     */
     @ApiOperation(value = "Delete OTA Package (deleteOtaPackage)",
             notes = "Deletes the OTA Package. Referencing non-existing OTA Package Id will cause an error. " +
                     "Can't delete the OTA Package if it is referenced by existing devices or device profile." + TENANT_AUTHORITY_PARAGRAPH)

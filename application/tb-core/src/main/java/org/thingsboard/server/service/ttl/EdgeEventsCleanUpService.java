@@ -30,6 +30,13 @@ import java.util.concurrent.TimeUnit;
 
 import static org.thingsboard.server.dao.model.ModelConstants.EDGE_EVENT_TABLE_NAME;
 
+/**
+ * Edge 事件 TTL 清理服务：删除过期的 Edge 事件分区。
+ * <p>
+ * <b>触发方式：</b>定时 TTL（{@code sql.ttl.edge_events.execution_interval_ms}）。
+ * <p>
+ * <b>清理对象：</b>edge_event 过期数据；非系统分区节点仅清本地分区缓存。
+ */
 @TbCoreComponent
 @Slf4j
 @Service
@@ -58,6 +65,7 @@ public class EdgeEventsCleanUpService extends AbstractCleanUpService {
         this.partitioningRepository = partitioningRepository;
     }
 
+    /** 按 TTL 清理过期 Edge 事件。 */
     @Scheduled(initialDelayString = RANDOM_DELAY_INTERVAL_MS_EXPRESSION, fixedDelayString = "${sql.ttl.edge_events.execution_interval_ms}")
     public void cleanUp() {
         long edgeEventsExpTime = System.currentTimeMillis() - TimeUnit.SECONDS.toMillis(ttl);

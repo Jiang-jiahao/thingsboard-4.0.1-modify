@@ -25,6 +25,11 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.config.annotations.ApiOperation;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+/**
+ * UI 帮助资源基址 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。前端据此拼接帮助文档 URL。
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -33,6 +38,9 @@ public class UiSettingsController extends BaseController {
     @Value("${ui.help.base-url}")
     private String helpBaseUrl;
 
+    /**
+     * 返回配置文件中的 UI 帮助文档基址 {@code ui.help.base-url}。
+     */
     @ApiOperation(value = "Get UI help base url (getHelpBaseUrl)",
             notes = "Get UI help base url used to fetch help assets. " +
                     "The actual value of the base url is configurable in the system configuration file.")

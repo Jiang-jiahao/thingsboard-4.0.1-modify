@@ -50,6 +50,14 @@ import java.util.stream.Collectors;
 
 import static org.thingsboard.server.common.data.StringUtils.isNotEmpty;
 
+/**
+ * {@link TbImageService} 默认实现。
+ * <p>
+ * 在 Core 实体服务层封装图片 DAO：保存/删除时记审计日志，ETag 变更后广播
+ * {@code ResourceCacheInvalidateMsg} 到其它 Core 节点，保证集群 HTTP 缓存一致。
+ *
+ * @see TbImageService
+ */
 @Service
 @Slf4j
 @TbCoreComponent
@@ -73,16 +81,25 @@ public class DefaultTbImageService extends AbstractTbEntityService implements Tb
                 .build();
     }
 
+    /**
+     * 读取本机 ETag 缓存。
+     */
     @Override
     public String getETag(ImageCacheKey imageCacheKey) {
         return etagCache.getIfPresent(imageCacheKey);
     }
 
+    /**
+     * 写入本机 ETag 缓存。
+     */
     @Override
     public void putETag(ImageCacheKey imageCacheKey, String etag) {
         etagCache.put(imageCacheKey, etag);
     }
 
+    /**
+     * 驱逐原图 ETag；非公开图键时同时驱逐预览图。
+     */
     @Override
     public void evictETags(ImageCacheKey imageCacheKey) {
         etagCache.invalidate(imageCacheKey);
@@ -91,6 +108,9 @@ public class DefaultTbImageService extends AbstractTbEntityService implements Tb
         }
     }
 
+    /**
+     * 保存图片；ETag 或公开状态变化时驱逐并广播集群缓存失效。
+     */
     @Override
     public TbResourceInfo save(TbResource image, User user) throws Exception {
         ActionType actionType = image.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -142,6 +162,9 @@ public class DefaultTbImageService extends AbstractTbEntityService implements Tb
         return Optional.ofNullable(descriptor != null ? descriptor.getEtag() : null);
     }
 
+    /**
+     * 更新图片元数据；公开状态翻转时驱逐公开图缓存。
+     */
     @Override
     public TbResourceInfo save(TbResourceInfo imageInfo, TbResourceInfo oldImageInfo, User user) {
         TenantId tenantId = imageInfo.getTenantId();
@@ -160,6 +183,9 @@ public class DefaultTbImageService extends AbstractTbEntityService implements Tb
         }
     }
 
+    /**
+     * 删除图片并在成功后驱逐本机与集群 ETag。
+     */
     @Override
     public TbImageDeleteResult delete(TbResourceInfo imageInfo, User user, boolean force) {
         TenantId tenantId = imageInfo.getTenantId();
@@ -183,6 +209,9 @@ public class DefaultTbImageService extends AbstractTbEntityService implements Tb
         }
     }
 
+    /**
+     * 导入图片：已存在则校验读权限，否则校验创建权限后保存。
+     */
     @Override
     public TbResourceInfo importImage(ResourceExportData imageData, boolean checkExisting, SecurityUser user) throws Exception {
         TbResource image = imageService.toImage(user.getTenantId(), imageData, checkExisting);

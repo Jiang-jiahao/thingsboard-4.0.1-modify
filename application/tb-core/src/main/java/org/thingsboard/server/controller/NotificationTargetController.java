@@ -72,6 +72,22 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.service.security.permission.Resource.NOTIFICATION;
 
+/**
+ * 通知目标（Notification Target）REST 入口。
+ * <p>
+ * 目标定义「发给谁」：平台用户过滤器（用户列表 / 客户用户 / 租户管理员等）或 Slack。
+ * 租户用户保存 PLATFORM_USERS 时会校验不能越权选系统管理员或跨租户管理员。
+ * 仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api/notification}。路径如 {@code /target}、{@code /targets}、
+ * {@code /target/recipients}。
+ * <p>
+ * <b>权限：</b>全部接口 SYS_ADMIN、TENANT_ADMIN。
+ * <p>
+ * <b>下游：</b>{@link NotificationTargetService}。
+ *
+ * @see NotificationTargetService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api/notification")
@@ -81,6 +97,9 @@ public class NotificationTargetController extends BaseController {
 
     private final NotificationTargetService notificationTargetService;
 
+    /**
+     * 创建或更新通知目标。PLATFORM_USERS 会按当前角色校验用户过滤器是否越权。
+     */
     @ApiOperation(value = "Save notification target (saveNotificationTarget)",
             notes = "Creates or updates notification target." + NEW_LINE +
                     "Available `configuration` types are `PLATFORM_USERS` and `SLACK`.\n" +
@@ -120,6 +139,9 @@ public class NotificationTargetController extends BaseController {
         return doSaveAndLog(EntityType.NOTIFICATION_TARGET, notificationTarget, notificationTargetService::saveNotificationTarget);
     }
 
+    /**
+     * 按 Id 读取通知目标。
+     */
     @ApiOperation(value = "Get notification target by id (getNotificationTargetById)",
             notes = "Fetches notification target by id." +
                     SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -130,6 +152,9 @@ public class NotificationTargetController extends BaseController {
         return checkNotificationTargetId(notificationTargetId, Operation.READ);
     }
 
+    /**
+     * 按目标配置分页预览实际接收人（仅 PLATFORM_USERS）。
+     */
     @ApiOperation(value = "Get recipients for notification target config (getRecipientsForNotificationTargetConfig)",
             notes = "Returns the page of recipients for such notification target configuration." +
                     SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -153,6 +178,9 @@ public class NotificationTargetController extends BaseController {
         return notificationTargetService.findRecipientsForNotificationTargetConfig(user.getTenantId(), (PlatformUsersNotificationTargetConfig) notificationTarget.getConfiguration(), pageLink);
     }
 
+    /**
+     * 按一组 UUID 批量读取通知目标。
+     */
     @ApiOperation(value = "Get notification targets by ids (getNotificationTargetsByIds)",
             notes = "Returns the list of notification targets found by provided ids." +
                     SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -166,6 +194,9 @@ public class NotificationTargetController extends BaseController {
         return notificationTargetService.findNotificationTargetsByTenantIdAndIds(user.getTenantId(), targetsIds);
     }
 
+    /**
+     * 分页列出当前租户（或系统租户）的通知目标。
+     */
     @ApiOperation(value = "Get notification targets (getNotificationTargets)",
             notes = "Returns the page of notification targets owned by sysadmin or tenant." + NEW_LINE +
                     PAGE_DATA_PARAMETERS +
@@ -188,6 +219,9 @@ public class NotificationTargetController extends BaseController {
         return notificationTargetService.findNotificationTargetsByTenantId(user.getTenantId(), pageLink);
     }
 
+    /**
+     * 按通知类型过滤，分页列出可用于该类型的目标。
+     */
     @ApiOperation(value = "Get notification targets by supported notification type (getNotificationTargetsBySupportedNotificationType)",
             notes = "Returns the page of notification targets filtered by notification type that they can be used for." + NEW_LINE +
                     PAGE_DATA_PARAMETERS +
@@ -206,6 +240,9 @@ public class NotificationTargetController extends BaseController {
         return notificationTargetService.findNotificationTargetsByTenantIdAndSupportedNotificationType(user.getTenantId(), notificationType, pageLink);
     }
 
+    /**
+     * 按 Id 删除通知目标。仍被定时请求或规则引用时不能删。
+     */
     @ApiOperation(value = "Delete notification target by id (deleteNotificationTargetById)",
             notes = "Deletes notification target by its id." + NEW_LINE +
                     "This target cannot be referenced by existing scheduled notification requests or any notification rules." +

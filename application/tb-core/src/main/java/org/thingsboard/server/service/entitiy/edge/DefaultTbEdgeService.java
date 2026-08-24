@@ -33,6 +33,14 @@ import org.thingsboard.server.dao.rule.RuleChainService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 
+/**
+ * {@link TbEdgeService} 的默认实现。
+ * <p>
+ * 由 EdgeController 调用，委托 {@code edgeService} DAO 落库；新建时绑定模板根规则链与默认规则链，
+ * 成功或失败都写审计日志（含 Edge 同步副作用）。
+ *
+ * @see TbEdgeService
+ */
 @AllArgsConstructor
 @TbCoreComponent
 @Service
@@ -41,6 +49,7 @@ public class DefaultTbEdgeService extends AbstractTbEntityService implements TbE
 
     private final RuleChainService ruleChainService;
 
+    /** 保存 Edge；新建时绑定根规则链并写审计。 */
     @Override
     public Edge save(Edge edge, RuleChain edgeTemplateRootRuleChain, User user) throws Exception {
         ActionType actionType = edge.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -67,6 +76,7 @@ public class DefaultTbEdgeService extends AbstractTbEntityService implements TbE
         }
     }
 
+    /** 删除 Edge 并写 DELETED 审计。 */
     @Override
     public void delete(Edge edge, User user) {
         ActionType actionType = ActionType.DELETED;
@@ -82,6 +92,7 @@ public class DefaultTbEdgeService extends AbstractTbEntityService implements TbE
         }
     }
 
+    /** 将 Edge 分配给客户并写审计。 */
     @Override
     public Edge assignEdgeToCustomer(TenantId tenantId, EdgeId edgeId, Customer customer, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
@@ -99,6 +110,7 @@ public class DefaultTbEdgeService extends AbstractTbEntityService implements TbE
         }
     }
 
+    /** 取消 Edge 与客户的分配并写审计。 */
     @Override
     public Edge unassignEdgeFromCustomer(Edge edge, Customer customer, User user) throws ThingsboardException {
         ActionType actionType = ActionType.UNASSIGNED_FROM_CUSTOMER;
@@ -117,6 +129,7 @@ public class DefaultTbEdgeService extends AbstractTbEntityService implements TbE
         }
     }
 
+    /** 将 Edge 分配给公开客户并写审计。 */
     @Override
     public Edge assignEdgeToPublicCustomer(TenantId tenantId, EdgeId edgeId, User user) throws ThingsboardException {
         ActionType actionType = ActionType.ASSIGNED_TO_CUSTOMER;
@@ -136,6 +149,7 @@ public class DefaultTbEdgeService extends AbstractTbEntityService implements TbE
         }
     }
 
+    /** 设置 Edge 根规则链并写审计。 */
     @Override
     public Edge setEdgeRootRuleChain(Edge edge, RuleChainId ruleChainId, User user) throws Exception {
         TenantId tenantId = edge.getTenantId();

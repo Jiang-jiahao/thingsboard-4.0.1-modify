@@ -44,6 +44,17 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * Core 侧 Slack 通知实现：向 Slack 会话发消息，并列举用户/频道。
+ * <p>
+ * <b>职责：</b>用 bot token 调用 Slack API；会话列表短时缓存。
+ * <p>
+ * <b>触发方式：</b>通知渠道发送与配置页列举会话。
+ * <p>
+ * <b>通知对象：</b>Slack 用户或频道。
+ * <p>
+ * <b>生效条件：</b>monolith 或 tb-core。
+ */
 @Service
 @RequiredArgsConstructor
 @ConditionalOnExpression("'${service.type:null}'=='monolith' || '${service.type:null}'=='tb-core'")
@@ -58,6 +69,7 @@ public class CoreSlackService implements SlackService {
             .build();
     private static final int CONVERSATIONS_LOAD_LIMIT = 1000;
 
+    /** 向 Slack 会话发送文本。 */
     @Override
     public void sendMessage(TenantId tenantId, String token, String conversationId, String message) {
         ChatPostMessageRequest request = ChatPostMessageRequest.builder()
@@ -67,6 +79,7 @@ public class CoreSlackService implements SlackService {
         sendRequest(token, request, MethodsClient::chatPostMessage);
     }
 
+    /** 列举指定类型的 Slack 会话（短时缓存）。 */
     @Override
     public List<SlackConversation> listConversations(TenantId tenantId, String token, SlackConversationType conversationType) {
         return cache.get(conversationType + ":" + token, k -> {
@@ -113,6 +126,7 @@ public class CoreSlackService implements SlackService {
         });
     }
 
+    /** 读取租户通知设置中的 Slack bot token。 */
     @Override
     public String getToken(TenantId tenantId) {
         NotificationSettings settings = notificationSettingsService.findNotificationSettings(tenantId);

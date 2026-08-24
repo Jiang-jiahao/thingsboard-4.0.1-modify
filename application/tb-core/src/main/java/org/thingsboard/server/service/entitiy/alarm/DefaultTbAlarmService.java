@@ -35,6 +35,14 @@ import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * {@link TbAlarmService} 的默认实现。
+ * <p>
+ * 由 AlarmController 调用，委托 {@code alarmSubscriptionService} 变更告警状态；
+ * 状态变化时写系统评论、审计日志，并经动作服务触发通知规则（分配/确认等）。
+ *
+ * @see TbAlarmService
+ */
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -43,6 +51,7 @@ public class DefaultTbAlarmService extends AbstractTbEntityService implements Tb
     @Autowired
     protected TbAlarmCommentService alarmCommentService;
 
+    /** 新建或更新告警，并按请求同步确认/清除/分配状态。 */
     @Override
     public Alarm save(Alarm alarm, User user) throws ThingsboardException {
         ActionType actionType = alarm.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -82,11 +91,13 @@ public class DefaultTbAlarmService extends AbstractTbEntityService implements Tb
         }
     }
 
+    /** 以当前时间确认告警。 */
     @Override
     public AlarmInfo ack(Alarm alarm, User user) throws ThingsboardException {
         return ack(alarm, System.currentTimeMillis(), user);
     }
 
+    /** 确认告警：写系统评论与 ALARM_ACK 审计。 */
     @Override
     public AlarmInfo ack(Alarm alarm, long ackTs, User user) throws ThingsboardException {
         AlarmApiCallResult result = alarmSubscriptionService.acknowledgeAlarm(alarm.getTenantId(), alarm.getId(), getOrDefault(ackTs));
@@ -105,11 +116,13 @@ public class DefaultTbAlarmService extends AbstractTbEntityService implements Tb
         return alarmInfo;
     }
 
+    /** 以当前时间清除告警。 */
     @Override
     public AlarmInfo clear(Alarm alarm, User user) throws ThingsboardException {
         return clear(alarm, System.currentTimeMillis(), user);
     }
 
+    /** 清除告警：写系统评论与 ALARM_CLEAR 审计。 */
     @Override
     public AlarmInfo clear(Alarm alarm, long clearTs, User user) throws ThingsboardException {
         AlarmApiCallResult result = alarmSubscriptionService.clearAlarm(alarm.getTenantId(), alarm.getId(), getOrDefault(clearTs), null);
@@ -128,6 +141,7 @@ public class DefaultTbAlarmService extends AbstractTbEntityService implements Tb
         return alarmInfo;
     }
 
+    /** 分配告警：写系统评论与 ALARM_ASSIGNED 审计。 */
     @Override
     public AlarmInfo assign(Alarm alarm, UserId assigneeId, long assignTs, User user) throws ThingsboardException {
         AlarmApiCallResult result = alarmSubscriptionService.assignAlarm(alarm.getTenantId(), alarm.getId(), assigneeId, getOrDefault(assignTs));
@@ -147,6 +161,7 @@ public class DefaultTbAlarmService extends AbstractTbEntityService implements Tb
         return alarmInfo;
     }
 
+    /** 取消分配：写系统评论与 ALARM_UNASSIGNED 审计。 */
     @Override
     public AlarmInfo unassign(Alarm alarm, long unassignTs, User user) throws ThingsboardException {
         AlarmApiCallResult result = alarmSubscriptionService.unassignAlarm(alarm.getTenantId(), alarm.getId(), getOrDefault(unassignTs));
@@ -165,6 +180,7 @@ public class DefaultTbAlarmService extends AbstractTbEntityService implements Tb
         return alarmInfo;
     }
 
+    /** 用户删除时批量取消其告警分配并写系统评论。 */
     @Override
     public void unassignDeletedUserAlarms(TenantId tenantId, UserId userId, String userTitle, List<UUID> alarms, long unassignTs) {
         for (UUID alarmId : alarms) {
@@ -182,6 +198,7 @@ public class DefaultTbAlarmService extends AbstractTbEntityService implements Tb
         }
     }
 
+    /** 先记 ALARM_DELETE 审计再删除告警。 */
     @Override
     public Boolean delete(Alarm alarm, User user) {
         TenantId tenantId = alarm.getTenantId();

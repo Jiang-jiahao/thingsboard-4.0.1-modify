@@ -55,6 +55,12 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_ID_PA
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_TEXT_SEARCH_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 租户 CRUD 与分页查询 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。系统管理员可创建/删除租户
+ * （会连带默认规则链与设备配置）；租户管理员仅能读取本租户。
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -67,6 +73,9 @@ public class TenantController extends BaseController {
     private final TenantService tenantService;
     private final TbTenantService tbTenantService;
 
+    /**
+     * 按租户 ID 读取租户对象，并补齐首页仪表盘信息。
+     */
     @ApiOperation(value = "Get Tenant (getTenantById)",
             notes = "Fetch the Tenant object based on the provided Tenant Id. " + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN')")
@@ -82,6 +91,9 @@ public class TenantController extends BaseController {
         return tenant;
     }
 
+    /**
+     * 按租户 ID 读取租户信息（含租户配置名称）。
+     */
     @ApiOperation(value = "Get Tenant Info (getTenantInfoById)",
             notes = "Fetch the Tenant Info object based on the provided Tenant Id. " +
                     TENANT_INFO_DESCRIPTION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
@@ -96,6 +108,9 @@ public class TenantController extends BaseController {
         return checkTenantInfoId(tenantId, Operation.READ);
     }
 
+    /**
+     * 创建或更新租户；新建时自动生成默认规则链与设备配置。
+     */
     @ApiOperation(value = "Create Or update Tenant (saveTenant)",
             notes = "Create or update the Tenant. When creating tenant, platform generates Tenant Id as " + UUID_WIKI_LINK +
                     "Default Rule Chain and Device profile are also generated for the new tenants automatically. " +
@@ -113,6 +128,9 @@ public class TenantController extends BaseController {
         return tbTenantService.save(tenant);
     }
 
+    /**
+     * 删除租户及其客户、规则链、设备等全部关联实体。
+     */
     @ApiOperation(value = "Delete Tenant (deleteTenant)",
             notes = "Deletes the tenant, it's customers, rule chains, devices and all other related entities. Referencing non-existing tenant Id will cause an error." + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
@@ -126,6 +144,9 @@ public class TenantController extends BaseController {
         tbTenantService.delete(tenant);
     }
 
+    /**
+     * 分页查询平台上的租户列表。
+     */
     @ApiOperation(value = "Get Tenants (getTenants)", notes = "Returns a page of tenants registered in the platform. " + PAGE_DATA_PARAMETERS + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")
     @RequestMapping(value = "/tenants", params = {"pageSize", "page"}, method = RequestMethod.GET)
@@ -145,6 +166,9 @@ public class TenantController extends BaseController {
         return checkNotNull(tenantService.findTenants(pageLink));
     }
 
+    /**
+     * 分页查询租户信息列表（含租户配置名称）。
+     */
     @ApiOperation(value = "Get Tenants Info (getTenants)", notes = "Returns a page of tenant info objects registered in the platform. "
             + TENANT_INFO_DESCRIPTION + PAGE_DATA_PARAMETERS + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")

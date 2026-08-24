@@ -25,6 +25,13 @@ import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 import org.thingsboard.server.queue.discovery.TenantRoutingInfo;
 import org.thingsboard.server.queue.discovery.TenantRoutingInfoService;
 
+/**
+ * 租户级队列路由信息提供者（仅 monolith / tb-core 生效）。
+ * <p>
+ * 根据租户档案判断规则引擎是否隔离，供分区服务决定消息投递到共享还是租户专属队列。
+ *
+ * @see TenantRoutingInfoService
+ */
 @Slf4j
 @Service
 @ConditionalOnExpression("'${service.type:null}'=='monolith' || '${service.type:null}'=='tb-core'")
@@ -36,6 +43,9 @@ public class DefaultTenantRoutingInfoService implements TenantRoutingInfoService
         this.tenantProfileCache = tenantProfileCache;
     }
 
+    /**
+     * 按租户档案返回路由信息；档案不存在时抛 {@link TenantNotFoundException}。
+     */
     @Override
     public TenantRoutingInfo getRoutingInfo(TenantId tenantId) {
         TenantProfile tenantProfile = tenantProfileCache.get(tenantId);

@@ -33,6 +33,13 @@ import org.thingsboard.server.service.security.model.token.JwtTokenFactory;
 import static org.thingsboard.server.dao.settings.DefaultSecuritySettingsService.DEFAULT_MOBILE_SECRET_KEY_LENGTH;
 
 
+/**
+ * 移动端一次性密钥服务：生成安全随机密钥，缓存对应 JWT 对，供 App 换票。
+ * <p>
+ * <b>职责：</b>密钥长度取自安全设置；密钥→JWT 写入缓存；过期后无法换票。
+ * <p>
+ * <b>触发方式：</b>移动端登录/授权 API 调用；缓存驱逐事件监听。
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -41,6 +48,7 @@ public class MobileAppSecretServiceImpl extends AbstractCachedService<String, Jw
     private final JwtTokenFactory tokenFactory;
     private final SecuritySettingsService securitySettingsService;
 
+    /** 生成一次性密钥并缓存 JWT 对。 */
     @Override
     public String generateMobileAppSecret(SecurityUser securityUser) {
         log.trace("Executing generateSecret for user [{}]", securityUser.getId());
@@ -50,6 +58,7 @@ public class MobileAppSecretServiceImpl extends AbstractCachedService<String, Jw
         return secret;
     }
 
+    /** 按密钥取出 JWT 对，不存在或已过期则抛异常。 */
     @Override
     public JwtPair getJwtPair(String secret) throws ThingsboardException {
         TbCacheValueWrapper<JwtPair> jwtPair = cache.get(secret);
@@ -60,6 +69,7 @@ public class MobileAppSecretServiceImpl extends AbstractCachedService<String, Jw
         }
     }
 
+    /** 处理密钥缓存驱逐事件。 */
     @TransactionalEventListener(classes = MobileSecretEvictEvent.class)
     @Override
     public void handleEvictEvent(MobileSecretEvictEvent event) {

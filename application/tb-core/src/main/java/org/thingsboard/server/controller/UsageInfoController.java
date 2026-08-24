@@ -27,6 +27,11 @@ import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.dao.usage.UsageInfoService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 
+/**
+ * 当前租户资源用量统计 REST 入口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。对照租户配置中的配额给出已用量。
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -36,6 +41,9 @@ public class UsageInfoController extends BaseController {
     @Autowired
     private UsageInfoService usageInfoService;
 
+    /**
+     * 返回当前租户的设备、资产、用户、消息等用量统计。
+     */
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
     @RequestMapping(value = "/usage", method = RequestMethod.GET)
     @ResponseBody

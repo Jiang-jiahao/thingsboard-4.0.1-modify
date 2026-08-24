@@ -30,6 +30,12 @@ import org.thingsboard.server.dao.widget.WidgetsBundleService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.sync.vc.data.EntitiesImportCtx;
 
+/**
+ * 针对 {@link WidgetsBundle} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 若导出数据含内嵌部件定义则先按 FQN 创建/更新部件类型，再保存包并绑定 FQN 列表。
+ * {@link #compare} 始终返回 true，每次导入都覆盖。
+ */
 @Service
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -43,11 +49,15 @@ public class WidgetsBundleImportService extends BaseEntityImportService<WidgetsB
         widgetsBundle.setTenantId(tenantId);
     }
 
+    /** 模板覆盖：部件包本身无额外关联 ID 需要映射。 */
     @Override
     protected WidgetsBundle prepare(EntitiesImportCtx ctx, WidgetsBundle widgetsBundle, WidgetsBundle old, WidgetsBundleExportData exportData, IdProvider idProvider) {
         return widgetsBundle;
     }
 
+    /**
+     * 先按导出数据创建/更新内嵌部件类型，再保存包并绑定 FQN。
+     */
     @Override
     protected WidgetsBundle saveOrUpdate(EntitiesImportCtx ctx, WidgetsBundle widgetsBundle, WidgetsBundleExportData exportData, IdProvider idProvider) {
         if (CollectionsUtil.isNotEmpty(exportData.getWidgets())) {
@@ -74,6 +84,7 @@ public class WidgetsBundleImportService extends BaseEntityImportService<WidgetsB
         return savedWidgetsBundle;
     }
 
+    /** 始终视为有变更，每次导入都覆盖保存。 */
     @Override
     protected boolean compare(EntitiesImportCtx ctx, WidgetsBundleExportData exportData, WidgetsBundle prepared, WidgetsBundle existing) {
         return true;

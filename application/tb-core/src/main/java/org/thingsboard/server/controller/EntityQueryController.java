@@ -53,20 +53,63 @@ import static org.thingsboard.server.controller.ControllerConstants.ATTRIBUTES_S
 import static org.thingsboard.server.controller.ControllerConstants.ENTITY_COUNT_QUERY_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.ENTITY_DATA_QUERY_DESCRIPTION;
 
+/**
+ * 实体 / 告警查询 REST 入口，以及 EDQS 系统级管理接口。
+ * <p>
+ * 仅在 {@link TbCoreComponent}（Core / Monolith）中生效。本类本身不决定查
+ * PostgreSQL 还是 EDQS：业务查询一律交给 {@link EntityQueryService}，后者再经
+ * {@code EntityService}（{@code BaseEntityService}）按
+ * {@link EdqsApiService#isEnabled()} 分流。
+ * <p>
+ * <b>接口分两组：</b>
+ * <ol>
+ *   <li><b>业务查询（租户/客户）：</b>{@code /entitiesQuery/*}、{@code /alarmsQuery/*}。
+ *       仪表盘、实体表、告警表等 UI 的过滤/分页都走这里。
+ *       实体 count/find 在 EDQS API 打开后会打到内存索引；告警 count 仍走 DB，
+ *       告警 find 会先按实体过滤（这段可能走 EDQS）再查告警表。</li>
+ *   <li><b>EDQS 管理（仅 SYS_ADMIN）：</b>手动触发全量同步 / 开关查询 API，
+ *       以及查看本节点 {@code apiEnabled}。对应 {@link EdqsService#processSystemRequest}
+ *       那条「广播 → 抢锁 sync / 各节点 setEnabled」集群通道。</li>
+ * </ol>
+ *
+ * @see EntityQueryService
+ * @see EdqsService
+ * @see EdqsApiService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
 public class EntityQueryController extends BaseController {
 
+    /** 实体 / 告警查询业务实现；动态值解析、告警与实体数据拼装都在这一层。 */
     @Autowired
     private EntityQueryService entityQueryService;
+    /**
+     * EDQS <strong>写路径 / 集群协作</strong>入口。
+     * 本控制器只用它下发系统请求（全量 sync、广播 apiEnabled），不直接写 events。
+     */
     @Autowired
     private EdqsService edqsService;
+    /**
+     * 本节点 EDQS <strong>查询 API 开关</strong>。
+     * {@link #isEdqsApiEnabled()} 读的就是它；真正的实体查询分流发生在 DAO 层。
+     */
     @Autowired
     private EdqsApiService edqsApiService;
 
+    /**
+     * {@link #findEntityTimeseriesAndAttributesKeysByQuery} 扫实体的上限。
+     * 该接口只为 UI 自动补全收集 key，不需要翻完全部实体。
+     */
     private static final int MAX_PAGE_SIZE = 100;
 
+    /**
+     * 按过滤条件统计实体数量。
+     * <p>
+     * 允许 SYS_ADMIN（跨租户运维场景也需要 count）。下游
+     * {@code BaseEntityService#countEntitiesByQuery}：EDQS 已启用、查询合法且
+     * 非系统租户时走 EDQS，否则走 SQL。
+     */
     @ApiOperation(value = "Count Entities by Query", notes = ENTITY_COUNT_QUERY_DESCRIPTION)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/entitiesQuery/count", method = RequestMethod.POST)
@@ -78,6 +121,14 @@ public class EntityQueryController extends BaseController {
         return this.entityQueryService.countEntitiesByQuery(getCurrentUser(), query);
     }
 
+    /**
+     * 按过滤、排序、分页查出实体及所选字段/最新遥测/属性。
+     * <p>
+     * 不含 SYS_ADMIN：结果带租户数据，只开放给租户管理员和客户用户。
+     * {@link EntityQueryService} 会先解析 KeyFilter 里的动态值（当前租户/客户/用户属性），
+     * 再交给 {@code EntityService}；EDQS 打开时走内存查询，否则走 SQL（部分查询还会做
+     * 「先筛 ID 再按 ID 拉字段」的优化）。
+     */
     @ApiOperation(value = "Find Entity Data by Query", notes = ENTITY_DATA_QUERY_DESCRIPTION)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/entitiesQuery/find", method = RequestMethod.POST)
@@ -89,6 +140,16 @@ public class EntityQueryController extends BaseController {
         return this.entityQueryService.findEntityDataByQuery(getCurrentUser(), query);
     }
 
+    /**
+     * 按实体过滤 + 告警条件分页查告警，并把实体最新字段拼进 {@link AlarmData}。
+     * <p>
+     * 若指定了处理人 {@code assigneeId}，先校验当前用户对该用户有 READ 权限，
+     * 避免用告警查询越权看别人。
+     * <p>
+     * 实现上先把告警查询收成实体查询（最多
+     * {@code server.ws.max_entities_per_alarm_subscription} 个实体），
+     * 这段可能走 EDQS；告警行本身仍查告警表。
+     */
     @ApiOperation(value = "Find Alarms by Query", notes = ALARM_DATA_QUERY_DESCRIPTION)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/alarmsQuery/find", method = RequestMethod.POST)
@@ -105,6 +166,10 @@ public class EntityQueryController extends BaseController {
         return this.entityQueryService.findAlarmDataByQuery(getCurrentUser(), query);
     }
 
+    /**
+     * 按条件统计告警条数。告警计数走 {@code AlarmService} / DB，不经过 EDQS。
+     * 指定处理人时同样先做 READ 校验。
+     */
     @ApiOperation(value = "Count Alarms by Query (countAlarmsByQuery)", notes = "Returns the number of alarms that match the query definition.")
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/alarmsQuery/count", method = RequestMethod.POST)
@@ -119,6 +184,13 @@ public class EntityQueryController extends BaseController {
         return this.entityQueryService.countAlarmsByQuery(getCurrentUser(), query);
     }
 
+    /**
+     * 为 UI 提示收集「这批实体上出现过哪些时序 / 属性 key」。
+     * <p>
+     * 先按实体查询取出最多 {@link #MAX_PAGE_SIZE} 条（超过则截断，避免为补全扫全库），
+     * 再异步去时序/属性库汇总去重 key。返回 {@link DeferredResult}，不占用 Tomcat 工作线程
+     * 等 DB。{@code scope} 为空时三个属性范围都扫。
+     */
     @ApiOperation(value = "Find Entity Keys by Query",
             notes = "Uses entity data query (see 'Find Entity Data by Query') to find first 100 entities. Then fetch and return all unique time-series and/or attribute keys. Used mostly for UI hints.")
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -142,12 +214,29 @@ public class EntityQueryController extends BaseController {
         return entityQueryService.getKeysByQuery(getCurrentUser(), tenantId, query, isTimeseries, isAttributes, scope);
     }
 
+    /**
+     * 系统管理员向「任意一台」Core 下发 EDQS 集群指令。
+     * <p>
+     * 请求体 {@link ToCoreEdqsRequest} 两类字段可并存：
+     * <ul>
+     *   <li>{@code syncRequest}：发起全量同步。本节点先把状态写成 REQUESTED，
+     *       再广播给所有 Core，由抢到 {@code edqs_sync} 锁的那台真正扫库灌 events；</li>
+     *   <li>{@code apiEnabled}：广播后每个 Core 改本机内存开关，决定实体查询是否走 EDQS。</li>
+     * </ul>
+     * 任意 Core 都可接收此 HTTP；真正执行方由广播 + 分布式锁决定，调用方不必是系统分区节点。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
     @PostMapping("/edqs/system/request")
     public void processSystemEdqsRequest(@RequestBody ToCoreEdqsRequest request) {
         edqsService.processSystemRequest(request);
     }
 
+    /**
+     * 返回<strong>本节点</strong> EDQS 查询 API 是否已打开。
+     * <p>
+     * {@code apiEnabled} 是进程内内存标志，不是集群共享配置；各 Core 可能短暂不一致。
+     * 为 true 时 {@code BaseEntityService} 把实体 count/find 转发到 EDQS，否则继续查 PostgreSQL。
+     */
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
     @GetMapping("/edqs/enabled")
     public boolean isEdqsApiEnabled() {

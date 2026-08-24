@@ -50,24 +50,42 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Created by ashvayka on 22.03.18.
+ * 服务端 RPC 的公共实现基类，供 {@code RpcV1Controller} / {@code RpcV2Controller} 复用。
+ * <p>
+ * 本类本身不暴露 REST 路径。子类收到 HTTP 请求后，把 JSON 体交给
+ * {@link #handleDeviceRPCRequest}：先校验当前用户对设备有 {@code RPC_CALL} 权限，
+ * 再经 {@link TbCoreDeviceRpcService} 把请求发到设备（或持久化等待上线）。
+ * 响应通过 {@link DeferredResult} 异步回写；超时 / 无连接分别映射为调用方指定的 HTTP 状态。
+ *
+ * @see TbCoreDeviceRpcService
+ * @see AccessValidator
  */
 @TbCoreComponent
 @Slf4j
 public abstract class AbstractRpcController extends BaseController {
 
+    /** 把 REST RPC 转发到 Core 设备 RPC 通道（含持久化、重试、设备应答回调）。 */
     @Autowired
     protected TbCoreDeviceRpcService deviceRpcService;
 
+    /** 校验当前用户是否对目标设备有 RPC_CALL 权限。 */
     @Autowired
     protected AccessValidator accessValidator;
 
+    /** REST RPC 超时下限（毫秒），请求里的 timeout 会与此取较大值。 */
     @Value("${server.rest.server_side_rpc.min_timeout:5000}")
     protected long minTimeout;
 
+    /** 请求体未带 timeout 时使用的默认超时（毫秒）。 */
     @Value("${server.rest.server_side_rpc.default_timeout:10000}")
     protected long defaultTimeout;
 
+    /**
+     * 解析 RPC JSON（method/params/timeout/expirationTime/persistent/retries 等），
+     * 校验权限后交给 {@link TbCoreDeviceRpcService} 下发。
+     *
+     * @param oneWay {@code true} 为单向 RPC（不等设备应答）；{@code false} 为双向
+     */
     protected DeferredResult<ResponseEntity> handleDeviceRPCRequest(boolean oneWay, DeviceId deviceId, String requestBody, HttpStatus timeoutStatus, HttpStatus noActiveConnectionStatus) throws ThingsboardException {
         try {
             JsonNode rpcRequestBody = JacksonUtil.toJsonNode(requestBody);
@@ -115,6 +133,10 @@ public abstract class AbstractRpcController extends BaseController {
         }
     }
 
+    /**
+     * 把设备侧 RPC 应答写成 HTTP 结果：TIMEOUT / NO_ACTIVE_CONNECTION 用调用方传入的状态码；
+     * 成功则解析 JSON 返回 200。同时写审计日志。
+     */
     public void reply(LocalRequestMetaData rpcRequest, FromDeviceRpcResponse response, HttpStatus timeoutStatus, HttpStatus noActiveConnectionStatus) {
         Optional<RpcError> rpcError = response.getError();
         DeferredResult<ResponseEntity> responseWriter = rpcRequest.getResponseWriter();

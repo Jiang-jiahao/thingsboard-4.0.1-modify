@@ -65,6 +65,22 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_ID;
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_ID_PARAM_DESCRIPTION;
 
+/**
+ * 实体事件（调试 / 生命周期 / 统计 / 错误）查询与清理 REST 入口。
+ * <p>
+ * 规则链调试、生命周期、统计、计算字段调试等事件都从这里按实体分页查询。
+ * 仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api}。路径如 {@code /events/{entityType}/{entityId}}、
+ * {@code /events/{entityType}/{entityId}/{eventType}}、
+ * {@code /events/{entityType}/{entityId}/clear}。
+ * <p>
+ * <b>权限：</b>SYS_ADMIN、TENANT_ADMIN、CUSTOMER_USER；先校验对实体有 READ（清理要 WRITE）。
+ * <p>
+ * <b>下游：</b>{@link EventService}。
+ *
+ * @see EventService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -113,6 +129,9 @@ public class EventController extends BaseController {
     @Autowired
     private EventService eventService;
 
+    /**
+     * 按事件类型分页查询指定实体的事件（STATS / LC_EVENT / ERROR / DEBUG 等）。
+     */
     @ApiOperation(value = "Get Events by type (getEvents)",
             notes = "Returns a page of events for specified entity by specifying event type. " +
                     PAGE_DATA_PARAMETERS)
@@ -152,6 +171,9 @@ public class EventController extends BaseController {
         return checkNotNull(eventService.findEvents(tenantId, entityId, resolveEventType(eventType), pageLink));
     }
 
+    /**
+     * 已废弃：不指定类型时只返回生命周期事件。请改用按类型或按过滤器查询。
+     */
     @ApiOperation(value = "Get Events (Deprecated)",
             notes = "Returns a page of events for specified entity. Deprecated and will be removed in next minor release. " +
                     "The call was deprecated to improve the performance of the system. " +
@@ -194,6 +216,9 @@ public class EventController extends BaseController {
         return checkNotNull(eventService.findEvents(tenantId, entityId, EventType.LC_EVENT, pageLink));
     }
 
+    /**
+     * 按 {@link EventFilter} 分页查询指定实体的事件（错误 / 生命周期 / 统计 / 调试等）。
+     */
     @ApiOperation(value = "Get Events by event filter (getEvents)",
             notes = "Returns a page of events for the chosen entity by specifying the event filter. " +
                     PAGE_DATA_PARAMETERS + NEW_LINE +
@@ -235,6 +260,9 @@ public class EventController extends BaseController {
         return checkNotNull(eventService.findEventsByFilter(tenantId, entityId, eventFilter, pageLink));
     }
 
+    /**
+     * 按过滤器清理指定实体的事件，可限定时间范围。需要对实体有 WRITE。
+     */
     @ApiOperation(value = "Clear Events (clearEvents)", notes = "Clears events by filter for specified entity.")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/events/{entityType}/{entityId}/clear", method = RequestMethod.POST)

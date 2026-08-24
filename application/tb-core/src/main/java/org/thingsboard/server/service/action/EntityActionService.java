@@ -103,9 +103,12 @@ public class EntityActionService {
      */
     public void pushEntityActionToRuleEngine(EntityId entityId, HasName entity, TenantId tenantId, CustomerId customerId,
                                              ActionType actionType, User user, Object... additionalInfo) {
+        // 仅当动作类型映射了规则引擎消息类型（如 ENTITY_CREATED、ALARM_ACK）才推送；
+        // 无映射的动作（RPC_CALL、LOGIN 等）直接跳过
         Optional<TbMsgType> msgType = actionType.getRuleEngineMsgType();
         if (msgType.isPresent()) {
             try {
+                // 组装元数据：把操作用户信息放入 metadata，规则链可用 ${metadata.userName} 等模板取值
                 TbMsgMetaData metaData = new TbMsgMetaData();
                 if (user != null) {
                     metaData.putValue("userId", user.getId().toString());
@@ -118,52 +121,64 @@ public class EntityActionService {
                         metaData.putValue("userLastName", user.getLastName());
                     }
                 }
+                // 客户 ID 写入元数据（空或 nullUid 不写）
                 if (customerId != null && !customerId.isNullUid()) {
                     metaData.putValue("customerId", customerId.toString());
                 }
+                // 分配类动作：从 additionalInfo 提取目标客户/租户/Edge 信息写入元数据
                 if (actionType == ActionType.ASSIGNED_TO_CUSTOMER) {
+                    // 实体分配给客户：写入目标客户 ID/名称
                     String strCustomerId = extractParameter(String.class, 1, additionalInfo);
                     String strCustomerName = extractParameter(String.class, 2, additionalInfo);
                     metaData.putValue("assignedCustomerId", strCustomerId);
                     metaData.putValue("assignedCustomerName", strCustomerName);
                 } else if (actionType == ActionType.UNASSIGNED_FROM_CUSTOMER) {
+                    // 实体从客户取消分配：写入原客户 ID/名称
                     String strCustomerId = extractParameter(String.class, 1, additionalInfo);
                     String strCustomerName = extractParameter(String.class, 2, additionalInfo);
                     metaData.putValue("unassignedCustomerId", strCustomerId);
                     metaData.putValue("unassignedCustomerName", strCustomerName);
                 } else if (actionType == ActionType.ASSIGNED_FROM_TENANT) {
+                    // 设备从其他租户转移过来：写入来源（原）租户 ID/名称，消息推给新租户的规则链
                     String strTenantId = extractParameter(String.class, 0, additionalInfo);
                     String strTenantName = extractParameter(String.class, 1, additionalInfo);
                     metaData.putValue("assignedFromTenantId", strTenantId);
                     metaData.putValue("assignedFromTenantName", strTenantName);
                 } else if (actionType == ActionType.ASSIGNED_TO_TENANT) {
+                    // 设备被转移给新租户：写入目标（新）租户 ID/名称，审计记在旧租户名下
                     String strTenantId = extractParameter(String.class, 0, additionalInfo);
                     String strTenantName = extractParameter(String.class, 1, additionalInfo);
                     metaData.putValue("assignedToTenantId", strTenantId);
                     metaData.putValue("assignedToTenantName", strTenantName);
                 } else if (actionType == ActionType.ASSIGNED_TO_EDGE) {
+                    // 实体分配给 Edge：写入目标 Edge ID/名称
                     String strEdgeId = extractParameter(String.class, 1, additionalInfo);
                     String strEdgeName = extractParameter(String.class, 2, additionalInfo);
                     metaData.putValue("assignedEdgeId", strEdgeId);
                     metaData.putValue("assignedEdgeName", strEdgeName);
                 } else if (actionType == ActionType.UNASSIGNED_FROM_EDGE) {
+                    // 实体从 Edge 取消分配：写入原 Edge ID/名称
                     String strEdgeId = extractParameter(String.class, 1, additionalInfo);
                     String strEdgeName = extractParameter(String.class, 2, additionalInfo);
                     metaData.putValue("unassignedEdgeId", strEdgeId);
                     metaData.putValue("unassignedEdgeName", strEdgeName);
                 } else if (actionType == ActionType.ADDED_COMMENT || actionType == ActionType.UPDATED_COMMENT) {
+                    // 告警评论动作：把完整评论 JSON 放入元数据
                     AlarmComment comment = extractParameter(AlarmComment.class, 0, additionalInfo);
                     metaData.putValue("comment", JacksonUtil.toString(comment));
                 }
+                // 组装消息体：优先序列化实体快照；无快照时按动作类型从 additionalInfo 构造
                 ObjectNode entityNode;
                 if (entity != null) {
                     entityNode = JacksonUtil.OBJECT_MAPPER.valueToTree(entity);
+                    // 仪表板 configuration 体积大，清空以减小消息体
                     if (entityId.getEntityType() == EntityType.DASHBOARD) {
                         entityNode.put("configuration", "");
                     }
                     metaData.putValue("entityName", entity.getName());
                     metaData.putValue("entityType", entityId.getEntityType().toString());
                 } else {
+                    // 无实体快照：属性/时序/关系类动作按约定下标从 additionalInfo 提取数据
                     entityNode = JacksonUtil.newObjectNode();
                     if (actionType == ActionType.ATTRIBUTES_UPDATED) {
                         AttributeScope scope = extractParameter(AttributeScope.class, 0, additionalInfo);
@@ -202,14 +217,17 @@ public class EntityActionService {
                     }
                 }
 
+                // 租户未传入时尝试从实体补全（需实现 HasTenantId）
                 if (tenantId == null || tenantId.isNullUid()) {
                     if (entity instanceof HasTenantId) {
                         tenantId = ((HasTenantId) entity).getTenantId();
                     }
                 }
+                // 仅非系统租户触发通知规则（实体限额、告警分配等）
                 if (tenantId != null && !tenantId.isSysTenantId()) {
                     processNotificationRules(tenantId, entityId, entity, actionType, user, additionalInfo);
                 }
+                // 构造消息：type 为规则引擎消息类型，originator 为动作主体实体
                 TbMsg tbMsg = TbMsg.newMsg()
                         .type(msgType.get())
                         .originator(entityId)
@@ -218,8 +236,10 @@ public class EntityActionService {
                         .dataType(TbMsgDataType.JSON)
                         .data(JacksonUtil.toString(entityNode))
                         .build();
+                // 按租户 + 实体分区路由，推送到规则引擎
                 tbClusterService.pushMsgToRuleEngine(tenantId, entityId, tbMsg, null);
             } catch (Exception e) {
+                // 推送失败仅记警告，不影响主业务流程
                 log.warn("[{}] Failed to push entity action to rule engine: {}", entityId, actionType, e);
             }
         }

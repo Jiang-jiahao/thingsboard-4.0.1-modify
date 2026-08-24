@@ -26,12 +26,20 @@ import org.thingsboard.server.common.data.mobile.app.MobileApp;
 import org.thingsboard.server.dao.mobile.MobileAppService;
 import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 
+/**
+ * {@link TbMobileAppService} 的默认实现。
+ * <p>
+ * 由 MobileAppController 调用，委托 {@link MobileAppService} 落库并写审计日志。
+ *
+ * @see TbMobileAppService
+ */
 @Service
 @AllArgsConstructor
 public class DefaultTbMobileAppService extends AbstractTbEntityService implements TbMobileAppService {
 
     private final MobileAppService mobileAppService;
 
+    /** 保存移动应用并写审计。 */
     @Override
     public MobileApp save(MobileApp mobileApp, User user) throws Exception {
         ActionType actionType = mobileApp.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -47,6 +55,7 @@ public class DefaultTbMobileAppService extends AbstractTbEntityService implement
     }
 
 
+    /** 删除移动应用并写 DELETED 审计。 */
     @Override
     public void delete(MobileApp mobileApp, User user) {
         ActionType actionType = ActionType.DELETED;

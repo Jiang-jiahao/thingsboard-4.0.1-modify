@@ -49,6 +49,15 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 告警评论 REST：对某条告警增删查评论。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径前缀 {@code /api/alarm/{alarmId}/comment}。
+ * 写操作需 TENANT_ADMIN / CUSTOMER_USER，且对告警有 WRITE；列表查询还允许 SYS_ADMIN。
+ * 写路径走 {@link TbAlarmCommentService}；分页列表直接用基类注入的 {@code alarmCommentService}。
+ *
+ * @see TbAlarmCommentService
+ */
 @RestController
 @TbCoreComponent
 @RequiredArgsConstructor
@@ -59,6 +68,9 @@ public class AlarmCommentController extends BaseController {
 
     private final TbAlarmCommentService tbAlarmCommentService;
 
+    /**
+     * 创建或更新告警评论。body 里的 alarmId / userId 会被忽略，以路径告警 ID 和当前用户为准。
+     */
     @ApiOperation(value = "Create or update Alarm Comment ",
             notes = "Creates or Updates the Alarm Comment. " +
                     "When creating comment, platform generates Alarm Comment Id as " + UUID_WIKI_LINK +
@@ -79,6 +91,9 @@ public class AlarmCommentController extends BaseController {
         return tbAlarmCommentService.saveAlarmComment(alarm, alarmComment, getCurrentUser());
     }
 
+    /**
+     * 删除指定告警下的一条评论；评论必须属于该告警。
+     */
     @ApiOperation(value = "Delete Alarm comment (deleteAlarmComment)",
             notes = "Deletes the Alarm comment. Referencing non-existing Alarm comment Id will cause an error." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -94,6 +109,9 @@ public class AlarmCommentController extends BaseController {
         tbAlarmCommentService.deleteAlarmComment(alarm, alarmComment, getCurrentUser());
     }
 
+    /**
+     * 分页列出某条告警的评论（含评论人信息）。
+     */
     @ApiOperation(value = "Get Alarm comments (getAlarmComments)",
             notes = "Returns a page of alarm comments for specified alarm. " +
                     PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)

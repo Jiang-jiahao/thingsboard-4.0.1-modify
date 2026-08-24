@@ -29,6 +29,15 @@ import org.thingsboard.server.transport.lwm2m.config.LwM2MTransportServerConfig;
 
 import java.util.Optional;
 
+/**
+ * LwM2M 服务实现：从传输层配置读取服务器/引导服务器主机、端口、公钥与证书。
+ * <p>
+ * <b>职责：</b>组装 {@link LwM2MServerSecurityConfigDefault}，供设备配置页展示。
+ * <p>
+ * <b>触发方式：</b>REST/业务查询调用，非定时、非队列。
+ * <p>
+ * <b>生效条件：</b>{@code transport.lwm2m.enabled=true}。
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -39,6 +48,7 @@ public class LwM2MServiceImpl implements LwM2MService {
     private final LwM2MTransportServerConfig serverConfig;
     private final Optional<LwM2MTransportBootstrapConfig> bootstrapConfig;
 
+    /** 按是否引导服务器返回对应安全配置，未配置则返回 {@code null}。 */
     @Override
     public LwM2MServerSecurityConfigDefault getServerSecurityInfo(boolean bootstrapServer) {
         LwM2MSecureServerConfig bsServerConfig = bootstrapServer ? bootstrapConfig.orElse(null) : serverConfig;

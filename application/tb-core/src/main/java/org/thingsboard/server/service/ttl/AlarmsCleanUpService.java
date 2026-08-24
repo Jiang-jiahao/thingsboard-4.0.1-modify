@@ -44,6 +44,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 告警 TTL 清理服务：按租户配置删除过期告警并推送 ALARM_DELETE 到规则引擎。
+ * <p>
+ * <b>职责：</b>遍历租户，读取租户配置 {@code alarmsTtlDays}，批量删除结束时间早于过期点的告警，
+ * 并清理已无实例的告警类型。
+ * <p>
+ * <b>触发方式：</b>定时 TTL（{@code sql.ttl.alarms.checking_interval}）。
+ * <p>
+ * <b>清理对象：</b>过期告警及其类型；仅处理本节点负责的租户分区。
+ */
 @TbCoreComponent
 @Service
 @Slf4j
@@ -60,6 +70,7 @@ public class AlarmsCleanUpService {
     private final PartitionService partitionService;
     private final TbTenantProfileCache tenantProfileCache;
 
+    /** 按租户 TTL 批量删除过期告警。 */
     @Scheduled(initialDelayString = "#{T(org.apache.commons.lang3.RandomUtils).nextLong(0, ${sql.ttl.alarms.checking_interval})}", fixedDelayString = "${sql.ttl.alarms.checking_interval}")
     public void cleanUp() {
         PageDataIterable<TenantId> tenants = new PageDataIterable<>(tenantService::findTenantsIds, 10_000);

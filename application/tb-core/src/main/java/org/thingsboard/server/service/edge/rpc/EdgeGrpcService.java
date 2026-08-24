@@ -83,7 +83,16 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
-
+/**
+ * Cloud 与 Edge 之间的 gRPC 会话服务。
+ * <p>
+ * 在 {@code edges.enabled=true} 时启动 Netty gRPC Server，维护每台 Edge 的 {@link EdgeGrpcSession}，
+ * 处理上下行消息、连接/断开状态（写活动属性并推规则引擎 {@code CONNECT_EVENT}/{@code DISCONNECT_EVENT}）、
+ * 配置更新、删除会话以及全量同步请求。实现 {@link org.thingsboard.server.service.edge.rpc.EdgeRpcService}，
+ * 供集群消息与 Controller 侧同步入口调用。
+ *
+ * @see EdgeGrpcSession
+ */
 @Service
 @Slf4j
 @ConditionalOnProperty(prefix = "edges", value = "enabled", havingValue = "true")
@@ -160,6 +169,7 @@ public class EdgeGrpcService extends EdgeRpcServiceGrpc.EdgeRpcServiceImplBase i
 
     private ScheduledExecutorService executorService;
 
+    /** 启动 gRPC Server 与下行/事件调度线程池。 */
     @PostConstruct
     public void init() {
         log.info("Initializing Edge RPC service!");
@@ -194,6 +204,7 @@ public class EdgeGrpcService extends EdgeRpcServiceGrpc.EdgeRpcServiceImplBase i
         log.info("Edge RPC service initialized!");
     }
 
+    /** 关闭 gRPC Server、取消定时任务并停止线程池。 */
     @PreDestroy
     public void destroy() {
         if (server != null) {
@@ -218,6 +229,7 @@ public class EdgeGrpcService extends EdgeRpcServiceGrpc.EdgeRpcServiceImplBase i
         }
     }
 
+    /** 为新连接创建 gRPC 会话并返回上行消息观察者。 */
     @Override
     public StreamObserver<RequestMsg> handleMsgs(StreamObserver<ResponseMsg> outputStream) {
         EdgeGrpcSession session = createEdgeGrpcSession(outputStream);
@@ -232,6 +244,7 @@ public class EdgeGrpcService extends EdgeRpcServiceGrpc.EdgeRpcServiceImplBase i
                 sendDownlinkExecutorService, maxInboundMessageSize, maxHighPriorityQueueSizePerSession);
     }
 
+    /** 处理发往本节点 Edge 会话的高优先级事件、事件更新或同步请求/响应。 */
     @Override
     public void onToEdgeSessionMsg(TenantId tenantId, EdgeSessionMsg msg) {
         switch (msg.getMsgType()) {
@@ -258,6 +271,7 @@ public class EdgeGrpcService extends EdgeRpcServiceGrpc.EdgeRpcServiceImplBase i
         }
     }
 
+    /** 已连接会话上推送 Edge 配置更新。 */
     @Override
     public void updateEdge(TenantId tenantId, Edge edge) {
         EdgeGrpcSession session = sessions.get(edge.getId());
@@ -269,6 +283,7 @@ public class EdgeGrpcService extends EdgeRpcServiceGrpc.EdgeRpcServiceImplBase i
         }
     }
 
+    /** 关闭并清理指定 Edge 的 gRPC 会话。 */
     @Override
     public void deleteEdge(TenantId tenantId, EdgeId edgeId) {
         EdgeGrpcSession session = sessions.get(edgeId);
@@ -360,6 +375,7 @@ public class EdgeGrpcService extends EdgeRpcServiceGrpc.EdgeRpcServiceImplBase i
         }
     }
 
+    /** 发起 Edge 全量同步；若本节点会话忙则直接回调失败。 */
     @Override
     public void processSyncRequest(TenantId tenantId, EdgeId edgeId, Consumer<FromEdgeSyncResponse> responseConsumer) {
         ToEdgeSyncRequest request = new ToEdgeSyncRequest(UUID.randomUUID(), tenantId, edgeId, serviceInfoProvider.getServiceId());

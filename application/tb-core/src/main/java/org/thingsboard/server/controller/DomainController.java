@@ -54,6 +54,21 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERT
 import static org.thingsboard.server.controller.ControllerConstants.SYSTEM_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * OAuth2 登录域名（Domain）REST 入口。
+ * <p>
+ * 系统管理员为平台配置对外域名，并把 OAuth2 客户端绑定到该域名。仅在
+ * {@link TbCoreComponent} 中生效。域名名称在整个平台范围内唯一。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api}。资源路径如 {@code /domain}、{@code /domain/infos}、
+ * {@code /domain/{id}/oauth2Clients}。
+ * <p>
+ * <b>权限：</b>全部接口仅 SYS_ADMIN。
+ * <p>
+ * <b>下游：</b>写路径走 {@link TbDomainService}；分页/详情查询走基类 {@code domainService}。
+ *
+ * @see TbDomainService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -63,6 +78,11 @@ public class DomainController extends BaseController {
 
     private final TbDomainService tbDomainService;
 
+    /**
+     * 创建或更新域名，并可同时绑定一组 OAuth2 客户端。
+     * <p>
+     * 无 {@code id} 为新建；指定已有 id 则更新。可选 {@code oauth2ClientIds} 逗号分隔。
+     */
     @ApiOperation(value = "Save or Update Domain (saveDomain)",
             notes = "Create or update the Domain. When creating domain, platform generates Domain Id as " + UUID_WIKI_LINK +
                     "The newly created Domain Id will be present in the response. " +
@@ -81,6 +101,9 @@ public class DomainController extends BaseController {
         return tbDomainService.save(domain, getOAuth2ClientIds(ids), getCurrentUser());
     }
 
+    /**
+     * 替换指定域名绑定的 OAuth2 客户端列表。
+     */
     @ApiOperation(value = "Update oauth2 clients (updateOauth2Clients)",
             notes = "Update oauth2 clients for the specified domain. ")
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
@@ -93,6 +116,9 @@ public class DomainController extends BaseController {
         tbDomainService.updateOauth2Clients(domain, oAuth2ClientIds, getCurrentUser());
     }
 
+    /**
+     * 分页列出当前租户（系统租户）下的域名信息（含关联 OAuth2 客户端摘要）。
+     */
     @ApiOperation(value = "Get Domain infos (getTenantDomainInfos)", notes = SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
     @GetMapping(value = "/domain/infos")
@@ -111,6 +137,9 @@ public class DomainController extends BaseController {
         return domainService.findDomainInfosByTenantId(getTenantId(), pageLink);
     }
 
+    /**
+     * 按 Id 读取域名详情（含关联 OAuth2 客户端）。
+     */
     @ApiOperation(value = "Get Domain info by Id (getDomainInfoById)", notes = SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
     @GetMapping(value = "/domain/info/{id}")
@@ -119,6 +148,9 @@ public class DomainController extends BaseController {
         return checkEntityId(domainId, domainService::findDomainInfoById, Operation.READ);
     }
 
+    /**
+     * 按 Id 删除域名。引用不存在的 Id 会报错。
+     */
     @ApiOperation(value = "Delete Domain by ID (deleteDomain)",
             notes = "Deletes Domain by ID. Referencing non-existing domain Id will cause an error." + SYSTEM_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('SYS_ADMIN')")

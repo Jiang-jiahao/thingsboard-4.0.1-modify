@@ -30,6 +30,13 @@ import org.thingsboard.server.queue.util.TbCoreComponent;
 import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
 import org.thingsboard.server.service.security.model.SecurityUser;
 
+/**
+ * {@link TbAssetProfileService} 的默认实现。
+ * <p>
+ * 由 AssetProfileController 调用，委托 {@link AssetProfileService} 落库；写审计日志，保存时 autoCommit。
+ *
+ * @see TbAssetProfileService
+ */
 @Service
 @TbCoreComponent
 @AllArgsConstructor
@@ -38,6 +45,7 @@ public class DefaultTbAssetProfileService extends AbstractTbEntityService implem
 
     private final AssetProfileService assetProfileService;
 
+    /** 保存资产配置，写审计并尝试 autoCommit。 */
     @Override
     public AssetProfile save(AssetProfile assetProfile, SecurityUser user) throws Exception {
         ActionType actionType = assetProfile.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
@@ -54,6 +62,7 @@ public class DefaultTbAssetProfileService extends AbstractTbEntityService implem
         }
     }
 
+    /** 删除资产配置并写 DELETED 审计。 */
     @Override
     public void delete(AssetProfile assetProfile, User user) {
         ActionType actionType = ActionType.DELETED;
@@ -70,6 +79,7 @@ public class DefaultTbAssetProfileService extends AbstractTbEntityService implem
         }
     }
 
+    /** 设为默认资产配置，并对新旧配置写 UPDATED 审计。 */
     @Override
     public AssetProfile setDefaultAssetProfile(AssetProfile assetProfile, AssetProfile previousDefaultAssetProfile, User user) throws ThingsboardException {
         TenantId tenantId = assetProfile.getTenantId();

@@ -83,6 +83,18 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHO
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
+/**
+ * 计算字段（Calculated Field）CRUD、调试事件与 TBEL 脚本试跑 REST。
+ * <p>
+ * 仅在 {@link TbCoreComponent} 中生效。路径 {@code /api/calculatedField*}、
+ * {@code /api/{entityType}/{entityId}/calculatedFields}。仅 TENANT_ADMIN。
+ * 写路径走 {@link TbCalculatedFieldService}；保存时会校验所属实体 WRITE_CALCULATED_FIELD，
+ * 以及配置里引用实体仅允许 TENANT/CUSTOMER/ASSET/DEVICE。
+ * 调试事件查 {@link EventService}；试跑脚本走 {@link TbelInvokeService}。
+ *
+ * @see TbCalculatedFieldService
+ * @see TbelInvokeService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -124,6 +136,9 @@ public class CalculatedFieldController extends BaseController {
             + MARKDOWN_CODE_BLOCK_END
             + "\n\n Expected result JSON contains \"output\" and \"error\".";
 
+    /**
+     * 创建或更新计算字段。会校验所属实体写权限，以及引用实体类型合法。
+     */
     @ApiOperation(value = "Create Or Update Calculated Field (saveCalculatedField)",
             notes = "Creates or Updates the Calculated Field. When creating calculated field, platform generates Calculated Field Id as " + UUID_WIKI_LINK +
                     "The newly created Calculated Field Id will be present in the response. " +
@@ -143,6 +158,9 @@ public class CalculatedFieldController extends BaseController {
         return tbCalculatedFieldService.save(calculatedField, getCurrentUser());
     }
 
+    /**
+     * 按 ID 取计算字段，并校验对所属实体有 READ_CALCULATED_FIELD。
+     */
     @ApiOperation(value = "Get Calculated Field (getCalculatedFieldById)",
             notes = "Fetch the Calculated Field object based on the provided Calculated Field Id."
     )
@@ -158,6 +176,9 @@ public class CalculatedFieldController extends BaseController {
         return calculatedField;
     }
 
+    /**
+     * 分页列出某实体上的计算字段。
+     */
     @ApiOperation(value = "Get Calculated Fields by Entity Id (getCalculatedFieldsByEntityId)",
             notes = "Fetch the Calculated Fields based on the provided Entity Id."
     )
@@ -179,6 +200,9 @@ public class CalculatedFieldController extends BaseController {
         return checkNotNull(tbCalculatedFieldService.findAllByTenantIdAndEntityId(entityId, getCurrentUser(), pageLink));
     }
 
+    /**
+     * 删除计算字段。
+     */
     @ApiOperation(value = "Delete Calculated Field (deleteCalculatedField)",
             notes = "Deletes the calculated field. Referencing non-existing Calculated Field Id will cause an error." + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -192,6 +216,9 @@ public class CalculatedFieldController extends BaseController {
         tbCalculatedFieldService.delete(calculatedField, getCurrentUser());
     }
 
+    /**
+     * 取该计算字段最近一条 DEBUG 事件，供 UI 调试。
+     */
     @ApiOperation(value = "Get latest calculated field debug event (getLatestCalculatedFieldDebugEvent)",
             notes = "Gets latest calculated field debug event for specified calculated field id. " +
                     "Referencing non-existing calculated field id will cause an error. " + TENANT_AUTHORITY_PARAGRAPH)
@@ -209,6 +236,9 @@ public class CalculatedFieldController extends BaseController {
                 .orElse(null);
     }
 
+    /**
+     * 用给定 expression + arguments 试跑 TBEL 脚本，返回 output / error。不落库。
+     */
     @ApiOperation(value = "Test Script expression",
             notes = TEST_SCRIPT_EXPRESSION + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")

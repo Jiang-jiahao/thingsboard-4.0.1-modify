@@ -53,6 +53,17 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * 通知请求调度服务：按分区加载已调度通知，到期后交给 {@link NotificationCenter} 发送。
+ * <p>
+ * <b>职责：</b>基于 Core 分区接管 SCHEDULED 通知请求；延迟到期后异步发送；
+ * 请求或租户删除、分区移交时取消本地定时任务。
+ * <p>
+ * <b>触发方式：</b>分区变更时加载；业务侧调用 {@link #scheduleNotificationRequest}；
+ * 组件生命周期删除事件取消调度。
+ * <p>
+ * <b>通知对象：</b>通知请求配置的目标用户/渠道。
+ */
 @TbCoreComponent
 @Service
 @RequiredArgsConstructor
@@ -66,6 +77,7 @@ public class DefaultNotificationSchedulerService extends AbstractPartitionBasedS
 
     private final Map<NotificationRequestId, ScheduledRequestMetadata> scheduledNotificationRequests = new ConcurrentHashMap<>();
 
+    /** 初始化分区感知调度。 */
     @Override
     @PostConstruct
     public void init() {
@@ -87,6 +99,7 @@ public class DefaultNotificationSchedulerService extends AbstractPartitionBasedS
         return Collections.emptyMap();
     }
 
+    /** 按请求 ID 加载并安排延迟发送。 */
     @Override
     public void scheduleNotificationRequest(TenantId tenantId, NotificationRequestId notificationRequestId, long requestTs) {
         NotificationRequest notificationRequest = notificationRequestService.findNotificationRequestById(tenantId, notificationRequestId);
@@ -123,6 +136,7 @@ public class DefaultNotificationSchedulerService extends AbstractPartitionBasedS
         scheduledNotificationRequests.put(request.getId(), new ScheduledRequestMetadata(tenantId, scheduledTask));
     }
 
+    /** 通知请求或租户删除时，取消对应本地调度。 */
     @EventListener(ComponentLifecycleMsg.class)
     public void handleComponentLifecycleEvent(ComponentLifecycleMsg event) {
         if (event.getEvent() == ComponentLifecycleEvent.DELETED) {
@@ -166,6 +180,7 @@ public class DefaultNotificationSchedulerService extends AbstractPartitionBasedS
         return "notifications-scheduler";
     }
 
+    /** 停止分区调度与本地定时线程池。 */
     @Override
     @PreDestroy
     public void stop() {

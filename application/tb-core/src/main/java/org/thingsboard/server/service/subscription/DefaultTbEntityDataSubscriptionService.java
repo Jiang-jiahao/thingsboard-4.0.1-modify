@@ -91,7 +91,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * 主要处理查询型订阅
+ * {@link TbEntityDataSubscriptionService} 默认实现。
+ * <p>
+ * Dashboard WebSocket 查询型订阅：执行实体/告警查询，建立 latest 与时序订阅，
+ * 并用调度线程按 {@code server.ws.dynamic_page_link.refresh_interval} 刷新动态页。
+ *
+ * @see TbEntityDataSubscriptionService
  */
 @SuppressWarnings("UnstableApiUsage")
 @Slf4j
@@ -153,6 +158,9 @@ public class DefaultTbEntityDataSubscriptionService implements TbEntityDataSubsc
     private String serviceId;
     private SubscriptionServiceStatistics stats = new SubscriptionServiceStatistics();
 
+    /**
+     * 启动 WS 回调线程与动态页刷新调度器。
+     */
     @PostConstruct
     public void initExecutor() {
         serviceId = serviceInfoProvider.getServiceId();
@@ -165,6 +173,9 @@ public class DefaultTbEntityDataSubscriptionService implements TbEntityDataSubsc
         }
     }
 
+    /**
+     * 关闭回调线程与调度器。
+     */
     @PreDestroy
     public void shutdownExecutor() {
         if (wsCallBackExecutor != null) {
@@ -175,6 +186,9 @@ public class DefaultTbEntityDataSubscriptionService implements TbEntityDataSubsc
         }
     }
 
+    /**
+     * 创建或更新实体数据订阅：执行查询并建立 latest/时序订阅。
+     */
     @Override
     public void handleCmd(WebSocketSessionRef session, EntityDataCmd cmd) {
         TbEntityDataSubCtx ctx = getSubCtx(session.getSessionId(), cmd.getCmdId());
@@ -369,6 +383,9 @@ public class DefaultTbEntityDataSubscriptionService implements TbEntityDataSubsc
         wsService.close(sessionId, CloseStatus.SERVICE_RESTARTED);
     }
 
+    /**
+     * 创建实体计数订阅并定时刷新动态查询。
+     */
     @Override
     public void handleCmd(WebSocketSessionRef session, EntityCountCmd cmd) {
         TbEntityCountSubCtx ctx = getSubCtx(session.getSessionId(), cmd.getCmdId());
@@ -389,6 +406,9 @@ public class DefaultTbEntityDataSubscriptionService implements TbEntityDataSubsc
         }
     }
 
+    /**
+     * 创建或更新告警数据订阅。
+     */
     @Override
     public void handleCmd(WebSocketSessionRef session, AlarmDataCmd cmd) {
         TbAlarmDataSubCtx ctx = getSubCtx(session.getSessionId(), cmd.getCmdId());
@@ -421,6 +441,9 @@ public class DefaultTbEntityDataSubscriptionService implements TbEntityDataSubsc
         }
     }
 
+    /**
+     * 创建告警计数订阅并按实体集合订阅告警变更。
+     */
     @Override
     public void handleCmd(WebSocketSessionRef session, AlarmCountCmd cmd) {
         TbAlarmCountSubCtx ctx = getSubCtx(session.getSessionId(), cmd.getCmdId());
@@ -453,6 +476,9 @@ public class DefaultTbEntityDataSubscriptionService implements TbEntityDataSubsc
         }
     }
 
+    /**
+     * 创建告警状态订阅并推送当前活跃告警。
+     */
     @Override
     public void handleCmd(WebSocketSessionRef session, AlarmStatusCmd cmd) {
         log.debug("[{}] Handling alarm status subscription cmd (cmdId: {})", session.getSessionId(), cmd.getCmdId());
@@ -511,6 +537,9 @@ public class DefaultTbEntityDataSubscriptionService implements TbEntityDataSubsc
         }
     }
 
+    /**
+     * 定时打印查询型订阅统计。
+     */
     @Scheduled(fixedDelayString = "${server.ws.dynamic_page_link.stats:10000}")
     public void printStats() {
         int alarmQueryInvocationCntValue = stats.getAlarmQueryInvocationCnt().getAndSet(0);
@@ -762,6 +791,9 @@ public class DefaultTbEntityDataSubscriptionService implements TbEntityDataSubsc
         return data.stream().collect(Collectors.toMap(TsKvEntry::getKey, value -> new TsValue(value.getTs(), value.getValueAsString())));
     }
 
+    /**
+     * 取消指定命令的查询型订阅。
+     */
     @Override
     public void cancelSubscription(String sessionId, UnsubscribeCmd cmd) {
         cleanupAndCancel(getSubCtx(sessionId, cmd.getCmdId()));
@@ -779,6 +811,9 @@ public class DefaultTbEntityDataSubscriptionService implements TbEntityDataSubsc
         }
     }
 
+    /**
+     * 取消会话全部查询型订阅。
+     */
     @Override
     public void cancelAllSessionSubscriptions(String sessionId) {
         Map<Integer, TbAbstractSubCtx> sessionSubs = subscriptionsBySessionId.remove(sessionId);

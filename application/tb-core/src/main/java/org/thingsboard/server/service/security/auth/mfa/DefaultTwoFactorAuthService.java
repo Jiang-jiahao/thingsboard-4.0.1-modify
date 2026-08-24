@@ -45,7 +45,12 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * 默认的双因子认证服务
+ * {@link TwoFactorAuthService} 默认实现。
+ * <p>
+ * 按 {@link TwoFaProviderType} 分发到具体 Provider；发送/校验走 {@link RateLimitService}，
+ * 失败锁定委托 {@link SystemSecurityService}。
+ *
+ * @see TwoFactorAuthService
  */
 @Service
 @RequiredArgsConstructor
@@ -63,6 +68,9 @@ public class DefaultTwoFactorAuthService implements TwoFactorAuthService {
     private static final ThingsboardException PROVIDER_NOT_AVAILABLE_ERROR = new ThingsboardException("2FA provider is not available", ThingsboardErrorCode.GENERAL);
     private static final ThingsboardException TOO_MANY_REQUESTS_ERROR = new ThingsboardException("Too many requests", ThingsboardErrorCode.TOO_MANY_REQUESTS);
 
+    /**
+     * 用户账号是否已配置 2FA。
+     */
     @Override
     public boolean isTwoFaEnabled(TenantId tenantId, UserId userId) {
         return configManager.getAccountTwoFaSettings(tenantId, userId)
@@ -70,12 +78,18 @@ public class DefaultTwoFactorAuthService implements TwoFactorAuthService {
                 .orElse(false);
     }
 
+    /**
+     * 检查提供方是否可用。
+     */
     @Override
     public void checkProvider(TenantId tenantId, TwoFaProviderType providerType) throws ThingsboardException {
         getTwoFaProvider(providerType).check(tenantId);
     }
 
 
+    /**
+     * 按提供方加载账号配置后准备验证码。
+     */
     @Override
     public void prepareVerificationCode(SecurityUser user, TwoFaProviderType providerType, boolean checkLimits) throws Exception {
         TwoFaAccountConfig accountConfig = configManager.getTwoFaAccountConfig(user.getTenantId(), user.getId(), providerType)
@@ -83,6 +97,9 @@ public class DefaultTwoFactorAuthService implements TwoFactorAuthService {
         prepareVerificationCode(user, accountConfig, checkLimits);
     }
 
+    /**
+     * 按账号配置准备验证码，可选发送频控。
+     */
     @Override
     public void prepareVerificationCode(SecurityUser user, TwoFaAccountConfig accountConfig, boolean checkLimits) throws ThingsboardException {
         PlatformTwoFaSettings twoFaSettings = configManager.getPlatformTwoFaSettings(user.getTenantId(), true)
@@ -105,6 +122,9 @@ public class DefaultTwoFactorAuthService implements TwoFactorAuthService {
     }
 
 
+    /**
+     * 按提供方加载账号配置后校验验证码。
+     */
     @Override
     public boolean checkVerificationCode(SecurityUser user, TwoFaProviderType providerType, String verificationCode, boolean checkLimits) throws ThingsboardException {
         TwoFaAccountConfig accountConfig = configManager.getTwoFaAccountConfig(user.getTenantId(), user.getId(), providerType)
@@ -112,6 +132,9 @@ public class DefaultTwoFactorAuthService implements TwoFactorAuthService {
         return checkVerificationCode(user, verificationCode, accountConfig, checkLimits);
     }
 
+    /**
+     * 校验验证码；可选频控与失败锁定，成功后清理限流计数。
+     */
     @Override
     public boolean checkVerificationCode(SecurityUser user, String verificationCode, TwoFaAccountConfig accountConfig, boolean checkLimits) throws ThingsboardException {
         if (!userService.findUserCredentialsByUserId(user.getTenantId(), user.getId()).isEnabled()) {
@@ -149,6 +172,9 @@ public class DefaultTwoFactorAuthService implements TwoFactorAuthService {
         return verificationSuccess;
     }
 
+    /**
+     * 生成新的 2FA 账号配置。
+     */
     @Override
     public TwoFaAccountConfig generateNewAccountConfig(User user, TwoFaProviderType providerType) throws ThingsboardException {
         TwoFaProviderConfig providerConfig = getTwoFaProviderConfig(user.getTenantId(), providerType);

@@ -36,6 +36,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * {@link TbQueueService} 的默认实现。
+ * <p>
+ * 由 QueueController 与租户配置变更调用，委托 {@link QueueService} 落库后经 {@link TbClusterService}
+ * 广播队列变更，并可能创建/删除 Kafka Topic。
+ *
+ * @see TbQueueService
+ */
 @Slf4j
 @Service
 @TbCoreComponent
@@ -46,6 +54,7 @@ public class DefaultTbQueueService extends AbstractTbEntityService implements Tb
     private final TbClusterService tbClusterService;
     private final TbQueueAdmin tbQueueAdmin;
 
+    /** 保存队列并通知集群（必要时创建 Topic）。 */
     @Override
     public Queue saveQueue(Queue queue) {
         boolean create = queue.getId() == null;
@@ -62,6 +71,7 @@ public class DefaultTbQueueService extends AbstractTbEntityService implements Tb
         return savedQueue;
     }
 
+    /** 按 ID 删除队列并通知集群。 */
     @Override
     public void deleteQueue(TenantId tenantId, QueueId queueId) {
         Queue queue = queueService.findQueueById(tenantId, queueId);
@@ -69,6 +79,7 @@ public class DefaultTbQueueService extends AbstractTbEntityService implements Tb
         tbClusterService.onQueuesDelete(List.of(queue));
     }
 
+    /** 按名称删除队列。 */
     @Override
     public void deleteQueueByQueueName(TenantId tenantId, String queueName) {
         Queue queue = queueService.findQueueByTenantIdAndNameInternal(tenantId, queueName);
@@ -76,6 +87,7 @@ public class DefaultTbQueueService extends AbstractTbEntityService implements Tb
         tbClusterService.onQueuesDelete(List.of(queue));
     }
 
+    /** 租户配置变更后为相关租户增删/更新队列。 */
     @Override
     public void updateQueuesByTenants(List<TenantId> tenantIds, TenantProfile newTenantProfile, TenantProfile
             oldTenantProfile) {

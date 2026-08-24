@@ -49,6 +49,22 @@ import static org.thingsboard.server.controller.ControllerConstants.RELATION_INF
 import static org.thingsboard.server.controller.ControllerConstants.RELATION_TYPE_GROUP_PARAM_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.RELATION_TYPE_PARAM_DESCRIPTION;
 
+/**
+ * 实体关系（Entity Relation）REST 入口。
+ * <p>
+ * 管理实体之间的有向关系（from / to、类型、类型组），以及按方向或复杂查询检索。
+ * 仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api}。路径如 {@code /relation}、{@code /v2/relation}、
+ * {@code /relations}、{@code /relations/info}。
+ * <p>
+ * <b>权限：</b>SYS_ADMIN、TENANT_ADMIN、CUSTOMER_USER；写关系时两端实体需 WRITE
+ * （租户管理员把关系连到自己租户实体时有特例），读时两端需 READ，结果还会再按权限过滤。
+ * <p>
+ * <b>下游：</b>写/删走 {@link TbEntityRelationService}；查询走基类 {@code relationService}。
+ *
+ * @see TbEntityRelationService
+ */
 @RestController
 @TbCoreComponent
 @RequestMapping("/api")
@@ -71,6 +87,9 @@ public class EntityRelationController extends BaseController {
             "If the user has the authority of 'Tenant Administrator', the server checks that the entity is owned by the same tenant. " +
             "If the user has the authority of 'Customer User', the server checks that the entity is assigned to the same customer.";
 
+    /**
+     * 创建或更新一条关系。唯一键为 from/to + 类型组 + 关系类型。无返回体。
+     */
     @ApiOperation(value = "Create Relation (saveRelation)",
             notes = "Creates or updates a relation between two entities in the platform. " +
                     "Relations unique key is a combination of from/to entity id and relation type group and relation type. " +
@@ -83,6 +102,9 @@ public class EntityRelationController extends BaseController {
         doSave(relation);
     }
 
+    /**
+     * 创建或更新一条关系（V2），返回保存后的 {@link EntityRelation}。
+     */
     @ApiOperation(value = "Create Relation (saveRelationV2)",
             notes = "Creates or updates a relation between two entities in the platform. " +
                     "Relations unique key is a combination of from/to entity id and relation type group and relation type. " +
@@ -106,6 +128,9 @@ public class EntityRelationController extends BaseController {
         return tbEntityRelationService.save(getTenantId(), getCurrentUser().getCustomerId(), relation, getCurrentUser());
     }
 
+    /**
+     * 按 from/to/类型删除一条关系。无返回体。
+     */
     @ApiOperation(value = "Delete Relation (deleteRelation)",
             notes = "Deletes a relation between two entities in the platform. " + SECURITY_CHECKS_ENTITIES_DESCRIPTION)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -120,6 +145,9 @@ public class EntityRelationController extends BaseController {
         doDelete(strFromId, strFromType, strRelationType, strRelationTypeGroup, strToId, strToType);
     }
 
+    /**
+     * 按 from/to/类型删除一条关系（V2），返回被删的 {@link EntityRelation}。
+     */
     @ApiOperation(value = "Delete Relation (deleteRelationV2)",
             notes = "Deletes a relation between two entities in the platform. " + SECURITY_CHECKS_ENTITIES_DESCRIPTION)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -150,6 +178,9 @@ public class EntityRelationController extends BaseController {
         return tbEntityRelationService.delete(getTenantId(), getCurrentUser().getCustomerId(), relation, getCurrentUser());
     }
 
+    /**
+     * 删除指定实体在 COMMON 类型组下的全部 from/to 关系。
+     */
     @ApiOperation(value = "Delete common relations (deleteCommonRelations)",
             notes = "Deletes all the relations ('from' and 'to' direction) for the specified entity and relation type group: 'COMMON'. " +
                     SECURITY_CHECKS_ENTITY_DESCRIPTION)
@@ -165,6 +196,9 @@ public class EntityRelationController extends BaseController {
         tbEntityRelationService.deleteCommonRelations(getTenantId(), getCurrentUser().getCustomerId(), entityId, getCurrentUser());
     }
 
+    /**
+     * 按 from/to/类型读取单条关系；不存在则抛异常。
+     */
     @ApiOperation(value = "Get Relation (getRelation)",
             notes = "Returns relation object between two specified entities if present. Otherwise throws exception. " + SECURITY_CHECKS_ENTITIES_DESCRIPTION)
     @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
@@ -189,6 +223,9 @@ public class EntityRelationController extends BaseController {
         return checkNotNull(relationService.getRelation(getTenantId(), fromId, toId, strRelationType, typeGroup));
     }
 
+    /**
+     * 列出以指定实体为 from 端的关系（不限关系类型）。
+     */
     @ApiOperation(value = "Get List of Relations (findByFrom)",
             notes = "Returns list of relation objects for the specified entity by the 'from' direction. " +
                     SECURITY_CHECKS_ENTITY_DESCRIPTION)
@@ -207,6 +244,9 @@ public class EntityRelationController extends BaseController {
         return checkNotNull(filterRelationsByReadPermission(relationService.findByFrom(getTenantId(), entityId, typeGroup)));
     }
 
+    /**
+     * 列出以指定实体为 from 端的关系信息（含对端名称等）。
+     */
     @ApiOperation(value = "Get List of Relation Infos (findInfoByFrom)",
             notes = "Returns list of relation info objects for the specified entity by the 'from' direction. " +
                     SECURITY_CHECKS_ENTITY_DESCRIPTION + " " + RELATION_INFO_DESCRIPTION)
@@ -225,6 +265,9 @@ public class EntityRelationController extends BaseController {
         return checkNotNull(filterRelationsByReadPermission(relationService.findInfoByFrom(getTenantId(), entityId, typeGroup).get()));
     }
 
+    /**
+     * 列出以指定实体为 from 端、且关系类型匹配的关系。
+     */
     @ApiOperation(value = "Get List of Relations (findByFrom)",
             notes = "Returns list of relation objects for the specified entity by the 'from' direction and relation type. " +
                     SECURITY_CHECKS_ENTITY_DESCRIPTION)
@@ -245,6 +288,9 @@ public class EntityRelationController extends BaseController {
         return checkNotNull(filterRelationsByReadPermission(relationService.findByFromAndType(getTenantId(), entityId, strRelationType, typeGroup)));
     }
 
+    /**
+     * 列出以指定实体为 to 端的关系（不限关系类型）。
+     */
     @ApiOperation(value = "Get List of Relations (findByTo)",
             notes = "Returns list of relation objects for the specified entity by the 'to' direction. " +
                     SECURITY_CHECKS_ENTITY_DESCRIPTION)
@@ -263,6 +309,9 @@ public class EntityRelationController extends BaseController {
         return checkNotNull(filterRelationsByReadPermission(relationService.findByTo(getTenantId(), entityId, typeGroup)));
     }
 
+    /**
+     * 列出以指定实体为 to 端的关系信息（含对端名称等）。
+     */
     @ApiOperation(value = "Get List of Relation Infos (findInfoByTo)",
             notes = "Returns list of relation info objects for the specified entity by the 'to' direction. " +
                     SECURITY_CHECKS_ENTITY_DESCRIPTION + " " + RELATION_INFO_DESCRIPTION)
@@ -281,6 +330,9 @@ public class EntityRelationController extends BaseController {
         return checkNotNull(filterRelationsByReadPermission(relationService.findInfoByTo(getTenantId(), entityId, typeGroup).get()));
     }
 
+    /**
+     * 列出以指定实体为 to 端、且关系类型匹配的关系。
+     */
     @ApiOperation(value = "Get List of Relations (findByTo)",
             notes = "Returns list of relation objects for the specified entity by the 'to' direction and relation type. " +
                     SECURITY_CHECKS_ENTITY_DESCRIPTION)
@@ -301,6 +353,9 @@ public class EntityRelationController extends BaseController {
         return checkNotNull(filterRelationsByReadPermission(relationService.findByToAndType(getTenantId(), entityId, strRelationType, typeGroup)));
     }
 
+    /**
+     * 按 {@link EntityRelationsQuery}（实体、关系类型、深度等）查找相关关系，结果再按 READ 过滤。
+     */
     @ApiOperation(value = "Find related entities (findByQuery)",
             notes = "Returns all entities that are related to the specific entity. " +
                     "The entity id, relation type, entity types, depth of the search, and other query parameters defined using complex 'EntityRelationsQuery' object. " +
@@ -317,6 +372,9 @@ public class EntityRelationController extends BaseController {
         return checkNotNull(filterRelationsByReadPermission(relationService.findByQuery(getTenantId(), query).get()));
     }
 
+    /**
+     * 按 {@link EntityRelationsQuery} 查找相关关系信息（含对端名称等）。
+     */
     @ApiOperation(value = "Find related entity infos (findInfoByQuery)",
             notes = "Returns all entity infos that are related to the specific entity. " +
                     "The entity id, relation type, entity types, depth of the search, and other query parameters defined using complex 'EntityRelationsQuery' object. " +

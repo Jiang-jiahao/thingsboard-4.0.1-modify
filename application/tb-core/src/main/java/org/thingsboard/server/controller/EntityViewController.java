@@ -79,7 +79,20 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CU
 import static org.thingsboard.server.controller.EdgeController.EDGE_ID;
 
 /**
- * Created by Victor Basanets on 8/28/2017.
+ * 实体视图（Entity View）REST 入口。
+ * <p>
+ * 实体视图是设备/资产遥测与属性的只读窗口，可分配给客户或公开客户，也可同步到 Edge。
+ * 仅在 {@link TbCoreComponent} 中生效。
+ * <p>
+ * <b>URL 前缀：</b>{@code /api}。路径如 {@code /entityView}、{@code /tenant/entityViews}、
+ * {@code /customer/{customerId}/entityViews}、{@code /edge/{edgeId}/entityView/{entityViewId}}。
+ * <p>
+ * <b>权限：</b>读写对 TENANT_ADMIN、CUSTOMER_USER 开放（客户仅能操作已分配的视图）；
+ * 删除、分配客户/公开/Edge 仅 TENANT_ADMIN。
+ * <p>
+ * <b>下游：</b>写/分配/解绑 {@link TbEntityViewService}；查询走基类 {@code entityViewService}。
+ *
+ * @see TbEntityViewService
  */
 @RestController
 @TbCoreComponent
@@ -92,6 +105,9 @@ public class EntityViewController extends BaseController {
 
     public static final String ENTITY_VIEW_ID = "entityViewId";
 
+    /**
+     * 按 Id 读取完整实体视图。
+     */
     @ApiOperation(value = "Get entity view (getEntityViewById)",
             notes = "Fetch the EntityView object based on the provided entity view id. "
                     + ENTITY_VIEW_DESCRIPTION + MODEL_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -105,6 +121,9 @@ public class EntityViewController extends BaseController {
         return checkEntityViewId(new EntityViewId(toUUID(strEntityViewId)), Operation.READ);
     }
 
+    /**
+     * 按 Id 读取实体视图摘要（含客户标题等）。
+     */
     @ApiOperation(value = "Get Entity View info (getEntityViewInfoById)",
             notes = "Fetch the Entity View info object based on the provided Entity View Id. "
                     + ENTITY_VIEW_INFO_DESCRIPTION + MODEL_DESCRIPTION + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -119,6 +138,9 @@ public class EntityViewController extends BaseController {
         return checkEntityViewInfoId(entityViewId, Operation.READ);
     }
 
+    /**
+     * 创建或更新实体视图。无 {@code id} 时校验 CREATE，有 id 时校验 WRITE。
+     */
     @ApiOperation(value = "Save or update entity view (saveEntityView)",
             notes = ENTITY_VIEW_DESCRIPTION + MODEL_DESCRIPTION +
                     "Remove 'id', 'tenantId' and optionally 'customerId' from the request body example (below) to create new Entity View entity." +
@@ -140,6 +162,9 @@ public class EntityViewController extends BaseController {
         return tbEntityViewService.save(entityView, existingEntityView, getCurrentUser());
     }
 
+    /**
+     * 按 Id 删除实体视图。
+     */
     @ApiOperation(value = "Delete entity view (deleteEntityView)",
             notes = "Delete the EntityView object based on the provided entity view id. "
                     + TENANT_AUTHORITY_PARAGRAPH)
@@ -155,6 +180,9 @@ public class EntityViewController extends BaseController {
         tbEntityViewService.delete(entityView, getCurrentUser());
     }
 
+    /**
+     * 按名称读取当前租户的实体视图。
+     */
     @ApiOperation(value = "Get Entity View by name (getTenantEntityView)",
             notes = "Fetch the Entity View object based on the tenant id and entity view name. " + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -167,6 +195,9 @@ public class EntityViewController extends BaseController {
         return checkNotNull(entityViewService.findEntityViewByTenantIdAndName(tenantId, entityViewName));
     }
 
+    /**
+     * 把实体视图分配给客户，之后该客户可查询此视图。
+     */
     @ApiOperation(value = "Assign Entity View to customer (assignEntityViewToCustomer)",
             notes = "Creates assignment of the Entity View to customer. Customer will be able to query Entity View afterwards." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -189,6 +220,9 @@ public class EntityViewController extends BaseController {
         return tbEntityViewService.assignEntityViewToCustomer(getTenantId(), entityViewId, customer, getCurrentUser());
     }
 
+    /**
+     * 取消实体视图与客户的分配。未分配时抛错。
+     */
     @ApiOperation(value = "Unassign Entity View from customer (unassignEntityViewFromCustomer)",
             notes = "Clears assignment of the Entity View to customer. Customer will not be able to query Entity View afterwards." + TENANT_AUTHORITY_PARAGRAPH)
     @PreAuthorize("hasAuthority('TENANT_ADMIN')")
@@ -209,6 +243,9 @@ public class EntityViewController extends BaseController {
         return tbEntityViewService.unassignEntityViewFromCustomer(getTenantId(), entityViewId, customer, getCurrentUser());
     }
 
+    /**
+     * 分页列出分配给指定客户的实体视图，可按类型过滤。
+     */
     @ApiOperation(value = "Get Customer Entity Views (getCustomerEntityViews)",
             notes = "Returns a page of Entity View objects assigned to customer. " +
                     PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -242,6 +279,9 @@ public class EntityViewController extends BaseController {
         }
     }
 
+    /**
+     * 分页列出分配给指定客户的实体视图摘要。
+     */
     @ApiOperation(value = "Get Customer Entity View info (getCustomerEntityViewInfos)",
             notes = "Returns a page of Entity View info objects assigned to customer. " + ENTITY_VIEW_DESCRIPTION +
                     PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -275,6 +315,9 @@ public class EntityViewController extends BaseController {
         }
     }
 
+    /**
+     * 分页列出当前租户拥有的实体视图，可按类型过滤。
+     */
     @ApiOperation(value = "Get Tenant Entity Views (getTenantEntityViews)",
             notes = "Returns a page of entity views owned by tenant. " + ENTITY_VIEW_DESCRIPTION +
                     PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
@@ -304,6 +347,9 @@ public class EntityViewController extends BaseController {
         }
     }
 
+    /**
+     * 分页列出当前租户拥有的实体视图摘要。
+     */
     @ApiOperation(value = "Get Tenant Entity Views (getTenantEntityViews)",
             notes = "Returns a page of entity views info owned by tenant. " + ENTITY_VIEW_DESCRIPTION +
                     PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
@@ -332,6 +378,9 @@ public class EntityViewController extends BaseController {
         }
     }
 
+    /**
+     * 按 {@link EntityViewSearchQuery} 查找与某实体相关的实体视图，结果再按 READ 过滤。
+     */
     @ApiOperation(value = "Find related entity views (findByQuery)",
             notes = "Returns all entity views that are related to the specific entity. " +
                     "The entity id, relation type, entity view types, depth of the search, and other query parameters defined using complex 'EntityViewSearchQuery' object. " +
@@ -358,6 +407,9 @@ public class EntityViewController extends BaseController {
         return entityViews;
     }
 
+    /**
+     * 返回当前租户下已使用的实体视图类型集合。
+     */
     @ApiOperation(value = "Get Entity View Types (getEntityViewTypes)",
             notes = "Returns a set of unique entity view types based on entity views that are either owned by the tenant or assigned to the customer which user is performing the request."
                     + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
@@ -371,6 +423,9 @@ public class EntityViewController extends BaseController {
         return checkNotNull(entityViewTypes.get());
     }
 
+    /**
+     * 把实体视图分配给公开客户，未登录用户也可访问（用于嵌入公开仪表盘）。
+     */
     @ApiOperation(value = "Make entity view publicly available (assignEntityViewToPublicCustomer)",
             notes = "Entity View will be available for non-authorized (not logged-in) users. " +
                     "This is useful to create dashboards that you plan to share/embed on a publicly available website. " +
@@ -387,6 +442,9 @@ public class EntityViewController extends BaseController {
         return tbEntityViewService.assignEntityViewToPublicCustomer(getTenantId(), entityViewId, getCurrentUser());
     }
 
+    /**
+     * 把实体视图分配到 Edge，异步同步到远端边缘实例。
+     */
     @ApiOperation(value = "Assign entity view to edge (assignEntityViewToEdge)",
             notes = "Creates assignment of an existing entity view to an instance of The Edge. " +
                     EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
@@ -411,6 +469,9 @@ public class EntityViewController extends BaseController {
                 entityViewId, edge, getCurrentUser());
     }
 
+    /**
+     * 取消实体视图与 Edge 的分配，并通知远端删除本地副本。
+     */
     @ApiOperation(value = "Unassign entity view from edge (unassignEntityViewFromEdge)",
             notes = "Clears assignment of the entity view to the edge. " +
                     EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
@@ -435,6 +496,9 @@ public class EntityViewController extends BaseController {
                 edge, getCurrentUser());
     }
 
+    /**
+     * 分页列出已分配到指定 Edge 的实体视图，并按当前用户 READ 权限过滤。
+     */
     @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
     @RequestMapping(value = "/edge/{edgeId}/entityViews", params = {"pageSize", "page"}, method = RequestMethod.GET)
     @ResponseBody

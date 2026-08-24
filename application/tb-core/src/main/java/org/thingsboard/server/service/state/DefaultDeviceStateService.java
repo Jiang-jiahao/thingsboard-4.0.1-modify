@@ -113,7 +113,13 @@ import static org.thingsboard.server.common.data.DataConstants.SCOPE;
 import static org.thingsboard.server.common.data.DataConstants.SERVER_SCOPE;
 
 /**
- * Created by ashvayka on 01.05.18.
+ * 设备在线/活跃状态服务。
+ * <p>
+ * Core 按分区持有设备状态：消费连接、心跳、断开、不活跃事件，定期扫描超时设备并写属性/时序
+ *（{@code activityState}、{@code lastActivityTime} 等），触发规则引擎与通知规则。
+ * 分区变更时按 {@link AbstractPartitionBasedService} 加载或卸载本节点负责的设备。
+ *
+ * @see DeviceStateService
  */
 @Service
 @TbCoreComponent
@@ -201,6 +207,9 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
 
     final ConcurrentMap<DeviceId, DeviceStateData> deviceStates = new ConcurrentHashMap<>();
 
+    /**
+     * 启动状态检查与用量上报定时任务，以及设备状态线程池。
+     */
     @PostConstruct
     public void init() {
         super.init();
@@ -212,6 +221,9 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
         scheduledExecutor.scheduleWithFixedDelay(this::reportActivityStats, defaultActivityStatsIntervalInSec, defaultActivityStatsIntervalInSec, TimeUnit.SECONDS);
     }
 
+    /**
+     * 停止父类分区任务与设备状态线程池。
+     */
     @PreDestroy
     public void stop() {
         super.stop();
@@ -223,16 +235,21 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     protected String getServiceName() {
         return "Device State";
     }
 
+    /** {@inheritDoc} */
     @Override
     protected String getSchedulerExecutorName() {
         return "device-state-scheduled";
     }
 
+    /**
+     * 设备连接：更新 lastConnectTime，必要时标记为活跃。
+     */
     @Override
     public void onDeviceConnect(TenantId tenantId, DeviceId deviceId, long lastConnectTime) {
         if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
@@ -257,6 +274,9 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
         checkAndUpdateState(deviceId, stateData);
     }
 
+    /**
+     * 设备活跃心跳：更新 lastActivityTime 并可能从 inactive 切回 active。
+     */
     @Override
     public void onDeviceActivity(TenantId tenantId, DeviceId deviceId, long lastReportedActivity) {
         if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
@@ -289,6 +309,9 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
         }
     }
 
+    /**
+     * 设备断开：更新 lastDisconnectTime。
+     */
     @Override
     public void onDeviceDisconnect(TenantId tenantId, DeviceId deviceId, long lastDisconnectTime) {
         if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
@@ -312,6 +335,9 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
         pushRuleEngineMessage(stateData, TbMsgType.DISCONNECT_EVENT);
     }
 
+    /**
+     * 更新设备不活跃超时阈值。
+     */
     @Override
     public void onDeviceInactivityTimeoutUpdate(TenantId tenantId, DeviceId deviceId, long inactivityTimeout) {
         if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
@@ -326,6 +352,9 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
         checkAndUpdateState(deviceId, stateData);
     }
 
+    /**
+     * 设备进入不活跃：更新 inactivityAlarmTime 并推送活动状态。
+     */
     @Override
     public void onDeviceInactivity(TenantId tenantId, DeviceId deviceId, long lastInactivityTime) {
         if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
@@ -353,6 +382,9 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
         reportInactivity(lastInactivityTime, deviceId, stateData);
     }
 
+    /**
+     * 处理设备增删改队列消息：加载或清理本分区设备状态。
+     */
     @Override
     public void onQueueMsg(TransportProtos.DeviceStateServiceMsgProto proto, TbCallback callback) {
         try {
@@ -422,6 +454,9 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
         save(fetchedState.getTenantId(), deviceId, DefaultDeviceStateConstants.ACTIVITY_STATE, activityState);
     }
 
+    /**
+     * 新分区加入时批量加载设备状态。
+     */
     @Override
     protected Map<TopicPartitionInfo, List<ListenableFuture<?>>> onAddedPartitions(Set<TopicPartitionInfo> addedPartitions) {
         var result = new HashMap<TopicPartitionInfo, List<ListenableFuture<?>>>();
@@ -635,6 +670,9 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
         return cleanup;
     }
 
+    /**
+     * 分区迁出时从本机状态表移除设备。
+     */
     @Override
     protected void cleanupEntityOnPartitionRemoval(DeviceId deviceId) {
         cleanupEntity(deviceId);

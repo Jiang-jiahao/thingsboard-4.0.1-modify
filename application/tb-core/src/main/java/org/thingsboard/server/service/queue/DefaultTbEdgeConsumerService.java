@@ -64,6 +64,16 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * Edge 队列默认消费服务。
+ * <p>
+ * 在 Core 节点消费 {@link ToEdgeMsg} 主通道与 {@link ToEdgeNotificationMsg} 通知通道：
+ * 主通道将实体变更通知交给 Edge Processor 推送到边缘；通知通道处理高优先级会话消息、同步请求与 Edge 生命周期。
+ * 批处理失败会按 {@code queue.edge.pack-processing-retries} 重试。
+ *
+ * @see TbEdgeConsumerService
+ * @see AbstractConsumerService
+ */
 @Service
 @TbCoreComponent
 public class DefaultTbEdgeConsumerService extends AbstractConsumerService<ToEdgeNotificationMsg> implements TbEdgeConsumerService {
@@ -85,6 +95,9 @@ public class DefaultTbEdgeConsumerService extends AbstractConsumerService<ToEdge
 
     private MainQueueConsumerManager<TbProtoQueueMsg<ToEdgeMsg>, QueueConfig> mainConsumer;
 
+    /**
+     * 组装 Edge 消费依赖；通知通道所需的档案缓存等由父类置空（Edge 消费不走那套缓存刷新）。
+     */
     public DefaultTbEdgeConsumerService(TbCoreQueueFactory tbCoreQueueFactory, ActorSystemContext actorContext,
                                         StatsFactory statsFactory, EdgeContextComponent edgeCtx) {
         super(actorContext, null, null, null, null, null, null,
@@ -94,6 +107,9 @@ public class DefaultTbEdgeConsumerService extends AbstractConsumerService<ToEdge
         this.queueFactory = tbCoreQueueFactory;
     }
 
+    /**
+     * 初始化 tb-edge 主消费者管理器（按分区消费 {@link ToEdgeMsg}）。
+     */
     @PostConstruct
     public void init() {
         super.init("tb-edge");
@@ -109,16 +125,25 @@ public class DefaultTbEdgeConsumerService extends AbstractConsumerService<ToEdge
                 .build();
     }
 
+    /**
+     * Bean 销毁：停止父类通知消费者及公共线程池。
+     */
     @PreDestroy
     public void destroy() {
         super.destroy();
     }
 
+    /**
+     * 启动通知消费者；主通道等分区事件后再 {@code update}。
+     */
     @Override
     protected void startConsumers() {
         super.startConsumers();
     }
 
+    /**
+     * Edge 分区变更时更新主消费者订阅。
+     */
     @Override
     protected void onTbApplicationEvent(PartitionChangeEvent event) {
         var partitions = event.getEdgePartitions();
@@ -164,31 +189,42 @@ public class DefaultTbEdgeConsumerService extends AbstractConsumerService<ToEdge
         consumer.commit();
     }
 
+    /** {@inheritDoc} */
     @Override
     protected ServiceType getServiceType() {
         return ServiceType.TB_CORE;
     }
 
+    /** @return Edge 通知队列 poll 间隔 */
     @Override
     protected long getNotificationPollDuration() {
         return pollInterval;
     }
 
+    /** @return Edge 通知批处理超时 */
     @Override
     protected long getNotificationPackProcessingTimeout() {
         return packProcessingTimeout;
     }
 
+    /** 管理任务线程池大小：至少 4，且不小于 CPU 核数。 */
     @Override
     protected int getMgmtThreadPoolSize() {
         return Math.max(Runtime.getRuntime().availableProcessors(), 4);
     }
 
+    /**
+     * 创建 Edge 通知队列消费者。
+     */
     @Override
     protected TbQueueConsumer<TbProtoQueueMsg<ToEdgeNotificationMsg>> createNotificationsConsumer() {
         return queueFactory.createToEdgeNotificationsMsgConsumer();
     }
 
+    /**
+     * 处理 Edge 通知：高优先级会话、事件更新、双向同步、Edge 增删生命周期。
+     * 未启用 Edge RPC 时直接 ack。
+     */
     @Override
     protected void handleNotification(UUID id, TbProtoQueueMsg<ToEdgeNotificationMsg> msg, TbCallback callback) {
         ToEdgeNotificationMsg toEdgeNotificationMsg = msg.getValue();
@@ -274,6 +310,9 @@ public class DefaultTbEdgeConsumerService extends AbstractConsumerService<ToEdge
         callback.onFailure(throwable);
     }
 
+    /**
+     * 定时打印并重置 Edge 消费统计。
+     */
     @Scheduled(fixedDelayString = "${queue.edge.stats.print-interval-ms}")
     public void printStats() {
         if (statsEnabled) {
@@ -282,6 +321,9 @@ public class DefaultTbEdgeConsumerService extends AbstractConsumerService<ToEdge
         }
     }
 
+    /**
+     * 停止通知消费者与 Edge 主通道。
+     */
     @Override
     protected void stopConsumers() {
         super.stopConsumers();
