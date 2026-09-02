@@ -17,10 +17,12 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.ListeningExecutor;
 import org.thingsboard.common.util.ThingsBoardExecutors;
 import org.thingsboard.mqtt.MqttClient;
+import org.thingsboard.mqtt.MqttClientCallback;
 import org.thingsboard.mqtt.MqttClientConfig;
 import org.thingsboard.mqtt.MqttConnectResult;
 import org.thingsboard.server.common.adaptor.JsonConverter;
@@ -31,6 +33,7 @@ import org.thingsboard.server.common.data.transport.mqtt.MqttPullAuthConfigurati
 import org.thingsboard.server.common.data.transport.mqtt.MqttPullAuthType;
 import org.thingsboard.server.common.data.transport.mqtt.MqttPullSubscribeRequest;
 import org.thingsboard.server.common.transport.TransportService;
+import org.thingsboard.server.common.transport.TransportServiceCallback;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.transport.mqtt.pull.session.MqttPullCollectorSessionContext;
 
@@ -46,6 +49,9 @@ public class MqttPullTransportService {
     private final TransportService transportService;
     private ListeningExecutor handlerExecutor;
     private ListeningExecutorService handlerExecutorService;
+
+    @Value("${transport.mqtt.netty.max_payload_size:65536}")
+    private int maxPayloadSize;
 
     @PostConstruct
     public void init() {
@@ -84,6 +90,8 @@ public class MqttPullTransportService {
         }
         MqttClientConfig config = new MqttClientConfig();
         config.setCleanSession(profile.getCleanSession() == null || profile.getCleanSession());
+        config.setReconnect(false);
+        config.setMaxBytesInMessage(Math.max(8092, maxPayloadSize));
         int keepAlive = profile.getKeepAliveSec() != null ? profile.getKeepAliveSec() : 60;
         config.setTimeoutSeconds(keepAlive);
         applyAuth(config, sessionContext.getDeviceTransportConfiguration() != null
@@ -93,9 +101,25 @@ public class MqttPullTransportService {
             config.setClientId(clientId);
         }
         MqttClient client = MqttClient.create(config, (topic, payload) -> {
-            onMessage(sessionContext, null, topic, payload);
+            dispatchByTopic(sessionContext, topic, payload);
             return Futures.immediateVoidFuture();
         }, handlerExecutor);
+        client.setCallback(new MqttClientCallback() {
+            @Override
+            public void connectionLost(Throwable cause) {
+                if (sessionContext.getMqttClient() != client) {
+                    return;
+                }
+                log.warn("[{}] MQTT pull connection lost", sessionContext.getDeviceId(), cause);
+                if (sessionContext.getTransportContext() != null) {
+                    sessionContext.getTransportContext().scheduleReconnect(sessionContext);
+                }
+            }
+
+            @Override
+            public void onSuccessfulReconnect() {
+            }
+        });
         sessionContext.setMqttClient(client);
         int connectTimeoutSec = Math.max(1, (profile.getConnectTimeoutMs() != null ? profile.getConnectTimeoutMs() : 10000) / 1000);
         try {
@@ -134,42 +158,62 @@ public class MqttPullTransportService {
         MqttPullDeviceProfileTransportConfiguration profile = sessionContext.getProfileTransportConfiguration();
         for (MqttPullSubscribeRequest request : profile.effectiveSubscribeRequests()) {
             MqttQoS qos = toQos(request.getQos());
-            client.on(request.getTopic(), (topic, payload) -> {
-                onMessage(sessionContext, request, topic, payload);
-                return Futures.immediateVoidFuture();
-            }, qos);
+            try {
+                client.on(request.getTopic(), (topic, payload) -> {
+                    onMessage(sessionContext, request, topic, payload);
+                    return Futures.immediateVoidFuture();
+                }, qos).get(15, TimeUnit.SECONDS);
+                log.info("[{}] MQTT pull subscribed topic [{}] qos [{}] dataType [{}]",
+                        sessionContext.getDeviceId(), request.getTopic(), qos.value(), request.getDataType());
+            } catch (Exception e) {
+                throw new IllegalStateException("MQTT subscribe failed for topic " + request.getTopic(), e);
+            }
         }
     }
 
-    private void onMessage(MqttPullCollectorSessionContext sessionContext, String topic, ByteBuf payload) {
+    private void dispatchByTopic(MqttPullCollectorSessionContext sessionContext, String topic, ByteBuf payload) {
         MqttPullDeviceProfileTransportConfiguration profile = sessionContext.getProfileTransportConfiguration();
+        boolean matched = false;
         for (MqttPullSubscribeRequest request : profile.effectiveSubscribeRequests()) {
             if (topicMatches(request.getTopic(), topic)) {
+                matched = true;
                 onMessage(sessionContext, request, topic, payload);
-                return;
             }
         }
-        onMessage(sessionContext, null, topic, payload);
+        if (!matched) {
+            log.debug("[{}] MQTT pull message on unmatched topic [{}]", sessionContext.getDeviceId(), topic);
+        }
     }
 
     private void onMessage(MqttPullCollectorSessionContext sessionContext, MqttPullSubscribeRequest request,
                            String topic, ByteBuf payload) {
-        String body = payload.toString(StandardCharsets.UTF_8);
-        if (request == null) {
-            log.debug("[{}] MQTT pull message on unmatched topic [{}]", sessionContext.getDeviceId(), topic);
-            return;
-        }
-        HttpPullPollDataType dataType = request.getDataType() != null ? request.getDataType() : HttpPullPollDataType.TELEMETRY;
-        if (dataType == HttpPullPollDataType.TELEMETRY) {
-            postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, request.resolveTelemetryPayloadKey());
-        } else {
-            postAttributes(sessionContext, sessionContext.getSessionInfo(), body,
-                    dataType == HttpPullPollDataType.SHARED_ATTRIBUTES);
+        try {
+            String body = payload.toString(StandardCharsets.UTF_8);
+            if (request == null) {
+                log.debug("[{}] MQTT pull message on unmatched topic [{}]", sessionContext.getDeviceId(), topic);
+                return;
+            }
+            log.info("[{}] MQTT pull received topic [{}] request [{}] bytes [{}]",
+                    sessionContext.getDeviceId(), topic, request.getName(), body.length());
+            HttpPullPollDataType dataType = request.getDataType() != null ? request.getDataType() : HttpPullPollDataType.TELEMETRY;
+            if (dataType == HttpPullPollDataType.TELEMETRY) {
+                postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, request.resolveTelemetryPayloadKey());
+            } else {
+                postAttributes(sessionContext, sessionContext.getSessionInfo(), body,
+                        dataType == HttpPullPollDataType.SHARED_ATTRIBUTES);
+            }
+        } catch (Exception e) {
+            log.warn("[{}] Failed to process MQTT pull message on topic [{}] request [{}]",
+                    sessionContext.getDeviceId(), topic, request != null ? request.getName() : null, e);
         }
     }
 
     private void postTelemetry(MqttPullCollectorSessionContext collectorCtx,
                                TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, String telemetryKey) {
+        if (sessionInfo == null) {
+            log.warn("[{}] Skip telemetry: MQTT pull session is not ready", collectorCtx.getDeviceId());
+            return;
+        }
         if (collectorCtx.getTransportContext() != null) {
             collectorCtx.getTransportContext().activateMqttPullDeviceSession(sessionInfo, collectorCtx.getDeviceId());
         }
@@ -181,22 +225,32 @@ public class MqttPullTransportService {
             wrapper.addProperty(key, jsonPayload);
         }
         TransportProtos.PostTelemetryMsg msg = JsonConverter.convertToTelemetryProto(wrapper);
-        transportService.process(sessionInfo, msg, null);
+        transportService.process(sessionInfo, msg, TransportServiceCallback.EMPTY);
     }
 
     private void postAttributes(MqttPullCollectorSessionContext collectorCtx,
                                 TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, boolean shared) {
+        if (sessionInfo == null) {
+            log.warn("[{}] Skip attributes: MQTT pull session is not ready", collectorCtx.getDeviceId());
+            return;
+        }
         if (collectorCtx.getTransportContext() != null) {
             collectorCtx.getTransportContext().activateMqttPullDeviceSession(sessionInfo, collectorCtx.getDeviceId());
         }
-        JsonElement parsed = JsonParser.parseString(jsonPayload);
+        JsonElement parsed;
+        try {
+            parsed = JsonParser.parseString(jsonPayload);
+        } catch (Exception e) {
+            log.warn("[{}] MQTT pull attributes payload is not valid JSON, skipping", collectorCtx.getDeviceId());
+            return;
+        }
         if (!parsed.isJsonObject()) {
-            log.warn("MQTT pull attributes payload is not a JSON object, skipping");
+            log.warn("[{}] MQTT pull attributes payload is not a JSON object, skipping", collectorCtx.getDeviceId());
             return;
         }
         TransportProtos.PostAttributeMsg.Builder builder = JsonConverter.convertToAttributesProto(parsed).toBuilder();
         builder.setShared(shared);
-        transportService.process(sessionInfo, builder.build(), null);
+        transportService.process(sessionInfo, builder.build(), TransportServiceCallback.EMPTY);
     }
 
     private String resolveBrokerUrl(MqttPullCollectorSessionContext ctx) {
