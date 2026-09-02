@@ -45,8 +45,9 @@ public class HttpPullPollRequest implements Serializable {
      */
     private HttpPullDeviceRoutingConfiguration routing = new HttpPullDeviceRoutingConfiguration();
 
+    /** 运行时判断；不能叫 isEnabled()，否则 Jackson 会忽略 enabled 字段导致关闭状态无法保存。 */
     @JsonIgnore
-    public boolean isEnabled() {
+    public boolean isRequestEnabled() {
         return enabled == null || enabled;
     }
 

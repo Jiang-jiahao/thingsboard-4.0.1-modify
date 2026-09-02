@@ -64,7 +64,7 @@ public class HttpPullDeviceProfileTransportConfiguration implements DeviceProfil
     @JsonIgnore
     public List<HttpPullPollRequest> effectivePollRequests() {
         if (pollRequests != null && !pollRequests.isEmpty()) {
-            return pollRequests.stream().filter(HttpPullPollRequest::isEnabled).toList();
+            return pollRequests.stream().filter(HttpPullPollRequest::isRequestEnabled).toList();
         }
         if (StringUtils.isNotBlank(pollUrl)) {
             return List.of(HttpPullPollRequest.fromLegacyProfile(this));

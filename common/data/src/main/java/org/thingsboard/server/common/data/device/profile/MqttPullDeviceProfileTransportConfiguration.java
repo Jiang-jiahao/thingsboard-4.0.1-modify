@@ -45,7 +45,7 @@ public class MqttPullDeviceProfileTransportConfiguration implements DeviceProfil
         if (subscribeRequests == null) {
             return List.of();
         }
-        return subscribeRequests.stream().filter(MqttPullSubscribeRequest::isEnabled).toList();
+        return subscribeRequests.stream().filter(MqttPullSubscribeRequest::isRequestEnabled).toList();
     }
 
     @JsonIgnore
