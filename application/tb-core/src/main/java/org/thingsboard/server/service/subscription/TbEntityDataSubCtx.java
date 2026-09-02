@@ -35,16 +35,49 @@ import org.thingsboard.server.service.ws.telemetry.sub.TelemetrySubscriptionUpda
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Dashboard 实体表 / 时序图对应的 ctx，处理 {@link EntityDataCmd}。
+ *
+ * <p>父类已经：查出本页、按实体拆内部订阅。本类补的是<strong>增量怎么合并再推给前端</strong>：
+ * <ul>
+ *   <li>latest：和 ctx 里已有单元格比较，丢掉更旧或完全相同的点，只推有变化的 key；</li>
+ *   <li>timeseries：同样去重后推点数组，并记下每个 key 最大 ts，避免倒序点。</li>
+ * </ul>
+ *
+ * <h2>动态页 {@link #doUpdate}</h2>
+ * 本页实体集合变了：离开的行退订；新来的行——若当前只订了 latest、没订时序——补 latest 订阅。
+ * 时序图对新实体不在这里补订（注释写明 widgets 会 re-init 另发命令）。
+ *
+ * <p>{@link #initialDataSent} 区分「第一次推整页 PageData」和「之后只推变化的实体列表」。
+ *
+ * @see DefaultTbEntityDataSubscriptionService#handleCmd(WebSocketSessionRef, EntityDataCmd)
+ * @see TbAbstractDataSubCtx
+ */
 @Slf4j
 public class TbEntityDataSubCtx extends TbAbstractDataSubCtx<EntityDataQuery> {
 
+    /**
+     * 是否已向该 cmdId 推过第一包（整页）。
+     * false 时 Service 组 {@code EntityDataUpdate} 带完整 PageData；之后只带 update 列表。
+     */
     @Getter
     @Setter
     private volatile boolean initialDataSent;
+
+    /** 最近一次命令里的时序子命令；{@link #getCurrentAggregation} 和动态页是否补时序订阅用。 */
     private TimeSeriesCmd curTsCmd;
+
+    /** 最近一次 latest 子命令；动态页出现新实体时按这里的 keys 补订。 */
     private LatestValueCmd latestValueCmd;
+
+    /** 本订阅最多追踪的实体数，下发给前端做截断提示。 */
     @Getter
     private final int maxEntitiesPerDataSubscription;
+
+    /**
+     * 每个实体当前已知的最新遥测点，专供 {@link #sendTsWsMsg} 去重。
+     * 与 {@code EntityData.latest} 分开存：推完时序后行上的 timeseries 会被清掉，这里还要留着比 ts。
+     */
     private Map<EntityId, Map<String, TsValue>> latestTsEntityData;
 
     public TbEntityDataSubCtx(String serviceId, WebSocketService wsService, EntityService entityService,
@@ -54,12 +87,17 @@ public class TbEntityDataSubCtx extends TbAbstractDataSubCtx<EntityDataQuery> {
         this.maxEntitiesPerDataSubscription = maxEntitiesPerDataSubscription;
     }
 
+    /** 拉本页后立刻缓存各实体 latest 遥测，后面时序增量好做对比。 */
     @Override
     public void fetchData() {
         super.fetchData();
         this.updateLatestTsData(this.data);
     }
 
+    /**
+     * 柜子回调入口：用内部 subscriptionId 找回实体。
+     * 找不到说明动态刷新已经退订，丢弃这条 stale 更新。
+     */
     @Override
     protected void sendWsMsg(String sessionId, TelemetrySubscriptionUpdate subscriptionUpdate, EntityKeyType keyType, boolean resultToLatestValues) {
         EntityId entityId = subToEntityIdMap.get(subscriptionUpdate.getSubscriptionId());
@@ -80,6 +118,10 @@ public class TbEntityDataSubCtx extends TbAbstractDataSubCtx<EntityDataQuery> {
         return (this.curTsCmd == null || this.curTsCmd.getAgg() == null) ? Aggregation.NONE : this.curTsCmd.getAgg();
     }
 
+    /**
+     * 把增量当成表格 latest 单元格：去掉更旧的 ts、相同值的重复，以及「删除通知」以外的空更新；
+     * 剩下的写回 ctx 再只推这一行的变化列。
+     */
     private void sendLatestWsMsg(EntityId entityId, String sessionId, TelemetrySubscriptionUpdate subscriptionUpdate, EntityKeyType keyType) {
         Map<String, TsValue> latestUpdate = new HashMap<>();
         subscriptionUpdate.getData().forEach((k, v) -> {
@@ -94,7 +136,7 @@ public class TbEntityDataSubCtx extends TbAbstractDataSubCtx<EntityDataQuery> {
                 latestCtxValues.forEach((k, v) -> {
                     TsValue update = latestUpdate.get(k);
                     if (update != null) {
-                        //Ignore notifications about deleted keys
+                        // Ignore notifications about deleted keys
                         if (!(update.getTs() == 0 && (update.getValue() == null || update.getValue().isEmpty()))) {
                             if (update.getTs() < v.getTs()) {
                                 log.trace("[{}][{}][{}] Removed stale update for key: {} and ts: {}", sessionId, cmdId, subscriptionUpdate.getSubscriptionId(), k, update.getTs());
@@ -108,7 +150,7 @@ public class TbEntityDataSubCtx extends TbAbstractDataSubCtx<EntityDataQuery> {
                         }
                     }
                 });
-                //Setting new values
+                // Setting new values
                 latestUpdate.forEach(latestCtxValues::put);
             }
         }
@@ -119,6 +161,10 @@ public class TbEntityDataSubCtx extends TbAbstractDataSubCtx<EntityDataQuery> {
         }
     }
 
+    /**
+     * 时序增量：丢掉与缓存完全相同的点；更旧的点目前只打日志、仍留给 UI 合并。
+     * 接受的点写入 {@link #latestTsEntityData} 后推 {@code EntityData.timeseries}。
+     */
     private void sendTsWsMsg(EntityId entityId, String sessionId, TelemetrySubscriptionUpdate subscriptionUpdate, EntityKeyType keyType) {
         Map<String, List<TsValue>> tsUpdate = new HashMap<>();
         subscriptionUpdate.getData().forEach((k, v) -> {
@@ -146,7 +192,7 @@ public class TbEntityDataSubCtx extends TbAbstractDataSubCtx<EntityDataQuery> {
                     }
                 }
             });
-            //Setting new values
+            // Setting new values
             tsUpdate.forEach((k, v) -> {
                 Optional<TsValue> maxValue = v.stream().max(Comparator.comparingLong(TsValue::getTs));
                 maxValue.ifPresent(max -> latestCtxValues.put(k, max));
@@ -168,6 +214,7 @@ public class TbEntityDataSubCtx extends TbAbstractDataSubCtx<EntityDataQuery> {
         return latestTsEntityData.get(entityId);
     }
 
+    /** 用本页 latest 遥测重建去重缓存。fetch / 动态页换集合之后都要调。 */
     private void updateLatestTsData(PageData<EntityData> data) {
         latestTsEntityData = new HashMap<>();
         data.getData().stream().forEach(entityData -> {
@@ -182,6 +229,10 @@ public class TbEntityDataSubCtx extends TbAbstractDataSubCtx<EntityDataQuery> {
         });
     }
 
+    /**
+     * 动态页实体集合变化：离开的 subscriptionId 退订；新实体仅在「当前是 latest 订阅、没有时序命令」时补订。
+     * 然后把完整新页推给前端（data 有值、update 为 null，让表格重绘行集合）。
+     */
     @Override
     public synchronized void doUpdate(Map<EntityId, EntityData> newDataMap) {
         this.updateLatestTsData(this.data);
@@ -218,6 +269,7 @@ public class TbEntityDataSubCtx extends TbAbstractDataSubCtx<EntityDataQuery> {
         sendWsMsg(new EntityDataUpdate(cmdId, data, null, maxEntitiesPerDataSubscription));
     }
 
+    /** Service 每次 handleCmd 记下当前子命令，动态刷新补订时要知道订的是 latest 还是时序。 */
     public void setCurrentCmd(EntityDataCmd cmd) {
         curTsCmd = cmd.getTsCmd();
         latestValueCmd = cmd.getLatestCmd();

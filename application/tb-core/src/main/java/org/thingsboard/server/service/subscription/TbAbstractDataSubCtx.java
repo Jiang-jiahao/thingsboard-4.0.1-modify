@@ -32,10 +32,33 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * 「有实体行」的查询 ctx：本页 {@link EntityData} + 按行拆到柜子里的内部订阅。
+ *
+ * <p>前端仍是一个 {@code cmdId}；柜子里是每个实体 × 每种 key 类型一条 {@code TbSubscription}。
+ * {@link #subToEntityIdMap} 记住内部 subscriptionId 对应哪一行，增量回调时才能拼回这条实体。
+ *
+ * <h2>和上一层的分工</h2>
+ * {@link TbAbstractEntityQuerySubCtx} 管 query、动态过滤值、刷新任务。
+ * 本类管：{@link #fetchData} 拉本页、{@link #createLatestValuesSubscriptions} /
+ * {@link #createTimeSeriesSubscriptions} 往柜子塞订阅、{@link #update} 对比新旧实体集合。
+ *
+ * <p>实体集合变了只调用 {@link #doUpdate}：子类决定给新行补订、给消失的行退订，并推整页更新。
+ *
+ * @param <T> 带 {@link EntityDataPageLink} 的数据 query（实体表、告警表等）
+ * @see TbEntityDataSubCtx
+ * @see TbAlarmDataSubCtx
+ */
 @Slf4j
 public abstract class TbAbstractDataSubCtx<T extends AbstractDataQuery<? extends EntityDataPageLink>> extends TbAbstractEntityQuerySubCtx<T> {
 
+    /**
+     * 内部订阅 id → 实体。增量从柜子回来时只有 subscriptionId，靠这张表找回是哪一行。
+     * 动态刷新丢掉某实体时，也靠它找出要 cancel 的订阅。
+     */
     protected final Map<Integer, EntityId> subToEntityIdMap;
+
+    /** 最近一次 query 的本页数据（含 latest / 刚查的 timeseries）。 */
     @Getter
     protected PageData<EntityData> data;
 
@@ -47,6 +70,7 @@ public abstract class TbAbstractDataSubCtx<T extends AbstractDataQuery<? extends
         this.subToEntityIdMap = new ConcurrentHashMap<>();
     }
 
+    /** 按 {@link #buildEntityDataQuery} 查本页，写入 {@link #data}。 */
     @Override
     public void fetchData() {
         this.data = findEntityData();
@@ -62,11 +86,16 @@ public abstract class TbAbstractDataSubCtx<T extends AbstractDataQuery<? extends
         return result;
     }
 
+    /** pageLink.dynamic 为 true 时 Service 才会挂定时刷新。 */
     @Override
     public boolean isDynamic() {
         return query != null && query.getPageLink().isDynamic();
     }
 
+    /**
+     * 动态刷新：再查一遍。实体 id 集合没变则什么都不做（遥测增量走柜子，不必整页推）。
+     * 有进有出才 {@link #doUpdate}。
+     */
     @Override
     protected synchronized void update() {
         PageData<EntityData> newData = findEntityData();
@@ -85,20 +114,31 @@ public abstract class TbAbstractDataSubCtx<T extends AbstractDataQuery<? extends
         }
     }
 
+    /**
+     * 本页实体集合已变。子类应：给离开的实体退订、给新来的实体补订，并推 {@code EntityDataUpdate}。
+     *
+     * @param newDataMap 新页 entityId → 行数据
+     */
     protected abstract void doUpdate(Map<EntityId, EntityData> newDataMap);
 
+    /** 实际丢给 {@link EntityService} 的 query（告警表会把 AlarmDataQuery 转成 EntityDataQuery）。 */
     protected abstract EntityDataQuery buildEntityDataQuery();
 
     public List<EntityData> getEntitiesData() {
         return data.getData();
     }
 
+    /** 先清实体级内部订阅，再清父类的动态值订阅。 */
     @Override
     public void clearSubscriptions() {
         clearEntitySubscriptions();
         super.clearSubscriptions();
     }
 
+    /**
+     * 取消 {@link #subToEntityIdMap} 里全部内部订阅（latest/时序/属性）。
+     * 同一 cmdId 带新子命令重建前、ctx stop 时调用。
+     */
     public void clearEntitySubscriptions() {
         if (subToEntityIdMap != null) {
             for (Integer subId : subToEntityIdMap.keySet()) {
@@ -108,14 +148,22 @@ public abstract class TbAbstractDataSubCtx<T extends AbstractDataQuery<? extends
         }
     }
 
+    /**
+     * 为本页每个实体、按 key 类型（遥测 / 各 scope 属性）建 latest 订阅。
+     * 这就是「一条 cmd 占柜子很多格」的入口之一。
+     */
     public void createLatestValuesSubscriptions(List<EntityKey> keys) {
         createSubscriptions(keys, true, 0, 0);
     }
 
+    /** 按已查到的各实体 key 最后时间戳建时序订阅，增量不当 latest 列推。 */
     public void createTimeSeriesSubscriptions(Map<EntityData, Map<String, Long>> entityKeyStates, long startTs, long endTs) {
         createTimeSeriesSubscriptions(entityKeyStates, startTs, endTs, false);
     }
 
+    /**
+     * @param resultToLatestValues true 时后续点走 latest 推送通道（聚合时序窗口订增量时用）
+     */
     public void createTimeSeriesSubscriptions(Map<EntityData, Map<String, Long>> entityKeyStates, long startTs, long endTs, boolean resultToLatestValues) {
         entityKeyStates.forEach((entityData, keyStates) -> {
             int subIdx = sessionRef.getSessionSubIdSeq().incrementAndGet();
@@ -125,6 +173,7 @@ public abstract class TbAbstractDataSubCtx<T extends AbstractDataQuery<? extends
         });
     }
 
+    /** 本页每个实体 × 每种 EntityKeyType 一条订阅，全部 add 进柜子。 */
     private void createSubscriptions(List<EntityKey> keys, boolean latestValues, long startTs, long endTs) {
         Map<EntityKeyType, List<EntityKey>> keysByType = getEntityKeyByTypeMap(keys);
         for (EntityData entityData : data.getData()) {
@@ -139,6 +188,9 @@ public abstract class TbAbstractDataSubCtx<T extends AbstractDataQuery<? extends
         return keysByType;
     }
 
+    /**
+     * 为单个实体按 key 类型各领一个 {@code sessionSubIdSeq}，写入 {@link #subToEntityIdMap} 后构造订阅对象（尚未 add）。
+     */
     protected List<TbSubscription> addSubscriptions(EntityData entityData, Map<EntityKeyType, List<EntityKey>> keysByType, boolean latestValues, long startTs, long endTs) {
         List<TbSubscription> subscriptionList = new ArrayList<>();
         keysByType.forEach((keysType, keysList) -> {
@@ -219,10 +271,14 @@ public abstract class TbAbstractDataSubCtx<T extends AbstractDataQuery<? extends
                 .build();
     }
 
+    /** 属性增量默认当 latest 列推（resultToLatestValues=true）。 */
     private void sendWsMsg(String sessionId, TelemetrySubscriptionUpdate subscriptionUpdate, EntityKeyType keyType) {
         sendWsMsg(sessionId, subscriptionUpdate, keyType, true);
     }
 
+    /**
+     * 内部订阅的 keyStates：先全部填 0，latest 模式再用当前行已有 ts 覆盖，避免把快照里已有的点再推一遍。
+     */
     private Map<String, Long> buildKeyStats(EntityData entityData, EntityKeyType keysType, List<EntityKey> subKeys, boolean latestValues) {
         Map<String, Long> keyStates = new HashMap<>();
         subKeys.forEach(key -> keyStates.put(key.getKey(), 0L));
@@ -240,8 +296,14 @@ public abstract class TbAbstractDataSubCtx<T extends AbstractDataQuery<? extends
         return keyStates;
     }
 
+    /**
+     * 柜子增量到达。子类用 {@link #subToEntityIdMap} 找回实体，决定推进 latest 列还是 timeseries 列。
+     *
+     * @param resultToLatestValues true：当成表格单元格最新值；false：当成时序曲线上的点
+     */
     abstract void sendWsMsg(String sessionId, TelemetrySubscriptionUpdate subscriptionUpdate, EntityKeyType keyType, boolean resultToLatestValues);
 
+    /** 当前时序命令的聚合类型；无时序命令时为 NONE。创建时序订阅算 keyStates 截止 ts 时用。 */
     protected abstract Aggregation getCurrentAggregation();
 
 }

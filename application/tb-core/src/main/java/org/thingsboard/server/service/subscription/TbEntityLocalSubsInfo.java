@@ -30,16 +30,28 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 实体本地订阅信息管理类
- * <p>
- * 这个类负责管理单个实体的所有本地 WebSocket 订阅信息，包括：
- * 1. 订阅的增删改查操作
- * 2. 订阅状态的维护和变更跟踪
- * 3. 待处理订阅的管理（用于错过更新补偿）
- * 4. 订阅事件的生成和序列号管理
- * <p>
- * 每个实体（设备、资产等）都有一个对应的 TbEntityLocalSubsInfo 实例
- * 用于跟踪该实体的所有本地订阅和订阅状态
+ * 本节点上「某一个实体」的全部 WebSocket 订阅汇总。
+ *
+ * <p>{@link DefaultTbLocalSubscriptionService} 按实体建一份本对象，挂在 {@code subscriptionsByEntityId} 上。
+ * 设备上报时按实体找到它，就能知道本节点有哪些连接在盯这个实体。
+ * 按连接取消时走另一张表 {@code subscriptionsBySessionId}，不经过本类做主键查找。
+ *
+ * <h2>两层信息</h2>
+ * <ul>
+ *   <li>{@link #subs}：逐条订阅（某条 WS 的某个 subId）；</li>
+ *   <li>{@link #state}：把所有订阅合并成「本节点对这个实体的兴趣」——要不要告警/通知、属性/遥测订了哪些键。</li>
+ * </ul>
+ * 集群里的 {@code SubscriptionManagerService} 只关心 {@code state} 变没变。
+ * 第二个浏览器再订已经盯着的 {@code temperature}，{@code state} 不变，就不必再发事件。
+ *
+ * <h2>事件与错过补偿</h2>
+ * {@link #add} / {@link #remove} 在兴趣变化时生成带 {@link #seqNumber} 的 {@link TbEntitySubEvent}，
+ * 推给负责该实体的 Core。确认回调到达前，新订阅先放进 {@link #pendingSubs}，
+ * 避免空档里已经发生的属性/遥测更新漏推。
+ *
+ * @see DefaultTbLocalSubscriptionService
+ * @see TbSubscriptionsInfo
+ * @see TbEntitySubEvent
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -51,85 +63,73 @@ public class TbEntityLocalSubsInfo {
     private final EntityId entityId;
 
     /**
-     * 该实体的所有订阅数据集合，使用线程安全的Set实现
+     * 本节点上盯这个实体的全部订阅对象。增删都在租户锁内进行；
+     * 用 ConcurrentHashMap 的 keySet 只是避免迭代时的结构性问题，不能替代外层锁。
      */
     @Getter
     private final Set<TbSubscription<?>> subs = ConcurrentHashMap.newKeySet();
 
     /**
-     * 当前实体的订阅状态信息
-     * 用于优化数据分发，避免向没有订阅的类型发送数据
-     * <p>
-     * 状态包括：
-     * - 是否有通知订阅
-     * - 是否有告警订阅
-     * - 属性订阅的键集合（或标记为全键订阅）
-     * - 时间序列订阅的键集合（或标记为全键订阅）
+     * 合并后的兴趣：有没有通知/告警订阅，属性、遥测是全键还是指定键集合。
+     * 管理器按这份信息决定上报时要不要把某类数据转到本节点。
+     * 写时复制：先改副本，确认有变化再赋回，避免读到半更新状态。
      */
     private volatile TbSubscriptionsInfo state = new TbSubscriptionsInfo();
 
     /**
-     * 待处理订阅映射：序列号 -> 订阅数据集合
-     * <p>
-     * 当新订阅建立时，会将其添加到待处理集合中，等待集群确认
-     * 只有在收到集群回调后，才会实际处理这些订阅的错过更新
+     * 等待集群确认的订阅：{@code seqNumber → 等这个序号回调的订阅集合}。
+     * 回调 {@link #clearPendingSubscriptions} 取出后再做错过更新检查。
      */
     private final Map<Integer, Set<TbSubscription<?>>> pendingSubs = new ConcurrentHashMap<>();
 
     /**
-     * 待处理时间序列事件的序列号
+     * 当前尚未确认的遥测兴趣变更序号。{@code > 0} 表示还有人在等这次 CREATED/UPDATED 的回调。
+     * 回调到达或被更新的序号覆盖后清零。
      */
     @Getter
     @Setter
     private int pendingTimeSeriesEvent;
 
-    /**
-     * 待处理时间序列事件的时间戳
-     */
+    /** 登记上述遥测 pending 时的时间戳，便于排查订阅确认是否过慢。 */
     @Getter
     @Setter
     private long pendingTimeSeriesEventTs;
 
-    /**
-     * 待处理属性事件的序列号
-     */
+    /** 当前尚未确认的属性兴趣变更序号，含义同 {@link #pendingTimeSeriesEvent}。 */
     @Getter
     @Setter
     private int pendingAttributesEvent;
 
-    /**
-     * 待处理属性事件的时间戳
-     */
+    /** 登记上述属性 pending 时的时间戳。 */
     @Getter
     @Setter
     private long pendingAttributesEventTs;
 
     /**
-     * 事件序列号，用于保证订阅事件的顺序和唯一性
-     * 每次生成事件时递增，用于集群间的状态同步
+     * 本实体订阅事件的本地序号，每次 {@link #toEvent} 加一。
+     * 集群用它把「兴趣变更」和「确认回调」对上，也用来挂 pending。
      */
     private int seqNumber = 0;
 
     /**
-     * 添加订阅到实体
-     * <p>
-     * 流程：
-     * 1. 将订阅添加到订阅集合
-     * 2. 更新订阅状态信息
-     * 3. 根据状态变化生成相应的事件
+     * 增加一条订阅，并视需要生成集群事件。
      *
-     * @param subscription 要添加的订阅
-     * @return 订阅事件（null表示没有状态变化）
+     * <p>返回值：
+     * <ul>
+     *   <li>本实体在本节点的第一条订阅 → {@code CREATED}；</li>
+     *   <li>不是第一条，但合并兴趣变了（新类型或新键）→ {@code UPDATED}；</li>
+     *   <li>兴趣没变（例如又有人订已经在盯的键）→ {@code null}，调用方不必通知管理器。</li>
+     * </ul>
+     *
+     * @param subscription 已带 sessionId / subId / 实体 / 键信息的订阅
      */
     public TbEntitySubEvent add(TbSubscription<?> subscription) {
         log.trace("[{}][{}][{}] Adding: {}", tenantId, entityId, subscription.getSubscriptionId(), subscription);
-        // 检查是否是第一个订阅（实体订阅的创建）
         boolean created = subs.isEmpty();
         subs.add(subscription);
-        // 如果是第一个订阅，则状态对象是新的，直接拿来使用；否则复制当前状态用来使用（写时复制）
+        // 第一条可以直接改当前 state；已有订阅则 copy，避免并发读到改到一半的对象。
         TbSubscriptionsInfo newState = created ? state : state.copy();
         boolean stateChanged = false;
-        // 根据订阅类型更新状态
         switch (subscription.getType()) {
             case NOTIFICATIONS:
             case NOTIFICATIONS_COUNT:
@@ -146,17 +146,17 @@ public class TbEntityLocalSubsInfo {
                 break;
             case ATTRIBUTES:
                 var attrSub = (TbAttributeSubscription) subscription;
+                // 已经是全键订阅时，再加指定键不会扩大兴趣。
                 if (!newState.attrAllKeys) {
                     if (attrSub.isAllKeys()) {
-                        // 标记为全键属性订阅
                         newState.attrAllKeys = true;
                         stateChanged = true;
                     } else {
-                        // 添加特定键到属性订阅集合
                         if (newState.attrKeys == null) {
                             newState.attrKeys = new HashSet<>(attrSub.getKeyStates().keySet());
                             stateChanged = true;
                         } else if (newState.attrKeys.addAll(attrSub.getKeyStates().keySet())) {
+                            // addAll 返回 true 表示集合里出现了新键。
                             stateChanged = true;
                         }
                     }
@@ -166,11 +166,9 @@ public class TbEntityLocalSubsInfo {
                 var tsSub = (TbTimeSeriesSubscription) subscription;
                 if (!newState.tsAllKeys) {
                     if (tsSub.isAllKeys()) {
-                        // 标记为全键时间序列订阅
                         newState.tsAllKeys = true;
                         stateChanged = true;
                     } else {
-                        // 添加特定键到时间序列订阅集合
                         if (newState.tsKeys == null) {
                             newState.tsKeys = new HashSet<>(tsSub.getKeyStates().keySet());
                             stateChanged = true;
@@ -181,39 +179,33 @@ public class TbEntityLocalSubsInfo {
                 }
                 break;
         }
-        // 如果状态发生变化，更新状态并生成相应事件
         if (stateChanged) {
             state = newState;
         }
         if (created) {
-            // 第一个订阅，生成创建事件
             return toEvent(ComponentLifecycleEvent.CREATED);
         } else if (stateChanged) {
-            // 状态变化，生成更新事件
             return toEvent(ComponentLifecycleEvent.UPDATED);
         } else {
-            // 没有状态变化，返回null
             return null;
         }
     }
 
     /**
-     * 移除单个订阅
+     * 移除单条订阅。
      *
-     * @param sub 要移除的订阅
-     * @return 订阅事件（null表示没有状态变化或订阅不存在）
+     * <p>对象不在集合里 → {@code null}（重复取消）。
+     * 删完后 {@link #subs} 空了 → {@code DELETED}，管理器应停止往本节点转发该实体。
+     * 否则先清空该类型在 {@code state} 里的合并结果，再扫剩余订阅重建，有变化才 {@code UPDATED}。
      */
     public TbEntitySubEvent remove(TbSubscription<?> sub) {
         log.trace("[{}][{}][{}] Removing: {}", tenantId, entityId, sub.getSubscriptionId(), sub);
-        // 尝试移除订阅，如果订阅不存在则返回null
         if (!subs.remove(sub)) {
             return null;
         }
-        // 如果移除后没有订阅了，生成删除事件
         if (isEmpty()) {
             return toEvent(ComponentLifecycleEvent.DELETED);
         }
-        // 重新计算状态
         TbSubscriptionType type = sub.getType();
         TbSubscriptionsInfo newState = state.copy();
         clearState(newState, type);
@@ -221,32 +213,27 @@ public class TbEntityLocalSubsInfo {
     }
 
     /**
-     * 批量移除订阅
+     * 批量移除（关整条 WS 时，同一实体上可能挂了多条订阅）。
      *
-     * @param subsToRemove 要移除的订阅列表
-     * @return 订阅事件（null表示没有状态变化）
+     * <p>中途若集合已空，立刻返回 {@code DELETED}，不再扫剩余类型。
+     * 同一类型只 {@link #clearState} 一次，最后用 {@link #updateState} 从还在的订阅重建。
      */
     public TbEntitySubEvent removeAll(List<? extends TbSubscription<?>> subsToRemove) {
         Set<TbSubscriptionType> changedTypes = new HashSet<>();
         TbSubscriptionsInfo newState = state.copy();
-        // 遍历所有要移除的订阅
         for (TbSubscription<?> sub : subsToRemove) {
             log.trace("[{}][{}][{}] Removing: {}", tenantId, entityId, sub.getSubscriptionId(), sub);
             if (!subs.remove(sub)) {
-                // 订阅不存在，跳过
                 continue;
             }
-            // 如果移除后没有订阅了，生成删除事件
             if (isEmpty()) {
                 return toEvent(ComponentLifecycleEvent.DELETED);
             }
             TbSubscriptionType type = sub.getType();
             if (changedTypes.contains(type)) {
-                // 该类型已经处理过，跳过
                 continue;
             }
 
-            // 清除该类型的状态
             clearState(newState, type);
             changedTypes.add(type);
         }
@@ -255,10 +242,8 @@ public class TbEntityLocalSubsInfo {
     }
 
     /**
-     * 清除指定订阅类型的状态
-     *
-     * @param state 状态对象
-     * @param type 订阅类型
+     * 把某一类型在 {@code state} 里的合并结果清掉，供随后从剩余 {@link #subs} 重建。
+     * 不能只把「被删那一条」的键抠掉：不知道别人是否还订着同一个键。
      */
     private void clearState(TbSubscriptionsInfo state, TbSubscriptionType type) {
         switch (type) {
@@ -280,18 +265,13 @@ public class TbEntityLocalSubsInfo {
     }
 
     /**
-     * 更新状态并检查是否需要生成事件
-     *
-     * @param updatedTypes 发生变化的订阅类型集合
-     * @param newState 新的状态对象
-     * @return 订阅事件（null表示状态没有实际变化）
+     * 仅根据 {@code updatedTypes} 里的类型，用还在的 {@link #subs} 重建 {@code newState}。
+     * 其它类型保持副本里原值。重建后与当前 {@link #state} 相等则无事件。
      */
     private TbEntitySubEvent updateState(Set<TbSubscriptionType> updatedTypes, TbSubscriptionsInfo newState) {
-        // 重新计算剩余订阅的状态
         for (TbSubscription<?> subscription : subs) {
             TbSubscriptionType type = subscription.getType();
             if (!updatedTypes.contains(type)) {
-                // 该类型没有变化，跳过
                 continue;
             }
             switch (type) {
@@ -340,6 +320,10 @@ public class TbEntityLocalSubsInfo {
         }
     }
 
+    /**
+     * 生成一条带新序号的事件。DELETED 不再附带 {@code info}（本节点已无兴趣）；
+     * CREATED/UPDATED 把当前 {@link #state} 拷贝进去，并写入同一个 seqNumber。
+     */
     public TbEntitySubEvent toEvent(ComponentLifecycleEvent type) {
         seqNumber++;
         var result = TbEntitySubEvent.builder().tenantId(tenantId).entityId(entityId).type(type).seqNumber(seqNumber);
@@ -349,67 +333,64 @@ public class TbEntityLocalSubsInfo {
         return result.build();
     }
 
+    /** 本节点是否有人订了该实体的通知（列表或未读计数）。 */
     public boolean isNf() {
         return state.notifications;
     }
 
 
+    /** 本节点是否已经没有任何订阅盯这个实体。为空后服务会从 {@code subscriptionsByEntityId} 摘掉本对象。 */
     public boolean isEmpty() {
         return subs.isEmpty();
     }
 
     /**
-     * 注册待处理订阅（用于错过更新补偿机制）
-     * <p>
-     * 当新订阅建立时，可能已经错过了一些数据更新。
-     * 这个方法将订阅标记为待处理状态，等待集群确认后再查询历史数据。
+     * 决定这条新订阅是立刻做错过更新检查，还是先等集群确认。
      *
-     * @param subscription 待处理的订阅
-     * @param event 相关的事件（当订阅状态没有发生改变的时候，为null）
-     * @return 如果需要立即检查错过更新，返回订阅；否则返回null
+     * <p>只处理属性和遥测（这两类才有「订上前后上报空档」问题）。
+     *
+     * <ul>
+     *   <li>{@code event != null}：本次 add 改变了兴趣，把订阅挂到这个 event 的 seqNumber 上，等回调；</li>
+     *   <li>{@code event == null} 但同类已有 pending：兴趣没变，可是上一次兴趣变更还没确认，
+     *       也挂到那个序号上，避免确认前漏数据；</li>
+     *   <li>两者都没有：管理器侧兴趣早已对齐，返回本订阅让调用方马上 {@code checkMissedUpdates}。</li>
+     * </ul>
+     *
+     * @return 需要立刻补查则返回订阅本身；已进入 pending 则返回 {@code null}
      */
     public TbSubscription<?> registerPendingSubscription(TbSubscription<?> subscription, TbEntitySubEvent event) {
         if (TbSubscriptionType.ATTRIBUTES.equals(subscription.getType())) {
             if (event != null) {
-                // 事件存在，表示订阅导致状态变化了
                 log.trace("[{}][{}] Registering new pending attributes subscription event: {} for subscription: {}", tenantId, entityId, event.getSeqNumber(), subscription.getSubscriptionId());
-                // 记录属性事件的序列号和时间戳（直接覆盖之前的状态）
                 pendingAttributesEvent = event.getSeqNumber();
                 pendingAttributesEventTs = System.currentTimeMillis();
-                // 将订阅添加到待处理集合
                 pendingSubs.computeIfAbsent(pendingAttributesEvent, e -> new HashSet<>()).add(subscription);
             } else if (pendingAttributesEvent > 0) {
-                // 订阅没有导致状态变化，但已经有待处理的属性事件
                 log.trace("[{}][{}] Registering pending attributes subscription {} for event: {} ", tenantId, entityId, subscription.getSubscriptionId(), pendingAttributesEvent);
-                // 使用现有的待处理事件
                 pendingSubs.computeIfAbsent(pendingAttributesEvent, e -> new HashSet<>()).add(subscription);
             } else {
-                // 订阅没有导致状态变化，也没有待处理事件，立即返回订阅对象
                 return subscription;
             }
         } else if (subscription instanceof TbTimeSeriesSubscription) {
             if (event != null) {
-                // 事件存在，表示订阅导致状态变化了
                 log.trace("[{}][{}] Registering new pending time-series subscription event: {} for subscription: {}", tenantId, entityId, event.getSeqNumber(), subscription.getSubscriptionId());
-                // 记录时间序列事件的序列号和时间戳
                 pendingTimeSeriesEvent = event.getSeqNumber();
                 pendingTimeSeriesEventTs = System.currentTimeMillis();
-                // 将订阅添加到待处理集合
                 pendingSubs.computeIfAbsent(pendingTimeSeriesEvent, e -> new HashSet<>()).add(subscription);
             } else if (pendingTimeSeriesEvent > 0) {
-                // 订阅没有导致状态变化，但已经有待处理的属性事件
                 log.trace("[{}][{}] Registering pending time-series subscription {} for event: {} ", tenantId, entityId, subscription.getSubscriptionId(), pendingTimeSeriesEvent);
-                // 使用现有的待处理事件
                 pendingSubs.computeIfAbsent(pendingTimeSeriesEvent, e -> new HashSet<>()).add(subscription);
             } else {
-                // 订阅没有导致状态变化，也没有待处理事件，立即返回订阅对象
                 return subscription;
             }
         }
-        // 订阅已注册为待处理，等待集群回调
         return null;
     }
 
+    /**
+     * 管理器确认序号 {@code seqNumber} 后调用：清掉对应的 pending 标记，返回等这个序号的订阅集合。
+     * 调用方再对这些订阅做错过更新检查。没有挂过该序号则返回 {@code null}。
+     */
     public Set<TbSubscription<?>> clearPendingSubscriptions(int seqNumber) {
         if (pendingTimeSeriesEvent == seqNumber) {
             pendingTimeSeriesEvent = 0;
