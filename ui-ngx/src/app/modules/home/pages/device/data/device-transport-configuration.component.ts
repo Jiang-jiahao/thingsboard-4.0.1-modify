@@ -98,10 +98,7 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
   httpPullProfilePollUrl: string | null = null;
 
   @Input()
-  mqttPullRoutingMode: HttpPullRoutingMode | null = null;
-
-  @Input()
-  mqttPullProfileBrokerUrl: string | null = null;
+  mqttPullProfileActive = false;
 
   @Input()
   deviceProfileId: string | null = null;
@@ -191,7 +188,7 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
       configuration = this.deviceTransportConfigurationFormGroup.getRawValue().configuration;
       const transportType = configuration?.type ?? this.configurationTransportType ?? this.profileTransportType;
       const httpPullProfileActive = this.httpPullProfilePollUrl != null;
-      const mqttPullProfileActive = this.mqttPullProfileBrokerUrl != null;
+      const mqttPullProfileActive = this.mqttPullProfileActive;
       configuration = normalizeDeviceTransportConfigurationForSave(
         transportType,
         configuration,

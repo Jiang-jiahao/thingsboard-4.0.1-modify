@@ -14,19 +14,13 @@ import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
-import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.data.MqttPullDeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.MqttPullDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.plugin.ComponentLifecycleEvent;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.data.security.DeviceCredentialsType;
-import org.thingsboard.server.common.data.transport.http.HttpPullDeviceIdMatchStrategy;
-import org.thingsboard.server.common.data.transport.http.HttpPullDeviceRoutingConfiguration;
-import org.thingsboard.server.common.data.transport.http.HttpPullRoutingMode;
-import org.thingsboard.server.common.data.transport.mqtt.MqttPullSubscribeRequest;
 import org.thingsboard.server.common.transport.DeviceDeletedEvent;
 import org.thingsboard.server.common.transport.DeviceProfileUpdatedEvent;
 import org.thingsboard.server.common.transport.DeviceUpdatedEvent;
@@ -44,10 +38,8 @@ import org.thingsboard.server.queue.util.AfterStartUp;
 import org.thingsboard.server.transport.mqtt.pull.service.MqttPullProtoEntityService;
 import org.thingsboard.server.transport.mqtt.pull.session.MqttPullCollectorSessionContext;
 import org.thingsboard.server.transport.mqtt.pull.session.MqttPullNoOpSessionListener;
-import org.thingsboard.server.transport.mqtt.pull.session.MqttPullTargetSession;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -55,7 +47,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @ConditionalOnExpression("'${service.type:null}'=='tb-transport' || ('${service.type:null}'=='monolith' && '${transport.api_enabled:true}'=='true' && '${transport.mqtt.enabled}'=='true')")
@@ -70,7 +61,6 @@ public class MqttPullTransportContext extends TransportContext {
     private final MqttPullProtoEntityService protoEntityService;
 
     private final Map<DeviceId, MqttPullCollectorSessionContext> collectorSessions = new ConcurrentHashMap<>();
-    private final Map<DeviceProfileId, Integer> collectorCountByProfile = new ConcurrentHashMap<>();
     private final Set<UUID> activatedTransportSessions = ConcurrentHashMap.newKeySet();
 
     @AfterStartUp(order = AfterStartUp.AFTER_TRANSPORT_SERVICE)
@@ -104,9 +94,6 @@ public class MqttPullTransportContext extends TransportContext {
         MqttPullDeviceTransportConfiguration deviceCfg = device.getDeviceData() != null
                 && device.getDeviceData().getTransportConfiguration() instanceof MqttPullDeviceTransportConfiguration m
                 ? m : new MqttPullDeviceTransportConfiguration();
-        if (!deviceCfg.isCollector()) {
-            return;
-        }
         establishCollectorSession(device, profile, profileCfg, deviceCfg);
     }
 
@@ -135,7 +122,6 @@ public class MqttPullTransportContext extends TransportContext {
             registerMqttPullTransportSession(sessionInfo, MqttPullNoOpSessionListener.INSTANCE);
             ctx.setSessionInfo(sessionInfo);
             collectorSessions.put(device.getId(), ctx);
-            preloadActiveTargets(ctx);
             mqttPullTransportService.connectAndSubscribe(ctx);
             log.info("Established MQTT pull collector session for {}", device.getId());
         });
@@ -158,115 +144,6 @@ public class MqttPullTransportContext extends TransportContext {
         ctx.setReconnectTask(task);
     }
 
-    private void preloadActiveTargets(MqttPullCollectorSessionContext collectorCtx) {
-        MqttPullDeviceProfileTransportConfiguration profileCfg = collectorCtx.getProfileTransportConfiguration();
-        if (!profileCfg.needsMultiDeviceTargets()) {
-            return;
-        }
-        Set<UUID> loadedProfileIds = new HashSet<>();
-        for (MqttPullSubscribeRequest subscribeRequest : profileCfg.effectiveSubscribeRequests()) {
-            HttpPullDeviceRoutingConfiguration routing = profileCfg.resolveRouting(subscribeRequest);
-            if (routing == null || (routing.getRoutingMode() != HttpPullRoutingMode.MULTI_DEVICE
-                    && routing.getRoutingMode() != HttpPullRoutingMode.PER_MESSAGE
-                    && routing.getRoutingMode() != HttpPullRoutingMode.AUTO)) {
-                continue;
-            }
-            DeviceProfileId targetProfileId = routing.getTargetDeviceProfileId() != null
-                    ? new DeviceProfileId(routing.getTargetDeviceProfileId())
-                    : collectorCtx.getDeviceProfile().getId();
-            if (!loadedProfileIds.add(targetProfileId.getId())) {
-                continue;
-            }
-            HttpPullDeviceIdMatchStrategy strategy = routing.getDeviceIdMatchStrategy() != null
-                    ? routing.getDeviceIdMatchStrategy() : HttpPullDeviceIdMatchStrategy.DEVICE_NAME;
-            int page = 0;
-            boolean next;
-            do {
-                TransportProtos.GetMqttPullRoutingTargetsResponseMsg resp = protoEntityService.getRoutingTargets(
-                        collectorCtx.getTenantId(), targetProfileId, page, 512);
-                int collectorsOnProfile = resolveCollectorCountForProfile(targetProfileId);
-                for (TransportProtos.HttpPullRoutingTargetProto target : resp.getTargetsList()) {
-                    if (!shouldBindTargetToCollector(collectorCtx, target, collectorsOnProfile)) {
-                        continue;
-                    }
-                    String matchKey = MqttPullTransportService.buildMatchKey(strategy, target);
-                    if (StringUtils.isBlank(matchKey)) {
-                        continue;
-                    }
-                    DeviceId targetId = new DeviceId(new UUID(target.getDeviceIdMSB(), target.getDeviceIdLSB()));
-                    registerTargetSession(collectorCtx, targetId, matchKey.trim());
-                }
-                next = resp.getHasNextPage();
-                page++;
-            } while (next);
-        }
-        log.info("[{}] MQTT pull active targets loaded: {}", collectorCtx.getDeviceId(), collectorCtx.getActiveTargets().size());
-    }
-
-    private boolean shouldBindTargetToCollector(MqttPullCollectorSessionContext collectorCtx,
-                                                TransportProtos.HttpPullRoutingTargetProto target,
-                                                int collectorsOnProfile) {
-        String assignedCollectorId = target.getCollectorDeviceId() != null ? target.getCollectorDeviceId().trim() : "";
-        if (StringUtils.isNotBlank(assignedCollectorId)) {
-            return collectorCtx.getDeviceId().getId().toString().equals(assignedCollectorId);
-        }
-        return collectorsOnProfile <= 1;
-    }
-
-    private int resolveCollectorCountForProfile(DeviceProfileId profileId) {
-        return collectorCountByProfile.computeIfAbsent(profileId, this::countCollectorsForProfile);
-    }
-
-    private int countCollectorsForProfile(DeviceProfileId profileId) {
-        AtomicInteger count = new AtomicInteger();
-        int batchIndex = 0;
-        int batchSize = 512;
-        boolean next;
-        do {
-            TransportProtos.GetMqttPullDevicesResponseMsg response = protoEntityService.getMqttPullDevicesIds(batchIndex, batchSize);
-            response.getIdsList().forEach(idStr -> {
-                Device device = protoEntityService.getDeviceById(new DeviceId(UUID.fromString(idStr)));
-                if (device == null || !profileId.equals(device.getDeviceProfileId())) {
-                    return;
-                }
-                if (device.getDeviceData() != null
-                        && device.getDeviceData().getTransportConfiguration() instanceof MqttPullDeviceTransportConfiguration mqttPull
-                        && mqttPull.isCollector()) {
-                    count.incrementAndGet();
-                }
-            });
-            next = response.getHasNextPage();
-            batchIndex++;
-        } while (next);
-        return count.get();
-    }
-
-    private void registerTargetSession(MqttPullCollectorSessionContext collectorCtx, DeviceId targetId, String matchKey) {
-        DeviceCredentials credentials = protoEntityService.getDeviceCredentialsByDeviceId(targetId);
-        transportService.process(DeviceTransportType.MQTT_PULL,
-                TransportProtos.ValidateDeviceTokenRequestMsg.newBuilder().setToken(credentials.getCredentialsId()).build(),
-                new TransportServiceCallback<>() {
-                    @Override
-                    public void onSuccess(ValidateDeviceCredentialsResponse msg) {
-                        if (!msg.hasDeviceInfo()) {
-                            return;
-                        }
-                        SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, MqttPullTransportContext.this, UUID.randomUUID());
-                        registerMqttPullTransportSession(sessionInfo, MqttPullNoOpSessionListener.INSTANCE);
-                        collectorCtx.getActiveTargets().put(matchKey, MqttPullTargetSession.builder()
-                                .deviceId(targetId)
-                                .matchKey(matchKey)
-                                .sessionInfo(sessionInfo)
-                                .build());
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        log.warn("[{}] Failed to register MQTT pull target {}", collectorCtx.getDeviceId(), targetId, e);
-                    }
-                });
-    }
-
     private void registerCollectorAuth(MqttPullCollectorSessionContext ctx,
                                        java.util.function.Consumer<ValidateDeviceCredentialsResponse> onSuccess) {
         transportService.process(DeviceTransportType.MQTT_PULL,
@@ -287,7 +164,6 @@ public class MqttPullTransportContext extends TransportContext {
     @EventListener(DeviceUpdatedEvent.class)
     public void onDeviceUpdated(DeviceUpdatedEvent event) {
         refreshCollectorDevice(event.getDevice());
-        reloadActiveTargetsForProfile(event.getDevice());
     }
 
     @EventListener(DeviceDeletedEvent.class)
@@ -296,9 +172,7 @@ public class MqttPullTransportContext extends TransportContext {
         MqttPullCollectorSessionContext collector = collectorSessions.get(deviceId);
         if (collector != null) {
             destroyCollector(collector);
-            return;
         }
-        collectorSessions.values().forEach(ctx -> removeTargetDevice(ctx, deviceId));
     }
 
     @EventListener(DeviceProfileUpdatedEvent.class)
@@ -317,49 +191,15 @@ public class MqttPullTransportContext extends TransportContext {
         }
     }
 
-    private void reloadActiveTargetsForProfile(Device device) {
-        if (device == null || device.getDeviceProfileId() == null) {
-            return;
-        }
-        invalidateCollectorCountCache(device.getDeviceProfileId());
-        for (MqttPullCollectorSessionContext ctx : collectorSessions.values()) {
-            if (!ctx.getDeviceProfile().getId().equals(device.getDeviceProfileId())) {
-                continue;
-            }
-            ctx.getActiveTargets().values().forEach(t -> {
-                if (t.getSessionInfo() != null) {
-                    forgetActivatedTransportSession(t.getSessionInfo());
-                    transportService.deregisterSession(t.getSessionInfo());
-                }
-            });
-            ctx.getActiveTargets().clear();
-            preloadActiveTargets(ctx);
-        }
-    }
-
     private void refreshCollectorDevice(Device device) {
         if (device == null) {
             return;
         }
-        invalidateCollectorCountCache(device.getDeviceProfileId());
         MqttPullCollectorSessionContext existing = collectorSessions.get(device.getId());
         if (existing != null) {
             destroyCollector(existing);
         }
         tryEstablishCollector(device);
-    }
-
-    private void removeTargetDevice(MqttPullCollectorSessionContext collectorCtx, DeviceId targetId) {
-        collectorCtx.getActiveTargets().entrySet().removeIf(entry -> {
-            if (!targetId.equals(entry.getValue().getDeviceId())) {
-                return false;
-            }
-            if (entry.getValue().getSessionInfo() != null) {
-                forgetActivatedTransportSession(entry.getValue().getSessionInfo());
-                transportService.deregisterSession(entry.getValue().getSessionInfo());
-            }
-            return true;
-        });
     }
 
     private void registerMqttPullTransportSession(SessionInfoProto sessionInfo, org.thingsboard.server.common.transport.SessionMsgListener listener) {
@@ -418,12 +258,6 @@ public class MqttPullTransportContext extends TransportContext {
         if (ctx == null) {
             return;
         }
-        ctx.getActiveTargets().values().forEach(t -> {
-            if (t.getSessionInfo() != null) {
-                forgetActivatedTransportSession(t.getSessionInfo());
-                transportService.deregisterSession(t.getSessionInfo());
-            }
-        });
         if (ctx.getSessionInfo() != null) {
             forgetActivatedTransportSession(ctx.getSessionInfo());
             transportService.deregisterSession(ctx.getSessionInfo());
@@ -432,11 +266,5 @@ public class MqttPullTransportContext extends TransportContext {
         ctx.close();
         collectorSessions.remove(ctx.getDeviceId());
         transportService.lifecycleEvent(ctx.getTenantId(), ctx.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
-    }
-
-    private void invalidateCollectorCountCache(DeviceProfileId profileId) {
-        if (profileId != null) {
-            collectorCountByProfile.remove(profileId);
-        }
     }
 }

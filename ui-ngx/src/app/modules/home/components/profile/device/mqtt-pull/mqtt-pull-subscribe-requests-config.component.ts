@@ -14,12 +14,8 @@ import {
   Validators
 } from '@angular/forms';
 import {
-  HttpPullDeviceIdMatchStrategy,
   HttpPullPollDataType,
-  HttpPullRoutingMode,
-  MQTT_PULL_ROUTING_MODE_OPTIONS,
-  MqttPullSubscribeRequest,
-  normalizeMqttPullRoutingMode
+  MqttPullSubscribeRequest
 } from '@shared/models/device.models';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -47,10 +43,6 @@ export class MqttPullSubscribeRequestsConfigComponent implements OnInit, OnDestr
 
   form: UntypedFormGroup;
   dataTypes = Object.keys(HttpPullPollDataType);
-  httpPullPollDataType = HttpPullPollDataType;
-  routingModes = MQTT_PULL_ROUTING_MODE_OPTIONS;
-  matchStrategies = Object.keys(HttpPullDeviceIdMatchStrategy);
-  httpPullRoutingMode = HttpPullRoutingMode;
   qosOptions = [0, 1, 2];
 
   private destroy$ = new Subject<void>();
@@ -109,19 +101,6 @@ export class MqttPullSubscribeRequestsConfigComponent implements OnInit, OnDestr
     }
   }
 
-  showRoutingFields(req: UntypedFormGroup): boolean {
-    const mode = req.get('routingMode')?.value;
-    return mode === HttpPullRoutingMode.MULTI_DEVICE || mode === HttpPullRoutingMode.PER_MESSAGE;
-  }
-
-  showArrayPath(req: UntypedFormGroup): boolean {
-    return req.get('routingMode')?.value === HttpPullRoutingMode.MULTI_DEVICE;
-  }
-
-  showTopicSegmentIndex(req: UntypedFormGroup): boolean {
-    return req.get('routingMode')?.value === HttpPullRoutingMode.PER_MESSAGE;
-  }
-
   showTelemetryKey(req: UntypedFormGroup): boolean {
     return req.get('dataType')?.value === HttpPullPollDataType.TELEMETRY;
   }
@@ -134,18 +113,11 @@ export class MqttPullSubscribeRequestsConfigComponent implements OnInit, OnDestr
       topic: '',
       qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY,
-      routing: {
-        routingMode: HttpPullRoutingMode.PER_MESSAGE,
-        deviceIdJsonPath: 'deviceId',
-        deviceIdTopicSegmentIndex: -1,
-        deviceIdMatchStrategy: HttpPullDeviceIdMatchStrategy.EXTERNAL_DEVICE_ID,
-        telemetryPayloadKey: 'mqttPullPayload'
-      }
+      telemetryPayloadKey: 'mqttPullPayload'
     };
   }
 
   private createRequestGroup(r: MqttPullSubscribeRequest): UntypedFormGroup {
-    const routing = r.routing || {};
     return this.fb.group({
       id: [r.id || this.newId()],
       name: [r.name || ''],
@@ -153,13 +125,7 @@ export class MqttPullSubscribeRequestsConfigComponent implements OnInit, OnDestr
       topic: [r.topic || '', Validators.required],
       qos: [r.qos ?? 1, [Validators.required, Validators.min(0), Validators.max(2)]],
       dataType: [r.dataType || HttpPullPollDataType.TELEMETRY, Validators.required],
-      routingMode: [normalizeMqttPullRoutingMode(routing.routingMode)],
-      responseArrayJsonPath: [routing.responseArrayJsonPath || ''],
-      deviceIdJsonPath: [routing.deviceIdJsonPath || 'deviceId'],
-      deviceIdTopicSegmentIndex: [routing.deviceIdTopicSegmentIndex ?? null],
-      deviceIdMatchStrategy: [routing.deviceIdMatchStrategy || HttpPullDeviceIdMatchStrategy.EXTERNAL_DEVICE_ID],
-      targetDeviceProfileId: [routing.targetDeviceProfileId || ''],
-      telemetryPayloadKey: [routing.telemetryPayloadKey || 'mqttPullPayload']
+      telemetryPayloadKey: [r.telemetryPayloadKey || 'mqttPullPayload']
     });
   }
 
@@ -171,28 +137,9 @@ export class MqttPullSubscribeRequestsConfigComponent implements OnInit, OnDestr
       topic: v.topic,
       qos: v.qos,
       dataType: v.dataType,
-      routing: {
-        routingMode: v.routingMode,
-        responseArrayJsonPath: v.responseArrayJsonPath || undefined,
-        deviceIdJsonPath: v.deviceIdJsonPath,
-        deviceIdTopicSegmentIndex: v.deviceIdTopicSegmentIndex ?? undefined,
-        deviceIdMatchStrategy: v.deviceIdMatchStrategy,
-        targetDeviceProfileId: this.sanitizeTargetProfileId(v.targetDeviceProfileId),
-        telemetryPayloadKey: v.telemetryPayloadKey
-      }
+      telemetryPayloadKey: v.telemetryPayloadKey || 'mqttPullPayload'
     }));
     this.propagateChange(requests);
-  }
-
-  private static readonly UUID_PATTERN =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-  private sanitizeTargetProfileId(value: string | null | undefined): string | undefined {
-    const trimmed = (value || '').trim();
-    if (!trimmed) {
-      return undefined;
-    }
-    return MqttPullSubscribeRequestsConfigComponent.UUID_PATTERN.test(trimmed) ? trimmed : undefined;
   }
 
   private applyDisabledState(): void {

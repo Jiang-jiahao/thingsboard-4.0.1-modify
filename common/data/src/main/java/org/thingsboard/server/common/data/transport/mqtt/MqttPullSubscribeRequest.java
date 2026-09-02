@@ -6,16 +6,19 @@
 package org.thingsboard.server.common.data.transport.mqtt;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.common.data.transport.http.HttpPullDeviceRoutingConfiguration;
 import org.thingsboard.server.common.data.transport.http.HttpPullPollDataType;
 
 import java.io.Serializable;
 import java.util.UUID;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MqttPullSubscribeRequest implements Serializable {
+
+    private static final String DEFAULT_TELEMETRY_KEY = "mqttPullPayload";
 
     private String id;
     private String name;
@@ -23,11 +26,16 @@ public class MqttPullSubscribeRequest implements Serializable {
     private String topic;
     private Integer qos = 1;
     private HttpPullPollDataType dataType = HttpPullPollDataType.TELEMETRY;
-    private HttpPullDeviceRoutingConfiguration routing = new HttpPullDeviceRoutingConfiguration();
+    private String telemetryPayloadKey = DEFAULT_TELEMETRY_KEY;
 
     @JsonIgnore
     public boolean isEnabled() {
         return enabled == null || enabled;
+    }
+
+    @JsonIgnore
+    public String resolveTelemetryPayloadKey() {
+        return StringUtils.isNotBlank(telemetryPayloadKey) ? telemetryPayloadKey : DEFAULT_TELEMETRY_KEY;
     }
 
     @JsonIgnore
@@ -44,8 +52,8 @@ public class MqttPullSubscribeRequest implements Serializable {
         if (StringUtils.isBlank(id)) {
             id = UUID.randomUUID().toString();
         }
-        if (routing != null) {
-            routing.validate();
+        if (StringUtils.isBlank(telemetryPayloadKey)) {
+            telemetryPayloadKey = DEFAULT_TELEMETRY_KEY;
         }
     }
 }

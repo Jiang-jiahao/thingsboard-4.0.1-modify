@@ -539,7 +539,7 @@ export enum HttpPullAuthType {
 
 export enum HttpPullRoutingMode {
   SINGLE_DEVICE = 'SINGLE_DEVICE',
-  /** 每条 MQTT 消息对应一个设备（通配订阅、分时上报） */
+  /** 已废弃：曾用于 MQTT 按消息路由 */
   PER_MESSAGE = 'PER_MESSAGE',
   MULTI_DEVICE = 'MULTI_DEVICE',
   AUTO = 'AUTO'
@@ -551,24 +551,10 @@ export const HTTP_PULL_ROUTING_MODE_OPTIONS = [
   HttpPullRoutingMode.MULTI_DEVICE
 ];
 
-/** MQTT Pull 订阅请求可选路由模式 */
-export const MQTT_PULL_ROUTING_MODE_OPTIONS = [
-  HttpPullRoutingMode.SINGLE_DEVICE,
-  HttpPullRoutingMode.PER_MESSAGE,
-  HttpPullRoutingMode.MULTI_DEVICE
-];
-
 export function normalizeHttpPullRoutingMode(mode?: HttpPullRoutingMode | null): HttpPullRoutingMode {
   return mode === HttpPullRoutingMode.MULTI_DEVICE || mode === HttpPullRoutingMode.AUTO
     ? HttpPullRoutingMode.MULTI_DEVICE
     : HttpPullRoutingMode.SINGLE_DEVICE;
-}
-
-export function normalizeMqttPullRoutingMode(mode?: HttpPullRoutingMode | null): HttpPullRoutingMode {
-  if (mode === HttpPullRoutingMode.PER_MESSAGE) {
-    return HttpPullRoutingMode.PER_MESSAGE;
-  }
-  return normalizeHttpPullRoutingMode(mode);
 }
 
 export enum HttpPullDeviceIdMatchStrategy {
@@ -611,8 +597,6 @@ export interface HttpPullDeviceRoutingConfiguration {
   routingMode?: HttpPullRoutingMode;
   responseArrayJsonPath?: string;
   deviceIdJsonPath?: string;
-  /** MQTT：从主题路径分段取设备 ID（0 起）；-1 为最后一段 */
-  deviceIdTopicSegmentIndex?: number;
   deviceIdMatchStrategy?: HttpPullDeviceIdMatchStrategy;
   targetDeviceProfileId?: string;
   telemetryPayloadKey?: string;
@@ -905,26 +889,22 @@ export interface MqttPullSubscribeRequest {
   topic?: string;
   qos?: number;
   dataType?: HttpPullPollDataType;
-  routing?: HttpPullDeviceRoutingConfiguration;
+  telemetryPayloadKey?: string;
 }
 
 export interface MqttPullDeviceProfileTransportConfiguration {
   mqttTransportMode?: MqttTransportMode;
-  brokerUrl?: string;
   connectTimeoutMs?: number;
   keepAliveSec?: number;
   cleanSession?: boolean;
   reconnectIntervalMs?: number;
-  clientIdPrefix?: string;
   subscribeRequests?: MqttPullSubscribeRequest[];
-  auth?: MqttPullAuthConfiguration;
 }
 
 export interface MqttPullDeviceTransportConfiguration {
-  collector?: boolean;
-  externalDeviceId?: string;
-  collectorDeviceId?: string;
-  brokerUrlOverride?: string;
+  brokerUrl?: string;
+  clientId?: string;
+  auth?: MqttPullAuthConfiguration;
 }
 
 /** 判断档案传输配置是否为 MQTT 主动拉取（不依赖 type 字段，父表单会剥离 type） */
@@ -947,13 +927,7 @@ export function isMqttPullProfileTransportConfiguration(
   if (cfg.subscribeRequests?.length) {
     return true;
   }
-  if (cfg.brokerUrl) {
-    return true;
-  }
-  if (cfg.connectTimeoutMs != null && cfg.auth != null) {
-    return true;
-  }
-  return false;
+  return cfg.connectTimeoutMs != null;
 }
 
 export function resolveMqttProfileTransportTypeForDisplay(
@@ -1009,10 +983,21 @@ export function normalizeMqttProfileTransportConfigurationForSave(
     || isMqttPullProfileTransportConfiguration(transportConfiguration as MqttPullDeviceProfileTransportConfiguration);
   const mode = isPull ? MqttTransportMode.PULL : MqttTransportMode.PASSIVE;
   if (isPull) {
+    const raw = transportConfiguration as MqttPullDeviceProfileTransportConfiguration;
+    const subscribeRequests = (raw.subscribeRequests || []).map(req => ({
+      id: req.id,
+      name: req.name,
+      enabled: req.enabled,
+      topic: req.topic,
+      qos: req.qos,
+      dataType: req.dataType,
+      telemetryPayloadKey: req.telemetryPayloadKey || 'mqttPullPayload'
+    }));
     return {
       ...transportConfiguration,
       type: DeviceTransportType.MQTT_PULL,
-      mqttTransportMode: mode
+      mqttTransportMode: mode,
+      subscribeRequests
     } as DeviceProfileTransportConfiguration;
   }
   return {
@@ -1056,31 +1041,13 @@ export function normalizeProfileTransportConfigurationForSave(
   return transportConfiguration as DeviceProfileTransportConfiguration;
 }
 
-export function resolveMqttPullDeviceIsCollector(
-  cfg: Pick<MqttPullDeviceTransportConfiguration, 'collector' | 'externalDeviceId'> | null | undefined
-): boolean {
-  if (!cfg) {
-    return true;
-  }
-  if ((cfg.externalDeviceId || '').trim()) {
-    return false;
-  }
-  return cfg.collector !== false;
-}
-
-export function isMqttPullCollectorCandidate(
-  cfg: Pick<MqttPullDeviceTransportConfiguration, 'externalDeviceId'> | null | undefined
-): boolean {
-  return !(cfg?.externalDeviceId || '').trim();
-}
-
 export function isMqttPullDeviceTransportConfigurationShape(
   cfg: Record<string, unknown> | null | undefined
 ): boolean {
   if (!cfg) {
     return false;
   }
-  return 'collector' in cfg || 'brokerUrlOverride' in cfg || 'collectorDeviceId' in cfg;
+  return 'brokerUrl' in cfg || 'clientId' in cfg || 'auth' in cfg;
 }
 
 export function resolveMqttDeviceTransportTypeForSave(
@@ -1113,143 +1080,30 @@ export function normalizeMqttDeviceTransportConfigurationForSave(
     return { ...configuration, type: resolvedType } as DeviceTransportConfiguration;
   }
   const raw = configuration as MqttPullDeviceTransportConfiguration;
-  const collector = resolveMqttPullDeviceIsCollector(raw);
-  const externalDeviceId = (raw.externalDeviceId || '').trim() || undefined;
-  const collectorDeviceId = (raw.collectorDeviceId || '').trim() || undefined;
-  const brokerUrlOverride = (raw.brokerUrlOverride || '').trim() || undefined;
+  const brokerUrl = (raw.brokerUrl || '').trim() || undefined;
+  const clientId = (raw.clientId || '').trim() || undefined;
+  const authType = raw.auth?.authType || MqttPullAuthType.NONE;
   return {
     type: DeviceTransportType.MQTT_PULL,
-    collector,
-    externalDeviceId: collector ? undefined : externalDeviceId,
-    collectorDeviceId: collector ? undefined : collectorDeviceId,
-    brokerUrlOverride: collector ? brokerUrlOverride : undefined
+    brokerUrl,
+    clientId,
+    auth: {
+      authType,
+      username: authType === MqttPullAuthType.USERNAME_PASSWORD ? (raw.auth?.username || undefined) : undefined,
+      password: authType === MqttPullAuthType.USERNAME_PASSWORD ? (raw.auth?.password || undefined) : undefined
+    }
   };
 }
 
 export interface MqttPullProfileContext {
-  routingMode: HttpPullRoutingMode;
-  brokerUrl: string | null;
-}
-
-export function resolveMqttPullProfileRoutingMode(
-  raw: MqttPullDeviceProfileTransportConfiguration | null | undefined
-): HttpPullRoutingMode {
-  if (!raw) {
-    return HttpPullRoutingMode.SINGLE_DEVICE;
-  }
-  const subscribeRequests = raw.subscribeRequests;
-  if (subscribeRequests?.length) {
-    for (const req of subscribeRequests) {
-      const mode = req.routing?.routingMode;
-      if (mode === HttpPullRoutingMode.MULTI_DEVICE || mode === HttpPullRoutingMode.PER_MESSAGE
-          || mode === HttpPullRoutingMode.AUTO) {
-        return mode === HttpPullRoutingMode.AUTO ? HttpPullRoutingMode.MULTI_DEVICE : mode;
-      }
-    }
-    return normalizeMqttPullRoutingMode(subscribeRequests[0]?.routing?.routingMode);
-  }
-  return HttpPullRoutingMode.SINGLE_DEVICE;
+  active: true;
 }
 
 export function extractMqttPullProfileContext(dp: DeviceProfile | null | undefined): MqttPullProfileContext | null {
   if (!dp || dp.transportType !== DeviceTransportType.MQTT_PULL) {
     return null;
   }
-  const raw = dp.profileData?.transportConfiguration as unknown as MqttPullDeviceProfileTransportConfiguration | undefined;
-  if (!raw) {
-    return null;
-  }
-  return {
-    routingMode: resolveMqttPullProfileRoutingMode(raw),
-    brokerUrl: raw.brokerUrl ?? null
-  };
-}
-
-const MQTT_PULL_HOST_PORT_PATTERN = /^[\w.\-]+:\d+$/;
-
-function parseMqttPullOverrideUrl(raw: string): URL | null {
-  try {
-    const withScheme = /^(tcp|ssl|mqtt|mqtts):\/\//i.test(raw) || raw.includes('://') ? raw : `tcp://${raw}`;
-    return new URL(withScheme);
-  } catch {
-    return null;
-  }
-}
-
-export function shouldMergeMqttPullBrokerUrlWithProfile(raw: string | undefined | null): boolean {
-  const trimmed = raw?.trim();
-  if (!trimmed) {
-    return false;
-  }
-  if (MQTT_PULL_HOST_PORT_PATTERN.test(trimmed)) {
-    return true;
-  }
-  const parsed = parseMqttPullOverrideUrl(trimmed);
-  if (!parsed) {
-    return false;
-  }
-  return !parsed.pathname || parsed.pathname === '/';
-}
-
-export function resolveMqttPullBrokerUrlOverride(
-  raw: string | undefined | null,
-  profileBrokerUrl: string | null | undefined
-): string | undefined {
-  const trimmed = raw?.trim();
-  if (!trimmed) {
-    return profileBrokerUrl || undefined;
-  }
-  if (!shouldMergeMqttPullBrokerUrlWithProfile(trimmed)) {
-    return trimmed;
-  }
-  if (!profileBrokerUrl) {
-    const parsed = parseMqttPullOverrideUrl(trimmed);
-    if (!parsed) {
-      return trimmed;
-    }
-    const scheme = parsed.protocol.replace(':', '') || 'tcp';
-    const port = parsed.port ? `:${parsed.port}` : '';
-    return `${scheme}://${parsed.hostname}${port}`;
-  }
-  try {
-    const profile = parseMqttPullOverrideUrl(profileBrokerUrl);
-    const override = parseMqttPullOverrideUrl(trimmed);
-    if (!profile || !override) {
-      return trimmed;
-    }
-    const scheme = profile.protocol.replace(':', '') || 'tcp';
-    const port = override.port || profile.port;
-    return `${scheme}://${override.hostname}${port ? `:${port}` : ''}`;
-  } catch {
-    return trimmed;
-  }
-}
-
-export function formatMqttPullBrokerUrlOverrideForDisplay(
-  stored: string | undefined | null,
-  profileBrokerUrl: string | null | undefined
-): string {
-  const trimmed = stored?.trim();
-  if (!trimmed) {
-    return '';
-  }
-  if (MQTT_PULL_HOST_PORT_PATTERN.test(trimmed)) {
-    return trimmed;
-  }
-  if (!profileBrokerUrl) {
-    return trimmed;
-  }
-  try {
-    const profile = parseMqttPullOverrideUrl(profileBrokerUrl);
-    const override = parseMqttPullOverrideUrl(trimmed);
-    if (profile && override && override.hostname === profile.hostname
-      && (override.port || '') === (profile.port || '')) {
-      return override.port ? `${override.hostname}:${override.port}` : override.hostname;
-    }
-  } catch {
-    /* keep trimmed */
-  }
-  return trimmed;
+  return { active: true };
 }
 
 export function normalizeDeviceTransportConfigurationForSave(
@@ -1983,7 +1837,6 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
       case BasicTransportType.MQTT:
       case DeviceTransportType.MQTT_PULL:
         const mqttPullTransportConfiguration: MqttPullDeviceProfileTransportConfiguration = {
-          brokerUrl: 'tcp://192.168.1.10:1883',
           connectTimeoutMs: 10000,
           keepAliveSec: 60,
           cleanSession: true,
@@ -1994,15 +1847,8 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
             topic: 'devices/+/telemetry',
             qos: 1,
             dataType: HttpPullPollDataType.TELEMETRY,
-            routing: {
-              routingMode: HttpPullRoutingMode.PER_MESSAGE,
-              deviceIdJsonPath: 'deviceId',
-              deviceIdTopicSegmentIndex: -1,
-              deviceIdMatchStrategy: HttpPullDeviceIdMatchStrategy.EXTERNAL_DEVICE_ID,
-              telemetryPayloadKey: 'mqttPullPayload'
-            }
-          }],
-          auth: { authType: MqttPullAuthType.NONE }
+            telemetryPayloadKey: 'mqttPullPayload'
+          }]
         };
         transportConfiguration = {...mqttPullTransportConfiguration, type: DeviceTransportType.MQTT_PULL} as unknown as DeviceProfileTransportConfiguration;
         break;
@@ -2082,8 +1928,9 @@ export const createDeviceTransportConfiguration = (type: TransportType): DeviceT
       case BasicTransportType.MQTT:
       case DeviceTransportType.MQTT_PULL:
         const mqttPullDeviceTransportConfiguration: MqttPullDeviceTransportConfiguration = {
-          collector: true,
-          externalDeviceId: null
+          brokerUrl: '',
+          clientId: '',
+          auth: { authType: MqttPullAuthType.NONE }
         };
         transportConfiguration = {...mqttPullDeviceTransportConfiguration, type: DeviceTransportType.MQTT_PULL};
         break;

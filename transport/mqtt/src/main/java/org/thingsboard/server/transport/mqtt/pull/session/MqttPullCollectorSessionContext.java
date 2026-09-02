@@ -17,8 +17,6 @@ import org.thingsboard.server.gen.transport.TransportProtos.SessionInfoProto;
 import org.thingsboard.server.transport.mqtt.pull.MqttPullTransportContext;
 import org.thingsboard.mqtt.MqttClient;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 @Data
@@ -37,9 +35,6 @@ public class MqttPullCollectorSessionContext {
     private ScheduledFuture<?> reconnectTask;
     private volatile boolean brokerLinkActive;
 
-    @Builder.Default
-    private final Map<String, MqttPullTargetSession> activeTargets = new ConcurrentHashMap<>();
-
     public DeviceId getDeviceId() {
         return device.getId();
     }
@@ -56,6 +51,5 @@ public class MqttPullCollectorSessionContext {
             }
             mqttClient = null;
         }
-        activeTargets.clear();
     }
 }

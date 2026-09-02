@@ -9,7 +9,7 @@ public enum HttpPullRoutingMode {
     /** 整包写入采集器 */
     SINGLE_DEVICE,
     /**
-     * 每条消息对应一个设备（适用于 MQTT 通配订阅：多设备分时上报，payload 为单条 JSON）。
+     * 已废弃：曾用于 MQTT 按消息路由，现 MQTT Pull 直接写入本设备遥测。
      */
     PER_MESSAGE,
     /** 按本请求配置的路径拆分并路由（单条消息内 JSON 数组批量设备） */

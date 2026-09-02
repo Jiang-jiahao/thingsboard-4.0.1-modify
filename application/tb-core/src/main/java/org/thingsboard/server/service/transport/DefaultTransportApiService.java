@@ -244,8 +244,6 @@ public class DefaultTransportApiService implements TransportApiService {
             return handle(transportApiRequestMsg.getHttpPullRoutingTargetsRequestMsg());
         } else if (transportApiRequestMsg.hasMqttPullDevicesRequestMsg()) {
             return handle(transportApiRequestMsg.getMqttPullDevicesRequestMsg());
-        } else if (transportApiRequestMsg.hasMqttPullRoutingTargetsRequestMsg()) {
-            return handle(transportApiRequestMsg.getMqttPullRoutingTargetsRequestMsg());
         }
         return getEmptyTransportApiResponse();
     }
@@ -654,43 +652,6 @@ public class DefaultTransportApiService implements TransportApiService {
                 .build();
         return TransportApiResponseMsg.newBuilder().setMqttPullDevicesResponseMsg(responseMsg).build();
     }
-
-    private TransportApiResponseMsg handle(TransportProtos.GetMqttPullRoutingTargetsRequestMsg requestMsg) {
-        TenantId tenantId = TenantId.fromUUID(new UUID(requestMsg.getTenantIdMSB(), requestMsg.getTenantIdLSB()));
-        DeviceProfileId profileId = new DeviceProfileId(new UUID(requestMsg.getDeviceProfileIdMSB(), requestMsg.getDeviceProfileIdLSB()));
-        PageLink pageLink = new PageLink(requestMsg.getPageSize(), requestMsg.getPage());
-        PageData<DeviceId> deviceIds = deviceService.findDeviceIdsByTenantIdAndDeviceProfileId(tenantId, profileId, pageLink);
-        TransportProtos.GetMqttPullRoutingTargetsResponseMsg.Builder builder = TransportProtos.GetMqttPullRoutingTargetsResponseMsg.newBuilder();
-        for (DeviceId deviceId : deviceIds.getData()) {
-            Device device = deviceService.findDeviceById(tenantId, deviceId);
-            if (device == null) {
-                continue;
-            }
-            String externalDeviceId = "";
-            String collectorDeviceId = "";
-            if (device.getDeviceData() != null && device.getDeviceData().getTransportConfiguration() != null) {
-                var tc = device.getDeviceData().getTransportConfiguration();
-                if (tc instanceof org.thingsboard.server.common.data.device.data.MqttPullDeviceTransportConfiguration mqttPull) {
-                    if (mqttPull.isCollector()) {
-                        continue;
-                    }
-                    externalDeviceId = mqttPull.getExternalDeviceId() != null ? mqttPull.getExternalDeviceId() : "";
-                    collectorDeviceId = mqttPull.getCollectorDeviceId() != null ? mqttPull.getCollectorDeviceId() : "";
-                }
-            }
-            builder.addTargets(TransportProtos.HttpPullRoutingTargetProto.newBuilder()
-                    .setDeviceIdMSB(deviceId.getId().getMostSignificantBits())
-                    .setDeviceIdLSB(deviceId.getId().getLeastSignificantBits())
-                    .setName(device.getName() != null ? device.getName() : "")
-                    .setLabel(device.getLabel() != null ? device.getLabel() : "")
-                    .setExternalDeviceId(externalDeviceId)
-                    .setCollectorDeviceId(collectorDeviceId)
-                    .build());
-        }
-        builder.setHasNextPage(deviceIds.hasNext());
-        return TransportApiResponseMsg.newBuilder().setMqttPullRoutingTargetsResponseMsg(builder.build()).build();
-    }
-
 
     private TransportApiResponseMsg handle(GetTcpDevicesRequestMsg requestMsg) {
         PageLink pageLink = new PageLink(requestMsg.getPageSize(), requestMsg.getPage());

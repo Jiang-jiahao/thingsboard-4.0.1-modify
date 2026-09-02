@@ -26,7 +26,6 @@ import org.thingsboard.mqtt.MqttConnectResult;
 import org.thingsboard.server.common.adaptor.JsonConverter;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.profile.MqttPullDeviceProfileTransportConfiguration;
-import org.thingsboard.server.common.data.transport.http.HttpPullDeviceRoutingConfiguration;
 import org.thingsboard.server.common.data.transport.http.HttpPullPollDataType;
 import org.thingsboard.server.common.data.transport.mqtt.MqttPullAuthConfiguration;
 import org.thingsboard.server.common.data.transport.mqtt.MqttPullAuthType;
@@ -34,10 +33,8 @@ import org.thingsboard.server.common.data.transport.mqtt.MqttPullSubscribeReques
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.transport.mqtt.pull.session.MqttPullCollectorSessionContext;
-import org.thingsboard.server.transport.mqtt.pull.session.MqttPullTargetSession;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -89,8 +86,9 @@ public class MqttPullTransportService {
         config.setCleanSession(profile.getCleanSession() == null || profile.getCleanSession());
         int keepAlive = profile.getKeepAliveSec() != null ? profile.getKeepAliveSec() : 60;
         config.setTimeoutSeconds(keepAlive);
-        applyAuth(config, profile.getAuth());
-        String clientId = buildClientId(profile, sessionContext);
+        applyAuth(config, sessionContext.getDeviceTransportConfiguration() != null
+                ? sessionContext.getDeviceTransportConfiguration().getAuth() : null);
+        String clientId = buildClientId(sessionContext);
         if (StringUtils.isNotBlank(clientId)) {
             config.setClientId(clientId);
         }
@@ -158,98 +156,16 @@ public class MqttPullTransportService {
                            String topic, ByteBuf payload) {
         String body = payload.toString(StandardCharsets.UTF_8);
         if (request == null) {
+            log.debug("[{}] MQTT pull message on unmatched topic [{}]", sessionContext.getDeviceId(), topic);
             return;
         }
-        HttpPullDeviceRoutingConfiguration routing = sessionContext.getProfileTransportConfiguration().resolveRouting(request);
         HttpPullPollDataType dataType = request.getDataType() != null ? request.getDataType() : HttpPullPollDataType.TELEMETRY;
         if (dataType == HttpPullPollDataType.TELEMETRY) {
-            dispatchTelemetry(sessionContext, body, routing, topic);
+            postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, request.resolveTelemetryPayloadKey());
         } else {
-            dispatchAttributes(sessionContext, body, dataType == HttpPullPollDataType.SHARED_ATTRIBUTES, routing, topic);
+            postAttributes(sessionContext, sessionContext.getSessionInfo(), body,
+                    dataType == HttpPullPollDataType.SHARED_ATTRIBUTES);
         }
-        if (MqttPullRoutingHelper.shouldRouteToMultipleDevices(routing, body)) {
-            touchCollectorActivity(sessionContext);
-        }
-    }
-
-    private void dispatchTelemetry(MqttPullCollectorSessionContext sessionContext, String body,
-                                   HttpPullDeviceRoutingConfiguration routing, String topic) {
-        String telemetryKey = routing != null ? routing.getTelemetryPayloadKey() : "mqttPullPayload";
-        if (!MqttPullRoutingHelper.shouldRouteToMultipleDevices(routing, body)) {
-            postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, telemetryKey);
-            return;
-        }
-        if (MqttPullRoutingHelper.isPerMessageMode(routing)) {
-            routePerMessageTelemetry(sessionContext, body, routing, topic, telemetryKey);
-            return;
-        }
-        List<Object> elements = MqttPullJsonHelper.readArrayElements(body, routing.getResponseArrayJsonPath());
-        for (Object element : elements) {
-            String externalId = MqttPullJsonHelper.readDeviceId(element, routing.getDeviceIdJsonPath());
-            routeToTargetTelemetry(sessionContext, body, routing, telemetryKey, externalId,
-                    MqttPullJsonHelper.elementToJsonString(element));
-        }
-    }
-
-    private void dispatchAttributes(MqttPullCollectorSessionContext sessionContext, String body, boolean shared,
-                                    HttpPullDeviceRoutingConfiguration routing, String topic) {
-        if (!MqttPullRoutingHelper.shouldRouteToMultipleDevices(routing, body)) {
-            postAttributes(sessionContext, sessionContext.getSessionInfo(), body, shared);
-            return;
-        }
-        if (MqttPullRoutingHelper.isPerMessageMode(routing)) {
-            routePerMessageAttributes(sessionContext, body, routing, topic, shared);
-            return;
-        }
-        List<Object> elements = MqttPullJsonHelper.readArrayElements(body, routing.getResponseArrayJsonPath());
-        for (Object element : elements) {
-            String externalId = MqttPullJsonHelper.readDeviceId(element, routing.getDeviceIdJsonPath());
-            MqttPullTargetSession target = findTargetSession(sessionContext, externalId);
-            if (target == null || target.getSessionInfo() == null) {
-                continue;
-            }
-            postAttributes(sessionContext, target.getSessionInfo(), MqttPullJsonHelper.elementToJsonString(element), shared);
-        }
-    }
-
-    private void routePerMessageTelemetry(MqttPullCollectorSessionContext sessionContext, String body,
-                                          HttpPullDeviceRoutingConfiguration routing, String topic, String telemetryKey) {
-        String externalId = MqttPullDeviceIdResolver.resolve(topic, body, routing);
-        routeToTargetTelemetry(sessionContext, body, routing, telemetryKey, externalId, body);
-    }
-
-    private void routePerMessageAttributes(MqttPullCollectorSessionContext sessionContext, String body,
-                                         HttpPullDeviceRoutingConfiguration routing, String topic, boolean shared) {
-        String externalId = MqttPullDeviceIdResolver.resolve(topic, body, routing);
-        MqttPullTargetSession target = findTargetSession(sessionContext, externalId);
-        if (target == null || target.getSessionInfo() == null) {
-            log.debug("[{}] No MQTT pull target for per-message device id [{}]", sessionContext.getDeviceId(), externalId);
-            return;
-        }
-        postAttributes(sessionContext, target.getSessionInfo(), body, shared);
-    }
-
-    private void routeToTargetTelemetry(MqttPullCollectorSessionContext sessionContext, String body,
-                                        HttpPullDeviceRoutingConfiguration routing, String telemetryKey,
-                                        String externalId, String payloadJson) {
-        if (StringUtils.isBlank(externalId)) {
-            return;
-        }
-        MqttPullTargetSession target = findTargetSession(sessionContext, externalId);
-        if (target == null || target.getSessionInfo() == null) {
-            log.debug("[{}] No MQTT pull target for device id [{}] (strategy={})",
-                    sessionContext.getDeviceId(), externalId.trim(),
-                    routing != null ? routing.getDeviceIdMatchStrategy() : null);
-            return;
-        }
-        postTelemetry(sessionContext, target.getSessionInfo(), payloadJson, telemetryKey);
-    }
-
-    private MqttPullTargetSession findTargetSession(MqttPullCollectorSessionContext sessionContext, String externalId) {
-        if (StringUtils.isBlank(externalId)) {
-            return null;
-        }
-        return sessionContext.getActiveTargets().get(externalId.trim());
     }
 
     private void postTelemetry(MqttPullCollectorSessionContext collectorCtx,
@@ -283,27 +199,9 @@ public class MqttPullTransportService {
         transportService.process(sessionInfo, builder.build(), null);
     }
 
-    /**
-     * 多设备/按消息路由时，目标设备收到数据后同步刷新采集器活跃状态（不重复写入业务遥测）。
-     */
-    private void touchCollectorActivity(MqttPullCollectorSessionContext collectorCtx) {
-        if (collectorCtx.getSessionInfo() == null) {
-            return;
-        }
-        if (collectorCtx.getTransportContext() != null) {
-            collectorCtx.getTransportContext().activateMqttPullDeviceSession(
-                    collectorCtx.getSessionInfo(), collectorCtx.getDeviceId());
-        }
-        JsonObject wrapper = new JsonObject();
-        wrapper.addProperty("mqttPullLastActivityTs", System.currentTimeMillis());
-        TransportProtos.PostTelemetryMsg msg = JsonConverter.convertToTelemetryProto(wrapper);
-        transportService.process(collectorCtx.getSessionInfo(), msg, null);
-    }
-
     private String resolveBrokerUrl(MqttPullCollectorSessionContext ctx) {
-        String override = ctx.getDeviceTransportConfiguration() != null
-                ? ctx.getDeviceTransportConfiguration().getBrokerUrlOverride() : null;
-        return MqttPullBrokerUrlResolver.resolve(ctx.getProfileTransportConfiguration().getBrokerUrl(), override);
+        return ctx.getDeviceTransportConfiguration() != null
+                ? ctx.getDeviceTransportConfiguration().getBrokerUrl() : null;
     }
 
     private void applyAuth(MqttClientConfig config, MqttPullAuthConfiguration auth) {
@@ -316,13 +214,14 @@ public class MqttPullTransportService {
         }
     }
 
-    private String buildClientId(MqttPullDeviceProfileTransportConfiguration profile, MqttPullCollectorSessionContext ctx) {
-        String prefix = profile.getClientIdPrefix();
-        if (StringUtils.isBlank(prefix)) {
-            prefix = "tb-mqtt-pull";
+    private String buildClientId(MqttPullCollectorSessionContext ctx) {
+        String deviceClientId = ctx.getDeviceTransportConfiguration() != null
+                ? ctx.getDeviceTransportConfiguration().getClientId() : null;
+        if (StringUtils.isNotBlank(deviceClientId)) {
+            return deviceClientId.trim();
         }
         String suffix = ctx.getDeviceId().getId().toString().replace("-", "").substring(0, 8);
-        String clientId = prefix + "-" + suffix;
+        String clientId = "tb-mqtt-pull-" + suffix;
         return clientId.length() > 23 ? clientId.substring(0, 23) : clientId;
     }
 
@@ -362,14 +261,5 @@ public class MqttPullTransportService {
             return true;
         }
         return false;
-    }
-
-    public static String buildMatchKey(org.thingsboard.server.common.data.transport.http.HttpPullDeviceIdMatchStrategy strategy,
-                                       TransportProtos.HttpPullRoutingTargetProto target) {
-        return switch (strategy) {
-            case DEVICE_LABEL -> target.getLabel();
-            case EXTERNAL_DEVICE_ID -> target.getExternalDeviceId();
-            default -> target.getName();
-        };
     }
 }

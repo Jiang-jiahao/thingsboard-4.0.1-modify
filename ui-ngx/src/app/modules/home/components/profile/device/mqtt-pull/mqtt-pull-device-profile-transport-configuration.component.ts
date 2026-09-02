@@ -2,8 +2,6 @@
 /// Copyright © 2016-2025 The Thingsboard Authors
 ///
 import { Component, forwardRef, Input, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { HttpPullRoutingHelpDialogComponent } from '../http-pull/http-pull-routing-help-dialog.component';
 import {
   ControlValueAccessor,
   NG_VALIDATORS,
@@ -16,7 +14,6 @@ import {
 } from '@angular/forms';
 import {
   DeviceTransportType,
-  MqttPullAuthType,
   MqttPullDeviceProfileTransportConfiguration,
   MqttPullSubscribeRequest,
   MqttTransportMode
@@ -45,27 +42,19 @@ export class MqttPullDeviceProfileTransportConfigurationComponent implements OnI
   @Input() disabled: boolean;
 
   form: UntypedFormGroup;
-  mqttPullAuthType = MqttPullAuthType;
-  authTypes = Object.keys(MqttPullAuthType);
 
   private destroy$ = new Subject<void>();
   private propagateChange: (v: MqttPullDeviceProfileTransportConfiguration) => void = () => {};
 
-  constructor(private fb: UntypedFormBuilder,
-              private dialog: MatDialog) {}
+  constructor(private fb: UntypedFormBuilder) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      brokerUrl: ['', Validators.required],
       connectTimeoutMs: [10000, [Validators.required, Validators.min(0)]],
       keepAliveSec: [60, [Validators.required, Validators.min(1)]],
       cleanSession: [true],
       reconnectIntervalMs: [5000, [Validators.required, Validators.min(1000)]],
-      clientIdPrefix: [''],
-      subscribeRequests: [[] as MqttPullSubscribeRequest[], Validators.required],
-      authType: [MqttPullAuthType.NONE],
-      username: [''],
-      password: ['']
+      subscribeRequests: [[] as MqttPullSubscribeRequest[], Validators.required]
     });
     this.form.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => this.updateModel());
   }
@@ -93,18 +82,12 @@ export class MqttPullDeviceProfileTransportConfigurationComponent implements OnI
     if (!value) {
       return;
     }
-    const auth = value.auth || {};
     this.form.patchValue({
-      brokerUrl: value.brokerUrl,
       connectTimeoutMs: value.connectTimeoutMs,
       keepAliveSec: value.keepAliveSec,
       cleanSession: value.cleanSession !== false,
       reconnectIntervalMs: value.reconnectIntervalMs,
-      clientIdPrefix: value.clientIdPrefix,
-      subscribeRequests: value.subscribeRequests?.length ? value.subscribeRequests : undefined,
-      authType: auth.authType || MqttPullAuthType.NONE,
-      username: auth.username,
-      password: auth.password
+      subscribeRequests: value.subscribeRequests?.length ? value.subscribeRequests : undefined
     }, { emitEvent: false });
   }
 
@@ -112,33 +95,16 @@ export class MqttPullDeviceProfileTransportConfigurationComponent implements OnI
     return this.form.valid ? null : { mqttPull: true };
   }
 
-  openRoutingExample(event: Event): void {
-    event.stopPropagation();
-    this.dialog.open(HttpPullRoutingHelpDialogComponent, {
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
-      autoFocus: false,
-      width: '560px',
-      maxWidth: '95vw'
-    });
-  }
-
   private updateModel(): void {
     const v = this.form.value;
     const model: MqttPullDeviceProfileTransportConfiguration & { type: DeviceTransportType } = {
       type: DeviceTransportType.MQTT_PULL,
       mqttTransportMode: MqttTransportMode.PULL,
-      brokerUrl: v.brokerUrl,
       connectTimeoutMs: v.connectTimeoutMs,
       keepAliveSec: v.keepAliveSec,
       cleanSession: v.cleanSession,
       reconnectIntervalMs: v.reconnectIntervalMs,
-      clientIdPrefix: v.clientIdPrefix || undefined,
-      subscribeRequests: v.subscribeRequests,
-      auth: {
-        authType: v.authType,
-        username: v.username,
-        password: v.password
-      }
+      subscribeRequests: v.subscribeRequests
     };
     this.propagateChange(model);
   }

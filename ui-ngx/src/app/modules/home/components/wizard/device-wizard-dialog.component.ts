@@ -95,9 +95,7 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
 
   httpPullProfilePollUrl: string | null = null;
 
-  mqttPullProfileRoutingMode: HttpPullRoutingMode | null = null;
-
-  mqttPullProfileBrokerUrl: string | null = null;
+  mqttPullProfileActive = false;
 
   readonly deviceWizardDeviceScope: 'tenant' = 'tenant';
 
@@ -272,8 +270,7 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
     this.httpPullProfileRoutingMode = null;
     this.httpPushProfileRoutingMode = null;
     this.httpPullProfilePollUrl = null;
-    this.mqttPullProfileRoutingMode = null;
-    this.mqttPullProfileBrokerUrl = null;
+    this.mqttPullProfileActive = false;
     if (!dp) {
       return;
     }
@@ -282,11 +279,7 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
       this.httpPullProfileRoutingMode = httpPullCtx.routingMode;
       this.httpPullProfilePollUrl = httpPullCtx.pollUrl;
     }
-    const mqttPullCtx = extractMqttPullProfileContext(dp);
-    if (mqttPullCtx) {
-      this.mqttPullProfileRoutingMode = mqttPullCtx.routingMode;
-      this.mqttPullProfileBrokerUrl = mqttPullCtx.brokerUrl;
-    }
+    this.mqttPullProfileActive = extractMqttPullProfileContext(dp) != null;
     const httpPushCtx = extractHttpPushProfileContext(dp);
     if (httpPushCtx) {
       this.httpPushProfileRoutingMode = httpPushCtx.routingMode;

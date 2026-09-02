@@ -117,8 +117,6 @@ public interface TransportService {
 
     TransportProtos.GetMqttPullDevicesResponseMsg getMqttPullDevicesIds(TransportProtos.GetMqttPullDevicesRequestMsg requestMsg);
 
-    TransportProtos.GetMqttPullRoutingTargetsResponseMsg getMqttPullRoutingTargets(TransportProtos.GetMqttPullRoutingTargetsRequestMsg requestMsg);
-
     /**
      * 获取使用 TCP 传输类型的设备 ID 列表（用于 CLIENT 模式主动建连等）。
      */

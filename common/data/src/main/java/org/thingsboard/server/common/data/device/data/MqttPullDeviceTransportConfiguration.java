@@ -5,27 +5,22 @@
  */
 package org.thingsboard.server.common.data.device.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.transport.mqtt.MqttPullAuthConfiguration;
 
 /**
- * 设备级 MQTT Pull 配置。
- * <ul>
- *   <li>{@link #collector}：为 true 时该设备作为采集器，连接外部 Broker 并订阅主题。</li>
- *   <li>{@link #externalDeviceId}：多设备路由时，与消息中设备 ID 字段匹配。</li>
- *   <li>{@link #collectorDeviceId}：目标设备归属的采集器设备 ID。</li>
- *   <li>{@link #brokerUrlOverride}：覆盖档案中的 brokerUrl。</li>
- * </ul>
+ * 设备级 MQTT Pull 配置：连接地址、Client ID、账号密码均在设备上填写。
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MqttPullDeviceTransportConfiguration implements DeviceTransportConfiguration {
 
-    private Boolean collector = true;
-    private String externalDeviceId;
-    private String collectorDeviceId;
-    private String brokerUrlOverride;
+    private String brokerUrl;
+    private String clientId;
+    private MqttPullAuthConfiguration auth = new MqttPullAuthConfiguration();
 
     @Override
     public DeviceTransportType getType() {
@@ -34,26 +29,11 @@ public class MqttPullDeviceTransportConfiguration implements DeviceTransportConf
 
     @Override
     public void validate() {
-        if (StringUtils.isNotBlank(externalDeviceId)) {
-            collector = false;
-            brokerUrlOverride = null;
-        } else if (StringUtils.isNotBlank(collectorDeviceId)) {
-            collector = false;
-            brokerUrlOverride = null;
-        } else if (Boolean.TRUE.equals(collector)) {
-            collectorDeviceId = null;
-            externalDeviceId = null;
+        if (StringUtils.isBlank(brokerUrl)) {
+            throw new IllegalArgumentException("MQTT pull device requires broker URL");
         }
-        if (collector == null) {
-            collector = true;
+        if (auth != null) {
+            auth.validate();
         }
-    }
-
-    @JsonIgnore
-    public boolean isCollector() {
-        if (StringUtils.isNotBlank(externalDeviceId)) {
-            return false;
-        }
-        return !Boolean.FALSE.equals(collector);
     }
 }

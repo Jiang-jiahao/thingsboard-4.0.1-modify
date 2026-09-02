@@ -13,7 +13,6 @@ import org.thingsboard.server.common.data.device.data.DeviceData;
 import org.thingsboard.server.common.data.device.data.DeviceTransportConfiguration;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.util.ProtoUtils;
@@ -62,17 +61,6 @@ public class MqttPullProtoEntityService {
 
     public TransportProtos.GetMqttPullDevicesResponseMsg getMqttPullDevicesIds(int page, int pageSize) {
         return transportService.getMqttPullDevicesIds(TransportProtos.GetMqttPullDevicesRequestMsg.newBuilder()
-                .setPage(page)
-                .setPageSize(pageSize)
-                .build());
-    }
-
-    public TransportProtos.GetMqttPullRoutingTargetsResponseMsg getRoutingTargets(TenantId tenantId, DeviceProfileId profileId, int page, int pageSize) {
-        return transportService.getMqttPullRoutingTargets(TransportProtos.GetMqttPullRoutingTargetsRequestMsg.newBuilder()
-                .setTenantIdMSB(tenantId.getId().getMostSignificantBits())
-                .setTenantIdLSB(tenantId.getId().getLeastSignificantBits())
-                .setDeviceProfileIdMSB(profileId.getId().getMostSignificantBits())
-                .setDeviceProfileIdLSB(profileId.getId().getLeastSignificantBits())
                 .setPage(page)
                 .setPageSize(pageSize)
                 .build());

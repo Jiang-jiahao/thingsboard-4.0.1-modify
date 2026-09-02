@@ -417,21 +417,6 @@ public class DefaultTransportService extends TransportActivityManager implements
     }
 
     @Override
-    public TransportProtos.GetMqttPullRoutingTargetsResponseMsg getMqttPullRoutingTargets(TransportProtos.GetMqttPullRoutingTargetsRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
-                UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
-                .setMqttPullRoutingTargetsRequestMsg(requestMsg)
-                .build()
-        );
-        try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
-            return response.getValue().getMqttPullRoutingTargetsResponseMsg();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public TransportProtos.GetTcpDevicesResponseMsg getTcpDevicesIds(TransportProtos.GetTcpDevicesRequestMsg requestMsg) {
         TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
