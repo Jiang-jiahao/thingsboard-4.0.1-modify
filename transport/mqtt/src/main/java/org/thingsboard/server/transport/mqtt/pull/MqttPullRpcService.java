@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.mqtt.MqttClient;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.profile.DeviceProfileRpcMethod;
@@ -128,6 +129,7 @@ public class MqttPullRpcService {
             throw new IllegalStateException("MQTT pull RPC publish failed: " + e.getMessage(), e);
         }
         transportService.process(sessionInfo, request, RpcStatus.DELIVERED, TransportServiceCallback.EMPTY);
+    }
 
     private void registerPending(MqttPullCollectorSessionContext collectorCtx,
                                  TransportProtos.SessionInfoProto sessionInfo,
