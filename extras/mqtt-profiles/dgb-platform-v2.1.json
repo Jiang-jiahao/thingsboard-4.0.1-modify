@@ -3,7 +3,7 @@
   "type": "DEFAULT",
   "transportType": "MQTT_PULL",
   "provisionType": "DISABLED",
-  "description": "一个本平台设备对应对方一个平台。无主题前缀。上行用 MQTT + 通配订阅。RPC 请求/响应主题中的设备 ID 由调用参数 params.deviceId 填入，发起时订阅对应响应主题。侦测按遥测键区分：status / detect / oc4 / direction / aoa / channel / lna。RPC：detectOpen / detectClose / channelOpen / channelClose。",
+  "description": "一个本平台设备对应对方一个平台。上行用 MQTT + 通配订阅。RPC 请求/响应主题中的设备 ID 由调用参数 params.deviceId 填入，发起时订阅对应响应主题。侦测按遥测键区分：status / detect / oc4 / direction / aoa / channel / lna。RPC：detectOpen / detectClose / channelOpen / channelClose。",
   "profileData": {
     "configuration": { "type": "DEFAULT" },
     "transportConfiguration": {
