@@ -10,6 +10,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.device.data.DefaultDeviceTransportConfiguration;
+import org.thingsboard.server.common.data.device.data.DeviceTransportConfiguration;
+import org.thingsboard.server.common.data.device.data.HttpPullDeviceTransportConfiguration;
+import org.thingsboard.server.common.data.device.data.MqttPullDeviceTransportConfiguration;
 import org.thingsboard.server.common.transport.auth.TransportDeviceInfo;
 
 import java.util.regex.Matcher;
@@ -17,7 +21,8 @@ import java.util.regex.Pattern;
 
 /**
  * MQTT RPC 主题/载荷模板占位符：{@code ${params}}、{@code ${params.xxx}}、
- * {@code ${device.name}}、{@code ${device.label}}、{@code ${requestId}}、{@code ${method}}。
+ * {@code ${device.name}}、{@code ${device.label}}、{@code ${device.externalDeviceId}}、
+ * {@code ${requestId}}、{@code ${method}}。
  */
 public final class MqttRpcTemplateResolver {
 
@@ -34,11 +39,12 @@ public final class MqttRpcTemplateResolver {
         JsonObject params = parseParams(paramsJson);
         String deviceName = deviceName(device, deviceInfo);
         String deviceLabel = device != null && device.getLabel() != null ? device.getLabel() : "";
+        String externalDeviceId = externalDeviceId(device);
         Matcher matcher = PLACEHOLDER.matcher(template);
         StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             String key = matcher.group(1).trim();
-            String replacement = resolveKey(key, deviceName, deviceLabel, params, requestId, method);
+            String replacement = resolveKey(key, deviceName, deviceLabel, externalDeviceId, params, requestId, method);
             matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
         }
         matcher.appendTail(sb);
@@ -54,6 +60,7 @@ public final class MqttRpcTemplateResolver {
         }
         String deviceName = deviceName(device, deviceInfo);
         String deviceLabel = device != null && device.getLabel() != null ? device.getLabel() : "";
+        String externalDeviceId = externalDeviceId(device);
         Matcher matcher = PLACEHOLDER.matcher(template);
         StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
@@ -61,6 +68,7 @@ public final class MqttRpcTemplateResolver {
             String replacement = switch (key) {
                 case "device.name", "deviceName" -> deviceName;
                 case "device.label", "deviceLabel" -> deviceLabel;
+                case "device.externalDeviceId", "externalDeviceId", "deviceId" -> externalDeviceId;
                 default -> "+";
             };
             matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
@@ -69,8 +77,8 @@ public final class MqttRpcTemplateResolver {
         return sb.toString();
     }
 
-    private static String resolveKey(String key, String deviceName, String deviceLabel, JsonObject params,
-                                     int requestId, String method) {
+    private static String resolveKey(String key, String deviceName, String deviceLabel, String externalDeviceId,
+                                     JsonObject params, int requestId, String method) {
         if ("params".equals(key)) {
             return params.toString();
         }
@@ -90,16 +98,38 @@ public final class MqttRpcTemplateResolver {
             return switch (deviceKey) {
                 case "name" -> deviceName != null ? deviceName : "";
                 case "label" -> deviceLabel != null ? deviceLabel : "";
+                case "externalDeviceId" -> externalDeviceId != null ? externalDeviceId : "";
                 default -> "";
             };
         }
         return switch (key) {
             case "deviceName" -> deviceName != null ? deviceName : "";
             case "deviceLabel" -> deviceLabel != null ? deviceLabel : "";
+            case "externalDeviceId", "deviceId" -> externalDeviceId != null ? externalDeviceId : "";
             case "requestId", "rpc.requestId" -> Integer.toString(requestId);
             case "method", "rpc.method" -> method != null ? method : "";
             default -> "";
         };
+    }
+
+    private static String externalDeviceId(Device device) {
+        if (device == null || device.getDeviceData() == null) {
+            return "";
+        }
+        DeviceTransportConfiguration cfg = device.getDeviceData().getTransportConfiguration();
+        if (cfg instanceof MqttPullDeviceTransportConfiguration mqtt
+                && StringUtils.isNotBlank(mqtt.getExternalDeviceId())) {
+            return mqtt.getExternalDeviceId().trim();
+        }
+        if (cfg instanceof HttpPullDeviceTransportConfiguration http
+                && StringUtils.isNotBlank(http.getExternalDeviceId())) {
+            return http.getExternalDeviceId().trim();
+        }
+        if (cfg instanceof DefaultDeviceTransportConfiguration def
+                && StringUtils.isNotBlank(def.getExternalDeviceId())) {
+            return def.getExternalDeviceId().trim();
+        }
+        return "";
     }
 
     private static String deviceName(Device device, TransportDeviceInfo deviceInfo) {

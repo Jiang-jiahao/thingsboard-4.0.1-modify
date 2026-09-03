@@ -19,9 +19,11 @@ public class MqttPullTopicPrefixTest {
 
     @Test
     public void blankPrefixKeepsProfileTopic() {
-        assertThat(MqttPullTopicPrefix.resolve(null, "dgb/${device.name}/status/detect_report", "W1014_01", null))
+        assertThat(MqttPullTopicPrefix.resolve(null, "dgb/${device.externalDeviceId}/status/detect_report",
+                "ignored-name", null, "W1014_01"))
                 .isEqualTo("dgb/W1014_01/status/detect_report");
-        assertThat(MqttPullTopicPrefix.resolve("  ", "dgb/${device.name}/request/detect_open", "W1014_01", "lab"))
+        assertThat(MqttPullTopicPrefix.resolve("  ", "dgb/${deviceId}/request/detect_open",
+                null, "lab", "W1014_01"))
                 .isEqualTo("dgb/W1014_01/request/detect_open");
     }
 

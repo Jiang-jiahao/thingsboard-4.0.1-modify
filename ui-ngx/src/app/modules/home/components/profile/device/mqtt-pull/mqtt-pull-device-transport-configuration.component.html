@@ -15,6 +15,11 @@
     <mat-hint translate>device-profile.mqtt-pull.topic-prefix-hint</mat-hint>
   </mat-form-field>
   <mat-form-field class="mat-block">
+    <mat-label translate>device-profile.mqtt-pull.external-device-id</mat-label>
+    <input matInput formControlName="externalDeviceId" placeholder="W1014_01">
+    <mat-hint translate>device-profile.mqtt-pull.external-device-id-hint</mat-hint>
+  </mat-form-field>
+  <mat-form-field class="mat-block">
     <mat-label translate>device-profile.mqtt-pull.auth-type</mat-label>
     <mat-select formControlName="authType">
       <mat-option *ngFor="let t of authTypes" [value]="t">{{ t }}</mat-option>

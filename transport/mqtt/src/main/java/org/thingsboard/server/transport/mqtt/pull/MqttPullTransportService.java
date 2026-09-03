@@ -287,7 +287,10 @@ public class MqttPullTransportService {
         Device device = sessionContext.getDevice();
         String deviceName = device != null ? device.getName() : null;
         String deviceLabel = device != null ? device.getLabel() : null;
-        return MqttPullTopicPrefix.resolve(prefix, request != null ? request.getTopic() : null, deviceName, deviceLabel);
+        String externalDeviceId = sessionContext.getDeviceTransportConfiguration() != null
+                ? sessionContext.getDeviceTransportConfiguration().getExternalDeviceId() : null;
+        return MqttPullTopicPrefix.resolve(prefix, request != null ? request.getTopic() : null,
+                deviceName, deviceLabel, externalDeviceId);
     }
 
     private String resolveBrokerUrl(MqttPullCollectorSessionContext ctx) {

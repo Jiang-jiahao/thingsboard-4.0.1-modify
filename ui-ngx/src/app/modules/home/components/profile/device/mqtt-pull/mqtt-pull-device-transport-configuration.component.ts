@@ -54,6 +54,7 @@ export class MqttPullDeviceTransportConfigurationComponent implements OnInit, On
       brokerUrl: ['', Validators.required],
       clientId: [''],
       topicPrefix: [''],
+      externalDeviceId: [''],
       authType: [MqttPullAuthType.NONE],
       username: [''],
       password: ['']
@@ -100,6 +101,7 @@ export class MqttPullDeviceTransportConfigurationComponent implements OnInit, On
       brokerUrl: (cfg.brokerUrl || '').trim(),
       clientId: (cfg.clientId || '').trim(),
       topicPrefix: (cfg.topicPrefix || '').trim(),
+      externalDeviceId: (cfg.externalDeviceId || '').trim(),
       auth: {
         authType: auth.authType || MqttPullAuthType.NONE,
         username: auth.username,
@@ -123,6 +125,7 @@ export class MqttPullDeviceTransportConfigurationComponent implements OnInit, On
       brokerUrl: this.pendingValue.brokerUrl || '',
       clientId: this.pendingValue.clientId || '',
       topicPrefix: this.pendingValue.topicPrefix || '',
+      externalDeviceId: this.pendingValue.externalDeviceId || '',
       authType: auth.authType || MqttPullAuthType.NONE,
       username: auth.username || '',
       password: auth.password || ''
@@ -139,6 +142,7 @@ export class MqttPullDeviceTransportConfigurationComponent implements OnInit, On
       brokerUrl: (v.brokerUrl || '').trim() || undefined,
       clientId: (v.clientId || '').trim() || undefined,
       topicPrefix: (v.topicPrefix || '').trim() || undefined,
+      externalDeviceId: (v.externalDeviceId || '').trim() || undefined,
       auth: {
         authType,
         username: authType === MqttPullAuthType.USERNAME_PASSWORD ? (v.username || undefined) : undefined,

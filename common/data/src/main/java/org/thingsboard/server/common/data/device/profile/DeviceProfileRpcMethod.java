@@ -63,7 +63,7 @@ public class DeviceProfileRpcMethod implements Serializable {
     // --- MQTT（NATIVE 可选主题 / MQTT_CUSTOM 必填主题与模板）---
 
     /**
-     * 请求主题。支持 {@code ${device.name}}、{@code ${requestId}}、{@code ${params.xxx}} 等占位符。
+     * 请求主题。支持 {@code ${device.name}}、{@code ${device.externalDeviceId}}、{@code ${requestId}}、{@code ${params.xxx}} 等占位符。
      * MQTT 服务端 NATIVE 留空则使用标准 {@code v1/devices/me/rpc/request/{requestId}}。
      */
     private String mqttRequestTopic;

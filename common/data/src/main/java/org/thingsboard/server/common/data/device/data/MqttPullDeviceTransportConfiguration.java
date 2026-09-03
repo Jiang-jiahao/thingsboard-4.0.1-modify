@@ -25,6 +25,11 @@ public class MqttPullDeviceTransportConfiguration implements DeviceTransportConf
      * 大公博创等主题已含 {@code dgb/{deviceid}} 的协议请留空，档案写完整主题。
      */
     private String topicPrefix;
+    /**
+     * 对方协议中的设备 ID（如大公 {@code deviceid}：W1014_01）。
+     * 档案主题 {@code dgb/${device.externalDeviceId}/...} 会替换为本值。不是本平台设备 UUID，也不是设备名称。
+     */
+    private String externalDeviceId;
     private MqttPullAuthConfiguration auth = new MqttPullAuthConfiguration();
 
     @Override

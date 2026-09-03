@@ -238,9 +238,11 @@ public class MqttPullRpcService {
         Device device = collectorCtx.getDevice();
         String deviceName = device != null ? device.getName() : null;
         String deviceLabel = device != null ? device.getLabel() : null;
+        String externalDeviceId = collectorCtx.getDeviceTransportConfiguration() != null
+                ? collectorCtx.getDeviceTransportConfiguration().getExternalDeviceId() : null;
         return command.toBuilder()
-                .requestTopic(MqttPullTopicPrefix.resolve(prefix, command.getRequestTopic(), deviceName, deviceLabel))
-                .responseTopic(MqttPullTopicPrefix.resolve(prefix, command.getResponseTopic(), deviceName, deviceLabel))
+                .requestTopic(MqttPullTopicPrefix.resolve(prefix, command.getRequestTopic(), deviceName, deviceLabel, externalDeviceId))
+                .responseTopic(MqttPullTopicPrefix.resolve(prefix, command.getResponseTopic(), deviceName, deviceLabel, externalDeviceId))
                 .build();
     }
 
