@@ -1127,10 +1127,8 @@ export enum DeviceProfileRpcBindingType {
 }
 
 /** 档案主题已是完整路径（如大公 dgb/{对方设备ID}/...）时，设备不需要填写主题前缀 */
-export function mqttPullProfileUsesAbsoluteTopics(
-  dp: { profileData?: { transportConfiguration?: MqttPullDeviceProfileTransportConfiguration } } | null | undefined
-): boolean {
-  const cfg = dp?.profileData?.transportConfiguration;
+export function mqttPullProfileUsesAbsoluteTopics(dp: DeviceProfile | null | undefined): boolean {
+  const cfg = dp?.profileData?.transportConfiguration as MqttPullDeviceProfileTransportConfiguration | undefined;
   const topics = (cfg?.subscribeRequests || []).map(r => (r.topic || '').trim()).filter(Boolean);
   return topics.some(t =>
     t.startsWith('dgb/')
@@ -1140,30 +1138,32 @@ export function mqttPullProfileUsesAbsoluteTopics(
     || t.includes('${deviceName}'));
 }
 
-export function defaultMqttPullDeviceTopicPrefix(
-  dp?: { profileData?: { transportConfiguration?: MqttPullDeviceProfileTransportConfiguration } } | null
-): string | undefined {
+export function defaultMqttPullDeviceTopicPrefix(dp?: DeviceProfile | null): string | undefined {
   return mqttPullProfileUsesAbsoluteTopics(dp) ? undefined : 'server/chan';
 }
 
 export function withMqttPullTopicPrefixForProfile(
   transportConfiguration: DeviceTransportConfiguration | null | undefined,
-  deviceProfile: { profileData?: { transportConfiguration?: MqttPullDeviceProfileTransportConfiguration } } | null | undefined
+  deviceProfile: DeviceProfile | null | undefined
 ): DeviceTransportConfiguration | null | undefined {
   if (!transportConfiguration || !deviceProfile) {
     return transportConfiguration;
   }
-  const cfg = transportConfiguration as MqttPullDeviceTransportConfiguration;
-  if (cfg.type && cfg.type !== DeviceTransportType.MQTT_PULL) {
+  if (transportConfiguration.type && transportConfiguration.type !== DeviceTransportType.MQTT_PULL) {
     return transportConfiguration;
   }
+  const cfg = transportConfiguration as MqttPullDeviceTransportConfiguration;
   const current = (cfg.topicPrefix || '').trim();
   const next = defaultMqttPullDeviceTopicPrefix(deviceProfile) || '';
   const wasDefault = !current || current === 'server/chan';
   if (!wasDefault || current === next) {
     return transportConfiguration;
   }
-  return { ...cfg, topicPrefix: next || undefined };
+  return {
+    ...transportConfiguration,
+    topicPrefix: next || undefined,
+    type: DeviceTransportType.MQTT_PULL
+  };
 }
 
 export function createUavMqttPlatformSubscribeRequests(): MqttPullSubscribeRequest[] {
@@ -2086,7 +2086,7 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
 
 export const createDeviceTransportConfiguration = (
   type: TransportType,
-  deviceProfile?: { profileData?: { transportConfiguration?: MqttPullDeviceProfileTransportConfiguration } } | null
+  deviceProfile?: DeviceProfile | null
 ): DeviceTransportConfiguration => {
   let transportConfiguration: DeviceTransportConfiguration = null;
   if (type) {
