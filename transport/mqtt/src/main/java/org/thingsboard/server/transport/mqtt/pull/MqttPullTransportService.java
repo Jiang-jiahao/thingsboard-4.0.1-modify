@@ -32,7 +32,6 @@ import org.thingsboard.server.common.data.transport.http.HttpPullPollDataType;
 import org.thingsboard.server.common.data.transport.mqtt.MqttPullAuthConfiguration;
 import org.thingsboard.server.common.data.transport.mqtt.MqttPullAuthType;
 import org.thingsboard.server.common.data.transport.mqtt.MqttPullSubscribeRequest;
-import org.thingsboard.server.common.data.transport.mqtt.MqttPullTopicPrefix;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.transport.TransportServiceCallback;
 import org.thingsboard.server.gen.transport.TransportProtos;
@@ -178,7 +177,7 @@ public class MqttPullTransportService {
     private void subscribeAll(MqttPullCollectorSessionContext sessionContext, MqttClient client) {
         MqttPullDeviceProfileTransportConfiguration profile = sessionContext.getProfileTransportConfiguration();
         for (MqttPullSubscribeRequest request : profile.effectiveSubscribeRequests()) {
-            String topicFilter = resolveSubscribeTopic(sessionContext, request);
+            String topicFilter = request.getTopic();
             MqttQoS qos = toQos(request.getQos());
             try {
                 client.on(topicFilter, (topic, payload) -> {
@@ -201,7 +200,7 @@ public class MqttPullTransportService {
         MqttPullDeviceProfileTransportConfiguration profile = sessionContext.getProfileTransportConfiguration();
         boolean matched = false;
         for (MqttPullSubscribeRequest request : profile.effectiveSubscribeRequests()) {
-            String topicFilter = resolveSubscribeTopic(sessionContext, request);
+            String topicFilter = request.getTopic();
             if (topicMatches(topicFilter, topic)) {
                 matched = true;
                 onMessage(sessionContext, request, topic, payload);
@@ -222,7 +221,6 @@ public class MqttPullTransportService {
             }
             log.info("[{}] MQTT pull received topic [{}] request [{}] bytes [{}]",
                     sessionContext.getDeviceId(), topic, request.getName(), body.length());
-            rememberPlusSegment(sessionContext, request, topic);
             HttpPullPollDataType dataType = request.getDataType() != null ? request.getDataType() : HttpPullPollDataType.TELEMETRY;
             if (dataType == HttpPullPollDataType.TELEMETRY) {
                 postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, request.resolveTelemetryPayloadKey());
@@ -279,21 +277,6 @@ public class MqttPullTransportService {
         TransportProtos.PostAttributeMsg.Builder builder = JsonConverter.convertToAttributesProto(parsed).toBuilder();
         builder.setShared(shared);
         transportService.process(sessionInfo, builder.build(), TransportServiceCallback.EMPTY);
-    }
-
-    private String resolveSubscribeTopic(MqttPullCollectorSessionContext sessionContext, MqttPullSubscribeRequest request) {
-        String prefix = sessionContext.getDeviceTransportConfiguration() != null
-                ? sessionContext.getDeviceTransportConfiguration().getTopicPrefix() : null;
-        return MqttPullTopicPrefix.resolve(prefix, request != null ? request.getTopic() : null);
-    }
-
-    private void rememberPlusSegment(MqttPullCollectorSessionContext sessionContext,
-                                     MqttPullSubscribeRequest request, String topic) {
-        String filter = resolveSubscribeTopic(sessionContext, request);
-        String segment = MqttPullTopicPrefix.firstPlusSegment(filter, topic);
-        if (StringUtils.isNotBlank(segment)) {
-            sessionContext.setMqttPlusSegment(segment);
-        }
     }
 
     private String resolveBrokerUrl(MqttPullCollectorSessionContext ctx) {

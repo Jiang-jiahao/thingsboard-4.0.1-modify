@@ -45,8 +45,6 @@ public class MqttPullCollectorSessionContext {
     private final Map<String, ConcurrentLinkedQueue<PendingMqttPullRpc>> pendingRpcByResponseTopic = new ConcurrentHashMap<>();
     @Builder.Default
     private final Set<String> rpcResponseSubscriptions = ConcurrentHashMap.newKeySet();
-    /** 入站主题中 {@code +} 段的实际值，RPC 发布时用于替换通配符 */
-    private volatile String mqttPlusSegment;
 
     public DeviceId getDeviceId() {
         return device.getId();

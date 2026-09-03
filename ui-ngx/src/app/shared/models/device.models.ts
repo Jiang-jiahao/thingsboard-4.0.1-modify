@@ -904,8 +904,6 @@ export interface MqttPullDeviceProfileTransportConfiguration {
 export interface MqttPullDeviceTransportConfiguration {
   brokerUrl?: string;
   clientId?: string;
-  /** 可选。档案主题为相对路径时与此前缀拼接 */
-  topicPrefix?: string;
   auth?: MqttPullAuthConfiguration;
 }
 
@@ -1084,13 +1082,11 @@ export function normalizeMqttDeviceTransportConfigurationForSave(
   const raw = configuration as MqttPullDeviceTransportConfiguration;
   const brokerUrl = (raw.brokerUrl || '').trim() || undefined;
   const clientId = (raw.clientId || '').trim() || undefined;
-  const topicPrefix = (raw.topicPrefix || '').trim() || undefined;
   const authType = raw.auth?.authType || MqttPullAuthType.NONE;
   return {
     type: DeviceTransportType.MQTT_PULL,
     brokerUrl,
     clientId,
-    topicPrefix,
     auth: {
       authType,
       username: authType === MqttPullAuthType.USERNAME_PASSWORD ? (raw.auth?.username || undefined) : undefined,
@@ -1124,19 +1120,19 @@ export enum DeviceProfileRpcBindingType {
 
 export function createUavMqttPlatformSubscribeRequests(): MqttPullSubscribeRequest[] {
   return [
-    { name: 'system', enabled: true, topic: 'api/system', qos: 1,
+    { name: 'system', enabled: true, topic: '+/+/api/system', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'system' },
-    { name: 'locate', enabled: true, topic: 'api/locate', qos: 1,
+    { name: 'locate', enabled: true, topic: '+/+/api/locate', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'locate' },
-    { name: 'rid', enabled: true, topic: 'api/rid', qos: 1,
+    { name: 'rid', enabled: true, topic: '+/+/api/rid', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'rid' },
-    { name: 'detect', enabled: true, topic: 'api/detect', qos: 1,
+    { name: 'detect', enabled: true, topic: '+/+/api/detect', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'detect' },
-    { name: 'aoa', enabled: true, topic: 'api/aoa', qos: 1,
+    { name: 'aoa', enabled: true, topic: '+/+/api/aoa', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'aoa' },
-    { name: 'jammerresult', enabled: true, topic: 'api/jammerresult', qos: 1,
+    { name: 'jammerresult', enabled: true, topic: '+/+/api/jammerresult', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'jammerresult' },
-    { name: 'jammerResponse', enabled: true, topic: 'api/jammer/response', qos: 1,
+    { name: 'jammerResponse', enabled: true, topic: '+/+/api/jammer/response', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'jammerResponse' }
   ];
 }
@@ -1149,12 +1145,12 @@ export function createUavMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 20000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'api/jammer',
-      mqttResponseTopic: 'api/jammerresult',
+      mqttRequestTopic: '${params.prefix}/api/jammer',
+      mqttResponseTopic: '${params.prefix}/api/jammerresult',
       mqttPayloadTemplate:
         '{"device_id":${params.device_id},"sector_id":${params.sector_id},"emit":{"freq":${params.freq},"power":${params.power},"duration":${params.duration}}}',
       mqttQos: 1,
-      paramsTemplateJson: '{"device_id":0,"sector_id":7,"freq":["2400","5800"],"power":1,"duration":10}'
+      paramsTemplateJson: '{"prefix":"server/chan","device_id":0,"sector_id":7,"freq":["2400","5800"],"power":1,"duration":10}'
     },
     {
       id: 'jammerStop',
@@ -1162,12 +1158,12 @@ export function createUavMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 15000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'api/jammer',
-      mqttResponseTopic: 'api/jammerresult',
+      mqttRequestTopic: '${params.prefix}/api/jammer',
+      mqttResponseTopic: '${params.prefix}/api/jammerresult',
       mqttPayloadTemplate:
         '{"device_id":${params.device_id},"sector_id":${params.sector_id},"emit":{"freq":${params.freq},"power":0,"duration":0}}',
       mqttQos: 1,
-      paramsTemplateJson: '{"device_id":0,"sector_id":7,"freq":[]}'
+      paramsTemplateJson: '{"prefix":"server/chan","device_id":0,"sector_id":7,"freq":[]}'
     },
     {
       id: 'spoof',
@@ -1175,12 +1171,12 @@ export function createUavMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 20000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'api/jammer',
-      mqttResponseTopic: 'api/jammer/response',
+      mqttRequestTopic: '${params.prefix}/api/jammer',
+      mqttResponseTopic: '${params.prefix}/api/jammer/response',
       mqttPayloadTemplate:
         '{"device_id":${params.device_id},"sector_id":${params.sector_id},"emit":{"freq":${params.freq},"power":${params.power},"mode":${params.mode}}}',
       mqttQos: 1,
-      paramsTemplateJson: '{"device_id":0,"sector_id":0,"freq":["gps","bds"],"power":1,"mode":1}'
+      paramsTemplateJson: '{"prefix":"server/chan","device_id":0,"sector_id":0,"freq":["gps","bds"],"power":1,"mode":1}'
     },
     {
       id: 'preciseJammer',
@@ -1188,12 +1184,12 @@ export function createUavMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 20000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'api/jammer',
-      mqttResponseTopic: 'api/jammer/response',
+      mqttRequestTopic: '${params.prefix}/api/jammer',
+      mqttResponseTopic: '${params.prefix}/api/jammer/response',
       mqttPayloadTemplate:
         '{"device_id":${params.device_id},"target_uuid":"${params.target_uuid}","emit":{"freq":${params.freq},"duration":${params.duration}}}',
       mqttQos: 1,
-      paramsTemplateJson: '{"device_id":0,"target_uuid":"","freq":["2400","5800"],"duration":20}'
+      paramsTemplateJson: '{"prefix":"server/chan","device_id":0,"target_uuid":"","freq":["2400","5800"],"duration":20}'
     }
   ];
 }
@@ -1225,10 +1221,11 @@ export function createDgbMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 15000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'dgb/+/request/detect_open',
-      mqttResponseTopic: 'dgb/+/response/detect_open',
+      mqttRequestTopic: 'dgb/${params.deviceId}/request/detect_open',
+      mqttResponseTopic: 'dgb/${params.deviceId}/response/detect_open',
       mqttPayloadTemplate: '{}',
-      mqttQos: 1
+      mqttQos: 1,
+      paramsTemplateJson: '{"deviceId":1}'
     },
     {
       id: 'detectClose',
@@ -1236,10 +1233,11 @@ export function createDgbMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 15000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'dgb/+/request/detect_close',
-      mqttResponseTopic: 'dgb/+/response/detect_close',
+      mqttRequestTopic: 'dgb/${params.deviceId}/request/detect_close',
+      mqttResponseTopic: 'dgb/${params.deviceId}/response/detect_close',
       mqttPayloadTemplate: '{}',
-      mqttQos: 1
+      mqttQos: 1,
+      paramsTemplateJson: '{"deviceId":1}'
     },
     {
       id: 'channelOpen',
@@ -1247,13 +1245,13 @@ export function createDgbMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 20000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'dgb/+/request/channel_open',
-      mqttResponseTopic: 'dgb/+/response/channel_set',
+      mqttRequestTopic: 'dgb/${params.deviceId}/request/channel_open',
+      mqttResponseTopic: 'dgb/${params.deviceId}/response/channel_set',
       mqttPayloadTemplate:
         '{"suppressChannels":${params.suppressChannels},"sustainTime":${params.sustainTime}}',
       mqttQos: 1,
       paramsTemplateJson:
-        '{"suppressChannels":[{"suppressDirection":"1","channel":["2400","5800"]}],"sustainTime":10}'
+        '{"deviceId":1,"suppressChannels":[{"suppressDirection":"1","channel":["2400","5800"]}],"sustainTime":10}'
     },
     {
       id: 'channelClose',
@@ -1261,10 +1259,11 @@ export function createDgbMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 15000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'dgb/+/request/channel_close',
-      mqttResponseTopic: 'dgb/+/response/channel_close',
+      mqttRequestTopic: 'dgb/${params.deviceId}/request/channel_close',
+      mqttResponseTopic: 'dgb/${params.deviceId}/response/channel_close',
       mqttPayloadTemplate: '{}',
-      mqttQos: 1
+      mqttQos: 1,
+      paramsTemplateJson: '{"deviceId":1}'
     }
   ];
 }

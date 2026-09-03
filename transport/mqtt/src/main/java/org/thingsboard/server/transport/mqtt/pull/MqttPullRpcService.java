@@ -19,7 +19,6 @@ import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.profile.DeviceProfileRpcMethod;
 import org.thingsboard.server.common.data.rpc.RpcStatus;
-import org.thingsboard.server.common.data.transport.mqtt.MqttPullTopicPrefix;
 import org.thingsboard.server.common.transport.TransportDeviceProfileCache;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.transport.TransportServiceCallback;
@@ -101,7 +100,7 @@ public class MqttPullRpcService {
                             TransportProtos.SessionInfoProto sessionInfo,
                             TransportProtos.ToDeviceRpcRequestMsg request) {
         DeviceProfileRpcMethod method = MqttRpcCatalog.find(resolveProfile(collectorCtx), request.getMethodName());
-        MqttRpcCommandFactory.Command command = applyTopicPrefix(collectorCtx, MqttRpcCommandFactory.resolve(
+        MqttRpcCommandFactory.Command command = finalizeTopics(MqttRpcCommandFactory.resolve(
                 method, request, collectorCtx.getDevice(), null, true));
         if (command.isUseStandardNativeTopic() || StringUtils.isBlank(command.getRequestTopic())) {
             throw new IllegalArgumentException("MQTT pull RPC requires mqttRequestTopic");
@@ -231,21 +230,37 @@ public class MqttPullRpcService {
                 TransportServiceCallback.EMPTY);
     }
 
-    private MqttRpcCommandFactory.Command applyTopicPrefix(MqttPullCollectorSessionContext collectorCtx,
-                                                           MqttRpcCommandFactory.Command command) {
-        String prefix = collectorCtx.getDeviceTransportConfiguration() != null
-                ? collectorCtx.getDeviceTransportConfiguration().getTopicPrefix() : null;
-        String requestTopic = MqttPullTopicPrefix.resolve(prefix, command.getRequestTopic());
-        String responseTopic = MqttPullTopicPrefix.resolve(prefix, command.getResponseTopic());
-        requestTopic = MqttPullTopicPrefix.fillPlusSegments(requestTopic, collectorCtx.getMqttPlusSegment());
-        if (StringUtils.isNotBlank(requestTopic) && (requestTopic.contains("+") || requestTopic.contains("#"))) {
-            throw new IllegalStateException(
-                    "MQTT pull RPC request topic still contains wildcard. Wait for first inbound message: " + requestTopic);
-        }
+    private MqttRpcCommandFactory.Command finalizeTopics(MqttRpcCommandFactory.Command command) {
+        String requestTopic = stripLeadingSlashes(command.getRequestTopic());
+        String responseTopic = stripLeadingSlashes(command.getResponseTopic());
+        requireConcreteTopic(requestTopic, "request");
+        requireConcreteTopic(responseTopic, "response");
         return command.toBuilder()
                 .requestTopic(requestTopic)
                 .responseTopic(responseTopic)
                 .build();
+    }
+
+    /** 前缀参数为空时 ${params.prefix}/api/... 会变成 /api/...，去掉开头的 /。 */
+    private static String stripLeadingSlashes(String topic) {
+        if (StringUtils.isBlank(topic)) {
+            return topic;
+        }
+        String t = topic.trim();
+        while (t.startsWith("/")) {
+            t = t.substring(1);
+        }
+        return t;
+    }
+
+    private static void requireConcreteTopic(String topic, String kind) {
+        if (StringUtils.isBlank(topic)) {
+            return;
+        }
+        if (topic.contains("+") || topic.contains("#") || topic.contains("//")) {
+            throw new IllegalStateException(
+                    "MQTT pull RPC " + kind + " topic is not concrete. Pass topic params: " + topic);
+        }
     }
 
     private DeviceProfile resolveProfile(MqttPullCollectorSessionContext collectorCtx) {

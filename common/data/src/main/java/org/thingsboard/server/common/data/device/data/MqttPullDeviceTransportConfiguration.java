@@ -20,10 +20,6 @@ public class MqttPullDeviceTransportConfiguration implements DeviceTransportConf
 
     private String brokerUrl;
     private String clientId;
-    /**
-     * 可选。档案主题为相对路径时，与此前缀拼接后订阅/发布。
-     */
-    private String topicPrefix;
     private MqttPullAuthConfiguration auth = new MqttPullAuthConfiguration();
 
     @Override

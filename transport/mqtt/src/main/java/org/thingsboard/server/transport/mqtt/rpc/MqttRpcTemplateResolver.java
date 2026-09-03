@@ -67,7 +67,7 @@ public final class MqttRpcTemplateResolver {
             String replacement = switch (key) {
                 case "device.name", "deviceName" -> deviceName;
                 case "device.label", "deviceLabel" -> deviceLabel;
-                case "device.externalDeviceId", "externalDeviceId", "deviceId" -> externalDeviceId;
+                case "device.externalDeviceId", "externalDeviceId" -> externalDeviceId;
                 default -> "+";
             };
             matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
@@ -88,7 +88,8 @@ public final class MqttRpcTemplateResolver {
                 return "";
             }
             if (el.isJsonPrimitive()) {
-                return el.getAsString();
+                var primitive = el.getAsJsonPrimitive();
+                return primitive.isNumber() ? primitive.getAsNumber().toString() : primitive.getAsString();
             }
             return el.toString();
         }
@@ -104,7 +105,7 @@ public final class MqttRpcTemplateResolver {
         return switch (key) {
             case "deviceName" -> deviceName != null ? deviceName : "";
             case "deviceLabel" -> deviceLabel != null ? deviceLabel : "";
-            case "externalDeviceId", "deviceId" -> externalDeviceId != null ? externalDeviceId : "";
+            case "externalDeviceId" -> externalDeviceId != null ? externalDeviceId : "";
             case "requestId", "rpc.requestId" -> Integer.toString(requestId);
             case "method", "rpc.method" -> method != null ? method : "";
             default -> "";
