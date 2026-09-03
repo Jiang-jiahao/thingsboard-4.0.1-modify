@@ -60,6 +60,24 @@ public class DeviceProfileRpcMethod implements Serializable {
     private Map<String, String> httpHeaders = new HashMap<>();
     private Boolean requiresAuth;
 
+    // --- MQTT（NATIVE 可选主题 / MQTT_CUSTOM 必填主题与模板）---
+
+    /**
+     * 请求主题。支持 {@code ${device.name}}、{@code ${requestId}}、{@code ${params.xxx}} 等占位符。
+     * MQTT 服务端 NATIVE 留空则使用标准 {@code v1/devices/me/rpc/request/{requestId}}。
+     */
+    private String mqttRequestTopic;
+    /**
+     * 双向 RPC 的响应主题。留空表示单向，或 MQTT 服务端 NATIVE 走标准 {@code v1/devices/me/rpc/response/{requestId}}。
+     */
+    private String mqttResponseTopic;
+    /**
+     * MQTT_CUSTOM 请求体模板。支持 {@code ${params}}、{@code ${params.xxx}}、{@code ${device.name}}、{@code ${requestId}}、{@code ${method}}。
+     */
+    private String mqttPayloadTemplate;
+    /** 0/1/2，默认 1 */
+    private Integer mqttQos;
+
     public void validate(DeviceProfileRpcBindingType expectedForTransport) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("device profile RPC method id is required");
@@ -96,6 +114,17 @@ public class DeviceProfileRpcMethod implements Serializable {
                     throw new IllegalArgumentException("HTTP_OUTBOUND RPC method requires httpMethod: " + id);
                 }
             }
+            case MQTT_CUSTOM -> {
+                if (mqttRequestTopic == null || mqttRequestTopic.isBlank()) {
+                    throw new IllegalArgumentException("MQTT_CUSTOM RPC method requires mqttRequestTopic: " + id);
+                }
+                if (mqttPayloadTemplate == null || mqttPayloadTemplate.isBlank()) {
+                    throw new IllegalArgumentException("MQTT_CUSTOM RPC method requires mqttPayloadTemplate: " + id);
+                }
+            }
+        }
+        if (mqttQos != null && (mqttQos < 0 || mqttQos > 2)) {
+            throw new IllegalArgumentException("RPC method mqttQos must be 0, 1 or 2: " + id);
         }
     }
 }

@@ -22,5 +22,9 @@ public enum DeviceProfileRpcBindingType {
     /**
      * HTTP 主动出站：平台按档案中配置的 HTTP 接口调用厂家服务端（与 HTTP Pull 共用鉴权）。
      */
-    HTTP_OUTBOUND
+    HTTP_OUTBOUND,
+    /**
+     * MQTT 自定义数据格式：按档案配置的请求/响应主题与 payload 模板下发（MQTT 服务端与 MQTT Pull 客户端均可用）。
+     */
+    MQTT_CUSTOM
 }

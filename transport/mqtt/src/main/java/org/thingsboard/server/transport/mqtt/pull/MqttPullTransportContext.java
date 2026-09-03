@@ -36,7 +36,7 @@ import org.thingsboard.server.gen.transport.TransportProtos.SessionInfoProto;
 import org.thingsboard.server.queue.util.AfterStartUp;
 import org.thingsboard.server.transport.mqtt.pull.service.MqttPullProtoEntityService;
 import org.thingsboard.server.transport.mqtt.pull.session.MqttPullCollectorSessionContext;
-import org.thingsboard.server.transport.mqtt.pull.session.MqttPullNoOpSessionListener;
+import org.thingsboard.server.transport.mqtt.pull.session.MqttPullRpcSessionListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +55,7 @@ public class MqttPullTransportContext extends TransportContext {
 
     @Getter
     private final MqttPullTransportService mqttPullTransportService;
+    private final MqttPullRpcService mqttPullRpcService;
     private final TransportDeviceProfileCache deviceProfileCache;
     private final TransportService transportService;
     private final MqttPullProtoEntityService protoEntityService;
@@ -118,7 +119,7 @@ public class MqttPullTransportContext extends TransportContext {
                 return;
             }
             SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, UUID.randomUUID());
-            registerMqttPullTransportSession(sessionInfo, MqttPullNoOpSessionListener.INSTANCE);
+            registerMqttPullTransportSession(sessionInfo, new MqttPullRpcSessionListener(mqttPullRpcService, ctx));
             ctx.setSessionInfo(sessionInfo);
             MqttPullCollectorSessionContext previous = collectorSessions.put(device.getId(), ctx);
             if (previous != null && previous != ctx) {

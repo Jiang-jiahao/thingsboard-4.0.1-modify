@@ -83,6 +83,11 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
 
   readonly gatewayUiEnabled = GATEWAY_UI_ENABLED;
 
+  get hidePlatformCredentials(): boolean {
+    return this.mqttPullProfileActive
+      || this.entity?.deviceData?.transportConfiguration?.type === DeviceTransportType.MQTT_PULL;
+  }
+
   get httpPullDeviceProfileId(): string | null {
     return this.resolveDeviceProfileUuid(this.entityForm?.get('deviceProfileId')?.value);
   }
@@ -282,7 +287,8 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     const needsFullProfile = !transportType
       || transportType === DeviceTransportType.TCP
       || transportType === DeviceTransportType.UDP
-      || transportType === DeviceTransportType.HTTP_PULL;
+      || transportType === DeviceTransportType.HTTP_PULL
+      || transportType === DeviceTransportType.MQTT_PULL;
     if (!needsFullProfile) {
       this.applyTcpProfileWireAuthFromDeviceProfile(null);
       this.cd.markForCheck();

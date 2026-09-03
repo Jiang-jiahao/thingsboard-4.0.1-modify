@@ -85,6 +85,10 @@ import org.thingsboard.server.transport.mqtt.session.DeviceSessionCtx;
 import org.thingsboard.server.transport.mqtt.session.GatewaySessionHandler;
 import org.thingsboard.server.transport.mqtt.session.MqttTopicMatcher;
 import org.thingsboard.server.transport.mqtt.session.SparkplugNodeSessionHandler;
+import org.thingsboard.server.transport.mqtt.rpc.MqttRpcCatalog;
+import org.thingsboard.server.transport.mqtt.rpc.MqttRpcCommandFactory;
+import org.thingsboard.server.transport.mqtt.rpc.PendingMqttServerRpc;
+import org.thingsboard.server.common.data.device.profile.DeviceProfileRpcMethod;
 import org.thingsboard.server.transport.mqtt.util.ReturnCodeResolver;
 import org.thingsboard.server.transport.mqtt.util.sparkplug.SparkplugMessageType;
 import org.thingsboard.server.transport.mqtt.util.sparkplug.SparkplugRpcRequestHeader;
@@ -105,6 +109,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -212,6 +217,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
      * 等待ACK的RPC请求（key: MQTT消息ID, value: RPC请求消息）
      */
     private final ConcurrentMap<Integer, TransportProtos.ToDeviceRpcRequestMsg> rpcAwaitingAck;
+    private final ConcurrentMap<String, ConcurrentLinkedQueue<PendingMqttServerRpc>> pendingCustomRpcByResponseTopic;
 
     /**
      * 主题类型枚举：标识不同的MQTT主题版本和格式
@@ -232,6 +238,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         this.otaPackSessions = new ConcurrentHashMap<>();
         this.chunkSizes = new ConcurrentHashMap<>();
         this.rpcAwaitingAck = new ConcurrentHashMap<>();
+        this.pendingCustomRpcByResponseTopic = new ConcurrentHashMap<>();
     }
 
     /**
@@ -302,6 +309,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
             log.debug("[{}] Cleanup RPC awaiting ack map due to session close!", sessionId);
             rpcAwaitingAck.clear();
         }
+        pendingCustomRpcByResponseTopic.clear();
 
         if (ctx.channel() == null) {
             log.debug("[{}] Channel is null, closing ctx...", sessionId);
@@ -748,6 +756,8 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                 TransportProtos.GetAttributeRequestMsg getAttributeMsg = payloadAdaptor.convertToGetAttributes(deviceSessionCtx, mqttMsg, MqttTopics.DEVICE_ATTRIBUTES_REQUEST_SHORT_TOPIC_PREFIX);
                 transportService.process(deviceSessionCtx.getSessionInfo(), getAttributeMsg, getPubAckCallback(ctx, msgId, getAttributeMsg));
                 attrReqTopicType = TopicType.V2;
+            } else if (tryCompleteCustomMqttRpcResponse(topicName, mqttMsg, ctx, msgId)) {
+                return;
             } else {
                 // 未知主题，记录活动并返回错误ACK
                 transportService.recordActivity(deviceSessionCtx.getSessionInfo());
@@ -1072,10 +1082,15 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                             registerSubQoS(topic, grantedQoSList, reqQoS);
                             break;
                         default:
-                            // 不支持的订阅主题
-                            //TODO increment an error counter if any exists
-                            log.warn("[{}][{}] Failed to subscribe because topic is not supported [{}][{}]", deviceSessionCtx.getTenantId(), sessionId, topic, reqQoS);
-                            grantedQoSList.add(ReturnCodeResolver.getSubscriptionReturnCode(deviceSessionCtx.getMqttVersion(), MqttReasonCodes.SubAck.TOPIC_FILTER_INVALID));
+                            if (isCustomMqttRpcSubscribeTopic(topic)) {
+                                transportService.process(deviceSessionCtx.getSessionInfo(),
+                                        TransportProtos.SubscribeToRPCMsg.newBuilder().build(), null);
+                                registerSubQoS(topic, grantedQoSList, reqQoS);
+                                activityReported = true;
+                            } else {
+                                log.warn("[{}][{}] Failed to subscribe because topic is not supported [{}][{}]", deviceSessionCtx.getTenantId(), sessionId, topic, reqQoS);
+                                grantedQoSList.add(ReturnCodeResolver.getSubscriptionReturnCode(deviceSessionCtx.getMqttVersion(), MqttReasonCodes.SubAck.TOPIC_FILTER_INVALID));
+                            }
                             break;
                     }
                 }
@@ -1693,10 +1708,18 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
             if (sparkplugSessionHandler != null) {
                 handleToSparkplugDeviceRpcRequest(rpcRequest);
             } else {
-                String baseTopic = rpcSubTopicType.getRpcRequestTopicBase();
-                MqttTransportAdaptor adaptor = deviceSessionCtx.getAdaptor(rpcSubTopicType);
-                adaptor.convertToPublish(deviceSessionCtx, rpcRequest, baseTopic)
-                        .ifPresent(payload -> sendToDeviceRpcRequest(payload, rpcRequest, deviceSessionCtx.getSessionInfo()));
+                DeviceProfileRpcMethod rpcMethod = MqttRpcCatalog.find(deviceSessionCtx.getDeviceProfile(), rpcRequest.getMethodName());
+                MqttRpcCommandFactory.Command command = MqttRpcCommandFactory.resolve(
+                        rpcMethod, rpcRequest, null, deviceSessionCtx.getDeviceInfo(), false);
+                if (!command.isUseStandardNativeTopic()) {
+                    publishCustomMqttRpc(command);
+                    return;
+                }
+                TopicType topicType = rpcSubTopicType != null ? rpcSubTopicType : TopicType.V1;
+                String baseTopic = topicType.getRpcRequestTopicBase();
+                MqttTransportAdaptor adaptor = deviceSessionCtx.getAdaptor(topicType);
+                adaptor.convertToPublish(deviceSessionCtx, command.getRequestToDeliver(), baseTopic)
+                        .ifPresent(payload -> sendToDeviceRpcRequest(payload, command.getRequestToDeliver(), deviceSessionCtx.getSessionInfo()));
             }
         } catch (Exception e) {
             log.trace("[{}][{}] Failed to convert device RPC command to MQTT msg", deviceSessionCtx.getDeviceId(), sessionId, e);
@@ -1866,6 +1889,121 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
     }
 
     /* SessionMsgListener接口实现 - 处理从服务端到设备的消息 END*/
+
+    private void publishCustomMqttRpc(MqttRpcCommandFactory.Command command) {
+        TransportProtos.ToDeviceRpcRequestMsg rpcRequest = command.getRequestToDeliver();
+        byte[] payloadBytes = command.getPayload() != null
+                ? command.getPayload().getBytes(StandardCharsets.UTF_8) : new byte[0];
+        MqttQoS qos = switch (Math.min(command.getQos(), 1)) {
+            case 0 -> MqttQoS.AT_MOST_ONCE;
+            case 2 -> MqttQoS.EXACTLY_ONCE;
+            default -> MqttQoS.AT_LEAST_ONCE;
+        };
+        MqttMessage payload = deviceSessionCtx.getPayloadAdaptor()
+                .createMqttPublishMsg(deviceSessionCtx, command.getRequestTopic(), payloadBytes, qos);
+        if (!rpcRequest.getOneway() && StringUtils.isNotBlank(command.getResponseTopic())) {
+            registerPendingCustomRpc(command, rpcRequest);
+        }
+        sendToDeviceRpcRequest(payload, rpcRequest, deviceSessionCtx.getSessionInfo());
+    }
+
+    private void registerPendingCustomRpc(MqttRpcCommandFactory.Command command,
+                                          TransportProtos.ToDeviceRpcRequestMsg rpcRequest) {
+        PendingMqttServerRpc pending = PendingMqttServerRpc.builder()
+                .requestId(rpcRequest.getRequestId())
+                .request(rpcRequest)
+                .responseTopic(command.getResponseTopic())
+                .build();
+        pendingCustomRpcByResponseTopic
+                .computeIfAbsent(command.getResponseTopic(), t -> new ConcurrentLinkedQueue<>())
+                .add(pending);
+        long delayMs = rpcRequest.getExpirationTime() > 0
+                ? Math.max(1L, rpcRequest.getExpirationTime() - System.currentTimeMillis())
+                : context.getTimeout();
+        context.getScheduler().schedule(() ->
+                removePendingCustomRpc(command.getResponseTopic(), rpcRequest.getRequestId()),
+                delayMs, TimeUnit.MILLISECONDS);
+    }
+
+    private PendingMqttServerRpc removePendingCustomRpc(String responseTopic, int requestId) {
+        if (StringUtils.isBlank(responseTopic)) {
+            return null;
+        }
+        ConcurrentLinkedQueue<PendingMqttServerRpc> queue = pendingCustomRpcByResponseTopic.get(responseTopic);
+        if (queue == null) {
+            return null;
+        }
+        for (PendingMqttServerRpc p : queue) {
+            if (p.getRequestId() == requestId && queue.remove(p)) {
+                if (queue.isEmpty()) {
+                    pendingCustomRpcByResponseTopic.remove(responseTopic, queue);
+                }
+                return p;
+            }
+        }
+        return null;
+    }
+
+    private boolean tryCompleteCustomMqttRpcResponse(String topicName, MqttPublishMessage mqttMsg,
+                                                     ChannelHandlerContext ctx, int msgId) {
+        if (pendingCustomRpcByResponseTopic.isEmpty()) {
+            return false;
+        }
+        String payload = mqttMsg.payload() != null ? mqttMsg.payload().toString(StandardCharsets.UTF_8) : "";
+        PendingMqttServerRpc pending = takePendingCustomRpc(topicName, payload);
+        if (pending == null) {
+            for (var entry : pendingCustomRpcByResponseTopic.entrySet()) {
+                if (MqttRpcCommandFactory.topicMatches(entry.getKey(), topicName)) {
+                    pending = takePendingFromQueue(entry.getKey(), payload, entry.getValue());
+                    if (pending != null) {
+                        break;
+                    }
+                }
+            }
+        }
+        if (pending == null) {
+            return false;
+        }
+        TransportProtos.ToDeviceRpcResponseMsg rpcResponseMsg = TransportProtos.ToDeviceRpcResponseMsg.newBuilder()
+                .setRequestId(pending.getRequestId())
+                .setPayload(MqttRpcCommandFactory.normalizeResponsePayload(payload))
+                .build();
+        transportService.process(deviceSessionCtx.getSessionInfo(), rpcResponseMsg,
+                getPubAckCallback(ctx, msgId, rpcResponseMsg));
+        return true;
+    }
+
+    private PendingMqttServerRpc takePendingCustomRpc(String topic, String payload) {
+        return takePendingFromQueue(topic, payload, pendingCustomRpcByResponseTopic.get(topic));
+    }
+
+    private PendingMqttServerRpc takePendingFromQueue(String mapKey, String payload,
+                                                      ConcurrentLinkedQueue<PendingMqttServerRpc> queue) {
+        if (queue == null || queue.isEmpty()) {
+            return null;
+        }
+        Integer extractedId = MqttRpcCommandFactory.tryExtractRequestId(payload);
+        if (extractedId != null) {
+            for (PendingMqttServerRpc p : queue) {
+                if (p.getRequestId() == extractedId && queue.remove(p)) {
+                    if (queue.isEmpty()) {
+                        pendingCustomRpcByResponseTopic.remove(mapKey, queue);
+                    }
+                    return p;
+                }
+            }
+        }
+        PendingMqttServerRpc p = queue.poll();
+        if (queue.isEmpty()) {
+            pendingCustomRpcByResponseTopic.remove(mapKey, queue);
+        }
+        return p;
+    }
+
+    private boolean isCustomMqttRpcSubscribeTopic(String topic) {
+        return MqttRpcCatalog.isCustomRequestSubscribeTopic(
+                deviceSessionCtx.getDeviceProfile(), null, deviceSessionCtx.getDeviceInfo(), topic);
+    }
 
     /**
      * 发送错误RPC响应

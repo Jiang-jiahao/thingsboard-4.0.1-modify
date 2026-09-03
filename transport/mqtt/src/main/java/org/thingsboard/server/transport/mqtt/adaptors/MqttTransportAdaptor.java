@@ -23,6 +23,7 @@ import io.netty.handler.codec.mqtt.MqttMessage;
 import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
+import io.netty.handler.codec.mqtt.MqttQoS;
 import org.thingsboard.server.common.adaptor.AdaptorException;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.gen.transport.TransportProtos.AttributeUpdateNotificationMsg;
@@ -151,8 +152,13 @@ public interface MqttTransportAdaptor {
      * @return 构造好的 MqttPublishMessage 对象
      */
     default MqttPublishMessage createMqttPublishMsg(MqttDeviceAwareSessionContext ctx, String topic, byte[] payloadInBytes) {
+        return createMqttPublishMsg(ctx, topic, payloadInBytes, ctx.getQoSForTopic(topic));
+    }
+
+    default MqttPublishMessage createMqttPublishMsg(MqttDeviceAwareSessionContext ctx, String topic, byte[] payloadInBytes, MqttQoS qos) {
+        MqttQoS publishQos = qos != null ? qos : ctx.getQoSForTopic(topic);
         MqttFixedHeader mqttFixedHeader =
-                new MqttFixedHeader(MqttMessageType.PUBLISH, false, ctx.getQoSForTopic(topic), false, 0);
+                new MqttFixedHeader(MqttMessageType.PUBLISH, false, publishQos, false, 0);
         MqttPublishVariableHeader header = new MqttPublishVariableHeader(topic, ctx.nextMsgId());
         ByteBuf payload = ALLOCATOR.buffer();
         payload.writeBytes(payloadInBytes);

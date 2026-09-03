@@ -2074,7 +2074,9 @@ export enum DeviceProfileRpcBindingType {
   UDP_TEMPLATE = 'UDP_TEMPLATE',
   NATIVE = 'NATIVE',
   /** HTTP Pull：平台主动调用厂家 HTTP 接口（与拉取共用鉴权） */
-  HTTP_OUTBOUND = 'HTTP_OUTBOUND'
+  HTTP_OUTBOUND = 'HTTP_OUTBOUND',
+  /** MQTT 自定义数据格式：自定义请求/响应主题与 payload 模板 */
+  MQTT_CUSTOM = 'MQTT_CUSTOM'
 }
 
 /** 支持协议模板（原始字节 / PROTOCOL_TEMPLATE）的传输类型 */
@@ -2097,6 +2099,25 @@ export function isHttpPullProfileTransport(
 
 export function isHttpOutboundRpcBinding(bindingType: DeviceProfileRpcBindingType | null | undefined): boolean {
   return bindingType === DeviceProfileRpcBindingType.HTTP_OUTBOUND;
+}
+
+export function isMqttCustomRpcBinding(bindingType: DeviceProfileRpcBindingType | null | undefined): boolean {
+  return bindingType === DeviceProfileRpcBindingType.MQTT_CUSTOM;
+}
+
+export function isMqttProfileRpcTransport(
+  type: DeviceTransportType | string | null | undefined,
+  transportConfiguration?: { type?: DeviceTransportType; mqttTransportMode?: MqttTransportMode } | null
+): boolean {
+  const resolved = resolveMqttProfileTransportTypeForDisplay(type, transportConfiguration);
+  return resolved === DeviceTransportType.MQTT || resolved === DeviceTransportType.MQTT_PULL;
+}
+
+export function isMqttPullProfileTransport(
+  type: DeviceTransportType | string | null | undefined,
+  transportConfiguration?: { type?: DeviceTransportType; mqttTransportMode?: MqttTransportMode } | null
+): boolean {
+  return resolveMqttProfileTransportTypeForDisplay(type, transportConfiguration) === DeviceTransportType.MQTT_PULL;
 }
 
 export function wireProfileProtocolTemplateBundleId(
@@ -2147,6 +2168,11 @@ export interface DeviceProfileRpcMethod {
   httpBody?: string;
   httpHeaders?: Record<string, string>;
   requiresAuth?: boolean;
+  /** MQTT NATIVE 可选主题 / MQTT_CUSTOM 必填 */
+  mqttRequestTopic?: string;
+  mqttResponseTopic?: string;
+  mqttPayloadTemplate?: string;
+  mqttQos?: number;
 }
 
 export interface DeviceProfileData {

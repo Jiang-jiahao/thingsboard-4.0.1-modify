@@ -47,6 +47,7 @@ import java.util.concurrent.TimeUnit;
 public class MqttPullTransportService {
 
     private final TransportService transportService;
+    private final MqttPullRpcService mqttPullRpcService;
     private ListeningExecutor handlerExecutor;
     private ListeningExecutorService handlerExecutorService;
 
@@ -191,6 +192,10 @@ public class MqttPullTransportService {
     }
 
     private void dispatchByTopic(MqttPullCollectorSessionContext sessionContext, String topic, ByteBuf payload) {
+        String body = payload != null ? payload.toString(StandardCharsets.UTF_8) : "";
+        if (mqttPullRpcService != null && mqttPullRpcService.tryCompletePendingRpc(sessionContext, topic, body)) {
+            return;
+        }
         MqttPullDeviceProfileTransportConfiguration profile = sessionContext.getProfileTransportConfiguration();
         boolean matched = false;
         for (MqttPullSubscribeRequest request : profile.effectiveSubscribeRequests()) {

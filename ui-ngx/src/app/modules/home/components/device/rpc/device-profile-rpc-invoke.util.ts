@@ -23,12 +23,13 @@ import {
   TcpDeviceProfileTransportConfiguration,
   UdpDeviceProfileTransportConfiguration,
   isHttpOutboundRpcBinding,
+  isMqttCustomRpcBinding,
   isProtocolTemplateWireTransport,
   isProtocolTemplateRpcBinding,
   wireProfileProtocolTemplateBundleId
 } from '@shared/models/device.models';
 
-export { isProtocolTemplateRpcBinding, isHttpOutboundRpcBinding };
+export { isProtocolTemplateRpcBinding, isHttpOutboundRpcBinding, isMqttCustomRpcBinding };
 
 export interface DeviceRpcInvokeFieldRow {
   /** 协议模板字段 key（模块侧） */
@@ -221,6 +222,9 @@ export function catalogMethodPlatformKeys(
   if (isHttpOutboundRpcBinding(method.bindingType)) {
     return extractHttpTemplateParamKeys(method.httpUrl, method.httpBody);
   }
+  if (isMqttCustomRpcBinding(method.bindingType)) {
+    return extractHttpTemplateParamKeys(method.mqttRequestTopic, method.mqttResponseTopic, method.mqttPayloadTemplate);
+  }
   const profile = parseNativeParamsJson(method.paramsTemplateJson ?? '') ?? {};
   return Object.keys(profile);
 }
@@ -396,6 +400,9 @@ export function catalogMethodLabel(m: DeviceProfileRpcMethod): string {
   if (isHttpOutboundRpcBinding(m.bindingType)) {
     const label = m.displayName?.trim() || m.id;
     return m.httpMethod ? `${label} (${m.httpMethod})` : label;
+  }
+  if (isMqttCustomRpcBinding(m.bindingType)) {
+    return m.displayName?.trim() || m.id;
   }
   return m.displayName?.trim() || m.id;
 }

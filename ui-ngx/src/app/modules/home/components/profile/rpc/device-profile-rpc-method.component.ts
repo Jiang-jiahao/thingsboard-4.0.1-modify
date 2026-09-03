@@ -21,6 +21,9 @@ import {
   DeviceTransportType,
   isHttpOutboundRpcBinding,
   isHttpPullProfileTransport,
+  isMqttCustomRpcBinding,
+  isMqttProfileRpcTransport,
+  isMqttPullProfileTransport,
   isProtocolTemplateWireTransport,
   isProtocolTemplateRpcBinding,
   ProtocolTemplateCommandDefinition,
@@ -102,25 +105,47 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     return isHttpPullProfileTransport(this.transportType, this.transportConfiguration);
   }
 
+  get mqttRpcTransport(): boolean {
+    return isMqttProfileRpcTransport(this.transportType, this.transportConfiguration);
+  }
+
+  get mqttPullRpcTransport(): boolean {
+    return isMqttPullProfileTransport(this.transportType, this.transportConfiguration);
+  }
+
   get httpOutboundBinding(): boolean {
     const bt = this.rpcMethodFormGroup?.get('bindingType')?.value as DeviceProfileRpcBindingType;
     return this.httpPullRpcTransport && isHttpOutboundRpcBinding(bt);
+  }
+
+  get mqttCustomBinding(): boolean {
+    const bt = this.rpcMethodFormGroup?.get('bindingType')?.value as DeviceProfileRpcBindingType;
+    return this.mqttRpcTransport && isMqttCustomRpcBinding(bt);
   }
 
   get nativeBindingOnly(): boolean {
     if (this.templateBindingOnly) {
       return false;
     }
-    if (this.httpPullRpcTransport) {
+    if (this.httpPullRpcTransport || this.mqttRpcTransport) {
       const bt = this.rpcMethodFormGroup?.get('bindingType')?.value as DeviceProfileRpcBindingType;
       return bt === DeviceProfileRpcBindingType.NATIVE;
     }
     return true;
   }
 
+  get bindingTypeSelectable(): boolean {
+    return this.httpPullRpcTransport || this.mqttRpcTransport;
+  }
+
   readonly httpPullRpcBindingTypes = [
     DeviceProfileRpcBindingType.HTTP_OUTBOUND,
     DeviceProfileRpcBindingType.NATIVE
+  ];
+
+  readonly mqttRpcBindingTypes = [
+    DeviceProfileRpcBindingType.NATIVE,
+    DeviceProfileRpcBindingType.MQTT_CUSTOM
   ];
 
   get isLocked(): boolean {
@@ -175,13 +200,22 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       httpMethod: ['POST'],
       httpBody: [''],
       httpHeadersJson: ['{}'],
-      requiresAuth: [null as boolean | null]
+      requiresAuth: [null as boolean | null],
+      mqttRequestTopic: [''],
+      mqttResponseTopic: [''],
+      mqttPayloadTemplate: [''],
+      mqttQos: [1]
     });
 
     this.applyBindingFieldState(defaultBinding);
 
     this.rpcMethodFormGroup.get('bindingType').valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((bt: DeviceProfileRpcBindingType) => this.applyBindingFieldState(bt));
+    this.rpcMethodFormGroup.get('oneWay').valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.applyMqttResponseTopicValidator();
+        this.rpcMethodFormGroup.get('mqttResponseTopic')?.updateValueAndValidity({ emitEvent: false });
+      });
 
     this.rpcMethodFormGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.updateModel());
     this.applyFormDisabledState();
@@ -202,7 +236,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       return;
     }
     this.rpcMethodFormGroup.enable({ emitEvent: false });
-    if (!this.httpPullRpcTransport) {
+    if (!this.bindingTypeSelectable) {
       this.rpcMethodFormGroup.get('bindingType').disable({ emitEvent: false });
     }
     const bt = this.rpcMethodFormGroup.get('bindingType').value as DeviceProfileRpcBindingType;
@@ -216,11 +250,17 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     const httpFields = ['httpUrl', 'httpMethod', 'httpBody', 'httpHeadersJson', 'requiresAuth'];
     const nativeFields = ['deviceMethod', 'paramsTemplateJson'];
     const templateFields = ['templateCommandRef', 'paramMapJson'];
+    const mqttTopicFields = ['mqttRequestTopic', 'mqttResponseTopic', 'mqttQos'];
+    const mqttCustomFields = ['mqttPayloadTemplate'];
 
     const disableAll = (fields: string[]) => fields.forEach(f => this.rpcMethodFormGroup.get(f)?.disable({ emitEvent: false }));
     const enableAll = (fields: string[]) => fields.forEach(f => this.rpcMethodFormGroup.get(f)?.enable({ emitEvent: false }));
 
-    disableAll([...httpFields, ...nativeFields, ...templateFields]);
+    disableAll([...httpFields, ...nativeFields, ...templateFields, ...mqttTopicFields, ...mqttCustomFields]);
+
+    this.rpcMethodFormGroup.get('mqttRequestTopic').clearValidators();
+    this.rpcMethodFormGroup.get('mqttResponseTopic').clearValidators();
+    this.rpcMethodFormGroup.get('mqttPayloadTemplate').clearValidators();
 
     if (this.templateBindingOnly) {
       enableAll(templateFields);
@@ -232,16 +272,44 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       this.rpcMethodFormGroup.get('httpUrl').setValidators([Validators.required]);
       this.rpcMethodFormGroup.get('httpMethod').setValidators([Validators.required]);
       this.rpcMethodFormGroup.get('deviceMethod').clearValidators();
+    } else if (this.mqttRpcTransport && isMqttCustomRpcBinding(bindingType)) {
+      enableAll([...mqttTopicFields, ...mqttCustomFields]);
+      this.rpcMethodFormGroup.get('mqttRequestTopic').setValidators([Validators.required]);
+      this.rpcMethodFormGroup.get('mqttPayloadTemplate').setValidators([Validators.required]);
+      this.rpcMethodFormGroup.get('deviceMethod').clearValidators();
+      this.rpcMethodFormGroup.get('httpUrl').clearValidators();
+      this.rpcMethodFormGroup.get('httpMethod').clearValidators();
+      this.applyMqttResponseTopicValidator();
     } else {
       enableAll(nativeFields);
       this.rpcMethodFormGroup.get('deviceMethod').setValidators([Validators.required]);
       this.rpcMethodFormGroup.get('httpUrl').clearValidators();
       this.rpcMethodFormGroup.get('httpMethod').clearValidators();
+      if (this.mqttRpcTransport) {
+        enableAll(mqttTopicFields);
+        if (this.mqttPullRpcTransport) {
+          this.rpcMethodFormGroup.get('mqttRequestTopic').setValidators([Validators.required]);
+        }
+        this.applyMqttResponseTopicValidator();
+      }
     }
     this.rpcMethodFormGroup.get('deviceMethod').updateValueAndValidity({ emitEvent: false });
     this.rpcMethodFormGroup.get('httpUrl').updateValueAndValidity({ emitEvent: false });
     this.rpcMethodFormGroup.get('httpMethod').updateValueAndValidity({ emitEvent: false });
     this.rpcMethodFormGroup.get('templateCommandRef').updateValueAndValidity({ emitEvent: false });
+    this.rpcMethodFormGroup.get('mqttRequestTopic').updateValueAndValidity({ emitEvent: false });
+    this.rpcMethodFormGroup.get('mqttResponseTopic').updateValueAndValidity({ emitEvent: false });
+    this.rpcMethodFormGroup.get('mqttPayloadTemplate').updateValueAndValidity({ emitEvent: false });
+  }
+
+  private applyMqttResponseTopicValidator(): void {
+    const oneWay = this.rpcMethodFormGroup.get('oneWay')?.value !== false;
+    const responseCtrl = this.rpcMethodFormGroup.get('mqttResponseTopic');
+    if (!oneWay && (this.mqttCustomBinding || this.mqttPullRpcTransport)) {
+      responseCtrl?.setValidators([Validators.required]);
+    } else {
+      responseCtrl?.clearValidators();
+    }
   }
 
   writeValue(value: DeviceProfileRpcMethod | null): void {
@@ -279,7 +347,11 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       httpMethod: value.httpMethod ?? 'POST',
       httpBody: value.httpBody ?? '',
       httpHeadersJson,
-      requiresAuth: value.requiresAuth ?? null
+      requiresAuth: value.requiresAuth ?? null,
+      mqttRequestTopic: value.mqttRequestTopic ?? '',
+      mqttResponseTopic: value.mqttResponseTopic ?? '',
+      mqttPayloadTemplate: value.mqttPayloadTemplate ?? '',
+      mqttQos: value.mqttQos ?? 1
     }, { emitEvent: false });
     this.applyFormDisabledState();
   }
@@ -289,7 +361,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     let bindingType = raw.bindingType as DeviceProfileRpcBindingType;
     if (this.templateBindingOnly) {
       bindingType = DeviceProfileRpcBindingType.TCP_TEMPLATE;
-    } else if (!this.httpPullRpcTransport) {
+    } else if (!this.httpPullRpcTransport && !this.mqttRpcTransport) {
       bindingType = DeviceProfileRpcBindingType.NATIVE;
     }
 
@@ -324,10 +396,23 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       if (raw.requiresAuth === true || raw.requiresAuth === false) {
         out.requiresAuth = raw.requiresAuth;
       }
+    } else if (isMqttCustomRpcBinding(bindingType)) {
+      out.mqttRequestTopic = (raw.mqttRequestTopic as string)?.trim();
+      const resp = (raw.mqttResponseTopic as string)?.trim();
+      out.mqttResponseTopic = resp || undefined;
+      out.mqttPayloadTemplate = (raw.mqttPayloadTemplate as string)?.trim();
+      out.mqttQos = raw.mqttQos != null && raw.mqttQos !== '' ? Number(raw.mqttQos) : 1;
     } else {
       out.deviceMethod = (raw.deviceMethod as string)?.trim();
       const pt = (raw.paramsTemplateJson as string)?.trim();
       out.paramsTemplateJson = pt || undefined;
+      if (this.mqttRpcTransport) {
+        const req = (raw.mqttRequestTopic as string)?.trim();
+        out.mqttRequestTopic = req || undefined;
+        const resp = (raw.mqttResponseTopic as string)?.trim();
+        out.mqttResponseTopic = resp || undefined;
+        out.mqttQos = raw.mqttQos != null && raw.mqttQos !== '' ? Number(raw.mqttQos) : 1;
+      }
     }
 
     this.propagateChange(out);
@@ -348,6 +433,13 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     } else if (this.httpOutboundBinding) {
       if (parseJsonObject(raw.httpHeadersJson) === null && (raw.httpHeadersJson as string)?.trim()) {
         return { httpHeadersJson: true };
+      }
+    } else if (this.mqttCustomBinding) {
+      if (!(raw.mqttRequestTopic as string)?.trim()) {
+        return { mqttRequestTopic: true };
+      }
+      if (!(raw.mqttPayloadTemplate as string)?.trim()) {
+        return { mqttPayloadTemplate: true };
       }
     } else {
       const pt = (raw.paramsTemplateJson as string)?.trim();

@@ -36,6 +36,7 @@ import {
   DeviceInfo,
   DeviceInfoFilter,
   DeviceInfoQuery,
+  DeviceTransportType,
   GATEWAY_UI_ENABLED
 } from '@app/shared/models/device.models';
 import { DeviceComponent } from '@modules/home/pages/device/device.component';
@@ -317,7 +318,7 @@ export class DevicesTableConfigResolver  {
         {
           name: this.translate.instant('device.manage-credentials'),
           icon: 'security',
-          isEnabled: () => true,
+          isEnabled: (entity) => !this.isMqttPullClientDevice(entity),
           onAction: ($event, entity) => this.manageCredentials($event, entity)
         }
       );
@@ -339,7 +340,7 @@ export class DevicesTableConfigResolver  {
         {
           name: this.translate.instant('device.manage-credentials'),
           icon: 'security',
-          isEnabled: () => true,
+          isEnabled: (entity) => !this.isMqttPullClientDevice(entity),
           onAction: ($event, entity) => this.manageCredentials($event, entity)
         }
       );
@@ -349,7 +350,7 @@ export class DevicesTableConfigResolver  {
         {
           name: this.translate.instant('device.view-credentials'),
           icon: 'security',
-          isEnabled: () => true,
+          isEnabled: (entity) => !this.isMqttPullClientDevice(entity),
           onAction: ($event, entity) => this.manageCredentials($event, entity)
         }
       );
@@ -607,6 +608,9 @@ export class DevicesTableConfigResolver  {
   }
 
   manageCredentials($event: Event, device: Device) {
+    if (this.isMqttPullClientDevice(device)) {
+      return;
+    }
     if ($event) {
       $event.stopPropagation();
     }
@@ -743,5 +747,10 @@ export class DevicesTableConfigResolver  {
           this.config.updateData();
         }
       });
+  }
+
+  private isMqttPullClientDevice(device?: Device | DeviceInfo | null): boolean {
+    const cfg = device?.deviceData?.transportConfiguration;
+    return cfg?.type === DeviceTransportType.MQTT_PULL;
   }
 }

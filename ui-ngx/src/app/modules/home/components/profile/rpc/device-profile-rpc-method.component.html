@@ -10,6 +10,7 @@
       <span class="mat-caption">{{ mid }}</span>
       <span class="mat-caption" *ngIf="templateBindingOnly" translate>device-profile.rpc-binding-tcp-template</span>
       <span class="mat-caption" *ngIf="httpOutboundBinding" translate>device-profile.rpc-binding-http-outbound</span>
+      <span class="mat-caption" *ngIf="mqttCustomBinding" translate>device-profile.rpc-binding-mqtt-custom</span>
       <span class="mat-caption" *ngIf="nativeBindingOnly" translate>device-profile.rpc-binding-native</span>
     </mat-panel-description>
   </mat-expansion-panel-header>
@@ -51,6 +52,18 @@
           <mat-option *ngFor="let bt of httpPullRpcBindingTypes" [value]="bt">
             <span *ngIf="bt === 'HTTP_OUTBOUND'" translate>device-profile.rpc-binding-http-outbound</span>
             <span *ngIf="bt === 'NATIVE'" translate>device-profile.rpc-binding-native</span>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="mqttRpcTransport">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-binding-type</mat-label>
+        <mat-select formControlName="bindingType" [disabled]="isLocked">
+          <mat-option *ngFor="let bt of mqttRpcBindingTypes" [value]="bt">
+            <span *ngIf="bt === 'NATIVE'" translate>device-profile.rpc-binding-native</span>
+            <span *ngIf="bt === 'MQTT_CUSTOM'" translate>device-profile.rpc-binding-mqtt-custom</span>
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -121,6 +134,8 @@
         <mat-label translate>device-profile.rpc-device-method</mat-label>
         <input matInput formControlName="deviceMethod" required/>
         <mat-hint *ngIf="httpPullRpcTransport" translate>device-profile.rpc-device-method-http-passive-hint</mat-hint>
+        <mat-hint *ngIf="mqttPullRpcTransport" translate>device-profile.rpc-device-method-mqtt-pull-hint</mat-hint>
+        <mat-hint *ngIf="mqttRpcTransport && !mqttPullRpcTransport" translate>device-profile.rpc-device-method-mqtt-server-hint</mat-hint>
         <mat-error *ngIf="rpcMethodFormGroup.get('deviceMethod').hasError('required')" translate>
           device-profile.rpc-device-method-required
         </mat-error>
@@ -129,6 +144,73 @@
         <mat-label translate>device-profile.rpc-params-template</mat-label>
         <textarea matInput formControlName="paramsTemplateJson" rows="3"></textarea>
         <mat-hint translate>device-profile.rpc-params-template-hint</mat-hint>
+      </mat-form-field>
+      <ng-container *ngIf="mqttRpcTransport">
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-profile.rpc-mqtt-request-topic</mat-label>
+          <input matInput formControlName="mqttRequestTopic"
+                 [placeholder]="mqttPullRpcTransport ? 'devices/${device.name}/rpc/request/${requestId}' : 'v1/devices/me/rpc/request/${requestId}'"/>
+          <mat-hint *ngIf="mqttPullRpcTransport" translate>device-profile.rpc-mqtt-request-topic-pull-native-hint</mat-hint>
+          <mat-hint *ngIf="!mqttPullRpcTransport" translate>device-profile.rpc-mqtt-request-topic-server-native-hint</mat-hint>
+          <mat-error *ngIf="rpcMethodFormGroup.get('mqttRequestTopic').hasError('required')" translate>
+            device-profile.rpc-mqtt-request-topic-required
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-profile.rpc-mqtt-response-topic</mat-label>
+          <input matInput formControlName="mqttResponseTopic"
+                 placeholder="devices/${device.name}/rpc/response/${requestId}"/>
+          <mat-hint translate>device-profile.rpc-mqtt-response-topic-hint</mat-hint>
+          <mat-error *ngIf="rpcMethodFormGroup.get('mqttResponseTopic').hasError('required')" translate>
+            device-profile.rpc-mqtt-response-topic-required
+          </mat-error>
+        </mat-form-field>
+        <mat-form-field style="max-width: 140px;">
+          <mat-label translate>device-profile.rpc-mqtt-qos</mat-label>
+          <mat-select formControlName="mqttQos">
+            <mat-option [value]="0">0</mat-option>
+            <mat-option [value]="1">1</mat-option>
+            <mat-option [value]="2">2</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </ng-container>
+    </ng-container>
+
+    <ng-container *ngIf="mqttCustomBinding">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-mqtt-request-topic</mat-label>
+        <input matInput formControlName="mqttRequestTopic" required
+               placeholder="devices/${device.name}/cmd"/>
+        <mat-hint translate>device-profile.rpc-mqtt-request-topic-custom-hint</mat-hint>
+        <mat-error *ngIf="rpcMethodFormGroup.get('mqttRequestTopic').hasError('required')" translate>
+          device-profile.rpc-mqtt-request-topic-required
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-mqtt-response-topic</mat-label>
+        <input matInput formControlName="mqttResponseTopic"
+               placeholder="devices/${device.name}/cmd/resp/${requestId}"/>
+        <mat-hint translate>device-profile.rpc-mqtt-response-topic-hint</mat-hint>
+        <mat-error *ngIf="rpcMethodFormGroup.get('mqttResponseTopic').hasError('required')" translate>
+          device-profile.rpc-mqtt-response-topic-required
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-mqtt-payload-template</mat-label>
+        <textarea matInput formControlName="mqttPayloadTemplate" rows="4" required
+                  placeholder='{"sn":"${device.name}","cmd":"${params.command}","id":"${requestId}"}'></textarea>
+        <mat-hint translate>device-profile.rpc-mqtt-payload-template-hint</mat-hint>
+        <mat-error *ngIf="rpcMethodFormGroup.get('mqttPayloadTemplate').hasError('required')" translate>
+          device-profile.rpc-mqtt-payload-template-required
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field style="max-width: 140px;">
+        <mat-label translate>device-profile.rpc-mqtt-qos</mat-label>
+        <mat-select formControlName="mqttQos">
+          <mat-option [value]="0">0</mat-option>
+          <mat-option [value]="1">1</mat-option>
+          <mat-option [value]="2">2</mat-option>
+        </mat-select>
       </mat-form-field>
     </ng-container>
   </div>

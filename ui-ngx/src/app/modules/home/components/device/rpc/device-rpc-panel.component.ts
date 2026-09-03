@@ -85,6 +85,7 @@ import {
   protocolTemplateBundleIdFromTcpProfile,
   protocolTemplateBundleIdFromWireProfile,
   isHttpOutboundRpcBinding,
+  isMqttCustomRpcBinding,
   isProtocolTemplateRpcBinding,
 
   resolveMethodRpcDefaults,
@@ -150,7 +151,8 @@ export class DeviceRpcPanelComponent implements OnChanges {
   }
 
   get selectedMethodUsesHttpOutbound(): boolean {
-    return isHttpOutboundRpcBinding(this.selectedMethod?.bindingType);
+    return isHttpOutboundRpcBinding(this.selectedMethod?.bindingType)
+      || isMqttCustomRpcBinding(this.selectedMethod?.bindingType);
   }
 
   get editableInvokeKeys(): string[] {
@@ -526,7 +528,8 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
       this.sendTcpTemplate(deviceId, oneWay, timeout);
 
-    } else if (isHttpOutboundRpcBinding(this.selectedMethod.bindingType)) {
+    } else if (isHttpOutboundRpcBinding(this.selectedMethod.bindingType)
+      || isMqttCustomRpcBinding(this.selectedMethod.bindingType)) {
 
       this.sendHttpOutbound(deviceId, oneWay, timeout);
 
@@ -582,7 +585,7 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
       }
 
-    } else if (isHttpOutboundRpcBinding(m.bindingType)) {
+    } else if (isHttpOutboundRpcBinding(m.bindingType) || isMqttCustomRpcBinding(m.bindingType)) {
 
       const keys = catalogMethodPlatformKeys(null, m);
 

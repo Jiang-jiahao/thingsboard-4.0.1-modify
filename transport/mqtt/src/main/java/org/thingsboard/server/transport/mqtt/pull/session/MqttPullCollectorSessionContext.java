@@ -14,9 +14,13 @@ import org.thingsboard.server.common.data.device.profile.MqttPullDeviceProfileTr
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.gen.transport.TransportProtos.SessionInfoProto;
-import org.thingsboard.server.transport.mqtt.pull.MqttPullTransportContext;
 import org.thingsboard.mqtt.MqttClient;
+import org.thingsboard.server.transport.mqtt.pull.MqttPullTransportContext;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledFuture;
 
 @Data
@@ -37,6 +41,10 @@ public class MqttPullCollectorSessionContext {
     private volatile boolean brokerLinkActive = false;
     @Builder.Default
     private volatile boolean destroyed = false;
+    @Builder.Default
+    private final Map<String, ConcurrentLinkedQueue<PendingMqttPullRpc>> pendingRpcByResponseTopic = new ConcurrentHashMap<>();
+    @Builder.Default
+    private final Set<String> rpcResponseSubscriptions = ConcurrentHashMap.newKeySet();
 
     public DeviceId getDeviceId() {
         return device.getId();
@@ -48,6 +56,8 @@ public class MqttPullCollectorSessionContext {
 
     public void close() {
         markDestroyed();
+        pendingRpcByResponseTopic.clear();
+        rpcResponseSubscriptions.clear();
         if (reconnectTask != null) {
             reconnectTask.cancel(false);
             reconnectTask = null;
