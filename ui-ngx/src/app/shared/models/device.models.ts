@@ -904,7 +904,7 @@ export interface MqttPullDeviceProfileTransportConfiguration {
 export interface MqttPullDeviceTransportConfiguration {
   brokerUrl?: string;
   clientId?: string;
-  /** 对方 Server Topic 前缀，默认 server/chan，不同防区可改 */
+  /** 对方 Server Topic 前缀。仅无人机监管等协议需要；大公博创留空 */
   topicPrefix?: string;
   auth?: MqttPullAuthConfiguration;
 }
@@ -1110,6 +1110,37 @@ export function extractMqttPullProfileContext(dp: DeviceProfile | null | undefin
   return { active: true };
 }
 
+/** 档案主题已是完整路径（如大公 dgb/${device.name}/...）时，设备不需要填写主题前缀 */
+export function mqttPullProfileUsesAbsoluteTopics(dp: DeviceProfile | null | undefined): boolean {
+  const cfg = dp?.profileData?.transportConfiguration as MqttPullDeviceProfileTransportConfiguration | undefined;
+  const topics = (cfg?.subscribeRequests || []).map(r => (r.topic || '').trim()).filter(Boolean);
+  return topics.some(t => t.startsWith('dgb/') || t.includes('${device.name}') || t.includes('${deviceName}'));
+}
+
+export function defaultMqttPullDeviceTopicPrefix(dp?: DeviceProfile | null): string | undefined {
+  return mqttPullProfileUsesAbsoluteTopics(dp) ? undefined : 'server/chan';
+}
+
+export function withMqttPullTopicPrefixForProfile(
+  transportConfiguration: DeviceTransportConfiguration | null | undefined,
+  deviceProfile: DeviceProfile | null | undefined
+): DeviceTransportConfiguration | null | undefined {
+  if (!transportConfiguration || !deviceProfile) {
+    return transportConfiguration;
+  }
+  const cfg = transportConfiguration as MqttPullDeviceTransportConfiguration;
+  if (cfg.type && cfg.type !== DeviceTransportType.MQTT_PULL) {
+    return transportConfiguration;
+  }
+  const current = (cfg.topicPrefix || '').trim();
+  const next = defaultMqttPullDeviceTopicPrefix(deviceProfile) || '';
+  const wasDefault = !current || current === 'server/chan';
+  if (!wasDefault || current === next) {
+    return transportConfiguration;
+  }
+  return { ...cfg, topicPrefix: next || undefined };
+}
+
 export function createUavMqttPlatformSubscribeRequests(): MqttPullSubscribeRequest[] {
   return [
     { name: 'system', enabled: true, topic: 'api/system', qos: 1,
@@ -1188,19 +1219,19 @@ export function createUavMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
 
 export function createDgbMqttPlatformSubscribeRequests(): MqttPullSubscribeRequest[] {
   return [
-    { name: 'status_report', enabled: true, topic: 'status/status_report', qos: 1,
+    { name: 'status_report', enabled: true, topic: 'dgb/${device.name}/status/status_report', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'status' },
-    { name: 'detect_report', enabled: true, topic: 'status/detect_report', qos: 1,
+    { name: 'detect_report', enabled: true, topic: 'dgb/${device.name}/status/detect_report', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'detect' },
-    { name: 'oc4_report', enabled: true, topic: 'status/oc4_report', qos: 1,
+    { name: 'oc4_report', enabled: true, topic: 'dgb/${device.name}/status/oc4_report', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'oc4' },
-    { name: 'direction_report', enabled: true, topic: 'status/direction_report', qos: 1,
+    { name: 'direction_report', enabled: true, topic: 'dgb/${device.name}/status/direction_report', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'direction' },
-    { name: 'aoa_location', enabled: true, topic: 'status/aoa_location', qos: 1,
+    { name: 'aoa_location', enabled: true, topic: 'dgb/${device.name}/status/aoa_location', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'aoa' },
-    { name: 'channel_report', enabled: true, topic: 'status/channel_report', qos: 1,
+    { name: 'channel_report', enabled: true, topic: 'dgb/${device.name}/status/channel_report', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'channel' },
-    { name: 'lna_report', enabled: true, topic: 'status/lna_report', qos: 1,
+    { name: 'lna_report', enabled: true, topic: 'dgb/${device.name}/status/lna_report', qos: 1,
       dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'lna' }
   ];
 }
@@ -1213,8 +1244,8 @@ export function createDgbMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 15000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'request/detect_open',
-      mqttResponseTopic: 'response/detect_open',
+      mqttRequestTopic: 'dgb/${device.name}/request/detect_open',
+      mqttResponseTopic: 'dgb/${device.name}/response/detect_open',
       mqttPayloadTemplate: '{}',
       mqttQos: 1
     },
@@ -1224,8 +1255,8 @@ export function createDgbMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 15000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'request/detect_close',
-      mqttResponseTopic: 'response/detect_close',
+      mqttRequestTopic: 'dgb/${device.name}/request/detect_close',
+      mqttResponseTopic: 'dgb/${device.name}/response/detect_close',
       mqttPayloadTemplate: '{}',
       mqttQos: 1
     },
@@ -1235,8 +1266,8 @@ export function createDgbMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 20000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'request/channel_open',
-      mqttResponseTopic: 'response/channel_set',
+      mqttRequestTopic: 'dgb/${device.name}/request/channel_open',
+      mqttResponseTopic: 'dgb/${device.name}/response/channel_set',
       mqttPayloadTemplate:
         '{"suppressChannels":${params.suppressChannels},"sustainTime":${params.sustainTime}}',
       mqttQos: 1,
@@ -1249,8 +1280,8 @@ export function createDgbMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
       oneWay: false,
       timeoutMs: 15000,
       bindingType: DeviceProfileRpcBindingType.MQTT_CUSTOM,
-      mqttRequestTopic: 'request/channel_close',
-      mqttResponseTopic: 'response/channel_close',
+      mqttRequestTopic: 'dgb/${device.name}/request/channel_close',
+      mqttResponseTopic: 'dgb/${device.name}/response/channel_close',
       mqttPayloadTemplate: '{}',
       mqttQos: 1
     }
@@ -2028,7 +2059,7 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
   return transportConfiguration;
 };
 
-export const createDeviceTransportConfiguration = (type: TransportType): DeviceTransportConfiguration => {
+export const createDeviceTransportConfiguration = (type: TransportType, deviceProfile?: DeviceProfile | null): DeviceTransportConfiguration => {
   let transportConfiguration: DeviceTransportConfiguration = null;
   if (type) {
     switch (type) {
@@ -2074,7 +2105,7 @@ export const createDeviceTransportConfiguration = (type: TransportType): DeviceT
         const mqttPullDeviceTransportConfiguration: MqttPullDeviceTransportConfiguration = {
           brokerUrl: '',
           clientId: '',
-          topicPrefix: 'server/chan',
+          topicPrefix: defaultMqttPullDeviceTopicPrefix(deviceProfile),
           auth: { authType: MqttPullAuthType.NONE }
         };
         transportConfiguration = {...mqttPullDeviceTransportConfiguration, type: DeviceTransportType.MQTT_PULL};

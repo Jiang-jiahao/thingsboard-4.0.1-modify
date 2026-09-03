@@ -53,7 +53,7 @@ export class MqttPullDeviceTransportConfigurationComponent implements OnInit, On
     this.form = this.fb.group({
       brokerUrl: ['', Validators.required],
       clientId: [''],
-      topicPrefix: ['server/chan', Validators.required],
+      topicPrefix: [''],
       authType: [MqttPullAuthType.NONE],
       username: [''],
       password: ['']
@@ -99,7 +99,7 @@ export class MqttPullDeviceTransportConfigurationComponent implements OnInit, On
       ...cfg,
       brokerUrl: (cfg.brokerUrl || '').trim(),
       clientId: (cfg.clientId || '').trim(),
-      topicPrefix: (cfg.topicPrefix || '').trim() || 'server/chan',
+      topicPrefix: (cfg.topicPrefix || '').trim(),
       auth: {
         authType: auth.authType || MqttPullAuthType.NONE,
         username: auth.username,
@@ -122,7 +122,7 @@ export class MqttPullDeviceTransportConfigurationComponent implements OnInit, On
     this.form.patchValue({
       brokerUrl: this.pendingValue.brokerUrl || '',
       clientId: this.pendingValue.clientId || '',
-      topicPrefix: this.pendingValue.topicPrefix || 'server/chan',
+      topicPrefix: this.pendingValue.topicPrefix || '',
       authType: auth.authType || MqttPullAuthType.NONE,
       username: auth.username || '',
       password: auth.password || ''

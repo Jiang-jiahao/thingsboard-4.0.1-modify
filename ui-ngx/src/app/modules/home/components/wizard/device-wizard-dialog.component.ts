@@ -38,6 +38,7 @@ import {
   UdpDeviceProfileTransportConfiguration,
   TcpTransportConnectMode,
   TcpWireAuthenticationMode,
+  withMqttPullTopicPrefixForProfile,
   UdpWireAuthenticationMode,
   GATEWAY_UI_ENABLED
 } from '@shared/models/device.models';
@@ -190,14 +191,14 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
       return;
     }
     const prev: DeviceData = this.deviceWizardFormGroup.getRawValue().deviceData;
-    const apply = (profileType: DeviceProfileType, transportType: DeviceTransportType) => {
+    const apply = (profileType: DeviceProfileType, transportType: DeviceTransportType, fullProfile?: DeviceProfile) => {
       if (!transportType) {
         return;
       }
       if (!prev) {
         const deviceData: DeviceData = {
           configuration: createDeviceConfiguration(profileType),
-          transportConfiguration: createDeviceTransportConfiguration(transportType)
+          transportConfiguration: createDeviceTransportConfiguration(transportType, fullProfile)
         };
         this.deviceWizardFormGroup.patchValue({ deviceData }, { emitEvent: true });
         this.cd.markForCheck();
@@ -210,8 +211,13 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
       if (prev.transportConfiguration?.type !== transportType) {
         next = {
           ...next,
-          transportConfiguration: createDeviceTransportConfiguration(transportType)
+          transportConfiguration: createDeviceTransportConfiguration(transportType, fullProfile)
         };
+      } else {
+        const adjusted = withMqttPullTopicPrefixForProfile(next.transportConfiguration, fullProfile);
+        if (adjusted && adjusted !== next.transportConfiguration) {
+          next = {...next, transportConfiguration: adjusted};
+        }
       }
       if (next !== prev) {
         this.deviceWizardFormGroup.patchValue({ deviceData: next }, { emitEvent: true });
@@ -234,7 +240,7 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
         this.applyTcpProfileWireAuthFromDeviceProfile(dp);
         const resolvedProfileType = dp?.type ?? profileType;
         const resolvedTransportType = dp?.transportType ?? transportTypeFromAutocomplete;
-        apply(resolvedProfileType, resolvedTransportType);
+        apply(resolvedProfileType, resolvedTransportType, dp);
         this.currentDeviceProfileTransportType = resolvedTransportType ?? DeviceTransportType.DEFAULT;
         this.credentialsOptionalStep = this.currentDeviceProfileTransportType !== DeviceTransportType.LWM2M;
         this.cd.markForCheck();

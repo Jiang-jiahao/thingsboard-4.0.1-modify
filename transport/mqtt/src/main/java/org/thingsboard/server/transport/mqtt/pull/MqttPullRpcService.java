@@ -235,9 +235,12 @@ public class MqttPullRpcService {
                                                            MqttRpcCommandFactory.Command command) {
         String prefix = collectorCtx.getDeviceTransportConfiguration() != null
                 ? collectorCtx.getDeviceTransportConfiguration().getTopicPrefix() : null;
+        Device device = collectorCtx.getDevice();
+        String deviceName = device != null ? device.getName() : null;
+        String deviceLabel = device != null ? device.getLabel() : null;
         return command.toBuilder()
-                .requestTopic(MqttPullTopicPrefix.resolve(prefix, command.getRequestTopic()))
-                .responseTopic(MqttPullTopicPrefix.resolve(prefix, command.getResponseTopic()))
+                .requestTopic(MqttPullTopicPrefix.resolve(prefix, command.getRequestTopic(), deviceName, deviceLabel))
+                .responseTopic(MqttPullTopicPrefix.resolve(prefix, command.getResponseTopic(), deviceName, deviceLabel))
                 .build();
     }
 

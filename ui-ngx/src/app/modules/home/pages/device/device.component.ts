@@ -23,6 +23,7 @@ import {
   createDeviceConfiguration,
   createDeviceTransportConfiguration, DeviceCredentials,
   DeviceData,
+  withMqttPullTopicPrefixForProfile,
   DeviceInfo,
   DeviceProfile,
   DeviceProfileInfo,
@@ -201,14 +202,14 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
       return;
     }
     const prev: DeviceData = this.entityForm.getRawValue().deviceData;
-    const apply = (profileType: DeviceProfileType, transportType: DeviceTransportType) => {
+    const apply = (profileType: DeviceProfileType, transportType: DeviceTransportType, fullProfile?: DeviceProfile) => {
       if (!transportType) {
         return;
       }
       if (!prev) {
         const deviceData: DeviceData = {
           configuration: createDeviceConfiguration(profileType),
-          transportConfiguration: createDeviceTransportConfiguration(transportType)
+          transportConfiguration: createDeviceTransportConfiguration(transportType, fullProfile)
         };
         this.entityForm.patchValue({deviceData});
         this.entityForm.markAsDirty();
@@ -221,8 +222,13 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
       if (prev.transportConfiguration?.type !== transportType) {
         next = {
           ...next,
-          transportConfiguration: createDeviceTransportConfiguration(transportType)
+          transportConfiguration: createDeviceTransportConfiguration(transportType, fullProfile)
         };
+      } else {
+        const adjusted = withMqttPullTopicPrefixForProfile(next.transportConfiguration, fullProfile);
+        if (adjusted && adjusted !== next.transportConfiguration) {
+          next = {...next, transportConfiguration: adjusted};
+        }
       }
       if (next !== prev) {
         this.entityForm.patchValue({deviceData: next});
@@ -246,7 +252,7 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
         this.applyTcpProfileWireAuthFromDeviceProfile(dp);
         const resolvedProfileType = dp?.type ?? profileType;
         const resolvedTransportType = dp?.transportType ?? transportTypeFromAutocomplete;
-        apply(resolvedProfileType, resolvedTransportType);
+        apply(resolvedProfileType, resolvedTransportType, dp);
         this.cd.markForCheck();
       },
       error: () => {

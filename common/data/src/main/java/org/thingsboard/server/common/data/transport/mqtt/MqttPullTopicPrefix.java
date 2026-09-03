@@ -8,9 +8,11 @@ package org.thingsboard.server.common.data.transport.mqtt;
 import org.thingsboard.server.common.data.StringUtils;
 
 /**
- * 将设备级主题前缀与档案相对主题拼接。档案可写 {@code api/locate}，设备填写 {@code server/chan}
- *（不同防区可改），实际订阅 {@code server/chan/api/locate}。
- * 若档案主题已包含该前缀，则不再重复拼接。
+ * 将设备级主题前缀与档案主题拼接，并替换设备占位符。
+ * <p>无人机监管：档案写相对路径 {@code api/locate}，设备填写 Server Topic 前缀 {@code server/chan}，
+ * 实际订阅 {@code server/chan/api/locate}。前缀为空则原样使用档案主题。
+ * <p>大公博创无 Server Topic 前缀：档案写完整主题 {@code dgb/${device.name}/status/detect_report}，
+ * 设备名称即对方 deviceid。
  */
 public final class MqttPullTopicPrefix {
 
@@ -18,6 +20,10 @@ public final class MqttPullTopicPrefix {
     }
 
     public static String resolve(String prefix, String topic) {
+        return resolve(prefix, topic, null, null);
+    }
+
+    public static String resolve(String prefix, String topic, String deviceName, String deviceLabel) {
         if (StringUtils.isBlank(topic)) {
             return topic;
         }
@@ -25,19 +31,28 @@ public final class MqttPullTopicPrefix {
         while (t.startsWith("/")) {
             t = t.substring(1);
         }
-        if (StringUtils.isBlank(prefix)) {
-            return t;
+        if (!StringUtils.isBlank(prefix)) {
+            String p = prefix.trim();
+            while (p.endsWith("/")) {
+                p = p.substring(0, p.length() - 1);
+            }
+            if (!StringUtils.isBlank(p) && !t.equals(p) && !t.startsWith(p + "/")) {
+                t = p + "/" + t;
+            }
         }
-        String p = prefix.trim();
-        while (p.endsWith("/")) {
-            p = p.substring(0, p.length() - 1);
+        return resolveDevicePlaceholders(t, deviceName, deviceLabel);
+    }
+
+    public static String resolveDevicePlaceholders(String topic, String deviceName, String deviceLabel) {
+        if (StringUtils.isBlank(topic) || !topic.contains("${")) {
+            return topic;
         }
-        if (StringUtils.isBlank(p)) {
-            return t;
-        }
-        if (t.equals(p) || t.startsWith(p + "/")) {
-            return t;
-        }
-        return p + "/" + t;
+        String name = deviceName != null ? deviceName : "";
+        String label = deviceLabel != null ? deviceLabel : "";
+        return topic
+                .replace("${device.name}", name)
+                .replace("${deviceName}", name)
+                .replace("${device.label}", label)
+                .replace("${deviceLabel}", label);
     }
 }

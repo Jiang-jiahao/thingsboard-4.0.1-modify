@@ -26,6 +26,7 @@ import org.thingsboard.mqtt.MqttClientCallback;
 import org.thingsboard.mqtt.MqttClientConfig;
 import org.thingsboard.mqtt.MqttConnectResult;
 import org.thingsboard.server.common.adaptor.JsonConverter;
+import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.profile.MqttPullDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.transport.http.HttpPullPollDataType;
@@ -283,7 +284,10 @@ public class MqttPullTransportService {
     private String resolveSubscribeTopic(MqttPullCollectorSessionContext sessionContext, MqttPullSubscribeRequest request) {
         String prefix = sessionContext.getDeviceTransportConfiguration() != null
                 ? sessionContext.getDeviceTransportConfiguration().getTopicPrefix() : null;
-        return MqttPullTopicPrefix.resolve(prefix, request != null ? request.getTopic() : null);
+        Device device = sessionContext.getDevice();
+        String deviceName = device != null ? device.getName() : null;
+        String deviceLabel = device != null ? device.getLabel() : null;
+        return MqttPullTopicPrefix.resolve(prefix, request != null ? request.getTopic() : null, deviceName, deviceLabel);
     }
 
     private String resolveBrokerUrl(MqttPullCollectorSessionContext ctx) {
