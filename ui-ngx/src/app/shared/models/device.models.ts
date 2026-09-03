@@ -1114,9 +1114,23 @@ export function extractMqttPullProfileContext(dp: DeviceProfile | null | undefin
   return { active: true };
 }
 
-/** 档案主题已是完整路径（如大公 dgb/${device.externalDeviceId}/...）时，设备不需要填写主题前缀 */
-export function mqttPullProfileUsesAbsoluteTopics(dp: DeviceProfile | null | undefined): boolean {
-  const cfg = dp?.profileData?.transportConfiguration as MqttPullDeviceProfileTransportConfiguration | undefined;
+export enum DeviceProfileRpcBindingType {
+  /** TCP/UDP 共用同一协议模板包与下行组帧（params.hex） */
+  TCP_TEMPLATE = 'TCP_TEMPLATE',
+  /** 与 {@link TCP_TEMPLATE} 等价，保存时统一为 TCP_TEMPLATE */
+  UDP_TEMPLATE = 'UDP_TEMPLATE',
+  NATIVE = 'NATIVE',
+  /** HTTP Pull：平台主动调用厂家 HTTP 接口（与拉取共用鉴权） */
+  HTTP_OUTBOUND = 'HTTP_OUTBOUND',
+  /** MQTT 自定义数据格式：自定义请求/响应主题与 payload 模板 */
+  MQTT_CUSTOM = 'MQTT_CUSTOM'
+}
+
+/** 档案主题已是完整路径（如大公 dgb/{对方设备ID}/...）时，设备不需要填写主题前缀 */
+export function mqttPullProfileUsesAbsoluteTopics(
+  dp: { profileData?: { transportConfiguration?: MqttPullDeviceProfileTransportConfiguration } } | null | undefined
+): boolean {
+  const cfg = dp?.profileData?.transportConfiguration;
   const topics = (cfg?.subscribeRequests || []).map(r => (r.topic || '').trim()).filter(Boolean);
   return topics.some(t =>
     t.startsWith('dgb/')
@@ -1126,13 +1140,15 @@ export function mqttPullProfileUsesAbsoluteTopics(dp: DeviceProfile | null | und
     || t.includes('${deviceName}'));
 }
 
-export function defaultMqttPullDeviceTopicPrefix(dp?: DeviceProfile | null): string | undefined {
+export function defaultMqttPullDeviceTopicPrefix(
+  dp?: { profileData?: { transportConfiguration?: MqttPullDeviceProfileTransportConfiguration } } | null
+): string | undefined {
   return mqttPullProfileUsesAbsoluteTopics(dp) ? undefined : 'server/chan';
 }
 
 export function withMqttPullTopicPrefixForProfile(
   transportConfiguration: DeviceTransportConfiguration | null | undefined,
-  deviceProfile: DeviceProfile | null | undefined
+  deviceProfile: { profileData?: { transportConfiguration?: MqttPullDeviceProfileTransportConfiguration } } | null | undefined
 ): DeviceTransportConfiguration | null | undefined {
   if (!transportConfiguration || !deviceProfile) {
     return transportConfiguration;
@@ -2068,7 +2084,10 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
   return transportConfiguration;
 };
 
-export const createDeviceTransportConfiguration = (type: TransportType, deviceProfile?: DeviceProfile | null): DeviceTransportConfiguration => {
+export const createDeviceTransportConfiguration = (
+  type: TransportType,
+  deviceProfile?: { profileData?: { transportConfiguration?: MqttPullDeviceProfileTransportConfiguration } } | null
+): DeviceTransportConfiguration => {
   let transportConfiguration: DeviceTransportConfiguration = null;
   if (type) {
     switch (type) {
@@ -2252,18 +2271,6 @@ export const deviceProfileAlarmValidator = (control: AbstractControl): Validatio
   return {deviceProfileAlarm: true};
 };
 
-
-export enum DeviceProfileRpcBindingType {
-  /** TCP/UDP 共用同一协议模板包与下行组帧（params.hex） */
-  TCP_TEMPLATE = 'TCP_TEMPLATE',
-  /** 与 {@link TCP_TEMPLATE} 等价，保存时统一为 TCP_TEMPLATE */
-  UDP_TEMPLATE = 'UDP_TEMPLATE',
-  NATIVE = 'NATIVE',
-  /** HTTP Pull：平台主动调用厂家 HTTP 接口（与拉取共用鉴权） */
-  HTTP_OUTBOUND = 'HTTP_OUTBOUND',
-  /** MQTT 自定义数据格式：自定义请求/响应主题与 payload 模板 */
-  MQTT_CUSTOM = 'MQTT_CUSTOM'
-}
 
 /** 支持协议模板（原始字节 / PROTOCOL_TEMPLATE）的传输类型 */
 export function isProtocolTemplateWireTransport(type: DeviceTransportType | null | undefined): boolean {
