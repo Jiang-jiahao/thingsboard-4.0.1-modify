@@ -26,7 +26,6 @@ import org.thingsboard.mqtt.MqttClientCallback;
 import org.thingsboard.mqtt.MqttClientConfig;
 import org.thingsboard.mqtt.MqttConnectResult;
 import org.thingsboard.server.common.adaptor.JsonConverter;
-import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.profile.MqttPullDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.transport.http.HttpPullPollDataType;
@@ -223,6 +222,7 @@ public class MqttPullTransportService {
             }
             log.info("[{}] MQTT pull received topic [{}] request [{}] bytes [{}]",
                     sessionContext.getDeviceId(), topic, request.getName(), body.length());
+            rememberPlusSegment(sessionContext, request, topic);
             HttpPullPollDataType dataType = request.getDataType() != null ? request.getDataType() : HttpPullPollDataType.TELEMETRY;
             if (dataType == HttpPullPollDataType.TELEMETRY) {
                 postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, request.resolveTelemetryPayloadKey());
@@ -284,13 +284,16 @@ public class MqttPullTransportService {
     private String resolveSubscribeTopic(MqttPullCollectorSessionContext sessionContext, MqttPullSubscribeRequest request) {
         String prefix = sessionContext.getDeviceTransportConfiguration() != null
                 ? sessionContext.getDeviceTransportConfiguration().getTopicPrefix() : null;
-        Device device = sessionContext.getDevice();
-        String deviceName = device != null ? device.getName() : null;
-        String deviceLabel = device != null ? device.getLabel() : null;
-        String externalDeviceId = sessionContext.getDeviceTransportConfiguration() != null
-                ? sessionContext.getDeviceTransportConfiguration().getExternalDeviceId() : null;
-        return MqttPullTopicPrefix.resolve(prefix, request != null ? request.getTopic() : null,
-                deviceName, deviceLabel, externalDeviceId);
+        return MqttPullTopicPrefix.resolve(prefix, request != null ? request.getTopic() : null);
+    }
+
+    private void rememberPlusSegment(MqttPullCollectorSessionContext sessionContext,
+                                     MqttPullSubscribeRequest request, String topic) {
+        String filter = resolveSubscribeTopic(sessionContext, request);
+        String segment = MqttPullTopicPrefix.firstPlusSegment(filter, topic);
+        if (StringUtils.isNotBlank(segment)) {
+            sessionContext.setMqttPlusSegment(segment);
+        }
     }
 
     private String resolveBrokerUrl(MqttPullCollectorSessionContext ctx) {

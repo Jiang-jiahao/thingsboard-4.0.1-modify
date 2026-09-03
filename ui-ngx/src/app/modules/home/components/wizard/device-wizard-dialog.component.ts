@@ -38,7 +38,6 @@ import {
   UdpDeviceProfileTransportConfiguration,
   TcpTransportConnectMode,
   TcpWireAuthenticationMode,
-  withMqttPullTopicPrefixForProfile,
   UdpWireAuthenticationMode,
   GATEWAY_UI_ENABLED
 } from '@shared/models/device.models';
@@ -213,11 +212,6 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
           ...next,
           transportConfiguration: createDeviceTransportConfiguration(transportType, fullProfile)
         };
-      } else {
-        const adjusted = withMqttPullTopicPrefixForProfile(next.transportConfiguration, fullProfile);
-        if (adjusted && adjusted !== next.transportConfiguration) {
-          next = {...next, transportConfiguration: adjusted};
-        }
       }
       if (next !== prev) {
         this.deviceWizardFormGroup.patchValue({ deviceData: next }, { emitEvent: true });

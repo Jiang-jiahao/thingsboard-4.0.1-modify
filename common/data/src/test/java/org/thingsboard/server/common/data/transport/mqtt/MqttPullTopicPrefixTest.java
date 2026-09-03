@@ -12,24 +12,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class MqttPullTopicPrefixTest {
 
     @Test
-    public void uavRelativeTopicIsPrefixed() {
-        assertThat(MqttPullTopicPrefix.resolve("server/chan", "api/locate"))
-                .isEqualTo("server/chan/api/locate");
+    public void relativeTopicIsPrefixed() {
+        assertThat(MqttPullTopicPrefix.resolve("site/a", "api/data"))
+                .isEqualTo("site/a/api/data");
     }
 
     @Test
     public void blankPrefixKeepsProfileTopic() {
-        assertThat(MqttPullTopicPrefix.resolve(null, "dgb/${device.externalDeviceId}/status/detect_report",
-                "ignored-name", null, "W1014_01"))
-                .isEqualTo("dgb/W1014_01/status/detect_report");
-        assertThat(MqttPullTopicPrefix.resolve("  ", "dgb/${deviceId}/request/detect_open",
-                null, "lab", "W1014_01"))
-                .isEqualTo("dgb/W1014_01/request/detect_open");
+        assertThat(MqttPullTopicPrefix.resolve(null, "peer/+/status"))
+                .isEqualTo("peer/+/status");
     }
 
     @Test
     public void doesNotDoublePrefix() {
-        assertThat(MqttPullTopicPrefix.resolve("server/chan", "server/chan/api/locate"))
-                .isEqualTo("server/chan/api/locate");
+        assertThat(MqttPullTopicPrefix.resolve("site/a", "site/a/api/data"))
+                .isEqualTo("site/a/api/data");
+    }
+
+    @Test
+    public void fillPlusForPublish() {
+        assertThat(MqttPullTopicPrefix.fillPlusSegments("peer/+/cmd", "dev-1"))
+                .isEqualTo("peer/dev-1/cmd");
+        assertThat(MqttPullTopicPrefix.firstPlusSegment("peer/+/status", "peer/dev-1/status"))
+                .isEqualTo("dev-1");
     }
 }

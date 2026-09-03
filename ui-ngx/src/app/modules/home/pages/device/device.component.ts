@@ -23,7 +23,6 @@ import {
   createDeviceConfiguration,
   createDeviceTransportConfiguration, DeviceCredentials,
   DeviceData,
-  withMqttPullTopicPrefixForProfile,
   DeviceInfo,
   DeviceProfile,
   DeviceProfileInfo,
@@ -224,11 +223,6 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
           ...next,
           transportConfiguration: createDeviceTransportConfiguration(transportType, fullProfile)
         };
-      } else {
-        const adjusted = withMqttPullTopicPrefixForProfile(next.transportConfiguration, fullProfile);
-        if (adjusted && adjusted !== next.transportConfiguration) {
-          next = {...next, transportConfiguration: adjusted};
-        }
       }
       if (next !== prev) {
         this.entityForm.patchValue({deviceData: next});

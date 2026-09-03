@@ -235,14 +235,16 @@ public class MqttPullRpcService {
                                                            MqttRpcCommandFactory.Command command) {
         String prefix = collectorCtx.getDeviceTransportConfiguration() != null
                 ? collectorCtx.getDeviceTransportConfiguration().getTopicPrefix() : null;
-        Device device = collectorCtx.getDevice();
-        String deviceName = device != null ? device.getName() : null;
-        String deviceLabel = device != null ? device.getLabel() : null;
-        String externalDeviceId = collectorCtx.getDeviceTransportConfiguration() != null
-                ? collectorCtx.getDeviceTransportConfiguration().getExternalDeviceId() : null;
+        String requestTopic = MqttPullTopicPrefix.resolve(prefix, command.getRequestTopic());
+        String responseTopic = MqttPullTopicPrefix.resolve(prefix, command.getResponseTopic());
+        requestTopic = MqttPullTopicPrefix.fillPlusSegments(requestTopic, collectorCtx.getMqttPlusSegment());
+        if (StringUtils.isNotBlank(requestTopic) && (requestTopic.contains("+") || requestTopic.contains("#"))) {
+            throw new IllegalStateException(
+                    "MQTT pull RPC request topic still contains wildcard. Wait for first inbound message: " + requestTopic);
+        }
         return command.toBuilder()
-                .requestTopic(MqttPullTopicPrefix.resolve(prefix, command.getRequestTopic(), deviceName, deviceLabel, externalDeviceId))
-                .responseTopic(MqttPullTopicPrefix.resolve(prefix, command.getResponseTopic(), deviceName, deviceLabel, externalDeviceId))
+                .requestTopic(requestTopic)
+                .responseTopic(responseTopic)
                 .build();
     }
 

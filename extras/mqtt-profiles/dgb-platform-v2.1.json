@@ -1,0 +1,76 @@
+{
+  "name": "大公博创通用平台 V2.1",
+  "type": "DEFAULT",
+  "transportType": "MQTT_PULL",
+  "provisionType": "DISABLED",
+  "description": "一个本平台设备对应对方一个平台。无主题前缀。协议中的 deviceid 用 MQTT + 通配，例如 dgb/+/status/detect_report。侦测按遥测键区分：status / detect / oc4 / direction / aoa / channel / lna。RPC：detectOpen / detectClose / channelOpen / channelClose。",
+  "profileData": {
+    "configuration": { "type": "DEFAULT" },
+    "transportConfiguration": {
+      "type": "MQTT_PULL",
+      "mqttTransportMode": "PULL",
+      "connectTimeoutMs": 10000,
+      "keepAliveSec": 60,
+      "cleanSession": true,
+      "reconnectIntervalMs": 5000,
+      "subscribeRequests": [
+        { "name": "status_report", "enabled": true, "topic": "dgb/+/status/status_report", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "status" },
+        { "name": "detect_report", "enabled": true, "topic": "dgb/+/status/detect_report", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "detect" },
+        { "name": "oc4_report", "enabled": true, "topic": "dgb/+/status/oc4_report", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "oc4" },
+        { "name": "direction_report", "enabled": true, "topic": "dgb/+/status/direction_report", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "direction" },
+        { "name": "aoa_location", "enabled": true, "topic": "dgb/+/status/aoa_location", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "aoa" },
+        { "name": "channel_report", "enabled": true, "topic": "dgb/+/status/channel_report", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "channel" },
+        { "name": "lna_report", "enabled": true, "topic": "dgb/+/status/lna_report", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "lna" }
+      ]
+    },
+    "rpcMethods": [
+      {
+        "id": "detectOpen",
+        "displayName": "侦测开启",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/+/request/detect_open",
+        "mqttResponseTopic": "dgb/+/response/detect_open",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1
+      },
+      {
+        "id": "detectClose",
+        "displayName": "侦测关闭",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/+/request/detect_close",
+        "mqttResponseTopic": "dgb/+/response/detect_close",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1
+      },
+      {
+        "id": "channelOpen",
+        "displayName": "干扰通道开启",
+        "oneWay": false,
+        "timeoutMs": 20000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/+/request/channel_open",
+        "mqttResponseTopic": "dgb/+/response/channel_set",
+        "mqttPayloadTemplate": "{\"suppressChannels\":${params.suppressChannels},\"sustainTime\":${params.sustainTime}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"suppressChannels\":[{\"suppressDirection\":\"1\",\"channel\":[\"2400\",\"5800\"]}],\"sustainTime\":10}"
+      },
+      {
+        "id": "channelClose",
+        "displayName": "干扰通道关闭",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/+/request/channel_close",
+        "mqttResponseTopic": "dgb/+/response/channel_close",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1
+      }
+    ],
+    "alarms": [],
+    "provisionConfiguration": { "type": "DISABLED" }
+  }
+}

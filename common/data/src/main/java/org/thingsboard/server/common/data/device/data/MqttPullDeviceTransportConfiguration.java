@@ -21,15 +21,9 @@ public class MqttPullDeviceTransportConfiguration implements DeviceTransportConf
     private String brokerUrl;
     private String clientId;
     /**
-     * 可选。仅无人机监管这类「Server Topic 可改」的协议需要：默认 {@code server/chan}，不同防区可改。
-     * 大公博创等主题已含 {@code dgb/{deviceid}} 的协议请留空，档案写完整主题。
+     * 可选。档案主题为相对路径时，与此前缀拼接后订阅/发布。
      */
     private String topicPrefix;
-    /**
-     * 对方协议中的设备 ID（如大公 {@code deviceid}：W1014_01）。
-     * 档案主题 {@code dgb/${device.externalDeviceId}/...} 会替换为本值。不是本平台设备 UUID，也不是设备名称。
-     */
-    private String externalDeviceId;
     private MqttPullAuthConfiguration auth = new MqttPullAuthConfiguration();
 
     @Override

@@ -1,0 +1,79 @@
+{
+  "name": "无人机监管平台 MQTT v1.2.2",
+  "type": "DEFAULT",
+  "transportType": "MQTT_PULL",
+  "provisionType": "DISABLED",
+  "description": "一个本平台设备对应对方一个防区/平台。设备传输配置填写 Broker 与主题前缀（默认 server/chan，不同防区可改）。侦测按遥测键区分：system / locate / rid / detect / aoa。反制 RPC：jammer、jammerStop、spoof、preciseJammer。",
+  "profileData": {
+    "configuration": { "type": "DEFAULT" },
+    "transportConfiguration": {
+      "type": "MQTT_PULL",
+      "mqttTransportMode": "PULL",
+      "connectTimeoutMs": 10000,
+      "keepAliveSec": 60,
+      "cleanSession": true,
+      "reconnectIntervalMs": 5000,
+      "subscribeRequests": [
+        { "name": "system", "enabled": true, "topic": "api/system", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "system" },
+        { "name": "locate", "enabled": true, "topic": "api/locate", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "locate" },
+        { "name": "rid", "enabled": true, "topic": "api/rid", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "rid" },
+        { "name": "detect", "enabled": true, "topic": "api/detect", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "detect" },
+        { "name": "aoa", "enabled": true, "topic": "api/aoa", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "aoa" },
+        { "name": "jammerresult", "enabled": true, "topic": "api/jammerresult", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "jammerresult" },
+        { "name": "jammerResponse", "enabled": true, "topic": "api/jammer/response", "qos": 1, "dataType": "TELEMETRY", "telemetryPayloadKey": "jammerResponse" }
+      ]
+    },
+    "rpcMethods": [
+      {
+        "id": "jammer",
+        "displayName": "单次反制",
+        "oneWay": false,
+        "timeoutMs": 20000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "api/jammer",
+        "mqttResponseTopic": "api/jammerresult",
+        "mqttPayloadTemplate": "{\"device_id\":${params.device_id},\"sector_id\":${params.sector_id},\"emit\":{\"freq\":${params.freq},\"power\":${params.power},\"duration\":${params.duration}}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"device_id\":0,\"sector_id\":7,\"freq\":[\"2400\",\"5800\"],\"power\":1,\"duration\":10}"
+      },
+      {
+        "id": "jammerStop",
+        "displayName": "停止反制",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "api/jammer",
+        "mqttResponseTopic": "api/jammerresult",
+        "mqttPayloadTemplate": "{\"device_id\":${params.device_id},\"sector_id\":${params.sector_id},\"emit\":{\"freq\":${params.freq},\"power\":0,\"duration\":0}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"device_id\":0,\"sector_id\":7,\"freq\":[]}"
+      },
+      {
+        "id": "spoof",
+        "displayName": "诱骗控制",
+        "oneWay": false,
+        "timeoutMs": 20000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "api/jammer",
+        "mqttResponseTopic": "api/jammer/response",
+        "mqttPayloadTemplate": "{\"device_id\":${params.device_id},\"sector_id\":${params.sector_id},\"emit\":{\"freq\":${params.freq},\"power\":${params.power},\"mode\":${params.mode}}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"device_id\":0,\"sector_id\":0,\"freq\":[\"gps\",\"bds\"],\"power\":1,\"mode\":1}"
+      },
+      {
+        "id": "preciseJammer",
+        "displayName": "精准反制",
+        "oneWay": false,
+        "timeoutMs": 20000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "api/jammer",
+        "mqttResponseTopic": "api/jammer/response",
+        "mqttPayloadTemplate": "{\"device_id\":${params.device_id},\"target_uuid\":\"${params.target_uuid}\",\"emit\":{\"freq\":${params.freq},\"duration\":${params.duration}}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"device_id\":0,\"target_uuid\":\"\",\"freq\":[\"2400\",\"5800\"],\"duration\":20}"
+      }
+    ],
+    "alarms": [],
+    "provisionConfiguration": { "type": "DISABLED" }
+  }
+}
