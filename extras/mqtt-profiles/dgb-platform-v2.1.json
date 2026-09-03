@@ -3,7 +3,7 @@
   "type": "DEFAULT",
   "transportType": "MQTT_PULL",
   "provisionType": "DISABLED",
-  "description": "一个本平台设备对应对方一个平台。无主题前缀。协议中的 deviceid 用 MQTT + 通配，例如 dgb/+/status/detect_report。侦测按遥测键区分：status / detect / oc4 / direction / aoa / channel / lna。RPC：detectOpen / detectClose / channelOpen / channelClose。",
+  "description": "一个本平台设备对应对方一个平台。无主题前缀。上行侦测用 MQTT + 通配，例如 dgb/+/status/detect_report。RPC 按设备协议 deviceid 发布/订阅，例如 dgb/${deviceId}/request/detect_open。侦测按遥测键区分：status / detect / oc4 / direction / aoa / channel / lna。RPC：detectOpen / detectClose / channelOpen / channelClose。",
   "profileData": {
     "configuration": { "type": "DEFAULT" },
     "transportConfiguration": {
@@ -30,8 +30,8 @@
         "oneWay": false,
         "timeoutMs": 15000,
         "bindingType": "MQTT_CUSTOM",
-        "mqttRequestTopic": "dgb/+/request/detect_open",
-        "mqttResponseTopic": "dgb/+/response/detect_open",
+        "mqttRequestTopic": "dgb/${deviceId}/request/detect_open",
+        "mqttResponseTopic": "dgb/${deviceId}/response/detect_open",
         "mqttPayloadTemplate": "{}",
         "mqttQos": 1
       },
@@ -41,8 +41,8 @@
         "oneWay": false,
         "timeoutMs": 15000,
         "bindingType": "MQTT_CUSTOM",
-        "mqttRequestTopic": "dgb/+/request/detect_close",
-        "mqttResponseTopic": "dgb/+/response/detect_close",
+        "mqttRequestTopic": "dgb/${deviceId}/request/detect_close",
+        "mqttResponseTopic": "dgb/${deviceId}/response/detect_close",
         "mqttPayloadTemplate": "{}",
         "mqttQos": 1
       },
@@ -52,8 +52,8 @@
         "oneWay": false,
         "timeoutMs": 20000,
         "bindingType": "MQTT_CUSTOM",
-        "mqttRequestTopic": "dgb/+/request/channel_open",
-        "mqttResponseTopic": "dgb/+/response/channel_set",
+        "mqttRequestTopic": "dgb/${deviceId}/request/channel_open",
+        "mqttResponseTopic": "dgb/${deviceId}/response/channel_set",
         "mqttPayloadTemplate": "{\"suppressChannels\":${params.suppressChannels},\"sustainTime\":${params.sustainTime}}",
         "mqttQos": 1,
         "paramsTemplateJson": "{\"suppressChannels\":[{\"suppressDirection\":\"1\",\"channel\":[\"2400\",\"5800\"]}],\"sustainTime\":10}"
@@ -64,8 +64,8 @@
         "oneWay": false,
         "timeoutMs": 15000,
         "bindingType": "MQTT_CUSTOM",
-        "mqttRequestTopic": "dgb/+/request/channel_close",
-        "mqttResponseTopic": "dgb/+/response/channel_close",
+        "mqttRequestTopic": "dgb/${deviceId}/request/channel_close",
+        "mqttResponseTopic": "dgb/${deviceId}/response/channel_close",
         "mqttPayloadTemplate": "{}",
         "mqttQos": 1
       }
