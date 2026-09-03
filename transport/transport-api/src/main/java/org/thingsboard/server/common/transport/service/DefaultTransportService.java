@@ -945,6 +945,38 @@ public class DefaultTransportService extends TransportActivityManager implements
     }
 
     @Override
+    public void reportDeviceInactivity(TenantId tenantId, DeviceId deviceId) {
+        if (tenantId == null || deviceId == null) {
+            return;
+        }
+        ToCoreMsg msg = ToCoreMsg.newBuilder()
+                .setDeviceInactivityMsg(TransportProtos.DeviceInactivityProto.newBuilder()
+                        .setTenantIdMSB(tenantId.getId().getMostSignificantBits())
+                        .setTenantIdLSB(tenantId.getId().getLeastSignificantBits())
+                        .setDeviceIdMSB(deviceId.getId().getMostSignificantBits())
+                        .setDeviceIdLSB(deviceId.getId().getLeastSignificantBits())
+                        .setLastInactivityTime(getCurrentTimeMillis() + 1)
+                        .build())
+                .build();
+        try {
+            sendToCore(tenantId, deviceId, msg, deviceId.getId(), TransportServiceCallback.EMPTY);
+        } catch (Exception e) {
+            log.error("[{}][{}] Failed to send device inactivity to core", tenantId, deviceId, e);
+        }
+    }
+
+    @Override
+    public void closeSessionWithoutReportingActivity(TransportProtos.SessionInfoProto sessionInfo) {
+        if (sessionInfo == null) {
+            return;
+        }
+        sendToDeviceActor(sessionInfo, TransportToDeviceActorMsg.newBuilder()
+                .setSessionInfo(sessionInfo)
+                .setSessionEvent(SESSION_EVENT_MSG_CLOSED)
+                .build(), TransportServiceCallback.EMPTY);
+    }
+
+    @Override
     public SessionMetaData registerSyncSession(TransportProtos.SessionInfoProto sessionInfo, SessionMsgListener listener, long timeout) {
         SessionMetaData currentSession = new SessionMetaData(sessionInfo, TransportProtos.SessionType.SYNC, listener);
         UUID sessionId = toSessionId(sessionInfo);

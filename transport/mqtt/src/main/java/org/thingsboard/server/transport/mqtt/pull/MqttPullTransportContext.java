@@ -31,7 +31,6 @@ import org.thingsboard.server.common.transport.TransportServiceCallback;
 import org.thingsboard.server.common.transport.auth.SessionInfoCreator;
 import org.thingsboard.server.common.transport.auth.ValidateDeviceCredentialsResponse;
 import org.thingsboard.server.common.transport.service.DefaultTransportService;
-import org.thingsboard.server.common.transport.service.TransportActivityManager;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.gen.transport.TransportProtos.SessionInfoProto;
 import org.thingsboard.server.queue.util.AfterStartUp;
@@ -157,6 +156,8 @@ public class MqttPullTransportContext extends TransportContext {
                     @Override
                     public void onError(Throwable e) {
                         log.warn("[{}] MQTT pull collector auth failed", ctx.getDeviceId(), e);
+                        transportService.errorEvent(ctx.getTenantId(), ctx.getDeviceId(), "mqttPullAuth", e);
+                        transportService.reportDeviceInactivity(ctx.getTenantId(), ctx.getDeviceId());
                     }
                 });
     }
@@ -236,16 +237,39 @@ public class MqttPullTransportContext extends TransportContext {
     }
 
     /**
-     * 外部 Broker 断开：上报会话 CLOSED，便于下次重连时再次更新 lastConnectTime。
+     * 外部 Broker 连接失败 / 链路断开：立刻写错误事件，并立即标为非活动。
      */
-    public void onMqttBrokerDisconnected(MqttPullCollectorSessionContext ctx) {
-        if (ctx == null || ctx.getSessionInfo() == null || !ctx.isBrokerLinkActive()) {
+    public void onMqttBrokerFailed(MqttPullCollectorSessionContext ctx, String method, Throwable error) {
+        if (ctx == null) {
             return;
         }
+        if (error != null) {
+            transportService.errorEvent(ctx.getTenantId(), ctx.getDeviceId(), method, error);
+        }
+        markMqttPullDeviceInactive(ctx);
+    }
+
+    /**
+     * 外部 Broker 断开：关闭 Core 会话并立即标为非活动，不等待不活动超时。
+     */
+    public void onMqttBrokerDisconnected(MqttPullCollectorSessionContext ctx) {
+        markMqttPullDeviceInactive(ctx);
+    }
+
+    private void markMqttPullDeviceInactive(MqttPullCollectorSessionContext ctx) {
+        if (ctx == null) {
+            return;
+        }
+        boolean wasLinked = ctx.isBrokerLinkActive();
         ctx.setBrokerLinkActive(false);
-        UUID sessionId = new UUID(ctx.getSessionInfo().getSessionIdMSB(), ctx.getSessionInfo().getSessionIdLSB());
-        activatedTransportSessions.remove(sessionId);
-        transportService.process(ctx.getSessionInfo(), TransportActivityManager.SESSION_EVENT_MSG_CLOSED, null);
+        if (ctx.getSessionInfo() != null) {
+            UUID sessionId = new UUID(ctx.getSessionInfo().getSessionIdMSB(), ctx.getSessionInfo().getSessionIdLSB());
+            activatedTransportSessions.remove(sessionId);
+            if (wasLinked) {
+                transportService.closeSessionWithoutReportingActivity(ctx.getSessionInfo());
+            }
+        }
+        transportService.reportDeviceInactivity(ctx.getTenantId(), ctx.getDeviceId());
     }
 
     private void forgetActivatedTransportSession(SessionInfoProto sessionInfo) {

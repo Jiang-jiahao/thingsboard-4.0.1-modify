@@ -59,11 +59,10 @@ public class MqttPullDeviceProfileTransportConfiguration implements DeviceProfil
         if (reconnectIntervalMs == null || reconnectIntervalMs < 1000) {
             return false;
         }
-        List<MqttPullSubscribeRequest> requests = effectiveSubscribeRequests();
-        if (requests.isEmpty()) {
+        if (subscribeRequests == null || subscribeRequests.isEmpty()) {
             return false;
         }
-        for (MqttPullSubscribeRequest request : requests) {
+        for (MqttPullSubscribeRequest request : subscribeRequests) {
             request.validate();
         }
         return true;

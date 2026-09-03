@@ -85,7 +85,10 @@ public class MqttPullTransportService {
             endpoint = MqttPullBrokerUrlResolver.parse(brokerUrl);
         } catch (Exception e) {
             log.warn("[{}] Invalid MQTT broker URL: {}", sessionContext.getDeviceId(), brokerUrl, e);
-            sessionContext.getTransportContext().scheduleReconnect(sessionContext);
+            if (sessionContext.getTransportContext() != null) {
+                sessionContext.getTransportContext().onMqttBrokerFailed(sessionContext, "mqttPullBrokerUrl", e);
+                sessionContext.getTransportContext().scheduleReconnect(sessionContext);
+            }
             return;
         }
         MqttClientConfig config = new MqttClientConfig();
@@ -112,6 +115,8 @@ public class MqttPullTransportService {
                 }
                 log.warn("[{}] MQTT pull connection lost", sessionContext.getDeviceId(), cause);
                 if (sessionContext.getTransportContext() != null) {
+                    sessionContext.getTransportContext().onMqttBrokerFailed(sessionContext, "mqttPullConnectionLost",
+                            cause != null ? cause : new RuntimeException("MQTT connection lost"));
                     sessionContext.getTransportContext().scheduleReconnect(sessionContext);
                 }
             }
@@ -135,6 +140,9 @@ public class MqttPullTransportService {
             }
         } catch (Exception e) {
             log.warn("[{}] MQTT pull connect failed to {}", sessionContext.getDeviceId(), brokerUrl, e);
+            if (sessionContext.getTransportContext() != null) {
+                sessionContext.getTransportContext().onMqttBrokerFailed(sessionContext, "mqttPullConnect", e);
+            }
             disconnectQuietly(sessionContext);
             sessionContext.getTransportContext().scheduleReconnect(sessionContext);
         }

@@ -399,6 +399,16 @@ public interface TransportService {
 
     void errorEvent(TenantId tenantId, DeviceId deviceId, String method, Throwable error);
 
+    /**
+     * 向 Core 上报设备立即不活跃，不经过会话不活动超时。
+     */
+    void reportDeviceInactivity(TenantId tenantId, DeviceId deviceId);
+
+    /**
+     * 关闭 Core 侧会话，但不记录传输层活动（避免断开瞬间把设备重新标成活跃）。
+     */
+    void closeSessionWithoutReportingActivity(SessionInfoProto sessionInfo);
+
     void deregisterSession(SessionInfoProto sessionInfo);
 
     void log(SessionInfoProto sessionInfo, String msg);
