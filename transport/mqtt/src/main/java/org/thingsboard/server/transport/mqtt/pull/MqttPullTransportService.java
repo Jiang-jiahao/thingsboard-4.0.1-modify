@@ -78,6 +78,11 @@ public class MqttPullTransportService {
     }
 
     public void connectAndSubscribe(MqttPullCollectorSessionContext sessionContext) {
+        if (sessionContext.getTransportContext() != null
+                && !sessionContext.getTransportContext().isCurrentCollector(sessionContext)) {
+            disconnectQuietly(sessionContext);
+            return;
+        }
         MqttPullDeviceProfileTransportConfiguration profile = sessionContext.getProfileTransportConfiguration();
         String brokerUrl = resolveBrokerUrl(sessionContext);
         MqttPullBrokerUrlResolver.BrokerEndpoint endpoint;
@@ -85,10 +90,7 @@ public class MqttPullTransportService {
             endpoint = MqttPullBrokerUrlResolver.parse(brokerUrl);
         } catch (Exception e) {
             log.warn("[{}] Invalid MQTT broker URL: {}", sessionContext.getDeviceId(), brokerUrl, e);
-            if (sessionContext.getTransportContext() != null) {
-                sessionContext.getTransportContext().onMqttBrokerFailed(sessionContext, "mqttPullBrokerUrl", e);
-                sessionContext.getTransportContext().scheduleReconnect(sessionContext);
-            }
+            failAndReconnect(sessionContext, "mqttPullBrokerUrl", e);
             return;
         }
         MqttClientConfig config = new MqttClientConfig();
@@ -114,11 +116,8 @@ public class MqttPullTransportService {
                     return;
                 }
                 log.warn("[{}] MQTT pull connection lost", sessionContext.getDeviceId(), cause);
-                if (sessionContext.getTransportContext() != null) {
-                    sessionContext.getTransportContext().onMqttBrokerFailed(sessionContext, "mqttPullConnectionLost",
-                            cause != null ? cause : new RuntimeException("MQTT connection lost"));
-                    sessionContext.getTransportContext().scheduleReconnect(sessionContext);
-                }
+                failAndReconnect(sessionContext, "mqttPullConnectionLost",
+                        cause != null ? cause : new RuntimeException("MQTT connection lost"));
             }
 
             @Override
@@ -133,6 +132,11 @@ public class MqttPullTransportService {
             if (!result.isSuccess()) {
                 throw new IllegalStateException("MQTT connect failed: " + result.getReturnCode());
             }
+            if (sessionContext.getTransportContext() != null
+                    && !sessionContext.getTransportContext().isCurrentCollector(sessionContext)) {
+                disconnectQuietly(sessionContext);
+                return;
+            }
             subscribeAll(sessionContext, client);
             log.info("[{}] MQTT pull connected to {}:{}", sessionContext.getDeviceId(), endpoint.getHost(), endpoint.getPort());
             if (sessionContext.getTransportContext() != null) {
@@ -140,12 +144,19 @@ public class MqttPullTransportService {
             }
         } catch (Exception e) {
             log.warn("[{}] MQTT pull connect failed to {}", sessionContext.getDeviceId(), brokerUrl, e);
-            if (sessionContext.getTransportContext() != null) {
-                sessionContext.getTransportContext().onMqttBrokerFailed(sessionContext, "mqttPullConnect", e);
-            }
-            disconnectQuietly(sessionContext);
-            sessionContext.getTransportContext().scheduleReconnect(sessionContext);
+            failAndReconnect(sessionContext, "mqttPullConnect", e);
         }
+    }
+
+    private void failAndReconnect(MqttPullCollectorSessionContext sessionContext, String method, Throwable error) {
+        if (sessionContext.getTransportContext() == null
+                || !sessionContext.getTransportContext().isCurrentCollector(sessionContext)) {
+            disconnectQuietly(sessionContext);
+            return;
+        }
+        sessionContext.getTransportContext().onMqttBrokerFailed(sessionContext, method, error);
+        disconnectQuietly(sessionContext);
+        sessionContext.getTransportContext().scheduleReconnect(sessionContext);
     }
 
     public void disconnectQuietly(MqttPullCollectorSessionContext sessionContext) {

@@ -33,13 +33,21 @@ public class MqttPullCollectorSessionContext {
     private MqttPullTransportContext transportContext;
     private MqttClient mqttClient;
     private ScheduledFuture<?> reconnectTask;
-    private volatile boolean brokerLinkActive;
+    @Builder.Default
+    private volatile boolean brokerLinkActive = false;
+    @Builder.Default
+    private volatile boolean destroyed = false;
 
     public DeviceId getDeviceId() {
         return device.getId();
     }
 
+    public void markDestroyed() {
+        this.destroyed = true;
+    }
+
     public void close() {
+        markDestroyed();
         if (reconnectTask != null) {
             reconnectTask.cancel(false);
             reconnectTask = null;

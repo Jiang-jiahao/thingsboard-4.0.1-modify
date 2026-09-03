@@ -114,33 +114,43 @@ public class MqttPullTransportContext extends TransportContext {
                 .transportContext(this)
                 .build();
         registerCollectorAuth(ctx, msg -> {
-            if (msg == null || !msg.hasDeviceInfo()) {
+            if (msg == null || !msg.hasDeviceInfo() || ctx.isDestroyed()) {
                 return;
             }
             SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, UUID.randomUUID());
             registerMqttPullTransportSession(sessionInfo, MqttPullNoOpSessionListener.INSTANCE);
             ctx.setSessionInfo(sessionInfo);
-            collectorSessions.put(device.getId(), ctx);
+            MqttPullCollectorSessionContext previous = collectorSessions.put(device.getId(), ctx);
+            if (previous != null && previous != ctx) {
+                destroyCollector(previous, false);
+            }
+            if (!isCurrentCollector(ctx)) {
+                return;
+            }
             mqttPullTransportService.connectAndSubscribe(ctx);
             log.info("Established MQTT pull collector session for {}", device.getId());
         });
     }
 
     public void scheduleReconnect(MqttPullCollectorSessionContext ctx) {
-        if (ctx.getReconnectTask() != null) {
+        if (ctx == null || !isCurrentCollector(ctx) || ctx.getReconnectTask() != null) {
             return;
         }
         long delayMs = ctx.getProfileTransportConfiguration().getReconnectIntervalMs() != null
                 ? ctx.getProfileTransportConfiguration().getReconnectIntervalMs() : 5000L;
         ScheduledFuture<?> task = getScheduler().schedule(() -> {
             ctx.setReconnectTask(null);
-            if (!collectorSessions.containsKey(ctx.getDeviceId())) {
+            if (!isCurrentCollector(ctx)) {
                 return;
             }
             mqttPullTransportService.disconnectQuietly(ctx);
             mqttPullTransportService.connectAndSubscribe(ctx);
         }, delayMs, TimeUnit.MILLISECONDS);
         ctx.setReconnectTask(task);
+    }
+
+    public boolean isCurrentCollector(MqttPullCollectorSessionContext ctx) {
+        return ctx != null && !ctx.isDestroyed() && collectorSessions.get(ctx.getDeviceId()) == ctx;
     }
 
     private void registerCollectorAuth(MqttPullCollectorSessionContext ctx,
@@ -172,7 +182,7 @@ public class MqttPullTransportContext extends TransportContext {
         DeviceId deviceId = event.getDeviceId();
         MqttPullCollectorSessionContext collector = collectorSessions.get(deviceId);
         if (collector != null) {
-            destroyCollector(collector);
+            destroyCollector(collector, true);
         }
     }
 
@@ -185,7 +195,7 @@ public class MqttPullTransportContext extends TransportContext {
         for (MqttPullCollectorSessionContext ctx : new ArrayList<>(affected)) {
             Device device = protoEntityService.getDeviceById(ctx.getDeviceId());
             if (device == null || profile.getTransportType() != DeviceTransportType.MQTT_PULL) {
-                destroyCollector(ctx);
+                destroyCollector(ctx, true);
             } else {
                 refreshCollectorDevice(device);
             }
@@ -198,7 +208,7 @@ public class MqttPullTransportContext extends TransportContext {
         }
         MqttPullCollectorSessionContext existing = collectorSessions.get(device.getId());
         if (existing != null) {
-            destroyCollector(existing);
+            destroyCollector(existing, false);
         }
         tryEstablishCollector(device);
     }
@@ -228,7 +238,8 @@ public class MqttPullTransportContext extends TransportContext {
      * 外部 Broker 连接成功：上报会话 OPEN，更新 lastConnectTime / active。
      */
     public void onMqttBrokerConnected(MqttPullCollectorSessionContext ctx) {
-        if (ctx == null || ctx.getSessionInfo() == null) {
+        if (!isCurrentCollector(ctx) || ctx.getSessionInfo() == null) {
+            mqttPullTransportService.disconnectQuietly(ctx);
             return;
         }
         ctx.setBrokerLinkActive(true);
@@ -240,7 +251,7 @@ public class MqttPullTransportContext extends TransportContext {
      * 外部 Broker 连接失败 / 链路断开：立刻写错误事件，并立即标为非活动。
      */
     public void onMqttBrokerFailed(MqttPullCollectorSessionContext ctx, String method, Throwable error) {
-        if (ctx == null) {
+        if (!isCurrentCollector(ctx)) {
             return;
         }
         if (error != null) {
@@ -253,6 +264,9 @@ public class MqttPullTransportContext extends TransportContext {
      * 外部 Broker 断开：关闭 Core 会话并立即标为非活动，不等待不活动超时。
      */
     public void onMqttBrokerDisconnected(MqttPullCollectorSessionContext ctx) {
+        if (!isCurrentCollector(ctx)) {
+            return;
+        }
         markMqttPullDeviceInactive(ctx);
     }
 
@@ -278,17 +292,23 @@ public class MqttPullTransportContext extends TransportContext {
         }
     }
 
-    private void destroyCollector(MqttPullCollectorSessionContext ctx) {
+    private void destroyCollector(MqttPullCollectorSessionContext ctx, boolean reportInactive) {
         if (ctx == null) {
             return;
         }
+        ctx.markDestroyed();
+        collectorSessions.remove(ctx.getDeviceId(), ctx);
         if (ctx.getSessionInfo() != null) {
             forgetActivatedTransportSession(ctx.getSessionInfo());
+            transportService.closeSessionWithoutReportingActivity(ctx.getSessionInfo());
             transportService.deregisterSession(ctx.getSessionInfo());
+        }
+        ctx.setBrokerLinkActive(false);
+        if (reportInactive) {
+            transportService.reportDeviceInactivity(ctx.getTenantId(), ctx.getDeviceId());
         }
         mqttPullTransportService.disconnectQuietly(ctx);
         ctx.close();
-        collectorSessions.remove(ctx.getDeviceId());
         transportService.lifecycleEvent(ctx.getTenantId(), ctx.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
     }
 }
