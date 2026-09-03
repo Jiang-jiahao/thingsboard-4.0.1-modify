@@ -25,7 +25,7 @@ public final class MqttRpcCommandFactory {
     }
 
     @Value
-    @Builder
+    @Builder(toBuilder = true)
     public static class Command {
         boolean useStandardNativeTopic;
         String requestTopic;

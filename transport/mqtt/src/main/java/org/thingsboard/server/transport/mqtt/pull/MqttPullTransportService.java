@@ -32,6 +32,7 @@ import org.thingsboard.server.common.data.transport.http.HttpPullPollDataType;
 import org.thingsboard.server.common.data.transport.mqtt.MqttPullAuthConfiguration;
 import org.thingsboard.server.common.data.transport.mqtt.MqttPullAuthType;
 import org.thingsboard.server.common.data.transport.mqtt.MqttPullSubscribeRequest;
+import org.thingsboard.server.common.data.transport.mqtt.MqttPullTopicPrefix;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.transport.TransportServiceCallback;
 import org.thingsboard.server.gen.transport.TransportProtos;
@@ -177,16 +178,17 @@ public class MqttPullTransportService {
     private void subscribeAll(MqttPullCollectorSessionContext sessionContext, MqttClient client) {
         MqttPullDeviceProfileTransportConfiguration profile = sessionContext.getProfileTransportConfiguration();
         for (MqttPullSubscribeRequest request : profile.effectiveSubscribeRequests()) {
+            String topicFilter = resolveSubscribeTopic(sessionContext, request);
             MqttQoS qos = toQos(request.getQos());
             try {
-                client.on(request.getTopic(), (topic, payload) -> {
+                client.on(topicFilter, (topic, payload) -> {
                     onMessage(sessionContext, request, topic, payload);
                     return Futures.immediateVoidFuture();
                 }, qos).get(15, TimeUnit.SECONDS);
                 log.info("[{}] MQTT pull subscribed topic [{}] qos [{}] dataType [{}]",
-                        sessionContext.getDeviceId(), request.getTopic(), qos.value(), request.getDataType());
+                        sessionContext.getDeviceId(), topicFilter, qos.value(), request.getDataType());
             } catch (Exception e) {
-                throw new IllegalStateException("MQTT subscribe failed for topic " + request.getTopic(), e);
+                throw new IllegalStateException("MQTT subscribe failed for topic " + topicFilter, e);
             }
         }
     }
@@ -199,7 +201,8 @@ public class MqttPullTransportService {
         MqttPullDeviceProfileTransportConfiguration profile = sessionContext.getProfileTransportConfiguration();
         boolean matched = false;
         for (MqttPullSubscribeRequest request : profile.effectiveSubscribeRequests()) {
-            if (topicMatches(request.getTopic(), topic)) {
+            String topicFilter = resolveSubscribeTopic(sessionContext, request);
+            if (topicMatches(topicFilter, topic)) {
                 matched = true;
                 onMessage(sessionContext, request, topic, payload);
             }
@@ -275,6 +278,12 @@ public class MqttPullTransportService {
         TransportProtos.PostAttributeMsg.Builder builder = JsonConverter.convertToAttributesProto(parsed).toBuilder();
         builder.setShared(shared);
         transportService.process(sessionInfo, builder.build(), TransportServiceCallback.EMPTY);
+    }
+
+    private String resolveSubscribeTopic(MqttPullCollectorSessionContext sessionContext, MqttPullSubscribeRequest request) {
+        String prefix = sessionContext.getDeviceTransportConfiguration() != null
+                ? sessionContext.getDeviceTransportConfiguration().getTopicPrefix() : null;
+        return MqttPullTopicPrefix.resolve(prefix, request != null ? request.getTopic() : null);
     }
 
     private String resolveBrokerUrl(MqttPullCollectorSessionContext ctx) {

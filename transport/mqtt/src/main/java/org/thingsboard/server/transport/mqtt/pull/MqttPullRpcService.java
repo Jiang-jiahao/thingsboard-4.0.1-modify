@@ -19,6 +19,7 @@ import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.profile.DeviceProfileRpcMethod;
 import org.thingsboard.server.common.data.rpc.RpcStatus;
+import org.thingsboard.server.common.data.transport.mqtt.MqttPullTopicPrefix;
 import org.thingsboard.server.common.transport.TransportDeviceProfileCache;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.transport.TransportServiceCallback;
@@ -100,8 +101,8 @@ public class MqttPullRpcService {
                             TransportProtos.SessionInfoProto sessionInfo,
                             TransportProtos.ToDeviceRpcRequestMsg request) {
         DeviceProfileRpcMethod method = MqttRpcCatalog.find(resolveProfile(collectorCtx), request.getMethodName());
-        MqttRpcCommandFactory.Command command = MqttRpcCommandFactory.resolve(
-                method, request, collectorCtx.getDevice(), null, true);
+        MqttRpcCommandFactory.Command command = applyTopicPrefix(collectorCtx, MqttRpcCommandFactory.resolve(
+                method, request, collectorCtx.getDevice(), null, true));
         if (command.isUseStandardNativeTopic() || StringUtils.isBlank(command.getRequestTopic())) {
             throw new IllegalArgumentException("MQTT pull RPC requires mqttRequestTopic");
         }
@@ -228,6 +229,16 @@ public class MqttPullRpcService {
                         .setPayload(body)
                         .build(),
                 TransportServiceCallback.EMPTY);
+    }
+
+    private MqttRpcCommandFactory.Command applyTopicPrefix(MqttPullCollectorSessionContext collectorCtx,
+                                                           MqttRpcCommandFactory.Command command) {
+        String prefix = collectorCtx.getDeviceTransportConfiguration() != null
+                ? collectorCtx.getDeviceTransportConfiguration().getTopicPrefix() : null;
+        return command.toBuilder()
+                .requestTopic(MqttPullTopicPrefix.resolve(prefix, command.getRequestTopic()))
+                .responseTopic(MqttPullTopicPrefix.resolve(prefix, command.getResponseTopic()))
+                .build();
     }
 
     private DeviceProfile resolveProfile(MqttPullCollectorSessionContext collectorCtx) {

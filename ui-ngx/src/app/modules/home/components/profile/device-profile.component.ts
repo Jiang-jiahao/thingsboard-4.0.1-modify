@@ -26,6 +26,7 @@ import {
   createDeviceProfileConfiguration,
   createDeviceProfileTransportConfiguration,
   createDisabledDeviceProvisionConfiguration,
+  createUavMqttPlatformRpcMethods,
   DEVICE_PROVISIONING_UI_ENABLED,
   DeviceProfile,
   DeviceProfileData,
@@ -40,6 +41,7 @@ import {
   deviceTransportTypeHintMap,
   deviceTransportTypeTranslationMap,
   hasDeviceProfileTransportConfiguration,
+  isMqttPullProfileTransportConfiguration,
   normalizeProfileTransportConfigurationForDisplay,
   normalizeProfileTransportConfigurationForSave,
   resolveHttpProfileTransportTypeForDisplay,
@@ -208,6 +210,9 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
       };
     }
     profileData.transportConfiguration = createDeviceProfileTransportConfiguration(deviceTransportType);
+    if (isMqttPullProfileTransportConfiguration(profileData.transportConfiguration)) {
+      profileData.rpcMethods = createUavMqttPlatformRpcMethods();
+    }
     form.patchValue({profileData});
   }
 

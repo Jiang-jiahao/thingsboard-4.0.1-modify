@@ -10,6 +10,11 @@
     <mat-hint translate>device-profile.mqtt-pull.client-id-hint</mat-hint>
   </mat-form-field>
   <mat-form-field class="mat-block">
+    <mat-label translate>device-profile.mqtt-pull.topic-prefix</mat-label>
+    <input matInput formControlName="topicPrefix" required placeholder="server/chan">
+    <mat-hint translate>device-profile.mqtt-pull.topic-prefix-hint</mat-hint>
+  </mat-form-field>
+  <mat-form-field class="mat-block">
     <mat-label translate>device-profile.mqtt-pull.auth-type</mat-label>
     <mat-select formControlName="authType">
       <mat-option *ngFor="let t of authTypes" [value]="t">{{ t }}</mat-option>

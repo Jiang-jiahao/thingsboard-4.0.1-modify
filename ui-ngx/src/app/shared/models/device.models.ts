@@ -904,6 +904,8 @@ export interface MqttPullDeviceProfileTransportConfiguration {
 export interface MqttPullDeviceTransportConfiguration {
   brokerUrl?: string;
   clientId?: string;
+  /** 对方 Server Topic 前缀，默认 server/chan，不同防区可改 */
+  topicPrefix?: string;
   auth?: MqttPullAuthConfiguration;
 }
 
@@ -1082,11 +1084,13 @@ export function normalizeMqttDeviceTransportConfigurationForSave(
   const raw = configuration as MqttPullDeviceTransportConfiguration;
   const brokerUrl = (raw.brokerUrl || '').trim() || undefined;
   const clientId = (raw.clientId || '').trim() || undefined;
+  const topicPrefix = (raw.topicPrefix || '').trim() || undefined;
   const authType = raw.auth?.authType || MqttPullAuthType.NONE;
   return {
     type: DeviceTransportType.MQTT_PULL,
     brokerUrl,
     clientId,
+    topicPrefix,
     auth: {
       authType,
       username: authType === MqttPullAuthType.USERNAME_PASSWORD ? (raw.auth?.username || undefined) : undefined,
@@ -1104,6 +1108,153 @@ export function extractMqttPullProfileContext(dp: DeviceProfile | null | undefin
     return null;
   }
   return { active: true };
+}
+
+export function createUavMqttPlatformSubscribeRequests(): MqttPullSubscribeRequest[] {
+  return [
+    { name: 'system', enabled: true, topic: 'api/system', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'system' },
+    { name: 'locate', enabled: true, topic: 'api/locate', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'locate' },
+    { name: 'rid', enabled: true, topic: 'api/rid', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'rid' },
+    { name: 'detect', enabled: true, topic: 'api/detect', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'detect' },
+    { name: 'aoa', enabled: true, topic: 'api/aoa', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'aoa' },
+    { name: 'jammerresult', enabled: true, topic: 'api/jammerresult', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'jammerresult' },
+    { name: 'jammerResponse', enabled: true, topic: 'api/jammer/response', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'jammerResponse' }
+  ];
+}
+
+export function createUavMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
+  return [
+    {
+      id: 'jammer',
+      displayName: '单次反制',
+      oneWay: false,
+      timeoutMs: 20000,
+      bindingType: 'MQTT_CUSTOM',
+      mqttRequestTopic: 'api/jammer',
+      mqttResponseTopic: 'api/jammerresult',
+      mqttPayloadTemplate:
+        '{"device_id":${params.device_id},"sector_id":${params.sector_id},"emit":{"freq":${params.freq},"power":${params.power},"duration":${params.duration}}}',
+      mqttQos: 1,
+      paramsTemplateJson: '{"device_id":0,"sector_id":7,"freq":["2400","5800"],"power":1,"duration":10}'
+    },
+    {
+      id: 'jammerStop',
+      displayName: '停止反制',
+      oneWay: false,
+      timeoutMs: 15000,
+      bindingType: 'MQTT_CUSTOM',
+      mqttRequestTopic: 'api/jammer',
+      mqttResponseTopic: 'api/jammerresult',
+      mqttPayloadTemplate:
+        '{"device_id":${params.device_id},"sector_id":${params.sector_id},"emit":{"freq":${params.freq},"power":0,"duration":0}}',
+      mqttQos: 1,
+      paramsTemplateJson: '{"device_id":0,"sector_id":7,"freq":[]}'
+    },
+    {
+      id: 'spoof',
+      displayName: '诱骗控制',
+      oneWay: false,
+      timeoutMs: 20000,
+      bindingType: 'MQTT_CUSTOM',
+      mqttRequestTopic: 'api/jammer',
+      mqttResponseTopic: 'api/jammer/response',
+      mqttPayloadTemplate:
+        '{"device_id":${params.device_id},"sector_id":${params.sector_id},"emit":{"freq":${params.freq},"power":${params.power},"mode":${params.mode}}}',
+      mqttQos: 1,
+      paramsTemplateJson: '{"device_id":0,"sector_id":0,"freq":["gps","bds"],"power":1,"mode":1}'
+    },
+    {
+      id: 'preciseJammer',
+      displayName: '精准反制',
+      oneWay: false,
+      timeoutMs: 20000,
+      bindingType: 'MQTT_CUSTOM',
+      mqttRequestTopic: 'api/jammer',
+      mqttResponseTopic: 'api/jammer/response',
+      mqttPayloadTemplate:
+        '{"device_id":${params.device_id},"target_uuid":"${params.target_uuid}","emit":{"freq":${params.freq},"duration":${params.duration}}}',
+      mqttQos: 1,
+      paramsTemplateJson: '{"device_id":0,"target_uuid":"","freq":["2400","5800"],"duration":20}'
+    }
+  ];
+}
+
+export function createDgbMqttPlatformSubscribeRequests(): MqttPullSubscribeRequest[] {
+  return [
+    { name: 'status_report', enabled: true, topic: 'status/status_report', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'status' },
+    { name: 'detect_report', enabled: true, topic: 'status/detect_report', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'detect' },
+    { name: 'oc4_report', enabled: true, topic: 'status/oc4_report', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'oc4' },
+    { name: 'direction_report', enabled: true, topic: 'status/direction_report', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'direction' },
+    { name: 'aoa_location', enabled: true, topic: 'status/aoa_location', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'aoa' },
+    { name: 'channel_report', enabled: true, topic: 'status/channel_report', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'channel' },
+    { name: 'lna_report', enabled: true, topic: 'status/lna_report', qos: 1,
+      dataType: HttpPullPollDataType.TELEMETRY, telemetryPayloadKey: 'lna' }
+  ];
+}
+
+export function createDgbMqttPlatformRpcMethods(): DeviceProfileRpcMethod[] {
+  return [
+    {
+      id: 'detectOpen',
+      displayName: '侦测开启',
+      oneWay: false,
+      timeoutMs: 15000,
+      bindingType: 'MQTT_CUSTOM',
+      mqttRequestTopic: 'request/detect_open',
+      mqttResponseTopic: 'response/detect_open',
+      mqttPayloadTemplate: '{}',
+      mqttQos: 1
+    },
+    {
+      id: 'detectClose',
+      displayName: '侦测关闭',
+      oneWay: false,
+      timeoutMs: 15000,
+      bindingType: 'MQTT_CUSTOM',
+      mqttRequestTopic: 'request/detect_close',
+      mqttResponseTopic: 'response/detect_close',
+      mqttPayloadTemplate: '{}',
+      mqttQos: 1
+    },
+    {
+      id: 'channelOpen',
+      displayName: '干扰通道开启',
+      oneWay: false,
+      timeoutMs: 20000,
+      bindingType: 'MQTT_CUSTOM',
+      mqttRequestTopic: 'request/channel_open',
+      mqttResponseTopic: 'response/channel_set',
+      mqttPayloadTemplate:
+        '{"suppressChannels":${params.suppressChannels},"sustainTime":${params.sustainTime}}',
+      mqttQos: 1,
+      paramsTemplateJson:
+        '{"suppressChannels":[{"suppressDirection":"1","channel":["2400","5800"]}],"sustainTime":10}'
+    },
+    {
+      id: 'channelClose',
+      displayName: '干扰通道关闭',
+      oneWay: false,
+      timeoutMs: 15000,
+      bindingType: 'MQTT_CUSTOM',
+      mqttRequestTopic: 'request/channel_close',
+      mqttResponseTopic: 'response/channel_close',
+      mqttPayloadTemplate: '{}',
+      mqttQos: 1
+    }
+  ];
 }
 
 export function normalizeDeviceTransportConfigurationForSave(
@@ -1841,14 +1992,7 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
           keepAliveSec: 60,
           cleanSession: true,
           reconnectIntervalMs: 5000,
-          subscribeRequests: [{
-            name: 'subscribe-1',
-            enabled: true,
-            topic: 'devices/+/telemetry',
-            qos: 1,
-            dataType: HttpPullPollDataType.TELEMETRY,
-            telemetryPayloadKey: 'mqttPullPayload'
-          }]
+          subscribeRequests: createUavMqttPlatformSubscribeRequests()
         };
         transportConfiguration = {...mqttPullTransportConfiguration, type: DeviceTransportType.MQTT_PULL} as unknown as DeviceProfileTransportConfiguration;
         break;
@@ -1930,6 +2074,7 @@ export const createDeviceTransportConfiguration = (type: TransportType): DeviceT
         const mqttPullDeviceTransportConfiguration: MqttPullDeviceTransportConfiguration = {
           brokerUrl: '',
           clientId: '',
+          topicPrefix: 'server/chan',
           auth: { authType: MqttPullAuthType.NONE }
         };
         transportConfiguration = {...mqttPullDeviceTransportConfiguration, type: DeviceTransportType.MQTT_PULL};

@@ -19,7 +19,8 @@
     <section class="flex flex-row gap-2 xs:flex-col">
       <mat-form-field class="flex-1 mat-block">
         <mat-label translate>device-profile.mqtt-pull.topic</mat-label>
-        <input matInput formControlName="topic" required placeholder="devices/+/telemetry">
+        <input matInput formControlName="topic" required placeholder="api/locate">
+        <mat-hint translate>device-profile.mqtt-pull.topic-hint</mat-hint>
       </mat-form-field>
       <mat-form-field class="flex-1 mat-block">
         <mat-label translate>device-profile.mqtt-pull.qos</mat-label>

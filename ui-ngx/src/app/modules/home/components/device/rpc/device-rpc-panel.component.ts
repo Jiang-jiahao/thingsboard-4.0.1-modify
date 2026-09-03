@@ -589,13 +589,15 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
       const keys = catalogMethodPlatformKeys(null, m);
 
+      const profileDefaults = parseNativeParamsJson(m.paramsTemplateJson ?? '') ?? {};
+
       const editableOnly: Record<string, unknown> = {};
 
       for (const k of keys) {
 
         if (!Object.prototype.hasOwnProperty.call(this.deviceRpcParamDefaults, k)) {
 
-          editableOnly[k] = '';
+          editableOnly[k] = Object.prototype.hasOwnProperty.call(profileDefaults, k) ? profileDefaults[k] : '';
 
         }
 

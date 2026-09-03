@@ -402,6 +402,8 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       out.mqttResponseTopic = resp || undefined;
       out.mqttPayloadTemplate = (raw.mqttPayloadTemplate as string)?.trim();
       out.mqttQos = raw.mqttQos != null && raw.mqttQos !== '' ? Number(raw.mqttQos) : 1;
+      const pt = (raw.paramsTemplateJson as string)?.trim();
+      out.paramsTemplateJson = pt || undefined;
     } else {
       out.deviceMethod = (raw.deviceMethod as string)?.trim();
       const pt = (raw.paramsTemplateJson as string)?.trim();

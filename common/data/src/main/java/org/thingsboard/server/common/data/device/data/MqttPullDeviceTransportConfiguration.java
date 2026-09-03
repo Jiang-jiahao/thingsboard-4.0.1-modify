@@ -20,6 +20,11 @@ public class MqttPullDeviceTransportConfiguration implements DeviceTransportConf
 
     private String brokerUrl;
     private String clientId;
+    /**
+     * 对方平台 MQTT Server Topic 前缀，默认 {@code server/chan}；不同防区可改，例如 {@code chan/topic1}。
+     * 档案订阅/RPC 主题为相对路径（如 {@code api/locate}）时，实际主题为本前缀拼接结果。
+     */
+    private String topicPrefix;
     private MqttPullAuthConfiguration auth = new MqttPullAuthConfiguration();
 
     @Override

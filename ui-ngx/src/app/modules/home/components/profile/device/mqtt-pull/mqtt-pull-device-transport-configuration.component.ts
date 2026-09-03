@@ -53,6 +53,7 @@ export class MqttPullDeviceTransportConfigurationComponent implements OnInit, On
     this.form = this.fb.group({
       brokerUrl: ['', Validators.required],
       clientId: [''],
+      topicPrefix: ['server/chan', Validators.required],
       authType: [MqttPullAuthType.NONE],
       username: [''],
       password: ['']
@@ -98,6 +99,7 @@ export class MqttPullDeviceTransportConfigurationComponent implements OnInit, On
       ...cfg,
       brokerUrl: (cfg.brokerUrl || '').trim(),
       clientId: (cfg.clientId || '').trim(),
+      topicPrefix: (cfg.topicPrefix || '').trim() || 'server/chan',
       auth: {
         authType: auth.authType || MqttPullAuthType.NONE,
         username: auth.username,
@@ -120,6 +122,7 @@ export class MqttPullDeviceTransportConfigurationComponent implements OnInit, On
     this.form.patchValue({
       brokerUrl: this.pendingValue.brokerUrl || '',
       clientId: this.pendingValue.clientId || '',
+      topicPrefix: this.pendingValue.topicPrefix || 'server/chan',
       authType: auth.authType || MqttPullAuthType.NONE,
       username: auth.username || '',
       password: auth.password || ''
@@ -135,6 +138,7 @@ export class MqttPullDeviceTransportConfigurationComponent implements OnInit, On
     this.propagateChange({
       brokerUrl: (v.brokerUrl || '').trim() || undefined,
       clientId: (v.clientId || '').trim() || undefined,
+      topicPrefix: (v.topicPrefix || '').trim() || undefined,
       auth: {
         authType,
         username: authType === MqttPullAuthType.USERNAME_PASSWORD ? (v.username || undefined) : undefined,
