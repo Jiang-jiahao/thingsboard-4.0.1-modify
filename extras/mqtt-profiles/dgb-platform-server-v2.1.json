@@ -1,0 +1,85 @@
+{
+  "name": "大公博创通用平台 MQTT 服务端 V2.1",
+  "type": "DEFAULT",
+  "transportType": "MQTT",
+  "provisionType": "DISABLED",
+  "description": "设备连接本平台 MQTT Broker。一个本平台设备对应对方一个平台。上行主题由设备 PUBLISH，档案用过滤器匹配。RPC 请求/响应主题中的设备 ID 由调用参数 params.deviceId 填入。侦测按遥测键区分：status / detect / oc4 / direction / aoa / channel / lna。RPC：detectOpen / detectClose / channelOpen / channelClose。",
+  "profileData": {
+    "configuration": { "type": "DEFAULT" },
+    "transportConfiguration": {
+      "type": "MQTT",
+      "mqttTransportMode": "PASSIVE",
+      "deviceTelemetryTopic": "dgb/+/status/status_report",
+      "deviceAttributesTopic": "v1/devices/me/attributes",
+      "deviceAttributesSubscribeTopic": "v1/devices/me/attributes",
+      "sparkplug": false,
+      "sendAckOnValidationException": false,
+      "transportPayloadTypeConfiguration": {
+        "transportPayloadType": "JSON",
+        "enableCompatibilityWithJsonPayloadFormat": false,
+        "useJsonPayloadFormatForDefaultDownlinkTopics": false
+      },
+      "uplinkTopicMappings": [
+        { "name": "status_report", "enabled": true, "topic": "dgb/+/status/status_report", "dataType": "TELEMETRY", "telemetryPayloadKey": "status" },
+        { "name": "detect_report", "enabled": true, "topic": "dgb/+/status/detect_report", "dataType": "TELEMETRY", "telemetryPayloadKey": "detect" },
+        { "name": "oc4_report", "enabled": true, "topic": "dgb/+/status/oc4_report", "dataType": "TELEMETRY", "telemetryPayloadKey": "oc4" },
+        { "name": "direction_report", "enabled": true, "topic": "dgb/+/status/direction_report", "dataType": "TELEMETRY", "telemetryPayloadKey": "direction" },
+        { "name": "aoa_location", "enabled": true, "topic": "dgb/+/status/aoa_location", "dataType": "TELEMETRY", "telemetryPayloadKey": "aoa" },
+        { "name": "channel_report", "enabled": true, "topic": "dgb/+/status/channel_report", "dataType": "TELEMETRY", "telemetryPayloadKey": "channel" },
+        { "name": "lna_report", "enabled": true, "topic": "dgb/+/status/lna_report", "dataType": "TELEMETRY", "telemetryPayloadKey": "lna" }
+      ]
+    },
+    "rpcMethods": [
+      {
+        "id": "detectOpen",
+        "displayName": "侦测开启",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/detect_open",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/detect_open",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\":1}"
+      },
+      {
+        "id": "detectClose",
+        "displayName": "侦测关闭",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/detect_close",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/detect_close",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\":1}"
+      },
+      {
+        "id": "channelOpen",
+        "displayName": "干扰通道开启",
+        "oneWay": false,
+        "timeoutMs": 20000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/channel_open",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/channel_set",
+        "mqttPayloadTemplate": "{\"suppressChannels\":${params.suppressChannels},\"sustainTime\":${params.sustainTime}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\":1,\"suppressChannels\":[{\"suppressDirection\":\"1\",\"channel\":[\"2400\",\"5800\"]}],\"sustainTime\":10}"
+      },
+      {
+        "id": "channelClose",
+        "displayName": "干扰通道关闭",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/channel_close",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/channel_close",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\":1}"
+      }
+    ],
+    "alarms": [],
+    "provisionConfiguration": { "type": "DISABLED" }
+  }
+}
