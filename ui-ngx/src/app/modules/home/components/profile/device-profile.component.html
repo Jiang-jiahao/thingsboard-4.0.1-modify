@@ -78,13 +78,6 @@
         [queueType]="serviceType"
         formControlName="defaultQueueName">
       </tb-queue-autocomplete>
-      <tb-rule-chain-autocomplete
-        *ngIf="edgeUiEnabled"
-        labelText="device-profile.default-edge-rule-chain"
-        formControlName="defaultEdgeRuleChainId"
-        [ruleChainType]="edgeRuleChainType">
-        <span tb-hint>{{'device-profile.default-edge-rule-chain-hint' | translate}}</span>
-      </tb-rule-chain-autocomplete>
       <ng-container *ngIf="otaUiEnabled">
         <tb-ota-package-autocomplete
           [useFullEntityId]="true"

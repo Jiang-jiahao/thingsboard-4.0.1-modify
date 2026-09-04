@@ -32,8 +32,6 @@ import org.thingsboard.server.common.data.notification.rule.EscalatedNotificatio
 import org.thingsboard.server.common.data.notification.rule.NotificationRule;
 import org.thingsboard.server.common.data.notification.rule.NotificationRuleRecipientsConfig;
 import org.thingsboard.server.common.data.notification.rule.trigger.config.DeviceActivityNotificationRuleTriggerConfig;
-import org.thingsboard.server.common.data.notification.rule.trigger.config.EdgeCommunicationFailureNotificationRuleTriggerConfig;
-import org.thingsboard.server.common.data.notification.rule.trigger.config.EdgeConnectionNotificationRuleTriggerConfig;
 import org.thingsboard.server.common.data.notification.rule.trigger.config.NotificationRuleTriggerConfig;
 import org.thingsboard.server.common.data.notification.rule.trigger.config.NotificationRuleTriggerType;
 import org.thingsboard.server.common.data.notification.rule.trigger.config.RuleEngineComponentLifecycleEventNotificationRuleTriggerConfig;
@@ -53,7 +51,7 @@ import java.util.stream.Collectors;
 /**
  * 针对 {@link NotificationRule} 的导入服务，继承 {@link BaseEntityImportService}。
  * <p>
- * 还原模板、设备/Profile/规则链、接收方 Target 的内部 ID；拒绝非租户级触发类型；Edge 配置同样清空 edges。
+ * 还原模板、设备/Profile/规则链、接收方 Target 的内部 ID；拒绝非租户级触发类型。
  */
 @Service
 @TbCoreComponent
@@ -102,16 +100,6 @@ public class NotificationRuleImportService extends BaseEntityImportService<Notif
                             .map(idProvider::getInternalId).map(UUIDBased::getId)
                             .collect(Collectors.toSet()));
                 }
-                break;
-            }
-            case EDGE_CONNECTION: {
-                EdgeConnectionNotificationRuleTriggerConfig triggerConfig = (EdgeConnectionNotificationRuleTriggerConfig) ruleTriggerConfig;
-                triggerConfig.setEdges(null);
-                break;
-            }
-            case EDGE_COMMUNICATION_FAILURE: {
-                EdgeCommunicationFailureNotificationRuleTriggerConfig triggerConfig = (EdgeCommunicationFailureNotificationRuleTriggerConfig) ruleTriggerConfig;
-                triggerConfig.setEdges(null);
                 break;
             }
         }

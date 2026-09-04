@@ -32,12 +32,9 @@ import org.thingsboard.server.common.data.asset.Asset;
 import org.thingsboard.server.common.data.asset.AssetInfo;
 import org.thingsboard.server.common.data.asset.AssetProfile;
 import org.thingsboard.server.common.data.asset.AssetSearchQuery;
-import org.thingsboard.server.common.data.audit.ActionType;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.id.AssetId;
 import org.thingsboard.server.common.data.id.AssetProfileId;
 import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.HasId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -45,10 +42,8 @@ import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.relation.EntityRelation;
 import org.thingsboard.server.common.data.relation.EntitySearchDirection;
-import org.thingsboard.server.common.data.relation.RelationTypeGroup;
 import org.thingsboard.server.dao.entity.AbstractCachedEntityService;
 import org.thingsboard.server.dao.entity.EntityCountService;
-import org.thingsboard.server.dao.eventsourcing.ActionEntityEvent;
 import org.thingsboard.server.dao.eventsourcing.DeleteEntityEvent;
 import org.thingsboard.server.dao.eventsourcing.SaveEntityEvent;
 import org.thingsboard.server.dao.exception.DataValidationException;
@@ -425,67 +420,6 @@ public class BaseAssetService extends AbstractCachedEntityService<AssetCacheKey,
         log.trace("Executing findAssetTypesByTenantId, tenantId [{}]", tenantId);
         validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
         return assetDao.findTenantAssetTypesAsync(tenantId.getId());
-    }
-
-    @Override
-    public Asset assignAssetToEdge(TenantId tenantId, AssetId assetId, EdgeId edgeId) {
-        Asset asset = findAssetById(tenantId, assetId);
-        Edge edge = edgeService.findEdgeById(tenantId, edgeId);
-        if (edge == null) {
-            throw new DataValidationException("Can't assign asset to non-existent edge!");
-        }
-        if (!edge.getTenantId().getId().equals(asset.getTenantId().getId())) {
-            throw new DataValidationException("Can't assign asset to edge from different tenant!");
-        }
-        try {
-            createRelation(tenantId, new EntityRelation(edgeId, assetId, EntityRelation.CONTAINS_TYPE, RelationTypeGroup.EDGE));
-        } catch (Exception e) {
-            log.warn("[{}] Failed to create asset relation. Edge Id: [{}]", assetId, edgeId);
-            throw new RuntimeException(e);
-        }
-        eventPublisher.publishEvent(ActionEntityEvent.builder().tenantId(tenantId).edgeId(edgeId).entityId(assetId)
-                .actionType(ActionType.ASSIGNED_TO_EDGE).build());
-        return asset;
-    }
-
-    @Override
-    public Asset unassignAssetFromEdge(TenantId tenantId, AssetId assetId, EdgeId edgeId) {
-        Asset asset = findAssetById(tenantId, assetId);
-        Edge edge = edgeService.findEdgeById(tenantId, edgeId);
-        if (edge == null) {
-            throw new DataValidationException("Can't unassign asset from non-existent edge!");
-        }
-
-        checkAssignedEntityViewsToEdge(tenantId, assetId, edgeId);
-
-        try {
-            deleteRelation(tenantId, new EntityRelation(edgeId, assetId, EntityRelation.CONTAINS_TYPE, RelationTypeGroup.EDGE));
-        } catch (Exception e) {
-            log.warn("[{}] Failed to delete asset relation. Edge Id: [{}]", assetId, edgeId);
-            throw new RuntimeException(e);
-        }
-        eventPublisher.publishEvent(ActionEntityEvent.builder().tenantId(tenantId).edgeId(edgeId).entityId(assetId)
-                .actionType(ActionType.UNASSIGNED_FROM_EDGE).build());
-        return asset;
-    }
-
-    @Override
-    public PageData<Asset> findAssetsByTenantIdAndEdgeId(TenantId tenantId, EdgeId edgeId, PageLink pageLink) {
-        log.trace("Executing findAssetsByTenantIdAndEdgeId, tenantId [{}], edgeId [{}], pageLink [{}]", tenantId, edgeId, pageLink);
-        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
-        validateId(edgeId, id -> INCORRECT_EDGE_ID + id);
-        validatePageLink(pageLink);
-        return assetDao.findAssetsByTenantIdAndEdgeId(tenantId.getId(), edgeId.getId(), pageLink);
-    }
-
-    @Override
-    public PageData<Asset> findAssetsByTenantIdAndEdgeIdAndType(TenantId tenantId, EdgeId edgeId, String type, PageLink pageLink) {
-        log.trace("Executing findAssetsByTenantIdAndEdgeIdAndType, tenantId [{}], edgeId [{}], type [{}] pageLink [{}]", tenantId, edgeId, type, pageLink);
-        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
-        validateId(edgeId, id -> INCORRECT_EDGE_ID + id);
-        validateString(type, t -> "Incorrect type " + t);
-        validatePageLink(pageLink);
-        return assetDao.findAssetsByTenantIdAndEdgeIdAndType(tenantId.getId(), edgeId.getId(), type, pageLink);
     }
 
     private final PaginatedRemover<TenantId, Asset> tenantAssetsRemover = new PaginatedRemover<>() {

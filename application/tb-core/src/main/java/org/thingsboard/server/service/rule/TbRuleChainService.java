@@ -16,7 +16,6 @@
 package org.thingsboard.server.service.rule;
 
 import org.thingsboard.server.common.data.User;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.RuleChainId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -29,7 +28,7 @@ import java.util.Set;
 /**
  * Core 侧规则链实体服务。
  * <p>
- * 在 REST 层封装规则链 CRUD、元数据保存、根链/Edge 模板设置，以及 Output 节点标签变更后的关联规则链更新。
+ * 在 REST 层封装规则链 CRUD、元数据保存、根链设置，以及 Output 节点标签变更后的关联规则链更新。
  *
  * @see DefaultTbRuleChainService
  */
@@ -65,31 +64,6 @@ public interface TbRuleChainService extends SimpleTbEntityService<RuleChain> {
      */
     RuleChainMetaData saveRuleChainMetaData(TenantId tenantId, RuleChain ruleChain, RuleChainMetaData ruleChainMetaData,
                                             boolean updateRelated, User user) throws Exception;
-
-    /**
-     * 将规则链分配到 Edge。
-     */
-    RuleChain assignRuleChainToEdge(TenantId tenantId, RuleChain ruleChain, Edge edge, User user) throws ThingsboardException;
-
-    /**
-     * 取消规则链与 Edge 的分配。
-     */
-    RuleChain unassignRuleChainFromEdge(TenantId tenantId, RuleChain ruleChain, Edge edge, User user) throws ThingsboardException;
-
-    /**
-     * 设为 Edge 模板根规则链。
-     */
-    RuleChain setEdgeTemplateRootRuleChain(TenantId tenantId, RuleChain ruleChain, User user) throws ThingsboardException;
-
-    /**
-     * 标记新建 Edge 时自动分配该规则链。
-     */
-    RuleChain setAutoAssignToEdgeRuleChain(TenantId tenantId, RuleChain ruleChain, User user) throws ThingsboardException;
-
-    /**
-     * 取消新建 Edge 自动分配。
-     */
-    RuleChain unsetAutoAssignToEdgeRuleChain(TenantId tenantId, RuleChain ruleChain, User user) throws ThingsboardException;
 
     /**
      * 按组件定义版本升级规则节点配置 JSON。

@@ -41,7 +41,6 @@ public class DataConstants {
     public static final String EXPIRATION_TIME = "expirationTime";
     public static final String ADDITIONAL_INFO = "additionalInfo";
     public static final String RETRIES = "retries";
-    public static final String EDGE_ID = "edgeId";
     public static final String DEVICE_ID = "deviceId";
     public static final String GATEWAY_PARAMETER = "gateway";
 
@@ -92,8 +91,6 @@ public class DataConstants {
     public static final String ENTITY_ASSIGNED_TO_TENANT = "ENTITY_ASSIGNED_TO_TENANT";
     public static final String PROVISION_SUCCESS = "PROVISION_SUCCESS";
     public static final String PROVISION_FAILURE = "PROVISION_FAILURE";
-    public static final String ENTITY_ASSIGNED_TO_EDGE = "ENTITY_ASSIGNED_TO_EDGE";
-    public static final String ENTITY_UNASSIGNED_FROM_EDGE = "ENTITY_UNASSIGNED_FROM_EDGE";
 
     public static final String RELATION_ADD_OR_UPDATE = "RELATION_ADD_OR_UPDATE";
     public static final String RELATION_DELETED = "RELATION_DELETED";
@@ -128,9 +125,7 @@ public class DataConstants {
     public static final String CLIENT_ID = "clientId";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
-    public static final String EDGE_MSG_SOURCE = "edge";
     public static final String MSG_SOURCE_KEY = "source";
-    public static final String EDGE_VERSION_ATTR_KEY = "edgeVersion";
 
     public static final String LAST_CONNECTED_GATEWAY = "lastConnectedGateway";
 
@@ -143,9 +138,6 @@ public class DataConstants {
     public static final String SQ_QUEUE_NAME = "SequentialByOriginator";
     public static final String SQ_QUEUE_TOPIC = "tb_rule_engine.sq";
     public static final String QUEUE_NAME = "queueName";
-
-    public static final String EDGE_QUEUE_NAME = "Edge";
-    public static final String EDGE_EVENT_QUEUE_NAME = "EdgeEvent";
 
     public static final String CF_QUEUE_NAME = "CalculatedFields";
     public static final String CF_STATES_QUEUE_NAME = "CalculatedFieldStates";

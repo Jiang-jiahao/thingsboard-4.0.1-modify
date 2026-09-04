@@ -28,7 +28,7 @@ import java.util.Set;
 /**
  * 针对 {@link AssetProfile} 的导出服务，继承 {@link BaseEntityExportService}。
  * <p>
- * 将默认仪表板、默认规则链、默认 Edge 规则链替换为 externalId。
+ * 将默认仪表板、默认规则链替换为 externalId。
  */
 @Service
 @TbCoreComponent
@@ -41,7 +41,6 @@ public class AssetProfileExportService extends BaseEntityExportService<AssetProf
     protected void setRelatedEntities(EntitiesExportCtx<?> ctx, AssetProfile assetProfile, EntityExportData<AssetProfile> exportData) {
         assetProfile.setDefaultDashboardId(getExternalIdOrElseInternal(ctx, assetProfile.getDefaultDashboardId()));
         assetProfile.setDefaultRuleChainId(getExternalIdOrElseInternal(ctx, assetProfile.getDefaultRuleChainId()));
-        assetProfile.setDefaultEdgeRuleChainId(getExternalIdOrElseInternal(ctx, assetProfile.getDefaultEdgeRuleChainId()));
     }
 
     @Override

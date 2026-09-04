@@ -20,7 +20,6 @@ import org.thingsboard.server.common.data.Customer;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.User;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DeviceId;
@@ -30,9 +29,9 @@ import org.thingsboard.server.dao.device.claim.ClaimResult;
 import org.thingsboard.server.dao.device.claim.ReclaimResult;
 
 /**
- * 设备业务层契约：CRUD、凭据、认领，以及分配到客户/租户/Edge。
+ * 设备业务层契约：CRUD、凭据、认领，以及分配到客户/租户。
  * <p>
- * 由 DeviceController 等调用；实现类委托 Device DAO，并写审计日志、版本控制提交与 Edge 同步事件。
+ * 由 DeviceController 等调用；实现类委托 Device DAO，并写审计日志与版本控制提交。
  */
 public interface TbDeviceService {
 
@@ -68,10 +67,4 @@ public interface TbDeviceService {
 
     /** 将设备转移到另一租户。 */
     Device assignDeviceToTenant(Device device, Tenant newTenant, User user);
-
-    /** 将设备分配给 Edge。 */
-    Device assignDeviceToEdge(TenantId tenantId, DeviceId deviceId, Edge edge, User user) throws ThingsboardException;
-
-    /** 取消设备与 Edge 的分配。 */
-    Device unassignDeviceFromEdge(Device device, Edge edge, User user) throws ThingsboardException;
 }

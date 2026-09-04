@@ -117,14 +117,6 @@ export class TableColumnsAssignmentComponent implements OnInit, ControlValueAcce
           { value: ImportEntityColumnType.timeseries }
         );
         break;
-      case EntityType.EDGE:
-        this.columnTypes.push(
-          { value: ImportEntityColumnType.routingKey },
-          { value: ImportEntityColumnType.secret },
-          { value: ImportEntityColumnType.serverAttribute },
-          { value: ImportEntityColumnType.timeseries }
-        );
-        break;
     }
   }
 
@@ -168,16 +160,6 @@ export class TableColumnsAssignmentComponent implements OnInit, ControlValueAcce
       this.columnDeviceCredentials.forEach((columnCredential) => {
         columnCredential.disabled = this.columns.findIndex(column => column.type === columnCredential.value) > -1;
       });
-    }
-
-    if (this.entityType === EntityType.EDGE) {
-      const isSelectRoutingKey = this.columns.findIndex((column) => column.type === ImportEntityColumnType.routingKey) > -1;
-      const isSelectSecret = this.columns.findIndex((column) => column.type === ImportEntityColumnType.secret) > -1;
-
-      this.valid = this.valid && isSelectSecret && isSelectRoutingKey;
-
-      this.columnTypes.find((columnType) => columnType.value === ImportEntityColumnType.routingKey).disabled = isSelectRoutingKey;
-      this.columnTypes.find((columnType) => columnType.value === ImportEntityColumnType.secret).disabled = isSelectSecret;
     }
 
     if (this.propagateChange) {

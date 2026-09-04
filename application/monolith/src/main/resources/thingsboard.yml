@@ -360,11 +360,6 @@ sql:
     batch_threads: "${SQL_EVENTS_BATCH_THREADS:3}" # 批处理线程数须为质数（如 3 或 5）以获得完美哈希分布
     partition_size: "${SQL_EVENTS_REGULAR_PARTITION_SIZE_HOURS:168}" # 事件分区的小时数。当前值对应一周。
     debug_partition_size: "${SQL_EVENTS_DEBUG_PARTITION_SIZE_HOURS:1}" # 调试事件分区的小时数。当前值对应一小时。
-  edge_events:
-    batch_size: "${SQL_EDGE_EVENTS_BATCH_SIZE:1000}" # 持久化最新遥测更新的批大小
-    batch_max_delay: "${SQL_EDGE_EVENTS_BATCH_MAX_DELAY_MS:100}" # 最新遥测条目队列轮询的最大超时。单位为毫秒
-    stats_print_interval_ms: "${SQL_EDGE_EVENTS_BATCH_STATS_PRINT_MS:10000}" # 打印最新遥测更新统计的间隔（毫秒）
-    partition_size: "${SQL_EDGE_EVENTS_PARTITION_SIZE_HOURS:168}" # 事件分区的小时数。当前值对应一周。
   audit_logs:
     partition_size: "${SQL_AUDIT_LOGS_PARTITION_SIZE_HOURS:168}" # 默认值 - 1 周
   alarm_comments:
@@ -406,10 +401,6 @@ sql:
       events_ttl: "${SQL_TTL_EVENTS_EVENTS_TTL:0}"
       # 秒数。当前值对应一周。清理精度取决于 sql.events.debug_partition_size 参数。
       debug_events_ttl: "${SQL_TTL_EVENTS_DEBUG_EVENTS_TTL:604800}"
-    edge_events:
-      enabled: "${SQL_TTL_EDGE_EVENTS_ENABLED:true}" # 启用/禁用 Edge 事件记录的 TTL（Time To Live）
-      execution_interval_ms: "${SQL_TTL_EDGE_EVENTS_EXECUTION_INTERVAL:86400000}" # 毫秒数。当前值对应一天
-      edge_events_ttl: "${SQL_TTL_EDGE_EVENTS_TTL:2628000}" # 秒数。当前值对应一个月
     alarms:
       checking_interval: "${SQL_ALARMS_TTL_CHECKING_INTERVAL:7200000}" # 毫秒数。当前值对应两小时
       removal_batch_size: "${SQL_ALARMS_TTL_REMOVAL_BATCH_SIZE:3000}" # 分批删除过期告警，而非一次性全部删除
@@ -439,7 +430,6 @@ actors:
     tenant_dispatcher_pool_size: "${ACTORS_SYSTEM_TENANT_DISPATCHER_POOL_SIZE:2}" # 处理租户 Actor 消息的 Actor 系统分发器线程池大小
     device_dispatcher_pool_size: "${ACTORS_SYSTEM_DEVICE_DISPATCHER_POOL_SIZE:4}" # 处理设备 Actor 消息的 Actor 系统分发器线程池大小
     rule_dispatcher_pool_size: "${ACTORS_SYSTEM_RULE_DISPATCHER_POOL_SIZE:8}" # 处理规则引擎（链/节点）Actor 消息的 Actor 系统分发器线程池大小
-    edge_dispatcher_pool_size: "${ACTORS_SYSTEM_EDGE_DISPATCHER_POOL_SIZE:4}" # 处理 Edge Actor 消息的 Actor 系统分发器线程池大小
     cfm_dispatcher_pool_size: "${ACTORS_SYSTEM_CFM_DISPATCHER_POOL_SIZE:2}" # 处理 CalculatedField 管理器 Actor 消息的 Actor 系统分发器线程池大小
     cfe_dispatcher_pool_size: "${ACTORS_SYSTEM_CFE_DISPATCHER_POOL_SIZE:8}" # 处理 CalculatedField 实体 Actor 消息的 Actor 系统分发器线程池大小
   tenant:
@@ -603,15 +593,6 @@ cache:
     otaPackagesData:
       timeToLiveInMinutes: "${CACHE_SPECS_OTA_PACKAGES_DATA_TTL:60}" # OTA 包数据缓存 TTL
       maxSize: "${CACHE_SPECS_OTA_PACKAGES_DATA_MAX_SIZE:10}" # 0 表示禁用缓存
-    edges:
-      timeToLiveInMinutes: "${CACHE_SPECS_EDGES_TTL:1440}" # Edge 缓存 TTL
-      maxSize: "${CACHE_SPECS_EDGES_MAX_SIZE:10000}" # 0 表示禁用缓存
-    edgeSessions:
-      timeToLiveInMinutes: "${CACHE_SPECS_EDGE_SESSIONS_TTL:0}" # Edge 会话缓存 TTL；设为 '0' 时无过期时间
-      maxSize: "${CACHE_SPECS_EDGE_SESSIONS_MAX_SIZE:10000}" # 0 表示禁用缓存
-    relatedEdges:
-      timeToLiveInMinutes: "${CACHE_SPECS_RELATED_EDGES_TTL:1440}" # 关联 Edge 缓存 TTL
-      maxSize: "${CACHE_SPECS_RELATED_EDGES_MAX_SIZE:10000}" # 0 表示禁用缓存
     repositorySettings:
       timeToLiveInMinutes: "${CACHE_SPECS_REPOSITORY_SETTINGS_TTL:1440}" # 仓库设置缓存 TTL
       maxSize: "${CACHE_SPECS_REPOSITORY_SETTINGS_MAX_SIZE:10000}" # 0 表示禁用缓存
@@ -856,7 +837,6 @@ audit-log:
       "entity_view": "${AUDIT_LOG_MASK_ENTITY_VIEW:W}" # 实体视图日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
       "device_profile": "${AUDIT_LOG_MASK_DEVICE_PROFILE:W}" # 设备配置文件日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
       "asset_profile": "${AUDIT_LOG_MASK_ASSET_PROFILE:W}" # 资产配置文件日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
-      "edge": "${AUDIT_LOG_MASK_EDGE:W}" # Edge 日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
       "tb_resource": "${AUDIT_LOG_MASK_RESOURCE:W}" # TB 资源日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
       "ota_package": "${AUDIT_LOG_MASK_OTA_PACKAGE:W}" # OTA 包日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
       "calculated_field": "${AUDIT_LOG_MASK_CALCULATED_FIELD:W}" # 计算字段日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
@@ -1457,54 +1437,6 @@ device:
       # docker-compose 中启动网关所使用的 thingsboard/tb-gateway 镜像 docker tag
       image_version: "${DEVICE_CONNECTIVITY_GATEWAY_IMAGE_VERSION:3.7-stable}"
 
-# Edge 参数
-edges:
-  # 启用/禁用 Edge 实例
-  enabled: "${EDGES_ENABLED:true}"
-  rpc:
-    # RPC 端口绑定
-    port: "${EDGES_RPC_PORT:7070}"
-    # 客户端发送 keepalive ping 的最小间隔
-    # 防止客户端过于频繁发送 ping，避免对服务端造成干扰（滥用时甚至可能成为拒绝服务攻击向量）
-    # 若客户端 ping 间隔短于此值，服务端可能终止连接
-    client_max_keep_alive_time_sec: "${EDGES_RPC_CLIENT_MAX_KEEP_ALIVE_TIME_SEC:1}"
-    # 连接无读操作的不活动时长，超过后服务端将向客户端发送 keepalive ping
-    # 用于确认连接仍存活，并防止网络中间设备因不活动而断开连接
-    # 这是服务端主动检测客户端是否仍响应的方式
-    keep_alive_time_sec: "${EDGES_RPC_KEEP_ALIVE_TIME_SEC:10}"
-    # 服务端等待 keepalive ping 响应的最长时间
-    # 若在此时间内未收到确认，服务端认为连接已失效并可能关闭
-    # 该超时用于检测无响应的客户端
-    keep_alive_timeout_sec: "${EDGES_RPC_KEEP_ALIVE_TIMEOUT_SEC:5}"
-    ssl:
-      # 启用/禁用 SSL 支持
-      enabled: "${EDGES_RPC_SSL_ENABLED:false}"
-      # 与云端 TLS 连接时使用的证书文件
-      cert: "${EDGES_RPC_SSL_CERT:certChainFile.pem}"
-      # 与 Cert 证书关联的私钥文件，用于安全连接过程中的加密
-      private_key: "${EDGES_RPC_SSL_PRIVATE_KEY:privateKeyFile.pem}"
-    # 云端可处理的来自 Edge 的入站消息最大大小（字节），默认最大 4 MB
-    max_inbound_message_size: "${EDGES_RPC_MAX_INBOUND_MESSAGE_SIZE:4194304}"
-    # 云端发送至 Edge 的 telemetry（时序与属性）消息最大长度，默认无限制
-    max_telemetry_message_size: "${EDGES_RPC_MAX_TELEMETRY_MESSAGE_SIZE:0}"
-  storage:
-    # 从 DB 读取并发送至 Edge 的 Edge 事件最大记录数
-    max_read_records_count: "${EDGES_STORAGE_MAX_READ_RECORDS_COUNT:50}"
-    # 下次检查 DB 中 Edge 事件前的等待时间（毫秒）
-    no_read_records_sleep: "${EDGES_NO_READ_RECORDS_SLEEP:1000}"
-    # 重新发送失败 Edge 事件批次至 Edge 前的等待时间（毫秒）
-    sleep_between_batches: "${EDGES_SLEEP_BETWEEN_BATCHES:60000}"
-  # 每个 Edge 会话的高优先级 Edge 事件最大数量，无持久化，仅存于内存
-  max_high_priority_queue_size_per_session: "${EDGES_MAX_HIGH_PRIORITY_QUEUE_SIZE_PER_SESSION:10000}"
-  # 检查 DB 中 Edge 事件的线程数
-  scheduler_pool_size: "${EDGES_SCHEDULER_POOL_SIZE:4}"
-  # 通过 gRPC 向 Edge 发送下行消息的线程数
-  send_scheduler_pool_size: "${EDGES_SEND_SCHEDULER_POOL_SIZE:4}"
-  # 用于将数据库中的 Edge 事件转换为下行消息并发送投递的线程数
-  grpc_callback_thread_pool_size: "${EDGES_GRPC_CALLBACK_POOL_SIZE:4}"
-  state:
-    # 将 Edge 状态（active、last connect、last disconnect）持久化到时序或属性表。'false' 表示将 Edge 状态存储到属性表
-    persistToTelemetry: "${EDGES_PERSIST_STATE_TO_TELEMETRY:false}"
 
 # Spring doc 通用参数
 springdoc:
@@ -1622,24 +1554,6 @@ queue:
     #      tb_rule_engine.sq:
     #        - key: max.poll.records
     #          value: "${TB_QUEUE_KAFKA_SQ_MAX_POLL_RECORDS:1024}"
-      tb_edge:
-        # 面向 Edge 服务更新主题的 consumer 属性。
-        - key: max.poll.records
-          # 定义每次请求可从 tb_edge 主题轮询的最大记录数。
-          value: "${TB_QUEUE_KAFKA_EDGE_EVENTS_MAX_POLL_RECORDS:10}"
-      tb_edge.notifications:
-        # 面向高优先级 Edge 通知的 consumer 属性。
-        # 这些通知包括 RPC 调用、生命周期事件和新队列消息，
-        # 需要最低延迟和快速处理。
-        - key: max.poll.records
-          # 定义每次请求可从 tb_edge.notifications.SERVICE_ID 主题轮询的最大记录数。
-          value: "${TB_QUEUE_KAFKA_EDGE_HP_EVENTS_MAX_POLL_RECORDS:10}"
-      tb_edge_event.notifications:
-        # 面向特定 Edge 主题下行链路的 consumer 属性。
-        # 主题名使用租户和 Edge 标识符动态构建。
-        - key: max.poll.records
-          # 定义每次请求可从 tb_edge_event.notifications.TENANT_ID.EDGE_ID 主题轮询的最大记录数。
-          value: "${TB_QUEUE_KAFKA_EDGE_NOTIFICATIONS_MAX_POLL_RECORDS:10}"
       tb_housekeeper:
         # Housekeeper 任务主题的 consumer 属性
         - key: max.poll.records
@@ -1685,10 +1599,6 @@ queue:
       housekeeper: "${TB_QUEUE_KAFKA_HOUSEKEEPER_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
       # Housekeeper 重处理主题的 Kafka 属性；retention.ms 设为 90 天；partitions 设为 1，因为同一时间仅运行一个重处理服务
       housekeeper-reprocessing: "${TB_QUEUE_KAFKA_HOUSEKEEPER_REPROCESSING_TOPIC_PROPERTIES:retention.ms:7776000000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
-      # Edge 主题的 Kafka 属性
-      edge: "${TB_QUEUE_KAFKA_EDGE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
-      # Edge 事件主题的 Kafka 属性
-      edge-event: "${TB_QUEUE_KAFKA_EDGE_EVENT_TOPIC_PROPERTIES:retention.ms:2592000000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
       # Calculated Field 主题的 Kafka 属性
       calculated-field: "${TB_QUEUE_KAFKA_CF_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
       # Calculated Field State 主题的 Kafka 属性
@@ -1890,30 +1800,6 @@ queue:
     notifications_topic: "${TB_QUEUE_TRANSPORT_NOTIFICATIONS_TOPIC:tb_transport.notifications}"
     # 轮询消息的间隔（毫秒）
     poll_interval: "${TB_QUEUE_TRANSPORT_NOTIFICATIONS_POLL_INTERVAL_MS:25}"
-  edge:
-    # 通知 Edge 服务实体更新、分配等事件的主题名
-    topic: "${TB_QUEUE_EDGE_TOPIC:tb_edge}"
-    # 高优先级 Edge 通知（rpc、lifecycle、队列新消息）的主题前缀，需要最低延迟和处理时间。
-    # 每个 tb-core 有独立主题：PREFIX.SERVICE_ID
-    notifications_topic: "${TB_QUEUE_EDGE_NOTIFICATIONS_TOPIC:tb_edge.notifications}"
-    # 推送到特定 Edge 的下行链路主题前缀。
-    # 每个 Edge 有独立主题：PREFIX.TENANT_ID.EDGE_ID
-    event_notifications_topic: "${TB_QUEUE_EDGE_EVENT_NOTIFICATIONS_TOPIC:tb_edge_event.notifications}"
-    # Edge 服务使用的分区数
-    partitions: "${TB_QUEUE_EDGE_PARTITIONS:10}"
-    # Edge 服务相关主题的轮询间隔
-    poll-interval: "${TB_QUEUE_EDGE_POLL_INTERVAL_MS:25}"
-    # Edge 服务处理消息包的超时时间
-    pack-processing-timeout: "${TB_QUEUE_EDGE_PACK_PROCESSING_TIMEOUT_MS:10000}"
-    # Edge 服务处理失败消息包的重试次数
-    pack-processing-retries: "${TB_QUEUE_EDGE_MESSAGE_PROCESSING_RETRIES:3}"
-    # 为 Edge 队列的每个分区启用/禁用独立 consumer
-    consumer-per-partition: "${TB_QUEUE_EDGE_CONSUMER_PER_PARTITION:false}"
-    stats:
-      # 启用/禁用 Edge 服务统计
-      enabled: "${TB_QUEUE_EDGE_STATS_ENABLED:true}"
-      # Edge 服务统计信息打印间隔
-      print-interval-ms: "${TB_QUEUE_EDGE_STATS_PRINT_INTERVAL_MS:60000}"
 
 # 事件配置参数
 event:

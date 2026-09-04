@@ -196,29 +196,6 @@ public interface AssetRepository extends JpaRepository<AssetEntity, UUID>, Expor
 
     Long countByAssetProfileId(UUID assetProfileId);
 
-    @Query("SELECT a FROM AssetEntity a, RelationEntity re WHERE a.tenantId = :tenantId " +
-            "AND a.id = re.toId AND re.toType = 'ASSET' AND re.relationTypeGroup = 'EDGE' " +
-            "AND re.relationType = 'Contains' AND re.fromId = :edgeId AND re.fromType = 'EDGE' " +
-            "AND (:searchText IS NULL OR ilike(a.name, CONCAT('%', :searchText, '%')) = true " +
-            "  OR ilike(a.label, CONCAT('%', :searchText, '%')) = true " +
-            "  OR ilike(a.type, CONCAT('%', :searchText, '%')) = true) ")
-    Page<AssetEntity> findByTenantIdAndEdgeId(@Param("tenantId") UUID tenantId,
-                                              @Param("edgeId") UUID edgeId,
-                                              @Param("searchText") String searchText,
-                                              Pageable pageable);
-
-    @Query("SELECT a FROM AssetEntity a, RelationEntity re WHERE a.tenantId = :tenantId " +
-            "AND a.id = re.toId AND re.toType = 'ASSET' AND re.relationTypeGroup = 'EDGE' " +
-            "AND re.relationType = 'Contains' AND re.fromId = :edgeId AND re.fromType = 'EDGE' " +
-            "AND a.type = :type " +
-            "AND (:searchText IS NULL OR ilike(a.name, CONCAT('%', :searchText, '%')) = true " +
-            "  OR ilike(a.label, CONCAT('%', :searchText, '%')) = true) ")
-    Page<AssetEntity> findByTenantIdAndEdgeIdAndType(@Param("tenantId") UUID tenantId,
-                                                     @Param("edgeId") UUID edgeId,
-                                                     @Param("type") String type,
-                                                     @Param("searchText") String searchText,
-                                                     Pageable pageable);
-
     Long countByTenantId(UUID tenantId);
 
     @Query("SELECT externalId FROM AssetEntity WHERE id = :id")

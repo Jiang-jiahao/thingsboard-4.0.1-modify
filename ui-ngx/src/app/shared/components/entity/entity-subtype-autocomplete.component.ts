@@ -131,15 +131,6 @@ export class EntitySubTypeAutocompleteComponent implements ControlValueAccessor,
           this.subTypes = null;
         });
         break;
-      case EntityType.EDGE:
-        this.selectEntitySubtypeText = 'edge.select-edge-type';
-        this.entitySubtypeText = 'edge.edge-type';
-        this.entitySubtypeRequiredText = 'edge.edge-type-required';
-        this.entitySubtypeMaxLength = 'edge.type-max-length';
-        this.broadcastSubscription = this.broadcast.on('edgeSaved', () => {
-          this.subTypes = null;
-        });
-        break;
       case EntityType.ENTITY_VIEW:
         this.selectEntitySubtypeText = 'entity-view.select-entity-view-type';
         this.entitySubtypeText = 'entity-view.entity-view-type';

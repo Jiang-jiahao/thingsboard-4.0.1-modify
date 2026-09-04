@@ -79,8 +79,6 @@ import org.thingsboard.server.dao.device.DeviceCredentialsService;
 import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.domain.DomainService;
-import org.thingsboard.server.dao.edge.EdgeEventService;
-import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entity.EntityService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.event.EventService;
@@ -115,7 +113,6 @@ import org.thingsboard.server.queue.settings.TbQueueCalculatedFieldSettings;
 import org.thingsboard.server.service.apiusage.TbApiUsageStateService;
 import org.thingsboard.server.service.cf.CalculatedFieldQueueService;
 import org.thingsboard.server.service.component.ComponentDiscoveryService;
-import org.thingsboard.server.service.edge.rpc.EdgeRpcService;
 import org.thingsboard.server.service.entitiy.entityview.TbEntityViewService;
 import org.thingsboard.server.service.executors.DbCallbackExecutorService;
 import org.thingsboard.server.service.executors.ExternalCallExecutorService;
@@ -498,21 +495,6 @@ public class ActorSystemContext {
     @Lazy
     @Autowired(required = false)
     @Getter
-    private EdgeService edgeService;
-
-    @Lazy
-    @Autowired(required = false)
-    @Getter
-    private EdgeEventService edgeEventService;
-
-    @Lazy
-    @Autowired(required = false)
-    @Getter
-    private EdgeRpcService edgeRpcService;
-
-    @Lazy
-    @Autowired(required = false)
-    @Getter
     private ResourceService resourceService;
 
     @Lazy
@@ -590,10 +572,6 @@ public class ActorSystemContext {
     @Value("${actors.statistics.persist_frequency:3600000}")
     @Getter
     private long statisticsPersistFrequency;
-
-    @Value("${edges.enabled:true}")
-    @Getter
-    private boolean edgesEnabled;
 
     @Value("${cache.type:caffeine}")
     @Getter

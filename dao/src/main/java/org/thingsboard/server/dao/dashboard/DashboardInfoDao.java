@@ -67,16 +67,6 @@ public interface DashboardInfoDao extends Dao<DashboardInfo>, ImageContainerDao<
      */
     PageData<DashboardInfo> findMobileDashboardsByTenantIdAndCustomerId(UUID tenantId, UUID customerId, PageLink pageLink);
 
-    /**
-     * Find dashboards by tenantId, edgeId and page link.
-     *
-     * @param tenantId the tenantId
-     * @param edgeId the edgeId
-     * @param pageLink the page link
-     * @return the list of dashboard objects
-     */
-    PageData<DashboardInfo> findDashboardsByTenantIdAndEdgeId(UUID tenantId, UUID edgeId, PageLink pageLink);
-
     DashboardInfo findFirstByTenantIdAndName(UUID tenantId, String name);
 
     String findTitleById(UUID tenantId, UUID dashboardId);

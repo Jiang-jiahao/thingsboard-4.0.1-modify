@@ -33,7 +33,6 @@ export interface AssetProfile extends BaseData<AssetProfileId>, HasTenantId, Has
   defaultRuleChainId?: RuleChainId;
   defaultDashboardId?: DashboardId;
   defaultQueueName?: string;
-  defaultEdgeRuleChainId?: RuleChainId;
 }
 
 export interface AssetProfileInfo extends EntityInfoData {

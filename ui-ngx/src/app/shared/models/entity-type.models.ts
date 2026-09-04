@@ -31,7 +31,6 @@ export enum EntityType {
   ALARM = 'ALARM',
   RULE_CHAIN = 'RULE_CHAIN',
   RULE_NODE = 'RULE_NODE',
-  EDGE = 'EDGE',
   ENTITY_VIEW = 'ENTITY_VIEW',
   WIDGETS_BUNDLE = 'WIDGETS_BUNDLE',
   WIDGET_TYPE = 'WIDGET_TYPE',
@@ -189,20 +188,6 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
         noEntities: 'asset.no-assets-text',
         search: 'asset.search',
         selectedEntities: 'asset.selected-assets'
-      }
-    ],
-    [
-      EntityType.EDGE,
-      {
-        type: 'entity.type-edge',
-        typePlural: 'entity.type-edges',
-        list: 'entity.list-of-edges',
-        nameStartsWith: 'entity.edge-name-starts-with',
-        details: 'edge.edge-details',
-        add: 'edge.add',
-        noEntities: 'edge.no-edges-text',
-        search: 'edge.search',
-        selectedEntities: 'edge.selected-edges'
       }
     ],
     [
@@ -546,12 +531,6 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
       }
     ],
     [
-      EntityType.EDGE,
-      {
-        helpLinkId: 'edges'
-      }
-    ],
-    [
       EntityType.ENTITY_VIEW,
       {
         helpLinkId: 'entityViews'
@@ -638,7 +617,6 @@ export const baseDetailsPageByEntityType = new Map<EntityType, string>([
   [EntityType.DEVICE_PROFILE, '/profiles/deviceProfiles'],
   [EntityType.ASSET_PROFILE, '/profiles/assetProfiles'],
   [EntityType.RULE_CHAIN, '/ruleChains'],
-  [EntityType.EDGE, '/edgeManagement/instances'],
   [EntityType.ENTITY_VIEW, '/entities/entityViews'],
   [EntityType.TB_RESOURCE, '/resources/resources-library'],
   [EntityType.OTA_PACKAGE, '/features/otaUpdates'],

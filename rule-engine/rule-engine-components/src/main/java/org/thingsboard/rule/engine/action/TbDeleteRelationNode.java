@@ -50,8 +50,7 @@ import static org.thingsboard.common.util.DonAsynchron.withCallback;
                 "<li><strong>Tenant</strong> - use current tenant as target entity to delete relation with.</li>" +
                 "<li><strong>Customer</strong> - use customer with the specified title as the target entity to delete relation with.</li>" +
                 "<li><strong>Dashboard</strong> - use a dashboard with the specified title as the target entity to delete relation with.</li>" +
-                "<li><strong>User</strong> - use a user with the specified email as the target entity to delete relation with.</li>" +
-                "<li><strong>Edge</strong> - use an edge with the specified name as the target entity to delete relation with.</li></ul>" +
+                "<li><strong>User</strong> - use a user with the specified email as the target entity to delete relation with.</li></ul>" +
                 "Output connections: <code>Success</code> - If the relation(s) successfully deleted, otherwise <code>Failure</code>.",
         configDirective = "tbActionNodeDeleteRelationConfig",
         icon = "remove_circle",

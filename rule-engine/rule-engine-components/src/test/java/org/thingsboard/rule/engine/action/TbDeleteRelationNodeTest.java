@@ -42,12 +42,10 @@ import org.thingsboard.server.common.data.EntityView;
 import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.asset.Asset;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.id.AssetId;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DashboardId;
 import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityViewId;
 import org.thingsboard.server.common.data.id.HasId;
@@ -62,7 +60,6 @@ import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.dao.customer.CustomerService;
 import org.thingsboard.server.dao.dashboard.DashboardService;
 import org.thingsboard.server.dao.device.DeviceService;
-import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.user.UserService;
@@ -97,7 +94,7 @@ import static org.mockito.Mockito.when;
 public class TbDeleteRelationNodeTest extends AbstractRuleNodeUpgradeTest {
 
     private static final Set<EntityType> supportedEntityTypes = EnumSet.of(EntityType.TENANT, EntityType.DEVICE,
-            EntityType.ASSET, EntityType.CUSTOMER, EntityType.ENTITY_VIEW, EntityType.DASHBOARD, EntityType.EDGE, EntityType.USER);
+            EntityType.ASSET, EntityType.CUSTOMER, EntityType.ENTITY_VIEW, EntityType.DASHBOARD, EntityType.USER);
 
     private static final String supportedEntityTypesStr = supportedEntityTypes.stream().map(Enum::name).collect(Collectors.joining(" ,"));
 
@@ -113,7 +110,6 @@ public class TbDeleteRelationNodeTest extends AbstractRuleNodeUpgradeTest {
     private static final AssetId assetId = new AssetId(UUID.fromString("f4fd3b10-3f36-4d46-a162-5e62050774cc"));
     private static final CustomerId customerId = new CustomerId(UUID.fromString("ab890af2-3622-41e0-ac94-14d50af84348"));
     private static final EntityViewId entityViewId = new EntityViewId(UUID.fromString("39ce8d03-52a3-4aa8-b561-267d1d9d68b5"));
-    private static final EdgeId edgeId = new EdgeId(UUID.fromString("dc4f9809-b6f9-48f9-8057-2737216cfdf7"));
     private static final DashboardId dashboardId = new DashboardId(UUID.fromString("fda72baa-c882-4723-9693-25995dc37bc5"));
 
     private static Stream<Arguments> givenSupportedEntityType_whenOnMsg_thenVerifyConditions() {
@@ -122,7 +118,6 @@ public class TbDeleteRelationNodeTest extends AbstractRuleNodeUpgradeTest {
                 Arguments.of(new Asset(assetId)),
                 Arguments.of(new Customer(customerId)),
                 Arguments.of(new EntityView(entityViewId)),
-                Arguments.of(new Edge(edgeId)),
                 Arguments.of(new Dashboard(dashboardId)),
                 Arguments.of(new Tenant(tenantId))
         );
@@ -142,8 +137,6 @@ public class TbDeleteRelationNodeTest extends AbstractRuleNodeUpgradeTest {
     private EntityViewService entityViewServiceMock;
     @Mock
     private CustomerService customerServiceMock;
-    @Mock
-    private EdgeService edgeServiceMock;
     @Mock
     private UserService userServiceMock;
     @Mock
@@ -466,10 +459,6 @@ public class TbDeleteRelationNodeTest extends AbstractRuleNodeUpgradeTest {
                     when(ctxMock.getEntityViewService()).thenReturn(entityViewServiceMock);
                     when(entityViewServiceMock.findEntityViewByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(null));
                 },
-                EntityType.EDGE, () -> {
-                    when(ctxMock.getEdgeService()).thenReturn(edgeServiceMock);
-                    when(edgeServiceMock.findEdgeByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(null));
-                },
                 EntityType.USER, () -> {
                     when(ctxMock.getUserService()).thenReturn(userServiceMock);
                     when(userServiceMock.findUserByTenantIdAndEmailAsync(any(), any())).thenReturn(Futures.immediateFuture(null));
@@ -502,11 +491,6 @@ public class TbDeleteRelationNodeTest extends AbstractRuleNodeUpgradeTest {
                     var entityView = (EntityView) hasId;
                     when(ctxMock.getEntityViewService()).thenReturn(entityViewServiceMock);
                     when(entityViewServiceMock.findEntityViewByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(entityView));
-                },
-                EntityType.EDGE, hasId -> {
-                    var edge = (Edge) hasId;
-                    when(ctxMock.getEdgeService()).thenReturn(edgeServiceMock);
-                    when(edgeServiceMock.findEdgeByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(edge));
                 },
                 EntityType.USER, hasId -> {
                     var user = (User) hasId;
@@ -541,10 +525,6 @@ public class TbDeleteRelationNodeTest extends AbstractRuleNodeUpgradeTest {
                 EntityType.ENTITY_VIEW, hasId -> {
                     verify(entityViewServiceMock).findEntityViewByTenantIdAndNameAsync(eq(tenantId), eq("EntityName"));
                     verifyNoMoreInteractions(entityViewServiceMock);
-                },
-                EntityType.EDGE, hasId -> {
-                    verify(edgeServiceMock).findEdgeByTenantIdAndNameAsync(eq(tenantId), eq("EntityName"));
-                    verifyNoMoreInteractions(edgeServiceMock);
                 },
                 EntityType.USER, hasId -> {
                     verify(userServiceMock).findUserByTenantIdAndEmailAsync(eq(tenantId), eq("EntityName"));

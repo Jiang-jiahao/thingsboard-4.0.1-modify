@@ -45,7 +45,6 @@ import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.asset.Asset;
 import org.thingsboard.server.common.data.device.profile.DeviceProfileData;
 import org.thingsboard.server.common.data.device.profile.MqttDeviceProfileTransportConfiguration;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -60,7 +59,6 @@ import org.thingsboard.server.dao.customer.CustomerService;
 import org.thingsboard.server.dao.dashboard.DashboardService;
 import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.dao.device.DeviceService;
-import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.ota.OtaPackageService;
@@ -102,8 +100,6 @@ public class TenantServiceTest extends AbstractServiceTest {
     DeviceProfileService deviceProfileService;
     @Autowired
     DeviceService deviceService;
-    @Autowired
-    EdgeService edgeService;
     @Autowired
     EntityViewService entityViewService;
     @Autowired
@@ -468,7 +464,6 @@ public class TenantServiceTest extends AbstractServiceTest {
         Asset asset = createAndSaveAssetFor(tenant, customer);
         Dashboard dashboard = createAndSaveDashboardFor(tenant, customer);
         RuleChain ruleChain = createAndSaveRuleChainFor(tenant);
-        Edge edge = createAndSaveEdgeFor(tenant);
         OtaPackage otaPackage = createAndSaveOtaPackageFor(tenant, deviceProfile);
         TbResource resource = createAndSaveResourceFor(tenant);
         Rpc rpc = createAndSaveRpcFor(tenant, device);
@@ -483,7 +478,6 @@ public class TenantServiceTest extends AbstractServiceTest {
         assertDeviceIsDeleted(tenant, device);
         assertDeviceProfileIsDeleted(tenant, deviceProfile);
         assertDashboardIsDeleted(tenant, dashboard);
-        assertEdgeIsDeleted(tenant, edge);
         assertTenantAdminIsDeleted(tenant);
         assertUserIsDeleted(tenant, user);
         Assert.assertNull(ruleChainService.findRuleChainById(tenant.getId(), ruleChain.getId()));
@@ -529,14 +523,6 @@ public class TenantServiceTest extends AbstractServiceTest {
         PageData<User> tenantAdmins =
                 userService.findTenantAdmins(savedTenant.getId(), pageLinkTenantAdmins);
         Assert.assertEquals(0, tenantAdmins.getTotalElements());
-    }
-
-    private void assertEdgeIsDeleted(Tenant tenant, Edge edge) {
-        assertThat(edgeService.findEdgeById(tenant.getId(), edge.getId()))
-                .as("edge").isNull();
-        PageLink pageLinkEdges = new PageLink(1);
-        PageData<Edge> edges = edgeService.findEdgesByTenantId(tenant.getId(), pageLinkEdges);
-        Assert.assertEquals(0, edges.getTotalElements());
     }
 
     private void assertDashboardIsDeleted(Tenant tenant, Dashboard dashboard) {
@@ -625,11 +611,6 @@ public class TenantServiceTest extends AbstractServiceTest {
                 OtaPackageServiceTest.createFirmware(
                         tenant.getId(), "2", deviceProfile.getId())
         );
-    }
-
-    private Edge createAndSaveEdgeFor(Tenant tenant) {
-        Edge edge = constructEdge(tenant.getId(), "Test edge", "Simple");
-        return edgeService.saveEdge(edge);
     }
 
     private RuleChain createAndSaveRuleChainFor(Tenant tenant) {

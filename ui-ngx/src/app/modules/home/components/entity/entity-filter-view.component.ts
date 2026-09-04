@@ -113,21 +113,6 @@ export class EntityFilterViewComponent implements ControlValueAccessor {
               {deviceTypes});
           }
           break;
-        case AliasFilterType.edgeType:
-          const edgeTypesQuoted = [];
-          this.filter.edgeTypes.forEach((filterEdgeType) => {
-            edgeTypesQuoted.push(`'${filterEdgeType}'`);
-          });
-          const edgeTypes = edgeTypesQuoted.join(', ');
-          prefix = this.filter.edgeNameFilter;
-          if (prefix && prefix.length) {
-            this.filterDisplayValue = this.translate.instant('alias.filter-type-edge-type-and-name-description',
-              {edgeTypes, prefix});
-          } else {
-            this.filterDisplayValue = this.translate.instant('alias.filter-type-edge-type-description',
-              {edgeTypes});
-          }
-          break;
         case AliasFilterType.entityViewType:
           const entityViewTypesQuoted = [];
           this.filter.entityViewTypes.forEach((entityViewType) => {
@@ -197,7 +182,6 @@ export class EntityFilterViewComponent implements ControlValueAccessor {
           break;
         case AliasFilterType.assetSearchQuery:
         case AliasFilterType.deviceSearchQuery:
-        case AliasFilterType.edgeSearchQuery:
         case AliasFilterType.entityViewSearchQuery:
           allEntitiesText = this.translate.instant('alias.all-entities');
           anyRelationText = this.translate.instant('alias.any-relation');
@@ -237,16 +221,6 @@ export class EntityFilterViewComponent implements ControlValueAccessor {
             const deviceTypesText = deviceTypesQuoted.join(', ');
             translationValues.deviceTypes = deviceTypesText;
             this.filterDisplayValue = this.translate.instant('alias.filter-type-device-search-query-description',
-              translationValues
-            );
-          } else if (this.filter.type === AliasFilterType.edgeSearchQuery) {
-            const edgeTypesQuoted = [];
-            this.filter.edgeTypes.forEach((filterEdgeType) => {
-              edgeTypesQuoted.push(`'${filterEdgeType}'`);
-            });
-            const edgeTypesText = edgeTypesQuoted.join(', ');
-            translationValues.edgeTypes = edgeTypesText;
-            this.filterDisplayValue = this.translate.instant('alias.filter-type-edge-search-query-description',
               translationValues
             );
           } else if (this.filter.type === AliasFilterType.entityViewSearchQuery) {

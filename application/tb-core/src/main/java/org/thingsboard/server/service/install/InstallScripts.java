@@ -79,7 +79,6 @@ public class InstallScripts {
     public static final String JSON_DIR = "json";
     public static final String SYSTEM_DIR = "system";
     public static final String TENANT_DIR = "tenant";
-    public static final String EDGE_DIR = "edge";
     public static final String DEVICE_PROFILE_DIR = "device_profile";
     public static final String DEMO_DIR = "demo";
     public static final String RULE_CHAINS_DIR = "rule_chains";
@@ -127,10 +126,6 @@ public class InstallScripts {
         return Paths.get(getDataDir(), JSON_DIR, TENANT_DIR, DEVICE_PROFILE_DIR, "rule_chain_template.json");
     }
 
-    Path getEdgeRuleChainsDir() {
-        return Paths.get(getDataDir(), JSON_DIR, EDGE_DIR, RULE_CHAINS_DIR);
-    }
-
     public String getDataDir() {
         if (!StringUtils.isEmpty(dataDir)) {
             if (!Paths.get(this.dataDir).toFile().isDirectory()) {
@@ -168,11 +163,6 @@ public class InstallScripts {
     public void createDefaultRuleChains(TenantId tenantId) {
         Path tenantChainsDir = getTenantRuleChainsDir();
         loadRuleChainsFromPath(tenantId, tenantChainsDir);
-    }
-
-    public void createDefaultEdgeRuleChains(TenantId tenantId) {
-        Path edgeChainsDir = getEdgeRuleChainsDir();
-        loadRuleChainsFromPath(tenantId, edgeChainsDir);
     }
 
     private void loadRuleChainsFromPath(TenantId tenantId, Path ruleChainsPath) {
@@ -431,7 +421,6 @@ public class InstallScripts {
         try {
             createDefaultRuleChains(tenantId);
             createDefaultRuleChain(tenantId, "Thermostat");
-            createDefaultEdgeRuleChains(tenantId);
         } catch (Exception e) {
             log.error("Unable to load rule chain from json", e);
             throw new RuntimeException("Unable to load rule chain from json", e);

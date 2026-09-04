@@ -57,7 +57,6 @@ import java.util.stream.Stream;
 
 import static org.thingsboard.server.common.data.DataConstants.CF_QUEUE_NAME;
 import static org.thingsboard.server.common.data.DataConstants.CF_STATES_QUEUE_NAME;
-import static org.thingsboard.server.common.data.DataConstants.EDGE_QUEUE_NAME;
 import static org.thingsboard.server.common.data.DataConstants.MAIN_QUEUE_NAME;
 
 /**
@@ -98,14 +97,6 @@ public class HashPartitionService implements PartitionService {
     /** Version Control 队列分区数 */
     @Value("${queue.vc.partitions:10}")
     private Integer vcPartitions;
-
-    /** Edge 队列 topic */
-    @Value("${queue.edge.topic:tb_edge}")
-    private String edgeTopic;
-
-    /** Edge 队列分区数 */
-    @Value("${queue.edge.partitions:10}")
-    private Integer edgePartitions;
 
     /** EDQS 队列分区数 */
     @Value("${queue.edqs.partitions:12}")
@@ -174,7 +165,7 @@ public class HashPartitionService implements PartitionService {
     }
 
     /**
-     * 启动时注册系统级队列元数据（Core / VC / Edge / EDQS）。
+     * 启动时注册系统级队列元数据（Core / VC / EDQS）。
      * Rule Engine 队列：非 Transport 进程在此初始化；Transport 延后到 {@link #partitionsInit}。
      */
     @PostConstruct
@@ -195,11 +186,6 @@ public class HashPartitionService implements PartitionService {
         if (!isTransport(serviceInfoProvider.getServiceType())) {
             doInitRuleEnginePartitions();
         }
-
-        // Edge 挂在 Core 服务类型下，但 queueName 为 Edge
-        QueueKey edgeKey = coreKey.withQueueName(EDGE_QUEUE_NAME);
-        partitionSizesMap.put(edgeKey, edgePartitions);
-        partitionTopicsMap.put(edgeKey, edgeTopic);
 
         QueueKey edqsKey = new QueueKey(ServiceType.EDQS);
         partitionSizesMap.put(edqsKey, edqsPartitions);
@@ -847,7 +833,6 @@ public class HashPartitionService implements PartitionService {
                 }
             } else if (ServiceType.TB_CORE.equals(serviceType)) {
                 queueServiceList.computeIfAbsent(new QueueKey(serviceType), key -> new ArrayList<>()).add(instance);
-                queueServiceList.computeIfAbsent(new QueueKey(serviceType).withQueueName(EDGE_QUEUE_NAME), key -> new ArrayList<>()).add(instance);
             } else if (ServiceType.TB_VC_EXECUTOR.equals(serviceType)) {
                 queueServiceList.computeIfAbsent(new QueueKey(serviceType), key -> new ArrayList<>()).add(instance);
             } else if (ServiceType.EDQS.equals(serviceType)) {

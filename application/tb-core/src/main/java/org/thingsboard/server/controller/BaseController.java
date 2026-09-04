@@ -72,8 +72,6 @@ import org.thingsboard.server.common.data.asset.AssetProfile;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.cf.CalculatedField;
 import org.thingsboard.server.common.data.domain.Domain;
-import org.thingsboard.server.common.data.edge.Edge;
-import org.thingsboard.server.common.data.edge.EdgeInfo;
 import org.thingsboard.server.common.data.exception.EntityVersionMismatchException;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -87,7 +85,6 @@ import org.thingsboard.server.common.data.id.DashboardId;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.DomainId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityIdFactory;
 import org.thingsboard.server.common.data.id.EntityViewId;
@@ -142,7 +139,6 @@ import org.thingsboard.server.dao.device.DeviceCredentialsService;
 import org.thingsboard.server.dao.device.DeviceProfileService;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.domain.DomainService;
-import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
@@ -360,9 +356,6 @@ public abstract class BaseController {
     @Autowired
     protected TbAssetProfileCache assetProfileCache;
 
-    @Autowired(required = false)
-    protected EdgeService edgeService;
-
     @Autowired
     protected TbLogEntityActionService logEntityActionService;
 
@@ -390,10 +383,6 @@ public abstract class BaseController {
     @Value("${server.log_controller_error_stack_trace}")
     @Getter
     private boolean logControllerErrorStackTrace;
-
-    @Value("${edges.enabled}")
-    @Getter
-    protected boolean edgesEnabled;
 
     /**
      * 未声明的异常统一转成 {@link ThingsboardException} 再写 HTTP 错误响应。
@@ -685,9 +674,6 @@ public abstract class BaseController {
                 case ENTITY_VIEW:
                     checkEntityViewId(new EntityViewId(entityId.getId()), operation);
                     return;
-                case EDGE:
-                    checkEdgeId(new EdgeId(entityId.getId()), operation);
-                    return;
                 case WIDGETS_BUNDLE:
                     checkWidgetsBundleId(new WidgetsBundleId(entityId.getId()), operation);
                     return;
@@ -831,15 +817,6 @@ public abstract class BaseController {
     /** 加载仪表盘并校验权限。 */
     Dashboard checkDashboardId(DashboardId dashboardId, Operation operation) throws ThingsboardException {
         return checkEntityId(dashboardId, dashboardService::findDashboardById, operation);
-    }
-
-    /** 加载 Edge 并校验权限。 */
-    Edge checkEdgeId(EdgeId edgeId, Operation operation) throws ThingsboardException {
-        return checkEntityId(edgeId, edgeService::findEdgeById, operation);
-    }
-
-    EdgeInfo checkEdgeInfoId(EdgeId edgeId, Operation operation) throws ThingsboardException {
-        return checkEntityId(edgeId, edgeService::findEdgeInfoById, operation);
     }
 
     /** 加载仪表盘 Info 并校验权限。 */

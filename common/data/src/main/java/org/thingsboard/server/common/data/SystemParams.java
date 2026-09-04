@@ -24,7 +24,6 @@ import java.util.List;
 public class SystemParams {
     boolean userTokenAccessEnabled;
     List<String> allowedDashboardIds;
-    boolean edgesSupportEnabled;
     boolean hasRepository;
     boolean tbelEnabled;
     boolean persistDeviceStateToTelemetry;

@@ -318,8 +318,6 @@ import * as DashboardSettingsDialogComponent from '@home/components/dashboard-pa
 import * as ManageDashboardStatesDialogComponent from '@home/components/dashboard-page/states/manage-dashboard-states-dialog.component';
 import * as DashboardStateDialogComponent from '@home/components/dashboard-page/states/dashboard-state-dialog.component';
 import * as EmbedDashboardDialogComponent from '@home/components/widget/dialog/embed-dashboard-dialog.component';
-import * as EdgeDownlinkTableComponent from '@home/components/edge/edge-downlink-table.component';
-import * as EdgeDownlinkTableHeaderComponent from '@home/components/edge/edge-downlink-table-header.component';
 import * as DisplayWidgetTypesPanelComponent from '@home/components/dashboard-page/widget-types-panel.component';
 import * as AlarmDurationPredicateValueComponent from '@home/components/profile/alarm/alarm-duration-predicate-value.component';
 import * as DashboardImageDialogComponent from '@home/components/dashboard-page/dashboard-image-dialog.component';
@@ -661,8 +659,6 @@ class ModulesMap implements IModulesMap {
     '@home/components/dashboard-page/states/manage-dashboard-states-dialog.component': ManageDashboardStatesDialogComponent,
     '@home/components/dashboard-page/states/dashboard-state-dialog.component': DashboardStateDialogComponent,
     '@home/components/widget/dialog/embed-dashboard-dialog.component': EmbedDashboardDialogComponent,
-    '@home/components/edge/edge-downlink-table.component': EdgeDownlinkTableComponent,
-    '@home/components/edge/edge-downlink-table-header.component': EdgeDownlinkTableHeaderComponent,
     '@home/components/dashboard-page/widget-types-panel.component': DisplayWidgetTypesPanelComponent,
     '@home/components/profile/alarm/alarm-duration-predicate-value.component': AlarmDurationPredicateValueComponent,
     '@home/components/dashboard-page/dashboard-image-dialog.component': DashboardImageDialogComponent,

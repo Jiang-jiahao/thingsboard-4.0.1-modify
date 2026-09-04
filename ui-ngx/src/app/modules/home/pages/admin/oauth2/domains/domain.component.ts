@@ -63,8 +63,7 @@ export class DomainComponent extends EntityComponent<DomainInfo> {
       name: [entity?.name ? entity.name : '', [
         Validators.required, Validators.maxLength(255), Validators.pattern('^(?:\\w+(?::\\w+)?@)?[^\\s/]+(?::\\d+)?$')]],
       oauth2Enabled: isDefinedAndNotNull(entity?.oauth2Enabled) ? entity.oauth2Enabled : true,
-      oauth2ClientInfos: entity?.oauth2ClientInfos ? entity.oauth2ClientInfos.map(info => info.id.id) : [],
-      propagateToEdge: isDefinedAndNotNull(entity?.propagateToEdge) ? entity.propagateToEdge : false
+      oauth2ClientInfos: entity?.oauth2ClientInfos ? entity.oauth2ClientInfos.map(info => info.id.id) : []
     });
   }
 
@@ -72,8 +71,7 @@ export class DomainComponent extends EntityComponent<DomainInfo> {
     this.entityForm.patchValue({
       name: entity.name,
       oauth2Enabled: entity.oauth2Enabled,
-      oauth2ClientInfos: entity.oauth2ClientInfos?.map(info => info.id ? info.id.id : info),
-      propagateToEdge: entity.propagateToEdge
+      oauth2ClientInfos: entity.oauth2ClientInfos?.map(info => info.id ? info.id.id : info)
     });
   }
 

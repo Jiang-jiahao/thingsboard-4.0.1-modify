@@ -31,8 +31,6 @@ import { EntityTableConfig } from '@home/models/entity/entities-table-config.mod
 })
 export class RuleChainComponent extends EntityComponent<RuleChain> {
 
-  ruleChainScope: 'tenant' | 'edges' | 'edge';
-
   constructor(protected store: Store<AppState>,
               protected translate: TranslateService,
               @Inject('entity') protected entityValue: RuleChain,
@@ -40,11 +38,6 @@ export class RuleChainComponent extends EntityComponent<RuleChain> {
               public fb: UntypedFormBuilder,
               protected cd: ChangeDetectorRef) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
-  }
-
-  ngOnInit() {
-    this.ruleChainScope = this.entitiesTableConfig.componentsData.ruleChainScope;
-    super.ngOnInit();
   }
 
   hideDelete() {
@@ -85,31 +78,5 @@ export class RuleChainComponent extends EntityComponent<RuleChain> {
         verticalPosition: 'bottom',
         horizontalPosition: 'right'
       }));
-  }
-
-  isEdgeRootRuleChain() {
-    if (this.entitiesTableConfig && this.entityValue) {
-      return this.entitiesTableConfig.componentsData.edge?.rootRuleChainId?.id == this.entityValue.id.id;
-    } else {
-      return false;
-    }
-  }
-
-  isAutoAssignToEdgeRuleChain() {
-    if (this.entitiesTableConfig && this.entityValue) {
-      return !this.entityValue.root &&
-        this.entitiesTableConfig.componentsData?.autoAssignToEdgeRuleChainIds?.includes(this.entityValue.id.id);
-    } else {
-      return false;
-    }
-  }
-
-  isNotAutoAssignToEdgeRuleChain() {
-    if (this.entitiesTableConfig && this.entityValue) {
-      return !this.entityValue.root &&
-        !this.entitiesTableConfig.componentsData?.autoAssignToEdgeRuleChainIds?.includes(this.entityValue.id.id);
-    } else {
-      return false;
-    }
   }
 }

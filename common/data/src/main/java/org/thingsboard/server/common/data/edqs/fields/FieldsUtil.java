@@ -29,7 +29,6 @@ import org.thingsboard.server.common.data.TenantProfile;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.asset.Asset;
 import org.thingsboard.server.common.data.asset.AssetProfile;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.queue.QueueStats;
 import org.thingsboard.server.common.data.rule.RuleChain;
@@ -52,8 +51,6 @@ public class FieldsUtil {
             return toFields(device);
         } else if (entity instanceof Asset asset) {
             return toFields(asset);
-        } else if (entity instanceof Edge edge) {
-            return toFields(edge);
         } else if (entity instanceof EntityView entityView) {
             return toFields(entityView);
         } else if (entity instanceof User user) {
@@ -149,19 +146,6 @@ public class FieldsUtil {
                 .name(entity.getName())
                 .type(entity.getType())
                 .assetProfileId(entity.getAssetProfileId().getId())
-                .label(entity.getLabel())
-                .additionalInfo(getText(entity.getAdditionalInfo()))
-                .version(entity.getVersion())
-                .build();
-    }
-
-    private static EdgeFields toFields(Edge entity) {
-        return EdgeFields.builder()
-                .id(entity.getUuidId())
-                .createdTime(entity.getCreatedTime())
-                .customerId(getCustomerId(entity.getCustomerId()))
-                .name(entity.getName())
-                .type(entity.getType())
                 .label(entity.getLabel())
                 .additionalInfo(getText(entity.getAdditionalInfo()))
                 .version(entity.getVersion())

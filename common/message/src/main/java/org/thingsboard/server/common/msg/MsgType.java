@@ -96,8 +96,6 @@ public enum MsgType {
 
     DEVICE_DELETE_TO_DEVICE_ACTOR_MSG,
 
-    DEVICE_EDGE_UPDATE_TO_DEVICE_ACTOR_MSG,
-
     DEVICE_RPC_REQUEST_TO_DEVICE_ACTOR_MSG,
 
     DEVICE_RPC_RESPONSE_TO_DEVICE_ACTOR_MSG,
@@ -122,19 +120,6 @@ public enum MsgType {
      * Message that is sent by TransportRuleEngineService to Device Actor. Represents messages from the device itself.
      */
     TRANSPORT_TO_DEVICE_ACTOR_MSG,
-
-    /**
-     * Message that is sent on Edge Event to Edge Session
-     */
-    EDGE_EVENT_UPDATE_TO_EDGE_SESSION_MSG,
-    EDGE_HIGH_PRIORITY_TO_EDGE_SESSION_MSG,
-
-    /**
-     * Messages that are sent to and from edge session to start edge synchronization process
-     */
-    EDGE_SYNC_REQUEST_TO_EDGE_SESSION_MSG,
-    EDGE_SYNC_RESPONSE_FROM_EDGE_SESSION_MSG,
-
 
     CF_CACHE_INIT_MSG, // Sent to init caches for CF actor;
     CF_INIT_PROFILE_ENTITY_MSG, // Sent to init profile entities cache;

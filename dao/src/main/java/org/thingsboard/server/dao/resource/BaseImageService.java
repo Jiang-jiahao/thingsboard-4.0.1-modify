@@ -573,32 +573,6 @@ public class BaseImageService extends BaseResourceService implements ImageServic
         return images.values();
     }
 
-    @Override
-    public void inlineImageForEdge(HasImage entity) {
-        log.trace("Executing inlineImageForEdge [{}] [{}] [{}]", entity.getTenantId(), entity.getClass().getSimpleName(), entity.getName());
-        entity.setImage(inlineImage(entity.getTenantId(), "image", entity.getImage(), false));
-    }
-
-    @Override
-    public void inlineImagesForEdge(Dashboard dashboard) {
-        log.trace("Executing inlineImagesForEdge [{}] [Dashboard] [{}]", dashboard.getTenantId(), dashboard.getId());
-        inlineImageForEdge(dashboard);
-        inlineImages(dashboard.getTenantId(), dashboard.getConfiguration(), false);
-    }
-
-    @Override
-    public void inlineImagesForEdge(WidgetTypeDetails widgetTypeDetails) {
-        log.trace("Executing inlineImage [{}] [WidgetTypeDetails] [{}]", widgetTypeDetails.getTenantId(), widgetTypeDetails.getId());
-        inlineImageForEdge(widgetTypeDetails);
-        inlineImages(widgetTypeDetails.getTenantId(), widgetTypeDetails.getDescriptor(), false);
-    }
-
-    private void inlineImages(TenantId tenantId, JsonNode root, boolean addTbImagePrefix) {
-        processImages(tenantId, root, (key, imageInfo) -> {
-            return inlineImage(key, imageInfo, addTbImagePrefix);
-        });
-    }
-
     private String inlineImage(TenantId tenantId, String path, String url, boolean addTbImagePrefix) {
         return processImage(tenantId, path, url, (key, imageInfo) -> {
             return inlineImage(key, imageInfo, addTbImagePrefix);

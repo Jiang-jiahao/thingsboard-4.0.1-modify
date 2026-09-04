@@ -27,8 +27,6 @@ import static org.thingsboard.server.common.data.msg.TbMsgType.DELAY_TIMEOUT_SEL
 import static org.thingsboard.server.common.data.msg.TbMsgType.DEVICE_PROFILE_PERIODIC_SELF_MSG;
 import static org.thingsboard.server.common.data.msg.TbMsgType.DEVICE_PROFILE_UPDATE_SELF_MSG;
 import static org.thingsboard.server.common.data.msg.TbMsgType.DEVICE_UPDATE_SELF_MSG;
-import static org.thingsboard.server.common.data.msg.TbMsgType.ENTITY_ASSIGNED_TO_EDGE;
-import static org.thingsboard.server.common.data.msg.TbMsgType.ENTITY_UNASSIGNED_FROM_EDGE;
 import static org.thingsboard.server.common.data.msg.TbMsgType.GENERATOR_NODE_SELF_MSG;
 import static org.thingsboard.server.common.data.msg.TbMsgType.MSG_COUNT_SELF_MSG;
 import static org.thingsboard.server.common.data.msg.TbMsgType.NA;
@@ -41,8 +39,6 @@ class TbMsgTypeTest {
     private static final List<TbMsgType> typesWithNullRuleNodeConnection = List.of(
             ALARM,
             ALARM_DELETE,
-            ENTITY_ASSIGNED_TO_EDGE,
-            ENTITY_UNASSIGNED_FROM_EDGE,
             PROVISION_FAILURE,
             PROVISION_SUCCESS,
             SEND_EMAIL,

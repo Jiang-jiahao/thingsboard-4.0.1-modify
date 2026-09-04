@@ -116,7 +116,7 @@
         "timeout-required": "Необхідно вказати час очікування.",
         "timeout-invalid": "Це не схоже на правильний час очікування.",
         "enable-tls": "Увімкнути TLS",
-        "tls-version" : "Версія TLS",
+        "tls-version": "Версія TLS",
         "send-test-mail": "Надіслати тестове повідомлення",
         "use-system-mail-settings": "Використовувати параметри системного поштового сервера",
         "mail-templates": "Шаблони електронної пошти",
@@ -154,29 +154,29 @@
         "minimum-max-failed-login-attempts-range": "Максимальна кількість невдалих спроб входу не може бути негативною",
         "user-lockout-notification-email": "У разі блокування облікового запису користувача, надішліть сповіщення на електронну пошту",
         "smpp-provider": {
-          "smpp-version": "SMPP версія",
-          "smpp-host": "SMPP хост",
-          "smpp-host-required": "Необхідно вказати хост SMPP.",
-          "smpp-port": "SMPP порт",
-          "smpp-port-required": "Необхідно вказати порт SMPP.",
-          "system-id": "Id системи",
-          "system-id-required": "Необхідно вказати ID системи.",
-          "password": "Пароль",
-          "password-required": "Необхідно вказати пароль.",
-          "type-settings": "Налаштування типів",
-          "source-settings": "Налаштування джерела",
-          "destination-settings": "Налаштування призначення",
-          "additional-settings": "Додаткові налаштування",
-          "system-type": "Тип системи",
-          "bind-type": "Тип зв'язування",
-          "service-type": "Тип обслуговування",
-          "source-address": "Адреса джерела",
-          "source-ton": "Тип номера джерела",
-          "source-npi": "Ідентифікація плану нумерації джерела",
-          "destination-ton": "Тип номера призначення",
-          "destination-npi": "Ідентифікація плану нумерації призначення",
-          "address-range": "Діапазон адрес",
-          "coding-scheme": "Схема кодування"
+            "smpp-version": "SMPP версія",
+            "smpp-host": "SMPP хост",
+            "smpp-host-required": "Необхідно вказати хост SMPP.",
+            "smpp-port": "SMPP порт",
+            "smpp-port-required": "Необхідно вказати порт SMPP.",
+            "system-id": "Id системи",
+            "system-id-required": "Необхідно вказати ID системи.",
+            "password": "Пароль",
+            "password-required": "Необхідно вказати пароль.",
+            "type-settings": "Налаштування типів",
+            "source-settings": "Налаштування джерела",
+            "destination-settings": "Налаштування призначення",
+            "additional-settings": "Додаткові налаштування",
+            "system-type": "Тип системи",
+            "bind-type": "Тип зв'язування",
+            "service-type": "Тип обслуговування",
+            "source-address": "Адреса джерела",
+            "source-ton": "Тип номера джерела",
+            "source-npi": "Ідентифікація плану нумерації джерела",
+            "destination-ton": "Тип номера призначення",
+            "destination-npi": "Ідентифікація плану нумерації призначення",
+            "address-range": "Діапазон адрес",
+            "coding-scheme": "Схема кодування"
         },
         "resources": "Ресурси"
     },
@@ -397,7 +397,7 @@
         "selected-telemetry": "{ count, plural, =1 {1 telemetry unit} other {# telemetry units} } selected"
     },
     "api-usage": {
-    "api-usage": "Використання API"
+        "api-usage": "Використання API"
     },
     "audit-log": {
         "audit": "Операція",
@@ -907,11 +907,6 @@
     "direction": {
         "column": "Колонка",
         "row": "Рядок"
-    },
-    "edge": {
-        "management": "Керування Edge",
-        "instances": "Інстанси",
-        "rulechain-templates": "Шаблони ланцюжків правил"
     },
     "error": {
         "unable-to-connect": "Неможливо підключитися до сервера! Перевірте підключення до Інтернету.",
@@ -1446,8 +1441,8 @@
         "invalid-file-error": "Неправильний формат файлу"
     },
     "feature": {
-    "advanced-features": "Додаткові можливості"
-  },
+        "advanced-features": "Додаткові можливості"
+    },
     "fullscreen": {
         "expand": "Відкрити у повноекранному режимі",
         "exit": "Вийти з повноекранного режиму",
@@ -2129,9 +2124,9 @@
         "timezone-required": "Необхідно вказати часовий пояс."
     },
     "queue": {
-      "select_name": "Виберіть назву для Queue",
-      "name": "Назва для Queue",
-      "name_required": "Поле 'Назва для Queue' необхідно заповнити!"
+        "select_name": "Виберіть назву для Queue",
+        "name": "Назва для Queue",
+        "name_required": "Поле 'Назва для Queue' необхідно заповнити!"
     },
     "tenant": {
         "tenant": "Власник",
@@ -2605,7 +2600,7 @@
             "row-double-click": "Дії при подвійному натисканні на рядок"
         }
     },
-    "paginator" : {
+    "paginator": {
         "items-per-page": "Елементів на сторінці:",
         "first-page-label": "Перша сторінка",
         "last-page-label": "Остання сторінка",

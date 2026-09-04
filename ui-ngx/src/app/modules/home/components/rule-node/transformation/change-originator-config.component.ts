@@ -37,7 +37,7 @@ export class ChangeOriginatorConfigComponent extends RuleNodeConfigurationCompon
 
   changeOriginatorConfigForm: FormGroup;
 
-  allowedEntityTypes = [EntityType.DEVICE, EntityType.ASSET, EntityType.ENTITY_VIEW, EntityType.USER, EntityType.EDGE];
+  allowedEntityTypes = [EntityType.DEVICE, EntityType.ASSET, EntityType.ENTITY_VIEW, EntityType.USER];
 
   constructor(private fb: FormBuilder) {
     super();

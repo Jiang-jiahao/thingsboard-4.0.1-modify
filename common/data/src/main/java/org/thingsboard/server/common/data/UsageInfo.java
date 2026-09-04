@@ -30,8 +30,6 @@ public class UsageInfo {
     private long maxUsers;
     private long dashboards;
     private long maxDashboards;
-    private long edges;
-    private long maxEdges;
 
     private long transportMessages;
     private long maxTransportMessages;

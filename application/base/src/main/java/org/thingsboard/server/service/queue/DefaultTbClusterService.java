@@ -23,13 +23,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
-import org.thingsboard.server.cache.TbTransactionalCache;
 import org.thingsboard.server.cluster.TbClusterService;
 import org.thingsboard.server.common.data.ApiUsageState;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
-import org.thingsboard.server.common.data.EdgeUtils;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.HasName;
 import org.thingsboard.server.common.data.HasRuleEngineProfile;
@@ -39,39 +37,27 @@ import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.TenantProfile;
 import org.thingsboard.server.common.data.asset.Asset;
 import org.thingsboard.server.common.data.cf.CalculatedField;
-import org.thingsboard.server.common.data.edge.EdgeEventActionType;
-import org.thingsboard.server.common.data.edge.EdgeEventType;
 import org.thingsboard.server.common.data.id.AssetId;
 import org.thingsboard.server.common.data.id.AssetProfileId;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.RuleChainId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.msg.TbMsgType;
-import org.thingsboard.server.common.data.page.PageData;
-import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.plugin.ComponentLifecycleEvent;
 import org.thingsboard.server.common.data.queue.Queue;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.ToDeviceActorNotificationMsg;
-import org.thingsboard.server.common.msg.edge.EdgeEventUpdateMsg;
-import org.thingsboard.server.common.msg.edge.EdgeHighPriorityMsg;
-import org.thingsboard.server.common.msg.edge.FromEdgeSyncResponse;
-import org.thingsboard.server.common.msg.edge.ToEdgeSyncRequest;
 import org.thingsboard.server.common.msg.plugin.ComponentLifecycleMsg;
 import org.thingsboard.server.common.msg.queue.ServiceType;
 import org.thingsboard.server.common.msg.queue.TopicPartitionInfo;
 import org.thingsboard.server.common.msg.rpc.FromDeviceRpcResponse;
-import org.thingsboard.server.common.msg.rule.engine.DeviceEdgeUpdateMsg;
 import org.thingsboard.server.common.msg.rule.engine.DeviceNameOrTypeUpdateMsg;
 import org.thingsboard.server.common.util.ProtoUtils;
-import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.gen.transport.TransportProtos.ComponentLifecycleMsgProto;
 import org.thingsboard.server.gen.transport.TransportProtos.DeviceStateServiceMsgProto;
-import org.thingsboard.server.gen.transport.TransportProtos.EdgeNotificationMsgProto;
 import org.thingsboard.server.gen.transport.TransportProtos.EntityDeleteMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.FromDeviceRPCResponseProto;
 import org.thingsboard.server.gen.transport.TransportProtos.QueueDeleteMsg;
@@ -82,8 +68,6 @@ import org.thingsboard.server.gen.transport.TransportProtos.ToCalculatedFieldMsg
 import org.thingsboard.server.gen.transport.TransportProtos.ToCalculatedFieldNotificationMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToCoreMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToCoreNotificationMsg;
-import org.thingsboard.server.gen.transport.TransportProtos.ToEdgeMsg;
-import org.thingsboard.server.gen.transport.TransportProtos.ToEdgeNotificationMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToRuleEngineMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToRuleEngineNotificationMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToTransportMsg;
@@ -115,7 +99,7 @@ import static org.thingsboard.server.common.util.ProtoUtils.toProto;
  * {@link TbClusterService} 的默认实现，作为集群消息分发的统一门面。
  * <p>
  * 通过 {@link PartitionService} 解析目标分区，再经 {@link TbQueueProducerProvider} 将消息投递到对应队列。
- * 涵盖向 Core、Rule Engine、Transport、Edge、Version Control、Calculated Field 等服务的推送，
+ * 涵盖向 Core、Rule Engine、Transport、Version Control、Calculated Field 等服务的推送，
  * 以及组件生命周期、队列变更的广播，和设备/租户配置变更通知。
  */
 @Service
@@ -126,9 +110,6 @@ public class DefaultTbClusterService implements TbClusterService {
     /** 是否启用集群消息统计输出 */
     @Value("${cluster.stats.enabled:false}")
     private boolean statsEnabled;
-    /** 是否启用 Edge 功能 */
-    @Value("${edges.enabled:true}")
-    protected boolean edgesEnabled;
 
     /** 发往 Core 的业务消息计数 */
     private final AtomicInteger toCoreMsgs = new AtomicInteger(0);
@@ -140,10 +121,6 @@ public class DefaultTbClusterService implements TbClusterService {
     private final AtomicInteger toRuleEngineNfs = new AtomicInteger(0);
     /** 发往 Transport 的通知消息计数 */
     private final AtomicInteger toTransportNfs = new AtomicInteger(0);
-    /** 发往 Edge 的业务消息计数 */
-    private final AtomicInteger toEdgeMsgs = new AtomicInteger(0);
-    /** 发往 Edge 的通知消息计数 */
-    private final AtomicInteger toEdgeNfs = new AtomicInteger(0);
 
     /** 分区解析服务，用于确定消息目标 Topic 分区 */
     @Autowired
@@ -172,10 +149,6 @@ public class DefaultTbClusterService implements TbClusterService {
     private final TbAssetProfileCache assetProfileCache;
     /** 网关设备通知服务（可选） */
     private final Optional<GatewayNotificationsService> gatewayNotificationsService;
-    /** Edge 数据访问服务 */
-    private final EdgeService edgeService;
-    /** Edge 与 Core 服务实例 ID 的映射缓存 */
-    private final TbTransactionalCache<EdgeId, String> edgeIdServiceIdCache;
 
     /**
      * 向 Core 服务推送业务消息。
@@ -660,107 +633,6 @@ public class DefaultTbClusterService implements TbClusterService {
     }
 
     /**
-     * 向 Edge 队列推送业务消息。
-     * 路由目标：TB_CORE 的 Edge 专用队列分区。
-     */
-    @Override
-    public void pushMsgToEdge(TenantId tenantId, EntityId entityId, ToEdgeMsg msg, TbQueueCallback callback) {
-        TopicPartitionInfo tpi = partitionService.resolve(ServiceType.TB_CORE, DataConstants.EDGE_QUEUE_NAME, tenantId, entityId);
-        TbQueueProducer<TbProtoQueueMsg<ToEdgeMsg>> toEdgeProducer = producerProvider.getTbEdgeMsgProducer();
-        toEdgeProducer.send(tpi, new TbProtoQueueMsg<>(UUID.randomUUID(), msg), callback);
-        toEdgeMsgs.incrementAndGet();
-    }
-
-    /**
-     * 处理 Edge 高优先级事件，推送至 Edge notifications Topic。
-     */
-    @Override
-    public void onEdgeHighPriorityMsg(EdgeHighPriorityMsg msg) {
-        log.trace("[{}] Processing edge event for edgeId: {}", msg.getTenantId(), msg.getEdgeEvent().getEdgeId());
-        ToEdgeNotificationMsg toEdgeNotificationMsg = ToEdgeNotificationMsg.newBuilder().setEdgeHighPriority(toProto(msg)).build();
-        processEdgeNotification(msg.getEdgeEvent().getEdgeId(), toEdgeNotificationMsg);
-    }
-
-    /**
-     * 处理 Edge 事件更新通知，推送至 Edge notifications Topic。
-     */
-    @Override
-    public void onEdgeEventUpdate(EdgeEventUpdateMsg msg) {
-        log.trace("[{}] Processing edge event update for edgeId: {}", msg.getTenantId(), msg.getEdgeId());
-        ToEdgeNotificationMsg toEdgeNotificationMsg = ToEdgeNotificationMsg.newBuilder().setEdgeEventUpdate(toProto(msg)).build();
-        processEdgeNotification(msg.getEdgeId(), toEdgeNotificationMsg);
-    }
-
-    /**
-     * 处理 Edge 生命周期状态变更，推送至 Edge notifications Topic。
-     */
-    @Override
-    public void onEdgeStateChangeEvent(ComponentLifecycleMsg msg) {
-        log.trace("[{}] Processing {} state change event: {}", msg.getTenantId(), EntityType.EDGE, msg.getEvent());
-        ComponentLifecycleMsgProto componentLifecycleMsgProto = toProto(msg);
-        ToEdgeNotificationMsg toEdgeNotificationMsg = ToEdgeNotificationMsg.newBuilder().setComponentLifecycle(componentLifecycleMsgProto).build();
-        processEdgeNotification((EdgeId) msg.getEntityId(), toEdgeNotificationMsg);
-    }
-
-    /**
-     * 向 Edge 推送同步请求通知。
-     */
-    @Override
-    public void pushEdgeSyncRequestToEdge(ToEdgeSyncRequest request) {
-        log.trace("[{}] Processing edge sync request for edgeId: {}", request.getTenantId(), request.getEdgeId());
-        ToEdgeNotificationMsg toEdgeNotificationMsg = ToEdgeNotificationMsg.newBuilder().setToEdgeSyncRequest(toProto(request)).build();
-        processEdgeNotification(request.getEdgeId(), toEdgeNotificationMsg);
-    }
-
-    /**
-     * 将 Edge 同步响应推送回发起请求的 Core 实例。
-     */
-    @Override
-    public void pushEdgeSyncResponseToCore(FromEdgeSyncResponse response, String requestServiceId) {
-        log.trace("[{}] Processing edge sync response for edgeId: {}", response.getTenantId(), response.getEdgeId());
-        ToEdgeNotificationMsg toEdgeNotificationMsg = ToEdgeNotificationMsg.newBuilder().setFromEdgeSyncResponse(toProto(response)).build();
-        pushMsgToEdgeNotification(toEdgeNotificationMsg, requestServiceId);
-    }
-
-    /**
-     * 分发 Edge 通知：优先按 edgeId 缓存定位 Core 实例；未命中则广播至所有 Core。
-     */
-    private void processEdgeNotification(EdgeId edgeId, ToEdgeNotificationMsg toEdgeNotificationMsg) {
-        if (edgesEnabled) {
-            var serviceIdOpt = Optional.ofNullable(edgeIdServiceIdCache.get(edgeId));
-            serviceIdOpt.ifPresentOrElse(
-                    serviceId -> pushMsgToEdgeNotification(toEdgeNotificationMsg, serviceId.get()),
-                    () -> broadcastEdgeNotification(edgeId, toEdgeNotificationMsg)
-            );
-        } else {
-            log.trace("Edges disabled. Ignoring edge notification {} for edgeId: {}", toEdgeNotificationMsg, edgeId);
-        }
-    }
-
-    /**
-     * 向指定 Core 实例的 Edge notifications Topic 推送通知。
-     */
-    private void pushMsgToEdgeNotification(ToEdgeNotificationMsg toEdgeNotificationMsg, String serviceId) {
-        TopicPartitionInfo tpi = topicService.getEdgeNotificationsTopic(serviceId);
-        TbQueueProducer<TbProtoQueueMsg<ToEdgeNotificationMsg>> toEdgeNotificationProducer = producerProvider.getTbEdgeNotificationsMsgProducer();
-        toEdgeNotificationProducer.send(tpi, new TbProtoQueueMsg<>(UUID.randomUUID(), toEdgeNotificationMsg), null);
-        toEdgeNfs.incrementAndGet();
-    }
-
-    /**
-     * 向所有 Core 实例广播 Edge 通知（缓存未命中时的兜底策略）。
-     */
-    private void broadcastEdgeNotification(EdgeId edgeId, ToEdgeNotificationMsg toEdgeNotificationMsg) {
-        TbQueueProducer<TbProtoQueueMsg<ToEdgeNotificationMsg>> toEdgeNotificationProducer = producerProvider.getTbEdgeNotificationsMsgProducer();
-        Set<String> serviceIds = partitionService.getAllServiceIds(ServiceType.TB_CORE);
-        for (String serviceId : serviceIds) {
-            TopicPartitionInfo tpi = topicService.getEdgeNotificationsTopic(serviceId);
-            toEdgeNotificationProducer.send(tpi, new TbProtoQueueMsg<>(edgeId.getId(), toEdgeNotificationMsg), null);
-            toEdgeNfs.incrementAndGet();
-        }
-    }
-
-    /**
      * 广播组件生命周期消息。
      * <p>
      * 对租户/配置/设备等特定实体类型，同时通知 Core 与 Rule Engine；
@@ -814,11 +686,9 @@ public class DefaultTbClusterService implements TbClusterService {
             int toRuleEngineMsgsCnt = toRuleEngineMsgs.getAndSet(0);
             int toRuleEngineNfsCnt = toRuleEngineNfs.getAndSet(0);
             int toTransportNfsCnt = toTransportNfs.getAndSet(0);
-            int toEdgeMsgCnt = toEdgeMsgs.getAndSet(0);
-            int toEdgeNfsCnt = toEdgeNfs.getAndSet(0);
-            if (toCoreMsgCnt > 0 || toCoreNfsCnt > 0 || toRuleEngineMsgsCnt > 0 || toRuleEngineNfsCnt > 0 || toTransportNfsCnt > 0 || toEdgeMsgCnt > 0 || toEdgeNfsCnt > 0) {
-                log.info("To TbCore: [{}] messages [{}] notifications; To TbRuleEngine: [{}] messages [{}] notifications; To Transport: [{}] notifications;" +
-                        "To Edge: [{}] messages [{}] notifications", toCoreMsgCnt, toCoreNfsCnt, toRuleEngineMsgsCnt, toRuleEngineNfsCnt, toTransportNfsCnt, toEdgeMsgCnt, toEdgeNfsCnt);
+            if (toCoreMsgCnt > 0 || toCoreNfsCnt > 0 || toRuleEngineMsgsCnt > 0 || toRuleEngineNfsCnt > 0 || toTransportNfsCnt > 0) {
+                log.info("To TbCore: [{}] messages [{}] notifications; To TbRuleEngine: [{}] messages [{}] notifications; To Transport: [{}] notifications",
+                        toCoreMsgCnt, toCoreNfsCnt, toRuleEngineMsgsCnt, toRuleEngineNfsCnt, toTransportNfsCnt);
             }
         }
     }
@@ -907,77 +777,6 @@ public class DefaultTbClusterService implements TbClusterService {
     @Override
     public void onCalculatedFieldDeleted(CalculatedField calculatedField, TbQueueCallback callback) {
         broadcastEntityStateChangeEvent(calculatedField.getTenantId(), calculatedField.getId(), ComponentLifecycleEvent.DELETED);
-    }
-
-    /**
-     * 向 Edge 服务发送实体变更通知消息。
-     * 路由目标：TB_CORE Edge 队列；设备实体还会额外通知 Core 设备 Actor。
-     */
-    @Override
-    public void sendNotificationMsgToEdge(TenantId tenantId, EdgeId edgeId, EntityId entityId, String body, EdgeEventType type, EdgeEventActionType action, EdgeId originatorEdgeId) {
-        if (!edgesEnabled) {
-            return;
-        }
-        if (type == null) {
-            if (entityId != null) {
-                type = EdgeUtils.getEdgeEventTypeByEntityType(entityId.getEntityType());
-            } else {
-                log.trace("[{}] entity id and type are null. Ignoring this notification", tenantId);
-                return;
-            }
-            if (type == null) {
-                log.trace("[{}] edge event type is null. Ignoring this notification [{}]", tenantId, entityId);
-                return;
-            }
-        }
-        EdgeNotificationMsgProto.Builder builder = EdgeNotificationMsgProto.newBuilder();
-        builder.setTenantIdMSB(tenantId.getId().getMostSignificantBits());
-        builder.setTenantIdLSB(tenantId.getId().getLeastSignificantBits());
-        builder.setType(type.name());
-        builder.setAction(action.name());
-        if (entityId != null) {
-            builder.setEntityIdMSB(entityId.getId().getMostSignificantBits());
-            builder.setEntityIdLSB(entityId.getId().getLeastSignificantBits());
-            builder.setEntityType(entityId.getEntityType().name());
-        }
-        if (edgeId != null) {
-            builder.setEdgeIdMSB(edgeId.getId().getMostSignificantBits());
-            builder.setEdgeIdLSB(edgeId.getId().getLeastSignificantBits());
-        }
-        if (body != null) {
-            builder.setBody(body);
-        }
-        if (originatorEdgeId != null) {
-            builder.setOriginatorEdgeIdMSB(originatorEdgeId.getId().getMostSignificantBits());
-            builder.setOriginatorEdgeIdLSB(originatorEdgeId.getId().getLeastSignificantBits());
-        }
-        EdgeNotificationMsgProto msg = builder.build();
-        log.trace("[{}] sending notification to edge service {}", tenantId.getId(), msg);
-        pushMsgToEdge(tenantId, entityId != null ? entityId : tenantId, ToEdgeMsg.newBuilder().setEdgeNotificationMsg(msg).build(), null);
-
-        if (entityId != null && EntityType.DEVICE.equals(entityId.getEntityType())) {
-            pushDeviceUpdateMessage(tenantId, edgeId, entityId, action);
-        }
-    }
-
-    /**
-     * 设备与 Edge 关联关系变更时，通知 Core 设备 Actor 更新 Edge 绑定。
-     */
-    private void pushDeviceUpdateMessage(TenantId tenantId, EdgeId edgeId, EntityId entityId, EdgeEventActionType action) {
-        log.trace("{} Going to send edge update notification for device actor, device id {}, edge id {}", tenantId, entityId, edgeId);
-        switch (action) {
-            case ASSIGNED_TO_EDGE -> pushMsgToCore(new DeviceEdgeUpdateMsg(tenantId, new DeviceId(entityId.getId()), edgeId), null);
-            case UNASSIGNED_FROM_EDGE -> {
-                EdgeId relatedEdgeId = findRelatedEdgeIdIfAny(tenantId, entityId);
-                pushMsgToCore(new DeviceEdgeUpdateMsg(tenantId, new DeviceId(entityId.getId()), relatedEdgeId), null);
-            }
-        }
-    }
-
-    /** 查询实体仍关联的 Edge ID（取消分配时用于确定新的绑定关系）。 */
-    private EdgeId findRelatedEdgeIdIfAny(TenantId tenantId, EntityId entityId) {
-        PageData<EdgeId> pageData = edgeService.findRelatedEdgeIdsByEntityId(tenantId, entityId, new PageLink(1));
-        return Optional.ofNullable(pageData).filter(pd -> pd.getTotalElements() > 0).map(pd -> pd.getData().get(0)).orElse(null);
     }
 
     /**

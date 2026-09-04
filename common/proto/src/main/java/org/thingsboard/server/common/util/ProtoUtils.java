@@ -16,7 +16,6 @@
 package org.thingsboard.server.common.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.common.util.JacksonUtil;
@@ -28,7 +27,6 @@ import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceProfileProvisionType;
 import org.thingsboard.server.common.data.DeviceProfileType;
 import org.thingsboard.server.common.data.DeviceTransportType;
-import org.thingsboard.server.common.data.EdgeUtils;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.ResourceSubType;
 import org.thingsboard.server.common.data.ResourceType;
@@ -40,16 +38,12 @@ import org.thingsboard.server.common.data.device.data.CoapDeviceTransportConfigu
 import org.thingsboard.server.common.data.device.data.Lwm2mDeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.PowerMode;
 import org.thingsboard.server.common.data.device.data.PowerSavingConfiguration;
-import org.thingsboard.server.common.data.edge.EdgeEvent;
-import org.thingsboard.server.common.data.edge.EdgeEventActionType;
-import org.thingsboard.server.common.data.edge.EdgeEventType;
 import org.thingsboard.server.common.data.id.ApiUsageStateId;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DashboardId;
 import org.thingsboard.server.common.data.id.DeviceCredentialsId;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityIdFactory;
 import org.thingsboard.server.common.data.id.OtaPackageId;
@@ -77,10 +71,6 @@ import org.thingsboard.server.common.data.security.DeviceCredentialsType;
 import org.thingsboard.server.common.data.sync.vc.RepositoryAuthMethod;
 import org.thingsboard.server.common.data.sync.vc.RepositorySettings;
 import org.thingsboard.server.common.msg.ToDeviceActorNotificationMsg;
-import org.thingsboard.server.common.msg.edge.EdgeEventUpdateMsg;
-import org.thingsboard.server.common.msg.edge.EdgeHighPriorityMsg;
-import org.thingsboard.server.common.msg.edge.FromEdgeSyncResponse;
-import org.thingsboard.server.common.msg.edge.ToEdgeSyncRequest;
 import org.thingsboard.server.common.msg.plugin.ComponentLifecycleMsg;
 import org.thingsboard.server.common.msg.rpc.FromDeviceRpcResponse;
 import org.thingsboard.server.common.msg.rpc.FromDeviceRpcResponseActorMsg;
@@ -90,7 +80,6 @@ import org.thingsboard.server.common.msg.rpc.ToDeviceRpcRequestActorMsg;
 import org.thingsboard.server.common.msg.rule.engine.DeviceAttributesEventNotificationMsg;
 import org.thingsboard.server.common.msg.rule.engine.DeviceCredentialsUpdateNotificationMsg;
 import org.thingsboard.server.common.msg.rule.engine.DeviceDeleteMsg;
-import org.thingsboard.server.common.msg.rule.engine.DeviceEdgeUpdateMsg;
 import org.thingsboard.server.common.msg.rule.engine.DeviceNameOrTypeUpdateMsg;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.gen.transport.TransportProtos.KeyValueProto;
@@ -171,179 +160,6 @@ public class ProtoUtils {
 
     public static EntityType fromProto(TransportProtos.EntityTypeProto entityType) {
         return entityTypeByProtoNumber[entityType.getNumber()];
-    }
-
-    public static TransportProtos.ToEdgeSyncRequestMsgProto toProto(ToEdgeSyncRequest request) {
-        return TransportProtos.ToEdgeSyncRequestMsgProto.newBuilder()
-                .setTenantIdMSB(request.getTenantId().getId().getMostSignificantBits())
-                .setTenantIdLSB(request.getTenantId().getId().getLeastSignificantBits())
-                .setRequestIdMSB(request.getId().getMostSignificantBits())
-                .setRequestIdLSB(request.getId().getLeastSignificantBits())
-                .setEdgeIdMSB(request.getEdgeId().getId().getMostSignificantBits())
-                .setEdgeIdLSB(request.getEdgeId().getId().getLeastSignificantBits())
-                .setServiceId(request.getServiceId())
-                .build();
-    }
-
-    public static ToEdgeSyncRequest fromProto(TransportProtos.ToEdgeSyncRequestMsgProto proto) {
-        return new ToEdgeSyncRequest(
-                new UUID(proto.getRequestIdMSB(), proto.getRequestIdLSB()),
-                TenantId.fromUUID(new UUID(proto.getTenantIdMSB(), proto.getTenantIdLSB())),
-                EdgeId.fromUUID(new UUID(proto.getEdgeIdMSB(), proto.getEdgeIdLSB())),
-                proto.getServiceId()
-        );
-    }
-
-    public static TransportProtos.FromEdgeSyncResponseMsgProto toProto(FromEdgeSyncResponse response) {
-        return TransportProtos.FromEdgeSyncResponseMsgProto.newBuilder()
-                .setTenantIdMSB(response.getTenantId().getId().getMostSignificantBits())
-                .setTenantIdLSB(response.getTenantId().getId().getLeastSignificantBits())
-                .setResponseIdMSB(response.getId().getMostSignificantBits())
-                .setResponseIdLSB(response.getId().getLeastSignificantBits())
-                .setEdgeIdMSB(response.getEdgeId().getId().getMostSignificantBits())
-                .setEdgeIdLSB(response.getEdgeId().getId().getLeastSignificantBits())
-                .setSuccess(response.isSuccess())
-                .setError(response.getError())
-                .build();
-    }
-
-    public static FromEdgeSyncResponse fromProto(TransportProtos.FromEdgeSyncResponseMsgProto proto) {
-        return new FromEdgeSyncResponse(
-                new UUID(proto.getResponseIdMSB(), proto.getResponseIdLSB()),
-                TenantId.fromUUID(new UUID(proto.getTenantIdMSB(), proto.getTenantIdLSB())),
-                EdgeId.fromUUID(new UUID(proto.getEdgeIdMSB(), proto.getEdgeIdLSB())),
-                proto.getSuccess(),
-                proto.getError()
-        );
-    }
-
-    public static TransportProtos.EdgeEventMsgProto toProto(EdgeEvent edgeEvent) {
-        TransportProtos.EdgeEventMsgProto.Builder builder = TransportProtos.EdgeEventMsgProto.newBuilder();
-
-        builder.setTenantIdMSB(edgeEvent.getTenantId().getId().getMostSignificantBits());
-        builder.setTenantIdLSB(edgeEvent.getTenantId().getId().getLeastSignificantBits());
-        builder.setEntityType(edgeEvent.getType().name());
-        builder.setAction(edgeEvent.getAction().name());
-
-        if (edgeEvent.getEdgeId() != null) {
-            builder.setEdgeIdMSB(edgeEvent.getEdgeId().getId().getMostSignificantBits());
-            builder.setEdgeIdLSB(edgeEvent.getEdgeId().getId().getLeastSignificantBits());
-        }
-        if (edgeEvent.getEntityId() != null) {
-            builder.setEntityIdMSB(edgeEvent.getEntityId().getMostSignificantBits());
-            builder.setEntityIdLSB(edgeEvent.getEntityId().getLeastSignificantBits());
-        }
-        if (edgeEvent.getBody() != null) {
-            builder.setBody(JacksonUtil.toString(edgeEvent.getBody()));
-        }
-
-        return builder.build();
-    }
-
-    public static EdgeEvent fromProto(TransportProtos.EdgeEventMsgProto proto) {
-        EdgeEvent edgeEvent = new EdgeEvent();
-        TenantId tenantId = new TenantId(new UUID(proto.getTenantIdMSB(), proto.getTenantIdLSB()));
-        edgeEvent.setTenantId(tenantId);
-        edgeEvent.setType(EdgeEventType.valueOf(proto.getEntityType()));
-        edgeEvent.setAction(EdgeEventActionType.valueOf(proto.getAction()));
-
-        if (proto.hasEdgeIdMSB() && proto.hasEdgeIdLSB()) {
-            edgeEvent.setEdgeId(new EdgeId(new UUID(proto.getEdgeIdMSB(), proto.getEdgeIdLSB())));
-        }
-        if (proto.hasEntityIdMSB() && proto.hasEntityIdLSB()) {
-            edgeEvent.setEntityId(new UUID(proto.getEntityIdMSB(), proto.getEntityIdLSB()));
-        }
-        if (proto.hasBody()) {
-            edgeEvent.setBody(JacksonUtil.toJsonNode(proto.getBody()));
-        }
-
-        return edgeEvent;
-    }
-
-    public static TransportProtos.EdgeHighPriorityMsgProto toProto(EdgeHighPriorityMsg msg) {
-        TransportProtos.EdgeHighPriorityMsgProto.Builder builder = TransportProtos.EdgeHighPriorityMsgProto.newBuilder()
-                .setTenantIdMSB(msg.getTenantId().getId().getMostSignificantBits())
-                .setTenantIdLSB(msg.getTenantId().getId().getLeastSignificantBits())
-                .setType(msg.getEdgeEvent().getType().name())
-                .setAction(msg.getEdgeEvent().getAction().name());
-
-        if (msg.getEdgeEvent().getEntityId() != null) {
-            builder.setEntityIdMSB(msg.getEdgeEvent().getEntityId().getMostSignificantBits());
-            builder.setEntityIdLSB(msg.getEdgeEvent().getEntityId().getLeastSignificantBits());
-        }
-        if (msg.getEdgeEvent().getEdgeId() != null) {
-            builder.setEdgeIdMSB(msg.getEdgeEvent().getEdgeId().getId().getMostSignificantBits());
-            builder.setEdgeIdLSB(msg.getEdgeEvent().getEdgeId().getId().getLeastSignificantBits());
-        }
-        if (msg.getEdgeEvent().getBody() != null) {
-            builder.setBody(JacksonUtil.toString(msg.getEdgeEvent().getBody()));
-        }
-
-        return builder.build();
-    }
-
-    public static EdgeHighPriorityMsg fromProto(TransportProtos.EdgeHighPriorityMsgProto proto) {
-        EdgeEventType type = EdgeEventType.valueOf(proto.getType());
-        EdgeEventActionType actionType = EdgeEventActionType.valueOf(proto.getAction());
-        JsonNode body = proto.hasBody() ? JacksonUtil.toJsonNode(proto.getBody()) : null;
-
-        EdgeId edgeId = null;
-        if (proto.hasEdgeIdMSB() && proto.hasEdgeIdLSB()) {
-            edgeId = EdgeId.fromUUID(new UUID(proto.getEdgeIdMSB(), proto.getEdgeIdLSB()));
-        }
-
-        EntityId entityId = null;
-        if (proto.hasEntityIdMSB() && proto.hasEntityIdLSB()) {
-            entityId = EntityIdFactory.getByEdgeEventTypeAndUuid(type, new UUID(proto.getEntityIdMSB(), proto.getEntityIdLSB()));
-        }
-
-        return new EdgeHighPriorityMsg(
-                TenantId.fromUUID(new UUID(proto.getTenantIdMSB(), proto.getTenantIdLSB())),
-                EdgeUtils.constructEdgeEvent(TenantId.fromUUID(new UUID(proto.getTenantIdMSB(), proto.getTenantIdLSB())),
-                        edgeId, type, actionType, entityId, body)
-        );
-    }
-
-    public static TransportProtos.EdgeEventUpdateMsgProto toProto(EdgeEventUpdateMsg msg) {
-        return TransportProtos.EdgeEventUpdateMsgProto.newBuilder()
-                .setTenantIdMSB(msg.getTenantId().getId().getMostSignificantBits())
-                .setTenantIdLSB(msg.getTenantId().getId().getLeastSignificantBits())
-                .setEdgeIdMSB(msg.getEdgeId().getId().getMostSignificantBits())
-                .setEdgeIdLSB(msg.getEdgeId().getId().getLeastSignificantBits())
-                .build();
-    }
-
-    public static EdgeEventUpdateMsg fromProto(TransportProtos.EdgeEventUpdateMsgProto proto) {
-        return new EdgeEventUpdateMsg(
-                TenantId.fromUUID(new UUID(proto.getTenantIdMSB(), proto.getTenantIdLSB())),
-                EdgeId.fromUUID(new UUID(proto.getEdgeIdMSB(), proto.getEdgeIdLSB()))
-        );
-    }
-
-    private static TransportProtos.DeviceEdgeUpdateMsgProto toProto(DeviceEdgeUpdateMsg msg) {
-        TransportProtos.DeviceEdgeUpdateMsgProto.Builder builder = TransportProtos.DeviceEdgeUpdateMsgProto.newBuilder()
-                .setTenantIdMSB(msg.getTenantId().getId().getMostSignificantBits())
-                .setTenantIdLSB(msg.getTenantId().getId().getLeastSignificantBits())
-                .setDeviceIdMSB(msg.getDeviceId().getId().getMostSignificantBits())
-                .setDeviceIdLSB(msg.getDeviceId().getId().getLeastSignificantBits());
-
-        if (msg.getEdgeId() != null) {
-            builder.setEdgeIdMSB(msg.getEdgeId().getId().getMostSignificantBits())
-                    .setEdgeIdLSB(msg.getEdgeId().getId().getLeastSignificantBits());
-        }
-
-        return builder.build();
-    }
-
-    private static DeviceEdgeUpdateMsg fromProto(TransportProtos.DeviceEdgeUpdateMsgProto proto) {
-        EdgeId edgeId = null;
-        if (proto.hasEdgeIdMSB() && proto.hasEdgeIdLSB()) {
-            edgeId = EdgeId.fromUUID(new UUID(proto.getEdgeIdMSB(), proto.getEdgeIdLSB()));
-        }
-        return new DeviceEdgeUpdateMsg(
-                TenantId.fromUUID(new UUID(proto.getTenantIdMSB(), proto.getTenantIdLSB())),
-                new DeviceId(new UUID(proto.getDeviceIdMSB(), proto.getDeviceIdLSB())),
-                edgeId);
     }
 
     private static TransportProtos.DeviceNameOrTypeUpdateMsgProto toProto(DeviceNameOrTypeUpdateMsg msg) {
@@ -612,10 +428,7 @@ public class ProtoUtils {
     }
 
     public static TransportProtos.ToDeviceActorNotificationMsgProto toProto(ToDeviceActorNotificationMsg msg) {
-        if (msg instanceof DeviceEdgeUpdateMsg updateMsg) {
-            TransportProtos.DeviceEdgeUpdateMsgProto proto = toProto(updateMsg);
-            return TransportProtos.ToDeviceActorNotificationMsgProto.newBuilder().setDeviceEdgeUpdateMsg(proto).build();
-        } else if (msg instanceof DeviceNameOrTypeUpdateMsg updateMsg) {
+        if (msg instanceof DeviceNameOrTypeUpdateMsg updateMsg) {
             TransportProtos.DeviceNameOrTypeUpdateMsgProto proto = toProto(updateMsg);
             return TransportProtos.ToDeviceActorNotificationMsgProto.newBuilder().setDeviceNameOrTypeMsg(proto).build();
         } else if (msg instanceof DeviceAttributesEventNotificationMsg updateMsg) {
@@ -641,9 +454,7 @@ public class ProtoUtils {
     }
 
     public static ToDeviceActorNotificationMsg fromProto(TransportProtos.ToDeviceActorNotificationMsgProto proto) {
-        if (proto.hasDeviceEdgeUpdateMsg()) {
-            return fromProto(proto.getDeviceEdgeUpdateMsg());
-        } else if (proto.hasDeviceNameOrTypeMsg()) {
+        if (proto.hasDeviceNameOrTypeMsg()) {
             return fromProto(proto.getDeviceNameOrTypeMsg());
         } else if (proto.hasDeviceAttributesEventMsg()) {
             return fromProto(proto.getDeviceAttributesEventMsg());
@@ -910,10 +721,6 @@ public class ProtoUtils {
             builder.setExternalIdMSB(getMsb(deviceProfile.getExternalId()))
                     .setExternalIdLSB(getLsb(deviceProfile.getExternalId()));
         }
-        if (isNotNull(deviceProfile.getDefaultEdgeRuleChainId())) {
-            builder.setDefaultEdgeRuleChainIdMSB(getMsb(deviceProfile.getDefaultEdgeRuleChainId()))
-                    .setDefaultEdgeRuleChainIdLSB(getLsb(deviceProfile.getDefaultEdgeRuleChainId()));
-        }
         if (isNotNull(deviceProfile.getVersion())) {
             builder.setVersion(deviceProfile.getVersion());
         }
@@ -958,9 +765,6 @@ public class ProtoUtils {
         }
         if (proto.hasExternalIdMSB() && proto.hasExternalIdLSB()) {
             deviceProfile.setExternalId(getEntityId(proto.getExternalIdMSB(), proto.getExternalIdLSB(), DeviceProfileId::new));
-        }
-        if (proto.hasDefaultEdgeRuleChainIdMSB() && proto.hasDefaultEdgeRuleChainIdLSB()) {
-            deviceProfile.setDefaultEdgeRuleChainId(getEntityId(proto.getDefaultEdgeRuleChainIdMSB(), proto.getDefaultEdgeRuleChainIdLSB(), RuleChainId::new));
         }
         if (proto.hasVersion()) {
             deviceProfile.setVersion(proto.getVersion());

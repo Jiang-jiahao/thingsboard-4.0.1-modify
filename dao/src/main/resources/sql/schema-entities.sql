@@ -245,14 +245,12 @@ CREATE TABLE IF NOT EXISTS asset_profile (
     default_rule_chain_id uuid,
     default_dashboard_id uuid,
     default_queue_name varchar(255),
-    default_edge_rule_chain_id uuid,
     external_id uuid,
     version BIGINT DEFAULT 1,
     CONSTRAINT asset_profile_name_unq_key UNIQUE (tenant_id, name),
     CONSTRAINT asset_profile_external_id_unq_key UNIQUE (tenant_id, external_id),
     CONSTRAINT fk_default_rule_chain_asset_profile FOREIGN KEY (default_rule_chain_id) REFERENCES rule_chain(id),
-    CONSTRAINT fk_default_dashboard_asset_profile FOREIGN KEY (default_dashboard_id) REFERENCES dashboard(id),
-    CONSTRAINT fk_default_edge_rule_chain_asset_profile FOREIGN KEY (default_edge_rule_chain_id) REFERENCES rule_chain(id)
+    CONSTRAINT fk_default_dashboard_asset_profile FOREIGN KEY (default_dashboard_id) REFERENCES dashboard(id)
     );
 
 CREATE TABLE IF NOT EXISTS asset (
@@ -290,7 +288,6 @@ CREATE TABLE IF NOT EXISTS device_profile (
     default_dashboard_id uuid,
     default_queue_name varchar(255),
     provision_device_key varchar,
-    default_edge_rule_chain_id uuid,
     external_id uuid,
     version BIGINT DEFAULT 1,
     CONSTRAINT device_profile_name_unq_key UNIQUE (tenant_id, name),
@@ -299,8 +296,7 @@ CREATE TABLE IF NOT EXISTS device_profile (
     CONSTRAINT fk_default_rule_chain_device_profile FOREIGN KEY (default_rule_chain_id) REFERENCES rule_chain(id),
     CONSTRAINT fk_default_dashboard_device_profile FOREIGN KEY (default_dashboard_id) REFERENCES dashboard(id),
     CONSTRAINT fk_firmware_device_profile FOREIGN KEY (firmware_id) REFERENCES ota_package(id),
-    CONSTRAINT fk_software_device_profile FOREIGN KEY (software_id) REFERENCES ota_package(id),
-    CONSTRAINT fk_default_edge_rule_chain_device_profile FOREIGN KEY (default_edge_rule_chain_id) REFERENCES rule_chain(id)
+    CONSTRAINT fk_software_device_profile FOREIGN KEY (software_id) REFERENCES ota_package(id)
 );
 
 DO
@@ -615,8 +611,7 @@ CREATE TABLE IF NOT EXISTS domain (
     created_time bigint NOT NULL,
     tenant_id uuid NOT NULL,
     name varchar(255) UNIQUE,
-    oauth2_enabled boolean,
-    edge_enabled boolean
+    oauth2_enabled boolean
 );
 
 CREATE TABLE IF NOT EXISTS mobile_app (
@@ -726,38 +721,6 @@ CREATE TABLE IF NOT EXISTS resource (
     CONSTRAINT resource_unq_key UNIQUE (tenant_id, resource_type, resource_key)
 );
 
-CREATE TABLE IF NOT EXISTS edge (
-    id uuid NOT NULL CONSTRAINT edge_pkey PRIMARY KEY,
-    created_time bigint NOT NULL,
-    additional_info varchar,
-    customer_id uuid,
-    root_rule_chain_id uuid,
-    type varchar(255),
-    name varchar(255),
-    label varchar(255),
-    routing_key varchar(255),
-    secret varchar(255),
-    tenant_id uuid,
-    version BIGINT DEFAULT 1,
-    CONSTRAINT edge_name_unq_key UNIQUE (tenant_id, name),
-    CONSTRAINT edge_routing_key_unq_key UNIQUE (routing_key)
-);
-
-CREATE TABLE IF NOT EXISTS edge_event (
-    seq_id INT GENERATED ALWAYS AS IDENTITY,
-    id uuid NOT NULL,
-    created_time bigint NOT NULL,
-    edge_id uuid,
-    edge_event_type varchar(255),
-    edge_event_uid varchar(255),
-    entity_id uuid,
-    edge_event_action varchar(255),
-    body varchar(10000000),
-    tenant_id uuid,
-    ts bigint NOT NULL
-) PARTITION BY RANGE(created_time);
-ALTER TABLE IF EXISTS edge_event ALTER COLUMN seq_id SET CYCLE;
-
 CREATE TABLE IF NOT EXISTS rpc (
     id uuid NOT NULL CONSTRAINT rpc_pkey PRIMARY KEY,
     created_time bigint NOT NULL,
@@ -777,24 +740,6 @@ BEGIN
                '-' || substring(entity_id, 16, 4) || '-' || substring(entity_id, 20, 12);
 END;
 $$ LANGUAGE plpgsql;
-
-
-CREATE OR REPLACE PROCEDURE cleanup_edge_events_by_ttl(IN ttl bigint, INOUT deleted bigint)
-    LANGUAGE plpgsql AS
-$$
-DECLARE
-    ttl_ts bigint;
-    ttl_deleted_count bigint DEFAULT 0;
-BEGIN
-    IF ttl > 0 THEN
-        ttl_ts := (EXTRACT(EPOCH FROM current_timestamp) * 1000 - ttl::bigint * 1000)::bigint;
-        EXECUTE format(
-                'WITH deleted AS (DELETE FROM edge_event WHERE ts < %L::bigint RETURNING *) SELECT count(*) FROM deleted', ttl_ts) into ttl_deleted_count;
-    END IF;
-    RAISE NOTICE 'Edge events removed by ttl: %', ttl_deleted_count;
-    deleted := ttl_deleted_count;
-END
-$$;
 
 
 CREATE TABLE IF NOT EXISTS user_auth_settings (

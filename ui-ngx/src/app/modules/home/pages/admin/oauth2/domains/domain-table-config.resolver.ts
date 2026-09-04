@@ -66,16 +66,6 @@ export class DomainTableConfigResolver  {
           iconFunction: (domain) => domain.oauth2Enabled ? 'mdi:toggle-switch' : 'mdi:toggle-switch-off-outline',
           isEnabled: () => true,
           onAction: ($event, entity) => this.toggleEnableOAuth($event, entity)
-        }),
-      new EntityActionTableColumn('propagateToEdge', 'admin.oauth2.edge',
-        {
-          name: '',
-          nameFunction: (domain) =>
-            this.translate.instant(domain.propagateToEdge ? 'admin.oauth2.edge-disable' : 'admin.oauth2.edge-enable'),
-          icon: 'mdi:toggle-switch',
-          iconFunction: (entity) => entity.propagateToEdge ? 'mdi:toggle-switch' : 'mdi:toggle-switch-off-outline',
-          isEnabled: () => true,
-          onAction: ($event, entity) => this.togglePropagateToEdge($event, entity)
         })
     );
 
@@ -118,21 +108,6 @@ export class DomainTableConfigResolver  {
       {ignoreLoading: true})
       .subscribe((result) => {
         domain.oauth2Enabled = result.oauth2Enabled;
-        this.config.getTable().detectChanges();
-      });
-  }
-
-  private togglePropagateToEdge($event: Event, domain: DomainInfo): void {
-    if ($event) {
-      $event.stopPropagation();
-    }
-
-    const { oauth2ClientInfos, propagateToEdge, ...updatedDomain } = domain;
-
-    this.domainService.saveDomain({ ...updatedDomain, propagateToEdge: !propagateToEdge }, null,
-      {ignoreLoading: true})
-      .subscribe((result) => {
-        domain.propagateToEdge = result.propagateToEdge;
         this.config.getTable().detectChanges();
       });
   }

@@ -26,7 +26,6 @@ import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.TopicExistsException;
-import org.thingsboard.server.queue.TbEdgeQueueAdmin;
 import org.thingsboard.server.queue.TbQueueAdmin;
 import org.thingsboard.server.queue.util.PropertyUtils;
 
@@ -44,7 +43,7 @@ import java.util.stream.Collectors;
  * Created by ashvayka on 24.09.18.
  */
 @Slf4j
-public class TbKafkaAdmin implements TbQueueAdmin, TbEdgeQueueAdmin {
+public class TbKafkaAdmin implements TbQueueAdmin {
 
     private final TbKafkaSettings settings;
     private final Map<String, String> topicConfigs;
@@ -157,27 +156,6 @@ public class TbKafkaAdmin implements TbQueueAdmin, TbEdgeQueueAdmin {
             syncOffsetsUnsafe(fatGroupId, newGroupId, "." + partitionId);
         } catch (Exception e) {
             log.warn("Failed to syncOffsets from {} to {} partitionId {}", fatGroupId, newGroupId, partitionId, e);
-        }
-    }
-
-    /**
-     * Sync edge notifications offsets from a fat group to a single group per edge
-     * */
-    public void syncEdgeNotificationsOffsets(String fatGroupId, String newGroupId) {
-        try {
-            log.info("syncEdgeNotificationsOffsets [{}][{}]", fatGroupId, newGroupId);
-            syncOffsetsUnsafe(fatGroupId, newGroupId, newGroupId);
-        } catch (Exception e) {
-            log.warn("Failed to syncEdgeNotificationsOffsets from {} to {}", fatGroupId, newGroupId, e);
-        }
-    }
-
-    @Override
-    public void deleteConsumerGroup(String consumerGroupId) {
-        try {
-            settings.getAdminClient().deleteConsumerGroups(Collections.singletonList(consumerGroupId));
-        } catch (Exception e) {
-            log.warn("Failed to delete consumer group {}", consumerGroupId, e);
         }
     }
 

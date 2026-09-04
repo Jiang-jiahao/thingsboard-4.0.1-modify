@@ -206,7 +206,6 @@ class TbCreateAlarmNodeTest {
                         .propagateToTenant(false)
                         .propagateRelationTypes(Collections.emptyList()).build())
                 .userId(null)
-                .edgeAlarmId(null)
                 .build();
 
         // mocks
@@ -378,7 +377,6 @@ class TbCreateAlarmNodeTest {
                         .propagateToTenant(true)
                         .propagateRelationTypes(config.getRelationTypes()).build())
                 .userId(null)
-                .edgeAlarmId(null)
                 .build();
 
         // mocks
@@ -747,7 +745,6 @@ class TbCreateAlarmNodeTest {
                         .propagateToTenant(true)
                         .propagateRelationTypes(Collections.emptyList()).build())
                 .userId(null)
-                .edgeAlarmId(null)
                 .build();
 
         // mocks

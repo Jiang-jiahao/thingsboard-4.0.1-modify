@@ -47,7 +47,6 @@ import org.thingsboard.server.common.data.notification.targets.platform.UsersFil
 import org.thingsboard.server.common.data.notification.template.EmailDeliveryMethodNotificationTemplate;
 import org.thingsboard.server.common.data.notification.template.NotificationTemplate;
 import org.thingsboard.server.common.data.notification.template.NotificationTemplateConfig;
-import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.settings.UserSettings;
 import org.thingsboard.server.common.data.settings.UserSettingsType;
 import org.thingsboard.server.dao.settings.AdminSettingsService;
@@ -59,7 +58,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -201,8 +199,6 @@ public class DefaultNotificationSettingsService implements NotificationSettingsS
         defaultNotifications.create(tenantId, DefaultNotifications.alarmComment, tenantAdmins.getId());
         defaultNotifications.create(tenantId, DefaultNotifications.alarmAssignment, affectedUser.getId());
         defaultNotifications.create(tenantId, DefaultNotifications.ruleEngineComponentLifecycleFailure, tenantAdmins.getId());
-        defaultNotifications.create(tenantId, DefaultNotifications.edgeConnection, tenantAdmins.getId());
-        defaultNotifications.create(tenantId, DefaultNotifications.edgeCommunicationFailures, tenantAdmins.getId());
     }
 
     @Override
@@ -220,36 +216,6 @@ public class DefaultNotificationSettingsService implements NotificationSettingsS
             }
             if (!isNotificationConfigured(tenantId, NotificationType.TASK_PROCESSING_FAILURE)) {
                 defaultNotifications.create(tenantId, DefaultNotifications.taskProcessingFailure, sysAdmins.getId());
-            }
-        } else {
-            var requiredNotificationTypes = List.of(NotificationType.EDGE_CONNECTION, NotificationType.EDGE_COMMUNICATION_FAILURE);
-            var existingNotificationTypes = notificationTemplateService.findNotificationTemplatesByTenantIdAndNotificationTypes(
-                            tenantId, requiredNotificationTypes, new PageLink(2))
-                    .getData()
-                    .stream()
-                    .map(NotificationTemplate::getNotificationType)
-                    .collect(Collectors.toSet());
-
-            if (existingNotificationTypes.containsAll(requiredNotificationTypes)) {
-                return;
-            }
-
-            NotificationTarget tenantAdmins = notificationTargetService.findNotificationTargetsByTenantIdAndUsersFilterType(tenantId, UsersFilterType.TENANT_ADMINISTRATORS)
-                    .stream()
-                    .findFirst()
-                    .orElseGet(() -> createTarget(tenantId, "Tenant administrators", new TenantAdministratorsFilter(), "Tenant administrators"));
-
-            for (NotificationType type : requiredNotificationTypes) {
-                if (!existingNotificationTypes.contains(type)) {
-                    switch (type) {
-                        case EDGE_CONNECTION:
-                            defaultNotifications.create(tenantId, DefaultNotifications.edgeConnection, tenantAdmins.getId());
-                            break;
-                        case EDGE_COMMUNICATION_FAILURE:
-                            defaultNotifications.create(tenantId, DefaultNotifications.edgeCommunicationFailures, tenantAdmins.getId());
-                            break;
-                    }
-                }
             }
         }
     }

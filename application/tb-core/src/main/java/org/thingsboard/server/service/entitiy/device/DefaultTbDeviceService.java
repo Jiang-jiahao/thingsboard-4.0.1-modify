@@ -28,11 +28,9 @@ import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.audit.ActionType;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.dao.device.ClaimDevicesService;
@@ -49,7 +47,7 @@ import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
  * <p>
  * 由 DeviceController 调用，委托 {@link DeviceService} / {@link DeviceCredentialsService} /
  * {@link ClaimDevicesService} 落库；成功或失败均写审计日志，保存时尝试版本控制 autoCommit。
- * 分配到客户/Edge 会触发规则引擎与 Edge 同步（经 {@link org.thingsboard.server.service.entitiy.TbLogEntityActionService}）。
+ * 分配到客户会触发规则引擎（经 {@link org.thingsboard.server.service.entitiy.TbLogEntityActionService}）。
  *
  * @see TbDeviceService
  */
@@ -258,44 +256,6 @@ public class DefaultTbDeviceService extends AbstractTbEntityService implements T
         } catch (Exception e) {
             logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.DEVICE),
                     actionType, user, e, deviceId.toString());
-            throw e;
-        }
-    }
-
-    /** 将设备分配给 Edge 并写审计。 */
-    @Override
-    public Device assignDeviceToEdge(TenantId tenantId, DeviceId deviceId, Edge edge, User user) throws ThingsboardException {
-        ActionType actionType = ActionType.ASSIGNED_TO_EDGE;
-        EdgeId edgeId = edge.getId();
-        try {
-            Device savedDevice = checkNotNull(deviceService.assignDeviceToEdge(tenantId, deviceId, edgeId));
-            logEntityActionService.logEntityAction(tenantId, deviceId, savedDevice, savedDevice.getCustomerId(),
-                    actionType, user, deviceId.toString(), edgeId.toString(), edge.getName());
-
-            return savedDevice;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.DEVICE),
-                    actionType, user, e, deviceId.toString(), edgeId.toString());
-            throw e;
-        }
-    }
-
-    /** 取消设备与 Edge 的分配并写审计。 */
-    @Override
-    public Device unassignDeviceFromEdge(Device device, Edge edge, User user) throws ThingsboardException {
-        ActionType actionType = ActionType.UNASSIGNED_FROM_EDGE;
-        TenantId tenantId = device.getTenantId();
-        DeviceId deviceId = device.getId();
-        EdgeId edgeId = edge.getId();
-        try {
-            Device savedDevice = checkNotNull(deviceService.unassignDeviceFromEdge(tenantId, deviceId, edgeId));
-            logEntityActionService.logEntityAction(tenantId, deviceId, savedDevice, savedDevice.getCustomerId(),
-                    actionType, user, deviceId.toString(), edgeId.toString(), edge.getName());
-
-            return savedDevice;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.DEVICE),
-                    actionType, user, e, deviceId.toString(), edgeId.toString());
             throw e;
         }
     }

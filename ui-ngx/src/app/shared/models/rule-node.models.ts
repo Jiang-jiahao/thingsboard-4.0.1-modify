@@ -504,8 +504,6 @@ const ruleNodeClazzHelpLinkMap = {
   'org.thingsboard.rule.engine.rest.TbRestApiCallNode': 'ruleNodeRestApiCall',
   'org.thingsboard.rule.engine.mail.TbSendEmailNode': 'ruleNodeSendEmail',
   'org.thingsboard.rule.engine.sms.TbSendSmsNode': 'ruleNodeSendSms',
-  'org.thingsboard.rule.engine.edge.TbMsgPushToCloudNode': 'ruleNodePushToCloud',
-  'org.thingsboard.rule.engine.edge.TbMsgPushToEdgeNode': 'ruleNodePushToEdge',
   'org.thingsboard.rule.engine.flow.TbRuleChainInputNode': 'ruleNodeRuleChain',
   'org.thingsboard.rule.engine.flow.TbRuleChainOutputNode': 'ruleNodeOutputNode',
   'org.thingsboard.rule.engine.flow.TbAckNode': 'ruleNodeAcknowledge',

@@ -75,7 +75,7 @@ public class ComponentDescriptorController extends BaseController {
     }
 
     /**
-     * 按规则节点类型（FILTER / ACTION 等）列出描述符，可再按规则链类型 CORE/EDGE 过滤。
+     * 按规则节点类型（FILTER / ACTION 等）列出描述符，可再按规则链类型过滤（当前仅 CORE）。
      */
     @ApiOperation(value = "Get Component Descriptors (getComponentDescriptorsByType)",
             notes = "Gets the Component Descriptors using rule node type and optional rule chain type request parameters. " +
@@ -86,7 +86,7 @@ public class ComponentDescriptorController extends BaseController {
     public List<ComponentDescriptor> getComponentDescriptorsByType(
             @Parameter(description = "Type of the Rule Node", schema = @Schema(allowableValues = {"ENRICHMENT", "FILTER", "TRANSFORMATION", "ACTION", "EXTERNAL"}, requiredMode = Schema.RequiredMode.REQUIRED))
             @PathVariable("componentType") String strComponentType,
-            @Parameter(description = "Type of the Rule Chain", schema = @Schema(allowableValues = {"CORE", "EDGE"}))
+            @Parameter(description = "Type of the Rule Chain", schema = @Schema(allowableValues = {"CORE"}))
             @RequestParam(value = "ruleChainType", required = false) String strRuleChainType) throws ThingsboardException {
         checkParameter("componentType", strComponentType);
         return checkComponentDescriptorsByType(ComponentType.valueOf(strComponentType), getRuleChainType(strRuleChainType));
@@ -104,7 +104,7 @@ public class ComponentDescriptorController extends BaseController {
     public List<ComponentDescriptor> getComponentDescriptorsByTypes(
             @Parameter(description = "List of types of the Rule Nodes, (ENRICHMENT, FILTER, TRANSFORMATION, ACTION or EXTERNAL)", array = @ArraySchema(schema = @Schema(type = "string")), required = true)
             @RequestParam("componentTypes") String[] strComponentTypes,
-            @Parameter(description = "Type of the Rule Chain", schema = @Schema(allowableValues = {"CORE", "EDGE"}))
+            @Parameter(description = "Type of the Rule Chain", schema = @Schema(allowableValues = {"CORE"}))
             @RequestParam(value = "ruleChainType", required = false) String strRuleChainType) throws ThingsboardException {
         checkArrayParameter("componentTypes", strComponentTypes);
         Set<ComponentType> componentTypes = new HashSet<>();

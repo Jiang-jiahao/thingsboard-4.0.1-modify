@@ -69,11 +69,6 @@ public class AssetProfile extends BaseData<AssetProfileId> implements HasName, H
             "Otherwise, the 'Main' queue will be used to store those messages.")
     private String defaultQueueName;
 
-    @Schema(description = "Reference to the edge rule chain. " +
-            "If present, the specified edge rule chain will be used on the edge to process all messages related to asset, including asset updates, telemetry, attribute updates, etc. " +
-            "Otherwise, the edge root rule chain will be used to process those messages.")
-    private RuleChainId defaultEdgeRuleChainId;
-
     private AssetProfileId externalId;
     private Long version;
 
@@ -95,7 +90,6 @@ public class AssetProfile extends BaseData<AssetProfileId> implements HasName, H
         this.defaultRuleChainId = assetProfile.getDefaultRuleChainId();
         this.defaultDashboardId = assetProfile.getDefaultDashboardId();
         this.defaultQueueName = assetProfile.getDefaultQueueName();
-        this.defaultEdgeRuleChainId = assetProfile.getDefaultEdgeRuleChainId();
         this.externalId = assetProfile.getExternalId();
         this.version = assetProfile.getVersion();
     }

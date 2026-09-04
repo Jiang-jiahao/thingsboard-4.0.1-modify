@@ -33,8 +33,7 @@ import { DashboardModule } from '@modules/home/pages/dashboard/dashboard.module'
 import { TenantProfileModule } from './tenant-profile/tenant-profile.module';
 import { DeviceProfileModule } from './device-profile/device-profile.module';
 import { ApiUsageModule } from '@home/pages/api-usage/api-usage.module';
-import { EdgeModule } from '@home/pages/edge/edge.module';
-import { EDGE_UI_ENABLED, MOBILE_UI_ENABLED, OTA_UI_ENABLED, VERSION_CONTROL_UI_ENABLED } from '@shared/models/device.models';
+import { MOBILE_UI_ENABLED, OTA_UI_ENABLED, VERSION_CONTROL_UI_ENABLED } from '@shared/models/device.models';
 import { OtaUpdateModule } from '@home/pages/ota-update/ota-update.module';
 import { VcModule } from '@home/pages/vc/vc.module';
 import { AssetProfileModule } from '@home/pages/asset-profile/asset-profile.module';
@@ -66,7 +65,6 @@ import { MobileModule } from '@home/pages/mobile/mobile.module';
     DeviceModule,
     AssetModule,
     AlarmModule,
-    ...(EDGE_UI_ENABLED ? [EdgeModule] : []),
     EntityViewModule,
     CustomerModule,
     RuleChainModule,

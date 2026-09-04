@@ -70,12 +70,6 @@ public interface ImageService {
 
     Collection<TbResourceInfo> getUsedImages(WidgetTypeDetails widgetTypeDetails);
 
-    void inlineImageForEdge(HasImage entity);
-
-    void inlineImagesForEdge(Dashboard dashboard);
-
-    void inlineImagesForEdge(WidgetTypeDetails widgetTypeDetails);
-
     TbResourceInfo createOrUpdateSystemImage(String resourceKey, byte[] data);
 
 }

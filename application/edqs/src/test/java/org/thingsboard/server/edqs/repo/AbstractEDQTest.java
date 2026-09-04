@@ -37,7 +37,6 @@ import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.EntityView;
 import org.thingsboard.server.common.data.asset.Asset;
 import org.thingsboard.server.common.data.asset.AssetProfile;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.edqs.EdqsObject;
 import org.thingsboard.server.common.data.edqs.query.QueryResult;
 import org.thingsboard.server.common.data.id.AssetId;
@@ -46,7 +45,6 @@ import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DashboardId;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityIdFactory;
 import org.thingsboard.server.common.data.id.EntityViewId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -170,30 +168,6 @@ public abstract class AbstractEDQTest {
         addOrUpdate(EntityType.ENTITY_VIEW, entity);
         return entityId;
     }
-
-    protected UUID createEdge(String name) {
-        return createEdge(null, "default", name);
-    }
-
-    protected UUID createEdge(CustomerId customerId, String name) {
-        return createEdge(customerId.getId(), "default", name);
-    }
-
-    protected UUID createEdge(UUID customerId, String type, String name) {
-        UUID id = UUID.randomUUID();
-        Edge edge = new Edge();
-        edge.setId(new EdgeId(id));
-        edge.setTenantId(tenantId);
-        if (customerId != null) {
-            edge.setCustomerId(new CustomerId(customerId));
-        }
-        edge.setType(type);
-        edge.setName(name);
-        edge.setCreatedTime(42L);
-        addOrUpdate(EntityType.EDGE, edge);
-        return id;
-    }
-
 
     protected UUID createAsset(String name) {
         return createAsset(null, defaultAssetProfileId, name);

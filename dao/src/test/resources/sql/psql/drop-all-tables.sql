@@ -6,7 +6,6 @@ DROP FUNCTION IF EXISTS clear_alarm;
 DROP FUNCTION IF EXISTS assign_alarm;
 DROP FUNCTION IF EXISTS unassign_alarm;
 
-DROP PROCEDURE IF EXISTS cleanup_edge_events_by_ttl;
 DROP PROCEDURE IF EXISTS cleanup_timeseries_by_ttl;
 DROP FUNCTION IF EXISTS delete_customer_records_from_ts_kv;
 
@@ -64,8 +63,6 @@ DROP TABLE IF EXISTS ota_package;
 DROP TABLE IF EXISTS api_usage_state;
 DROP TABLE IF EXISTS resource;
 DROP TABLE IF EXISTS firmware;
-DROP TABLE IF EXISTS edge;
-DROP TABLE IF EXISTS edge_event;
 DROP TABLE IF EXISTS rpc;
 DROP TABLE IF EXISTS queue;
 DROP TABLE IF EXISTS notification;

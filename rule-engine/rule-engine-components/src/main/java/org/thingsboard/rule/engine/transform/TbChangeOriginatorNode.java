@@ -52,7 +52,7 @@ import static org.thingsboard.rule.engine.transform.OriginatorSource.RELATED;
                 "If multiple related entities are found, only first entity is used as new originator, other entities are discarded.</li>" +
                 "<li><strong>Alarm Originator</strong> - use alarm originator as new originator. Only if incoming message originator is alarm entity.</li>" +
                 "<li><strong>Entity by name pattern</strong> - specify entity type and name pattern of new originator. Following entity types are supported: " +
-                "'Device', 'Asset', 'Entity View', 'Edge' or 'User'.</li></ul>" +
+                "'Device', 'Asset', 'Entity View' or 'User'.</li></ul>" +
                 "Output connections: <code>Success</code>, <code>Failure</code>.",
         configDirective = "tbTransformationNodeChangeOriginatorConfig",
         icon = "find_replace"

@@ -50,6 +50,4 @@ public interface OAuth2ClientService extends EntityDaoService {
 
     List<OAuth2ClientInfo> findOAuth2ClientInfosByIds(TenantId tenantId, List<OAuth2ClientId> oAuth2ClientIds);
 
-    boolean isPropagateOAuth2ClientToEdge(TenantId tenantId, OAuth2ClientId oAuth2ClientId);
-
 }

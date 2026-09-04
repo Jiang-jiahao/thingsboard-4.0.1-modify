@@ -315,11 +315,7 @@ export class RuleChainPageComponent extends PageComponent
   }
 
   currentRuleChainIdChanged(ruleChainId: string) {
-    if (this.ruleChainType === RuleChainType.CORE) {
-      this.router.navigateByUrl(`ruleChains/${ruleChainId}`);
-    } else {
-      this.router.navigateByUrl(`edgeManagement/ruleChains/${ruleChainId}`);
-    }
+    this.router.navigateByUrl(`ruleChains/${ruleChainId}`);
   }
 
   onSearchTextUpdated(searchText: string) {
@@ -1531,11 +1527,7 @@ export class RuleChainPageComponent extends PageComponent
           if (this.isImport) {
             this.isDirtyValue = false;
             this.isImport = false;
-            if (this.ruleChainType !== RuleChainType.EDGE) {
-              this.router.navigateByUrl(`ruleChains/${this.ruleChain.id.id}`);
-            } else {
-              this.router.navigateByUrl(`edgeManagement/ruleChains/${this.ruleChain.id.id}`);
-            }
+            this.router.navigateByUrl(`ruleChains/${this.ruleChain.id.id}`);
           } else {
             this.createRuleChainModel();
           }

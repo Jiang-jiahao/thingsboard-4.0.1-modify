@@ -142,9 +142,6 @@ import {
   DateRangeNavigatorWidgetSettingsComponent
 } from '@home/components/widget/lib/settings/date/date-range-navigator-widget-settings.component';
 import {
-  EdgeQuickOverviewWidgetSettingsComponent
-} from '@home/components/widget/lib/settings/cards/edge-quick-overview-widget-settings.component';
-import {
   GatewayConfigWidgetSettingsComponent
 } from '@home/components/widget/lib/settings/gateway/gateway-config-widget-settings.component';
 import {
@@ -425,7 +422,6 @@ import { MapWidgetSettingsComponent } from '@home/components/widget/lib/settings
     RpcTerminalWidgetSettingsComponent,
     RpcShellWidgetSettingsComponent,
     DateRangeNavigatorWidgetSettingsComponent,
-    EdgeQuickOverviewWidgetSettingsComponent,
     GatewayConfigWidgetSettingsComponent,
     GatewayConfigSingleDeviceWidgetSettingsComponent,
     GatewayEventsWidgetSettingsComponent,
@@ -564,7 +560,6 @@ import { MapWidgetSettingsComponent } from '@home/components/widget/lib/settings
     RpcTerminalWidgetSettingsComponent,
     RpcShellWidgetSettingsComponent,
     DateRangeNavigatorWidgetSettingsComponent,
-    EdgeQuickOverviewWidgetSettingsComponent,
     GatewayConfigWidgetSettingsComponent,
     GatewayConfigSingleDeviceWidgetSettingsComponent,
     GatewayEventsWidgetSettingsComponent,

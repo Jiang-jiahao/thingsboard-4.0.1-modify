@@ -40,8 +40,6 @@ public class Domain extends BaseData<DomainId> implements HasTenantId, HasName {
     private String name;
     @Schema(description = "Whether OAuth2 settings are enabled or not")
     private boolean oauth2Enabled;
-    @Schema(description = "Whether OAuth2 settings are enabled on Edge or not")
-    private boolean propagateToEdge;
 
     public Domain() {
         super();
@@ -56,7 +54,6 @@ public class Domain extends BaseData<DomainId> implements HasTenantId, HasName {
         this.tenantId = domain.tenantId;
         this.name = domain.name;
         this.oauth2Enabled = domain.oauth2Enabled;
-        this.propagateToEdge = domain.propagateToEdge;
     }
 
 }

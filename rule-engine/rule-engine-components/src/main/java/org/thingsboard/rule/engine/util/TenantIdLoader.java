@@ -30,7 +30,6 @@ import org.thingsboard.server.common.data.id.DashboardId;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.DomainId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityViewId;
 import org.thingsboard.server.common.data.id.MobileAppBundleId;
@@ -89,9 +88,6 @@ public class TenantIdLoader {
                 break;
             case DASHBOARD:
                 tenantEntity = ctx.getDashboardService().findDashboardById(ctxTenantId, new DashboardId(id));
-                break;
-            case EDGE:
-                tenantEntity = ctx.getEdgeService().findEdgeById(ctxTenantId, new EdgeId(id));
                 break;
             case OTA_PACKAGE:
                 tenantEntity = ctx.getOtaPackageService().findOtaPackageInfoById(ctxTenantId, new OtaPackageId(id));

@@ -84,7 +84,6 @@
         <curator.version>5.6.0</curator.version>
         <zookeeper.version>3.9.2</zookeeper.version>
         <protobuf.version>3.25.5</protobuf.version> <!-- A Major v4 does not support by the pubsub yet-->
-        <grpc.version>1.63.0</grpc.version>
         <tbel.version>1.2.6</tbel.version>
         <lombok.version>1.18.32</lombok.version>
         <paho.client.version>1.2.5</paho.client.version>
@@ -775,22 +774,13 @@
                     <artifactId>protobuf-maven-plugin</artifactId>
                     <version>0.6.1</version>
                     <configuration>
-                        <!--
-                          The version of protoc must match protobuf-java. If you don't depend on
-                          protobuf-java directly, you will be transitively depending on the
-                          protobuf-java version that grpc depends on.
-                        -->
                         <protocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}
                         </protocArtifact>
-                        <pluginId>grpc-java</pluginId>
-                        <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
-                        </pluginArtifact>
                     </configuration>
                     <executions>
                         <execution>
                             <goals>
                                 <goal>compile</goal>
-                                <goal>compile-custom</goal>
                                 <goal>test-compile</goal>
                             </goals>
                         </execution>
@@ -1062,11 +1052,6 @@
             <dependency>
                 <groupId>org.thingsboard.transport</groupId>
                 <artifactId>udp</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.thingsboard.common</groupId>
-                <artifactId>edge-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -1771,93 +1756,6 @@
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-java-util</artifactId>
                 <version>${protobuf.version}</version>
-            </dependency>
-            <!-- 基于 Netty 的grpc网络传输实现，重新打包了 Netty 依赖，避免与业务中其它 Netty 版本冲突 -->
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-netty-shaded</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-protobuf</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <!-- gRPC 移动端优化版，减少了方法数 -->
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-protobuf-lite</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-rls</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <!-- gRPC 通用工具类集合 -->
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-util</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-googleapis</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-xds</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-services</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-context</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-inprocess</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <!-- gRPC 核心功能 -->
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-core</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-grpclb</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <!-- gRPC 客户端Stub生成 -->
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-stub</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <!-- gRPC 应用层传输安全	Google 内部使用的安全协议 -->
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-alts</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-auth</artifactId>
-                <version>${grpc.version}</version>
-            </dependency>
-            <!-- gRPC定义核心接口和注解 -->
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-api</artifactId>
-                <version>${grpc.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.thingsboard</groupId>

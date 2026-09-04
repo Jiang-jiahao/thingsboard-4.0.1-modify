@@ -24,11 +24,9 @@ import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.ShortCustomerInfo;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.audit.ActionType;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DashboardId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.dashboard.DashboardService;
 import org.thingsboard.server.queue.util.TbCoreComponent;
@@ -43,7 +41,7 @@ import java.util.Set;
  * {@link TbDashboardService} 的默认实现。
  * <p>
  * 由 DashboardController 调用，委托 {@link DashboardService} 落库；写审计日志，保存时 autoCommit，
- * 分配客户/Edge 会触发规则引擎与 Edge 同步。
+ * 分配客户会触发规则引擎。
  *
  * @see TbDashboardService
  */
@@ -254,42 +252,6 @@ public class DefaultTbDashboardService extends AbstractTbEntityService implement
             }
         } catch (Exception e) {
             logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.DASHBOARD), actionType, user, e, dashboardId.toString());
-            throw e;
-        }
-    }
-
-    /** 将仪表板分配给 Edge 并写审计。 */
-    @Override
-    public Dashboard asignDashboardToEdge(TenantId tenantId, DashboardId dashboardId, Edge edge, User user) throws ThingsboardException {
-        ActionType actionType = ActionType.ASSIGNED_TO_EDGE;
-        EdgeId edgeId = edge.getId();
-        try {
-            Dashboard savedDashboard = checkNotNull(dashboardService.assignDashboardToEdge(tenantId, dashboardId, edgeId));
-            logEntityActionService.logEntityAction(tenantId, dashboardId, savedDashboard, null, actionType,
-                    user, dashboardId.toString(), edgeId.toString(), edge.getName());
-            return savedDashboard;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.DEVICE),
-                    actionType, user, e, dashboardId.toString(), edgeId);
-            throw e;
-        }
-    }
-
-    /** 取消仪表板与 Edge 的分配并写审计。 */
-    @Override
-    public Dashboard unassignDashboardFromEdge(Dashboard dashboard, Edge edge, User user) throws ThingsboardException {
-        ActionType actionType = ActionType.UNASSIGNED_FROM_EDGE;
-        TenantId tenantId = dashboard.getTenantId();
-        DashboardId dashboardId = dashboard.getId();
-        EdgeId edgeId = edge.getId();
-        try {
-            Dashboard savedDevice = checkNotNull(dashboardService.unassignDashboardFromEdge(tenantId, dashboardId, edgeId));
-            logEntityActionService.logEntityAction(tenantId, dashboardId, dashboard, null, actionType,
-                    user, dashboardId.toString(), edgeId.toString(), edge.getName());
-            return savedDevice;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.DASHBOARD), actionType, user, e,
-                    dashboardId.toString(), edgeId.toString());
             throw e;
         }
     }

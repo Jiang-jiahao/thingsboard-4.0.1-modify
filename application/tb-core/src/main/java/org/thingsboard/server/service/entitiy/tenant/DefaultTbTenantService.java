@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * {@link TbTenantService} 的默认实现。
  * <p>
- * 由 TenantController 调用，委托 {@link TenantService} 落库；新建时安装默认规则链/Edge 规则链/仪表板，
+ * 由 TenantController 调用，委托 {@link TenantService} 落库；新建时安装默认规则链/仪表板，
  * 刷新租户配置缓存，并按配置同步队列。删除时清缓存并删除版本控制设置。
  *
  * @see TbTenantService
@@ -60,7 +60,6 @@ public class DefaultTbTenantService extends AbstractTbEntityService implements T
 
         Tenant savedTenant = tenantService.saveTenant(tenant, tenantId -> {
             installScripts.createDefaultRuleChains(tenantId);
-            installScripts.createDefaultEdgeRuleChains(tenantId);
             if (!isTestProfile()) {
                 installScripts.createDefaultTenantDashboards(tenantId, null);
             }

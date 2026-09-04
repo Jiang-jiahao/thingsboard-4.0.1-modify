@@ -125,25 +125,6 @@ public interface EntityViewRepository extends JpaRepository<EntityViewEntity, UU
     @Query("SELECT DISTINCT ev.type FROM EntityViewEntity ev WHERE ev.tenantId = :tenantId")
     List<String> findTenantEntityViewTypes(@Param("tenantId") UUID tenantId);
 
-    @Query("SELECT ev FROM EntityViewEntity ev, RelationEntity re WHERE ev.tenantId = :tenantId " +
-            "AND ev.id = re.toId AND re.toType = 'ENTITY_VIEW' AND re.relationTypeGroup = 'EDGE' " +
-            "AND re.relationType = 'Contains' AND re.fromId = :edgeId AND re.fromType = 'EDGE' " +
-            "AND (:searchText IS NULL OR ilike(ev.name, CONCAT('%', :searchText, '%')) = true)")
-    Page<EntityViewEntity> findByTenantIdAndEdgeId(@Param("tenantId") UUID tenantId,
-                                               @Param("edgeId") UUID edgeId,
-                                               @Param("searchText") String searchText,
-                                               Pageable pageable);
-
-    @Query("SELECT ev FROM EntityViewEntity ev, RelationEntity re WHERE ev.tenantId = :tenantId " +
-            "AND ev.id = re.toId AND re.toType = 'ENTITY_VIEW' AND re.relationTypeGroup = 'EDGE' " +
-            "AND re.relationType = 'Contains' AND re.fromId = :edgeId AND re.fromType = 'EDGE' " +
-            "AND ev.type = :type " +
-            "AND (:searchText IS NULL OR ilike(ev.name, CONCAT('%', :searchText, '%')) = true)")
-    Page<EntityViewEntity> findByTenantIdAndEdgeIdAndType(@Param("tenantId") UUID tenantId,
-                                                   @Param("edgeId") UUID edgeId,
-                                                   @Param("type") String type,
-                                                   @Param("searchText") String searchText,
-                                                   Pageable pageable);
     @Query("SELECT externalId FROM EntityViewEntity WHERE id = :id")
     UUID getExternalIdById(@Param("id") UUID id);
 

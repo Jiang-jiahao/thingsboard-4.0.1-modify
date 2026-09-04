@@ -24,7 +24,6 @@ import org.thingsboard.server.common.data.edqs.fields.EntityFields;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.permission.QueryContext;
 import org.thingsboard.server.common.data.query.EntityKeyType;
-import org.thingsboard.server.edqs.data.dp.BoolDataPoint;
 import org.thingsboard.server.common.data.edqs.DataPoint;
 import org.thingsboard.server.edqs.data.dp.LongDataPoint;
 import org.thingsboard.server.edqs.data.dp.StringDataPoint;
@@ -124,7 +123,6 @@ public abstract class BaseEntityData<T extends EntityFields> implements EntityDa
         String key = newKey.key();
         return switch (key) {
             case "createdTime" -> new LongDataPoint(System.currentTimeMillis(), fields.getCreatedTime());
-            case "edgeTemplate" -> new BoolDataPoint(System.currentTimeMillis(), fields.isEdgeTemplate());
             case "parentId" -> new StringDataPoint(System.currentTimeMillis(), getRelatedParentId(ctx), false);
             default -> new StringDataPoint(System.currentTimeMillis(), getField(key), false);
         };

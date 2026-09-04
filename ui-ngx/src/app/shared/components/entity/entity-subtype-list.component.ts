@@ -167,16 +167,6 @@ export class EntitySubTypeListComponent implements ControlValueAccessor, OnInit,
           this.entitySubtypes = null;
         });
         break;
-      case EntityType.EDGE:
-        this.placeholder = this.required ? this.translate.instant('edge.enter-edge-type')
-          : this.translate.instant('edge.any-edge');
-        this.secondaryPlaceholder = '+' + this.translate.instant('edge.edge-type');
-        this.noSubtypesMathingText = 'edge.no-edge-types-matching';
-        this.subtypeListEmptyText = 'edge.edge-type-list-empty';
-        this.broadcastSubscription = this.broadcast.on('edgeSaved', () => {
-          this.entitySubtypes = null;
-        });
-        break;
       case EntityType.ENTITY_VIEW:
         this.placeholder = this.required ? this.translate.instant('entity-view.enter-entity-view-type')
           : this.translate.instant('entity-view.any-entity-view');

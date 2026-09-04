@@ -105,7 +105,6 @@ public class JpaDeviceDao extends JpaAbstractDao<DeviceEntity, Device> implement
                 deviceRepository.findDeviceInfosByFilter(
                         filter.getTenantId().getId(),
                         DaoUtil.getId(filter.getCustomerId()),
-                        DaoUtil.getId(filter.getEdgeId()),
                         filter.getType(),
                         DaoUtil.getId(filter.getDeviceProfileId()),
                         filter.getActive() != null,
@@ -244,29 +243,6 @@ public class JpaDeviceDao extends JpaAbstractDao<DeviceEntity, Device> implement
     @Override
     public Long countByTenantId(TenantId tenantId) {
         return deviceRepository.countByTenantId(tenantId.getId());
-    }
-
-    @Override
-    public PageData<Device> findDevicesByTenantIdAndEdgeId(UUID tenantId, UUID edgeId, PageLink pageLink) {
-        log.debug("Try to find devices by tenantId [{}], edgeId [{}] and pageLink [{}]", tenantId, edgeId, pageLink);
-        return DaoUtil.toPageData(deviceRepository
-                .findByTenantIdAndEdgeId(
-                        tenantId,
-                        edgeId,
-                        pageLink.getTextSearch(),
-                        DaoUtil.toPageable(pageLink)));
-    }
-
-    @Override
-    public PageData<Device> findDevicesByTenantIdAndEdgeIdAndType(UUID tenantId, UUID edgeId, String type, PageLink pageLink) {
-        log.debug("Try to find devices by tenantId [{}], edgeId [{}], type [{}] and pageLink [{}]", tenantId, edgeId, type, pageLink);
-        return DaoUtil.toPageData(deviceRepository
-                .findByTenantIdAndEdgeIdAndType(
-                        tenantId,
-                        edgeId,
-                        type,
-                        pageLink.getTextSearch(),
-                        DaoUtil.toPageable(pageLink)));
     }
 
     @Override

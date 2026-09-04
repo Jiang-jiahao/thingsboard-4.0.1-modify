@@ -34,16 +34,13 @@ import org.thingsboard.server.common.data.Customer;
 import org.thingsboard.server.common.data.EntitySubtype;
 import org.thingsboard.server.common.data.EntityView;
 import org.thingsboard.server.common.data.EntityViewInfo;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.entityview.EntityViewSearchQuery;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityViewId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.config.annotations.ApiOperation;
 import org.thingsboard.server.dao.exception.IncorrectParameterException;
 import org.thingsboard.server.dao.model.ModelConstants;
@@ -59,10 +56,6 @@ import java.util.stream.Collectors;
 
 import static org.thingsboard.server.controller.ControllerConstants.CUSTOMER_ID;
 import static org.thingsboard.server.controller.ControllerConstants.CUSTOMER_ID_PARAM_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ASSIGN_RECEIVE_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_UNASSIGN_RECEIVE_STEP_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.ENTITY_VIEW_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.ENTITY_VIEW_ID_PARAM_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.ENTITY_VIEW_INFO_DESCRIPTION;
@@ -76,19 +69,18 @@ import static org.thingsboard.server.controller.ControllerConstants.SORT_ORDER_D
 import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERTY_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
-import static org.thingsboard.server.controller.EdgeController.EDGE_ID;
 
 /**
  * 实体视图（Entity View）REST 入口。
  * <p>
- * 实体视图是设备/资产遥测与属性的只读窗口，可分配给客户或公开客户，也可同步到 Edge。
+ * 实体视图是设备/资产遥测与属性的只读窗口，可分配给客户或公开客户。
  * 仅在 {@link TbCoreComponent} 中生效。
  * <p>
  * <b>URL 前缀：</b>{@code /api}。路径如 {@code /entityView}、{@code /tenant/entityViews}、
- * {@code /customer/{customerId}/entityViews}、{@code /edge/{edgeId}/entityView/{entityViewId}}。
+ * {@code /customer/{customerId}/entityViews}。
  * <p>
  * <b>权限：</b>读写对 TENANT_ADMIN、CUSTOMER_USER 开放（客户仅能操作已分配的视图）；
- * 删除、分配客户/公开/Edge 仅 TENANT_ADMIN。
+ * 删除、分配客户/公开仅 TENANT_ADMIN。
  * <p>
  * <b>下游：</b>写/分配/解绑 {@link TbEntityViewService}；查询走基类 {@code entityViewService}。
  *
@@ -440,101 +432,5 @@ public class EntityViewController extends BaseController {
         EntityViewId entityViewId = new EntityViewId(toUUID(strEntityViewId));
         checkEntityViewId(entityViewId, Operation.ASSIGN_TO_CUSTOMER);
         return tbEntityViewService.assignEntityViewToPublicCustomer(getTenantId(), entityViewId, getCurrentUser());
-    }
-
-    /**
-     * 把实体视图分配到 Edge，异步同步到远端边缘实例。
-     */
-    @ApiOperation(value = "Assign entity view to edge (assignEntityViewToEdge)",
-            notes = "Creates assignment of an existing entity view to an instance of The Edge. " +
-                    EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
-                    "Second, remote edge service will receive a copy of assignment entity view " +
-                    EDGE_ASSIGN_RECEIVE_STEP_DESCRIPTION +
-                    "Third, once entity view will be delivered to edge service, it's going to be available for usage on remote edge instance.")
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/edge/{edgeId}/entityView/{entityViewId}", method = RequestMethod.POST)
-    @ResponseBody
-    public EntityView assignEntityViewToEdge(@PathVariable(EDGE_ID) String strEdgeId,
-                                             @PathVariable(ENTITY_VIEW_ID) String strEntityViewId) throws ThingsboardException {
-        checkParameter(EDGE_ID, strEdgeId);
-        checkParameter(ENTITY_VIEW_ID, strEntityViewId);
-
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        Edge edge = checkEdgeId(edgeId, Operation.READ);
-
-        EntityViewId entityViewId = new EntityViewId(toUUID(strEntityViewId));
-        checkEntityViewId(entityViewId, Operation.READ);
-
-        return tbEntityViewService.assignEntityViewToEdge(getTenantId(), getCurrentUser().getCustomerId(),
-                entityViewId, edge, getCurrentUser());
-    }
-
-    /**
-     * 取消实体视图与 Edge 的分配，并通知远端删除本地副本。
-     */
-    @ApiOperation(value = "Unassign entity view from edge (unassignEntityViewFromEdge)",
-            notes = "Clears assignment of the entity view to the edge. " +
-                    EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
-                    "Second, remote edge service will receive an 'unassign' command to remove entity view " +
-                    EDGE_UNASSIGN_RECEIVE_STEP_DESCRIPTION +
-                    "Third, once 'unassign' command will be delivered to edge service, it's going to remove entity view locally.")
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/edge/{edgeId}/entityView/{entityViewId}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public EntityView unassignEntityViewFromEdge(@PathVariable(EDGE_ID) String strEdgeId,
-                                                 @PathVariable(ENTITY_VIEW_ID) String strEntityViewId) throws ThingsboardException {
-        checkParameter(EDGE_ID, strEdgeId);
-        checkParameter(ENTITY_VIEW_ID, strEntityViewId);
-
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        Edge edge = checkEdgeId(edgeId, Operation.READ);
-
-        EntityViewId entityViewId = new EntityViewId(toUUID(strEntityViewId));
-        EntityView entityView = checkEntityViewId(entityViewId, Operation.READ);
-
-        return tbEntityViewService.unassignEntityViewFromEdge(getTenantId(), entityView.getCustomerId(), entityView,
-                edge, getCurrentUser());
-    }
-
-    /**
-     * 分页列出已分配到指定 Edge 的实体视图，并按当前用户 READ 权限过滤。
-     */
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/edge/{edgeId}/entityViews", params = {"pageSize", "page"}, method = RequestMethod.GET)
-    @ResponseBody
-    public PageData<EntityView> getEdgeEntityViews(
-            @PathVariable(EDGE_ID) String strEdgeId,
-            @RequestParam int pageSize,
-            @RequestParam int page,
-            @RequestParam(required = false) String type,
-            @RequestParam(required = false) String textSearch,
-            @RequestParam(required = false) String sortProperty,
-            @RequestParam(required = false) String sortOrder,
-            @RequestParam(required = false) Long startTime,
-            @RequestParam(required = false) Long endTime) throws ThingsboardException {
-        checkParameter(EDGE_ID, strEdgeId);
-        TenantId tenantId = getCurrentUser().getTenantId();
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        checkEdgeId(edgeId, Operation.READ);
-        TimePageLink pageLink = createTimePageLink(pageSize, page, textSearch, sortProperty, sortOrder, startTime, endTime);
-        PageData<EntityView> nonFilteredResult;
-        if (type != null && type.trim().length() > 0) {
-            nonFilteredResult = entityViewService.findEntityViewsByTenantIdAndEdgeIdAndType(tenantId, edgeId, type, pageLink);
-        } else {
-            nonFilteredResult = entityViewService.findEntityViewsByTenantIdAndEdgeId(tenantId, edgeId, pageLink);
-        }
-        List<EntityView> filteredEntityViews = nonFilteredResult.getData().stream().filter(entityView -> {
-            try {
-                accessControlService.checkPermission(getCurrentUser(), Resource.ENTITY_VIEW, Operation.READ, entityView.getId(), entityView);
-                return true;
-            } catch (ThingsboardException e) {
-                return false;
-            }
-        }).collect(Collectors.toList());
-        PageData<EntityView> filteredResult = new PageData<>(filteredEntityViews,
-                nonFilteredResult.getTotalPages(),
-                nonFilteredResult.getTotalElements(),
-                nonFilteredResult.hasNext());
-        return checkNotNull(filteredResult);
     }
 }

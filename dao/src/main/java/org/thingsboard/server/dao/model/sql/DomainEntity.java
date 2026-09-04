@@ -45,9 +45,6 @@ public class DomainEntity extends BaseSqlEntity<Domain> {
     @Column(name = ModelConstants.DOMAIN_OAUTH2_ENABLED_PROPERTY)
     private Boolean oauth2Enabled;
 
-    @Column(name = ModelConstants.DOMAIN_PROPAGATE_TO_EDGE_PROPERTY)
-    private Boolean propagateToEdge;
-
     public DomainEntity(Domain domain) {
         super(domain);
         if (domain.getTenantId() != null) {
@@ -55,7 +52,6 @@ public class DomainEntity extends BaseSqlEntity<Domain> {
         }
         this.name = domain.getName();
         this.oauth2Enabled = domain.isOauth2Enabled();
-        this.propagateToEdge = domain.isPropagateToEdge();
     }
 
     public DomainEntity() {
@@ -72,7 +68,6 @@ public class DomainEntity extends BaseSqlEntity<Domain> {
         domain.setCreatedTime(createdTime);
         domain.setName(name);
         domain.setOauth2Enabled(oauth2Enabled);
-        domain.setPropagateToEdge(propagateToEdge);
         return domain;
     }
 }

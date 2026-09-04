@@ -23,11 +23,9 @@ import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.asset.Asset;
 import org.thingsboard.server.common.data.audit.ActionType;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.AssetId;
 import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
@@ -36,7 +34,7 @@ import org.thingsboard.server.service.entitiy.AbstractTbEntityService;
  * {@link TbAssetService} 的默认实现。
  * <p>
  * 由 AssetController 调用，委托 {@link AssetService} 落库；写审计日志，保存时尝试 autoCommit。
- * 分配到客户/Edge 会经 {@code logEntityActionService} 触发规则引擎与 Edge 同步。
+ * 分配到客户会经 {@code logEntityActionService} 触发规则引擎。
  *
  * @see TbAssetService
  */
@@ -129,42 +127,6 @@ public class DefaultTbAssetService extends AbstractTbEntityService implements Tb
             return savedAsset;
         } catch (Exception e) {
             logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.ASSET), actionType, user, e, assetId.toString());
-            throw e;
-        }
-    }
-
-    /** 将资产分配给 Edge 并写审计。 */
-    @Override
-    public Asset assignAssetToEdge(TenantId tenantId, AssetId assetId, Edge edge, User user) throws ThingsboardException {
-        ActionType actionType = ActionType.ASSIGNED_TO_EDGE;
-        EdgeId edgeId = edge.getId();
-        try {
-            Asset savedAsset = checkNotNull(assetService.assignAssetToEdge(tenantId, assetId, edgeId));
-            logEntityActionService.logEntityAction(tenantId, assetId, savedAsset, savedAsset.getCustomerId(),
-                    actionType, user, assetId.toString(), edgeId.toString(), edge.getName());
-            return savedAsset;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.ASSET), actionType,
-                    user, e, assetId.toString(), edgeId.toString());
-            throw e;
-        }
-    }
-
-    /** 取消资产与 Edge 的分配并写审计。 */
-    @Override
-    public Asset unassignAssetFromEdge(TenantId tenantId, Asset asset, Edge edge, User user) throws ThingsboardException {
-        ActionType actionType = ActionType.UNASSIGNED_FROM_EDGE;
-        AssetId assetId = asset.getId();
-        EdgeId edgeId = edge.getId();
-        try {
-            Asset savedAsset = checkNotNull(assetService.unassignAssetFromEdge(tenantId, assetId, edgeId));
-            logEntityActionService.logEntityAction(tenantId, assetId, asset, asset.getCustomerId(),
-                    actionType, user, assetId.toString(), edgeId.toString(), edge.getName());
-
-            return savedAsset;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.ASSET), actionType,
-                    user, e, assetId.toString(), edgeId.toString());
             throw e;
         }
     }

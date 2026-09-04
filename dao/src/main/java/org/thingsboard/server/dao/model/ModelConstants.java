@@ -185,7 +185,6 @@ public class ModelConstants {
     public static final String DEVICE_PROFILE_PROVISION_DEVICE_KEY = "provision_device_key";
     public static final String DEVICE_PROFILE_FIRMWARE_ID_PROPERTY = "firmware_id";
     public static final String DEVICE_PROFILE_SOFTWARE_ID_PROPERTY = "software_id";
-    public static final String DEVICE_PROFILE_DEFAULT_EDGE_RULE_CHAIN_ID_PROPERTY = "default_edge_rule_chain_id";
 
     /**
      * Asset profile constants.
@@ -199,7 +198,6 @@ public class ModelConstants {
     public static final String ASSET_PROFILE_DEFAULT_RULE_CHAIN_ID_PROPERTY = "default_rule_chain_id";
     public static final String ASSET_PROFILE_DEFAULT_DASHBOARD_ID_PROPERTY = "default_dashboard_id";
     public static final String ASSET_PROFILE_DEFAULT_QUEUE_NAME_PROPERTY = "default_queue_name";
-    public static final String ASSET_PROFILE_DEFAULT_EDGE_RULE_CHAIN_ID_PROPERTY = "default_edge_rule_chain_id";
 
     /**
      * Entity view constants.
@@ -446,7 +444,6 @@ public class ModelConstants {
     public static final String DOMAIN_TABLE_NAME = "domain";
     public static final String DOMAIN_NAME_PROPERTY = "name";
     public static final String DOMAIN_OAUTH2_ENABLED_PROPERTY = "oauth2_enabled";
-    public static final String DOMAIN_PROPAGATE_TO_EDGE_PROPERTY = "edge_enabled";
 
     public static final String DOMAIN_OAUTH2_CLIENT_TABLE_NAME = "domain_oauth2_client";
     public static final String DOMAIN_OAUTH2_CLIENT_CLIENT_ID_PROPERTY = "oauth2_client_id";
@@ -585,34 +582,6 @@ public class ModelConstants {
     public static final String RPC_RESPONSE = "response";
     public static final String RPC_STATUS = "status";
     public static final String RPC_ADDITIONAL_INFO = ADDITIONAL_INFO_PROPERTY;
-
-    /**
-     * Edge constants.
-     */
-    public static final String EDGE_TABLE_NAME = "edge";
-    public static final String EDGE_TENANT_ID_PROPERTY = TENANT_ID_PROPERTY;
-    public static final String EDGE_CUSTOMER_ID_PROPERTY = CUSTOMER_ID_PROPERTY;
-    public static final String EDGE_ROOT_RULE_CHAIN_ID_PROPERTY = "root_rule_chain_id";
-    public static final String EDGE_NAME_PROPERTY = "name";
-    public static final String EDGE_LABEL_PROPERTY = "label";
-    public static final String EDGE_TYPE_PROPERTY = "type";
-    public static final String EDGE_ADDITIONAL_INFO_PROPERTY = ADDITIONAL_INFO_PROPERTY;
-
-    public static final String EDGE_ROUTING_KEY_PROPERTY = "routing_key";
-    public static final String EDGE_SECRET_PROPERTY = "secret";
-
-    /**
-     * Edge queue constants.
-     */
-    public static final String EDGE_EVENT_TABLE_NAME = "edge_event";
-    public static final String EDGE_EVENT_TENANT_ID_PROPERTY = TENANT_ID_PROPERTY;
-    public static final String EDGE_EVENT_SEQUENTIAL_ID_PROPERTY = "seq_id";
-    public static final String EDGE_EVENT_EDGE_ID_PROPERTY = "edge_id";
-    public static final String EDGE_EVENT_TYPE_PROPERTY = "edge_event_type";
-    public static final String EDGE_EVENT_ACTION_PROPERTY = "edge_event_action";
-    public static final String EDGE_EVENT_UID_PROPERTY = "edge_event_uid";
-    public static final String EDGE_EVENT_ENTITY_ID_PROPERTY = "entity_id";
-    public static final String EDGE_EVENT_BODY_PROPERTY = "body";
 
     public static final String EXTERNAL_ID_PROPERTY = "external_id";
 

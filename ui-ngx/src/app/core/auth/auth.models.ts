@@ -20,7 +20,6 @@ import { UserSettings } from '@shared/models/user-settings.models';
 export interface SysParamsState {
   userTokenAccessEnabled: boolean;
   allowedDashboardIds: string[];
-  edgesSupportEnabled: boolean;
   hasRepository: boolean;
   tbelEnabled: boolean;
   persistDeviceStateToTelemetry: boolean;

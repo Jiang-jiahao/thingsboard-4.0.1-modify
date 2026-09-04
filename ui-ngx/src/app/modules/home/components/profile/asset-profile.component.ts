@@ -28,7 +28,6 @@ import { ServiceType } from '@shared/models/queue.models';
 import { EntityId } from '@shared/models/id/entity-id';
 import { DashboardId } from '@shared/models/id/dashboard-id';
 import { AssetProfile } from '@shared/models/asset.models';
-import { RuleChainType } from '@shared/models/rule-chain.models';
 
 @Component({
   selector: 'tb-asset-profile',
@@ -43,8 +42,6 @@ export class AssetProfileComponent extends EntityComponent<AssetProfile> {
   entityType = EntityType;
 
   serviceType = ServiceType.TB_RULE_ENGINE;
-
-  edgeRuleChainType = RuleChainType.EDGE;
 
   assetProfileId: EntityId;
 
@@ -74,7 +71,6 @@ export class AssetProfileComponent extends EntityComponent<AssetProfile> {
         defaultRuleChainId: [entity && entity.defaultRuleChainId ? entity.defaultRuleChainId.id : null, []],
         defaultDashboardId: [entity && entity.defaultDashboardId ? entity.defaultDashboardId.id : null, []],
         defaultQueueName: [entity ? entity.defaultQueueName : null, []],
-        defaultEdgeRuleChainId: [entity && entity.defaultEdgeRuleChainId ? entity.defaultEdgeRuleChainId.id : null, []],
         description: [entity ? entity.description : '', []],
       }
     );
@@ -88,7 +84,6 @@ export class AssetProfileComponent extends EntityComponent<AssetProfile> {
     this.entityForm.patchValue({defaultRuleChainId: entity.defaultRuleChainId ? entity.defaultRuleChainId.id : null}, {emitEvent: false});
     this.entityForm.patchValue({defaultDashboardId: entity.defaultDashboardId ? entity.defaultDashboardId.id : null}, {emitEvent: false});
     this.entityForm.patchValue({defaultQueueName: entity.defaultQueueName}, {emitEvent: false});
-    this.entityForm.patchValue({defaultEdgeRuleChainId: entity.defaultEdgeRuleChainId ? entity.defaultEdgeRuleChainId.id : null}, {emitEvent: false});
     this.entityForm.patchValue({description: entity.description}, {emitEvent: false});
   }
 
@@ -98,9 +93,6 @@ export class AssetProfileComponent extends EntityComponent<AssetProfile> {
     }
     if (formValue.defaultDashboardId) {
       formValue.defaultDashboardId = new DashboardId(formValue.defaultDashboardId);
-    }
-    if (formValue.defaultEdgeRuleChainId) {
-      formValue.defaultEdgeRuleChainId = new RuleChainId(formValue.defaultEdgeRuleChainId);
     }
     return super.prepareFormValue(formValue);
   }

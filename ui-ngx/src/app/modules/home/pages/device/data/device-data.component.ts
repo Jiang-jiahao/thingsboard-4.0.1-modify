@@ -98,7 +98,7 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   @Input()
   editingDeviceId: string | null = null;
 
-  /** 来自设备详情页：tenant | customer | customer_user | edge | edge_customer_user */
+  /** 来自设备详情页：tenant | customer | customer_user */
   @Input()
   deviceScope: string;
 

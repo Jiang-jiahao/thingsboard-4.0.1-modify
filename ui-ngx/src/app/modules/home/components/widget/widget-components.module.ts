@@ -35,7 +35,6 @@ import { TripAnimationComponent } from '@home/components/widget/lib/trip-animati
 import { PhotoCameraInputWidgetComponent } from '@home/components/widget/lib/photo-camera-input.component';
 import { NavigationCardsWidgetComponent } from '@home/components/widget/lib/navigation-cards-widget.component';
 import { NavigationCardWidgetComponent } from '@home/components/widget/lib/navigation-card-widget.component';
-import { EdgesOverviewWidgetComponent } from '@home/components/widget/lib/edges-overview-widget.component';
 import { JsonInputWidgetComponent } from '@home/components/widget/lib/json-input-widget.component';
 import { QrCodeWidgetComponent } from '@home/components/widget/lib/qrcode-widget.component';
 import { MarkdownWidgetComponent } from '@home/components/widget/lib/markdown-widget.component';
@@ -102,7 +101,6 @@ import { MapTimelinePanelComponent } from '@home/components/widget/lib/maps/pane
     AlarmsTableWidgetComponent,
     TimeseriesTableWidgetComponent,
     EntitiesHierarchyWidgetComponent,
-    EdgesOverviewWidgetComponent,
     DateRangeNavigatorWidgetComponent,
     DateRangeNavigatorPanelComponent,
     JsonInputWidgetComponent,
@@ -167,7 +165,6 @@ import { MapTimelinePanelComponent } from '@home/components/widget/lib/maps/pane
     AlarmsTableWidgetComponent,
     TimeseriesTableWidgetComponent,
     EntitiesHierarchyWidgetComponent,
-    EdgesOverviewWidgetComponent,
     RpcWidgetsModule,
     HomePageWidgetsModule,
     DateRangeNavigatorWidgetComponent,

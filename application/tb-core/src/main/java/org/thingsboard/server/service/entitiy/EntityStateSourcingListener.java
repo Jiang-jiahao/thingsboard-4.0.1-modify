@@ -34,8 +34,6 @@ import org.thingsboard.server.common.data.TenantProfile;
 import org.thingsboard.server.common.data.asset.Asset;
 import org.thingsboard.server.common.data.audit.ActionType;
 import org.thingsboard.server.common.data.cf.CalculatedField;
-import org.thingsboard.server.common.data.edge.Edge;
-import org.thingsboard.server.common.data.edge.EdgeEvent;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.RuleChainId;
@@ -49,10 +47,7 @@ import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
-import org.thingsboard.server.common.msg.edge.EdgeEventUpdateMsg;
-import org.thingsboard.server.common.msg.plugin.ComponentLifecycleMsg;
 import org.thingsboard.server.common.msg.rule.engine.DeviceCredentialsUpdateNotificationMsg;
-import org.thingsboard.server.dao.edge.EdgeSynchronizationManager;
 import org.thingsboard.server.dao.eventsourcing.ActionEntityEvent;
 import org.thingsboard.server.dao.eventsourcing.DeleteEntityEvent;
 import org.thingsboard.server.dao.eventsourcing.SaveEntityEvent;
@@ -68,7 +63,6 @@ import java.util.Set;
  * 1. 监听实体保存、删除和特定动作事件
  * 2. 根据实体类型执行相应的集群同步操作
  * 3. 广播实体状态变化到集群其他节点
- * 4. 处理边缘计算相关的同步事件
  * <p>
  * 设计模式：事件监听器模式 + 观察者模式
  * 技术特点：使用Spring事务事件监听器，确保在事务提交后执行
@@ -87,11 +81,6 @@ public class EntityStateSourcingListener {
      * 集群服务，用于跨节点通信和状态同步
      */
     private final TbClusterService tbClusterService;
-
-    /**
-     * 边缘同步管理器，处理边缘设备同步逻辑
-     */
-    private final EdgeSynchronizationManager edgeSynchronizationManager;
 
     /**
      * 初始化方法 - 在Bean创建后执行
@@ -170,10 +159,6 @@ public class EntityStateSourcingListener {
                 DeviceProfile deviceProfile = (DeviceProfile) event.getEntity();
                 onDeviceProfileUpdate(deviceProfile, event.getOldEntity(), isCreated);
             }
-            case EDGE -> {
-                // 边缘设备 - 处理边缘相关事件
-                onEdgeEvent(tenantId, entityId, event.getEntity(), lifecycleEvent);
-            }
             case TB_RESOURCE -> {
                 // 资源文件 - 处理资源变化
                 TbResource tbResource = (TbResource) event.getEntity();
@@ -212,7 +197,7 @@ public class EntityStateSourcingListener {
                 Asset asset = (Asset) event.getEntity();
                 tbClusterService.onAssetDeleted(tenantId, asset, null);
             }
-            case ASSET_PROFILE, ENTITY_VIEW, CUSTOMER, EDGE, NOTIFICATION_RULE -> {
+            case ASSET_PROFILE, ENTITY_VIEW, CUSTOMER, NOTIFICATION_RULE -> {
                 tbClusterService.broadcastEntityStateChangeEvent(tenantId, entityId, ComponentLifecycleEvent.DELETED);
             }
             case NOTIFICATION_REQUEST -> {
@@ -327,17 +312,6 @@ public class EntityStateSourcingListener {
             oldAsset = (Asset) oldEntity;
         }
         tbClusterService.onAssetUpdated(asset, oldAsset);
-    }
-
-    private void onEdgeEvent(TenantId tenantId, EntityId entityId, Object entity, ComponentLifecycleEvent lifecycleEvent) {
-        if (entity instanceof Edge) {
-            if (entityId.equals(edgeSynchronizationManager.getEdgeId().get())) {
-                return;
-            }
-            tbClusterService.onEdgeStateChangeEvent(new ComponentLifecycleMsg(tenantId, entityId, lifecycleEvent));
-        } else if (entity instanceof EdgeEvent edgeEvent) {
-            tbClusterService.onEdgeEventUpdate(new EdgeEventUpdateMsg(tenantId, edgeEvent.getEdgeId()));
-        }
     }
 
     private void onCalculatedFieldUpdate(Object entity, Object oldEntity) {

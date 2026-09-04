@@ -215,27 +215,6 @@ public interface AssetDao extends Dao<Asset>, TenantEntityDao<Asset>, Exportable
      */
     PageData<Asset> findAssetsByTenantIdAndProfileId(UUID tenantId, UUID profileId, PageLink pageLink);
 
-    /**
-     * Find assets by tenantId, edgeId and page link.
-     *
-     * @param tenantId the tenantId
-     * @param edgeId the edgeId
-     * @param pageLink the page link
-     * @return the list of asset objects
-     */
-    PageData<Asset> findAssetsByTenantIdAndEdgeId(UUID tenantId, UUID edgeId, PageLink pageLink);
-
-    /**
-     * Find assets by tenantId, edgeId, type and page link.
-     *
-     * @param tenantId the tenantId
-     * @param edgeId the edgeId
-     * @param type the type
-     * @param pageLink the page link
-     * @return the list of asset objects
-     */
-    PageData<Asset> findAssetsByTenantIdAndEdgeIdAndType(UUID tenantId, UUID edgeId, String type, PageLink pageLink);
-
     PageData<TbPair<UUID, String>> getAllAssetTypes(PageLink pageLink);
 
     PageData<ProfileEntityIdInfo> findProfileEntityIdInfos(PageLink pageLink);

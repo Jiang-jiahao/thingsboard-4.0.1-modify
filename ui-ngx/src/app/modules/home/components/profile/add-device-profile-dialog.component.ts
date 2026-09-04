@@ -29,7 +29,6 @@ import {
   deviceProfileTypeTranslationMap,
   createDisabledDeviceProvisionConfiguration,
   DEVICE_PROVISIONING_UI_ENABLED,
-  EDGE_UI_ENABLED,
   MOBILE_UI_ENABLED,
   DeviceProvisionConfiguration,
   DeviceProvisionType,
@@ -48,7 +47,6 @@ import { StepperSelectionEvent } from '@angular/cdk/stepper';
 import { deepTrim } from '@core/utils';
 import { ServiceType } from '@shared/models/queue.models';
 import { DashboardId } from '@shared/models/id/dashboard-id';
-import { RuleChainType } from '@shared/models/rule-chain.models';
 import { Observable } from 'rxjs';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { MediaBreakpoints } from '@shared/models/constants';
@@ -98,13 +96,9 @@ export class AddDeviceProfileDialogComponent extends
 
   serviceType = ServiceType.TB_RULE_ENGINE;
 
-  edgeRuleChainType = RuleChainType.EDGE;
-
   readonly deviceProvisioningUiEnabled = DEVICE_PROVISIONING_UI_ENABLED;
 
   readonly mobileUiEnabled = MOBILE_UI_ENABLED;
-
-  readonly edgeUiEnabled = EDGE_UI_ENABLED;
 
   constructor(protected store: Store<AppState>,
               protected router: Router,
@@ -128,7 +122,6 @@ export class AddDeviceProfileDialogComponent extends
         defaultRuleChainId: [null, []],
         defaultDashboardId: [null, []],
         defaultQueueName: [null, []],
-        defaultEdgeRuleChainId: [null, []],
         description: ['', []]
       }
     );
@@ -231,9 +224,6 @@ export class AddDeviceProfileDialogComponent extends
       }
       if (this.deviceProfileDetailsFormGroup.get('defaultDashboardId').value) {
         deviceProfile.defaultDashboardId = new DashboardId(this.deviceProfileDetailsFormGroup.get('defaultDashboardId').value);
-      }
-      if (this.deviceProfileDetailsFormGroup.get('defaultEdgeRuleChainId').value) {
-        deviceProfile.defaultEdgeRuleChainId = new RuleChainId(this.deviceProfileDetailsFormGroup.get('defaultEdgeRuleChainId').value);
       }
       this.deviceProfileService.saveDeviceProfile(deepTrim(deviceProfile)).subscribe(
         (savedDeviceProfile) => {

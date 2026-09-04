@@ -91,11 +91,6 @@ public class DeviceProfile extends BaseData<DeviceProfileId> implements HasName,
     @Schema(description = "Reference to the software OTA package. If present, the specified package will be used as default device software. ")
     private OtaPackageId softwareId;
 
-    @Schema(description = "Reference to the edge rule chain. " +
-            "If present, the specified edge rule chain will be used on the edge to process all messages related to device, including telemetry, attribute updates, etc. " +
-            "Otherwise, the edge root rule chain will be used to process those messages.")
-    private RuleChainId defaultEdgeRuleChainId;
-
     private DeviceProfileId externalId;
     private Long version;
 
@@ -121,7 +116,6 @@ public class DeviceProfile extends BaseData<DeviceProfileId> implements HasName,
         this.provisionDeviceKey = deviceProfile.getProvisionDeviceKey();
         this.firmwareId = deviceProfile.getFirmwareId();
         this.softwareId = deviceProfile.getSoftwareId();
-        this.defaultEdgeRuleChainId = deviceProfile.getDefaultEdgeRuleChainId();
         this.externalId = deviceProfile.getExternalId();
         this.version = deviceProfile.getVersion();
     }

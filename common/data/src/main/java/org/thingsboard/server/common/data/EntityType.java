@@ -49,7 +49,6 @@ public enum EntityType {
     API_USAGE_STATE(23),
     TB_RESOURCE(24, "resource"),
     OTA_PACKAGE(25),
-    EDGE(26),
     RPC(27),
     QUEUE(28),
     NOTIFICATION_TARGET(29),

@@ -17,8 +17,6 @@ package org.thingsboard.server.queue.discovery;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ConcurrentReferenceHashMap;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.msg.queue.ServiceType;
 import org.thingsboard.server.common.msg.queue.TopicPartitionInfo;
@@ -41,20 +39,12 @@ public class TopicService {
     @Value("${queue.transport.notifications-topic:tb_transport.notifications}")
     private String tbTransportNotificationsTopic;
 
-    @Value("${queue.edge.notifications-topic:tb_edge.notifications}")
-    private String tbEdgeNotificationsTopic;
-
-    @Value("${queue.edge.event-notifications-topic:tb_edge_event.notifications}")
-    private String tbEdgeEventNotificationsTopic;
-
     @Value("${queue.calculated-fields.notifications-topic:calculated_field.notifications}")
     private String tbCalculatedFieldNotificationsTopic;
 
     private final ConcurrentMap<String, TopicPartitionInfo> tbCoreNotificationTopics = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, TopicPartitionInfo> tbRuleEngineNotificationTopics = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, TopicPartitionInfo> tbEdgeNotificationTopics = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, TopicPartitionInfo> tbCalculatedFieldNotificationTopics = new ConcurrentHashMap<>();
-    private final ConcurrentReferenceHashMap<EdgeId, TopicPartitionInfo> tbEdgeEventsNotificationTopics = new ConcurrentReferenceHashMap<>();
 
     /**
      * Each Service should start a consumer for messages that target individual service instance based on serviceId.
@@ -82,24 +72,8 @@ public class TopicService {
         return new TopicPartitionInfo(buildTopicName(topic), tenantId, partition, myPartition);
     }
 
-    public TopicPartitionInfo getEdgeNotificationsTopic(String serviceId) {
-        return tbEdgeNotificationTopics.computeIfAbsent(serviceId, id -> buildEdgeNotificationsTopicPartitionInfo(serviceId));
-    }
-
-    private TopicPartitionInfo buildEdgeNotificationsTopicPartitionInfo(String serviceId) {
-        return buildTopicPartitionInfo(buildNotificationTopicName(tbEdgeNotificationsTopic, serviceId), null, null, false);
-    }
-
     public TopicPartitionInfo getCalculatedFieldNotificationsTopic(String serviceId) {
         return tbCalculatedFieldNotificationTopics.computeIfAbsent(serviceId, id -> buildNotificationsTopicPartitionInfo(tbCalculatedFieldNotificationsTopic, serviceId));
-    }
-
-    public TopicPartitionInfo getEdgeEventNotificationsTopic(TenantId tenantId, EdgeId edgeId) {
-        return tbEdgeEventsNotificationTopics.computeIfAbsent(edgeId, id -> buildEdgeEventNotificationsTopicPartitionInfo(tenantId, edgeId));
-    }
-
-    public TopicPartitionInfo buildEdgeEventNotificationsTopicPartitionInfo(TenantId tenantId, EdgeId edgeId) {
-        return buildTopicPartitionInfo(tbEdgeEventNotificationsTopic + "." + tenantId + "." + edgeId, null, null, false);
     }
 
     public String buildTopicName(String topic) {

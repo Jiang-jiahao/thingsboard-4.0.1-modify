@@ -27,7 +27,7 @@
     <artifactId>proto</artifactId>
     <packaging>jar</packaging>
 
-    <name>Thingsboard Server Common Protobuf and gRPC structures</name>
+    <name>Thingsboard Server Common Protobuf structures</name>
     <url>https://thingsboard.io</url>
 
     <properties>

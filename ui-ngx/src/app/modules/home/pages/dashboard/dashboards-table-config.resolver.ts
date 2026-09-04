@@ -65,11 +65,6 @@ import {
 } from '@modules/home/pages/dashboard/make-dashboard-public-dialog.component';
 import { DashboardTabsComponent } from '@home/pages/dashboard/dashboard-tabs.component';
 import { ImportExportService } from '@shared/import-export/import-export.service';
-import { EdgeService } from '@core/http/edge.service';
-import {
-  AddEntitiesToEdgeDialogComponent,
-  AddEntitiesToEdgeDialogData
-} from '@home/dialogs/add-entities-to-edge-dialog.component';
 import { HomeDialogsService } from '@home/dialogs/home-dialogs.service';
 import { Widget } from '@shared/models/widget.models';
 import { EntityAliases } from '@shared/models/alias.models';
@@ -86,7 +81,6 @@ export class DashboardsTableConfigResolver  {
   constructor(private store: Store<AppState>,
               private dashboardService: DashboardService,
               private customerService: CustomerService,
-              private edgeService: EdgeService,
               private dialogService: DialogService,
               private homeDialogs: HomeDialogsService,
               private importExport: ImportExportService,
@@ -112,8 +106,7 @@ export class DashboardsTableConfigResolver  {
     this.config.loadEntity = id => this.dashboardService.getDashboard(id.id);
     this.config.saveEntity = dashboard => this.saveAndAssignDashboard(dashboard as DashboardSetup);
     this.config.onEntityAction = action => this.onDashboardAction(action);
-    this.config.detailsReadonly = () => (this.config.componentsData.dashboardScope === 'customer_user' ||
-      this.config.componentsData.dashboardScope === 'edge_customer_user');
+    this.config.detailsReadonly = () => this.config.componentsData.dashboardScope === 'customer_user';
 
     this.config.handleRowClick = ($event, dashboard) => {
       if (this.config.isDetailsOpen()) {
@@ -133,17 +126,12 @@ export class DashboardsTableConfigResolver  {
     const routeParams = route.params;
     this.config.componentsData = {
       dashboardScope: route.data.dashboardsType,
-      customerId: routeParams.customerId,
-      edgeId: routeParams.edgeId
+      customerId: routeParams.customerId
     };
     return this.store.pipe(select(selectAuthUser), take(1)).pipe(
       tap((authUser) => {
         if (authUser.authority === Authority.CUSTOMER_USER) {
-          if (route.data.dashboardsType === 'edge') {
-            this.config.componentsData.dashboardScope = 'edge_customer_user';
-          } else {
-            this.config.componentsData.dashboardScope = 'customer_user';
-          }
+          this.config.componentsData.dashboardScope = 'customer_user';
           this.config.componentsData.customerId = authUser.customerId;
         }
       }),
@@ -158,10 +146,6 @@ export class DashboardsTableConfigResolver  {
           } else {
             this.config.tableTitle = parentCustomer.title + ': ' + this.translate.instant('dashboard.dashboards');
           }
-        } else if (this.config.componentsData.dashboardScope === 'edge') {
-          this.edgeService.getEdge(this.config.componentsData.edgeId).subscribe(
-            edge => this.config.tableTitle = edge.name + ': ' + this.translate.instant('dashboard.dashboards')
-          );
         } else {
           this.config.tableTitle = this.translate.instant('dashboard.dashboards');
         }
@@ -170,8 +154,7 @@ export class DashboardsTableConfigResolver  {
         this.config.cellActionDescriptors = this.configureCellActions(this.config.componentsData.dashboardScope);
         this.config.groupActionDescriptors = this.configureGroupActions(this.config.componentsData.dashboardScope);
         this.config.addActionDescriptors = this.configureAddActions(this.config.componentsData.dashboardScope);
-        this.config.addEnabled = !(this.config.componentsData.dashboardScope === 'customer_user' ||
-          this.config.componentsData.dashboardScope === 'edge_customer_user');
+        this.config.addEnabled = this.config.componentsData.dashboardScope !== 'customer_user';
         this.config.entitiesDeleteEnabled = this.config.componentsData.dashboardScope === 'tenant';
         this.config.deleteEnabled = () => this.config.componentsData.dashboardScope === 'tenant';
         return this.config;
@@ -200,9 +183,6 @@ export class DashboardsTableConfigResolver  {
       this.config.entitiesFetchFunction = pageLink =>
         this.dashboardService.getTenantDashboards(pageLink);
       this.config.deleteEntity = id => this.dashboardService.deleteDashboard(id.id);
-    } else if (dashboardScope === 'edge' || dashboardScope === 'edge_customer_user') {
-      this.config.entitiesFetchFunction = pageLink =>
-        this.dashboardService.getEdgeDashboards(this.config.componentsData.edgeId, pageLink, this.config.componentsData.dashboardsType);
     } else {
       this.config.entitiesFetchFunction = pageLink =>
         this.dashboardService.getCustomerDashboards(this.config.componentsData.customerId, pageLink);
@@ -263,22 +243,6 @@ export class DashboardsTableConfigResolver  {
         }
       );
     }
-    if (dashboardScope === 'edge') {
-      actions.push(
-        {
-          name: this.translate.instant('dashboard.export'),
-          icon: 'file_download',
-          isEnabled: () => true,
-          onAction: ($event, entity) => this.exportDashboard($event, entity)
-        },
-        {
-          name: this.translate.instant('edge.unassign-from-edge'),
-          icon: 'assignment_return',
-          isEnabled: () => true,
-          onAction: ($event, entity) => this.unassignFromEdge($event, entity)
-        }
-      );
-    }
     actions.push(
       {
         name: this.translate.instant('dashboard.dashboard-details'),
@@ -321,16 +285,6 @@ export class DashboardsTableConfigResolver  {
         }
       );
     }
-    if (dashboardScope === 'edge') {
-      actions.push(
-        {
-          name: this.translate.instant('dashboard.unassign-dashboards'),
-          icon: 'assignment_return',
-          isEnabled: true,
-          onAction: ($event, entities) => this.unassignDashboardsFromEdge($event, entities)
-        }
-      );
-    }
     return actions;
   }
 
@@ -362,16 +316,6 @@ export class DashboardsTableConfigResolver  {
         }
       );
     }
-    if (dashboardScope === 'edge') {
-      actions.push(
-        {
-          name: this.translate.instant('dashboard.assign-new-dashboard'),
-          icon: 'add',
-          isEnabled: () => true,
-          onAction: ($event) => this.addDashboardsToEdge($event)
-        }
-      );
-    }
     return actions;
   }
 
@@ -381,8 +325,6 @@ export class DashboardsTableConfigResolver  {
     }
     if (this.config.componentsData.dashboardScope === 'customer') {
       this.router.navigateByUrl(`customers/${this.config.componentsData.customerId}/dashboards/${dashboard.id.id}`);
-    } else if (this.config.componentsData.dashboardScope === 'edge') {
-      this.router.navigateByUrl(`edgeInstances/${this.config.componentsData.edgeId}/dashboards/${dashboard.id.id}`);
     } else {
       this.router.navigateByUrl(`dashboards/${dashboard.id.id}`);
     }
@@ -599,81 +541,8 @@ export class DashboardsTableConfigResolver  {
       case 'unassignFromCustomer':
         this.unassignFromCustomer(action.event, action.entity, this.config.componentsData.customerId);
         return true;
-      case 'unassignFromEdge':
-        this.unassignFromEdge(action.event, action.entity);
-        return true;
     }
     return false;
-  }
-
-  addDashboardsToEdge($event: Event) {
-    if ($event) {
-      $event.stopPropagation();
-    }
-    this.dialog.open<AddEntitiesToEdgeDialogComponent, AddEntitiesToEdgeDialogData,
-      boolean>(AddEntitiesToEdgeDialogComponent, {
-      disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
-      data: {
-        edgeId: this.config.componentsData.edgeId,
-        entityType: EntityType.DASHBOARD
-      }
-    }).afterClosed()
-      .subscribe((res) => {
-        if (res) {
-          this.config.updateData();
-        }
-      });
-  }
-
-  unassignFromEdge($event: Event, dashboard: DashboardInfo) {
-    if ($event) {
-      $event.stopPropagation();
-    }
-    this.dialogService.confirm(
-      this.translate.instant('dashboard.unassign-dashboard-title', {dashboardTitle: dashboard.title}),
-      this.translate.instant('dashboard.unassign-dashboard-from-edge-text'),
-      this.translate.instant('action.no'),
-      this.translate.instant('action.yes'),
-      true
-    ).subscribe((res) => {
-        if (res) {
-          this.dashboardService.unassignDashboardFromEdge(this.config.componentsData.edgeId, dashboard.id.id).subscribe(
-            () => {
-              this.config.updateData(this.config.componentsData.dashboardScope !== 'tenant');
-            }
-          );
-        }
-      }
-    );
-  }
-
-  unassignDashboardsFromEdge($event: Event, dashboards: Array<DashboardInfo>) {
-    if ($event) {
-      $event.stopPropagation();
-    }
-    this.dialogService.confirm(
-      this.translate.instant('dashboard.unassign-dashboards-from-edge-title', {count: dashboards.length}),
-      this.translate.instant('dashboard.unassign-dashboards-from-edge-text'),
-      this.translate.instant('action.no'),
-      this.translate.instant('action.yes'),
-      true
-    ).subscribe((res) => {
-        if (res) {
-          const tasks: Observable<any>[] = [];
-          dashboards.forEach(
-            (dashboard) => {
-              tasks.push(this.dashboardService.unassignDashboardFromEdge(this.config.componentsData.edgeId, dashboard.id.id));
-            }
-          );
-          forkJoin(tasks).subscribe(
-            () => {
-              this.config.updateData();
-            }
-          );
-        }
-      }
-    );
   }
 
   saveAndAssignDashboard(dashboard: DashboardSetup): Observable<Dashboard> {

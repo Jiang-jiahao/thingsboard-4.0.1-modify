@@ -27,14 +27,10 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { map, share, tap } from 'rxjs/operators';
-import { Store } from '@ngrx/store';
-import { AppState } from '@app/core/core.state';
 import { WidgetsBundle } from '@shared/models/widgets-bundle.model';
 import { WidgetService } from '@core/http/widget.service';
 import { isDefined } from '@core/utils';
 import { NULL_UUID } from '@shared/models/id/has-uuid';
-import { getCurrentAuthState } from '@core/auth/auth.selectors';
-import { EDGE_UI_ENABLED } from '@shared/models/device.models';
 import { coerceBoolean } from '@shared/decorators/coercion';
 import { MatDialog } from '@angular/material/dialog';
 import {
@@ -88,8 +84,7 @@ export class WidgetsBundleSelectComponent implements ControlValueAccessor, OnIni
   onTouched = () => {};
   private propagateChange: (value: any) => void = () => {};
 
-  constructor(private store: Store<AppState>,
-              private widgetService: WidgetService,
+  constructor(private widgetService: WidgetService,
               private dialog: MatDialog,
               private cd: ChangeDetectorRef) {
   }
@@ -104,13 +99,6 @@ export class WidgetsBundleSelectComponent implements ControlValueAccessor, OnIni
 
   ngOnInit() {
     this.widgetsBundles$ = this.getWidgetsBundles().pipe(
-      map((widgetsBundles) => {
-        const authState = getCurrentAuthState(this.store);
-        if (!EDGE_UI_ENABLED || !authState.edgesSupportEnabled) {
-          widgetsBundles = widgetsBundles.filter(widgetsBundle => widgetsBundle.alias !== 'edge_widgets');
-        }
-        return widgetsBundles;
-      }),
       tap((widgetsBundles) => {
         this.widgetsBundles = widgetsBundles;
         if (this.selectFirstBundle) {

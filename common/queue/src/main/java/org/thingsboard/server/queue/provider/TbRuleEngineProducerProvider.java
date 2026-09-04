@@ -22,9 +22,6 @@ import org.thingsboard.server.gen.transport.TransportProtos.ToCalculatedFieldMsg
 import org.thingsboard.server.gen.transport.TransportProtos.ToCalculatedFieldNotificationMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToCoreMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToCoreNotificationMsg;
-import org.thingsboard.server.gen.transport.TransportProtos.ToEdgeEventNotificationMsg;
-import org.thingsboard.server.gen.transport.TransportProtos.ToEdgeMsg;
-import org.thingsboard.server.gen.transport.TransportProtos.ToEdgeNotificationMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToHousekeeperServiceMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToRuleEngineMsg;
 import org.thingsboard.server.gen.transport.TransportProtos.ToRuleEngineNotificationMsg;
@@ -62,15 +59,6 @@ public class TbRuleEngineProducerProvider implements TbQueueProducerProvider {
     // 管家服务生产者
     private TbQueueProducer<TbProtoQueueMsg<ToHousekeeperServiceMsg>> toHousekeeper;
 
-    // 边缘服务消息生产者
-    private TbQueueProducer<TbProtoQueueMsg<ToEdgeMsg>> toEdge;
-
-    // 边缘服务通知生产者
-    private TbQueueProducer<TbProtoQueueMsg<ToEdgeNotificationMsg>> toEdgeNotifications;
-
-    // 边缘事件通知生产者
-    private TbQueueProducer<TbProtoQueueMsg<ToEdgeEventNotificationMsg>> toEdgeEvents;
-
     // 计算字段服务生产者
     private TbQueueProducer<TbProtoQueueMsg<ToCalculatedFieldMsg>> toCalculatedFields;
 
@@ -90,9 +78,6 @@ public class TbRuleEngineProducerProvider implements TbQueueProducerProvider {
         this.toTbCoreNotifications = tbQueueProvider.createTbCoreNotificationsMsgProducer();
         this.toUsageStats = tbQueueProvider.createToUsageStatsServiceMsgProducer();
         this.toHousekeeper = tbQueueProvider.createHousekeeperMsgProducer();
-        this.toEdge = tbQueueProvider.createEdgeMsgProducer();
-        this.toEdgeNotifications = tbQueueProvider.createEdgeNotificationsMsgProducer();
-        this.toEdgeEvents = tbQueueProvider.createEdgeEventMsgProducer();
         this.toCalculatedFields = tbQueueProvider.createToCalculatedFieldMsgProducer();
         this.toCalculatedFieldNotifications = tbQueueProvider.createToCalculatedFieldNotificationMsgProducer();
     }
@@ -120,21 +105,6 @@ public class TbRuleEngineProducerProvider implements TbQueueProducerProvider {
     @Override
     public TbQueueProducer<TbProtoQueueMsg<ToCoreNotificationMsg>> getTbCoreNotificationsMsgProducer() {
         return toTbCoreNotifications;
-    }
-
-    @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToEdgeMsg>> getTbEdgeMsgProducer() {
-        return toEdge;
-    }
-
-    @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToEdgeNotificationMsg>> getTbEdgeNotificationsMsgProducer() {
-        return toEdgeNotifications;
-    }
-
-    @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToEdgeEventNotificationMsg>> getTbEdgeEventsMsgProducer() {
-        return toEdgeEvents;
     }
 
     @Override

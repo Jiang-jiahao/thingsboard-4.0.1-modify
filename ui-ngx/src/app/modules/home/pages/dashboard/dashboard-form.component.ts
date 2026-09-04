@@ -39,7 +39,7 @@ import { EntityType } from '@shared/models/entity-type.models';
 })
 export class DashboardFormComponent extends EntityComponent<Dashboard> {
 
-  dashboardScope: 'tenant' | 'customer' | 'customer_user' | 'edge';
+  dashboardScope: 'tenant' | 'customer' | 'customer_user';
   customerId: string;
 
   publicLink: string;

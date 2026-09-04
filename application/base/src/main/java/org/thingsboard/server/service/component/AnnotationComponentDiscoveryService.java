@@ -75,8 +75,6 @@ public class AnnotationComponentDiscoveryService implements ComponentDiscoverySe
 
     private final Map<ComponentType, List<ComponentDescriptor>> coreComponentsMap = new HashMap<>();
 
-    private final Map<ComponentType, List<ComponentDescriptor>> edgeComponentsMap = new HashMap<>();
-
     private boolean isInstall() {
         return environment.acceptsProfiles(Profiles.of("install"));
     }
@@ -160,9 +158,6 @@ public class AnnotationComponentDiscoveryService implements ComponentDiscoverySe
         if (ruleChainTypesMethodAvailable) {
             if (ruleChainTypeContainsArray(RuleChainType.CORE, ruleNodeAnnotation.ruleChainTypes())) {
                 coreComponentsMap.computeIfAbsent(type, k -> new ArrayList<>()).add(component);
-            }
-            if (ruleChainTypeContainsArray(RuleChainType.EDGE, ruleNodeAnnotation.ruleChainTypes())) {
-                edgeComponentsMap.computeIfAbsent(type, k -> new ArrayList<>()).add(component);
             }
         } else {
             coreComponentsMap.computeIfAbsent(type, k -> new ArrayList<>()).add(component);
@@ -267,12 +262,6 @@ public class AnnotationComponentDiscoveryService implements ComponentDiscoverySe
             } else {
                 return Collections.emptyList();
             }
-        } else if (RuleChainType.EDGE.equals(ruleChainType)) {
-            if (edgeComponentsMap.containsKey(type)) {
-                return Collections.unmodifiableList(edgeComponentsMap.get(type));
-            } else {
-                return Collections.emptyList();
-            }
         } else {
             log.error("Unsupported rule chain type {}", ruleChainType);
             throw new RuntimeException("Unsupported rule chain type " + ruleChainType);
@@ -283,8 +272,6 @@ public class AnnotationComponentDiscoveryService implements ComponentDiscoverySe
     public List<ComponentDescriptor> getComponents(Set<ComponentType> types, RuleChainType ruleChainType) {
         if (RuleChainType.CORE.equals(ruleChainType)) {
             return getComponents(types, coreComponentsMap);
-        } else if (RuleChainType.EDGE.equals(ruleChainType)) {
-            return getComponents(types, edgeComponentsMap);
         } else {
             log.error("Unsupported rule chain type {}", ruleChainType);
             throw new RuntimeException("Unsupported rule chain type " + ruleChainType);

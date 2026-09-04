@@ -55,12 +55,6 @@
   </button>
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
-          (click)="onEntityAction($event, 'unassignFromEdge')"
-          [class.!hidden]="isEdit || dashboardScope !== 'edge'">
-    {{ 'edge.unassign-from-edge' | translate }}
-  </button>
-  <button mat-raised-button color="primary"
-          [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'delete')"
           [class.!hidden]="hideDelete() || isEdit">
     {{'dashboard.delete' | translate }}

@@ -206,27 +206,6 @@ public interface DeviceDao extends Dao<Device>, TenantEntityDao<Device>, Exporta
 
     PageData<UUID> findDevicesIdsByDeviceProfileTransportType(DeviceTransportType transportType, PageLink pageLink);
 
-    /**
-     * Find devices by tenantId, edgeId and page link.
-     *
-     * @param tenantId the tenantId
-     * @param edgeId the edgeId
-     * @param pageLink the page link
-     * @return the list of device objects
-     */
-    PageData<Device> findDevicesByTenantIdAndEdgeId(UUID tenantId, UUID edgeId, PageLink pageLink);
-
-    /**
-     * Find devices by tenantId, edgeId, type and page link.
-     *
-     * @param tenantId the tenantId
-     * @param edgeId the edgeId
-     * @param type the type
-     * @param pageLink the page link
-     * @return the list of device objects
-     */
-    PageData<Device> findDevicesByTenantIdAndEdgeIdAndType(UUID tenantId, UUID edgeId, String type, PageLink pageLink);
-
     PageData<DeviceIdInfo> findDeviceIdInfos(PageLink pageLink);
 
     PageData<ProfileEntityIdInfo> findProfileEntityIdInfos(PageLink pageLink);

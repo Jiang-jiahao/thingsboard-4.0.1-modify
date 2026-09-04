@@ -28,7 +28,6 @@ import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.id.AssetId;
 import org.thingsboard.server.common.data.id.DashboardId;
 import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityViewId;
 import org.thingsboard.server.common.data.plugin.ComponentType;
 import org.thingsboard.server.common.msg.TbMsg;
@@ -82,7 +81,6 @@ public class TbUnassignFromCustomerNode extends TbAbstractCustomerActionNode<TbU
                         ctx.getDeviceService().unassignDeviceFromCustomer(tenantId, new DeviceId(originator.getId()));
                 case ENTITY_VIEW ->
                         ctx.getEntityViewService().unassignEntityViewFromCustomer(tenantId, new EntityViewId(originator.getId()));
-                case EDGE -> ctx.getEdgeService().unassignEdgeFromCustomer(tenantId, new EdgeId(originator.getId()));
             }
             return null;
         });

@@ -73,7 +73,7 @@ import static org.mockito.Mockito.times;
 public class TbMsgGeneratorNodeTest extends AbstractRuleNodeUpgradeTest {
 
     private static final Set<EntityType> supportedEntityTypes = EnumSet.of(EntityType.DEVICE, EntityType.ASSET, EntityType.ENTITY_VIEW,
-            EntityType.TENANT, EntityType.CUSTOMER, EntityType.USER, EntityType.DASHBOARD, EntityType.EDGE, EntityType.RULE_NODE);
+            EntityType.TENANT, EntityType.CUSTOMER, EntityType.USER, EntityType.DASHBOARD, EntityType.RULE_NODE);
 
     private final RuleNodeId RULE_NODE_ID = new RuleNodeId(UUID.fromString("1c649392-1f53-4377-b12f-1ba172611746"));
     private final TenantId TENANT_ID = TenantId.fromUUID(UUID.fromString("4470dfc2-f621-42b2-b82c-b5776d424140"));
@@ -163,7 +163,7 @@ public class TbMsgGeneratorNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"ASSET", "DEVICE", "ENTITY_VIEW", "CUSTOMER", "USER", "DASHBOARD", "EDGE"})
+    @ValueSource(strings = {"ASSET", "DEVICE", "ENTITY_VIEW", "CUSTOMER", "USER", "DASHBOARD"})
     public void givenOriginatorEntityType_whenInit_thenVerifyOriginatorId(String entityTypeStr) throws TbNodeException {
         // GIVEN
         EntityType entityType = EntityType.valueOf(entityTypeStr);

@@ -27,7 +27,6 @@ import org.thingsboard.server.common.msg.rpc.FromDeviceRpcResponseActorMsg;
 import org.thingsboard.server.common.msg.rpc.RemoveRpcActorMsg;
 import org.thingsboard.server.common.msg.rpc.ToDeviceRpcRequestActorMsg;
 import org.thingsboard.server.common.msg.rule.engine.DeviceAttributesEventNotificationMsg;
-import org.thingsboard.server.common.msg.rule.engine.DeviceEdgeUpdateMsg;
 import org.thingsboard.server.common.msg.rule.engine.DeviceNameOrTypeUpdateMsg;
 import org.thingsboard.server.common.msg.timeout.DeviceActorServerSideRpcTimeoutMsg;
 import org.thingsboard.server.service.transport.msg.TransportToDeviceActorMsgWrapper;
@@ -77,16 +76,13 @@ public class DeviceActor extends ContextAwareActor {
                 processor.processRpcRequest(ctx, (ToDeviceRpcRequestActorMsg) msg);
                 break;
             case DEVICE_RPC_RESPONSE_TO_DEVICE_ACTOR_MSG:
-                processor.processRpcResponsesFromEdge((FromDeviceRpcResponseActorMsg) msg);
+                processor.processRpcResponse((FromDeviceRpcResponseActorMsg) msg);
                 break;
             case DEVICE_ACTOR_SERVER_SIDE_RPC_TIMEOUT_MSG:
                 processor.processServerSideRpcTimeout((DeviceActorServerSideRpcTimeoutMsg) msg);
                 break;
             case SESSION_TIMEOUT_MSG:
                 processor.checkSessionsTimeout();
-                break;
-            case DEVICE_EDGE_UPDATE_TO_DEVICE_ACTOR_MSG:
-                processor.processEdgeUpdate((DeviceEdgeUpdateMsg) msg);
                 break;
             case REMOVE_RPC_TO_DEVICE_ACTOR_MSG:
                 processor.processRemoveRpc((RemoveRpcActorMsg) msg);

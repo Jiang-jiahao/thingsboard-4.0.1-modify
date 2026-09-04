@@ -23,7 +23,6 @@ public enum StatsType {
     TBEL_INVOKE("tbelInvoke"),
     RATE_EXECUTOR("rateExecutor"),
     HOUSEKEEPER("housekeeper"),
-    EDGE("edge"),
     EDQS("edqs");
 
     private final String name;

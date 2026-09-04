@@ -134,12 +134,6 @@ public class OAuth2ClientServiceImpl extends AbstractEntityService implements OA
     }
 
     @Override
-    public boolean isPropagateOAuth2ClientToEdge(TenantId tenantId, OAuth2ClientId oAuth2ClientId) {
-        log.trace("Executing isPropagateOAuth2ClientToEdge, tenantId [{}], oAuth2ClientId [{}]", tenantId, oAuth2ClientId);
-        return oauth2ClientDao.isPropagateToEdge(tenantId, oAuth2ClientId.getId());
-    }
-
-    @Override
     public void deleteByTenantId(TenantId tenantId) {
         deleteOauth2ClientsByTenantId(tenantId);
     }

@@ -1026,15 +1026,6 @@ export class DashboardUtilsService {
         delete entityAlias.filter.entityViewType;
       }
     }
-    if (entityAlias.filter.type === AliasFilterType.edgeType) {
-      if (entityAlias.filter.edgeType) {
-        if (!entityAlias.filter.edgeTypes) {
-          entityAlias.filter.edgeTypes = [];
-        }
-        entityAlias.filter.edgeTypes.push(entityAlias.filter.edgeType);
-        delete entityAlias.filter.edgeType;
-      }
-    }
     return entityAlias;
   }
 

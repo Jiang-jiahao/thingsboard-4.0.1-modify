@@ -25,7 +25,6 @@ public class ControllerConstants {
     protected static final String TENANT_ID = "tenantId";
     protected static final String DEVICE_ID = "deviceId";
     protected static final String PROTOCOL = "protocol";
-    protected static final String EDGE_ID = "edgeId";
     protected static final String RPC_ID = "rpcId";
     protected static final String ENTITY_ID = "entityId";
     protected static final String ASSIGNEE_ID = "assigneeId";
@@ -47,7 +46,6 @@ public class ControllerConstants {
     protected static final String ASSET_PROFILE_ID_PARAM_DESCRIPTION = "A string value representing the asset profile id. For example, '784f394c-42b6-435a-983c-b7beff2784f9'";
     protected static final String TENANT_PROFILE_ID_PARAM_DESCRIPTION = "A string value representing the tenant profile id. For example, '784f394c-42b6-435a-983c-b7beff2784f9'";
     protected static final String TENANT_ID_PARAM_DESCRIPTION = "A string value representing the tenant id. For example, '784f394c-42b6-435a-983c-b7beff2784f9'";
-    protected static final String EDGE_ID_PARAM_DESCRIPTION = "A string value representing the edge id. For example, '784f394c-42b6-435a-983c-b7beff2784f9'";
     protected static final String CUSTOMER_ID_PARAM_DESCRIPTION = "A string value representing the customer id. For example, '784f394c-42b6-435a-983c-b7beff2784f9'";
     protected static final String USER_ID_PARAM_DESCRIPTION = "A string value representing the user id. For example, '784f394c-42b6-435a-983c-b7beff2784f9'";
     protected static final String ASSET_ID_PARAM_DESCRIPTION = "A string value representing the asset id. For example, '784f394c-42b6-435a-983c-b7beff2784f9'";
@@ -76,8 +74,7 @@ public class ControllerConstants {
     protected static final String DEVICE_ACTIVE_PARAM_DESCRIPTION = "A boolean value representing the device active flag.";
     protected static final String ENTITY_VIEW_TYPE_DESCRIPTION = "Entity View type";
     protected static final String ASSET_TYPE_DESCRIPTION = "Asset type";
-    protected static final String EDGE_TYPE_DESCRIPTION = "A string value representing the edge type. For example, 'default'";
-    protected static final String RULE_CHAIN_TYPE_DESCRIPTION = "Rule chain type (CORE or EDGE)";
+    protected static final String RULE_CHAIN_TYPE_DESCRIPTION = "Rule chain type (CORE)";
     protected static final String ASSET_TEXT_SEARCH_DESCRIPTION = "The case insensitive 'substring' filter based on the asset name.";
     protected static final String DASHBOARD_TEXT_SEARCH_DESCRIPTION = "The case insensitive 'substring' filter based on the dashboard title.";
     protected static final String WIDGET_BUNDLE_TEXT_SEARCH_DESCRIPTION = "The case insensitive 'substring' filter based on the widget bundle title.";
@@ -93,7 +90,6 @@ public class ControllerConstants {
 
     protected static final String ASSET_PROFILE_TEXT_SEARCH_DESCRIPTION = "The case insensitive 'substring' filter based on the asset profile name.";
     protected static final String CUSTOMER_TEXT_SEARCH_DESCRIPTION = "The case insensitive 'substring' filter based on the customer title.";
-    protected static final String EDGE_TEXT_SEARCH_DESCRIPTION = "The case insensitive 'substring' filter based on the edge name.";
     protected static final String EVENT_TEXT_SEARCH_DESCRIPTION = "The value is not used in searching.";
     protected static final String AUDIT_LOG_TEXT_SEARCH_DESCRIPTION = "The case insensitive 'substring' filter based on one of the next properties: entityType, entityName, userName, actionType, actionStatus.";
     protected static final String CF_TEXT_SEARCH_DESCRIPTION = "The case insensitive 'substring' filter based on the calculated field name.";
@@ -104,7 +100,6 @@ public class ControllerConstants {
     protected static final String ASSET_INFO_DESCRIPTION = "Asset Info is an extension of the default Asset object that contains information about the assigned customer name. ";
     protected static final String ALARM_INFO_DESCRIPTION = "Alarm Info is an extension of the default Alarm object that also contains name of the alarm originator.";
     protected static final String RELATION_INFO_DESCRIPTION = "Relation Info is an extension of the default Relation object that contains information about the 'from' and 'to' entity names. ";
-    protected static final String EDGE_INFO_DESCRIPTION = "Edge Info is an extension of the default Edge object that contains information about the assigned customer name. ";
     protected static final String DEVICE_PROFILE_INFO_DESCRIPTION = "Device Profile Info is a lightweight object that includes main information about Device Profile excluding the heavyweight configuration object. ";
 
     protected static final String ASSET_PROFILE_INFO_DESCRIPTION = "Asset Profile Info is a lightweight object that includes main information about Asset Profile. ";
@@ -136,10 +131,6 @@ public class ControllerConstants {
     protected static final String EVENT_START_TIME_DESCRIPTION = "Timestamp. Events with creation time before it won't be queried.";
     protected static final String EVENT_END_TIME_DESCRIPTION = "Timestamp. Events with creation time after it won't be queried.";
 
-    protected static final String EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION = "Unassignment works in async way - first, 'unassign' notification event pushed to edge queue on platform. ";
-    protected static final String EDGE_UNASSIGN_RECEIVE_STEP_DESCRIPTION = "(Edge will receive this instantly, if it's currently connected, or once it's going to be connected to platform). ";
-    protected static final String EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION = "Assignment works in async way - first, notification event pushed to edge service queue on platform. ";
-    protected static final String EDGE_ASSIGN_RECEIVE_STEP_DESCRIPTION = "(Edge will receive this instantly, if it's currently connected, or once it's going to be connected to platform). ";
 
     protected static final String ENTITY_VERSION_TEXT_SEARCH_DESCRIPTION = "The case insensitive 'substring' filter based on the entity version name.";
     protected static final String VERSION_ID_PARAM_DESCRIPTION = "Version id, for example fd82625bdd7d6131cf8027b44ee967012ecaf990. Represents commit hash.";
@@ -622,18 +613,6 @@ public class ControllerConstants {
             MARKDOWN_CODE_BLOCK_END +
             "";
 
-    protected static final String EDGE_TYPE = "\n\n## Edge Type Filter\n\n" +
-            "Allows to filter edge instances based on their type and the **'starts with'** expression over their name. " +
-            "For example, this entity filter selects all 'Factory' edge instances which name starts with 'Nevada':\n\n" +
-            MARKDOWN_CODE_BLOCK_START +
-            "{\n" +
-            "  \"type\": \"edgeType\",\n" +
-            "  \"edgeType\": \"Factory\",\n" +
-            "  \"edgeNameFilter\": \"Nevada\"\n" +
-            "}" +
-            MARKDOWN_CODE_BLOCK_END +
-            "";
-
     protected static final String ENTITY_VIEW_TYPE = "\n\n## Entity View Filter\n\n" +
             "Allows to filter entity views based on their type and the **'starts with'** expression over their name. " +
             "For example, this entity filter selects all 'Concrete Mixer' entity views which name starts with 'CAT':\n\n" +
@@ -773,32 +752,6 @@ public class ControllerConstants {
             MARKDOWN_CODE_BLOCK_END +
             "";
 
-    protected static final String EDGE_QUERY_FILTER = "\n\n## Edge Search Query\n\n" +
-            "Allows to filter edge instances that are related to the provided root entity. Filters related edge instances based on the relation type and set of edge types. " +
-            MAX_LEVEL_DESCRIPTION +
-            FETCH_LAST_LEVEL_ONLY_DESCRIPTION +
-            "The 'relationType' defines the type of the relation to search for. " +
-            "The 'deviceTypes' defines the type of the device to search for. " +
-            "The relation query calculates all related entities, even if they are filtered using different relation types, and then extracts only devices that match 'relationType' and 'deviceTypes' conditions.\n\n" +
-            "For example, this entity filter selects 'Factory' edge instances which are related to the asset with id 'e52b0020-2a7a-11ec-94eb-213c95f54092' using 'Contains' relation:\n\n" +
-            MARKDOWN_CODE_BLOCK_START +
-            "{\n" +
-            "  \"type\": \"deviceSearchQuery\",\n" +
-            "  \"rootEntity\": {\n" +
-            "    \"entityType\": \"ASSET\",\n" +
-            "    \"id\": \"e52b0020-2a7a-11ec-94eb-213c95f54092\"\n" +
-            "  },\n" +
-            "  \"direction\": \"FROM\",\n" +
-            "  \"maxLevel\": 2,\n" +
-            "  \"fetchLastLevelOnly\": true,\n" +
-            "  \"relationType\": \"Contains\",\n" +
-            "  \"edgeTypes\": [\n" +
-            "    \"Factory\"\n" +
-            "  ]\n" +
-            "}" +
-            MARKDOWN_CODE_BLOCK_END +
-            "";
-
     protected static final String EMPTY = "\n\n## Entity Type Filter\n\n" +
             "Allows to filter multiple entities of the same type using the **'starts with'** expression over entity name. " +
             "For example, this entity filter selects all devices which name starts with 'Air Quality':\n\n" +
@@ -810,8 +763,8 @@ public class ControllerConstants {
     protected static final String ENTITY_FILTERS =
             "\n\n # Entity Filters" +
                     "\nEntity Filter body depends on the 'type' parameter. Let's review available entity filter types. In fact, they do correspond to available dashboard aliases." +
-                    SINGLE_ENTITY + ENTITY_LIST + ENTITY_NAME + ENTITY_TYPE_FILTER + ASSET_TYPE + DEVICE_TYPE + EDGE_TYPE + ENTITY_VIEW_TYPE + API_USAGE + RELATIONS_QUERY_FILTER
-                    + ASSET_QUERY_FILTER + DEVICE_QUERY_FILTER + EV_QUERY_FILTER + EDGE_QUERY_FILTER;
+                    SINGLE_ENTITY + ENTITY_LIST + ENTITY_NAME + ENTITY_TYPE_FILTER + ASSET_TYPE + DEVICE_TYPE + ENTITY_VIEW_TYPE + API_USAGE + RELATIONS_QUERY_FILTER
+                    + ASSET_QUERY_FILTER + DEVICE_QUERY_FILTER + EV_QUERY_FILTER;
 
     protected static final String FILTER_KEY = "\n\n## Filter Key\n\n" +
             "Filter Key defines either entity field, attribute or telemetry. It is a JSON object that consists the key name and type. " +

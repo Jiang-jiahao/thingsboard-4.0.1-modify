@@ -55,7 +55,6 @@ import { ServiceType } from '@shared/models/queue.models';
 import { EntityId } from '@shared/models/id/entity-id';
 import { OtaUpdateType } from '@shared/models/ota-package.models';
 import { DashboardId } from '@shared/models/id/dashboard-id';
-import { RuleChainType } from '@shared/models/rule-chain.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -87,8 +86,6 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
   isTransportTypeChanged = false;
 
   serviceType = ServiceType.TB_RULE_ENGINE;
-
-  edgeRuleChainType = RuleChainType.EDGE;
 
   readonly deviceProvisioningUiEnabled = DEVICE_PROVISIONING_UI_ENABLED;
 
@@ -154,7 +151,6 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
         defaultRuleChainId: [entity && entity.defaultRuleChainId ? entity.defaultRuleChainId.id : null, []],
         defaultDashboardId: [entity && entity.defaultDashboardId ? entity.defaultDashboardId.id : null, []],
         defaultQueueName: [entity ? entity.defaultQueueName : null, []],
-        defaultEdgeRuleChainId: [entity && entity.defaultEdgeRuleChainId ? entity.defaultEdgeRuleChainId.id : null, []],
         firmwareId: [entity ? entity.firmwareId : null],
         softwareId: [entity ? entity.softwareId : null],
         description: [entity ? entity.description : '', []],
@@ -249,7 +245,6 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     this.entityForm.patchValue({defaultRuleChainId: entity.defaultRuleChainId ? entity.defaultRuleChainId.id : null}, {emitEvent: false});
     this.entityForm.patchValue({defaultDashboardId: entity.defaultDashboardId ? entity.defaultDashboardId.id : null}, {emitEvent: false});
     this.entityForm.patchValue({defaultQueueName: entity.defaultQueueName}, {emitEvent: false});
-    this.entityForm.patchValue({defaultEdgeRuleChainId: entity.defaultEdgeRuleChainId ? entity.defaultEdgeRuleChainId.id : null}, {emitEvent: false});
     this.entityForm.patchValue({firmwareId: entity.firmwareId}, {emitEvent: false});
     this.entityForm.patchValue({softwareId: entity.softwareId}, {emitEvent: false});
     this.entityForm.patchValue({description: entity.description}, {emitEvent: false});
@@ -261,9 +256,6 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     }
     if (formValue.defaultDashboardId) {
       formValue.defaultDashboardId = new DashboardId(formValue.defaultDashboardId);
-    }
-    if (formValue.defaultEdgeRuleChainId) {
-      formValue.defaultEdgeRuleChainId = new RuleChainId(formValue.defaultEdgeRuleChainId);
     }
     const deviceProvisionConfiguration: DeviceProvisionConfiguration = DEVICE_PROVISIONING_UI_ENABLED
       ? formValue.profileData.provisionConfiguration

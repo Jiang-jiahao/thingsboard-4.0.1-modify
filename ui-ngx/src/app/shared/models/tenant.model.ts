@@ -31,7 +31,6 @@ export interface DefaultTenantProfileConfiguration {
   maxUsers: number;
   maxDashboards: number;
   maxRuleChains: number;
-  maxEdges: number;
   maxResourcesInBytes: number;
   maxOtaPackagesInBytes: number;
   maxResourceSize: number;
@@ -85,11 +84,6 @@ export interface DefaultTenantProfileConfiguration {
 
   cassandraQueryTenantRateLimitsConfiguration: string;
 
-  edgeEventRateLimits?: string;
-  edgeEventRateLimitsPerEdge?: string;
-  edgeUplinkMessagesRateLimits?: string;
-  edgeUplinkMessagesRateLimitsPerEdge?: string;
-
   defaultStorageTtlDays: number;
   alarmsTtlDays: number;
   rpcTtlDays: number;
@@ -122,7 +116,6 @@ export function createTenantProfileConfiguration(type: TenantProfileType): Tenan
           maxUsers: 0,
           maxDashboards: 0,
           maxRuleChains: 0,
-          maxEdges: 0,
           maxResourcesInBytes: 0,
           maxOtaPackagesInBytes: 0,
           maxResourceSize: 0,

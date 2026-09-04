@@ -49,8 +49,6 @@ public enum TbMsgType {
     RPC_CALL_FROM_SERVER_TO_DEVICE("RPC Request to Device"),
     ENTITY_ASSIGNED_FROM_TENANT("Entity Assigned From Tenant"),
     ENTITY_ASSIGNED_TO_TENANT("Entity Assigned To Tenant"),
-    ENTITY_ASSIGNED_TO_EDGE,
-    ENTITY_UNASSIGNED_FROM_EDGE,
     TIMESERIES_UPDATED("Timeseries Updated"),
     TIMESERIES_DELETED("Timeseries Deleted"),
     RPC_QUEUED("RPC Queued"),

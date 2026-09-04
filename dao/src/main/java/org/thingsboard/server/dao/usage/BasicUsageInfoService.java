@@ -63,8 +63,6 @@ public class BasicUsageInfoService implements UsageInfoService {
         usageInfo.setMaxUsers(profileConfiguration.getMaxUsers());
         usageInfo.setDashboards(countService.countByTenantIdAndEntityType(tenantId, EntityType.DASHBOARD));
         usageInfo.setMaxDashboards(profileConfiguration.getMaxDashboards());
-        usageInfo.setEdges(countService.countByTenantIdAndEntityType(tenantId, EntityType.EDGE));
-        usageInfo.setMaxEdges(profileConfiguration.getMaxEdges());
 
         usageInfo.setMaxAlarms(profileConfiguration.getMaxCreatedAlarms());
         usageInfo.setMaxTransportMessages(profileConfiguration.getMaxTransportMessages());

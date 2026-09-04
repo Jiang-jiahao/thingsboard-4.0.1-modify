@@ -32,7 +32,6 @@ import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityIdFactory;
 import org.thingsboard.server.dao.alarm.AlarmService;
 import org.thingsboard.server.dao.customer.CustomerService;
-import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entity.EntityService;
 import org.thingsboard.server.dao.model.ModelConstants;
 import org.thingsboard.server.service.executors.DbCallbackExecutorService;
@@ -49,7 +48,7 @@ import java.util.UUID;
  * <p>
  * {@code DefaultTb*} 实现继承本类，由 Controller 调用后再委托对应 DAO。
  * 提供空值校验、空实体 ID、版本控制自动提交，以及审计（{@link TbLogEntityActionService}）、
- * 告警、客户、Edge、集群通知等公共依赖。规则引擎进程中部分依赖可能为 {@code null}。
+ * 告警、客户、集群通知等公共依赖。规则引擎进程中部分依赖可能为 {@code null}。
  */
 @Slf4j
 public abstract class AbstractTbEntityService {
@@ -65,8 +64,6 @@ public abstract class AbstractTbEntityService {
     protected DbCallbackExecutorService dbExecutor;
     @Autowired(required = false)
     protected TbLogEntityActionService logEntityActionService;
-    @Autowired(required = false)
-    protected EdgeService edgeService;
     @Autowired
     protected AlarmService alarmService;
     @Autowired

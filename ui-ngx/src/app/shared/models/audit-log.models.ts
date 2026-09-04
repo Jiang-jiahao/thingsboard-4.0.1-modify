@@ -62,8 +62,6 @@ export enum ActionType {
   PROVISION_FAILURE = 'PROVISION_FAILURE',
   TIMESERIES_UPDATED = 'TIMESERIES_UPDATED',
   TIMESERIES_DELETED = 'TIMESERIES_DELETED',
-  ASSIGNED_TO_EDGE = 'ASSIGNED_TO_EDGE',
-  UNASSIGNED_FROM_EDGE = 'UNASSIGNED_FROM_EDGE',
   SMS_SENT = 'SMS_SENT'
 }
 
@@ -107,8 +105,6 @@ export const actionTypeTranslations = new Map<ActionType, string>(
     [ActionType.PROVISION_FAILURE, 'audit-log.type-provision-failure'],
     [ActionType.TIMESERIES_UPDATED, 'audit-log.type-timeseries-updated'],
     [ActionType.TIMESERIES_DELETED, 'audit-log.type-timeseries-deleted'],
-    [ActionType.ASSIGNED_TO_EDGE, 'audit-log.type-assigned-to-edge'],
-    [ActionType.UNASSIGNED_FROM_EDGE, 'audit-log.type-unassigned-from-edge'],
     [ActionType.SMS_SENT, 'audit-log.type-sms-sent'],
   ]
 );

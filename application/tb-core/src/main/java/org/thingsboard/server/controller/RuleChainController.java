@@ -43,14 +43,11 @@ import org.thingsboard.server.actors.ActorSystemContext;
 import org.thingsboard.server.actors.tenant.DebugTbRateLimits;
 import org.thingsboard.server.common.data.EventInfo;
 import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.RuleChainId;
 import org.thingsboard.server.common.data.id.RuleNodeId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
-import org.thingsboard.server.common.data.page.PageDataIterableByTenant;
 import org.thingsboard.server.common.data.page.PageLink;
 import org.thingsboard.server.common.data.rule.DefaultRuleChainCreateRequest;
 import org.thingsboard.server.common.data.rule.RuleChain;
@@ -72,7 +69,6 @@ import org.thingsboard.server.service.script.RuleNodeTbelScriptEngine;
 import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -80,12 +76,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ASSIGN_RECEIVE_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ID;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ID_PARAM_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_UNASSIGN_RECEIVE_STEP_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.MARKDOWN_CODE_BLOCK_END;
 import static org.thingsboard.server.controller.ControllerConstants.MARKDOWN_CODE_BLOCK_START;
 import static org.thingsboard.server.controller.ControllerConstants.PAGE_DATA_PARAMETERS;
@@ -103,11 +93,10 @@ import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LI
 /**
  * 规则链 REST 入口。
  * <p>
- * <b>职责：</b>管理租户规则链及其元数据（节点与连线）：CRUD、设根、脚本试跑、导入导出，
- * 以及 Edge 规则链的分配、模板根链、新建 Edge 自动分配列表。
+ * <b>职责：</b>管理租户规则链及其元数据（节点与连线）：CRUD、设根、脚本试跑、导入导出。
  * 规则链对象本身较轻，节点拓扑在 metadata 中。
  * <p>
- * <b>URL：</b>{@code /api}（{@code /ruleChain*}、{@code /ruleChains*}、{@code /ruleNode/*}、{@code /edge/*}{@code /ruleChain*}）
+ * <b>URL：</b>{@code /api}（{@code /ruleChain*}、{@code /ruleChains*}、{@code /ruleNode/*}）
  * <p>
  * <b>权限：</b>全部接口 {@code TENANT_ADMIN}。写/删会校验资源 {@code RULE_CHAIN}。
  * <p>
@@ -337,7 +326,7 @@ public class RuleChainController extends BaseController {
     }
 
     /**
-     * 分页查询租户规则链，可按类型 CORE/EDGE 过滤。
+     * 分页查询租户规则链，可按类型 CORE 过滤。
      * <p>
      * 权限：{@code TENANT_ADMIN}。下游 {@code ruleChainService}。
      */
@@ -351,7 +340,7 @@ public class RuleChainController extends BaseController {
             @RequestParam int pageSize,
             @Parameter(description = PAGE_NUMBER_DESCRIPTION, required = true)
             @RequestParam int page,
-            @Parameter(description = RULE_CHAIN_TYPE_DESCRIPTION, schema = @Schema(allowableValues = {"CORE", "EDGE"}))
+            @Parameter(description = RULE_CHAIN_TYPE_DESCRIPTION, schema = @Schema(allowableValues = {"CORE"}))
             @RequestParam(value = "type", required = false) String typeStr,
             @Parameter(description = RULE_CHAIN_TEXT_SEARCH_DESCRIPTION)
             @RequestParam(required = false) String textSearch,
@@ -572,169 +561,5 @@ public class RuleChainController extends BaseController {
         msgData.set("metadata", JacksonUtil.valueToTree(metadata));
         msgData.put("msgType", msg.getType());
         return msgData;
-    }
-
-    /**
-     * 将 EDGE 类型规则链分配到指定 Edge，随后异步下发到边缘侧本地执行。
-     * <p>
-     * 权限：{@code TENANT_ADMIN}。Edge WRITE、规则链 READ。下游 {@link TbRuleChainService#assignRuleChainToEdge}。
-     */
-    @ApiOperation(value = "Assign rule chain to edge (assignRuleChainToEdge)",
-            notes = "Creates assignment of an existing rule chain to an instance of The Edge. " +
-                    EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
-                    "Second, remote edge service will receive a copy of assignment rule chain " +
-                    EDGE_ASSIGN_RECEIVE_STEP_DESCRIPTION +
-                    "Third, once rule chain will be delivered to edge service, it's going to start processing messages locally. " +
-                    "\n\nOnly rule chain with type 'EDGE' can be assigned to edge." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/edge/{edgeId}/ruleChain/{ruleChainId}", method = RequestMethod.POST)
-    @ResponseBody
-    public RuleChain assignRuleChainToEdge(@PathVariable("edgeId") String strEdgeId,
-                                           @PathVariable(RULE_CHAIN_ID) String strRuleChainId) throws ThingsboardException {
-        checkParameter("edgeId", strEdgeId);
-        checkParameter(RULE_CHAIN_ID, strRuleChainId);
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        Edge edge = checkEdgeId(edgeId, Operation.WRITE);
-
-        RuleChainId ruleChainId = new RuleChainId(toUUID(strRuleChainId));
-        RuleChain ruleChain = checkRuleChain(ruleChainId, Operation.READ);
-
-        return tbRuleChainService.assignRuleChainToEdge(getTenantId(), ruleChain, edge, getCurrentUser());
-    }
-
-    /**
-     * 解除规则链与 Edge 的分配，并异步通知边缘侧删除本地副本。
-     * <p>
-     * 权限：{@code TENANT_ADMIN}。Edge WRITE、规则链 READ。下游 {@link TbRuleChainService#unassignRuleChainFromEdge}。
-     */
-    @ApiOperation(value = "Unassign rule chain from edge (unassignRuleChainFromEdge)",
-            notes = "Clears assignment of the rule chain to the edge. " +
-                    EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
-                    "Second, remote edge service will receive an 'unassign' command to remove rule chain " +
-                    EDGE_UNASSIGN_RECEIVE_STEP_DESCRIPTION +
-                    "Third, once 'unassign' command will be delivered to edge service, it's going to remove rule chain locally." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/edge/{edgeId}/ruleChain/{ruleChainId}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public RuleChain unassignRuleChainFromEdge(@PathVariable("edgeId") String strEdgeId,
-                                               @PathVariable(RULE_CHAIN_ID) String strRuleChainId) throws ThingsboardException {
-        checkParameter("edgeId", strEdgeId);
-        checkParameter(RULE_CHAIN_ID, strRuleChainId);
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        Edge edge = checkEdgeId(edgeId, Operation.WRITE);
-        RuleChainId ruleChainId = new RuleChainId(toUUID(strRuleChainId));
-        RuleChain ruleChain = checkRuleChain(ruleChainId, Operation.READ);
-
-        return tbRuleChainService.unassignRuleChainFromEdge(getTenantId(), ruleChain, edge, getCurrentUser());
-    }
-
-    /**
-     * 分页查询已分配给指定 Edge 的规则链。
-     * <p>
-     * 权限：{@code TENANT_ADMIN}；Edge READ。下游 {@code ruleChainService}。
-     */
-    @ApiOperation(value = "Get Edge Rule Chains (getEdgeRuleChains)",
-            notes = "Returns a page of Rule Chains assigned to the specified edge. " + RULE_CHAIN_DESCRIPTION + PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/edge/{edgeId}/ruleChains", params = {"pageSize", "page"}, method = RequestMethod.GET)
-    @ResponseBody
-    public PageData<RuleChain> getEdgeRuleChains(
-            @Parameter(description = EDGE_ID_PARAM_DESCRIPTION, required = true)
-            @PathVariable(EDGE_ID) String strEdgeId,
-            @Parameter(description = PAGE_SIZE_DESCRIPTION, required = true)
-            @RequestParam int pageSize,
-            @Parameter(description = PAGE_NUMBER_DESCRIPTION, required = true)
-            @RequestParam int page,
-            @Parameter(description = RULE_CHAIN_TEXT_SEARCH_DESCRIPTION)
-            @RequestParam(required = false) String textSearch,
-            @Parameter(description = SORT_PROPERTY_DESCRIPTION, schema = @Schema(allowableValues = {"createdTime", "name", "root"}))
-            @RequestParam(required = false) String sortProperty,
-            @Parameter(description = SORT_ORDER_DESCRIPTION, schema = @Schema(allowableValues = {"ASC", "DESC"}))
-            @RequestParam(required = false) String sortOrder) throws ThingsboardException {
-        checkParameter(EDGE_ID, strEdgeId);
-        TenantId tenantId = getCurrentUser().getTenantId();
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        checkEdgeId(edgeId, Operation.READ);
-        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-        return checkNotNull(ruleChainService.findRuleChainsByTenantIdAndEdgeId(tenantId, edgeId, pageLink));
-    }
-
-    /**
-     * 将指定规则链设为新建 Edge 的模板根链。不影响已创建的 Edge。
-     * <p>
-     * 权限：{@code TENANT_ADMIN}；实体 WRITE。下游 {@link TbRuleChainService#setEdgeTemplateRootRuleChain}。
-     */
-    @ApiOperation(value = "Set Edge Template Root Rule Chain (setEdgeTemplateRootRuleChain)",
-            notes = "Makes the rule chain to be root rule chain for any new edge that will be created. " +
-                    "Does not update root rule chain for already created edges. " + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/ruleChain/{ruleChainId}/edgeTemplateRoot", method = RequestMethod.POST)
-    @ResponseBody
-    public RuleChain setEdgeTemplateRootRuleChain(@Parameter(description = RULE_CHAIN_ID_PARAM_DESCRIPTION)
-                                                  @PathVariable(RULE_CHAIN_ID) String strRuleChainId) throws ThingsboardException {
-        checkParameter(RULE_CHAIN_ID, strRuleChainId);
-        RuleChainId ruleChainId = new RuleChainId(toUUID(strRuleChainId));
-        RuleChain ruleChain = checkRuleChain(ruleChainId, Operation.WRITE);
-        return tbRuleChainService.setEdgeTemplateRootRuleChain(getTenantId(), ruleChain, getCurrentUser());
-    }
-
-    /**
-     * 将指定规则链加入「新建 Edge 自动分配」列表。不影响已创建的 Edge。
-     * <p>
-     * 权限：{@code TENANT_ADMIN}；实体 WRITE。下游 {@link TbRuleChainService#setAutoAssignToEdgeRuleChain}。
-     */
-    @ApiOperation(value = "Set Auto Assign To Edge Rule Chain (setAutoAssignToEdgeRuleChain)",
-            notes = "Makes the rule chain to be automatically assigned for any new edge that will be created. " +
-                    "Does not assign this rule chain for already created edges. " + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/ruleChain/{ruleChainId}/autoAssignToEdge", method = RequestMethod.POST)
-    @ResponseBody
-    public RuleChain setAutoAssignToEdgeRuleChain(@Parameter(description = RULE_CHAIN_ID_PARAM_DESCRIPTION)
-                                                  @PathVariable(RULE_CHAIN_ID) String strRuleChainId) throws ThingsboardException {
-        checkParameter(RULE_CHAIN_ID, strRuleChainId);
-        RuleChainId ruleChainId = new RuleChainId(toUUID(strRuleChainId));
-        RuleChain ruleChain = checkRuleChain(ruleChainId, Operation.WRITE);
-        return tbRuleChainService.setAutoAssignToEdgeRuleChain(getTenantId(), ruleChain, getCurrentUser());
-    }
-
-    /**
-     * 从「新建 Edge 自动分配」列表移除该规则链。不解除已分配 Edge 上的绑定。
-     * <p>
-     * 权限：{@code TENANT_ADMIN}；实体 WRITE。下游 {@link TbRuleChainService#unsetAutoAssignToEdgeRuleChain}。
-     */
-    @ApiOperation(value = "Unset Auto Assign To Edge Rule Chain (unsetAutoAssignToEdgeRuleChain)",
-            notes = "Removes the rule chain from the list of rule chains that are going to be automatically assigned for any new edge that will be created. " +
-                    "Does not unassign this rule chain for already assigned edges. " + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/ruleChain/{ruleChainId}/autoAssignToEdge", method = RequestMethod.DELETE)
-    @ResponseBody
-    public RuleChain unsetAutoAssignToEdgeRuleChain(@Parameter(description = RULE_CHAIN_ID_PARAM_DESCRIPTION)
-                                                    @PathVariable(RULE_CHAIN_ID) String strRuleChainId) throws ThingsboardException {
-        checkParameter(RULE_CHAIN_ID, strRuleChainId);
-        RuleChainId ruleChainId = new RuleChainId(toUUID(strRuleChainId));
-        RuleChain ruleChain = checkRuleChain(ruleChainId, Operation.WRITE);
-        return tbRuleChainService.unsetAutoAssignToEdgeRuleChain(getTenantId(), ruleChain, getCurrentUser());
-    }
-
-    // TODO: @voba refactor this - add new config to edge rule chain to set it as auto-assign
-    /**
-     * 列出将自动分配给新建 Edge 的规则链。
-     * <p>
-     * 权限：{@code TENANT_ADMIN}。下游 {@code ruleChainService}。
-     */
-    @ApiOperation(value = "Get Auto Assign To Edge Rule Chains (getAutoAssignToEdgeRuleChains)",
-            notes = "Returns a list of Rule Chains that will be assigned to a newly created edge. " + RULE_CHAIN_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/ruleChain/autoAssignToEdgeRuleChains", method = RequestMethod.GET)
-    @ResponseBody
-    public List<RuleChain> getAutoAssignToEdgeRuleChains() throws ThingsboardException {
-        TenantId tenantId = getCurrentUser().getTenantId();
-        List<RuleChain> result = new ArrayList<>();
-        PageDataIterableByTenant<RuleChain> autoAssignRuleChainsIterator =
-                new PageDataIterableByTenant<>(ruleChainService::findAutoAssignToEdgeRuleChainsByTenantId, tenantId, DEFAULT_PAGE_SIZE);
-        for (RuleChain ruleChain : autoAssignRuleChainsIterator) {
-            result.add(ruleChain);
-        }
-        return checkNotNull(result);
     }
 }

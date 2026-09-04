@@ -22,18 +22,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.thingsboard.common.util.DebugModeUtil;
-import org.thingsboard.server.common.data.EntityView;
 import org.thingsboard.server.common.data.HasDebugSettings;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.debug.DebugSettings;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.relation.EntityRelation;
-import org.thingsboard.server.common.data.relation.RelationTypeGroup;
 import org.thingsboard.server.dao.alarm.AlarmService;
 import org.thingsboard.server.dao.cf.CalculatedFieldService;
-import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.exception.DataValidationException;
 import org.thingsboard.server.dao.housekeeper.CleanUpService;
@@ -41,7 +37,6 @@ import org.thingsboard.server.dao.relation.RelationService;
 import org.thingsboard.server.dao.tenant.TbTenantProfileCache;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -49,7 +44,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public abstract class AbstractEntityService {
 
-    public static final String INCORRECT_EDGE_ID = "Incorrect edgeId ";
     public static final String INCORRECT_PAGE_LINK = "Incorrect page link ";
 
     @Autowired
@@ -70,10 +64,6 @@ public abstract class AbstractEntityService {
     @Lazy
     @Autowired
     protected CalculatedFieldService calculatedFieldService;
-
-    @Lazy
-    @Autowired(required = false)
-    protected EdgeService edgeService;
 
     @Autowired
     @Lazy
@@ -125,20 +115,6 @@ public abstract class AbstractEntityService {
                         throw new DataValidationException(constraintMessage.getValue());
                     }
                 }
-            }
-        }
-    }
-
-    protected void checkAssignedEntityViewsToEdge(TenantId tenantId, EntityId entityId, EdgeId edgeId) {
-        List<EntityView> entityViews = entityViewService.findEntityViewsByTenantIdAndEntityId(tenantId, entityId);
-        if (entityViews != null && !entityViews.isEmpty()) {
-            EntityView entityView = entityViews.get(0);
-            boolean relationExists = relationService.checkRelation(
-                    tenantId, edgeId, entityView.getId(),
-                    EntityRelation.CONTAINS_TYPE, RelationTypeGroup.EDGE
-            );
-            if (relationExists) {
-                throw new DataValidationException("Can't unassign device/asset from edge that is related to entity view and entity view is assigned to edge!");
             }
         }
     }

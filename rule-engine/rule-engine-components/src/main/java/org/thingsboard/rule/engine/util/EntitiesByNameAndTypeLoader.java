@@ -28,7 +28,6 @@ public class EntitiesByNameAndTypeLoader {
             EntityType.DEVICE,
             EntityType.ASSET,
             EntityType.ENTITY_VIEW,
-            EntityType.EDGE,
             EntityType.USER);
 
     public static EntityId findEntityId(TbContext ctx, EntityType entityType, String entityName) {
@@ -42,9 +41,6 @@ public class EntitiesByNameAndTypeLoader {
                 break;
             case ENTITY_VIEW:
                 targetEntity = ctx.getEntityViewService().findEntityViewByTenantIdAndName(ctx.getTenantId(), entityName);
-                break;
-            case EDGE:
-                targetEntity = ctx.getEdgeService().findEdgeByTenantIdAndName(ctx.getTenantId(), entityName);
                 break;
             case USER:
                 targetEntity = ctx.getUserService().findUserByTenantIdAndEmail(ctx.getTenantId(), entityName);

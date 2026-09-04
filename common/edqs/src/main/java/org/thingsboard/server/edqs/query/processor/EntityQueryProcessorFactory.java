@@ -30,13 +30,11 @@ public class EntityQueryProcessorFactory {
             case DEVICE_TYPE -> new DeviceTypeQueryProcessor(repo, ctx, query);
             case ASSET_TYPE -> new AssetTypeQueryProcessor(repo, ctx, query);
             case ENTITY_VIEW_TYPE -> new EntityViewTypeQueryProcessor(repo, ctx, query);
-            case EDGE_TYPE -> new EdgeTypeQueryProcessor(repo, ctx, query);
             case RELATIONS_QUERY -> new RelationQueryProcessor(repo, ctx, query);
             case API_USAGE_STATE -> new ApiUsageStateQueryProcessor(repo, ctx, query);
             case ASSET_SEARCH_QUERY -> new AssetSearchQueryProcessor(repo, ctx, query);
             case DEVICE_SEARCH_QUERY -> new DeviceSearchQueryProcessor(repo, ctx, query);
             case ENTITY_VIEW_SEARCH_QUERY -> new EntityViewSearchQueryProcessor(repo, ctx, query);
-            case EDGE_SEARCH_QUERY -> new EdgeTypeSearchQueryProcessor(repo, ctx, query);
             default -> throw new RuntimeException("Not Implemented!");
         };
     }

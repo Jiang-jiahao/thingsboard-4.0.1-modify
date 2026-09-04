@@ -71,7 +71,6 @@ import { TenantProfile } from '@shared/models/tenant.model';
 import { TenantProfileService } from '@core/http/tenant-profile.service';
 import { DeviceService } from '@core/http/device.service';
 import { AssetService } from '@core/http/asset.service';
-import { EdgeService } from '@core/http/edge.service';
 import { RuleNode } from '@shared/models/rule-node.models';
 import { AssetProfileService } from '@core/http/asset-profile.service';
 import { AssetProfile } from '@shared/models/asset.models';
@@ -114,7 +113,6 @@ export class ImportExportService {
               private ruleChainService: RuleChainService,
               private deviceService: DeviceService,
               private assetService: AssetService,
-              private edgeService: EdgeService,
               private imageService: ImageService,
               private utils: UtilsService,
               private itembuffer: ItemBufferService,
@@ -605,8 +603,6 @@ export class ImportExportService {
         return this.deviceService.bulkImportDevices(entitiesData, config);
       case EntityType.ASSET:
         return this.assetService.bulkImportAssets(entitiesData, config);
-      case EntityType.EDGE:
-        return this.edgeService.bulkImportEdges(entitiesData, config);
     }
   }
 

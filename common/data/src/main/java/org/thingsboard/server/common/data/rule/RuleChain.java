@@ -47,7 +47,7 @@ public class RuleChain extends BaseDataWithAdditionalInfo<RuleChainId> implement
     @Length(fieldName = "name")
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Rule Chain name", example = "Humidity data processing")
     private String name;
-    @Schema(description = "Rule Chain type. 'EDGE' rule chains are processing messages on the edge devices only.", example = "A4B72CCDFF33")
+    @Schema(description = "Rule Chain type.", example = "CORE")
     private RuleChainType type;
     @Schema(description = "JSON object with Rule Chain Id. Pointer to the first rule node that should receive all messages pushed to this rule chain.")
     private RuleNodeId firstRuleNodeId;

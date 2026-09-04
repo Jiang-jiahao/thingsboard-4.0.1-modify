@@ -44,7 +44,7 @@ import static org.thingsboard.common.util.DonAsynchron.withCallback;
 public abstract class TbAbstractCustomerActionNode<C extends TbAbstractCustomerActionNodeConfiguration> implements TbNode {
 
     private static final Set<EntityType> supportedEntityTypes = EnumSet.of(EntityType.ASSET, EntityType.DEVICE,
-            EntityType.ENTITY_VIEW, EntityType.DASHBOARD, EntityType.EDGE);
+            EntityType.ENTITY_VIEW, EntityType.DASHBOARD);
 
     private static final String supportedEntityTypesStr = supportedEntityTypes.stream().map(Enum::name).collect(Collectors.joining(", "));
 

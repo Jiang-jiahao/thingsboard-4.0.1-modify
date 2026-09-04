@@ -109,10 +109,6 @@ public interface EntityFields {
         return "";
     }
 
-    default boolean isEdgeTemplate() {
-        return false;
-    }
-
     default String getConfiguration() {
         return "";
     }
@@ -163,7 +159,6 @@ public interface EntityFields {
             case "region" -> getRegion();
             case "firstName" -> getFirstName();
             case "lastName" -> getLastName();
-            case "edgeTemplate" -> Boolean.toString(isEdgeTemplate());
             case "configuration" -> getConfiguration();
             case "schedule" -> getSchedule();
             case "originatorId" -> getOriginatorId().getId().toString();

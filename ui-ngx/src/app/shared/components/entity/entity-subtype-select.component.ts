@@ -114,14 +114,6 @@ export class EntitySubTypeSelectComponent implements ControlValueAccessor, OnIni
           this.subTypesOptionsSubject.next('');
         });
         break;
-      case EntityType.EDGE:
-        this.entitySubtypeTitle = 'edge.edge-type';
-        this.entitySubtypeRequiredText = 'edge.edge-type-required';
-        this.broadcastSubscription = this.broadcast.on('edgeSaved',() => {
-          this.subTypes = null;
-          this.subTypesOptionsSubject.next('');
-        });
-        break;
       case EntityType.ENTITY_VIEW:
         this.entitySubtypeTitle = 'entity-view.entity-view-type';
         this.entitySubtypeRequiredText = 'entity-view.entity-view-type-required';

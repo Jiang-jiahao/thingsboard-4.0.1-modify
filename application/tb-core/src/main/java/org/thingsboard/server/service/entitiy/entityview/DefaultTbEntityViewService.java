@@ -35,10 +35,8 @@ import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.EntityView;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.audit.ActionType;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityViewId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -210,42 +208,6 @@ public class DefaultTbEntityViewService extends AbstractTbEntityService implemen
         } catch (Exception e) {
             logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.ENTITY_VIEW),
                     actionType, user, e, entityViewId.toString());
-            throw e;
-        }
-    }
-
-    /** 将实体视图分配给 Edge 并写审计。 */
-    @Override
-    public EntityView assignEntityViewToEdge(TenantId tenantId, CustomerId customerId, EntityViewId entityViewId, Edge edge, User user) throws ThingsboardException {
-        ActionType actionType = ActionType.ASSIGNED_TO_EDGE;
-        EdgeId edgeId = edge.getId();
-        try {
-            EntityView savedEntityView = checkNotNull(entityViewService.assignEntityViewToEdge(tenantId, entityViewId, edgeId));
-            logEntityActionService.logEntityAction(tenantId, entityViewId, savedEntityView, customerId, actionType,
-                    user, savedEntityView.getEntityId().toString(), edgeId.toString(), edge.getName());
-            return savedEntityView;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.ENTITY_VIEW),
-                    actionType, user, e, entityViewId.toString(), edgeId.toString());
-            throw e;
-        }
-    }
-
-    /** 取消实体视图与 Edge 的分配并写审计。 */
-    @Override
-    public EntityView unassignEntityViewFromEdge(TenantId tenantId, CustomerId customerId, EntityView entityView,
-                                                 Edge edge, User user) throws ThingsboardException {
-        ActionType actionType = ActionType.UNASSIGNED_FROM_EDGE;
-        EntityViewId entityViewId = entityView.getId();
-        EdgeId edgeId = edge.getId();
-        try {
-            EntityView savedEntityView = checkNotNull(entityViewService.unassignEntityViewFromEdge(tenantId, entityViewId, edgeId));
-            logEntityActionService.logEntityAction(tenantId, entityViewId, savedEntityView, customerId, actionType,
-                    user, entityViewId.toString(), edgeId.toString(), edge.getName());
-            return savedEntityView;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.ENTITY_VIEW),
-                    actionType, user, e, entityViewId.toString(), edgeId.toString());
             throw e;
         }
     }

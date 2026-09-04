@@ -44,13 +44,12 @@ export class CreateRelationConfigComponent extends RuleNodeConfigurationComponen
       [EntityType.ENTITY_VIEW, 'rule-node-config.entity-view-name-pattern'],
       [EntityType.CUSTOMER, 'rule-node-config.customer-title-pattern'],
       [EntityType.USER, 'rule-node-config.user-name-pattern'],
-      [EntityType.DASHBOARD, 'rule-node-config.dashboard-name-pattern'],
-      [EntityType.EDGE, 'rule-node-config.edge-name-pattern']
+      [EntityType.DASHBOARD, 'rule-node-config.dashboard-name-pattern']
     ]
   );
 
   allowedEntityTypes = [EntityType.DEVICE, EntityType.ASSET, EntityType.ENTITY_VIEW, EntityType.TENANT,
-    EntityType.CUSTOMER, EntityType.USER, EntityType.DASHBOARD, EntityType.EDGE];
+    EntityType.CUSTOMER, EntityType.USER, EntityType.DASHBOARD];
 
   createRelationConfigForm: UntypedFormGroup;
 

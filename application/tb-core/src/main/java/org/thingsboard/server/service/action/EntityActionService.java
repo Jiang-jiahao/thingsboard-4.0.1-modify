@@ -150,18 +150,6 @@ public class EntityActionService {
                     String strTenantName = extractParameter(String.class, 1, additionalInfo);
                     metaData.putValue("assignedToTenantId", strTenantId);
                     metaData.putValue("assignedToTenantName", strTenantName);
-                } else if (actionType == ActionType.ASSIGNED_TO_EDGE) {
-                    // 实体分配给 Edge：写入目标 Edge ID/名称
-                    String strEdgeId = extractParameter(String.class, 1, additionalInfo);
-                    String strEdgeName = extractParameter(String.class, 2, additionalInfo);
-                    metaData.putValue("assignedEdgeId", strEdgeId);
-                    metaData.putValue("assignedEdgeName", strEdgeName);
-                } else if (actionType == ActionType.UNASSIGNED_FROM_EDGE) {
-                    // 实体从 Edge 取消分配：写入原 Edge ID/名称
-                    String strEdgeId = extractParameter(String.class, 1, additionalInfo);
-                    String strEdgeName = extractParameter(String.class, 2, additionalInfo);
-                    metaData.putValue("unassignedEdgeId", strEdgeId);
-                    metaData.putValue("unassignedEdgeName", strEdgeName);
                 } else if (actionType == ActionType.ADDED_COMMENT || actionType == ActionType.UPDATED_COMMENT) {
                     // 告警评论动作：把完整评论 JSON 放入元数据
                     AlarmComment comment = extractParameter(AlarmComment.class, 0, additionalInfo);

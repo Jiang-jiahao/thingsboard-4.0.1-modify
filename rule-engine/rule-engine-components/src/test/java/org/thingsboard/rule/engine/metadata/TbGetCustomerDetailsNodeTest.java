@@ -37,12 +37,10 @@ import org.thingsboard.server.common.data.Dashboard;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.asset.Asset;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.id.AssetId;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DashboardId;
 import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.id.UserId;
@@ -53,7 +51,6 @@ import org.thingsboard.server.common.msg.TbMsgMetaData;
 import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.dao.customer.CustomerService;
 import org.thingsboard.server.dao.device.DeviceService;
-import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.user.UserService;
 
@@ -90,8 +87,6 @@ public class TbGetCustomerDetailsNodeTest {
     private EntityViewService entityViewServiceMock;
     @Mock
     private UserService userServiceMock;
-    @Mock
-    private EdgeService edgeServiceMock;
     private TbGetCustomerDetailsNode node;
     private TbGetCustomerDetailsNodeConfiguration config;
     private TbNodeConfiguration nodeConfiguration;
@@ -286,16 +281,16 @@ public class TbGetCustomerDetailsNodeTest {
     @Test
     public void givenDidNotFindCustomer_whenOnMsg_thenShouldTellSuccessAndFetchNothingToData() {
         // GIVEN
-        var edge = new Edge();
-        edge.setId(new EdgeId(UUID.randomUUID()));
-        edge.setCustomerId(customer.getId());
+        var device = new Device();
+        device.setId(new DeviceId(UUID.randomUUID()));
+        device.setCustomerId(customer.getId());
 
-        prepareMsgAndConfig(TbMsgSource.DATA, List.of(ContactBasedEntityDetails.ZIP, ContactBasedEntityDetails.ADDRESS, ContactBasedEntityDetails.ADDRESS2), edge.getId());
+        prepareMsgAndConfig(TbMsgSource.DATA, List.of(ContactBasedEntityDetails.ZIP, ContactBasedEntityDetails.ADDRESS, ContactBasedEntityDetails.ADDRESS2), device.getId());
 
         when(ctxMock.getTenantId()).thenReturn(TENANT_ID);
 
-        when(ctxMock.getEdgeService()).thenReturn(edgeServiceMock);
-        when(edgeServiceMock.findEdgeByIdAsync(eq(TENANT_ID), eq(edge.getId()))).thenReturn(Futures.immediateFuture(edge));
+        when(ctxMock.getDeviceService()).thenReturn(deviceServiceMock);
+        when(deviceServiceMock.findDeviceByIdAsync(eq(TENANT_ID), eq(device.getId()))).thenReturn(Futures.immediateFuture(device));
 
         when(ctxMock.getCustomerService()).thenReturn(customerServiceMock);
         when(customerServiceMock.findCustomerByIdAsync(eq(TENANT_ID), eq(customer.getId()))).thenReturn(Futures.immediateFuture(null));
@@ -318,16 +313,16 @@ public class TbGetCustomerDetailsNodeTest {
     @Test
     public void givenDidNotFindOriginator_whenOnMsg_thenShouldTellSuccessAndFetchNothingToData() {
         // GIVEN
-        var edge = new Edge();
-        edge.setId(new EdgeId(UUID.randomUUID()));
-        edge.setCustomerId(customer.getId());
+        var device = new Device();
+        device.setId(new DeviceId(UUID.randomUUID()));
+        device.setCustomerId(customer.getId());
 
-        prepareMsgAndConfig(TbMsgSource.DATA, List.of(ContactBasedEntityDetails.ZIP, ContactBasedEntityDetails.ADDRESS, ContactBasedEntityDetails.ADDRESS2), edge.getId());
+        prepareMsgAndConfig(TbMsgSource.DATA, List.of(ContactBasedEntityDetails.ZIP, ContactBasedEntityDetails.ADDRESS, ContactBasedEntityDetails.ADDRESS2), device.getId());
 
         when(ctxMock.getTenantId()).thenReturn(TENANT_ID);
 
-        when(ctxMock.getEdgeService()).thenReturn(edgeServiceMock);
-        when(edgeServiceMock.findEdgeByIdAsync(eq(TENANT_ID), eq(edge.getId()))).thenReturn(Futures.immediateFuture(null));
+        when(ctxMock.getDeviceService()).thenReturn(deviceServiceMock);
+        when(deviceServiceMock.findDeviceByIdAsync(eq(TENANT_ID), eq(device.getId()))).thenReturn(Futures.immediateFuture(null));
 
         when(ctxMock.getDbCallbackExecutor()).thenReturn(DB_EXECUTOR);
 

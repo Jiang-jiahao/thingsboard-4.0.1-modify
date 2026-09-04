@@ -68,7 +68,6 @@ import {
 } from '@shared/models/api-usage.models';
 import { LimitedApi, LimitedApiTranslationMap } from '@shared/models/limited-api.models';
 import { StringItemsOption } from '@shared/components/string-items-list.component';
-import { EdgeConnectionEvent, EdgeConnectionEventTranslationMap } from '@shared/models/edge.models';
 
 export interface RuleNotificationDialogData {
   rule?: NotificationRule;
@@ -99,8 +98,6 @@ export class RuleNotificationDialogComponent extends
   apiUsageLimitTemplateForm: FormGroup;
   newPlatformVersionTemplateForm: FormGroup;
   rateLimitsTemplateForm: FormGroup;
-  edgeCommunicationFailureTemplateForm: FormGroup;
-  edgeConnectionTemplateForm: FormGroup;
   taskProcessingFailureTemplateForm: FormGroup;
 
   triggerType = TriggerType;
@@ -135,9 +132,6 @@ export class RuleNotificationDialogComponent extends
 
   apiFeatures: ApiFeature[] = Object.values(ApiFeature);
   apiFeatureTranslationMap = ApiFeatureTranslationMap;
-
-  edgeConnectionEvents: EdgeConnectionEvent[] = Object.values(EdgeConnectionEvent);
-  edgeConnectionEventTranslationMap = EdgeConnectionEventTranslationMap;
 
   limitedApis: StringItemsOption[];
 
@@ -226,19 +220,6 @@ export class RuleNotificationDialogComponent extends
       } else {
         this.alarmTemplateForm.get('triggerConfig.clearRule').disable({emitEvent: false});
       }
-    });
-
-    this.edgeConnectionTemplateForm = this.fb.group({
-      triggerConfig: this.fb.group({
-        edges: [null],
-        notifyOn: [null]
-      })
-    });
-
-    this.edgeCommunicationFailureTemplateForm = this.fb.group({
-      triggerConfig: this.fb.group({
-        edges: [null]
-      })
     });
 
     this.alarmTemplateForm = this.fb.group({
@@ -355,8 +336,6 @@ export class RuleNotificationDialogComponent extends
       [TriggerType.API_USAGE_LIMIT, this.apiUsageLimitTemplateForm],
       [TriggerType.NEW_PLATFORM_VERSION, this.newPlatformVersionTemplateForm],
       [TriggerType.RATE_LIMITS, this.rateLimitsTemplateForm],
-      [TriggerType.EDGE_COMMUNICATION_FAILURE, this.edgeCommunicationFailureTemplateForm],
-      [TriggerType.EDGE_CONNECTION, this.edgeConnectionTemplateForm],
       [TriggerType.TASK_PROCESSING_FAILURE, this.taskProcessingFailureTemplateForm]
     ]);
 

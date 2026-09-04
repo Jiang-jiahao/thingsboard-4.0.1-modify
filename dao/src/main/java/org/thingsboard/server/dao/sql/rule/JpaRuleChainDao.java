@@ -85,27 +85,6 @@ public class JpaRuleChainDao extends JpaAbstractDao<RuleChainEntity, RuleChain> 
     }
 
     @Override
-    public PageData<RuleChain> findRuleChainsByTenantIdAndEdgeId(UUID tenantId, UUID edgeId, PageLink pageLink) {
-        log.debug("Try to find rule chains by tenantId [{}], edgeId [{}] and pageLink [{}]", tenantId, edgeId, pageLink);
-        return DaoUtil.toPageData(ruleChainRepository
-                .findByTenantIdAndEdgeId(
-                        tenantId,
-                        edgeId,
-                        pageLink.getTextSearch(),
-                        DaoUtil.toPageable(pageLink)));
-    }
-
-    @Override
-    public PageData<RuleChain> findAutoAssignToEdgeRuleChainsByTenantId(UUID tenantId, PageLink pageLink) {
-        log.debug("Try to find auto assign to edge rule chains by tenantId [{}]", tenantId);
-        return DaoUtil.toPageData(ruleChainRepository
-                .findAutoAssignByTenantId(
-                        tenantId,
-                        pageLink.getTextSearch(),
-                        DaoUtil.toPageable(pageLink)));
-    }
-
-    @Override
     public Collection<RuleChain> findByTenantIdAndTypeAndName(TenantId tenantId, RuleChainType type, String name) {
         return DaoUtil.convertDataList(ruleChainRepository.findByTenantIdAndTypeAndName(tenantId.getId(), type, name));
     }

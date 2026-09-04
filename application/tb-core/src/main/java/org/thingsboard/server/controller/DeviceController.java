@@ -49,18 +49,15 @@ import org.thingsboard.server.common.data.EntitySubtype;
 import org.thingsboard.server.common.data.SaveDeviceWithCredentialsRequest;
 import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.device.DeviceSearchQuery;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
-import org.thingsboard.server.common.data.page.TimePageLink;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.data.sync.ie.importing.csv.BulkImportRequest;
 import org.thingsboard.server.common.data.sync.ie.importing.csv.BulkImportResult;
@@ -103,11 +100,6 @@ import static org.thingsboard.server.controller.ControllerConstants.DEVICE_WITH_
 import static org.thingsboard.server.controller.ControllerConstants.DEVICE_WITH_DEVICE_CREDENTIALS_PARAM_LVM2M_RPK_DESCRIPTION_MARKDOWN;
 import static org.thingsboard.server.controller.ControllerConstants.DEVICE_WITH_DEVICE_CREDENTIALS_PARAM_MQTT_BASIC_DESCRIPTION_MARKDOWN;
 import static org.thingsboard.server.controller.ControllerConstants.DEVICE_WITH_DEVICE_CREDENTIALS_PARAM_X509_CERTIFICATE_DESCRIPTION_MARKDOWN;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ASSIGN_RECEIVE_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ID_PARAM_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_UNASSIGN_RECEIVE_STEP_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.PAGE_DATA_PARAMETERS;
 import static org.thingsboard.server.controller.ControllerConstants.PAGE_NUMBER_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.PAGE_SIZE_DESCRIPTION;
@@ -118,18 +110,17 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_ID;
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_ID_PARAM_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH;
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
-import static org.thingsboard.server.controller.EdgeController.EDGE_ID;
 
 /**
- * 设备 CRUD、凭据、客户/租户/Edge 分配、认领（claim）与 CSV 批量导入 REST。
+ * 设备 CRUD、凭据、客户/租户分配、认领（claim）与 CSV 批量导入 REST。
  * <p>
  * 仅在 {@link TbCoreComponent} 中生效。路径 {@code /api/device*}、{@code /api/tenant/devices}、
- * {@code /api/customer/{id}/device*}、{@code /api/edge/{id}/device*}。
+ * {@code /api/customer/{id}/device*}。
  * TENANT_ADMIN 可写；CUSTOMER_USER 可读已分配设备，并可 claim。
  * 写路径走 {@link TbDeviceService}；CSV 导入走 {@link DeviceBulkImportService}。
  * <p>
  * 特殊副作用：{@code claim} 用密钥把未分配设备归到当前客户；{@code reclaim} 解绑以便再次认领；
- * {@code assignDeviceToTenant} 把设备迁到另一租户；Edge 分配异步下发。
+ * {@code assignDeviceToTenant} 把设备迁到另一租户。
  *
  * @see TbDeviceService
  * @see DeviceBulkImportService
@@ -736,108 +727,6 @@ public class DeviceController extends BaseController {
             throw new ThingsboardException("Could not find the specified Tenant!", ThingsboardErrorCode.BAD_REQUEST_PARAMS);
         }
         return tbDeviceService.assignDeviceToTenant(device, newTenant, getCurrentUser());
-    }
-
-    /**
-     * 把设备分配给 Edge，并异步下发到远端。
-     */
-    @ApiOperation(value = "Assign device to edge (assignDeviceToEdge)",
-            notes = "Creates assignment of an existing device to an instance of The Edge. " +
-                    EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
-                    "Second, remote edge service will receive a copy of assignment device " +
-                    EDGE_ASSIGN_RECEIVE_STEP_DESCRIPTION +
-                    "Third, once device will be delivered to edge service, it's going to be available for usage on remote edge instance." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/edge/{edgeId}/device/{deviceId}", method = RequestMethod.POST)
-    @ResponseBody
-    public Device assignDeviceToEdge(@Parameter(description = EDGE_ID_PARAM_DESCRIPTION)
-                                     @PathVariable(EDGE_ID) String strEdgeId,
-                                     @Parameter(description = DEVICE_ID_PARAM_DESCRIPTION)
-                                     @PathVariable(DEVICE_ID) String strDeviceId) throws ThingsboardException {
-        checkParameter(EDGE_ID, strEdgeId);
-        checkParameter(DEVICE_ID, strDeviceId);
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        Edge edge = checkEdgeId(edgeId, Operation.READ);
-
-        DeviceId deviceId = new DeviceId(toUUID(strDeviceId));
-        checkDeviceId(deviceId, Operation.READ);
-
-        return tbDeviceService.assignDeviceToEdge(getTenantId(), deviceId, edge, getCurrentUser());
-    }
-
-    /**
-     * 取消设备与 Edge 的分配，并异步通知远端删除本地副本。
-     */
-    @ApiOperation(value = "Unassign device from edge (unassignDeviceFromEdge)",
-            notes = "Clears assignment of the device to the edge. " +
-                    EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
-                    "Second, remote edge service will receive an 'unassign' command to remove device " +
-                    EDGE_UNASSIGN_RECEIVE_STEP_DESCRIPTION +
-                    "Third, once 'unassign' command will be delivered to edge service, it's going to remove device locally." + TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/edge/{edgeId}/device/{deviceId}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public Device unassignDeviceFromEdge(@Parameter(description = EDGE_ID_PARAM_DESCRIPTION)
-                                         @PathVariable(EDGE_ID) String strEdgeId,
-                                         @Parameter(description = DEVICE_ID_PARAM_DESCRIPTION)
-                                         @PathVariable(DEVICE_ID) String strDeviceId) throws ThingsboardException {
-        checkParameter(EDGE_ID, strEdgeId);
-        checkParameter(DEVICE_ID, strDeviceId);
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        Edge edge = checkEdgeId(edgeId, Operation.READ);
-
-        DeviceId deviceId = new DeviceId(toUUID(strDeviceId));
-        Device device = checkDeviceId(deviceId, Operation.READ);
-        return tbDeviceService.unassignDeviceFromEdge(device, edge, getCurrentUser());
-    }
-
-    /**
-     * 分页列出已分配给指定 Edge 的设备。
-     */
-    @ApiOperation(value = "Get devices assigned to edge (getEdgeDevices)",
-            notes = "Returns a page of devices assigned to edge. " +
-                    PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/edge/{edgeId}/devices", params = {"pageSize", "page"}, method = RequestMethod.GET)
-    @ResponseBody
-    public PageData<DeviceInfo> getEdgeDevices(
-            @Parameter(description = EDGE_ID_PARAM_DESCRIPTION, required = true)
-            @PathVariable(EDGE_ID) String strEdgeId,
-            @Parameter(description = PAGE_SIZE_DESCRIPTION, required = true)
-            @RequestParam int pageSize,
-            @Parameter(description = PAGE_NUMBER_DESCRIPTION, required = true)
-            @RequestParam int page,
-            @Parameter(description = DEVICE_TYPE_DESCRIPTION)
-            @RequestParam(required = false) String type,
-            @Parameter(description = DEVICE_PROFILE_ID_PARAM_DESCRIPTION)
-            @RequestParam(required = false) String deviceProfileId,
-            @Parameter(description = DEVICE_ACTIVE_PARAM_DESCRIPTION)
-            @RequestParam(required = false) Boolean active,
-            @Parameter(description = DEVICE_TEXT_SEARCH_DESCRIPTION)
-            @RequestParam(required = false) String textSearch,
-            @Parameter(description = SORT_PROPERTY_DESCRIPTION, schema = @Schema(allowableValues = {"createdTime", "name", "deviceProfileName", "label", "customerTitle"}))
-            @RequestParam(required = false) String sortProperty,
-            @Parameter(description = SORT_ORDER_DESCRIPTION, schema = @Schema(allowableValues = {"ASC", "DESC"}))
-            @RequestParam(required = false) String sortOrder,
-            @Parameter(description = "Timestamp. Devices with creation time before it won't be queried")
-            @RequestParam(required = false) Long startTime,
-            @Parameter(description = "Timestamp. Devices with creation time after it won't be queried")
-            @RequestParam(required = false) Long endTime) throws ThingsboardException {
-        checkParameter(EDGE_ID, strEdgeId);
-        TenantId tenantId = getCurrentUser().getTenantId();
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        checkEdgeId(edgeId, Operation.READ);
-        TimePageLink pageLink = createTimePageLink(pageSize, page, textSearch, sortProperty, sortOrder, startTime, endTime);
-        DeviceInfoFilter.DeviceInfoFilterBuilder filter = DeviceInfoFilter.builder();
-        filter.tenantId(tenantId);
-        filter.edgeId(edgeId);
-        filter.active(active);
-        if (type != null && type.trim().length() > 0) {
-            filter.type(type);
-        } else if (deviceProfileId != null && deviceProfileId.length() > 0) {
-            filter.deviceProfileId(new DeviceProfileId(toUUID(deviceProfileId)));
-        }
-        return checkNotNull(deviceService.findDeviceInfosByFilter(filter.build(), pageLink));
     }
 
     /**

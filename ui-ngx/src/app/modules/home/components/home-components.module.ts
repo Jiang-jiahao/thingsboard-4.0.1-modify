@@ -130,8 +130,6 @@ import { ManageDashboardStatesDialogComponent } from '@home/components/dashboard
 import { DashboardStateDialogComponent } from '@home/components/dashboard-page/states/dashboard-state-dialog.component';
 import { EmbedDashboardDialogComponent } from '@home/components/widget/dialog/embed-dashboard-dialog.component';
 import { EMBED_DASHBOARD_DIALOG_TOKEN } from '@home/components/widget/dialog/embed-dashboard-dialog-token';
-import { EdgeDownlinkTableComponent } from '@home/components/edge/edge-downlink-table.component';
-import { EdgeDownlinkTableHeaderComponent } from '@home/components/edge/edge-downlink-table-header.component';
 import { DisplayWidgetTypesPanelComponent } from '@home/components/dashboard-page/widget-types-panel.component';
 import { AlarmDurationPredicateValueComponent } from '@home/components/profile/alarm/alarm-duration-predicate-value.component';
 import { DashboardImageDialogComponent } from '@home/components/dashboard-page/dashboard-image-dialog.component';
@@ -229,8 +227,6 @@ import {
       EventTableHeaderComponent,
       EventTableComponent,
       EventFilterPanelComponent,
-      EdgeDownlinkTableHeaderComponent,
-      EdgeDownlinkTableComponent,
       RelationTableComponent,
       RelationDialogComponent,
       RelationFiltersComponent,
@@ -397,8 +393,6 @@ import {
     EntityDetailsPageComponent,
     AuditLogTableComponent,
     EventTableComponent,
-    EdgeDownlinkTableHeaderComponent,
-    EdgeDownlinkTableComponent,
     RelationTableComponent,
     RelationFiltersComponent,
     AlarmTableComponent,

@@ -19,7 +19,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.TenantId;
 
 @Data
@@ -28,7 +27,6 @@ public class DeviceInfoFilter {
 
     private TenantId tenantId;
     private CustomerId customerId;
-    private EdgeId edgeId;
     private String type;
     private DeviceProfileId deviceProfileId;
     private Boolean active;

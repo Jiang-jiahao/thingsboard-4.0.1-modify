@@ -177,29 +177,6 @@ public class JpaEntityViewDao extends JpaAbstractDao<EntityViewEntity, EntityVie
     }
 
     @Override
-    public PageData<EntityView> findEntityViewsByTenantIdAndEdgeId(UUID tenantId, UUID edgeId, PageLink pageLink) {
-        log.debug("Try to find entity views by tenantId [{}], edgeId [{}] and pageLink [{}]", tenantId, edgeId, pageLink);
-        return DaoUtil.toPageData(entityViewRepository
-                .findByTenantIdAndEdgeId(
-                        tenantId,
-                        edgeId,
-                        pageLink.getTextSearch(),
-                        DaoUtil.toPageable(pageLink)));
-    }
-
-    @Override
-    public PageData<EntityView> findEntityViewsByTenantIdAndEdgeIdAndType(UUID tenantId, UUID edgeId, String type, PageLink pageLink) {
-        log.debug("Try to find entity views by tenantId [{}], edgeId [{}], type [{}] and pageLink [{}]", tenantId, edgeId, type, pageLink);
-        return DaoUtil.toPageData(entityViewRepository
-                .findByTenantIdAndEdgeIdAndType(
-                        tenantId,
-                        edgeId,
-                        type,
-                        pageLink.getTextSearch(),
-                        DaoUtil.toPageable(pageLink)));
-    }
-
-    @Override
     public EntityView findByTenantIdAndExternalId(UUID tenantId, UUID externalId) {
         return DaoUtil.getData(entityViewRepository.findByTenantIdAndExternalId(tenantId, externalId));
     }

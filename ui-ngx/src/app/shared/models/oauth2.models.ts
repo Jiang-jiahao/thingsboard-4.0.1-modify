@@ -77,7 +77,6 @@ export interface Domain extends BaseData<DomainId>, HasTenantId {
   tenantId?: TenantId;
   name: string;
   oauth2Enabled: boolean;
-  propagateToEdge: boolean;
 }
 
 export interface DomainInfo extends Domain {

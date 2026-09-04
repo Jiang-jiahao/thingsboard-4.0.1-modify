@@ -229,29 +229,6 @@ public class JpaAssetDao extends JpaAbstractDao<AssetEntity, Asset> implements A
                         DaoUtil.toPageable(pageLink)));
     }
 
-    @Override
-    public PageData<Asset> findAssetsByTenantIdAndEdgeId(UUID tenantId, UUID edgeId, PageLink pageLink) {
-        log.debug("Try to find assets by tenantId [{}], edgeId [{}] and pageLink [{}]", tenantId, edgeId, pageLink);
-        return DaoUtil.toPageData(assetRepository
-                .findByTenantIdAndEdgeId(
-                        tenantId,
-                        edgeId,
-                        pageLink.getTextSearch(),
-                        DaoUtil.toPageable(pageLink)));
-    }
-
-    @Override
-    public PageData<Asset> findAssetsByTenantIdAndEdgeIdAndType(UUID tenantId, UUID edgeId, String type, PageLink pageLink) {
-        log.debug("Try to find assets by tenantId [{}], edgeId [{}], type [{}] and pageLink [{}]", tenantId, edgeId, type, pageLink);
-        return DaoUtil.toPageData(assetRepository
-                .findByTenantIdAndEdgeIdAndType(
-                        tenantId,
-                        edgeId,
-                        type,
-                        pageLink.getTextSearch(),
-                        DaoUtil.toPageable(pageLink)));
-    }
-
     public PageData<TbPair<UUID, String>> getAllAssetTypes(PageLink pageLink) {
         log.debug("Try to find all asset types and pageLink [{}]", pageLink);
         return DaoUtil.pageToPageData(assetRepository.getAllAssetTypes(

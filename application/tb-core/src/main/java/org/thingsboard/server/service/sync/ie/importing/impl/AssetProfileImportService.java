@@ -31,7 +31,7 @@ import org.thingsboard.server.service.sync.vc.data.EntitiesImportCtx;
 /**
  * 针对 {@link AssetProfile} 的导入服务，继承 {@link BaseEntityImportService}。
  * <p>
- * 还原默认规则链、仪表板、Edge 规则链内部 ID；最终轮次导入计算字段。
+ * 还原默认规则链、仪表板内部 ID；最终轮次导入计算字段。
  */
 @Service
 @TbCoreComponent
@@ -50,7 +50,6 @@ public class AssetProfileImportService extends BaseEntityImportService<AssetProf
     protected AssetProfile prepare(EntitiesImportCtx ctx, AssetProfile assetProfile, AssetProfile old, EntityExportData<AssetProfile> exportData, IdProvider idProvider) {
         assetProfile.setDefaultRuleChainId(idProvider.getInternalId(assetProfile.getDefaultRuleChainId()));
         assetProfile.setDefaultDashboardId(idProvider.getInternalId(assetProfile.getDefaultDashboardId()));
-        assetProfile.setDefaultEdgeRuleChainId(idProvider.getInternalId(assetProfile.getDefaultEdgeRuleChainId()));
         return assetProfile;
     }
 

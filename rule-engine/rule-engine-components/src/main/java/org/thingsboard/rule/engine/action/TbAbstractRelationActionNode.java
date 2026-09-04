@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 public abstract class TbAbstractRelationActionNode<C extends TbAbstractRelationActionNodeConfiguration> implements TbNode {
 
     private static final Set<EntityType> supportedEntityTypes = EnumSet.of(EntityType.TENANT, EntityType.DEVICE,
-            EntityType.ASSET, EntityType.CUSTOMER, EntityType.ENTITY_VIEW, EntityType.DASHBOARD, EntityType.EDGE, EntityType.USER);
+            EntityType.ASSET, EntityType.CUSTOMER, EntityType.ENTITY_VIEW, EntityType.DASHBOARD, EntityType.USER);
 
     private static final String supportedEntityTypesStr = supportedEntityTypes.stream().map(Enum::name).collect(Collectors.joining(" ,"));
 
@@ -186,15 +186,6 @@ public abstract class TbAbstractRelationActionNode<C extends TbAbstractRelationA
                         return entityView.getId();
                     }
                     throw new NoSuchElementException("Entity View with name '" + targetEntityName + "' doesn't exist!");
-                }, MoreExecutors.directExecutor());
-            }
-            case EDGE -> {
-                var edgeFuture = ctx.getEdgeService().findEdgeByTenantIdAndNameAsync(tenantId, targetEntityName);
-                return Futures.transform(edgeFuture, edge -> {
-                    if (edge != null) {
-                        return edge.getId();
-                    }
-                    throw new NoSuchElementException("Edge with name '" + targetEntityName + "' doesn't exist!");
                 }, MoreExecutors.directExecutor());
             }
             case DASHBOARD -> {

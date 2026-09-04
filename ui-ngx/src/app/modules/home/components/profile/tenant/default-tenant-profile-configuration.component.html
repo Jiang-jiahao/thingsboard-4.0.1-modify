@@ -111,22 +111,6 @@
             <mat-hint></mat-hint>
           </mat-form-field>
         </div>
-        <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-          <mat-form-field class="mat-block flex-1" appearance="fill">
-            <mat-label translate>tenant-profile.maximum-edges</mat-label>
-            <input matInput required min="0" step="1"
-                   formControlName="maxEdges"
-                   type="number">
-            <mat-error *ngIf="defaultTenantProfileConfigurationFormGroup.get('maxEdges').hasError('required')">
-              {{ 'tenant-profile.maximum-edges-required' | translate }}
-            </mat-error>
-            <mat-error *ngIf="defaultTenantProfileConfigurationFormGroup.get('maxEdges').hasError('min')">
-              {{ 'tenant-profile.maximum-edges-range' | translate }}
-            </mat-error>
-            <mat-hint></mat-hint>
-          </mat-form-field>
-          <div class="flex-1"></div>
-        </div>
       </ng-template>
     </mat-expansion-panel>
   </fieldset>
@@ -706,22 +690,6 @@
           </tb-rate-limits>
           <tb-rate-limits class="flex-1" formControlName="tenantNotificationRequestsPerRuleRateLimit"
                           [type]="rateLimitsType.TENANT_NOTIFICATION_REQUESTS_PER_RULE_RATE_LIMIT">
-          </tb-rate-limits>
-        </div>
-        <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-          <tb-rate-limits class="flex-1" formControlName="edgeEventRateLimits"
-                          [type]="rateLimitsType.EDGE_EVENTS_RATE_LIMIT">
-          </tb-rate-limits>
-          <tb-rate-limits class="flex-1" formControlName="edgeEventRateLimitsPerEdge"
-                          [type]="rateLimitsType.EDGE_EVENTS_PER_EDGE_RATE_LIMIT">
-          </tb-rate-limits>
-        </div>
-        <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-          <tb-rate-limits class="flex-1" formControlName="edgeUplinkMessagesRateLimits"
-                          [type]="rateLimitsType.EDGE_UPLINK_MESSAGES_RATE_LIMIT">
-          </tb-rate-limits>
-          <tb-rate-limits class="flex-1" formControlName="edgeUplinkMessagesRateLimitsPerEdge"
-                          [type]="rateLimitsType.EDGE_UPLINK_MESSAGES_PER_EDGE_RATE_LIMIT">
           </tb-rate-limits>
         </div>
         <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">

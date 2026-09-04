@@ -62,7 +62,7 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
 
   deviceCredentials$: Subject<DeviceCredentials>;
 
-  deviceScope: 'tenant' | 'customer' | 'customer_user' | 'edge' | 'edge_customer_user';
+  deviceScope: 'tenant' | 'customer' | 'customer_user';
 
   otaUpdateType = OtaUpdateType;
 

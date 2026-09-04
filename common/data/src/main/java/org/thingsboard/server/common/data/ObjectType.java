@@ -31,7 +31,6 @@ public enum ObjectType {
     EVENT,
     RULE_NODE,
     USER,
-    EDGE,
     WIDGETS_BUNDLE,
     WIDGET_TYPE,
     DASHBOARD,
@@ -60,7 +59,7 @@ public enum ObjectType {
     LATEST_TS_KV;
 
     public static final Set<ObjectType> edqsTenantTypes = EnumSet.of(
-            TENANT, CUSTOMER, DEVICE_PROFILE, DEVICE, ASSET_PROFILE, ASSET, EDGE, ENTITY_VIEW, USER, DASHBOARD,
+            TENANT, CUSTOMER, DEVICE_PROFILE, DEVICE, ASSET_PROFILE, ASSET, ENTITY_VIEW, USER, DASHBOARD,
             RULE_CHAIN, WIDGET_TYPE, WIDGETS_BUNDLE, API_USAGE_STATE, QUEUE_STATS
     );
     public static final Set<ObjectType> edqsTypes =  EnumSet.copyOf(edqsTenantTypes);

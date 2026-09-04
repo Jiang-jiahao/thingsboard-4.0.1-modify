@@ -43,7 +43,6 @@ public class DefaultTenantProfileConfiguration implements TenantProfileConfigura
     private long maxUsers;
     private long maxDashboards;
     private long maxRuleChains;
-    private long maxEdges;
     private long maxResourcesInBytes;
     private long maxOtaPackagesInBytes;
     private long maxResourceSize;
@@ -123,11 +122,6 @@ public class DefaultTenantProfileConfiguration implements TenantProfileConfigura
 
     private String cassandraQueryTenantRateLimitsConfiguration;
 
-    private String edgeEventRateLimits;
-    private String edgeEventRateLimitsPerEdge;
-    private String edgeUplinkMessagesRateLimits;
-    private String edgeUplinkMessagesRateLimitsPerEdge;
-
     private int defaultStorageTtlDays;
     private int alarmsTtlDays;
     private int rpcTtlDays;
@@ -188,7 +182,6 @@ public class DefaultTenantProfileConfiguration implements TenantProfileConfigura
             case USER -> maxUsers;
             case DASHBOARD -> maxDashboards;
             case RULE_CHAIN -> maxRuleChains;
-            case EDGE -> maxEdges;
             default -> 0;
         };
     }

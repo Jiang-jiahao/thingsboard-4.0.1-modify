@@ -35,8 +35,6 @@ public enum NotificationType {
     API_USAGE_LIMIT,
     RULE_NODE,
     RATE_LIMITS,
-    EDGE_CONNECTION,
-    EDGE_COMMUNICATION_FAILURE,
     TASK_PROCESSING_FAILURE;
 
     @Getter

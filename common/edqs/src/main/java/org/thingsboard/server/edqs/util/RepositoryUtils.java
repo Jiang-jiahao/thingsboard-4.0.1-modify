@@ -82,7 +82,6 @@ public class RepositoryUtils {
             case ASSET_TYPE, ASSET_SEARCH_QUERY -> EntityType.ASSET;
             case DEVICE_TYPE, DEVICE_SEARCH_QUERY -> EntityType.DEVICE;
             case ENTITY_VIEW_TYPE, ENTITY_VIEW_SEARCH_QUERY -> EntityType.ENTITY_VIEW;
-            case EDGE_TYPE, EDGE_SEARCH_QUERY -> EntityType.EDGE;
             case RELATIONS_QUERY -> {
                 RelationsQueryFilter rgf = (RelationsQueryFilter) entityFilter;
                 yield rgf.isMultiRoot() ? rgf.getMultiRootEntitiesType() : rgf.getRootEntity().getEntityType();

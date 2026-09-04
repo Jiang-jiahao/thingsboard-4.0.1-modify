@@ -25,9 +25,7 @@ import org.thingsboard.rule.engine.flow.TbRuleChainOutputNode;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.User;
 import org.thingsboard.server.common.data.audit.ActionType;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.RuleChainId;
 import org.thingsboard.server.common.data.id.RuleNodeId;
 import org.thingsboard.server.common.data.id.TenantId;
@@ -313,97 +311,6 @@ public class DefaultTbRuleChainService extends AbstractTbEntityService implement
         } catch (Exception e) {
             logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.RULE_CHAIN), ActionType.ADDED,
                     user, e, ruleChainMetaData);
-            throw e;
-        }
-    }
-
-    /**
-     * 将规则链分配到 Edge。
-     */
-    @Override
-    public RuleChain assignRuleChainToEdge(TenantId tenantId, RuleChain ruleChain, Edge edge, User user) throws ThingsboardException {
-        ActionType actionType = ActionType.ASSIGNED_TO_EDGE;
-        RuleChainId ruleChainId = ruleChain.getId();
-        EdgeId edgeId = edge.getId();
-        try {
-            RuleChain savedRuleChain = checkNotNull(ruleChainService.assignRuleChainToEdge(tenantId, ruleChainId, edgeId));
-            logEntityActionService.logEntityAction(tenantId, ruleChainId, savedRuleChain, null, actionType,
-                    user, ruleChainId.toString(), edgeId.toString(), edge.getName());
-            return savedRuleChain;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.RULE_CHAIN),
-                    actionType, user, e, ruleChainId.toString(), edgeId.toString());
-            throw e;
-        }
-    }
-
-    /**
-     * 取消规则链与 Edge 的分配。
-     */
-    @Override
-    public RuleChain unassignRuleChainFromEdge(TenantId tenantId, RuleChain ruleChain, Edge edge, User user) throws ThingsboardException {
-        ActionType actionType = ActionType.UNASSIGNED_FROM_EDGE;
-        RuleChainId ruleChainId = ruleChain.getId();
-        EdgeId edgeId = edge.getId();
-        try {
-            RuleChain savedRuleChain = checkNotNull(ruleChainService.unassignRuleChainFromEdge(tenantId, ruleChainId, edgeId, false));
-            logEntityActionService.logEntityAction(tenantId, ruleChainId, savedRuleChain, null, actionType,
-                    user, ruleChainId.toString(), edgeId.toString(), edge.getName());
-            return savedRuleChain;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.RULE_CHAIN),
-                    actionType, user, e, ruleChainId, edgeId);
-            throw e;
-        }
-    }
-
-    /**
-     * 设为 Edge 模板根规则链。
-     */
-    @Override
-    public RuleChain setEdgeTemplateRootRuleChain(TenantId tenantId, RuleChain ruleChain, User user) throws ThingsboardException {
-        RuleChainId ruleChainId = ruleChain.getId();
-        try {
-            ruleChainService.setEdgeTemplateRootRuleChain(tenantId, ruleChainId);
-            logEntityActionService.logEntityAction(tenantId, ruleChainId, ruleChain, ActionType.UPDATED, user);
-            return ruleChain;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.RULE_CHAIN), ActionType.UPDATED,
-                    user, e, ruleChainId.toString());
-            throw e;
-        }
-    }
-
-    /**
-     * 标记新建 Edge 时自动分配该规则链。
-     */
-    @Override
-    public RuleChain setAutoAssignToEdgeRuleChain(TenantId tenantId, RuleChain ruleChain, User user) throws ThingsboardException {
-        RuleChainId ruleChainId = ruleChain.getId();
-        try {
-            ruleChainService.setAutoAssignToEdgeRuleChain(tenantId, ruleChainId);
-            logEntityActionService.logEntityAction(tenantId, ruleChainId, ruleChain, ActionType.UPDATED, user);
-            return ruleChain;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.RULE_CHAIN), ActionType.UPDATED,
-                    user, e, ruleChainId.toString());
-            throw e;
-        }
-    }
-
-    /**
-     * 取消新建 Edge 自动分配。
-     */
-    @Override
-    public RuleChain unsetAutoAssignToEdgeRuleChain(TenantId tenantId, RuleChain ruleChain, User user) throws ThingsboardException {
-        RuleChainId ruleChainId = ruleChain.getId();
-        try {
-            ruleChainService.unsetAutoAssignToEdgeRuleChain(tenantId, ruleChainId);
-            logEntityActionService.logEntityAction(tenantId, ruleChainId, ruleChain, ActionType.UPDATED, user);
-            return ruleChain;
-        } catch (Exception e) {
-            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.RULE_CHAIN), ActionType.UPDATED,
-                    user, e, ruleChainId.toString());
             throw e;
         }
     }

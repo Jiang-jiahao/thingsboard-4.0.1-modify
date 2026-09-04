@@ -17,7 +17,6 @@
 import { AuthState } from '@core/auth/auth.models';
 import { Authority } from '@shared/models/authority.enum';
 import {
-  EDGE_UI_ENABLED,
   GATEWAY_UI_ENABLED,
   MOBILE_UI_ENABLED,
   OTA_UI_ENABLED,
@@ -105,10 +104,6 @@ export enum MenuId {
   asset_profiles = 'asset_profiles',
   customers = 'customers',
   rule_chains = 'rule_chains',
-  edge_management = 'edge_management',
-  edges = 'edges',
-  edge_instances = 'edge_instances',
-  rulechain_templates = 'rulechain_templates',
   features = 'features',
   otaUpdates = 'otaUpdates',
   version_control = 'version_control',
@@ -621,49 +616,6 @@ export const menuSectionMap = new Map<MenuId, MenuSection>([
     }
   ],
   [
-    MenuId.edge_management,
-    {
-      id: MenuId.edge_management,
-      name: 'edge.management',
-      type: 'toggle',
-      path: '/edgeManagement',
-      icon: 'settings_input_antenna'
-    }
-  ],
-  [
-    MenuId.edges,
-    {
-      id: MenuId.edges,
-      name: 'edge.instances',
-      fullName: 'edge.edge-instances',
-      type: 'link',
-      path: '/edgeManagement/instances',
-      icon: 'router'
-    }
-  ],
-  [
-    MenuId.edge_instances,
-    {
-      id: MenuId.edge_instances,
-      name: 'edge.edge-instances',
-      fullName: 'edge.edge-instances',
-      type: 'link',
-      path: '/edgeManagement/instances',
-      icon: 'router'
-    }
-  ],
-  [
-    MenuId.rulechain_templates,
-    {
-      id: MenuId.rulechain_templates,
-      name: 'edge.rulechain-templates',
-      fullName: 'edge.edge-rulechain-templates',
-      type: 'link',
-      path: '/edgeManagement/ruleChains',
-      icon: 'settings_ethernet'
-    }
-  ],
-  [
     MenuId.features,
     {
       id: MenuId.features,
@@ -708,18 +660,6 @@ export const menuSectionMap = new Map<MenuId, MenuSection>([
 const menuFilters = new Map<MenuId, MenuFilter>([
   [
     MenuId.gateways, () => GATEWAY_UI_ENABLED
-  ],
-  [
-    MenuId.edges, (authState) => EDGE_UI_ENABLED && authState.edgesSupportEnabled
-  ],
-  [
-    MenuId.edge_management, (authState) => EDGE_UI_ENABLED && authState.edgesSupportEnabled
-  ],
-  [
-    MenuId.rulechain_templates, (authState) => EDGE_UI_ENABLED && authState.edgesSupportEnabled
-  ],
-  [
-    MenuId.edge_instances, (authState) => EDGE_UI_ENABLED && authState.edgesSupportEnabled
   ],
   [
     MenuId.features, () => OTA_UI_ENABLED || VERSION_CONTROL_UI_ENABLED
@@ -842,13 +782,6 @@ const defaultUserMenuMap = new Map<Authority, MenuReference[]>([
       {id: MenuId.customers},
       {id: MenuId.rule_chains},
       {
-        id: MenuId.edge_management,
-        pages: [
-          {id: MenuId.edges},
-          {id: MenuId.rulechain_templates}
-        ]
-      },
-      {
         id: MenuId.features,
         pages: [
           {id: MenuId.otaUpdates},
@@ -926,7 +859,6 @@ const defaultUserMenuMap = new Map<Authority, MenuReference[]>([
           {id: MenuId.entity_views}
         ]
       },
-      {id: MenuId.edge_instances},
       {
         id: MenuId.notifications_center,
         pages: [
@@ -981,10 +913,6 @@ const defaultHomeSectionMap = new Map<Authority, HomeSectionReference[]>([
         places: [MenuId.entity_views]
       },
       {
-        name: 'edge.management',
-        places: [MenuId.edges, MenuId.rulechain_templates]
-      },
-      {
         name: 'dashboard.management',
         places: [MenuId.widget_library, MenuId.dashboards]
       },
@@ -1016,10 +944,6 @@ const defaultHomeSectionMap = new Map<Authority, HomeSectionReference[]>([
       {
         name: 'entity-view.management',
         places: [MenuId.entity_views]
-      },
-      {
-        name: 'edge.management',
-        places: [MenuId.edge_instances]
       },
       {
         name: 'dashboard.view-dashboards',

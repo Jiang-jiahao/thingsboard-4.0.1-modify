@@ -46,7 +46,6 @@ import org.thingsboard.server.common.data.asset.AssetProfile;
 import org.thingsboard.server.common.data.cf.CalculatedField;
 import org.thingsboard.server.common.data.cf.CalculatedFieldLink;
 import org.thingsboard.server.common.data.domain.Domain;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.id.AssetProfileId;
 import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.id.EntityId;
@@ -74,7 +73,6 @@ import org.thingsboard.server.dao.customer.CustomerService;
 import org.thingsboard.server.dao.dashboard.DashboardService;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.domain.DomainService;
-import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 import org.thingsboard.server.dao.mobile.MobileAppBundleService;
 import org.thingsboard.server.dao.mobile.MobileAppService;
@@ -120,8 +118,6 @@ public class TenantIdLoaderTest {
     private EntityViewService entityViewService;
     @Mock
     private DashboardService dashboardService;
-    @Mock
-    private EdgeService edgeService;
     @Mock
     private OtaPackageService otaPackageService;
     @Mock
@@ -258,14 +254,6 @@ public class TenantIdLoaderTest {
 
                 when(ctx.getDashboardService()).thenReturn(dashboardService);
                 doReturn(dashboard).when(dashboardService).findDashboardById(eq(tenantId), any());
-
-                break;
-            case EDGE:
-                Edge edge = new Edge();
-                edge.setTenantId(tenantId);
-
-                when(ctx.getEdgeService()).thenReturn(edgeService);
-                doReturn(edge).when(edgeService).findEdgeById(eq(tenantId), any());
 
                 break;
             case OTA_PACKAGE:

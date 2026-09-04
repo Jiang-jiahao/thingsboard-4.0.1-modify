@@ -37,7 +37,6 @@ import {
 } from '@home/components/profile/device/lwm2m/lwm2m-profile-config.models';
 import { PageLink } from '@shared/models/page/page-link';
 import { isDefinedAndNotNull, isNotEmptyStr } from '@core/utils';
-import { EdgeId } from '@shared/models/id/edge-id';
 
 export enum DeviceProfileType {
   DEFAULT = 'DEFAULT',
@@ -98,9 +97,6 @@ export const DEVICE_PROVISIONING_UI_ENABLED = false;
 
 /** Set to true to show gateway management UI (menu, routes, device gateway options). */
 export const GATEWAY_UI_ENABLED = false;
-
-/** Set to true to show edge management UI (menu, routes, customer edge actions). */
-export const EDGE_UI_ENABLED = false;
 
 /** Set to true to show mobile center UI (menu, routes, device/asset profile mobile dashboard). */
 export const MOBILE_UI_ENABLED = false;
@@ -2443,7 +2439,6 @@ export interface DeviceProfile extends BaseData<DeviceProfileId>, HasTenantId, H
   firmwareId?: OtaPackageId;
   softwareId?: OtaPackageId;
   profileData: DeviceProfileData;
-  defaultEdgeRuleChainId?: RuleChainId;
 }
 
 export interface DeviceProfileInfo extends EntityInfoData, HasTenantId {
@@ -2597,7 +2592,6 @@ export interface DeviceInfo extends Device {
 
 export interface DeviceInfoFilter {
   customerId?: CustomerId;
-  edgeId?: EdgeId;
   type?: string;
   deviceProfileId?: DeviceProfileId;
   active?: boolean;
@@ -2617,8 +2611,6 @@ export class DeviceInfoQuery  {
     let query;
     if (this.deviceInfoFilter.customerId) {
       query = `/customer/${this.deviceInfoFilter.customerId.id}/deviceInfos`;
-    } else if (this.deviceInfoFilter.edgeId) {
-      query = `/edge/${this.deviceInfoFilter.edgeId.id}/devices`;
     } else {
       query = '/tenant/deviceInfos';
     }

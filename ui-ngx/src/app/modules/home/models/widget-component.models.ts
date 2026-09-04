@@ -99,7 +99,6 @@ import { PageLink, TimePageLink } from '@shared/models/page/page-link';
 import { SortOrder } from '@shared/models/page/sort-order';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Router } from '@angular/router';
-import { EdgeService } from '@core/http/edge.service';
 import * as RxJS from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import * as RxJSOperators from 'rxjs/operators';
@@ -210,7 +209,6 @@ export class WidgetContext {
   deviceService: DeviceService;
   assetService: AssetService;
   entityViewService: EntityViewService;
-  edgeService: EdgeService;
   customerService: CustomerService;
   dashboardService: DashboardService;
   userService: UserService;

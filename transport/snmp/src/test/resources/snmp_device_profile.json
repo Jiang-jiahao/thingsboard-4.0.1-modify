@@ -284,6 +284,5 @@
   "provisionDeviceKey": null,
   "firmwareId": null,
   "softwareId": null,
-  "defaultEdgeRuleChainId": null,
   "default": false
 }

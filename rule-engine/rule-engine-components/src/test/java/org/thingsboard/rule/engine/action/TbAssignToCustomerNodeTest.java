@@ -38,12 +38,10 @@ import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.EntityView;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.asset.Asset;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.id.AssetId;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DashboardId;
 import org.thingsboard.server.common.data.id.DeviceId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityIdFactory;
 import org.thingsboard.server.common.data.id.EntityViewId;
@@ -56,7 +54,6 @@ import org.thingsboard.server.dao.asset.AssetService;
 import org.thingsboard.server.dao.customer.CustomerService;
 import org.thingsboard.server.dao.dashboard.DashboardService;
 import org.thingsboard.server.dao.device.DeviceService;
-import org.thingsboard.server.dao.edge.EdgeService;
 import org.thingsboard.server.dao.entityview.EntityViewService;
 
 import java.util.Arrays;
@@ -84,7 +81,7 @@ import static org.mockito.Mockito.when;
 class TbAssignToCustomerNodeTest extends AbstractRuleNodeUpgradeTest {
 
     private static final Set<EntityType> supportedEntityTypes = EnumSet.of(EntityType.DEVICE, EntityType.ASSET,
-            EntityType.ENTITY_VIEW, EntityType.EDGE, EntityType.DASHBOARD);
+            EntityType.ENTITY_VIEW, EntityType.DASHBOARD);
 
     private static final String supportedEntityTypesStr = supportedEntityTypes.stream().map(Enum::name).collect(Collectors.joining(", "));
 
@@ -94,7 +91,6 @@ class TbAssignToCustomerNodeTest extends AbstractRuleNodeUpgradeTest {
     private final Device DEVICE = new Device();
     private final Asset ASSET = new Asset();
     private final EntityView ENTITY_VIEW = new EntityView();
-    private final Edge EDGE = new Edge();
     private final Dashboard DASHBOARD = new Dashboard();
 
     private final TenantId TENANT_ID = new TenantId(UUID.fromString("c818385f-e661-407f-8c52-daf2dddf406d"));
@@ -126,9 +122,6 @@ class TbAssignToCustomerNodeTest extends AbstractRuleNodeUpgradeTest {
 
     @Mock
     private EntityViewService entityViewServiceMock;
-
-    @Mock
-    private EdgeService edgeServiceMock;
 
     @Mock
     private DashboardService dashboardServiceMock;
@@ -278,11 +271,6 @@ class TbAssignToCustomerNodeTest extends AbstractRuleNodeUpgradeTest {
                     when(ctxMock.getEntityViewService()).thenReturn(entityViewServiceMock);
                     when(entityViewServiceMock.assignEntityViewToCustomer(eq(TENANT_ID), (EntityViewId) eq(id), any()))
                             .thenReturn(ENTITY_VIEW);
-                },
-                EntityType.EDGE, id -> {
-                    when(ctxMock.getEdgeService()).thenReturn(edgeServiceMock);
-                    when(edgeServiceMock.assignEdgeToCustomer(eq(TENANT_ID), (EdgeId) eq(id), any()))
-                            .thenReturn(EDGE);
                 },
                 EntityType.DASHBOARD, id -> {
                     when(ctxMock.getDashboardService()).thenReturn(dashboardServiceMock);

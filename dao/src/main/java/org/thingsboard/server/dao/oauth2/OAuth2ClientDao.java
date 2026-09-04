@@ -16,7 +16,6 @@
 package org.thingsboard.server.dao.oauth2;
 
 import org.thingsboard.server.common.data.id.OAuth2ClientId;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.oauth2.OAuth2Client;
 import org.thingsboard.server.common.data.oauth2.PlatformType;
 import org.thingsboard.server.common.data.page.PageData;
@@ -43,7 +42,5 @@ public interface OAuth2ClientDao extends Dao<OAuth2Client> {
     void deleteByTenantId(UUID tenantId);
 
     List<OAuth2Client> findByIds(UUID tenantId, List<OAuth2ClientId> oAuth2ClientIds);
-
-    boolean isPropagateToEdge(TenantId tenantId, UUID oAuth2ClientId);
 
 }

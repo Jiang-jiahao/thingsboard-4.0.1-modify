@@ -18,19 +18,16 @@ package org.thingsboard.server.service.entitiy.dashboard;
 import org.thingsboard.server.common.data.Customer;
 import org.thingsboard.server.common.data.Dashboard;
 import org.thingsboard.server.common.data.User;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
-import org.thingsboard.server.common.data.id.DashboardId;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.service.entitiy.SimpleTbEntityService;
 
 import java.util.Set;
 
 /**
- * 仪表板业务层契约：CRUD 以及分配到客户 / 公开客户 / Edge。
+ * 仪表板业务层契约：CRUD 以及分配到客户 / 公开客户。
  * <p>
- * 由 DashboardController 调用；实现类委托 Dashboard DAO，写审计日志并触发 Edge 同步。
+ * 由 DashboardController 调用；实现类委托 Dashboard DAO，并写审计日志。
  */
 public interface TbDashboardService extends SimpleTbEntityService<Dashboard> {
 
@@ -51,12 +48,6 @@ public interface TbDashboardService extends SimpleTbEntityService<Dashboard> {
 
     /** 从仪表板移除若干客户分配。 */
     Dashboard removeDashboardCustomers(Dashboard dashboard, Set<CustomerId> customerIds, User user) throws ThingsboardException;
-
-    /** 将仪表板分配给 Edge。 */
-    Dashboard asignDashboardToEdge(TenantId tenantId, DashboardId dashboardId, Edge edge, User user) throws ThingsboardException;
-
-    /** 取消仪表板与 Edge 的分配。 */
-    Dashboard unassignDashboardFromEdge(Dashboard dashboard, Edge edge, User user) throws ThingsboardException;
 
     /** 取消仪表板与指定客户的分配。 */
     Dashboard unassignDashboardFromCustomer(Dashboard dashboard, Customer customer, User user) throws ThingsboardException;

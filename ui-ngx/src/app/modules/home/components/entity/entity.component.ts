@@ -24,7 +24,7 @@ import { EntityAction } from '@home/models/entity/entity-component.models';
 import { EntityTableConfig } from '@home/models/entity/entities-table-config.models';
 import { PageLink } from '@shared/models/page/page-link';
 import { deepTrim } from '@core/utils';
-import { EDGE_UI_ENABLED, MOBILE_UI_ENABLED, OTA_UI_ENABLED } from '@shared/models/device.models';
+import { MOBILE_UI_ENABLED, OTA_UI_ENABLED } from '@shared/models/device.models';
 
 // @dynamic
 @Directive()
@@ -44,8 +44,6 @@ export abstract class EntityComponent<T extends BaseData<HasId>,
   readonly otaUiEnabled = OTA_UI_ENABLED;
 
   readonly mobileUiEnabled = MOBILE_UI_ENABLED;
-
-  readonly edgeUiEnabled = EDGE_UI_ENABLED;
 
   @Input()
   set entitiesTableConfig(entitiesTableConfig: C) {

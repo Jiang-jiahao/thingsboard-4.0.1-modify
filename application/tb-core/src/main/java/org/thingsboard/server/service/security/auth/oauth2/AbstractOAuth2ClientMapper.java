@@ -16,10 +16,8 @@
 package org.thingsboard.server.service.security.auth.oauth2;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -86,10 +84,6 @@ public abstract class AbstractOAuth2ClientMapper {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
-
-    @Value("${edges.enabled}")
-    @Getter
-    private boolean edgesEnabled;
 
     private final Lock userCreationLock = new ReentrantLock();
 

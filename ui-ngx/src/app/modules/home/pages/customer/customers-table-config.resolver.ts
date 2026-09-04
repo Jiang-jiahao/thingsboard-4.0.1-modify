@@ -31,11 +31,6 @@ import { Customer } from '@app/shared/models/customer.model';
 import { CustomerService } from '@app/core/http/customer.service';
 import { CustomerComponent } from '@modules/home/pages/customer/customer.component';
 import { CustomerTabsComponent } from '@home/pages/customer/customer-tabs.component';
-import { getCurrentAuthState } from '@core/auth/auth.selectors';
-import { EDGE_UI_ENABLED } from '@shared/models/device.models';
-import { Store } from '@ngrx/store';
-import { AppState } from '@core/core.state';
-import { HomeDialogsService } from '@home/dialogs/home-dialogs.service';
 
 @Injectable()
 export class CustomersTableConfigResolver  {
@@ -43,18 +38,15 @@ export class CustomersTableConfigResolver  {
   private readonly config: EntityTableConfig<Customer> = new EntityTableConfig<Customer>();
 
   constructor(private customerService: CustomerService,
-              private homeDialogs: HomeDialogsService,
               private translate: TranslateService,
               private datePipe: DatePipe,
-              private router: Router,
-              private store: Store<AppState>) {
+              private router: Router) {
 
     this.config.entityType = EntityType.CUSTOMER;
     this.config.entityComponent = CustomerComponent;
     this.config.entityTabsComponent = CustomerTabsComponent;
     this.config.entityTranslations = entityTypeTranslations.get(EntityType.CUSTOMER);
     this.config.entityResources = entityTypeResources.get(EntityType.CUSTOMER);
-    const authState = getCurrentAuthState(this.store);
 
     this.config.columns.push(
       new DateEntityTableColumn<Customer>('createdTime', 'common.created-time', this.datePipe, '150px'),
@@ -103,21 +95,6 @@ export class CustomersTableConfigResolver  {
         isEnabled: (customer) => true,
         onAction: ($event, entity) => this.manageCustomerDashboards($event, entity)
       });
-    if (EDGE_UI_ENABLED && authState.edgesSupportEnabled) {
-      this.config.cellActionDescriptors.push(
-        {
-          name: this.translate.instant('customer.manage-customer-edges'),
-          nameFunction: (customer) => {
-            return customer.additionalInfo && customer.additionalInfo.isPublic
-              ? this.translate.instant('customer.manage-public-edges')
-              : this.translate.instant('customer.manage-customer-edges');
-          },
-          icon: 'router',
-          isEnabled: (customer) => true,
-          onAction: ($event, entity) => this.manageCustomerEdges($event, entity)
-        }
-      );
-    }
 
     this.config.deleteEntityTitle = customer => this.translate.instant('customer.delete-customer-title', { customerTitle: customer.title });
     this.config.deleteEntityContent = () => this.translate.instant('customer.delete-customer-text');
@@ -176,13 +153,6 @@ export class CustomersTableConfigResolver  {
     this.router.navigateByUrl(`customers/${customer.id.id}/dashboards`);
   }
 
-  manageCustomerEdges($event: Event, customer: Customer) {
-    if ($event) {
-      $event.stopPropagation();
-    }
-    this.router.navigateByUrl(`customers/${customer.id.id}/edgeInstances`);
-  }
-
   onCustomerAction(action: EntityAction<Customer>, config: EntityTableConfig<Customer>): boolean {
     switch (action.action) {
       case 'open':
@@ -199,9 +169,6 @@ export class CustomersTableConfigResolver  {
         return true;
       case 'manageDashboards':
         this.manageCustomerDashboards(action.event, action.entity);
-        return true;
-      case 'manageEdges':
-        this.manageCustomerEdges(action.event, action.entity);
         return true;
     }
     return false;

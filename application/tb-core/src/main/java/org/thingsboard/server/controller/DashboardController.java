@@ -48,11 +48,9 @@ import org.thingsboard.server.common.data.HomeDashboard;
 import org.thingsboard.server.common.data.HomeDashboardInfo;
 import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.User;
-import org.thingsboard.server.common.data.edge.Edge;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
 import org.thingsboard.server.common.data.id.CustomerId;
 import org.thingsboard.server.common.data.id.DashboardId;
-import org.thingsboard.server.common.data.id.EdgeId;
 import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.page.PageData;
 import org.thingsboard.server.common.data.page.PageLink;
@@ -65,22 +63,14 @@ import org.thingsboard.server.service.security.permission.Operation;
 import org.thingsboard.server.service.security.permission.Resource;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.thingsboard.server.controller.ControllerConstants.CUSTOMER_ID;
 import static org.thingsboard.server.controller.ControllerConstants.CUSTOMER_ID_PARAM_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.DASHBOARD_ID_PARAM_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.DASHBOARD_TEXT_SEARCH_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ASSIGN_RECEIVE_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ID;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_ID_PARAM_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION;
-import static org.thingsboard.server.controller.ControllerConstants.EDGE_UNASSIGN_RECEIVE_STEP_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.INCLUDE_RESOURCES;
 import static org.thingsboard.server.controller.ControllerConstants.INCLUDE_RESOURCES_DESCRIPTION;
 import static org.thingsboard.server.controller.ControllerConstants.PAGE_DATA_PARAMETERS;
@@ -96,10 +86,10 @@ import static org.thingsboard.server.controller.ControllerConstants.TENANT_OR_CU
 import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
 
 /**
- * 仪表盘 CRUD、客户/Edge 分配、首页仪表盘 REST。
+ * 仪表盘 CRUD、客户分配、首页仪表盘 REST。
  * <p>
  * 仅在 {@link TbCoreComponent} 中生效。路径 {@code /api/dashboard*}、{@code /api/tenant/dashboards}、
- * {@code /api/customer/{id}/dashboards}、{@code /api/edge/{id}/dashboard*}。
+ * {@code /api/customer/{id}/dashboards}。
  * 写操作 TENANT_ADMIN；读操作含 CUSTOMER_USER（须已分配）。SYS_ADMIN 可按租户列仪表盘。
  * 写路径走 {@link TbDashboardService}；取完整配置时可通过 {@link TbResourceService} 内联图片资源。
  * 首页仪表盘按 User → Customer → Tenant 的 additionalInfo 逐级回退。
@@ -601,102 +591,6 @@ public class DashboardController extends BaseController {
             }
         } catch (Exception ignored) {}
         return null;
-    }
-
-    /**
-     * 把仪表盘分配给 Edge，并异步下发到远端。
-     */
-    @ApiOperation(value = "Assign dashboard to edge (assignDashboardToEdge)",
-            notes = "Creates assignment of an existing dashboard to an instance of The Edge. " +
-                    EDGE_ASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
-                    "Second, remote edge service will receive a copy of assignment dashboard " +
-                    EDGE_ASSIGN_RECEIVE_STEP_DESCRIPTION +
-                    "Third, once dashboard will be delivered to edge service, it's going to be available for usage on remote edge instance." +
-                    TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/edge/{edgeId}/dashboard/{dashboardId}", method = RequestMethod.POST)
-    @ResponseBody
-    public Dashboard assignDashboardToEdge(@PathVariable("edgeId") String strEdgeId,
-                                           @PathVariable(DASHBOARD_ID) String strDashboardId) throws ThingsboardException {
-        checkParameter("edgeId", strEdgeId);
-        checkParameter(DASHBOARD_ID, strDashboardId);
-
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        Edge edge = checkEdgeId(edgeId, Operation.READ);
-
-        DashboardId dashboardId = new DashboardId(toUUID(strDashboardId));
-        checkDashboardId(dashboardId, Operation.READ);
-        return tbDashboardService.asignDashboardToEdge(getTenantId(), dashboardId, edge, getCurrentUser());
-    }
-
-    /**
-     * 取消仪表盘与 Edge 的分配，并异步通知远端删除。
-     */
-    @ApiOperation(value = "Unassign dashboard from edge (unassignDashboardFromEdge)",
-            notes = "Clears assignment of the dashboard to the edge. " +
-                    EDGE_UNASSIGN_ASYNC_FIRST_STEP_DESCRIPTION +
-                    "Second, remote edge service will receive an 'unassign' command to remove dashboard " +
-                    EDGE_UNASSIGN_RECEIVE_STEP_DESCRIPTION +
-                    "Third, once 'unassign' command will be delivered to edge service, it's going to remove dashboard locally." +
-                    TENANT_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
-    @RequestMapping(value = "/edge/{edgeId}/dashboard/{dashboardId}", method = RequestMethod.DELETE)
-    @ResponseBody
-    public Dashboard unassignDashboardFromEdge(@PathVariable("edgeId") String strEdgeId,
-                                               @PathVariable(DASHBOARD_ID) String strDashboardId) throws ThingsboardException {
-        checkParameter(EDGE_ID, strEdgeId);
-        checkParameter(DASHBOARD_ID, strDashboardId);
-
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        Edge edge = checkEdgeId(edgeId, Operation.READ);
-
-        DashboardId dashboardId = new DashboardId(toUUID(strDashboardId));
-        Dashboard dashboard = checkDashboardId(dashboardId, Operation.READ);
-
-        return tbDashboardService.unassignDashboardFromEdge(dashboard, edge, getCurrentUser());
-    }
-
-    /**
-     * 分页列出已分配给指定 Edge 的仪表盘。
-     */
-    @ApiOperation(value = "Get Edge Dashboards (getEdgeDashboards)",
-            notes = "Returns a page of dashboard info objects assigned to the specified edge. "
-                    + DASHBOARD_INFO_DEFINITION + " " + PAGE_DATA_PARAMETERS + TENANT_OR_CUSTOMER_AUTHORITY_PARAGRAPH)
-    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN', 'CUSTOMER_USER')")
-    @RequestMapping(value = "/edge/{edgeId}/dashboards", params = {"pageSize", "page"}, method = RequestMethod.GET)
-    @ResponseBody
-    public PageData<DashboardInfo> getEdgeDashboards(
-            @Parameter(description = EDGE_ID_PARAM_DESCRIPTION, required = true)
-            @PathVariable(EDGE_ID) String strEdgeId,
-            @Parameter(description = PAGE_SIZE_DESCRIPTION, required = true)
-            @RequestParam int pageSize,
-            @Parameter(description = PAGE_NUMBER_DESCRIPTION, required = true)
-            @RequestParam int page,
-            @Parameter(description = DASHBOARD_TEXT_SEARCH_DESCRIPTION)
-            @RequestParam(required = false) String textSearch,
-            @Parameter(description = SORT_PROPERTY_DESCRIPTION, schema = @Schema(allowableValues = {"createdTime", "title"}))
-            @RequestParam(required = false) String sortProperty,
-            @Parameter(description = SORT_ORDER_DESCRIPTION, schema = @Schema(allowableValues = {"ASC", "DESC"}))
-            @RequestParam(required = false) String sortOrder) throws ThingsboardException {
-        checkParameter("edgeId", strEdgeId);
-        TenantId tenantId = getCurrentUser().getTenantId();
-        EdgeId edgeId = new EdgeId(toUUID(strEdgeId));
-        checkEdgeId(edgeId, Operation.READ);
-        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
-        PageData<DashboardInfo> nonFilteredResult = dashboardService.findDashboardsByTenantIdAndEdgeId(tenantId, edgeId, pageLink);
-        List<DashboardInfo> filteredDashboards = nonFilteredResult.getData().stream().filter(dashboardInfo -> {
-            try {
-                accessControlService.checkPermission(getCurrentUser(), Resource.DASHBOARD, Operation.READ, dashboardInfo.getId(), dashboardInfo);
-                return true;
-            } catch (ThingsboardException e) {
-                return false;
-            }
-        }).collect(Collectors.toList());
-        PageData<DashboardInfo> filteredResult = new PageData<>(filteredDashboards,
-                nonFilteredResult.getTotalPages(),
-                nonFilteredResult.getTotalElements(),
-                nonFilteredResult.hasNext());
-        return checkNotNull(filteredResult);
     }
 
     private Set<CustomerId> customerIdFromStr(String[] strCustomerIds) {

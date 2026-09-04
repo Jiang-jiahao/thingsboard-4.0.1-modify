@@ -39,7 +39,6 @@ services:
     image: "${DOCKER_REPO}/${TB_NODE_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "8080"
-      - "7070"
     logging:
       driver: "json-file"
       options:
@@ -48,7 +47,6 @@ services:
     environment:
       TB_SERVICE_ID: tb-core1
       TB_SERVICE_TYPE: tb-core
-      EDGES_ENABLED: "true"
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - tb-node.env
@@ -65,7 +63,6 @@ services:
     image: "${DOCKER_REPO}/${TB_NODE_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "8080"
-      - "7070"
     logging:
       driver: "json-file"
       options:
@@ -74,7 +71,6 @@ services:
     environment:
       TB_SERVICE_ID: tb-core2
       TB_SERVICE_TYPE: tb-core
-      EDGES_ENABLED: "true"
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - tb-node.env
@@ -310,7 +306,6 @@ services:
      - "80:80"
      - "443:443"
      - "1883:1883"
-     - "7070:7070"
      - "9999:9999"
     cap_add:
      - NET_ADMIN
@@ -318,7 +313,6 @@ services:
       HTTP_PORT: 80
       HTTPS_PORT: 443
       MQTT_PORT: 1883
-      EDGES_RPC_PORT: 7070
       FORCE_HTTPS_REDIRECT: "false"
     links:
         - tb-core1

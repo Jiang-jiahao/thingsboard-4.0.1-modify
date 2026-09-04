@@ -15,7 +15,6 @@
  */
 package org.thingsboard.rule.engine.rpc;
 
-import com.google.common.util.concurrent.SettableFuture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,31 +26,25 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.thingsboard.common.util.JacksonUtil;
-import org.thingsboard.common.util.ListeningExecutor;
 import org.thingsboard.rule.engine.api.RuleEngineRpcService;
 import org.thingsboard.rule.engine.api.TbContext;
 import org.thingsboard.rule.engine.api.TbNodeConfiguration;
 import org.thingsboard.rule.engine.api.TbNodeException;
-import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.EntityId;
 import org.thingsboard.server.common.data.id.EntityIdFactory;
-import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.msg.TbMsgType;
 import org.thingsboard.server.common.msg.TbMsg;
 import org.thingsboard.server.common.msg.TbMsgDataType;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
-import org.thingsboard.server.dao.edge.EdgeEventService;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -66,7 +59,6 @@ public class TbSendRPCReplyNodeTest {
     private TbSendRPCReplyNode node;
     private TbSendRpcReplyNodeConfiguration config;
 
-    private final TenantId tenantId = TenantId.fromUUID(UUID.fromString("4e2e2336-3376-4238-ba0a-c669b412ca66"));
     private final DeviceId deviceId = new DeviceId(UUID.fromString("af64d1b9-8635-47e1-8738-6389df7fe57e"));
 
     @Mock
@@ -74,12 +66,6 @@ public class TbSendRPCReplyNodeTest {
 
     @Mock
     private RuleEngineRpcService rpcService;
-
-    @Mock
-    private EdgeEventService edgeEventService;
-
-    @Mock
-    private ListeningExecutor listeningExecutor;
 
     @BeforeEach
     public void setUp() throws TbNodeException {
@@ -103,31 +89,6 @@ public class TbSendRPCReplyNodeTest {
         node.onMsg(ctx, msg);
 
         verify(rpcService).sendRpcReplyToDevice(DUMMY_SERVICE_ID, DUMMY_SESSION_ID, DUMMY_REQUEST_ID, DUMMY_DATA);
-        verify(edgeEventService, never()).saveAsync(any());
-    }
-
-    @Test
-    public void sendReplyToEdgeQueue() {
-        when(ctx.getTenantId()).thenReturn(tenantId);
-        when(ctx.getEdgeEventService()).thenReturn(edgeEventService);
-        when(edgeEventService.saveAsync(any())).thenReturn(SettableFuture.create());
-        when(ctx.getDbCallbackExecutor()).thenReturn(listeningExecutor);
-
-        TbMsgMetaData defaultMetadata = getDefaultMetadata();
-        defaultMetadata.putValue(DataConstants.EDGE_ID, UUID.randomUUID().toString());
-        defaultMetadata.putValue(DataConstants.DEVICE_ID, UUID.randomUUID().toString());
-        TbMsg msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
-                .originator(deviceId)
-                .copyMetaData(defaultMetadata)
-                .dataType(TbMsgDataType.JSON)
-                .data(DUMMY_DATA)
-                .build();
-
-        node.onMsg(ctx, msg);
-
-        verify(edgeEventService).saveAsync(any());
-        verify(rpcService, never()).sendRpcReplyToDevice(DUMMY_SERVICE_ID, DUMMY_SESSION_ID, DUMMY_REQUEST_ID, DUMMY_DATA);
     }
 
     @ParameterizedTest

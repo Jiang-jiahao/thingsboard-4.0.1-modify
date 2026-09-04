@@ -102,9 +102,6 @@ public final class DeviceProfileEntity extends BaseVersionedEntity<DeviceProfile
     @Column(name = ModelConstants.DEVICE_PROFILE_SOFTWARE_ID_PROPERTY)
     private UUID softwareId;
 
-    @Column(name = ModelConstants.DEVICE_PROFILE_DEFAULT_EDGE_RULE_CHAIN_ID_PROPERTY, columnDefinition = "uuid")
-    private UUID defaultEdgeRuleChainId;
-
     @Column(name = ModelConstants.EXTERNAL_ID_PROPERTY)
     private UUID externalId;
 
@@ -138,9 +135,6 @@ public final class DeviceProfileEntity extends BaseVersionedEntity<DeviceProfile
         }
         if (deviceProfile.getSoftwareId() != null) {
             this.softwareId = deviceProfile.getSoftwareId().getId();
-        }
-        if (deviceProfile.getDefaultEdgeRuleChainId() != null) {
-            this.defaultEdgeRuleChainId = deviceProfile.getDefaultEdgeRuleChainId().getId();
         }
         if (deviceProfile.getExternalId() != null) {
             this.externalId = deviceProfile.getExternalId().getId();
@@ -177,9 +171,6 @@ public final class DeviceProfileEntity extends BaseVersionedEntity<DeviceProfile
         }
         if (softwareId != null) {
             deviceProfile.setSoftwareId(new OtaPackageId(softwareId));
-        }
-        if (defaultEdgeRuleChainId != null) {
-            deviceProfile.setDefaultEdgeRuleChainId(new RuleChainId(defaultEdgeRuleChainId));
         }
         if (externalId != null) {
             deviceProfile.setExternalId(new DeviceProfileId(externalId));

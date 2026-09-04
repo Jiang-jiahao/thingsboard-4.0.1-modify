@@ -141,7 +141,6 @@ public class SystemInfoController extends BaseController {
         } else {
             systemParams.setAllowedDashboardIds(Collections.emptyList());
         }
-        systemParams.setEdgesSupportEnabled(edgesEnabled);
         if (currentUser.isTenantAdmin()) {
             systemParams.setHasRepository(versionControlService.getVersionControlSettings(tenantId) != null);
             systemParams.setTbelEnabled(tbelEnabled);

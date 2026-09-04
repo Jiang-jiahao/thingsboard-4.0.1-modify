@@ -54,8 +54,7 @@ import static org.thingsboard.common.util.DonAsynchron.withCallback;
                 "<li><strong>Customer</strong> - use customer with the specified title as the target entity to create a relation with. " +
                 "When selected, rule node allows us to use advanced mode to enable customer creation if it doesn't exist.</li>" +
                 "<li><strong>Dashboard</strong> - use a dashboard with the specified title as the target entity to create a relation with.</li>" +
-                "<li><strong>User</strong> - use a user with the specified email as the target entity to create a relation with.</li>" +
-                "<li><strong>Edge</strong> - use an edge with the specified name as the target entity to create a relation with.</li></ul>" +
+                "<li><strong>User</strong> - use a user with the specified email as the target entity to create a relation with.</li></ul>" +
                 "Advanced settings: " +
                 "<ul><li><strong>Remove current relations</strong> - removes current relations with originator of the incoming message based on direction and type. " +
                 "Useful in GPS tracking use cases where relation acts as a temporary indicator of a tracker presence in specific geofence.</li>" +
