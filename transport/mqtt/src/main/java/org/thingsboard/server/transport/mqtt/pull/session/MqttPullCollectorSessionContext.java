@@ -13,6 +13,7 @@ import org.thingsboard.server.common.data.device.data.MqttPullDeviceTransportCon
 import org.thingsboard.server.common.data.device.profile.MqttPullDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.transport.SessionMsgListener;
 import org.thingsboard.server.gen.transport.TransportProtos.SessionInfoProto;
 import org.thingsboard.mqtt.MqttClient;
 import org.thingsboard.server.transport.mqtt.pull.MqttPullTransportContext;
@@ -36,7 +37,9 @@ public class MqttPullCollectorSessionContext {
     private MqttPullDeviceTransportConfiguration deviceTransportConfiguration;
     private MqttPullTransportContext transportContext;
     private MqttClient mqttClient;
+    private SessionMsgListener rpcSessionListener;
     private ScheduledFuture<?> reconnectTask;
+    private ScheduledFuture<?> activityHeartbeatTask;
     @Builder.Default
     private volatile boolean brokerLinkActive = false;
     @Builder.Default
@@ -54,14 +57,29 @@ public class MqttPullCollectorSessionContext {
         this.destroyed = true;
     }
 
-    public void close() {
-        markDestroyed();
+    /**
+     * Broker 断开或换新客户端后必须清空，否则会跳过对响应主题的重新订阅。
+     */
+    public void resetRpcState() {
         pendingRpcByResponseTopic.clear();
         rpcResponseSubscriptions.clear();
+    }
+
+    public void cancelActivityHeartbeat() {
+        if (activityHeartbeatTask != null) {
+            activityHeartbeatTask.cancel(false);
+            activityHeartbeatTask = null;
+        }
+    }
+
+    public void close() {
+        markDestroyed();
+        resetRpcState();
         if (reconnectTask != null) {
             reconnectTask.cancel(false);
             reconnectTask = null;
         }
+        cancelActivityHeartbeat();
         if (mqttClient != null) {
             try {
                 mqttClient.disconnect();

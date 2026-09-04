@@ -8,6 +8,7 @@ package org.thingsboard.server.transport.mqtt.pull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import org.thingsboard.server.common.data.security.DeviceCredentialsType;
 import org.thingsboard.server.common.transport.DeviceDeletedEvent;
 import org.thingsboard.server.common.transport.DeviceProfileUpdatedEvent;
 import org.thingsboard.server.common.transport.DeviceUpdatedEvent;
+import org.thingsboard.server.common.transport.SessionMsgListener;
 import org.thingsboard.server.common.transport.TransportContext;
 import org.thingsboard.server.common.transport.TransportDeviceProfileCache;
 import org.thingsboard.server.common.transport.TransportService;
@@ -62,6 +64,9 @@ public class MqttPullTransportContext extends TransportContext {
 
     private final Map<DeviceId, MqttPullCollectorSessionContext> collectorSessions = new ConcurrentHashMap<>();
     private final Set<UUID> activatedTransportSessions = ConcurrentHashMap.newKeySet();
+
+    @Value("${transport.sessions.inactivity_timeout:300000}")
+    private long sessionInactivityTimeout;
 
     @AfterStartUp(order = AfterStartUp.AFTER_TRANSPORT_SERVICE)
     public void fetchCollectorsAndEstablishSessions() {
@@ -119,8 +124,10 @@ public class MqttPullTransportContext extends TransportContext {
                 return;
             }
             SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, UUID.randomUUID());
-            registerMqttPullTransportSession(sessionInfo, new MqttPullRpcSessionListener(mqttPullRpcService, ctx));
+            SessionMsgListener listener = new MqttPullRpcSessionListener(mqttPullRpcService, ctx);
+            ctx.setRpcSessionListener(listener);
             ctx.setSessionInfo(sessionInfo);
+            registerMqttPullTransportSession(sessionInfo, listener);
             MqttPullCollectorSessionContext previous = collectorSessions.put(device.getId(), ctx);
             if (previous != null && previous != ctx) {
                 destroyCollector(previous, false);
@@ -214,7 +221,7 @@ public class MqttPullTransportContext extends TransportContext {
         tryEstablishCollector(device);
     }
 
-    private void registerMqttPullTransportSession(SessionInfoProto sessionInfo, org.thingsboard.server.common.transport.SessionMsgListener listener) {
+    private void registerMqttPullTransportSession(SessionInfoProto sessionInfo, SessionMsgListener listener) {
         transportService.registerAsyncSession(sessionInfo, listener);
     }
 
@@ -222,8 +229,33 @@ public class MqttPullTransportContext extends TransportContext {
         if (sessionInfo == null) {
             return;
         }
+        MqttPullCollectorSessionContext ctx = collectorDeviceId != null ? collectorSessions.get(collectorDeviceId) : null;
+        if (ctx != null && sessionInfo.equals(ctx.getSessionInfo())) {
+            activateMqttPullDeviceSession(ctx, false);
+            return;
+        }
+        activateMqttPullDeviceSession(sessionInfo, collectorDeviceId, false, null);
+    }
+
+    public void activateMqttPullDeviceSession(MqttPullCollectorSessionContext ctx, boolean force) {
+        if (ctx == null || ctx.getSessionInfo() == null) {
+            return;
+        }
+        activateMqttPullDeviceSession(ctx.getSessionInfo(), ctx.getDeviceId(), force, ctx);
+    }
+
+    private void activateMqttPullDeviceSession(SessionInfoProto sessionInfo, DeviceId collectorDeviceId,
+                                               boolean force, MqttPullCollectorSessionContext ctx) {
+        if (sessionInfo == null) {
+            return;
+        }
+        if (ctx != null && ctx.getRpcSessionListener() != null) {
+            registerMqttPullTransportSession(sessionInfo, ctx.getRpcSessionListener());
+        }
         UUID sessionId = new UUID(sessionInfo.getSessionIdMSB(), sessionInfo.getSessionIdLSB());
-        if (!activatedTransportSessions.add(sessionId)) {
+        if (force) {
+            activatedTransportSessions.add(sessionId);
+        } else if (!activatedTransportSessions.add(sessionId)) {
             return;
         }
         transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_OPEN, null);
@@ -236,16 +268,69 @@ public class MqttPullTransportContext extends TransportContext {
     }
 
     /**
-     * 外部 Broker 连接成功：上报会话 OPEN，更新 lastConnectTime / active。
+     * Core / 本地会话超时关闭后：若 Broker 仍连着，用新 sessionId 重建 RPC 会话。
+     * 同一 sessionId 再次 OPEN 会被 DeviceActor 当成重复事件丢掉，第二次 10 分钟超时后 RPC 就会失效。
+     */
+    public void onTransportSessionClosed(MqttPullCollectorSessionContext ctx, UUID sessionId) {
+        if (!isCurrentCollector(ctx) || ctx.getSessionInfo() == null || sessionId == null) {
+            return;
+        }
+        UUID currentId = new UUID(ctx.getSessionInfo().getSessionIdMSB(), ctx.getSessionInfo().getSessionIdLSB());
+        if (!sessionId.equals(currentId)) {
+            return;
+        }
+        forgetActivatedTransportSession(ctx.getSessionInfo());
+        if (!ctx.isBrokerLinkActive()) {
+            return;
+        }
+        getExecutor().execute(() -> {
+            if (!isCurrentCollector(ctx) || !ctx.isBrokerLinkActive()) {
+                return;
+            }
+            log.info("[{}] MQTT pull transport session closed while broker is connected, renewing RPC session", ctx.getDeviceId());
+            renewMqttPullTransportSession(ctx);
+        });
+    }
+
+    /**
+     * 换新 sessionId 后重新注册、OPEN 并订阅 RPC，避免 DeviceActor 丢弃重复 OPEN。
+     */
+    private void renewMqttPullTransportSession(MqttPullCollectorSessionContext ctx) {
+        SessionInfoProto previous = ctx.getSessionInfo();
+        if (previous == null || ctx.getRpcSessionListener() == null) {
+            return;
+        }
+        forgetActivatedTransportSession(previous);
+        transportService.closeSessionWithoutReportingActivity(previous);
+        transportService.deregisterSession(previous);
+        UUID newId = UUID.randomUUID();
+        SessionInfoProto next = previous.toBuilder()
+                .setSessionIdMSB(newId.getMostSignificantBits())
+                .setSessionIdLSB(newId.getLeastSignificantBits())
+                .build();
+        ctx.setSessionInfo(next);
+        ctx.resetRpcState();
+        registerMqttPullTransportSession(next, ctx.getRpcSessionListener());
+        activateMqttPullDeviceSession(ctx, true);
+        transportService.recordActivity(next);
+        startSessionHeartbeat(ctx);
+        log.info("[{}] MQTT pull RPC session renewed {} -> {}", ctx.getDeviceId(),
+                new UUID(previous.getSessionIdMSB(), previous.getSessionIdLSB()), newId);
+    }
+
+    /**
+     * 外部 Broker 连接成功：重新注册传输会话并订阅 RPC，更新 lastConnectTime / active。
      */
     public void onMqttBrokerConnected(MqttPullCollectorSessionContext ctx) {
-        if (!isCurrentCollector(ctx) || ctx.getSessionInfo() == null) {
+        if (!isCurrentCollector(ctx) || ctx.getSessionInfo() == null || ctx.getRpcSessionListener() == null) {
             mqttPullTransportService.disconnectQuietly(ctx);
             return;
         }
         ctx.setBrokerLinkActive(true);
-        activateMqttPullDeviceSession(ctx.getSessionInfo(), ctx.getDeviceId());
+        ctx.resetRpcState();
+        activateMqttPullDeviceSession(ctx, true);
         transportService.recordActivity(ctx.getSessionInfo());
+        startSessionHeartbeat(ctx);
     }
 
     /**
@@ -271,20 +356,45 @@ public class MqttPullTransportContext extends TransportContext {
         markMqttPullDeviceInactive(ctx);
     }
 
+    private void startSessionHeartbeat(MqttPullCollectorSessionContext ctx) {
+        ctx.cancelActivityHeartbeat();
+        long periodMs = Math.max(5_000L, sessionInactivityTimeout / 3);
+        ctx.setActivityHeartbeatTask(getScheduler().scheduleWithFixedDelay(() -> {
+            try {
+                if (!isCurrentCollector(ctx) || !ctx.isBrokerLinkActive() || ctx.getSessionInfo() == null) {
+                    return;
+                }
+                if (ctx.getRpcSessionListener() != null) {
+                    registerMqttPullTransportSession(ctx.getSessionInfo(), ctx.getRpcSessionListener());
+                }
+                transportService.recordActivity(ctx.getSessionInfo());
+            } catch (Exception e) {
+                log.warn("[{}] MQTT pull session heartbeat failed", ctx.getDeviceId(), e);
+            }
+        }, periodMs, periodMs, TimeUnit.MILLISECONDS));
+    }
+
     private void markMqttPullDeviceInactive(MqttPullCollectorSessionContext ctx) {
         if (ctx == null) {
             return;
         }
         boolean wasLinked = ctx.isBrokerLinkActive();
         ctx.setBrokerLinkActive(false);
+        ctx.cancelActivityHeartbeat();
+        mqttPullRpcService.failPendingRpcs(ctx, "MQTT pull client is not connected");
+        ctx.resetRpcState();
         if (ctx.getSessionInfo() != null) {
             UUID sessionId = new UUID(ctx.getSessionInfo().getSessionIdMSB(), ctx.getSessionInfo().getSessionIdLSB());
             activatedTransportSessions.remove(sessionId);
             if (wasLinked) {
                 transportService.closeSessionWithoutReportingActivity(ctx.getSessionInfo());
             }
+            transportService.deregisterSession(ctx.getSessionInfo());
         }
         transportService.reportDeviceInactivity(ctx.getTenantId(), ctx.getDeviceId());
+        if (wasLinked) {
+            transportService.lifecycleEvent(ctx.getTenantId(), ctx.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
+        }
     }
 
     private void forgetActivatedTransportSession(SessionInfoProto sessionInfo) {
@@ -299,6 +409,8 @@ public class MqttPullTransportContext extends TransportContext {
         }
         ctx.markDestroyed();
         collectorSessions.remove(ctx.getDeviceId(), ctx);
+        ctx.cancelActivityHeartbeat();
+        mqttPullRpcService.failPendingRpcs(ctx, "MQTT pull collector destroyed");
         if (ctx.getSessionInfo() != null) {
             forgetActivatedTransportSession(ctx.getSessionInfo());
             transportService.closeSessionWithoutReportingActivity(ctx.getSessionInfo());

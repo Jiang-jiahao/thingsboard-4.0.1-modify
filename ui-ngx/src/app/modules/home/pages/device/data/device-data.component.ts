@@ -171,7 +171,7 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
 
   
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.deviceProfile && this.deviceDataFormGroup) {
+    if ((changes.deviceProfile || changes.mqttPullProfileActive) && this.deviceDataFormGroup) {
       this.applyVisibilityFromValue(this.lastWrittenValue);
       this.ensureTransportConfigurationForProfile();
     }
@@ -183,7 +183,7 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
     if (!transportType || !this.deviceDataFormGroup) {
       return;
     }
-    if (!hasDeviceTransportConfiguration(toUiTransportType(transportType))) {
+    if (!this.needsDeviceTransportConfiguration(transportType)) {
       return;
     }
     const ctrl = this.deviceDataFormGroup.get('transportConfiguration');
@@ -206,8 +206,18 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
     const profileInfo = profileType && deviceProfileTypeConfigurationInfoMap.get(profileType);
     this.displayDeviceConfiguration = !!(profileInfo?.hasDeviceConfiguration);
     const transportType = value?.transportConfiguration?.type ?? this.deviceProfile?.transportType;
-    this.displayTransportConfiguration = transportType &&
-      hasDeviceTransportConfiguration(toUiTransportType(transportType as DeviceTransportType));
+    this.displayTransportConfiguration = this.needsDeviceTransportConfiguration(transportType as DeviceTransportType);
+  }
+
+  /** MQTT 服务端无设备级字段，不展示空的传输配置；MQTT 客户端仍展示 Broker 等表单。 */
+  private needsDeviceTransportConfiguration(transportType: DeviceTransportType | TransportType | null | undefined): boolean {
+    if (!transportType) {
+      return false;
+    }
+    if (this.mqttPullProfileActive || transportType === DeviceTransportType.MQTT_PULL) {
+      return true;
+    }
+    return hasDeviceTransportConfiguration(toUiTransportType(transportType));
   }
 
   validate(): ValidationErrors | null {

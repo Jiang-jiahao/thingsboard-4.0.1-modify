@@ -29,6 +29,10 @@ public class MqttPullRpcSessionListener implements SessionMsgListener {
 
     @Override
     public void onRemoteSessionCloseCommand(UUID sessionId, TransportProtos.SessionCloseNotificationProto sessionCloseNotification) {
+        var transportContext = collectorCtx.getTransportContext();
+        if (transportContext != null) {
+            transportContext.onTransportSessionClosed(collectorCtx, sessionId);
+        }
     }
 
     @Override

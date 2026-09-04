@@ -241,7 +241,7 @@ public class MqttPullTransportService {
             return;
         }
         if (collectorCtx.getTransportContext() != null) {
-            collectorCtx.getTransportContext().activateMqttPullDeviceSession(sessionInfo, collectorCtx.getDeviceId());
+            collectorCtx.getTransportContext().activateMqttPullDeviceSession(collectorCtx, false);
         }
         String key = StringUtils.isNotBlank(telemetryKey) ? telemetryKey : "mqttPullPayload";
         JsonObject wrapper = new JsonObject();
@@ -261,7 +261,7 @@ public class MqttPullTransportService {
             return;
         }
         if (collectorCtx.getTransportContext() != null) {
-            collectorCtx.getTransportContext().activateMqttPullDeviceSession(sessionInfo, collectorCtx.getDeviceId());
+            collectorCtx.getTransportContext().activateMqttPullDeviceSession(collectorCtx, false);
         }
         JsonElement parsed;
         try {

@@ -342,8 +342,12 @@ export function hasDeviceProfileTransportConfiguration(transportType: TransportT
 }
 
 export function hasDeviceTransportConfiguration(transportType: TransportType): boolean {
-  if (transportType === BasicTransportType.HTTP || transportType === BasicTransportType.MQTT) {
+  if (transportType === BasicTransportType.HTTP) {
     return true;
+  }
+  // MQTT 服务端无设备级传输字段，空面板应隐藏；MQTT 客户端由 mqttPullProfileActive 单独展示。
+  if (transportType === BasicTransportType.MQTT) {
+    return false;
   }
   return deviceTransportTypeConfigurationInfoMap.get(transportType as DeviceTransportType)?.hasDeviceConfiguration ?? false;
 }

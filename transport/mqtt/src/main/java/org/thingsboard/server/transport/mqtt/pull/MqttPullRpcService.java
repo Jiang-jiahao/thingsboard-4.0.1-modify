@@ -73,6 +73,19 @@ public class MqttPullRpcService {
         }
     }
 
+    public void failPendingRpcs(MqttPullCollectorSessionContext collectorCtx, String error) {
+        if (collectorCtx == null || collectorCtx.getPendingRpcByResponseTopic().isEmpty()) {
+            return;
+        }
+        for (ConcurrentLinkedQueue<PendingMqttPullRpc> queue : collectorCtx.getPendingRpcByResponseTopic().values()) {
+            PendingMqttPullRpc pending;
+            while (queue != null && (pending = queue.poll()) != null) {
+                respondError(pending.getSessionInfo(), pending.getRequest(), error);
+            }
+        }
+        collectorCtx.getPendingRpcByResponseTopic().clear();
+    }
+
     public boolean tryCompletePendingRpc(MqttPullCollectorSessionContext collectorCtx, String topic, String payload) {
         if (collectorCtx == null || StringUtils.isBlank(topic) || collectorCtx.getPendingRpcByResponseTopic().isEmpty()) {
             return false;
@@ -304,7 +317,7 @@ public class MqttPullRpcService {
 
     private void respondError(TransportProtos.SessionInfoProto sessionInfo,
                               TransportProtos.ToDeviceRpcRequestMsg request, String error) {
-        if (request.getOneway()) {
+        if (sessionInfo == null || request == null) {
             return;
         }
         var node = JacksonUtil.newObjectNode();
