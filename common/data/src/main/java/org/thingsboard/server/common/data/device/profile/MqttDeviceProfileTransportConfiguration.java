@@ -15,11 +15,16 @@
  */
 package org.thingsboard.server.common.data.device.profile;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.transport.http.HttpPullPollDataType;
+import org.thingsboard.server.common.data.transport.mqtt.MqttUplinkTopicMapping;
 import org.thingsboard.server.common.data.validation.NoXss;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -33,6 +38,8 @@ public class MqttDeviceProfileTransportConfiguration implements DeviceProfileTra
     @NoXss
     private String deviceAttributesSubscribeTopic = MqttTopics.DEVICE_ATTRIBUTES_TOPIC;
 
+    private List<MqttUplinkTopicMapping> uplinkTopicMappings;
+
     private TransportPayloadTypeConfiguration transportPayloadTypeConfiguration;
     private boolean sparkplug;
     private Set<String> sparkplugAttributesMetricNames;
@@ -41,6 +48,25 @@ public class MqttDeviceProfileTransportConfiguration implements DeviceProfileTra
     @Override
     public DeviceTransportType getType() {
         return DeviceTransportType.MQTT;
+    }
+
+    @Override
+    public void validate() {
+        if (sparkplug) {
+            return;
+        }
+        if (uplinkTopicMappings != null) {
+            Set<String> enabledTopics = new HashSet<>();
+            for (MqttUplinkTopicMapping mapping : uplinkTopicMappings) {
+                mapping.validate();
+                if (mapping.isMappingEnabled()) {
+                    if (!enabledTopics.add(mapping.getTopic())) {
+                        throw new IllegalArgumentException("MQTT uplink topic filters must be unique: " + mapping.getTopic());
+                    }
+                }
+            }
+            syncLegacyTopicsFromMappings();
+        }
     }
 
     public TransportPayloadTypeConfiguration getTransportPayloadTypeConfiguration() {
@@ -57,6 +83,52 @@ public class MqttDeviceProfileTransportConfiguration implements DeviceProfileTra
 
     public String getDeviceAttributesSubscribeTopic() {
         return StringUtils.notBlankOrDefault(deviceAttributesSubscribeTopic, MqttTopics.DEVICE_ATTRIBUTES_TOPIC);
+    }
+
+    /**
+     * 运行时使用的上行映射。档案未配置列表时，从旧的遥测/属性主题字段合成两条。
+     */
+    @JsonIgnore
+    public List<MqttUplinkTopicMapping> effectiveUplinkMappings() {
+        if (uplinkTopicMappings != null && !uplinkTopicMappings.isEmpty()) {
+            return uplinkTopicMappings.stream().filter(MqttUplinkTopicMapping::isMappingEnabled).toList();
+        }
+        return List.of(
+                syntheticMapping("legacy-telemetry", "telemetry", getDeviceTelemetryTopic(), HttpPullPollDataType.TELEMETRY),
+                syntheticMapping("legacy-attributes", "attributes", getDeviceAttributesTopic(), HttpPullPollDataType.CLIENT_ATTRIBUTES)
+        );
+    }
+
+    @JsonIgnore
+    public void syncLegacyTopicsFromMappings() {
+        if (uplinkTopicMappings == null || uplinkTopicMappings.isEmpty()) {
+            return;
+        }
+        List<MqttUplinkTopicMapping> enabled = uplinkTopicMappings.stream()
+                .filter(MqttUplinkTopicMapping::isMappingEnabled)
+                .toList();
+        if (enabled.isEmpty()) {
+            return;
+        }
+        enabled.stream()
+                .filter(m -> m.getDataType() == HttpPullPollDataType.TELEMETRY)
+                .findFirst()
+                .ifPresent(m -> deviceTelemetryTopic = m.getTopic());
+        enabled.stream()
+                .filter(m -> m.getDataType() == HttpPullPollDataType.CLIENT_ATTRIBUTES
+                        || m.getDataType() == HttpPullPollDataType.SHARED_ATTRIBUTES)
+                .findFirst()
+                .ifPresent(m -> deviceAttributesTopic = m.getTopic());
+    }
+
+    private static MqttUplinkTopicMapping syntheticMapping(String id, String name, String topic, HttpPullPollDataType dataType) {
+        MqttUplinkTopicMapping mapping = new MqttUplinkTopicMapping();
+        mapping.setId(id);
+        mapping.setName(name);
+        mapping.setEnabled(true);
+        mapping.setTopic(topic);
+        mapping.setDataType(dataType);
+        return mapping;
     }
 
 }

@@ -489,6 +489,7 @@ export interface MqttDeviceProfileTransportConfiguration {
   deviceTelemetryTopic?: string;
   deviceAttributesTopic?: string;
   deviceAttributesSubscribeTopic?: string;
+  uplinkTopicMappings?: MqttUplinkTopicMapping[];
   sparkplug?: boolean;
   sendAckOnValidationException?: boolean;
   transportPayloadTypeConfiguration?: {
@@ -892,6 +893,83 @@ export interface MqttPullSubscribeRequest {
   telemetryPayloadKey?: string;
 }
 
+export interface MqttUplinkTopicMapping {
+  id?: string;
+  name?: string;
+  enabled?: boolean;
+  topic?: string;
+  dataType?: HttpPullPollDataType;
+  telemetryPayloadKey?: string;
+}
+
+export function createDefaultMqttUplinkTopicMappings(): MqttUplinkTopicMapping[] {
+  return [
+    {
+      id: newMqttUplinkMappingId(),
+      name: 'telemetry',
+      enabled: true,
+      topic: 'v1/devices/me/telemetry',
+      dataType: HttpPullPollDataType.TELEMETRY
+    },
+    {
+      id: newMqttUplinkMappingId(),
+      name: 'attributes',
+      enabled: true,
+      topic: 'v1/devices/me/attributes',
+      dataType: HttpPullPollDataType.CLIENT_ATTRIBUTES
+    }
+  ];
+}
+
+export function hydrateMqttUplinkTopicMappings(
+  value: MqttDeviceProfileTransportConfiguration | null | undefined
+): MqttUplinkTopicMapping[] {
+  if (value?.uplinkTopicMappings?.length) {
+    return value.uplinkTopicMappings.map(m => ({
+      ...m,
+      id: m.id || newMqttUplinkMappingId(),
+      enabled: m.enabled !== false,
+      dataType: m.dataType || HttpPullPollDataType.TELEMETRY
+    }));
+  }
+  return [
+    {
+      id: newMqttUplinkMappingId(),
+      name: 'telemetry',
+      enabled: true,
+      topic: value?.deviceTelemetryTopic || 'v1/devices/me/telemetry',
+      dataType: HttpPullPollDataType.TELEMETRY
+    },
+    {
+      id: newMqttUplinkMappingId(),
+      name: 'attributes',
+      enabled: true,
+      topic: value?.deviceAttributesTopic || 'v1/devices/me/attributes',
+      dataType: HttpPullPollDataType.CLIENT_ATTRIBUTES
+    }
+  ];
+}
+
+export function syncMqttPassiveLegacyTopics(mappings: MqttUplinkTopicMapping[] | undefined): {
+  deviceTelemetryTopic: string;
+  deviceAttributesTopic: string;
+} {
+  const enabled = (mappings || []).filter(m => m.enabled !== false);
+  const telemetry = enabled.find(m => m.dataType === HttpPullPollDataType.TELEMETRY);
+  const attributes = enabled.find(m => m.dataType === HttpPullPollDataType.CLIENT_ATTRIBUTES
+    || m.dataType === HttpPullPollDataType.SHARED_ATTRIBUTES);
+  return {
+    deviceTelemetryTopic: telemetry?.topic || 'v1/devices/me/telemetry',
+    deviceAttributesTopic: attributes?.topic || 'v1/devices/me/attributes'
+  };
+}
+
+function newMqttUplinkMappingId(): string {
+  return typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `uplink-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 export interface MqttPullDeviceProfileTransportConfiguration {
   mqttTransportMode?: MqttTransportMode;
   connectTimeoutMs?: number;
@@ -1000,10 +1078,25 @@ export function normalizeMqttProfileTransportConfigurationForSave(
       subscribeRequests
     } as DeviceProfileTransportConfiguration;
   }
+  const raw = transportConfiguration as MqttDeviceProfileTransportConfiguration;
+  const uplinkTopicMappings = (raw.uplinkTopicMappings?.length
+    ? raw.uplinkTopicMappings
+    : hydrateMqttUplinkTopicMappings(raw)).map(m => ({
+    id: m.id,
+    name: m.name,
+    enabled: m.enabled,
+    topic: m.topic,
+    dataType: m.dataType,
+    telemetryPayloadKey: m.telemetryPayloadKey || undefined
+  }));
+  const synced = syncMqttPassiveLegacyTopics(uplinkTopicMappings);
   return {
     ...transportConfiguration,
     type: DeviceTransportType.MQTT,
-    mqttTransportMode: mode
+    mqttTransportMode: mode,
+    uplinkTopicMappings,
+    deviceTelemetryTopic: synced.deviceTelemetryTopic,
+    deviceAttributesTopic: synced.deviceAttributesTopic
   } as DeviceProfileTransportConfiguration;
 }
 
@@ -1934,6 +2027,7 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
           deviceTelemetryTopic: 'v1/devices/me/telemetry',
           deviceAttributesTopic: 'v1/devices/me/attributes',
           deviceAttributesSubscribeTopic: 'v1/devices/me/attributes',
+          uplinkTopicMappings: createDefaultMqttUplinkTopicMappings(),
           sparkplug: false,
           sparkplugAttributesMetricNames: ['Node Control/*', 'Device Control/*', 'Properties/*'],
           sendAckOnValidationException: false,

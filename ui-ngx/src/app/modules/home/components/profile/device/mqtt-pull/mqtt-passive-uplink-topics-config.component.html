@@ -1,0 +1,57 @@
+<div [formGroup]="form" class="mqtt-passive-uplink-topics">
+  <div *ngFor="let mapping of mappingsArray.controls; let i = index"
+       class="uplink-topic-card" [formGroup]="mapping">
+    <div class="uplink-topic-header flex flex-row items-center justify-between gap-2">
+      <mat-form-field class="flex-1 mat-block uplink-name-field">
+        <mat-label translate>device-profile.mqtt.uplink-topic-name</mat-label>
+        <input matInput formControlName="name">
+      </mat-form-field>
+      <mat-slide-toggle formControlName="enabled" class="uplink-enabled-toggle">
+        {{ 'device-profile.mqtt.uplink-topic-enabled' | translate }}
+      </mat-slide-toggle>
+      <button *ngIf="!disabled && mappingsArray.length > 1"
+              type="button" mat-icon-button color="primary"
+              (click)="removeMapping(i)"
+              matTooltip="{{ 'action.remove' | translate }}">
+        <mat-icon>remove_circle_outline</mat-icon>
+      </button>
+    </div>
+    <section class="flex flex-row gap-2 xs:flex-col">
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.mqtt.topic</mat-label>
+        <input matInput formControlName="topic" required placeholder="v1/devices/me/telemetry">
+        <mat-hint translate>device-profile.mqtt.topic-hint</mat-hint>
+        <mat-error *ngIf="mapping.get('topic').hasError('required')">
+          {{ 'device-profile.mqtt.topic-required' | translate }}
+        </mat-error>
+        <mat-error *ngIf="mapping.get('topic').hasError('invalidSingleTopicCharacter')">
+          {{ 'device-profile.not-valid-single-character' | translate }}
+        </mat-error>
+        <mat-error *ngIf="mapping.get('topic').hasError('invalidMultiTopicCharacter')">
+          {{ 'device-profile.not-valid-multi-character' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field class="flex-1 mat-block">
+        <mat-label translate>device-profile.mqtt.data-type</mat-label>
+        <mat-select formControlName="dataType">
+          <mat-option *ngFor="let t of dataTypes" [value]="t">
+            {{ ('device-profile.mqtt.data-type-' + t) | translate }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </section>
+    <mat-form-field class="mat-block" *ngIf="showTelemetryKey(mapping)">
+      <mat-label translate>device-profile.mqtt.telemetry-key</mat-label>
+      <input matInput formControlName="telemetryPayloadKey">
+      <mat-hint translate>device-profile.mqtt.telemetry-key-hint</mat-hint>
+    </mat-form-field>
+  </div>
+  <mat-error *ngIf="form.hasError('uniqueUplinkTopics')">
+    {{ 'device-profile.mqtt.uplink-topics-unique' | translate }}
+  </mat-error>
+  <button *ngIf="!disabled" type="button" mat-stroked-button color="primary" class="add-uplink-btn"
+          (click)="addMapping()">
+    <mat-icon>add_circle_outline</mat-icon>
+    {{ 'device-profile.mqtt.add-uplink-topic' | translate }}
+  </button>
+</div>

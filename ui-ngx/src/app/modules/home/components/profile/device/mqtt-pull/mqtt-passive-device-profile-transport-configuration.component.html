@@ -33,58 +33,31 @@
 </form>
 <form [formGroup]="mqttDeviceProfileTransportConfigurationFormGroup" style="padding-bottom: 16px;" *ngIf="!mqttDeviceProfileTransportConfigurationFormGroup.get('sparkplug').value">
   <fieldset class="fields-group">
+    <legend class="group-title" translate>device-profile.mqtt.uplink-topics</legend>
+    <div class="tb-hint" translate>device-profile.mqtt.uplink-topics-hint</div>
+    <tb-mqtt-passive-uplink-topics-config
+      formControlName="uplinkTopicMappings"
+      [disabled]="disabled">
+    </tb-mqtt-passive-uplink-topics-config>
+  </fieldset>
+  <fieldset class="fields-group">
     <legend class="group-title" translate>device-profile.mqtt-device-topic-filters</legend>
     <div class="flex flex-col gap-2">
-      <div class="flex flex-row gap-2 xs:flex-col">
-        <mat-form-field class="flex-1">
-          <mat-label translate>device-profile.telemetry-topic-filter</mat-label>
-          <input matInput required
-                 formControlName="deviceTelemetryTopic"
-                 type="text">
-          <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceTelemetryTopic').hasError('required')">
-            {{ 'device-profile.telemetry-topic-filter-required' | translate}}
-          </mat-error>
-          <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceTelemetryTopic').hasError('invalidSingleTopicCharacter')">
-            {{ 'device-profile.not-valid-single-character' | translate}}
-          </mat-error>
-          <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceTelemetryTopic').hasError('invalidMultiTopicCharacter')">
-            {{ 'device-profile.not-valid-multi-character' | translate}}
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field class="flex-1">
-          <mat-label translate>device-profile.attributes-topic-filter</mat-label>
-          <input matInput required
-                 formControlName="deviceAttributesTopic"
-                 type="text">
-          <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceAttributesTopic').hasError('required')">
-            {{ 'device-profile.attributes-topic-filter-required' | translate}}
-          </mat-error>
-          <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceAttributesTopic').hasError('invalidSingleTopicCharacter')">
-            {{ 'device-profile.not-valid-single-character' | translate}}
-          </mat-error>
-          <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceAttributesTopic').hasError('invalidMultiTopicCharacter')">
-            {{ 'device-profile.not-valid-multi-character' | translate}}
-          </mat-error>
-        </mat-form-field>
-        <mat-form-field class="flex-1">
-          <mat-label translate>device-profile.attributes-subscribe-topic-filter</mat-label>
-          <input matInput required
-                 formControlName="deviceAttributesSubscribeTopic"
-                 type="text">
-          <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceAttributesSubscribeTopic').hasError('required')">
-            {{ 'device-profile.attributes-subscribe-topic-filter-required' | translate}}
-          </mat-error>
-          <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceAttributesSubscribeTopic').hasError('invalidSingleTopicCharacter')">
-            {{ 'device-profile.not-valid-single-character' | translate}}
-          </mat-error>
-          <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceAttributesSubscribeTopic').hasError('invalidMultiTopicCharacter')">
-            {{ 'device-profile.not-valid-multi-character' | translate}}
-          </mat-error>
-        </mat-form-field>
-      </div>
-      <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.hasError('unique')">
-        {{ 'device-profile.mqtt-device-topic-filters-unique' | translate }}
-      </mat-error>
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.attributes-subscribe-topic-filter</mat-label>
+        <input matInput required
+               formControlName="deviceAttributesSubscribeTopic"
+               type="text">
+        <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceAttributesSubscribeTopic').hasError('required')">
+          {{ 'device-profile.attributes-subscribe-topic-filter-required' | translate}}
+        </mat-error>
+        <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceAttributesSubscribeTopic').hasError('invalidSingleTopicCharacter')">
+          {{ 'device-profile.not-valid-single-character' | translate}}
+        </mat-error>
+        <mat-error *ngIf="mqttDeviceProfileTransportConfigurationFormGroup.get('deviceAttributesSubscribeTopic').hasError('invalidMultiTopicCharacter')">
+          {{ 'device-profile.not-valid-multi-character' | translate}}
+        </mat-error>
+      </mat-form-field>
       <div class="tb-hint" innerHTML="{{ 'device-profile.support-level-wildcards' | translate }}"></div>
       <div class="tb-hint" innerHTML="{{ 'device-profile.single-level-wildcards-hint' | translate }}"></div>
       <div class="tb-hint" innerHTML="{{ 'device-profile.multi-level-wildcards-hint' | translate }}"></div>

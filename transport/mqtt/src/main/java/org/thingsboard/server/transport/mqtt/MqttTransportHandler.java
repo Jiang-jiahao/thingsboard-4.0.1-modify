@@ -53,6 +53,7 @@ import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.TransportPayloadType;
+import org.thingsboard.server.common.data.device.profile.DeviceProfileRpcMethod;
 import org.thingsboard.server.common.data.device.profile.MqttTopics;
 import org.thingsboard.server.common.data.exception.ThingsboardErrorCode;
 import org.thingsboard.server.common.data.exception.ThingsboardException;
@@ -61,6 +62,8 @@ import org.thingsboard.server.common.data.id.OtaPackageId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.rpc.RpcStatus;
 import org.thingsboard.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
+import org.thingsboard.server.common.data.transport.http.HttpPullPollDataType;
+import org.thingsboard.server.common.data.transport.mqtt.MqttUplinkTopicMapping;
 import org.thingsboard.server.common.msg.EncryptionUtil;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
 import org.thingsboard.server.common.msg.tools.TbRateLimitsException;
@@ -88,7 +91,7 @@ import org.thingsboard.server.transport.mqtt.session.SparkplugNodeSessionHandler
 import org.thingsboard.server.transport.mqtt.rpc.MqttRpcCatalog;
 import org.thingsboard.server.transport.mqtt.rpc.MqttRpcCommandFactory;
 import org.thingsboard.server.transport.mqtt.rpc.PendingMqttServerRpc;
-import org.thingsboard.server.common.data.device.profile.DeviceProfileRpcMethod;
+import org.thingsboard.server.transport.mqtt.util.MqttUplinkIngestHelper;
 import org.thingsboard.server.transport.mqtt.util.ReturnCodeResolver;
 import org.thingsboard.server.transport.mqtt.util.sparkplug.SparkplugMessageType;
 import org.thingsboard.server.transport.mqtt.util.sparkplug.SparkplugRpcRequestHeader;
@@ -644,8 +647,10 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         try {
             Matcher fwMatcher;
             MqttTransportAdaptor payloadAdaptor = deviceSessionCtx.getPayloadAdaptor();
-            // 根据主题前缀处理不同类型的消息
-            if (deviceSessionCtx.isDeviceAttributesTopic(topicName)) {
+            MqttUplinkTopicMapping uplinkMapping = deviceSessionCtx.findUplinkMapping(topicName);
+            if (uplinkMapping != null) {
+                processUplinkMappingPublish(ctx, mqttMsg, topicName, msgId, uplinkMapping, payloadAdaptor);
+            } else if (deviceSessionCtx.isDeviceAttributesTopic(topicName)) {
                 // 设备属性上传
                 TransportProtos.PostAttributeMsg postAttributeMsg = payloadAdaptor.convertToPostAttributes(deviceSessionCtx, mqttMsg);
                 transportService.process(deviceSessionCtx.getSessionInfo(), postAttributeMsg, getMetadata(deviceSessionCtx, topicName),
@@ -769,6 +774,35 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         }
     }
 
+
+    /**
+     * 按档案上行主题映射落点：遥测（可选 wrap 键）或客户端/共享属性。
+     */
+    private void processUplinkMappingPublish(ChannelHandlerContext ctx, MqttPublishMessage mqttMsg, String topicName, int msgId,
+                                             MqttUplinkTopicMapping mapping, MqttTransportAdaptor payloadAdaptor) throws AdaptorException {
+        HttpPullPollDataType dataType = mapping.getDataType() != null ? mapping.getDataType() : HttpPullPollDataType.TELEMETRY;
+        if (dataType == HttpPullPollDataType.TELEMETRY) {
+            TransportProtos.PostTelemetryMsg postTelemetryMsg;
+            if (mapping.hasTelemetryPayloadKey()) {
+                postTelemetryMsg = MqttUplinkIngestHelper.toWrappedTelemetry(
+                        MqttUplinkIngestHelper.payloadAsUtf8(mqttMsg), mapping.getTelemetryPayloadKey());
+            } else {
+                postTelemetryMsg = payloadAdaptor.convertToPostTelemetry(deviceSessionCtx, mqttMsg);
+            }
+            transportService.process(deviceSessionCtx.getSessionInfo(), postTelemetryMsg, getMetadata(deviceSessionCtx, topicName),
+                    getPubAckCallback(ctx, msgId, postTelemetryMsg));
+            return;
+        }
+        TransportProtos.PostAttributeMsg postAttributeMsg;
+        if (dataType == HttpPullPollDataType.SHARED_ATTRIBUTES) {
+            postAttributeMsg = MqttUplinkIngestHelper.toAttributes(
+                    MqttUplinkIngestHelper.payloadAsUtf8(mqttMsg), true);
+        } else {
+            postAttributeMsg = payloadAdaptor.convertToPostAttributes(deviceSessionCtx, mqttMsg);
+        }
+        transportService.process(deviceSessionCtx.getSessionInfo(), postAttributeMsg, getMetadata(deviceSessionCtx, topicName),
+                getPubAckCallback(ctx, msgId, postAttributeMsg));
+    }
 
     /**
      * 获取元数据 - 如果是MQTT传输类型的设备，在元数据中添加MQTT主题信息

@@ -22,8 +22,10 @@ import {
   defaultRpcResponseSchema,
   defaultTelemetrySchema,
   DeviceTransportType,
+  hydrateMqttUplinkTopicMappings,
   MqttDeviceProfileTransportConfiguration,
   MqttTransportMode,
+  syncMqttPassiveLegacyTopics,
   TransportPayloadType,
   transportPayloadTypeTranslationMap
 } from '@shared/models/device.models';
@@ -76,9 +78,8 @@ export class MqttPassiveDeviceProfileTransportConfigurationComponent implements 
 
   ngOnInit() {
     this.mqttDeviceProfileTransportConfigurationFormGroup = this.fb.group({
-        deviceAttributesTopic: [null, [Validators.required, this.validationMQTTTopic()]],
         deviceAttributesSubscribeTopic: [null, [Validators.required, this.validationMQTTTopic()]],
-        deviceTelemetryTopic: [null, [Validators.required, this.validationMQTTTopic()]],
+        uplinkTopicMappings: [[]],
         sparkplug: [false],
         sparkplugAttributesMetricNames: [null],
         sendAckOnValidationException: [false, Validators.required],
@@ -91,7 +92,7 @@ export class MqttPassiveDeviceProfileTransportConfigurationComponent implements 
           enableCompatibilityWithJsonPayloadFormat: [false, Validators.required],
           useJsonPayloadFormatForDefaultDownlinkTopics: [false, Validators.required]
         })
-      }, {validators: this.uniqueDeviceTopicValidator}
+      }
     );
     this.mqttDeviceProfileTransportConfigurationFormGroup.get('transportPayloadTypeConfiguration.transportPayloadType').valueChanges.pipe(
       takeUntil(this.destroy$)
@@ -150,7 +151,10 @@ export class MqttPassiveDeviceProfileTransportConfigurationComponent implements 
 
   writeValue(value: MqttDeviceProfileTransportConfiguration | null): void {
     if (isDefinedAndNotNull(value)) {
-      this.mqttDeviceProfileTransportConfigurationFormGroup.patchValue(value, {emitEvent: false});
+      this.mqttDeviceProfileTransportConfigurationFormGroup.patchValue({
+        ...value,
+        uplinkTopicMappings: hydrateMqttUplinkTopicMappings(value)
+      }, {emitEvent: false});
       this.updateTransportPayloadBasedControls(value.transportPayloadTypeConfiguration?.transportPayloadType);
       if (!this.disabled) {
         this.mqttDeviceProfileTransportConfigurationFormGroup.get('sparkplug').updateValueAndValidity({onlySelf: true});
@@ -166,6 +170,9 @@ export class MqttPassiveDeviceProfileTransportConfigurationComponent implements 
 
   private updateModel() {
     const configuration = this.mqttDeviceProfileTransportConfigurationFormGroup.getRawValue();
+    const synced = syncMqttPassiveLegacyTopics(configuration.uplinkTopicMappings);
+    configuration.deviceTelemetryTopic = synced.deviceTelemetryTopic;
+    configuration.deviceAttributesTopic = synced.deviceAttributesTopic;
     configuration.type = DeviceTransportType.MQTT;
     configuration.mqttTransportMode = MqttTransportMode.PASSIVE;
     this.propagateChange(configuration);
@@ -229,15 +236,5 @@ export class MqttPassiveDeviceProfileTransportConfigurationComponent implements 
       }
       return null;
     };
-  }
-
-  private uniqueDeviceTopicValidator(control: UntypedFormGroup): { [key: string]: boolean } | null {
-    if (control.getRawValue()) {
-      const formValue = control.getRawValue() as MqttDeviceProfileTransportConfiguration;
-      if (formValue.deviceAttributesTopic === formValue.deviceTelemetryTopic) {
-        return {unique: true};
-      }
-    }
-    return null;
   }
 }

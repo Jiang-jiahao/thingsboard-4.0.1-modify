@@ -9,6 +9,7 @@ import { MqttPullDeviceTransportConfigurationComponent } from './mqtt-pull-devic
 import { MqttDeviceProfileTransportConfigurationComponent } from './mqtt-device-profile-transport-configuration.component';
 import { MqttPassiveDeviceProfileTransportConfigurationComponent } from './mqtt-passive-device-profile-transport-configuration.component';
 import { MqttPullSubscribeRequestsConfigComponent } from './mqtt-pull-subscribe-requests-config.component';
+import { MqttPassiveUplinkTopicsConfigComponent } from './mqtt-passive-uplink-topics-config.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { MqttPullSubscribeRequestsConfigComponent } from './mqtt-pull-subscribe-
     MqttPullDeviceTransportConfigurationComponent,
     MqttDeviceProfileTransportConfigurationComponent,
     MqttPassiveDeviceProfileTransportConfigurationComponent,
-    MqttPullSubscribeRequestsConfigComponent
+    MqttPullSubscribeRequestsConfigComponent,
+    MqttPassiveUplinkTopicsConfigComponent
   ],
   imports: [
     CommonModule,

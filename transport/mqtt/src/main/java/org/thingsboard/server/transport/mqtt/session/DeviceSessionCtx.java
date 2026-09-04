@@ -31,6 +31,7 @@ import org.thingsboard.server.common.data.device.profile.DeviceProfileTransportC
 import org.thingsboard.server.common.data.device.profile.MqttDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.ProtoTransportPayloadConfiguration;
 import org.thingsboard.server.common.data.device.profile.TransportPayloadTypeConfiguration;
+import org.thingsboard.server.common.data.transport.mqtt.MqttUplinkTopicMapping;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.transport.mqtt.MqttTransportContext;
 import org.thingsboard.server.transport.mqtt.TopicType;
@@ -38,6 +39,7 @@ import org.thingsboard.server.transport.mqtt.adaptors.BackwardCompatibilityAdapt
 import org.thingsboard.server.transport.mqtt.adaptors.MqttTransportAdaptor;
 import org.thingsboard.server.transport.mqtt.util.MqttTopicFilter;
 import org.thingsboard.server.transport.mqtt.util.MqttTopicFilterFactory;
+import org.thingsboard.server.transport.mqtt.util.MqttUplinkTopicMatcher;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -118,6 +120,7 @@ public class DeviceSessionCtx extends MqttDeviceAwareSessionContext {
     private volatile MqttTopicFilter telemetryTopicFilter = MqttTopicFilterFactory.getDefaultTelemetryFilter();
     private volatile MqttTopicFilter attributesPublishTopicFilter = MqttTopicFilterFactory.getDefaultAttributesFilter();
     private volatile MqttTopicFilter attributesSubscribeTopicFilter = MqttTopicFilterFactory.getDefaultAttributesFilter();
+    private volatile MqttUplinkTopicMatcher uplinkTopicMatcher = new MqttUplinkTopicMatcher(null);
 
     /**
      * 负载类型：JSON或PROTOBUF
@@ -216,6 +219,13 @@ public class DeviceSessionCtx extends MqttDeviceAwareSessionContext {
     }
 
     /**
+     * 按档案上行主题列表匹配设备 PUBLISH 主题（列表为空时回退为旧遥测/属性主题）。
+     */
+    public MqttUplinkTopicMapping findUplinkMapping(String topicName) {
+        return uplinkTopicMatcher.find(topicName);
+    }
+
+    /**
      * 获取当前负载适配器
      */
     public MqttTransportAdaptor getPayloadAdaptor() {
@@ -309,6 +319,7 @@ public class DeviceSessionCtx extends MqttDeviceAwareSessionContext {
             telemetryTopicFilter = MqttTopicFilterFactory.toFilter(mqttConfig.getDeviceTelemetryTopic());
             attributesPublishTopicFilter = MqttTopicFilterFactory.toFilter(mqttConfig.getDeviceAttributesTopic());
             attributesSubscribeTopicFilter = MqttTopicFilterFactory.toFilter(mqttConfig.getDeviceAttributesSubscribeTopic());
+            uplinkTopicMatcher = new MqttUplinkTopicMatcher(mqttConfig.effectiveUplinkMappings());
             sendAckOnValidationException = mqttConfig.isSendAckOnValidationException();
             // 如果是PROTOBUF负载类型，需要初始化Protocol Buffers相关配置
             if (TransportPayloadType.PROTOBUF.equals(payloadType)) {
@@ -321,6 +332,7 @@ public class DeviceSessionCtx extends MqttDeviceAwareSessionContext {
             // 非MQTT传输类型或配置异常时，使用默认配置
             telemetryTopicFilter = MqttTopicFilterFactory.getDefaultTelemetryFilter();
             attributesPublishTopicFilter = MqttTopicFilterFactory.getDefaultAttributesFilter();
+            uplinkTopicMatcher = new MqttUplinkTopicMatcher(null);
             payloadType = TransportPayloadType.JSON;
             deviceProfileMqttTransportType = false;
             sendAckOnValidationException = false;
