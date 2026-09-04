@@ -1587,6 +1587,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
             // 通知传输服务会话关闭
             transportService.process(deviceSessionCtx.getSessionInfo(), SESSION_EVENT_MSG_CLOSED, null);
             transportService.deregisterSession(deviceSessionCtx.getSessionInfo());
+            context.scheduleDisconnectInactivity(deviceSessionCtx.getSessionInfo());
             if (gatewaySessionHandler != null) {
                 // 网关设备断开
                 gatewaySessionHandler.onDevicesDisconnect();
@@ -1644,6 +1645,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                     ctx.writeAndFlush(createMqttConnAckMsg(MqttConnectReturnCode.CONNECTION_ACCEPTED, connectMessage));
                     deviceSessionCtx.setConnected(true);
                     log.debug("[{}] Client connected!", sessionId);
+                    context.cancelDisconnectInactivity(deviceSessionCtx.getDeviceId());
                     // 连接成功后处理队列中的消息
                     transportService.getCallbackExecutor().execute(() -> processMsgQueue(ctx)); //this callback will execute in Producer worker thread and hard or blocking work have to be submitted to the separate thread.
                 }

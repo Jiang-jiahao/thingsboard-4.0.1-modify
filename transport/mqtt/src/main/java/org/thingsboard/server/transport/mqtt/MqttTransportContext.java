@@ -23,13 +23,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.transport.TransportContext;
 import org.thingsboard.server.common.transport.TransportTenantProfileCache;
+import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.transport.mqtt.adaptors.JsonMqttAdaptor;
 import org.thingsboard.server.transport.mqtt.adaptors.ProtoMqttAdaptor;
 import org.thingsboard.server.transport.mqtt.gateway.GatewayMetricsService;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -84,11 +92,20 @@ public class MqttTransportContext extends TransportContext {
     @Value("${transport.mqtt.disconnect_timeout:1000}")
     private long disconnectTimeout;
 
+    /**
+     * MQTT 服务端断开后延迟多久标为非活跃。0 表示立即上报。
+     * 短延迟用于闪断重连，避免和立刻非活跃来回抖动。
+     */
+    @Getter
+    @Value("${transport.mqtt.disconnect_inactivity_delay_ms:5000}")
+    private long disconnectInactivityDelayMs;
+
     @Getter
     @Value("${transport.mqtt.proxy_enabled:false}")
     private boolean proxyEnabled;
 
     private final AtomicInteger connectionsCounter = new AtomicInteger();
+    private final Map<DeviceId, ScheduledFuture<?>> pendingDisconnectInactivity = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
@@ -114,6 +131,51 @@ public class MqttTransportContext extends TransportContext {
 
     public void onAuthFailure(InetSocketAddress address) {
         rateLimitService.onAuthFailure(address);
+    }
+
+    public void cancelDisconnectInactivity(DeviceId deviceId) {
+        if (deviceId == null) {
+            return;
+        }
+        ScheduledFuture<?> pending = pendingDisconnectInactivity.remove(deviceId);
+        if (pending != null) {
+            pending.cancel(false);
+        }
+    }
+
+    public void scheduleDisconnectInactivity(TransportProtos.SessionInfoProto sessionInfo) {
+        if (sessionInfo == null) {
+            return;
+        }
+        scheduleDisconnectInactivity(
+                new TenantId(new UUID(sessionInfo.getTenantIdMSB(), sessionInfo.getTenantIdLSB())),
+                new DeviceId(new UUID(sessionInfo.getDeviceIdMSB(), sessionInfo.getDeviceIdLSB())));
+    }
+
+    public void scheduleDisconnectInactivity(TenantId tenantId, DeviceId deviceId) {
+        if (tenantId == null || deviceId == null) {
+            return;
+        }
+        if (disconnectInactivityDelayMs <= 0) {
+            cancelDisconnectInactivity(deviceId);
+            transportService.reportDeviceInactivity(tenantId, deviceId);
+            return;
+        }
+        ScheduledFuture<?>[] holder = new ScheduledFuture<?>[1];
+        holder[0] = getScheduler().schedule(() -> {
+            try {
+                if (pendingDisconnectInactivity.remove(deviceId, holder[0])) {
+                    log.debug("[{}] MQTT server session disconnected, reporting device inactivity", deviceId);
+                    transportService.reportDeviceInactivity(tenantId, deviceId);
+                }
+            } catch (Exception e) {
+                log.warn("[{}] Failed to report MQTT server disconnect inactivity", deviceId, e);
+            }
+        }, disconnectInactivityDelayMs, TimeUnit.MILLISECONDS);
+        ScheduledFuture<?> previous = pendingDisconnectInactivity.put(deviceId, holder[0]);
+        if (previous != null) {
+            previous.cancel(false);
+        }
     }
 
 }

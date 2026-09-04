@@ -1079,6 +1079,8 @@ transport:
     timeout: "${MQTT_TIMEOUT:10000}"
     # MQTT 断开连接超时（毫秒），即服务端发送断开消息后等待客户端断开的时间
     disconnect_timeout: "${MQTT_DISCONNECT_TIMEOUT:1000}"
+    # MQTT 服务端设备断开后，延迟多久标记为非活跃（毫秒）。0 表示立即标记。短延迟用于闪断重连，避免活跃状态抖动。
+    disconnect_inactivity_delay_ms: "${MQTT_DISCONNECT_INACTIVITY_DELAY_MS:5000}"
     msg_queue_size_per_device_limit: "${MQTT_MSG_QUEUE_SIZE_PER_DEVICE_LIMIT:100}" # 设备进入已连接状态前队列中等待的消息数；该限制在 TenantProfileLimits 机制之前于底层生效
     # 网关指标周期性上报间隔
     gateway_metrics_report_interval_sec: "${MQTT_GATEWAY_METRICS_REPORT_INTERVAL_SEC:60}"

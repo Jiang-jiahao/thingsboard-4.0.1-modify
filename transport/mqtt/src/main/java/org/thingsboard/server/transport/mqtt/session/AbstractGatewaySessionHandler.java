@@ -448,6 +448,7 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
                                         .setSubscribeToAttributes(SUBSCRIBE_TO_ATTRIBUTE_UPDATES_ASYNC_MSG)
                                         .setSubscribeToRPC(SUBSCRIBE_TO_RPC_ASYNC_MSG)
                                         .build(), null);
+                                context.cancelDisconnectInactivity(deviceSessionCtx.getDeviceId());
                             }
                             // 设置Future结果
                             futureToSet.set(devices.get(deviceName));
@@ -896,6 +897,7 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
         }
         transportService.deregisterSession(deviceSessionCtx.getSessionInfo());
         transportService.process(deviceSessionCtx.getSessionInfo(), SESSION_EVENT_MSG_CLOSED, null);
+        context.scheduleDisconnectInactivity(deviceSessionCtx.getSessionInfo());
         log.debug("[{}][{}][{}] Removed device [{}] from the gateway session", gateway.getTenantId(), gateway.getDeviceId(), sessionId, deviceName);
     }
 
