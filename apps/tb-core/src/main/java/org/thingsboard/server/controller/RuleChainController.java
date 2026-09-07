@@ -1,0 +1,563 @@
+/**
+ * Copyright © 2016-2025 The Thingsboard Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.thingsboard.server.controller;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.thingsboard.common.util.JacksonUtil;
+import org.thingsboard.rule.engine.api.ScriptEngine;
+import org.thingsboard.script.api.js.JsInvokeService;
+import org.thingsboard.script.api.tbel.TbelInvokeService;
+import org.thingsboard.server.actors.ActorSystemContext;
+import org.thingsboard.server.actors.tenant.DebugTbRateLimits;
+import org.thingsboard.server.common.data.EventInfo;
+import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.exception.ThingsboardException;
+import org.thingsboard.server.common.data.id.RuleChainId;
+import org.thingsboard.server.common.data.id.RuleNodeId;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.page.PageData;
+import org.thingsboard.server.common.data.page.PageLink;
+import org.thingsboard.server.common.data.rule.DefaultRuleChainCreateRequest;
+import org.thingsboard.server.common.data.rule.RuleChain;
+import org.thingsboard.server.common.data.rule.RuleChainData;
+import org.thingsboard.server.common.data.rule.RuleChainImportResult;
+import org.thingsboard.server.common.data.rule.RuleChainMetaData;
+import org.thingsboard.server.common.data.rule.RuleChainOutputLabelsUsage;
+import org.thingsboard.server.common.data.rule.RuleChainType;
+import org.thingsboard.server.common.data.script.ScriptLanguage;
+import org.thingsboard.server.common.msg.TbMsg;
+import org.thingsboard.server.common.msg.TbMsgDataType;
+import org.thingsboard.server.common.msg.TbMsgMetaData;
+import org.thingsboard.server.config.annotations.ApiOperation;
+import org.thingsboard.server.dao.event.EventService;
+import org.thingsboard.server.service.rule.TbRuleChainService;
+import org.thingsboard.server.service.script.RuleNodeJsScriptEngine;
+import org.thingsboard.server.service.script.RuleNodeTbelScriptEngine;
+import org.thingsboard.server.service.security.permission.Operation;
+import org.thingsboard.server.service.security.permission.Resource;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+
+import static org.thingsboard.server.controller.ControllerConstants.MARKDOWN_CODE_BLOCK_END;
+import static org.thingsboard.server.controller.ControllerConstants.MARKDOWN_CODE_BLOCK_START;
+import static org.thingsboard.server.controller.ControllerConstants.PAGE_DATA_PARAMETERS;
+import static org.thingsboard.server.controller.ControllerConstants.PAGE_NUMBER_DESCRIPTION;
+import static org.thingsboard.server.controller.ControllerConstants.PAGE_SIZE_DESCRIPTION;
+import static org.thingsboard.server.controller.ControllerConstants.RULE_CHAIN_ID_PARAM_DESCRIPTION;
+import static org.thingsboard.server.controller.ControllerConstants.RULE_CHAIN_TEXT_SEARCH_DESCRIPTION;
+import static org.thingsboard.server.controller.ControllerConstants.RULE_CHAIN_TYPE_DESCRIPTION;
+import static org.thingsboard.server.controller.ControllerConstants.RULE_NODE_ID_PARAM_DESCRIPTION;
+import static org.thingsboard.server.controller.ControllerConstants.SORT_ORDER_DESCRIPTION;
+import static org.thingsboard.server.controller.ControllerConstants.SORT_PROPERTY_DESCRIPTION;
+import static org.thingsboard.server.controller.ControllerConstants.TENANT_AUTHORITY_PARAGRAPH;
+import static org.thingsboard.server.controller.ControllerConstants.UUID_WIKI_LINK;
+
+/**
+ * 规则链 REST 入口。
+ * <p>
+ * <b>职责：</b>管理租户规则链及其元数据（节点与连线）：CRUD、设根、脚本试跑、导入导出。
+ * 规则链对象本身较轻，节点拓扑在 metadata 中。
+ * <p>
+ * <b>URL：</b>{@code /api}（{@code /ruleChain*}、{@code /ruleChains*}、{@code /ruleNode/*}）
+ * <p>
+ * <b>权限：</b>全部接口 {@code TENANT_ADMIN}。写/删会校验资源 {@code RULE_CHAIN}。
+ * <p>
+ * <b>下游：</b>{@link TbRuleChainService}、{@code ruleChainService}（{@link BaseController}）、
+ * {@link EventService}、{@link JsInvokeService}、{@link TbelInvokeService}
+ */
+@Slf4j
+@RestController
+@RequestMapping("/api")
+public class RuleChainController extends BaseController {
+
+    public static final String RULE_CHAIN_ID = "ruleChainId";
+    public static final String RULE_NODE_ID = "ruleNodeId";
+
+    private static final int DEFAULT_PAGE_SIZE = 1000;
+
+    public static final int TIMEOUT = 20;
+
+    private static final String RULE_CHAIN_DESCRIPTION = "The rule chain object is lightweight and contains general information about the rule chain. " +
+            "List of rule nodes and their connection is stored in a separate 'metadata' object.";
+    private static final String RULE_CHAIN_METADATA_DESCRIPTION = "The metadata object contains information about the rule nodes and their connections.";
+    private static final String TEST_SCRIPT_FUNCTION = "Execute the Script function and return the result. The format of request: \n\n"
+            + MARKDOWN_CODE_BLOCK_START
+            + "{\n" +
+            "  \"script\": \"Your Function as String\",\n" +
+            "  \"scriptType\": \"One of: update, generate, filter, switch, json, string\",\n" +
+            "  \"argNames\": [\"msg\", \"metadata\", \"type\"],\n" +
+            "  \"msg\": \"{\\\"temperature\\\": 42}\", \n" +
+            "  \"metadata\": {\n" +
+            "    \"deviceName\": \"Device A\",\n" +
+            "    \"deviceType\": \"Thermometer\"\n" +
+            "  },\n" +
+            "  \"msgType\": \"POST_TELEMETRY_REQUEST\"\n" +
+            "}"
+            + MARKDOWN_CODE_BLOCK_END
+            + "\n\n Expected result JSON contains \"output\" and \"error\".";
+
+    @Autowired
+    protected TbRuleChainService tbRuleChainService;
+
+    @Autowired
+    private EventService eventService;
+
+    @Autowired
+    private JsInvokeService jsInvokeService;
+
+    @Autowired(required = false)
+    private TbelInvokeService tbelInvokeService;
+
+    @Autowired(required = false)
+    private ActorSystemContext actorContext;
+
+    @Value("${actors.rule.chain.debug_mode_rate_limits_per_tenant.enabled}")
+    private boolean debugPerTenantEnabled;
+
+    @Value("${tbel.enabled:true}")
+    private boolean tbelEnabled;
+
+    /**
+     * 按 id 查询规则链基本信息（不含节点拓扑）。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 READ。
+     */
+    @ApiOperation(value = "Get Rule Chain (getRuleChainById)",
+            notes = "Fetch the Rule Chain object based on the provided Rule Chain Id. " + RULE_CHAIN_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChain/{ruleChainId}", method = RequestMethod.GET)
+    @ResponseBody
+    public RuleChain getRuleChainById(
+            @Parameter(description = RULE_CHAIN_ID_PARAM_DESCRIPTION)
+            @PathVariable(RULE_CHAIN_ID) String strRuleChainId) throws ThingsboardException {
+        checkParameter(RULE_CHAIN_ID, strRuleChainId);
+        RuleChainId ruleChainId = new RuleChainId(toUUID(strRuleChainId));
+        return checkRuleChain(ruleChainId, Operation.READ);
+    }
+
+    /**
+     * 查询该规则链内「output」节点的去重标签集合。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 READ。下游 {@link TbRuleChainService#getRuleChainOutputLabels}。
+     */
+    @ApiOperation(value = "Get Rule Chain output labels (getRuleChainOutputLabels)",
+            notes = "Fetch the unique labels for the \"output\" Rule Nodes that belong to the Rule Chain based on the provided Rule Chain Id. "
+                    + RULE_CHAIN_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChain/{ruleChainId}/output/labels", method = RequestMethod.GET)
+    @ResponseBody
+    public Set<String> getRuleChainOutputLabels(
+            @Parameter(description = RULE_CHAIN_ID_PARAM_DESCRIPTION)
+            @PathVariable(RULE_CHAIN_ID) String strRuleChainId) throws ThingsboardException {
+        checkParameter(RULE_CHAIN_ID, strRuleChainId);
+        RuleChainId ruleChainId = new RuleChainId(toUUID(strRuleChainId));
+        checkRuleChain(ruleChainId, Operation.READ);
+        return tbRuleChainService.getRuleChainOutputLabels(getTenantId(), ruleChainId);
+    }
+
+    /**
+     * 查询哪些规则链、以何种关系类型消费本链的 output 标签。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 READ。下游 {@link TbRuleChainService#getOutputLabelUsage}。
+     */
+    @ApiOperation(value = "Get output labels usage (getRuleChainOutputLabelsUsage)",
+            notes = "Fetch the list of rule chains and the relation types (labels) they use to process output of the current rule chain based on the provided Rule Chain Id. "
+                    + RULE_CHAIN_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChain/{ruleChainId}/output/labels/usage", method = RequestMethod.GET)
+    @ResponseBody
+    public List<RuleChainOutputLabelsUsage> getRuleChainOutputLabelsUsage(
+            @Parameter(description = RULE_CHAIN_ID_PARAM_DESCRIPTION)
+            @PathVariable(RULE_CHAIN_ID) String strRuleChainId) throws ThingsboardException {
+        checkParameter(RULE_CHAIN_ID, strRuleChainId);
+        RuleChainId ruleChainId = new RuleChainId(toUUID(strRuleChainId));
+        checkRuleChain(ruleChainId, Operation.READ);
+        return tbRuleChainService.getOutputLabelUsage(getCurrentUser().getTenantId(), ruleChainId);
+    }
+
+    /**
+     * 按 id 查询规则链元数据（节点与连线）。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 READ。下游 {@code ruleChainService}。
+     */
+    @ApiOperation(value = "Get Rule Chain (getRuleChainById)",
+            notes = "Fetch the Rule Chain Metadata object based on the provided Rule Chain Id. " + RULE_CHAIN_METADATA_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChain/{ruleChainId}/metadata", method = RequestMethod.GET)
+    @ResponseBody
+    public RuleChainMetaData getRuleChainMetaData(
+            @Parameter(description = RULE_CHAIN_ID_PARAM_DESCRIPTION)
+            @PathVariable(RULE_CHAIN_ID) String strRuleChainId) throws ThingsboardException {
+        checkParameter(RULE_CHAIN_ID, strRuleChainId);
+        RuleChainId ruleChainId = new RuleChainId(toUUID(strRuleChainId));
+        checkRuleChain(ruleChainId, Operation.READ);
+        return ruleChainService.loadRuleChainMetaData(getTenantId(), ruleChainId);
+    }
+
+    /**
+     * 创建或更新规则链基本信息。新建时平台生成 id。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；资源 {@code RULE_CHAIN}。下游 {@link TbRuleChainService#save}。
+     */
+    @ApiOperation(value = "Create Or Update Rule Chain (saveRuleChain)",
+            notes = "Create or update the Rule Chain. When creating Rule Chain, platform generates Rule Chain Id as " + UUID_WIKI_LINK +
+                    "The newly created Rule Chain Id will be present in the response. " +
+                    "Specify existing Rule Chain id to update the rule chain. " +
+                    "Referencing non-existing rule chain Id will cause 'Not Found' error." +
+                    "\n\n" + RULE_CHAIN_DESCRIPTION +
+                    "Remove 'id', 'tenantId' from the request body example (below) to create new Rule Chain entity." +
+                    TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChain", method = RequestMethod.POST)
+    @ResponseBody
+    public RuleChain saveRuleChain(
+            @Parameter(description = "A JSON value representing the rule chain.")
+            @RequestBody RuleChain ruleChain) throws Exception {
+        ruleChain.setTenantId(getCurrentUser().getTenantId());
+        checkEntity(ruleChain.getId(), ruleChain, Resource.RULE_CHAIN);
+        return tbRuleChainService.save(ruleChain, getCurrentUser());
+    }
+
+    /**
+     * 按请求中的名称，用创建根规则链的同一模板生成一条新规则链。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@link TbRuleChainService#saveDefaultByName}。
+     */
+    @ApiOperation(value = "Create Default Rule Chain",
+            notes = "Create rule chain from template, based on the specified name in the request. " +
+                    "Creates the rule chain based on the template that is used to create root rule chain. " + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChain/device/default", method = RequestMethod.POST)
+    @ResponseBody
+    public RuleChain saveRuleChain(
+            @Parameter(description = "A JSON value representing the request.")
+            @RequestBody DefaultRuleChainCreateRequest request) throws Exception {
+        checkNotNull(request);
+        checkParameter(request.getName(), "name");
+        return tbRuleChainService.saveDefaultByName(getTenantId(), request, getCurrentUser());
+    }
+
+    /**
+     * 将指定规则链设为租户根规则链，并更新原根链。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 WRITE。下游 {@link TbRuleChainService#setRootRuleChain}。
+     */
+    @ApiOperation(value = "Set Root Rule Chain (setRootRuleChain)",
+            notes = "Makes the rule chain to be root rule chain. Updates previous root rule chain as well. " + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChain/{ruleChainId}/root", method = RequestMethod.POST)
+    @ResponseBody
+    public RuleChain setRootRuleChain(
+            @Parameter(description = RULE_CHAIN_ID_PARAM_DESCRIPTION)
+            @PathVariable(RULE_CHAIN_ID) String strRuleChainId) throws ThingsboardException {
+        checkParameter(RULE_CHAIN_ID, strRuleChainId);
+        RuleChainId ruleChainId = new RuleChainId(toUUID(strRuleChainId));
+        RuleChain ruleChain = checkRuleChain(ruleChainId, Operation.WRITE);
+        return tbRuleChainService.setRootRuleChain(getTenantId(), ruleChain, getCurrentUser());
+    }
+
+    /**
+     * 保存规则链元数据（节点与连线）。可选同步更新关联规则节点。
+     * 若开启了租户级调试限流，保存前会清掉该租户的调试计数。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 WRITE。下游 {@link TbRuleChainService#saveRuleChainMetaData}。
+     */
+    @ApiOperation(value = "Update Rule Chain Metadata",
+            notes = "Updates the rule chain metadata. " + RULE_CHAIN_METADATA_DESCRIPTION + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChain/metadata", method = RequestMethod.POST)
+    @ResponseBody
+    public RuleChainMetaData saveRuleChainMetaData(
+            @Parameter(description = "A JSON value representing the rule chain metadata.")
+            @RequestBody RuleChainMetaData ruleChainMetaData,
+            @Parameter(description = "Update related rule nodes.")
+            @RequestParam(value = "updateRelated", required = false, defaultValue = "true") boolean updateRelated
+    ) throws Exception {
+        TenantId tenantId = getTenantId();
+        if (debugPerTenantEnabled) {
+            ConcurrentMap<TenantId, DebugTbRateLimits> debugPerTenantLimits = actorContext.getDebugPerTenantLimits();
+            DebugTbRateLimits debugTbRateLimits = debugPerTenantLimits.getOrDefault(tenantId, null);
+            if (debugTbRateLimits != null) {
+                debugPerTenantLimits.remove(tenantId, debugTbRateLimits);
+            }
+        }
+        RuleChain ruleChain = checkRuleChain(ruleChainMetaData.getRuleChainId(), Operation.WRITE);
+
+        return tbRuleChainService.saveRuleChainMetaData(tenantId, ruleChain, ruleChainMetaData, updateRelated, getCurrentUser());
+    }
+
+    /**
+     * 分页查询租户规则链，可按类型 CORE 过滤。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@code ruleChainService}。
+     */
+    @ApiOperation(value = "Get Rule Chains (getRuleChains)",
+            notes = "Returns a page of Rule Chains owned by tenant. " + RULE_CHAIN_DESCRIPTION + PAGE_DATA_PARAMETERS + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChains", params = {"pageSize", "page"}, method = RequestMethod.GET)
+    @ResponseBody
+    public PageData<RuleChain> getRuleChains(
+            @Parameter(description = PAGE_SIZE_DESCRIPTION, required = true)
+            @RequestParam int pageSize,
+            @Parameter(description = PAGE_NUMBER_DESCRIPTION, required = true)
+            @RequestParam int page,
+            @Parameter(description = RULE_CHAIN_TYPE_DESCRIPTION, schema = @Schema(allowableValues = {"CORE"}))
+            @RequestParam(value = "type", required = false) String typeStr,
+            @Parameter(description = RULE_CHAIN_TEXT_SEARCH_DESCRIPTION)
+            @RequestParam(required = false) String textSearch,
+            @Parameter(description = SORT_PROPERTY_DESCRIPTION, schema = @Schema(allowableValues = {"createdTime", "name", "root"}))
+            @RequestParam(required = false) String sortProperty,
+            @Parameter(description = SORT_ORDER_DESCRIPTION, schema = @Schema(allowableValues = {"ASC", "DESC"}))
+            @RequestParam(required = false) String sortOrder) throws ThingsboardException {
+        TenantId tenantId = getCurrentUser().getTenantId();
+        PageLink pageLink = createPageLink(pageSize, page, textSearch, sortProperty, sortOrder);
+        RuleChainType type = RuleChainType.CORE;
+        if (typeStr != null && typeStr.trim().length() > 0) {
+            type = RuleChainType.valueOf(typeStr);
+        }
+        return checkNotNull(ruleChainService.findTenantRuleChainsByType(tenantId, type, pageLink));
+    }
+
+    /**
+     * 删除规则链。id 不存在或仍被设备配置文件引用会报错。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；实体 DELETE。下游 {@link TbRuleChainService#delete}。
+     */
+    @ApiOperation(value = "Delete rule chain (deleteRuleChain)",
+            notes = "Deletes the rule chain. Referencing non-existing rule chain Id will cause an error. " +
+                    "Referencing rule chain that is used in the device profiles will cause an error." + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChain/{ruleChainId}", method = RequestMethod.DELETE)
+    @ResponseStatus(value = HttpStatus.OK)
+    public void deleteRuleChain(
+            @Parameter(description = RULE_CHAIN_ID_PARAM_DESCRIPTION)
+            @PathVariable(RULE_CHAIN_ID) String strRuleChainId) throws ThingsboardException {
+        checkParameter(RULE_CHAIN_ID, strRuleChainId);
+        RuleChainId ruleChainId = new RuleChainId(toUUID(strRuleChainId));
+        RuleChain ruleChain = checkRuleChain(ruleChainId, Operation.DELETE);
+        tbRuleChainService.delete(ruleChain, getCurrentUser());
+    }
+
+    /**
+     * 取指定规则节点最近一次调试输入消息，用于脚本试跑预填。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}；节点 READ。下游 {@link EventService#findLatestDebugRuleNodeInEvent}。
+     */
+    @ApiOperation(value = "Get latest input message (getLatestRuleNodeDebugInput)",
+            notes = "Gets the input message from the debug events for specified Rule Chain Id. " +
+                    "Referencing non-existing rule chain Id will cause an error. " + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleNode/{ruleNodeId}/debugIn", method = RequestMethod.GET)
+    @ResponseBody
+    public JsonNode getLatestRuleNodeDebugInput(
+            @Parameter(description = RULE_NODE_ID_PARAM_DESCRIPTION)
+            @PathVariable(RULE_NODE_ID) String strRuleNodeId) throws ThingsboardException {
+        checkParameter(RULE_NODE_ID, strRuleNodeId);
+        RuleNodeId ruleNodeId = new RuleNodeId(toUUID(strRuleNodeId));
+        checkRuleNode(ruleNodeId, Operation.READ);
+        TenantId tenantId = getCurrentUser().getTenantId();
+        return Optional.ofNullable(eventService.findLatestDebugRuleNodeInEvent(tenantId, ruleNodeId))
+                .map(EventInfo::getBody).orElse(null);
+    }
+
+    /**
+     * 返回当前节点是否启用 TBEL 脚本引擎。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。读配置 {@code tbel.enabled}。
+     */
+    @ApiOperation(value = "Is TBEL script executor enabled",
+            notes = "Returns 'True' if the TBEL script execution is enabled" + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChain/tbelEnabled", method = RequestMethod.GET)
+    @ResponseBody
+    public Boolean isTbelEnabled() {
+        return tbelEnabled;
+    }
+
+    /**
+     * 试跑规则节点脚本（JS 或 TBEL），类型含 update/generate/filter/switch/json/string。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@link JsInvokeService} 或 {@link TbelInvokeService}。
+     */
+    @ApiOperation(value = "Test Script function",
+            notes = TEST_SCRIPT_FUNCTION + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChain/testScript", method = RequestMethod.POST)
+    @ResponseBody
+    public JsonNode testScript(
+            @Parameter(description = "Script language: JS or TBEL")
+            @RequestParam(required = false) ScriptLanguage scriptLang,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Test JS request. See API call description above.")
+            @RequestBody JsonNode inputParams) throws ThingsboardException, JsonProcessingException {
+        String script = inputParams.get("script").asText();
+        String scriptType = inputParams.get("scriptType").asText();
+        JsonNode argNamesJson = inputParams.get("argNames");
+        String[] argNames = JacksonUtil.treeToValue(argNamesJson, String[].class);
+
+        String data = inputParams.get("msg").asText();
+        JsonNode metadataJson = inputParams.get("metadata");
+        Map<String, String> metadata = JacksonUtil.convertValue(metadataJson, new TypeReference<Map<String, String>>() {
+        });
+        String msgType = inputParams.get("msgType").asText();
+        String output = "";
+        String errorText = "";
+        ScriptEngine engine = null;
+        try {
+            if (scriptLang == null) {
+                scriptLang = ScriptLanguage.JS;
+            }
+            if (ScriptLanguage.JS.equals(scriptLang)) {
+                engine = new RuleNodeJsScriptEngine(getTenantId(), jsInvokeService, script, argNames);
+            } else {
+                if (tbelInvokeService == null) {
+                    throw new IllegalArgumentException("TBEL script engine is disabled!");
+                }
+                engine = new RuleNodeTbelScriptEngine(getTenantId(), tbelInvokeService, script, argNames);
+            }
+            TbMsg inMsg = TbMsg.newMsg()
+                    .type(msgType)
+                    .copyMetaData(new TbMsgMetaData(metadata))
+                    .dataType(TbMsgDataType.JSON)
+                    .data(data)
+                    .build();
+            switch (scriptType) {
+                case "update":
+                    output = msgToOutput(engine.executeUpdateAsync(inMsg).get(TIMEOUT, TimeUnit.SECONDS));
+                    break;
+                case "generate":
+                    output = msgToOutput(engine.executeGenerateAsync(inMsg).get(TIMEOUT, TimeUnit.SECONDS));
+                    break;
+                case "filter":
+                    boolean result = engine.executeFilterAsync(inMsg).get(TIMEOUT, TimeUnit.SECONDS);
+                    output = Boolean.toString(result);
+                    break;
+                case "switch":
+                    Set<String> states = engine.executeSwitchAsync(inMsg).get(TIMEOUT, TimeUnit.SECONDS);
+                    output = JacksonUtil.toString(states);
+                    break;
+                case "json":
+                    JsonNode json = engine.executeJsonAsync(inMsg).get(TIMEOUT, TimeUnit.SECONDS);
+                    output = JacksonUtil.toString(json);
+                    break;
+                case "string":
+                    output = engine.executeToStringAsync(inMsg).get(TIMEOUT, TimeUnit.SECONDS);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported script type: " + scriptType);
+            }
+        } catch (Exception e) {
+            log.error("Error evaluating JS function", e);
+            errorText = e.getMessage();
+        } finally {
+            if (engine != null) {
+                engine.destroy();
+            }
+        }
+        ObjectNode result = JacksonUtil.newObjectNode();
+        result.put("output", output);
+        result.put("error", errorText);
+        return result;
+    }
+
+    /**
+     * 导出当前租户规则链为一份 JSON，数量由 {@code limit} 限制。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@code ruleChainService}。
+     */
+    @ApiOperation(value = "Export Rule Chains", notes = "Exports all tenant rule chains as one JSON." + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChains/export", params = {"limit"}, method = RequestMethod.GET)
+    @ResponseBody
+    public RuleChainData exportRuleChains(
+            @Parameter(description = "A limit of rule chains to export.", required = true)
+            @RequestParam("limit") int limit) throws ThingsboardException {
+        TenantId tenantId = getCurrentUser().getTenantId();
+        PageLink pageLink = new PageLink(limit);
+        return checkNotNull(ruleChainService.exportTenantRuleChains(tenantId, pageLink));
+    }
+
+    /**
+     * 从 JSON 导入租户规则链；{@code overwrite} 为 true 时覆盖同名链。
+     * <p>
+     * 权限：{@code TENANT_ADMIN}。下游 {@code ruleChainService}。
+     */
+    @ApiOperation(value = "Import Rule Chains", notes = "Imports all tenant rule chains as one JSON." + TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAuthority('TENANT_ADMIN')")
+    @RequestMapping(value = "/ruleChains/import", method = RequestMethod.POST)
+    @ResponseBody
+    public List<RuleChainImportResult> importRuleChains(
+            @Parameter(description = "A JSON value representing the rule chains.")
+            @RequestBody RuleChainData ruleChainData,
+            @Parameter(description = "Enables overwrite for existing rule chains with the same name.")
+            @RequestParam(required = false, defaultValue = "false") boolean overwrite) throws ThingsboardException {
+        TenantId tenantId = getCurrentUser().getTenantId();
+        return ruleChainService.importTenantRuleChains(tenantId, ruleChainData, overwrite, tbRuleChainService::updateRuleNodeConfiguration);
+    }
+
+    private String msgToOutput(TbMsg msg) throws Exception {
+        JsonNode resultNode = convertMsgToOut(msg);
+        return JacksonUtil.toString(resultNode);
+    }
+
+    private String msgToOutput(List<TbMsg> msgs) throws Exception {
+        JsonNode resultNode;
+        if (msgs.size() > 1) {
+            resultNode = JacksonUtil.newArrayNode();
+            for (TbMsg msg : msgs) {
+                JsonNode convertedData = convertMsgToOut(msg);
+                ((ArrayNode) resultNode).add(convertedData);
+            }
+        } else {
+            resultNode = convertMsgToOut(msgs.get(0));
+        }
+        return JacksonUtil.toString(resultNode);
+    }
+
+    private JsonNode convertMsgToOut(TbMsg msg) throws Exception {
+        ObjectNode msgData = JacksonUtil.newObjectNode();
+        if (!StringUtils.isEmpty(msg.getData())) {
+            msgData.set("msg", JacksonUtil.toJsonNode(msg.getData()));
+        }
+        Map<String, String> metadata = msg.getMetaData().getData();
+        msgData.set("metadata", JacksonUtil.valueToTree(metadata));
+        msgData.put("msgType", msg.getType());
+        return msgData;
+    }
+}

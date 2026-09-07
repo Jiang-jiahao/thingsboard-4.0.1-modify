@@ -1,0 +1,512 @@
+/**
+ * Copyright © 2016-2025 The Thingsboard Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ */
+package org.thingsboard.server.transport.http.pull;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
+import org.thingsboard.server.common.data.Device;
+import org.thingsboard.server.common.data.DeviceProfile;
+import org.thingsboard.server.common.data.DeviceTransportType;
+import org.thingsboard.server.common.data.device.data.HttpPullDeviceTransportConfiguration;
+import org.thingsboard.server.common.data.device.profile.HttpPullDeviceProfileTransportConfiguration;
+import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.plugin.ComponentLifecycleEvent;
+import org.thingsboard.server.common.data.security.DeviceCredentials;
+import org.thingsboard.server.common.data.security.DeviceCredentialsType;
+import org.thingsboard.server.common.data.transport.http.HttpPullDeviceIdMatchStrategy;
+import org.thingsboard.server.common.data.transport.http.HttpPullDeviceRoutingConfiguration;
+import org.thingsboard.server.common.data.transport.http.HttpPullPollRequest;
+import org.thingsboard.server.common.data.transport.http.HttpPullRoutingMode;
+import org.thingsboard.server.common.transport.DeviceDeletedEvent;
+import org.thingsboard.server.common.transport.DeviceProfileUpdatedEvent;
+import org.thingsboard.server.common.transport.DeviceUpdatedEvent;
+import org.thingsboard.server.common.transport.TransportContext;
+import org.thingsboard.server.common.transport.TransportDeviceProfileCache;
+import org.thingsboard.server.common.transport.TransportService;
+import org.thingsboard.server.common.transport.TransportServiceCallback;
+import org.thingsboard.server.common.transport.SessionMsgListener;
+import org.thingsboard.server.common.transport.service.DefaultTransportService;
+import org.thingsboard.server.common.transport.auth.SessionInfoCreator;
+import org.thingsboard.server.common.transport.auth.ValidateDeviceCredentialsResponse;
+import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.gen.transport.TransportProtos;
+import org.thingsboard.server.gen.transport.TransportProtos.SessionInfoProto;
+import org.thingsboard.common.util.AfterStartUp;
+import org.thingsboard.server.transport.http.HttpTransportBalancingService;
+import org.thingsboard.server.transport.http.event.HttpTransportListChangedEvent;
+import org.thingsboard.server.transport.http.pull.service.HttpPullProtoEntityService;
+import org.thingsboard.server.transport.http.pull.session.HttpPullCollectorSessionContext;
+import org.thingsboard.server.transport.http.pull.session.HttpPullRpcSessionListener;
+import org.thingsboard.server.transport.http.pull.session.HttpPullTargetSession;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Component
+@ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.http.enabled:true}'=='true'")
+@Slf4j
+@RequiredArgsConstructor
+public class HttpPullTransportContext extends TransportContext {
+
+    @Getter
+    private final HttpPullTransportService httpPullTransportService;
+    private final HttpPullRpcService httpPullRpcService;
+    private final TransportDeviceProfileCache deviceProfileCache;
+    private final TransportService transportService;
+    private final HttpPullProtoEntityService protoEntityService;
+    private final HttpTransportBalancingService balancingService;
+
+    private final Map<DeviceId, HttpPullCollectorSessionContext> collectorSessions = new ConcurrentHashMap<>();
+    private final Set<DeviceId> allHttpPullDeviceIds = ConcurrentHashMap.newKeySet();
+    private final Map<DeviceProfileId, Integer> collectorCountByProfile = new ConcurrentHashMap<>();
+    /** 已向 Core 上报 OPEN/RPC 订阅的会话；仅在实际连通并同步数据后才加入 */
+    private final Set<UUID> activatedTransportSessions = ConcurrentHashMap.newKeySet();
+
+    @AfterStartUp(order = AfterStartUp.AFTER_TRANSPORT_SERVICE)
+    public void fetchCollectorsAndEstablishSessions() {
+        if (!isHttpPullEnabled()) {
+            return;
+        }
+        log.info("Initializing HTTP pull collector sessions");
+        int batchIndex = 0;
+        int batchSize = 512;
+        boolean next;
+        int loaded = 0;
+        int managed = 0;
+        do {
+            TransportProtos.GetHttpPullDevicesResponseMsg response = protoEntityService.getHttpPullDevicesIds(batchIndex, batchSize);
+            for (String id : response.getIdsList()) {
+                DeviceId deviceId = new DeviceId(UUID.fromString(id));
+                allHttpPullDeviceIds.add(deviceId);
+                loaded++;
+                if (!balancingService.isManagedByCurrentTransport(deviceId.getId())) {
+                    continue;
+                }
+                managed++;
+                Device device = protoEntityService.getDeviceById(deviceId);
+                getExecutor().execute(() -> tryEstablishCollector(device));
+            }
+            next = response.getHasNextPage();
+            batchIndex++;
+        } while (next);
+        log.info("HTTP pull devices loaded: {}, managed by this node: {}", loaded, managed);
+    }
+
+    public boolean isManagedByCurrentTransport(UUID entityId) {
+        return balancingService.isManagedByCurrentTransport(entityId);
+    }
+
+    private boolean isHttpPullEnabled() {
+        return true;
+    }
+
+    private void tryEstablishCollector(Device device) {
+        if (device == null) {
+            return;
+        }
+        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
+        if (profile == null || profile.getTransportType() != DeviceTransportType.HTTP_PULL) {
+            allHttpPullDeviceIds.remove(device.getId());
+            return;
+        }
+        allHttpPullDeviceIds.add(device.getId());
+        if (!balancingService.isManagedByCurrentTransport(device.getId().getId())) {
+            log.debug("[{}] HTTP pull collector is not managed by current HTTP transport node", device.getId());
+            return;
+        }
+        if (!(profile.getProfileData().getTransportConfiguration() instanceof HttpPullDeviceProfileTransportConfiguration profileCfg)) {
+            return;
+        }
+        HttpPullDeviceTransportConfiguration deviceCfg = device.getDeviceData() != null
+                && device.getDeviceData().getTransportConfiguration() instanceof HttpPullDeviceTransportConfiguration h
+                ? h : new HttpPullDeviceTransportConfiguration();
+        if (!deviceCfg.isCollector()) {
+            return;
+        }
+        establishCollectorSession(device, profile, profileCfg, deviceCfg);
+    }
+
+    private void establishCollectorSession(Device device, DeviceProfile profile,
+                                           HttpPullDeviceProfileTransportConfiguration profileCfg,
+                                           HttpPullDeviceTransportConfiguration deviceCfg) {
+        DeviceCredentials credentials = protoEntityService.getDeviceCredentialsByDeviceId(device.getId());
+        if (credentials.getCredentialsType() != DeviceCredentialsType.ACCESS_TOKEN) {
+            log.warn("[{}] HTTP pull collector requires ACCESS_TOKEN credentials", device.getId());
+            return;
+        }
+        HttpPullCollectorSessionContext ctx = HttpPullCollectorSessionContext.builder()
+                .tenantId(profile.getTenantId())
+                .device(device)
+                .deviceProfile(profile)
+                .token(credentials.getCredentialsId())
+                .profileTransportConfiguration(profileCfg)
+                .deviceTransportConfiguration(deviceCfg)
+                .transportContext(this)
+                .build();
+        registerCollectorAuth(ctx, msg -> {
+            if (msg == null || !msg.hasDeviceInfo()) {
+                return;
+            }
+            SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, UUID.randomUUID());
+            registerHttpPullTransportSession(sessionInfo, createRpcSessionListener(ctx, null, sessionInfo));
+            ctx.setSessionInfo(sessionInfo);
+            if (!balancingService.isManagedByCurrentTransport(device.getId().getId())) {
+                transportService.deregisterSession(sessionInfo);
+                return;
+            }
+            collectorSessions.put(device.getId(), ctx);
+            preloadActiveTargets(ctx);
+            httpPullTransportService.createQueryingTasks(ctx);
+            log.info("Established HTTP pull collector session for {} (inactive until first successful poll)", device.getId());
+        });
+    }
+
+    private void preloadActiveTargets(HttpPullCollectorSessionContext collectorCtx) {
+        HttpPullDeviceProfileTransportConfiguration profileCfg = collectorCtx.getProfileTransportConfiguration();
+        if (!profileCfg.needsMultiDeviceTargets()) {
+            return;
+        }
+        java.util.Set<java.util.UUID> loadedProfileIds = new java.util.HashSet<>();
+        for (HttpPullPollRequest pollRequest : profileCfg.effectivePollRequests()) {
+            HttpPullDeviceRoutingConfiguration routing = profileCfg.resolveRouting(pollRequest);
+            if (routing == null || (routing.getRoutingMode() != HttpPullRoutingMode.MULTI_DEVICE
+                    && routing.getRoutingMode() != HttpPullRoutingMode.AUTO)) {
+                continue;
+            }
+            DeviceProfileId targetProfileId = routing.getTargetDeviceProfileId() != null
+                    ? new DeviceProfileId(routing.getTargetDeviceProfileId())
+                    : collectorCtx.getDeviceProfile().getId();
+            if (!loadedProfileIds.add(targetProfileId.getId())) {
+                continue;
+            }
+            HttpPullDeviceIdMatchStrategy strategy = routing.getDeviceIdMatchStrategy() != null
+                    ? routing.getDeviceIdMatchStrategy() : HttpPullDeviceIdMatchStrategy.DEVICE_NAME;
+            int page = 0;
+            boolean next;
+            do {
+                TransportProtos.GetHttpPullRoutingTargetsResponseMsg resp = protoEntityService.getRoutingTargets(
+                        collectorCtx.getTenantId(), targetProfileId, page, 512);
+                int collectorsOnProfile = resolveCollectorCountForProfile(targetProfileId);
+                for (TransportProtos.HttpPullRoutingTargetProto target : resp.getTargetsList()) {
+                    if (!shouldBindTargetToCollector(collectorCtx, target, collectorsOnProfile)) {
+                        continue;
+                    }
+                    String matchKey = HttpPullTransportService.buildMatchKey(strategy, target);
+                    if (StringUtils.isBlank(matchKey)) {
+                        continue;
+                    }
+                    DeviceId targetId = new DeviceId(new UUID(target.getDeviceIdMSB(), target.getDeviceIdLSB()));
+                    registerTargetSession(collectorCtx, targetId, matchKey.trim());
+                }
+                next = resp.getHasNextPage();
+                page++;
+            } while (next);
+        }
+        log.info("[{}] HTTP pull active targets loaded: {}", collectorCtx.getDeviceId(), collectorCtx.getActiveTargets().size());
+    }
+
+    private boolean shouldBindTargetToCollector(HttpPullCollectorSessionContext collectorCtx,
+                                                TransportProtos.HttpPullRoutingTargetProto target,
+                                                int collectorsOnProfile) {
+        String assignedCollectorId = target.getCollectorDeviceId() != null ? target.getCollectorDeviceId().trim() : "";
+        if (StringUtils.isNotBlank(assignedCollectorId)) {
+            return collectorCtx.getDeviceId().getId().toString().equals(assignedCollectorId);
+        }
+        if (collectorsOnProfile > 1) {
+            log.debug("[{}] Skip target without collectorDeviceId — profile {} has {} collector(s)",
+                    collectorCtx.getDeviceId(), collectorCtx.getDeviceProfile().getId(), collectorsOnProfile);
+            return false;
+        }
+        return true;
+    }
+
+    private int resolveCollectorCountForProfile(DeviceProfileId profileId) {
+        return collectorCountByProfile.computeIfAbsent(profileId, this::countCollectorsForProfile);
+    }
+
+    private int countCollectorsForProfile(DeviceProfileId profileId) {
+        AtomicInteger count = new AtomicInteger();
+        int batchIndex = 0;
+        int batchSize = 512;
+        boolean next;
+        do {
+            TransportProtos.GetHttpPullDevicesResponseMsg response = protoEntityService.getHttpPullDevicesIds(batchIndex, batchSize);
+            response.getIdsList().forEach(idStr -> {
+                Device device = protoEntityService.getDeviceById(new DeviceId(UUID.fromString(idStr)));
+                if (device == null || !profileId.equals(device.getDeviceProfileId())) {
+                    return;
+                }
+                if (device.getDeviceData() != null
+                        && device.getDeviceData().getTransportConfiguration() instanceof HttpPullDeviceTransportConfiguration httpPull
+                        && httpPull.isCollector()) {
+                    count.incrementAndGet();
+                }
+            });
+            next = response.getHasNextPage();
+            batchIndex++;
+        } while (next);
+        return count.get();
+    }
+
+    private void invalidateCollectorCountCache(DeviceProfileId profileId) {
+        if (profileId != null) {
+            collectorCountByProfile.remove(profileId);
+        }
+    }
+
+    private void registerTargetSession(HttpPullCollectorSessionContext collectorCtx, DeviceId targetId, String matchKey) {
+        DeviceCredentials credentials = protoEntityService.getDeviceCredentialsByDeviceId(targetId);
+        transportService.process(DeviceTransportType.HTTP_PULL,
+                TransportProtos.ValidateDeviceTokenRequestMsg.newBuilder().setToken(credentials.getCredentialsId()).build(),
+                new TransportServiceCallback<>() {
+                    @Override
+                    public void onSuccess(ValidateDeviceCredentialsResponse msg) {
+                        if (!msg.hasDeviceInfo()) {
+                            return;
+                        }
+                        SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, HttpPullTransportContext.this, UUID.randomUUID());
+                        registerHttpPullTransportSession(sessionInfo,
+                                createRpcSessionListener(collectorCtx, targetId, sessionInfo));
+                        HttpPullTargetSession targetSession = HttpPullTargetSession.builder()
+                                .deviceId(targetId)
+                                .matchKey(matchKey)
+                                .sessionInfo(sessionInfo)
+                                .build();
+                        collectorCtx.getActiveTargets().put(matchKey, targetSession);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        log.warn("[{}] Failed to register HTTP pull target {}", collectorCtx.getDeviceId(), targetId, e);
+                    }
+                });
+    }
+
+    private void registerCollectorAuth(HttpPullCollectorSessionContext ctx,
+                                       java.util.function.Consumer<ValidateDeviceCredentialsResponse> onSuccess) {
+        transportService.process(DeviceTransportType.HTTP_PULL,
+                TransportProtos.ValidateDeviceTokenRequestMsg.newBuilder().setToken(ctx.getToken()).build(),
+                new TransportServiceCallback<>() {
+                    @Override
+                    public void onSuccess(ValidateDeviceCredentialsResponse msg) {
+                        onSuccess.accept(msg);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        log.warn("[{}] HTTP pull collector auth failed", ctx.getDeviceId(), e);
+                    }
+                });
+    }
+
+    @EventListener(DeviceUpdatedEvent.class)
+    public void onDeviceUpdated(DeviceUpdatedEvent event) {
+        if (!isHttpPullEnabled()) {
+            return;
+        }
+        Device device = event.getDevice();
+        refreshCollectorDevice(device);
+        reloadActiveTargetsForProfile(device);
+    }
+
+    private void reloadActiveTargetsForProfile(Device device) {
+        if (device == null || device.getDeviceProfileId() == null) {
+            return;
+        }
+        DeviceProfileId profileId = device.getDeviceProfileId();
+        invalidateCollectorCountCache(profileId);
+        for (HttpPullCollectorSessionContext ctx : new ArrayList<>(collectorSessions.values())) {
+            if (!ctx.getDeviceProfile().getId().equals(profileId)) {
+                continue;
+            }
+            ctx.getActiveTargets().values().forEach(t -> {
+                if (t.getSessionInfo() != null) {
+                    forgetActivatedTransportSession(t.getSessionInfo());
+                    transportService.deregisterSession(t.getSessionInfo());
+                }
+            });
+            ctx.getActiveTargets().clear();
+            preloadActiveTargets(ctx);
+        }
+    }
+
+    @EventListener(DeviceDeletedEvent.class)
+    public void onDeviceDeleted(DeviceDeletedEvent event) {
+        if (!isHttpPullEnabled()) {
+            return;
+        }
+        DeviceId deviceId = event.getDeviceId();
+        allHttpPullDeviceIds.remove(deviceId);
+        HttpPullCollectorSessionContext collector = collectorSessions.get(deviceId);
+        if (collector != null) {
+            log.info("Destroying HTTP pull collector session for deleted device {}", deviceId);
+            destroyCollector(collector);
+            return;
+        }
+        for (HttpPullCollectorSessionContext ctx : collectorSessions.values()) {
+            removeTargetDevice(ctx, deviceId);
+        }
+    }
+
+    @EventListener(DeviceProfileUpdatedEvent.class)
+    public void onDeviceProfileUpdated(DeviceProfileUpdatedEvent event) {
+        if (!isHttpPullEnabled()) {
+            return;
+        }
+        DeviceProfile profile = event.getDeviceProfile();
+        DeviceProfileId profileId = profile.getId();
+        List<HttpPullCollectorSessionContext> affected = collectorSessions.values().stream()
+                .filter(ctx -> ctx.getDeviceProfile().getId().equals(profileId))
+                .toList();
+        if (affected.isEmpty()) {
+            return;
+        }
+        log.info("Refreshing {} HTTP pull collector session(s) after device profile {} update",
+                affected.size(), profileId);
+        for (HttpPullCollectorSessionContext ctx : new ArrayList<>(affected)) {
+            Device device = protoEntityService.getDeviceById(ctx.getDeviceId());
+            if (device == null) {
+                destroyCollector(ctx);
+                continue;
+            }
+            if (profile.getTransportType() != DeviceTransportType.HTTP_PULL) {
+                destroyCollector(ctx);
+                continue;
+            }
+            refreshCollectorDevice(device);
+        }
+    }
+
+    private void refreshCollectorDevice(Device device) {
+        if (device == null) {
+            return;
+        }
+        invalidateCollectorCountCache(device.getDeviceProfileId());
+        DeviceId deviceId = device.getId();
+        HttpPullCollectorSessionContext existing = collectorSessions.get(deviceId);
+        if (!balancingService.isManagedByCurrentTransport(deviceId.getId())) {
+            if (existing != null) {
+                destroyCollector(existing);
+            }
+            tryEstablishCollector(device);
+            return;
+        }
+        if (existing != null) {
+            destroyCollector(existing);
+        }
+        tryEstablishCollector(device);
+    }
+
+    @EventListener(HttpTransportListChangedEvent.class)
+    public void onHttpTransportListChanged(HttpTransportListChangedEvent event) {
+        if (!isHttpPullEnabled()) {
+            return;
+        }
+        log.info("HTTP transport list changed, refreshing pull collectors");
+        for (DeviceId deviceId : allHttpPullDeviceIds) {
+            if (balancingService.isManagedByCurrentTransport(deviceId.getId())) {
+                if (!collectorSessions.containsKey(deviceId)) {
+                    Device device = protoEntityService.getDeviceById(deviceId);
+                    if (device != null) {
+                        tryEstablishCollector(device);
+                    }
+                }
+            } else {
+                HttpPullCollectorSessionContext ctx = collectorSessions.get(deviceId);
+                if (ctx != null) {
+                    log.info("[{}] HTTP pull collector is not managed by current node anymore", deviceId);
+                    destroyCollector(ctx);
+                }
+            }
+        }
+        log.info("HTTP pull collectors owned by this node: {}", collectorSessions.keySet());
+    }
+
+    private void removeTargetDevice(HttpPullCollectorSessionContext collectorCtx, DeviceId targetId) {
+        collectorCtx.getActiveTargets().entrySet().removeIf(entry -> {
+            if (!targetId.equals(entry.getValue().getDeviceId())) {
+                return false;
+            }
+            if (entry.getValue().getSessionInfo() != null) {
+                forgetActivatedTransportSession(entry.getValue().getSessionInfo());
+                transportService.deregisterSession(entry.getValue().getSessionInfo());
+            }
+            log.debug("[{}] Removed HTTP pull target {} after device deletion",
+                    collectorCtx.getDeviceId(), targetId);
+            return true;
+        });
+    }
+
+    private void registerHttpPullTransportSession(SessionInfoProto sessionInfo, SessionMsgListener listener) {
+        transportService.registerAsyncSession(sessionInfo, listener);
+    }
+
+    /**
+     * 首次成功拉取/出站 RPC 后激活会话：向 Core 上报 OPEN 并订阅 RPC。
+     * 避免仅注册传输会话、厂家实际不通时设备仍显示「活跃」。
+     */
+    public void activateHttpPullDeviceSession(SessionInfoProto sessionInfo, DeviceId collectorDeviceId) {
+        if (sessionInfo == null) {
+            return;
+        }
+        UUID sessionId = new UUID(sessionInfo.getSessionIdMSB(), sessionInfo.getSessionIdLSB());
+        if (!activatedTransportSessions.add(sessionId)) {
+            return;
+        }
+        transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_OPEN, null);
+        transportService.process(sessionInfo, DefaultTransportService.SUBSCRIBE_TO_RPC_ASYNC_MSG, TransportServiceCallback.EMPTY);
+        DeviceId deviceId = new DeviceId(new UUID(sessionInfo.getDeviceIdMSB(), sessionInfo.getDeviceIdLSB()));
+        if (collectorDeviceId != null && collectorDeviceId.equals(deviceId)) {
+            TenantId tenantId = new TenantId(new UUID(sessionInfo.getTenantIdMSB(), sessionInfo.getTenantIdLSB()));
+            transportService.lifecycleEvent(tenantId, deviceId, ComponentLifecycleEvent.STARTED, true, null);
+        }
+        log.debug("Activated HTTP pull session for device {}", deviceId);
+    }
+
+    private void forgetActivatedTransportSession(SessionInfoProto sessionInfo) {
+        if (sessionInfo == null) {
+            return;
+        }
+        activatedTransportSessions.remove(new UUID(sessionInfo.getSessionIdMSB(), sessionInfo.getSessionIdLSB()));
+    }
+
+    private HttpPullRpcSessionListener createRpcSessionListener(HttpPullCollectorSessionContext collectorCtx,
+                                                                DeviceId targetDeviceId,
+                                                                SessionInfoProto sessionInfo) {
+        return new HttpPullRpcSessionListener(httpPullRpcService, protoEntityService, collectorCtx, targetDeviceId, sessionInfo);
+    }
+
+    private void destroyCollector(HttpPullCollectorSessionContext ctx) {
+        if (ctx == null) {
+            return;
+        }
+        ctx.getActiveTargets().values().forEach(t -> {
+            if (t.getSessionInfo() != null) {
+                forgetActivatedTransportSession(t.getSessionInfo());
+                transportService.deregisterSession(t.getSessionInfo());
+            }
+        });
+        if (ctx.getSessionInfo() != null) {
+            forgetActivatedTransportSession(ctx.getSessionInfo());
+            transportService.deregisterSession(ctx.getSessionInfo());
+        }
+        httpPullTransportService.cancelQueryingTasks(ctx);
+        ctx.close();
+        collectorSessions.remove(ctx.getDeviceId());
+        transportService.lifecycleEvent(ctx.getTenantId(), ctx.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
+    }
+}

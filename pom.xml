@@ -148,6 +148,7 @@
         <rest-assured.version>5.4.0</rest-assured.version>
         <hamcrest.version>2.2</hamcrest.version>
         <testcontainers.version>1.20.4</testcontainers.version>
+        <blackBoxTests.skip>true</blackBoxTests.skip>
         <testcontainers-junit4-mock.version>1.0.1</testcontainers-junit4-mock.version>
         <zeroturnaround.version>1.12</zeroturnaround.version>
         <selenium.version>4.19.1</selenium.version>
@@ -171,18 +172,18 @@
     </properties>
 
     <modules>
-        <module>netty-mqtt</module>
-        <module>common</module>
-        <module>rule-engine</module>
-        <module>dao</module>
-        <!-- 前端服务     -->
-<!--        <module>ui-ngx</module>-->
+        <!-- 共享库：模型 / DAO / 协议 / 规则节点。不能单独启动 -->
+        <module>libs</module>
+        <!-- 可运行进程：单体、Core、规则引擎、各协议接入 -->
+        <module>apps</module>
+        <!-- Docker 镜像组装（原 msa） -->
+        <module>images</module>
+        <!-- Java REST SDK（原 rest-client） -->
+        <module>clients</module>
+        <!-- 迁移等一次性工具 -->
         <module>tools</module>
-        <!-- Microservice Assembly 微服务镜像的自动化工厂 主要是云原生使用     -->
-        <module>msa</module>
-        <module>rest-client</module>
-        <module>application</module>
-        <module>transport</module>
+        <!-- Angular 前端（当前不参与 Maven 构建） -->
+        <!-- <module>ui</module> -->
     </modules>
 
     <profiles>
@@ -191,6 +192,18 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+        </profile>
+        <profile>
+            <id>black-box-tests</id>
+            <activation>
+                <property>
+                    <name>blackBoxTests.skip</name>
+                    <value>false</value>
+                </property>
+            </activation>
+            <modules>
+                <module>tests/black-box-tests</module>
+            </modules>
         </profile>
         <!-- download sources under target/dependencies -->
         <!-- mvn package -Pdownload-dependencies -Dclassifier=sources dependency:copy-dependencies -->
@@ -435,7 +448,7 @@
                                                 <directory>src/main/data</directory>
                                             </resource>
                                             <resource>
-                                                <directory>../dao/src/main/resources</directory>
+                                                <directory>${main.dir}/libs/dao/src/main/resources</directory>
                                                 <includes>
                                                     <include>**/*.cql</include>
                                                     <include>**/*.sql</include>
@@ -1071,6 +1084,26 @@
             </dependency>
             <dependency>
                 <groupId>org.thingsboard.common</groupId>
+                <artifactId>usage-stats</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.thingsboard.common</groupId>
+                <artifactId>notification-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.thingsboard.common</groupId>
+                <artifactId>housekeeper-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.thingsboard.common</groupId>
+                <artifactId>rule-engine-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.thingsboard.common</groupId>
                 <artifactId>coap-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -1097,62 +1130,62 @@
             </dependency>
             <dependency>
                 <groupId>org.thingsboard</groupId>
-                <artifactId>rest-client</artifactId>
+                <artifactId>clients</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.msa</groupId>
+                <groupId>org.thingsboard.images</groupId>
                 <artifactId>js-executor</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.msa</groupId>
+                <groupId>org.thingsboard.images</groupId>
                 <artifactId>web-ui</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.msa</groupId>
+                <groupId>org.thingsboard.images</groupId>
                 <artifactId>tb-node</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.msa.transport</groupId>
-                <artifactId>coap</artifactId>
+                <groupId>org.thingsboard.images.transport</groupId>
+                <artifactId>tb-coap-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.msa.transport</groupId>
-                <artifactId>http</artifactId>
+                <groupId>org.thingsboard.images.transport</groupId>
+                <artifactId>tb-http-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.msa.transport</groupId>
-                <artifactId>mqtt</artifactId>
+                <groupId>org.thingsboard.images.transport</groupId>
+                <artifactId>tb-mqtt-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.msa.transport</groupId>
-                <artifactId>lwm2m</artifactId>
+                <groupId>org.thingsboard.images.transport</groupId>
+                <artifactId>tb-lwm2m-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.msa.transport</groupId>
-                <artifactId>snmp</artifactId>
+                <groupId>org.thingsboard.images.transport</groupId>
+                <artifactId>tb-snmp-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>

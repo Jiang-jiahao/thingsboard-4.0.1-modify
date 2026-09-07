@@ -24,10 +24,10 @@
     <artifactId>thingsboard</artifactId>
   </parent>
   <groupId>org.thingsboard</groupId>
-  <artifactId>ui-ngx</artifactId>
+  <artifactId>ui</artifactId>
   <packaging>jar</packaging>
 
-  <name>ThingsBoard Server UI</name>
+  <name>ui</name>
   <url>https://thingsboard.io</url>
 
   <properties>

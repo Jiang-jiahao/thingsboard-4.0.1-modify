@@ -17,7 +17,7 @@
 
 set -e # exit on any error
 
-#PROJECTS="msa/tb-node,msa/web-ui,rule-engine-pe/rule-node-twilio-sms"
+#PROJECTS="images/tb-node,images/web-ui,rule-engine-pe/rule-node-twilio-sms"
 PROJECTS=""
 
 if [ "$1" ]; then
@@ -26,9 +26,9 @@ fi
 
 echo "Building and pushing [amd64,arm64] projects '$PROJECTS' ..."
 echo "HELP: usage ./build.sh [projects]"
-echo "HELP: example ./build.sh msa/web-ui,msa/web-report"
+echo "HELP: example ./build.sh images/web-ui,images/web-report"
 java -version
-#echo "Cleaning ui-ngx/node_modules" && rm -rf ui-ngx/node_modules
+#echo "Cleaning ui/node_modules" && rm -rf ui/node_modules
 
 MAVEN_OPTS="-Xmx1024m" NODE_OPTIONS="--max_old_space_size=4096" DOCKER_CLI_EXPERIMENTAL=enabled DOCKER_BUILDKIT=0 \
 mvn -T2 license:format clean install -DskipTests \
@@ -37,7 +37,7 @@ mvn -T2 license:format clean install -DskipTests \
 #  -Dpush-docker-amd-arm-images
 #  -Ddockerfile.skip=false -Dpush-docker-image=true
 #  --offline
-#  --projects '!msa/web-report' --also-make
+#  --projects '!images/web-report' --also-make"
 
 # push all
 # mvn -T 1C license:format clean install -DskipTests -Ddockerfile.skip=false -Dpush-docker-image=true

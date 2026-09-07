@@ -1,0 +1,1874 @@
+#
+# Copyright © 2016-2025 The Thingsboard Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# 单体进程配置：Core + Rule Engine + 内嵌 MQTT/HTTP/CoAP/LwM2M/SNMP/TCP/UDP。
+# 服务器通用参数
+server:
+  # 服务器绑定地址
+  address: "${HTTP_BIND_ADDRESS:0.0.0.0}"
+  # 服务器绑定端口
+  port: "${HTTP_BIND_PORT:8080}"
+  # 服务器转发头策略。使用反向代理时 SWAGGER UI 需要此配置
+  forward_headers_strategy: "${HTTP_FORWARD_HEADERS_STRATEGY:framework}"
+  # 服务器 SSL 配置
+  ssl:
+    # 启用/禁用 SSL 支持
+    enabled: "${SSL_ENABLED:false}"
+    # 服务器 SSL 凭据
+    credentials:
+      # 服务器凭据类型（PEM - pem 证书文件；KEYSTORE - Java 密钥库）
+      type: "${SSL_CREDENTIALS_TYPE:PEM}"
+      # PEM 服务器凭据
+      pem:
+        # 服务器证书文件路径（包含服务器证书或证书链，可包含服务器私钥）
+        cert_file: "${SSL_PEM_CERT:server.pem}"
+        # 服务器证书私钥文件路径（可选）。若私钥不在服务器证书文件中则必须设置
+        key_file: "${SSL_PEM_KEY:server_key.pem}"
+        # 服务器证书私钥密码（可选）
+        key_password: "${SSL_PEM_KEY_PASSWORD:server_key_password}"
+      # Keystore 服务器凭据
+      keystore:
+        # 密钥库类型（JKS 或 PKCS12）
+        type: "${SSL_KEY_STORE_TYPE:PKCS12}"
+        # 存放 SSL 证书的密钥库路径
+        store_file: "${SSL_KEY_STORE:classpath:keystore/keystore.p12}"
+        # 访问密钥库所用的密码
+        store_password: "${SSL_KEY_STORE_PASSWORD:thingsboard}"
+        # 密钥别名
+        key_alias: "${SSL_KEY_ALIAS:tomcat}"
+        # 访问密钥所用的密码
+        key_password: "${SSL_KEY_PASSWORD:thingsboard}"
+  # HTTP 设置
+  http:
+    # 以分号分隔的 urlPattern=maxPayloadSize 列表，为指定 URL 模式定义最大 HTTP 请求大小。首次匹配后其余规则将被跳过
+    max_payload_size: "${HTTP_MAX_PAYLOAD_SIZE_LIMIT_CONFIGURATION:/api/image*/**=52428800;/api/resource/**=52428800;/api/**=16777216}"
+  # HTTP/2 支持（仅在启用服务器 SSL 时生效）
+  http2:
+    # 启用/禁用 HTTP/2 支持
+    enabled: "${HTTP2_ENABLED:true}"
+  # 当 REST API 抛出消息为 "Please contact sysadmin" 的异常时，记录带堆栈跟踪的错误
+  log_controller_error_stack_trace: "${HTTP_LOG_CONTROLLER_ERROR_STACK_TRACE:false}"
+  ws:
+    # 向客户端 WebSocket 会话发送数据的超时时间（毫秒）
+    send_timeout: "${TB_SERVER_WS_SEND_TIMEOUT:5000}"
+    # 建议超时时间 >= 30 秒。平台将在超时时间内尝试发送 3 次 'ping' 请求
+    ping_timeout: "${TB_SERVER_WS_PING_TIMEOUT:30000}"
+    dynamic_page_link:
+      # 动态告警及实体数据查询的刷新频率
+      refresh_interval: "${TB_SERVER_WS_DYNAMIC_PAGE_LINK_REFRESH_INTERVAL_SEC:60}"
+      # 执行动态查询的线程池大小
+      refresh_pool_size: "${TB_SERVER_WS_DYNAMIC_PAGE_LINK_REFRESH_POOL_SIZE:1}"
+      # 每个刷新间隔内动态查询的最大数量。例如，用户在所有浏览器中同时执行的告警查询不超过 10 个。
+      max_alarm_queries_per_refresh_interval: "${TB_SERVER_WS_MAX_ALARM_QUERIES_PER_REFRESH_INTERVAL:10}"
+      # 每个用户的动态查询最大数量。例如，用户在所有浏览器中同时打开的告警组件不超过 10 个
+      max_per_user: "${TB_SERVER_WS_DYNAMIC_PAGE_LINK_MAX_PER_USER:10}"
+    # 单个实体订阅返回的实体最大数量。例如，地图组件上不超过 10,000 个实体
+    max_entities_per_data_subscription: "${TB_SERVER_WS_MAX_ENTITIES_PER_DATA_SUBSCRIPTION:10000}"
+    # 单个告警订阅返回的告警最大数量。例如，告警组件上不超过 10,000 条告警
+    max_entities_per_alarm_subscription: "${TB_SERVER_WS_MAX_ENTITIES_PER_ALARM_SUBSCRIPTION:10000}"
+    # 每个会话 WebSocket 更新的最大队列大小。此限制可防止 WS 无限更新
+    max_queue_messages_per_session: "${TB_SERVER_WS_DEFAULT_QUEUE_MESSAGES_PER_SESSION:1000}"
+    # WS 会话打开与发送鉴权命令之间的最大时间
+    auth_timeout_ms: "${TB_SERVER_WS_AUTH_TIMEOUT_MS:10000}"
+    rate_limits:
+      # WS 订阅的每租户速率限制
+      subscriptions_per_tenant: "${TB_SERVER_WS_SUBSCRIPTIONS_PER_TENANT_RATE_LIMIT:}"
+      # WS 订阅的每用户速率限制
+      subscriptions_per_user: "${TB_SERVER_WS_SUBSCRIPTIONS_PER_USER_RATE_LIMIT:}"
+    # 单个告警状态订阅在缓存中保存的活动源告警 ID 最大数量。例如，告警组件上不超过 10 个告警 ID
+    alarms_per_alarm_status_subscription_cache_size: "${TB_ALARMS_PER_ALARM_STATUS_SUBSCRIPTION_CACHE_SIZE:10}"
+  rest:
+    server_side_rpc:
+      # 服务端 RPC 超时的最小值。可覆盖 REST API 调用中提供的值。
+      # 自 2.5 版本迁移到队列后，RPC 延迟取决于队列中待处理消息的数量。
+      # 因此默认 UI 参数 500ms 在高负载环境中可能不足。
+      min_timeout: "${MIN_SERVER_SIDE_RPC_TIMEOUT:5000}"
+      # 服务端 RPC 超时的默认值。
+      default_timeout: "${DEFAULT_SERVER_SIDE_RPC_TIMEOUT:10000}"
+    rate_limits:
+      # 限制用户过于频繁地重置密码的速率限制值。默认每小时不超过 5 次请求
+      reset_password_per_user: "${RESET_PASSWORD_PER_USER_RATE_LIMIT_CONFIGURATION:5:3600}"
+
+# 应用信息参数
+app:
+  # 应用版本
+  version: "@project.version@"
+
+# ZooKeeper 连接参数
+zk:
+  # 启用/禁用 ZooKeeper 发现服务。
+  enabled: "${ZOOKEEPER_ENABLED:false}"
+  # ZooKeeper 连接字符串
+  url: "${ZOOKEEPER_URL:localhost:2181}"
+  # ZooKeeper 重试间隔（毫秒）
+  retry_interval_ms: "${ZOOKEEPER_RETRY_INTERVAL_MS:3000}"
+  # ZooKeeper 连接超时（毫秒）
+  connection_timeout_ms: "${ZOOKEEPER_CONNECTION_TIMEOUT_MS:3000}"
+  # ZooKeeper 会话超时（毫秒）
+  session_timeout_ms: "${ZOOKEEPER_SESSION_TIMEOUT_MS:3000}"
+  # ZooKeeper "文件系统" 中的目录名称
+  zk_dir: "${ZOOKEEPER_NODES_DIR:/thingsboard}"
+  # 在微服务架构的规则引擎服务中建议配置 recalculate_delay 属性。
+  # 此属性提供暂停时间，确保规则引擎服务重启时，其他节点不会立即尝试重新计算其分区。
+  # 建议设置延迟，因为规则链 Actor 的初始化较耗时。重启期间避免不必要的重新计算可提升系统性能与稳定性。
+  recalculate_delay: "${ZOOKEEPER_RECALCULATE_DELAY_MS:0}"
+
+# 集群参数
+cluster:
+  stats:
+    # 启用/禁用集群统计。按类型计算集群节点之间发送的消息数量
+    enabled: "${TB_CLUSTER_STATS_ENABLED:false}"
+    # 将集群统计信息打印到日志文件的间隔
+    print_interval_ms: "${TB_CLUSTER_STATS_PRINT_INTERVAL_MS:10000}"
+
+# 插件配置参数
+plugins:
+  # 插件类路径扫描时使用的逗号分隔包列表
+  scan_packages: "${PLUGINS_SCAN_PACKAGES:org.thingsboard.server.extensions,org.thingsboard.rule.engine}"
+
+# 安全参数
+security:
+  # JWT 令牌参数
+  jwt: # 自 3.4.2 起，安装或升级期间值会持久化到数据库。安装时若未设置自定义值，密钥将随机生成。之后可在 Web UI 的 SYS_ADMIN 下修改
+    tokenExpirationTime: "${JWT_TOKEN_EXPIRATION_TIME:9000}" # 秒数（2.5 小时）
+    refreshTokenExpTime: "${JWT_REFRESH_TOKEN_EXPIRATION_TIME:604800}" # 秒数（1 周）。
+    tokenIssuer: "${JWT_TOKEN_ISSUER:thingsboard.io}" # 用户 JWT 令牌签发者
+    tokenSigningKey: "${JWT_TOKEN_SIGNING_KEY:thingsboardDefaultSigningKey}" # Base64 编码
+  # 启用/禁用系统管理员访问租户管理员 JWT 令牌，或租户管理员访问客户用户 JWT 令牌
+  user_token_access_enabled: "${SECURITY_USER_TOKEN_ACCESS_ENABLED:true}"
+  # 启用/禁用区分大小写的用户名登录
+  user_login_case_sensitive: "${SECURITY_USER_LOGIN_CASE_SENSITIVE:true}"
+  claim:
+    # 启用/禁用认领设备；若为 false -> 设备的 [claimingAllowed] SERVER_SCOPE 属性须设为 [true] 才允许认领该设备
+    allowClaimingByDefault: "${SECURITY_CLAIM_ALLOW_CLAIMING_BY_DEFAULT:true}"
+    # 允许认领设备的时间（毫秒）
+    duration: "${SECURITY_CLAIM_DURATION:86400000}" # 1 分钟，注意此值须等于 claimDevices.timeToLiveInMinutes 的值
+  basic:
+    # 启用/禁用基本安全选项
+    enabled: "${SECURITY_BASIC_ENABLED:false}"
+  oauth2:
+    # 处理外部用户管理系统访问码的重定向 URL
+    loginProcessingUrl: "${SECURITY_OAUTH2_LOGIN_PROCESSING_URL:/login/oauth2/code/}"
+    githubMapper:
+      # 将从 URL 映射的电子邮件地址
+      emailUrl: "${SECURITY_OAUTH2_GITHUB_MAPPER_EMAIL_URL_KEY:https://api.github.com/user/emails}"
+  java_cacerts:
+    # CA 证书密钥库默认路径。通常位于 JAVA_HOME/lib/security/cacerts
+    path: "${SECURITY_JAVA_CACERTS_PATH:${java.home}/lib/security/cacerts}"
+    # cacerts 密钥库文件的密码
+    password: "${SECURITY_JAVA_CACERTS_PASSWORD:changeit}"
+
+# 邮件设置参数
+mail:
+  oauth2:
+    # 检查刷新令牌过期的间隔（秒）（默认 1 天）。
+    refreshTokenCheckingInterval: "${REFRESH_TOKEN_EXPIRATION_CHECKING_INTERVAL:86400}"
+  # 每个租户发送邮件的速率限制。例如每分钟 1000 次、每小时 10000 次为 "1000:60,10000:3600"
+  per_tenant_rate_limits: "${MAIL_PER_TENANT_RATE_LIMITS:}"
+
+# 使用统计参数
+usage:
+  stats:
+    report:
+      # 启用/禁用 API 使用统计收集。默认在系统和租户级别收集
+      enabled: "${USAGE_STATS_REPORT_ENABLED:true}"
+      # 启用/禁用客户级别的 API 使用统计收集
+      enabled_per_customer: "${USAGE_STATS_REPORT_PER_CUSTOMER_ENABLED:false}"
+      # 统计报告间隔，默认每 10 秒发送汇总数据
+      interval: "${USAGE_STATS_REPORT_INTERVAL:60}"
+      # 每个数据包中的统计消息数量
+      pack_size: "${USAGE_STATS_REPORT_PACK_SIZE:1024}"
+    check:
+      # 检查下一周期开始并重新启用被阻止租户/客户的间隔
+      cycle: "${USAGE_STATS_CHECK_CYCLE:60000}"
+    # 毫秒。默认值为 3 分钟
+    gauge_report_interval: "${USAGE_STATS_GAUGE_REPORT_INTERVAL:180000}"
+    devices:
+      # 秒，默认值为 1 分钟。修改时，在集群模式下请确保 usage.stats.gauge_report_interval 设为此值的 2-3 倍
+      report_interval: "${DEVICES_STATS_REPORT_INTERVAL:60}"
+
+# UI 设置参数
+ui:
+  # 仪表板参数
+  dashboard:
+    # 组件获取数据点的最大允许数量
+    max_datapoints_limit: "${DASHBOARD_MAX_DATAPOINTS_LIMIT:50000}"
+  # 帮助参数
+  help:
+    # UI 帮助资源的基 URL
+    base-url: "${UI_HELP_BASE_URL:https://raw.githubusercontent.com/thingsboard/thingsboard-ui-help/release-4.0}"
+
+# 遥测数据库参数
+# 遥测数据的数据库参数
+database:
+  ts_max_intervals: "${DATABASE_TS_MAX_INTERVALS:700}" # 单次 API 调用获取遥测记录所生成的数据库查询最大数量
+  ts:
+    type: "${DATABASE_TS_TYPE:sql}" # cassandra、sql 或 timescale（混合模式下 DATABASE_TS_TYPE 值应为 cassandra 或 timescale）
+  ts_latest:
+    type: "${DATABASE_TS_LATEST_TYPE:sql}" # cassandra、sql 或 timescale（混合模式下 DATABASE_TS_TYPE 值应为 cassandra 或 timescale）
+
+# Cassandra 驱动配置参数
+cassandra:
+  # ThingsBoard 集群名称
+  cluster_name: "${CASSANDRA_CLUSTER_NAME:Thingsboard Cluster}"
+  # ThingsBoard 键空间名称
+  keyspace_name: "${CASSANDRA_KEYSPACE_NAME:thingsboard}"
+  # 指定节点列表
+  url: "${CASSANDRA_URL:127.0.0.1:9042}"
+  # 指定本地数据中心名称
+  local_datacenter: "${CASSANDRA_LOCAL_DATACENTER:datacenter1}"
+  ssl:
+    # 启用/禁用安全连接
+    enabled: "${CASSANDRA_USE_SSL:false}"
+    # 启用/禁用 Cassandra 服务器主机名验证
+    # 若启用，Cassandra 服务器主机名须与服务器证书的 CN 匹配
+    hostname_validation: "${CASSANDRA_SSL_HOSTNAME_VALIDATION:true}"
+    # 设置用于客户端验证服务器的信任库（可选，未设置时使用默认 SSLContext 的信任库）
+    trust_store: "${CASSANDRA_SSL_TRUST_STORE:}"
+    # Cassandra 信任库密钥的密码
+    trust_store_password: "${CASSANDRA_SSL_TRUST_STORE_PASSWORD:}"
+    # 设置用于服务器验证客户端的密钥库（可选，未设置时使用默认 SSLContext 的密钥库）
+    # 仅当 Cassandra 服务器要求客户端认证时才需要密钥库
+    key_store: "${CASSANDRA_SSL_KEY_STORE:}"
+    # Cassandra 密钥库的密码
+    key_store_password: "${CASSANDRA_SSL_KEY_STORE_PASSWORD:}"
+    # 逗号分隔的密码套件列表（可选，未设置时使用 Java 默认密码套件）
+    cipher_suites: "${CASSANDRA_SSL_CIPHER_SUITES:}"
+  # 启用/禁用 JMX
+  jmx: "${CASSANDRA_USE_JMX:false}"
+  # 启用/禁用指标收集。
+  metrics: "${CASSANDRA_USE_METRICS:false}"
+  # NONE SNAPPY LZ4
+  compression: "${CASSANDRA_COMPRESSION:none}"
+  # 指定 Cassandra 集群初始化超时（毫秒）（启动时若无可用主机）
+  init_timeout_ms: "${CASSANDRA_CLUSTER_INIT_TIMEOUT_MS:300000}"
+  # 指定 Cassandra 集群初始化重试间隔（启动时若无可用主机）
+  init_retry_interval_ms: "${CASSANDRA_CLUSTER_INIT_RETRY_INTERVAL_MS:3000}"
+  # Cassandra 每个连接的本地最大请求数
+  max_requests_per_connection_local: "${CASSANDRA_MAX_REQUESTS_PER_CONNECTION_LOCAL:32768}"
+  # Cassandra 每个连接的远程最大请求数
+  max_requests_per_connection_remote: "${CASSANDRA_MAX_REQUESTS_PER_CONNECTION_REMOTE:32768}"
+  # 凭据参数
+  credentials: "${CASSANDRA_USE_CREDENTIALS:false}"
+  # 指定用户名
+  username: "${CASSANDRA_USERNAME:}"
+  # 指定密码
+  password: "${CASSANDRA_PASSWORD:}"
+  # Astra DB 连接 https://astra.datastax.com/
+  cloud:
+    # /etc/thingsboard/astra/secure-connect-thingsboard.zip
+    secure_connect_bundle_path: "${CASSANDRA_CLOUD_SECURE_BUNDLE_PATH:}"
+    # DucitQPHMzPCBOZqFYexAfKk
+    client_id: "${CASSANDRA_CLOUD_CLIENT_ID:}"
+    # ZnF7FpuHp43FP5BzM+KY8wGmSb4Ql6BhT4Z7sOU13ze+gXQ-n7OkFpNuB,oACUIQObQnK0g4bSPoZhK5ejkcF9F.j6f64j71Sr.tiRe0Fsq2hPS1ZCGSfAaIgg63IydG
+    client_secret: "${CASSANDRA_CLOUD_CLIENT_SECRET:}"
+
+  # Cassandra 集群连接 Socket 参数 #
+  socket:
+    # 设置 ThingsBoard 到 Cassandra 原生连接的超时（毫秒）。默认值为 5000
+    connect_timeout: "${CASSANDRA_SOCKET_TIMEOUT:5000}"
+    # 关闭连接前的超时。单位为毫秒
+    read_timeout: "${CASSANDRA_SOCKET_READ_TIMEOUT:20000}"
+    # 是否使用 TCP keep-alive
+    keep_alive: "${CASSANDRA_SOCKET_KEEP_ALIVE:true}"
+    # 启用/禁用 reuse-address。该 Socket 选项允许复用本地地址和端口
+    reuse_address: "${CASSANDRA_SOCKET_REUSE_ADDRESS:true}"
+    # 设置关闭时 linger 超时。默认驱动未设置此选项，实际值取自底层 Netty 传输的默认值
+    so_linger: "${CASSANDRA_SOCKET_SO_LINGER:}"
+    # 启用/禁用 Nagle 算法
+    tcp_no_delay: "${CASSANDRA_SOCKET_TCP_NO_DELAY:false}"
+    # 设置入站网络 I/O 底层缓冲区大小的提示。默认驱动未设置此选项，实际值取自底层 Netty 传输的默认值
+    receive_buffer_size: "${CASSANDRA_SOCKET_RECEIVE_BUFFER_SIZE:}"
+    # 返回出站网络 I/O 底层缓冲区大小的提示。默认驱动未设置此选项，实际值取自底层 Netty 传输的默认值
+    send_buffer_size: "${CASSANDRA_SOCKET_SEND_BUFFER_SIZE:}"
+
+  # Cassandra 集群连接查询参数
+  query:
+    # Cassandra 一致性级别可配置可用性与数据准确性的平衡。所有读写操作默认一致性级别为 ONE
+    read_consistency_level: "${CASSANDRA_READ_CONSISTENCY_LEVEL:ONE}"
+    # Cassandra 一致性级别可配置可用性与数据准确性的平衡。所有读写操作默认一致性级别为 ONE
+    write_consistency_level: "${CASSANDRA_WRITE_CONSISTENCY_LEVEL:ONE}"
+    # fetch size 指定 Cassandra 一次返回的行数（即每页大小）
+    default_fetch_size: "${CASSANDRA_DEFAULT_FETCH_SIZE:2000}"
+    # 指定时间戳键值存储的分区大小。示例：MINUTES、HOURS、DAYS、MONTHS、INDEFINITE
+    ts_key_value_partitioning: "${TS_KV_PARTITIONING:MONTHS}"
+    # 启用/禁用读查询中的时间戳键值分区
+    use_ts_key_value_partitioning_on_read: "${USE_TS_KV_PARTITIONING_ON_READ:true}"
+    # 每个服务内存中缓存的分区数量。有助于减少重复插入相同分区的负载
+    ts_key_value_partitions_max_cache_size: "${TS_KV_PARTITIONS_MAX_CACHE_SIZE:100000}"
+    # Cassandra 记录时序 TTL（秒）。0 表示记录永不过期
+    ts_key_value_ttl: "${TS_KV_TTL:0}"
+    # 等待执行的 Cassandra 查询最大数量
+    buffer_size: "${CASSANDRA_QUERY_BUFFER_SIZE:200000}"
+    # 并发 Cassandra 查询最大数量
+    concurrent_limit: "${CASSANDRA_QUERY_CONCURRENT_LIMIT:1000}"
+    # 查询等待执行的最大时间（毫秒）
+    permit_max_wait_time: "${PERMIT_MAX_WAIT_TIME:120000}"
+    # 分发 Cassandra 查询的线程数量
+    dispatcher_threads: "${CASSANDRA_QUERY_DISPATCHER_THREADS:2}"
+    callback_threads: "${CASSANDRA_QUERY_CALLBACK_THREADS:4}" # 用于管理 I/O 速率的缓冲速率执行器（读、写）。参见 JMX 中的 "nosql-*-callback" 线程
+    result_processing_threads: "${CASSANDRA_QUERY_RESULT_PROCESSING_THREADS:50}" # 结果集转换与处理。参见 JMX 中的 "cassandra-callback" 线程
+    # Cassandra 查询队列轮询间隔（毫秒）
+    poll_ms: "${CASSANDRA_QUERY_POLL_MS:50}"
+    # 打印 Cassandra 查询队列统计的间隔（毫秒）
+    rate_limit_print_interval_ms: "${CASSANDRA_QUERY_RATE_LIMIT_PRINT_MS:10000}"
+    # 保存时将同一 ts 下除 target 外的所有数据类型值设为 null
+    set_null_values_enabled: "${CASSANDRA_QUERY_SET_NULL_VALUES_ENABLED:true}"
+    # 按指定频率记录一条 Cassandra 查询（0 - 禁用日志）
+    print_queries_freq: "${CASSANDRA_QUERY_PRINT_FREQ:0}"
+    tenant_rate_limits:
+      # 打印 Cassandra 查询队列统计时是否打印被速率限制的租户名称
+      print_tenant_names: "${CASSANDRA_QUERY_TENANT_RATE_LIMITS_PRINT_TENANT_NAMES:false}"
+
+# SQL 配置参数
+sql:
+  # 指定持久化属性更新的批大小
+  attributes:
+    batch_size: "${SQL_ATTRIBUTES_BATCH_SIZE:1000}" # 持久化属性更新的批大小
+    batch_max_delay: "${SQL_ATTRIBUTES_BATCH_MAX_DELAY_MS:50}" # 属性条目队列轮询的最大超时。单位为毫秒
+    stats_print_interval_ms: "${SQL_ATTRIBUTES_BATCH_STATS_PRINT_MS:10000}" # 打印属性更新统计的间隔（毫秒）
+    batch_threads: "${SQL_ATTRIBUTES_BATCH_THREADS:3}" # 批处理线程数须为质数（如 3 或 5）以获得完美哈希分布
+    value_no_xss_validation: "${SQL_ATTRIBUTES_VALUE_NO_XSS_VALIDATION:false}" # 若为 true，属性值将检查 XSS 漏洞
+  ts:
+    batch_size: "${SQL_TS_BATCH_SIZE:10000}" # 持久化时序插入的批大小
+    batch_max_delay: "${SQL_TS_BATCH_MAX_DELAY_MS:100}" # 时序条目队列轮询的最大超时。单位为毫秒
+    stats_print_interval_ms: "${SQL_TS_BATCH_STATS_PRINT_MS:10000}" # 打印时序插入统计的间隔（毫秒）
+    batch_threads: "${SQL_TS_BATCH_THREADS:3}" # 批处理线程数须为质数（如 3 或 5）以获得完美哈希分布
+    value_no_xss_validation: "${SQL_TS_VALUE_NO_XSS_VALIDATION:false}" # 若为 true，遥测值将检查 XSS 漏洞
+  ts_latest:
+    batch_size: "${SQL_TS_LATEST_BATCH_SIZE:1000}" # 持久化最新遥测更新的批大小
+    batch_max_delay: "${SQL_TS_LATEST_BATCH_MAX_DELAY_MS:50}" # 最新遥测条目队列轮询的最大超时。单位为毫秒
+    stats_print_interval_ms: "${SQL_TS_LATEST_BATCH_STATS_PRINT_MS:10000}" # 打印最新遥测更新统计的间隔（毫秒）
+    batch_threads: "${SQL_TS_LATEST_BATCH_THREADS:3}" # 批处理线程数须为质数（如 3 或 5）以获得完美哈希分布
+    update_by_latest_ts: "${SQL_TS_UPDATE_BY_LATEST_TIMESTAMP:true}" # 仅当新记录时间戳大于或等于先前保存的最新值时间戳时才更新最新值。最新值与历史值分开存储以便快速查询。历史值插入始终进行
+  events:
+    batch_size: "${SQL_EVENTS_BATCH_SIZE:10000}" # 持久化最新遥测更新的批大小
+    batch_max_delay: "${SQL_EVENTS_BATCH_MAX_DELAY_MS:100}" # 最新遥测条目队列轮询的最大超时。单位为毫秒
+    stats_print_interval_ms: "${SQL_EVENTS_BATCH_STATS_PRINT_MS:10000}" # 打印最新遥测更新统计的间隔（毫秒）
+    batch_threads: "${SQL_EVENTS_BATCH_THREADS:3}" # 批处理线程数须为质数（如 3 或 5）以获得完美哈希分布
+    partition_size: "${SQL_EVENTS_REGULAR_PARTITION_SIZE_HOURS:168}" # 事件分区的小时数。当前值对应一周。
+    debug_partition_size: "${SQL_EVENTS_DEBUG_PARTITION_SIZE_HOURS:1}" # 调试事件分区的小时数。当前值对应一小时。
+  audit_logs:
+    partition_size: "${SQL_AUDIT_LOGS_PARTITION_SIZE_HOURS:168}" # 默认值 - 1 周
+  alarm_comments:
+    partition_size: "${SQL_ALARM_COMMENTS_PARTITION_SIZE_HOURS:168}" # 默认值 - 1 周
+  notifications:
+    partition_size: "${SQL_NOTIFICATIONS_PARTITION_SIZE_HOURS:168}" # 默认值 - 1 周
+  # 指定批更新前是否对实体排序。集群模式下应启用以避免死锁
+  batch_sort: "${SQL_BATCH_SORT:true}"
+  # 指定插入前是否从属性和时序的 strValue 中移除 null 字符
+  remove_null_chars: "${SQL_REMOVE_NULL_CHARS:true}"
+  # 指定是否记录实体查询仓库生成的数据库查询及其参数
+  log_queries: "${SQL_LOG_QUERIES:false}"
+  # 记录慢 SQL 查询的阈值。单位为毫秒
+  log_queries_threshold: "${SQL_LOG_QUERIES_THRESHOLD:5000}"
+  # 启用/禁用记录租户统计信息
+  log_tenant_stats: "${SQL_LOG_TENANT_STATS:true}"
+  # 打印租户最新统计信息的间隔（毫秒）
+  log_tenant_stats_interval_ms: "${SQL_LOG_TENANT_STATS_INTERVAL_MS:60000}"
+  postgres:
+    # 指定时间戳键值存储的分区大小。示例：DAYS、MONTHS、YEARS、INDEFINITE。
+    ts_key_value_partitioning: "${SQL_POSTGRES_TS_KV_PARTITIONING:MONTHS}"
+  timescale:
+    # 指定新数据块存储的间隔大小。
+    chunk_time_interval: "${SQL_TIMESCALE_CHUNK_TIME_INTERVAL:604800000}"
+    batch_threads: "${SQL_TIMESCALE_BATCH_THREADS:3}" # 批处理线程数须为质数（如 3 或 5）以获得完美哈希分布
+  ttl:
+    ts:
+      # 启用/禁用时序记录的 TTL（Time To Live）
+      enabled: "${SQL_TTL_TS_ENABLED:true}"
+      execution_interval_ms: "${SQL_TTL_TS_EXECUTION_INTERVAL:86400000}" # 毫秒数。当前值对应一天
+      # 指定时序记录系统 TTL（Time To Live）值的参数。单位为秒。
+      # 0 - 记录永不过期。
+      ts_key_value_ttl: "${SQL_TTL_TS_TS_KEY_VALUE_TTL:0}"
+    events:
+      # 启用/禁用事件记录的 TTL（Time To Live）
+      enabled: "${SQL_TTL_EVENTS_ENABLED:true}"
+      execution_interval_ms: "${SQL_TTL_EVENTS_EXECUTION_INTERVAL:3600000}" # 毫秒数（最大随机初始延迟和固定周期）。
+      # 秒数。默认禁用 TTL。清理精度取决于 sql.events.partition_size 参数。
+      events_ttl: "${SQL_TTL_EVENTS_EVENTS_TTL:0}"
+      # 秒数。当前值对应一周。清理精度取决于 sql.events.debug_partition_size 参数。
+      debug_events_ttl: "${SQL_TTL_EVENTS_DEBUG_EVENTS_TTL:604800}"
+    alarms:
+      checking_interval: "${SQL_ALARMS_TTL_CHECKING_INTERVAL:7200000}" # 毫秒数。当前值对应两小时
+      removal_batch_size: "${SQL_ALARMS_TTL_REMOVAL_BATCH_SIZE:3000}" # 分批删除过期告警，而非一次性全部删除
+    rpc:
+      enabled: "${SQL_TTL_RPC_ENABLED:true}" # 启用/禁用 RPC 调用记录的 TTL（Time To Live）
+      checking_interval: "${SQL_RPC_TTL_CHECKING_INTERVAL:7200000}" # 毫秒数。当前值对应两小时
+    audit_logs:
+      enabled: "${SQL_TTL_AUDIT_LOGS_ENABLED:true}" # 启用/禁用审计日志记录的 TTL（Time To Live）
+      ttl: "${SQL_TTL_AUDIT_LOGS_SECS:0}" # 默认禁用。清理精度取决于 sql.audit_logs.partition_size
+      checking_interval_ms: "${SQL_TTL_AUDIT_LOGS_CHECKING_INTERVAL_MS:86400000}" # 默认值 - 1 天
+    notifications:
+      enabled: "${SQL_TTL_NOTIFICATIONS_ENABLED:true}" # 启用/禁用通知中心记录的 TTL（Time To Live）
+      ttl: "${SQL_TTL_NOTIFICATIONS_SECS:2592000}" # 默认值 - 30 天
+      checking_interval_ms: "${SQL_TTL_NOTIFICATIONS_CHECKING_INTERVAL_MS:86400000}" # 默认值 - 1 天
+  relations:
+    max_level: "${SQL_RELATIONS_MAX_LEVEL:50}" # 此值应足够小以尽早防止无限递归
+    pool_size: "${SQL_RELATIONS_POOL_SIZE:4}" # 此值应足够小以防止关系查询阻塞所有其他数据库调用
+    query_timeout: "${SQL_RELATIONS_QUERY_TIMEOUT_SEC:20}" # 此值应足够小以防止关系查询阻塞所有其他数据库调用
+
+# Actor 系统参数
+actors:
+  system:
+    throughput: "${ACTORS_SYSTEM_THROUGHPUT:5}" # Actor 系统在切换到下一个 Actor 前每个 Actor 处理的消息数量
+    scheduler_pool_size: "${ACTORS_SYSTEM_SCHEDULER_POOL_SIZE:1}" # Actor 系统调度器的线程池大小
+    max_actor_init_attempts: "${ACTORS_SYSTEM_MAX_ACTOR_INIT_ATTEMPTS:10}" # 禁用 Actor 前初始化 Actor 的最大尝试次数
+    app_dispatcher_pool_size: "${ACTORS_SYSTEM_APP_DISPATCHER_POOL_SIZE:1}" # 主 Actor 系统分发器的线程池大小
+    tenant_dispatcher_pool_size: "${ACTORS_SYSTEM_TENANT_DISPATCHER_POOL_SIZE:2}" # 处理租户 Actor 消息的 Actor 系统分发器线程池大小
+    device_dispatcher_pool_size: "${ACTORS_SYSTEM_DEVICE_DISPATCHER_POOL_SIZE:4}" # 处理设备 Actor 消息的 Actor 系统分发器线程池大小
+    rule_dispatcher_pool_size: "${ACTORS_SYSTEM_RULE_DISPATCHER_POOL_SIZE:8}" # 处理规则引擎（链/节点）Actor 消息的 Actor 系统分发器线程池大小
+    cfm_dispatcher_pool_size: "${ACTORS_SYSTEM_CFM_DISPATCHER_POOL_SIZE:2}" # 处理 CalculatedField 管理器 Actor 消息的 Actor 系统分发器线程池大小
+    cfe_dispatcher_pool_size: "${ACTORS_SYSTEM_CFE_DISPATCHER_POOL_SIZE:8}" # 处理 CalculatedField 实体 Actor 消息的 Actor 系统分发器线程池大小
+  tenant:
+    create_components_on_init: "${ACTORS_TENANT_CREATE_COMPONENTS_ON_INIT:true}" # 在初始化时创建组件
+  session:
+    max_concurrent_sessions_per_device: "${ACTORS_MAX_CONCURRENT_SESSION_PER_DEVICE:1}" # 每个设备的最大并发会话数
+    sync:
+      # 使用同步会话（HTTP、CoAP）处理请求的默认超时（毫秒）
+      timeout: "${ACTORS_SESSION_SYNC_TIMEOUT:10000}"
+  rule:
+    # 指定数据库请求回调执行服务的线程池大小
+    db_callback_thread_pool_size: "${ACTORS_RULE_DB_CALLBACK_THREAD_POOL_SIZE:50}"
+    # 指定邮件发送执行服务的线程池大小
+    mail_thread_pool_size: "${ACTORS_RULE_MAIL_THREAD_POOL_SIZE:40}"
+    # 指定密码重置邮件的线程池大小
+    mail_password_reset_thread_pool_size: "${ACTORS_RULE_MAIL_PASSWORD_RESET_THREAD_POOL_SIZE:10}"
+    # 指定短信发送执行服务的线程池大小
+    sms_thread_pool_size: "${ACTORS_RULE_SMS_THREAD_POOL_SIZE:50}"
+    # 是否允许规则使用系统邮件服务
+    allow_system_mail_service: "${ACTORS_RULE_ALLOW_SYSTEM_MAIL_SERVICE:true}"
+    # 是否允许规则使用系统短信服务
+    allow_system_sms_service: "${ACTORS_RULE_ALLOW_SYSTEM_SMS_SERVICE:true}"
+    # 指定外部调用服务的线程池大小
+    external_call_thread_pool_size: "${ACTORS_RULE_EXTERNAL_CALL_THREAD_POOL_SIZE:50}"
+    chain:
+      # 特定 Actor 的错误按指定毫秒间隔持久化一次
+      error_persist_frequency: "${ACTORS_RULE_CHAIN_ERROR_FREQUENCY:3000}"
+      debug_mode_rate_limits_per_tenant:
+        # 启用/禁用每个租户所有规则节点持久化调试事件的速率限制
+        enabled: "${ACTORS_RULE_CHAIN_DEBUG_MODE_RATE_LIMITS_PER_TENANT_ENABLED:true}"
+        # DEBUG 模式速率限制值。默认每小时不超过 5 万条事件
+        configuration: "${ACTORS_RULE_CHAIN_DEBUG_MODE_RATE_LIMITS_PER_TENANT_CONFIGURATION:50000:3600}"
+    node:
+      # 特定 Actor 的错误按指定毫秒间隔持久化一次
+      error_persist_frequency: "${ACTORS_RULE_NODE_ERROR_FREQUENCY:3000}"
+    transaction:
+      # 存储事务规则节点消息的队列大小
+      queue_size: "${ACTORS_RULE_TRANSACTION_QUEUE_SIZE:15000}"
+      # 事务完成的超时时间（毫秒）
+      duration: "${ACTORS_RULE_TRANSACTION_DURATION:60000}"
+    external:
+      # 强制确认外部规则节点的入站消息以降低处理延迟。
+      # 将外部节点处理结果作为单独消息入队到规则引擎。
+      force_ack: "${ACTORS_RULE_EXTERNAL_NODE_FORCE_ACK:false}"
+  rpc:
+    # 请求投递失败时持久 RPC 调用的最大重试次数。
+    max_retries: "${ACTORS_RPC_MAX_RETRIES:5}"
+    # RPC 提交策略。允许值：BURST、SEQUENTIAL_ON_ACK_FROM_DEVICE、SEQUENTIAL_ON_RESPONSE_FROM_DEVICE。
+    submit_strategy: "${ACTORS_RPC_SUBMIT_STRATEGY_TYPE:BURST}"
+    # RPC 投递后接收响应的时间（毫秒）。仅用于 SEQUENTIAL_ON_RESPONSE_FROM_DEVICE 提交策略。
+    response_timeout_ms: "${ACTORS_RPC_RESPONSE_TIMEOUT_MS:30000}"
+    # RPC 投递超时时关闭传输会话。若启用，RPC 将恢复为排队状态。
+    # 注意：
+    # - 对于 MQTT 传输：
+    #   - QoS 级别 0：不适用此功能，因为不期望确认，因此不会触发超时。
+    #   - QoS 级别 1：适用此功能，因为期望确认。
+    #   - QoS 级别 2：不支持。
+    # - 对于 CoAP 传输：
+    #   - 可确认请求：适用此功能，因为预期需要交付确认。
+    #   - 不可确认请求：不适用此功能，因为不预期交付确认。
+    # - 对于 HTTP 和 SNPM 传输：RPC 视为立即交付，无等待确认的逻辑。
+    close_session_on_rpc_delivery_timeout: "${ACTORS_RPC_CLOSE_SESSION_ON_RPC_DELIVERY_TIMEOUT:false}"
+  statistics:
+    # 启用/禁用 Actor 统计
+    enabled: "${ACTORS_STATISTICS_ENABLED:true}"
+    # Actor 统计持久化频率（毫秒）
+    persist_frequency: "${ACTORS_STATISTICS_PERSIST_FREQUENCY:3600000}"
+  calculated_fields:
+    debug_mode_rate_limits_per_tenant:
+      # 启用/禁用每个租户下所有计算字段的持久化调试事件速率限制
+      enabled: "${ACTORS_CALCULATED_FIELD_DEBUG_MODE_RATE_LIMITS_PER_TENANT_ENABLED:true}"
+      # DEBUG 模式速率限制值。默认每小时不超过 5 万条事件
+      configuration: "${ACTORS_CALCULATED_FIELD_DEBUG_MODE_RATE_LIMITS_PER_TENANT_CONFIGURATION:50000:3600}"
+    # 接收计算结果的超时时间（秒）。
+    calculation_timeout: "${ACTORS_CALCULATION_TIMEOUT_SEC:5}"
+
+debug:
+  settings:
+    # 调试模式默认持续时间（分钟）。最小值为 1 分钟。租户配置文件设置将覆盖此值。
+    # 若此设置的值无效，将使用默认值（15 分钟）。
+    default_duration: "${DEBUG_SETTINGS_DEFAULT_DURATION_MINUTES:15}"
+
+# 缓存设置参数
+cache:
+  # caffeine 或 redis（7.2 - 最新兼容版本）
+  type: "${CACHE_TYPE:caffeine}"
+  maximumPoolSize: "${CACHE_MAXIMUM_POOL_SIZE:16}" # 处理调用外部缓存的 future 的最大线程池大小
+  attributes:
+    # 若将 Redis 配置属性 'maxmemory-policy' 改为 'allkeys-lru'、'allkeys-lfu' 或 'allkeys-random'，请确保 cache.type 为 'redis' 且 cache.attributes.enabled 为 'true'
+    enabled: "${CACHE_ATTRIBUTES_ENABLED:true}"
+  ts_latest:
+    # 将为 SQL 时序最新数据 DAO 启用 cache-aside 策略。
+    # 若将 Redis 配置属性 'maxmemory-policy' 改为 'allkeys-lru'、'allkeys-lfu' 或 'allkeys-random'，请确保 cache.type 为 'redis' 且 cache.ts_latest.enabled 为 'true'
+    enabled: "${CACHE_TS_LATEST_ENABLED:true}"
+  specs:
+    relations:
+      timeToLiveInMinutes: "${CACHE_SPECS_RELATIONS_TTL:1440}" # 关系缓存 TTL
+      maxSize: "${CACHE_SPECS_RELATIONS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    deviceCredentials:
+      timeToLiveInMinutes: "${CACHE_SPECS_DEVICE_CREDENTIALS_TTL:1440}" # 设备凭证缓存 TTL
+      maxSize: "${CACHE_SPECS_DEVICE_CREDENTIALS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    devices:
+      timeToLiveInMinutes: "${CACHE_SPECS_DEVICES_TTL:1440}" # 设备缓存 TTL
+      maxSize: "${CACHE_SPECS_DEVICES_MAX_SIZE:10000}" # 0 表示禁用缓存
+    sessions:
+      timeToLiveInMinutes: "${CACHE_SPECS_SESSIONS_TTL:1440}" # 会话缓存 TTL
+      maxSize: "${CACHE_SPECS_SESSIONS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    assets:
+      timeToLiveInMinutes: "${CACHE_SPECS_ASSETS_TTL:1440}" # 资产缓存 TTL
+      maxSize: "${CACHE_SPECS_ASSETS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    customers:
+      timeToLiveInMinutes: "${CACHE_SPECS_CUSTOMERS_TTL:1440}" # 客户缓存 TTL
+      maxSize: "${CACHE_SPECS_CUSTOMERS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    users:
+      timeToLiveInMinutes: "${CACHE_SPECS_USERS_TTL:1440}" # 用户缓存 TTL
+      maxSize: "${CACHE_SPECS_USERS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    entityViews:
+      timeToLiveInMinutes: "${CACHE_SPECS_ENTITY_VIEWS_TTL:1440}" # 实体视图缓存 TTL
+      maxSize: "${CACHE_SPECS_ENTITY_VIEWS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    claimDevices:
+      timeToLiveInMinutes: "${CACHE_SPECS_CLAIM_DEVICES_TTL:1440}" # 认领设备缓存 TTL
+      maxSize: "${CACHE_SPECS_CLAIM_DEVICES_MAX_SIZE:1000}" # 0 表示禁用缓存
+    securitySettings:
+      timeToLiveInMinutes: "${CACHE_SPECS_SECURITY_SETTINGS_TTL:1440}" # 安全设置缓存 TTL
+      maxSize: "${CACHE_SPECS_SECURITY_SETTINGS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    tenantProfiles:
+      timeToLiveInMinutes: "${CACHE_SPECS_TENANT_PROFILES_TTL:1440}" # 租户配置文件缓存 TTL
+      maxSize: "${CACHE_SPECS_TENANT_PROFILES_MAX_SIZE:10000}" # 0 表示禁用缓存
+    tenants:
+      timeToLiveInMinutes: "${CACHE_SPECS_TENANTS_TTL:1440}" # 租户缓存 TTL
+      maxSize: "${CACHE_SPECS_TENANTS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    tenantsExist:
+      # 环境变量有意与 'tenants' 缓存保持一致。
+      timeToLiveInMinutes: "${CACHE_SPECS_TENANTS_TTL:1440}"
+      maxSize: "${CACHE_SPECS_TENANTS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    deviceProfiles:
+      timeToLiveInMinutes: "${CACHE_SPECS_DEVICE_PROFILES_TTL:1440}" # 设备配置文件缓存 TTL
+      maxSize: "${CACHE_SPECS_DEVICE_PROFILES_MAX_SIZE:10000}" # 0 表示禁用缓存
+    assetProfiles:
+      timeToLiveInMinutes: "${CACHE_SPECS_ASSET_PROFILES_TTL:1440}" # 资产配置文件缓存 TTL
+      maxSize: "${CACHE_SPECS_ASSET_PROFILES_MAX_SIZE:10000}" # 0 表示禁用缓存
+    notificationSettings:
+      timeToLiveInMinutes: "${CACHE_SPECS_NOTIFICATION_SETTINGS_TTL:10}" # 通知设置缓存 TTL
+      maxSize: "${CACHE_SPECS_NOTIFICATION_SETTINGS_MAX_SIZE:1000}" # 0 表示禁用缓存
+    sentNotifications:
+      timeToLiveInMinutes: "${CACHE_SPECS_SENT_NOTIFICATIONS_TTL:1440}" # 已发送通知缓存 TTL
+      maxSize: "${CACHE_SPECS_SENT_NOTIFICATIONS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    attributes:
+      timeToLiveInMinutes: "${CACHE_SPECS_ATTRIBUTES_TTL:1440}" # 属性缓存 TTL
+      maxSize: "${CACHE_SPECS_ATTRIBUTES_MAX_SIZE:100000}" # 0 表示禁用缓存
+    tsLatest:
+      timeToLiveInMinutes: "${CACHE_SPECS_TS_LATEST_TTL:1440}" # 时序最新数据缓存 TTL
+      maxSize: "${CACHE_SPECS_TS_LATEST_MAX_SIZE:100000}" # 0 表示禁用缓存
+    userSessionsInvalidation:
+      # 此 TTL 值将被忽略，并替换为 JWT 刷新令牌过期时间
+      timeToLiveInMinutes: "0"
+      maxSize: "${CACHE_SPECS_USERS_UPDATE_TIME_MAX_SIZE:10000}" # 0 表示禁用缓存
+    otaPackages:
+      timeToLiveInMinutes: "${CACHE_SPECS_OTA_PACKAGES_TTL:60}" # OTA 包缓存 TTL
+      maxSize: "${CACHE_SPECS_OTA_PACKAGES_MAX_SIZE:10}" # 0 表示禁用缓存
+    otaPackagesData:
+      timeToLiveInMinutes: "${CACHE_SPECS_OTA_PACKAGES_DATA_TTL:60}" # OTA 包数据缓存 TTL
+      maxSize: "${CACHE_SPECS_OTA_PACKAGES_DATA_MAX_SIZE:10}" # 0 表示禁用缓存
+    repositorySettings:
+      timeToLiveInMinutes: "${CACHE_SPECS_REPOSITORY_SETTINGS_TTL:1440}" # 仓库设置缓存 TTL
+      maxSize: "${CACHE_SPECS_REPOSITORY_SETTINGS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    autoCommitSettings:
+      timeToLiveInMinutes: "${CACHE_SPECS_AUTO_COMMIT_SETTINGS_TTL:1440}" # 自动提交设置缓存 TTL
+      maxSize: "${CACHE_SPECS_AUTO_COMMIT_SETTINGS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    twoFaVerificationCodes:
+      timeToLiveInMinutes: "${CACHE_SPECS_TWO_FA_VERIFICATION_CODES_TTL:60}" # 双因素验证码缓存 TTL
+      maxSize: "${CACHE_SPECS_TWO_FA_VERIFICATION_CODES_MAX_SIZE:100000}" # 0 表示禁用缓存
+    versionControlTask:
+      timeToLiveInMinutes: "${CACHE_SPECS_VERSION_CONTROL_TASK_TTL:20}" # 版本控制任务缓存 TTL
+      maxSize: "${CACHE_SPECS_VERSION_CONTROL_TASK_MAX_SIZE:100000}" # 0 表示禁用缓存
+    userSettings:
+      timeToLiveInMinutes: "${CACHE_SPECS_USER_SETTINGS_TTL:1440}" # 用户设置缓存 TTL
+      maxSize: "${CACHE_SPECS_USER_SETTINGS_MAX_SIZE:100000}" # 0 表示禁用缓存
+    dashboardTitles:
+      timeToLiveInMinutes: "${CACHE_SPECS_DASHBOARD_TITLES_TTL:1440}" # 仪表板标题缓存 TTL
+      maxSize: "${CACHE_SPECS_DASHBOARD_TITLES_MAX_SIZE:100000}" # 0 表示禁用缓存
+    entityCount:
+      timeToLiveInMinutes: "${CACHE_SPECS_ENTITY_COUNT_TTL:1440}" # 实体计数缓存 TTL
+      maxSize: "${CACHE_SPECS_ENTITY_COUNT_MAX_SIZE:100000}" # 0 表示禁用缓存
+    resourceInfo:
+      timeToLiveInMinutes: "${CACHE_SPECS_RESOURCE_INFO_TTL:1440}" # 资源信息缓存 TTL
+      maxSize: "${CACHE_SPECS_RESOURCE_INFO_MAX_SIZE:100000}" # 0 表示禁用缓存
+    alarmTypes:
+      timeToLiveInMinutes: "${CACHE_SPECS_ALARM_TYPES_TTL:60}" # 告警类型缓存 TTL
+      maxSize: "${CACHE_SPECS_ALARM_TYPES_MAX_SIZE:10000}" # 0 表示禁用缓存
+    qrCodeSettings:
+      timeToLiveInMinutes: "${CACHE_SPECS_MOBILE_APP_SETTINGS_TTL:1440}" # 二维码设置缓存 TTL
+      maxSize: "${CACHE_SPECS_MOBILE_APP_SETTINGS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    mobileSecretKey:
+      timeToLiveInMinutes: "${CACHE_MOBILE_SECRET_KEY_TTL:2}" # QR 密钥缓存 TTL
+      maxSize: "${CACHE_MOBILE_SECRET_KEY_MAX_SIZE:10000}" # 0 表示禁用缓存
+
+  # 有意放置于上方 'specs' 组之外
+  notificationRules:
+    timeToLiveInMinutes: "${CACHE_SPECS_NOTIFICATION_RULES_TTL:30}" # 通知规则缓存 TTL
+    maxSize: "${CACHE_SPECS_NOTIFICATION_RULES_MAX_SIZE:1000}" # 0 表示禁用缓存
+  rateLimits:
+    timeToLiveInMinutes: "${CACHE_SPECS_RATE_LIMITS_TTL:120}" # 速率限制缓存 TTL
+    maxSize: "${CACHE_SPECS_RATE_LIMITS_MAX_SIZE:200000}" # 0 表示禁用缓存
+  entityLimits:
+    timeToLiveInMinutes: "${CACHE_SPECS_ENTITY_LIMITS_TTL:5}" # 实体限制缓存 TTL
+    maxSize: "${CACHE_SPECS_ENTITY_LIMITS_MAX_SIZE:100000}" # 0 表示禁用缓存
+  image:
+    etag:
+      timeToLiveInMinutes: "${CACHE_SPECS_IMAGE_ETAGS_TTL:44640}" # 图片 ETag 缓存 TTL
+      maxSize: "${CACHE_SPECS_IMAGE_ETAGS_MAX_SIZE:10000}" # 0 表示禁用缓存
+    systemImagesBrowserTtlInMinutes: "${CACHE_SPECS_IMAGE_SYSTEM_BROWSER_TTL:0}" # 系统图片浏览器缓存 TTL（分钟）。0 表示禁用缓存
+    tenantImagesBrowserTtlInMinutes: "${CACHE_SPECS_IMAGE_TENANT_BROWSER_TTL:0}" # 租户图片浏览器缓存 TTL（分钟）。0 表示禁用缓存
+
+# Spring 数据参数
+spring.data.redis.repositories.enabled: false # 禁用此项，因为不需要。
+
+# Redis 配置参数
+redis:
+  # standalone 或 cluster 或 sentinel
+  connection:
+    # Redis 部署类型：Standalone（单 Redis 节点部署）或 Cluster
+    type: "${REDIS_CONNECTION_TYPE:standalone}"
+  standalone:
+    # Redis 连接主机
+    host: "${REDIS_HOST:localhost}"
+    # Redis 连接端口
+    port: "${REDIS_PORT:6379}"
+    # 使用默认 Redis 配置文件
+    useDefaultClientConfig: "${REDIS_USE_DEFAULT_CLIENT_CONFIG:true}"
+    # 仅在使用非默认 ClientConfig 时可使用此值
+    clientName: "${REDIS_CLIENT_NAME:standalone}"
+    # 仅在使用非默认 ClientConfig 时可使用此值
+    connectTimeout: "${REDIS_CLIENT_CONNECT_TIMEOUT:30000}"
+    # 仅在使用非默认 ClientConfig 时可使用此值
+    readTimeout: "${REDIS_CLIENT_READ_TIMEOUT:60000}"
+    # 仅在使用非默认 ClientConfig 时可使用此值
+    usePoolConfig: "${REDIS_CLIENT_USE_POOL_CONFIG:false}"
+  cluster:
+    # 逗号分隔的 "host:port" 列表，用于引导连接。
+    nodes: "${REDIS_NODES:}"
+    # 跨集群执行命令时跟随重定向的最大次数。
+    max-redirects: "${REDIS_MAX_REDIRECTS:12}"
+    # 若设为 false，将使用 pool config 节的值构建连接池配置
+    useDefaultPoolConfig: "${REDIS_USE_DEFAULT_POOL_CONFIG:true}"
+  sentinel:
+    # 主节点名称
+    master: "${REDIS_MASTER:}"
+    # 逗号分隔的 Sentinel "host:port" 列表
+    sentinels: "${REDIS_SENTINELS:}"
+    # 连接 Sentinel 的认证密码
+    password: "${REDIS_SENTINEL_PASSWORD:}"
+    # 若设为 false，将使用 pool config 节的值构建连接池配置
+    useDefaultPoolConfig: "${REDIS_USE_DEFAULT_POOL_CONFIG:true}"
+  # 数据库索引
+  db: "${REDIS_DB:0}"
+  # 数据库密码
+  password: "${REDIS_PASSWORD:}"
+  # SSL 配置
+  ssl:
+    # 启用/禁用安全连接
+    enabled: "${TB_REDIS_SSL_ENABLED:false}"
+    # 服务端 SSL 凭证（仅支持 PEM 格式）
+    credentials:
+      # Redis 服务端（CA）证书路径
+      cert_file: "${TB_REDIS_SSL_PEM_CERT:}"
+      # 用户证书文件路径。客户端可选，可用于客户端双向认证
+      user_cert_file: "${TB_REDIS_SSL_PEM_KEY:}"
+      # 用户私钥文件路径。客户端可选，仅在配置了 'user_cert_file' 时需要
+      user_key_file: "${TB_REDIS_SSL_PEM_KEY_PASSWORD:}"
+  # 连接池配置
+  pool_config:
+    # 连接池可分配的最大连接数
+    maxTotal: "${REDIS_POOL_CONFIG_MAX_TOTAL:128}"
+    # 连接池中可保持而不关闭的最大空闲连接数
+    maxIdle: "${REDIS_POOL_CONFIG_MAX_IDLE:128}"
+    # 连接池中可保持而不关闭的最小空闲连接数
+    minIdle: "${REDIS_POOL_CONFIG_MIN_IDLE:16}"
+    # 启用/禁用借出连接时发送 PING 命令
+    testOnBorrow: "${REDIS_POOL_CONFIG_TEST_ON_BORROW:true}"
+    # 用于指定在将连接归还连接池之前是否测试连接。
+    testOnReturn: "${REDIS_POOL_CONFIG_TEST_ON_RETURN:true}"
+    # 此属性用于 Redis 连接池上下文
+    testWhileIdle: "${REDIS_POOL_CONFIG_TEST_WHILE_IDLE:true}"
+    # 空闲连接在被连接池驱逐前应保持空闲的最短时间（毫秒）
+    minEvictableMs: "${REDIS_POOL_CONFIG_MIN_EVICTABLE_MS:60000}"
+    # 两次连续驱逐运行之间的时间间隔（毫秒）
+    evictionRunsMs: "${REDIS_POOL_CONFIG_EVICTION_RUNS_MS:30000}"
+    # 所有连接耗尽时，客户端等待从连接池获取连接的最大时间（毫秒）
+    maxWaitMills: "${REDIS_POOL_CONFIG_MAX_WAIT_MS:60000}"
+    # 每次驱逐运行时要测试的连接数
+    numberTestsPerEvictionRun: "${REDIS_POOL_CONFIG_NUMBER_TESTS_PER_EVICTION_RUN:3}"
+    # 当线程从连接池请求连接但没有可用连接且因 maxTotal 配置无法创建更多连接时的行为
+    blockWhenExhausted: "${REDIS_POOL_CONFIG_BLOCK_WHEN_EXHAUSTED:true}"
+  # 用于替代 DEL 以支持事务的短生命周期 SET 命令的 TTL
+  evictTtlInMs: "${REDIS_EVICT_TTL_MS:60000}"
+
+
+# 版本更新参数
+updates:
+  # 启用/禁用新版本检查
+  enabled: "${UPDATES_ENABLED:true}"
+
+# Spring CORS 配置参数
+spring.mvc.cors:
+  mappings:
+    # 拦截路径
+    "[/api/**]":
+      # 允许的来源列表，逗号分隔。'*' 表示允许所有来源。未设置时禁用 CORS 支持。
+      allowed-origin-patterns: "*"
+      # 允许的方法列表，逗号分隔。'*' 表示允许所有方法。
+      allowed-methods: "*"
+      # 允许在请求中使用的请求头列表，逗号分隔。'*' 表示允许所有请求头。
+      allowed-headers: "*"
+      #预检请求的响应可被客户端缓存的时长（秒）。
+      max-age: "1800"
+      #设置是否支持凭证。未设置时不支持凭证。
+      allow-credentials: "true"
+
+# Spring 通用参数
+spring.main.allow-circular-references: "true" # Spring Boot 配置项，控制是否允许 Bean 之间的循环依赖。
+spring.freemarker.checkTemplateLocation: "false" # Spring Freemarker 配置
+spring.mvc.async.request-timeout: "${SPRING_MVC_ASYNC_REQUEST_TIMEOUT:30000}" # 异步请求的默认超时时间（毫秒）
+spring.mvc.pathmatch.matching-strategy: "ANT_PATH_MATCHER" # 用于 Swagger 中的端点匹配
+spring.resources.chain:
+  compressed: "true" # 启用/禁用提供预压缩资源（例如 .gzip 或 .br 文件）的支持
+  strategy:
+    content:
+      enabled: "true" # 启用/禁用内容版本策略。该策略允许 Spring 根据静态资源内容生成唯一版本
+
+spring.servlet.multipart.max-file-size: "${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:50MB}" # 配置文件上传时，单个文件总大小不能超过 50MB
+spring.servlet.multipart.max-request-size: "${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:50MB}" # multipart/form-data 请求总大小不能超过 50MB
+
+spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation: "true" # 修复 Postgres JPA 错误（Method org.postgresql.jdbc.PgConnection.createClob() is not yet implemented）
+spring.jpa.properties.hibernate.order_by.default_null_ordering: "${SPRING_JPA_PROPERTIES_HIBERNATE_ORDER_BY_DEFAULT_NULL_ORDERING:last}" # 注意：当前 Spring JPA 版本中，Sort.Order 的自定义 NullHandling 会被忽略，将使用此参数
+spring.jpa.properties.hibernate.dialect: "${SPRING_JPA_DIALECT:org.thingsboard.server.dao.ThingsboardPostgreSQLDialect}" # 使用包含 ilike(arg1, arg2) 函数的自定义方言（映射为 Postgres ILIKE 运算符）
+
+# SQL DAO 配置参数
+spring:
+  data:
+    jpa:
+      repositories:
+        enabled: "true" # 启用/禁用 Spring Data JPA 仓库支持
+  jpa:
+    properties:
+      jakarta.persistence.query.timeout: "${JAVAX_PERSISTENCE_QUERY_TIMEOUT:30000}" # JDBC 查询的通用超时时间
+    open-in-view: "false" # 默认启用。因此，视图渲染期间可能执行数据库查询。显式配置 spring.jpa.open-in-view 以禁用此警告
+    hibernate:
+      # 可设置更细粒度控制 DDL 行为的 Hibernate 特性。标准 Hibernate 属性值为 none、validate、update、create-drop。Spring Boot 会根据数据库是否为嵌入式（默认 create-drop）或非嵌入式（默认 none）选择默认值
+      ddl-auto: "none"
+  datasource:
+    # Spring JPA 数据库驱动 - org.postgresql.Driver
+    driverClassName: "${SPRING_DRIVER_CLASS_NAME:org.postgresql.Driver}"
+    # 数据库连接 URL
+    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://10.2.0.120:5432/thingsboard}"
+    # 数据库用户名
+    username: "${SPRING_DATASOURCE_USERNAME:postgres}"
+    # 数据库用户密码
+    password: "${SPRING_DATASOURCE_PASSWORD:root}"
+    hikari:
+      # 控制连接在池外停留多久后记录可能连接泄漏的日志。值为 0 表示禁用泄漏检测
+      leakDetectionThreshold: "${SPRING_DATASOURCE_HIKARI_LEAK_DETECTION_THRESHOLD:0}"
+      # 随需求增加而增加连接池中的连接数。同时确保连接池不会增长到耗尽系统资源的程度，以免影响应用性能和可用性
+      maximumPoolSize: "${SPRING_DATASOURCE_MAXIMUM_POOL_SIZE:16}"
+      # 启用 MBean，通过 JMX 诊断连接池状态
+      registerMbeans: "${SPRING_DATASOURCE_HIKARI_REGISTER_MBEANS:false}"
+    events:
+      # 为事件和审计日志启用独立数据源（独立数据库）。
+      # 启用前，请确保在新数据库中已创建以下表：
+      # error_event、lc_event、rule_chain_debug_event、rule_node_debug_event、stats_event、audit_log、cf_debug_event
+      enabled: "${SPRING_DEDICATED_EVENTS_DATASOURCE_ENABLED:false}"
+      # 事件数据源的 Spring JPA 数据库驱动
+      driverClassName: "${SPRING_EVENTS_DATASOURCE_DRIVER_CLASS_NAME:org.postgresql.Driver}"
+      # 事件数据源的数据库连接 URL
+      url: "${SPRING_EVENTS_DATASOURCE_URL:jdbc:postgresql://localhost:5432/thingsboard_events}"
+      # 事件数据源的数据库用户名
+      username: "${SPRING_EVENTS_DATASOURCE_USERNAME:postgres}"
+      # 事件数据源的数据库用户密码
+      password: "${SPRING_EVENTS_DATASOURCE_PASSWORD:root}"
+      hikari:
+        # 控制事件数据源连接在池外停留多久后记录可能连接泄漏的日志。值为 0 表示禁用泄漏检测
+        leakDetectionThreshold: "${SPRING_EVENTS_DATASOURCE_HIKARI_LEAK_DETECTION_THRESHOLD:0}"
+        # 随需求增加而增加事件数据源连接池中的连接数。同时确保连接池不会增长到耗尽系统资源的程度，以免影响应用性能和可用性
+        maximumPoolSize: "${SPRING_EVENTS_DATASOURCE_MAXIMUM_POOL_SIZE:4}"
+        # 启用 MBean，通过 JMX 诊断事件数据源连接池状态
+        registerMbeans: "${SPRING_EVENTS_DATASOURCE_HIKARI_REGISTER_MBEANS:false}"
+
+# 审计日志参数
+audit-log:
+  # 启用/禁用审计日志功能。
+  enabled: "${AUDIT_LOG_ENABLED:true}"
+  # 各实体类型的日志级别。
+  # 允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作）
+  logging-level:
+    mask:
+      "device": "${AUDIT_LOG_MASK_DEVICE:W}" # 设备日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "asset": "${AUDIT_LOG_MASK_ASSET:W}" # 资产日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "dashboard": "${AUDIT_LOG_MASK_DASHBOARD:W}" # 仪表板日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "widget_type": "${AUDIT_LOG_MASK_WIDGET_TYPE:W}" # 组件类型日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "widgets_bundle": "${AUDIT_LOG_MASK_WIDGETS_BUNDLE:W}" # 组件包日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "customer": "${AUDIT_LOG_MASK_CUSTOMER:W}" # 客户日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "user": "${AUDIT_LOG_MASK_USER:W}" # 用户日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "rule_chain": "${AUDIT_LOG_MASK_RULE_CHAIN:W}" # 规则链日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "alarm": "${AUDIT_LOG_MASK_ALARM:W}" # 告警日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "entity_view": "${AUDIT_LOG_MASK_ENTITY_VIEW:W}" # 实体视图日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "device_profile": "${AUDIT_LOG_MASK_DEVICE_PROFILE:W}" # 设备配置文件日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "asset_profile": "${AUDIT_LOG_MASK_ASSET_PROFILE:W}" # 资产配置文件日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "tb_resource": "${AUDIT_LOG_MASK_RESOURCE:W}" # TB 资源日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "ota_package": "${AUDIT_LOG_MASK_OTA_PACKAGE:W}" # OTA 包日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "calculated_field": "${AUDIT_LOG_MASK_CALCULATED_FIELD:W}" # 计算字段日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+  sink:
+    # 外部接收端类型。可选值：none、elasticsearch
+    type: "${AUDIT_LOG_SINK_TYPE:none}"
+    # 存储审计日志的索引名称
+    # 索引名称可包含以下占位符（非必需）：
+    # @{TENANT} - 替换为租户 ID
+    # @{DATE} - 按 audit_log.sink.date_format 提供的格式替换为当前日期
+    index_pattern: "${AUDIT_LOG_SINK_INDEX_PATTERN:@{TENANT}_AUDIT_LOG_@{DATE}}"
+    # 日期格式。模式详情参见：
+    # https://docs.oracle.com/javase/8/docs/api/java/time/format/DateTimeFormatter.html
+    date_format: "${AUDIT_LOG_SINK_DATE_FORMAT:YYYY.MM.dd}"
+    scheme_name: "${AUDIT_LOG_SINK_SCHEME_NAME:http}" # http 或 https
+    host: "${AUDIT_LOG_SINK_HOST:localhost}" # 外部接收端系统主机
+    port: "${AUDIT_LOG_SINK_PORT:9200}" # 外部接收端系统端口
+    user_name: "${AUDIT_LOG_SINK_USER_NAME:}" # 访问外部接收端系统的用户名
+    password: "${AUDIT_LOG_SINK_PASSWORD:}" # 访问外部接收端系统的密码
+
+# 设备状态参数
+state:
+  # 设备不活动超时是全局配置参数，定义设备何时被服务器标记为「inactive」。
+  # 参数值单位为秒。用户可通过设置服务端属性「inactivityTimeout」为单个设备覆盖此参数（注意：期望值为毫秒）。
+  # 建议此参数与会话不活动超时（"transport.sessions.inactivity_timeout" 或 TB_TRANSPORT_SESSIONS_INACTIVITY_TIMEOUT）参数保持一致
+  # 该参数负责检测过期的设备连接会话。
+  # 会话不活动超时参数值应大于或等于设备不活动超时。
+  # 注意：会话不活动超时以毫秒为单位，设备不活动超时以秒为单位。
+  defaultInactivityTimeoutInSec: "${DEFAULT_INACTIVITY_TIMEOUT:600}"
+  defaultStateCheckIntervalInSec: "${DEFAULT_STATE_CHECK_INTERVAL:60}" # 在指定周期后检查设备状态的间隔（秒）
+  # 控制设备 'active' 标志存储在属性（默认）还是遥测中。
+  # 若更改此参数，应按以下方式之一重新创建设备信息视图：
+  # 若 'persistToTelemetry' 从 'false' 改为 'true'：'CREATE OR REPLACE VIEW device_info_view AS SELECT * FROM device_info_active_ts_view;'
+  # 若 'persistToTelemetry' 从 'true' 改为 'false'：'CREATE OR REPLACE VIEW device_info_view AS SELECT * FROM device_info_active_attribute_view;'
+  persistToTelemetry: "${PERSIST_STATE_TO_TELEMETRY:false}"
+  # 定义设备状态遥测数据（如 'active'、'lastActivityTime'）生存时间的毫秒值。
+  # 仅在 state.persistToTelemetry 为 'true' 且使用 Cassandra 存储时序数据时使用。
+  # 0 表示禁用生存时间机制。
+  telemetryTtl: "${STATE_TELEMETRY_TTL:0}"
+  # 与设备活动状态相关的规则节点配置属性
+  rule:
+    node:
+      # 设备状态规则节点
+      deviceState:
+        # 定义设备连接事件可触发的速率。
+        # 逗号分隔的 capacity:duration 对，定义令牌桶速率限制算法的带宽容量和补充时长。
+        # 补充策略设为 greedy。详见 Bucket4j 库文档。
+        rateLimit: "${DEVICE_STATE_NODE_RATE_LIMIT_CONFIGURATION:1:1,30:60,60:3600}"
+
+# TBEL 参数
+tbel:
+  # 启用/禁用 TBEL 功能。
+  enabled: "${TBEL_ENABLED:true}"
+  # 限制传递给脚本执行函数的参数数量
+  max_total_args_size: "${TBEL_MAX_TOTAL_ARGS_SIZE:100000}"
+  # 脚本处理后结果允许的最大字符数
+  max_result_size: "${TBEL_MAX_RESULT_SIZE:300000}"
+  # 脚本体允许的最大字符数
+  max_script_body_size: "${TBEL_MAX_SCRIPT_BODY_SIZE:50000}"
+  # TBEL 脚本执行允许的最大内存
+  max_memory_limit_mb: "${TBEL_MAX_MEMORY_LIMIT_MB: 8}"
+  # TBEL 脚本执行允许的最大错误次数，超过后将加入黑名单
+  max_errors: "${TBEL_MAX_ERRORS:3}"
+  # TBEL Eval 最大请求超时（毫秒）。0 表示无超时
+  max_requests_timeout: "${TBEL_MAX_REQUEST_TIMEOUT:500}"
+  # 黑名单函数保留在列表中的最长时间（秒）。
+  max_black_list_duration_sec: "${TBEL_MAX_BLACKLIST_DURATION_SEC:60}"
+  # 指定 JavaScript 执行器服务的线程池大小
+  thread_pool_size: "${TBEL_THREAD_POOL_SIZE:50}"
+  # TBEL 编译脚本的最大缓存大小
+  compiled_scripts_cache_size: "${TBEL_COMPILED_SCRIPTS_CACHE_SIZE:1000}"
+  stats:
+    # 启用/禁用 TBEL 引擎统计收集
+    enabled: "${TB_TBEL_STATS_ENABLED:false}"
+    # TBEL 统计日志输出间隔
+    print_interval_ms: "${TB_TBEL_STATS_PRINT_INTERVAL_MS:10000}"
+
+# JS 参数
+js:
+  # local（Nashorn Engine，已弃用）或 remote JS-Executors（NodeJS）
+  evaluator: "${JS_EVALUATOR:local}"
+  # 限制传递给脚本执行函数的参数数量
+  max_total_args_size: "${JS_MAX_TOTAL_ARGS_SIZE:100000}"
+  # 脚本处理后结果允许的最大字符数
+  max_result_size: "${JS_MAX_RESULT_SIZE:300000}"
+  # 脚本体允许的最大字符数
+  max_script_body_size: "${JS_MAX_SCRIPT_BODY_SIZE:50000}"
+  # 内置 JVM JavaScript 环境属性
+  local:
+    # 指定 JavaScript 执行器服务的线程池大小
+    js_thread_pool_size: "${LOCAL_JS_THREAD_POOL_SIZE:50}"
+    # 使用沙箱（安全）JVM JavaScript 环境
+    use_js_sandbox: "${USE_LOCAL_JS_SANDBOX:true}"
+    # 指定 JavaScript 沙箱资源监控器的线程池大小
+    monitor_thread_pool_size: "${LOCAL_JS_SANDBOX_MONITOR_THREAD_POOL_SIZE:4}"
+    # 脚本执行允许的最大 CPU 时间（毫秒）
+    max_cpu_time: "${LOCAL_JS_SANDBOX_MAX_CPU_TIME:8000}"
+    # JS 执行器线程可分配的最大内存（字节，近似计算）。由于 Nashorn 0.4.2 的实现，不建议内存限制为 0 且 CPU 限制非 0。100MiB 在多数情况下等效于无限制
+    max_memory: "${LOCAL_JS_SANDBOX_MAX_MEMORY:104857600}"
+    # JavaScript 执行允许的最大错误次数，超过后将加入黑名单
+    max_errors: "${LOCAL_JS_SANDBOX_MAX_ERRORS:3}"
+    # JS Eval 最大请求超时。0 表示无超时
+    max_requests_timeout: "${LOCAL_JS_MAX_REQUEST_TIMEOUT:0}"
+    # 黑名单函数保留在列表中的最长时间（秒）。
+    max_black_list_duration_sec: "${LOCAL_JS_SANDBOX_MAX_BLACKLIST_DURATION_SEC:60}"
+    stats:
+      # 启用/禁用本地 JS 执行器统计收集
+      enabled: "${TB_JS_LOCAL_STATS_ENABLED:false}"
+      # 本地 JS 执行器统计日志输出间隔
+      print_interval_ms: "${TB_JS_LOCAL_STATS_PRINT_INTERVAL_MS:10000}"
+  # 远程 JavaScript 环境属性
+  remote:
+    # 指定 JavaScript 执行器服务的线程池大小
+    js_thread_pool_size: "${REMOTE_JS_THREAD_POOL_SIZE:50}"
+    # JavaScript 执行允许的最大错误次数，超过后将加入黑名单
+    max_errors: "${REMOTE_JS_SANDBOX_MAX_ERRORS:3}"
+    # 黑名单函数保留在列表中的最长时间（秒）。
+    max_black_list_duration_sec: "${REMOTE_JS_SANDBOX_MAX_BLACKLIST_DURATION_SEC:60}"
+    stats:
+      # 启用/禁用远程 JS 执行器统计收集
+      enabled: "${TB_JS_REMOTE_STATS_ENABLED:false}"
+      # 远程 JS 执行器统计日志输出间隔
+      print_interval_ms: "${TB_JS_REMOTE_STATS_PRINT_INTERVAL_MS:10000}"
+
+# 传输配置参数
+transport:
+  sessions:
+    # 会话不活动超时是全局配置参数，定义设备最后一条消息到达后会话保持打开的时长。
+    # 参数值单位为毫秒。
+    # 若设备发送任何消息（包括 keepalive），设备会话的最后活动时间会更新
+    # 若无活动，会话将关闭，所有订阅将被删除。
+    # 建议此参数与设备不活动超时（"state.defaultInactivityTimeoutInSec" 或 DEFAULT_INACTIVITY_TIMEOUT）参数保持一致
+    # 该参数负责在平台核心服务中检测设备连接状态。
+    # 会话不活动超时参数值应大于或等于设备不活动超时。
+    # 注意：会话不活动超时以毫秒为单位，设备不活动超时以秒为单位。
+    inactivity_timeout: "${TB_TRANSPORT_SESSIONS_INACTIVITY_TIMEOUT:600000}"
+    # 定期检查过期会话并上报会话最后活动时间变更的间隔
+    report_timeout: "${TB_TRANSPORT_SESSIONS_REPORT_TIMEOUT:3000}"
+  activity:
+    # 此属性指定每个上报周期内活动事件的上报策略。
+    # 接受的值为 'FIRST'、'LAST'、'FIRST_AND_LAST' 和 'ALL'。
+    # - 'FIRST'：每个上报周期内仅上报第一个 activity 事件。
+    # - 'LAST'：每个上报周期内仅上报最后一个 activity 事件。
+    # - 'FIRST_AND_LAST'：上报周期内的第一个和最后一个 activity 事件均会上报。
+    # - 'ALL'：上报周期内的所有 activity 事件均会上报。
+    reporting_strategy: "${TB_TRANSPORT_ACTIVITY_REPORTING_STRATEGY:LAST}"
+  json:
+    # 处理 Telemetry/Attributes JSON 时，尽可能将 String 类型转换为 Numeric
+    type_cast_enabled: "${JSON_TYPE_CAST_ENABLED:true}"
+    # 处理 Telemetry/Attributes JSON 时允许的最大字符串长度（0 表示禁用字符串长度检查）
+    max_string_value_length: "${JSON_MAX_STRING_VALUE_LENGTH:0}"
+  client_side_rpc:
+    # 客户端侧 RPC 命令的处理超时间隔，单位为毫秒
+    timeout: "${CLIENT_SIDE_RPC_TIMEOUT:60000}"
+  # 启用/禁用 http/mqtt/coap/lwm2m 传输协议（优先级高于各协议自身的 enabled 属性）
+  api_enabled: "${TB_TRANSPORT_API_ENABLED:true}"
+  log:
+    # 启用/禁用将传输消息记录到 telemetry 的日志，例如 LwM2M 注册更新日志
+    enabled: "${TB_TRANSPORT_LOG_ENABLED:true}"
+    # 日志消息的最大长度，超出时将截断至指定值
+    max_length: "${TB_TRANSPORT_LOG_MAX_LENGTH:1024}"
+  rate_limits:
+    # 启用或禁用通用速率限制；设备和租户级速率限制在 Tenant Profile 中配置
+    ip_limits_enabled: "${TB_TRANSPORT_IP_RATE_LIMITS_ENABLED:false}"
+    # 使用无效凭据的最大连接尝试次数
+    max_wrong_credentials_per_ip: "${TB_TRANSPORT_MAX_WRONG_CREDENTIALS_PER_IP:10}"
+    # IP 封禁过期时间（毫秒）
+    ip_block_timeout: "${TB_TRANSPORT_IP_BLOCK_TIMEOUT:60000}"
+  tcp:
+    enabled: "${TCP_TRANSPORT_ENABLED:true}"
+    server:
+      enabled: "${TCP_SERVER_ENABLED:true}"
+      # SERVER 入站首帧分帧（鉴权）。鉴权成功后切换为设备配置文件中的 tcpTransportFramingMode。
+      auth_framing_mode: "${TCP_SERVER_AUTH_FRAMING_MODE:LINE}"
+      auth_fixed_frame_length: "${TCP_SERVER_AUTH_FIXED_FRAME_LENGTH:512}"
+    # 绑定地址；监听端口仅由设备档案 SERVER 模式下的 tcpProfileServerBindPort 决定（不再默认占用 5683）。
+    bind_address: "${TCP_BIND_ADDRESS:0.0.0.0}"
+    bind_port: "${TCP_BIND_PORT:5683}"
+    netty:
+      leak_detector_level: "${TCP_NETTY_LEAK_DETECTOR_LEVEL:PARANOID}"
+      boss_group_thread_count: "${TCP_NETTY_BOSS_GROUP_THREADS:1}"
+      worker_group_thread_count: "${TCP_NETTY_WORKER_GROUP_THREADS:0}"
+      so_keep_alive: "${TCP_NETTY_SO_KEEPALIVE:true}"
+      max_frame_length: "${TCP_NETTY_MAX_FRAME_LENGTH:65536}"
+  udp:
+    enabled: "${UDP_TRANSPORT_ENABLED:true}"
+    server:
+      enabled: "${UDP_SERVER_ENABLED:true}"
+      auth_framing_mode: "${UDP_SERVER_AUTH_FRAMING_MODE:NONE}"
+      auth_fixed_frame_length: "${UDP_SERVER_AUTH_FIXED_FRAME_LENGTH:512}"
+    # 绑定地址；监听端口仅由设备档案 SERVER 模式下的 udpProfileServerBindPort 决定（不再默认占用 5684，避免与 CoAP DTLS 冲突）。
+    bind_address: "${UDP_BIND_ADDRESS:0.0.0.0}"
+    bind_port: "${UDP_BIND_PORT:5684}"
+    netty:
+      leak_detector_level: "${UDP_NETTY_LEAK_DETECTOR_LEVEL:PARANOID}"
+      worker_group_thread_count: "${UDP_NETTY_WORKER_GROUP_THREADS:0}"
+      max_datagram_length: "${UDP_NETTY_MAX_DATAGRAM_LENGTH:65536}"
+  # 本地 HTTP 传输参数
+  http:
+    # 启用/禁用本地 HTTP 传输协议
+    enabled: "${HTTP_ENABLED:true}"
+    # HTTP 请求处理超时（毫秒）
+    request_timeout: "${HTTP_REQUEST_TIMEOUT:60000}"
+    # HTTP 请求最大处理超时（毫秒）
+    max_request_timeout: "${HTTP_MAX_REQUEST_TIMEOUT:300000}"
+    # 以分号分隔的 urlPattern=maxPayloadSize 列表，为指定 URL 模式定义最大 HTTP 请求大小；匹配第一项后跳过其余项
+    max_payload_size: "${HTTP_TRANSPORT_MAX_PAYLOAD_SIZE_LIMIT_CONFIGURATION:/api/v1/*/rpc/**=65536;/api/v1/**=52428800}"
+  # 本地 MQTT 传输参数
+  mqtt:
+    # 启用/禁用 MQTT 传输协议。
+    enabled: "${MQTT_ENABLED:true}"
+    # MQTT 绑定地址
+    bind_address: "${MQTT_BIND_ADDRESS:0.0.0.0}"
+    # MQTT 绑定端口
+    bind_port: "${MQTT_BIND_PORT:18883}"
+    # 启用 Proxy Protocol 支持，默认禁用；启用后同时支持 v1 和 v2。
+    # 用于在日志和速率限制中获取客户端真实 IP 地址。
+    proxy_enabled: "${MQTT_PROXY_PROTOCOL_ENABLED:false}"
+    # MQTT 处理超时（毫秒）
+    timeout: "${MQTT_TIMEOUT:10000}"
+    # MQTT 断开连接超时（毫秒），即服务端发送断开消息后等待客户端断开的时间
+    disconnect_timeout: "${MQTT_DISCONNECT_TIMEOUT:1000}"
+    # MQTT 服务端设备断开后，延迟多久标记为非活跃（毫秒）。0 表示立即标记。短延迟用于闪断重连，避免活跃状态抖动。
+    disconnect_inactivity_delay_ms: "${MQTT_DISCONNECT_INACTIVITY_DELAY_MS:5000}"
+    msg_queue_size_per_device_limit: "${MQTT_MSG_QUEUE_SIZE_PER_DEVICE_LIMIT:100}" # 设备进入已连接状态前队列中等待的消息数；该限制在 TenantProfileLimits 机制之前于底层生效
+    # 网关指标周期性上报间隔
+    gateway_metrics_report_interval_sec: "${MQTT_GATEWAY_METRICS_REPORT_INTERVAL_SEC:60}"
+    netty:
+      # Netty 泄漏检测级别
+      leak_detector_level: "${NETTY_LEAK_DETECTOR_LVL:DISABLED}"
+      # Netty BOSS 线程数
+      boss_group_thread_count: "${NETTY_BOSS_GROUP_THREADS:1}"
+      # Netty worker 线程数
+      worker_group_thread_count: "${NETTY_WORKER_GROUP_THREADS:12}"
+      # 最大 payload 大小（字节）
+      max_payload_size: "${NETTY_MAX_PAYLOAD_SIZE:65536}"
+      # 启用 TCP keepalive；连接空闲一段时间后 TCP 将开始发送 keepalive 探测
+      so_keep_alive: "${NETTY_SO_KEEPALIVE:false}"
+    # MQTT SSL 配置
+    ssl:
+      # 启用/禁用 SSL 支持
+      enabled: "${MQTT_SSL_ENABLED:false}"
+      # MQTT SSL 绑定地址
+      bind_address: "${MQTT_SSL_BIND_ADDRESS:0.0.0.0}"
+      # MQTT SSL 绑定端口
+      bind_port: "${MQTT_SSL_BIND_PORT:8883}"
+      # SSL 协议：参见 https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#sslcontext-algorithms
+      protocol: "${MQTT_SSL_PROTOCOL:TLSv1.2}"
+      # 服务端 SSL 凭据
+      credentials:
+        # 服务端凭据类型（PEM - pem 证书文件；KEYSTORE - Java keystore）
+        type: "${MQTT_SSL_CREDENTIALS_TYPE:PEM}"
+        # PEM 服务端凭据
+        pem:
+          # 服务端证书文件路径（包含服务端证书或证书链，可含服务端私钥）
+          cert_file: "${MQTT_SSL_PEM_CERT:mqttserver.pem}"
+          # 服务端证书私钥文件路径；默认可选，若证书文件中未包含私钥则为必填
+          key_file: "${MQTT_SSL_PEM_KEY:mqttserver_key.pem}"
+          # 服务端证书私钥密码（可选）
+          key_password: "${MQTT_SSL_PEM_KEY_PASSWORD:server_key_password}"
+        # Keystore 服务端凭据
+        keystore:
+          # 密钥库类型（JKS 或 PKCS12）
+          type: "${MQTT_SSL_KEY_STORE_TYPE:JKS}"
+          # 存放 SSL 证书的密钥库路径
+          store_file: "${MQTT_SSL_KEY_STORE:mqttserver.jks}"
+          # 访问密钥库的密码
+          store_password: "${MQTT_SSL_KEY_STORE_PASSWORD:server_ks_password}"
+          # 私钥别名（可选）；未设置时平台将加载密钥库中的第一个私钥
+          key_alias: "${MQTT_SSL_KEY_ALIAS:}"
+          # 访问私钥的密码（可选）；未设置时平台将尝试加载未受密码保护的私钥
+          key_password: "${MQTT_SSL_KEY_PASSWORD:server_key_password}"
+      # 跳过对客户端证书的有效期检查
+      skip_validity_check_for_client_cert: "${MQTT_SSL_SKIP_VALIDITY_CHECK_FOR_CLIENT_CERT:false}"
+  # 本地 CoAP 传输参数
+  coap:
+    # 启用/禁用 CoAP 传输协议。
+    enabled: "${COAP_ENABLED:true}"
+    # CoAP 处理超时（毫秒）
+    timeout: "${COAP_TIMEOUT:10000}"
+    # CoAP piggyback 响应超时（毫秒）
+    piggyback_timeout: "${COAP_PIGGYBACK_TIMEOUT:500}"
+    # 设备配置文件中未指定时的默认 PSM Activity Timer
+    psm_activity_timer: "${COAP_PSM_ACTIVITY_TIMER:10000}"
+    # 设备配置文件中未指定时的默认 Paging Transmission Window
+    paging_transmission_window: "${COAP_PAGING_TRANSMISSION_WINDOW:10000}"
+  # 本地 LwM2M 传输参数
+  lwm2m:
+    # 启用/禁用 LwM2M 传输协议。
+    enabled: "${LWM2M_ENABLED:true}"
+    dtls:
+      # RFC7925_RETRANSMISSION_TIMEOUT_IN_MILLISECONDS = 9000
+      retransmission_timeout: "${LWM2M_DTLS_RETRANSMISSION_TIMEOUT_MS:9000}"
+      # LwM2M 的 CoAP DTLS Connection ID 长度。RFC 9146，DTLS 1.2 的 Connection Identifier
+      # 默认：off
+      # 控制 DTLS Connection ID 长度（CID）的使用方式。
+      # - 'off'：禁用。
+      # - 'on'：启用 Connection ID 支持（等同于 CID 0 或多个 0）。
+      # - 正整数：生成的 CID 大小（字节）。
+      # - 0：接受使用 CID，但不为对端生成（启用支持但不用于入站流量）。
+      # - 0 到 <= 4 之间：使用 SingleNodeConnectionIdGenerator
+      # - 大于 4：使用 MultiNodeConnectionIdGenerator
+      connection_id_length: "${LWM2M_DTLS_CONNECTION_ID_LENGTH:}"
+    server:
+      # LwM2M 服务端 ID
+      id: "${LWM2M_SERVER_ID:123}"
+      # LwM2M 服务端绑定地址，默认绑定所有网卡
+      bind_address: "${LWM2M_BIND_ADDRESS:0.0.0.0}"
+      # LwM2M 服务端绑定端口
+      bind_port: "${LWM2M_BIND_PORT:5685}"
+      security:
+        # LwM2M DTLS 服务端绑定地址，默认绑定所有网卡
+        bind_address: "${LWM2M_SECURITY_BIND_ADDRESS:0.0.0.0}"
+        # LwM2M DTLS 服务端绑定端口
+        bind_port: "${LWM2M_SECURITY_BIND_PORT:5686}"
+        # 服务端 X509 证书支持
+        credentials:
+          # 是否启用 LwM2M 服务端 X509 Certificate/RPK 支持
+          enabled: "${LWM2M_SERVER_CREDENTIALS_ENABLED:false}"
+          # 服务端凭据类型（PEM - pem 证书文件；KEYSTORE - Java keystore）
+          type: "${LWM2M_SERVER_CREDENTIALS_TYPE:PEM}"
+          # PEM 服务端凭据
+          pem:
+            # 服务端证书文件路径（包含服务端证书或证书链，可含服务端私钥）
+            cert_file: "${LWM2M_SERVER_PEM_CERT:lwm2mserver.pem}"
+            # 服务端证书私钥文件路径；默认可选，若证书文件中未包含私钥则为必填
+            key_file: "${LWM2M_SERVER_PEM_KEY:lwm2mserver_key.pem}"
+            # 服务端证书私钥密码（可选）
+            key_password: "${LWM2M_SERVER_PEM_KEY_PASSWORD:server_key_password}"
+          # Keystore 服务端凭据
+          keystore:
+            # 密钥库类型（JKS 或 PKCS12）
+            type: "${LWM2M_SERVER_KEY_STORE_TYPE:JKS}"
+            # 存放 SSL 证书的密钥库路径
+            store_file: "${LWM2M_SERVER_KEY_STORE:lwm2mserver.jks}"
+            # 访问密钥库的密码
+            store_password: "${LWM2M_SERVER_KEY_STORE_PASSWORD:server_ks_password}"
+            # 密钥别名
+            key_alias: "${LWM2M_SERVER_KEY_ALIAS:server}"
+            # 访问密钥的密码
+            key_password: "${LWM2M_SERVER_KEY_PASSWORD:server_ks_password}"
+        # 仅 Certificate_x509：
+        skip_validity_check_for_client_cert: "${TB_LWM2M_SERVER_SECURITY_SKIP_VALIDITY_CHECK_FOR_CLIENT_CERT:false}"
+    bootstrap:
+      # 启用/禁用 Bootstrap Server
+      enabled: "${LWM2M_ENABLED_BS:true}"
+      # LwM2M 客户端 Bootstrap 模式启动后对象 "LWM2M Security" 字段 "Short Server ID" 的默认值（deviceProfile：Bootstrap.BOOTSTRAP SERVER.Short ID）
+      id: "${LWM2M_SERVER_ID_BS:111}"
+      # LwM2M Bootstrap 服务端绑定地址，默认绑定所有网卡
+      bind_address: "${LWM2M_BS_BIND_ADDRESS:0.0.0.0}"
+      # LwM2M Bootstrap 服务端绑定端口
+      bind_port: "${LWM2M_BS_BIND_PORT:5687}"
+      security:
+        # LwM2M Bootstrap DTLS 服务端绑定地址，默认绑定所有网卡
+        bind_address: "${LWM2M_BS_SECURITY_BIND_ADDRESS:0.0.0.0}"
+        # LwM2M Bootstrap DTLS 服务端绑定端口
+        bind_port: "${LWM2M_BS_SECURITY_BIND_PORT:5688}"
+        # Bootstrap 服务端 X509 证书支持
+        credentials:
+          # 是否启用 LwM2M Bootstrap 服务端 X509 Certificate/RPK 支持
+          enabled: "${LWM2M_BS_CREDENTIALS_ENABLED:false}"
+          # 服务端凭据类型（PEM - pem 证书文件；KEYSTORE - Java keystore）
+          type: "${LWM2M_BS_CREDENTIALS_TYPE:PEM}"
+          # PEM 服务端凭据
+          pem:
+            # 服务端证书文件路径（包含服务端证书或证书链，可含服务端私钥）
+            cert_file: "${LWM2M_BS_PEM_CERT:lwm2mserver.pem}"
+            # 服务端证书私钥文件路径；默认可选，若证书文件中未包含私钥则为必填
+            key_file: "${LWM2M_BS_PEM_KEY:lwm2mserver_key.pem}"
+            # 服务端证书私钥密码（可选）
+            key_password: "${LWM2M_BS_PEM_KEY_PASSWORD:server_key_password}"
+          # Keystore 服务端凭据
+          keystore:
+            # 密钥库类型（JKS 或 PKCS12）
+            type: "${LWM2M_BS_KEY_STORE_TYPE:JKS}"
+            # 存放 SSL 证书的密钥库路径
+            store_file: "${LWM2M_BS_KEY_STORE:lwm2mserver.jks}"
+            # 访问密钥库的密码
+            store_password: "${LWM2M_BS_KEY_STORE_PASSWORD:server_ks_password}"
+            # 密钥别名
+            key_alias: "${LWM2M_BS_KEY_ALIAS:bootstrap}"
+            # 访问密钥的密码
+            key_password: "${LWM2M_BS_KEY_PASSWORD:server_ks_password}"
+    security:
+      # X509 信任证书
+      trust-credentials:
+        # 是否加载 X509 信任证书
+        enabled: "${LWM2M_TRUST_CREDENTIALS_ENABLED:false}"
+        # 信任证书存储类型（PEM - pem 证书文件；KEYSTORE - Java keystore）
+        type: "${LWM2M_TRUST_CREDENTIALS_TYPE:PEM}"
+        # PEM 证书
+        pem:
+          # 证书文件路径（存放信任证书）
+          cert_file: "${LWM2M_TRUST_PEM_CERT:lwm2mtruststorechain.pem}"
+        # 含信任证书的 Keystore
+        keystore:
+          # 密钥库类型（JKS 或 PKCS12）
+          type: "${LWM2M_TRUST_KEY_STORE_TYPE:JKS}"
+          # 存放 X509 证书的密钥库路径
+          store_file: "${LWM2M_TRUST_KEY_STORE:lwm2mtruststorechain.jks}"
+          # 访问密钥库的密码
+          store_password: "${LWM2M_TRUST_KEY_STORE_PASSWORD:server_ks_password}"
+      # 是否使用推荐密码套件；true - 仅允许推荐密码套件；false - 允许非推荐密码套件
+      recommended_ciphers: "${LWM2M_RECOMMENDED_CIPHERS:false}"
+      # 是否使用推荐支持组（曲线）；true - 仅允许推荐支持组；false - 允许非推荐支持组
+      recommended_supported_groups: "${LWM2M_RECOMMENDED_SUPPORTED_GROUPS:true}"
+    # LwM2M 操作超时
+    timeout: "${LWM2M_TIMEOUT:120000}"
+    # 处理 LwM2M 上行链路的线程池大小
+    uplink_pool_size: "${LWM2M_UPLINK_POOL_SIZE:10}"
+    # 处理 LwM2M 下行链路的线程池大小
+    downlink_pool_size: "${LWM2M_DOWNLINK_POOL_SIZE:10}"
+    # 处理 OTA 更新的线程池大小
+    ota_pool_size: "${LWM2M_OTA_POOL_SIZE:10}"
+    # 注册信息存储清理周期
+    clean_period_in_sec: "${LWM2M_CLEAN_PERIOD_IN_SEC:2}"
+    # 最大日志长度
+    log_max_length: "${LWM2M_LOG_MAX_LENGTH:1024}"
+    # 设备配置文件中未指定时的 PSM Activity Timer
+    psm_activity_timer: "${LWM2M_PSM_ACTIVITY_TIMER:10000}"
+    # 设备配置文件中未指定时 eDRX 支持的 Paging Transmission Window
+    paging_transmission_window: "${LWM2M_PAGING_TRANSMISSION_WINDOW:10000}"
+    network_config: # 可在此指定 LwM2M 网络配置的自定义参数，并通过环境变量在外部配置
+  #      - key: "PROTOCOL_STAGE_THREAD_COUNT"
+  #        value: "${LWM2M_PROTOCOL_STAGE_THREAD_COUNT:4}"
+  snmp:
+    # 启用/禁用 SNMP 传输协议
+    enabled: "${SNMP_ENABLED:true}"
+    # SNMP 绑定地址
+    bind_address: "${SNMP_BIND_ADDRESS:0.0.0.0}"
+    # SNMP 绑定端口，默认为 0（随机）；使用 SNMP TRAP 时建议指定静态端口，例如 1620
+    bind_port: "${SNMP_BIND_PORT:0}"
+    response_processing:
+      # 处理 SNMP 设备响应的 executor（workStealingPool）并行度
+      parallelism_level: "${SNMP_RESPONSE_PROCESSING_PARALLELISM_LEVEL:4}"
+    # 配置 SNMP 使用 UDP 或 TCP
+    underlying_protocol: "${SNMP_UNDERLYING_PROTOCOL:udp}"
+    # PDU 最大大小（单个 SNMP 请求中 OID 映射数量）；超出时将拆分为多个 PDU
+    max_request_oids: "${SNMP_MAX_REQUEST_OIDS:100}"
+    # 发送每个请求分块后的延迟（因 max_request_oids 导致请求被拆分时）
+    request_chunk_delay_ms: "${SNMP_REQUEST_CHUNK_DELAY_MS:100}"
+    response:
+      # 是否忽略与已配置 OID 映射数据类型不匹配的 SNMP 响应值（默认 false - 响应中任何值类型不匹配将抛出错误）
+      ignore_type_cast_errors: "${SNMP_RESPONSE_IGNORE_TYPE_CAST_ERRORS:false}"
+    # 执行设备查询任务的调度器线程池大小
+    scheduler_thread_pool_size: "${SNMP_SCHEDULER_THREAD_POOL_SIZE:4}"
+  stats:
+    # 启用/禁用传输统计信息收集
+    enabled: "${TB_TRANSPORT_STATS_ENABLED:true}"
+    # 传输统计信息日志输出间隔
+    print-interval-ms: "${TB_TRANSPORT_STATS_PRINT_INTERVAL_MS:60000}"
+  gateway:
+    dashboard:
+      sync:
+        # 启用/禁用网关仪表板与 Git 仓库同步
+        enabled: "${TB_GATEWAY_DASHBOARD_SYNC_ENABLED:true}"
+        # 网关仪表板仓库 URL
+        repository_url: "${TB_GATEWAY_DASHBOARD_SYNC_REPOSITORY_URL:https://github.com/thingsboard/gateway-management-extensions-dist.git}"
+        # 网关仪表板仓库工作分支
+        branch: "${TB_GATEWAY_DASHBOARD_SYNC_BRANCH:release/4.0.0}"
+        # 网关仪表板仓库拉取频率（小时）
+        fetch_frequency: "${TB_GATEWAY_DASHBOARD_SYNC_FETCH_FREQUENCY:24}"
+
+# CoAP 服务端参数
+coap:
+  server:
+    # 启用/禁用 CoAP 服务端
+    enabled: "${COAP_SERVER_ENABLED:true}"
+  # CoAP 绑定地址
+  bind_address: "${COAP_BIND_ADDRESS:0.0.0.0}"
+  # CoAP 绑定端口
+  bind_port: "${COAP_BIND_PORT:5683}"
+  dtls:
+    # 启用/禁用 DTLS 1.2 支持
+    enabled: "${COAP_DTLS_ENABLED:false}"
+    # RFC7925_RETRANSMISSION_TIMEOUT_IN_MILLISECONDS = 9000
+    retransmission_timeout: "${COAP_DTLS_RETRANSMISSION_TIMEOUT_MS:9000}"
+    # CoAP DTLS 绑定地址
+    bind_address: "${COAP_DTLS_BIND_ADDRESS:0.0.0.0}"
+    # CoAP DTLS 绑定端口
+    bind_port: "${COAP_DTLS_BIND_PORT:5684}"
+    # CoAP DTLS Connection ID 长度。RFC 9146，DTLS 1.2 的 Connection Identifier
+    # 默认：off
+    # 控制 DTLS Connection ID 长度（CID）的使用方式。
+    # - 'off'：禁用。
+    # - 'on'：启用 Connection ID 支持（等同于 CID 0 或多个 0）。
+    # - 正整数：生成的 CID 大小（字节）。
+    # - 0：接受使用 CID，但不为对端生成（启用支持但不用于入站流量）。
+    # - 0 到 <= 4 之间：使用 SingleNodeConnectionIdGenerator
+    # - 大于 4：使用 MultiNodeConnectionIdGenerator
+    connection_id_length: "${COAP_DTLS_CONNECTION_ID_LENGTH:}"
+    # 指定 MTU（Maximum Transmission Unit）。
+    # 未使用 LAN MTU 时使用，例如使用 IP 隧道或客户端 MTU 小于 LAN MTU 时。
+    # 默认 = 1024
+    # 最小值 = 64
+    # 设为 0 则使用 LAN MTU。
+    max_transmission_unit: "${COAP_DTLS_MAX_TRANSMISSION_UNIT:1024}"
+    # DTLS 最大分片长度（RFC 6066，第 4 节）。
+    # 默认 = 1024
+    # 可选值：512、1024、2048、4096。
+    # 设为 0 时使用默认最大分片大小 2^14 字节（16,384 字节）。
+    # 不使用此扩展时，TLS 规定明文分片最大长度为 2^14 字节。
+    # 受资源限制的客户端可能需要协商更小的最大分片长度。
+    # 为协商更小的最大分片长度，
+    # 客户端 MAY 在（扩展）client hello 中包含 "max_fragment_length" 类型扩展。
+    # 该扩展的 "extension_data" 字段 SHALL 包含：
+    # enum {
+    #   2^9(1) == 512,
+    #   2^10(2) == 1024,
+    #   2^11(3) == 2048,
+    #   2^12(4) == 4096,
+    #   (255)
+    # } MaxFragmentLength;
+    # TLS 已要求客户端和服务端支持握手消息分片。
+    max_fragment_length: "${COAP_DTLS_MAX_FRAGMENT_LENGTH:1024}"
+    # 服务端 DTLS 凭据
+    credentials:
+      # 服务端凭据类型（PEM - pem 证书文件；KEYSTORE - Java keystore）
+      type: "${COAP_DTLS_CREDENTIALS_TYPE:PEM}"
+      # PEM 服务端凭据
+      pem:
+        # 服务端证书文件路径（包含服务端证书或证书链，可含服务端私钥）
+        cert_file: "${COAP_DTLS_PEM_CERT:coapserver.pem}"
+        # 服务端证书私钥文件路径；默认可选，若证书文件中未包含私钥则为必填
+        key_file: "${COAP_DTLS_PEM_KEY:coapserver_key.pem}"
+        # 服务端证书私钥密码（可选）
+        key_password: "${COAP_DTLS_PEM_KEY_PASSWORD:server_key_password}"
+      # Keystore 服务端凭据
+      keystore:
+        # 密钥库类型（JKS 或 PKCS12）
+        type: "${COAP_DTLS_KEY_STORE_TYPE:JKS}"
+        # 存放 SSL 证书的密钥库路径
+        store_file: "${COAP_DTLS_KEY_STORE:coapserver.jks}"
+        # 访问密钥库的密码
+        store_password: "${COAP_DTLS_KEY_STORE_PASSWORD:server_ks_password}"
+        # 密钥别名
+        key_alias: "${COAP_DTLS_KEY_ALIAS:serveralias}"
+        # 访问密钥的密码
+        key_password: "${COAP_DTLS_KEY_PASSWORD:server_key_password}"
+    x509:
+      # 跳过对客户端证书的有效期检查
+      skip_validity_check_for_client_cert: "${TB_COAP_X509_DTLS_SKIP_VALIDITY_CHECK_FOR_CLIENT_CERT:false}"
+      # DTLS 会话不活动超时，用于清理缓存
+      dtls_session_inactivity_timeout: "${TB_COAP_X509_DTLS_SESSION_INACTIVITY_TIMEOUT:86400000}"
+      # 周期性驱逐超时 DTLS 会话的间隔
+      dtls_session_report_timeout: "${TB_COAP_X509_DTLS_SESSION_REPORT_TIMEOUT:1800000}"
+
+# 设备连通性参数
+device:
+  connectivity:
+    http:
+      # 若为 true，check-connectivity 服务将在全部测试命令列表中加入使用 DEVICE_CONNECTIVITY_HTTP_HOST 和 DEVICE_CONNECTIVITY_HTTP_PORT 的 curl 命令
+      enabled: "${DEVICE_CONNECTIVITY_HTTP_ENABLED:true}"
+      # HTTP 传输服务主机；为空时使用 base URL
+      host: "${DEVICE_CONNECTIVITY_HTTP_HOST:}"
+      # HTTP 传输服务端口；为空时使用默认 HTTP 端口
+      port: "${DEVICE_CONNECTIVITY_HTTP_PORT:8080}"
+    https:
+      # 若为 true，check-connectivity 服务将在全部测试命令列表中加入使用 DEVICE_CONNECTIVITY_HTTPS_HOST 和 DEVICE_CONNECTIVITY_HTTPS_PORT 的 curl 命令
+      enabled: "${DEVICE_CONNECTIVITY_HTTPS_ENABLED:false}"
+      # HTTP 传输服务主机；为空时使用 base URL
+      host: "${DEVICE_CONNECTIVITY_HTTPS_HOST:}"
+      # HTTP 传输服务端口；为空时使用默认 HTTPS 端口
+      port: "${DEVICE_CONNECTIVITY_HTTPS_PORT:443}"
+    mqtt:
+      # 若为 true，将在全部测试命令列表中加入使用 DEVICE_CONNECTIVITY_MQTT_HOST 和 DEVICE_CONNECTIVITY_MQTT_PORT 的 mosquitto 命令
+      enabled: "${DEVICE_CONNECTIVITY_MQTT_ENABLED:true}"
+      # MQTT 传输服务主机；为空时使用 base URL 主机
+      host: "${DEVICE_CONNECTIVITY_MQTT_HOST:}"
+      # MQTT 传输服务端口
+      port: "${DEVICE_CONNECTIVITY_MQTT_PORT:1883}"
+    mqtts:
+      # 若为 true，将在全部测试命令列表中加入使用 DEVICE_CONNECTIVITY_MQTTS_HOST 和 DEVICE_CONNECTIVITY_MQTTS_PORT 的 mosquitto 命令
+      enabled: "${DEVICE_CONNECTIVITY_MQTTS_ENABLED:false}"
+      # MQTT 传输服务主机；为空时使用 base URL 主机
+      host: "${DEVICE_CONNECTIVITY_MQTTS_HOST:}"
+      # MQTT 传输服务端口；为空时使用 MQTTS 默认端口
+      port: "${DEVICE_CONNECTIVITY_MQTTS_PORT:8883}"
+      # MQTT CA 根证书文件路径
+      pem_cert_file: "${DEVICE_CONNECTIVITY_MQTTS_CA_ROOT_CERT:cafile.pem}"
+    coap:
+      # 若为 true，将在全部测试命令列表中加入使用 DEVICE_CONNECTIVITY_COAP_HOST 和 DEVICE_CONNECTIVITY_COAP_PORT 的 coap 命令
+      enabled: "${DEVICE_CONNECTIVITY_COAP_ENABLED:true}"
+      # CoAP 传输服务主机；为空时使用 base URL 主机
+      host: "${DEVICE_CONNECTIVITY_COAP_HOST:}"
+      # CoAP 传输服务端口；为空时使用 CoAP 默认端口
+      port: "${DEVICE_CONNECTIVITY_COAP_PORT:5683}"
+    coaps:
+      # 若为 true，将在全部测试命令列表中加入使用 DEVICE_CONNECTIVITY_COAPS_HOST 和 DEVICE_CONNECTIVITY_COAPS_PORT 的 coap 命令
+      enabled: "${DEVICE_CONNECTIVITY_COAPS_ENABLED:false}"
+      # CoAP 传输服务主机；为空时使用 base URL 主机
+      host: "${DEVICE_CONNECTIVITY_COAPS_HOST:}"
+      # CoAP 传输服务端口；为空时使用 CoAPS 默认端口
+      port: "${DEVICE_CONNECTIVITY_COAPS_PORT:5684}"
+      # CoAP CA 根证书文件路径
+      pem_cert_file: "${DEVICE_CONNECTIVITY_COAPS_CA_ROOT_CERT:cafile.pem}"
+    gateway:
+      # docker-compose 中启动网关所使用的 thingsboard/tb-gateway 镜像 docker tag
+      image_version: "${DEVICE_CONNECTIVITY_GATEWAY_IMAGE_VERSION:3.7-stable}"
+
+
+# Spring doc 通用参数
+springdoc:
+  # 若为 false，Swagger API 文档将不可用
+  api-docs.enabled: "${SWAGGER_ENABLED:true}"
+  # Swagger 默认 produces 媒体类型
+  default-produces-media-type: "${SWAGGER_DEFAULT_PRODUCES_MEDIA_TYPE:application/json}"
+
+# Swagger 通用参数
+swagger:
+  # Swagger UI 链接的通用匹配模式
+  api_path: "${SWAGGER_API_PATH:/api/**}"
+  # Swagger UI 链接的通用路径匹配模式
+  security_path_regex: "${SWAGGER_SECURITY_PATH_REGEX:/api/.*}"
+  # Swagger UI 链接的非安全 API 路径匹配模式
+  non_security_path_regex: "${SWAGGER_NON_SECURITY_PATH_REGEX:/api/(?:noauth|v1)/.*}"
+  # API 文档 UI 页面上的标题
+  title: "${SWAGGER_TITLE:ThingsBoard REST API}"
+  # API 文档 UI 页面上的描述
+  description: "${SWAGGER_DESCRIPTION: ThingsBoard open-source IoT platform REST API documentation.}"
+  contact:
+    # API 文档 UI 页面上的联系人名称
+    name: "${SWAGGER_CONTACT_NAME:ThingsBoard team}"
+    # API 文档 UI 页面上的联系人 URL
+    url: "${SWAGGER_CONTACT_URL:https://thingsboard.io}"
+    # API 文档 UI 页面上的联系人邮箱
+    email: "${SWAGGER_CONTACT_EMAIL:info@thingsboard.io}"
+  license:
+    # API 文档 UI 页面上的许可证标题
+    title: "${SWAGGER_LICENSE_TITLE:Apache License Version 2.0}"
+    # API 文档 UI 页面上许可证正文的链接
+    url: "${SWAGGER_LICENSE_URL:https://github.com/thingsboard/thingsboard/blob/master/LICENSE}"
+  # 要显示的 API 文档版本。默认为包版本。
+  version: "${SWAGGER_VERSION:}"
+  # API 文档 UI 页面上的组名（定义）。
+  group_name: "${SWAGGER_GROUP_NAME:thingsboard}"
+
+# 队列配置参数
+queue:
+  type: "${TB_QUEUE_TYPE:in-memory}" # in-memory 或 kafka (Apache Kafka)
+  prefix: "${TB_QUEUE_PREFIX:}" # 全局队列前缀。若指定，前缀将加在默认主题名之前：'prefix.default_topic_name'。前缀应用于所有主题（Kafka 还包括 consumer groups）。
+  in_memory:
+    stats:
+      # 用于 debug 级别
+      print-interval-ms: "${TB_QUEUE_IN_MEMORY_STATS_PRINT_INTERVAL_MS:60000}"
+  kafka:
+    # Kafka Bootstrap 节点，格式为 "host:port"
+    bootstrap.servers: "${TB_KAFKA_SERVERS:localhost:9092}"
+    ssl:
+      # 启用/禁用 Kafka SSL 通信
+      enabled: "${TB_KAFKA_SSL_ENABLED:false}"
+      # trust store 文件的位置
+      truststore.location: "${TB_KAFKA_SSL_TRUSTSTORE_LOCATION:}"
+      # 若指定则 trust store 文件的密码
+      truststore.password: "${TB_KAFKA_SSL_TRUSTSTORE_PASSWORD:}"
+      # key store 文件的位置。对客户端为可选，可用于客户端双向认证
+      keystore.location: "${TB_KAFKA_SSL_KEYSTORE_LOCATION:}"
+      # key store 文件的 store 密码。对客户端为可选，仅在配置了 ‘ssl.keystore.location’ 时需要。PEM 格式不支持 key store 密码
+      keystore.password: "${TB_KAFKA_SSL_KEYSTORE_PASSWORD:}"
+      # key store 文件中私钥或 ‘keystore.key’ 指定的 PEM 密钥的密码
+      key.password: "${TB_KAFKA_SSL_KEY_PASSWORD:}"
+    # producer 认为请求完成前要求 leader 收到的确认数。控制发送记录的持久性。允许的值：0、1 和 all
+    acks: "${TB_KAFKA_ACKS:all}"
+    # 重试次数。对因可能为瞬时错误而发送失败的记录进行重发
+    retries: "${TB_KAFKA_RETRIES:1}"
+    # producer 生成的所有数据的压缩类型。默认为 none（即不压缩）。有效值：none 或 gzip
+    compression.type: "${TB_KAFKA_COMPRESSION_TYPE:none}" # none 或 gzip
+    # 默认 batch 大小。此设置给出待发送 batch 大小的上限
+    batch.size: "${TB_KAFKA_BATCH_SIZE:16384}"
+    # 此变量产生少量人为延迟，即不会立即发送记录
+    linger.ms: "${TB_KAFKA_LINGER_MS:1}"
+    # 请求的最大字节大小。此设置限制 producer 在单次请求中发送的 record batch 数量，以避免发送过大请求
+    max.request.size: "${TB_KAFKA_MAX_REQUEST_SIZE:1048576}"
+    # 客户端在阻塞前可在单条连接上发送的最大未确认请求数
+    max.in.flight.requests.per.connection: "${TB_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION:5}"
+    # producer 可用于缓冲待发送到服务器的记录的内存总字节数
+    buffer.memory: "${TB_BUFFER_MEMORY:33554432}"
+    # Kafka 多个 broker 上的数据副本数
+    replication_factor: "${TB_QUEUE_KAFKA_REPLICATION_FACTOR:1}"
+    # 使用 consumer group 管理时 poll() 方法调用之间的最大延迟。限制 consumer 在获取更多记录前可空闲的最长时间
+    max_poll_interval_ms: "${TB_QUEUE_KAFKA_MAX_POLL_INTERVAL_MS:300000}"
+    # 单次 poll() 调用返回的最大记录数
+    max_poll_records: "${TB_QUEUE_KAFKA_MAX_POLL_RECORDS:8192}"
+    # 服务器每个分区返回的最大数据量。consumer 以 batch 方式获取记录
+    max_partition_fetch_bytes: "${TB_QUEUE_KAFKA_MAX_PARTITION_FETCH_BYTES:16777216}"
+    # 服务器返回的最大数据量。consumer 以 batch 方式获取记录
+    fetch_max_bytes: "${TB_QUEUE_KAFKA_FETCH_MAX_BYTES:134217728}"
+    request.timeout.ms: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 秒) # 参见 https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
+    session.timeout.ms: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 秒) # 参见 https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
+    auto_offset_reset: "${TB_QUEUE_KAFKA_AUTO_OFFSET_RESET:earliest}" # earliest、latest 或 none
+    # 启用/禁用 Confluent Cloud
+    use_confluent_cloud: "${TB_QUEUE_KAFKA_USE_CONFLUENT_CLOUD:false}"
+    confluent:
+      # 客户端用于验证服务器主机名的端点识别算法。默认值为 https
+      ssl.algorithm: "${TB_QUEUE_KAFKA_CONFLUENT_SSL_ALGORITHM:https}"
+      # 用于认证 Schema Registry 请求的机制。SASL/PLAIN 应仅与 TLS/SSL 传输层一起使用，以确保明文密码不会在未加密的情况下传输
+      sasl.mechanism: "${TB_QUEUE_KAFKA_CONFLUENT_SASL_MECHANISM:PLAIN}"
+      # 使用 JAAS 配置在 broker 上指定多个 SASL 机制
+      sasl.config: "${TB_QUEUE_KAFKA_CONFLUENT_SASL_JAAS_CONFIG:org.apache.kafka.common.security.plain.PlainLoginModule required username=\"CLUSTER_API_KEY\" password=\"CLUSTER_API_SECRET\";}"
+      # 与 broker 通信使用的协议。有效值：PLAINTEXT、SSL、SASL_PLAINTEXT、SASL_SSL
+      security.protocol: "${TB_QUEUE_KAFKA_CONFLUENT_SECURITY_PROTOCOL:SASL_SSL}"
+    # 按特定主题的 Kafka consumer 键值属性，例如 tb_ota_package 是 OTA 的主题名，tb_rule_engine.sq 是默认 SequentialByOriginator 队列的主题名。
+    # 参见 TB_QUEUE_CORE_OTA_TOPIC 和 TB_QUEUE_RE_SQ_TOPIC 参数
+    consumer-properties-per-topic:
+      tb_ota_package:
+        # 按特定主题的 Kafka consumer 键值属性，例如 tb_ota_package 是 OTA 的主题名，tb_rule_engine.sq 是默认 SequentialByOriginator 队列的主题名。参见 TB_QUEUE_CORE_OTA_TOPIC 和 TB_QUEUE_RE_SQ_TOPIC 参数
+        - key: max.poll.records
+          # 按主题指定 consumer 属性值的示例
+          value: "${TB_QUEUE_KAFKA_OTA_MAX_POLL_RECORDS:10}"
+      tb_version_control:
+        # 按主题指定 VC consumer 属性值的示例
+        - key: max.poll.interval.ms
+          # 按主题指定 VC consumer 属性值的示例
+          value: "${TB_QUEUE_KAFKA_VC_MAX_POLL_INTERVAL_MS:600000}"
+    #      tb_rule_engine.sq:
+    #        - key: max.poll.records
+    #          value: "${TB_QUEUE_KAFKA_SQ_MAX_POLL_RECORDS:1024}"
+      tb_housekeeper:
+        # Housekeeper 任务主题的 consumer 属性
+        - key: max.poll.records
+          # 单次 poll 返回的记录数。对于 Housekeeper 任务主题，应逐条消费消息（任务）
+          value: "${TB_QUEUE_KAFKA_HOUSEKEEPER_MAX_POLL_RECORDS:1}"
+      tb_housekeeper.reprocessing:
+        # Housekeeper 重处理主题的 consumer 属性
+        - key: max.poll.records
+          # 单次 poll 返回的记录数。对于 Housekeeper 重处理主题，应逐条消费消息（任务）
+          value: "${TB_QUEUE_KAFKA_HOUSEKEEPER_REPROCESSING_MAX_POLL_RECORDS:1}"
+      edqs.events:
+        # edqs.events 主题的 Kafka consumer 键值属性
+        - key: max.poll.records
+          # edqs.events 主题的 max poll records
+          value: "${TB_QUEUE_KAFKA_EDQS_EVENTS_MAX_POLL_RECORDS:512}"
+      edqs.state:
+        # edqs.state 主题的 Kafka consumer 键值属性
+        - key: max.poll.records
+          # edqs.state 主题的 max poll records
+          value: "${TB_QUEUE_KAFKA_EDQS_STATE_MAX_POLL_RECORDS:512}"
+    other-inline: "${TB_QUEUE_KAFKA_OTHER_PROPERTIES:}" # 在此可指定 Kafka consumer/producer/admin 的自定义参数（分号分隔） # 示例 "metrics.recording.level:INFO;metrics.sample.window.ms:30000"
+    other: # 已弃用。在此可指定 Kafka consumer/producer 的自定义参数，并暴露环境变量以便外部配置
+    #  - key: "request.timeout.ms" # 参见 https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
+    #    value: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 秒)
+    #  - key: "session.timeout.ms" # 参见 https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
+    #    value: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 秒)
+    topic-properties:
+      # Rule Engine 的 Kafka 属性
+      rule-engine: "${TB_QUEUE_KAFKA_RE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      # Core 主题的 Kafka 属性
+      core: "${TB_QUEUE_KAFKA_CORE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      # Transport Api 主题的 Kafka 属性
+      transport-api: "${TB_QUEUE_KAFKA_TA_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
+      # Notifications 主题的 Kafka 属性
+      notifications: "${TB_QUEUE_KAFKA_NOTIFICATIONS_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      # JS Executor 主题的 Kafka 属性
+      js-executor: "${TB_QUEUE_KAFKA_JE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:104857600;partitions:100;min.insync.replicas:1}"
+      # OTA 更新主题的 Kafka 属性
+      ota-updates: "${TB_QUEUE_KAFKA_OTA_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
+      # Version Control 主题的 Kafka 属性
+      version-control: "${TB_QUEUE_KAFKA_VC_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      # Housekeeper 任务主题的 Kafka 属性
+      housekeeper: "${TB_QUEUE_KAFKA_HOUSEKEEPER_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
+      # Housekeeper 重处理主题的 Kafka 属性；retention.ms 设为 90 天；partitions 设为 1，因为同一时间仅运行一个重处理服务
+      housekeeper-reprocessing: "${TB_QUEUE_KAFKA_HOUSEKEEPER_REPROCESSING_TOPIC_PROPERTIES:retention.ms:7776000000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      # Calculated Field 主题的 Kafka 属性
+      calculated-field: "${TB_QUEUE_KAFKA_CF_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      # Calculated Field State 主题的 Kafka 属性
+      calculated-field-state: "${TB_QUEUE_KAFKA_CF_STATE_TOPIC_PROPERTIES:retention.ms:-1;segment.bytes:52428800;retention.bytes:104857600000;partitions:1;min.insync.replicas:1;cleanup.policy:compact}"
+      # EDQS 事件主题的 Kafka 属性
+      edqs-events: "${TB_QUEUE_KAFKA_EDQS_EVENTS_TOPIC_PROPERTIES:retention.ms:86400000;segment.bytes:52428800;retention.bytes:-1;partitions:1;min.insync.replicas:1}"
+      # EDQS 请求主题的 Kafka 属性（默认保留 3 分钟）
+      edqs-requests: "${TB_QUEUE_KAFKA_EDQS_REQUESTS_TOPIC_PROPERTIES:retention.ms:180000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      # EDQS 状态主题的 Kafka 属性（无限保留，compaction）
+      edqs-state: "${TB_QUEUE_KAFKA_EDQS_STATE_TOPIC_PROPERTIES:retention.ms:-1;segment.bytes:52428800;retention.bytes:-1;partitions:1;min.insync.replicas:1;cleanup.policy:compact}"
+    consumer-stats:
+      # 打印 Kafka 主题中 consumer group 偏移量与最后消息偏移量之间的 lag
+      enabled: "${TB_QUEUE_KAFKA_CONSUMER_STATS_ENABLED:true}"
+      # Kafka consumer-groups 统计信息的打印间隔
+      print-interval-ms: "${TB_QUEUE_KAFKA_CONSUMER_STATS_MIN_PRINT_INTERVAL_MS:60000}"
+      # 等待向 Kafka 发送的统计加载请求完成的时间
+      kafka-response-timeout-ms: "${TB_QUEUE_KAFKA_CONSUMER_STATS_RESPONSE_TIMEOUT_MS:1000}"
+  partitions:
+    hash_function_name: "${TB_QUEUE_PARTITIONS_HASH_FUNCTION_NAME:murmur3_128}" # murmur3_32、murmur3_128 或 sha256
+  transport_api:
+    # 用于消费来自 transport 微服务 API 请求的主题
+    requests_topic: "${TB_QUEUE_TRANSPORT_API_REQUEST_TOPIC:tb_transport.api.requests}"
+    # 用于向 transport 微服务生产 API 响应的主题
+    responses_topic: "${TB_QUEUE_TRANSPORT_API_RESPONSE_TOPIC:tb_transport.api.responses}"
+    # 服务器待处理的来自 transport 微服务的最大 API 请求数
+    max_pending_requests: "${TB_QUEUE_TRANSPORT_MAX_PENDING_REQUESTS:10000}"
+    # 服务器处理来自 transport 微服务 API 请求的最大超时时间（毫秒）
+    max_requests_timeout: "${TB_QUEUE_TRANSPORT_MAX_REQUEST_TIMEOUT:10000}"
+    # 用于调用回调的线程数
+    max_callback_threads: "${TB_QUEUE_TRANSPORT_MAX_CALLBACK_THREADS:100}"
+    # 用于 transport API 请求的线程数
+    max_core_handler_threads: "${TB_QUEUE_TRANSPORT_MAX_CORE_HANDLER_THREADS:16}"
+    # 从 transport 微服务轮询 API 请求的间隔（毫秒）
+    request_poll_interval: "${TB_QUEUE_TRANSPORT_REQUEST_POLL_INTERVAL_MS:25}"
+    # 从 transport 微服务轮询 API 响应的间隔（毫秒）
+    response_poll_interval: "${TB_QUEUE_TRANSPORT_RESPONSE_POLL_INTERVAL_MS:25}"
+  core:
+    # 默认主题名
+    topic: "${TB_QUEUE_CORE_TOPIC:tb_core}"
+    # 需要最低延迟和处理时间的高优先级通知
+    notifications_topic: "${TB_QUEUE_CORE_NOTIFICATIONS_TOPIC:tb_core.notifications}"
+    # Core 微服务轮询消息的间隔（毫秒）
+    poll-interval: "${TB_QUEUE_CORE_POLL_INTERVAL_MS:25}"
+    # Core 微服务使用的分区数
+    partitions: "${TB_QUEUE_CORE_PARTITIONS:10}"
+    # Core 微服务处理消息包的超时时间
+    pack-processing-timeout: "${TB_QUEUE_CORE_PACK_PROCESSING_TIMEOUT_MS:2000}"
+    # 为 Core 队列的每个分区启用/禁用独立 consumer
+    consumer-per-partition: "${TB_QUEUE_CORE_CONSUMER_PER_PARTITION:true}"
+    ota:
+      # 默认主题名 for OTA updates
+      topic: "${TB_QUEUE_CORE_OTA_TOPIC:tb_ota_package}"
+      # 处理设备 OTA 更新的间隔。用于避免因大量并行 OTA 更新而对网络造成损害
+      pack-interval-ms: "${TB_QUEUE_CORE_OTA_PACK_INTERVAL_MS:60000}"
+      # 从队列获取的 OTA 更新通知数量。队列存储固件与设备 id 的配对
+      pack-size: "${TB_QUEUE_CORE_OTA_PACK_SIZE:100}"
+    # 统计主题名
+    usage-stats-topic: "${TB_QUEUE_US_TOPIC:tb_usage_stats}"
+    stats:
+      # 启用/禁用 Core 微服务统计
+      enabled: "${TB_QUEUE_CORE_STATS_ENABLED:true}"
+      # Core 微服务统计信息打印间隔
+      print-interval-ms: "${TB_QUEUE_CORE_STATS_PRINT_INTERVAL_MS:60000}"
+    housekeeper:
+      # Housekeeper 任务的主题名
+      topic: "${TB_HOUSEKEEPER_TOPIC:tb_housekeeper}"
+      # 待重新处理的 Housekeeper 任务主题名
+      reprocessing-topic: "${TB_HOUSEKEEPER_REPROCESSING_TOPIC:tb_housekeeper.reprocessing}"
+      # Housekeeper 相关主题的轮询间隔
+      poll-interval-ms: "${TB_HOUSEKEEPER_POLL_INTERVAL_MS:500}"
+      # 任务处理的超时时间（毫秒）。未按时完成的任务将提交重处理
+      task-processing-timeout-ms: "${TB_HOUSEKEEPER_TASK_PROCESSING_TIMEOUT_MS:120000}"
+      # 不应处理的任务类型列表（逗号分隔）。可用任务类型：
+      # DELETE_ATTRIBUTES、DELETE_TELEMETRY（DELETE_LATEST_TS 和 DELETE_TS_HISTORY 均将被禁用），
+      # DELETE_LATEST_TS、DELETE_TS_HISTORY、DELETE_EVENTS、DELETE_ALARMS、UNASSIGN_ALARMS
+      disabled-task-types: "${TB_HOUSEKEEPER_DISABLED_TASK_TYPES:}"
+      # 任务重处理之间的延迟（毫秒）
+      task-reprocessing-delay-ms: "${TB_HOUSEKEEPER_TASK_REPROCESSING_DELAY_MS:3000}"
+      # 任务重处理的最大尝试次数。超出后任务将被丢弃
+      max-reprocessing-attempts: "${TB_HOUSEKEEPER_MAX_REPROCESSING_ATTEMPTS:10}"
+      stats:
+        # 启用/禁用 Housekeeper 统计
+        enabled: "${TB_HOUSEKEEPER_STATS_ENABLED:true}"
+        # Housekeeper 统计信息打印间隔
+        print-interval-ms: "${TB_HOUSEKEEPER_STATS_PRINT_INTERVAL_MS:60000}"
+  edqs:
+    sync:
+      # 启用/禁用 EDQS 同步
+      enabled: "${TB_EDQS_SYNC_ENABLED:true}"
+      # 与 EDQS 同步的实体 batch 大小
+      entity_batch_size: "${TB_EDQS_SYNC_ENTITY_BATCH_SIZE:10000}"
+      # 与 EDQS 同步的时序数据 batch 大小
+      ts_batch_size: "${TB_EDQS_SYNC_TS_BATCH_SIZE:10000}"
+    api:
+      # 是否将实体数据查询请求转发到 EDQS（否则使用 PostgreSQL 实现）。
+      # Monolith 本地 EDQS：与 queue.edqs.sync.enabled=true 一起设为 true（DefaultEdqsService 位于 tb-core）。
+      supported: "${TB_EDQS_API_SUPPORTED:false}"
+      # 当数据同步到 Kafka 完成后是否自动启用 EDQS API（若 queue.edqs.api.supported 为 true）
+      auto_enable: "${TB_EDQS_API_AUTO_ENABLE:true}"
+    # EDQS 模式：local（用于 monolith）或 remote（独立 EDQS 微服务）
+    mode: "${TB_EDQS_MODE:local}"
+    local:
+      # 本地模式下 EDQS 备份的 RocksDB 路径
+      rocksdb_path: "${TB_EDQS_ROCKSDB_PATH:${user.home}/.rocksdb/edqs}"
+    # EDQS 主题的分区数
+    partitions: "${TB_EDQS_PARTITIONS:12}"
+    # EDQS 分区策略：tenant（按租户 id 解析分区）或 none（无特定策略，按消息 key 解析）
+    partitioning_strategy: "${TB_EDQS_PARTITIONING_STRATEGY:tenant}"
+    # EDQS 事件主题
+    events_topic: "${TB_EDQS_EVENTS_TOPIC:edqs.events}"
+    # EDQS 状态主题
+    state_topic: "${TB_EDQS_STATE_TOPIC:edqs.state}"
+    # EDQS 请求主题
+    requests_topic: "${TB_EDQS_REQUESTS_TOPIC:edqs.requests}"
+    # EDQS 响应主题
+    responses_topic: "${TB_EDQS_RESPONSES_TOPIC:edqs.responses}"
+    # EDQS 主题的轮询间隔
+    poll_interval: "${TB_EDQS_POLL_INTERVAL_MS:25}"
+    # 发往 EDQS 的最大待处理请求数
+    max_pending_requests: "${TB_EDQS_MAX_PENDING_REQUESTS:10000}"
+    # 发往 EDQS 请求的最大超时时间
+    max_request_timeout: "${TB_EDQS_MAX_REQUEST_TIMEOUT:20000}"
+    # 超过此阈值的字符串将被压缩
+    string_compression_length_threshold: "${TB_EDQS_STRING_COMPRESSION_LENGTH_THRESHOLD:512}"
+    stats:
+      # 启用/禁用 EDQS 统计
+      enabled: "${TB_EDQS_STATS_ENABLED:true}"
+      # 慢查询日志阈值（毫秒）
+      slow_query_threshold: "${TB_EDQS_SLOW_QUERY_THRESHOLD_MS:3000}"
+  vc:
+    # 默认主题名
+    topic: "${TB_QUEUE_VC_TOPIC:tb_version_control}"
+    # 与此队列关联的分区数。用于扩展可并行处理的消息数量
+    partitions: "${TB_QUEUE_VC_PARTITIONS:10}"
+    # 无新消息时轮询消息的间隔（毫秒）
+    poll-interval: "${TB_QUEUE_VC_INTERVAL_MS:25}"
+    # 重试处理包中所有失败和超时消息前的等待时间
+    pack-processing-timeout: "${TB_QUEUE_VC_PACK_PROCESSING_TIMEOUT_MS:180000}"
+    # VC-executor 请求的超时时间（如实体版本请求、commit 提交等）
+    request-timeout: "${TB_QUEUE_VC_REQUEST_TIMEOUT:180000}"
+    # 单条队列消息的大小限制
+    msg-chunk-size: "${TB_QUEUE_VC_MSG_CHUNK_SIZE:250000}"
+  js:
+    # JS Eval 请求主题
+    request_topic: "${REMOTE_JS_EVAL_REQUEST_TOPIC:js_eval.requests}"
+    # 与 node id 组合的 JS Eval 响应主题前缀
+    response_topic_prefix: "${REMOTE_JS_EVAL_RESPONSE_TOPIC:js_eval.responses}"
+    # JS Eval 最大待处理请求数
+    max_pending_requests: "${REMOTE_JS_MAX_PENDING_REQUESTS:10000}"
+    # JS Eval 最大请求超时时间
+    max_eval_requests_timeout: "${REMOTE_JS_MAX_EVAL_REQUEST_TIMEOUT:60000}"
+    # JS 最大请求超时时间
+    max_requests_timeout: "${REMOTE_JS_MAX_REQUEST_TIMEOUT:10000}"
+    # JS 执行最大请求超时时间
+    max_exec_requests_timeout: "${REMOTE_JS_MAX_EXEC_REQUEST_TIMEOUT:2000}"
+    # JS 响应轮询间隔
+    response_poll_interval: "${REMOTE_JS_RESPONSE_POLL_INTERVAL_MS:25}"
+  rule-engine:
+    # 已弃用。将在近期版本中移除
+    topic: "${TB_QUEUE_RULE_ENGINE_TOPIC:tb_rule_engine}"
+    # 需要最低延迟和处理时间的高优先级通知
+    notifications_topic: "${TB_QUEUE_RULE_ENGINE_NOTIFICATIONS_TOPIC:tb_rule_engine.notifications}"
+    # Rule Engine 轮询消息的间隔（毫秒）
+    poll-interval: "${TB_QUEUE_RULE_ENGINE_POLL_INTERVAL_MS:25}"
+    # Rule Engine 处理消息包的超时时间
+    pack-processing-timeout: "${TB_QUEUE_RULE_ENGINE_PACK_PROCESSING_TIMEOUT_MS:2000}"
+    stats:
+      # 启用/禁用 Rule Engine 统计
+      enabled: "${TB_QUEUE_RULE_ENGINE_STATS_ENABLED:true}"
+      # Rule Engine 统计信息打印间隔
+      print-interval-ms: "${TB_QUEUE_RULE_ENGINE_STATS_PRINT_INTERVAL_MS:60000}"
+      # 统计打印的错误消息最大长度
+      max-error-message-length: "${TB_QUEUE_RULE_ENGINE_MAX_ERROR_MESSAGE_LENGTH:4096}"
+    # 队列删除后（或 profile 的 isolation 选项被禁用后），Rule Engine 将在此时间段内继续读取相关主题，然后再删除实际主题
+    topic-deletion-delay: "${TB_QUEUE_RULE_ENGINE_TOPIC_DELETION_DELAY_SEC:15}"
+    # 处理分区变更、配置更新、队列删除等操作的线程池大小
+    management-thread-pool-size: "${TB_QUEUE_RULE_ENGINE_MGMT_THREAD_POOL_SIZE:12}"
+  calculated_fields:
+    # 来自 Rule Engine 的 Calculated Field (CF) 事件主题名
+    event_topic: "${TB_QUEUE_CF_EVENT_TOPIC:tb_cf_event}"
+    # Calculated Field (CF) compacted 状态主题名
+    state_topic: "${TB_QUEUE_CF_STATE_TOPIC:tb_cf_state}"
+    # 需要最低延迟和处理时间的高优先级通知
+    notifications_topic: "${TB_QUEUE_CF_NOTIFICATIONS_TOPIC:calculated_field.notifications}"
+    # CF (Rule Engine) 微服务轮询消息的间隔（毫秒）
+    poll_interval: "${TB_QUEUE_CF_POLL_INTERVAL_MS:1000}"
+    # CF 微服务处理消息包的超时时间
+    pack_processing_timeout: "${TB_QUEUE_CF_PACK_PROCESSING_TIMEOUT_MS:60000}"
+    # 处理传入消息的线程池大小
+    pool_size: "${TB_QUEUE_CF_POOL_SIZE:8}"
+    # 存储 CF 状态的 RocksDB 路径
+    rocks_db_path: "${TB_QUEUE_CF_ROCKS_DB_PATH:${user.home}/.rocksdb/cf_states}"
+    # fetch size 指定初始获取时每次请求从数据库获取的行数
+    init_fetch_pack_size: "${TB_QUEUE_CF_FETCH_PACK_SIZE:50000}"
+    # fetch size 指定按租户获取时每次请求从数据库获取的行数
+    init_tenant_fetch_pack_size: "${TB_QUEUE_CF_TENANT_FETCH_PACK_SIZE:1000}"
+  transport:
+    # 需要最低延迟和处理时间的高优先级通知
+    notifications_topic: "${TB_QUEUE_TRANSPORT_NOTIFICATIONS_TOPIC:tb_transport.notifications}"
+    # 轮询消息的间隔（毫秒）
+    poll_interval: "${TB_QUEUE_TRANSPORT_NOTIFICATIONS_POLL_INTERVAL_MS:25}"
+
+# 事件配置参数
+event:
+  debug:
+    # 每个 debug 事件的最大符号数。必要时将截断事件内容
+    max-symbols: "${TB_MAX_DEBUG_EVENT_SYMBOLS:4096}"
+
+# 通用服务参数
+service:
+  type: "${TB_SERVICE_TYPE:monolith}" # monolith 或 tb-core 或 tb-rule-engine
+  # 此服务的唯一 id（为空则自动生成）
+  id: "${TB_SERVICE_ID:}"
+  rule_engine:
+    # 分配给此 Rule Engine 的租户 profile id 列表（逗号分隔）。
+    # 此 Rule Engine 仅负责这些 profile 的租户（当 profile 中启用 'isolation' 选项时）。
+    assigned_tenant_profiles: "${TB_RULE_ENGINE_ASSIGNED_TENANT_PROFILES:}"
+    pubsub:
+      # pubsub rule node executor provider 的线程池大小。若未设置则使用默认 pubsub executor provider 值（5 * 可用处理器数）
+      executor_thread_pool_size: "${TB_RULE_ENGINE_PUBSUB_EXECUTOR_THREAD_POOL_SIZE:0}"
+
+# Metrics 参数
+metrics:
+  # 启用/禁用 actuator metrics。
+  enabled: "${METRICS_ENABLED:false}"
+  timer:
+    # actuator 为 timer metrics 返回的 metrics 百分位数。双精度值列表（以 , 分隔）。
+    percentiles: "${METRICS_TIMER_PERCENTILES:0.5}"
+  system_info:
+    # 系统信息（CPU、内存使用等）的持久化频率（秒）
+    persist_frequency: "${METRICS_SYSTEM_INFO_PERSIST_FREQUENCY_SECONDS:60}"
+    # 系统信息时序的 TTL（天）
+    ttl: "${METRICS_SYSTEM_INFO_TTL_DAYS:7}"
+
+# Version Control 参数
+vc:
+  # 处理导出任务的线程池大小
+  thread_pool_size: "${TB_VC_POOL_SIZE:6}"
+  git:
+    # 处理 git IO 操作的线程池大小
+    io_pool_size: "${TB_VC_GIT_POOL_SIZE:3}"
+    # 默认仓库存储路径
+    repositories-folder: "${TB_VC_GIT_REPOSITORIES_FOLDER:${java.io.tmpdir}/repositories}"
+
+# 通知系统参数
+notification_system:
+  # 指定 Notification System 处理通知规则和发送通知的线程池大小。建议值 <= 10
+  thread_pool_size: "${TB_NOTIFICATION_SYSTEM_THREAD_POOL_SIZE:10}"
+  rules:
+    # 触发类型的去重时长（毫秒，分号分隔）。格式：'NotificationRuleTriggerType1:123;NotificationRuleTriggerType2:456'
+    deduplication_durations: "${TB_NOTIFICATION_RULES_DEDUPLICATION_DURATIONS:NEW_PLATFORM_VERSION:0;RATE_LIMITS:14400000;}"
+
+# 通用 management 参数
+management:
+  endpoints:
+    web:
+      exposure:
+        # 暴露 metrics 端点（使用值 'prometheus' 启用 prometheus metrics）。
+        include: '${METRICS_ENDPOINTS_EXPOSE:info}'
+  health:
+    elasticsearch:
+      # 启用 org.springframework.boot.actuate.elasticsearch.ElasticsearchRestClientHealthIndicator.doHealthCheck
+      enabled: "false"
+
+# ThingsBoard 移动应用的移动应用设置
+mobileApp:
+  # ThingsBoard Live 移动应用的服务器域名
+  domain: "${TB_MOBILE_APP_DOMAIN:demo.thingsboard.io}"
+  # ThingsBoard Live 移动应用的 Google Play 商店链接
+  googlePlayLink: "${TB_MOBILE_APP_GOOGLE_PLAY_LINK:https://play.google.com/store/apps/details?id=org.thingsboard.demo.app}"
+  # ThingsBoard Live 移动应用的 App Store 链接
+  appStoreLink: "${TB_MOBILE_APP_APP_STORE_LINK:https://apps.apple.com/us/app/thingsboard-live/id1594355695}"

@@ -117,13 +117,18 @@ def check_yml(total_list, input_yaml_file):
 
 if __name__ == '__main__':
     sys.setrecursionlimit(10000)
-    files_to_check = ["application/src/main/resources/thingsboard.yml",
-                      "transport/http/src/main/resources/tb-http-transport.yml",
-                      "transport/mqtt/src/main/resources/tb-mqtt-transport.yml",
-                      "transport/coap/src/main/resources/tb-coap-transport.yml",
-                      "transport/lwm2m/src/main/resources/tb-lwm2m-transport.yml",
-                      "transport/snmp/src/main/resources/tb-snmp-transport.yml",
-                      "msa/vc-executor/src/main/resources/tb-vc-executor.yml"]
+    files_to_check = ["apps/monolith/src/main/resources/thingsboard.yml",
+                      "apps/tb-core/src/main/resources/thingsboard-core.yml",
+                      "apps/tb-rule-engine/src/main/resources/thingsboard-rule-engine.yml",
+                      "apps/tb-transport/tb-http-transport/src/main/resources/tb-http-transport.yml",
+                      "apps/tb-transport/tb-mqtt-transport/src/main/resources/tb-mqtt-transport.yml",
+                      "apps/tb-transport/tb-coap-transport/src/main/resources/tb-coap-transport.yml",
+                      "apps/tb-transport/tb-lwm2m-transport/src/main/resources/tb-lwm2m-transport.yml",
+                      "apps/tb-transport/tb-snmp-transport/src/main/resources/tb-snmp-transport.yml",
+                      "apps/tb-transport/tb-tcp-transport/src/main/resources/tb-tcp-transport.yml",
+                      "apps/tb-transport/tb-udp-transport/src/main/resources/tb-udp-transport.yml",
+                      "apps/vc-executor/src/main/resources/tb-vc-executor.yml",
+                      "apps/tb-edqs/src/main/resources/tb-edqs.yml"]
 
     total_list = []
     for file in files_to_check:

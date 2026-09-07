@@ -1,0 +1,819 @@
+/**
+ * Copyright © 2016-2025 The Thingsboard Authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ */
+package org.thingsboard.server.service.protocoltemplate;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.thingsboard.server.common.data.device.profile.ProtocolTemplateBundle;
+import org.thingsboard.server.common.data.device.profile.ProtocolTemplateCommandDefinition;
+import org.thingsboard.server.common.data.device.profile.ProtocolTemplateCommandDirection;
+import org.thingsboard.server.common.data.device.profile.ProtocolTemplateDefinition;
+import org.thingsboard.server.common.data.device.profile.ProtocolTemplateTransportTcpDataConfiguration;
+import org.thingsboard.server.common.data.device.profile.TcpHexChecksumDefinition;
+import org.thingsboard.server.common.data.device.profile.TcpHexCommandProfile;
+import org.thingsboard.server.common.data.device.profile.TcpHexFieldDefinition;
+import org.thingsboard.server.common.data.device.profile.TcpHexFixedBytesUtil;
+import org.thingsboard.server.common.data.device.profile.TcpHexValueType;
+import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.device.profile.TcpHexProtocolParser;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.HexFormat;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * 协议模板 HEX 组帧服务：按首帧模板 + 下行/双向命令合并字段组帧，并写入命令字与校验和。
+ * <p>
+ * <b>职责：</b>匹配 DOWNLINK/BOTH 命令，合并模板与命令字段，写入参长/总长/命令字/校验和。
+ * <p>
+ * <b>触发方式：</b>管理端下行组帧 API 调用，非定时、非队列。
+ */
+@Service
+@RequiredArgsConstructor
+public class ProtocolTemplateHexBuildService {
+
+    private static final Pattern PA_WORD_FIELD_KEY = Pattern.compile("^pa(\\d+)_word$");
+
+    private final DefaultProtocolTemplateBundleService bundleService;
+
+    /** 按请求组一帧下行 HEX。 */
+    @Transactional(readOnly = true)
+    public ProtocolTemplateHexBuildResult build(TenantId tenantId, ProtocolTemplateHexBuildRequest request) {
+        ProtocolTemplateHexBuildResult out = new ProtocolTemplateHexBuildResult();
+        if (request == null) {
+            out.setErrorMessage("request is required");
+            return out;
+        }
+        if (request.getBundleId() == null || request.getBundleId().isBlank()) {
+            out.setErrorMessage("bundleId is required");
+            return out;
+        }
+        if (request.getCommandValue() == null
+                && (request.getCommandMatchBytesHex() == null || request.getCommandMatchBytesHex().isBlank())) {
+            out.setErrorMessage("commandValue or commandMatchBytesHex is required");
+            return out;
+        }
+        UUID bundleId;
+        try {
+            bundleId = UUID.fromString(request.getBundleId().trim());
+        } catch (IllegalArgumentException e) {
+            out.setErrorMessage("Invalid bundleId (must be UUID)");
+            return out;
+        }
+
+        Optional<ProtocolTemplateBundle> bundleOpt = bundleService.findById(tenantId, bundleId);
+        if (bundleOpt.isEmpty()) {
+            out.setErrorMessage("Protocol template bundle not found");
+            return out;
+        }
+        ProtocolTemplateBundle bundle = bundleOpt.get();
+        List<ProtocolTemplateCommandDefinition> cmds = bundle.getProtocolCommands() != null
+                ? bundle.getProtocolCommands()
+                : List.of();
+        Long cv = request.getCommandValue();
+        String tidFilter = request.getTemplateId() != null ? request.getTemplateId().trim() : null;
+        List<ProtocolTemplateCommandDefinition> matches = new ArrayList<>();
+        for (ProtocolTemplateCommandDefinition c : cmds) {
+            if (c == null) {
+                continue;
+            }
+            if (c.getDirection() != ProtocolTemplateCommandDirection.DOWNLINK
+                    && c.getDirection() != ProtocolTemplateCommandDirection.BOTH) {
+                continue;
+            }
+            TcpHexValueType mvt = c.getMatchValueType() != null ? c.getMatchValueType() : TcpHexValueType.UINT32_LE;
+            if (TcpHexCommandProfile.isByteSliceCommandMatchType(mvt)) {
+                ProtocolTemplateDefinition tpl0 = findTemplateInBundle(bundle, c.getTemplateId());
+                if (tpl0 == null) {
+                    continue;
+                }
+                int w = tpl0.getCommandMatchWidth() != null && tpl0.getCommandMatchWidth() == 1 ? 1 : 4;
+                try {
+                    byte[] reqB = TcpHexFixedBytesUtil.parseHexExactWireBytes(request.getCommandMatchBytesHex(), w);
+                    byte[] defB = TcpHexFixedBytesUtil.parseHexExactWireBytes(c.getCommandMatchBytesHex(), w);
+                    if (!Arrays.equals(reqB, defB)) {
+                        continue;
+                    }
+                } catch (IllegalArgumentException e) {
+                    continue;
+                }
+            } else {
+                if (cv == null || c.getCommandValue() != cv) {
+                    continue;
+                }
+            }
+            if (tidFilter != null && !tidFilter.equals(c.getTemplateId())) {
+                continue;
+            }
+            matches.add(c);
+        }
+        if (matches.isEmpty()) {
+            out.setErrorMessage("No DOWNLINK/BOTH command with this commandValue in the bundle");
+            return out;
+        }
+        if (matches.size() > 1 && (tidFilter == null || tidFilter.isEmpty())) {
+            out.setErrorMessage("Ambiguous commandValue: set templateId to pick one of: "
+                    + matches.stream().map(ProtocolTemplateCommandDefinition::getTemplateId).distinct().toList());
+            return out;
+        }
+        ProtocolTemplateCommandDefinition cmd = matches.get(0);
+
+        ProtocolTemplateTransportTcpDataConfiguration pcfg = new ProtocolTemplateTransportTcpDataConfiguration();
+        pcfg.setProtocolTemplates(bundle.getProtocolTemplates());
+        pcfg.setProtocolCommands(cmds);
+        ProtocolTemplateDefinition tpl = pcfg.findTemplate(cmd.getTemplateId());
+        if (tpl == null) {
+            out.setErrorMessage("Unknown templateId on command: " + cmd.getTemplateId());
+            return out;
+        }
+
+        List<TcpHexFieldDefinition> merged;
+        try {
+            merged = ProtocolTemplateTransportTcpDataConfiguration.mergeTemplateAndCommandFields(
+                    tpl.getHexProtocolFields(), cmd.getFields());
+        } catch (RuntimeException e) {
+            out.setErrorMessage(e.getMessage());
+            return out;
+        }
+        if (merged == null || merged.isEmpty()) {
+            out.setErrorMessage("No merged fields to build (template and command fields are empty)");
+            return out;
+        }
+
+        TcpHexValueType matchVt = cmd.getMatchValueType() != null ? cmd.getMatchValueType() : TcpHexValueType.UINT32_LE;
+        int cmdOff = tpl.getCommandByteOffset() != null ? tpl.getCommandByteOffset() : 12;
+        int cmdW = TcpHexCommandProfile.isByteSliceCommandMatchType(matchVt)
+                ? (tpl.getCommandMatchWidth() != null && tpl.getCommandMatchWidth() == 1 ? 1 : 4)
+                : integralTypeWidth(matchVt);
+
+        TcpHexChecksumDefinition checksum = tpl.getChecksum();
+
+        Map<String, Object> values = new HashMap<>();
+        if (request.getValues() != null) {
+            values.putAll(request.getValues());
+        }
+        expandPaWordHiLoAliases(values);
+
+        int frameLen;
+        try {
+            frameLen = computeFrameLength(merged, checksum, cmdOff, cmdW, values);
+        } catch (IllegalArgumentException e) {
+            out.setErrorMessage(e.getMessage());
+            return out;
+        }
+
+        byte[] buf = new byte[frameLen];
+
+        boolean cmdLenAuto = commandLevelDownlinkPayloadLengthAuto(cmd);
+        try {
+            for (TcpHexFieldDefinition f : merged) {
+                if (f == null) {
+                    continue;
+                }
+                f.validate();
+                if (cmdLenAuto && cmd.getDownlinkPayloadLengthFieldKey() != null
+                        && cmd.getDownlinkPayloadLengthFieldKey().trim().equals(f.getKey())) {
+                    continue;
+                }
+                if (writesAutoDownlinkPayloadLength(f)) {
+                    continue;
+                }
+                if (writesAutoDownlinkTotalFrameLength(f)) {
+                    continue;
+                }
+                if (fieldOverlapsCommandSpan(f, cmdOff, cmdW, values)) {
+                    continue;
+                }
+                if (isRedundantPaWordField(f, merged)) {
+                    continue;
+                }
+                writeFieldFromValues(buf, f, values);
+            }
+            if (cmd.getDirection() != ProtocolTemplateCommandDirection.DOWNLINK
+                    && cmd.getSecondaryMatchByteOffset() != null) {
+                TcpHexValueType st = cmd.getSecondaryMatchValueType() != null
+                        ? cmd.getSecondaryMatchValueType()
+                        : TcpHexValueType.UINT8;
+                int secOff = cmd.getSecondaryMatchByteOffset();
+                if (TcpHexCommandProfile.isByteSliceCommandMatchType(st)) {
+                    byte[] secBytes = TcpHexFixedBytesUtil.parseHexExactWireBytes(cmd.getSecondaryMatchBytesHex(), cmdW);
+                    System.arraycopy(secBytes, 0, buf, secOff, cmdW);
+                } else {
+                    if (!TcpHexCommandProfile.isIntegralMatchType(st)) {
+                        throw new IllegalArgumentException("secondaryMatchValueType must be integral or BYTES_AS_HEX/BYTES_AS_UTF8");
+                    }
+                    Long secDef = cmd.getSecondaryMatchValue();
+                    long sec = secDef != null ? secDef : 0L;
+                    for (TcpHexFieldDefinition f : merged) {
+                        if (f != null && f.getByteOffset() == secOff) {
+                            Object v = values.get(f.getKey());
+                            if (v != null) {
+                                sec = toLongForIntegral(v, f.getKey());
+                            }
+                            break;
+                        }
+                    }
+                    TcpHexProtocolParser.writeIntegralAt(buf, secOff, st, sec);
+                }
+            }
+            if (TcpHexCommandProfile.isByteSliceCommandMatchType(matchVt)) {
+                byte[] cmdBytes = TcpHexFixedBytesUtil.parseHexExactWireBytes(cmd.getCommandMatchBytesHex(), cmdW);
+                System.arraycopy(cmdBytes, 0, buf, cmdOff, cmdW);
+            } else {
+                TcpHexProtocolParser.writeIntegralAt(buf, cmdOff, matchVt, cmd.getCommandValue());
+            }
+            writeAutoDownlinkPayloadLengthFields(buf, merged, cmd, cmdOff, cmdW, values);
+            writeAutoDownlinkTotalFrameLengthFields(buf, merged);
+            TcpHexProtocolParser.applyChecksumToFrame(checksum, buf);
+        } catch (IllegalArgumentException | ArithmeticException e) {
+            out.setErrorMessage(e.getMessage());
+            return out;
+        }
+
+        out.setSuccess(true);
+        out.setHex(HexFormat.of().formatHex(buf));
+        return out;
+    }
+
+    private static int computeFrameLength(List<TcpHexFieldDefinition> merged, TcpHexChecksumDefinition cs,
+                                          int cmdOff, int cmdWireBytes, Map<String, Object> values) {
+        int maxEnd = cmdOff + cmdWireBytes;
+        for (TcpHexFieldDefinition f : merged) {
+            if (f == null) {
+                continue;
+            }
+            int w = fieldWidthForDownlinkSizing(f, values);
+            maxEnd = Math.max(maxEnd, f.getByteOffset() + w);
+        }
+        int cksN = checksumAlgBytes(cs);
+        if (cksN == 0) {
+            return maxEnd;
+        }
+        int cksIdx = cs.getChecksumByteIndex();
+        if (cksIdx < 0) {
+            return maxEnd + cksN;
+        }
+        return Math.max(maxEnd, cksIdx + cksN);
+    }
+
+    private static int checksumAlgBytes(TcpHexChecksumDefinition cs) {
+        if (cs == null || cs.getType() == null || "NONE".equalsIgnoreCase(cs.getType().trim())) {
+            return 0;
+        }
+        return switch (cs.getType().toUpperCase()) {
+            case "SUM8" -> 1;
+            case "CRC16_MODBUS", "CRC16_CCITT" -> 2;
+            case "CRC32" -> 4;
+            default -> throw new IllegalArgumentException("Unknown checksum type: " + cs.getType());
+        };
+    }
+
+    private static int integralTypeWidth(TcpHexValueType vt) {
+        return switch (vt) {
+            case UINT8, INT8 -> 1;
+            case UINT16_BE, UINT16_LE, INT16_BE, INT16_LE -> 2;
+            case UINT32_BE, UINT32_LE, INT32_BE, INT32_LE -> 4;
+            default -> throw new IllegalArgumentException("not an integral width: " + vt);
+        };
+    }
+
+    private static boolean fieldOverlapsCommandSpan(TcpHexFieldDefinition f, int cmdOff, int cmdW,
+                                                  Map<String, Object> values) {
+        int fw = fieldWidthForDownlinkSizing(f, values);
+        return spansOverlap(f.getByteOffset(), fw, cmdOff, cmdW);
+    }
+
+    /**
+     * 下行组帧：定宽字段用模板线宽；无 {@link TcpHexFieldDefinition#getByteLength()} 的 BYTES 切片用 {@code values} 中该键的实际字节数（与参长汇总一致）。
+     */
+    private static int fieldWidthForDownlinkSizing(TcpHexFieldDefinition f, Map<String, Object> values) {
+        TcpHexValueType vt = f.getValueType();
+        if (vt == null || !vt.isVariableByteSlice()) {
+            return fieldWidthForBuild(f);
+        }
+        if (f.getByteLength() != null && f.getByteLength() > 0) {
+            return f.getByteLength();
+        }
+        if (values == null) {
+            throw new IllegalArgumentException("Field [" + f.getKey() + "]: variable byte slice needs byteLength or values for downlink build");
+        }
+        Object raw = values.get(f.getKey());
+        if (raw == null) {
+            return 0;
+        }
+        if (vt == TcpHexValueType.BYTES_AS_UTF8) {
+            return raw.toString().getBytes(StandardCharsets.UTF_8).length;
+        }
+        if (vt == TcpHexValueType.BYTES_AS_HEX) {
+            return TcpHexFixedBytesUtil.parseHexLooseToBytes(raw.toString()).length;
+        }
+        throw new IllegalArgumentException("Field [" + f.getKey() + "]: unsupported variable slice type for downlink sizing: " + vt);
+    }
+
+    /** 与 {@link ProtocolTemplateTransportTcpDataConfiguration#hexFieldSpansOverlap} 区间规则一致。 */
+    private static boolean spansOverlap(int a0, int aLen, int b0, int bLen) {
+        if (aLen <= 0 || bLen <= 0) {
+            return a0 == b0;
+        }
+        int a1 = a0 + aLen;
+        int b1 = b0 + bLen;
+        return a0 < b1 && b0 < a1;
+    }
+
+    /** 本字段在下行组帧时由系统写入参长（非 JSON）。 */
+    private static boolean writesAutoDownlinkPayloadLength(TcpHexFieldDefinition f) {
+        if (f == null) {
+            return false;
+        }
+        if (f.hasDownlinkPayloadLengthMemberKeys()) {
+            return true;
+        }
+        return Boolean.TRUE.equals(f.getAutoDownlinkPayloadLength());
+    }
+
+    /** 本字段在下行组帧时由系统写入整包总长（非 JSON）。 */
+    private static boolean writesAutoDownlinkTotalFrameLength(TcpHexFieldDefinition f) {
+        return f != null && Boolean.TRUE.equals(f.getAutoDownlinkTotalFrameLength());
+    }
+
+    private static boolean commandLevelDownlinkPayloadLengthAuto(ProtocolTemplateCommandDefinition cmd) {
+        if (cmd == null || !Boolean.TRUE.equals(cmd.getDownlinkPayloadLengthAuto())) {
+            return false;
+        }
+        if (cmd.getDirection() != ProtocolTemplateCommandDirection.DOWNLINK
+                && cmd.getDirection() != ProtocolTemplateCommandDirection.BOTH) {
+            return false;
+        }
+        return cmd.getDownlinkPayloadLengthFieldKey() != null && !cmd.getDownlinkPayloadLengthFieldKey().isBlank();
+    }
+
+    private static void writeCommandLevelDownlinkPayloadLength(byte[] buf, List<TcpHexFieldDefinition> merged,
+                                                                 ProtocolTemplateCommandDefinition cmd,
+                                                                 Map<String, Object> values) {
+        cmd.validate();
+        String lenKey = cmd.getDownlinkPayloadLengthFieldKey().trim();
+        TcpHexFieldDefinition lengthField = null;
+        for (TcpHexFieldDefinition m : merged) {
+            if (m != null && lenKey.equals(m.getKey())) {
+                lengthField = m;
+                break;
+            }
+        }
+        if (lengthField == null) {
+            throw new IllegalArgumentException("downlinkPayloadLengthFieldKey: no merged field \"" + lenKey + "\"");
+        }
+        lengthField.validate();
+        if (lengthField.getValueType() == null || lengthField.getValueType().isVariableByteSlice()
+                || !TcpHexCommandProfile.isIntegralMatchType(lengthField.getValueType())) {
+            throw new IllegalArgumentException("Length field [" + lenKey + "] must use an integral valueType");
+        }
+        Set<String> want = ProtocolTemplateCommandDefinition.resolveDownlinkPayloadContributorKeys(merged);
+        for (String wk : want) {
+            boolean found = false;
+            for (TcpHexFieldDefinition g : merged) {
+                if (g != null && wk.equals(g.getKey())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new IllegalArgumentException("includeInDownlinkPayloadLength: merged field not found for key \"" + wk + "\"");
+            }
+        }
+        long len = 0;
+        for (TcpHexFieldDefinition g : merged) {
+            if (g == null) {
+                continue;
+            }
+            String gk = g.getKey() != null ? g.getKey().trim() : "";
+            // 参长字段默认不计入；若该字段也勾选「参与参长」，则把自身线宽计入（如：长度 = 本字段 + 后续字段）。
+            if (lenKey.equals(gk) && !want.contains(lenKey)) {
+                continue;
+            }
+            if (writesAutoDownlinkPayloadLength(g)) {
+                continue;
+            }
+            if (!want.contains(gk)) {
+                continue;
+            }
+            if (isRedundantPaWordField(g, merged)) {
+                continue;
+            }
+            len += fieldWidthForDownlinkSizing(g, values);
+        }
+        long maxWire = maxUnsignedIntegralForType(lengthField.getValueType());
+        if (len < 0 || len > maxWire) {
+            throw new IllegalArgumentException(
+                    "Field [" + lenKey + "]: auto payload length " + len + " out of range for " + lengthField.getValueType());
+        }
+        TcpHexProtocolParser.writeIntegralAt(buf, lengthField.getByteOffset(), lengthField.getValueType(), len);
+    }
+
+    private static void writeAutoDownlinkPayloadLengthFields(byte[] buf, List<TcpHexFieldDefinition> merged,
+                                                             ProtocolTemplateCommandDefinition cmd,
+                                                             int cmdOff, int cmdW,
+                                                             Map<String, Object> values) {
+        if (commandLevelDownlinkPayloadLengthAuto(cmd)) {
+            writeCommandLevelDownlinkPayloadLength(buf, merged, cmd, values);
+        }
+        for (TcpHexFieldDefinition f : merged) {
+            if (f == null || !writesAutoDownlinkPayloadLength(f)) {
+                continue;
+            }
+            if (commandLevelDownlinkPayloadLengthAuto(cmd) && cmd.getDownlinkPayloadLengthFieldKey() != null
+                    && cmd.getDownlinkPayloadLengthFieldKey().trim().equals(f.getKey())) {
+                continue;
+            }
+            f.validate();
+            if (f.hasDownlinkPayloadLengthMemberKeys()) {
+                validateDownlinkPayloadLengthMemberKeysResolve(merged, f);
+            }
+            int impliedStart = f.getByteOffset() + fieldWidthForBuild(f);
+            int pStart = f.getDownlinkPayloadStartByteOffset() != null ? f.getDownlinkPayloadStartByteOffset() : impliedStart;
+            if (pStart < 0 || pStart > buf.length) {
+                throw new IllegalArgumentException("Field [" + f.getKey() + "]: invalid payload start offset " + pStart);
+            }
+            Integer pEndEx = f.getDownlinkPayloadEndExclusiveByteOffset();
+            long len = computeDownlinkPayloadByteCount(merged, f, pStart, pEndEx, cmdOff, cmdW);
+            long maxWire = maxUnsignedIntegralForType(f.getValueType());
+            if (len < 0 || len > maxWire) {
+                throw new IllegalArgumentException(
+                        "Field [" + f.getKey() + "]: auto payload length " + len + " out of range for " + f.getValueType());
+            }
+            TcpHexProtocolParser.writeIntegralAt(buf, f.getByteOffset(), f.getValueType(), len);
+        }
+    }
+
+    /**
+     * 写入「整包总长」类字段：在参长与命令字已就绪后、校验和前写入，以便校验范围可包含该字段。
+     * 合并字段中至多一个 {@link TcpHexFieldDefinition#getAutoDownlinkTotalFrameLength()}。
+     */
+    private static void writeAutoDownlinkTotalFrameLengthFields(byte[] buf, List<TcpHexFieldDefinition> merged) {
+        TcpHexFieldDefinition only = null;
+        for (TcpHexFieldDefinition f : merged) {
+            if (f == null || !writesAutoDownlinkTotalFrameLength(f)) {
+                continue;
+            }
+            if (only != null) {
+                throw new IllegalArgumentException(
+                        "At most one field may set autoDownlinkTotalFrameLength (found: "
+                                + only.getKey() + " and " + f.getKey() + ")");
+            }
+            only = f;
+        }
+        if (only == null) {
+            return;
+        }
+        only.validate();
+        long len = buf.length;
+        int selfW = fieldWidthForBuild(only);
+        if (Boolean.TRUE.equals(only.getDownlinkTotalFrameLengthExcludesLengthFieldBytes())) {
+            len -= (long) selfW;
+        }
+        if (len < 0) {
+            throw new IllegalArgumentException(
+                    "Field [" + only.getKey() + "]: auto total frame length negative after excludes self");
+        }
+        long maxWire = maxUnsignedIntegralForType(only.getValueType());
+        if (len > maxWire) {
+            throw new IllegalArgumentException(
+                    "Field [" + only.getKey() + "]: auto total frame length " + len + " out of range for "
+                            + only.getValueType());
+        }
+        TcpHexProtocolParser.writeIntegralAt(buf, only.getByteOffset(), only.getValueType(), len);
+    }
+
+    private static void validateDownlinkPayloadLengthMemberKeysResolve(List<TcpHexFieldDefinition> merged,
+                                                                       TcpHexFieldDefinition lengthField) {
+        for (String raw : lengthField.getDownlinkPayloadLengthMemberKeys()) {
+            if (raw == null || raw.isBlank()) {
+                continue;
+            }
+            String want = raw.trim();
+            boolean found = false;
+            for (TcpHexFieldDefinition g : merged) {
+                if (g != null && want.equals(g.getKey())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw new IllegalArgumentException(
+                        "Field [" + lengthField.getKey() + "]: downlinkPayloadLengthMemberKeys has no merged field \"" + want + "\"");
+            }
+        }
+    }
+
+    private static long computeDownlinkPayloadByteCount(List<TcpHexFieldDefinition> merged, TcpHexFieldDefinition lengthField,
+                                                        int payloadStart, Integer payloadEndExclusive, int cmdOff, int cmdW) {
+        if (lengthField.hasDownlinkPayloadLengthMemberKeys()) {
+            Set<String> want = new HashSet<>();
+            for (String k : lengthField.getDownlinkPayloadLengthMemberKeys()) {
+                if (k != null && !k.isBlank()) {
+                    want.add(k.trim());
+                }
+            }
+            int maxExclusive = payloadStart;
+            for (TcpHexFieldDefinition g : merged) {
+                if (g == null || g == lengthField) {
+                    continue;
+                }
+                if (writesAutoDownlinkPayloadLength(g)) {
+                    continue;
+                }
+                if (writesAutoDownlinkTotalFrameLength(g)) {
+                    continue;
+                }
+                if (!want.contains(g.getKey())) {
+                    continue;
+                }
+                int go = g.getByteOffset();
+                if (go < payloadStart) {
+                    continue;
+                }
+                maxExclusive = Math.max(maxExclusive, go + fieldWidthForBuild(g));
+            }
+            return (long) maxExclusive - payloadStart;
+        }
+        int pEnd = payloadEndExclusive != null ? payloadEndExclusive : Integer.MAX_VALUE;
+        int maxExclusive = payloadStart;
+        for (TcpHexFieldDefinition g : merged) {
+            if (g == null || g == lengthField) {
+                continue;
+            }
+            if (writesAutoDownlinkPayloadLength(g)) {
+                continue;
+            }
+            if (writesAutoDownlinkTotalFrameLength(g)) {
+                continue;
+            }
+            int go = g.getByteOffset();
+            if (go < payloadStart || go >= pEnd) {
+                continue;
+            }
+            int fieldEnd = go + fieldWidthForBuild(g);
+            int cappedEnd = Math.min(fieldEnd, pEnd);
+            maxExclusive = Math.max(maxExclusive, cappedEnd);
+        }
+        if (cmdOff >= payloadStart && cmdOff < pEnd) {
+            maxExclusive = Math.max(maxExclusive, Math.min(cmdOff + cmdW, pEnd));
+        }
+        return (long) maxExclusive - payloadStart;
+    }
+
+    /** 按线格式写入的无符号上限（参长按字节计数，按无符号写入 wire）。 */
+    private static long maxUnsignedIntegralForType(TcpHexValueType vt) {
+        return switch (vt) {
+            case UINT8, INT8 -> 0xFFL;
+            case UINT16_BE, UINT16_LE, INT16_BE, INT16_LE -> 0xFFFFL;
+            case UINT32_BE, UINT32_LE, INT32_BE, INT32_LE -> 0xFFFFFFFFL;
+            default -> throw new IllegalArgumentException("unsupported integral type for auto payload length: " + vt);
+        };
+    }
+
+    private static int fieldWidthForBuild(TcpHexFieldDefinition f) {
+        TcpHexValueType vt = f.getValueType();
+        if (vt.isLtvAutoWidthIntegral()) {
+            throw new IllegalArgumentException(
+                    "Field [" + f.getKey() + "]: LTV auto integral types are not supported for downlink hex build");
+        }
+        if (vt.isVariableByteSlice()) {
+            if (f.getByteLength() != null && f.getByteLength() > 0) {
+                return f.getByteLength();
+            }
+            throw new IllegalArgumentException(
+                    "Field [" + f.getKey() + "]: BYTES_AS_HEX/BYTES_AS_UTF8 for build requires fixed byteLength (dynamic length unsupported)");
+        }
+        return vt.getFixedByteLength();
+    }
+
+    /**
+     * 合并列表里若已有 {@code paN_hi} 与 {@code paN_lo}，则 {@code paN_word} 与二者占用同一 2 字节；
+     * 再按 word 写字会与 hi/lo 叠加，典型错位为多出一个 {@code 0x00}。此时 word 仅作 JSON 别名（见 {@link #expandPaWordHiLoAliases}），不应再作为独立字段写入。
+     */
+    static boolean isRedundantPaWordField(TcpHexFieldDefinition f, List<TcpHexFieldDefinition> merged) {
+        if (f == null || f.getKey() == null || merged == null) {
+            return false;
+        }
+        Matcher wm = PA_WORD_FIELD_KEY.matcher(f.getKey().trim());
+        if (!wm.matches()) {
+            return false;
+        }
+        String n = wm.group(1);
+        String hiKey = "pa" + n + "_hi";
+        String loKey = "pa" + n + "_lo";
+        boolean hasHi = false;
+        boolean hasLo = false;
+        for (TcpHexFieldDefinition g : merged) {
+            if (g == null || g.getKey() == null) {
+                continue;
+            }
+            String k = g.getKey().trim();
+            if (hiKey.equals(k)) {
+                hasHi = true;
+            } else if (loKey.equals(k)) {
+                hasLo = true;
+            }
+            if (hasHi && hasLo) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 兼容「整格 UINT16」与「高/低字节 UINT8」两种下发键名：若存在 {@code paN_word} 且未单独提供 {@code paN_hi}/{@code paN_lo}，
+     * 则按大端拆成 hi、lo（16 位线值掩码 0xFFFF）。已显式给出的 hi/lo 不会被覆盖。
+     */
+    static void expandPaWordHiLoAliases(Map<String, Object> values) {
+        if (values == null || values.isEmpty()) {
+            return;
+        }
+        Pattern p = PA_WORD_FIELD_KEY;
+        for (String key : List.copyOf(values.keySet())) {
+            if (key == null) {
+                continue;
+            }
+            String trimmed = key.trim();
+            Matcher m = p.matcher(trimmed);
+            if (!m.matches()) {
+                continue;
+            }
+            Object w = values.get(key);
+            if (w == null) {
+                continue;
+            }
+            long word;
+            try {
+                word = toLongForIntegral(w, trimmed);
+            } catch (IllegalArgumentException | ArithmeticException e) {
+                continue;
+            }
+            word &= 0xFFFFL;
+            String n = m.group(1);
+            String hk = "pa" + n + "_hi";
+            String lk = "pa" + n + "_lo";
+            if (!values.containsKey(hk)) {
+                values.put(hk, (int) ((word >>> 8) & 0xFF));
+            }
+            if (!values.containsKey(lk)) {
+                values.put(lk, (int) (word & 0xFF));
+            }
+        }
+    }
+
+    private static void writeFieldFromValues(byte[] buf, TcpHexFieldDefinition f, Map<String, Object> values) {
+        TcpHexValueType vt = f.getValueType();
+        int off = f.getByteOffset();
+        double scale = f.getEffectiveScale();
+
+        if (f.getFixedWireIntegralValue() != null) {
+            if (vt == null || vt.isVariableByteSlice() || !TcpHexCommandProfile.isIntegralMatchType(vt)) {
+                throw new IllegalArgumentException("Field [" + f.getKey() + "]: fixedWireIntegralValue requires integral type");
+            }
+            TcpHexProtocolParser.writeIntegralAt(buf, off, vt, f.getFixedWireIntegralValue());
+            return;
+        }
+        if (f.getFixedBytesHex() != null && TcpHexFixedBytesUtil.hasFixedBytesWireText(f.getFixedBytesHex())) {
+            if (vt == null || !vt.isVariableByteSlice()) {
+                throw new IllegalArgumentException("Field [" + f.getKey() + "]: fixedBytesHex requires BYTES_AS_HEX or BYTES_AS_UTF8");
+            }
+            int len = fieldWidthForBuild(f);
+            try {
+                byte[] parsed = vt == TcpHexValueType.BYTES_AS_UTF8
+                        ? TcpHexFixedBytesUtil.utf8FixedWireAfterUnescapeOrHexLiteral(f.getFixedBytesHex(), len)
+                        : TcpHexFixedBytesUtil.parseHexToByteLength(f.getFixedBytesHex(), len);
+                System.arraycopy(parsed, 0, buf, off, len);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Field [" + f.getKey() + "]: " + e.getMessage());
+            }
+            return;
+        }
+
+        Object raw = values.get(f.getKey());
+        if (vt.isVariableByteSlice()) {
+            if (f.getByteLength() != null && f.getByteLength() > 0) {
+                int len = f.getByteLength();
+                byte[] slice = new byte[len];
+                if (raw != null) {
+                    try {
+                        if (vt == TcpHexValueType.BYTES_AS_HEX) {
+                            byte[] parsed = TcpHexFixedBytesUtil.parseHexToByteLength(raw.toString(), len);
+                            System.arraycopy(parsed, 0, slice, 0, len);
+                        } else {
+                            byte[] enc = raw.toString().getBytes(StandardCharsets.UTF_8);
+                            if (enc.length > len) {
+                                throw new IllegalArgumentException("Field [" + f.getKey() + "]: UTF-8 text encodes to " + enc.length
+                                        + " bytes, max " + len);
+                            }
+                            System.arraycopy(enc, 0, slice, 0, enc.length);
+                        }
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Field [" + f.getKey() + "]: " + e.getMessage());
+                    }
+                }
+                System.arraycopy(slice, 0, buf, off, len);
+            } else {
+                if (raw == null) {
+                    return;
+                }
+                try {
+                    if (vt == TcpHexValueType.BYTES_AS_HEX) {
+                        byte[] decoded = TcpHexFixedBytesUtil.parseHexLooseToBytes(raw.toString());
+                        if (off + decoded.length > buf.length) {
+                            throw new IllegalArgumentException("Field [" + f.getKey() + "]: hex decodes to " + decoded.length
+                                    + " bytes, exceeds frame " + buf.length + " at offset " + off);
+                        }
+                        System.arraycopy(decoded, 0, buf, off, decoded.length);
+                    } else {
+                        byte[] enc = raw.toString().getBytes(StandardCharsets.UTF_8);
+                        if (off + enc.length > buf.length) {
+                            throw new IllegalArgumentException("Field [" + f.getKey() + "]: UTF-8 encodes to " + enc.length
+                                    + " bytes, exceeds frame " + buf.length + " at offset " + off);
+                        }
+                        System.arraycopy(enc, 0, buf, off, enc.length);
+                    }
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Field [" + f.getKey() + "]: " + e.getMessage());
+                }
+            }
+            return;
+        }
+
+        switch (vt) {
+            case UINT8, INT8, UINT16_BE, UINT16_LE, INT16_BE, INT16_LE, UINT32_BE, UINT32_LE, INT32_BE, INT32_LE -> {
+                long lv = raw != null ? toLongForIntegral(raw, f.getKey()) : 0L;
+                long rawInt = scaleToRawLong(lv, scale, f.getKey());
+                TcpHexProtocolParser.writeIntegralAt(buf, off, vt, rawInt);
+            }
+            case FLOAT_BE, FLOAT_LE -> {
+                double dv = raw != null ? toDouble(raw, f.getKey()) : 0.0;
+                float fv = (float) (dv / scale);
+                TcpHexProtocolParser.writeFloatAt(buf, off, vt, fv);
+            }
+            case DOUBLE_BE, DOUBLE_LE -> {
+                double dv = raw != null ? toDouble(raw, f.getKey()) : 0.0;
+                double enc = dv / scale;
+                TcpHexProtocolParser.writeDoubleAt(buf, off, vt, enc);
+            }
+            default -> throw new IllegalArgumentException("Unsupported value type for build: " + vt);
+        }
+    }
+
+    private static long scaleToRawLong(long logicalScaled, double scale, String key) {
+        if (scale == 0.0 || Double.isNaN(scale) || Double.isInfinite(scale)) {
+            throw new IllegalArgumentException("Field [" + key + "]: invalid scale");
+        }
+        double raw = logicalScaled / scale;
+        if (Double.isNaN(raw) || Double.isInfinite(raw)) {
+            throw new IllegalArgumentException("Field [" + key + "]: value out of range");
+        }
+        return Math.round(raw);
+    }
+
+    private static long toLongForIntegral(Object o, String key) {
+        if (o instanceof Number n) {
+            return Math.round(n.doubleValue());
+        }
+        if (o instanceof String s) {
+            return Math.round(Double.parseDouble(s.trim()));
+        }
+        throw new IllegalArgumentException("Field [" + key + "]: expected number for integral type");
+    }
+
+    private static double toDouble(Object o, String key) {
+        if (o instanceof Number n) {
+            return n.doubleValue();
+        }
+        if (o instanceof String s) {
+            return Double.parseDouble(s.trim());
+        }
+        throw new IllegalArgumentException("Field [" + key + "]: expected number for float/double type");
+    }
+
+    private static ProtocolTemplateDefinition findTemplateInBundle(ProtocolTemplateBundle bundle, String templateId) {
+        if (templateId == null || bundle.getProtocolTemplates() == null) {
+            return null;
+        }
+        for (ProtocolTemplateDefinition t : bundle.getProtocolTemplates()) {
+            if (t != null && templateId.equals(t.getId())) {
+                return t;
+            }
+        }
+        return null;
+    }
+}
