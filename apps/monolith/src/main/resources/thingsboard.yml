@@ -251,7 +251,7 @@ cassandra:
   jmx: "${CASSANDRA_USE_JMX:false}"
   # 启用/禁用指标收集。
   metrics: "${CASSANDRA_USE_METRICS:false}"
-  # NONE SNAPPY LZ4
+  # 压缩类型：NONE / SNAPPY / LZ4
   compression: "${CASSANDRA_COMPRESSION:none}"
   # 指定 Cassandra 集群初始化超时（毫秒）（启动时若无可用主机）
   init_timeout_ms: "${CASSANDRA_CLUSTER_INIT_TIMEOUT_MS:300000}"
@@ -269,11 +269,11 @@ cassandra:
   password: "${CASSANDRA_PASSWORD:}"
   # Astra DB 连接 https://astra.datastax.com/
   cloud:
-    # /etc/thingsboard/astra/secure-connect-thingsboard.zip
+    # 安全连接包路径，例如 /etc/thingsboard/astra/secure-connect-thingsboard.zip
     secure_connect_bundle_path: "${CASSANDRA_CLOUD_SECURE_BUNDLE_PATH:}"
-    # DucitQPHMzPCBOZqFYexAfKk
+    # 示例 Client ID：DucitQPHMzPCBOZqFYexAfKk
     client_id: "${CASSANDRA_CLOUD_CLIENT_ID:}"
-    # ZnF7FpuHp43FP5BzM+KY8wGmSb4Ql6BhT4Z7sOU13ze+gXQ-n7OkFpNuB,oACUIQObQnK0g4bSPoZhK5ejkcF9F.j6f64j71Sr.tiRe0Fsq2hPS1ZCGSfAaIgg63IydG
+    # 示例 Client Secret：ZnF7FpuHp43FP5BzM+KY8wGmSb4Ql6BhT4Z7sOU13ze+gXQ-n7OkFpNuB,oACUIQObQnK0g4bSPoZhK5ejkcF9F.j6f64j71Sr.tiRe0Fsq2hPS1ZCGSfAaIgg63IydG
     client_secret: "${CASSANDRA_CLOUD_CLIENT_SECRET:}"
 
   # Cassandra 集群连接 Socket 参数 #
@@ -1129,7 +1129,7 @@ transport:
     # 启用/禁用 LwM2M 传输协议。
     enabled: "${LWM2M_ENABLED:true}"
     dtls:
-      # RFC7925_RETRANSMISSION_TIMEOUT_IN_MILLISECONDS = 9000
+      # RFC7925 重传超时（毫秒）= 9000
       retransmission_timeout: "${LWM2M_DTLS_RETRANSMISSION_TIMEOUT_MS:9000}"
       # LwM2M 的 CoAP DTLS Connection ID 长度。RFC 9146，DTLS 1.2 的 Connection Identifier
       # 默认：off
@@ -1313,7 +1313,7 @@ coap:
   dtls:
     # 启用/禁用 DTLS 1.2 支持
     enabled: "${COAP_DTLS_ENABLED:false}"
-    # RFC7925_RETRANSMISSION_TIMEOUT_IN_MILLISECONDS = 9000
+    # RFC7925 重传超时（毫秒）= 9000
     retransmission_timeout: "${COAP_DTLS_RETRANSMISSION_TIMEOUT_MS:9000}"
     # CoAP DTLS 绑定地址
     bind_address: "${COAP_DTLS_BIND_ADDRESS:0.0.0.0}"
@@ -1344,13 +1344,13 @@ coap:
     # 为协商更小的最大分片长度，
     # 客户端 MAY 在（扩展）client hello 中包含 "max_fragment_length" 类型扩展。
     # 该扩展的 "extension_data" 字段 SHALL 包含：
-    # enum {
+    # 枚举：{
     #   2^9(1) == 512,
     #   2^10(2) == 1024,
     #   2^11(3) == 2048,
     #   2^12(4) == 4096,
     #   (255)
-    # } MaxFragmentLength;
+    # } MaxFragmentLength；
     # TLS 已要求客户端和服务端支持握手消息分片。
     max_fragment_length: "${COAP_DTLS_MAX_FRAGMENT_LENGTH:1024}"
     # 服务端 DTLS 凭据

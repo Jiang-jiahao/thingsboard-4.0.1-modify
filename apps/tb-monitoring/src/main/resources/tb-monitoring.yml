@@ -15,95 +15,95 @@
 #
 
 monitoring:
-  # Monitored server domain
+  # 被监控服务器域名
   domain: "${DOMAIN:localhost}"
   rest:
-    # Base REST API url, https://DOMAIN by default
+    # REST API 基础 URL，默认为 https://DOMAIN
     base_url: '${REST_BASE_URL:https://${monitoring.domain}}'
-    # Authentication username
+    # 认证用户名
     username: '${REST_AUTH_USERNAME:tenant@thingsboard.org}'
-    # Authentication password
+    # 认证密码
     password: '${REST_AUTH_PASSWORD:tenant}'
-    # REST request timeout in milliseconds
+    # REST 请求超时（毫秒）
     request_timeout_ms: '${REST_REQUEST_TIMEOUT_MS:5000}'
   ws:
-    # WebSocket url, wss://DOMAIN by default
+    # WebSocket URL，默认为 wss://DOMAIN
     base_url: '${WS_BASE_URL:wss://${monitoring.domain}}'
-    # WebSocket request timeout
+    # WebSocket 请求超时
     request_timeout_ms: '${WS_REQUEST_TIMEOUT_MS:3000}'
 
-  # Checks frequency in milliseconds
+  # 检查频率（毫秒）
   monitoring_rate_ms: '${MONITORING_RATE_MS:10000}'
-  # Maximum time between request to transport and WebSocket update
+  # 向传输层发请求与收到 WebSocket 更新之间的最长时间
   check_timeout_ms: '${CHECK_TIMEOUT_MS:5000}'
 
-  # Failures threshold for notifying
+  # 触发通知的失败次数阈值
   failures_threshold: '${FAILURES_THRESHOLD:1}'
-  # Notify after each REPEATED_FAILURE_NOTIFICATION subsequent failures, 0 to notify only once on first failure
+  # 之后每累计 REPEATED_FAILURE_NOTIFICATION 次失败再通知一次；为 0 则仅在首次失败时通知一次
   repeated_failure_notification: '${REPEATED_FAILURE_NOTIFICATION:4}'
 
   transports:
     mqtt:
-      # Enable MQTT transport checks
+      # 启用 MQTT 传输检查
       enabled: '${MQTT_TRANSPORT_MONITORING_ENABLED:true}'
-      # MQTT request timeout in milliseconds
+      # MQTT 请求超时（毫秒）
       request_timeout_ms: '${MQTT_REQUEST_TIMEOUT_MS:4000}'
-      # MQTT QoS
+      # MQTT 服务质量（QoS）
       qos: '${MQTT_QOS_LEVEL:1}'
       targets:
-          # MQTT transport base url, tcp://DOMAIN:1883 by default
+          # MQTT 传输基础 URL，默认为 tcp://DOMAIN:1883
         - base_url: '${MQTT_TRANSPORT_BASE_URL:tcp://${monitoring.domain}:1883}'
-          # Queue to use for target device
+          # 目标设备使用的队列
           queue: '${MQTT_TRANSPORT_USED_QUEUE:Main}'
-          # Whether to monitor IPs associated with the domain from base url
+          # 是否监控基础 URL 中域名对应的 IP
           check_domain_ips: '${MQTT_TRANSPORT_CHECK_DOMAIN_IPS:false}'
-        # To add more targets, use following environment variables:
-        # monitoring.transports.mqtt.targets[1].base_url, monitoring.transports.mqtt.targets[2].base_url, etc.
+        # 如需添加更多目标，请使用以下环境变量：
+        # monitoring.transports.mqtt.targets[1].base_url、monitoring.transports.mqtt.targets[2].base_url 等。
 
     coap:
-      # Enable CoAP transport checks
+      # 启用 CoAP 传输检查
       enabled: '${COAP_TRANSPORT_MONITORING_ENABLED:true}'
-      # CoAP request timeout in milliseconds
+      # CoAP 请求超时（毫秒）
       request_timeout_ms: '${COAP_REQUEST_TIMEOUT_MS:4000}'
       targets:
-          # CoAP transport base url, coap://DOMAIN by default
+          # CoAP 传输基础 URL，默认为 coap://DOMAIN
         - base_url: '${COAP_TRANSPORT_BASE_URL:coap://${monitoring.domain}}'
-          # Queue to use for target device
+          # 目标设备使用的队列
           queue: '${COAP_TRANSPORT_USED_QUEUE:Main}'
-          # Whether to monitor IPs associated with the domain from base url
+          # 是否监控基础 URL 中域名对应的 IP
           check_domain_ips: '${COAP_TRANSPORT_CHECK_DOMAIN_IPS:false}'
-        # To add more targets, use following environment variables:
-        # monitoring.transports.coap.targets[1].base_url, monitoring.transports.coap.targets[2].base_url, etc.
+        # 如需添加更多目标，请使用以下环境变量：
+        # monitoring.transports.coap.targets[1].base_url、monitoring.transports.coap.targets[2].base_url 等。
 
     http:
-      # Enable HTTP transport checks
+      # 启用 HTTP 传输检查
       enabled: '${HTTP_TRANSPORT_MONITORING_ENABLED:true}'
-      # HTTP request timeout in milliseconds
+      # HTTP 请求超时（毫秒）
       request_timeout_ms: '${HTTP_REQUEST_TIMEOUT_MS:4000}'
       targets:
-          # HTTP transport base url, http://DOMAIN by default
+          # HTTP 传输基础 URL，默认为 http://DOMAIN
         - base_url: '${HTTP_TRANSPORT_BASE_URL:http://${monitoring.domain}}'
-          # Queue to use for target device
+          # 目标设备使用的队列
           queue: '${HTTP_TRANSPORT_USED_QUEUE:Main}'
-          # Whether to monitor IPs associated with the domain from base url
+          # 是否监控基础 URL 中域名对应的 IP
           check_domain_ips: '${HTTP_TRANSPORT_CHECK_DOMAIN_IPS:false}'
-        # To add more targets, use following environment variables:
-        # monitoring.transports.http.targets[1].base_url, monitoring.transports.http.targets[2].base_url, etc.
+        # 如需添加更多目标，请使用以下环境变量：
+        # monitoring.transports.http.targets[1].base_url、monitoring.transports.http.targets[2].base_url 等。
 
     lwm2m:
-      # Enable LwM2M transport checks
+      # 启用 LwM2M 传输检查
       enabled: '${LWM2M_TRANSPORT_MONITORING_ENABLED:true}'
-      # LwM2M request timeout in milliseconds
+      # LwM2M 请求超时（毫秒）
       request_timeout_ms: '${LWM2M_REQUEST_TIMEOUT_MS:4000}'
       targets:
-          # LwM2M transport base url, coap://DOMAIN:5685 by default
+          # LwM2M 传输基础 URL，默认为 coap://DOMAIN:5685
         - base_url: '${LWM2M_TRANSPORT_BASE_URL:coap://${monitoring.domain}:5685}'
-          # Queue to use for target device
+          # 目标设备使用的队列
           queue: '${LWM2M_TRANSPORT_USED_QUEUE:Main}'
-          # Whether to monitor IPs associated with the domain from base url
+          # 是否监控基础 URL 中域名对应的 IP
           check_domain_ips: '${LWM2M_TRANSPORT_CHECK_DOMAIN_IPS:false}'
-        # To add more targets, use following environment variables:
-        # monitoring.transports.lwm2m.targets[1].base_url, monitoring.transports.lwm2m.targets[2].base_url, etc.
+        # 如需添加更多目标，请使用以下环境变量：
+        # monitoring.transports.lwm2m.targets[1].base_url、monitoring.transports.lwm2m.targets[2].base_url 等。
 
   edqs:
     enabled: "${EDQS_MONITORING_ENABLED:false}"
@@ -111,15 +111,15 @@ monitoring:
   notifications:
     message_prefix: '${NOTIFICATION_MESSAGE_PREFIX:}'
     slack:
-      # Enable notifying via Slack
+      # 启用 Slack 通知
       enabled: '${SLACK_NOTIFICATION_CHANNEL_ENABLED:false}'
-      # Slack webhook url
+      # Slack Webhook 地址
       webhook_url: '${SLACK_WEBHOOK_URL:}'
 
   latency:
-    # Enable latencies reporting
+    # 启用延迟上报
     enabled: "${LATENCY_REPORTING_ENABLED:true}"
-    # Latency threshold for notifying
+    # 触发通知的延迟阈值
     threshold_ms: '${LATENCY_THRESHOLD:2000}'
-    # ID of the asset to save latencies to. If not set and latencies reporting is enabled - asset will be found or created automatically
+    # 用于保存延迟数据的资产 ID。未设置且已启用延迟上报时，将自动查找或创建该资产
     reporting_asset_id: '${LATENCY_REPORTING_ASSET_ID:}'

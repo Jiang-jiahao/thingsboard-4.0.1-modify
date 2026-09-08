@@ -14,199 +14,199 @@
 # limitations under the License.
 #
 
-# tb-edqs process config.
+# tb-edqs 进程配置。
 server:
-  # Server bind-address
+  # 服务器绑定地址
   address: "${HTTP_BIND_ADDRESS:0.0.0.0}"
-  # Server bind port
-  port: "${HTTP_BIND_PORT:8080}"
+  # 服务器绑定端口
+  port: "${HTTP_BIND_PORT:8090}"
 
-# Application info parameters
+# 应用信息参数
 app:
-  # Application version
+  # 应用版本
   version: "@project.version@"
 
-# Zookeeper connection parameters
+# ZooKeeper 连接参数
 zk:
-  # Enable/disable zookeeper discovery service.
+  # 启用/禁用 ZooKeeper 发现服务。
   enabled: "${ZOOKEEPER_ENABLED:true}"
-  # Zookeeper connect string
+  # ZooKeeper 连接字符串
   url: "${ZOOKEEPER_URL:localhost:2181}"
-  # Zookeeper retry interval in milliseconds
+  # ZooKeeper 重试间隔（毫秒）
   retry_interval_ms: "${ZOOKEEPER_RETRY_INTERVAL_MS:3000}"
-  # Zookeeper connection timeout in milliseconds
+  # ZooKeeper 连接超时（毫秒）
   connection_timeout_ms: "${ZOOKEEPER_CONNECTION_TIMEOUT_MS:3000}"
-  # Zookeeper session timeout in milliseconds
+  # ZooKeeper 会话超时（毫秒）
   session_timeout_ms: "${ZOOKEEPER_SESSION_TIMEOUT_MS:3000}"
-  # Name of the directory in zookeeper 'filesystem'
+  # ZooKeeper "文件系统" 中的目录名称
   zk_dir: "${ZOOKEEPER_NODES_DIR:/thingsboard}"
-  # The recalculate_delay property is recommended in a microservices architecture setup for rule-engine services.
-  # This property provides a pause to ensure that when a rule-engine service is restarted, other nodes don't immediately attempt to recalculate their partitions.
-  # The delay is recommended because the initialization of rule chain actors is time-consuming. Avoiding unnecessary recalculations during a restart can enhance system performance and stability.
+  # 在微服务架构的规则引擎服务中建议配置 recalculate_delay 属性。
+  # 此属性提供暂停时间，确保规则引擎服务重启时，其他节点不会立即尝试重新计算其分区。
+  # 建议设置延迟，因为规则链 Actor 的初始化较耗时。重启期间避免不必要的重新计算可提升系统性能与稳定性。
   recalculate_delay: "${ZOOKEEPER_RECALCULATE_DELAY_MS:0}"
 
 spring:
   main:
-    allow-circular-references: "true" # Spring Boot configuration property that controls whether circular dependencies between beans are allowed.
+    allow-circular-references: "true" # Spring Boot 配置项，控制是否允许 Bean 之间的循环依赖。
 
-# Queue configuration parameters
+# 队列配置参数
 queue:
-  type: "${TB_QUEUE_TYPE:kafka}" # kafka (Apache Kafka)
-  prefix: "${TB_QUEUE_PREFIX:}" # Global queue prefix. If specified, prefix is added before default topic name: 'prefix.default_topic_name'. Prefix is applied to all topics (and consumer groups for kafka).
+  type: "${TB_QUEUE_TYPE:kafka}" # in-memory 或 kafka (Apache Kafka)
+  prefix: "${TB_QUEUE_PREFIX:}" # 全局队列前缀。若指定，前缀将加在默认主题名之前：'prefix.default_topic_name'。前缀应用于所有主题（Kafka 还包括 consumer groups）。
   edqs:
-    # This process hosts the EDQS engine (same flag as monolith local mode).
+    # EDQS 模式：local（用于 monolith）或 remote（独立 EDQS 微服务）
     mode: "${TB_EDQS_MODE:local}"
     sync:
       enabled: "${TB_EDQS_SYNC_ENABLED:true}"
-    # Number of partitions for EDQS topics
+    # EDQS 主题的分区数
     partitions: "${TB_EDQS_PARTITIONS:12}"
-    # EDQS partitioning strategy: tenant (partitions are resolved and distributed by tenant id) or none (partitions are resolved by message key; each instance has all the partitions)
+    # EDQS 分区策略：tenant（按租户 id 解析分区）或 none（无特定策略，按消息 key 解析）
     partitioning_strategy: "${TB_EDQS_PARTITIONING_STRATEGY:tenant}"
-    # EDQS events topic
+    # EDQS 事件主题
     events_topic: "${TB_EDQS_EVENTS_TOPIC:edqs.events}"
-    # EDQS state topic
+    # EDQS 状态主题
     state_topic: "${TB_EDQS_STATE_TOPIC:edqs.state}"
-    # EDQS requests topic
+    # EDQS 请求主题
     requests_topic: "${TB_EDQS_REQUESTS_TOPIC:edqs.requests}"
-    # EDQS responses topic
+    # EDQS 响应主题
     responses_topic: "${TB_EDQS_RESPONSES_TOPIC:edqs.responses}"
-    # Poll interval for EDQS topics
+    # EDQS 主题的轮询间隔
     poll_interval: "${TB_EDQS_POLL_INTERVAL_MS:25}"
-    # Maximum amount of pending requests to EDQS
+    # 发往 EDQS 的最大待处理请求数
     max_pending_requests: "${TB_EDQS_MAX_PENDING_REQUESTS:10000}"
-    # Maximum timeout for requests to EDQS
+    # 发往 EDQS 请求的最大超时时间
     max_request_timeout: "${TB_EDQS_MAX_REQUEST_TIMEOUT:20000}"
-    # Strings longer than this threshold will be compressed
+    # 超过此阈值的字符串将被压缩
     string_compression_length_threshold: "${TB_EDQS_STRING_COMPRESSION_LENGTH_THRESHOLD:512}"
     stats:
-      # Enable/disable statistics for EDQS
+      # 启用/禁用 EDQS 统计
       enabled: "${TB_EDQS_STATS_ENABLED:true}"
-      # Threshold for slow queries to log, in milliseconds
+      # 慢查询日志阈值（毫秒）
       slow_query_threshold: "${TB_EDQS_SLOW_QUERY_THRESHOLD_MS:200}"
 
   kafka:
-    # Kafka Bootstrap nodes in "host:port" format
+    # Kafka Bootstrap 节点，格式为 "host:port"
     bootstrap.servers: "${TB_KAFKA_SERVERS:localhost:9092}"
     ssl:
-      # Enable/Disable SSL Kafka communication
+      # 启用/禁用 Kafka SSL 通信
       enabled: "${TB_KAFKA_SSL_ENABLED:false}"
-      # The location of the trust store file
+      # trust store 文件的位置
       truststore.location: "${TB_KAFKA_SSL_TRUSTSTORE_LOCATION:}"
-      # The password of trust store file if specified
+      # 若指定则 trust store 文件的密码
       truststore.password: "${TB_KAFKA_SSL_TRUSTSTORE_PASSWORD:}"
-      # The location of the key store file. This is optional for the client and can be used for two-way authentication for the client
+      # key store 文件的位置。对客户端为可选，可用于客户端双向认证
       keystore.location: "${TB_KAFKA_SSL_KEYSTORE_LOCATION:}"
-      # The store password for the key store file. This is optional for the client and only needed if ‘ssl.keystore.location’ is configured. Key store password is not supported for PEM format
+      # key store 文件的 store 密码。对客户端为可选，仅在配置了 ‘ssl.keystore.location’ 时需要。PEM 格式不支持 key store 密码
       keystore.password: "${TB_KAFKA_SSL_KEYSTORE_PASSWORD:}"
-      # The password of the private key in the key store file or the PEM key specified in ‘keystore.key’
+      # key store 文件中私钥或 ‘keystore.key’ 指定的 PEM 密钥的密码
       key.password: "${TB_KAFKA_SSL_KEY_PASSWORD:}"
-    # The number of acknowledgments the producer requires the leader to have received before considering a request complete. This controls the durability of records that are sent. The following settings are allowed:0, 1 and all
+    # producer 认为请求完成前要求 leader 收到的确认数。控制发送记录的持久性。允许的值：0、1 和 all
     acks: "${TB_KAFKA_ACKS:all}"
-    # Number of retries. Resend any record whose send fails with a potentially transient error
+    # 重试次数。对因可能为瞬时错误而发送失败的记录进行重发
     retries: "${TB_KAFKA_RETRIES:1}"
-    # The compression type for all data generated by the producer. The default is none (i.e. no compression). Valid values none or gzip
-    compression.type: "${TB_KAFKA_COMPRESSION_TYPE:none}" # none or gzip
-    # Default batch size. This setting gives the upper bound of the batch size to be sent
+    # producer 生成的所有数据的压缩类型。默认为 none（即不压缩）。有效值：none 或 gzip
+    compression.type: "${TB_KAFKA_COMPRESSION_TYPE:none}" # none 或 gzip
+    # 默认 batch 大小。此设置给出待发送 batch 大小的上限
     batch.size: "${TB_KAFKA_BATCH_SIZE:16384}"
-    # This variable creates a small amount of artificial delay—that is, rather than immediately sending out a record
+    # 此变量产生少量人为延迟，即不会立即发送记录
     linger.ms: "${TB_KAFKA_LINGER_MS:1}"
-    # The maximum size of a request in bytes. This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests
+    # 请求的最大字节大小。此设置限制 producer 在单次请求中发送的 record batch 数量，以避免发送过大请求
     max.request.size: "${TB_KAFKA_MAX_REQUEST_SIZE:1048576}"
-    # The maximum number of unacknowledged requests the client will send on a single connection before blocking
+    # 客户端在阻塞前可在单条连接上发送的最大未确认请求数
     max.in.flight.requests.per.connection: "${TB_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION:5}"
-    # The total bytes of memory the producer can use to buffer records waiting to be sent to the server
+    # producer 可用于缓冲待发送到服务器的记录的内存总字节数
     buffer.memory: "${TB_BUFFER_MEMORY:33554432}"
-    # The multiple copies of data over the multiple brokers of Kafka
+    # Kafka 多个 broker 上的数据副本数
     replication_factor: "${TB_QUEUE_KAFKA_REPLICATION_FACTOR:1}"
-    # The maximum delay between invocations of poll() method when using consumer group management. This places an upper bound on the amount of time that the consumer can be idle before fetching more records
+    # 使用 consumer group 管理时 poll() 方法调用之间的最大延迟。限制 consumer 在获取更多记录前可空闲的最长时间
     max_poll_interval_ms: "${TB_QUEUE_KAFKA_MAX_POLL_INTERVAL_MS:300000}"
-    # The maximum number of records returned in a single call of poll() method
+    # 单次 poll() 调用返回的最大记录数
     max_poll_records: "${TB_QUEUE_KAFKA_MAX_POLL_RECORDS:8192}"
-    # The maximum amount of data per-partition the server will return. Records are fetched in batches by the consumer
+    # 服务器每个分区返回的最大数据量。consumer 以 batch 方式获取记录
     max_partition_fetch_bytes: "${TB_QUEUE_KAFKA_MAX_PARTITION_FETCH_BYTES:16777216}"
-    # The maximum amount of data the server will return. Records are fetched in batches by the consumer
+    # 服务器返回的最大数据量。consumer 以 batch 方式获取记录
     fetch_max_bytes: "${TB_QUEUE_KAFKA_FETCH_MAX_BYTES:134217728}"
-    request.timeout.ms: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 seconds) # refer to https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
-    session.timeout.ms: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 seconds) # refer to https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
-    auto_offset_reset: "${TB_QUEUE_KAFKA_AUTO_OFFSET_RESET:earliest}" # earliest, latest or none
-    # Enable/Disable using of Confluent Cloud
+    request.timeout.ms: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 秒) # 参见 https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
+    session.timeout.ms: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 秒) # 参见 https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
+    auto_offset_reset: "${TB_QUEUE_KAFKA_AUTO_OFFSET_RESET:earliest}" # earliest、latest 或 none
+    # 启用/禁用 Confluent Cloud
     use_confluent_cloud: "${TB_QUEUE_KAFKA_USE_CONFLUENT_CLOUD:false}"
     confluent:
-      # The endpoint identification algorithm used by clients to validate server hostname. The default value is https
+      # 客户端用于验证服务器主机名的端点识别算法。默认值为 https
       ssl.algorithm: "${TB_QUEUE_KAFKA_CONFLUENT_SSL_ALGORITHM:https}"
-      # The mechanism used to authenticate Schema Registry requests. SASL/PLAIN should only be used with TLS/SSL as a transport layer to ensure that clear passwords are not transmitted on the wire without encryption
+      # 用于认证 Schema Registry 请求的机制。SASL/PLAIN 应仅与 TLS/SSL 传输层一起使用，以确保明文密码不会在未加密的情况下传输
       sasl.mechanism: "${TB_QUEUE_KAFKA_CONFLUENT_SASL_MECHANISM:PLAIN}"
-      # Using JAAS Configuration for specifying multiple SASL mechanisms on a broker
+      # 使用 JAAS 配置在 broker 上指定多个 SASL 机制
       sasl.config: "${TB_QUEUE_KAFKA_CONFLUENT_SASL_JAAS_CONFIG:org.apache.kafka.common.security.plain.PlainLoginModule required username=\"CLUSTER_API_KEY\" password=\"CLUSTER_API_SECRET\";}"
-      # Protocol used to communicate with brokers. Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+      # 与 broker 通信使用的协议。有效值：PLAINTEXT、SSL、SASL_PLAINTEXT、SASL_SSL
       security.protocol: "${TB_QUEUE_KAFKA_CONFLUENT_SECURITY_PROTOCOL:SASL_SSL}"
-    # Key-value properties for Kafka consumer per specific topic, e.g. tb_ota_package is a topic name for ota, tb_rule_engine.sq is a topic name for default SequentialByOriginator queue.
-    # Check TB_QUEUE_CORE_OTA_TOPIC and TB_QUEUE_RE_SQ_TOPIC params
+    # 按特定主题的 Kafka consumer 键值属性，例如 tb_ota_package 是 OTA 的主题名，tb_rule_engine.sq 是默认 SequentialByOriginator 队列的主题名。
+    # 参见 TB_QUEUE_CORE_OTA_TOPIC 和 TB_QUEUE_RE_SQ_TOPIC 参数
     consumer-properties-per-topic:
       edqs.events:
-        # Key-value properties for Kafka consumer for edqs.events topic
+        # edqs.events 主题的 Kafka consumer 键值属性
         - key: max.poll.records
-          # Max poll records for edqs.events topic
+          # edqs.events 主题的 max poll records
           value: "${TB_QUEUE_KAFKA_EDQS_EVENTS_MAX_POLL_RECORDS:512}"
       edqs.state:
-        # Key-value properties for Kafka consumer for edqs.state topic
+        # edqs.state 主题的 Kafka consumer 键值属性
         - key: max.poll.records
-          # Max poll records for edqs.state topic
+          # edqs.state 主题的 max poll records
           value: "${TB_QUEUE_KAFKA_EDQS_STATE_MAX_POLL_RECORDS:512}"
 
-    other-inline: "${TB_QUEUE_KAFKA_OTHER_PROPERTIES:}" # In this section you can specify custom parameters (semicolon separated) for Kafka consumer/producer/admin # Example "metrics.recording.level:INFO;metrics.sample.window.ms:30000"
-    other: # DEPRECATED. In this section, you can specify custom parameters for Kafka consumer/producer and expose the env variables to configure outside
-    #  - key: "request.timeout.ms" # refer to https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
-    #    value: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 seconds)
-    #  - key: "session.timeout.ms" # refer to https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
-    #    value: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 seconds)
+    other-inline: "${TB_QUEUE_KAFKA_OTHER_PROPERTIES:}" # 在此可指定 Kafka consumer/producer/admin 的自定义参数（分号分隔） # 示例 "metrics.recording.level:INFO;metrics.sample.window.ms:30000"
+    other: # 已弃用。在此可指定 Kafka consumer/producer 的自定义参数，并暴露环境变量以便外部配置
+    #  - key: "request.timeout.ms" # 参见 https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
+    #    value: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 秒)
+    #  - key: "session.timeout.ms" # 参见 https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
+    #    value: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 秒)
     topic-properties:
-      # Kafka properties for EDQS events topics
+      # EDQS 事件主题的 Kafka 属性
       edqs-events: "${TB_QUEUE_KAFKA_EDQS_EVENTS_TOPIC_PROPERTIES:retention.ms:86400000;segment.bytes:52428800;retention.bytes:-1;partitions:1;min.insync.replicas:1}"
-      # Kafka properties for EDQS requests topic (default: 3 minutes retention)
+      # EDQS 请求主题的 Kafka 属性（默认保留 3 分钟）
       edqs-requests: "${TB_QUEUE_KAFKA_EDQS_REQUESTS_TOPIC_PROPERTIES:retention.ms:180000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
-      # Kafka properties for EDQS state topic (infinite retention, compaction)
+      # EDQS 状态主题的 Kafka 属性（无限保留，compaction）
       edqs-state: "${TB_QUEUE_KAFKA_EDQS_STATE_TOPIC_PROPERTIES:retention.ms:-1;segment.bytes:52428800;retention.bytes:-1;partitions:1;min.insync.replicas:1;cleanup.policy:compact}"
     consumer-stats:
-      # Prints lag between consumer group offset and last messages offset in Kafka topics
+      # 打印 Kafka 主题中 consumer group 偏移量与最后消息偏移量之间的 lag
       enabled: "${TB_QUEUE_KAFKA_CONSUMER_STATS_ENABLED:true}"
-      # Statistics printing interval for Kafka's consumer-groups stats
+      # Kafka consumer-groups 统计信息的打印间隔
       print-interval-ms: "${TB_QUEUE_KAFKA_CONSUMER_STATS_MIN_PRINT_INTERVAL_MS:60000}"
-      # Time to wait for the stats-loading requests to Kafka to finish
+      # 等待向 Kafka 发送的统计加载请求完成的时间
       kafka-response-timeout-ms: "${TB_QUEUE_KAFKA_CONSUMER_STATS_RESPONSE_TIMEOUT_MS:1000}"
   partitions:
-    hash_function_name: "${TB_QUEUE_PARTITIONS_HASH_FUNCTION_NAME:murmur3_128}" # murmur3_32, murmur3_128 or sha256
+    hash_function_name: "${TB_QUEUE_PARTITIONS_HASH_FUNCTION_NAME:murmur3_128}" # murmur3_32、murmur3_128 或 sha256
 
-# General service parameters
+# 通用服务参数
 service:
   type: "${TB_SERVICE_TYPE:edqs}"
-  # Unique id for this service (autogenerated if empty)
-  id: "${TB_SERVICE_ID:}"
+  # 此服务的唯一 id（为空则自动生成）
+  id: "${TB_SERVICE_ID:tb-edqs1}"
   edqs:
-    # EDQS instances with the same label will share the same list of partitions
+    # 具有相同 label 的 EDQS 实例将共享同一组分片
     label: "${TB_EDQS_LABEL:}"
 
-# Metrics parameters
+# Metrics 参数
 metrics:
-  # Enable/disable actuator metrics.
+  # 启用/禁用 actuator metrics。
   enabled: "${METRICS_ENABLED:false}"
   timer:
-    # Metrics percentiles returned by actuator for timer metrics. List of double values (divided by ,).
+    # actuator 为 timer metrics 返回的 metrics 百分位数。双精度值列表（以 , 分隔）。
     percentiles: "${METRICS_TIMER_PERCENTILES:0.5}"
   system_info:
-    # Persist frequency of system info (CPU, memory usage, etc.) in seconds
+    # 系统信息（CPU、内存使用等）的持久化频率（秒）
     persist_frequency: "${METRICS_SYSTEM_INFO_PERSIST_FREQUENCY_SECONDS:60}"
-    # TTL in days for system info timeseries
+    # 系统信息时序的 TTL（天）
     ttl: "${METRICS_SYSTEM_INFO_TTL_DAYS:7}"
 
-# General management parameters
+# 通用 management 参数
 management:
   endpoints:
     web:
       exposure:
-        # Expose metrics endpoint (use value 'prometheus' to enable prometheus metrics).
+        # 暴露 metrics 端点（使用值 'prometheus' 启用 prometheus metrics）。
         include: '${METRICS_ENDPOINTS_EXPOSE:info}'
   health:
     elasticsearch:
-      # Enable the org.springframework.boot.actuate.elasticsearch.ElasticsearchRestClientHealthIndicator.doHealthCheck
+      # 启用 org.springframework.boot.actuate.elasticsearch.ElasticsearchRestClientHealthIndicator.doHealthCheck
       enabled: "false"

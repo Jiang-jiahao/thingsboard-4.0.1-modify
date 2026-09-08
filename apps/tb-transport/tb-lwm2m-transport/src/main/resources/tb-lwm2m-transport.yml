@@ -14,562 +14,562 @@
 # limitations under the License.
 #
 
-# Spring common parameters
-spring.main.web-environment: "${WEB_APPLICATION_ENABLE:false}" # If you enabled process metrics you should also enable 'web-environment'.
-spring.main.web-application-type: "${WEB_APPLICATION_TYPE:none}" # If you enabled process metrics you should set 'web-application-type' to 'servlet' value.
-spring.main.allow-circular-references: "true" # Spring Boot configuration property that controls whether circular dependencies between beans are allowed.
+# Spring 通用参数
+spring.main.web-environment: "${WEB_APPLICATION_ENABLE:false}" # 若启用了进程指标，还应启用 web-environment。
+spring.main.web-application-type: "${WEB_APPLICATION_TYPE:none}" # 若启用了进程指标，应将 web-application-type 设为 servlet。
+spring.main.allow-circular-references: "true" # Spring Boot 配置项，控制是否允许 Bean 之间的循环依赖。
 
-# Server common parameters
+# 服务器通用参数
 server:
-  # Server bind address (has no effect if web-environment is disabled).
+  # 服务器绑定地址
   address: "${HTTP_BIND_ADDRESS:0.0.0.0}"
-  # Server bind port (has no effect if web-environment is disabled).
-  port: "${HTTP_BIND_PORT:8083}"
+  # 服务器绑定端口
+  port: "${HTTP_BIND_PORT:8085}"
 
-# Zookeeper connection parameters. Used for service discovery.
+# ZooKeeper 连接参数
 zk:
-  # Enable/disable zookeeper discovery service.
-  enabled: "${ZOOKEEPER_ENABLED:false}"
-  # Zookeeper connect string
+  # 启用/禁用 ZooKeeper 发现服务。
+  enabled: "${ZOOKEEPER_ENABLED:true}"
+  # ZooKeeper 连接字符串
   url: "${ZOOKEEPER_URL:localhost:2181}"
-  # Zookeeper retry interval in milliseconds
+  # ZooKeeper 重试间隔（毫秒）
   retry_interval_ms: "${ZOOKEEPER_RETRY_INTERVAL_MS:3000}"
-  # Zookeeper connection timeout in milliseconds
+  # ZooKeeper 连接超时（毫秒）
   connection_timeout_ms: "${ZOOKEEPER_CONNECTION_TIMEOUT_MS:3000}"
-  # Zookeeper session timeout in milliseconds
+  # ZooKeeper 会话超时（毫秒）
   session_timeout_ms: "${ZOOKEEPER_SESSION_TIMEOUT_MS:3000}"
-  # Name of the directory in zookeeper 'filesystem'
+  # ZooKeeper "文件系统" 中的目录名称
   zk_dir: "${ZOOKEEPER_NODES_DIR:/thingsboard}"
-  # The recalculate_delay property is recommended in a microservices architecture setup for rule-engine services.
-  # This property provides a pause to ensure that when a rule-engine service is restarted, other nodes don't immediately attempt to recalculate their partitions.
-  # The delay is recommended because the initialization of rule chain actors is time-consuming. Avoiding unnecessary recalculations during a restart can enhance system performance and stability.
+  # 在微服务架构的规则引擎服务中建议配置 recalculate_delay 属性。
+  # 此属性提供暂停时间，确保规则引擎服务重启时，其他节点不会立即尝试重新计算其分区。
+  # 建议设置延迟，因为规则链 Actor 的初始化较耗时。重启期间避免不必要的重新计算可提升系统性能与稳定性。
   recalculate_delay: "${ZOOKEEPER_RECALCULATE_DELAY_MS:0}"
 
-# Cache parameters
+# 缓存设置参数
 cache:
-  # caffeine or redis
-  type: "${CACHE_TYPE:redis}"
+  # caffeine 或 redis（7.2 - 最新兼容版本）
+  type: "${CACHE_TYPE:caffeine}"
   specs:
     relations:
-      timeToLiveInMinutes: "${CACHE_SPECS_RELATIONS_TTL:1440}" # Relations cache TTL
-      maxSize: "${CACHE_SPECS_RELATIONS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_RELATIONS_TTL:1440}" # 关系缓存 TTL
+      maxSize: "${CACHE_SPECS_RELATIONS_MAX_SIZE:10000}" # 0 表示禁用缓存
     deviceCredentials:
-      timeToLiveInMinutes: "${CACHE_SPECS_DEVICE_CREDENTIALS_TTL:1440}" # Device credentials cache TTL
-      maxSize: "${CACHE_SPECS_DEVICE_CREDENTIALS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_DEVICE_CREDENTIALS_TTL:1440}" # 设备凭证缓存 TTL
+      maxSize: "${CACHE_SPECS_DEVICE_CREDENTIALS_MAX_SIZE:10000}" # 0 表示禁用缓存
     devices:
-      timeToLiveInMinutes: "${CACHE_SPECS_DEVICES_TTL:1440}" # Device cache TTL
-      maxSize: "${CACHE_SPECS_DEVICES_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_DEVICES_TTL:1440}" # 设备缓存 TTL
+      maxSize: "${CACHE_SPECS_DEVICES_MAX_SIZE:10000}" # 0 表示禁用缓存
     sessions:
-      timeToLiveInMinutes: "${CACHE_SPECS_SESSIONS_TTL:1440}" # Sessions cache TTL
-      maxSize: "${CACHE_SPECS_SESSIONS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_SESSIONS_TTL:1440}" # 会话缓存 TTL
+      maxSize: "${CACHE_SPECS_SESSIONS_MAX_SIZE:10000}" # 0 表示禁用缓存
     assets:
-      timeToLiveInMinutes: "${CACHE_SPECS_ASSETS_TTL:1440}" # Asset cache TTL
-      maxSize: "${CACHE_SPECS_ASSETS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_ASSETS_TTL:1440}" # 资产缓存 TTL
+      maxSize: "${CACHE_SPECS_ASSETS_MAX_SIZE:10000}" # 0 表示禁用缓存
     customers:
-      timeToLiveInMinutes: "${CACHE_SPECS_CUSTOMERS_TTL:1440}" # Customer cache TTL
-      maxSize: "${CACHE_SPECS_CUSTOMERS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_CUSTOMERS_TTL:1440}" # 客户缓存 TTL
+      maxSize: "${CACHE_SPECS_CUSTOMERS_MAX_SIZE:10000}" # 0 表示禁用缓存
     users:
-      timeToLiveInMinutes: "${CACHE_SPECS_USERS_TTL:1440}" # User cache TTL
-      maxSize: "${CACHE_SPECS_USERS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_USERS_TTL:1440}" # 用户缓存 TTL
+      maxSize: "${CACHE_SPECS_USERS_MAX_SIZE:10000}" # 0 表示禁用缓存
     entityViews:
-      timeToLiveInMinutes: "${CACHE_SPECS_ENTITY_VIEWS_TTL:1440}" # Entity view cache TTL
-      maxSize: "${CACHE_SPECS_ENTITY_VIEWS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_ENTITY_VIEWS_TTL:1440}" # 实体视图缓存 TTL
+      maxSize: "${CACHE_SPECS_ENTITY_VIEWS_MAX_SIZE:10000}" # 0 表示禁用缓存
     claimDevices:
-      timeToLiveInMinutes: "${CACHE_SPECS_CLAIM_DEVICES_TTL:1440}" # Claim devices cache TTL
-      maxSize: "${CACHE_SPECS_CLAIM_DEVICES_MAX_SIZE:1000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_CLAIM_DEVICES_TTL:1440}" # 认领设备缓存 TTL
+      maxSize: "${CACHE_SPECS_CLAIM_DEVICES_MAX_SIZE:1000}" # 0 表示禁用缓存
     securitySettings:
-      timeToLiveInMinutes: "${CACHE_SPECS_SECURITY_SETTINGS_TTL:1440}" # Security settings cache TTL
-      maxSize: "${CACHE_SPECS_SECURITY_SETTINGS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_SECURITY_SETTINGS_TTL:1440}" # 安全设置缓存 TTL
+      maxSize: "${CACHE_SPECS_SECURITY_SETTINGS_MAX_SIZE:10000}" # 0 表示禁用缓存
     tenantProfiles:
-      timeToLiveInMinutes: "${CACHE_SPECS_TENANT_PROFILES_TTL:1440}" # Tenant profiles cache TTL
-      maxSize: "${CACHE_SPECS_TENANT_PROFILES_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_TENANT_PROFILES_TTL:1440}" # 租户配置文件缓存 TTL
+      maxSize: "${CACHE_SPECS_TENANT_PROFILES_MAX_SIZE:10000}" # 0 表示禁用缓存
     tenants:
-      timeToLiveInMinutes: "${CACHE_SPECS_TENANTS_TTL:1440}" # Tenant cache TTL
-      maxSize: "${CACHE_SPECS_TENANTS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_TENANTS_TTL:1440}" # 租户缓存 TTL
+      maxSize: "${CACHE_SPECS_TENANTS_MAX_SIZE:10000}" # 0 表示禁用缓存
     tenantsExist:
-      # Environment variables are intentionally the same as in 'tenants' cache to be equal.
+      # 环境变量有意与 'tenants' 缓存保持一致。
       timeToLiveInMinutes: "${CACHE_SPECS_TENANTS_TTL:1440}"
-      maxSize: "${CACHE_SPECS_TENANTS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      maxSize: "${CACHE_SPECS_TENANTS_MAX_SIZE:10000}" # 0 表示禁用缓存
     deviceProfiles:
-      timeToLiveInMinutes: "${CACHE_SPECS_DEVICE_PROFILES_TTL:1440}" # Device profile cache TTL
-      maxSize: "${CACHE_SPECS_DEVICE_PROFILES_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_DEVICE_PROFILES_TTL:1440}" # 设备配置文件缓存 TTL
+      maxSize: "${CACHE_SPECS_DEVICE_PROFILES_MAX_SIZE:10000}" # 0 表示禁用缓存
     assetProfiles:
-      timeToLiveInMinutes: "${CACHE_SPECS_ASSET_PROFILES_TTL:1440}" # Asset profile cache TTL
-      maxSize: "${CACHE_SPECS_ASSET_PROFILES_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_ASSET_PROFILES_TTL:1440}" # 资产配置文件缓存 TTL
+      maxSize: "${CACHE_SPECS_ASSET_PROFILES_MAX_SIZE:10000}" # 0 表示禁用缓存
     notificationSettings:
-      timeToLiveInMinutes: "${CACHE_SPECS_NOTIFICATION_SETTINGS_TTL:10}" # Notification settings cache TTL
-      maxSize: "${CACHE_SPECS_NOTIFICATION_SETTINGS_MAX_SIZE:1000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_NOTIFICATION_SETTINGS_TTL:10}" # 通知设置缓存 TTL
+      maxSize: "${CACHE_SPECS_NOTIFICATION_SETTINGS_MAX_SIZE:1000}" # 0 表示禁用缓存
     sentNotifications:
-      timeToLiveInMinutes: "${CACHE_SPECS_SENT_NOTIFICATIONS_TTL:1440}" # Sent notifications cache TTL
-      maxSize: "${CACHE_SPECS_SENT_NOTIFICATIONS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_SENT_NOTIFICATIONS_TTL:1440}" # 已发送通知缓存 TTL
+      maxSize: "${CACHE_SPECS_SENT_NOTIFICATIONS_MAX_SIZE:10000}" # 0 表示禁用缓存
     attributes:
-      timeToLiveInMinutes: "${CACHE_SPECS_ATTRIBUTES_TTL:1440}" # Attributes cache TTL
-      maxSize: "${CACHE_SPECS_ATTRIBUTES_MAX_SIZE:100000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_ATTRIBUTES_TTL:1440}" # 属性缓存 TTL
+      maxSize: "${CACHE_SPECS_ATTRIBUTES_MAX_SIZE:100000}" # 0 表示禁用缓存
     tsLatest:
-      timeToLiveInMinutes: "${CACHE_SPECS_TS_LATEST_TTL:1440}" # Timeseries latest cache TTL
-      maxSize: "${CACHE_SPECS_TS_LATEST_MAX_SIZE:100000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_TS_LATEST_TTL:1440}" # 时序最新数据缓存 TTL
+      maxSize: "${CACHE_SPECS_TS_LATEST_MAX_SIZE:100000}" # 0 表示禁用缓存
     userSessionsInvalidation:
-      # The value of this TTL is ignored and replaced by the JWT refresh token expiration time
+      # 此 TTL 值将被忽略，并替换为 JWT 刷新令牌过期时间
       timeToLiveInMinutes: "0"
-      maxSize: "${CACHE_SPECS_USERS_UPDATE_TIME_MAX_SIZE:10000}" # 0 means the cache is disabled
+      maxSize: "${CACHE_SPECS_USERS_UPDATE_TIME_MAX_SIZE:10000}" # 0 表示禁用缓存
     otaPackages:
-      timeToLiveInMinutes: "${CACHE_SPECS_OTA_PACKAGES_TTL:60}" # Ota packages cache TTL
-      maxSize: "${CACHE_SPECS_OTA_PACKAGES_MAX_SIZE:10}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_OTA_PACKAGES_TTL:60}" # OTA 包缓存 TTL
+      maxSize: "${CACHE_SPECS_OTA_PACKAGES_MAX_SIZE:10}" # 0 表示禁用缓存
     otaPackagesData:
-      timeToLiveInMinutes: "${CACHE_SPECS_OTA_PACKAGES_DATA_TTL:60}" # Ota packages data cache TTL
-      maxSize: "${CACHE_SPECS_OTA_PACKAGES_DATA_MAX_SIZE:10}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_OTA_PACKAGES_DATA_TTL:60}" # OTA 包数据缓存 TTL
+      maxSize: "${CACHE_SPECS_OTA_PACKAGES_DATA_MAX_SIZE:10}" # 0 表示禁用缓存
     repositorySettings:
-      timeToLiveInMinutes: "${CACHE_SPECS_REPOSITORY_SETTINGS_TTL:1440}" # Repository settings cache TTL
-      maxSize: "${CACHE_SPECS_REPOSITORY_SETTINGS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_REPOSITORY_SETTINGS_TTL:1440}" # 仓库设置缓存 TTL
+      maxSize: "${CACHE_SPECS_REPOSITORY_SETTINGS_MAX_SIZE:10000}" # 0 表示禁用缓存
     autoCommitSettings:
-      timeToLiveInMinutes: "${CACHE_SPECS_AUTO_COMMIT_SETTINGS_TTL:1440}" # Autocommit settings cache TTL
-      maxSize: "${CACHE_SPECS_AUTO_COMMIT_SETTINGS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_AUTO_COMMIT_SETTINGS_TTL:1440}" # 自动提交设置缓存 TTL
+      maxSize: "${CACHE_SPECS_AUTO_COMMIT_SETTINGS_MAX_SIZE:10000}" # 0 表示禁用缓存
     twoFaVerificationCodes:
-      timeToLiveInMinutes: "${CACHE_SPECS_TWO_FA_VERIFICATION_CODES_TTL:60}" # Two factor verification codes cache TTL
-      maxSize: "${CACHE_SPECS_TWO_FA_VERIFICATION_CODES_MAX_SIZE:100000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_TWO_FA_VERIFICATION_CODES_TTL:60}" # 双因素验证码缓存 TTL
+      maxSize: "${CACHE_SPECS_TWO_FA_VERIFICATION_CODES_MAX_SIZE:100000}" # 0 表示禁用缓存
     versionControlTask:
-      timeToLiveInMinutes: "${CACHE_SPECS_VERSION_CONTROL_TASK_TTL:20}" # Version control task cache TTL
-      maxSize: "${CACHE_SPECS_VERSION_CONTROL_TASK_MAX_SIZE:100000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_VERSION_CONTROL_TASK_TTL:20}" # 版本控制任务缓存 TTL
+      maxSize: "${CACHE_SPECS_VERSION_CONTROL_TASK_MAX_SIZE:100000}" # 0 表示禁用缓存
     userSettings:
-      timeToLiveInMinutes: "${CACHE_SPECS_USER_SETTINGS_TTL:1440}" # User settings cache TTL
-      maxSize: "${CACHE_SPECS_USER_SETTINGS_MAX_SIZE:100000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_USER_SETTINGS_TTL:1440}" # 用户设置缓存 TTL
+      maxSize: "${CACHE_SPECS_USER_SETTINGS_MAX_SIZE:100000}" # 0 表示禁用缓存
     dashboardTitles:
-      timeToLiveInMinutes: "${CACHE_SPECS_DASHBOARD_TITLES_TTL:1440}" # Dashboard titles cache TTL
-      maxSize: "${CACHE_SPECS_DASHBOARD_TITLES_MAX_SIZE:100000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_DASHBOARD_TITLES_TTL:1440}" # 仪表板标题缓存 TTL
+      maxSize: "${CACHE_SPECS_DASHBOARD_TITLES_MAX_SIZE:100000}" # 0 表示禁用缓存
     entityCount:
-      timeToLiveInMinutes: "${CACHE_SPECS_ENTITY_COUNT_TTL:1440}" # Entity count cache TTL
-      maxSize: "${CACHE_SPECS_ENTITY_COUNT_MAX_SIZE:100000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_ENTITY_COUNT_TTL:1440}" # 实体计数缓存 TTL
+      maxSize: "${CACHE_SPECS_ENTITY_COUNT_MAX_SIZE:100000}" # 0 表示禁用缓存
     resourceInfo:
-      timeToLiveInMinutes: "${CACHE_SPECS_RESOURCE_INFO_TTL:1440}" # Resource info cache TTL
-      maxSize: "${CACHE_SPECS_RESOURCE_INFO_MAX_SIZE:100000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_RESOURCE_INFO_TTL:1440}" # 资源信息缓存 TTL
+      maxSize: "${CACHE_SPECS_RESOURCE_INFO_MAX_SIZE:100000}" # 0 表示禁用缓存
     alarmTypes:
-      timeToLiveInMinutes: "${CACHE_SPECS_ALARM_TYPES_TTL:60}" # Alarm types cache TTL
-      maxSize: "${CACHE_SPECS_ALARM_TYPES_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_ALARM_TYPES_TTL:60}" # 告警类型缓存 TTL
+      maxSize: "${CACHE_SPECS_ALARM_TYPES_MAX_SIZE:10000}" # 0 表示禁用缓存
     qrCodeSettings:
-      timeToLiveInMinutes: "${CACHE_SPECS_MOBILE_APP_SETTINGS_TTL:1440}" # Qr code settings cache TTL
-      maxSize: "${CACHE_SPECS_MOBILE_APP_SETTINGS_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_SPECS_MOBILE_APP_SETTINGS_TTL:1440}" # 二维码设置缓存 TTL
+      maxSize: "${CACHE_SPECS_MOBILE_APP_SETTINGS_MAX_SIZE:10000}" # 0 表示禁用缓存
     mobileSecretKey:
-      timeToLiveInMinutes: "${CACHE_MOBILE_SECRET_KEY_TTL:2}" # QR secret key cache TTL
-      maxSize: "${CACHE_MOBILE_SECRET_KEY_MAX_SIZE:10000}" # 0 means the cache is disabled
+      timeToLiveInMinutes: "${CACHE_MOBILE_SECRET_KEY_TTL:2}" # QR 密钥缓存 TTL
+      maxSize: "${CACHE_MOBILE_SECRET_KEY_MAX_SIZE:10000}" # 0 表示禁用缓存
 
-  # Deliberately placed outside the 'specs' group above
+  # 有意放置于上方 'specs' 组之外
   entityLimits:
-    timeToLiveInMinutes: "${CACHE_SPECS_ENTITY_LIMITS_TTL:5}" # Entity limits cache TTL
-    maxSize: "${CACHE_SPECS_ENTITY_LIMITS_MAX_SIZE:100000}" # 0 means the cache is disabled
+    timeToLiveInMinutes: "${CACHE_SPECS_ENTITY_LIMITS_TTL:5}" # 实体限制缓存 TTL
+    maxSize: "${CACHE_SPECS_ENTITY_LIMITS_MAX_SIZE:100000}" # 0 表示禁用缓存
 
-# Redis configuration parameters
+# Redis 配置参数
 redis:
   connection:
-    # standalone or cluster or sentinel
+    # Redis 部署类型：Standalone（单 Redis 节点部署）或 Cluster
     type: "${REDIS_CONNECTION_TYPE:standalone}"
   standalone:
-    # Redis connection host
+    # Redis 连接主机
     host: "${REDIS_HOST:localhost}"
-    # Redis connection port
+    # Redis 连接端口
     port: "${REDIS_PORT:6379}"
-    # Use default Redis configuration file
+    # 使用默认 Redis 配置文件
     useDefaultClientConfig: "${REDIS_USE_DEFAULT_CLIENT_CONFIG:true}"
-    # this value may be used only if you used not default ClientConfig
+    # 仅在使用非默认 ClientConfig 时可使用此值
     clientName: "${REDIS_CLIENT_NAME:standalone}"
-    # this value may be used only if you used not default ClientConfig
+    # 仅在使用非默认 ClientConfig 时可使用此值
     connectTimeout: "${REDIS_CLIENT_CONNECT_TIMEOUT:30000}"
-    # this value may be used only if you used not default ClientConfig
+    # 仅在使用非默认 ClientConfig 时可使用此值
     readTimeout: "${REDIS_CLIENT_READ_TIMEOUT:60000}"
-    # this value may be used only if you used not default ClientConfig
+    # 仅在使用非默认 ClientConfig 时可使用此值
     usePoolConfig: "${REDIS_CLIENT_USE_POOL_CONFIG:false}"
   cluster:
-    # Comma-separated list of "host:port" pairs to bootstrap from.
+    # 逗号分隔的 "host:port" 列表，用于引导连接。
     nodes: "${REDIS_NODES:}"
-    # Maximum number of redirects to follow when executing commands across the cluster.
+    # 跨集群执行命令时跟随重定向的最大次数。
     max-redirects: "${REDIS_MAX_REDIRECTS:12}"
-    # if set false will be used pool config build from values of the pool config section
+    # 若设为 false，将使用 pool config 节的值构建连接池配置
     useDefaultPoolConfig: "${REDIS_USE_DEFAULT_POOL_CONFIG:true}"
   sentinel:
-    # name of master node
+    # 主节点名称
     master: "${REDIS_MASTER:}"
-    # comma-separated list of "host:port" pairs of sentinels
+    # 逗号分隔的 Sentinel "host:port" 列表
     sentinels: "${REDIS_SENTINELS:}"
-    # password to authenticate with sentinel
+    # 连接 Sentinel 的认证密码
     password: "${REDIS_SENTINEL_PASSWORD:}"
-    # if set false will be used pool config build from values of the pool config section
+    # 若设为 false，将使用 pool config 节的值构建连接池配置
     useDefaultPoolConfig: "${REDIS_USE_DEFAULT_POOL_CONFIG:true}"
-  # db index
+  # 数据库索引
   db: "${REDIS_DB:0}"
-  # db password
+  # 数据库密码
   password: "${REDIS_PASSWORD:}"
   ssl:
-    # Enable/disable secure connection
+    # 启用/禁用安全连接
     enabled: "${TB_REDIS_SSL_ENABLED:false}"
-    # Server SSL credentials (only PEM format is supported)
+    # 服务端 SSL 凭证（仅支持 PEM 格式）
     credentials:
-      # Path redis server (CA) certificate
+      # Redis 服务端（CA）证书路径
       cert_file: "${TB_REDIS_SSL_PEM_CERT:}"
-      # Path to user certificate file. This is optional for the client and can be used for two-way authentication for the client
+      # 用户证书文件路径。客户端可选，可用于客户端双向认证
       user_cert_file: "${TB_REDIS_SSL_PEM_KEY:}"
-      # Path to user private key file. This is optional for the client and only needed if ‘user_cert_file’ is configured.
+      # 用户私钥文件路径。客户端可选，仅在配置了 'user_cert_file' 时需要
       user_key_file: "${TB_REDIS_SSL_PEM_KEY_PASSWORD:}"
-  # pool config
+  # 连接池配置
   pool_config:
-    # Maximum number of connections that can be allocated by the connection pool
+    # 连接池可分配的最大连接数
     maxTotal: "${REDIS_POOL_CONFIG_MAX_TOTAL:128}"
-    # Maximum number of idle connections that can be maintained in the pool without being closed
+    # 连接池中可保持而不关闭的最大空闲连接数
     maxIdle: "${REDIS_POOL_CONFIG_MAX_IDLE:128}"
-    # Minumum number of idle connections that can be maintained in the pool without being closed
+    # 连接池中可保持而不关闭的最小空闲连接数
     minIdle: "${REDIS_POOL_CONFIG_MIN_IDLE:16}"
-    # Enable/Disable PING command send when a connection is borrowed
+    # 启用/禁用借出连接时发送 PING 命令
     testOnBorrow: "${REDIS_POOL_CONFIG_TEST_ON_BORROW:true}"
-    # The property is used to specify whether to test the connection before returning it to the connection pool.
+    # 用于指定在将连接归还连接池之前是否测试连接。
     testOnReturn: "${REDIS_POOL_CONFIG_TEST_ON_RETURN:true}"
-    # The property is used in the context of connection pooling in Redis
+    # 此属性用于 Redis 连接池上下文
     testWhileIdle: "${REDIS_POOL_CONFIG_TEST_WHILE_IDLE:true}"
-    # Minimum amount of time that an idle connection should be idle before it can be evicted from the connection pool. Value set in milliseconds
+    # 空闲连接在被连接池驱逐前应保持空闲的最短时间（毫秒）
     minEvictableMs: "${REDIS_POOL_CONFIG_MIN_EVICTABLE_MS:60000}"
-    # Specifies the time interval in milliseconds between two consecutive eviction runs
+    # 两次连续驱逐运行之间的时间间隔（毫秒）
     evictionRunsMs: "${REDIS_POOL_CONFIG_EVICTION_RUNS_MS:30000}"
-    # Maximum time in milliseconds where a client is willing to wait for a connection from the pool when all connections are exhausted
+    # 所有连接耗尽时，客户端等待从连接池获取连接的最大时间（毫秒）
     maxWaitMills: "${REDIS_POOL_CONFIG_MAX_WAIT_MS:60000}"
-    # Specifies the number of connections to test for eviction during each eviction run
+    # 每次驱逐运行时要测试的连接数
     numberTestsPerEvictionRun: "${REDIS_POOL_CONFIG_NUMBER_TESTS_PER_EVICTION_RUN:3}"
-    # Determines the behavior when a thread requests a connection from the pool but there are no available connections and the pool cannot create more due to the maxTotal configuration
+    # 当线程从连接池请求连接但没有可用连接且因 maxTotal 配置无法创建更多连接时的行为
     blockWhenExhausted: "${REDIS_POOL_CONFIG_BLOCK_WHEN_EXHAUSTED:true}"
 
-# LWM2M server parameters
+# 传输配置参数
 transport:
   sessions:
-    # Session inactivity timeout is a global configuration parameter that defines how long the device transport session will be opened after the last message arrives from the device.
-    # The parameter value is in milliseconds.
-    # The last activity time of the device session is updated if the device sends any message, including keepalive messages
-    # If there is no activity, the session will be closed, and all subscriptions will be deleted.
-    # We recommend this parameter to be in sync with device inactivity timeout ("state.defaultInactivityTimeoutInSec" or DEFAULT_INACTIVITY_TIMEOUT) parameter
-    # which is responsible for detection of the device connectivity status in the core service of the platform.
-    # The value of the session inactivity timeout parameter should be greater or equal to the device inactivity timeout.
-    # Note that the session inactivity timeout is set in milliseconds while device inactivity timeout is in seconds.
+    # 会话不活动超时是全局配置参数，定义设备最后一条消息到达后会话保持打开的时长。
+    # 参数值单位为毫秒。
+    # 若设备发送任何消息（包括 keepalive），设备会话的最后活动时间会更新
+    # 若无活动，会话将关闭，所有订阅将被删除。
+    # 建议此参数与设备不活动超时（"state.defaultInactivityTimeoutInSec" 或 DEFAULT_INACTIVITY_TIMEOUT）参数保持一致
+    # 该参数负责在平台核心服务中检测设备连接状态。
+    # 会话不活动超时参数值应大于或等于设备不活动超时。
+    # 注意：会话不活动超时以毫秒为单位，设备不活动超时以秒为单位。
     inactivity_timeout: "${TB_TRANSPORT_SESSIONS_INACTIVITY_TIMEOUT:600000}"
-    # Interval of periodic check for expired sessions and report of the changes to session last activity time
+    # 定期检查过期会话并上报会话最后活动时间变更的间隔
     report_timeout: "${TB_TRANSPORT_SESSIONS_REPORT_TIMEOUT:3000}"
   json:
-    # Cast String data types to Numeric if possible when processing Telemetry/Attributes JSON
+    # 处理 Telemetry/Attributes JSON 时，尽可能将 String 类型转换为 Numeric
     type_cast_enabled: "${JSON_TYPE_CAST_ENABLED:false}"
-    # Maximum allowed string value length when processing Telemetry/Attributes JSON (0 value disables string value length check)
+    # 处理 Telemetry/Attributes JSON 时允许的最大字符串长度（0 表示禁用字符串长度检查）
     max_string_value_length: "${JSON_MAX_STRING_VALUE_LENGTH:0}"
   client_side_rpc:
-    # Processing timeout interval of the RPC command on the CLIENT SIDE. Time in milliseconds
+    # 客户端侧 RPC 命令的处理超时间隔，单位为毫秒
     timeout: "${CLIENT_SIDE_RPC_TIMEOUT:60000}"
   log:
-    # Enable/Disable log of transport messages to telemetry. For example, logging of LwM2M registration update
+    # 启用/禁用将传输消息记录到 telemetry 的日志，例如 LwM2M 注册更新日志
     enabled: "${TB_TRANSPORT_LOG_ENABLED:true}"
-    # Maximum length of the log message. The content will be truncated to the specified value if needed
+    # 日志消息的最大长度，超出时将截断至指定值
     max_length: "${TB_TRANSPORT_LOG_MAX_LENGTH:1024}"
-  # Local LwM2M transport parameters
+  # 本地 LwM2M 传输参数
   lwm2m:
-    # Enable/disable lvm2m transport protocol.
+    # 启用/禁用 LwM2M 传输协议。
     enabled: "${LWM2M_ENABLED:true}"
     dtls:
-      # RFC7925_RETRANSMISSION_TIMEOUT_IN_MILLISECONDS = 9000
+      # RFC7925 重传超时（毫秒）= 9000
       retransmission_timeout: "${LWM2M_DTLS_RETRANSMISSION_TIMEOUT_MS:9000}"
-      # CoAP DTLS connection ID length for LWM2M. RFC 9146, Connection Identifier for DTLS 1.2
-      # Default: off
-      # Control usage of DTLS connection ID length (CID).
-      # - 'off' to deactivate it.
-      # - 'on' to activate Connection ID support (same as CID 0 or more 0).
-      # - A positive value defines generated CID size in bytes.
-      # - A value of 0 means we accept using CID but will not generate one for foreign peer (enables support but not for incoming traffic).
-      # - A value between 0 and <= 4: SingleNodeConnectionIdGenerator is used
-      # - A value that are > 4: MultiNodeConnectionIdGenerator is used
+      # LwM2M 的 CoAP DTLS Connection ID 长度。RFC 9146，DTLS 1.2 的 Connection Identifier
+      # 默认：off
+      # 控制 DTLS Connection ID 长度（CID）的使用方式。
+      # - 'off'：禁用。
+      # - 'on'：启用 Connection ID 支持（等同于 CID 0 或多个 0）。
+      # - 正整数：生成的 CID 大小（字节）。
+      # - 0：接受使用 CID，但不为对端生成（启用支持但不用于入站流量）。
+      # - 0 到 <= 4 之间：使用 SingleNodeConnectionIdGenerator
+      # - 大于 4：使用 MultiNodeConnectionIdGenerator
       connection_id_length: "${LWM2M_DTLS_CONNECTION_ID_LENGTH:}"
     server:
-      # LwM2M Server ID
+      # LwM2M 服务端 ID
       id: "${LWM2M_SERVER_ID:123}"
-      # LwM2M server bind address. Bind to all interfaces by default
+      # LwM2M 服务端绑定地址，默认绑定所有网卡
       bind_address: "${LWM2M_BIND_ADDRESS:0.0.0.0}"
-      # LwM2M server bind port
+      # LwM2M 服务端绑定端口
       bind_port: "${LWM2M_BIND_PORT:5685}"
       security:
-        # LwM2M server bind address for DTLS. Bind to all interfaces by default
+        # LwM2M DTLS 服务端绑定地址，默认绑定所有网卡
         bind_address: "${LWM2M_SECURITY_BIND_ADDRESS:0.0.0.0}"
-        # LwM2M server bind port for DTLS
+        # LwM2M DTLS 服务端绑定端口
         bind_port: "${LWM2M_SECURITY_BIND_PORT:5686}"
-        # Server X509 Certificates support
+        # 服务端 X509 证书支持
         credentials:
-          # Whether to enable LWM2M server X509 Certificate/RPK support
+          # 是否启用 LwM2M 服务端 X509 Certificate/RPK 支持
           enabled: "${LWM2M_SERVER_CREDENTIALS_ENABLED:false}"
-          # Server credentials type (PEM - pem certificate file; KEYSTORE - java keystore)
+          # 服务端凭据类型（PEM - pem 证书文件；KEYSTORE - Java keystore）
           type: "${LWM2M_SERVER_CREDENTIALS_TYPE:PEM}"
-          # PEM server credentials
+          # PEM 服务端凭据
           pem:
-            # Path to the server certificate file (holds server certificate or certificate chain, may include server private key)
+            # 服务端证书文件路径（包含服务端证书或证书链，可含服务端私钥）
             cert_file: "${LWM2M_SERVER_PEM_CERT:lwm2mserver.pem}"
-            # Path to the server certificate private key file. Optional by default. Required if the private key is not present in server certificate file;
+            # 服务端证书私钥文件路径；默认可选，若证书文件中未包含私钥则为必填
             key_file: "${LWM2M_SERVER_PEM_KEY:lwm2mserver_key.pem}"
-            # Server certificate private key password (optional)
+            # 服务端证书私钥密码（可选）
             key_password: "${LWM2M_SERVER_PEM_KEY_PASSWORD:server_key_password}"
-          # Keystore server credentials
+          # Keystore 服务端凭据
           keystore:
-            # Type of the key store (JKS or PKCS12)
+            # 密钥库类型（JKS 或 PKCS12）
             type: "${LWM2M_SERVER_KEY_STORE_TYPE:JKS}"
-            # Path to the key store that holds the SSL certificate
+            # 存放 SSL 证书的密钥库路径
             store_file: "${LWM2M_SERVER_KEY_STORE:lwm2mserver.jks}"
-            # Password used to access the key store
+            # 访问密钥库的密码
             store_password: "${LWM2M_SERVER_KEY_STORE_PASSWORD:server_ks_password}"
-            # Key alias
+            # 密钥别名
             key_alias: "${LWM2M_SERVER_KEY_ALIAS:server}"
-            # Password used to access the key
+            # 访问密钥的密码
             key_password: "${LWM2M_SERVER_KEY_PASSWORD:server_ks_password}"
-        # Only Certificate_x509:
+        # 仅 Certificate_x509：
         skip_validity_check_for_client_cert: "${TB_LWM2M_SERVER_SECURITY_SKIP_VALIDITY_CHECK_FOR_CLIENT_CERT:false}"
     bootstrap:
-      # Enable/disable Bootstrap Server
+      # 启用/禁用 Bootstrap Server
       enabled: "${LWM2M_ENABLED_BS:true}"
-      # Default value in Lwm2mClient after start in mode Bootstrap for the object : name "LWM2M Security" field: "Short Server ID" (deviceProfile: Bootstrap.BOOTSTRAP SERVER.Short ID)
+      # LwM2M 客户端 Bootstrap 模式启动后对象 "LWM2M Security" 字段 "Short Server ID" 的默认值（deviceProfile：Bootstrap.BOOTSTRAP SERVER.Short ID）
       id: "${LWM2M_SERVER_ID_BS:111}"
-      # LwM2M bootstrap server bind address. Bind to all interfaces by default
+      # LwM2M Bootstrap 服务端绑定地址，默认绑定所有网卡
       bind_address: "${LWM2M_BS_BIND_ADDRESS:0.0.0.0}"
-      # LwM2M bootstrap server bind port
+      # LwM2M Bootstrap 服务端绑定端口
       bind_port: "${LWM2M_BS_BIND_PORT:5687}"
       security:
-        # LwM2M bootstrap server bind address for DTLS. Bind to all interfaces by default
+        # LwM2M Bootstrap DTLS 服务端绑定地址，默认绑定所有网卡
         bind_address: "${LWM2M_BS_SECURITY_BIND_ADDRESS:0.0.0.0}"
-        # LwM2M bootstrap server bind address for DTLS. Bind to all interfaces by default
+        # LwM2M Bootstrap DTLS 服务端绑定端口
         bind_port: "${LWM2M_BS_SECURITY_BIND_PORT:5688}"
-        # Bootstrap server X509 Certificates support
+        # Bootstrap 服务端 X509 证书支持
         credentials:
-          # Whether to enable LWM2M bootstrap server X509 Certificate/RPK support
+          # 是否启用 LwM2M Bootstrap 服务端 X509 Certificate/RPK 支持
           enabled: "${LWM2M_BS_CREDENTIALS_ENABLED:false}"
-          # Server credentials type (PEM - pem certificate file; KEYSTORE - java keystore)
+          # 服务端凭据类型（PEM - pem 证书文件；KEYSTORE - Java keystore）
           type:  "${LWM2M_BS_CREDENTIALS_TYPE:PEM}"
-          # PEM server credentials
+          # PEM 服务端凭据
           pem:
-            # Path to the server certificate file (holds server certificate or certificate chain, may include server private key)
+            # 服务端证书文件路径（包含服务端证书或证书链，可含服务端私钥）
             cert_file: "${LWM2M_BS_PEM_CERT:lwm2mserver.pem}"
-            # Path to the server certificate private key file. Optional by default. Required if the private key is not present in server certificate file;
+            # 服务端证书私钥文件路径；默认可选，若证书文件中未包含私钥则为必填
             key_file: "${LWM2M_BS_PEM_KEY:lwm2mserver_key.pem}"
-            # Server certificate private key password (optional)
+            # 服务端证书私钥密码（可选）
             key_password: "${LWM2M_BS_PEM_KEY_PASSWORD:server_key_password}"
-          # Keystore server credentials
+          # Keystore 服务端凭据
           keystore:
-            # Type of the key store (JKS or PKCS12)
+            # 密钥库类型（JKS 或 PKCS12）
             type: "${LWM2M_BS_KEY_STORE_TYPE:JKS}"
-            # Path to the key store that holds the SSL certificate
+            # 存放 SSL 证书的密钥库路径
             store_file: "${LWM2M_BS_KEY_STORE:lwm2mserver.jks}"
-            # Password used to access the key store
+            # 访问密钥库的密码
             store_password: "${LWM2M_BS_KEY_STORE_PASSWORD:server_ks_password}"
-            # Key alias
+            # 密钥别名
             key_alias: "${LWM2M_BS_KEY_ALIAS:bootstrap}"
-            # Password used to access the key
+            # 访问密钥的密码
             key_password: "${LWM2M_BS_KEY_PASSWORD:server_ks_password}"
     security:
-      # X509 trust certificates
+      # X509 信任证书
       trust-credentials:
-        # Whether to load X509 trust certificates
+        # 是否加载 X509 信任证书
         enabled: "${LWM2M_TRUST_CREDENTIALS_ENABLED:false}"
-        # Trust certificates store type (PEM - pem certificates file; KEYSTORE - java keystore)
+        # 信任证书存储类型（PEM - pem 证书文件；KEYSTORE - Java keystore）
         type:  "${LWM2M_TRUST_CREDENTIALS_TYPE:PEM}"
-        # PEM certificates
+        # PEM 证书
         pem:
-          # Path to the certificates file (holds trust certificates)
+          # 证书文件路径（存放信任证书）
           cert_file: "${LWM2M_TRUST_PEM_CERT:lwm2mtruststorechain.pem}"
-        # Keystore with trust certificates
+        # 含信任证书的 Keystore
         keystore:
-          # Type of the key store (JKS or PKCS12)
+          # 密钥库类型（JKS 或 PKCS12）
           type: "${LWM2M_TRUST_KEY_STORE_TYPE:JKS}"
-          # Path to the key store that holds the X509 certificates
+          # 存放 X509 证书的密钥库路径
           store_file: "${LWM2M_TRUST_KEY_STORE:lwm2mtruststorechain.jks}"
-          # Password used to access the key store
+          # 访问密钥库的密码
           store_password: "${LWM2M_TRUST_KEY_STORE_PASSWORD:server_ks_password}"
-      # Set usage of recommended cipher suites; true - allow only recommended cipher suites; false - allow not recommended cipher suites
+      # 是否使用推荐密码套件；true - 仅允许推荐密码套件；false - 允许非推荐密码套件
       recommended_ciphers: "${LWM2M_RECOMMENDED_CIPHERS:false}"
-      # Set usage of recommended supported groups (curves); true - allow only recommended supported groups, false - allow not recommended supported groups
+      # 是否使用推荐支持组（曲线）；true - 仅允许推荐支持组；false - 允许非推荐支持组
       recommended_supported_groups: "${LWM2M_RECOMMENDED_SUPPORTED_GROUPS:true}"
-    # Timeout of LwM2M operation
+    # LwM2M 操作超时
     timeout: "${LWM2M_TIMEOUT:120000}"
-    # Thread pool size for processing of the LwM2M uplinks
+    # 处理 LwM2M 上行链路的线程池大小
     uplink_pool_size: "${LWM2M_UPLINK_POOL_SIZE:10}"
-    # Thread pool size for processing of the LwM2M downlinks
+    # 处理 LwM2M 下行链路的线程池大小
     downlink_pool_size: "${LWM2M_DOWNLINK_POOL_SIZE:10}"
-    # Thread pool size for processing of the OTA updates
+    # 处理 OTA 更新的线程池大小
     ota_pool_size: "${LWM2M_OTA_POOL_SIZE:10}"
-    # Period of cleanup for the registrations in store
+    # 注册信息存储清理周期
     clean_period_in_sec: "${LWM2M_CLEAN_PERIOD_IN_SEC:2}"
-    # PSM Activity Timer if not specified in the device profile
+    # 设备配置文件中未指定时的 PSM Activity Timer
     psm_activity_timer: "${LWM2M_PSM_ACTIVITY_TIMER:10000}"
-    # Paging Transmission Window for eDRX support if not specified in the device profile
+    # 设备配置文件中未指定时 eDRX 支持的 Paging Transmission Window
     paging_transmission_window: "${LWM2M_PAGING_TRANSMISSION_WINDOW:10000}"
-    network_config: # In this section you can specify custom parameters for LwM2M network configuration and expose the env variables to configure outside
+    network_config: # 可在此指定 LwM2M 网络配置的自定义参数，并通过环境变量在外部配置
   #      - key: "PROTOCOL_STAGE_THREAD_COUNT"
   #        value: "${LWM2M_PROTOCOL_STAGE_THREAD_COUNT:4}"
   stats:
-    # Enable/Disable the collection of transport statistics
+    # 启用/禁用传输统计信息收集
     enabled: "${TB_TRANSPORT_STATS_ENABLED:true}"
-    # Interval of transport statistics logging
+    # 传输统计信息日志输出间隔
     print-interval-ms: "${TB_TRANSPORT_STATS_PRINT_INTERVAL_MS:60000}"
 
-# Queue configuration properties
+# 队列配置参数
 queue:
-  type: "${TB_QUEUE_TYPE:kafka}" # kafka (Apache Kafka)
-  prefix: "${TB_QUEUE_PREFIX:}" # Global queue prefix. If specified, prefix is added before default topic name: 'prefix.default_topic_name'. Prefix is applied to all topics (and consumer groups for kafka).
+  type: "${TB_QUEUE_TYPE:kafka}" # in-memory 或 kafka (Apache Kafka)
+  prefix: "${TB_QUEUE_PREFIX:}" # 全局队列前缀。若指定，前缀将加在默认主题名之前：'prefix.default_topic_name'。前缀应用于所有主题（Kafka 还包括 consumer groups）。
   kafka:
-    # Kafka Bootstrap Servers
+    # Kafka Bootstrap 节点，格式为 "host:port"
     bootstrap.servers: "${TB_KAFKA_SERVERS:localhost:9092}"
     ssl:
-      # Enable/Disable SSL Kafka communication
+      # 启用/禁用 Kafka SSL 通信
       enabled: "${TB_KAFKA_SSL_ENABLED:false}"
-      # The location of the trust store file
+      # trust store 文件的位置
       truststore.location: "${TB_KAFKA_SSL_TRUSTSTORE_LOCATION:}"
-      # The password of trust store file if specified
+      # 若指定则 trust store 文件的密码
       truststore.password: "${TB_KAFKA_SSL_TRUSTSTORE_PASSWORD:}"
-      # The location of the key store file. This is optional for the client and can be used for two-way authentication for the client
+      # key store 文件的位置。对客户端为可选，可用于客户端双向认证
       keystore.location: "${TB_KAFKA_SSL_KEYSTORE_LOCATION:}"
-      # The store password for the key store file. This is optional for the client and only needed if ‘ssl.keystore.location’ is configured. Key store password is not supported for PEM format
+      # key store 文件的 store 密码。对客户端为可选，仅在配置了 ‘ssl.keystore.location’ 时需要。PEM 格式不支持 key store 密码
       keystore.password: "${TB_KAFKA_SSL_KEYSTORE_PASSWORD:}"
-      # The password of the private key in the key store file or the PEM key specified in ‘keystore.key’
+      # key store 文件中私钥或 ‘keystore.key’ 指定的 PEM 密钥的密码
       key.password: "${TB_KAFKA_SSL_KEY_PASSWORD:}"
-    # The number of acknowledgments the producer requires the leader to have received before considering a request complete. This controls the durability of records that are sent. The following settings are allowed:0,1 and all
+    # producer 认为请求完成前要求 leader 收到的确认数。控制发送记录的持久性。允许的值：0、1 和 all
     acks: "${TB_KAFKA_ACKS:all}"
-    # Number of retries. Resend any record whose send fails with a potentially transient error
+    # 重试次数。对因可能为瞬时错误而发送失败的记录进行重发
     retries: "${TB_KAFKA_RETRIES:1}"
-    # The compression type for all data generated by the producer. The default is none (i.e. no compression). Valid values none or gzip
-    compression.type: "${TB_KAFKA_COMPRESSION_TYPE:none}" # none or gzip
-    # Default batch size. This setting gives the upper bound of the batch size to be sent
+    # producer 生成的所有数据的压缩类型。默认为 none（即不压缩）。有效值：none 或 gzip
+    compression.type: "${TB_KAFKA_COMPRESSION_TYPE:none}" # none 或 gzip
+    # 默认 batch 大小。此设置给出待发送 batch 大小的上限
     batch.size: "${TB_KAFKA_BATCH_SIZE:16384}"
-    # This variable creates a small amount of artificial delay—that is, rather than immediately sending out a record
+    # 此变量产生少量人为延迟，即不会立即发送记录
     linger.ms: "${TB_KAFKA_LINGER_MS:1}"
-    # The maximum size of a request in bytes. This setting will limit the number of record batches the producer will send in a single request to avoid sending huge requests
+    # 请求的最大字节大小。此设置限制 producer 在单次请求中发送的 record batch 数量，以避免发送过大请求
     max.request.size: "${TB_KAFKA_MAX_REQUEST_SIZE:1048576}"
-    # The maximum number of unacknowledged requests the client will send on a single connection before blocking
+    # 客户端在阻塞前可在单条连接上发送的最大未确认请求数
     max.in.flight.requests.per.connection: "${TB_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION:5}"
-    # The total bytes of memory the producer can use to buffer records waiting to be sent to the server
+    # producer 可用于缓冲待发送到服务器的记录的内存总字节数
     buffer.memory: "${TB_BUFFER_MEMORY:33554432}"
-    # The multiple copies of data over the multiple brokers of Kafka
+    # Kafka 多个 broker 上的数据副本数
     replication_factor: "${TB_QUEUE_KAFKA_REPLICATION_FACTOR:1}"
-    # The maximum delay between invocations of poll() when using consumer group management. This places an upper bound on the amount of time that the consumer can be idle before fetching more records
+    # 使用 consumer group 管理时 poll() 方法调用之间的最大延迟。限制 consumer 在获取更多记录前可空闲的最长时间
     max_poll_interval_ms: "${TB_QUEUE_KAFKA_MAX_POLL_INTERVAL_MS:300000}"
-    # The maximum number of records returned in a single call to poll()
+    # 单次 poll() 调用返回的最大记录数
     max_poll_records: "${TB_QUEUE_KAFKA_MAX_POLL_RECORDS:8192}"
-    # The maximum amount of data per-partition the server will return. Records are fetched in batches by the consumer
+    # 服务器每个分区返回的最大数据量。consumer 以 batch 方式获取记录
     max_partition_fetch_bytes: "${TB_QUEUE_KAFKA_MAX_PARTITION_FETCH_BYTES:16777216}"
-    # The maximum amount of data the server will return. Records are fetched in batches by the consumer
+    # 服务器返回的最大数据量。consumer 以 batch 方式获取记录
     fetch_max_bytes: "${TB_QUEUE_KAFKA_FETCH_MAX_BYTES:134217728}"
-    request.timeout.ms: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 seconds) # refer to https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
-    session.timeout.ms: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 seconds) # refer to https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
-    auto_offset_reset: "${TB_QUEUE_KAFKA_AUTO_OFFSET_RESET:earliest}" # earliest, latest or none
-    # Enable/Disable using of Confluent Cloud
+    request.timeout.ms: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 秒) # 参见 https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
+    session.timeout.ms: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 秒) # 参见 https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
+    auto_offset_reset: "${TB_QUEUE_KAFKA_AUTO_OFFSET_RESET:earliest}" # earliest、latest 或 none
+    # 启用/禁用 Confluent Cloud
     use_confluent_cloud: "${TB_QUEUE_KAFKA_USE_CONFLUENT_CLOUD:false}"
     confluent:
-      # The endpoint identification algorithm used by clients to validate server hostname. The default value is https
+      # 客户端用于验证服务器主机名的端点识别算法。默认值为 https
       ssl.algorithm: "${TB_QUEUE_KAFKA_CONFLUENT_SSL_ALGORITHM:https}"
-      # The mechanism used to authenticate Schema Registry requests. SASL/PLAIN should only be used with TLS/SSL as a transport layer to ensure that clear passwords are not transmitted on the wire without encryption
+      # 用于认证 Schema Registry 请求的机制。SASL/PLAIN 应仅与 TLS/SSL 传输层一起使用，以确保明文密码不会在未加密的情况下传输
       sasl.mechanism: "${TB_QUEUE_KAFKA_CONFLUENT_SASL_MECHANISM:PLAIN}"
-      # Using JAAS Configuration for specifying multiple SASL mechanisms on a broker
+      # 使用 JAAS 配置在 broker 上指定多个 SASL 机制
       sasl.config: "${TB_QUEUE_KAFKA_CONFLUENT_SASL_JAAS_CONFIG:org.apache.kafka.common.security.plain.PlainLoginModule required username=\"CLUSTER_API_KEY\" password=\"CLUSTER_API_SECRET\";}"
-      # Protocol used to communicate with brokers. Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL
+      # 与 broker 通信使用的协议。有效值：PLAINTEXT、SSL、SASL_PLAINTEXT、SASL_SSL
       security.protocol: "${TB_QUEUE_KAFKA_CONFLUENT_SECURITY_PROTOCOL:SASL_SSL}"
-    other-inline: "${TB_QUEUE_KAFKA_OTHER_PROPERTIES:}" # In this section you can specify custom parameters (semicolon separated) for Kafka consumer/producer/admin # Example "metrics.recording.level:INFO;metrics.sample.window.ms:30000"
-    other: # DEPRECATED. In this section you can specify custom parameters for Kafka consumer/producer and expose the env variables to configure outside
-    #  - key: "request.timeout.ms" # refer to https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
-    #    value: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 seconds)
-    #  - key: "session.timeout.ms" # refer to https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
-    #    value: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 seconds)
+    other-inline: "${TB_QUEUE_KAFKA_OTHER_PROPERTIES:}" # 在此可指定 Kafka consumer/producer/admin 的自定义参数（分号分隔） # 示例 "metrics.recording.level:INFO;metrics.sample.window.ms:30000"
+    other: # 已弃用。在此可指定 Kafka consumer/producer 的自定义参数，并暴露环境变量以便外部配置
+    #  - key: "request.timeout.ms" # 参见 https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
+    #    value: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 秒)
+    #  - key: "session.timeout.ms" # 参见 https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
+    #    value: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 秒)
     topic-properties:
-      # Kafka properties for Rule Engine
+      # Rule Engine 的 Kafka 属性
       rule-engine: "${TB_QUEUE_KAFKA_RE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
-      # Kafka properties for Core topics
+      # Core 主题的 Kafka 属性
       core: "${TB_QUEUE_KAFKA_CORE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
-      # Kafka properties for Transport Api topics
+      # Transport Api 主题的 Kafka 属性
       transport-api: "${TB_QUEUE_KAFKA_TA_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
-      # Kafka properties for Notifications topics
+      # Notifications 主题的 Kafka 属性
       notifications: "${TB_QUEUE_KAFKA_NOTIFICATIONS_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
-      # Kafka properties for Housekeeper tasks topic
+      # Housekeeper 任务主题的 Kafka 属性
       housekeeper: "${TB_QUEUE_KAFKA_HOUSEKEEPER_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
   partitions:
-    hash_function_name: "${TB_QUEUE_PARTITIONS_HASH_FUNCTION_NAME:murmur3_128}"  # murmur3_32, murmur3_128 or sha256
+    hash_function_name: "${TB_QUEUE_PARTITIONS_HASH_FUNCTION_NAME:murmur3_128}"  # murmur3_32、murmur3_128 或 sha256
   transport_api:
-    # Topic used to consume api requests from transport microservices
+    # 用于消费来自 transport 微服务 API 请求的主题
     requests_topic: "${TB_QUEUE_TRANSPORT_API_REQUEST_TOPIC:tb_transport.api.requests}"
-    # Topic used to produce api responses to transport microservices
+    # 用于向 transport 微服务生产 API 响应的主题
     responses_topic: "${TB_QUEUE_TRANSPORT_API_RESPONSE_TOPIC:tb_transport.api.responses}"
-    # Maximum pending api requests from transport microservices to be handled by server
+    # 服务器待处理的来自 transport 微服务的最大 API 请求数
     max_pending_requests: "${TB_QUEUE_TRANSPORT_MAX_PENDING_REQUESTS:10000}"
-    # Maximum timeout in milliseconds to handle api request from transport microservice by server
+    # 服务器处理来自 transport 微服务 API 请求的最大超时时间（毫秒）
     max_requests_timeout: "${TB_QUEUE_TRANSPORT_MAX_REQUEST_TIMEOUT:10000}"
-    # Amount of threads used to invoke callbacks
+    # 用于调用回调的线程数
     max_callback_threads: "${TB_QUEUE_TRANSPORT_MAX_CALLBACK_THREADS:100}"
-    # Interval in milliseconds to poll api requests from transport microservices
+    # 从 transport 微服务轮询 API 请求的间隔（毫秒）
     request_poll_interval: "${TB_QUEUE_TRANSPORT_REQUEST_POLL_INTERVAL_MS:25}"
-    # Interval in milliseconds to poll api response from transport microservices
+    # 从 transport 微服务轮询 API 响应的间隔（毫秒）
     response_poll_interval: "${TB_QUEUE_TRANSPORT_RESPONSE_POLL_INTERVAL_MS:25}"
   core:
-    # Default topic name
+    # 默认主题名
     topic: "${TB_QUEUE_CORE_TOPIC:tb_core}"
-    # For high-priority notifications that require minimum latency and processing time
+    # 需要最低延迟和处理时间的高优先级通知
     notifications_topic: "${TB_QUEUE_CORE_NOTIFICATIONS_TOPIC:tb_core.notifications}"
-    # Interval in milliseconds to poll messages by Core microservices
+    # Core 微服务轮询消息的间隔（毫秒）
     poll-interval: "${TB_QUEUE_CORE_POLL_INTERVAL_MS:25}"
-    # Amount of partitions used by Core microservices
+    # Core 微服务使用的分区数
     partitions: "${TB_QUEUE_CORE_PARTITIONS:10}"
-    # Timeout for processing a message pack by Core microservices
+    # Core 微服务处理消息包的超时时间
     pack-processing-timeout: "${TB_QUEUE_CORE_PACK_PROCESSING_TIMEOUT_MS:60000}"
     stats:
-      # Enable/disable statistics for Core microservices
+      # 启用/禁用 Core 微服务统计
       enabled: "${TB_QUEUE_CORE_STATS_ENABLED:false}"
-      # Statistics printing interval for Core microservices
+      # Core 微服务统计信息打印间隔
       print-interval-ms: "${TB_QUEUE_CORE_STATS_PRINT_INTERVAL_MS:10000}"
     housekeeper:
-      # Topic name for Housekeeper tasks
+      # Housekeeper 任务的主题名
       topic: "${TB_HOUSEKEEPER_TOPIC:tb_housekeeper}"
   rule-engine:
-    # Deprecated. It will be removed in the nearest releases
+    # 已弃用。将在近期版本中移除
     topic: "${TB_QUEUE_RULE_ENGINE_TOPIC:tb_rule_engine}"
-    # For high-priority notifications that require minimum latency and processing time
+    # 需要最低延迟和处理时间的高优先级通知
     notifications_topic: "${TB_QUEUE_RULE_ENGINE_NOTIFICATIONS_TOPIC:tb_rule_engine.notifications}"
-    # Interval in milliseconds to poll messages by Rule Engine
+    # Rule Engine 轮询消息的间隔（毫秒）
     poll-interval: "${TB_QUEUE_RULE_ENGINE_POLL_INTERVAL_MS:25}"
-    # Timeout for processing a message pack of Rule Engine
+    # Rule Engine 处理消息包的超时时间
     pack-processing-timeout: "${TB_QUEUE_RULE_ENGINE_PACK_PROCESSING_TIMEOUT_MS:60000}"
     stats:
-      # Enable/disable statistics for Rule Engine
+      # 启用/禁用 Rule Engine 统计
       enabled: "${TB_QUEUE_RULE_ENGINE_STATS_ENABLED:true}"
-      # Statistics printing interval for Rule Engine
+      # Rule Engine 统计信息打印间隔
       print-interval-ms: "${TB_QUEUE_RULE_ENGINE_STATS_PRINT_INTERVAL_MS:60000}"
   transport:
-    # For high priority notifications that require minimum latency and processing time
+    # 需要最低延迟和处理时间的高优先级通知
     notifications_topic: "${TB_QUEUE_TRANSPORT_NOTIFICATIONS_TOPIC:tb_transport.notifications}"
-    # Interval in milliseconds to poll messages
+    # 轮询消息的间隔（毫秒）
     poll_interval: "${TB_QUEUE_TRANSPORT_NOTIFICATIONS_POLL_INTERVAL_MS:25}"
 
-# Service common parameters
+# 通用服务参数
 service:
-  type: "${TB_SERVICE_TYPE:tb-transport}" # service type
-  # Unique id for this service (autogenerated if empty)
-  id: "${TB_SERVICE_ID:}"
+  type: "${TB_SERVICE_TYPE:tb-transport}" # monolith 或 tb-core 或 tb-rule-engine
+  # 此服务的唯一 id（为空则自动生成）
+  id: "${TB_SERVICE_ID:tb-lwm2m-transport1}"
 
-# Usage statistics parameters
+# 使用统计参数
 usage:
   stats:
     report:
-      # Enable/Disable the collection of statistics about API usage. Collected on a system and tenant level by default
+      # 启用/禁用 API 使用统计收集。默认在系统和租户级别收集
       enabled: "${USAGE_STATS_REPORT_ENABLED:true}"
-      # Enable/Disable collection of statistics about API usage on a customer level
+      # 启用/禁用客户级别的 API 使用统计收集
       enabled_per_customer: "${USAGE_STATS_REPORT_PER_CUSTOMER_ENABLED:false}"
-      # Interval of reporting the statistics. By default, the summarized statistics are sent every 10 seconds
+      # 统计报告间隔，默认每 10 秒发送汇总数据
       interval: "${USAGE_STATS_REPORT_INTERVAL:60}"
-      # Amount of statistic messages in pack
+      # 每个数据包中的统计消息数量
       pack_size: "${USAGE_STATS_REPORT_PACK_SIZE:1024}"
 
-# Metrics parameters
+# Metrics 参数
 metrics:
-  # Enable/disable actuator metrics.
+  # 启用/禁用 actuator metrics。
   enabled: "${METRICS_ENABLED:false}"
 
-# General management parameters
+# 通用 management 参数
 management:
   endpoints:
     web:
       exposure:
-        # Expose metrics endpoint (use value 'prometheus' to enable prometheus metrics).
+        # 暴露 metrics 端点（使用值 'prometheus' 启用 prometheus metrics）。
         include: '${METRICS_ENDPOINTS_EXPOSE:info}'
 
-# Notification system parameters
+# 通知系统参数
 notification_system:
   rules:
-    # Semicolon-separated deduplication durations (in millis) for trigger types. Format: 'NotificationRuleTriggerType1:123;NotificationRuleTriggerType2:456'
+    # 触发类型的去重时长（毫秒，分号分隔）。格式：'NotificationRuleTriggerType1:123;NotificationRuleTriggerType2:456'
     deduplication_durations: "${TB_NOTIFICATION_RULES_DEDUPLICATION_DURATIONS:RATE_LIMITS:14400000;}"
