@@ -23,7 +23,10 @@ public interface TbQueueProducer<T extends TbQueueMsg> {
 
     String getDefaultTopic();
 
-    void send(TopicPartitionInfo tpi, T msg, TbQueueCallback callback);
+    public void send(TopicPartitionInfo tpi, T msg, TbQueueCallback callback);
+
+    default void flush() {
+    }
 
     void stop();
 }

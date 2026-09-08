@@ -49,6 +49,7 @@ import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.data.security.DeviceCredentialsType;
 import org.thingsboard.server.common.msg.TbActorMsg;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
+import org.thingsboard.server.common.msg.queue.ServiceType;
 import org.thingsboard.server.common.msg.queue.TbCallback;
 import org.thingsboard.server.common.msg.rpc.FromDeviceRpcResponse;
 import org.thingsboard.server.common.msg.rpc.FromDeviceRpcResponseActorMsg;
@@ -757,6 +758,8 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
             clearAwaitRpcResponseScheduler();
             if (sessions.isEmpty()) {
                 reportSessionClose();
+                // 不在这里标非活跃。MQTT 服务端断开有 5 秒闪断窗口，
+                // 非活跃由传输层 delay / 重启 flush / 会话超时兜底上报。
             }
             dumpSessions();
         }
@@ -974,10 +977,21 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
 
     void checkSessionsTimeout() {
         final long expTime = System.currentTimeMillis() - systemContext.getSessionInactivityTimeout();
+        Set<String> liveTransports = Set.of();
+        try {
+            liveTransports = systemContext.getPartitionService().getAllServiceIds(ServiceType.TB_TRANSPORT);
+        } catch (Exception e) {
+            log.debug("[{}] Failed to resolve live transport nodes", deviceId, e);
+        }
         List<UUID> expiredIds = null;
 
         for (Map.Entry<UUID, SessionInfoMetaData> kv : sessions.entrySet()) { //entry set are cached for stable sessions
-            if (kv.getValue().getLastActivityTime() < expTime) {
+            SessionInfoMetaData sessionMd = kv.getValue();
+            boolean timedOut = sessionMd.getLastActivityTime() < expTime;
+            String nodeId = sessionMd.getSessionInfo() != null ? sessionMd.getSessionInfo().getNodeId() : null;
+            boolean transportGone = liveTransports != null && !liveTransports.isEmpty()
+                    && nodeId != null && !liveTransports.contains(nodeId);
+            if (timedOut || transportGone) {
                 final UUID id = kv.getKey();
                 if (expiredIds == null) {
                     expiredIds = new ArrayList<>(1); //most of the expired sessions is a single event
@@ -998,6 +1012,10 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
                 }
             }
             if (removed != 0) {
+                if (sessions.isEmpty()) {
+                    reportSessionClose();
+                    systemContext.getDeviceStateService().onLastSessionClosed(tenantId, deviceId);
+                }
                 dumpSessions();
             }
         }

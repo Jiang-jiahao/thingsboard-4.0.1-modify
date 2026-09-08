@@ -35,6 +35,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.common.util.ThingsBoardExecutors;
@@ -77,6 +78,7 @@ import org.thingsboard.server.common.msg.queue.ServiceType;
 import org.thingsboard.server.common.msg.queue.TbCallback;
 import org.thingsboard.server.common.msg.queue.TopicPartitionInfo;
 import org.thingsboard.server.common.stats.TbApiUsageReportClient;
+import org.thingsboard.server.common.transport.LocalDeviceInactivityEvent;
 import org.thingsboard.server.dao.attributes.AttributesService;
 import org.thingsboard.server.dao.device.DeviceService;
 import org.thingsboard.server.dao.sql.query.EntityQueryRepository;
@@ -84,6 +86,7 @@ import org.thingsboard.server.dao.timeseries.TimeseriesService;
 import org.thingsboard.server.dao.util.DbTypeInfoComponent;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.queue.discovery.PartitionService;
+import org.thingsboard.server.queue.discovery.TbServiceInfoProvider;
 import org.thingsboard.server.service.partition.AbstractPartitionBasedService;
 import org.thingsboard.server.service.state.constants.DefaultDeviceStateConstants;
 import org.thingsboard.server.service.telemetry.TelemetrySubscriptionService;
@@ -161,6 +164,7 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
     private final TimeseriesService tsService;
     private final TbClusterService clusterService;
     private final PartitionService partitionService;
+    private final TbServiceInfoProvider serviceInfoProvider;
     private final EntityQueryRepository entityQueryRepository;
     private final DbTypeInfoComponent dbTypeInfoComponent;
     private final TbApiUsageReportClient apiUsageReportClient;
@@ -282,7 +286,15 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
         }
         log.trace("[{}] on Device Activity [{}], lastReportedActivity [{}]", tenantId.getId(), deviceId.getId(), lastReportedActivity);
         final DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
-        if (lastReportedActivity > 0 && lastReportedActivity > stateData.getState().getLastActivityTime()) {
+        DeviceState state = stateData.getState();
+        // 会话断开后仍可能收到断开前发出的活动上报。若时间不晚于不活跃事件，不能把设备重新标成活跃。
+        if (!state.isActive() && state.getLastInactivityAlarmTime() > 0
+                && lastReportedActivity <= state.getLastInactivityAlarmTime()) {
+            log.debug("[{}][{}] Ignore stale activity [{}] after inactivity [{}]",
+                    tenantId.getId(), deviceId.getId(), lastReportedActivity, state.getLastInactivityAlarmTime());
+            return;
+        }
+        if (lastReportedActivity > 0 && lastReportedActivity > state.getLastActivityTime()) {
             updateActivityState(deviceId, stateData, lastReportedActivity);
         }
     }
@@ -378,6 +390,33 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
         }
         log.trace("[{}][{}] On device inactivity: processing inactivity event with ts [{}].", tenantId.getId(), deviceId.getId(), lastInactivityTime);
         reportInactivity(lastInactivityTime, deviceId, stateData);
+    }
+
+    /**
+     * 最后一个 MQTT/TCP 等长连接会话关闭：按 Core 侧时间标非活跃。
+     * 传输进程时钟可能落后于 SESSION_OPEN 写入的 lastActivityTime，直接用传输时间会被当成过期事件丢掉。
+     */
+    @Override
+    public void onLastSessionClosed(TenantId tenantId, DeviceId deviceId) {
+        if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
+            return;
+        }
+        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
+        DeviceState state = stateData.getState();
+        if (!state.isActive()) {
+            return;
+        }
+        long ts = Math.max(getCurrentTimeMillis(), state.getLastActivityTime() + 1);
+        if (ts <= state.getLastInactivityAlarmTime()) {
+            ts = state.getLastInactivityAlarmTime() + 1;
+        }
+        log.debug("[{}][{}] Last transport session closed, marking inactive ts [{}]", tenantId.getId(), deviceId.getId(), ts);
+        reportInactivity(ts, deviceId, stateData);
+    }
+
+    @EventListener
+    public void onLocalTransportInactivity(LocalDeviceInactivityEvent event) {
+        onLastSessionClosed(event.getTenantId(), event.getDeviceId());
     }
 
     /**
@@ -497,7 +536,7 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
                                 if (isMyPartition) {
                                     deviceIds.add(state.getDeviceId());
                                     deviceStates.putIfAbsent(state.getDeviceId(), state);
-                                    checkAndUpdateState(state.getDeviceId(), state);
+                                    checkAndUpdateState(state.getDeviceId(), state, true);
                                 } else {
                                     log.debug("[{}] Device belongs to external partition {}", state.getDeviceId(), tpi.getFullTopicName());
                                 }
@@ -521,19 +560,42 @@ public class DefaultDeviceStateService extends AbstractPartitionBasedService<Dev
     }
 
     void checkAndUpdateState(@Nonnull DeviceId deviceId, @Nonnull DeviceStateData state) {
+        checkAndUpdateState(deviceId, state, false);
+    }
+
+    /**
+     * @param partitionInit true 表示 Core 刚加载分区（进程启动/再平衡），不能根据 lastActivityTime 窗口把设备拉回活跃。
+     */
+    void checkAndUpdateState(@Nonnull DeviceId deviceId, @Nonnull DeviceStateData state, boolean partitionInit) {
         var deviceState = state.getState();
+        if (partitionInit && deviceState.isActive() && localTransportSessionsWereDropped()) {
+            // 本进程同时跑 MQTT 等传输。Core 重启后本机长连接已全部断开，库里的 active=true 不可信。
+            onLastSessionClosed(state.getTenantId(), deviceId);
+            return;
+        }
         if (deviceState.isActive()) {
             updateInactivityStateIfExpired(getCurrentTimeMillis(), deviceId, state);
-        } else {
-            //trying to fix activity state
-            if (isActive(getCurrentTimeMillis(), deviceState)) {
-                updateActivityState(deviceId, state, deviceState.getLastActivityTime());
-                if (deviceState.getLastInactivityAlarmTime() != 0L && deviceState.getLastInactivityAlarmTime() >= deviceState.getLastActivityTime()) {
-                    deviceState.setLastInactivityAlarmTime(0L);
-                    save(state.getTenantId(), deviceId, DefaultDeviceStateConstants.INACTIVITY_ALARM_TIME, 0L);
-                }
-            }
+            return;
         }
+        // 分区加载时绝不回补为活跃：lastActivityTime 仍在超时窗口内，并不代表此刻有连接。
+        if (partitionInit) {
+            return;
+        }
+        if (isActive(getCurrentTimeMillis(), deviceState) && !hasExplicitInactivity(deviceState)) {
+            updateActivityState(deviceId, state, deviceState.getLastActivityTime());
+        }
+    }
+
+    private boolean localTransportSessionsWereDropped() {
+        return serviceInfoProvider != null && serviceInfoProvider.isService(ServiceType.TB_TRANSPORT);
+    }
+
+    /**
+     * 传输层明确报过非活跃，且之后没有更新的活动时间。
+     */
+    static boolean hasExplicitInactivity(DeviceState state) {
+        return state.getLastInactivityAlarmTime() > 0L
+                && state.getLastInactivityAlarmTime() >= state.getLastActivityTime();
     }
 
     void checkStates() {

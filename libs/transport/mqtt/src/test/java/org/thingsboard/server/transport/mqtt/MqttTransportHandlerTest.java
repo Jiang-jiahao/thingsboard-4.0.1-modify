@@ -32,9 +32,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.thingsboard.common.util.ThingsBoardThreadFactory;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.DeviceProfile;
@@ -42,14 +44,19 @@ import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.device.profile.DeviceProfileData;
 import org.thingsboard.server.common.data.device.profile.JsonTransportPayloadConfiguration;
 import org.thingsboard.server.common.data.device.profile.MqttDeviceProfileTransportConfiguration;
+import org.thingsboard.server.common.data.transport.http.HttpPullPollDataType;
+import org.thingsboard.server.common.data.transport.mqtt.MqttUplinkTopicMapping;
 import org.thingsboard.server.common.msg.TbMsgMetaData;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.transport.mqtt.adaptors.JsonMqttAdaptor;
+import org.thingsboard.server.transport.mqtt.rpc.PendingMqttServerRpc;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -66,6 +73,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -129,9 +137,13 @@ public class MqttTransportHandlerTest {
     }
 
     MqttPublishMessage getMqttPublishMessage(String topicName) {
+        return getMqttPublishMessage(topicName, "{\"testKey\":\"testValue\"}");
+    }
+
+    MqttPublishMessage getMqttPublishMessage(String topicName, String payloadJson) {
         MqttFixedHeader mqttFixedHeader = new MqttFixedHeader(MqttMessageType.PUBLISH, true, MqttQoS.AT_LEAST_ONCE, false, 123);
         MqttPublishVariableHeader variableHeader = new MqttPublishVariableHeader(topicName, packedId.incrementAndGet());
-        ByteBuf payload = Unpooled.wrappedBuffer("{\"testKey\":\"testValue\"}".getBytes());
+        ByteBuf payload = Unpooled.wrappedBuffer(payloadJson.getBytes(StandardCharsets.UTF_8));
         return new MqttPublishMessage(mqttFixedHeader, variableHeader, payload);
     }
 
@@ -250,6 +262,119 @@ public class MqttTransportHandlerTest {
         expectedMd.putValue(DataConstants.MQTT_TOPIC, message.variableHeader().topicName());
 
         verify(transportService, times(1)).process(any(), (TransportProtos.PostTelemetryMsg) any(), eq(expectedMd), any());
+    }
+
+    @Test
+    public void givenUplinkMappedRpcResponse_whenPendingCustomRpc_thenCompleteRpcAndIngestTelemetry() {
+        setupUavServerDeviceProfile();
+        registerPendingCustomRpc("server/chan/api/jammerresult", 42);
+        MqttPublishMessage message = getMqttPublishMessage("server/chan/api/jammerresult",
+                "{\"device_id\":0,\"sector_id\":7,\"ok\":true}");
+
+        handler.processRegularSessionMsg(ctx, message);
+
+        ArgumentCaptor<TransportProtos.ToDeviceRpcResponseMsg> captor =
+                ArgumentCaptor.forClass(TransportProtos.ToDeviceRpcResponseMsg.class);
+        verify(transportService).process(any(), captor.capture(), any());
+        assertThat(captor.getValue().getRequestId(), is(42));
+        assertThat(captor.getValue().getPayload(), is("{\"device_id\":0,\"sector_id\":7,\"ok\":true}"));
+        verify(transportService).process(any(), (TransportProtos.PostTelemetryMsg) any(), any(), any());
+    }
+
+    @Test
+    public void givenUplinkMappedAttributesRpcResponse_whenPendingCustomRpc_thenCompleteRpcAndIngestAttributes() {
+        setupUavServerDeviceProfile(HttpPullPollDataType.CLIENT_ATTRIBUTES, null);
+        registerPendingCustomRpc("server/chan/api/jammer/response", 7);
+        MqttPublishMessage message = getMqttPublishMessage("server/chan/api/jammer/response",
+                "{\"status\":\"ok\"}");
+
+        handler.processRegularSessionMsg(ctx, message);
+
+        ArgumentCaptor<TransportProtos.ToDeviceRpcResponseMsg> captor =
+                ArgumentCaptor.forClass(TransportProtos.ToDeviceRpcResponseMsg.class);
+        verify(transportService).process(any(), captor.capture(), any());
+        assertThat(captor.getValue().getRequestId(), is(7));
+        verify(transportService).process(any(), (TransportProtos.PostAttributeMsg) any(), any(), any());
+    }
+
+    @Test
+    public void givenConnectedSession_whenDoDisconnect_thenScheduleDelayedInactivityWithoutRecordingClosedAsActivity() {
+        TransportProtos.SessionInfoProto sessionInfo = TransportProtos.SessionInfoProto.newBuilder()
+                .setDeviceIdMSB(1L)
+                .setDeviceIdLSB(2L)
+                .setTenantIdMSB(3L)
+                .setTenantIdLSB(4L)
+                .setSessionIdMSB(5L)
+                .setSessionIdLSB(6L)
+                .build();
+        handler.deviceSessionCtx.setConnected(true);
+        handler.deviceSessionCtx.setSessionInfo(sessionInfo);
+
+        handler.doDisconnect();
+
+        verify(transportService).process(eq(sessionInfo), any(TransportProtos.SessionEventMsg.class), isNull());
+        verify(transportService).deregisterSession(sessionInfo);
+        verify(context).scheduleDisconnectInactivity(sessionInfo);
+        verify(transportService, never()).reportDeviceInactivity(any(), any());
+        assertThat(handler.deviceSessionCtx.isConnected(), is(false));
+    }
+
+    @Test
+    public void givenUplinkMappedJammerResult_whenNoPendingRpc_thenIngestTelemetry() {
+        setupUavServerDeviceProfile();
+        MqttPublishMessage message = getMqttPublishMessage("server/chan/api/jammerresult",
+                "{\"device_id\":0,\"ok\":true}");
+
+        handler.processRegularSessionMsg(ctx, message);
+
+        verify(transportService).process(any(), (TransportProtos.PostTelemetryMsg) any(), any(), any());
+        verify(transportService, never()).process(any(), any(TransportProtos.ToDeviceRpcResponseMsg.class), any());
+    }
+
+    private void setupUavServerDeviceProfile() {
+        setupUavServerDeviceProfile("+/+/api/jammerresult", HttpPullPollDataType.TELEMETRY, "jammerresult");
+    }
+
+    private void setupUavServerDeviceProfile(HttpPullPollDataType dataType, String telemetryPayloadKey) {
+        String topic = dataType == HttpPullPollDataType.TELEMETRY ? "+/+/api/jammerresult" : "+/+/api/jammer/response";
+        setupUavServerDeviceProfile(topic, dataType, telemetryPayloadKey);
+    }
+
+    private void setupUavServerDeviceProfile(String topic, HttpPullPollDataType dataType, String telemetryPayloadKey) {
+        when(context.getJsonMqttAdaptor()).thenReturn(new JsonMqttAdaptor());
+        handler.deviceSessionCtx.setConnected(true);
+        handler.deviceSessionCtx.setSessionInfo(TransportProtos.SessionInfoProto.getDefaultInstance());
+        DeviceProfile deviceProfile = new DeviceProfile();
+        DeviceProfileData deviceProfileData = new DeviceProfileData();
+        MqttDeviceProfileTransportConfiguration mqttConfig = new MqttDeviceProfileTransportConfiguration();
+        mqttConfig.setTransportPayloadTypeConfiguration(new JsonTransportPayloadConfiguration());
+        MqttUplinkTopicMapping mapping = new MqttUplinkTopicMapping();
+        mapping.setName("overlap");
+        mapping.setEnabled(true);
+        mapping.setTopic(topic);
+        mapping.setDataType(dataType);
+        mapping.setTelemetryPayloadKey(telemetryPayloadKey);
+        mqttConfig.setUplinkTopicMappings(List.of(mapping));
+        deviceProfileData.setTransportConfiguration(mqttConfig);
+        deviceProfile.setProfileData(deviceProfileData);
+        deviceProfile.setTransportType(DeviceTransportType.MQTT);
+        handler.deviceSessionCtx.setDeviceProfile(deviceProfile);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void registerPendingCustomRpc(String responseTopic, int requestId) {
+        ConcurrentMap<String, ConcurrentLinkedQueue<PendingMqttServerRpc>> pending =
+                (ConcurrentMap<String, ConcurrentLinkedQueue<PendingMqttServerRpc>>)
+                        ReflectionTestUtils.getField(handler, "pendingCustomRpcByResponseTopic");
+        pending.computeIfAbsent(responseTopic, t -> new ConcurrentLinkedQueue<>())
+                .add(PendingMqttServerRpc.builder()
+                        .requestId(requestId)
+                        .request(TransportProtos.ToDeviceRpcRequestMsg.newBuilder()
+                                .setRequestId(requestId)
+                                .setMethodName("jammer")
+                                .build())
+                        .responseTopic(responseTopic)
+                        .build());
     }
 
 }

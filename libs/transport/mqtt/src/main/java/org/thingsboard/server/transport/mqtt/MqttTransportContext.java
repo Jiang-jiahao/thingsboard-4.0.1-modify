@@ -34,11 +34,14 @@ import org.thingsboard.server.transport.mqtt.adaptors.ProtoMqttAdaptor;
 import org.thingsboard.server.transport.mqtt.gateway.GatewayMetricsService;
 
 import java.net.InetSocketAddress;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -106,7 +109,9 @@ public class MqttTransportContext extends TransportContext {
     private boolean proxyEnabled;
 
     private final AtomicInteger connectionsCounter = new AtomicInteger();
-    private final Map<DeviceId, ScheduledFuture<?>> pendingDisconnectInactivity = new ConcurrentHashMap<>();
+    private final AtomicBoolean shuttingDown = new AtomicBoolean(false);
+    private final Map<UUID, TransportProtos.SessionInfoProto> connectedMqttServerSessions = new ConcurrentHashMap<>();
+    private final Map<DeviceId, PendingDisconnectInactivity> pendingDisconnectInactivity = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void init() {
@@ -138,45 +143,122 @@ public class MqttTransportContext extends TransportContext {
         if (deviceId == null) {
             return;
         }
-        ScheduledFuture<?> pending = pendingDisconnectInactivity.remove(deviceId);
+        PendingDisconnectInactivity pending = pendingDisconnectInactivity.remove(deviceId);
         if (pending != null) {
-            pending.cancel(false);
+            pending.future().cancel(false);
         }
+    }
+
+    /**
+     * 设备连上 MQTT 服务端后登记会话，并取消尚未生效的断开非活跃任务。
+     */
+    public void registerMqttServerSession(TransportProtos.SessionInfoProto sessionInfo) {
+        if (sessionInfo == null) {
+            return;
+        }
+        DeviceId deviceId = toDeviceId(sessionInfo);
+        cancelDisconnectInactivity(deviceId);
+        connectedMqttServerSessions.put(toSessionId(sessionInfo), sessionInfo);
     }
 
     public void scheduleDisconnectInactivity(TransportProtos.SessionInfoProto sessionInfo) {
         if (sessionInfo == null) {
             return;
         }
-        scheduleDisconnectInactivity(
-                new TenantId(new UUID(sessionInfo.getTenantIdMSB(), sessionInfo.getTenantIdLSB())),
-                new DeviceId(new UUID(sessionInfo.getDeviceIdMSB(), sessionInfo.getDeviceIdLSB())));
+        connectedMqttServerSessions.remove(toSessionId(sessionInfo));
+        scheduleDisconnectInactivity(toTenantId(sessionInfo), toDeviceId(sessionInfo));
     }
 
     public void scheduleDisconnectInactivity(TenantId tenantId, DeviceId deviceId) {
         if (tenantId == null || deviceId == null) {
             return;
         }
-        if (disconnectInactivityDelayMs <= 0) {
+        if (hasOtherConnectedSession(deviceId)) {
             cancelDisconnectInactivity(deviceId);
-            transportService.reportDeviceInactivity(tenantId, deviceId);
+            return;
+        }
+        if (shuttingDown.get() || disconnectInactivityDelayMs <= 0) {
+            cancelDisconnectInactivity(deviceId);
+            reportInactivity(tenantId, deviceId);
             return;
         }
         ScheduledFuture<?>[] holder = new ScheduledFuture<?>[1];
         holder[0] = getScheduler().schedule(() -> {
             try {
-                if (pendingDisconnectInactivity.remove(deviceId, holder[0])) {
+                PendingDisconnectInactivity current = pendingDisconnectInactivity.get(deviceId);
+                if (current != null && current.future() == holder[0]
+                        && pendingDisconnectInactivity.remove(deviceId, current)) {
                     log.debug("[{}] MQTT server session disconnected, reporting device inactivity", deviceId);
-                    transportService.reportDeviceInactivity(tenantId, deviceId);
+                    reportInactivity(tenantId, deviceId);
                 }
             } catch (Exception e) {
                 log.warn("[{}] Failed to report MQTT server disconnect inactivity", deviceId, e);
             }
         }, disconnectInactivityDelayMs, TimeUnit.MILLISECONDS);
-        ScheduledFuture<?> previous = pendingDisconnectInactivity.put(deviceId, holder[0]);
+        PendingDisconnectInactivity previous = pendingDisconnectInactivity.put(
+                deviceId, new PendingDisconnectInactivity(tenantId, deviceId, holder[0]));
         if (previous != null) {
-            previous.cancel(false);
+            previous.future().cancel(false);
         }
+    }
+
+    /**
+     * 传输进程退出前立刻把仍在线或待延迟的设备标为非活跃。
+     * 正常断开仍走短延迟；重启时延迟任务会随进程一起丢掉。
+     */
+    public void flushMqttServerDisconnectInactivity() {
+        shuttingDown.set(true);
+        Set<DeviceId> reported = new HashSet<>();
+        for (TransportProtos.SessionInfoProto sessionInfo : connectedMqttServerSessions.values()) {
+            DeviceId deviceId = toDeviceId(sessionInfo);
+            if (reported.add(deviceId)) {
+                reportInactivity(toTenantId(sessionInfo), deviceId);
+            }
+        }
+        connectedMqttServerSessions.clear();
+        for (PendingDisconnectInactivity pending : pendingDisconnectInactivity.values()) {
+            pending.future().cancel(false);
+            if (reported.add(pending.deviceId())) {
+                reportInactivity(pending.tenantId(), pending.deviceId());
+            }
+        }
+        pendingDisconnectInactivity.clear();
+        if (transportService != null) {
+            transportService.closeLocalSessionsAndReportInactivity();
+            transportService.flushToCore();
+        }
+        log.info("Flushed MQTT server disconnect inactivity for {} device(s)", reported.size());
+    }
+
+    private boolean hasOtherConnectedSession(DeviceId deviceId) {
+        for (TransportProtos.SessionInfoProto sessionInfo : connectedMqttServerSessions.values()) {
+            if (deviceId.equals(toDeviceId(sessionInfo))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void reportInactivity(TenantId tenantId, DeviceId deviceId) {
+        if (tenantId == null || deviceId == null || transportService == null) {
+            return;
+        }
+        transportService.reportDeviceInactivity(tenantId, deviceId);
+    }
+
+    private static UUID toSessionId(TransportProtos.SessionInfoProto sessionInfo) {
+        return new UUID(sessionInfo.getSessionIdMSB(), sessionInfo.getSessionIdLSB());
+    }
+
+    private static TenantId toTenantId(TransportProtos.SessionInfoProto sessionInfo) {
+        return TenantId.fromUUID(new UUID(sessionInfo.getTenantIdMSB(), sessionInfo.getTenantIdLSB()));
+    }
+
+    private static DeviceId toDeviceId(TransportProtos.SessionInfoProto sessionInfo) {
+        return new DeviceId(new UUID(sessionInfo.getDeviceIdMSB(), sessionInfo.getDeviceIdLSB()));
+    }
+
+    private record PendingDisconnectInactivity(TenantId tenantId, DeviceId deviceId, ScheduledFuture<?> future) {
     }
 
 }

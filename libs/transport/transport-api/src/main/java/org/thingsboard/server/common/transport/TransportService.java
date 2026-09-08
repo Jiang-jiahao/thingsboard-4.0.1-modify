@@ -411,6 +411,16 @@ public interface TransportService {
 
     void deregisterSession(SessionInfoProto sessionInfo);
 
+    /**
+     * 关闭本传输进程内所有会话并立刻上报非活跃。用于 MQTT 传输退出，避免只关监听端口、活动心跳仍把设备标成活跃。
+     */
+    void closeLocalSessionsAndReportInactivity();
+
+    /**
+     * 等待发往 Core 的队列消息落盘/发出。关闭传输进程前调用，避免 JVM 退出时 Kafka 消息丢失。
+     */
+    void flushToCore();
+
     void log(SessionInfoProto sessionInfo, String msg);
 
     void notifyAboutUplink(SessionInfoProto sessionInfo, TransportProtos.UplinkNotificationMsg build, TransportServiceCallback<Void> empty);

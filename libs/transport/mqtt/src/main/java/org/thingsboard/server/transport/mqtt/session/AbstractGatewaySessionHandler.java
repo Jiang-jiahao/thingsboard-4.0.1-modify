@@ -448,7 +448,7 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
                                         .setSubscribeToAttributes(SUBSCRIBE_TO_ATTRIBUTE_UPDATES_ASYNC_MSG)
                                         .setSubscribeToRPC(SUBSCRIBE_TO_RPC_ASYNC_MSG)
                                         .build(), null);
-                                context.cancelDisconnectInactivity(deviceSessionCtx.getDeviceId());
+                                context.registerMqttServerSession(deviceSessionCtx.getSessionInfo());
                             }
                             // 设置Future结果
                             futureToSet.set(devices.get(deviceName));

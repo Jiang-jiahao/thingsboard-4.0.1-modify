@@ -647,19 +647,27 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         try {
             Matcher fwMatcher;
             MqttTransportAdaptor payloadAdaptor = deviceSessionCtx.getPayloadAdaptor();
+            // 自定义 RPC 回执与上行映射/遥测/属性可以落在同一主题：先完成 pending RPC，
+            // 若主题同时匹配遥测或属性则再入库。QoS1 只 PUBACK 一次，避免重复应答。
+            boolean rpcCompleted = tryCompleteCustomMqttRpcResponse(topicName, mqttMsg, ctx, msgId);
             MqttUplinkTopicMapping uplinkMapping = deviceSessionCtx.findUplinkMapping(topicName);
             if (uplinkMapping != null) {
-                processUplinkMappingPublish(ctx, mqttMsg, topicName, msgId, uplinkMapping, payloadAdaptor);
+                processUplinkMappingPublish(ctx, mqttMsg, topicName, msgId, uplinkMapping, payloadAdaptor, !rpcCompleted);
+                return;
             } else if (deviceSessionCtx.isDeviceAttributesTopic(topicName)) {
                 // 设备属性上传
                 TransportProtos.PostAttributeMsg postAttributeMsg = payloadAdaptor.convertToPostAttributes(deviceSessionCtx, mqttMsg);
                 transportService.process(deviceSessionCtx.getSessionInfo(), postAttributeMsg, getMetadata(deviceSessionCtx, topicName),
-                        getPubAckCallback(ctx, msgId, postAttributeMsg));
+                        maybePubAckCallback(ctx, msgId, postAttributeMsg, !rpcCompleted));
+                return;
             } else if (deviceSessionCtx.isDeviceTelemetryTopic(topicName)) {
                 // 设备遥测数据上传
                 TransportProtos.PostTelemetryMsg postTelemetryMsg = payloadAdaptor.convertToPostTelemetry(deviceSessionCtx, mqttMsg);
                 transportService.process(deviceSessionCtx.getSessionInfo(), postTelemetryMsg, getMetadata(deviceSessionCtx, topicName),
-                        getPubAckCallback(ctx, msgId, postTelemetryMsg));
+                        maybePubAckCallback(ctx, msgId, postTelemetryMsg, !rpcCompleted));
+                return;
+            } else if (rpcCompleted) {
+                return;
             } else if (topicName.startsWith(MqttTopics.DEVICE_ATTRIBUTES_REQUEST_TOPIC_PREFIX)) {
                 // 设备属性请求
                 TransportProtos.GetAttributeRequestMsg getAttributeMsg = payloadAdaptor.convertToGetAttributes(deviceSessionCtx, mqttMsg, MqttTopics.DEVICE_ATTRIBUTES_REQUEST_TOPIC_PREFIX);
@@ -761,8 +769,6 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                 TransportProtos.GetAttributeRequestMsg getAttributeMsg = payloadAdaptor.convertToGetAttributes(deviceSessionCtx, mqttMsg, MqttTopics.DEVICE_ATTRIBUTES_REQUEST_SHORT_TOPIC_PREFIX);
                 transportService.process(deviceSessionCtx.getSessionInfo(), getAttributeMsg, getPubAckCallback(ctx, msgId, getAttributeMsg));
                 attrReqTopicType = TopicType.V2;
-            } else if (tryCompleteCustomMqttRpcResponse(topicName, mqttMsg, ctx, msgId)) {
-                return;
             } else {
                 // 未知主题，记录活动并返回错误ACK
                 transportService.recordActivity(deviceSessionCtx.getSessionInfo());
@@ -779,7 +785,8 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
      * 按档案上行主题映射落点：遥测（可选 wrap 键）或客户端/共享属性。
      */
     private void processUplinkMappingPublish(ChannelHandlerContext ctx, MqttPublishMessage mqttMsg, String topicName, int msgId,
-                                             MqttUplinkTopicMapping mapping, MqttTransportAdaptor payloadAdaptor) throws AdaptorException {
+                                             MqttUplinkTopicMapping mapping, MqttTransportAdaptor payloadAdaptor,
+                                             boolean sendPubAck) throws AdaptorException {
         HttpPullPollDataType dataType = mapping.getDataType() != null ? mapping.getDataType() : HttpPullPollDataType.TELEMETRY;
         if (dataType == HttpPullPollDataType.TELEMETRY) {
             TransportProtos.PostTelemetryMsg postTelemetryMsg;
@@ -790,7 +797,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                 postTelemetryMsg = payloadAdaptor.convertToPostTelemetry(deviceSessionCtx, mqttMsg);
             }
             transportService.process(deviceSessionCtx.getSessionInfo(), postTelemetryMsg, getMetadata(deviceSessionCtx, topicName),
-                    getPubAckCallback(ctx, msgId, postTelemetryMsg));
+                    maybePubAckCallback(ctx, msgId, postTelemetryMsg, sendPubAck));
             return;
         }
         TransportProtos.PostAttributeMsg postAttributeMsg;
@@ -801,7 +808,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
             postAttributeMsg = payloadAdaptor.convertToPostAttributes(deviceSessionCtx, mqttMsg);
         }
         transportService.process(deviceSessionCtx.getSessionInfo(), postAttributeMsg, getMetadata(deviceSessionCtx, topicName),
-                getPubAckCallback(ctx, msgId, postAttributeMsg));
+                maybePubAckCallback(ctx, msgId, postAttributeMsg, sendPubAck));
     }
 
     /**
@@ -889,6 +896,10 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
      * 创建发布ACK回调
      * 用于处理消息发布后的成功/失败逻辑
      */
+    private <T> TransportServiceCallback<Void> maybePubAckCallback(ChannelHandlerContext ctx, int msgId, T msg, boolean sendAck) {
+        return sendAck ? getPubAckCallback(ctx, msgId, msg) : TransportServiceCallback.EMPTY;
+    }
+
     private <T> TransportServiceCallback<Void> getPubAckCallback(final ChannelHandlerContext ctx, final int msgId, final T msg) {
         return new TransportServiceCallback<>() {
             @Override
@@ -1645,7 +1656,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                     ctx.writeAndFlush(createMqttConnAckMsg(MqttConnectReturnCode.CONNECTION_ACCEPTED, connectMessage));
                     deviceSessionCtx.setConnected(true);
                     log.debug("[{}] Client connected!", sessionId);
-                    context.cancelDisconnectInactivity(deviceSessionCtx.getDeviceId());
+                    context.registerMqttServerSession(deviceSessionCtx.getSessionInfo());
                     // 连接成功后处理队列中的消息
                     transportService.getCallbackExecutor().execute(() -> processMsgQueue(ctx)); //this callback will execute in Producer worker thread and hard or blocking work have to be submitted to the separate thread.
                 }
@@ -2004,6 +2015,8 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                 .setRequestId(pending.getRequestId())
                 .setPayload(MqttRpcCommandFactory.normalizeResponsePayload(payload))
                 .build();
+        log.debug("[{}] Completing custom MQTT RPC [{}] from topic [{}]", deviceSessionCtx.getDeviceId(),
+                pending.getRequestId(), topicName);
         transportService.process(deviceSessionCtx.getSessionInfo(), rpcResponseMsg,
                 getPubAckCallback(ctx, msgId, rpcResponseMsg));
         return true;

@@ -143,7 +143,7 @@ public abstract class AbstractActivityManager<Key, Metadata> implements Activity
         } else {
             states.remove(key);
             hasExpired = false;
-            shouldReport = true;
+            shouldReport = false;
         }
 
         if (hasExpired) {

@@ -194,8 +194,8 @@ public class MqttPullTransportService {
 
     private void dispatchByTopic(MqttPullCollectorSessionContext sessionContext, String topic, ByteBuf payload) {
         String body = payload != null ? payload.toString(StandardCharsets.UTF_8) : "";
-        if (mqttPullRpcService != null && mqttPullRpcService.tryCompletePendingRpc(sessionContext, topic, body)) {
-            return;
+        if (mqttPullRpcService != null) {
+            mqttPullRpcService.tryCompletePendingRpc(sessionContext, topic, body);
         }
         MqttPullDeviceProfileTransportConfiguration profile = sessionContext.getProfileTransportConfiguration();
         boolean matched = false;
@@ -215,6 +215,9 @@ public class MqttPullTransportService {
                            String topic, ByteBuf payload) {
         try {
             String body = payload.toString(StandardCharsets.UTF_8);
+            if (mqttPullRpcService != null) {
+                mqttPullRpcService.tryCompletePendingRpc(sessionContext, topic, body);
+            }
             if (request == null) {
                 log.debug("[{}] MQTT pull message on unmatched topic [{}]", sessionContext.getDeviceId(), topic);
                 return;

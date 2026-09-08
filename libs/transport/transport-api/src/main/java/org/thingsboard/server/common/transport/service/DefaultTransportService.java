@@ -71,6 +71,7 @@ import org.thingsboard.server.common.stats.TbApiUsageReportClient;
 import org.thingsboard.server.common.transport.DeviceDeletedEvent;
 import org.thingsboard.server.common.transport.DeviceProfileUpdatedEvent;
 import org.thingsboard.server.common.transport.DeviceUpdatedEvent;
+import org.thingsboard.server.common.transport.LocalDeviceInactivityEvent;
 import org.thingsboard.server.common.transport.SessionMsgListener;
 import org.thingsboard.server.common.transport.TransportDeviceProfileCache;
 import org.thingsboard.server.common.transport.TransportResourceCache;
@@ -671,7 +672,10 @@ public class DefaultTransportService extends TransportActivityManager implements
     @Override
     public void process(TransportProtos.SessionInfoProto sessionInfo, TransportProtos.SessionEventMsg msg, TransportServiceCallback<Void> callback) {
         if (checkLimits(sessionInfo, msg, callback)) {
-            recordActivityInternal(sessionInfo);
+            // SESSION_CLOSED 不能记活动：否则重启/断连时会用“当前时间”把刚标成非活跃的设备又拉回去。
+            if (msg.getEvent() != TransportProtos.SessionEvent.CLOSED) {
+                recordActivityInternal(sessionInfo);
+            }
             sendToDeviceActor(sessionInfo, TransportToDeviceActorMsg.newBuilder().setSessionInfo(sessionInfo)
                     .setSessionEvent(msg).build(), callback);
         }
@@ -691,7 +695,9 @@ public class DefaultTransportService extends TransportActivityManager implements
                 }
             }
 
-            recordActivityInternal(sessionInfo);
+            if (!msg.hasSessionEvent() || msg.getSessionEvent().getEvent() != TransportProtos.SessionEvent.CLOSED) {
+                recordActivityInternal(sessionInfo);
+            }
             sendToDeviceActor(sessionInfo, msg, callback);
         }
     }
@@ -963,6 +969,12 @@ public class DefaultTransportService extends TransportActivityManager implements
         } catch (Exception e) {
             log.error("[{}][{}] Failed to send device inactivity to core", tenantId, deviceId, e);
         }
+        // 单体 in-memory 队列在 JVM 退出时会丢掉未消费消息。同进程先同步写设备状态。
+        try {
+            eventPublisher.publishEvent(new LocalDeviceInactivityEvent(tenantId, deviceId));
+        } catch (Exception e) {
+            log.debug("[{}][{}] No local inactivity listener", tenantId, deviceId, e);
+        }
     }
 
     @Override
@@ -1001,6 +1013,38 @@ public class DefaultTransportService extends TransportActivityManager implements
             currentSession.getScheduledFuture().cancel(false);
         }
         sessions.remove(toSessionId(sessionInfo));
+    }
+
+    @Override
+    public void closeLocalSessionsAndReportInactivity() {
+        int closed = 0;
+        for (SessionMetaData md : List.copyOf(sessions.values())) {
+            TransportProtos.SessionInfoProto sessionInfo = md.getSessionInfo();
+            if (sessionInfo == null) {
+                continue;
+            }
+            try {
+                closeSessionWithoutReportingActivity(sessionInfo);
+                deregisterSession(sessionInfo);
+                reportDeviceInactivity(getTenantId(sessionInfo), getDeviceId(sessionInfo));
+                closed++;
+            } catch (Exception e) {
+                log.warn("Failed to close transport session on shutdown: {}", sessionInfo.getDeviceName(), e);
+            }
+        }
+        log.info("Closed {} local transport session(s) and reported device inactivity", closed);
+    }
+
+    @Override
+    public void flushToCore() {
+        if (tbCoreMsgProducer == null) {
+            return;
+        }
+        try {
+            tbCoreMsgProducer.flush();
+        } catch (Exception e) {
+            log.warn("Failed to flush messages to core", e);
+        }
     }
 
     @Override

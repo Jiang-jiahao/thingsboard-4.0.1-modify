@@ -155,7 +155,15 @@ public class TbKafkaProducerTemplate<T extends TbQueueMsg> implements TbQueuePro
     @Override
     public void stop() {
         if (producer != null) {
+            producer.flush();
             producer.close();
+        }
+    }
+
+    @Override
+    public void flush() {
+        if (producer != null) {
+            producer.flush();
         }
     }
 

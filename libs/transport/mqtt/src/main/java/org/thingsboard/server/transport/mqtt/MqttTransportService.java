@@ -23,17 +23,17 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.AttributeKey;
 import io.netty.util.ResourceLeakDetector;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.TbTransportService;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Andrew Shvayka
@@ -41,7 +41,7 @@ import java.net.InetSocketAddress;
 @Service("MqttTransportService")
 @ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.mqtt.enabled:true}'=='true'")
 @Slf4j
-public class MqttTransportService implements TbTransportService {
+public class MqttTransportService implements TbTransportService, SmartLifecycle {
 
     public static AttributeKey<InetSocketAddress> ADDRESS = AttributeKey.newInstance("SRC_ADDRESS");
 
@@ -74,9 +74,42 @@ public class MqttTransportService implements TbTransportService {
     private Channel sslServerChannel;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
+    private volatile boolean running;
 
-    @PostConstruct
-    public void init() throws Exception {
+    @Override
+    public void start() {
+        try {
+            init();
+            running = true;
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to start MQTT transport", e);
+        }
+    }
+
+    @Override
+    public void stop() {
+        try {
+            shutdown();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("MQTT transport stop interrupted");
+        } finally {
+            running = false;
+        }
+    }
+
+    @Override
+    public boolean isRunning() {
+        return running;
+    }
+
+    @Override
+    public int getPhase() {
+        // 比默认 bean（含设备状态服务）更晚启动、更早停止，退出时还能同步把设备标非活跃。
+        return Integer.MAX_VALUE - 100;
+    }
+
+    private void init() throws Exception {
         log.info("Setting resource leak detector level to {}", leakDetectorLevel);
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.valueOf(leakDetectorLevel.toUpperCase()));
 
@@ -101,19 +134,40 @@ public class MqttTransportService implements TbTransportService {
         log.info("Mqtt transport started!");
     }
 
-    @PreDestroy
-    public void shutdown() throws InterruptedException {
+    private void shutdown() throws InterruptedException {
         log.info("Stopping MQTT transport!");
         try {
-            serverChannel.close().sync();
-            if (sslEnabled) {
+            // 先同步把在线设备标非活跃并 flush，再关连接。单体 in-memory 队列重启会丢未消费消息。
+            context.flushMqttServerDisconnectInactivity();
+        } catch (Exception e) {
+            log.warn("Failed to flush MQTT server disconnect inactivity on shutdown", e);
+        }
+        try {
+            if (serverChannel != null) {
+                serverChannel.close().sync();
+            }
+            if (sslEnabled && sslServerChannel != null) {
                 sslServerChannel.close().sync();
             }
         } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
+            shutdownEventLoop(workerGroup, "MQTT worker");
+            shutdownEventLoop(bossGroup, "MQTT boss");
         }
         log.info("MQTT transport stopped!");
+    }
+
+    private void shutdownEventLoop(EventLoopGroup group, String name) {
+        if (group == null) {
+            return;
+        }
+        try {
+            if (!group.shutdownGracefully(0, 15, TimeUnit.SECONDS).await(15, TimeUnit.SECONDS)) {
+                log.warn("{} event loop did not terminate in time", name);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("{} event loop shutdown interrupted", name);
+        }
     }
 
     @Override
