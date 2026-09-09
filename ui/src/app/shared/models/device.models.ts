@@ -622,6 +622,8 @@ export interface HttpPullPollRequest {
   dataType?: HttpPullPollDataType;
   /** false：本请求无需携带登录凭证（如登录接口） */
   requiresAuth?: boolean;
+  telemetryPayloadKey?: string;
+  /** @deprecated HTTP 拉取不再做多设备路由 */
   routing?: HttpPullDeviceRoutingConfiguration;
 }
 
@@ -642,31 +644,7 @@ export interface HttpPullDeviceProfileTransportConfiguration {
 }
 
 export interface HttpPullDeviceTransportConfiguration {
-  collector?: boolean;
-  externalDeviceId?: string;
-  /** 目标设备归属的采集器设备 ID（UUID） */
-  collectorDeviceId?: string;
   pollUrlOverride?: string;
-}
-
-/** 与后端 {@code HttpPullDeviceTransportConfiguration#isCollector()} 一致 */
-export function resolveHttpPullDeviceIsCollector(
-  cfg: Pick<HttpPullDeviceTransportConfiguration, 'collector' | 'externalDeviceId'> | null | undefined
-): boolean {
-  if (!cfg) {
-    return true;
-  }
-  if ((cfg.externalDeviceId || '').trim()) {
-    return false;
-  }
-  return cfg.collector !== false;
-}
-
-/** 档案下同配置下可作为「归属采集器」的候选设备：未配置外部设备 ID */
-export function isHttpPullCollectorCandidate(
-  cfg: Pick<HttpPullDeviceTransportConfiguration, 'externalDeviceId'> | null | undefined
-): boolean {
-  return !(cfg?.externalDeviceId || '').trim();
 }
 
 /** 根据字段形态判断是否为 HTTP 主动拉取设备传输配置（与 Default 被动上报区分） */
@@ -676,10 +654,13 @@ export function isHttpPullDeviceTransportConfigurationShape(
   if (!cfg) {
     return false;
   }
-  return 'collector' in cfg || 'pollUrlOverride' in cfg || 'collectorDeviceId' in cfg;
+  return cfg.type === DeviceTransportType.HTTP_PULL
+    || 'pollUrlOverride' in cfg
+    || 'collector' in cfg
+    || 'collectorDeviceId' in cfg;
 }
 
-/** 保存设备时解析传输 JSON 多态 type，避免误存为 DEFAULT 导致 collectorDeviceId 等字段丢失 */
+/** 保存设备时解析传输 JSON 多态 type，避免误存为 DEFAULT */
 export function resolveHttpDeviceTransportTypeForSave(
   transportType: DeviceTransportType | TransportType | null | undefined,
   configuration: Record<string, unknown> | null | undefined,
@@ -711,45 +692,18 @@ export function normalizeHttpDeviceTransportConfigurationForSave(
     return { ...configuration, type: resolvedType } as DeviceTransportConfiguration;
   }
   const raw = configuration as HttpPullDeviceTransportConfiguration;
-  const collector = resolveHttpPullDeviceIsCollector(raw);
-  const externalDeviceId = (raw.externalDeviceId || '').trim() || undefined;
-  const collectorDeviceId = (raw.collectorDeviceId || '').trim() || undefined;
   const pollUrlOverride = (raw.pollUrlOverride || '').trim() || undefined;
   return {
     type: DeviceTransportType.HTTP_PULL,
-    collector,
-    externalDeviceId: collector ? undefined : externalDeviceId,
-    collectorDeviceId: collector ? undefined : collectorDeviceId,
-    pollUrlOverride: collector ? pollUrlOverride : undefined
+    pollUrlOverride
   };
 }
 
 export interface HttpPullProfileContext {
-  routingMode: HttpPullRoutingMode;
   pollUrl: string | null;
 }
 
-/** 从档案传输配置解析路由模式（优先各拉取请求上的 routing，兼容旧版档案级 routing） */
-export function resolveHttpPullProfileRoutingMode(
-  raw: HttpPullDeviceProfileTransportConfiguration | null | undefined
-): HttpPullRoutingMode {
-  if (!raw) {
-    return HttpPullRoutingMode.SINGLE_DEVICE;
-  }
-  const pollRequests = raw.pollRequests;
-  if (pollRequests?.length) {
-    for (const req of pollRequests) {
-      const mode = req.routing?.routingMode ?? raw.routing?.routingMode;
-      if (mode === HttpPullRoutingMode.MULTI_DEVICE || mode === HttpPullRoutingMode.AUTO) {
-        return HttpPullRoutingMode.MULTI_DEVICE;
-      }
-    }
-    return normalizeHttpPullRoutingMode(pollRequests[0]?.routing?.routingMode ?? raw.routing?.routingMode);
-  }
-  return normalizeHttpPullRoutingMode(raw.routing?.routingMode);
-}
-
-/** 从完整设备档案解析 HTTP 主动采集的路由模式与档案级拉取 URL */
+/** 从完整设备档案解析 HTTP 主动采集的档案级拉取 URL */
 export function extractHttpPullProfileContext(dp: DeviceProfile | null | undefined): HttpPullProfileContext | null {
   if (!dp || dp.transportType !== DeviceTransportType.HTTP_PULL) {
     return null;
@@ -760,7 +714,6 @@ export function extractHttpPullProfileContext(dp: DeviceProfile | null | undefin
   }
   const firstPoll = raw.pollRequests?.[0];
   return {
-    routingMode: resolveHttpPullProfileRoutingMode(raw),
     pollUrl: firstPoll?.pollUrl ?? raw.pollUrl ?? null
   };
 }
@@ -2080,11 +2033,7 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
             pollMethod: 'GET',
             dataType: HttpPullPollDataType.TELEMETRY,
             requiresAuth: true,
-            routing: {
-              routingMode: HttpPullRoutingMode.MULTI_DEVICE,
-              deviceIdJsonPath: 'deviceId',
-              telemetryPayloadKey: 'httpPullPayload'
-            }
+            telemetryPayloadKey: 'httpPullPayload'
           }],
           auth: { authType: HttpPullAuthType.NONE }
         };
@@ -2172,8 +2121,7 @@ export const createDeviceTransportConfiguration = (
       case BasicTransportType.HTTP:
       case DeviceTransportType.HTTP_PULL:
         const httpPullDeviceTransportConfiguration: HttpPullDeviceTransportConfiguration = {
-          collector: true,
-          externalDeviceId: null
+          pollUrlOverride: ''
         };
         transportConfiguration = {...httpPullDeviceTransportConfiguration, type: DeviceTransportType.HTTP_PULL};
         break;

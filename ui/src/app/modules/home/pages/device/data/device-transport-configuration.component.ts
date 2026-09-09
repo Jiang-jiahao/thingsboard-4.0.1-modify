@@ -89,9 +89,6 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
   udpWireAuthenticationMode: UdpWireAuthenticationMode | null = null;
 
   @Input()
-  httpPullRoutingMode: HttpPullRoutingMode | null = null;
-
-  @Input()
   httpPushRoutingMode: HttpPullRoutingMode | null = null;
 
   @Input()
@@ -99,12 +96,6 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
 
   @Input()
   mqttPullProfileActive = false;
-
-  @Input()
-  deviceProfileId: string | null = null;
-
-  @Input()
-  editingDeviceId: string | null = null;
 
   /** 设备档案传输类型（优先；HTTP 档案为 UI 类型 HTTP） */
   @Input()

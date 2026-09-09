@@ -73,8 +73,6 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   /** 当前所选设备档案的 TCP 连接模式（CLIENT/SERVER），用于设备传输页表单项显隐 */
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
 
-  httpPullProfileRoutingMode: HttpPullRoutingMode | null = null;
-
   httpPushProfileRoutingMode: HttpPullRoutingMode | null = null;
 
   httpPullProfilePollUrl: string | null = null;
@@ -86,14 +84,6 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   get hidePlatformCredentials(): boolean {
     return this.mqttPullProfileActive
       || this.entity?.deviceData?.transportConfiguration?.type === DeviceTransportType.MQTT_PULL;
-  }
-
-  get httpPullDeviceProfileId(): string | null {
-    return this.resolveDeviceProfileUuid(this.entityForm?.get('deviceProfileId')?.value);
-  }
-
-  get mqttPullDeviceProfileId(): string | null {
-    return this.resolveDeviceProfileUuid(this.entityForm?.get('deviceProfileId')?.value);
   }
 
   constructor(protected store: Store<AppState>,
@@ -310,7 +300,6 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     this.tcpProfileWireAuthMode = null;
     this.tcpProfileTransportConnectMode = null;
     this.udpProfileWireAuthMode = null;
-    this.httpPullProfileRoutingMode = null;
     this.httpPushProfileRoutingMode = null;
     this.httpPullProfilePollUrl = null;
     this.mqttPullProfileActive = false;
@@ -319,7 +308,6 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     }
     const httpPullCtx = extractHttpPullProfileContext(dp);
     if (httpPullCtx) {
-      this.httpPullProfileRoutingMode = httpPullCtx.routingMode;
       this.httpPullProfilePollUrl = httpPullCtx.pollUrl;
     }
     this.mqttPullProfileActive = extractMqttPullProfileContext(dp) != null;

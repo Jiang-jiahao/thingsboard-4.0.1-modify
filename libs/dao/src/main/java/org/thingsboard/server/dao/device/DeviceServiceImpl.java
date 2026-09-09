@@ -262,7 +262,9 @@ public class DeviceServiceImpl extends CachedVersionedEntityService<DeviceCacheK
     @Override
     public void handleEvictEvent(DeviceCacheEvictEvent event) {
         List<DeviceCacheKey> toEvict = new ArrayList<>(3);
-        toEvict.add(new DeviceCacheKey(event.getTenantId(), event.getNewName()));
+        if (StringUtils.isNotEmpty(event.getNewName())) {
+            toEvict.add(new DeviceCacheKey(event.getTenantId(), event.getNewName()));
+        }
         if (StringUtils.isNotEmpty(event.getOldName()) && !event.getOldName().equals(event.getNewName())) {
             toEvict.add(new DeviceCacheKey(event.getTenantId(), event.getOldName()));
         }
@@ -275,6 +277,11 @@ public class DeviceServiceImpl extends CachedVersionedEntityService<DeviceCacheK
             toEvict.add(new DeviceCacheKey(event.getTenantId(), event.getDeviceId()));
         }
         cache.evict(toEvict);
+    }
+
+    @Override
+    public void evictCache(TenantId tenantId, DeviceId deviceId, String newName, String oldName) {
+        handleEvictEvent(new DeviceCacheEvictEvent(tenantId, deviceId, newName, oldName));
     }
 
     /**
@@ -312,6 +319,12 @@ public class DeviceServiceImpl extends CachedVersionedEntityService<DeviceCacheK
                     break;
                 case UDP:
                     deviceData.setTransportConfiguration(new UdpDeviceTransportConfiguration());
+                    break;
+                case MQTT_PULL:
+                    deviceData.setTransportConfiguration(new MqttPullDeviceTransportConfiguration());
+                    break;
+                case HTTP_PULL:
+                    deviceData.setTransportConfiguration(new HttpPullDeviceTransportConfiguration());
                     break;
             }
         }

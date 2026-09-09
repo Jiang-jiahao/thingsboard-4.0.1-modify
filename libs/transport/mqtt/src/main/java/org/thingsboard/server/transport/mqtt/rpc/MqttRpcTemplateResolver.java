@@ -12,7 +12,6 @@ import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.data.DefaultDeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.DeviceTransportConfiguration;
-import org.thingsboard.server.common.data.device.data.HttpPullDeviceTransportConfiguration;
 import org.thingsboard.server.common.transport.auth.TransportDeviceInfo;
 
 import java.util.regex.Matcher;
@@ -117,10 +116,6 @@ public final class MqttRpcTemplateResolver {
             return "";
         }
         DeviceTransportConfiguration cfg = device.getDeviceData().getTransportConfiguration();
-        if (cfg instanceof HttpPullDeviceTransportConfiguration http
-                && StringUtils.isNotBlank(http.getExternalDeviceId())) {
-            return http.getExternalDeviceId().trim();
-        }
         if (cfg instanceof DefaultDeviceTransportConfiguration def
                 && StringUtils.isNotBlank(def.getExternalDeviceId())) {
             return def.getExternalDeviceId().trim();

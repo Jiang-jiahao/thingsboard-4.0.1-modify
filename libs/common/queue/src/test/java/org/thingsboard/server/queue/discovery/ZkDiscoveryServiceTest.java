@@ -38,10 +38,12 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type.CHILD_ADDED;
 import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type.CHILD_REMOVED;
+import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type.CHILD_UPDATED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -90,11 +92,11 @@ public class ZkDiscoveryServiceTest {
         ReflectionTestUtils.setField(zkDiscoveryService, "recalculateDelay", RECALCULATE_DELAY);
         ReflectionTestUtils.setField(zkDiscoveryService, "zkDir", "/thingsboard");
 
-        when(serviceInfoProvider.getServiceInfo()).thenReturn(currentInfo);
+        lenient().when(serviceInfoProvider.getServiceInfo()).thenReturn(currentInfo);
 
         List<ChildData> dataList = new ArrayList<>();
         dataList.add(currentData);
-        when(cache.getCurrentData()).thenReturn(dataList);
+        lenient().when(cache.getCurrentData()).thenReturn(dataList);
     }
 
     @Test
@@ -176,6 +178,60 @@ public class ZkDiscoveryServiceTest {
         startNode(childData);
 
         verify(partitionService, times(1)).recalculatePartitions(eq(currentInfo), eq(List.of(anotherInfo, childInfo)));
+    }
+
+    @Test
+    public void transportChildUpdatedRecalculatesOnlyWhenTransportsChange() throws Exception {
+        var mqttInfo = TransportProtos.ServiceInfo.newBuilder()
+                .setServiceId("tb-mqtt-transport2")
+                .addServiceTypes("TB_TRANSPORT")
+                .build();
+        var mqttData = new ChildData("/thingsboard/nodes/0000000040", null, mqttInfo.toByteArray());
+
+        startNode(mqttData);
+        verify(partitionService, times(1)).recalculatePartitions(eq(currentInfo), eq(List.of(mqttInfo)));
+        reset(partitionService);
+
+        zkDiscoveryService.childEvent(curatorFramework, new PathChildrenCacheEvent(CHILD_UPDATED, mqttData));
+        verify(partitionService, never()).recalculatePartitions(any(), any());
+
+        var mqttWithTransports = mqttInfo.toBuilder().addTransports("MQTT").build();
+        var updatedData = new ChildData(mqttData.getPath(), null, mqttWithTransports.toByteArray());
+        cache.getCurrentData().remove(mqttData);
+        cache.getCurrentData().add(updatedData);
+        zkDiscoveryService.childEvent(curatorFramework, new PathChildrenCacheEvent(CHILD_UPDATED, updatedData));
+        verify(partitionService, times(1)).recalculatePartitions(eq(currentInfo), eq(List.of(mqttWithTransports)));
+        reset(partitionService);
+
+        zkDiscoveryService.childEvent(curatorFramework, new PathChildrenCacheEvent(CHILD_UPDATED, updatedData));
+        verify(partitionService, never()).recalculatePartitions(any(), any());
+    }
+
+    @Test
+    public void childRemovedWithZeroDelayRecalculatesImmediately() throws Exception {
+        ReflectionTestUtils.setField(zkDiscoveryService, "recalculateDelay", 0L);
+        startNode(childData);
+        verify(partitionService, times(1)).recalculatePartitions(eq(currentInfo), eq(List.of(childInfo)));
+        reset(partitionService);
+
+        stopNode(childData);
+
+        assertTrue(zkDiscoveryService.delayedTasks.isEmpty());
+        verify(partitionService, times(1)).recalculatePartitions(eq(currentInfo), eq(Collections.emptyList()));
+    }
+
+    @Test
+    public void firstChildUpdatedForUnknownTransportDoesNotRecalculate() throws Exception {
+        var mqttInfo = TransportProtos.ServiceInfo.newBuilder()
+                .setServiceId("tb-mqtt-transport2")
+                .addServiceTypes("TB_TRANSPORT")
+                .addTransports("MQTT")
+                .build();
+        var mqttData = new ChildData("/thingsboard/nodes/0000000050", null, mqttInfo.toByteArray());
+        cache.getCurrentData().add(mqttData);
+
+        zkDiscoveryService.childEvent(curatorFramework, new PathChildrenCacheEvent(CHILD_UPDATED, mqttData));
+        verify(partitionService, never()).recalculatePartitions(any(), any());
     }
 
     private void startNode(ChildData data) throws Exception {

@@ -14,12 +14,8 @@ import {
   Validators
 } from '@angular/forms';
 import {
-  HTTP_PULL_ROUTING_MODE_OPTIONS,
-  HttpPullDeviceIdMatchStrategy,
   HttpPullPollDataType,
-  HttpPullPollRequest,
-  HttpPullRoutingMode,
-  normalizeHttpPullRoutingMode
+  HttpPullPollRequest
 } from '@shared/models/device.models';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -49,9 +45,6 @@ export class HttpPullPollRequestsConfigComponent implements OnInit, OnDestroy, C
   form: UntypedFormGroup;
   dataTypes = Object.keys(HttpPullPollDataType);
   httpPullPollDataType = HttpPullPollDataType;
-  routingModes = HTTP_PULL_ROUTING_MODE_OPTIONS;
-  matchStrategies = Object.keys(HttpPullDeviceIdMatchStrategy);
-  httpPullRoutingMode = HttpPullRoutingMode;
 
   private destroy$ = new Subject<void>();
   private propagateChange: (v: HttpPullPollRequest[]) => void = () => {};
@@ -109,11 +102,6 @@ export class HttpPullPollRequestsConfigComponent implements OnInit, OnDestroy, C
     }
   }
 
-  showRoutingFields(req: UntypedFormGroup): boolean {
-    const mode = req.get('routingMode')?.value;
-    return mode === HttpPullRoutingMode.MULTI_DEVICE;
-  }
-
   showTelemetryKey(req: UntypedFormGroup): boolean {
     return req.get('dataType')?.value === HttpPullPollDataType.TELEMETRY;
   }
@@ -129,17 +117,11 @@ export class HttpPullPollRequestsConfigComponent implements OnInit, OnDestroy, C
       queryingFrequencyMs: null,
       dataType: HttpPullPollDataType.TELEMETRY,
       requiresAuth: true,
-      routing: {
-        routingMode: HttpPullRoutingMode.MULTI_DEVICE,
-        deviceIdJsonPath: 'deviceId',
-        deviceIdMatchStrategy: HttpPullDeviceIdMatchStrategy.DEVICE_NAME,
-        telemetryPayloadKey: 'httpPullPayload'
-      }
+      telemetryPayloadKey: 'httpPullPayload'
     };
   }
 
   private createRequestGroup(r: HttpPullPollRequest): UntypedFormGroup {
-    const routing = r.routing || {};
     return this.fb.group({
       id: [r.id || this.newId()],
       name: [r.name || ''],
@@ -150,12 +132,7 @@ export class HttpPullPollRequestsConfigComponent implements OnInit, OnDestroy, C
       pollBody: [r.pollBody || ''],
       queryingFrequencyMs: [r.queryingFrequencyMs ?? null, [Validators.min(1000)]],
       dataType: [r.dataType || HttpPullPollDataType.TELEMETRY, Validators.required],
-      routingMode: [normalizeHttpPullRoutingMode(routing.routingMode)],
-      responseArrayJsonPath: [routing.responseArrayJsonPath || ''],
-      deviceIdJsonPath: [routing.deviceIdJsonPath || 'deviceId'],
-      deviceIdMatchStrategy: [routing.deviceIdMatchStrategy || HttpPullDeviceIdMatchStrategy.DEVICE_NAME],
-      targetDeviceProfileId: [routing.targetDeviceProfileId || ''],
-      telemetryPayloadKey: [routing.telemetryPayloadKey || 'httpPullPayload']
+      telemetryPayloadKey: [r.telemetryPayloadKey || r.routing?.telemetryPayloadKey || 'httpPullPayload']
     });
   }
 
@@ -170,14 +147,7 @@ export class HttpPullPollRequestsConfigComponent implements OnInit, OnDestroy, C
       pollBody: v.pollBody || undefined,
       queryingFrequencyMs: v.queryingFrequencyMs || undefined,
       dataType: v.dataType,
-      routing: {
-        routingMode: v.routingMode,
-        responseArrayJsonPath: v.responseArrayJsonPath || undefined,
-        deviceIdJsonPath: v.deviceIdJsonPath,
-        deviceIdMatchStrategy: v.deviceIdMatchStrategy,
-        targetDeviceProfileId: v.targetDeviceProfileId || undefined,
-        telemetryPayloadKey: v.telemetryPayloadKey
-      }
+      telemetryPayloadKey: v.telemetryPayloadKey || 'httpPullPayload'
     }));
     this.propagateChange(requests);
   }

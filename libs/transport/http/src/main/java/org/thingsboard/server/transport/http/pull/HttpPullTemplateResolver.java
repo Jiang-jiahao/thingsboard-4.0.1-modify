@@ -32,7 +32,7 @@ final class HttpPullTemplateResolver {
         StringBuilder sb = new StringBuilder();
         while (matcher.find()) {
             String key = matcher.group(1).trim();
-            String replacement = resolveKey(key, device, deviceCfg, params);
+            String replacement = resolveKey(key, device, params);
             matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement));
         }
         matcher.appendTail(sb);
@@ -63,8 +63,7 @@ final class HttpPullTemplateResolver {
         }
     }
 
-    private static String resolveKey(String key, Device device, HttpPullDeviceTransportConfiguration deviceCfg,
-                                     JsonObject params) {
+    private static String resolveKey(String key, Device device, JsonObject params) {
         if ("params".equals(key)) {
             return params.toString();
         }
@@ -84,8 +83,7 @@ final class HttpPullTemplateResolver {
             return switch (deviceKey) {
                 case "name" -> device != null && device.getName() != null ? device.getName() : "";
                 case "label" -> device != null && device.getLabel() != null ? device.getLabel() : "";
-                case "externalDeviceId" -> deviceCfg != null && StringUtils.isNotBlank(deviceCfg.getExternalDeviceId())
-                        ? deviceCfg.getExternalDeviceId() : "";
+                case "externalDeviceId" -> "";
                 default -> "";
             };
         }

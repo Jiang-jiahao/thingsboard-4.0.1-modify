@@ -47,11 +47,12 @@ public class HttpPullRpcService {
         httpClient = new HttpPullHttpClient(10000);
     }
 
-    public void onToDeviceRpcRequest(HttpPullCollectorSessionContext collectorCtx, Device targetDevice,
-                                     HttpPullDeviceTransportConfiguration targetDeviceCfg,
-                                     TransportProtos.SessionInfoProto sessionInfo,
+    public void onToDeviceRpcRequest(HttpPullCollectorSessionContext collectorCtx,
                                      TransportProtos.ToDeviceRpcRequestMsg request) {
-        DeviceProfileRpcMethod rpcMethod = findRpcMethod(targetDevice, collectorCtx, request.getMethodName());
+        TransportProtos.SessionInfoProto sessionInfo = collectorCtx.getSessionInfo();
+        Device device = collectorCtx.getDevice();
+        HttpPullDeviceTransportConfiguration deviceCfg = collectorCtx.getDeviceTransportConfiguration();
+        DeviceProfileRpcMethod rpcMethod = findRpcMethod(device, collectorCtx, request.getMethodName());
         if (rpcMethod == null) {
             log.warn("[{}] HTTP pull RPC method not found: {}", collectorCtx.getDeviceId(), request.getMethodName());
             respondError(sessionInfo, request, "RPC method not found: " + request.getMethodName());
@@ -68,9 +69,9 @@ public class HttpPullRpcService {
                     respondTimeout(sessionInfo, request);
                     return;
                 }
-                executeOutboundRpc(collectorCtx, targetDevice, targetDeviceCfg, sessionInfo, request, rpcMethod);
+                executeOutboundRpc(collectorCtx, device, deviceCfg, sessionInfo, request, rpcMethod);
             } catch (Exception e) {
-                log.warn("[{}] HTTP outbound RPC [{}] failed", targetDevice != null ? targetDevice.getId() : collectorCtx.getDeviceId(),
+                log.warn("[{}] HTTP outbound RPC [{}] failed", collectorCtx.getDeviceId(),
                         request.getMethodName(), e);
                 String message = e instanceof RpcDeadlineExceededException ? RPC_TIMEOUT_MESSAGE : e.getMessage();
                 respondError(sessionInfo, request, message);

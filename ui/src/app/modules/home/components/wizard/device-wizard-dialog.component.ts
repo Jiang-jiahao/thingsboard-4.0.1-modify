@@ -89,8 +89,6 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
 
   udpProfileWireAuthMode: UdpWireAuthenticationMode | null = null;
 
-  httpPullProfileRoutingMode: HttpPullRoutingMode | null = null;
-
   httpPushProfileRoutingMode: HttpPullRoutingMode | null = null;
 
   httpPullProfilePollUrl: string | null = null;
@@ -100,10 +98,6 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
   readonly deviceWizardDeviceScope: 'tenant' = 'tenant';
 
   readonly gatewayUiEnabled = GATEWAY_UI_ENABLED;
-
-  get httpPullDeviceProfileId(): string | null {
-    return this.resolveDeviceProfileUuid(this.deviceWizardFormGroup?.get('deviceProfileId')?.value);
-  }
 
   constructor(protected store: Store<AppState>,
               protected router: Router,
@@ -267,7 +261,6 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
     this.tcpProfileWireAuthMode = null;
     this.tcpProfileTransportConnectMode = null;
     this.udpProfileWireAuthMode = null;
-    this.httpPullProfileRoutingMode = null;
     this.httpPushProfileRoutingMode = null;
     this.httpPullProfilePollUrl = null;
     this.mqttPullProfileActive = false;
@@ -276,7 +269,6 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
     }
     const httpPullCtx = extractHttpPullProfileContext(dp);
     if (httpPullCtx) {
-      this.httpPullProfileRoutingMode = httpPullCtx.routingMode;
       this.httpPullProfilePollUrl = httpPullCtx.pollUrl;
     }
     this.mqttPullProfileActive = extractMqttPullProfileContext(dp) != null;

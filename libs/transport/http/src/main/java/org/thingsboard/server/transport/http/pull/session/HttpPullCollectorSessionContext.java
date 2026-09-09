@@ -18,8 +18,6 @@ import org.thingsboard.server.transport.http.pull.HttpPullTransportContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Data
 @Builder
@@ -37,10 +35,6 @@ public class HttpPullCollectorSessionContext {
     @Builder.Default
     private final List<ScheduledTask> queryingTasks = new ArrayList<>();
 
-    /** 活跃目标设备：matchKey -> 目标会话 */
-    @Builder.Default
-    private final Map<String, HttpPullTargetSession> activeTargets = new ConcurrentHashMap<>();
-
     public DeviceId getDeviceId() {
         return device.getId();
     }
@@ -48,6 +42,5 @@ public class HttpPullCollectorSessionContext {
     public void close() {
         queryingTasks.forEach(ScheduledTask::cancel);
         queryingTasks.clear();
-        activeTargets.clear();
     }
 }

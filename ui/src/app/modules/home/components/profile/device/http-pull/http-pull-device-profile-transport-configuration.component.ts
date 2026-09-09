@@ -2,8 +2,6 @@
 /// Copyright © 2016-2025 The Thingsboard Authors
 ///
 import { Component, forwardRef, Input, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { HttpPullRoutingHelpDialogComponent } from './http-pull-routing-help-dialog.component';
 import {
   ControlValueAccessor,
   NG_VALIDATORS,
@@ -52,8 +50,7 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
   private destroy$ = new Subject<void>();
   private propagateChange: (v: HttpPullDeviceProfileTransportConfiguration) => void = () => {};
 
-  constructor(private fb: UntypedFormBuilder,
-              private dialog: MatDialog) {}
+  constructor(private fb: UntypedFormBuilder) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -116,7 +113,7 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
         queryingFrequencyMs: value.queryingFrequencyMs,
         dataType: HttpPullPollDataType.TELEMETRY,
         requiresAuth: true,
-        routing: value.routing
+        telemetryPayloadKey: value.routing?.telemetryPayloadKey || 'httpPullPayload'
       }];
     }
     this.form.patchValue({
@@ -144,16 +141,6 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
 
   validate(): ValidationErrors | null {
     return this.form.valid ? null : { httpPull: true };
-  }
-
-  openRoutingExample(event: Event): void {
-    event.stopPropagation();
-    this.dialog.open(HttpPullRoutingHelpDialogComponent, {
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
-      autoFocus: false,
-      width: '560px',
-      maxWidth: '95vw'
-    });
   }
 
   private updateModel(): void {

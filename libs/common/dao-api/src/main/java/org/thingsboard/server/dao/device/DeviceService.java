@@ -110,4 +110,10 @@ public interface DeviceService extends EntityDaoService {
 
     PageData<UUID> findDevicesIdsByDeviceProfileTransportType(DeviceTransportType transportType, PageLink pageLink);
 
+    /**
+     * 驱逐本节点设备缓存（按 id 与名称）。多 Core + caffeine 时，由集群生命周期广播调用，
+     * 避免其它节点继续命中过期的连接配置。
+     */
+    void evictCache(TenantId tenantId, DeviceId deviceId, String newName, String oldName);
+
 }

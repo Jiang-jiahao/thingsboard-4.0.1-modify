@@ -223,7 +223,7 @@ public final class TcpHexProtocolParser {
     }
 
     /** 未映射 Tag 键名后缀是否用 {@code 0x}：节级开关为 true，或任一行映射以十六进制字面保存。 */
-    static boolean effectiveUnknownTagTelemetryKeyHexLiteral(TcpHexLtvRepeatingConfig cfg) {
+    public static boolean effectiveUnknownTagTelemetryKeyHexLiteral(TcpHexLtvRepeatingConfig cfg) {
         if (Boolean.TRUE.equals(cfg.getUnknownTagTelemetryKeyHexLiteral())) {
             return true;
         }

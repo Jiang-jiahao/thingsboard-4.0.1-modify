@@ -303,7 +303,7 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
      *   <li>租户配置：驱逐缓存；UPDATED 时通知 API 用量；</li>
      *   <li>系统租户实体：重新加载 JWT 设置后直接返回（不再走后续 Actor 转发前的租户分支逻辑）；</li>
      *   <li>普通租户：驱逐配置与路由缓存；UPDATED/DELETED 时更新或删除用量，DELETED 时移除租户分区信息；</li>
-     *   <li>设备/资产及其 Profile：驱逐对应缓存；</li>
+     *   <li>设备：驱逐设备实体缓存与设备 Profile 缓存；资产及其 Profile：驱逐对应缓存；</li>
      *   <li>Entity View：委托 {@code TbEntityViewService}（若存在）；</li>
      *   <li>API 用量状态、客户删除、计算字段增删改：更新对应服务或缓存。</li>
      * </ul>
@@ -339,7 +339,12 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
         } else if (EntityType.DEVICE_PROFILE.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
             deviceProfileCache.evict(tenantId, new DeviceProfileId(componentLifecycleMsg.getEntityId().getId()));
         } else if (EntityType.DEVICE.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            deviceProfileCache.evict(tenantId, new DeviceId(componentLifecycleMsg.getEntityId().getId()));
+            DeviceId deviceId = new DeviceId(componentLifecycleMsg.getEntityId().getId());
+            deviceProfileCache.evict(tenantId, deviceId);
+            // caffeine 是进程内缓存：保存节点会在本地 put 新值，其它 Core 必须按生命周期驱逐，
+            // 否则 GetDevice 仍会命中过期的 brokerUrl/pollUrl。
+            actorContext.getDeviceService().evictCache(tenantId, deviceId,
+                    componentLifecycleMsg.getName(), componentLifecycleMsg.getOldName());
         } else if (EntityType.ASSET_PROFILE.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
             assetProfileCache.evict(tenantId, new AssetProfileId(componentLifecycleMsg.getEntityId().getId()));
         } else if (EntityType.ASSET.equals(componentLifecycleMsg.getEntityId().getEntityType())) {

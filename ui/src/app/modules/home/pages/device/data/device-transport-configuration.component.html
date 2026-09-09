@@ -57,10 +57,7 @@
     <ng-template [ngSwitchCase]="basicTransportType.HTTP">
       <ng-container *ngIf="httpPullProfilePollUrl; else httpPassiveDeviceTransport">
         <tb-http-pull-device-transport-configuration
-          [httpPullRoutingMode]="httpPullRoutingMode"
           [httpPullProfilePollUrl]="httpPullProfilePollUrl"
-          [deviceProfileId]="deviceProfileId"
-          [editingDeviceId]="editingDeviceId"
           formControlName="configuration">
         </tb-http-pull-device-transport-configuration>
       </ng-container>
@@ -73,10 +70,7 @@
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.HTTP_PULL">
       <tb-http-pull-device-transport-configuration
-        [httpPullRoutingMode]="httpPullRoutingMode"
         [httpPullProfilePollUrl]="httpPullProfilePollUrl"
-        [deviceProfileId]="deviceProfileId"
-        [editingDeviceId]="editingDeviceId"
         formControlName="configuration">
       </tb-http-pull-device-transport-configuration>
     </ng-template>

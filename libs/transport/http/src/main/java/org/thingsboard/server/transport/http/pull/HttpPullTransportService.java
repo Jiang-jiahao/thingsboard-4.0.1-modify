@@ -22,12 +22,10 @@ import org.thingsboard.common.util.ThingsBoardExecutors;
 import org.thingsboard.server.common.adaptor.JsonConverter;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.profile.HttpPullDeviceProfileTransportConfiguration;
-import org.thingsboard.server.common.data.transport.http.HttpPullDeviceRoutingConfiguration;
 import org.thingsboard.server.common.data.transport.http.HttpPullPollDataType;
 import org.thingsboard.server.common.data.transport.http.HttpPullPollRequest;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.transport.http.pull.session.HttpPullCollectorSessionContext;
-import org.thingsboard.server.transport.http.pull.session.HttpPullTargetSession;
 import org.thingsboard.server.transport.http.pull.session.ScheduledTask;
 import org.thingsboard.server.gen.transport.TransportProtos;
 
@@ -44,6 +42,10 @@ public class HttpPullTransportService {
     private final HttpPullAuthService authService;
     private ListeningScheduledExecutorService scheduler;
     private HttpPullHttpClient httpClient;
+
+    void setHttpClient(HttpPullHttpClient httpClient) {
+        this.httpClient = httpClient;
+    }
 
     @Value("${transport.http.pull.scheduler_thread_pool_size:4}")
     private int schedulerThreadPoolSize;
@@ -79,7 +81,7 @@ public class HttpPullTransportService {
         authService.invalidate(sessionContext.getDeviceId());
     }
 
-    private ListenableFuture<Void> executePoll(HttpPullCollectorSessionContext sessionContext, HttpPullPollRequest pollRequest) {
+    ListenableFuture<Void> executePoll(HttpPullCollectorSessionContext sessionContext, HttpPullPollRequest pollRequest) {
         if (sessionContext.getTransportContext() != null
                 && !sessionContext.getTransportContext().isManagedByCurrentTransport(sessionContext.getDeviceId().getId())) {
             return Futures.immediateVoidFuture();
@@ -141,66 +143,23 @@ public class HttpPullTransportService {
                 .build());
     }
 
-    private void dispatchResponse(HttpPullCollectorSessionContext sessionContext, HttpPullPollRequest pollRequest, String body) {
-        HttpPullDeviceRoutingConfiguration routing = sessionContext.getProfileTransportConfiguration().resolveRouting(pollRequest);
+    void dispatchResponse(HttpPullCollectorSessionContext sessionContext, HttpPullPollRequest pollRequest, String body) {
         HttpPullPollDataType dataType = pollRequest.getDataType() != null
                 ? pollRequest.getDataType() : HttpPullPollDataType.TELEMETRY;
         if (dataType == HttpPullPollDataType.TELEMETRY) {
-            dispatchTelemetry(sessionContext, body, routing);
+            postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, pollRequest.resolveTelemetryPayloadKey());
         } else {
-            boolean shared = dataType == HttpPullPollDataType.SHARED_ATTRIBUTES;
-            dispatchAttributes(sessionContext, body, shared, routing);
+            postAttributes(sessionContext, sessionContext.getSessionInfo(), body,
+                    dataType == HttpPullPollDataType.SHARED_ATTRIBUTES);
         }
-    }
-
-    private void dispatchTelemetry(HttpPullCollectorSessionContext sessionContext, String body,
-                                   HttpPullDeviceRoutingConfiguration routing) {
-        String telemetryKey = routing != null ? routing.getTelemetryPayloadKey() : "httpPullPayload";
-        if (!HttpPullRoutingHelper.shouldRouteToMultipleDevices(routing, body)) {
-            postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, telemetryKey);
-            return;
-        }
-        List<Object> elements = HttpPullJsonHelper.readArrayElements(body, routing.getResponseArrayJsonPath());
-        for (Object element : elements) {
-            String externalId = HttpPullJsonHelper.readDeviceId(element, routing.getDeviceIdJsonPath());
-            if (StringUtils.isBlank(externalId)) {
-                continue;
-            }
-            HttpPullTargetSession target = sessionContext.getActiveTargets().get(externalId.trim());
-            if (target == null || target.getSessionInfo() == null) {
-                log.debug("[{}] No active target for external device id [{}]", sessionContext.getDeviceId(), externalId);
-                continue;
-            }
-            String payloadJson = HttpPullJsonHelper.elementToJsonString(element);
-            postTelemetry(sessionContext, target.getSessionInfo(), payloadJson, telemetryKey);
-        }
-        postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, telemetryKey);
-    }
-
-    private void dispatchAttributes(HttpPullCollectorSessionContext sessionContext, String body, boolean shared,
-                                    HttpPullDeviceRoutingConfiguration routing) {
-        if (!HttpPullRoutingHelper.shouldRouteToMultipleDevices(routing, body)) {
-            postAttributes(sessionContext, sessionContext.getSessionInfo(), body, shared);
-            return;
-        }
-        List<Object> elements = HttpPullJsonHelper.readArrayElements(body, routing.getResponseArrayJsonPath());
-        for (Object element : elements) {
-            String externalId = HttpPullJsonHelper.readDeviceId(element, routing.getDeviceIdJsonPath());
-            if (StringUtils.isBlank(externalId)) {
-                continue;
-            }
-            HttpPullTargetSession target = sessionContext.getActiveTargets().get(externalId.trim());
-            if (target == null || target.getSessionInfo() == null) {
-                continue;
-            }
-            String payloadJson = HttpPullJsonHelper.elementToJsonString(element);
-            postAttributes(sessionContext, target.getSessionInfo(), payloadJson, shared);
-        }
-        postAttributes(sessionContext, sessionContext.getSessionInfo(), body, shared);
     }
 
     private void postTelemetry(HttpPullCollectorSessionContext collectorCtx,
                                TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, String telemetryKey) {
+        if (sessionInfo == null) {
+            log.warn("[{}] Skip telemetry: HTTP pull session is not ready", collectorCtx.getDeviceId());
+            return;
+        }
         if (collectorCtx.getTransportContext() != null) {
             collectorCtx.getTransportContext().activateHttpPullDeviceSession(sessionInfo, collectorCtx.getDeviceId());
         }
@@ -217,12 +176,22 @@ public class HttpPullTransportService {
 
     private void postAttributes(HttpPullCollectorSessionContext collectorCtx,
                                 TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, boolean shared) {
+        if (sessionInfo == null) {
+            log.warn("[{}] Skip attributes: HTTP pull session is not ready", collectorCtx.getDeviceId());
+            return;
+        }
         if (collectorCtx.getTransportContext() != null) {
             collectorCtx.getTransportContext().activateHttpPullDeviceSession(sessionInfo, collectorCtx.getDeviceId());
         }
-        JsonElement parsed = JsonParser.parseString(jsonPayload);
+        JsonElement parsed;
+        try {
+            parsed = JsonParser.parseString(jsonPayload);
+        } catch (Exception e) {
+            log.warn("[{}] HTTP pull attributes payload is not valid JSON, skipping", collectorCtx.getDeviceId());
+            return;
+        }
         if (!parsed.isJsonObject()) {
-            log.warn("HTTP pull attributes response is not a JSON object, skipping");
+            log.warn("[{}] HTTP pull attributes response is not a JSON object, skipping", collectorCtx.getDeviceId());
             return;
         }
         TransportProtos.PostAttributeMsg.Builder builder = JsonConverter.convertToAttributesProto(parsed).toBuilder();

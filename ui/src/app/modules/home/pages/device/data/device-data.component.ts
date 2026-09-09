@@ -81,9 +81,6 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
 
   @Input()
-  httpPullRoutingMode: HttpPullRoutingMode | null = null;
-
-  @Input()
   httpPushRoutingMode: HttpPullRoutingMode | null = null;
 
   @Input()
@@ -91,12 +88,6 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
 
   @Input()
   mqttPullProfileActive = false;
-
-  @Input()
-  deviceProfileId: string | null = null;
-
-  @Input()
-  editingDeviceId: string | null = null;
 
   /** 来自设备详情页：tenant | customer | customer_user */
   @Input()

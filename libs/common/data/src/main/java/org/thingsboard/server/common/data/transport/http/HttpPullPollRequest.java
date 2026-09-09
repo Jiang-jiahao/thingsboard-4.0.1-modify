@@ -6,6 +6,7 @@
 package org.thingsboard.server.common.data.transport.http;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.profile.HttpPullDeviceProfileTransportConfiguration;
@@ -16,7 +17,10 @@ import java.util.Map;
 import java.util.UUID;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HttpPullPollRequest implements Serializable {
+
+    private static final String DEFAULT_TELEMETRY_KEY = "httpPullPayload";
 
     private String id;
     private String name;
@@ -33,6 +37,7 @@ public class HttpPullPollRequest implements Serializable {
     private Long queryingFrequencyMs;
 
     private HttpPullPollDataType dataType = HttpPullPollDataType.TELEMETRY;
+    private String telemetryPayloadKey;
 
     /**
      * 是否携带档案鉴权（登录令牌等）。false 表示本请求无需令牌，例如登录接口本身。
@@ -41,9 +46,10 @@ public class HttpPullPollRequest implements Serializable {
     private Boolean requiresAuth;
 
     /**
-     * 本请求响应体的解析与多设备路由（各请求 JSON 结构可不同）。
+     * 兼容旧配置中的路由块；拉取不再做多设备路由，仅用于回读遥测键。
      */
-    private HttpPullDeviceRoutingConfiguration routing = new HttpPullDeviceRoutingConfiguration();
+    @Deprecated
+    private HttpPullDeviceRoutingConfiguration routing;
 
     /** 运行时判断；不能叫 isEnabled()，否则 Jackson 会忽略 enabled 字段导致关闭状态无法保存。 */
     @JsonIgnore
@@ -61,7 +67,18 @@ public class HttpPullPollRequest implements Serializable {
     }
 
     @JsonIgnore
-    public void validate(HttpPullDeviceRoutingConfiguration profileRoutingFallback) {
+    public String resolveTelemetryPayloadKey() {
+        if (StringUtils.isNotBlank(telemetryPayloadKey)) {
+            return telemetryPayloadKey;
+        }
+        if (routing != null && StringUtils.isNotBlank(routing.getTelemetryPayloadKey())) {
+            return routing.getTelemetryPayloadKey();
+        }
+        return DEFAULT_TELEMETRY_KEY;
+    }
+
+    @JsonIgnore
+    public void validate() {
         if (StringUtils.isBlank(pollUrl)) {
             throw new IllegalArgumentException("HTTP pull poll request requires pollUrl");
         }
@@ -77,9 +94,8 @@ public class HttpPullPollRequest implements Serializable {
         if (StringUtils.isBlank(id)) {
             id = UUID.randomUUID().toString();
         }
-        HttpPullDeviceRoutingConfiguration effective = routing != null ? routing : profileRoutingFallback;
-        if (effective != null) {
-            effective.validate();
+        if (StringUtils.isBlank(telemetryPayloadKey)) {
+            telemetryPayloadKey = resolveTelemetryPayloadKey();
         }
     }
 
@@ -96,8 +112,8 @@ public class HttpPullPollRequest implements Serializable {
         request.setQueryingFrequencyMs(profile.getQueryingFrequencyMs());
         request.setDataType(HttpPullPollDataType.TELEMETRY);
         request.setRequiresAuth(null);
-        if (profile.getRouting() != null) {
-            request.setRouting(profile.getRouting());
+        if (profile.getRouting() != null && StringUtils.isNotBlank(profile.getRouting().getTelemetryPayloadKey())) {
+            request.setTelemetryPayloadKey(profile.getRouting().getTelemetryPayloadKey());
         }
         return request;
     }

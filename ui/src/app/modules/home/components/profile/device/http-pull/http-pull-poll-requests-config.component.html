@@ -53,49 +53,11 @@
       <mat-label translate>device-profile.http-pull.poll-body</mat-label>
       <textarea matInput formControlName="pollBody" rows="2"></textarea>
     </mat-form-field>
-
-    <mat-expansion-panel class="http-pull-panel request-routing-panel" expanded>
-      <mat-expansion-panel-header>
-        <mat-panel-title translate>device-profile.http-pull.request-routing-title</mat-panel-title>
-      </mat-expansion-panel-header>
-      <mat-form-field class="mat-block">
-        <mat-label translate>device-profile.http-pull.routing-mode</mat-label>
-        <mat-select formControlName="routingMode">
-          <mat-option *ngFor="let m of routingModes" [value]="m">{{ m }}</mat-option>
-        </mat-select>
-        <mat-hint translate>device-profile.http-pull.routing-mode-per-request-hint</mat-hint>
-      </mat-form-field>
-      <ng-container *ngIf="showRoutingFields(req)">
-        <section class="flex flex-row gap-2 xs:flex-col">
-          <mat-form-field class="flex-1 mat-block">
-            <mat-label translate>device-profile.http-pull.response-array-path</mat-label>
-            <input matInput formControlName="responseArrayJsonPath" placeholder="$.data.list">
-          </mat-form-field>
-          <mat-form-field class="flex-1 mat-block">
-            <mat-label translate>device-profile.http-pull.device-id-path</mat-label>
-            <input matInput formControlName="deviceIdJsonPath">
-            <mat-hint translate>device-profile.http-pull.device-id-path-hint</mat-hint>
-          </mat-form-field>
-        </section>
-        <section class="flex flex-row gap-2 xs:flex-col">
-          <mat-form-field class="flex-1 mat-block">
-            <mat-label translate>device-profile.http-pull.match-strategy</mat-label>
-            <mat-select formControlName="deviceIdMatchStrategy">
-              <mat-option *ngFor="let s of matchStrategies" [value]="s">{{ s }}</mat-option>
-            </mat-select>
-          </mat-form-field>
-          <mat-form-field class="flex-1 mat-block">
-            <mat-label translate>device-profile.http-pull.target-profile-id</mat-label>
-            <input matInput formControlName="targetDeviceProfileId">
-          </mat-form-field>
-        </section>
-      </ng-container>
-      <mat-form-field class="mat-block" *ngIf="showTelemetryKey(req)">
-        <mat-label translate>device-profile.http-pull.telemetry-key</mat-label>
-        <input matInput formControlName="telemetryPayloadKey">
-        <mat-hint translate>device-profile.http-pull.telemetry-key-hint</mat-hint>
-      </mat-form-field>
-    </mat-expansion-panel>
+    <mat-form-field class="mat-block" *ngIf="showTelemetryKey(req)">
+      <mat-label translate>device-profile.http-pull.telemetry-key</mat-label>
+      <input matInput formControlName="telemetryPayloadKey">
+      <mat-hint translate>device-profile.http-pull.telemetry-key-hint</mat-hint>
+    </mat-form-field>
   </div>
   <button *ngIf="!disabled" type="button" mat-stroked-button color="primary" class="add-poll-btn"
           (click)="addPollRequest()">

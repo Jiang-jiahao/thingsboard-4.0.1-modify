@@ -25,8 +25,11 @@ import org.thingsboard.server.queue.discovery.PartitionService;
 import org.thingsboard.server.queue.discovery.event.ServiceListChangedEvent;
 import org.thingsboard.server.transport.mqtt.event.MqttTransportListChangedEvent;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,8 +43,9 @@ public class MqttTransportBalancingService {
     private final ApplicationEventPublisher eventPublisher;
     private final MqttTransportService mqttTransportService;
 
-    private int mqttTransportsCount = 1;
-    private int currentTransportPartitionIndex = 0;
+    private volatile int mqttTransportsCount = 1;
+    private volatile int currentTransportPartitionIndex = 0;
+    private volatile List<String> lastMqttServiceIds = List.of();
 
     public MqttTransportBalancingService(PartitionService partitionService,
                                          ApplicationEventPublisher eventPublisher,
@@ -60,32 +64,75 @@ public class MqttTransportBalancingService {
     }
 
     private int resolvePartitionIndexForEntity(UUID entityId) {
-        return partitionService.resolvePartitionIndex(entityId, mqttTransportsCount);
+        return partitionService.resolvePartitionIndex(entityId, Math.max(1, mqttTransportsCount));
     }
 
     private void recalculatePartitions(List<ServiceInfo> otherServices, ServiceInfo currentService) {
-        log.info("Recalculating partitions for MQTT transports");
-        List<ServiceInfo> mqttTransports = Stream.concat(otherServices.stream(), Stream.of(currentService))
-                .filter(service -> service.getTransportsList().contains(mqttTransportService.getName()))
-                .sorted(Comparator.comparing(ServiceInfo::getServiceId))
-                .collect(Collectors.toList());
+        List<ServiceInfo> mqttTransports = uniqueMqttTransports(otherServices, currentService);
+        log.info("Recalculating partitions for MQTT transports: {}",
+                mqttTransports.stream()
+                        .map(service -> service.getServiceId() + service.getTransportsList())
+                        .collect(Collectors.toList()));
         int previousIndex = currentTransportPartitionIndex;
         int previousCount = mqttTransportsCount;
-        if (!mqttTransports.isEmpty()) {
-            for (int i = 0; i < mqttTransports.size(); i++) {
-                if (mqttTransports.get(i).getServiceId().equals(currentService.getServiceId())) {
-                    currentTransportPartitionIndex = i;
-                    break;
-                }
+        List<String> previousIds = lastMqttServiceIds;
+        currentTransportPartitionIndex = 0;
+        for (int i = 0; i < mqttTransports.size(); i++) {
+            if (mqttTransports.get(i).getServiceId().equals(currentService.getServiceId())) {
+                currentTransportPartitionIndex = i;
+                break;
             }
-            mqttTransportsCount = mqttTransports.size();
         }
-        if (mqttTransportsCount != previousCount || currentTransportPartitionIndex != previousIndex) {
+        mqttTransportsCount = Math.max(1, mqttTransports.size());
+        lastMqttServiceIds = mqttTransports.stream().map(ServiceInfo::getServiceId).collect(Collectors.toList());
+        if (mqttTransportsCount != previousCount
+                || currentTransportPartitionIndex != previousIndex
+                || !lastMqttServiceIds.equals(previousIds)) {
             log.info("MQTT transports partitions have changed: transports count = {}, current transport partition index = {}",
                     mqttTransportsCount, currentTransportPartitionIndex);
             eventPublisher.publishEvent(new MqttTransportListChangedEvent());
         } else {
             log.info("MQTT transports partitions have not changed");
         }
+    }
+
+    /**
+     * 只按 serviceId 计 MQTT 节点。ZK 里可能残留同 ID 的旧 ephemeral，
+     * 或对端刚注册时还没有 transports，都会让本机仍按 count=1 独占全部设备。
+     */
+    List<ServiceInfo> uniqueMqttTransports(List<ServiceInfo> otherServices, ServiceInfo currentService) {
+        String mqttName = mqttTransportService.getName();
+        Map<String, ServiceInfo> byId = Stream.concat(otherServices.stream(), Stream.of(currentService))
+                .filter(service -> isMqttTransportNode(service, currentService, mqttName))
+                .collect(Collectors.toMap(
+                        ServiceInfo::getServiceId,
+                        service -> service,
+                        (left, right) -> left.getTransportsCount() >= right.getTransportsCount() ? left : right,
+                        LinkedHashMap::new));
+        if (!byId.containsKey(currentService.getServiceId())) {
+            byId.put(currentService.getServiceId(), currentService);
+        }
+        List<ServiceInfo> mqttTransports = new ArrayList<>(byId.values());
+        mqttTransports.sort(Comparator.comparing(ServiceInfo::getServiceId));
+        return mqttTransports;
+    }
+
+    static boolean isMqttTransportNode(ServiceInfo service, ServiceInfo currentService, String mqttName) {
+        if (service.getServiceId().equals(currentService.getServiceId())) {
+            return true;
+        }
+        if (service.getTransportsList().contains(mqttName)) {
+            return true;
+        }
+        return sameReplicaFamily(currentService.getServiceId(), service.getServiceId());
+    }
+
+    static boolean sameReplicaFamily(String left, String right) {
+        if (left == null || right == null) {
+            return false;
+        }
+        String leftFamily = left.replaceFirst("\\d+$", "");
+        String rightFamily = right.replaceFirst("\\d+$", "");
+        return !leftFamily.isEmpty() && leftFamily.equals(rightFamily);
     }
 }

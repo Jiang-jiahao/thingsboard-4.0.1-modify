@@ -68,6 +68,7 @@ public class MqttPullTransportContext extends TransportContext {
     private final Map<DeviceId, MqttPullCollectorSessionContext> collectorSessions = new ConcurrentHashMap<>();
     private final Set<DeviceId> allMqttPullDeviceIds = ConcurrentHashMap.newKeySet();
     private final Set<UUID> activatedTransportSessions = ConcurrentHashMap.newKeySet();
+    private final Set<DeviceId> establishingCollectors = ConcurrentHashMap.newKeySet();
 
     @Value("${transport.sessions.inactivity_timeout:300000}")
     private long sessionInactivityTimeout;
@@ -75,6 +76,41 @@ public class MqttPullTransportContext extends TransportContext {
     @AfterStartUp(order = AfterStartUp.AFTER_TRANSPORT_SERVICE)
     public void fetchCollectorsAndEstablishSessions() {
         log.info("Initializing MQTT pull collector sessions");
+        reconcileCollectors();
+        // ZK ephemeral 可能要数秒才消失；启动时若仍看到已停的 mqtt 节点，会只接管一半设备。
+        getScheduler().schedule(this::reconcileCollectors, 5, TimeUnit.SECONDS);
+        getScheduler().schedule(this::reconcileCollectors, 15, TimeUnit.SECONDS);
+    }
+
+    private synchronized void reconcileCollectors() {
+        try {
+            reloadAllMqttPullDeviceIds();
+            int managed = 0;
+            for (DeviceId deviceId : allMqttPullDeviceIds) {
+                if (balancingService.isManagedByCurrentTransport(deviceId.getId())) {
+                    managed++;
+                    if (!collectorSessions.containsKey(deviceId)) {
+                        Device device = protoEntityService.getDeviceById(deviceId);
+                        if (device != null) {
+                            getExecutor().execute(() -> tryEstablishCollector(device));
+                        }
+                    }
+                } else {
+                    MqttPullCollectorSessionContext ctx = collectorSessions.get(deviceId);
+                    if (ctx != null) {
+                        log.info("[{}] MQTT pull collector is not managed by current node anymore", deviceId);
+                        destroyCollector(ctx, true);
+                    }
+                }
+            }
+            log.info("MQTT pull reconcile: devices={}, managed by this node={}", allMqttPullDeviceIds.size(), managed);
+        } catch (Exception e) {
+            log.warn("Failed to reconcile MQTT pull collectors", e);
+        }
+    }
+
+    private void reloadAllMqttPullDeviceIds() {
+        Set<DeviceId> loaded = ConcurrentHashMap.newKeySet();
         int batchIndex = 0;
         int batchSize = 512;
         boolean next;
@@ -82,35 +118,50 @@ public class MqttPullTransportContext extends TransportContext {
             TransportProtos.GetMqttPullDevicesResponseMsg response = protoEntityService.getMqttPullDevicesIds(batchIndex, batchSize);
             response.getIdsList().stream()
                     .map(id -> new DeviceId(UUID.fromString(id)))
-                    .peek(allMqttPullDeviceIds::add)
-                    .filter(deviceId -> balancingService.isManagedByCurrentTransport(deviceId.getId()))
-                    .map(protoEntityService::getDeviceById)
-                    .forEach(device -> getExecutor().execute(() -> tryEstablishCollector(device)));
+                    .forEach(loaded::add);
             next = response.getHasNextPage();
             batchIndex++;
         } while (next);
+        allMqttPullDeviceIds.clear();
+        allMqttPullDeviceIds.addAll(loaded);
     }
 
     private void tryEstablishCollector(Device device) {
         if (device == null) {
             return;
         }
+        DeviceId deviceId = device.getId();
         DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
         if (profile == null || profile.getTransportType() != DeviceTransportType.MQTT_PULL) {
-            allMqttPullDeviceIds.remove(device.getId());
+            allMqttPullDeviceIds.remove(deviceId);
             return;
         }
-        allMqttPullDeviceIds.add(device.getId());
-        if (!balancingService.isManagedByCurrentTransport(device.getId().getId())) {
+        allMqttPullDeviceIds.add(deviceId);
+        if (!balancingService.isManagedByCurrentTransport(deviceId.getId())) {
+            return;
+        }
+        if (collectorSessions.containsKey(deviceId)) {
             return;
         }
         if (!(profile.getProfileData().getTransportConfiguration() instanceof MqttPullDeviceProfileTransportConfiguration profileCfg)) {
             return;
         }
-        MqttPullDeviceTransportConfiguration deviceCfg = device.getDeviceData() != null
-                && device.getDeviceData().getTransportConfiguration() instanceof MqttPullDeviceTransportConfiguration m
-                ? m : new MqttPullDeviceTransportConfiguration();
-        establishCollectorSession(device, profile, profileCfg, deviceCfg);
+        if (!establishingCollectors.add(deviceId)) {
+            return;
+        }
+        boolean authSubmitted = false;
+        try {
+            MqttPullDeviceTransportConfiguration deviceCfg = device.getDeviceData() != null
+                    && device.getDeviceData().getTransportConfiguration() instanceof MqttPullDeviceTransportConfiguration m
+                    ? m : new MqttPullDeviceTransportConfiguration();
+            log.info("[{}] MQTT pull will connect using brokerUrl={}", deviceId, deviceCfg.getBrokerUrl());
+            establishCollectorSession(device, profile, profileCfg, deviceCfg);
+            authSubmitted = true;
+        } finally {
+            if (!authSubmitted) {
+                establishingCollectors.remove(deviceId);
+            }
+        }
     }
 
     private void establishCollectorSession(Device device, DeviceProfile profile,
@@ -119,6 +170,7 @@ public class MqttPullTransportContext extends TransportContext {
         DeviceCredentials credentials = protoEntityService.getDeviceCredentialsByDeviceId(device.getId());
         if (credentials.getCredentialsType() != DeviceCredentialsType.ACCESS_TOKEN) {
             log.warn("[{}] MQTT pull collector requires ACCESS_TOKEN credentials", device.getId());
+            establishingCollectors.remove(device.getId());
             return;
         }
         MqttPullCollectorSessionContext ctx = MqttPullCollectorSessionContext.builder()
@@ -131,23 +183,35 @@ public class MqttPullTransportContext extends TransportContext {
                 .transportContext(this)
                 .build();
         registerCollectorAuth(ctx, msg -> {
-            if (msg == null || !msg.hasDeviceInfo() || ctx.isDestroyed()) {
-                return;
+            try {
+                if (msg == null || !msg.hasDeviceInfo() || ctx.isDestroyed()) {
+                    return;
+                }
+                if (!balancingService.isManagedByCurrentTransport(device.getId().getId())) {
+                    return;
+                }
+                SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, UUID.randomUUID());
+                SessionMsgListener listener = new MqttPullRpcSessionListener(mqttPullRpcService, ctx);
+                ctx.setRpcSessionListener(listener);
+                ctx.setSessionInfo(sessionInfo);
+                registerMqttPullTransportSession(sessionInfo, listener);
+                MqttPullCollectorSessionContext previous = collectorSessions.put(device.getId(), ctx);
+                if (previous != null && previous != ctx) {
+                    destroyCollector(previous, false);
+                }
+                if (!isCurrentCollector(ctx)) {
+                    destroyCollector(ctx, true);
+                    return;
+                }
+                mqttPullTransportService.connectAndSubscribe(ctx);
+                if (!isCurrentCollector(ctx)) {
+                    destroyCollector(ctx, true);
+                    return;
+                }
+                log.info("Established MQTT pull collector session for {}", device.getId());
+            } finally {
+                establishingCollectors.remove(device.getId());
             }
-            SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, this, UUID.randomUUID());
-            SessionMsgListener listener = new MqttPullRpcSessionListener(mqttPullRpcService, ctx);
-            ctx.setRpcSessionListener(listener);
-            ctx.setSessionInfo(sessionInfo);
-            registerMqttPullTransportSession(sessionInfo, listener);
-            MqttPullCollectorSessionContext previous = collectorSessions.put(device.getId(), ctx);
-            if (previous != null && previous != ctx) {
-                destroyCollector(previous, false);
-            }
-            if (!isCurrentCollector(ctx)) {
-                return;
-            }
-            mqttPullTransportService.connectAndSubscribe(ctx);
-            log.info("Established MQTT pull collector session for {}", device.getId());
         });
     }
 
@@ -185,6 +249,7 @@ public class MqttPullTransportContext extends TransportContext {
 
                     @Override
                     public void onError(Throwable e) {
+                        establishingCollectors.remove(ctx.getDeviceId());
                         log.warn("[{}] MQTT pull collector auth failed", ctx.getDeviceId(), e);
                         transportService.errorEvent(ctx.getTenantId(), ctx.getDeviceId(), "mqttPullAuth", e);
                         transportService.reportDeviceInactivity(ctx.getTenantId(), ctx.getDeviceId());
@@ -232,7 +297,6 @@ public class MqttPullTransportContext extends TransportContext {
             if (existing != null) {
                 destroyCollector(existing, true);
             }
-            tryEstablishCollector(device);
             return;
         }
         if (existing != null) {
@@ -244,22 +308,7 @@ public class MqttPullTransportContext extends TransportContext {
     @EventListener(MqttTransportListChangedEvent.class)
     public void onMqttTransportListChanged(MqttTransportListChangedEvent event) {
         log.info("MQTT transport list changed, refreshing pull collectors");
-        for (DeviceId deviceId : allMqttPullDeviceIds) {
-            if (balancingService.isManagedByCurrentTransport(deviceId.getId())) {
-                if (!collectorSessions.containsKey(deviceId)) {
-                    Device device = protoEntityService.getDeviceById(deviceId);
-                    if (device != null) {
-                        tryEstablishCollector(device);
-                    }
-                }
-            } else {
-                MqttPullCollectorSessionContext ctx = collectorSessions.get(deviceId);
-                if (ctx != null) {
-                    log.info("[{}] MQTT pull collector is not managed by current node anymore", deviceId);
-                    destroyCollector(ctx, true);
-                }
-            }
-        }
+        reconcileCollectors();
     }
 
     private void registerMqttPullTransportSession(SessionInfoProto sessionInfo, SessionMsgListener listener) {

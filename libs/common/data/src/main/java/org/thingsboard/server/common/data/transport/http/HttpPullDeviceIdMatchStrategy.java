@@ -13,6 +13,6 @@ public enum HttpPullDeviceIdMatchStrategy {
     DEVICE_NAME,
     /** 与设备 {@code label} 匹配 */
     DEVICE_LABEL,
-    /** 与设备传输配置中的 {@link org.thingsboard.server.common.data.device.data.HttpPullDeviceTransportConfiguration#getExternalDeviceId()} 匹配 */
+    /** 与 HTTP 被动上报设备传输配置中的 {@code externalDeviceId} 匹配 */
     EXTERNAL_DEVICE_ID
 }

@@ -6,13 +6,13 @@
 package org.thingsboard.server.common.data.device.profile;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.transport.http.HttpPullAuthConfiguration;
 import org.thingsboard.server.common.data.transport.http.HttpPullDeviceRoutingConfiguration;
 import org.thingsboard.server.common.data.transport.http.HttpPullPollRequest;
-import org.thingsboard.server.common.data.transport.http.HttpPullRoutingMode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HttpPullDeviceProfileTransportConfiguration implements DeviceProfileTransportConfiguration {
 
     /**
@@ -45,9 +46,9 @@ public class HttpPullDeviceProfileTransportConfiguration implements DeviceProfil
     /** 档案级登录/令牌配置，供 requiresAuth=true 的拉取请求共用 */
     private HttpPullAuthConfiguration auth = new HttpPullAuthConfiguration();
 
-    /** 兼容旧配置；新配置请写在各 {@link HttpPullPollRequest#getRouting()} */
+    /** 兼容旧配置；HTTP 拉取不再做多设备路由 */
     @Deprecated
-    private HttpPullDeviceRoutingConfiguration routing = new HttpPullDeviceRoutingConfiguration();
+    private HttpPullDeviceRoutingConfiguration routing;
 
     @Override
     public DeviceTransportType getType() {
@@ -73,26 +74,6 @@ public class HttpPullDeviceProfileTransportConfiguration implements DeviceProfil
     }
 
     @JsonIgnore
-    public HttpPullDeviceRoutingConfiguration resolveRouting(HttpPullPollRequest request) {
-        if (request.getRouting() != null) {
-            return request.getRouting();
-        }
-        return routing;
-    }
-
-    @JsonIgnore
-    public boolean needsMultiDeviceTargets() {
-        for (HttpPullPollRequest request : effectivePollRequests()) {
-            HttpPullDeviceRoutingConfiguration r = resolveRouting(request);
-            if (r != null && (r.getRoutingMode() == HttpPullRoutingMode.MULTI_DEVICE
-                    || r.getRoutingMode() == HttpPullRoutingMode.AUTO)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @JsonIgnore
     public long resolveQueryingFrequencyMs(HttpPullPollRequest request) {
         if (request.getQueryingFrequencyMs() != null && request.getQueryingFrequencyMs() > 0) {
             return request.getQueryingFrequencyMs();
@@ -113,7 +94,7 @@ public class HttpPullDeviceProfileTransportConfiguration implements DeviceProfil
             return false;
         }
         for (HttpPullPollRequest request : requests) {
-            request.validate(routing);
+            request.validate();
         }
         if (auth != null) {
             auth.validate();

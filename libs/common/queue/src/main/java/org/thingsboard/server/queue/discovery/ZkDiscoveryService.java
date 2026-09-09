@@ -76,6 +76,7 @@ public class ZkDiscoveryService implements DiscoveryService, PathChildrenCacheLi
     private Long recalculateDelay;
 
     protected final ConcurrentHashMap<String, ScheduledFuture<?>> delayedTasks;
+    private final ConcurrentHashMap<String, List<String>> lastSeenTransports = new ConcurrentHashMap<>();
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TbServiceInfoProvider serviceInfoProvider;
@@ -183,11 +184,10 @@ public class ZkDiscoveryService implements DiscoveryService, PathChildrenCacheLi
         }
         try {
             TransportProtos.ServiceInfo self = serviceInfoProvider.getServiceInfo();
-            TransportProtos.ServiceInfo registeredServerInfo = null;
-            registeredServerInfo = TransportProtos.ServiceInfo.parseFrom(client.getData().forPath(nodePath));
-            if (self.equals(registeredServerInfo)) {
-                return true;
-            }
+            TransportProtos.ServiceInfo registeredServerInfo = TransportProtos.ServiceInfo.parseFrom(client.getData().forPath(nodePath));
+            // 只比 serviceId。整份 proto（含 CPU/内存、transports）每次心跳都会变，
+            // equals 失败会再创建一个 ephemeral 节点，单进程被当成两台 transport。
+            return self.getServiceId().equals(registeredServerInfo.getServiceId());
         } catch (KeeperException.NoNodeException e) {
             log.info("ZK node does not exist: {}", nodePath);
         } catch (Exception e) {
@@ -312,6 +312,7 @@ public class ZkDiscoveryService implements DiscoveryService, PathChildrenCacheLi
         log.trace("Processing [{}] event for [{}]", pathChildrenCacheEvent.getType(), serviceId);
         switch (pathChildrenCacheEvent.getType()) {
             case CHILD_ADDED:
+                boolean transportsChangedOnAdd = rememberTransports(serviceId, instance);
                 ScheduledFuture<?> task = delayedTasks.remove(serviceId);
                 if (task != null) {
                     if (task.cancel(false)) {
@@ -323,26 +324,57 @@ public class ZkDiscoveryService implements DiscoveryService, PathChildrenCacheLi
                         recalculatePartitions();
                     }
                 } else {
-                    log.trace("[{}] Going to recalculate partitions due to adding new node [{}].",
-                            serviceId, serviceTypesList);
+                    log.info("[{}] Going to recalculate partitions due to adding new node [{}] transports={}.",
+                            serviceId, serviceTypesList, instance.getTransportsList());
+                    recalculatePartitions();
+                }
+                if (transportsChangedOnAdd && task != null) {
+                    log.info("[{}] Transport list changed during in-time restart, recalculating partitions. transports={}",
+                            serviceId, instance.getTransportsList());
+                    recalculatePartitions();
+                }
+                break;
+            case CHILD_UPDATED:
+                if (rememberTransports(serviceId, instance) && serviceTypesList.contains("TB_TRANSPORT")) {
+                    log.info("[{}] Going to recalculate partitions due to updated transport list [{}] transports={}.",
+                            serviceId, serviceTypesList, instance.getTransportsList());
                     recalculatePartitions();
                 }
                 break;
             case CHILD_REMOVED:
                 zkExecutorService.submit(() -> applicationEventPublisher.publishEvent(new OtherServiceShutdownEvent(this, serviceId, serviceTypesList)));
-                ScheduledFuture<?> future = zkExecutorService.schedule(() -> {
-                    log.debug("[{}] Going to recalculate partitions due to removed node [{}]",
+                lastSeenTransports.remove(serviceId);
+                // MQTT/HTTP 的 zk.recalculate_delay 默认是 0。schedule(0) 可能在 delayedTasks.put 之前跑完，
+                // 旧逻辑会丢掉这次重算；再叠加心跳不再触发 CHILD_UPDATED 重算，停掉对端节点就会一直不接手。
+                if (recalculateDelay == null || recalculateDelay <= 0) {
+                    log.info("[{}] Going to recalculate partitions due to removed node [{}]",
                             serviceId, serviceTypesList);
-                    ScheduledFuture<?> removedTask = delayedTasks.remove(serviceId);
-                    if (removedTask != null) {
+                    recalculatePartitions();
+                } else {
+                    ScheduledFuture<?> future = zkExecutorService.schedule(() -> {
+                        log.info("[{}] Going to recalculate partitions due to removed node [{}]",
+                                serviceId, serviceTypesList);
+                        delayedTasks.remove(serviceId);
+                        lastSeenTransports.remove(serviceId);
                         recalculatePartitions();
-                    }
-                }, recalculateDelay, TimeUnit.MILLISECONDS);
-                delayedTasks.put(serviceId, future);
+                    }, recalculateDelay, TimeUnit.MILLISECONDS);
+                    delayedTasks.put(serviceId, future);
+                }
                 break;
             default:
                 break;
         }
+    }
+
+    /**
+     * 心跳会改 CPU/内存，不能每次 CHILD_UPDATED 都重算分区。
+     * 只在已经见过该节点、且 transports 列表相对上次有变化时才重算。
+     * 第一次见到节点（CHILD_ADDED 或缓存里已有的对端心跳）不算变化。
+     */
+    boolean rememberTransports(String serviceId, TransportProtos.ServiceInfo instance) {
+        List<String> next = List.copyOf(instance.getTransportsList());
+        List<String> previous = lastSeenTransports.put(serviceId, next);
+        return previous != null && !previous.equals(next);
     }
 
     /**

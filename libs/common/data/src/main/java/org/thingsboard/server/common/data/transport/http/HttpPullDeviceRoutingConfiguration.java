@@ -13,12 +13,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 /**
- * 多设备路由：从响应 JSON 中读取设备标识，映射到租户内已注册且具备会话的目标设备。
- * <p>
- * 目标设备须在 {@link #targetDeviceProfileId} 对应档案下，且设备传输配置中填写
- * {@link org.thingsboard.server.common.data.device.data.HttpPullDeviceTransportConfiguration#getExternalDeviceId()}
- *（{@link HttpPullDeviceIdMatchStrategy#EXTERNAL_DEVICE_ID}）或与 name/label 一致。
- * 仅对已成功建立异步会话的「活跃」目标设备上报遥测。
+ * HTTP 被动上报（Push）的多设备路由：从请求 JSON 中读取设备标识，映射到租户内已注册的目标设备。
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

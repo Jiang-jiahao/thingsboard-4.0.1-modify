@@ -5,40 +5,19 @@
  */
 package org.thingsboard.server.common.data.device.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.thingsboard.server.common.data.DeviceTransportType;
-import org.thingsboard.server.common.data.StringUtils;
 
 /**
- * 设备级 HTTP Pull 配置。
- * <ul>
- *   <li>{@link #collector}：为 true 时该设备作为采集器，按档案周期发起 HTTP 请求。</li>
- *   <li>{@link #externalDeviceId}：多设备路由时，与响应中设备 ID 字段匹配（见档案 routing）。</li>
- *   <li>{@link #collectorDeviceId}：目标设备归属的采集器设备 ID；多采集器且外部 ID 可能重复时必填。</li>
- *   <li>{@link #pollUrlOverride}：覆盖档案中的 pollUrl。</li>
- * </ul>
+ * 设备级 HTTP Pull 配置：每个设备独立作为 HTTP 客户端轮询，数据只写入本设备。
  */
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HttpPullDeviceTransportConfiguration implements DeviceTransportConfiguration {
 
     /**
-     * 是否作为 HTTP 采集器（发起轮询）。默认 true。
-     */
-    private Boolean collector = true;
-
-    /**
-     * 第三方平台设备 ID，用于 MULTI_DEVICE 路由匹配。
-     */
-    private String externalDeviceId;
-
-    /**
-     * 目标设备所归属的采集器 {@link org.thingsboard.server.common.data.id.DeviceId}（UUID 字符串）。
-     */
-    private String collectorDeviceId;
-
-    /**
-     * 可选：覆盖设备档案中的 pollUrl。
+     * 可选：覆盖设备档案中的 pollUrl（主机:端口或完整 URL）。
      */
     private String pollUrlOverride;
 
@@ -49,26 +28,5 @@ public class HttpPullDeviceTransportConfiguration implements DeviceTransportConf
 
     @Override
     public void validate() {
-        if (StringUtils.isNotBlank(externalDeviceId)) {
-            collector = false;
-            pollUrlOverride = null;
-        } else if (StringUtils.isNotBlank(collectorDeviceId)) {
-            collector = false;
-            pollUrlOverride = null;
-        } else if (Boolean.TRUE.equals(collector)) {
-            collectorDeviceId = null;
-            externalDeviceId = null;
-        }
-        if (collector == null) {
-            collector = true;
-        }
-    }
-
-    @JsonIgnore
-    public boolean isCollector() {
-        if (StringUtils.isNotBlank(externalDeviceId)) {
-            return false;
-        }
-        return !Boolean.FALSE.equals(collector);
     }
 }

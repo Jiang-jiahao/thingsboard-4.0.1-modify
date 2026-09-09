@@ -140,15 +140,22 @@ public class DefaultTbServiceInfoProvider implements TbServiceInfoProvider {
     }
 
     /**
-     * 生成包含最新系统信息的服务信息
-     * @return 更新后的服务信息
+     * 生成包含最新系统信息的服务信息。
+     * 心跳刷新只更新 systemInfo，必须保留已登记的 transports，
+     * 否则 MQTT/HTTP 等按传输类型做的设备分片会一直停留在第一次计算结果。
      */
     @Override
     public ServiceInfo generateNewServiceInfoWithCurrentSystemInfo() {
+        TransportProtos.SystemInfoProto systemInfoProto = getCurrentSystemInfoProto();
+        if (serviceInfo != null) {
+            return serviceInfo = serviceInfo.toBuilder()
+                    .setSystemInfo(systemInfoProto)
+                    .build();
+        }
         ServiceInfo.Builder builder = ServiceInfo.newBuilder()
                 .setServiceId(serviceId)
                 .addAllServiceTypes(serviceTypes.stream().map(ServiceType::name).collect(Collectors.toList()))
-                .setSystemInfo(getCurrentSystemInfoProto());
+                .setSystemInfo(systemInfoProto);
         if (CollectionsUtil.isNotEmpty(assignedTenantProfiles)) {
             builder.addAllAssignedTenantProfiles(assignedTenantProfiles.stream().map(UUID::toString).collect(Collectors.toList()));
         }

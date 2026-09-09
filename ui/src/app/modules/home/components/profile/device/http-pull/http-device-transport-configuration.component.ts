@@ -92,6 +92,7 @@ export class HttpDeviceTransportConfigurationComponent implements OnInit, OnDest
       return;
     }
     const isPull = value.type === DeviceTransportType.HTTP_PULL
+      || (value as { pollUrlOverride?: string }).pollUrlOverride != null
       || (value as { collector?: boolean }).collector != null
       || (value as { externalDeviceId?: string }).externalDeviceId != null;
     this.form.patchValue({
