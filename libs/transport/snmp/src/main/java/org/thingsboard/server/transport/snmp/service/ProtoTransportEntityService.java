@@ -53,6 +53,8 @@ public class ProtoTransportEntityService {
 
         Device device = new Device();
         device.setId(id);
+        device.setName(deviceProto.getName());
+        device.setLabel(deviceProto.getLabel());
         device.setDeviceProfileId(deviceProfileId);
 
         DeviceTransportConfiguration deviceTransportConfiguration = JacksonUtil.fromBytes(

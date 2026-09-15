@@ -49,6 +49,7 @@ import org.thingsboard.server.gen.transport.TransportProtos.ToTransportUpdateCre
 import org.thingsboard.server.transport.tcp.TcpTransportContext;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.nio.charset.StandardCharsets;
 
@@ -99,6 +100,13 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
     private final boolean outboundClient;
 
     private final AtomicBoolean serverAuthInFlight = new AtomicBoolean(false);
+    private final AtomicLong serverAuthStartedAt = new AtomicLong(0);
+    private final AtomicBoolean preAuthDropLogged = new AtomicBoolean(false);
+    /**
+     * 鉴权在途保护窗口：超过该时长视为上一次鉴权响应丢失（例如队列重平衡期间），允许设备重新发起；
+     * 否则会话会永久卡在"鉴权在途"，后续帧全部被丢弃。测试中会调小该值。
+     */
+    private volatile long serverAuthTimeoutMs = 30_000L;
 
     private final AtomicBoolean channelCloseHandled = new AtomicBoolean(false);
 
@@ -193,8 +201,15 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
 
     public void sendJsonPayload(JsonObject json) {
         byte[] body = TcpPayloadUtil.bodyBytesForDataType(getPayloadDataType(), json.toString());
-        ByteBuf buf = Unpooled.wrappedBuffer(body);
-        writeByteBuf(buf);
+        // 下行必须与上行对称地分帧：否则 LINE / LENGTH_PREFIX 档案的设备切不出这一帧
+        // （连续两条下行还会被拼成一段无法解析的 JSON）。
+        TcpTransportFramingMode framing = getTcpTransportFramingMode();
+        if (framing == TcpTransportFramingMode.FIXED_LENGTH) {
+            log.warn("[{}] JSON downlink cannot be fixed-length framed, sending unframed", getSessionId());
+            writeByteBuf(Unpooled.wrappedBuffer(body));
+            return;
+        }
+        writeByteBuf(TcpPayloadUtil.wrapFraming(framing, body, getTcpFixedFrameLengthForFraming()));
     }
 
     public void writeByteBuf(ByteBuf buf) {
@@ -342,11 +357,30 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
     }
 
     public boolean tryBeginServerAuth() {
-        return serverAuthInFlight.compareAndSet(false, true);
+        long now = System.currentTimeMillis();
+        long startedAt = serverAuthStartedAt.get();
+        if (serverAuthInFlight.get()) {
+            if (now - startedAt < serverAuthTimeoutMs) {
+                return false;
+            }
+            log.warn("[{}] Server auth has been in flight for {} ms (timeout {} ms), allowing the device to retry",
+                    getSessionId(), now - startedAt, serverAuthTimeoutMs);
+        }
+        serverAuthInFlight.set(true);
+        serverAuthStartedAt.set(now);
+        return true;
     }
 
     public void endServerAuth() {
         serverAuthInFlight.set(false);
+        serverAuthStartedAt.set(0);
+    }
+
+    /**
+     * 鉴权在途时被丢弃的帧只提示一次，避免同一设备反复重传时刷屏。
+     */
+    public boolean shouldLogPreAuthDrop() {
+        return preAuthDropLogged.compareAndSet(false, true);
     }
 
     public boolean beginCloseHandling() {

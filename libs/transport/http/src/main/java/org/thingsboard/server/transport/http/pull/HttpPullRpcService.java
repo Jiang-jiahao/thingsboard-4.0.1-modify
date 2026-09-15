@@ -143,7 +143,7 @@ public class HttpPullRpcService {
                 ? collectorCtx.getProfileTransportConfiguration().getAuth() : null;
         int readTimeoutMs = resolveScheduledReadTimeoutMs(rpcMethod);
         HttpOutboundRpcExecutor.OutboundHttpResult result = outboundRpcExecutor.execute(
-                collectorCtx.getDeviceId(), device, deviceCfg, auth, rpcMethod, "{}", urlOverride, readTimeoutMs);
+                collectorCtx.getDeviceId(), device, deviceCfg, auth, rpcMethod, "{}", urlOverride, readTimeoutMs, 0);
         if (result.statusCode() < 200 || result.statusCode() >= 300) {
             log.warn("[{}] Scheduled HTTP outbound RPC [{}] manufacturer error HTTP {}: {}",
                     collectorCtx.getDeviceId(), rpcMethod.getId(), result.statusCode(), truncate(result.body()));
@@ -168,7 +168,8 @@ public class HttpPullRpcService {
         int readTimeoutMs = resolveRpcReadTimeoutMs(request);
         String urlOverride = targetDeviceCfg != null ? targetDeviceCfg.getPollUrlOverride() : null;
         HttpOutboundRpcExecutor.OutboundHttpResult result = outboundRpcExecutor.execute(
-                deviceId, targetDevice, targetDeviceCfg, auth, rpcMethod, paramsJson, urlOverride, readTimeoutMs);
+                deviceId, targetDevice, targetDeviceCfg, auth, rpcMethod, paramsJson, urlOverride, readTimeoutMs,
+                request.getRequestId());
 
         if (result.statusCode() < 200 || result.statusCode() >= 300) {
             respondManufacturerError(sessionInfo, request, result.statusCode(), result.body());

@@ -60,16 +60,18 @@ class HttpOutboundRpcExecutorTest {
         method.setBindingType(DeviceProfileRpcBindingType.HTTP_OUTBOUND);
         method.setHttpUrl("http://127.0.0.1:19090/rpc");
         method.setHttpMethod("POST");
-        method.setHttpBody("{\"device\":\"${device.name}\",\"cmd\":\"${params.cmd}\"}");
+        method.setHttpBody("{\"device\":\"${device.name}\",\"cmd\":\"${params.cmd}\",\"rid\":\"${requestId}\",\"m\":\"${method}\"}");
 
         HttpOutboundRpcExecutor.OutboundHttpResult result = executor.execute(
-                device.getId(), device, null, null, method, "{\"cmd\":\"go\"}", null, 5000);
+                device.getId(), device, null, null, method, "{\"cmd\":\"go\"}", null, 5000, 42);
 
         assertThat(result.statusCode()).isEqualTo(200);
         ArgumentCaptor<HttpPullHttpClient.HttpPullRequest> captor = ArgumentCaptor.forClass(HttpPullHttpClient.HttpPullRequest.class);
         verify(httpClient).execute(captor.capture());
         assertThat(captor.getValue().getBody()).contains("\"device\":\"passive-1\"");
         assertThat(captor.getValue().getBody()).contains("\"cmd\":\"go\"");
+        assertThat(captor.getValue().getBody()).contains("\"rid\":\"42\"");
+        assertThat(captor.getValue().getBody()).contains("\"m\":\"httpSet\"");
         assertThat(captor.getValue().getMethod()).isEqualTo("POST");
     }
 }

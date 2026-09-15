@@ -644,37 +644,54 @@ public class DeviceApiController implements TbTransportService {
 
         @Override
         public void onToDeviceRpcRequest(UUID sessionId, ToDeviceRpcRequestMsg msg) {
-            if (isHttpOutboundRpc(msg.getMethodName())) {
+            DeviceProfileRpcMethod rpcMethod = findRpcMethod(msg.getMethodName());
+            if (rpcMethod != null && rpcMethod.getBindingType() == DeviceProfileRpcBindingType.HTTP_OUTBOUND) {
                 // HTTP_OUTBOUND 由虚拟出站会话处理；long-poll 静默忽略，避免误标 DELIVERED
                 log.trace("[{}] Ignore HTTP_OUTBOUND RPC on long-poll session: {}", sessionId, msg.getMethodName());
                 return;
             }
+            // 与 MQTT / 定时 RPC 一致：NATIVE 下发时把档案 id 重写为 deviceMethod
+            ToDeviceRpcRequestMsg toDeliver = rewriteNativeMethod(rpcMethod, msg);
             log.trace("[{}] Received RPC command to device", sessionId);
-            responseWriter.setResult(new ResponseEntity<>(JsonConverter.toJson(msg, true).toString(), HttpStatus.OK));
-            transportService.process(sessionInfo, msg, RpcStatus.DELIVERED, TransportServiceCallback.EMPTY);
+            responseWriter.setResult(new ResponseEntity<>(JsonConverter.toJson(toDeliver, true).toString(), HttpStatus.OK));
+            transportService.process(sessionInfo, toDeliver, RpcStatus.DELIVERED, TransportServiceCallback.EMPTY);
         }
 
-        private boolean isHttpOutboundRpc(String methodName) {
+        private ToDeviceRpcRequestMsg rewriteNativeMethod(DeviceProfileRpcMethod rpcMethod, ToDeviceRpcRequestMsg msg) {
+            if (rpcMethod == null || rpcMethod.getBindingType() != DeviceProfileRpcBindingType.NATIVE
+                    || StringUtils.isBlank(rpcMethod.getDeviceMethod())
+                    || rpcMethod.getDeviceMethod().equals(msg.getMethodName())) {
+                return msg;
+            }
+            return msg.toBuilder().setMethodName(rpcMethod.getDeviceMethod()).build();
+        }
+
+        private DeviceProfileRpcMethod findRpcMethod(String methodName) {
             if (StringUtils.isBlank(methodName) || deviceProfileCache == null) {
-                return false;
+                return null;
             }
             try {
                 DeviceProfileId profileId = new DeviceProfileId(
                         new UUID(sessionInfo.getDeviceProfileIdMSB(), sessionInfo.getDeviceProfileIdLSB()));
                 DeviceProfile profile = deviceProfileCache.get(profileId);
                 if (profile == null || profile.getProfileData() == null || profile.getProfileData().getRpcMethods() == null) {
-                    return false;
+                    return null;
                 }
-                for (DeviceProfileRpcMethod m : profile.getProfileData().getRpcMethods()) {
-                    if (m != null && methodName.equals(m.getId())
-                            && m.getBindingType() == DeviceProfileRpcBindingType.HTTP_OUTBOUND) {
-                        return true;
+                List<DeviceProfileRpcMethod> methods = profile.getProfileData().getRpcMethods();
+                for (DeviceProfileRpcMethod m : methods) {
+                    if (m != null && methodName.equals(m.getId())) {
+                        return m;
+                    }
+                }
+                for (DeviceProfileRpcMethod m : methods) {
+                    if (m != null && methodName.equals(m.getDeviceMethod())) {
+                        return m;
                     }
                 }
             } catch (Exception e) {
                 log.debug("Failed to resolve RPC binding for method {}", methodName, e);
             }
-            return false;
+            return null;
         }
 
         @Override

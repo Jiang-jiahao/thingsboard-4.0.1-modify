@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.plugin.ComponentLifecycleEvent;
 import org.thingsboard.server.common.scheduler.SchedulerComponent;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.gen.transport.TransportProtos;
@@ -124,6 +125,35 @@ public class MqttTransportContextTest {
         context.flushMqttServerDisconnectInactivity();
         context.scheduleDisconnectInactivity(sessionInfo(UUID.randomUUID()));
         verify(transportService, times(1)).reportDeviceInactivity(tenantId, deviceId);
+    }
+
+    @Test
+    public void connectEmitsStartedLifecycleEvent() {
+        context.registerMqttServerSession(sessionInfo(UUID.randomUUID()));
+
+        verify(transportService).lifecycleEvent(tenantId, deviceId, ComponentLifecycleEvent.STARTED, true, null);
+    }
+
+    @Test
+    public void confirmedDisconnectEmitsStoppedLifecycleEvent() {
+        setDelayMs(0);
+        TransportProtos.SessionInfoProto session = sessionInfo(UUID.randomUUID());
+        context.registerMqttServerSession(session);
+        context.scheduleDisconnectInactivity(session);
+
+        verify(transportService).lifecycleEvent(tenantId, deviceId, ComponentLifecycleEvent.STOPPED, true, null);
+    }
+
+    @Test
+    public void reconnectDoesNotEmitStoppedLifecycleEvent() {
+        setDelayMs(80);
+        TransportProtos.SessionInfoProto session = sessionInfo(UUID.randomUUID());
+        context.registerMqttServerSession(session);
+        context.scheduleDisconnectInactivity(session);
+        context.registerMqttServerSession(sessionInfo(UUID.randomUUID()));
+
+        verify(transportService, after(150).never())
+                .lifecycleEvent(tenantId, deviceId, ComponentLifecycleEvent.STOPPED, true, null);
     }
 
     private void setDelayMs(long delayMs) {

@@ -50,6 +50,7 @@ import org.thingsboard.server.gen.transport.TransportProtos.ToTransportUpdateCre
 import org.thingsboard.server.transport.udp.UdpTransportContext;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.nio.charset.StandardCharsets;
 
@@ -104,6 +105,13 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
     private final boolean outboundClient;
 
     private final AtomicBoolean serverAuthInFlight = new AtomicBoolean(false);
+    private final AtomicLong serverAuthStartedAt = new AtomicLong(0);
+    private final AtomicBoolean preAuthDropLogged = new AtomicBoolean(false);
+    /**
+     * 鉴权在途保护窗口：超过该时长视为上一次鉴权响应丢失（例如队列重平衡期间），允许设备重新发起；
+     * 否则会话会永久卡在"鉴权在途"，后续帧全部被丢弃。测试中会调小该值。
+     */
+    private volatile long serverAuthTimeoutMs = 30_000L;
 
 
     /**
@@ -331,11 +339,30 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
     }
 
     public boolean tryBeginServerAuth() {
-        return serverAuthInFlight.compareAndSet(false, true);
+        long now = System.currentTimeMillis();
+        long startedAt = serverAuthStartedAt.get();
+        if (serverAuthInFlight.get()) {
+            if (now - startedAt < serverAuthTimeoutMs) {
+                return false;
+            }
+            log.warn("[{}] Server auth has been in flight for {} ms (timeout {} ms), allowing the device to retry",
+                    getSessionId(), now - startedAt, serverAuthTimeoutMs);
+        }
+        serverAuthInFlight.set(true);
+        serverAuthStartedAt.set(now);
+        return true;
     }
 
     public void endServerAuth() {
         serverAuthInFlight.set(false);
+        serverAuthStartedAt.set(0);
+    }
+
+    /**
+     * 鉴权在途时被丢弃的帧只提示一次，避免同一设备反复重传时刷屏。
+     */
+    public boolean shouldLogPreAuthDrop() {
+        return preAuthDropLogged.compareAndSet(false, true);
     }
 
 

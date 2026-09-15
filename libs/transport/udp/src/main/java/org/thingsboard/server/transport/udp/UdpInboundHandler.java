@@ -47,6 +47,14 @@ public class UdpInboundHandler extends SimpleChannelInboundHandler<DatagramPacke
                     return;
                 }
                 if (!session.tryBeginServerAuth()) {
+                    // 鉴权在途时的额外数据报（设备重传首帧/抢跑）：丢弃即可，只提示一次避免刷屏。
+                    if (session.shouldLogPreAuthDrop()) {
+                        log.warn("[{}] UDP datagram dropped: server authentication is still in flight",
+                                session.getSessionId());
+                    } else {
+                        log.debug("[{}] UDP datagram dropped: server authentication is still in flight",
+                                session.getSessionId());
+                    }
                     return;
                 }
                 String authJson = new String(data, StandardCharsets.UTF_8).trim();

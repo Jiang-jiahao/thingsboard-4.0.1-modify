@@ -47,9 +47,11 @@ public class HttpOutboundRpcExecutor {
                                       DeviceProfileRpcMethod rpcMethod,
                                       String paramsJson,
                                       String urlOverride,
-                                      int readTimeoutMs) throws Exception {
+                                      int readTimeoutMs,
+                                      int requestId) throws Exception {
         String url = HttpPullPollUrlResolver.resolve(rpcMethod.getHttpUrl(), urlOverride);
-        url = HttpPullTemplateResolver.resolve(url, targetDevice, targetDeviceCfg, paramsJson);
+        url = HttpPullTemplateResolver.resolve(url, targetDevice, targetDeviceCfg, paramsJson,
+                requestId, rpcMethod.getId());
 
         boolean requiresAuth = rpcMethod.getRequiresAuth() != null
                 ? rpcMethod.getRequiresAuth()
@@ -58,9 +60,10 @@ public class HttpOutboundRpcExecutor {
         HttpPullAuthService.AuthRequestContext authCtx = authService.prepareAuth(
                 authDeviceId, auth, url, requiresAuth, urlOverride, readTimeoutMs);
 
-        Map<String, String> headers = buildResolvedHeaders(rpcMethod, targetDevice, targetDeviceCfg, paramsJson, authCtx);
+        Map<String, String> headers = buildResolvedHeaders(rpcMethod, targetDevice, targetDeviceCfg, paramsJson,
+                requestId, authCtx);
         String body = HttpPullTemplateResolver.resolve(
-                rpcMethod.getHttpBody(), targetDevice, targetDeviceCfg, paramsJson);
+                rpcMethod.getHttpBody(), targetDevice, targetDeviceCfg, paramsJson, requestId, rpcMethod.getId());
         if (!headers.containsKey("Content-Type") && StringUtils.isNotBlank(body)) {
             headers.put("Content-Type", "application/json");
         }
@@ -75,7 +78,7 @@ public class HttpOutboundRpcExecutor {
                     authDeviceId, rpcMethod.getId());
             authService.invalidate(authDeviceId);
             authCtx = authService.prepareAuth(authDeviceId, auth, url, true, urlOverride, readTimeoutMs);
-            headers = buildResolvedHeaders(rpcMethod, targetDevice, targetDeviceCfg, paramsJson, authCtx);
+            headers = buildResolvedHeaders(rpcMethod, targetDevice, targetDeviceCfg, paramsJson, requestId, authCtx);
             if (!headers.containsKey("Content-Type") && StringUtils.isNotBlank(body)) {
                 headers.put("Content-Type", "application/json");
             }
@@ -88,11 +91,12 @@ public class HttpOutboundRpcExecutor {
                                                      Device targetDevice,
                                                      HttpPullDeviceTransportConfiguration targetDeviceCfg,
                                                      String paramsJson,
+                                                     int requestId,
                                                      HttpPullAuthService.AuthRequestContext authCtx) {
         Map<String, String> headers = new HashMap<>();
         if (rpcMethod.getHttpHeaders() != null) {
             headers.putAll(HttpPullTemplateResolver.resolveHeaders(
-                    rpcMethod.getHttpHeaders(), targetDevice, targetDeviceCfg, paramsJson));
+                    rpcMethod.getHttpHeaders(), targetDevice, targetDeviceCfg, paramsJson, requestId, rpcMethod.getId()));
         }
         if (authCtx.getHeaders() != null) {
             headers.putAll(authCtx.getHeaders());

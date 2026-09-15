@@ -521,7 +521,9 @@ public class DefaultTransportApiService implements TransportApiService {
                             .setDeviceProfileIdLSB(deviceProfileId.getLeastSignificantBits())
                             .setDeviceTransportConfiguration(ByteString.copyFrom(
                                     JacksonUtil.writeValueAsBytes(device.getDeviceData().getTransportConfiguration())
-                            )))
+                            ))
+                            .setName(StringUtils.defaultString(device.getName(), ""))
+                            .setLabel(StringUtils.defaultString(device.getLabel(), "")))
                     .build();
         } else {
             responseMsg = TransportApiResponseMsg.getDefaultInstance();

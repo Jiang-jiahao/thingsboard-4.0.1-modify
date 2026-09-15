@@ -88,7 +88,16 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
                     return;
                 }
                 if (!session.tryBeginServerAuth()) {
-                    ctx.close();
+                    // 鉴权在途时又收到帧（设备重传首帧/抢跑）：只丢弃这一帧。
+                    // 早期实现这里直接 ctx.close()：设备侧只看到"莫名掉线"，服务端不留任何痕迹，
+                    // 而 Core 的鉴权响应回来后仍会注册会话，形成"看着在线、下行全丢"的难查状态。
+                    if (session.shouldLogPreAuthDrop()) {
+                        log.warn("[{}] TCP frame dropped: server authentication is still in flight",
+                                session.getSessionId());
+                    } else {
+                        log.debug("[{}] TCP frame dropped: server authentication is still in flight",
+                                session.getSessionId());
+                    }
                     return;
                 }
                 String authJson = new String(data, StandardCharsets.UTF_8).trim();

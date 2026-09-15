@@ -46,6 +46,8 @@ public class UdpProtoTransportEntityService {
         );
         Device device = new Device();
         device.setId(id);
+        device.setName(deviceProto.getName());
+        device.setLabel(deviceProto.getLabel());
         device.setDeviceProfileId(deviceProfileId);
         DeviceTransportConfiguration deviceTransportConfiguration = JacksonUtil.fromBytes(
                 deviceProto.getDeviceTransportConfiguration().toByteArray(), DeviceTransportConfiguration.class);

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.data.id.TenantId;
+import org.thingsboard.server.common.data.plugin.ComponentLifecycleEvent;
 import org.thingsboard.server.common.transport.TransportContext;
 import org.thingsboard.server.common.transport.TransportTenantProfileCache;
 import org.thingsboard.server.gen.transport.TransportProtos;
@@ -151,6 +152,7 @@ public class MqttTransportContext extends TransportContext {
 
     /**
      * 设备连上 MQTT 服务端后登记会话，并取消尚未生效的断开非活跃任务。
+     * 新会话会同步产生 STARTED 生命周期事件，与 HTTP/TCP/UDP 的行为对齐。
      */
     public void registerMqttServerSession(TransportProtos.SessionInfoProto sessionInfo) {
         if (sessionInfo == null) {
@@ -158,7 +160,10 @@ public class MqttTransportContext extends TransportContext {
         }
         DeviceId deviceId = toDeviceId(sessionInfo);
         cancelDisconnectInactivity(deviceId);
-        connectedMqttServerSessions.put(toSessionId(sessionInfo), sessionInfo);
+        TransportProtos.SessionInfoProto previous = connectedMqttServerSessions.put(toSessionId(sessionInfo), sessionInfo);
+        if (previous == null) {
+            lifecycleEvent(toTenantId(sessionInfo), deviceId, ComponentLifecycleEvent.STARTED);
+        }
     }
 
     public void scheduleDisconnectInactivity(TransportProtos.SessionInfoProto sessionInfo) {
@@ -239,11 +244,22 @@ public class MqttTransportContext extends TransportContext {
         return false;
     }
 
+    /**
+     * 设备确认离线（延迟窗口内没有重连）后上报非活跃，并产生 STOPPED 生命周期事件。
+     */
     private void reportInactivity(TenantId tenantId, DeviceId deviceId) {
         if (tenantId == null || deviceId == null || transportService == null) {
             return;
         }
         transportService.reportDeviceInactivity(tenantId, deviceId);
+        lifecycleEvent(tenantId, deviceId, ComponentLifecycleEvent.STOPPED);
+    }
+
+    private void lifecycleEvent(TenantId tenantId, DeviceId deviceId, ComponentLifecycleEvent eventType) {
+        if (tenantId == null || deviceId == null || transportService == null) {
+            return;
+        }
+        transportService.lifecycleEvent(tenantId, deviceId, eventType, true, null);
     }
 
     private static UUID toSessionId(TransportProtos.SessionInfoProto sessionInfo) {

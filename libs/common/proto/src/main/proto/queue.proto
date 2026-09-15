@@ -603,6 +603,9 @@ message GetDeviceResponseMsg {
   int64 deviceProfileIdLSB = 2;
   //Json
   bytes deviceTransportConfiguration = 3;
+  // 供模板占位符 ${device.name} / ${device.label} 使用
+  string name = 4;
+  string label = 5;
 }
 
 message GetDeviceCredentialsRequestMsg {
