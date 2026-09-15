@@ -18,6 +18,8 @@ import org.thingsboard.server.transport.http.pull.HttpPullTransportContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Data
 @Builder
@@ -34,6 +36,10 @@ public class HttpPullCollectorSessionContext {
 
     @Builder.Default
     private final List<ScheduledTask> queryingTasks = new ArrayList<>();
+
+    /** 轮询失败抑制状态（key = poll request id），随会话一起销毁。 */
+    @Builder.Default
+    private final Map<String, HttpPullPollFailureTracker> pollFailures = new ConcurrentHashMap<>();
 
     public DeviceId getDeviceId() {
         return device.getId();

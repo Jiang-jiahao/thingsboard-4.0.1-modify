@@ -26,6 +26,7 @@ import org.thingsboard.server.common.data.transport.http.HttpPullPollDataType;
 import org.thingsboard.server.common.data.transport.http.HttpPullPollRequest;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.transport.http.pull.session.HttpPullCollectorSessionContext;
+import org.thingsboard.server.transport.http.pull.session.HttpPullPollFailureTracker;
 import org.thingsboard.server.transport.http.pull.session.ScheduledTask;
 import org.thingsboard.server.gen.transport.TransportProtos;
 
@@ -105,17 +106,55 @@ public class HttpPullTransportService {
 
             if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
                 String detail = "HTTP status " + response.getStatusCode() + ", body=" + truncate(response.getBody());
-                log.warn("[{}] HTTP pull [{}] failed {}", sessionContext.getDeviceId(), pollRequest.getName(), detail);
-                transportService.errorEvent(sessionContext.getTenantId(), sessionContext.getDeviceId(), "httpPullPoll",
-                        new RuntimeException(detail));
+                reportPollFailure(sessionContext, pollRequest, detail, null);
                 return Futures.immediateVoidFuture();
             }
+            reportPollSuccess(sessionContext, pollRequest);
             dispatchResponse(sessionContext, pollRequest, response.getBody());
         } catch (Exception e) {
-            log.warn("[{}] HTTP pull [{}] failed", sessionContext.getDeviceId(), pollRequest.getName(), e);
-            transportService.errorEvent(sessionContext.getTenantId(), sessionContext.getDeviceId(), "httpPullPoll", e);
+            reportPollFailure(sessionContext, pollRequest,
+                    e.getClass().getSimpleName() + ": " + e.getMessage(), e);
         }
         return Futures.immediateVoidFuture();
+    }
+
+    /**
+     * 轮询失败按「错误签名」抑制输出：厂家不可达/鉴权失效/路径配错都会按轮询间隔持续失败，
+     * 每次都打 WARN + 堆栈会让日志迅速刷满。首次与错误变化时完整输出，同一种错误持续期间
+     * 只在窗口内打一条摘要，其余降到 DEBUG；errorEvent 与之一致，避免下游事件/规则链被同样刷屏。
+     */
+    private void reportPollFailure(HttpPullCollectorSessionContext sessionContext, HttpPullPollRequest pollRequest,
+                                   String detail, Throwable error) {
+        HttpPullPollFailureTracker tracker = sessionContext.getPollFailures()
+                .computeIfAbsent(pollRequest.getId(), id -> new HttpPullPollFailureTracker());
+        HttpPullPollFailureTracker.Report report = tracker.onFailure(detail, System.currentTimeMillis());
+        String deviceId = String.valueOf(sessionContext.getDeviceId());
+        if (report.firstOrChanged()) {
+            if (error != null) {
+                log.warn("[{}] HTTP pull [{}] failed", deviceId, pollRequest.getName(), error);
+            } else {
+                log.warn("[{}] HTTP pull [{}] failed {}", deviceId, pollRequest.getName(), detail);
+            }
+        } else if (report.reported()) {
+            log.warn("[{}] HTTP pull [{}] still failing ({} consecutive): {}",
+                    deviceId, pollRequest.getName(), report.consecutive(), detail);
+        } else {
+            log.debug("[{}] HTTP pull [{}] failed ({} consecutive): {}",
+                    deviceId, pollRequest.getName(), report.consecutive(), detail);
+        }
+        if (report.reported()) {
+            transportService.errorEvent(sessionContext.getTenantId(), sessionContext.getDeviceId(), "httpPullPoll",
+                    error != null ? error : new RuntimeException(detail));
+        }
+    }
+
+    private void reportPollSuccess(HttpPullCollectorSessionContext sessionContext, HttpPullPollRequest pollRequest) {
+        HttpPullPollFailureTracker tracker = sessionContext.getPollFailures().get(pollRequest.getId());
+        int recovered = tracker != null ? tracker.reset() : 0;
+        if (recovered > 0) {
+            log.info("[{}] HTTP pull [{}] recovered after {} consecutive failures",
+                    sessionContext.getDeviceId(), pollRequest.getName(), recovered);
+        }
     }
 
     private HttpPullHttpClient.HttpPullResponse executeHttpRequest(HttpPullCollectorSessionContext sessionContext,

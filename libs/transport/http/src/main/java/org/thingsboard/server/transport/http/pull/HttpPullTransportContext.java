@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.data.HttpPullDeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.HttpPullDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.id.DeviceId;
@@ -21,6 +22,7 @@ import org.thingsboard.server.common.data.id.TenantId;
 import org.thingsboard.server.common.data.plugin.ComponentLifecycleEvent;
 import org.thingsboard.server.common.data.security.DeviceCredentials;
 import org.thingsboard.server.common.data.security.DeviceCredentialsType;
+import org.thingsboard.server.common.data.transport.http.HttpPullPollRequest;
 import org.thingsboard.server.common.transport.DeviceDeletedEvent;
 import org.thingsboard.server.common.transport.DeviceProfileUpdatedEvent;
 import org.thingsboard.server.common.transport.DeviceUpdatedEvent;
@@ -178,6 +180,7 @@ public class HttpPullTransportContext extends TransportContext {
     private void establishCollectorSession(Device device, DeviceProfile profile,
                                            HttpPullDeviceProfileTransportConfiguration profileCfg,
                                            HttpPullDeviceTransportConfiguration deviceCfg) {
+        warnOnUnreachablePollUrls(device.getId(), profileCfg, deviceCfg);
         DeviceCredentials credentials = protoEntityService.getDeviceCredentialsByDeviceId(device.getId());
         if (credentials.getCredentialsType() != DeviceCredentialsType.ACCESS_TOKEN) {
             log.warn("[{}] HTTP pull collector requires ACCESS_TOKEN credentials", device.getId());
@@ -218,6 +221,27 @@ public class HttpPullTransportContext extends TransportContext {
                 establishingCollectors.remove(device.getId());
             }
         });
+    }
+
+    /**
+     * 档案侧常只配路径、真实 host:port 由设备 {@code pollUrlOverride} 提供。
+     * 两者拼不出绝对 URL 时每轮轮询都会失败，这里在建会话时一次性说清楚。
+     */
+    private void warnOnUnreachablePollUrls(DeviceId deviceId,
+                                           HttpPullDeviceProfileTransportConfiguration profileCfg,
+                                           HttpPullDeviceTransportConfiguration deviceCfg) {
+        if (profileCfg == null) {
+            return;
+        }
+        String override = deviceCfg != null ? deviceCfg.getPollUrlOverride() : null;
+        for (HttpPullPollRequest request : profileCfg.effectivePollRequests()) {
+            String url = HttpPullPollUrlResolver.resolve(request.getPollUrl(), override);
+            if (!HttpPullPollUrlResolver.isAbsolute(url)) {
+                log.warn("[{}] HTTP pull request [{}] resolves to non-absolute URL [{}]. "
+                                + "Set the device pollUrlOverride to host:port (or make the profile pollUrl a full URL).",
+                        deviceId, StringUtils.isNotBlank(request.getName()) ? request.getName() : request.getId(), url);
+            }
+        }
     }
 
     private boolean isCurrentCollector(HttpPullCollectorSessionContext ctx) {

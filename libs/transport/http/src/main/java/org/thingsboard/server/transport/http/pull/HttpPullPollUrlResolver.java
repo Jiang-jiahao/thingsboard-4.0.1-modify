@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
 
 /**
  * 设备级 {@code pollUrlOverride}：可为完整 URL，或仅主机:端口（沿用档案 URL 的路径与查询串）。
+ * <p>
+ * 档案侧通常只配路径（真实 host:port 由设备提供），因此只写 {@code api/data} 这种缺前导斜杠的路径也要能拼对。
  */
 public final class HttpPullPollUrlResolver {
 
@@ -30,6 +32,22 @@ public final class HttpPullPollUrlResolver {
             return mergeHostWithProfilePath(trimmed, profilePollUrl);
         }
         return trimmed;
+    }
+
+    /**
+     * 解析后的 URL 能否真正发起请求：必须有 scheme 与 host。
+     * 档案只配路径又没配设备 host:port 时，拼出来的是相对路径，逐次轮询都会失败。
+     */
+    public static boolean isAbsolute(String url) {
+        if (StringUtils.isBlank(url) || !url.contains("://")) {
+            return false;
+        }
+        try {
+            URI uri = new URI(url);
+            return StringUtils.isNotBlank(uri.getScheme()) && StringUtils.isNotBlank(uri.getHost());
+        } catch (URISyntaxException e) {
+            return false;
+        }
     }
 
     private static boolean shouldMergeWithProfilePath(String override) {
@@ -52,7 +70,7 @@ public final class HttpPullPollUrlResolver {
         try {
             URI profile = new URI(profilePollUrl);
             URI origin = toUri(override);
-            String path = profile.getRawPath() != null ? profile.getRawPath() : "";
+            String path = normalizePath(profile.getRawPath());
             String query = profile.getRawQuery() != null ? "?" + profile.getRawQuery() : "";
             return origin.getScheme() + "://" + origin.getHost()
                     + (origin.getPort() > 0 ? ":" + origin.getPort() : "")
@@ -60,6 +78,13 @@ public final class HttpPullPollUrlResolver {
         } catch (URISyntaxException e) {
             return normalizeOrigin(override);
         }
+    }
+
+    private static String normalizePath(String path) {
+        if (StringUtils.isBlank(path)) {
+            return "";
+        }
+        return path.startsWith("/") ? path : "/" + path;
     }
 
     private static URI toUri(String value) throws URISyntaxException {
