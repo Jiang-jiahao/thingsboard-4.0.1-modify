@@ -7,8 +7,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioDatagramChannel;
+import org.thingsboard.server.transport.udp.netty.UdpNettyTransport;
 import io.netty.util.ResourceLeakDetector;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -24,9 +23,6 @@ import org.thingsboard.server.common.data.TbTransportService;
 import org.thingsboard.server.common.data.device.profile.UdpTransportFramingMode;
 
 import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service("UdpTransportService")
 @ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.udp.enabled:true}'=='true'")
@@ -44,6 +40,8 @@ public class UdpTransportService implements TbTransportService {
     private String leakDetectorLevel;
     @Value("${transport.udp.netty.worker_group_thread_count:0}")
     private int workerGroupThreadCount;
+    @Value("${transport.udp.reuse_port:true}")
+    private boolean reusePort;
     @Value("${transport.udp.netty.max_datagram_length:65536}")
     private int maxDatagramLength;
 
@@ -57,7 +55,6 @@ public class UdpTransportService implements TbTransportService {
     private UdpTransportContext context;
 
     private Channel serverChannel;
-    private final ConcurrentHashMap<Integer, Channel> dedicatedListenChannels = new ConcurrentHashMap<>();
     @Getter
     private EventLoopGroup workerGroup;
 
@@ -66,78 +63,42 @@ public class UdpTransportService implements TbTransportService {
         log.info("Setting UDP resource leak detector level to {}", leakDetectorLevel);
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.valueOf(leakDetectorLevel.toUpperCase()));
         int workers = workerGroupThreadCount > 0 ? workerGroupThreadCount : Runtime.getRuntime().availableProcessors();
-        workerGroup = new NioEventLoopGroup(workers);
+        log.info("UDP transport uses {} transport, reuse_port={}", UdpNettyTransport.name(), reusePort);
+        workerGroup = UdpNettyTransport.newEventLoopGroup(workers);
         if (!serverEnabled) {
             log.info("UDP server is disabled (transport.udp.server.enabled=false)");
             return;
         }
-        log.info("UDP transport ready; listen ports open only when UDP device profiles configure SERVER udpProfileServerBindPort");
-    }
-
-    public synchronized void syncDedicatedPorts(Set<Integer> devicePorts) {
-        if (!serverEnabled || workerGroup == null) {
-            return;
-        }
-        Set<Integer> desired = new HashSet<>(devicePorts);
-        for (Integer boundPort : new HashSet<>(dedicatedListenChannels.keySet())) {
-            if (!desired.contains(boundPort)) {
-                Channel ch = dedicatedListenChannels.remove(boundPort);
-                if (ch != null) {
-                    try {
-                        context.closeInboundSessionsOnLocalPort(boundPort);
-                        ch.close().sync();
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        log.warn("Interrupted while closing UDP listen on {}", boundPort);
-                    }
-                    log.info("Stopped UDP dedicated listen on {}", boundPort);
-                }
-            }
-        }
-        for (int p : desired) {
-            if (dedicatedListenChannels.containsKey(p)) {
-                continue;
-            }
-            try {
-                Channel ch = bindDatagramSocket(p);
-                dedicatedListenChannels.put(p, ch);
-                log.info("UDP dedicated listen bound on {}", ch.localAddress());
-            } catch (Exception ex) {
-                log.error("Failed to bind UDP dedicated port {} — check privileges / port availability", p, ex);
-            }
-        }
+        log.info("Starting UDP transport server on {}:{} ...", host, port);
+        serverChannel = bindDatagramSocket(port);
+        log.info("UDP transport server listening on {}", serverChannel.localAddress());
     }
 
     private Channel bindDatagramSocket(int bindPort) throws InterruptedException {
         Bootstrap b = new Bootstrap();
         b.group(workerGroup)
-                .channel(NioDatagramChannel.class)
+                .channel(UdpNettyTransport.datagramChannelClass())
                 .option(ChannelOption.SO_BROADCAST, false)
                 .handler(new UdpTransportServerInitializer(context, this));
+        UdpNettyTransport.applyReusePort(b, reusePort);
         return b.bind(host, bindPort).sync().channel();
-    }
-
-    public int getPrimaryBindPort() {
-        return port;
     }
 
     @PreDestroy
     public void shutdown() throws InterruptedException {
         log.info("Stopping UDP transport");
         try {
-            for (Channel ch : dedicatedListenChannels.values()) {
-                try {
-                    if (ch.localAddress() instanceof InetSocketAddress isa) {
-                        context.closeInboundSessionsOnLocalPort(isa.getPort());
-                    }
-                    ch.close().sync();
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-            dedicatedListenChannels.clear();
             if (serverChannel != null) {
+                // 共享监听端口：本节点退出会切断落在本节点上的全部设备会话，主动上报会话关闭与非活跃，
+                // 避免 Core 侧要等 transport.sessions.inactivity_timeout（默认 600s）。
+                if (serverChannel.localAddress() instanceof InetSocketAddress isa) {
+                    context.closeInboundSessionsOnLocalPort(isa.getPort());
+                }
                 serverChannel.close().sync();
+            }
+            if (context.getTransportService() != null) {
+                context.getTransportService().closeLocalSessionsAndReportInactivity();
+                context.getTransportService().flushToCore();
             }
         } finally {
             if (workerGroup != null) {
@@ -150,10 +111,6 @@ public class UdpTransportService implements TbTransportService {
     @Override
     public String getName() {
         return DataConstants.UDP_TRANSPORT_NAME;
-    }
-
-    public InetSocketAddress getServerAddress() {
-        return serverChannel == null ? null : (InetSocketAddress) serverChannel.localAddress();
     }
 
     public int getMaxDatagramLength() {

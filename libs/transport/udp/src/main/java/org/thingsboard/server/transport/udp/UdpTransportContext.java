@@ -21,7 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioDatagramChannel;
+import org.thingsboard.server.transport.udp.netty.UdpNettyTransport;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.transport.udp.netty.UdpPipelineBuilder;
@@ -35,14 +35,13 @@ import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.transport.udp.service.UdpDedicatedListenPortService;
+import org.thingsboard.server.transport.udp.service.UdpProtocolDeviceIdRegistry;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import org.thingsboard.server.common.data.device.data.DeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.UdpDeviceTransportConfiguration;
-import org.thingsboard.server.common.data.device.data.UdpEffectiveServerBindPort;
 import org.thingsboard.server.common.data.device.profile.UdpDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.UdpWireAuthenticationMode;
 import org.thingsboard.server.transport.udp.service.UdpProtoTransportEntityService;
@@ -81,7 +80,7 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
     private final UdpProtoTransportEntityService protoEntityService;
     private final UdpTransportBalancingService balancingService;
     private final UdpSourceBindingService udpSourceBindingService;
-    private final UdpDedicatedListenPortService udpDedicatedListenPortService;
+    private final UdpProtocolDeviceIdRegistry udpProtocolDeviceIdRegistry;
     @Getter
     private final UdpMessageProcessor udpMessageProcessor;
 
@@ -115,7 +114,7 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
                                UdpProtoTransportEntityService protoEntityService,
                                UdpTransportBalancingService balancingService,
                                UdpSourceBindingService udpSourceBindingService,
-                               UdpDedicatedListenPortService udpDedicatedListenPortService,
+                               UdpProtocolDeviceIdRegistry udpProtocolDeviceIdRegistry,
                                UdpMessageProcessor udpMessageProcessor,
                                @Lazy UdpTransportService udpTransportService) {
         this.deviceProfileCache = deviceProfileCache;
@@ -123,7 +122,7 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
         this.protoEntityService = protoEntityService;
         this.balancingService = balancingService;
         this.udpSourceBindingService = udpSourceBindingService;
-        this.udpDedicatedListenPortService = udpDedicatedListenPortService;
+        this.udpProtocolDeviceIdRegistry = udpProtocolDeviceIdRegistry;
         this.udpMessageProcessor = udpMessageProcessor;
         this.udpTransportService = udpTransportService;
     }
@@ -161,28 +160,15 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
             UdpDeviceSession session = newInboundDeviceSession();
             session.setChannel(channel);
             session.setRemoteAddress(sender);
-            Optional<UdpInboundPipelineConfig> dedicatedCfg = resolveInboundPipelineConfigForLocalPort(localPort);
-            UdpTransportFramingMode framingMode = UdpTransportFramingMode.NONE;
-            int fixedLen = 0;
-            if (dedicatedCfg.isPresent()) {
-                UdpInboundPipelineConfig cfg = dedicatedCfg.get();
-                framingMode = cfg.getFramingMode();
-                fixedLen = cfg.getFixedFrameLength();
-                session.setDeviceProfile(cfg.getDeviceProfile());
-            }
-            session.setInboundPipelineFramingMode(framingMode);
-            session.setInboundPipelineFixedFrameLength(fixedLen);
+            // 共享监听端口 + 每个数据报即一帧：分帧恒为 NONE，无需按端口解析档案
+            session.setInboundPipelineFramingMode(UdpTransportFramingMode.NONE);
+            session.setInboundPipelineFixedFrameLength(0);
             trackInboundSession(session);
             return session;
         });
     }
 
     public void afterSuccessfulAuth(ChannelHandlerContext ctx, UdpDeviceSession session, ValidateDeviceCredentialsResponse msg) {
-        if (!validateDedicatedListenPortIfConfigured(ctx, msg)) {
-            session.endServerAuth();
-            evictInboundPeerSession(session);
-            return;
-        }
         completeSessionRegistration(session, msg);
         if (!session.isOutboundClient() && session.getDeviceId() != null) {
             UdpDeviceSession oldSession = serverSessions.put(session.getDeviceId(), session);
@@ -272,7 +258,7 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
         int readIdleSec = readIdleSecFromProfile(session.getDeviceProfile());
         Bootstrap b = new Bootstrap();
         b.group(udpTransportService.getWorkerGroup())
-                .channel(NioDatagramChannel.class)
+                .channel(UdpNettyTransport.datagramChannelClass())
                 .handler(new ChannelInitializer<io.netty.channel.socket.DatagramChannel>() {
                     @Override
                     protected void initChannel(io.netty.channel.socket.DatagramChannel ch) {
@@ -548,11 +534,7 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
      * @return true 表示已走异步注册，此时须保持 autoRead=false 直至回调中打开
      */
     public boolean startServerWireAuth(ChannelHandlerContext ctx, UdpDeviceSession session, InetSocketAddress remote) {
-        var deviceIdOpt = udpDedicatedListenPortService.findDeviceIdForDedicatedPortNoneSilentAuth(
-                ctx.channel().localAddress(), remote);
-        if (deviceIdOpt.isEmpty()) {
-            deviceIdOpt = udpSourceBindingService.findDeviceIdForRemoteAddress(remote);
-        }
+        var deviceIdOpt = udpSourceBindingService.findDeviceIdForRemoteAddress(remote);
         if (deviceIdOpt.isEmpty()) {
             return false;
         }
@@ -609,7 +591,7 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
         DeviceProfile profile = session.getDeviceProfile();
         if (profile == null || profile.getProfileData() == null
                 || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration ptc)) {
-            log.warn("[{}] Deferred payload wire auth requires inbound session bound to device profile (use serverBindPort dedicated listen)",
+            log.warn("[{}] Deferred payload wire auth requires inbound session bound to device profile",
                     session.getSessionId());
             failInboundSession(session);
             return;
@@ -635,11 +617,10 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
             submitDeferredAccessTokenValidation(ctx, session, rawFrame, fieldValue);
             return;
         }
-        int localPort = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
-        Optional<DeviceId> deviceIdOpt = udpDedicatedListenPortService.findDeviceIdByListenPortAndProtocolDeviceId(localPort, fieldValue);
+        Optional<DeviceId> deviceIdOpt = udpProtocolDeviceIdRegistry.findByProtocolDeviceId(fieldValue);
         if (deviceIdOpt.isEmpty()) {
-            log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: no TB device for local port {} and payload device id [{}]",
-                    session.getSessionId(), localPort, fieldValue);
+            log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: no TB device for payload device id [{}]",
+                    session.getSessionId(), fieldValue);
             failInboundSession(session);
             return;
         }
@@ -688,34 +669,7 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
                 });
     }
 
-    private boolean validateDedicatedListenPortIfConfigured(ChannelHandlerContext ctx, ValidateDeviceCredentialsResponse msg) {
-        if (!msg.hasDeviceInfo()) {
-            return true;
-        }
-        var di = msg.getDeviceInfo();
-        DeviceId deviceId = di.getDeviceId();
-        if (deviceId == null) {
-            return true;
-        }
-        Device device = protoEntityService.getDeviceById(deviceId);
-        if (device == null || device.getDeviceData() == null
-                || !(device.getDeviceData().getTransportConfiguration() instanceof UdpDeviceTransportConfiguration)) {
-            return true;
-        }
-        UdpDeviceTransportConfiguration dtc = (UdpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
-        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
-        Integer expectedPort = UdpEffectiveServerBindPort.resolve(profile, dtc);
-        if (expectedPort == null) {
-            return true;
-        }
-        int localPort = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
-        if (localPort != expectedPort) {
-            log.warn("[{}] TCP auth rejected: expect listen port {} but socket local port is {}", deviceId, expectedPort, localPort);
-            return false;
-        }
-        return true;
-    }
-    private boolean sourceHostMatchesIfRequired(Device device, SocketAddress remote) {
+private boolean sourceHostMatchesIfRequired(Device device, SocketAddress remote) {
         if (device.getDeviceData() == null || !(device.getDeviceData().getTransportConfiguration() instanceof UdpDeviceTransportConfiguration)) {
             return true;
         }
@@ -736,27 +690,4 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
         }
     }
 
-    /**
-     * 专用监听端口（设备 {@code serverBindPort}）上入站时，从设备配置文件解析首段分帧与负载类型（与 {@link UdpDeviceProfileTransportConfiguration} 一致）。
-     */
-    public Optional<UdpInboundPipelineConfig> resolveInboundPipelineConfigForLocalPort(int localPort) {
-        Optional<DeviceId> idOpt = udpDedicatedListenPortService.findAnyDeviceIdForLocalPort(localPort);
-        if (idOpt.isEmpty()) {
-            return Optional.empty();
-        }
-        Device device = protoEntityService.getDeviceById(idOpt.get());
-        if (device == null) {
-            return Optional.empty();
-        }
-        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
-        if (profile == null || profile.getProfileData() == null
-                || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration)) {
-            return Optional.empty();
-        }
-        UdpDeviceProfileTransportConfiguration udpCfg = (UdpDeviceProfileTransportConfiguration) profile.getProfileData().getTransportConfiguration();
-        if (udpCfg.getUdpProfileServerBindPort() == null) {
-            return Optional.empty();
-        }
-        return Optional.of(new UdpInboundPipelineConfig(UdpTransportFramingMode.NONE, 0, profile));
-    }
 }

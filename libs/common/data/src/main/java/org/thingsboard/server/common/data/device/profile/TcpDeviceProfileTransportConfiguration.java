@@ -12,10 +12,9 @@ import java.util.Objects;
  * @author jiahaozz
  * TCP 传输配置：接入模式（平台作服务端或客户端）、分帧解码、负载编码（UTF-8 文本 / 原始字节 / ASCII）、链路上鉴权等。
  * <p>
- * {@link TcpTransportConnectMode#SERVER} 时须在档案填写 {@code tcpProfileServerBindPort}（任意链路上鉴权模式均必填），
- * 入站连接自<strong>首帧</strong>起使用本配置中的分帧与负载类型（无需依赖全局 {@code transport.tcp.server.auth_framing_mode}）。
- * 设备传输不得再填写 {@link org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration#getServerBindPort() serverBindPort}。
- * 非 SERVER 模式不得配置档案专用端口；非 TCP 档案且仍使用设备级 {@code serverBindPort} 的兼容行为见 {@link org.thingsboard.server.common.data.device.data.TcpEffectiveServerBindPort}。
+ * {@link TcpTransportConnectMode#SERVER} 时平台监听全局配置的 {@code transport.tcp.bind_address:bind_port}（默认 {@code 0.0.0.0:5683}），
+ * 入站连接自<strong>首帧</strong>起按全局 {@code transport.tcp.server.auth_framing_mode} 解码，鉴权完成后切换到本档案的分帧与负载类型。
+ * 同一个共享端口可同时服务多个档案（设备身份由 token / 协议设备号解析）；多实例由前置 LB 或 SO_REUSEPORT 分派连接。
  */
 @Data
 public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTransportConfiguration {
@@ -43,16 +42,9 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
     private TcpWireAuthenticationMode tcpWireAuthenticationMode;
 
     /**
-     * SERVER 专用监听端口（1–65535）：在设备档案上统一指定时，同档案下多设备共用该 TCP 入口；
-     * 与 {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} / {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 联用时在 SERVER 模式下必填；
-     * 此时设备传输配置中勿再填写 {@link org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration#getServerBindPort() serverBindPort}。
-     */
-    private Integer tcpProfileServerBindPort;
-
-    /**
      * 当 {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} 时：解析得到的 JSON 中存放 <strong>ACCESS_TOKEN</strong>（{@code credentialsId}）的字段名。<br>
      * 当 {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：解析得到的 JSON 中存放<strong>协议设备 ID</strong>的字段名（与设备传输配置
-     * {@link org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration#getTcpWireAuthPayloadDeviceId() tcpWireAuthPayloadDeviceId} 比对，并结合入站监听端口定位设备）。<br>
+     * {@link org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration#getTcpWireAuthPayloadDeviceId() tcpWireAuthPayloadDeviceId} 比对，同一租户内须唯一）。<br>
      * 校验成功后该字段会从本帧重放及后续上行的副本中移除。
      */
     private String tcpDeferredWireAuthTokenJsonKey;
@@ -171,17 +163,6 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
                 throw new IllegalArgumentException(
                         "tcpDeferredWireAuthTokenJsonKey is required when tcpWireAuthenticationMode is DEFERRED_PAYLOAD_TOKEN or DEFERRED_PAYLOAD_DEVICE_ID");
             }
-        }
-        if (getTcpTransportConnectMode() == TcpTransportConnectMode.SERVER) {
-            if (tcpProfileServerBindPort == null) {
-                throw new IllegalArgumentException(
-                        "tcpProfileServerBindPort is required on the device profile when tcpTransportConnectMode is SERVER (all wire authentication modes).");
-            }
-            if (tcpProfileServerBindPort < 1 || tcpProfileServerBindPort > 65535) {
-                throw new IllegalArgumentException("tcpProfileServerBindPort must be between 1 and 65535");
-            }
-        } else if (tcpProfileServerBindPort != null) {
-            throw new IllegalArgumentException("tcpProfileServerBindPort is only allowed when tcpTransportConnectMode is SERVER");
         }
     }
 

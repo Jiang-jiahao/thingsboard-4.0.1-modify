@@ -24,14 +24,6 @@
             <mat-option [value]="'DEFERRED_PAYLOAD_DEVICE_ID'">{{ 'device-profile.udp.wire-auth-deferred-device-id' | translate }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <mat-form-field class="flex-1">
-        <mat-label translate>device-profile.udp.udp-profile-server-bind-port</mat-label>
-        <input matInput type="number" min="1" max="65535" formControlName="udpProfileServerBindPort" required>
-        <mat-hint translate>device-profile.udp.udp-profile-server-bind-port-hint</mat-hint>
-        <mat-error *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('udpProfileServerBindPort').hasError('required')">
-          {{ 'device-profile.udp.udp-profile-server-bind-port-required' | translate }}
-        </mat-error>
-      </mat-form-field>
     </div>
     <div class="flex flex-row gap-2 xs:flex-col" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('udpWireAuthenticationMode').value === 'DEFERRED_PAYLOAD_TOKEN'
         || tcpDeviceProfileTransportConfigurationFormGroup.get('udpWireAuthenticationMode').value === 'DEFERRED_PAYLOAD_DEVICE_ID'">

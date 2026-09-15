@@ -19,8 +19,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.thingsboard.server.transport.tcp.netty.TcpNettyTransport;
 import io.netty.util.ResourceLeakDetector;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -36,9 +35,6 @@ import org.thingsboard.server.common.data.DataConstants;
 import org.thingsboard.server.common.data.TbTransportService;
 
 import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service("TcpTransportService")
 @ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.tcp.enabled:true}'=='true'")
@@ -59,6 +55,8 @@ public class TcpTransportService implements TbTransportService {
     private int workerGroupThreadCount;
     @Value("${transport.tcp.netty.so_keep_alive:true}")
     private boolean keepAlive;
+    @Value("${transport.tcp.reuse_port:true}")
+    private boolean reusePort;
     @Value("${transport.tcp.netty.max_frame_length:65536}")
     private int maxFrameLength;
 
@@ -77,7 +75,6 @@ public class TcpTransportService implements TbTransportService {
     @Lazy
     private TcpTransportContext context;
     private Channel serverChannel;
-    private final ConcurrentHashMap<Integer, Channel> dedicatedListenChannels = new ConcurrentHashMap<>();
     private EventLoopGroup bossGroup;
     @Getter
     private EventLoopGroup workerGroup;
@@ -87,82 +84,43 @@ public class TcpTransportService implements TbTransportService {
         log.info("Setting TCP resource leak detector level to {}", leakDetectorLevel);
         ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.valueOf(leakDetectorLevel.toUpperCase()));
         int workers = workerGroupThreadCount > 0 ? workerGroupThreadCount : Runtime.getRuntime().availableProcessors();
-        bossGroup = new NioEventLoopGroup(bossGroupThreadCount);
-        workerGroup = new NioEventLoopGroup(workers);
+        log.info("TCP transport uses {} transport, reuse_port={}", TcpNettyTransport.name(), reusePort);
+        bossGroup = TcpNettyTransport.newEventLoopGroup(bossGroupThreadCount);
+        workerGroup = TcpNettyTransport.newEventLoopGroup(workers);
         if (!serverEnabled) {
             log.info("TCP server is disabled (transport.tcp.server.enabled=false)");
             return;
         }
-        log.info("TCP transport ready; listen ports open only when TCP device profiles configure SERVER tcpProfileServerBindPort");
-    }
-
-    /**
-     * 为设备专用 {@code serverBindPort} 增删监听；与 {@link #port} 相同则跳过（已由主 socket 监听）。
-     */
-    public synchronized void syncDedicatedPorts(Set<Integer> devicePorts) {
-        if (!serverEnabled || bossGroup == null) {
-            return;
-        }
-        Set<Integer> desired = new HashSet<>(devicePorts);
-        for (Integer boundPort : new HashSet<>(dedicatedListenChannels.keySet())) {
-            if (!desired.contains(boundPort)) {
-                Channel ch = dedicatedListenChannels.remove(boundPort);
-                if (ch != null) {
-                    try {
-                        context.closeInboundSessionsOnLocalPort(boundPort);
-                        ch.close().sync();
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        log.warn("Interrupted while closing TCP listen on {}", boundPort);
-                    }
-                    log.info("Stopped TCP dedicated listen on {}", boundPort);
-                }
-            }
-        }
-        for (int p : desired) {
-            if (dedicatedListenChannels.containsKey(p)) {
-                continue;
-            }
-            try {
-                Channel ch = bindListenSocket(p);
-                dedicatedListenChannels.put(p, ch);
-                log.info("TCP dedicated listen bound on {}", ch.localAddress());
-            } catch (Exception ex) {
-                log.error("Failed to bind TCP dedicated port {} — check privileges / port availability", p, ex);
-            }
-        }
+        log.info("Starting TCP transport server on {}:{} ...", host, port);
+        serverChannel = bindListenSocket(port);
+        log.info("TCP transport server listening on {}", serverChannel.localAddress());
     }
 
     private Channel bindListenSocket(int bindPort) throws InterruptedException {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
+                .channel(TcpNettyTransport.serverChannelClass())
                 .childHandler(new TcpTransportServerInitializer(context, this))
                 .childOption(ChannelOption.SO_KEEPALIVE, keepAlive);
+        TcpNettyTransport.applyReusePort(b, reusePort);
         return b.bind(host, bindPort).sync().channel();
-    }
-
-    public int getPrimaryBindPort() {
-        return port;
     }
 
     @PreDestroy
     public void shutdown() throws InterruptedException {
         log.info("Stopping TCP transport");
         try {
-            for (Channel ch : dedicatedListenChannels.values()) {
-                try {
-                    if (ch.localAddress() instanceof InetSocketAddress isa) {
-                        context.closeInboundSessionsOnLocalPort(isa.getPort());
-                    }
-                    ch.close().sync();
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-            dedicatedListenChannels.clear();
             if (serverChannel != null) {
+                // 共享监听端口：本节点退出会切断落在本节点上的全部设备会话，主动上报会话关闭与非活跃，
+                // 避免 Core 侧要等 transport.sessions.inactivity_timeout（默认 600s）。
+                if (serverChannel.localAddress() instanceof InetSocketAddress isa) {
+                    context.closeInboundSessionsOnLocalPort(isa.getPort());
+                }
                 serverChannel.close().sync();
+            }
+            if (context.getTransportService() != null) {
+                context.getTransportService().closeLocalSessionsAndReportInactivity();
+                context.getTransportService().flushToCore();
             }
         } finally {
             if (workerGroup != null) {
@@ -178,10 +136,6 @@ public class TcpTransportService implements TbTransportService {
     @Override
     public String getName() {
         return DataConstants.TCP_TRANSPORT_NAME;
-    }
-
-    public InetSocketAddress getServerAddress() {
-        return serverChannel == null ? null : (InetSocketAddress) serverChannel.localAddress();
     }
 
     public int getMaxFrameLength() {

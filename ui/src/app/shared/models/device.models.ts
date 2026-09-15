@@ -1786,8 +1786,6 @@ export interface TcpDeviceProfileTransportConfiguration {
   tcpTransportFramingMode?: TcpTransportFramingMode;
   tcpFixedFrameLength?: number;
   tcpWireAuthenticationMode?: TcpWireAuthenticationMode;
-  /** SERVER：档案级专用监听端口；与延迟链路上鉴权配套时设备侧勿再填 serverBindPort */
-  tcpProfileServerBindPort?: number;
   /** DEFERRED：解析后 JSON 中身份字段名（TOKEN 模式为 ACCESS_TOKEN；DEVICE_ID 模式为协议设备 ID） */
   tcpDeferredWireAuthTokenJsonKey?: string;
   /** CLIENT：断线/建连失败后重连间隔（秒）；空=后端默认 30；0=不重连 */
@@ -1874,7 +1872,6 @@ export interface UdpDeviceProfileTransportConfiguration {
   udpTransportFramingMode?: UdpTransportFramingMode;
   udpFixedFrameLength?: number;
   udpWireAuthenticationMode?: UdpWireAuthenticationMode;
-  udpProfileServerBindPort?: number;
   udpDeferredWireAuthTokenJsonKey?: string;
   udpOutboundReconnectIntervalSec?: number;
   udpOutboundReconnectMaxAttempts?: number;
@@ -1891,7 +1888,6 @@ export interface UdpDeviceTransportConfiguration {
   /** @deprecated 历史 CLIENT 模式字段 */
   port?: number;
   sourceHost?: string;
-  serverBindPort?: number;
   udpWireAuthPayloadDeviceId?: string;
 }
 
@@ -2506,8 +2502,7 @@ export interface TcpDeviceTransportConfiguration {
   host?: string;
   port?: number;
   sourceHost?: string;
-  serverBindPort?: number;
-  /** DEFERRED_PAYLOAD_DEVICE_ID：与负载 JSON 中档案配置的字段值一致，用于同端口多设备区分（可与其它端口使用相同字符串） */
+  /** DEFERRED_PAYLOAD_DEVICE_ID：与负载 JSON 中档案配置的字段值一致，须在租户内唯一 */
   tcpWireAuthPayloadDeviceId?: string;
 }
 

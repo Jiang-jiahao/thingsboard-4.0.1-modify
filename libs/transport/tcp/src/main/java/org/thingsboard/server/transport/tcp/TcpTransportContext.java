@@ -21,7 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
+import org.thingsboard.server.transport.tcp.netty.TcpNettyTransport;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.thingsboard.server.transport.tcp.netty.TcpPipelineBuilder;
@@ -35,14 +35,13 @@ import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
-import org.thingsboard.server.transport.tcp.service.TcpDedicatedListenPortService;
+import org.thingsboard.server.transport.tcp.service.TcpProtocolDeviceIdRegistry;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import org.thingsboard.server.common.data.device.data.DeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration;
-import org.thingsboard.server.common.data.device.data.TcpEffectiveServerBindPort;
 import org.thingsboard.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode;
 import org.thingsboard.server.transport.tcp.service.TcpProtoTransportEntityService;
@@ -81,7 +80,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
     private final TcpProtoTransportEntityService protoEntityService;
     private final TcpTransportBalancingService balancingService;
     private final TcpSourceBindingService tcpSourceBindingService;
-    private final TcpDedicatedListenPortService tcpDedicatedListenPortService;
+    private final TcpProtocolDeviceIdRegistry tcpProtocolDeviceIdRegistry;
     @Getter
     private final TcpMessageProcessor tcpMessageProcessor;
 
@@ -107,7 +106,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
                                TcpProtoTransportEntityService protoEntityService,
                                TcpTransportBalancingService balancingService,
                                TcpSourceBindingService tcpSourceBindingService,
-                               TcpDedicatedListenPortService tcpDedicatedListenPortService,
+                               TcpProtocolDeviceIdRegistry tcpProtocolDeviceIdRegistry,
                                TcpMessageProcessor tcpMessageProcessor,
                                @Lazy TcpTransportService tcpTransportService) {
         this.deviceProfileCache = deviceProfileCache;
@@ -115,7 +114,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
         this.protoEntityService = protoEntityService;
         this.balancingService = balancingService;
         this.tcpSourceBindingService = tcpSourceBindingService;
-        this.tcpDedicatedListenPortService = tcpDedicatedListenPortService;
+        this.tcpProtocolDeviceIdRegistry = tcpProtocolDeviceIdRegistry;
         this.tcpMessageProcessor = tcpMessageProcessor;
         this.tcpTransportService = tcpTransportService;
     }
@@ -157,11 +156,6 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
         return new TcpDeviceSession(UUID.randomUUID(), this, false);
     }
     public void afterSuccessfulAuth(ChannelHandlerContext ctx, TcpDeviceSession session, ValidateDeviceCredentialsResponse msg) {
-        if (!validateDedicatedListenPortIfConfigured(ctx, msg)) {
-            session.endServerAuth();
-            ctx.close();
-            return;
-        }
         completeSessionRegistration(session, msg);
         if (!session.isOutboundClient() && session.getDeviceId() != null) {
             TcpDeviceSession oldSession = serverSessions.put(session.getDeviceId(), session);
@@ -256,7 +250,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
         int readIdleSec = readIdleSecFromProfile(session.getDeviceProfile());
         Bootstrap b = new Bootstrap();
         b.group(tcpTransportService.getWorkerGroup())
-                .channel(NioSocketChannel.class)
+                .channel(TcpNettyTransport.socketChannelClass())
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .handler(new ChannelInitializer<SocketChannel>() {
@@ -552,11 +546,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
      * @return true 表示已走异步注册，此时须保持 autoRead=false 直至回调中打开
      */
     public boolean startServerWireAuth(ChannelHandlerContext ctx, TcpDeviceSession session) {
-        var deviceIdOpt = tcpDedicatedListenPortService.findDeviceIdForDedicatedPortNoneSilentAuth(
-                ctx.channel().localAddress(), ctx.channel().remoteAddress());
-        if (deviceIdOpt.isEmpty()) {
-            deviceIdOpt = tcpSourceBindingService.findDeviceIdForRemoteAddress(ctx.channel().remoteAddress());
-        }
+        var deviceIdOpt = tcpSourceBindingService.findDeviceIdForRemoteAddress(ctx.channel().remoteAddress());
         if (deviceIdOpt.isEmpty()) {
             return false;
         }
@@ -610,13 +600,13 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
     /**
      * SERVER {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} / {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID}：
      * 在 Core 会话注册前对每一帧按档案解析；本帧无身份字段则丢弃并等待；有字段则提交 Core 注册（TOKEN 模式字段值为 ACCESS_TOKEN；
-     * DEVICE_ID 模式字段值为协议设备 ID，由监听端口 + 设备传输配置 {@code tcpWireAuthPayloadDeviceId} 定位 TB 设备后以该设备 ACCESS_TOKEN 注册）。
+     * DEVICE_ID 模式字段值为协议设备 ID，由设备传输配置 {@code tcpWireAuthPayloadDeviceId} 在全量设备中定位 TB 设备后以该设备 ACCESS_TOKEN 注册）。
      */
     public void completeDeferredWireAuthServerAuth(ChannelHandlerContext ctx, TcpDeviceSession session, byte[] rawFrame) {
         DeviceProfile profile = session.getDeviceProfile();
         if (profile == null || profile.getProfileData() == null
                 || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration ptc)) {
-            log.warn("[{}] Deferred payload wire auth requires inbound session bound to device profile (use serverBindPort dedicated listen)",
+            log.warn("[{}] Deferred payload wire auth requires inbound session bound to device profile",
                     session.getSessionId());
             session.endServerAuth();
             ctx.close();
@@ -644,11 +634,10 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
             submitDeferredAccessTokenValidation(ctx, session, rawFrame, fieldValue);
             return;
         }
-        int localPort = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
-        Optional<DeviceId> deviceIdOpt = tcpDedicatedListenPortService.findDeviceIdByListenPortAndProtocolDeviceId(localPort, fieldValue);
+        Optional<DeviceId> deviceIdOpt = tcpProtocolDeviceIdRegistry.findByProtocolDeviceId(fieldValue);
         if (deviceIdOpt.isEmpty()) {
-            log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: no TB device for local port {} and payload device id [{}]",
-                    session.getSessionId(), localPort, fieldValue);
+            log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: no TB device for payload device id [{}]",
+                    session.getSessionId(), fieldValue);
             session.endServerAuth();
             ctx.close();
             return;
@@ -660,7 +649,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
             ctx.close();
             return;
         }
-        // 身份已由监听端口 + 负载协议设备 ID 确定，不再校验 sourceHost（NONE 多机同端口仍靠 IP 区分）。
+        // 身份已由负载中的协议设备号确定，不再校验 sourceHost。
         DeviceCredentials cred = protoEntityService.getDeviceCredentialsByDeviceId(device.getId());
         if (cred.getCredentialsType() != DeviceCredentialsType.ACCESS_TOKEN) {
             log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: device {} has no ACCESS_TOKEN credentials", session.getSessionId(), device.getId());
@@ -702,34 +691,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
                 });
     }
 
-    private boolean validateDedicatedListenPortIfConfigured(ChannelHandlerContext ctx, ValidateDeviceCredentialsResponse msg) {
-        if (!msg.hasDeviceInfo()) {
-            return true;
-        }
-        var di = msg.getDeviceInfo();
-        DeviceId deviceId = di.getDeviceId();
-        if (deviceId == null) {
-            return true;
-        }
-        Device device = protoEntityService.getDeviceById(deviceId);
-        if (device == null || device.getDeviceData() == null
-                || !(device.getDeviceData().getTransportConfiguration() instanceof TcpDeviceTransportConfiguration)) {
-            return true;
-        }
-        TcpDeviceTransportConfiguration dtc = (TcpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
-        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
-        Integer expectedPort = TcpEffectiveServerBindPort.resolve(profile, dtc);
-        if (expectedPort == null) {
-            return true;
-        }
-        int localPort = ((InetSocketAddress) ctx.channel().localAddress()).getPort();
-        if (localPort != expectedPort) {
-            log.warn("[{}] TCP auth rejected: expect listen port {} but socket local port is {}", deviceId, expectedPort, localPort);
-            return false;
-        }
-        return true;
-    }
-    private boolean sourceHostMatchesIfRequired(Device device, SocketAddress remote) {
+private boolean sourceHostMatchesIfRequired(Device device, SocketAddress remote) {
         if (device.getDeviceData() == null || !(device.getDeviceData().getTransportConfiguration() instanceof TcpDeviceTransportConfiguration)) {
             return true;
         }
@@ -750,36 +712,4 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
         }
     }
 
-    /**
-     * 专用监听端口（设备 {@code serverBindPort}）上入站时，从设备配置文件解析首段分帧与负载类型（与 {@link TcpDeviceProfileTransportConfiguration} 一致）。
-     */
-    public Optional<TcpInboundPipelineConfig> resolveInboundPipelineConfigForLocalPort(int localPort) {
-        Optional<DeviceId> idOpt = tcpDedicatedListenPortService.findAnyDeviceIdForLocalPort(localPort);
-        if (idOpt.isEmpty()) {
-            return Optional.empty();
-        }
-        Device device = protoEntityService.getDeviceById(idOpt.get());
-        if (device == null) {
-            return Optional.empty();
-        }
-        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
-        if (profile == null || profile.getProfileData() == null
-                || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration)) {
-            return Optional.empty();
-        }
-        TcpDeviceProfileTransportConfiguration tcp = (TcpDeviceProfileTransportConfiguration) profile.getProfileData().getTransportConfiguration();
-        if (tcp.getTcpTransportConnectMode() != TcpTransportConnectMode.SERVER) {
-            return Optional.empty();
-        }
-        int fixed = tcpTransportService.getServerAuthFixedFrameLength();
-        if (tcp.getTcpTransportFramingMode() == TcpTransportFramingMode.FIXED_LENGTH) {
-            Integer n = tcp.getTcpFixedFrameLength();
-            if (n != null && n > 0) {
-                fixed = n;
-            }
-        } else {
-            fixed = tcpTransportService.getServerAuthFixedFrameLength();
-        }
-        return Optional.of(new TcpInboundPipelineConfig(tcp.getTcpTransportFramingMode(), fixed, profile));
-    }
 }

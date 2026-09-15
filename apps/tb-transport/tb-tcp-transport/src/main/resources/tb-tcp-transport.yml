@@ -242,9 +242,11 @@ transport:
       # SERVER 入站首帧分帧（鉴权）。鉴权成功后切换为设备配置文件中的 tcpTransportFramingMode。
       auth_framing_mode: "${TCP_SERVER_AUTH_FRAMING_MODE:LINE}"
       auth_fixed_frame_length: "${TCP_SERVER_AUTH_FIXED_FRAME_LENGTH:512}"
-    # 默认监听端口；设备还可在传输配置中指定 serverBindPort 以额外 bind 专用端口（一设备一端口）。
+    # 所有 TCP transport 实例监听同一地址端口；多实例由前置 LB 分派连接，
+    # 同主机多实例则靠 reuse_port（SO_REUSEPORT，需要 epoll/kqueue 原生传输）共享同一 IP:端口。
     bind_address: "${TCP_BIND_ADDRESS:0.0.0.0}"
     bind_port: "${TCP_BIND_PORT:5683}"
+    reuse_port: "${TCP_REUSE_PORT:true}"
     netty:
       leak_detector_level: "${TCP_NETTY_LEAK_DETECTOR_LEVEL:PARANOID}"
       boss_group_thread_count: "${TCP_NETTY_BOSS_GROUP_THREADS:1}"

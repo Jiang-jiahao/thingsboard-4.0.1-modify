@@ -24,15 +24,14 @@ import org.thingsboard.server.common.data.StringUtils;
  * <p>
  * SERVER 模式：
  * <ul>
- *   <li>优先在设备档案配置 {@code tcpProfileServerBindPort}；未配置档案端口时可在此配置 {@link #serverBindPort}（兼容旧数据）。</li>
  *   <li>无线上鉴权 {@link org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode#NONE} 时还可配置
- *   {@link #sourceHost} 与对端 IP 匹配（可与专用端口组合使用）。</li>
+ *   {@link #sourceHost} 与对端 IP 匹配（前置 LB 时看到的是 LB 的源 IP，该模式需透明代理）。</li>
  *   <li>链路上鉴权 {@link org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时须配置
- *   {@link #tcpWireAuthPayloadDeviceId}：与负载 JSON 中档案所配字段值一致，且在同一专用监听端口下多设备时值须互异。</li>
+ *   {@link #tcpWireAuthPayloadDeviceId}：与负载 JSON 中档案所配字段值一致，且在同一租户内多设备时值须互异。</li>
  * </ul>
  */
 @Data
-@ToString(of = {"host", "port", "sourceHost", "serverBindPort", "tcpWireAuthPayloadDeviceId"})
+@ToString(of = {"host", "port", "sourceHost", "tcpWireAuthPayloadDeviceId"})
 public class TcpDeviceTransportConfiguration implements DeviceTransportConfiguration {
 
     private String host;
@@ -46,14 +45,9 @@ public class TcpDeviceTransportConfiguration implements DeviceTransportConfigura
 
     /**
      * 当设备档案为 {@link org.thingsboard.server.common.data.device.profile.TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：
-     * 与上行解析 JSON 中「协议设备 ID」字段值一致，用于在共用专用监听端口下区分 TB 设备（可与其它端口下设备使用相同字符串）。
+     * 与上行解析 JSON 中「协议设备 ID」字段值一致，用于区分 TB 设备（同一租户内须唯一）。
      */
     private String tcpWireAuthPayloadDeviceId;
-
-    /**
-     * 兼容旧版：设备级专用监听端口。若设备档案已配置 {@code tcpProfileServerBindPort}，此处须留空，由档案统一指定入口端口。
-     */
-    private Integer serverBindPort;
 
     public TcpDeviceTransportConfiguration() {
         this.host = "127.0.0.1";
@@ -66,18 +60,12 @@ public class TcpDeviceTransportConfiguration implements DeviceTransportConfigura
     @Override
     public void validate() {
         if (!isValid()) {
-            throw new IllegalArgumentException("TCP transport: set host+port for CLIENT, or sourceHost / serverBindPort for SERVER");
+            throw new IllegalArgumentException("TCP transport: set host+port for CLIENT, or sourceHost for SERVER");
         }
     }
     @JsonIgnore
     private boolean isValid() {
-        if (serverBindPort != null && (serverBindPort < 1 || serverBindPort > 65535)) {
-            return false;
-        }
         if (StringUtils.isNotBlank(sourceHost)) {
-            return true;
-        }
-        if (serverBindPort != null) {
             return true;
         }
         return StringUtils.isNotBlank(host) && port != null && port > 0 && port <= 65535;

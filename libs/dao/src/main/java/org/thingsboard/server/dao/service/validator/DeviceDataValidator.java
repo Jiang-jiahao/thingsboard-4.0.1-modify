@@ -27,8 +27,6 @@ import org.thingsboard.server.common.data.device.data.DeviceScheduledRpc;
 import org.thingsboard.server.common.data.device.data.DeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.UdpDeviceTransportConfiguration;
-import org.thingsboard.server.common.data.device.data.TcpEffectiveServerBindPort;
-import org.thingsboard.server.common.data.device.data.UdpEffectiveServerBindPort;
 import org.thingsboard.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.UdpDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.TcpTransportConnectMode;
@@ -110,13 +108,11 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
                 .flatMap(deviceData -> Optional.ofNullable(deviceData.getTransportConfiguration()))
                 .ifPresent(DeviceTransportConfiguration::validate);
         validateScheduledRpcs(device);
-        validateTcpDeviceNoServerBindPortWhenProfileServer(device);
-        validateTcpSharedServerBindPort(tenantId, device);
         validateTcpWireAuthPayloadDeviceIdWhenRequired(device);
+        validateTcpWireIdentityUniquePerTenant(tenantId, device);
         ensureUdpDeviceTransportForDeferredPayloadDeviceIdProfile(device);
-        validateUdpDeviceNoServerBindPortWhenProfileServer(device);
-        validateUdpSharedServerBindPort(tenantId, device);
         validateUdpWireAuthPayloadDeviceIdWhenRequired(device);
+        validateUdpWireIdentityUniquePerTenant(tenantId, device);
         // 验证设备（或设备档案）与OTA包的关联关系是否合法。
         validateOtaPackage(tenantId, device, device.getDeviceProfileId());
     }
@@ -143,117 +139,156 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
 
 
     /**
-     * TCP 设备档案为 SERVER 时，监听端口仅在档案 {@code tcpProfileServerBindPort} 配置；设备传输不得填写 {@code serverBindPort}。
+     * 共享监听端口下端口不再起消歧作用：{@link TcpWireAuthenticationMode#NONE} 靠 {@code sourceHost}、
+     * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 靠协议设备号识别设备，因此这两种模式的身份串
+     * 必须在<strong>租户内</strong>唯一（原先的范围是"同一专用监听端口内"）。与旧行为一致：仅当该模式下租户内
+     * 存在多台设备时才强制校验（且不得为空）。
      */
-    private void validateTcpDeviceNoServerBindPortWhenProfileServer(Device device) {
-        if (device.getDeviceData() == null || !(device.getDeviceData().getTransportConfiguration() instanceof TcpDeviceTransportConfiguration tcp)) {
+    private void validateTcpWireIdentityUniquePerTenant(TenantId tenantId, Device device) {
+        if (device.getDeviceData() == null
+                || !(device.getDeviceData().getTransportConfiguration() instanceof TcpDeviceTransportConfiguration current)) {
             return;
         }
-        if (tcp.getServerBindPort() == null) {
-            return;
-        }
-        DeviceProfile profile = deviceProfileService.findDeviceProfileById(device.getTenantId(), device.getDeviceProfileId(), false);
+        DeviceProfile profile = deviceProfileService.findDeviceProfileById(tenantId, device.getDeviceProfileId(), false);
         if (profile == null || profile.getProfileData() == null
                 || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration ptc)) {
             return;
         }
-        if (ptc.getTcpTransportConnectMode() == TcpTransportConnectMode.SERVER) {
-            throw new DataValidationException(
-                    "TCP device transport must not set serverBindPort when the device profile uses SERVER connect mode; set tcpProfileServerBindPort on the profile instead.");
-        }
-    }
-
-    /**
-     * 同一专用监听端口（设备档案 {@code tcpProfileServerBindPort}）可对应多台设备，但必须共用同一设备配置文件；
-     * 若多台且链路上鉴权为 NONE，则每台须配置互异的 {@code sourceHost}。
-     */
-    private void validateTcpSharedServerBindPort(TenantId tenantId, Device device) {
-        if (device.getDeviceData() == null || !(device.getDeviceData().getTransportConfiguration() instanceof TcpDeviceTransportConfiguration)) {
+        TcpWireAuthenticationMode wireMode = ptc.getTcpWireAuthenticationMode();
+        if (wireMode != TcpWireAuthenticationMode.NONE
+                && wireMode != TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             return;
         }
-        TcpDeviceTransportConfiguration tcp = (TcpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
-        DeviceProfile profile = deviceProfileService.findDeviceProfileById(tenantId, device.getDeviceProfileId(), false);
-        Integer bindPort = TcpEffectiveServerBindPort.resolve(profile, tcp);
-        if (bindPort == null) {
-            return;
-        }
-        UUID currentProfileId = device.getDeviceProfileId().getId();
-        UUID currentDeviceUuid = device.getId() != null ? device.getId().getId() : null;
-        List<Device> samePort = new ArrayList<>();
+        String field = wireMode == TcpWireAuthenticationMode.NONE ? "sourceHost" : "tcpWireAuthPayloadDeviceId";
+        String identity = normalizeTcpWireIdentity(wireMode, current);
+        UUID selfUuid = device.getId() != null ? device.getId().getId() : null;
+        boolean otherExists = false;
+        Set<String> others = new HashSet<>();
         PageLink pageLink = new PageLink(500);
         PageData<Device> page;
         do {
             page = deviceDao.findDevicesByTenantId(tenantId.getId(), pageLink);
             for (Device other : page.getData()) {
-                if (currentDeviceUuid != null && other.getId().getId().equals(currentDeviceUuid)) {
+                if (selfUuid != null && selfUuid.equals(other.getId().getId())) {
                     continue;
                 }
-                if (other.getDeviceData() == null || !(other.getDeviceData().getTransportConfiguration() instanceof TcpDeviceTransportConfiguration)) {
+                if (other.getDeviceData() == null
+                        || !(other.getDeviceData().getTransportConfiguration() instanceof TcpDeviceTransportConfiguration ot)) {
                     continue;
                 }
-                TcpDeviceTransportConfiguration ot = (TcpDeviceTransportConfiguration) other.getDeviceData().getTransportConfiguration();
                 DeviceProfile otherProfile = deviceProfileService.findDeviceProfileById(tenantId, other.getDeviceProfileId(), false);
-                Integer otherBind = TcpEffectiveServerBindPort.resolve(otherProfile, ot);
-                if (otherBind == null || !otherBind.equals(bindPort)) {
+                if (otherProfile == null || otherProfile.getProfileData() == null
+                        || !(otherProfile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration optc)
+                        || optc.getTcpWireAuthenticationMode() != wireMode) {
                     continue;
                 }
-                if (!other.getDeviceProfileId().getId().equals(currentProfileId)) {
-                    throw new DataValidationException("TCP dedicated listen port " + bindPort
-                            + " is already used by a device with a different device profile. "
-                            + "The same listen port may only be shared by devices that use the same device profile.");
+                otherExists = true;
+                String otherIdentity = normalizeTcpWireIdentity(wireMode, ot);
+                if (otherIdentity != null) {
+                    others.add(otherIdentity);
                 }
-                samePort.add(other);
             }
             if (!page.hasNext()) {
                 break;
             }
             pageLink = pageLink.nextPageLink();
         } while (true);
-        samePort.add(device);
-        if (samePort.size() <= 1) {
+        if (!otherExists) {
             return;
         }
-        if (profile == null || profile.getProfileData() == null
-                || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration)) {
-            return;
+        if (identity == null) {
+            throw new DataValidationException("With a shared TCP listen port, each device using " + wireMode
+                    + " must set a non-empty " + field + " (it is the only way to identify the device).");
         }
-        TcpDeviceProfileTransportConfiguration ptc = (TcpDeviceProfileTransportConfiguration) profile.getProfileData().getTransportConfiguration();
-        TcpWireAuthenticationMode wireMode = ptc.getTcpWireAuthenticationMode();
+        if (others.contains(identity)) {
+            throw new DataValidationException("Duplicate " + field + " '" + identity
+                    + "' within the tenant: with a shared TCP listen port the identity must be unique per tenant.");
+        }
+    }
+
+    private static String normalizeTcpWireIdentity(TcpWireAuthenticationMode wireMode, TcpDeviceTransportConfiguration cfg) {
         if (wireMode == TcpWireAuthenticationMode.NONE) {
-            Set<String> seenHosts = new HashSet<>();
-            for (Device d : samePort) {
-                TcpDeviceTransportConfiguration dt = (TcpDeviceTransportConfiguration) d.getDeviceData().getTransportConfiguration();
-                if (StringUtils.isNotBlank(dt.getSourceHost())) {
-                    try {
-                        String normalized = InetAddress.getByName(dt.getSourceHost().trim()).getHostAddress();
-                        if (!seenHosts.add(normalized)) {
-                            throw new DataValidationException("Duplicate sourceHost for devices sharing TCP dedicated listen port " + bindPort + ".");
-                        }
-                    } catch (UnknownHostException e) {
-                        throw new DataValidationException("Invalid sourceHost for shared TCP port: " + dt.getSourceHost());
-                    }
-                } else {
-                    throw new DataValidationException("When multiple devices share TCP dedicated listen port " + bindPort
-                            + " with wire authentication NONE, each device must set a distinct sourceHost.");
-                }
-            }
-            return;
+            return StringUtils.isBlank(cfg.getSourceHost()) ? null : cfg.getSourceHost().trim();
         }
         if (wireMode == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
-            Set<String> seenPayloadIds = new HashSet<>();
-            for (Device d : samePort) {
-                TcpDeviceTransportConfiguration dt = (TcpDeviceTransportConfiguration) d.getDeviceData().getTransportConfiguration();
-                if (StringUtils.isBlank(dt.getTcpWireAuthPayloadDeviceId())) {
-                    throw new DataValidationException("TCP dedicated listen port " + bindPort
-                            + " with DEFERRED_PAYLOAD_DEVICE_ID requires each device to set a non-empty tcpWireAuthPayloadDeviceId.");
+            return StringUtils.isBlank(cfg.getTcpWireAuthPayloadDeviceId()) ? null : cfg.getTcpWireAuthPayloadDeviceId().trim();
+        }
+        return null;
+    }
+
+    /**
+     * UDP 侧与 TCP 同构，见 {@link #validateTcpWireIdentityUniquePerTenant}。
+     */
+    private void validateUdpWireIdentityUniquePerTenant(TenantId tenantId, Device device) {
+        if (device.getDeviceData() == null
+                || !(device.getDeviceData().getTransportConfiguration() instanceof UdpDeviceTransportConfiguration current)) {
+            return;
+        }
+        DeviceProfile profile = deviceProfileService.findDeviceProfileById(tenantId, device.getDeviceProfileId(), false);
+        if (profile == null || profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration ptc)) {
+            return;
+        }
+        UdpWireAuthenticationMode wireMode = ptc.getUdpWireAuthenticationMode();
+        if (wireMode != UdpWireAuthenticationMode.NONE
+                && wireMode != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+            return;
+        }
+        String field = wireMode == UdpWireAuthenticationMode.NONE ? "sourceHost" : "udpWireAuthPayloadDeviceId";
+        String identity = normalizeUdpWireIdentity(wireMode, current);
+        UUID selfUuid = device.getId() != null ? device.getId().getId() : null;
+        boolean otherExists = false;
+        Set<String> others = new HashSet<>();
+        PageLink pageLink = new PageLink(500);
+        PageData<Device> page;
+        do {
+            page = deviceDao.findDevicesByTenantId(tenantId.getId(), pageLink);
+            for (Device other : page.getData()) {
+                if (selfUuid != null && selfUuid.equals(other.getId().getId())) {
+                    continue;
                 }
-                String pid = dt.getTcpWireAuthPayloadDeviceId().trim();
-                if (!seenPayloadIds.add(pid)) {
-                    throw new DataValidationException("Duplicate tcpWireAuthPayloadDeviceId on TCP dedicated listen port " + bindPort
-                            + " with DEFERRED_PAYLOAD_DEVICE_ID; protocol device ids must be unique per listen port.");
+                if (other.getDeviceData() == null
+                        || !(other.getDeviceData().getTransportConfiguration() instanceof UdpDeviceTransportConfiguration ot)) {
+                    continue;
+                }
+                DeviceProfile otherProfile = deviceProfileService.findDeviceProfileById(tenantId, other.getDeviceProfileId(), false);
+                if (otherProfile == null || otherProfile.getProfileData() == null
+                        || !(otherProfile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration optc)
+                        || optc.getUdpWireAuthenticationMode() != wireMode) {
+                    continue;
+                }
+                otherExists = true;
+                String otherIdentity = normalizeUdpWireIdentity(wireMode, ot);
+                if (otherIdentity != null) {
+                    others.add(otherIdentity);
                 }
             }
+            if (!page.hasNext()) {
+                break;
+            }
+            pageLink = pageLink.nextPageLink();
+        } while (true);
+        if (!otherExists) {
+            return;
         }
+        if (identity == null) {
+            throw new DataValidationException("With a shared UDP listen port, each device using " + wireMode
+                    + " must set a non-empty " + field + " (it is the only way to identify the device).");
+        }
+        if (others.contains(identity)) {
+            throw new DataValidationException("Duplicate " + field + " '" + identity
+                    + "' within the tenant: with a shared UDP listen port the identity must be unique per tenant.");
+        }
+    }
+
+    private static String normalizeUdpWireIdentity(UdpWireAuthenticationMode wireMode, UdpDeviceTransportConfiguration cfg) {
+        if (wireMode == UdpWireAuthenticationMode.NONE) {
+            return StringUtils.isBlank(cfg.getSourceHost()) ? null : cfg.getSourceHost().trim();
+        }
+        if (wireMode == UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+            return StringUtils.isBlank(cfg.getUdpWireAuthPayloadDeviceId()) ? null : cfg.getUdpWireAuthPayloadDeviceId().trim();
+        }
+        return null;
     }
 
     /**
@@ -306,7 +341,7 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
         TcpDeviceTransportConfiguration tcp = (TcpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
         if (StringUtils.isBlank(tcp.getTcpWireAuthPayloadDeviceId())) {
             throw new DataValidationException(
-                    "TCP DEFERRED_PAYLOAD_DEVICE_ID requires tcpWireAuthPayloadDeviceId on the device transport configuration (must match the payload JSON field value on this listen port).");
+                    "TCP DEFERRED_PAYLOAD_DEVICE_ID requires tcpWireAuthPayloadDeviceId on the device transport configuration (must match the payload JSON field value; the value must be unique within the tenant).");
         }
     }
 
@@ -334,113 +369,6 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
         }
     }
 
-    private void validateUdpDeviceNoServerBindPortWhenProfileServer(Device device) {
-        if (device.getDeviceData() == null || !(device.getDeviceData().getTransportConfiguration() instanceof UdpDeviceTransportConfiguration udp)) {
-            return;
-        }
-        if (udp.getServerBindPort() == null) {
-            return;
-        }
-        DeviceProfile profile = deviceProfileService.findDeviceProfileById(device.getTenantId(), device.getDeviceProfileId(), false);
-        if (profile == null || profile.getProfileData() == null
-                || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration ptc)) {
-            return;
-        }
-        if (ptc.getUdpProfileServerBindPort() != null) {
-            throw new DataValidationException(
-                    "UDP device transport must not set serverBindPort; set udpProfileServerBindPort on the device profile instead.");
-        }
-    }
-
-    private void validateUdpSharedServerBindPort(TenantId tenantId, Device device) {
-        if (device.getDeviceData() == null || !(device.getDeviceData().getTransportConfiguration() instanceof UdpDeviceTransportConfiguration)) {
-            return;
-        }
-        UdpDeviceTransportConfiguration udp = (UdpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
-        DeviceProfile profile = deviceProfileService.findDeviceProfileById(tenantId, device.getDeviceProfileId(), false);
-        Integer bindPort = UdpEffectiveServerBindPort.resolve(profile, udp);
-        if (bindPort == null) {
-            return;
-        }
-        UUID currentProfileId = device.getDeviceProfileId().getId();
-        UUID currentDeviceUuid = device.getId() != null ? device.getId().getId() : null;
-        List<Device> samePort = new ArrayList<>();
-        PageLink pageLink = new PageLink(500);
-        PageData<Device> page;
-        do {
-            page = deviceDao.findDevicesByTenantId(tenantId.getId(), pageLink);
-            for (Device other : page.getData()) {
-                if (currentDeviceUuid != null && other.getId().getId().equals(currentDeviceUuid)) {
-                    continue;
-                }
-                if (other.getDeviceData() == null || !(other.getDeviceData().getTransportConfiguration() instanceof UdpDeviceTransportConfiguration)) {
-                    continue;
-                }
-                UdpDeviceTransportConfiguration ot = (UdpDeviceTransportConfiguration) other.getDeviceData().getTransportConfiguration();
-                DeviceProfile otherProfile = deviceProfileService.findDeviceProfileById(tenantId, other.getDeviceProfileId(), false);
-                Integer otherBind = UdpEffectiveServerBindPort.resolve(otherProfile, ot);
-                if (otherBind == null || !otherBind.equals(bindPort)) {
-                    continue;
-                }
-                if (!other.getDeviceProfileId().getId().equals(currentProfileId)) {
-                    throw new DataValidationException("UDP dedicated listen port " + bindPort
-                            + " is already used by a device with a different device profile. "
-                            + "The same listen port may only be shared by devices that use the same device profile.");
-                }
-                samePort.add(other);
-            }
-            if (!page.hasNext()) {
-                break;
-            }
-            pageLink = pageLink.nextPageLink();
-        } while (true);
-        samePort.add(device);
-        if (samePort.size() <= 1) {
-            return;
-        }
-        if (profile == null || profile.getProfileData() == null
-                || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration)) {
-            return;
-        }
-        UdpDeviceProfileTransportConfiguration ptc = (UdpDeviceProfileTransportConfiguration) profile.getProfileData().getTransportConfiguration();
-        UdpWireAuthenticationMode wireMode = ptc.getUdpWireAuthenticationMode();
-        if (wireMode == UdpWireAuthenticationMode.NONE) {
-            Set<String> seenHosts = new HashSet<>();
-            for (Device d : samePort) {
-                UdpDeviceTransportConfiguration dt = (UdpDeviceTransportConfiguration) d.getDeviceData().getTransportConfiguration();
-                if (StringUtils.isNotBlank(dt.getSourceHost())) {
-                    try {
-                        String normalized = InetAddress.getByName(dt.getSourceHost().trim()).getHostAddress();
-                        if (!seenHosts.add(normalized)) {
-                            throw new DataValidationException("Duplicate sourceHost for devices sharing UDP dedicated listen port " + bindPort + ".");
-                        }
-                    } catch (UnknownHostException e) {
-                        throw new DataValidationException("Invalid sourceHost for shared UDP port: " + dt.getSourceHost());
-                    }
-                } else {
-                    throw new DataValidationException("When multiple devices share UDP dedicated listen port " + bindPort
-                            + " with wire authentication NONE, each device must set a distinct sourceHost.");
-                }
-            }
-            return;
-        }
-        if (wireMode == UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
-            Set<String> seenPayloadIds = new HashSet<>();
-            for (Device d : samePort) {
-                UdpDeviceTransportConfiguration dt = (UdpDeviceTransportConfiguration) d.getDeviceData().getTransportConfiguration();
-                if (StringUtils.isBlank(dt.getUdpWireAuthPayloadDeviceId())) {
-                    throw new DataValidationException("UDP dedicated listen port " + bindPort
-                            + " with DEFERRED_PAYLOAD_DEVICE_ID requires each device to set a non-empty udpWireAuthPayloadDeviceId.");
-                }
-                String pid = dt.getUdpWireAuthPayloadDeviceId().trim();
-                if (!seenPayloadIds.add(pid)) {
-                    throw new DataValidationException("Duplicate udpWireAuthPayloadDeviceId on UDP dedicated listen port " + bindPort
-                            + " with DEFERRED_PAYLOAD_DEVICE_ID; protocol device ids must be unique per listen port.");
-                }
-            }
-        }
-    }
-
     private void validateUdpWireAuthPayloadDeviceIdWhenRequired(Device device) {
         DeviceProfile profile = deviceProfileService.findDeviceProfileById(device.getTenantId(), device.getDeviceProfileId(), false);
         if (profile == null || profile.getProfileData() == null
@@ -458,7 +386,7 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
         UdpDeviceTransportConfiguration udp = (UdpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
         if (StringUtils.isBlank(udp.getUdpWireAuthPayloadDeviceId())) {
             throw new DataValidationException(
-                    "UDP DEFERRED_PAYLOAD_DEVICE_ID requires udpWireAuthPayloadDeviceId on the device transport configuration (must match the payload JSON field value on this listen port).");
+                    "UDP DEFERRED_PAYLOAD_DEVICE_ID requires udpWireAuthPayloadDeviceId on the device transport configuration (must match the payload JSON field value; the value must be unique within the tenant).");
         }
     }
 

@@ -98,11 +98,10 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
     if (this.tcpDeviceTransportConfigurationFormGroup
         && mode === TcpTransportConnectMode.CLIENT) {
       this.tcpDeviceTransportConfigurationFormGroup.patchValue(
-        { sourceHost: '', serverBindPort: null },
+        { sourceHost: '' },
         { emitEvent: true }
       );
     }
-    this.applyServerBindPortControlState();
   }
 
   /** 延迟 TOKEN / 延迟协议设备 ID +（SERVER 或未带 connectMode）：按入站场景，不展示 CLIENT 对端主机/端口 */
@@ -155,8 +154,6 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
       host: ['127.0.0.1'],
       port: [5025, [Validators.min(1), Validators.max(65535)]],
       sourceHost: [''],
-      /* 勿对 null 加 min(1)：档案 connectMode 异步到达前 tcpProfileTransportConnectMode 为 null，会误使整个表单 invalid，deviceData 变成 null 提交 */
-      serverBindPort: [null],
       tcpWireAuthPayloadDeviceId: ['']
     });
     this.tcpDeviceTransportConfigurationFormGroup.valueChanges.pipe(
@@ -164,7 +161,6 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
     ).subscribe(() => {
       this.updateModel();
     });
-    this.applyServerBindPortControlState();
     this.applyDeferredPayloadDeviceIdValidators();
   }
 
@@ -186,21 +182,6 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
     pidCtrl.updateValueAndValidity({ emitEvent: true });
   }
 
-  /** 设备侧不再提交 serverBindPort（监听端口在档案）；清空控件与校验避免残留旧数据 */
-  private applyServerBindPortControlState(): void {
-    const grp = this.tcpDeviceTransportConfigurationFormGroup;
-    if (!grp) {
-      return;
-    }
-    const ctrl = grp.get('serverBindPort');
-    if (!ctrl) {
-      return;
-    }
-    ctrl.reset(null, { emitEvent: false });
-    ctrl.clearValidators();
-    ctrl.updateValueAndValidity({ emitEvent: false });
-    this.updateModel();
-  }
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
     if (this.disabled) {
@@ -215,11 +196,9 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
         host: value.host,
         port: value.port,
         sourceHost: value.sourceHost || '',
-        serverBindPort: value.serverBindPort,
         tcpWireAuthPayloadDeviceId: value.tcpWireAuthPayloadDeviceId || ''
       }, {emitEvent: false});
     }
-    this.applyServerBindPortControlState();
   }
   validate(): ValidationErrors | null {
     return this.tcpDeviceTransportConfigurationFormGroup.valid ? null : {tcpDeviceTransport: false};

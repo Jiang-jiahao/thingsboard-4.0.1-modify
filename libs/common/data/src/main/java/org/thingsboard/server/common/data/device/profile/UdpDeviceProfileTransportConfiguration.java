@@ -7,10 +7,10 @@ import org.thingsboard.server.common.data.StringUtils;
 import java.util.Objects;
 
 /**
- * UDP 传输配置：设备向平台监听端口发送<strong>数据报</strong>（无 TCP 式 CLIENT/SERVER 建连，也无半包/粘包分帧）。
+ * UDP 传输配置：设备向平台监听端口（全局 {@code transport.udp.bind_address:bind_port}，默认 {@code 0.0.0.0:5684}）发送<strong>数据报</strong>
+ * （无 TCP 式 CLIENT/SERVER 建连，也无半包/粘包分帧）。
  * <p>
- * 须在档案填写 {@code udpProfileServerBindPort}；每个 UDP 报文即一条业务负载。
- * 设备传输不得再填写 {@link org.thingsboard.server.common.data.device.data.UdpDeviceTransportConfiguration#getServerBindPort() serverBindPort}。
+ * 每个 UDP 报文即一条业务负载；多实例由前置 LB（需按源地址粘性）或 SO_REUSEPORT 分派。
  */
 @Data
 public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTransportConfiguration {
@@ -30,11 +30,6 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
      * 为从业务负载（任意一帧，见枚举说明）解析身份字段后再注册会话。
      */
     private UdpWireAuthenticationMode udpWireAuthenticationMode;
-
-    /**
-     * 平台 UDP 监听端口（1–65535）：同档案下多设备共用；设备传输勿再填写 {@code serverBindPort}。
-     */
-    private Integer udpProfileServerBindPort;
 
     /**
      * 当 {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} 时：解析得到的 JSON 中存放 <strong>ACCESS_TOKEN</strong>（{@code credentialsId}）的字段名。<br>
@@ -162,12 +157,6 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
         }
         if (udpTransportFramingMode != null && udpTransportFramingMode != UdpTransportFramingMode.NONE) {
             throw new IllegalArgumentException("UDP transport does not support stream framing (LINE/LENGTH_PREFIX/FIXED_LENGTH); each datagram is one payload.");
-        }
-        if (udpProfileServerBindPort == null) {
-            throw new IllegalArgumentException("udpProfileServerBindPort is required on the UDP device profile.");
-        }
-        if (udpProfileServerBindPort < 1 || udpProfileServerBindPort > 65535) {
-            throw new IllegalArgumentException("udpProfileServerBindPort must be between 1 and 65535");
         }
     }
 

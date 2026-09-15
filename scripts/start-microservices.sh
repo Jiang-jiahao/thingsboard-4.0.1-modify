@@ -151,14 +151,13 @@ mqtt_bind_for_replica() {
   echo $((MQTT_BIND_BASE + idx - 1))
 }
 
+# 所有 replica 监听同一端口：多实例由前置 LB 分派，同主机多实例靠 SO_REUSEPORT（reuse_port）共享。
 tcp_bind_for_replica() {
-  local idx="$1"
-  echo $((TCP_BIND_BASE + (idx - 1) * 10))
+  echo "${TCP_BIND_BASE}"
 }
 
 udp_bind_for_replica() {
-  local idx="$1"
-  echo $((UDP_BIND_BASE + (idx - 1) * 10))
+  echo "${UDP_BIND_BASE}"
 }
 
 port_open() {
@@ -730,8 +729,8 @@ Default local topology (2 of each):
   tb-rule-engine1 / tb-rule-engine2        HTTP 8082 / 18082
   tb-http-transport1 / tb-http-transport2  HTTP 8081 / 18081
   tb-mqtt-transport1 / tb-mqtt-transport2  HTTP 8083 / 18083  MQTT 1883 / 1884
-  tb-tcp-transport1 / tb-tcp-transport2    HTTP 8087 / 18087  TCP 5683 / 5693
-  tb-udp-transport1 / tb-udp-transport2    HTTP 8088 / 18088  UDP 5684 / 5694
+  tb-tcp-transport1 / tb-tcp-transport2    HTTP 8087 / 18087  TCP 均监听 5683（SO_REUSEPORT 共享）
+  tb-udp-transport1 / tb-udp-transport2    HTTP 8088 / 18088  UDP 均监听 5684（SO_REUSEPORT 共享）
 
 Requires ZooKeeper + Postgres (and normally Kafka/Redis) already running.
 EOF

@@ -164,7 +164,6 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
 
     this.tcpDeviceProfileTransportConfigurationFormGroup = this.fb.group({
       udpWireAuthenticationMode: [UdpWireAuthenticationMode.TOKEN, Validators.required],
-      udpProfileServerBindPort: [null, [Validators.required, Validators.min(1), Validators.max(65535)]],
       udpDeferredWireAuthTokenJsonKey: [''],
       udpReadIdleTimeoutSec: [null, [Validators.min(0)]],
       udpOpaqueRuleEngineKey: ['udpOpaquePayload'],
@@ -822,7 +821,6 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
         : rawType;
       this.tcpDeviceProfileTransportConfigurationFormGroup.patchValue({
         udpWireAuthenticationMode: value.udpWireAuthenticationMode,
-        udpProfileServerBindPort: value.udpProfileServerBindPort ?? null,
         udpDeferredWireAuthTokenJsonKey: value.udpDeferredWireAuthTokenJsonKey ?? '',
         udpReadIdleTimeoutSec: value.udpReadIdleTimeoutSec,
         udpOpaqueRuleEngineKey: value.udpOpaqueRuleEngineKey || 'udpOpaquePayload',
@@ -1114,13 +1112,6 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
     };
     if (v.udpReadIdleTimeoutSec != null && v.udpReadIdleTimeoutSec !== '') {
       configuration.udpReadIdleTimeoutSec = Number(v.udpReadIdleTimeoutSec);
-    }
-    const pbp = v.udpProfileServerBindPort;
-    if (pbp != null && pbp !== '') {
-      const n = Number(pbp);
-      if (Number.isFinite(n)) {
-        configuration.udpProfileServerBindPort = n;
-      }
     }
     if (v.udpWireAuthenticationMode === UdpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
         || v.udpWireAuthenticationMode === UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
