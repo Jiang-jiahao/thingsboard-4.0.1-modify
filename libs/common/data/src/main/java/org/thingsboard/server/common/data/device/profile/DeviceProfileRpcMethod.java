@@ -3,6 +3,7 @@
  */
 package org.thingsboard.server.common.data.device.profile;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
@@ -25,6 +26,22 @@ public class DeviceProfileRpcMethod implements Serializable {
     private Boolean oneWay;
     /** 可选；毫秒 */
     private Long timeoutMs;
+
+    /**
+     * @deprecated 定时已改到设备 {@code deviceData.scheduledRpcs}；档案上仅保留方法定义。
+     */
+    @Deprecated
+    private Boolean scheduleEnabled;
+    /**
+     * @deprecated 见 {@link #scheduleEnabled}。
+     */
+    @Deprecated
+    private Long scheduleIntervalMs;
+    /**
+     * @deprecated 见 {@link #scheduleEnabled}。
+     */
+    @Deprecated
+    private String scheduleParamsJson;
 
     private DeviceProfileRpcBindingType bindingType;
 
@@ -126,5 +143,12 @@ public class DeviceProfileRpcMethod implements Serializable {
         if (mqttQos != null && (mqttQos < 0 || mqttQos > 2)) {
             throw new IllegalArgumentException("RPC method mqttQos must be 0, 1 or 2: " + id);
         }
+    }
+
+    @JsonIgnore
+    public boolean isScheduleActive() {
+        return Boolean.TRUE.equals(scheduleEnabled)
+                && scheduleIntervalMs != null
+                && scheduleIntervalMs >= 1000L;
     }
 }

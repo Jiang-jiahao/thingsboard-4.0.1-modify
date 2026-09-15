@@ -247,7 +247,13 @@ public class HttpPullTransportContext extends TransportContext {
         if (!isHttpPullEnabled()) {
             return;
         }
-        refreshCollectorDevice(event.getDevice());
+        Device eventDevice = event.getDevice();
+        if (eventDevice == null || eventDevice.getId() == null) {
+            return;
+        }
+        // 与档案更新一致：用 GetDevice 拉取完整 deviceTransportConfiguration，避免更新通知里配置丢失。
+        Device device = protoEntityService.getDeviceById(eventDevice.getId());
+        refreshCollectorDevice(device != null ? device : eventDevice);
     }
 
     @EventListener(DeviceDeletedEvent.class)

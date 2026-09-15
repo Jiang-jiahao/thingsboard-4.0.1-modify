@@ -43,16 +43,21 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.thingsboard.server.common.adaptor.JsonConverter;
 import org.thingsboard.server.common.data.DataConstants;
+import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.common.data.device.profile.DeviceProfileRpcBindingType;
+import org.thingsboard.server.common.data.device.profile.DeviceProfileRpcMethod;
 import org.thingsboard.server.common.data.transport.http.HttpPullDeviceRoutingConfiguration;
 import org.thingsboard.server.common.data.transport.http.HttpPullRoutingMode;
 import org.thingsboard.server.common.data.TbTransportService;
 import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.ota.OtaPackageType;
 import org.thingsboard.server.common.data.rpc.RpcStatus;
 import org.thingsboard.server.common.transport.SessionMsgListener;
 import org.thingsboard.server.common.transport.TransportContext;
+import org.thingsboard.server.common.transport.TransportDeviceProfileCache;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.transport.TransportServiceCallback;
 import org.thingsboard.server.common.transport.auth.SessionInfoCreator;
@@ -137,6 +142,9 @@ public class DeviceApiController implements TbTransportService {
     @Autowired
     private HttpTransportContext transportContext;
 
+    @Autowired
+    private TransportDeviceProfileCache deviceProfileCache;
+
     @Autowired(required = false)
     private HttpPushTransportContext httpPushTransportContext;
 
@@ -173,7 +181,7 @@ public class DeviceApiController implements TbTransportService {
                     }
                     TransportService transportService = transportContext.getTransportService();
                     transportService.registerSyncSession(sessionInfo,
-                            new HttpSessionListener(responseWriter, transportContext.getTransportService(), sessionInfo),
+                            new HttpSessionListener(responseWriter, transportContext.getTransportService(), sessionInfo, deviceProfileCache),
                             transportContext.getDefaultTimeout());
                     transportService.process(sessionInfo, request.build(), new SessionCloseOnErrorCallback(transportService, sessionInfo));
                 }));
@@ -289,7 +297,7 @@ public class DeviceApiController implements TbTransportService {
                 new DeviceAuthCallback(transportContext, responseWriter, sessionInfo -> {
                     TransportService transportService = transportContext.getTransportService();
                     transportService.registerSyncSession(sessionInfo,
-                            new HttpSessionListener(responseWriter, transportContext.getTransportService(), sessionInfo),
+                            new HttpSessionListener(responseWriter, transportContext.getTransportService(), sessionInfo, deviceProfileCache),
                             timeout == 0 ? transportContext.getDefaultTimeout() : timeout);
                     transportService.process(sessionInfo, SubscribeToRPCMsg.getDefaultInstance(),
                             new SessionCloseOnErrorCallback(transportService, sessionInfo));
@@ -350,7 +358,7 @@ public class DeviceApiController implements TbTransportService {
                     JsonObject request = JsonParser.parseString(json).getAsJsonObject();
                     TransportService transportService = transportContext.getTransportService();
                     transportService.registerSyncSession(sessionInfo,
-                            new HttpSessionListener(responseWriter, transportContext.getTransportService(), sessionInfo),
+                            new HttpSessionListener(responseWriter, transportContext.getTransportService(), sessionInfo, deviceProfileCache),
                             transportContext.getDefaultTimeout());
                     transportService.process(sessionInfo, ToServerRpcRequestMsg.newBuilder().setRequestId(0)
                                     .setMethodName(request.get("method").getAsString())
@@ -376,7 +384,7 @@ public class DeviceApiController implements TbTransportService {
                 new DeviceAuthCallback(transportContext, responseWriter, sessionInfo -> {
                     TransportService transportService = transportContext.getTransportService();
                     transportService.registerSyncSession(sessionInfo,
-                            new HttpSessionListener(responseWriter, transportContext.getTransportService(), sessionInfo),
+                            new HttpSessionListener(responseWriter, transportContext.getTransportService(), sessionInfo, deviceProfileCache),
                             timeout == 0 ? transportContext.getDefaultTimeout() : timeout);
                     transportService.process(sessionInfo, SubscribeToAttributeUpdatesMsg.getDefaultInstance(),
                             new SessionCloseOnErrorCallback(transportService, sessionInfo));
@@ -615,6 +623,7 @@ public class DeviceApiController implements TbTransportService {
         private final DeferredResult<ResponseEntity> responseWriter;
         private final TransportService transportService;
         private final SessionInfoProto sessionInfo;
+        private final TransportDeviceProfileCache deviceProfileCache;
 
         @Override
         public void onGetAttributesResponse(GetAttributeResponseMsg msg) {
@@ -635,9 +644,37 @@ public class DeviceApiController implements TbTransportService {
 
         @Override
         public void onToDeviceRpcRequest(UUID sessionId, ToDeviceRpcRequestMsg msg) {
+            if (isHttpOutboundRpc(msg.getMethodName())) {
+                // HTTP_OUTBOUND 由虚拟出站会话处理；long-poll 静默忽略，避免误标 DELIVERED
+                log.trace("[{}] Ignore HTTP_OUTBOUND RPC on long-poll session: {}", sessionId, msg.getMethodName());
+                return;
+            }
             log.trace("[{}] Received RPC command to device", sessionId);
             responseWriter.setResult(new ResponseEntity<>(JsonConverter.toJson(msg, true).toString(), HttpStatus.OK));
             transportService.process(sessionInfo, msg, RpcStatus.DELIVERED, TransportServiceCallback.EMPTY);
+        }
+
+        private boolean isHttpOutboundRpc(String methodName) {
+            if (StringUtils.isBlank(methodName) || deviceProfileCache == null) {
+                return false;
+            }
+            try {
+                DeviceProfileId profileId = new DeviceProfileId(
+                        new UUID(sessionInfo.getDeviceProfileIdMSB(), sessionInfo.getDeviceProfileIdLSB()));
+                DeviceProfile profile = deviceProfileCache.get(profileId);
+                if (profile == null || profile.getProfileData() == null || profile.getProfileData().getRpcMethods() == null) {
+                    return false;
+                }
+                for (DeviceProfileRpcMethod m : profile.getProfileData().getRpcMethods()) {
+                    if (m != null && methodName.equals(m.getId())
+                            && m.getBindingType() == DeviceProfileRpcBindingType.HTTP_OUTBOUND) {
+                        return true;
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("Failed to resolve RPC binding for method {}", methodName, e);
+            }
+            return false;
         }
 
         @Override

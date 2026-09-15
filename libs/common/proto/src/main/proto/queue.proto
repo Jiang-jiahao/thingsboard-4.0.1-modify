@@ -627,6 +627,8 @@ message GetSnmpDevicesResponseMsg {
 message GetHttpPullDevicesRequestMsg {
   int32 page = 1;
   int32 pageSize = 2;
+  // 可选：DEFAULT / HTTP_PULL；缺省 HTTP_PULL（兼容旧客户端）
+  optional string transportType = 3;
 }
 
 message GetHttpPullDevicesResponseMsg {

@@ -23,6 +23,7 @@ import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.EntityType;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.data.DeviceData;
+import org.thingsboard.server.common.data.device.data.DeviceScheduledRpc;
 import org.thingsboard.server.common.data.device.data.DeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.data.UdpDeviceTransportConfiguration;
@@ -108,6 +109,7 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
         Optional.ofNullable(device.getDeviceData())
                 .flatMap(deviceData -> Optional.ofNullable(deviceData.getTransportConfiguration()))
                 .ifPresent(DeviceTransportConfiguration::validate);
+        validateScheduledRpcs(device);
         validateTcpDeviceNoServerBindPortWhenProfileServer(device);
         validateTcpSharedServerBindPort(tenantId, device);
         validateTcpWireAuthPayloadDeviceIdWhenRequired(device);
@@ -117,6 +119,26 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
         validateUdpWireAuthPayloadDeviceIdWhenRequired(device);
         // 验证设备（或设备档案）与OTA包的关联关系是否合法。
         validateOtaPackage(tenantId, device, device.getDeviceProfileId());
+    }
+
+    private void validateScheduledRpcs(Device device) {
+        if (device.getDeviceData() == null || device.getDeviceData().getScheduledRpcs() == null) {
+            return;
+        }
+        Set<String> methodIds = new HashSet<>();
+        for (DeviceScheduledRpc scheduled : device.getDeviceData().getScheduledRpcs()) {
+            if (scheduled == null) {
+                continue;
+            }
+            try {
+                scheduled.validate();
+            } catch (IllegalArgumentException e) {
+                throw new DataValidationException(e.getMessage());
+            }
+            if (StringUtils.isNotBlank(scheduled.getMethodId()) && !methodIds.add(scheduled.getMethodId())) {
+                throw new DataValidationException("Duplicate scheduled RPC methodId: " + scheduled.getMethodId());
+            }
+        }
     }
 
 

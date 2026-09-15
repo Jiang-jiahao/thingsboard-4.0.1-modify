@@ -225,7 +225,8 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
         configuration: raw.configuration,
         transportConfiguration: raw.transportConfiguration,
         rpcParamDefaults: this.lastWrittenValue?.rpcParamDefaults,
-        rpcParamDefaultsByMethod: this.lastWrittenValue?.rpcParamDefaultsByMethod
+        rpcParamDefaultsByMethod: this.lastWrittenValue?.rpcParamDefaultsByMethod,
+        scheduledRpcs: this.lastWrittenValue?.scheduledRpcs
       };
     }
     this.propagateChange(deviceData);

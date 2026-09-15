@@ -300,6 +300,42 @@
 
           </div>
 
+          <mat-expansion-panel class="tb-device-rpc-schedule" [expanded]="scheduleEnabled" style="margin-top: 12px;">
+            <mat-expansion-panel-header>
+              <mat-panel-title translate>device.rpc.schedule-title</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="tb-hint mat-body-2" style="margin-bottom: 8px;" translate>device.rpc.schedule-hint</div>
+            <div class="flex flex-row gap-2 flex-wrap items-center">
+              <mat-checkbox [(ngModel)]="scheduleEnabled" [ngModelOptions]="{standalone: true}" color="primary">
+                <span translate>device.rpc.schedule-enabled</span>
+              </mat-checkbox>
+              <mat-form-field style="max-width: 180px;" *ngIf="scheduleEnabled">
+                <mat-label translate>device.rpc.schedule-interval-ms</mat-label>
+                <input matInput type="number" min="1000"
+                       [(ngModel)]="scheduleIntervalMs" [ngModelOptions]="{standalone: true}"/>
+                <mat-hint translate>device.rpc.schedule-interval-min</mat-hint>
+              </mat-form-field>
+            </div>
+            <mat-form-field class="mat-block" *ngIf="scheduleEnabled && !selectedMethodScheduleHidesParams" style="margin-top: 8px;">
+              <mat-label translate>device.rpc.schedule-params</mat-label>
+              <textarea matInput rows="2"
+                        [(ngModel)]="scheduleParamsJson" [ngModelOptions]="{standalone: true}"
+                        placeholder='{"pin":7,"value":1}'></textarea>
+              <mat-hint translate>device.rpc.schedule-params-hint</mat-hint>
+            </mat-form-field>
+            <div class="tb-hint mat-caption" *ngIf="scheduleEnabled && selectedMethodScheduleHidesParams"
+                 style="margin-top: 8px;" translate>device.rpc.schedule-params-http-hint</div>
+            <div style="margin-top: 12px;">
+              <button mat-stroked-button color="primary" type="button"
+                      [disabled]="savingSchedule"
+                      (click)="saveSchedule()">
+                <mat-icon *ngIf="!savingSchedule">schedule</mat-icon>
+                <mat-spinner *ngIf="savingSchedule" diameter="20"></mat-spinner>
+                <span translate>device.rpc.schedule-save</span>
+              </button>
+            </div>
+          </mat-expansion-panel>
+
         </ng-container>
 
       </form>

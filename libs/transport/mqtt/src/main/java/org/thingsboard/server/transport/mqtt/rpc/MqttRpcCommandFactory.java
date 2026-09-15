@@ -77,10 +77,8 @@ public final class MqttRpcCommandFactory {
                                          int qos,
                                          boolean mqttPull) {
         String payload = JsonConverter.toJson(toDeliver, false).toString();
-        if (StringUtils.isBlank(method.getMqttRequestTopic())) {
-            if (mqttPull) {
-                throw new IllegalArgumentException("NATIVE MQTT pull RPC requires mqttRequestTopic: " + method.getId());
-            }
+        // NATIVE 一律标准主题；忽略档案上残留的自定义 mqttRequestTopic/mqttResponseTopic
+        if (!mqttPull) {
             return Command.builder()
                     .useStandardNativeTopic(true)
                     .qos(qos)
@@ -88,10 +86,11 @@ public final class MqttRpcCommandFactory {
                     .payload(payload)
                     .build();
         }
-        String requestTopic = MqttRpcTemplateResolver.resolve(
-                method.getMqttRequestTopic(), device, deviceInfo, toDeliver.getParams(),
-                toDeliver.getRequestId(), toDeliver.getMethodName());
-        String responseTopic = resolveResponseTopic(method, toDeliver, device, deviceInfo);
+        int requestId = toDeliver.getRequestId();
+        String requestTopic = "v1/devices/me/rpc/request/" + requestId;
+        String responseTopic = toDeliver.getOneway()
+                ? null
+                : "v1/devices/me/rpc/response/" + requestId;
         return Command.builder()
                 .useStandardNativeTopic(false)
                 .requestTopic(requestTopic)

@@ -575,7 +575,15 @@ public class DefaultTransportApiService implements TransportApiService {
 
     private TransportApiResponseMsg handle(TransportProtos.GetHttpPullDevicesRequestMsg requestMsg) {
         PageLink pageLink = new PageLink(requestMsg.getPageSize(), requestMsg.getPage());
-        PageData<UUID> result = deviceService.findDevicesIdsByDeviceProfileTransportType(DeviceTransportType.HTTP_PULL, pageLink);
+        DeviceTransportType transportType = DeviceTransportType.HTTP_PULL;
+        if (requestMsg.hasTransportType() && StringUtils.isNotBlank(requestMsg.getTransportType())) {
+            try {
+                transportType = DeviceTransportType.valueOf(requestMsg.getTransportType().trim());
+            } catch (IllegalArgumentException ignored) {
+                transportType = DeviceTransportType.HTTP_PULL;
+            }
+        }
+        PageData<UUID> result = deviceService.findDevicesIdsByDeviceProfileTransportType(transportType, pageLink);
         TransportProtos.GetHttpPullDevicesResponseMsg responseMsg = TransportProtos.GetHttpPullDevicesResponseMsg.newBuilder()
                 .addAllIds(result.getData().stream().map(UUID::toString).collect(Collectors.toList()))
                 .setHasNextPage(result.hasNext())

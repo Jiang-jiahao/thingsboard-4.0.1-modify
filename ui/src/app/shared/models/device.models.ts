@@ -2285,6 +2285,22 @@ export function isHttpPullProfileTransport(
   return resolveHttpProfileTransportTypeForDisplay(type, transportConfiguration) === DeviceTransportType.HTTP_PULL;
 }
 
+/** HTTP 被动服务端（DEFAULT / PASSIVE）档案 */
+export function isHttpPassiveProfileTransport(
+  type: DeviceTransportType | string | null | undefined,
+  transportConfiguration?: { type?: DeviceTransportType; httpTransportMode?: HttpTransportMode } | null
+): boolean {
+  const resolved = resolveHttpProfileTransportTypeForDisplay(type, transportConfiguration);
+  if (resolved === DeviceTransportType.HTTP_PULL) {
+    return false;
+  }
+  // HTTP 合并下拉：entity 常为 DEFAULT，或 UI 显示为 HTTP+PASSIVE
+  return resolved === DeviceTransportType.DEFAULT
+    || type === DeviceTransportType.DEFAULT
+    || type === BasicTransportType.HTTP
+    || transportConfiguration?.httpTransportMode === HttpTransportMode.PASSIVE;
+}
+
 export function isHttpOutboundRpcBinding(bindingType: DeviceProfileRpcBindingType | null | undefined): boolean {
   return bindingType === DeviceProfileRpcBindingType.HTTP_OUTBOUND;
 }
@@ -2509,6 +2525,15 @@ export interface DeviceTransportConfiguration extends DeviceTransportConfigurati
   type: DeviceTransportType;
 }
 
+/** 设备级定时 RPC：引用档案方法 methodId，开关与间隔由本设备配置 */
+export interface DeviceScheduledRpc {
+  methodId: string;
+  enabled?: boolean;
+  intervalMs?: number;
+  /** 原生/MQTT 定时 params 原文；HTTP 出站忽略，使用档案请求体 */
+  paramsJson?: string;
+}
+
 export interface DeviceData {
   configuration: DeviceConfiguration;
   transportConfiguration: DeviceTransportConfiguration;
@@ -2516,6 +2541,8 @@ export interface DeviceData {
   rpcParamDefaults?: Record<string, unknown>;
   /** 按 RPC 方法 id 分组的固定参数 */
   rpcParamDefaultsByMethod?: Record<string, Record<string, unknown>>;
+  /** 本设备定时自动调用的档案 RPC 方法 */
+  scheduledRpcs?: DeviceScheduledRpc[];
 }
 
 export interface Device extends BaseData<DeviceId>, HasTenantId, HasVersion, ExportableEntity<DeviceId> {

@@ -20,6 +20,7 @@ import {
   DeviceProfileTransportConfiguration,
   DeviceTransportType,
   isHttpOutboundRpcBinding,
+  isHttpPassiveProfileTransport,
   isHttpPullProfileTransport,
   isMqttCustomRpcBinding,
   isMqttProfileRpcTransport,
@@ -105,6 +106,16 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     return isHttpPullProfileTransport(this.transportType, this.transportConfiguration);
   }
 
+  /** HTTP 被动（服务端 / DEFAULT） */
+  get httpPassiveRpcTransport(): boolean {
+    return isHttpPassiveProfileTransport(this.transportType, this.transportConfiguration);
+  }
+
+  /** HTTP 主动或被动，均可配置 NATIVE / HTTP_OUTBOUND */
+  get httpRpcTransport(): boolean {
+    return this.httpPullRpcTransport || this.httpPassiveRpcTransport;
+  }
+
   get mqttRpcTransport(): boolean {
     return isMqttProfileRpcTransport(this.transportType, this.transportConfiguration);
   }
@@ -115,7 +126,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
 
   get httpOutboundBinding(): boolean {
     const bt = this.rpcMethodFormGroup?.get('bindingType')?.value as DeviceProfileRpcBindingType;
-    return this.httpPullRpcTransport && isHttpOutboundRpcBinding(bt);
+    return this.httpRpcTransport && isHttpOutboundRpcBinding(bt);
   }
 
   get mqttCustomBinding(): boolean {
@@ -127,7 +138,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     if (this.templateBindingOnly) {
       return false;
     }
-    if (this.httpPullRpcTransport || this.mqttRpcTransport) {
+    if (this.httpRpcTransport || this.mqttRpcTransport) {
       const bt = this.rpcMethodFormGroup?.get('bindingType')?.value as DeviceProfileRpcBindingType;
       return bt === DeviceProfileRpcBindingType.NATIVE;
     }
@@ -135,10 +146,10 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
   }
 
   get bindingTypeSelectable(): boolean {
-    return this.httpPullRpcTransport || this.mqttRpcTransport;
+    return this.httpRpcTransport || this.mqttRpcTransport;
   }
 
-  readonly httpPullRpcBindingTypes = [
+  readonly httpRpcBindingTypes = [
     DeviceProfileRpcBindingType.HTTP_OUTBOUND,
     DeviceProfileRpcBindingType.NATIVE
   ];
@@ -184,7 +195,9 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
   ngOnInit(): void {
     const defaultBinding = this.templateBindingOnly
       ? DeviceProfileRpcBindingType.TCP_TEMPLATE
-      : (this.httpPullRpcTransport ? DeviceProfileRpcBindingType.HTTP_OUTBOUND : DeviceProfileRpcBindingType.NATIVE);
+      : (this.httpPullRpcTransport
+        ? DeviceProfileRpcBindingType.HTTP_OUTBOUND
+        : DeviceProfileRpcBindingType.NATIVE);
 
     this.rpcMethodFormGroup = this.fb.group({
       id: ['', [Validators.required, Validators.pattern(/^[a-zA-Z][a-zA-Z0-9_]*$/)]],
@@ -267,7 +280,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       this.rpcMethodFormGroup.get('templateCommandRef').setValidators([Validators.required]);
       this.rpcMethodFormGroup.get('deviceMethod').clearValidators();
       this.rpcMethodFormGroup.get('httpUrl').clearValidators();
-    } else if (this.httpPullRpcTransport && isHttpOutboundRpcBinding(bindingType)) {
+    } else if (this.httpRpcTransport && isHttpOutboundRpcBinding(bindingType)) {
       enableAll(httpFields);
       this.rpcMethodFormGroup.get('httpUrl').setValidators([Validators.required]);
       this.rpcMethodFormGroup.get('httpMethod').setValidators([Validators.required]);
@@ -285,13 +298,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       this.rpcMethodFormGroup.get('deviceMethod').setValidators([Validators.required]);
       this.rpcMethodFormGroup.get('httpUrl').clearValidators();
       this.rpcMethodFormGroup.get('httpMethod').clearValidators();
-      if (this.mqttRpcTransport) {
-        enableAll(mqttTopicFields);
-        if (this.mqttPullRpcTransport) {
-          this.rpcMethodFormGroup.get('mqttRequestTopic').setValidators([Validators.required]);
-        }
-        this.applyMqttResponseTopicValidator();
-      }
+      // NATIVE MQTT：不配置主题，后端固定 v1/devices/me/rpc/*
     }
     this.rpcMethodFormGroup.get('deviceMethod').updateValueAndValidity({ emitEvent: false });
     this.rpcMethodFormGroup.get('httpUrl').updateValueAndValidity({ emitEvent: false });
@@ -305,7 +312,8 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
   private applyMqttResponseTopicValidator(): void {
     const oneWay = this.rpcMethodFormGroup.get('oneWay')?.value !== false;
     const responseCtrl = this.rpcMethodFormGroup.get('mqttResponseTopic');
-    if (!oneWay && (this.mqttCustomBinding || this.mqttPullRpcTransport)) {
+    // 仅 MQTT_CUSTOM 双向时要求响应主题；NATIVE 使用标准主题由后端处理
+    if (!oneWay && this.mqttCustomBinding) {
       responseCtrl?.setValidators([Validators.required]);
     } else {
       responseCtrl?.clearValidators();
@@ -361,7 +369,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     let bindingType = raw.bindingType as DeviceProfileRpcBindingType;
     if (this.templateBindingOnly) {
       bindingType = DeviceProfileRpcBindingType.TCP_TEMPLATE;
-    } else if (!this.httpPullRpcTransport && !this.mqttRpcTransport) {
+    } else if (!this.httpRpcTransport && !this.mqttRpcTransport) {
       bindingType = DeviceProfileRpcBindingType.NATIVE;
     }
 
@@ -408,13 +416,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       out.deviceMethod = (raw.deviceMethod as string)?.trim();
       const pt = (raw.paramsTemplateJson as string)?.trim();
       out.paramsTemplateJson = pt || undefined;
-      if (this.mqttRpcTransport) {
-        const req = (raw.mqttRequestTopic as string)?.trim();
-        out.mqttRequestTopic = req || undefined;
-        const resp = (raw.mqttResponseTopic as string)?.trim();
-        out.mqttResponseTopic = resp || undefined;
-        out.mqttQos = raw.mqttQos != null && raw.mqttQos !== '' ? Number(raw.mqttQos) : 1;
-      }
+      // NATIVE MQTT 不再写出自定义主题；旧数据由后端忽略
     }
 
     this.propagateChange(out);

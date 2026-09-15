@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 @Schema
@@ -44,5 +45,12 @@ public class DeviceData implements Serializable {
      */
     @Schema(description = "Per-device fixed RPC defaults keyed by profile RPC method id")
     private Map<String, Map<String, Object>> rpcParamDefaultsByMethod;
+
+    /**
+     * 本设备要自动调用的档案 RPC 方法（开关、间隔、可选 params）。
+     * 方法定义仍在设备档案；定时属于设备。
+     */
+    @Schema(description = "Per-device scheduled RPC invocations referencing profile method ids")
+    private List<DeviceScheduledRpc> scheduledRpcs;
 
 }

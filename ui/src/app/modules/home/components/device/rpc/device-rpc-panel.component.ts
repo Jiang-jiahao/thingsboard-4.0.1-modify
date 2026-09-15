@@ -38,6 +38,8 @@ import {
 
   DeviceProfileRpcMethod,
 
+  DeviceScheduledRpc,
+
   DeviceTransportType,
 
   isTcpHexVariableByteSlice,
@@ -155,6 +157,10 @@ export class DeviceRpcPanelComponent implements OnChanges {
       || isMqttCustomRpcBinding(this.selectedMethod?.bindingType);
   }
 
+  get selectedMethodScheduleHidesParams(): boolean {
+    return isHttpOutboundRpcBinding(this.selectedMethod?.bindingType);
+  }
+
   get editableInvokeKeys(): string[] {
     const fixed = new Set(this.methodFixedEntries.map(e => e.platformKey));
     return this.methodPlatformKeys.filter(k => !fixed.has(k));
@@ -186,6 +192,12 @@ export class DeviceRpcPanelComponent implements OnChanges {
   newFixedValue = '';
 
   savingFixedParams = false;
+
+  scheduleEnabled = false;
+  scheduleIntervalMs: number | null = null;
+  scheduleParamsJson = '{}';
+  savingSchedule = false;
+  private scheduledRpcs: DeviceScheduledRpc[] = [];
 
 
 
@@ -333,6 +345,8 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
       this.methodFixedEntries = [];
 
+      this.applyScheduleForMethod();
+
       return;
 
     }
@@ -344,6 +358,8 @@ export class DeviceRpcPanelComponent implements OnChanges {
     this.deviceRpcParamDefaults = resolveMethodRpcDefaults(this.deviceDataForRpcDefaults, methodId);
 
     this.methodFixedEntries = fixedEntriesFromDefaults(this.deviceRpcParamDefaults, this.methodFieldMeta);
+
+    this.applyScheduleForMethod();
 
     this.applyInvokeFieldsForMethod();
 
@@ -450,7 +466,9 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
             transportConfiguration: existing.transportConfiguration,
 
-            rpcParamDefaultsByMethod: byMethod
+            rpcParamDefaultsByMethod: byMethod,
+
+            scheduledRpcs: existing.scheduledRpcs
 
           }
 
@@ -483,6 +501,7 @@ export class DeviceRpcPanelComponent implements OnChanges {
           rpcParamDefaultsByMethod: this.rpcParamDefaultsByMethod,
           rpcParamDefaults: saved.deviceData?.rpcParamDefaults
         };
+        this.scheduledRpcs = saved.deviceData?.scheduledRpcs ?? this.scheduledRpcs;
 
         this.onMethodSelected(methodId);
 
@@ -500,6 +519,86 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
     });
 
+  }
+
+  saveSchedule(): void {
+    const deviceId = this.device?.id?.id;
+    const methodId = this.selectedMethod?.id;
+    if (!deviceId || !methodId || this.savingSchedule) {
+      return;
+    }
+    if (this.scheduleEnabled) {
+      const interval = Number(this.scheduleIntervalMs);
+      if (!Number.isFinite(interval) || interval < 1000) {
+        this.notifyError('device.rpc.schedule-interval-min');
+        return;
+      }
+    }
+    let paramsJson: string | undefined;
+    if (!this.selectedMethodScheduleHidesParams) {
+      const trimmed = (this.scheduleParamsJson ?? '').trim();
+      if (trimmed && trimmed !== '{}') {
+        try {
+          JSON.parse(trimmed);
+        } catch {
+          this.notifyError('device.rpc.schedule-params-invalid');
+          return;
+        }
+        paramsJson = trimmed;
+      }
+    }
+    const intervalNum = Number(this.scheduleIntervalMs);
+    const next: DeviceScheduledRpc = {
+      methodId,
+      enabled: !!this.scheduleEnabled,
+      intervalMs: Number.isFinite(intervalNum) ? intervalNum : undefined,
+      paramsJson
+    };
+    this.savingSchedule = true;
+    this.cd.markForCheck();
+    this.deviceService.getDevice(deviceId).pipe(
+      switchMap(dev => {
+        const existing = dev.deviceData ?? {} as Device['deviceData'];
+        const merged = mergeDeviceScheduledRpcs(existing.scheduledRpcs, next);
+        const updated: Device = {
+          ...dev,
+          deviceData: {
+            ...existing,
+            configuration: existing.configuration,
+            transportConfiguration: existing.transportConfiguration,
+            rpcParamDefaults: existing.rpcParamDefaults,
+            rpcParamDefaultsByMethod: existing.rpcParamDefaultsByMethod,
+            scheduledRpcs: merged
+          }
+        };
+        return this.deviceService.saveDevice(updated).pipe(
+          switchMap(() => this.deviceService.getDevice(deviceId))
+        );
+      }),
+      finalize(() => {
+        this.savingSchedule = false;
+        this.cd.markForCheck();
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (saved) => {
+        this.scheduledRpcs = saved.deviceData?.scheduledRpcs ?? [];
+        this.applyScheduleForMethod();
+        this.notifySuccess('device.rpc.schedule-save-success');
+      },
+      error: (err) => {
+        const detail = err?.error?.message || err?.message || String(err);
+        this.notifyError('device.rpc.schedule-save-failed', { detail });
+      }
+    });
+  }
+
+  private applyScheduleForMethod(): void {
+    const methodId = this.selectedMethod?.id;
+    const found = methodId ? this.scheduledRpcs.find(s => s?.methodId === methodId) : undefined;
+    this.scheduleEnabled = !!found?.enabled;
+    this.scheduleIntervalMs = found?.intervalMs ?? null;
+    this.scheduleParamsJson = found?.paramsJson?.trim() || '{}';
   }
 
 
@@ -1008,6 +1107,7 @@ export class DeviceRpcPanelComponent implements OnChanges {
           rpcParamDefaultsByMethod: dev.deviceData?.rpcParamDefaultsByMethod,
           rpcParamDefaults: dev.deviceData?.rpcParamDefaults
         };
+        this.scheduledRpcs = dev.deviceData?.scheduledRpcs ?? [];
 
         const profileId = dev.deviceProfileId?.id;
 
@@ -1144,5 +1244,13 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
   }
 
+}
+
+function mergeDeviceScheduledRpcs(
+  existing: DeviceScheduledRpc[] | undefined,
+  next: DeviceScheduledRpc
+): DeviceScheduledRpc[] {
+  const others = (existing ?? []).filter(s => s?.methodId && s.methodId !== next.methodId);
+  return [...others, next];
 }
 

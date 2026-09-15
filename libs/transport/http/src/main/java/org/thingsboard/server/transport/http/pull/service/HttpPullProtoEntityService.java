@@ -66,6 +66,16 @@ public class HttpPullProtoEntityService {
                 .build());
     }
 
+    public TransportProtos.GetHttpPullDevicesResponseMsg getDevicesIdsByTransportType(String transportType, int page, int pageSize) {
+        var builder = TransportProtos.GetHttpPullDevicesRequestMsg.newBuilder()
+                .setPage(page)
+                .setPageSize(pageSize);
+        if (transportType != null) {
+            builder.setTransportType(transportType);
+        }
+        return transportService.getHttpPullDevicesIds(builder.build());
+    }
+
     public TransportProtos.GetHttpPullRoutingTargetsResponseMsg getRoutingTargets(TenantId tenantId, DeviceProfileId profileId, int page, int pageSize) {
         return transportService.getHttpPullRoutingTargets(TransportProtos.GetHttpPullRoutingTargetsRequestMsg.newBuilder()
                 .setTenantIdMSB(tenantId.getId().getMostSignificantBits())

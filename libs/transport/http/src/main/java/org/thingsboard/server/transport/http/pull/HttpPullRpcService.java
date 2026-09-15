@@ -5,19 +5,21 @@
  */
 package org.thingsboard.server.transport.http.pull;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.stereotype.Service;
 import org.thingsboard.common.util.JacksonUtil;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
-import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.data.HttpPullDeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.DeviceProfileRpcBindingType;
 import org.thingsboard.server.common.data.device.profile.DeviceProfileRpcMethod;
 import org.thingsboard.server.common.data.device.profile.HttpPullDeviceProfileTransportConfiguration;
+import org.thingsboard.server.common.data.id.DeviceId;
+import org.thingsboard.server.common.data.id.DeviceProfileId;
 import org.thingsboard.server.common.data.rpc.RpcStatus;
 import org.thingsboard.server.common.data.transport.http.HttpPullAuthConfiguration;
 import org.thingsboard.server.common.transport.TransportDeviceProfileCache;
@@ -25,10 +27,10 @@ import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.transport.TransportServiceCallback;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.transport.http.pull.session.HttpPullCollectorSessionContext;
+import org.thingsboard.server.transport.http.outbound.HttpOutboundSessionContext;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 @Service
 @RequiredArgsConstructor
@@ -37,22 +39,20 @@ public class HttpPullRpcService {
 
     private static final String RPC_TIMEOUT_MESSAGE = "HTTP outbound RPC timed out";
 
-    private final HttpPullAuthService authService;
+    private final HttpOutboundRpcExecutor outboundRpcExecutor;
     private final TransportService transportService;
     private final TransportDeviceProfileCache deviceProfileCache;
-    private HttpPullHttpClient httpClient;
 
-    @jakarta.annotation.PostConstruct
+    @PostConstruct
     public void init() {
-        httpClient = new HttpPullHttpClient(10000);
+        // executor owns HttpClient lifecycle
     }
 
     public void onToDeviceRpcRequest(HttpPullCollectorSessionContext collectorCtx,
                                      TransportProtos.ToDeviceRpcRequestMsg request) {
         TransportProtos.SessionInfoProto sessionInfo = collectorCtx.getSessionInfo();
         Device device = collectorCtx.getDevice();
-        HttpPullDeviceTransportConfiguration deviceCfg = collectorCtx.getDeviceTransportConfiguration();
-        DeviceProfileRpcMethod rpcMethod = findRpcMethod(device, collectorCtx, request.getMethodName());
+        DeviceProfileRpcMethod rpcMethod = findRpcMethod(device, collectorCtx.getDeviceProfile(), request.getMethodName());
         if (rpcMethod == null) {
             log.warn("[{}] HTTP pull RPC method not found: {}", collectorCtx.getDeviceId(), request.getMethodName());
             respondError(sessionInfo, request, "RPC method not found: " + request.getMethodName());
@@ -61,7 +61,7 @@ public class HttpPullRpcService {
         if (rpcMethod.getBindingType() != DeviceProfileRpcBindingType.HTTP_OUTBOUND) {
             return;
         }
-        var executor = collectorCtx.getTransportContext() != null
+        ExecutorService executor = collectorCtx.getTransportContext() != null
                 ? collectorCtx.getTransportContext().getExecutor() : null;
         Runnable task = () -> {
             try {
@@ -69,7 +69,17 @@ public class HttpPullRpcService {
                     respondTimeout(sessionInfo, request);
                     return;
                 }
-                executeOutboundRpc(collectorCtx, device, deviceCfg, sessionInfo, request, rpcMethod);
+                executeOutboundRpc(collectorCtx.getDeviceId(), device,
+                        collectorCtx.getDeviceTransportConfiguration(),
+                        collectorCtx.getProfileTransportConfiguration() != null
+                                ? collectorCtx.getProfileTransportConfiguration().getAuth() : null,
+                        sessionInfo, request, rpcMethod,
+                        () -> {
+                            if (collectorCtx.getTransportContext() != null) {
+                                collectorCtx.getTransportContext().activateHttpPullDeviceSession(
+                                        sessionInfo, collectorCtx.getDeviceId());
+                            }
+                        });
             } catch (Exception e) {
                 log.warn("[{}] HTTP outbound RPC [{}] failed", collectorCtx.getDeviceId(),
                         request.getMethodName(), e);
@@ -84,9 +94,104 @@ public class HttpPullRpcService {
         }
     }
 
-    private DeviceProfileRpcMethod findRpcMethod(Device targetDevice, HttpPullCollectorSessionContext collectorCtx,
-                                                 String methodName) {
-        DeviceProfile profile = resolveProfileForRpc(targetDevice, collectorCtx);
+    public void onToDeviceRpcRequest(HttpOutboundSessionContext outboundCtx,
+                                     TransportProtos.ToDeviceRpcRequestMsg request) {
+        TransportProtos.SessionInfoProto sessionInfo = outboundCtx.getSessionInfo();
+        Device device = outboundCtx.getDevice();
+        DeviceProfileRpcMethod rpcMethod = findRpcMethod(device, outboundCtx.getDeviceProfile(), request.getMethodName());
+        if (rpcMethod == null) {
+            respondError(sessionInfo, request, "RPC method not found: " + request.getMethodName());
+            return;
+        }
+        if (rpcMethod.getBindingType() != DeviceProfileRpcBindingType.HTTP_OUTBOUND) {
+            // NATIVE 由设备 long-poll 会话处理；此处静默忽略避免与 long-poll 双投冲突
+            return;
+        }
+        ExecutorService executor = outboundCtx.getTransportContext() != null
+                ? outboundCtx.getTransportContext().getExecutor() : null;
+        Runnable task = () -> {
+            try {
+                if (isRpcExpired(request)) {
+                    respondTimeout(sessionInfo, request);
+                    return;
+                }
+                executeOutboundRpc(outboundCtx.getDeviceId(), device, null, null,
+                        sessionInfo, request, rpcMethod, null);
+            } catch (Exception e) {
+                log.warn("[{}] HTTP outbound RPC [{}] failed", outboundCtx.getDeviceId(),
+                        request.getMethodName(), e);
+                String message = e instanceof RpcDeadlineExceededException ? RPC_TIMEOUT_MESSAGE : e.getMessage();
+                respondError(sessionInfo, request, message);
+            }
+        };
+        if (executor != null) {
+            executor.execute(task);
+        } else {
+            task.run();
+        }
+    }
+
+    public void executeScheduledOutboundRpc(HttpPullCollectorSessionContext collectorCtx,
+                                            DeviceProfileRpcMethod rpcMethod) throws Exception {
+        if (rpcMethod == null || !rpcMethod.isScheduleActive()) {
+            return;
+        }
+        Device device = collectorCtx.getDevice();
+        HttpPullDeviceTransportConfiguration deviceCfg = collectorCtx.getDeviceTransportConfiguration();
+        String urlOverride = deviceCfg != null ? deviceCfg.getPollUrlOverride() : null;
+        HttpPullAuthConfiguration auth = collectorCtx.getProfileTransportConfiguration() != null
+                ? collectorCtx.getProfileTransportConfiguration().getAuth() : null;
+        int readTimeoutMs = resolveScheduledReadTimeoutMs(rpcMethod);
+        HttpOutboundRpcExecutor.OutboundHttpResult result = outboundRpcExecutor.execute(
+                collectorCtx.getDeviceId(), device, deviceCfg, auth, rpcMethod, "{}", urlOverride, readTimeoutMs);
+        if (result.statusCode() < 200 || result.statusCode() >= 300) {
+            log.warn("[{}] Scheduled HTTP outbound RPC [{}] manufacturer error HTTP {}: {}",
+                    collectorCtx.getDeviceId(), rpcMethod.getId(), result.statusCode(), truncate(result.body()));
+            return;
+        }
+        if (collectorCtx.getTransportContext() != null) {
+            collectorCtx.getTransportContext().activateHttpPullDeviceSession(
+                    collectorCtx.getSessionInfo(), collectorCtx.getDeviceId());
+        }
+        log.debug("[{}] Scheduled HTTP outbound RPC [{}] ok HTTP {}",
+                collectorCtx.getDeviceId(), rpcMethod.getId(), result.statusCode());
+    }
+
+    private void executeOutboundRpc(DeviceId deviceId, Device targetDevice,
+                                    HttpPullDeviceTransportConfiguration targetDeviceCfg,
+                                    HttpPullAuthConfiguration auth,
+                                    TransportProtos.SessionInfoProto sessionInfo,
+                                    TransportProtos.ToDeviceRpcRequestMsg request,
+                                    DeviceProfileRpcMethod rpcMethod,
+                                    Runnable onDelivered) throws Exception {
+        String paramsJson = request.getParams() != null ? request.getParams() : "{}";
+        int readTimeoutMs = resolveRpcReadTimeoutMs(request);
+        String urlOverride = targetDeviceCfg != null ? targetDeviceCfg.getPollUrlOverride() : null;
+        HttpOutboundRpcExecutor.OutboundHttpResult result = outboundRpcExecutor.execute(
+                deviceId, targetDevice, targetDeviceCfg, auth, rpcMethod, paramsJson, urlOverride, readTimeoutMs);
+
+        if (result.statusCode() < 200 || result.statusCode() >= 300) {
+            respondManufacturerError(sessionInfo, request, result.statusCode(), result.body());
+            return;
+        }
+
+        if (onDelivered != null) {
+            onDelivered.run();
+        }
+        transportService.process(sessionInfo, request, RpcStatus.DELIVERED, TransportServiceCallback.EMPTY);
+        if (!request.getOneway()) {
+            String payload = normalizeRpcResponsePayload(result.body());
+            transportService.process(sessionInfo,
+                    TransportProtos.ToDeviceRpcResponseMsg.newBuilder()
+                            .setRequestId(request.getRequestId())
+                            .setPayload(payload)
+                            .build(),
+                    TransportServiceCallback.EMPTY);
+        }
+    }
+
+    private DeviceProfileRpcMethod findRpcMethod(Device targetDevice, DeviceProfile fallbackProfile, String methodName) {
+        DeviceProfile profile = resolveProfileForRpc(targetDevice, fallbackProfile);
         if (StringUtils.isBlank(methodName) || profile == null || profile.getProfileData() == null) {
             return null;
         }
@@ -95,10 +200,7 @@ public class HttpPullRpcService {
             return null;
         }
         for (DeviceProfileRpcMethod m : methods) {
-            if (m == null || StringUtils.isBlank(m.getId())) {
-                continue;
-            }
-            if (methodName.equals(m.getId())) {
+            if (m != null && methodName.equals(m.getId())) {
                 return m;
             }
         }
@@ -110,119 +212,30 @@ public class HttpPullRpcService {
         return null;
     }
 
-    private DeviceProfile resolveProfileForRpc(Device targetDevice, HttpPullCollectorSessionContext collectorCtx) {
+    private DeviceProfile resolveProfileForRpc(Device targetDevice, DeviceProfile fallbackProfile) {
         DeviceProfileId profileId = targetDevice != null && targetDevice.getDeviceProfileId() != null
                 ? targetDevice.getDeviceProfileId()
-                : collectorCtx.getDeviceProfile().getId();
+                : (fallbackProfile != null ? fallbackProfile.getId() : null);
+        if (profileId == null) {
+            return fallbackProfile;
+        }
         DeviceProfile cached = deviceProfileCache.get(profileId);
-        return cached != null ? cached : collectorCtx.getDeviceProfile();
+        return cached != null ? cached : fallbackProfile;
     }
 
-    private void executeOutboundRpc(HttpPullCollectorSessionContext collectorCtx, Device targetDevice,
-                                    HttpPullDeviceTransportConfiguration targetDeviceCfg,
-                                    TransportProtos.SessionInfoProto sessionInfo,
-                                    TransportProtos.ToDeviceRpcRequestMsg request,
-                                    DeviceProfileRpcMethod rpcMethod) throws Exception {
-        HttpPullDeviceProfileTransportConfiguration profile = collectorCtx.getProfileTransportConfiguration();
-        String paramsJson = request.getParams() != null ? request.getParams() : "{}";
-        String urlOverride = targetDeviceCfg != null ? targetDeviceCfg.getPollUrlOverride() : null;
-        if (StringUtils.isBlank(urlOverride) && collectorCtx.getDeviceTransportConfiguration() != null) {
-            urlOverride = collectorCtx.getDeviceTransportConfiguration().getPollUrlOverride();
-        }
-        String url = HttpPullPollUrlResolver.resolve(rpcMethod.getHttpUrl(), urlOverride);
-        url = HttpPullTemplateResolver.resolve(url, targetDevice, targetDeviceCfg, paramsJson);
-
-        HttpPullAuthConfiguration auth = profile.getAuth();
-        boolean requiresAuth = rpcMethod.getRequiresAuth() != null
-                ? rpcMethod.getRequiresAuth()
-                : auth != null && auth.getAuthType() != null
-                && auth.getAuthType() != org.thingsboard.server.common.data.transport.http.HttpPullAuthType.NONE;
-
-        int readTimeoutMs = resolveRpcReadTimeoutMs(request);
-        HttpPullAuthService.AuthRequestContext authCtx = authService.prepareAuth(
-                collectorCtx.getDeviceId(), auth, url, requiresAuth, urlOverride, readTimeoutMs);
-
-        Map<String, String> headers = new HashMap<>();
-        if (rpcMethod.getHttpHeaders() != null) {
-            headers.putAll(HttpPullTemplateResolver.resolveHeaders(
-                    rpcMethod.getHttpHeaders(), targetDevice, targetDeviceCfg, paramsJson));
-        }
-        if (authCtx.getHeaders() != null) {
-            headers.putAll(authCtx.getHeaders());
-        }
-
-        String body = HttpPullTemplateResolver.resolve(
-                rpcMethod.getHttpBody(), targetDevice, targetDeviceCfg, paramsJson);
-        if (!headers.containsKey("Content-Type") && StringUtils.isNotBlank(body)) {
-            headers.put("Content-Type", "application/json");
-        }
-
-        log.info("[{}] HTTP outbound RPC [{}] {} {} body={}",
-                collectorCtx.getDeviceId(), rpcMethod.getId(), rpcMethod.getHttpMethod(), url, truncate(body));
-
-        HttpPullHttpClient.HttpPullResponse response = executeHttp(request, rpcMethod, authCtx, headers, body);
-
-        if (response.getStatusCode() == 401 && requiresAuth) {
-            log.info("[{}] HTTP outbound RPC [{}] 401, refreshing login token",
-                    collectorCtx.getDeviceId(), rpcMethod.getId());
-            authService.invalidate(collectorCtx.getDeviceId());
-            readTimeoutMs = resolveRpcReadTimeoutMs(request);
-            authCtx = authService.prepareAuth(collectorCtx.getDeviceId(), auth, url, true, urlOverride, readTimeoutMs);
-            headers = new HashMap<>();
-            if (rpcMethod.getHttpHeaders() != null) {
-                headers.putAll(HttpPullTemplateResolver.resolveHeaders(
-                        rpcMethod.getHttpHeaders(), targetDevice, targetDeviceCfg, paramsJson));
-            }
-            if (authCtx.getHeaders() != null) {
-                headers.putAll(authCtx.getHeaders());
-            }
-            response = executeHttp(request, rpcMethod, authCtx, headers, body);
-        }
-
-        if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
-            respondManufacturerError(sessionInfo, request, response.getStatusCode(), response.getBody());
-            return;
-        }
-
-        if (collectorCtx.getTransportContext() != null) {
-            collectorCtx.getTransportContext().activateHttpPullDeviceSession(sessionInfo, collectorCtx.getDeviceId());
-        }
-        transportService.process(sessionInfo, request, RpcStatus.DELIVERED, TransportServiceCallback.EMPTY);
-        if (!request.getOneway()) {
-            String payload = normalizeRpcResponsePayload(response.getBody());
-            transportService.process(sessionInfo,
-                    TransportProtos.ToDeviceRpcResponseMsg.newBuilder()
-                            .setRequestId(request.getRequestId())
-                            .setPayload(payload)
-                            .build(),
-                    TransportServiceCallback.EMPTY);
-        }
-    }
-
-    private HttpPullHttpClient.HttpPullResponse executeHttp(TransportProtos.ToDeviceRpcRequestMsg request,
-                                                            DeviceProfileRpcMethod rpcMethod,
-                                                            HttpPullAuthService.AuthRequestContext authCtx,
-                                                            Map<String, String> headers,
-                                                            String body) throws Exception {
-        return httpClient.execute(HttpPullHttpClient.HttpPullRequest.builder()
-                .url(authCtx.getUrl())
-                .method(rpcMethod.getHttpMethod())
-                .body(body)
-                .headers(headers)
-                .queryParams(authCtx.getQueryParams())
-                .readTimeoutMs(resolveRpcReadTimeoutMs(request))
-                .build());
-    }
-
-    /**
-     * 与 REST RPC {@code expirationTime} 对齐：HTTP 读超时 = 到期剩余时间（与设备 Actor / 规则引擎一致）。
-     */
     private static int resolveRpcReadTimeoutMs(TransportProtos.ToDeviceRpcRequestMsg request) {
         long remaining = remainingRpcMillis(request);
         if (remaining <= 0) {
             throw new RpcDeadlineExceededException();
         }
         return (int) Math.min(remaining, Integer.MAX_VALUE);
+    }
+
+    private static int resolveScheduledReadTimeoutMs(DeviceProfileRpcMethod rpcMethod) {
+        if (rpcMethod.getTimeoutMs() != null && rpcMethod.getTimeoutMs() > 0) {
+            return (int) Math.min(rpcMethod.getTimeoutMs(), Integer.MAX_VALUE);
+        }
+        return 10000;
     }
 
     private static long remainingRpcMillis(TransportProtos.ToDeviceRpcRequestMsg request) {
@@ -247,9 +260,6 @@ public class HttpPullRpcService {
         }
     }
 
-    /**
-     * 厂家 HTTP 非 2xx：以 JSON payload 返回，避免 REST 层将纯文本 error 当响应体解析导致 406。
-     */
     private void respondManufacturerError(TransportProtos.SessionInfoProto sessionInfo,
                                           TransportProtos.ToDeviceRpcRequestMsg request,
                                           int httpStatus, String body) {

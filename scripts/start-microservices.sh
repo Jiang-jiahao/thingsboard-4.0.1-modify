@@ -15,7 +15,8 @@
 #   ./start-microservices.sh status
 #   ./start-microservices.sh restart [name]
 
-if [ -z "${BASH_VERSION:-}" ]; then
+# macOS 的 `sh` 往往是 POSIX 模式 bash：BASH_VERSION 有值，但 <(...) 不可用。
+if [ -z "${BASH_VERSION:-}" ] || [ -n "${POSIXLY_CORRECT:-}" ]; then
   exec bash "$0" "$@"
 fi
 
@@ -170,6 +171,17 @@ port_open() {
   fi
 }
 
+# UDP 没有 TCP listen，nc -z 探测不到；macOS 上 UDP 也通常没有 LISTEN 状态。
+udp_port_in_use() {
+  local port="$1"
+  lsof -nP -iUDP:"${port}" >/dev/null 2>&1
+}
+
+port_ready() {
+  local port="$1"
+  port_open localhost "${port}" || udp_port_in_use "${port}"
+}
+
 process_alive() {
   local pid_file="$1"
   [[ -n "${pid_file}" && -f "${pid_file}" ]] || return 0
@@ -205,7 +217,7 @@ wait_ready() {
     fi
     local p
     for p in "$@"; do
-      if port_open localhost "${p}"; then
+      if port_ready "${p}"; then
         echo "    ${name} is up (port ${p})"
         return 0
       fi
@@ -290,43 +302,96 @@ start_java() {
     rm -f "${pid_file}"
   fi
   echo "  starting ${name}"
+  # 新建 session，避免 IDE/agent 结束命令时把同进程组的 Java 一起 SIGTERM。
+  # macOS 没有 setsid(1)，用 perl POSIX::setsid + exec。
   (
     cd "${ROOT}"
-    nohup env "$@" java \
+    perl -e 'use POSIX; POSIX::setsid(); exec @ARGV' -- env "$@" java \
       -Xms256m -Xmx"${xmx}" \
       -Dfile.encoding=UTF-8 \
       -jar "${jar}" \
-      > "${log_file}" 2>&1 &
+      < /dev/null > "${log_file}" 2>&1 &
     echo $! > "${pid_file}"
   )
+}
+
+kill_pid() {
+  local pid="$1"
+  [[ -n "${pid}" ]] || return 0
+  kill -0 "${pid}" >/dev/null 2>&1 || return 0
+  kill "${pid}" >/dev/null 2>&1 || true
+  local i=0
+  while kill -0 "${pid}" >/dev/null 2>&1 && (( i < 20 )); do
+    sleep 0.5
+    i=$((i + 1))
+  done
+  if kill -0 "${pid}" >/dev/null 2>&1; then
+    kill -9 "${pid}" >/dev/null 2>&1 || true
+  fi
 }
 
 stop_one() {
   local name="$1"
   local pid_file="${PID_DIR}/${name}.pid"
-  if [[ ! -f "${pid_file}" ]]; then
-    return 0
-  fi
-  local pid
-  pid="$(cat "${pid_file}")"
-  if kill -0 "${pid}" >/dev/null 2>&1; then
-    echo "  stopping ${name} (${pid})"
-    kill "${pid}" >/dev/null 2>&1 || true
-    local i=0
-    while kill -0 "${pid}" >/dev/null 2>&1 && (( i < 20 )); do
-      sleep 0.5
-      i=$((i + 1))
-    done
+  if [[ -f "${pid_file}" ]]; then
+    local pid
+    pid="$(cat "${pid_file}")"
     if kill -0 "${pid}" >/dev/null 2>&1; then
-      kill -9 "${pid}" >/dev/null 2>&1 || true
+      echo "  stopping ${name} (${pid})"
+      kill_pid "${pid}"
+    else
+      echo "  ${name} pid ${pid} already dead"
     fi
+    rm -f "${pid_file}"
   fi
-  rm -f "${pid_file}"
+}
+
+# start/stop 共用的拓扑名（含 TCP/UDP）。stop 必须按这个清单扫，不能只看 pid 文件：
+# pid 丢失或已 DEAD 时，UDP/TCP 的 Java 仍可能占着 5684/5683。
+known_node_names() {
+  local i
+  for (( i = 1; i <= CORE_REPLICAS; i++ )); do echo "tb-core${i}"; done
+  for (( i = 1; i <= RULE_ENGINE_REPLICAS; i++ )); do echo "tb-rule-engine${i}"; done
+  for (( i = 1; i <= HTTP_TRANSPORT_REPLICAS; i++ )); do echo "tb-http-transport${i}"; done
+  for (( i = 1; i <= MQTT_TRANSPORT_REPLICAS; i++ )); do echo "tb-mqtt-transport${i}"; done
+  for (( i = 1; i <= TCP_TRANSPORT_REPLICAS; i++ )); do echo "tb-tcp-transport${i}"; done
+  for (( i = 1; i <= UDP_TRANSPORT_REPLICAS; i++ )); do echo "tb-udp-transport${i}"; done
+  for (( i = 1; i <= COAP_TRANSPORT_REPLICAS; i++ )); do echo "tb-coap-transport${i}"; done
+  for (( i = 1; i <= SNMP_TRANSPORT_REPLICAS; i++ )); do echo "tb-snmp-transport${i}"; done
+  for (( i = 1; i <= LWM2M_TRANSPORT_REPLICAS; i++ )); do echo "tb-lwm2m-transport${i}"; done
 }
 
 list_started_names() {
   [[ -d "${PID_DIR}" ]] || return 0
   ls -1 "${PID_DIR}"/*.pid 2>/dev/null | xargs -n1 basename | sed 's/\.pid$//' || true
+}
+
+reverse_lines() {
+  awk '{ a[NR] = $0 } END { for (i = NR; i >= 1; i--) print a[i] }'
+}
+
+# 清掉 pid 对不上的 boot jar（IDEA / 上次崩溃残留）。UDP/TCP 最常见。
+kill_orphan_boot_jars() {
+  local jars=(
+    "thingsboard-core-${VERSION}-boot.jar"
+    "thingsboard-rule-engine-${VERSION}-boot.jar"
+    "tb-http-transport-${VERSION}-boot.jar"
+    "tb-mqtt-transport-${VERSION}-boot.jar"
+    "tb-tcp-transport-${VERSION}-boot.jar"
+    "tb-udp-transport-${VERSION}-boot.jar"
+    "tb-coap-transport-${VERSION}-boot.jar"
+    "tb-snmp-transport-${VERSION}-boot.jar"
+    "tb-lwm2m-transport-${VERSION}-boot.jar"
+  )
+  local jar pid pids
+  for jar in "${jars[@]}"; do
+    pids="$(pgrep -f "${jar}" 2>/dev/null || true)"
+    for pid in ${pids}; do
+      [[ -n "${pid}" ]] || continue
+      echo "  killing leftover ${jar} pid ${pid}"
+      kill_pid "${pid}"
+    done
+  done
 }
 
 check_infra() {
@@ -442,7 +507,7 @@ start_udp_transport_replicas() {
       TB_SERVICE_ID="tb-udp-transport${i}" \
       HTTP_BIND_PORT="${http}" \
       UDP_BIND_PORT="${udp}"
-    wait_ready "tb-udp-transport${i}" "${PID_DIR}/tb-udp-transport${i}.pid" "${NODE_WAIT_SEC}"
+    wait_ready "tb-udp-transport${i}" "${PID_DIR}/tb-udp-transport${i}.pid" "${NODE_WAIT_SEC}" "${udp}"
   done
 }
 
@@ -538,7 +603,7 @@ start_named() {
     udp="$(udp_bind_for_replica "${idx}")"
     start_java "${name}" "${jar}" "${TRANSPORT_XMX}" \
       TB_SERVICE_ID="${name}" HTTP_BIND_PORT="${http}" UDP_BIND_PORT="${udp}"
-    wait_ready "${name}" "${PID_DIR}/${name}.pid" "${NODE_WAIT_SEC}"
+    wait_ready "${name}" "${PID_DIR}/${name}.pid" "${NODE_WAIT_SEC}" "${udp}"
   else
     echo "ERROR: unknown node '${name}'" >&2
     usage
@@ -616,17 +681,19 @@ do_start() {
 }
 
 do_stop() {
-  echo "== stopping microservices (reverse order) =="
-  local names
-  names="$(list_started_names | sort -r || true)"
+  echo "== stopping microservices (reverse order, including TCP/UDP) =="
+  local names name
+  names="$( { known_node_names; list_started_names; } | awk 'NF && !seen[$0]++' | reverse_lines )"
   if [[ -z "${names}" ]]; then
-    echo "  nothing to stop"
-    return 0
+    echo "  no tracked node names"
+  else
+    while IFS= read -r name; do
+      [[ -n "${name}" ]] || continue
+      stop_one "${name}"
+    done <<< "${names}"
   fi
-  while IFS= read -r name; do
-    [[ -n "${name}" ]] || continue
-    stop_one "${name}"
-  done <<< "${names}"
+  echo "== stopping leftover boot jars (orphans) =="
+  kill_orphan_boot_jars
   echo "Stopped."
 }
 

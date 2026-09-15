@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
+import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.device.data.MqttPullDeviceTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.MqttPullDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.id.DeviceId;
@@ -154,6 +155,10 @@ public class MqttPullTransportContext extends TransportContext {
             MqttPullDeviceTransportConfiguration deviceCfg = device.getDeviceData() != null
                     && device.getDeviceData().getTransportConfiguration() instanceof MqttPullDeviceTransportConfiguration m
                     ? m : new MqttPullDeviceTransportConfiguration();
+            if (StringUtils.isBlank(deviceCfg.getBrokerUrl())) {
+                log.info("[{}] MQTT pull skip establish: brokerUrl is blank", deviceId);
+                return;
+            }
             log.info("[{}] MQTT pull will connect using brokerUrl={}", deviceId, deviceCfg.getBrokerUrl());
             establishCollectorSession(device, profile, profileCfg, deviceCfg);
             authSubmitted = true;
@@ -259,7 +264,14 @@ public class MqttPullTransportContext extends TransportContext {
 
     @EventListener(DeviceUpdatedEvent.class)
     public void onDeviceUpdated(DeviceUpdatedEvent event) {
-        refreshCollectorDevice(event.getDevice());
+        Device eventDevice = event.getDevice();
+        if (eventDevice == null || eventDevice.getId() == null) {
+            return;
+        }
+        // DeviceProto 全量 deviceData 反序列化在更新通知里可能丢传输配置（brokerUrl→null）；
+        // 与档案更新路径一致，走 GetDevice 只取 deviceTransportConfiguration。
+        Device device = protoEntityService.getDeviceById(eventDevice.getId());
+        refreshCollectorDevice(device != null ? device : eventDevice);
     }
 
     @EventListener(DeviceDeletedEvent.class)
@@ -297,8 +309,11 @@ public class MqttPullTransportContext extends TransportContext {
             if (existing != null) {
                 destroyCollector(existing, true);
             }
+            establishingCollectors.remove(device.getId());
             return;
         }
+        // 取消进行中的建立，避免「先无 brokerUrl、后补配置」时被 establishing 互斥挡住
+        establishingCollectors.remove(device.getId());
         if (existing != null) {
             destroyCollector(existing, false);
         }
@@ -346,6 +361,9 @@ public class MqttPullTransportContext extends TransportContext {
         if (force) {
             activatedTransportSessions.add(sessionId);
         } else if (!activatedTransportSessions.add(sessionId)) {
+            // 本地已激活时仍刷新 Core 侧 RPC 订阅，避免 DeviceActor 丢订阅后长期 NO_ACTIVE_CONNECTION
+            transportService.recordActivity(sessionInfo);
+            transportService.process(sessionInfo, DefaultTransportService.SUBSCRIBE_TO_RPC_ASYNC_MSG, TransportServiceCallback.EMPTY);
             return;
         }
         transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_OPEN, null);
@@ -458,6 +476,9 @@ public class MqttPullTransportContext extends TransportContext {
                     registerMqttPullTransportSession(ctx.getSessionInfo(), ctx.getRpcSessionListener());
                 }
                 transportService.recordActivity(ctx.getSessionInfo());
+                // 心跳顺带续订 RPC，降低 Core 丢订阅导致的 NO_ACTIVE_CONNECTION
+                transportService.process(ctx.getSessionInfo(),
+                        DefaultTransportService.SUBSCRIBE_TO_RPC_ASYNC_MSG, TransportServiceCallback.EMPTY);
             } catch (Exception e) {
                 log.warn("[{}] MQTT pull session heartbeat failed", ctx.getDeviceId(), e);
             }

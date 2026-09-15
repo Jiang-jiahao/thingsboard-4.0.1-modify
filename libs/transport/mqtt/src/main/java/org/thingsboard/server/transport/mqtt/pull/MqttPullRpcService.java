@@ -115,15 +115,15 @@ public class MqttPullRpcService {
         DeviceProfileRpcMethod method = MqttRpcCatalog.find(resolveProfile(collectorCtx), request.getMethodName());
         MqttRpcCommandFactory.Command command = finalizeTopics(MqttRpcCommandFactory.resolve(
                 method, request, collectorCtx.getDevice(), null, true));
-        if (command.isUseStandardNativeTopic() || StringUtils.isBlank(command.getRequestTopic())) {
-            throw new IllegalArgumentException("MQTT pull RPC requires mqttRequestTopic");
+        if (StringUtils.isBlank(command.getRequestTopic())) {
+            throw new IllegalArgumentException("MQTT pull RPC requires a concrete request topic");
         }
         MqttClient client = collectorCtx.getMqttClient();
         if (client == null || !client.isConnected()) {
             throw new IllegalStateException("MQTT pull client is not connected");
         }
         if (!request.getOneway() && StringUtils.isBlank(command.getResponseTopic())) {
-            throw new IllegalArgumentException("Two-way MQTT pull RPC requires mqttResponseTopic");
+            throw new IllegalArgumentException("Two-way MQTT pull RPC requires a response topic");
         }
         if (!request.getOneway() && StringUtils.isNotBlank(command.getResponseTopic())) {
             registerPending(collectorCtx, sessionInfo, command, request);

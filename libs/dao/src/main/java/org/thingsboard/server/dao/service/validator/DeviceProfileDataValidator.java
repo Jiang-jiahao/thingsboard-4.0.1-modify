@@ -34,6 +34,7 @@ import org.thingsboard.server.common.data.device.profile.CoapDeviceProfileTransp
 import org.thingsboard.server.common.data.device.profile.CoapDeviceTypeConfiguration;
 import org.thingsboard.server.common.data.device.profile.DefaultCoapDeviceTypeConfiguration;
 import org.thingsboard.server.common.data.device.profile.DeviceProfileAlarm;
+import org.thingsboard.server.common.data.device.profile.DeviceProfileRpcMethod;
 import org.thingsboard.server.common.data.device.profile.DeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.Lwm2mDeviceProfileTransportConfiguration;
 import org.thingsboard.server.common.data.device.profile.MqttDeviceProfileTransportConfiguration;
@@ -139,6 +140,7 @@ public class DeviceProfileDataValidator extends AbstractHasOtaPackageValidator<D
         }
         DeviceProfileTransportConfiguration transportConfiguration = deviceProfile.getProfileData().getTransportConfiguration();
         transportConfiguration.validate();
+        validateRpcMethods(deviceProfile);
         if (transportConfiguration instanceof MqttDeviceProfileTransportConfiguration) {
             MqttDeviceProfileTransportConfiguration mqttTransportConfiguration = (MqttDeviceProfileTransportConfiguration) transportConfiguration;
             if (mqttTransportConfiguration.getTransportPayloadTypeConfiguration() instanceof ProtoTransportPayloadConfiguration) {
@@ -236,6 +238,26 @@ public class DeviceProfileDataValidator extends AbstractHasOtaPackageValidator<D
             }
         }
         return old;
+    }
+
+    private void validateRpcMethods(DeviceProfile deviceProfile) {
+        if (deviceProfile.getProfileData() == null || CollectionUtils.isEmpty(deviceProfile.getProfileData().getRpcMethods())) {
+            return;
+        }
+        Set<String> ids = new HashSet<>();
+        for (DeviceProfileRpcMethod method : deviceProfile.getProfileData().getRpcMethods()) {
+            if (method == null) {
+                continue;
+            }
+            try {
+                method.validate(null);
+            } catch (IllegalArgumentException e) {
+                throw new DataValidationException(e.getMessage());
+            }
+            if (!ids.add(method.getId())) {
+                throw new DataValidationException("Device profile RPC method id must be unique: " + method.getId());
+            }
+        }
     }
 
     private void validateProtoSchemas(ProtoTransportPayloadConfiguration protoTransportPayloadTypeConfiguration) {
