@@ -46,21 +46,19 @@ public class UdpInboundHandler extends SimpleChannelInboundHandler<DatagramPacke
                 if (udpTransportContext.startServerWireAuth(ctx, session, sender)) {
                     return;
                 }
-                if (!session.tryBeginServerAuth()) {
-                    // 鉴权在途时的额外数据报（设备重传首帧/抢跑）：丢弃即可，只提示一次避免刷屏。
-                    if (session.shouldLogPreAuthDrop()) {
-                        log.warn("[{}] UDP datagram dropped: server authentication is still in flight",
-                                session.getSessionId());
-                    } else {
-                        log.debug("[{}] UDP datagram dropped: server authentication is still in flight",
-                                session.getSessionId());
-                    }
+                // 共享端口下鉴权前不知道档案：命中已配置的"延迟鉴权键"时走延迟鉴权。
+                if (tryDeferredAuthFromCatalog(ctx, session, data)) {
                     return;
                 }
-                String authJson = new String(data, StandardCharsets.UTF_8).trim();
-                JsonObject root = JsonParser.parseString(authJson).getAsJsonObject();
-                udpTransportContext.getUdpMessageProcessor().processServerSideAuth(session, root,
-                        msg -> udpTransportContext.afterSuccessfulAuth(ctx, session, msg));
+                // 既没有已绑定的延迟鉴权档案、也匹配不上任何延迟鉴权键：身份无从确定，丢弃这一包。
+                // 不关连接（UDP 本也无连接）——延迟鉴权目录是异步刷新的，目录热起来后设备重发的包仍能被识别。
+                if (session.shouldLogPreAuthDrop()) {
+                    log.warn("[{}] UDP pre-auth datagram dropped: no deferred device-id key matched",
+                            session.getSessionId());
+                } else {
+                    log.debug("[{}] UDP pre-auth datagram dropped: no deferred device-id key matched",
+                            session.getSessionId());
+                }
                 return;
             }
             udpTransportContext.recordUplinkFrameActivity(session);
@@ -79,6 +77,26 @@ public class UdpInboundHandler extends SimpleChannelInboundHandler<DatagramPacke
             session.processIncomingJsonLine(jsonPayload);
         } catch (Exception e) {
             log.warn("[{}] Bad UDP datagram from {}", session.getSessionId(), sender, e);
+        }
+    }
+
+    /** 命中"已配置的延迟鉴权键"时走延迟鉴权并返回 true；否则返回 false 交给 NONE 路径。 */
+    private boolean tryDeferredAuthFromCatalog(ChannelHandlerContext ctx, UdpDeviceSession session, byte[] data) {
+        try {
+            String authJson = new String(data, StandardCharsets.UTF_8).trim();
+            if (!authJson.startsWith("{")) {
+                return false;
+            }
+            JsonObject root = JsonParser.parseString(authJson).getAsJsonObject();
+            var deferred = udpTransportContext.getDeferredAuthCatalog().match(root);
+            if (deferred.isEmpty()) {
+                return false;
+            }
+            udpTransportContext.completeDeferredWireAuthServerAuth(ctx, session, data, deferred.get().profile());
+            return true;
+        } catch (Exception e) {
+            log.debug("[{}] deferred auth catalog lookup skipped: {}", session.getSessionId(), e.getMessage());
+            return false;
         }
     }
 

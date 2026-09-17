@@ -66,11 +66,6 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
             if (!tcpTransportContext.startServerWireAuth(ctx, session)) {
                 ctx.channel().config().setAutoRead(true);
             }
-            return;
-        }
-        if (session.shouldSendWireAuthPayload()) {
-            String token = tcpTransportContext.getProtoEntityService().getDeviceCredentialsByDeviceId(session.getDeviceId()).getCredentialsId();
-            session.sendAuthFrame(token);
         }
     }
     @Override
@@ -87,23 +82,18 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
                     tcpTransportContext.completeDeferredWireAuthServerAuth(ctx, session, data);
                     return;
                 }
-                if (!session.tryBeginServerAuth()) {
-                    // 鉴权在途时又收到帧（设备重传首帧/抢跑）：只丢弃这一帧。
-                    // 早期实现这里直接 ctx.close()：设备侧只看到"莫名掉线"，服务端不留任何痕迹，
-                    // 而 Core 的鉴权响应回来后仍会注册会话，形成"看着在线、下行全丢"的难查状态。
-                    if (session.shouldLogPreAuthDrop()) {
-                        log.warn("[{}] TCP frame dropped: server authentication is still in flight",
-                                session.getSessionId());
-                    } else {
-                        log.debug("[{}] TCP frame dropped: server authentication is still in flight",
-                                session.getSessionId());
-                    }
+                // 共享端口下鉴权前不知道档案：若帧里出现某个档案配置的"延迟鉴权键"，
+                // 就用该档案走延迟鉴权。
+                if (tryDeferredAuthFromCatalog(ctx, session, data)) {
                     return;
                 }
-                String authJson = new String(data, StandardCharsets.UTF_8).trim();
-                JsonObject root = JsonParser.parseString(authJson).getAsJsonObject();
-                tcpTransportContext.getTcpMessageProcessor().processServerSideAuth(session, root,
-                        msg -> tcpTransportContext.afterSuccessfulAuth(ctx, session, msg));
+                // 既没有已绑定的延迟鉴权档案、也匹配不上任何延迟鉴权键：身份无从确定，丢弃这一帧。
+                // 不关连接——延迟鉴权目录是异步刷新的，目录热起来后设备重发的帧仍能被识别。
+                if (session.shouldLogPreAuthDrop()) {
+                    log.warn("[{}] TCP pre-auth frame dropped: no deferred device-id key matched", session.getSessionId());
+                } else {
+                    log.debug("[{}] TCP pre-auth frame dropped: no deferred device-id key matched", session.getSessionId());
+                }
                 return;
             }
             tcpTransportContext.recordUplinkFrameActivity(session);
@@ -112,6 +102,26 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
         } catch (Exception e) {
             log.warn("[{}] Bad TCP frame", session.getSessionId(), e);
             ctx.close();
+        }
+    }
+
+    /** 命中"已配置的延迟鉴权键"时走延迟鉴权并返回 true；否则返回 false 交给 token 鉴权路径。 */
+    private boolean tryDeferredAuthFromCatalog(ChannelHandlerContext ctx, TcpDeviceSession session, byte[] data) {
+        try {
+            String authJson = new String(data, StandardCharsets.UTF_8).trim();
+            if (!authJson.startsWith("{")) {
+                return false;
+            }
+            JsonObject root = JsonParser.parseString(authJson).getAsJsonObject();
+            var deferred = tcpTransportContext.getDeferredAuthCatalog().match(root);
+            if (deferred.isEmpty()) {
+                return false;
+            }
+            tcpTransportContext.completeDeferredWireAuthServerAuth(ctx, session, data, deferred.get().profile());
+            return true;
+        } catch (Exception e) {
+            log.debug("[{}] deferred auth catalog lookup skipped: {}", session.getSessionId(), e.getMessage());
+            return false;
         }
     }
     @Override

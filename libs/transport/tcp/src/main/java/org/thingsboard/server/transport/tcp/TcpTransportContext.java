@@ -35,6 +35,7 @@ import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.transport.tcp.service.TcpDeferredAuthCatalog;
 import org.thingsboard.server.transport.tcp.service.TcpProtocolDeviceIdRegistry;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -81,6 +82,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
     private final TcpTransportBalancingService balancingService;
     private final TcpSourceBindingService tcpSourceBindingService;
     private final TcpProtocolDeviceIdRegistry tcpProtocolDeviceIdRegistry;
+    private final TcpDeferredAuthCatalog tcpDeferredAuthCatalog;
     @Getter
     private final TcpMessageProcessor tcpMessageProcessor;
 
@@ -107,6 +109,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
                                TcpTransportBalancingService balancingService,
                                TcpSourceBindingService tcpSourceBindingService,
                                TcpProtocolDeviceIdRegistry tcpProtocolDeviceIdRegistry,
+                               TcpDeferredAuthCatalog tcpDeferredAuthCatalog,
                                TcpMessageProcessor tcpMessageProcessor,
                                @Lazy TcpTransportService tcpTransportService) {
         this.deviceProfileCache = deviceProfileCache;
@@ -115,6 +118,7 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
         this.balancingService = balancingService;
         this.tcpSourceBindingService = tcpSourceBindingService;
         this.tcpProtocolDeviceIdRegistry = tcpProtocolDeviceIdRegistry;
+        this.tcpDeferredAuthCatalog = tcpDeferredAuthCatalog;
         this.tcpMessageProcessor = tcpMessageProcessor;
         this.tcpTransportService = tcpTransportService;
     }
@@ -152,6 +156,10 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
         }
         return false;
     }
+    public TcpDeferredAuthCatalog getDeferredAuthCatalog() {
+        return tcpDeferredAuthCatalog;
+    }
+
     public TcpDeviceSession newInboundDeviceSession() {
         return new TcpDeviceSession(UUID.randomUUID(), this, false);
     }
@@ -598,12 +606,20 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
     }
 
     /**
-     * SERVER {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} / {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID}：
-     * 在 Core 会话注册前对每一帧按档案解析；本帧无身份字段则丢弃并等待；有字段则提交 Core 注册（TOKEN 模式字段值为 ACCESS_TOKEN；
-     * DEVICE_ID 模式字段值为协议设备 ID，由设备传输配置 {@code tcpWireAuthPayloadDeviceId} 在全量设备中定位 TB 设备后以该设备 ACCESS_TOKEN 注册）。
+     * SERVER {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID}：
+     * 在 Core 会话注册前对每一帧按档案解析；本帧无身份字段则丢弃并等待；有字段则以协议设备号
+     * （由设备传输配置 {@code tcpWireAuthPayloadDeviceId} 在全量设备中定位到 TB 设备）取该设备 ACCESS_TOKEN 注册。
      */
     public void completeDeferredWireAuthServerAuth(ChannelHandlerContext ctx, TcpDeviceSession session, byte[] rawFrame) {
-        DeviceProfile profile = session.getDeviceProfile();
+        completeDeferredWireAuthServerAuth(ctx, session, rawFrame, session.getDeviceProfile());
+    }
+
+    /**
+     * 共享端口下鉴权前会话没有档案：由 {@link TcpDeferredAuthCatalog} 按帧里命中的"已配置延迟鉴权键"
+     * 反推档案后调用本入口（档案会被提前绑定到会话，供解析负载与后续按档案切换分帧使用）。
+     */
+    public void completeDeferredWireAuthServerAuth(ChannelHandlerContext ctx, TcpDeviceSession session, byte[] rawFrame,
+                                                   DeviceProfile profile) {
         if (profile == null || profile.getProfileData() == null
                 || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration ptc)) {
             log.warn("[{}] Deferred payload wire auth requires inbound session bound to device profile",
@@ -612,14 +628,13 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
             ctx.close();
             return;
         }
-        TcpWireAuthenticationMode mode = ptc.getTcpWireAuthenticationMode();
-        if (mode != TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-                && mode != TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+        if (ptc.getTcpWireAuthenticationMode() != TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             log.warn("[{}] inbound handler expected deferred payload wire auth mode", session.getSessionId());
             session.endServerAuth();
             ctx.close();
             return;
         }
+        session.setDeviceProfile(profile);
         Optional<String> fieldValueOpt = tcpMessageProcessor.extractDeferredWireAuthAccessToken(profile, session, rawFrame);
         if (fieldValueOpt.isEmpty() || StringUtils.isBlank(fieldValueOpt.get())) {
             log.debug("[{}] Deferred wire auth: identity field absent in this frame, waiting for next frame", session.getSessionId());
@@ -630,10 +645,6 @@ public class TcpTransportContext extends org.thingsboard.server.common.transport
             return;
         }
         String fieldValue = fieldValueOpt.get().trim();
-        if (mode == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN) {
-            submitDeferredAccessTokenValidation(ctx, session, rawFrame, fieldValue);
-            return;
-        }
         Optional<DeviceId> deviceIdOpt = tcpProtocolDeviceIdRegistry.findByProtocolDeviceId(fieldValue);
         if (deviceIdOpt.isEmpty()) {
             log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: no TB device for payload device id [{}]",

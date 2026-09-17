@@ -92,8 +92,7 @@ export class UdpDeviceTransportConfigurationComponent implements ControlValueAcc
   }
 
   get showUdpDeviceHint(): boolean {
-    return this.udpWireAuthMode !== UdpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-      && this.udpWireAuthMode !== UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID;
+    return this.udpWireAuthMode !== UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID;
   }
 
   private propagateChange = (v: any) => { };

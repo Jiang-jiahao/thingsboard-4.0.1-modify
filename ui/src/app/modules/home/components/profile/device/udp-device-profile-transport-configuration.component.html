@@ -18,18 +18,15 @@
       <mat-form-field class="flex-1">
         <mat-label translate>device-profile.udp.wire-auth</mat-label>
         <mat-select formControlName="udpWireAuthenticationMode" required>
-            <mat-option [value]="'TOKEN'">{{ 'device-profile.udp.wire-auth-token' | translate }}</mat-option>
             <mat-option [value]="'NONE'">{{ 'device-profile.udp.wire-auth-none' | translate }}</mat-option>
-            <mat-option [value]="'DEFERRED_PAYLOAD_TOKEN'">{{ 'device-profile.udp.wire-auth-deferred-token' | translate }}</mat-option>
             <mat-option [value]="'DEFERRED_PAYLOAD_DEVICE_ID'">{{ 'device-profile.udp.wire-auth-deferred-device-id' | translate }}</mat-option>
         </mat-select>
       </mat-form-field>
     </div>
-    <div class="flex flex-row gap-2 xs:flex-col" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('udpWireAuthenticationMode').value === 'DEFERRED_PAYLOAD_TOKEN'
-        || tcpDeviceProfileTransportConfigurationFormGroup.get('udpWireAuthenticationMode').value === 'DEFERRED_PAYLOAD_DEVICE_ID'">
+    <div class="flex flex-row gap-2 xs:flex-col" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('udpWireAuthenticationMode').value === 'DEFERRED_PAYLOAD_DEVICE_ID'">
       <mat-form-field class="flex-1">
         <mat-label translate>device-profile.udp.deferred-token-json-key</mat-label>
-        <input matInput formControlName="udpDeferredWireAuthTokenJsonKey" placeholder="accessToken">
+        <input matInput formControlName="udpDeferredWireAuthTokenJsonKey" placeholder="deviceId">
         <mat-hint translate>device-profile.udp.deferred-token-json-key-hint</mat-hint>
         <mat-error *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('udpDeferredWireAuthTokenJsonKey').hasError('required')">
           {{ 'device-profile.udp.deferred-token-json-key-required' | translate }}

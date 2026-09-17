@@ -27,7 +27,7 @@ class TcpHexProtocolParserTest {
 
     @Test
     void parsesUint16BeAndFloatBe() {
-        String hex = "006440480fdb";
+        String hex = "00644048f5c3";
         var payload = JsonParser.parseString("{\"hex\":\"" + hex + "\"}");
         TcpHexFieldDefinition a = new TcpHexFieldDefinition();
         a.setKey("count");
@@ -119,7 +119,9 @@ class TcpHexProtocolParserTest {
     }
 
     @Test
-    void fixedIntegralMismatchSkipsFieldWhenUsingDefaultTemplate() {
+    void fixedIntegralMismatchEmitsNoTelemetryWhenUsingDefaultTemplate() {
+        // 语义：默认模板下所有字段都被跳过（固定值不匹配）时不发射遥测（Optional.empty），
+        // 由 TcpMessageProcessor 记录 "frame did not match parser rules (no telemetry emitted)"。
         var payload = JsonParser.parseString("{\"hex\":\"00\"}");
         TcpHexFieldDefinition a = new TcpHexFieldDefinition();
         a.setKey("h");
@@ -127,8 +129,7 @@ class TcpHexProtocolParserTest {
         a.setValueType(TcpHexValueType.UINT8);
         a.setFixedWireIntegralValue(165L);
         var out = TcpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, List.of(a), null, null, UUID.randomUUID());
-        assertThat(out).isPresent();
-        assertThat(out.get().has("h")).isFalse();
+        assertThat(out).isEmpty();
     }
 
     /** 命令字已匹配但固定线值与帧不符：该规则作废，继续默认字段 */

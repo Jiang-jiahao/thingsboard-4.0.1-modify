@@ -92,8 +92,10 @@ public class TcpProtocolDeviceIdRegistry {
                 hasNext = response.getHasNextPage();
                 page++;
             } while (hasNext);
-            protocolDeviceIdToDeviceId.clear();
-            protocolDeviceIdToDeviceId.putAll(loaded);
+            // 只增不删：扫描依赖"设备列表 + 档案缓存"的即时快照，刚建好的设备/尚未热的档案都可能漏。
+            // 早先的 clear + putAll 会把已索引的设备号抹掉，导致该实例上设备号鉴权失效。
+            // 设备被删后条目会残留，但解析时会因设备不存在而被拒（协议设备号在租户内唯一，不会误配到别人）。
+            loaded.forEach(protocolDeviceIdToDeviceId::putIfAbsent);
             log.info("TCP protocol device ids loaded: {} entr(ies)", protocolDeviceIdToDeviceId.size());
         } catch (Exception e) {
             log.warn("Failed to load TCP protocol device ids", e);

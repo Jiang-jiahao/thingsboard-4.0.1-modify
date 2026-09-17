@@ -163,7 +163,7 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
     });
 
     this.tcpDeviceProfileTransportConfigurationFormGroup = this.fb.group({
-      udpWireAuthenticationMode: [UdpWireAuthenticationMode.TOKEN, Validators.required],
+      udpWireAuthenticationMode: [UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID, Validators.required],
       udpDeferredWireAuthTokenJsonKey: [''],
       udpReadIdleTimeoutSec: [null, [Validators.min(0)]],
       udpOpaqueRuleEngineKey: ['udpOpaquePayload'],
@@ -243,8 +243,7 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
     if (!keyCtrl) {
       return;
     }
-    if (mode === UdpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-        || mode === UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+    if (mode === UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
       keyCtrl.setValidators([Validators.required, Validators.pattern(/\S+/)]);
     } else {
       keyCtrl.clearValidators();
@@ -1113,8 +1112,7 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
     if (v.udpReadIdleTimeoutSec != null && v.udpReadIdleTimeoutSec !== '') {
       configuration.udpReadIdleTimeoutSec = Number(v.udpReadIdleTimeoutSec);
     }
-    if (v.udpWireAuthenticationMode === UdpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-        || v.udpWireAuthenticationMode === UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+    if (v.udpWireAuthenticationMode === UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
       const dk = String(v.udpDeferredWireAuthTokenJsonKey ?? '').trim();
       if (dk.length > 0) {
         configuration.udpDeferredWireAuthTokenJsonKey = dk;

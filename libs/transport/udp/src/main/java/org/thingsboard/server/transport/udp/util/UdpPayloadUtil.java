@@ -33,18 +33,6 @@ public final class UdpPayloadUtil {
     private static final byte[] CRLF = "\n".getBytes(StandardCharsets.UTF_8);
     private UdpPayloadUtil() {
     }
-    /**
-     * 首帧鉴权行固定为 UTF-8 JSON：{@code {"token":"..."}}，不使用 HEX 包装。
-     */
-    public static String encodeAuthLine(String token) {
-        return "{\"token\":\"" + escapeJson(token) + "\"}";
-    }
-    private static String escapeJson(String s) {
-        if (s == null) {
-            return "";
-        }
-        return s.replace("\\", "\\\\").replace("\"", "\\\"");
-    }
     public static String decodePayloadLine(TransportUdpDataType type, String line) {
         String trimmed = line.trim();
         if (trimmed.isEmpty()) {
@@ -79,10 +67,30 @@ public final class UdpPayloadUtil {
 
 
     /**
+     * FIXED_LENGTH 分帧会按帧长在负载尾部补 0（见 wrapFraming）；解码文本负载时须剥掉这些填充，
+     * 否则 JSON 解析失败、帧会被当作无效负载丢弃。
+     */
+    public static String stripFramePadding(String payload) {
+        if (payload == null) {
+            return null;
+        }
+        int end = payload.length();
+        while (end > 0) {
+            char c = payload.charAt(end - 1);
+            if (c == '\u0000' || c == ' ' || c == '\t' || c == '\r' || c == '\n') {
+                end--;
+            } else {
+                break;
+            }
+        }
+        return payload.substring(0, end).trim();
+    }
+
+    /**
      * 一次读取到的负载字节 → JSON 文本：
-     * {@link TransportUdpDataType#JSON} 按 UTF-8 解码，
+     * {@link TransportUdpDataType#UTF8} 按 UTF-8 解码，
      * {@link TransportUdpDataType#ASCII} 按 US-ASCII 解码，
-     * {@link TransportUdpDataType#HEX} / {@link TransportUdpDataType#PROTOCOL_TEMPLATE} 保留为原始字节并包成 {@code hex} 键。
+     * {@link TransportUdpDataType#RAW_BYTES} / {@link TransportUdpDataType#PROTOCOL_TEMPLATE} 保留为原始字节并包成 {@code hex} 键。
      */
     public static String decodePayloadBytes(TransportUdpDataType type, byte[] payloadBytes) {
         if (payloadBytes == null || payloadBytes.length == 0) {
@@ -96,10 +104,10 @@ public final class UdpPayloadUtil {
             case PROTOCOL_TEMPLATE:
                 return jsonFromRawPayloadAsHex(payloadBytes);
             case ASCII:
-                return new String(payloadBytes, StandardCharsets.US_ASCII).trim();
+                return stripFramePadding(new String(payloadBytes, StandardCharsets.US_ASCII));
             case UTF8:
             default:
-                return new String(payloadBytes, StandardCharsets.UTF_8).trim();
+                return stripFramePadding(new String(payloadBytes, StandardCharsets.UTF_8));
         }
     }
 
@@ -126,13 +134,6 @@ public final class UdpPayloadUtil {
             default:
                 return jsonUtf8.getBytes(StandardCharsets.UTF_8);
         }
-    }
-    /**
-     * 鉴权首包固定为 UTF-8 JSON 文本，不参与业务分帧（LINE/LENGTH_PREFIX/FIXED_LENGTH）。
-     */
-    public static ByteBuf encodeAuthFrame(String token) {
-        byte[] inner = encodeAuthLine(token).getBytes(StandardCharsets.UTF_8);
-        return Unpooled.wrappedBuffer(inner);
     }
     /**
      * 下行业务消息：先按数据类型得到负载字节，再按分帧方式封装。

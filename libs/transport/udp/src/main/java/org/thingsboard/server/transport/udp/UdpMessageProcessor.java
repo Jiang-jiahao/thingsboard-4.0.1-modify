@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.thingsboard.server.common.adaptor.JsonConverter;
 import org.thingsboard.server.common.data.DeviceProfile;
-import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
 import org.thingsboard.server.common.data.TransportUdpDataType;
 import org.thingsboard.server.common.data.device.profile.UdpDeviceProfileTransportConfiguration;
@@ -33,16 +32,15 @@ import org.thingsboard.server.common.data.device.profile.UdpWireAuthenticationMo
 import org.thingsboard.server.common.data.id.DeviceId;
 import org.thingsboard.server.common.transport.TransportService;
 import org.thingsboard.server.common.transport.TransportServiceCallback;
-import org.thingsboard.server.common.transport.auth.ValidateDeviceCredentialsResponse;
 import org.thingsboard.server.gen.transport.TransportProtos;
 import org.thingsboard.server.transport.udp.session.UdpDeviceSession;
 import org.thingsboard.server.transport.udp.util.UdpHexProtocolParser;
 import org.thingsboard.server.transport.udp.util.UdpPayloadUtil;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
 @ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.udp.enabled:true}'=='true'")
 @Component
 @RequiredArgsConstructor
@@ -255,9 +253,7 @@ public class UdpMessageProcessor {
      * DEFERRED 模式且会话已就绪时，从 JSON 对象副本中移除档案配置的身份字段，避免写入遥测/属性。
      */
     private JsonObject stripDeferredWireAuthTokenField(UdpDeviceSession session, JsonObject root) {
-        UdpWireAuthenticationMode mode = session.getUdpWireAuthenticationMode();
-        if (mode != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-                && mode != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+        if (session.getUdpWireAuthenticationMode() != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             return root;
         }
         Optional<String> keyOpt = deferredWireAuthPayloadIdentityJsonKey(session.getDeviceProfile());
@@ -274,9 +270,7 @@ public class UdpMessageProcessor {
                 || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration ptc)) {
             return Optional.empty();
         }
-        UdpWireAuthenticationMode mode = ptc.getUdpWireAuthenticationMode();
-        if (mode != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-                && mode != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+        if (ptc.getUdpWireAuthenticationMode() != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             return Optional.empty();
         }
         String k = ptc.getUdpDeferredWireAuthTokenJsonKey();
@@ -286,42 +280,9 @@ public class UdpMessageProcessor {
         return Optional.of(k.trim());
     }
 
-    public void processServerSideAuth(UdpDeviceSession session, JsonObject root, Consumer<ValidateDeviceCredentialsResponse> onSuccess) {
-        if (!root.has("token")) {
-            log.warn("[{}] Missing token in auth line", session.getSessionId());
-            session.endServerAuth();
-            return;
-        }
-        String token = root.get("token").getAsString();
-        transportService.process(DeviceTransportType.UDP,
-                TransportProtos.ValidateDeviceTokenRequestMsg.newBuilder().setToken(token).build(),
-                new TransportServiceCallback<>() {
-                    @Override
-                    public void onSuccess(ValidateDeviceCredentialsResponse msg) {
-                        if (msg.hasDeviceInfo()) {
-                            session.setDeviceInfo(msg.getDeviceInfo());
-                            session.setDeviceProfile(msg.getDeviceProfile());
-                            session.setDeviceWireAuthenticated(true);
-                            onSuccess.accept(msg);
-                        } else {
-                            log.warn("[{}] Auth failed", session.getSessionId());
-                            session.endServerAuth();
-                            session.close();
-                        }
-                    }
-                    @Override
-                    public void onError(Throwable e) {
-                        log.warn("[{}] Auth error", session.getSessionId(), e);
-                        session.endServerAuth();
-                        session.close();
-                    }
-                });
-    }
-
     /**
      * SERVER 延迟链路上鉴权：从<strong>当前帧</strong>按业务类型解码后的 JSON 中取档案配置的字段字符串
-     * （{@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} 为 ACCESS_TOKEN；
-     * {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 为协议设备 ID）。未注册前可多次尝试，无字段的帧忽略。
+     * （{@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 为协议设备 ID）。未注册前可多次尝试，无字段的帧忽略。
      */
     public Optional<String> extractDeferredWireAuthAccessToken(DeviceProfile profile, UdpDeviceSession session, byte[] rawFrame) {
         if (profile == null || rawFrame == null) {
@@ -335,6 +296,13 @@ public class UdpMessageProcessor {
         if (StringUtils.isBlank(key)) {
             return Optional.empty();
         }
+        // 身份帧统一为 UTF-8 JSON 文本：共享端口下鉴权发生在"按档案负载类型解码"之前，
+        // 因此即使是原始字节（HEX / 协议模板）档案，设备也用一帧 JSON 声明自己的协议设备号。
+        Optional<JsonObject> identityFrame = identityJsonText(rawFrame, key);
+        if (identityFrame.isPresent()) {
+            return tokenStringFromJsonObject(identityFrame.get(), key);
+        }
+        // 回退：按档案负载类型解码后再取该字段（HEX / 协议模板按 hexProtocolFields 解析出字段）。
         TransportUdpDataType type = session.getPayloadDataType();
         String json;
         try {
@@ -373,6 +341,30 @@ public class UdpMessageProcessor {
         return Optional.empty();
     }
 
+    /**
+     * 身份帧约定为 UTF-8 JSON 文本：共享端口下鉴权发生在"按档案负载类型解码"之前，
+     * 所以原始字节（HEX / 协议模板）档案的设备也用一帧 JSON 声明协议设备号。
+     * 帧不是 JSON 文本、或没有该字段时返回 empty，交由调用方按档案类型回退解析。
+     */
+    private static Optional<JsonObject> identityJsonText(byte[] rawFrame, String key) {
+        if (rawFrame == null) {
+            return Optional.empty();
+        }
+        try {
+            String text = new String(rawFrame, StandardCharsets.UTF_8).trim();
+            if (!text.startsWith("{")) {
+                return Optional.empty();
+            }
+            JsonElement el = JsonParser.parseString(text);
+            if (!el.isJsonObject() || !el.getAsJsonObject().has(key)) {
+                return Optional.empty();
+            }
+            return Optional.of(el.getAsJsonObject());
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
     private static Optional<String> tokenStringFromJsonObject(JsonObject o, String key) {
         if (!o.has(key)) {
             return Optional.empty();
@@ -399,13 +391,26 @@ public class UdpMessageProcessor {
                 || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration ptc)) {
             return;
         }
-        UdpWireAuthenticationMode mode = ptc.getUdpWireAuthenticationMode();
-        if (mode != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-                && mode != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+        if (ptc.getUdpWireAuthenticationMode() != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             return;
         }
         String key = ptc.getUdpDeferredWireAuthTokenJsonKey();
         if (StringUtils.isBlank(key)) {
+            return;
+        }
+        // 身份帧是 JSON 文本（含 HEX / 协议模板档案）：剥掉身份字段后按普通上行重放。
+        Optional<JsonObject> identityFrame = identityJsonText(rawFrame, key);
+        if (identityFrame.isPresent()) {
+            JsonObject o = identityFrame.get().deepCopy();
+            o.remove(key);
+            if (o.size() == 0) {
+                return;
+            }
+            if (o.has("method")) {
+                processUplinkJson(session, o);
+            } else {
+                processUplinkWithoutMethod(session, o);
+            }
             return;
         }
         TransportUdpDataType type = session.getPayloadDataType();

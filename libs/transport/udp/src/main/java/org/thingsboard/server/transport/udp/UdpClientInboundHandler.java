@@ -40,11 +40,6 @@ public class UdpClientInboundHandler extends SimpleChannelInboundHandler<Datagra
         if (session.getDeviceId() != null) {
             udpTransportContext.resetClientReconnectFailureCount(session.getDeviceId());
         }
-        if (session.shouldSendWireAuthPayload()) {
-            String token = udpTransportContext.getProtoEntityService()
-                    .getDeviceCredentialsByDeviceId(session.getDeviceId()).getCredentialsId();
-            session.sendAuthFrame(token);
-        }
     }
 
     @Override

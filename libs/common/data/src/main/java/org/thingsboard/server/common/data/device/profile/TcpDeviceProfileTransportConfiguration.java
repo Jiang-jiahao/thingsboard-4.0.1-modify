@@ -34,16 +34,13 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
     private Integer tcpFixedFrameLength;
 
     /**
-     * 链路上是否要求发送 token：{@link TcpWireAuthenticationMode#NONE} 为直连即通讯（SERVER 需配 {@code sourceHost} 绑定 IP）；
-     * {@link TcpWireAuthenticationMode#TOKEN} 为启用首帧/首包 token 鉴权；
-     * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} / {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID}
-     * 为从业务负载（任意一帧，见枚举说明）解析身份字段后再注册会话。
+     * 链路上如何识别设备：{@link TcpWireAuthenticationMode#NONE} 为直连即通讯（SERVER 需配 {@code sourceHost} 绑定 IP）；
+     * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 为从业务负载（任意一帧，见枚举说明）解析协议设备号后再注册会话。
      */
     private TcpWireAuthenticationMode tcpWireAuthenticationMode;
 
     /**
-     * 当 {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} 时：解析得到的 JSON 中存放 <strong>ACCESS_TOKEN</strong>（{@code credentialsId}）的字段名。<br>
-     * 当 {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：解析得到的 JSON 中存放<strong>协议设备 ID</strong>的字段名（与设备传输配置
+     * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：解析得到的 JSON 中存放<strong>协议设备 ID</strong>的字段名（与设备传输配置
      * {@link org.thingsboard.server.common.data.device.data.TcpDeviceTransportConfiguration#getTcpWireAuthPayloadDeviceId() tcpWireAuthPayloadDeviceId} 比对，同一租户内须唯一）。<br>
      * 校验成功后该字段会从本帧重放及后续上行的副本中移除。
      */
@@ -95,7 +92,7 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
     }
 
     public TcpWireAuthenticationMode getTcpWireAuthenticationMode() {
-        return Objects.requireNonNullElse(tcpWireAuthenticationMode, TcpWireAuthenticationMode.TOKEN);
+        return Objects.requireNonNullElse(tcpWireAuthenticationMode, TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID);
     }
 
 
@@ -157,11 +154,10 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
         if (tcpReadIdleTimeoutSec != null && tcpReadIdleTimeoutSec < 0) {
             throw new IllegalArgumentException("tcpReadIdleTimeoutSec must be >= 0");
         }
-        if (getTcpWireAuthenticationMode() == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-                || getTcpWireAuthenticationMode() == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+        if (getTcpWireAuthenticationMode() == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             if (StringUtils.isBlank(tcpDeferredWireAuthTokenJsonKey)) {
                 throw new IllegalArgumentException(
-                        "tcpDeferredWireAuthTokenJsonKey is required when tcpWireAuthenticationMode is DEFERRED_PAYLOAD_TOKEN or DEFERRED_PAYLOAD_DEVICE_ID");
+                        "tcpDeferredWireAuthTokenJsonKey is required when tcpWireAuthenticationMode is DEFERRED_PAYLOAD_DEVICE_ID");
             }
         }
     }

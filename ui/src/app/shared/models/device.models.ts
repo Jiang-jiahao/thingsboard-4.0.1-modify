@@ -1362,9 +1362,7 @@ export enum TcpTransportFramingMode {
   FIXED_LENGTH = 'FIXED_LENGTH'
 }
 export enum TcpWireAuthenticationMode {
-  TOKEN = 'TOKEN',
   NONE = 'NONE',
-  DEFERRED_PAYLOAD_TOKEN = 'DEFERRED_PAYLOAD_TOKEN',
   DEFERRED_PAYLOAD_DEVICE_ID = 'DEFERRED_PAYLOAD_DEVICE_ID'
 }
 export enum TcpJsonWithoutMethodMode {
@@ -1786,7 +1784,7 @@ export interface TcpDeviceProfileTransportConfiguration {
   tcpTransportFramingMode?: TcpTransportFramingMode;
   tcpFixedFrameLength?: number;
   tcpWireAuthenticationMode?: TcpWireAuthenticationMode;
-  /** DEFERRED：解析后 JSON 中身份字段名（TOKEN 模式为 ACCESS_TOKEN；DEVICE_ID 模式为协议设备 ID） */
+  /** 协议设备号在负载 JSON 中的字段名 */
   tcpDeferredWireAuthTokenJsonKey?: string;
   /** CLIENT：断线/建连失败后重连间隔（秒）；空=后端默认 30；0=不重连 */
   tcpOutboundReconnectIntervalSec?: number;
@@ -1832,8 +1830,6 @@ export enum UdpTransportFramingMode {
 
 export enum UdpWireAuthenticationMode {
   NONE = 'NONE',
-  TOKEN = 'TOKEN',
-  DEFERRED_PAYLOAD_TOKEN = 'DEFERRED_PAYLOAD_TOKEN',
   DEFERRED_PAYLOAD_DEVICE_ID = 'DEFERRED_PAYLOAD_DEVICE_ID'
 }
 
@@ -2051,7 +2047,7 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
           tcpTransportConnectMode: TcpTransportConnectMode.SERVER,
           tcpTransportFramingMode: TcpTransportFramingMode.LINE,
           tcpFixedFrameLength: null,
-          tcpWireAuthenticationMode: TcpWireAuthenticationMode.TOKEN,
+          tcpWireAuthenticationMode: TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID,
           tcpJsonWithoutMethodMode: TcpJsonWithoutMethodMode.TELEMETRY_FLAT,
           tcpOpaqueRuleEngineKey: 'tcpOpaquePayload',
           transportTcpDataTypeConfiguration: {
@@ -2064,7 +2060,7 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
         const udpTransportConfiguration: UdpDeviceProfileTransportConfiguration = {
           udpTransportFramingMode: UdpTransportFramingMode.NONE,
           udpFixedFrameLength: null,
-          udpWireAuthenticationMode: UdpWireAuthenticationMode.TOKEN,
+          udpWireAuthenticationMode: UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID,
           udpJsonWithoutMethodMode: UdpJsonWithoutMethodMode.TELEMETRY_FLAT,
           udpOpaqueRuleEngineKey: 'udpOpaquePayload',
           transportUdpDataTypeConfiguration: {

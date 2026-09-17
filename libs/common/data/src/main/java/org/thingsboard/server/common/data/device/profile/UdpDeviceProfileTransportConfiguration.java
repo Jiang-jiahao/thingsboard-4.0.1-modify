@@ -24,16 +24,13 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
     private Integer udpFixedFrameLength;
 
     /**
-     * 链路上是否要求发送 token：{@link UdpWireAuthenticationMode#NONE} 为直连即通讯（SERVER 需配 {@code sourceHost} 绑定 IP）；
-     * {@link UdpWireAuthenticationMode#TOKEN} 为启用首帧/首包 token 鉴权；
-     * {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} / {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID}
-     * 为从业务负载（任意一帧，见枚举说明）解析身份字段后再注册会话。
+     * 链路上如何识别设备：{@link UdpWireAuthenticationMode#NONE} 为直连即通讯（SERVER 需配 {@code sourceHost} 绑定 IP）；
+     * {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 为从业务负载（任意一帧，见枚举说明）解析协议设备号后再注册会话。
      */
     private UdpWireAuthenticationMode udpWireAuthenticationMode;
 
     /**
-     * 当 {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} 时：解析得到的 JSON 中存放 <strong>ACCESS_TOKEN</strong>（{@code credentialsId}）的字段名。<br>
-     * 当 {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：解析得到的 JSON 中存放<strong>协议设备 ID</strong>的字段名（与设备传输配置
+     * {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：解析得到的 JSON 中存放<strong>协议设备 ID</strong>的字段名（与设备传输配置
      * {@link org.thingsboard.server.common.data.device.data.UdpDeviceTransportConfiguration#getUdpWireAuthPayloadDeviceId() udpWireAuthPayloadDeviceId} 比对，并结合入站监听端口定位设备）。<br>
      * 校验成功后该字段会从本帧重放及后续上行的副本中移除。
      */
@@ -83,7 +80,7 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
     }
 
     public UdpWireAuthenticationMode getUdpWireAuthenticationMode() {
-        return Objects.requireNonNullElse(udpWireAuthenticationMode, UdpWireAuthenticationMode.TOKEN);
+        return Objects.requireNonNullElse(udpWireAuthenticationMode, UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID);
     }
 
 
@@ -145,11 +142,10 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
         if (udpReadIdleTimeoutSec != null && udpReadIdleTimeoutSec < 0) {
             throw new IllegalArgumentException("udpReadIdleTimeoutSec must be >= 0");
         }
-        if (getUdpWireAuthenticationMode() == UdpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-                || getUdpWireAuthenticationMode() == UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+        if (getUdpWireAuthenticationMode() == UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             if (StringUtils.isBlank(udpDeferredWireAuthTokenJsonKey)) {
                 throw new IllegalArgumentException(
-                        "udpDeferredWireAuthTokenJsonKey is required when udpWireAuthenticationMode is DEFERRED_PAYLOAD_TOKEN or DEFERRED_PAYLOAD_DEVICE_ID");
+                        "udpDeferredWireAuthTokenJsonKey is required when udpWireAuthenticationMode is DEFERRED_PAYLOAD_DEVICE_ID");
             }
         }
         if (udpTransportConnectMode == UdpTransportConnectMode.CLIENT) {

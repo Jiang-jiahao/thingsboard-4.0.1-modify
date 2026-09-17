@@ -35,6 +35,7 @@ import org.thingsboard.server.common.data.Device;
 import org.thingsboard.server.common.data.DeviceProfile;
 import org.thingsboard.server.common.data.DeviceTransportType;
 import org.thingsboard.server.common.data.StringUtils;
+import org.thingsboard.server.transport.udp.service.UdpDeferredAuthCatalog;
 import org.thingsboard.server.transport.udp.service.UdpProtocolDeviceIdRegistry;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -81,6 +82,7 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
     private final UdpTransportBalancingService balancingService;
     private final UdpSourceBindingService udpSourceBindingService;
     private final UdpProtocolDeviceIdRegistry udpProtocolDeviceIdRegistry;
+    private final UdpDeferredAuthCatalog udpDeferredAuthCatalog;
     @Getter
     private final UdpMessageProcessor udpMessageProcessor;
 
@@ -115,6 +117,7 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
                                UdpTransportBalancingService balancingService,
                                UdpSourceBindingService udpSourceBindingService,
                                UdpProtocolDeviceIdRegistry udpProtocolDeviceIdRegistry,
+                               UdpDeferredAuthCatalog udpDeferredAuthCatalog,
                                UdpMessageProcessor udpMessageProcessor,
                                @Lazy UdpTransportService udpTransportService) {
         this.deviceProfileCache = deviceProfileCache;
@@ -123,6 +126,7 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
         this.balancingService = balancingService;
         this.udpSourceBindingService = udpSourceBindingService;
         this.udpProtocolDeviceIdRegistry = udpProtocolDeviceIdRegistry;
+        this.udpDeferredAuthCatalog = udpDeferredAuthCatalog;
         this.udpMessageProcessor = udpMessageProcessor;
         this.udpTransportService = udpTransportService;
     }
@@ -147,6 +151,10 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
         session.endServerAuth();
         evictInboundPeerSession(session);
     }
+    public UdpDeferredAuthCatalog getDeferredAuthCatalog() {
+        return udpDeferredAuthCatalog;
+    }
+
     public UdpDeviceSession newInboundDeviceSession() {
         return new UdpDeviceSession(UUID.randomUUID(), this, false);
     }
@@ -583,12 +591,20 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
     }
 
     /**
-     * SERVER {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} / {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID}：
-     * 在 Core 会话注册前对每一帧按档案解析；本帧无身份字段则丢弃并等待；有字段则提交 Core 注册（TOKEN 模式字段值为 ACCESS_TOKEN；
-     * DEVICE_ID 模式字段值为协议设备 ID，由监听端口 + 设备传输配置 {@code udpWireAuthPayloadDeviceId} 定位 TB 设备后以该设备 ACCESS_TOKEN 注册）。
+     * SERVER {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID}：
+     * 在 Core 会话注册前对每一帧按档案解析；本帧无身份字段则丢弃并等待；有字段则以协议设备号
+     * （由设备传输配置 {@code udpWireAuthPayloadDeviceId} 定位 TB 设备）取该设备 ACCESS_TOKEN 注册。
      */
     public void completeDeferredWireAuthServerAuth(ChannelHandlerContext ctx, UdpDeviceSession session, byte[] rawFrame) {
-        DeviceProfile profile = session.getDeviceProfile();
+        completeDeferredWireAuthServerAuth(ctx, session, rawFrame, session.getDeviceProfile());
+    }
+
+    /**
+     * 共享端口下鉴权前会话没有档案：由 {@link UdpDeferredAuthCatalog} 按帧里命中的"已配置延迟鉴权键"
+     * 反推档案后调用本入口。
+     */
+    public void completeDeferredWireAuthServerAuth(ChannelHandlerContext ctx, UdpDeviceSession session, byte[] rawFrame,
+                                                   DeviceProfile profile) {
         if (profile == null || profile.getProfileData() == null
                 || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration ptc)) {
             log.warn("[{}] Deferred payload wire auth requires inbound session bound to device profile",
@@ -596,13 +612,12 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
             failInboundSession(session);
             return;
         }
-        UdpWireAuthenticationMode mode = ptc.getUdpWireAuthenticationMode();
-        if (mode != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-                && mode != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+        if (ptc.getUdpWireAuthenticationMode() != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             log.warn("[{}] inbound handler expected deferred payload wire auth mode", session.getSessionId());
             failInboundSession(session);
             return;
         }
+        session.setDeviceProfile(profile);
         Optional<String> fieldValueOpt = udpMessageProcessor.extractDeferredWireAuthAccessToken(profile, session, rawFrame);
         if (fieldValueOpt.isEmpty() || StringUtils.isBlank(fieldValueOpt.get())) {
             log.debug("[{}] Deferred wire auth: identity field absent in this frame, waiting for next frame", session.getSessionId());
@@ -613,10 +628,6 @@ public class UdpTransportContext extends org.thingsboard.server.common.transport
             return;
         }
         String fieldValue = fieldValueOpt.get().trim();
-        if (mode == UdpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN) {
-            submitDeferredAccessTokenValidation(ctx, session, rawFrame, fieldValue);
-            return;
-        }
         Optional<DeviceId> deviceIdOpt = udpProtocolDeviceIdRegistry.findByProtocolDeviceId(fieldValue);
         if (deviceIdOpt.isEmpty()) {
             log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: no TB device for payload device id [{}]",

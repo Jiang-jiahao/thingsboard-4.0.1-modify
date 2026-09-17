@@ -168,7 +168,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       tcpTransportConnectMode: [TcpTransportConnectMode.SERVER, Validators.required],
       tcpTransportFramingMode: [TcpTransportFramingMode.LINE, Validators.required],
       tcpFixedFrameLength: [null],
-      tcpWireAuthenticationMode: [TcpWireAuthenticationMode.TOKEN, Validators.required],
+      tcpWireAuthenticationMode: [TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID, Validators.required],
       tcpDeferredWireAuthTokenJsonKey: [''],
       tcpOutboundReconnectIntervalSec: [null, [Validators.min(0)]],
       tcpOutboundReconnectMaxAttempts: [null, [Validators.min(0)]],
@@ -268,8 +268,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     if (!keyCtrl) {
       return;
     }
-    if (mode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-        || mode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+    if (mode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
       keyCtrl.setValidators([Validators.required, Validators.pattern(/\S+/)]);
     } else {
       keyCtrl.clearValidators();
@@ -1163,8 +1162,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     if (v.tcpReadIdleTimeoutSec != null && v.tcpReadIdleTimeoutSec !== '') {
       configuration.tcpReadIdleTimeoutSec = Number(v.tcpReadIdleTimeoutSec);
     }
-    if (v.tcpWireAuthenticationMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-        || v.tcpWireAuthenticationMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+    if (v.tcpWireAuthenticationMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
       const dk = String(v.tcpDeferredWireAuthTokenJsonKey ?? '').trim();
       if (dk.length > 0) {
         configuration.tcpDeferredWireAuthTokenJsonKey = dk;

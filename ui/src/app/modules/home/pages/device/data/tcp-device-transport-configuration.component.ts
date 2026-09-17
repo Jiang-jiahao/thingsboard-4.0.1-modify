@@ -69,8 +69,7 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
 
   /**
    * 来自设备页拉取的设备档案 TCP 链路上鉴权模式；
-   * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时显示协议设备 ID；
-   * 与 {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_TOKEN} 同属入站延迟鉴权时的表单项显隐见各 getter。
+   * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时显示协议设备 ID；表单项显隐见各 getter。
    */
   @Input()
   set tcpWireAuthenticationMode(mode: TcpWireAuthenticationMode | null) {
@@ -127,13 +126,12 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
     return !this.isDeferredPayloadWireAuthInboundMode();
   }
 
-  /** DEFERRED_PAYLOAD_TOKEN / DEFERRED_PAYLOAD_DEVICE_ID（链路上延迟解析身份） */
+  /** DEFERRED_PAYLOAD_DEVICE_ID（链路上延迟解析协议设备号） */
   private isDeferredPayloadWireAuthMode(): boolean {
-    return this.tcpWireAuthMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-      || this.tcpWireAuthMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID;
+    return this.tcpWireAuthMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID;
   }
 
-  /** 延迟 TOKEN 或延迟协议设备 ID，且非显式 CLIENT：入站专用端口场景，隐藏 CLIENT/源 IP/通用提示 */
+  /** 延迟协议设备 ID，且非显式 CLIENT：入站场景，隐藏 CLIENT/源 IP/通用提示 */
   private isDeferredPayloadWireAuthInboundMode(): boolean {
     return this.isDeferredPayloadWireAuthMode()
       && this.tcpProfileTransportConnectModeValue !== TcpTransportConnectMode.CLIENT;

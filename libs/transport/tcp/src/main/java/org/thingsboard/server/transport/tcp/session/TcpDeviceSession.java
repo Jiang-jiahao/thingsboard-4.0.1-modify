@@ -194,11 +194,6 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
         return 0;
     }
 
-    public void sendAuthFrame(String token) {
-        ByteBuf buf = TcpPayloadUtil.encodeAuthFrame(token);
-        writeByteBuf(buf);
-    }
-
     public void sendJsonPayload(JsonObject json) {
         byte[] body = TcpPayloadUtil.bodyBytesForDataType(getPayloadDataType(), json.toString());
         // 下行必须与上行对称地分帧：否则 LINE / LENGTH_PREFIX 档案的设备切不出这一帧
@@ -397,28 +392,21 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
     public TcpWireAuthenticationMode getTcpWireAuthenticationMode() {
         DeviceProfile profile = getDeviceProfile();
         if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
-            return TcpWireAuthenticationMode.TOKEN;
+            return TcpWireAuthenticationMode.NONE;
         }
         var tc = profile.getProfileData().getTransportConfiguration();
         if (tc instanceof TcpDeviceProfileTransportConfiguration) {
             return ((TcpDeviceProfileTransportConfiguration) tc).getTcpWireAuthenticationMode();
         }
-        return TcpWireAuthenticationMode.TOKEN;
-    }
-    /**
-     * CLIENT 建连后是否在链路上发送 {@code {"token":"..."}} 帧。
-     */
-    public boolean shouldSendWireAuthPayload() {
-        return getTcpWireAuthenticationMode() == TcpWireAuthenticationMode.TOKEN;
+        return TcpWireAuthenticationMode.NONE;
     }
 
     /**
-     * SERVER：链路上鉴权为从业务负载解析身份后再向 Core 注册（ACCESS_TOKEN 或 协议设备 ID 模式）。
+     * SERVER：链路上鉴权为从业务负载解析协议设备号后再向 Core 注册。
+     * 未绑定档案的会话必须返回 false —— 共享端口下鉴权前还不知道档案，那条路要留给延迟鉴权目录。
      */
     public boolean isDeferredPayloadWireAuth() {
-        TcpWireAuthenticationMode m = getTcpWireAuthenticationMode();
-        return m == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_TOKEN
-                || m == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID;
+        return getTcpWireAuthenticationMode() == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID;
     }
 
 

@@ -8,7 +8,6 @@ package org.thingsboard.server.common.data.device.profile;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class DeviceProfileRpcMethodScheduleTest {
 
@@ -23,13 +22,13 @@ class DeviceProfileRpcMethodScheduleTest {
 
     @Test
     void scheduleRequiresMinInterval() {
+        // 定时配置已迁到设备级 deviceData.scheduledRpcs；档案上这两个字段为 @Deprecated 且不再参与校验
+        // （间隔 >= 1000 的校验由 DeviceScheduledRpc.validate() 负责，见 C.1 用例）。
         DeviceProfileRpcMethod method = baseHttpOutbound();
         method.setScheduleEnabled(true);
         method.setScheduleIntervalMs(500L);
         assertThat(method.isScheduleActive()).isFalse();
-        assertThatThrownBy(() -> method.validate(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("scheduleIntervalMs");
+        method.validate(null);
     }
 
     @Test
