@@ -1,19 +1,3 @@
-///
-/// Copyright © 2016-2025 The Thingsboard Authors
-///
-/// Licensed under the Apache License, Version 2.0 (the "License");
-/// you may not use this file except in compliance with the License.
-/// You may obtain a copy of the License at
-///
-///     http://www.apache.org/licenses/LICENSE-2.0
-///
-/// Unless required by applicable law or agreed to in writing, software
-/// distributed under the License is distributed on an "AS IS" BASIS,
-/// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-/// See the License for the specific language governing permissions and
-/// limitations under the License.
-///
-
 import 'hammerjs';
 
 import { Component, OnInit } from '@angular/core';
@@ -27,10 +11,12 @@ import { LocalStorageService } from '@core/local-storage/local-storage.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatIconRegistry } from '@angular/material/icon';
 import { getCurrentAuthState, selectUserReady } from '@core/auth/auth.selectors';
-import { filter, skip, tap } from 'rxjs/operators';
+import { catchError, filter, map, shareReplay, skip, switchMap, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
 import { AuthService } from '@core/auth/auth.service';
 import { svgIcons, svgIconsUrl } from '@shared/models/icon.models';
 import { ActionSettingsChangeLanguage } from '@core/settings/settings.actions';
+import { updateUserLang } from '@core/settings/settings.utils';
 import { SETTINGS_KEY } from '@core/settings/settings.effects';
 import { initCustomJQueryEvents } from '@shared/models/jquery-event.models';
 
@@ -40,6 +26,10 @@ import { initCustomJQueryEvents } from '@shared/models/jquery-event.models';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
+
+  /** 当前语言包加载完成的信号，供首次导航前等待 */
+  private userLangApplied$: Observable<unknown> = of(undefined);
+  private loadingUserLang: string | null = null;
 
   constructor(private store: Store<AppState>,
               private storageService: LocalStorageService,
@@ -99,13 +89,37 @@ export class AppComponent implements OnInit {
           const settings = this.storageService.getItem(SETTINGS_KEY);
           userLang = settings?.userLang ?? null;
         }
+        this.loadUserLang(userLang);
         this.notifyUserLang(userLang);
       }),
       skip(1),
+      // 首次导航前必须等语言包加载完成：路由解析器里的 translate.instant() 会把当时的
+      // 语言固化成字符串写进表格列标题与操作菜单，早于加载完成就会一直显示默认语言。
+      switchMap((data) => this.userLangApplied$.pipe(map(() => data))),
     ).subscribe((data) => {
       this.authService.gotoDefaultPlace(data.isAuthenticated);
     });
     this.authService.reloadUser();
+  }
+
+  /**
+   * 主动持有语言包加载。translate.use() 在目标语言已是 currentLang 时会直接返回且不重新加载，
+   * 若只靠 effect 触发，导航侧就拿不到「加载完成」的信号，所以这里自己发起并缓存同一份 observable。
+   */
+  private loadUserLang(userLang: string) {
+    if (this.loadingUserLang === userLang) {
+      return;
+    }
+    this.loadingUserLang = userLang;
+    this.userLangApplied$ = updateUserLang(this.translate, document, userLang).pipe(
+      // 语言包加载失败也必须放行导航，否则会卡在启动页
+      catchError((err) => {
+        console.error('Failed to load user language pack', err);
+        return of(undefined);
+      }),
+      shareReplay(1)
+    );
+    this.userLangApplied$.subscribe();
   }
 
   ngOnInit() {

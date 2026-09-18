@@ -1,18 +1,3 @@
-/**
- * Copyright © 2016-2025 The Thingsboard Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.thingsboard.server.dao.entity;
 
 import lombok.extern.slf4j.Slf4j;
@@ -108,15 +93,27 @@ public abstract class AbstractEntityService {
         var exOpt = extractConstraintViolationException(t);
         if (exOpt.isPresent()) {
             var ex = exOpt.get();
-            if (StringUtils.isNotEmpty(ex.getConstraintName())) {
-                var constraintName = ex.getConstraintName();
-                for (var constraintMessage : constraints.entrySet()) {
-                    if (constraintName.equals(constraintMessage.getKey())) {
-                        throw new DataValidationException(constraintMessage.getValue());
-                    }
+            var constraintName = ex.getConstraintName();
+            // PostgreSQL 的报错文本会跟随服务端 locale 本地化（中文库返回「重复键违反唯一约束"tb_user_email_key"」），
+            // 而 Hibernate 是用英文正则从消息里提取约束名的，本地化后提取不到（返回 null），
+            // 导致下面按名字精确匹配全部落空、原始 SQL 直接漏给前端。此时退回在根因异常文本里找。
+            var fallbackMessage = StringUtils.isEmpty(constraintName) ? rootCauseMessage(t) : null;
+            for (var constraintMessage : constraints.entrySet()) {
+                var expectedName = constraintMessage.getKey();
+                if (expectedName.equals(constraintName)
+                        || (fallbackMessage != null && fallbackMessage.contains(expectedName))) {
+                    throw new DataValidationException(constraintMessage.getValue());
                 }
             }
         }
+    }
+
+    private static String rootCauseMessage(Throwable t) {
+        var cause = t;
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+        return StringUtils.defaultString(cause.getMessage(), "");
     }
 
     protected void updateDebugSettings(TenantId tenantId, HasDebugSettings entity, long now) {

@@ -1,21 +1,7 @@
-/**
- * Copyright © 2016-2025 The Thingsboard Authors
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.thingsboard.server.service.entitiy.tenant;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.thingsboard.server.common.data.Tenant;
 import org.thingsboard.server.common.data.TenantProfile;
@@ -29,7 +15,9 @@ import org.thingsboard.server.service.install.InstallScripts;
 import org.thingsboard.server.service.sync.vc.EntitiesVersionControlService;
 
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * {@link TbTenantService} 的默认实现。
@@ -41,6 +29,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DefaultTbTenantService extends AbstractTbEntityService implements TbTenantService {
 
     private final TenantService tenantService;
@@ -76,6 +65,16 @@ public class DefaultTbTenantService extends AbstractTbEntityService implements T
         TenantId tenantId = tenant.getId();
         tenantService.deleteTenant(tenantId);
         tenantProfileCache.evict(tenantId);
-        versionControlService.deleteVersionControlSettings(tenantId).get(1, TimeUnit.MINUTES);
+        // 版本控制仓库的清理由独立的 VC 执行器响应，该执行器未部署时会一直等不到响应。
+        // 此时租户本体已经删除，不能因为这份尽力而为的清理没做完就让接口以 500 收场。
+        try {
+            versionControlService.deleteVersionControlSettings(tenantId).get(1, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw e;
+        } catch (TimeoutException | ExecutionException e) {
+            log.warn("[{}] Version control settings cleanup did not complete: {}. Tenant itself is already deleted.",
+                    tenantId, e.getMessage());
+        }
     }
 }
