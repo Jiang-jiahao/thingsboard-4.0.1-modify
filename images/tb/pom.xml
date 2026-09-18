@@ -45,8 +45,8 @@
             <groupId>org.thingsboard</groupId>
             <artifactId>monolith</artifactId>
             <version>${project.version}</version>
-            <classifier>deb</classifier>
-            <type>deb</type>
+            <classifier>boot</classifier>
+            <type>jar</type>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -58,7 +58,7 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-tb-postgres-deb</id>
+                        <id>copy-tb-postgres-jar</id>
                         <phase>package</phase>
                         <goals>
                             <goal>copy</goal>
@@ -68,16 +68,16 @@
                                 <artifactItem>
                                     <groupId>org.thingsboard</groupId>
                                     <artifactId>monolith</artifactId>
-                                    <classifier>deb</classifier>
-                                    <type>deb</type>
-                                    <destFileName>${pkg.name}.deb</destFileName>
+                                    <classifier>boot</classifier>
+                                    <type>jar</type>
+                                    <destFileName>${pkg.name}.jar</destFileName>
                                     <outputDirectory>${project.build.directory}/docker-postgres</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>copy-tb-cassandra-deb</id>
+                        <id>copy-tb-cassandra-jar</id>
                         <phase>package</phase>
                         <goals>
                             <goal>copy</goal>
@@ -87,9 +87,9 @@
                                 <artifactItem>
                                     <groupId>org.thingsboard</groupId>
                                     <artifactId>monolith</artifactId>
-                                    <classifier>deb</classifier>
-                                    <type>deb</type>
-                                    <destFileName>${pkg.name}.deb</destFileName>
+                                    <classifier>boot</classifier>
+                                    <type>jar</type>
+                                    <destFileName>${pkg.name}.jar</destFileName>
                                     <outputDirectory>${project.build.directory}/docker-cassandra</outputDirectory>
                                 </artifactItem>
                             </artifactItems>

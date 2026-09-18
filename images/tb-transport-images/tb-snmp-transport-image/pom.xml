@@ -47,8 +47,8 @@
             <groupId>org.thingsboard</groupId>
             <artifactId>tb-snmp-transport</artifactId>
             <version>${project.version}</version>
-            <classifier>deb</classifier>
-            <type>deb</type>
+            <classifier>boot</classifier>
+            <type>jar</type>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -60,7 +60,7 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-tb-snmp-transport-deb</id>
+                        <id>copy-tb-snmp-transport-jar</id>
                         <phase>package</phase>
                         <goals>
                             <goal>copy</goal>
@@ -70,9 +70,9 @@
                                 <artifactItem>
                                     <groupId>org.thingsboard</groupId>
                                     <artifactId>tb-snmp-transport</artifactId>
-                                    <classifier>deb</classifier>
-                                    <type>deb</type>
-                                    <destFileName>${pkg.name}.deb</destFileName>
+                                    <classifier>boot</classifier>
+                                    <type>jar</type>
+                                    <destFileName>${pkg.name}.jar</destFileName>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>

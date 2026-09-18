@@ -142,27 +142,31 @@ function additionalComposeEdqsArgs() {
 
 function permissionList() {
     PERMISSION_LIST="
-      799  799  tb-node/log
-      799  799  tb-transports/lwm2m/log
-      799  799  tb-transports/http/log
-      799  799  tb-transports/mqtt/log
-      799  799  tb-transports/snmp/log
-      799  799  tb-transports/coap/log
-      799  799  tb-vc-executor/log
-      999  999  tb-node/postgres
+      999  999  tb-core/log
+      999  999  tb-rule-engine/log
+      999  999  tb-monolith/log
+      999  999  tb-transports/lwm2m/log
+      999  999  tb-transports/http/log
+      999  999  tb-transports/mqtt/log
+      999  999  tb-transports/snmp/log
+      999  999  tb-transports/coap/log
+      999  999  tb-transports/tcp/log
+      999  999  tb-transports/udp/log
+      999  999  tb-vc-executor/log
+      999  999  tb-monolith/postgres
       "
 
     source .env
 
     if [ "$DATABASE" = "hybrid" ]; then
       PERMISSION_LIST="$PERMISSION_LIST
-      999  999  tb-node/cassandra
+      999  999  tb-monolith/cassandra
       "
     fi
 
     if [ "$EDQS_ENABLED" = true ]; then
       PERMISSION_LIST="$PERMISSION_LIST
-      799  799  edqs/log
+      999  999  edqs/log
       "
     fi
 
@@ -170,24 +174,24 @@ function permissionList() {
     case $CACHE in
         redis)
           PERMISSION_LIST="$PERMISSION_LIST
-          1001 1001 tb-node/redis-data
+          1001 1001 tb-monolith/redis-data
           "
         ;;
         redis-cluster)
           PERMISSION_LIST="$PERMISSION_LIST
-          1001 1001 tb-node/redis-cluster-data-0
-          1001 1001 tb-node/redis-cluster-data-1
-          1001 1001 tb-node/redis-cluster-data-2
-          1001 1001 tb-node/redis-cluster-data-3
-          1001 1001 tb-node/redis-cluster-data-4
-          1001 1001 tb-node/redis-cluster-data-5
+          1001 1001 tb-monolith/redis-cluster-data-0
+          1001 1001 tb-monolith/redis-cluster-data-1
+          1001 1001 tb-monolith/redis-cluster-data-2
+          1001 1001 tb-monolith/redis-cluster-data-3
+          1001 1001 tb-monolith/redis-cluster-data-4
+          1001 1001 tb-monolith/redis-cluster-data-5
           "
         ;;
         redis-sentinel)
           PERMISSION_LIST="$PERMISSION_LIST
-          1001 1001 tb-node/redis-sentinel-data-master
-          1001 1001 tb-node/redis-sentinel-data-slave
-          1001 1001 tb-node/redis-sentinel-data-sentinel
+          1001 1001 tb-monolith/redis-sentinel-data-master
+          1001 1001 tb-monolith/redis-sentinel-data-slave
+          1001 1001 tb-monolith/redis-sentinel-data-sentinel
           "
         ;;
         *)

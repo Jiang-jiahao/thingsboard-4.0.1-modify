@@ -40,5 +40,7 @@
         <module>tb-coap-transport-image</module>
         <module>tb-lwm2m-transport-image</module>
         <module>tb-snmp-transport-image</module>
+        <module>tb-tcp-transport-image</module>
+        <module>tb-udp-transport-image</module>
     </modules>
 </project>

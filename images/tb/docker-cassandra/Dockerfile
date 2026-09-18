@@ -40,7 +40,7 @@ ENV PATH=$PATH:/usr/lib/postgresql/$PG_MAJOR/bin
 ENV PGLOG=/var/log/postgres
 ENV CASSANDRA_LOG=/var/log/cassandra
 
-COPY logback.xml ${pkg.name}.conf start-db.sh stop-db.sh start-tb.sh upgrade-tb.sh install-tb.sh ${pkg.name}.deb /tmp/
+COPY logback.xml ${pkg.name}.conf start-db.sh stop-db.sh start-tb.sh upgrade-tb.sh install-tb.sh ${pkg.name}.jar /tmp/
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends wget nmap procps gnupg2 \
@@ -61,9 +61,9 @@ RUN apt-get update \
     && mv /tmp/install-tb.sh /usr/bin \
     && mv /tmp/start-db.sh /usr/bin \
     && mv /tmp/stop-db.sh /usr/bin \
-    && dpkg -i /tmp/${pkg.name}.deb \
-    && rm /tmp/${pkg.name}.deb \
-    && (systemctl --no-reload disable --now ${pkg.name}.service > /dev/null 2>&1 || :) \
+    && (id -u ${pkg.user} > /dev/null 2>&1 || useradd --system --create-home ${pkg.user}) \
+    && mkdir -p ${pkg.installFolder}/bin \
+    && mv /tmp/${pkg.name}.jar ${pkg.installFolder}/bin/${pkg.name}.jar \
     && mv /tmp/logback.xml ${pkg.installFolder}/conf \
     && mv /tmp/${pkg.name}.conf ${pkg.installFolder}/conf \
 # postgres config
@@ -84,7 +84,9 @@ USER ${pkg.user}
 
 EXPOSE 9090
 EXPOSE 1883
+EXPOSE 5683
 EXPOSE 5683/udp
+EXPOSE 5684/udp
 EXPOSE 5685/udp
 EXPOSE 5686/udp
 

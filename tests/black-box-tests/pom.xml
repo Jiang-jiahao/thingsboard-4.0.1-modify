@@ -139,7 +139,7 @@
         </dependency>
         <dependency>
             <groupId>org.thingsboard.images</groupId>
-            <artifactId>tb-node</artifactId>
+            <artifactId>tb-monolith-image</artifactId>
             <type>docker-info</type>
         </dependency>
         <dependency>

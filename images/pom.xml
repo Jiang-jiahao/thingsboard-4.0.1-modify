@@ -39,12 +39,15 @@
 
     <modules>
         <!--Modules order is important to speedup parallel build and avoid yarn pgk parallel execution-->
-        <module>tb</module>
-<!--        <module>web-ui</module>-->
+        <!-- tb（一体化 tb-postgres / tb-cassandra）先不参与构建：它依赖的安装流程（ThingsboardInstallApplication）在当前代码里不存在 -->
+        <!-- <module>tb</module> -->
+        <module>web-ui</module>
         <module>tb-vc-executor-image</module>
-        <module>tb-node</module>
+        <module>tb-core</module>
+        <module>tb-rule-engine</module>
+        <module>tb-monolith</module>
         <module>tb-transport-images</module>
-<!--        <module>js-executor</module>-->
+        <module>js-executor</module>
         <module>tb-monitoring-image</module>
         <module>tb-edqs-image</module>
     </modules>

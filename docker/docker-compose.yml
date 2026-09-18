@@ -36,7 +36,7 @@ services:
       - tb-js-executor.env
   tb-core1:
     restart: always
-    image: "${DOCKER_REPO}/${TB_NODE_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${TB_CORE_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "8080"
     logging:
@@ -46,13 +46,12 @@ services:
         max-file: "30"
     environment:
       TB_SERVICE_ID: tb-core1
-      TB_SERVICE_TYPE: tb-core
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - tb-node.env
     volumes:
-      - ./tb-node/conf:/config
-      - ./tb-node/log:/var/log/thingsboard
+      - ./tb-core/conf:/config
+      - ./tb-core/log:/var/log/thingsboard-core
     depends_on:
       - zookeeper
       - tb-js-executor
@@ -60,7 +59,7 @@ services:
       - tb-rule-engine2
   tb-core2:
     restart: always
-    image: "${DOCKER_REPO}/${TB_NODE_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${TB_CORE_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "8080"
     logging:
@@ -70,13 +69,12 @@ services:
         max-file: "30"
     environment:
       TB_SERVICE_ID: tb-core2
-      TB_SERVICE_TYPE: tb-core
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - tb-node.env
     volumes:
-      - ./tb-node/conf:/config
-      - ./tb-node/log:/var/log/thingsboard
+      - ./tb-core/conf:/config
+      - ./tb-core/log:/var/log/thingsboard-core
     depends_on:
       - zookeeper
       - tb-js-executor
@@ -84,7 +82,7 @@ services:
       - tb-rule-engine2
   tb-rule-engine1:
     restart: always
-    image: "${DOCKER_REPO}/${TB_NODE_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${TB_RULE_ENGINE_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "8080"
     logging:
@@ -94,19 +92,18 @@ services:
         max-file: "30"
     environment:
       TB_SERVICE_ID: tb-rule-engine1
-      TB_SERVICE_TYPE: tb-rule-engine
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - tb-node.env
     volumes:
-      - ./tb-node/conf:/config
-      - ./tb-node/log:/var/log/thingsboard
+      - ./tb-rule-engine/conf:/config
+      - ./tb-rule-engine/log:/var/log/thingsboard-rule-engine
     depends_on:
       - zookeeper
       - tb-js-executor
   tb-rule-engine2:
     restart: always
-    image: "${DOCKER_REPO}/${TB_NODE_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${TB_RULE_ENGINE_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "8080"
     logging:
@@ -116,13 +113,12 @@ services:
         max-file: "30"
     environment:
       TB_SERVICE_ID: tb-rule-engine2
-      TB_SERVICE_TYPE: tb-rule-engine
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
       - tb-node.env
     volumes:
-      - ./tb-node/conf:/config
-      - ./tb-node/log:/var/log/thingsboard
+      - ./tb-rule-engine/conf:/config
+      - ./tb-rule-engine/log:/var/log/thingsboard-rule-engine
     depends_on:
       - zookeeper
       - tb-js-executor
@@ -133,7 +129,7 @@ services:
       - "1883"
     environment:
       TB_SERVICE_ID: tb-mqtt-transport1
-      JAVA_OPTS: "${JAVA_OPTS}"
+      JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
       - tb-mqtt-transport.env
     volumes:
@@ -150,7 +146,7 @@ services:
       - "1883"
     environment:
       TB_SERVICE_ID: tb-mqtt-transport2
-      JAVA_OPTS: "${JAVA_OPTS}"
+      JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
       - tb-mqtt-transport.env
     volumes:
@@ -167,7 +163,7 @@ services:
       - "8081"
     environment:
       TB_SERVICE_ID: tb-http-transport1
-      JAVA_OPTS: "${JAVA_OPTS}"
+      JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
       - tb-http-transport.env
     volumes:
@@ -184,7 +180,7 @@ services:
       - "8081"
     environment:
       TB_SERVICE_ID: tb-http-transport2
-      JAVA_OPTS: "${JAVA_OPTS}"
+      JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
       - tb-http-transport.env
     volumes:
@@ -201,7 +197,7 @@ services:
       - "5683:5683/udp"
     environment:
       TB_SERVICE_ID: tb-coap-transport
-      JAVA_OPTS: "${JAVA_OPTS}"
+      JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
       - tb-coap-transport.env
     volumes:
@@ -219,7 +215,7 @@ services:
       - "5686:5686/udp"
     environment:
       TB_SERVICE_ID: tb-lwm2m-transport
-      JAVA_OPTS: "${JAVA_OPTS}"
+      JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
       - tb-lwm2m-transport.env
     volumes:
@@ -236,7 +232,7 @@ services:
       - "1620:1620/udp"
     environment:
       TB_SERVICE_ID: tb-snmp-transport
-      JAVA_OPTS: "${JAVA_OPTS}"
+      JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
       - tb-snmp-transport.env
     volumes:
@@ -246,20 +242,92 @@ services:
       - zookeeper
       - tb-core1
       - tb-core2
+  tb-tcp-transport1:
+    restart: always
+    image: "${DOCKER_REPO}/${TCP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    ports:
+      # 只发临时宿主端口：所有 TCP 实例监听同一容器端口 5683，对外统一由入口网关（nginx-gateway）转发
+      - "5683"
+      - "8087"
+    environment:
+      TB_SERVICE_ID: tb-tcp-transport1
+      JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
+    env_file:
+      - tb-tcp-transport.env
+    volumes:
+      - ./tb-transports/tcp/conf:/config
+      - ./tb-transports/tcp/log:/var/log/tb-tcp-transport
+    depends_on:
+      - zookeeper
+      - tb-core1
+      - tb-core2
+  tb-tcp-transport2:
+    restart: always
+    image: "${DOCKER_REPO}/${TCP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    ports:
+      - "5683"
+      - "8087"
+    environment:
+      TB_SERVICE_ID: tb-tcp-transport2
+      JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
+    env_file:
+      - tb-tcp-transport.env
+    volumes:
+      - ./tb-transports/tcp/conf:/config
+      - ./tb-transports/tcp/log:/var/log/tb-tcp-transport
+    depends_on:
+      - zookeeper
+      - tb-core1
+      - tb-core2
+  tb-udp-transport1:
+    restart: always
+    image: "${DOCKER_REPO}/${UDP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    ports:
+      # 同上：两个 UDP 实例都监听容器端口 5684，由入口网关按源地址哈希转发
+      - "5684/udp"
+      - "8088"
+    environment:
+      TB_SERVICE_ID: tb-udp-transport1
+      JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
+    env_file:
+      - tb-udp-transport.env
+    volumes:
+      - ./tb-transports/udp/conf:/config
+      - ./tb-transports/udp/log:/var/log/tb-udp-transport
+    depends_on:
+      - zookeeper
+      - tb-core1
+      - tb-core2
+  tb-udp-transport2:
+    restart: always
+    image: "${DOCKER_REPO}/${UDP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    ports:
+      - "5684/udp"
+      - "8088"
+    environment:
+      TB_SERVICE_ID: tb-udp-transport2
+      JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
+    env_file:
+      - tb-udp-transport.env
+    volumes:
+      - ./tb-transports/udp/conf:/config
+      - ./tb-transports/udp/log:/var/log/tb-udp-transport
+    depends_on:
+      - zookeeper
+      - tb-core1
+      - tb-core2
+  # Web UI：nginx 直接发静态文件（前端产物已打进镜像），不再是 Node/Express 服务，也不需要 env 文件。
+  # 两个副本纯粹是为了重启/升级时界面不断（入口网关按 least_conn 分发）。
   tb-web-ui1:
     restart: always
     image: "${DOCKER_REPO}/${WEB_UI_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "8080"
-    env_file:
-      - tb-web-ui.env
   tb-web-ui2:
     restart: always
     image: "${DOCKER_REPO}/${WEB_UI_DOCKER_NAME}:${TB_VERSION}"
     ports:
       - "8080"
-    env_file:
-      - tb-web-ui.env
   tb-vc-executor1:
     restart: always
     image: "${DOCKER_REPO}/${TB_VC_EXECUTOR_DOCKER_NAME}:${TB_VERSION}"
@@ -294,26 +362,24 @@ services:
       - zookeeper
       - tb-core1
       - tb-core2
-  haproxy:
+  # 统一入口网关（nginx）：80/443 路由 + TLS、1883 MQTT、5683/5684 TCP/UDP，全部入口就这一个容器。
+  # 替代了原来的两个代理 —— haproxy-certbot（80/443/1883 + certbot 自动证书）与 nginx-tcpudp（5683/5684）。
+  # 配置：./nginx/config/（nginx.conf + locations.conf + proxy-headers.conf）
+  # 证书：./nginx/certs/（首次用 bash nginx/gen-self-signed-cert.sh 生成自签，生产换成真实证书）
+  nginx-gateway:
     restart: always
     container_name: "${LOAD_BALANCER_NAME}"
-    image: thingsboard/haproxy-certbot:2.2.33-alpine
-    volumes:
-     - ./haproxy/config:/config
-     - ./haproxy/letsencrypt:/etc/letsencrypt
-     - ./haproxy/certs.d:/usr/local/etc/haproxy/certs.d
+    image: "${NGINX_GATEWAY_IMAGE}"
     ports:
      - "80:80"
      - "443:443"
      - "1883:1883"
-     - "9999:9999"
-    cap_add:
-     - NET_ADMIN
-    environment:
-      HTTP_PORT: 80
-      HTTPS_PORT: 443
-      MQTT_PORT: 1883
-      FORCE_HTTPS_REDIRECT: "false"
+     - "5683:5683"
+     - "5684:5684/udp"
+    volumes:
+     - ./nginx/config/nginx.conf:/etc/nginx/nginx.conf:ro
+     - ./nginx/config:/etc/nginx/tbconf:ro
+     - ./nginx/certs:/etc/nginx/certs:ro
     links:
         - tb-core1
         - tb-core2
@@ -323,3 +389,20 @@ services:
         - tb-mqtt-transport2
         - tb-http-transport1
         - tb-http-transport2
+        - tb-tcp-transport1
+        - tb-tcp-transport2
+        - tb-udp-transport1
+        - tb-udp-transport2
+    depends_on:
+        - tb-core1
+        - tb-core2
+        - tb-web-ui1
+        - tb-web-ui2
+        - tb-mqtt-transport1
+        - tb-mqtt-transport2
+        - tb-http-transport1
+        - tb-http-transport2
+        - tb-tcp-transport1
+        - tb-tcp-transport2
+        - tb-udp-transport1
+        - tb-udp-transport2

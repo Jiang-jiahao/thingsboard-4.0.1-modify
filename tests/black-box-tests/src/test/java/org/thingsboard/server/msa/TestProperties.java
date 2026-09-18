@@ -37,7 +37,7 @@ public class TestProperties {
         if (instance.isActive()) {
             //return "https://host.docker.internal"; // this alternative requires docker-selenium.yml extra_hosts: - "host.docker.internal:host-gateway"
             //return "https://" + DockerClientFactory.instance().dockerHostIpAddress(); //this alternative will get Docker IP from testcontainers
-            return "https://haproxy"; //communicate inside current docker-compose network to the load balancer container
+            return "https://nginx-gateway"; //communicate inside current docker-compose network to the gateway container
         }
         return System.getProperty("tb.baseUiUrl", "http://localhost:8080");
     }

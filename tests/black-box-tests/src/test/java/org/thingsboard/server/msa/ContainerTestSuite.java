@@ -173,7 +173,7 @@ public class ContainerTestSuite {
                     .withEnv(installTb.getEnv())
                     .withEnv(queueEnv)
                     .withEnv("LOAD_BALANCER_NAME", "")
-                    .withExposedService("haproxy", 80, Wait.forHttp("/swagger-ui.html").withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .withExposedService("nginx-gateway", 80, Wait.forHttp("/swagger-ui.html").withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
                     .withExposedService("broker", 1883)
                     .waitingFor("tb-core1", Wait.forLogMessage(TB_CORE_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
                     .waitingFor("tb-core2", Wait.forLogMessage(TB_CORE_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))

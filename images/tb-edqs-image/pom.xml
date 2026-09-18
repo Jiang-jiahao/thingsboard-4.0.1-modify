@@ -46,8 +46,8 @@
             <groupId>org.thingsboard</groupId>
             <artifactId>tb-edqs</artifactId>
             <version>${project.version}</version>
-            <classifier>deb</classifier>
-            <type>deb</type>
+            <classifier>boot</classifier>
+            <type>jar</type>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -69,9 +69,9 @@
                                 <artifactItem>
                                     <groupId>org.thingsboard</groupId>
                                     <artifactId>tb-edqs</artifactId>
-                                    <classifier>deb</classifier>
-                                    <type>deb</type>
-                                    <destFileName>${pkg.name}.deb</destFileName>
+                                    <classifier>boot</classifier>
+                                    <type>jar</type>
+                                    <destFileName>${pkg.name}.jar</destFileName>
                                     <outputDirectory>${project.build.directory}</outputDirectory>
                                 </artifactItem>
                             </artifactItems>

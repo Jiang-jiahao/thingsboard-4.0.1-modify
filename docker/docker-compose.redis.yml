@@ -18,17 +18,15 @@ version: '3.0'
 
 services:
 # Redis standalone
-# The latest version of Redis compatible with ThingsBoard is 7.2
+# 上游用的是 bitnami/redis:7.2（同理被加速站白名单拦住），这里换官方 redis 镜像。
+# TB 侧不用改：cache-redis.env 只给了 REDIS_HOST=redis、没有密码，而官方镜像默认就是无密码。
   redis:
     restart: always
-    image: bitnami/redis:7.2
-    environment:
-      # ALLOW_EMPTY_PASSWORD is recommended only for development.
-      ALLOW_EMPTY_PASSWORD: "yes"
+    image: redis:7-alpine
     ports:
       - '6379:6379'
     volumes:
-      - ./tb-node/redis-data:/bitnami/redis/data
+      - ./tb-monolith/redis-data:/data
 
 # ThingsBoard setup to use redis-standalone
   tb-core1:
@@ -92,6 +90,27 @@ services:
     depends_on:
       - redis
   tb-vc-executor2:
+    env_file:
+      - cache-redis.env
+    depends_on:
+      - redis
+  # TCP/UDP transport 是后来加的，最初写这个覆盖文件时还没有它们（同理见 docker-compose.kafka.yml）
+  tb-tcp-transport1:
+    env_file:
+      - cache-redis.env
+    depends_on:
+      - redis
+  tb-tcp-transport2:
+    env_file:
+      - cache-redis.env
+    depends_on:
+      - redis
+  tb-udp-transport1:
+    env_file:
+      - cache-redis.env
+    depends_on:
+      - redis
+  tb-udp-transport2:
     env_file:
       - cache-redis.env
     depends_on:

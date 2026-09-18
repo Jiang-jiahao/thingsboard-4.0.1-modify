@@ -19,13 +19,21 @@ version: '3.0'
 services:
   kafka:
     restart: always
-    image: "bitnami/kafka:3.7.0"
-    ports:
-      - "9092:9092"
+    # 这个镜像是**自建的**（docker/kafka-image/，内容就是标准 Apache Kafka 3.7.1 发行版）。
+    # 为什么自建：本环境与目标内网都拉不到 Kafka 镜像 —— bitnami 直接 denied；官方 apache/kafka
+    # 0 字节；confluentinc/cp-kafka 卡在 10~11/13 层；bitnamilegacy 也是 0 字节。
+    # 如果哪天网络能拉官方镜像：`bash docker/kafka-image/build.sh` 不用跑，把下面这行换成
+    #   image: "confluentinc/cp-kafka:7.7.0"
+    # 即可（kafka.env 里的 KAFKA_* 变量名和 KRaft 配置跟它是兼容的，不用改）。
+    image: "thingsboard/tb-kafka:3.7.1"
+    # 不把 9092 发到宿主：TB 在容器网络里用 kafka:9092 就够了；
+    # 而且宿主 9092 往往已经被本机那套「JVM 模式」的 Kafka（~/Library/Caches/tb-msa-infra）占着。
+    # 需要宿主的工具连它时，再把这行打开（并保证宿主 9092 空着）：
+    # ports:
+    #   - "9092:9092"
     env_file:
       - kafka.env
-    depends_on:
-      - zookeeper
+    # KRaft 不需要 zookeeper 管 broker 元数据；TB 自己的服务发现仍在用下面那个 zookeeper 服务
   tb-js-executor:
     env_file:
       - queue-kafka.env
@@ -92,6 +100,28 @@ services:
     depends_on:
       - kafka
   tb-vc-executor2:
+    env_file:
+      - queue-kafka.env
+    depends_on:
+      - kafka
+  # TCP/UDP transport 是后来加的，最初写这个覆盖文件时还没有它们 —— 漏在这里会导致
+  # 它们拿不到 TB_KAFKA_SERVERS，回落到应用默认的 localhost:9092 并反复重启。
+  tb-tcp-transport1:
+    env_file:
+      - queue-kafka.env
+    depends_on:
+      - kafka
+  tb-tcp-transport2:
+    env_file:
+      - queue-kafka.env
+    depends_on:
+      - kafka
+  tb-udp-transport1:
+    env_file:
+      - queue-kafka.env
+    depends_on:
+      - kafka
+  tb-udp-transport2:
     env_file:
       - queue-kafka.env
     depends_on:

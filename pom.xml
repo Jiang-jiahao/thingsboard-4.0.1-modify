@@ -884,8 +884,10 @@
                             <exclude>src/main/scripts/windows/**</exclude>
                             <exclude>src/main/resources/public/static/rulenode/**</exclude>
                             <exclude>**/*.proto.js</exclude>
-                            <exclude>docker/haproxy/**</exclude>
-                            <exclude>docker/tb-node/**</exclude>
+                            <exclude>docker/nginx/**</exclude>
+                            <exclude>docker/tb-core/**</exclude>
+                            <exclude>docker/tb-rule-engine/**</exclude>
+                            <exclude>docker/tb-monolith/**</exclude>
                             <exclude>ui/**</exclude>
                             <exclude>**/.browserslistrc</exclude>
                             <exclude>**/yarn.lock</exclude>
@@ -1150,7 +1152,7 @@
             </dependency>
             <dependency>
                 <groupId>org.thingsboard.images</groupId>
-                <artifactId>tb-node</artifactId>
+                <artifactId>tb-monolith-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
