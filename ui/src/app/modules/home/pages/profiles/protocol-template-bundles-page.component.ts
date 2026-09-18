@@ -1,6 +1,3 @@
-///
-/// Copyright © 2016-2025 The Thingsboard Authors
-///
 import { SelectionModel } from '@angular/cdk/collections';
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';

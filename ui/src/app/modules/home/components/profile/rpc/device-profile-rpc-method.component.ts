@@ -1,7 +1,3 @@
-///
-/// Copyright © 2016-2025 The Thingsboard Authors
-///
-
 import { Component, DestroyRef, EventEmitter, forwardRef, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import {
   ControlValueAccessor,

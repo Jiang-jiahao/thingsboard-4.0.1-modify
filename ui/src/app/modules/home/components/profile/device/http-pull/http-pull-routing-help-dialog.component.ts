@@ -1,6 +1,3 @@
-///
-/// Copyright © 2016-2025 The Thingsboard Authors
-///
 import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 

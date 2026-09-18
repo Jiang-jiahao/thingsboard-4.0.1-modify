@@ -1,6 +1,3 @@
-///
-/// Copyright © 2016-2025 The Thingsboard Authors
-///
 import { NgModule } from '@angular/core';
 import { SharedModule } from '@shared/shared.module';
 import { CommonModule } from '@angular/common';

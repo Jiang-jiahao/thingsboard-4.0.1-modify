@@ -1,6 +1,3 @@
-///
-/// Copyright © 2016-2025 The Thingsboard Authors
-///
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';

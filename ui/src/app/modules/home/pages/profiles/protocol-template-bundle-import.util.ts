@@ -1,9 +1,3 @@
-///
-/// Copyright © 2016-2025 The Thingsboard Authors
-///
-///
-/// Copyright © 2016-2025 The Thingsboard Authors
-///
 import {
   ProtocolTemplateBundle,
   ProtocolTemplateCommandDefinition,

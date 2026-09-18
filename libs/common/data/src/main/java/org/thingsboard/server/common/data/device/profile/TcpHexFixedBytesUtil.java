@@ -1,6 +1,3 @@
-/**
- * Copyright © 2016-2025 The ThingsBoard Authors
- */
 package org.thingsboard.server.common.data.device.profile;
 
 import java.nio.charset.StandardCharsets;

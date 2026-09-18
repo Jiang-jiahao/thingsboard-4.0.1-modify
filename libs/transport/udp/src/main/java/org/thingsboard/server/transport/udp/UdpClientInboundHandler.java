@@ -1,6 +1,3 @@
-/**
- * Copyright © 2016-2025 The Thingsboard Authors
- */
 package org.thingsboard.server.transport.udp;
 
 import com.google.gson.JsonObject;

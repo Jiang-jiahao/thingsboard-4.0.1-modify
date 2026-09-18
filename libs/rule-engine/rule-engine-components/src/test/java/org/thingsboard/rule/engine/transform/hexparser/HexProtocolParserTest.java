@@ -1,6 +1,3 @@
-/**
- * Copyright © 2016-2025 The Thingsboard Authors
- */
 package org.thingsboard.rule.engine.transform.hexparser;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;

@@ -1,11 +1,3 @@
-///
-
-/// Copyright © 2016-2025 The Thingsboard Authors
-
-///
-
-
-
 import { ChangeDetectorRef, Component, DestroyRef, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
