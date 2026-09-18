@@ -15,7 +15,7 @@ In order to set database type change the value of `DATABASE` variable in `.env` 
 - `postgres` - use PostgreSQL database;
 - `hybrid` - use PostgreSQL for entities database and Cassandra for timeseries database;
 
-**NOTE**: According to the database type corresponding docker service will be deployed (see `docker-compose.postgres.yml`, `docker-compose.hybrid.yml` for details).
+**NOTE**: According to the database type corresponding docker service will be deployed (see `postgres/postgres.yml`, `postgres/hybrid.yml` for details).
 
 In order to set cache type change the value of `CACHE` variable in `.env` file to one of the following:
 
@@ -23,20 +23,24 @@ In order to set cache type change the value of `CACHE` variable in `.env` file t
 - `redis-cluster` - use Redis cluster cache (6 nodes - 3 masters, 3 slaves);
 - `redis-sentinel` - use Redis sentinel cache (3 nodes - 1 master, 1 slave, 1 sentinel)
 
-**NOTE**: According to the cache type corresponding docker service will be deployed (see `docker-compose.redis.yml`, `docker-compose.redis-cluster.yml`, `docker-compose.redis-sentinel.yml` for details).
+**NOTE**: According to the cache type corresponding docker service will be deployed (see `redis/redis.yml`, `redis/redis-cluster.yml`, `redis/redis-sentinel.yml` for details).
 
 Execute the following command to create log folders for the services and chown of these folders to the docker container users. 
 To be able to change user, **chown** command is used, which requires sudo permissions (script will request password for a sudo access): 
 
 `
-$ ./docker-create-log-folders.sh
+$ ./scripts/docker-create-log-folders.sh
 `
 
 Execute the following command to run installation:
 
 `
-$ ./docker-install-tb.sh --loadDemo
+$ ./scripts/docker-install-tb.sh --loadDemo
 `
+
+> ⚠️ **这段安装流程当前不可用。** 本仓库的镜像不含数据库初始化能力（启动脚本不认 `INSTALL_TB`，
+> `ThingsboardInstallApplication` 类也不存在），上面的命令不会建库。请改为**先准备一份已初始化好的库**，
+> 步骤见 [DEPLOY.md](DEPLOY.md) 第 1 节。
 
 Where:
 
@@ -47,7 +51,7 @@ Where:
 Execute the following command to start services:
 
 `
-$ ./docker-start-services.sh
+$ ./scripts/docker-start-services.sh
 `
 
 After a while when all services will be successfully started you can open `http://{your-host-ip}` in you browser (for ex. `http://localhost`).
@@ -76,19 +80,19 @@ See [docker-compose logs](https://docs.docker.com/compose/reference/logs/) comma
 Execute the following command to stop services:
 
 `
-$ ./docker-stop-services.sh
+$ ./scripts/docker-stop-services.sh
 `
 
 Execute the following command to stop and completely remove deployed docker containers:
 
 `
-$ ./docker-remove-services.sh
+$ ./scripts/docker-remove-services.sh
 `
 
 Execute the following command to update particular or all services (pull newer docker image and rebuild container):
 
 `
-$ ./docker-update-service.sh [SERVICE...]
+$ ./scripts/docker-update-service.sh [SERVICE...]
 `
 
 Where:
@@ -97,12 +101,15 @@ Where:
 
 ## Upgrading
 
+> ⚠️ **升级流程同样是断的** —— `docker-upgrade-tb.sh` 依赖上面那套已不存在的安装/升级机制，
+> 换镜像重启可以让服务跑起来，但**数据库 schema 迁移要自己处理**。详见 [DEPLOY.md](DEPLOY.md) 第 7 节。
+
 In case when database upgrade is needed, execute the following commands:
 
 ```
-$ ./docker-stop-services.sh
-$ ./docker-upgrade-tb.sh --fromVersion=[FROM_VERSION]
-$ ./docker-start-services.sh
+$ ./scripts/docker-stop-services.sh
+$ ./scripts/docker-upgrade-tb.sh --fromVersion=[FROM_VERSION]
+$ ./scripts/docker-start-services.sh
 ```
 
 Where:

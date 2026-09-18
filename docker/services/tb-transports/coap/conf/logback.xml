@@ -4,10 +4,10 @@
 
     <appender name="fileLogAppender"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/log/tb-edqs/${TB_SERVICE_ID}/tb-edqs.log</file>
+        <file>/var/log/tb-coap-transport/${TB_SERVICE_ID}/tb-coap-transport.log</file>
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>/var/log/tb-edqs/${TB_SERVICE_ID}/tb-edqs.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>/var/log/tb-coap-transport/${TB_SERVICE_ID}/tb-coap-transport.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>
@@ -24,6 +24,10 @@
     </appender>
 
     <logger name="org.thingsboard.server" level="INFO" />
+
+    <logger name="com.microsoft.azure.servicebus.primitives.CoreMessageReceiver" level="OFF" />
+
+    <logger name="org.apache.kafka.common.utils.AppInfoParser" level="WARN"/>
     <logger name="org.apache.kafka.clients" level="WARN"/>
 
     <root level="INFO">

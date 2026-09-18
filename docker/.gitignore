@@ -1,12 +1,12 @@
-nginx/certs/**
-tb-core/log/**
-tb-rule-engine/log/**
+services/nginx/certs/**
+services/tb-core/log/**
+services/tb-rule-engine/log/**
 tb-monolith/log/**
 tb-monolith/db/**
 tb-monolith/postgres/**
 tb-monolith/cassandra/**
-tb-transports/*/log
-tb-vc-executor/log/**
+services/tb-transports/*/log
+services/tb-vc-executor/log/**
 tb-monolith/redis-cluster-data-0/**
 tb-monolith/redis-cluster-data-1/**
 tb-monolith/redis-cluster-data-2/**
@@ -18,4 +18,4 @@ tb-monolith/redis-sentinel-data-slave/**
 tb-monolith/redis-sentinel-data-sentinel/**
 tb-monolith/redis-data/**
 
-!.env
+!services/.env
