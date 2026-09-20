@@ -9,8 +9,17 @@ services:
     environment:
       POSTGRES_DB: thingsboard
       POSTGRES_PASSWORD: postgres
+      # 数据目录是挂载点下的子目录，且容器以 postgres(999) 身份直接跑 —— 这两条是为 macOS 准备的：
+      # Docker Desktop 里「容器内看到的属主 = 创建者的 uid，chown 是空操作」，宿主建的目录（包括挂载点本身）
+      # 一律显示成 root。postgres 启动时会校验数据目录属主必须是自己，所以数据目录必须由 999 自己创建。
+      # Linux 上没这个限制，但要求宿主目录 docker/tb/postgres-data 归 999（用 scripts/docker-create-log-folders.sh
+      # 建目录时会一并 chown）。
+      PGDATA: /var/lib/postgresql/data/db
+    user: "999:999"
     volumes:
-      - ../tb-monolith/postgres:/var/lib/postgresql/data
+      - ../tb/postgres-data:/var/lib/postgresql/data
+      # 只在数据目录为空时执行 —— 已经初始化过的库不会被重复初始化
+      - ../postgres/init:/docker-entrypoint-initdb.d:ro
   tb-core1:
     env_file:
       - ../postgres/tb-node.postgres.env

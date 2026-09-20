@@ -30,15 +30,17 @@ scrape_configs:
     static_configs:
       - targets: [ 'tb-core2:8080' ]
 
+  # rule-engine 的 HTTP 端口是 8082（thingsboard-rule-engine.yml 里 server.port 的默认值），
+  # 不是 core 的 8080 —— 写成 8080 会一直 connection refused。
   - job_name: 'tb-rule-engine1'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-rule-engine1:8080' ]
+      - targets: [ 'tb-rule-engine1:8082' ]
 
   - job_name: 'tb-rule-engine2'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-rule-engine2:8080' ]
+      - targets: [ 'tb-rule-engine2:8082' ]
 
   - job_name: 'tb-mqtt-transport1'
     metrics_path: /actuator/prometheus

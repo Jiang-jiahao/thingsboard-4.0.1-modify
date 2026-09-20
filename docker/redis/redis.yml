@@ -2,7 +2,6 @@ version: '3.0'
 
 services:
 # Redis standalone
-# 上游用的是 bitnami/redis:7.2（同理被加速站白名单拦住），这里换官方 redis 镜像。
 # TB 侧不用改：cache-redis.env 只给了 REDIS_HOST=redis、没有密码，而官方镜像默认就是无密码。
   redis:
     restart: always
@@ -10,7 +9,7 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - ../tb-monolith/redis-data:/data
+      - ../tb/redis-data:/data
 
 # ThingsBoard setup to use redis-standalone
   tb-core1:

@@ -38,9 +38,9 @@ Execute the following command to run installation:
 $ ./scripts/docker-install-tb.sh --loadDemo
 `
 
-> ⚠️ **这段安装流程当前不可用。** 本仓库的镜像不含数据库初始化能力（启动脚本不认 `INSTALL_TB`，
-> `ThingsboardInstallApplication` 类也不存在），上面的命令不会建库。请改为**先准备一份已初始化好的库**，
-> 步骤见 [DEPLOY.md](DEPLOY.md) 第 1 节。
+> ℹ️ **这条命令不用跑。** postgres 容器首次启动时会自动执行 `postgres/init/` 里的建库脚本
+> （TB 4.0.1 的 schema 与系统数据），起栈即可用。要改用外部已有的库，见 [DEPLOY.md](DEPLOY.md) 第 1 节。
+> 上游这套 `docker-install-tb.sh` 在本仓库用不了：镜像不认 `INSTALL_TB`，且 `ThingsboardInstallApplication` 类不存在。
 
 Where:
 

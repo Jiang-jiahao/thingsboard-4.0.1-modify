@@ -31,7 +31,6 @@
         <module>tb-monolith</module>
         <module>tb-transport-images</module>
         <module>js-executor</module>
-        <module>tb-monitoring-image</module>
         <module>tb-edqs-image</module>
     </modules>
 

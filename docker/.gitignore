@@ -17,5 +17,8 @@ tb-monolith/redis-sentinel-data-master/**
 tb-monolith/redis-sentinel-data-slave/**
 tb-monolith/redis-sentinel-data-sentinel/**
 tb-monolith/redis-data/**
+tb/redis-data/**
+tb/postgres-data/**
+tb/postgres/**
 
 !services/.env

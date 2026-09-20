@@ -19,7 +19,6 @@
         <module>tb-transport</module>
         <module>tb-edqs</module>
         <module>vc-executor</module>
-        <module>tb-monitoring</module>
     </modules>
 
     <properties>

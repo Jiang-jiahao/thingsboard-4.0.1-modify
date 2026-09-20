@@ -122,7 +122,7 @@ function permissionList() {
       999  999  tb-transports/tcp/log
       999  999  tb-transports/udp/log
       999  999  tb-vc-executor/log
-      999  999  ../tb-monolith/postgres
+      999  999  ../tb/postgres-data
       "
 
     source .env
@@ -143,7 +143,7 @@ function permissionList() {
     case $CACHE in
         redis)
           PERMISSION_LIST="$PERMISSION_LIST
-          1001 1001 ../tb-monolith/redis-data
+          999 1000 ../tb/redis-data
           "
         ;;
         redis-cluster)

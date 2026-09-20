@@ -23,12 +23,13 @@ docker/
 │
 └── 以下是**附加组件**：不在主 compose 里，各自一份 compose + env，由 .env 开关按需加载
     ├── postgres/           postgres.yml  hybrid.yml + tb-node.{postgres,hybrid}.env
+    │   └── init/           建库脚本：容器首次初始化数据目录时自动执行，已有数据则跳过
     ├── redis/              redis{,-cluster,-sentinel}.yml + cache-redis*.env
     ├── kafka/              kafka.yml + kafka.env（Kafka 容器配置）kafka-client.env（TB 侧连接配置）
-    │   └── image/           自建 Kafka 镜像的构建脚本（可直接执行，不被 compose 引用）
     ├── tb-edqs/            edqs.yml + tb-edqs.env  tb-core-edqs.env  tb-rule-engine-edqs.env
     ├── monitoring/         prometheus-grafana.yml（+ grafana/ prometheus/）
-    └── tb-monolith/        单体形态的 conf/ log/ ＋ Postgres/Redis 的数据目录
+    ├── tb-monolith/        单体形态的 conf/ log/
+    └── tb/                 运行时数据目录：postgres-data/（PG 数据，PGDATA 在其下 db/）redis-data/
 ```
 
 **分界线**：`services/` 里的东西全部出现在主 `docker-compose.yml` 中；不出现的（可选数据库/缓存/队列/EDQS/监控、单体）都放在外面，各自成目录。
@@ -42,8 +43,8 @@ docker/
 
 没有一键脚本，按下面几节依次做（出错时按节排查）：
 
-1. **前置条件**（§0）—— 内存 ≥8G、Docker ≥24、能拉基础镜像
-2. **准备数据库**（§1）—— **这套镜像不能建库**，必须自带一份已初始化的库
+1. **前置条件**（§0）—— 内存 ≥10G、Docker ≥24、能拉基础镜像
+2. **数据库**（§1）—— 容器首次启动自动初始化，不用手工准备
 3. **取代码**（§2）
 4. **构建镜像**（§3）—— 手工 `docker build`，或在别处构建后推 registry
 5. **配置 `.env`**（§4）
@@ -56,27 +57,35 @@ docker/
 
 | 项 | 要求 | 说明 |
 |---|---|---|
-| 内存 | 给 Docker **≥ 8G** | 完整栈是 12 个 JVM（core×2、rule-engine×2、transport×8，transport 覆盖 mqtt/http/coap/lwm2m/snmp/tcp/udp）。实测每 JVM 约占 `堆 + 300M`，8G 是底线 |
-| CPU | ≥ 4 核 | 12 个 JVM 启动期比较吃 CPU |
+| 内存 | 给 Docker **≥ 10G**（本机跑 12G） | 完整栈是 **34 个容器**：19 个 JVM（core×2、rule-engine×2、transport×11、vc-executor×2、Kafka、ZooKeeper）+ 10 个 js-executor(Node) + web-ui×2 等。实测合计约 **9G**，其中 transport（11 个实例）4.6G、rule-engine 1.4G、core 0.8G、Kafka 0.77G。默认只给宿主一半内存，8G 会不够（见 §7）|
+| CPU | ≥ 4 核 | 这些进程启动期比较吃 CPU，全部同时冷启动时网关可能短暂 502 |
 | Docker | Engine ≥ 24 + compose plugin | `docker compose version` 能跑即可 |
-| 网络 | 能拉 `docker.io` 或配好的加速站 | 需要 `thingsboard/openjdk17:bookworm-slim`（所有 Java 镜像的基础）、`nginx:1.27-alpine`（入口网关与前端）、`postgres:16`、`zookeeper:3.8.1`、`redis:7-alpine`（Redis）。**Kafka 镜像不用拉 —— 它是自建的**（`docker/kafka/image/`，用 Kafka 发行版打包，见第 3 节）。注意 bitnami 的镜像在不少加速站被白名单拦掉（`denied`），所以上游的 `bitnami/kafka`、`bitnami/redis` 都没用上 |
+| 网络 | 能拉 `docker.io` 或配好的加速站 | 中间件全部靠拉取：`postgres:16`、`redis:7-alpine`、`apache/kafka:3.7.0`、`zookeeper:3.8.1`、`nginx:1.27-alpine`（入口网关与前端）；构建 TB 镜像另需 `thingsboard/openjdk17:bookworm-slim`（所有 Java 镜像的基础）。注意 bitnami 的镜像在不少加速站被白名单拦掉（`denied`），所以上游的 `bitnami/kafka`、`bitnami/redis` 都没用上 |
 | 构建机 | JDK 21 + Maven ≥ 3.6.3 | 只在"在服务器上构建镜像"时需要；本机 PATH 里没有 mvn 时用 wrapper 那份 |
 
-## 1. 数据库（**当前这条链路是断的，部署前必须解决**）
+## 1. 数据库（容器首次启动时自动初始化）
 
-这套代码/镜像**不含数据库初始化流程**：
+`docker/postgres/init/01-thingsboard-4.0.1.sql.gz` 是 **TB 4.0.1 装完之后的整库导出**：schema + 系统数据（sysadmin 账号、系统 widget、仪表盘、通知配置、租户/设备档案模板），**不含演示数据**。
 
-- `docker/scripts/docker-install-tb.sh`（**已失效，不要用**）走的是给 `tb-core1` 传 `INSTALL_TB=true`，但 `images/tb-core/docker/start-tb-core.sh` 不认这个变量（拆分镜像后安装流程没跟着搬过来）。同目录的 `docker-upgrade-tb.sh` 依赖同一套机制，同样不可用；
-- 老的 `images/tb`（产出 `tb-postgres`/`tb-cassandra` 的一体化镜像）依赖 `org.thingsboard.server.ThingsboardInstallApplication`，而这个类**在源码里不存在**，所以它也已经被移出 `images/pom.xml` 的 modules；
-- 手工只跑 `apps/tb-core/src/main/data/sql/schema-*.sql` 也不够：系统租户、管理员账号、默认规则链/widget/仪表盘是 Java 侧 `InstallScripts` 从 `data/json/**` 灌进去的。
+postgres 容器把它挂到 `/docker-entrypoint-initdb.d/`，postgres 官方镜像**只在数据目录为空时执行**这个目录 —— 库里已经有数据就不会再跑，也不会覆盖。
 
-所以目标环境必须**有一份已经初始化好的库**。可选路径：
+这份脚本是这么来的（官方没有现成的 post-install SQL，只能自己装一遍再导）：
 
-1. **导出现有的库**（推荐）：从一台已经跑起来的 TB 库 `pg_dump -Fc -d thingsboard -f tb.dump`，在新机器上 `pg_restore`；
-2. 先用**上游官方 4.0.1 镜像**装一次库，再把本仓库的镜像指过去（注意 schema 版本要对得上）；
-3. 把安装流程补回源码（工作量大，另议）。
+```bash
+# 1) 装一份干净的库。别用镜像默认的 start-tb.sh —— 它写死了首次启动 install-tb.sh --loadDemo，会灌进演示设备
+docker run -d --name tb-init -v tb-init-data:/data --entrypoint bash thingsboard/tb-postgres:4.0.1 \
+  -c 'start-db.sh && install-tb.sh; echo "INSTALL_EXIT=$?"; sleep 100000'
+#    等日志出现 INSTALL_EXIT=0（约 1~2 分钟；期间日志里不应有 "Loading demo data"）
 
-库准备好后，把连接信息写进 `docker/postgres/tb-node.postgres.env`（或 `.env` 里对应变量）：
+# 2) 导出（官方镜像是 PG12，SQL 文本向下兼容我们的 postgres:16）
+docker exec tb-init pg_dump -U thingsboard -d thingsboard --no-owner --no-privileges \
+  | gzip -9 > docker/postgres/init/01-thingsboard-4.0.1.sql.gz
+
+# 3) 收拾
+docker rm -f tb-init && docker volume rm tb-init-data
+```
+
+要连**别的库**（从旧环境迁数据、或多个环境共用一个库）时，把连接信息写进 `docker/postgres/tb-node.postgres.env`：
 
 ```
 SPRING_DRIVER_CLASS_NAME=org.postgresql.Driver
@@ -85,6 +94,8 @@ SPRING_DATASOURCE_USERNAME=<user>
 SPRING_DATASOURCE_PASSWORD=<password>
 DATABASE_TS_TYPE=sql
 ```
+
+注意：装库这件事**只有这条 SQL 路径**。源码里的 `ThingsboardInstallApplication` 不存在，所以 `scripts/docker-install-tb.sh` 与 `docker-upgrade-tb.sh` 依旧不可用，版本升级的 schema 迁移要自己处理（§7）。
 
 ## 2. 取代码
 
@@ -117,12 +128,6 @@ docker build -t thingsboard/tb-core:latest images/tb-core/target
 - 镜像名取 `docker/services/.env` 的 `DOCKER_REPO` + `TB_VERSION`
 - 每个服务一个模块：`images/tb-core`、`images/tb-rule-engine`、`images/tb-monolith`、`images/tb-vc-executor-image`、`images/tb-transport-images/tb-<协议>-transport-image` …
 - **web-ui 与 js-executor 额外需要联网拉 node 基础镜像**；web-ui 的前端产物要先单独 `ng build`（见 §7）
-
-Kafka 镜像是自建的，单独打（需要 Kafka 发行版，从 Apache 官方或国内镜像下 kafka_2.13-3.7.1.tgz 解压即可）：
-
-```bash
-KAFKA_DIST=/path/to/kafka_2.13-3.7.1 bash docker/kafka/image/build.sh
-```
 
 ### B. 别处构建后推 registry
 
@@ -173,7 +178,7 @@ docker/scripts/docker-start-services.sh           # = docker compose -f docker-c
 
 入口网关启动时要读 `docker/services/nginx/certs/tls.pem` 和 `tls.key`：没有就先生成自签（上一条），或者把正式证书按这两个文件名放进去。
 
-`docker-create-log-folders.sh` 用的是 `compose-utils.sh` 里的权限清单：日志目录 chown 给 **999**（= 镜像里 `thingsboard` 用户的 uid，由基础镜像 `thingsboard/openjdk17` 定义），Postgres 数据目录 999、Redis 1001。**如果直接手工 `docker compose up`，这些目录会被 Docker 以 root 建出来，容器内的非 root 用户写不进去**，所以这一步别省。
+`docker-create-log-folders.sh` 用的是 `compose-utils.sh` 里的权限清单：日志目录 chown 给 **999**（= 镜像里 `thingsboard` 用户的 uid，由基础镜像 `thingsboard/openjdk17` 定义），Postgres 数据目录（`docker/tb/postgres-data`）**999**，Redis 数据目录（`docker/tb/redis-data`）**999:1000**。**如果直接手工 `docker compose up`，这些目录会被 Docker 以 root 建出来，容器内的非 root 用户写不进去**，所以这一步别省（macOS 上宿主属主不影响容器内可见的属主，见 §7）。
 
 ## 6. 验证与访问地址
 
@@ -211,10 +216,11 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
 - 改 `nginx.conf` / `locations.conf` 里的路由或端口要改文件本身（官方 nginx 镜像不做环境变量替换），改完 `docker exec tb-gateway nginx -s reload` 即可。
 - 目前**没有数据库升级/安装入口**（见第 1 节），版本升级需要自己处理 schema 迁移。
 - 前端 `web-ui` 是独立镜像，由 **nginx 直接发静态文件**（`nginx.conf` 做 SPA 回退 + gzip）。它不转发 `/api`，API 路由由入口网关负责。前端产物来自 `ui/` 的 `ng build`（`ui/target/generated-resources/public`），`ui` 不在 Maven reactor 里，要单独构建；构建 web-ui 镜像前这个目录必须存在。镜像约 **266MB**（nginx 基础 77MB + 前端产物 156MB，其中 57MB 是 source map；不需要浏览器调试就可以把这 57MB 排除掉）。两个副本只是为了重启/升级时界面不断，跟吞吐无关。
-- **Kafka 镜像是自建的**：`kafka/kafka.yml` 用的是 `thingsboard/tb-kafka:3.7.1`，由 `docker/kafka/image/build.sh` 用 **Kafka 发行版**打包（内容就是标准 Apache Kafka 3.7.1，KRaft 单节点、不依赖 zookeeper；`kafka.env` 用标准 `KAFKA_*` 变量）。为什么自建：实测本环境与目标内网**拉不到任何 Kafka 镜像** —— `bitnami/kafka` 直接 denied、官方 `apache/kafka` 0 字节、`confluentinc/cp-kafka` 卡在 10~11/13 层、`bitnamilegacy/kafka` 也是 0 字节。如果哪天网络能拉官方镜像，把 image 换成 `confluentinc/cp-kafka:7.7.0` 即可，`kafka.env` 不用改。
+- **Kafka 用官方 `apache/kafka:3.7.0`**（KRaft 单节点，`kafka.env` 里是标准 `KAFKA_*` 变量）。两个坑：① **`KAFKA_LOG_DIRS` 不能省** —— 官方镜像只要拿到任意 `KAFKA_*` 变量就会重写 `server.properties` 且只写 env 派生的项，缺了它 `log.dirs` 为空、启动直接 `ConfigException`；② KRaft 存储的格式化是镜像自己在每次启动时做的，不需要额外初始化步骤。`kafka.yml` 把 9092 发布到宿主，方便本机工具直连 —— 起栈前确认宿主没有别的 Kafka 占着这个端口。
+- **postgres 的数据目录在宿主上**（`docker/tb/postgres-data`），但 `postgres.yml` 里有两个反直觉的设置是为 macOS 准备的：① `PGDATA=/var/lib/postgresql/data/db`（挂载点下的**子目录**，不是挂载点本身）；② 容器直接 `user: "999:999"`，不走 entrypoint 的 root→gosu 降权。原因：Docker Desktop 的文件共享层里**「容器内看到的属主 = 创建该文件的 uid，chown 是空操作」，宿主上建出来的目录（含挂载点）一律显示成 root**。postgres 启动时会校验数据目录属主必须是它自己，拿挂载点当 PGDATA 就会报 `data directory has wrong ownership` 并**跳过整个初始化**（连 `/docker-entrypoint-initdb.d` 里的建库脚本都不执行，库是空的）。让 999 自己创建这个子目录就没问题。代价是宿主目录要能被 999 写（Linux 上由 `scripts/docker-create-log-folders.sh` 负责 chown）。
 - **Redis 用官方 `redis:7-alpine`**（TB 侧本来就没配密码）。**`redis-cluster` / `redis-sentinel` 两个变体仍是 bitnami**，要用它们得先在能拉 bitnami 的网络里拉镜像或同样换掉。
-- **内存配额必须算够**：Kafka 也是 JVM。`docker/services/.env` 里 core/rule-engine 是 `-Xmx768M`，transport 通过 `JAVA_OPTS_TRANSPORT`（compose 里覆盖）是 `-Xmx256M`，Kafka 在 `kafka.env` 里是 `KAFKA_HEAP_OPTS=-Xmx512M` —— 8G 的 VM 下合计约 6.8G 刚好够。**不给 Kafka 设堆上限它会默认吃 VM 内存的 1/4**，把 core/rule-engine 挤到被内核 OOM kill（表现为容器无错误地反复重启）。
-- `js-executor` 是 JS 规则节点的执行器，compose 里写的是 `deploy.replicas: 10`，单机部署建议调小。
+- **内存配额必须算够（这是本栈最容易踩的坑）**：整套实测约 **9G**（34 个容器，见 §0 表），Docker VM 默认只分到宿主一半 —— 不够时的表现很有迷惑性：**内核 OOM 杀掉 JVM，但容器日志里没有任何错误、`docker inspect` 的 `OOMKilled` 也是 false**，只会看到 core/rule-engine 反复重启、`RestartCount` 一直涨，用户侧表现为**登录接口间歇 502**。判断方法：`docker stats` 看总量是否顶到 `docker info` 里的 MemTotal。**解法是给 VM 加内存（或调小各服务堆），不是停掉多实例副本** —— transport 的 `*1/*2`、core 的 `*1/*2` 都是刻意的多实例部署。堆参数现状：core/rule-engine `-Xmx768M`、transport `JAVA_OPTS_TRANSPORT=-Xmx256M`、Kafka `KAFKA_HEAP_OPTS=-Xmx512M`（Kafka 不设堆上限会默认吃掉 VM 内存的 1/4）。
+- `js-executor` 是 JS 规则节点的执行器，compose 里写的是 `deploy.replicas: 10`（这套拓扑里 10 个实例实测约占 0.5G，是刻意的多实例，不是冗余）。
 
 ## 8. 单体（全在一个 JVM 里）
 
