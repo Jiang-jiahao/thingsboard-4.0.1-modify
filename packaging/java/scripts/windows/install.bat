@@ -12,7 +12,7 @@ if %jver% NEQ 170 GOTO JAVA_NOT_INSTALLED
 :JAVA_INSTALLED
 
 @ECHO Java 17 found!
-@ECHO Installing thingsboard ...
+@ECHO Installing jnks-iot ...
 
 SET loadDemo=false
 
@@ -28,7 +28,7 @@ SET installDir=%BASE%\data
 
 PUSHD "%BASE%\conf"
 
-java -cp "%jarfile%" -Dloader.main=org.thingsboard.server.ThingsboardInstallApplication^
+java -cp "%jarfile%" -Dloader.main=com.jnks.iot.server.JnksIotInstallApplication^
                     -Dinstall.data_dir="%installDir%"^
                     -Dinstall.load_demo=%loadDemo%^
                     -Dspring.jpa.hibernate.ddl-auto=none^
@@ -37,15 +37,15 @@ java -cp "%jarfile%" -Dloader.main=org.thingsboard.server.ThingsboardInstallAppl
                     org.springframework.boot.loader.launch.PropertiesLauncher
 
 if errorlevel 1 (
-   @echo ThingsBoard installation failed!
+   @echo JnksIOT installation failed!
    POPD
    exit /b %errorlevel%
 )
 POPD
 
-"%BASE%"thingsboard.exe install
+"%BASE%"jnks-iot.exe install
 
-@ECHO ThingsBoard installed successfully!
+@ECHO JnksIOT installed successfully!
 
 GOTO END
 

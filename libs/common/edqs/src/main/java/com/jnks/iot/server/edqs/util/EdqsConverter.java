@@ -1,0 +1,282 @@
+package com.jnks.iot.server.edqs.util;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.google.protobuf.ByteString;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.common.util.TbStringPool;
+import com.jnks.iot.server.common.data.AttributeScope;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.ObjectType;
+import com.jnks.iot.server.common.data.edqs.AttributeKv;
+import com.jnks.iot.server.common.data.edqs.DataPoint;
+import com.jnks.iot.server.common.data.edqs.EdqsObject;
+import com.jnks.iot.server.common.data.edqs.Entity;
+import com.jnks.iot.server.common.data.edqs.LatestTsKv;
+import com.jnks.iot.server.common.data.edqs.fields.FieldsUtil;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.common.data.id.EntityIdFactory;
+import com.jnks.iot.server.common.data.kv.KvEntry;
+import com.jnks.iot.server.common.data.relation.EntityRelation;
+import com.jnks.iot.server.common.stats.EdqsStatsService;
+import com.jnks.iot.server.common.util.ProtoUtils;
+import com.jnks.iot.server.edqs.data.dp.BoolDataPoint;
+import com.jnks.iot.server.edqs.data.dp.CompressedJsonDataPoint;
+import com.jnks.iot.server.edqs.data.dp.CompressedStringDataPoint;
+import com.jnks.iot.server.edqs.data.dp.DoubleDataPoint;
+import com.jnks.iot.server.edqs.data.dp.JsonDataPoint;
+import com.jnks.iot.server.edqs.data.dp.LongDataPoint;
+import com.jnks.iot.server.edqs.data.dp.StringDataPoint;
+import com.jnks.iot.server.gen.transport.TransportProtos;
+import com.jnks.iot.server.gen.transport.TransportProtos.DataPointProto;
+import org.xerial.snappy.Snappy;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class EdqsConverter {
+
+    private final EdqsStatsService edqsStatsService;
+
+    @Value("${queue.edqs.string_compression_length_threshold:512}")
+    private int stringCompressionLengthThreshold;
+
+    private final Map<ObjectType, Converter<? extends EdqsObject>> converters = new HashMap<>();
+    private final Converter<Entity> defaultConverter = new JsonConverter<>(Entity.class);
+
+    {
+        converters.put(ObjectType.RELATION, new JsonConverter<>(EntityRelation.class));
+        converters.put(ObjectType.ATTRIBUTE_KV, new Converter<AttributeKv>() {
+            @Override
+            public byte[] serialize(ObjectType type, AttributeKv attributeKv) {
+                var proto = TransportProtos.AttributeKvProto.newBuilder()
+                        .setEntityIdMSB(attributeKv.getEntityId().getId().getMostSignificantBits())
+                        .setEntityIdLSB(attributeKv.getEntityId().getId().getLeastSignificantBits())
+                        .setEntityType(ProtoUtils.toProto(attributeKv.getEntityId().getEntityType()))
+                        .setScope(TransportProtos.AttributeScopeProto.forNumber(attributeKv.getScope().ordinal()))
+                        .setKey(attributeKv.getKey())
+                        .setVersion(attributeKv.getVersion());
+                if (attributeKv.getLastUpdateTs() != null && attributeKv.getValue() != null) {
+                    proto.setDataPoint(toDataPointProto(attributeKv.getLastUpdateTs(), attributeKv.getValue()));
+                }
+                return proto.build().toByteArray();
+            }
+
+            @Override
+            public AttributeKv deserialize(ObjectType type, byte[] bytes) throws Exception {
+                TransportProtos.AttributeKvProto proto = TransportProtos.AttributeKvProto.parseFrom(bytes);
+                EntityId entityId = EntityIdFactory.getByTypeAndUuid(ProtoUtils.fromProto(proto.getEntityType()),
+                        new UUID(proto.getEntityIdMSB(), proto.getEntityIdLSB()));
+                AttributeScope scope = AttributeScope.values()[proto.getScope().getNumber()];
+                DataPoint dataPoint = proto.hasDataPoint() ? fromDataPointProto(proto.getDataPoint()) : null;
+                return AttributeKv.builder()
+                        .entityId(entityId)
+                        .scope(scope)
+                        .key(proto.getKey())
+                        .version(proto.getVersion())
+                        .dataPoint(dataPoint)
+                        .build();
+            }
+        });
+        converters.put(ObjectType.LATEST_TS_KV, new Converter<LatestTsKv>() {
+            @Override
+            public byte[] serialize(ObjectType type, LatestTsKv latestTsKv) {
+                var proto = TransportProtos.LatestTsKvProto.newBuilder()
+                        .setEntityIdMSB(latestTsKv.getEntityId().getId().getMostSignificantBits())
+                        .setEntityIdLSB(latestTsKv.getEntityId().getId().getLeastSignificantBits())
+                        .setEntityType(ProtoUtils.toProto(latestTsKv.getEntityId().getEntityType()))
+                        .setKey(latestTsKv.getKey())
+                        .setVersion(latestTsKv.getVersion());
+                if (latestTsKv.getTs() != null && latestTsKv.getValue() != null) {
+                    proto.setDataPoint(toDataPointProto(latestTsKv.getTs(), latestTsKv.getValue()));
+                }
+                return proto.build().toByteArray();
+            }
+
+            @Override
+            public LatestTsKv deserialize(ObjectType type, byte[] bytes) throws Exception {
+                TransportProtos.LatestTsKvProto proto = TransportProtos.LatestTsKvProto.parseFrom(bytes);
+                EntityId entityId = EntityIdFactory.getByTypeAndUuid(ProtoUtils.fromProto(proto.getEntityType()),
+                        new UUID(proto.getEntityIdMSB(), proto.getEntityIdLSB()));
+                DataPoint dataPoint = proto.hasDataPoint() ? fromDataPointProto(proto.getDataPoint()) : null;
+                return LatestTsKv.builder()
+                        .entityId(entityId)
+                        .key(proto.getKey())
+                        .version(proto.getVersion())
+                        .dataPoint(dataPoint)
+                        .build();
+            }
+        });
+    }
+
+    public DataPointProto toDataPointProto(long ts, KvEntry kvEntry) {
+        DataPointProto.Builder proto = DataPointProto.newBuilder();
+        proto.setTs(ts);
+        switch (kvEntry.getDataType()) {
+            case BOOLEAN -> proto.setBoolV(kvEntry.getBooleanValue().get());
+            case LONG -> proto.setLongV(kvEntry.getLongValue().get());
+            case DOUBLE -> proto.setDoubleV(kvEntry.getDoubleValue().get());
+            case STRING -> {
+                String strValue = kvEntry.getStrValue().get();
+                if (strValue.length() < stringCompressionLengthThreshold) {
+                    proto.setStringV(strValue);
+                } else {
+                    proto.setCompressedStringV(ByteString.copyFrom(compress(strValue)));
+                }
+            }
+            case JSON -> {
+                String jsonValue = kvEntry.getJsonValue().get();
+                if (jsonValue.length() < stringCompressionLengthThreshold) {
+                    proto.setJsonV(jsonValue);
+                } else {
+                    proto.setCompressedJsonV(ByteString.copyFrom(compress(jsonValue)));
+                }
+            }
+        }
+        return proto.build();
+    }
+
+    public DataPoint fromDataPointProto(DataPointProto proto) {
+        long ts = proto.getTs();
+        if (proto.hasBoolV()) {
+            return new BoolDataPoint(ts, proto.getBoolV());
+        } else if (proto.hasLongV()) {
+            return new LongDataPoint(ts, proto.getLongV());
+        } else if (proto.hasDoubleV()) {
+            return new DoubleDataPoint(ts, proto.getDoubleV());
+        } else if (proto.hasStringV()) {
+            String stringV = proto.getStringV();
+            if (stringV.length() < stringCompressionLengthThreshold) {
+                return new StringDataPoint(ts, stringV);
+            } else {
+                return new CompressedStringDataPoint(ts, compress(stringV), this::uncompress);
+            }
+        } else if (proto.hasCompressedStringV()) {
+            return new CompressedStringDataPoint(ts, proto.getCompressedStringV().toByteArray(), this::uncompress);
+        } else if (proto.hasJsonV()) {
+            String jsonV = proto.getJsonV();
+            if (jsonV.length() < stringCompressionLengthThreshold) {
+                return new JsonDataPoint(ts, jsonV);
+            } else {
+                return new CompressedJsonDataPoint(ts, compress(jsonV), this::uncompress);
+            }
+        } else if (proto.hasCompressedJsonV()) {
+            return new CompressedJsonDataPoint(ts, proto.getCompressedJsonV().toByteArray(), this::uncompress);
+        } else {
+            throw new IllegalArgumentException("Unsupported data point proto: " + proto);
+        }
+    }
+
+    @SneakyThrows
+    private byte[] compress(String value) {
+        byte[] compressed = Snappy.compress(value, StandardCharsets.UTF_8);
+        log.debug("Compressed {} chars to {} bytes", value.length(), compressed.length);
+        edqsStatsService.reportStringCompressed();
+        return compressed;
+    }
+
+    @SneakyThrows
+    private String uncompress(byte[] compressed) {
+        String value = Snappy.uncompressString(compressed, StandardCharsets.UTF_8);
+        log.debug("Uncompressed {} bytes to {} chars", compressed.length, value.length());
+        edqsStatsService.reportStringUncompressed();
+        return value;
+    }
+
+    public static Entity toEntity(EntityType entityType, Object entity) {
+        Entity edqsEntity = new Entity();
+        edqsEntity.setType(entityType);
+        edqsEntity.setFields(FieldsUtil.toFields(entity));
+        return edqsEntity;
+    }
+
+    @SuppressWarnings("unchecked")
+    @SneakyThrows
+    public <T extends EdqsObject> byte[] serialize(ObjectType type, T value) {
+        Converter<T> converter = (Converter<T>) converters.get(type);
+        if (converter != null) {
+            return converter.serialize(type, value);
+        } else {
+            return defaultConverter.serialize(type, (Entity) value);
+        }
+    }
+
+    @SneakyThrows
+    public EdqsObject deserialize(ObjectType type, byte[] bytes) {
+        Converter<? extends EdqsObject> converter = converters.get(type);
+        if (converter != null) {
+            return converter.deserialize(type, bytes);
+        } else {
+            return defaultConverter.deserialize(type, bytes);
+        }
+    }
+
+    @RequiredArgsConstructor
+    private static class JsonConverter<T> implements Converter<T> {
+
+        private static final SimpleModule module = new SimpleModule();
+        private static final ObjectMapper mapper = JsonMapper.builder()
+                .visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .visibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE)
+                .visibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE)
+                .build();
+
+        static {
+            module.addDeserializer(String.class, new InterningStringDeserializer());
+            mapper.registerModule(module);
+        }
+
+        private final Class<T> type;
+
+        @SneakyThrows
+        @Override
+        public byte[] serialize(ObjectType objectType, T value) {
+            return mapper.writeValueAsBytes(value);
+        }
+
+        @SneakyThrows
+        @Override
+        public T deserialize(ObjectType objectType, byte[] bytes) {
+            return mapper.readValue(bytes, this.type);
+        }
+
+    }
+
+    private interface Converter<T> {
+
+        byte[] serialize(ObjectType type, T value) throws Exception;
+
+        T deserialize(ObjectType type, byte[] bytes) throws Exception;
+
+    }
+
+    public static class InterningStringDeserializer extends StdDeserializer<String> {
+
+        public InterningStringDeserializer() {
+            super(String.class);
+        }
+
+        @Override
+        public String deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
+            return TbStringPool.intern(p.getText());
+        }
+
+    }
+
+}

@@ -1,0 +1,28 @@
+package com.jnks.iot.server.dao.model.sqlts.dictionary;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
+import lombok.Data;
+import org.hibernate.annotations.Generated;
+
+import static com.jnks.iot.server.dao.model.ModelConstants.KEY_COLUMN;
+import static com.jnks.iot.server.dao.model.ModelConstants.KEY_ID_COLUMN;
+
+@Data
+@Entity
+@Table(name = "key_dictionary")
+@IdClass(KeyDictionaryCompositeKey.class)
+public final class KeyDictionaryEntry {
+
+    @Id
+    @Column(name = KEY_COLUMN)
+    private String key;
+
+    @Column(name = KEY_ID_COLUMN, unique = true, columnDefinition = "int")
+    @Generated
+    private int keyId;
+
+}

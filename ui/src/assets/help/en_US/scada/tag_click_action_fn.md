@@ -29,7 +29,7 @@ A JavaScript function invoked when user clicks on SVG element with specific tag.
 <br>
 
 This JavaScript snippet demonstrates triggering a <a href="${siteBaseUrl}/docs${docPlatformPrefix}/user-guide//ui/widget-actions/#action-types" target="_blank">widget action</a> using the <a href="${siteBaseUrl}/docs${docPlatformPrefix}/user-guide/scada/scada-symbols-dev-guide/#scadasymbolcontext" target="_blank">ScadaSymbolContext API</a> when the click event occurs. The widget action will be linked to the behaviorId 'click', which defines the action that will be executed upon the event.
-The behavior of this action depends on the type of widget action configured in the ThingsBoard platform (e.g., navigating to a dashboard state, updating the current state, opening a URL, etc.).
+The behavior of this action depends on the type of widget action configured in the JnksIOT platform (e.g., navigating to a dashboard state, updating the current state, opening a URL, etc.).
 
 <br>
 

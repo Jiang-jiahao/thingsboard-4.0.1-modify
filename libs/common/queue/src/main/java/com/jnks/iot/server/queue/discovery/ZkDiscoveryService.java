@@ -1,0 +1,375 @@
+package com.jnks.iot.server.queue.discovery;
+
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.ProtocolStringList;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import lombok.Getter;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.imps.CuratorFrameworkState;
+import org.apache.curator.framework.recipes.cache.ChildData;
+import org.apache.curator.framework.recipes.cache.PathChildrenCache;
+import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
+import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
+import org.apache.curator.framework.state.ConnectionState;
+import org.apache.curator.framework.state.ConnectionStateListener;
+import org.apache.curator.retry.RetryForever;
+import org.apache.curator.utils.CloseableUtils;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import com.jnks.iot.common.util.JnksIotExecutors;
+import com.jnks.iot.server.gen.transport.TransportProtos;
+import com.jnks.iot.server.queue.discovery.event.OtherServiceShutdownEvent;
+import com.jnks.iot.common.util.AfterStartUp;
+
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent.Type.CHILD_REMOVED;
+
+@Service
+@ConditionalOnProperty(prefix = "zk", value = "enabled", havingValue = "true", matchIfMissing = false)
+@Slf4j
+public class ZkDiscoveryService implements DiscoveryService, PathChildrenCacheListener {
+
+    @Value("${zk.url}")
+    private String zkUrl;
+    @Value("${zk.retry_interval_ms}")
+    private Integer zkRetryInterval;
+    @Value("${zk.connection_timeout_ms}")
+    private Integer zkConnectionTimeout;
+    @Value("${zk.session_timeout_ms}")
+    private Integer zkSessionTimeout;
+    @Getter
+    @Value("${zk.zk_dir}")
+    private String zkDir;
+    @Value("${zk.recalculate_delay:0}")
+    private Long recalculateDelay;
+
+    protected final ConcurrentHashMap<String, ScheduledFuture<?>> delayedTasks;
+    private final ConcurrentHashMap<String, List<String>> lastSeenTransports = new ConcurrentHashMap<>();
+
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final TbServiceInfoProvider serviceInfoProvider;
+    private final PartitionService partitionService;
+
+    private ScheduledExecutorService zkExecutorService;
+    @Getter
+    private CuratorFramework client;
+    private PathChildrenCache cache;
+    private String nodePath;
+    private String zkNodesDir;
+
+    private volatile boolean stopped = true;
+
+    public ZkDiscoveryService(ApplicationEventPublisher applicationEventPublisher,
+                              TbServiceInfoProvider serviceInfoProvider,
+                              PartitionService partitionService) {
+        this.applicationEventPublisher = applicationEventPublisher;
+        this.serviceInfoProvider = serviceInfoProvider;
+        this.partitionService = partitionService;
+        delayedTasks = new ConcurrentHashMap<>();
+    }
+
+    @PostConstruct
+    public void init() {
+        log.info("Initializing...");
+        Assert.hasLength(zkUrl, missingProperty("zk.url"));
+        Assert.notNull(zkRetryInterval, missingProperty("zk.retry_interval_ms"));
+        Assert.notNull(zkConnectionTimeout, missingProperty("zk.connection_timeout_ms"));
+        Assert.notNull(zkSessionTimeout, missingProperty("zk.session_timeout_ms"));
+
+        zkExecutorService = JnksIotExecutors.newSingleThreadScheduledExecutor("zk-discovery");
+
+        log.info("Initializing discovery service using ZK connect string: {}", zkUrl);
+
+        zkNodesDir = zkDir + "/nodes";
+        initZkClient();
+    }
+
+    @Override
+    public List<TransportProtos.ServiceInfo> getOtherServers() {
+        return cache.getCurrentData().stream()
+                .filter(cd -> !cd.getPath().equals(nodePath))
+                .map(cd -> {
+                    try {
+                        return TransportProtos.ServiceInfo.parseFrom(cd.getData());
+                    } catch (NoSuchElementException | InvalidProtocolBufferException e) {
+                        log.error("Failed to decode ZK node", e);
+                        throw new RuntimeException(e);
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isMonolith() {
+        return false;
+    }
+
+    @AfterStartUp(order = AfterStartUp.DISCOVERY_SERVICE)
+    public void onApplicationEvent(ApplicationReadyEvent event) {
+        if (stopped) {
+            log.debug("Ignoring application ready event. Service is stopped.");
+            return;
+        } else {
+            log.info("Received application ready event. Starting current ZK node.");
+        }
+        subscribeToEvents();
+        if (client.getState() != CuratorFrameworkState.STARTED) {
+            log.debug("Ignoring application ready event, ZK client is not started, ZK client state [{}]", client.getState());
+            return;
+        }
+        log.info("Going to publish current server...");
+        publishCurrentServer();
+        log.info("Going to recalculate partitions...");
+        recalculatePartitions();
+
+        zkExecutorService.scheduleAtFixedRate(this::publishCurrentServer, 1, 1, TimeUnit.MINUTES);
+    }
+
+    @SneakyThrows
+    public synchronized void publishCurrentServer() {
+        TransportProtos.ServiceInfo self = serviceInfoProvider.getServiceInfo();
+        if (currentServerExists()) {
+            log.trace("[{}] Updating ZK node for current instance: {}", self.getServiceId(), nodePath);
+            client.setData().forPath(nodePath, serviceInfoProvider.generateNewServiceInfoWithCurrentSystemInfo().toByteArray());
+        } else {
+            try {
+                log.info("[{}] Creating ZK node for current instance", self.getServiceId());
+                nodePath = client.create()
+                        .creatingParentsIfNeeded()
+                        .withMode(CreateMode.EPHEMERAL_SEQUENTIAL).forPath(zkNodesDir + "/", self.toByteArray());
+                log.info("[{}] Created ZK node for current instance: {}", self.getServiceId(), nodePath);
+                client.getConnectionStateListenable().addListener(checkReconnect(self));
+            } catch (Exception e) {
+                log.error("Failed to create ZK node", e);
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private boolean currentServerExists() {
+        if (nodePath == null) {
+            return false;
+        }
+        try {
+            TransportProtos.ServiceInfo self = serviceInfoProvider.getServiceInfo();
+            TransportProtos.ServiceInfo registeredServerInfo = TransportProtos.ServiceInfo.parseFrom(client.getData().forPath(nodePath));
+            // 只比 serviceId。整份 proto（含 CPU/内存、transports）每次心跳都会变，
+            // equals 失败会再创建一个 ephemeral 节点，单进程被当成两台 transport。
+            return self.getServiceId().equals(registeredServerInfo.getServiceId());
+        } catch (KeeperException.NoNodeException e) {
+            log.info("ZK node does not exist: {}", nodePath);
+        } catch (Exception e) {
+            log.error("Couldn't check if ZK node exists", e);
+        }
+        return false;
+    }
+
+    private ConnectionStateListener checkReconnect(TransportProtos.ServiceInfo self) {
+        return (client, newState) -> {
+            log.info("[{}] ZK state changed: {}", self.getServiceId(), newState);
+            if (newState == ConnectionState.LOST) {
+                zkExecutorService.submit(this::reconnect);
+            }
+        };
+    }
+
+    private volatile boolean reconnectInProgress = false;
+
+    private synchronized void reconnect() {
+        if (!reconnectInProgress) {
+            reconnectInProgress = true;
+            try {
+                destroyZkClient();
+                initZkClient();
+                subscribeToEvents();
+                publishCurrentServer();
+            } catch (Exception e) {
+                log.error("Failed to reconnect to ZK: {}", e.getMessage(), e);
+            } finally {
+                reconnectInProgress = false;
+            }
+        }
+    }
+
+    private void initZkClient() {
+        try {
+            client = CuratorFrameworkFactory.newClient(zkUrl, zkSessionTimeout, zkConnectionTimeout, new RetryForever(zkRetryInterval));
+            client.start();
+            client.blockUntilConnected();
+            cache = new PathChildrenCache(client, zkNodesDir, true);
+            cache.start();
+            stopped = false;
+            log.info("ZK client connected");
+        } catch (Exception e) {
+            log.error("Failed to connect to ZK: {}", e.getMessage(), e);
+            CloseableUtils.closeQuietly(cache);
+            CloseableUtils.closeQuietly(client);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void subscribeToEvents() {
+        cache.getListenable().addListener(this);
+    }
+
+    private void unpublishCurrentServer() {
+        try {
+            if (nodePath != null) {
+                client.delete().forPath(nodePath);
+            }
+        } catch (Exception e) {
+            log.error("Failed to delete ZK node {}", nodePath, e);
+        }
+    }
+
+    private void destroyZkClient() {
+        stopped = true;
+        unpublishCurrentServer();
+        CloseableUtils.closeQuietly(cache);
+        CloseableUtils.closeQuietly(client);
+        log.info("ZK client disconnected");
+    }
+
+    @PreDestroy
+    private void destroy() {
+        zkExecutorService.shutdownNow();
+        destroyZkClient();
+        log.info("Stopped discovery service");
+    }
+
+    public static String missingProperty(String propertyName) {
+        return "The " + propertyName + " property need to be set!";
+    }
+
+    @Override
+    public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent pathChildrenCacheEvent) throws Exception {
+        if (stopped) {
+            log.debug("Ignoring {}. Service is stopped.", pathChildrenCacheEvent);
+            return;
+        }
+        if (client.getState() != CuratorFrameworkState.STARTED) {
+            log.debug("Ignoring {}, ZK client is not started, ZK client state [{}]", pathChildrenCacheEvent, client.getState());
+            return;
+        }
+        ChildData data = pathChildrenCacheEvent.getData();
+        if (data == null) {
+            log.debug("Ignoring {} due to empty child data", pathChildrenCacheEvent);
+            return;
+        } else if (data.getData() == null) {
+            log.debug("Ignoring {} due to empty child's data", pathChildrenCacheEvent);
+            return;
+        } else if (nodePath != null && nodePath.equals(data.getPath())) {
+            if (pathChildrenCacheEvent.getType() == CHILD_REMOVED) {
+                log.info("ZK node for current instance is somehow deleted.");
+                publishCurrentServer();
+            }
+            log.debug("Ignoring event about current server {}", pathChildrenCacheEvent);
+            return;
+        }
+        TransportProtos.ServiceInfo instance;
+        try {
+            instance = TransportProtos.ServiceInfo.parseFrom(data.getData());
+        } catch (InvalidProtocolBufferException e) {
+            log.error("Failed to decode server instance for node {}", data.getPath(), e);
+            throw e;
+        }
+
+        String serviceId = instance.getServiceId();
+        ProtocolStringList serviceTypesList = instance.getServiceTypesList();
+
+        log.trace("Processing [{}] event for [{}]", pathChildrenCacheEvent.getType(), serviceId);
+        switch (pathChildrenCacheEvent.getType()) {
+            case CHILD_ADDED:
+                boolean transportsChangedOnAdd = rememberTransports(serviceId, instance);
+                ScheduledFuture<?> task = delayedTasks.remove(serviceId);
+                if (task != null) {
+                    if (task.cancel(false)) {
+                        log.info("[{}] Recalculate partitions ignored. Service was restarted in time [{}].",
+                                serviceId, serviceTypesList);
+                    } else {
+                        log.debug("[{}] Going to recalculate partitions. Service was not restarted in time [{}]!",
+                                serviceId, serviceTypesList);
+                        recalculatePartitions();
+                    }
+                } else {
+                    log.info("[{}] Going to recalculate partitions due to adding new node [{}] transports={}.",
+                            serviceId, serviceTypesList, instance.getTransportsList());
+                    recalculatePartitions();
+                }
+                if (transportsChangedOnAdd && task != null) {
+                    log.info("[{}] Transport list changed during in-time restart, recalculating partitions. transports={}",
+                            serviceId, instance.getTransportsList());
+                    recalculatePartitions();
+                }
+                break;
+            case CHILD_UPDATED:
+                if (rememberTransports(serviceId, instance) && serviceTypesList.contains("TB_TRANSPORT")) {
+                    log.info("[{}] Going to recalculate partitions due to updated transport list [{}] transports={}.",
+                            serviceId, serviceTypesList, instance.getTransportsList());
+                    recalculatePartitions();
+                }
+                break;
+            case CHILD_REMOVED:
+                zkExecutorService.submit(() -> applicationEventPublisher.publishEvent(new OtherServiceShutdownEvent(this, serviceId, serviceTypesList)));
+                lastSeenTransports.remove(serviceId);
+                // MQTT/HTTP 的 zk.recalculate_delay 默认是 0。schedule(0) 可能在 delayedTasks.put 之前跑完，
+                // 旧逻辑会丢掉这次重算；再叠加心跳不再触发 CHILD_UPDATED 重算，停掉对端节点就会一直不接手。
+                if (recalculateDelay == null || recalculateDelay <= 0) {
+                    log.info("[{}] Going to recalculate partitions due to removed node [{}]",
+                            serviceId, serviceTypesList);
+                    recalculatePartitions();
+                } else {
+                    ScheduledFuture<?> future = zkExecutorService.schedule(() -> {
+                        log.info("[{}] Going to recalculate partitions due to removed node [{}]",
+                                serviceId, serviceTypesList);
+                        delayedTasks.remove(serviceId);
+                        lastSeenTransports.remove(serviceId);
+                        recalculatePartitions();
+                    }, recalculateDelay, TimeUnit.MILLISECONDS);
+                    delayedTasks.put(serviceId, future);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 心跳会改 CPU/内存，不能每次 CHILD_UPDATED 都重算分区。
+     * 只在已经见过该节点、且 transports 列表相对上次有变化时才重算。
+     * 第一次见到节点（CHILD_ADDED 或缓存里已有的对端心跳）不算变化。
+     */
+    boolean rememberTransports(String serviceId, TransportProtos.ServiceInfo instance) {
+        List<String> next = List.copyOf(instance.getTransportsList());
+        List<String> previous = lastSeenTransports.put(serviceId, next);
+        return previous != null && !previous.equals(next);
+    }
+
+    /**
+     * A single entry point to recalculate partitions
+     * Synchronized to ensure that other servers info is up to date
+     * */
+    synchronized void recalculatePartitions() {
+        delayedTasks.values().forEach(future -> future.cancel(false));
+        delayedTasks.clear();
+        partitionService.recalculatePartitions(serviceInfoProvider.getServiceInfo(), getOtherServers());
+    }
+
+}

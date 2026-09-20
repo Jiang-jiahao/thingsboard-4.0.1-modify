@@ -1,0 +1,49 @@
+package com.jnks.iot.server.dao.cf;
+
+import com.jnks.iot.server.common.data.cf.CalculatedField;
+import com.jnks.iot.server.common.data.cf.CalculatedFieldLink;
+import com.jnks.iot.server.common.data.id.CalculatedFieldId;
+import com.jnks.iot.server.common.data.id.CalculatedFieldLinkId;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.page.PageData;
+import com.jnks.iot.server.common.data.page.PageLink;
+import com.jnks.iot.server.dao.entity.EntityDaoService;
+
+import java.util.List;
+
+public interface CalculatedFieldService extends EntityDaoService {
+
+    CalculatedField save(CalculatedField calculatedField);
+
+    CalculatedField findById(TenantId tenantId, CalculatedFieldId calculatedFieldId);
+
+    List<CalculatedFieldId> findCalculatedFieldIdsByEntityId(TenantId tenantId, EntityId entityId);
+
+    List<CalculatedField> findCalculatedFieldsByEntityId(TenantId tenantId, EntityId entityId);
+
+    PageData<CalculatedField> findAllCalculatedFields(PageLink pageLink);
+
+    PageData<CalculatedField> findCalculatedFieldsByTenantId(TenantId tenantId, PageLink pageLink);
+
+    PageData<CalculatedField> findAllCalculatedFieldsByEntityId(TenantId tenantId, EntityId entityId, PageLink pageLink);
+
+    void deleteCalculatedField(TenantId tenantId, CalculatedFieldId calculatedFieldId);
+
+    int deleteAllCalculatedFieldsByEntityId(TenantId tenantId, EntityId entityId);
+
+    CalculatedFieldLink saveCalculatedFieldLink(TenantId tenantId, CalculatedFieldLink calculatedFieldLink);
+
+    CalculatedFieldLink findCalculatedFieldLinkById(TenantId tenantId, CalculatedFieldLinkId calculatedFieldLinkId);
+
+    List<CalculatedFieldLink> findAllCalculatedFieldLinksById(TenantId tenantId, CalculatedFieldId calculatedFieldId);
+
+    List<CalculatedFieldLink> findAllCalculatedFieldLinksByEntityId(TenantId tenantId, EntityId entityId);
+
+    PageData<CalculatedFieldLink> findAllCalculatedFieldLinksByTenantId(TenantId tenantId, PageLink pageLink);
+
+    PageData<CalculatedFieldLink> findAllCalculatedFieldLinks(PageLink pageLink);
+
+    boolean referencedInAnyCalculatedField(TenantId tenantId, EntityId referencedEntityId);
+
+}

@@ -25,7 +25,7 @@ readonly CLIENT_JKS_FOR_TEST="lwm2mclient"
 readonly CLIENT_CERT_KEY_PREF="LwX509"
 readonly CLIENT_CERT_ALIAS_PREF="client_alias_"
 readonly CLIENT_STORE_PWD="client_ks_password"
-readonly CLIENT_HOST_NAME="thingsboard_test.io"
+readonly CLIENT_HOST_NAME="jnks-iot_test.io"
 
 readonly TRUST_NO_PATH="TrustNo"
 readonly CA_ROOT_NO_ALIAS="root-no"
@@ -116,7 +116,7 @@ tee ./${TRUST_PATH}/ca-config.json 1> /dev/null <<-CONFIG
           "C": "UK",
           "ST": "Kyiv city",
           "L": "Kyiv",
-          "O": "Thingsboard",
+          "O": "JnksIOT",
           "OU": "DEVELOPER_TEST"
         }
       ]
@@ -207,7 +207,7 @@ cfssl genkey \
       "C": "UK",
       "ST": "Kyiv city",
       "L": "Kyiv",
-      "O": "Thingsboard",
+      "O": "JnksIOT",
       "OU": "DEVELOPER_TEST"
     }
   ],
@@ -241,7 +241,7 @@ do
         "C": "UK",
         "ST": "Kyiv city",
         "L": "Kyiv",
-        "O": "Thingsboard",
+        "O": "JnksIOT",
         "OU": "DEVELOPER_TEST"
       }
     ]
@@ -314,7 +314,7 @@ cfssl genkey \
       "C": "UK",
       "ST": "Kyiv city",
       "L": "Kyiv",
-      "O": "Thingsboard",
+      "O": "JnksIOT",
       "OU": "DEVELOPER_TEST"
     }
   ],
@@ -352,7 +352,7 @@ do
         "C": "UK",
         "ST": "Kyiv city",
         "L": "Kyiv",
-        "O": "Thingsboard",
+        "O": "JnksIOT",
         "OU": "DEVELOPER_TEST"
       }
     ]

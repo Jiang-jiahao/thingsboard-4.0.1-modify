@@ -13,7 +13,7 @@ IF "%SQL_DATA_FOLDER%" == "" (
 	SET SQL_DATA_FOLDER=/tmp
 )
 
-java -cp %jarfile% -Dloader.main=org.thingsboard.server.ThingsboardInstallApplication^
+java -cp %jarfile% -Dloader.main=com.jnks.iot.server.JnksIotInstallApplication^
                     -Dinstall.data_dir=%installDir%^
                     -Dinstall.load_demo=%loadDemo%^
                     -Dspring.jpa.hibernate.ddl-auto=none^
@@ -22,8 +22,8 @@ java -cp %jarfile% -Dloader.main=org.thingsboard.server.ThingsboardInstallApplic
                     org.springframework.boot.loader.launch.PropertiesLauncher
 
 if errorlevel 1 (
-   @echo ThingsBoard DB installation failed!
+   @echo JnksIOT DB installation failed!
    POPD
    exit /b %errorlevel%
    )
-@echo ThingsBoard DB installed successfully!
+@echo JnksIOT DB installed successfully!

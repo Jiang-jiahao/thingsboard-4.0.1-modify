@@ -1,0 +1,13 @@
+package com.jnks.iot.server.common.data.sync.vc.request.load;
+
+import lombok.Data;
+
+@Data
+public class VersionLoadConfig {
+
+    private boolean loadRelations;
+    private boolean loadAttributes;
+    private boolean loadCredentials;
+    private boolean loadCalculatedFields;
+
+}

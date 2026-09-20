@@ -1,0 +1,221 @@
+package com.jnks.iot.server.controller;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
+import com.jnks.iot.common.util.JacksonUtil;
+import com.jnks.iot.server.common.data.exception.JnksIotException;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.mobile.app.MobileApp;
+import com.jnks.iot.server.common.data.mobile.qrCodeSettings.QrCodeSettings;
+import com.jnks.iot.server.common.data.mobile.app.StoreInfo;
+import com.jnks.iot.server.common.data.security.model.JwtPair;
+import com.jnks.iot.server.config.annotations.ApiOperation;
+import com.jnks.iot.server.dao.mobile.QrCodeSettingService;
+import com.jnks.iot.server.service.mobile.secret.MobileAppSecretService;
+import com.jnks.iot.server.service.security.model.SecurityUser;
+import com.jnks.iot.server.service.security.permission.Operation;
+import com.jnks.iot.server.service.security.permission.Resource;
+import com.jnks.iot.server.service.security.system.SystemSecurityService;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import static com.jnks.iot.server.common.data.oauth2.PlatformType.ANDROID;
+import static com.jnks.iot.server.common.data.oauth2.PlatformType.IOS;
+import static com.jnks.iot.server.controller.ControllerConstants.AVAILABLE_FOR_ANY_AUTHORIZED_USER;
+import static com.jnks.iot.server.controller.ControllerConstants.SYSTEM_AUTHORITY_PARAGRAPH;
+
+/**
+ * 移动应用二维码 / 深链 REST 入口。
+ * <p>
+ * <b>职责：</b>维护系统级二维码设置（Android/iOS 商店信息、是否启用默认 App），
+ * 对外提供 Digital Asset Links / Apple App Site Association、深链、用短期 secret 换 JWT，
+ * 以及按 User-Agent 跳转应用商店。
+ * <p>
+ * <b>URL：</b>无统一类级前缀。公开路径 {@code /.well-known/*}、{@code /api/noauth/qr*}；
+ * 鉴权路径 {@code /api/mobile/qr/*}。
+ * <p>
+ * <b>权限：</b>Asset Links / AASA / noauth 换 token / 商店跳转无需登录；
+ * 写设置仅 {@code SYS_ADMIN}；读设置与深链 {@code SYS_ADMIN} / {@code TENANT_ADMIN} / {@code CUSTOMER_USER}。
+ * 设置读写会校验资源 {@code MOBILE_APP_SETTINGS}。
+ * <p>
+ * <b>下游：</b>{@link QrCodeSettingService}、{@link MobileAppSecretService}、{@link SystemSecurityService}
+ */
+@RequiredArgsConstructor
+@RestController
+public class QrCodeSettingsController extends BaseController {
+
+    @Value("${cache.specs.mobileSecretKey.timeToLiveInMinutes:2}")
+    private int mobileSecretKeyTtl;
+    @Value("${mobileApp.domain:demo.iot.example.com}")
+    private String defaultAppDomain;
+
+    public static final String ASSET_LINKS_PATTERN = "[{\n" +
+            "  \"relation\": [\"delegate_permission/common.handle_all_urls\"],\n" +
+            "  \"target\": {\n" +
+            "    \"namespace\": \"android_app\",\n" +
+            "    \"package_name\": \"%s\",\n" +
+            "    \"sha256_cert_fingerprints\":\n" +
+            "    [\"%s\"]\n" +
+            "  }\n" +
+            "}]";
+
+    public static final String APPLE_APP_SITE_ASSOCIATION_PATTERN = "{\n" +
+            "    \"applinks\": {\n" +
+            "        \"apps\": [],\n" +
+            "        \"details\": [\n" +
+            "            {\n" +
+            "                \"appID\": \"%s\",\n" +
+            "                \"paths\": [ \"/api/noauth/qr\" ]\n" +
+            "            }\n" +
+            "        ]\n" +
+            "    }\n" +
+            "}";
+
+    public static final String SECRET = "secret";
+    public static final String SECRET_PARAM_DESCRIPTION = "A string value representing short-lived secret key";
+    public static final String DEEP_LINK_PATTERN = "https://%s/api/noauth/qr?secret=%s&ttl=%s";
+
+    private final SystemSecurityService systemSecurityService;
+    private final MobileAppSecretService mobileAppSecretService;
+    private final QrCodeSettingService qrCodeSettingService;
+
+    /**
+     * 返回 Android Digital Asset Links（{@code /.well-known/assetlinks.json}），供系统关联 App。
+     * <p>
+     * 无需登录。未配置包名或 SHA256 指纹时返回 404。下游 {@link QrCodeSettingService}。
+     */
+    @ApiOperation(value = "Get associated android applications (getAssetLinks)")
+    @GetMapping(value = "/.well-known/assetlinks.json")
+    public ResponseEntity<JsonNode> getAssetLinks() {
+        MobileApp mobileApp = qrCodeSettingService.findAppFromQrCodeSettings(TenantId.SYS_TENANT_ID, ANDROID);
+        StoreInfo storeInfo = mobileApp != null ? mobileApp.getStoreInfo() : null;
+        if (storeInfo != null && storeInfo.getSha256CertFingerprints() != null) {
+            return ResponseEntity.ok(JacksonUtil.toJsonNode(String.format(ASSET_LINKS_PATTERN, mobileApp.getPkgName(), storeInfo.getSha256CertFingerprints())));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * 返回 iOS Apple App Site Association，供 Universal Link 关联 App。
+     * <p>
+     * 无需登录。未配置 App Id 时返回 404。下游 {@link QrCodeSettingService}。
+     */
+    @ApiOperation(value = "Get associated ios applications (getAppleAppSiteAssociation)")
+    @GetMapping(value = "/.well-known/apple-app-site-association")
+    public ResponseEntity<JsonNode> getAppleAppSiteAssociation() {
+        MobileApp mobileApp = qrCodeSettingService.findAppFromQrCodeSettings(TenantId.SYS_TENANT_ID, IOS);
+        StoreInfo storeInfo = mobileApp != null ? mobileApp.getStoreInfo() : null;
+        if (storeInfo != null && storeInfo.getAppId() != null) {
+            return ResponseEntity.ok(JacksonUtil.toJsonNode(String.format(APPLE_APP_SITE_ASSOCIATION_PATTERN, storeInfo.getAppId())));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * 创建或更新系统级移动二维码设置（Android/iOS 配置与二维码组件）。
+     * <p>
+     * 权限：{@code SYS_ADMIN}；资源 {@code MOBILE_APP_SETTINGS} WRITE。下游 {@link QrCodeSettingService#saveQrCodeSettings}。
+     */
+    @ApiOperation(value = "Create Or Update the Mobile application settings (saveMobileAppSettings)",
+            notes = "The request payload contains configuration for android/iOS applications and platform qr code widget settings." + SYSTEM_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN')")
+    @PostMapping(value = "/api/mobile/qr/settings")
+    public QrCodeSettings saveQrCodeSettings(@Parameter(description = "A JSON value representing the mobile apps configuration")
+                                             @RequestBody QrCodeSettings qrCodeSettings) throws JnksIotException {
+        SecurityUser currentUser = getCurrentUser();
+        accessControlService.checkPermission(currentUser, Resource.MOBILE_APP_SETTINGS, Operation.WRITE);
+        qrCodeSettings.setTenantId(getTenantId());
+        return qrCodeSettingService.saveQrCodeSettings(currentUser.getTenantId(), qrCodeSettings);
+    }
+
+    /**
+     * 读取系统级移动二维码设置。
+     * <p>
+     * 权限：任意已登录用户。资源 {@code MOBILE_APP_SETTINGS} READ。下游 {@link QrCodeSettingService#findQrCodeSettings}。
+     */
+    @ApiOperation(value = "Get Mobile application settings (getMobileAppSettings)",
+            notes = "The response payload contains configuration for android/iOS applications and platform qr code widget settings." + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
+    @GetMapping(value = "/api/mobile/qr/settings")
+    public QrCodeSettings getQrCodeSettings() throws JnksIotException {
+        SecurityUser currentUser = getCurrentUser();
+        accessControlService.checkPermission(currentUser, Resource.MOBILE_APP_SETTINGS, Operation.READ);
+        return qrCodeSettingService.findQrCodeSettings(TenantId.SYS_TENANT_ID);
+    }
+
+    /**
+     * 生成当前用户的移动深链（含短期 secret 与 TTL）。使用默认 App 时域名取配置，否则取平台 host。
+     * <p>
+     * 权限：任意已登录用户。下游 {@link MobileAppSecretService#generateMobileAppSecret}、
+     * {@link SystemSecurityService#getBaseUrl}。
+     */
+    @ApiOperation(value = "Get the deep link to the associated mobile application (getMobileAppDeepLink)",
+            notes = "Fetch the url that takes user to linked mobile application " + AVAILABLE_FOR_ANY_AUTHORIZED_USER)
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
+    @GetMapping(value = "/api/mobile/qr/deepLink", produces = "text/plain")
+    public String getMobileAppDeepLink(HttpServletRequest request) throws JnksIotException, URISyntaxException {
+        String secret = mobileAppSecretService.generateMobileAppSecret(getCurrentUser());
+        String baseUrl = systemSecurityService.getBaseUrl(TenantId.SYS_TENANT_ID, null, request);
+        String platformDomain = new URI(baseUrl).getHost();
+        QrCodeSettings qrCodeSettings = qrCodeSettingService.findQrCodeSettings(TenantId.SYS_TENANT_ID);
+        String appDomain = qrCodeSettings.isUseDefaultApp() ? defaultAppDomain : platformDomain;
+        String deepLink = String.format(DEEP_LINK_PATTERN, appDomain, secret, mobileSecretKeyTtl);
+        if (!appDomain.equals(platformDomain)) {
+            deepLink = deepLink + "&host=" + baseUrl;
+        }
+        return "\"" + deepLink + "\"";
+    }
+
+    /**
+     * 用短期 secret 换取对应用户的 JWT 对，供移动端扫码登录。
+     * <p>
+     * 无需登录。下游 {@link MobileAppSecretService#getJwtPair}。
+     */
+    @ApiOperation(value = "Get User Token (getUserTokenByMobileSecret)",
+            notes = "Returns the token of the User based on the provided secret key.")
+    @GetMapping(value = "/api/noauth/qr/{secret}")
+    public JwtPair getUserTokenByMobileSecret(@Parameter(description = SECRET_PARAM_DESCRIPTION)
+                                              @PathVariable(SECRET) String secret) throws JnksIotException {
+        checkParameter(SECRET, secret);
+        return mobileAppSecretService.getJwtPair(secret);
+    }
+
+    /**
+     * 按 User-Agent 将扫码请求 302 到 Google Play 或 App Store；无法匹配则 404。
+     * <p>
+     * 无需登录。下游 {@link QrCodeSettingService#findQrCodeSettings}。
+     */
+    @GetMapping(value = "/api/noauth/qr")
+    public ResponseEntity<?> getApplicationRedirect(@RequestHeader(value = "User-Agent") String userAgent) {
+        QrCodeSettings qrCodeSettings = qrCodeSettingService.findQrCodeSettings(TenantId.SYS_TENANT_ID);
+        if (userAgent.contains("Android") && qrCodeSettings.isAndroidEnabled()) {
+            String googlePlayLink = qrCodeSettings.getGooglePlayLink();
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", googlePlayLink)
+                    .build();
+        } else if ((userAgent.contains("iPhone") || userAgent.contains("iPad")) && qrCodeSettings.isIosEnabled()) {
+            String appStoreLink = qrCodeSettings.getAppStoreLink();
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", appStoreLink)
+                    .build();
+        } else {
+            return response(HttpStatus.NOT_FOUND);
+        }
+    }
+
+}

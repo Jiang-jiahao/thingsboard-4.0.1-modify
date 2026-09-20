@@ -18,9 +18,9 @@ if [ "$INSTALL_TB" == "true" ]; then
         loadDemo=false
     fi
 
-    echo "Starting ThingsBoard installation ..."
+    echo "Starting JnksIOT installation ..."
 
-    exec java -cp ${jarfile} $JAVA_OPTS -Dloader.main=org.thingsboard.server.ThingsboardInstallApplication \
+    exec java -cp ${jarfile} $JAVA_OPTS -Dloader.main=com.jnks.iot.server.JnksIotInstallApplication \
                         -Dinstall.load_demo=${loadDemo} \
                         -Dspring.jpa.hibernate.ddl-auto=none \
                         -Dinstall.upgrade=false \
@@ -29,12 +29,12 @@ if [ "$INSTALL_TB" == "true" ]; then
 
 elif [ "$UPGRADE_TB" == "true" ]; then
 
-    echo "Starting ThingsBoard upgrade ..."
+    echo "Starting JnksIOT upgrade ..."
 
 
     fromVersion="${FROM_VERSION// }"
 
-    exec java -cp ${jarfile} $JAVA_OPTS -Dloader.main=org.thingsboard.server.ThingsboardInstallApplication \
+    exec java -cp ${jarfile} $JAVA_OPTS -Dloader.main=com.jnks.iot.server.JnksIotInstallApplication \
                     -Dspring.jpa.hibernate.ddl-auto=none \
                     -Dinstall.upgrade=true \
                     -Dinstall.upgrade.from_version=${fromVersion} \
@@ -45,7 +45,7 @@ else
 
     echo "Starting '${project.name}' ..."
 
-    exec java -cp ${jarfile} $JAVA_OPTS -Dloader.main=org.thingsboard.server.ThingsboardServerApplication \
+    exec java -cp ${jarfile} $JAVA_OPTS -Dloader.main=com.jnks.iot.server.JnksIotServerApplication \
                         -Dspring.jpa.hibernate.ddl-auto=none \
                         -Dlogging.config=/config/logback.xml \
                         org.springframework.boot.loader.launch.PropertiesLauncher

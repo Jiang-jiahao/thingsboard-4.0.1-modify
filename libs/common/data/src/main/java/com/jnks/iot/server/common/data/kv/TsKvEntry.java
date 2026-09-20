@@ -1,0 +1,25 @@
+package com.jnks.iot.server.common.data.kv;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.jnks.iot.server.common.data.HasVersion;
+import com.jnks.iot.server.common.data.query.TsValue;
+
+/**
+ * Represents time series KV data entry
+ *
+ * @author ashvayka
+ *
+ */
+public interface TsKvEntry extends KvEntry, HasVersion {
+
+    long getTs();
+
+    @JsonIgnore
+    int getDataPoints();
+
+    @JsonIgnore
+    default TsValue toTsValue() {
+        return new TsValue(getTs(), getValueAsString());
+    }
+
+}

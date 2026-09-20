@@ -1,0 +1,59 @@
+package com.jnks.iot.server.common.data.transport.http;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import com.jnks.iot.server.common.data.StringUtils;
+
+import java.io.Serializable;
+import java.util.UUID;
+
+/**
+ * HTTP 被动上报（Push）的多设备路由：从请求 JSON 中读取设备标识，映射到租户内已注册的目标设备。
+ */
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class HttpPullDeviceRoutingConfiguration implements Serializable {
+
+    private HttpPullRoutingMode routingMode = HttpPullRoutingMode.SINGLE_DEVICE;
+
+    /**
+     * 响应体中数组的 JSONPath，如 {@code $.data.list}；空表示根节点即为数组或单对象。
+     */
+    private String responseArrayJsonPath;
+
+    /**
+     * 每个数组元素内设备 ID 的 JSONPath（相对元素），如 {@code deviceId} 或 {@code id}。
+     * {@link HttpPullRoutingMode#MULTI_DEVICE} 时必填。
+     */
+    private String deviceIdJsonPath;
+
+    private HttpPullDeviceIdMatchStrategy deviceIdMatchStrategy = HttpPullDeviceIdMatchStrategy.DEVICE_NAME;
+
+    /**
+     * 仅路由到该设备档案下的目标设备；为空则允许匹配租户内任意档案（仍须能解析到设备）。
+     */
+    private UUID targetDeviceProfileId;
+
+    /**
+     * 整包 JSON 写入遥测的键名。
+     */
+    private String telemetryPayloadKey = "httpPullPayload";
+
+    public void validate() {
+        if (routingMode == null) {
+            routingMode = HttpPullRoutingMode.SINGLE_DEVICE;
+        }
+        if (deviceIdMatchStrategy == null) {
+            deviceIdMatchStrategy = HttpPullDeviceIdMatchStrategy.DEVICE_NAME;
+        }
+        if (StringUtils.isBlank(telemetryPayloadKey)) {
+            telemetryPayloadKey = "httpPullPayload";
+        }
+        if (routingMode == HttpPullRoutingMode.MULTI_DEVICE && StringUtils.isBlank(deviceIdJsonPath)) {
+            throw new IllegalArgumentException("HTTP pull multi-device routing requires deviceIdJsonPath");
+        }
+        if (routingMode == HttpPullRoutingMode.AUTO && StringUtils.isBlank(deviceIdJsonPath)) {
+            throw new IllegalArgumentException("HTTP pull auto routing requires deviceIdJsonPath");
+        }
+    }
+}

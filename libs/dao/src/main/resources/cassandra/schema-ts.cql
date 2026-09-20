@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS thingsboard.ts_kv_cf (
+CREATE TABLE IF NOT EXISTS jnks_iot.ts_kv_cf (
     entity_type text, -- (DEVICE, CUSTOMER, TENANT)
     entity_id timeuuid,
     key text,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS thingsboard.ts_kv_cf (
     PRIMARY KEY (( entity_type, entity_id, key, partition ), ts)
 );
 
-CREATE TABLE IF NOT EXISTS thingsboard.ts_kv_partitions_cf (
+CREATE TABLE IF NOT EXISTS jnks_iot.ts_kv_partitions_cf (
     entity_type text, -- (DEVICE, CUSTOMER, TENANT)
     entity_id timeuuid,
     key text,

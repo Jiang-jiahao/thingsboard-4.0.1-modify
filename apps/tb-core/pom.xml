@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.thingsboard</groupId>
+        <groupId>com.jnks.iot</groupId>
         <artifactId>apps</artifactId>
         <version>4.0.1</version>
     </parent>
@@ -19,25 +19,25 @@
         <pkg.disabled>false</pkg.disabled>
         <pkg.process-resources.phase>process-resources</pkg.process-resources.phase>
         <pkg.package.phase>package</pkg.package.phase>
-        <pkg.name>thingsboard-core</pkg.name>
+        <pkg.name>jnks-iot-core</pkg.name>
         <pkg.win.dist>${project.build.directory}/windows</pkg.win.dist>
         <pkg.copyInstallScripts>true</pkg.copyInstallScripts>
-        <pkg.implementationTitle>ThingsBoard</pkg.implementationTitle>
-        <pkg.mainClass>org.thingsboard.server.ThingsboardCoreServerApplication</pkg.mainClass>
+        <pkg.implementationTitle>JnksIOT</pkg.implementationTitle>
+        <pkg.mainClass>com.jnks.iot.server.JnksIotCoreServerApplication</pkg.mainClass>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.thingsboard</groupId>
+            <groupId>com.jnks.iot</groupId>
             <artifactId>base</artifactId>
             <version>4.0.1</version>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.transport</groupId>
+            <groupId>com.jnks.iot.transport</groupId>
             <artifactId>transport-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>edqs</artifactId>
         </dependency>
         <dependency>
@@ -54,14 +54,14 @@
                 <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
-                    <include>thingsboard-core.yml</include>
+                    <include>jnks-iot-core.yml</include>
                 </includes>
             </resource>
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>false</filtering>
                 <excludes>
-                    <exclude>thingsboard-core.yml</exclude>
+                    <exclude>jnks-iot-core.yml</exclude>
                 </excludes>
             </resource>
         </resources>
@@ -79,7 +79,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
-                        <spring.config.name>thingsboard-core</spring.config.name>
+                        <spring.config.name>jnks-iot-core</spring.config.name>
                     </systemPropertyVariables>
                     <excludes>
                         <exclude>**/nosql/*Test.java</exclude>

@@ -14,7 +14,7 @@ SET configuration = (
            )
     )::text,
     configuration_version = 1
-WHERE type = 'org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode'
+WHERE type = 'com.jnks.iot.rule.engine.telemetry.TbMsgTimeseriesNode'
   AND configuration_version = 0
   AND configuration::jsonb ->> 'skipLatestPersistence' = 'true';
 
@@ -28,7 +28,7 @@ SET configuration = (
            )
     )::text,
     configuration_version = 1
-WHERE type = 'org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode'
+WHERE type = 'com.jnks.iot.rule.engine.telemetry.TbMsgTimeseriesNode'
   AND configuration_version = 0
   AND (configuration::jsonb ->> 'skipLatestPersistence' != 'true' OR configuration::jsonb ->> 'skipLatestPersistence' IS NULL);
 
@@ -44,7 +44,7 @@ SET configuration = (
            )
     )::text,
     configuration_version = 3
-WHERE type = 'org.thingsboard.rule.engine.telemetry.TbMsgAttributesNode'
+WHERE type = 'com.jnks.iot.rule.engine.telemetry.TbMsgAttributesNode'
   AND configuration_version = 2;
 
 -- UPDATE SAVE ATTRIBUTES NODES END

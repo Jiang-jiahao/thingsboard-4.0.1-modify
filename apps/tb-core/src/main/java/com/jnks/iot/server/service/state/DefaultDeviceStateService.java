@@ -1,0 +1,1010 @@
+package com.jnks.iot.server.service.state;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.common.util.JacksonUtil;
+import com.jnks.iot.common.util.JnksIotExecutors;
+import com.jnks.iot.rule.engine.api.AttributesSaveRequest;
+import com.jnks.iot.rule.engine.api.TimeseriesSaveRequest;
+import com.jnks.iot.server.cluster.TbClusterService;
+import com.jnks.iot.server.common.data.ApiUsageRecordKey;
+import com.jnks.iot.server.common.data.AttributeScope;
+import com.jnks.iot.server.common.data.Device;
+import com.jnks.iot.server.common.data.DeviceIdInfo;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.StringUtils;
+import com.jnks.iot.server.common.data.exception.TenantNotFoundException;
+import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.id.UUIDBased;
+import com.jnks.iot.server.common.data.kv.AttributeKvEntry;
+import com.jnks.iot.server.common.data.kv.BaseAttributeKvEntry;
+import com.jnks.iot.server.common.data.kv.BasicTsKvEntry;
+import com.jnks.iot.server.common.data.kv.BooleanDataEntry;
+import com.jnks.iot.server.common.data.kv.KvEntry;
+import com.jnks.iot.server.common.data.kv.LongDataEntry;
+import com.jnks.iot.server.common.data.kv.TsKvEntry;
+import com.jnks.iot.server.common.data.msg.TbMsgType;
+import com.jnks.iot.server.common.data.notification.rule.trigger.DeviceActivityTrigger;
+import com.jnks.iot.server.common.data.page.PageData;
+import com.jnks.iot.server.common.data.page.PageDataIterable;
+import com.jnks.iot.server.common.data.query.EntityData;
+import com.jnks.iot.server.common.data.query.EntityDataPageLink;
+import com.jnks.iot.server.common.data.query.EntityDataQuery;
+import com.jnks.iot.server.common.data.query.EntityKey;
+import com.jnks.iot.server.common.data.query.EntityKeyType;
+import com.jnks.iot.server.common.data.query.EntityListFilter;
+import com.jnks.iot.server.common.msg.TbMsg;
+import com.jnks.iot.server.common.msg.TbMsgDataType;
+import com.jnks.iot.server.common.msg.TbMsgMetaData;
+import com.jnks.iot.server.common.msg.notification.NotificationRuleProcessor;
+import com.jnks.iot.server.common.msg.queue.ServiceType;
+import com.jnks.iot.server.common.msg.queue.TbCallback;
+import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
+import com.jnks.iot.server.common.stats.TbApiUsageReportClient;
+import com.jnks.iot.server.common.transport.LocalDeviceInactivityEvent;
+import com.jnks.iot.server.dao.attributes.AttributesService;
+import com.jnks.iot.server.dao.device.DeviceService;
+import com.jnks.iot.server.dao.sql.query.EntityQueryRepository;
+import com.jnks.iot.server.dao.timeseries.TimeseriesService;
+import com.jnks.iot.server.dao.util.DbTypeInfoComponent;
+import com.jnks.iot.server.gen.transport.TransportProtos;
+import com.jnks.iot.server.queue.discovery.PartitionService;
+import com.jnks.iot.server.queue.discovery.TbServiceInfoProvider;
+import com.jnks.iot.server.service.partition.AbstractPartitionBasedService;
+import com.jnks.iot.server.service.state.constants.DefaultDeviceStateConstants;
+import com.jnks.iot.server.service.telemetry.TelemetrySubscriptionService;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
+import static com.jnks.iot.server.common.data.DataConstants.SCOPE;
+import static com.jnks.iot.server.common.data.DataConstants.SERVER_SCOPE;
+
+/**
+ * 设备在线/活跃状态服务。
+ * <p>
+ * Core 按分区持有设备状态：消费连接、心跳、断开、不活跃事件，定期扫描超时设备并写属性/时序
+ *（{@code activityState}、{@code lastActivityTime} 等），触发规则引擎与通知规则。
+ * 分区变更时按 {@link AbstractPartitionBasedService} 加载或卸载本节点负责的设备。
+ *
+ * @see DeviceStateService
+ */
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class DefaultDeviceStateService extends AbstractPartitionBasedService<DeviceId> implements DeviceStateService {
+
+
+    private static final List<EntityKey> PERSISTENT_TELEMETRY_KEYS = Arrays.asList(
+            new EntityKey(EntityKeyType.TIME_SERIES, DefaultDeviceStateConstants.LAST_ACTIVITY_TIME),
+            new EntityKey(EntityKeyType.TIME_SERIES, DefaultDeviceStateConstants.INACTIVITY_ALARM_TIME),
+            new EntityKey(EntityKeyType.TIME_SERIES, DefaultDeviceStateConstants.ACTIVITY_STATE),
+            new EntityKey(EntityKeyType.TIME_SERIES, DefaultDeviceStateConstants.LAST_CONNECT_TIME),
+            new EntityKey(EntityKeyType.TIME_SERIES, DefaultDeviceStateConstants.LAST_DISCONNECT_TIME),
+            new EntityKey(EntityKeyType.SERVER_ATTRIBUTE, DefaultDeviceStateConstants.INACTIVITY_TIMEOUT)); // inactivity timeout is always a server attribute, even when activity data is stored as time series
+
+    private static final List<EntityKey> PERSISTENT_ATTRIBUTE_KEYS = Arrays.asList(
+            new EntityKey(EntityKeyType.SERVER_ATTRIBUTE, DefaultDeviceStateConstants.LAST_ACTIVITY_TIME),
+            new EntityKey(EntityKeyType.SERVER_ATTRIBUTE, DefaultDeviceStateConstants.INACTIVITY_ALARM_TIME),
+            new EntityKey(EntityKeyType.SERVER_ATTRIBUTE, DefaultDeviceStateConstants.INACTIVITY_TIMEOUT),
+            new EntityKey(EntityKeyType.SERVER_ATTRIBUTE, DefaultDeviceStateConstants.ACTIVITY_STATE),
+            new EntityKey(EntityKeyType.SERVER_ATTRIBUTE, DefaultDeviceStateConstants.LAST_CONNECT_TIME),
+            new EntityKey(EntityKeyType.SERVER_ATTRIBUTE, DefaultDeviceStateConstants.LAST_DISCONNECT_TIME));
+
+    public static final Set<String> ACTIVITY_KEYS_WITHOUT_INACTIVITY_TIMEOUT = Set.of(
+            DefaultDeviceStateConstants.ACTIVITY_STATE, DefaultDeviceStateConstants.LAST_CONNECT_TIME, DefaultDeviceStateConstants.LAST_DISCONNECT_TIME, DefaultDeviceStateConstants.LAST_ACTIVITY_TIME, DefaultDeviceStateConstants.INACTIVITY_ALARM_TIME
+    );
+
+    public static final Set<String> ACTIVITY_KEYS_WITH_INACTIVITY_TIMEOUT = Set.of(
+            DefaultDeviceStateConstants.ACTIVITY_STATE, DefaultDeviceStateConstants.LAST_CONNECT_TIME, DefaultDeviceStateConstants.LAST_DISCONNECT_TIME, DefaultDeviceStateConstants.LAST_ACTIVITY_TIME, DefaultDeviceStateConstants.INACTIVITY_ALARM_TIME, DefaultDeviceStateConstants.INACTIVITY_TIMEOUT
+    );
+
+    private static final List<EntityKey> PERSISTENT_ENTITY_FIELDS = Arrays.asList(
+            new EntityKey(EntityKeyType.ENTITY_FIELD, "name"),
+            new EntityKey(EntityKeyType.ENTITY_FIELD, "type"),
+            new EntityKey(EntityKeyType.ENTITY_FIELD, "label"),
+            new EntityKey(EntityKeyType.ENTITY_FIELD, "createdTime"));
+
+    private final DeviceService deviceService;
+    private final AttributesService attributesService;
+    private final TimeseriesService tsService;
+    private final TbClusterService clusterService;
+    private final PartitionService partitionService;
+    private final TbServiceInfoProvider serviceInfoProvider;
+    private final EntityQueryRepository entityQueryRepository;
+    private final DbTypeInfoComponent dbTypeInfoComponent;
+    private final TbApiUsageReportClient apiUsageReportClient;
+    private final NotificationRuleProcessor notificationRuleProcessor;
+    @Autowired
+    @Lazy
+    private TelemetrySubscriptionService tsSubService;
+
+    @Value("${state.defaultInactivityTimeoutInSec}")
+    @Getter
+    @Setter
+    private long defaultInactivityTimeoutInSec;
+
+    @Value("#{${state.defaultInactivityTimeoutInSec} * 1000}")
+    @Getter
+    @Setter
+    private long defaultInactivityTimeoutMs;
+
+    @Value("${state.defaultStateCheckIntervalInSec}")
+    @Getter
+    private int defaultStateCheckIntervalInSec;
+
+    @Value("${usage.stats.devices.report_interval:60}")
+    @Getter
+    private int defaultActivityStatsIntervalInSec;
+
+    @Value("${state.persistToTelemetry:false}")
+    @Getter
+    @Setter
+    private boolean persistToTelemetry;
+
+    @Value("${state.initFetchPackSize:50000}")
+    @Getter
+    private int initFetchPackSize;
+
+    @Value("${state.telemetryTtl:0}")
+    @Getter
+    private int telemetryTtl;
+
+    private ListeningExecutorService deviceStateExecutor;
+    private ListeningExecutorService deviceStateCallbackExecutor;
+
+    final ConcurrentMap<DeviceId, DeviceStateData> deviceStates = new ConcurrentHashMap<>();
+
+    /**
+     * 启动状态检查与用量上报定时任务，以及设备状态线程池。
+     */
+    @PostConstruct
+    public void init() {
+        super.init();
+        deviceStateExecutor = MoreExecutors.listeningDecorator(JnksIotExecutors.newWorkStealingPool(
+                Math.max(4, Runtime.getRuntime().availableProcessors()), "device-state"));
+        deviceStateCallbackExecutor = MoreExecutors.listeningDecorator(JnksIotExecutors.newWorkStealingPool(
+                Math.max(4, Runtime.getRuntime().availableProcessors()), "device-state-callback"));
+        scheduledExecutor.scheduleWithFixedDelay(this::checkStates, new Random().nextInt(defaultStateCheckIntervalInSec), defaultStateCheckIntervalInSec, TimeUnit.SECONDS);
+        scheduledExecutor.scheduleWithFixedDelay(this::reportActivityStats, defaultActivityStatsIntervalInSec, defaultActivityStatsIntervalInSec, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 停止父类分区任务与设备状态线程池。
+     */
+    @PreDestroy
+    public void stop() {
+        super.stop();
+        if (deviceStateExecutor != null) {
+            deviceStateExecutor.shutdownNow();
+        }
+        if (deviceStateCallbackExecutor != null) {
+            deviceStateCallbackExecutor.shutdownNow();
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected String getServiceName() {
+        return "Device State";
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected String getSchedulerExecutorName() {
+        return "device-state-scheduled";
+    }
+
+    /**
+     * 设备连接：更新 lastConnectTime，必要时标记为活跃。
+     */
+    @Override
+    public void onDeviceConnect(TenantId tenantId, DeviceId deviceId, long lastConnectTime) {
+        if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
+            return;
+        }
+        if (lastConnectTime < 0) {
+            log.trace("[{}][{}] On device connect: received negative last connect ts [{}]. Skipping this event.",
+                    tenantId.getId(), deviceId.getId(), lastConnectTime);
+            return;
+        }
+        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
+        long currentLastConnectTime = stateData.getState().getLastConnectTime();
+        if (lastConnectTime <= currentLastConnectTime) {
+            log.trace("[{}][{}] On device connect: received outdated last connect ts [{}]. Skipping this event. Current last connect ts [{}].",
+                    tenantId.getId(), deviceId.getId(), lastConnectTime, currentLastConnectTime);
+            return;
+        }
+        log.trace("[{}][{}] On device connect: processing connect event with ts [{}].", tenantId.getId(), deviceId.getId(), lastConnectTime);
+        stateData.getState().setLastConnectTime(lastConnectTime);
+        save(tenantId, deviceId, DefaultDeviceStateConstants.LAST_CONNECT_TIME, lastConnectTime);
+        pushRuleEngineMessage(stateData, TbMsgType.CONNECT_EVENT);
+        checkAndUpdateState(deviceId, stateData);
+    }
+
+    /**
+     * 设备活跃心跳：更新 lastActivityTime 并可能从 inactive 切回 active。
+     */
+    @Override
+    public void onDeviceActivity(TenantId tenantId, DeviceId deviceId, long lastReportedActivity) {
+        if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
+            return;
+        }
+        log.trace("[{}] on Device Activity [{}], lastReportedActivity [{}]", tenantId.getId(), deviceId.getId(), lastReportedActivity);
+        final DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
+        DeviceState state = stateData.getState();
+        // 会话断开后仍可能收到断开前发出的活动上报。若时间不晚于不活跃事件，不能把设备重新标成活跃。
+        if (!state.isActive() && state.getLastInactivityAlarmTime() > 0
+                && lastReportedActivity <= state.getLastInactivityAlarmTime()) {
+            log.debug("[{}][{}] Ignore stale activity [{}] after inactivity [{}]",
+                    tenantId.getId(), deviceId.getId(), lastReportedActivity, state.getLastInactivityAlarmTime());
+            return;
+        }
+        if (lastReportedActivity > 0 && lastReportedActivity > state.getLastActivityTime()) {
+            updateActivityState(deviceId, stateData, lastReportedActivity);
+        }
+    }
+
+    void updateActivityState(DeviceId deviceId, DeviceStateData stateData, long lastReportedActivity) {
+        log.trace("updateActivityState - fetched state {} for device {}, lastReportedActivity {}", stateData, deviceId, lastReportedActivity);
+        if (stateData != null) {
+            save(stateData.getTenantId(), deviceId, DefaultDeviceStateConstants.LAST_ACTIVITY_TIME, lastReportedActivity);
+            DeviceState state = stateData.getState();
+            state.setLastActivityTime(lastReportedActivity);
+            if (!state.isActive()) {
+                state.setActive(true);
+                if (lastReportedActivity <= state.getLastInactivityAlarmTime()) {
+                    state.setLastInactivityAlarmTime(0);
+                    save(stateData.getTenantId(), deviceId, DefaultDeviceStateConstants.INACTIVITY_ALARM_TIME, 0);
+                }
+                onDeviceActivityStatusChange(deviceId, true, stateData);
+            }
+        } else {
+            log.debug("updateActivityState - fetched state IS NULL for device {}, lastReportedActivity {}", deviceId, lastReportedActivity);
+            cleanupEntity(deviceId);
+        }
+    }
+
+    /**
+     * 设备断开：更新 lastDisconnectTime。
+     */
+    @Override
+    public void onDeviceDisconnect(TenantId tenantId, DeviceId deviceId, long lastDisconnectTime) {
+        if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
+            return;
+        }
+        if (lastDisconnectTime < 0) {
+            log.trace("[{}][{}] On device disconnect: received negative last disconnect ts [{}]. Skipping this event.",
+                    tenantId.getId(), deviceId.getId(), lastDisconnectTime);
+            return;
+        }
+        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
+        long currentLastDisconnectTime = stateData.getState().getLastDisconnectTime();
+        if (lastDisconnectTime <= currentLastDisconnectTime) {
+            log.trace("[{}][{}] On device disconnect: received outdated last disconnect ts [{}]. Skipping this event. Current last disconnect ts [{}].",
+                    tenantId.getId(), deviceId.getId(), lastDisconnectTime, currentLastDisconnectTime);
+            return;
+        }
+        log.trace("[{}][{}] On device disconnect: processing disconnect event with ts [{}].", tenantId.getId(), deviceId.getId(), lastDisconnectTime);
+        stateData.getState().setLastDisconnectTime(lastDisconnectTime);
+        save(tenantId, deviceId, DefaultDeviceStateConstants.LAST_DISCONNECT_TIME, lastDisconnectTime);
+        pushRuleEngineMessage(stateData, TbMsgType.DISCONNECT_EVENT);
+    }
+
+    /**
+     * 更新设备不活跃超时阈值。
+     */
+    @Override
+    public void onDeviceInactivityTimeoutUpdate(TenantId tenantId, DeviceId deviceId, long inactivityTimeout) {
+        if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
+            return;
+        }
+        if (inactivityTimeout <= 0L) {
+            inactivityTimeout = defaultInactivityTimeoutMs;
+        }
+        log.trace("[{}] on Device Activity Timeout Update device id {} inactivityTimeout {}", tenantId.getId(), deviceId.getId(), inactivityTimeout);
+        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
+        stateData.getState().setInactivityTimeout(inactivityTimeout);
+        checkAndUpdateState(deviceId, stateData);
+    }
+
+    /**
+     * 设备进入不活跃：更新 inactivityAlarmTime 并推送活动状态。
+     */
+    @Override
+    public void onDeviceInactivity(TenantId tenantId, DeviceId deviceId, long lastInactivityTime) {
+        if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
+            return;
+        }
+        if (lastInactivityTime < 0) {
+            log.trace("[{}][{}] On device inactivity: received negative last inactivity ts [{}]. Skipping this event.",
+                    tenantId.getId(), deviceId.getId(), lastInactivityTime);
+            return;
+        }
+        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
+        long currentLastInactivityAlarmTime = stateData.getState().getLastInactivityAlarmTime();
+        if (lastInactivityTime <= currentLastInactivityAlarmTime) {
+            log.trace("[{}][{}] On device inactivity: received last inactivity ts [{}] is less than current last inactivity ts [{}]. Skipping this event.",
+                    tenantId.getId(), deviceId.getId(), lastInactivityTime, currentLastInactivityAlarmTime);
+            return;
+        }
+        long currentLastActivityTime = stateData.getState().getLastActivityTime();
+        if (lastInactivityTime <= currentLastActivityTime) {
+            log.trace("[{}][{}] On device inactivity: received last inactivity ts [{}] is less or equal to current last activity ts [{}]. Skipping this event.",
+                    tenantId.getId(), deviceId.getId(), lastInactivityTime, currentLastActivityTime);
+            return;
+        }
+        log.trace("[{}][{}] On device inactivity: processing inactivity event with ts [{}].", tenantId.getId(), deviceId.getId(), lastInactivityTime);
+        reportInactivity(lastInactivityTime, deviceId, stateData);
+    }
+
+    /**
+     * 最后一个 MQTT/TCP 等长连接会话关闭：按 Core 侧时间标非活跃。
+     * 传输进程时钟可能落后于 SESSION_OPEN 写入的 lastActivityTime，直接用传输时间会被当成过期事件丢掉。
+     */
+    @Override
+    public void onLastSessionClosed(TenantId tenantId, DeviceId deviceId) {
+        if (cleanDeviceStateIfBelongsToExternalPartition(tenantId, deviceId)) {
+            return;
+        }
+        DeviceStateData stateData = getOrFetchDeviceStateData(deviceId);
+        DeviceState state = stateData.getState();
+        if (!state.isActive()) {
+            return;
+        }
+        long ts = Math.max(getCurrentTimeMillis(), state.getLastActivityTime() + 1);
+        if (ts <= state.getLastInactivityAlarmTime()) {
+            ts = state.getLastInactivityAlarmTime() + 1;
+        }
+        log.debug("[{}][{}] Last transport session closed, marking inactive ts [{}]", tenantId.getId(), deviceId.getId(), ts);
+        reportInactivity(ts, deviceId, stateData);
+    }
+
+    @EventListener
+    public void onLocalTransportInactivity(LocalDeviceInactivityEvent event) {
+        onLastSessionClosed(event.getTenantId(), event.getDeviceId());
+    }
+
+    /**
+     * 处理设备增删改队列消息：加载或清理本分区设备状态。
+     */
+    @Override
+    public void onQueueMsg(TransportProtos.DeviceStateServiceMsgProto proto, TbCallback callback) {
+        try {
+            TenantId tenantId = TenantId.fromUUID(new UUID(proto.getTenantIdMSB(), proto.getTenantIdLSB()));
+            DeviceId deviceId = new DeviceId(new UUID(proto.getDeviceIdMSB(), proto.getDeviceIdLSB()));
+            if (proto.getDeleted()) {
+                onDeviceDeleted(tenantId, deviceId);
+                callback.onSuccess();
+            } else {
+                Device device = deviceService.findDeviceById(TenantId.SYS_TENANT_ID, deviceId);
+                if (device != null) {
+                    if (proto.getAdded()) {
+                        Futures.addCallback(fetchDeviceState(device), new FutureCallback<>() {
+                            @Override
+                            public void onSuccess(DeviceStateData state) {
+                                TopicPartitionInfo tpi = partitionService.resolve(ServiceType.TB_CORE, tenantId, device.getId());
+                                Set<DeviceId> deviceIds = partitionedEntities.get(tpi);
+                                boolean isMyPartition = deviceIds != null;
+                                if (isMyPartition) {
+                                    deviceIds.add(state.getDeviceId());
+                                    initializeActivityState(deviceId, state);
+                                    callback.onSuccess();
+                                } else {
+                                    log.debug("[{}][{}] Device belongs to external partition. Probably rebalancing is in progress. Topic: {}", tenantId, deviceId, tpi.getFullTopicName());
+                                    callback.onFailure(new RuntimeException("Device belongs to external partition " + tpi.getFullTopicName() + "!"));
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Throwable t) {
+                                log.warn("Failed to register device to the state service", t);
+                                callback.onFailure(t);
+                            }
+                        }, deviceStateCallbackExecutor);
+                    } else if (proto.getUpdated()) {
+                        DeviceStateData stateData = getOrFetchDeviceStateData(device.getId());
+                        TbMsgMetaData md = new TbMsgMetaData();
+                        md.putValue("deviceName", device.getName());
+                        md.putValue("deviceLabel", device.getLabel());
+                        md.putValue("deviceType", device.getType());
+                        stateData.setMetaData(md);
+                        callback.onSuccess();
+                    }
+                } else {
+                    //Device was probably deleted while message was in queue;
+                    callback.onSuccess();
+                }
+            }
+        } catch (Exception e) {
+            log.trace("Failed to process queue msg: [{}]", proto, e);
+            callback.onFailure(e);
+        }
+    }
+
+    private void onDeviceDeleted(TenantId tenantId, DeviceId deviceId) {
+        cleanupEntity(deviceId);
+        TopicPartitionInfo tpi = partitionService.resolve(ServiceType.TB_CORE, tenantId, deviceId);
+        Set<DeviceId> deviceIdSet = partitionedEntities.get(tpi);
+        if (deviceIdSet != null) {
+            deviceIdSet.remove(deviceId);
+        }
+    }
+
+    private void initializeActivityState(DeviceId deviceId, DeviceStateData fetchedState) {
+        DeviceStateData cachedState = deviceStates.putIfAbsent(fetchedState.getDeviceId(), fetchedState);
+        boolean activityState = Objects.requireNonNullElse(cachedState, fetchedState).getState().isActive();
+        save(fetchedState.getTenantId(), deviceId, DefaultDeviceStateConstants.ACTIVITY_STATE, activityState);
+    }
+
+    /**
+     * 新分区加入时批量加载设备状态。
+     */
+    @Override
+    protected Map<TopicPartitionInfo, List<ListenableFuture<?>>> onAddedPartitions(Set<TopicPartitionInfo> addedPartitions) {
+        var result = new HashMap<TopicPartitionInfo, List<ListenableFuture<?>>>();
+        PageDataIterable<DeviceIdInfo> deviceIdInfos = new PageDataIterable<>(deviceService::findDeviceIdInfos, initFetchPackSize);
+        Map<TopicPartitionInfo, List<DeviceIdInfo>> tpiDeviceMap = new HashMap<>();
+
+        for (DeviceIdInfo idInfo : deviceIdInfos) {
+            TopicPartitionInfo tpi;
+            try {
+                tpi = partitionService.resolve(ServiceType.TB_CORE, idInfo.getTenantId(), idInfo.getDeviceId());
+            } catch (Exception e) {
+                log.warn("Failed to resolve partition for device with id [{}], tenant id [{}], customer id [{}]. Reason: {}",
+                        idInfo.getDeviceId(), idInfo.getTenantId(), idInfo.getCustomerId(), e.getMessage());
+                continue;
+            }
+            if (addedPartitions.contains(tpi) && !deviceStates.containsKey(idInfo.getDeviceId())) {
+                tpiDeviceMap.computeIfAbsent(tpi, tmp -> new ArrayList<>()).add(idInfo);
+            }
+        }
+
+        for (var entry : tpiDeviceMap.entrySet()) {
+            AtomicInteger counter = new AtomicInteger(0);
+            // hard-coded limit of 1000 is due to the Entity Data Query limitations and should not be changed.
+            for (List<DeviceIdInfo> partition : Lists.partition(entry.getValue(), 1000)) {
+                log.info("[{}] Submit task for device states: {}", entry.getKey(), partition.size());
+                DevicePackFutureHolder devicePackFutureHolder = new DevicePackFutureHolder();
+                var devicePackFuture = deviceStateExecutor.submit(() -> {
+                    try {
+                        List<DeviceStateData> states;
+                        if (persistToTelemetry && !dbTypeInfoComponent.isLatestTsDaoStoredToSql()) {
+                            states = fetchDeviceStateDataUsingSeparateRequests(partition);
+                        } else {
+                            states = fetchDeviceStateDataUsingEntityDataQuery(partition);
+                        }
+                        if (devicePackFutureHolder.future == null || !devicePackFutureHolder.future.isCancelled()) {
+                            for (var state : states) {
+                                TopicPartitionInfo tpi = entry.getKey();
+                                Set<DeviceId> deviceIds = partitionedEntities.get(tpi);
+                                boolean isMyPartition = deviceIds != null;
+                                if (isMyPartition) {
+                                    deviceIds.add(state.getDeviceId());
+                                    deviceStates.putIfAbsent(state.getDeviceId(), state);
+                                    checkAndUpdateState(state.getDeviceId(), state, true);
+                                } else {
+                                    log.debug("[{}] Device belongs to external partition {}", state.getDeviceId(), tpi.getFullTopicName());
+                                }
+                            }
+                            log.info("[{}] Initialized {} out of {} device states", entry.getKey().getPartition().orElse(0), counter.addAndGet(states.size()), entry.getValue().size());
+                        }
+                    } catch (Throwable t) {
+                        log.error("Unexpected exception while device pack fetching", t);
+                        throw t;
+                    }
+                });
+                devicePackFutureHolder.future = devicePackFuture;
+                result.computeIfAbsent(entry.getKey(), tmp -> new ArrayList<>()).add(devicePackFuture);
+            }
+        }
+        return result;
+    }
+
+    private static class DevicePackFutureHolder {
+        private volatile ListenableFuture<?> future;
+    }
+
+    void checkAndUpdateState(@Nonnull DeviceId deviceId, @Nonnull DeviceStateData state) {
+        checkAndUpdateState(deviceId, state, false);
+    }
+
+    /**
+     * @param partitionInit true 表示 Core 刚加载分区（进程启动/再平衡），不能根据 lastActivityTime 窗口把设备拉回活跃。
+     */
+    void checkAndUpdateState(@Nonnull DeviceId deviceId, @Nonnull DeviceStateData state, boolean partitionInit) {
+        var deviceState = state.getState();
+        if (partitionInit && deviceState.isActive() && localTransportSessionsWereDropped()) {
+            // 本进程同时跑 MQTT 等传输。Core 重启后本机长连接已全部断开，库里的 active=true 不可信。
+            onLastSessionClosed(state.getTenantId(), deviceId);
+            return;
+        }
+        if (deviceState.isActive()) {
+            updateInactivityStateIfExpired(getCurrentTimeMillis(), deviceId, state);
+            return;
+        }
+        // 分区加载时绝不回补为活跃：lastActivityTime 仍在超时窗口内，并不代表此刻有连接。
+        if (partitionInit) {
+            return;
+        }
+        if (isActive(getCurrentTimeMillis(), deviceState) && !hasExplicitInactivity(deviceState)) {
+            updateActivityState(deviceId, state, deviceState.getLastActivityTime());
+        }
+    }
+
+    private boolean localTransportSessionsWereDropped() {
+        return serviceInfoProvider != null && serviceInfoProvider.isService(ServiceType.TB_TRANSPORT);
+    }
+
+    /**
+     * 传输层明确报过非活跃，且之后没有更新的活动时间。
+     */
+    static boolean hasExplicitInactivity(DeviceState state) {
+        return state.getLastInactivityAlarmTime() > 0L
+                && state.getLastInactivityAlarmTime() >= state.getLastActivityTime();
+    }
+
+    void checkStates() {
+        try {
+            final long ts = getCurrentTimeMillis();
+            partitionedEntities.forEach((tpi, deviceIds) -> {
+                log.debug("Calculating state updates. tpi {} for {} devices", tpi.getFullTopicName(), deviceIds.size());
+                Set<DeviceId> idsFromRemovedTenant = new HashSet<>();
+                for (DeviceId deviceId : deviceIds) {
+                    DeviceStateData stateData;
+                    try {
+                        stateData = getOrFetchDeviceStateData(deviceId);
+                    } catch (Exception e) {
+                        log.error("[{}] Failed to get or fetch device state data", deviceId, e);
+                        continue;
+                    }
+                    try {
+                        updateInactivityStateIfExpired(ts, deviceId, stateData);
+                    } catch (Exception e) {
+                        if (e instanceof TenantNotFoundException) {
+                            idsFromRemovedTenant.add(deviceId);
+                        } else {
+                            log.warn("[{}] Failed to update inactivity state [{}]", deviceId, e.getMessage());
+                        }
+                    }
+                }
+                deviceIds.removeAll(idsFromRemovedTenant);
+            });
+        } catch (Throwable t) {
+            log.warn("Failed to check devices states", t);
+        }
+    }
+
+    void reportActivityStats() {
+        try {
+            Map<TenantId, Pair<AtomicInteger, AtomicInteger>> stats = new HashMap<>();
+            for (DeviceStateData stateData : deviceStates.values()) {
+                Pair<AtomicInteger, AtomicInteger> tenantDevicesActivity = stats.computeIfAbsent(stateData.getTenantId(),
+                        tenantId -> Pair.of(new AtomicInteger(), new AtomicInteger()));
+                if (stateData.getState().isActive()) {
+                    tenantDevicesActivity.getLeft().incrementAndGet();
+                } else {
+                    tenantDevicesActivity.getRight().incrementAndGet();
+                }
+            }
+
+            stats.forEach((tenantId, tenantDevicesActivity) -> {
+                int active = tenantDevicesActivity.getLeft().get();
+                int inactive = tenantDevicesActivity.getRight().get();
+                apiUsageReportClient.report(tenantId, null, ApiUsageRecordKey.ACTIVE_DEVICES, active);
+                apiUsageReportClient.report(tenantId, null, ApiUsageRecordKey.INACTIVE_DEVICES, inactive);
+                if (active > 0) {
+                    log.debug("[{}] Active devices: {}, inactive devices: {}", tenantId, active, inactive);
+                }
+            });
+        } catch (Throwable t) {
+            log.warn("Failed to report activity states", t);
+        }
+    }
+
+    void updateInactivityStateIfExpired(long ts, DeviceId deviceId, DeviceStateData stateData) {
+        log.trace("Processing state {} for device {}", stateData, deviceId);
+        if (stateData != null) {
+            DeviceState state = stateData.getState();
+            if (!isActive(ts, state)
+                    && (state.getLastInactivityAlarmTime() == 0L || state.getLastInactivityAlarmTime() <= state.getLastActivityTime())
+                    && stateData.getDeviceCreationTime() + state.getInactivityTimeout() <= ts) {
+                if (partitionService.resolve(ServiceType.TB_CORE, stateData.getTenantId(), deviceId).isMyPartition()) {
+                    reportInactivity(ts, deviceId, stateData);
+                } else {
+                    cleanupEntity(deviceId);
+                }
+            }
+        } else {
+            log.debug("[{}] Device that belongs to other server is detected and removed.", deviceId);
+            cleanupEntity(deviceId);
+        }
+    }
+
+    private void reportInactivity(long ts, DeviceId deviceId, DeviceStateData stateData) {
+        DeviceState state = stateData.getState();
+        state.setActive(false);
+        state.setLastInactivityAlarmTime(ts);
+        save(stateData.getTenantId(), deviceId, DefaultDeviceStateConstants.INACTIVITY_ALARM_TIME, ts);
+        onDeviceActivityStatusChange(deviceId, false, stateData);
+    }
+
+    boolean isActive(long ts, DeviceState state) {
+        return ts < state.getLastActivityTime() + state.getInactivityTimeout();
+    }
+
+    @Nonnull
+    DeviceStateData getOrFetchDeviceStateData(DeviceId deviceId) {
+        return deviceStates.computeIfAbsent(deviceId, this::fetchDeviceStateDataUsingSeparateRequests);
+    }
+
+    DeviceStateData fetchDeviceStateDataUsingSeparateRequests(final DeviceId deviceId) {
+        final Device device = deviceService.findDeviceById(TenantId.SYS_TENANT_ID, deviceId);
+        if (device == null) {
+            log.warn("[{}] Failed to fetch device by Id!", deviceId);
+            throw new RuntimeException("Failed to fetch device by id [" + deviceId + "]!");
+        }
+        try {
+            return fetchDeviceState(device).get();
+        } catch (InterruptedException | ExecutionException e) {
+            log.warn("[{}] Failed to fetch device state!", deviceId, e);
+            throw new RuntimeException("Failed to fetch device state for device [" + deviceId + "]");
+        }
+    }
+
+    private void onDeviceActivityStatusChange(DeviceId deviceId, boolean active, DeviceStateData stateData) {
+        save(stateData.getTenantId(), deviceId, DefaultDeviceStateConstants.ACTIVITY_STATE, active);
+        pushRuleEngineMessage(stateData, active ? TbMsgType.ACTIVITY_EVENT : TbMsgType.INACTIVITY_EVENT);
+        TbMsgMetaData metaData = stateData.getMetaData();
+        notificationRuleProcessor.process(DeviceActivityTrigger.builder()
+                .tenantId(stateData.getTenantId()).customerId(stateData.getCustomerId())
+                .deviceId(deviceId).active(active)
+                .deviceName(metaData.getValue("deviceName"))
+                .deviceType(metaData.getValue("deviceType"))
+                .deviceLabel(metaData.getValue("deviceLabel"))
+                .build());
+    }
+
+    boolean cleanDeviceStateIfBelongsToExternalPartition(TenantId tenantId, final DeviceId deviceId) {
+        TopicPartitionInfo tpi = partitionService.resolve(ServiceType.TB_CORE, tenantId, deviceId);
+        boolean cleanup = !partitionedEntities.containsKey(tpi);
+        if (cleanup) {
+            cleanupEntity(deviceId);
+            log.debug("[{}][{}] device belongs to external partition. Probably rebalancing is in progress. Topic: {}"
+                    , tenantId, deviceId, tpi.getFullTopicName());
+        }
+        return cleanup;
+    }
+
+    /**
+     * 分区迁出时从本机状态表移除设备。
+     */
+    @Override
+    protected void cleanupEntityOnPartitionRemoval(DeviceId deviceId) {
+        cleanupEntity(deviceId);
+    }
+
+    private void cleanupEntity(DeviceId deviceId) {
+        deviceStates.remove(deviceId);
+    }
+
+    private ListenableFuture<DeviceStateData> fetchDeviceState(Device device) {
+        ListenableFuture<DeviceStateData> future;
+        if (persistToTelemetry) {
+            ListenableFuture<List<TsKvEntry>> timeseriesActivityDataFuture = tsService.findLatest(TenantId.SYS_TENANT_ID, device.getId(), ACTIVITY_KEYS_WITHOUT_INACTIVITY_TIMEOUT);
+            ListenableFuture<Optional<AttributeKvEntry>> inactivityTimeoutAttributeFuture = attributesService.find(
+                    TenantId.SYS_TENANT_ID, device.getId(), AttributeScope.SERVER_SCOPE, DefaultDeviceStateConstants.INACTIVITY_TIMEOUT
+            );
+
+            ListenableFuture<List<? extends KvEntry>> fullActivityDataFuture = Futures.whenAllSucceed(timeseriesActivityDataFuture, inactivityTimeoutAttributeFuture).call(() -> {
+                List<TsKvEntry> activityTimeseries = Futures.getDone(timeseriesActivityDataFuture);
+                Optional<AttributeKvEntry> inactivityTimeoutAttribute = Futures.getDone(inactivityTimeoutAttributeFuture);
+
+                if (inactivityTimeoutAttribute.isPresent()) {
+                    List<KvEntry> result = new ArrayList<>(activityTimeseries.size() + 1);
+                    result.addAll(activityTimeseries);
+                    result.add(inactivityTimeoutAttribute.get());
+                    return result;
+                } else {
+                    return activityTimeseries;
+                }
+            }, deviceStateCallbackExecutor);
+
+            future = Futures.transform(fullActivityDataFuture, extractDeviceStateData(device), MoreExecutors.directExecutor());
+        } else {
+            ListenableFuture<List<AttributeKvEntry>> attributesActivityDataFuture = attributesService.find(
+                    TenantId.SYS_TENANT_ID, device.getId(), AttributeScope.SERVER_SCOPE, ACTIVITY_KEYS_WITH_INACTIVITY_TIMEOUT
+            );
+            future = Futures.transform(attributesActivityDataFuture, extractDeviceStateData(device), MoreExecutors.directExecutor());
+        }
+        return future;
+    }
+
+    private Function<List<? extends KvEntry>, DeviceStateData> extractDeviceStateData(Device device) {
+        return new Function<>() {
+            @Nonnull
+            @Override
+            public DeviceStateData apply(@Nullable List<? extends KvEntry> data) {
+                try {
+                    long lastActivityTime = getEntryValue(data, DefaultDeviceStateConstants.LAST_ACTIVITY_TIME, 0L);
+                    long inactivityAlarmTime = getEntryValue(data, DefaultDeviceStateConstants.INACTIVITY_ALARM_TIME, 0L);
+                    long inactivityTimeout = getEntryValue(data, DefaultDeviceStateConstants.INACTIVITY_TIMEOUT, defaultInactivityTimeoutMs);
+                    // Actual active state by wall-clock will be updated outside this method. This method is only for fetching persistent state
+                    final boolean active = getEntryValue(data, DefaultDeviceStateConstants.ACTIVITY_STATE, false);
+                    DeviceState deviceState = DeviceState.builder()
+                            .active(active)
+                            .lastConnectTime(getEntryValue(data, DefaultDeviceStateConstants.LAST_CONNECT_TIME, 0L))
+                            .lastDisconnectTime(getEntryValue(data, DefaultDeviceStateConstants.LAST_DISCONNECT_TIME, 0L))
+                            .lastActivityTime(lastActivityTime)
+                            .lastInactivityAlarmTime(inactivityAlarmTime)
+                            .inactivityTimeout(inactivityTimeout > 0 ? inactivityTimeout : defaultInactivityTimeoutMs)
+                            .build();
+                    TbMsgMetaData md = new TbMsgMetaData();
+                    md.putValue("deviceName", device.getName());
+                    md.putValue("deviceLabel", device.getLabel());
+                    md.putValue("deviceType", device.getType());
+                    DeviceStateData deviceStateData = DeviceStateData.builder()
+                            .customerId(device.getCustomerId())
+                            .tenantId(device.getTenantId())
+                            .deviceId(device.getId())
+                            .deviceCreationTime(device.getCreatedTime())
+                            .metaData(md)
+                            .state(deviceState).build();
+                    log.debug("[{}] Fetched device state from the DB {}", device.getId(), deviceStateData);
+                    return deviceStateData;
+                } catch (Exception e) {
+                    log.warn("[{}] Failed to fetch device state data", device.getId(), e);
+                    throw new RuntimeException("Failed to fetch device state data for device [" + device.getId() + "]", e);
+                }
+            }
+        };
+    }
+
+    private List<DeviceStateData> fetchDeviceStateDataUsingSeparateRequests(List<DeviceIdInfo> deviceIds) {
+        List<Device> devices = deviceService.findDevicesByIds(deviceIds.stream().map(DeviceIdInfo::getDeviceId).collect(Collectors.toList()));
+        List<ListenableFuture<DeviceStateData>> deviceStateFutures = new ArrayList<>();
+        for (Device device : devices) {
+            deviceStateFutures.add(fetchDeviceState(device));
+        }
+        try {
+            List<DeviceStateData> result = Futures.successfulAsList(deviceStateFutures).get(5, TimeUnit.MINUTES);
+            boolean success = true;
+            for (int i = 0; i < result.size(); i++) {
+                success = false;
+                if (result.get(i) == null) {
+                    DeviceIdInfo deviceIdInfo = deviceIds.get(i);
+                    log.warn("[{}][{}] Failed to initialized device state due to:", deviceIdInfo.getTenantId(), deviceIdInfo.getDeviceId());
+                }
+            }
+            return success ? result : result.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            String deviceIdsStr = deviceIds.stream()
+                    .map(DeviceIdInfo::getDeviceId)
+                    .map(UUIDBased::getId)
+                    .map(UUID::toString)
+                    .collect(Collectors.joining(", "));
+            log.warn("Failed to initialized device state futures for ids [{}] due to:", deviceIdsStr, e);
+            throw new RuntimeException("Failed to initialized device state futures for ids [" + deviceIdsStr + "]!", e);
+        }
+    }
+
+    private List<DeviceStateData> fetchDeviceStateDataUsingEntityDataQuery(List<DeviceIdInfo> deviceIds) {
+        EntityListFilter ef = new EntityListFilter();
+        ef.setEntityType(EntityType.DEVICE);
+        ef.setEntityList(deviceIds.stream().map(DeviceIdInfo::getDeviceId).map(DeviceId::getId).map(UUID::toString).collect(Collectors.toList()));
+
+        EntityDataQuery query = new EntityDataQuery(ef,
+                new EntityDataPageLink(deviceIds.size(), 0, null, null),
+                PERSISTENT_ENTITY_FIELDS,
+                persistToTelemetry ? PERSISTENT_TELEMETRY_KEYS : PERSISTENT_ATTRIBUTE_KEYS, Collections.emptyList());
+        PageData<EntityData> queryResult = entityQueryRepository.findEntityDataByQueryInternal(query);
+
+        Map<EntityId, DeviceIdInfo> deviceIdInfos = deviceIds.stream().collect(Collectors.toMap(DeviceIdInfo::getDeviceId, java.util.function.Function.identity()));
+
+        return queryResult.getData().stream().map(ed -> toDeviceStateData(ed, deviceIdInfos.get(ed.getEntityId()))).collect(Collectors.toList());
+
+    }
+
+    DeviceStateData toDeviceStateData(EntityData ed, DeviceIdInfo deviceIdInfo) {
+        long lastActivityTime = getEntryValue(ed, getKeyType(), DefaultDeviceStateConstants.LAST_ACTIVITY_TIME, 0L);
+        long inactivityAlarmTime = getEntryValue(ed, getKeyType(), DefaultDeviceStateConstants.INACTIVITY_ALARM_TIME, 0L);
+        long inactivityTimeout = getEntryValue(ed, EntityKeyType.SERVER_ATTRIBUTE, DefaultDeviceStateConstants.INACTIVITY_TIMEOUT, defaultInactivityTimeoutMs);
+        // Actual active state by wall-clock will be updated outside this method. This method is only for fetching persistent state
+        final boolean active = getEntryValue(ed, getKeyType(), DefaultDeviceStateConstants.ACTIVITY_STATE, false);
+        DeviceState deviceState = DeviceState.builder()
+                .active(active)
+                .lastConnectTime(getEntryValue(ed, getKeyType(), DefaultDeviceStateConstants.LAST_CONNECT_TIME, 0L))
+                .lastDisconnectTime(getEntryValue(ed, getKeyType(), DefaultDeviceStateConstants.LAST_DISCONNECT_TIME, 0L))
+                .lastActivityTime(lastActivityTime)
+                .lastInactivityAlarmTime(inactivityAlarmTime)
+                .inactivityTimeout(inactivityTimeout)
+                .build();
+        TbMsgMetaData md = new TbMsgMetaData();
+        md.putValue("deviceName", getEntryValue(ed, EntityKeyType.ENTITY_FIELD, "name", ""));
+        md.putValue("deviceLabel", getEntryValue(ed, EntityKeyType.ENTITY_FIELD, "label", ""));
+        md.putValue("deviceType", getEntryValue(ed, EntityKeyType.ENTITY_FIELD, "type", ""));
+        return DeviceStateData.builder()
+                .customerId(deviceIdInfo.getCustomerId())
+                .tenantId(deviceIdInfo.getTenantId())
+                .deviceId(deviceIdInfo.getDeviceId())
+                .deviceCreationTime(getEntryValue(ed, EntityKeyType.ENTITY_FIELD, "createdTime", 0L))
+                .metaData(md)
+                .state(deviceState).build();
+    }
+
+    private EntityKeyType getKeyType() {
+        return persistToTelemetry ? EntityKeyType.TIME_SERIES : EntityKeyType.SERVER_ATTRIBUTE;
+    }
+
+    private String getEntryValue(EntityData ed, EntityKeyType keyType, String keyName, String defaultValue) {
+        return getEntryValue(ed, keyType, keyName, s -> s, defaultValue);
+    }
+
+    private long getEntryValue(EntityData ed, EntityKeyType keyType, String keyName, long defaultValue) {
+        return getEntryValue(ed, keyType, keyName, Long::parseLong, defaultValue);
+    }
+
+    private boolean getEntryValue(EntityData ed, EntityKeyType keyType, String keyName, boolean defaultValue) {
+        return getEntryValue(ed, keyType, keyName, Boolean::parseBoolean, defaultValue);
+    }
+
+    private <T> T getEntryValue(EntityData ed, EntityKeyType entityKeyType, String attributeName, Function<String, T> converter, T defaultValue) {
+        if (ed != null && ed.getLatest() != null) {
+            var map = ed.getLatest().get(entityKeyType);
+            if (map != null) {
+                var value = map.get(attributeName);
+                if (value != null && !StringUtils.isEmpty(value.getValue())) {
+                    try {
+                        return converter.apply(value.getValue());
+                    } catch (Exception e) {
+                        return defaultValue;
+                    }
+                }
+            }
+        }
+        return defaultValue;
+    }
+
+    private long getEntryValue(List<? extends KvEntry> kvEntries, String attributeName, long defaultValue) {
+        if (kvEntries != null) {
+            for (KvEntry entry : kvEntries) {
+                if (entry != null && !StringUtils.isEmpty(entry.getKey()) && entry.getKey().equals(attributeName)) {
+                    return entry.getLongValue().orElse(defaultValue);
+                }
+            }
+        }
+        return defaultValue;
+    }
+
+    private boolean getEntryValue(List<? extends KvEntry> kvEntries, String attributeName, boolean defaultValue) {
+        if (kvEntries != null) {
+            for (KvEntry entry : kvEntries) {
+                if (entry != null && !StringUtils.isEmpty(entry.getKey()) && entry.getKey().equals(attributeName)) {
+                    return entry.getBooleanValue().orElse(defaultValue);
+                }
+            }
+        }
+        return defaultValue;
+    }
+
+    private void pushRuleEngineMessage(DeviceStateData stateData, TbMsgType msgType) {
+        DeviceState state = stateData.getState();
+        try {
+            String data;
+            if (msgType.equals(TbMsgType.CONNECT_EVENT)) {
+                ObjectNode stateNode = JacksonUtil.convertValue(state, ObjectNode.class);
+                stateNode.remove(DefaultDeviceStateConstants.ACTIVITY_STATE);
+                data = JacksonUtil.toString(stateNode);
+            } else {
+                data = JacksonUtil.toString(state);
+            }
+            TbMsgMetaData md = stateData.getMetaData().copy();
+            if (!persistToTelemetry) {
+                md.putValue(SCOPE, SERVER_SCOPE);
+            }
+            TbMsg tbMsg = TbMsg.newMsg()
+                    .type(msgType)
+                    .originator(stateData.getDeviceId())
+                    .customerId(stateData.getCustomerId())
+                    .copyMetaData(md)
+                    .dataType(TbMsgDataType.JSON)
+                    .data(data)
+                    .build();
+            clusterService.pushMsgToRuleEngine(stateData.getTenantId(), stateData.getDeviceId(), tbMsg, null);
+        } catch (Exception e) {
+            log.warn("[{}] Failed to push inactivity alarm: {}", stateData.getDeviceId(), state, e);
+        }
+    }
+
+    private void save(TenantId tenantId, DeviceId deviceId, String key, long value) {
+        save(tenantId, deviceId, new LongDataEntry(key, value), getCurrentTimeMillis());
+    }
+
+    private void save(TenantId tenantId, DeviceId deviceId, String key, boolean value) {
+        save(tenantId, deviceId, new BooleanDataEntry(key, value), getCurrentTimeMillis());
+    }
+
+    private void save(TenantId tenantId, DeviceId deviceId, KvEntry kvEntry, long ts) {
+        if (persistToTelemetry) {
+            tsSubService.saveTimeseriesInternal(TimeseriesSaveRequest.builder()
+                    .tenantId(tenantId)
+                    .entityId(deviceId)
+                    .entry(new BasicTsKvEntry(ts, kvEntry))
+                    .ttl(telemetryTtl)
+                    .callback(new TelemetrySaveCallback<>(deviceId, kvEntry))
+                    .build());
+        } else {
+            tsSubService.saveAttributes(AttributesSaveRequest.builder()
+                    .tenantId(tenantId)
+                    .entityId(deviceId)
+                    .scope(AttributeScope.SERVER_SCOPE)
+                    .entry(new BaseAttributeKvEntry(ts, kvEntry))
+                    .callback(new TelemetrySaveCallback<>(deviceId, kvEntry))
+                    .build());
+        }
+    }
+
+    long getCurrentTimeMillis() {
+        return System.currentTimeMillis();
+    }
+
+    private static class TelemetrySaveCallback<T> implements FutureCallback<T> {
+        private final DeviceId deviceId;
+        private final KvEntry kvEntry;
+
+        TelemetrySaveCallback(DeviceId deviceId, KvEntry kvEntry) {
+            this.deviceId = deviceId;
+            this.kvEntry = kvEntry;
+        }
+
+        @Override
+        public void onSuccess(@Nullable T result) {
+            log.trace("[{}] Successfully updated entry {}", deviceId, kvEntry);
+        }
+
+        @Override
+        public void onFailure(Throwable t) {
+            log.warn("[{}] Failed to update entry {}", deviceId, kvEntry, t);
+        }
+    }
+
+}

@@ -1,0 +1,86 @@
+package com.jnks.iot.server.service.sync.ie.importing.impl;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.common.util.JacksonUtil;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.id.WidgetsBundleId;
+import com.jnks.iot.server.common.data.sync.ie.WidgetsBundleExportData;
+import com.jnks.iot.server.common.data.util.CollectionsUtil;
+import com.jnks.iot.server.common.data.widget.WidgetTypeDetails;
+import com.jnks.iot.server.common.data.widget.WidgetsBundle;
+import com.jnks.iot.server.dao.widget.WidgetTypeService;
+import com.jnks.iot.server.dao.widget.WidgetsBundleService;
+import com.jnks.iot.server.service.sync.vc.data.EntitiesImportCtx;
+
+/**
+ * 针对 {@link WidgetsBundle} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 若导出数据含内嵌部件定义则先按 FQN 创建/更新部件类型，再保存包并绑定 FQN 列表。
+ * {@link #compare} 始终返回 true，每次导入都覆盖。
+ */
+@Service
+@RequiredArgsConstructor
+public class WidgetsBundleImportService extends BaseEntityImportService<WidgetsBundleId, WidgetsBundle, WidgetsBundleExportData> {
+
+    private final WidgetsBundleService widgetsBundleService;
+    private final WidgetTypeService widgetTypeService;
+
+    @Override
+    protected void setOwner(TenantId tenantId, WidgetsBundle widgetsBundle, IdProvider idProvider) {
+        widgetsBundle.setTenantId(tenantId);
+    }
+
+    /** 模板覆盖：部件包本身无额外关联 ID 需要映射。 */
+    @Override
+    protected WidgetsBundle prepare(EntitiesImportCtx ctx, WidgetsBundle widgetsBundle, WidgetsBundle old, WidgetsBundleExportData exportData, IdProvider idProvider) {
+        return widgetsBundle;
+    }
+
+    /**
+     * 先按导出数据创建/更新内嵌部件类型，再保存包并绑定 FQN。
+     */
+    @Override
+    protected WidgetsBundle saveOrUpdate(EntitiesImportCtx ctx, WidgetsBundle widgetsBundle, WidgetsBundleExportData exportData, IdProvider idProvider) {
+        if (CollectionsUtil.isNotEmpty(exportData.getWidgets())) {
+            exportData.getWidgets().forEach(widgetTypeNode -> {
+                String bundleAlias = widgetTypeNode.remove("bundleAlias").asText();
+                String alias = widgetTypeNode.remove("alias").asText();
+                String fqn = String.format("%s.%s", bundleAlias, alias);
+                exportData.addFqn(fqn);
+                WidgetTypeDetails widgetType = JacksonUtil.treeToValue(widgetTypeNode, WidgetTypeDetails.class);
+                widgetType.setTenantId(ctx.getTenantId());
+                widgetType.setFqn(fqn);
+                var existingWidgetType = widgetTypeService.findWidgetTypeByTenantIdAndFqn(ctx.getTenantId(), fqn);
+                if (existingWidgetType == null) {
+                    widgetType.setId(null);
+                } else {
+                    widgetType.setId(existingWidgetType.getId());
+                    widgetType.setCreatedTime(existingWidgetType.getCreatedTime());
+                }
+                widgetTypeService.saveWidgetType(widgetType);
+            });
+        }
+        WidgetsBundle savedWidgetsBundle = widgetsBundleService.saveWidgetsBundle(widgetsBundle);
+        widgetTypeService.updateWidgetsBundleWidgetFqns(ctx.getTenantId(), savedWidgetsBundle.getId(), exportData.getFqns());
+        return savedWidgetsBundle;
+    }
+
+    /** 始终视为有变更，每次导入都覆盖保存。 */
+    @Override
+    protected boolean compare(EntitiesImportCtx ctx, WidgetsBundleExportData exportData, WidgetsBundle prepared, WidgetsBundle existing) {
+        return true;
+    }
+
+    @Override
+    protected WidgetsBundle deepCopy(WidgetsBundle widgetsBundle) {
+        return new WidgetsBundle(widgetsBundle);
+    }
+
+    @Override
+    public EntityType getEntityType() {
+        return EntityType.WIDGETS_BUNDLE;
+    }
+
+}

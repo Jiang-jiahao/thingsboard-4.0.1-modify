@@ -2,14 +2,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.thingsboard</groupId>
+        <groupId>com.jnks.iot</groupId>
         <version>4.0.1</version>
         <artifactId>tb-transport</artifactId>
     </parent>
     <artifactId>tb-udp-transport</artifactId>
     <packaging>jar</packaging>
     <name>tb-udp-transport</name>
-    <url>https://thingsboard.io</url>
+    <url>https://iot.example.com</url>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <main.dir>${basedir}/../../..</main.dir>
@@ -20,20 +20,20 @@
         <pkg.name>tb-udp-transport</pkg.name>
         <pkg.copyInstallScripts>false</pkg.copyInstallScripts>
         <pkg.win.dist>${project.build.directory}/windows</pkg.win.dist>
-        <pkg.implementationTitle>ThingsBoard TCP Transport Service</pkg.implementationTitle>
-        <pkg.mainClass>org.thingsboard.server.udp.ThingsboardUdpTransportApplication</pkg.mainClass>
+        <pkg.implementationTitle>JnksIOT TCP Transport Service</pkg.implementationTitle>
+        <pkg.mainClass>com.jnks.iot.server.udp.JnksIotUdpTransportApplication</pkg.mainClass>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>org.thingsboard.transport</groupId>
+            <groupId>com.jnks.iot.transport</groupId>
             <artifactId>udp</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>queue</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard</groupId>
+            <groupId>com.jnks.iot</groupId>
             <artifactId>transport-base</artifactId>
             <version>4.0.1</version>
         </dependency>

@@ -11,7 +11,7 @@ echo "Starting '${project.name}' ..."
 
 cd ${pkg.installFolder}/bin
 
-exec java -cp ${jarfile} $JAVA_OPTS -Dloader.main=org.thingsboard.server.udp.ThingsboardUdpTransportApplication \
+exec java -cp ${jarfile} $JAVA_OPTS -Dloader.main=com.jnks.iot.server.udp.JnksIotUdpTransportApplication \
                     -Dspring.jpa.hibernate.ddl-auto=none \
                     -Dlogging.config=/config/logback.xml \
                     org.springframework.boot.loader.launch.PropertiesLauncher

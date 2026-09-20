@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.thingsboard</groupId>
+        <groupId>com.jnks.iot</groupId>
         <artifactId>apps</artifactId>
         <version>4.0.1</version>
     </parent>
@@ -19,16 +19,16 @@
         <pkg.disabled>false</pkg.disabled>
         <pkg.process-resources.phase>process-resources</pkg.process-resources.phase>
         <pkg.package.phase>package</pkg.package.phase>
-        <pkg.name>thingsboard-rule-engine</pkg.name>
+        <pkg.name>jnks-iot-rule-engine</pkg.name>
         <pkg.win.dist>${project.build.directory}/windows</pkg.win.dist>
         <pkg.copyInstallScripts>true</pkg.copyInstallScripts>
-        <pkg.implementationTitle>ThingsBoard</pkg.implementationTitle>
-        <pkg.mainClass>org.thingsboard.server.ThingsboardRuleEngineServerApplication</pkg.mainClass>
+        <pkg.implementationTitle>JnksIOT</pkg.implementationTitle>
+        <pkg.mainClass>com.jnks.iot.server.JnksIotRuleEngineServerApplication</pkg.mainClass>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.thingsboard</groupId>
+            <groupId>com.jnks.iot</groupId>
             <artifactId>base</artifactId>
             <version>4.0.1</version>
         </dependency>
@@ -41,14 +41,14 @@
                 <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>true</filtering>
                 <includes>
-                    <include>thingsboard-rule-engine.yml</include>
+                    <include>jnks-iot-rule-engine.yml</include>
                 </includes>
             </resource>
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
                 <filtering>false</filtering>
                 <excludes>
-                    <exclude>thingsboard-rule-engine.yml</exclude>
+                    <exclude>jnks-iot-rule-engine.yml</exclude>
                 </excludes>
             </resource>
         </resources>
@@ -66,7 +66,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
-                        <spring.config.name>thingsboard-rule-engine</spring.config.name>
+                        <spring.config.name>jnks-iot-rule-engine</spring.config.name>
                     </systemPropertyVariables>
                     <excludes>
                         <exclude>**/nosql/*Test.java</exclude>

@@ -1,13 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.thingsboard</groupId>
-    <artifactId>thingsboard</artifactId>
+    <groupId>com.jnks.iot</groupId>
+    <artifactId>jnks-iot</artifactId>
     <version>4.0.1</version>
     <packaging>pom</packaging>
 
-    <name>Thingsboard</name>
-    <url>https://thingsboard.io</url>
+    <name>JnksIOT</name>
+    <url>https://iot.example.com</url>
     <inceptionYear>2016</inceptionYear>
 
     <properties>
@@ -17,7 +17,7 @@
         <pkg.disabled>true</pkg.disabled>
         <pkg.process-resources.phase>none</pkg.process-resources.phase>
         <pkg.package.phase>none</pkg.package.phase>
-        <pkg.user>thingsboard</pkg.user>
+        <pkg.user>jnksiot</pkg.user>
         <pkg.implementationTitle>${project.name}</pkg.implementationTitle>
         <pkg.unixLogFolder>/var/log/${pkg.name}</pkg.unixLogFolder>
         <pkg.installFolder>/usr/share/${pkg.name}</pkg.installFolder>
@@ -85,8 +85,8 @@
         <bouncycastle.version>1.78.1</bouncycastle.version>
         <winsw.version>2.0.1</winsw.version>
         <postgresql.driver.version>42.7.3</postgresql.driver.version>
-        <sonar.exclusions>org/thingsboard/server/gen/**/*,
-            org/thingsboard/server/extensions/core/plugin/telemetry/gen/**/*
+        <sonar.exclusions>org/jnks-iot/server/gen/**/*,
+            org/jnks-iot/server/extensions/core/plugin/telemetry/gen/**/*
         </sonar.exclusions>
         <elasticsearch.version>8.13.2</elasticsearch.version>
         <delight-nashorn-sandbox.version>0.4.5</delight-nashorn-sandbox.version>
@@ -871,235 +871,235 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.thingsboard</groupId>
+                <groupId>com.jnks.iot</groupId>
                 <artifactId>netty-mqtt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>data</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>util</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>version-control</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>proto</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>cache</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>actor</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>dao-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>cluster-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.rule-engine</groupId>
+                <groupId>com.jnks.iot.rule-engine</groupId>
                 <artifactId>rule-engine-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.rule-engine</groupId>
+                <groupId>com.jnks.iot.rule-engine</groupId>
                 <artifactId>rule-engine-components</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>message</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard</groupId>
+                <groupId>com.jnks.iot</groupId>
                 <artifactId>transport</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.transport</groupId>
+                <groupId>com.jnks.iot.transport</groupId>
                 <artifactId>transport-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.transport</groupId>
+                <groupId>com.jnks.iot.transport</groupId>
                 <artifactId>mqtt</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.transport</groupId>
+                <groupId>com.jnks.iot.transport</groupId>
                 <artifactId>http</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.transport</groupId>
+                <groupId>com.jnks.iot.transport</groupId>
                 <artifactId>coap</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.transport</groupId>
+                <groupId>com.jnks.iot.transport</groupId>
                 <artifactId>snmp</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.transport</groupId>
+                <groupId>com.jnks.iot.transport</groupId>
                 <artifactId>lwm2m</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.transport</groupId>
+                <groupId>com.jnks.iot.transport</groupId>
                 <artifactId>tcp</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.transport</groupId>
+                <groupId>com.jnks.iot.transport</groupId>
                 <artifactId>udp</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard</groupId>
+                <groupId>com.jnks.iot</groupId>
                 <artifactId>dao</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>queue</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>stats</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>usage-stats</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>notification-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>housekeeper-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>rule-engine-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>coap-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common</groupId>
+                <groupId>com.jnks.iot.common</groupId>
                 <artifactId>edqs</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common.script</groupId>
+                <groupId>com.jnks.iot.common.script</groupId>
                 <artifactId>script-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.common.script</groupId>
+                <groupId>com.jnks.iot.common.script</groupId>
                 <artifactId>remote-js-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard</groupId>
+                <groupId>com.jnks.iot</groupId>
                 <artifactId>tools</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard</groupId>
+                <groupId>com.jnks.iot</groupId>
                 <artifactId>clients</artifactId>
                 <version>${project.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.images</groupId>
+                <groupId>com.jnks.iot.images</groupId>
                 <artifactId>js-executor</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.images</groupId>
+                <groupId>com.jnks.iot.images</groupId>
                 <artifactId>web-ui</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.images</groupId>
+                <groupId>com.jnks.iot.images</groupId>
                 <artifactId>tb-monolith-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.images.transport</groupId>
+                <groupId>com.jnks.iot.images.transport</groupId>
                 <artifactId>tb-coap-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.images.transport</groupId>
+                <groupId>com.jnks.iot.images.transport</groupId>
                 <artifactId>tb-http-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.images.transport</groupId>
+                <groupId>com.jnks.iot.images.transport</groupId>
                 <artifactId>tb-mqtt-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.images.transport</groupId>
+                <groupId>com.jnks.iot.images.transport</groupId>
                 <artifactId>tb-lwm2m-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard.images.transport</groupId>
+                <groupId>com.jnks.iot.images.transport</groupId>
                 <artifactId>tb-snmp-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.thingsboard</groupId>
+                <groupId>com.jnks.iot</groupId>
                 <artifactId>dao</artifactId>
                 <version>${project.version}</version>
                 <type>test-jar</type>
@@ -2220,8 +2220,8 @@
 
     <distributionManagement>
         <repository>
-            <id>thingsboard-repo-deploy</id>
-            <name>ThingsBoard Repo Deployment</name>
+            <id>jnks-iot-repo-deploy</id>
+            <name>JnksIOT Repo Deployment</name>
             <url>https://repo.thingsboard.io/artifactory/libs-release-public</url>
         </repository>
     </distributionManagement>

@@ -1,0 +1,48 @@
+package com.jnks.iot.server.common.data.notification.template;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import com.jnks.iot.server.common.data.BaseData;
+import com.jnks.iot.server.common.data.ExportableEntity;
+import com.jnks.iot.server.common.data.HasName;
+import com.jnks.iot.server.common.data.HasTenantId;
+import com.jnks.iot.server.common.data.id.NotificationTemplateId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.notification.NotificationType;
+import com.jnks.iot.server.common.data.validation.Length;
+import com.jnks.iot.server.common.data.validation.NoXss;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class NotificationTemplate extends BaseData<NotificationTemplateId> implements HasTenantId, HasName, ExportableEntity<NotificationTemplateId> {
+
+    private TenantId tenantId;
+    @NoXss
+    @NotEmpty
+    @Length(max = 255, message = "cannot be longer than 255 chars")
+    private String name;
+    @NoXss
+    @NotNull
+    private NotificationType notificationType;
+    @Valid
+    @NotNull
+    private NotificationTemplateConfig configuration;
+
+    private NotificationTemplateId externalId;
+
+    public NotificationTemplate() {
+    }
+
+    public NotificationTemplate(NotificationTemplate other) {
+        super(other);
+        this.tenantId = other.tenantId;
+        this.name = other.name;
+        this.notificationType = other.notificationType;
+        this.configuration = other.configuration != null ? other.configuration.copy() : null;
+        this.externalId = other.externalId;
+    }
+
+}

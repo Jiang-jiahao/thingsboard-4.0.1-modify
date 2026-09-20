@@ -1,0 +1,119 @@
+package com.jnks.iot.server.cache.limits;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.server.common.data.StringUtils;
+import com.jnks.iot.server.common.data.TenantProfile;
+import com.jnks.iot.server.common.data.exception.TenantProfileNotFoundException;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.limit.LimitedApi;
+import com.jnks.iot.server.common.data.notification.rule.trigger.RateLimitsTrigger;
+import com.jnks.iot.server.common.msg.notification.NotificationRuleProcessor;
+import com.jnks.iot.server.common.msg.tools.TbRateLimits;
+
+import java.util.concurrent.TimeUnit;
+
+@Lazy
+@Service
+@Slf4j
+public class DefaultRateLimitService implements RateLimitService {
+
+    private final TenantProfileProvider tenantProfileProvider;
+    private final NotificationRuleProcessor notificationRuleProcessor;
+    private final Cache<RateLimitKey, TbRateLimits> rateLimits;
+
+    public DefaultRateLimitService(TenantProfileProvider tenantProfileProvider,
+                                   @Lazy NotificationRuleProcessor notificationRuleProcessor, // 延迟注入，防止循环依赖
+                                   @Value("${cache.rateLimits.timeToLiveInMinutes:120}") int rateLimitsTtl,
+                                   @Value("${cache.rateLimits.maxSize:200000}") int rateLimitsCacheMaxSize) {
+        this.tenantProfileProvider = tenantProfileProvider;
+        this.notificationRuleProcessor = notificationRuleProcessor;
+        this.rateLimits = Caffeine.newBuilder()
+                .expireAfterAccess(rateLimitsTtl, TimeUnit.MINUTES)
+                .maximumSize(rateLimitsCacheMaxSize)
+                .build();
+    }
+
+
+    @Override
+    public boolean checkRateLimit(LimitedApi api, TenantId tenantId) {
+        return checkRateLimit(api, tenantId, tenantId);
+    }
+
+    @Override
+    public boolean checkRateLimit(LimitedApi api, TenantId tenantId, Object level) {
+        return checkRateLimit(api, tenantId, level, false);
+    }
+
+    @Override
+    public boolean checkRateLimit(LimitedApi api, TenantId tenantId, Object level, boolean ignoreTenantNotFound) {
+        // 如果是系统租户，则不限制
+        if (tenantId.isSysTenantId()) {
+            return true;
+        }
+        TenantProfile tenantProfile = tenantProfileProvider.get(tenantId);
+        if (tenantProfile == null) {
+            if (ignoreTenantNotFound) {
+                return true;
+            } else {
+                throw new TenantProfileNotFoundException(tenantId);
+            }
+        }
+
+        String rateLimitConfig = tenantProfile.getProfileConfiguration()
+                .map(api::getLimitConfig).orElse(null);
+        // 根据租户配置来限制是否允许
+        boolean success = checkRateLimit(api, level, rateLimitConfig);
+        if (!success) {
+            notificationRuleProcessor.process(RateLimitsTrigger.builder()
+                    .tenantId(tenantId)
+                    .api(api)
+                    .limitLevel(level instanceof EntityId ? (EntityId) level : tenantId)
+                    .limitLevelEntityName(null)
+                    .build());
+        }
+        return success;
+    }
+
+    @Override
+    public boolean checkRateLimit(LimitedApi api, Object level, String rateLimitConfig) {
+        RateLimitKey key = new RateLimitKey(api, level);
+        if (StringUtils.isEmpty(rateLimitConfig)) {
+            rateLimits.invalidate(key);
+            return true;
+        }
+        log.trace("[{}] Checking rate limit for {} ({})", level, api, rateLimitConfig);
+
+        TbRateLimits rateLimit = rateLimits.asMap().compute(key, (k, limit) -> {
+            if (limit == null || !limit.getConfiguration().equals(rateLimitConfig)) {
+                limit = new TbRateLimits(rateLimitConfig, api.isRefillRateLimitIntervally());
+                log.trace("[{}] Created new rate limit bucket for {} ({})", level, api, rateLimitConfig);
+            }
+            return limit;
+        });
+        boolean success = rateLimit.tryConsume();
+        if (!success) {
+            log.debug("[{}] Rate limit exceeded for {} ({})", level, api, rateLimitConfig);
+        }
+        return success;
+    }
+
+    @Override
+    public void cleanUp(LimitedApi api, Object level) {
+        RateLimitKey key = new RateLimitKey(api, level);
+        rateLimits.invalidate(key);
+    }
+
+    @Data(staticConstructor = "of")
+    private static class RateLimitKey {
+        private final LimitedApi api;
+        private final Object level;
+    }
+
+}

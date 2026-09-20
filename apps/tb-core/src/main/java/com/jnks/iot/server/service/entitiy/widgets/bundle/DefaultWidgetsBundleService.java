@@ -1,0 +1,80 @@
+package com.jnks.iot.server.service.entitiy.widgets.bundle;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.User;
+import com.jnks.iot.server.common.data.audit.ActionType;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.id.WidgetTypeId;
+import com.jnks.iot.server.common.data.id.WidgetsBundleId;
+import com.jnks.iot.server.common.data.widget.WidgetsBundle;
+import com.jnks.iot.server.dao.widget.WidgetTypeService;
+import com.jnks.iot.server.dao.widget.WidgetsBundleService;
+import com.jnks.iot.server.service.entitiy.AbstractTbEntityService;
+import com.jnks.iot.server.service.security.model.SecurityUser;
+
+import java.util.List;
+
+/**
+ * {@link TbWidgetsBundleService} 的默认实现。
+ * <p>
+ * 由 WidgetsBundleController 调用，委托 {@link WidgetsBundleService} 落库；写审计日志，保存/更新内容时 autoCommit。
+ *
+ * @see TbWidgetsBundleService
+ */
+@Service
+@AllArgsConstructor
+@Slf4j
+public class DefaultWidgetsBundleService extends AbstractTbEntityService implements TbWidgetsBundleService {
+
+    private final WidgetsBundleService widgetsBundleService;
+    private final WidgetTypeService widgetTypeService;
+
+    /** 保存部件包，写审计并尝试 autoCommit。 */
+    @Override
+    public WidgetsBundle save(WidgetsBundle widgetsBundle, SecurityUser user) throws Exception {
+        ActionType actionType = widgetsBundle.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
+        TenantId tenantId = widgetsBundle.getTenantId();
+        try {
+            WidgetsBundle savedWidgetsBundle = checkNotNull(widgetsBundleService.saveWidgetsBundle(widgetsBundle));
+            autoCommit(user, savedWidgetsBundle.getId());
+            logEntityActionService.logEntityAction(tenantId, savedWidgetsBundle.getId(), savedWidgetsBundle,
+                    null, actionType, user);
+            return savedWidgetsBundle;
+        } catch (Exception e) {
+            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.WIDGETS_BUNDLE), widgetsBundle, actionType, user, e);
+            throw e;
+        }
+    }
+
+    /** 删除部件包并写 DELETED 审计。 */
+    @Override
+    public void delete(WidgetsBundle widgetsBundle, User user) {
+        ActionType actionType = ActionType.DELETED;
+        TenantId tenantId = widgetsBundle.getTenantId();
+        try {
+            widgetsBundleService.deleteWidgetsBundle(widgetsBundle.getTenantId(), widgetsBundle.getId());
+            logEntityActionService.logEntityAction(tenantId, widgetsBundle.getId(), widgetsBundle, null, actionType, user);
+        } catch (Exception e) {
+            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.WIDGETS_BUNDLE), actionType, user, e, widgetsBundle.getId());
+            throw e;
+        }
+    }
+
+    /** 按部件类型 ID 更新包内容并 autoCommit。 */
+    @Override
+    public void updateWidgetsBundleWidgetTypes(WidgetsBundleId widgetsBundleId, List<WidgetTypeId> widgetTypeIds, User user) throws Exception {
+        widgetTypeService.updateWidgetsBundleWidgetTypes(user.getTenantId(), widgetsBundleId, widgetTypeIds);
+        autoCommit(user, widgetsBundleId);
+    }
+
+    /** 按部件 FQN 更新包内容并 autoCommit。 */
+    @Override
+    public void updateWidgetsBundleWidgetFqns(WidgetsBundleId widgetsBundleId, List<String> widgetFqns, User user) throws Exception {
+        widgetTypeService.updateWidgetsBundleWidgetFqns(user.getTenantId(), widgetsBundleId, widgetFqns);
+        autoCommit(user, widgetsBundleId);
+    }
+
+}

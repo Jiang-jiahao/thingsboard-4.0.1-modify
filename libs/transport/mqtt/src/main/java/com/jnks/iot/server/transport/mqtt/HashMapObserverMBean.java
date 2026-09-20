@@ -1,0 +1,23 @@
+package com.jnks.iot.server.transport.mqtt;
+
+public interface HashMapObserverMBean {
+    int getSize();
+
+    long getGatewayCount(String unused);
+
+    long getNonGatewayCount(String unused);
+
+    String getSessionByUUID(String key);
+
+    String getAllSessions(String key);
+
+    String getSubscribedSessions(String unused);
+
+    String getNonActiveSessions(String unused);
+
+    String getActiveSessions(String unused);
+
+    String getGatewayDeviceSessionContextConnectedSessions(String unused);
+
+    String getDeviceAwareSessionContextNotConnectedSessions(String unused);
+}

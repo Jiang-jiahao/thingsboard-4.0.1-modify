@@ -11,7 +11,7 @@ services:
     volumes:
       - ../tb/redis-data:/data
 
-# ThingsBoard setup to use redis-standalone
+# JnksIOT setup to use redis-standalone
   tb-core1:
     env_file:
       - ../redis/cache-redis.env

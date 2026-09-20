@@ -1,0 +1,72 @@
+package com.jnks.iot.server.transport.tcp.service;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import com.jnks.iot.common.util.JacksonUtil;
+import com.jnks.iot.server.common.data.Device;
+import com.jnks.iot.server.common.data.device.data.DeviceData;
+import com.jnks.iot.server.common.data.device.data.DeviceTransportConfiguration;
+import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.data.id.DeviceProfileId;
+import com.jnks.iot.server.common.data.security.DeviceCredentials;
+import com.jnks.iot.server.common.transport.TransportService;
+import com.jnks.iot.server.common.util.ProtoUtils;
+import com.jnks.iot.server.gen.transport.TransportProtos;
+import java.util.UUID;
+@ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.tcp.enabled:true}'=='true'")
+@Service
+@RequiredArgsConstructor
+public class TcpProtoTransportEntityService {
+    private final TransportService transportService;
+    public Device getDeviceById(DeviceId id) {
+        TransportProtos.GetDeviceResponseMsg deviceProto = transportService.getDevice(TransportProtos.GetDeviceRequestMsg.newBuilder()
+                .setDeviceIdMSB(id.getId().getMostSignificantBits())
+                .setDeviceIdLSB(id.getId().getLeastSignificantBits())
+                .build());
+        if (deviceProto == null) {
+            return null;
+        }
+        DeviceProfileId deviceProfileId = new DeviceProfileId(new UUID(
+                deviceProto.getDeviceProfileIdMSB(), deviceProto.getDeviceProfileIdLSB())
+        );
+        Device device = new Device();
+        device.setId(id);
+        device.setName(deviceProto.getName());
+        device.setLabel(deviceProto.getLabel());
+        device.setDeviceProfileId(deviceProfileId);
+        DeviceTransportConfiguration deviceTransportConfiguration = JacksonUtil.fromBytes(
+                deviceProto.getDeviceTransportConfiguration().toByteArray(), DeviceTransportConfiguration.class);
+        DeviceData deviceData = new DeviceData();
+        deviceData.setTransportConfiguration(deviceTransportConfiguration);
+        device.setDeviceData(deviceData);
+        return device;
+    }
+    public DeviceCredentials getDeviceCredentialsByDeviceId(DeviceId deviceId) {
+        TransportProtos.GetDeviceCredentialsResponseMsg deviceCredentialsResponse = transportService.getDeviceCredentials(
+                TransportProtos.GetDeviceCredentialsRequestMsg.newBuilder()
+                        .setDeviceIdMSB(deviceId.getId().getMostSignificantBits())
+                        .setDeviceIdLSB(deviceId.getId().getLeastSignificantBits())
+                        .build()
+        );
+        if (deviceCredentialsResponse.hasDeviceCredentialsData()) {
+            return ProtoUtils.fromProto(deviceCredentialsResponse.getDeviceCredentialsData());
+        } else {
+            throw new IllegalArgumentException("Device credentials not found");
+        }
+    }
+    public TransportProtos.GetTcpDevicesResponseMsg getTcpDevicesIds(int page, int pageSize) {
+        TransportProtos.GetTcpDevicesRequestMsg requestMsg = TransportProtos.GetTcpDevicesRequestMsg.newBuilder()
+                .setPage(page)
+                .setPageSize(pageSize)
+                .build();
+        return transportService.getTcpDevicesIds(requestMsg);
+    }
+
+    public TransportProtos.GetTcpProfilesResponseMsg getTcpProfileIds(int page, int pageSize) {
+        TransportProtos.GetTcpProfilesRequestMsg requestMsg = TransportProtos.GetTcpProfilesRequestMsg.newBuilder()
+                .setPage(page)
+                .setPageSize(pageSize)
+                .build();
+        return transportService.getTcpProfileIds(requestMsg);
+    }
+}

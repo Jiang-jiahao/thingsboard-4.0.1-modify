@@ -1,0 +1,121 @@
+package com.jnks.iot.server.dao.sql.dashboard;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Component;
+import com.jnks.iot.server.common.data.DashboardInfo;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.page.PageData;
+import com.jnks.iot.server.common.data.page.PageLink;
+import com.jnks.iot.server.common.data.page.SortOrder;
+import com.jnks.iot.server.dao.DaoUtil;
+import com.jnks.iot.server.dao.dashboard.DashboardInfoDao;
+import com.jnks.iot.server.dao.model.sql.DashboardInfoEntity;
+import com.jnks.iot.server.dao.sql.JpaAbstractDao;
+import com.jnks.iot.server.dao.util.SqlDao;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Created by Valerii Sosliuk on 5/6/2017.
+ */
+@Slf4j
+@Component
+@SqlDao
+public class JpaDashboardInfoDao extends JpaAbstractDao<DashboardInfoEntity, DashboardInfo> implements DashboardInfoDao {
+
+    @Autowired
+    private DashboardInfoRepository dashboardInfoRepository;
+
+    @Override
+    protected Class<DashboardInfoEntity> getEntityClass() {
+        return DashboardInfoEntity.class;
+    }
+
+    @Override
+    protected JpaRepository<DashboardInfoEntity, UUID> getRepository() {
+        return dashboardInfoRepository;
+    }
+
+    @Override
+    public PageData<DashboardInfo> findDashboardsByTenantId(UUID tenantId, PageLink pageLink) {
+        return DaoUtil.toPageData(dashboardInfoRepository
+                .findByTenantId(
+                        tenantId,
+                        pageLink.getTextSearch(),
+                        DaoUtil.toPageable(pageLink)));
+    }
+
+    @Override
+    public PageData<DashboardInfo> findMobileDashboardsByTenantId(UUID tenantId, PageLink pageLink) {
+        List<SortOrder> sortOrders = new ArrayList<>();
+        sortOrders.add(new SortOrder("mobileOrder", SortOrder.Direction.ASC));
+        if (pageLink.getSortOrder() != null) {
+            sortOrders.add(pageLink.getSortOrder());
+        }
+        return DaoUtil.toPageData(dashboardInfoRepository
+                .findMobileByTenantId(
+                        tenantId,
+                        pageLink.getTextSearch(),
+                        DaoUtil.toPageable(pageLink, sortOrders)));
+    }
+
+    @Override
+    public PageData<DashboardInfo> findDashboardsByTenantIdAndCustomerId(UUID tenantId, UUID customerId, PageLink pageLink) {
+        return DaoUtil.toPageData(dashboardInfoRepository
+                .findByTenantIdAndCustomerId(
+                        tenantId,
+                        customerId,
+                        pageLink.getTextSearch(),
+                        DaoUtil.toPageable(pageLink)));
+    }
+
+    @Override
+    public PageData<DashboardInfo> findMobileDashboardsByTenantIdAndCustomerId(UUID tenantId, UUID customerId, PageLink pageLink) {
+        List<SortOrder> sortOrders = new ArrayList<>();
+        sortOrders.add(new SortOrder("mobileOrder", SortOrder.Direction.ASC));
+        if (pageLink.getSortOrder() != null) {
+            sortOrders.add(pageLink.getSortOrder());
+        }
+        return DaoUtil.toPageData(dashboardInfoRepository
+                .findMobileByTenantIdAndCustomerId(
+                        tenantId,
+                        customerId,
+                        pageLink.getTextSearch(),
+                        DaoUtil.toPageable(pageLink, sortOrders)));
+    }
+
+    @Override
+    public DashboardInfo findFirstByTenantIdAndName(UUID tenantId, String name) {
+        return DaoUtil.getData(dashboardInfoRepository.findFirstByTenantIdAndTitle(tenantId, name));
+    }
+
+    @Override
+    public String findTitleById(UUID tenantId, UUID dashboardId) {
+        return dashboardInfoRepository.findTitleByTenantIdAndId(tenantId, dashboardId);
+    }
+
+    @Override
+    public List<DashboardInfo> findByTenantAndImageLink(TenantId tenantId, String imageLink, int limit) {
+        return DaoUtil.convertDataList(dashboardInfoRepository.findByTenantAndImageLink(tenantId.getId(), imageLink, limit));
+    }
+
+    @Override
+    public List<DashboardInfo> findByImageLink(String imageLink, int limit) {
+        return DaoUtil.convertDataList(dashboardInfoRepository.findByImageLink(imageLink, limit));
+    }
+
+    @Override
+    public List<DashboardInfo> findByTenantIdAndResourceLink(TenantId tenantId, String url, int limit) {
+        return DaoUtil.convertDataList(dashboardInfoRepository.findDashboardInfosByTenantIdAndResourceLink(tenantId.getId(), url, limit));
+    }
+
+    @Override
+    public List<DashboardInfo> findByResourceLink(String link, int limit) {
+        return DaoUtil.convertDataList(dashboardInfoRepository.findDashboardInfosByResourceLink(link, limit));
+    }
+
+}

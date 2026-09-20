@@ -1,0 +1,86 @@
+package com.jnks.iot.server.transport.http.pull.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.common.util.JacksonUtil;
+import com.jnks.iot.server.common.data.Device;
+import com.jnks.iot.server.common.data.device.data.DeviceData;
+import com.jnks.iot.server.common.data.device.data.DeviceTransportConfiguration;
+import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.data.id.DeviceProfileId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.security.DeviceCredentials;
+import com.jnks.iot.server.common.transport.TransportService;
+import com.jnks.iot.server.common.util.ProtoUtils;
+import com.jnks.iot.server.gen.transport.TransportProtos;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+public class HttpPullProtoEntityService {
+
+    private final TransportService transportService;
+
+    public Device getDeviceById(DeviceId id) {
+        TransportProtos.GetDeviceResponseMsg deviceProto = transportService.getDevice(TransportProtos.GetDeviceRequestMsg.newBuilder()
+                .setDeviceIdMSB(id.getId().getMostSignificantBits())
+                .setDeviceIdLSB(id.getId().getLeastSignificantBits())
+                .build());
+        if (deviceProto == null || deviceProto.getDeviceProfileIdMSB() == 0 && deviceProto.getDeviceProfileIdLSB() == 0) {
+            return null;
+        }
+        DeviceProfileId deviceProfileId = new DeviceProfileId(new UUID(
+                deviceProto.getDeviceProfileIdMSB(), deviceProto.getDeviceProfileIdLSB()));
+        Device device = new Device();
+        device.setId(id);
+        device.setName(deviceProto.getName());
+        device.setLabel(deviceProto.getLabel());
+        device.setDeviceProfileId(deviceProfileId);
+        DeviceTransportConfiguration deviceTransportConfiguration = JacksonUtil.fromBytes(
+                deviceProto.getDeviceTransportConfiguration().toByteArray(), DeviceTransportConfiguration.class);
+        DeviceData deviceData = new DeviceData();
+        deviceData.setTransportConfiguration(deviceTransportConfiguration);
+        device.setDeviceData(deviceData);
+        return device;
+    }
+
+    public DeviceCredentials getDeviceCredentialsByDeviceId(DeviceId deviceId) {
+        TransportProtos.GetDeviceCredentialsResponseMsg response = transportService.getDeviceCredentials(
+                TransportProtos.GetDeviceCredentialsRequestMsg.newBuilder()
+                        .setDeviceIdMSB(deviceId.getId().getMostSignificantBits())
+                        .setDeviceIdLSB(deviceId.getId().getLeastSignificantBits())
+                        .build());
+        if (response.hasDeviceCredentialsData()) {
+            return ProtoUtils.fromProto(response.getDeviceCredentialsData());
+        }
+        throw new IllegalArgumentException("Device credentials not found for " + deviceId);
+    }
+
+    public TransportProtos.GetHttpPullDevicesResponseMsg getHttpPullDevicesIds(int page, int pageSize) {
+        return transportService.getHttpPullDevicesIds(TransportProtos.GetHttpPullDevicesRequestMsg.newBuilder()
+                .setPage(page)
+                .setPageSize(pageSize)
+                .build());
+    }
+
+    public TransportProtos.GetHttpPullDevicesResponseMsg getDevicesIdsByTransportType(String transportType, int page, int pageSize) {
+        var builder = TransportProtos.GetHttpPullDevicesRequestMsg.newBuilder()
+                .setPage(page)
+                .setPageSize(pageSize);
+        if (transportType != null) {
+            builder.setTransportType(transportType);
+        }
+        return transportService.getHttpPullDevicesIds(builder.build());
+    }
+
+    public TransportProtos.GetHttpPullRoutingTargetsResponseMsg getRoutingTargets(TenantId tenantId, DeviceProfileId profileId, int page, int pageSize) {
+        return transportService.getHttpPullRoutingTargets(TransportProtos.GetHttpPullRoutingTargetsRequestMsg.newBuilder()
+                .setTenantIdMSB(tenantId.getId().getMostSignificantBits())
+                .setTenantIdLSB(tenantId.getId().getLeastSignificantBits())
+                .setDeviceProfileIdMSB(profileId.getId().getMostSignificantBits())
+                .setDeviceProfileIdLSB(profileId.getId().getLeastSignificantBits())
+                .setPage(page)
+                .setPageSize(pageSize)
+                .build());
+    }
+}

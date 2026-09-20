@@ -3,7 +3,7 @@ syntax = "proto3";
 import "efento/proto_measurement_types.proto";
 import "efento/proto_rule.proto";
 
-option java_package = "org.thingsboard.server.gen.transport.coap";
+option java_package = "com.jnks.iot.server.gen.transport.coap";
 option java_outer_classname = "ConfigProtos";
 
 /* Message containing optional channels control parameters                                                                      */

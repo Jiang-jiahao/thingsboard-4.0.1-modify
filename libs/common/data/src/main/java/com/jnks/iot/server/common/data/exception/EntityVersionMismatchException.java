@@ -1,0 +1,15 @@
+package com.jnks.iot.server.common.data.exception;
+
+import com.jnks.iot.server.common.data.EntityType;
+
+public class EntityVersionMismatchException extends RuntimeException {
+
+    public EntityVersionMismatchException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public EntityVersionMismatchException(EntityType entityType, Throwable cause) {
+        this((entityType != null ? entityType.getNormalName() : "Entity") + " was already changed by someone else", cause);
+    }
+
+}

@@ -232,7 +232,7 @@
         "domain-name": "اسم النطاق",
         "domain-name-unique": "يجب أن يكون اسم النطاق والبروتوكول فريدين.",
         "domain-name-max-length": "يجب أن يكون اسم النطاق أقل من 256",
-        "error-verification-url": "لا ينبغي أن يحتوي اسم النطاق على الرموز '/' و ':'. مثال: thingsboard.io",
+        "error-verification-url": "لا ينبغي أن يحتوي اسم النطاق على الرموز '/' و ':'. مثال: iot.example.com",
         "connection-settings": "إعدادات الاتصال",
         "oauth2": {
             "access-token-uri": "عنوان URI لرمز الوصول",
@@ -1242,8 +1242,8 @@
         "make-private-dashboard-title": "هل أنت متأكد أنك تريد جعل لوحة المعلومات '{{dashboardTitle}}' خاصة؟",
         "make-private-dashboard-text": "بعد التأكيد ستصبح لوحة المعلومات خاصة ولن تكون متاحة للآخرين.",
         "make-private-dashboard": "جعل لوحة المعلومات خاصة",
-        "socialshare-text": "'{{dashboardTitle}}' بدعم من ThingsBoard",
-        "socialshare-title": "'{{dashboardTitle}}' بدعم من ThingsBoard",
+        "socialshare-text": "'{{dashboardTitle}}' بدعم من JnksIOT",
+        "socialshare-title": "'{{dashboardTitle}}' بدعم من JnksIOT",
         "select-dashboard": "اختر لوحة المعلومات",
         "no-dashboards-matching": "لم يتم العثور على لوحات معلومات تطابق '{{entity}}'.",
         "dashboard-required": "لوحة المعلومات مطلوبة.",
@@ -4789,7 +4789,7 @@
         "allow-customer-white-labeling": "السماح بالتسمية البيضاء للعميل",
         "search": "البحث عن المستأجرين",
         "selected-tenants": "{ count, plural, =1 {1 مستأجر} other {# مستأجرون} } تم تحديدها",
-        "isolated-tb-rule-engine": "استخدام طوابور محرك قواعد ThingsBoard المعزولة",
+        "isolated-tb-rule-engine": "استخدام طوابور محرك قواعد JnksIOT المعزولة",
         "isolated-tb-rule-engine-details": "سيكون لكل مستأجر طوابور محرك قواعد مخصصة"
     },
     "tenant-profile": {
@@ -6074,7 +6074,7 @@
         "help-link-base-url": "عناوين مساعدة الروابط الأساسية",
         "ui-help-base-url": "عنوان URL الأساسي للمساعدة في واجهة المستخدم",
         "enable-help-links": "تمكين روابط المساعدة",
-        "error-verification-url": "لا يجب أن يحتوي اسم النطاق على الرموز '/' و ':' . مثال: thingsboard.io",
+        "error-verification-url": "لا يجب أن يحتوي اسم النطاق على الرموز '/' و ':' . مثال: iot.example.com",
         "show-platform-name-version": "عرض اسم المنصة والإصدار",
         "platform-name": "اسم المنصة",
         "platform-version": "إصدار المنصة",
@@ -7527,7 +7527,7 @@
         },
         "functions": {
             "title": "الوظائف",
-            "pe-feature-tooltip": "فقط على ThingsBoard\nالنسخة المهنية",
+            "pe-feature-tooltip": "فقط على JnksIOT\nالنسخة المهنية",
             "switch-to-pe": "التبديل إلى النسخة المهنية",
             "alarms": "التنبيهات",
             "dashboards": "لوحات التحكم",
@@ -7664,7 +7664,7 @@
         "entity-limit-text": "ومع ذلك، يمكنك ترقية خطة اشتراكك لزيادة حدودك.",
         "upgrade-your-plan": "ترقية خطة الاشتراك",
         "white-labeling-feature": "ميزة التسمية البيضاء",
-        "white-labeling-text-full": "قم بإعادة تسمية واجهة ويب منصة ThingsBoard باستخدام شعار شركتك أو منتجك ونظام ألوانك في 2 دقيقة.<br><br>إزالة عبارة 'Powered By' في تذييل لوحات القيادة.<br>لا تحتاج إلى برمجة أو إعادة تشغيل الخدمة. اسمح لعملائك أيضًا بتسمية واجهتهم بالأبيض.",
+        "white-labeling-text-full": "قم بإعادة تسمية واجهة ويب منصة JnksIOT باستخدام شعار شركتك أو منتجك ونظام ألوانك في 2 دقيقة.<br><br>إزالة عبارة 'Powered By' في تذييل لوحات القيادة.<br>لا تحتاج إلى برمجة أو إعادة تشغيل الخدمة. اسمح لعملائك أيضًا بتسمية واجهتهم بالأبيض.",
         "enable-white-labeling": "قم بتمكين ميزة التسمية البيضاء الآن من خلال ترقية خطة اشتراكك!",
         "read-more": "اقرأ المزيد",
         "white-labeling-video-text": "انظر إلى البرنامج التعليمي الفيديو أدناه لمعرفة كيفية عمل هذه الميزة!"

@@ -2,22 +2,22 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.thingsboard</groupId>
+        <groupId>com.jnks.iot</groupId>
         <version>4.0.1</version>
         <artifactId>images</artifactId>
     </parent>
-    <groupId>org.thingsboard.images</groupId>
+    <groupId>com.jnks.iot.images</groupId>
     <artifactId>tb-rule-engine-image</artifactId>
     <packaging>pom</packaging>
 
     <name>tb-rule-engine-image</name>
-    <url>https://thingsboard.io</url>
-    <description>ThingsBoard Rule Engine Microservice</description>
+    <url>https://iot.example.com</url>
+    <description>JnksIOT Rule Engine Microservice</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <main.dir>${basedir}/../..</main.dir>
-        <pkg.name>thingsboard-rule-engine</pkg.name>
+        <pkg.name>jnks-iot-rule-engine</pkg.name>
         <docker.name>tb-rule-engine</docker.name>
         <pkg.unixLogFolder>/var/log/${pkg.name}</pkg.unixLogFolder>
         <pkg.installFolder>/usr/share/${pkg.name}</pkg.installFolder>
@@ -26,7 +26,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.thingsboard</groupId>
+            <groupId>com.jnks.iot</groupId>
             <artifactId>tb-rule-engine</artifactId>
             <version>${project.version}</version>
             <classifier>boot</classifier>
@@ -50,7 +50,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.thingsboard</groupId>
+                                    <groupId>com.jnks.iot</groupId>
                                     <artifactId>tb-rule-engine</artifactId>
                                     <classifier>boot</classifier>
                                     <type>jar</type>

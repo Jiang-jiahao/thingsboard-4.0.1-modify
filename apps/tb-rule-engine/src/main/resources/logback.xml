@@ -8,36 +8,36 @@
         </encoder>
     </appender>
 
-    <logger name="org.thingsboard.server" level="INFO"/>
+    <logger name="com.jnks.iot.server" level="INFO"/>
     <logger name="org.apache.kafka.common.utils.AppInfoParser" level="WARN"/>
     <logger name="org.apache.kafka.clients" level="WARN"/>
     <!-- To enable the logging of scanned rule engine components-->
-    <!--    <logger name="org.thingsboard.server.service.component.AnnotationComponentDiscoveryService" level="DEBUG" />-->
+    <!--    <logger name="com.jnks.iot.server.service.component.AnnotationComponentDiscoveryService" level="DEBUG" />-->
     <!-- To enable the debug logging of rule node upgrade -->
-    <!--    <logger name="org.thingsboard.server.service.install.update.DefaultDataUpdateService" level="DEBUG"/>-->
+    <!--    <logger name="com.jnks.iot.server.service.install.update.DefaultDataUpdateService" level="DEBUG"/>-->
     <!-- Other useful logs -->
     <!--    <logger name="org.springframework.jdbc.core" level="TRACE" />-->
     <!--    <logger name="org.hibernate.SQL" level="DEBUG" />-->
     <!--    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" />-->
 
-    <!--    <logger name="org.thingsboard.server.service.queue" level="TRACE" />-->
-    <!--    <logger name="org.thingsboard.server.service.transport" level="TRACE" />-->
-    <!--    <logger name="org.thingsboard.server.queue.memory.InMemoryStorage" level="DEBUG" />-->
-    <!--    <logger name="org.thingsboard.server.service.ttl.AbstractCleanUpService" level="DEBUG" />-->
+    <!--    <logger name="com.jnks.iot.server.service.queue" level="TRACE" />-->
+    <!--    <logger name="com.jnks.iot.server.service.transport" level="TRACE" />-->
+    <!--    <logger name="com.jnks.iot.server.queue.memory.InMemoryStorage" level="DEBUG" />-->
+    <!--    <logger name="com.jnks.iot.server.service.ttl.AbstractCleanUpService" level="DEBUG" />-->
 
-    <!--    <logger name="org.thingsboard.server.service.subscription" level="TRACE"/>-->
-    <!--    <logger name="org.thingsboard.server.service.telemetry" level="TRACE"/>-->
+    <!--    <logger name="com.jnks.iot.server.service.subscription" level="TRACE"/>-->
+    <!--    <logger name="com.jnks.iot.server.service.telemetry" level="TRACE"/>-->
     <!--    <logger name="org.eclipse.californium.scandium.DTLSConnector" level="TRACE" />-->
     <!--    <logger name="org.eclipse.californium.scandium.dtls.Handshaker" level="DEBUG" />-->
 
     <!-- Top Rule Nodes by max execution time -->
-    <!--    <logger name="org.thingsboard.server.service.queue.TbMsgPackProcessingContext" level="DEBUG" /> -->
+    <!--    <logger name="com.jnks.iot.server.service.queue.TbMsgPackProcessingContext" level="DEBUG" /> -->
 
     <!-- MQTT transport debug -->
-    <!--    <logger name="org.thingsboard.server.transport.mqtt.MqttTransportHandler" level="DEBUG" /> -->
+    <!--    <logger name="com.jnks.iot.server.transport.mqtt.MqttTransportHandler" level="DEBUG" /> -->
 
     <!-- Device actor message processor debug -->
-    <!--    <logger name="org.thingsboard.server.actors.device.DeviceActorMessageProcessor" level="DEBUG" />-->
+    <!--    <logger name="com.jnks.iot.server.actors.device.DeviceActorMessageProcessor" level="DEBUG" />-->
 
     <logger name="com.microsoft.azure.servicebus.primitives.CoreMessageReceiver" level="OFF" />
 

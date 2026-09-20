@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS thingsboard.ts_kv_latest_cf (
+CREATE TABLE IF NOT EXISTS jnks_iot.ts_kv_latest_cf (
     entity_type text, -- (DEVICE, CUSTOMER, TENANT)
     entity_id timeuuid,
     key text,

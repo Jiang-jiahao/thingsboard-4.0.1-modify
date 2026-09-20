@@ -1,0 +1,17 @@
+package com.jnks.iot.server.service.ws.telemetry.cmd.v2;
+
+import lombok.Data;
+import lombok.Getter;
+import com.jnks.iot.server.service.ws.WsCmd;
+
+@Data
+public abstract class DataCmd implements WsCmd {
+
+    @Getter
+    private final int cmdId;
+
+    public DataCmd(int cmdId) {
+        this.cmdId = cmdId;
+    }
+
+}

@@ -2,14 +2,14 @@ version: '3.0'
 
 services:
   # Redis sentinel
-  # The latest version of Redis compatible with ThingsBoard is 7.2
+  # The latest version of Redis compatible with JnksIOT is 7.2
   redis-master:
     image: 'bitnami/redis:7.2'
     volumes:
       - ../tb-monolith/redis-sentinel-data-master:/bitnami/redis/data
     environment:
       - 'REDIS_REPLICATION_MODE=master'
-      - 'REDIS_PASSWORD=thingsboard'
+      - 'REDIS_PASSWORD=jnks-iot'
 
   redis-slave:
     image: 'bitnami/redis:7.2'
@@ -18,8 +18,8 @@ services:
     environment:
       - 'REDIS_REPLICATION_MODE=slave'
       - 'REDIS_MASTER_HOST=redis-master'
-      - 'REDIS_MASTER_PASSWORD=thingsboard'
-      - 'REDIS_PASSWORD=thingsboard'
+      - 'REDIS_MASTER_PASSWORD=jnks-iot'
+      - 'REDIS_PASSWORD=jnks-iot'
     depends_on:
       - redis-master
 
@@ -31,12 +31,12 @@ services:
       - 'REDIS_MASTER_HOST=redis-master'
       - 'REDIS_MASTER_SET=mymaster'
       - 'REDIS_SENTINEL_PASSWORD=sentinel'
-      - 'REDIS_MASTER_PASSWORD=thingsboard'
+      - 'REDIS_MASTER_PASSWORD=jnks-iot'
     depends_on:
       - redis-master
       - redis-slave
 
-  # ThingsBoard setup to use redis-sentinel
+  # JnksIOT setup to use redis-sentinel
   tb-core1:
     env_file:
       - ../redis/cache-redis-sentinel.env

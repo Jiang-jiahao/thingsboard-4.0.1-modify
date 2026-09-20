@@ -22,7 +22,7 @@ SET installDir=%BASE%\data
 
 PUSHD "%BASE%\conf"
 
-java -cp "%jarfile%" -Dloader.main=org.thingsboard.server.ThingsboardInstallApplication^
+java -cp "%jarfile%" -Dloader.main=com.jnks.iot.server.JnksIotInstallApplication^
                     -Dinstall.data_dir="%installDir%"^
                     -Dspring.jpa.hibernate.ddl-auto=none^
                     -Dinstall.upgrade=true^
@@ -31,13 +31,13 @@ java -cp "%jarfile%" -Dloader.main=org.thingsboard.server.ThingsboardInstallAppl
                     org.springframework.boot.loader.launch.PropertiesLauncher
 
 if errorlevel 1 (
-   @echo ThingsBoard upgrade failed!
+   @echo JnksIOT upgrade failed!
    POPD
    exit /b %errorlevel%
 )
 POPD
 
-@ECHO ThingsBoard upgraded successfully!
+@ECHO JnksIOT upgraded successfully!
 
 GOTO END
 

@@ -1,0 +1,101 @@
+package com.jnks.iot.server.dao.service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
+import com.jnks.iot.common.util.JacksonUtil;
+import com.jnks.iot.server.common.data.AdminSettings;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.dao.exception.DataValidationException;
+import com.jnks.iot.server.dao.settings.AdminSettingsService;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+@DaoSqlTest
+public class AdminSettingsServiceTest extends AbstractServiceTest {
+
+    @Autowired
+    AdminSettingsService adminSettingsService;
+
+    @Test
+    public void testFindAdminSettingsByKey() {
+        AdminSettings adminSettings = adminSettingsService.findAdminSettingsByKey(SYSTEM_TENANT_ID, "general");
+        Assert.assertNotNull(adminSettings);
+        adminSettings = adminSettingsService.findAdminSettingsByKey(SYSTEM_TENANT_ID, "mail");
+        Assert.assertNotNull(adminSettings);
+        adminSettings = adminSettingsService.findAdminSettingsByKey(SYSTEM_TENANT_ID, "unknown");
+        Assert.assertNull(adminSettings);
+    }
+
+    @Test
+    public void testFindAdminSettingsById() {
+        AdminSettings adminSettings = adminSettingsService.findAdminSettingsByKey(SYSTEM_TENANT_ID, "general");
+        AdminSettings foundAdminSettings = adminSettingsService.findAdminSettingsById(SYSTEM_TENANT_ID, adminSettings.getId());
+        Assert.assertNotNull(foundAdminSettings);
+        Assert.assertEquals(adminSettings, foundAdminSettings);
+    }
+
+    @Test
+    public void testSaveAdminSettings() {
+        AdminSettings adminSettings = adminSettingsService.findAdminSettingsByKey(SYSTEM_TENANT_ID, "general");
+        JsonNode json = adminSettings.getJsonValue();
+        ((ObjectNode) json).put("baseUrl", "http://myhost.org");
+        adminSettings.setJsonValue(json);
+        adminSettingsService.saveAdminSettings(SYSTEM_TENANT_ID, adminSettings);
+        AdminSettings savedAdminSettings = adminSettingsService.findAdminSettingsByKey(SYSTEM_TENANT_ID, "general");
+        Assert.assertNotNull(savedAdminSettings);
+        Assert.assertEquals(adminSettings.getJsonValue(), savedAdminSettings.getJsonValue());
+    }
+
+    @Test
+    public void testSaveAdminSettingsWithEmptyKey() {
+        AdminSettings adminSettings = adminSettingsService.findAdminSettingsByKey(SYSTEM_TENANT_ID, "mail");
+        adminSettings.setKey(null);
+        Assertions.assertThrows(DataValidationException.class, () -> {
+            adminSettingsService.saveAdminSettings(SYSTEM_TENANT_ID, adminSettings);
+        });
+    }
+
+    @Test
+    public void testChangeAdminSettingsKey() {
+        AdminSettings adminSettings = adminSettingsService.findAdminSettingsByKey(SYSTEM_TENANT_ID, "mail");
+        adminSettings.setKey("newKey");
+        Assertions.assertThrows(DataValidationException.class, () -> {
+            adminSettingsService.saveAdminSettings(SYSTEM_TENANT_ID, adminSettings);
+        });
+    }
+
+    @Test
+    public void whenSavingAdminSettingsWithAlreadyExistingKey_thenReturnError() {
+        String key = RandomStringUtils.randomAlphanumeric(15);
+        ObjectNode value = JacksonUtil.newObjectNode().put("test", "test");
+
+        AdminSettings systemSettings = new AdminSettings();
+        systemSettings.setTenantId(TenantId.SYS_TENANT_ID);
+        systemSettings.setKey(key);
+        systemSettings.setJsonValue(value);
+        adminSettingsService.saveAdminSettings(TenantId.SYS_TENANT_ID, systemSettings);
+
+        assertThatThrownBy(() -> {
+            adminSettingsService.saveAdminSettings(TenantId.SYS_TENANT_ID, systemSettings);
+        }).hasMessageContaining("already exists");
+
+        AdminSettings tenantSettings = new AdminSettings();
+        tenantSettings.setTenantId(tenantId);
+        tenantSettings.setKey(key);
+        tenantSettings.setJsonValue(value);
+        assertDoesNotThrow(() -> {
+            adminSettingsService.saveAdminSettings(tenantId, tenantSettings);
+        });
+
+        assertThatThrownBy(() -> {
+            adminSettingsService.saveAdminSettings(tenantId, tenantSettings);
+        }).hasMessageContaining("already exists");
+    }
+
+}

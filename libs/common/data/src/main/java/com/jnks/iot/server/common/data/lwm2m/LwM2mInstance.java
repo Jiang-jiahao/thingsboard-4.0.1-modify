@@ -1,0 +1,14 @@
+package com.jnks.iot.server.common.data.lwm2m;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+@Schema
+@Data
+public class LwM2mInstance {
+    @Schema(description = "LwM2M Instance id.", example = "0")
+    int id;
+    @Schema(description = "LwM2M Resource observe.")
+    LwM2mResourceObserve[] resources;
+
+}

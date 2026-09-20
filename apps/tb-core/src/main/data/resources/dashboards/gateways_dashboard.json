@@ -1,5 +1,5 @@
 {
-  "title": "ThingsBoard IoT 网关",
+  "title": "JnksIOT IoT 网关",
   "image": "tb-image;/api/images/system/gateway-dashboard.png",
   "mobileHide": false,
   "mobileOrder": 6,
@@ -10341,6 +10341,6 @@
       "dashboardCss": ""
     }
   },
-  "name": "ThingsBoard IoT 网关",
+  "name": "JnksIOT IoT 网关",
   "resources": null
 }

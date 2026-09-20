@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.thingsboard</groupId>
+        <groupId>com.jnks.iot</groupId>
         <artifactId>tb-transport</artifactId>
         <version>4.0.1</version>
     </parent>
@@ -22,22 +22,22 @@
         <pkg.name>tb-coap-transport</pkg.name>
         <pkg.copyInstallScripts>false</pkg.copyInstallScripts>
         <pkg.win.dist>${project.build.directory}/windows</pkg.win.dist>
-        <pkg.implementationTitle>ThingsBoard CoAP Transport Service</pkg.implementationTitle>
-        <pkg.mainClass>org.thingsboard.server.coap.ThingsboardCoapTransportApplication</pkg.mainClass>
+        <pkg.implementationTitle>JnksIOT CoAP Transport Service</pkg.implementationTitle>
+        <pkg.mainClass>com.jnks.iot.server.coap.JnksIotCoapTransportApplication</pkg.mainClass>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.thingsboard.transport</groupId>
+            <groupId>com.jnks.iot.transport</groupId>
             <artifactId>coap</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard</groupId>
+            <groupId>com.jnks.iot</groupId>
             <artifactId>transport-base</artifactId>
             <version>4.0.1</version>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>queue</artifactId>
         </dependency>
         <dependency>

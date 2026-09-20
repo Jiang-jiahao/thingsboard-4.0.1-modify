@@ -101,9 +101,9 @@ def check_yml(total_list, input_yaml_file):
 
 if __name__ == '__main__':
     sys.setrecursionlimit(10000)
-    files_to_check = ["apps/monolith/src/main/resources/thingsboard.yml",
-                      "apps/tb-core/src/main/resources/thingsboard-core.yml",
-                      "apps/tb-rule-engine/src/main/resources/thingsboard-rule-engine.yml",
+    files_to_check = ["apps/monolith/src/main/resources/jnks-iot.yml",
+                      "apps/tb-core/src/main/resources/jnks-iot-core.yml",
+                      "apps/tb-rule-engine/src/main/resources/jnks-iot-rule-engine.yml",
                       "apps/tb-transport/tb-http-transport/src/main/resources/tb-http-transport.yml",
                       "apps/tb-transport/tb-mqtt-transport/src/main/resources/tb-mqtt-transport.yml",
                       "apps/tb-transport/tb-coap-transport/src/main/resources/tb-coap-transport.yml",

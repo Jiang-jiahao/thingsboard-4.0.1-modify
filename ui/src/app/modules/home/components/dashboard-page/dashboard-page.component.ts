@@ -242,7 +242,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
   editingWidgetSubtitle: string = null;
   editingLayoutCtx: DashboardPageLayoutContext = null;
 
-  thingsboardVersion: string = env.tbVersion;
+  jnksIotVersion: string = env.tbVersion;
 
   translatedDashboardTitle: string;
 

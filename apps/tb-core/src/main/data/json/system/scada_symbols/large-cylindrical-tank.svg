@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://thingsboard.io/svg" width="1e3" height="1e3" fill="none" version="1.1" viewBox="0 0 1e3 1e3"><tb:metadata xmlns=""><![CDATA[{
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="1e3" height="1e3" fill="none" version="1.1" viewBox="0 0 1e3 1e3"><tb:metadata xmlns=""><![CDATA[{
   "title": "Large cylindrical tank",
   "description": " Large cylindrical tank with current volume value and level visualizations.",
   "searchTags": [

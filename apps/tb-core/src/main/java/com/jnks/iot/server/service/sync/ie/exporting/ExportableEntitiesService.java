@@ -1,0 +1,44 @@
+package com.jnks.iot.server.service.sync.ie.exporting;
+
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.ExportableEntity;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.common.data.id.HasId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.page.PageData;
+import com.jnks.iot.server.common.data.page.PageLink;
+
+/**
+ * 可导出实体的统一 DAO 门面：按租户 + externalId / 内部 ID / 名称查找，并支持分页列出与删除。
+ * 供导出、导入匹配已有实体、版本加载后清理「版本中不存在的实体」使用。
+ */
+public interface ExportableEntitiesService {
+
+    /**
+     * 按租户 + externalId 查找可导出实体。
+     */
+    <E extends ExportableEntity<I>, I extends EntityId> E findEntityByTenantIdAndExternalId(TenantId tenantId, I externalId);
+
+    <E extends HasId<I>, I extends EntityId> E findEntityByTenantIdAndId(TenantId tenantId, I id);
+
+    <E extends HasId<I>, I extends EntityId> E findEntityById(I id);
+
+    <E extends ExportableEntity<I>, I extends EntityId> E findEntityByTenantIdAndName(TenantId tenantId, EntityType entityType, String name);
+
+    <E extends ExportableEntity<I>, I extends EntityId> E findDefaultEntityByTenantId(TenantId tenantId, EntityType entityType);
+
+    <E extends ExportableEntity<I>, I extends EntityId> PageData<E> findEntitiesByTenantId(TenantId tenantId, EntityType entityType, PageLink pageLink);
+
+    <I extends EntityId> PageData<I> findEntitiesIdsByTenantId(TenantId tenantId, EntityType entityType, PageLink pageLink);
+
+    /**
+     * 内部 ID 转 externalId，供导出时替换关联引用。
+     */
+    <I extends EntityId> I getExternalIdByInternal(I internalId);
+
+    /**
+     * 按 ID 删除实体（版本加载时清理多余实体）。
+     */
+    <I extends EntityId> void removeById(TenantId tenantId, I id);
+
+}

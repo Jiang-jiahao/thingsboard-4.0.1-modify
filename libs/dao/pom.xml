@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.thingsboard</groupId>
+        <groupId>com.jnks.iot</groupId>
         <version>4.0.1</version>
         <artifactId>libs</artifactId>
     </parent>
@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>dao</name>
-    <url>https://thingsboard.io</url>
+    <url>https://iot.example.com</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,27 +19,27 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>data</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>cache</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>message</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>stats</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>dao-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>util</artifactId>
         </dependency>
         <dependency>
@@ -221,7 +221,7 @@
             <artifactId>json-path</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.rule-engine</groupId>
+            <groupId>com.jnks.iot.rule-engine</groupId>
             <artifactId>rule-engine-api</artifactId>
         </dependency>
         <dependency>

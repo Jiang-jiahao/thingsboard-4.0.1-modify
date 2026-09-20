@@ -7,7 +7,7 @@ global:
   # Attach these labels to any time series or alerts when communicating with
   # external systems (federation, remote storage, Alertmanager).
   external_labels:
-      monitor: 'thingsboard'
+      monitor: 'jnks-iot'
 
 
 # A scrape configuration containing exactly one endpoint to scrape:
@@ -30,7 +30,7 @@ scrape_configs:
     static_configs:
       - targets: [ 'tb-core2:8080' ]
 
-  # rule-engine 的 HTTP 端口是 8082（thingsboard-rule-engine.yml 里 server.port 的默认值），
+  # rule-engine 的 HTTP 端口是 8082（jnks-iot-rule-engine.yml 里 server.port 的默认值），
   # 不是 core 的 8080 —— 写成 8080 会一直 connection refused。
   - job_name: 'tb-rule-engine1'
     metrics_path: /actuator/prometheus

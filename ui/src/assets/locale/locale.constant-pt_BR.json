@@ -518,8 +518,8 @@
     "make-private-dashboard-title": "Tem certeza de que deseja tornar o dashboard '{{dashboardTitle}}' privado?",
     "make-private-dashboard-text": "Após confirmar, o dashboard e todos os dados associados a ele se tornarão privados e não poderão ser acessados por outros.",
     "make-private-dashboard": "Tornar dashboards privado",
-    "socialshare-text": "'{{dashboardTitle}}' da plataforma ThingsBoard",
-    "socialshare-title": "'{{dashboardTitle}}' da plataforma ThingsBoard",
+    "socialshare-text": "'{{dashboardTitle}}' da plataforma JnksIOT",
+    "socialshare-title": "'{{dashboardTitle}}' da plataforma JnksIOT",
     "select-dashboard": "Selecionar dashboard",
     "no-dashboards-matching": "Nenhum dashboard encontrado que coincida com '{{entity}}'.",
     "dashboard-required": "O dashboard é obrigatório.",
@@ -1595,7 +1595,7 @@
     "tenant-required": "O locatário é obrigatório",
     "search": "Pesquisar locatários",
     "selected-tenants": "{ count, plural, =1 {1 tenant} other {# tenants} } selecionado(s)",
-    "isolated-tb-rule-engine": "Processamento em contêiner isolado do ThingsBoard Rule Engine",
+    "isolated-tb-rule-engine": "Processamento em contêiner isolado do JnksIOT Rule Engine",
     "isolated-tb-rule-engine-details": "Exige microsserviço(s) separado(s) para cada locatário isolado"
   },
   "timeinterval": {

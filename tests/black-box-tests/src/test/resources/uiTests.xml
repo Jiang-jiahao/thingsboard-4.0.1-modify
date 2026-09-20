@@ -3,7 +3,7 @@
 
 <suite name="UI smoke tests">
     <listeners>
-        <listener class-name="org.thingsboard.server.msa.ui.listeners.RetryTestListener"/>
+        <listener class-name="com.jnks.iot.server.msa.ui.listeners.RetryTestListener"/>
     </listeners>
     <test name="Smoke rule chains tests">
         <groups>
@@ -12,7 +12,7 @@
             </run>
         </groups>
         <packages>
-            <package name="org.thingsboard.server.msa.ui.tests.rulechainssmoke"/>
+            <package name="com.jnks.iot.server.msa.ui.tests.rulechainssmoke"/>
         </packages>
     </test>
     <test name="Smoke customers tests">
@@ -22,7 +22,7 @@
             </run>
         </groups>
         <packages>
-            <package name="org.thingsboard.server.msa.ui.tests.customerSmoke"/>
+            <package name="com.jnks.iot.server.msa.ui.tests.customerSmoke"/>
         </packages>
     </test>
     <test name="Smoke device profile tests">
@@ -32,7 +32,7 @@
             </run>
         </groups>
         <packages>
-            <package name="org.thingsboard.server.msa.ui.tests.deviceProfileSmoke"/>
+            <package name="com.jnks.iot.server.msa.ui.tests.deviceProfileSmoke"/>
         </packages>
     </test>
     <test name="Smoke asset profile tests">
@@ -42,7 +42,7 @@
             </run>
         </groups>
         <packages>
-            <package name="org.thingsboard.server.msa.ui.tests.assetProfileSmoke"/>
+            <package name="com.jnks.iot.server.msa.ui.tests.assetProfileSmoke"/>
         </packages>
     </test>
     <test name="Smoke devices tests">
@@ -52,7 +52,7 @@
             </run>
         </groups>
         <packages>
-            <package name="org.thingsboard.server.msa.ui.tests.devicessmoke"/>
+            <package name="com.jnks.iot.server.msa.ui.tests.devicessmoke"/>
         </packages>
     </test>
     <test name="Alarm assignee tests">
@@ -62,7 +62,7 @@
             </run>
         </groups>
         <packages>
-            <package name="org.thingsboard.server.msa.ui.tests.alarmassignee.*"/>
+            <package name="com.jnks.iot.server.msa.ui.tests.alarmassignee.*"/>
         </packages>
     </test>
 </suite>

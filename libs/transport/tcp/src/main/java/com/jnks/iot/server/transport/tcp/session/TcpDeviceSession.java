@@ -1,0 +1,420 @@
+package com.jnks.iot.server.transport.tcp.session;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import io.netty.channel.Channel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
+import com.jnks.iot.server.common.adaptor.JsonConverter;
+import io.netty.buffer.ByteBuf;
+import com.google.gson.JsonElement;
+import com.jnks.iot.server.common.data.device.profile.TcpJsonWithoutMethodMode;
+import com.jnks.iot.server.common.data.device.profile.TcpTransportFramingMode;
+import com.jnks.iot.server.common.data.Device;
+import com.jnks.iot.server.common.data.DeviceProfile;
+import com.jnks.iot.server.common.data.TransportTcpDataType;
+import com.jnks.iot.server.common.data.device.profile.HexTransportTcpDataConfiguration;
+import com.jnks.iot.server.common.data.device.profile.ProtocolTemplateTransportTcpDataConfiguration;
+import com.jnks.iot.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
+import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.transport.SessionMsgListener;
+import com.jnks.iot.server.common.transport.TransportService;
+import com.jnks.iot.server.common.transport.auth.ValidateDeviceCredentialsResponse;
+import com.jnks.iot.server.common.transport.session.DeviceAwareSessionContext;
+import com.jnks.iot.server.gen.transport.TransportProtos;
+import com.jnks.iot.server.common.data.device.profile.TcpWireAuthenticationMode;
+import com.jnks.iot.server.gen.transport.TransportProtos.AttributeUpdateNotificationMsg;
+import com.jnks.iot.server.gen.transport.TransportProtos.GetAttributeResponseMsg;
+import com.jnks.iot.server.gen.transport.TransportProtos.SessionCloseNotificationProto;
+import com.jnks.iot.server.gen.transport.TransportProtos.ToDeviceRpcRequestMsg;
+import com.jnks.iot.server.gen.transport.TransportProtos.ToServerRpcResponseMsg;
+import com.jnks.iot.server.gen.transport.TransportProtos.ToTransportUpdateCredentialsProto;
+import com.jnks.iot.server.transport.tcp.TcpTransportContext;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import java.nio.charset.StandardCharsets;
+
+import io.netty.buffer.Unpooled;
+import com.jnks.iot.server.transport.tcp.util.TcpPayloadUtil;
+
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+
+@Slf4j
+public class TcpDeviceSession extends DeviceAwareSessionContext implements SessionMsgListener {
+
+    private final TcpTransportContext tcpTransportContext;
+    private final TransportService transportService;
+    private final AtomicInteger msgIdSeq = new AtomicInteger(0);
+    @Getter
+    @Setter
+    private volatile Channel channel;
+    /**
+     * 平台已向 Core 完成鉴权并注册会话（CLIENT 在出站 TCP 建连成功且 {@code channelActive} 中注册后为 true；SERVER 在收到首行 token 后为 true）。
+     */
+    @Getter
+    @Setter
+    private volatile boolean coreSessionReady;
+
+    /**
+     * CLIENT：令牌校验通过后暂存，在 Netty {@code channelActive} 时再向 Core 注册，避免未建连即显示在线。
+     */
+    private final AtomicReference<ValidateDeviceCredentialsResponse> pendingOutboundCredentials = new AtomicReference<>();
+
+    public void stashPendingOutboundCredentials(ValidateDeviceCredentialsResponse msg) {
+        pendingOutboundCredentials.set(msg);
+    }
+
+    public ValidateDeviceCredentialsResponse takePendingOutboundCredentials() {
+        return pendingOutboundCredentials.getAndSet(null);
+    }
+    /**
+     * SERVER 模式下设备已通过首行 token 完成接入认证。
+     */
+    @Getter
+    @Setter
+    private volatile boolean deviceWireAuthenticated;
+
+
+    @Getter
+    private final boolean outboundClient;
+
+    private final AtomicBoolean serverAuthInFlight = new AtomicBoolean(false);
+    private final AtomicLong serverAuthStartedAt = new AtomicLong(0);
+    private final AtomicBoolean preAuthDropLogged = new AtomicBoolean(false);
+    /**
+     * 鉴权在途保护窗口：超过该时长视为上一次鉴权响应丢失（例如队列重平衡期间），允许设备重新发起；
+     * 否则会话会永久卡在"鉴权在途"，后续帧全部被丢弃。测试中会调小该值。
+     */
+    private volatile long serverAuthTimeoutMs = 30_000L;
+
+    private final AtomicBoolean channelCloseHandled = new AtomicBoolean(false);
+
+    @Getter
+    @Setter
+    private volatile Throwable pendingDisconnectCause;
+
+
+    /**
+     * 入站 SERVER 连接在 Netty pipeline 首段实际使用的分帧（专用端口时等于设备配置文件，否则等于全局鉴权分帧）。
+     */
+    @Getter
+    @Setter
+    private volatile TcpTransportFramingMode inboundPipelineFramingMode;
+    @Getter
+    @Setter
+    private volatile int inboundPipelineFixedFrameLength;
+
+    public TcpDeviceSession(UUID sessionId, TcpTransportContext tcpTransportContext, boolean outboundClient) {
+        super(sessionId);
+        this.tcpTransportContext = tcpTransportContext;
+        this.transportService = tcpTransportContext.getTransportService();
+        this.outboundClient = outboundClient;
+    }
+
+    public TransportTcpDataType getPayloadDataType() {
+        DeviceProfile profile = getDeviceProfile();
+        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
+            return TransportTcpDataType.UTF8;
+        }
+        var tc = profile.getProfileData().getTransportConfiguration();
+        if (tc instanceof TcpDeviceProfileTransportConfiguration) {
+            TcpDeviceProfileTransportConfiguration tcpCfg = (TcpDeviceProfileTransportConfiguration) tc;
+            return tcpCfg.getTransportTcpDataTypeConfiguration().getTransportTcpDataType();
+        }
+        return TransportTcpDataType.UTF8;
+    }
+
+    /**
+     * 当前 TCP 传输为 HEX 且已配置 {@link HexTransportTcpDataConfiguration} 时返回该配置，否则 {@code null}。
+     */
+    public HexTransportTcpDataConfiguration getHexTcpDataConfiguration() {
+        DeviceProfile profile = getDeviceProfile();
+        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
+            return null;
+        }
+        var tc = profile.getProfileData().getTransportConfiguration();
+        if (tc instanceof TcpDeviceProfileTransportConfiguration tcpCfg) {
+            var dataCfg = tcpCfg.getTransportTcpDataTypeConfiguration();
+            if (dataCfg instanceof HexTransportTcpDataConfiguration hexCfg) {
+                return hexCfg;
+            }
+            if (dataCfg instanceof ProtocolTemplateTransportTcpDataConfiguration ptCfg) {
+                return ptCfg.expandToHexTransportTcpDataConfiguration();
+            }
+        }
+        return null;
+    }
+
+    public TcpTransportFramingMode getTcpTransportFramingMode() {
+        DeviceProfile profile = getDeviceProfile();
+        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
+            return TcpTransportFramingMode.LINE;
+        }
+        var tc = profile.getProfileData().getTransportConfiguration();
+        if (tc instanceof TcpDeviceProfileTransportConfiguration) {
+            return ((TcpDeviceProfileTransportConfiguration) tc).getTcpTransportFramingMode();
+        }
+        return TcpTransportFramingMode.LINE;
+    }
+
+    /**
+     * FIXED_LENGTH 分帧时从设备配置读取；未配置时返回 0（由调用方与全局默认处理）。
+     */
+    public int getTcpFixedFrameLengthForFraming() {
+        DeviceProfile profile = getDeviceProfile();
+        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
+            return 0;
+        }
+        var tc = profile.getProfileData().getTransportConfiguration();
+        if (tc instanceof TcpDeviceProfileTransportConfiguration) {
+            Integer n = ((TcpDeviceProfileTransportConfiguration) tc).getTcpFixedFrameLength();
+            return n != null ? n : 0;
+        }
+        return 0;
+    }
+
+    public void sendJsonPayload(JsonObject json) {
+        byte[] body = TcpPayloadUtil.bodyBytesForDataType(getPayloadDataType(), json.toString());
+        // 下行必须与上行对称地分帧：否则 LINE / LENGTH_PREFIX 档案的设备切不出这一帧
+        // （连续两条下行还会被拼成一段无法解析的 JSON）。
+        TcpTransportFramingMode framing = getTcpTransportFramingMode();
+        if (framing == TcpTransportFramingMode.FIXED_LENGTH) {
+            log.warn("[{}] JSON downlink cannot be fixed-length framed, sending unframed", getSessionId());
+            writeByteBuf(Unpooled.wrappedBuffer(body));
+            return;
+        }
+        writeByteBuf(TcpPayloadUtil.wrapFraming(framing, body, getTcpFixedFrameLengthForFraming()));
+    }
+
+    public void writeByteBuf(ByteBuf buf) {
+        Channel ch = this.channel;
+        if (ch != null && ch.isActive()) {
+            ch.eventLoop().execute(() -> {
+                if (ch.isActive()) {
+                    ch.writeAndFlush(buf);
+                } else {
+                    buf.release();
+                }
+            });
+        } else {
+            buf.release();
+        }
+    }
+
+    public void writeRaw(String text) {
+        writeByteBuf(Unpooled.wrappedBuffer(text.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Override
+    public int nextMsgId() {
+        return msgIdSeq.incrementAndGet();
+    }
+
+    public void close() {
+        setConnected(false);
+        Channel ch = this.channel;
+        if (ch != null && ch.isActive()) {
+            ch.close();
+        }
+    }
+
+    @Override
+    public void onGetAttributesResponse(GetAttributeResponseMsg getAttributesResponse) {
+        JsonObject msg = new JsonObject();
+        msg.addProperty("method", "getAttributesResponse");
+        msg.add("data", JsonConverter.toJson(getAttributesResponse));
+        sendJsonPayload(msg);
+    }
+
+    @Override
+    public void onAttributeUpdate(UUID sessionId, AttributeUpdateNotificationMsg attributeUpdateNotification) {
+        JsonObject msg = new JsonObject();
+        msg.addProperty("method", "attributeUpdate");
+        msg.add("data", JsonConverter.toJson(attributeUpdateNotification));
+        sendJsonPayload(msg);
+    }
+
+    @Override
+    public void onRemoteSessionCloseCommand(UUID sessionId, SessionCloseNotificationProto sessionCloseNotification) {
+        JsonObject msg = new JsonObject();
+        msg.addProperty("method", "sessionClose");
+        msg.addProperty("reason", sessionCloseNotification.getReason().name());
+        msg.addProperty("message", sessionCloseNotification.getMessage());
+        sendJsonPayload(msg);
+        // Core 要求关闭会话时，主动断开 TCP 通道，确保 CLIENT 能按现有策略重连。
+        close();
+    }
+
+    @Override
+    public void onToDeviceRpcRequest(UUID sessionId, ToDeviceRpcRequestMsg rpcRequest) {
+        String params = rpcRequest.getParams();
+        TransportTcpDataType dataType = getPayloadDataType();
+        // 协议模板 / 原始字节：params.hex 已由 UI buildHex 组好，线上只发 decode 后的原始字节，不再包 RPC 信封 JSON。
+        if ((dataType == TransportTcpDataType.RAW_BYTES || dataType == TransportTcpDataType.PROTOCOL_TEMPLATE)
+                && TcpPayloadUtil.isHexTemplateRpcParams(params)) {
+            ByteBuf buf = TcpPayloadUtil.encodeBusinessFrame(
+                    dataType,
+                    getTcpTransportFramingMode(),
+                    getTcpFixedFrameLengthForFraming(),
+                    params);
+            writeByteBuf(buf);
+            return;
+        }
+        JsonObject msg = new JsonObject();
+        msg.addProperty("method", "rpc");
+        msg.addProperty("requestId", rpcRequest.getRequestId());
+        msg.addProperty("name", rpcRequest.getMethodName());
+        msg.addProperty("params", params);
+        msg.addProperty("expirationTime", rpcRequest.getExpirationTime());
+        msg.addProperty("oneway", rpcRequest.getOneway());
+        sendJsonPayload(msg);
+    }
+
+    @Override
+    public void onToServerRpcResponse(ToServerRpcResponseMsg toServerResponse) {
+        JsonObject msg = new JsonObject();
+        msg.addProperty("method", "toServerRpcResponse");
+        msg.addProperty("requestId", toServerResponse.getRequestId());
+        msg.addProperty("payload", toServerResponse.getPayload());
+        msg.addProperty("error", toServerResponse.getError());
+        sendJsonPayload(msg);
+    }
+
+    @Override
+    public void onDeviceDeleted(DeviceId deviceId) {
+        tcpTransportContext.onTcpSessionDeviceDeleted(this);
+    }
+
+    @Override
+    public void onToTransportUpdateCredentials(ToTransportUpdateCredentialsProto toTransportUpdateCredentials) {
+        log.info("[{}] Credentials update not supported over TCP in this version", getSessionId());
+    }
+
+    @Override
+    public void onDeviceProfileUpdate(TransportProtos.SessionInfoProto newSessionInfo, DeviceProfile deviceProfile) {
+        super.onDeviceProfileUpdate(newSessionInfo, deviceProfile);
+        tcpTransportContext.onTcpDeviceProfileUpdated(this, deviceProfile);
+    }
+
+    @Override
+    public void onDeviceUpdate(TransportProtos.SessionInfoProto sessionInfo, Device device, Optional<DeviceProfile> deviceProfileOpt) {
+        super.onDeviceUpdate(sessionInfo, device, deviceProfileOpt);
+        tcpTransportContext.onTcpDeviceUpdated(this, device, deviceProfileOpt);
+    }
+
+    public void processIncomingJsonLine(String jsonLine) {
+        try {
+            JsonElement el = JsonParser.parseString(jsonLine);
+            if (el.isJsonObject()) {
+                tcpTransportContext.getTcpMessageProcessor().processUplinkJson(this, el.getAsJsonObject());
+            } else if (getPayloadDataType() == TransportTcpDataType.UTF8
+                    || getPayloadDataType() == TransportTcpDataType.ASCII) {
+                tcpTransportContext.getTcpMessageProcessor().processUplinkWithoutMethod(this, el);
+            } else {
+                log.warn("[{}] Expected JSON object line for payload type {}", getSessionId(), getPayloadDataType());
+            }
+        } catch (Exception e) {
+            TransportTcpDataType payloadType = getPayloadDataType();
+            if (payloadType == TransportTcpDataType.UTF8
+                    || payloadType == TransportTcpDataType.ASCII) {
+                try {
+                    JsonPrimitive fallback = new JsonPrimitive(jsonLine == null ? "" : jsonLine);
+                    tcpTransportContext.getTcpMessageProcessor().processUplinkWithoutMethod(this, fallback);
+                    return;
+                } catch (Exception inner) {
+                    log.warn("[{}] Failed fallback non-JSON text processing: {}", getSessionId(), jsonLine, inner);
+                }
+            }
+            log.warn("[{}] Failed to process TCP JSON line: {}", getSessionId(), jsonLine, e);
+            transportService.errorEvent(getTenantId(), getDeviceId(), "tcpUplink", e);
+        }
+    }
+
+    public boolean tryBeginServerAuth() {
+        long now = System.currentTimeMillis();
+        long startedAt = serverAuthStartedAt.get();
+        if (serverAuthInFlight.get()) {
+            if (now - startedAt < serverAuthTimeoutMs) {
+                return false;
+            }
+            log.warn("[{}] Server auth has been in flight for {} ms (timeout {} ms), allowing the device to retry",
+                    getSessionId(), now - startedAt, serverAuthTimeoutMs);
+        }
+        serverAuthInFlight.set(true);
+        serverAuthStartedAt.set(now);
+        return true;
+    }
+
+    public void endServerAuth() {
+        serverAuthInFlight.set(false);
+        serverAuthStartedAt.set(0);
+    }
+
+    /**
+     * 鉴权在途时被丢弃的帧只提示一次，避免同一设备反复重传时刷屏。
+     */
+    public boolean shouldLogPreAuthDrop() {
+        return preAuthDropLogged.compareAndSet(false, true);
+    }
+
+    public boolean beginCloseHandling() {
+        return channelCloseHandled.compareAndSet(false, true);
+    }
+
+    public Throwable takePendingDisconnectCause() {
+        Throwable cause = pendingDisconnectCause;
+        pendingDisconnectCause = null;
+        return cause;
+    }
+
+
+    public TcpWireAuthenticationMode getTcpWireAuthenticationMode() {
+        DeviceProfile profile = getDeviceProfile();
+        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
+            return TcpWireAuthenticationMode.NONE;
+        }
+        var tc = profile.getProfileData().getTransportConfiguration();
+        if (tc instanceof TcpDeviceProfileTransportConfiguration) {
+            return ((TcpDeviceProfileTransportConfiguration) tc).getTcpWireAuthenticationMode();
+        }
+        return TcpWireAuthenticationMode.NONE;
+    }
+
+    /**
+     * SERVER：链路上鉴权为从业务负载解析协议设备号后再向 Core 注册。
+     * 未绑定档案的会话必须返回 false —— 共享端口下鉴权前还不知道档案，那条路要留给延迟鉴权目录。
+     */
+    public boolean isDeferredPayloadWireAuth() {
+        return getTcpWireAuthenticationMode() == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID;
+    }
+
+
+    public TcpJsonWithoutMethodMode getTcpJsonWithoutMethodMode() {
+        DeviceProfile profile = getDeviceProfile();
+        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
+            return TcpJsonWithoutMethodMode.TELEMETRY_FLAT;
+        }
+        var tc = profile.getProfileData().getTransportConfiguration();
+        if (tc instanceof TcpDeviceProfileTransportConfiguration) {
+            return ((TcpDeviceProfileTransportConfiguration) tc).getTcpJsonWithoutMethodMode();
+        }
+        return TcpJsonWithoutMethodMode.TELEMETRY_FLAT;
+    }
+    public String getTcpOpaqueRuleEngineKey() {
+        DeviceProfile profile = getDeviceProfile();
+        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
+            return "tcpOpaquePayload";
+        }
+        var tc = profile.getProfileData().getTransportConfiguration();
+        if (tc instanceof TcpDeviceProfileTransportConfiguration) {
+            return ((TcpDeviceProfileTransportConfiguration) tc).getTcpOpaqueRuleEngineKey();
+        }
+        return "tcpOpaquePayload";
+    }
+}

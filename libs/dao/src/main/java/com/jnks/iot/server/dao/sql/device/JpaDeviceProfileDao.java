@@ -1,0 +1,168 @@
+package com.jnks.iot.server.dao.sql.device;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Component;
+import com.jnks.iot.server.common.data.DeviceProfile;
+import com.jnks.iot.server.common.data.DeviceProfileInfo;
+import com.jnks.iot.server.common.data.DeviceTransportType;
+import com.jnks.iot.server.common.data.EntityInfo;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.StringUtils;
+import com.jnks.iot.server.common.data.edqs.fields.DeviceProfileFields;
+import com.jnks.iot.server.common.data.id.DeviceProfileId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.page.PageData;
+import com.jnks.iot.server.common.data.page.PageLink;
+import com.jnks.iot.server.dao.DaoUtil;
+import com.jnks.iot.server.dao.TenantEntityDao;
+import com.jnks.iot.server.dao.device.DeviceProfileDao;
+import com.jnks.iot.server.dao.model.sql.DeviceProfileEntity;
+import com.jnks.iot.server.dao.sql.JpaAbstractDao;
+import com.jnks.iot.server.dao.util.SqlDao;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Component
+@SqlDao
+public class JpaDeviceProfileDao extends JpaAbstractDao<DeviceProfileEntity, DeviceProfile> implements DeviceProfileDao, TenantEntityDao<DeviceProfile> {
+
+    @Autowired
+    private DeviceProfileRepository deviceProfileRepository;
+
+    @Override
+    protected Class<DeviceProfileEntity> getEntityClass() {
+        return DeviceProfileEntity.class;
+    }
+
+    @Override
+    protected JpaRepository<DeviceProfileEntity, UUID> getRepository() {
+        return deviceProfileRepository;
+    }
+
+    @Override
+    public DeviceProfileInfo findDeviceProfileInfoById(TenantId tenantId, UUID deviceProfileId) {
+        return deviceProfileRepository.findDeviceProfileInfoById(deviceProfileId);
+    }
+
+    @Override
+    public PageData<DeviceProfile> findDeviceProfiles(TenantId tenantId, PageLink pageLink) {
+        return DaoUtil.toPageData(
+                deviceProfileRepository.findDeviceProfiles(
+                        tenantId.getId(),
+                        pageLink.getTextSearch(),
+                        DaoUtil.toPageable(pageLink)));
+    }
+
+    @Override
+    public PageData<UUID> findProfileIdsByTransportType(DeviceTransportType transportType, PageLink pageLink) {
+        return DaoUtil.pageToPageData(
+                deviceProfileRepository.findIdsByTransportType(transportType, DaoUtil.toPageable(pageLink)));
+    }
+
+    @Override
+    public PageData<DeviceProfileInfo> findDeviceProfileInfos(TenantId tenantId, PageLink pageLink, String transportType) {
+        if (StringUtils.isNotEmpty(transportType)) {
+            return DaoUtil.pageToPageData(
+                    deviceProfileRepository.findDeviceProfileInfos(
+                            tenantId.getId(),
+                            pageLink.getTextSearch(),
+                            DeviceTransportType.valueOf(transportType),
+                            DaoUtil.toPageable(pageLink)));
+        } else {
+            return DaoUtil.pageToPageData(
+                    deviceProfileRepository.findDeviceProfileInfos(
+                            tenantId.getId(),
+                            pageLink.getTextSearch(),
+                            DaoUtil.toPageable(pageLink)));
+        }
+    }
+
+    @Override
+    public DeviceProfile findDefaultDeviceProfile(TenantId tenantId) {
+        return DaoUtil.getData(deviceProfileRepository.findByDefaultTrueAndTenantId(tenantId.getId()));
+    }
+
+    @Override
+    public DeviceProfileInfo findDefaultDeviceProfileInfo(TenantId tenantId) {
+        return deviceProfileRepository.findDefaultDeviceProfileInfo(tenantId.getId());
+    }
+
+    @Override
+    public DeviceProfile findByProvisionDeviceKey(String provisionDeviceKey) {
+        return DaoUtil.getData(deviceProfileRepository.findByProvisionDeviceKey(provisionDeviceKey));
+    }
+
+    @Override
+    public DeviceProfile findByName(TenantId tenantId, String profileName) {
+        return DaoUtil.getData(deviceProfileRepository.findByTenantIdAndName(tenantId.getId(), profileName));
+    }
+
+    @Override
+    public PageData<DeviceProfile> findAllWithImages(PageLink pageLink) {
+        return DaoUtil.toPageData(deviceProfileRepository.findAllByImageNotNull(DaoUtil.toPageable(pageLink)));
+    }
+
+    @Override
+    public List<EntityInfo> findTenantDeviceProfileNames(UUID tenantId, boolean activeOnly) {
+        return activeOnly ?
+                deviceProfileRepository.findActiveTenantDeviceProfileNames(tenantId) :
+                deviceProfileRepository.findAllTenantDeviceProfileNames(tenantId);
+    }
+
+    @Override
+    public DeviceProfile findByTenantIdAndExternalId(UUID tenantId, UUID externalId) {
+        return DaoUtil.getData(deviceProfileRepository.findByTenantIdAndExternalId(tenantId, externalId));
+    }
+
+    @Override
+    public DeviceProfile findByTenantIdAndName(UUID tenantId, String name) {
+        return DaoUtil.getData(deviceProfileRepository.findByTenantIdAndName(tenantId, name));
+    }
+
+    @Override
+    public PageData<DeviceProfile> findByTenantId(UUID tenantId, PageLink pageLink) {
+        return findDeviceProfiles(TenantId.fromUUID(tenantId), pageLink);
+    }
+
+    @Override
+    public DeviceProfileId getExternalIdByInternal(DeviceProfileId internalId) {
+        return Optional.ofNullable(deviceProfileRepository.getExternalIdById(internalId.getId()))
+                .map(DeviceProfileId::new).orElse(null);
+    }
+
+    @Override
+    public DeviceProfile findDefaultEntityByTenantId(UUID tenantId) {
+        return findDefaultDeviceProfile(TenantId.fromUUID(tenantId));
+    }
+
+    @Override
+    public List<DeviceProfileInfo> findByTenantAndImageLink(TenantId tenantId, String imageLink, int limit) {
+        return deviceProfileRepository.findByTenantAndImageLink(tenantId.getId(), imageLink, PageRequest.of(0, limit));
+    }
+
+    @Override
+    public List<DeviceProfileInfo> findByImageLink(String imageLink, int limit) {
+        return deviceProfileRepository.findByImageLink(imageLink, PageRequest.of(0, limit));
+    }
+
+    @Override
+    public PageData<DeviceProfile> findAllByTenantId(TenantId tenantId, PageLink pageLink) {
+        return findDeviceProfiles(tenantId, pageLink);
+    }
+
+    @Override
+    public List<DeviceProfileFields> findNextBatch(UUID id, int batchSize) {
+        return deviceProfileRepository.findNextBatch(id, Limit.of(batchSize));
+    }
+
+    @Override
+    public EntityType getEntityType() {
+        return EntityType.DEVICE_PROFILE;
+    }
+
+}

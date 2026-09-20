@@ -1,0 +1,23 @@
+package com.jnks.iot.server.common.data;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.common.data.id.HasId;
+import com.jnks.iot.server.common.data.id.TenantId;
+
+public interface ExportableEntity<I extends EntityId> extends HasId<I>, HasName {
+
+    void setId(I id);
+
+    @Schema(description = "JSON object with External Id from the VCS", accessMode = Schema.AccessMode.READ_ONLY, hidden = true)
+    I getExternalId();
+
+    void setExternalId(I externalId);
+
+    long getCreatedTime();
+
+    void setCreatedTime(long createdTime);
+
+    void setTenantId(TenantId tenantId);
+
+}

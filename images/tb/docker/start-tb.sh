@@ -13,14 +13,14 @@ if [ ! -f ${firstlaunch} ]; then
 fi
 
 if [ -f ${firstlaunch} ]; then
-    echo "Starting ThingsBoard ..."
+    echo "Starting JnksIOT ..."
 
-    java -cp ${jarfile} $JAVA_OPTS -Dloader.main=org.thingsboard.server.ThingsboardServerApplication \
+    java -cp ${jarfile} $JAVA_OPTS -Dloader.main=com.jnks.iot.server.JnksIotServerApplication \
                         -Dspring.jpa.hibernate.ddl-auto=none \
                         -Dlogging.config=${CONF_FOLDER}/logback.xml \
                         org.springframework.boot.loader.launch.PropertiesLauncher
 else
-    echo "ERROR: ThingsBoard is not installed"
+    echo "ERROR: JnksIOT is not installed"
 fi
 
 stop-db.sh

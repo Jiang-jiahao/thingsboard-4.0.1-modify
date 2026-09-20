@@ -23,15 +23,15 @@
         </encoder>
     </appender>
 
-    <logger name="org.thingsboard.server.install" level="INFO">
+    <logger name="com.jnks.iot.server.install" level="INFO">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="org.thingsboard.server.service.install" level="INFO">
+    <logger name="com.jnks.iot.server.service.install" level="INFO">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="org.thingsboard.server.ThingsboardInstallApplication" level="ERROR">
+    <logger name="com.jnks.iot.server.JnksIotInstallApplication" level="ERROR">
         <appender-ref ref="STDOUT" />
     </logger>
 
@@ -39,11 +39,11 @@
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="org.thingsboard.server.config.jwt" level="INFO">
+    <logger name="com.jnks.iot.server.config.jwt" level="INFO">
         <appender-ref ref="STDOUT" />
     </logger>
 
-    <logger name="org.thingsboard.server" level="INFO" />
+    <logger name="com.jnks.iot.server" level="INFO" />
 
     <root level="INFO">
         <appender-ref ref="fileLogAppender"/>

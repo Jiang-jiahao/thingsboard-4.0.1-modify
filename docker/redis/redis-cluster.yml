@@ -2,14 +2,14 @@ version: '3.0'
 
 services:
 # Redis cluster
-# The latest version of Redis compatible with ThingsBoard is 7.2
+# The latest version of Redis compatible with JnksIOT is 7.2
   redis-node-0:
     image: bitnami/redis-cluster:7.2
     volumes:
       - ../tb-monolith/redis-cluster-data-0:/bitnami/redis/data
     environment:
-      - 'REDIS_PASSWORD=thingsboard'
-      - 'REDISCLI_AUTH=thingsboard'
+      - 'REDIS_PASSWORD=jnks-iot'
+      - 'REDISCLI_AUTH=jnks-iot'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-1:
@@ -19,8 +19,8 @@ services:
     depends_on:
       - redis-node-0
     environment:
-      - 'REDIS_PASSWORD=thingsboard'
-      - 'REDISCLI_AUTH=thingsboard'
+      - 'REDIS_PASSWORD=jnks-iot'
+      - 'REDISCLI_AUTH=jnks-iot'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-2:
@@ -30,8 +30,8 @@ services:
     depends_on:
       - redis-node-1
     environment:
-      - 'REDIS_PASSWORD=thingsboard'
-      - 'REDISCLI_AUTH=thingsboard'
+      - 'REDIS_PASSWORD=jnks-iot'
+      - 'REDISCLI_AUTH=jnks-iot'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-3:
@@ -41,8 +41,8 @@ services:
     depends_on:
       - redis-node-2
     environment:
-      - 'REDIS_PASSWORD=thingsboard'
-      - 'REDISCLI_AUTH=thingsboard'
+      - 'REDIS_PASSWORD=jnks-iot'
+      - 'REDISCLI_AUTH=jnks-iot'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-4:
@@ -52,8 +52,8 @@ services:
     depends_on:
       - redis-node-3
     environment:
-      - 'REDIS_PASSWORD=thingsboard'
-      - 'REDISCLI_AUTH=thingsboard'
+      - 'REDIS_PASSWORD=jnks-iot'
+      - 'REDISCLI_AUTH=jnks-iot'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-5:
@@ -67,13 +67,13 @@ services:
       - redis-node-3
       - redis-node-4
     environment:
-      - 'REDIS_PASSWORD=thingsboard'
-      - 'REDISCLI_AUTH=thingsboard'
+      - 'REDIS_PASSWORD=jnks-iot'
+      - 'REDISCLI_AUTH=jnks-iot'
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
       - 'REDIS_CLUSTER_REPLICAS=1'
       - 'REDIS_CLUSTER_CREATOR=yes'
 
-# ThingsBoard setup to use redis-cluster
+# JnksIOT setup to use redis-cluster
   tb-core1:
     env_file:
       - ../redis/cache-redis-cluster.env

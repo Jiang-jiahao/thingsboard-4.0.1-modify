@@ -23,7 +23,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.thingsboard.server" level="INFO" />
+    <logger name="com.jnks.iot.server" level="INFO" />
 
     <logger name="com.microsoft.azure.servicebus.primitives.CoreMessageReceiver" level="OFF" />
 

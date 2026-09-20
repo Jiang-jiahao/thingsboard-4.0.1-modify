@@ -7,7 +7,7 @@ services:
     ports:
     - "5432"
     environment:
-      POSTGRES_DB: thingsboard
+      POSTGRES_DB: jnks_iot
       POSTGRES_PASSWORD: postgres
       # 数据目录是挂载点下的子目录，且容器以 postgres(999) 身份直接跑 —— 这两条是为 macOS 准备的：
       # Docker Desktop 里「容器内看到的属主 = 创建者的 uid，chown 是空操作」，宿主建的目录（包括挂载点本身）

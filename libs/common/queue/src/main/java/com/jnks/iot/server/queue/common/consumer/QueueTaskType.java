@@ -1,0 +1,10 @@
+package com.jnks.iot.server.queue.common.consumer;
+
+import java.io.Serializable;
+
+public enum QueueTaskType implements Serializable {
+
+    UPDATE_PARTITIONS, UPDATE_CONFIG, DELETE,
+    ADD_PARTITIONS, REMOVE_PARTITIONS, DELETE_PARTITIONS
+
+}

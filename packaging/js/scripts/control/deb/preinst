@@ -12,6 +12,6 @@ if ! getent passwd ${pkg.user} >/dev/null; then
             --disabled-password \
             --home ${pkg.installFolder} \
             --no-create-home \
-            -gecos "Thingsboard application" \
+            -gecos "JnksIOT application" \
             ${pkg.user}
 fi

@@ -2,19 +2,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.thingsboard</groupId>
+        <groupId>com.jnks.iot</groupId>
         <version>4.0.1</version>
-        <artifactId>thingsboard</artifactId>
+        <artifactId>jnks-iot</artifactId>
     </parent>
     <artifactId>images</artifactId>
     <packaging>pom</packaging>
 
     <name>images</name>
-    <url>https://thingsboard.io</url>
+    <url>https://iot.example.com</url>
 
     <properties>
         <main.dir>${basedir}/..</main.dir>
-        <docker.repo>thingsboard</docker.repo>
+        <docker.repo>jnks-iot</docker.repo>
         <dockerfile.skip>true</dockerfile.skip>
         <dockerfile-maven.version>1.4.13</dockerfile-maven.version>
         <docker.push-arm-amd-image.phase>none</docker.push-arm-amd-image.phase>
@@ -22,7 +22,7 @@
 
     <modules>
         <!--Modules order is important to speedup parallel build and avoid yarn pgk parallel execution-->
-        <!-- tb（一体化 tb-postgres / tb-cassandra）先不参与构建：它依赖的安装流程（ThingsboardInstallApplication）在当前代码里不存在 -->
+        <!-- tb（一体化 tb-postgres / tb-cassandra）先不参与构建：它依赖的安装流程（JnksIotInstallApplication）在当前代码里不存在 -->
         <!-- <module>tb</module> -->
         <module>web-ui</module>
         <module>tb-vc-executor-image</module>

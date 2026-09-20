@@ -2,7 +2,7 @@ version: '3.0'
 
 services:
 # Redis standalone
-# The latest version of Redis compatible with ThingsBoard is 7.2
+# The latest version of Redis compatible with JnksIOT is 7.2
   redis:
     restart: always
     image: bitnami/redis:7.2
@@ -20,7 +20,7 @@ services:
       - ./tb-node/redis-data:/bitnami/redis/data
       - ./redis-certs:/redis/certs
 
-# ThingsBoard setup to use redis-standalone
+# JnksIOT setup to use redis-standalone
   tb-core1:
     env_file:
       - cache-redis.env

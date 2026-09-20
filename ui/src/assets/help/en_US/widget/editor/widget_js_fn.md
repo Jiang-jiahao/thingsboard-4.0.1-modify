@@ -30,7 +30,7 @@ In order to implement a new widget, the following JavaScript functions should be
 ##### Creating simple widgets 
 
 The tutorials below show how to create minimal widgets of each type.
-In order to minimize the amount of code, the Angular framework will be used, on which ThingsBoard UI is actually based.
+In order to minimize the amount of code, the Angular framework will be used, on which JnksIOT UI is actually based.
 By the way, you can always use pure JavaScript or jQuery API in your widget code.
 
 <br>

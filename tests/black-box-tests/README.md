@@ -1,7 +1,7 @@
 
 ## Black box tests execution
-To run the black box tests with using Docker, the local Docker images of Thingsboard's microservices should be built. <br />
-- Build the local Docker images in the directory with the Thingsboard's main [pom.xml](./../../pom.xml):
+To run the black box tests with using Docker, the local Docker images of JnksIOT's microservices should be built. <br />
+- Build the local Docker images in the directory with the JnksIOT's main [pom.xml](./../../pom.xml):
         
         mvn clean install -Ddockerfile.skip=false
 - Verify that the new local images were built: 
@@ -9,15 +9,15 @@ To run the black box tests with using Docker, the local Docker images of Thingsb
         docker image ls
 As result, in REPOSITORY column, next images should be present:
         
-        thingsboard/tb-coap-transport
-        thingsboard/tb-lwm2m-transport
-        thingsboard/tb-http-transport
-        thingsboard/tb-mqtt-transport
-        thingsboard/tb-snmp-transport
-        thingsboard/tb-core
-        thingsboard/tb-rule-engine
-        thingsboard/tb-web-ui
-        thingsboard/tb-js-executor
+        jnks-iot/tb-coap-transport
+        jnks-iot/tb-lwm2m-transport
+        jnks-iot/tb-http-transport
+        jnks-iot/tb-mqtt-transport
+        jnks-iot/tb-snmp-transport
+        jnks-iot/tb-core
+        jnks-iot/tb-rule-engine
+        jnks-iot/tb-web-ui
+        jnks-iot/tb-js-executor
 
 - Run the black box tests (without ui tests) in the [tests/black-box-tests](../black-box-tests) directory with Redis standalone:
 
@@ -66,4 +66,4 @@ As result, in REPOSITORY column, next images should be present:
 ### To run a separate test manually on a built UI:
 1. Add the black-box-tests module in the [pom.xml](./../../pom.xml) or add as a Maven project
 2. Add Vm Option "*-DrunLocal=true -Dtb.baseUiUrl=http://localhost:4200/*" in "Run" -> "Edit Configuration" -> "Edit Configuration Templates" -> "TestNG"
-3. To run a specific test, go to the test class in the [UI tests package](src/test/java/org/thingsboard/server/msa/ui/tests) and run the test. Alternatively, go to the [resources](src/test/resources) in the black-box-tests module and run the test suite that you need.
+3. To run a specific test, go to the test class in the [UI tests package](src/test/java/org/jnks-iot/server/msa/ui/tests) and run the test. Alternatively, go to the [resources](src/test/resources) in the black-box-tests module and run the test suite that you need.

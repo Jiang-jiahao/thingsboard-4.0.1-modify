@@ -187,7 +187,7 @@ export class SecuritySettingsComponent extends PageComponent implements HasConfi
   }
 
   private base64Format(control: UntypedFormControl): { [key: string]: boolean } | null {
-    if (control.value === '' || control.value === 'thingsboardDefaultSigningKey') {
+    if (control.value === '' || control.value === 'jnksIotDefaultSigningKey') {
       return null;
     }
     try {

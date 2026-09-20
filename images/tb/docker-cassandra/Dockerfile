@@ -11,7 +11,7 @@ ENV PGDATA=/data/db
 ENV CASSANDRA_DATA=/data/cassandra
 
 ENV SPRING_DRIVER_CLASS_NAME=org.postgresql.Driver
-ENV SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/thingsboard
+ENV SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/jnks_iot
 ENV SPRING_DATASOURCE_USERNAME=${pkg.user}
 
 ENV CASSANDRA_HOST=localhost

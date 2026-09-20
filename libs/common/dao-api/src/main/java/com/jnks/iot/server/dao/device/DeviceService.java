@@ -1,0 +1,104 @@
+package com.jnks.iot.server.dao.device;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import com.jnks.iot.server.common.data.Device;
+import com.jnks.iot.server.common.data.DeviceIdInfo;
+import com.jnks.iot.server.common.data.DeviceInfo;
+import com.jnks.iot.server.common.data.DeviceInfoFilter;
+import com.jnks.iot.server.common.data.DeviceProfile;
+import com.jnks.iot.server.common.data.DeviceTransportType;
+import com.jnks.iot.server.common.data.EntitySubtype;
+import com.jnks.iot.server.common.data.ProfileEntityIdInfo;
+import com.jnks.iot.server.common.data.device.DeviceSearchQuery;
+import com.jnks.iot.server.common.data.id.CustomerId;
+import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.data.id.DeviceProfileId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.ota.OtaPackageType;
+import com.jnks.iot.server.common.data.page.PageData;
+import com.jnks.iot.server.common.data.page.PageLink;
+import com.jnks.iot.server.common.data.security.DeviceCredentials;
+import com.jnks.iot.server.dao.device.provision.ProvisionRequest;
+import com.jnks.iot.server.dao.entity.EntityDaoService;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface DeviceService extends EntityDaoService {
+
+    DeviceInfo findDeviceInfoById(TenantId tenantId, DeviceId deviceId);
+
+    Device findDeviceById(TenantId tenantId, DeviceId deviceId);
+
+    ListenableFuture<Device> findDeviceByIdAsync(TenantId tenantId, DeviceId deviceId);
+
+    Device findDeviceByTenantIdAndName(TenantId tenantId, String name);
+
+    ListenableFuture<Device> findDeviceByTenantIdAndNameAsync(TenantId tenantId, String name);
+
+    Device saveDevice(Device device);
+
+    Device saveDevice(Device device, boolean doValidate);
+
+    Device saveDeviceWithAccessToken(Device device, String accessToken);
+
+    Device saveDeviceWithCredentials(Device device, DeviceCredentials deviceCredentials);
+
+    Device saveDevice(ProvisionRequest provisionRequest, DeviceProfile profile);
+
+    Device assignDeviceToCustomer(TenantId tenantId, DeviceId deviceId, CustomerId customerId);
+
+    Device unassignDeviceFromCustomer(TenantId tenantId, DeviceId deviceId);
+
+    void deleteDevice(TenantId tenantId, DeviceId deviceId);
+
+    PageData<Device> findDevicesByTenantId(TenantId tenantId, PageLink pageLink);
+
+    PageData<DeviceInfo> findDeviceInfosByFilter(DeviceInfoFilter filter, PageLink pageLink);
+
+    PageData<DeviceIdInfo> findDeviceIdInfos(PageLink pageLink);
+
+    PageData<ProfileEntityIdInfo> findProfileEntityIdInfos(PageLink pageLink);
+
+    PageData<ProfileEntityIdInfo> findProfileEntityIdInfosByTenantId(TenantId tenantId, PageLink pageLink);
+
+    PageData<Device> findDevicesByTenantIdAndType(TenantId tenantId, String type, PageLink pageLink);
+
+    PageData<DeviceId> findDeviceIdsByTenantIdAndDeviceProfileId(TenantId tenantId, DeviceProfileId deviceProfileId, PageLink pageLink);
+
+    PageData<Device> findDevicesByTenantIdAndTypeAndEmptyOtaPackage(TenantId tenantId, DeviceProfileId deviceProfileId, OtaPackageType type, PageLink pageLink);
+
+    long countDevicesByTenantIdAndDeviceProfileIdAndEmptyOtaPackage(TenantId tenantId, DeviceProfileId deviceProfileId, OtaPackageType otaPackageType);
+
+    ListenableFuture<List<Device>> findDevicesByTenantIdAndIdsAsync(TenantId tenantId, List<DeviceId> deviceIds);
+
+    List<Device> findDevicesByIds(List<DeviceId> deviceIds);
+
+    ListenableFuture<List<Device>> findDevicesByIdsAsync(List<DeviceId> deviceIds);
+
+    void deleteDevicesByTenantId(TenantId tenantId);
+
+    PageData<Device> findDevicesByTenantIdAndCustomerId(TenantId tenantId, CustomerId customerId, PageLink pageLink);
+
+    PageData<Device> findDevicesByTenantIdAndCustomerIdAndType(TenantId tenantId, CustomerId customerId, String type, PageLink pageLink);
+
+    ListenableFuture<List<Device>> findDevicesByTenantIdCustomerIdAndIdsAsync(TenantId tenantId, CustomerId customerId, List<DeviceId> deviceIds);
+
+    void unassignCustomerDevices(TenantId tenantId, CustomerId customerId);
+
+    ListenableFuture<List<Device>> findDevicesByQuery(TenantId tenantId, DeviceSearchQuery query);
+
+    @Deprecated(since = "3.6.2", forRemoval = true)
+    ListenableFuture<List<EntitySubtype>> findDeviceTypesByTenantId(TenantId tenantId);
+
+    Device assignDeviceToTenant(TenantId tenantId, Device device);
+
+    PageData<UUID> findDevicesIdsByDeviceProfileTransportType(DeviceTransportType transportType, PageLink pageLink);
+
+    /**
+     * 驱逐本节点设备缓存（按 id 与名称）。多 Core + caffeine 时，由集群生命周期广播调用，
+     * 避免其它节点继续命中过期的连接配置。
+     */
+    void evictCache(TenantId tenantId, DeviceId deviceId, String newName, String oldName);
+
+}

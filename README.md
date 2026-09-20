@@ -1,40 +1,63 @@
-# ThingsBoard 
-[![ThingsBoard Builds Server Status](https://img.shields.io/teamcity/build/e/ThingsBoard_Build?label=TB%20builds%20server&server=https%3A%2F%2Fbuilds.thingsboard.io&logo=data:image/png;base64,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&labelColor=305680)](https://builds.thingsboard.io/viewType.html?buildTypeId=ThingsBoard_Build&guest=1)
+# JnksIOT 物联网平台
 
-ThingsBoard is an open-source IoT platform for data collection, processing, visualization, and device management.
+杰能科世物联网平台。设备接入、数据采集、规则引擎、可视化与多租户管理。
 
-<img src="./img/logo.png?raw=true" width="100" height="100">
+## 能力概览
 
-## Documentation
+- **设备接入**：MQTT、HTTP、CoAP、LwM2M、SNMP、TCP、UDP 七种传输协议
+- **数据处理**：规则引擎（节点可编排）、计算字段、告警
+- **可视化**：仪表盘、部件库、SCADA 符号
+- **管理**：多租户、设备档案、客户、资产、实体视图
+- **集成**：REST API、版本控制、通知（邮件 / SMS / 移动推送）
 
-ThingsBoard documentation is hosted on [thingsboard.io](https://thingsboard.io/docs).
+## 构建
 
-## IoT use cases
+需要 **JDK 17+**（推荐 21）和 **Maven 3.6.3+**。
 
-[**Smart energy**](https://thingsboard.io/smart-energy/)
-[![Smart energy](https://user-images.githubusercontent.com/8308069/152984256-eb48564a-645c-468d-912b-f554b63104a5.gif "Smart energy")](https://thingsboard.io/smart-energy/)
+```bash
+mvn clean install -DskipTests
+```
 
-[**Fleet tracking**](https://thingsboard.io/fleet-tracking/)
-[![Fleet tracking](https://user-images.githubusercontent.com/8308069/152984528-0054ed55-8b8b-4cda-ba45-02fe95a81222.gif "Fleet tracking")](https://thingsboard.io/fleet-tracking/)
+> 不要加 `-Dmaven.test.skip=true`。`apps/base` 依赖 `libs/dao` 的 test-jar，
+> 完全跳过测试会让该构件不被生成，构建报
+> `Could not find artifact ...:dao:jar:tests`。
 
-[**Smart farming**](https://thingsboard.io/smart-farming/)
-[![Smart farming](https://user-images.githubusercontent.com/8308069/152984443-a98b7d3d-ff7a-4037-9011-e71e1e6f755f.gif "Smart farming")](https://thingsboard.io/smart-farming/)
+打包可运行的 boot jar：
 
-[**IoT Rule Engine**](https://thingsboard.io/docs/user-guide/rule-engine-2-0/re-getting-started/)
-[![IoT Rule Engine](https://img.thingsboard.io/demo/send-email-rule-chain.gif "IoT Rule Engine")](https://thingsboard.io/docs/user-guide/rule-engine-2-0/re-getting-started/)
+```bash
+mvn -pl apps/tb-core,apps/tb-rule-engine -am package -DskipTests -Dpkg.package.phase=none
+```
 
-[**Smart metering**](https://thingsboard.io/smart-metering/)
-[![Smart metering](https://user-images.githubusercontent.com/8308069/31455788-6888a948-aec1-11e7-9819-410e0ba785e0.gif "Smart metering")](https://thingsboard.io/smart-metering/)
+产物在各自 `target/jnks-iot-*-boot.jar`。
 
-## Getting Started
+## 前端
 
-Collect and Visualize your IoT data in minutes by following this [guide](https://thingsboard.io/docs/getting-started-guides/helloworld/).
+`ui/` 不在 Maven reactor 里，要单独构建：
 
-## Support
+```bash
+cd ui && npx ng build --configuration production
+```
 
- - [Q&A forum](https://groups.google.com/forum/#!forum/thingsboard)
- - [Stackoverflow](http://stackoverflow.com/questions/tagged/thingsboard)
+产物在 `ui/target/generated-resources/public`。
 
-## Licenses
+## 部署
 
-This project is released under [Apache 2.0 License](./LICENSE).
+见 [docker/DEPLOY.md](docker/DEPLOY.md) —— 整库初始化、镜像构建、compose 起栈、
+nginx 网关与证书的完整步骤，以及已知的坑。
+
+容器编排说明见 [docker/README.md](docker/README.md)。
+
+## 模块结构
+
+```
+apps/       可运行服务：tb-core / tb-rule-engine / tb-transport（7 种协议）
+            / tb-edqs / monolith / vc-executor
+libs/       公共库：common（数据模型、消息、队列、缓存）、dao、rule-engine
+            、transport、netty-mqtt
+ui/         Angular 前端
+docker/     部署编排与脚本
+images/     各服务的 Docker 镜像定义
+clients/    Java REST 客户端
+tools/      迁移等工具
+tests/      黑盒测试
+```

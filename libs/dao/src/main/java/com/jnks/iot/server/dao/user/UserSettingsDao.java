@@ -1,0 +1,23 @@
+package com.jnks.iot.server.dao.user;
+
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.id.UserId;
+import com.jnks.iot.server.common.data.settings.UserSettings;
+import com.jnks.iot.server.common.data.settings.UserSettingsCompositeKey;
+import com.jnks.iot.server.common.data.settings.UserSettingsType;
+
+import java.util.List;
+
+public interface UserSettingsDao {
+
+    UserSettings save(TenantId tenantId, UserSettings userSettings);
+
+    UserSettings findById(TenantId tenantId, UserSettingsCompositeKey key);
+
+    void removeById(TenantId tenantId, UserSettingsCompositeKey key);
+
+    void removeByUserId(TenantId tenantId, UserId userId);
+
+    List<UserSettings> findByTypeAndPath(TenantId tenantId, UserSettingsType type, String... path);
+
+}

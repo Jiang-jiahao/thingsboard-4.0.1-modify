@@ -1,0 +1,16 @@
+package com.jnks.iot.server.common.data.device.profile;
+
+import lombok.Data;
+import com.jnks.iot.server.common.data.DeviceProfileProvisionType;
+
+@Data
+public class DisabledDeviceProfileProvisionConfiguration implements DeviceProfileProvisionConfiguration {
+
+    private final String provisionDeviceSecret;
+
+    @Override
+    public DeviceProfileProvisionType getType() {
+        return DeviceProfileProvisionType.DISABLED;
+    }
+
+}

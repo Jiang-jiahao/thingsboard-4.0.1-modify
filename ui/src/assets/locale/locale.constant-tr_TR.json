@@ -159,7 +159,7 @@
     "user-lockout-notification-email": "Hesap kilidi kaldırıldığında bilgilendirme maili gönder",
     "domain-name": "Alan adı",
     "domain-name-unique": "Alan adı ve protokolün benzersiz olması gerekir.",
-    "error-verification-url": "Bir alan adı '/' ve ':' sembollerini içermemelidir. Örnek: thingsboard.io",
+    "error-verification-url": "Bir alan adı '/' ve ':' sembollerini içermemelidir. Örnek: iot.example.com",
     "oauth2": {
       "access-token-uri": "Erişim belirteci URI'si",
       "access-token-uri-required": "Erişim belirteci URI'si gerekli.",
@@ -2299,7 +2299,7 @@
     "tenant-required": "Tenant gerekli",
     "search": "Tenantları ara",
     "selected-tenants": "{ count, plural, =1 {1 tenant} other {# tenant} } seçildi",
-    "isolated-tb-rule-engine": "ThingsBoard soyutlanmış kural yönetimi konteynerda işlensin",
+    "isolated-tb-rule-engine": "JnksIOT soyutlanmış kural yönetimi konteynerda işlensin",
     "isolated-tb-rule-engine-details": "Her soyutlanmış tenant ayrı bir mikro servis gerektirir"
   },
   "tenant-profile": {

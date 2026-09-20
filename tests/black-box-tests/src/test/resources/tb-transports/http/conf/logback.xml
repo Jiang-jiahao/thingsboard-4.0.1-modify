@@ -23,14 +23,14 @@
         </encoder>
     </appender>
 
-    <logger name="org.thingsboard.server" level="INFO" />
+    <logger name="com.jnks.iot.server" level="INFO" />
 
     <logger name="com.microsoft.azure.servicebus.primitives.CoreMessageReceiver" level="OFF" />
 
     <logger name="org.apache.kafka.common.utils.AppInfoParser" level="WARN"/>
     <logger name="org.apache.kafka.clients" level="WARN"/>
 
-    <logger name="org.thingsboard.server.transport.http" level="TRACE"/>
+    <logger name="com.jnks.iot.server.transport.http" level="TRACE"/>
 
     <root level="INFO">
         <appender-ref ref="fileLogAppender"/>

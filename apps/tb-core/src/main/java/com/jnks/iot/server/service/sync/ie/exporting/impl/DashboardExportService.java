@@ -1,0 +1,49 @@
+package com.jnks.iot.server.service.sync.ie.exporting.impl;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.common.util.JacksonUtil;
+import com.jnks.iot.server.common.data.Dashboard;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.id.DashboardId;
+import com.jnks.iot.server.common.data.sync.ie.EntityExportData;
+import com.jnks.iot.server.service.sync.vc.data.EntitiesExportCtx;
+
+import java.util.Collections;
+import java.util.Set;
+
+import static com.jnks.iot.server.service.sync.ie.importing.impl.DashboardImportService.WIDGET_CONFIG_PROCESSED_FIELDS_PATTERN;
+
+/**
+ * 针对 {@link Dashboard} 的导出服务，继承 {@link BaseEntityExportService}。
+ * <p>
+ * 将已分配客户替换为 externalId；递归替换实体别名及 widget 动作配置中的 UUID，保证跨环境可导入。
+ */
+@Service
+public class DashboardExportService extends BaseEntityExportService<DashboardId, Dashboard, EntityExportData<Dashboard>> {
+
+    /**
+     * 替换已分配客户 ID，以及别名/widget 动作配置里的实体 UUID。
+     */
+    @Override
+    protected void setRelatedEntities(EntitiesExportCtx<?> ctx, Dashboard dashboard, EntityExportData<Dashboard> exportData) {
+        if (CollectionUtils.isNotEmpty(dashboard.getAssignedCustomers())) {
+            dashboard.getAssignedCustomers().forEach(customerInfo -> {
+                customerInfo.setCustomerId(getExternalIdOrElseInternal(ctx, customerInfo.getCustomerId()));
+            });
+        }
+        for (JsonNode entityAlias : dashboard.getEntityAliasesConfig()) {
+            replaceUuidsRecursively(ctx, entityAlias, Set.of("id"), null);
+        }
+        for (JsonNode widgetConfig : dashboard.getWidgetsConfig()) {
+            replaceUuidsRecursively(ctx, JacksonUtil.getSafely(widgetConfig, "config", "actions"), Collections.emptySet(), WIDGET_CONFIG_PROCESSED_FIELDS_PATTERN);
+        }
+    }
+
+    @Override
+    public Set<EntityType> getSupportedEntityTypes() {
+        return Set.of(EntityType.DASHBOARD);
+    }
+
+}

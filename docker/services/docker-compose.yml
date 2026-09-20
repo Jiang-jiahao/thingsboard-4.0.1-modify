@@ -35,7 +35,7 @@ services:
       - tb-core/tb-core.env
     volumes:
       - ./tb-core/conf:/config
-      - ./tb-core/log:/var/log/thingsboard-core
+      - ./tb-core/log:/var/log/jnks-iot-core
     depends_on:
       - zookeeper
       - tb-js-executor
@@ -58,7 +58,7 @@ services:
       - tb-core/tb-core.env
     volumes:
       - ./tb-core/conf:/config
-      - ./tb-core/log:/var/log/thingsboard-core
+      - ./tb-core/log:/var/log/jnks-iot-core
     depends_on:
       - zookeeper
       - tb-js-executor
@@ -81,7 +81,7 @@ services:
       - tb-rule-engine/tb-rule-engine.env
     volumes:
       - ./tb-rule-engine/conf:/config
-      - ./tb-rule-engine/log:/var/log/thingsboard-rule-engine
+      - ./tb-rule-engine/log:/var/log/jnks-iot-rule-engine
     depends_on:
       - zookeeper
       - tb-js-executor
@@ -102,7 +102,7 @@ services:
       - tb-rule-engine/tb-rule-engine.env
     volumes:
       - ./tb-rule-engine/conf:/config
-      - ./tb-rule-engine/log:/var/log/thingsboard-rule-engine
+      - ./tb-rule-engine/log:/var/log/jnks-iot-rule-engine
     depends_on:
       - zookeeper
       - tb-js-executor

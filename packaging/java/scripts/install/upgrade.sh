@@ -23,7 +23,7 @@ source "${CONF_FOLDER}/${configfile}"
 
 run_user=${pkg.user}
 
-su -s /bin/sh -c "java -cp ${jarfile} $JAVA_OPTS -Dloader.main=org.thingsboard.server.ThingsboardInstallApplication \
+su -s /bin/sh -c "java -cp ${jarfile} $JAVA_OPTS -Dloader.main=com.jnks.iot.server.JnksIotInstallApplication \
                     -Dinstall.data_dir=${installDir} \
                     -Dspring.jpa.hibernate.ddl-auto=none \
                     -Dinstall.upgrade=true \
@@ -32,9 +32,9 @@ su -s /bin/sh -c "java -cp ${jarfile} $JAVA_OPTS -Dloader.main=org.thingsboard.s
                     org.springframework.boot.loader.launch.PropertiesLauncher" "$run_user"
 
 if [ $? -ne 0 ]; then
-    echo "ThingsBoard upgrade failed!"
+    echo "JnksIOT upgrade failed!"
 else
-    echo "ThingsBoard upgraded successfully!"
+    echo "JnksIOT upgraded successfully!"
 fi
 
 exit $?

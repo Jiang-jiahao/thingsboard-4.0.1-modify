@@ -1,0 +1,153 @@
+package com.jnks.iot.server.dao.service;
+
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.jnks.iot.common.util.JnksIotExecutors;
+import com.jnks.iot.server.common.data.Device;
+import com.jnks.iot.server.common.data.cf.CalculatedField;
+import com.jnks.iot.server.common.data.cf.CalculatedFieldType;
+import com.jnks.iot.server.common.data.cf.configuration.Argument;
+import com.jnks.iot.server.common.data.cf.configuration.ArgumentType;
+import com.jnks.iot.server.common.data.cf.configuration.CalculatedFieldConfiguration;
+import com.jnks.iot.server.common.data.cf.configuration.Output;
+import com.jnks.iot.server.common.data.cf.configuration.OutputType;
+import com.jnks.iot.server.common.data.cf.configuration.ReferencedEntityKey;
+import com.jnks.iot.server.common.data.cf.configuration.SimpleCalculatedFieldConfiguration;
+import com.jnks.iot.server.common.data.id.CalculatedFieldId;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.dao.cf.CalculatedFieldService;
+import com.jnks.iot.server.dao.device.DeviceService;
+import com.jnks.iot.server.dao.exception.DataValidationException;
+
+import java.util.Map;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@DaoSqlTest
+public class CalculatedFieldServiceTest extends AbstractServiceTest {
+
+    @Autowired
+    private CalculatedFieldService calculatedFieldService;
+    @Autowired
+    private DeviceService deviceService;
+
+    private ListeningExecutorService executor;
+
+    @Before
+    public void before() {
+        executor = MoreExecutors.listeningDecorator(JnksIotExecutors.newWorkStealingPool(8, getClass()));
+    }
+
+    @After
+    public void after() {
+        executor.shutdownNow();
+    }
+
+    @Test
+    public void testSaveCalculatedField() {
+        Device device = createTestDevice();
+        CalculatedField calculatedField = getCalculatedField(device.getId(), device.getId());
+        CalculatedField savedCalculatedField = calculatedFieldService.save(calculatedField);
+
+        assertThat(savedCalculatedField).isNotNull();
+        assertThat(savedCalculatedField.getId()).isNotNull();
+        assertThat(savedCalculatedField.getCreatedTime()).isGreaterThan(0);
+        assertThat(savedCalculatedField.getTenantId()).isEqualTo(calculatedField.getTenantId());
+        assertThat(savedCalculatedField.getEntityId()).isEqualTo(calculatedField.getEntityId());
+        assertThat(savedCalculatedField.getType()).isEqualTo(calculatedField.getType());
+        assertThat(savedCalculatedField.getName()).isEqualTo(calculatedField.getName());
+        assertThat(savedCalculatedField.getConfiguration()).isEqualTo(calculatedField.getConfiguration());
+        assertThat(savedCalculatedField.getVersion()).isEqualTo(1L);
+
+        savedCalculatedField.setName("Test CF");
+
+        CalculatedField updatedCalculatedField = calculatedFieldService.save(savedCalculatedField);
+
+        assertThat(updatedCalculatedField.getName()).isEqualTo(savedCalculatedField.getName());
+        assertThat(updatedCalculatedField.getVersion()).isEqualTo(savedCalculatedField.getVersion() + 1);
+
+        calculatedFieldService.deleteCalculatedField(tenantId, savedCalculatedField.getId());
+    }
+
+    @Test
+    public void testSaveCalculatedFieldWithExistingName() {
+        Device device = createTestDevice();
+        CalculatedField calculatedField = getCalculatedField(device.getId(), device.getId());
+        calculatedFieldService.save(calculatedField);
+
+        assertThatThrownBy(() -> calculatedFieldService.save(calculatedField))
+                .isInstanceOf(DataValidationException.class)
+                .hasMessage("Calculated Field with such name is already in exists!");
+    }
+
+    @Test
+    public void testFindCalculatedFieldById() {
+        CalculatedField savedCalculatedField = saveValidCalculatedField();
+        CalculatedField fetchedCalculatedField = calculatedFieldService.findById(tenantId, savedCalculatedField.getId());
+
+        assertThat(fetchedCalculatedField).isEqualTo(savedCalculatedField);
+
+        calculatedFieldService.deleteCalculatedField(tenantId, savedCalculatedField.getId());
+    }
+
+    @Test
+    public void testDeleteCalculatedField() {
+        CalculatedField savedCalculatedField = saveValidCalculatedField();
+
+        calculatedFieldService.deleteCalculatedField(tenantId, savedCalculatedField.getId());
+
+        assertThat(calculatedFieldService.findById(tenantId, savedCalculatedField.getId())).isNull();
+    }
+
+    private CalculatedField saveValidCalculatedField() {
+        Device device = createTestDevice();
+        CalculatedField calculatedField = getCalculatedField(device.getId(), device.getId());
+        return calculatedFieldService.save(calculatedField);
+    }
+
+    private CalculatedField getCalculatedField(EntityId entityId, EntityId referencedEntityId) {
+        CalculatedField calculatedField = new CalculatedField();
+        calculatedField.setTenantId(tenantId);
+        calculatedField.setEntityId(entityId);
+        calculatedField.setType(CalculatedFieldType.SIMPLE);
+        calculatedField.setName("Test Calculated Field");
+        calculatedField.setConfigurationVersion(1);
+        calculatedField.setConfiguration(getCalculatedFieldConfig(referencedEntityId));
+        return calculatedField;
+    }
+
+    private CalculatedFieldConfiguration getCalculatedFieldConfig(EntityId referencedEntityId) {
+        SimpleCalculatedFieldConfiguration config = new SimpleCalculatedFieldConfiguration();
+
+        Argument argument = new Argument();
+        argument.setRefEntityId(referencedEntityId);
+        ReferencedEntityKey refEntityKey = new ReferencedEntityKey("temperature", ArgumentType.TS_LATEST, null);
+        argument.setRefEntityKey(refEntityKey);
+
+        config.setArguments(Map.of("T", argument));
+
+        config.setExpression("T - (100 - H) / 5");
+
+        Output output = new Output();
+        output.setName("output");
+        output.setType(OutputType.TIME_SERIES);
+
+        config.setOutput(output);
+
+        return config;
+    }
+
+    private Device createTestDevice() {
+        Device device = new Device();
+        device.setTenantId(tenantId);
+        device.setName("Test");
+        return deviceService.saveDevice(device);
+    }
+
+}

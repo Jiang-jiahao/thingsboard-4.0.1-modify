@@ -1,0 +1,61 @@
+package com.jnks.iot.server.transport.coap;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import com.jnks.iot.server.common.transport.TransportContext;
+import com.jnks.iot.server.gen.transport.TransportProtos;
+import com.jnks.iot.server.transport.coap.adaptors.JsonCoapAdaptor;
+import com.jnks.iot.server.transport.coap.adaptors.ProtoCoapAdaptor;
+import com.jnks.iot.server.transport.coap.client.CoapClientContext;
+import com.jnks.iot.server.transport.coap.efento.adaptor.EfentoCoapAdaptor;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+/**
+ * Created by ashvayka on 18.10.18.
+ */
+@Slf4j
+@ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${coap.server.enabled:true}'=='true' && '${transport.coap.enabled:true}'=='true'")
+@Component
+@Getter
+public class CoapTransportContext extends TransportContext {
+
+    @Value("${transport.sessions.report_timeout}")
+    private long sessionReportTimeout;
+
+    @Getter
+    @Value("${transport.coap.timeout}")
+    private Long timeout;
+
+    @Getter
+    @Value("${transport.coap.piggyback_timeout}")
+    private Long piggybackTimeout;
+
+    @Getter
+    @Value("${transport.coap.psm_activity_timer:10000}")
+    private long psmActivityTimer;
+
+    @Getter
+    @Value("${transport.coap.paging_transmission_window:10000}")
+    private long pagingTransmissionWindow;
+
+    @Autowired
+    private JsonCoapAdaptor jsonCoapAdaptor;
+
+    @Autowired
+    private ProtoCoapAdaptor protoCoapAdaptor;
+
+    @Autowired
+    private EfentoCoapAdaptor efentoCoapAdaptor;
+
+    @Autowired
+    private CoapClientContext clientContext;
+
+    private final ConcurrentMap<Integer, TransportProtos.ToDeviceRpcRequestMsg> rpcAwaitingAck = new ConcurrentHashMap<>();
+
+}

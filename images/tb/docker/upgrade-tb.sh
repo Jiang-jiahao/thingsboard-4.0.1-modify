@@ -7,12 +7,12 @@ configfile=${pkg.name}.conf
 
 source "${CONF_FOLDER}/${configfile}"
 
-echo "Starting ThingsBoard upgrade ..."
+echo "Starting JnksIOT upgrade ..."
 
-java -cp ${jarfile} $JAVA_OPTS -Dloader.main=org.thingsboard.server.ThingsboardInstallApplication \
+java -cp ${jarfile} $JAVA_OPTS -Dloader.main=com.jnks.iot.server.JnksIotInstallApplication \
                 -Dspring.jpa.hibernate.ddl-auto=none \
                 -Dinstall.upgrade=true \
-                -Dlogging.config=/usr/share/thingsboard/bin/install/logback.xml \
+                -Dlogging.config=/usr/share/jnks-iot/bin/install/logback.xml \
                 org.springframework.boot.loader.launch.PropertiesLauncher
 
 stop-db.sh

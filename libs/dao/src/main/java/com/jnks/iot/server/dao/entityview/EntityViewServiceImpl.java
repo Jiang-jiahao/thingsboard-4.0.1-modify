@@ -1,0 +1,401 @@
+package com.jnks.iot.server.dao.entityview;
+
+import com.google.common.base.Function;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+import jakarta.annotation.Nullable;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionalEventListener;
+import com.jnks.iot.server.common.data.EntitySubtype;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.EntityView;
+import com.jnks.iot.server.common.data.EntityViewInfo;
+import com.jnks.iot.server.common.data.StringUtils;
+import com.jnks.iot.server.common.data.entityview.EntityViewSearchQuery;
+import com.jnks.iot.server.common.data.id.CustomerId;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.common.data.id.EntityViewId;
+import com.jnks.iot.server.common.data.id.HasId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.page.PageData;
+import com.jnks.iot.server.common.data.page.PageLink;
+import com.jnks.iot.server.common.data.relation.EntityRelation;
+import com.jnks.iot.server.common.data.relation.EntitySearchDirection;
+import com.jnks.iot.server.dao.entity.CachedVersionedEntityService;
+import com.jnks.iot.server.dao.eventsourcing.DeleteEntityEvent;
+import com.jnks.iot.server.dao.eventsourcing.SaveEntityEvent;
+import com.jnks.iot.server.dao.exception.DataValidationException;
+import com.jnks.iot.server.dao.service.PaginatedRemover;
+import com.jnks.iot.server.dao.service.validator.EntityViewDataValidator;
+import com.jnks.iot.server.dao.sql.JpaExecutorService;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static com.jnks.iot.server.dao.service.Validator.validateId;
+import static com.jnks.iot.server.dao.service.Validator.validatePageLink;
+import static com.jnks.iot.server.dao.service.Validator.validateString;
+
+/**
+ * Created by Victor Basanets on 8/28/2017.
+ */
+@Service("EntityViewDaoService")
+@Slf4j
+public class EntityViewServiceImpl extends CachedVersionedEntityService<EntityViewCacheKey, EntityViewCacheValue, EntityViewEvictEvent> implements EntityViewService {
+
+    public static final String INCORRECT_TENANT_ID = "Incorrect tenantId ";
+    public static final String INCORRECT_CUSTOMER_ID = "Incorrect customerId ";
+    public static final String INCORRECT_ENTITY_VIEW_ID = "Incorrect entityViewId ";
+
+    @Autowired
+    private EntityViewDao entityViewDao;
+
+    @Autowired
+    private EntityViewDataValidator entityViewValidator;
+
+    @Autowired
+    protected JpaExecutorService service;
+
+    @TransactionalEventListener(classes = EntityViewEvictEvent.class)
+    @Override
+    public void handleEvictEvent(EntityViewEvictEvent event) {
+        List<EntityViewCacheKey> toEvict = new ArrayList<>(5);
+        toEvict.add(EntityViewCacheKey.byName(event.getTenantId(), event.getNewName()));
+        if (event.getSavedEntityView() != null) {
+            cache.put(EntityViewCacheKey.byId(event.getSavedEntityView().getId()), new EntityViewCacheValue(event.getSavedEntityView(), null));
+        } else if (event.getEntityViewId() != null) {
+            toEvict.add(EntityViewCacheKey.byId(event.getEntityViewId()));
+        }
+        toEvict.add(EntityViewCacheKey.byEntityId(event.getTenantId(), event.getNewEntityId()));
+        if (event.getOldEntityId() != null && !event.getOldEntityId().equals(event.getNewEntityId())) {
+            toEvict.add(EntityViewCacheKey.byEntityId(event.getTenantId(), event.getOldEntityId()));
+        }
+        if (StringUtils.isNotEmpty(event.getOldName()) && !event.getOldName().equals(event.getNewName())) {
+            toEvict.add(EntityViewCacheKey.byName(event.getTenantId(), event.getOldName()));
+        }
+        cache.evict(toEvict);
+    }
+
+    @Override
+    public EntityView saveEntityView(EntityView entityView) {
+        return saveEntityView(entityView, true);
+    }
+
+    @Override
+    public EntityView saveEntityView(EntityView entityView, boolean doValidate) {
+        log.trace("Executing save entity view [{}]", entityView);
+        EntityView old = null;
+        if (doValidate) {
+            old = entityViewValidator.validate(entityView, EntityView::getTenantId);
+        } else if (entityView.getId() != null) {
+            old = findEntityViewById(entityView.getTenantId(), entityView.getId(), false);
+        }
+        try {
+            EntityView saved = entityViewDao.save(entityView.getTenantId(), entityView);
+            publishEvictEvent(new EntityViewEvictEvent(saved.getTenantId(), saved.getId(), saved.getEntityId(), old != null ? old.getEntityId() : null, saved.getName(), old != null ? old.getName() : null, saved));
+            eventPublisher.publishEvent(SaveEntityEvent.builder().tenantId(saved.getTenantId())
+                    .entityId(saved.getId()).entity(saved).created(entityView.getId() == null).build());
+            return saved;
+        } catch (Exception t) {
+            checkConstraintViolation(t,
+                    "entity_view_external_id_unq_key", "Entity View with such external id already exists!");
+            throw t;
+        }
+    }
+
+    @Override
+    public EntityView assignEntityViewToCustomer(TenantId tenantId, EntityViewId entityViewId, CustomerId customerId) {
+        EntityView entityView = findEntityViewById(tenantId, entityViewId);
+        if (customerId.equals(entityView.getCustomerId())) {
+            return entityView;
+        }
+        entityView.setCustomerId(customerId);
+        return saveEntityView(entityView);
+    }
+
+    @Override
+    public EntityView unassignEntityViewFromCustomer(TenantId tenantId, EntityViewId entityViewId) {
+        EntityView entityView = findEntityViewById(tenantId, entityViewId);
+        if (entityView.getCustomerId() == null) {
+            return entityView;
+        }
+        entityView.setCustomerId(null);
+        return saveEntityView(entityView);
+    }
+
+    @Override
+    public void unassignCustomerEntityViews(TenantId tenantId, CustomerId customerId) {
+        log.trace("Executing unassignCustomerEntityViews, tenantId [{}], customerId [{}]", tenantId, customerId);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        validateId(customerId, id -> INCORRECT_CUSTOMER_ID + id);
+        customerEntityViewsRemover.removeEntities(tenantId, customerId);
+    }
+
+    @Override
+    public EntityViewInfo findEntityViewInfoById(TenantId tenantId, EntityViewId entityViewId) {
+        log.trace("Executing findEntityViewInfoById [{}]", entityViewId);
+        validateId(entityViewId, id -> INCORRECT_ENTITY_VIEW_ID + id);
+        return entityViewDao.findEntityViewInfoById(tenantId, entityViewId.getId());
+    }
+
+    @Override
+    public EntityView findEntityViewById(TenantId tenantId, EntityViewId entityViewId) {
+        return findEntityViewById(tenantId, entityViewId, true);
+    }
+
+    @Override
+    public EntityView findEntityViewById(TenantId tenantId, EntityViewId entityViewId, boolean putInCache) {
+        log.trace("Executing findEntityViewById [{}]", entityViewId);
+        validateId(entityViewId, id -> INCORRECT_ENTITY_VIEW_ID + id);
+        EntityViewCacheValue value = cache.get(EntityViewCacheKey.byId(entityViewId), () -> {
+            EntityView entityView = entityViewDao.findById(tenantId, entityViewId.getId());
+            return new EntityViewCacheValue(entityView, null);
+        }, putInCache);
+        return value != null ? value.getEntityView() : null;
+    }
+
+    @Override
+    public EntityView findEntityViewByTenantIdAndName(TenantId tenantId, String name) {
+        log.trace("Executing findEntityViewByTenantIdAndName [{}][{}]", tenantId, name);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        return cache.getAndPutInTransaction(EntityViewCacheKey.byName(tenantId, name),
+                () -> entityViewDao.findEntityViewByTenantIdAndName(tenantId.getId(), name).orElse(null)
+                , EntityViewCacheValue::getEntityView, v -> new EntityViewCacheValue(v, null), true);
+
+    }
+
+    @Override
+    public ListenableFuture<EntityView> findEntityViewByTenantIdAndNameAsync(TenantId tenantId, String name) {
+        log.trace("Executing findEntityViewByTenantIdAndNameAsync [{}][{}]", tenantId, name);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        return service.submit(() -> findEntityViewByTenantIdAndName(tenantId, name));
+    }
+
+    @Override
+    public PageData<EntityView> findEntityViewByTenantId(TenantId tenantId, PageLink pageLink) {
+        log.trace("Executing findEntityViewsByTenantId, tenantId [{}], pageLink [{}]", tenantId, pageLink);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        validatePageLink(pageLink);
+        return entityViewDao.findEntityViewsByTenantId(tenantId.getId(), pageLink);
+    }
+
+    @Override
+    public PageData<EntityViewInfo> findEntityViewInfosByTenantId(TenantId tenantId, PageLink pageLink) {
+        log.trace("Executing findEntityViewInfosByTenantId, tenantId [{}], pageLink [{}]", tenantId, pageLink);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        validatePageLink(pageLink);
+        return entityViewDao.findEntityViewInfosByTenantId(tenantId.getId(), pageLink);
+    }
+
+    @Override
+    public PageData<EntityView> findEntityViewByTenantIdAndType(TenantId tenantId, PageLink pageLink, String type) {
+        log.trace("Executing findEntityViewByTenantIdAndType, tenantId [{}], pageLink [{}], type [{}]", tenantId, pageLink, type);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        validatePageLink(pageLink);
+        validateString(type, t -> "Incorrect type " + t);
+        return entityViewDao.findEntityViewsByTenantIdAndType(tenantId.getId(), type, pageLink);
+    }
+
+    @Override
+    public PageData<EntityViewInfo> findEntityViewInfosByTenantIdAndType(TenantId tenantId, String type, PageLink pageLink) {
+        log.trace("Executing findEntityViewInfosByTenantIdAndType, tenantId [{}], pageLink [{}], type [{}]", tenantId, pageLink, type);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        validatePageLink(pageLink);
+        validateString(type, t -> "Incorrect type " + t);
+        return entityViewDao.findEntityViewInfosByTenantIdAndType(tenantId.getId(), type, pageLink);
+    }
+
+    @Override
+    public PageData<EntityView> findEntityViewsByTenantIdAndCustomerId(TenantId tenantId, CustomerId customerId,
+                                                                       PageLink pageLink) {
+        log.trace("Executing findEntityViewByTenantIdAndCustomerId, tenantId [{}], customerId [{}]," +
+                " pageLink [{}]", tenantId, customerId, pageLink);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        validateId(customerId, id -> INCORRECT_CUSTOMER_ID + id);
+        validatePageLink(pageLink);
+        return entityViewDao.findEntityViewsByTenantIdAndCustomerId(tenantId.getId(),
+                customerId.getId(), pageLink);
+    }
+
+    @Override
+    public PageData<EntityViewInfo> findEntityViewInfosByTenantIdAndCustomerId(TenantId tenantId, CustomerId customerId, PageLink pageLink) {
+        log.trace("Executing findEntityViewInfosByTenantIdAndCustomerId, tenantId [{}], customerId [{}]," +
+                " pageLink [{}]", tenantId, customerId, pageLink);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        validateId(customerId, id -> INCORRECT_CUSTOMER_ID + id);
+        validatePageLink(pageLink);
+        return entityViewDao.findEntityViewInfosByTenantIdAndCustomerId(tenantId.getId(),
+                customerId.getId(), pageLink);
+    }
+
+    @Override
+    public PageData<EntityView> findEntityViewsByTenantIdAndCustomerIdAndType(TenantId tenantId, CustomerId customerId, PageLink pageLink, String type) {
+        log.trace("Executing findEntityViewsByTenantIdAndCustomerIdAndType, tenantId [{}], customerId [{}]," +
+                " pageLink [{}], type [{}]", tenantId, customerId, pageLink, type);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        validateId(customerId, id -> INCORRECT_CUSTOMER_ID + id);
+        validatePageLink(pageLink);
+        validateString(type, t -> "Incorrect type " + t);
+        return entityViewDao.findEntityViewsByTenantIdAndCustomerIdAndType(tenantId.getId(),
+                customerId.getId(), type, pageLink);
+    }
+
+    @Override
+    public PageData<EntityViewInfo> findEntityViewInfosByTenantIdAndCustomerIdAndType(TenantId tenantId, CustomerId customerId, String type, PageLink pageLink) {
+        log.trace("Executing findEntityViewInfosByTenantIdAndCustomerIdAndType, tenantId [{}], customerId [{}]," +
+                " pageLink [{}], type [{}]", tenantId, customerId, pageLink, type);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        validateId(customerId, id -> INCORRECT_CUSTOMER_ID + id);
+        validatePageLink(pageLink);
+        validateString(type, t -> "Incorrect type " + t);
+        return entityViewDao.findEntityViewInfosByTenantIdAndCustomerIdAndType(tenantId.getId(),
+                customerId.getId(), type, pageLink);
+    }
+
+    @Override
+    public ListenableFuture<List<EntityView>> findEntityViewsByQuery(TenantId tenantId, EntityViewSearchQuery query) {
+        ListenableFuture<List<EntityRelation>> relations = relationService.findByQuery(tenantId, query.toEntitySearchQuery());
+        ListenableFuture<List<EntityView>> entityViews = Futures.transformAsync(relations, r -> {
+            EntitySearchDirection direction = query.toEntitySearchQuery().getParameters().getDirection();
+            List<ListenableFuture<EntityView>> futures = new ArrayList<>();
+            for (EntityRelation relation : r) {
+                EntityId entityId = direction == EntitySearchDirection.FROM ? relation.getTo() : relation.getFrom();
+                if (entityId.getEntityType() == EntityType.ENTITY_VIEW) {
+                    futures.add(findEntityViewByIdAsync(tenantId, new EntityViewId(entityId.getId())));
+                }
+            }
+            return Futures.successfulAsList(futures);
+        }, MoreExecutors.directExecutor());
+
+        entityViews = Futures.transform(entityViews, new Function<List<EntityView>, List<EntityView>>() {
+            @Nullable
+            @Override
+            public List<EntityView> apply(@Nullable List<EntityView> entityViewList) {
+                return entityViewList == null ? Collections.emptyList() : entityViewList.stream().filter(entityView -> query.getEntityViewTypes().contains(entityView.getType())).collect(Collectors.toList());
+            }
+        }, MoreExecutors.directExecutor());
+
+        return entityViews;
+    }
+
+    @Override
+    public ListenableFuture<EntityView> findEntityViewByIdAsync(TenantId tenantId, EntityViewId entityViewId) {
+        log.trace("Executing findEntityViewByIdAsync [{}]", entityViewId);
+        validateId(entityViewId, id -> INCORRECT_ENTITY_VIEW_ID + id);
+        return entityViewDao.findByIdAsync(tenantId, entityViewId.getId());
+    }
+
+    @Override
+    public ListenableFuture<List<EntityView>> findEntityViewsByTenantIdAndEntityIdAsync(TenantId tenantId, EntityId entityId) {
+        log.trace("Executing findEntityViewsByTenantIdAndEntityIdAsync, tenantId [{}], entityId [{}]", tenantId, entityId);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        validateId(entityId.getId(), id -> "Incorrect entityId" + id);
+
+        return service.submit(() -> cache.getAndPutInTransaction(EntityViewCacheKey.byEntityId(tenantId, entityId),
+                () -> entityViewDao.findEntityViewsByTenantIdAndEntityId(tenantId.getId(), entityId.getId()),
+                EntityViewCacheValue::getEntityViews, v -> new EntityViewCacheValue(null, v), true));
+    }
+
+    @Override
+    public List<EntityView> findEntityViewsByTenantIdAndEntityId(TenantId tenantId, EntityId entityId) {
+        log.trace("Executing findEntityViewsByTenantIdAndEntityId, tenantId [{}], entityId [{}]", tenantId, entityId);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        validateId(entityId.getId(), id -> "Incorrect entityId" + id);
+
+        return cache.getAndPutInTransaction(EntityViewCacheKey.byEntityId(tenantId, entityId),
+                () -> entityViewDao.findEntityViewsByTenantIdAndEntityId(tenantId.getId(), entityId.getId()),
+                EntityViewCacheValue::getEntityViews, v -> new EntityViewCacheValue(null, v), true);
+    }
+
+    @Override
+    public boolean existsByTenantIdAndEntityId(TenantId tenantId, EntityId entityId) {
+        return entityViewDao.existsByTenantIdAndEntityId(tenantId.getId(), entityId.getId());
+    }
+
+    @Override
+    @Transactional
+    public void deleteEntityView(TenantId tenantId, EntityViewId entityViewId) {
+        log.trace("Executing deleteEntityView [{}]", entityViewId);
+        validateId(entityViewId, id -> INCORRECT_ENTITY_VIEW_ID + id);
+        EntityView entityView = entityViewDao.findById(tenantId, entityViewId.getId());
+        if (entityView == null) {
+            return;
+        }
+        entityViewDao.removeById(tenantId, entityViewId.getId());
+        publishEvictEvent(new EntityViewEvictEvent(entityView.getTenantId(), entityView.getId(), entityView.getEntityId(), null, entityView.getName(), null));
+        eventPublisher.publishEvent(DeleteEntityEvent.builder().tenantId(tenantId).entityId(entityViewId).build());
+    }
+
+    @Override
+    @Transactional
+    public void deleteEntity(TenantId tenantId, EntityId id, boolean force) {
+        deleteEntityView(tenantId, (EntityViewId) id);
+    }
+
+    @Override
+    public void deleteEntityViewsByTenantId(TenantId tenantId) {
+        log.trace("Executing deleteEntityViewsByTenantId, tenantId [{}]", tenantId);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        tenantEntityViewRemover.removeEntities(tenantId, tenantId);
+    }
+
+    @Override
+    public void deleteByTenantId(TenantId tenantId) {
+        deleteEntityViewsByTenantId(tenantId);
+    }
+
+    @Override
+    public ListenableFuture<List<EntitySubtype>> findEntityViewTypesByTenantId(TenantId tenantId) {
+        log.trace("Executing findEntityViewTypesByTenantId, tenantId [{}]", tenantId);
+        validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
+        ListenableFuture<List<EntitySubtype>> tenantEntityViewTypes = entityViewDao.findTenantEntityViewTypesAsync(tenantId.getId());
+        return Futures.transform(tenantEntityViewTypes,
+                entityViewTypes -> {
+                    entityViewTypes.sort(Comparator.comparing(EntitySubtype::getType));
+                    return entityViewTypes;
+                }, MoreExecutors.directExecutor());
+    }
+
+    private final PaginatedRemover<TenantId, EntityView> tenantEntityViewRemover = new PaginatedRemover<>() {
+        @Override
+        protected PageData<EntityView> findEntities(TenantId tenantId, TenantId id, PageLink pageLink) {
+            return entityViewDao.findEntityViewsByTenantId(id.getId(), pageLink);
+        }
+
+        @Override
+        protected void removeEntity(TenantId tenantId, EntityView entity) {
+            deleteEntityView(tenantId, new EntityViewId(entity.getUuidId()));
+        }
+    };
+
+    private final PaginatedRemover<CustomerId, EntityView> customerEntityViewsRemover = new PaginatedRemover<>() {
+        @Override
+        protected PageData<EntityView> findEntities(TenantId tenantId, CustomerId id, PageLink pageLink) {
+            return entityViewDao.findEntityViewsByTenantIdAndCustomerId(tenantId.getId(), id.getId(), pageLink);
+        }
+
+        @Override
+        protected void removeEntity(TenantId tenantId, EntityView entity) {
+            unassignEntityViewFromCustomer(tenantId, new EntityViewId(entity.getUuidId()));
+        }
+    };
+
+    @Override
+    public Optional<HasId<?>> findEntity(TenantId tenantId, EntityId entityId) {
+        return Optional.ofNullable(findEntityViewById(tenantId, new EntityViewId(entityId.getId())));
+    }
+
+    @Override
+    public EntityType getEntityType() {
+        return EntityType.ENTITY_VIEW;
+    }
+
+}

@@ -6,7 +6,7 @@
         "layoutX": 325,
         "layoutY": 150
       },
-      "type": "org.thingsboard.rule.engine.filter.TbMsgTypeSwitchNode",
+      "type": "com.jnks.iot.rule.engine.filter.TbMsgTypeSwitchNode",
       "name": "msgTypeSwitch",
       "configuration": {
         "version": 0
@@ -17,7 +17,7 @@
         "layoutX": 60,
         "layoutY": 300
       },
-      "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+      "type": "com.jnks.iot.rule.engine.transform.TbTransformMsgNode",
       "name": "formResponse",
       "configuration": {
         "jsScript": "if (msg.method == \"getResponse\") {\n    return {msg: {\"response\": \"requestReceived\"}, metadata: metadata, msgType: msgType};\n}\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};"
@@ -28,7 +28,7 @@
         "layoutX": 450,
         "layoutY": 300
       },
-      "type": "org.thingsboard.rule.engine.rpc.TbSendRPCReplyNode",
+      "type": "com.jnks.iot.rule.engine.rpc.TbSendRPCReplyNode",
       "name": "rpcReply",
       "configuration": {
         "requestIdMetaDataAttribute": "requestId"

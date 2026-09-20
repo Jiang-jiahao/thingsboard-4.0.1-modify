@@ -1,8 +1,8 @@
 {
-  "name": "thingsboard-js-executor",
+  "name": "jnks-iot-js-executor",
   "private": true,
   "version": "4.0.1",
-  "description": "ThingsBoard JavaScript Executor Microservice",
+  "description": "JnksIOT JavaScript Executor Microservice",
   "main": "server.ts",
   "bin": "server.js",
   "scripts": {

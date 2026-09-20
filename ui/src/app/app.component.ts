@@ -38,7 +38,7 @@ export class AppComponent implements OnInit {
               private domSanitizer: DomSanitizer,
               private authService: AuthService) {
 
-    console.log(`ThingsBoard Version: ${env.tbVersion}`);
+    console.log(`JnksIOT Version: ${env.tbVersion}`);
 
     this.matIconRegistry.addSvgIconResolver((name, namespace) => {
       if (namespace === 'mdi') {

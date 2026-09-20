@@ -1,0 +1,19 @@
+package com.jnks.iot.server.common.data.query;
+
+import lombok.Data;
+import com.jnks.iot.server.common.data.EntityType;
+
+import java.util.List;
+
+@Data
+public class EntityListFilter implements EntityFilter {
+    @Override
+    public EntityFilterType getType() {
+        return EntityFilterType.ENTITY_LIST;
+    }
+
+    private EntityType entityType;
+
+    private List<String> entityList;
+
+}

@@ -24,7 +24,7 @@ package org.apache.kafka.common.network;
 import org.apache.kafka.common.memory.MemoryPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thingsboard.server.common.data.exception.ThingsboardKafkaClientError;
+import com.jnks.iot.server.common.data.exception.JnksIotKafkaClientError;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -101,7 +101,7 @@ public class NetworkReceive implements Receive {
                 if (receiveSize < 0)
                     throw new InvalidReceiveException("Invalid receive (size = " + receiveSize + ")");
                 if (maxSize != UNLIMITED && receiveSize > maxSize) {
-                    throw new ThingsboardKafkaClientError("Invalid receive (size = " + receiveSize + " larger than " + maxSize + ")");
+                    throw new JnksIotKafkaClientError("Invalid receive (size = " + receiveSize + " larger than " + maxSize + ")");
                 }
                 requestedBufferSize = receiveSize; //may be 0 for some payloads (SASL)
                 if (receiveSize == 0) {

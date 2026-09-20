@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.thingsboard.server.cache" level="TRACE"/>
+    <logger name="com.jnks.iot.server.cache" level="TRACE"/>
 
     <root level="INFO">
         <appender-ref ref="console"/>

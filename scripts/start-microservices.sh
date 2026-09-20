@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 本地顺序启动 ThingsBoard 微服务。
+# 本地顺序启动 JnksIOT 微服务。
 #
 # 默认每种服务 2 个实例（同机端口自动错开）：
 #   1) 基础设施已就绪（ZK / Kafka / Postgres / Redis）
@@ -372,8 +372,8 @@ reverse_lines() {
 # 清掉 pid 对不上的 boot jar（IDEA / 上次崩溃残留）。UDP/TCP 最常见。
 kill_orphan_boot_jars() {
   local jars=(
-    "thingsboard-core-${VERSION}-boot.jar"
-    "thingsboard-rule-engine-${VERSION}-boot.jar"
+    "jnks-iot-core-${VERSION}-boot.jar"
+    "jnks-iot-rule-engine-${VERSION}-boot.jar"
     "tb-http-transport-${VERSION}-boot.jar"
     "tb-mqtt-transport-${VERSION}-boot.jar"
     "tb-tcp-transport-${VERSION}-boot.jar"
@@ -426,7 +426,7 @@ check_infra() {
 
 start_core_replicas() {
   local jar
-  jar="$(find_boot_jar "apps/tb-core" "thingsboard-core")"
+  jar="$(find_boot_jar "apps/tb-core" "jnks-iot-core")"
   local i http
   for (( i = 1; i <= CORE_REPLICAS; i++ )); do
     http="$(port_for_replica "${CORE_HTTP_BASE}" "${i}")"
@@ -440,7 +440,7 @@ start_core_replicas() {
 
 start_re_replicas() {
   local jar
-  jar="$(find_boot_jar "apps/tb-rule-engine" "thingsboard-rule-engine")"
+  jar="$(find_boot_jar "apps/tb-rule-engine" "jnks-iot-rule-engine")"
   local i http
   for (( i = 1; i <= RULE_ENGINE_REPLICAS; i++ )); do
     http="$(port_for_replica "${RE_HTTP_BASE}" "${i}")"
@@ -554,7 +554,7 @@ start_named() {
   local idx jar http mqtt tcp udp
   if [[ "${name}" =~ ^tb-core([0-9]+)$ ]]; then
     idx="${BASH_REMATCH[1]}"
-    jar="$(find_boot_jar "apps/tb-core" "thingsboard-core")"
+    jar="$(find_boot_jar "apps/tb-core" "jnks-iot-core")"
     [[ -n "${jar}" ]] || { echo "ERROR: boot jar not found for ${name}" >&2; return 1; }
     http="$(port_for_replica "${CORE_HTTP_BASE}" "${idx}")"
     start_java "${name}" "${jar}" "${CORE_XMX}" \
@@ -562,7 +562,7 @@ start_named() {
     wait_ready "${name}" "${PID_DIR}/${name}.pid" "${CORE_WAIT_SEC}" "${http}"
   elif [[ "${name}" =~ ^tb-rule-engine([0-9]+)$ ]]; then
     idx="${BASH_REMATCH[1]}"
-    jar="$(find_boot_jar "apps/tb-rule-engine" "thingsboard-rule-engine")"
+    jar="$(find_boot_jar "apps/tb-rule-engine" "jnks-iot-rule-engine")"
     [[ -n "${jar}" ]] || { echo "ERROR: boot jar not found for ${name}" >&2; return 1; }
     http="$(port_for_replica "${RE_HTTP_BASE}" "${idx}")"
     start_java "${name}" "${jar}" "${RE_XMX}" \
@@ -612,8 +612,8 @@ start_named() {
 
 collect_needed_jars() {
   local needed=()
-  if (( CORE_REPLICAS > 0 )); then needed+=("apps/tb-core:thingsboard-core"); fi
-  if (( RULE_ENGINE_REPLICAS > 0 )); then needed+=("apps/tb-rule-engine:thingsboard-rule-engine"); fi
+  if (( CORE_REPLICAS > 0 )); then needed+=("apps/tb-core:jnks-iot-core"); fi
+  if (( RULE_ENGINE_REPLICAS > 0 )); then needed+=("apps/tb-rule-engine:jnks-iot-rule-engine"); fi
   if (( HTTP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/tb-transport/tb-http-transport:tb-http-transport"); fi
   if (( MQTT_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/tb-transport/tb-mqtt-transport:tb-mqtt-transport"); fi
   if (( TCP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/tb-transport/tb-tcp-transport:tb-tcp-transport"); fi

@@ -1,0 +1,75 @@
+package com.jnks.iot.server.service.security.auth.rest;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.WebAttributes;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+import com.jnks.iot.common.util.JacksonUtil;
+import com.jnks.iot.server.common.data.security.Authority;
+import com.jnks.iot.server.common.data.security.model.JwtPair;
+import com.jnks.iot.server.service.security.auth.MfaAuthenticationToken;
+import com.jnks.iot.server.service.security.auth.mfa.config.TwoFaConfigManager;
+import com.jnks.iot.server.service.security.model.SecurityUser;
+import com.jnks.iot.server.service.security.model.token.JwtTokenFactory;
+
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+@Component(value = "defaultAuthenticationSuccessHandler")
+@RequiredArgsConstructor
+public class RestAwareAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+    private final JwtTokenFactory tokenFactory;
+    private final TwoFaConfigManager twoFaConfigManager;
+
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException, ServletException {
+        SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
+        JwtPair tokenPair = new JwtPair();
+
+        if (authentication instanceof MfaAuthenticationToken) {
+            // 获取双因子认证的预验证令牌有效期（默认30分钟）
+            int preVerificationTokenLifetime = twoFaConfigManager.getPlatformTwoFaSettings(securityUser.getTenantId(), true)
+                    .flatMap(settings -> Optional.ofNullable(settings.getTotalAllowedTimeForVerification())
+                            .filter(time -> time > 0))
+                    .orElse((int) TimeUnit.MINUTES.toSeconds(30));
+            // 创建预验证令牌（用于第二阶段的MFA验证）
+            tokenPair.setToken(tokenFactory.createPreVerificationToken(securityUser, preVerificationTokenLifetime).getToken());
+            // 预验证阶段不提供刷新令牌
+            tokenPair.setRefreshToken(null);
+            // 设置令牌范围为预验证令牌
+            tokenPair.setScope(Authority.PRE_VERIFICATION_TOKEN);
+        } else {
+            tokenPair = tokenFactory.createTokenPair(securityUser);
+        }
+
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        JacksonUtil.writeValue(response.getWriter(), tokenPair);
+
+        clearAuthenticationAttributes(request);
+    }
+
+    /**
+     * Removes temporary authentication-related data which may have been stored
+     * in the session during the authentication process..
+     *
+     */
+    protected final void clearAuthenticationAttributes(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            return;
+        }
+
+        session.removeAttribute(WebAttributes.AUTHENTICATION_EXCEPTION);
+    }
+}

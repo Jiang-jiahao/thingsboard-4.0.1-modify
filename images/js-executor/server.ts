@@ -16,7 +16,7 @@ let queues: IQueue | null;
 let httpServer: HttpServer | null;
 
 (async () => {
-    logger.info('Starting ThingsBoard JavaScript Executor Microservice...');
+    logger.info('Starting JnksIOT JavaScript Executor Microservice...');
     try {
         queues = await createQueue(serviceType);
         logger.info(`Starting ${queues.name} template...`);
@@ -24,7 +24,7 @@ let httpServer: HttpServer | null;
         logger.info(`${queues.name} template started.`);
         httpServer = new HttpServer(httpPort);
     } catch (e: any) {
-        logger.error('Failed to start ThingsBoard JavaScript Executor Microservice: %s', e.message);
+        logger.error('Failed to start JnksIOT JavaScript Executor Microservice: %s', e.message);
         logger.error(e.stack);
         await exit(-1);
     }
@@ -48,7 +48,7 @@ async function createQueue(serviceType: string): Promise<IQueue> {
 })
 
 process.on('exit', (code: number) => {
-    logger.info(`ThingsBoard JavaScript Executor Microservice has been stopped. Exit code: ${code}.`);
+    logger.info(`JnksIOT JavaScript Executor Microservice has been stopped. Exit code: ${code}.`);
 });
 
 async function exit(status: number) {

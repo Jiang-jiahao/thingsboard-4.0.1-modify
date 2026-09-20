@@ -2,18 +2,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.thingsboard.images</groupId>
+        <groupId>com.jnks.iot.images</groupId>
         <artifactId>tb-transport-images</artifactId>
         <version>4.0.1</version>
     </parent>
 
-    <groupId>org.thingsboard.images.transport</groupId>
+    <groupId>com.jnks.iot.images.transport</groupId>
     <artifactId>tb-snmp-transport-image</artifactId>
     <packaging>pom</packaging>
 
     <name>tb-snmp-transport-image</name>
-    <url>https://thingsboard.io</url>
-    <description>ThingsBoard SNMP Transport Microservice</description>
+    <url>https://iot.example.com</url>
+    <description>JnksIOT SNMP Transport Microservice</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,7 +27,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.thingsboard</groupId>
+            <groupId>com.jnks.iot</groupId>
             <artifactId>tb-snmp-transport</artifactId>
             <version>${project.version}</version>
             <classifier>boot</classifier>
@@ -51,7 +51,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.thingsboard</groupId>
+                                    <groupId>com.jnks.iot</groupId>
                                     <artifactId>tb-snmp-transport</artifactId>
                                     <classifier>boot</classifier>
                                     <type>jar</type>

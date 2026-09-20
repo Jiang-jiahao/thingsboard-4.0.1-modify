@@ -1,0 +1,460 @@
+package com.jnks.iot.server.transport.udp;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import com.jnks.iot.server.common.adaptor.JsonConverter;
+import com.jnks.iot.server.common.data.DeviceProfile;
+import com.jnks.iot.server.common.data.StringUtils;
+import com.jnks.iot.server.common.data.TransportUdpDataType;
+import com.jnks.iot.server.common.data.device.profile.UdpDeviceProfileTransportConfiguration;
+import com.jnks.iot.server.common.data.device.profile.ProtocolTemplateUplinkDataDestination;
+import com.jnks.iot.server.common.data.device.profile.UdpWireAuthenticationMode;
+import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.transport.TransportService;
+import com.jnks.iot.server.common.transport.TransportServiceCallback;
+import com.jnks.iot.server.gen.transport.TransportProtos;
+import com.jnks.iot.server.transport.udp.session.UdpDeviceSession;
+import com.jnks.iot.server.transport.udp.util.UdpHexProtocolParser;
+import com.jnks.iot.server.transport.udp.util.UdpPayloadUtil;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+@ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.udp.enabled:true}'=='true'")
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class UdpMessageProcessor {
+    private final TransportService transportService;
+    public void processUplinkJson(UdpDeviceSession session, JsonObject root) {
+        if (!session.isCoreSessionReady()) {
+            log.warn("[{}] Session not ready", session.getSessionId());
+            return;
+        }
+        JsonObject work = stripDeferredWireAuthTokenField(session, root);
+        if (work.has("method")) {
+            String method = work.get("method").getAsString();
+            switch (method) {
+                case "telemetry":
+                    processTelemetry(session, work);
+                    break;
+                case "attributes":
+                    processAttributes(session, work);
+                    break;
+                case "claim":
+                    processClaim(session, work);
+                    break;
+                case "rpcResponse":
+                    processRpcResponse(session, work);
+                    break;
+                case "toServerRpc":
+                    processToServerRpc(session, work);
+                    break;
+                case "getAttributes":
+                    processGetAttributes(session, work);
+                    break;
+                case "subscribeAttr":
+                    processSubscribeAttr(session, work);
+                    break;
+                case "subscribeRpc":
+                    processSubscribeRpc(session, work);
+                    break;
+                default:
+                    log.warn("[{}] Unknown method {}", session.getSessionId(), method);
+            }
+        } else {
+            processUplinkWithoutMethod(session, work);
+        }
+    }
+    /**
+     * 无 {@code method} 的上行：UTF-8（{@link TransportUdpDataType#UTF8}）/ ASCII 整帧写入单一可配置遥测键；
+     * 原始字节（{@link TransportUdpDataType#RAW_BYTES}）/ 协议模板仅走 {@link UdpHexProtocolParser}，解析失败则丢弃。
+     */
+    public void processUplinkWithoutMethod(UdpDeviceSession session, JsonElement payload) {
+        if (!session.isCoreSessionReady()) {
+            log.warn("[{}] Session not ready", session.getSessionId());
+            return;
+        }
+        TransportUdpDataType payloadType = session.getPayloadDataType();
+        if (payloadType == TransportUdpDataType.RAW_BYTES
+                || payloadType == TransportUdpDataType.PROTOCOL_TEMPLATE) {
+            var hexCfg = session.getHexTcpDataConfiguration();
+            if (hexCfg == null) {
+                log.warn("[{}] HEX/PROTOCOL_TEMPLATE uplink but profile has no HEX/protocol-template configuration",
+                        session.getSessionId());
+                return;
+            }
+            var parsedOpt = UdpHexProtocolParser.tryParseUplinkPayloadFromHex(
+                    payload, hexCfg.getHexCommandProfiles(), hexCfg.getHexProtocolFields(),
+                    hexCfg.getHexLtvRepeating(), hexCfg.getChecksum(),
+                    session.getSessionId());
+            if (parsedOpt.isEmpty()) {
+                log.warn("[{}] HEX/PROTOCOL_TEMPLATE frame did not match parser rules (no telemetry emitted)",
+                        session.getSessionId());
+                return;
+            }
+            var parsed = parsedOpt.get();
+            JsonObject payloadForCore = stripDeferredWireAuthTokenField(session, parsed.getPayload());
+            String matchedProfile = payloadForCore.has("hexCmdProfile")
+                    ? payloadForCore.get("hexCmdProfile").getAsString()
+                    : "<default-template-fallback>";
+            log.info("[{}] HEX uplink route decision: profile={}, destination={}",
+                    session.getSessionId(), matchedProfile, parsed.getDestination());
+            if (parsed.getDestination() == ProtocolTemplateUplinkDataDestination.ATTRIBUTES) {
+                transportService.process(session.getSessionInfo(), JsonConverter.convertToAttributesProto(payloadForCore),
+                        TransportServiceCallback.EMPTY);
+            } else {
+                transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(payloadForCore),
+                        TransportServiceCallback.EMPTY);
+            }
+            return;
+        }
+        if (payloadType == TransportUdpDataType.UTF8
+                || payloadType == TransportUdpDataType.ASCII) {
+            String telemetryKey = session.getUdpOpaqueRuleEngineKey();
+            if (telemetryKey == null || telemetryKey.isBlank()) {
+                telemetryKey = "tcpOpaquePayload";
+            }
+            JsonElement inner = payload;
+            if (payload.isJsonObject()) {
+                inner = stripDeferredWireAuthTokenField(session, payload.getAsJsonObject());
+            }
+            JsonObject wrap = new JsonObject();
+            wrap.add(telemetryKey, inner);
+            transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(wrap),
+                    TransportServiceCallback.EMPTY);
+            return;
+        }
+        log.warn("[{}] Uplink without method not supported for payload type {}", session.getSessionId(), payloadType);
+    }
+
+    private void processTelemetry(UdpDeviceSession session, JsonObject root) {
+        JsonElement body = root.get("body");
+        if (body == null) {
+            log.warn("[{}] telemetry without body", session.getSessionId());
+            return;
+        }
+        transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(body),
+                TransportServiceCallback.EMPTY);
+    }
+    private void processAttributes(UdpDeviceSession session, JsonObject root) {
+        JsonElement body = root.get("body");
+        if (body == null) {
+            log.warn("[{}] attributes without body", session.getSessionId());
+            return;
+        }
+        transportService.process(session.getSessionInfo(), JsonConverter.convertToAttributesProto(body),
+                TransportServiceCallback.EMPTY);
+    }
+    private void processClaim(UdpDeviceSession session, JsonObject root) {
+        JsonElement body = root.get("body");
+        String json = body != null ? body.toString() : "{}";
+        DeviceId deviceId = new DeviceId(new UUID(session.getSessionInfo().getDeviceIdMSB(), session.getSessionInfo().getDeviceIdLSB()));
+        transportService.process(session.getSessionInfo(), JsonConverter.convertToClaimDeviceProto(deviceId, json),
+                TransportServiceCallback.EMPTY);
+    }
+    private void processRpcResponse(UdpDeviceSession session, JsonObject root) {
+        int requestId = root.get("requestId").getAsInt();
+        String payload = root.has("payload") ? root.get("payload").toString() : "{}";
+        transportService.process(session.getSessionInfo(),
+                TransportProtos.ToDeviceRpcResponseMsg.newBuilder().setRequestId(requestId).setPayload(payload).build(),
+                TransportServiceCallback.EMPTY);
+    }
+    private void processToServerRpc(UdpDeviceSession session, JsonObject root) {
+        JsonElement body = root.get("body");
+        if (body == null) {
+            log.warn("[{}] toServerRpc without body", session.getSessionId());
+            return;
+        }
+        int requestId = session.nextMsgId();
+        transportService.process(session.getSessionInfo(),
+                JsonConverter.convertToServerRpcRequest(body, requestId),
+                TransportServiceCallback.EMPTY);
+    }
+    private void processGetAttributes(UdpDeviceSession session, JsonObject root) {
+        TransportProtos.GetAttributeRequestMsg.Builder b = TransportProtos.GetAttributeRequestMsg.newBuilder()
+                .setRequestId(session.nextMsgId());
+        if (root.has("clientKeys")) {
+            b.addAllClientAttributeNames(splitKeys(root.get("clientKeys")));
+        }
+        if (root.has("sharedKeys")) {
+            b.addAllSharedAttributeNames(splitKeys(root.get("sharedKeys")));
+        }
+        transportService.process(session.getSessionInfo(), b.build(), TransportServiceCallback.EMPTY);
+    }
+    private List<String> splitKeys(JsonElement keysEl) {
+        List<String> keys = new ArrayList<>();
+        if (keysEl == null || keysEl.isJsonNull()) {
+            return keys;
+        }
+        if (keysEl.isJsonPrimitive()) {
+            String s = keysEl.getAsString();
+            if (!s.isBlank()) {
+                for (String p : s.split(",")) {
+                    String t = p.trim();
+                    if (!t.isEmpty()) {
+                        keys.add(t);
+                    }
+                }
+            }
+            return keys;
+        }
+        if (keysEl.isJsonArray()) {
+            JsonArray arr = keysEl.getAsJsonArray();
+            for (JsonElement e : arr) {
+                if (e.isJsonPrimitive()) {
+                    keys.add(e.getAsString());
+                }
+            }
+        }
+        return keys;
+    }
+    private void processSubscribeAttr(UdpDeviceSession session, JsonObject root) {
+        boolean unsubscribe = root.has("unsubscribe") && root.get("unsubscribe").getAsBoolean();
+        transportService.process(session.getSessionInfo(),
+                TransportProtos.SubscribeToAttributeUpdatesMsg.newBuilder()
+                        .setUnsubscribe(unsubscribe)
+                        .setSessionType(TransportProtos.SessionType.ASYNC)
+                        .build(),
+                TransportServiceCallback.EMPTY);
+    }
+    private void processSubscribeRpc(UdpDeviceSession session, JsonObject root) {
+        boolean unsubscribe = root.has("unsubscribe") && root.get("unsubscribe").getAsBoolean();
+        transportService.process(session.getSessionInfo(),
+                TransportProtos.SubscribeToRPCMsg.newBuilder()
+                        .setUnsubscribe(unsubscribe)
+                        .setSessionType(TransportProtos.SessionType.ASYNC)
+                        .build(),
+                TransportServiceCallback.EMPTY);
+    }
+
+    /**
+     * DEFERRED 模式且会话已就绪时，从 JSON 对象副本中移除档案配置的身份字段，避免写入遥测/属性。
+     */
+    private JsonObject stripDeferredWireAuthTokenField(UdpDeviceSession session, JsonObject root) {
+        if (session.getUdpWireAuthenticationMode() != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+            return root;
+        }
+        Optional<String> keyOpt = deferredWireAuthPayloadIdentityJsonKey(session.getDeviceProfile());
+        if (keyOpt.isEmpty() || !root.has(keyOpt.get())) {
+            return root;
+        }
+        JsonObject copy = root.deepCopy();
+        copy.remove(keyOpt.get());
+        return copy;
+    }
+
+    private static Optional<String> deferredWireAuthPayloadIdentityJsonKey(DeviceProfile profile) {
+        if (profile == null || profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration ptc)) {
+            return Optional.empty();
+        }
+        if (ptc.getUdpWireAuthenticationMode() != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+            return Optional.empty();
+        }
+        String k = ptc.getUdpDeferredWireAuthTokenJsonKey();
+        if (StringUtils.isBlank(k)) {
+            return Optional.empty();
+        }
+        return Optional.of(k.trim());
+    }
+
+    /**
+     * SERVER 延迟链路上鉴权：从<strong>当前帧</strong>按业务类型解码后的 JSON 中取档案配置的字段字符串
+     * （{@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 为协议设备 ID）。未注册前可多次尝试，无字段的帧忽略。
+     */
+    public Optional<String> extractDeferredWireAuthAccessToken(DeviceProfile profile, UdpDeviceSession session, byte[] rawFrame) {
+        if (profile == null || rawFrame == null) {
+            return Optional.empty();
+        }
+        if (profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration ptc)) {
+            return Optional.empty();
+        }
+        String key = ptc.getUdpDeferredWireAuthTokenJsonKey();
+        if (StringUtils.isBlank(key)) {
+            return Optional.empty();
+        }
+        // 身份帧统一为 UTF-8 JSON 文本：共享端口下鉴权发生在"按档案负载类型解码"之前，
+        // 因此即使是原始字节（HEX / 协议模板）档案，设备也用一帧 JSON 声明自己的协议设备号。
+        Optional<JsonObject> identityFrame = identityJsonText(rawFrame, key);
+        if (identityFrame.isPresent()) {
+            return tokenStringFromJsonObject(identityFrame.get(), key);
+        }
+        // 回退：按档案负载类型解码后再取该字段（HEX / 协议模板按 hexProtocolFields 解析出字段）。
+        TransportUdpDataType type = session.getPayloadDataType();
+        String json;
+        try {
+            json = UdpPayloadUtil.decodePayloadBytes(type, rawFrame);
+        } catch (Exception e) {
+            log.debug("[{}] deferred wire auth: decode payload failed: {}", session.getSessionId(), e.getMessage());
+            return Optional.empty();
+        }
+        if (StringUtils.isBlank(json)) {
+            return Optional.empty();
+        }
+        final JsonElement root;
+        try {
+            root = JsonParser.parseString(json);
+        } catch (Exception e) {
+            log.warn("[{}] deferred wire auth: JSON parse failed", session.getSessionId(), e);
+            return Optional.empty();
+        }
+        if (type == TransportUdpDataType.UTF8 || type == TransportUdpDataType.ASCII) {
+            if (root.isJsonObject()) {
+                return tokenStringFromJsonObject(root.getAsJsonObject(), key);
+            }
+            return Optional.empty();
+        }
+        if (type == TransportUdpDataType.RAW_BYTES || type == TransportUdpDataType.PROTOCOL_TEMPLATE) {
+            var hexCfg = session.getHexTcpDataConfiguration();
+            if (hexCfg == null) {
+                return Optional.empty();
+            }
+            return UdpHexProtocolParser.tryParseUplinkPayloadFromHex(
+                    root, hexCfg.getHexCommandProfiles(), hexCfg.getHexProtocolFields(),
+                    hexCfg.getHexLtvRepeating(), hexCfg.getChecksum(),
+                    session.getSessionId())
+                    .flatMap(parsed -> tokenStringFromJsonObject(parsed.getPayload(), key));
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * 身份帧约定为 UTF-8 JSON 文本：共享端口下鉴权发生在"按档案负载类型解码"之前，
+     * 所以原始字节（HEX / 协议模板）档案的设备也用一帧 JSON 声明协议设备号。
+     * 帧不是 JSON 文本、或没有该字段时返回 empty，交由调用方按档案类型回退解析。
+     */
+    private static Optional<JsonObject> identityJsonText(byte[] rawFrame, String key) {
+        if (rawFrame == null) {
+            return Optional.empty();
+        }
+        try {
+            String text = new String(rawFrame, StandardCharsets.UTF_8).trim();
+            if (!text.startsWith("{")) {
+                return Optional.empty();
+            }
+            JsonElement el = JsonParser.parseString(text);
+            if (!el.isJsonObject() || !el.getAsJsonObject().has(key)) {
+                return Optional.empty();
+            }
+            return Optional.of(el.getAsJsonObject());
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<String> tokenStringFromJsonObject(JsonObject o, String key) {
+        if (!o.has(key)) {
+            return Optional.empty();
+        }
+        JsonElement el = o.get(key);
+        if (el == null || el.isJsonNull()) {
+            return Optional.empty();
+        }
+        if (el.isJsonPrimitive()) {
+            return Optional.of(el.getAsString());
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * 鉴权成功后重放<strong>触发鉴权的那一帧</strong>上行：从 JSON 副本中移除令牌字段，再按原逻辑入库。
+     */
+    public void replayDeferredUplinkAfterAuth(UdpDeviceSession session, byte[] rawFrame) {
+        if (!session.isCoreSessionReady() || rawFrame == null) {
+            return;
+        }
+        DeviceProfile profile = session.getDeviceProfile();
+        if (profile == null || profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration ptc)) {
+            return;
+        }
+        if (ptc.getUdpWireAuthenticationMode() != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+            return;
+        }
+        String key = ptc.getUdpDeferredWireAuthTokenJsonKey();
+        if (StringUtils.isBlank(key)) {
+            return;
+        }
+        // 身份帧是 JSON 文本（含 HEX / 协议模板档案）：剥掉身份字段后按普通上行重放。
+        Optional<JsonObject> identityFrame = identityJsonText(rawFrame, key);
+        if (identityFrame.isPresent()) {
+            JsonObject o = identityFrame.get().deepCopy();
+            o.remove(key);
+            if (o.size() == 0) {
+                return;
+            }
+            if (o.has("method")) {
+                processUplinkJson(session, o);
+            } else {
+                processUplinkWithoutMethod(session, o);
+            }
+            return;
+        }
+        TransportUdpDataType type = session.getPayloadDataType();
+        String json = UdpPayloadUtil.decodePayloadBytes(type, rawFrame);
+        if (StringUtils.isBlank(json)) {
+            return;
+        }
+        JsonElement root;
+        try {
+            root = JsonParser.parseString(json);
+        } catch (Exception e) {
+            log.warn("[{}] deferred replay: JSON parse failed", session.getSessionId(), e);
+            return;
+        }
+        if (type == TransportUdpDataType.UTF8 || type == TransportUdpDataType.ASCII) {
+            if (!root.isJsonObject()) {
+                return;
+            }
+            JsonObject o = root.getAsJsonObject().deepCopy();
+            o.remove(key);
+            if (o.size() == 0) {
+                return;
+            }
+            if (o.has("method")) {
+                processUplinkJson(session, o);
+            } else {
+                processUplinkWithoutMethod(session, o);
+            }
+            return;
+        }
+        if (type == TransportUdpDataType.RAW_BYTES || type == TransportUdpDataType.PROTOCOL_TEMPLATE) {
+            var hexCfg = session.getHexTcpDataConfiguration();
+            if (hexCfg == null) {
+                return;
+            }
+            var parsedOpt = UdpHexProtocolParser.tryParseUplinkPayloadFromHex(
+                    root, hexCfg.getHexCommandProfiles(), hexCfg.getHexProtocolFields(),
+                    hexCfg.getHexLtvRepeating(), hexCfg.getChecksum(),
+                    session.getSessionId());
+            if (parsedOpt.isEmpty()) {
+                return;
+            }
+            var parsed = parsedOpt.get();
+            JsonObject body = parsed.getPayload().deepCopy();
+            body.remove(key);
+            if (body.size() == 0) {
+                return;
+            }
+            emitParsedHexUplink(session, new UdpHexProtocolParser.ParsedUplinkPayload(body, parsed.getDestination()));
+        }
+    }
+
+    private void emitParsedHexUplink(UdpDeviceSession session, UdpHexProtocolParser.ParsedUplinkPayload parsed) {
+        if (parsed.getDestination() == ProtocolTemplateUplinkDataDestination.ATTRIBUTES) {
+            transportService.process(session.getSessionInfo(), JsonConverter.convertToAttributesProto(parsed.getPayload()),
+                    TransportServiceCallback.EMPTY);
+        } else {
+            transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(parsed.getPayload()),
+                    TransportServiceCallback.EMPTY);
+        }
+    }
+}

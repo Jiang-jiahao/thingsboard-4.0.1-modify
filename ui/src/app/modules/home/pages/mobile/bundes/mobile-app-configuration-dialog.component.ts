@@ -45,14 +45,14 @@ export class MobileAppConfigurationDialogComponent extends DialogComponent<Mobil
 
     this.setApplication = !!this.data.androidApp || !!this.data.iosApp;
 
-    this.configureApi = `static const thingsBoardApiEndpoint = '${window.location.origin}';`;
+    this.configureApi = `static const jnksIotApiEndpoint = '${window.location.origin}';`;
     if (this.setApplication) {
       this.configureApi += '\n';
       if (!!this.data.androidApp) {
-        this.configureApi += `\nstatic const thingsboardAndroidAppSecret = '${this.data.androidApp.appSecret}';`;
+        this.configureApi += `\nstatic const jnksIotAndroidAppSecret = '${this.data.androidApp.appSecret}';`;
       }
       if (!!this.data.iosApp) {
-        this.configureApi += `\nstatic const thingsboardIOSAppSecret = '${this.data.iosApp.appSecret}';`;
+        this.configureApi += `\nstatic const jnksIotIOSAppSecret = '${this.data.iosApp.appSecret}';`;
       }
     }
     if (this.setApplication) {

@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    logger name="org.thingsboard.server.transport.http.DeviceApiController" level="DEBUG" />
+    logger name="com.jnks.iot.server.transport.http.DeviceApiController" level="DEBUG" />
 
     <root level="INFO">
         <appender-ref ref="console"/>

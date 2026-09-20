@@ -1,0 +1,24 @@
+package com.jnks.iot.server.common.transport.activity.strategy;
+
+public final class AllEventsActivityStrategy implements ActivityStrategy {
+
+    private static final AllEventsActivityStrategy INSTANCE = new AllEventsActivityStrategy();
+
+    private AllEventsActivityStrategy() {
+    }
+
+    public static AllEventsActivityStrategy getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public boolean onActivity() {
+        return true;
+    }
+
+    @Override
+    public boolean onReportingPeriodEnd() {
+        return true;
+    }
+
+}

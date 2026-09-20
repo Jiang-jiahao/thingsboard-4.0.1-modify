@@ -1,0 +1,14 @@
+package com.jnks.iot.server.dao.sql.domain;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.jnks.iot.server.dao.model.sql.DomainOauth2ClientCompositeKey;
+import com.jnks.iot.server.dao.model.sql.DomainOauth2ClientEntity;
+
+import java.util.List;
+import java.util.UUID;
+
+public interface DomainOauth2ClientRepository extends JpaRepository<DomainOauth2ClientEntity, DomainOauth2ClientCompositeKey> {
+
+    List<DomainOauth2ClientEntity> findAllByDomainId(UUID domainId);
+
+}

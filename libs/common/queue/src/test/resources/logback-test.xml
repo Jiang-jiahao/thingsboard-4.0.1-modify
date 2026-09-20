@@ -11,7 +11,7 @@
            - DEBUG - producerId and thread name
            - TRACE - will add stacktrace.
          Kafka compression is highly recommended -->
-    <logger name="org.thingsboard.server.queue.kafka.TbKafkaProducerTemplate" level="TRACE"/>
+    <logger name="com.jnks.iot.server.queue.kafka.TbKafkaProducerTemplate" level="TRACE"/>
 
     <root level="INFO">
         <appender-ref ref="console"/>

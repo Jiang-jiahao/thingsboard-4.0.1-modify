@@ -16,8 +16,8 @@ distinguished_name = dn
 x509_extensions = v3
 prompt = no
 [dn]
-O = thingsboard
-CN = thingsboard.selfsigned.invalid
+O = jnks-iot
+CN = jnks-iot.selfsigned.invalid
 [v3]
 subjectAltName = @alt
 basicConstraints = critical, CA:true
@@ -25,7 +25,7 @@ keyUsage = critical, digitalSignature, keyEncipherment, keyCertSign
 extendedKeyUsage = serverAuth
 [alt]
 DNS.1 = localhost
-DNS.2 = thingsboard.selfsigned.invalid
+DNS.2 = jnks-iot.selfsigned.invalid
 IP.1 = 127.0.0.1
 EOF
 

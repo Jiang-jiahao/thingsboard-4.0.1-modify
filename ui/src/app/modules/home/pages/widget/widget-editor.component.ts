@@ -209,7 +209,7 @@ export class WidgetEditorComponent extends PageComponent implements OnInit, OnDe
     this.iframe = $(this.widgetIFrameElmRef.nativeElement);
     this.window.addEventListener('message', this.onWindowMessageListener);
     this.iframe.attr('data-widget', JSON.stringify(this.widget));
-    this.iframe.attr('src', '/thingsboard/widget-editor');
+    this.iframe.attr('src', '/jnks-iot/widget-editor');
   }
 
   ngOnDestroy(): void {

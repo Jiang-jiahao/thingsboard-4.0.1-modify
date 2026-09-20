@@ -60,12 +60,12 @@ docker/
 | 内存 | 给 Docker **≥ 10G**（本机跑 12G） | 完整栈是 **34 个容器**：19 个 JVM（core×2、rule-engine×2、transport×11、vc-executor×2、Kafka、ZooKeeper）+ 10 个 js-executor(Node) + web-ui×2 等。实测合计约 **9G**，其中 transport（11 个实例）4.6G、rule-engine 1.4G、core 0.8G、Kafka 0.77G。默认只给宿主一半内存，8G 会不够（见 §7）|
 | CPU | ≥ 4 核 | 这些进程启动期比较吃 CPU，全部同时冷启动时网关可能短暂 502 |
 | Docker | Engine ≥ 24 + compose plugin | `docker compose version` 能跑即可 |
-| 网络 | 能拉 `docker.io` 或配好的加速站 | 中间件全部靠拉取：`postgres:16`、`redis:7-alpine`、`apache/kafka:3.7.0`、`zookeeper:3.8.1`、`nginx:1.27-alpine`（入口网关与前端）；构建 TB 镜像另需 `thingsboard/openjdk17:bookworm-slim`（所有 Java 镜像的基础）。注意 bitnami 的镜像在不少加速站被白名单拦掉（`denied`），所以上游的 `bitnami/kafka`、`bitnami/redis` 都没用上 |
+| 网络 | 能拉 `docker.io` 或配好的加速站 | 中间件全部靠拉取：`postgres:16`、`redis:7-alpine`、`apache/kafka:3.7.0`、`zookeeper:3.8.1`、`nginx:1.27-alpine`（入口网关与前端）；构建 TB 镜像另需 `jnks-iot/openjdk17:bookworm-slim`（所有 Java 镜像的基础）。注意 bitnami 的镜像在不少加速站被白名单拦掉（`denied`），所以上游的 `bitnami/kafka`、`bitnami/redis` 都没用上 |
 | 构建机 | JDK 21 + Maven ≥ 3.6.3 | 只在"在服务器上构建镜像"时需要；本机 PATH 里没有 mvn 时用 wrapper 那份 |
 
 ## 1. 数据库（容器首次启动时自动初始化）
 
-`docker/postgres/init/01-thingsboard-4.0.1.sql.gz` 是 **TB 4.0.1 装完之后的整库导出**：schema + 系统数据（sysadmin 账号、系统 widget、仪表盘、通知配置、租户/设备档案模板），**不含演示数据**。
+`docker/postgres/init/01-jnks-iot-4.0.1.sql.gz` 是 **TB 4.0.1 装完之后的整库导出**：schema + 系统数据（sysadmin 账号、系统 widget、仪表盘、通知配置、租户/设备档案模板），**不含演示数据**。
 
 postgres 容器把它挂到 `/docker-entrypoint-initdb.d/`，postgres 官方镜像**只在数据目录为空时执行**这个目录 —— 库里已经有数据就不会再跑，也不会覆盖。
 
@@ -73,13 +73,13 @@ postgres 容器把它挂到 `/docker-entrypoint-initdb.d/`，postgres 官方镜�
 
 ```bash
 # 1) 装一份干净的库。别用镜像默认的 start-tb.sh —— 它写死了首次启动 install-tb.sh --loadDemo，会灌进演示设备
-docker run -d --name tb-init -v tb-init-data:/data --entrypoint bash thingsboard/tb-postgres:4.0.1 \
+docker run -d --name tb-init -v tb-init-data:/data --entrypoint bash jnks-iot/tb-postgres:4.0.1 \
   -c 'start-db.sh && install-tb.sh; echo "INSTALL_EXIT=$?"; sleep 100000'
 #    等日志出现 INSTALL_EXIT=0（约 1~2 分钟；期间日志里不应有 "Loading demo data"）
 
 # 2) 导出（官方镜像是 PG12，SQL 文本向下兼容我们的 postgres:16）
-docker exec tb-init pg_dump -U thingsboard -d thingsboard --no-owner --no-privileges \
-  | gzip -9 > docker/postgres/init/01-thingsboard-4.0.1.sql.gz
+docker exec tb-init pg_dump -U jnks-iot -d jnks-iot --no-owner --no-privileges \
+  | gzip -9 > docker/postgres/init/01-jnks-iot-4.0.1.sql.gz
 
 # 3) 收拾
 docker rm -f tb-init && docker volume rm tb-init-data
@@ -89,18 +89,18 @@ docker rm -f tb-init && docker volume rm tb-init-data
 
 ```
 SPRING_DRIVER_CLASS_NAME=org.postgresql.Driver
-SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/thingsboard
+SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/jnks_iot
 SPRING_DATASOURCE_USERNAME=<user>
 SPRING_DATASOURCE_PASSWORD=<password>
 DATABASE_TS_TYPE=sql
 ```
 
-注意：装库这件事**只有这条 SQL 路径**。源码里的 `ThingsboardInstallApplication` 不存在，所以 `scripts/docker-install-tb.sh` 与 `docker-upgrade-tb.sh` 依旧不可用，版本升级的 schema 迁移要自己处理（§7）。
+注意：装库这件事**只有这条 SQL 路径**。源码里的 `JnksIOTInstallApplication` 不存在，所以 `scripts/docker-install-tb.sh` 与 `docker-upgrade-tb.sh` 依旧不可用，版本升级的 schema 迁移要自己处理（§7）。
 
 ## 2. 取代码
 
 ```bash
-git clone <仓库地址> && cd thingsboard-4.0.1-modify
+git clone <仓库地址> && cd jnks-iot-4.0.1-modify
 ```
 
 注意 `.mvn/maven.config` 必须一起带上（里面有 `-Dpkg.package.phase=none`，缺了会去跑 deb/assembly 打包）。
@@ -122,7 +122,7 @@ export MVN=/path/to/apache-maven-3.6.3/bin/mvn
 "$MVN" -pl images/tb-core -am package -DskipTests -Dmaven.test.skip=true
 
 # 2) 构建镜像
-docker build -t thingsboard/tb-core:latest images/tb-core/target
+docker build -t jnks-iot/tb-core:latest images/tb-core/target
 ```
 
 - 镜像名取 `docker/services/.env` 的 `DOCKER_REPO` + `TB_VERSION`
@@ -143,7 +143,7 @@ docker buildx build --platform linux/amd64 -t <registry>/tb-core:4.0.1 images/tb
 
 | 变量 | 默认 | 部署时建议 |
 |---|---|---|
-| `DOCKER_REPO` | `thingsboard` | 用了 registry 就改成你的 registry 前缀 |
+| `DOCKER_REPO` | `jnks-iot` | 用了 registry 就改成你的 registry 前缀 |
 | `TB_VERSION` | `latest` | **改成具体版本号**（如 `4.0.1`），多机/回滚时分得清 |
 | `JAVA_OPTS` | `-Xmx768M -Xms256M` | core / rule-engine 用。按内存算：每 JVM ≈ 堆 + 300M 开销 |
 | `JAVA_OPTS_TRANSPORT` | `-Xmx256M -Xms128M` | transport 用（compose 里覆盖 `JAVA_OPTS`）。有 8 个实例，别调大 |
@@ -178,7 +178,7 @@ docker/scripts/docker-start-services.sh           # = docker compose -f docker-c
 
 入口网关启动时要读 `docker/services/nginx/certs/tls.pem` 和 `tls.key`：没有就先生成自签（上一条），或者把正式证书按这两个文件名放进去。
 
-`docker-create-log-folders.sh` 用的是 `compose-utils.sh` 里的权限清单：日志目录 chown 给 **999**（= 镜像里 `thingsboard` 用户的 uid，由基础镜像 `thingsboard/openjdk17` 定义），Postgres 数据目录（`docker/tb/postgres-data`）**999**，Redis 数据目录（`docker/tb/redis-data`）**999:1000**。**如果直接手工 `docker compose up`，这些目录会被 Docker 以 root 建出来，容器内的非 root 用户写不进去**，所以这一步别省（macOS 上宿主属主不影响容器内可见的属主，见 §7）。
+`docker-create-log-folders.sh` 用的是 `compose-utils.sh` 里的权限清单：日志目录 chown 给 **999**（= 镜像里 `jnks-iot` 用户的 uid，由基础镜像 `jnks-iot/openjdk17` 定义），Postgres 数据目录（`docker/tb/postgres-data`）**999**，Redis 数据目录（`docker/tb/redis-data`）**999:1000**。**如果直接手工 `docker compose up`，这些目录会被 Docker 以 root 建出来，容器内的非 root 用户写不进去**，所以这一步别省（macOS 上宿主属主不影响容器内可见的属主，见 §7）。
 
 ## 6. 验证与访问地址
 
@@ -186,21 +186,21 @@ docker/scripts/docker-start-services.sh           # = docker compose -f docker-c
 docker compose ps                                     # 各服务应 running
 curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"username":"sysadmin@thingsboard.org","password":"sysadmin"}'   # 期望 200
+  -d '{"username":"sysadmin@jnks-iot.org","password":"sysadmin"}'   # 期望 200
 ```
 
 **所有入口都经过 `nginx-gateway`**（配置在 `docker/services/nginx/config/`：`nginx.conf` + `locations.conf` + `proxy-headers.conf`）：
 
 | 地址 | 去向 |
 |---|---|
-| `http://<host>/` | ThingsBoard 管理界面（tb-web-ui1/2 的 nginx 静态服务） |
+| `http://<host>/` | JnksIOT 管理界面（tb-web-ui1/2 的 nginx 静态服务） |
 | `http://<host>/api/**` | tb-core1/2（REST API）。其中 `/api/v1/**` 转给 tb-http-transport1/2（设备 HTTP 接入）、`/api/images/**` 也转 core 但限流更宽 |
 | `https://<host>/` | 同上走 443；证书来自 `docker/services/nginx/certs/`（默认是自签，浏览器会提示不受信任 —— 要正式证书就换成真实证书或接 certbot） |
 | `<host>:1883` | MQTT 设备接入（转给 tb-mqtt-transport1/2） |
 | `<host>:5683` | TCP 设备接入（转给 tb-tcp-transport1/2） |
 | `<host>:5684/udp` | UDP 设备接入（转给 tb-udp-transport1/2） |
 
-默认账号：`sysadmin@thingsboard.org` / `sysadmin`。
+默认账号：`sysadmin@jnks-iot.org` / `sysadmin`。
 
 **注意 UI 必须和 API 同源**：界面里的请求打到同源的 `/api/...`，而 web-ui 镜像只发静态文件、不转发 `/api`（原来 Node 版有个可选的代理开关，现在由入口网关承担）。所以入口只能走网关（或其它把 `/` 与 `/api` 收在同一端口的反向代理）—— 直接把 web-ui 容器的端口当入口用是不行的，那样页面能打开但登录和所有数据都会 404。
 
@@ -224,16 +224,16 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
 
 ## 8. 单体（全在一个 JVM 里）
 
-不用微服务那套时，`thingsboard/tb-monolith` 镜像自带合适默认值（`zookeeper.enabled=false`、`js.evaluator=local`、`service.type=monolith`），单独一个容器即可：
+不用微服务那套时，`jnks-iot/tb-monolith` 镜像自带合适默认值（`zookeeper.enabled=false`、`js.evaluator=local`、`service.type=monolith`），单独一个容器即可：
 
 ```bash
 docker run -d --name tb-monolith -p 8080:8080 \
   -v "$PWD/docker/tb-monolith/conf:/config" \
-  -v "$PWD/docker/tb-monolith/log:/var/log/thingsboard" \
+  -v "$PWD/docker/tb-monolith/log:/var/log/jnks-iot" \
   -e SPRING_DRIVER_CLASS_NAME=org.postgresql.Driver \
-  -e SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/thingsboard \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/jnks_iot \
   -e SPRING_DATASOURCE_USERNAME=<user> -e SPRING_DATASOURCE_PASSWORD=<password> \
-  thingsboard/tb-monolith:latest
+  jnks-iot/tb-monolith:latest
 ```
 
 单体与微服务**是二选一的部署形态，不要同时在同一个库上跑**（两边都会去抢分区/队列）。

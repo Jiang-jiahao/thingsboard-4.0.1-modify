@@ -1,0 +1,146 @@
+package com.jnks.iot.server.service.update;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.annotation.PreDestroy;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import com.jnks.iot.common.util.JacksonUtil;
+import com.jnks.iot.common.util.JnksIotExecutors;
+import com.jnks.iot.server.common.data.UpdateMessage;
+import com.jnks.iot.server.common.data.notification.rule.trigger.NewPlatformVersionTrigger;
+import com.jnks.iot.server.common.msg.notification.NotificationRuleProcessor;
+import com.jnks.iot.common.util.AfterStartUp;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * 平台更新检查服务：定时向 JnksIOT 更新服务器查询新版本。
+ * <p>
+ * <b>职责：</b>上报 instanceId/platform/version；发现新版本时触发
+ * {@code NewPlatformVersion} 通知。
+ * <p>
+ * <b>触发方式：</b>启动后每小时一次（{@code updates.enabled=true}）。
+ * <p>
+ * <b>通知对象：</b>配置了新版本规则的通知目标。
+ */
+@Service
+@Slf4j
+public class DefaultUpdateService implements UpdateService {
+
+    private static final String INSTANCE_ID_FILE = ".instance_id";
+    private static final String UPDATE_SERVER_BASE_URL = "https://updates.thingsboard.io";
+
+    private static final String PLATFORM_PARAM = "platform";
+    private static final String VERSION_PARAM = "version";
+    private static final String INSTANCE_ID_PARAM = "instanceId";
+
+    @Value("${updates.enabled}")
+    private boolean updatesEnabled;
+
+    @Autowired(required = false)
+    private BuildProperties buildProperties;
+
+    @Autowired
+    private NotificationRuleProcessor notificationRuleProcessor;
+
+    private final ScheduledExecutorService scheduler = JnksIotExecutors.newSingleThreadScheduledExecutor("tb-update-service");
+
+    private ScheduledFuture<?> checkUpdatesFuture = null;
+    private final RestTemplate restClient = new RestTemplate();
+
+    private UpdateMessage updateMessage;
+
+    private String platform;
+    private String version;
+    private UUID instanceId = null;
+
+    /** 启动后开始定时检查更新。 */
+    @AfterStartUp(order = AfterStartUp.REGULAR_SERVICE)
+    public void init() {
+        version = buildProperties != null ? buildProperties.getVersion() : "unknown";
+        updateMessage = new UpdateMessage(false, version, "", "",
+                "https://iot.example.com/docs/reference/releases",
+                "https://iot.example.com/docs/reference/releases");
+        if (updatesEnabled) {
+            try {
+                platform = System.getProperty("platform", "unknown");
+                instanceId = parseInstanceId();
+                checkUpdatesFuture = scheduler.scheduleAtFixedRate(checkUpdatesRunnable, 0, 1, TimeUnit.HOURS);
+            } catch (Exception e) {
+                //Do nothing
+            }
+        }
+    }
+
+    private UUID parseInstanceId() throws IOException {
+        UUID result = null;
+        Path instanceIdPath = Paths.get(INSTANCE_ID_FILE);
+        if (instanceIdPath.toFile().exists()) {
+            byte[] data = Files.readAllBytes(instanceIdPath);
+            if (data.length > 0) {
+                try {
+                    result = UUID.fromString(new String(data));
+                } catch (IllegalArgumentException e) {
+                    //Do nothing
+                }
+            }
+        }
+        if (result == null) {
+            result = UUID.randomUUID();
+            Files.write(instanceIdPath, result.toString().getBytes());
+        }
+        return result;
+    }
+
+    @PreDestroy
+    private void destroy() {
+        try {
+            if (checkUpdatesFuture != null) {
+                checkUpdatesFuture.cancel(true);
+            }
+            scheduler.shutdownNow();
+        } catch (Exception e) {
+            //Do nothing
+        }
+    }
+
+    Runnable checkUpdatesRunnable = () -> {
+        try {
+            log.trace("Executing check update method for instanceId [{}], platform [{}] and version [{}]", instanceId, platform, version);
+            var headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            ObjectNode request = JacksonUtil.newObjectNode();
+            request.put(PLATFORM_PARAM, platform);
+            request.put(VERSION_PARAM, version);
+            request.put(INSTANCE_ID_PARAM, instanceId.toString());
+            UpdateMessage prevUpdateMessage = updateMessage;
+            updateMessage = restClient.postForObject(UPDATE_SERVER_BASE_URL + "/api/v2/jnks-iot/updates", new HttpEntity<>(request.toString(), headers), UpdateMessage.class);
+            if (updateMessage != null && updateMessage.isUpdateAvailable() && !updateMessage.equals(prevUpdateMessage)) {
+                notificationRuleProcessor.process(NewPlatformVersionTrigger.builder()
+                        .updateInfo(updateMessage)
+                        .build());
+            }
+        } catch (Exception e) {
+            log.trace(e.getMessage());
+        }
+    };
+
+    /** 返回缓存的最新更新消息。 */
+    @Override
+    public UpdateMessage checkUpdates() {
+        return updateMessage;
+    }
+}

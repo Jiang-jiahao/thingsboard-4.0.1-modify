@@ -1,6 +1,6 @@
 #!/bin/bash
 usage() {
-    echo "This script generates thingsboard server's ssl certificate"
+    echo "This script generates jnks-iot server's ssl certificate"
     echo "and optionally copies it to the server's resource directory."
     echo "usage: ./server.keygen.sh [-c flag] [-d directory] [-p file]"
     echo "    -c | --copy flag                  Specifies if the keystore should be copied to the server directory. Defaults to true"

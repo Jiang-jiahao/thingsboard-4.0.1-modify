@@ -3,7 +3,7 @@
 
 <suite name="Devices Smoke Tests">
     <listeners>
-        <listener class-name="org.thingsboard.server.msa.ui.listeners.RetryTestListener"/>
+        <listener class-name="com.jnks.iot.server.msa.ui.listeners.RetryTestListener"/>
     </listeners>
     <test name="Devices ui smoke tests">
         <groups>
@@ -12,7 +12,7 @@
             </run>
         </groups>
         <packages>
-            <package name="org.thingsboard.server.msa.ui.tests.devicessmoke"/>
+            <package name="com.jnks.iot.server.msa.ui.tests.devicessmoke"/>
         </packages>
     </test>
 </suite>

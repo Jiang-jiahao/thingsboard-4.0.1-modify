@@ -1,0 +1,22 @@
+package com.jnks.iot.server.common.stats;
+
+public enum StatsType {
+    RULE_ENGINE("ruleEngine"),
+    CORE("core"),
+    TRANSPORT("transport"),
+    JS_INVOKE("jsInvoke"),
+    TBEL_INVOKE("tbelInvoke"),
+    RATE_EXECUTOR("rateExecutor"),
+    HOUSEKEEPER("housekeeper"),
+    EDQS("edqs");
+
+    private final String name;
+
+    StatsType(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+}

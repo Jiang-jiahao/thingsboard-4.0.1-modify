@@ -2,16 +2,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.thingsboard.common</groupId>
+        <groupId>com.jnks.iot.common</groupId>
         <version>4.0.1</version>
         <artifactId>script</artifactId>
     </parent>
-    <groupId>org.thingsboard.common.script</groupId>
+    <groupId>com.jnks.iot.common.script</groupId>
     <artifactId>script-api</artifactId>
     <packaging>jar</packaging>
 
     <name>script-api</name>
-    <url>https://thingsboard.io</url>
+    <url>https://iot.example.com</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,15 +20,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>data</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>stats</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>util</artifactId>
         </dependency>
         <dependency>
@@ -98,8 +98,8 @@
 
     <distributionManagement>
         <repository>
-            <id>thingsboard-repo-deploy</id>
-            <name>ThingsBoard Repo Deployment</name>
+            <id>jnks-iot-repo-deploy</id>
+            <name>JnksIOT Repo Deployment</name>
             <url>https://repo.thingsboard.io/artifactory/libs-release-public</url>
         </repository>
     </distributionManagement>

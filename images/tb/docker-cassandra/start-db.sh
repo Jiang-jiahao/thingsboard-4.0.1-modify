@@ -20,7 +20,7 @@ done
 
 if [ ! -f ${firstlaunch} ]; then
     echo "Creating database..."
-    psql -U ${pkg.user} -d postgres -c "CREATE DATABASE thingsboard"
+    psql -U ${pkg.user} -d postgres -c "CREATE DATABASE jnks_iot"
 fi
 
 echo "Postgresql is ready"

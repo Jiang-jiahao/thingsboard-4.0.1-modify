@@ -207,7 +207,7 @@
         "domain-name": "Domain name",
         "domain-name-unique": "Domain name and protocol need to unique.",
         "domain-name-max-length": "Domain name should be less than 256",
-        "error-verification-url": "A domain name shouldn't contain symbols '/' and ':'. Example: thingsboard.io",
+        "error-verification-url": "A domain name shouldn't contain symbols '/' and ':'. Example: iot.example.com",
         "connection-settings": "Connection settings",
         "oauth2": {
             "access-token-uri": "Access token URI",
@@ -1215,8 +1215,8 @@
         "make-private-dashboard-title": "Ar tikrai norite skydelį '{{dashboardTitle}}' padaryti privačiu?",
         "make-private-dashboard-text": "Po patvirtinimo, skydelis taps privačiu ir jo nematys kiti vartotojai.",
         "make-private-dashboard": "Skydelį padaryti privačiu",
-        "socialshare-text": "'{{dashboardTitle}}' powered by ThingsBoard",
-        "socialshare-title": "'{{dashboardTitle}}' powered by ThingsBoard",
+        "socialshare-text": "'{{dashboardTitle}}' powered by JnksIOT",
+        "socialshare-title": "'{{dashboardTitle}}' powered by JnksIOT",
         "select-dashboard": "Pasirinkite skydelį",
         "no-dashboards-matching": "Skydelio, atitinkančio '{{entity}}' nėra.",
         "dashboard-required": "Skydelis būtinas.",
@@ -4686,7 +4686,7 @@
         "allow-customer-white-labeling": "Leisti kliento personalizavimą",
         "search": "Valdytojų paieška",
         "selected-tenants": "Pasirinkta { count, plural, =1 {1 valdytojas} other {# valdutojai} }",
-        "isolated-tb-rule-engine": "Use isolated ThingsBoard Rule Engine queues",
+        "isolated-tb-rule-engine": "Use isolated JnksIOT Rule Engine queues",
         "isolated-tb-rule-engine-details": "Each tenant will have dedicated Rule Engine queues"
     },
     "tenant-profile": {
@@ -5952,7 +5952,7 @@
         "help-link-base-url": "Bazinis pagalbos puslapio url",
         "ui-help-base-url": "UI help base url",
         "enable-help-links": "Įjungti pagalbos nuorodas",
-        "error-verification-url": "Domeno pavadinime negali būti '/' ir ':' simbolių. Pavyzdžiui: thingsboard.io",
+        "error-verification-url": "Domeno pavadinime negali būti '/' ir ':' simbolių. Pavyzdžiui: iot.example.com",
         "show-platform-name-version": "Rodyti platformos pavadinimą ir versiją",
         "platform-name": "Platformas pavadinimas",
         "platform-version": "Platformos versija",
@@ -7226,7 +7226,7 @@
         },
         "functions": {
             "title": "Functions",
-            "pe-feature-tooltip": "Only on ThingsBoard\nProfessional Edition",
+            "pe-feature-tooltip": "Only on JnksIOT\nProfessional Edition",
             "switch-to-pe": "Switch to PE",
             "alarms": "Alarms",
             "dashboards": "Dashboards",
@@ -7363,7 +7363,7 @@
         "entity-limit-text": "However you can upgrade your subscription plan in order to increase your limits.",
         "upgrade-your-plan": "Upgrade subscription plan",
         "white-labeling-feature": "White labeling feature",
-        "white-labeling-text-full": "Rebrand ThingsBoard platform web interface with your company or product logo and color scheme in 2 minutes.<br><br>Remove “Powered By” on the dashboards footer.<br>No coding or service restart required. Allow your customers to white-label their interface as well.",
+        "white-labeling-text-full": "Rebrand JnksIOT platform web interface with your company or product logo and color scheme in 2 minutes.<br><br>Remove “Powered By” on the dashboards footer.<br>No coding or service restart required. Allow your customers to white-label their interface as well.",
         "enable-white-labeling": "Enable white-labeling feature now by upgrading your subscription plan!",
         "read-more": "Read more",
         "white-labeling-video-text": "See video tutorial below to see how this feature works!"

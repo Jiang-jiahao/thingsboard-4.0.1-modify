@@ -1,0 +1,13 @@
+package com.jnks.iot.server.common.data.transport.http;
+
+/**
+ * 将 HTTP 响应中的设备标识映射到 JnksIOT 设备。
+ */
+public enum HttpPullDeviceIdMatchStrategy {
+    /** 与设备 {@code name} 匹配（默认） */
+    DEVICE_NAME,
+    /** 与设备 {@code label} 匹配 */
+    DEVICE_LABEL,
+    /** 与 HTTP 被动上报设备传输配置中的 {@code externalDeviceId} 匹配 */
+    EXTERNAL_DEVICE_ID
+}

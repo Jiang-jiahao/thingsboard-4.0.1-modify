@@ -1,0 +1,106 @@
+package com.jnks.iot.server.common.data.rule;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.JsonNode;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
+import com.jnks.iot.server.common.data.BaseDataWithAdditionalInfo;
+import com.jnks.iot.server.common.data.ExportableEntity;
+import com.jnks.iot.server.common.data.HasDefaultOption;
+import com.jnks.iot.server.common.data.HasName;
+import com.jnks.iot.server.common.data.HasTenantId;
+import com.jnks.iot.server.common.data.HasVersion;
+import com.jnks.iot.server.common.data.id.RuleChainId;
+import com.jnks.iot.server.common.data.id.RuleNodeId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.validation.Length;
+import com.jnks.iot.server.common.data.validation.NoXss;
+
+@Schema
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Slf4j
+public class RuleChain extends BaseDataWithAdditionalInfo<RuleChainId> implements HasName, HasTenantId, ExportableEntity<RuleChainId>, HasDefaultOption, HasVersion {
+
+    private static final long serialVersionUID = -5656679015121935465L;
+
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "JSON object with Tenant Id.", accessMode = Schema.AccessMode.READ_ONLY)
+    private TenantId tenantId;
+    @NoXss
+    @Length(fieldName = "name")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, description = "Rule Chain name", example = "Humidity data processing")
+    private String name;
+    @Schema(description = "Rule Chain type.", example = "CORE")
+    private RuleChainType type;
+    @Schema(description = "JSON object with Rule Chain Id. Pointer to the first rule node that should receive all messages pushed to this rule chain.")
+    private RuleNodeId firstRuleNodeId;
+    @Schema(description = "Indicates root rule chain. The root rule chain process messages from all devices and entities by default. User may configure default rule chain per device profile.")
+    private boolean root;
+    @Schema(description = "Reserved for future usage.")
+    private boolean debugMode;
+    @Schema(description = "Reserved for future usage. The actual list of rule nodes and their relations is stored in the database separately.")
+    private transient JsonNode configuration;
+
+    private RuleChainId externalId;
+    private Long version;
+
+    @JsonIgnore
+    private byte[] configurationBytes;
+
+    public RuleChain() {
+        super();
+    }
+
+    public RuleChain(RuleChainId id) {
+        super(id);
+    }
+
+    public RuleChain(RuleChain ruleChain) {
+        super(ruleChain);
+        this.tenantId = ruleChain.getTenantId();
+        this.name = ruleChain.getName();
+        this.type = ruleChain.getType();
+        this.firstRuleNodeId = ruleChain.getFirstRuleNodeId();
+        this.root = ruleChain.isRoot();
+        this.setConfiguration(ruleChain.getConfiguration());
+        this.setExternalId(ruleChain.getExternalId());
+        this.version = ruleChain.getVersion();
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Schema(description = "JSON object with the Rule Chain Id. " +
+            "Specify this field to update the Rule Chain. " +
+            "Referencing non-existing Rule Chain Id will cause error. " +
+            "Omit this field to create new rule chain.")
+    @Override
+    public RuleChainId getId() {
+        return super.getId();
+    }
+
+    @Schema(description = "Timestamp of the rule chain creation, in milliseconds", example = "1609459200000", accessMode = Schema.AccessMode.READ_ONLY)
+    @Override
+    public long getCreatedTime() {
+        return super.getCreatedTime();
+    }
+
+    public JsonNode getConfiguration() {
+        return BaseDataWithAdditionalInfo.getJson(() -> configuration, () -> configurationBytes);
+    }
+
+    public void setConfiguration(JsonNode data) {
+        setJson(data, json -> this.configuration = json, bytes -> this.configurationBytes = bytes);
+    }
+
+    @JsonIgnore
+    @Override
+    public boolean isDefault() {
+        return root && type == RuleChainType.CORE;
+    }
+
+}

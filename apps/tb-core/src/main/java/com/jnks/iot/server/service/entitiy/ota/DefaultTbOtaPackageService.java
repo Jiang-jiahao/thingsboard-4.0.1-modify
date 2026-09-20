@@ -1,0 +1,106 @@
+package com.jnks.iot.server.service.entitiy.ota;
+
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.OtaPackage;
+import com.jnks.iot.server.common.data.OtaPackageInfo;
+import com.jnks.iot.server.common.data.SaveOtaPackageInfoRequest;
+import com.jnks.iot.server.common.data.StringUtils;
+import com.jnks.iot.server.common.data.User;
+import com.jnks.iot.server.common.data.audit.ActionType;
+import com.jnks.iot.server.common.data.exception.JnksIotException;
+import com.jnks.iot.server.common.data.id.OtaPackageId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.ota.ChecksumAlgorithm;
+import com.jnks.iot.server.dao.ota.OtaPackageService;
+import com.jnks.iot.server.service.entitiy.AbstractTbEntityService;
+
+import java.nio.ByteBuffer;
+
+/**
+ * {@link TbOtaPackageService} 的默认实现。
+ * <p>
+ * 由 OtaPackageController 调用，委托 {@link OtaPackageService} 落库元数据与二进制，并写审计日志。
+ *
+ * @see TbOtaPackageService
+ */
+@Service
+@AllArgsConstructor
+@Slf4j
+public class DefaultTbOtaPackageService extends AbstractTbEntityService implements TbOtaPackageService {
+
+    private final OtaPackageService otaPackageService;
+
+    /** 保存 OTA 包元信息并写审计。 */
+    @Override
+    public OtaPackageInfo save(SaveOtaPackageInfoRequest saveOtaPackageInfoRequest, User user) throws JnksIotException {
+        ActionType actionType = saveOtaPackageInfoRequest.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
+        TenantId tenantId = saveOtaPackageInfoRequest.getTenantId();
+        try {
+            OtaPackageInfo savedOtaPackageInfo = otaPackageService.saveOtaPackageInfo(new OtaPackageInfo(saveOtaPackageInfoRequest), saveOtaPackageInfoRequest.isUsesUrl());
+
+            logEntityActionService.logEntityAction(tenantId, savedOtaPackageInfo.getId(), savedOtaPackageInfo,
+                    null, actionType, user);
+
+            return savedOtaPackageInfo;
+        } catch (Exception e) {
+            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.OTA_PACKAGE), saveOtaPackageInfoRequest,
+                    actionType, user, e);
+            throw e;
+        }
+    }
+
+    /** 保存 OTA 包二进制数据与校验和并写审计。 */
+    @Override
+    public OtaPackageInfo saveOtaPackageData(OtaPackageInfo otaPackageInfo, String checksum, ChecksumAlgorithm checksumAlgorithm,
+                                             byte[] data, String filename, String contentType, User user) throws JnksIotException {
+        ActionType actionType = ActionType.UPDATED;
+        TenantId tenantId = otaPackageInfo.getTenantId();
+        OtaPackageId otaPackageId = otaPackageInfo.getId();
+        try {
+            if (StringUtils.isEmpty(checksum)) {
+                checksum = otaPackageService.generateChecksum(checksumAlgorithm, ByteBuffer.wrap(data));
+            }
+            OtaPackage otaPackage = new OtaPackage(otaPackageId);
+            otaPackage.setCreatedTime(otaPackageInfo.getCreatedTime());
+            otaPackage.setTenantId(tenantId);
+            otaPackage.setDeviceProfileId(otaPackageInfo.getDeviceProfileId());
+            otaPackage.setType(otaPackageInfo.getType());
+            otaPackage.setTitle(otaPackageInfo.getTitle());
+            otaPackage.setVersion(otaPackageInfo.getVersion());
+            otaPackage.setTag(otaPackageInfo.getTag());
+            otaPackage.setAdditionalInfo(otaPackageInfo.getAdditionalInfo());
+            otaPackage.setChecksumAlgorithm(checksumAlgorithm);
+            otaPackage.setChecksum(checksum);
+            otaPackage.setFileName(filename);
+            otaPackage.setContentType(contentType);
+            otaPackage.setData(ByteBuffer.wrap(data));
+            otaPackage.setDataSize((long) data.length);
+            OtaPackageInfo savedOtaPackage = otaPackageService.saveOtaPackage(otaPackage);
+            logEntityActionService.logEntityAction(tenantId, savedOtaPackage.getId(), savedOtaPackage, null, actionType, user);
+            return savedOtaPackage;
+        } catch (Exception e) {
+            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.OTA_PACKAGE), actionType, user, e, otaPackageId.toString());
+            throw e;
+        }
+    }
+
+    /** 删除 OTA 包并写 DELETED 审计。 */
+    @Override
+    public void delete(OtaPackageInfo otaPackageInfo, User user) throws JnksIotException {
+        ActionType actionType = ActionType.DELETED;
+        TenantId tenantId = otaPackageInfo.getTenantId();
+        OtaPackageId otaPackageId = otaPackageInfo.getId();
+        try {
+            otaPackageService.deleteOtaPackage(tenantId, otaPackageId);
+            logEntityActionService.logEntityAction(tenantId, otaPackageId, otaPackageInfo, null,
+                    actionType, user, otaPackageInfo.getId().toString());
+        } catch (Exception e) {
+            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.OTA_PACKAGE),
+                    actionType, user, e, otaPackageId.toString());
+            throw e;
+        }
+    }
+}

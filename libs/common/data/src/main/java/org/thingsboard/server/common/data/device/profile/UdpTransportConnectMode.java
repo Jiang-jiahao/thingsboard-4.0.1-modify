@@ -1,8 +1,0 @@
-package org.thingsboard.server.common.data.device.profile;
-/**
- * Udp 接入模式：平台监听端口由设备连接（SERVER），或由平台主动连接设备（CLIENT）。
- */
-public enum UdpTransportConnectMode {
-    SERVER,
-    CLIENT
-}

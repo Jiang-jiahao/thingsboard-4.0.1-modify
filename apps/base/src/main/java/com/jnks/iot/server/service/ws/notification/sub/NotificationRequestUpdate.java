@@ -1,0 +1,16 @@
+package com.jnks.iot.server.service.ws.notification.sub;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import com.jnks.iot.server.common.data.id.NotificationRequestId;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class NotificationRequestUpdate {
+    private NotificationRequestId notificationRequestId;
+    private boolean deleted;
+}

@@ -1215,8 +1215,8 @@
         "make-private-dashboard-title": "Czy na pewno chcesz uczynić panel '{{dashboardTitle}}' prywatnym?",
         "make-private-dashboard-text": "Po potwierdzeniu panel stanie się prywatny i nie będzie dostępny dla innych.",
         "make-private-dashboard": "Ustaw panel jako prywatny",
-        "socialshare-text": "'{{dashboardTitle}}' zasilany przez ThingsBoard",
-        "socialshare-title": "'{{dashboardTitle}}' zasilany przez ThingsBoard",
+        "socialshare-text": "'{{dashboardTitle}}' zasilany przez JnksIOT",
+        "socialshare-title": "'{{dashboardTitle}}' zasilany przez JnksIOT",
         "select-dashboard": "Wybierz panel",
         "no-dashboards-matching": "Nie znaleziono pasujących paneli do '{{entity}}'.",
         "dashboard-required": "Panel jest wymagany.",
@@ -4702,7 +4702,7 @@
         "allow-customer-white-labeling": "Zezwalaj na White Labeling klienta",
         "search": "Wyszukaj tenantów",
         "selected-tenants": "Wybrano { count, plural, =1 {1 tenanta} other {# tenantów} }",
-        "isolated-tb-rule-engine": "Przetwarzanie w izolowanym kontenerze mechanizmu reguł ThingsBoard",
+        "isolated-tb-rule-engine": "Przetwarzanie w izolowanym kontenerze mechanizmu reguł JnksIOT",
         "isolated-tb-rule-engine-details": "Wymaga oddzielnych mikrousług dla każdego izolowanego Tenanta"
     },
     "tenant-profile": {
@@ -5968,7 +5968,7 @@
         "help-link-base-url": "Bazowy adres URL linków pomocy",
         "ui-help-base-url": "Bazowy adres URL pomocy interfejsu użytkownika",
         "enable-help-links": "Włącz linki pomocy",
-        "error-verification-url": "Nazwa domeny nie powinna zawierać symboli „/” i „:”. Przykład: thingsboard.io",
+        "error-verification-url": "Nazwa domeny nie powinna zawierać symboli „/” i „:”. Przykład: iot.example.com",
         "show-platform-name-version": "Pokaż nazwę i wersję platformy",
         "platform-name": "Nazwa platformy",
         "platform-version": "Wersja platformowa",
@@ -7256,7 +7256,7 @@
         },
         "functions": {
             "title": "Funkcje",
-            "pe-feature-tooltip": "Tylko na ThingsBoard\nProfessional Edition",
+            "pe-feature-tooltip": "Tylko na JnksIOT\nProfessional Edition",
             "switch-to-pe": "Przejdź na PE",
             "alarms": "Alarmy",
             "dashboards": "Panele",
@@ -7393,7 +7393,7 @@
         "entity-limit-text": "Możesz jednak uaktualnić swój plan subskrypcji, aby zwiększyć swoje limity.",
         "upgrade-your-plan": "Uaktualnij plan subskrypcji",
         "white-labeling-feature": "Funkcja white labeling",
-        "white-labeling-text-full": "Zmień nazwę interfejsu internetowego platformy ThingsBoard za pomocą logo Twojej firmy lub produktu oraz schematu kolorów w 2 minuty.<br><br>Usuń opcję „Powered By” w stopce panelu.<br>Nie jest wymagane kodowanie ani ponowne uruchamianie usługi. Pozwól także swoim klientom na White Labeling swoich interfejsów",
+        "white-labeling-text-full": "Zmień nazwę interfejsu internetowego platformy JnksIOT za pomocą logo Twojej firmy lub produktu oraz schematu kolorów w 2 minuty.<br><br>Usuń opcję „Powered By” w stopce panelu.<br>Nie jest wymagane kodowanie ani ponowne uruchamianie usługi. Pozwól także swoim klientom na White Labeling swoich interfejsów",
         "enable-white-labeling": "Włącz teraz funkcję white labeling, aktualizując swój plan subskrypcji!",
         "read-more": "Czytaj więcej",
         "white-labeling-video-text": "Obejrzyj samouczek wideo poniżej, aby zobaczyć, jak działa ta funkcja!"

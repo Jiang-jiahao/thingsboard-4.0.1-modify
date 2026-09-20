@@ -1,0 +1,139 @@
+package com.jnks.iot.server.service.sync.ie.importing.impl;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.User;
+import com.jnks.iot.server.common.data.audit.ActionType;
+import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.data.id.DeviceProfileId;
+import com.jnks.iot.server.common.data.id.NotificationRuleId;
+import com.jnks.iot.server.common.data.id.NotificationTargetId;
+import com.jnks.iot.server.common.data.id.RuleChainId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.id.UUIDBased;
+import com.jnks.iot.server.common.data.notification.rule.DefaultNotificationRuleRecipientsConfig;
+import com.jnks.iot.server.common.data.notification.rule.EscalatedNotificationRuleRecipientsConfig;
+import com.jnks.iot.server.common.data.notification.rule.NotificationRule;
+import com.jnks.iot.server.common.data.notification.rule.NotificationRuleRecipientsConfig;
+import com.jnks.iot.server.common.data.notification.rule.trigger.config.DeviceActivityNotificationRuleTriggerConfig;
+import com.jnks.iot.server.common.data.notification.rule.trigger.config.NotificationRuleTriggerConfig;
+import com.jnks.iot.server.common.data.notification.rule.trigger.config.NotificationRuleTriggerType;
+import com.jnks.iot.server.common.data.notification.rule.trigger.config.RuleEngineComponentLifecycleEventNotificationRuleTriggerConfig;
+import com.jnks.iot.server.common.data.sync.ie.EntityExportData;
+import com.jnks.iot.server.dao.notification.NotificationRuleService;
+import com.jnks.iot.server.dao.service.ConstraintValidator;
+import com.jnks.iot.server.service.sync.vc.data.EntitiesImportCtx;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+/**
+ * 针对 {@link NotificationRule} 的导入服务，继承 {@link BaseEntityImportService}。
+ * <p>
+ * 还原模板、设备/Profile/规则链、接收方 Target 的内部 ID；拒绝非租户级触发类型。
+ */
+@Service
+@RequiredArgsConstructor
+public class NotificationRuleImportService extends BaseEntityImportService<NotificationRuleId, NotificationRule, EntityExportData<NotificationRule>> {
+
+    private final NotificationRuleService notificationRuleService;
+
+    @Override
+    protected void setOwner(TenantId tenantId, NotificationRule notificationRule, IdProvider idProvider) {
+        notificationRule.setTenantId(tenantId);
+    }
+
+    /**
+     * 映射模板与触发/接收配置中的实体 ID，并校验触发类型对租户可用。
+     */
+    @Override
+    protected NotificationRule prepare(EntitiesImportCtx ctx, NotificationRule notificationRule, NotificationRule oldNotificationRule, EntityExportData<NotificationRule> exportData, IdProvider idProvider) {
+        notificationRule.setTemplateId(idProvider.getInternalId(notificationRule.getTemplateId()));
+
+        NotificationRuleTriggerConfig ruleTriggerConfig = notificationRule.getTriggerConfig();
+        NotificationRuleTriggerType triggerType = ruleTriggerConfig.getTriggerType();
+        switch (triggerType) {
+            case DEVICE_ACTIVITY: {
+                DeviceActivityNotificationRuleTriggerConfig triggerConfig = (DeviceActivityNotificationRuleTriggerConfig) ruleTriggerConfig;
+                Set<UUID> devices = triggerConfig.getDevices();
+                if (devices != null) {
+                    triggerConfig.setDevices(devices.stream().map(DeviceId::new)
+                            .map(idProvider::getInternalId).map(UUIDBased::getId)
+                            .collect(Collectors.toSet()));
+                }
+
+                Set<UUID> deviceProfiles = triggerConfig.getDeviceProfiles();
+                if (deviceProfiles != null) {
+                    triggerConfig.setDeviceProfiles(deviceProfiles.stream().map(DeviceProfileId::new)
+                            .map(idProvider::getInternalId).map(UUIDBased::getId)
+                            .collect(Collectors.toSet()));
+                }
+                break;
+            }
+            case RULE_ENGINE_COMPONENT_LIFECYCLE_EVENT: {
+                RuleEngineComponentLifecycleEventNotificationRuleTriggerConfig triggerConfig = (RuleEngineComponentLifecycleEventNotificationRuleTriggerConfig) ruleTriggerConfig;
+                Set<UUID> ruleChains = triggerConfig.getRuleChains();
+                if (ruleChains != null) {
+                    triggerConfig.setRuleChains(ruleChains.stream().map(RuleChainId::new)
+                            .map(idProvider::getInternalId).map(UUIDBased::getId)
+                            .collect(Collectors.toSet()));
+                }
+                break;
+            }
+        }
+        if (!triggerType.isTenantLevel()) {
+            throw new IllegalArgumentException("Trigger type " + triggerType + " is not available for tenants");
+        }
+
+        NotificationRuleRecipientsConfig ruleRecipientsConfig = notificationRule.getRecipientsConfig();
+        switch (triggerType) {
+            case ALARM: {
+                EscalatedNotificationRuleRecipientsConfig recipientsConfig = (EscalatedNotificationRuleRecipientsConfig) ruleRecipientsConfig;
+                Map<Integer, List<UUID>> escalationTable = new LinkedHashMap<>(recipientsConfig.getEscalationTable());
+                escalationTable.replaceAll((delay, targets) -> targets.stream()
+                        .map(NotificationTargetId::new).map(idProvider::getInternalId)
+                        .map(UUIDBased::getId).collect(Collectors.toList()));
+                recipientsConfig.setEscalationTable(escalationTable);
+                break;
+            }
+            default: {
+                DefaultNotificationRuleRecipientsConfig recipientsConfig = (DefaultNotificationRuleRecipientsConfig) ruleRecipientsConfig;
+                List<UUID> targets = recipientsConfig.getTargets().stream()
+                        .map(NotificationTargetId::new).map(idProvider::getInternalId)
+                        .map(UUIDBased::getId).collect(Collectors.toList());
+                recipientsConfig.setTargets(targets);
+                break;
+            }
+        }
+        return notificationRule;
+    }
+
+    /** 校验字段后保存通知规则。 */
+    @Override
+    protected NotificationRule saveOrUpdate(EntitiesImportCtx ctx, NotificationRule notificationRule, EntityExportData<NotificationRule> exportData, IdProvider idProvider) {
+        ConstraintValidator.validateFields(notificationRule);
+        return notificationRuleService.saveNotificationRule(ctx.getTenantId(), notificationRule);
+    }
+
+    @Override
+    protected void onEntitySaved(User user, NotificationRule savedEntity, NotificationRule oldEntity) {
+        entityActionService.logEntityAction(user, savedEntity.getId(), savedEntity, null,
+                oldEntity == null ? ActionType.ADDED : ActionType.UPDATED, null);
+    }
+
+    @Override
+    protected NotificationRule deepCopy(NotificationRule notificationRule) {
+        return new NotificationRule(notificationRule);
+    }
+
+    @Override
+    public EntityType getEntityType() {
+        return EntityType.NOTIFICATION_RULE;
+    }
+
+}

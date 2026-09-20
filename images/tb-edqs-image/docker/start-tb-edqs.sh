@@ -9,7 +9,7 @@ echo "Starting '${project.name}' ..."
 
 cd ${pkg.installFolder}/bin
 
-exec java -cp ${jarfile} $JAVA_OPTS -Dloader.main=org.thingsboard.server.edqs.ThingsboardEdqsApplication \
+exec java -cp ${jarfile} $JAVA_OPTS -Dloader.main=com.jnks.iot.server.edqs.JnksIotEdqsApplication \
                     -Dspring.jpa.hibernate.ddl-auto=none \
                     -Dlogging.config=$CONF_FOLDER/logback.xml \
                     org.springframework.boot.loader.launch.PropertiesLauncher

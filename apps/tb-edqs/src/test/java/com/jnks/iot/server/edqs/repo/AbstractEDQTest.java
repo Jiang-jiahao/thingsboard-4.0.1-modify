@@ -1,0 +1,215 @@
+package com.jnks.iot.server.edqs.repo;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
+import com.jnks.iot.server.common.data.Customer;
+import com.jnks.iot.server.common.data.Dashboard;
+import com.jnks.iot.server.common.data.Device;
+import com.jnks.iot.server.common.data.DeviceProfile;
+import com.jnks.iot.server.common.data.DeviceProfileType;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.EntityView;
+import com.jnks.iot.server.common.data.asset.Asset;
+import com.jnks.iot.server.common.data.asset.AssetProfile;
+import com.jnks.iot.server.common.data.edqs.EdqsObject;
+import com.jnks.iot.server.common.data.edqs.query.QueryResult;
+import com.jnks.iot.server.common.data.id.AssetId;
+import com.jnks.iot.server.common.data.id.AssetProfileId;
+import com.jnks.iot.server.common.data.id.CustomerId;
+import com.jnks.iot.server.common.data.id.DashboardId;
+import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.data.id.DeviceProfileId;
+import com.jnks.iot.server.common.data.id.EntityIdFactory;
+import com.jnks.iot.server.common.data.id.EntityViewId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.page.PageData;
+import com.jnks.iot.server.common.data.query.EntityKey;
+import com.jnks.iot.server.common.data.query.EntityKeyType;
+import com.jnks.iot.server.common.data.query.EntityKeyValueType;
+import com.jnks.iot.server.common.data.query.FilterPredicateValue;
+import com.jnks.iot.server.common.data.query.KeyFilter;
+import com.jnks.iot.server.common.data.query.StringFilterPredicate;
+import com.jnks.iot.server.common.data.relation.EntityRelation;
+import com.jnks.iot.server.common.data.relation.RelationTypeGroup;
+import com.jnks.iot.server.common.stats.DummyEdqsStatsService;
+import com.jnks.iot.server.edqs.util.EdqsConverter;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+@RunWith(SpringRunner.class)
+@Configuration
+@ComponentScan({"com.jnks.iot.server.edqs.repo", "com.jnks.iot.server.edqs.util"})
+@EntityScan("com.jnks.iot.server.edqs")
+@TestPropertySource(locations = {"classpath:edqs-test.properties"})
+@TestExecutionListeners({
+        DependencyInjectionTestExecutionListener.class,
+        DirtiesContextTestExecutionListener.class})
+public abstract class AbstractEDQTest {
+
+    @Autowired
+    protected DefaultEdqsRepository repository;
+    @Autowired
+    protected EdqsConverter edqsConverter;
+    @MockBean
+    private DummyEdqsStatsService edqsStatsService;
+
+    protected final TenantId tenantId = TenantId.fromUUID(UUID.randomUUID());
+    protected final CustomerId customerId = new CustomerId(UUID.randomUUID());
+
+    protected final UUID defaultAssetProfileId = UUID.randomUUID();
+    protected final UUID defaultDeviceProfileId = UUID.randomUUID();
+
+    @Before
+    public final void before() {
+        AssetProfile ap = new AssetProfile(new AssetProfileId(defaultAssetProfileId));
+        ap.setName("default");
+        ap.setDefault(true);
+        addOrUpdate(EntityType.ASSET_PROFILE, ap);
+
+        DeviceProfile dp = new DeviceProfile(new DeviceProfileId(defaultDeviceProfileId));
+        dp.setName("default");
+        dp.setDefault(true);
+        dp.setType(DeviceProfileType.DEFAULT);
+        addOrUpdate(EntityType.DEVICE_PROFILE, dp);
+
+        createCustomer(customerId.getId(), null, "Customer A");
+    }
+
+    @After
+    public final void after() {
+        repository.clear();
+    }
+
+    protected void createCustomer(UUID id, UUID parentCustomerId, String title) {
+        Customer entity = new Customer();
+        entity.setId(new CustomerId(id));
+        entity.setTitle(title);
+        addOrUpdate(EntityType.CUSTOMER, entity);
+    }
+
+
+    protected UUID createDevice(String name) {
+        return createDevice(null, defaultDeviceProfileId, name);
+    }
+
+    protected UUID createDevice(CustomerId customerId, String name) {
+        return createDevice(customerId.getId(), defaultDeviceProfileId, name);
+    }
+
+    protected UUID createDevice(UUID customerId, UUID profileId, String name) {
+        UUID entityId = UUID.randomUUID();
+        Device entity = new Device();
+        entity.setId(new DeviceId(entityId));
+        if (profileId != null) {
+            entity.setDeviceProfileId(new DeviceProfileId(profileId));
+        }
+        if (customerId != null) {
+            entity.setCustomerId(new CustomerId(customerId));
+        }
+        entity.setName(name);
+        addOrUpdate(EntityType.DEVICE, entity);
+        return entityId;
+    }
+
+    protected UUID createDashboard(String name) {
+        UUID entityId = UUID.randomUUID();
+        Dashboard entity = new Dashboard();
+        entity.setId(new DashboardId(entityId));
+        entity.setTitle(name);
+        addOrUpdate(EntityType.DEVICE, entity);
+        return entityId;
+    }
+
+    protected UUID createView(String name) {
+        return createView(null, "default", name);
+    }
+
+    protected UUID createView(CustomerId customerId, String name) {
+        return createView(customerId.getId(), "default", name);
+    }
+
+    protected UUID createView(UUID customerId, String type, String name) {
+        UUID entityId = UUID.randomUUID();
+        EntityView entity = new EntityView();
+        entity.setId(new EntityViewId(entityId));
+        entity.setType(type);
+        if (customerId != null) {
+            entity.setCustomerId(new CustomerId(customerId));
+        }
+        entity.setName(name);
+        addOrUpdate(EntityType.ENTITY_VIEW, entity);
+        return entityId;
+    }
+
+    protected UUID createAsset(String name) {
+        return createAsset(null, defaultAssetProfileId, name);
+    }
+
+    protected UUID createAsset(UUID customerId, String name) {
+        return createAsset(customerId, defaultAssetProfileId, name);
+    }
+
+    protected UUID createAsset(UUID customerId, UUID profileId, String name) {
+        UUID entityId = UUID.randomUUID();
+        Asset entity = new Asset();
+        entity.setId(new AssetId(entityId));
+        if (profileId != null) {
+            entity.setAssetProfileId(new AssetProfileId(profileId));
+        }
+        if (customerId != null) {
+            entity.setCustomerId(new CustomerId(customerId));
+        }
+        entity.setName(name);
+        addOrUpdate(EntityType.ASSET, entity);
+        return entityId;
+    }
+
+    protected void createRelation(EntityType fromType, UUID fromId, EntityType toType, UUID toId, String type) {
+        createRelation(fromType, fromId, toType, toId, RelationTypeGroup.COMMON, type);
+    }
+
+    protected void createRelation(EntityType fromType, UUID fromId, EntityType toType, UUID toId, RelationTypeGroup group, String type) {
+        addOrUpdate(new EntityRelation(EntityIdFactory.getByTypeAndUuid(fromType, fromId), EntityIdFactory.getByTypeAndUuid(toType, toId), type, group));
+    }
+
+
+    protected boolean checkContains(PageData<QueryResult> data, UUID entityId) {
+        return data.getData().stream().anyMatch(r -> r.getEntityId().getId().equals(entityId));
+    }
+
+    protected List<KeyFilter> createStringKeyFilters(String key, EntityKeyType keyType, StringFilterPredicate.StringOperation operation, String value) {
+        KeyFilter filter = new KeyFilter();
+        filter.setKey(new EntityKey(keyType, key));
+        filter.setValueType(EntityKeyValueType.STRING);
+        StringFilterPredicate predicate = new StringFilterPredicate();
+        predicate.setValue(FilterPredicateValue.fromString(value));
+        predicate.setOperation(operation);
+        predicate.setIgnoreCase(true);
+        filter.setPredicate(predicate);
+        return Collections.singletonList(filter);
+    }
+
+    protected void addOrUpdate(EntityType entityType, Object entity) {
+        addOrUpdate(EdqsConverter.toEntity(entityType, entity));
+    }
+
+    protected void addOrUpdate(EdqsObject edqsObject) {
+        byte[] serialized = edqsConverter.serialize(edqsObject.type(), edqsObject);
+        edqsObject = edqsConverter.deserialize(edqsObject.type(), serialized);
+        repository.get(tenantId).addOrUpdate(edqsObject);
+    }
+
+}

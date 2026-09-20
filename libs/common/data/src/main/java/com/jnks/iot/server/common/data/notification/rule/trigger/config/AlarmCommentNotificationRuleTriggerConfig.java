@@ -1,0 +1,29 @@
+package com.jnks.iot.server.common.data.notification.rule.trigger.config;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import com.jnks.iot.server.common.data.alarm.AlarmSearchStatus;
+import com.jnks.iot.server.common.data.alarm.AlarmSeverity;
+
+import java.util.Set;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class AlarmCommentNotificationRuleTriggerConfig implements NotificationRuleTriggerConfig {
+
+    private Set<String> alarmTypes;
+    private Set<AlarmSeverity> alarmSeverities;
+    private Set<AlarmSearchStatus> alarmStatuses;
+    private boolean onlyUserComments;
+    private boolean notifyOnCommentUpdate;
+
+    @Override
+    public NotificationRuleTriggerType getTriggerType() {
+        return NotificationRuleTriggerType.ALARM_COMMENT;
+    }
+
+}

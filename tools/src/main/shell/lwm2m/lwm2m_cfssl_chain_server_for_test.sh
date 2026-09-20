@@ -80,7 +80,7 @@ tee ./${SERVER_PATH}/ca-config.json 1> /dev/null <<-CONFIG
           "C": "UK",
           "ST": "Kyiv city",
           "L": "Kyiv",
-          "O": "Thingsboard",
+          "O": "JnksIOT",
           "OU": "DEVELOPER_TEST"
         }
       ]
@@ -171,7 +171,7 @@ cfssl genkey \
       "C": "UK",
       "ST": "Kyiv city",
       "L": "Kyiv",
-      "O": "Thingsboard",
+      "O": "JnksIOT",
       "OU": "DEVELOPER_TEST"
     }
   ],
@@ -199,7 +199,7 @@ cfssl gencert \
       "C": "UK",
       "ST": "Kyiv city",
       "L": "Kyiv",
-      "O": "Thingsboard",
+      "O": "JnksIOT",
       "OU": "DEVELOPER_TEST"
     }
   ]
@@ -253,7 +253,7 @@ cfssl gencert \
       "C": "UK",
       "ST": "Kyiv city",
       "L": "Kyiv",
-      "O": "Thingsboard",
+      "O": "JnksIOT",
       "OU": "DEVELOPER_TEST"
     }
   ]

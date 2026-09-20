@@ -8,7 +8,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.thingsboard.server" level="INFO" />
+    <logger name="com.jnks.iot.server" level="INFO" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>

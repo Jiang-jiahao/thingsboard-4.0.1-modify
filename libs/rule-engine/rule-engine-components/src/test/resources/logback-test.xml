@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.thingsboard.rule.engine.filter.TbCheckAlarmStatusNode" level="DEBUG"/>
+    <logger name="com.jnks.iot.rule.engine.filter.TbCheckAlarmStatusNode" level="DEBUG"/>
 
     <root level="INFO">
         <appender-ref ref="console"/>

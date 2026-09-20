@@ -2,15 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.thingsboard</groupId>
-        <artifactId>thingsboard</artifactId>
+        <groupId>com.jnks.iot</groupId>
+        <artifactId>jnks-iot</artifactId>
         <version>4.0.1</version>
     </parent>
     <artifactId>libs</artifactId>
     <packaging>pom</packaging>
 
     <name>libs</name>
-    <url>https://thingsboard.io</url>
+    <url>https://iot.example.com</url>
 
     <properties>
         <main.dir>${basedir}/..</main.dir>

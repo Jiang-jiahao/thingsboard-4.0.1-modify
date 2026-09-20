@@ -1,0 +1,41 @@
+package com.jnks.iot.server.service.ws.telemetry.cmd.v2;
+
+import com.jnks.iot.server.common.data.kv.Aggregation;
+import com.jnks.iot.server.common.data.kv.AggregationParams;
+import com.jnks.iot.server.common.data.kv.IntervalType;
+
+import java.util.List;
+
+public interface GetTsCmd {
+
+    long getStartTs();
+
+    long getEndTs();
+
+    List<String> getKeys();
+
+    IntervalType getIntervalType();
+
+    long getInterval();
+
+    String getTimeZoneId();
+
+    int getLimit();
+
+    Aggregation getAgg();
+
+    boolean isFetchLatestPreviousPoint();
+
+    default AggregationParams toAggregationParams() {
+        var agg = getAgg();
+        var intervalType = getIntervalType();
+        if (agg == null || Aggregation.NONE.equals(agg)) {
+            return AggregationParams.none();
+        } else if (intervalType == null || IntervalType.MILLISECONDS.equals(intervalType)) {
+            return AggregationParams.milliseconds(agg, getInterval());
+        } else {
+            return AggregationParams.calendar(agg, intervalType, getTimeZoneId());
+        }
+    }
+
+}

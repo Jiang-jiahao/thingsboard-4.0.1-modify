@@ -1,0 +1,64 @@
+package com.jnks.iot.server.dao.model.sql;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import com.jnks.iot.server.common.data.cf.CalculatedFieldLink;
+import com.jnks.iot.server.common.data.id.CalculatedFieldId;
+import com.jnks.iot.server.common.data.id.CalculatedFieldLinkId;
+import com.jnks.iot.server.common.data.id.EntityIdFactory;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.dao.model.BaseEntity;
+import com.jnks.iot.server.dao.model.BaseSqlEntity;
+
+import java.util.UUID;
+
+import static com.jnks.iot.server.dao.model.ModelConstants.CALCULATED_FIELD_LINK_CALCULATED_FIELD_ID;
+import static com.jnks.iot.server.dao.model.ModelConstants.CALCULATED_FIELD_LINK_ENTITY_ID;
+import static com.jnks.iot.server.dao.model.ModelConstants.CALCULATED_FIELD_LINK_ENTITY_TYPE;
+import static com.jnks.iot.server.dao.model.ModelConstants.CALCULATED_FIELD_LINK_TABLE_NAME;
+import static com.jnks.iot.server.dao.model.ModelConstants.CALCULATED_FIELD_LINK_TENANT_ID_COLUMN;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Entity
+@Table(name = CALCULATED_FIELD_LINK_TABLE_NAME)
+public class CalculatedFieldLinkEntity extends BaseSqlEntity<CalculatedFieldLink> implements BaseEntity<CalculatedFieldLink> {
+
+    @Column(name = CALCULATED_FIELD_LINK_TENANT_ID_COLUMN)
+    private UUID tenantId;
+
+    @Column(name = CALCULATED_FIELD_LINK_ENTITY_TYPE)
+    private String entityType;
+
+    @Column(name = CALCULATED_FIELD_LINK_ENTITY_ID)
+    private UUID entityId;
+
+    @Column(name = CALCULATED_FIELD_LINK_CALCULATED_FIELD_ID)
+    private UUID calculatedFieldId;
+
+    public CalculatedFieldLinkEntity() {
+        super();
+    }
+
+    public CalculatedFieldLinkEntity(CalculatedFieldLink calculatedFieldLink) {
+        super(calculatedFieldLink);
+        this.tenantId = calculatedFieldLink.getTenantId().getId();
+        this.entityType = calculatedFieldLink.getEntityId().getEntityType().name();
+        this.entityId = calculatedFieldLink.getEntityId().getId();
+        this.calculatedFieldId = calculatedFieldLink.getCalculatedFieldId().getId();
+    }
+
+    @Override
+    public CalculatedFieldLink toData() {
+        CalculatedFieldLink calculatedFieldLink = new CalculatedFieldLink(new CalculatedFieldLinkId(id));
+        calculatedFieldLink.setCreatedTime(createdTime);
+        calculatedFieldLink.setTenantId(TenantId.fromUUID(tenantId));
+        calculatedFieldLink.setEntityId(EntityIdFactory.getByTypeAndUuid(entityType, entityId));
+        calculatedFieldLink.setCalculatedFieldId(new CalculatedFieldId(calculatedFieldId));
+        return calculatedFieldLink;
+    }
+
+}

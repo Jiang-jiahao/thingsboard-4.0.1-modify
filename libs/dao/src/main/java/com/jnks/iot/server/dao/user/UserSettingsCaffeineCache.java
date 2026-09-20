@@ -1,0 +1,19 @@
+package com.jnks.iot.server.dao.user;
+
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cache.CacheManager;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.server.cache.CaffeineTbTransactionalCache;
+import com.jnks.iot.server.common.data.CacheConstants;
+import com.jnks.iot.server.common.data.settings.UserSettings;
+import com.jnks.iot.server.common.data.settings.UserSettingsCompositeKey;
+
+@ConditionalOnProperty(prefix = "cache", value = "type", havingValue = "caffeine", matchIfMissing = true)
+@Service("UserSettingsCache")
+public class UserSettingsCaffeineCache extends CaffeineTbTransactionalCache<UserSettingsCompositeKey, UserSettings> {
+
+    public UserSettingsCaffeineCache(CacheManager cacheManager) {
+        super(cacheManager, CacheConstants.USER_SETTINGS_CACHE);
+    }
+
+}

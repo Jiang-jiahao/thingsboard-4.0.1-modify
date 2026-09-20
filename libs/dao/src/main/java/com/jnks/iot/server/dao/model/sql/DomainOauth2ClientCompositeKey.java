@@ -1,0 +1,22 @@
+package com.jnks.iot.server.dao.model.sql;
+
+import jakarta.persistence.Transient;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.UUID;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class DomainOauth2ClientCompositeKey implements Serializable {
+
+    @Transient
+    private static final long serialVersionUID = -245388185894468455L;
+
+    private UUID domainId;
+    private UUID oauth2ClientId;
+
+}

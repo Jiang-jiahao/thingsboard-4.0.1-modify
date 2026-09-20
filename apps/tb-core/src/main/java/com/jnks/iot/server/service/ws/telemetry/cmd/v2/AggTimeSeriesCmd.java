@@ -1,0 +1,14 @@
+package com.jnks.iot.server.service.ws.telemetry.cmd.v2;
+
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+public class AggTimeSeriesCmd {
+
+    private List<AggKey> keys;
+    private long startTs;
+    private long timeWindow;
+
+}

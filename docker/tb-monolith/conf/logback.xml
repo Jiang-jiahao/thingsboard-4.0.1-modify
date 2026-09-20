@@ -1,30 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!--
-
-    Copyright © 2016-2018 The Thingsboard Authors
-
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-
-        http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-
--->
 <!DOCTYPE configuration>
 <configuration scan="true" scanPeriod="10 seconds">
 
     <appender name="fileLogAppender"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>/var/log/thingsboard/${TB_SERVICE_ID}/thingsboard.log</file>
+        <file>/var/log/jnks-iot/${TB_SERVICE_ID}/jnks-iot.log</file>
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>/var/log/thingsboard/${TB_SERVICE_ID}/thingsboard.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>/var/log/jnks-iot/${TB_SERVICE_ID}/jnks-iot.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>3GB</totalSizeCap>
@@ -40,32 +23,32 @@
         </encoder>
     </appender>
 
-    <logger name="org.thingsboard.server" level="INFO" />
+    <logger name="com.jnks.iot.server" level="INFO" />
     <logger name="com.google.common.util.concurrent.AggregateFuture" level="OFF" />
     <logger name="org.apache.kafka.common.utils.AppInfoParser" level="WARN"/>
     <logger name="org.apache.kafka.clients" level="WARN"/>
     <!-- To enable the logging of scanned rule engine components-->
-    <!--    <logger name="org.thingsboard.server.service.component.AnnotationComponentDiscoveryService" level="DEBUG" />-->
+    <!--    <logger name="com.jnks.iot.server.service.component.AnnotationComponentDiscoveryService" level="DEBUG" />-->
     <!-- Other useful logs -->
     <!--    <logger name="org.springframework.jdbc.core" level="TRACE" />-->
     <!--    <logger name="org.hibernate.SQL" level="DEBUG" />-->
     <!--    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" />-->
 
-    <!--    <logger name="org.thingsboard.server.service.queue" level="TRACE" />-->
-    <!--    <logger name="org.thingsboard.server.service.transport" level="TRACE" />-->
-    <!--    <logger name="org.thingsboard.server.queue.memory.InMemoryStorage" level="DEBUG" />-->
-    <!--    <logger name="org.thingsboard.server.service.ttl.AbstractCleanUpService" level="DEBUG" />-->
+    <!--    <logger name="com.jnks.iot.server.service.queue" level="TRACE" />-->
+    <!--    <logger name="com.jnks.iot.server.service.transport" level="TRACE" />-->
+    <!--    <logger name="com.jnks.iot.server.queue.memory.InMemoryStorage" level="DEBUG" />-->
+    <!--    <logger name="com.jnks.iot.server.service.ttl.AbstractCleanUpService" level="DEBUG" />-->
 
-    <!--    <logger name="org.thingsboard.server.service.subscription" level="TRACE"/>-->
-    <!--    <logger name="org.thingsboard.server.service.telemetry" level="TRACE"/>-->
+    <!--    <logger name="com.jnks.iot.server.service.subscription" level="TRACE"/>-->
+    <!--    <logger name="com.jnks.iot.server.service.telemetry" level="TRACE"/>-->
     <!--    <logger name="org.eclipse.californium.scandium.DTLSConnector" level="TRACE" />-->
     <!--    <logger name="org.eclipse.californium.scandium.dtls.Handshaker" level="DEBUG" />-->
 
     <!-- Top Rule Nodes by max execution time -->
-    <!--    <logger name="org.thingsboard.server.service.queue.TbMsgPackProcessingContext" level="DEBUG" /> -->
+    <!--    <logger name="com.jnks.iot.server.service.queue.TbMsgPackProcessingContext" level="DEBUG" /> -->
 
     <!-- MQTT transport debug -->
-    <!--    <logger name="org.thingsboard.server.transport.mqtt.MqttTransportHandler" level="DEBUG" /> -->
+    <!--    <logger name="com.jnks.iot.server.transport.mqtt.MqttTransportHandler" level="DEBUG" /> -->
 
     <logger name="com.microsoft.azure.servicebus.primitives.CoreMessageReceiver" level="OFF" />
 

@@ -3,15 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.thingsboard</groupId>
+        <groupId>com.jnks.iot</groupId>
         <artifactId>apps</artifactId>
         <version>4.0.1</version>
     </parent>
     <artifactId>vc-executor</artifactId>
 
     <name>vc-executor</name>
-    <url>https://thingsboard.io</url>
-    <description>Project for ThingsBoard version control microservice</description>
+    <url>https://iot.example.com</url>
+    <description>Project for JnksIOT version control microservice</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,17 +23,17 @@
         <pkg.name>tb-vc-executor</pkg.name>
         <pkg.copyInstallScripts>false</pkg.copyInstallScripts>
         <pkg.win.dist>${project.build.directory}/windows</pkg.win.dist>
-        <pkg.implementationTitle>ThingsBoard Version Control Executor Service</pkg.implementationTitle>
-        <pkg.mainClass>org.thingsboard.server.vc.ThingsboardVersionControlExecutorApplication</pkg.mainClass>
+        <pkg.implementationTitle>JnksIOT Version Control Executor Service</pkg.implementationTitle>
+        <pkg.mainClass>com.jnks.iot.server.vc.JnksIotVersionControlExecutorApplication</pkg.mainClass>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>queue</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.thingsboard.common</groupId>
+            <groupId>com.jnks.iot.common</groupId>
             <artifactId>version-control</artifactId>
         </dependency>
         <dependency>

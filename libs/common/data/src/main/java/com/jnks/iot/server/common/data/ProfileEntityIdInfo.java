@@ -1,0 +1,39 @@
+package com.jnks.iot.server.common.data;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import com.jnks.iot.server.common.data.id.AssetId;
+import com.jnks.iot.server.common.data.id.AssetProfileId;
+import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.data.id.DeviceProfileId;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.common.data.id.TenantId;
+
+import java.io.Serializable;
+import java.util.UUID;
+
+@Data
+@Slf4j
+public class ProfileEntityIdInfo implements Serializable, HasTenantId {
+
+    private static final long serialVersionUID = 8532058281983868003L;
+
+    private final TenantId tenantId;
+    private final EntityId profileId;
+    private final EntityId entityId;
+
+    private ProfileEntityIdInfo(UUID tenantId, EntityId profileId, EntityId entityId) {
+        this.tenantId = TenantId.fromUUID(tenantId);
+        this.profileId = profileId;
+        this.entityId = entityId;
+    }
+
+    public static ProfileEntityIdInfo create(UUID tenantId, DeviceProfileId profileId, DeviceId entityId) {
+        return new ProfileEntityIdInfo(tenantId, profileId, entityId);
+    }
+
+    public static ProfileEntityIdInfo create(UUID tenantId, AssetProfileId profileId, AssetId entityId) {
+        return new ProfileEntityIdInfo(tenantId, profileId, entityId);
+    }
+
+}

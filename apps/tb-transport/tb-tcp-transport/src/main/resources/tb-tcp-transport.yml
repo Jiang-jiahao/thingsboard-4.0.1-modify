@@ -23,7 +23,7 @@ zk:
   # ZooKeeper 会话超时（毫秒）
   session_timeout_ms: "${ZOOKEEPER_SESSION_TIMEOUT_MS:3000}"
   # ZooKeeper "文件系统" 中的目录名称
-  zk_dir: "${ZOOKEEPER_NODES_DIR:/thingsboard}"
+  zk_dir: "${ZOOKEEPER_NODES_DIR:/jnks-iot}"
   # 在微服务架构的规则引擎服务中建议配置 recalculate_delay 属性。
   # 此属性提供暂停时间，确保规则引擎服务重启时，其他节点不会立即尝试重新计算其分区。
   # 建议设置延迟，因为规则链 Actor 的初始化较耗时。重启期间避免不必要的重新计算可提升系统性能与稳定性。

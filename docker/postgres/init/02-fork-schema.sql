@@ -1,6 +1,6 @@
 -- fork 相对上游 4.0.1 多出来的 schema 增量。
 --
--- 01-thingsboard-4.0.1.sql.gz 是从**上游**官方镜像装出来的库导出的，不含本仓库自己加的表/列；
+-- 01-jnks-iot-4.0.1.sql.gz 是从**上游**官方镜像装出来的库导出的，不含本仓库自己加的表/列；
 -- 应用侧 ddl-auto=none，不会自己建表，所以缺了这些对象时相关页面会直接 500
 -- （例如协议模板页面：relation "protocol_template_bundle" does not exist）。
 --

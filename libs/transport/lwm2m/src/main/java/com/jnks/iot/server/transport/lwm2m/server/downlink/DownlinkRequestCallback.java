@@ -1,0 +1,15 @@
+package com.jnks.iot.server.transport.lwm2m.server.downlink;
+
+public interface DownlinkRequestCallback<R, T> {
+
+    default boolean onSent(R request) {
+        return true;
+    }
+
+    void onSuccess(R request, T response);
+
+    void onValidationError(String params, String msg);
+
+    void onError(String params, Exception e);
+
+}

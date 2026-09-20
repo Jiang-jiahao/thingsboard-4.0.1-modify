@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://thingsboard.io/svg" width="400" height="200" fill="none" version="1.1" viewBox="0 0 400 200"><tb:metadata xmlns=""><![CDATA[{
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="200" fill="none" version="1.1" viewBox="0 0 400 200"><tb:metadata xmlns=""><![CDATA[{
   "title": "Long horizontal broken pipe",
   "description": "Long horizontal broken pipe.",
   "searchTags": [

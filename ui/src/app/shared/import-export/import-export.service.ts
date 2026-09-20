@@ -688,7 +688,7 @@ export class ImportExportService {
           const ruleChainNode: RuleNode = {
             name: '',
             singletonMode: false,
-            type: 'org.thingsboard.rule.engine.flow.TbRuleChainInputNode',
+            type: 'com.jnks.iot.rule.engine.flow.TbRuleChainInputNode',
             configuration: {
               ruleChainId: ruleChainConnection.targetRuleChainId.id
             },
