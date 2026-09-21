@@ -231,17 +231,62 @@
   opacity: 1 !important;
 }
 
-// 密度：Material 单元格左右各 16px 内边距是表格「稀」的主因，压到 10px
+// 密度（ISA-101「一屏一个工艺段」）：
+// 1) 单元格左右内边距 Material 默认 16px → 8px
+// 2) 行高被「长文本换行」顶到 50px（设备名/配置名在 25% 宽的列里折成两行），
+//    改成不换行 + 省略号；单元格本就带 tooltip，悬停仍能看全名
 :host ::ng-deep {
   .mat-mdc-table {
+    // 实测：Material 主题里的 density 没作用到表格，单元格实测 52px。
+    // 变量压不动它，只能对行高直接定值并 !important。
+    --mat-table-row-item-container-height: 34px;
+    --mat-table-header-container-height: 32px;
+    --mat-table-row-item-label-text-size: 13px;
+
+    .mat-mdc-row {
+      height: 34px !important;
+      min-height: 34px !important;
+    }
+
+    .mat-mdc-header-row {
+      height: 32px !important;
+      min-height: 32px !important;
+    }
+
     .mat-mdc-header-cell,
     .mat-mdc-cell {
-      padding-left: 10px;
-      padding-right: 10px;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
+
+    .mat-mdc-cell {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .mat-mdc-row {
-      min-height: 32px;
+      min-height: 30px;
+    }
+
+    // 行高实际是被「操作图标按钮」撑起来的：Material 图标按钮默认 48px（密度 -2 仍 40px），
+    // 比一行文字高得多。按钮和图标一起收小，行高才真正落下来。
+    .mat-mdc-icon-button {
+      --mdc-icon-button-state-layer-size: 28px;
+      width: 28px;
+      height: 28px;
+      padding: 4px;
+      line-height: 1;
+
+      .mat-icon,
+      jnks-iot-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+    .mat-mdc-header-row {
+      min-height: 30px;
     }
   }
 }

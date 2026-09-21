@@ -265,6 +265,34 @@
     font-size: 12px;
   }
 
+  // ── 状态点：ISA-101 的第一条——正常态不给颜色，颜色只留给异常
+  .jnks-iot-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: $jnks-iot-text-muted;
+  }
+
+  .jnks-iot-state-dot {
+    display: block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: $jnks-iot-text-faint;
+    flex: none;
+  }
+
+  // 非活动：空心点，仍然中性（不是异常，只是状态）
+  .jnks-iot-state-dot.off {
+    background: transparent;
+    box-shadow: inset 0 0 0 1.5px $jnks-iot-line-strong;
+  }
+
+  // 真异常才上色
+  .jnks-iot-state-dot.warn { background: $jnks-iot-status-warn; }
+  .jnks-iot-state-dot.crit { background: $jnks-iot-seal-color; }
+
   // ── 数字与标识符：等宽，便于纵向比对
   .jnks-iot-num {
     font-family: $jnks-iot-font-data;

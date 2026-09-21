@@ -209,29 +209,23 @@ export class DevicesTableConfigResolver  {
     return columns;
   }
 
+  /**
+   * 状态：按 ISA-101，正常态不给颜色 —— 表格里每个设备都挂彩色药丸，画面就一直在「响」，
+   * 真正异常反而跳不出来。所以活动=实心灰点、非活动=空心灰点，颜色只留给告警。
+   * 顺带把高度从 32px 药丸压到一行文字，行高才降得下来。
+   */
   private deviceState(device: DeviceInfo): string {
-    let translateKey = 'device.active';
-    let backgroundColor = 'rgba(25, 128, 56, 0.08)';
-    if (!device.active) {
-      translateKey = 'device.inactive';
-      backgroundColor = 'rgba(209, 39, 48, 0.08)';
-    }
-    return `<div class="status" style="border-radius: 16px; height: 32px;
-                line-height: 32px; padding: 0 12px; width: fit-content; background-color: ${backgroundColor}">
-                ${this.translate.instant(translateKey)}
-            </div>`;
+    const translateKey = device.active ? 'device.active' : 'device.inactive';
+    const dotClass = device.active ? 'jnks-iot-state-dot' : 'jnks-iot-state-dot off';
+    return `<span class="jnks-iot-state"><i class="${dotClass}"></i>${this.translate.instant(translateKey)}</span>`;
   }
 
   private deviceStateStyle(device: DeviceInfo): object {
-    const styleObj = {
-      fontSize: '14px',
-      color: '#198038',
+    return {
+      fontSize: '13px',
+      color: 'var(--tb-text-muted)',
       cursor: 'pointer'
     };
-    if (!device.active) {
-      styleObj.color = '#d12730';
-    }
-    return styleObj;
   }
 
   configureEntityFunctions(deviceScope: string): void {
