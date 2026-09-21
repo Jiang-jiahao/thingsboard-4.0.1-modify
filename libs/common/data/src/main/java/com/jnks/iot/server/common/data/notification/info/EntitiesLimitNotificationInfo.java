@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.jnks.iot.server.common.data.notification.NotificationLabels;
 import com.jnks.iot.server.common.data.EntityType;
 import com.jnks.iot.server.common.data.id.TenantId;
 
@@ -27,7 +28,7 @@ public class EntitiesLimitNotificationInfo implements RuleOriginatedNotification
     @Override
     public Map<String, String> getTemplateData() {
         return mapOf(
-                "entityType", entityType.getNormalName(),
+                "entityType", NotificationLabels.entityType(entityType),
                 "currentCount", String.valueOf(currentCount),
                 "limit", String.valueOf(limit),
                 "percents", String.valueOf(percents),

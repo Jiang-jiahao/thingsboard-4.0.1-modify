@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.jnks.iot.server.common.data.notification.NotificationLabels;
 import com.jnks.iot.server.common.data.audit.ActionType;
 import com.jnks.iot.server.common.data.id.CustomerId;
 import com.jnks.iot.server.common.data.id.EntityId;
@@ -33,10 +34,11 @@ public class EntityActionNotificationInfo implements RuleOriginatedNotificationI
     @Override
     public Map<String, String> getTemplateData() {
         return mapOf(
-                "entityType", entityId.getEntityType().getNormalName(),
+                "entityType", entityId.getEntityType().getNormalName(),   // 链接里要用英文值
+                "entityTypeLabel", NotificationLabels.entityType(entityId.getEntityType()),
                 "entityId", entityId.toString(),
                 "entityName", entityName,
-                "actionType", actionType.name().toLowerCase(),
+                "actionType", NotificationLabels.actionType(actionType),
                 "userId", userId.toString(),
                 "userTitle", userTitle,
                 "userEmail", userEmail,

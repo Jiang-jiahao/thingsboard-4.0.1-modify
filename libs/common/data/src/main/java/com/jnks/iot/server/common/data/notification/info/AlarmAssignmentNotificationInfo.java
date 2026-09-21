@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.jnks.iot.server.common.data.notification.NotificationLabels;
 import com.jnks.iot.server.common.data.User;
 import com.jnks.iot.server.common.data.alarm.AlarmSeverity;
 import com.jnks.iot.server.common.data.alarm.AlarmStatus;
@@ -46,7 +47,7 @@ public class AlarmAssignmentNotificationInfo implements RuleOriginatedNotificati
     @Override
     public Map<String, String> getTemplateData() {
         return mapOf(
-                "action", action,
+                "action", NotificationLabels.alarmAction(action),
                 "assigneeTitle", User.getTitle(assigneeEmail, assigneeFirstName, assigneeLastName),
                 "assigneeFirstName", assigneeFirstName,
                 "assigneeLastName", assigneeLastName,
@@ -58,9 +59,9 @@ public class AlarmAssignmentNotificationInfo implements RuleOriginatedNotificati
                 "userLastName", userLastName,
                 "alarmType", alarmType,
                 "alarmId", alarmId.toString(),
-                "alarmSeverity", alarmSeverity.name().toLowerCase(),
+                "alarmSeverity", NotificationLabels.alarmSeverity(alarmSeverity),
                 "alarmStatus", alarmStatus.toString(),
-                "alarmOriginatorEntityType", alarmOriginator.getEntityType().getNormalName(),
+                "alarmOriginatorEntityType", NotificationLabels.entityType(alarmOriginator.getEntityType()),
                 "alarmOriginatorId", alarmOriginator.getId().toString(),
                 "alarmOriginatorName", alarmOriginatorName
         );

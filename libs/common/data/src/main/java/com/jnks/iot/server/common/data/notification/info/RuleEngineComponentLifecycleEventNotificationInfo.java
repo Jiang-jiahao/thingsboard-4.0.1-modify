@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.jnks.iot.server.common.data.notification.NotificationLabels;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.RuleChainId;
 import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
@@ -32,10 +33,10 @@ public class RuleEngineComponentLifecycleEventNotificationInfo implements RuleOr
                 "ruleChainId", ruleChainId.toString(),
                 "ruleChainName", ruleChainName,
                 "componentId", componentId.toString(),
-                "componentType", componentId.getEntityType().getNormalName(),
+                "componentType", NotificationLabels.entityType(componentId.getEntityType()),
                 "componentName", componentName,
-                "action", action,
-                "eventType", eventType.name().toLowerCase(),
+                "action", NotificationLabels.lifecycleAction(action),
+                "eventType", NotificationLabels.lifecycleEvent(eventType.name().toLowerCase()),
                 "error", error
         );
     }

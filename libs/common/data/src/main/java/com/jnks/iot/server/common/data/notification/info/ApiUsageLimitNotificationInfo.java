@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.jnks.iot.server.common.data.notification.NotificationLabels;
 import com.jnks.iot.server.common.data.ApiFeature;
 import com.jnks.iot.server.common.data.ApiUsageRecordKey;
 import com.jnks.iot.server.common.data.ApiUsageStateValue;
@@ -30,9 +31,9 @@ public class ApiUsageLimitNotificationInfo implements RuleOriginatedNotification
     @Override
     public Map<String, String> getTemplateData() {
         return mapOf(
-                "feature", feature.getLabel(),
+                "feature", NotificationLabels.apiFeature(feature),
                 "unitLabel", recordKey.getUnitLabel(),
-                "status", status.name().toLowerCase(),
+                "status", NotificationLabels.apiUsageStatus(status.name().toLowerCase()),
                 "limit", limit,
                 "currentValue", currentValue,
                 "tenantId", tenantId.toString(),

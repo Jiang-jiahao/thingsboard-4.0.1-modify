@@ -1434,7 +1434,7 @@ The widget is deprecated. Use "Update Multiple Attributes" widget. Timeseries ke
  WHERE btrim(t.description) = btrim(v.src)
    AND (t.description IS DISTINCT FROM v.description);
 
--- notification_template: 19 条（只动 name 与 WEB 的 subject/body）
+-- notification_template: 19 条（name 与 WEB 的 subject/body）
 UPDATE notification_template t
    SET name = v.name,
        configuration = jsonb_set(
@@ -1442,30 +1442,46 @@ UPDATE notification_template t
                      '{deliveryMethodsTemplates,WEB,subject}', to_jsonb(v.subject::text)),
                      '{deliveryMethodsTemplates,WEB,body}',    to_jsonb(v.body::text))
   FROM (VALUES
-    ('API feature disabled notification for sysadmin', 'API 功能禁用通知（系统管理员）', '租户 ${tenantName} 的 ${feature} 功能已被禁用', '已使用 ${currentValue}，上限 ${limit} ${unitLabel}s'),
-    ('API feature disabled notification for tenant', 'API 功能禁用通知（租户）', '${feature} 功能已被禁用', '已使用 ${currentValue}，上限 ${limit} ${unitLabel}s'),
-    ('API feature warning notification for sysadmin', 'API 功能用量预警通知（系统管理员）', '租户 ${tenantName} 的 ${feature} 功能即将被禁用', '用量：${currentValue}，上限 ${limit} ${unitLabel}s'),
-    ('API feature warning notification for tenant', 'API 功能用量预警通知（租户）', '警告：${feature} 功能即将被禁用', '用量：${currentValue}，上限 ${limit} ${unitLabel}s'),
+    ('API feature disabled notification for sysadmin', 'API 功能禁用通知（系统管理员）', '租户 ${tenantName} 的 ${feature} 功能已被禁用', '已使用 ${currentValue}，上限 ${limit}'),
+    ('API feature disabled notification for tenant', 'API 功能禁用通知（租户）', '${feature} 功能已被禁用', '已使用 ${currentValue}，上限 ${limit}'),
+    ('API feature warning notification for sysadmin', 'API 功能用量预警通知（系统管理员）', '租户 ${tenantName} 的 ${feature} 功能即将被禁用', '用量：${currentValue}，上限 ${limit}'),
+    ('API feature warning notification for tenant', 'API 功能用量预警通知（租户）', '警告：${feature} 功能即将被禁用', '用量：${currentValue}，上限 ${limit}'),
     ('Alarm assigned notification', '告警指派通知', '告警 ''${alarmType}''（${alarmSeverity}）已指派给用户', '${userEmail} 将 ${alarmOriginatorEntityType} ''${alarmOriginatorName}'' 上的告警指派给 ${assigneeEmail}'),
-    ('Alarm comment notification', '告警评论通知', '''${alarmType}'' 告警有新评论', '${userEmail} ${action}了评论：${comment}'),
+    ('Alarm comment notification', '告警评论通知', '''${alarmType}'' 告警有新评论', '${userEmail} ${action}评论：${comment}'),
     ('Alarm update notification', '告警更新通知', '告警 ''${alarmType}'' - ${action}', '严重程度：${alarmSeverity}，来源：${alarmOriginatorEntityType} ''${alarmOriginatorName}'''),
-    ('Device activity notification', '设备活动通知', '设备 ''${deviceName}'' 已变为 ${eventType}', '类型为 ''${deviceType}'' 的设备 ''${deviceName}'' 当前为 ${eventType}'),
-    ('Entities count limit notification for sysadmin', '实体数量上限预警通知（系统管理员）', '租户 ${tenantName} 的 ${entityType}s 数量即将达到上限', '${entityType}s 用量：${currentCount}/${limit}（${percents}%）'),
-    ('Entities count limit notification for tenant', '实体数量上限预警通知（租户）', '警告：${entityType}s 数量即将达到上限', '${entityType}s 用量：${currentCount}/${limit}（${percents}%）'),
-    ('Entity action notification', '实体操作通知', '${entityType} 已${actionType}', '${entityType} ''${entityName}'' 已被用户 ${userEmail} ${actionType}'),
+    ('Device activity notification', '设备活动通知', '设备 ''${deviceName}'' ${eventType}', '类型为 ''${deviceType}'' 的设备 ''${deviceName}'' 当前${eventType}'),
+    ('Entities count limit notification for sysadmin', '实体数量上限预警通知（系统管理员）', '租户 ${tenantName} 的 ${entityType} 数量即将达到上限', '${entityType} 用量：${currentCount}/${limit}（${percents}%）'),
+    ('Entities count limit notification for tenant', '实体数量上限预警通知（租户）', '警告：${entityType} 数量即将达到上限', '${entityType} 用量：${currentCount}/${limit}（${percents}%）'),
+    ('Entity action notification', '实体操作通知', '${entityTypeLabel}已${actionType}', '${entityTypeLabel} ''${entityName}'' 已被用户 ${userEmail} ${actionType}'),
     ('Exceeded per-entity rate limits notification for tenant', '超出单实体限流通知（租户）', '已超出限流阈值', '''${limitLevelEntityName}'' 的 ${api} 已超出限流阈值'),
     ('Exceeded per-tenant rate limits notification for sysadmin', '超出单租户限流通知（系统管理员）', '租户 ${tenantName} 已超出限流阈值', '${api} 已超出限流阈值'),
     ('Exceeded per-tenant rate limits notification for tenant', '超出单租户限流通知（租户）', '已超出限流阈值', '${api} 已超出限流阈值'),
     ('Maintenance work notification', '维护作业通知', '基础设施维护', '维护作业计划于明天进行（UTC 7:00 - 9:00）'),
     ('New alarm notification', '新告警通知', '新告警 ''${alarmType}''', '严重程度：${alarmSeverity}，来源：${alarmOriginatorEntityType} ''${alarmOriginatorName}'''),
     ('New platform version notification', '平台新版本通知', '新版本 <b>${latestVersion}</b> 已发布', '当前平台版本为 ${currentVersion}'),
-    ('Rule chain/node lifecycle failure notification', '规则链/节点生命周期失败通知', '规则链 ''${ruleChainName}'' 中 ${action:capitalize} 失败', '${componentType} ''${componentName}'' ${action} 失败'),
+    ('Rule chain/node lifecycle failure notification', '规则链/节点生命周期失败通知', '规则链 ''${ruleChainName}'' 中${action}失败', '${componentType} ''${componentName}'' ${action}失败'),
     ('Task processing failure notification', '任务处理失败通知', '处理 ${taskType} 失败', '为租户 ${tenantId} 处理 ${taskDescription} 失败：${error}')
        ) AS v(src, name, subject, body)
  WHERE btrim(t.name) = btrim(v.src)
    AND (t.name IS DISTINCT FROM v.name
         OR t.configuration::jsonb->'deliveryMethodsTemplates'->'WEB'->>'subject' IS DISTINCT FROM v.subject
         OR t.configuration::jsonb->'deliveryMethodsTemplates'->'WEB'->>'body' IS DISTINCT FROM v.body);
+
+-- notification_template 的动作按钮文案: 5 条
+UPDATE notification_template t
+   SET configuration = jsonb_set(t.configuration::jsonb,
+           '{deliveryMethodsTemplates,WEB,additionalConfig,actionButtonConfig,text}',
+           to_jsonb(v.text::text))
+  FROM (VALUES
+    ('设备活动通知', '查看设备'),
+    ('实体操作通知', '查看${entityTypeLabel}'),
+    ('超出单租户限流通知（系统管理员）', '查看租户'),
+    ('平台新版本通知', '查看发行说明'),
+    ('规则链/节点生命周期失败通知', '查看规则链')
+       ) AS v(name, text)
+ WHERE btrim(t.name) = v.name
+   AND t.configuration::jsonb->'deliveryMethodsTemplates'->'WEB'->'additionalConfig'
+        ->'actionButtonConfig'->>'text' IS DISTINCT FROM v.text;
 
 -- notification_rule: 18 条
 UPDATE notification_rule t

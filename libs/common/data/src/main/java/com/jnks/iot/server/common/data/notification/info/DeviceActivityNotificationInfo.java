@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.jnks.iot.server.common.data.notification.NotificationLabels;
 import com.jnks.iot.server.common.data.id.CustomerId;
 import com.jnks.iot.server.common.data.id.DeviceId;
 import com.jnks.iot.server.common.data.id.EntityId;
@@ -29,7 +30,7 @@ public class DeviceActivityNotificationInfo implements RuleOriginatedNotificatio
     @Override
     public Map<String, String> getTemplateData() {
         return mapOf(
-                "eventType", eventType,
+                "eventType", NotificationLabels.deviceActivityEvent(eventType),
                 "deviceId", deviceId.toString(),
                 "deviceName", deviceName,
                 "deviceLabel", deviceLabel,

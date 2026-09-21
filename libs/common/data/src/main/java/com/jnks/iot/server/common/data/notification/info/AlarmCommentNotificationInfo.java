@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.jnks.iot.server.common.data.notification.NotificationLabels;
 import com.jnks.iot.server.common.data.User;
 import com.jnks.iot.server.common.data.alarm.AlarmSeverity;
 import com.jnks.iot.server.common.data.alarm.AlarmStatus;
@@ -42,7 +43,7 @@ public class AlarmCommentNotificationInfo implements RuleOriginatedNotificationI
     public Map<String, String> getTemplateData() {
         return mapOf(
                 "comment", comment,
-                "action", action,
+                "action", NotificationLabels.alarmAction(action),
                 "userTitle", User.getTitle(userEmail, userFirstName, userLastName),
                 "userEmail", userEmail,
                 "userFirstName", userFirstName,
