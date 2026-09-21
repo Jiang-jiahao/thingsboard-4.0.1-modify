@@ -3,7 +3,7 @@
   </li>
   <li><b>metadata:</b> <code>{[key: string]: string}</code> - is a Message metadata key/value map, where both keys and values are strings.
   </li>
-  <li><b>msgType:</b> <code>string</code> - is a string containing Message type. See <a href="https://github.com/thingsboard/thingsboard/blob/ea039008b148453dfa166cf92bc40b26e487e660/ui-ngx/src/app/shared/models/rule-node.models.ts#L338" target="_blank">MessageType</a> enum for common used values.
+  <li><b>msgType:</b> <code>string</code> - is a string containing Message type. See <code>MessageType</code> enum for common used values.
   </li>
 </ul>
 

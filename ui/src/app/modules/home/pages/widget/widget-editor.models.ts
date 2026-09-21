@@ -9,7 +9,7 @@ const widgetEditorCompletions = (settingsCompletions?: JnksIotEditorCompletions)
   return {
     ... {self: {
         description: 'Built-in variable <b>self</b> that is a reference to the widget instance',
-        type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/modules/home/models/widget-component.models.ts#L350" target="_blank">WidgetTypeInstance</a>',
+        type: '<code>WidgetTypeInstance</code>',
         meta: 'object',
         children: {
           ...{
@@ -19,19 +19,19 @@ const widgetEditorCompletions = (settingsCompletions?: JnksIotEditorCompletions)
             },
             onDataUpdated: {
               description: 'Called when the new data is available from the widget subscription.<br>Latest data can be accessed from ' +
-                'the <code>defaultSubscription</code> property of <a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/modules/home/models/widget-component.models.ts#L83" target="_blank">widget context (<code>ctx</code>)</a>.',
+                'the <code>defaultSubscription</code> property of widget context (<code>ctx</code>).',
               meta: 'function'
             },
             onResize: {
-              description: 'Called when widget container is resized. Latest <code>width</code> and <code>height</code> can be obtained from <a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/modules/home/models/widget-component.models.ts#L83" target="_blank">widget context (<code>ctx</code>)</a>.',
+              description: 'Called when widget container is resized. Latest <code>width</code> and <code>height</code> can be obtained from widget context (<code>ctx</code>).',
               meta: 'function'
             },
             onEditModeChanged: {
-              description: 'Called when dashboard editing mode is changed. Latest mode is handled by <code>isEdit</code> property of <a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/modules/home/models/widget-component.models.ts#L83" target="_blank">widget context (<code>ctx</code>)</a>.',
+              description: 'Called when dashboard editing mode is changed. Latest mode is handled by <code>isEdit</code> property of widget context (<code>ctx</code>).',
               meta: 'function'
             },
             onMobileModeChanged: {
-              description: 'Called when dashboard view width crosses mobile breakpoint. Latest state is handled by <code>isMobile</code> property of <a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/modules/home/models/widget-component.models.ts#L83" target="_blank">widget context (<code>ctx</code>)</a>.',
+              description: 'Called when dashboard view width crosses mobile breakpoint. Latest state is handled by <code>isMobile</code> property of widget context (<code>ctx</code>).',
               meta: 'function'
             },
             onDestroy: {
@@ -75,7 +75,7 @@ const widgetEditorCompletions = (settingsCompletions?: JnksIotEditorCompletions)
               meta: 'function',
               return: {
                 description: 'An object describing widget datasource parameters.',
-                type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L146" target="_blank">WidgetTypeParameters</a>'
+                type: '<code>WidgetTypeParameters</code>'
               }
             },
             actionSources: {
@@ -83,7 +83,7 @@ const widgetEditorCompletions = (settingsCompletions?: JnksIotEditorCompletions)
               meta: 'function',
               return: {
                 description: 'A map of action sources by action source id.',
-                type: '{[actionSourceId: string]: <a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L118" target="_blank">WidgetActionSource</a>}'
+                type: '{[actionSourceId: string]: <code>WidgetActionSource</code>}'
               }
             }
           },

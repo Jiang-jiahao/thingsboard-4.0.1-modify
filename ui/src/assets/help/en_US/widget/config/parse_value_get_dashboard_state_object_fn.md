@@ -10,7 +10,7 @@ A JavaScript function that converts the current dashboard state object into a bo
 **Parameters:**
 
 <ul>
-  <li><b>data:</b> <a href="https://github.com/thingsboard/thingsboard/blob/master/ui-ngx/src/app/core/api/widget-api.models.ts#L150" target="_blank">StateObject</a> - the current dashboard state object.
+  <li><b>data:</b> <code>StateObject</code> - the current dashboard state object.
    </li>
 </ul>
 

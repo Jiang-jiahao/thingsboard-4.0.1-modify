@@ -9,11 +9,11 @@ In this case, you can create own TypeScript class or Angular component and bundl
 
 In order to make this code accessible within the widget, you need to register corresponding Angular module or inject TypeScript class to a global variable (for ex. window object).
 
-Some ThingsBoard widgets already use this approach. Take a look at the [widget-component-service.ts{:target="_blank"}](https://github.com/thingsboard/thingsboard/blob/2627fe51d491055d4140f16617ed543f7f5bd8f6/ui-ngx/src/app/modules/home/components/widget/widget-component.service.ts#L140)
-or [widget-components.module.ts{:target="_blank"}](https://github.com/thingsboard/thingsboard/blob/2627fe51d491055d4140f16617ed543f7f5bd8f6/ui-ngx/src/app/modules/home/components/widget/widget-components.module.ts#L50). <br>
+Some JnksIOT widgets already use this approach. Take a look at the `widget-component-service.ts`
+or `widget-components.module.ts`. <br>
 Here you can find how some bundled classes or components are registered for later use in JnksIOT widgets.
 
-For example "Timeseries - Flot" widget (from "Charts" Widgets Bundle) uses [**JnksIotFlot**{:target="_blank"}](https://github.com/thingsboard/thingsboard/blob/2627fe51d491055d4140f16617ed543f7f5bd8f6/ui-ngx/src/app/modules/home/components/widget/lib/flot-widget.ts#L73) TypeScript class which is injected as window property inside **widget-component-service.ts**:
+For example "Timeseries - Flot" widget (from "Charts" Widgets Bundle) uses `**JnksIotFlot**` TypeScript class which is injected as window property inside **widget-component-service.ts**:
 
 ```typescript
 ...
@@ -30,7 +30,7 @@ widgetModulesTasks.push(from(import('@home/components/widget/lib/flot-widget')).
 
 ```
 
-Another example is "Timeseries table" widget (from "Cards" Widgets Bundle) that uses Angular component [**jnks-iot-timeseries-table-widget**{:target="_blank"}](https://github.com/thingsboard/thingsboard/blob/2627fe51d491055d4140f16617ed543f7f5bd8f6/ui-ngx/src/app/modules/home/components/widget/lib/timeseries-table-widget.component.ts#L107)<br>which is registered as dependency of **WidgetComponentsModule** Angular module inside **widget-components.module.ts**.
+Another example is "Timeseries table" widget (from "Cards" Widgets Bundle) that uses Angular component `**jnks-iot-timeseries-table-widget**`<br>which is registered as dependency of **WidgetComponentsModule** Angular module inside **widget-components.module.ts**.
 Thereby this component becomes available for use inside the widget template HTML.
 
 ```typescript

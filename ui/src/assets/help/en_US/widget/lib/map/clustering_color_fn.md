@@ -10,7 +10,7 @@ A JavaScript function used to compute clustering marker color.
 **Parameters:**
 
 <ul>
-  <li><b>data:</b> <code><a href="https://github.com/thingsboard/thingsboard/blob/b881f1c2985399f9665e033e2479549e97da1f36/ui-ngx/src/app/shared/models/widget.models.ts#L513" target="_blank">FormattedData[]</a></code>
+  <li><b>data:</b> <code><code>FormattedData[]</code></code>
     - the array of total markers contained within each cluster.<br/>
      Represents basic entity properties (ex. <code>entityId</code>, <code>entityName</code>)<br/>and provides access to other entity attributes/timeseries declared in datasource of the data layer configuration.
   </li>

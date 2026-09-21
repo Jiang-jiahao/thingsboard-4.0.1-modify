@@ -4,7 +4,7 @@ import { entityIdHref, serviceCompletions } from '@shared/models/ace/service-com
 export const timewindowCompletion: JnksIotEditorCompletion = {
   description: 'Timewindow configuration object',
   meta: 'property',
-  type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/time/time.models.ts#L80" target="_blank">Timewindow</a>',
+  type: '<code>Timewindow</code>',
   children: {
     displayValue: {
       description: 'Current timewindow display value.',
@@ -34,7 +34,7 @@ export const timewindowCompletion: JnksIotEditorCompletion = {
     realtime: {
       description: 'Realtime timewindow configuration object.',
       meta: 'property',
-      type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/time/time.models.ts#L39" target="_blank">IntervalWindow</a>',
+      type: '<code>IntervalWindow</code>',
       children: {
         interval: {
           description: 'Timewindow aggregation interval in milliseconds',
@@ -51,7 +51,7 @@ export const timewindowCompletion: JnksIotEditorCompletion = {
     history: {
       description: 'History timewindow configuration object.',
       meta: 'property',
-      type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/time/time.models.ts#L49" target="_blank">HistoryWindow</a>',
+      type: '<code>HistoryWindow</code>',
       children: {
         historyType: {
           description: 'History timewindow type (0 - last interval, 1 - fixed)',
@@ -71,7 +71,7 @@ export const timewindowCompletion: JnksIotEditorCompletion = {
         fixedTimewindow: {
           description: 'Fixed history timewindow configuration object',
           meta: 'property',
-          type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/time/time.models.ts#L44" target="_blank">FixedWindow</a>',
+          type: '<code>FixedWindow</code>',
           children: {
             startTimeMs: {
               description: 'Timewindow start time in UTC milliseconds',
@@ -90,7 +90,7 @@ export const timewindowCompletion: JnksIotEditorCompletion = {
     aggregation: {
       description: 'Timewindow aggregation configuration object.',
       meta: 'property',
-      type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/time/time.models.ts#L74" target="_blank">Aggregation</a>',
+      type: '<code>Aggregation</code>',
       children: {
         interval: {
           description: 'Aggregation interval in milliseconds',
@@ -100,7 +100,7 @@ export const timewindowCompletion: JnksIotEditorCompletion = {
         type: {
           description: 'Aggregation type',
           meta: 'property',
-          type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/time/time.models.ts#L54" target="_blank">AggregationType</a>'
+          type: '<code>AggregationType</code>'
         },
         limit: {
           description: 'Maximum allowed datapoints when aggregation is disabled (<code>AggregationType == \'NONE\'</code>)',
@@ -117,7 +117,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
     ctx: {
       description: 'A reference to widget context that has all necessary API<br>and data used by widget instance.',
       meta: 'object',
-      type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/modules/home/models/widget-component.models.ts#L83" target="_blank">WidgetContext</a>',
+      type: '<code>WidgetContext</code>',
       children: {
         ...{
           $container: {
@@ -128,7 +128,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
           $scope: {
             description: 'Reference to the current widget component.<br>Can be used to access/modify component properties when widget is built using Angular approach.',
             meta: 'property',
-            type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/modules/home/models/widget-component.models.ts#L274" target="_blank">IDynamicWidgetComponent</a>'
+            type: '<code>IDynamicWidgetComponent</code>'
           },
           width: {
             description: 'Current width of widget container in pixels.',
@@ -153,7 +153,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
           widgetConfig: {
             description: 'Common widget configuration containing properties such as <code>color</code> (text color), <code>backgroundColor</code> (widget background color), etc.',
             meta: 'property',
-            type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L341" target="_blank">WidgetConfig</a>',
+            type: '<code>WidgetConfig</code>',
             children: {
               title: {
                 description: 'Widget title.',
@@ -218,17 +218,17 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
               legendConfig: {
                 description: 'Legend configuration.',
                 meta: 'property',
-                type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L198" target="_blank">LegendConfig</a>',
+                type: '<code>LegendConfig</code>',
                 children: {
                   position: {
                     description: 'Legend position. Possible values: <code>\'top\', \'bottom\', \'left\', \'right\'</code>',
                     meta: 'property',
-                    type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L182" target="_blank">LegendPosition</a>',
+                    type: '<code>LegendPosition</code>',
                   },
                   direction: {
                     description: 'Legend direction. Possible values: <code>\'column\', \'row\'</code>',
                     meta: 'property',
-                    type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L170" target="_blank">LegendDirection</a>',
+                    type: '<code>LegendDirection</code>',
                   },
                   showMin: {
                     description: 'Whether to display aggregated min values.',
@@ -317,12 +317,12 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
               alarmSource: {
                 description: 'Configured alarm source for alarm widget type.',
                 meta: 'property',
-                type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L250" target="_blank">Datasource</a>'
+                type: '<code>Datasource</code>'
               },
               alarmSearchStatus: {
                 description: 'Configured default alarm search status for alarm widget type.',
                 meta: 'property',
-                type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/alarm.models.ts#L41" target="_blank">AlarmSearchStatus</a>'
+                type: '<code>AlarmSearchStatus</code>'
               },
               alarmsPollingInterval: {
                 description: 'Configured alarms polling interval for alarm widget type.',
@@ -342,7 +342,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
               datasources: {
                 description: 'Array of configured widget datasources.',
                 meta: 'property',
-                type: 'Array&lt;<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L250" target="_blank">Datasource</a>&gt;'
+                type: 'Array&lt;<code>Datasource</code>&gt;'
               }
             }
           },
@@ -355,17 +355,17 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
           datasources: {
             description: 'Array of resolved widget datasources.',
             meta: 'property',
-            type: 'Array&lt;<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L250" target="_blank">Datasource</a>&gt;'
+            type: 'Array&lt;<code>Datasource</code>&gt;'
           },
           data: {
             description: 'Array of latest datasources data.',
             meta: 'property',
-            type: 'Array&lt;<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L275" target="_blank">DatasourceData</a>&gt;'
+            type: 'Array&lt;<code>DatasourceData</code>&gt;'
           },
           timeWindow: {
             description: 'Current widget timewindow (applicable for timeseries widgets).',
             meta: 'property',
-            type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/time/time.models.ts#L104" target="_blank">WidgetTimewindow</a>'
+            type: '<code>WidgetTimewindow</code>'
           },
           units: {
             description: 'Optional property defining units text of values displayed by widget. Useful for simple widgets like cards or gauges.',
@@ -380,7 +380,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
           currentUser: {
             description: 'Current user object.',
             meta: 'property',
-            type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/user.model.ts#L45" target="_blank">AuthUser</a>',
+            type: '<code>AuthUser</code>',
             children: {
               sub: {
                 description: 'User subject (email).',
@@ -430,7 +430,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
               authority: {
                 description: 'User authority. Possible values: SYS_ADMIN, TENANT_ADMIN, CUSTOMER_USER',
                 meta: 'property',
-                type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/authority.enum.ts#L17" target="_blank">Authority</a>'
+                type: '<code>Authority</code>'
               }
             }
           },
@@ -455,12 +455,12 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
           defaultSubscription: {
             description: 'Default widget subscription object contains all subscription information,<br>including current data, according to the widget type.',
             meta: 'property',
-            type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/core/api/widget-api.models.ts#L220" target="_blank">IWidgetSubscription</a>'
+            type: '<code>IWidgetSubscription</code>'
           },
           timewindowFunctions: {
             description: 'Object with timewindow functions used to manage widget data time frame. Can by used by Time-series or Alarm widgets.',
             meta: 'property',
-            type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/core/api/widget-api.models.ts#L45" target="_blank">TimewindowFunctions</a>',
+            type: '<code>TimewindowFunctions</code>',
             children: {
               onUpdateTimewindow: {
                 description: 'This function can be used to update current subscription time frame<br>to historical one identified by <code>startTimeMs</code> and <code>endTimeMs</code> arguments.',
@@ -487,7 +487,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
           controlApi: {
             description: 'Object that provides API functions for RPC (Control) widgets.',
             meta: 'property',
-            type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/core/api/widget-api.models.ts#L58" target="_blank">RpcApi</a>',
+            type: '<code>RpcApi</code>',
             children: {
               sendOneWayCommand: {
                 description: 'Sends one way (without response) RPC command to the device.',
@@ -572,7 +572,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
           actionsApi: {
             description: 'Set of API functions to work with user defined actions.',
             meta: 'property',
-            type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/core/api/widget-api.models.ts#L67" target="_blank">WidgetActionsApi</a>',
+            type: '<code>WidgetActionsApi</code>',
             children: {
               getActionDescriptors: {
                 description: 'Get list of action descriptors for provided <code>actionSourceId</code>.',
@@ -586,7 +586,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
                 ],
                 return: {
                   description: 'The list of action descriptors',
-                  type: 'Array&lt;<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L323" target="_blank">WidgetActionDescriptor</a>&gt;'
+                  type: 'Array&lt;<code>WidgetActionDescriptor</code>&gt;'
                 }
               },
               handleWidgetAction: {
@@ -601,7 +601,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
                   {
                     name: 'descriptor',
                     description: 'An action descriptor.',
-                    type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/widget.models.ts#L323" target="_blank">WidgetActionDescriptor</a>'
+                    type: '<code>WidgetActionDescriptor</code>'
                   },
                   {
                     name: 'entityId',
@@ -622,7 +622,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
           stateController: {
             description: 'Reference to Dashboard state controller, providing API to manage current dashboard state.',
             meta: 'property',
-            type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/core/api/widget-api.models.ts#L121" target="_blank">IStateController</a>',
+            type: '<code>IStateController</code>',
             children: {
               openState: {
                 description: 'Navigate to new dashboard state.',
@@ -636,7 +636,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
                   {
                     name: 'params',
                     description: 'An object with state parameters to use by the new state.',
-                    type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/core/api/widget-api.models.ts#L111" target="_blank">StateParams</a>',
+                    type: '<code>StateParams</code>',
                     optional: true
                   },
                   {
@@ -654,7 +654,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
                   {
                     name: 'id',
                     description: 'An array state object of the target dashboard state.',
-                    type: 'Array <a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/core/api/widget-api.models.ts#L140" target="_blank">StateObject</a>',
+                    type: 'Array <code>StateObject</code>',
                   },
                   {
                     name: 'openRightLayout',
@@ -677,7 +677,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
                   {
                     name: 'params',
                     description: 'An object with state parameters to update current state parameters.',
-                    type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/core/api/widget-api.models.ts#L111" target="_blank">StateParams</a>',
+                    type: '<code>StateParams</code>',
                     optional: true
                   },
                   {
@@ -701,7 +701,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
                 meta: 'function',
                 return: {
                   description: 'current dashboard state parameters.',
-                  type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/core/api/widget-api.models.ts#L111" target="_blank">StateParams</a>'
+                  type: '<code>StateParams</code>'
                 }
               },
               getStateParamsByStateId: {
@@ -716,7 +716,7 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksI
                 ],
                 return: {
                   description: 'current dashboard state parameters.',
-                  type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/core/api/widget-api.models.ts#L111" target="_blank">StateParams</a>'
+                  type: '<code>StateParams</code>'
                 }
               }
             }
