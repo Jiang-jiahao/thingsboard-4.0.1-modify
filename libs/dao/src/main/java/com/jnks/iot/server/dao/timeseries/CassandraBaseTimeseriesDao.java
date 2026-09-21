@@ -37,8 +37,8 @@ import com.jnks.iot.server.common.data.kv.TsKvEntry;
 import com.jnks.iot.server.common.data.kv.TsKvEntryAggWrapper;
 import com.jnks.iot.server.common.data.kv.TsKvQuery;
 import com.jnks.iot.server.dao.model.ModelConstants;
-import com.jnks.iot.server.dao.nosql.TbResultSet;
-import com.jnks.iot.server.dao.nosql.TbResultSetFuture;
+import com.jnks.iot.server.dao.nosql.JnksIotResultSet;
+import com.jnks.iot.server.dao.nosql.JnksIotResultSetFuture;
 import com.jnks.iot.server.dao.sqlts.AggregationTimeseriesDao;
 import com.jnks.iot.server.dao.util.NoSqlTsDao;
 import com.jnks.iot.server.dao.util.TimeUtils;
@@ -346,9 +346,9 @@ public class CassandraBaseTimeseriesDao extends AbstractCassandraBaseTimeseriesD
 
             BoundStatement stmt = stmtBuilder.build();
 
-            Futures.addCallback(executeAsyncRead(tenantId, stmt), new FutureCallback<TbResultSet>() {
+            Futures.addCallback(executeAsyncRead(tenantId, stmt), new FutureCallback<JnksIotResultSet>() {
                 @Override
-                public void onSuccess(@Nullable TbResultSet result) {
+                public void onSuccess(@Nullable JnksIotResultSet result) {
                     if (result == null) {
                         cursor.addData(convertResultToTsKvEntryList(Collections.emptyList()));
                         findAllAsyncSequentiallyWithLimit(tenantId, cursor, resultFuture);
@@ -386,13 +386,13 @@ public class CassandraBaseTimeseriesDao extends AbstractCassandraBaseTimeseriesD
         final long endTs = query.getEndTs();
         final long ts = startTs + (endTs - startTs) / 2;
         ListenableFuture<List<Long>> partitionsListFuture = getPartitionsFuture(tenantId, query, entityId, minPartition, maxPartition);
-        ListenableFuture<List<TbResultSet>> aggregationChunks = Futures.transformAsync(partitionsListFuture,
+        ListenableFuture<List<JnksIotResultSet>> aggregationChunks = Futures.transformAsync(partitionsListFuture,
                 getFetchChunksAsyncFunction(tenantId, entityId, key, aggregation, startTs, endTs), readResultsProcessingExecutor);
 
         return Futures.transformAsync(aggregationChunks, new AggregatePartitionsFunction(aggregation, key, ts, readResultsProcessingExecutor), readResultsProcessingExecutor);
     }
 
-    private AsyncFunction<TbResultSet, List<Long>> getPartitionsArrayFunction() {
+    private AsyncFunction<JnksIotResultSet, List<Long>> getPartitionsArrayFunction() {
         return rs ->
                 Futures.transform(rs.allRows(readResultsProcessingExecutor), rows ->
                                 rows.stream()
@@ -407,7 +407,7 @@ public class CassandraBaseTimeseriesDao extends AbstractCassandraBaseTimeseriesD
         if (!isUseTsKeyValuePartitioningOnRead()) {
             return Futures.immediateFuture(calculatePartitions(minPartition, maxPartition));
         }
-        TbResultSetFuture partitionsFuture = fetchPartitions(tenantId, entityId, query.getKey(), minPartition, maxPartition);
+        JnksIotResultSetFuture partitionsFuture = fetchPartitions(tenantId, entityId, query.getKey(), minPartition, maxPartition);
         return Futures.transformAsync(partitionsFuture, getPartitionsArrayFunction(), readResultsProcessingExecutor);
     }
 
@@ -435,11 +435,11 @@ public class CassandraBaseTimeseriesDao extends AbstractCassandraBaseTimeseriesD
         return time.plus(1, tsFormat.getTruncateUnit());
     }
 
-    private AsyncFunction<List<Long>, List<TbResultSet>> getFetchChunksAsyncFunction(TenantId tenantId, EntityId entityId, String key, Aggregation aggregation, long startTs, long endTs) {
+    private AsyncFunction<List<Long>, List<JnksIotResultSet>> getFetchChunksAsyncFunction(TenantId tenantId, EntityId entityId, String key, Aggregation aggregation, long startTs, long endTs) {
         return partitions -> {
             try {
                 PreparedStatement proto = getFetchStmt(aggregation, DESC_ORDER);
-                List<TbResultSetFuture> futures = new ArrayList<>(partitions.size());
+                List<JnksIotResultSetFuture> futures = new ArrayList<>(partitions.size());
                 for (Long partition : partitions) {
                     log.trace("Fetching data for partition [{}] for entityType {} and entityId {}", partition, entityId.getEntityType(), entityId.getId());
                     BoundStatementBuilder stmtBuilder = new BoundStatementBuilder(proto.bind());
@@ -721,7 +721,7 @@ public class CassandraBaseTimeseriesDao extends AbstractCassandraBaseTimeseriesD
      * //     * <code>{@link ModelConstants#TS_KV_PARTITIONS_CF}</code> for the given entity
      * //
      */
-    private TbResultSetFuture fetchPartitions(TenantId tenantId, EntityId entityId, String key, long minPartition, long maxPartition) {
+    private JnksIotResultSetFuture fetchPartitions(TenantId tenantId, EntityId entityId, String key, long minPartition, long maxPartition) {
         Select select = QueryBuilder.selectFrom(ModelConstants.TS_KV_PARTITIONS_CF).column(ModelConstants.PARTITION_COLUMN)
                 .whereColumn(ModelConstants.ENTITY_TYPE_COLUMN).isEqualTo(literal(entityId.getEntityType().name()))
                 .whereColumn(ModelConstants.ENTITY_ID_COLUMN).isEqualTo(literal(entityId.getId()))

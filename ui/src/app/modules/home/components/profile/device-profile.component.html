@@ -1,4 +1,4 @@
-<div class="tb-details-buttons xs:flex xs:flex-col" *ngIf="!standalone">
+<div class="jnks-iot-details-buttons xs:flex xs:flex-col" *ngIf="!standalone">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'open')"
@@ -47,35 +47,35 @@
           {{ 'device-profile.name-max-length' | translate }}
         </mat-error>
       </mat-form-field>
-      <tb-rule-chain-autocomplete
+      <jnks-iot-rule-chain-autocomplete
         labelText="device-profile.default-rule-chain"
         formControlName="defaultRuleChainId">
-      </tb-rule-chain-autocomplete>
-      <tb-dashboard-autocomplete
+      </jnks-iot-rule-chain-autocomplete>
+      <jnks-iot-dashboard-autocomplete
         *ngIf="mobileUiEnabled"
         label="{{'device-profile.mobile-dashboard' | translate}}"
         formControlName="defaultDashboardId">
-        <span tb-hint>{{'device-profile.mobile-dashboard-hint' | translate}}</span>
-      </tb-dashboard-autocomplete>
-      <tb-queue-autocomplete
+        <span jnks-iot-hint>{{'device-profile.mobile-dashboard-hint' | translate}}</span>
+      </jnks-iot-dashboard-autocomplete>
+      <jnks-iot-queue-autocomplete
         [queueType]="serviceType"
         formControlName="defaultQueueName">
-      </tb-queue-autocomplete>
+      </jnks-iot-queue-autocomplete>
       <ng-container *ngIf="otaUiEnabled">
-        <tb-ota-package-autocomplete
+        <jnks-iot-ota-package-autocomplete
           [useFullEntityId]="true"
           [showDetailsPageLink]="true"
           [type]="otaUpdateType.FIRMWARE"
           [deviceProfileId]="deviceProfileId?.id"
           formControlName="firmwareId">
-        </tb-ota-package-autocomplete>
-        <tb-ota-package-autocomplete
+        </jnks-iot-ota-package-autocomplete>
+        <jnks-iot-ota-package-autocomplete
           [useFullEntityId]="true"
           [showDetailsPageLink]="true"
           [type]="otaUpdateType.SOFTWARE"
           [deviceProfileId]="deviceProfileId?.id"
           formControlName="softwareId">
-        </tb-ota-package-autocomplete>
+        </jnks-iot-ota-package-autocomplete>
       </ng-container>
       <mat-form-field class="mat-block !hidden">
         <mat-label translate>device-profile.type</mat-label>
@@ -88,10 +88,10 @@
           {{ 'device-profile.type-required' | translate }}
         </mat-error>
       </mat-form-field>
-      <tb-gallery-image-input class="flex-1"
+      <jnks-iot-gallery-image-input class="flex-1"
                       label="{{'device-profile.image' | translate}}"
                       formControlName="image">
-      </tb-gallery-image-input>
+      </jnks-iot-gallery-image-input>
       <mat-form-field class="mat-block">
         <mat-label translate>device-profile.description</mat-label>
         <textarea matInput formControlName="description" rows="2"></textarea>
@@ -119,9 +119,9 @@
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <tb-device-profile-configuration
+              <jnks-iot-device-profile-configuration
                 formControlName="configuration">
-              </tb-device-profile-configuration>
+              </jnks-iot-device-profile-configuration>
             </ng-template>
           </mat-expansion-panel>
           <mat-expansion-panel *ngIf="displayTransportConfiguration" [expanded]="true">
@@ -131,12 +131,12 @@
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <tb-device-profile-transport-configuration
+              <jnks-iot-device-profile-transport-configuration
                 formControlName="transportConfiguration"
                 [selectedTransportType]="entityForm.get('transportType').value"
                 [entityTransportType]="entity?.transportType"
                 [isAdd] = "isTransportTypeChanged">
-              </tb-device-profile-transport-configuration>
+              </jnks-iot-device-profile-transport-configuration>
             </ng-template>
           </mat-expansion-panel>
           <mat-expansion-panel [expanded]="false">
@@ -148,12 +148,12 @@
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <tb-device-profile-rpc-methods
+              <jnks-iot-device-profile-rpc-methods
                 formControlName="rpcMethods"
                 [readOnly]="!isEdit"
                 [transportType]="entityForm.get('transportType').value"
                 [transportConfiguration]="entityForm.get('profileData.transportConfiguration').value">
-              </tb-device-profile-rpc-methods>
+              </jnks-iot-device-profile-rpc-methods>
             </ng-template>
           </mat-expansion-panel>
           <mat-expansion-panel [expanded]="false">
@@ -165,10 +165,10 @@
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <tb-device-profile-alarms
+              <jnks-iot-device-profile-alarms
                 formControlName="alarms"
                 [deviceProfileId]="deviceProfileId">
-              </tb-device-profile-alarms>
+              </jnks-iot-device-profile-alarms>
             </ng-template>
           </mat-expansion-panel>
           <mat-expansion-panel *ngIf="deviceProvisioningUiEnabled" [expanded]="true">
@@ -178,9 +178,9 @@
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <tb-device-profile-provision-configuration
+              <jnks-iot-device-profile-provision-configuration
                 formControlName="provisionConfiguration">
-              </tb-device-profile-provision-configuration>
+              </jnks-iot-device-profile-provision-configuration>
             </ng-template>
           </mat-expansion-panel>
         </mat-accordion>

@@ -1,4 +1,4 @@
-<div class="tb-details-buttons xs:flex xs:flex-col" *ngIf="!standalone">
+<div class="jnks-iot-details-buttons xs:flex xs:flex-col" *ngIf="!standalone">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'open')"
@@ -37,10 +37,10 @@
           {{ 'widgets-bundle.title-max-length' | translate }}
         </mat-error>
       </mat-form-field>
-      <tb-gallery-image-input class="flex-1"
+      <jnks-iot-gallery-image-input class="flex-1"
                               label="{{'widgets-bundle.image-preview' | translate}}"
                               formControlName="image">
-      </tb-gallery-image-input>
+      </jnks-iot-gallery-image-input>
       <mat-form-field class="mat-block">
         <mat-label translate>widgets-bundle.description</mat-label>
         <textarea matInput formControlName="description" rows="2" maxlength="1024" #descriptionInput></textarea>

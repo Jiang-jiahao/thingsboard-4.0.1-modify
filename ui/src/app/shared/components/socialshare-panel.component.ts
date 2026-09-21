@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { isLocalUrl } from '@core/utils';
 
 @Component({
-  selector: 'tb-social-share-panel',
+  selector: 'jnks-iot-social-share-panel',
   templateUrl: './socialshare-panel.component.html',
   styleUrls: ['./socialshare-panel.component.scss']
 })

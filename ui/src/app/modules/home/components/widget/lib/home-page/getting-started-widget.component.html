@@ -1,6 +1,6 @@
-<div class="tb-title" translate>widgets.getting-started.get-started</div>
-<div class="tb-get-started-container">
-  <mat-stepper #matStepper class="tb-get-started" orientation="vertical" [linear]="false"
+<div class="jnks-iot-title" translate>widgets.getting-started.get-started</div>
+<div class="jnks-iot-get-started-container">
+  <mat-stepper #matStepper class="jnks-iot-get-started" orientation="vertical" [linear]="false"
                (selectionChange)="updateSelectedIndex($event)">
     <ng-template matStepperIcon="edit" let-index="index">
       {{ index + 1 }}
@@ -93,42 +93,42 @@
             </div>
           </ng-template>
           <div [innerHTML]="'widgets.getting-started.tenant-admin.step2.content-before' | translate | safe: 'html'"></div>
-          <div class="tb-bordered-content">
-            <tb-toggle-header #publishCommandSteps value="ubuntu" name="publishCommandSteps" useSelectOnMdLg="false">
-              <tb-toggle-option value="ubuntu">Ubuntu</tb-toggle-option>
-              <tb-toggle-option value="macos">MacOS</tb-toggle-option>
-              <tb-toggle-option value="windows">Windows</tb-toggle-option>
-            </tb-toggle-header>
+          <div class="jnks-iot-bordered-content">
+            <jnks-iot-toggle-header #publishCommandSteps value="ubuntu" name="publishCommandSteps" useSelectOnMdLg="false">
+              <jnks-iot-toggle-option value="ubuntu">Ubuntu</jnks-iot-toggle-option>
+              <jnks-iot-toggle-option value="macos">MacOS</jnks-iot-toggle-option>
+              <jnks-iot-toggle-option value="windows">Windows</jnks-iot-toggle-option>
+            </jnks-iot-toggle-header>
             <ng-container [ngSwitch]="publishCommandSteps.value">
               <ng-template [ngSwitchCase]="'ubuntu'">
                 <p [innerHTML]="'widgets.getting-started.tenant-admin.step2.ubuntu.install-curl' | translate | safe: 'html'"></p>
-                <tb-markdown usePlainMarkdown containerClass="tb-getting-started-code" data="
+                <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-getting-started-code" data="
                     ```bash
                     sudo apt-get install curl
                     {:copy-code}
                     ```
-                "></tb-markdown>
+                "></jnks-iot-markdown>
               </ng-template>
               <ng-template [ngSwitchCase]="'macos'">
                 <p [innerHTML]="'widgets.getting-started.tenant-admin.step2.macos.install-curl' | translate | safe: 'html'"></p>
-                <tb-markdown usePlainMarkdown containerClass="tb-getting-started-code" data="
+                <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-getting-started-code" data="
                     ```bash
                     brew install curl
                     {:copy-code}
                     ```
-                "></tb-markdown>
+                "></jnks-iot-markdown>
               </ng-template>
               <ng-template [ngSwitchCase]="'windows'">
                 <p [innerHTML]="'widgets.getting-started.tenant-admin.step2.windows.install-curl' | translate | safe: 'html'"></p>
               </ng-template>
             </ng-container>
             <p [innerHTML]="'widgets.getting-started.tenant-admin.step2.replace-access-token' | translate | safe: 'html'"></p>
-            <tb-markdown usePlainMarkdown containerClass="tb-getting-started-code" data="
+            <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-getting-started-code" data="
                     ```bash
                     curl -v -X POST -d &quot;{\&quot;temperature\&quot;: 25}&quot; {{baseUrl}}/api/v1/$ACCESS_TOKEN/telemetry --header &quot;Content-Type:application/json&quot;
                     {:copy-code}
                     ```
-                "></tb-markdown>
+                "></jnks-iot-markdown>
           </div>
           <div [innerHTML]="'widgets.getting-started.tenant-admin.step2.content-after' | translate | safe: 'html'"></div>
           <a mat-stroked-button color="primary" href="https://iot.example.com/docs/getting-started-guides/helloworld/#step-2-connect-device" target="_blank">
@@ -164,12 +164,12 @@
           </ng-template>
           <div [innerHTML]="'widgets.getting-started.tenant-admin.step5.content-before' | translate | safe: 'html'"></div>
           <p [innerHTML]="'widgets.getting-started.tenant-admin.step5.replace-access-token' | translate | safe: 'html'"></p>
-          <tb-markdown usePlainMarkdown containerClass="tb-getting-started-code" data="
+          <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-getting-started-code" data="
                     ```bash
                     curl -v -X POST -d &quot;{\&quot;temperature\&quot;: 26}&quot; {{baseUrl}}/api/v1/$ACCESS_TOKEN/telemetry --header &quot;Content-Type:application/json&quot;
                     {:copy-code}
                     ```
-                "></tb-markdown>
+                "></jnks-iot-markdown>
           <div [innerHTML]="'widgets.getting-started.tenant-admin.step5.content-after' | translate | safe: 'html'"></div>
           <a mat-stroked-button color="primary" href="https://iot.example.com/docs/getting-started-guides/helloworld/#step-5-create-alarm" target="_blank">
             <mat-icon>description</mat-icon>{{ 'widgets.getting-started.tenant-admin.step5.how-to-create-alarm' | translate }}</a>

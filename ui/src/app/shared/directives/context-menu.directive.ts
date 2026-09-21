@@ -1,5 +1,5 @@
 import { Directive, ElementRef, EventEmitter, OnDestroy, Output } from '@angular/core';
-import { TbContextMenuEvent } from '@shared/models/jquery-event.models';
+import { JnksIotContextMenuEvent } from '@shared/models/jquery-event.models';
 
 @Directive({
   selector: '[tbcontextmenu]'
@@ -7,10 +7,10 @@ import { TbContextMenuEvent } from '@shared/models/jquery-event.models';
 export class ContextMenuDirective implements OnDestroy {
 
   @Output()
-  tbcontextmenu = new EventEmitter<TbContextMenuEvent>();
+  tbcontextmenu = new EventEmitter<JnksIotContextMenuEvent>();
 
   constructor(private el: ElementRef) {
-    $(this.el.nativeElement).on('tbcontextmenu', (e: TbContextMenuEvent) => this.tbcontextmenu.emit(e));
+    $(this.el.nativeElement).on('tbcontextmenu', (e: JnksIotContextMenuEvent) => this.tbcontextmenu.emit(e));
   }
 
   ngOnDestroy() {

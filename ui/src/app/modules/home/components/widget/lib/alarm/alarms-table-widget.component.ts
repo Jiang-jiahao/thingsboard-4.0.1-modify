@@ -148,7 +148,7 @@ interface AlarmWidgetActionDescriptor extends TableCellButtonActionDescriptor {
 }
 
 @Component({
-  selector: 'tb-alarms-table-widget',
+  selector: 'jnks-iot-alarms-table-widget',
   templateUrl: './alarms-table-widget.component.html',
   styleUrls: ['./alarms-table-widget.component.scss', './../table-widget.scss']
 })
@@ -536,7 +536,7 @@ export class AlarmsTableWidgetComponent extends PageComponent implements OnInit,
     }
     const target = $event.target || $event.currentTarget;
     const config = new OverlayConfig({
-      panelClass: 'tb-panel-container',
+      panelClass: 'jnks-iot-panel-container',
       backdropClass: 'cdk-overlay-transparent-backdrop',
       hasBackdrop: true,
       height: 'fit-content',
@@ -607,7 +607,7 @@ export class AlarmsTableWidgetComponent extends PageComponent implements OnInit,
     }
     const target = $event.target || $event.currentTarget;
     const config = new OverlayConfig({
-      panelClass: 'tb-filter-panel',
+      panelClass: 'jnks-iot-filter-panel',
       backdropClass: 'cdk-overlay-transparent-backdrop',
       hasBackdrop: true,
       height: 'fit-content',
@@ -945,7 +945,7 @@ export class AlarmsTableWidgetComponent extends PageComponent implements OnInit,
       (AlarmDetailsDialogComponent,
         {
           disableClose: true,
-          panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+          panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
           data: {
             alarmId: alarm.id.id,
             allowAcknowledgment: this.allowAcknowledgment,
@@ -1098,7 +1098,7 @@ export class AlarmsTableWidgetComponent extends PageComponent implements OnInit,
       (AlarmCommentDialogComponent,
         {
           disableClose: true,
-          panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+          panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
           data: {
             alarmId: alarm.id.id
           }

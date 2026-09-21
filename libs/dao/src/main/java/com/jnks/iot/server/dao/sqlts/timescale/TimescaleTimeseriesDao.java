@@ -24,8 +24,8 @@ import com.jnks.iot.server.dao.DaoUtil;
 import com.jnks.iot.server.dao.dictionary.KeyDictionaryDao;
 import com.jnks.iot.server.dao.model.sql.AbstractTsKvEntity;
 import com.jnks.iot.server.dao.model.sqlts.timescale.ts.TimescaleTsKvEntity;
-import com.jnks.iot.server.dao.sql.TbSqlBlockingQueueParams;
-import com.jnks.iot.server.dao.sql.TbSqlBlockingQueueWrapper;
+import com.jnks.iot.server.dao.sql.JnksIotSqlBlockingQueueParams;
+import com.jnks.iot.server.dao.sql.JnksIotSqlBlockingQueueWrapper;
 import com.jnks.iot.server.dao.sqlts.AbstractSqlTimeseriesDao;
 import com.jnks.iot.server.dao.sqlts.insert.InsertTsRepository;
 import com.jnks.iot.server.dao.timeseries.TimeseriesDao;
@@ -60,11 +60,11 @@ public class TimescaleTimeseriesDao extends AbstractSqlTimeseriesDao implements 
     @Autowired
     protected KeyDictionaryDao keyDictionaryDao;
 
-    protected TbSqlBlockingQueueWrapper<TimescaleTsKvEntity, Void> tsQueue;
+    protected JnksIotSqlBlockingQueueWrapper<TimescaleTsKvEntity, Void> tsQueue;
 
     @PostConstruct
     protected void init() {
-        TbSqlBlockingQueueParams tsParams = TbSqlBlockingQueueParams.builder()
+        JnksIotSqlBlockingQueueParams tsParams = JnksIotSqlBlockingQueueParams.builder()
                 .logName("TS Timescale")
                 .batchSize(tsBatchSize)
                 .maxDelay(tsMaxDelay)
@@ -74,7 +74,7 @@ public class TimescaleTimeseriesDao extends AbstractSqlTimeseriesDao implements 
                 .build();
 
         Function<TimescaleTsKvEntity, Integer> hashcodeFunction = entity -> entity.getEntityId().hashCode();
-        tsQueue = new TbSqlBlockingQueueWrapper<>(tsParams, hashcodeFunction, timescaleBatchThreads, statsFactory);
+        tsQueue = new JnksIotSqlBlockingQueueWrapper<>(tsParams, hashcodeFunction, timescaleBatchThreads, statsFactory);
 
         tsQueue.init(logExecutor, v -> insertRepository.saveOrUpdate(v),
                 Comparator.comparing((Function<TimescaleTsKvEntity, UUID>) AbstractTsKvEntity::getEntityId)

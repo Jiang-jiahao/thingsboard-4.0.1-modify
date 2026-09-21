@@ -1,8 +1,8 @@
-<cdk-virtual-scroll-viewport #viewport class="tb-scroll-grid-viewport" [itemSize]="calculatedItemSize"
+<cdk-virtual-scroll-viewport #viewport class="jnks-iot-scroll-grid-viewport" [itemSize]="calculatedItemSize"
                              [minBufferPx]="minBuffer" [maxBufferPx]="maxBuffer" appendOnly>
   <ng-container *cdkVirtualFor="let itemsRow of dataSource; let row = index; trackBy: trackByItemsRow">
-    <div *ngIf="itemsRow" class="tb-scroll-grid-items-row" [style]="{gap: gap+'px'}">
-      <div *ngFor="let item of itemsRow; let col = index; trackBy: trackByItem" class="tb-scroll-grid-item-container">
+    <div *ngIf="itemsRow" class="jnks-iot-scroll-grid-items-row" [style]="{gap: gap+'px'}">
+      <div *ngFor="let item of itemsRow; let col = index; trackBy: trackByItem" class="jnks-iot-scroll-grid-item-container">
         <ng-container *ngIf="item === 'loadingCell'">
           <ng-container *ngTemplateOutlet="loadingCell ? loadingCell : defaultLoadingCell"></ng-container>
         </ng-container>
@@ -30,7 +30,7 @@
   </div>
 </ng-template>
 <ng-template #defaultDataLoading>
-  <div class="tb-absolute-fill flex flex-col items-center justify-center">
+  <div class="jnks-iot-absolute-fill flex flex-col items-center justify-center">
     <mat-spinner color="accent" strokeWidth="5"></mat-spinner>
   </div>
 </ng-template>

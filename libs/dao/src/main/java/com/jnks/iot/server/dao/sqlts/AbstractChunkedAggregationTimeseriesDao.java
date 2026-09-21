@@ -21,8 +21,8 @@ import com.jnks.iot.server.dao.DaoUtil;
 import com.jnks.iot.server.dao.dictionary.KeyDictionaryDao;
 import com.jnks.iot.server.dao.model.sql.AbstractTsKvEntity;
 import com.jnks.iot.server.dao.model.sqlts.ts.TsKvEntity;
-import com.jnks.iot.server.dao.sql.TbSqlBlockingQueueParams;
-import com.jnks.iot.server.dao.sql.TbSqlBlockingQueueWrapper;
+import com.jnks.iot.server.dao.sql.JnksIotSqlBlockingQueueParams;
+import com.jnks.iot.server.dao.sql.JnksIotSqlBlockingQueueWrapper;
 import com.jnks.iot.server.dao.sqlts.insert.InsertTsRepository;
 import com.jnks.iot.server.dao.sqlts.ts.TsKvRepository;
 import com.jnks.iot.server.dao.timeseries.TimeseriesDao;
@@ -45,7 +45,7 @@ public abstract class AbstractChunkedAggregationTimeseriesDao extends AbstractSq
     @Autowired
     protected InsertTsRepository<TsKvEntity> insertRepository;
 
-    protected TbSqlBlockingQueueWrapper<TsKvEntity, Void> tsQueue;
+    protected JnksIotSqlBlockingQueueWrapper<TsKvEntity, Void> tsQueue;
     @Autowired
     private StatsFactory statsFactory;
 
@@ -54,7 +54,7 @@ public abstract class AbstractChunkedAggregationTimeseriesDao extends AbstractSq
 
     @PostConstruct
     protected void init() {
-        TbSqlBlockingQueueParams tsParams = TbSqlBlockingQueueParams.builder()
+        JnksIotSqlBlockingQueueParams tsParams = JnksIotSqlBlockingQueueParams.builder()
                 .logName("TS")
                 .batchSize(tsBatchSize)
                 .maxDelay(tsMaxDelay)
@@ -64,7 +64,7 @@ public abstract class AbstractChunkedAggregationTimeseriesDao extends AbstractSq
                 .build();
 
         Function<TsKvEntity, Integer> hashcodeFunction = entity -> entity.getEntityId().hashCode();
-        tsQueue = new TbSqlBlockingQueueWrapper<>(tsParams, hashcodeFunction, tsBatchThreads, statsFactory);
+        tsQueue = new JnksIotSqlBlockingQueueWrapper<>(tsParams, hashcodeFunction, tsBatchThreads, statsFactory);
         tsQueue.init(logExecutor, v -> insertRepository.saveOrUpdate(v),
                 Comparator.comparing((Function<TsKvEntity, UUID>) AbstractTsKvEntity::getEntityId)
                         .thenComparing(AbstractTsKvEntity::getKey)

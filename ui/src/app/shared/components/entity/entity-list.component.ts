@@ -33,7 +33,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { isArray } from 'lodash';
 
 @Component({
-  selector: 'tb-entity-list',
+  selector: 'jnks-iot-entity-list',
   templateUrl: './entity-list.component.html',
   styleUrls: [],
   providers: [

@@ -1,6 +1,6 @@
 package com.jnks.iot.rule.engine.util;
 
-import com.jnks.iot.rule.engine.api.TbContext;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
 import com.jnks.iot.server.common.data.BaseData;
 import com.jnks.iot.server.common.data.EntityType;
 import com.jnks.iot.server.common.data.id.EntityId;
@@ -15,7 +15,7 @@ public class EntitiesByNameAndTypeLoader {
             EntityType.ENTITY_VIEW,
             EntityType.USER);
 
-    public static EntityId findEntityId(TbContext ctx, EntityType entityType, String entityName) {
+    public static EntityId findEntityId(JnksIotContext ctx, EntityType entityType, String entityName) {
         BaseData<? extends EntityId> targetEntity;
         switch (entityType) {
             case DEVICE:

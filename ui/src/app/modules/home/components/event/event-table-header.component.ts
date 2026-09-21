@@ -6,7 +6,7 @@ import { DebugEventType, Event, EventType, eventTypeTranslations } from '@app/sh
 import { EventTableConfig } from '@home/components/event/event-table-config';
 
 @Component({
-  selector: 'tb-event-table-header',
+  selector: 'jnks-iot-event-table-header',
   templateUrl: './event-table-header.component.html',
   styleUrls: ['./event-table-header.component.scss']
 })

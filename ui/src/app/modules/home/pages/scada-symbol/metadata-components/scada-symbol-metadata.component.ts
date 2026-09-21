@@ -28,7 +28,7 @@ import { TranslateService } from '@ngx-translate/core';
 import {
   ScadaSymbolMetadataTagsComponent
 } from '@home/pages/scada-symbol/metadata-components/scada-symbol-metadata-tags.component';
-import { TbEditorCompleter } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompleter } from '@shared/models/ace/completion.models';
 import {
   clickActionFunctionCompletions,
   elementStateRenderFunctionCompletions,
@@ -42,7 +42,7 @@ import { WidgetActionCallbacks } from '@home/components/widget/action/manage-wid
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-scada-symbol-metadata',
+  selector: 'jnks-iot-scada-symbol-metadata',
   templateUrl: './scada-symbol-metadata.component.html',
   styleUrls: ['./scada-symbol-metadata.component.scss'],
   providers: [
@@ -103,9 +103,9 @@ export class ScadaSymbolMetadataComponent extends PageComponent implements OnIni
 
   selectedOption = 'general';
 
-  generalStateRenderFunctionCompleter: TbEditorCompleter;
-  elementStateRenderFunctionCompleter: TbEditorCompleter;
-  clickActionFunctionCompleter: TbEditorCompleter;
+  generalStateRenderFunctionCompleter: JnksIotEditorCompleter;
+  elementStateRenderFunctionCompleter: JnksIotEditorCompleter;
+  clickActionFunctionCompleter: JnksIotEditorCompleter;
 
   highlightRules = scadaSymbolGeneralStateHighlightRules;
 
@@ -213,19 +213,19 @@ export class ScadaSymbolMetadataComponent extends PageComponent implements OnIni
     const contextCompleter = scadaSymbolContextCompletion(metadata, this.tags, this.customTranslate);
     const generalStateRender = generalStateRenderFunctionCompletions(contextCompleter);
     if (!this.generalStateRenderFunctionCompleter) {
-      this.generalStateRenderFunctionCompleter = new TbEditorCompleter(generalStateRender);
+      this.generalStateRenderFunctionCompleter = new JnksIotEditorCompleter(generalStateRender);
     } else {
       this.generalStateRenderFunctionCompleter.updateCompletions(generalStateRender);
     }
     const elementStateRender = elementStateRenderFunctionCompletions(contextCompleter);
     if (!this.elementStateRenderFunctionCompleter) {
-      this.elementStateRenderFunctionCompleter = new TbEditorCompleter(elementStateRender);
+      this.elementStateRenderFunctionCompleter = new JnksIotEditorCompleter(elementStateRender);
     } else {
       this.elementStateRenderFunctionCompleter.updateCompletions(elementStateRender);
     }
     const clickAction = clickActionFunctionCompletions(contextCompleter);
     if (!this.clickActionFunctionCompleter) {
-      this.clickActionFunctionCompleter = new TbEditorCompleter(clickAction);
+      this.clickActionFunctionCompleter = new JnksIotEditorCompleter(clickAction);
     } else {
       this.clickActionFunctionCompleter.updateCompletions(clickAction);
     }

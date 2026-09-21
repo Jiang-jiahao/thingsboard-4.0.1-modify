@@ -47,7 +47,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { DataEntry } from '@shared/models/widget.models';
 
 @Component({
-  selector: 'tb-liquid-level-widget',
+  selector: 'jnks-iot-liquid-level-widget',
   templateUrl: './liquid-level-widget.component.html',
   styleUrls: ['./liquid-level-widget.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -427,8 +427,8 @@ export class LiquidLevelWidgetComponent implements OnInit {
   private updateLevel(newY: number, percentage: number, ignoreAnimation = false): void {
     this.liquidColor.update(percentage);
     const jQueryContainerElement = $(this.liquidLevelContent.nativeElement);
-    const fill = jQueryContainerElement.find('.tb-liquid-fill');
-    const surfaces = jQueryContainerElement.find('.tb-liquid-surface');
+    const fill = jQueryContainerElement.find('.jnks-iot-liquid-fill');
+    const surfaces = jQueryContainerElement.find('.jnks-iot-liquid-surface');
     const surfacePositionAttr = this.shape !== Shapes.vCylinder ? 'y' : 'cy';
     const animationSpeed = 500;
 
@@ -448,7 +448,7 @@ export class LiquidLevelWidgetComponent implements OnInit {
       } else {
         $element.animate({[surfacePositionAttr]: newY}, animationSpeed);
       }
-      if ($element.hasClass('tb-liquid')) {
+      if ($element.hasClass('jnks-iot-liquid')) {
         $element.attr('fill', levelColor);
       }
     });
@@ -456,8 +456,8 @@ export class LiquidLevelWidgetComponent implements OnInit {
 
   private updateShapeColor(value: number): void {
     const jQueryContainerElement = $(this.liquidLevelContent.nativeElement);
-    const shapeStrokes = jQueryContainerElement.find('.tb-shape-stroke');
-    const shapeFill = jQueryContainerElement.find('.tb-shape-fill');
+    const shapeStrokes = jQueryContainerElement.find('.jnks-iot-shape-stroke');
+    const shapeFill = jQueryContainerElement.find('.jnks-iot-shape-fill');
     this.tankColor.update(value);
 
     const shapeColor = this.errorsMsg.length ? '#CACACA' : this.tankColor.color;

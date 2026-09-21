@@ -149,7 +149,7 @@ export class UsersTableConfigResolver  {
     return this.dialog.open<AddUserDialogComponent, AddUserDialogData,
       User>(AddUserDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         tenantId: this.tenantId,
         customerId: this.customerId,
@@ -182,7 +182,7 @@ export class UsersTableConfigResolver  {
         this.dialog.open<ActivationLinkDialogComponent, ActivationLinkDialogData,
           void>(ActivationLinkDialogComponent, {
           disableClose: true,
-          panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+          panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
           data: {
             activationLinkInfo
           }

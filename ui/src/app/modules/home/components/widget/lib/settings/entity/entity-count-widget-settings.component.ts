@@ -6,7 +6,7 @@ import { AppState } from '@core/core.state';
 import { countDefaultSettings } from '@home/components/widget/lib/count/count-widget.models';
 
 @Component({
-  selector: 'tb-entity-count-widget-settings',
+  selector: 'jnks-iot-entity-count-widget-settings',
   templateUrl: './entity-count-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

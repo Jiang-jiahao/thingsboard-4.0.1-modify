@@ -13,24 +13,24 @@
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
   <div mat-dialog-content>
     <fieldset [disabled]="isLoading$ | async">
-      <tb-relation-type-autocomplete
+      <jnks-iot-relation-type-autocomplete
         formControlName="type"
         required="true">
-      </tb-relation-type-autocomplete>
+      </jnks-iot-relation-type-autocomplete>
       <small>{{(direction === entitySearchDirection.FROM ?
           'relation.to-entity' : 'relation.from-entity') | translate}}</small>
-      <tb-entity-list-select
+      <jnks-iot-entity-list-select
         formControlName="targetEntityIds"
         required="true">
-      </tb-entity-list-select>
-      <tb-json-object-edit
+      </jnks-iot-entity-list-select>
+      <jnks-iot-json-object-edit
         #additionalInfoEdit
         [formControl]="additionalInfo"
         label="{{ 'relation.additional-info' | translate }}">
-      </tb-json-object-edit>
-      <div class="tb-error-messages" *ngIf="submitted &&
+      </jnks-iot-json-object-edit>
+      <div class="jnks-iot-error-messages" *ngIf="submitted &&
                                             additionalInfo.invalid" role="alert">
-        <div translate class="tb-error-message">relation.invalid-additional-info</div>
+        <div translate class="jnks-iot-error-message">relation.invalid-additional-info</div>
       </div>
     </fieldset>
   </div>

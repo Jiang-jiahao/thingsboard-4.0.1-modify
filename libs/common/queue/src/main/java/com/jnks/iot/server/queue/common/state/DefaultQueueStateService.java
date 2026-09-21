@@ -1,6 +1,6 @@
 package com.jnks.iot.server.queue.common.state;
 
-import com.jnks.iot.server.queue.TbQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueMsg;
 import com.jnks.iot.server.queue.common.consumer.PartitionedQueueConsumerManager;
 
 /**
@@ -18,7 +18,7 @@ import com.jnks.iot.server.queue.common.consumer.PartitionedQueueConsumerManager
  * @see QueueStateService
  * @see KafkaQueueStateService
  */
-public class DefaultQueueStateService<E extends TbQueueMsg, S extends TbQueueMsg> extends QueueStateService<E, S> {
+public class DefaultQueueStateService<E extends JnksIotQueueMsg, S extends JnksIotQueueMsg> extends QueueStateService<E, S> {
 
     /**
      * @param eventConsumer 唯一需要管理的事件分区消费者

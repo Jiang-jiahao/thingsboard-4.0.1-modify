@@ -1,0 +1,28 @@
+package com.jnks.iot.server.transport.lwm2m.server.store;
+
+import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClient;
+
+import java.util.Collections;
+import java.util.Set;
+
+public class JnksIotDummyLwM2MClientStore implements JnksIotLwM2MClientStore {
+    @Override
+    public LwM2mClient get(String endpoint) {
+        return null;
+    }
+
+    @Override
+    public Set<LwM2mClient> getAll() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public void put(LwM2mClient client) {
+
+    }
+
+    @Override
+    public void remove(String endpoint) {
+
+    }
+}

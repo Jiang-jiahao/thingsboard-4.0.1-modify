@@ -17,7 +17,7 @@ import {
   overlayStyle, validateAndUpdateBackgroundSettings
 } from '@shared/models/widget-settings.models';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import {
   BackgroundSettingsPanelComponent
 } from '@home/components/widget/lib/settings/common/background-settings-panel.component';
@@ -27,7 +27,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { tap } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-background-settings',
+  selector: 'jnks-iot-background-settings',
   templateUrl: './background-settings.component.html',
   styleUrls: ['./background-settings.component.scss'],
   providers: [
@@ -56,7 +56,7 @@ export class BackgroundSettingsComponent implements OnInit, ControlValueAccessor
 
   constructor(private imagePipe: ImagePipe,
               private sanitizer: DomSanitizer,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private cd: ChangeDetectorRef) {}
@@ -102,8 +102,8 @@ export class BackgroundSettingsComponent implements OnInit, ControlValueAccessor
        },
        isModal: true
      });
-      backgroundSettingsPanelPopover.tbComponentRef.instance.popover = backgroundSettingsPanelPopover;
-      backgroundSettingsPanelPopover.tbComponentRef.instance.backgroundSettingsApplied.subscribe((backgroundSettings) => {
+      backgroundSettingsPanelPopover.jnksIotComponentRef.instance.popover = backgroundSettingsPanelPopover;
+      backgroundSettingsPanelPopover.jnksIotComponentRef.instance.backgroundSettingsApplied.subscribe((backgroundSettings) => {
         backgroundSettingsPanelPopover.hide();
         this.modelValue = backgroundSettings;
         this.updateBackgroundStyle();

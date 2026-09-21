@@ -9,7 +9,7 @@ import { toggleButtonDefaultSettings } from '@home/components/widget/lib/button/
 type ButtonAppearanceType = 'checked' | 'unchecked';
 
 @Component({
-  selector: 'tb-toggle-button-widget-settings',
+  selector: 'jnks-iot-toggle-button-widget-settings',
   templateUrl: './toggle-button-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

@@ -25,13 +25,13 @@ import org.springframework.stereotype.Service;
 import com.jnks.iot.common.util.JnksIotExecutors;
 import com.jnks.iot.script.api.AbstractScriptInvokeService;
 import com.jnks.iot.script.api.ScriptType;
-import com.jnks.iot.script.api.TbScriptException;
+import com.jnks.iot.script.api.JnksIotScriptException;
 import com.jnks.iot.server.common.data.ApiUsageRecordKey;
 import com.jnks.iot.server.common.data.id.CustomerId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.stats.StatsType;
-import com.jnks.iot.server.common.stats.TbApiUsageReportClient;
-import com.jnks.iot.server.common.stats.TbApiUsageStateClient;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageReportClient;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageStateClient;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -56,8 +56,8 @@ public class DefaultTbelInvokeService extends AbstractScriptInvokeService implem
     protected Cache<String, Serializable> compiledScriptsCache;
 
     private SandboxedParserConfiguration parserConfig;
-    private final Optional<TbApiUsageStateClient> apiUsageStateClient;
-    private final Optional<TbApiUsageReportClient> apiUsageReportClient;
+    private final Optional<JnksIotApiUsageStateClient> apiUsageStateClient;
+    private final Optional<JnksIotApiUsageReportClient> apiUsageReportClient;
 
     @Getter
     @Value("${tbel.max_total_args_size:100000}")
@@ -98,7 +98,7 @@ public class DefaultTbelInvokeService extends AbstractScriptInvokeService implem
 
     private final Lock lock = new ReentrantLock();
 
-    protected DefaultTbelInvokeService(Optional<TbApiUsageStateClient> apiUsageStateClient, Optional<TbApiUsageReportClient> apiUsageReportClient) {
+    protected DefaultTbelInvokeService(Optional<JnksIotApiUsageStateClient> apiUsageStateClient, Optional<JnksIotApiUsageReportClient> apiUsageReportClient) {
         this.apiUsageStateClient = apiUsageStateClient;
         this.apiUsageReportClient = apiUsageReportClient;
     }
@@ -115,19 +115,19 @@ public class DefaultTbelInvokeService extends AbstractScriptInvokeService implem
         super.init();
         OptimizerFactory.setDefaultOptimizer(OptimizerFactory.SAFE_REFLECTIVE);
         parserConfig = ParserContext.enableSandboxedMode();
-        parserConfig.addImport("JSON", TbJson.class);
-        parserConfig.registerDataType("Date", TbDate.class, val -> 8L);
+        parserConfig.addImport("JSON", JnksIotJson.class);
+        parserConfig.registerDataType("Date", JnksIotDate.class, val -> 8L);
         parserConfig.registerDataType("Random", Random.class, val -> 8L);
         parserConfig.registerDataType("Calendar", Calendar.class, val -> 8L);
         parserConfig.registerDataType("TbelCfSingleValueArg", TbelCfSingleValueArg.class, TbelCfSingleValueArg::memorySize);
         parserConfig.registerDataType("TbelCfTsRollingArg", TbelCfTsRollingArg.class, TbelCfTsRollingArg::memorySize);
         parserConfig.registerDataType("TbelCfTsDoubleVal", TbelCfTsDoubleVal.class, TbelCfTsDoubleVal::memorySize);
         parserConfig.registerDataType("TbelCfTsRollingData", TbelCfTsRollingData.class, TbelCfTsRollingData::memorySize);
-        parserConfig.registerDataType("TbTimeWindow", TbTimeWindow.class, TbTimeWindow::memorySize);
+        parserConfig.registerDataType("JnksIotTimeWindow", JnksIotTimeWindow.class, JnksIotTimeWindow::memorySize);
         parserConfig.registerDataType("TbelCfTsDoubleVal", TbelCfTsMultiDoubleVal.class, TbelCfTsMultiDoubleVal::memorySize);
         parserConfig.registerDataType("TbelCfCtx", TbelCfCtx.class, TbelCfCtx::memorySize);
 
-        TbUtils.register(parserConfig);
+        JnksIotUtils.register(parserConfig);
         executor = MoreExecutors.listeningDecorator(JnksIotExecutors.newWorkStealingPool(threadPoolSize, "tbel-executor"));
         try {
             // Special command to warm up TBEL engine
@@ -190,7 +190,7 @@ public class DefaultTbelInvokeService extends AbstractScriptInvokeService implem
                 }
                 return scriptId;
             } catch (Exception e) {
-                throw new TbScriptException(scriptId, TbScriptException.ErrorCode.COMPILATION, scriptBody, e);
+                throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.COMPILATION, scriptBody, e);
             }
         });
     }
@@ -201,16 +201,16 @@ public class DefaultTbelInvokeService extends AbstractScriptInvokeService implem
         return new TbelScriptExecutionTask(executionContext, executor.submit(() -> {
             String scriptHash = scriptIdToHash.get(scriptId);
             if (scriptHash == null) {
-                throw new TbScriptException(scriptId, TbScriptException.ErrorCode.OTHER, null, new RuntimeException("Script not found!"));
+                throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.OTHER, null, new RuntimeException("Script not found!"));
             }
             TbelScript script = scriptMap.get(scriptHash);
             Serializable compiledScript = compiledScriptsCache.get(scriptHash, k -> compileScript(script.getScriptBody()));
             try {
                 return MVEL.executeTbExpression(compiledScript, executionContext, script.createVars(args));
             } catch (ScriptMemoryOverflowException e) {
-                throw new TbScriptException(scriptId, TbScriptException.ErrorCode.OTHER, script.getScriptBody(), new RuntimeException("Script memory overflow!"));
+                throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.OTHER, script.getScriptBody(), new RuntimeException("Script memory overflow!"));
             } catch (Exception e) {
-                throw new TbScriptException(scriptId, TbScriptException.ErrorCode.RUNTIME, script.getScriptBody(), e);
+                throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.RUNTIME, script.getScriptBody(), e);
             }
         }));
     }

@@ -38,7 +38,7 @@ import { deepClone, mergeDeep } from '@core/utils';
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({
-  selector: 'tb-map-settings',
+  selector: 'jnks-iot-map-settings',
   templateUrl: './map-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [
@@ -286,7 +286,7 @@ export class MapSettingsComponent implements OnInit, ControlValueAccessor, Valid
     return this.dialog.open<DataKeyConfigDialogComponent, DataKeyConfigDialogData, DataKey>(DataKeyConfigDialogComponent,
       {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           dataKey: deepClone(key),
           dataKeyConfigMode: DataKeyConfigMode.general,

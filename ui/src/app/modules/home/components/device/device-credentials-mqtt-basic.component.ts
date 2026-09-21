@@ -16,7 +16,7 @@ import { takeUntil } from 'rxjs/operators';
 import { generateSecret, isDefinedAndNotNull, isEmptyStr } from '@core/utils';
 
 @Component({
-  selector: 'tb-device-credentials-mqtt-basic',
+  selector: 'jnks-iot-device-credentials-mqtt-basic',
   templateUrl: './device-credentials-mqtt-basic.component.html',
   providers: [
     {

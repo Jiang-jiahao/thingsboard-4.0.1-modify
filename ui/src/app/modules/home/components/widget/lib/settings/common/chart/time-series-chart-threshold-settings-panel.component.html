@@ -1,7 +1,7 @@
-<div class="tb-threshold-settings-panel" [formGroup]="thresholdSettingsFormGroup">
-  <div class="tb-threshold-settings-title">{{ panelTitle | translate }}</div>
-  <div class="tb-threshold-settings-panel-content">
-    <div *ngIf="!hideYAxis" class="tb-form-row space-between column-xs">
+<div class="jnks-iot-threshold-settings-panel" [formGroup]="thresholdSettingsFormGroup">
+  <div class="jnks-iot-threshold-settings-title">{{ panelTitle | translate }}</div>
+  <div class="jnks-iot-threshold-settings-panel-content">
+    <div *ngIf="!hideYAxis" class="jnks-iot-form-row space-between column-xs">
       <div translate>widgets.time-series-chart.axis.y-axis</div>
       <mat-form-field class="medium-width" appearance="outline" subscriptSizing="dynamic">
         <mat-select formControlName="yAxisId">
@@ -11,19 +11,19 @@
         </mat-select>
       </mat-form-field>
     </div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <div translate>widget-config.units-short</div>
-      <tb-unit-input
+      <jnks-iot-unit-input
         formControlName="units">
-      </tb-unit-input>
+      </jnks-iot-unit-input>
     </div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <div translate>widget-config.decimals-short</div>
       <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
         <input matInput formControlName="decimals" type="number" min="0" max="15" step="1" placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
     </div>
-    <div class="tb-form-row space-between column-lt-md">
+    <div class="jnks-iot-form-row space-between column-lt-md">
       <mat-slide-toggle class="mat-slide" formControlName="showLabel">
         {{ 'widgets.time-series-chart.threshold.label' | translate }}
       </mat-slide-toggle>
@@ -35,37 +35,37 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <tb-font-settings formControlName="labelFont"
+        <jnks-iot-font-settings formControlName="labelFont"
                           clearButton
                           disabledLineHeight
                           forceSizeUnit="px"
                           [previewText]="labelPreviewFn">
-        </tb-font-settings>
-        <tb-color-input asBoxInput
+        </jnks-iot-font-settings>
+        <jnks-iot-color-input asBoxInput
                         colorClearButton
                         formControlName="labelColor">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
     </div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <mat-slide-toggle class="mat-slide" formControlName="enableLabelBackground">
         {{ 'widgets.time-series-chart.threshold.label-background' | translate }}
       </mat-slide-toggle>
-      <tb-color-input asBoxInput
+      <jnks-iot-color-input asBoxInput
                       colorClearButton
                       formControlName="labelBackground">
-      </tb-color-input>
+      </jnks-iot-color-input>
     </div>
-    <div class="tb-form-panel">
-      <div class="tb-form-panel-title" translate>widgets.time-series-chart.threshold.line-appearance</div>
-      <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-panel">
+      <div class="jnks-iot-form-panel-title" translate>widgets.time-series-chart.threshold.line-appearance</div>
+      <div class="jnks-iot-form-row space-between">
         <div translate>widgets.time-series-chart.threshold.line-color</div>
-        <tb-color-input asBoxInput
+        <jnks-iot-color-input asBoxInput
                         colorClearButton
                         formControlName="lineColor">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
-      <div class="tb-form-row space-between column-xs">
+      <div class="jnks-iot-form-row space-between column-xs">
         <div translate>widgets.time-series-chart.line-type</div>
         <mat-form-field class="medium-width" appearance="outline" subscriptSizing="dynamic">
           <mat-select formControlName="lineType">
@@ -75,15 +75,15 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div class="tb-form-row space-between column-xs">
+      <div class="jnks-iot-form-row space-between column-xs">
         <div translate>widgets.time-series-chart.line-width</div>
         <mat-form-field class="medium-width number" appearance="outline" subscriptSizing="dynamic">
           <input matInput type="number" formControlName="lineWidth" min="0" step="1" placeholder="{{ 'widget-config.set' | translate }}"/>
         </mat-form-field>
       </div>
-      <div class="tb-form-row column-xs">
+      <div class="jnks-iot-form-row column-xs">
         <div translate>widgets.time-series-chart.threshold.start-symbol</div>
-        <div class="tb-flex row flex-end">
+        <div class="jnks-iot-flex row flex-end">
           <mat-form-field class="medium-width lt-md:flex-1" appearance="outline" subscriptSizing="dynamic">
             <mat-select formControlName="startSymbol">
               <mat-option *ngFor="let shape of chartShapes" [value]="shape">
@@ -91,16 +91,16 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <div class="tb-small-label" translate>widgets.time-series-chart.threshold.symbol-size</div>
+          <div class="jnks-iot-small-label" translate>widgets.time-series-chart.threshold.symbol-size</div>
           <mat-form-field appearance="outline" class="number fixed-width" subscriptSizing="dynamic">
             <input matInput formControlName="startSymbolSize"
                    type="number" min="0" step="1" placeholder="{{ 'widget-config.set' | translate }}">
           </mat-form-field>
         </div>
       </div>
-      <div class="tb-form-row column-xs">
+      <div class="jnks-iot-form-row column-xs">
         <div translate>widgets.time-series-chart.threshold.end-symbol</div>
-        <div class="tb-flex row flex-end">
+        <div class="jnks-iot-flex row flex-end">
           <mat-form-field class="medium-width lt-md:flex-1" appearance="outline" subscriptSizing="dynamic">
             <mat-select formControlName="endSymbol">
               <mat-option *ngFor="let shape of chartShapes" [value]="shape">
@@ -108,7 +108,7 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <div class="tb-small-label" translate>widgets.time-series-chart.threshold.symbol-size</div>
+          <div class="jnks-iot-small-label" translate>widgets.time-series-chart.threshold.symbol-size</div>
           <mat-form-field appearance="outline" class="number fixed-width" subscriptSizing="dynamic">
             <input matInput formControlName="endSymbolSize"
                    type="number" min="0" step="1" placeholder="{{ 'widget-config.set' | translate }}">
@@ -117,7 +117,7 @@
       </div>
     </div>
   </div>
-  <div class="tb-threshold-settings-panel-buttons">
+  <div class="jnks-iot-threshold-settings-panel-buttons">
     <button mat-button
             color="primary"
             type="button"

@@ -11,16 +11,16 @@ services:
       ZOO_MY_ID: 1
       ZOO_SERVERS: server.1=zookeeper:2888:3888;zookeeper:2181
       ZOO_ADMINSERVER_ENABLED: "false"
-  tb-js-executor:
+  jnks-iot-js-executor:
     restart: always
-    image: "${DOCKER_REPO}/${JS_EXECUTOR_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${JS_EXECUTOR_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     deploy:
       replicas: 10
     env_file:
-      - tb-js-executor/tb-js-executor.env
-  tb-core1:
+      - jnks-iot-js-executor/jnks-iot-js-executor.env
+  jnks-iot-core1:
     restart: always
-    image: "${DOCKER_REPO}/${TB_CORE_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${JNKS_IOT_CORE_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "8080"
     logging:
@@ -29,21 +29,21 @@ services:
         max-size: "200m"
         max-file: "30"
     environment:
-      TB_SERVICE_ID: tb-core1
+      JNKS_IOT_SERVICE_ID: jnks-iot-core1
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
-      - tb-core/tb-core.env
+      - jnks-iot-core/jnks-iot-core.env
     volumes:
-      - ./tb-core/conf:/config
-      - ./tb-core/log:/var/log/jnks-iot-core
+      - ./jnks-iot-core/conf:/config
+      - ./jnks-iot-core/log:/var/log/jnks-iot-core
     depends_on:
       - zookeeper
-      - tb-js-executor
-      - tb-rule-engine1
-      - tb-rule-engine2
-  tb-core2:
+      - jnks-iot-js-executor
+      - jnks-iot-rule-engine1
+      - jnks-iot-rule-engine2
+  jnks-iot-core2:
     restart: always
-    image: "${DOCKER_REPO}/${TB_CORE_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${JNKS_IOT_CORE_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "8080"
     logging:
@@ -52,21 +52,21 @@ services:
         max-size: "200m"
         max-file: "30"
     environment:
-      TB_SERVICE_ID: tb-core2
+      JNKS_IOT_SERVICE_ID: jnks-iot-core2
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
-      - tb-core/tb-core.env
+      - jnks-iot-core/jnks-iot-core.env
     volumes:
-      - ./tb-core/conf:/config
-      - ./tb-core/log:/var/log/jnks-iot-core
+      - ./jnks-iot-core/conf:/config
+      - ./jnks-iot-core/log:/var/log/jnks-iot-core
     depends_on:
       - zookeeper
-      - tb-js-executor
-      - tb-rule-engine1
-      - tb-rule-engine2
-  tb-rule-engine1:
+      - jnks-iot-js-executor
+      - jnks-iot-rule-engine1
+      - jnks-iot-rule-engine2
+  jnks-iot-rule-engine1:
     restart: always
-    image: "${DOCKER_REPO}/${TB_RULE_ENGINE_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${JNKS_IOT_RULE_ENGINE_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "8080"
     logging:
@@ -75,19 +75,19 @@ services:
         max-size: "200m"
         max-file: "30"
     environment:
-      TB_SERVICE_ID: tb-rule-engine1
+      JNKS_IOT_SERVICE_ID: jnks-iot-rule-engine1
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
-      - tb-rule-engine/tb-rule-engine.env
+      - jnks-iot-rule-engine/jnks-iot-rule-engine.env
     volumes:
-      - ./tb-rule-engine/conf:/config
-      - ./tb-rule-engine/log:/var/log/jnks-iot-rule-engine
+      - ./jnks-iot-rule-engine/conf:/config
+      - ./jnks-iot-rule-engine/log:/var/log/jnks-iot-rule-engine
     depends_on:
       - zookeeper
-      - tb-js-executor
-  tb-rule-engine2:
+      - jnks-iot-js-executor
+  jnks-iot-rule-engine2:
     restart: always
-    image: "${DOCKER_REPO}/${TB_RULE_ENGINE_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${JNKS_IOT_RULE_ENGINE_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "8080"
     logging:
@@ -96,256 +96,256 @@ services:
         max-size: "200m"
         max-file: "30"
     environment:
-      TB_SERVICE_ID: tb-rule-engine2
+      JNKS_IOT_SERVICE_ID: jnks-iot-rule-engine2
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
-      - tb-rule-engine/tb-rule-engine.env
+      - jnks-iot-rule-engine/jnks-iot-rule-engine.env
     volumes:
-      - ./tb-rule-engine/conf:/config
-      - ./tb-rule-engine/log:/var/log/jnks-iot-rule-engine
+      - ./jnks-iot-rule-engine/conf:/config
+      - ./jnks-iot-rule-engine/log:/var/log/jnks-iot-rule-engine
     depends_on:
       - zookeeper
-      - tb-js-executor
-  tb-mqtt-transport1:
+      - jnks-iot-js-executor
+  jnks-iot-mqtt-transport1:
     restart: always
-    image: "${DOCKER_REPO}/${MQTT_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${MQTT_TRANSPORT_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "1883"
     environment:
-      TB_SERVICE_ID: tb-mqtt-transport1
+      JNKS_IOT_SERVICE_ID: jnks-iot-mqtt-transport1
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
-      - tb-transports/mqtt/tb-mqtt-transport.env
+      - jnks-iot-transports/mqtt/jnks-iot-mqtt-transport.env
     volumes:
-      - ./tb-transports/mqtt/conf:/config
-      - ./tb-transports/mqtt/log:/var/log/tb-mqtt-transport
+      - ./jnks-iot-transports/mqtt/conf:/config
+      - ./jnks-iot-transports/mqtt/log:/var/log/jnks-iot-mqtt-transport
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
-  tb-mqtt-transport2:
+      - jnks-iot-core1
+      - jnks-iot-core2
+  jnks-iot-mqtt-transport2:
     restart: always
-    image: "${DOCKER_REPO}/${MQTT_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${MQTT_TRANSPORT_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "1883"
     environment:
-      TB_SERVICE_ID: tb-mqtt-transport2
+      JNKS_IOT_SERVICE_ID: jnks-iot-mqtt-transport2
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
-      - tb-transports/mqtt/tb-mqtt-transport.env
+      - jnks-iot-transports/mqtt/jnks-iot-mqtt-transport.env
     volumes:
-      - ./tb-transports/mqtt/conf:/config
-      - ./tb-transports/mqtt/log:/var/log/tb-mqtt-transport
+      - ./jnks-iot-transports/mqtt/conf:/config
+      - ./jnks-iot-transports/mqtt/log:/var/log/jnks-iot-mqtt-transport
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
-  tb-http-transport1:
+      - jnks-iot-core1
+      - jnks-iot-core2
+  jnks-iot-http-transport1:
     restart: always
-    image: "${DOCKER_REPO}/${HTTP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${HTTP_TRANSPORT_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "8081"
     environment:
-      TB_SERVICE_ID: tb-http-transport1
+      JNKS_IOT_SERVICE_ID: jnks-iot-http-transport1
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
-      - tb-transports/http/tb-http-transport.env
+      - jnks-iot-transports/http/jnks-iot-http-transport.env
     volumes:
-      - ./tb-transports/http/conf:/config
-      - ./tb-transports/http/log:/var/log/tb-http-transport
+      - ./jnks-iot-transports/http/conf:/config
+      - ./jnks-iot-transports/http/log:/var/log/jnks-iot-http-transport
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
-  tb-http-transport2:
+      - jnks-iot-core1
+      - jnks-iot-core2
+  jnks-iot-http-transport2:
     restart: always
-    image: "${DOCKER_REPO}/${HTTP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${HTTP_TRANSPORT_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "8081"
     environment:
-      TB_SERVICE_ID: tb-http-transport2
+      JNKS_IOT_SERVICE_ID: jnks-iot-http-transport2
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
-      - tb-transports/http/tb-http-transport.env
+      - jnks-iot-transports/http/jnks-iot-http-transport.env
     volumes:
-      - ./tb-transports/http/conf:/config
-      - ./tb-transports/http/log:/var/log/tb-http-transport
+      - ./jnks-iot-transports/http/conf:/config
+      - ./jnks-iot-transports/http/log:/var/log/jnks-iot-http-transport
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
-  tb-coap-transport:
+      - jnks-iot-core1
+      - jnks-iot-core2
+  jnks-iot-coap-transport:
     restart: always
-    image: "${DOCKER_REPO}/${COAP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${COAP_TRANSPORT_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "5683:5683/udp"
     environment:
-      TB_SERVICE_ID: tb-coap-transport
+      JNKS_IOT_SERVICE_ID: jnks-iot-coap-transport
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
-      - tb-transports/coap/tb-coap-transport.env
+      - jnks-iot-transports/coap/jnks-iot-coap-transport.env
     volumes:
-      - ./tb-transports/coap/conf:/config
-      - ./tb-transports/coap/log:/var/log/tb-coap-transport
+      - ./jnks-iot-transports/coap/conf:/config
+      - ./jnks-iot-transports/coap/log:/var/log/jnks-iot-coap-transport
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
-  tb-lwm2m-transport:
+      - jnks-iot-core1
+      - jnks-iot-core2
+  jnks-iot-lwm2m-transport:
     restart: always
-    image: "${DOCKER_REPO}/${LWM2M_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${LWM2M_TRANSPORT_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "5685:5685/udp"
       - "5686:5686/udp"
     environment:
-      TB_SERVICE_ID: tb-lwm2m-transport
+      JNKS_IOT_SERVICE_ID: jnks-iot-lwm2m-transport
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
-      - tb-transports/lwm2m/tb-lwm2m-transport.env
+      - jnks-iot-transports/lwm2m/jnks-iot-lwm2m-transport.env
     volumes:
-      - ./tb-transports/lwm2m/conf:/config
-      - ./tb-transports/lwm2m/log:/var/log/tb-lwm2m-transport
+      - ./jnks-iot-transports/lwm2m/conf:/config
+      - ./jnks-iot-transports/lwm2m/log:/var/log/jnks-iot-lwm2m-transport
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
-  tb-snmp-transport:
+      - jnks-iot-core1
+      - jnks-iot-core2
+  jnks-iot-snmp-transport:
     restart: always
-    image: "${DOCKER_REPO}/${SNMP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${SNMP_TRANSPORT_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "1620:1620/udp"
     environment:
-      TB_SERVICE_ID: tb-snmp-transport
+      JNKS_IOT_SERVICE_ID: jnks-iot-snmp-transport
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
-      - tb-transports/snmp/tb-snmp-transport.env
+      - jnks-iot-transports/snmp/jnks-iot-snmp-transport.env
     volumes:
-      - ./tb-transports/snmp/conf:/config
-      - ./tb-transports/snmp/log:/var/log/tb-snmp-transport
+      - ./jnks-iot-transports/snmp/conf:/config
+      - ./jnks-iot-transports/snmp/log:/var/log/jnks-iot-snmp-transport
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
-  tb-tcp-transport1:
+      - jnks-iot-core1
+      - jnks-iot-core2
+  jnks-iot-tcp-transport1:
     restart: always
-    image: "${DOCKER_REPO}/${TCP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${TCP_TRANSPORT_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       # 只发临时宿主端口：所有 TCP 实例监听同一容器端口 5683，对外统一由入口网关（nginx-gateway）转发
       - "5683"
       - "8087"
     environment:
-      TB_SERVICE_ID: tb-tcp-transport1
+      JNKS_IOT_SERVICE_ID: jnks-iot-tcp-transport1
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
-      - tb-transports/tcp/tb-tcp-transport.env
+      - jnks-iot-transports/tcp/jnks-iot-tcp-transport.env
     volumes:
-      - ./tb-transports/tcp/conf:/config
-      - ./tb-transports/tcp/log:/var/log/tb-tcp-transport
+      - ./jnks-iot-transports/tcp/conf:/config
+      - ./jnks-iot-transports/tcp/log:/var/log/jnks-iot-tcp-transport
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
-  tb-tcp-transport2:
+      - jnks-iot-core1
+      - jnks-iot-core2
+  jnks-iot-tcp-transport2:
     restart: always
-    image: "${DOCKER_REPO}/${TCP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${TCP_TRANSPORT_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "5683"
       - "8087"
     environment:
-      TB_SERVICE_ID: tb-tcp-transport2
+      JNKS_IOT_SERVICE_ID: jnks-iot-tcp-transport2
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
-      - tb-transports/tcp/tb-tcp-transport.env
+      - jnks-iot-transports/tcp/jnks-iot-tcp-transport.env
     volumes:
-      - ./tb-transports/tcp/conf:/config
-      - ./tb-transports/tcp/log:/var/log/tb-tcp-transport
+      - ./jnks-iot-transports/tcp/conf:/config
+      - ./jnks-iot-transports/tcp/log:/var/log/jnks-iot-tcp-transport
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
-  tb-udp-transport1:
+      - jnks-iot-core1
+      - jnks-iot-core2
+  jnks-iot-udp-transport1:
     restart: always
-    image: "${DOCKER_REPO}/${UDP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${UDP_TRANSPORT_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       # 同上：两个 UDP 实例都监听容器端口 5684，由入口网关按源地址哈希转发
       - "5684/udp"
       - "8088"
     environment:
-      TB_SERVICE_ID: tb-udp-transport1
+      JNKS_IOT_SERVICE_ID: jnks-iot-udp-transport1
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
-      - tb-transports/udp/tb-udp-transport.env
+      - jnks-iot-transports/udp/jnks-iot-udp-transport.env
     volumes:
-      - ./tb-transports/udp/conf:/config
-      - ./tb-transports/udp/log:/var/log/tb-udp-transport
+      - ./jnks-iot-transports/udp/conf:/config
+      - ./jnks-iot-transports/udp/log:/var/log/jnks-iot-udp-transport
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
-  tb-udp-transport2:
+      - jnks-iot-core1
+      - jnks-iot-core2
+  jnks-iot-udp-transport2:
     restart: always
-    image: "${DOCKER_REPO}/${UDP_TRANSPORT_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${UDP_TRANSPORT_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "5684/udp"
       - "8088"
     environment:
-      TB_SERVICE_ID: tb-udp-transport2
+      JNKS_IOT_SERVICE_ID: jnks-iot-udp-transport2
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
-      - tb-transports/udp/tb-udp-transport.env
+      - jnks-iot-transports/udp/jnks-iot-udp-transport.env
     volumes:
-      - ./tb-transports/udp/conf:/config
-      - ./tb-transports/udp/log:/var/log/tb-udp-transport
+      - ./jnks-iot-transports/udp/conf:/config
+      - ./jnks-iot-transports/udp/log:/var/log/jnks-iot-udp-transport
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
+      - jnks-iot-core1
+      - jnks-iot-core2
   # Web UI：nginx 直接发静态文件（前端产物已打进镜像），不再是 Node/Express 服务，也不需要 env 文件。
   # 两个副本纯粹是为了重启/升级时界面不断（入口网关按 least_conn 分发）。
-  tb-web-ui1:
+  jnks-iot-web-ui1:
     restart: always
-    image: "${DOCKER_REPO}/${WEB_UI_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${WEB_UI_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "8080"
-  tb-web-ui2:
+  jnks-iot-web-ui2:
     restart: always
-    image: "${DOCKER_REPO}/${WEB_UI_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${WEB_UI_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "8080"
-  tb-vc-executor1:
+  jnks-iot-vc-executor1:
     restart: always
-    image: "${DOCKER_REPO}/${TB_VC_EXECUTOR_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${JNKS_IOT_VC_EXECUTOR_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "8081"
     environment:
-      TB_SERVICE_ID: tb-vc-executor1
+      JNKS_IOT_SERVICE_ID: jnks-iot-vc-executor1
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
-      - tb-vc-executor/tb-vc-executor.env
+      - jnks-iot-vc-executor/jnks-iot-vc-executor.env
     volumes:
-      - ./tb-vc-executor/conf:/config
-      - ./tb-vc-executor/log:/var/log/tb-vc-executor
+      - ./jnks-iot-vc-executor/conf:/config
+      - ./jnks-iot-vc-executor/log:/var/log/jnks-iot-vc-executor
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
-  tb-vc-executor2:
+      - jnks-iot-core1
+      - jnks-iot-core2
+  jnks-iot-vc-executor2:
     restart: always
-    image: "${DOCKER_REPO}/${TB_VC_EXECUTOR_DOCKER_NAME}:${TB_VERSION}"
+    image: "${DOCKER_REPO}/${JNKS_IOT_VC_EXECUTOR_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "8081"
     environment:
-      TB_SERVICE_ID: tb-vc-executor2
+      JNKS_IOT_SERVICE_ID: jnks-iot-vc-executor2
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
-      - tb-vc-executor/tb-vc-executor.env
+      - jnks-iot-vc-executor/jnks-iot-vc-executor.env
     volumes:
-      - ./tb-vc-executor/conf:/config
-      - ./tb-vc-executor/log:/var/log/tb-vc-executor
+      - ./jnks-iot-vc-executor/conf:/config
+      - ./jnks-iot-vc-executor/log:/var/log/jnks-iot-vc-executor
     depends_on:
       - zookeeper
-      - tb-core1
-      - tb-core2
+      - jnks-iot-core1
+      - jnks-iot-core2
   # 统一入口网关（nginx）：80/443 路由 + TLS、1883 MQTT、5683/5684 TCP/UDP，全部入口就这一个容器。
   # 替代了原来的两个代理 —— haproxy-certbot（80/443/1883 + certbot 自动证书）与 nginx-tcpudp（5683/5684）。
   # 配置：./nginx/config/（nginx.conf + locations.conf + proxy-headers.conf）
@@ -365,28 +365,28 @@ services:
      - ./nginx/config:/etc/nginx/tbconf:ro
      - ./nginx/certs:/etc/nginx/certs:ro
     links:
-        - tb-core1
-        - tb-core2
-        - tb-web-ui1
-        - tb-web-ui2
-        - tb-mqtt-transport1
-        - tb-mqtt-transport2
-        - tb-http-transport1
-        - tb-http-transport2
-        - tb-tcp-transport1
-        - tb-tcp-transport2
-        - tb-udp-transport1
-        - tb-udp-transport2
+        - jnks-iot-core1
+        - jnks-iot-core2
+        - jnks-iot-web-ui1
+        - jnks-iot-web-ui2
+        - jnks-iot-mqtt-transport1
+        - jnks-iot-mqtt-transport2
+        - jnks-iot-http-transport1
+        - jnks-iot-http-transport2
+        - jnks-iot-tcp-transport1
+        - jnks-iot-tcp-transport2
+        - jnks-iot-udp-transport1
+        - jnks-iot-udp-transport2
     depends_on:
-        - tb-core1
-        - tb-core2
-        - tb-web-ui1
-        - tb-web-ui2
-        - tb-mqtt-transport1
-        - tb-mqtt-transport2
-        - tb-http-transport1
-        - tb-http-transport2
-        - tb-tcp-transport1
-        - tb-tcp-transport2
-        - tb-udp-transport1
-        - tb-udp-transport2
+        - jnks-iot-core1
+        - jnks-iot-core2
+        - jnks-iot-web-ui1
+        - jnks-iot-web-ui2
+        - jnks-iot-mqtt-transport1
+        - jnks-iot-mqtt-transport2
+        - jnks-iot-http-transport1
+        - jnks-iot-http-transport2
+        - jnks-iot-tcp-transport1
+        - jnks-iot-tcp-transport2
+        - jnks-iot-udp-transport1
+        - jnks-iot-udp-transport2

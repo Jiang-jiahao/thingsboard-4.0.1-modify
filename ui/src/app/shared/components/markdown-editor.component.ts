@@ -16,7 +16,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { CancelAnimationFrame, RafService } from '@core/services/raf.service';
 
 @Component({
-  selector: 'tb-markdown-editor',
+  selector: 'jnks-iot-markdown-editor',
   templateUrl: './markdown-editor.component.html',
   styleUrls: ['./markdown-editor.component.scss'],
   providers: [

@@ -15,7 +15,7 @@ import org.eclipse.leshan.server.registration.DefaultRegistrationDataExtractor;
 import org.eclipse.leshan.server.registration.Registration;
 import org.eclipse.leshan.server.registration.RegistrationDataExtractor;
 import org.junit.jupiter.api.Test;
-import com.jnks.iot.server.common.data.TbResource;
+import com.jnks.iot.server.common.data.JnksIotResource;
 import com.jnks.iot.server.common.data.device.data.PowerMode;
 import com.jnks.iot.server.common.data.id.CustomerId;
 import com.jnks.iot.server.common.data.id.DeviceId;
@@ -101,9 +101,9 @@ public class LwM2MClientSerDesTest {
 
         var provider = new LwM2mVersionedModelProvider(clientContext, new LwM2mTransportServerHelper(context), context);
 
-        TbResource resource15 = new TbResource();
+        JnksIotResource resource15 = new JnksIotResource();
         resource15.setData(Files.readAllBytes(Path.of(this.getClass().getClassLoader().getResource("15.xml").toURI())));
-        TbResource resource17 = new TbResource();
+        JnksIotResource resource17 = new JnksIotResource();
         resource17.setData(Files.readAllBytes(Path.of(this.getClass().getClassLoader().getResource("17.xml").toURI())));
 
         when(resourceCache.get(any(), any(), eq("15_1.0"))).thenReturn(Optional.of(resource15));

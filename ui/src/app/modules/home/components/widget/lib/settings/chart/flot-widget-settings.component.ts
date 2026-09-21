@@ -12,7 +12,7 @@ import {
   Validators
 } from '@angular/forms';
 import { PageComponent } from '@shared/components/page.component';
-import { ChartType, TbFlotSettings } from '@home/components/widget/lib/flot-widget.models';
+import { ChartType, JnksIotFlotSettings } from '@home/components/widget/lib/flot-widget.models';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { TranslateService } from '@ngx-translate/core';
@@ -27,8 +27,8 @@ import { DataKeyType } from '@shared/models/telemetry/telemetry.models';
 import { defaultLegendConfig, widgetType } from '@shared/models/widget.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-export const flotDefaultSettings = (chartType: ChartType): Partial<TbFlotSettings> => {
-  const settings: Partial<TbFlotSettings> = {
+export const flotDefaultSettings = (chartType: ChartType): Partial<JnksIotFlotSettings> => {
+  const settings: Partial<JnksIotFlotSettings> = {
     stack: false,
     enableSelection: true,
     fontColor: '#545454',
@@ -90,7 +90,7 @@ export const flotDefaultSettings = (chartType: ChartType): Partial<TbFlotSetting
 };
 
 @Component({
-  selector: 'tb-flot-widget-settings',
+  selector: 'jnks-iot-flot-widget-settings',
   templateUrl: './flot-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss'],
   providers: [
@@ -116,7 +116,7 @@ export class FlotWidgetSettingsComponent extends PageComponent implements OnInit
 
   functionScopeVariables = this.widgetService.getWidgetScopeVariables();
 
-  private modelValue: TbFlotSettings;
+  private modelValue: JnksIotFlotSettings;
 
   private propagateChange = null;
 
@@ -291,7 +291,7 @@ export class FlotWidgetSettingsComponent extends PageComponent implements OnInit
     }
   }
 
-  writeValue(value: TbFlotSettings): void {
+  writeValue(value: JnksIotFlotSettings): void {
     const dataKeysListForLabels = value?.dataKeysListForLabels;
     this.modelValue = value;
     this.flotSettingsFormGroup.patchValue(
@@ -316,7 +316,7 @@ export class FlotWidgetSettingsComponent extends PageComponent implements OnInit
   }
 
   private updateModel() {
-    const value: TbFlotSettings = this.flotSettingsFormGroup.value;
+    const value: JnksIotFlotSettings = this.flotSettingsFormGroup.value;
     this.modelValue = value;
     this.propagateChange(this.modelValue);
   }

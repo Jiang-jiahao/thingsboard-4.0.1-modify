@@ -22,7 +22,7 @@ import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autoc
 import { SubscriptSizing } from '@angular/material/form-field';
 
 @Component({
-  selector: 'tb-branch-autocomplete',
+  selector: 'jnks-iot-branch-autocomplete',
   templateUrl: './branch-autocomplete.component.html',
   styleUrls: ['./branch-autocomplete.component.scss'],
   providers: [{

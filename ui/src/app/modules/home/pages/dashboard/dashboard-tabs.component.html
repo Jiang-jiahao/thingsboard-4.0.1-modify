@@ -1,10 +1,10 @@
 <mat-tab *ngIf="entity && authUser.authority === authorities.TENANT_ADMIN"
          label="{{ 'audit-log.audit-logs' | translate }}" #auditLogsTab="matTab">
-  <tb-audit-log-table [active]="auditLogsTab.isActive" [auditLogMode]="auditLogModes.ENTITY" [entityId]="entity.id" detailsMode="true"></tb-audit-log-table>
+  <jnks-iot-audit-log-table [active]="auditLogsTab.isActive" [auditLogMode]="auditLogModes.ENTITY" [entityId]="entity.id" detailsMode="true"></jnks-iot-audit-log-table>
 </mat-tab>
 <mat-tab *ngIf="entity && authUser.authority === authorities.TENANT_ADMIN && versionControlUiEnabled"
          label="{{ 'version-control.version-control' | translate }}" #versionControlTab="matTab">
-  <tb-version-control detailsMode="true" singleEntityMode="true"
+  <jnks-iot-version-control detailsMode="true" singleEntityMode="true"
                       (versionRestored)="entitiesTableConfig.updateData()"
-                      [active]="versionControlTab.isActive" [entityId]="entity.id" [entityName]="entity.name" [externalEntityId]="entity.externalId || entity.id"></tb-version-control>
+                      [active]="versionControlTab.isActive" [entityId]="entity.id" [entityName]="entity.name" [externalEntityId]="entity.externalId || entity.id"></jnks-iot-version-control>
 </mat-tab>

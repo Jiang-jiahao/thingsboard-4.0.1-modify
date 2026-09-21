@@ -1,4 +1,4 @@
-<div [formGroup]="alarmCommentFormGroup" class="tb-alarm-comments flex flex-col">
+<div [formGroup]="alarmCommentFormGroup" class="jnks-iot-alarm-comments flex flex-col">
   <div class="header" [class.activity-only]="alarmActivityOnly">
     <div class="header-container flex flex-row items-center justify-between"
          [class.asc]="isDirectionAscending()"
@@ -19,7 +19,7 @@
                 (click)="changeSortDirection()"
                 [matTooltip]="getSortDirectionTooltipText()"
                 matTooltipPosition="above">
-          <tb-icon class="material-icons">{{ getSortDirectionIcon() }}</tb-icon>
+          <jnks-iot-icon class="material-icons">{{ getSortDirectionIcon() }}</jnks-iot-icon>
         </button>
         <button mat-icon-button
                 type="button"
@@ -60,7 +60,7 @@
               {{ getUserInitials(displayDataElement.displayName) }}
             </div>
             <ng-template #userDeleted>
-              <mat-icon class="mat-icon tb-mat-28 xs:!hidden">no_accounts</mat-icon>
+              <mat-icon class="mat-icon jnks-iot-mat-28 xs:!hidden">no_accounts</mat-icon>
             </ng-template>
             <div class="flex flex-1 flex-col" style="gap: 5px">
               <div class="flex flex-row items-center justify-start gap-2">
@@ -98,7 +98,7 @@
                    [style.background-color]="displayDataElement.avatarBgColor">
                 {{ getUserInitials(displayDataElement.displayName) }}
               </div>
-              <mat-form-field class="mat-block tb-appearance-transparent flex-1">
+              <mat-form-field class="mat-block jnks-iot-appearance-transparent flex-1">
                 <textarea matInput
                           type="text"
                           placeholder="{{ 'alarm-activity.add' | translate }}"
@@ -142,7 +142,7 @@
              [style.background-color]="getCurrentUserBgColor(userDisplayName)">
           {{ getUserInitials(userDisplayName) }}
         </div>
-        <mat-form-field class="mat-block tb-appearance-transparent flex-1">
+        <mat-form-field class="mat-block jnks-iot-appearance-transparent flex-1">
           <textarea matInput
                     type="text"
                     placeholder="{{ 'alarm-activity.add' | translate }}"

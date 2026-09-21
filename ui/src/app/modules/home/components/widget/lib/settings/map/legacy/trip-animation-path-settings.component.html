@@ -1,13 +1,13 @@
-<section class="tb-widget-settings" [formGroup]="tripAnimationPathSettingsFormGroup">
+<section class="jnks-iot-widget-settings" [formGroup]="tripAnimationPathSettingsFormGroup">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.maps.path-settings</legend>
     <section class="!flex flex-col gt-xs:flex-row gt-xs:gap-2">
-      <tb-color-input
+      <jnks-iot-color-input
         class="flex-1"
         formControlName="color"
         icon="format_color_fill"
         label="{{ 'widgets.maps.path-color' | translate }}" openOnInput colorClearButton>
-      </tb-color-input>
+      </jnks-iot-color-input>
       <mat-form-field class="flex-1">
         <mat-label translate>widgets.maps.stroke-weight</mat-label>
         <input matInput type="number" min="0" formControlName="strokeWeight">
@@ -17,7 +17,7 @@
         <input matInput type="number" min="0" max="1" formControlName="strokeOpacity">
       </mat-form-field>
     </section>
-    <mat-expansion-panel class="tb-settings" [expanded]="tripAnimationPathSettingsFormGroup.get('useColorFunction').value">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="tripAnimationPathSettingsFormGroup.get('useColorFunction').value">
       <mat-expansion-panel-header class="flex-wrap">
         <mat-panel-title>
           <mat-slide-toggle formControlName="useColorFunction" (click)="$event.stopPropagation()">
@@ -29,18 +29,18 @@
         </mat-panel-description>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
-        <tb-js-func formControlName="colorFunction"
+        <jnks-iot-js-func formControlName="colorFunction"
                     withModules
                     [globalVariables]="functionScopeVariables"
                     [functionArgs]="['data', 'dsData', 'dsIndex']"
                     functionTitle="{{ 'widgets.maps.path-color-function' | translate }}"
                     helpId="widget/lib/map-legacy/path_color_fn">
-        </tb-js-func>
+        </jnks-iot-js-func>
       </ng-template>
     </mat-expansion-panel>
     <fieldset class="fields-group fields-group-slider">
       <legend class="group-title" translate>widgets.maps.path-decorator</legend>
-      <mat-expansion-panel class="tb-settings" [expanded]="tripAnimationPathSettingsFormGroup.get('usePolylineDecorator').value">
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="tripAnimationPathSettingsFormGroup.get('usePolylineDecorator').value">
         <mat-expansion-panel-header class="flex-wrap">
           <mat-panel-title>
             <mat-slide-toggle formControlName="usePolylineDecorator" (click)="$event.stopPropagation()">
@@ -70,12 +70,12 @@
             <mat-slide-toggle class="flex-1" formControlName="useDecoratorCustomColor">
               {{ 'widgets.maps.use-path-decorator-custom-color' | translate }}
             </mat-slide-toggle>
-            <tb-color-input
+            <jnks-iot-color-input
               class="flex-1"
               formControlName="decoratorCustomColor"
               icon="format_color_fill"
               label="{{ 'widgets.maps.decorator-custom-color' | translate }}" openOnInput colorClearButton>
-            </tb-color-input>
+            </jnks-iot-color-input>
           </section>
           <section class="flex flex-col gt-xs:flex-row gt-xs:gap-2">
             <mat-form-field class="flex-1">

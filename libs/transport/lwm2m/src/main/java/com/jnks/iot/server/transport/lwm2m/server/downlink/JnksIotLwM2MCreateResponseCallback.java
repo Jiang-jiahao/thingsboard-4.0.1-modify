@@ -1,0 +1,21 @@
+package com.jnks.iot.server.transport.lwm2m.server.downlink;
+
+import org.eclipse.leshan.core.request.CreateRequest;
+import org.eclipse.leshan.core.response.CreateResponse;
+import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClient;
+import com.jnks.iot.server.transport.lwm2m.server.log.LwM2MTelemetryLogService;
+import com.jnks.iot.server.transport.lwm2m.server.uplink.LwM2mUplinkMsgHandler;
+
+public class JnksIotLwM2MCreateResponseCallback extends JnksIotLwM2MUplinkTargetedCallback<CreateRequest, CreateResponse> {
+
+    public JnksIotLwM2MCreateResponseCallback(LwM2mUplinkMsgHandler handler, LwM2MTelemetryLogService logService, LwM2mClient client, String targetId) {
+        super(handler, logService, client, targetId);
+    }
+
+    @Override
+    public void onSuccess(CreateRequest request, CreateResponse response) {
+        super.onSuccess(request, response);
+        handler.onCreateResponseOk(client, versionedId, request);
+    }
+
+}

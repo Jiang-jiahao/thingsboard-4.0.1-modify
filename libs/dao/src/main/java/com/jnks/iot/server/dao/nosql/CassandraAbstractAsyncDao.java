@@ -34,21 +34,21 @@ public abstract class CassandraAbstractAsyncDao extends CassandraAbstractDao {
         }
     }
 
-    protected <T> ListenableFuture<T> getFuture(TbResultSetFuture future, java.util.function.Function<TbResultSet, T> transformer) {
-        return Futures.transform(future, new Function<TbResultSet, T>() {
+    protected <T> ListenableFuture<T> getFuture(JnksIotResultSetFuture future, java.util.function.Function<JnksIotResultSet, T> transformer) {
+        return Futures.transform(future, new Function<JnksIotResultSet, T>() {
             @Nullable
             @Override
-            public T apply(@Nullable TbResultSet input) {
+            public T apply(@Nullable JnksIotResultSet input) {
                 return transformer.apply(input);
             }
         }, readResultsProcessingExecutor);
     }
 
-    protected <T> ListenableFuture<T> getFutureAsync(TbResultSetFuture future, com.google.common.util.concurrent.AsyncFunction<TbResultSet, T> transformer) {
-        return Futures.transformAsync(future, new AsyncFunction<TbResultSet, T>() {
+    protected <T> ListenableFuture<T> getFutureAsync(JnksIotResultSetFuture future, com.google.common.util.concurrent.AsyncFunction<JnksIotResultSet, T> transformer) {
+        return Futures.transformAsync(future, new AsyncFunction<JnksIotResultSet, T>() {
             @Nullable
             @Override
-            public ListenableFuture<T> apply(@Nullable TbResultSet input) {
+            public ListenableFuture<T> apply(@Nullable JnksIotResultSet input) {
                 try {
                     return transformer.apply(input);
                 } catch (Exception e) {

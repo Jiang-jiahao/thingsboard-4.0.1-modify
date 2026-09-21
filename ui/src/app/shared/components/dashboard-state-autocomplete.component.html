@@ -13,7 +13,7 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
   <mat-autocomplete
-    class="tb-autocomplete"
+    class="jnks-iot-autocomplete"
     #dashboardStateAutocomplete="matAutocomplete">
     <mat-option *ngFor="let state of filteredStatesDashboard$ | async" [value]="state">
       <span [innerHTML]="state | highlight:searchText"></span>

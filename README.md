@@ -25,7 +25,7 @@ mvn clean install -DskipTests
 打包可运行的 boot jar：
 
 ```bash
-mvn -pl apps/tb-core,apps/tb-rule-engine -am package -DskipTests -Dpkg.package.phase=none
+mvn -pl apps/jnks-iot-core,apps/jnks-iot-rule-engine -am package -DskipTests -Dpkg.package.phase=none
 ```
 
 产物在各自 `target/jnks-iot-*-boot.jar`。
@@ -50,8 +50,8 @@ nginx 网关与证书的完整步骤，以及已知的坑。
 ## 模块结构
 
 ```
-apps/       可运行服务：tb-core / tb-rule-engine / tb-transport（7 种协议）
-            / tb-edqs / monolith / vc-executor
+apps/       可运行服务：jnks-iot-core / jnks-iot-rule-engine / jnks-iot-transport（7 种协议）
+            / jnks-iot-edqs / monolith / vc-executor
 libs/       公共库：common（数据模型、消息、队列、缓存）、dao、rule-engine
             、transport、netty-mqtt
 ui/         Angular 前端

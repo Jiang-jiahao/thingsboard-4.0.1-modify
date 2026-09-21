@@ -24,7 +24,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { ImagePipe } from '@shared/pipe/image.pipe';
 
 @Component({
-  selector: 'tb-image-input',
+  selector: 'jnks-iot-image-input',
   templateUrl: './image-input.component.html',
   styleUrls: ['./image-input.component.scss'],
   providers: [

@@ -9,8 +9,8 @@
             <span>{{ numberText(gpioItemFormGroup.value.row, -1) }}) - [</span><small>col:</small>
             <span>{{ numberText(gpioItemFormGroup.value.col, -1) }}]</span>
           </div>
-          <div *ngIf="hasColor" class="tb-color-preview" style="margin-left: 6px;">
-            <div class="tb-color-result" [style.background]="gpioItemFormGroup.get('color').value"></div>
+          <div *ngIf="hasColor" class="jnks-iot-color-preview" style="margin-left: 6px;">
+            <div class="jnks-iot-color-result" [style.background]="gpioItemFormGroup.get('color').value"></div>
           </div>
         </div>
       </mat-panel-title>
@@ -27,7 +27,7 @@
   <ng-template matExpansionPanelContent>
     <div class="flex flex-col gap-2">
       <mat-divider></mat-divider>
-      <section class="tb-widget-settings flex flex-col">
+      <section class="jnks-iot-widget-settings flex flex-col">
         <section class="flex flex-row xs:flex-col gt-xs:gap-2 gt-xs:items-center gt-xs:justify-start">
           <mat-form-field class="mat-block flex=1">
             <mat-label translate>widgets.gpio.pin</mat-label>
@@ -48,13 +48,13 @@
             <input required matInput type="number" min="0" max="1" step="1" formControlName="col">
           </mat-form-field>
         </section>
-        <tb-color-input
+        <jnks-iot-color-input
           *ngIf="hasColor"
           required
           formControlName="color"
           icon="format_color_fill"
           label="{{ 'widgets.gpio.color' | translate }}" openOnInput colorClearButton>
-        </tb-color-input>
+        </jnks-iot-color-input>
       </section>
     </div>
   </ng-template>

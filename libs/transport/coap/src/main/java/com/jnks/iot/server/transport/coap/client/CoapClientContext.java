@@ -12,19 +12,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public interface CoapClientContext {
 
-    boolean registerAttributeObservation(TbCoapClientState clientState, String token, CoapExchange exchange);
+    boolean registerAttributeObservation(JnksIotCoapClientState clientState, String token, CoapExchange exchange);
 
-    boolean registerRpcObservation(TbCoapClientState clientState, String token, CoapExchange exchange);
+    boolean registerRpcObservation(JnksIotCoapClientState clientState, String token, CoapExchange exchange);
 
     AtomicInteger getNotificationCounterByToken(String token);
 
-    TbCoapClientState getOrCreateClient(CoapSessionMsgType type, ValidateDeviceCredentialsResponse deviceCredentials, DeviceProfile deviceProfile) throws AdaptorException;
+    JnksIotCoapClientState getOrCreateClient(CoapSessionMsgType type, ValidateDeviceCredentialsResponse deviceCredentials, DeviceProfile deviceProfile) throws AdaptorException;
 
-    TransportProtos.SessionInfoProto getNewSyncSession(TbCoapClientState clientState);
+    TransportProtos.SessionInfoProto getNewSyncSession(JnksIotCoapClientState clientState);
 
-    void deregisterAttributeObservation(TbCoapClientState clientState, String token, CoapExchange exchange);
+    void deregisterAttributeObservation(JnksIotCoapClientState clientState, String token, CoapExchange exchange);
 
-    void deregisterRpcObservation(TbCoapClientState clientState, String token, CoapExchange exchange);
+    void deregisterRpcObservation(JnksIotCoapClientState clientState, String token, CoapExchange exchange);
 
     void reportActivity();
 
@@ -32,5 +32,5 @@ public interface CoapClientContext {
 
     void deregisterObserveRelation(String token);
 
-    boolean awake(TbCoapClientState client);
+    boolean awake(JnksIotCoapClientState client);
 }

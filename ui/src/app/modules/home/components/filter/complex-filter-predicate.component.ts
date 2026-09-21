@@ -8,7 +8,7 @@ import { COMPLEX_FILTER_PREDICATE_DIALOG_COMPONENT_TOKEN } from '@home/component
 import { ComponentType } from '@angular/cdk/portal';
 
 @Component({
-  selector: 'tb-complex-filter-predicate',
+  selector: 'jnks-iot-complex-filter-predicate',
   templateUrl: './complex-filter-predicate.component.html',
   styleUrls: [],
   providers: [
@@ -63,7 +63,7 @@ export class ComplexFilterPredicateComponent implements ControlValueAccessor, On
     this.dialog.open<any, ComplexFilterPredicateDialogData,
       ComplexFilterPredicateInfo>(this.complexFilterPredicateDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         complexPredicate: this.disabled ? this.complexFilterPredicate : deepClone(this.complexFilterPredicate),
         readonly: this.disabled,

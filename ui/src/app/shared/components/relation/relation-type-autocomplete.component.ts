@@ -11,7 +11,7 @@ import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-
 import { coerceArray, coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-relation-type-autocomplete',
+  selector: 'jnks-iot-relation-type-autocomplete',
   templateUrl: './relation-type-autocomplete.component.html',
   styleUrls: [],
   providers: [{

@@ -11,7 +11,7 @@ import org.eclipse.leshan.core.model.ResourceModel;
 import org.eclipse.leshan.core.node.codec.CodecException;
 import org.springframework.stereotype.Component;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import com.jnks.iot.server.common.data.util.TbDDFFileParser;
+import com.jnks.iot.server.common.data.util.JnksIotDDFFileParser;
 import com.jnks.iot.server.common.transport.TransportServiceCallback;
 import com.jnks.iot.server.common.transport.auth.ValidateDeviceCredentialsResponse;
 import com.jnks.iot.server.gen.transport.TransportProtos;
@@ -128,7 +128,7 @@ public class LwM2mTransportServerHelper {
 
     public ObjectModel parseFromXmlToObjectModel(byte[] xmlByte, String streamName) {
         try {
-            TbDDFFileParser ddfFileParser = new TbDDFFileParser();
+            JnksIotDDFFileParser ddfFileParser = new JnksIotDDFFileParser();
             return ddfFileParser.parse(new ByteArrayInputStream(xmlByte), streamName).get(0);
         } catch (IOException | InvalidDDFFileException e) {
             log.error("Could not parse the XML file [{}]", streamName, e);

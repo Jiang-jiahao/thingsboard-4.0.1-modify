@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 
 @Component({
-  selector: 'tb-dashboard-toolbar',
+  selector: 'jnks-iot-dashboard-toolbar',
   templateUrl: './dashboard-toolbar.component.html',
   styleUrls: ['./dashboard-toolbar.component.scss'],
   encapsulation: ViewEncapsulation.None

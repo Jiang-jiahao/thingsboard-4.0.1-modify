@@ -1,32 +1,32 @@
-<div class="tb-form-panel tb-scada-symbol-behaviors">
-  <div class="tb-form-table">
-    <div class="tb-form-table-header" [class.no-padding-right]="!disabled">
-      <div class="tb-form-table-header-cell tb-id-header" translate>scada.behavior.id</div>
-      <div class="tb-form-table-header-cell tb-name-header" translate>scada.behavior.name</div>
-      <div class="tb-form-table-header-cell tb-type-header" translate>scada.behavior.type</div>
-      <div class="tb-form-table-header-cell tb-actions-header" [class.disabled]="disabled"></div>
+<div class="jnks-iot-form-panel jnks-iot-scada-symbol-behaviors">
+  <div class="jnks-iot-form-table">
+    <div class="jnks-iot-form-table-header" [class.no-padding-right]="!disabled">
+      <div class="jnks-iot-form-table-header-cell jnks-iot-id-header" translate>scada.behavior.id</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-name-header" translate>scada.behavior.name</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-type-header" translate>scada.behavior.type</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-actions-header" [class.disabled]="disabled"></div>
     </div>
-    <div *ngIf="behaviorsFormArray().controls.length; else noBehaviors" class="tb-form-table-body tb-drop-list"
+    <div *ngIf="behaviorsFormArray().controls.length; else noBehaviors" class="jnks-iot-form-table-body jnks-iot-drop-list"
          cdkDropList cdkDropListOrientation="vertical"
          [cdkDropListDisabled]="!dragEnabled"
          (cdkDropListDropped)="behaviorDrop($event)">
       <div cdkDrag [cdkDragDisabled]="!dragEnabled"
-           [class.tb-draggable]="!disabled"
-           [class.tb-draggable-form-table-row]="!disabled"
+           [class.jnks-iot-draggable]="!disabled"
+           [class.jnks-iot-draggable-form-table-row]="!disabled"
            *ngFor="let behaviorControl of behaviorsFormArray().controls; trackBy: trackByBehavior; let $index = index;">
-        <tb-scada-symbol-metadata-behavior-row class="flex-1"
+        <jnks-iot-scada-symbol-metadata-behavior-row class="flex-1"
           [index]="$index"
           [formControl]="behaviorControl"
           [aliasController]="aliasController"
           [callbacks]="callbacks"
           (behaviorRemoved)="removeBehavior($index)">
-        </tb-scada-symbol-metadata-behavior-row>
-        <div class="tb-form-table-row-cell-buttons">
+        </jnks-iot-scada-symbol-metadata-behavior-row>
+        <div class="jnks-iot-form-table-row-cell-buttons">
           <button mat-icon-button
                   *ngIf="!disabled"
                   type="button"
                   cdkDragHandle
-                  [class.tb-hidden]="!dragEnabled"
+                  [class.jnks-iot-hidden]="!dragEnabled"
                   matTooltip="{{ 'action.drag' | translate }}"
                   matTooltipPosition="above">
             <mat-icon>drag_indicator</mat-icon>
@@ -34,7 +34,7 @@
         </div>
       </div>
     </div>
-    <tb-error *ngIf="errorText" noMargin [error]="errorText" style="padding-left: 12px;"></tb-error>
+    <jnks-iot-error *ngIf="errorText" noMargin [error]="errorText" style="padding-left: 12px;"></jnks-iot-error>
   </div>
   <div *ngIf="!disabled">
     <button type="button" mat-stroked-button color="primary" (click)="addBehavior()">
@@ -44,5 +44,5 @@
 </div>
 
 <ng-template #noBehaviors>
-  <span class="tb-prompt flex items-center justify-center">{{ 'scada.behavior.no-behaviors' | translate }}</span>
+  <span class="jnks-iot-prompt flex items-center justify-center">{{ 'scada.behavior.no-behaviors' | translate }}</span>
 </ng-template>

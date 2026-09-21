@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-device-claiming-widget-settings',
+  selector: 'jnks-iot-device-claiming-widget-settings',
   templateUrl: './device-claiming-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

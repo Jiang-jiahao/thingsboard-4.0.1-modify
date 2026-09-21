@@ -29,7 +29,7 @@ export interface MobileBundleDialogData {
 }
 
 @Component({
-  selector: 'tb-mobile-bundle-dialog',
+  selector: 'jnks-iot-mobile-bundle-dialog',
   templateUrl: './mobile-bundle-dialog.component.html',
   styleUrls: ['./mobile-bundle-dialog.component.scss']
 })
@@ -135,7 +135,7 @@ export class MobileBundleDialogComponent extends DialogComponent<MobileBundleDia
   createApplication(formControl: string, platformType: PlatformType) {
     this.dialog.open<MobileAppDialogComponent, MobileAppDialogData, MobileApp>(MobileAppDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         platformType
       }
@@ -155,7 +155,7 @@ export class MobileBundleDialogComponent extends DialogComponent<MobileBundleDia
     }
     this.dialog.open<ClientDialogComponent>(ClientDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {}
     }).afterClosed()
       .subscribe((client) => {

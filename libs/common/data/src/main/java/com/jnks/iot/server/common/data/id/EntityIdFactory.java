@@ -67,8 +67,8 @@ public class EntityIdFactory {
                 return new TenantProfileId(uuid);
             case API_USAGE_STATE:
                 return new ApiUsageStateId(uuid);
-            case TB_RESOURCE:
-                return new TbResourceId(uuid);
+            case JNKS_IOT_RESOURCE:
+                return new JnksIotResourceId(uuid);
             case OTA_PACKAGE:
                 return new OtaPackageId(uuid);
             case RPC:

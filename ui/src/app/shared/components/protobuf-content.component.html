@@ -1,8 +1,8 @@
 <div class="flex flex-col" style="background: #fff;" [class.fill-height]="fillHeight"
-     tb-fullscreen
+     jnks-iot-fullscreen
      [fullscreen]="fullscreen" (fullscreenChanged)="onFullscreen()">
-  <div style="height: 40px;" class="tb-protobuf-content-toolbar flex flex-row items-center justify-start">
-    <label class="tb-title no-padding">{{ label }}</label>
+  <div style="height: 40px;" class="jnks-iot-protobuf-content-toolbar flex flex-row items-center justify-start">
+    <label class="jnks-iot-title no-padding">{{ label }}</label>
     <span class="flex-1"></span>
     <button type="button"
             mat-button *ngIf="!readonly && !disabled" class="tidy" (click)="beautifyProtobuf()">
@@ -13,14 +13,14 @@
            matTooltipPosition="above"
            style="border-radius: 50%"
            (click)="fullscreen = !fullscreen">
-        <button type='button' mat-icon-button class="tb-mat-32">
+        <button type='button' mat-icon-button class="jnks-iot-mat-32">
           <mat-icon class="material-icons">{{ fullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
         </button>
       </div>
     </fieldset>
   </div>
-  <div id="tb-protobuf-panel" tb-toast toastTarget="{{toastTargetId}}"
-       class="tb-protobuf-content-panel flex flex-col">
-    <div #protobufEditor id="tb-protobuf-input" [style]="editorStyle" [class.fill-height]="fillHeight"></div>
+  <div id="jnks-iot-protobuf-panel" jnks-iot-toast toastTarget="{{toastTargetId}}"
+       class="jnks-iot-protobuf-content-panel flex flex-col">
+    <div #protobufEditor id="jnks-iot-protobuf-input" [style]="editorStyle" [class.fill-height]="fillHeight"></div>
   </div>
 </div>

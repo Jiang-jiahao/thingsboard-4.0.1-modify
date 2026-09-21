@@ -20,36 +20,36 @@ import com.jnks.iot.server.transport.lwm2m.server.LwM2MOperationType;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClient;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClientContext;
 import com.jnks.iot.server.transport.lwm2m.server.downlink.LwM2mDownlinkMsgHandler;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MCancelAllObserveCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MCancelAllRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MCancelObserveCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MCancelObserveRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MCreateRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MCreateResponseCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MDeleteCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MDeleteRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MDiscoverAllRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MDiscoverCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MDiscoverRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MExecuteCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MExecuteRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MObserveAllRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MObserveCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MObserveRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MReadCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MReadRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteAttributesCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteAttributesRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteReplaceRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteResponseCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteUpdateRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MCancelObserveCompositeCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MCancelObserveCompositeRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MObserveCompositeCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MObserveCompositeRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MReadCompositeCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MReadCompositeRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MWriteResponseCompositeCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MCancelAllObserveCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MCancelAllRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MCancelObserveCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MCancelObserveRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MCreateRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MCreateResponseCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MDeleteCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MDeleteRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MDiscoverAllRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MDiscoverCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MDiscoverRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MExecuteCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MExecuteRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MObserveAllRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MObserveCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MObserveRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MReadCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MReadRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteAttributesCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteAttributesRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteReplaceRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteResponseCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteUpdateRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MCancelObserveCompositeCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MCancelObserveCompositeRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MObserveCompositeCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MObserveCompositeRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MReadCompositeCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MReadCompositeRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MWriteResponseCompositeCallback;
 import com.jnks.iot.server.transport.lwm2m.server.log.LwM2MTelemetryLogService;
 import com.jnks.iot.server.transport.lwm2m.server.rpc.composite.RpcCancelObserveCompositeCallback;
 import com.jnks.iot.server.transport.lwm2m.server.rpc.composite.RpcObserveResponseCompositeCallback;
@@ -187,85 +187,85 @@ public class DefaultLwM2MRpcRequestHandler implements LwM2MRpcRequestHandler {
     }
 
     private void sendReadRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg, String versionedId) {
-        TbLwM2MReadRequest request = TbLwM2MReadRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MReadCallback(uplinkHandler, logService, client, versionedId);
+        JnksIotLwM2MReadRequest request = JnksIotLwM2MReadRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
+        var mainCallback = new JnksIotLwM2MReadCallback(uplinkHandler, logService, client, versionedId);
         var rpcCallback = new RpcReadResponseCallback<>(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendReadRequest(client, request, rpcCallback);
     }
 
     private void sendReadCompositeRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg) {
         String[] versionedIds = getIdsFromParameters(client, requestMsg);
-        TbLwM2MReadCompositeRequest request = TbLwM2MReadCompositeRequest.builder().versionedIds(versionedIds).timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MReadCompositeCallback(uplinkHandler, logService, client, versionedIds);
+        JnksIotLwM2MReadCompositeRequest request = JnksIotLwM2MReadCompositeRequest.builder().versionedIds(versionedIds).timeout(clientContext.getRequestTimeout(client)).build();
+        var mainCallback = new JnksIotLwM2MReadCompositeCallback(uplinkHandler, logService, client, versionedIds);
         var rpcCallback = new RpcReadResponseCompositeCallback(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendReadCompositeRequest(client, request, rpcCallback);
     }
 
     private void sendObserveRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg, String versionedId) {
-        TbLwM2MObserveRequest request = TbLwM2MObserveRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MObserveCallback(uplinkHandler, logService, client, versionedId);
+        JnksIotLwM2MObserveRequest request = JnksIotLwM2MObserveRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
+        var mainCallback = new JnksIotLwM2MObserveCallback(uplinkHandler, logService, client, versionedId);
         var rpcCallback = new RpcReadResponseCallback<>(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendObserveRequest(client, request, rpcCallback);
     }
 
     private void sendObserveAllRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg) {
-        TbLwM2MObserveAllRequest request = TbLwM2MObserveAllRequest.builder().timeout(clientContext.getRequestTimeout(client)).build();
+        JnksIotLwM2MObserveAllRequest request = JnksIotLwM2MObserveAllRequest.builder().timeout(clientContext.getRequestTimeout(client)).build();
         downlinkHandler.sendObserveAllRequest(client, request, new RpcLinkSetCallback<>(transportService, client, requestMsg, null));
     }
 
     private void sendDiscoverAllRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg) {
-        TbLwM2MDiscoverAllRequest request = TbLwM2MDiscoverAllRequest.builder().timeout(clientContext.getRequestTimeout(client)).build();
+        JnksIotLwM2MDiscoverAllRequest request = JnksIotLwM2MDiscoverAllRequest.builder().timeout(clientContext.getRequestTimeout(client)).build();
         downlinkHandler.sendDiscoverAllRequest(client, request, new RpcLinkSetCallback<>(transportService, client, requestMsg, null));
     }
 
     private void sendDiscoverRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg, String versionedId) {
-        TbLwM2MDiscoverRequest request = TbLwM2MDiscoverRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MDiscoverCallback(logService, client, versionedId);
+        JnksIotLwM2MDiscoverRequest request = JnksIotLwM2MDiscoverRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
+        var mainCallback = new JnksIotLwM2MDiscoverCallback(logService, client, versionedId);
         var rpcCallback = new RpcDiscoverCallback(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendDiscoverRequest(client, request, rpcCallback);
     }
 
     private void sendExecuteRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg, String versionedId) {
-        TbLwM2MExecuteRequest downlink = TbLwM2MExecuteRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MExecuteCallback(logService, client, versionedId);
+        JnksIotLwM2MExecuteRequest downlink = JnksIotLwM2MExecuteRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
+        var mainCallback = new JnksIotLwM2MExecuteCallback(logService, client, versionedId);
         var rpcCallback = new RpcEmptyResponseCallback<>(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendExecuteRequest(client, downlink, rpcCallback);
     }
 
     private void sendWriteAttributesRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg, String versionedId) {
         RpcWriteAttributesRequest requestBody = JacksonUtil.fromString(requestMsg.getParams(), RpcWriteAttributesRequest.class);
-         TbLwM2MWriteAttributesRequest request = TbLwM2MWriteAttributesRequest.builder().versionedId(versionedId)
+         JnksIotLwM2MWriteAttributesRequest request = JnksIotLwM2MWriteAttributesRequest.builder().versionedId(versionedId)
                 .attributes(requestBody.getAttributes())
                 .timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MWriteAttributesCallback(logService, client, versionedId);
+        var mainCallback = new JnksIotLwM2MWriteAttributesCallback(logService, client, versionedId);
         var rpcCallback = new RpcEmptyResponseCallback<>(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendWriteAttributesRequest(client, request, rpcCallback);
     }
 
     private void sendWriteUpdateRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg, String versionedId) {
         RpcWriteUpdateRequest requestBody = JacksonUtil.fromString(requestMsg.getParams(), RpcWriteUpdateRequest.class);
-        TbLwM2MWriteUpdateRequest.TbLwM2MWriteUpdateRequestBuilder builder = TbLwM2MWriteUpdateRequest.builder().versionedId(versionedId);
+        JnksIotLwM2MWriteUpdateRequest.JnksIotLwM2MWriteUpdateRequestBuilder builder = JnksIotLwM2MWriteUpdateRequest.builder().versionedId(versionedId);
         builder.value(requestBody.getValue()).timeout(clientContext.getRequestTimeout(client));
-        var mainCallback = new TbLwM2MWriteResponseCallback(uplinkHandler, logService, client, versionedId);
+        var mainCallback = new JnksIotLwM2MWriteResponseCallback(uplinkHandler, logService, client, versionedId);
         var rpcCallback = new RpcEmptyResponseCallback<>(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendWriteUpdateRequest(client, builder.build(), rpcCallback);
     }
 
     private void sendCreateRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg, String versionedId) {
         RpcCreateRequest requestBody = JacksonUtil.fromString(requestMsg.getParams(), RpcCreateRequest.class);
-        TbLwM2MCreateRequest.TbLwM2MCreateRequestBuilder builder = TbLwM2MCreateRequest.builder().versionedId(versionedId);
+        JnksIotLwM2MCreateRequest.JnksIotLwM2MCreateRequestBuilder builder = JnksIotLwM2MCreateRequest.builder().versionedId(versionedId);
         builder.value(requestBody.getValue()).nodes(requestBody.getNodes()).timeout(clientContext.getRequestTimeout(client));
-        var mainCallback = new TbLwM2MCreateResponseCallback(uplinkHandler, logService, client, versionedId);
+        var mainCallback = new JnksIotLwM2MCreateResponseCallback(uplinkHandler, logService, client, versionedId);
         var rpcCallback = new RpcCreateResponseCallback<>(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendCreateRequest(client, builder.build(), rpcCallback);
     }
 
     private void sendWriteReplaceRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg, String versionedId) {
         RpcWriteReplaceRequest requestBody = JacksonUtil.fromString(requestMsg.getParams(), RpcWriteReplaceRequest.class);
-        TbLwM2MWriteReplaceRequest request = TbLwM2MWriteReplaceRequest.builder().versionedId(versionedId)
+        JnksIotLwM2MWriteReplaceRequest request = JnksIotLwM2MWriteReplaceRequest.builder().versionedId(versionedId)
                 .value(requestBody.getValue())
                 .timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MWriteResponseCallback(uplinkHandler, logService, client, versionedId);
+        var mainCallback = new JnksIotLwM2MWriteResponseCallback(uplinkHandler, logService, client, versionedId);
         var rpcCallback = new RpcEmptyResponseCallback<>(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendWriteReplaceRequest(client, request, rpcCallback);
     }
@@ -283,7 +283,7 @@ public class DefaultLwM2MRpcRequestHandler implements LwM2MRpcRequestHandler {
         Map<String, Object> validNodes = validateCompositesNodes(client, rpcWriteCompositeRequest.getNodes());
         if (validNodes.size() > 0) {
             rpcWriteCompositeRequest.setNodes(validNodes);
-            var mainCallback = new TbLwM2MWriteResponseCompositeCallback(uplinkHandler, logService, client, null);
+            var mainCallback = new JnksIotLwM2MWriteResponseCompositeCallback(uplinkHandler, logService, client, null);
             var rpcCallback = new RpcEmptyResponseCallback<>(transportService, client, requestMsg, mainCallback);
             downlinkHandler.sendWriteCompositeRequest(client, rpcWriteCompositeRequest, rpcCallback);
         } else {
@@ -362,38 +362,38 @@ public class DefaultLwM2MRpcRequestHandler implements LwM2MRpcRequestHandler {
     }
 
     private void sendCancelObserveRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg, String versionedId) {
-        TbLwM2MCancelObserveRequest downlink = TbLwM2MCancelObserveRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MCancelObserveCallback(logService, client, versionedId);
+        JnksIotLwM2MCancelObserveRequest downlink = JnksIotLwM2MCancelObserveRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
+        var mainCallback = new JnksIotLwM2MCancelObserveCallback(logService, client, versionedId);
         var rpcCallback = new RpcCancelObserveCallback(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendCancelObserveRequest(client, downlink, rpcCallback);
     }
 
     private void sendObserveCompositeRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg) {
         String[] versionedIds = getIdsFromParameters(client, requestMsg);
-        TbLwM2MObserveCompositeRequest request = TbLwM2MObserveCompositeRequest.builder().versionedIds(versionedIds).timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MObserveCompositeCallback(uplinkHandler, logService, client, versionedIds);
+        JnksIotLwM2MObserveCompositeRequest request = JnksIotLwM2MObserveCompositeRequest.builder().versionedIds(versionedIds).timeout(clientContext.getRequestTimeout(client)).build();
+        var mainCallback = new JnksIotLwM2MObserveCompositeCallback(uplinkHandler, logService, client, versionedIds);
         var rpcCallback = new RpcObserveResponseCompositeCallback(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendObserveCompositeRequest(client, request, rpcCallback);
     }
 
     private void sendCancelObserveCompositeRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg) {
         String[] versionedIds = getIdsFromParameters(client, requestMsg);
-        TbLwM2MCancelObserveCompositeRequest request = TbLwM2MCancelObserveCompositeRequest.builder().versionedIds(versionedIds).timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MCancelObserveCompositeCallback(logService, client, versionedIds);
+        JnksIotLwM2MCancelObserveCompositeRequest request = JnksIotLwM2MCancelObserveCompositeRequest.builder().versionedIds(versionedIds).timeout(clientContext.getRequestTimeout(client)).build();
+        var mainCallback = new JnksIotLwM2MCancelObserveCompositeCallback(logService, client, versionedIds);
         var rpcCallback = new RpcCancelObserveCompositeCallback(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendCancelObserveCompositeRequest(client, request, rpcCallback);
     }
 
     private void sendDeleteRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg, String versionedId) {
-        TbLwM2MDeleteRequest downlink = TbLwM2MDeleteRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MDeleteCallback(logService, client, versionedId);
+        JnksIotLwM2MDeleteRequest downlink = JnksIotLwM2MDeleteRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
+        var mainCallback = new JnksIotLwM2MDeleteCallback(logService, client, versionedId);
         var rpcCallback = new RpcEmptyResponseCallback<>(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendDeleteRequest(client, downlink, rpcCallback);
     }
 
     private void sendCancelAllObserveRequest(LwM2mClient client, TransportProtos.ToDeviceRpcRequestMsg requestMsg) {
-        TbLwM2MCancelAllRequest downlink = TbLwM2MCancelAllRequest.builder().timeout(clientContext.getRequestTimeout(client)).build();
-        var mainCallback = new TbLwM2MCancelAllObserveCallback(logService, client);
+        JnksIotLwM2MCancelAllRequest downlink = JnksIotLwM2MCancelAllRequest.builder().timeout(clientContext.getRequestTimeout(client)).build();
+        var mainCallback = new JnksIotLwM2MCancelAllObserveCallback(logService, client);
         var rpcCallback = new RpcCancelAllObserveCallback(transportService, client, requestMsg, mainCallback);
         downlinkHandler.sendCancelObserveAllRequest(client, downlink, rpcCallback);
     }

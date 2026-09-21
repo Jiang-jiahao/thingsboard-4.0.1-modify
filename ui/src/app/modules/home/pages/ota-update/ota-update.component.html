@@ -1,4 +1,4 @@
-<div class="tb-details-buttons xs:flex xs:flex-col">
+<div class="jnks-iot-details-buttons xs:flex xs:flex-col">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'open')"
@@ -74,7 +74,7 @@
         <input matInput formControlName="tag" type="text" [readonly]="!isAdd">
         <mat-hint *ngIf="isAdd" translate>ota-update.version-tag-hint</mat-hint>
       </mat-form-field>
-      <tb-device-profile-autocomplete
+      <jnks-iot-device-profile-autocomplete
         formControlName="deviceProfileId"
         required
         [class.pb-4]="isAdd"
@@ -83,7 +83,7 @@
         [editProfileEnabled]="false"
         [addNewProfile]="false"
         [showDetailsPageLink]="true">
-      </tb-device-profile-autocomplete>
+      </jnks-iot-device-profile-autocomplete>
       <mat-form-field class="mat-block">
         <mat-label translate>ota-update.package-type</mat-label>
         <mat-select formControlName="type" required>
@@ -101,13 +101,13 @@
       </section>
       <section *ngIf="!entityForm.get('isURL').value">
         <section *ngIf="isAdd">
-          <tb-file-input
+          <jnks-iot-file-input
             formControlName="file"
             workFromFileObj="true"
             label="{{ 'ota-update.package-file' | translate }}"
             [required]="!entityForm.get('isURL').value"
             dropLabel="{{'ota-update.drop-package-file-or' | translate}}">
-          </tb-file-input>
+          </jnks-iot-file-input>
           <mat-checkbox formControlName="generateChecksum" style="margin-top: 16px">
             {{ 'ota-update.auto-generate-checksum' | translate }}
           </mat-checkbox>

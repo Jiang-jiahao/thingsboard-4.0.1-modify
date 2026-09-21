@@ -11,32 +11,32 @@
 </mat-progress-bar>
 <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
 <div mat-dialog-content>
-  <div class="tb-form-panel stroked tb-slide-toggle" *ngIf="!readonly || image.public">
-    <mat-expansion-panel class="tb-settings" [expanded]="image.public" disabled>
+  <div class="jnks-iot-form-panel stroked jnks-iot-slide-toggle" *ngIf="!readonly || image.public">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="image.public" disabled>
       <mat-expansion-panel-header class="flex flex-row flex-wrap">
         <mat-panel-title>
-          <div *ngIf="!readonly" tb-hint-tooltip-icon="{{ 'image.embed-to-html-hint' | translate }}"
-               class="tb-form-row no-border no-padding">
+          <div *ngIf="!readonly" jnks-iot-hint-tooltip-icon="{{ 'image.embed-to-html-hint' | translate }}"
+               class="jnks-iot-form-row no-border no-padding">
             <mat-slide-toggle class="mat-slide flex items-stretch justify-center" [formControl]="publicStatusControl" (click)="$event.stopPropagation()">
-              <div class="tb-form-panel-title">{{ 'image.embed-to-html' | translate }}</div>
+              <div class="jnks-iot-form-panel-title">{{ 'image.embed-to-html' | translate }}</div>
             </mat-slide-toggle>
           </div>
-          <div *ngIf="readonly" class="tb-form-panel-title" translate>image.embed-to-html</div>
+          <div *ngIf="readonly" class="jnks-iot-form-panel-title" translate>image.embed-to-html</div>
         </mat-panel-title>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
-        <div class="tb-embed-image-text" [innerHTML]="'image.embed-to-html-text' | translate"></div>
-        <tb-markdown usePlainMarkdown
-                     containerClass="tb-embed-image-code"
-                     [data]="embedToHtmlCode()"></tb-markdown>
+        <div class="jnks-iot-embed-image-text" [innerHTML]="'image.embed-to-html-text' | translate"></div>
+        <jnks-iot-markdown usePlainMarkdown
+                     containerClass="jnks-iot-embed-image-code"
+                     [data]="embedToHtmlCode()"></jnks-iot-markdown>
       </ng-template>
     </mat-expansion-panel>
   </div>
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" translate>image.embed-to-angular-template</div>
-    <div class="tb-embed-image-text" [innerHTML]="'image.embed-to-angular-template-text' | translate"></div>
-    <tb-markdown usePlainMarkdown
-                 containerClass="tb-embed-image-code"
-                 [data]="embedToAngularTemplateCode()"></tb-markdown>
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" translate>image.embed-to-angular-template</div>
+    <div class="jnks-iot-embed-image-text" [innerHTML]="'image.embed-to-angular-template-text' | translate"></div>
+    <jnks-iot-markdown usePlainMarkdown
+                 containerClass="jnks-iot-embed-image-code"
+                 [data]="embedToAngularTemplateCode()"></jnks-iot-markdown>
   </div>
 </div>

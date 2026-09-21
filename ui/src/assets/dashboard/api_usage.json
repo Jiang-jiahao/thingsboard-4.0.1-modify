@@ -8731,7 +8731,7 @@
             },
             "2e4c97b0-257a-a1b9-690c-141d9bf2ec6f": {
                 "id": "2e4c97b0-257a-a1b9-690c-141d9bf2ec6f",
-                "alias": "TbServiceQueues",
+                "alias": "JnksIotServiceQueues",
                 "filter": {
                     "type": "entityType",
                     "resolveMultiple": true,

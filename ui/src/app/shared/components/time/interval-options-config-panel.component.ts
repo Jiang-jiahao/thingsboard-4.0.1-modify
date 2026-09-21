@@ -11,7 +11,7 @@ import {
   TimewindowType
 } from '@shared/models/time/time.models';
 import { AbstractControl, FormBuilder, FormGroup, UntypedFormArray } from '@angular/forms';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { TimeService } from '@core/services/time.service';
 import { coerceBoolean } from '@shared/decorators/coercion';
 import { TranslateService } from '@ngx-translate/core';
@@ -23,7 +23,7 @@ export interface IntervalOptionsConfigPanelData {
 }
 
 @Component({
-  selector: 'tb-interval-options-config-panel',
+  selector: 'jnks-iot-interval-options-config-panel',
   templateUrl: './interval-options-config-panel.component.html',
   styleUrls: ['./interval-options-config-panel.component.scss']
 })
@@ -49,7 +49,7 @@ export class IntervalOptionsConfigPanelComponent implements OnInit {
   onClose: (result: IntervalOptionsConfigPanelData | null) => void;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   intervalOptionsConfigForm: FormGroup;
 

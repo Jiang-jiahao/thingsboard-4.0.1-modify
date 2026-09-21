@@ -15,7 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Service;
 import com.jnks.iot.server.common.data.DataConstants;
-import com.jnks.iot.server.common.data.TbTransportService;
+import com.jnks.iot.server.common.data.JnksIotTransportService;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 @Service("MqttTransportService")
 @ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.mqtt.enabled:true}'=='true'")
 @Slf4j
-public class MqttTransportService implements TbTransportService, SmartLifecycle {
+public class MqttTransportService implements JnksIotTransportService, SmartLifecycle {
 
     public static AttributeKey<InetSocketAddress> ADDRESS = AttributeKey.newInstance("SRC_ADDRESS");
 

@@ -12,7 +12,7 @@
           (click)="clear()">
     <mat-icon class="material-icons">close</mat-icon>
   </button>
-  <mat-autocomplete #auto="matAutocomplete" class="tb-autocomplete" [displayWith]="mathFunctionDisplayFn">
+  <mat-autocomplete #auto="matAutocomplete" class="jnks-iot-autocomplete" [displayWith]="mathFunctionDisplayFn">
     <mat-option *ngFor="let option of filteredOptions | async" [value]="option.value">
       <span [innerHTML]="option.value + ' | ' + option.name | highlight:searchText"></span>
       <small style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">

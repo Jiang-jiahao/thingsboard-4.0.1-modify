@@ -32,14 +32,14 @@
     <span style="white-space: nowrap">{{ 'notification.create-new' | translate }}</span>
   </button>
   <mat-autocomplete
-    class="tb-autocomplete"
+    class="jnks-iot-autocomplete"
     #tenantProfileAutocomplete="matAutocomplete"
     [displayWith]="displayTenantProfileFn">
     <mat-option *ngFor="let tenantProfile of filteredTenantProfiles | async" [value]="tenantProfile">
       <span [innerHTML]="tenantProfile.name | highlight:searchText"></span>
     </mat-option>
-    <mat-option *ngIf="!(filteredTenantProfiles | async)?.length" [value]="null" class="tb-not-found">
-      <div class="tb-not-found-content" (click)="$event.stopPropagation()">
+    <mat-option *ngIf="!(filteredTenantProfiles | async)?.length" [value]="null" class="jnks-iot-not-found">
+      <div class="jnks-iot-not-found-content" (click)="$event.stopPropagation()">
         <div *ngIf="!textIsNotEmpty(searchText); else searchNotEmpty">
           <span translate>tenant-profile.no-tenant-profiles-found</span>
         </div>

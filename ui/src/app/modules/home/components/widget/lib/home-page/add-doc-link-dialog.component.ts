@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 import { DocumentationLink } from '@shared/models/user-settings.models';
 
 @Component({
-  selector: 'tb-add-doc-link-dialog',
+  selector: 'jnks-iot-add-doc-link-dialog',
   templateUrl: './add-doc-link-dialog.component.html',
   styleUrls: ['./add-doc-link-dialog.component.scss']
 })

@@ -1,5 +1,5 @@
-<div class="tb-table-widget tb-absolute-fill">
-  <div class="tb-absolute-fill flex flex-1 flex-col">
+<div class="jnks-iot-table-widget jnks-iot-absolute-fill">
+  <div class="jnks-iot-absolute-fill flex flex-1 flex-col">
     <mat-toolbar class="mat-mdc-table-toolbar" [class.!hidden]="!textSearchMode">
       <div class="mat-toolbar-tools">
         <button mat-icon-button
@@ -20,7 +20,7 @@
         </button>
       </div>
     </mat-toolbar>
-    <mat-tab-group [class.tb-headless]="sources.length === 1"
+    <mat-tab-group [class.jnks-iot-headless]="sources.length === 1"
                    class="flex-1"
                    mat-stretch-tabs="false"
                    [(selectedIndex)]="sourceIndex" (selectedIndexChange)="onSourceIndexChanged()">
@@ -60,18 +60,18 @@
                       <ng-container *ngFor="let actionDescriptor of row.actionCellButtons; trackBy: trackByActionCellDescriptionId">
                         <span *ngIf="!actionDescriptor.icon" style="width: 40px;"></span>
                         <button *ngIf="actionDescriptor.icon"
-                                class="tb-mat-40"
+                                class="jnks-iot-mat-40"
                                 mat-icon-button [disabled]="isLoading$ | async"
                                 matTooltip="{{ actionDescriptor.displayName }}"
                                 matTooltipPosition="above"
                                 (click)="onActionButtonClick($event, row, actionDescriptor)">
-                          <tb-icon>{{actionDescriptor.icon}}</tb-icon>
+                          <jnks-iot-icon>{{actionDescriptor.icon}}</jnks-iot-icon>
                         </button>
                       </ng-container>
                     </div>
                     <div [class.!hidden]="!showCellActionsMenu || source.timeseriesDatasource.countCellButtonAction === 1" class="gt-md:!hidden" *ngIf="row.hasActions">
                       <button mat-icon-button
-                              class="tb-mat-40"
+                              class="jnks-iot-mat-40"
                               (click)="$event.stopPropagation(); ctx.detectChanges();"
                               [matMenuTriggerFor]="cellActionsMenu">
                         <mat-icon class="material-icons">more_vert</mat-icon>
@@ -81,7 +81,7 @@
                           <button mat-menu-item *ngIf="actionDescriptor.icon"
                                   [disabled]="isLoading$ | async"
                                   (click)="onActionButtonClick($event, row, actionDescriptor)">
-                            <tb-icon matMenuItemIcon>{{actionDescriptor.icon}}</tb-icon>
+                            <jnks-iot-icon matMenuItemIcon>{{actionDescriptor.icon}}</jnks-iot-icon>
                             <span>{{ actionDescriptor.displayName }}</span>
                           </button>
                         </ng-container>
@@ -91,7 +91,7 @@
                 </mat-cell>
               </ng-container>
               <mat-header-row *matHeaderRowDef="source.displayedColumns; sticky: enableStickyHeader"></mat-header-row>
-              <mat-row [class.tb-pointer]="hasRowAction"
+              <mat-row [class.jnks-iot-pointer]="hasRowAction"
                        *matRowDef="let row; columns: source.displayedColumns; let rowIndex = index"
                        [style]="rowStyle(source, row, rowIndex) | async"
                        (click)="onRowClick($event, row)"></mat-row>

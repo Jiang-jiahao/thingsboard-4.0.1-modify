@@ -1,26 +1,26 @@
 @import "../../../../../../../../../scss/constants";
 
-.tb-dynamic-form-array {
-  .tb-dynamic-form-array-body {
+.jnks-iot-dynamic-form-array {
+  .jnks-iot-dynamic-form-array-body {
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
 }
-.tb-dynamic-form-array-row {
+.jnks-iot-dynamic-form-array-row {
   background: #fff;
   display: flex;
   flex-direction: row;
   place-content: center flex-start;
   align-items: flex-start;
-  .tb-dynamic-form-item-index-container {
+  .jnks-iot-dynamic-form-item-index-container {
     width: 36px;
     height: 56px;
     display: flex;
     flex-direction: row;
     place-content: flex-start;
     align-items: center;
-    .tb-dynamic-form-item-index {
+    .jnks-iot-dynamic-form-item-index {
       width: 24px;
       height: 24px;
       position: relative;
@@ -29,7 +29,7 @@
       display: flex;
       align-items: center;
       place-content: center;
-      color: $tb-primary-color;
+      color: $jnks-iot-primary-color;
       &:before {
         content: "";
         display: block;
@@ -38,18 +38,18 @@
         position: absolute;
         left: 0;
         top: 0;
-        background-color: $tb-primary-color;
+        background-color: $jnks-iot-primary-color;
         opacity: 0.06;
         border-radius: 100%;
       }
     }
   }
-  .tb-dynamic-form-array-buttons {
+  .jnks-iot-dynamic-form-array-buttons {
     display: flex;
     flex-direction: row;
     button.mat-mdc-icon-button.mat-mdc-button-base {
       color: rgba(0, 0, 0, 0.38);
-      &.tb-hidden {
+      &.jnks-iot-hidden {
         visibility: hidden;
       }
     }

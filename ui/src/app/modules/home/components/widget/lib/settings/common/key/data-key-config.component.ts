@@ -41,12 +41,12 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { WidgetConfigComponentData } from '@home/models/widget-component.models';
 import { WidgetComponentService } from '@home/components/widget/widget-component.service';
 import { WidgetConfigCallbacks } from '@home/components/widget/config/widget-config.component.models';
-import { isNotEmptyTbFunction, TbFunction } from '@shared/models/js-function.models';
+import { isNotEmptyJnksIotFunction, JnksIotFunction } from '@shared/models/js-function.models';
 import { FormProperty } from '@shared/models/dynamic-form.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-data-key-config',
+  selector: 'jnks-iot-data-key-config',
   templateUrl: './data-key-config.component.html',
   styleUrls: [],
   providers: [
@@ -286,10 +286,10 @@ export class DataKeyConfigComponent extends PageComponent implements OnInit, Con
     this.dataKeyFormGroup.get('usePostProcessing').valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe((usePostProcessing: boolean) => {
-      const postFuncBody: TbFunction = this.dataKeyFormGroup.get('postFuncBody').value;
-      if (usePostProcessing && !isNotEmptyTbFunction(postFuncBody)) {
+      const postFuncBody: JnksIotFunction = this.dataKeyFormGroup.get('postFuncBody').value;
+      if (usePostProcessing && !isNotEmptyJnksIotFunction(postFuncBody)) {
         this.dataKeyFormGroup.get('postFuncBody').patchValue('return value;');
-      } else if (!usePostProcessing && isNotEmptyTbFunction(postFuncBody)) {
+      } else if (!usePostProcessing && isNotEmptyJnksIotFunction(postFuncBody)) {
         this.dataKeyFormGroup.get('postFuncBody').patchValue(null);
       }
     });
@@ -313,7 +313,7 @@ export class DataKeyConfigComponent extends PageComponent implements OnInit, Con
 
   writeValue(value: DataKey): void {
     this.modelValue = value;
-    if (isNotEmptyTbFunction(this.modelValue.postFuncBody)) {
+    if (isNotEmptyJnksIotFunction(this.modelValue.postFuncBody)) {
       this.modelValue.usePostProcessing = true;
     }
     if (this.widgetType === widgetType.latest && this.modelValue.type === DataKeyType.timeseries && !this.modelValue.aggregationType) {

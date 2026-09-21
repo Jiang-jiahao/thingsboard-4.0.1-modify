@@ -1,13 +1,13 @@
 @import '../../../../../../../../scss/constants';
 
-.tb-data-keys-panel {
-  .tb-form-table-header-cell {
-    &.tb-source-header {
+.jnks-iot-data-keys-panel {
+  .jnks-iot-form-table-header-cell {
+    &.jnks-iot-source-header {
       width: 108px;
       min-width: 108px;
     }
 
-    &.tb-key-header {
+    &.jnks-iot-key-header {
       flex: 1;
       min-width: 150px;
       @media #{$mat-gt-sm} {
@@ -15,37 +15,37 @@
       }
     }
 
-    &.tb-label-header {
+    &.jnks-iot-label-header {
       flex: 1 1 40%;
       min-width: 100px;
     }
 
-    &.tb-units-header {
+    &.jnks-iot-units-header {
       width: 80px;
       min-width: 80px;
     }
 
-    &.tb-color-header {
+    &.jnks-iot-color-header {
       width: 40px;
       min-width: 40px;
     }
 
-    &.tb-decimals-header {
+    &.jnks-iot-decimals-header {
       width: 60px;
       min-width: 60px;
     }
 
-    &.tb-y-axis-header {
+    &.jnks-iot-y-axis-header {
       width: 100px;
       min-width: 100px;
     }
 
-    &.tb-time-series-type-header {
+    &.jnks-iot-time-series-type-header {
       width: 60px;
       min-width: 60px;
     }
 
-    &.tb-actions-header {
+    &.jnks-iot-actions-header {
       width: 40px;
       min-width: 40px;
       @media #{$mat-gt-md} {
@@ -54,20 +54,20 @@
       }
     }
 
-    &.tb-label-header, &.tb-units-header, &.tb-color-header, &.tb-decimals-header {
+    &.jnks-iot-label-header, &.jnks-iot-units-header, &.jnks-iot-color-header, &.jnks-iot-decimals-header {
       display: none;
       @media #{$mat-gt-sm} {
         display: block;
       }
     }
 
-    &.tb-y-axis-header {
+    &.jnks-iot-y-axis-header {
       @media #{$mat-md} {
         display: none;
       }
     }
 
-    &.tb-time-series-type-header {
+    &.jnks-iot-time-series-type-header {
       @media #{$mat-xs} {
         display: none;
       }
@@ -77,8 +77,8 @@
     }
   }
 
-  .tb-form-table-body {
-    tb-data-key-row {
+  .jnks-iot-form-table-body {
+    jnks-iot-data-key-row {
       overflow: hidden;
     }
   }

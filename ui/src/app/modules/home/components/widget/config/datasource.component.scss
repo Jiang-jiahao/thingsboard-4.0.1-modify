@@ -1,4 +1,4 @@
-.tb-datasource-section {
+.jnks-iot-datasource-section {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -6,8 +6,8 @@
 }
 
 :host ::ng-deep {
-  .tb-datasource-section {
-    tb-alarm-filter-config {
+  .jnks-iot-datasource-section {
+    jnks-iot-alarm-filter-config {
       .mdc-button {
         width: 100%;
         height: 100%;

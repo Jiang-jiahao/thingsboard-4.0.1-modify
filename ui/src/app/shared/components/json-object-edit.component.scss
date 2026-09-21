@@ -6,8 +6,8 @@
   }
 }
 
-.tb-json-object-toolbar {
-  button.mat-mdc-button-base, button.mat-mdc-button-base.tb-mat-32 {
+.jnks-iot-json-object-toolbar {
+  button.mat-mdc-button-base, button.mat-mdc-button-base.jnks-iot-mat-32 {
     align-items: center;
     vertical-align: middle;
     min-width: 32px;
@@ -28,12 +28,12 @@
   }
 }
 
-.tb-json-object-panel {
+.jnks-iot-json-object-panel {
   height: 100%;
   margin-left: 15px;
   border: 1px solid #c0c0c0;
 
-  #tb-json-input {
+  #jnks-iot-json-input {
     width: 100%;
     min-width: 200px;
     height: 100%;

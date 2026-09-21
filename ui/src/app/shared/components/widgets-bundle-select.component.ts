@@ -23,7 +23,7 @@ import {
 } from '@home/pages/widget/widgets-bundle-dialog.component';
 
 @Component({
-  selector: 'tb-widgets-bundle-select',
+  selector: 'jnks-iot-widgets-bundle-select',
   templateUrl: './widgets-bundle-select.component.html',
   styleUrls: ['./widgets-bundle-select.component.scss'],
   providers: [{
@@ -180,7 +180,7 @@ export class WidgetsBundleSelectComponent implements ControlValueAccessor, OnIni
     this.dialog.open<WidgetsBundleDialogComponent, WidgetsBundleDialogData,
       WidgetsBundle>(WidgetsBundleDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         widgetsBundle
       }

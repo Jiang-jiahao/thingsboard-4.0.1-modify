@@ -5,7 +5,7 @@ import { NotificationType } from '@shared/models/notification.models';
 import { EntityType } from '@shared/models/entity-type.models';
 
 @Component({
-  selector: 'tb-external-node-notification-config',
+  selector: 'jnks-iot-external-node-notification-config',
   templateUrl: './notification-config.component.html',
   styleUrls: []
 })

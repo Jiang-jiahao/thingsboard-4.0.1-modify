@@ -21,7 +21,7 @@ export interface ManageWidgetActionsDialogData {
 }
 
 @Component({
-  selector: 'tb-manage-widget-actions-dialog',
+  selector: 'jnks-iot-manage-widget-actions-dialog',
   templateUrl: './manage-widget-actions-dialog.component.html',
   providers: [],
   styleUrls: []

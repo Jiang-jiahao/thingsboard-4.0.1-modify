@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-update-location-attribute-widget-settings',
+  selector: 'jnks-iot-update-location-attribute-widget-settings',
   templateUrl: './update-location-attribute-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

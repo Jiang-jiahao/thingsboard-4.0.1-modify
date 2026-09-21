@@ -13,7 +13,7 @@ export interface FiltersEditPanelData {
 }
 
 @Component({
-  selector: 'tb-filters-edit-panel',
+  selector: 'jnks-iot-filters-edit-panel',
   templateUrl: './filters-edit-panel.component.html',
   styleUrls: ['./filters-edit-panel.component.scss']
 })
@@ -31,7 +31,7 @@ export class FiltersEditPanelComponent {
     this.dialog.open<UserFilterDialogComponent, UserFilterDialogData,
       Filter>(UserFilterDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         filter: singleFilter
       }

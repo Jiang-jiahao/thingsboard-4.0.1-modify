@@ -86,7 +86,7 @@ import { Router } from '@angular/router';
 import * as RxJS from 'rxjs';
 import { BehaviorSubject, Observable } from 'rxjs';
 import * as RxJSOperators from 'rxjs/operators';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { EntityId } from '@shared/models/id/entity-id';
 import { AlarmQuery, AlarmSearchStatus, AlarmStatus } from '@app/shared/models/alarm.models';
 import { ImagePipe } from '@shared/pipe/image.pipe';
@@ -96,7 +96,7 @@ import { UserId } from '@shared/models/id/user-id';
 import { UserSettingsService } from '@core/http/user-settings.service';
 import { DataKeySettingsFunction } from '@home/components/widget/lib/settings/common/key/data-keys.component.models';
 import { UtilsService } from '@core/services/utils.service';
-import { CompiledTbFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction } from '@shared/models/js-function.models';
 import { FormProperty } from '@shared/models/dynamic-form.models';
 import { ExportableEntity } from '@shared/models/base-data';
 
@@ -118,7 +118,7 @@ export interface WidgetHeaderAction extends IWidgetAction {
   buttonBorderColor?: string;
   customButtonStyle?: {[key: string]: string};
   useShowWidgetHeaderActionFunction: boolean;
-  showWidgetHeaderActionFunction: CompiledTbFunction<ShowWidgetHeaderActionFunction>;
+  showWidgetHeaderActionFunction: CompiledJnksIotFunction<ShowWidgetHeaderActionFunction>;
 }
 
 export interface WidgetAction extends IWidgetAction {
@@ -135,7 +135,7 @@ export class WidgetContext {
               private dashboardWidget: IDashboardWidget,
               private widget: Widget,
               public parentDashboard?: IDashboardComponent,
-              public popoverComponent?: TbPopoverComponent) {}
+              public popoverComponent?: JnksIotPopoverComponent) {}
 
   get stateController(): IStateController {
     return this.parentDashboard ? this.parentDashboard.stateController : this.dashboard.stateController;
@@ -313,7 +313,7 @@ export class WidgetContext {
 
   store?: Store<AppState>;
 
-  private popoverComponents: TbPopoverComponent[] = [];
+  private popoverComponents: JnksIotPopoverComponent[] = [];
 
   rxjs = {
 
@@ -321,9 +321,9 @@ export class WidgetContext {
     ...RxJSOperators
   };
 
-  registerPopoverComponent(popoverComponent: TbPopoverComponent) {
+  registerPopoverComponent(popoverComponent: JnksIotPopoverComponent) {
     this.popoverComponents.push(popoverComponent);
-    popoverComponent.tbDestroy.subscribe(() => {
+    popoverComponent.jnksIotDestroy.subscribe(() => {
       const index = this.popoverComponents.indexOf(popoverComponent, 0);
       if (index > -1) {
         this.popoverComponents.splice(index, 1);
@@ -339,7 +339,7 @@ export class WidgetContext {
 
   setPopoversHidden(hidden: boolean) {
     this.popoverComponents.forEach(comp => {
-      comp.tbHidden = hidden;
+      comp.jnksIotHidden = hidden;
     });
   }
 
@@ -598,8 +598,8 @@ export const MissingWidgetType: WidgetInfo = {
   sizeX: 8,
   sizeY: 6,
   resources: [],
-  templateHtml: '<div class="tb-widget-error-container">' +
-    '<div class="tb-widget-error-msg" innerHTML="{{\'widget.widget-type-not-found\' | translate }}"></div>' +
+  templateHtml: '<div class="jnks-iot-widget-error-container">' +
+    '<div class="jnks-iot-widget-error-msg" innerHTML="{{\'widget.widget-type-not-found\' | translate }}"></div>' +
     '</div>',
   templateCss: '',
   controllerScript: 'self.onInit = function() {}',
@@ -624,9 +624,9 @@ export const ErrorWidgetType: WidgetInfo = {
   sizeX: 8,
   sizeY: 6,
   resources: [],
-  templateHtml: '<div class="tb-widget-error-container">' +
-                   '<div translate class="tb-widget-error-msg">widget.widget-type-load-error</div>' +
-                   '<div *ngFor="let error of errorMessages" class="tb-widget-error-msg">{{ error }}</div>' +
+  templateHtml: '<div class="jnks-iot-widget-error-container">' +
+                   '<div translate class="jnks-iot-widget-error-msg">widget.widget-type-load-error</div>' +
+                   '<div *ngFor="let error of errorMessages" class="jnks-iot-widget-error-msg">{{ error }}</div>' +
                 '</div>',
   templateCss: '',
   controllerScript: 'self.onInit = function() {}',

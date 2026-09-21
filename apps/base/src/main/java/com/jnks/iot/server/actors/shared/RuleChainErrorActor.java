@@ -2,14 +2,14 @@ package com.jnks.iot.server.actors.shared;
 
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.actors.ActorSystemContext;
-import com.jnks.iot.server.actors.TbActor;
-import com.jnks.iot.server.actors.TbActorId;
-import com.jnks.iot.server.actors.TbEntityActorId;
+import com.jnks.iot.server.actors.JnksIotActor;
+import com.jnks.iot.server.actors.JnksIotActorId;
+import com.jnks.iot.server.actors.JnksIotEntityActorId;
 import com.jnks.iot.server.actors.service.ContextAwareActor;
 import com.jnks.iot.server.actors.service.ContextBasedCreator;
 import com.jnks.iot.server.common.data.id.RuleChainId;
 import com.jnks.iot.server.common.data.id.TenantId;
-import com.jnks.iot.server.common.msg.TbActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
 import com.jnks.iot.server.common.msg.aware.RuleChainAwareMsg;
 import com.jnks.iot.server.common.msg.queue.RuleEngineException;
 
@@ -26,7 +26,7 @@ public class RuleChainErrorActor extends ContextAwareActor {
     }
 
     @Override
-    protected boolean doProcess(TbActorMsg msg) {
+    protected boolean doProcess(JnksIotActorMsg msg) {
         if (msg instanceof RuleChainAwareMsg rcMsg) {
             log.debug("[{}] Reply with {} for message {}", tenantId, error.getMessage(), msg);
             rcMsg.getMsg().getCallback().onFailure(error);
@@ -50,12 +50,12 @@ public class RuleChainErrorActor extends ContextAwareActor {
         }
 
         @Override
-        public TbActorId createActorId() {
-            return new TbEntityActorId(ruleChainId);
+        public JnksIotActorId createActorId() {
+            return new JnksIotEntityActorId(ruleChainId);
         }
 
         @Override
-        public TbActor createActor() {
+        public JnksIotActor createActor() {
             return new RuleChainErrorActor(context, tenantId, error);
         }
     }

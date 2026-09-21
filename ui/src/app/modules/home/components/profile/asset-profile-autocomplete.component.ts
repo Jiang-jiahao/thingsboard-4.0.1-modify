@@ -35,7 +35,7 @@ import { getCurrentAuthUser } from '@core/auth/auth.selectors';
 import { Authority } from '@shared/models/authority.enum';
 
 @Component({
-  selector: 'tb-asset-profile-autocomplete',
+  selector: 'jnks-iot-asset-profile-autocomplete',
   templateUrl: './asset-profile-autocomplete.component.html',
   styleUrls: ['./asset-profile-autocomplete.component.scss'],
   providers: [{
@@ -333,7 +333,7 @@ export class AssetProfileAutocompleteComponent implements ControlValueAccessor, 
     this.dialog.open<AssetProfileDialogComponent, AssetProfileDialogData,
       AssetProfile>(AssetProfileDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         assetProfile

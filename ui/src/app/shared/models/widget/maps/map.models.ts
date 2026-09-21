@@ -20,7 +20,7 @@ import {
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { materialColors } from '@shared/models/material.models';
 import type L from 'leaflet';
-import { TbFunction } from '@shared/models/js-function.models';
+import { JnksIotFunction } from '@shared/models/js-function.models';
 import { Observable, Observer, of, switchMap } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ImagePipe } from '@shared/pipe/image.pipe';
@@ -41,11 +41,11 @@ export interface MapDataSourceSettings {
   dsFilterId?: string;
 }
 
-export interface TbMapDatasource extends Datasource {
+export interface JnksIotMapDatasource extends Datasource {
   mapDataIds: string[];
 }
 
-export const mapDataSourceSettingsToDatasource = (settings: MapDataSourceSettings, id = guid()): TbMapDatasource => {
+export const mapDataSourceSettingsToDatasource = (settings: MapDataSourceSettings, id = guid()): JnksIotMapDatasource => {
   return {
     type: settings.dsType,
     name: settings.dsLabel,
@@ -68,7 +68,7 @@ export interface DataLayerPatternSettings {
   show: boolean;
   type: DataLayerPatternType;
   pattern?: string;
-  patternFunction?: TbFunction;
+  patternFunction?: JnksIotFunction;
 }
 
 export enum DataLayerTooltipTrigger {
@@ -229,7 +229,7 @@ export interface DataLayerColorSettings {
   color: string;
   rangeKey?: DataKey;
   range?: ColorRange[];
-  colorFunction?: TbFunction;
+  colorFunction?: JnksIotFunction;
 }
 
 export enum MarkerImageType {
@@ -241,7 +241,7 @@ export interface MarkerImageSettings {
   type: MarkerImageType;
   image?: string;
   imageSize?: number;
-  imageFunction?: TbFunction;
+  imageFunction?: JnksIotFunction;
   images?: string[];
 }
 
@@ -269,7 +269,7 @@ export interface MarkerClusteringSettings {
   chunkedLoad: boolean;
   lazyLoad: boolean;
   useClusterMarkerColorFunction: boolean;
-  clusterMarkerColorFunction: TbFunction;
+  clusterMarkerColorFunction: JnksIotFunction;
 }
 
 
@@ -282,7 +282,7 @@ export interface MarkersDataLayerSettings extends MapDataLayerSettings {
   markerImage?: MarkerImageSettings;
   markerOffsetX: number;
   markerOffsetY: number;
-  positionFunction?: TbFunction;
+  positionFunction?: JnksIotFunction;
   markerClustering: MarkerClusteringSettings;
 }
 
@@ -489,7 +489,7 @@ export interface ShapeFillImageSettings {
   opacity?: number; // (0-1)
   angle?: number; // (0-360)
   scale?: number; // (0-...)
-  imageFunction?: TbFunction;
+  imageFunction?: JnksIotFunction;
   images?: string[];
 }
 
@@ -642,7 +642,7 @@ export interface AdditionalMapDataSourceSettings extends MapDataSourceSettings {
   dataKeys: DataKey[];
 }
 
-export const additionalMapDataSourcesToDatasources = (additionalMapDataSources: AdditionalMapDataSourceSettings[]): TbMapDatasource[] => {
+export const additionalMapDataSourcesToDatasources = (additionalMapDataSources: AdditionalMapDataSourceSettings[]): JnksIotMapDatasource[] => {
   return additionalMapDataSources.map(addDs => {
     const res = mapDataSourceSettingsToDatasource(addDs);
     res.dataKeys = addDs.dataKeys;
@@ -763,7 +763,7 @@ export interface TripTimelineSettings {
   showTimestamp: boolean;
   timestampFormat: DateFormatSettings;
   snapToRealLocation: boolean;
-  locationSnapFilter: TbFunction;
+  locationSnapFilter: JnksIotFunction;
 }
 
 export interface BaseMapSettings {
@@ -1179,30 +1179,30 @@ export interface ShapeFillImageInfo {
   scale?: number;
 }
 
-export type MapStringFunction = (data: FormattedData<TbMapDatasource>,
-                                 dsData: FormattedData<TbMapDatasource>[]) => string;
+export type MapStringFunction = (data: FormattedData<JnksIotMapDatasource>,
+                                 dsData: FormattedData<JnksIotMapDatasource>[]) => string;
 
-export type MapBooleanFunction = (data: FormattedData<TbMapDatasource>,
-                                 dsData: FormattedData<TbMapDatasource>[]) => boolean;
+export type MapBooleanFunction = (data: FormattedData<JnksIotMapDatasource>,
+                                 dsData: FormattedData<JnksIotMapDatasource>[]) => boolean;
 
-export type MarkerImageFunction = (data: FormattedData<TbMapDatasource>, markerImages: string[],
-                                   dsData: FormattedData<TbMapDatasource>[]) => MarkerImageInfo;
+export type MarkerImageFunction = (data: FormattedData<JnksIotMapDatasource>, markerImages: string[],
+                                   dsData: FormattedData<JnksIotMapDatasource>[]) => MarkerImageInfo;
 
-export type ClusterMarkerColorFunction = (data: FormattedData<TbMapDatasource>[], childCount: number) => string;
+export type ClusterMarkerColorFunction = (data: FormattedData<JnksIotMapDatasource>[], childCount: number) => string;
 
-export type MarkerPositionFunction = (origXPos: number, origYPos: number, data: FormattedData<TbMapDatasource>,
-                                      dsData: FormattedData<TbMapDatasource>[], aspect: number) => { x: number, y: number };
+export type MarkerPositionFunction = (origXPos: number, origYPos: number, data: FormattedData<JnksIotMapDatasource>,
+                                      dsData: FormattedData<JnksIotMapDatasource>[], aspect: number) => { x: number, y: number };
 
-export type ShapeFillImageFunction = (data: FormattedData<TbMapDatasource>, images: string[],
-                                      dsData: FormattedData<TbMapDatasource>[]) => ShapeFillImageInfo;
+export type ShapeFillImageFunction = (data: FormattedData<JnksIotMapDatasource>, images: string[],
+                                      dsData: FormattedData<JnksIotMapDatasource>[]) => ShapeFillImageInfo;
 
-export type TbPolygonRawCoordinate = L.LatLngTuple | L.LatLngTuple[] | L.LatLngTuple[][];
-export type TbPolygonRawCoordinates = TbPolygonRawCoordinate[];
-export type TbPolyData = L.LatLngTuple[] | L.LatLngTuple[][] | L.LatLngTuple[][][];
-export type TbPolygonCoordinate = L.LatLng | L.LatLng[] | L.LatLng[][];
-export type TbPolygonCoordinates = TbPolygonCoordinate[];
+export type JnksIotPolygonRawCoordinate = L.LatLngTuple | L.LatLngTuple[] | L.LatLngTuple[][];
+export type JnksIotPolygonRawCoordinates = JnksIotPolygonRawCoordinate[];
+export type JnksIotPolyData = L.LatLngTuple[] | L.LatLngTuple[][] | L.LatLngTuple[][][];
+export type JnksIotPolygonCoordinate = L.LatLng | L.LatLng[] | L.LatLng[][];
+export type JnksIotPolygonCoordinates = JnksIotPolygonCoordinate[];
 
-export interface TbCircleData {
+export interface JnksIotCircleData {
   latitude: number;
   longitude: number;
   radius: number;
@@ -1235,7 +1235,7 @@ export const isValidLongitude = (longitude: any): boolean =>
 export const isValidLatLng = (latitude: any, longitude: any): boolean =>
   isValidLatitude(latitude) && isValidLongitude(longitude);
 
-export const isCutPolygon = (data: TbPolygonCoordinates | TbPolygonRawCoordinates): boolean => {
+export const isCutPolygon = (data: JnksIotPolygonCoordinates | JnksIotPolygonRawCoordinates): boolean => {
   return data.length > 1 && Array.isArray(data[0]) && (Array.isArray(data[0][0]) || (isNumber((data[0][0] as any).lat) && isNumber((data[0][0] as any).lng)) );
 }
 
@@ -1267,8 +1267,8 @@ export const updateDataKeyToNewDsType = (dataKey: DataKey | null, newDsType: Dat
   return false;
 }
 
-export const mergeMapDatasources = (target: TbMapDatasource[], source: TbMapDatasource[]): TbMapDatasource[] => {
-  const appendDatasources: TbMapDatasource[] = [];
+export const mergeMapDatasources = (target: JnksIotMapDatasource[], source: JnksIotMapDatasource[]): JnksIotMapDatasource[] => {
+  const appendDatasources: JnksIotMapDatasource[] = [];
   for (const sourceDs of source) {
     let merged = false;
     for (let i = 0; i < target.length; i++) {
@@ -1287,7 +1287,7 @@ export const mergeMapDatasources = (target: TbMapDatasource[], source: TbMapData
   return target;
 };
 
-const mapDatasourceIsSame = (ds1: TbMapDatasource, ds2: TbMapDatasource): boolean => {
+const mapDatasourceIsSame = (ds1: JnksIotMapDatasource, ds2: JnksIotMapDatasource): boolean => {
   if (ds1.type === ds2.type) {
     switch (ds1.type) {
       case DatasourceType.function:
@@ -1306,7 +1306,7 @@ const mapDatasourceIsSame = (ds1: TbMapDatasource, ds2: TbMapDatasource): boolea
   return false;
 }
 
-const mergeMapDatasource = (target: TbMapDatasource, source: TbMapDatasource): TbMapDatasource => {
+const mergeMapDatasource = (target: JnksIotMapDatasource, source: JnksIotMapDatasource): JnksIotMapDatasource => {
   target.mapDataIds = _.union(target.mapDataIds, source.mapDataIds);
   const appendKeys: DataKey[] = [];
   for (const sourceKey of source.dataKeys) {
@@ -1385,11 +1385,11 @@ const linkActionRegex = /<link-act name=['"]([^['"]*)['"]>([^<]*)<\/link-act>/g;
 const buttonActionRegex = /<button-act name=['"]([^['"]*)['"]>([^<]*)<\/button-act>/g;
 
 const createTooltipLinkElement = (actionName: string, actionText: string): string => {
-  return `<a href="javascript:void(0);" class="tb-custom-action" data-action-name="${actionName}">${actionText}</a>`;
+  return `<a href="javascript:void(0);" class="jnks-iot-custom-action" data-action-name="${actionName}">${actionText}</a>`;
 }
 
 const creatTooltipButtonElement = (actionName: string, actionText: string): string => {
-  return `<button mat-button class="tb-custom-action" data-action-name="${actionName}">${actionText}</button>`;
+  return `<button mat-button class="jnks-iot-custom-action" data-action-name="${actionName}">${actionText}</button>`;
 }
 
 export const processTooltipTemplate = (template: string): string => {
@@ -1445,7 +1445,7 @@ export const latLngPointToBounds = (point: L.LatLng, southWest: L.LatLng, northE
   return point;
 }
 
-export type TripRouteData = {[time: number]: FormattedData<TbMapDatasource>};
+export type TripRouteData = {[time: number]: FormattedData<JnksIotMapDatasource>};
 
 export const calculateInterpolationRatio = (firsMoment: number, secondMoment: number, intermediateMoment: number): number => {
   return (intermediateMoment - firsMoment) / (secondMoment - firsMoment);
@@ -1473,7 +1473,7 @@ export const findRotationAngle = (startPoint: L.LatLng, endPoint: L.LatLng): num
   return parseInt(angle.toFixed(2), 10);
 }
 
-export const calculateLastPoints = (routeData: TripRouteData, time: number): FormattedData<TbMapDatasource> => {
+export const calculateLastPoints = (routeData: TripRouteData, time: number): FormattedData<JnksIotMapDatasource> => {
   const timeArr = Object.keys(routeData);
   let index = timeArr.findIndex((dtime) => {
     return Number(dtime) >= time;

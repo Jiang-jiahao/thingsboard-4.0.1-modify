@@ -13,7 +13,7 @@ export interface AuditLogDetailsDialogData {
 }
 
 @Component({
-  selector: 'tb-audit-log-details-dialog',
+  selector: 'jnks-iot-audit-log-details-dialog',
   templateUrl: './audit-log-details-dialog.component.html',
   styleUrls: ['./audit-log-details-dialog.component.scss']
 })

@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import com.jnks.iot.server.common.data.DataConstants;
-import com.jnks.iot.server.common.data.TbTransportService;
+import com.jnks.iot.server.common.data.JnksIotTransportService;
 import com.jnks.iot.server.common.data.device.profile.UdpTransportFramingMode;
 
 import java.net.InetSocketAddress;
@@ -24,7 +24,7 @@ import java.net.InetSocketAddress;
 @Service("UdpTransportService")
 @ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.udp.enabled:true}'=='true'")
 @Slf4j
-public class UdpTransportService implements TbTransportService {
+public class UdpTransportService implements JnksIotTransportService {
 
     @Value("${transport.udp.server.enabled:true}")
     @Getter

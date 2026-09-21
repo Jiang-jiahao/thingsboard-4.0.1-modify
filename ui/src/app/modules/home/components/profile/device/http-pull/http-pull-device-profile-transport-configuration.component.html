@@ -1,5 +1,5 @@
 <form [formGroup]="form" class="http-pull-form">
-  <div class="tb-small section-title" translate>device-profile.http-pull.section-poll</div>
+  <div class="jnks-iot-small section-title" translate>device-profile.http-pull.section-poll</div>
   <section class="flex flex-row gap-2 xs:flex-col global-timing">
     <mat-form-field class="flex-1 mat-block">
       <mat-label translate>device-profile.http-pull.querying-frequency-ms</mat-label>
@@ -16,16 +16,16 @@
     </mat-form-field>
   </section>
 
-  <tb-http-pull-poll-requests-config
+  <jnks-iot-http-pull-poll-requests-config
     formControlName="pollRequests"
     [defaultQueryingFrequencyMs]="form.get('queryingFrequencyMs').value">
-  </tb-http-pull-poll-requests-config>
+  </jnks-iot-http-pull-poll-requests-config>
 
   <mat-expansion-panel class="http-pull-panel">
     <mat-expansion-panel-header>
       <mat-panel-title translate>device-profile.http-pull.section-auth</mat-panel-title>
     </mat-expansion-panel-header>
-    <p class="tb-hint auth-section-hint" translate>device-profile.http-pull.auth-section-hint</p>
+    <p class="jnks-iot-hint auth-section-hint" translate>device-profile.http-pull.auth-section-hint</p>
     <mat-form-field class="mat-block">
       <mat-label translate>device-profile.http-pull.auth-type</mat-label>
       <mat-select formControlName="authType">

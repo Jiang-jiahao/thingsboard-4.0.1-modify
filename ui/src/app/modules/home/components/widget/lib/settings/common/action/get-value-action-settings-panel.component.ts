@@ -1,6 +1,6 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -22,7 +22,7 @@ import { EntityType } from '@shared/models/entity-type.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-get-value-action-settings-panel',
+  selector: 'jnks-iot-get-value-action-settings-panel',
   templateUrl: './get-value-action-settings-panel.component.html',
   providers: [],
   styleUrls: ['./action-settings-panel.component.scss'],
@@ -58,7 +58,7 @@ export class GetValueActionSettingsPanelComponent extends PageComponent implemen
   widgetType: widgetType;
 
   @Input()
-  popover: TbPopoverComponent<GetValueActionSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<GetValueActionSettingsPanelComponent>;
 
   @Output()
   getValueSettingsApplied = new EventEmitter<GetValueSettings<any>>();

@@ -29,29 +29,29 @@
       </mat-form-field>
     </div>
     <div class="flex flex-row gap-2 xs:flex-col xs:gap-0">
-      <tb-entity-type-select
+      <jnks-iot-entity-type-select
         class="mat-block flex-1"
         formControlName="entityType"
         [showLabel]="true"
         [appearance]="'outline'"
         [allowedEntityTypes]="allowedEntityTypes"
-      ></tb-entity-type-select>
-      <tb-entity-subtype-autocomplete
+      ></jnks-iot-entity-type-select>
+      <jnks-iot-entity-subtype-autocomplete
         *ngIf="addEntityFormGroup.get('entityType').value == 'ASSET'"
         class="mat-block flex-1"
         formControlName="type"
         [required]="true"
         [entityType]="'ASSET'"
         [appearance]="'outline'"
-      ></tb-entity-subtype-autocomplete>
-      <tb-entity-subtype-autocomplete
+      ></jnks-iot-entity-subtype-autocomplete>
+      <jnks-iot-entity-subtype-autocomplete
         *ngIf="addEntityFormGroup.get('entityType').value != 'ASSET'"
         class="mat-block flex-1"
         formControlName="type"
         [required]="true"
         [entityType]="'DEVICE'"
         [appearance]="'outline'"
-      ></tb-entity-subtype-autocomplete>
+      ></jnks-iot-entity-subtype-autocomplete>
     </div>
     <div formGroupName="attributes" class="flex flex-col">
       <div class="flex flex-row gap-2 xs:flex-col xs:gap-0">

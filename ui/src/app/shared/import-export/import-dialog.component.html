@@ -12,13 +12,13 @@
   </mat-progress-bar>
   <div mat-dialog-content>
     <div class="flex flex-1 flex-col">
-      <tb-toggle-select *ngIf="enableImportFromContent"
+      <jnks-iot-toggle-select *ngIf="enableImportFromContent"
                         class="flex-1"
                         formControlName="importType">
-        <tb-toggle-option value="file">{{ importFileLabel | translate }}</tb-toggle-option>
-        <tb-toggle-option value="content">{{ importContentLabel | translate }}</tb-toggle-option>
-      </tb-toggle-select>
-      <tb-file-input *ngIf="importFormGroup.get('importType').value === 'file'"
+        <jnks-iot-toggle-option value="file">{{ importFileLabel | translate }}</jnks-iot-toggle-option>
+        <jnks-iot-toggle-option value="content">{{ importContentLabel | translate }}</jnks-iot-toggle-option>
+      </jnks-iot-toggle-select>
+      <jnks-iot-file-input *ngIf="importFormGroup.get('importType').value === 'file'"
         [contentConvertFunction]="loadDataFromJsonContent"
         [existingFileName]="currentFileName"
         (fileNameChanged)="currentFileName = $event"
@@ -28,12 +28,12 @@
         dropLabel="{{ 'import.drop-json-file-or' | translate }}"
         accept=".json,application/json"
         allowedExtensions="json">
-      </tb-file-input>
-      <tb-json-object-edit *ngIf="importFormGroup.get('importType').value === 'content'"
+      </jnks-iot-file-input>
+      <jnks-iot-json-object-edit *ngIf="importFormGroup.get('importType').value === 'content'"
         formControlName="jsonContent"
         jsonRequired
         label="{{ importContentLabel | translate }}">
-      </tb-json-object-edit>
+      </jnks-iot-json-object-edit>
     </div>
   </div>
   <div mat-dialog-actions class="flex items-center justify-end">

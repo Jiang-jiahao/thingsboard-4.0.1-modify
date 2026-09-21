@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
 import { COMMA, ENTER, SEMICOLON } from '@angular/cdk/keycodes';
 
 @Component({
-  selector: 'tb-analogue-compass-widget-settings',
+  selector: 'jnks-iot-analogue-compass-widget-settings',
   templateUrl: './analogue-compass-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

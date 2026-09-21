@@ -28,7 +28,7 @@ import { getCurrentAuthUser } from '@core/auth/auth.selectors';
 import { Authority } from '@shared/models/authority.enum';
 
 @Component({
-  selector: 'tb-client',
+  selector: 'jnks-iot-client',
   templateUrl: './client.component.html',
   styleUrls: ['./client.component.scss']
 })

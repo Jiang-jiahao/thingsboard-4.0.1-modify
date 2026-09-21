@@ -23,7 +23,7 @@ import { UtilsService } from '@core/services/utils.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-alarm-rule',
+  selector: 'jnks-iot-alarm-rule',
   templateUrl: './alarm-rule.component.html',
   styleUrls: ['./alarm-rule.component.scss'],
   providers: [
@@ -118,7 +118,7 @@ export class AlarmRuleComponent implements ControlValueAccessor, OnInit, Validat
     this.dialog.open<EditAlarmDetailsDialogComponent, EditAlarmDetailsDialogData,
           string>(EditAlarmDetailsDialogComponent, {
           disableClose: true,
-          panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+          panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
           data: {
             alarmDetails: this.alarmRuleFormGroup.get('alarmDetails').value,
             readonly: this.disabled

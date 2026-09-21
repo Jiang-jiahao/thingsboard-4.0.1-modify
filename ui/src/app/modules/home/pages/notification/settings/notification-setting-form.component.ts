@@ -9,7 +9,7 @@ import {
 } from '@shared/models/notification.models';
 
 @Component({
-  selector: 'tb-notification-setting-form',
+  selector: 'jnks-iot-notification-setting-form',
   templateUrl: './notification-setting-form.component.html',
   styleUrls: ['./notification-setting-form.component.scss'],
   providers: [

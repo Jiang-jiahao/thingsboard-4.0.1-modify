@@ -44,7 +44,7 @@ export type ScrollDirection = 'after' | 'before';
 @Directive(
   {
     // eslint-disable-next-line @angular-eslint/directive-selector
-    selector: 'tb-toggle-option',
+    selector: 'jnks-iot-toggle-option',
   }
 )
 // eslint-disable-next-line @angular-eslint/directive-class-suffix
@@ -120,7 +120,7 @@ export abstract class _ToggleBase extends PageComponent implements AfterContentI
 }
 
 @Component({
-  selector: 'tb-toggle-header',
+  selector: 'jnks-iot-toggle-header',
   templateUrl: './toggle-header.component.html',
   styleUrls: ['./toggle-header.component.scss']
 })
@@ -136,7 +136,7 @@ export class ToggleHeaderComponent extends _ToggleBase implements OnInit, AfterV
   @ViewChild('toggleGroupContainer', {static: false})
   toggleGroupContainer: ElementRef<HTMLElement>;
 
-  @HostBinding('class.tb-toggle-header-pagination-controls-enabled')
+  @HostBinding('class.jnks-iot-toggle-header-pagination-controls-enabled')
   private showPaginationControls = false;
   private _showPaginationControlsChanged = false;
 

@@ -2,31 +2,31 @@ import {
   CirclesDataLayerSettings,
   defaultBaseCirclesDataLayerSettings,
   isJSON, MapDataLayerType,
-  TbCircleData,
-  TbMapDatasource
+  JnksIotCircleData,
+  JnksIotMapDatasource
 } from '@shared/models/widget/maps/map.models';
 import L from 'leaflet';
 import { DataKey, FormattedData } from '@shared/models/widget.models';
-import { ShapeStyleInfo, TbShapesDataLayer } from '@home/components/widget/lib/maps/data-layer/shapes-data-layer';
-import { TbMap } from '@home/components/widget/lib/maps/map';
+import { ShapeStyleInfo, JnksIotShapesDataLayer } from '@home/components/widget/lib/maps/data-layer/shapes-data-layer';
+import { JnksIotMap } from '@home/components/widget/lib/maps/map';
 import { Observable } from 'rxjs';
 import { isNotEmptyStr } from '@core/utils';
 import {
-  TbLatestDataLayerItem,
+  JnksIotLatestDataLayerItem,
   UnplacedMapDataItem
 } from '@home/components/widget/lib/maps/data-layer/latest-map-data-layer';
 import { map } from 'rxjs/operators';
 
-class TbCircleDataLayerItem extends TbLatestDataLayerItem<CirclesDataLayerSettings, TbCirclesDataLayer> {
+class JnksIotCircleDataLayerItem extends JnksIotLatestDataLayerItem<CirclesDataLayerSettings, JnksIotCirclesDataLayer> {
 
   private circle: L.Circle;
   private circleStyleInfo: ShapeStyleInfo;
   private editing = false;
 
-  constructor(data: FormattedData<TbMapDatasource>,
-              dsData: FormattedData<TbMapDatasource>[],
+  constructor(data: FormattedData<JnksIotMapDatasource>,
+              dsData: FormattedData<JnksIotMapDatasource>[],
               protected settings: CirclesDataLayerSettings,
-              protected dataLayer: TbCirclesDataLayer) {
+              protected dataLayer: JnksIotCirclesDataLayer) {
     super(data, dsData, settings, dataLayer);
   }
 
@@ -45,7 +45,7 @@ class TbCircleDataLayerItem extends TbLatestDataLayerItem<CirclesDataLayerSettin
     }
   }
 
-  protected create(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): L.Layer {
+  protected create(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): L.Layer {
     const circleData = this.dataLayer.extractCircleCoordinates(data);
     const center = new L.LatLng(circleData.latitude, circleData.longitude);
     this.circle = L.circle(center, {
@@ -70,11 +70,11 @@ class TbCircleDataLayerItem extends TbLatestDataLayerItem<CirclesDataLayerSettin
   }
 
   protected bindLabel(content: L.Content): void {
-    this.circle.bindTooltip(content, { className: 'tb-circle-label', permanent: true, direction: 'center'})
+    this.circle.bindTooltip(content, { className: 'jnks-iot-circle-label', permanent: true, direction: 'center'})
     .openTooltip(this.circle.getLatLng());
   }
 
-  protected doUpdate(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): void {
+  protected doUpdate(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): void {
     this.dataLayer.getShapeStyle(data, dsData, this.circleStyleInfo?.patternId).subscribe((styleInfo) => {
       this.circleStyleInfo = styleInfo;
       this.updateCircleShape(data);
@@ -84,7 +84,7 @@ class TbCircleDataLayerItem extends TbLatestDataLayerItem<CirclesDataLayerSettin
     });
   }
 
-  protected doInvalidateCoordinates(data: FormattedData<TbMapDatasource>, _dsData: FormattedData<TbMapDatasource>[]): void {
+  protected doInvalidateCoordinates(data: FormattedData<JnksIotMapDatasource>, _dsData: FormattedData<JnksIotMapDatasource>[]): void {
     this.updateCircleShape(data);
   }
 
@@ -153,7 +153,7 @@ class TbCircleDataLayerItem extends TbLatestDataLayerItem<CirclesDataLayerSettin
     this.dataLayer.saveCircleCoordinates(this.data, center, radius).subscribe();
   }
 
-  private updateCircleShape(data: FormattedData<TbMapDatasource>) {
+  private updateCircleShape(data: FormattedData<JnksIotMapDatasource>) {
     if (this.editing) {
       return;
     }
@@ -168,9 +168,9 @@ class TbCircleDataLayerItem extends TbLatestDataLayerItem<CirclesDataLayerSettin
   }
 }
 
-export class TbCirclesDataLayer extends TbShapesDataLayer<CirclesDataLayerSettings, TbCirclesDataLayer> {
+export class JnksIotCirclesDataLayer extends JnksIotShapesDataLayer<CirclesDataLayerSettings, JnksIotCirclesDataLayer> {
 
-  constructor(protected map: TbMap<any>,
+  constructor(protected map: JnksIotMap<any>,
               inputSettings: CirclesDataLayerSettings) {
     super(map, inputSettings);
   }
@@ -194,12 +194,12 @@ export class TbCirclesDataLayer extends TbShapesDataLayer<CirclesDataLayerSettin
     }
   }
 
-  public extractCircleCoordinates(data: FormattedData<TbMapDatasource>) {
-    const circleData: TbCircleData = JSON.parse(data[this.settings.circleKey.label]);
+  public extractCircleCoordinates(data: FormattedData<JnksIotMapDatasource>) {
+    const circleData: JnksIotCircleData = JSON.parse(data[this.settings.circleKey.label]);
     return this.map.circleDataToCoordinates(circleData);
   }
 
-  public saveCircleCoordinates(data: FormattedData<TbMapDatasource>, center: L.LatLng, radius: number): Observable<TbCircleData> {
+  public saveCircleCoordinates(data: FormattedData<JnksIotMapDatasource>, center: L.LatLng, radius: number): Observable<JnksIotCircleData> {
     const converted = center ? this.map.coordinatesToCircleData(center, radius) : null;
     const circleData = [
       {
@@ -216,7 +216,7 @@ export class TbCirclesDataLayer extends TbShapesDataLayer<CirclesDataLayerSettin
     return [this.settings.circleKey];
   }
 
-  protected defaultBaseSettings(map: TbMap<any>): Partial<CirclesDataLayerSettings> {
+  protected defaultBaseSettings(map: JnksIotMap<any>): Partial<CirclesDataLayerSettings> {
     return defaultBaseCirclesDataLayerSettings(map.type());
   }
 
@@ -224,12 +224,12 @@ export class TbCirclesDataLayer extends TbShapesDataLayer<CirclesDataLayerSettin
     return super.doSetup();
   }
 
-  protected isValidLayerData(layerData: FormattedData<TbMapDatasource>): boolean {
+  protected isValidLayerData(layerData: FormattedData<JnksIotMapDatasource>): boolean {
     return layerData && isNotEmptyStr(layerData[this.settings.circleKey.label]) && isJSON(layerData[this.settings.circleKey.label]);
   }
 
-  protected createLayerItem(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): TbLatestDataLayerItem<CirclesDataLayerSettings, TbCirclesDataLayer> {
-    return new TbCircleDataLayerItem(data, dsData, this.settings, this);
+  protected createLayerItem(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): JnksIotLatestDataLayerItem<CirclesDataLayerSettings, JnksIotCirclesDataLayer> {
+    return new JnksIotCircleDataLayerItem(data, dsData, this.settings, this);
   }
 
 }

@@ -1,28 +1,28 @@
-<div class="tb-data-layer-color-settings-panel" [formGroup]="colorSettingsFormGroup">
-  <div class="tb-data-layer-color-settings-title" translate>widgets.maps.data-layer.color-settings</div>
+<div class="jnks-iot-data-layer-color-settings-panel" [formGroup]="colorSettingsFormGroup">
+  <div class="jnks-iot-data-layer-color-settings-title" translate>widgets.maps.data-layer.color-settings</div>
   <div class="flex flex-row">
-    <tb-toggle-select formControlName="type" class="flex-1">
-      <tb-toggle-option [value]="DataLayerColorType.constant">
+    <jnks-iot-toggle-select formControlName="type" class="flex-1">
+      <jnks-iot-toggle-option [value]="DataLayerColorType.constant">
         {{ 'widgets.maps.data-layer.color-type-constant' | translate }}
-      </tb-toggle-option>
-      <tb-toggle-option [value]="DataLayerColorType.range">
+      </jnks-iot-toggle-option>
+      <jnks-iot-toggle-option [value]="DataLayerColorType.range">
         {{ 'widgets.maps.data-layer.color-type-range' | translate }}
-      </tb-toggle-option>
-      <tb-toggle-option [value]="DataLayerColorType.function">
+      </jnks-iot-toggle-option>
+      <jnks-iot-toggle-option [value]="DataLayerColorType.function">
         {{ 'widgets.maps.data-layer.color-type-function' | translate }}
-      </tb-toggle-option>
-    </tb-toggle-select>
+      </jnks-iot-toggle-option>
+    </jnks-iot-toggle-select>
   </div>
-  <div class="tb-form-row space-between">
+  <div class="jnks-iot-form-row space-between">
     <div translate>widgets.maps.data-layer.color</div>
-    <tb-color-input asBoxInput
+    <jnks-iot-color-input asBoxInput
                     formControlName="color">
-    </tb-color-input>
+    </jnks-iot-color-input>
   </div>
-  <div class="tb-data-layer-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== DataLayerColorType.constant">
+  <div class="jnks-iot-data-layer-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== DataLayerColorType.constant">
   </div>
-  <div class="tb-data-layer-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== DataLayerColorType.range">
-    <tb-data-key-input style="padding-top: 6px;"
+  <div class="jnks-iot-data-layer-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== DataLayerColorType.range">
+    <jnks-iot-data-key-input style="padding-top: 6px;"
       inlineField="false"
       appearance="outline"
       subscriptSizing="fixed"
@@ -40,20 +40,20 @@
       [generateKey]="context.generateDataKey"
       (keyEdit)="editRangeKey()"
       formControlName="rangeKey">
-    </tb-data-key-input>
-    <div class="tb-form-panel stroked">
+    </jnks-iot-data-key-input>
+    <div class="jnks-iot-form-panel stroked">
       <div translate>widgets.maps.data-layer.color-range</div>
-      <tb-color-range-list class="tb-color-ranges-panel"
+      <jnks-iot-color-range-list class="jnks-iot-color-ranges-panel"
                            simpleRange
                            formControlName="range"
                            [popover]="popover">
-      </tb-color-range-list>
+      </jnks-iot-color-range-list>
     </div>
   </div>
-  <div class="tb-data-layer-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== DataLayerColorType.function">
+  <div class="jnks-iot-data-layer-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== DataLayerColorType.function">
     <ng-container *ngTemplateOutlet="function"></ng-container>
   </div>
-  <div class="tb-data-layer-color-settings-panel-buttons">
+  <div class="jnks-iot-data-layer-color-settings-panel-buttons">
     <span class="flex-1"></span>
     <button mat-button
             color="primary"
@@ -72,14 +72,14 @@
 </div>
 
 <ng-template #function>
-  <div class="tb-form-panel no-padding no-border" [formGroup]="colorSettingsFormGroup">
-    <tb-js-func formControlName="colorFunction"
+  <div class="jnks-iot-form-panel no-padding no-border" [formGroup]="colorSettingsFormGroup">
+    <jnks-iot-js-func formControlName="colorFunction"
                 withModules
                 [functionArgs]="['data', 'dsData']"
                 [globalVariables]="functionScopeVariables"
                 functionTitle="{{ 'widgets.maps.data-layer.color-function' | translate }}"
                 [helpId]="helpId"
                 [helpPopupStyle]="{width: '900px'}">
-    </tb-js-func>
+    </jnks-iot-js-func>
   </div>
 </ng-template>

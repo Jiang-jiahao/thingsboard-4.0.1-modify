@@ -36,7 +36,7 @@ import {
 } from '@shared/models/time/time.models';
 
 @Component({
-  selector: 'tb-aggregated-value-card-basic-config',
+  selector: 'jnks-iot-aggregated-value-card-basic-config',
   templateUrl: './aggregated-value-card-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

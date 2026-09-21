@@ -10,8 +10,8 @@ import com.jnks.iot.server.common.data.id.TenantId;
  * EDQS（Entity Data Query Service）查询 API 客户端接口。
  * <p>
  * 供 Core / DAO 等发起实体数据查询：将 {@link EdqsRequest} 交给 EDQS，
- * 异步拿到 {@link EdqsResponse}。真正实现通常通过队列请求-响应打到 tb-edqs
- *（如 tb-core 中的 {@code DefaultEdqsApiService}）；无真实现时由
+ * 异步拿到 {@link EdqsResponse}。真正实现通常通过队列请求-响应打到 jnks-iot-edqs
+ *（如 jnks-iot-core 中的 {@code DefaultEdqsApiService}）；无真实现时由
  * {@code DummyEdqsApiService} 占位，保证 Spring 能注入。
  * <p>
  * 与 {@link EdqsService} 的分工：本接口负责<strong>读/查询</strong>；

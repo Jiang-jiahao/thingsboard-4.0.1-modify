@@ -7,8 +7,8 @@ import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.stereotype.Service;
 import com.jnks.iot.server.cache.CacheSpecsMap;
 import com.jnks.iot.server.cache.TBRedisCacheConfiguration;
-import com.jnks.iot.server.cache.TbRedisSerializer;
-import com.jnks.iot.server.cache.VersionedRedisTbCache;
+import com.jnks.iot.server.cache.JnksIotRedisSerializer;
+import com.jnks.iot.server.cache.VersionedRedisJnksIotCache;
 import com.jnks.iot.server.common.data.CacheConstants;
 import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.util.ProtoUtils;
@@ -16,10 +16,10 @@ import com.jnks.iot.server.gen.transport.TransportProtos;
 
 @ConditionalOnProperty(prefix = "cache", value = "type", havingValue = "redis")
 @Service("DeviceProfileCache")
-public class DeviceProfileRedisCache extends VersionedRedisTbCache<DeviceProfileCacheKey, DeviceProfile> {
+public class DeviceProfileRedisCache extends VersionedRedisJnksIotCache<DeviceProfileCacheKey, DeviceProfile> {
 
     public DeviceProfileRedisCache(TBRedisCacheConfiguration configuration, CacheSpecsMap cacheSpecsMap, RedisConnectionFactory connectionFactory) {
-        super(CacheConstants.DEVICE_PROFILE_CACHE, cacheSpecsMap, connectionFactory, configuration, new TbRedisSerializer<DeviceProfileCacheKey, DeviceProfile>() {
+        super(CacheConstants.DEVICE_PROFILE_CACHE, cacheSpecsMap, connectionFactory, configuration, new JnksIotRedisSerializer<DeviceProfileCacheKey, DeviceProfile>() {
             @Override
             public byte[] serialize(DeviceProfile deviceProfile) throws SerializationException {
                 return ProtoUtils.toProto(deviceProfile).toByteArray();

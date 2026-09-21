@@ -61,7 +61,7 @@ self.onDataUpdated = function() {
 
 In this example, the external JS library API was used that becomes available after injecting the corresponding URL in **Resources** section.
 
-The value displayed was obtained from <span trigger-style="fontSize: 16px;" trigger-text="<b>subscription</b>" tb-help-popup="widget/editor/widget_js_subscription_object"></span> **data** property for the first dataKey. 
+The value displayed was obtained from <span trigger-style="fontSize: 16px;" trigger-text="<b>subscription</b>" jnks-iot-help-popup="widget/editor/widget_js_subscription_object"></span> **data** property for the first dataKey. 
 
 <br/>
 <br/>

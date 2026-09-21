@@ -15,7 +15,7 @@ import {
 import { badgePositionTranslationsMap } from '@app/shared/models/mobile-app.models';
 
 @Component({
-  selector: 'tb-mobile-app-qr-code-basic-config',
+  selector: 'jnks-iot-mobile-app-qr-code-basic-config',
   templateUrl: './mobile-app-qr-code-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

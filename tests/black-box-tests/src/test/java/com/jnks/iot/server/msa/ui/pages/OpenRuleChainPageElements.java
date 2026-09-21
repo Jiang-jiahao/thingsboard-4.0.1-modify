@@ -10,8 +10,8 @@ public class OpenRuleChainPageElements extends AbstractBasePage {
     }
 
     private static final String DONE_BTN = "//mat-icon[contains(text(),'done')]/parent::button";
-    private static final String INPUT_NODE = "//div[@class='tb-rule-node tb-input-type']";
-    private static final String HEAD_RULE_CHAIN_NAME = "//div[@class='tb-breadcrumb']/span[2]";
+    private static final String INPUT_NODE = "//div[@class='jnks-iot-rule-node jnks-iot-input-type']";
+    private static final String HEAD_RULE_CHAIN_NAME = "//div[@class='jnks-iot-breadcrumb']/span[2]";
 
     public WebElement inputNode() {
         return waitUntilVisibilityOfElementLocated(INPUT_NODE);

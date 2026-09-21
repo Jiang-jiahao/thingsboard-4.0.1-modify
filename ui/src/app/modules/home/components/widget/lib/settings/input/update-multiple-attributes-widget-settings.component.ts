@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-update-multiple-attributes-widget-settings',
+  selector: 'jnks-iot-update-multiple-attributes-widget-settings',
   templateUrl: './update-multiple-attributes-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

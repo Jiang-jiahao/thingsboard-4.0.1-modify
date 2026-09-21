@@ -24,7 +24,7 @@ import { ErrorStateMatcher } from '@angular/material/core';
 import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
 @Component({
-  selector: 'tb-entity-alias-select',
+  selector: 'jnks-iot-entity-alias-select',
   templateUrl: './entity-alias-select.component.html',
   styleUrls: ['./entity-alias-select.component.scss'],
   providers: [{
@@ -60,7 +60,7 @@ export class EntityAliasSelectComponent implements ControlValueAccessor, OnInit,
 
   @Input()
   @coerceBoolean()
-  tbRequired: boolean;
+  jnksIotRequired: boolean;
 
   @Input()
   disabled: boolean;
@@ -137,7 +137,7 @@ export class EntityAliasSelectComponent implements ControlValueAccessor, OnInit,
 
   isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
     const originalErrorState = this.errorStateMatcher.isErrorState(control, form);
-    const customErrorState = this.tbRequired && !this.modelValue;
+    const customErrorState = this.jnksIotRequired && !this.modelValue;
     return originalErrorState || customErrorState;
   }
 

@@ -14,10 +14,10 @@ import { WidgetContext } from '@home/models/widget-component.models';
 import { DataSet, DatasourceType, FormattedData, widgetType } from '@shared/models/widget.models';
 import { DataKeyType } from '@shared/models/telemetry/telemetry.models';
 import { WidgetSubscriptionOptions } from '@core/api/widget-api.models';
-import { isDefinedAndNotNull, isEmptyStr, isNotEmptyStr, parseTbFunction } from '@core/utils';
+import { isDefinedAndNotNull, isEmptyStr, isNotEmptyStr, parseJnksIotFunction } from '@core/utils';
 import { EntityDataPageLink } from '@shared/models/query/query.models';
 import { ImagePipe } from '@shared/pipe/image.pipe';
-import { CompiledTbFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction } from '@shared/models/js-function.models';
 
 const maxZoom = 4; // ?
 
@@ -28,13 +28,13 @@ export class ImageMap extends LeafletMap {
     width = 0;
     height = 0;
     imageUrl: string;
-    posFunction: CompiledTbFunction<PosFunction>;
+    posFunction: CompiledJnksIotFunction<PosFunction>;
 
     constructor(ctx: WidgetContext, $container: HTMLElement, options: WidgetUnitedMapSettings) {
         super(ctx, $container, options);
 
         const initData = {
-          posFunction: parseTbFunction<PosFunction>(this.ctx.http, options.posFunction,
+          posFunction: parseJnksIotFunction<PosFunction>(this.ctx.http, options.posFunction,
             ['origXPos', 'origYPos', 'data', 'dsData', 'dsIndex', 'aspect']),
           mapImage: this.mapImage(options)
         };

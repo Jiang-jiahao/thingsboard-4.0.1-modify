@@ -25,7 +25,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-count-widget-settings',
+  selector: 'jnks-iot-count-widget-settings',
   templateUrl: './count-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss'],
   providers: [

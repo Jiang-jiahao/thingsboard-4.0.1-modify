@@ -12,7 +12,7 @@ import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
 import com.jnks.iot.server.common.data.tenant.profile.TenantProfileData;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.common.transport.TransportTenantProfileCache;
 import com.jnks.iot.server.common.transport.profile.TenantProfileUpdateResult;
 
@@ -60,21 +60,21 @@ public class DefaultTransportRateLimitService implements TransportRateLimitServi
     }
 
     @Override
-    public TbPair<EntityType, Boolean> checkLimits(TenantId tenantId, DeviceId gatewayId, DeviceId deviceId, int dataPoints, boolean isGateway) {
+    public JnksIotPair<EntityType, Boolean> checkLimits(TenantId tenantId, DeviceId gatewayId, DeviceId deviceId, int dataPoints, boolean isGateway) {
         if (!tenantAllowed.getOrDefault(tenantId, Boolean.TRUE)) {
-            return TbPair.of(EntityType.API_USAGE_STATE, false);
+            return JnksIotPair.of(EntityType.API_USAGE_STATE, false);
         }
         if (!checkEntityRateLimit(dataPoints, getTenantRateLimits(tenantId))) {
-            return TbPair.of(EntityType.TENANT, false);
+            return JnksIotPair.of(EntityType.TENANT, false);
         }
         if (isGateway && !checkEntityRateLimit(dataPoints, getGatewayDeviceRateLimits(tenantId, deviceId))) {
-            return TbPair.of(EntityType.DEVICE, true);
+            return JnksIotPair.of(EntityType.DEVICE, true);
         }
         if (gatewayId != null && !checkEntityRateLimit(dataPoints, getGatewayRateLimits(tenantId, gatewayId))) {
-            return TbPair.of(EntityType.DEVICE, true);
+            return JnksIotPair.of(EntityType.DEVICE, true);
         }
         if (!isGateway && deviceId != null && !checkEntityRateLimit(dataPoints, getDeviceRateLimits(tenantId, deviceId))) {
-            return TbPair.of(EntityType.DEVICE, false);
+            return JnksIotPair.of(EntityType.DEVICE, false);
         }
 
         return null;

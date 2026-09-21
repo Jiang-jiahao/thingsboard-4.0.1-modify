@@ -8,14 +8,14 @@
     </button>
   </mat-toolbar>
   <div mat-dialog-content class="relative">
-    <div class="tb-absolute-fill">
-      <div class="tb-fullscreen-panel flex size-full flex-row lt-md:flex-col">
+    <div class="jnks-iot-absolute-fill">
+      <div class="jnks-iot-fullscreen-panel flex size-full flex-row lt-md:flex-col">
         <div #leftPanel class="test-block-content overflow-hidden">
           <div class="relative size-full min-w-64">
             <div class="block-label-container left">
               <span class="block-label">{{ 'calculated-fields.expression' | translate }}</span>
             </div>
-            <tb-js-func
+            <jnks-iot-js-func
               #expressionContent
               formControlName="expression"
               functionName="calculate"
@@ -39,7 +39,7 @@
               <div class="block-label-container right-top">
                 <span class="block-label">{{ 'calculated-fields.arguments' | translate }}</span>
               </div>
-              <tb-calculated-field-test-arguments class="size-full" formControlName="arguments" [argumentsTypeMap]="argumentsTypeMap"/>
+              <jnks-iot-calculated-field-test-arguments class="size-full" formControlName="arguments" [argumentsTypeMap]="argumentsTypeMap"/>
             </div>
           </div>
           <div #bottomRightPanel class="test-block-content">
@@ -47,7 +47,7 @@
               <div class="block-label-container right-bottom">
                 <span class="block-label" translate>common.output</span>
               </div>
-              <tb-json-content
+              <jnks-iot-json-content
                 class="flex-1"
                 formControlName="output"
                 label="{{ 'common.output' | translate }}"

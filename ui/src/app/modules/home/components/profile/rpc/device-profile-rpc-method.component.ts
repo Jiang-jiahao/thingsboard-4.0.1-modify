@@ -51,7 +51,7 @@ export function parseProtocolTemplateCommandRef(ref: string): Pick<DeviceProfile
 }
 
 @Component({
-  selector: 'tb-device-profile-rpc-method',
+  selector: 'jnks-iot-device-profile-rpc-method',
   templateUrl: './device-profile-rpc-method.component.html',
   styleUrls: ['./device-profile-rpc-method.component.scss'],
   providers: [

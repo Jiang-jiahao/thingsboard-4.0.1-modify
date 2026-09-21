@@ -22,7 +22,7 @@ import {
 } from '@home/components/widget/lib/cards/value-chart-card-widget.models';
 
 @Component({
-  selector: 'tb-value-chart-card-basic-config',
+  selector: 'jnks-iot-value-chart-card-basic-config',
   templateUrl: './value-chart-card-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

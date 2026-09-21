@@ -5,7 +5,7 @@ import { EntityTabsComponent } from '../../components/entity/entity-tabs.compone
 import { User } from '@app/shared/models/user.model';
 
 @Component({
-  selector: 'tb-user-tabs',
+  selector: 'jnks-iot-user-tabs',
   templateUrl: './user-tabs.component.html',
   styleUrls: []
 })

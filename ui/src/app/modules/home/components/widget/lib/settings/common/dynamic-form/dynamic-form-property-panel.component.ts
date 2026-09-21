@@ -1,5 +1,5 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { ContentType, ValueType } from '@shared/models/constants';
 import {
@@ -18,7 +18,7 @@ import { isUndefinedOrNull } from '@core/utils';
 import { StringItemsOption } from '@shared/components/string-items-list.component';
 
 @Component({
-  selector: 'tb-dynamic-form-property-panel',
+  selector: 'jnks-iot-dynamic-form-property-panel',
   templateUrl: './dynamic-form-property-panel.component.html',
   styleUrls: ['./dynamic-form-property-panel.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -66,7 +66,7 @@ export class DynamicFormPropertyPanelComponent implements OnInit {
   disabled: boolean;
 
   @Input()
-  popover: TbPopoverComponent<DynamicFormPropertyPanelComponent>;
+  popover: JnksIotPopoverComponent<DynamicFormPropertyPanelComponent>;
 
   @Output()
   propertySettingsApplied = new EventEmitter<FormProperty>();

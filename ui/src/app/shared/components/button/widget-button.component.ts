@@ -29,7 +29,7 @@ const horizontalLayoutPadding = 24;
 const verticalLayoutPadding = 16;
 
 @Component({
-  selector: 'tb-widget-button',
+  selector: 'jnks-iot-widget-button',
   templateUrl: './widget-button.component.html',
   styleUrls: ['./widget-button.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -140,7 +140,7 @@ export class WidgetButtonComponent implements OnInit, AfterViewInit, OnDestroy, 
     this.updateBorderRadius();
     const appearanceCss = generateWidgetButtonAppearanceCss(this.appearance);
     this.appearanceCssClass = this.utils.applyCssToElement(this.renderer, this.elementRef.nativeElement,
-      'tb-widget-button', appearanceCss);
+      'jnks-iot-widget-button', appearanceCss);
     this.updateAutoScale();
   }
 

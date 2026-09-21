@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-external-node-pub-sub-config',
+  selector: 'jnks-iot-external-node-pub-sub-config',
   templateUrl: './pubsub-config.component.html',
   styleUrls: []
 })

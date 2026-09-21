@@ -50,7 +50,7 @@ public class MqttTransportBalancingServiceTest {
 
     @Test
     void soleMqttNodeOwnsEveryDevice() {
-        ServiceInfo mqtt1 = mqttNode("tb-mqtt-transport1");
+        ServiceInfo mqtt1 = mqttNode("jnks-iot-mqtt-transport1");
         balancing.onServiceListChanged(new ServiceListChangedEvent(List.of(), mqtt1));
 
         assertThat(balancing.isManagedByCurrentTransport(DEVICE_A)).isTrue();
@@ -59,8 +59,8 @@ public class MqttTransportBalancingServiceTest {
 
     @Test
     void twoMqttNodesSplitDevices() {
-        ServiceInfo mqtt1 = mqttNode("tb-mqtt-transport1");
-        ServiceInfo mqtt2 = mqttNode("tb-mqtt-transport2");
+        ServiceInfo mqtt1 = mqttNode("jnks-iot-mqtt-transport1");
+        ServiceInfo mqtt2 = mqttNode("jnks-iot-mqtt-transport2");
         balancing.onServiceListChanged(new ServiceListChangedEvent(List.of(mqtt2), mqtt1));
 
         assertThat(balancing.isManagedByCurrentTransport(DEVICE_A)).isTrue();
@@ -69,8 +69,8 @@ public class MqttTransportBalancingServiceTest {
 
     @Test
     void duplicateZkEntriesForSameServiceIdCountAsOneNode() {
-        ServiceInfo mqtt1 = mqttNode("tb-mqtt-transport1");
-        ServiceInfo ghost = mqttNode("tb-mqtt-transport1");
+        ServiceInfo mqtt1 = mqttNode("jnks-iot-mqtt-transport1");
+        ServiceInfo ghost = mqttNode("jnks-iot-mqtt-transport1");
         balancing.onServiceListChanged(new ServiceListChangedEvent(List.of(ghost), mqtt1));
 
         assertThat(balancing.uniqueMqttTransports(List.of(ghost), mqtt1)).hasSize(1);
@@ -80,7 +80,7 @@ public class MqttTransportBalancingServiceTest {
 
     @Test
     void currentNodeWithoutTransportsStillOwnsEveryDevice() {
-        ServiceInfo mqtt1 = ServiceInfo.newBuilder().setServiceId("tb-mqtt-transport1").build();
+        ServiceInfo mqtt1 = ServiceInfo.newBuilder().setServiceId("jnks-iot-mqtt-transport1").build();
         balancing.onServiceListChanged(new ServiceListChangedEvent(List.of(), mqtt1));
 
         assertThat(balancing.isManagedByCurrentTransport(DEVICE_A)).isTrue();
@@ -89,12 +89,12 @@ public class MqttTransportBalancingServiceTest {
 
     @Test
     void peerJoiningSplitsDevicesEvenWithoutTransports() {
-        ServiceInfo mqtt1 = mqttNode("tb-mqtt-transport1");
+        ServiceInfo mqtt1 = mqttNode("jnks-iot-mqtt-transport1");
         balancing.onServiceListChanged(new ServiceListChangedEvent(List.of(), mqtt1));
         assertThat(balancing.isManagedByCurrentTransport(DEVICE_A)).isTrue();
         assertThat(balancing.isManagedByCurrentTransport(DEVICE_B)).isTrue();
 
-        ServiceInfo mqtt2 = ServiceInfo.newBuilder().setServiceId("tb-mqtt-transport2").build();
+        ServiceInfo mqtt2 = ServiceInfo.newBuilder().setServiceId("jnks-iot-mqtt-transport2").build();
         balancing.onServiceListChanged(new ServiceListChangedEvent(List.of(mqtt2), mqtt1));
         assertThat(balancing.uniqueMqttTransports(List.of(mqtt2), mqtt1)).hasSize(2);
         assertThat(balancing.isManagedByCurrentTransport(DEVICE_A)).isTrue();
@@ -103,8 +103,8 @@ public class MqttTransportBalancingServiceTest {
 
     @Test
     void droppingPeerMqttNodeTakesOverTheOtherHalf() {
-        ServiceInfo mqtt1 = mqttNode("tb-mqtt-transport1");
-        ServiceInfo mqtt2 = mqttNode("tb-mqtt-transport2");
+        ServiceInfo mqtt1 = mqttNode("jnks-iot-mqtt-transport1");
+        ServiceInfo mqtt2 = mqttNode("jnks-iot-mqtt-transport2");
         balancing.onServiceListChanged(new ServiceListChangedEvent(List.of(mqtt2), mqtt1));
         assertThat(balancing.isManagedByCurrentTransport(DEVICE_B)).isFalse();
 

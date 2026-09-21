@@ -32,7 +32,7 @@ const layoutHeightWithTitle = 60;
 const layoutPadding = 24;
 
 @Component({
-  selector: 'tb-count-widget',
+  selector: 'jnks-iot-count-widget',
   templateUrl: './count-widget.component.html',
   styleUrls: ['./count-widget.component.scss']
 })

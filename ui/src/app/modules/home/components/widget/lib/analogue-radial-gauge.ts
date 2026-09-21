@@ -3,13 +3,13 @@ import {
   AnalogueRadialGaugeSettings
 } from '@home/components/widget/lib/analogue-radial-gauge.models';
 import { WidgetContext } from '@home/models/widget-component.models';
-import { TbAnalogueGauge } from '@home/components/widget/lib/analogue-gauge.models';
+import { JnksIotAnalogueGauge } from '@home/components/widget/lib/analogue-gauge.models';
 import RadialGauge = CanvasGauges.RadialGauge;
 import RadialGaugeOptions = CanvasGauges.RadialGaugeOptions;
 import BaseGauge = CanvasGauges.BaseGauge;
 
 // @dynamic
-export class TbAnalogueRadialGauge extends TbAnalogueGauge<AnalogueRadialGaugeSettings, RadialGaugeOptions>{
+export class JnksIotAnalogueRadialGauge extends JnksIotAnalogueGauge<AnalogueRadialGaugeSettings, RadialGaugeOptions>{
 
   constructor(ctx: WidgetContext, canvasId: string) {
     super(ctx, canvasId);

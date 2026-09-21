@@ -17,7 +17,7 @@ import {
 import { ValueType } from '@shared/models/constants';
 
 @Component({
-  selector: 'tb-single-switch-basic-config',
+  selector: 'jnks-iot-single-switch-basic-config',
   templateUrl: './single-switch-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

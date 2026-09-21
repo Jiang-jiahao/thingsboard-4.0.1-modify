@@ -1,6 +1,6 @@
 import { BaseData, ExportableEntity, HasId } from '@shared/models/base-data';
 import { TenantId } from '@shared/models/id/tenant-id';
-import { TbResourceId } from '@shared/models/id/tb-resource-id';
+import { JnksIotResourceId } from '@shared/models/id/jnks-iot-resource-id';
 import { NULL_UUID } from '@shared/models/id/has-uuid';
 import { HasTenantId } from '@shared/models/entity.models';
 
@@ -54,7 +54,7 @@ export const ResourceSubTypeTranslationMap = new Map<ResourceSubType, string>(
   ]
 );
 
-export interface TbResourceInfo<D> extends Omit<BaseData<TbResourceId>, 'name' | 'label'>, HasTenantId, ExportableEntity<TbResourceId> {
+export interface JnksIotResourceInfo<D> extends Omit<BaseData<JnksIotResourceId>, 'name' | 'label'>, HasTenantId, ExportableEntity<JnksIotResourceId> {
   tenantId?: TenantId;
   resourceKey?: string;
   title?: string;
@@ -68,7 +68,7 @@ export interface TbResourceInfo<D> extends Omit<BaseData<TbResourceId>, 'name' |
   descriptor?: D;
 }
 
-export type ResourceInfo = TbResourceInfo<any>;
+export type ResourceInfo = JnksIotResourceInfo<any>;
 
 export interface Resource extends ResourceInfo {
   data: string;
@@ -84,7 +84,7 @@ export interface ImageDescriptor {
   previewDescriptor: ImageDescriptor;
 }
 
-export type ImageResourceInfo = TbResourceInfo<ImageDescriptor>;
+export type ImageResourceInfo = JnksIotResourceInfo<ImageDescriptor>;
 
 export interface ImageResource extends ImageResourceInfo {
   base64?: string;
@@ -111,7 +111,7 @@ export interface ResourceInfoWithReferences extends ResourceInfo {
 }
 
 export interface ResourceDeleteResult {
-  resource: TbResourceInfo<any>;
+  resource: JnksIotResourceInfo<any>;
   success: boolean;
   resourceIsReferencedError?: boolean;
   error?: any;
@@ -135,8 +135,8 @@ export const toResourceDeleteResult = (resource: ResourceInfo, e?: any): Resourc
 export const imageResourceType = (imageInfo: ImageResourceInfo): ImageResourceType =>
   (!imageInfo.tenantId || imageInfo.tenantId?.id === NULL_UUID) ? 'system' : 'tenant';
 
-export const TB_IMAGE_PREFIX = 'tb-image;';
-export const TB_RESOURCE_PREFIX = 'tb-resource;';
+export const JNKS_IOT_IMAGE_PREFIX = 'jnks-iot-image;';
+export const JNKS_IOT_RESOURCE_PREFIX = 'jnks-iot-resource;';
 
 export const IMAGES_URL_REGEXP = /\/api\/images\/(tenant|system)\/(.*)/;
 export const IMAGES_URL_PREFIX = '/api/images';
@@ -147,23 +147,23 @@ export const PUBLIC_IMAGES_URL_PREFIX = '/api/images/public';
 
 export const IMAGE_BASE64_URL_PREFIX = 'data:image/';
 
-export const removeTbImagePrefix = (url: string): string => url ? url.replace(TB_IMAGE_PREFIX, '') : url;
-export const removeTbResourcePrefix = (url: string): string => url ? url.replace(TB_RESOURCE_PREFIX, '') : url;
+export const removeJnksIotImagePrefix = (url: string): string => url ? url.replace(JNKS_IOT_IMAGE_PREFIX, '') : url;
+export const removeJnksIotResourcePrefix = (url: string): string => url ? url.replace(JNKS_IOT_RESOURCE_PREFIX, '') : url;
 
-export const removeTbImagePrefixFromUrls = (urls: string[]): string[] => urls ? urls.map(url => removeTbImagePrefix(url)) : [];
+export const removeJnksIotImagePrefixFromUrls = (urls: string[]): string[] => urls ? urls.map(url => removeJnksIotImagePrefix(url)) : [];
 
-export const prependTbImagePrefix = (url: string): string => {
-  if (url && !url.startsWith(TB_IMAGE_PREFIX)) {
-    url = TB_IMAGE_PREFIX + url;
+export const prependJnksIotImagePrefix = (url: string): string => {
+  if (url && !url.startsWith(JNKS_IOT_IMAGE_PREFIX)) {
+    url = JNKS_IOT_IMAGE_PREFIX + url;
   }
   return url;
 };
 
-export const prependTbImagePrefixToUrls = (urls: string[]): string[] => urls ? urls.map(url => prependTbImagePrefix(url)) : [];
+export const prependJnksIotImagePrefixToUrls = (urls: string[]): string[] => urls ? urls.map(url => prependJnksIotImagePrefix(url)) : [];
 
-export const prependTbResourcePrefix = (url: string): string => {
-  if (url && !url.startsWith(TB_RESOURCE_PREFIX)) {
-    url = TB_RESOURCE_PREFIX + url;
+export const prependJnksIotResourcePrefix = (url: string): string => {
+  if (url && !url.startsWith(JNKS_IOT_RESOURCE_PREFIX)) {
+    url = JNKS_IOT_RESOURCE_PREFIX + url;
   }
   return url;
 };
@@ -171,7 +171,7 @@ export const prependTbResourcePrefix = (url: string): string => {
 export const isImageResourceUrl = (url: string): boolean => url && IMAGES_URL_REGEXP.test(url);
 
 export const isJSResourceUrl = (url: string): boolean => url && RESOURCES_URL_REGEXP.test(url);
-export const isJSResource = (url: string): boolean => url?.startsWith(TB_RESOURCE_PREFIX);
+export const isJSResource = (url: string): boolean => url?.startsWith(JNKS_IOT_RESOURCE_PREFIX);
 
 export const extractParamsFromImageResourceUrl = (url: string): {type: ImageResourceType; key: string} => {
   const res = url.match(IMAGES_URL_REGEXP);

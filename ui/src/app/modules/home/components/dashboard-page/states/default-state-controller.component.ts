@@ -13,7 +13,7 @@ import { EntityService } from '@core/http/entity.service';
 import { MobileService } from '@core/services/mobile.service';
 
 @Component({
-  selector: 'tb-default-state-controller',
+  selector: 'jnks-iot-default-state-controller',
   templateUrl: './default-state-controller.component.html',
   styleUrls: ['./default-state-controller.component.scss']
 })

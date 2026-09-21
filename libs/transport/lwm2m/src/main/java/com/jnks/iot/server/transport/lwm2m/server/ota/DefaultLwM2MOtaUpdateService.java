@@ -27,10 +27,10 @@ import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClient;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClientContext;
 import com.jnks.iot.server.transport.lwm2m.server.common.LwM2MExecutorAwareService;
 import com.jnks.iot.server.transport.lwm2m.server.downlink.LwM2mDownlinkMsgHandler;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MExecuteCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MExecuteRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteReplaceRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteResponseCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MExecuteCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MExecuteRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteReplaceRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteResponseCallback;
 import com.jnks.iot.server.transport.lwm2m.server.log.LwM2MTelemetryLogService;
 import com.jnks.iot.server.transport.lwm2m.server.ota.firmware.FirmwareDeliveryMethod;
 import com.jnks.iot.server.transport.lwm2m.server.ota.firmware.FirmwareUpdateResult;
@@ -41,7 +41,7 @@ import com.jnks.iot.server.transport.lwm2m.server.ota.software.LwM2MClientSwOtaI
 import com.jnks.iot.server.transport.lwm2m.server.ota.software.LwM2MSoftwareUpdateStrategy;
 import com.jnks.iot.server.transport.lwm2m.server.ota.software.SoftwareUpdateResult;
 import com.jnks.iot.server.transport.lwm2m.server.ota.software.SoftwareUpdateState;
-import com.jnks.iot.server.transport.lwm2m.server.store.TbLwM2MClientOtaInfoStore;
+import com.jnks.iot.server.transport.lwm2m.server.store.JnksIotLwM2MClientOtaInfoStore;
 import com.jnks.iot.server.transport.lwm2m.server.uplink.LwM2mUplinkMsgHandler;
 
 import java.util.ArrayList;
@@ -118,7 +118,7 @@ public class DefaultLwM2MOtaUpdateService extends LwM2MExecutorAwareService impl
     private final OtaPackageDataCache otaPackageDataCache;
     private final LwM2MTelemetryLogService logService;
     private final LwM2mTransportServerHelper helper;
-    private final TbLwM2MClientOtaInfoStore otaInfoStore;
+    private final JnksIotLwM2MClientOtaInfoStore otaInfoStore;
 
     @Autowired
     @Lazy
@@ -466,8 +466,8 @@ public class DefaultLwM2MOtaUpdateService extends LwM2MExecutorAwareService impl
 
     private void startUpdateUsingUrl(LwM2mClient client, String id, String url) {
         String targetIdVer = convertObjectIdToVersionedId(id, client);
-        TbLwM2MWriteReplaceRequest request = TbLwM2MWriteReplaceRequest.builder().versionedId(targetIdVer).value(url).timeout(clientContext.getRequestTimeout(client)).build();
-        downlinkHandler.sendWriteReplaceRequest(client, request, new TbLwM2MWriteResponseCallback(uplinkHandler, logService, client, targetIdVer));
+        JnksIotLwM2MWriteReplaceRequest request = JnksIotLwM2MWriteReplaceRequest.builder().versionedId(targetIdVer).value(url).timeout(clientContext.getRequestTimeout(client)).build();
+        downlinkHandler.sendWriteReplaceRequest(client, request, new JnksIotLwM2MWriteResponseCallback(uplinkHandler, logService, client, targetIdVer));
     }
 
     public void startUpdateUsingBinary(LwM2mClient client, LwM2MClientFwOtaInfo fwInfo) {
@@ -533,10 +533,10 @@ public class DefaultLwM2MOtaUpdateService extends LwM2MExecutorAwareService impl
 
     private void startUpdateUsingBinary(LwM2mClient client, String versionedId, UUID otaPackageId) {
         byte[] firmwareChunk = otaPackageDataCache.get(otaPackageId.toString(), 0, 0);
-        TbLwM2MWriteReplaceRequest writeRequest = TbLwM2MWriteReplaceRequest.builder().versionedId(versionedId)
+        JnksIotLwM2MWriteReplaceRequest writeRequest = JnksIotLwM2MWriteReplaceRequest.builder().versionedId(versionedId)
                 .value(firmwareChunk).contentFormat(ContentFormat.OPAQUE)
                 .timeout(clientContext.getRequestTimeout(client)).build();
-        downlinkHandler.sendWriteReplaceRequest(client, writeRequest, new TbLwM2MWriteResponseCallback(uplinkHandler, logService, client, versionedId));
+        downlinkHandler.sendWriteReplaceRequest(client, writeRequest, new JnksIotLwM2MWriteResponseCallback(uplinkHandler, logService, client, versionedId));
     }
 
     private TransportProtos.GetOtaPackageRequestMsg createOtaPackageRequestMsg(TransportProtos.SessionInfoProto sessionInfo, String nameFwSW) {
@@ -551,20 +551,20 @@ public class DefaultLwM2MOtaUpdateService extends LwM2MExecutorAwareService impl
 
     private void executeFwUpdate(LwM2mClient client) {
         String fwExecuteVerId = convertObjectIdToVersionedId(FW_EXECUTE_ID, client);
-        TbLwM2MExecuteRequest request = TbLwM2MExecuteRequest.builder().versionedId(fwExecuteVerId).timeout(clientContext.getRequestTimeout(client)).build();
-        downlinkHandler.sendExecuteRequest(client, request, new TbLwM2MExecuteCallback(logService, client, fwExecuteVerId));
+        JnksIotLwM2MExecuteRequest request = JnksIotLwM2MExecuteRequest.builder().versionedId(fwExecuteVerId).timeout(clientContext.getRequestTimeout(client)).build();
+        downlinkHandler.sendExecuteRequest(client, request, new JnksIotLwM2MExecuteCallback(logService, client, fwExecuteVerId));
     }
 
     private void executeSwInstall(LwM2mClient client) {
         String swInstallVerId = convertObjectIdToVersionedId(SW_INSTALL_ID, client);
-        TbLwM2MExecuteRequest request = TbLwM2MExecuteRequest.builder().versionedId(swInstallVerId).timeout(clientContext.getRequestTimeout(client)).build();
-        downlinkHandler.sendExecuteRequest(client, request, new TbLwM2MExecuteCallback(logService, client, swInstallVerId));
+        JnksIotLwM2MExecuteRequest request = JnksIotLwM2MExecuteRequest.builder().versionedId(swInstallVerId).timeout(clientContext.getRequestTimeout(client)).build();
+        downlinkHandler.sendExecuteRequest(client, request, new JnksIotLwM2MExecuteCallback(logService, client, swInstallVerId));
     }
 
     private void executeSwUninstallForUpdate(LwM2mClient client) {
         String swInInstallVerId = convertObjectIdToVersionedId(SW_UN_INSTALL_ID, client);
-        TbLwM2MExecuteRequest request = TbLwM2MExecuteRequest.builder().versionedId(swInInstallVerId).params("1").timeout(clientContext.getRequestTimeout(client)).build();
-        downlinkHandler.sendExecuteRequest(client, request, new TbLwM2MExecuteCallback(logService, client, swInInstallVerId));
+        JnksIotLwM2MExecuteRequest request = JnksIotLwM2MExecuteRequest.builder().versionedId(swInInstallVerId).params("1").timeout(clientContext.getRequestTimeout(client)).build();
+        downlinkHandler.sendExecuteRequest(client, request, new JnksIotLwM2MExecuteCallback(logService, client, swInInstallVerId));
     }
 
     private Optional<String> getAttributeValue(List<TransportProtos.TsKvProto> attrs, String keyName) {

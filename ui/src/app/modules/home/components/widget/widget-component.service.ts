@@ -45,7 +45,7 @@ import moment from 'moment';
 import { IModulesMap } from '@modules/common/modules-map.models';
 import { HOME_COMPONENTS_MODULE_TOKEN } from '@home/components/tokens';
 import { IBasicWidgetConfigComponent } from '@home/components/widget/config/widget-config.component.models';
-import { compileTbFunction, TbFunction } from '@shared/models/js-function.models';
+import { compileJnksIotFunction, JnksIotFunction } from '@shared/models/js-function.models';
 import { HttpClient } from '@angular/common/http';
 import { jsonFormSchemaToFormProperties } from '@shared/models/dynamic-form.models';
 
@@ -142,42 +142,42 @@ export class WidgetComponentService {
 
       widgetModulesTasks.push(from(import('@home/components/widget/lib/flot-widget')).pipe(
         tap((mod) => {
-          (window as any).TbFlot = mod.TbFlot;
+          (window as any).JnksIotFlot = mod.JnksIotFlot;
         }))
       );
       widgetModulesTasks.push(from(import('@home/components/widget/lib/chart/time-series-chart')).pipe(
         tap((mod) => {
-          (window as any).TbTimeSeriesChart = mod.TbTimeSeriesChart;
+          (window as any).JnksIotTimeSeriesChart = mod.JnksIotTimeSeriesChart;
         }))
       );
       widgetModulesTasks.push(from(import('@home/components/widget/lib/analogue-compass')).pipe(
         tap((mod) => {
-          (window as any).TbAnalogueCompass = mod.TbAnalogueCompass;
+          (window as any).JnksIotAnalogueCompass = mod.JnksIotAnalogueCompass;
         }))
       );
       widgetModulesTasks.push(from(import('@home/components/widget/lib/analogue-radial-gauge')).pipe(
         tap((mod) => {
-          (window as any).TbAnalogueRadialGauge = mod.TbAnalogueRadialGauge;
+          (window as any).JnksIotAnalogueRadialGauge = mod.JnksIotAnalogueRadialGauge;
         }))
       );
       widgetModulesTasks.push(from(import('@home/components/widget/lib/analogue-linear-gauge')).pipe(
         tap((mod) => {
-          (window as any).TbAnalogueLinearGauge = mod.TbAnalogueLinearGauge;
+          (window as any).JnksIotAnalogueLinearGauge = mod.JnksIotAnalogueLinearGauge;
         }))
       );
       widgetModulesTasks.push(from(import('@home/components/widget/lib/digital-gauge')).pipe(
         tap((mod) => {
-          (window as any).TbCanvasDigitalGauge = mod.TbCanvasDigitalGauge;
+          (window as any).JnksIotCanvasDigitalGauge = mod.JnksIotCanvasDigitalGauge;
         }))
       );
       widgetModulesTasks.push(from(import('@home/components/widget/lib/maps-legacy/map-widget2')).pipe(
         tap((mod) => {
-          (window as any).TbMapWidgetV2 = mod.TbMapWidgetV2;
+          (window as any).JnksIotMapWidgetV2 = mod.JnksIotMapWidgetV2;
         }))
       );
       widgetModulesTasks.push(from(import('@home/components/widget/lib/trip-animation/trip-animation.component')).pipe(
         tap((mod) => {
-          (window as any).TbTripAnimationWidget = mod.TbTripAnimationWidget;
+          (window as any).JnksIotTripAnimationWidget = mod.JnksIotTripAnimationWidget;
         }))
       );
 
@@ -523,17 +523,17 @@ export class WidgetComponentService {
     widgetTypeFunctionBody += controllerBody;
     widgetTypeFunctionBody += '\n};\n';
 
-    let tbWidgetTypeFunction: TbFunction;
+    let jnksIotWidgetTypeFunction: JnksIotFunction;
     if (modules && Object.keys(modules).length) {
-      tbWidgetTypeFunction = {
+      jnksIotWidgetTypeFunction = {
         body: widgetTypeFunctionBody,
         modules
       }
     } else {
-      tbWidgetTypeFunction = widgetTypeFunctionBody;
+      jnksIotWidgetTypeFunction = widgetTypeFunctionBody;
     }
 
-    return compileTbFunction(this.http, tbWidgetTypeFunction).pipe(
+    return compileJnksIotFunction(this.http, jnksIotWidgetTypeFunction).pipe(
       map((compiled) => {
         const widgetType = compiled.apply(this);
         const widgetTypeInstance: WidgetTypeInstance = new widgetType();

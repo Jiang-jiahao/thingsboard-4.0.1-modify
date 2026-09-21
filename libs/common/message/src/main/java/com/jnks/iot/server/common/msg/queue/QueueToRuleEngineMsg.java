@@ -5,9 +5,9 @@ import lombok.Getter;
 import lombok.ToString;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.msg.MsgType;
-import com.jnks.iot.server.common.msg.TbActorStopReason;
-import com.jnks.iot.server.common.msg.TbMsg;
-import com.jnks.iot.server.common.msg.TbRuleEngineActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorStopReason;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
+import com.jnks.iot.server.common.msg.JnksIotRuleEngineActorMsg;
 
 import java.util.Set;
 
@@ -16,7 +16,7 @@ import java.util.Set;
  */
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public final class QueueToRuleEngineMsg extends TbRuleEngineActorMsg {
+public final class QueueToRuleEngineMsg extends JnksIotRuleEngineActorMsg {
 
     @Getter
     private final TenantId tenantId;
@@ -25,8 +25,8 @@ public final class QueueToRuleEngineMsg extends TbRuleEngineActorMsg {
     @Getter
     private final String failureMessage;
 
-    public QueueToRuleEngineMsg(TenantId tenantId, TbMsg tbMsg, Set<String> relationTypes, String failureMessage) {
-        super(tbMsg);
+    public QueueToRuleEngineMsg(TenantId tenantId, JnksIotMsg jnksIotMsg, Set<String> relationTypes, String failureMessage) {
+        super(jnksIotMsg);
         this.tenantId = tenantId;
         this.relationTypes = relationTypes;
         this.failureMessage = failureMessage;
@@ -38,14 +38,14 @@ public final class QueueToRuleEngineMsg extends TbRuleEngineActorMsg {
     }
 
     @Override
-    public void onTbActorStopped(TbActorStopReason reason) {
+    public void onJnksIotActorStopped(JnksIotActorStopReason reason) {
         String message;
         if (msg.getRuleChainId() != null) {
-            message = reason == TbActorStopReason.STOPPED ?
+            message = reason == JnksIotActorStopReason.STOPPED ?
                     String.format("Rule chain [%s] stopped", msg.getRuleChainId().getId()) :
                     String.format("Failed to initialize rule chain [%s]!", msg.getRuleChainId().getId());
         } else {
-            message = reason == TbActorStopReason.STOPPED ? "Rule chain stopped" : "Failed to initialize rule chain!";
+            message = reason == JnksIotActorStopReason.STOPPED ? "Rule chain stopped" : "Failed to initialize rule chain!";
         }
         msg.getCallback().onFailure(new RuleEngineException(message));
     }

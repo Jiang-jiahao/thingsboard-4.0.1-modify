@@ -17,12 +17,12 @@ import { ActionAuthUpdateHasRepository } from '@core/auth/auth.actions';
 import { selectHasRepository } from '@core/auth/auth.selectors';
 import { catchError, mergeMap, take } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { coerceBoolean } from '@shared/decorators/coercion';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-repository-settings',
+  selector: 'jnks-iot-repository-settings',
   templateUrl: './repository-settings.component.html',
   styleUrls: ['./repository-settings.component.scss', './../../pages/admin/settings-card.scss']
 })
@@ -32,7 +32,7 @@ export class RepositorySettingsComponent extends PageComponent implements OnInit
   detailsMode = false;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   @Input()
   @coerceBoolean()

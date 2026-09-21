@@ -1,29 +1,29 @@
 @import "../../../../../../../scss/constants";
 
 :host {
-  .tb-card-header {
+  .jnks-iot-card-header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-end;
   }
 
-  .tb-title-icon {
+  .jnks-iot-title-icon {
     color: rgba(0, 0, 0, 0.38);
     width: 32px;
     height: 32px;
     padding: 4px;
   }
 
-  .tb-links-list {
+  .jnks-iot-links-list {
     overflow: auto;
   }
 
-  .mat-grid-tile.tb-links-tile {
+  .mat-grid-tile.jnks-iot-links-tile {
     overflow: visible;
   }
 
-  .tb-link-button {
+  .jnks-iot-link-button {
     height: 55px;
     display: flex;
     overflow: hidden;
@@ -42,11 +42,11 @@
       border: 1px solid rgba(0, 0, 0, 0.12);
       box-shadow: 0 4px 10px rgba(23, 33, 90, 0.08);
     }
-    .tb-link-container {
+    .jnks-iot-link-container {
       display: flex;
       flex-direction: row;
       align-items: center;
-      .tb-link-icon-container {
+      .jnks-iot-link-icon-container {
         height: 40px;
         padding: 8px;
         background: #F3F6FA;
@@ -56,7 +56,7 @@
           display: none;
         }
       }
-      .tb-link-text {
+      .jnks-iot-link-text {
         font-weight: 400;
         font-size: 14px;
         line-height: 20px;
@@ -73,7 +73,7 @@
     }
   }
 
-  .tb-add-link-button {
+  .jnks-iot-add-link-button {
     height: 55px;
     cursor: pointer;
     display: flex;
@@ -87,17 +87,17 @@
     @media #{$mat-md-lg} {
       height: 18px;
       padding: 0 8px;
-      .tb-add-icon {
+      .jnks-iot-add-icon {
         height: 12px;
         width: 12px;
         font-size: 12px;
       }
     }
-    .tb-add-icon {
+    .jnks-iot-add-icon {
       color: rgba(0, 0, 0, 0.12);
     }
     &:hover {
-      .tb-add-icon {
+      .jnks-iot-add-icon {
         color: rgba(0, 0, 0, 0.38);
       }
     }

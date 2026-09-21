@@ -3,8 +3,8 @@ package com.jnks.iot.server.queue.memory;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import com.jnks.iot.server.queue.TbQueueMsg;
-import com.jnks.iot.server.queue.common.DefaultTbQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueMsg;
+import com.jnks.iot.server.queue.common.DefaultJnksIotQueueMsg;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,18 +17,18 @@ import static org.mockito.Mockito.mock;
 public class DefaultInMemoryStorageTest {
     static final int MAX_POLL_SIZE = 1000;
     final Gson gson = new Gson();
-    final String topic = "tb_core_notification.tb-node-0";
+    final String topic = "jnks_iot_core_notification.jnks-iot-node-0";
 
     InMemoryStorage storage = new DefaultInMemoryStorage();
 
     @Test
     public void givenStorage_whenGetLagTotal_thenReturnInteger() throws InterruptedException {
         assertThat(storage.getLagTotal()).isEqualTo(0);
-        storage.put("main", mock(TbQueueMsg.class));
+        storage.put("main", mock(JnksIotQueueMsg.class));
         assertThat(storage.getLagTotal()).isEqualTo(1);
-        storage.put("main", mock(TbQueueMsg.class));
+        storage.put("main", mock(JnksIotQueueMsg.class));
         assertThat(storage.getLagTotal()).isEqualTo(2);
-        storage.put("hp", mock(TbQueueMsg.class));
+        storage.put("hp", mock(JnksIotQueueMsg.class));
         assertThat(storage.getLagTotal()).isEqualTo(3);
         storage.get("main");
         assertThat(storage.getLagTotal()).isEqualTo(1);
@@ -36,9 +36,9 @@ public class DefaultInMemoryStorageTest {
 
     @Test
     public void givenQueueWithMoreThenBatchSize_whenPoll_thenReturnFullListAndSecondList() throws InterruptedException {
-        List<TbQueueMsg> msgs = new ArrayList<>(MAX_POLL_SIZE + 1);
+        List<JnksIotQueueMsg> msgs = new ArrayList<>(MAX_POLL_SIZE + 1);
         for (int i = 0; i < MAX_POLL_SIZE + 1; i++) {
-            DefaultTbQueueMsg msg = gson.fromJson("{\"key\": \"" + UUID.randomUUID() + "\"}", DefaultTbQueueMsg.class);
+            DefaultJnksIotQueueMsg msg = gson.fromJson("{\"key\": \"" + UUID.randomUUID() + "\"}", DefaultJnksIotQueueMsg.class);
             msgs.add(msg);
             storage.put(topic, msg);
         }
@@ -50,9 +50,9 @@ public class DefaultInMemoryStorageTest {
     }
 
     private void testPollOnce(final int msgCount) throws InterruptedException {
-        List<TbQueueMsg> msgs = new ArrayList<>(msgCount);
+        List<JnksIotQueueMsg> msgs = new ArrayList<>(msgCount);
         for (int i = 0; i < msgCount; i++) {
-            DefaultTbQueueMsg msg = gson.fromJson("{\"key\": \"" + UUID.randomUUID() + "\"}", DefaultTbQueueMsg.class);
+            DefaultJnksIotQueueMsg msg = gson.fromJson("{\"key\": \"" + UUID.randomUUID() + "\"}", DefaultJnksIotQueueMsg.class);
             msgs.add(msg);
             storage.put(topic, msg);
         }

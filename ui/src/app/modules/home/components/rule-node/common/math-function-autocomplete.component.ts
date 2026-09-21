@@ -7,7 +7,7 @@ import { map, tap } from 'rxjs/operators';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 
 @Component({
-  selector: 'tb-math-function-autocomplete',
+  selector: 'jnks-iot-math-function-autocomplete',
   templateUrl: './math-function-autocomplete.component.html',
   styleUrls: [],
   providers: [

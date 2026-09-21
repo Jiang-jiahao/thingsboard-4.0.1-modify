@@ -1,11 +1,11 @@
 @import "../../../../../theme";
 @import '../../../../../scss/constants';
 
-.tb-widget-config {
+.jnks-iot-widget-config {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  .tb-widget-config-header {
+  .jnks-iot-widget-config-header {
     padding: 24px 24px 0;
     display: flex;
     gap: 12px;
@@ -17,7 +17,7 @@
       align-items: center;
       justify-content: space-between;
     }
-    .tb-widget-config-header-components {
+    .jnks-iot-widget-config-header-components {
       width: 100%;
       flex: 1;
       display: flex;
@@ -26,7 +26,7 @@
       justify-content: space-between;
     }
   }
-  .tb-widget-config-content {
+  .jnks-iot-widget-config-content {
     & > .mat-content {
       padding-top: 8px;
       @media #{$mat-xs} {
@@ -48,7 +48,7 @@
       }
     }
   }
-  .tb-basic-mode-directive-error {
+  .jnks-iot-basic-mode-directive-error {
     font-size: 13px;
     font-weight: 400;
     color: rgb(221, 44, 0);
@@ -56,8 +56,8 @@
 }
 
 :host ::ng-deep {
-  .tb-widget-config {
-    .tb-widget-config-header {
+  .jnks-iot-widget-config {
+    .jnks-iot-widget-config-header {
       .mat-button-toggle-appearance-standard .mat-button-toggle-label-content {
         padding: 0 20px;
       }

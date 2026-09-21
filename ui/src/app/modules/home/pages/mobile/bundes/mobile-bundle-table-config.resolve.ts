@@ -142,7 +142,7 @@ export class MobileBundleTableConfigResolver {
     return this.dialog.open<MobileBundleDialogComponent, MobileBundleDialogData,
       MobileAppBundleInfo>(MobileBundleDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         bundle
@@ -162,7 +162,7 @@ export class MobileBundleTableConfigResolver {
       this.dialog.open<MobileAppConfigurationDialogComponent, MobileAppConfigurationDialogData,
         MobileAppBundleInfo>(MobileAppConfigurationDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           afterAdd,
           androidApp: data.androidApp,

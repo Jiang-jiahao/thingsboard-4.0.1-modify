@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import com.jnks.iot.server.common.data.ResourceType;
-import com.jnks.iot.server.common.data.TbResource;
+import com.jnks.iot.server.common.data.JnksIotResource;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.transport.TransportResourceCache;
 import com.jnks.iot.server.common.transport.TransportService;
@@ -29,15 +29,15 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DefaultTransportResourceCache implements TransportResourceCache {
 
     private final Lock resourceFetchLock = new ReentrantLock();
-    private final ConcurrentMap<ResourceCompositeKey, TbResource> resources = new ConcurrentHashMap<>();
+    private final ConcurrentMap<ResourceCompositeKey, JnksIotResource> resources = new ConcurrentHashMap<>();
     private final Set<ResourceCompositeKey> keys = ConcurrentHashMap.newKeySet();
     @Lazy
     private final TransportService transportService;
 
     @Override
-    public Optional<TbResource> get(TenantId tenantId, ResourceType resourceType, String resourceKey) {
+    public Optional<JnksIotResource> get(TenantId tenantId, ResourceType resourceType, String resourceKey) {
         ResourceCompositeKey compositeKey = new ResourceCompositeKey(tenantId, resourceType, resourceKey);
-        TbResource resource;
+        JnksIotResource resource;
 
         if (keys.contains(compositeKey)) {
             resource = resources.get(compositeKey);
@@ -64,7 +64,7 @@ public class DefaultTransportResourceCache implements TransportResourceCache {
         return Optional.ofNullable(resource);
     }
 
-    private TbResource fetchResource(ResourceCompositeKey compositeKey) {
+    private JnksIotResource fetchResource(ResourceCompositeKey compositeKey) {
         UUID tenantId = compositeKey.getTenantId().getId();
         TransportProtos.GetResourceRequestMsg.Builder builder = TransportProtos.GetResourceRequestMsg.newBuilder();
         builder
@@ -75,7 +75,7 @@ public class DefaultTransportResourceCache implements TransportResourceCache {
         TransportProtos.GetResourceResponseMsg responseMsg = transportService.getResource(builder.build());
 
         if (responseMsg.hasResource()) {
-            TbResource resource = ProtoUtils.fromProto(responseMsg.getResource());
+            JnksIotResource resource = ProtoUtils.fromProto(responseMsg.getResource());
             resources.put(new ResourceCompositeKey(resource.getTenantId(), resource.getResourceType(), resource.getResourceKey()), resource);
             return resource;
         }

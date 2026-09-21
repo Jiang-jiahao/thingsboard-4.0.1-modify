@@ -1,23 +1,23 @@
-<div [formGroup]="keyRowFormGroup" class="tb-form-table-row tb-aggregated-data-key-row">
-  <mat-form-field class="tb-inline-field tb-position-field" appearance="outline" subscriptSizing="dynamic">
+<div [formGroup]="keyRowFormGroup" class="jnks-iot-form-table-row jnks-iot-aggregated-data-key-row">
+  <mat-form-field class="jnks-iot-inline-field jnks-iot-position-field" appearance="outline" subscriptSizing="dynamic">
     <mat-select formControlName="position">
       <mat-option *ngFor="let position of aggregatedValueCardKeyPositions" [value]="position">
         {{ aggregatedValueCardKeyPositionTranslationMap.get(position) | translate }}
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <mat-form-field class="tb-inline-field tb-aggregation-field" subscriptSizing="dynamic">
+  <mat-form-field class="jnks-iot-inline-field jnks-iot-aggregation-field" subscriptSizing="dynamic">
     <mat-chip-grid #chipList>
-      <mat-chip-row class="tb-datakey-chip">
-        <div class="tb-attribute-chip flex flex-row items-center justify-start gap-1">
-          <div class="tb-chip-labels">
-            <div class="tb-chip-label tb-chip-text">
+      <mat-chip-row class="jnks-iot-datakey-chip">
+        <div class="jnks-iot-attribute-chip flex flex-row items-center justify-start gap-1">
+          <div class="jnks-iot-chip-labels">
+            <div class="jnks-iot-chip-label jnks-iot-chip-text">
               <ng-container *ngTemplateOutlet="keyName"></ng-container>
             </div>
           </div>
           <button type="button"
-                  (click)="editKey()" mat-icon-button class="tb-mat-24">
-            <mat-icon class="tb-mat-18">edit</mat-icon>
+                  (click)="editKey()" mat-icon-button class="jnks-iot-mat-24">
+            <mat-icon class="jnks-iot-mat-18">edit</mat-icon>
           </button>
         </div>
       </mat-chip-row>
@@ -29,28 +29,28 @@
            [matChipInputFor]="chipList"
     />
   </mat-form-field>
-  <div class="tb-units-field">
-    <tb-unit-input formControlName="units">
-    </tb-unit-input>
+  <div class="jnks-iot-units-field">
+    <jnks-iot-unit-input formControlName="units">
+    </jnks-iot-unit-input>
   </div>
-  <div class="tb-decimals-field">
-    <mat-form-field appearance="outline" class="tb-inline-field number" subscriptSizing="dynamic">
+  <div class="jnks-iot-decimals-field">
+    <mat-form-field appearance="outline" class="jnks-iot-inline-field number" subscriptSizing="dynamic">
       <input matInput formControlName="decimals" type="number" min="0" max="15" step="1" placeholder="{{ 'widget-config.set' | translate }}">
     </mat-form-field>
   </div>
-  <div class="tb-font-field">
-    <tb-font-settings formControlName="font"
+  <div class="jnks-iot-font-field">
+    <jnks-iot-font-settings formControlName="font"
                       [previewText]="valuePreviewFn">
-    </tb-font-settings>
+    </jnks-iot-font-settings>
   </div>
-  <div class="tb-color-field">
-    <tb-color-settings formControlName="color" settingsKey="{{ (index+1) }}. {{ aggregatedValueCardKeyPositionTranslationMap.get(keyRowFormGroup.get('position').value) | translate }}">
-    </tb-color-settings>
+  <div class="jnks-iot-color-field">
+    <jnks-iot-color-settings formControlName="color" settingsKey="{{ (index+1) }}. {{ aggregatedValueCardKeyPositionTranslationMap.get(keyRowFormGroup.get('position').value) | translate }}">
+    </jnks-iot-color-settings>
   </div>
-  <div class="tb-arrow-field">
+  <div class="jnks-iot-arrow-field">
     <mat-checkbox formControlName="showArrow"></mat-checkbox>
   </div>
-  <div class="tb-form-table-row-cell-buttons">
+  <div class="jnks-iot-form-table-row-cell-buttons">
     <button type="button"
             mat-icon-button
             (click)="keyRemoved.emit()"
@@ -70,7 +70,7 @@
 </ng-template>
 <ng-template #keyNameTemplate>
   <ng-container>
-    <strong><span class="tb-agg-func">{{ (modelValue?.aggregationType || aggregationTypes.NONE) }}</span></strong>
+    <strong><span class="jnks-iot-agg-func">{{ (modelValue?.aggregationType || aggregationTypes.NONE) }}</span></strong>
     <span *ngIf="!modelValue?.aggregationType || modelValue?.aggregationType === aggregationTypes.NONE; else aggValue">({{ 'datakey.latest-value' | translate }})</span>
   </ng-container>
   <ng-template #aggValue>

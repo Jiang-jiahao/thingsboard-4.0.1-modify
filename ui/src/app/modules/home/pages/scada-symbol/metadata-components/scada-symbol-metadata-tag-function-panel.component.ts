@@ -8,10 +8,10 @@ import {
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { WidgetService } from '@core/http/widget.service';
-import { TbEditorCompleter } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompleter } from '@shared/models/ace/completion.models';
 import { AceHighlightRules } from '@shared/models/ace/ace.models';
 import {
   scadaSymbolClickActionHighlightRules,
@@ -20,7 +20,7 @@ import {
 import { JsFuncComponent } from '@shared/components/js-func.component';
 
 @Component({
-  selector: 'tb-scada-symbol-metadata-tag-function-panel',
+  selector: 'jnks-iot-scada-symbol-metadata-tag-function-panel',
   templateUrl: './scada-symbol-metadata-tag-function-panel.component.html',
   styleUrls: ['./scada-symbol-metadata-tag-function-panel.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -40,13 +40,13 @@ export class ScadaSymbolMetadataTagFunctionPanelComponent implements OnInit, Aft
   tag: string;
 
   @Input()
-  completer: TbEditorCompleter;
+  completer: JnksIotEditorCompleter;
 
   @Input()
   disabled: boolean;
 
   @Input()
-  popover: TbPopoverComponent<ScadaSymbolMetadataTagFunctionPanelComponent>;
+  popover: JnksIotPopoverComponent<ScadaSymbolMetadataTagFunctionPanelComponent>;
 
   @Output()
   tagFunctionApplied = new EventEmitter<string>();

@@ -11,7 +11,7 @@ import {
 
 
 @Component({
-  selector: 'tb-action-node-math-function-config',
+  selector: 'jnks-iot-action-node-math-function-config',
   templateUrl: './math-function-config.component.html',
   styleUrls: ['./math-function-config.component.scss']
 })

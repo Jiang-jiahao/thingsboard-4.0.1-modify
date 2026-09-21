@@ -29,7 +29,7 @@ export const dataKeySelectOptionValidator = (control: AbstractControl) => {
 };
 
 @Component({
-  selector: 'tb-datakey-select-option',
+  selector: 'jnks-iot-datakey-select-option',
   templateUrl: './datakey-select-option.component.html',
   styleUrls: ['./datakey-select-option.component.scss'],
   providers: [

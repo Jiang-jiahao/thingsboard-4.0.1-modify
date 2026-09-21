@@ -13,7 +13,7 @@ interface NavigationCardWidgetSettings {
 }
 
 @Component({
-  selector: 'tb-navigation-card-widget',
+  selector: 'jnks-iot-navigation-card-widget',
   templateUrl: './navigation-card-widget.component.html',
   styleUrls: ['./navigation-card-widget.component.scss']
 })

@@ -4,11 +4,11 @@
     <div [formGroup]="rateLimitsFormGroup" class="flex flex-1 flex-row gap-2"
          (click)="onClick($event)"
          [matTooltip]="'tenant-profile.rate-limits.edit-limit' | translate" matTooltipPosition="above">
-      <tb-rate-limits-text [rateLimitsArray]="rateLimitsArray" [disabled]="disabled"></tb-rate-limits-text>
+      <jnks-iot-rate-limits-text [rateLimitsArray]="rateLimitsArray" [disabled]="disabled"></jnks-iot-rate-limits-text>
     </div>
   </fieldset>
   <button mat-icon-button color="primary" type="button" *ngIf="!disabled"
-          class="tb-rate-limits-button"
+          class="jnks-iot-rate-limits-button"
           (click)="onClick($event)"
           [matTooltip]="'tenant-profile.rate-limits.add-limit' | translate" matTooltipPosition="above">
     <mat-icon>add_circle_outline</mat-icon>

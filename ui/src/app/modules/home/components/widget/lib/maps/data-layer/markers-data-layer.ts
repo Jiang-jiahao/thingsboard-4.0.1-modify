@@ -18,24 +18,24 @@ import {
   MarkersDataLayerSettings,
   MarkerShapeSettings,
   MarkerType,
-  TbMapDatasource
+  JnksIotMapDatasource
 } from '@shared/models/widget/maps/map.models';
 import L, { FeatureGroup } from 'leaflet';
 import { DataKey, FormattedData } from '@shared/models/widget.models';
 import { forkJoin, Observable, of } from 'rxjs';
-import { CompiledTbFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction } from '@shared/models/js-function.models';
 import {
   deepClone,
   isDefined,
   isDefinedAndNotNull,
   isEmptyStr,
-  parseTbFunction,
-  safeExecuteTbFunction
+  parseJnksIotFunction,
+  safeExecuteJnksIotFunction
 } from '@core/utils';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import tinycolor from 'tinycolor2';
 import { ImagePipe } from '@shared/pipe/image.pipe';
-import { TbMap } from '@home/components/widget/lib/maps/map';
+import { JnksIotMap } from '@home/components/widget/lib/maps/map';
 import {
   createColorMarkerIconElement,
   createColorMarkerShapeURI,
@@ -45,19 +45,19 @@ import {
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import {
-  TbLatestDataLayerItem,
-  TbLatestMapDataLayer,
+  JnksIotLatestDataLayerItem,
+  JnksIotLatestMapDataLayer,
   UnplacedMapDataItem
 } from '@home/components/widget/lib/maps/data-layer/latest-map-data-layer';
-import { TbImageMap } from '@home/components/widget/lib/maps/image-map';
-import { DataLayerColorProcessor, TbMapDataLayer } from '@home/components/widget/lib/maps/data-layer/map-data-layer';
+import { JnksIotImageMap } from '@home/components/widget/lib/maps/image-map';
+import { DataLayerColorProcessor, JnksIotMapDataLayer } from '@home/components/widget/lib/maps/data-layer/map-data-layer';
 
 export class MarkerDataProcessor<S extends MarkersDataLayerSettings = MarkersDataLayerSettings> {
 
-  private positionFunction: CompiledTbFunction<MarkerPositionFunction>;
+  private positionFunction: CompiledJnksIotFunction<MarkerPositionFunction>;
   private markerIconProcessor: MarkerIconProcessor<any>;
 
-  constructor(public dataLayer: TbMapDataLayer,
+  constructor(public dataLayer: JnksIotMapDataLayer,
               private settings: S,
               public markerOffset: L.LatLngTuple,
               public tooltipOffset: L.LatLngTuple) {
@@ -68,7 +68,7 @@ export class MarkerDataProcessor<S extends MarkersDataLayerSettings = MarkersDat
     const setup$: Observable<void>[] = [this.markerIconProcessor.setup()];
     if (this.dataLayer.mapType() === MapType.image) {
       setup$.push(
-        parseTbFunction<MarkerPositionFunction>(this.dataLayer.getCtx().http, this.settings.positionFunction, ['origXPos', 'origYPos', 'data', 'dsData', 'aspect']).pipe(
+        parseJnksIotFunction<MarkerPositionFunction>(this.dataLayer.getCtx().http, this.settings.positionFunction, ['origXPos', 'origYPos', 'data', 'dsData', 'aspect']).pipe(
           map((parsed) => {
             this.positionFunction = parsed;
             return null;
@@ -79,11 +79,11 @@ export class MarkerDataProcessor<S extends MarkersDataLayerSettings = MarkersDat
     return forkJoin(setup$).pipe(map(() => null));
   }
 
-  public extractLocation(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): L.LatLng {
+  public extractLocation(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): L.LatLng {
     let locationData = this.extractLocationData(data);
     if (locationData) {
       if (this.dataLayer.mapType() === MapType.image && this.positionFunction) {
-        const imageMap = this.dataLayer.getMap() as TbImageMap;
+        const imageMap = this.dataLayer.getMap() as JnksIotImageMap;
         locationData = this.positionFunction.execute(locationData.x, locationData.y, data, dsData, imageMap.getAspect()) || {x: 0, y: 0};
       }
       return this.dataLayer.getMap().locationDataToLatLng(locationData);
@@ -92,7 +92,7 @@ export class MarkerDataProcessor<S extends MarkersDataLayerSettings = MarkersDat
     }
   }
 
-  public extractLocationData(data: FormattedData<TbMapDatasource>):  {x: number; y: number} {
+  public extractLocationData(data: FormattedData<JnksIotMapDatasource>):  {x: number; y: number} {
     if (data) {
       const xKeyVal = data[this.settings.xKey.label];
       const yKeyVal = data[this.settings.yKey.label];
@@ -114,8 +114,8 @@ export class MarkerDataProcessor<S extends MarkersDataLayerSettings = MarkersDat
     }
   }
 
-  public createMarkerIcon(data: FormattedData<TbMapDatasource>,
-                          dsData: FormattedData<TbMapDatasource>[],
+  public createMarkerIcon(data: FormattedData<JnksIotMapDatasource>,
+                          dsData: FormattedData<JnksIotMapDatasource>[],
                           rotationAngle?: number): Observable<MarkerIconInfo> {
     return this.markerIconProcessor.createMarkerIcon(data, dsData, rotationAngle);
   }
@@ -140,7 +140,7 @@ export class MarkerDataProcessor<S extends MarkersDataLayerSettings = MarkersDat
           const style = `background-image: url(${iconUrl}); transform: rotate(${rotationAngle}deg); height: ${size}px; width: ${size}px;`;
           icon = L.divIcon({
             html: `<div style="${style}"></div>`,
-            className: 'tb-marker-div-icon',
+            className: 'jnks-iot-marker-div-icon',
             iconSize: [size, size],
             iconAnchor: [size * this.markerOffset[0], size * this.markerOffset[1]],
             popupAnchor: [size * this.tooltipOffset[0], size * this.tooltipOffset[1]]
@@ -166,7 +166,7 @@ export class MarkerDataProcessor<S extends MarkersDataLayerSettings = MarkersDat
           size: [size, size],
           icon: L.divIcon({
             html: element.outerHTML,
-            className: 'tb-marker-div-icon',
+            className: 'jnks-iot-marker-div-icon',
             iconSize: [size, size],
             iconAnchor: [size * this.markerOffset[0], size * this.markerOffset[1]],
             popupAnchor: [size * this.tooltipOffset[0], size * this.tooltipOffset[1]]
@@ -197,8 +197,8 @@ abstract class MarkerIconProcessor<S> {
 
   public abstract setup(): Observable<void>;
 
-  public abstract createMarkerIcon(data: FormattedData<TbMapDatasource>,
-                                   dsData: FormattedData<TbMapDatasource>[],
+  public abstract createMarkerIcon(data: FormattedData<JnksIotMapDatasource>,
+                                   dsData: FormattedData<JnksIotMapDatasource>[],
                                    rotationAngle?: number): Observable<MarkerIconInfo>;
 
 }
@@ -230,7 +230,7 @@ abstract class BaseColorMarkerShapeProcessor<S extends BaseMarkerShapeSettings> 
     return forkJoin(setup$).pipe(map(() => null));
   }
 
-  public createMarkerIcon(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[], rotationAngle = 0): Observable<MarkerIconInfo> {
+  public createMarkerIcon(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[], rotationAngle = 0): Observable<MarkerIconInfo> {
     const colorSettings = this.settings.color;
     if (colorSettings.type === DataLayerColorType.constant && rotationAngle === 0) {
       return of(this.defaultMarkerIconInfo);
@@ -271,7 +271,7 @@ class IconMarkerIconProcessor extends BaseColorMarkerShapeProcessor<MarkerIconSe
 
 class ImageMarkerIconProcessor extends MarkerIconProcessor<MarkerImageSettings> {
 
-  private markerImageFunction: CompiledTbFunction<MarkerImageFunction>;
+  private markerImageFunction: CompiledJnksIotFunction<MarkerImageFunction>;
 
   private defaultMarkerIconInfo: MarkerIconInfo;
 
@@ -282,7 +282,7 @@ class ImageMarkerIconProcessor extends MarkerIconProcessor<MarkerImageSettings> 
 
   public setup(): Observable<void> {
     if (this.settings.type === MarkerImageType.function) {
-      return parseTbFunction<MarkerImageFunction>(this.dataProcessor.dataLayer.getCtx().http, this.settings.imageFunction, ['data', 'images', 'dsData']).pipe(
+      return parseJnksIotFunction<MarkerImageFunction>(this.dataProcessor.dataLayer.getCtx().http, this.settings.imageFunction, ['data', 'images', 'dsData']).pipe(
         map((parsed) => {
           this.markerImageFunction = parsed;
           return null;
@@ -302,9 +302,9 @@ class ImageMarkerIconProcessor extends MarkerIconProcessor<MarkerImageSettings> 
     }
   }
 
-  public createMarkerIcon(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[], rotationAngle = 0): Observable<MarkerIconInfo> {
+  public createMarkerIcon(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[], rotationAngle = 0): Observable<MarkerIconInfo> {
     if (this.settings.type === MarkerImageType.function) {
-      const currentImage: MarkerImageInfo = safeExecuteTbFunction(this.markerImageFunction, [data, this.settings.images, dsData]);
+      const currentImage: MarkerImageInfo = safeExecuteJnksIotFunction(this.markerImageFunction, [data, this.settings.images, dsData]);
       return this.loadMarkerIconInfo(currentImage, rotationAngle);
     } else if (rotationAngle === 0) {
       return of(this.defaultMarkerIconInfo);
@@ -351,7 +351,7 @@ class ImageMarkerIconProcessor extends MarkerIconProcessor<MarkerImageSettings> 
               const style = `background-image: url(${aspectImage.url}); background-size: contain; transform: rotate(${rotationAngle}deg); height: ${height}px; width: ${width}px;`;
               icon = L.divIcon({
                 html: `<div style="${style}"></div>`,
-                className: 'tb-marker-div-icon',
+                className: 'jnks-iot-marker-div-icon',
                 iconSize: [width, height],
                 iconAnchor,
                 popupAnchor
@@ -374,7 +374,7 @@ class ImageMarkerIconProcessor extends MarkerIconProcessor<MarkerImageSettings> 
   }
 }
 
-class TbMarkerDataLayerItem extends TbLatestDataLayerItem<MarkersDataLayerSettings, TbMarkersDataLayer, L.Marker> {
+class JnksIotMarkerDataLayerItem extends JnksIotLatestDataLayerItem<MarkersDataLayerSettings, JnksIotMarkersDataLayer, L.Marker> {
 
   private marker: L.Marker;
   private labelOffset: L.PointTuple;
@@ -383,10 +383,10 @@ class TbMarkerDataLayerItem extends TbLatestDataLayerItem<MarkersDataLayerSettin
   private dragStart: () => void;
   private dragEnd: () => void;
 
-  constructor(data: FormattedData<TbMapDatasource>,
-              dsData: FormattedData<TbMapDatasource>[],
+  constructor(data: FormattedData<JnksIotMapDatasource>,
+              dsData: FormattedData<JnksIotMapDatasource>[],
               protected settings: MarkersDataLayerSettings,
-              protected dataLayer: TbMarkersDataLayer) {
+              protected dataLayer: JnksIotMarkersDataLayer) {
     super(data, dsData, settings, dataLayer);
   }
 
@@ -398,13 +398,13 @@ class TbMarkerDataLayerItem extends TbLatestDataLayerItem<MarkersDataLayerSettin
     this.marker.options.bubblingMouseEvents = !this.dataLayer.isEditMode();
   }
 
-  protected create(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): L.Marker {
+  protected create(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): L.Marker {
     this.iconClassList = [];
     const location = this.dataLayer.dataProcessor.extractLocation(data, dsData);
     this.dragStart = this._dragStart.bind(this);
     this.dragEnd = this._dragEnd.bind(this);
     this.marker = L.marker(location, {
-      tbMarkerData: data,
+      jnksIotMarkerData: data,
       snapIgnore: !this.dataLayer.isSnappable(),
       bubblingMouseEvents: !this.dataLayer.isEditMode()
     });
@@ -417,17 +417,17 @@ class TbMarkerDataLayerItem extends TbLatestDataLayerItem<MarkersDataLayerSettin
   }
 
   protected bindLabel(content: L.Content): void {
-    this.marker.bindTooltip(content, { className: 'tb-marker-label', permanent: true, direction: 'top', offset: this.labelOffset });
+    this.marker.bindTooltip(content, { className: 'jnks-iot-marker-label', permanent: true, direction: 'top', offset: this.labelOffset });
   }
 
-  protected doUpdate(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): void {
-    this.marker.options.tbMarkerData = data;
+  protected doUpdate(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): void {
+    this.marker.options.jnksIotMarkerData = data;
     this.updateMarkerLocation(data, dsData);
     this.updateTooltip(data, dsData);
     this.updateMarkerIcon(data, dsData);
   }
 
-  protected doInvalidateCoordinates(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): void {
+  protected doInvalidateCoordinates(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): void {
     this.updateMarkerLocation(data, dsData);
   }
 
@@ -499,14 +499,14 @@ class TbMarkerDataLayerItem extends TbLatestDataLayerItem<MarkersDataLayerSettin
     this.dataLayer.saveMarkerLocation(this.data, location).subscribe();
   }
 
-  private updateMarkerLocation(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]) {
+  private updateMarkerLocation(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]) {
     const location = this.dataLayer.dataProcessor.extractLocation(data, dsData);
     if (!this.marker.getLatLng().equals(location) && !this.moving) {
       this.marker.setLatLng(location);
     }
   }
 
-  private updateMarkerIcon(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]) {
+  private updateMarkerIcon(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]) {
     this.dataLayer.dataProcessor.createMarkerIcon(data, dsData).subscribe(
       (iconInfo) => {
         let icon: L.Icon | L.DivIcon;
@@ -550,7 +550,7 @@ class TbMarkerDataLayerItem extends TbLatestDataLayerItem<MarkersDataLayerSettin
   }
 }
 
-export class TbMarkersDataLayer extends TbLatestMapDataLayer<MarkersDataLayerSettings, TbMarkersDataLayer> {
+export class JnksIotMarkersDataLayer extends JnksIotLatestMapDataLayer<MarkersDataLayerSettings, JnksIotMarkersDataLayer> {
 
   public dataProcessor: MarkerDataProcessor;
 
@@ -558,9 +558,9 @@ export class TbMarkersDataLayer extends TbLatestMapDataLayer<MarkersDataLayerSet
   public tooltipOffset: L.LatLngTuple;
 
   private markersClusterContainer: L.MarkerClusterGroup;
-  private clusterMarkerColorFunction: CompiledTbFunction<ClusterMarkerColorFunction>;
+  private clusterMarkerColorFunction: CompiledJnksIotFunction<ClusterMarkerColorFunction>;
 
-  constructor(protected map: TbMap<any>,
+  constructor(protected map: JnksIotMap<any>,
               inputSettings: MarkersDataLayerSettings) {
     super(map, inputSettings);
   }
@@ -584,7 +584,7 @@ export class TbMarkersDataLayer extends TbLatestMapDataLayer<MarkersDataLayerSet
     }
   }
 
-  public saveMarkerLocation(data: FormattedData<TbMapDatasource>, position: L.LatLng): Observable<{x: number; y: number}> {
+  public saveMarkerLocation(data: FormattedData<JnksIotMapDatasource>, position: L.LatLng): Observable<{x: number; y: number}> {
     const converted = this.map.latLngToLocationData(position);
     const locationData = [
       {
@@ -622,7 +622,7 @@ export class TbMarkersDataLayer extends TbLatestMapDataLayer<MarkersDataLayerSet
     return [];
   }
 
-  protected defaultBaseSettings(map: TbMap<any>): Partial<MarkersDataLayerSettings> {
+  protected defaultBaseSettings(map: JnksIotMap<any>): Partial<MarkersDataLayerSettings> {
     return defaultBaseMarkersDataLayerSettings(map.type());
   }
 
@@ -639,7 +639,7 @@ export class TbMarkersDataLayer extends TbLatestMapDataLayer<MarkersDataLayerSet
     const setup$: Observable<void>[] = [this.dataProcessor.setup()];
     if (this.settings.markerClustering?.enable && this.settings.markerClustering.useClusterMarkerColorFunction) {
       setup$.push(
-        parseTbFunction<ClusterMarkerColorFunction>(this.getCtx().http, this.settings.markerClustering.clusterMarkerColorFunction, ['data', 'childCount']).pipe(
+        parseJnksIotFunction<ClusterMarkerColorFunction>(this.getCtx().http, this.settings.markerClustering.clusterMarkerColorFunction, ['data', 'childCount']).pipe(
           map((parsed) => {
             this.clusterMarkerColorFunction = parsed;
             return null;
@@ -650,15 +650,15 @@ export class TbMarkersDataLayer extends TbLatestMapDataLayer<MarkersDataLayerSet
     return forkJoin(setup$).pipe(map(() => null));
   }
 
-  protected isValidLayerData(layerData: FormattedData<TbMapDatasource>): boolean {
+  protected isValidLayerData(layerData: FormattedData<JnksIotMapDatasource>): boolean {
     return !!this.dataProcessor.extractLocationData(layerData);
   }
 
-  protected createLayerItem(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): TbMarkerDataLayerItem {
-    return new TbMarkerDataLayerItem(data, dsData, this.settings, this);
+  protected createLayerItem(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): JnksIotMarkerDataLayerItem {
+    return new JnksIotMarkerDataLayerItem(data, dsData, this.settings, this);
   }
 
-  protected layerItemsUpdated(updatedItems: TbLatestDataLayerItem<MarkersDataLayerSettings, TbMarkersDataLayer, L.Marker>[]) {
+  protected layerItemsUpdated(updatedItems: JnksIotLatestDataLayerItem<MarkersDataLayerSettings, JnksIotMarkersDataLayer, L.Marker>[]) {
     if (this.settings.markerClustering?.enable) {
       this.markersClusterContainer.refreshClusters(updatedItems.map(item => item.getLayer()));
     }
@@ -678,18 +678,18 @@ export class TbMarkersDataLayer extends TbLatestMapDataLayer<MarkersDataLayerSet
     if (this.settings.markerClustering?.useClusterMarkerColorFunction) {
       markerClusterOptions.iconCreateFunction = (cluster) => {
         const childCount = cluster.getChildCount();
-        const data = cluster.getAllChildMarkers().map(clusterMarker => clusterMarker.options.tbMarkerData);
+        const data = cluster.getAllChildMarkers().map(clusterMarker => clusterMarker.options.jnksIotMarkerData);
         const markerColor: string = this.clusterMarkerColorFunction ?
-          safeExecuteTbFunction(this.clusterMarkerColorFunction, [data, childCount]) : null;
+          safeExecuteJnksIotFunction(this.clusterMarkerColorFunction, [data, childCount]) : null;
         if (isDefinedAndNotNull(markerColor) && tinycolor(markerColor).isValid()) {
           const parsedColor = tinycolor(markerColor);
           const alpha = parsedColor.getAlpha();
           return L.divIcon({
             html: `<div style="background-color: ${parsedColor.setAlpha(alpha * 0.4).toRgbString()};" ` +
-              `class="marker-cluster tb-cluster-marker-element">` +
+              `class="marker-cluster jnks-iot-cluster-marker-element">` +
               `<div style="background-color: ${parsedColor.setAlpha(alpha * 0.9).toRgbString()};"><span>` + childCount + '</span></div></div>',
             iconSize: new L.Point(40, 40),
-            className: 'tb-cluster-marker-container'
+            className: 'jnks-iot-cluster-marker-container'
           });
         } else {
           let c = ' marker-cluster-';

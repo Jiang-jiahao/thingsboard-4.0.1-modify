@@ -14,7 +14,7 @@ import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.kv.AttributeKvEntry;
 import com.jnks.iot.server.common.data.kv.BaseAttributeKvEntry;
 import com.jnks.iot.server.common.data.kv.KvEntry;
-import com.jnks.iot.server.common.data.msg.TbMsgType;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
 
 import java.util.List;
 import java.util.UUID;
@@ -33,8 +33,8 @@ public class AttributesSaveRequest implements CalculatedFieldSystemAwareRequest 
     private final boolean notifyDevice;
     private final Strategy strategy;
     private final List<CalculatedFieldId> previousCalculatedFieldIds;
-    private final UUID tbMsgId;
-    private final TbMsgType tbMsgType;
+    private final UUID jnksIotMsgId;
+    private final JnksIotMsgType jnksIotMsgType;
     private final FutureCallback<Void> callback;
 
     public record Strategy(boolean saveAttributes, boolean sendWsUpdate, boolean processCalculatedFields) {
@@ -58,8 +58,8 @@ public class AttributesSaveRequest implements CalculatedFieldSystemAwareRequest 
         private boolean notifyDevice = true;
         private Strategy strategy;
         private List<CalculatedFieldId> previousCalculatedFieldIds;
-        private UUID tbMsgId;
-        private TbMsgType tbMsgType;
+        private UUID jnksIotMsgId;
+        private JnksIotMsgType jnksIotMsgType;
         private FutureCallback<Void> callback;
 
         Builder() {}
@@ -117,13 +117,13 @@ public class AttributesSaveRequest implements CalculatedFieldSystemAwareRequest 
             return this;
         }
 
-        public Builder tbMsgId(UUID tbMsgId) {
-            this.tbMsgId = tbMsgId;
+        public Builder jnksIotMsgId(UUID jnksIotMsgId) {
+            this.jnksIotMsgId = jnksIotMsgId;
             return this;
         }
 
-        public Builder tbMsgType(TbMsgType tbMsgType) {
-            this.tbMsgType = tbMsgType;
+        public Builder jnksIotMsgType(JnksIotMsgType jnksIotMsgType) {
+            this.jnksIotMsgType = jnksIotMsgType;
             return this;
         }
 
@@ -149,7 +149,7 @@ public class AttributesSaveRequest implements CalculatedFieldSystemAwareRequest 
         public AttributesSaveRequest build() {
             return new AttributesSaveRequest(
                     tenantId, entityId, scope, entries, notifyDevice, requireNonNullElse(strategy, Strategy.PROCESS_ALL),
-                    previousCalculatedFieldIds, tbMsgId, tbMsgType, requireNonNullElse(callback, NoOpFutureCallback.instance())
+                    previousCalculatedFieldIds, jnksIotMsgId, jnksIotMsgType, requireNonNullElse(callback, NoOpFutureCallback.instance())
             );
         }
 

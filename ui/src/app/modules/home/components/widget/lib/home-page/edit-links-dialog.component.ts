@@ -16,7 +16,7 @@ export interface EditLinksDialogData {
 }
 
 @Component({
-  selector: 'tb-edit-links-dialog',
+  selector: 'jnks-iot-edit-links-dialog',
   templateUrl: './edit-links-dialog.component.html',
   styleUrls: ['./edit-links-dialog.component.scss']
 })

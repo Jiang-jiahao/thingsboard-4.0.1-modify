@@ -14,7 +14,7 @@ import com.jnks.iot.server.common.data.ExportableEntity;
 import com.jnks.iot.server.common.data.cf.CalculatedField;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.relation.EntityRelation;
-import com.jnks.iot.server.common.data.sync.JsonTbEntity;
+import com.jnks.iot.server.common.data.sync.JsonJnksIotEntity;
 
 import java.util.Comparator;
 import java.util.List;
@@ -44,7 +44,7 @@ public class EntityExportData<E extends ExportableEntity<? extends EntityId>> {
     public static final Comparator<CalculatedField> calculatedFieldsComparator = Comparator.comparing(CalculatedField::getName);
 
     @JsonProperty(index = 2)
-    @JsonTbEntity
+    @JsonJnksIotEntity
     private E entity;
     @JsonProperty(index = 1)
     private EntityType entityType;

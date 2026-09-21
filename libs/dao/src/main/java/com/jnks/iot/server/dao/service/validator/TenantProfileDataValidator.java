@@ -46,7 +46,7 @@ public class TenantProfileDataValidator extends DataValidator<TenantProfile> {
             }
         }
 
-        if (tenantProfile.isIsolatedTbRuleEngine()) {
+        if (tenantProfile.isIsolatedJnksIotRuleEngine()) {
             List<TenantProfileQueueConfiguration> queueConfiguration = tenantProfile.getProfileData().getQueueConfiguration();
             if (queueConfiguration == null) {
                 throw new DataValidationException("Tenant profile data queue configuration should be specified!");

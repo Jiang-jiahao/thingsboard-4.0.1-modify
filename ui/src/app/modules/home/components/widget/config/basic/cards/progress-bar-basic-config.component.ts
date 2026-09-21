@@ -28,7 +28,7 @@ import {
 } from '@home/components/widget/lib/cards/progress-bar-widget.models';
 
 @Component({
-  selector: 'tb-progress-bar-basic-config',
+  selector: 'jnks-iot-progress-bar-basic-config',
   templateUrl: './progress-bar-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

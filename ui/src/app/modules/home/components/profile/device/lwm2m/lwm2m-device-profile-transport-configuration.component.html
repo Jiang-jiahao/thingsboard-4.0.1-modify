@@ -3,14 +3,14 @@
     <mat-tab label="{{ 'device-profile.lwm2m.model-tab' | translate }}">
       <ng-template matTabContent>
         <section [formGroup]="lwm2mDeviceProfileFormGroup">
-          <tb-profile-lwm2m-object-list
+          <jnks-iot-profile-lwm2m-object-list
             (addList)="addObjectsList($event)"
             (removeList)="removeObjectsList($event)"
             formControlName="objectIds">
-          </tb-profile-lwm2m-object-list>
-          <tb-profile-lwm2m-observe-attr-telemetry
+          </jnks-iot-profile-lwm2m-object-list>
+          <jnks-iot-profile-lwm2m-observe-attr-telemetry
             formControlName="observeAttrTelemetry">
-          </tb-profile-lwm2m-observe-attr-telemetry>
+          </jnks-iot-profile-lwm2m-observe-attr-telemetry>
         </section>
       </ng-template>
     </mat-tab>
@@ -24,10 +24,10 @@
           {{ 'device-profile.lwm2m.include-bootstrap-server' | translate }}
         </mat-checkbox>
         <section style="padding: 20px 2px">
-          <tb-profile-lwm2m-bootstrap-config-servers formControlName="bootstrap"
+          <jnks-iot-profile-lwm2m-bootstrap-config-servers formControlName="bootstrap"
                                                      [isBootstrapServerUpdateEnable]="isBootstrapServerUpdateEnable"
                                                      [(isTransportWasRunWithBootstrap)]="isTransportWasRunWithBootstrap">
-          </tb-profile-lwm2m-bootstrap-config-servers>
+          </jnks-iot-profile-lwm2m-bootstrap-config-servers>
         </section>
       </section>
     </mat-tab>
@@ -71,8 +71,8 @@
           </fieldset>
           <fieldset class="fields-group">
             <legend class="group-title" translate>device-profile.power-saving-mode</legend>
-            <tb-power-mode-settings [parentForm]="clientSettingsFormGroup">
-            </tb-power-mode-settings>
+            <jnks-iot-power-mode-settings [parentForm]="clientSettingsFormGroup">
+            </jnks-iot-power-mode-settings>
           </fieldset>
           <fieldset class="fields-group">
             <legend class="group-title" translate>device-profile.lwm2m.default-object-id</legend>
@@ -90,12 +90,12 @@
     <mat-tab label="{{ 'device-profile.lwm2m.config-json-tab' | translate }}">
       <ng-template matTabContent>
         <section style="padding: 8px 0">
-          <tb-json-object-edit
+          <jnks-iot-json-object-edit
             readonly
             [sort]="sortFunction"
             label="{{ 'device-profile.transport-type-lwm2m' | translate }}"
             [ngModel]="configurationValue">
-          </tb-json-object-edit>
+          </jnks-iot-json-object-edit>
         </section>
       </ng-template>
     </mat-tab>

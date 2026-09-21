@@ -33,17 +33,17 @@ import com.jnks.iot.server.common.data.kv.KvEntry;
 import com.jnks.iot.server.common.data.kv.TimeseriesSaveResult;
 import com.jnks.iot.server.common.data.kv.TsKvEntry;
 import com.jnks.iot.server.common.data.kv.TsKvLatestRemovingResult;
-import com.jnks.iot.server.common.msg.queue.TbCallback;
+import com.jnks.iot.server.common.msg.queue.JnksIotCallback;
 import com.jnks.iot.server.common.msg.rule.engine.DeviceAttributesEventNotificationMsg;
-import com.jnks.iot.server.common.stats.TbApiUsageReportClient;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageReportClient;
 import com.jnks.iot.server.dao.attributes.AttributesService;
 import com.jnks.iot.server.dao.timeseries.TimeseriesService;
 import com.jnks.iot.server.dao.util.KvUtils;
-import com.jnks.iot.server.service.apiusage.TbApiUsageStateService;
+import com.jnks.iot.server.service.apiusage.JnksIotApiUsageStateService;
 import com.jnks.iot.server.service.cf.CalculatedFieldQueueService;
-import com.jnks.iot.server.service.entitiy.entityview.TbEntityViewService;
+import com.jnks.iot.server.service.entitiy.entityview.JnksIotEntityViewService;
 import com.jnks.iot.server.service.state.constants.DefaultDeviceStateConstants;
-import com.jnks.iot.server.service.subscription.TbSubscriptionUtils;
+import com.jnks.iot.server.service.subscription.JnksIotSubscriptionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,7 +69,7 @@ import static java.util.Comparator.nullsFirst;
  * <ul>
  *   <li>计算字段：策略开启时把请求推给 {@link CalculatedFieldQueueService} 异步计算；</li>
  *   <li>WebSocket 订阅：把变更推送给在线订阅者（仪表板实时刷新）；</li>
- *   <li>API 用量：时序数据点计数上报 {@link TbApiUsageReportClient}；</li>
+ *   <li>API 用量：时序数据点计数上报 {@link JnksIotApiUsageReportClient}；</li>
  *   <li>设备联动：共享属性变更通知在线设备；server 属性 inactivityTimeout 变化同步给设备状态管理器；</li>
  *   <li>实体视图：设备/资产的最新值复制到关联的 {@link EntityView}。</li>
  * </ul>
@@ -86,11 +86,11 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
     /** 时序 KV 存储 */
     private final TimeseriesService tsService;
     /** 实体视图服务：设备/资产最新值复制目标 */
-    private final Optional<TbEntityViewService> tbEntityViewService;
+    private final Optional<JnksIotEntityViewService> jnksIotEntityViewService;
     /** API 用量上报客户端（数据点计数） */
-    private final TbApiUsageReportClient apiUsageClient;
+    private final JnksIotApiUsageReportClient apiUsageClient;
     /** API 用量状态：DB 写入是否被限额禁用 */
-    private final TbApiUsageStateService apiUsageStateService;
+    private final JnksIotApiUsageStateService apiUsageStateService;
     /** 计算字段异步队列 */
     private final CalculatedFieldQueueService calculatedFieldQueueService;
     /** 设备状态管理器：inactivityTimeout 联动 */
@@ -104,14 +104,14 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
 
     public DefaultTelemetrySubscriptionService(AttributesService attrService,
                                                TimeseriesService tsService,
-                                               Optional<TbEntityViewService> tbEntityViewService,
-                                               TbApiUsageReportClient apiUsageClient,
-                                               TbApiUsageStateService apiUsageStateService,
+                                               Optional<JnksIotEntityViewService> jnksIotEntityViewService,
+                                               JnksIotApiUsageReportClient apiUsageClient,
+                                               JnksIotApiUsageStateService apiUsageStateService,
                                                CalculatedFieldQueueService calculatedFieldQueueService,
                                                Optional<DeviceStateManager> deviceStateManager) {
         this.attrService = attrService;
         this.tsService = tsService;
-        this.tbEntityViewService = tbEntityViewService;
+        this.jnksIotEntityViewService = jnksIotEntityViewService;
         this.apiUsageClient = apiUsageClient;
         this.apiUsageStateService = apiUsageStateService;
         this.calculatedFieldQueueService = calculatedFieldQueueService;
@@ -239,7 +239,7 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
             deviceStateManager.ifPresent(dsm ->
                     findNewInactivityTimeout(request.getEntries()).ifPresent(newInactivityTimeout ->
                             addMainCallback(resultFuture, success -> dsm.onDeviceInactivityTimeoutUpdate(
-                                    tenantId, new DeviceId(entityId.getId()), newInactivityTimeout, TbCallback.EMPTY)
+                                    tenantId, new DeviceId(entityId.getId()), newInactivityTimeout, JnksIotCallback.EMPTY)
                             )
                     )
             );
@@ -312,7 +312,7 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
         if (inactivityTimeoutDeleted(request)) {
             deviceStateManager.ifPresent(dsm ->
                     addMainCallback(deleteFuture, success -> dsm.onDeviceInactivityTimeoutUpdate(
-                            tenantId, new DeviceId(entityId.getId()), 0L, TbCallback.EMPTY)
+                            tenantId, new DeviceId(entityId.getId()), 0L, JnksIotCallback.EMPTY)
                     )
             );
         }
@@ -376,10 +376,10 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
      * 每个键取窗口内最新的一个点，以 LATEST_AND_WS 策略写回视图实体。
      */
     private void copyLatestToEntityViews(TenantId tenantId, EntityId entityId, List<TsKvEntry> ts) {
-        if (tbEntityViewService.isEmpty()) {
+        if (jnksIotEntityViewService.isEmpty()) {
             return;
         }
-        Futures.addCallback(tbEntityViewService.get().findEntityViewsByTenantIdAndEntityIdAsync(tenantId, entityId),
+        Futures.addCallback(jnksIotEntityViewService.get().findEntityViewsByTenantIdAndEntityIdAsync(tenantId, entityId),
                 new FutureCallback<>() {
                     @Override
                     public void onSuccess(@Nullable List<EntityView> result) {
@@ -437,22 +437,22 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
     /** 属性更新 → 推送给在线 WebSocket 订阅者（本地直推或跨节点 proto 转发） */
     private void onAttributesUpdate(TenantId tenantId, EntityId entityId, String scope, List<AttributeKvEntry> attributes) {
         forwardToSubscriptionManagerService(tenantId, entityId,
-                subscriptionManagerService -> subscriptionManagerService.onAttributesUpdate(tenantId, entityId, scope, attributes, TbCallback.EMPTY),
-                () -> TbSubscriptionUtils.toAttributesUpdateProto(tenantId, entityId, scope, attributes));
+                subscriptionManagerService -> subscriptionManagerService.onAttributesUpdate(tenantId, entityId, scope, attributes, JnksIotCallback.EMPTY),
+                () -> JnksIotSubscriptionUtils.toAttributesUpdateProto(tenantId, entityId, scope, attributes));
     }
 
     /** 属性删除 → 推送给在线 WebSocket 订阅者 */
     private void onAttributesDelete(TenantId tenantId, EntityId entityId, String scope, List<String> keys) {
         forwardToSubscriptionManagerService(tenantId, entityId,
-                subscriptionManagerService -> subscriptionManagerService.onAttributesDelete(tenantId, entityId, scope, keys, TbCallback.EMPTY),
-                () -> TbSubscriptionUtils.toAttributesDeleteProto(tenantId, entityId, scope, keys));
+                subscriptionManagerService -> subscriptionManagerService.onAttributesDelete(tenantId, entityId, scope, keys, JnksIotCallback.EMPTY),
+                () -> JnksIotSubscriptionUtils.toAttributesDeleteProto(tenantId, entityId, scope, keys));
     }
 
     /** 时序更新 → 推送给在线 WebSocket 订阅者 */
     private void onTimeSeriesUpdate(TenantId tenantId, EntityId entityId, List<TsKvEntry> ts) {
         forwardToSubscriptionManagerService(tenantId, entityId,
-                subscriptionManagerService -> subscriptionManagerService.onTimeSeriesUpdate(tenantId, entityId, ts, TbCallback.EMPTY),
-                () -> TbSubscriptionUtils.toTimeseriesUpdateProto(tenantId, entityId, ts));
+                subscriptionManagerService -> subscriptionManagerService.onTimeSeriesUpdate(tenantId, entityId, ts, JnksIotCallback.EMPTY),
+                () -> JnksIotSubscriptionUtils.toTimeseriesUpdateProto(tenantId, entityId, ts));
     }
 
     /**
@@ -474,9 +474,9 @@ public class DefaultTelemetrySubscriptionService extends AbstractSubscriptionSer
                 }
             });
 
-            subscriptionManagerService.onTimeSeriesUpdate(tenantId, entityId, updated, TbCallback.EMPTY);
-            subscriptionManagerService.onTimeSeriesDelete(tenantId, entityId, deleted, TbCallback.EMPTY);
-        }, () -> TbSubscriptionUtils.toTimeseriesDeleteProto(tenantId, entityId, keys));
+            subscriptionManagerService.onTimeSeriesUpdate(tenantId, entityId, updated, JnksIotCallback.EMPTY);
+            subscriptionManagerService.onTimeSeriesDelete(tenantId, entityId, deleted, JnksIotCallback.EMPTY);
+        }, () -> JnksIotSubscriptionUtils.toTimeseriesDeleteProto(tenantId, entityId, keys));
     }
 
     private <S> void addMainCallback(ListenableFuture<S> saveFuture, final FutureCallback<Void> callback) {

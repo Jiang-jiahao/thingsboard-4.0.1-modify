@@ -25,7 +25,7 @@ export interface DashboardImageDialogResult {
 }
 
 @Component({
-  selector: 'tb-dashboard-image-dialog',
+  selector: 'jnks-iot-dashboard-image-dialog',
   templateUrl: './dashboard-image-dialog.component.html',
   styleUrls: ['./dashboard-image-dialog.component.scss']
 })

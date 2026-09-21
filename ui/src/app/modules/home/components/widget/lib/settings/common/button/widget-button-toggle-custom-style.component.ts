@@ -11,7 +11,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { MatIconButton } from '@angular/material/button';
 import { deepClone } from '@core/utils';
 import {
@@ -24,7 +24,7 @@ import {
 } from '@home/components/widget/lib/settings/common/button/widget-button-toggle-custom-style-panel.component';
 
 @Component({
-  selector: 'tb-widget-button-toggle-custom-style',
+  selector: 'jnks-iot-widget-button-toggle-custom-style',
   templateUrl: './widget-button-toggle-custom-style.component.html',
   styleUrls: ['./widget-button-toggle-custom-style.component.scss'],
   providers: [
@@ -64,7 +64,7 @@ export class WidgetButtonToggleCustomStyleComponent implements OnInit, OnChanges
 
   private propagateChange = (_val: any) => {};
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private cd: ChangeDetectorRef) {}
@@ -127,8 +127,8 @@ export class WidgetButtonToggleCustomStyleComponent implements OnInit, OnChanges
         },
         isModal: true
       });
-      widgetButtonCustomStylePanelPopover.tbComponentRef.instance.popover = widgetButtonCustomStylePanelPopover;
-      widgetButtonCustomStylePanelPopover.tbComponentRef.instance.customStyleApplied.subscribe((customStyle) => {
+      widgetButtonCustomStylePanelPopover.jnksIotComponentRef.instance.popover = widgetButtonCustomStylePanelPopover;
+      widgetButtonCustomStylePanelPopover.jnksIotComponentRef.instance.customStyleApplied.subscribe((customStyle) => {
         widgetButtonCustomStylePanelPopover.hide();
         this.updateModel(customStyle);
       });

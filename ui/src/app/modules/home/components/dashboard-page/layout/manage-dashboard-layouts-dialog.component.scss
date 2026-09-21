@@ -2,30 +2,30 @@
 @import '../theme.scss';
 @import '../scss/constants.scss';
 
-$tb-warn: mat.m2-get-color-from-palette(map-get($tb-theme, warn), text);
+$jnks-iot-warn: mat.m2-get-color-from-palette(map-get($jnks-iot-theme, warn), text);
 
 :host {
-  .tb-layout-fixed-container {
+  .jnks-iot-layout-fixed-container {
     width: 100%;
     min-width: 368px;
     padding: 8px 8px 8px 0;
     min-height: 48px;
   }
 
-  .tb-hint-group {
+  .jnks-iot-hint-group {
     padding: 0;
     margin-top: -14px;
   }
 
-  .tb-layout-preview {
+  .jnks-iot-layout-preview {
     width: 100%;
-    background-color: rgba(mat.m2-get-color-from-palette($tb-primary, 50), 0.6);
+    background-color: rgba(mat.m2-get-color-from-palette($jnks-iot-primary, 50), 0.6);
     padding: 35px;
 
     &-container {
       width: 75%;
 
-      button.tb-fixed-layout-button {
+      button.jnks-iot-fixed-layout-button {
         background-color: transparent;
         color: #000000;
         cursor: pointer;
@@ -49,7 +49,7 @@ $tb-warn: mat.m2-get-color-from-palette(map-get($tb-theme, warn), text);
         }
       }
 
-      .tb-layout-preview-element {
+      .jnks-iot-layout-preview-element {
         position: absolute;
         z-index: 99;
 
@@ -83,7 +83,7 @@ $tb-warn: mat.m2-get-color-from-palette(map-get($tb-theme, warn), text);
         -moz-appearance: textfield;
       }
 
-      .tb-layout-preview-input {
+      .jnks-iot-layout-preview-input {
         margin: 80px 0 0;
 
         input {
@@ -98,18 +98,18 @@ $tb-warn: mat.m2-get-color-from-palette(map-get($tb-theme, warn), text);
           font-size: 14px;
 
           &:invalid {
-            outline: 2px solid $tb-warn;
+            outline: 2px solid $jnks-iot-warn;
             border: 1px solid transparent;
-            background-color: rgba($tb-warn, 0.2);
+            background-color: rgba($jnks-iot-warn, 0.2);
           }
         }
       }
     }
   }
 
-  .tb-layout-breakpoints {
-    .tb-form-table-header-cell, .tb-form-table-row-cell {
-      &.tb-icon {
+  .jnks-iot-layout-breakpoints {
+    .jnks-iot-form-table-header-cell, .jnks-iot-form-table-row-cell {
+      &.jnks-iot-icon {
         width: 29px;
         min-width: 29px;
         max-width: 29px;
@@ -117,18 +117,18 @@ $tb-warn: mat.m2-get-color-from-palette(map-get($tb-theme, warn), text);
         place-content: center;
       }
 
-      &.tb-breakpoint {
+      &.jnks-iot-breakpoint {
         flex: 1 1 15%;
         width: 15%;
         min-width: 100px;
       }
 
-      &.tb-size {
+      &.jnks-iot-size {
         flex: 1 1 85%;
         width: 200px;
       }
 
-      &.tb-actions {
+      &.jnks-iot-actions {
         width: 96pxpx;
         min-width: 96px;
         max-width: 96px;
@@ -143,7 +143,7 @@ $tb-warn: mat.m2-get-color-from-palette(map-get($tb-theme, warn), text);
     }
   }
 
-  .tb-add-breakpoint-button {
+  .jnks-iot-add-breakpoint-button {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -174,7 +174,7 @@ $tb-warn: mat.m2-get-color-from-palette(map-get($tb-theme, warn), text);
   }
 }
 
-:host-context(.tb-fullscreen-dialog .mat-mdc-dialog-container) {
+:host-context(.jnks-iot-fullscreen-dialog .mat-mdc-dialog-container) {
   .mat-mdc-dialog-content {
     width: 550px;
     max-width: 100%;
@@ -184,15 +184,15 @@ $tb-warn: mat.m2-get-color-from-palette(map-get($tb-theme, warn), text);
 
 ::ng-deep {
   /* Alarm tooltip with side-to-side movement */
-  .tb-layout-error-tooltip-right {
-    background-color: $tb-warn !important;
+  .jnks-iot-layout-error-tooltip-right {
+    background-color: $jnks-iot-warn !important;
     margin: 5px 0 0 105px;
     width: 160px;
     text-align: center;
   }
 
-  .tb-layout-error-tooltip-main {
-    background-color: $tb-warn !important;
+  .jnks-iot-layout-error-tooltip-main {
+    background-color: $jnks-iot-warn !important;
     margin: 5px 105px 0 0;
     width: 160px;
     text-align: center;

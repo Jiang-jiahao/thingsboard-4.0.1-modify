@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import com.jnks.iot.server.common.data.edqs.fields.AssetFields;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.dao.ExportableEntityRepository;
 import com.jnks.iot.server.dao.model.sql.AssetEntity;
 import com.jnks.iot.server.dao.model.sql.AssetInfoEntity;
@@ -186,8 +186,8 @@ public interface AssetRepository extends JpaRepository<AssetEntity, UUID>, Expor
     @Query("SELECT externalId FROM AssetEntity WHERE id = :id")
     UUID getExternalIdById(@Param("id") UUID id);
 
-    @Query(value = "SELECT DISTINCT new com.jnks.iot.server.common.data.util.TbPair(a.tenantId , a.type) FROM  AssetEntity a")
-    Page<TbPair<UUID, String>> getAllAssetTypes(Pageable pageable);
+    @Query(value = "SELECT DISTINCT new com.jnks.iot.server.common.data.util.JnksIotPair(a.tenantId , a.type) FROM  AssetEntity a")
+    Page<JnksIotPair<UUID, String>> getAllAssetTypes(Pageable pageable);
 
 
     @Query("SELECT new com.jnks.iot.server.common.data.edqs.fields.AssetFields(a.id, a.createdTime, a.tenantId, a.customerId," +

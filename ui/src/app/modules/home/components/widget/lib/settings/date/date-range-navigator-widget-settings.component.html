@@ -1,7 +1,7 @@
-<section class="tb-widget-settings flex flex-col" [formGroup]="dateRangeNavigatorWidgetSettingsForm">
+<section class="jnks-iot-widget-settings flex flex-col" [formGroup]="dateRangeNavigatorWidgetSettingsForm">
   <fieldset class="fields-group fields-group-slider">
     <legend class="group-title" translate>widgets.date-range-navigator.date-range-picker-settings</legend>
-    <mat-expansion-panel class="tb-settings" [expanded]="!dateRangeNavigatorWidgetSettingsForm.get('hidePicker').value">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="!dateRangeNavigatorWidgetSettingsForm.get('hidePicker').value">
       <mat-expansion-panel-header class="flex flex-row flex-wrap">
         <mat-panel-title>
           <mat-slide-toggle formControlName="hidePicker" (click)="$event.stopPropagation()"
@@ -34,7 +34,7 @@
   </fieldset>
   <fieldset class="fields-group fields-group-slider">
     <legend class="group-title" translate>widgets.date-range-navigator.interval-settings</legend>
-    <mat-expansion-panel class="tb-settings" [expanded]="!dateRangeNavigatorWidgetSettingsForm.get('hideInterval').value">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="!dateRangeNavigatorWidgetSettingsForm.get('hideInterval').value">
       <mat-expansion-panel-header class="flex flex-row flex-wrap">
         <mat-panel-title>
           <mat-slide-toggle formControlName="hideInterval" (click)="$event.stopPropagation()"
@@ -78,7 +78,7 @@
   </fieldset>
   <fieldset class="fields-group fields-group-slider">
     <legend class="group-title" translate>widgets.date-range-navigator.step-settings</legend>
-    <mat-expansion-panel class="tb-settings" [expanded]="!dateRangeNavigatorWidgetSettingsForm.get('hideStepSize').value">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="!dateRangeNavigatorWidgetSettingsForm.get('hideStepSize').value">
       <mat-expansion-panel-header class="flex flex-row flex-wrap">
         <mat-panel-title>
           <mat-slide-toggle formControlName="hideStepSize" (click)="$event.stopPropagation()"

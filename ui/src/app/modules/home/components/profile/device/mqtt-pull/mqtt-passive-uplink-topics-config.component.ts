@@ -21,7 +21,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-mqtt-passive-uplink-topics-config',
+  selector: 'jnks-iot-mqtt-passive-uplink-topics-config',
   templateUrl: './mqtt-passive-uplink-topics-config.component.html',
   styleUrls: ['./mqtt-passive-uplink-topics-config.component.scss'],
   providers: [

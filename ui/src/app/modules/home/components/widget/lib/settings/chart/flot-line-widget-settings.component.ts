@@ -7,7 +7,7 @@ import { flotDefaultSettings } from '@home/components/widget/lib/settings/chart/
 import { deepClone } from '@core/utils';
 
 @Component({
-  selector: 'tb-flot-line-widget-settings',
+  selector: 'jnks-iot-flot-line-widget-settings',
   templateUrl: './flot-line-widget-settings.component.html',
   styleUrls: []
 })

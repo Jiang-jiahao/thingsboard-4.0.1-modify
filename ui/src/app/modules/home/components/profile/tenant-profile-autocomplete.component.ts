@@ -21,7 +21,7 @@ import { emptyPageData } from '@shared/models/page/page-data';
 import { getEntityDetailsPageURL } from '@core/utils';
 
 @Component({
-  selector: 'tb-tenant-profile-autocomplete',
+  selector: 'jnks-iot-tenant-profile-autocomplete',
   templateUrl: './tenant-profile-autocomplete.component.html',
   styleUrls: ['./tenant-profile-autocomplete.component.scss'],
   providers: [{
@@ -221,7 +221,7 @@ export class TenantProfileAutocompleteComponent implements ControlValueAccessor,
     this.dialog.open<TenantProfileDialogComponent, TenantProfileDialogData,
       TenantProfile>(TenantProfileDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         tenantProfile

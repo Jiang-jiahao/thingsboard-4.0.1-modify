@@ -1,5 +1,5 @@
-queue_type: "TB_QUEUE_TYPE" #kafka (Apache Kafka)
-queue_prefix: "TB_QUEUE_PREFIX"
+queue_type: "JNKS_IOT_QUEUE_TYPE" #kafka (Apache Kafka)
+queue_prefix: "JNKS_IOT_QUEUE_PREFIX"
 request_topic: "REMOTE_JS_EVAL_REQUEST_TOPIC"
 http_port: "HTTP_PORT"      # /livenessProbe
 
@@ -10,34 +10,34 @@ js:
 kafka:
   bootstrap:
     # Kafka Bootstrap Servers
-    servers: "TB_KAFKA_SERVERS"
-  replication_factor: "TB_QUEUE_KAFKA_REPLICATION_FACTOR"
-  acks: "TB_KAFKA_ACKS" # -1 = all; 0 = no acknowledgments; 1 = only waits for the leader to acknowledge
-  batch_size: "TB_KAFKA_BATCH_SIZE" # for producer
-  linger_ms: "TB_KAFKA_LINGER_MS" # for producer
-  partitions_consumed_concurrently: "TB_KAFKA_PARTITIONS_CONSUMED_CONCURRENTLY" # (EXPERIMENTAL) increase this value if you are planning to handle more than one partition (scale up, scale down) - this will decrease the latency
-  requestTimeout: "TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS"
-  connectionTimeout: "TB_KAFKA_CONNECTION_TIMEOUT_MS"
-  compression: "TB_QUEUE_KAFKA_COMPRESSION" # gzip or uncompressed
-  topic_properties: "TB_QUEUE_KAFKA_JE_TOPIC_PROPERTIES"
-  use_confluent_cloud: "TB_QUEUE_KAFKA_USE_CONFLUENT_CLOUD"
+    servers: "JNKS_IOT_KAFKA_SERVERS"
+  replication_factor: "JNKS_IOT_QUEUE_KAFKA_REPLICATION_FACTOR"
+  acks: "JNKS_IOT_KAFKA_ACKS" # -1 = all; 0 = no acknowledgments; 1 = only waits for the leader to acknowledge
+  batch_size: "JNKS_IOT_KAFKA_BATCH_SIZE" # for producer
+  linger_ms: "JNKS_IOT_KAFKA_LINGER_MS" # for producer
+  partitions_consumed_concurrently: "JNKS_IOT_KAFKA_PARTITIONS_CONSUMED_CONCURRENTLY" # (EXPERIMENTAL) increase this value if you are planning to handle more than one partition (scale up, scale down) - this will decrease the latency
+  requestTimeout: "JNKS_IOT_QUEUE_KAFKA_REQUEST_TIMEOUT_MS"
+  connectionTimeout: "JNKS_IOT_KAFKA_CONNECTION_TIMEOUT_MS"
+  compression: "JNKS_IOT_QUEUE_KAFKA_COMPRESSION" # gzip or uncompressed
+  topic_properties: "JNKS_IOT_QUEUE_KAFKA_JE_TOPIC_PROPERTIES"
+  use_confluent_cloud: "JNKS_IOT_QUEUE_KAFKA_USE_CONFLUENT_CLOUD"
   client_id: "KAFKA_CLIENT_ID" #inject pod name to easy identify the client using /opt/kafka/bin/kafka-consumer-groups.sh
   ssl:
     # Enable or disable SSL for Kafka communication.
-    enabled: "TB_KAFKA_SSL_ENABLED"
+    enabled: "JNKS_IOT_KAFKA_SSL_ENABLED"
     # Path to the server certificate file. This file can hold the server certificate or a certificate chain and may include the server private key.
-    cert_file: "TB_KAFKA_SSL_PEM_CERTIFICATE"
+    cert_file: "JNKS_IOT_KAFKA_SSL_PEM_CERTIFICATE"
     # Optional: Path to the server certificate private key file. Required if the private key is not included in the server certificate file.
-    key_file: "TB_KAFKA_SSL_PEM_KEY"
+    key_file: "JNKS_IOT_KAFKA_SSL_PEM_KEY"
     # Optional: Password for the server certificate private key, if applicable.
-    key_password: "TB_KAFKA_SSL_PEM_KEY_PASSWORD"
+    key_password: "JNKS_IOT_KAFKA_SSL_PEM_KEY_PASSWORD"
     # Optional: Path to a custom CA certificate file. Defaults to trusting well-known CAs curated by Mozilla.
-    ca_file: "TB_KAFKA_SSL_PEM_TRUSTS_CERTIFICATE"
+    ca_file: "JNKS_IOT_KAFKA_SSL_PEM_TRUSTS_CERTIFICATE"
   confluent:
     sasl:
-      mechanism: "TB_QUEUE_KAFKA_CONFLUENT_SASL_MECHANISM"
-    username: "TB_QUEUE_KAFKA_CONFLUENT_USERNAME"
-    password: "TB_QUEUE_KAFKA_CONFLUENT_PASSWORD"
+      mechanism: "JNKS_IOT_QUEUE_KAFKA_CONFLUENT_SASL_MECHANISM"
+    username: "JNKS_IOT_QUEUE_KAFKA_CONFLUENT_USERNAME"
+    password: "JNKS_IOT_QUEUE_KAFKA_CONFLUENT_PASSWORD"
 
 logger:
   level: "LOGGER_LEVEL"

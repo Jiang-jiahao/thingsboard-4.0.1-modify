@@ -29,7 +29,7 @@ import { ImagePipe } from '@shared/pipe/image.pipe';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
-  selector: 'tb-label-card-widget',
+  selector: 'jnks-iot-label-card-widget',
   templateUrl: './label-card-widget.component.html',
   styleUrls: ['./label-card-widget.component.scss'],
   encapsulation: ViewEncapsulation.None

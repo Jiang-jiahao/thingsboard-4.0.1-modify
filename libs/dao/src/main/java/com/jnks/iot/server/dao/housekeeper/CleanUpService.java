@@ -29,7 +29,7 @@ public class CleanUpService {
     private final RelationService relationService;
 
     private final Set<EntityType> skippedEntities = EnumSet.of(
-            EntityType.ALARM, EntityType.QUEUE, EntityType.TB_RESOURCE, EntityType.OTA_PACKAGE,
+            EntityType.ALARM, EntityType.QUEUE, EntityType.JNKS_IOT_RESOURCE, EntityType.OTA_PACKAGE,
             EntityType.NOTIFICATION_REQUEST, EntityType.NOTIFICATION_TEMPLATE,
             EntityType.NOTIFICATION_TARGET, EntityType.NOTIFICATION_RULE
     );

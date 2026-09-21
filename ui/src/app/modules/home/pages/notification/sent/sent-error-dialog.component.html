@@ -10,12 +10,12 @@
 <div mat-dialog-content>
   <div *ngFor="let errorStat of errorStats | keyvalue; last as isLast">
     <h6>{{ NotificationDeliveryMethodInfoMap.get(errorStat.key).name | translate }}</h6>
-    <table class="tb-table-list">
+    <table class="jnks-iot-table-list">
       <tr *ngFor="let error of errorStat.value | keyvalue">
         <td>
           <mat-chip>{{ error.key }}</mat-chip>
         </td>
-        <td class="tb-row-error">{{ error.value }}</td>
+        <td class="jnks-iot-row-error">{{ error.value }}</td>
       </tr>
     </table>
     <mat-divider *ngIf="!isLast"></mat-divider>

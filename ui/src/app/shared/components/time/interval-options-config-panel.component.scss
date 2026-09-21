@@ -1,42 +1,42 @@
 @import '../../../../scss/constants';
 
 :host {
-  .tb-interval-options-form {
+  .jnks-iot-interval-options-form {
     height: 100%;
 
-    .tb-form-table {
+    .jnks-iot-form-table {
       overflow: hidden;
     }
 
-    .tb-form-table-body {
+    .jnks-iot-form-table-body {
       overflow-y: auto;
     }
 
-    .tb-form-table-header-cell, .tb-form-table-row-cell {
-      &.tb-interval {
+    .jnks-iot-form-table-header-cell, .jnks-iot-form-table-row-cell {
+      &.jnks-iot-interval {
         flex: 1 1 30%;
         min-width: calc(30% - 8px);
         @media #{$mat-gt-md} {
           min-width: calc(30% - 12px);
         }
       }
-      &.tb-agg-interval {
+      &.jnks-iot-agg-interval {
         flex: 1 1 70%;
         min-width: 70%;
       }
     }
 
-    .tb-form-table-header-cell.tb-agg-interval-header {
+    .jnks-iot-form-table-header-cell.jnks-iot-agg-interval-header {
       flex: 1 1 35%;
       width: 35%;
     }
 
-    .tb-form-hint {
+    .jnks-iot-form-hint {
       flex-shrink: 0;
     }
 
     ::ng-deep {
-      .tb-interval-option {
+      .jnks-iot-interval-option {
         display: block;
 
         .mdc-form-field {

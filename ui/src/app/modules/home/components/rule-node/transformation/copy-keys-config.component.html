@@ -1,10 +1,10 @@
-<section [formGroup]="copyKeysConfigForm" class="tb-form-panel no-padding no-border">
-  <tb-msg-metadata-chip
+<section [formGroup]="copyKeysConfigForm" class="jnks-iot-form-panel no-padding no-border">
+  <jnks-iot-msg-metadata-chip
     [labelText]="('rule-node-config.key-val.copy-key-values-from' | translate)"
     [translation]="translation"
     formControlName="copyFrom">
-  </tb-msg-metadata-chip>
-  <tb-string-items-list class="mat-block"
+  </jnks-iot-msg-metadata-chip>
+  <jnks-iot-string-items-list class="mat-block"
                         required
                         [label]="'rule-node-config.keys' | translate"
                         [placeholder]="'rule-node-config.add-key' | translate"
@@ -15,5 +15,5 @@
               matTooltip="{{ 'rule-node-config.use-regular-expression-hint' | translate }}">
       help
     </mat-icon>
-  </tb-string-items-list>
+  </jnks-iot-string-items-list>
 </section>

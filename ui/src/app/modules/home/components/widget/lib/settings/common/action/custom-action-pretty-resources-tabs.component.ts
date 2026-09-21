@@ -25,7 +25,7 @@ import { getAce } from '@shared/models/ace/ace.models';
 import { beautifyCss, beautifyHtml } from '@shared/models/beautify.models';
 
 @Component({
-  selector: 'tb-custom-action-pretty-resources-tabs',
+  selector: 'jnks-iot-custom-action-pretty-resources-tabs',
   templateUrl: './custom-action-pretty-resources-tabs.component.html',
   styleUrls: ['./custom-action-pretty-resources-tabs.component.scss'],
   encapsulation: ViewEncapsulation.None

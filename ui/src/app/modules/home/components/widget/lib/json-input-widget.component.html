@@ -1,11 +1,11 @@
-<div class="tb-json-input" tb-toast toastTarget="{{ toastTargetId }}">
+<div class="jnks-iot-json-input" jnks-iot-toast toastTarget="{{ toastTargetId }}">
   <form *ngIf="attributeUpdateFormGroup"
-        class="tb-json-input__form flex flex-col"
+        class="jnks-iot-json-input__form flex flex-col"
         [formGroup]="attributeUpdateFormGroup"
         (ngSubmit)="save()">
       <div class="flex flex-1 flex-col gap-2.5" *ngIf="datasourceDetected && !errorMessage; else errorContainer">
         <fieldset class="flex-1">
-          <tb-json-object-edit
+          <jnks-iot-json-object-edit
             [editorStyle]="{minHeight: '100px'}"
             fillHeight="true"
             [jsonRequired]="settings.attributeRequired"
@@ -13,9 +13,9 @@
             formControlName="currentValue"
             (focusin)="isFocused = true;"
             (focusout)="isFocused = false;"
-          ></tb-json-object-edit>
+          ></jnks-iot-json-object-edit>
         </fieldset>
-        <div class="tb-json-input__actions flex flex-row items-center justify-end gap-5">
+        <div class="jnks-iot-json-input__actions flex flex-row items-center justify-end gap-5">
           <button mat-button color="primary"
                   type="button"
                   [disabled]="!attributeUpdateFormGroup.dirty"
@@ -33,7 +33,7 @@
       </div>
 
     <ng-template #errorContainer>
-      <div class="tb-json-input__error flex flex-1 flex-col items-center justify-center">
+      <div class="jnks-iot-json-input__error flex flex-1 flex-col items-center justify-center">
         {{ errorMessage | translate }}
       </div>
     </ng-template>

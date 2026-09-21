@@ -6,7 +6,7 @@
 --
 -- 内容摘自：
 --   libs/dao/src/main/resources/sql/schema-entities.sql      （protocol_template_bundle）
---   apps/tb-core/src/main/data/upgrade/basic/schema_update.sql（api_usage_state.version）
+--   apps/jnks-iot-core/src/main/data/upgrade/basic/schema_update.sql（api_usage_state.version）
 -- 两边都写成 IF NOT EXISTS，重复执行安全。以后再往 schema 里加东西，记得同步补到这里。
 
 CREATE TABLE IF NOT EXISTS protocol_template_bundle (

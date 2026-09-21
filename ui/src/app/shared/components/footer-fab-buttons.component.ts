@@ -18,7 +18,7 @@ export interface FooterFabButtons {
 }
 
 @Component({
-  selector: 'tb-footer-fab-buttons',
+  selector: 'jnks-iot-footer-fab-buttons',
   templateUrl: './footer-fab-buttons.component.html',
   styleUrls: ['./footer-fab-buttons.component.scss'],
   animations: speedDialFabAnimations

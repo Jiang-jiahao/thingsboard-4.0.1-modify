@@ -26,7 +26,7 @@ import {
 } from '@home/components/widget/lib/chart/chart.models';
 
 @Component({
-  selector: 'tb-range-chart-widget-settings',
+  selector: 'jnks-iot-range-chart-widget-settings',
   templateUrl: './range-chart-widget-settings.component.html',
   styleUrls: []
 })

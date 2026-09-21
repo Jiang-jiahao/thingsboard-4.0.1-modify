@@ -2,7 +2,7 @@
   <mat-toolbar color="primary">
     <h2 translate>user.add</h2>
     <span class="flex-1"></span>
-    <div [tb-help]="'users'"></div>
+    <div [jnks-iot-help]="'users'"></div>
     <button mat-icon-button
             (click)="cancel()"
             type="button">
@@ -13,7 +13,7 @@
   </mat-progress-bar>
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
   <div mat-dialog-content>
-    <tb-user></tb-user>
+    <jnks-iot-user></jnks-iot-user>
     <mat-form-field class="mat-block">
       <mat-label translate>user.activation-method</mat-label>
       <mat-select [ngModelOptions]="{standalone: true}" [(ngModel)]="activationMethod">

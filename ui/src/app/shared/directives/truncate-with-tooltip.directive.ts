@@ -5,7 +5,7 @@ import { merge } from 'rxjs';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
 @Directive({
-  selector: '[tbTruncateWithTooltip]',
+  selector: '[jnksIotTruncateWithTooltip]',
   hostDirectives: [{
     directive: MatTooltip,
     inputs: ['matTooltipClass', 'matTooltipTouchGestures'],
@@ -13,7 +13,7 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 })
 export class TruncateWithTooltipDirective implements OnInit {
 
-  text = input<string>(undefined, {alias: 'tbTruncateWithTooltip'});
+  text = input<string>(undefined, {alias: 'jnksIotTruncateWithTooltip'});
 
   tooltipEnabled = input(true, {transform: booleanAttribute});
 

@@ -10,7 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-default-device-profile-configuration',
+  selector: 'jnks-iot-default-device-profile-configuration',
   templateUrl: './default-device-profile-configuration.component.html',
   styleUrls: [],
   providers: [{

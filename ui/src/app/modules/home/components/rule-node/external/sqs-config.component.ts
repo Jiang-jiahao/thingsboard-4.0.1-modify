@@ -4,7 +4,7 @@ import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@app/shar
 import { SqsQueueType, sqsQueueTypeTranslations } from '@home/components/rule-node/rule-node-config.models';
 
 @Component({
-  selector: 'tb-external-node-sqs-config',
+  selector: 'jnks-iot-external-node-sqs-config',
   templateUrl: './sqs-config.component.html',
   styleUrls: []
 })

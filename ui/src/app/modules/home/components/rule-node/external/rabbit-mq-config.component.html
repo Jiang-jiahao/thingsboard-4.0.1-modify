@@ -48,7 +48,7 @@
   <mat-form-field class="mat-block">
     <mat-label translate>rule-node-config.password</mat-label>
     <input type="password" matInput formControlName="password">
-    <tb-toggle-password matSuffix></tb-toggle-password>
+    <jnks-iot-toggle-password matSuffix></jnks-iot-toggle-password>
   </mat-form-field>
   <mat-checkbox formControlName="automaticRecoveryEnabled">
     {{ 'rule-node-config.automatic-recovery' | translate }}
@@ -67,13 +67,13 @@
       {{ 'rule-node-config.min-handshake-timeout-ms-message' | translate }}
     </mat-error>
   </mat-form-field>
-  <label translate class="tb-title">rule-node-config.client-properties</label>
-  <tb-kv-map-config-old
+  <label translate class="jnks-iot-title">rule-node-config.client-properties</label>
+  <jnks-iot-kv-map-config-old
     required="false"
     formControlName="clientProperties"
     keyText="rule-node-config.key"
     keyRequiredText="rule-node-config.key-required"
     valText="rule-node-config.value"
     valRequiredText="rule-node-config.value-required">
-  </tb-kv-map-config-old>
+  </jnks-iot-kv-map-config-old>
 </section>

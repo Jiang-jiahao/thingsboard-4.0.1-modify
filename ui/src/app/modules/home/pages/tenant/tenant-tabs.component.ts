@@ -5,7 +5,7 @@ import { EntityTabsComponent } from '../../components/entity/entity-tabs.compone
 import { TenantInfo } from '@shared/models/tenant.model';
 
 @Component({
-  selector: 'tb-tenant-tabs',
+  selector: 'jnks-iot-tenant-tabs',
   templateUrl: './tenant-tabs.component.html',
   styleUrls: []
 })

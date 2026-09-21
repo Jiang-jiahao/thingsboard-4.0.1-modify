@@ -8,7 +8,7 @@ import {
 } from '@home/components/rule-node/rule-node-config.models';
 
 @Component({
-  selector: 'tb-external-node-azure-iot-hub-config',
+  selector: 'jnks-iot-external-node-azure-iot-hub-config',
   templateUrl: './azure-iot-hub-config.component.html',
   styleUrls: ['./mqtt-config.component.scss']
 })

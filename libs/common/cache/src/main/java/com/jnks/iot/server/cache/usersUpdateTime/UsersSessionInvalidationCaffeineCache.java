@@ -4,13 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
-import com.jnks.iot.server.cache.CaffeineTbTransactionalCache;
+import com.jnks.iot.server.cache.CaffeineJnksIotTransactionalCache;
 import com.jnks.iot.server.common.data.CacheConstants;
 
 
 @ConditionalOnProperty(prefix = "cache", value = "type", havingValue = "caffeine", matchIfMissing = true)
 @Service("UsersSessionInvalidation")
-public class UsersSessionInvalidationCaffeineCache extends CaffeineTbTransactionalCache<String, Long> {
+public class UsersSessionInvalidationCaffeineCache extends CaffeineJnksIotTransactionalCache<String, Long> {
 
     @Autowired
     public UsersSessionInvalidationCaffeineCache(CacheManager cacheManager) {

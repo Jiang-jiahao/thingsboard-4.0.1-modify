@@ -19,7 +19,7 @@ export interface ExportResourceDialogDialogResult {
 }
 
 @Component({
-  selector: 'tb-export-resource-dialog',
+  selector: 'jnks-iot-export-resource-dialog',
   templateUrl: './export-resource-dialog.component.html',
   styleUrls: []
 })

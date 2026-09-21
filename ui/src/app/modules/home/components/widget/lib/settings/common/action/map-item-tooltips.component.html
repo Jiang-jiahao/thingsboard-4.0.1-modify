@@ -1,10 +1,10 @@
-<div class="tb-form-panel stroked" [formGroup]="tooltipsForm">
-  <mat-expansion-panel class="tb-settings">
+<div class="jnks-iot-form-panel stroked" [formGroup]="tooltipsForm">
+  <mat-expansion-panel class="jnks-iot-settings">
     <mat-expansion-panel-header>{{ 'widget-action.map-item-tooltip.customize-map-item-tooltips' | translate }}</mat-expansion-panel-header>
     <ng-template matExpansionPanelContent>
       @switch (mapItemType) {
         @case (MapItemType.marker) {
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <div class="fixed-title-width" translate>widget-action.map-item-tooltip.place-marker</div>
             <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
               <input matInput placeholder="{{ mapItemTooltipsDefaultTranslate.placeMarker | translate }}" formControlName="placeMarker">
@@ -12,13 +12,13 @@
           </div>
         }
         @case (MapItemType.rectangle) {
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <div class="fixed-title-width" translate>widget-action.map-item-tooltip.start-draw-rectangle</div>
             <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
               <input matInput placeholder="{{ mapItemTooltipsDefaultTranslate.startRect | translate }}" formControlName="startRect">
             </mat-form-field>
           </div>
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <div class="fixed-title-width" translate>widget-action.map-item-tooltip.finish-draw-rectangle</div>
             <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
               <input matInput placeholder="{{ mapItemTooltipsDefaultTranslate.finishRect | translate }}" formControlName="finishRect">
@@ -26,19 +26,19 @@
           </div>
         }
         @case (MapItemType.polygon) {
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <div class="fixed-title-width" translate>widget-action.map-item-tooltip.start-draw-polygon</div>
             <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
               <input matInput placeholder="{{ mapItemTooltipsDefaultTranslate.firstVertex | translate }}" formControlName="firstVertex">
             </mat-form-field>
           </div>
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <div class="fixed-title-width" translate>widget-action.map-item-tooltip.continue-draw-polygon</div>
             <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
               <input matInput placeholder="{{ mapItemTooltipsDefaultTranslate.continueLine | translate }}" formControlName="continueLine">
             </mat-form-field>
           </div>
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <div class="fixed-title-width" translate>widget-action.map-item-tooltip.finish-draw-polygon</div>
             <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
               <input matInput placeholder="{{ mapItemTooltipsDefaultTranslate.finishPoly | translate }}" formControlName="finishPoly">
@@ -46,13 +46,13 @@
           </div>
         }
         @case (MapItemType.circle) {
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <div class="fixed-title-width" translate>widget-action.map-item-tooltip.start-draw-circle</div>
             <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
               <input matInput placeholder="{{ mapItemTooltipsDefaultTranslate.startCircle | translate }}" formControlName="startCircle">
             </mat-form-field>
           </div>
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <div class="fixed-title-width" translate>widget-action.map-item-tooltip.finish-draw-circle</div>
             <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
               <input matInput placeholder="{{ mapItemTooltipsDefaultTranslate.finishCircle | translate }}" formControlName="finishCircle">

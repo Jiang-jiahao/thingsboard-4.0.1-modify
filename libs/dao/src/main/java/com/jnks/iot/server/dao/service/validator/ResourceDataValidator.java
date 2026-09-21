@@ -5,40 +5,40 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
-import com.jnks.iot.server.common.data.TbResource;
-import com.jnks.iot.server.common.data.id.TbResourceId;
+import com.jnks.iot.server.common.data.JnksIotResource;
+import com.jnks.iot.server.common.data.id.JnksIotResourceId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
 import com.jnks.iot.server.dao.exception.DataValidationException;
-import com.jnks.iot.server.dao.resource.TbResourceDao;
+import com.jnks.iot.server.dao.resource.JnksIotResourceDao;
 import com.jnks.iot.server.dao.service.DataValidator;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
 import com.jnks.iot.server.dao.tenant.TenantService;
 
-import static com.jnks.iot.server.common.data.EntityType.TB_RESOURCE;
+import static com.jnks.iot.server.common.data.EntityType.JNKS_IOT_RESOURCE;
 
 @Component
-public class ResourceDataValidator extends DataValidator<TbResource> {
+public class ResourceDataValidator extends DataValidator<JnksIotResource> {
 
     @Autowired
-    private TbResourceDao resourceDao;
+    private JnksIotResourceDao resourceDao;
 
     @Autowired
     private TenantService tenantService;
 
     @Autowired
     @Lazy
-    private TbTenantProfileCache tenantProfileCache;
+    private JnksIotTenantProfileCache tenantProfileCache;
 
     @Override
-    protected void validateCreate(TenantId tenantId, TbResource resource) {
+    protected void validateCreate(TenantId tenantId, JnksIotResource resource) {
         if (resource.getData() == null || resource.getData().length == 0) {
             throw new DataValidationException("Resource data should be specified");
         }
     }
 
     @Override
-    protected TbResource validateUpdate(TenantId tenantId, TbResource resource) {
+    protected JnksIotResource validateUpdate(TenantId tenantId, JnksIotResource resource) {
         if (resource.getData() != null && !resource.getResourceType().isUpdatable() &&
                 tenantId != null && !tenantId.isSysTenantId()) {
             throw new DataValidationException("This type of resource can't be updated");
@@ -47,7 +47,7 @@ public class ResourceDataValidator extends DataValidator<TbResource> {
     }
 
     @Override
-    protected void validateDataImpl(TenantId tenantId, TbResource resource) {
+    protected void validateDataImpl(TenantId tenantId, JnksIotResource resource) {
         validateString("Resource title", resource.getTitle());
         if (resource.getTenantId() == null) {
             resource.setTenantId(TenantId.SYS_TENANT_ID);
@@ -74,7 +74,7 @@ public class ResourceDataValidator extends DataValidator<TbResource> {
         }
     }
 
-    public void validateResourceSize(TenantId tenantId, TbResourceId resourceId, long dataSize) {
+    public void validateResourceSize(TenantId tenantId, JnksIotResourceId resourceId, long dataSize) {
         if (!tenantId.isSysTenantId()) {
             DefaultTenantProfileConfiguration profileConfiguration = tenantProfileCache.get(tenantId).getDefaultProfileConfiguration();
             long maxResourceSize = profileConfiguration.getMaxResourceSize();
@@ -86,7 +86,7 @@ public class ResourceDataValidator extends DataValidator<TbResource> {
                 long prevSize = resourceDao.getResourceSize(tenantId, resourceId);
                 dataSize -= prevSize;
             }
-            validateMaxSumDataSizePerTenant(tenantId, resourceDao, maxSumResourcesDataInBytes, dataSize, TB_RESOURCE);
+            validateMaxSumDataSizePerTenant(tenantId, resourceDao, maxSumResourcesDataInBytes, dataSize, JNKS_IOT_RESOURCE);
         }
     }
 }

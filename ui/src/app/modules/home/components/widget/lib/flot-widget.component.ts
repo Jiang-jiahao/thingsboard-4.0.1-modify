@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { WidgetContext } from '@home/models/widget-component.models';
-import { ChartType, TbFlotSettings } from '@home/components/widget/lib/flot-widget.models';
-import { TbFlot } from '@home/components/widget/lib/flot-widget';
+import { ChartType, JnksIotFlotSettings } from '@home/components/widget/lib/flot-widget.models';
+import { JnksIotFlot } from '@home/components/widget/lib/flot-widget';
 import {
   defaultLegendConfig,
   LegendConfig,
@@ -12,7 +12,7 @@ import {
 import { isDefinedAndNotNull } from '@core/utils';
 
 @Component({
-  selector: 'tb-flot-widget',
+  selector: 'jnks-iot-flot-widget',
   templateUrl: './flot-widget.component.html',
   styleUrls: []
 })
@@ -33,8 +33,8 @@ export class FlotWidgetComponent implements OnInit {
   legendContainerLayoutType: 'flex-row' | 'flex-col';
   legendStyle: {[klass: string]: any};
 
-  public settings: TbFlotSettings;
-  private flot: TbFlot;
+  public settings: JnksIotFlotSettings;
+  private flot: JnksIotFlot;
 
   constructor() {
   }
@@ -45,7 +45,7 @@ export class FlotWidgetComponent implements OnInit {
     this.chartType = this.chartType || 'line';
     this.configureLegend();
     if (this.ctx.datasources?.length) {
-      this.flot = new TbFlot(this.ctx, this.chartType, $(this.flotElement.nativeElement));
+      this.flot = new JnksIotFlot(this.ctx, this.chartType, $(this.flotElement.nativeElement));
     }
   }
 

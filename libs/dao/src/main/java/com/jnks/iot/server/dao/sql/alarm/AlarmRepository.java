@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import com.jnks.iot.server.common.data.alarm.AlarmSeverity;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.dao.model.sql.AlarmEntity;
 import com.jnks.iot.server.dao.model.sql.AlarmInfoEntity;
 
@@ -317,37 +317,37 @@ public interface AlarmRepository extends JpaRepository<AlarmEntity, UUID> {
     AlarmInfoEntity findAlarmInfoById(@Param("tenantId") UUID tenantId, @Param("alarmId") UUID alarmId);
 
     // using Slice so that count query is not executed
-    @Query("SELECT new com.jnks.iot.server.common.data.util.TbPair(a.id, a.createdTime) " +
+    @Query("SELECT new com.jnks.iot.server.common.data.util.JnksIotPair(a.id, a.createdTime) " +
             "FROM AlarmEntity a WHERE a.tenantId = :tenantId AND a.assigneeId = :assigneeId")
-    Slice<TbPair<UUID, Long>> findAlarmIdsByAssigneeId(@Param("tenantId") UUID tenantId,
+    Slice<JnksIotPair<UUID, Long>> findAlarmIdsByAssigneeId(@Param("tenantId") UUID tenantId,
                                                        @Param("assigneeId") UUID assigneeId,
                                                        Pageable pageable);
 
     // using Slice so that count query is not executed
-    @Query("SELECT new com.jnks.iot.server.common.data.util.TbPair(a.id, a.createdTime) " +
+    @Query("SELECT new com.jnks.iot.server.common.data.util.JnksIotPair(a.id, a.createdTime) " +
             "FROM AlarmEntity a WHERE a.tenantId = :tenantId AND a.assigneeId = :assigneeId " +
             "AND (a.createdTime > :createdTimeOffset OR " +
             "(a.createdTime = :createdTimeOffset AND a.id > :idOffset))")
-    Slice<TbPair<UUID, Long>> findAlarmIdsByAssigneeId(@Param("tenantId") UUID tenantId,
+    Slice<JnksIotPair<UUID, Long>> findAlarmIdsByAssigneeId(@Param("tenantId") UUID tenantId,
                                                        @Param("assigneeId") UUID assigneeId,
                                                        @Param("createdTimeOffset") long createdTimeOffset,
                                                        @Param("idOffset") UUID idOffset,
                                                        Pageable pageable);
 
     // using Slice so that count query is not executed
-    @Query("SELECT new com.jnks.iot.server.common.data.util.TbPair(a.id, a.createdTime) " +
+    @Query("SELECT new com.jnks.iot.server.common.data.util.JnksIotPair(a.id, a.createdTime) " +
             "FROM AlarmEntity a WHERE a.originatorId = :originatorId " +
             "AND (a.createdTime > :createdTimeOffset OR " +
             "(a.createdTime = :createdTimeOffset AND a.id > :idOffset))")
-    Slice<TbPair<UUID, Long>> findAlarmIdsByOriginatorId(@Param("originatorId") UUID originatorId,
+    Slice<JnksIotPair<UUID, Long>> findAlarmIdsByOriginatorId(@Param("originatorId") UUID originatorId,
                                                          @Param("createdTimeOffset") long createdTimeOffset,
                                                          @Param("idOffset") UUID idOffset,
                                                          Pageable pageable);
 
     // using Slice so that count query is not executed
-    @Query("SELECT new com.jnks.iot.server.common.data.util.TbPair(a.id, a.createdTime) " +
+    @Query("SELECT new com.jnks.iot.server.common.data.util.JnksIotPair(a.id, a.createdTime) " +
             "FROM AlarmEntity a WHERE a.originatorId = :originatorId")
-    Slice<TbPair<UUID, Long>> findAlarmIdsByOriginatorId(@Param("originatorId") UUID originatorId,
+    Slice<JnksIotPair<UUID, Long>> findAlarmIdsByOriginatorId(@Param("originatorId") UUID originatorId,
                                                          Pageable pageable);
 
     @Query(value = "SELECT create_or_update_active_alarm(:t_id, :c_id, :a_id, :a_created_ts, :a_o_id, :a_o_type, :a_type, :a_severity, " +

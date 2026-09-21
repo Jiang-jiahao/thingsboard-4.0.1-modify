@@ -2,15 +2,15 @@
   <mat-select [required]="required"
               [disabled]="disabled"
               [(ngModel)]="widgetsBundle"
-              panelClass="tb-widgets-bundle-select"
+              panelClass="jnks-iot-widgets-bundle-select"
               placeholder="{{ 'widget.select-widgets-bundle' | translate }}"
               (blur)="onTouched()"
               [compareWith]="compareById"
               (ngModelChange)="widgetsBundleChanged()">
     <mat-select-trigger>
-      <div class="tb-bundle-item">
+      <div class="jnks-iot-bundle-item">
         <span>{{widgetsBundle?.title}}</span>
-        <span translate class="tb-bundle-system" *ngIf="isSystem(widgetsBundle)">widgets-bundle.system</span>
+        <span translate class="jnks-iot-bundle-system" *ngIf="isSystem(widgetsBundle)">widgets-bundle.system</span>
       </div>
     </mat-select-trigger>
     <mat-option *ngIf="createNew; else empty" [value]="null" (click)="openWidgetsBundleDialog($event)">
@@ -20,9 +20,9 @@
       <mat-option [value]="null" *ngIf="!required"></mat-option>
     </ng-template>
     <mat-option *ngFor="let widgetsBundle of widgetsBundles$ | async" [value]="widgetsBundle">
-      <div class="tb-bundle-item">
+      <div class="jnks-iot-bundle-item">
         <span>{{widgetsBundle.title}}</span>
-        <span translate class="tb-bundle-system" *ngIf="isSystem(widgetsBundle)">widgets-bundle.system</span>
+        <span translate class="jnks-iot-bundle-system" *ngIf="isSystem(widgetsBundle)">widgets-bundle.system</span>
       </div>
     </mat-option>
   </mat-select>

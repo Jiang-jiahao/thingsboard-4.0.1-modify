@@ -4,7 +4,7 @@
       <span class="mat-headline-5" translate>admin.security-settings</span>
     </mat-card-title>
     <span class="flex-1"></span>
-    <div tb-help="securitySettings"></div>
+    <div jnks-iot-help="securitySettings"></div>
   </mat-card-header>
   <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
   </mat-progress-bar>
@@ -179,7 +179,7 @@
                 <mat-label translate>admin.allow-whitespace</mat-label>
               </mat-checkbox>
               <mat-checkbox class="flex-1" formControlName="forceUserToResetPasswordIfNotValid" style="margin-bottom: 16px">
-                <mat-label tb-hint-tooltip-icon="{{'admin.force-reset-password-if-no-valid-hint' | translate}}">
+                <mat-label jnks-iot-hint-tooltip-icon="{{'admin.force-reset-password-if-no-valid-hint' | translate}}">
                   {{'admin.force-reset-password-if-no-valid' | translate}}
                 </mat-label>
               </mat-checkbox>
@@ -206,7 +206,7 @@
       <span class="mat-headline-5" translate>admin.jwt.security-settings</span>
     </mat-card-title>
     <span class="flex-1"></span>
-    <div tb-help="jwtSecuritySettings"></div>
+    <div jnks-iot-help="jwtSecuritySettings"></div>
   </mat-card-header>
   <mat-card-content style="padding-top: 16px;">
     <form [formGroup]="jwtSecuritySettingsFormGroup" (ngSubmit)="saveJwtSettings()" autocomplete="off">

@@ -2,7 +2,7 @@ import { Component, forwardRef, Input, Renderer2, ViewContainerRef } from '@angu
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ColorType, ComponentStyle } from '@shared/models/widget-settings.models';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { DataLayerColorSettings, DataLayerColorType } from '@shared/models/widget/maps/map.models';
 import {
   DataLayerColorSettingsPanelComponent
@@ -11,7 +11,7 @@ import { MapSettingsContext } from '@home/components/widget/lib/settings/common/
 import { DatasourceType } from '@shared/models/widget.models';
 
 @Component({
-  selector: 'tb-data-layer-color-settings',
+  selector: 'jnks-iot-data-layer-color-settings',
   templateUrl: './data-layer-color-settings.component.html',
   styleUrls: [],
   providers: [
@@ -50,7 +50,7 @@ export class DataLayerColorSettingsComponent implements ControlValueAccessor {
 
   private propagateChange: (v: any) => void = () => { };
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef) {}
 
@@ -97,8 +97,8 @@ export class DataLayerColorSettingsComponent implements ControlValueAccessor {
         },
         isModal: true
       });
-      colorSettingsPanelPopover.tbComponentRef.instance.popover = colorSettingsPanelPopover;
-      colorSettingsPanelPopover.tbComponentRef.instance.colorSettingsApplied.subscribe((colorSettings) => {
+      colorSettingsPanelPopover.jnksIotComponentRef.instance.popover = colorSettingsPanelPopover;
+      colorSettingsPanelPopover.jnksIotComponentRef.instance.colorSettingsApplied.subscribe((colorSettings) => {
         colorSettingsPanelPopover.hide();
         this.modelValue = colorSettings;
         this.updateColorStyle();

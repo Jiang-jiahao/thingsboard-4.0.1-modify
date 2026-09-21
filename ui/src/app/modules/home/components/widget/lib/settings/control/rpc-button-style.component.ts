@@ -13,7 +13,7 @@ export interface RpcButtonStyle {
 }
 
 @Component({
-  selector: 'tb-rpc-button-style',
+  selector: 'jnks-iot-rpc-button-style',
   templateUrl: './rpc-button-style.component.html',
   styleUrls: ['./../widget-settings.scss'],
   providers: [

@@ -1,37 +1,37 @@
-<section class="tb-widget-settings" [formGroup]="commonMapSettingsFormGroup">
+<section class="jnks-iot-widget-settings" [formGroup]="commonMapSettingsFormGroup">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.maps.common-map-settings</legend>
     <section class="!flex flex-col gt-xs:flex-row gt-xs:gap-2">
-      <tb-datasources-key-autocomplete class="flex-1"
+      <jnks-iot-datasources-key-autocomplete class="flex-1"
                                        [class.!hidden]="provider !== mapProvider.image"
                                        required
                                        [datasources]="widget?.config?.datasources"
                                        label="widgets.maps.x-pos-key-name"
                                        formControlName="xPosKeyName">
-      </tb-datasources-key-autocomplete>
-      <tb-datasources-key-autocomplete class="flex-1"
+      </jnks-iot-datasources-key-autocomplete>
+      <jnks-iot-datasources-key-autocomplete class="flex-1"
                                        [class.!hidden]="provider !== mapProvider.image"
                                        required
                                        [datasources]="widget?.config?.datasources"
                                        label="widgets.maps.y-pos-key-name"
                                        formControlName="yPosKeyName">
-      </tb-datasources-key-autocomplete>
-      <tb-datasources-key-autocomplete class="flex-1"
+      </jnks-iot-datasources-key-autocomplete>
+      <jnks-iot-datasources-key-autocomplete class="flex-1"
                                        [class.!hidden]="provider === mapProvider.image"
                                        required
                                        [datasources]="widget?.config?.datasources"
                                        label="widgets.maps.latitude-key-name"
                                        formControlName="latKeyName">
-      </tb-datasources-key-autocomplete>
-      <tb-datasources-key-autocomplete class="flex-1"
+      </jnks-iot-datasources-key-autocomplete>
+      <jnks-iot-datasources-key-autocomplete class="flex-1"
                                        [class.!hidden]="provider === mapProvider.image"
                                        required
                                        [datasources]="widget?.config?.datasources"
                                        label="widgets.maps.longitude-key-name"
                                        formControlName="lngKeyName">
-      </tb-datasources-key-autocomplete>
+      </jnks-iot-datasources-key-autocomplete>
     </section>
-    <mat-expansion-panel class="tb-settings">
+    <mat-expansion-panel class="jnks-iot-settings">
       <mat-expansion-panel-header class="flex-wrap">
         <mat-panel-description class="justify-end" translate>
           widget-config.advanced-settings

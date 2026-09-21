@@ -1,13 +1,13 @@
 <button type="button"
         mat-stroked-button
-        class="tb-box-button"
+        class="jnks-iot-box-button"
         [disabled]="disabled"
         #matButton
         (click)="openColorSettingsPopup($event, matButton)">
-  <tb-icon matButtonIcon *ngIf="modelValue?.type === colorType.function; else colorPreview">mdi:function-variant</tb-icon>
+  <jnks-iot-icon matButtonIcon *ngIf="modelValue?.type === colorType.function; else colorPreview">mdi:function-variant</jnks-iot-icon>
 </button>
 <ng-template #colorPreview>
-  <div class="tb-color-preview box" [class.disabled]="disabled">
-    <div class="tb-color-result" [style]="colorStyle"></div>
+  <div class="jnks-iot-color-preview box" [class.disabled]="disabled">
+    <div class="jnks-iot-color-result" [style]="colorStyle"></div>
   </div>
 </ng-template>

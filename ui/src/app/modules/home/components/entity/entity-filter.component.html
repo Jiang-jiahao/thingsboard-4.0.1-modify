@@ -1,4 +1,4 @@
-<div [formGroup]="entityFilterFormGroup" class="tb-entity-filter flex flex-col">
+<div [formGroup]="entityFilterFormGroup" class="jnks-iot-entity-filter flex flex-col">
   <mat-form-field class="mat-block">
     <mat-label translate>alias.filter-type</mat-label>
     <mat-select required formControlName="type">
@@ -12,31 +12,31 @@
   </mat-form-field>
   <section class="flex flex-col" [formGroup]="filterFormGroup" [ngSwitch]="entityFilterFormGroup.get('type').value">
     <ng-template [ngSwitchCase]="aliasFilterType.singleEntity">
-      <tb-entity-select required
+      <jnks-iot-entity-select required
                         useAliasEntityTypes="true"
                         formControlName="singleEntity">
-      </tb-entity-select>
+      </jnks-iot-entity-select>
     </ng-template>
     <ng-template [ngSwitchCase]="aliasFilterType.entityList">
-      <tb-entity-type-select required
+      <jnks-iot-entity-type-select required
                              showLabel
                              useAliasEntityTypes="true"
                              [allowedEntityTypes]="listEntityTypes"
                              formControlName="entityType">
-      </tb-entity-type-select>
-      <tb-entity-list required
+      </jnks-iot-entity-type-select>
+      <jnks-iot-entity-list required
                       labelText="{{'entity.entity-list' | translate}}"
                       [entityType]="filterFormGroup.get('entityType').value"
                       formControlName="entityList">
-      </tb-entity-list>
+      </jnks-iot-entity-list>
     </ng-template>
     <ng-template [ngSwitchCase]="aliasFilterType.entityName">
-      <tb-entity-type-select required
+      <jnks-iot-entity-type-select required
                              showLabel
                              useAliasEntityTypes="true"
                              [allowedEntityTypes]="listEntityTypes"
                              formControlName="entityType">
-      </tb-entity-type-select>
+      </jnks-iot-entity-type-select>
       <mat-form-field class="mat-block">
         <mat-label translate>entity.name-starts-with</mat-label>
         <mat-icon class="mat-primary" aria-hidden="false" aria-label="help-icon" matSuffix style="cursor:pointer;"
@@ -48,12 +48,12 @@
       </mat-form-field>
     </ng-template>
     <ng-template [ngSwitchCase]="aliasFilterType.entityType">
-      <tb-entity-type-select required
+      <jnks-iot-entity-type-select required
                              showLabel
                              useAliasEntityTypes="true"
                              [allowedEntityTypes]="listEntityTypes"
                              formControlName="entityType">
-      </tb-entity-type-select>
+      </jnks-iot-entity-type-select>
     </ng-template>
     <ng-template [ngSwitchCase]="aliasFilterType.stateEntity">
       <mat-form-field floatLabel="always" class="mat-block">
@@ -62,18 +62,18 @@
                placeholder="{{ 'alias.default-entity-parameter-name' | translate }}">
       </mat-form-field>
       <div class="flex flex-col">
-        <label class="tb-small">{{ 'alias.default-state-entity' | translate }}</label>
-        <tb-entity-select class="flex-1"
+        <label class="jnks-iot-small">{{ 'alias.default-state-entity' | translate }}</label>
+        <jnks-iot-entity-select class="flex-1"
                           useAliasEntityTypes="true"
                           formControlName="defaultStateEntity">
-        </tb-entity-select>
+        </jnks-iot-entity-select>
       </div>
     </ng-template>
     <ng-template [ngSwitchCase]="aliasFilterType.assetType">
-      <tb-entity-subtype-list required
+      <jnks-iot-entity-subtype-list required
                               [entityType]="entityType.ASSET"
                               formControlName="assetTypes">
-      </tb-entity-subtype-list>
+      </jnks-iot-entity-subtype-list>
       <mat-form-field class="mat-block">
         <mat-label translate>asset.name-starts-with</mat-label>
         <mat-icon class="mat-primary" aria-hidden="false" aria-label="help-icon" matSuffix style="cursor:pointer;"
@@ -82,10 +82,10 @@
       </mat-form-field>
     </ng-template>
     <ng-template [ngSwitchCase]="aliasFilterType.deviceType">
-      <tb-entity-subtype-list required
+      <jnks-iot-entity-subtype-list required
                               [entityType]="entityType.DEVICE"
                               formControlName="deviceTypes">
-      </tb-entity-subtype-list>
+      </jnks-iot-entity-subtype-list>
       <mat-form-field class="mat-block">
         <mat-label translate>device.name-starts-with</mat-label>
         <mat-icon class="mat-primary" aria-hidden="false" aria-label="help-icon" matSuffix style="cursor:pointer;"
@@ -94,10 +94,10 @@
       </mat-form-field>
     </ng-template>
     <ng-template [ngSwitchCase]="aliasFilterType.entityViewType">
-      <tb-entity-subtype-list required
+      <jnks-iot-entity-subtype-list required
                               [entityType]="entityType.ENTITY_VIEW"
                               formControlName="entityViewTypes">
-      </tb-entity-subtype-list>
+      </jnks-iot-entity-subtype-list>
       <mat-form-field class="mat-block">
         <mat-label translate>entity-view.name-starts-with</mat-label>
         <mat-icon class="mat-primary" aria-hidden="false" aria-label="help-icon" matSuffix style="cursor:pointer;"
@@ -106,26 +106,26 @@
       </mat-form-field>
     </ng-template>
     <ng-template [ngSwitchCase]="aliasFilterType.relationsQuery">
-      <section class="tb-form-panel no-border no-padding">
-        <div class="tb-form-panel stroked no-gap">
-          <div class="tb-form-panel-title" translate>alias.root-entity</div>
+      <section class="jnks-iot-form-panel no-border no-padding">
+        <div class="jnks-iot-form-panel stroked no-gap">
+          <div class="jnks-iot-form-panel-title" translate>alias.root-entity</div>
           <mat-slide-toggle class="mat-slide margin" formControlName="rootStateEntity">
             {{ 'alias.root-state-entity' | translate }}
           </mat-slide-toggle>
-          <div *ngIf="filterFormGroup.get('rootStateEntity').value" class="tb-form-panel no-border no-padding no-gap">
+          <div *ngIf="filterFormGroup.get('rootStateEntity').value" class="jnks-iot-form-panel no-border no-padding no-gap">
             <mat-form-field>
               <mat-label translate>alias.state-entity-parameter-name</mat-label>
               <input matInput formControlName="stateEntityParamName">
             </mat-form-field>
-            <tb-entity-select useAliasEntityTypes="true" formControlName="defaultStateEntity">
-            </tb-entity-select>
+            <jnks-iot-entity-select useAliasEntityTypes="true" formControlName="defaultStateEntity">
+            </jnks-iot-entity-select>
           </div>
-          <tb-entity-select *ngIf="!filterFormGroup.get('rootStateEntity').value"
+          <jnks-iot-entity-select *ngIf="!filterFormGroup.get('rootStateEntity').value"
                             required
                             useAliasEntityTypes="true"
                             formControlName="rootEntity">
-          </tb-entity-select>
-          <div class="tb-form-row no-border no-padding tb-standard-fields">
+          </jnks-iot-entity-select>
+          <div class="jnks-iot-form-row no-border no-padding jnks-iot-standard-fields">
             <mat-form-field class="flex">
               <mat-label translate>relation.direction</mat-label>
               <mat-select required formControlName="direction">
@@ -149,13 +149,13 @@
             {{ 'alias.last-level-relation' | translate }}
           </mat-slide-toggle>
         </div>
-        <div class="tb-form-panel stroked">
-          <div class="tb-form-panel-title" translate>relation.relation-filters</div>
-          <tb-relation-filters
+        <div class="jnks-iot-form-panel stroked">
+          <div class="jnks-iot-form-panel-title" translate>relation.relation-filters</div>
+          <jnks-iot-relation-filters
             enableNotOption
             [allowedEntityTypes]="allowedEntityTypes"
             formControlName="filters">
-          </tb-relation-filters>
+          </jnks-iot-relation-filters>
         </div>
       </section>
     </ng-template>
@@ -163,19 +163,19 @@
                                  entityFilterFormGroup.get('type').value === aliasFilterType.deviceSearchQuery ||
                                  entityFilterFormGroup.get('type').value === aliasFilterType.entityViewSearchQuery ?
                                  entityFilterFormGroup.get('type').value : ''">
-      <label class="tb-small">{{ 'alias.root-entity' | translate }}</label>
-      <section class="tb-root-state-entity-switch flex flex-row items-center justify-start" style="padding-left: 0;">
+      <label class="jnks-iot-small">{{ 'alias.root-entity' | translate }}</label>
+      <section class="jnks-iot-root-state-entity-switch flex flex-row items-center justify-start" style="padding-left: 0;">
         <mat-slide-toggle class="root-state-entity-switch"
                           formControlName="rootStateEntity">
         </mat-slide-toggle>
-        <label class="tb-small root-state-entity-label" translate>alias.root-state-entity</label>
+        <label class="jnks-iot-small root-state-entity-label" translate>alias.root-state-entity</label>
       </section>
       <div class="flex flex-1 flex-row" *ngIf="!filterFormGroup.get('rootStateEntity').value">
-        <tb-entity-select class="flex-1"
+        <jnks-iot-entity-select class="flex-1"
                           required
                           useAliasEntityTypes="true"
                           formControlName="rootEntity">
-        </tb-entity-select>
+        </jnks-iot-entity-select>
       </div>
       <div class="flex flex-1 flex-col gt-sm:flex-row" *ngIf="filterFormGroup.get('rootStateEntity').value">
         <mat-form-field floatLabel="always" class="mat-block" style="margin-top: 24px; padding-right: 8px;">
@@ -184,19 +184,19 @@
                  placeholder="{{ 'alias.default-entity-parameter-name' | translate }}">
         </mat-form-field>
         <div class="flex flex-1 flex-col">
-          <label class="tb-small">{{ 'alias.default-state-entity' | translate }}</label>
-          <tb-entity-select class="flex-1"
+          <label class="jnks-iot-small">{{ 'alias.default-state-entity' | translate }}</label>
+          <jnks-iot-entity-select class="flex-1"
                             useAliasEntityTypes="true"
                             formControlName="defaultStateEntity">
-          </tb-entity-select>
+          </jnks-iot-entity-select>
         </div>
       </div>
       <div class="flex flex-1 flex-row">
-        <section class="tb-root-state-entity-switch flex flex-row items-center justify-start" style="padding-left: 0;">
+        <section class="jnks-iot-root-state-entity-switch flex flex-row items-center justify-start" style="padding-left: 0;">
           <mat-slide-toggle class="root-state-entity-switch"
                             formControlName="fetchLastLevelOnly">
           </mat-slide-toggle>
-          <label class="tb-small root-state-entity-label" translate>alias.last-level-relation</label>
+          <label class="jnks-iot-small root-state-entity-label" translate>alias.last-level-relation</label>
         </section>
       </div>
       <div class="flex flex-1 flex-row gap-2 xs:flex-col">
@@ -219,34 +219,34 @@
         </mat-form-field>
       </div>
       <div class="mat-caption" style="color: rgba(0,0,0,0.57);" translate>relation.relation-type</div>
-      <tb-relation-type-autocomplete
+      <jnks-iot-relation-type-autocomplete
         class="flex-1"
         formControlName="relationType">
-      </tb-relation-type-autocomplete>
+      </jnks-iot-relation-type-autocomplete>
     </ng-template>
     <ng-template [ngSwitchCase]="aliasFilterType.assetSearchQuery">
-      <div class="mat-caption tb-required" style="color: rgba(0,0,0,0.57);" translate>asset.asset-types</div>
-      <tb-entity-subtype-list
+      <div class="mat-caption jnks-iot-required" style="color: rgba(0,0,0,0.57);" translate>asset.asset-types</div>
+      <jnks-iot-entity-subtype-list
         required
         [entityType]="entityType.ASSET"
         formControlName="assetTypes">
-      </tb-entity-subtype-list>
+      </jnks-iot-entity-subtype-list>
     </ng-template>
     <ng-template [ngSwitchCase]="aliasFilterType.deviceSearchQuery">
-      <div class="mat-caption tb-required" style="color: rgba(0,0,0,0.57);" translate>device.device-types</div>
-      <tb-entity-subtype-list
+      <div class="mat-caption jnks-iot-required" style="color: rgba(0,0,0,0.57);" translate>device.device-types</div>
+      <jnks-iot-entity-subtype-list
         required
         [entityType]="entityType.DEVICE"
         formControlName="deviceTypes">
-      </tb-entity-subtype-list>
+      </jnks-iot-entity-subtype-list>
     </ng-template>
     <ng-template [ngSwitchCase]="aliasFilterType.entityViewSearchQuery">
-      <div class="mat-caption tb-required" style="color: rgba(0,0,0,0.57);" translate>entity-view.entity-view-types</div>
-      <tb-entity-subtype-list
+      <div class="mat-caption jnks-iot-required" style="color: rgba(0,0,0,0.57);" translate>entity-view.entity-view-types</div>
+      <jnks-iot-entity-subtype-list
         required
         [entityType]="entityType.ENTITY_VIEW"
         formControlName="entityViewTypes">
-      </tb-entity-subtype-list>
+      </jnks-iot-entity-subtype-list>
     </ng-template>
   </section>
 </div>

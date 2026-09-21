@@ -20,7 +20,7 @@ import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'tb-device-credentials-lwm2m-server',
+  selector: 'jnks-iot-device-credentials-lwm2m-server',
   templateUrl: './device-credentials-lwm2m-server.component.html',
   styleUrls: [],
   providers: [

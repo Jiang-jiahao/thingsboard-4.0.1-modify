@@ -1,9 +1,9 @@
 import { Ace } from 'ace-builds';
 import { deepClone } from '@core/utils';
 
-export type tbMetaType = 'object' | 'function' | 'service' | 'property' | 'argument' | 'constant' | 'module';
+export type jnksIotMetaType = 'object' | 'function' | 'service' | 'property' | 'argument' | 'constant' | 'module';
 
-export type TbEditorCompletions = {[name: string]: TbEditorCompletion};
+export type JnksIotEditorCompletions = {[name: string]: JnksIotEditorCompletion};
 
 export interface FunctionArgType {
   type?: string;
@@ -17,17 +17,17 @@ export interface FunctionArg extends FunctionArgType {
   optional?: boolean;
 }
 
-export interface TbEditorCompletion {
-  meta: tbMetaType;
+export interface JnksIotEditorCompletion {
+  meta: jnksIotMetaType;
   description?: string;
   type?: string;
   args?: FunctionArg[];
   return?: FunctionArgType;
-  children?: TbEditorCompletions;
+  children?: JnksIotEditorCompletions;
 }
 
-interface TbEditorAceCompletion extends Ace.SnippetCompletion {
-  isTbEditorAceCompletion: true;
+interface JnksIotEditorAceCompletion extends Ace.SnippetCompletion {
+  isJnksIotEditorAceCompletion: true;
   title: string;
   description?: string;
   type?: string;
@@ -35,16 +35,16 @@ interface TbEditorAceCompletion extends Ace.SnippetCompletion {
   return?: FunctionArgType;
 }
 
-export class TbEditorCompleter implements Ace.Completer {
+export class JnksIotEditorCompleter implements Ace.Completer {
 
   identifierRegexps: RegExp[] = [
     /[a-zA-Z_0-9\$\-\u00A2-\u2000\u2070-\uFFFF.]/
   ];
 
-  constructor(private editorCompletions: TbEditorCompletions) {
+  constructor(private editorCompletions: JnksIotEditorCompletions) {
   }
 
-  updateCompletions(completions: TbEditorCompletions): void {
+  updateCompletions(completions: JnksIotEditorCompletions): void {
     this.editorCompletions = completions;
   }
 
@@ -89,7 +89,7 @@ export class TbEditorCompleter implements Ace.Completer {
     }
   }
 
-  private toAceCompletionsList(completions: TbEditorCompletions, parentPath: string[]): Ace.Completion[]  {
+  private toAceCompletionsList(completions: JnksIotEditorCompletions, parentPath: string[]): Ace.Completion[]  {
     const result: Ace.Completion[] = [];
     let targetCompletions = completions;
     let parentPrefix = '';
@@ -105,9 +105,9 @@ export class TbEditorCompleter implements Ace.Completer {
     return result;
   }
 
-  private toAceCompletion(name: string, completion: TbEditorCompletion, parentPrefix: string): Ace.Completion {
-    const aceCompletion: TbEditorAceCompletion = {
-      isTbEditorAceCompletion: true,
+  private toAceCompletion(name: string, completion: JnksIotEditorCompletion, parentPrefix: string): Ace.Completion {
+    const aceCompletion: JnksIotEditorAceCompletion = {
+      isJnksIotEditorAceCompletion: true,
       snippet: parentPrefix + name,
       title: name,
       caption: parentPrefix + name,
@@ -121,15 +121,15 @@ export class TbEditorCompleter implements Ace.Completer {
     return aceCompletion;
   }
 
-  getDocTooltip(completion: TbEditorAceCompletion) {
-    if (completion && completion.isTbEditorAceCompletion) {
+  getDocTooltip(completion: JnksIotEditorAceCompletion) {
+    if (completion && completion.isJnksIotEditorAceCompletion) {
       const aceCompletion = deepClone(completion);
       aceCompletion.docHTML = this.createDocHTML(completion);
       return aceCompletion;
     }
   }
 
-  private createDocHTML(completion: TbEditorAceCompletion): string {
+  private createDocHTML(completion: JnksIotEditorAceCompletion): string {
     let title = `<b>${completion.title}</b>`;
     if (completion.meta === 'function') {
       title += '(';
@@ -156,15 +156,15 @@ export class TbEditorCompleter implements Ace.Completer {
     } else {
       title += `: ${completion.type ? completion.type : completion.meta}`;
     }
-    let html = `<div class="tb-ace-doc-tooltip"><code class="title">${title}</code>`;
+    let html = `<div class="jnks-iot-ace-doc-tooltip"><code class="title">${title}</code>`;
     if (completion.description) {
       html += `<hr><div>${completion.description}</div>`;
     }
     if (completion.args || completion.return) {
-      let functionInfoBlock = '<div class="tb-function-info">';
+      let functionInfoBlock = '<div class="jnks-iot-function-info">';
       if (completion.args) {
-        functionInfoBlock += '<div class="tb-api-title">Parameters</div>';
-        let argsTable = '<table class="tb-api-table"><tbody>';
+        functionInfoBlock += '<div class="jnks-iot-api-title">Parameters</div>';
+        let argsTable = '<table class="jnks-iot-api-table"><tbody>';
         const strArgs: string[] = [];
         for (const arg of completion.args) {
           let strArg = `<tr><td class="arg-name"><code>${arg.name}`;
@@ -186,8 +186,8 @@ export class TbEditorCompleter implements Ace.Completer {
         functionInfoBlock += argsTable;
       }
       if (completion.return) {
-        let returnStr = '<div class="tb-api-title">Returns</div>';
-        returnStr += `<div class="tb-function-return"><code>${completion.return.type}</code>`;
+        let returnStr = '<div class="jnks-iot-api-title">Returns</div>';
+        returnStr += `<div class="jnks-iot-function-return"><code>${completion.return.type}</code>`;
         if (completion.return.description) {
           returnStr += `: ${completion.return.description}`;
         }

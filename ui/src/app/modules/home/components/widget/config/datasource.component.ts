@@ -31,7 +31,7 @@ import { FormProperty } from '@shared/models/dynamic-form.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-datasource',
+  selector: 'jnks-iot-datasource',
   templateUrl: './datasource.component.html',
   styleUrls: ['./datasource.component.scss'],
   providers: [

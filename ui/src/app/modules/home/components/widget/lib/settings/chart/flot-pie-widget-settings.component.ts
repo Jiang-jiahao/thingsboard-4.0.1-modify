@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-flot-pie-widget-settings',
+  selector: 'jnks-iot-flot-pie-widget-settings',
   templateUrl: './flot-pie-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

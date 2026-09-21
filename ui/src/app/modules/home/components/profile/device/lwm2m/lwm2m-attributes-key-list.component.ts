@@ -25,7 +25,7 @@ import { PageComponent } from '@shared/components/page.component';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-lwm2m-attributes-key-list',
+  selector: 'jnks-iot-lwm2m-attributes-key-list',
   templateUrl: './lwm2m-attributes-key-list.component.html',
   styleUrls: ['./lwm2m-attributes-key-list.component.scss'],
   providers: [

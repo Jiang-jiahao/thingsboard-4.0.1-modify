@@ -10,9 +10,9 @@
   </mat-toolbar>
   <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
   </mat-progress-bar>
-  <div mat-dialog-content class="tb-form-panel no-border no-padding">
-    <div *ngIf="settings" class="tb-form-panel no-border no-padding" [formGroup]="settingsFormGroup">
-      <div class="tb-form-row space-between">
+  <div mat-dialog-content class="jnks-iot-form-panel no-border no-padding">
+    <div *ngIf="settings" class="jnks-iot-form-panel no-border no-padding" [formGroup]="settingsFormGroup">
+      <div class="jnks-iot-form-row space-between">
         <div>{{ 'dashboard.state-controller' | translate }}</div>
         <mat-form-field class="medium-width" appearance="outline" subscriptSizing="dynamic">
           <mat-select required formControlName="stateControllerId">
@@ -22,32 +22,32 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div class="tb-form-panel stroked">
-        <div class="tb-form-panel-title" translate>dashboard.title-settings</div>
-        <div class="tb-form-row space-between">
+      <div class="jnks-iot-form-panel stroked">
+        <div class="jnks-iot-form-panel-title" translate>dashboard.title-settings</div>
+        <div class="jnks-iot-form-row space-between">
           <mat-slide-toggle class="mat-slide" formControlName="showTitle">
             {{ 'dashboard.title' | translate }}
           </mat-slide-toggle>
-          <tb-color-input asBoxInput
+          <jnks-iot-color-input asBoxInput
                           colorClearButton
                           formControlName="titleColor">
-          </tb-color-input>
+          </jnks-iot-color-input>
         </div>
       </div>
-      <div class="tb-form-panel stroked">
-        <div class="tb-form-panel-title" translate>dashboard.dashboard-logo-settings</div>
-        <div class="tb-form-row">
+      <div class="jnks-iot-form-panel stroked">
+        <div class="jnks-iot-form-panel-title" translate>dashboard.dashboard-logo-settings</div>
+        <div class="jnks-iot-form-row">
           <mat-slide-toggle class="mat-slide" formControlName="showDashboardLogo">
             {{ 'dashboard.display-dashboard-logo' | translate }}
           </mat-slide-toggle>
         </div>
-        <tb-gallery-image-input class="flex-1"
+        <jnks-iot-gallery-image-input class="flex-1"
                                 label="{{'dashboard.dashboard-logo-image' | translate}}"
                                 formControlName="dashboardLogoUrl">
-        </tb-gallery-image-input>
+        </jnks-iot-gallery-image-input>
       </div>
-      <div class="tb-form-panel stroked">
-        <div class="tb-form-panel-title" translate>dashboard.toolbar-settings</div>
+      <div class="jnks-iot-form-panel stroked">
+        <div class="jnks-iot-form-panel-title" translate>dashboard.toolbar-settings</div>
         <mat-slide-toggle class="mat-slide" formControlName="hideToolbar">
           {{ 'dashboard.hide-toolbar' | translate }}
         </mat-slide-toggle>
@@ -73,24 +73,24 @@
           {{ 'dashboard.display-update-dashboard-image' | translate }}
         </mat-slide-toggle>
       </div>
-      <mat-expansion-panel class="tb-settings">
+      <mat-expansion-panel class="jnks-iot-settings">
         <mat-expansion-panel-header>
           <mat-panel-description class="flex items-stretch justify-end" translate>
             dashboard.advanced-settings
           </mat-panel-description>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <tb-css
+          <jnks-iot-css
             label="{{ 'dashboard.dashboard-css' | translate }}"
             formControlName="dashboardCss"
-          ></tb-css>
+          ></jnks-iot-css>
         </ng-template>
       </mat-expansion-panel>
     </div>
-    <div *ngIf="gridSettings" class="tb-form-panel no-border no-padding" [formGroup]="gridSettingsFormGroup">
-      <div class="tb-form-panel stroked">
-        <div class="tb-form-panel-title" translate [translateParams]="{type: layoutSettingsType}">dashboard.layout-settings-type</div>
-        <div *ngIf="isDefaultLayout && !isDefaultBreakpoint" class="tb-form-row space-between">
+    <div *ngIf="gridSettings" class="jnks-iot-form-panel no-border no-padding" [formGroup]="gridSettingsFormGroup">
+      <div class="jnks-iot-form-panel stroked">
+        <div class="jnks-iot-form-panel-title" translate [translateParams]="{type: layoutSettingsType}">dashboard.layout-settings-type</div>
+        <div *ngIf="isDefaultLayout && !isDefaultBreakpoint" class="jnks-iot-form-row space-between">
           <div class="fixed-title-width" translate>dashboard.view-format</div>
           <mat-form-field class="medium-width" appearance="outline" subscriptSizing="dynamic">
             <mat-select formControlName="viewFormat">
@@ -100,11 +100,11 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <div class="tb-form-row space-between">
+        <div class="jnks-iot-form-row space-between">
           <div translate>dashboard.columns-count</div>
-          <mat-form-field *ngIf="!isScada()" appearance="outline" class="number medium-width tb-suffix-absolute" subscriptSizing="dynamic"
+          <mat-form-field *ngIf="!isScada()" appearance="outline" class="number medium-width jnks-iot-suffix-absolute" subscriptSizing="dynamic"
                           matTooltipPosition="above"
-                          matTooltipClass="tb-error-tooltip"
+                          matTooltipClass="jnks-iot-error-tooltip"
                           [matTooltipDisabled]="!(gridSettingsFormGroup.get('columns').invalid && gridSettingsFormGroup.get('columns').touched)"
                           [matTooltip]="(gridSettingsFormGroup.get('columns').hasError('required') ? 'dashboard.columns-count-required' :
                                      (gridSettingsFormGroup.get('columns').hasError('min') ? 'dashboard.min-columns-count-message' : 'dashboard.max-columns-count-message')) | translate">
@@ -121,11 +121,11 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <div class="tb-form-row space-between">
+        <div class="jnks-iot-form-row space-between">
           <div translate>dashboard.min-layout-width</div>
           <mat-form-field appearance="outline" class="number medium-width" subscriptSizing="dynamic"
                           matTooltipPosition="above"
-                          matTooltipClass="tb-error-tooltip"
+                          matTooltipClass="jnks-iot-error-tooltip"
                           [matTooltipDisabled]="!(gridSettingsFormGroup.get('minColumns').invalid && gridSettingsFormGroup.get('minColumns').touched)"
                           [matTooltip]="(gridSettingsFormGroup.get('minColumns').hasError('required') ? 'dashboard.columns-count-required' :
                                      (gridSettingsFormGroup.get('minColumns').hasError('min') ? 'dashboard.min-columns-count-message' : 'dashboard.max-columns-count-message')) | translate">
@@ -135,11 +135,11 @@
             <span translate matSuffix>dashboard.columns-suffix</span>
           </mat-form-field>
         </div>
-        <div *ngIf="!isScada()" class="tb-form-row space-between">
+        <div *ngIf="!isScada()" class="jnks-iot-form-row space-between">
           <div translate>dashboard.widgets-margins</div>
-          <mat-form-field appearance="outline" class="number medium-width tb-suffix-absolute" subscriptSizing="dynamic"
+          <mat-form-field appearance="outline" class="number medium-width jnks-iot-suffix-absolute" subscriptSizing="dynamic"
                           matTooltipPosition="above"
-                          matTooltipClass="tb-error-tooltip"
+                          matTooltipClass="jnks-iot-error-tooltip"
                           [matTooltipDisabled]="!(gridSettingsFormGroup.get('margin').invalid && gridSettingsFormGroup.get('margin').touched)"
                           [matTooltip]="(gridSettingsFormGroup.get('margin').hasError('required') ? 'dashboard.margin-required' :
                                      (gridSettingsFormGroup.get('margin').hasError('min') ? 'dashboard.min-margin-message' : 'dashboard.max-margin-message')) | translate">
@@ -148,21 +148,21 @@
                    placeholder="{{ 'widget-config.set' | translate }}">
           </mat-form-field>
         </div>
-        <div *ngIf="!isScada()" class="tb-form-row">
+        <div *ngIf="!isScada()" class="jnks-iot-form-row">
           <mat-slide-toggle class="mat-slide" formControlName="outerMargin">
             {{ 'dashboard.apply-outer-margin' | translate }}
           </mat-slide-toggle>
         </div>
-        <div *ngIf="!isScada()" class="tb-form-row">
+        <div *ngIf="!isScada()" class="jnks-iot-form-row">
           <mat-slide-toggle class="mat-slide" formControlName="autoFillHeight">
             {{ 'dashboard.autofill-height' | translate }}
           </mat-slide-toggle>
         </div>
-        <div *ngIf="isDefaultLayout && !isDefaultBreakpoint" class="tb-form-row space-between">
+        <div *ngIf="isDefaultLayout && !isDefaultBreakpoint" class="jnks-iot-form-row space-between">
           <div translate>dashboard.row-height</div>
           <mat-form-field appearance="outline" class="number medium-width" subscriptSizing="dynamic"
                           matTooltipPosition="above"
-                          matTooltipClass="tb-error-tooltip"
+                          matTooltipClass="jnks-iot-error-tooltip"
                           [matTooltipDisabled]="!(gridSettingsFormGroup.get('rowHeight').invalid && gridSettingsFormGroup.get('rowHeight').touched)"
                           [matTooltip]="(gridSettingsFormGroup.get('rowHeight').hasError('required') ? 'dashboard.row-height-required' :
                                      (gridSettingsFormGroup.get('rowHeight').hasError('min') ?
@@ -173,18 +173,18 @@
             <span matSuffix>px</span>
           </mat-form-field>
         </div>
-        <div class="tb-form-row space-between">
+        <div class="jnks-iot-form-row space-between">
           <div translate>dashboard.background-color</div>
-          <tb-color-input asBoxInput
+          <jnks-iot-color-input asBoxInput
                           colorClearButton
                           formControlName="backgroundColor">
-          </tb-color-input>
+          </jnks-iot-color-input>
         </div>
-        <tb-gallery-image-input class="flex-1"
+        <jnks-iot-gallery-image-input class="flex-1"
                                 label="{{'dashboard.background-image' | translate}}"
                                 formControlName="backgroundImageUrl">
-        </tb-gallery-image-input>
-        <div class="tb-form-row space-between">
+        </jnks-iot-gallery-image-input>
+        <div class="jnks-iot-form-row space-between">
           <div>{{ 'dashboard.background-size-mode' | translate }}</div>
           <mat-form-field class="medium-width" appearance="outline" subscriptSizing="dynamic">
             <mat-select formControlName="backgroundSizeMode">
@@ -197,23 +197,23 @@
           </mat-form-field>
         </div>
       </div>
-      <div *ngIf="!isScada() && isDefaultBreakpoint" class="tb-form-panel stroked">
-        <div class="tb-form-panel-title" translate>dashboard.mobile-layout</div>
-        <div *ngIf="isRightLayout" class="tb-form-row">
+      <div *ngIf="!isScada() && isDefaultBreakpoint" class="jnks-iot-form-panel stroked">
+        <div class="jnks-iot-form-panel-title" translate>dashboard.mobile-layout</div>
+        <div *ngIf="isRightLayout" class="jnks-iot-form-row">
           <mat-slide-toggle class="mat-slide" formControlName="mobileDisplayLayoutFirst">
             {{ 'dashboard.display-first-in-mobile-view' | translate }}
           </mat-slide-toggle>
         </div>
-        <div *ngIf="!isScada()" class="tb-form-row">
+        <div *ngIf="!isScada()" class="jnks-iot-form-row">
           <mat-slide-toggle class="mat-slide" formControlName="mobileAutoFillHeight">
             {{ 'dashboard.autofill-height' | translate }}
           </mat-slide-toggle>
         </div>
-        <div *ngIf="!isScada()" class="tb-form-row space-between">
+        <div *ngIf="!isScada()" class="jnks-iot-form-row space-between">
           <div translate>dashboard.mobile-row-height</div>
           <mat-form-field appearance="outline" class="number medium-width" subscriptSizing="dynamic"
                           matTooltipPosition="above"
-                          matTooltipClass="tb-error-tooltip"
+                          matTooltipClass="jnks-iot-error-tooltip"
                           [matTooltipDisabled]="!(gridSettingsFormGroup.get('mobileRowHeight').invalid && gridSettingsFormGroup.get('mobileRowHeight').touched)"
                           [matTooltip]="(gridSettingsFormGroup.get('mobileRowHeight').hasError('required') ? 'dashboard.mobile-row-height-required' :
                                      (gridSettingsFormGroup.get('mobileRowHeight').hasError('min') ?

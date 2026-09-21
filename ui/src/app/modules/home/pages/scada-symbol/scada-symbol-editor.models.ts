@@ -13,7 +13,7 @@ import {
   scadaSymbolContentData,
   ScadaSymbolMetadata
 } from '@home/components/widget/lib/scada/scada-symbol.models';
-import { TbEditorCompletion, TbEditorCompletions } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompletion, JnksIotEditorCompletions } from '@shared/models/ace/completion.models';
 import { CustomTranslatePipe } from '@shared/pipe/custom-translate.pipe';
 import {
   AceHighlightRule,
@@ -104,7 +104,7 @@ export class ScadaSymbolEditObject {
     origSvg.remove();
     this.svgShape.size(this.box.width, this.box.height);
     this.svgShape.viewbox(`0 0 ${this.box.width} ${this.box.height}`);
-    this.svgShape.style().attr('tb:inner', true).rule('.tb-element', {cursor: 'pointer', transition: '0.2s filter ease-in-out'});
+    this.svgShape.style().attr('tb:inner', true).rule('.jnks-iot-element', {cursor: 'pointer', transition: '0.2s filter ease-in-out'});
     this.svgShape.addTo(this.rootElement);
     this.updateHoverFilterStyle();
     this.performSetup = true;
@@ -118,7 +118,7 @@ export class ScadaSymbolEditObject {
         if (e.node.hasAttribute('tb:inner')) {
           return false;
         } else {
-          e.node.classList.remove('tb-element', 'tooltipstered');
+          e.node.classList.remove('jnks-iot-element', 'tooltipstered');
           if (!e.node.classList.length) {
             e.node.removeAttribute('class');
           }
@@ -506,7 +506,7 @@ export class ScadaSymbolElement {
       this.highlightRect.timeline(this.highlightRectTimeline);
       this.highlightRect.hide();
     } else {
-      this.element.addClass('tb-element');
+      this.element.addClass('jnks-iot-element');
     }
     this.element.on('mouseenter', (_event) => {
       this.highlight();
@@ -580,7 +580,7 @@ export class ScadaSymbolElement {
       }
       if (this.hasTag()) {
         this.tooltip.reposition();
-        $(this.tooltip.elementTooltip()).addClass('tb-active');
+        $(this.tooltip.elementTooltip()).addClass('jnks-iot-active');
       }
     }
   }
@@ -597,7 +597,7 @@ export class ScadaSymbolElement {
         this.element.removeClass('hovered');
       }
       if (this.hasTag() && !this.editing) {
-        $(this.tooltip.elementTooltip()).removeClass('tb-active');
+        $(this.tooltip.elementTooltip()).removeClass('jnks-iot-active');
       }
     }
   }
@@ -665,7 +665,7 @@ export class ScadaSymbolElement {
       }
       this.onCancelEdit = null;
       if (this.hasTag() && !this.highlighted) {
-        $(this.tooltip.elementTooltip()).removeClass('tb-active');
+        $(this.tooltip.elementTooltip()).removeClass('jnks-iot-active');
       }
     }
   }
@@ -763,7 +763,7 @@ export class ScadaSymbolElement {
         parent: this.tooltipContainer,
         zIndex: 100,
         arrow: true,
-        theme: ['scada-symbol', 'tb-active'],
+        theme: ['scada-symbol', 'jnks-iot-active'],
         delay: [0, 300],
         interactive: true,
         trigger: 'hover',
@@ -1076,7 +1076,7 @@ export const scadaSymbolClickActionHighlightRules: AceHighlightRules = {
   ...scadaSymbolEventPropertyHighlightRules
 };
 
-export const generalStateRenderFunctionCompletions = (ctxCompletion: TbEditorCompletion): TbEditorCompletions => ({
+export const generalStateRenderFunctionCompletions = (ctxCompletion: JnksIotEditorCompletion): JnksIotEditorCompletions => ({
     ctx: ctxCompletion,
     svg: {
       meta: 'argument',
@@ -1086,7 +1086,7 @@ export const generalStateRenderFunctionCompletions = (ctxCompletion: TbEditorCom
     }
   });
 
-export const elementStateRenderFunctionCompletions = (ctxCompletion: TbEditorCompletion): TbEditorCompletions => ({
+export const elementStateRenderFunctionCompletions = (ctxCompletion: JnksIotEditorCompletion): JnksIotEditorCompletions => ({
     ctx: ctxCompletion,
     element: {
       meta: 'argument',
@@ -1098,7 +1098,7 @@ export const elementStateRenderFunctionCompletions = (ctxCompletion: TbEditorCom
     }
   });
 
-export const clickActionFunctionCompletions = (ctxCompletion: TbEditorCompletion): TbEditorCompletions => {
+export const clickActionFunctionCompletions = (ctxCompletion: JnksIotEditorCompletion): JnksIotEditorCompletions => {
   const completions = elementStateRenderFunctionCompletions(ctxCompletion);
   completions.event = {
     meta: 'argument',
@@ -1109,18 +1109,18 @@ export const clickActionFunctionCompletions = (ctxCompletion: TbEditorCompletion
 };
 
 export const scadaSymbolContextCompletion = (metadata: ScadaSymbolMetadata, tags: string[],
-                                             customTranslate: CustomTranslatePipe): TbEditorCompletion => {
+                                             customTranslate: CustomTranslatePipe): JnksIotEditorCompletion => {
 
   const scadaSymbolAnimationLink = HelpLinks.linksMap.scadaSymbolDevAnimation;
   const scadaSymbolAnimation = `<a href="${scadaSymbolAnimationLink}" target="_blank">ScadaSymbolAnimation</a>`;
 
-  const properties: TbEditorCompletion = {
+  const properties: JnksIotEditorCompletion = {
     meta: 'object',
     type: 'object',
     description: 'An object holding all defined SCADA symbol properties.',
     children: formPropertyCompletions(metadata.properties, customTranslate)
   };
-  const values: TbEditorCompletion = {
+  const values: JnksIotEditorCompletion = {
     meta: 'object',
     type: 'object',
     description: 'An object holding all values obtained using behaviors of type <b>"Value"</b>',
@@ -1130,7 +1130,7 @@ export const scadaSymbolContextCompletion = (metadata: ScadaSymbolMetadata, tags
   for (const value of getValues) {
     values.children[value.id] = scadaSymbolValueCompletion(value, customTranslate);
   }
-  const tagsCompletions: TbEditorCompletion = {
+  const tagsCompletions: JnksIotEditorCompletion = {
     meta: 'object',
     type: 'object',
     description: 'An object holding all tagged SVG elements grouped by tags (object keys).',
@@ -1415,7 +1415,7 @@ export const scadaSymbolContextCompletion = (metadata: ScadaSymbolMetadata, tags
   };
 };
 
-const scadaSymbolValueCompletion = (value: ScadaSymbolBehavior, customTranslate: CustomTranslatePipe): TbEditorCompletion => {
+const scadaSymbolValueCompletion = (value: ScadaSymbolBehavior, customTranslate: CustomTranslatePipe): JnksIotEditorCompletion => {
   const description = customTranslate.transform(value.name, value.name);
   return {
     meta: 'property',

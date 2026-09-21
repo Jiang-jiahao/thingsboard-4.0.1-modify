@@ -1,12 +1,12 @@
-import { TbContextMenuEvent } from '@shared/models/jquery-event.models';
+import { JnksIotContextMenuEvent } from '@shared/models/jquery-event.models';
 
 export interface ILayoutController {
   reload();
   resetHighlight();
   highlightWidget(widgetId: string, delay?: number);
   selectWidget(widgetId: string, delay?: number);
-  pasteWidget($event: TbContextMenuEvent | KeyboardEvent);
-  pasteWidgetReference($event: TbContextMenuEvent | KeyboardEvent);
+  pasteWidget($event: JnksIotContextMenuEvent | KeyboardEvent);
+  pasteWidgetReference($event: JnksIotContextMenuEvent | KeyboardEvent);
 }
 
 export enum LayoutWidthType {

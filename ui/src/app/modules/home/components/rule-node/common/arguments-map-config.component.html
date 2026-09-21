@@ -2,19 +2,19 @@
 
   <div [class.readonly]="disabled"
        style="max-height: 500px; overflow: auto;">
-    <mat-list class="tb-drop-list arguments-list" cdkDropList cdkDropListOrientation="vertical"
+    <mat-list class="jnks-iot-drop-list arguments-list" cdkDropList cdkDropListOrientation="vertical"
               [formGroup]="argumentsFormGroup"
               (cdkDropListDropped)="onDrop($event)"
               [cdkDropListDisabled]="disabled">
       <mat-list-item *ngFor="let argumentControl of argumentsFormArray.controls; let $index = index"
                      formArrayName="arguments"
-                     cdkDrag class="tb-argument tb-draggable"
+                     cdkDrag class="jnks-iot-argument jnks-iot-draggable"
                      [cdkDragDisabled]="disabled"
                      style="height: 100%">
         <div class="flex flex-1 flex-row items-center justify-start">
           <button *ngIf="!disabled" mat-icon-button color="primary"
                   cdkDragHandle
-                  class="tb-drag-handle handle"
+                  class="jnks-iot-drag-handle handle"
                   style="min-width: 40px; margin: 0"
                   matTooltip="{{ 'action.drag' | translate }}"
                   matTooltipPosition="above">
@@ -99,7 +99,7 @@
   </div>
   <div *ngIf="!argumentsFormArray.length">
       <span translate
-            class="tb-prompt flex items-center justify-center">rule-node-config.no-arguments-prompt</span>
+            class="jnks-iot-prompt flex items-center justify-center">rule-node-config.no-arguments-prompt</span>
   </div>
   <button mat-button mat-raised-button color="primary"
           [disabled]="argumentsFormArray.length >= maxArgs"

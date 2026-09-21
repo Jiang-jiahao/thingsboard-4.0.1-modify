@@ -1,7 +1,7 @@
-<section class="tb-widget-settings" [formGroup]="tripAnimationPointSettingsFormGroup">
+<section class="jnks-iot-widget-settings" [formGroup]="tripAnimationPointSettingsFormGroup">
   <fieldset class="fields-group fields-group-slider">
     <legend class="group-title" translate>widgets.maps.points-settings</legend>
-    <mat-expansion-panel class="tb-settings" [expanded]="tripAnimationPointSettingsFormGroup.get('showPoints').value">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="tripAnimationPointSettingsFormGroup.get('showPoints').value">
       <mat-expansion-panel-header class="flex-wrap">
         <mat-panel-title>
           <mat-slide-toggle formControlName="showPoints" (click)="$event.stopPropagation()">
@@ -14,18 +14,18 @@
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
         <section class="flex flex-col gt-xs:flex-row gt-xs:gap-2">
-          <tb-color-input
+          <jnks-iot-color-input
             class="flex-1"
             formControlName="pointColor"
             icon="format_color_fill"
             label="{{ 'widgets.maps.point-color' | translate }}" openOnInput colorClearButton>
-          </tb-color-input>
+          </jnks-iot-color-input>
           <mat-form-field class="flex-1">
             <mat-label translate>widgets.maps.point-size</mat-label>
             <input matInput type="number" min="1" formControlName="pointSize">
           </mat-form-field>
         </section>
-        <mat-expansion-panel class="tb-settings" [expanded]="tripAnimationPointSettingsFormGroup.get('useColorPointFunction').value">
+        <mat-expansion-panel class="jnks-iot-settings" [expanded]="tripAnimationPointSettingsFormGroup.get('useColorPointFunction').value">
           <mat-expansion-panel-header class="flex-wrap">
             <mat-panel-title>
               <mat-slide-toggle formControlName="useColorPointFunction" (click)="$event.stopPropagation()">
@@ -37,16 +37,16 @@
             </mat-panel-description>
           </mat-expansion-panel-header>
           <ng-template matExpansionPanelContent>
-            <tb-js-func formControlName="colorPointFunction"
+            <jnks-iot-js-func formControlName="colorPointFunction"
                         withModules
                         [globalVariables]="functionScopeVariables"
                         [functionArgs]="['data', 'dsData', 'dsIndex']"
                         functionTitle="{{ 'widgets.maps.point-color-function' | translate }}"
                         helpId="widget/lib/map-legacy/path_point_color_fn">
-            </tb-js-func>
+            </jnks-iot-js-func>
           </ng-template>
         </mat-expansion-panel>
-        <mat-expansion-panel class="tb-settings" [expanded]="tripAnimationPointSettingsFormGroup.get('usePointAsAnchor').value">
+        <mat-expansion-panel class="jnks-iot-settings" [expanded]="tripAnimationPointSettingsFormGroup.get('usePointAsAnchor').value">
           <mat-expansion-panel-header class="flex-wrap">
             <mat-panel-title>
               <mat-slide-toggle formControlName="usePointAsAnchor" (click)="$event.stopPropagation()">
@@ -58,13 +58,13 @@
             </mat-panel-description>
           </mat-expansion-panel-header>
           <ng-template matExpansionPanelContent>
-            <tb-js-func formControlName="pointAsAnchorFunction"
+            <jnks-iot-js-func formControlName="pointAsAnchorFunction"
                         withModules
                         [globalVariables]="functionScopeVariables"
                         [functionArgs]="['data', 'dsData', 'dsIndex']"
                         functionTitle="{{ 'widgets.maps.point-as-anchor-function' | translate }}"
                         helpId="widget/lib/map-legacy/trip_point_as_anchor_fn">
-            </tb-js-func>
+            </jnks-iot-js-func>
           </ng-template>
         </mat-expansion-panel>
         <mat-slide-toggle formControlName="pointTooltipOnRightPanel" class="slide-block">

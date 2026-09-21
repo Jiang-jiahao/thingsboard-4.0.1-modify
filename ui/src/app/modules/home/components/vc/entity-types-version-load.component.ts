@@ -23,12 +23,12 @@ import { AppState } from '@core/core.state';
 import { TranslateService } from '@ngx-translate/core';
 import { EntityType, entityTypeTranslations } from '@shared/models/entity-type.models';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { RemoveOtherEntitiesConfirmComponent } from '@home/components/vc/remove-other-entities-confirm.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-entity-types-version-load',
+  selector: 'jnks-iot-entity-types-version-load',
   templateUrl: './entity-types-version-load.component.html',
   styleUrls: ['./entity-types-version.component.scss'],
   providers: [
@@ -64,7 +64,7 @@ export class EntityTypesVersionLoadComponent extends PageComponent implements On
 
   constructor(protected store: Store<AppState>,
               private translate: TranslateService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private fb: UntypedFormBuilder,

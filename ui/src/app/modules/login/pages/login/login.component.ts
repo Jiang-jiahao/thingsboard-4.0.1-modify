@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 import { OAuth2ClientLoginInfo } from '@shared/models/oauth2.models';
 
 @Component({
-  selector: 'tb-login',
+  selector: 'jnks-iot-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })

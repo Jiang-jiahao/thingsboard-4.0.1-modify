@@ -36,7 +36,7 @@ import { deepClone } from '@core/utils';
 import { CustomTranslatePipe } from '@shared/pipe/custom-translate.pipe';
 
 @Component({
-  selector: 'tb-quick-link',
+  selector: 'jnks-iot-quick-link',
   templateUrl: './quick-link.component.html',
   styleUrls: ['./link.component.scss'],
   providers: [

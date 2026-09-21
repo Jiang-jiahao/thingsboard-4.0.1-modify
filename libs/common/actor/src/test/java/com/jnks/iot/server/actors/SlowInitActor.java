@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SlowInitActor extends TestRootActor {
 
-    public SlowInitActor(TbActorId actorId, ActorTestCtx testCtx) {
+    public SlowInitActor(JnksIotActorId actorId, ActorTestCtx testCtx) {
         super(actorId, testCtx);
     }
 
     @Override
-    public void init(TbActorCtx ctx) throws TbActorException {
+    public void init(JnksIotActorCtx ctx) throws JnksIotActorException {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
@@ -19,23 +19,23 @@ public class SlowInitActor extends TestRootActor {
         super.init(ctx);
     }
 
-    public static class SlowInitActorCreator implements TbActorCreator {
+    public static class SlowInitActorCreator implements JnksIotActorCreator {
 
-        private final TbActorId actorId;
+        private final JnksIotActorId actorId;
         private final ActorTestCtx testCtx;
 
-        public SlowInitActorCreator(TbActorId actorId, ActorTestCtx testCtx) {
+        public SlowInitActorCreator(JnksIotActorId actorId, ActorTestCtx testCtx) {
             this.actorId = actorId;
             this.testCtx = testCtx;
         }
 
         @Override
-        public TbActorId createActorId() {
+        public JnksIotActorId createActorId() {
             return actorId;
         }
 
         @Override
-        public TbActor createActor() {
+        public JnksIotActor createActor() {
             return new SlowInitActor(actorId, testCtx);
         }
     }

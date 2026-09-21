@@ -81,7 +81,7 @@ export class RecipientTableConfigResolver  {
     return this.dialog.open<RecipientNotificationDialogComponent, RecipientNotificationDialogData,
       NotificationTarget>(RecipientNotificationDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         target

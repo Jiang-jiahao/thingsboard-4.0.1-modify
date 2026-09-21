@@ -39,8 +39,8 @@ public class DataConstants {
     public static final String SNMP_TRANSPORT_NAME = "SNMP";
     public static final String MAXIMUM_NUMBER_OF_DEVICES_REACHED = "Maximum number of devices reached!";
 
-    public static final String TB_IMAGE_PREFIX = "tb-image;";
-    public static final String TB_RESOURCE_PREFIX = "tb-resource;";
+    public static final String JNKS_IOT_IMAGE_PREFIX = "jnks-iot-image;";
+    public static final String JNKS_IOT_RESOURCE_PREFIX = "jnks-iot-resource;";
 
 
     public static String[] allScopes() {
@@ -117,11 +117,11 @@ public class DataConstants {
     public static final String MQTT_TOPIC = "mqttTopic";
 
     public static final String MAIN_QUEUE_NAME = "Main";
-    public static final String MAIN_QUEUE_TOPIC = "tb_rule_engine.main";
+    public static final String MAIN_QUEUE_TOPIC = "jnks_iot_rule_engine.main";
     public static final String HP_QUEUE_NAME = "HighPriority";
-    public static final String HP_QUEUE_TOPIC = "tb_rule_engine.hp";
+    public static final String HP_QUEUE_TOPIC = "jnks_iot_rule_engine.hp";
     public static final String SQ_QUEUE_NAME = "SequentialByOriginator";
-    public static final String SQ_QUEUE_TOPIC = "tb_rule_engine.sq";
+    public static final String SQ_QUEUE_TOPIC = "jnks_iot_rule_engine.sq";
     public static final String QUEUE_NAME = "queueName";
 
     public static final String CF_QUEUE_NAME = "CalculatedFields";

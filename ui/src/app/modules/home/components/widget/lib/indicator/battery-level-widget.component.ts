@@ -59,7 +59,7 @@ const horizontalBatteryDimensions = {
 };
 
 @Component({
-  selector: 'tb-battery-level-widget',
+  selector: 'jnks-iot-battery-level-widget',
   templateUrl: './battery-level-widget.component.html',
   styleUrls: ['./battery-level-widget.component.scss'],
   encapsulation: ViewEncapsulation.None

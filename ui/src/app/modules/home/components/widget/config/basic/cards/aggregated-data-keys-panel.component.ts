@@ -27,7 +27,7 @@ import { aggregatedValueCardDefaultKeySettings } from '@home/components/widget/l
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-aggregated-data-keys-panel',
+  selector: 'jnks-iot-aggregated-data-keys-panel',
   templateUrl: './aggregated-data-keys-panel.component.html',
   styleUrls: ['./aggregated-data-keys-panel.component.scss'],
   providers: [

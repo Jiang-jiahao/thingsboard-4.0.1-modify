@@ -1,4 +1,4 @@
-<div class="tb-details-buttons xs:flex xs:flex-col">
+<div class="jnks-iot-details-buttons xs:flex xs:flex-col">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'open')"
@@ -75,19 +75,19 @@
         <mat-label translate>user.last-name</mat-label>
         <input matInput formControlName="lastName">
       </mat-form-field>
-      <tb-phone-input [required]="false"
+      <jnks-iot-phone-input [required]="false"
                       label="{{ 'contact.phone' | translate }}"
                       [enableFlagsSelect]="true"
                       formControlName="phone">
-      </tb-phone-input>
+      </jnks-iot-phone-input>
       <div formGroupName="additionalInfo" class="flex flex-col">
         <mat-form-field class="mat-block">
           <mat-label translate>user.description</mat-label>
           <textarea matInput formControlName="description" rows="2"></textarea>
         </mat-form-field>
-        <section class="tb-default-dashboard flex flex-1 flex-col" *ngIf="entity?.id">
+        <section class="jnks-iot-default-dashboard flex flex-1 flex-col" *ngIf="entity?.id">
           <section class="flex flex-1 flex-col gt-sm:flex-row">
-            <tb-dashboard-autocomplete
+            <jnks-iot-dashboard-autocomplete
               class="flex-1"
               label="{{ 'user.default-dashboard' | translate }}"
               formControlName="defaultDashboardId"
@@ -95,13 +95,13 @@
               [tenantId]="entity?.tenantId?.id"
               [customerId]="entity?.customerId?.id"
               [selectFirstDashboard]="false"
-            ></tb-dashboard-autocomplete>
+            ></jnks-iot-dashboard-autocomplete>
             <mat-checkbox class="flex-1" formControlName="defaultDashboardFullscreen">
               {{ 'user.always-fullscreen' | translate }}
             </mat-checkbox>
           </section>
           <section class="flex flex-1 flex-col gt-sm:flex-row">
-            <tb-dashboard-autocomplete
+            <jnks-iot-dashboard-autocomplete
               class="flex-1"
               label="{{ 'dashboard.home-dashboard' | translate }}"
               formControlName="homeDashboardId"
@@ -109,7 +109,7 @@
               [tenantId]="entity?.tenantId?.id"
               [customerId]="entity?.customerId?.id"
               [selectFirstDashboard]="false"
-            ></tb-dashboard-autocomplete>
+            ></jnks-iot-dashboard-autocomplete>
             <mat-checkbox class="flex-1" formControlName="homeDashboardHideToolbar">
               {{ 'dashboard.home-dashboard-hide-toolbar' | translate }}
             </mat-checkbox>

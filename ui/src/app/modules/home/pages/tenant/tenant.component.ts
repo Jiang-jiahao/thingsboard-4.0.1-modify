@@ -11,7 +11,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { CountryData } from '@shared/models/country.models';
 
 @Component({
-  selector: 'tb-tenant',
+  selector: 'jnks-iot-tenant',
   templateUrl: './tenant.component.html',
   styleUrls: ['./tenant.component.scss']
 })

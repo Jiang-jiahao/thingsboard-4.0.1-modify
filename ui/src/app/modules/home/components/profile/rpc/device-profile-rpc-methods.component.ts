@@ -35,7 +35,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { guid } from '@core/utils';
 
 @Component({
-  selector: 'tb-device-profile-rpc-methods',
+  selector: 'jnks-iot-device-profile-rpc-methods',
   templateUrl: './device-profile-rpc-methods.component.html',
   styleUrls: ['./device-profile-rpc-methods.component.scss'],
   providers: [

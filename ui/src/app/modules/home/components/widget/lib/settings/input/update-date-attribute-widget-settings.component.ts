@@ -9,7 +9,7 @@ import {
 } from '@home/components/widget/lib/settings/input/update-attribute-general-settings.component';
 
 @Component({
-  selector: 'tb-update-date-attribute-widget-settings',
+  selector: 'jnks-iot-update-date-attribute-widget-settings',
   templateUrl: './update-date-attribute-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

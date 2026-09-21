@@ -7,7 +7,7 @@ import { labelValueCardWidgetDefaultSettings } from '@home/components/widget/lib
 import { formatValue } from '@core/utils';
 
 @Component({
-  selector: 'tb-label-value-card-widget-settings',
+  selector: 'jnks-iot-label-value-card-widget-settings',
   templateUrl: './label-value-card-widget-settings.component.html',
   styleUrls: []
 })

@@ -1,11 +1,11 @@
 import { Component, DestroyRef, EventEmitter, inject, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { DefaultMobilePage, defaultMobilePageMap, hideDefaultMenuItems } from '@shared/models/mobile-app.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { FormBuilder, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-default-mobile-page-panel',
+  selector: 'jnks-iot-default-mobile-page-panel',
   templateUrl: './default-mobile-page-panel.component.html',
   styleUrls: ['./default-mobile-page-panel.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -19,7 +19,7 @@ export class DefaultMobilePagePanelComponent implements OnInit {
   pageItem: DefaultMobilePage;
 
   @Input()
-  popover: TbPopoverComponent<DefaultMobilePagePanelComponent>;
+  popover: JnksIotPopoverComponent<DefaultMobilePagePanelComponent>;
 
   @Output()
   defaultMobilePageApplied = new EventEmitter<DefaultMobilePage>();

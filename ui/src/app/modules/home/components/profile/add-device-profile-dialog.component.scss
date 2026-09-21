@@ -18,7 +18,7 @@
   }
 }
 
-:host-context(.tb-fullscreen-dialog .mat-mdc-dialog-container) {
+:host-context(.jnks-iot-fullscreen-dialog .mat-mdc-dialog-container) {
   @media #{$mat-lt-sm} {
     .mat-mdc-dialog-content {
       max-height: 75vh;

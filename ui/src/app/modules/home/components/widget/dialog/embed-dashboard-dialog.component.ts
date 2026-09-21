@@ -18,7 +18,7 @@ export interface EmbedDashboardDialogData {
 }
 
 @Component({
-  selector: 'tb-embed-dashboard-dialog',
+  selector: 'jnks-iot-embed-dashboard-dialog',
   templateUrl: './embed-dashboard-dialog.component.html',
   styleUrls: ['./embed-dashboard-dialog.component.scss']
 })

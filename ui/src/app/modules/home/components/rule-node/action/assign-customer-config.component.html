@@ -1,5 +1,5 @@
 <section [formGroup]="assignCustomerConfigForm" class="flex flex-col">
-  <div class="tb-form-panel no-padding no-border">
+  <div class="jnks-iot-form-panel no-padding no-border">
     <mat-form-field class="mat-block" subscriptSizing="dynamic">
       <mat-label translate>rule-node-config.customer-name-pattern</mat-label>
       <input required matInput formControlName="customerNamePattern">
@@ -9,7 +9,7 @@
       </mat-error>
       <mat-hint translate>rule-node-config.customer-name-pattern-hint</mat-hint>
     </mat-form-field>
-    <div class="tb-form-row">
+    <div class="jnks-iot-form-row">
       <mat-slide-toggle class="mat-slide" formControlName="createCustomerIfNotExists">
         {{ 'rule-node-config.create-customer-if-not-exists' | translate }}
       </mat-slide-toggle>

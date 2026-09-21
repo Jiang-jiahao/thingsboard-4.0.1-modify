@@ -54,6 +54,6 @@ public class SideBarMenuViewHelper extends SideBarMenuViewElements {
     }
 
     private boolean dropdownIsClose(WebElement dropdown) {
-        return !dropdown.getAttribute("class").contains("tb-toggled");
+        return !dropdown.getAttribute("class").contains("jnks-iot-toggled");
     }
 }

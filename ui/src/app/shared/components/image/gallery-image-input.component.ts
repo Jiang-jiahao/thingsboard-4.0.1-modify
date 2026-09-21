@@ -9,8 +9,8 @@ import {
   ImageResourceInfo,
   isBase64DataImageUrl,
   isImageResourceUrl,
-  prependTbImagePrefix,
-  removeTbImagePrefix,
+  prependJnksIotImagePrefix,
+  removeJnksIotImagePrefix,
   ResourceSubType
 } from '@shared/models/resource.models';
 import { ImageService } from '@core/http/image.service';
@@ -29,7 +29,7 @@ export enum ImageLinkType {
 }
 
 @Component({
-  selector: 'tb-gallery-image-input',
+  selector: 'jnks-iot-gallery-image-input',
   templateUrl: './gallery-image-input.component.html',
   styleUrls: ['./gallery-image-input.component.scss'],
   providers: [
@@ -105,7 +105,7 @@ export class GalleryImageInputComponent extends PageComponent implements OnInit,
   }
 
   writeValue(value: string): void {
-    value = removeTbImagePrefix(value);
+    value = removeJnksIotImagePrefix(value);
     if (this.imageUrl !== value) {
       this.reset();
       this.imageUrl = value;
@@ -159,7 +159,7 @@ export class GalleryImageInputComponent extends PageComponent implements OnInit,
     this.cd.markForCheck();
     if (this.imageUrl !== value) {
       this.imageUrl = value;
-      this.propagateChange(prependTbImagePrefix(this.imageUrl));
+      this.propagateChange(prependJnksIotImagePrefix(this.imageUrl));
     }
   }
 
@@ -189,7 +189,7 @@ export class GalleryImageInputComponent extends PageComponent implements OnInit,
       ImageResourceInfo>(ImageGalleryDialogComponent, {
         autoFocus: false,
         disableClose: false,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           imageSubType: ResourceSubType.IMAGE
         }

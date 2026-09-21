@@ -3,7 +3,7 @@ import { MenuService } from '@core/services/menu.service';
 import { MenuSection } from '@core/services/menu.models';
 
 @Component({
-  selector: 'tb-side-menu',
+  selector: 'jnks-iot-side-menu',
   templateUrl: './side-menu.component.html',
   styleUrls: ['./side-menu.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

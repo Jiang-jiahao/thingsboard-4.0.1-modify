@@ -20,7 +20,7 @@ export interface EventContentDialogData {
 }
 
 @Component({
-  selector: 'tb-event-content-dialog',
+  selector: 'jnks-iot-event-content-dialog',
   templateUrl: './event-content-dialog.component.html',
   styleUrls: ['./event-content-dialog.component.scss']
 })

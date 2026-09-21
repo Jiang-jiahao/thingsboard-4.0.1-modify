@@ -18,7 +18,7 @@ interface MessageType {
 }
 
 @Component({
-  selector: 'tb-output-message-type-autocomplete',
+  selector: 'jnks-iot-output-message-type-autocomplete',
   templateUrl: './output-message-type-autocomplete.component.html',
   styleUrls: [],
   providers: [

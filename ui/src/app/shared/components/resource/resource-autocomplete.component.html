@@ -1,5 +1,5 @@
 <mat-form-field [formGroup]="resourceFormGroup"
-                [class]="{'tb-inline-field': inlineField, 'flex': inlineField}"
+                [class]="{'jnks-iot-inline-field': inlineField, 'flex': inlineField}"
                 class="mat-block"
                 [appearance]="inlineField ? 'outline' : appearance"
                 [hideRequiredMarker]="hideRequiredMarker"
@@ -18,7 +18,7 @@
           (click)="clear()">
     <mat-icon class="material-icons">close</mat-icon>
   </button>
-  <mat-autocomplete class="tb-autocomplete"
+  <mat-autocomplete class="jnks-iot-autocomplete"
                     #entityAutocomplete="matAutocomplete"
                     [displayWith]="displayResourceFn">
     <mat-option *ngFor="let resource of filteredResources$ | async" [value]="resource">

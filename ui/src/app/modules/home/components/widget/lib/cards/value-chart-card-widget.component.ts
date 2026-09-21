@@ -35,7 +35,7 @@ import { getTsValueByLatestDataKey } from '@home/components/widget/lib/cards/agg
 import { Observable } from 'rxjs';
 import { ImagePipe } from '@shared/pipe/image.pipe';
 import { DomSanitizer } from '@angular/platform-browser';
-import { TbTimeSeriesChart } from '@home/components/widget/lib/chart/time-series-chart';
+import { JnksIotTimeSeriesChart } from '@home/components/widget/lib/chart/time-series-chart';
 import {
   TimeSeriesChartKeySettings,
   TimeSeriesChartSeriesType,
@@ -47,7 +47,7 @@ const layoutHeight = 56;
 const valueRelativeWidth = 0.35;
 
 @Component({
-  selector: 'tb-value-chart-card-widget',
+  selector: 'jnks-iot-value-chart-card-widget',
   templateUrl: './value-chart-card-widget.component.html',
   styleUrls: ['./value-chart-card-widget.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -83,7 +83,7 @@ export class ValueChartCardWidgetComponent implements OnInit, AfterViewInit, OnD
   overlayStyle: ComponentStyle = {};
   padding: string;
 
-  private lineChart: TbTimeSeriesChart;
+  private lineChart: JnksIotTimeSeriesChart;
   private lineChartDataKey: DataKey;
 
   private valueKey: DataKey;
@@ -163,7 +163,7 @@ export class ValueChartCardWidgetComponent implements OnInit, AfterViewInit, OnD
       tooltipDateFormat: autoDateFormat()
     };
 
-    this.lineChart = new TbTimeSeriesChart(this.ctx, settings, this.chartElement.nativeElement, this.renderer, false);
+    this.lineChart = new JnksIotTimeSeriesChart(this.ctx, settings, this.chartElement.nativeElement, this.renderer, false);
 
     this.contentResize$ = new ResizeObserver(() => {
       this.onResize();

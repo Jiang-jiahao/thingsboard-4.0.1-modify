@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-action-node-assign-to-customer-config',
+  selector: 'jnks-iot-action-node-assign-to-customer-config',
   templateUrl: './assign-customer-config.component.html',
   styleUrls: []
 })

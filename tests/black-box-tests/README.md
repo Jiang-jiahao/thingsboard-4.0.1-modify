@@ -9,15 +9,15 @@ To run the black box tests with using Docker, the local Docker images of JnksIOT
         docker image ls
 As result, in REPOSITORY column, next images should be present:
         
-        jnks-iot/tb-coap-transport
-        jnks-iot/tb-lwm2m-transport
-        jnks-iot/tb-http-transport
-        jnks-iot/tb-mqtt-transport
-        jnks-iot/tb-snmp-transport
-        jnks-iot/tb-core
-        jnks-iot/tb-rule-engine
-        jnks-iot/tb-web-ui
-        jnks-iot/tb-js-executor
+        jnks-iot/jnks-iot-coap-transport
+        jnks-iot/jnks-iot-lwm2m-transport
+        jnks-iot/jnks-iot-http-transport
+        jnks-iot/jnks-iot-mqtt-transport
+        jnks-iot/jnks-iot-snmp-transport
+        jnks-iot/jnks-iot-core
+        jnks-iot/jnks-iot-rule-engine
+        jnks-iot/jnks-iot-web-ui
+        jnks-iot/jnks-iot-js-executor
 
 - Run the black box tests (without ui tests) in the [tests/black-box-tests](../black-box-tests) directory with Redis standalone:
 

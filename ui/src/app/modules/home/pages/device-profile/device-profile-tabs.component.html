@@ -16,18 +16,18 @@
       </mat-error>
     </mat-form-field>
     <div formGroupName="profileData">
-      <tb-device-profile-transport-configuration
+      <jnks-iot-device-profile-transport-configuration
         formControlName="transportConfiguration"
         [selectedTransportType]="detailsForm.get('transportType').value"
         [entityTransportType]="entity?.transportType"
         [isAdd]="isTransportTypeChanged">
-      </tb-device-profile-transport-configuration>
+      </jnks-iot-device-profile-transport-configuration>
     </div>
   </div>
 </mat-tab>
 <mat-tab *ngIf="entity && authUser.authority === authorities.TENANT_ADMIN && !isEdit"
          label="{{ 'entity.type-calculated-fields' | translate }}" #calculatedFieldsTab="matTab">
-  <tb-calculated-fields-table [active]="calculatedFieldsTab.isActive" [entityId]="entity.id" [entityName]="entity.name"/>
+  <jnks-iot-calculated-fields-table [active]="calculatedFieldsTab.isActive" [entityId]="entity.id" [entityName]="entity.name"/>
 </mat-tab>
 <mat-tab *ngIf="entity" #rpcMethodsTab="matTab"
          label="{{ this.detailsForm.get('profileData.rpcMethods').value?.length
@@ -35,12 +35,12 @@
          : 'device-profile.rpc-methods' | translate }}">
   <div class="mat-padding" [formGroup]="detailsForm" *ngIf="rpcMethodsTab.isActive">
     <div formGroupName="profileData">
-      <tb-device-profile-rpc-methods
+      <jnks-iot-device-profile-rpc-methods
         formControlName="rpcMethods"
         [readOnly]="!isEdit"
         [transportType]="detailsForm.get('transportType').value"
         [transportConfiguration]="detailsForm.get('profileData.transportConfiguration').value">
-      </tb-device-profile-rpc-methods>
+      </jnks-iot-device-profile-rpc-methods>
     </div>
   </div>
 </mat-tab>
@@ -50,7 +50,7 @@
          : 'device-profile.alarm-rules' | translate }}">
   <div class="mat-padding" [formGroup]="detailsForm" *ngIf="alarmRules.isActive">
     <div formGroupName="profileData">
-      <tb-device-profile-alarms formControlName="alarms" [deviceProfileId]="entity.id"></tb-device-profile-alarms>
+      <jnks-iot-device-profile-alarms formControlName="alarms" [deviceProfileId]="entity.id"></jnks-iot-device-profile-alarms>
     </div>
   </div>
 </mat-tab>
@@ -58,8 +58,8 @@
          label="{{ 'device-profile.device-provisioning' | translate }}">
   <div class="mat-padding" [formGroup]="detailsForm" *ngIf="deviceProvisioning.isActive">
     <div formGroupName="profileData">
-      <tb-device-profile-provision-configuration formControlName="provisionConfiguration">
-      </tb-device-profile-provision-configuration>
+      <jnks-iot-device-profile-provision-configuration formControlName="provisionConfiguration">
+      </jnks-iot-device-profile-provision-configuration>
     </div>
   </div>
 </mat-tab>
@@ -67,19 +67,19 @@
          label="{{'device-profile.profile-configuration' | translate }}" #deviceProfile="matTab">
   <div class="mat-padding" [formGroup]="detailsForm">
     <div formGroupName="profileData">
-      <tb-device-profile-configuration
+      <jnks-iot-device-profile-configuration
         formControlName="configuration">
-      </tb-device-profile-configuration>
+      </jnks-iot-device-profile-configuration>
     </div>
   </div>
 </mat-tab>
 <mat-tab *ngIf="entity && !isEdit" #auditLogsTab="matTab"
          label="{{ 'audit-log.audit-logs' | translate }}">
-  <tb-audit-log-table detailsMode="true" [active]="auditLogsTab.isActive" [auditLogMode]="auditLogModes.ENTITY" [entityId]="entity.id"></tb-audit-log-table>
+  <jnks-iot-audit-log-table detailsMode="true" [active]="auditLogsTab.isActive" [auditLogMode]="auditLogModes.ENTITY" [entityId]="entity.id"></jnks-iot-audit-log-table>
 </mat-tab>
 <mat-tab *ngIf="entity && authUser.authority === authorities.TENANT_ADMIN && !isEdit && versionControlUiEnabled"
          label="{{ 'version-control.version-control' | translate }}" #versionControlTab="matTab">
-  <tb-version-control detailsMode="true" singleEntityMode="true"
+  <jnks-iot-version-control detailsMode="true" singleEntityMode="true"
                       (versionRestored)="entitiesTableConfig.updateData()"
-                      [active]="versionControlTab.isActive" [entityId]="entity.id" [entityName]="entity.name" [externalEntityId]="entity.externalId || entity.id"></tb-version-control>
+                      [active]="versionControlTab.isActive" [entityId]="entity.id" [entityName]="entity.name" [externalEntityId]="entity.externalId || entity.id"></jnks-iot-version-control>
 </mat-tab>

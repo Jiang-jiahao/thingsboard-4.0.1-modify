@@ -15,7 +15,7 @@ export interface EmbedImageDialogData {
 }
 
 @Component({
-  selector: 'tb-embed-image-dialog',
+  selector: 'jnks-iot-embed-image-dialog',
   templateUrl: './embed-image-dialog.component.html',
   styleUrls: ['./embed-image-dialog.component.scss']
 })

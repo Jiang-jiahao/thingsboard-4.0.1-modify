@@ -2,7 +2,7 @@ import { Datasource, FormattedData } from '@app/shared/models/widget.models';
 import tinycolor from 'tinycolor2';
 import { BaseIconOptions, Icon } from 'leaflet';
 import { Observable } from 'rxjs';
-import { CompiledTbFunction, TbFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction, JnksIotFunction } from '@shared/models/js-function.models';
 
 export const DEFAULT_MAP_PAGE_SIZE = 16384;
 export const DEFAULT_ZOOM_LEVEL = 8;
@@ -258,7 +258,7 @@ export interface TripAnimationCommonSettings {
 }
 
 export interface WidgetTripAnimationCommonSettings extends TripAnimationCommonSettings {
-  parsedTooltipFunction: CompiledTbFunction<GenericFunction>;
+  parsedTooltipFunction: CompiledJnksIotFunction<GenericFunction>;
 }
 
 export const defaultTripAnimationCommonSettings: TripAnimationCommonSettings = {
@@ -290,35 +290,35 @@ export const showTooltipActionTranslationMap = new Map<ShowTooltipAction, string
 export interface MarkersSettings {
   markerOffsetX: number;
   markerOffsetY: number;
-  posFunction?: TbFunction;
+  posFunction?: JnksIotFunction;
   draggableMarker: boolean;
   showLabel: boolean;
   useLabelFunction: boolean;
   label?: string;
-  labelFunction?: TbFunction;
+  labelFunction?: JnksIotFunction;
   showTooltip: boolean;
   showTooltipAction: ShowTooltipAction;
   autocloseTooltip: boolean;
   useTooltipFunction: boolean;
   tooltipPattern?: string;
-  tooltipFunction?: TbFunction;
+  tooltipFunction?: JnksIotFunction;
   tooltipOffsetX: number;
   tooltipOffsetY: number;
   color?: string;
   useColorFunction: boolean;
-  colorFunction?: TbFunction;
+  colorFunction?: JnksIotFunction;
   useMarkerImageFunction: boolean;
   markerImage?: string;
   markerImageSize?: number;
-  markerImageFunction?: TbFunction;
+  markerImageFunction?: JnksIotFunction;
   markerImages?: string[];
 }
 
 export interface WidgetMarkersSettings extends MarkersSettings, WidgetToolipSettings {
-  parsedLabelFunction: CompiledTbFunction<GenericFunction>;
-  parsedTooltipFunction: CompiledTbFunction<GenericFunction>;
-  parsedColorFunction: CompiledTbFunction<GenericFunction>;
-  parsedMarkerImageFunction: CompiledTbFunction<MarkerImageFunction>;
+  parsedLabelFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedTooltipFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedColorFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedMarkerImageFunction: CompiledJnksIotFunction<MarkerImageFunction>;
   markerClick: { [name: string]: actionsHandler };
   currentImage: MarkerImageInfo;
   tinyColor: tinycolor.Instance;
@@ -367,7 +367,7 @@ export interface TripAnimationMarkerSettings {
 }
 
 export interface WidgetTripAnimationMarkerSettings extends TripAnimationMarkerSettings {
-  parsedLabelFunction: CompiledTbFunction<GenericFunction>;
+  parsedLabelFunction: CompiledJnksIotFunction<GenericFunction>;
 }
 
 export const defaultTripAnimationMarkersSettings: TripAnimationMarkerSettings = {
@@ -390,29 +390,29 @@ export interface PolygonSettings {
   showPolygonLabel: boolean;
   usePolygonLabelFunction: boolean;
   polygonLabel?: string;
-  polygonLabelFunction?: TbFunction;
+  polygonLabelFunction?: JnksIotFunction;
   showPolygonTooltip: boolean;
   showPolygonTooltipAction: ShowTooltipAction;
   autoClosePolygonTooltip: boolean;
   usePolygonTooltipFunction: boolean;
   polygonTooltipPattern?: string;
-  polygonTooltipFunction?: TbFunction;
+  polygonTooltipFunction?: JnksIotFunction;
   polygonColor?: string;
   polygonOpacity?: number;
   usePolygonColorFunction: boolean;
-  polygonColorFunction?: TbFunction;
+  polygonColorFunction?: JnksIotFunction;
   polygonStrokeColor?: string;
   polygonStrokeOpacity?: number;
   polygonStrokeWeight?: number;
   usePolygonStrokeColorFunction: boolean;
-  polygonStrokeColorFunction?: TbFunction;
+  polygonStrokeColorFunction?: JnksIotFunction;
 }
 
 export interface WidgetPolygonSettings extends PolygonSettings, WidgetToolipSettings {
-  parsedPolygonLabelFunction: CompiledTbFunction<GenericFunction>;
-  parsedPolygonTooltipFunction: CompiledTbFunction<GenericFunction>;
-  parsedPolygonColorFunction: CompiledTbFunction<GenericFunction>;
-  parsedPolygonStrokeColorFunction: CompiledTbFunction<GenericFunction>;
+  parsedPolygonLabelFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedPolygonTooltipFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedPolygonColorFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedPolygonStrokeColorFunction: CompiledJnksIotFunction<GenericFunction>;
   polygonClick: { [name: string]: actionsHandler };
 }
 
@@ -448,29 +448,29 @@ export interface CircleSettings {
   showCircleLabel: boolean;
   useCircleLabelFunction: boolean;
   circleLabel?: string;
-  circleLabelFunction?: TbFunction;
+  circleLabelFunction?: JnksIotFunction;
   showCircleTooltip: boolean;
   showCircleTooltipAction: ShowTooltipAction;
   autoCloseCircleTooltip: boolean;
   useCircleTooltipFunction: boolean;
   circleTooltipPattern?: string;
-  circleTooltipFunction?: TbFunction;
+  circleTooltipFunction?: JnksIotFunction;
   circleFillColor?: string;
   circleFillColorOpacity?: number;
   useCircleFillColorFunction: boolean;
-  circleFillColorFunction?: TbFunction;
+  circleFillColorFunction?: JnksIotFunction;
   circleStrokeColor?: string;
   circleStrokeOpacity?: number;
   circleStrokeWeight?: number;
   useCircleStrokeColorFunction: boolean;
-  circleStrokeColorFunction?: TbFunction;
+  circleStrokeColorFunction?: JnksIotFunction;
 }
 
 export interface WidgetCircleSettings extends CircleSettings, WidgetToolipSettings {
-  parsedCircleLabelFunction: CompiledTbFunction<GenericFunction>;
-  parsedCircleTooltipFunction: CompiledTbFunction<GenericFunction>;
-  parsedCircleFillColorFunction: CompiledTbFunction<GenericFunction>;
-  parsedCircleStrokeColorFunction: CompiledTbFunction<GenericFunction>;
+  parsedCircleLabelFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedCircleTooltipFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedCircleFillColorFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedCircleStrokeColorFunction: CompiledJnksIotFunction<GenericFunction>;
   circleClick: { [name: string]: actionsHandler };
 }
 
@@ -514,13 +514,13 @@ export const polylineDecoratorSymbolTranslationMap = new Map<PolylineDecoratorSy
 export interface PolylineSettings {
   useStrokeWeightFunction?: boolean;
   strokeWeight: number;
-  strokeWeightFunction?: TbFunction;
+  strokeWeightFunction?: JnksIotFunction;
   useStrokeOpacityFunction?: boolean;
   strokeOpacity: number;
-  strokeOpacityFunction?: TbFunction;
+  strokeOpacityFunction?: JnksIotFunction;
   useColorFunction?: boolean;
   color?: string;
-  colorFunction?: TbFunction;
+  colorFunction?: JnksIotFunction;
   usePolylineDecorator?: boolean;
   decoratorSymbol?: PolylineDecoratorSymbol;
   decoratorSymbolSize?: number;
@@ -532,9 +532,9 @@ export interface PolylineSettings {
 }
 
 export interface WidgetPolylineSettings extends PolylineSettings {
-  parsedColorFunction: CompiledTbFunction<GenericFunction>;
-  parsedStrokeOpacityFunction: CompiledTbFunction<GenericFunction>;
-  parsedStrokeWeightFunction: CompiledTbFunction<GenericFunction>;
+  parsedColorFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedStrokeOpacityFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedStrokeWeightFunction: CompiledJnksIotFunction<GenericFunction>;
 }
 
 export const defaultRouteMapSettings: PolylineSettings = {
@@ -562,7 +562,7 @@ export interface PointsSettings {
   showPoints?: boolean;
   pointColor?: string;
   useColorPointFunction?: false;
-  colorPointFunction?: TbFunction;
+  colorPointFunction?: JnksIotFunction;
   pointSize?: number;
   usePointAsAnchor?: false;
   pointAsAnchorFunction?: string;
@@ -570,8 +570,8 @@ export interface PointsSettings {
 }
 
 export interface WidgetPointsSettings extends PointsSettings {
-  parsedColorPointFunction: CompiledTbFunction<GenericFunction>;
-  parsedPointAsAnchorFunction: CompiledTbFunction<GenericFunction>;
+  parsedColorPointFunction: CompiledJnksIotFunction<GenericFunction>;
+  parsedPointAsAnchorFunction: CompiledJnksIotFunction<GenericFunction>;
 }
 
 export const defaultTripAnimationPointSettings: PointsSettings = {
@@ -596,11 +596,11 @@ export interface MarkerClusteringSettings {
   chunkedLoading: boolean;
   removeOutsideVisibleBounds: boolean;
   useIconCreateFunction: boolean;
-  clusterMarkerFunction?: TbFunction;
+  clusterMarkerFunction?: JnksIotFunction;
 }
 
 export interface WidgetMarkerClusteringSettings extends MarkerClusteringSettings {
-  parsedClusterMarkerFunction?: CompiledTbFunction<GenericFunction>;
+  parsedClusterMarkerFunction?: CompiledJnksIotFunction<GenericFunction>;
 }
 
 export const defaultMarkerClusteringSettings: MarkerClusteringSettings = {

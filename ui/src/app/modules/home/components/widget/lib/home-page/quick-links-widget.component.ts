@@ -38,7 +38,7 @@ interface QuickLinksWidgetSettings {
 }
 
 @Component({
-  selector: 'tb-quick-links-widget',
+  selector: 'jnks-iot-quick-links-widget',
   templateUrl: './quick-links-widget.component.html',
   styleUrls: ['./home-page-widget.scss', './links-widget.component.scss']
 })
@@ -125,7 +125,7 @@ export class QuickLinksWidgetComponent extends PageComponent implements OnInit, 
         mode: 'quickLinks',
         links: this.quickLinks
       },
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
     }).afterClosed().subscribe(
       (result) => {
         if (result) {
@@ -139,7 +139,7 @@ export class QuickLinksWidgetComponent extends PageComponent implements OnInit, 
       string>(AddQuickLinkDialogComponent, {
       disableClose: true,
       autoFocus: false,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
     }).afterClosed().subscribe(
       (link) => {
         if (link) {

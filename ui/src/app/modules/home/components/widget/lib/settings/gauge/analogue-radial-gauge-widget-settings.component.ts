@@ -8,7 +8,7 @@ import {
 } from '@home/components/widget/lib/settings/gauge/analogue-gauge-widget-settings.component';
 
 @Component({
-  selector: 'tb-analogue-radial-gauge-widget-settings',
+  selector: 'jnks-iot-analogue-radial-gauge-widget-settings',
   templateUrl: './analogue-gauge-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

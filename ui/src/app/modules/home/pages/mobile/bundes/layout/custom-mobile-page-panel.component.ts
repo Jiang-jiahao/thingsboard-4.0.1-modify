@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { CustomMobilePage } from '@shared/models/mobile-app.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 
 @Component({
-  selector: 'tb-custom-menu-item-panel',
+  selector: 'jnks-iot-custom-menu-item-panel',
   templateUrl: './custom-mobile-page-panel.component.html',
   styleUrls: ['./custom-mobile-page-panel.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -18,7 +18,7 @@ export class CustomMobilePagePanelComponent implements OnInit {
   pageItem: CustomMobilePage;
 
   @Input()
-  popover: TbPopoverComponent<CustomMobilePagePanelComponent>;
+  popover: JnksIotPopoverComponent<CustomMobilePagePanelComponent>;
 
   @Output()
   customMobilePageApplied = new EventEmitter<CustomMobilePage>();

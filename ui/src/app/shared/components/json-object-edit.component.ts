@@ -29,7 +29,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 export const jsonRequired = (control: AbstractControl): ValidationErrors | null => !control.value ? {required: true} : null;
 
 @Component({
-  selector: 'tb-json-object-edit',
+  selector: 'jnks-iot-json-object-edit',
   templateUrl: './json-object-edit.component.html',
   styleUrls: ['./json-object-edit.component.scss'],
   providers: [

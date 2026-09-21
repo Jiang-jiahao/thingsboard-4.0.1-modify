@@ -12,12 +12,12 @@ import {
 } from '@angular/core';
 import { Overlay, OverlayConfig, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
-import { TbAnchorComponent } from '@shared/components/tb-anchor.component';
+import { JnksIotAnchorComponent } from '@shared/components/jnks-iot-anchor.component';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
-  selector: '[tb-fullscreen]'
+  selector: '[jnks-iot-fullscreen]'
 })
 export class FullscreenDirective implements OnChanges, OnDestroy {
 
@@ -76,11 +76,11 @@ export class FullscreenDirective implements OnChanges, OnDestroy {
     const targetElement: HTMLElement = this.fullscreenElement || this.elementRef.nativeElement;
     this.parentElement = targetElement.parentElement;
     this.parentElement.removeChild(targetElement);
-    targetElement.classList.add('tb-fullscreen');
+    targetElement.classList.add('jnks-iot-fullscreen');
     const position = this.overlay.position();
     const config = new OverlayConfig({
       hasBackdrop: false,
-      panelClass: 'tb-fullscreen-parent'
+      panelClass: 'jnks-iot-fullscreen-parent'
     });
     config.minWidth = '100%';
     config.minHeight = '100%';
@@ -123,9 +123,9 @@ export class FullscreenDirective implements OnChanges, OnDestroy {
       this.parentElement.appendChild(targetElement);
       this.parentElement = null;
     }
-    targetElement.classList.remove('tb-fullscreen');
+    targetElement.classList.remove('jnks-iot-fullscreen');
     if (this.elementRef) {
-      this.elementRef.nativeElement.classList.remove('tb-fullscreen');
+      this.elementRef.nativeElement.classList.remove('jnks-iot-fullscreen');
     }
     if (this.overlayRef) {
       this.overlayRef.dispose();
@@ -134,10 +134,10 @@ export class FullscreenDirective implements OnChanges, OnDestroy {
   }
 }
 
-class EmptyPortal extends ComponentPortal<TbAnchorComponent> {
+class EmptyPortal extends ComponentPortal<JnksIotAnchorComponent> {
 
   constructor() {
-    super(TbAnchorComponent);
+    super(JnksIotAnchorComponent);
   }
 
 }

@@ -1,4 +1,4 @@
-<section class="tb-widget-settings flex flex-col" [formGroup]="sendRpcWidgetSettingsForm">
+<section class="jnks-iot-widget-settings flex flex-col" [formGroup]="sendRpcWidgetSettingsForm">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.rpc.common-settings</legend>
     <mat-form-field class="mat-block flex-1">
@@ -19,12 +19,12 @@
       <mat-label translate>widgets.rpc.rpc-method</mat-label>
       <input matInput formControlName="methodName">
     </mat-form-field>
-    <tb-json-content
+    <jnks-iot-json-content
       label="{{ 'widgets.rpc.rpc-method-params' | translate }}"
       [contentType]="contentTypes.JSON"
       validateOnChange
       formControlName="methodParams">
-    </tb-json-content>
+    </jnks-iot-json-content>
     <mat-form-field class="mat-block flex-1">
       <mat-label translate>widgets.rpc.request-timeout</mat-label>
       <input matInput type="number" min="0" formControlName="requestTimeout">
@@ -34,7 +34,7 @@
     </mat-checkbox>
     <fieldset class="fields-group fields-group-slider">
       <legend class="group-title" translate>widgets.rpc.persistent-rpc-settings</legend>
-      <mat-expansion-panel class="tb-settings" [expanded]="sendRpcWidgetSettingsForm.get('requestPersistent').value">
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="sendRpcWidgetSettingsForm.get('requestPersistent').value">
         <mat-expansion-panel-header class="flex flex-row flex-wrap">
           <mat-panel-title>
             <mat-slide-toggle formControlName="requestPersistent" (click)="$event.stopPropagation()"
@@ -55,7 +55,7 @@
       </mat-expansion-panel>
     </fieldset>
   </fieldset>
-  <tb-rpc-button-style
+  <jnks-iot-rpc-button-style
     formControlName="styleButton">
-  </tb-rpc-button-style>
+  </jnks-iot-rpc-button-style>
 </section>

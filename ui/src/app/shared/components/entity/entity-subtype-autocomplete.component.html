@@ -13,7 +13,7 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
   <mat-autocomplete
-    class="tb-autocomplete"
+    class="jnks-iot-autocomplete"
     #subTypeAutocomplete="matAutocomplete"
     [displayWith]="displaySubTypeFn">
     <mat-option *ngFor="let subType of filteredSubTypes | async" [value]="subType">

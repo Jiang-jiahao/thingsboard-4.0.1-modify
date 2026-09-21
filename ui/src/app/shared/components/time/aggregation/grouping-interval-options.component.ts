@@ -13,7 +13,7 @@ import { isDefined } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-grouping-interval-options',
+  selector: 'jnks-iot-grouping-interval-options',
   templateUrl: './grouping-interval-options.component.html',
   styleUrls: ['./grouping-interval-options.component.scss'],
   providers: [

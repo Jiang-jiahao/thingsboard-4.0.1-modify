@@ -16,7 +16,7 @@ export const exportableEntityTypes: Array<EntityType> = [
   EntityType.RULE_CHAIN,
   EntityType.WIDGET_TYPE,
   EntityType.WIDGETS_BUNDLE,
-  EntityType.TB_RESOURCE,
+  EntityType.JNKS_IOT_RESOURCE,
   EntityType.NOTIFICATION_TEMPLATE,
   EntityType.NOTIFICATION_TARGET,
   EntityType.NOTIFICATION_RULE
@@ -26,7 +26,7 @@ export const entityTypesWithoutRelatedData: Set<EntityType | AliasEntityType> = 
   EntityType.NOTIFICATION_TEMPLATE,
   EntityType.NOTIFICATION_TARGET,
   EntityType.NOTIFICATION_RULE,
-  EntityType.TB_RESOURCE
+  EntityType.JNKS_IOT_RESOURCE
 ]);
 
 export interface VersionCreateConfig {

@@ -12,7 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-widget-actions-panel',
+  selector: 'jnks-iot-widget-actions-panel',
   templateUrl: './widget-actions-panel.component.html',
   styleUrls: [],
   providers: [
@@ -101,7 +101,7 @@ export class WidgetActionsPanelComponent implements ControlValueAccessor, OnInit
     this.dialog.open<ManageWidgetActionsDialogComponent, ManageWidgetActionsDialogData,
       {[actionSourceId: string]: Array<WidgetActionDescriptor>}>(ManageWidgetActionsDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         widgetTitle: this.widgetConfigComponent.modelValue.widgetName,
         callbacks: this.widgetConfigComponent.widgetConfigCallbacks,

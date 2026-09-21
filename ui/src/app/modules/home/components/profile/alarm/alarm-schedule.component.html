@@ -10,14 +10,14 @@
     </mat-error>
   </mat-form-field>
   <div *ngIf="alarmScheduleForm.get('type').value !== alarmScheduleType.ANY_TIME">
-    <tb-timezone-select
+    <jnks-iot-timezone-select
       userTimezoneByDefault
       required
       formControlName="timezone">
-    </tb-timezone-select>
+    </jnks-iot-timezone-select>
     <section *ngIf="alarmScheduleForm.get('type').value === alarmScheduleType.SPECIFIC_TIME">
-      <tb-alarm-dynamic-value formControlName = 'dynamicValue' helpId = 'device-profile/alarm_specific_schedule_format'></tb-alarm-dynamic-value>
-      <div class="tb-small" style="margin-bottom: 0.5em" translate>device-profile.schedule-days</div>
+      <jnks-iot-alarm-dynamic-value formControlName = 'dynamicValue' helpId = 'device-profile/alarm_specific_schedule_format'></jnks-iot-alarm-dynamic-value>
+      <div class="jnks-iot-small" style="margin-bottom: 0.5em" translate>device-profile.schedule-days</div>
       <div class="flex flex-col gap-2 gt-md:flex-row">
         <div class="flex flex-row gap-2">
           <mat-checkbox *ngFor="let day of firstRowDays" [formControl]="weeklyRepeatControl(day)">
@@ -30,9 +30,9 @@
           </mat-checkbox>
         </div>
       </div>
-      <tb-error style="display: block;" [error]="alarmScheduleForm.get('daysOfWeek').hasError('dayOfWeeks')
-                  ? ('device-profile.schedule-days-of-week-required' | translate) : ''"></tb-error>
-      <div class="tb-small" style="margin-bottom: 0.5em" translate>device-profile.schedule-time</div>
+      <jnks-iot-error style="display: block;" [error]="alarmScheduleForm.get('daysOfWeek').hasError('dayOfWeeks')
+                  ? ('device-profile.schedule-days-of-week-required' | translate) : ''"></jnks-iot-error>
+      <div class="jnks-iot-small" style="margin-bottom: 0.5em" translate>device-profile.schedule-time</div>
       <div class="flex flex-row xs:flex-col gt-xs:gap-2">
         <div class="flex flex-row gap-2 gt-md:flex-1">
           <mat-form-field class="flex-1 sm:min-w-37.5 sm:max-w-37.5 sm:basis-37.5 md:min-w-37.5 md:max-w-37.5 md:basis-37.5">
@@ -56,8 +56,8 @@
       </div>
     </section>
     <section *ngIf="alarmScheduleForm.get('type').value === alarmScheduleType.CUSTOM">
-      <tb-alarm-dynamic-value formControlName = 'dynamicValue' helpId = 'device-profile/alarm_custom_schedule_format'></tb-alarm-dynamic-value>
-      <div class="tb-small" style="margin-bottom: 0.5em" translate>device-profile.schedule-days</div>
+      <jnks-iot-alarm-dynamic-value formControlName = 'dynamicValue' helpId = 'device-profile/alarm_custom_schedule_format'></jnks-iot-alarm-dynamic-value>
+      <div class="jnks-iot-small" style="margin-bottom: 0.5em" translate>device-profile.schedule-days</div>
       <div *ngFor="let day of allDays" class="flex flex-col gap-4" formArrayName="items">
         <div class="flex flex-row items-center justify-start gap-2 xs:flex-col xs:items-start xs:justify-center" [formGroupName]="''+day">
           <mat-checkbox formControlName="enabled" class="max-w-17% flex-full" (change)="changeCustomScheduler($event, day)">
@@ -84,8 +84,8 @@
         </div>
       </div>
 
-      <tb-error style="display: block;" [error]="alarmScheduleForm.get('items').hasError('dayOfWeeks')
-                  ? ('device-profile.schedule-days-of-week-required' | translate) : ''"></tb-error>
+      <jnks-iot-error style="display: block;" [error]="alarmScheduleForm.get('items').hasError('dayOfWeeks')
+                  ? ('device-profile.schedule-days-of-week-required' | translate) : ''"></jnks-iot-error>
     </section>
   </div>
 </section>

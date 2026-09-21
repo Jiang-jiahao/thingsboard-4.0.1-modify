@@ -5,7 +5,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-msg-metadata-chip',
+  selector: 'jnks-iot-msg-metadata-chip',
   templateUrl: './msg-metadata-chip.component.html',
   providers: [{
     provide: NG_VALUE_ACCESSOR,

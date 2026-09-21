@@ -310,7 +310,7 @@ const buttonToggleStateCssGeneratorsMap = new Map<WidgetButtonToggleState, Butto
   ]
 );
 
-const widgetButtonCssSelector = '.mat-button-toggle-group.mat-button-toggle-group-appearance-standard.tb-toggle-header';
+const widgetButtonCssSelector = '.mat-button-toggle-group.mat-button-toggle-group-appearance-standard.jnks-iot-toggle-header';
 
 export const generateWidgetButtonToggleAppearanceCss = (selectedAppearance: SegmentedButtonStyles, unselectedAppearance: SegmentedButtonStyles): string => {
   let statesCss = '';

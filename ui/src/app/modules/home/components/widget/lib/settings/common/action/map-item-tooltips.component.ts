@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { deepTrim, isEqual } from '@core/utils';
 
 @Component({
-  selector: 'tb-map-item-tooltips',
+  selector: 'jnks-iot-map-item-tooltips',
   templateUrl: './map-item-tooltips.component.html',
   providers: [
     {

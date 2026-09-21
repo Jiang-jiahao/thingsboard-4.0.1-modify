@@ -3,11 +3,11 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } fro
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { UntypedFormControl } from '@angular/forms';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-color-picker-panel',
+  selector: 'jnks-iot-color-picker-panel',
   templateUrl: './color-picker-panel.component.html',
   providers: [],
   styleUrls: ['./color-picker-panel.component.scss'],
@@ -27,7 +27,7 @@ export class ColorPickerPanelComponent extends PageComponent implements OnInit {
   colorCancelButton = false;
 
   @Input()
-  popover: TbPopoverComponent<ColorPickerPanelComponent>;
+  popover: JnksIotPopoverComponent<ColorPickerPanelComponent>;
 
   @Output()
   colorSelected = new EventEmitter<string>();

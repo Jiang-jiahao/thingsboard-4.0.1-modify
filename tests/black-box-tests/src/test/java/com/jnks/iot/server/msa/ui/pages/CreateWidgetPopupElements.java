@@ -11,12 +11,12 @@ public class CreateWidgetPopupElements extends AbstractBasePage {
 
     private static final String ENTITY_ALIAS = "//input[@formcontrolname='entityAlias']";
     private static final String CREATE_NEW_ALIAS_BTN = "//a[text() = 'Create a new one!']/parent::span";
-    private static final String FILTER_TYPE_FIELD = "//div[contains(@class,'tb-entity-filter')]//mat-select//span";
+    private static final String FILTER_TYPE_FIELD = "//div[contains(@class,'jnks-iot-entity-filter')]//mat-select//span";
     private static final String TYPE_FIELD = "//mat-select[@formcontrolname='entityType']//span";
     private static final String OPTION_FROM_DROPDOWN = "//span[text() = ' %s ']";
     private static final String ENTITY_FIELD = "//input[@formcontrolname='entity']";
-    private static final String ADD_ALIAS_BTN = "//tb-entity-alias-dialog//span[text() = ' Add ']/parent::button";
-    private static final String ADD_WIDGET_BTN = "//tb-add-widget-dialog//span[text() = ' Add ']/parent::button";
+    private static final String ADD_ALIAS_BTN = "//jnks-iot-entity-alias-dialog//span[text() = ' Add ']/parent::button";
+    private static final String ADD_WIDGET_BTN = "//jnks-iot-add-widget-dialog//span[text() = ' Add ']/parent::button";
     private static final String ENTITY_FROM_DROPDOWN = "//b[text() = '%s']";
 
     public WebElement entityAlias() {

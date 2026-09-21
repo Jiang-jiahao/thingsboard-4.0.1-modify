@@ -52,14 +52,14 @@ import { DndDropEvent } from 'ngx-drag-drop/lib/dnd-dropzone.directive';
 import { moveItemInArray } from '@angular/cdk/drag-drop';
 import { coerceBoolean } from '@shared/decorators/coercion';
 import { ColorPickerPanelComponent } from '@shared/components/color-picker/color-picker-panel.component';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { WidgetConfigCallbacks } from '@home/components/widget/config/widget-config.component.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormProperty } from '@shared/models/dynamic-form.models';
 import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
 @Component({
-  selector: 'tb-data-keys',
+  selector: 'jnks-iot-data-keys',
   templateUrl: './data-keys.component.html',
   styleUrls: ['./data-keys.component.scss'],
   providers: [
@@ -83,7 +83,7 @@ import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-
 export class DataKeysComponent implements ControlValueAccessor, OnInit, OnChanges, ErrorStateMatcher, Validator {
 
   @HostBinding('class')
-  hostClass = 'tb-data-keys';
+  hostClass = 'jnks-iot-data-keys';
 
   @Input()
   label: string;
@@ -234,7 +234,7 @@ export class DataKeysComponent implements ControlValueAccessor, OnInit, OnChange
               private utils: UtilsService,
               private dialog: MatDialog,
               private fb: FormBuilder,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private viewContainerRef: ViewContainerRef,
               private renderer: Renderer2,
               private destroyRef: DestroyRef) {
@@ -563,8 +563,8 @@ export class DataKeysComponent implements ControlValueAccessor, OnInit, OnChange
         popoverContentStyle: {padding: '12px 4px 12px 12px'},
         isModal: true
       });
-      colorPickerPopover.tbComponentRef.instance.popover = colorPickerPopover;
-      colorPickerPopover.tbComponentRef.instance.colorSelected.subscribe((color) => {
+      colorPickerPopover.jnksIotComponentRef.instance.popover = colorPickerPopover;
+      colorPickerPopover.jnksIotComponentRef.instance.colorSelected.subscribe((color) => {
         colorPickerPopover.hide();
         if (color && key.color !== color) {
           key.color = color;
@@ -578,7 +578,7 @@ export class DataKeysComponent implements ControlValueAccessor, OnInit, OnChange
     this.dialog.open<DataKeyConfigDialogComponent, DataKeyConfigDialogData, DataKey>(DataKeyConfigDialogComponent,
       {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           dataKey: deepClone(key),
           dataKeySettingsForm: this.dataKeySettingsForm,

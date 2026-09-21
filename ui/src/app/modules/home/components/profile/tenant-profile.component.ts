@@ -11,7 +11,7 @@ import { guid } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-tenant-profile',
+  selector: 'jnks-iot-tenant-profile',
   templateUrl: './tenant-profile.component.html',
   styleUrls: ['./tenant-profile.component.scss']
 })
@@ -58,7 +58,7 @@ export class TenantProfileComponent extends EntityComponent<TenantProfile> {
           batchSize: 1000,
           type: 'BURST'
         },
-        topic: 'tb_rule_engine.main',
+        topic: 'jnks_iot_rule_engine.main',
         additionalInfo: {
           description: '',
           customProperties: '',
@@ -68,7 +68,7 @@ export class TenantProfileComponent extends EntityComponent<TenantProfile> {
       {
         id: guid(),
         name: 'HighPriority',
-        topic: 'tb_rule_engine.hp',
+        topic: 'jnks_iot_rule_engine.hp',
         pollInterval: 2000,
         partitions: 1,
         consumerPerPartition: false,
@@ -93,7 +93,7 @@ export class TenantProfileComponent extends EntityComponent<TenantProfile> {
       {
         id: guid(),
         name: 'SequentialByOriginator',
-        topic: 'tb_rule_engine.sq',
+        topic: 'jnks_iot_rule_engine.sq',
         pollInterval: 2000,
         partitions: 1,
         consumerPerPartition: false,
@@ -119,7 +119,7 @@ export class TenantProfileComponent extends EntityComponent<TenantProfile> {
     const formGroup = this.fb.group(
       {
         name: [entity ? entity.name : '', [Validators.required, Validators.maxLength(255)]],
-        isolatedTbRuleEngine: [entity ? entity.isolatedTbRuleEngine : false, []],
+        isolatedJnksIotRuleEngine: [entity ? entity.isolatedJnksIotRuleEngine : false, []],
         profileData: this.fb.group({
           configuration: [entity && !this.isAdd ? entity?.profileData.configuration
             : createTenantProfileConfiguration(TenantProfileType.DEFAULT), []],
@@ -128,7 +128,7 @@ export class TenantProfileComponent extends EntityComponent<TenantProfile> {
         description: [entity ? entity.description : '', []],
       }
     );
-    formGroup.get('isolatedTbRuleEngine').valueChanges.pipe(
+    formGroup.get('isolatedJnksIotRuleEngine').valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe((value) => {
       if (value) {
@@ -146,7 +146,7 @@ export class TenantProfileComponent extends EntityComponent<TenantProfile> {
 
   updateForm(entity: TenantProfile) {
     this.entityForm.patchValue({name: entity.name}, {emitEvent: false});
-    this.entityForm.patchValue({isolatedTbRuleEngine: entity.isolatedTbRuleEngine}, {emitEvent: false});
+    this.entityForm.patchValue({isolatedJnksIotRuleEngine: entity.isolatedJnksIotRuleEngine}, {emitEvent: false});
     this.entityForm.get('profileData').patchValue({
       configuration: !this.isAdd ? entity.profileData?.configuration : createTenantProfileConfiguration(TenantProfileType.DEFAULT)
     }, {emitEvent: false});

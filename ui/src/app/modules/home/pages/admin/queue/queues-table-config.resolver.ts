@@ -25,7 +25,7 @@ import { EntityAction } from '@home/models/entity/entity-component.models';
 @Injectable()
 export class QueuesTableConfigResolver  {
 
-  readonly queueType = ServiceType.TB_RULE_ENGINE;
+  readonly queueType = ServiceType.JNKS_IOT_RULE_ENGINE;
 
   private readonly config: EntityTableConfig<QueueInfo> = new EntityTableConfig<QueueInfo>();
 

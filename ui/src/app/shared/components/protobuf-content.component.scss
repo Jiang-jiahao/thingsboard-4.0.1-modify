@@ -6,8 +6,8 @@
   }
 }
 
-.tb-protobuf-content-toolbar {
-  button.mat-mdc-button-base, button.mat-mdc-button-base.tb-mat-32 {
+.jnks-iot-protobuf-content-toolbar {
+  button.mat-mdc-button-base, button.mat-mdc-button-base.jnks-iot-mat-32 {
     align-items: center;
     vertical-align: middle;
     min-width: 32px;
@@ -27,12 +27,12 @@
   }
 }
 
-.tb-protobuf-content-panel {
+.jnks-iot-protobuf-content-panel {
   height: 100%;
   margin-left: 15px;
   border: 1px solid #c0c0c0;
 
-  #tb-protobuf-input {
+  #jnks-iot-protobuf-input {
     width: 100%;
     min-width: 200px;
     min-height: 160px;

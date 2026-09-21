@@ -1,7 +1,7 @@
 import { AttributeScope } from '@shared/models/telemetry/telemetry.models';
 import { widgetType } from '@shared/models/widget.models';
 import { AlarmSeverity } from '@shared/models/alarm.models';
-import { TbFunction } from '@shared/models/js-function.models';
+import { JnksIotFunction } from '@shared/models/js-function.models';
 
 export enum GetValueAction {
   DO_NOTHING = 'DO_NOTHING',
@@ -66,7 +66,7 @@ export enum DataToValueType {
 
 export interface DataToValueSettings {
   type: DataToValueType;
-  dataToValueFunction: TbFunction;
+  dataToValueFunction: JnksIotFunction;
   compareToValue?: any;
 }
 
@@ -118,7 +118,7 @@ export enum ValueToDataType {
 export interface ValueToDataSettings {
   type: ValueToDataType;
   constantValue: any;
-  valueToDataFunction: TbFunction;
+  valueToDataFunction: JnksIotFunction;
 }
 
 export interface SetValueSettings extends ValueActionSettings {

@@ -19,7 +19,7 @@ import { takeUntil } from 'rxjs/operators';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-escalations-component',
+  selector: 'jnks-iot-escalations-component',
   templateUrl: './escalations.component.html',
   styleUrls: [],
   providers: [

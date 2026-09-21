@@ -1,7 +1,7 @@
 @import '../../../../scss/constants';
 
 :host {
-  .tb-image-gallery-dialog {
+  .jnks-iot-image-gallery-dialog {
     position: relative;
     padding: 24px 32px 16px 32px;
     width: 100vw;
@@ -21,7 +21,7 @@
     @media #{$mat-gt-xl} {
       width: 900px;
     }
-    .tb-image-gallery-close {
+    .jnks-iot-image-gallery-close {
       position: absolute;
       top: 12px;
       right: 12px;

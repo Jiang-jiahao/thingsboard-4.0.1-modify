@@ -22,9 +22,9 @@
     </mat-error>
   </mat-form-field>
   <mat-accordion>
-    <mat-expansion-panel class="tb-mqtt-credentials-panel-group">
+    <mat-expansion-panel class="jnks-iot-mqtt-credentials-panel-group">
       <mat-expansion-panel-header>
-        <mat-panel-title class="tb-required" translate>rule-node-config.credentials</mat-panel-title>
+        <mat-panel-title class="jnks-iot-required" translate>rule-node-config.credentials</mat-panel-title>
         <mat-panel-description>
           {{ azureIotHubCredentialsTypeTranslationsMap.get(azureIotHubConfigForm.get('credentials.type').value) | translate }}
         </mat-panel-description>
@@ -48,30 +48,30 @@
             <mat-form-field class="mat-block">
               <mat-label translate>rule-node-config.sas-key</mat-label>
               <input type="password" required matInput formControlName="sasKey" autocomplete="new-password">
-              <tb-toggle-password matSuffix></tb-toggle-password>
+              <jnks-iot-toggle-password matSuffix></jnks-iot-toggle-password>
               <mat-error *ngIf="azureIotHubConfigForm.get('credentials.sasKey').hasError('required')">
                 {{ 'rule-node-config.sas-key-required' | translate }}
               </mat-error>
             </mat-form-field>
-            <tb-file-input formControlName="caCert"
+            <jnks-iot-file-input formControlName="caCert"
                            inputId="caCertSelect"
                            [existingFileName]="azureIotHubConfigForm.get('credentials.caCertFileName').value"
                            (fileNameChanged)="azureIotHubConfigForm.get('credentials.caCertFileName').setValue($event)"
                            label="{{'rule-node-config.azure-ca-cert' | translate}}"
                            noFileText="rule-node-config.no-file"
                            dropLabel="{{'rule-node-config.drop-file' | translate}}">
-            </tb-file-input>
+            </jnks-iot-file-input>
           </ng-template>
           <ng-template ngSwitchCase="cert.PEM">
-            <tb-file-input formControlName="caCert"
+            <jnks-iot-file-input formControlName="caCert"
                            inputId="caCertSelect"
                            [existingFileName]="azureIotHubConfigForm.get('credentials.caCertFileName').value"
                            (fileNameChanged)="azureIotHubConfigForm.get('credentials.caCertFileName').setValue($event)"
                            label="{{'rule-node-config.azure-ca-cert' | translate}}"
                            noFileText="rule-node-config.no-file"
                            dropLabel="{{'rule-node-config.drop-file' | translate}}">
-            </tb-file-input>
-            <tb-file-input formControlName="cert"
+            </jnks-iot-file-input>
+            <jnks-iot-file-input formControlName="cert"
                            inputId="CertSelect"
                            [existingFileName]="azureIotHubConfigForm.get('credentials.certFileName').value"
                            (fileNameChanged)="azureIotHubConfigForm.get('credentials.certFileName').setValue($event)"
@@ -80,8 +80,8 @@
                            label="{{'rule-node-config.cert' | translate}}"
                            noFileText="rule-node-config.no-file"
                            dropLabel="{{'rule-node-config.drop-file' | translate}}">
-            </tb-file-input>
-            <tb-file-input style="padding-bottom: 8px;"
+            </jnks-iot-file-input>
+            <jnks-iot-file-input style="padding-bottom: 8px;"
                            formControlName="privateKey"
                            inputId="privateKeySelect"
                            [existingFileName]="azureIotHubConfigForm.get('credentials.privateKeyFileName').value"
@@ -91,11 +91,11 @@
                            label="{{'rule-node-config.private-key' | translate}}"
                            noFileText="rule-node-config.no-file"
                            dropLabel="{{'rule-node-config.drop-file' | translate}}">
-            </tb-file-input>
+            </jnks-iot-file-input>
             <mat-form-field class="mat-block">
               <mat-label translate>rule-node-config.private-key-password</mat-label>
               <input type="password" matInput formControlName="password" autocomplete="new-password">
-              <tb-toggle-password matSuffix></tb-toggle-password>
+              <jnks-iot-toggle-password matSuffix></jnks-iot-toggle-password>
             </mat-form-field>
           </ng-template>
         </section>

@@ -50,11 +50,11 @@
   <mat-checkbox formControlName="appendClientIdSuffix">
     {{ 'rule-node-config.append-client-id-suffix' | translate }}
   </mat-checkbox>
-  <div class="tb-hint">{{ "rule-node-config.client-id-suffix-hint" | translate }}</div>
+  <div class="jnks-iot-hint">{{ "rule-node-config.client-id-suffix-hint" | translate }}</div>
   <mat-checkbox formControlName="parseToPlainText">
     {{ 'rule-node-config.parse-to-plain-text' | translate }}
   </mat-checkbox>
-  <div class="tb-hint">{{ "rule-node-config.parse-to-plain-text-hint" | translate }}</div>
+  <div class="jnks-iot-hint">{{ "rule-node-config.parse-to-plain-text-hint" | translate }}</div>
   <mat-checkbox formControlName="cleanSession">
     {{ 'rule-node-config.clean-session' | translate }}
   </mat-checkbox>
@@ -64,5 +64,5 @@
   <mat-checkbox formControlName="ssl">
     {{ 'rule-node-config.enable-ssl' | translate }}
   </mat-checkbox>
-  <tb-credentials-config formControlName="credentials" [passwordFieldRequired]="false"></tb-credentials-config>
+  <jnks-iot-credentials-config formControlName="credentials" [passwordFieldRequired]="false"></jnks-iot-credentials-config>
 </section>

@@ -7,7 +7,7 @@ import com.jnks.iot.server.common.data.id.DeviceProfileId;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.kv.AttributeKvEntry;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.dao.model.sql.AttributeKvEntity;
 
 import java.util.Collection;
@@ -30,7 +30,7 @@ public interface AttributesDao {
 
     List<ListenableFuture<String>> removeAll(TenantId tenantId, EntityId entityId, AttributeScope attributeScope, List<String> keys);
 
-    List<ListenableFuture<TbPair<String, Long>>> removeAllWithVersions(TenantId tenantId, EntityId entityId, AttributeScope attributeScope, List<String> keys);
+    List<ListenableFuture<JnksIotPair<String, Long>>> removeAllWithVersions(TenantId tenantId, EntityId entityId, AttributeScope attributeScope, List<String> keys);
 
     List<AttributeKvEntity> findNextBatch(UUID entityId, int attributeType, int attributeKey, int batchSize);
 

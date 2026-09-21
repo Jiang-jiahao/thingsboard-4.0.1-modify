@@ -1,4 +1,4 @@
-<mat-expansion-panel class="tb-device-profile-rpc-method-panel" [expanded]="expanded">
+<mat-expansion-panel class="jnks-iot-device-profile-rpc-method-panel" [expanded]="expanded">
   <mat-expansion-panel-header>
     <mat-panel-title>
       {{ rpcMethodFormGroup.get('displayName').value || rpcMethodFormGroup.get('id').value || ('device-profile.edit-rpc-method' | translate) }}
@@ -11,8 +11,8 @@
       <span class="mat-caption" *ngIf="nativeBindingOnly" translate>device-profile.rpc-binding-native</span>
     </mat-panel-description>
   </mat-expansion-panel-header>
-  <div [formGroup]="rpcMethodFormGroup" class="tb-device-profile-rpc-method-fields"
-       [class.tb-rpc-method-locked]="isLocked">
+  <div [formGroup]="rpcMethodFormGroup" class="jnks-iot-device-profile-rpc-method-fields"
+       [class.jnks-iot-rpc-method-locked]="isLocked">
     <div class="flex flex-row gap-2 items-start">
       <mat-form-field class="mat-block flex-1">
         <mat-label translate>device-profile.rpc-method-id</mat-label>
@@ -67,7 +67,7 @@
     </ng-container>
 
     <ng-container *ngIf="templateBindingOnly">
-      <div class="tb-hint mat-body-2" *ngIf="!protocolTemplateBundleSelected" style="color: var(--tb-warn-color, #f57c00);"
+      <div class="jnks-iot-hint mat-body-2" *ngIf="!protocolTemplateBundleSelected" style="color: var(--tb-warn-color, #f57c00);"
            translate>device-profile.rpc-template-bundle-missing</div>
       <mat-form-field class="mat-block">
         <mat-label translate>device-profile.rpc-template-command</mat-label>

@@ -20,7 +20,7 @@
         "build": {
           "builder": "@angular-builders/custom-esbuild:application",
           "options": {
-            "plugins": ["./esbuild/tb-esbuild-plugins.ts"],
+            "plugins": ["./esbuild/jnks-iot-esbuild-plugins.ts"],
             "loader": {
                 ".raw": "text"
             },
@@ -181,7 +181,7 @@
           "options": {
             "buildTarget": "jnks-iot:build",
             "proxyConfig": "proxy.conf.js",
-            "middlewares": ["./esbuild/tb-html-fallback-middleware.ts"]
+            "middlewares": ["./esbuild/jnks-iot-html-fallback-middleware.ts"]
           },
           "configurations": {
             "production": {

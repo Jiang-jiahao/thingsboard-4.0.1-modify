@@ -39,7 +39,7 @@ import { ContentType } from '@shared/models/constants';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
-  selector: 'tb-dynamic-form',
+  selector: 'jnks-iot-dynamic-form',
   templateUrl: './dynamic-form.component.html',
   styleUrls: ['./dynamic-form.component.scss'],
   providers: [

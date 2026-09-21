@@ -1,10 +1,10 @@
-<div class="mat-padding tb-entity-table tb-absolute-fill">
-  <div class="tb-entity-table-content tb-outlined-border flex flex-1 flex-col">
+<div class="mat-padding jnks-iot-entity-table jnks-iot-absolute-fill">
+  <div class="jnks-iot-entity-table-content jnks-iot-outlined-border flex flex-1 flex-col">
     <mat-toolbar class="mat-mdc-table-toolbar" [class.!hidden]="mode !== 'default' || textSearchMode || !dataSource.selection.isEmpty()">
       <div class="mat-toolbar-tools">
         <div class="title-container flex flex-row items-center justify-start xs:flex-col xs:items-start xs:justify-center">
-          <span class="tb-entity-table-title">{{telemetryTypeTranslationsMap.get(attributeScope) | translate}}</span>
-          <mat-form-field class="mat-block tb-attribute-scope" *ngIf="!disableAttributeScopeSelection && !attributeScopeSelectionReadonly">
+          <span class="jnks-iot-entity-table-title">{{telemetryTypeTranslationsMap.get(attributeScope) | translate}}</span>
+          <mat-form-field class="mat-block jnks-iot-attribute-scope" *ngIf="!disableAttributeScopeSelection && !attributeScopeSelectionReadonly">
             <mat-label translate>attribute.attributes-scope</mat-label>
             <mat-select [disabled]="(isLoading$ | async)"
                         [ngModel]="attributeScope"
@@ -63,7 +63,7 @@
     </mat-toolbar>
     <mat-toolbar class="mat-mdc-table-toolbar" color="primary" [class.!hidden]="mode !== 'default' || dataSource.selection.isEmpty()">
       <div class="mat-toolbar-tools xs:flex xs:flex-row xs:flex-wrap">
-        <span class="tb-entity-table-info">
+        <span class="jnks-iot-entity-table-info">
           {{ (attributeScope === latestTelemetryTypes.LATEST_TELEMETRY ?
                 'attribute.selected-telemetry' : 'attribute.selected-attributes') | translate:{count: dataSource.selection.selected.length} }}
         </span>
@@ -90,15 +90,15 @@
     <mat-toolbar class="mat-mdc-table-toolbar" color="primary" [class.!hidden]="mode !== 'widget'">
       <div class="mat-toolbar-tools gap-2 xs:flex xs:flex-row xs:flex-wrap">
         <div class="flex flex-1 flex-row items-stretch justify-start">
-          <span class="tb-details-subtitle">{{ 'widgets-bundle.current' | translate }}</span>
-          <tb-widgets-bundle-select class="flex-1"
+          <span class="jnks-iot-details-subtitle">{{ 'widgets-bundle.current' | translate }}</span>
+          <jnks-iot-widgets-bundle-select class="flex-1"
                                     style="margin-left: 5%"
                                     required
                                     [selectFirstBundle]="false"
                                     [selectBundleAlias]="selectedWidgetsBundleAlias"
                                     [ngModel]="null"
                                     (ngModelChange)="onWidgetsBundleChanged($event)">
-          </tb-widgets-bundle-select>
+          </jnks-iot-widgets-bundle-select>
         </div>
         <button mat-raised-button [class.!hidden]="!widgetsList.length"
                 color="accent"
@@ -147,7 +147,7 @@
           <mat-cell *matCellDef="let attribute" class="attribute">
             <div class="flex flex-row" style="align-items: center">
               <span class="ellipsis">{{ attribute.key }}</span>
-              <tb-copy-button
+              <jnks-iot-copy-button
                 class="attribute-copy"
                 [disabled]="isLoading$ | async"
                 [copyText]="attribute.key"
@@ -156,29 +156,29 @@
                 icon="content_copy"
                 [style]="{padding: '4px', 'font-size': '16px', color: 'rgba(0,0,0,.87)'}"
               >
-              </tb-copy-button>
+              </jnks-iot-copy-button>
             </div>
           </mat-cell>
         </ng-container>
         <ng-container matColumnDef="value">
           <mat-header-cell *matHeaderCellDef style="width: 60%"> {{ 'attribute.value' | translate }} </mat-header-cell>
           <mat-cell *matCellDef="let attribute"
-                    class="tb-value-cell attribute"
+                    class="jnks-iot-value-cell attribute"
                     (click)="editAttribute($event, attribute)">
             <div class="flex flex-1 flex-row" style="align-items: center">
               <div class="flex flex-1 flex-row" style="overflow: hidden; align-items: center;">
-                <span class="ellipsis">{{attribute.value | tbJson}}</span>
-                <tb-copy-button
+                <span class="ellipsis">{{attribute.value | jnksIotJson}}</span>
+                <jnks-iot-copy-button
                   *ngIf="attribute.value !== ''"
                   class="attribute-copy"
                   [disabled]="isLoading$ | async"
-                  [copyText]="attribute.value | tbJson"
+                  [copyText]="attribute.value | jnksIotJson"
                   tooltipText="{{ 'attribute.copy-value' | translate }}"
                   tooltipPosition="above"
                   icon="content_copy"
                   [style]="{padding: '4px', 'font-size': '16px', color: 'rgba(0,0,0,.87)'}"
                 >
-                </tb-copy-button>
+                </jnks-iot-copy-button>
               </div>
               <span [class.!hidden]="isClientSideTelemetryTypeMap.get(attributeScope)">
                 <mat-icon>edit</mat-icon>
@@ -220,7 +220,7 @@
         <article class="item cursor-pointer"
                  ngx-hm-carousel-item
                  *ngFor="let widgets of widgetsList">
-          <tb-dashboard class="tb-absolute-fill"
+          <jnks-iot-dashboard class="jnks-iot-absolute-fill"
             [aliasController]="aliasController"
             [widgets]="widgets"
             [columns]="20"
@@ -228,7 +228,7 @@
             [isMobileDisabled]="true"
             [isEditActionEnabled]="false"
             [isRemoveActionEnabled]="false">
-          </tb-dashboard>
+          </jnks-iot-dashboard>
         </article>
       </section>
 

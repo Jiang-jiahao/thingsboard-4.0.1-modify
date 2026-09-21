@@ -12,7 +12,7 @@ export interface MoveWidgetsDialogResult {
 }
 
 @Component({
-  selector: 'tb-move-widgets-dialog',
+  selector: 'jnks-iot-move-widgets-dialog',
   templateUrl: './move-widgets-dialog.component.html',
   providers: [],
   styleUrls: []

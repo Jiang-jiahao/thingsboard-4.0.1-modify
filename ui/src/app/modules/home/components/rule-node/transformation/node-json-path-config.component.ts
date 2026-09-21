@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-transformation-node-json-path-config',
+  selector: 'jnks-iot-transformation-node-json-path-config',
   templateUrl: './node-json-path-config.component.html',
   styleUrls: []
 })

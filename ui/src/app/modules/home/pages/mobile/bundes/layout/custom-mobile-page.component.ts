@@ -21,7 +21,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-mobile-page-item',
+  selector: 'jnks-iot-mobile-page-item',
   templateUrl: './custom-mobile-page.component.html',
   styleUrls: ['./custom-mobile-page.component.scss'],
   providers: [

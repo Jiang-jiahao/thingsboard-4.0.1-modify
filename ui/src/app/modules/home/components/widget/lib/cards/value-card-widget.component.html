@@ -1,9 +1,9 @@
-<div #valueCardPanel class="tb-value-card-panel" [class]="this.layout" [style.padding]="padding" [style]="backgroundStyle$ | async">
-  <div class="tb-value-card-overlay" [style]="overlayStyle"></div>
-  <div class="tb-value-card-title-panel">
+<div #valueCardPanel class="jnks-iot-value-card-panel" [class]="this.layout" [style.padding]="padding" [style]="backgroundStyle$ | async">
+  <div class="jnks-iot-value-card-overlay" [style]="overlayStyle"></div>
+  <div class="jnks-iot-value-card-title-panel">
     <ng-container *ngTemplateOutlet="widgetTitlePanel"></ng-container>
   </div>
-  <div #valueCardContent class="tb-value-card-content" [class]="this.layout">
+  <div #valueCardContent class="jnks-iot-value-card-content" [class]="this.layout">
     <ng-container [ngSwitch]="layout">
       <ng-template [ngSwitchCase]="valueCardLayout.square">
         <ng-container *ngTemplateOutlet="iconWithLabelTpl"></ng-container>
@@ -16,7 +16,7 @@
       </ng-template>
       <ng-template [ngSwitchCase]="valueCardLayout.centered">
         <ng-container *ngTemplateOutlet="labelTpl"></ng-container>
-        <div class="tb-value-card-icon-row">
+        <div class="jnks-iot-value-card-icon-row">
           <ng-container *ngTemplateOutlet="iconTpl"></ng-container>
           <ng-container *ngTemplateOutlet="valueTpl"></ng-container>
         </div>
@@ -36,16 +36,16 @@
   </div>
 </div>
 <ng-template #iconWithLabelTpl>
-  <div class="tb-value-card-icon-row">
+  <div class="jnks-iot-value-card-icon-row">
     <ng-container *ngTemplateOutlet="iconTpl"></ng-container>
-    <div class="tb-value-card-label-row">
+    <div class="jnks-iot-value-card-label-row">
       <ng-container *ngTemplateOutlet="labelTpl"></ng-container>
       <ng-container *ngTemplateOutlet="dateTpl"></ng-container>
     </div>
   </div>
 </ng-template>
 <ng-template #iconTpl>
-  <tb-icon *ngIf="showIcon" [style]="iconStyle" [style.color]="iconColor.color">{{ icon }}</tb-icon>
+  <jnks-iot-icon *ngIf="showIcon" [style]="iconStyle" [style.color]="iconColor.color">{{ icon }}</jnks-iot-icon>
 </ng-template>
 <ng-template #labelTpl>
   <div *ngIf="showLabel" [style]="labelStyle" [style.color]="labelColor.color">{{ label$ | async }}</div>
@@ -54,5 +54,5 @@
   <div *ngIf="showDate" [style]="dateStyle" [style.color]="dateColor.color" [innerHTML]="dateFormat.formatted"></div>
 </ng-template>
 <ng-template #valueTpl>
-  <div class="tb-value-card-value" [style]="valueStyle" [style.color]="valueColor.color">{{ valueText }}</div>
+  <div class="jnks-iot-value-card-value" [style]="valueStyle" [style.color]="valueColor.color">{{ valueText }}</div>
 </ng-template>

@@ -8,11 +8,11 @@
   </mat-progress-bar>
   <form [formGroup]="createVersionFormGroup" class="flex flex-col" style="flex: 1; padding-top: 16px; overflow: auto;">
     <div class="flex flex-col gt-sm:flex-row gt-sm:gap-2">
-      <tb-branch-autocomplete
+      <jnks-iot-branch-autocomplete
         class="flex-1"
         required
         formControlName="branch">
-      </tb-branch-autocomplete>
+      </jnks-iot-branch-autocomplete>
       <mat-form-field class="mat-block flex-1">
         <mat-label translate>version-control.version-name</mat-label>
         <input required matInput formControlName="versionName">
@@ -31,9 +31,9 @@
       </mat-select>
       <mat-hint [innerHTML]="(syncStrategyHints.get(createVersionFormGroup.get('syncStrategy').value) | translate) | safe:'html'"></mat-hint>
     </mat-form-field>
-    <tb-entity-types-version-create
+    <jnks-iot-entity-types-version-create
       formControlName="entityTypes">
-    </tb-entity-types-version-create>
+    </jnks-iot-entity-types-version-create>
   </form>
   <div class="flex items-center justify-end gap-2" style="padding-top: 16px;">
     <button mat-button color="primary"

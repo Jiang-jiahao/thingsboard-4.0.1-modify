@@ -1,4 +1,4 @@
-<section class="tb-widget-settings flex flex-col" [formGroup]="updateDeviceAttributeWidgetSettingsForm">
+<section class="jnks-iot-widget-settings flex flex-col" [formGroup]="updateDeviceAttributeWidgetSettingsForm">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.rpc.common-settings</legend>
     <mat-form-field class="mat-block flex-1">
@@ -20,14 +20,14 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <tb-json-content
+    <jnks-iot-json-content
       label="{{ 'widgets.rpc.device-attribute-parameters' | translate }}"
       [contentType]="contentTypes.JSON"
       validateOnChange
       formControlName="entityParameters">
-    </tb-json-content>
+    </jnks-iot-json-content>
   </fieldset>
-  <tb-rpc-button-style
+  <jnks-iot-rpc-button-style
     formControlName="styleButton">
-  </tb-rpc-button-style>
+  </jnks-iot-rpc-button-style>
 </section>

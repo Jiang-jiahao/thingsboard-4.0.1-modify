@@ -22,7 +22,7 @@ import com.jnks.iot.server.dao.exception.DataValidationException;
 import com.jnks.iot.server.dao.service.DataValidator;
 import com.jnks.iot.server.dao.service.PaginatedRemover;
 import com.jnks.iot.server.dao.service.Validator;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +37,7 @@ public class BaseQueueService extends AbstractEntityService implements QueueServ
 
     @Lazy
     @Autowired
-    private TbTenantProfileCache tenantProfileCache;
+    private JnksIotTenantProfileCache tenantProfileCache;
 
     @Autowired
     private DataValidator<Queue> queueValidator;
@@ -148,7 +148,7 @@ public class BaseQueueService extends AbstractEntityService implements QueueServ
     private TenantId getSystemOrIsolatedTenantId(TenantId tenantId) {
         if (!tenantId.equals(TenantId.SYS_TENANT_ID)) {
             TenantProfile tenantProfile = tenantProfileCache.get(tenantId);
-            if (tenantProfile.isIsolatedTbRuleEngine()) {
+            if (tenantProfile.isIsolatedJnksIotRuleEngine()) {
                 return tenantId;
             }
         }

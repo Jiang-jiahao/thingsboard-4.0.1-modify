@@ -8,8 +8,8 @@ import {
   extractParamsFromImageResourceUrl,
   IMAGE_BASE64_URL_PREFIX,
   ImageResourceInfo,
-  prependTbImagePrefix,
-  removeTbImagePrefix,
+  prependJnksIotImagePrefix,
+  removeJnksIotImagePrefix,
   ResourceSubType
 } from '@shared/models/resource.models';
 import { ImageService } from '@core/http/image.service';
@@ -28,7 +28,7 @@ export enum ScadaSymbolLinkType {
 }
 
 @Component({
-  selector: 'tb-scada-symbol-input',
+  selector: 'jnks-iot-scada-symbol-input',
   templateUrl: './scada-symbol-input.component.html',
   styleUrls: ['./scada-symbol-input.component.scss'],
   providers: [
@@ -101,7 +101,7 @@ export class ScadaSymbolInputComponent extends PageComponent implements OnInit, 
   }
 
   writeValue(value: string): void {
-    value = removeTbImagePrefix(value);
+    value = removeJnksIotImagePrefix(value);
     if (this.scadaSymbolUrl !== value) {
       this.reset();
       this.scadaSymbolUrl = value;
@@ -144,7 +144,7 @@ export class ScadaSymbolInputComponent extends PageComponent implements OnInit, 
     this.cd.markForCheck();
     if (this.scadaSymbolUrl !== value) {
       this.scadaSymbolUrl = value;
-      this.propagateChange(prependTbImagePrefix(this.scadaSymbolUrl));
+      this.propagateChange(prependJnksIotImagePrefix(this.scadaSymbolUrl));
     }
   }
 
@@ -166,7 +166,7 @@ export class ScadaSymbolInputComponent extends PageComponent implements OnInit, 
       ImageResourceInfo>(ImageGalleryDialogComponent, {
       autoFocus: false,
       disableClose: false,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         imageSubType: ResourceSubType.SCADA_SYMBOL
       }

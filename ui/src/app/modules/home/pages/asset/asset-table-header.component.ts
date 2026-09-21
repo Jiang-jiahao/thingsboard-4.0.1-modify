@@ -7,7 +7,7 @@ import { AssetInfo } from '@shared/models/asset.models';
 import { AssetProfileId } from '@shared/models/id/asset-profile-id';
 
 @Component({
-  selector: 'tb-asset-table-header',
+  selector: 'jnks-iot-asset-table-header',
   templateUrl: './asset-table-header.component.html',
   styleUrls: []
 })

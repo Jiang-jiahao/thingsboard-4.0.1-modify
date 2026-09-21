@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-external-node-send-email-config',
+  selector: 'jnks-iot-external-node-send-email-config',
   templateUrl: './send-email-config.component.html',
   styleUrls: []
 })

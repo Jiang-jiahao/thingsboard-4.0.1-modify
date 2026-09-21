@@ -8,38 +8,38 @@ h2[mat-dialog-title] {
   padding-right: 40px;
 }
 
-.tb-dialog-close {
+.jnks-iot-dialog-close {
   position: absolute;
   top: 8px;
   right: 8px;
   z-index: 1;
 }
 
-.tb-protocol-hex-test-dialog-content {
+.jnks-iot-protocol-hex-test-dialog-content {
   max-height: 72vh;
   overflow: auto;
   padding-top: 8px;
   padding-bottom: 8px;
 }
 
-.tb-protocol-hex-test-intro {
+.jnks-iot-protocol-hex-test-intro {
   margin-bottom: 20px;
   line-height: 1.5;
 }
 
-.tb-protocol-hex-test-bundle-field {
+.jnks-iot-protocol-hex-test-bundle-field {
   max-width: 100%;
   margin-bottom: 8px;
 }
 
-.tb-protocol-hex-test-accordion {
+.jnks-iot-protocol-hex-test-accordion {
   margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 
-.tb-protocol-hex-test-panel-stack {
+.jnks-iot-protocol-hex-test-panel-stack {
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -47,29 +47,29 @@ h2[mat-dialog-title] {
   padding-bottom: 8px;
 }
 
-.tb-protocol-hex-test-field-inputs-block {
+.jnks-iot-protocol-hex-test-field-inputs-block {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.tb-protocol-hex-test-actions {
+.jnks-iot-protocol-hex-test-actions {
   margin: 0;
 }
 
-.tb-protocol-hex-test-result {
+.jnks-iot-protocol-hex-test-result {
   margin-top: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.tb-protocol-hex-test-result-line {
+.jnks-iot-protocol-hex-test-result-line {
   margin: 0;
   line-height: 1.45;
 }
 
-.tb-protocol-hex-test-pre {
+.jnks-iot-protocol-hex-test-pre {
   margin: 4px 0 0;
   padding: 12px 14px;
   background: rgba(0, 0, 0, 0.04);
@@ -80,33 +80,33 @@ h2[mat-dialog-title] {
   word-break: break-all;
 }
 
-.tb-protocol-hex-test-downlink-hint {
+.jnks-iot-protocol-hex-test-downlink-hint {
   margin: 0;
   line-height: 1.45;
 }
 
-.tb-protocol-hex-test-fields-hint {
+.jnks-iot-protocol-hex-test-fields-hint {
   margin: 0;
   line-height: 1.45;
 }
 
 /** 参数字段单列自上而下，不排多列 */
-.tb-protocol-hex-test-fields-grid {
+.jnks-iot-protocol-hex-test-fields-grid {
   display: flex;
   flex-direction: column;
   gap: 12px;
   align-items: stretch;
 }
 
-.tb-protocol-hex-test-field-input {
+.jnks-iot-protocol-hex-test-field-input {
   width: 100%;
 }
 
-:host ::ng-deep .tb-protocol-hex-test-accordion .mat-expansion-panel-body {
+:host ::ng-deep .jnks-iot-protocol-hex-test-accordion .mat-expansion-panel-body {
   padding-bottom: 20px;
 }
 
-.tb-error-text {
+.jnks-iot-error-text {
   color: var(--mdc-theme-error, #f44336);
   margin-top: 8px;
 }
@@ -118,10 +118,10 @@ h2[mat-dialog-title] {
 .button-spinner {
   vertical-align: middle;
   margin-right: 4px;
-  animation: tb-protocol-hex-spin 1.2s linear infinite;
+  animation: jnks-iot-protocol-hex-spin 1.2s linear infinite;
 }
 
-@keyframes tb-protocol-hex-spin {
+@keyframes jnks-iot-protocol-hex-spin {
   100% {
     transform: rotate(360deg);
   }

@@ -1,5 +1,5 @@
-<section class="tb-datasource-section" [formGroup]="datasourceFormGroup">
-  <mat-form-field *ngIf="!basicMode" class="tb-datasource-type" hideRequiredMarker>
+<section class="jnks-iot-datasource-section" [formGroup]="datasourceFormGroup">
+  <mat-form-field *ngIf="!basicMode" class="jnks-iot-datasource-type" hideRequiredMarker>
     <mat-label translate>widget-config.datasource-type</mat-label>
     <mat-select formControlName="type">
       <mat-option *ngFor="let datasourceType of datasourceTypes" [value]="datasourceType">
@@ -19,24 +19,24 @@
                                  datasourceFormGroup.get('type').value === datasourceType.entity ||
                                  datasourceFormGroup.get('type').value === datasourceType.entityCount ||
                                  datasourceFormGroup.get('type').value === datasourceType.alarmCount ? datasourceFormGroup.get('type').value : ''">
-      <tb-alarm-filter-config *ngIf="datasourceFormGroup.get('type').value === datasourceType.alarmCount && !hideAlarmFilter"
+      <jnks-iot-alarm-filter-config *ngIf="datasourceFormGroup.get('type').value === datasourceType.alarmCount && !hideAlarmFilter"
                               propagatedFilter="false"
                               [initialAlarmFilterConfig]="{ statusList: [alarmSearchStatus.ACTIVE] }"
                               style="height: 56px; margin-bottom: 22px;"
-                              formControlName="alarmFilterConfig"></tb-alarm-filter-config>
-      <tb-entity-autocomplete *ngIf="datasourceFormGroup.get('type').value === datasourceType.device"
+                              formControlName="alarmFilterConfig"></jnks-iot-alarm-filter-config>
+      <jnks-iot-entity-autocomplete *ngIf="datasourceFormGroup.get('type').value === datasourceType.device"
                               [required]="!datasourcesOptional"
                               [entityType]="entityType.DEVICE"
                               formControlName="deviceId">
-      </tb-entity-autocomplete>
-      <tb-entity-alias-select
+      </jnks-iot-entity-autocomplete>
+      <jnks-iot-entity-alias-select
         *ngIf="datasourceFormGroup.get('type').value !== datasourceType.device"
         [showLabel]="true"
-        [tbRequired]="!entityAliasOptional"
+        [jnksIotRequired]="!entityAliasOptional"
         [aliasController]="aliasController"
         formControlName="entityAliasId"
         [callbacks]="entityAliasSelectCallbacks">
-      </tb-entity-alias-select>
+      </jnks-iot-entity-alias-select>
       <mat-form-field *ngIf="!hideDatasourceLabel && [datasourceType.entityCount, datasourceType.alarmCount].includes(datasourceFormGroup.get('type').value)"
                       class="flex-1">
         <input matInput
@@ -46,7 +46,7 @@
     </ng-template>
   </section>
   <section *ngIf="!hideDataKeys" class="flex flex-1 flex-col items-stretch justify-start">
-    <tb-data-keys class="tb-data-keys flex-1"
+    <jnks-iot-data-keys class="jnks-iot-data-keys flex-1"
                   [widgetType]="widgetType"
                   [datasourceType]="datasourceFormGroup.get('type').value"
                   [hideDataKeyLabel]="hideDataKeyLabel"
@@ -66,8 +66,8 @@
                   [entityAliasId]="datasourceFormGroup.get('entityAliasId').value"
                   [deviceId]="datasourceFormGroup.get('deviceId').value"
                   formControlName="dataKeys">
-    </tb-data-keys>
-    <tb-data-keys *ngIf="hasAdditionalLatestDataKeys" class="tb-data-keys flex-1"
+    </jnks-iot-data-keys>
+    <jnks-iot-data-keys *ngIf="hasAdditionalLatestDataKeys" class="jnks-iot-data-keys flex-1"
                   [widgetType]="widgetTypes.latest"
                   [datasourceType]="datasourceFormGroup.get('type').value"
                   [hideDataKeyLabel]="hideDataKeyLabel"
@@ -86,13 +86,13 @@
                   [entityAliasId]="datasourceFormGroup.get('entityAliasId').value"
                   [deviceId]="datasourceFormGroup.get('deviceId').value"
                   formControlName="latestDataKeys">
-    </tb-data-keys>
+    </jnks-iot-data-keys>
   </section>
-  <tb-filter-select
+  <jnks-iot-filter-select
     *ngIf="(!basicMode || displayDatasourceFilterForBasicMode) && ![datasourceType.function].includes(datasourceFormGroup.get('type').value)"
     [showLabel]="true"
     [aliasController]="aliasController"
     formControlName="filterId"
     [callbacks]="filterSelectCallbacks">
-  </tb-filter-select>
+  </jnks-iot-filter-select>
 </section>

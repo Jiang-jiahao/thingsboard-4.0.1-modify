@@ -1,4 +1,4 @@
-.mat-mdc-chip.mat-mdc-standard-chip.tb-tag-action-chip {
+.mat-mdc-chip.mat-mdc-standard-chip.jnks-iot-tag-action-chip {
   overflow: hidden;
   line-height: 20px;
   height: 32px;
@@ -10,17 +10,17 @@
     }
   }
 
-  .tb-chip-labels {
+  .jnks-iot-chip-labels {
     display: flex;
     flex-direction: row;
     align-items: center;
     min-width: 0;
     padding: 2px 10px;
-    .tb-chip-label {
+    .jnks-iot-chip-label {
       font-weight: normal;
       font-size: 14px;
       line-height: 20px;
-      &.tb-chip-text {
+      &.jnks-iot-chip-text {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;

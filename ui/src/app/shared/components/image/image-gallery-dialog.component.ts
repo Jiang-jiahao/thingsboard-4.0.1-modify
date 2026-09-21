@@ -11,7 +11,7 @@ export interface ImageGalleryDialogData {
 }
 
 @Component({
-  selector: 'tb-image-gallery-dialog',
+  selector: 'jnks-iot-image-gallery-dialog',
   templateUrl: './image-gallery-dialog.component.html',
   styleUrls: ['./image-gallery-dialog.component.scss']
 })

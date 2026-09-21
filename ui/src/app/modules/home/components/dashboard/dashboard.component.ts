@@ -41,13 +41,13 @@ import { SafeStyle } from '@angular/platform-browser';
 import { distinct, take } from 'rxjs/operators';
 import { UtilsService } from '@core/services/utils.service';
 import { WidgetComponentAction, WidgetComponentActionType } from '@home/components/widget/widget-container.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { displayGrids } from 'angular-gridster2/lib/gridsterConfig.interface';
 import { coerceBoolean } from '@shared/decorators/coercion';
-import { TbContextMenuEvent } from '@shared/models/jquery-event.models';
+import { JnksIotContextMenuEvent } from '@shared/models/jquery-event.models';
 
 @Component({
-  selector: 'tb-dashboard',
+  selector: 'jnks-iot-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -153,7 +153,7 @@ export class DashboardComponent extends PageComponent implements IDashboardCompo
   parentDashboard?: IDashboardComponent = null;
 
   @Input()
-  popoverComponent?: TbPopoverComponent = null;
+  popoverComponent?: JnksIotPopoverComponent = null;
 
   dashboardTimewindowChangedSubject: Subject<Timewindow> = new ReplaySubject<Timewindow>();
 
@@ -174,13 +174,13 @@ export class DashboardComponent extends PageComponent implements IDashboardCompo
 
   dashboardMenuPosition = { x: '0px', y: '0px' };
 
-  dashboardContextMenuEvent: TbContextMenuEvent;
+  dashboardContextMenuEvent: JnksIotContextMenuEvent;
 
   @ViewChild('widgetMenuTrigger', {static: true}) widgetMenuTrigger: MatMenuTrigger;
 
   widgetMenuPosition = { x: '0px', y: '0px' };
 
-  widgetContextMenuEvent: TbContextMenuEvent;
+  widgetContextMenuEvent: JnksIotContextMenuEvent;
 
   dashboardWidgets = new DashboardWidgets(this,
     this.differs.find([]).create<Widget>((_, item) => item),
@@ -387,7 +387,7 @@ export class DashboardComponent extends PageComponent implements IDashboardCompo
     }
   }
 
-  openDashboardContextMenu($event: TbContextMenuEvent) {
+  openDashboardContextMenu($event: JnksIotContextMenuEvent) {
     if (this.callbacks && this.callbacks.prepareDashboardContextMenu) {
       const items = this.callbacks.prepareDashboardContextMenu($event);
       if (items && items.length) {
@@ -402,7 +402,7 @@ export class DashboardComponent extends PageComponent implements IDashboardCompo
     }
   }
 
-  private openWidgetContextMenu($event: TbContextMenuEvent, widget: DashboardWidget) {
+  private openWidgetContextMenu($event: JnksIotContextMenuEvent, widget: DashboardWidget) {
     if (this.callbacks && this.callbacks.prepareWidgetContextMenu) {
       const items = this.callbacks.prepareWidgetContextMenu($event, widget.widget, widget.isReference);
       if (items && items.length) {
@@ -519,7 +519,7 @@ export class DashboardComponent extends PageComponent implements IDashboardCompo
     return dashboardWidget ? dashboardWidget.widget : null;
   }
 
-  getEventGridPosition(event: TbContextMenuEvent | KeyboardEvent): WidgetPosition {
+  getEventGridPosition(event: JnksIotContextMenuEvent | KeyboardEvent): WidgetPosition {
     const pos: WidgetPosition = {
       row: 0,
       column: 0

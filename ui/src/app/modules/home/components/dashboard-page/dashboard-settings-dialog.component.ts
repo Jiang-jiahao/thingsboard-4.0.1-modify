@@ -31,7 +31,7 @@ export interface DashboardSettingsDialogData {
 }
 
 @Component({
-  selector: 'tb-dashboard-settings-dialog',
+  selector: 'jnks-iot-dashboard-settings-dialog',
   templateUrl: './dashboard-settings-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: DashboardSettingsDialogComponent}],
   styleUrls: ['./dashboard-settings-dialog.component.scss']

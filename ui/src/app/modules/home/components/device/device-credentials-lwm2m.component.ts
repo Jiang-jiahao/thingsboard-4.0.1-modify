@@ -21,7 +21,7 @@ import { takeUntil } from 'rxjs/operators';
 import { isDefinedAndNotNull } from '@core/utils';
 
 @Component({
-  selector: 'tb-device-credentials-lwm2m',
+  selector: 'jnks-iot-device-credentials-lwm2m',
   templateUrl: './device-credentials-lwm2m.component.html',
   styleUrls: ['./device-credentials-lwm2m.component.scss'],
   providers: [

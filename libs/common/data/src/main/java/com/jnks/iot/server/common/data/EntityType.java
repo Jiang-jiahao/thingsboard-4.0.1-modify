@@ -20,7 +20,7 @@ public enum EntityType {
     RULE_CHAIN(11),
     RULE_NODE(12),
     ENTITY_VIEW(15) {
-        // backward compatibility for TbOriginatorTypeSwitchNode to return correct rule node connection.
+        // backward compatibility for JnksIotOriginatorTypeSwitchNode to return correct rule node connection.
         @Override
         public String getNormalName() {
             return "Entity View";
@@ -32,7 +32,7 @@ public enum EntityType {
     DEVICE_PROFILE(21),
     ASSET_PROFILE(22),
     API_USAGE_STATE(23),
-    TB_RESOURCE(24, "resource"),
+    JNKS_IOT_RESOURCE(24, "resource"),
     OTA_PACKAGE(25),
     RPC(27),
     QUEUE(28),
@@ -54,7 +54,7 @@ public enum EntityType {
     @Getter
     private final String tableName;
     @Getter
-    private final String normalName = StringUtils.capitalize(StringUtils.removeStart(name(), "TB_")
+    private final String normalName = StringUtils.capitalize(StringUtils.removeStart(name(), "JNKS_IOT_")
             .toLowerCase().replaceAll("_", " "));
 
     public static final List<String> NORMAL_NAMES = EnumSet.allOf(EntityType.class).stream()

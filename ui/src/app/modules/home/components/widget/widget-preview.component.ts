@@ -8,7 +8,7 @@ import { deepClone } from '@core/utils';
 import { Timewindow } from '@shared/models/time/time.models';
 
 @Component({
-  selector: 'tb-widget-preview',
+  selector: 'jnks-iot-widget-preview',
   templateUrl: './widget-preview.component.html',
   styleUrls: ['./widget-preview.component.scss']
 })

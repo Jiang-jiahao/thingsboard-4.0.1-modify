@@ -1,27 +1,27 @@
-<div class="tb-scada-symbol-editor mat-content flex flex-col">
-  <section class="tb-scada-symbol-editor-container flex flex-1 flex-col">
-    <div class="tb-scada-symbol-editor-layout flex flex-1 flex-row">
+<div class="jnks-iot-scada-symbol-editor mat-content flex flex-col">
+  <section class="jnks-iot-scada-symbol-editor-container flex flex-1 flex-col">
+    <div class="jnks-iot-scada-symbol-editor-layout flex flex-1 flex-row">
       <mat-drawer-container class="size-full">
-        <mat-drawer class="tb-scada-symbol-editor-details-drawer mat-elevation-z4"
+        <mat-drawer class="jnks-iot-scada-symbol-editor-details-drawer mat-elevation-z4"
                     disableClose="true"
                     mode="side"
                     opened
                     position="end">
-          <tb-details-panel class="flex-1"
+          <jnks-iot-details-panel class="flex-1"
                             [isReadOnly]="true"
                             [showCloseDetails]="false"
                             headerHeightPx="64"
                             headerTitle="{{symbolData?.imageResource?.title}}">
             <div class="details-buttons flex flex-row items-center justify-start gap-4">
-              <div tb-help="scadaSymbolDev"></div>
+              <div jnks-iot-help="scadaSymbolDev"></div>
               <button mat-stroked-button
                       [disabled]="scadaSymbolFormGroup.invalid"
                       (click)="createWidget()">
                 {{ 'scada.create-widget' | translate }}
               </button>
             </div>
-            <div *ngIf="previewMode" class="tb-scada-symbol-editor-preview-content tb-absolute-fill">
-              <div class="tb-scada-symbol-editor-preview-header">
+            <div *ngIf="previewMode" class="jnks-iot-scada-symbol-editor-preview-content jnks-iot-absolute-fill">
+              <div class="jnks-iot-scada-symbol-editor-preview-header">
                 <button mat-button
                         (click)="exitPreviewMode()">
                   <mat-icon>chevron_left</mat-icon>
@@ -41,33 +41,33 @@
                   {{ 'action.apply' | translate }}
                 </button>
               </div>
-              <div [formGroup]="scadaPreviewFormGroup" class="tb-scada-symbol-editor-preview-settings">
+              <div [formGroup]="scadaPreviewFormGroup" class="jnks-iot-scada-symbol-editor-preview-settings">
                 <div class="mat-content">
-                  <div class="tb-form-panel">
-                    <div class="tb-form-panel-title" translate>scada.symbol.symbol</div>
-                    <tb-scada-symbol-input
+                  <div class="jnks-iot-form-panel">
+                    <div class="jnks-iot-form-panel-title" translate>scada.symbol.symbol</div>
+                    <jnks-iot-scada-symbol-input
                       [scadaSymbolContent]="symbolData.scadaSymbolContent"
                       [scadaSymbolMetadata]="previewMetadata">
-                    </tb-scada-symbol-input>
+                    </jnks-iot-scada-symbol-input>
                   </div>
-                  <tb-scada-symbol-object-settings
+                  <jnks-iot-scada-symbol-object-settings
                     formControlName="scadaSymbolObjectSettings"
                     [scadaSymbolMetadata]="previewMetadata"
                     [aliasController]="aliasController"
                     [widgetType]="widgetType.rpc"
                     [callbacks]="widgetActionCallbacks">
-                  </tb-scada-symbol-object-settings>
+                  </jnks-iot-scada-symbol-object-settings>
                 </div>
               </div>
             </div>
             <div [class.!hidden]="previewMode" [formGroup]="scadaSymbolFormGroup">
-              <tb-scada-symbol-metadata
+              <jnks-iot-scada-symbol-metadata
                 #symbolMetadata
                 [tags]="tags"
                 [aliasController]="aliasController"
                 [callbacks]="widgetActionCallbacks"
                 formControlName="metadata">
-                <div class="tb-scada-symbol-metadata-header-prefix">
+                <div class="jnks-iot-scada-symbol-metadata-header-prefix">
                   <button class="gt-sm:!hidden"
                           [disabled]="scadaSymbolFormGroup.invalid || !symbolEditorValid"
                           mat-button color="primary"
@@ -76,7 +76,7 @@
                     {{ 'scada.preview' | translate }}
                   </button>
                 </div>
-                <div class="tb-scada-symbol-metadata-header-suffix flex flex-row items-center justify-end gap-3 lt-md:flex-1">
+                <div class="jnks-iot-scada-symbol-metadata-header-suffix flex flex-row items-center justify-end gap-3 lt-md:flex-1">
                   <button class="lt-md:!hidden"
                           [disabled]="scadaSymbolFormGroup.invalid || !symbolEditorValid"
                           mat-button color="primary"
@@ -99,20 +99,20 @@
                     </button>
                   </div>
                 </div>
-              </tb-scada-symbol-metadata>
+              </jnks-iot-scada-symbol-metadata>
             </div>
-          </tb-details-panel>
+          </jnks-iot-details-panel>
         </mat-drawer>
-        <mat-drawer-content class="tb-scada-symbol-editor-content" [class.preview]="previewMode">
-          <tb-scada-symbol-editor *ngIf="!previewMode" #symbolEditor
+        <mat-drawer-content class="jnks-iot-scada-symbol-editor-content" [class.preview]="previewMode">
+          <jnks-iot-scada-symbol-editor *ngIf="!previewMode" #symbolEditor
                                   [readonly]="readonly"
                                   [(showHiddenElements)]="showHiddenElements"
                                   [data]="symbolEditorData"
                                   [editObjectCallbacks]="editObjectCallbacks"
                                   (updateScadaSymbol)="updateScadaSymbol()"
-                                  (downloadScadaSymbol)="downloadScadaSymbol()"></tb-scada-symbol-editor>
-          <tb-dashboard *ngIf="previewMode"
-                        class="tb-absolute-fill"
+                                  (downloadScadaSymbol)="downloadScadaSymbol()"></jnks-iot-scada-symbol-editor>
+          <jnks-iot-dashboard *ngIf="previewMode"
+                        class="jnks-iot-absolute-fill"
                         [aliasController]="aliasController"
                         [widgets]="previewWidgets"
                         [autofillHeight]="false"
@@ -127,7 +127,7 @@
                         [isMobileDisabled]="true"
                         [isEditActionEnabled]="false"
                         [isRemoveActionEnabled]="false">
-          </tb-dashboard>
+          </jnks-iot-dashboard>
         </mat-drawer-content>
       </mat-drawer-container>
     </div>

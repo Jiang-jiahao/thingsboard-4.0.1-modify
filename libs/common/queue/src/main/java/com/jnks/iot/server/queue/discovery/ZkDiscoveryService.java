@@ -64,7 +64,7 @@ public class ZkDiscoveryService implements DiscoveryService, PathChildrenCacheLi
     private final ConcurrentHashMap<String, List<String>> lastSeenTransports = new ConcurrentHashMap<>();
 
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final TbServiceInfoProvider serviceInfoProvider;
+    private final JnksIotServiceInfoProvider serviceInfoProvider;
     private final PartitionService partitionService;
 
     private ScheduledExecutorService zkExecutorService;
@@ -77,7 +77,7 @@ public class ZkDiscoveryService implements DiscoveryService, PathChildrenCacheLi
     private volatile boolean stopped = true;
 
     public ZkDiscoveryService(ApplicationEventPublisher applicationEventPublisher,
-                              TbServiceInfoProvider serviceInfoProvider,
+                              JnksIotServiceInfoProvider serviceInfoProvider,
                               PartitionService partitionService) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.serviceInfoProvider = serviceInfoProvider;
@@ -320,7 +320,7 @@ public class ZkDiscoveryService implements DiscoveryService, PathChildrenCacheLi
                 }
                 break;
             case CHILD_UPDATED:
-                if (rememberTransports(serviceId, instance) && serviceTypesList.contains("TB_TRANSPORT")) {
+                if (rememberTransports(serviceId, instance) && serviceTypesList.contains("JNKS_IOT_TRANSPORT")) {
                     log.info("[{}] Going to recalculate partitions due to updated transport list [{}] transports={}.",
                             serviceId, serviceTypesList, instance.getTransportsList());
                     recalculatePartitions();

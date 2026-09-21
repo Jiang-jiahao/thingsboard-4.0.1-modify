@@ -1,4 +1,4 @@
-<section class="tb-widget-settings flex flex-col" [formGroup]="flotPieWidgetSettingsForm">
+<section class="jnks-iot-widget-settings flex flex-col" [formGroup]="flotPieWidgetSettingsForm">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.chart.common-pie-settings</legend>
     <section class="flex flex-col gt-xs:flex-row gt-xs:gap-2">
@@ -38,11 +38,11 @@
         <mat-label translate>widgets.chart.width-pixels</mat-label>
         <input matInput type="number" min="0" formControlName="width">
       </mat-form-field>
-      <tb-color-input class="flex-1"
+      <jnks-iot-color-input class="flex-1"
         formControlName="color"
         icon="format_color_fill"
         label="{{ 'widgets.chart.color' | translate }}" openOnInput colorClearButton>
-      </tb-color-input>
+      </jnks-iot-color-input>
     </section>
   </fieldset>
   <fieldset class="fields-group">

@@ -7,7 +7,7 @@ import {
   defaultGradient,
   defaultRange
 } from '@shared/models/widget-settings.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -21,7 +21,7 @@ import { Datasource } from '@shared/models/widget.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-color-settings-panel',
+  selector: 'jnks-iot-color-settings-panel',
   templateUrl: './color-settings-panel.component.html',
   providers: [],
   styleUrls: ['./color-settings-panel.component.scss'],
@@ -33,7 +33,7 @@ export class ColorSettingsPanelComponent extends PageComponent implements OnInit
   colorSettings: ColorSettings;
 
   @Input()
-  popover: TbPopoverComponent<ColorSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<ColorSettingsPanelComponent>;
 
   @Input()
   settingsComponents: ColorSettingsComponent[];

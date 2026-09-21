@@ -18,7 +18,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'tb-profile-lwm2m-observe-attr-telemetry-instances',
+  selector: 'jnks-iot-profile-lwm2m-observe-attr-telemetry-instances',
   templateUrl: './lwm2m-observe-attr-telemetry-instances.component.html',
   styleUrls: [ './lwm2m-observe-attr-telemetry-instances.component.scss'],
   providers: [

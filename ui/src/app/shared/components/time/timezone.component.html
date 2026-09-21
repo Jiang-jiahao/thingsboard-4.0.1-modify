@@ -26,12 +26,12 @@
   <span>{{displayValue()}}</span>
 </button>
 <section *ngIf="!asButton"
-         class="tb-timezone"
+         class="jnks-iot-timezone"
          [class]="{'no-padding': noPadding}"
          [matTooltip]="tooltipValue()"
          [matTooltipPosition]="tooltipPosition"
          (click)="toggleTimezone($event)">
-  <div class="tb-timezone-label" [class.!hidden]="hideLabel">
+  <div class="jnks-iot-timezone-label" [class.!hidden]="hideLabel">
     {{displayValue()}}
   </div>
 </section>

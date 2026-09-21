@@ -6,7 +6,7 @@ import { _ToggleBase, ToggleHeaderAppearance } from '@shared/components/toggle-h
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-toggle-select',
+  selector: 'jnks-iot-toggle-select',
   templateUrl: './toggle-select.component.html',
   styleUrls: ['./toggle-select.component.scss'],
   providers: [

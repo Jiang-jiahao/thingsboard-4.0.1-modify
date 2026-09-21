@@ -9,7 +9,7 @@ import { Authority } from '@shared/models/authority.enum';
 import { of } from 'rxjs';
 
 @Component({
-  selector: 'tb-version-info',
+  selector: 'jnks-iot-version-info',
   templateUrl: './version-info.component.html',
   styleUrls: ['./home-page-widget.scss', './version-info.component.scss']
 })

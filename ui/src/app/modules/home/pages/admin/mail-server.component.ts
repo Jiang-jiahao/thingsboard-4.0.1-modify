@@ -22,7 +22,7 @@ import { DomainSchema, domainSchemaTranslations, } from '@shared/models/oauth2.m
 import { WINDOW } from '@core/services/window.service';
 
 @Component({
-  selector: 'tb-mail-server',
+  selector: 'jnks-iot-mail-server',
   templateUrl: './mail-server.component.html',
   styleUrls: ['./mail-server.component.scss', './settings-card.scss']
 })

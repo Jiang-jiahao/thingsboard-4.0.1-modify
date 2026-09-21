@@ -1,4 +1,4 @@
-<section class="tb-widget-settings" [formGroup]="updateMultipleAttributesWidgetSettingsForm">
+<section class="jnks-iot-widget-settings" [formGroup]="updateMultipleAttributesWidgetSettingsForm">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.input-widgets.general-settings</legend>
     <mat-form-field class="mat-block flex-1">
@@ -11,7 +11,7 @@
   </fieldset>
   <fieldset class="fields-group fields-group-slider">
     <legend class="group-title" translate>widgets.input-widgets.action-buttons</legend>
-    <mat-expansion-panel class="tb-settings" [expanded]="updateMultipleAttributesWidgetSettingsForm.get('showActionButtons').value">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="updateMultipleAttributesWidgetSettingsForm.get('showActionButtons').value">
       <mat-expansion-panel-header class="flex flex-row flex-wrap">
         <mat-panel-title>
           <mat-slide-toggle formControlName="showActionButtons" (click)="$event.stopPropagation()"

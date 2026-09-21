@@ -33,7 +33,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-time-series-chart-y-axes-panel',
+  selector: 'jnks-iot-time-series-chart-y-axes-panel',
   templateUrl: './time-series-chart-y-axes-panel.component.html',
   styleUrls: ['./time-series-chart-y-axes-panel.component.scss'],
   providers: [

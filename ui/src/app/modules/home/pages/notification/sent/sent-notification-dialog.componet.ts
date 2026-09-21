@@ -38,7 +38,7 @@ export interface RequestNotificationDialogData {
 }
 
 @Component({
-  selector: 'tb-sent-notification-dialog',
+  selector: 'jnks-iot-sent-notification-dialog',
   templateUrl: './sent-notification-dialog.component.html',
   styleUrls: ['./sent-notification-dialog.component.scss']
 })
@@ -288,7 +288,7 @@ export class SentNotificationDialogComponent extends
     this.dialog.open<RecipientNotificationDialogComponent, RecipientNotificationDialogData,
       NotificationTarget>(RecipientNotificationDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {}
     }).afterClosed()
       .subscribe((res) => {

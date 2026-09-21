@@ -12,7 +12,7 @@ export interface AlarmCommentDialogData {
 }
 
 @Component({
-  selector: 'tb-alarm-comment-dialog',
+  selector: 'jnks-iot-alarm-comment-dialog',
   templateUrl: './alarm-comment-dialog.component.html',
   styleUrls: []
 })

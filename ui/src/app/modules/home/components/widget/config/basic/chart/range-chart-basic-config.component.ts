@@ -42,7 +42,7 @@ import {
 } from '@home/components/widget/lib/chart/chart.models';
 
 @Component({
-  selector: 'tb-range-chart-basic-config',
+  selector: 'jnks-iot-range-chart-basic-config',
   templateUrl: './range-chart-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

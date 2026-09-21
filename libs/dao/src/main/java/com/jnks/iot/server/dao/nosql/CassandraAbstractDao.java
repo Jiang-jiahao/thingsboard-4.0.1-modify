@@ -57,24 +57,24 @@ public abstract class CassandraAbstractDao {
         return execute(tenantId, statement, defaultWriteLevel, rateWriteLimiter);
     }
 
-    protected TbResultSetFuture executeAsyncRead(TenantId tenantId, Statement statement) {
+    protected JnksIotResultSetFuture executeAsyncRead(TenantId tenantId, Statement statement) {
         return executeAsync(tenantId, statement, defaultReadLevel, rateReadLimiter);
     }
 
-    protected TbResultSetFuture executeAsyncWrite(TenantId tenantId, Statement statement) {
+    protected JnksIotResultSetFuture executeAsyncWrite(TenantId tenantId, Statement statement) {
         return executeAsync(tenantId, statement, defaultWriteLevel, rateWriteLimiter);
     }
 
     private AsyncResultSet execute(TenantId tenantId, Statement statement, ConsistencyLevel level,
-                                   BufferedRateExecutor<CassandraStatementTask, TbResultSetFuture> rateExecutor) {
+                                   BufferedRateExecutor<CassandraStatementTask, JnksIotResultSetFuture> rateExecutor) {
         if (log.isDebugEnabled()) {
             log.debug("Execute cassandra statement {}", statementToString(statement));
         }
         return executeAsync(tenantId, statement, level, rateExecutor).getUninterruptibly();
     }
 
-    private TbResultSetFuture executeAsync(TenantId tenantId, Statement statement, ConsistencyLevel level,
-                                           BufferedRateExecutor<CassandraStatementTask, TbResultSetFuture> rateExecutor) {
+    private JnksIotResultSetFuture executeAsync(TenantId tenantId, Statement statement, ConsistencyLevel level,
+                                           BufferedRateExecutor<CassandraStatementTask, JnksIotResultSetFuture> rateExecutor) {
         if (log.isDebugEnabled()) {
             log.debug("Execute cassandra async statement {}", statementToString(statement));
         }

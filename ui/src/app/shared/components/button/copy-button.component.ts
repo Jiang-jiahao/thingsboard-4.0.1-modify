@@ -6,7 +6,7 @@ import { ThemePalette } from '@angular/material/core';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-copy-button',
+  selector: 'jnks-iot-copy-button',
   styleUrls: ['copy-button.component.scss'],
   templateUrl: './copy-button.component.html'
 })

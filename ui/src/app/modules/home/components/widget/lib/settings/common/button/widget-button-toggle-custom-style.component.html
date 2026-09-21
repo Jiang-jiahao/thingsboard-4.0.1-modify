@@ -1,6 +1,6 @@
-<div class="tb-widget-button-custom-style">
-  <div class="tb-widget-button-preview-panel tb-primary-fill">
-    <tb-widget-button-toggle
+<div class="jnks-iot-widget-button-custom-style">
+  <div class="jnks-iot-widget-button-preview-panel jnks-iot-primary-fill">
+    <jnks-iot-widget-button-toggle
       [value]="value"
       [appearance]="previewAppearance"
       [borderRadius]="borderRadius"
@@ -8,18 +8,18 @@
       disableEvents
       [hovered]="state === widgetButtonToggleState.hovered"
       [disabled]="state === widgetButtonToggleState.disabled">
-    </tb-widget-button-toggle>
+    </jnks-iot-widget-button-toggle>
     <button *ngIf="modelValue"
             mat-icon-button
             [matTooltip]="'widgets.button.clear-style' | translate"
             matTooltipPosition="above"
-            class="tb-mat-32"
+            class="jnks-iot-mat-32"
             (click)="clearStyle()">
-      <tb-icon>mdi:broom</tb-icon>
+      <jnks-iot-icon>mdi:broom</jnks-iot-icon>
     </button>
   </div>
   <button mat-icon-button
-          class="tb-mat-32"
+          class="jnks-iot-mat-32"
           #matIconButton
           (click)="openButtonCustomStylePopup($event, matIconButton)">
     <mat-icon>edit</mat-icon>

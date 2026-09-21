@@ -1,13 +1,13 @@
 @import '../../../../../../../../scss/constants';
 
-.tb-data-key-row {
+.jnks-iot-data-key-row {
 
-  .tb-source-field {
+  .jnks-iot-source-field {
     width: 108px;
     min-width: 108px;
   }
 
-  .tb-data-key-input {
+  .jnks-iot-data-key-input {
     flex: 1;
     min-width: 150px;
     @media #{$mat-gt-sm} {
@@ -15,34 +15,34 @@
     }
   }
 
-  .tb-label-field {
+  .jnks-iot-label-field {
     flex: 1 1 40%;
     min-width: 100px;
   }
 
-  .tb-color-field, .tb-units-field, .tb-decimals-field, .tb-time-series-type-field {
+  .jnks-iot-color-field, .jnks-iot-units-field, .jnks-iot-decimals-field, .jnks-iot-time-series-type-field {
     display: flex;
     flex-direction: row;
     place-content: center;
     align-items: center;
   }
 
-  .tb-units-field {
+  .jnks-iot-units-field {
     width: 80px;
     min-width: 80px;
   }
 
-  .tb-color-field {
+  .jnks-iot-color-field {
     width: 40px;
     min-width: 40px;
   }
 
-  .tb-decimals-field {
+  .jnks-iot-decimals-field {
     width: 60px;
     min-width: 60px;
   }
 
-  .tb-y-axis-field {
+  .jnks-iot-y-axis-field {
     width: 100px;
     min-width: 100px;
     .mat-mdc-form-field {
@@ -50,7 +50,7 @@
     }
   }
 
-  .tb-time-series-type-field {
+  .jnks-iot-time-series-type-field {
     width: 60px;
     min-width: 60px;
     .mat-icon {
@@ -58,20 +58,20 @@
     }
   }
 
-  .tb-label-field, .tb-units-field, .tb-color-field, .tb-decimals-field {
+  .jnks-iot-label-field, .jnks-iot-units-field, .jnks-iot-color-field, .jnks-iot-decimals-field {
     display: none;
     @media #{$mat-gt-sm} {
       display: flex;
     }
   }
 
-  .tb-y-axis-field {
+  .jnks-iot-y-axis-field {
     @media #{$mat-md} {
       display: none;
     }
   }
 
-  .tb-time-series-type-field {
+  .jnks-iot-time-series-type-field {
     @media #{$mat-xs} {
       display: none;
     }
@@ -80,24 +80,24 @@
     }
   }
 
-  .tb-settings-button {
+  .jnks-iot-settings-button {
     width: 40px;
     min-width: 40px;
   }
 
-  &.tb-single-row {
+  &.jnks-iot-single-row {
     padding: 0;
-    .tb-units-field, .tb-decimals-field {
+    .jnks-iot-units-field, .jnks-iot-decimals-field {
       min-width: 0;
       width: auto;
     }
-    .tb-units-field {
-      tb-unit-input {
+    .jnks-iot-units-field {
+      jnks-iot-unit-input {
         width: auto;
         max-width: 140px;
       }
     }
-    .tb-decimals-field {
+    .jnks-iot-decimals-field {
       .mat-mdc-form-field {
         width: auto;
         max-width: 140px;
@@ -106,7 +106,7 @@
   }
 }
 
-.tb-time-series-type-field {
+.jnks-iot-time-series-type-field {
   .mat-mdc-option:not(.mdc-list-item--selected) {
     .mat-icon {
       color: rgba(0,0,0,0.54);

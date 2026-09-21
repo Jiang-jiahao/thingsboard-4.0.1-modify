@@ -2,7 +2,7 @@
   <mat-toolbar color="primary">
     <h2>{{ 'mobile.add-application' | translate }}</h2>
     <span class="flex-1"></span>
-    <div tb-help="mobileApplication"></div>
+    <div jnks-iot-help="mobileApplication"></div>
     <button mat-icon-button
             (click)="cancel()"
             type="button">
@@ -13,7 +13,7 @@
   </mat-progress-bar>
   <div *ngIf="!(isLoading$ | async)"></div>
   <div mat-dialog-content class="!p-0">
-    <tb-mobile-app #mobileAppComponent></tb-mobile-app>
+    <jnks-iot-mobile-app #mobileAppComponent></jnks-iot-mobile-app>
   </div>
   <div mat-dialog-actions class="justify-end">
     <button mat-button color="primary"

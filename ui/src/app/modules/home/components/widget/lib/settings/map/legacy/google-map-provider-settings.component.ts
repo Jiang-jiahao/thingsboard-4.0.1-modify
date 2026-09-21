@@ -21,7 +21,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-google-map-provider-settings',
+  selector: 'jnks-iot-google-map-provider-settings',
   templateUrl: './google-map-provider-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

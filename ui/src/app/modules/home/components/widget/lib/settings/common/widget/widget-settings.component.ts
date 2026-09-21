@@ -31,7 +31,7 @@ import { WidgetConfigCallbacks } from '@home/components/widget/config/widget-con
 import { FormProperty } from '@shared/models/dynamic-form.models';
 
 @Component({
-  selector: 'tb-widget-settings',
+  selector: 'jnks-iot-widget-settings',
   templateUrl: './widget-settings.component.html',
   styleUrls: ['./widget-settings.component.scss'],
   providers: [{

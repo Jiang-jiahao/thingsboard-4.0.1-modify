@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-action-node-send-rest-api-call-reply-config',
+  selector: 'jnks-iot-action-node-send-rest-api-call-reply-config',
   templateUrl: './send-rest-api-call-reply-config.component.html',
   styleUrls: []
 })

@@ -13,52 +13,52 @@ import { ComparisonDuration } from '@shared/models/time/time.models';
 
 export declare type ChartType = 'line' | 'pie' | 'bar' | 'state' | 'graph';
 
-export declare type TbFlotSettings = TbFlotBaseSettings & TbFlotLegendSettings &
-  TbFlotGraphSettings & TbFlotBarSettings & TbFlotPieSettings;
+export declare type JnksIotFlotSettings = JnksIotFlotBaseSettings & JnksIotFlotLegendSettings &
+  JnksIotFlotGraphSettings & JnksIotFlotBarSettings & JnksIotFlotPieSettings;
 
 export declare type TooltipValueFormatFunction = (value: any, latestData: FormattedData) => string;
 
-export declare type TbFlotTicksFormatterFunction = (t: number, a?: TbFlotPlotAxis) => string;
+export declare type JnksIotFlotTicksFormatterFunction = (t: number, a?: JnksIotFlotPlotAxis) => string;
 
-export interface TbFlotSeries extends DatasourceData, JQueryPlotSeriesOptions {
-  dataKey: TbFlotDataKey;
+export interface JnksIotFlotSeries extends DatasourceData, JQueryPlotSeriesOptions {
+  dataKey: JnksIotFlotDataKey;
   xaxisIndex?: number;
   yaxisIndex?: number;
   yaxis?: number;
 }
 
-export interface TbFlotDataKey extends DataKey {
-  settings?: TbFlotKeySettings;
+export interface JnksIotFlotDataKey extends DataKey {
+  settings?: JnksIotFlotKeySettings;
   tooltipValueFormatFunction?: TooltipValueFormatFunction;
 }
 
-export interface TbFlotPlotAxis extends JQueryPlotAxis, TbFlotAxisOptions {
-  options: TbFlotAxisOptions;
+export interface JnksIotFlotPlotAxis extends JQueryPlotAxis, JnksIotFlotAxisOptions {
+  options: JnksIotFlotAxisOptions;
 }
 
-export interface TbFlotAxisOptions extends JQueryPlotAxisOptions {
+export interface JnksIotFlotAxisOptions extends JQueryPlotAxisOptions {
   tickUnits?: string;
   hidden?: boolean;
   keysInfo?: Array<{hidden: boolean}>;
-  ticksFormatterFunction?: TbFlotTicksFormatterFunction;
+  ticksFormatterFunction?: JnksIotFlotTicksFormatterFunction;
 }
 
-export interface TbFlotPlotDataSeries extends JQueryPlotDataSeries {
+export interface JnksIotFlotPlotDataSeries extends JQueryPlotDataSeries {
   datasource?: Datasource;
-  dataKey?: TbFlotDataKey;
+  dataKey?: JnksIotFlotDataKey;
   percent?: number;
 }
 
-export interface TbFlotPlotItem extends jquery.flot.item {
-  series: TbFlotPlotDataSeries;
+export interface JnksIotFlotPlotItem extends jquery.flot.item {
+  series: JnksIotFlotPlotDataSeries;
 }
 
-export interface TbFlotHoverInfo {
-  seriesHover: Array<TbFlotSeriesHoverInfo>;
+export interface JnksIotFlotHoverInfo {
+  seriesHover: Array<JnksIotFlotSeriesHoverInfo>;
   time?: any;
 }
 
-export interface TbFlotSeriesHoverInfo {
+export interface JnksIotFlotSeriesHoverInfo {
   hoverIndex: number;
   units: string;
   decimals: number;
@@ -71,19 +71,19 @@ export interface TbFlotSeriesHoverInfo {
   distance: number;
 }
 
-export interface TbFlotThresholdMarking {
+export interface JnksIotFlotThresholdMarking {
   lineWidth?: number;
   color?: string;
   [key: string]: any;
 }
 
-export interface TbFlotThresholdKeySettings {
+export interface JnksIotFlotThresholdKeySettings {
   yaxis: number;
   lineWidth: number;
   color: string;
 }
 
-export interface TbFlotGridSettings {
+export interface JnksIotFlotGridSettings {
   color: string;
   backgroundColor: string;
   tickColor: string;
@@ -94,19 +94,19 @@ export interface TbFlotGridSettings {
   margin?: number;
 }
 
-export interface TbFlotXAxisSettings {
+export interface JnksIotFlotXAxisSettings {
   showLabels: boolean;
   title: string;
   color: boolean;
 }
 
-export interface TbFlotSecondXAxisSettings {
-  axisPosition: TbFlotXAxisPosition;
+export interface JnksIotFlotSecondXAxisSettings {
+  axisPosition: JnksIotFlotXAxisPosition;
   showLabels: boolean;
   title: string;
 }
 
-export interface TbFlotYAxisSettings {
+export interface JnksIotFlotYAxisSettings {
   min: number;
   max: number;
   showLabels: boolean;
@@ -118,7 +118,7 @@ export interface TbFlotYAxisSettings {
   tickGenerator: string;
 }
 
-export interface TbFlotBaseSettings {
+export interface JnksIotFlotBaseSettings {
   stack: boolean;
   enableSelection: boolean;
   shadowSize: number;
@@ -128,52 +128,52 @@ export interface TbFlotBaseSettings {
   tooltipCumulative: boolean;
   tooltipValueFormatter: string;
   hideZeros: boolean;
-  grid: TbFlotGridSettings;
-  xaxis: TbFlotXAxisSettings;
-  yaxis: TbFlotYAxisSettings;
+  grid: JnksIotFlotGridSettings;
+  xaxis: JnksIotFlotXAxisSettings;
+  yaxis: JnksIotFlotYAxisSettings;
 }
 
-export interface TbFlotLegendSettings {
+export interface JnksIotFlotLegendSettings {
   showLegend?: boolean;
   legendConfig?: LegendConfig;
 }
 
-export interface TbFlotComparisonSettings {
+export interface JnksIotFlotComparisonSettings {
   comparisonEnabled: boolean;
   timeForComparison: ComparisonDuration;
-  xaxisSecond: TbFlotSecondXAxisSettings;
+  xaxisSecond: JnksIotFlotSecondXAxisSettings;
   comparisonCustomIntervalValue?: number;
 }
 
-export interface TbFlotThresholdsSettings {
+export interface JnksIotFlotThresholdsSettings {
   thresholdsLineWidth: number;
 }
 
-export interface TbFlotCustomLegendSettings {
+export interface JnksIotFlotCustomLegendSettings {
   customLegendEnabled: boolean;
-  dataKeysListForLabels: Array<TbFlotLabelPatternSettings>;
+  dataKeysListForLabels: Array<JnksIotFlotLabelPatternSettings>;
 }
 
-export interface TbFlotLabelPatternSettings {
+export interface JnksIotFlotLabelPatternSettings {
   name: string;
   type: DataKeyType;
   settings?: any;
 }
 
-export interface TbFlotGraphSettings extends TbFlotBaseSettings,
-                                             TbFlotThresholdsSettings, TbFlotComparisonSettings, TbFlotCustomLegendSettings {
+export interface JnksIotFlotGraphSettings extends JnksIotFlotBaseSettings,
+                                             JnksIotFlotThresholdsSettings, JnksIotFlotComparisonSettings, JnksIotFlotCustomLegendSettings {
   smoothLines: boolean;
 }
 
 export declare type BarAlignment = 'left' | 'right' | 'center';
 
-export interface TbFlotBarSettings extends TbFlotBaseSettings,
-                                           TbFlotThresholdsSettings, TbFlotComparisonSettings, TbFlotCustomLegendSettings {
+export interface JnksIotFlotBarSettings extends JnksIotFlotBaseSettings,
+                                           JnksIotFlotThresholdsSettings, JnksIotFlotComparisonSettings, JnksIotFlotCustomLegendSettings {
   defaultBarWidth: number;
   barAlignment: BarAlignment;
 }
 
-export interface TbFlotPieSettings {
+export interface JnksIotFlotPieSettings {
   radius: number;
   innerRadius: number;
   tilt: number;
@@ -188,13 +188,13 @@ export interface TbFlotPieSettings {
   fontSize: number;
 }
 
-export declare type TbFlotYAxisPosition = 'left' | 'right';
-export declare type TbFlotXAxisPosition = 'top' | 'bottom';
+export declare type JnksIotFlotYAxisPosition = 'left' | 'right';
+export declare type JnksIotFlotXAxisPosition = 'top' | 'bottom';
 
-export declare type TbFlotThresholdValueSource = 'predefinedValue' | 'entityAttribute';
+export declare type JnksIotFlotThresholdValueSource = 'predefinedValue' | 'entityAttribute';
 
-export interface TbFlotKeyThreshold {
-  thresholdValueSource: TbFlotThresholdValueSource;
+export interface JnksIotFlotKeyThreshold {
+  thresholdValueSource: JnksIotFlotThresholdValueSource;
   thresholdEntityAlias: string;
   thresholdAttribute: string;
   thresholdValue: number;
@@ -202,7 +202,7 @@ export interface TbFlotKeyThreshold {
   color: string;
 }
 
-export interface TbFlotKeySettings extends DataKeySettingsWithComparison {
+export interface JnksIotFlotKeySettings extends DataKeySettingsWithComparison {
   excludeFromStacking: boolean;
   hideDataByDefault: boolean;
   disableDataHiding: boolean;
@@ -223,12 +223,12 @@ export interface TbFlotKeySettings extends DataKeySettingsWithComparison {
   axisTitle: string;
   axisTickDecimals: number;
   axisTickSize: number;
-  axisPosition: TbFlotYAxisPosition;
+  axisPosition: JnksIotFlotYAxisPosition;
   axisTicksFormatter: string;
-  thresholds: TbFlotKeyThreshold[];
+  thresholds: JnksIotFlotKeyThreshold[];
 }
 
-export interface TbFlotLatestKeySettings {
+export interface JnksIotFlotLatestKeySettings {
   useAsThreshold: boolean;
   thresholdLineWidth: number;
   thresholdColor: string;

@@ -1,5 +1,5 @@
 <h2 mat-dialog-title translate>{{configuration.title}}</h2>
-<div mat-dialog-content class="tb-resources-in-use-content" [class]="{multiple: data.multiple}">
+<div mat-dialog-content class="jnks-iot-resources-in-use-content" [class]="{multiple: data.multiple}">
   <div [innerHTML]="configuration.message | safe: 'html'"></div>
   <ng-container *ngIf="data.multiple; else singleResourceReferences">
     <div class="table-container">
@@ -21,7 +21,7 @@
         <ng-container matColumnDef="preview" *ngIf="displayPreview">
           <mat-header-cell *matHeaderCellDef style="width: 50px; min-width: 50px;"></mat-header-cell>
           <mat-cell *matCellDef="let image">
-            <img class="tb-image-preview" [src]="image.link | image: {preview: true} | async" alt="{{ image.title }}">
+            <img class="jnks-iot-image-preview" [src]="image.link | image: {preview: true} | async" alt="{{ image.title }}">
           </mat-cell>
         </ng-container>
         <ng-container matColumnDef="title">
@@ -60,6 +60,6 @@
           cdkFocusInitial>{{ (data.multiple ? 'action.delete-selected' : 'action.delete-anyway') | translate}}</button>
 </div>
 <ng-template #singleResourceReferences>
-  <tb-image-references [references]="references"></tb-image-references>
+  <jnks-iot-image-references [references]="references"></jnks-iot-image-references>
   <div [innerHTML]="configuration.deleteText | translate | safe: 'html'"></div>
 </ng-template>

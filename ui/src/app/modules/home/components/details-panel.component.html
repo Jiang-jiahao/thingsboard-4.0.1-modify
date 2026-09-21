@@ -1,12 +1,12 @@
 <header>
   <mat-toolbar class="details-toolbar" color="primary" [style.height]="headerHeightPx+'px'">
     <div class="mat-toolbar-tools flex flex-row items-center justify-start" style="height: 100%;">
-      <div class="mat-toolbar-tools tb-details-title-header flex flex-1 flex-col items-start justify-start" [class.!hidden]="showSearchPane">
-        <div class="tb-details-title flex flex-row items-center justify-start">
+      <div class="mat-toolbar-tools jnks-iot-details-title-header flex flex-1 flex-col items-start justify-start" [class.!hidden]="showSearchPane">
+        <div class="jnks-iot-details-title flex flex-row items-center justify-start">
           <ng-content select=".prefix-title-buttons"></ng-content>
-          <span class="tb-details-title-text">{{ headerTitle }}</span>
+          <span class="jnks-iot-details-title-text">{{ headerTitle }}</span>
         </div>
-        <span class="tb-details-subtitle">{{ headerSubtitle }}</span>
+        <span class="jnks-iot-details-subtitle">{{ headerSubtitle }}</span>
         <span style="width: 100%;">
           <ng-content select=".header-pane"></ng-content>
         </span>
@@ -29,7 +29,7 @@
                 matTooltip="{{ 'action.apply-changes' | translate }}"
                 matTooltipPosition="below"
                 color="accent"
-                class="tb-details-action-btn"
+                class="jnks-iot-details-action-btn"
                 [class.!hidden]="!isEdit"
                 (click)="onApplyDetails()">
           <mat-icon class="material-icons">done</mat-icon>
@@ -38,12 +38,12 @@
                 mat-icon-button
                 matTooltip="{{ (isAlwaysEdit ? 'action.decline-changes' : (isEdit ? 'action.decline-changes' : 'details.toggle-edit-mode')) | translate }}"
                 matTooltipPosition="below"
-                class="tb-details-action-btn"
+                class="jnks-iot-details-action-btn"
                 (click)="onToggleDetailsEditMode()">
           <mat-icon class="material-icons">{{isEdit ? 'close' : 'edit'}}</mat-icon>
         </button>
       </ng-container>
-      <button *ngIf="showCloseDetails" mat-icon-button class="tb-details-close-btn" (click)="onCloseDetails()">
+      <button *ngIf="showCloseDetails" mat-icon-button class="jnks-iot-details-close-btn" (click)="onCloseDetails()">
         <mat-icon class="material-icons">close</mat-icon>
       </button>
     </div>

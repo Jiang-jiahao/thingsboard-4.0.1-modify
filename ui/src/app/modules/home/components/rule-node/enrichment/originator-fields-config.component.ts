@@ -6,7 +6,7 @@ import { allowedOriginatorFields, FetchTo, SvMapOption } from '@home/components/
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@app/shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-enrichment-node-originator-fields-config',
+  selector: 'jnks-iot-enrichment-node-originator-fields-config',
   templateUrl: './originator-fields-config.component.html'
 })
 export class OriginatorFieldsConfigComponent extends RuleNodeConfigurationComponent {

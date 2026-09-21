@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-quick-links-widget-settings',
+  selector: 'jnks-iot-quick-links-widget-settings',
   templateUrl: './quick-links-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

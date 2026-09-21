@@ -48,37 +48,37 @@ import { isNotEmptyStr, onParentScrollOrWindowResize } from '@core/utils';
 import { animate, AnimationBuilder, AnimationMetadata, style } from '@angular/animations';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
-export type TbPopoverTrigger = 'click' | 'focus' | 'hover' | null;
+export type JnksIotPopoverTrigger = 'click' | 'focus' | 'hover' | null;
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
-  selector: '[tb-popover]',
-  exportAs: 'tbPopover',
+  selector: '[jnks-iot-popover]',
+  exportAs: 'jnksIotPopover',
   // eslint-disable-next-line @angular-eslint/no-host-metadata-property
   host: {
-    '[class.tb-popover-open]': 'visible'
+    '[class.jnks-iot-popover-open]': 'visible'
   }
 })
-export class TbPopoverDirective implements OnChanges, OnDestroy, AfterViewInit {
+export class JnksIotPopoverDirective implements OnChanges, OnDestroy, AfterViewInit {
 
   /* eslint-disable @angular-eslint/no-input-rename */
-  @Input('tbPopoverContent') content?: string | TemplateRef<void>;
-  @Input('tbPopoverContext') context?: any | null = null;
-  @Input('tbPopoverTrigger') trigger?: TbPopoverTrigger = 'hover';
-  @Input('tbPopoverPlacement') placement?: string | string[] = 'top';
-  @Input('tbPopoverOrigin') origin?: ElementRef<HTMLElement>;
-  @Input('tbPopoverVisible') visible?: boolean;
-  @Input('tbPopoverShowCloseButton') @coerceBoolean() showCloseButton = true;
-  @Input('tbPopoverMouseEnterDelay') mouseEnterDelay?: number;
-  @Input('tbPopoverMouseLeaveDelay') mouseLeaveDelay?: number;
-  @Input('tbPopoverOverlayClassName') overlayClassName?: string;
-  @Input('tbPopoverOverlayStyle') overlayStyle?: { [klass: string]: any };
-  @Input() tbPopoverBackdrop = false;
+  @Input('jnksIotPopoverContent') content?: string | TemplateRef<void>;
+  @Input('jnksIotPopoverContext') context?: any | null = null;
+  @Input('jnksIotPopoverTrigger') trigger?: JnksIotPopoverTrigger = 'hover';
+  @Input('jnksIotPopoverPlacement') placement?: string | string[] = 'top';
+  @Input('jnksIotPopoverOrigin') origin?: ElementRef<HTMLElement>;
+  @Input('jnksIotPopoverVisible') visible?: boolean;
+  @Input('jnksIotPopoverShowCloseButton') @coerceBoolean() showCloseButton = true;
+  @Input('jnksIotPopoverMouseEnterDelay') mouseEnterDelay?: number;
+  @Input('jnksIotPopoverMouseLeaveDelay') mouseLeaveDelay?: number;
+  @Input('jnksIotPopoverOverlayClassName') overlayClassName?: string;
+  @Input('jnksIotPopoverOverlayStyle') overlayStyle?: { [klass: string]: any };
+  @Input() jnksIotPopoverBackdrop = false;
 
   // eslint-disable-next-line @angular-eslint/no-output-rename
-  @Output('tbPopoverVisibleChange') readonly visibleChange = new EventEmitter<boolean>();
+  @Output('jnksIotPopoverVisibleChange') readonly visibleChange = new EventEmitter<boolean>();
 
-  component?: TbPopoverComponent;
+  component?: JnksIotPopoverComponent;
 
   private readonly destroy$ = new Subject<void>();
   private readonly triggerDisposables: Array<() => void> = [];
@@ -132,7 +132,7 @@ export class TbPopoverDirective implements OnChanges, OnDestroy, AfterViewInit {
   }
 
   private createComponent(): void {
-    const componentRef = this.hostView.createComponent(TbPopoverComponent);
+    const componentRef = this.hostView.createComponent(JnksIotPopoverComponent);
 
     this.component = componentRef.instance;
 
@@ -144,7 +144,7 @@ export class TbPopoverDirective implements OnChanges, OnDestroy, AfterViewInit {
 
     this.initProperties();
 
-    this.component.tbVisibleChange
+    this.component.jnksIotVisibleChange
       .pipe(distinctUntilChanged(), takeUntil(this.destroy$))
       .subscribe((visible: boolean) => {
         this.internalVisible = visible;
@@ -210,17 +210,17 @@ export class TbPopoverDirective implements OnChanges, OnDestroy, AfterViewInit {
   private updatePropertiesByKeys(keys?: string[]): void {
     const mappingProperties: PropertyMapping = {
       // common mappings
-      content: ['tbContent', () => this.content],
-      context: ['tbComponentContext', () => this.context],
-      trigger: ['tbTrigger', () => this.trigger],
-      placement: ['tbPlacement', () => this.placement],
-      visible: ['tbVisible', () => this.visible],
-      showCloseButton: ['tbShowCloseButton', () => this.showCloseButton],
-      mouseEnterDelay: ['tbMouseEnterDelay', () => this.mouseEnterDelay],
-      mouseLeaveDelay: ['tbMouseLeaveDelay', () => this.mouseLeaveDelay],
-      overlayClassName: ['tbOverlayClassName', () => this.overlayClassName],
-      overlayStyle: ['tbOverlayStyle', () => this.overlayStyle],
-      tbPopoverBackdrop: ['tbBackdrop', () => this.tbPopoverBackdrop]
+      content: ['jnksIotContent', () => this.content],
+      context: ['jnksIotComponentContext', () => this.context],
+      trigger: ['jnksIotTrigger', () => this.trigger],
+      placement: ['jnksIotPlacement', () => this.placement],
+      visible: ['jnksIotVisible', () => this.visible],
+      showCloseButton: ['jnksIotShowCloseButton', () => this.showCloseButton],
+      mouseEnterDelay: ['jnksIotMouseEnterDelay', () => this.mouseEnterDelay],
+      mouseLeaveDelay: ['jnksIotMouseLeaveDelay', () => this.mouseLeaveDelay],
+      overlayClassName: ['jnksIotOverlayClassName', () => this.overlayClassName],
+      overlayStyle: ['jnksIotOverlayStyle', () => this.overlayStyle],
+      jnksIotPopoverBackdrop: ['jnksIotBackdrop', () => this.jnksIotPopoverBackdrop]
     };
 
     (keys || Object.keys(mappingProperties).filter(key => !key.startsWith('directive'))).forEach(
@@ -284,8 +284,8 @@ export class TbPopoverDirective implements OnChanges, OnDestroy, AfterViewInit {
 }
 
 @Component({
-  selector: 'tb-popover',
-  exportAs: 'tbPopoverComponent',
+  selector: 'jnks-iot-popover',
+  exportAs: 'jnksIotPopoverComponent',
   animations: [popoverMotion],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -306,36 +306,36 @@ export class TbPopoverDirective implements OnChanges, OnDestroy, AfterViewInit {
       (detach)="hide()"
       (positionChange)="onPositionChange($event)"
     >
-      <div #popoverRoot [@popoverMotion]="tbAnimationState"
+      <div #popoverRoot [@popoverMotion]="jnksIotAnimationState"
            (@popoverMotion.done)="animationDone()">
         <div
           #popover
-          class="tb-popover"
+          class="jnks-iot-popover"
           [class.strict-position]="strictPosition"
-          [class.tb-popover-rtl]="dir === 'rtl'"
+          [class.jnks-iot-popover-rtl]="dir === 'rtl'"
           [class]="classMap"
-          [style]="tbOverlayStyle"
+          [style]="jnksIotOverlayStyle"
         >
-          <div class="tb-popover-content">
-            <div class="tb-popover-arrow">
-              <span class="tb-popover-arrow-content"></span>
+          <div class="jnks-iot-popover-content">
+            <div class="jnks-iot-popover-arrow">
+              <span class="jnks-iot-popover-arrow-content"></span>
             </div>
-            <div class="tb-popover-inner" [style]="tbPopoverInnerStyle" role="tooltip">
-              <div *ngIf="tbShowCloseButton" class="tb-popover-close-button" (click)="closeButtonClick($event)">×</div>
+            <div class="jnks-iot-popover-inner" [style]="jnksIotPopoverInnerStyle" role="tooltip">
+              <div *ngIf="jnksIotShowCloseButton" class="jnks-iot-popover-close-button" (click)="closeButtonClick($event)">×</div>
               <div style="width: 100%; height: 100%;">
-                <div class="tb-popover-inner-content"  [style]="tbPopoverInnerContentStyle"
+                <div class="jnks-iot-popover-inner-content"  [style]="jnksIotPopoverInnerContentStyle"
                      [class.strict-position]="strictPosition">
-                  <ng-container *ngIf="tbContent">
-                    <ng-container *tbStringTemplateOutlet="tbContent; context: tbComponentContext">
-                      {{ tbContent }}
+                  <ng-container *ngIf="jnksIotContent">
+                    <ng-container *jnksIotStringTemplateOutlet="jnksIotContent; context: jnksIotComponentContext">
+                      {{ jnksIotContent }}
                     </ng-container>
                   </ng-container>
-                  <ng-container *ngIf="tbComponent"
-                                [tbComponentOutlet]="tbComponent"
-                                [tbComponentInjector]="tbComponentInjector"
-                                [tbComponentOutletContext]="tbComponentContext"
+                  <ng-container *ngIf="jnksIotComponent"
+                                [jnksIotComponentOutlet]="jnksIotComponent"
+                                [jnksIotComponentInjector]="jnksIotComponentInjector"
+                                [jnksIotComponentOutletContext]="jnksIotComponentContext"
                                 (componentChange)="onComponentChange($event)"
-                                [tbComponentStyle]="tbComponentStyle">
+                                [jnksIotComponentStyle]="jnksIotComponentStyle">
                   </ng-container>
                 </div>
               </div>
@@ -346,51 +346,51 @@ export class TbPopoverDirective implements OnChanges, OnDestroy, AfterViewInit {
     </ng-template>
   `
 })
-export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
+export class JnksIotPopoverComponent<T = any> implements OnDestroy, OnInit {
 
   @ViewChild('overlay', { static: false }) overlay!: CdkConnectedOverlay;
   @ViewChild('popoverRoot', { static: false }) popoverRoot!: ElementRef<HTMLElement>;
   @ViewChild('popover', { static: false }) popover!: ElementRef<HTMLElement>;
 
-  tbContent: string | TemplateRef<void> | null = null;
-  tbComponent: Type<T> | null = null;
-  tbComponentRef: ComponentRef<T> | null = null;
-  tbComponentContext: any;
-  tbComponentInjector: Injector | null = null;
-  tbComponentStyle: { [klass: string]: any }  = {};
-  tbOverlayClassName!: string;
-  tbPopoverInnerStyle: { [klass: string]: any } = {};
-  tbPopoverInnerContentStyle: { [klass: string]: any } = {};
-  tbBackdrop = false;
-  tbMouseEnterDelay?: number;
-  tbMouseLeaveDelay?: number;
-  tbHideOnClickOutside = true;
-  tbShowCloseButton = true;
-  tbModal = false;
+  jnksIotContent: string | TemplateRef<void> | null = null;
+  jnksIotComponent: Type<T> | null = null;
+  jnksIotComponentRef: ComponentRef<T> | null = null;
+  jnksIotComponentContext: any;
+  jnksIotComponentInjector: Injector | null = null;
+  jnksIotComponentStyle: { [klass: string]: any }  = {};
+  jnksIotOverlayClassName!: string;
+  jnksIotPopoverInnerStyle: { [klass: string]: any } = {};
+  jnksIotPopoverInnerContentStyle: { [klass: string]: any } = {};
+  jnksIotBackdrop = false;
+  jnksIotMouseEnterDelay?: number;
+  jnksIotMouseLeaveDelay?: number;
+  jnksIotHideOnClickOutside = true;
+  jnksIotShowCloseButton = true;
+  jnksIotModal = false;
 
-  tbAnimationState = 'active';
+  jnksIotAnimationState = 'active';
 
-  tbHideStart = new Subject<void>();
-  tbVisibleChange = new Subject<boolean>();
-  tbAnimationDone = new Subject<void>();
-  tbComponentChange = new Subject<ComponentRef<any>>();
-  tbDestroy = new Subject<void>();
+  jnksIotHideStart = new Subject<void>();
+  jnksIotVisibleChange = new Subject<boolean>();
+  jnksIotAnimationDone = new Subject<void>();
+  jnksIotComponentChange = new Subject<ComponentRef<any>>();
+  jnksIotDestroy = new Subject<void>();
 
-  set tbVisible(value: boolean) {
+  set jnksIotVisible(value: boolean) {
     const visible = value;
     if (this.visible !== visible) {
       this.visible = visible;
-      this.tbVisibleChange.next(visible);
+      this.jnksIotVisibleChange.next(visible);
     }
   }
 
-  get tbVisible(): boolean {
-    return this.visible && this.tbAnimationState === 'active';
+  get jnksIotVisible(): boolean {
+    return this.visible && this.jnksIotAnimationState === 'active';
   }
 
   visible = false;
 
-  set tbHidden(value: boolean) {
+  set jnksIotHidden(value: boolean) {
     const hidden = value;
     if (this.hidden !== hidden) {
       this.hidden = hidden;
@@ -408,24 +408,24 @@ export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
     }
   }
 
-  get tbHidden(): boolean {
+  get jnksIotHidden(): boolean {
     return this.hidden;
   }
 
   hidden = false;
   lastIsIntersecting = true;
 
-  set tbTrigger(value: TbPopoverTrigger) {
+  set jnksIotTrigger(value: JnksIotPopoverTrigger) {
     this.trigger = value;
   }
 
-  get tbTrigger(): TbPopoverTrigger {
+  get jnksIotTrigger(): JnksIotPopoverTrigger {
     return this.trigger;
   }
 
-  protected trigger: TbPopoverTrigger = 'hover';
+  protected trigger: JnksIotPopoverTrigger = 'hover';
 
-  set tbPlacement(value: PopoverPreferredPlacement) {
+  set jnksIotPlacement(value: PopoverPreferredPlacement) {
     if (typeof value === 'string') {
       if (isStrictPopoverPlacement(value)) {
         const placement = convertStrictPopoverPlacement(value as StrictPopoverPlacement);
@@ -446,22 +446,22 @@ export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
   }
 
   get hasBackdrop(): boolean {
-    return this.tbModal || (this.tbTrigger === 'click' && this.tbBackdrop);
+    return this.jnksIotModal || (this.jnksIotTrigger === 'click' && this.jnksIotBackdrop);
   }
 
   get backdropClass(): string {
-    return this.tbModal ? 'tb-popover-overlay-backdrop' : '';
+    return this.jnksIotModal ? 'jnks-iot-popover-overlay-backdrop' : '';
   }
 
 
-  set tbOverlayStyle(value: { [klass: string]: any }) {
+  set jnksIotOverlayStyle(value: { [klass: string]: any }) {
     this._tbOverlayStyle = value;
     if (this.popover) {
       this.cdr.detectChanges();
     }
   }
 
-  get tbOverlayStyle(): { [klass: string]: any } {
+  get jnksIotOverlayStyle(): { [klass: string]: any } {
     return this._tbOverlayStyle;
   }
 
@@ -490,7 +490,7 @@ export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.directionality.change?.pipe(takeUntil(this.tbDestroy)).subscribe((direction: Direction) => {
+    this.directionality.change?.pipe(takeUntil(this.jnksIotDestroy)).subscribe((direction: Direction) => {
       this.dir = direction;
       this.cdr.detectChanges();
     });
@@ -509,11 +509,11 @@ export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
     }
     this.intersectionObserver.disconnect();
     this.intersectionObserver = null;
-    this.tbHideStart.complete();
-    this.tbVisibleChange.complete();
-    this.tbAnimationDone.complete();
-    this.tbDestroy.next();
-    this.tbDestroy.complete();
+    this.jnksIotHideStart.complete();
+    this.jnksIotVisibleChange.complete();
+    this.jnksIotAnimationDone.complete();
+    this.jnksIotDestroy.next();
+    this.jnksIotDestroy.complete();
   }
 
   closeButtonClick($event: Event) {
@@ -525,13 +525,13 @@ export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
   }
 
   show(): void {
-    if (this.tbVisible) {
+    if (this.jnksIotVisible) {
       return;
     }
 
     if (!this.isEmpty()) {
-      this.tbVisible = true;
-      this.tbVisibleChange.next(true);
+      this.jnksIotVisible = true;
+      this.jnksIotVisibleChange.next(true);
       this.cdr.detectChanges();
     }
 
@@ -545,14 +545,14 @@ export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
       });
       this.intersectionObserver.observe(el);
     }
-    this.tbAnimationState = 'active';
+    this.jnksIotAnimationState = 'active';
   }
 
   hide(): void {
-    if (!this.tbVisible) {
+    if (!this.jnksIotVisible) {
       return;
     }
-    this.tbHideStart.next();
+    this.jnksIotHideStart.next();
     if (this.parentScrollSubscription) {
       this.parentScrollSubscription.unsubscribe();
       this.parentScrollSubscription = null;
@@ -561,10 +561,10 @@ export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
       const el = this.origin.elementRef.nativeElement;
       this.intersectionObserver.unobserve(el);
     }
-    this.tbAnimationState = 'void';
+    this.jnksIotAnimationState = 'void';
     this.cdr.detectChanges();
-    this.tbAnimationDone.pipe(take(1)).subscribe(() => {
-      this.tbVisible = false;
+    this.jnksIotAnimationDone.pipe(take(1)).subscribe(() => {
+      this.jnksIotVisible = false;
       this.cdr.detectChanges();
     });
   }
@@ -622,11 +622,11 @@ export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
 
   updateStyles(): void {
     this.classMap = {
-      [`tb-popover-placement-${this.preferredPlacement}`]: true,
-      ['tb-popover-hidden']: this.tbHidden || !this.lastIsIntersecting
+      [`jnks-iot-popover-placement-${this.preferredPlacement}`]: true,
+      ['jnks-iot-popover-hidden']: this.jnksIotHidden || !this.lastIsIntersecting
     };
-    if (this.tbOverlayClassName) {
-      this.classMap[this.tbOverlayClassName] = true;
+    if (this.jnksIotOverlayClassName) {
+      this.classMap[this.jnksIotOverlayClassName] = true;
     }
   }
 
@@ -636,7 +636,7 @@ export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
   }
 
   onClickOutside(event: MouseEvent): void {
-    if (!this.tbModal && this.tbHideOnClickOutside && !this.origin.elementRef.nativeElement.contains(event.target) && this.tbTrigger !== null) {
+    if (!this.jnksIotModal && this.jnksIotHideOnClickOutside && !this.origin.elementRef.nativeElement.contains(event.target) && this.jnksIotTrigger !== null) {
       if (!this.isTopOverlay(event.target as Element)) {
         this.hide();
       }
@@ -644,16 +644,16 @@ export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
   }
 
   onComponentChange(component: ComponentRef<any>) {
-    this.tbComponentRef = component;
+    this.jnksIotComponentRef = component;
     if (this.strictPosition) {
-      this.renderer.setStyle(this.tbComponentRef.location.nativeElement, 'display', 'flex');
-      this.renderer.setStyle(this.tbComponentRef.location.nativeElement, 'height', '100%');
+      this.renderer.setStyle(this.jnksIotComponentRef.location.nativeElement, 'display', 'flex');
+      this.renderer.setStyle(this.jnksIotComponentRef.location.nativeElement, 'height', '100%');
     }
-    this.tbComponentChange.next(component);
+    this.jnksIotComponentChange.next(component);
   }
 
   animationDone() {
-    this.tbAnimationDone.next();
+    this.jnksIotAnimationDone.next();
   }
 
   private isTopOverlay(targetElement: Element): boolean {
@@ -678,7 +678,7 @@ export class TbPopoverComponent<T = any> implements OnDestroy, OnInit {
   }
 
   private isEmpty(): boolean {
-    return (this.tbComponent instanceof Type || this.tbContent instanceof TemplateRef)
-      ? false : !isNotEmptyStr(this.tbContent);
+    return (this.jnksIotComponent instanceof Type || this.jnksIotContent instanceof TemplateRef)
+      ? false : !isNotEmptyStr(this.jnksIotContent);
   }
 }

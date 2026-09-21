@@ -1,4 +1,4 @@
-<mat-form-field [formGroup]="keysListFormGroup" class="mat-block tb-chip-list">
+<mat-form-field [formGroup]="keysListFormGroup" class="mat-block jnks-iot-chip-list">
   <mat-chip-grid #chipList>
     <mat-chip-row
       *ngFor="let key of modelValue"
@@ -22,7 +22,7 @@
            (matChipInputTokenEnd)="add($event)">
   </mat-chip-grid>
   <mat-autocomplete #keyAutocomplete="matAutocomplete"
-                    class="tb-autocomplete"
+                    class="jnks-iot-autocomplete"
                     (optionSelected)="selected($event)"
                     [displayWith]="displayKeyFn">
     <mat-option *ngFor="let key of filteredKeys | async" [value]="key">

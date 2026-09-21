@@ -7,7 +7,7 @@ import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.id.UserId;
 import com.jnks.iot.server.common.data.kv.AttributeKvEntry;
 import com.jnks.iot.server.common.data.kv.TsKvEntry;
-import com.jnks.iot.server.common.msg.queue.TbCallback;
+import com.jnks.iot.server.common.msg.queue.JnksIotCallback;
 import com.jnks.iot.server.queue.discovery.event.OtherServiceShutdownEvent;
 import com.jnks.iot.server.queue.discovery.event.PartitionChangeEvent;
 import com.jnks.iot.server.service.ws.notification.sub.NotificationUpdate;
@@ -25,7 +25,7 @@ public interface SubscriptionManagerService extends ApplicationListener<Partitio
      * 处理实体订阅事件
      * 当客户端订阅设备数据时调用
      */
-    void onSubEvent(String serviceId, TbEntitySubEvent event, TbCallback empty);
+    void onSubEvent(String serviceId, JnksIotEntitySubEvent event, JnksIotCallback empty);
 
     void onApplicationEvent(OtherServiceShutdownEvent event);
 
@@ -38,7 +38,7 @@ public interface SubscriptionManagerService extends ApplicationListener<Partitio
      * @param ts 时序数据列表
      * @param callback 回调函数
      */
-    void onTimeSeriesUpdate(TenantId tenantId, EntityId entityId, List<TsKvEntry> ts, TbCallback callback);
+    void onTimeSeriesUpdate(TenantId tenantId, EntityId entityId, List<TsKvEntry> ts, JnksIotCallback callback);
 
     /**
      * 处理属性更新
@@ -46,9 +46,9 @@ public interface SubscriptionManagerService extends ApplicationListener<Partitio
      *
      * @param scope 属性作用域（SERVER_SCOPE, SHARED_SCOPE, CLIENT_SCOPE）
      */
-    void onAttributesUpdate(TenantId tenantId, EntityId entityId, String scope, List<AttributeKvEntry> attributes, TbCallback callback);
+    void onAttributesUpdate(TenantId tenantId, EntityId entityId, String scope, List<AttributeKvEntry> attributes, JnksIotCallback callback);
 
-    void onAttributesDelete(TenantId tenantId, EntityId entityId, String scope, List<String> keys, TbCallback empty);
+    void onAttributesDelete(TenantId tenantId, EntityId entityId, String scope, List<String> keys, JnksIotCallback empty);
 
     /**
      * This method is retained solely for backwards compatibility, specifically to handle
@@ -57,14 +57,14 @@ public interface SubscriptionManagerService extends ApplicationListener<Partitio
      * @deprecated as of 4.0, this method will be removed in future releases.
      */
     @Deprecated(forRemoval = true, since = "4.0")
-    void onAttributesDelete(TenantId tenantId, EntityId entityId, String scope, List<String> keys, boolean notifyDevice, TbCallback empty);
+    void onAttributesDelete(TenantId tenantId, EntityId entityId, String scope, List<String> keys, boolean notifyDevice, JnksIotCallback empty);
 
-    void onTimeSeriesDelete(TenantId tenantId, EntityId entityId, List<String> keys, TbCallback callback);
+    void onTimeSeriesDelete(TenantId tenantId, EntityId entityId, List<String> keys, JnksIotCallback callback);
 
-    void onAlarmUpdate(TenantId tenantId, EntityId entityId, AlarmInfo alarm, TbCallback callback);
+    void onAlarmUpdate(TenantId tenantId, EntityId entityId, AlarmInfo alarm, JnksIotCallback callback);
 
-    void onAlarmDeleted(TenantId tenantId, EntityId entityId, AlarmInfo alarm, TbCallback callback);
+    void onAlarmDeleted(TenantId tenantId, EntityId entityId, AlarmInfo alarm, JnksIotCallback callback);
 
-    void onNotificationUpdate(TenantId tenantId, UserId recipientId, NotificationUpdate notificationUpdate, TbCallback callback);
+    void onNotificationUpdate(TenantId tenantId, UserId recipientId, NotificationUpdate notificationUpdate, JnksIotCallback callback);
 
 }

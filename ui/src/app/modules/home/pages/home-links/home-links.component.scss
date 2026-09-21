@@ -6,7 +6,7 @@
 }
 
 :host ::ng-deep {
-  .tb-home-links {
+  .jnks-iot-home-links {
     .mat-headline-5 {
       font-size: 20px;
       @media #{$mat-gt-xmd} {
@@ -36,7 +36,7 @@
         padding: 12px 16px 20px;
       }
     }
-    .tb-card-button {
+    .jnks-iot-card-button {
       width: 100%;
       height: 100%;
       max-width: 240px;

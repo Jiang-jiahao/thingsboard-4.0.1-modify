@@ -13,7 +13,7 @@ export interface EditAttributeValuePanelData {
 }
 
 @Component({
-  selector: 'tb-edit-attribute-value-panel',
+  selector: 'jnks-iot-edit-attribute-value-panel',
   templateUrl: './edit-attribute-value-panel.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: EditAttributeValuePanelComponent}],
   styleUrls: ['./edit-attribute-value-panel.component.scss']

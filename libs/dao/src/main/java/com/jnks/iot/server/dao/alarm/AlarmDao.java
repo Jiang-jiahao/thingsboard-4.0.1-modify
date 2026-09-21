@@ -24,7 +24,7 @@ import com.jnks.iot.server.common.data.query.AlarmCountQuery;
 import com.jnks.iot.server.common.data.query.AlarmData;
 import com.jnks.iot.server.common.data.query.AlarmDataQuery;
 import com.jnks.iot.server.common.data.query.OriginatorAlarmFilter;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.dao.Dao;
 
 import java.util.Collection;
@@ -65,9 +65,9 @@ public interface AlarmDao extends Dao<Alarm> {
 
     PageData<AlarmId> findAlarmsIdsByEndTsBeforeAndTenantId(Long time, TenantId tenantId, PageLink pageLink);
 
-    PageData<TbPair<UUID, Long>> findAlarmIdsByAssigneeId(TenantId tenantId, UserId userId, long createdTimeOffset, AlarmId idOffset, int limit);
+    PageData<JnksIotPair<UUID, Long>> findAlarmIdsByAssigneeId(TenantId tenantId, UserId userId, long createdTimeOffset, AlarmId idOffset, int limit);
 
-    PageData<TbPair<UUID, Long>> findAlarmIdsByOriginatorId(TenantId tenantId, EntityId originatorId, long createdTimeOffset, AlarmId idOffset, int limit);
+    PageData<JnksIotPair<UUID, Long>> findAlarmIdsByOriginatorId(TenantId tenantId, EntityId originatorId, long createdTimeOffset, AlarmId idOffset, int limit);
 
     void createEntityAlarmRecord(EntityAlarm entityAlarm);
 

@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-action-node-rpc-reply-config',
+  selector: 'jnks-iot-action-node-rpc-reply-config',
   templateUrl: './rpc-reply-config.component.html',
   styleUrls: []
 })

@@ -24,12 +24,12 @@ import { UtilsService } from '@core/services/utils.service';
 import { deepClone, guid, isEqual, isObject, isUndefined, isUndefinedOrNull } from '@app/core/utils';
 import { TranslateService } from '@ngx-translate/core';
 import { CancelAnimationFrame, RafService } from '@core/services/raf.service';
-import { TbEditorCompleter } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompleter } from '@shared/models/ace/completion.models';
 import { beautifyJs } from '@shared/models/beautify.models';
 import { ScriptLanguage } from '@shared/models/rule-node.models';
 import { coerceBoolean } from '@shared/decorators/coercion';
-import { compileTbFunction, loadModulesCompleter, TbFunction } from '@shared/models/js-function.models';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { compileJnksIotFunction, loadModulesCompleter, JnksIotFunction } from '@shared/models/js-function.models';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { JsFuncModulesComponent } from '@shared/components/js-func-modules.component';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable, of } from 'rxjs';
@@ -37,7 +37,7 @@ import { catchError } from 'rxjs/operators';
 import { tbelUtilsAutocompletes, tbelUtilsFuncHighlightRules } from '@shared/models/ace/tbel-utils.models';
 
 @Component({
-  selector: 'tb-js-func',
+  selector: 'jnks-iot-js-func',
   templateUrl: './js-func.component.html',
   styleUrls: ['./js-func.component.scss'],
   providers: [
@@ -85,7 +85,7 @@ export class JsFuncComponent implements OnInit, OnChanges, OnDestroy, ControlVal
 
   @Input() minHeight = '200px';
 
-  @Input() editorCompleter: TbEditorCompleter;
+  @Input() editorCompleter: JnksIotEditorCompleter;
 
   @Input() highlightRules: AceHighlightRules;
 
@@ -160,7 +160,7 @@ export class JsFuncComponent implements OnInit, OnChanges, OnDestroy, ControlVal
               protected store: Store<AppState>,
               private raf: RafService,
               private cd: ChangeDetectorRef,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private http: HttpClient) {
@@ -355,7 +355,7 @@ export class JsFuncComponent implements OnInit, OnChanges, OnDestroy, ControlVal
   }
 
   private validateJsFunc(): Observable<boolean> {
-    let toCompile: TbFunction;
+    let toCompile: JnksIotFunction;
     if (this.withModules && this.modules && Object.keys(this.modules).length) {
       toCompile = {
         body: this.modelValue,
@@ -365,7 +365,7 @@ export class JsFuncComponent implements OnInit, OnChanges, OnDestroy, ControlVal
       toCompile = this.modelValue;
     }
     const args = this.functionArgs || [];
-    return compileTbFunction(this.http, toCompile, ...args).pipe(
+    return compileJnksIotFunction(this.http, toCompile, ...args).pipe(
       map(toValidate => {
         if (this.noValidate) {
           return true;
@@ -465,7 +465,7 @@ export class JsFuncComponent implements OnInit, OnChanges, OnDestroy, ControlVal
     }
   }
 
-  writeValue(value: TbFunction): void {
+  writeValue(value: JnksIotFunction): void {
     if (isUndefinedOrNull(value) || typeof value === 'string') {
       this.modelValue = value as any;
       this.modules = null;
@@ -513,8 +513,8 @@ export class JsFuncComponent implements OnInit, OnChanges, OnDestroy, ControlVal
         },
         isModal: true
       });
-      modulesPanelPopover.tbComponentRef.instance.popover = modulesPanelPopover;
-      modulesPanelPopover.tbComponentRef.instance.modulesApplied.subscribe((modules) => {
+      modulesPanelPopover.jnksIotComponentRef.instance.popover = modulesPanelPopover;
+      modulesPanelPopover.jnksIotComponentRef.instance.modulesApplied.subscribe((modules) => {
         modulesPanelPopover.hide();
         this.modules = modules;
         this.updateJsWorkerGlobals();
@@ -526,11 +526,11 @@ export class JsFuncComponent implements OnInit, OnChanges, OnDestroy, ControlVal
 
   private propagateValue(value: string) {
     if (this.withModules && this.modules && Object.keys(this.modules).length) {
-      const tbFunction: TbFunction = {
+      const jnksIotFunction: JnksIotFunction = {
         body: value,
         modules: this.modules
       };
-      this.propagateChange(tbFunction);
+      this.propagateChange(jnksIotFunction);
     } else {
       this.propagateChange(value);
     }
@@ -628,7 +628,7 @@ export class JsFuncComponent implements OnInit, OnChanges, OnDestroy, ControlVal
     if (!this.jsEditor) {
       return;
     }
-    let modulesCompleterObservable: Observable<TbEditorCompleter>;
+    let modulesCompleterObservable: Observable<JnksIotEditorCompleter>;
     if (this.withModules) {
       modulesCompleterObservable = loadModulesCompleter(this.http, this.modules);
     } else {

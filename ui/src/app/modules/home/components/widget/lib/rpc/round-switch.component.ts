@@ -26,7 +26,7 @@ interface RoundSwitchSettings {
 }
 
 @Component({
-  selector: 'tb-round-switch',
+  selector: 'jnks-iot-round-switch',
   templateUrl: './round-switch.component.html',
   styleUrls: ['./round-switch.component.scss']
 })

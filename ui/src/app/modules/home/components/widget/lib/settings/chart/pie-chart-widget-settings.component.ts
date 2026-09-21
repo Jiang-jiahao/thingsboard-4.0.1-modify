@@ -12,7 +12,7 @@ import {
 } from '@home/components/widget/lib/settings/chart/latest-chart-widget-settings.component';
 
 @Component({
-  selector: 'tb-pie-chart-widget-settings',
+  selector: 'jnks-iot-pie-chart-widget-settings',
   templateUrl: './latest-chart-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

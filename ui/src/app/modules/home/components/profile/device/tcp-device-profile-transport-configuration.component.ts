@@ -65,7 +65,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 @Component({
-  selector: 'tb-tcp-device-profile-transport-configuration',
+  selector: 'jnks-iot-tcp-device-profile-transport-configuration',
   templateUrl: './tcp-device-profile-transport-configuration.component.html',
   styleUrls: ['./tcp-device-profile-transport-configuration.component.scss'],
   providers: [

@@ -4336,7 +4336,7 @@
                 "WHITE_LABELING": "Tinkinimas",
                 "AUDIT_LOG": "Audito žurnalas",
                 "API_USAGE_STATE": "API Usage State",
-                "TB_RESOURCE": "Resource",
+                "JNKS_IOT_RESOURCE": "Resource",
                 "OTA_PACKAGE": "Ota package",
                 "QUEUE": "Queue",
                 "VERSION_CONTROL": "Version control",

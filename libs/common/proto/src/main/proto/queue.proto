@@ -29,7 +29,7 @@ enum EntityTypeProto {
   DEVICE_PROFILE        = 21;
   ASSET_PROFILE         = 22;
   API_USAGE_STATE       = 23;
-  TB_RESOURCE           = 24;
+  JNKS_IOT_RESOURCE           = 24;
   OTA_PACKAGE           = 25;
   reserved 26; // was EDGE
   RPC                   = 27;
@@ -313,11 +313,11 @@ message TenantProfileProto {
   string name = 4;
   optional string description = 5;
   bool isDefault = 6;
-  bool isolatedTbRuleEngine = 7;
+  bool isolatedJnksIotRuleEngine = 7;
   optional bytes profileData = 8;
 }
 
-message TbResourceProto {
+message JnksIotResourceProto {
   int64 tenantIdMSB = 1;
   int64 tenantIdLSB = 2;
   int64 resourceIdMSB = 3;
@@ -543,7 +543,7 @@ message GetResourceRequestMsg {
 }
 
 message GetResourceResponseMsg {
-  TbResourceProto resource = 1;
+  JnksIotResourceProto resource = 1;
 }
 
 message ValidateDeviceLwM2MCredentialsRequestMsg {
@@ -561,7 +561,7 @@ message GetTenantRoutingInfoRequestMsg {
 }
 
 message GetTenantRoutingInfoResponseMsg {
-  bool isolatedTbRuleEngine = 2;
+  bool isolatedJnksIotRuleEngine = 2;
 }
 
 message GetDeviceProfileRequestMsg {
@@ -905,9 +905,9 @@ message CalculatedFieldTelemetryMsgProto {
   repeated AttributeValueProto attrData = 11;
   repeated string removedTsKeys = 12;
   repeated string removedAttrKeys = 13;
-  int64 tbMsgIdMSB = 14;
-  int64 tbMsgIdLSB = 15;
-  string tbMsgType = 16;
+  int64 jnksIotMsgIdMSB = 14;
+  int64 jnksIotMsgIdLSB = 15;
+  string jnksIotMsgType = 16;
 }
 
 message CalculatedFieldLinkedTelemetryMsgProto {
@@ -955,7 +955,7 @@ message CalculatedFieldStateProto {
   repeated TsRollingArgumentProto rollingValueArguments = 4;
 }
 
-//Used to report session state to tb-Service and persist this state in the cache on the tb-Service level.
+//Used to report session state to jnks-iot-Service and persist this state in the cache on the jnks-iot-Service level.
 message SubscriptionInfoProto {
   int64 lastActivityTime = 1;
   bool attributeSubscription = 2;
@@ -998,7 +998,7 @@ message TransportToRuleEngineMsg {
  * TB Core Data Structures
  */
 
-message TbEntitySubEventProto {
+message JnksIotEntitySubEventProto {
   string serviceId = 1;
   int32 seqNumber = 2;
   int64 tenantIdMSB = 3;
@@ -1015,7 +1015,7 @@ message TbEntitySubEventProto {
   repeated string attrKeys = 14;
 }
 
-message TbEntitySubEventCallbackProto {
+message JnksIotEntitySubEventCallbackProto {
   int64 entityIdMSB = 1;
   int64 entityIdLSB = 2;
   int32 seqNumber = 3;
@@ -1040,7 +1040,7 @@ message TsValueListProto {
   repeated TsValueProto tsValue = 2;
 }
 
-message TbSubUpdateProto {
+message JnksIotSubUpdateProto {
   int64 entityIdMSB = 1;
   int64 entityIdLSB = 2;
   int32 errorCode = 3;
@@ -1049,7 +1049,7 @@ message TbSubUpdateProto {
   string scope = 6;
 }
 
-message TbAlarmSubUpdateProto {
+message JnksIotAlarmSubUpdateProto {
   int64 entityIdMSB = 1;
   int64 entityIdLSB = 2;
   int32 errorCode = 3;
@@ -1066,7 +1066,7 @@ message NotificationsSubUpdateProto {
 }
 
 // DEPRECATED. FOR REMOVAL
-message TbSubscriptionProto {
+message JnksIotSubscriptionProto {
   option deprecated = true;
   string serviceId = 1;
   string sessionId = 2;
@@ -1079,57 +1079,57 @@ message TbSubscriptionProto {
 }
 
 // DEPRECATED. FOR REMOVAL
-message TbTimeSeriesSubscriptionProto {
+message JnksIotTimeSeriesSubscriptionProto {
   option deprecated = true;
-  TbSubscriptionProto sub = 1;
+  JnksIotSubscriptionProto sub = 1;
   bool allKeys = 2;
-  repeated TbSubscriptionKetStateProto keyStates = 3;
+  repeated JnksIotSubscriptionKetStateProto keyStates = 3;
   int64 startTime = 4;
   int64 endTime = 5;
   bool latestValues = 6;
 }
 
 // DEPRECATED. FOR REMOVAL
-message TbAttributeSubscriptionProto {
+message JnksIotAttributeSubscriptionProto {
   option deprecated = true;
-  TbSubscriptionProto sub = 1;
+  JnksIotSubscriptionProto sub = 1;
   bool allKeys = 2;
-  repeated TbSubscriptionKetStateProto keyStates = 3;
+  repeated JnksIotSubscriptionKetStateProto keyStates = 3;
   string scope = 4;
 }
 
 // DEPRECATED. FOR REMOVAL
-message TbAlarmSubscriptionProto {
+message JnksIotAlarmSubscriptionProto {
   option deprecated = true;
-  TbSubscriptionProto sub = 1;
+  JnksIotSubscriptionProto sub = 1;
   int64 ts = 2;
 }
 
 // DEPRECATED. FOR REMOVAL
 message NotificationsSubscriptionProto {
   option deprecated = true;
-  TbSubscriptionProto sub = 1;
+  JnksIotSubscriptionProto sub = 1;
   int32 limit = 2;
 }
 
 // DEPRECATED. FOR REMOVAL
 message NotificationsCountSubscriptionProto {
   option deprecated = true;
-  TbSubscriptionProto sub = 1;
+  JnksIotSubscriptionProto sub = 1;
 }
 
 // DEPRECATED. FOR REMOVAL
-message TbSubscriptionUpdateProto {
+message JnksIotSubscriptionUpdateProto {
   option deprecated = true;
   string sessionId = 1;
   int32 subscriptionId = 2;
   int32 errorCode = 3;
   string errorMsg = 4;
-  repeated TbSubscriptionUpdateValueListProto data = 5;
+  repeated JnksIotSubscriptionUpdateValueListProto data = 5;
 }
 
 // DEPRECATED. FOR REMOVAL
-message TbAlarmSubscriptionUpdateProto {
+message JnksIotAlarmSubscriptionUpdateProto {
   option deprecated = true;
   string sessionId = 1;
   int32 subscriptionId = 2;
@@ -1162,7 +1162,7 @@ message NotificationRequestUpdateProto {
   string update = 6;
 }
 
-message TbAttributeUpdateProto {
+message JnksIotAttributeUpdateProto {
   string entityType = 1;
   int64 entityIdMSB = 2;
   int64 entityIdLSB = 3;
@@ -1172,7 +1172,7 @@ message TbAttributeUpdateProto {
   repeated TsKvProto data = 7;
 }
 
-message TbAlarmUpdateProto {
+message JnksIotAlarmUpdateProto {
   string entityType = 1;
   int64 entityIdMSB = 2;
   int64 entityIdLSB = 3;
@@ -1181,7 +1181,7 @@ message TbAlarmUpdateProto {
   string alarm = 6;
 }
 
-message TbAlarmDeleteProto {
+message JnksIotAlarmDeleteProto {
   string entityType = 1;
   int64 entityIdMSB = 2;
   int64 entityIdLSB = 3;
@@ -1190,7 +1190,7 @@ message TbAlarmDeleteProto {
   string alarm = 6;
 }
 
-message TbAttributeDeleteProto {
+message JnksIotAttributeDeleteProto {
   string entityType = 1;
   int64 entityIdMSB = 2;
   int64 entityIdLSB = 3;
@@ -1205,7 +1205,7 @@ message TbAttributeDeleteProto {
   optional bool notifyDevice = 8 [deprecated = true];
 }
 
-message TbTimeSeriesDeleteProto {
+message JnksIotTimeSeriesDeleteProto {
   string entityType = 1;
   int64 entityIdMSB = 2;
   int64 entityIdLSB = 3;
@@ -1214,7 +1214,7 @@ message TbTimeSeriesDeleteProto {
   repeated string keys = 6;
 }
 
-message TbTimeSeriesUpdateProto {
+message JnksIotTimeSeriesUpdateProto {
   string entityType = 1;
   int64 entityIdMSB = 2;
   int64 entityIdLSB = 3;
@@ -1224,23 +1224,23 @@ message TbTimeSeriesUpdateProto {
 }
 
 // DEPRECATED. FOR REMOVAL
-message TbSubscriptionCloseProto {
+message JnksIotSubscriptionCloseProto {
   option deprecated = true;
   string sessionId = 1;
   int32 subscriptionId = 2;
 }
 
-message TbSubscriptionKetStateProto {
+message JnksIotSubscriptionKetStateProto {
   string key = 1;
   int64 ts = 2;
 }
 
-message TbSubscriptionUpdateValueListProto {
+message JnksIotSubscriptionUpdateValueListProto {
   string key = 1;
-  repeated TbSubscriptionUpdateTsValue tsValue = 2;
+  repeated JnksIotSubscriptionUpdateTsValue tsValue = 2;
 }
 
-message TbSubscriptionUpdateTsValue {
+message JnksIotSubscriptionUpdateTsValue {
   int64 ts = 1;
   optional string value = 2;
 }
@@ -1260,31 +1260,31 @@ message DeviceStateServiceMsgProto {
 }
 
 message SubscriptionMgrMsgProto {
-  TbTimeSeriesSubscriptionProto telemetrySub = 1 [deprecated = true]; // DEPRECATED. FOR REMOVAL
-  TbAttributeSubscriptionProto attributeSub = 2 [deprecated = true]; // DEPRECATED. FOR REMOVAL
-  TbSubscriptionCloseProto subClose = 3 [deprecated = true]; // DEPRECATED. FOR REMOVAL
-  TbTimeSeriesUpdateProto tsUpdate = 4;
-  TbAttributeUpdateProto attrUpdate = 5;
-  TbAttributeDeleteProto attrDelete = 6;
-  TbAlarmSubscriptionProto alarmSub = 7 [deprecated = true]; // DEPRECATED. FOR REMOVAL
-  TbAlarmUpdateProto alarmUpdate = 8;
-  TbAlarmDeleteProto alarmDelete = 9;
-  TbTimeSeriesDeleteProto tsDelete = 10;
+  JnksIotTimeSeriesSubscriptionProto telemetrySub = 1 [deprecated = true]; // DEPRECATED. FOR REMOVAL
+  JnksIotAttributeSubscriptionProto attributeSub = 2 [deprecated = true]; // DEPRECATED. FOR REMOVAL
+  JnksIotSubscriptionCloseProto subClose = 3 [deprecated = true]; // DEPRECATED. FOR REMOVAL
+  JnksIotTimeSeriesUpdateProto tsUpdate = 4;
+  JnksIotAttributeUpdateProto attrUpdate = 5;
+  JnksIotAttributeDeleteProto attrDelete = 6;
+  JnksIotAlarmSubscriptionProto alarmSub = 7 [deprecated = true]; // DEPRECATED. FOR REMOVAL
+  JnksIotAlarmUpdateProto alarmUpdate = 8;
+  JnksIotAlarmDeleteProto alarmDelete = 9;
+  JnksIotTimeSeriesDeleteProto tsDelete = 10;
   NotificationsSubscriptionProto notificationsSub = 11 [deprecated = true]; // DEPRECATED. FOR REMOVAL
   NotificationsCountSubscriptionProto notificationsCountSub = 12 [deprecated = true]; // DEPRECATED. FOR REMOVAL
   NotificationUpdateProto notificationUpdate = 13;
   NotificationRequestUpdateProto notificationRequestUpdate = 14;
-  TbEntitySubEventProto subEvent = 15;
+  JnksIotEntitySubEventProto subEvent = 15;
 }
 
 message LocalSubscriptionServiceMsgProto {
-  TbSubscriptionUpdateProto subUpdate = 1 [deprecated = true]; // DEPRECATED. FOR REMOVAL
-  TbAlarmSubscriptionUpdateProto alarmSubUpdate = 2 [deprecated = true]; // DEPRECATED. FOR REMOVAL
+  JnksIotSubscriptionUpdateProto subUpdate = 1 [deprecated = true]; // DEPRECATED. FOR REMOVAL
+  JnksIotAlarmSubscriptionUpdateProto alarmSubUpdate = 2 [deprecated = true]; // DEPRECATED. FOR REMOVAL
   NotificationsSubscriptionUpdateProto notificationsSubUpdate = 3 [deprecated = true]; // DEPRECATED. FOR REMOVAL
-  TbEntitySubEventCallbackProto subEventCallback = 4;
-  TbSubUpdateProto tsUpdate = 5;
-  TbSubUpdateProto attrUpdate = 6;
-  TbAlarmSubUpdateProto alarmUpdate = 7;
+  JnksIotEntitySubEventCallbackProto subEventCallback = 4;
+  JnksIotSubUpdateProto tsUpdate = 5;
+  JnksIotSubUpdateProto attrUpdate = 6;
+  JnksIotAlarmSubUpdateProto alarmUpdate = 7;
   NotificationsSubUpdateProto notificationsUpdate = 8;
 }
 
@@ -1653,7 +1653,7 @@ message ToCoreMsg {
 }
 
 /* High priority messages with low latency are handled by JnksIOT Core Service separately */
-/* Please, adjust the TbCoreConsumerStats when modifying the ToCoreNotificationMsg */
+/* Please, adjust the JnksIotCoreConsumerStats when modifying the ToCoreNotificationMsg */
 message ToCoreNotificationMsg {
   LocalSubscriptionServiceMsgProto toLocalSubscriptionServiceMsg = 1;
   FromDeviceRPCResponseProto fromDeviceRpcResponse = 2;
@@ -1683,7 +1683,7 @@ message ToCalculatedFieldNotificationMsg {
 message ToRuleEngineMsg {
   int64 tenantIdMSB = 1;
   int64 tenantIdLSB = 2;
-  bytes tbMsg = 3;
+  bytes jnksIotMsg = 3;
   repeated string relationTypes = 4;
   string failureMessage = 5;
 }

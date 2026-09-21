@@ -1,14 +1,14 @@
-<div [formGroup]="tagFormGroup" class="tb-form-table-row tb-scada-symbol-metadata-tag-row">
-  <div class="tb-tag-field">
+<div [formGroup]="tagFormGroup" class="jnks-iot-form-table-row jnks-iot-scada-symbol-metadata-tag-row">
+  <div class="jnks-iot-tag-field">
     <mat-chip-set>
       <mat-chip>
-        <span class="tb-scada-symbol-metadata-tag-label">
+        <span class="jnks-iot-scada-symbol-metadata-tag-label">
           {{ tagFormGroup.get('tag').value }}
         </span>
       </mat-chip>
     </mat-chip-set>
   </div>
-  <div class="tb-state-render-function-field">
+  <div class="jnks-iot-state-render-function-field">
     <button *ngIf="!disabled || tagFormGroup.get('stateRenderFunction').value"
             #editStateRenderFunctionButton
             mat-button
@@ -18,7 +18,7 @@
       <span>{{ ( disabled ? 'action.view' : (tagFormGroup.get('stateRenderFunction').value ? 'action.edit' : 'action.add') ) | translate }}</span>
     </button>
   </div>
-  <div class="tb-on-click-action-field">
+  <div class="jnks-iot-on-click-action-field">
     <button *ngIf="!disabled || tagFormGroup.get('clickAction').value"
             #editClickActionButton
             mat-button

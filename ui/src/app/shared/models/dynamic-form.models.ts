@@ -1,5 +1,5 @@
 import { CustomTranslatePipe } from '@shared/pipe/custom-translate.pipe';
-import { TbEditorCompletion, TbEditorCompletions } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompletion, JnksIotEditorCompletions } from '@shared/models/ace/completion.models';
 import { deepClone, isDefinedAndNotNull, isEmptyStr, isString, isUndefinedOrNull } from '@core/utils';
 import { JsonFormData, JsonSchema, JsonSettingsSchema, KeyLabelItem } from '@shared/legacy/json-form.models';
 import JsonFormUtils from '@shared/legacy/json-form-utils';
@@ -481,8 +481,8 @@ export const defaultPropertyValue = (type: FormPropertyType): any => {
   }
 };
 
-export const formPropertyCompletions = (properties: FormProperty[], customTranslate: CustomTranslatePipe): TbEditorCompletions => {
-  const propertiesCompletions: TbEditorCompletions = {};
+export const formPropertyCompletions = (properties: FormProperty[], customTranslate: CustomTranslatePipe): JnksIotEditorCompletions => {
+  const propertiesCompletions: JnksIotEditorCompletions = {};
   for (const property of properties) {
     if (property.type !== FormPropertyType.htmlSection) {
       propertiesCompletions[property.id] = formPropertyCompletion(property, customTranslate);
@@ -491,7 +491,7 @@ export const formPropertyCompletions = (properties: FormProperty[], customTransl
   return propertiesCompletions;
 }
 
-export const formPropertyCompletion = (property: FormProperty, customTranslate: CustomTranslatePipe): TbEditorCompletion => {
+export const formPropertyCompletion = (property: FormProperty, customTranslate: CustomTranslatePipe): JnksIotEditorCompletion => {
   let description = customTranslate.transform(property.name, property.name);
   if (property.subLabel) {
     description += ` <small>${customTranslate.transform(property.subLabel, property.subLabel)}</small>`;
@@ -513,7 +513,7 @@ export const formPropertyCompletion = (property: FormProperty, customTranslate: 
       description += '<br/><br/><code class="title">Stores time value in milliseconds since midnight, January 1, 1970 UTC.</code>';
     }
   }
-  const completion: TbEditorCompletion = {
+  const completion: JnksIotEditorCompletion = {
     meta: 'property',
     description,
     type: formPropertyCompletionType(property)

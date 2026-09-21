@@ -33,7 +33,7 @@ public class DefaultCoapServerService implements CoapServerService {
 
     private CoapServer server;
 
-    private TbCoapDtlsCertificateVerifier tbDtlsCertificateVerifier;
+    private JnksIotCoapDtlsCertificateVerifier jnksIotDtlsCertificateVerifier;
 
     private ScheduledExecutorService dtlsSessionsExecutor;
 
@@ -62,8 +62,8 @@ public class DefaultCoapServerService implements CoapServerService {
     }
 
     @Override
-    public ConcurrentMap<TbCoapDtlsSessionKey, TbCoapDtlsSessionInfo> getDtlsSessionsMap() {
-        return tbDtlsCertificateVerifier != null ? tbDtlsCertificateVerifier.getTbCoapDtlsSessionsMap() : null;
+    public ConcurrentMap<JnksIotCoapDtlsSessionKey, JnksIotCoapDtlsSessionInfo> getDtlsSessionsMap() {
+        return jnksIotDtlsCertificateVerifier != null ? jnksIotDtlsCertificateVerifier.getJnksIotCoapDtlsSessionsMap() : null;
     }
 
     private CoapServer createCoapServer() throws UnknownHostException {
@@ -89,7 +89,7 @@ public class DefaultCoapServerService implements CoapServerService {
         server.addEndpoint(noSecCoapEndpoint);
         if (isDtlsEnabled()) {
             CoapEndpoint.Builder dtlsCoapEndpointBuilder = new CoapEndpoint.Builder();
-            TbCoapDtlsSettings dtlsSettings = coapServerContext.getDtlsSettings();
+            JnksIotCoapDtlsSettings dtlsSettings = coapServerContext.getDtlsSettings();
             DtlsConnectorConfig dtlsConnectorConfig = dtlsSettings.dtlsConnectorConfig(networkConfig);
             networkConfig.set(CoapConfig.COAP_SECURE_PORT, dtlsConnectorConfig.getAddress().getPort());
             dtlsCoapEndpointBuilder.setConfiguration(networkConfig);
@@ -97,12 +97,12 @@ public class DefaultCoapServerService implements CoapServerService {
             dtlsCoapEndpointBuilder.setConnector(connector);
             CoapEndpoint dtlsCoapEndpoint = dtlsCoapEndpointBuilder.build();
             server.addEndpoint(dtlsCoapEndpoint);
-            tbDtlsCertificateVerifier = (TbCoapDtlsCertificateVerifier) dtlsConnectorConfig.getAdvancedCertificateVerifier();
+            jnksIotDtlsCertificateVerifier = (JnksIotCoapDtlsCertificateVerifier) dtlsConnectorConfig.getAdvancedCertificateVerifier();
             dtlsSessionsExecutor = JnksIotExecutors.newSingleThreadScheduledExecutor(getClass().getSimpleName());
             dtlsSessionsExecutor.scheduleAtFixedRate(this::evictTimeoutSessions, new Random().nextInt((int) getDtlsSessionReportTimeout()), getDtlsSessionReportTimeout(), TimeUnit.MILLISECONDS);
         }
         Resource root = server.getRoot();
-        TbCoapServerMessageDeliverer messageDeliverer = new TbCoapServerMessageDeliverer(root);
+        JnksIotCoapServerMessageDeliverer messageDeliverer = new JnksIotCoapServerMessageDeliverer(root);
         server.setMessageDeliverer(messageDeliverer);
 
         server.start();
@@ -114,11 +114,11 @@ public class DefaultCoapServerService implements CoapServerService {
     }
 
     private void evictTimeoutSessions() {
-        tbDtlsCertificateVerifier.evictTimeoutSessions();
+        jnksIotDtlsCertificateVerifier.evictTimeoutSessions();
     }
 
     private long getDtlsSessionReportTimeout() {
-        return tbDtlsCertificateVerifier.getDtlsSessionReportTimeout();
+        return jnksIotDtlsCertificateVerifier.getDtlsSessionReportTimeout();
     }
 
 }

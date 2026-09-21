@@ -1,4 +1,4 @@
-<div class="tb-details-buttons xs:flex xs:flex-col">
+<div class="jnks-iot-details-buttons xs:flex xs:flex-col">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'open')"
@@ -64,23 +64,23 @@
           <mat-label translate>customer.description</mat-label>
           <textarea matInput formControlName="description" rows="2"></textarea>
         </mat-form-field>
-        <section class="tb-default-dashboard flex flex-1 flex-col" *ngIf="entity?.id">
+        <section class="jnks-iot-default-dashboard flex flex-1 flex-col" *ngIf="entity?.id">
           <section class="flex flex-1 flex-col gt-sm:flex-row">
-            <tb-dashboard-autocomplete
+            <jnks-iot-dashboard-autocomplete
               class="flex-1"
               label="{{ 'dashboard.home-dashboard' | translate }}"
               formControlName="homeDashboardId"
               [dashboardsScope]="'customer'"
               [customerId]="entity?.id.id"
               [selectFirstDashboard]="false"
-            ></tb-dashboard-autocomplete>
+            ></jnks-iot-dashboard-autocomplete>
             <mat-checkbox class="flex-1" formControlName="homeDashboardHideToolbar">
               {{ 'dashboard.home-dashboard-hide-toolbar' | translate }}
             </mat-checkbox>
           </section>
         </section>
       </div>
-      <tb-contact [parentForm]="entityForm" [isEdit]="isEdit"></tb-contact>
+      <jnks-iot-contact [parentForm]="entityForm" [isEdit]="isEdit"></jnks-iot-contact>
     </fieldset>
   </form>
 </div>

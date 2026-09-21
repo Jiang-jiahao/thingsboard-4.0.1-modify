@@ -1,8 +1,8 @@
-<div class="tb-segmented-button-widget">
+<div class="jnks-iot-segmented-button-widget">
   <ng-container *ngTemplateOutlet="widgetTitlePanel"></ng-container>
-  <div class="tb-segmented-button-container">
-    <tb-widget-button-toggle
-      class="tb-widget-button-toggle"
+  <div class="jnks-iot-segmented-button-container">
+    <jnks-iot-widget-button-toggle
+      class="jnks-iot-widget-button-toggle"
       [appearance]="appearance"
       [autoScale]="autoScale"
       [disabled]="disabled || (loading$ | async)"
@@ -10,8 +10,8 @@
       [value]="value"
       [ctx]="ctx"
       (clicked)="onClick($event)">
-    </tb-widget-button-toggle>
+    </jnks-iot-widget-button-toggle>
   </div>
-  <mat-progress-bar class="tb-action-widget-progress" style="height: 4px;" color="accent" mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+  <mat-progress-bar class="jnks-iot-action-widget-progress" style="height: 4px;" color="accent" mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
 </div>
 

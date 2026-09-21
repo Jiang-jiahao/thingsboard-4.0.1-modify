@@ -19,7 +19,7 @@ import com.jnks.iot.server.common.data.kv.JsonDataEntry;
 import com.jnks.iot.server.common.data.kv.KvEntry;
 import com.jnks.iot.server.common.data.kv.LongDataEntry;
 import com.jnks.iot.server.common.data.kv.StringDataEntry;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.common.msg.gateway.metrics.GatewayMetadata;
 import com.jnks.iot.server.gen.transport.TransportProtos;
 import com.jnks.iot.server.gen.transport.TransportProtos.AttributeUpdateNotificationMsg;
@@ -69,7 +69,7 @@ public class JsonConverter {
         return convertToTelemetryProto(jsonElement, System.currentTimeMillis());
     }
 
-    public static TbPair<TransportProtos.PostTelemetryMsg, List<GatewayMetadata>> convertToGatewayTelemetry(JsonElement jsonElement, long systemTs) {
+    public static JnksIotPair<TransportProtos.PostTelemetryMsg, List<GatewayMetadata>> convertToGatewayTelemetry(JsonElement jsonElement, long systemTs) {
         List<GatewayMetadata> metadataResult = null;
         PostTelemetryMsg.Builder builder = PostTelemetryMsg.newBuilder();
         if (jsonElement.isJsonArray()) {
@@ -101,7 +101,7 @@ public class JsonConverter {
         } else {
             throw new JsonSyntaxException(CAN_T_PARSE_VALUE + jsonElement);
         }
-        return TbPair.of(builder.build(), metadataResult);
+        return JnksIotPair.of(builder.build(), metadataResult);
     }
 
     private static JsonElement getAndValidateMetadataElement(JsonObject metadata, String elementName) {

@@ -6,7 +6,7 @@ import { NULL_UUID } from '@shared/models/id/has-uuid';
 import { WidgetTypeDetails } from '@shared/models/widget.models';
 
 @Component({
-  selector: 'tb-widget-type-tabs',
+  selector: 'jnks-iot-widget-type-tabs',
   templateUrl: './widget-type-tabs.component.html',
   styleUrls: []
 })

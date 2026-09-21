@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @ToString
-public class ServiceListChangedEvent extends TbApplicationEvent {
+public class ServiceListChangedEvent extends JnksIotApplicationEvent {
     private final List<ServiceInfo> otherServices;
     private final ServiceInfo currentService;
 

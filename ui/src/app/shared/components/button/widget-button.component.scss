@@ -36,28 +36,28 @@ $boxShadowColorDisabled: var(--tb-widget-button-box-shadow-color-disabled, $defa
   color: $main;
   background-color: $background;
   box-shadow: 0 4px 8px 0 $boxShadow;
-  &.tb-outlined {
+  &.jnks-iot-outlined {
     border: 1px solid $main;
   }
-  &.tb-filled {
+  &.jnks-iot-filled {
     color: $background;
     background-color: $main;
   }
-  &.tb-underlined {
+  &.jnks-iot-underlined {
     border-bottom: 2px solid $main;
   }
-  &.tb-basic {
+  &.jnks-iot-basic {
     background-color: transparent;
   }
 }
 
 
-.mat-mdc-button.mat-mdc-button-base.tb-widget-button {
+.mat-mdc-button.mat-mdc-button-base.jnks-iot-widget-button {
   width: 100%;
   height: 100%;
   min-width: 0;
   padding: 8px 12px;
-  &.tb-icon-only {
+  &.jnks-iot-icon-only {
     padding: 8px;
   }
   .mdc-button__label {
@@ -67,7 +67,7 @@ $boxShadowColorDisabled: var(--tb-widget-button-box-shadow-color-disabled, $defa
     align-items: center;
     justify-content: center;
   }
-  .tb-widget-button-content {
+  .jnks-iot-widget-button-content {
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -77,7 +77,7 @@ $boxShadowColorDisabled: var(--tb-widget-button-box-shadow-color-disabled, $defa
     .mat-icon {
       margin: 0;
     }
-    span.tb-widget-button-label {
+    span.jnks-iot-widget-button-label {
       line-height: normal;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -91,16 +91,16 @@ $boxShadowColorDisabled: var(--tb-widget-button-box-shadow-color-disabled, $defa
 
   @include _tb-widget-button-styles($mainColorEnabled, $backgroundColorEnabled, $boxShadowColorEnabled);
 
-  &:not(:disabled):not(.tb-disabled-state) {
-    &:hover, &.tb-hover-state {
-      &:not(:active):not(.tb-active-state) {
-        &:not(.tb-filled) {
+  &:not(:disabled):not(.jnks-iot-disabled-state) {
+    &:hover, &.jnks-iot-hover-state {
+      &:not(:active):not(.jnks-iot-active-state) {
+        &:not(.jnks-iot-filled) {
           .mat-mdc-button-persistent-ripple::before {
             opacity: 0.04;
             background-color: $mainColorHovered;
           }
         }
-        &.tb-filled {
+        &.jnks-iot-filled {
           .mat-mdc-button-persistent-ripple::before {
             opacity: 1;
             background-color: $mainColorHoveredFilled;
@@ -109,38 +109,38 @@ $boxShadowColorDisabled: var(--tb-widget-button-box-shadow-color-disabled, $defa
         @include _tb-widget-button-styles($mainColorHovered, $backgroundColorHovered, $boxShadowColorHovered);
       }
     }
-    &.tb-pressed-state {
-      &:not(.tb-filled) {
+    &.jnks-iot-pressed-state {
+      &:not(.jnks-iot-filled) {
         .mat-mdc-button-ripple {
           background-color: $mainColorPressedRipple;
         }
       }
-      &.tb-filled {
+      &.jnks-iot-filled {
         .mat-mdc-button-ripple {
           background-color: $mainColorPressedRippleFilled;
         }
       }
     }
-    &.tb-pressed {
-      &:not(.tb-filled) {
+    &.jnks-iot-pressed {
+      &:not(.jnks-iot-filled) {
         .mat-ripple-element {
           background-color: $mainColorPressedRipple;
         }
       }
-      &.tb-filled {
+      &.jnks-iot-filled {
         .mat-ripple-element {
           background-color: $mainColorPressedRippleFilled;
         }
       }
     }
-    &.tb-pressed, &.tb-pressed-state {
-      &:not(.tb-filled) {
+    &.jnks-iot-pressed, &.jnks-iot-pressed-state {
+      &:not(.jnks-iot-filled) {
         .mat-mdc-button-persistent-ripple::before {
           opacity: 0.12;
           background-color: $mainColorPressed;
         }
       }
-      &.tb-filled {
+      &.jnks-iot-filled {
         .mat-mdc-button-persistent-ripple::before {
           opacity: 1;
           background-color: $mainColorPressedFilled;
@@ -148,15 +148,15 @@ $boxShadowColorDisabled: var(--tb-widget-button-box-shadow-color-disabled, $defa
       }
       @include _tb-widget-button-styles($mainColorPressed, $backgroundColorPressed, $boxShadowColorPressed);
     }
-    &:active, &.tb-active-state {
-      &:not(.tb-pressed):not(.tb-pressed-state) {
-        &:not(.tb-filled) {
+    &:active, &.jnks-iot-active-state {
+      &:not(.jnks-iot-pressed):not(.jnks-iot-pressed-state) {
+        &:not(.jnks-iot-filled) {
           .mat-mdc-button-persistent-ripple::before {
             opacity: 0.12;
             background-color: $mainColorActivated;
           }
         }
-        &.tb-filled {
+        &.jnks-iot-filled {
           .mat-mdc-button-persistent-ripple::before {
             opacity: 1;
             background-color: $mainColorActivatedFilled;
@@ -167,11 +167,11 @@ $boxShadowColorDisabled: var(--tb-widget-button-box-shadow-color-disabled, $defa
     }
   }
 
-  &:disabled, &.tb-disabled-state {
-    &:not(.tb-filled) {
+  &:disabled, &.jnks-iot-disabled-state {
+    &:not(.jnks-iot-filled) {
       @include _tb-widget-button-styles($mainColorDisabled, $backgroundColorDisabled, $boxShadowColorDisabled);
     }
-    &.tb-filled {
+    &.jnks-iot-filled {
       @include _tb-widget-button-styles($backgroundColorDisabled, $mainColorDisabled, $boxShadowColorDisabled);
     }
   }

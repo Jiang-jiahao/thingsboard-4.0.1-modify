@@ -21,7 +21,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { MapSettingsContext } from '@home/components/widget/lib/settings/common/map/map-settings.component.models';
 
 @Component({
-  selector: 'tb-data-layer-pattern-settings',
+  selector: 'jnks-iot-data-layer-pattern-settings',
   templateUrl: './data-layer-pattern-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

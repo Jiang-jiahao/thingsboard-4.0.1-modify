@@ -1,23 +1,23 @@
 @import "../scss/constants";
 @import '../scss/mixins';
 
-.tb-mobile-page-item-row-component-container {
+.jnks-iot-mobile-page-item-row-component-container {
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
-.tb-mobile-page-item-row-component {
+.jnks-iot-mobile-page-item-row-component {
   display: flex;
   gap: 8px;
   align-items: center;
   .mat-mdc-icon-button.mat-mdc-button-base {
-    &:not(.tb-drag-handle) {
+    &:not(.jnks-iot-drag-handle) {
       @media #{$mat-xs} {
-        @include tb-mat-icon-button-size(24);
+        @include jnks-iot-mat-icon-button-size(24);
       }
       @media #{$mat-sm} {
-        @include tb-mat-icon-button-size(32);
+        @include jnks-iot-mat-icon-button-size(32);
       }
     }
     &:not(:disabled) {
@@ -31,22 +31,22 @@
       }
     }
   }
-  .tb-form-row {
+  .jnks-iot-form-row {
     flex: 1;
     min-width: 0;
-    .tb-mobile-page-item-start-block {
+    .jnks-iot-mobile-page-item-start-block {
       display: flex;
       align-items: center;
       gap: 0;
       min-width: 0;
     }
-    .tb-mobile-page-item-icon-name-block {
+    .jnks-iot-mobile-page-item-icon-name-block {
       display: flex;
       align-items: center;
       gap: 12px;
       min-width: 0;
     }
-    .tb-mobile-page-item-input-block {
+    .jnks-iot-mobile-page-item-input-block {
       display: flex;
       gap: 8px;
       flex: 1;
@@ -54,15 +54,15 @@
   }
 }
 
-.tb-mobile-page-item-info {
+.jnks-iot-mobile-page-item-info {
   .mdc-text-field:not(.mdc-text-field--disabled) {
     input.mdc-text-field__input {
       cursor: default;
       &::placeholder {
-        color: $tb-primary-color;
+        color: $jnks-iot-primary-color;
       }
       &:-ms-input-placeholder {
-        color: $tb-primary-color;
+        color: $jnks-iot-primary-color;
       }
     }
   }

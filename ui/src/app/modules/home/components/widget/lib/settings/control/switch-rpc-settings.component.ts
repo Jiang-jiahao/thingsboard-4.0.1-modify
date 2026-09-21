@@ -49,7 +49,7 @@ export const switchRpcDefaultSettings = (): SwitchRpcSettings => ({
   });
 
 @Component({
-  selector: 'tb-switch-rpc-settings',
+  selector: 'jnks-iot-switch-rpc-settings',
   templateUrl: './switch-rpc-settings.component.html',
   styleUrls: ['./../widget-settings.scss'],
   providers: [

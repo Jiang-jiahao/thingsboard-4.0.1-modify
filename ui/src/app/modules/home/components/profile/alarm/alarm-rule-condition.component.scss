@@ -5,10 +5,10 @@
       border-bottom: none;
     }
   }
-  .tb-alarm-rule-condition {
+  .jnks-iot-alarm-rule-condition {
     cursor: pointer;
     min-width: 0;
-    .tb-alarm-rule-condition-spec {
+    .jnks-iot-alarm-rule-condition-spec {
       opacity: 0.7;
       padding: 4px;
     }
@@ -21,8 +21,8 @@
 }
 
 :host ::ng-deep {
-  .tb-alarm-rule-condition {
-    .tb-filter-text {
+  .jnks-iot-alarm-rule-condition {
+    .jnks-iot-filter-text {
       max-height: 200px;
     }
   }

@@ -1,7 +1,7 @@
 package com.jnks.iot.rule.engine.profile;
 
 import lombok.extern.slf4j.Slf4j;
-import com.jnks.iot.rule.engine.api.TbContext;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
 import com.jnks.iot.server.common.data.AttributeScope;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.id.CustomerId;
@@ -18,9 +18,9 @@ public class DynamicPredicateValueCtxImpl implements DynamicPredicateValueCtx {
     private final TenantId tenantId;
     private CustomerId customerId;
     private final DeviceId deviceId;
-    private final TbContext ctx;
+    private final JnksIotContext ctx;
 
-    public DynamicPredicateValueCtxImpl(TenantId tenantId, DeviceId deviceId, TbContext ctx) {
+    public DynamicPredicateValueCtxImpl(TenantId tenantId, DeviceId deviceId, JnksIotContext ctx) {
         this.tenantId = tenantId;
         this.deviceId = deviceId;
         this.ctx = ctx;

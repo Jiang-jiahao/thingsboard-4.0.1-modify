@@ -9,7 +9,7 @@ import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 
 @Configuration
-@ConditionalOnMissingBean(TbCaffeineCacheConfiguration.class)
+@ConditionalOnMissingBean(JnksIotCaffeineCacheConfiguration.class)
 @ConditionalOnProperty(prefix = "redis.connection", value = "type", havingValue = "sentinel")
 public class TBRedisSentinelConfiguration extends TBRedisCacheConfiguration {
 

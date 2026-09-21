@@ -36,7 +36,7 @@ import { NULL_UUID } from '@shared/models/id/has-uuid';
 
 // @dynamic
 @Component({
-  selector: 'tb-dashboard-select',
+  selector: 'jnks-iot-dashboard-select',
   templateUrl: './dashboard-select.component.html',
   styleUrls: ['./dashboard-select.component.scss'],
   providers: [{
@@ -118,7 +118,7 @@ export class DashboardSelectComponent implements ControlValueAccessor, OnInit {
   openDashboardSelectPanel() {
     if (!this.disabled) {
       const config = new OverlayConfig({
-        panelClass: 'tb-dashboard-select-panel',
+        panelClass: 'jnks-iot-dashboard-select-panel',
         backdropClass: 'cdk-overlay-transparent-backdrop',
         hasBackdrop: true
       });

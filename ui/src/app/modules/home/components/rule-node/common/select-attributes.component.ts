@@ -15,7 +15,7 @@ import { isDefinedAndNotNull } from '@core/public-api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-select-attributes',
+  selector: 'jnks-iot-select-attributes',
   templateUrl: './select-attributes.component.html',
   styleUrls: [],
   providers: [{

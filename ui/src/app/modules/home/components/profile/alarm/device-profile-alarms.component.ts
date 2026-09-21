@@ -21,7 +21,7 @@ import { EntityId } from '@shared/models/id/entity-id';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-device-profile-alarms',
+  selector: 'jnks-iot-device-profile-alarms',
   templateUrl: './device-profile-alarms.component.html',
   styleUrls: ['./device-profile-alarms.component.scss'],
   providers: [

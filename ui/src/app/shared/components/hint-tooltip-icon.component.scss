@@ -1,4 +1,4 @@
-:host(.tb-hint-tooltip) {
+:host(.jnks-iot-hint-tooltip) {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -6,13 +6,13 @@
 }
 
 :host {
-  .tb-hint-tooltip-content {
+  .jnks-iot-hint-tooltip-content {
     flex: 1 1 auto;
     min-width: 0;
     max-width: fit-content;
   }
 
-  .tb-hint-tooltip-icon {
+  .jnks-iot-hint-tooltip-icon {
     color: #E0E0E0;
     overflow: visible;
     order: 3;

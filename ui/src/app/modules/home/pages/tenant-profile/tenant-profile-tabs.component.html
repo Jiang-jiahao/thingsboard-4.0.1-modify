@@ -1,21 +1,21 @@
 <mat-tab *ngIf="entity"
          label="{{ 'attribute.attributes' | translate }}" #attributesTab="matTab">
-  <tb-attribute-table [defaultAttributeScope]="attributeScopes.SERVER_SCOPE"
+  <jnks-iot-attribute-table [defaultAttributeScope]="attributeScopes.SERVER_SCOPE"
                       [active]="attributesTab.isActive"
                       [entityId]="entity.id"
                       [entityName]="entity.name">
-  </tb-attribute-table>
+  </jnks-iot-attribute-table>
 </mat-tab>
 <mat-tab *ngIf="entity"
          label="{{ 'attribute.latest-telemetry' | translate }}" #telemetryTab="matTab">
-  <tb-attribute-table [defaultAttributeScope]="latestTelemetryTypes.LATEST_TELEMETRY"
+  <jnks-iot-attribute-table [defaultAttributeScope]="latestTelemetryTypes.LATEST_TELEMETRY"
                       disableAttributeScopeSelection
                       [active]="telemetryTab.isActive"
                       [entityId]="entity.id"
                       [entityName]="entity.name">
-  </tb-attribute-table>
+  </jnks-iot-attribute-table>
 </mat-tab>
 <mat-tab *ngIf="entity"
          label="{{ 'alarm.alarms' | translate }}" #alarmsTab="matTab">
-  <tb-alarm-table [active]="alarmsTab.isActive" [entityId]="entity.id"></tb-alarm-table>
+  <jnks-iot-alarm-table [active]="alarmsTab.isActive" [entityId]="entity.id"></jnks-iot-alarm-table>
 </mat-tab>

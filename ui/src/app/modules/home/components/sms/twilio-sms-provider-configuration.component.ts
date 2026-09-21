@@ -13,7 +13,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-twilio-sms-provider-configuration',
+  selector: 'jnks-iot-twilio-sms-provider-configuration',
   templateUrl: './twilio-sms-provider-configuration.component.html',
   styleUrls: [],
   providers: [{

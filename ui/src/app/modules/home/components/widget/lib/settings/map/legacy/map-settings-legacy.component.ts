@@ -37,7 +37,7 @@ import { Widget } from '@shared/models/widget.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-map-settings-legacy',
+  selector: 'jnks-iot-map-settings-legacy',
   templateUrl: './map-settings-legacy.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

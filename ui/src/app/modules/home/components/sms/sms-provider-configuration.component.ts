@@ -18,7 +18,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-sms-provider-configuration',
+  selector: 'jnks-iot-sms-provider-configuration',
   templateUrl: './sms-provider-configuration.component.html',
   styleUrls: [],
   providers: [{

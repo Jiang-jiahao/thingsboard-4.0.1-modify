@@ -19,7 +19,7 @@ import {
 } from '@home/components/widget/config/timewindow-config-panel.component';
 
 @Component({
-  selector: 'tb-entities-table-basic-config',
+  selector: 'jnks-iot-entities-table-basic-config',
   templateUrl: './entities-table-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

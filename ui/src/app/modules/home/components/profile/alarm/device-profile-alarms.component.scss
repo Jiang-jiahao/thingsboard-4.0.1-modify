@@ -1,7 +1,7 @@
 @import '../../../../../../scss/constants';
 
 :host {
-  .tb-device-profile-alarms {
+  .jnks-iot-device-profile-alarms {
     overflow-y: auto;
     &.mat-padding {
       padding: 8px;
@@ -11,7 +11,7 @@
     }
   }
 
-  .tb-prompt{
+  .jnks-iot-prompt{
     margin: 30px 0;
   }
 }

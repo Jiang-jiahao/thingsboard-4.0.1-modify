@@ -9,7 +9,7 @@ import { WidgetConfigComponent } from '@home/components/widget/widget-config.com
 import { WidgetConfigComponentData } from '@home/models/widget-component.models';
 
 @Component({
-  selector: 'tb-radial-gauge-basic-config',
+  selector: 'jnks-iot-radial-gauge-basic-config',
   templateUrl: './analog-gauge-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

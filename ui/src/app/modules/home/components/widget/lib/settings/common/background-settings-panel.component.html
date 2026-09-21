@@ -1,38 +1,38 @@
-<div class="tb-background-settings-panel" [formGroup]="backgroundSettingsFormGroup">
-  <div class="tb-background-settings-title" translate>widgets.background.background-settings</div>
-  <div class="tb-background-settings-panel-content">
-    <div class="tb-form-panel tb-background-form-panel">
+<div class="jnks-iot-background-settings-panel" [formGroup]="backgroundSettingsFormGroup">
+  <div class="jnks-iot-background-settings-title" translate>widgets.background.background-settings</div>
+  <div class="jnks-iot-background-settings-panel-content">
+    <div class="jnks-iot-form-panel jnks-iot-background-form-panel">
       <div class="flex flex-row items-center justify-start gap-4">
-        <div class="tb-form-panel-title" translate>widgets.background.background</div>
-        <tb-toggle-select formControlName="type" class="flex-1" selectMediaBreakpoint="xs">
-          <tb-toggle-option *ngFor="let type of backgroundTypes"
+        <div class="jnks-iot-form-panel-title" translate>widgets.background.background</div>
+        <jnks-iot-toggle-select formControlName="type" class="flex-1" selectMediaBreakpoint="xs">
+          <jnks-iot-toggle-option *ngFor="let type of backgroundTypes"
                             [value]="type">
             {{ backgroundTypeTranslationsMap.get(type) | translate }}
-          </tb-toggle-option>
-        </tb-toggle-select>
+          </jnks-iot-toggle-option>
+        </jnks-iot-toggle-select>
       </div>
-      <tb-gallery-image-input [class.!hidden]="backgroundSettingsFormGroup.get('type').value !== backgroundType.image"
-                              formControlName="imageUrl"></tb-gallery-image-input>
+      <jnks-iot-gallery-image-input [class.!hidden]="backgroundSettingsFormGroup.get('type').value !== backgroundType.image"
+                              formControlName="imageUrl"></jnks-iot-gallery-image-input>
       <div [class.!hidden]="backgroundSettingsFormGroup.get('type').value !== backgroundType.color"
-           class="tb-form-row space-between tb-background-color-field">
+           class="jnks-iot-form-row space-between jnks-iot-background-color-field">
         <div translate>widgets.color.color</div>
-        <tb-color-input asBoxInput
+        <jnks-iot-color-input asBoxInput
                         formControlName="color">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
     </div>
-    <div class="tb-form-panel" formGroupName="overlay">
-      <div class="tb-form-panel-title" translate>widgets.background.overlay</div>
+    <div class="jnks-iot-form-panel" formGroupName="overlay">
+      <div class="jnks-iot-form-panel-title" translate>widgets.background.overlay</div>
       <mat-slide-toggle class="mat-slide" formControlName="enabled">
         {{ 'widgets.background.enable-overlay' | translate }}
       </mat-slide-toggle>
-      <div class="tb-form-row space-between">
+      <div class="jnks-iot-form-row space-between">
         <div translate>widgets.color.color</div>
-        <tb-color-input asBoxInput
+        <jnks-iot-color-input asBoxInput
                         formControlName="color">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
-      <div class="tb-form-row space-between">
+      <div class="jnks-iot-form-row space-between">
         <div translate>widgets.background.blur</div>
         <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
           <input matInput formControlName="blur" type="number" min="0" step="1"
@@ -41,17 +41,17 @@
         </mat-form-field>
       </div>
     </div>
-    <div class="tb-background-settings-preview">
-      <div class="tb-background-settings-preview-title" translate>
+    <div class="jnks-iot-background-settings-preview">
+      <div class="jnks-iot-background-settings-preview-title" translate>
         widgets.background.preview
       </div>
-      <div class="tb-background-settings-preview-box mat-elevation-z4" [style]="backgroundStyle$ | async">
-        <div class="tb-background-settings-preview-overlay" [style]="overlayStyle">
+      <div class="jnks-iot-background-settings-preview-box mat-elevation-z4" [style]="backgroundStyle$ | async">
+        <div class="jnks-iot-background-settings-preview-overlay" [style]="overlayStyle">
         </div>
       </div>
     </div>
   </div>
-  <div class="tb-background-settings-panel-buttons">
+  <div class="jnks-iot-background-settings-panel-buttons">
     <button mat-button
             color="primary"
             type="button"

@@ -5,7 +5,7 @@ import com.jnks.iot.server.common.data.edqs.EdqsEventType;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToEdqsMsg;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
 import com.jnks.iot.server.queue.common.consumer.PartitionedQueueConsumerManager;
 
 import java.util.Set;
@@ -44,7 +44,7 @@ public interface EdqsStateService {
      *
      * @param eventConsumer 按分区消费 EDQS 事件 Topic 的管理器，后续分区对齐会驱动其增删订阅
      */
-    void init(PartitionedQueueConsumerManager<TbProtoQueueMsg<ToEdqsMsg>> eventConsumer);
+    void init(PartitionedQueueConsumerManager<JnksIotProtoQueueMsg<ToEdqsMsg>> eventConsumer);
 
     /**
      * 根据最新分区分配结果驱动状态恢复与事件消费对齐。

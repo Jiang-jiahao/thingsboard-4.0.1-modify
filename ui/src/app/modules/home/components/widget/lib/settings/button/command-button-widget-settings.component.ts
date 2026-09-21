@@ -7,7 +7,7 @@ import { ValueType } from '@shared/models/constants';
 import { commandButtonDefaultSettings } from '@home/components/widget/lib/button/command-button-widget.models';
 
 @Component({
-  selector: 'tb-command-button-widget-settings',
+  selector: 'jnks-iot-command-button-widget-settings',
   templateUrl: './command-button-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

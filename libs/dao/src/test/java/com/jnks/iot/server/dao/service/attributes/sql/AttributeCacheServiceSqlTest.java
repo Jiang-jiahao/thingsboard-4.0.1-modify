@@ -2,8 +2,8 @@ package com.jnks.iot.server.dao.service.attributes.sql;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.jnks.iot.server.cache.TbCacheValueWrapper;
-import com.jnks.iot.server.cache.VersionedTbCache;
+import com.jnks.iot.server.cache.JnksIotCacheValueWrapper;
+import com.jnks.iot.server.cache.VersionedJnksIotCache;
 import com.jnks.iot.server.common.data.AttributeScope;
 import com.jnks.iot.server.common.data.id.DeviceId;
 import com.jnks.iot.server.common.data.kv.AttributeKvEntry;
@@ -27,7 +27,7 @@ public class AttributeCacheServiceSqlTest extends AbstractServiceTest {
     private static final DeviceId DEVICE_ID = new DeviceId(UUID.randomUUID());
 
     @Autowired
-    VersionedTbCache<AttributeCacheKey, AttributeKvEntry> cache;
+    VersionedJnksIotCache<AttributeCacheKey, AttributeKvEntry> cache;
 
     @Test
     public void testPutAndGet() {
@@ -35,7 +35,7 @@ public class AttributeCacheServiceSqlTest extends AbstractServiceTest {
         AttributeKvEntry testValue = new BaseAttributeKvEntry(new StringDataEntry(TEST_KEY, TEST_VALUE), 1, 1L);
         cache.put(testKey, testValue);
 
-        TbCacheValueWrapper<AttributeKvEntry> wrapper = cache.get(testKey);
+        JnksIotCacheValueWrapper<AttributeKvEntry> wrapper = cache.get(testKey);
         assertNotNull(wrapper);
 
         assertEquals(testValue, wrapper.get());
@@ -65,7 +65,7 @@ public class AttributeCacheServiceSqlTest extends AbstractServiceTest {
         AttributeKvEntry testValue = new BaseAttributeKvEntry(new StringDataEntry(TEST_KEY, TEST_VALUE), 1, 1L);
         cache.put(testKey, testValue);
 
-        TbCacheValueWrapper<AttributeKvEntry> wrapper = cache.get(testKey);
+        JnksIotCacheValueWrapper<AttributeKvEntry> wrapper = cache.get(testKey);
         assertNotNull(wrapper);
 
         assertEquals(testValue, wrapper.get());
@@ -86,7 +86,7 @@ public class AttributeCacheServiceSqlTest extends AbstractServiceTest {
         AttributeKvEntry testValue = new BaseAttributeKvEntry(new StringDataEntry(TEST_KEY, TEST_VALUE), 1, 1L);
         cache.put(testKey, testValue);
 
-        TbCacheValueWrapper<AttributeKvEntry> wrapper = cache.get(testKey);
+        JnksIotCacheValueWrapper<AttributeKvEntry> wrapper = cache.get(testKey);
         assertNotNull(wrapper);
 
         assertEquals(testValue, wrapper.get());

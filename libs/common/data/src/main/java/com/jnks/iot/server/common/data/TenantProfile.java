@@ -43,7 +43,7 @@ public class TenantProfile extends BaseData<TenantProfileId> implements HasName 
     private boolean isDefault;
     @Schema(description = "If enabled, will push all messages related to this tenant and processed by the rule engine into separate queue. " +
             "Useful for complex microservices deployments, to isolate processing of the data for specific tenants", example = "false")
-    private boolean isolatedTbRuleEngine;
+    private boolean isolatedJnksIotRuleEngine;
     @Valid
     @Schema(description = "Complex JSON object that contains profile settings: queue configs, max devices, max assets, rate limits, etc.")
     private transient TenantProfileData profileData;
@@ -63,7 +63,7 @@ public class TenantProfile extends BaseData<TenantProfileId> implements HasName 
         this.name = tenantProfile.getName();
         this.description = tenantProfile.getDescription();
         this.isDefault = tenantProfile.isDefault();
-        this.isolatedTbRuleEngine = tenantProfile.isIsolatedTbRuleEngine();
+        this.isolatedJnksIotRuleEngine = tenantProfile.isIsolatedJnksIotRuleEngine();
         this.setProfileData(tenantProfile.getProfileData());
     }
 

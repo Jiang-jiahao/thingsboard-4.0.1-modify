@@ -7,35 +7,35 @@
 
   mat-sidenav-container {
     flex: 1;
-    background: $tb-surface-page;
+    background: $jnks-iot-surface-page;
   }
 
-  mat-sidenav.tb-site-sidenav {
+  mat-sidenav.jnks-iot-site-sidenav {
     width: 288px;
-    border-right: 1px solid $tb-sidebar-border !important;
+    border-right: 1px solid $jnks-iot-sidebar-border !important;
     box-shadow: 8px 0 32px rgba(0, 0, 0, 0.18);
-    background: $tb-sidebar-bg !important;
+    background: $jnks-iot-sidebar-bg !important;
 
     @media (max-width:456px) {
       width: calc(100% - 56px);
     }
 
-    .tb-nav-header {
+    .jnks-iot-nav-header {
       z-index: 2;
       flex-shrink: 0;
       white-space: nowrap;
 
-      .tb-nav-header-toolbar {
+      .jnks-iot-nav-header-toolbar {
         min-height: 88px;
         height: inherit;
         padding: 10px 16px;
         z-index: 2;
         flex-shrink: 0;
         white-space: nowrap;
-        border-bottom: 1px solid $tb-sidebar-border;
+        border-bottom: 1px solid $jnks-iot-sidebar-border;
         background:
-          radial-gradient(ellipse 100% 120% at 0% -20%, rgba($tb-accent-color, 0.22) 0%, transparent 50%),
-          linear-gradient(180deg, lighten($tb-sidebar-header-bg, 3%) 0%, $tb-sidebar-header-bg 100%);
+          radial-gradient(ellipse 100% 120% at 0% -20%, rgba($jnks-iot-accent-color, 0.22) 0%, transparent 50%),
+          linear-gradient(180deg, lighten($jnks-iot-sidebar-header-bg, 3%) 0%, $jnks-iot-sidebar-header-bg 100%);
         box-shadow: none;
 
         & > div {
@@ -47,20 +47,20 @@
       }
     }
 
-    .tb-side-menu-toolbar {
+    .jnks-iot-side-menu-toolbar {
       overflow-y: auto;
       height: inherit;
       padding: 12px 0 20px;
-      background: $tb-sidebar-bg !important;
+      background: $jnks-iot-sidebar-bg !important;
     }
   }
 
-  .tb-primary-toolbar {
+  .jnks-iot-primary-toolbar {
     z-index: 3;
     min-height: 60px !important;
     padding: 0 12px 0 8px !important;
-    color: $tb-topbar-text !important;
-    background: $tb-topbar-bg !important;
+    color: $jnks-iot-topbar-text !important;
+    background: $jnks-iot-topbar-bg !important;
     border-bottom: 1px solid rgba(15, 23, 42, 0.08);
     box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06) !important;
 
@@ -69,21 +69,21 @@
     & {
       button.mat-mdc-icon-button .mat-icon,
       .mat-mdc-icon-button .mat-icon {
-        color: $tb-topbar-text !important;
+        color: $jnks-iot-topbar-text !important;
       }
     }
 
     .mat-mdc-icon-button {
-      color: $tb-topbar-text !important;
+      color: $jnks-iot-topbar-text !important;
       border-radius: 10px;
       transition: background-color 0.2s ease, color 0.2s ease;
 
       &:hover {
-        color: $tb-primary-color !important;
-        background: rgba($tb-secondary-color, 0.1) !important;
+        color: $jnks-iot-primary-color !important;
+        background: rgba($jnks-iot-secondary-color, 0.1) !important;
 
         .mat-icon {
-          color: $tb-primary-color !important;
+          color: $jnks-iot-primary-color !important;
         }
       }
 
@@ -91,60 +91,60 @@
         font-size: 24px;
         width: 24px;
         height: 24px;
-        color: $tb-topbar-text !important;
+        color: $jnks-iot-topbar-text !important;
       }
     }
 
     ::ng-deep {
-      tb-breadcrumb {
-        color: $tb-topbar-text;
+      jnks-iot-breadcrumb {
+        color: $jnks-iot-topbar-text;
 
         h1, a, span:not(.divider) {
           color: inherit;
         }
 
         a {
-          color: $tb-topbar-muted;
+          color: $jnks-iot-topbar-muted;
         }
 
         a:hover, a:focus {
-          color: $tb-secondary-color;
+          color: $jnks-iot-secondary-color;
         }
 
         h1 {
           font-weight: 600;
-          color: $tb-topbar-text;
+          color: $jnks-iot-topbar-text;
         }
       }
 
-      tb-notification-bell {
+      jnks-iot-notification-bell {
         .mat-mdc-icon-button {
-          color: $tb-topbar-text !important;
+          color: $jnks-iot-topbar-text !important;
         }
       }
 
-      tb-user-menu {
-        .tb-user-display-name,
-        .tb-user-authority,
-        .mat-icon.tb-mini-avatar {
-          color: $tb-topbar-text;
+      jnks-iot-user-menu {
+        .jnks-iot-user-display-name,
+        .jnks-iot-user-authority,
+        .mat-icon.jnks-iot-mini-avatar {
+          color: $jnks-iot-topbar-text;
         }
 
-        .tb-user-authority {
-          color: $tb-topbar-muted !important;
+        .jnks-iot-user-authority {
+          color: $jnks-iot-topbar-muted !important;
           opacity: 1;
         }
       }
     }
   }
 
-  .tb-main-content {
+  .jnks-iot-main-content {
     overflow: auto;
     position: relative;
     background:
-      radial-gradient(ellipse 70% 50% at 0% 0%, rgba($tb-secondary-color, 0.07) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 40% at 100% 100%, rgba($tb-primary-color, 0.05) 0%, transparent 50%),
-      $tb-surface-page;
+      radial-gradient(ellipse 70% 50% at 0% 0%, rgba($jnks-iot-secondary-color, 0.07) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 100% 100%, rgba($jnks-iot-primary-color, 0.05) 0%, transparent 50%),
+      $jnks-iot-surface-page;
 
     > :not(router-outlet) {
       flex: 1;

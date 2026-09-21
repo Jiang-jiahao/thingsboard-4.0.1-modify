@@ -22,7 +22,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-here-map-provider-settings',
+  selector: 'jnks-iot-here-map-provider-settings',
   templateUrl: './here-map-provider-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

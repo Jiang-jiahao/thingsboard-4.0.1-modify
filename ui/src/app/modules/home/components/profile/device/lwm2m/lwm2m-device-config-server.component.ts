@@ -25,7 +25,7 @@ import {
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-profile-lwm2m-device-config-server',
+  selector: 'jnks-iot-profile-lwm2m-device-config-server',
   templateUrl: './lwm2m-device-config-server.component.html',
   providers: [
     {

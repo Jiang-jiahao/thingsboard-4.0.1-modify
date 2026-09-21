@@ -41,7 +41,7 @@ import {
 import { MapSettingsContext } from '@home/components/widget/lib/settings/common/map/map-settings.component.models';
 
 @Component({
-  selector: 'tb-map-data-layer-row',
+  selector: 'jnks-iot-map-data-layer-row',
   templateUrl: './map-data-layer-row.component.html',
   styleUrls: ['./map-data-layer-row.component.scss'],
   providers: [
@@ -234,7 +234,7 @@ export class MapDataLayerRowComponent implements ControlValueAccessor, OnInit {
     this.dialog.open<MapDataLayerDialogComponent, MapDataLayerDialogData,
       MapDataLayerSettings>(MapDataLayerDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         settings: deepClone(this.modelValue),
         mapType: this.mapType,

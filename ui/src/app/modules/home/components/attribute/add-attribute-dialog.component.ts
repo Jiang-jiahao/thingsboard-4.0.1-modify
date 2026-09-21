@@ -17,7 +17,7 @@ export interface AddAttributeDialogData {
 }
 
 @Component({
-  selector: 'tb-add-attribute-dialog',
+  selector: 'jnks-iot-add-attribute-dialog',
   templateUrl: './add-attribute-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: AddAttributeDialogComponent}],
   styleUrls: []

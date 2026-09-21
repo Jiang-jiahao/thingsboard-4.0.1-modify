@@ -14,12 +14,12 @@
   <div mat-dialog-content>
     <fieldset [disabled]="isLoading$ | async">
       <span>{{ assignToCustomerText | translate }}</span>
-      <tb-entity-list
+      <jnks-iot-entity-list
         formControlName="entityIds"
         required
         [entityType]="entityType"
       >
-      </tb-entity-list>
+      </jnks-iot-entity-list>
     </fieldset>
   </div>
   <div mat-dialog-actions class="flex items-center justify-end">

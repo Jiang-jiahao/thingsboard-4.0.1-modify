@@ -1,23 +1,23 @@
 <div class="flex flex-col gap-3 protocol-template-panel"
      [class.mat-elevation-z1]="layoutMode === 'full'"
      *ngIf="templatesArray && commandsArray">
-  <div *ngIf="layoutMode === 'full'" class="tb-hint mat-body-2" style="margin: 0; padding: 10px 12px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);">
+  <div *ngIf="layoutMode === 'full'" class="jnks-iot-hint mat-body-2" style="margin: 0; padding: 10px 12px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);">
     <span translate>device-profile.udp.protocol-template-intro</span>
   </div>
-  <div *ngIf="layoutMode === 'commandsOnly'" class="tb-hint mat-caption protocol-template-hint-compact" style="margin: 0;" translate>profiles.protocol-templates-dialog-tab-commands-hint</div>
+  <div *ngIf="layoutMode === 'commandsOnly'" class="jnks-iot-hint mat-caption protocol-template-hint-compact" style="margin: 0;" translate>profiles.protocol-templates-dialog-tab-commands-hint</div>
 
   <ng-container *ngIf="layoutMode === 'full' || layoutMode === 'templatesOnly'">
     <div class="mat-body-2" translate>device-profile.udp.protocol-template-templates-title</div>
-    <div class="tb-hint mat-caption protocol-template-hint-compact" translate>device-profile.udp.protocol-template-templates-hint-single</div>
+    <div class="jnks-iot-hint mat-caption protocol-template-hint-compact" translate>device-profile.udp.protocol-template-templates-hint-single</div>
 
-    <div *ngIf="!templatesArray.length" class="tb-hint mat-caption" translate>device-profile.udp.protocol-template-form-loading</div>
+    <div *ngIf="!templatesArray.length" class="jnks-iot-hint mat-caption" translate>device-profile.udp.protocol-template-form-loading</div>
 
     <div *ngIf="templatesArray.length > 0" class="flex flex-col gap-3 mat-elevation-z1" style="padding: 12px; border-radius: 4px;"
          [formGroup]="asFormGroup(templatesArray.at(0))">
       <input type="hidden" formControlName="id">
 
       <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.udp.protocol-template-default-fields-title</div>
-      <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-inline-hint" translate>device-profile.udp.protocol-template-variable-payload-hint</div>
+      <div class="jnks-iot-hint mat-caption protocol-template-hint-compact protocol-template-inline-hint" translate>device-profile.udp.protocol-template-variable-payload-hint</div>
       <div formArrayName="hexProtocolFields" class="protocol-template-hex-field-list">
         <div *ngFor="let fi of templateFieldIndicesSortedByByteOffset(0); let pos = index; trackBy: trackFieldIndex" [formGroupName]="fi"
              class="protocol-template-hex-field-compact">
@@ -71,7 +71,7 @@
             <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="outline"
                             [matTooltip]="'device-profile.udp.hex-field-length-mode-hint-detail' | translate"
                             matTooltipShowDelay="400"
-                            matTooltipClass="tb-tooltip-multiline">
+                            matTooltipClass="jnks-iot-tooltip-multiline">
               <mat-label translate>device-profile.udp.hex-field-length-mode</mat-label>
               <mat-select [value]="getHexFieldLengthModeTemplate(0, fi)"
                           (selectionChange)="onHexFieldLengthModeTemplate(0, fi, $event.value)">
@@ -131,7 +131,7 @@
       </button>
 
       <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.udp.protocol-template-checksum-title</div>
-      <div class="tb-hint mat-caption protocol-template-inline-hint protocol-template-hint-compact" translate>device-profile.udp.protocol-template-checksum-hint</div>
+      <div class="jnks-iot-hint mat-caption protocol-template-inline-hint protocol-template-hint-compact" translate>device-profile.udp.protocol-template-checksum-hint</div>
       <div class="flex flex-row flex-wrap gap-2 items-start">
         <mat-form-field class="flex-1" style="min-width: 200px;" subscriptSizing="dynamic">
           <mat-label translate>device-profile.udp.protocol-template-checksum-type</mat-label>
@@ -165,13 +165,13 @@
         <mat-expansion-panel-header>
           <mat-panel-title translate>device-profile.udp.hex-ltv-section-title</mat-panel-title>
         </mat-expansion-panel-header>
-        <div class="tb-hint mat-caption protocol-template-hint-compact" style="margin-bottom: 8px;" translate>device-profile.udp.hex-ltv-section-hint</div>
+        <div class="jnks-iot-hint mat-caption protocol-template-hint-compact" style="margin-bottom: 8px;" translate>device-profile.udp.hex-ltv-section-hint</div>
         <div class="protocol-template-ltv-toggle-block">
           <mat-slide-toggle formControlName="hexLtvEnabled" color="primary"
                             (change)="onTemplateHexLtvEnabledChange($event.checked)">
             <span translate>device-profile.udp.hex-ltv-enable</span>
           </mat-slide-toggle>
-          <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.udp.hex-ltv-enable-supplement-hint</div>
+          <div class="jnks-iot-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.udp.hex-ltv-enable-supplement-hint</div>
         </div>
         <ng-container *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value">
           <div class="protocol-template-ltv-toggle-block">
@@ -179,14 +179,14 @@
                               (change)="onTemplateHexLtvLengthIncludesTagChange($event.checked)">
               <span translate>device-profile.udp.hex-ltv-length-includes-tag</span>
             </mat-slide-toggle>
-            <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.udp.hex-ltv-length-includes-tag-hint</div>
+            <div class="jnks-iot-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.udp.hex-ltv-length-includes-tag-hint</div>
           </div>
           <div class="protocol-template-ltv-toggle-block">
             <mat-slide-toggle formControlName="hexLtvLengthIncludesLengthField" color="primary"
                               (change)="onTemplateHexLtvLengthIncludesLengthFieldChange($event.checked)">
               <span translate>device-profile.udp.hex-ltv-length-includes-length-field</span>
             </mat-slide-toggle>
-            <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.udp.hex-ltv-length-includes-length-field-hint</div>
+            <div class="jnks-iot-hint mat-caption protocol-template-hint-compact protocol-template-ltv-toggle-hint" translate>device-profile.udp.hex-ltv-length-includes-length-field-hint</div>
           </div>
         </ng-container>
         <div *ngIf="asFormGroup(templatesArray.at(0)).get('hexLtvEnabled')?.value" class="flex flex-col gap-3">
@@ -231,7 +231,7 @@
             </mat-form-field>
           </div>
           <div class="mat-body-2" translate>device-profile.udp.hex-ltv-mappings-title</div>
-          <div class="tb-hint mat-caption mb-2" translate>device-profile.udp.hex-ltv-mappings-hint</div>
+          <div class="jnks-iot-hint mat-caption mb-2" translate>device-profile.udp.hex-ltv-mappings-hint</div>
           <div formArrayName="hexLtvTagMappings" class="flex flex-col gap-2">
             <div *ngFor="let row of getTemplateLtvTagMappingsArray(0).controls; let li = index" [formGroupName]="li"
                  class="flex flex-row flex-wrap gap-2 items-start">
@@ -275,11 +275,11 @@
     <div class="flex flex-wrap items-baseline gap-1">
       <span class="mat-body-2" translate>device-profile.udp.protocol-template-commands-title</span>
     </div>
-    <div class="tb-hint mat-caption protocol-template-hint-compact" translate>device-profile.udp.protocol-template-commands-hint</div>
+    <div class="jnks-iot-hint mat-caption protocol-template-hint-compact" translate>device-profile.udp.protocol-template-commands-hint</div>
 
     <div *ngIf="templatesArray?.length" class="flex flex-col gap-2 protocol-template-cmd-row-block protocol-template-global-cmd-match">
       <div class="mat-body-2" translate>device-profile.udp.protocol-template-cmd-match-section-title</div>
-      <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-match-section-hint</div>
+      <div class="jnks-iot-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-match-section-hint</div>
       <div class="flex flex-row flex-wrap gap-2 items-start">
         <mat-form-field class="protocol-template-cmd-offset-field" subscriptSizing="dynamic">
           <mat-label translate>device-profile.udp.protocol-template-cmd-offset</mat-label>
@@ -295,7 +295,7 @@
       </div>
     </div>
 
-    <div class="tb-hint mat-caption protocol-template-hint-compact protocol-template-commands-count-hint"
+    <div class="jnks-iot-hint mat-caption protocol-template-hint-compact protocol-template-commands-count-hint"
          *ngIf="commandsArray.length > 0">
       {{ 'device-profile.udp.protocol-template-commands-count' | translate:{ count: commandsArray.length } }}
     </div>
@@ -388,10 +388,10 @@
                             translate>device-profile.udp.protocol-template-cmd-value-hint-bytes</mat-hint>
                 </mat-form-field>
               </div>
-              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-secondary-hint</div>
+              <div class="jnks-iot-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-secondary-hint</div>
             </ng-container>
             <div *ngIf="asFormGroup(cCtrl).get('direction')?.value === ProtocolTemplateCommandDirection.DOWNLINK"
-                 class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-secondary-hidden-downlink</div>
+                 class="jnks-iot-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-secondary-hidden-downlink</div>
             <div *ngIf="isDownlinkOrBothForCommand(ci)" class="flex flex-col gap-2 protocol-template-downlink-len-auto">
               <mat-checkbox formControlName="downlinkPayloadLengthAuto" color="primary">
                 <span class="mat-caption" translate>device-profile.udp.protocol-template-downlink-len-auto</span>
@@ -406,23 +406,23 @@
                 <mat-hint translate>device-profile.udp.protocol-template-downlink-len-field-hint</mat-hint>
               </mat-form-field>
             </div>
-            <div *ngIf="!singleTemplateMode" class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-template-hint</div>
+            <div *ngIf="!singleTemplateMode" class="jnks-iot-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-template-hint</div>
           </div>
 
           <ng-container [ngSwitch]="asFormGroup(cCtrl).get('direction')?.value">
             <ng-container *ngSwitchCase="ProtocolTemplateCommandDirection.DOWNLINK">
               <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.udp.protocol-template-cmd-override-title-downlink</div>
-              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-override-hint-downlink</div>
-              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-downlink-override-bytes-hint</div>
+              <div class="jnks-iot-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-override-hint-downlink</div>
+              <div class="jnks-iot-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-downlink-override-bytes-hint</div>
             </ng-container>
             <ng-container *ngSwitchCase="ProtocolTemplateCommandDirection.BOTH">
               <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.udp.protocol-template-cmd-override-title-both</div>
-              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-override-hint-both</div>
-              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-downlink-override-bytes-hint</div>
+              <div class="jnks-iot-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-override-hint-both</div>
+              <div class="jnks-iot-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-downlink-override-bytes-hint</div>
             </ng-container>
             <ng-container *ngSwitchDefault>
               <div class="mat-body-2 protocol-template-section-subtitle" translate>device-profile.udp.protocol-template-cmd-override-title-uplink</div>
-              <div class="tb-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-override-hint-uplink</div>
+              <div class="jnks-iot-hint mat-caption protocol-template-inline-hint" translate>device-profile.udp.protocol-template-cmd-override-hint-uplink</div>
             </ng-container>
           </ng-container>
           <div formArrayName="overrideFields" class="protocol-template-hex-field-list">
@@ -481,7 +481,7 @@
                 <mat-form-field class="protocol-template-hex-field-compact__len-mode" subscriptSizing="fixed" appearance="outline"
                                 [matTooltip]="'device-profile.udp.hex-field-length-mode-hint-detail' | translate"
                                 matTooltipShowDelay="400"
-                                matTooltipClass="tb-tooltip-multiline">
+                                matTooltipClass="jnks-iot-tooltip-multiline">
                   <mat-label translate>device-profile.udp.hex-field-length-mode</mat-label>
                   <mat-select [value]="getHexFieldLengthModeOverride(ci, fi)"
                               (selectionChange)="onHexFieldLengthModeOverride(ci, fi, $event.value)">

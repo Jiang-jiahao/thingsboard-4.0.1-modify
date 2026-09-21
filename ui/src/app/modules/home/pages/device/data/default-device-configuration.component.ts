@@ -11,7 +11,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-default-device-configuration',
+  selector: 'jnks-iot-default-device-configuration',
   templateUrl: './default-device-configuration.component.html',
   styleUrls: [],
   providers: [{

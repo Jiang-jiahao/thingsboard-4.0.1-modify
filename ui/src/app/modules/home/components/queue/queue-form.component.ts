@@ -22,7 +22,7 @@ import { Subscription } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-queue-form',
+  selector: 'jnks-iot-queue-form',
   templateUrl: './queue-form.component.html',
   styleUrls: ['./queue-form.component.scss'],
   providers: [
@@ -115,7 +115,7 @@ export class QueueFormComponent implements ControlValueAccessor, OnInit, Validat
     this.queueFormGroup.get('name').valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe((value) => {
-      this.queueFormGroup.patchValue({topic: `tb_rule_engine.${value}`});
+      this.queueFormGroup.patchValue({topic: `jnks_iot_rule_engine.${value}`});
     });
     this.queueFormGroup.get('submitStrategy').get('type').valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)

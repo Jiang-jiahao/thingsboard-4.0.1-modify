@@ -38,7 +38,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import com.jnks.iot.common.util.JnksIotExecutors;
 import com.jnks.iot.server.common.adaptor.JsonConverter;
 import com.jnks.iot.server.common.data.DataConstants;
-import com.jnks.iot.server.common.data.TbTransportService;
+import com.jnks.iot.server.common.data.JnksIotTransportService;
 import com.jnks.iot.server.common.data.kv.DataType;
 import com.jnks.iot.server.common.data.transport.snmp.SnmpCommunicationSpec;
 import com.jnks.iot.server.common.data.transport.snmp.SnmpMapping;
@@ -69,7 +69,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 @SuppressWarnings("UnstableApiUsage")
-public class SnmpTransportService implements TbTransportService, CommandResponder {
+public class SnmpTransportService implements JnksIotTransportService, CommandResponder {
     private final TransportService transportService;
     private final PduService pduService;
     @Autowired @Lazy

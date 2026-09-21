@@ -20,7 +20,7 @@
         <pkg.disabled>false</pkg.disabled>
         <pkg.process-resources.phase>process-resources</pkg.process-resources.phase>
         <pkg.package.phase>package</pkg.package.phase>
-        <pkg.name>tb-vc-executor</pkg.name>
+        <pkg.name>jnks-iot-vc-executor</pkg.name>
         <pkg.copyInstallScripts>false</pkg.copyInstallScripts>
         <pkg.win.dist>${project.build.directory}/windows</pkg.win.dist>
         <pkg.implementationTitle>JnksIOT Version Control Executor Service</pkg.implementationTitle>

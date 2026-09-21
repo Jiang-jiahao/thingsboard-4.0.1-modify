@@ -32,7 +32,7 @@ import com.jnks.iot.common.util.JacksonUtil;
 import com.jnks.iot.server.common.data.exception.JnksIotErrorCode;
 import com.jnks.iot.server.common.data.exception.JnksIotException;
 import com.jnks.iot.server.common.msg.tools.MaxPayloadSizeExceededException;
-import com.jnks.iot.server.common.msg.tools.TbRateLimitsException;
+import com.jnks.iot.server.common.msg.tools.JnksIotRateLimitsException;
 import com.jnks.iot.server.service.security.exception.AuthMethodNotSupportedException;
 import com.jnks.iot.server.service.security.exception.JwtExpiredTokenException;
 import com.jnks.iot.server.service.security.exception.UserPasswordExpiredException;
@@ -127,8 +127,8 @@ public class JnksIotErrorResponseHandler extends ResponseEntityExceptionHandler 
                     } else {
                         handleJnksIotException((JnksIotException) exception, response);
                     }
-                } else if (exception instanceof TbRateLimitsException) {
-                    handleRateLimitException(response, (TbRateLimitsException) exception);
+                } else if (exception instanceof JnksIotRateLimitsException) {
+                    handleRateLimitException(response, (JnksIotRateLimitsException) exception);
                 } else if (exception instanceof AccessDeniedException) {
                     handleAccessDeniedException(response);
                 } else if (exception instanceof AuthenticationException) {
@@ -165,7 +165,7 @@ public class JnksIotErrorResponseHandler extends ResponseEntityExceptionHandler 
         JacksonUtil.writeValue(response.getWriter(), JnksIotErrorResponse.of(jnksIotException.getMessage(), errorCode, status));
     }
 
-    private void handleRateLimitException(HttpServletResponse response, TbRateLimitsException exception) throws IOException {
+    private void handleRateLimitException(HttpServletResponse response, JnksIotRateLimitsException exception) throws IOException {
         response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
         String message = "Too many requests for current " + exception.getEntityType().name().toLowerCase() + "!";
         JacksonUtil.writeValue(response.getWriter(),

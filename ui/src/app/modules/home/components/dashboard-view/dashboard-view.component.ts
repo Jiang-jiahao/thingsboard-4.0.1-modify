@@ -8,7 +8,7 @@ import { GatewayLocaleMergeService } from '@core/translate/gateway-locale-merge.
 import { GATEWAY_UI_ENABLED } from '@shared/models/device.models';
 
 @Component({
-  selector: 'tb-dashboard-view',
+  selector: 'jnks-iot-dashboard-view',
   templateUrl: './dashboard-view.component.html',
   styleUrls: ['./dashboard-view.component.scss']
 })

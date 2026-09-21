@@ -16,7 +16,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-rate-limits-list',
+  selector: 'jnks-iot-rate-limits-list',
   templateUrl: './rate-limits-list.component.html',
   styleUrls: ['./rate-limits-list.component.scss'],
   providers: [

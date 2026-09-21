@@ -50,7 +50,7 @@ import { fromEvent } from 'rxjs';
 
 // @dynamic
 @Component({
-  selector: 'tb-timewindow',
+  selector: 'jnks-iot-timewindow',
   templateUrl: './timewindow.component.html',
   styleUrls: ['./timewindow.component.scss'],
   providers: [
@@ -208,7 +208,7 @@ export class TimewindowComponent implements ControlValueAccessor, OnInit, OnChan
       return;
     }
     const config = new OverlayConfig({
-      panelClass: 'tb-timewindow-panel',
+      panelClass: 'jnks-iot-timewindow-panel',
       backdropClass: 'cdk-overlay-transparent-backdrop',
       hasBackdrop: true,
       maxHeight: '70vh',

@@ -60,7 +60,7 @@ import static com.jnks.iot.server.common.data.DataConstants.MAIN_QUEUE_NAME;
 public class HashPartitionService implements PartitionService {
 
     /** Core 默认队列对应的 Kafka topic */
-    @Value("${queue.core.topic:tb_core}")
+    @Value("${queue.core.topic:jnks_iot_core}")
     private String coreTopic;
 
     /** Core 默认队列分区数 */
@@ -68,15 +68,15 @@ public class HashPartitionService implements PartitionService {
     private Integer corePartitions;
 
     /** Calculated Field 事件 topic */
-    @Value("${queue.calculated_fields.event_topic:tb_cf_event}")
+    @Value("${queue.calculated_fields.event_topic:jnks_iot_cf_event}")
     private String cfEventTopic;
 
     /** Calculated Field 状态 topic */
-    @Value("${queue.calculated_fields.state_topic:tb_cf_state}")
+    @Value("${queue.calculated_fields.state_topic:jnks_iot_cf_state}")
     private String cfStateTopic;
 
     /** Version Control 队列 topic */
-    @Value("${queue.vc.topic:tb_version_control}")
+    @Value("${queue.vc.topic:jnks_iot_version_control}")
     private String vcTopic;
 
     /** Version Control 队列分区数 */
@@ -94,7 +94,7 @@ public class HashPartitionService implements PartitionService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     /** 当前进程的服务身份（serviceId、serviceTypes、assignedTenantProfiles 等） */
-    private final TbServiceInfoProvider serviceInfoProvider;
+    private final JnksIotServiceInfoProvider serviceInfoProvider;
 
     /** 查询租户是否隔离、所属 TenantProfile 等路由信息 */
     private final TenantRoutingInfoService tenantRoutingInfoService;
@@ -127,7 +127,7 @@ public class HashPartitionService implements PartitionService {
     private List<ServiceInfo> currentOtherServices;
 
     /** 传输类型 → 开启了该传输的服务实例列表（如 mqtt、coap） */
-    private final Map<String, List<ServiceInfo>> tbTransportServicesByType = new HashMap<>();
+    private final Map<String, List<ServiceInfo>> jnksIotTransportServicesByType = new HashMap<>();
 
     /**
      * TenantProfileId → 「专管该 租户Profile 的 Rule Engine 实例」列表。
@@ -137,7 +137,7 @@ public class HashPartitionService implements PartitionService {
 
     private HashFunction hashFunction;
 
-    public HashPartitionService(TbServiceInfoProvider serviceInfoProvider,
+    public HashPartitionService(JnksIotServiceInfoProvider serviceInfoProvider,
                                 TenantRoutingInfoService tenantRoutingInfoService,
                                 ApplicationEventPublisher applicationEventPublisher,
                                 QueueRoutingInfoService queueRoutingInfoService,
@@ -157,13 +157,13 @@ public class HashPartitionService implements PartitionService {
     public void init() {
         this.hashFunction = forName(hashFunctionName);
 
-        // QK(Main, TB_CORE, system)
-        QueueKey coreKey = new QueueKey(ServiceType.TB_CORE);
+        // QK(Main, JNKS_IOT_CORE, system)
+        QueueKey coreKey = new QueueKey(ServiceType.JNKS_IOT_CORE);
         partitionSizesMap.put(coreKey, corePartitions);
         partitionTopicsMap.put(coreKey, coreTopic);
 
-        // QK(Main, TB_VC_EXECUTOR, system)
-        QueueKey vcKey = new QueueKey(ServiceType.TB_VC_EXECUTOR);
+        // QK(Main, JNKS_IOT_VC_EXECUTOR, system)
+        QueueKey vcKey = new QueueKey(ServiceType.JNKS_IOT_VC_EXECUTOR);
         partitionSizesMap.put(vcKey, vcPartitions);
         partitionTopicsMap.put(vcKey, vcTopic);
 
@@ -203,7 +203,7 @@ public class HashPartitionService implements PartitionService {
     private void doInitRuleEnginePartitions() {
         List<QueueRoutingInfo> queueRoutingInfoList = getQueueRoutingInfos();
         queueRoutingInfoList.forEach(queue -> {
-            QueueKey queueKey = new QueueKey(ServiceType.TB_RULE_ENGINE, queue);
+            QueueKey queueKey = new QueueKey(ServiceType.JNKS_IOT_RULE_ENGINE, queue);
             updateQueue(queueKey, queue.getQueueTopic(), queue.getPartitions());
             queueConfigs.put(queueKey, new QueueConfig(queue));
         });
@@ -211,7 +211,7 @@ public class HashPartitionService implements PartitionService {
 
     /**
      * 拉取全部队列路由定义。
-     * Transport 侧带重试：可能比 tb-core 先启动，一时拿不到队列信息。
+     * Transport 侧带重试：可能比 jnks-iot-core 先启动，一时拿不到队列信息。
      */
     private List<QueueRoutingInfo> getQueueRoutingInfos() {
         List<QueueRoutingInfo> queueRoutingInfoList;
@@ -244,7 +244,7 @@ public class HashPartitionService implements PartitionService {
     }
 
     private boolean isTransport(String serviceType) {
-        return "tb-transport".equals(serviceType);
+        return "jnks-iot-transport".equals(serviceType);
     }
 
     /**
@@ -256,7 +256,7 @@ public class HashPartitionService implements PartitionService {
         for (TransportProtos.QueueUpdateMsg queueUpdateMsg : queueUpdateMsgs) {
             QueueRoutingInfo queueRoutingInfo = new QueueRoutingInfo(queueUpdateMsg);
             TenantId tenantId = queueRoutingInfo.getTenantId();
-            QueueKey queueKey = new QueueKey(ServiceType.TB_RULE_ENGINE, queueRoutingInfo.getQueueName(), tenantId);
+            QueueKey queueKey = new QueueKey(ServiceType.JNKS_IOT_RULE_ENGINE, queueRoutingInfo.getQueueName(), tenantId);
             updateQueue(queueKey, queueRoutingInfo.getQueueTopic(), queueRoutingInfo.getPartitions());
             queueConfigs.put(queueKey, new QueueConfig(queueRoutingInfo));
             if (!tenantId.isSysTenantId()) {
@@ -275,7 +275,7 @@ public class HashPartitionService implements PartitionService {
         List<QueueKey> queueKeys = queueDeleteMsgs.stream()
                 .flatMap(queueDeleteMsg -> {
                     TenantId tenantId = TenantId.fromUUID(new UUID(queueDeleteMsg.getTenantIdMSB(), queueDeleteMsg.getTenantIdLSB()));
-                    QueueKey queueKey = new QueueKey(ServiceType.TB_RULE_ENGINE, queueDeleteMsg.getQueueName(), tenantId);
+                    QueueKey queueKey = new QueueKey(ServiceType.JNKS_IOT_RULE_ENGINE, queueDeleteMsg.getQueueName(), tenantId);
                     // Main 与 Calculated Field 队列绑定，删 Main 时连带清理
                     if (queueKey.getQueueName().equals(MAIN_QUEUE_NAME)) {
                         return Stream.of(queueKey, queueKey.withQueueName(CF_QUEUE_NAME),
@@ -288,8 +288,8 @@ public class HashPartitionService implements PartitionService {
             removeQueue(queueKey);
             evictTenantInfo(queueKey.getTenantId());
         });
-        if (serviceInfoProvider.isService(ServiceType.TB_RULE_ENGINE)) {
-            publishPartitionChangeEvent(ServiceType.TB_RULE_ENGINE, queueKeys.stream()
+        if (serviceInfoProvider.isService(ServiceType.JNKS_IOT_RULE_ENGINE)) {
+            publishPartitionChangeEvent(ServiceType.JNKS_IOT_RULE_ENGINE, queueKeys.stream()
                     .collect(Collectors.toMap(k -> k, k -> Collections.emptySet())), Collections.emptyMap());
         }
     }
@@ -350,8 +350,8 @@ public class HashPartitionService implements PartitionService {
      */
     @Override
     public boolean isManagedByCurrentService(TenantId tenantId) {
-        // serviceInfoProvider.isService(ServiceType.TB_CORE)条件不能去除，因为存在单体启动的时候直接处理所有的RE流量
-        if (serviceInfoProvider.isService(ServiceType.TB_CORE) || !serviceInfoProvider.isService(ServiceType.TB_RULE_ENGINE)) {
+        // serviceInfoProvider.isService(ServiceType.JNKS_IOT_CORE)条件不能去除，因为存在单体启动的时候直接处理所有的RE流量
+        if (serviceInfoProvider.isService(ServiceType.JNKS_IOT_CORE) || !serviceInfoProvider.isService(ServiceType.JNKS_IOT_RULE_ENGINE)) {
             return true;
         }
 
@@ -430,7 +430,7 @@ public class HashPartitionService implements PartitionService {
         QueueKey queueKey = getQueueKey(serviceType, queueName, tenantId);
         TopicPartitionInfo tpi = resolve(queueKey, entityId);
         // 非规则引擎，或不需要分区维度时，不做广播展开
-        if (serviceType != ServiceType.TB_RULE_ENGINE || tpi.getPartition().isEmpty()) {
+        if (serviceType != ServiceType.JNKS_IOT_RULE_ENGINE || tpi.getPartition().isEmpty()) {
             return List.of(tpi);
         }
         QueueConfig queueConfig = queueConfigs.get(queueKey);
@@ -527,7 +527,7 @@ public class HashPartitionService implements PartitionService {
     @Override
     public synchronized void recalculatePartitions(ServiceInfo currentService, List<ServiceInfo> otherServices) {
         log.info("Recalculating partitions");
-        tbTransportServicesByType.clear();
+        jnksIotTransportServicesByType.clear();
         logServiceInfo(currentService);
         otherServices.forEach(this::logServiceInfo);
 
@@ -575,9 +575,9 @@ public class HashPartitionService implements PartitionService {
         });
 
         // Rule Engine：隔离租户队列若本轮未分到任何分区，也视为移除，促使消费者退订
-        if (serviceInfoProvider.isService(ServiceType.TB_RULE_ENGINE)) {
+        if (serviceInfoProvider.isService(ServiceType.JNKS_IOT_RULE_ENGINE)) {
             partitionSizesMap.keySet().stream()
-                    .filter(queueKey -> queueKey.getType() == ServiceType.TB_RULE_ENGINE &&
+                    .filter(queueKey -> queueKey.getType() == ServiceType.JNKS_IOT_RULE_ENGINE &&
                             !queueKey.getTenantId().isSysTenantId() &&
                             !newPartitions.containsKey(queueKey))
                     .forEach(removed::add);
@@ -714,7 +714,7 @@ public class HashPartitionService implements PartitionService {
     /** 集群中声明了某传输类型的实例数量 */
     @Override
     public int countTransportsByType(String type) {
-        var list = tbTransportServicesByType.get(type);
+        var list = jnksIotTransportServicesByType.get(type);
         return list == null ? 0 : list.size();
     }
 
@@ -727,7 +727,7 @@ public class HashPartitionService implements PartitionService {
         services.forEach(serviceInfo -> {
             for (String serviceTypeStr : serviceInfo.getServiceTypesList()) {
                 ServiceType serviceType = ServiceType.of(serviceTypeStr);
-                if (ServiceType.TB_RULE_ENGINE.equals(serviceType)) {
+                if (ServiceType.JNKS_IOT_RULE_ENGINE.equals(serviceType)) {
                     partitionTopicsMap.keySet().forEach(queueKey ->
                             currentMap.computeIfAbsent(queueKey, key -> new ArrayList<>()).add(serviceInfo));
                 } else {
@@ -756,7 +756,7 @@ public class HashPartitionService implements PartitionService {
 
     /**
      * 是否走「租户隔离队列」。
-     * 仅 TB_RULE_ENGINE 关注隔离；系统租户永远非隔离；其他服务类型一律按共享处理。
+     * 仅 JNKS_IOT_RULE_ENGINE 关注隔离；系统租户永远非隔离；其他服务类型一律按共享处理。
      */
     private boolean isIsolated(ServiceType serviceType, TenantId tenantId) {
         if (TenantId.SYS_TENANT_ID.equals(tenantId)) {
@@ -766,7 +766,7 @@ public class HashPartitionService implements PartitionService {
         if (routingInfo == null) {
             throw new TenantNotFoundException(tenantId);
         }
-        if (serviceType == ServiceType.TB_RULE_ENGINE) {
+        if (serviceType == ServiceType.JNKS_IOT_RULE_ENGINE) {
             return routingInfo.isIsolated();
         }
         return false;
@@ -796,10 +796,10 @@ public class HashPartitionService implements PartitionService {
         // 单体进程可能同时带多种 serviceType
         for (String serviceTypeStr : instance.getServiceTypesList()) {
             ServiceType serviceType = ServiceType.of(serviceTypeStr);
-            if (ServiceType.TB_RULE_ENGINE.equals(serviceType)) {
+            if (ServiceType.JNKS_IOT_RULE_ENGINE.equals(serviceType)) {
                 // 每个 RE 实例都作为所有已注册 RE QueueKey 的候选消费者
                 partitionTopicsMap.keySet().forEach(key -> {
-                    if (key.getType().equals(ServiceType.TB_RULE_ENGINE)) {
+                    if (key.getType().equals(ServiceType.JNKS_IOT_RULE_ENGINE)) {
                         queueServiceList.computeIfAbsent(key, k -> new ArrayList<>()).add(instance);
                     }
                 });
@@ -816,16 +816,16 @@ public class HashPartitionService implements PartitionService {
                         responsibleServices.computeIfAbsent(profileId, k -> new ArrayList<>()).add(instance);
                     }
                 }
-            } else if (ServiceType.TB_CORE.equals(serviceType)) {
+            } else if (ServiceType.JNKS_IOT_CORE.equals(serviceType)) {
                 queueServiceList.computeIfAbsent(new QueueKey(serviceType), key -> new ArrayList<>()).add(instance);
-            } else if (ServiceType.TB_VC_EXECUTOR.equals(serviceType)) {
+            } else if (ServiceType.JNKS_IOT_VC_EXECUTOR.equals(serviceType)) {
                 queueServiceList.computeIfAbsent(new QueueKey(serviceType), key -> new ArrayList<>()).add(instance);
             } else if (ServiceType.EDQS.equals(serviceType)) {
                 queueServiceList.computeIfAbsent(new QueueKey(serviceType), key -> new ArrayList<>()).add(instance);
             }
         }
         for (String transportType : instance.getTransportsList()) {
-            tbTransportServicesByType.computeIfAbsent(transportType, t -> new ArrayList<>()).add(instance);
+            jnksIotTransportServicesByType.computeIfAbsent(transportType, t -> new ArrayList<>()).add(instance);
         }
     }
 
@@ -849,7 +849,7 @@ public class HashPartitionService implements PartitionService {
             return Collections.emptyList();
         }
         TenantId tenantId = queueKey.getTenantId();
-        if (queueKey.getType() == ServiceType.TB_RULE_ENGINE) {
+        if (queueKey.getType() == ServiceType.JNKS_IOT_RULE_ENGINE) {
             if (!responsibleServices.isEmpty()) { // 集群里存在任意专用 RE 时，进入 Profile 分流逻辑
                 TenantProfileId profileId;
                 if (tenantId != null && !tenantId.isSysTenantId()) {

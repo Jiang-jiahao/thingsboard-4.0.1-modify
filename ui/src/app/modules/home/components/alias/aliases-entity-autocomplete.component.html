@@ -12,7 +12,7 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
   <mat-autocomplete
-    class="tb-autocomplete"
+    class="jnks-iot-autocomplete"
     #entityInfoAutocomplete="matAutocomplete"
     [displayWith]="displayEntityInfoFn">
     <mat-option *ngFor="let entityInfo of filteredEntityInfos | async" [value]="entityInfo">

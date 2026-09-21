@@ -1,5 +1,5 @@
 :host {
-  .tb-kv-map-config {
+  .jnks-iot-kv-map-config {
     margin-bottom: 16px;
 
     .header {
@@ -16,7 +16,7 @@
         white-space: nowrap;
       }
 
-      .tb-required::after {
+      .jnks-iot-required::after {
         color: #757575;
         font-size: 12px;
         font-weight: 700;
@@ -36,7 +36,7 @@
       }
     }
 
-    tb-error {
+    jnks-iot-error {
       display: block;
       margin-top: -12px;
     }

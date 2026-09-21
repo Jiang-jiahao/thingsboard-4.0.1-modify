@@ -17,10 +17,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <main.dir>${basedir}/../..</main.dir>
-        <pkg.name>tb-web-ui</pkg.name>
+        <pkg.name>jnks-iot-web-ui</pkg.name>
         <pkg.type>js</pkg.type>
-        <docker.name>tb-web-ui</docker.name>
-        <pkg.name>tb-web-ui</pkg.name>
+        <docker.name>jnks-iot-web-ui</docker.name>
+        <pkg.name>jnks-iot-web-ui</pkg.name>
         <pkg.type>js</pkg.type>
         <pkg.disabled>false</pkg.disabled>
         <pkg.process-resources.phase>process-resources</pkg.process-resources.phase>

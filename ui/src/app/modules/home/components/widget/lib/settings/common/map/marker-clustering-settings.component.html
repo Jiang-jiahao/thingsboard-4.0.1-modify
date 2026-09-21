@@ -1,5 +1,5 @@
-<div class="tb-form-panel tb-slide-toggle" [formGroup]="clusteringSettingsFormGroup">
-  <mat-expansion-panel class="tb-settings" [expanded]="settingsExpanded"
+<div class="jnks-iot-form-panel jnks-iot-slide-toggle" [formGroup]="clusteringSettingsFormGroup">
+  <mat-expansion-panel class="jnks-iot-settings" [expanded]="settingsExpanded"
                        [disabled]="!clusteringSettingsFormGroup.get('enable').value">
     <mat-expansion-panel-header class="flex flex-row flex-wrap">
       <mat-panel-title>
@@ -9,54 +9,54 @@
       </mat-panel-title>
     </mat-expansion-panel-header>
     <ng-template matExpansionPanelContent>
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <mat-slide-toggle class="mat-slide" formControlName="zoomOnClick">
           {{ 'widgets.maps.data-layer.marker.clustering.zoom-on-cluster-click' | translate }}
         </mat-slide-toggle>
       </div>
-      <div class="tb-form-row space-between column-xs">
+      <div class="jnks-iot-form-row space-between column-xs">
         <div translate>widgets.maps.data-layer.marker.clustering.max-zoom</div>
         <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
           <input matInput type="number" min="0" max="18" step="1" formControlName="maxZoom" placeholder="{{ 'widget-config.set' | translate }}">
         </mat-form-field>
       </div>
-      <div class="tb-form-row space-between column-xs">
+      <div class="jnks-iot-form-row space-between column-xs">
         <div translate>widgets.maps.data-layer.marker.clustering.max-radius</div>
         <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
           <input matInput type="number" min="0" formControlName="maxClusterRadius" placeholder="{{ 'widget-config.set' | translate }}">
           <span matSuffix>px</span>
         </mat-form-field>
       </div>
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <mat-slide-toggle class="mat-slide" formControlName="zoomAnimation">
           {{ 'widgets.maps.data-layer.marker.clustering.zoom-animation' | translate }}
         </mat-slide-toggle>
       </div>
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <mat-slide-toggle class="mat-slide" formControlName="showCoverageOnHover">
           {{ 'widgets.maps.data-layer.marker.clustering.bounds-on-cluster-mouse-over' | translate }}
         </mat-slide-toggle>
       </div>
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <mat-slide-toggle class="mat-slide" formControlName="spiderfyOnMaxZoom">
           {{ 'widgets.maps.data-layer.marker.clustering.spiderfy-max-zoom-level' | translate }}
         </mat-slide-toggle>
       </div>
-      <div class="tb-form-panel stroked">
-        <div class="tb-form-panel-title" translate>widgets.maps.data-layer.marker.clustering.load-optimization</div>
-        <div class="tb-form-row">
+      <div class="jnks-iot-form-panel stroked">
+        <div class="jnks-iot-form-panel-title" translate>widgets.maps.data-layer.marker.clustering.load-optimization</div>
+        <div class="jnks-iot-form-row">
           <mat-slide-toggle class="mat-slide" formControlName="chunkedLoad">
             {{ 'widgets.maps.data-layer.marker.clustering.chunked-load' | translate }}
           </mat-slide-toggle>
         </div>
-        <div class="tb-form-row">
+        <div class="jnks-iot-form-row">
           <mat-slide-toggle class="mat-slide" formControlName="lazyLoad">
             {{ 'widgets.maps.data-layer.marker.clustering.lazy-load' | translate }}
           </mat-slide-toggle>
         </div>
       </div>
-      <div class="tb-form-panel stroked tb-slide-toggle">
-        <mat-expansion-panel class="tb-settings" [expanded]="clusteringSettingsFormGroup.get('useClusterMarkerColorFunction').value"
+      <div class="jnks-iot-form-panel stroked jnks-iot-slide-toggle">
+        <mat-expansion-panel class="jnks-iot-settings" [expanded]="clusteringSettingsFormGroup.get('useClusterMarkerColorFunction').value"
                              [disabled]="!clusteringSettingsFormGroup.get('useClusterMarkerColorFunction').value">
           <mat-expansion-panel-header class="flex flex-row flex-wrap">
             <mat-panel-title>
@@ -66,14 +66,14 @@
             </mat-panel-title>
           </mat-expansion-panel-header>
           <ng-template matExpansionPanelContent>
-            <tb-js-func formControlName="clusterMarkerColorFunction"
+            <jnks-iot-js-func formControlName="clusterMarkerColorFunction"
                         withModules
                         [globalVariables]="functionScopeVariables"
                         [functionArgs]="['data', 'childCount']"
                         functionTitle="{{ 'widgets.maps.data-layer.marker.clustering.marker-color-function' | translate }}"
                         helpId="widget/lib/map/clustering_color_fn"
                         [helpPopupStyle]="{width: '900px'}">
-            </tb-js-func>
+            </jnks-iot-js-func>
           </ng-template>
         </mat-expansion-panel>
       </div>

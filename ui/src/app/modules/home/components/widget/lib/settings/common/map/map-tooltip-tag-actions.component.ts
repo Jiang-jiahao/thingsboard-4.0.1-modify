@@ -11,7 +11,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { WidgetAction, WidgetActionType, widgetType } from '@shared/models/widget.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { MapSettingsContext } from '@home/components/widget/lib/settings/common/map/map-settings.component.models';
 import {
   WidgetActionSettingsPanelComponent
@@ -21,7 +21,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { deepClone } from '@core/utils';
 
 @Component({
-  selector: 'tb-map-tooltip-tag-actions-panel',
+  selector: 'jnks-iot-map-tooltip-tag-actions-panel',
   templateUrl: './map-tooltip-tag-actions.component.html',
   styleUrls: ['./map-tooltip-tag-actions.component.scss'],
   providers: [
@@ -46,7 +46,7 @@ export class MapTooltipTagActionsComponent implements ControlValueAccessor, OnIn
   private propagateChange = (_val: any) => {};
 
   constructor(private fb: UntypedFormBuilder,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private translate: TranslateService,
@@ -152,7 +152,7 @@ export class MapTooltipTagActionsComponent implements ControlValueAccessor, OnIn
         },
         isModal: true
       });
-      widgetActionSettingsPanelPopover.tbComponentRef.instance.widgetActionApplied.subscribe((widgetAction) => {
+      widgetActionSettingsPanelPopover.jnksIotComponentRef.instance.widgetActionApplied.subscribe((widgetAction) => {
         widgetActionSettingsPanelPopover.hide();
         callback(widgetAction);
       });

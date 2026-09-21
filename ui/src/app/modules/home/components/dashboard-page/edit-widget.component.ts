@@ -15,7 +15,7 @@ import { DataKeySettingsFunction } from '@home/components/widget/lib/settings/co
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-edit-widget',
+  selector: 'jnks-iot-edit-widget',
   templateUrl: './edit-widget.component.html',
   styleUrls: ['./edit-widget.component.scss']
 })

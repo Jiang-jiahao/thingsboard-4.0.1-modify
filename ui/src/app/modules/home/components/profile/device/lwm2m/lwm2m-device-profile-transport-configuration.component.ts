@@ -40,7 +40,7 @@ import { DialogService } from '@core/services/dialog.service';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'tb-profile-lwm2m-device-transport-configuration',
+  selector: 'jnks-iot-profile-lwm2m-device-transport-configuration',
   templateUrl: './lwm2m-device-profile-transport-configuration.component.html',
   styleUrls: ['./lwm2m-device-profile-transport-configuration.component.scss'],
   providers: [

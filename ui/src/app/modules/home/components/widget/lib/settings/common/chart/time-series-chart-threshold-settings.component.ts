@@ -1,7 +1,7 @@
 import { Component, forwardRef, Input, OnInit, Renderer2, ViewContainerRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { deepClone } from '@core/utils';
 import { coerceBoolean } from '@shared/decorators/coercion';
 import { WidgetConfig } from '@shared/models/widget.models';
@@ -14,7 +14,7 @@ import {
 } from '@home/components/widget/lib/settings/common/chart/time-series-chart-threshold-settings-panel.component';
 
 @Component({
-  selector: 'tb-time-series-chart-threshold-settings',
+  selector: 'jnks-iot-time-series-chart-threshold-settings',
   templateUrl: './time-series-chart-threshold-settings.component.html',
   styleUrls: [],
   providers: [
@@ -54,7 +54,7 @@ export class TimeSeriesChartThresholdSettingsComponent implements OnInit, Contro
 
   private propagateChange = null;
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef) {}
 
@@ -106,8 +106,8 @@ export class TimeSeriesChartThresholdSettingsComponent implements OnInit, Contro
         },
         isModal: true
       });
-      thresholdSettingsPanelPopover.tbComponentRef.instance.popover = thresholdSettingsPanelPopover;
-      thresholdSettingsPanelPopover.tbComponentRef.instance.thresholdSettingsApplied.subscribe((thresholdSettings) => {
+      thresholdSettingsPanelPopover.jnksIotComponentRef.instance.popover = thresholdSettingsPanelPopover;
+      thresholdSettingsPanelPopover.jnksIotComponentRef.instance.thresholdSettingsApplied.subscribe((thresholdSettings) => {
         thresholdSettingsPanelPopover.hide();
         this.modelValue = thresholdSettings;
         this.propagateChange(this.modelValue);

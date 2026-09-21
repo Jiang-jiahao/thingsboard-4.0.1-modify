@@ -14,7 +14,7 @@ import { isUndefined } from '@core/utils';
 import { cssSizeToStrSize, resolveCssSize } from '@shared/models/widget-settings.models';
 
 @Component({
-  selector: 'tb-scada-symbol-basic-config',
+  selector: 'jnks-iot-scada-symbol-basic-config',
   templateUrl: './scada-symbol-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

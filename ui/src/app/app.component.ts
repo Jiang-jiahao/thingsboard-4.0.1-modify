@@ -21,7 +21,7 @@ import { SETTINGS_KEY } from '@core/settings/settings.effects';
 import { initCustomJQueryEvents } from '@shared/models/jquery-event.models';
 
 @Component({
-  selector: 'tb-root',
+  selector: 'jnks-iot-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
@@ -38,7 +38,7 @@ export class AppComponent implements OnInit {
               private domSanitizer: DomSanitizer,
               private authService: AuthService) {
 
-    console.log(`JnksIOT Version: ${env.tbVersion}`);
+    console.log(`JnksIOT Version: ${env.jnksIotVersion}`);
 
     this.matIconRegistry.addSvgIconResolver((name, namespace) => {
       if (namespace === 'mdi') {
@@ -126,7 +126,7 @@ export class AppComponent implements OnInit {
   }
 
   onActivateComponent($event: any) {
-    const loadingElement = $('div#tb-loading-spinner');
+    const loadingElement = $('div#jnks-iot-loading-spinner');
     if (loadingElement.length) {
       loadingElement.remove();
     }

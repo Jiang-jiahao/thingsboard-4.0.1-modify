@@ -17,13 +17,13 @@ import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { getMaterialIcons, MaterialIcon } from '@shared/models/icon.models';
 import { distinctUntilChanged, map, mergeMap, share, startWith, tap } from 'rxjs/operators';
 import { ResourcesService } from '@core/services/resources.service';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { MediaBreakpoints } from '@shared/models/constants';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-material-icons',
+  selector: 'jnks-iot-material-icons',
   templateUrl: './material-icons.component.html',
   providers: [],
   styleUrls: ['./material-icons.component.scss'],
@@ -46,7 +46,7 @@ export class MaterialIconsComponent extends PageComponent implements OnInit {
   showTitle = true;
 
   @Input()
-  popover: TbPopoverComponent;
+  popover: JnksIotPopoverComponent;
 
   @Output()
   iconSelected = new EventEmitter<string>();

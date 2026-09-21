@@ -34,7 +34,7 @@ import {
 } from '@home/pages/profiles/protocol-template-downlink-fields.util';
 
 @Component({
-  selector: 'tb-protocol-template-bundle-editor',
+  selector: 'jnks-iot-protocol-template-bundle-editor',
   templateUrl: './protocol-template-bundle-editor.component.html',
   styleUrls: ['./protocol-template-bundle-editor.component.scss']
 })

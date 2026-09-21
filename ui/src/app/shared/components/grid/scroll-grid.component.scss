@@ -1,4 +1,4 @@
-.tb-scroll-grid-viewport {
+.jnks-iot-scroll-grid-viewport {
   height: 100%;
   .cdk-virtual-scroll-content-wrapper {
     display: flex;
@@ -8,11 +8,11 @@
   .cdk-virtual-scroll-spacer {
     height: auto !important;
   }
-  .tb-scroll-grid-items-row {
+  .jnks-iot-scroll-grid-items-row {
     display: flex;
     flex-direction: row;
   }
-  .tb-scroll-grid-item-container {
+  .jnks-iot-scroll-grid-item-container {
     flex: 1;
     min-width: 0;
   }

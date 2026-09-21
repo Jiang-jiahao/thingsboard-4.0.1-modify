@@ -1,5 +1,5 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import {
   TimeSeriesChartThreshold,
@@ -20,7 +20,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-time-series-chart-threshold-settings-panel',
+  selector: 'jnks-iot-time-series-chart-threshold-settings-panel',
   templateUrl: './time-series-chart-threshold-settings-panel.component.html',
   providers: [],
   styleUrls: ['./time-series-chart-threshold-settings-panel.component.scss'],
@@ -52,7 +52,7 @@ export class TimeSeriesChartThresholdSettingsPanelComponent implements OnInit {
   yAxisIds: TimeSeriesChartYAxisId[];
 
   @Input()
-  popover: TbPopoverComponent<TimeSeriesChartThresholdSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<TimeSeriesChartThresholdSettingsPanelComponent>;
 
   @Input()
   @coerceBoolean()

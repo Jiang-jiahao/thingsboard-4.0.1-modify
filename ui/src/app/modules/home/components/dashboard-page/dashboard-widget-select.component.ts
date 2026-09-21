@@ -32,7 +32,7 @@ interface BundleWidgetsFilter extends WidgetsFilter {
 }
 
 @Component({
-  selector: 'tb-dashboard-widget-select',
+  selector: 'jnks-iot-dashboard-widget-select',
   templateUrl: './dashboard-widget-select.component.html',
   styleUrls: ['./dashboard-widget-select.component.scss'],
   encapsulation: ViewEncapsulation.None

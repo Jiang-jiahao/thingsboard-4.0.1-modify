@@ -18,7 +18,7 @@ export interface RuleChainSelectPanelData {
 }
 
 @Component({
-  selector: 'tb-rule-chain-select-panel',
+  selector: 'jnks-iot-rule-chain-select-panel',
   templateUrl: './rule-chain-select-panel.component.html',
   styleUrls: ['./rule-chain-select-panel.component.scss']
 })

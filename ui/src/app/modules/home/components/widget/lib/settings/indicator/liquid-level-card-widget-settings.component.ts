@@ -40,7 +40,7 @@ import { EntityService } from '@core/http/entity.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-liquid-level-card-widget-settings',
+  selector: 'jnks-iot-liquid-level-card-widget-settings',
   templateUrl: './liquid-level-card-widget-settings.component.html',
   styleUrls: []
 })

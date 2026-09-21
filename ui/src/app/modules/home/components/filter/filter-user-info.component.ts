@@ -14,7 +14,7 @@ import {
 import { deepClone } from '@core/utils';
 
 @Component({
-  selector: 'tb-filter-user-info',
+  selector: 'jnks-iot-filter-user-info',
   templateUrl: './filter-user-info.component.html',
   styleUrls: [],
   providers: [
@@ -64,7 +64,7 @@ export class FilterUserInfoComponent implements ControlValueAccessor, OnInit {
    this.dialog.open<FilterUserInfoDialogComponent, FilterUserInfoDialogData,
      KeyFilterPredicateUserInfo>(FilterUserInfoDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         keyFilterPredicateUserInfo: deepClone(this.keyFilterPredicateUserInfo),
         valueType: this.valueType,

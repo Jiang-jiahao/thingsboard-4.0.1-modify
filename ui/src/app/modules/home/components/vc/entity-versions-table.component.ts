@@ -29,19 +29,19 @@ import { hidePageSizePixelValue } from '@shared/models/constants';
 import { Direction, SortOrder } from '@shared/models/page/sort-order';
 import { BranchAutocompleteComponent } from '@shared/components/vc/branch-autocomplete.component';
 import { isNotEmptyStr } from '@core/utils';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { EntityVersionCreateComponent } from '@home/components/vc/entity-version-create.component';
 import { MatButton } from '@angular/material/button';
 import { EntityVersionRestoreComponent } from '@home/components/vc/entity-version-restore.component';
 import { EntityVersionDiffComponent } from '@home/components/vc/entity-version-diff.component';
 import { ComplexVersionCreateComponent } from '@home/components/vc/complex-version-create.component';
 import { ComplexVersionLoadComponent } from '@home/components/vc/complex-version-load.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { AdminService } from '@core/http/admin.service';
 import { FormBuilder } from '@angular/forms';
 
 @Component({
-  selector: 'tb-entity-versions-table',
+  selector: 'jnks-iot-entity-versions-table',
   templateUrl: './entity-versions-table.component.html',
   styleUrls: ['./entity-versions-table.component.scss']
 })
@@ -53,7 +53,7 @@ export class EntityVersionsTableComponent extends PageComponent implements OnIni
   singleEntityMode = false;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   @Input()
   onBeforeCreateVersion: () => Observable<any>;
@@ -120,7 +120,7 @@ export class EntityVersionsTableComponent extends PageComponent implements OnIni
   constructor(protected store: Store<AppState>,
               private entitiesVersionControlService: EntitiesVersionControlService,
               private adminService: AdminService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private cd: ChangeDetectorRef,
               private viewContainerRef: ViewContainerRef,
@@ -222,7 +222,7 @@ export class EntityVersionsTableComponent extends PageComponent implements OnIni
         popoverStyle: {width: '400px', minWidth: '100%', maxWidth: '100%'},
         isModal: true
       });
-      createVersionPopover.tbComponentRef.instance.popoverComponent = createVersionPopover;
+      createVersionPopover.jnksIotComponentRef.instance.popoverComponent = createVersionPopover;
     }
   }
 
@@ -257,7 +257,7 @@ export class EntityVersionsTableComponent extends PageComponent implements OnIni
         overlayStyle: {maxHeight: '90vh', height: '100%', padding: '10px'},
         isModal: true
       });
-      complexCreateVersionPopover.tbComponentRef.instance.popoverComponent = complexCreateVersionPopover;
+      complexCreateVersionPopover.jnksIotComponentRef.instance.popoverComponent = complexCreateVersionPopover;
     }
   }
 
@@ -284,8 +284,8 @@ export class EntityVersionsTableComponent extends PageComponent implements OnIni
         showCloseButton: false,
         isModal: true
       });
-      diffVersionPopover.tbComponentRef.instance.popoverComponent = diffVersionPopover;
-      diffVersionPopover.tbComponentRef.instance.versionRestored.subscribe(() => {
+      diffVersionPopover.jnksIotComponentRef.instance.popoverComponent = diffVersionPopover;
+      diffVersionPopover.jnksIotComponentRef.instance.versionRestored.subscribe(() => {
         this.versionRestored.emit();
       });
     }
@@ -321,7 +321,7 @@ export class EntityVersionsTableComponent extends PageComponent implements OnIni
         popoverStyle: {width: '400px', minWidth: '100%', maxWidth: '100%'},
         isModal: true
       });
-      restoreVersionPopover.tbComponentRef.instance.popoverComponent = restoreVersionPopover;
+      restoreVersionPopover.jnksIotComponentRef.instance.popoverComponent = restoreVersionPopover;
     }
   }
 
@@ -350,7 +350,7 @@ export class EntityVersionsTableComponent extends PageComponent implements OnIni
         overlayStyle: {maxHeight: '80vh', height: '100%', padding: '10px'},
         isModal: true
       });
-      restoreEntitiesVersionPopover.tbComponentRef.instance.popoverComponent = restoreEntitiesVersionPopover;
+      restoreEntitiesVersionPopover.jnksIotComponentRef.instance.popoverComponent = restoreEntitiesVersionPopover;
     }
   }
 

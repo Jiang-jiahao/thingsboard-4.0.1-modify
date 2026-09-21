@@ -7,62 +7,62 @@
   </button>
 </mat-toolbar>
 <div mat-dialog-content class="flex flex-col gap-4 xs:gap-2 gt-xs:max-h-[80vh]">
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" translate>mobile.configuration-step.prepare-environment-title</div>
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" translate>mobile.configuration-step.prepare-environment-title</div>
     <div class="flex gap-4">
       <div class="flex-1" translate>mobile.configuration-step.prepare-environment-text</div>
       <a mat-stroked-button
          color="primary"
          href="https://docs.flutter.dev/get-started/install"
          target="_blank">
-        <mat-icon class="tb-mat-24">description</mat-icon>{{ 'common.documentation' | translate }}
+        <mat-icon class="jnks-iot-mat-24">description</mat-icon>{{ 'common.documentation' | translate }}
       </a>
     </div>
   </div>
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" translate>mobile.configuration-step.get-source-code-title</div>
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" translate>mobile.configuration-step.get-source-code-title</div>
     <div translate>mobile.configuration-step.get-source-code-text</div>
-    <tb-markdown usePlainMarkdown containerClass="tb-command-code"
-                 [data]=createMarkDownCommand(gitRepositoryLink)></tb-markdown>
+    <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-command-code"
+                 [data]=createMarkDownCommand(gitRepositoryLink)></jnks-iot-markdown>
   </div>
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" translate>mobile.configuration-step.configure-api-title</div>
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" translate>mobile.configuration-step.configure-api-title</div>
     <div translate>mobile.configuration-step.configure-api-text</div>
-    <tb-markdown usePlainMarkdown containerClass="tb-command-code"
-                 [data]=createMarkDownCommand(pathToConstants)></tb-markdown>
+    <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-command-code"
+                 [data]=createMarkDownCommand(pathToConstants)></jnks-iot-markdown>
     <div translate>mobile.configuration-step.configure-api-hint</div>
-    <tb-markdown usePlainMarkdown containerClass="tb-command-code"
-                 [data]=createMarkDownCommand(configureApi)></tb-markdown>
+    <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-command-code"
+                 [data]=createMarkDownCommand(configureApi)></jnks-iot-markdown>
   </div>
-  <div class="tb-form-panel stroked" *ngIf="setApplication">
-    <div class="tb-form-panel-title" translate>mobile.configuration-step.configure-package-title</div>
+  <div class="jnks-iot-form-panel stroked" *ngIf="setApplication">
+    <div class="jnks-iot-form-panel-title" translate>mobile.configuration-step.configure-package-title</div>
     <div translate>mobile.configuration-step.configure-package-text</div>
     <div translate>mobile.configuration-step.configure-package-text-install</div>
-    <tb-markdown usePlainMarkdown containerClass="tb-command-code"
-                 [data]=createMarkDownCommand(flutterInstallRenameCommand)></tb-markdown>
+    <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-command-code"
+                 [data]=createMarkDownCommand(flutterInstallRenameCommand)></jnks-iot-markdown>
     <div translate>mobile.configuration-step.configure-package-run-commands</div>
-    <tb-markdown usePlainMarkdown containerClass="tb-command-code"
-                 [data]=createMarkDownCommand(renameCommands)></tb-markdown>
+    <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-command-code"
+                 [data]=createMarkDownCommand(renameCommands)></jnks-iot-markdown>
   </div>
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" translate>mobile.configuration-step.run-app-title</div>
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" translate>mobile.configuration-step.run-app-title</div>
     <div translate>mobile.configuration-step.run-app-text</div>
-    <tb-markdown usePlainMarkdown containerClass="tb-command-code"
-                 [data]=createMarkDownCommand(flutterRunCommand)></tb-markdown>
+    <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-command-code"
+                 [data]=createMarkDownCommand(flutterRunCommand)></jnks-iot-markdown>
   </div>
-  <div class="tb-form-panel stroked">
+  <div class="jnks-iot-form-panel stroked">
     <div class="flex items-center gap-4">
       <div class="flex-1" translate>mobile.configuration-step.more-information</div>
       <a mat-stroked-button
          color="primary"
          href="https://docs.flutter.dev/get-started/learn-flutter"
          target="_blank">
-        <mat-icon class="tb-mat-24">rocket_launch</mat-icon>{{ 'mobile.configuration-step.getting-started' | translate }}
+        <mat-icon class="jnks-iot-mat-24">rocket_launch</mat-icon>{{ 'mobile.configuration-step.getting-started' | translate }}
       </a>
     </div>
   </div>
 </div>
-<div mat-dialog-actions class="tb-dialog-actions gap-2">
+<div mat-dialog-actions class="jnks-iot-dialog-actions gap-2">
   <mat-slide-toggle [class.!hidden]="!showDontShowAgain" [(ngModel)]="notShowAgain">{{ 'action.dont-show-again' | translate}}</mat-slide-toggle>
   <span class="flex-1"></span>
   <button mat-button

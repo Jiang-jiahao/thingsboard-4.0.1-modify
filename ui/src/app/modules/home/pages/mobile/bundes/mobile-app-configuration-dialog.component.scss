@@ -9,21 +9,21 @@
 }
 
 :host-context(.mat-mdc-dialog-container) {
-  .tb-dialog-actions {
+  .jnks-iot-dialog-actions {
     padding: 8px 16px 8px 24px;
   }
 }
 
 :host ::ng-deep {
-  .tb-markdown-view {
-    .tb-command-code {
+  .jnks-iot-markdown-view {
+    .jnks-iot-command-code {
       .code-wrapper {
         padding: 0;
         pre[class*=language-] {
           margin: 0;
           font-size: 14px;
           background: #F3F6FA;
-          border-color: $tb-primary-color;
+          border-color: $jnks-iot-primary-color;
           padding-right: 38px;
           overflow: hidden;
           overflow-x: auto;
@@ -40,7 +40,7 @@
       button.clipboard-btn, button.clipboard-btn.multiline {
         right: -2px;
         p {
-          color: $tb-primary-color;
+          color: $jnks-iot-primary-color;
         }
         p, div {
           background-color: #F3F6FA;
@@ -55,7 +55,7 @@
             display: block;
             width: 18px;
             height: 18px;
-            background: $tb-primary-color;
+            background: $jnks-iot-primary-color;
             mask-image: url(../../../../../../assets/copy-code-icon.svg);
             -webkit-mask-image: url(../../../../../../assets/copy-code-icon.svg);
             mask-repeat: no-repeat;
@@ -76,7 +76,7 @@
     margin-right: 8px;
   }
 
-  .tb-form-panel.tb-tab-body {
+  .jnks-iot-form-panel.jnks-iot-tab-body {
     padding: 16px 0 0;
   }
 }

@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-entities-table-key-settings',
+  selector: 'jnks-iot-entities-table-key-settings',
   templateUrl: './entities-table-key-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

@@ -1,6 +1,6 @@
 <ng-container [formGroup]="axisSettingsFormGroup">
-  <div class="tb-form-panel stroked tb-slide-toggle">
-    <mat-expansion-panel class="tb-settings" [expanded]="alwaysExpanded || settingsExpanded"
+  <div class="jnks-iot-form-panel stroked jnks-iot-slide-toggle">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="alwaysExpanded || settingsExpanded"
                          [disabled]="alwaysExpanded || !axisSettingsFormGroup.get('show').value">
       <mat-expansion-panel-header class="flex flex-row flex-wrap">
         <mat-panel-title>
@@ -10,25 +10,25 @@
         </mat-panel-title>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
-        <div class="tb-form-row column-xs">
+        <div class="jnks-iot-form-row column-xs">
           <div class="fixed-title-width" translate>widgets.time-series-chart.axis.label</div>
           <div class="flex flex-1 flex-row items-center justify-start gap-2">
             <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
               <input matInput formControlName="label" placeholder="{{ 'widget-config.set' | translate }}">
             </mat-form-field>
-            <tb-font-settings formControlName="labelFont"
+            <jnks-iot-font-settings formControlName="labelFont"
                               clearButton
                               disabledLineHeight
                               forceSizeUnit="px"
                               [previewText]="axisSettingsFormGroup.get('label').value">
-            </tb-font-settings>
-            <tb-color-input asBoxInput
+            </jnks-iot-font-settings>
+            <jnks-iot-color-input asBoxInput
                             colorClearButton
                             formControlName="labelColor">
-            </tb-color-input>
+            </jnks-iot-color-input>
           </div>
         </div>
-        <div class="tb-form-row space-between column-xs">
+        <div class="jnks-iot-form-row space-between column-xs">
           <div translate>widgets.time-series-chart.axis.position</div>
           <mat-form-field class="medium-width" appearance="outline" subscriptSizing="dynamic">
             <mat-select formControlName="position">
@@ -38,91 +38,91 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <div *ngIf="axisType === 'yAxis' && !hideUnits" class="tb-form-row space-between">
+        <div *ngIf="axisType === 'yAxis' && !hideUnits" class="jnks-iot-form-row space-between">
           <div translate>widget-config.units-short</div>
-          <tb-unit-input
+          <jnks-iot-unit-input
             formControlName="units">
-          </tb-unit-input>
+          </jnks-iot-unit-input>
         </div>
-        <div *ngIf="axisType === 'yAxis' && !hideDecimals" class="tb-form-row space-between">
+        <div *ngIf="axisType === 'yAxis' && !hideDecimals" class="jnks-iot-form-row space-between">
           <div translate>widget-config.decimals-short</div>
           <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
             <input matInput formControlName="decimals" type="number" min="0" max="15" step="1" placeholder="{{ 'widget-config.set' | translate }}">
           </mat-form-field>
         </div>
-        <div *ngIf="axisType === 'yAxis' && advanced" class="tb-form-row">
-          <tb-js-func class="flex-1"
+        <div *ngIf="axisType === 'yAxis' && advanced" class="jnks-iot-form-row">
+          <jnks-iot-js-func class="flex-1"
                       formControlName="ticksGenerator"
                       [globalVariables]="functionScopeVariables"
                       [functionArgs]="['extent']"
                       functionTitle="{{ 'widgets.time-series-chart.axis.ticks-generator-function' | translate }}"
                       helpId="widget/lib/chart/ticks_generator_fn">
-          </tb-js-func>
+          </jnks-iot-js-func>
         </div>
-        <div class="tb-form-panel no-padding stroked">
-          <div class="tb-form-row no-border space-between column-xs">
+        <div class="jnks-iot-form-panel no-padding stroked">
+          <div class="jnks-iot-form-row no-border space-between column-xs">
             <mat-slide-toggle class="mat-slide" formControlName="showTickLabels">
               <div translate>widgets.time-series-chart.axis.tick-labels</div>
             </mat-slide-toggle>
             <div class="flex flex-row items-center justify-start gap-2">
-              <tb-auto-date-format-settings *ngIf="axisType === 'xAxis'"
+              <jnks-iot-auto-date-format-settings *ngIf="axisType === 'xAxis'"
                                             formControlName="ticksFormat"
                                             [defaultValues]="defaultXAxisTicksFormat">
-              </tb-auto-date-format-settings>
-              <tb-font-settings formControlName="tickLabelFont"
+              </jnks-iot-auto-date-format-settings>
+              <jnks-iot-font-settings formControlName="tickLabelFont"
                                 clearButton
                                 disabledLineHeight
                                 forceSizeUnit="px"
                                 previewText="100">
-              </tb-font-settings>
-              <tb-color-input asBoxInput
+              </jnks-iot-font-settings>
+              <jnks-iot-color-input asBoxInput
                               colorClearButton
                               formControlName="tickLabelColor">
-              </tb-color-input>
+              </jnks-iot-color-input>
             </div>
           </div>
-          <div *ngIf="axisType === 'yAxis' && advanced" class="tb-form-row no-border">
-            <tb-js-func class="flex-1"
+          <div *ngIf="axisType === 'yAxis' && advanced" class="jnks-iot-form-row no-border">
+            <jnks-iot-js-func class="flex-1"
               formControlName="ticksFormatter"
               [globalVariables]="functionScopeVariables"
               [functionArgs]="['value']"
               functionTitle="{{ 'widgets.time-series-chart.axis.ticks-formatter-function' | translate }}"
               helpId="widget/lib/flot/ticks_formatter_fn">
-            </tb-js-func>
+            </jnks-iot-js-func>
           </div>
         </div>
-        <div class="tb-form-row space-between">
+        <div class="jnks-iot-form-row space-between">
           <mat-slide-toggle class="mat-slide" formControlName="showTicks">
             {{ 'widgets.time-series-chart.axis.show-ticks' | translate }}
           </mat-slide-toggle>
-          <tb-color-input asBoxInput
+          <jnks-iot-color-input asBoxInput
                           colorClearButton
                           formControlName="ticksColor">
-          </tb-color-input>
+          </jnks-iot-color-input>
         </div>
-        <div class="tb-form-row space-between">
+        <div class="jnks-iot-form-row space-between">
           <mat-slide-toggle class="mat-slide" formControlName="showLine">
             {{ 'widgets.time-series-chart.axis.show-line' | translate }}
           </mat-slide-toggle>
-          <tb-color-input asBoxInput
+          <jnks-iot-color-input asBoxInput
                           colorClearButton
                           formControlName="lineColor">
-          </tb-color-input>
+          </jnks-iot-color-input>
         </div>
-        <div class="tb-form-row space-between">
+        <div class="jnks-iot-form-row space-between">
           <mat-slide-toggle class="mat-slide" formControlName="showSplitLines">
-            <div tb-hint-tooltip-icon="{{ (axisType === 'xAxis' ? 'widgets.time-series-chart.axis.show-split-lines-x-axis-hint'
+            <div jnks-iot-hint-tooltip-icon="{{ (axisType === 'xAxis' ? 'widgets.time-series-chart.axis.show-split-lines-x-axis-hint'
                                                                 : 'widgets.time-series-chart.axis.show-split-lines-y-axis-hint') | translate}}">
               {{ 'widgets.time-series-chart.axis.show-split-lines' | translate }}
             </div>
           </mat-slide-toggle>
-          <tb-color-input asBoxInput
+          <jnks-iot-color-input asBoxInput
                           colorClearButton
                           formControlName="splitLinesColor">
-          </tb-color-input>
+          </jnks-iot-color-input>
         </div>
-        <div *ngIf="axisType === 'yAxis'" class="tb-form-row space-between">
-          <div tb-hint-tooltip-icon="{{ 'widgets.time-series-chart.axis.ticks-interval-hint' | translate }}">
+        <div *ngIf="axisType === 'yAxis'" class="jnks-iot-form-row space-between">
+          <div jnks-iot-hint-tooltip-icon="{{ 'widgets.time-series-chart.axis.ticks-interval-hint' | translate }}">
             {{ 'widgets.time-series-chart.axis.ticks-interval' | translate }}
           </div>
           <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
@@ -130,8 +130,8 @@
                    type="number" min="0" placeholder="{{ 'widgets.chart.chart-axis.scale-auto' | translate }}">
           </mat-form-field>
         </div>
-        <div *ngIf="axisType === 'yAxis'" class="tb-form-row space-between">
-          <div tb-hint-tooltip-icon="{{ 'widgets.time-series-chart.axis.split-number-hint' | translate }}">
+        <div *ngIf="axisType === 'yAxis'" class="jnks-iot-form-row space-between">
+          <div jnks-iot-hint-tooltip-icon="{{ 'widgets.time-series-chart.axis.split-number-hint' | translate }}">
             {{ 'widgets.time-series-chart.axis.split-number' | translate }}
           </div>
           <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
@@ -141,16 +141,16 @@
         </div>
       </ng-template>
     </mat-expansion-panel>
-    <div *ngIf="axisType === 'yAxis'" class="tb-form-panel no-border no-padding-top">
-      <div class="tb-form-row space-between column-xs">
+    <div *ngIf="axisType === 'yAxis'" class="jnks-iot-form-panel no-border no-padding-top">
+      <div class="jnks-iot-form-row space-between column-xs">
         <div translate>widgets.chart.chart-axis.scale</div>
         <div class="flex flex-row items-center justify-start gap-2">
-          <div class="tb-small-label" translate>widgets.chart.chart-axis.scale-min</div>
+          <div class="jnks-iot-small-label" translate>widgets.chart.chart-axis.scale-min</div>
           <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
             <input matInput formControlName="min"
                    type="number" placeholder="{{ 'widgets.chart.chart-axis.scale-auto' | translate }}">
           </mat-form-field>
-          <div class="tb-small-label" translate>widgets.chart.chart-axis.scale-max</div>
+          <div class="jnks-iot-small-label" translate>widgets.chart.chart-axis.scale-max</div>
           <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
             <input matInput formControlName="max"
                    type="number" placeholder="{{ 'widgets.chart.chart-axis.scale-auto' | translate }}">

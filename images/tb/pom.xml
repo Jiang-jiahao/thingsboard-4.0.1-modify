@@ -18,8 +18,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <main.dir>${basedir}/../..</main.dir>
         <pkg.name>jnks-iot</pkg.name>
-        <tb-postgres.docker.name>tb-postgres</tb-postgres.docker.name>
-        <tb-cassandra.docker.name>tb-cassandra</tb-cassandra.docker.name>
+        <jnks-iot-postgres.docker.name>jnks-iot-postgres</jnks-iot-postgres.docker.name>
+        <jnks-iot-cassandra.docker.name>jnks-iot-cassandra</jnks-iot-cassandra.docker.name>
         <pkg.installFolder>/usr/share/${pkg.name}</pkg.installFolder>
     </properties>
 
@@ -138,7 +138,7 @@
                         </goals>
                         <configuration>
                             <skip>${dockerfile.skip}</skip>
-                            <repository>${docker.repo}/${tb-postgres.docker.name}</repository>
+                            <repository>${docker.repo}/${jnks-iot-postgres.docker.name}</repository>
                             <verbose>true</verbose>
                             <googleContainerRegistryEnabled>false</googleContainerRegistryEnabled>
                             <contextDirectory>${project.build.directory}/docker-postgres</contextDirectory>
@@ -153,7 +153,7 @@
                         </goals>
                         <configuration>
                             <skip>${dockerfile.skip}</skip>
-                            <repository>${docker.repo}/${tb-postgres.docker.name}</repository>
+                            <repository>${docker.repo}/${jnks-iot-postgres.docker.name}</repository>
                             <tag>${project.version}</tag>
                         </configuration>
                     </execution>
@@ -165,7 +165,7 @@
                         </goals>
                         <configuration>
                             <skip>${dockerfile.skip}</skip>
-                            <repository>${docker.repo}/${tb-cassandra.docker.name}</repository>
+                            <repository>${docker.repo}/${jnks-iot-cassandra.docker.name}</repository>
                             <verbose>true</verbose>
                             <googleContainerRegistryEnabled>false</googleContainerRegistryEnabled>
                             <contextDirectory>${project.build.directory}/docker-cassandra</contextDirectory>
@@ -180,7 +180,7 @@
                         </goals>
                         <configuration>
                             <skip>${dockerfile.skip}</skip>
-                            <repository>${docker.repo}/${tb-cassandra.docker.name}</repository>
+                            <repository>${docker.repo}/${jnks-iot-cassandra.docker.name}</repository>
                             <tag>${project.version}</tag>
                         </configuration>
                     </execution>
@@ -210,7 +210,7 @@
                                 </goals>
                                 <configuration>
                                     <tag>latest</tag>
-                                    <repository>${docker.repo}/${tb-postgres.docker.name}</repository>
+                                    <repository>${docker.repo}/${jnks-iot-postgres.docker.name}</repository>
                                 </configuration>
                             </execution>
                             <execution>
@@ -221,7 +221,7 @@
                                 </goals>
                                 <configuration>
                                     <tag>${project.version}</tag>
-                                    <repository>${docker.repo}/${tb-postgres.docker.name}</repository>
+                                    <repository>${docker.repo}/${jnks-iot-postgres.docker.name}</repository>
                                 </configuration>
                             </execution>
                             <execution>
@@ -232,7 +232,7 @@
                                 </goals>
                                 <configuration>
                                     <tag>latest</tag>
-                                    <repository>${docker.repo}/${tb-cassandra.docker.name}</repository>
+                                    <repository>${docker.repo}/${jnks-iot-cassandra.docker.name}</repository>
                                 </configuration>
                             </execution>
                             <execution>
@@ -243,7 +243,7 @@
                                 </goals>
                                 <configuration>
                                     <tag>${project.version}</tag>
-                                    <repository>${docker.repo}/${tb-cassandra.docker.name}</repository>
+                                    <repository>${docker.repo}/${jnks-iot-cassandra.docker.name}</repository>
                                 </configuration>
                             </execution>
                         </executions>
@@ -277,7 +277,7 @@
                                         <argument>buildx</argument>
                                         <argument>build</argument>
                                         <argument>-t</argument>
-                                        <argument>${docker.repo}/${tb-postgres.docker.name}:latest</argument>
+                                        <argument>${docker.repo}/${jnks-iot-postgres.docker.name}:latest</argument>
                                         <argument>--platform=linux/amd64,linux/arm64</argument>
                                         <argument>-o</argument>
                                         <argument>type=registry</argument>
@@ -298,7 +298,7 @@
                                         <argument>buildx</argument>
                                         <argument>build</argument>
                                         <argument>-t</argument>
-                                        <argument>${docker.repo}/${tb-postgres.docker.name}:${project.version}</argument>
+                                        <argument>${docker.repo}/${jnks-iot-postgres.docker.name}:${project.version}</argument>
                                         <argument>--platform=linux/amd64,linux/arm64</argument>
                                         <argument>-o</argument>
                                         <argument>type=registry</argument>
@@ -319,7 +319,7 @@
                                         <argument>buildx</argument>
                                         <argument>build</argument>
                                         <argument>-t</argument>
-                                        <argument>${docker.repo}/${tb-cassandra.docker.name}:latest</argument>
+                                        <argument>${docker.repo}/${jnks-iot-cassandra.docker.name}:latest</argument>
                                         <argument>--platform=linux/amd64,linux/arm64</argument>
                                         <argument>-o</argument>
                                         <argument>type=registry</argument>
@@ -340,7 +340,7 @@
                                         <argument>buildx</argument>
                                         <argument>build</argument>
                                         <argument>-t</argument>
-                                        <argument>${docker.repo}/${tb-cassandra.docker.name}:${project.version}</argument>
+                                        <argument>${docker.repo}/${jnks-iot-cassandra.docker.name}:${project.version}</argument>
                                         <argument>--platform=linux/amd64,linux/arm64</argument>
                                         <argument>-o</argument>
                                         <argument>type=registry</argument>

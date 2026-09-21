@@ -1,4 +1,4 @@
-<section class="tb-widget-settings flex flex-col" [formGroup]="rpcTerminalWidgetSettingsForm">
+<section class="jnks-iot-widget-settings flex flex-col" [formGroup]="rpcTerminalWidgetSettingsForm">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.rpc.rpc-settings</legend>
     <mat-form-field class="mat-block flex-1">
@@ -7,7 +7,7 @@
     </mat-form-field>
     <fieldset class="fields-group fields-group-slider">
       <legend class="group-title" translate>widgets.rpc.persistent-rpc-settings</legend>
-      <mat-expansion-panel class="tb-settings" [expanded]="rpcTerminalWidgetSettingsForm.get('requestPersistent').value">
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="rpcTerminalWidgetSettingsForm.get('requestPersistent').value">
         <mat-expansion-panel-header class="flex flex-row flex-wrap">
           <mat-panel-title>
             <mat-slide-toggle formControlName="requestPersistent" (click)="$event.stopPropagation()"

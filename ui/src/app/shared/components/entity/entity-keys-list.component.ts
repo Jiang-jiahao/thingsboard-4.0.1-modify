@@ -15,7 +15,7 @@ import { DataKeyType } from '@shared/models/telemetry/telemetry.models';
 import { isEqual } from '@core/utils';
 
 @Component({
-  selector: 'tb-entity-keys-list',
+  selector: 'jnks-iot-entity-keys-list',
   templateUrl: './entity-keys-list.component.html',
   styleUrls: [],
   providers: [

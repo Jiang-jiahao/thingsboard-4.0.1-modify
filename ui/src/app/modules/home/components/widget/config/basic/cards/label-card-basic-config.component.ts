@@ -13,7 +13,7 @@ import {
 } from '@home/components/widget/lib/cards/label-card-widget.models';
 
 @Component({
-  selector: 'tb-label-card-basic-config',
+  selector: 'jnks-iot-label-card-basic-config',
   templateUrl: './label-card-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

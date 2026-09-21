@@ -16,7 +16,7 @@ import com.jnks.iot.server.edqs.processor.EdqsProducer;
 import com.jnks.iot.server.edqs.util.VersionsStore;
 import com.jnks.iot.server.gen.transport.TransportProtos.EdqsEventMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToEdqsMsg;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
 import com.jnks.iot.server.queue.common.consumer.PartitionedQueueConsumerManager;
 import com.jnks.iot.server.queue.common.consumer.QueueConsumerManager;
 import com.jnks.iot.server.queue.common.state.KafkaQueueStateService;
@@ -24,8 +24,8 @@ import com.jnks.iot.server.queue.common.state.QueueStateService;
 import com.jnks.iot.server.queue.discovery.QueueKey;
 import com.jnks.iot.edqs.queue.KafkaEdqsQueueFactory;
 import com.jnks.iot.server.queue.edqs.EdqsConfig;
-import com.jnks.iot.server.queue.kafka.TbKafkaAdmin;
-import com.jnks.iot.server.queue.kafka.TbKafkaConsumerTemplate;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaAdmin;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaConsumerTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -83,7 +83,7 @@ public class KafkaEdqsStateService implements EdqsStateService {
     private final EdqsPartitionService partitionService;
 
     /**
-     * Kafka 版 EDQS 队列工厂：创建 state/events 消费者、生产者以及 {@link TbKafkaAdmin}。
+     * Kafka 版 EDQS 队列工厂：创建 state/events 消费者、生产者以及 {@link JnksIotKafkaAdmin}。
      */
     private final KafkaEdqsQueueFactory queueFactory;
 
@@ -103,7 +103,7 @@ public class KafkaEdqsStateService implements EdqsStateService {
      * 由 {@link KafkaQueueStateService} 在分区分配时优先启动；每个分区读完并停止后，
      * 再打开对应的事件分区消费。
      */
-    private PartitionedQueueConsumerManager<TbProtoQueueMsg<ToEdqsMsg>> stateConsumer;
+    private PartitionedQueueConsumerManager<JnksIotProtoQueueMsg<ToEdqsMsg>> stateConsumer;
 
     /**
      * 事件与状态消费者的协调器。
@@ -111,7 +111,7 @@ public class KafkaEdqsStateService implements EdqsStateService {
      * {@link #process} 最终调用其 {@code update}；内部负责相对旧快照做增删，
      * 并在 Kafka 场景下保证状态恢复完成前不订阅事件分区。
      */
-    private QueueStateService<TbProtoQueueMsg<ToEdqsMsg>, TbProtoQueueMsg<ToEdqsMsg>> queueStateService;
+    private QueueStateService<JnksIotProtoQueueMsg<ToEdqsMsg>, JnksIotProtoQueueMsg<ToEdqsMsg>> queueStateService;
 
     /**
      * 将 events Topic 消息备份到 state Topic 的消费者（单消费者订阅全部分区）。
@@ -119,7 +119,7 @@ public class KafkaEdqsStateService implements EdqsStateService {
      * 首次 {@link #process} 时订阅并启动；同时其 consumer group 的 committed offset
      * 作为事件侧起始位点的来源。
      */
-    private QueueConsumerManager<TbProtoQueueMsg<ToEdqsMsg>> eventsToBackupConsumer;
+    private QueueConsumerManager<JnksIotProtoQueueMsg<ToEdqsMsg>> eventsToBackupConsumer;
 
     /**
      * 向 state Topic 发送备份消息的生产者封装。
@@ -169,14 +169,14 @@ public class KafkaEdqsStateService implements EdqsStateService {
      * @param eventConsumer 由 {@code EdqsProcessor} 创建的事件分区消费者，线程池与错误处理与其共享
      */
     @Override
-    public void init(PartitionedQueueConsumerManager<TbProtoQueueMsg<ToEdqsMsg>> eventConsumer) {
-        TbKafkaAdmin queueAdmin = queueFactory.getEdqsQueueAdmin();
-        stateConsumer = PartitionedQueueConsumerManager.<TbProtoQueueMsg<ToEdqsMsg>>create()
+    public void init(PartitionedQueueConsumerManager<JnksIotProtoQueueMsg<ToEdqsMsg>> eventConsumer) {
+        JnksIotKafkaAdmin queueAdmin = queueFactory.getEdqsQueueAdmin();
+        stateConsumer = PartitionedQueueConsumerManager.<JnksIotProtoQueueMsg<ToEdqsMsg>>create()
                 .queueKey(new QueueKey(ServiceType.EDQS, config.getStateTopic()))
                 .topic(config.getStateTopic())
                 .pollInterval(config.getPollInterval())
                 .msgPackProcessor((msgs, consumer, config) -> {
-                    for (TbProtoQueueMsg<ToEdqsMsg> queueMsg : msgs) {
+                    for (JnksIotProtoQueueMsg<ToEdqsMsg> queueMsg : msgs) {
                         try {
                             ToEdqsMsg msg = queueMsg.getValue();
                             // false：状态恢复路径，与实时事件路径在 Processor 内可区分处理策略
@@ -198,12 +198,12 @@ public class KafkaEdqsStateService implements EdqsStateService {
                 .uncaughtErrorHandler(edqsProcessor.getErrorHandler())
                 .build();
 
-        TbKafkaConsumerTemplate<TbProtoQueueMsg<ToEdqsMsg>> eventsToBackupKafkaConsumer = queueFactory.createEdqsEventsToBackupConsumer();
-        eventsToBackupConsumer = QueueConsumerManager.<TbProtoQueueMsg<ToEdqsMsg>>builder()
+        JnksIotKafkaConsumerTemplate<JnksIotProtoQueueMsg<ToEdqsMsg>> eventsToBackupKafkaConsumer = queueFactory.createEdqsEventsToBackupConsumer();
+        eventsToBackupConsumer = QueueConsumerManager.<JnksIotProtoQueueMsg<ToEdqsMsg>>builder()
                 .name("edqs-events-to-backup-consumer")
                 .pollInterval(config.getPollInterval())
                 .msgPackProcessor((msgs, consumer) -> {
-                    for (TbProtoQueueMsg<ToEdqsMsg> queueMsg : msgs) {
+                    for (JnksIotProtoQueueMsg<ToEdqsMsg> queueMsg : msgs) {
                         if (consumer.isStopped()) {
                             return;
                         }
@@ -247,7 +247,7 @@ public class KafkaEdqsStateService implements EdqsStateService {
                 .partitionService(partitionService)
                 .build();
 
-        queueStateService = KafkaQueueStateService.<TbProtoQueueMsg<ToEdqsMsg>, TbProtoQueueMsg<ToEdqsMsg>>builder()
+        queueStateService = KafkaQueueStateService.<JnksIotProtoQueueMsg<ToEdqsMsg>, JnksIotProtoQueueMsg<ToEdqsMsg>>builder()
                 .eventConsumer(eventConsumer)
                 .stateConsumer(stateConsumer)
                 .eventsStartOffsetsProvider(() -> {

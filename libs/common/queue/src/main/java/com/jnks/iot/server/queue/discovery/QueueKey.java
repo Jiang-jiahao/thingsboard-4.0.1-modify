@@ -10,9 +10,9 @@ import com.jnks.iot.server.common.msg.queue.ServiceType;
 
 /**
  * 哪个服务、哪条队列名、哪个租户”这三个维度组合成一个全局唯一的 key
- * TB_CORE + main + tenant_A	租户A的核心默认队列
- * TB_RULE_ENGINE + highPriority + tenant_B	租户B的规则引擎高优队列
- * TB_TRANSPORT + main + system	系统级传输默认队列
+ * JNKS_IOT_CORE + main + tenant_A	租户A的核心默认队列
+ * JNKS_IOT_RULE_ENGINE + highPriority + tenant_B	租户B的规则引擎高优队列
+ * JNKS_IOT_TRANSPORT + main + system	系统级传输默认队列
  */
 @Data
 @AllArgsConstructor

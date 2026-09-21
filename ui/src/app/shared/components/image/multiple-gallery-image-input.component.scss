@@ -31,14 +31,14 @@ $previewSize: 64px !default;
     height: $previewSize;
   }
 
-  .tb-image-preview {
+  .jnks-iot-image-preview {
     width: auto;
     max-width: $previewSize - 2px;
     height: auto;
     max-height: $previewSize  - 2px;
   }
 
-  .tb-image-preview-container {
+  .jnks-iot-image-preview-container {
     position: relative;
     width: $previewSize;
     height: $previewSize;
@@ -46,7 +46,7 @@ $previewSize: 64px !default;
     margin-bottom: -1px;
     border: 1px solid rgba(0, 0, 0, 0.54);
 
-    .tb-image-preview {
+    .jnks-iot-image-preview {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -54,7 +54,7 @@ $previewSize: 64px !default;
     }
   }
 
-  .tb-image-action-container {
+  .jnks-iot-image-action-container {
     position: relative;
     height: $previewSize - 2px;
     display: flex;
@@ -65,13 +65,13 @@ $previewSize: 64px !default;
 }
 
 :host {
-  .tb-container {
+  .jnks-iot-container {
     margin-top: 0;
     padding: 0 0 16px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    label.tb-title {
+    label.jnks-iot-title {
       display: block;
       padding-bottom: 0;
     }
@@ -96,7 +96,7 @@ $previewSize: 64px !default;
     color: rgba(0, 0, 0, 0.54);
   }
 
-  .tb-image-select-container {
+  .jnks-iot-image-select-container {
     width: 100%;
     height: $selectContainerHeight;
     border-radius: 4px;
@@ -104,7 +104,7 @@ $previewSize: 64px !default;
     display: flex;
     align-items: center;
 
-    .tb-image-container {
+    .jnks-iot-image-container {
       width: $selectContainerHeight - 1px;
       height: $selectContainerHeight - 2px;
       display: flex;
@@ -115,14 +115,14 @@ $previewSize: 64px !default;
       background: #fff;
       overflow: hidden;
 
-      .tb-image-preview {
+      .jnks-iot-image-preview {
         width: auto;
         max-width: $selectContainerHeight - 2px;
         height: auto;
         max-height: $selectContainerHeight  - 2px;
       }
 
-      .tb-no-image {
+      .jnks-iot-no-image {
         text-align: center;
         color: rgba(0, 0, 0, 0.38);
         font-size: 12px;
@@ -133,7 +133,7 @@ $previewSize: 64px !default;
       }
     }
 
-    .tb-image-info-container {
+    .jnks-iot-image-info-container {
       display: flex;
       flex: 1;
       align-self: stretch;
@@ -142,7 +142,7 @@ $previewSize: 64px !default;
       align-items: center;
       gap: 4px;
 
-      .tb-external-image-container {
+      .jnks-iot-external-image-container {
         display: flex;
         flex: 1;
         align-self: stretch;
@@ -150,7 +150,7 @@ $previewSize: 64px !default;
         flex-direction: column;
         align-items: flex-start;
         gap: 4px;
-        .tb-external-link-label {
+        .jnks-iot-external-link-label {
           color: rgba(0, 0, 0, 0.54);
           font-size: 12px;
           font-style: normal;
@@ -158,16 +158,16 @@ $previewSize: 64px !default;
           line-height: 16px;
           letter-spacing: 0.4px;
         }
-        .tb-external-link-input-container {
+        .jnks-iot-external-link-input-container {
           display: flex;
           justify-content: flex-end;
           align-items: center;
           gap: 4px;
           align-self: stretch;
-          .tb-inline-field {
+          .jnks-iot-inline-field {
             width: 100%;
           }
-          .tb-image-decline-btn {
+          .jnks-iot-image-decline-btn {
             color: rgba(0,0,0,0.38);
           }
         }
@@ -175,7 +175,7 @@ $previewSize: 64px !default;
 
     }
 
-    .tb-image-select-buttons-container {
+    .jnks-iot-image-select-buttons-container {
       display: flex;
       flex: 1;
       align-self: stretch;
@@ -183,7 +183,7 @@ $previewSize: 64px !default;
       gap: 8px;
       justify-content: center;
       align-items: flex-start;
-      .tb-image-select-button {
+      .jnks-iot-image-select-button {
         width: 100%;
         height: 100%;
         align-self: stretch;

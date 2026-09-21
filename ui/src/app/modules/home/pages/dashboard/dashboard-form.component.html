@@ -1,4 +1,4 @@
-<div class="tb-details-buttons xs:flex xs:flex-col">
+<div class="jnks-iot-details-buttons xs:flex xs:flex-col">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'open')"
@@ -62,12 +62,12 @@
   </mat-form-field>
   <div class="flex flex-col" [class.!hidden]="isEdit || !(dashboardScope === 'tenant' && isPublic(entity)
                                 || dashboardScope === 'customer' && isCurrentPublicCustomer(entity))">
-    <tb-social-share-panel style="padding-bottom: 1.25em;"
+    <jnks-iot-social-share-panel style="padding-bottom: 1.25em;"
                            shareTitle="{{ 'dashboard.socialshare-title' | translate:{dashboardTitle: entity?.title} }}"
                            shareText="{{ 'dashboard.socialshare-text' | translate:{dashboardTitle: entity?.title} }}"
                            shareLink="{{ publicLink }}"
                            shareHashTags="jnks-iot, iot">
-    </tb-social-share-panel>
+    </jnks-iot-social-share-panel>
     <div class="flex flex-row">
       <mat-form-field class="mat-block flex-1">
         <mat-label translate>dashboard.public-link</mat-label>
@@ -101,14 +101,14 @@
           <textarea matInput formControlName="description" rows="2"></textarea>
         </mat-form-field>
       </div>
-      <tb-entity-list
+      <jnks-iot-entity-list
         *ngIf="isAdd"
         formControlName="assignedCustomerIds"
         labelText="{{ 'dashboard.assigned-customers' | translate }}"
         [entityType]="entityType.CUSTOMER">
-      </tb-entity-list>
-      <div class="tb-form-panel stroked no-gap">
-        <div class="tb-form-panel-title" translate>dashboard.mobile-app-settings</div>
+      </jnks-iot-entity-list>
+      <div class="jnks-iot-form-panel stroked no-gap">
+        <div class="jnks-iot-form-panel-title" translate>dashboard.mobile-app-settings</div>
         <mat-slide-toggle formControlName="mobileHide" class="mat-slide margin fixed-title-width">
           {{ 'dashboard.mobile-hide' | translate }}
         </mat-slide-toggle>
@@ -116,10 +116,10 @@
           <mat-label translate>dashboard.mobile-order</mat-label>
           <input matInput formControlName="mobileOrder" type="number" step="1">
         </mat-form-field>
-        <tb-gallery-image-input class="flex-1"
+        <jnks-iot-gallery-image-input class="flex-1"
                                 label="{{'dashboard.image' | translate}}"
                                 formControlName="image">
-        </tb-gallery-image-input>
+        </jnks-iot-gallery-image-input>
       </div>
     </fieldset>
   </form>

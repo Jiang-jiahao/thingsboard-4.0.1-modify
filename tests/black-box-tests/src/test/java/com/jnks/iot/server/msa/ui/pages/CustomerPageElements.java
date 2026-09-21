@@ -21,12 +21,12 @@ public class CustomerPageElements extends OtherPageElementsHelper {
     private static final String MANAGE_CUSTOMERS_ASSETS_BTN = ENTITY + "/ancestor::mat-row//mat-icon[contains(text(),' domain')]/parent::button";
     private static final String MANAGE_CUSTOMERS_DEVICES_BTN = ENTITY + "/ancestor::mat-row//mat-icon[contains(text(),'devices_other')]/parent::button";
     private static final String MANAGE_CUSTOMERS_DASHBOARDS_BTN = ENTITY + "/ancestor::mat-row//mat-icon[contains(text(),'dashboard')]/parent::button";
-    private static final String ADD_USER_EMAIL = "//tb-add-user-dialog//input[@formcontrolname='email']";
+    private static final String ADD_USER_EMAIL = "//jnks-iot-add-user-dialog//input[@formcontrolname='email']";
     private static final String ACTIVATE_WINDOW_OK_BTN = "//span[contains(text(),'OK')]";
     private static final String USER_LOGIN_BTN = "//mat-icon[@data-mat-icon-name='login']/parent::button";
     private static final String USER_LOGIN_BTN_BY_EMAIL = "//mat-cell[contains(@class,'email')]/span[contains(text(),'%s')]" +
             "/ancestor::mat-row//mat-icon[@data-mat-icon-name='login']/parent::button";
-    private static final String USERS_WIDGET = "//tb-widget";
+    private static final String USERS_WIDGET = "//jnks-iot-widget";
     private static final String SELECT_COUNTRY_MENU = "//mat-form-field//mat-select[@formcontrolname='country']";
     private static final String COUNTRIES = "//span[@class='mdc-list-item__primary-text']";
     protected static final String INPUT_FIELD = "//input[@formcontrolname='%s']";
@@ -41,21 +41,21 @@ public class CustomerPageElements extends OtherPageElementsHelper {
     private static final String INPUT_FIELD_NAME_ASSIGNED_LIST = "entity";
     private static final String ASSIGNED_BTN = "//button[@type='submit']";
     private static final String HIDE_HOME_DASHBOARD_TOOLBAR = "//mat-checkbox[@formcontrolname='homeDashboardHideToolbar']//label";
-    private static final String FILTER_BTN = "//tb-filters-edit";
-    private static final String TIME_BTN = "//tb-timewindow[not(@hidelabel)]";
-    private static final String CUSTOMER_ICON_HEADER = "//tb-breadcrumb//span[contains(text(),'Customer %s')]";
+    private static final String FILTER_BTN = "//jnks-iot-filters-edit";
+    private static final String TIME_BTN = "//jnks-iot-timewindow[not(@hidelabel)]";
+    private static final String CUSTOMER_ICON_HEADER = "//jnks-iot-breadcrumb//span[contains(text(),'Customer %s')]";
     private static final String CUSTOMER_USER_ICON_HEADER = "Users";
     private static final String CUSTOMER_ASSETS_ICON_HEADER = "Assets";
     private static final String CUSTOMER_DEVICES_ICON_HEADER = "Devices";
     private static final String CUSTOMER_DASHBOARD_ICON_HEADER = "Dashboards";
-    private static final String CUSTOMER_USER_ICON_HEAD = "(//mat-drawer-content//span[contains(@class,'tb-entity-table')])[1]";
+    private static final String CUSTOMER_USER_ICON_HEAD = "(//mat-drawer-content//span[contains(@class,'jnks-iot-entity-table')])[1]";
     private static final String MANAGE_BTN_VIEW = "//span[contains(text(),'%s')]";
     private static final String MANAGE_CUSTOMERS_USERS_BTN_VIEW = "Manage users";
     private static final String MANAGE_CUSTOMERS_ASSETS_BTN_VIEW = "Manage assets";
     private static final String MANAGE_CUSTOMERS_DEVICE_BTN_VIEW = "Manage devices";
     private static final String MANAGE_CUSTOMERS_DASHBOARD_BTN_VIEW = "Manage dashboards";
-    private static final String DELETE_FROM_VIEW_BTN = "//tb-customer//span[contains(text(),' Delete')]";
-    private static final String CUSTOMER_DETAILS_VIEW = "//tb-details-panel";
+    private static final String DELETE_FROM_VIEW_BTN = "//jnks-iot-customer//span[contains(text(),' Delete')]";
+    private static final String CUSTOMER_DETAILS_VIEW = "//jnks-iot-details-panel";
     private static final String CUSTOMER_DETAILS_ALARMS = CUSTOMER_DETAILS_VIEW + "//span[text()='Alarms']";
 
     public WebElement titleFieldAddEntityView() {

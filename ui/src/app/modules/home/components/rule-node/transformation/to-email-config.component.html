@@ -1,7 +1,7 @@
-<section [formGroup]="toEmailConfigForm" class="tb-form-panel no-border no-padding">
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" translate>rule-node-config.email-sender</div>
-    <div class="tb-form-row no-border no-padding tb-standard-fields">
+<section [formGroup]="toEmailConfigForm" class="jnks-iot-form-panel no-border no-padding">
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" translate>rule-node-config.email-sender</div>
+    <div class="jnks-iot-form-row no-border no-padding jnks-iot-standard-fields">
       <mat-form-field class="flex" subscriptSizing="dynamic">
         <mat-label translate>rule-node-config.from-template</mat-label>
         <input required matInput formControlName="fromTemplate">
@@ -12,10 +12,10 @@
           <div class="input-bottom-double-hint">
             <div class="see-example"
                 hintMode
-                tb-help-popup="{{'rulenode/to_email_node_fields_templatization'}}"
-                tb-help-popup-placement="right"
+                jnks-iot-help-popup="{{'rulenode/to_email_node_fields_templatization'}}"
+                jnks-iot-help-popup-placement="right"
                 trigger-style="letter-spacing:0.25px; font-size:12px;"
-                [tb-help-popup-style]="{maxWidth: '820px'}"
+                [jnks-iot-help-popup-style]="{maxWidth: '820px'}"
                 trigger-text="{{ 'rule-node-config.key-val.see-examples' | translate }}"></div>
           </div>
         </mat-hint>
@@ -25,19 +25,19 @@
       </mat-form-field>
     </div>
   </div>
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel no-padding no-border">
-      <div class="tb-form-panel-title" translate>rule-node-config.recipients</div>
-      <tb-example-hint [hintText]="'rule-node-config.recipients-block-main-hint'"
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel no-padding no-border">
+      <div class="jnks-iot-form-panel-title" translate>rule-node-config.recipients</div>
+      <jnks-iot-example-hint [hintText]="'rule-node-config.recipients-block-main-hint'"
                         popupHelpLink="rulenode/to_email_node_fields_templatization">
-      </tb-example-hint>
+      </jnks-iot-example-hint>
     </div>
-    <div class="tb-form-row no-border no-padding tb-standard-fields">
+    <div class="jnks-iot-form-row no-border no-padding jnks-iot-standard-fields">
       <mat-form-field class="flex">
         <mat-label translate>rule-node-config.to-template</mat-label>
         <textarea required
                   matInput
-                  class="tb-enable-vertical-resize"
+                  class="jnks-iot-enable-vertical-resize"
                   formControlName="toTemplate"
                   cdkTextareaAutosize
                   cdkAutosizeMinRows="1"></textarea>
@@ -49,7 +49,7 @@
         <mat-label translate>rule-node-config.cc-template</mat-label>
         <textarea matInput
                   formControlName="ccTemplate"
-                  class="tb-enable-vertical-resize"
+                  class="jnks-iot-enable-vertical-resize"
                   cdkTextareaAutosize
                   cdkAutosizeMinRows="1"></textarea>
       </mat-form-field>
@@ -57,24 +57,24 @@
         <mat-label translate>rule-node-config.bcc-template</mat-label>
         <textarea matInput
                   formControlName="bccTemplate"
-                  class="tb-enable-vertical-resize"
+                  class="jnks-iot-enable-vertical-resize"
                   cdkTextareaAutosize
                   cdkAutosizeMinRows="1"></textarea>
       </mat-form-field>
     </div>
   </div>
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" translate>rule-node-config.message-subject-and-content</div>
-    <tb-example-hint [hintText]="'rule-node-config.kv-map-pattern-hint'"
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" translate>rule-node-config.message-subject-and-content</div>
+    <jnks-iot-example-hint [hintText]="'rule-node-config.kv-map-pattern-hint'"
                       popupHelpLink="rulenode/to_email_node_fields_templatization">
-    </tb-example-hint>
+    </jnks-iot-example-hint>
     <section>
       <mat-form-field class="mat-block">
         <mat-label translate>rule-node-config.subject-template</mat-label>
         <textarea required
                   matInput
                   formControlName="subjectTemplate"
-                  class="tb-enable-vertical-resize"
+                  class="jnks-iot-enable-vertical-resize"
                   cdkTextareaAutosize
                   cdkAutosizeMinRows="1"></textarea>
         <mat-error *ngIf="toEmailConfigForm.get('subjectTemplate').hasError('required')">
@@ -110,7 +110,7 @@
         <textarea required
                   matInput
                   formControlName="bodyTemplate"
-                  class="tb-enable-vertical-resize"
+                  class="jnks-iot-enable-vertical-resize"
                   cdkTextareaAutosize
                   cdkAutosizeMinRows="2"></textarea>
         <mat-error *ngIf="toEmailConfigForm.get('bodyTemplate').hasError('required')">

@@ -104,7 +104,7 @@ export class SentTableConfigResolver  {
     this.dialog.open<SentNotificationDialogComponent, RequestNotificationDialogData,
       NotificationTemplate>(SentNotificationDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         request
@@ -182,7 +182,7 @@ export class SentTableConfigResolver  {
     this.dialog.open<SentErrorDialogComponent, NotificationRequestErrorDialogData,
       void>(SentErrorDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         notificationRequest
       }

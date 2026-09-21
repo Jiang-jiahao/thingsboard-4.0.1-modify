@@ -1,7 +1,7 @@
-.tb-svg-xml {
+.jnks-iot-svg-xml {
   position: relative;
 
-  &.tb-disabled {
+  &.jnks-iot-disabled {
     color: rgba(0, 0, 0, .38);
   }
 
@@ -10,10 +10,10 @@
   }
 
   &.no-label {
-    .tb-svg-xml-content-panel {
+    .jnks-iot-svg-xml-content-panel {
       height: 100%;
     }
-    .tb-svg-xml-toolbar {
+    .jnks-iot-svg-xml-toolbar {
       position: absolute;
       top: 0;
       left: 0;
@@ -26,28 +26,28 @@
     }
   }
 
-  .tb-svg-xml-content-panel {
+  .jnks-iot-svg-xml-content-panel {
     height: calc(100% - 40px);
     border: 1px solid #c0c0c0;
 
-    #tb-svg-xml-input {
+    #jnks-iot-svg-xml-input {
       width: 100%;
       min-width: 200px;
       height: 100%;
     }
   }
 
-  &:not(.tb-fullscreen) {
+  &:not(.jnks-iot-fullscreen) {
     padding-bottom: 15px;
   }
 
-  .tb-svg-xml-toolbar {
+  .jnks-iot-svg-xml-toolbar {
     & > * {
       &:not(:last-child) {
         margin-right: 4px;
       }
     }
-    button.mat-mdc-button-base, button.mat-mdc-button-base.tb-mat-32 {
+    button.mat-mdc-button-base, button.mat-mdc-button-base.jnks-iot-mat-32 {
       background: rgba(220, 220, 220, .35);
       align-items: center;
       vertical-align: middle;
@@ -56,14 +56,14 @@
       padding: 4px;
       font-size: .8rem;
       line-height: 15px;
-      &:not(.tb-help-popup-button) {
+      &:not(.jnks-iot-help-popup-button) {
         color: #7b7b7b;
       }
     }
     button.mat-mdc-button-base:not(.mat-mdc-icon-button) {
       height: 23px;
     }
-    .tb-help-popup-button-loading {
+    .jnks-iot-help-popup-button-loading {
       background: #f3f3f3;
     }
   }

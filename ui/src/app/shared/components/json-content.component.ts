@@ -24,7 +24,7 @@ import { beautifyJs } from '@shared/models/beautify.models';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-json-content',
+  selector: 'jnks-iot-json-content',
   templateUrl: './json-content.component.html',
   styleUrls: ['./json-content.component.scss'],
   providers: [
@@ -63,7 +63,7 @@ export class JsonContentComponent implements OnInit, ControlValueAccessor, Valid
 
   @Input() editorStyle: {[klass: string]: any};
 
-  @Input() tbPlaceholder: string;
+  @Input() jnksIotPlaceholder: string;
 
   @Input()
   @coerceBoolean()
@@ -140,7 +140,7 @@ export class JsonContentComponent implements OnInit, ControlValueAccessor, Valid
           });
         }
 
-        if (this.tbPlaceholder && this.tbPlaceholder.length) {
+        if (this.jnksIotPlaceholder && this.jnksIotPlaceholder.length) {
           this.createPlaceholder();
         }
         this.editorResize$ = new ResizeObserver(() => {
@@ -164,7 +164,7 @@ export class JsonContentComponent implements OnInit, ControlValueAccessor, Valid
       (this.jsonEditor.renderer as any).emptyMessageNode = null;
     } else if (shouldShow && !node) {
       const placeholderElement = $('<textarea></textarea>');
-      placeholderElement.text(this.tbPlaceholder);
+      placeholderElement.text(this.jnksIotPlaceholder);
       placeholderElement.addClass('ace_invisible ace_emptyMessage');
       placeholderElement.css({
         padding: '0 9px',
@@ -176,7 +176,7 @@ export class JsonContentComponent implements OnInit, ControlValueAccessor, Valid
         resize: 'none',
         fontSize: '15px'
       });
-      const rows = this.tbPlaceholder.split('\n').length;
+      const rows = this.jnksIotPlaceholder.split('\n').length;
       placeholderElement.attr('rows', rows);
       node = placeholderElement[0];
       (this.jsonEditor.renderer as any).emptyMessageNode = node;

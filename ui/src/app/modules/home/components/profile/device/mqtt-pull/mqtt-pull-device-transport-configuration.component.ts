@@ -19,7 +19,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-mqtt-pull-device-transport-configuration',
+  selector: 'jnks-iot-mqtt-pull-device-transport-configuration',
   templateUrl: './mqtt-pull-device-transport-configuration.component.html',
   providers: [
     {

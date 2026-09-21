@@ -1,21 +1,21 @@
-.tb-scada-symbol-editor-shape {
+.jnks-iot-scada-symbol-editor-shape {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.tb-scada-symbol-editor-tooltips {
+.jnks-iot-scada-symbol-editor-tooltips {
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
-.tb-scada-symbol-editor-svg-xml {
+.jnks-iot-scada-symbol-editor-svg-xml {
   width: 100%;
   height: 100%;
   padding-top: 88px;
 }
-.tb-scada-symbol-editor-buttons {
+.jnks-iot-scada-symbol-editor-buttons {
   pointer-events: none;
   position: absolute;
   left: 20px;
@@ -25,7 +25,7 @@
   justify-content: space-between;
   align-items: flex-start;
 
-  .tb-primary-fill {
+  .jnks-iot-primary-fill {
     background: #fff;
     border-radius: 50%;
     &:before {
@@ -33,20 +33,20 @@
     }
   }
 
-  .tb-scada-symbol-editor-view-buttons {
+  .jnks-iot-scada-symbol-editor-view-buttons {
     display: flex;
     flex-direction: column;
     gap: 8px;
     z-index: 101;
   }
 
-  .tb-scada-symbol-editor-zoom-buttons {
+  .jnks-iot-scada-symbol-editor-zoom-buttons {
     display: flex;
     flex-direction: column;
     z-index: 101;
     background: #fff;
     border-radius: 24px;
-    &.tb-primary-fill {
+    &.jnks-iot-primary-fill {
       border-radius: 24px;
       &:before {
         opacity: 0.1;
@@ -54,12 +54,12 @@
     }
   }
 
-  .tb-scada-symbol-editor-right-buttons {
+  .jnks-iot-scada-symbol-editor-right-buttons {
     display: flex;
     flex-direction: row;
     gap: 8px;
     z-index: 101;
-    tb-toggle-select {
+    jnks-iot-toggle-select {
       pointer-events: auto;
     }
   }
@@ -82,7 +82,7 @@
       color: #ffffff;
     }
   }
-  &.tb-active {
+  &.jnks-iot-active {
     .tooltipster-box {
       background: #fff;
       border: 1px solid rgba(0, 0, 0, 0.38);

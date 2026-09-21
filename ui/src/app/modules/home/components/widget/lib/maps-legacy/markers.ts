@@ -8,7 +8,7 @@ import {
   isDefined,
   isDefinedAndNotNull,
   processDataPattern,
-  safeExecuteTbFunction
+  safeExecuteJnksIotFunction
 } from '@core/utils';
 import LeafletMap from './leaflet-map';
 import { FormattedData } from '@shared/models/widget.models';
@@ -36,7 +36,7 @@ export class Marker {
         this.leafletMarker = L.marker(this.location, {
           pmIgnore: !settings.draggableMarker,
           snapIgnore: !snappable,
-          tbMarkerData: this.data as any
+          jnksIotMarkerData: this.data as any
         });
 
         this.markerOffset = [
@@ -85,13 +85,13 @@ export class Marker {
     setDataSources(data: FormattedData, dataSources: FormattedData[]) {
       this.data = data;
       this.dataSources = dataSources;
-      this.leafletMarker.options.tbMarkerData = data as any;
+      this.leafletMarker.options.jnksIotMarkerData = data as any;
     }
 
     updateMarkerTooltip(data: FormattedData) {
       if (!this.map.markerTooltipText || this.settings.useTooltipFunction) {
         const pattern = this.settings.useTooltipFunction ?
-          safeExecuteTbFunction(this.settings.parsedTooltipFunction, [this.data, this.dataSources, this.data.dsIndex]) : this.settings.tooltipPattern;
+          safeExecuteJnksIotFunction(this.settings.parsedTooltipFunction, [this.data, this.dataSources, this.data.dsIndex]) : this.settings.tooltipPattern;
         this.map.markerTooltipText = parseWithTranslation.prepareProcessPattern(pattern, true);
         this.map.replaceInfoTooltipMarker = processDataPattern(this.map.markerTooltipText, data);
       }
@@ -113,14 +113,14 @@ export class Marker {
         if (settings.showLabel) {
             if (!this.map.markerLabelText || settings.useLabelFunction) {
               const pattern = settings.useLabelFunction ?
-                safeExecuteTbFunction(settings.parsedLabelFunction, [this.data, this.dataSources, this.data.dsIndex]) : settings.label;
+                safeExecuteJnksIotFunction(settings.parsedLabelFunction, [this.data, this.dataSources, this.data.dsIndex]) : settings.label;
               this.map.markerLabelText = parseWithTranslation.prepareProcessPattern(pattern, true);
               this.map.replaceInfoLabelMarker = processDataPattern(this.map.markerLabelText, this.data);
             }
             const labelText = fillDataPattern(this.map.markerLabelText, this.map.replaceInfoLabelMarker, this.data);
             const labelColor = this.map.ctx.widgetConfig.color;
             this.leafletMarker.bindTooltip(`<div style="color: ${labelColor};"><b>${labelText}</b></div>`,
-                { className: 'tb-marker-label', permanent: true, direction: 'top', offset: this.labelOffset });
+                { className: 'jnks-iot-marker-label', permanent: true, direction: 'top', offset: this.labelOffset });
         }
     }
 
@@ -155,11 +155,11 @@ export class Marker {
           return;
         }
         const currentImage: MarkerImageInfo = this.settings.useMarkerImageFunction ?
-          safeExecuteTbFunction(this.settings.parsedMarkerImageFunction,
+          safeExecuteJnksIotFunction(this.settings.parsedMarkerImageFunction,
                 [this.data, this.settings.markerImages, this.dataSources, this.data.dsIndex]) : this.settings.currentImage;
         let currentColor = this.settings.tinyColor;
         if (this.settings.useColorFunction) {
-          const functionColor = safeExecuteTbFunction(this.settings.parsedColorFunction,
+          const functionColor = safeExecuteJnksIotFunction(this.settings.parsedColorFunction,
             [this.data, this.dataSources, this.data.dsIndex]);
           if (isDefinedAndNotNull(functionColor)) {
             currentColor = tinycolor(functionColor);

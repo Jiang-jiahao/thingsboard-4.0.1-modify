@@ -20,7 +20,7 @@ import {
 import { WidgetContext } from '@home/models/widget-component.models';
 import { Observable } from 'rxjs';
 import { backgroundStyle, ComponentStyle, overlayStyle, textStyle } from '@shared/models/widget-settings.models';
-import { TbLatestChart } from '@home/components/widget/lib/chart/latest-chart';
+import { JnksIotLatestChart } from '@home/components/widget/lib/chart/latest-chart';
 import { ImagePipe } from '@shared/pipe/image.pipe';
 import { DomSanitizer } from '@angular/platform-browser';
 import { WidgetComponent } from '@home/components/widget/widget.component';
@@ -28,12 +28,12 @@ import { TranslateService } from '@ngx-translate/core';
 import { LegendPosition } from '@shared/models/widget.models';
 
 export interface LatestChartComponentCallbacks {
-  createChart: (chartShape: ElementRef<HTMLElement>, renderer: Renderer2) => TbLatestChart<LatestChartSettings>;
+  createChart: (chartShape: ElementRef<HTMLElement>, renderer: Renderer2) => JnksIotLatestChart<LatestChartSettings>;
   onItemClick?: ($event: Event, item: LatestChartDataItem) => void;
 }
 
 @Component({
-  selector: 'tb-latest-chart',
+  selector: 'jnks-iot-latest-chart',
   templateUrl: './latest-chart.component.html',
   styleUrls: ['./latest-chart.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -77,7 +77,7 @@ export class LatestChartComponent implements OnInit, OnDestroy, AfterViewInit {
   private shapeResize$: ResizeObserver;
   private legendHorizontal: boolean;
 
-  private latestChart: TbLatestChart<LatestChartSettings>;
+  private latestChart: JnksIotLatestChart<LatestChartSettings>;
 
   constructor(public widgetComponent: WidgetComponent,
               private imagePipe: ImagePipe,

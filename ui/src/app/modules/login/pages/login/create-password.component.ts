@@ -10,7 +10,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'tb-create-password',
+  selector: 'jnks-iot-create-password',
   templateUrl: './create-password.component.html',
   styleUrls: ['./create-password.component.scss']
 })

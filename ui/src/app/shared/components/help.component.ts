@@ -2,12 +2,12 @@ import { Component, Input } from '@angular/core';
 import { HelpLinks } from '@shared/models/constants';
 
 @Component({
-  selector: '[tb-help]',
+  selector: '[jnks-iot-help]',
   templateUrl: './help.component.html'
 })
 export class HelpComponent {
 
-  @Input('tb-help') helpLinkId: string;
+  @Input('jnks-iot-help') helpLinkId: string;
 
   gotoHelpPage(): void {
     let helpUrl = HelpLinks.linksMap[this.helpLinkId];

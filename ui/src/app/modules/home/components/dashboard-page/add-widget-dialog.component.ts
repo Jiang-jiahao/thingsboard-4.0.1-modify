@@ -26,7 +26,7 @@ export interface AddWidgetDialogData {
 }
 
 @Component({
-  selector: 'tb-add-widget-dialog',
+  selector: 'jnks-iot-add-widget-dialog',
   templateUrl: './add-widget-dialog.component.html',
   providers: [/*{provide: ErrorStateMatcher, useExisting: AddWidgetDialogComponent}*/],
   styleUrls: ['./add-widget-dialog.component.scss'],

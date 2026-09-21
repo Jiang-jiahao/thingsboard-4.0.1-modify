@@ -9,7 +9,7 @@ import com.jnks.iot.server.common.data.device.profile.AlarmRule;
 import com.jnks.iot.server.common.data.device.profile.DeviceProfileAlarm;
 import com.jnks.iot.server.common.data.device.profile.DurationAlarmConditionSpec;
 import com.jnks.iot.server.common.data.device.profile.RepeatingAlarmConditionSpec;
-import com.jnks.iot.server.common.msg.TbMsgMetaData;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
 
 import java.util.concurrent.TimeUnit;
 
@@ -27,7 +27,7 @@ public class AlarmStateTest {
         ruleState.getState().setEventCount(eventCount);
 
         AlarmState alarmState = createMockAlarmState();
-        TbMsgMetaData metaData = new TbMsgMetaData();
+        JnksIotMsgMetaData metaData = new JnksIotMsgMetaData();
 
         alarmState.setAlarmConditionMetadata(ruleState, metaData);
 
@@ -46,7 +46,7 @@ public class AlarmStateTest {
         ruleState.getState().setDuration(duration);
 
         AlarmState alarmState = createMockAlarmState();
-        TbMsgMetaData metaData = new TbMsgMetaData();
+        JnksIotMsgMetaData metaData = new JnksIotMsgMetaData();
 
         alarmState.setAlarmConditionMetadata(ruleState, metaData);
 

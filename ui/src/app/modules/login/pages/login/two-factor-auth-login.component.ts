@@ -16,7 +16,7 @@ import { isEqual } from '@core/utils';
 import { ActionNotificationShow } from '@core/notification/notification.actions';
 
 @Component({
-  selector: 'tb-two-factor-auth-login',
+  selector: 'jnks-iot-two-factor-auth-login',
   templateUrl: './two-factor-auth-login.component.html',
   styleUrls: ['./two-factor-auth-login.component.scss']
 })

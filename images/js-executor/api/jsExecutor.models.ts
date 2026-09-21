@@ -1,5 +1,5 @@
 
-export interface TbMessage {
+export interface JnksIotMessage {
     scriptHash: string;
 }
 
@@ -9,28 +9,28 @@ export interface RemoteJsRequest {
     releaseRequest?: JsReleaseRequest;
 }
 
-export interface JsReleaseRequest extends TbMessage {
+export interface JsReleaseRequest extends JnksIotMessage {
     functionName: string;
 }
 
-export interface JsInvokeRequest extends TbMessage {
+export interface JsInvokeRequest extends JnksIotMessage {
     functionName: string;
     scriptBody: string;
     timeout: number;
     args: string[];
 }
 
-export interface JsCompileRequest extends TbMessage {
+export interface JsCompileRequest extends JnksIotMessage {
     functionName: string;
     scriptBody: string;
 }
 
 
-export interface  JsReleaseResponse extends TbMessage {
+export interface  JsReleaseResponse extends JnksIotMessage {
     success: boolean;
 }
 
-export interface JsCompileResponse extends TbMessage {
+export interface JsCompileResponse extends JnksIotMessage {
     success: boolean;
     errorCode?: number;
     errorDetails?: string;

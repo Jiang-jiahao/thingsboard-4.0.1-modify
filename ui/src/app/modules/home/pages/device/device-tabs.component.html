@@ -1,48 +1,48 @@
 <mat-tab *ngIf="entity"
          label="{{ 'attribute.attributes' | translate }}" #attributesTab="matTab">
-  <tb-attribute-table [defaultAttributeScope]="attributeScopes.CLIENT_SCOPE"
+  <jnks-iot-attribute-table [defaultAttributeScope]="attributeScopes.CLIENT_SCOPE"
                       [active]="attributesTab.isActive"
                       [entityId]="entity.id"
                       [entityName]="entity.name">
-  </tb-attribute-table>
+  </jnks-iot-attribute-table>
 </mat-tab>
 <mat-tab *ngIf="entity"
          label="{{ 'attribute.latest-telemetry' | translate }}" #telemetryTab="matTab">
-  <tb-attribute-table [defaultAttributeScope]="latestTelemetryTypes.LATEST_TELEMETRY"
+  <jnks-iot-attribute-table [defaultAttributeScope]="latestTelemetryTypes.LATEST_TELEMETRY"
                       disableAttributeScopeSelection
                       [active]="telemetryTab.isActive"
                       [entityId]="entity.id"
                       [entityName]="entity.name">
-  </tb-attribute-table>
+  </jnks-iot-attribute-table>
 </mat-tab>
 <mat-tab *ngIf="entity && authUser.authority === authorities.TENANT_ADMIN" 
          label="{{ 'entity.type-calculated-fields' | translate }}" #calculatedFieldsTab="matTab">
-  <tb-calculated-fields-table [active]="calculatedFieldsTab.isActive" [entityId]="entity.id"/>
+  <jnks-iot-calculated-fields-table [active]="calculatedFieldsTab.isActive" [entityId]="entity.id"/>
 </mat-tab>
 <mat-tab *ngIf="entity"
          label="{{ 'device.rpc.tab' | translate }}" #rpcTab="matTab">
-  <tb-device-rpc-panel [active]="rpcTab.isActive" [device]="entity"></tb-device-rpc-panel>
+  <jnks-iot-device-rpc-panel [active]="rpcTab.isActive" [device]="entity"></jnks-iot-device-rpc-panel>
 </mat-tab>
 <mat-tab *ngIf="entity"
          label="{{ 'alarm.alarms' | translate }}" #alarmsTab="matTab">
-  <tb-alarm-table [active]="alarmsTab.isActive" [entityId]="entity.id"></tb-alarm-table>
+  <jnks-iot-alarm-table [active]="alarmsTab.isActive" [entityId]="entity.id"></jnks-iot-alarm-table>
 </mat-tab>
 <mat-tab *ngIf="entity"
          label="{{ 'device.events' | translate }}" #eventsTab="matTab">
-  <tb-event-table [defaultEventType]="eventTypes.ERROR" [active]="eventsTab.isActive" [tenantId]="entity.tenantId.id"
-                  [entityId]="entity.id"></tb-event-table>
+  <jnks-iot-event-table [defaultEventType]="eventTypes.ERROR" [active]="eventsTab.isActive" [tenantId]="entity.tenantId.id"
+                  [entityId]="entity.id"></jnks-iot-event-table>
 </mat-tab>
 <mat-tab *ngIf="entity"
          label="{{ 'relation.relations' | translate }}" #relationsTab="matTab">
-  <tb-relation-table [active]="relationsTab.isActive" [entityId]="entity.id"></tb-relation-table>
+  <jnks-iot-relation-table [active]="relationsTab.isActive" [entityId]="entity.id"></jnks-iot-relation-table>
 </mat-tab>
 <mat-tab *ngIf="entity && authUser.authority === authorities.TENANT_ADMIN"
          label="{{ 'audit-log.audit-logs' | translate }}" #auditLogsTab="matTab">
-  <tb-audit-log-table detailsMode="true" [active]="auditLogsTab.isActive" [auditLogMode]="auditLogModes.ENTITY" [entityId]="entity.id"></tb-audit-log-table>
+  <jnks-iot-audit-log-table detailsMode="true" [active]="auditLogsTab.isActive" [auditLogMode]="auditLogModes.ENTITY" [entityId]="entity.id"></jnks-iot-audit-log-table>
 </mat-tab>
 <mat-tab *ngIf="entity && authUser.authority === authorities.TENANT_ADMIN && versionControlUiEnabled"
          label="{{ 'version-control.version-control' | translate }}" #versionControlTab="matTab">
-  <tb-version-control detailsMode="true" singleEntityMode="true"
+  <jnks-iot-version-control detailsMode="true" singleEntityMode="true"
                       (versionRestored)="entitiesTableConfig.updateData()"
-                      [active]="versionControlTab.isActive" [entityId]="entity.id" [entityName]="entity.name" [externalEntityId]="entity.externalId || entity.id"></tb-version-control>
+                      [active]="versionControlTab.isActive" [entityId]="entity.id" [entityName]="entity.name" [externalEntityId]="entity.externalId || entity.id"></jnks-iot-version-control>
 </mat-tab>

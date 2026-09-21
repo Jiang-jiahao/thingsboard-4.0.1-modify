@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, forwardRef, Input, Renderer2, ViewContainerRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { MapDataLayerType, ShapeFillStripeSettings } from '@shared/models/widget/maps/map.models';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { isDefinedAndNotNull, stringToBase64 } from '@core/utils';
@@ -12,7 +12,7 @@ import {
 } from '@home/components/widget/lib/settings/common/map/shape-fill-stripe-settings-panel.component';
 
 @Component({
-  selector: 'tb-shape-fill-stripe-settings',
+  selector: 'jnks-iot-shape-fill-stripe-settings',
   templateUrl: './shape-fill-stripe-settings.component.html',
   styleUrls: [],
   providers: [
@@ -49,7 +49,7 @@ export class ShapeFillStripeSettingsComponent implements ControlValueAccessor {
 
   private propagateChange: (v: any) => void = () => { };
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private sanitizer: DomSanitizer,
               private renderer: Renderer2,
               private cd: ChangeDetectorRef,
@@ -96,7 +96,7 @@ export class ShapeFillStripeSettingsComponent implements ControlValueAccessor {
           dataLayerType: this.dataLayerType
         },
         isModal: true
-      }).tbComponentRef.instance.shapeFillStripeSettingsApplied.subscribe((shapeFillStripeSettings) => {
+      }).jnksIotComponentRef.instance.shapeFillStripeSettingsApplied.subscribe((shapeFillStripeSettings) => {
         this.modelValue = shapeFillStripeSettings;
         this.updatePreview();
         this.propagateChange(this.modelValue);

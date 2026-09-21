@@ -5,12 +5,12 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.common.data.queue.QueueConfig;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
-import com.jnks.iot.server.queue.TbQueueAdmin;
-import com.jnks.iot.server.queue.TbQueueConsumer;
-import com.jnks.iot.server.queue.TbQueueMsg;
-import com.jnks.iot.server.queue.common.consumer.TbQueueConsumerManagerTask.AddPartitionsTask;
-import com.jnks.iot.server.queue.common.consumer.TbQueueConsumerManagerTask.DeletePartitionsTask;
-import com.jnks.iot.server.queue.common.consumer.TbQueueConsumerManagerTask.RemovePartitionsTask;
+import com.jnks.iot.server.queue.JnksIotQueueAdmin;
+import com.jnks.iot.server.queue.JnksIotQueueConsumer;
+import com.jnks.iot.server.queue.JnksIotQueueMsg;
+import com.jnks.iot.server.queue.common.consumer.JnksIotQueueConsumerManagerTask.AddPartitionsTask;
+import com.jnks.iot.server.queue.common.consumer.JnksIotQueueConsumerManagerTask.DeletePartitionsTask;
+import com.jnks.iot.server.queue.common.consumer.JnksIotQueueConsumerManagerTask.RemovePartitionsTask;
 import com.jnks.iot.server.queue.discovery.QueueKey;
 
 import java.util.Set;
@@ -36,20 +36,20 @@ import java.util.function.Function;
  *       {@code consumerPerPartition = true}；</li>
  *   <li>持有父类 {@link MainQueueConsumerManager.ConsumerPerPartitionWrapper} 的强类型引用，
  *       以便直接调用 {@code addPartitions} / {@code removePartitions}；</li>
- *   <li>依赖 {@link TbQueueAdmin} 在「删除分区」任务中物理删除 Topic。</li>
+ *   <li>依赖 {@link JnksIotQueueAdmin} 在「删除分区」任务中物理删除 Topic。</li>
  * </ul>
  * <p>
  * <b>典型调用路径：</b>
  * {@link #addPartitions} / {@link #removePartitions} / {@link #delete} →
  * {@code addTask} → 任务线程持锁 → {@link #processTask} → 包装器增删消费者（删除时再调
- * {@link TbQueueAdmin#deleteTopic}）。
+ * {@link JnksIotQueueAdmin#deleteTopic}）。
  *
- * @param <M> 队列消息类型，需实现 {@link TbQueueMsg}
+ * @param <M> 队列消息类型，需实现 {@link JnksIotQueueMsg}
  * @see MainQueueConsumerManager
- * @see TbQueueConsumerManagerTask
+ * @see JnksIotQueueConsumerManagerTask
  */
 @Slf4j
-public class PartitionedQueueConsumerManager<M extends TbQueueMsg> extends MainQueueConsumerManager<M, QueueConfig> {
+public class PartitionedQueueConsumerManager<M extends JnksIotQueueMsg> extends MainQueueConsumerManager<M, QueueConfig> {
 
     /**
      * 父类「每分区一消费者」包装器的强类型引用。
@@ -63,9 +63,9 @@ public class PartitionedQueueConsumerManager<M extends TbQueueMsg> extends MainQ
      * 队列管理客户端，用于删除 Topic 等运维操作。
      * <p>
      * 仅在处理 {@link DeletePartitionsTask} 时使用：先停止对应消费者，再按分区的
-     * full topic name 调用 {@link TbQueueAdmin#deleteTopic}。
+     * full topic name 调用 {@link JnksIotQueueAdmin#deleteTopic}。
      */
-    private final TbQueueAdmin queueAdmin;
+    private final JnksIotQueueAdmin queueAdmin;
 
     /**
      * 本管理器关联的逻辑 Topic 名（不含分区后缀等完整路由信息时的基础名）。
@@ -95,7 +95,7 @@ public class PartitionedQueueConsumerManager<M extends TbQueueMsg> extends MainQ
      */
     @Builder(builderMethodName = "create") // not to conflict with super.builder()
     public PartitionedQueueConsumerManager(QueueKey queueKey, String topic, long pollInterval, MsgPackProcessor<M, QueueConfig> msgPackProcessor,
-                                           BiFunction<QueueConfig, TopicPartitionInfo, TbQueueConsumer<M>> consumerCreator, TbQueueAdmin queueAdmin,
+                                           BiFunction<QueueConfig, TopicPartitionInfo, JnksIotQueueConsumer<M>> consumerCreator, JnksIotQueueAdmin queueAdmin,
                                            ExecutorService consumerExecutor, ScheduledExecutorService scheduler,
                                            ExecutorService taskExecutor, Consumer<Throwable> uncaughtErrorHandler) {
         super(queueKey, QueueConfig.of(true, pollInterval), msgPackProcessor, consumerCreator, consumerExecutor, scheduler, taskExecutor, uncaughtErrorHandler);
@@ -119,7 +119,7 @@ public class PartitionedQueueConsumerManager<M extends TbQueueMsg> extends MainQ
      * @param task 从任务队列取出的管理任务
      */
     @Override
-    protected void processTask(TbQueueConsumerManagerTask task) {
+    protected void processTask(JnksIotQueueConsumerManagerTask task) {
         if (task instanceof AddPartitionsTask addPartitionsTask) {
             log.info("[{}] Added partitions: {}", queueKey, addPartitionsTask.partitions());
             consumerWrapper.addPartitions(addPartitionsTask.partitions(), addPartitionsTask.onStop(), addPartitionsTask.startOffsetProvider());
@@ -181,7 +181,7 @@ public class PartitionedQueueConsumerManager<M extends TbQueueMsg> extends MainQ
      * 适用于动态 Topic 生命周期结束（如租户队列销毁）等需要清理存储资源的场景。
      * Topic 删除失败不会回滚消费者移除，仅记录错误日志。
      *
-     * @param partitions 待删除的分区（其 full topic name 将交给 {@link TbQueueAdmin}）
+     * @param partitions 待删除的分区（其 full topic name 将交给 {@link JnksIotQueueAdmin}）
      */
     public void delete(Set<TopicPartitionInfo> partitions) {
         addTask(new DeletePartitionsTask(partitions));

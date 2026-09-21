@@ -12,7 +12,7 @@ export interface SelectEntityDialogData {
 }
 
 @Component({
-  selector: 'tb-select-entity-dialog',
+  selector: 'jnks-iot-select-entity-dialog',
   templateUrl: './select-entity-dialog.component.html',
   styleUrls: ['./select-entity-dialog.component.scss']
 })

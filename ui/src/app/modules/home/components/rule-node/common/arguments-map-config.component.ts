@@ -23,7 +23,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-arguments-map-config',
+  selector: 'jnks-iot-arguments-map-config',
   templateUrl: './arguments-map-config.component.html',
   styleUrls: ['./arguments-map-config.component.scss'],
   providers: [

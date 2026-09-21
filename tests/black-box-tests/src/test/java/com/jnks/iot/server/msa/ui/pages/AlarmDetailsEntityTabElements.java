@@ -18,9 +18,9 @@ public class AlarmDetailsEntityTabElements extends OtherPageElements {
     private static final String UNASSIGNED_BTN = "//div[@role='listbox']//mat-icon[text() = 'account_circle']/following-sibling::span";
     private static final String UNASSIGNED = "//span[text() = '%s']/ancestor::mat-row//span[@class='assignee-cell']//mat-icon[text() = 'account_circle']/following-sibling::span";
     private static final String ALARM_DETAILS_BTN = "//span[text() = '%s']/ancestor::mat-row//mat-icon[contains(text(),'more_horiz')]/parent::button";
-    private static final String ACCESS_FORBIDDEN_DIALOG_VIEW = "//h2[text() = 'Access Forbidden']/parent::tb-confirm-dialog";
-    private static final String ALARM_ASSIGNEE_DROPDOWN = "//tb-alarm-assignee-panel";
-    private static final String NO_USERS_FOUND_MESSAGE = "//div[@class='tb-not-found-content']/span";
+    private static final String ACCESS_FORBIDDEN_DIALOG_VIEW = "//h2[text() = 'Access Forbidden']/parent::jnks-iot-confirm-dialog";
+    private static final String ALARM_ASSIGNEE_DROPDOWN = "//jnks-iot-alarm-assignee-panel";
+    private static final String NO_USERS_FOUND_MESSAGE = "//div[@class='jnks-iot-not-found-content']/span";
 
     public WebElement assignBtn(String type) {
         return waitUntilElementToBeClickable(String.format(ASSIGN_BTN, type));

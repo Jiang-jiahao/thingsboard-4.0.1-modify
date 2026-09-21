@@ -9,14 +9,14 @@ import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.jnks.iot.common.util.JnksIotThreadFactory;
-import com.jnks.iot.server.cluster.TbClusterService;
+import com.jnks.iot.server.cluster.JnksIotClusterService;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.msg.queue.ServiceType;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
 import com.jnks.iot.server.gen.transport.TransportProtos;
 import com.jnks.iot.server.queue.discovery.PartitionService;
-import com.jnks.iot.server.queue.discovery.TbApplicationEventListener;
+import com.jnks.iot.server.queue.discovery.JnksIotApplicationEventListener;
 import com.jnks.iot.server.queue.discovery.event.PartitionChangeEvent;
 import com.jnks.iot.server.service.subscription.SubscriptionManagerService;
 
@@ -33,12 +33,12 @@ import java.util.function.Supplier;
  * Created by ashvayka on 27.03.18.
  */
 @Slf4j
-public abstract class AbstractSubscriptionService extends TbApplicationEventListener<PartitionChangeEvent> {
+public abstract class AbstractSubscriptionService extends JnksIotApplicationEventListener<PartitionChangeEvent> {
 
     protected final Set<TopicPartitionInfo> currentPartitions = ConcurrentHashMap.newKeySet();
 
     @Autowired
-    protected TbClusterService clusterService;
+    protected JnksIotClusterService clusterService;
     @Autowired
     protected PartitionService partitionService;
     @Autowired
@@ -61,8 +61,8 @@ public abstract class AbstractSubscriptionService extends TbApplicationEventList
     }
 
     @Override
-    protected void onTbApplicationEvent(PartitionChangeEvent partitionChangeEvent) {
-        if (ServiceType.TB_CORE.equals(partitionChangeEvent.getServiceType())) {
+    protected void onJnksIotApplicationEvent(PartitionChangeEvent partitionChangeEvent) {
+        if (ServiceType.JNKS_IOT_CORE.equals(partitionChangeEvent.getServiceType())) {
             currentPartitions.clear();
             currentPartitions.addAll(partitionChangeEvent.getCorePartitions());
         }
@@ -78,7 +78,7 @@ public abstract class AbstractSubscriptionService extends TbApplicationEventList
     protected void forwardToSubscriptionManagerService(TenantId tenantId, EntityId entityId,
                                                        Consumer<SubscriptionManagerService> toSubscriptionManagerService,
                                                        Supplier<TransportProtos.ToCoreMsg> toCore) {
-        TopicPartitionInfo tpi = partitionService.resolve(ServiceType.TB_CORE, tenantId, entityId);
+        TopicPartitionInfo tpi = partitionService.resolve(ServiceType.JNKS_IOT_CORE, tenantId, entityId);
         if (currentPartitions.contains(tpi)) {
             if (subscriptionManagerService.isPresent()) {
                 toSubscriptionManagerService.accept(subscriptionManagerService.get());

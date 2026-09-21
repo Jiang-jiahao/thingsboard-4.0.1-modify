@@ -1,14 +1,14 @@
-.tb-scada-symbol-metadata-tag-row {
-  .tb-tag-field {
+.jnks-iot-scada-symbol-metadata-tag-row {
+  .jnks-iot-tag-field {
     flex: 1 1 70%;
   }
-  .tb-state-render-function-field {
+  .jnks-iot-state-render-function-field {
     flex: 1 1 15%;
   }
-  .tb-on-click-action-field {
+  .jnks-iot-on-click-action-field {
     flex: 1 1 15%;
   }
-  .tb-state-render-function-field, .tb-on-click-action-field {
+  .jnks-iot-state-render-function-field, .jnks-iot-on-click-action-field {
     display: flex;
     justify-content: flex-end;
     .mdc-button {

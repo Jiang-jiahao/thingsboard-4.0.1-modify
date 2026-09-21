@@ -18,7 +18,7 @@ import { filter, startWith, takeUntil } from 'rxjs/operators';
 import { isNotEmptyStr } from '@core/utils';
 
 @Component({
-  selector: 'tb-ota-update',
+  selector: 'jnks-iot-ota-update',
   templateUrl: './ota-update.component.html'
 })
 export class OtaUpdateComponent extends EntityComponent<OtaPackage> implements OnInit, OnDestroy {

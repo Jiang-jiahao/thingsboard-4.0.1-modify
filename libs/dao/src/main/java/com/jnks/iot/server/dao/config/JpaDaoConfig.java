@@ -21,7 +21,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.support.TransactionTemplate;
 import com.jnks.iot.server.dao.sql.audit.AuditLogRepository;
 import com.jnks.iot.server.dao.sql.event.EventRepository;
-import com.jnks.iot.server.dao.util.TbAutoConfiguration;
+import com.jnks.iot.server.dao.util.JnksIotAutoConfiguration;
 
 import javax.sql.DataSource;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Configuration
-@TbAutoConfiguration
+@JnksIotAutoConfiguration
 @ComponentScan({"com.jnks.iot.server.dao.sql", "com.jnks.iot.server.dao.attributes", "com.jnks.iot.server.dao.sqlts.dictionary", "com.jnks.iot.server.dao.cache", "com.jnks.iot.server.cache"})
 @EnableJpaRepositories(value = {"com.jnks.iot.server.dao.sql", "com.jnks.iot.server.dao.sqlts.dictionary"},
         excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {EventRepository.class, AuditLogRepository.class}),

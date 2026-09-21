@@ -14,7 +14,7 @@ interface EntityConflictDialogData {
 }
 
 @Component({
-  selector: 'tb-entity-conflict-dialog',
+  selector: 'jnks-iot-entity-conflict-dialog',
   templateUrl: 'entity-conflict-dialog.component.html',
   styleUrls: ['./entity-conflict-dialog.component.scss'],
   standalone: true,

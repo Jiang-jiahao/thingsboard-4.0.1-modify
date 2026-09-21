@@ -20,7 +20,7 @@ export interface DeleteTimeseriesPanelResult {
 }
 
 @Component({
-  selector: 'tb-delete-timeseries-panel',
+  selector: 'jnks-iot-delete-timeseries-panel',
   templateUrl: './delete-timeseries-panel.component.html',
   styleUrls: ['./delete-timeseries-panel.component.scss']
 })

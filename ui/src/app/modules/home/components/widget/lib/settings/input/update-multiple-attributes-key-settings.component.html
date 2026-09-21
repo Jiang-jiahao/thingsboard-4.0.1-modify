@@ -1,4 +1,4 @@
-<section class="tb-widget-settings" [formGroup]="updateMultipleAttributesKeySettingsForm">
+<section class="jnks-iot-widget-settings" [formGroup]="updateMultipleAttributesKeySettingsForm">
   <mat-slide-toggle formControlName="dataKeyHidden" class="slide-block">
     {{ 'widgets.input-widgets.hide-input-field' | translate }}
   </mat-slide-toggle>
@@ -133,19 +133,19 @@
       {{ (updateMultipleAttributesKeySettingsForm.get('dataKeyValueType').value === 'select' ? 'widgets.input-widgets.select-options' : 'widgets.input-widgets.radio-options') | translate }}
     </legend>
     <div class="flex flex-col">
-      <div class="tb-control-list tb-drop-list" cdkDropList cdkDropListOrientation="vertical"
+      <div class="jnks-iot-control-list jnks-iot-drop-list" cdkDropList cdkDropListOrientation="vertical"
            (cdkDropListDropped)="selectOptionDrop($event)">
-        <div cdkDrag class="tb-draggable" *ngFor="let selectOptionControl of selectOptionsFormArray().controls; trackBy: trackBySelectOption;
+        <div cdkDrag class="jnks-iot-draggable" *ngFor="let selectOptionControl of selectOptionsFormArray().controls; trackBy: trackBySelectOption;
                  let $index = index; last as isLast;"
              class="flex flex-col" [class.pb-2]="!isLast">
-          <tb-datakey-select-option [formControl]="selectOptionControl"
+          <jnks-iot-datakey-select-option [formControl]="selectOptionControl"
                                     [expanded]="selectOptionControl.new"
                                     (removeSelectOption)="removeSelectOption($index)">
-          </tb-datakey-select-option>
+          </jnks-iot-datakey-select-option>
         </div>
       </div>
       <div *ngIf="!selectOptionsFormArray().controls.length">
-            <span class="tb-prompt flex items-center justify-center">
+            <span class="jnks-iot-prompt flex items-center justify-center">
               {{ (updateMultipleAttributesKeySettingsForm.get('dataKeyValueType').value === 'select' ? 'widgets.input-widgets.no-select-options' : 'widgets.input-widgets.no-radio-options') | translate }}
             </span>
       </div>
@@ -160,23 +160,23 @@
       </div>
     </div>
   </fieldset>
-  <div class="tb-form-panel mb-3.5"
+  <div class="jnks-iot-form-panel mb-3.5"
        [class.!hidden]="updateMultipleAttributesKeySettingsForm.get('dataKeyHidden').value ||
        updateMultipleAttributesKeySettingsForm.get('dataKeyValueType').value !== 'radio'">
-    <div class="tb-form-panel-title" translate>widgets.input-widgets.radio-button-settings</div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-panel-title" translate>widgets.input-widgets.radio-button-settings</div>
+    <div class="jnks-iot-form-row space-between">
       <div>{{ 'widgets.input-widgets.color' | translate }}</div>
-      <tb-color-input asBoxInput
+      <jnks-iot-color-input asBoxInput
                       formControlName="radioColor">
-      </tb-color-input>
+      </jnks-iot-color-input>
     </div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <div>{{ 'widgets.input-widgets.columns' | translate }}</div>
       <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
         <input matInput formControlName="radioColumns" type="number" min="0" step="1" placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
     </div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <div>{{ 'widgets.input-widgets.radio-label-position' | translate }}</div>
       <mat-form-field class="medium-width" appearance="outline" subscriptSizing="dynamic">
         <mat-select formControlName="radioLabelPosition">
@@ -263,21 +263,21 @@
     <mat-slide-toggle formControlName="useCustomIcon" class="slide-block">
       {{ 'widgets.input-widgets.use-custom-icon' | translate }}
     </mat-slide-toggle>
-    <tb-material-icon-select [class.!hidden]="updateMultipleAttributesKeySettingsForm.get('useCustomIcon').value"
+    <jnks-iot-material-icon-select [class.!hidden]="updateMultipleAttributesKeySettingsForm.get('useCustomIcon').value"
                              label="{{ 'widgets.input-widgets.input-cell-icon' | translate }}"
                              iconClearButton
                              formControlName="icon">
-    </tb-material-icon-select>
-    <tb-gallery-image-input [class.!hidden]="!updateMultipleAttributesKeySettingsForm.get('useCustomIcon').value"
+    </jnks-iot-material-icon-select>
+    <jnks-iot-gallery-image-input [class.!hidden]="!updateMultipleAttributesKeySettingsForm.get('useCustomIcon').value"
                     label="{{ 'widgets.input-widgets.input-cell-icon' | translate }}"
                     formControlName="customIcon">
-    </tb-gallery-image-input>
+    </jnks-iot-gallery-image-input>
   </fieldset>
   <fieldset [class.!hidden]="updateMultipleAttributesKeySettingsForm.get('dataKeyHidden').value" class="fields-group">
     <legend class="group-title" translate>widgets.input-widgets.value-conversion-settings</legend>
     <fieldset class="fields-group fields-group-slider">
       <legend class="group-title" translate>widgets.input-widgets.get-value-settings</legend>
-      <mat-expansion-panel class="tb-settings" [expanded]="updateMultipleAttributesKeySettingsForm.get('useGetValueFunction').value">
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="updateMultipleAttributesKeySettingsForm.get('useGetValueFunction').value">
         <mat-expansion-panel-header class="flex flex-row flex-wrap">
           <mat-panel-title>
             <mat-slide-toggle formControlName="useGetValueFunction" (click)="$event.stopPropagation()"
@@ -290,17 +290,17 @@
           </mat-panel-description>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <tb-js-func formControlName="getValueFunctionBody"
+          <jnks-iot-js-func formControlName="getValueFunctionBody"
                       [globalVariables]="functionScopeVariables"
                       [functionArgs]="['value', 'ctx']"
                       functionTitle="{{ 'widgets.input-widgets.get-value-function' | translate }}">
-          </tb-js-func>
+          </jnks-iot-js-func>
         </ng-template>
       </mat-expansion-panel>
     </fieldset>
     <fieldset class="fields-group fields-group-slider">
       <legend class="group-title" translate>widgets.input-widgets.set-value-settings</legend>
-      <mat-expansion-panel class="tb-settings" [expanded]="updateMultipleAttributesKeySettingsForm.get('useSetValueFunction').value">
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="updateMultipleAttributesKeySettingsForm.get('useSetValueFunction').value">
         <mat-expansion-panel-header class="flex flex-row flex-wrap">
           <mat-panel-title>
             <mat-slide-toggle formControlName="useSetValueFunction" (click)="$event.stopPropagation()"
@@ -313,11 +313,11 @@
           </mat-panel-description>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <tb-js-func formControlName="setValueFunctionBody"
+          <jnks-iot-js-func formControlName="setValueFunctionBody"
                       [globalVariables]="functionScopeVariables"
                       [functionArgs]="['value', 'originValue', 'ctx']"
                       functionTitle="{{ 'widgets.input-widgets.set-value-function' | translate }}">
-          </tb-js-func>
+          </jnks-iot-js-func>
         </ng-template>
       </mat-expansion-panel>
     </fieldset>

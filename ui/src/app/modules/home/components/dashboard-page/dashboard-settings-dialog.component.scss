@@ -13,7 +13,7 @@
 
 :host ::ng-deep {
   .mat-expansion-panel {
-    &.tb-settings {
+    &.jnks-iot-settings {
       box-shadow: none;
       .mat-content {
         overflow: visible;
@@ -33,7 +33,7 @@
       .mat-expansion-panel-body{
         padding: 0;
       }
-      .tb-css-content-panel {
+      .jnks-iot-css-content-panel {
         margin: 0 0 8px;
       }
     }

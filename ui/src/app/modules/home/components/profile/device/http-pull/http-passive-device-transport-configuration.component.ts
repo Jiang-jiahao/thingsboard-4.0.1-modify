@@ -17,7 +17,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-http-passive-device-transport-configuration',
+  selector: 'jnks-iot-http-passive-device-transport-configuration',
   templateUrl: './http-passive-device-transport-configuration.component.html',
   styleUrls: ['./http-device-profile-transport-configuration.component.scss'],
   providers: [

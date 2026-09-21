@@ -35,10 +35,10 @@
         </mat-form-field>
       </div>
       <div class="params-json-editor">
-        <tb-json-object-edit formControlName="params"
+        <jnks-iot-json-object-edit formControlName="params"
                              [editorStyle]="{minHeight: '130px'}"
                              label="{{ 'widgets.persistent-table.params' | translate }}">
-        </tb-json-object-edit>
+        </jnks-iot-json-object-edit>
       </div>
       <mat-expansion-panel class="additional-json-editor">
         <mat-expansion-panel-header>
@@ -47,9 +47,9 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <tb-json-object-edit formControlName="additionalInfo"
+          <jnks-iot-json-object-edit formControlName="additionalInfo"
                                [editorStyle]="{minHeight: '130px'}">
-          </tb-json-object-edit>
+          </jnks-iot-json-object-edit>
         </ng-template>
       </mat-expansion-panel>
     </fieldset>

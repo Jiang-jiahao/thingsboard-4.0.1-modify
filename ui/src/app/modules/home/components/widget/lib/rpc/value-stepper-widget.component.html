@@ -1,26 +1,26 @@
-<div class="tb-value-stepper-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
-  <div class="tb-value-stepper-overlay" [style]="overlayStyle"></div>
+<div class="jnks-iot-value-stepper-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
+  <div class="jnks-iot-value-stepper-overlay" [style]="overlayStyle"></div>
   <ng-container *ngTemplateOutlet="widgetTitlePanel"></ng-container>
-  <div #stepperContent class="tb-value-stepper-content">
+  <div #stepperContent class="jnks-iot-value-stepper-content">
     <div [class.!hidden]="!showLeftButton"
          #leftButton
-         class="tb-button-shape tb-button-shape-left"
-         [class.tb-button-pointer]="!leftDisabledState && (loading$ | async) === false">
+         class="jnks-iot-button-shape jnks-iot-button-shape-left"
+         [class.jnks-iot-button-pointer]="!leftDisabledState && (loading$ | async) === false">
     </div>
     <div #valueBoxContainer
-         class="tb-value-stepper-value-box"
+         class="jnks-iot-value-stepper-value-box"
          [class.!hidden]="!showValueBox"
-         [class.tb-value-stepper-value-box-disabled]="(disabledState$ | async) === true">
+         [class.jnks-iot-value-stepper-value-box-disabled]="(disabledState$ | async) === true">
       <div #value
-           class="tb-value-stepper-value"
+           class="jnks-iot-value-stepper-value"
            [style.color]="(disabledState$ | async) === true ? disabledColor : valueStyleColor"
            [style]="valueStyle">{{ valueText }}</div>
     </div>
     <div [class.!hidden]="!showRightButton"
          #rightButton
-         class="tb-button-shape tb-button-shape-right"
-         [class.tb-button-pointer]="!rightDisabledState && (loading$ | async) === false">
+         class="jnks-iot-button-shape jnks-iot-button-shape-right"
+         [class.jnks-iot-button-pointer]="!rightDisabledState && (loading$ | async) === false">
     </div>
   </div>
-  <mat-progress-bar class="tb-action-widget-progress" style="height: 4px;" color="accent" mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+  <mat-progress-bar class="jnks-iot-action-widget-progress" style="height: 4px;" color="accent" mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
 </div>

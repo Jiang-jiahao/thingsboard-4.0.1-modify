@@ -34,7 +34,7 @@ export interface KeyFilterDialogData {
 }
 
 @Component({
-  selector: 'tb-key-filter-dialog',
+  selector: 'jnks-iot-key-filter-dialog',
   templateUrl: './key-filter-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: KeyFilterDialogComponent}],
   styleUrls: ['./key-filter-dialog.component.scss']

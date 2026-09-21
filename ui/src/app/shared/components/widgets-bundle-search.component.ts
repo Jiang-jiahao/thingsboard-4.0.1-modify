@@ -2,7 +2,7 @@ import { Component, ElementRef, forwardRef, Input, ViewChild, ViewEncapsulation 
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
-  selector: 'tb-widgets-bundle-search',
+  selector: 'jnks-iot-widgets-bundle-search',
   templateUrl: './widgets-bundle-search.component.html',
   styleUrls: ['./widgets-bundle-search.component.scss'],
   providers: [{

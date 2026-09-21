@@ -12,7 +12,7 @@ import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.kv.TsKvEntry;
 import com.jnks.iot.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
 import com.jnks.iot.server.dao.entity.EntityCountService;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
 import com.jnks.iot.server.dao.timeseries.TimeseriesService;
 import com.jnks.iot.server.dao.usagerecord.ApiUsageStateService;
 
@@ -31,7 +31,7 @@ public class BasicUsageInfoService implements UsageInfoService {
     private final ApiUsageStateService apiUsageStateService;
     private final TimeseriesService tsService;
     @Lazy
-    private final TbTenantProfileCache tenantProfileCache;
+    private final JnksIotTenantProfileCache tenantProfileCache;
 
     @Override
     public UsageInfo getUsageInfo(TenantId tenantId) {

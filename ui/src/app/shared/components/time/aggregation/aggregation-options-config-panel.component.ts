@@ -1,10 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { aggregationTranslations, AggregationType } from '@shared/models/time/time.models';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 
 @Component({
-  selector: 'tb-aggregation-options-config-panel',
+  selector: 'jnks-iot-aggregation-options-config-panel',
   templateUrl: './aggregation-options-config-panel.component.html',
   styleUrls: ['./aggregation-options-config-panel.component.scss']
 })
@@ -17,7 +17,7 @@ export class AggregationOptionsConfigPanelComponent implements OnInit {
   onClose: (result: Array<AggregationType> | null) => void;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   aggregationOptionsConfigForm: FormGroup;
 

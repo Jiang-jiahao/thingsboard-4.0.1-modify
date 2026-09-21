@@ -1,23 +1,23 @@
-<div class="tb-widget-button-custom-style-panel" [formGroup]="customStyleFormGroup">
-  <div class="tb-widget-button-custom-style-title">{{ widgetButtonStateTranslationMap.get(state) | translate }}</div>
-  <div class="tb-widget-button-custom-style-panel-content">
-    <div class="tb-form-row space-between">
+<div class="jnks-iot-widget-button-custom-style-panel" [formGroup]="customStyleFormGroup">
+  <div class="jnks-iot-widget-button-custom-style-title">{{ widgetButtonStateTranslationMap.get(state) | translate }}</div>
+  <div class="jnks-iot-widget-button-custom-style-panel-content">
+    <div class="jnks-iot-form-row space-between">
       <mat-slide-toggle class="mat-slide" formControlName="overrideMainColor">
         {{ 'widgets.button.main' | translate }}
       </mat-slide-toggle>
-      <tb-color-input asBoxInput
+      <jnks-iot-color-input asBoxInput
                       formControlName="mainColor">
-      </tb-color-input>
+      </jnks-iot-color-input>
     </div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <mat-slide-toggle class="mat-slide" formControlName="overrideBackgroundColor">
         {{ 'widgets.button.background' | translate }}
       </mat-slide-toggle>
-      <tb-color-input asBoxInput
+      <jnks-iot-color-input asBoxInput
                       formControlName="backgroundColor">
-      </tb-color-input>
+      </jnks-iot-color-input>
     </div>
-    <div class="tb-form-row space-between column-xs">
+    <div class="jnks-iot-form-row space-between column-xs">
       <mat-slide-toggle class="mat-slide" formControlName="overrideDropShadow">
         {{ 'widgets.button.shadow' | translate }}
       </mat-slide-toggle>
@@ -26,11 +26,11 @@
         <mat-chip-option [selectable]="customStyleFormGroup.get('dropShadow').value" [value]="false">{{ 'widgets.button.disabled' | translate }}</mat-chip-option>
       </mat-chip-listbox>
     </div>
-    <div class="tb-widget-button-custom-style-preview">
-      <div class="tb-widget-button-custom-style-preview-title" translate>
+    <div class="jnks-iot-widget-button-custom-style-preview">
+      <div class="jnks-iot-widget-button-custom-style-preview-title" translate>
         widgets.button.preview
       </div>
-      <tb-widget-button
+      <jnks-iot-widget-button
         #widgetButtonPreview
         [appearance]="previewAppearance"
         [borderRadius]="borderRadius"
@@ -40,13 +40,13 @@
         [pressed]="state === widgetButtonState.pressed"
         [activated]="state === widgetButtonState.activated"
         [disabled]="state === widgetButtonState.disabled">
-      </tb-widget-button>
+      </jnks-iot-widget-button>
     </div>
   </div>
-  <div class="tb-widget-button-custom-style-panel-buttons">
+  <div class="jnks-iot-widget-button-custom-style-panel-buttons">
     <button *ngIf="copyFromStates?.length"
             #copyStyleButton
-            class="tb-nowrap"
+            class="jnks-iot-nowrap"
             mat-stroked-button
             color="primary"
             type="button"

@@ -1,16 +1,16 @@
-<div class="tb-form-panel tb-slide-toggle stroked" [formGroup]="actionButtonConfigForm">
-  <mat-expansion-panel class="tb-settings"
+<div class="jnks-iot-form-panel jnks-iot-slide-toggle stroked" [formGroup]="actionButtonConfigForm">
+  <mat-expansion-panel class="jnks-iot-settings"
                        [expanded]="actionButtonConfigForm.get('enabled').value">
     <mat-expansion-panel-header class="fill-width flex flex-row flex-wrap">
       <mat-panel-title class="max-w-60% flex-full">
-        <div tb-hint-tooltip-icon="{{ sliderHint }}" class="tb-form-row no-border no-padding">
+        <div jnks-iot-hint-tooltip-icon="{{ sliderHint }}" class="jnks-iot-form-row no-border no-padding">
           <mat-slide-toggle class="mat-slide flex items-stretch justify-center" formControlName="enabled" (click)="$event.stopPropagation()">
             {{ actionTitle }}
           </mat-slide-toggle>
         </div>
       </mat-panel-title>
     </mat-expansion-panel-header>
-    <ng-template matExpansionPanelContent class="tb-extension-panel">
+    <ng-template matExpansionPanelContent class="jnks-iot-extension-panel">
       <div class="flex flex-row xs:flex-col gt-xs:gap-2">
         <mat-form-field class="mat-block flex-1" *ngIf="!hideButtonText">
           <mat-label translate>notification.button-text</mat-label>
@@ -47,15 +47,15 @@
           </mat-error>
         </mat-form-field>
         <ng-template #dashboardSelector>
-          <tb-dashboard-autocomplete
+          <jnks-iot-dashboard-autocomplete
             class="max-w-35% flex-full xs:max-w-full"
             required
             formControlName="dashboardId">
-          </tb-dashboard-autocomplete>
-          <tb-dashboard-state-autocomplete class="max-w-35% flex-full xs:max-w-full"
+          </jnks-iot-dashboard-autocomplete>
+          <jnks-iot-dashboard-state-autocomplete class="max-w-35% flex-full xs:max-w-full"
                                            [dashboardId]="actionButtonConfigForm.get('dashboardId').value"
                                            formControlName="dashboardState">
-          </tb-dashboard-state-autocomplete>
+          </jnks-iot-dashboard-state-autocomplete>
         </ng-template>
       </div>
       <mat-slide-toggle formControlName="setEntityIdInState" class="toggle"

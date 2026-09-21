@@ -5,7 +5,7 @@
   min-width: 0;
 }
 
-.tb-brand-logo {
+.jnks-iot-brand-logo {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -15,7 +15,7 @@
 }
 
 // 圆形徽章：裁切横版 Logo 左侧徽标区域
-.tb-logo-emblem {
+.jnks-iot-logo-emblem {
   flex-shrink: 0;
   width: 52px;
   height: 52px;
@@ -26,7 +26,7 @@
   box-shadow: 0 2px 14px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
-.tb-logo-brand-img {
+.jnks-iot-logo-brand-img {
   display: block;
   height: 100%;
   width: auto;
@@ -36,7 +36,7 @@
   object-position: 6% center;
 }
 
-.tb-logo-copy {
+.jnks-iot-logo-copy {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -45,7 +45,7 @@
   flex: 1;
 }
 
-.tb-logo-text {
+.jnks-iot-logo-text {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -56,26 +56,26 @@
   color: #fff;
 }
 
-.tb-logo-subtitle {
+.jnks-iot-logo-subtitle {
   display: none;
   font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.03em;
   line-height: 1.4;
-  color: $tb-sidebar-text-muted;
+  color: $jnks-iot-sidebar-text-muted;
   white-space: normal;
   word-break: keep-all;
 }
 
 :host-context(.login-logo) {
-  .tb-brand-logo {
+  .jnks-iot-brand-logo {
     flex-direction: column;
     align-items: center;
     gap: 0;
-    color: $tb-primary-color;
+    color: $jnks-iot-primary-color;
   }
 
-  .tb-logo-emblem {
+  .jnks-iot-logo-emblem {
     width: min(100%, 300px);
     height: 72px;
     border-radius: 12px;
@@ -85,7 +85,7 @@
     box-shadow: none;
   }
 
-  .tb-logo-brand-img {
+  .jnks-iot-logo-brand-img {
     width: 100%;
     min-width: 100%;
     height: 100%;
@@ -93,42 +93,42 @@
     object-position: center;
   }
 
-  .tb-logo-copy {
+  .jnks-iot-logo-copy {
     display: none;
   }
 }
 
-:host-context(.tb-nav-logo) {
+:host-context(.jnks-iot-nav-logo) {
   width: 100%;
 
-  .tb-brand-logo {
+  .jnks-iot-brand-logo {
     width: 100%;
     align-items: center;
     padding: 2px 0;
     gap: 14px;
   }
 
-  .tb-logo-emblem {
+  .jnks-iot-logo-emblem {
     width: 56px;
     height: 56px;
   }
 
-  .tb-logo-brand-img {
+  .jnks-iot-logo-brand-img {
     min-width: 120%;
     object-position: 5% center;
   }
 
-  .tb-logo-subtitle {
+  .jnks-iot-logo-subtitle {
     display: block;
     font-size: 12px;
     line-height: 1.35;
-    color: rgba($tb-hue3-color, 0.78);
+    color: rgba($jnks-iot-hue3-color, 0.78);
   }
 
-  .tb-logo-text {
+  .jnks-iot-logo-text {
     font-size: 22px;
     letter-spacing: 0.11em;
-    background: linear-gradient(90deg, #fff 0%, rgba($tb-hue3-color, 0.95) 100%);
+    background: linear-gradient(90deg, #fff 0%, rgba($jnks-iot-hue3-color, 0.95) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;

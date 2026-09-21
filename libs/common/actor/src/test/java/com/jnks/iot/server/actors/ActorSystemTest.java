@@ -30,7 +30,7 @@ public class ActorSystemTest {
     private static final int _100K = 100 * 1024;
     public static final int TIMEOUT_AWAIT_MAX_SEC = 30;
 
-    private volatile TbActorSystem actorSystem;
+    private volatile JnksIotActorSystem actorSystem;
     private volatile ExecutorService submitPool;
     private ExecutorService executor;
     private int parallelism;
@@ -40,8 +40,8 @@ public class ActorSystemTest {
         int cores = Runtime.getRuntime().availableProcessors();
         parallelism = Math.max(2, cores / 2);
         log.debug("parallelism {}", parallelism);
-        TbActorSystemSettings settings = new TbActorSystemSettings(5, parallelism, 42);
-        actorSystem = new DefaultTbActorSystem(settings);
+        JnksIotActorSystemSettings settings = new JnksIotActorSystemSettings(5, parallelism, 42);
+        actorSystem = new DefaultJnksIotActorSystem(settings);
         submitPool = Executors.newFixedThreadPool(parallelism, JnksIotThreadFactory.forName(getClass().getSimpleName() + "-submit-test-scope")); //order guaranteed
     }
 
@@ -142,13 +142,13 @@ public class ActorSystemTest {
         ActorTestCtx testCtx1 = getActorTestCtx(1);
         ActorTestCtx testCtx2 = getActorTestCtx(1);
         // 创建两个actor
-        TbActorRef actorId1 = actorSystem.createRootActor(ROOT_DISPATCHER, new SlowInitActor.SlowInitActorCreator(
-                new TbEntityActorId(new DeviceId(UUID.randomUUID())), testCtx1));
-        TbActorRef actorId2 = actorSystem.createRootActor(ROOT_DISPATCHER, new SlowInitActor.SlowInitActorCreator(
-                new TbEntityActorId(new DeviceId(UUID.randomUUID())), testCtx2));
+        JnksIotActorRef actorId1 = actorSystem.createRootActor(ROOT_DISPATCHER, new SlowInitActor.SlowInitActorCreator(
+                new JnksIotEntityActorId(new DeviceId(UUID.randomUUID())), testCtx1));
+        JnksIotActorRef actorId2 = actorSystem.createRootActor(ROOT_DISPATCHER, new SlowInitActor.SlowInitActorCreator(
+                new JnksIotEntityActorId(new DeviceId(UUID.randomUUID())), testCtx2));
         // 因为上面的actor初始化的很慢，延迟有500毫秒，所以actorSystem.stop(actorId1);会先执行。模拟向actor放数据的时候actor被关了的情况
-        actorId1.tell(new IntTbActorMsg(42));
-        actorId2.tell(new IntTbActorMsg(42));
+        actorId1.tell(new IntJnksIotActorMsg(42));
+        actorId2.tell(new IntJnksIotActorMsg(42));
         actorSystem.stop(actorId1);
 
         Assertions.assertTrue(testCtx2.getLatch().await(1, TimeUnit.SECONDS));
@@ -170,7 +170,7 @@ public class ActorSystemTest {
         assertThat(testCtx1.getLatch().getCount()).as("testCtx1 latch initial state").isEqualTo(1);
         assertThat(testCtx2.getLatch().getCount()).as("testCtx2 latch initial state").isEqualTo(1);
         // 创建actorId
-        TbActorId actorId = new TbEntityActorId(new DeviceId(UUID.randomUUID()));
+        JnksIotActorId actorId = new JnksIotEntityActorId(new DeviceId(UUID.randomUUID()));
         // initLatch用来延迟执行SlowCreateActorCreator的创建，模拟在没有创建完成actor的时候，再次进行创建相同id的actor的场景
         final CountDownLatch initLatch = new CountDownLatch(1);
         final CountDownLatch actorsReadyLatch = new CountDownLatch(2);
@@ -190,7 +190,7 @@ public class ActorSystemTest {
         initLatch.countDown(); //replacement for Thread.wait(500) in the SlowCreateActorCreator
         Assertions.assertTrue(actorsReadyLatch.await(TIMEOUT_AWAIT_MAX_SEC, TimeUnit.SECONDS));
         log.info("actorsReadyLatch ok");
-        actorSystem.tell(actorId, new IntTbActorMsg(42));
+        actorSystem.tell(actorId, new IntJnksIotActorMsg(42));
 
         // 等待创建，两个上下文中只有一个被初始化。不管是Ctx1还是Ctx2
         Awaitility.await("one of two actors latch zeroed").atMost(TIMEOUT_AWAIT_MAX_SEC, TimeUnit.SECONDS)
@@ -218,7 +218,7 @@ public class ActorSystemTest {
         actorSystem.createDispatcher(ROOT_DISPATCHER, executor);
         ActorTestCtx testCtx = getActorTestCtx(1);
         // 创建actorId
-        TbActorId actorId = new TbEntityActorId(new DeviceId(UUID.randomUUID()));
+        JnksIotActorId actorId = new JnksIotEntityActorId(new DeviceId(UUID.randomUUID()));
         final int actorsCount = 1000;
         // initLatch用来延迟执行SlowCreateActorCreator的创建，模拟在没有创建完成actor的时候，再次进行创建相同id的actor的场景
         final CountDownLatch initLatch = new CountDownLatch(1);
@@ -232,7 +232,7 @@ public class ActorSystemTest {
         initLatch.countDown();
         Assertions.assertTrue(actorsReadyLatch.await(TIMEOUT_AWAIT_MAX_SEC, TimeUnit.SECONDS));
 
-        actorSystem.tell(actorId, new IntTbActorMsg(42));
+        actorSystem.tell(actorId, new IntJnksIotActorMsg(42));
 
         Assertions.assertTrue(testCtx.getLatch().await(TIMEOUT_AWAIT_MAX_SEC, TimeUnit.SECONDS));
         // 创建actor会执行一次InvocationCount + 1，一个用于消息被处理的时候InvocationCount + 1
@@ -250,13 +250,13 @@ public class ActorSystemTest {
         ActorTestCtx testCtx1 = getActorTestCtx(1);
         ActorTestCtx testCtx2 = getActorTestCtx(1);
 
-        TbActorRef actorId1 = actorSystem.createRootActor(ROOT_DISPATCHER, new FailedToInitActor.FailedToInitActorCreator(
-                new TbEntityActorId(new DeviceId(UUID.randomUUID())), testCtx1, 1, 3000)); // 1表示重试一次就初始化成功
-        TbActorRef actorId2 = actorSystem.createRootActor(ROOT_DISPATCHER, new FailedToInitActor.FailedToInitActorCreator(
-                new TbEntityActorId(new DeviceId(UUID.randomUUID())), testCtx2, 2, 1)); // 2表示重试两次就初始化成功
+        JnksIotActorRef actorId1 = actorSystem.createRootActor(ROOT_DISPATCHER, new FailedToInitActor.FailedToInitActorCreator(
+                new JnksIotEntityActorId(new DeviceId(UUID.randomUUID())), testCtx1, 1, 3000)); // 1表示重试一次就初始化成功
+        JnksIotActorRef actorId2 = actorSystem.createRootActor(ROOT_DISPATCHER, new FailedToInitActor.FailedToInitActorCreator(
+                new JnksIotEntityActorId(new DeviceId(UUID.randomUUID())), testCtx2, 2, 1)); // 2表示重试两次就初始化成功
 
-        actorId1.tell(new IntTbActorMsg(42));
-        actorId2.tell(new IntTbActorMsg(42));
+        actorId1.tell(new IntJnksIotActorMsg(42));
+        actorId2.tell(new IntJnksIotActorMsg(42));
         // Actor1在2秒内未完成初始化
         Assertions.assertFalse(testCtx1.getLatch().await(2, TimeUnit.SECONDS));
         // Actor2在1秒内完成初始化，因为Actor2是1毫秒重试一次，所以Actor2在1秒内完成初始化
@@ -288,11 +288,11 @@ public class ActorSystemTest {
 
         List<ActorTestCtx> testCtxes = new ArrayList<>();
         // 创建actorsCount个actor
-        List<TbActorRef> actorRefs = new ArrayList<>();
+        List<JnksIotActorRef> actorRefs = new ArrayList<>();
         for (int actorIdx = 0; actorIdx < actorsCount; actorIdx++) {
             ActorTestCtx testCtx = getActorTestCtx(msgNumber);
             actorRefs.add(actorSystem.createRootActor(ROOT_DISPATCHER, new TestRootActor.TestRootActorCreator(
-                    new TbEntityActorId(new DeviceId(UUID.randomUUID())), testCtx)));
+                    new JnksIotEntityActorId(new DeviceId(UUID.randomUUID())), testCtx)));
             testCtxes.add(testCtx);
         }
 
@@ -301,7 +301,7 @@ public class ActorSystemTest {
             // 并发的给所有的actor发送msgNumber条消息
             for (int i = 0; i < msgNumber; i++) {
                 int tmp = randomIntegers[i];
-                submitPool.execute(() -> actorRefs.forEach(actorId -> actorId.tell(new IntTbActorMsg(tmp))));
+                submitPool.execute(() -> actorRefs.forEach(actorId -> actorId.tell(new IntJnksIotActorMsg(tmp))));
             }
             log.info("Submitted all messages");
             testCtxes.forEach(ctx -> {

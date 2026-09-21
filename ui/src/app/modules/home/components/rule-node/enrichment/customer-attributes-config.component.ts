@@ -6,7 +6,7 @@ import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@app/shar
 import { DataToFetch, dataToFetchTranslations, FetchTo } from '@home/components/rule-node/rule-node-config.models';
 
 @Component({
-  selector: 'tb-enrichment-node-customer-attributes-config',
+  selector: 'jnks-iot-enrichment-node-customer-attributes-config',
   templateUrl: './customer-attributes-config.component.html',
   styleUrls: ['./customer-attributes-config.component.scss']
 })

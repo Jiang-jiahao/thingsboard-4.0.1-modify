@@ -1,6 +1,6 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -20,7 +20,7 @@ import { ValueType } from '@shared/models/constants';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-set-value-action-settings-panel',
+  selector: 'jnks-iot-set-value-action-settings-panel',
   templateUrl: './set-value-action-settings-panel.component.html',
   providers: [],
   styleUrls: ['./action-settings-panel.component.scss'],
@@ -47,7 +47,7 @@ export class SetValueActionSettingsPanelComponent extends PageComponent implemen
   widgetType: widgetType;
 
   @Input()
-  popover: TbPopoverComponent<SetValueActionSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<SetValueActionSettingsPanelComponent>;
 
   @Output()
   setValueSettingsApplied = new EventEmitter<SetValueSettings>();

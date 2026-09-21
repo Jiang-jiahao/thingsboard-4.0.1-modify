@@ -10,7 +10,7 @@ import {
 } from '@home/components/widget/lib/cards/aggregated-value-card.models';
 
 @Component({
-  selector: 'tb-aggregated-value-card-key-settings',
+  selector: 'jnks-iot-aggregated-value-card-key-settings',
   templateUrl: './aggregated-value-card-key-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

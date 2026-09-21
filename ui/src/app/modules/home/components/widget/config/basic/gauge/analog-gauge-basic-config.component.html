@@ -1,19 +1,19 @@
 <ng-container [formGroup]="radialGaugeWidgetConfigForm">
-  <tb-timewindow-config-panel *ngIf="displayTimewindowConfig"
+  <jnks-iot-timewindow-config-panel *ngIf="displayTimewindowConfig"
                               [onlyHistoryTimewindow]="onlyHistoryTimewindow()"
                               formControlName="timewindowConfig">
-  </tb-timewindow-config-panel>
-  <tb-datasources
+  </jnks-iot-timewindow-config-panel>
+  <jnks-iot-datasources
     [configMode]="basicMode"
     hideDataKeyLabel
     hideDataKeyColor
     hideDataKeyUnits
     hideDataKeyDecimals
     formControlName="datasources">
-  </tb-datasources>
-  <div class="tb-form-panel">
-    <div class="tb-form-panel-title" translate>widgets.gauge.gauge-appearance</div>
-    <div class="tb-form-row column-xs">
+  </jnks-iot-datasources>
+  <div class="jnks-iot-form-panel">
+    <div class="jnks-iot-form-panel-title" translate>widgets.gauge.gauge-appearance</div>
+    <div class="jnks-iot-form-row column-xs">
       <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="showUnitTitle">
         {{ 'widgets.gauge.units-title' | translate }}
       </mat-slide-toggle>
@@ -21,35 +21,35 @@
         <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
           <input matInput formControlName="unitTitle" placeholder="{{ 'widget-config.set' | translate }}">
         </mat-form-field>
-        <tb-font-settings formControlName="titleFont"
+        <jnks-iot-font-settings formControlName="titleFont"
                           disabledLineHeight
                           [previewText]="radialGaugeWidgetConfigForm.get('unitTitle').value">
-        </tb-font-settings>
-        <tb-color-input asBoxInput
+        </jnks-iot-font-settings>
+        <jnks-iot-color-input asBoxInput
                         colorClearButton
                         formControlName="titleColor">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
     </div>
 
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <div translate>widget-config.units-short</div>
       <div class="flex flex-row items-center justify-start gap-2">
-        <tb-unit-input
+        <jnks-iot-unit-input
           formControlName="units">
-        </tb-unit-input>
-        <tb-font-settings formControlName="unitsFont"
+        </jnks-iot-unit-input>
+        <jnks-iot-font-settings formControlName="unitsFont"
                           disabledLineHeight
                           [previewText]="radialGaugeWidgetConfigForm.get('units').value">
-        </tb-font-settings>
-        <tb-color-input asBoxInput
+        </jnks-iot-font-settings>
+        <jnks-iot-color-input asBoxInput
                         colorClearButton
                         formControlName="unitsColor">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
     </div>
 
-    <div class="tb-form-row space-between column-xs">
+    <div class="jnks-iot-form-row space-between column-xs">
       <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="valueBox">
         {{ 'widgets.gauge.value' | translate }}
       </mat-slide-toggle>
@@ -58,108 +58,108 @@
           <input matInput formControlName="valueInt" type="number" min="0" max="15" step="1" placeholder="{{ 'widget-config.set' | translate }}">
           <div matSuffix class="lt-md:!hidden" translate>widget-config.digits-suffix</div>
         </mat-form-field>
-        <tb-font-settings formControlName="valueFont"
+        <jnks-iot-font-settings formControlName="valueFont"
                           disabledLineHeight
                           [previewText]="valuePreviewFn">
-        </tb-font-settings>
-        <tb-color-input asBoxInput
+        </jnks-iot-font-settings>
+        <jnks-iot-color-input asBoxInput
                         colorClearButton
                         formControlName="valueColor">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
     </div>
 
-    <div class="tb-form-row space-between column-xs">
+    <div class="jnks-iot-form-row space-between column-xs">
       <div translate>widgets.gauge.ticks</div>
       <div class="flex flex-row items-center justify-start gap-2">
-        <div class="tb-small-label" translate>widgets.gauge.min-value-short</div>
+        <div class="jnks-iot-small-label" translate>widgets.gauge.min-value-short</div>
         <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
           <input matInput formControlName="minValue" type="number" step="1" placeholder="{{ 'widget-config.set' | translate }}">
         </mat-form-field>
-        <div class="tb-small-label" translate>widgets.gauge.max-value-short</div>
+        <div class="jnks-iot-small-label" translate>widgets.gauge.max-value-short</div>
         <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
           <input matInput formControlName="maxValue" type="number" step="1" placeholder="{{ 'widget-config.set' | translate }}">
         </mat-form-field>
-        <tb-font-settings formControlName="numbersFont"
+        <jnks-iot-font-settings formControlName="numbersFont"
                           disabledLineHeight
                           [previewText]="valuePreviewFn">
-        </tb-font-settings>
-        <tb-color-input asBoxInput
+        </jnks-iot-font-settings>
+        <jnks-iot-color-input asBoxInput
                         colorClearButton
                         formControlName="numbersColor">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
     </div>
 
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <div translate>widgets.gauge.arrow-and-scale-color</div>
-      <tb-color-input asBoxInput
+      <jnks-iot-color-input asBoxInput
                       colorClearButton
                       formControlName="defaultColor">
-      </tb-color-input>
+      </jnks-iot-color-input>
     </div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <div translate>widgets.gauge.plate-color</div>
-      <tb-color-input asBoxInput
+      <jnks-iot-color-input asBoxInput
                       colorClearButton
                       formControlName="colorPlate">
-      </tb-color-input>
+      </jnks-iot-color-input>
     </div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <div translate>widgets.gauge.scale-color</div>
-      <tb-color-range-settings formControlName="highlights">
-      </tb-color-range-settings>
+      <jnks-iot-color-range-settings formControlName="highlights">
+      </jnks-iot-color-range-settings>
     </div>
 
-    <div class="tb-form-panel" *ngIf="gaugeType === 'linear'">
-      <div class="tb-form-panel-title" translate>widgets.gauge.progress-bar</div>
-      <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-panel" *ngIf="gaugeType === 'linear'">
+      <div class="jnks-iot-form-panel-title" translate>widgets.gauge.progress-bar</div>
+      <div class="jnks-iot-form-row space-between">
         <div translate>widgets.gauge.progress-bar-color-start</div>
-        <tb-color-input asBoxInput
+        <jnks-iot-color-input asBoxInput
                         colorClearButton
                         formControlName="colorBarProgress">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
-      <div class="tb-form-row space-between">
+      <div class="jnks-iot-form-row space-between">
         <div translate>widgets.gauge.progress-bar-color-end</div>
-        <tb-color-input asBoxInput
+        <jnks-iot-color-input asBoxInput
                         colorClearButton
                         formControlName="colorBarProgressEnd">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
-      <div class="tb-form-row space-between">
+      <div class="jnks-iot-form-row space-between">
         <div translate>widgets.gauge.bar-stroke-color</div>
-        <tb-color-input asBoxInput
+        <jnks-iot-color-input asBoxInput
                         colorClearButton
                         formControlName="colorBarStroke">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
     </div>
 
   </div>
-  <div class="tb-form-panel">
-    <div class="tb-form-panel-title" translate>widget-config.card-appearance</div>
-    <div class="tb-form-row space-between">
+  <div class="jnks-iot-form-panel">
+    <div class="jnks-iot-form-panel-title" translate>widget-config.card-appearance</div>
+    <div class="jnks-iot-form-row space-between">
       <div>{{ 'widget-config.background-color' | translate }}</div>
-      <tb-color-input asBoxInput
+      <jnks-iot-color-input asBoxInput
                       colorClearButton
                       formControlName="backgroundColor">
-      </tb-color-input>
+      </jnks-iot-color-input>
     </div>
-    <div class="tb-form-row space-between column-lt-md">
+    <div class="jnks-iot-form-row space-between column-lt-md">
       <div translate>widget-config.show-card-buttons</div>
       <mat-chip-listbox multiple formControlName="cardButtons">
         <mat-chip-option value="fullscreen">{{ 'fullscreen.fullscreen' | translate }}</mat-chip-option>
       </mat-chip-listbox>
     </div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <div>{{ 'widget-config.card-border-radius' | translate }}</div>
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <input matInput formControlName="borderRadius" placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
     </div>
   </div>
-  <tb-widget-actions-panel
+  <jnks-iot-widget-actions-panel
     formControlName="actions">
-  </tb-widget-actions-panel>
+  </jnks-iot-widget-actions-panel>
 </ng-container>

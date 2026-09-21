@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.jnks.iot.common.util.ListeningExecutor;
 import com.jnks.iot.rule.engine.TestDbCallbackExecutor;
-import com.jnks.iot.rule.engine.api.TbContext;
-import com.jnks.iot.rule.engine.api.TbNodeException;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
+import com.jnks.iot.rule.engine.api.JnksIotNodeException;
 import com.jnks.iot.server.common.data.Customer;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.EntityType;
@@ -45,7 +45,7 @@ public class EntitiesCustomerIdAsyncLoaderTest {
     );
     private static final ListeningExecutor DB_EXECUTOR = new TestDbCallbackExecutor();
     @Mock
-    private TbContext ctxMock;
+    private JnksIotContext ctxMock;
     @Mock
     private UserService userServiceMock;
     @Mock
@@ -125,12 +125,12 @@ public class EntitiesCustomerIdAsyncLoaderTest {
             if (!SUPPORTED_ENTITY_TYPES.contains(entityType)) {
                 var entityId = EntityIdFactory.getByTypeAndUuid(entityType, UUID.randomUUID());
 
-                var expectedExceptionMsg = "com.jnks.iot.rule.engine.api.TbNodeException: Unexpected originator EntityType: " + entityType;
+                var expectedExceptionMsg = "com.jnks.iot.rule.engine.api.JnksIotNodeException: Unexpected originator EntityType: " + entityType;
 
                 var exception = assertThrows(ExecutionException.class,
                         () -> EntitiesCustomerIdAsyncLoader.findEntityIdAsync(ctxMock, entityId).get());
 
-                assertInstanceOf(TbNodeException.class, exception.getCause());
+                assertInstanceOf(JnksIotNodeException.class, exception.getCause());
                 assertEquals(expectedExceptionMsg, exception.getMessage());
             }
         }

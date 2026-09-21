@@ -13,7 +13,7 @@ import { Subject } from 'rxjs';
 import { isDefinedAndNotNull } from '@core/utils';
 
 @Component({
-  selector: 'tb-lwm2m-device-transport-configuration',
+  selector: 'jnks-iot-lwm2m-device-transport-configuration',
   templateUrl: './lwm2m-device-transport-configuration.component.html',
   styleUrls: [],
   providers: [{

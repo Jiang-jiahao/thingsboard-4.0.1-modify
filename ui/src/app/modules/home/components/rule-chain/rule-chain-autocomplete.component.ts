@@ -17,7 +17,7 @@ import { RuleChainType } from '@app/shared/models/rule-chain.models';
 import { getEntityDetailsPageURL } from '@core/utils';
 
 @Component({
-  selector: 'tb-rule-chain-autocomplete',
+  selector: 'jnks-iot-rule-chain-autocomplete',
   templateUrl: './rule-chain-autocomplete.component.html',
   styleUrls: [],
   providers: [{

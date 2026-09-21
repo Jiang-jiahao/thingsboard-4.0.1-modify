@@ -18,7 +18,7 @@ import { WidgetService } from '@core/http/widget.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-time-series-chart-axis-settings',
+  selector: 'jnks-iot-time-series-chart-axis-settings',
   templateUrl: './time-series-chart-axis-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

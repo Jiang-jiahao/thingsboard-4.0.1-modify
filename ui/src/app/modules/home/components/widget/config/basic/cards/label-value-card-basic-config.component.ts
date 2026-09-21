@@ -23,7 +23,7 @@ import {
 } from '@home/components/widget/config/timewindow-config-panel.component';
 
 @Component({
-  selector: 'tb-label-value-card-basic-config',
+  selector: 'jnks-iot-label-value-card-basic-config',
   templateUrl: './label-value-card-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

@@ -36,11 +36,11 @@
             <mat-label translate>user.last-name</mat-label>
             <input matInput formControlName="lastName"/>
           </mat-form-field>
-          <tb-phone-input [required]="false"
+          <jnks-iot-phone-input [required]="false"
                           label="{{ 'contact.phone' | translate }}"
                           [enableFlagsSelect]="true"
                           formControlName="phone">
-          </tb-phone-input>
+          </jnks-iot-phone-input>
           <mat-form-field class="mat-block">
             <mat-label translate>language.language</mat-label>
             <mat-select formControlName="language">
@@ -49,8 +49,8 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <section class="tb-home-dashboard flex flex-1 flex-col gt-sm:flex-row" *ngIf="!isSysAdmin()">
-            <tb-dashboard-autocomplete
+          <section class="jnks-iot-home-dashboard flex flex-1 flex-col gt-sm:flex-row" *ngIf="!isSysAdmin()">
+            <jnks-iot-dashboard-autocomplete
               class="flex-1"
               label="{{ 'dashboard.home-dashboard' | translate }}"
               formControlName="homeDashboardId"
@@ -58,7 +58,7 @@
               [tenantId]="user?.tenantId?.id"
               [customerId]="user?.customerId?.id"
               [selectFirstDashboard]="false"
-            ></tb-dashboard-autocomplete>
+            ></jnks-iot-dashboard-autocomplete>
             <mat-checkbox class="flex-1" formControlName="homeDashboardHideToolbar">
               {{ 'dashboard.home-dashboard-hide-toolbar' | translate }}
             </mat-checkbox>

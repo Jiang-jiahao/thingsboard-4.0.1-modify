@@ -1,13 +1,13 @@
 import { FormattedData } from '@shared/models/widget.models';
 import L from 'leaflet';
 import { Map as MapLibreGLMap, MapOptions as MapLibreGLMapOptions } from 'maplibre-gl';
-import { TbMapDatasource } from '@shared/models/widget/maps/map.models';
+import { JnksIotMapDatasource } from '@shared/models/widget/maps/map.models';
 import { MatIconRegistry } from '@angular/material/icon';
 
 // redeclare module, maintains compatibility with @types/leaflet
 declare module 'leaflet' {
   interface MarkerOptions {
-    tbMarkerData?: FormattedData<TbMapDatasource>;
+    jnksIotMarkerData?: FormattedData<JnksIotMapDatasource>;
   }
   interface Map {
     _patterns: {[id: number]: L.TB.Pattern};

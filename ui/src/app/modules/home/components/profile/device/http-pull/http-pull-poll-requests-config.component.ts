@@ -18,7 +18,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-http-pull-poll-requests-config',
+  selector: 'jnks-iot-http-pull-poll-requests-config',
   templateUrl: './http-pull-poll-requests-config.component.html',
   styleUrls: ['./http-pull-poll-requests-config.component.scss'],
   providers: [

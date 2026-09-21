@@ -26,7 +26,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import {
   AggregationOptionsConfigPanelComponent
 } from '@shared/components/time/aggregation/aggregation-options-config-panel.component';
@@ -42,7 +42,7 @@ export interface TimewindowConfigDialogData {
 }
 
 @Component({
-  selector: 'tb-timewindow-config-dialog',
+  selector: 'jnks-iot-timewindow-config-dialog',
   templateUrl: './timewindow-config-dialog.component.html',
   styleUrls: ['./timewindow-config-dialog.component.scss', './timewindow-form.scss']
 })
@@ -109,7 +109,7 @@ export class TimewindowConfigDialogComponent extends PageComponent implements On
               public fb: FormBuilder,
               private timeService: TimeService,
               private translate: TranslateService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private cd: ChangeDetectorRef,
               public viewContainerRef: ViewContainerRef) {
@@ -562,7 +562,7 @@ export class TimewindowConfigDialogComponent extends PageComponent implements On
         popoverContentStyle: {padding: 0},
         isModal: true
       });
-      aggregationConfigPopover.tbComponentRef.instance.popoverComponent = aggregationConfigPopover;
+      aggregationConfigPopover.jnksIotComponentRef.instance.popoverComponent = aggregationConfigPopover;
     }
     this.cd.detectChanges();
   }
@@ -627,7 +627,7 @@ export class TimewindowConfigDialogComponent extends PageComponent implements On
         popoverContentStyle: {padding: 0},
         isModal: true
       });
-      intervalsConfigPopover.tbComponentRef.instance.popoverComponent = intervalsConfigPopover;
+      intervalsConfigPopover.jnksIotComponentRef.instance.popoverComponent = intervalsConfigPopover;
     }
     this.cd.detectChanges();
   }

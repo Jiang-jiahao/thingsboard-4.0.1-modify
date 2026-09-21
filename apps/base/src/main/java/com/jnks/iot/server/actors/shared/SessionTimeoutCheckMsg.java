@@ -1,9 +1,9 @@
 package com.jnks.iot.server.actors.shared;
 
 import com.jnks.iot.server.common.msg.MsgType;
-import com.jnks.iot.server.common.msg.TbActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
 
-public class SessionTimeoutCheckMsg implements TbActorMsg {
+public class SessionTimeoutCheckMsg implements JnksIotActorMsg {
 
     private static final SessionTimeoutCheckMsg INSTANCE = new SessionTimeoutCheckMsg();
 

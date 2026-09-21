@@ -10,7 +10,7 @@ import { chartAnimationEasings, ChartAnimationSettings } from '@home/components/
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-chart-animation-settings',
+  selector: 'jnks-iot-chart-animation-settings',
   templateUrl: './chart-animation-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

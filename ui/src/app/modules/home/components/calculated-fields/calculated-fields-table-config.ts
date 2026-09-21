@@ -189,7 +189,7 @@ export class CalculatedFieldsTableConfig extends EntityTableConfig<CalculatedFie
   private getCalculatedFieldDialog(value?: CalculatedField, buttonTitle = 'action.add', isDirty = false): Observable<CalculatedField> {
     return this.dialog.open<CalculatedFieldDialogComponent, CalculatedFieldDialogData, CalculatedField>(CalculatedFieldDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         value,
         buttonTitle,
@@ -209,7 +209,7 @@ export class CalculatedFieldsTableConfig extends EntityTableConfig<CalculatedFie
   private openDebugEventsDialog(calculatedField: CalculatedField): void {
     this.dialog.open<CalculatedFieldDebugDialogComponent, CalculatedFieldDebugDialogData, null>(CalculatedFieldDebugDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         tenantId: this.tenantId,
         value: calculatedField,
@@ -271,7 +271,7 @@ export class CalculatedFieldsTableConfig extends EntityTableConfig<CalculatedFie
     return this.dialog.open<CalculatedFieldScriptTestDialogComponent, CalculatedFieldTestScriptDialogData, string>(CalculatedFieldScriptTestDialogComponent,
       {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog', 'tb-fullscreen-dialog-gt-xs'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog', 'jnks-iot-fullscreen-dialog-gt-xs'],
         data: {
           arguments: resultArguments,
           expression: calculatedField.configuration.expression,

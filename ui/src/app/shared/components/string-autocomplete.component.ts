@@ -20,7 +20,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
 @Component({
-  selector: 'tb-string-autocomplete',
+  selector: 'jnks-iot-string-autocomplete',
   templateUrl: './string-autocomplete.component.html',
   styleUrls: ['./string-autocomplete.component.scss'],
   providers: [
@@ -52,7 +52,7 @@ export class StringAutocompleteComponent implements ControlValueAccessor, OnInit
   subscriptSizing: SubscriptSizing = 'dynamic';
 
   @Input()
-  additionalClass: string | string[] | Record<string, boolean | undefined | null> = 'tb-inline-field tb-suffix-show-on-hover';
+  additionalClass: string | string[] | Record<string, boolean | undefined | null> = 'jnks-iot-inline-field jnks-iot-suffix-show-on-hover';
 
   @Input()
   appearance: MatFormFieldAppearance = 'outline';
@@ -61,7 +61,7 @@ export class StringAutocompleteComponent implements ControlValueAccessor, OnInit
   label: string;
 
   @Input()
-  tooltipClass = 'tb-error-tooltip';
+  tooltipClass = 'jnks-iot-error-tooltip';
 
   @Input()
   errorText: string;

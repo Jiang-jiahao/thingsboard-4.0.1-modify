@@ -19,7 +19,7 @@ import {
 import { cssSizeToStrSize, resolveCssSize } from '@shared/models/widget-settings.models';
 
 @Component({
-  selector: 'tb-slider-basic-config',
+  selector: 'jnks-iot-slider-basic-config',
   templateUrl: './slider-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

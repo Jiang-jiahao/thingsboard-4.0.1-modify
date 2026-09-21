@@ -10,16 +10,16 @@ import org.springframework.stereotype.Service;
 import com.jnks.iot.common.util.JnksIotExecutors;
 import com.jnks.iot.common.util.JnksIotThreadFactory;
 import com.jnks.iot.server.actors.ActorSystemContext;
-import com.jnks.iot.server.actors.DefaultTbActorSystem;
-import com.jnks.iot.server.actors.TbActorRef;
-import com.jnks.iot.server.actors.TbActorSystem;
-import com.jnks.iot.server.actors.TbActorSystemSettings;
+import com.jnks.iot.server.actors.DefaultJnksIotActorSystem;
+import com.jnks.iot.server.actors.JnksIotActorRef;
+import com.jnks.iot.server.actors.JnksIotActorSystem;
+import com.jnks.iot.server.actors.JnksIotActorSystemSettings;
 import com.jnks.iot.server.actors.app.AppActor;
 import com.jnks.iot.server.actors.app.AppInitMsg;
 import com.jnks.iot.server.actors.stats.StatsActor;
 import com.jnks.iot.server.common.msg.queue.PartitionChangeMsg;
 import com.jnks.iot.server.common.msg.queue.ServiceType;
-import com.jnks.iot.server.queue.discovery.TbApplicationEventListener;
+import com.jnks.iot.server.queue.discovery.JnksIotApplicationEventListener;
 import com.jnks.iot.server.queue.discovery.event.PartitionChangeEvent;
 import com.jnks.iot.common.util.AfterStartUp;
 
@@ -28,7 +28,7 @@ import java.util.concurrent.Executors;
 
 @Service
 @Slf4j
-public class DefaultActorService extends TbApplicationEventListener<PartitionChangeEvent> implements ActorService {
+public class DefaultActorService extends JnksIotApplicationEventListener<PartitionChangeEvent> implements ActorService {
 
     public static final String APP_DISPATCHER_NAME = "app-dispatcher";
     public static final String TENANT_DISPATCHER_NAME = "tenant-dispatcher";
@@ -40,9 +40,9 @@ public class DefaultActorService extends TbApplicationEventListener<PartitionCha
     @Autowired
     private ActorSystemContext actorContext;
 
-    private TbActorSystem system;
+    private JnksIotActorSystem system;
 
-    private TbActorRef appActor;
+    private JnksIotActorRef appActor;
 
     @Value("${actors.system.throughput:5}")
     private int actorThroughput;
@@ -76,8 +76,8 @@ public class DefaultActorService extends TbApplicationEventListener<PartitionCha
     public void initActorSystem() {
         log.info("Initializing actor system.");
         actorContext.setActorService(this);
-        TbActorSystemSettings settings = new TbActorSystemSettings(actorThroughput, schedulerPoolSize, maxActorInitAttempts);
-        system = new DefaultTbActorSystem(settings);
+        JnksIotActorSystemSettings settings = new JnksIotActorSystemSettings(actorThroughput, schedulerPoolSize, maxActorInitAttempts);
+        system = new DefaultJnksIotActorSystem(settings);
 
         system.createDispatcher(APP_DISPATCHER_NAME, initDispatcherExecutor(APP_DISPATCHER_NAME, appDispatcherSize));
         system.createDispatcher(TENANT_DISPATCHER_NAME, initDispatcherExecutor(TENANT_DISPATCHER_NAME, tenantDispatcherSize));
@@ -91,7 +91,7 @@ public class DefaultActorService extends TbApplicationEventListener<PartitionCha
         appActor = system.createRootActor(APP_DISPATCHER_NAME, new AppActor.ActorCreator(actorContext));
         actorContext.setAppActor(appActor);
         // 创建stateActor（主要用于收集和聚合性能指标）
-        TbActorRef statsActor = system.createRootActor(TENANT_DISPATCHER_NAME, new StatsActor.ActorCreator(actorContext, "StatsActor"));
+        JnksIotActorRef statsActor = system.createRootActor(TENANT_DISPATCHER_NAME, new StatsActor.ActorCreator(actorContext, "StatsActor"));
         actorContext.setStatsActor(statsActor);
 
         log.info("Actor system initialized.");
@@ -116,14 +116,14 @@ public class DefaultActorService extends TbApplicationEventListener<PartitionCha
     }
 
     @Override
-    protected void onTbApplicationEvent(PartitionChangeEvent event) {
+    protected void onJnksIotApplicationEvent(PartitionChangeEvent event) {
         log.info("Received partition change event.");
         appActor.tellWithHighPriority(new PartitionChangeMsg(event.getServiceType()));
     }
 
     @Override
-    protected boolean filterTbApplicationEvent(PartitionChangeEvent event) {
-        return event.getServiceType() == ServiceType.TB_RULE_ENGINE || event.getServiceType() == ServiceType.TB_CORE;
+    protected boolean filterJnksIotApplicationEvent(PartitionChangeEvent event) {
+        return event.getServiceType() == ServiceType.JNKS_IOT_RULE_ENGINE || event.getServiceType() == ServiceType.JNKS_IOT_CORE;
     }
 
     @PreDestroy

@@ -1,12 +1,12 @@
-<form #formContainer class="tb-multiple-input"
+<form #formContainer class="jnks-iot-multiple-input"
       [formGroup]="multipleInputFormGroup"
-      tb-toast toastTarget="{{ toastTargetId }}"
+      jnks-iot-toast toastTarget="{{ toastTargetId }}"
       (ngSubmit)="saveForm()" novalidate autocomplete="off">
-  <div class="tb-multiple-input-container" *ngIf="entityDetected && isAllParametersValid">
+  <div class="jnks-iot-multiple-input-container" *ngIf="entityDetected && isAllParametersValid">
     <fieldset *ngFor="let source of sources" [class.fields-group]="settings.showGroupTitle">
       <legend class="group-title" *ngIf="settings.showGroupTitle">{{ getGroupTitle(source.datasource) }}
       </legend>
-      <div class="tb-multiple-input-layout"
+      <div class="jnks-iot-multiple-input-layout"
            [style]="{'grid-template-columns': 'repeat(' + columns + ', 1fr)', 'column-gap': settings.columnGap + 'px', 'row-gap': settings.rowGap + 'px'}">
         <ng-container *ngFor="let key of visibleKeys(source)">
           <mat-form-field *ngIf="key.settings.dataKeyValueType === 'string'"
@@ -59,7 +59,7 @@
               matInput
               type="text"
               formControlName="{{key.formId}}"
-              tb-json-to-string
+              jnks-iot-json-to-string
               [readonly]="key.settings.isEditable === 'readonly'"
               [required]="key.settings.required"
               (focus)="key.isFocused = true; focusInputElement($event)"
@@ -156,14 +156,14 @@
             <ng-container *ngIf="key.settings.icon || key.settings.customIconUrl" matIconPrefix>
               <ng-container *ngTemplateOutlet="iconPrefix; context: {key: key}"></ng-container>
             </ng-container>
-            <tb-color-input #colorInput asBoxInput matSuffix
+            <jnks-iot-color-input #colorInput asBoxInput matSuffix
                             colorClearButton
                             [disabled]="multipleInputFormGroup.get(key.formId).disabled"
                             [readonly]="key.settings.isEditable === 'readonly'"
                             [ngModel]="multipleInputFormGroup.get(key.formId).value"
                             (ngModelChange)="colorChanged(source, key, $event)"
                             [ngModelOptions]="{ standalone: true }">
-            </tb-color-input>
+            </jnks-iot-color-input>
             <mat-error *ngIf="multipleInputFormGroup.get(key.formId).hasError('required')">
               {{ getErrorMessageText(key.settings, 'required') }}
             </mat-error>
@@ -189,30 +189,30 @@
       </div>
     </fieldset>
   </div>
-  <div class="mat-padding tb-multiple-input--buttons-container"
+  <div class="mat-padding jnks-iot-multiple-input--buttons-container"
        *ngIf="entityDetected && isAllParametersValid && settings.showActionButtons">
     <button mat-button color="primary" type="button"
-            (click)="discardAll()" class="tb-multiple-input--buttons-container__button"
+            (click)="discardAll()" class="jnks-iot-multiple-input--buttons-container__button"
             [disabled]="!multipleInputFormGroup.dirty">
       {{ resetButtonLabel }}
     </button>
     <button mat-button mat-raised-button color="primary" type="submit"
-            class="tb-multiple-input--buttons-container__button"
+            class="jnks-iot-multiple-input--buttons-container__button"
             [disabled]="!multipleInputFormGroup.dirty || invalid()">
       {{ saveButtonLabel }}
     </button>
   </div>
-  <div class="tb-multiple-input--errors-container" *ngIf="(!entityDetected || !isAllParametersValid) && datasourceDetected">
-    <div class="tb-multiple-input--errors-container__error" [class.!hidden]="entityDetected">
+  <div class="jnks-iot-multiple-input--errors-container" *ngIf="(!entityDetected || !isAllParametersValid) && datasourceDetected">
+    <div class="jnks-iot-multiple-input--errors-container__error" [class.!hidden]="entityDetected">
       {{ 'widgets.input-widgets.no-entity-selected' | translate }}
     </div>
-    <div class="tb-multiple-input--errors-container__error" [class.!hidden]="!entityDetected || isAllParametersValid">
+    <div class="jnks-iot-multiple-input--errors-container__error" [class.!hidden]="!entityDetected || isAllParametersValid">
       {{ 'widgets.input-widgets.not-allowed-entity' | translate }}
     </div>
   </div>
 </form>
 <ng-template #iconPrefix let-key="key">
-  <tb-icon *ngIf="!key.settings.customIconUrl; else customToggleIcon">{{key.settings.icon}}</tb-icon>
+  <jnks-iot-icon *ngIf="!key.settings.customIconUrl; else customToggleIcon">{{key.settings.icon}}</jnks-iot-icon>
   <ng-template #customToggleIcon>
     <img class="mat-icon" [src]="key.settings.customIconUrl | image | async" alt="icon">
   </ng-template>

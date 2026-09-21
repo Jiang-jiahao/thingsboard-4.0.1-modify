@@ -35,7 +35,7 @@ import { formatNumberValue, formatValue, isDefined, isDefinedAndNotNull, isNumer
 import { map } from 'rxjs/operators';
 import { ImagePipe } from '@shared/pipe/image.pipe';
 import { DomSanitizer } from '@angular/platform-browser';
-import { TbTimeSeriesChart } from '@home/components/widget/lib/chart/time-series-chart';
+import { JnksIotTimeSeriesChart } from '@home/components/widget/lib/chart/time-series-chart';
 import {
   TimeSeriesChartKeySettings,
   TimeSeriesChartSeriesType,
@@ -47,7 +47,7 @@ const valuesLayoutHeight = 66;
 const valuesLayoutVerticalPadding = 16;
 
 @Component({
-  selector: 'tb-aggregated-value-card-widget',
+  selector: 'jnks-iot-aggregated-value-card-widget',
   templateUrl: './aggregated-value-card-widget.component.html',
   styleUrls: ['./aggregated-value-card-widget.component.scss']
 })
@@ -91,7 +91,7 @@ export class AggregatedValueCardWidgetComponent implements OnInit, AfterViewInit
   overlayStyle: ComponentStyle = {};
   padding: string;
 
-  private lineChart: TbTimeSeriesChart;
+  private lineChart: JnksIotTimeSeriesChart;
   private lineChartDataKey: DataKey;
 
   private lastUpdateTs: number;
@@ -179,7 +179,7 @@ export class AggregatedValueCardWidgetComponent implements OnInit, AfterViewInit
           tooltipDateFormat: autoDateFormat()
       };
 
-      this.lineChart = new TbTimeSeriesChart(this.ctx, settings, this.chartElement.nativeElement, this.renderer, true);
+      this.lineChart = new JnksIotTimeSeriesChart(this.ctx, settings, this.chartElement.nativeElement, this.renderer, true);
 
       this.tickMin$ =this.lineChart.yMin$.pipe(
         map((value) => formatValue(value, (this.lineChartDataKey?.decimals || this.ctx.decimals))

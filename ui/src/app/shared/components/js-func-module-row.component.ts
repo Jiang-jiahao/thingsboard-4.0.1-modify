@@ -38,7 +38,7 @@ export interface JsFuncModuleRow {
 export const moduleValid = (module: JsFuncModuleRow): boolean => !(!module.alias || !module.moduleLink);
 
 @Component({
-  selector: 'tb-js-func-module-row',
+  selector: 'jnks-iot-js-func-module-row',
   templateUrl: './js-func-module-row.component.html',
   styleUrls: ['./js-func-module-row.component.scss'],
   providers: [

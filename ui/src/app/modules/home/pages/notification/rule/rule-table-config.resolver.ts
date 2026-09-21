@@ -102,7 +102,7 @@ export class RuleTableConfigResolver  {
     return this.dialog.open<RuleNotificationDialogComponent, RuleNotificationDialogData,
       NotificationRule>(RuleNotificationDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         isCopy,

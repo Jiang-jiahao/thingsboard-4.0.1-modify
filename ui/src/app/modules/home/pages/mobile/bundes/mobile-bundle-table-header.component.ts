@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-mobile-bundle-table-header',
+  selector: 'jnks-iot-mobile-bundle-table-header',
   templateUrl: './mobile-bundle-table-header.component.html',
   styleUrls: ['./mobile-bundle-table-header.component.scss']
 })

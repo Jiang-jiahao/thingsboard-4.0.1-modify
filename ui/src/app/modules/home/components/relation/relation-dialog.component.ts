@@ -25,7 +25,7 @@ export interface RelationDialogData {
 }
 
 @Component({
-  selector: 'tb-relation-dialog',
+  selector: 'jnks-iot-relation-dialog',
   templateUrl: './relation-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: RelationDialogComponent}],
   styleUrls: ['./relation-dialog.component.scss']

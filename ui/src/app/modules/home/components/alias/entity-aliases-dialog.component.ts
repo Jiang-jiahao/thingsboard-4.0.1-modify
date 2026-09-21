@@ -38,7 +38,7 @@ export interface EntityAliasesDialogData {
 }
 
 @Component({
-  selector: 'tb-entity-aliases-dialog',
+  selector: 'jnks-iot-entity-aliases-dialog',
   templateUrl: './entity-aliases-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: EntityAliasesDialogComponent}],
   styleUrls: ['./entity-aliases-dialog.component.scss']
@@ -195,7 +195,7 @@ export class EntityAliasesDialogComponent extends DialogComponent<EntityAliasesD
     this.dialog.open<EntityAliasDialogComponent, EntityAliasDialogData,
       EntityAlias>(EntityAliasDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         allowedEntityTypes: this.allowedEntityTypes,

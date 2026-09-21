@@ -2,17 +2,17 @@ package com.jnks.iot.server.queue.provider;
 
 import com.jnks.iot.server.gen.transport.TransportProtos.FromEdqsMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToEdqsMsg;
-import com.jnks.iot.server.queue.TbQueueProducer;
-import com.jnks.iot.server.queue.TbQueueRequestTemplate;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueProducer;
+import com.jnks.iot.server.queue.JnksIotQueueRequestTemplate;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
 
 /**
  * edqs客户端查询工厂
  */
 public interface EdqsClientQueueFactory {
 
-    TbQueueProducer<TbProtoQueueMsg<ToEdqsMsg>> createEdqsEventsProducer();
+    JnksIotQueueProducer<JnksIotProtoQueueMsg<ToEdqsMsg>> createEdqsEventsProducer();
 
-    TbQueueRequestTemplate<TbProtoQueueMsg<ToEdqsMsg>, TbProtoQueueMsg<FromEdqsMsg>> createEdqsRequestTemplate();
+    JnksIotQueueRequestTemplate<JnksIotProtoQueueMsg<ToEdqsMsg>, JnksIotProtoQueueMsg<FromEdqsMsg>> createEdqsRequestTemplate();
 
 }

@@ -1,14 +1,14 @@
 import { ChangeDetectorRef, Component, forwardRef, Input, Renderer2, ViewContainerRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { MarkerImageSettings, MarkerImageType } from '@shared/models/widget/maps/map.models';
 import {
   MarkerImageSettingsPanelComponent
 } from '@home/components/widget/lib/settings/common/map/marker-image-settings-panel.component';
 
 @Component({
-  selector: 'tb-marker-image-settings',
+  selector: 'jnks-iot-marker-image-settings',
   templateUrl: './marker-image-settings.component.html',
   styleUrls: [],
   providers: [
@@ -30,7 +30,7 @@ export class MarkerImageSettingsComponent implements ControlValueAccessor {
 
   private propagateChange: (v: any) => void = () => { };
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private cd: ChangeDetectorRef,
               private viewContainerRef: ViewContainerRef) {}
@@ -71,8 +71,8 @@ export class MarkerImageSettingsComponent implements ControlValueAccessor {
         },
         isModal: true
       });
-      markerImageSettingsPanelPopover.tbComponentRef.instance.popover = markerImageSettingsPanelPopover;
-      markerImageSettingsPanelPopover.tbComponentRef.instance.markerImageSettingsApplied.subscribe((markerImageSettings) => {
+      markerImageSettingsPanelPopover.jnksIotComponentRef.instance.popover = markerImageSettingsPanelPopover;
+      markerImageSettingsPanelPopover.jnksIotComponentRef.instance.markerImageSettingsApplied.subscribe((markerImageSettings) => {
         markerImageSettingsPanelPopover.hide();
         this.modelValue = markerImageSettings;
         this.propagateChange(this.modelValue);

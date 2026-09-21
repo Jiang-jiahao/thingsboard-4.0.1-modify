@@ -18,7 +18,7 @@ import { getAce } from '@shared/models/ace/ace.models';
 import { beautifyJs } from '@shared/models/beautify.models';
 
 @Component({
-  selector: 'tb-protobuf-content',
+  selector: 'jnks-iot-protobuf-content',
   templateUrl: './protobuf-content.component.html',
   styleUrls: ['./protobuf-content.component.scss'],
   providers: [
@@ -49,7 +49,7 @@ export class ProtobufContentComponent implements OnInit, ControlValueAccessor, O
 
   @Input() editorStyle: {[klass: string]: any};
 
-  @Input() tbPlaceholder: string;
+  @Input() jnksIotPlaceholder: string;
 
   private readonlyValue: boolean;
   get readonly(): boolean {

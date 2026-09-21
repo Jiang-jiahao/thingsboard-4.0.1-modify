@@ -23,18 +23,18 @@
   <span>{{displayValue()}}</span>
 </button>
 <section *ngIf="!asButton"
-         class="tb-timewindow"
+         class="jnks-iot-timewindow"
          [class]="{'no-padding': noPadding}"
          matTooltip="{{ 'timewindow.edit' | translate }}"
          [matTooltipPosition]="tooltipPosition"
          [matTooltipDisabled]="timewindowDisabled"
          [style]="timewindowComponentStyle"
          (click)="toggleTimewindow($event)">
-  <tb-icon *ngIf="computedTimewindowStyle.showIcon && computedTimewindowStyle.iconPosition === 'left'"
-           [style]="timewindowIconStyle">{{ computedTimewindowStyle.icon }}</tb-icon>
-  <div class="tb-timewindow-label" [class.!hidden]="hideLabel">
+  <jnks-iot-icon *ngIf="computedTimewindowStyle.showIcon && computedTimewindowStyle.iconPosition === 'left'"
+           [style]="timewindowIconStyle">{{ computedTimewindowStyle.icon }}</jnks-iot-icon>
+  <div class="jnks-iot-timewindow-label" [class.!hidden]="hideLabel">
     {{innerValue?.displayValue}} <span [class.!hidden]="!(innerValue?.displayTimezoneAbbr !== '')">| <span class="timezone-abbr">{{innerValue?.displayTimezoneAbbr}}</span></span>
   </div>
-  <tb-icon *ngIf="computedTimewindowStyle.showIcon && computedTimewindowStyle.iconPosition === 'right'"
-           [style]="timewindowIconStyle">{{ computedTimewindowStyle.icon }}</tb-icon>
+  <jnks-iot-icon *ngIf="computedTimewindowStyle.showIcon && computedTimewindowStyle.iconPosition === 'right'"
+           [style]="timewindowIconStyle">{{ computedTimewindowStyle.icon }}</jnks-iot-icon>
 </section>

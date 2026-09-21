@@ -1,17 +1,17 @@
 import {
   DataLayerTooltipSettings,
   DataLayerTooltipTrigger, processTooltipTemplate,
-  TbMapDatasource
+  JnksIotMapDatasource
 } from '@shared/models/widget/maps/map.models';
-import { TbMap } from '@home/components/widget/lib/maps/map';
+import { JnksIotMap } from '@home/components/widget/lib/maps/map';
 import { FormattedData } from '@shared/models/widget.models';
 import L from 'leaflet';
 import { DataLayerPatternProcessor } from '@home/components/widget/lib/maps/data-layer/map-data-layer';
 
-export const createTooltip = (map: TbMap<any>,
+export const createTooltip = (map: JnksIotMap<any>,
                               layer: L.Layer,
                               settings: DataLayerTooltipSettings,
-                              data: FormattedData<TbMapDatasource>,
+                              data: FormattedData<JnksIotMapDatasource>,
                               canOpen: () => boolean): L.Popup => {
   const tooltip = L.popup({autoClose: settings.autoclose, closeOnClick: false});
   (tooltip as any)._source = layer;
@@ -50,12 +50,12 @@ export const createTooltip = (map: TbMap<any>,
   return tooltip;
 }
 
-export const updateTooltip = (map: TbMap<any>,
+export const updateTooltip = (map: JnksIotMap<any>,
                               tooltip: L.Popup,
                               settings: DataLayerTooltipSettings,
                               processor: DataLayerPatternProcessor,
-                              data: FormattedData<TbMapDatasource>,
-                              dsData: FormattedData<TbMapDatasource>[]): void => {
+                              data: FormattedData<JnksIotMapDatasource>,
+                              dsData: FormattedData<JnksIotMapDatasource>[]): void => {
   let tooltipTemplate = processor.processPattern(data, dsData);
   tooltipTemplate = processTooltipTemplate(tooltipTemplate);
   tooltip.setContent(tooltipTemplate);
@@ -64,8 +64,8 @@ export const updateTooltip = (map: TbMap<any>,
   }
 }
 
-const bindTooltipActions = (map: TbMap<any>, tooltip: L.Popup, settings: DataLayerTooltipSettings, data: FormattedData<TbMapDatasource>): void => {
-  const actions = tooltip.getElement().getElementsByClassName('tb-custom-action');
+const bindTooltipActions = (map: JnksIotMap<any>, tooltip: L.Popup, settings: DataLayerTooltipSettings, data: FormattedData<JnksIotMapDatasource>): void => {
+  const actions = tooltip.getElement().getElementsByClassName('jnks-iot-custom-action');
   Array.from(actions).forEach(
     (element: HTMLElement) => {
       const actionName = element.getAttribute('data-action-name');

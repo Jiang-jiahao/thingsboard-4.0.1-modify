@@ -26,14 +26,14 @@ import { ScadaSymbolTag } from '@home/components/widget/lib/scada/scada-symbol.m
 import {
   ScadaSymbolMetadataTagComponent
 } from '@home/pages/scada-symbol/metadata-components/scada-symbol-metadata-tag.component';
-import { TbEditorCompleter } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompleter } from '@shared/models/ace/completion.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 const tagIsEmpty = (tag: ScadaSymbolTag): boolean =>
   !tag.stateRenderFunction && !tag.actions?.click?.actionFunction;
 
 @Component({
-  selector: 'tb-scada-symbol-metadata-tags',
+  selector: 'jnks-iot-scada-symbol-metadata-tags',
   templateUrl: './scada-symbol-metadata-tags.component.html',
   styleUrls: ['./scada-symbol-metadata-tags.component.scss'],
   providers: [
@@ -65,10 +65,10 @@ export class ScadaSymbolMetadataTagsComponent implements ControlValueAccessor, O
   tags: string[];
 
   @Input()
-  elementStateRenderFunctionCompleter: TbEditorCompleter;
+  elementStateRenderFunctionCompleter: JnksIotEditorCompleter;
 
   @Input()
-  clickActionFunctionCompleter: TbEditorCompleter;
+  clickActionFunctionCompleter: JnksIotEditorCompleter;
 
   tagsFormGroup: UntypedFormGroup;
 

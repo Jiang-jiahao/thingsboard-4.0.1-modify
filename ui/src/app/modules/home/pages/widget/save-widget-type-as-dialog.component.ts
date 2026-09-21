@@ -20,7 +20,7 @@ export interface SaveWidgetTypeAsDialogData {
 }
 
 @Component({
-  selector: 'tb-save-widget-type-as-dialog',
+  selector: 'jnks-iot-save-widget-type-as-dialog',
   templateUrl: './save-widget-type-as-dialog.component.html',
   styleUrls: []
 })

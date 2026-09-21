@@ -13,31 +13,31 @@ docker/
 ├── services/               ← 主 docker-compose.yml 的项目目录，只放主 compose 用到的
 │   ├── docker-compose.yml  主编排（-f 必须排第一）
 │   ├── .env                项目变量
-│   ├── tb-core/            tb-core.env + conf/ log/
-│   ├── tb-rule-engine/     tb-rule-engine.env + conf/ log/
-│   ├── tb-js-executor/     tb-js-executor.env
-│   ├── tb-vc-executor/     tb-vc-executor.env + conf/ log/
-│   ├── tb-transports/      各协议一个目录：coap/ http/ lwm2m/ mqtt/ snmp/ tcp/ udp/
-│   │                       （各有 tb-<协议>-transport.env + conf/ log/）
+│   ├── jnks-iot-core/            jnks-iot-core.env + conf/ log/
+│   ├── jnks-iot-rule-engine/     jnks-iot-rule-engine.env + conf/ log/
+│   ├── jnks-iot-js-executor/     jnks-iot-js-executor.env
+│   ├── jnks-iot-vc-executor/     jnks-iot-vc-executor.env + conf/ log/
+│   ├── jnks-iot-transports/      各协议一个目录：coap/ http/ lwm2m/ mqtt/ snmp/ tcp/ udp/
+│   │                       （各有 jnks-iot-<协议>-transport.env + conf/ log/）
 │   └── nginx/              入口网关配置与证书
 │
 └── 以下是**附加组件**：不在主 compose 里，各自一份 compose + env，由 .env 开关按需加载
-    ├── postgres/           postgres.yml  hybrid.yml + tb-node.{postgres,hybrid}.env
+    ├── postgres/           postgres.yml  hybrid.yml + jnks-iot-node.{postgres,hybrid}.env
     │   └── init/           建库脚本：容器首次初始化数据目录时自动执行，已有数据则跳过
     ├── redis/              redis{,-cluster,-sentinel}.yml + cache-redis*.env
     ├── kafka/              kafka.yml + kafka.env（Kafka 容器配置）kafka-client.env（TB 侧连接配置）
-    ├── tb-edqs/            edqs.yml + tb-edqs.env  tb-core-edqs.env  tb-rule-engine-edqs.env
+    ├── jnks-iot-edqs/            edqs.yml + jnks-iot-edqs.env  jnks-iot-core-edqs.env  jnks-iot-rule-engine-edqs.env
     ├── monitoring/         prometheus-grafana.yml（+ grafana/ prometheus/）
-    ├── tb-monolith/        单体形态的 conf/ log/
+    ├── jnks-iot-monolith/        单体形态的 conf/ log/
     └── tb/                 运行时数据目录：postgres-data/（PG 数据，PGDATA 在其下 db/）redis-data/
 ```
 
 **分界线**：`services/` 里的东西全部出现在主 `docker-compose.yml` 中；不出现的（可选数据库/缓存/队列/EDQS/监控、单体）都放在外面，各自成目录。
 
 
-**`services/` 是主 compose 的项目目录**：`-f` 必须让 `docker-compose.yml` 排第一，外加的附加组件写成 `-f ../postgres/postgres.yml` 这种形式（相对路径一律以 `services/` 为基准），`./tb-core/conf`、`redis/cache-redis.env` 这些相对路径都以它为基准 —— compose 与用到的目录同层，路径才不用互相迁就。
+**`services/` 是主 compose 的项目目录**：`-f` 必须让 `docker-compose.yml` 排第一，外加的附加组件写成 `-f ../postgres/postgres.yml` 这种形式（相对路径一律以 `services/` 为基准），`./jnks-iot-core/conf`、`redis/cache-redis.env` 这些相对路径都以它为基准 —— compose 与用到的目录同层，路径才不用互相迁就。
 
-**可选组件是「compose + 它的 env」成对放在一个目录里**，按 `.env` 的开关自动加载：`DATABASE`→`postgres/`，`CACHE`→`redis/`，`TB_QUEUE_TYPE`→`kafka/`，`MONITORING_ENABLED`→`monitoring/`，`EDQS_ENABLED`→`tb-edqs/`。改哪块就进哪个目录；服务目录里的 `conf/` 会被挂进容器，`log/` 是被 gitignore 的运行产物。
+**可选组件是「compose + 它的 env」成对放在一个目录里**，按 `.env` 的开关自动加载：`DATABASE`→`postgres/`，`CACHE`→`redis/`，`JNKS_IOT_QUEUE_TYPE`→`kafka/`，`MONITORING_ENABLED`→`monitoring/`，`EDQS_ENABLED`→`jnks-iot-edqs/`。改哪块就进哪个目录；服务目录里的 `conf/` 会被挂进容器，`log/` 是被 gitignore 的运行产物。
 
 ## 部署步骤概览
 
@@ -73,19 +73,19 @@ postgres 容器把它挂到 `/docker-entrypoint-initdb.d/`，postgres 官方镜�
 
 ```bash
 # 1) 装一份干净的库。别用镜像默认的 start-tb.sh —— 它写死了首次启动 install-tb.sh --loadDemo，会灌进演示设备
-docker run -d --name tb-init -v tb-init-data:/data --entrypoint bash jnks-iot/tb-postgres:4.0.1 \
+docker run -d --name jnks-iot-init -v jnks-iot-init-data:/data --entrypoint bash jnks-iot/jnks-iot-postgres:4.0.1 \
   -c 'start-db.sh && install-tb.sh; echo "INSTALL_EXIT=$?"; sleep 100000'
 #    等日志出现 INSTALL_EXIT=0（约 1~2 分钟；期间日志里不应有 "Loading demo data"）
 
 # 2) 导出（官方镜像是 PG12，SQL 文本向下兼容我们的 postgres:16）
-docker exec tb-init pg_dump -U jnks-iot -d jnks-iot --no-owner --no-privileges \
+docker exec jnks-iot-init pg_dump -U jnks-iot -d jnks-iot --no-owner --no-privileges \
   | gzip -9 > docker/postgres/init/01-jnks-iot-4.0.1.sql.gz
 
 # 3) 收拾
-docker rm -f tb-init && docker volume rm tb-init-data
+docker rm -f jnks-iot-init && docker volume rm jnks-iot-init-data
 ```
 
-要连**别的库**（从旧环境迁数据、或多个环境共用一个库）时，把连接信息写进 `docker/postgres/tb-node.postgres.env`：
+要连**别的库**（从旧环境迁数据、或多个环境共用一个库）时，把连接信息写进 `docker/postgres/jnks-iot-node.postgres.env`：
 
 ```
 SPRING_DRIVER_CLASS_NAME=org.postgresql.Driver
@@ -118,15 +118,15 @@ git clone <仓库地址> && cd jnks-iot-4.0.1-modify
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk
 export MVN=/path/to/apache-maven-3.6.3/bin/mvn
 
-# 1) 组装镜像上下文（以 tb-core 为例；换成你要的模块即可）
-"$MVN" -pl images/tb-core -am package -DskipTests -Dmaven.test.skip=true
+# 1) 组装镜像上下文（以 jnks-iot-core 为例；换成你要的模块即可）
+"$MVN" -pl images/jnks-iot-core -am package -DskipTests -Dmaven.test.skip=true
 
 # 2) 构建镜像
-docker build -t jnks-iot/tb-core:latest images/tb-core/target
+docker build -t jnks-iot/jnks-iot-core:latest images/jnks-iot-core/target
 ```
 
-- 镜像名取 `docker/services/.env` 的 `DOCKER_REPO` + `TB_VERSION`
-- 每个服务一个模块：`images/tb-core`、`images/tb-rule-engine`、`images/tb-monolith`、`images/tb-vc-executor-image`、`images/tb-transport-images/tb-<协议>-transport-image` …
+- 镜像名取 `docker/services/.env` 的 `DOCKER_REPO` + `JNKS_IOT_VERSION`
+- 每个服务一个模块：`images/jnks-iot-core`、`images/jnks-iot-rule-engine`、`images/jnks-iot-monolith`、`images/jnks-iot-vc-executor-image`、`images/jnks-iot-transport-images/jnks-iot-<协议>-transport-image` …
 - **web-ui 与 js-executor 额外需要联网拉 node 基础镜像**；web-ui 的前端产物要先单独 `ng build`（见 §7）
 
 ### B. 别处构建后推 registry
@@ -134,7 +134,7 @@ docker build -t jnks-iot/tb-core:latest images/tb-core/target
 本机若是 arm64（如 Apple Silicon），推到 amd64 服务器上必须显式指定平台：
 
 ```bash
-docker buildx build --platform linux/amd64 -t <registry>/tb-core:4.0.1 images/tb-core/target --push
+docker buildx build --platform linux/amd64 -t <registry>/jnks-iot-core:4.0.1 images/jnks-iot-core/target --push
 ```
 
 `images/pom.xml` 里有个 `push-docker-amd-arm-images` profile 是做多架构推送的，可作参考。用 registry 的话把 `docker/services/.env` 的 `DOCKER_REPO` 改成 `<registry>`。
@@ -144,24 +144,24 @@ docker buildx build --platform linux/amd64 -t <registry>/tb-core:4.0.1 images/tb
 | 变量 | 默认 | 部署时建议 |
 |---|---|---|
 | `DOCKER_REPO` | `jnks-iot` | 用了 registry 就改成你的 registry 前缀 |
-| `TB_VERSION` | `latest` | **改成具体版本号**（如 `4.0.1`），多机/回滚时分得清 |
+| `JNKS_IOT_VERSION` | `latest` | **改成具体版本号**（如 `4.0.1`），多机/回滚时分得清 |
 | `JAVA_OPTS` | `-Xmx768M -Xms256M` | core / rule-engine 用。按内存算：每 JVM ≈ 堆 + 300M 开销 |
 | `JAVA_OPTS_TRANSPORT` | `-Xmx256M -Xms128M` | transport 用（compose 里覆盖 `JAVA_OPTS`）。有 8 个实例，别调大 |
 | `DATABASE` | `postgres` | `postgres` 或 `hybrid`（hybrid = Postgres 存实体 + Cassandra 存时序） |
 | `CACHE` | `redis` | `redis` / `redis-cluster` / `redis-sentinel` |
-| `TB_QUEUE_TYPE` | `kafka` | **微服务形态只能是 `kafka`** —— core / rule-engine / vc-executor 在代码里只有 Kafka 实现（见下方说明）。要连 Confluent Cloud 也是走 `kafka`，在 `.env` 里另加云连接参数 |
+| `JNKS_IOT_QUEUE_TYPE` | `kafka` | **微服务形态只能是 `kafka`** —— core / rule-engine / vc-executor 在代码里只有 Kafka 实现（见下方说明）。要连 Confluent Cloud 也是走 `kafka`，在 `.env` 里另加云连接参数 |
 | `MONITORING_ENABLED` | `false` | 打开会额外起 Prometheus + Grafana |
 | `EDQS_ENABLED` | `false` | 边缘队列同步，用不到就关 |
-| `LOAD_BALANCER_NAME` | `tb-gateway` | 入口网关（nginx）的容器名 |
+| `LOAD_BALANCER_NAME` | `jnks-iot-gateway` | 入口网关（nginx）的容器名 |
 | `NGINX_GATEWAY_IMAGE` | `nginx:1.27-alpine` | 入口网关镜像。配置在 `docker/services/nginx/config/`，证书放 `docker/services/nginx/certs/` |
 
-**为什么微服务只能用 kafka**：`queue.type=in-memory` 走的是「同一 JVM 内的内存队列」，只有在**单体（monolith）**形态下才成立 —— 那里 core / rule-engine / transport 都在同一个进程（monolith 依赖 `transport-base`，`TB_TRANSPORT_API_ENABLED` 默认开）。微服务形态下它们是独立进程，内存队列互相看不见，所以这三个应用**只提供了 Kafka 的 QueueFactory**：
+**为什么微服务只能用 kafka**：`queue.type=in-memory` 走的是「同一 JVM 内的内存队列」，只有在**单体（monolith）**形态下才成立 —— 那里 core / rule-engine / transport 都在同一个进程（monolith 依赖 `transport-base`，`JNKS_IOT_TRANSPORT_API_ENABLED` 默认开）。微服务形态下它们是独立进程，内存队列互相看不见，所以这三个应用**只提供了 Kafka 的 QueueFactory**：
 
 | 模块 | 拥有的 QueueFactory | 可用队列 |
 |---|---|---|
-| tb-core / tb-rule-engine / vc-executor | 只有 `Kafka*` | **只能 kafka** |
+| jnks-iot-core / jnks-iot-rule-engine / vc-executor | 只有 `Kafka*` | **只能 kafka** |
 | monolith | `Kafka*` + `InMemory*` | kafka 或 in-memory |
-| tb-transport / tb-edqs | `Kafka*` + `InMemory*` | 两者都有（in-memory 仅在同进程时有意义） |
+| jnks-iot-transport / jnks-iot-edqs | `Kafka*` + `InMemory*` | 两者都有（in-memory 仅在同进程时有意义） |
 
 Kafka 的堆上限在 `docker/kafka/kafka.env` 的 `KAFKA_HEAP_OPTS`（默认 `-Xmx512M`）—— **它是 JVM，不设会默认吃掉 VM 内存的 1/4**，把 core/rule-engine 挤到被内核 OOM kill。
 
@@ -193,12 +193,12 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
 
 | 地址 | 去向 |
 |---|---|
-| `http://<host>/` | JnksIOT 管理界面（tb-web-ui1/2 的 nginx 静态服务） |
-| `http://<host>/api/**` | tb-core1/2（REST API）。其中 `/api/v1/**` 转给 tb-http-transport1/2（设备 HTTP 接入）、`/api/images/**` 也转 core 但限流更宽 |
+| `http://<host>/` | JnksIOT 管理界面（jnks-iot-web-ui1/2 的 nginx 静态服务） |
+| `http://<host>/api/**` | jnks-iot-core1/2（REST API）。其中 `/api/v1/**` 转给 jnks-iot-http-transport1/2（设备 HTTP 接入）、`/api/images/**` 也转 core 但限流更宽 |
 | `https://<host>/` | 同上走 443；证书来自 `docker/services/nginx/certs/`（默认是自签，浏览器会提示不受信任 —— 要正式证书就换成真实证书或接 certbot） |
-| `<host>:1883` | MQTT 设备接入（转给 tb-mqtt-transport1/2） |
-| `<host>:5683` | TCP 设备接入（转给 tb-tcp-transport1/2） |
-| `<host>:5684/udp` | UDP 设备接入（转给 tb-udp-transport1/2） |
+| `<host>:1883` | MQTT 设备接入（转给 jnks-iot-mqtt-transport1/2） |
+| `<host>:5683` | TCP 设备接入（转给 jnks-iot-tcp-transport1/2） |
+| `<host>:5684/udp` | UDP 设备接入（转给 jnks-iot-udp-transport1/2） |
 
 默认账号：`sysadmin@jnks-iot.org` / `sysadmin`。
 
@@ -213,7 +213,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
 - **与 haproxy 版的差异**：① 没有 certbot 自动签发 —— 证书放 `docker/services/nginx/certs/`（自签用 `nginx/gen-self-signed-cert.sh` 生成），要自动签发就自己加 certbot/acme.sh 容器；② 没有 haproxy 那个 9999 统计页（nginx 只有 `stub_status`，需要可自行加）；③ 健康检查是被动的（`max_fails` / `fail_timeout`），没有主动探测。
 - 限流与黑白名单是从原 haproxy 配置**等价翻译**过来的：`/api` 100 次/10 秒 + 300 次/1 分钟、`/api/images` 1000 次/10 秒、每 IP 并发 50；私网与本机（对应原 trustlist）不限流，`5.136.0.0/13`、`217.199.254.1`（对应原 blocklist）直接 403。
 - 上游用 `resolver 127.0.0.11 valid=10s` + `resolve` 动态解析：**容器重建换 IP 后 10 秒内自动跟上，不用重启网关**。代价是节点被**强杀**时，最长 10 秒内仍可能把请求发给已死的旧 IP（实测停掉一个 web-ui 副本，5 次请求里有 1 次 502）。想让窗口更小就调小 `valid` / `max_fails`；要滚动升级零中断，正确做法是先从上游摘除再停（或加主动健康检查）。
-- 改 `nginx.conf` / `locations.conf` 里的路由或端口要改文件本身（官方 nginx 镜像不做环境变量替换），改完 `docker exec tb-gateway nginx -s reload` 即可。
+- 改 `nginx.conf` / `locations.conf` 里的路由或端口要改文件本身（官方 nginx 镜像不做环境变量替换），改完 `docker exec jnks-iot-gateway nginx -s reload` 即可。
 - 目前**没有数据库升级/安装入口**（见第 1 节），版本升级需要自己处理 schema 迁移。
 - 前端 `web-ui` 是独立镜像，由 **nginx 直接发静态文件**（`nginx.conf` 做 SPA 回退 + gzip）。它不转发 `/api`，API 路由由入口网关负责。前端产物来自 `ui/` 的 `ng build`（`ui/target/generated-resources/public`），`ui` 不在 Maven reactor 里，要单独构建；构建 web-ui 镜像前这个目录必须存在。镜像约 **266MB**（nginx 基础 77MB + 前端产物 156MB，其中 57MB 是 source map；不需要浏览器调试就可以把这 57MB 排除掉）。两个副本只是为了重启/升级时界面不断，跟吞吐无关。
 - **Kafka 用官方 `apache/kafka:3.7.0`**（KRaft 单节点，`kafka.env` 里是标准 `KAFKA_*` 变量）。两个坑：① **`KAFKA_LOG_DIRS` 不能省** —— 官方镜像只要拿到任意 `KAFKA_*` 变量就会重写 `server.properties` 且只写 env 派生的项，缺了它 `log.dirs` 为空、启动直接 `ConfigException`；② KRaft 存储的格式化是镜像自己在每次启动时做的，不需要额外初始化步骤。`kafka.yml` 把 9092 发布到宿主，方便本机工具直连 —— 起栈前确认宿主没有别的 Kafka 占着这个端口。
@@ -224,16 +224,16 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
 
 ## 8. 单体（全在一个 JVM 里）
 
-不用微服务那套时，`jnks-iot/tb-monolith` 镜像自带合适默认值（`zookeeper.enabled=false`、`js.evaluator=local`、`service.type=monolith`），单独一个容器即可：
+不用微服务那套时，`jnks-iot/jnks-iot-monolith` 镜像自带合适默认值（`zookeeper.enabled=false`、`js.evaluator=local`、`service.type=monolith`），单独一个容器即可：
 
 ```bash
-docker run -d --name tb-monolith -p 8080:8080 \
-  -v "$PWD/docker/tb-monolith/conf:/config" \
-  -v "$PWD/docker/tb-monolith/log:/var/log/jnks-iot" \
+docker run -d --name jnks-iot-monolith -p 8080:8080 \
+  -v "$PWD/docker/jnks-iot-monolith/conf:/config" \
+  -v "$PWD/docker/jnks-iot-monolith/log:/var/log/jnks-iot" \
   -e SPRING_DRIVER_CLASS_NAME=org.postgresql.Driver \
   -e SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/jnks_iot \
   -e SPRING_DATASOURCE_USERNAME=<user> -e SPRING_DATASOURCE_PASSWORD=<password> \
-  jnks-iot/tb-monolith:latest
+  jnks-iot/jnks-iot-monolith:latest
 ```
 
 单体与微服务**是二选一的部署形态，不要同时在同一个库上跑**（两边都会去抢分区/队列）。

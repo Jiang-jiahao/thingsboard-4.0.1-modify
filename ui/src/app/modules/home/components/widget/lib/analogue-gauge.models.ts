@@ -52,7 +52,7 @@ interface BaseGaugeModel extends BaseGauge {
   _value?: number;
 }
 
-export abstract class TbBaseGauge<S, O extends GenericOptions> {
+export abstract class JnksIotBaseGauge<S, O extends GenericOptions> {
 
   private gauge: BaseGaugeModel;
 
@@ -102,7 +102,7 @@ export abstract class TbBaseGauge<S, O extends GenericOptions> {
   }
 }
 
-export abstract class TbAnalogueGauge<S extends AnalogueGaugeSettings, O extends GenericOptions> extends TbBaseGauge<S, O> {
+export abstract class JnksIotAnalogueGauge<S extends AnalogueGaugeSettings, O extends GenericOptions> extends JnksIotBaseGauge<S, O> {
 
   protected constructor(ctx: WidgetContext, canvasId: string) {
     super(ctx, canvasId);

@@ -20,13 +20,13 @@ import static com.jnks.iot.script.api.tbel.TbelCfTsDoubleVal.OBJ_SIZE;
 public class TbelCfTsRollingArg implements TbelCfArg, Iterable<TbelCfTsDoubleVal> {
 
     @Getter
-    private final TbTimeWindow timeWindow;
+    private final JnksIotTimeWindow timeWindow;
     @Getter
     private final List<TbelCfTsDoubleVal> values;
 
     @JsonCreator
     public TbelCfTsRollingArg(
-            @JsonProperty("timeWindow") TbTimeWindow timeWindow,
+            @JsonProperty("timeWindow") JnksIotTimeWindow timeWindow,
             @JsonProperty("values") List<TbelCfTsDoubleVal> values
     ) {
         this.timeWindow = timeWindow;
@@ -35,7 +35,7 @@ public class TbelCfTsRollingArg implements TbelCfArg, Iterable<TbelCfTsDoubleVal
 
     public TbelCfTsRollingArg(long timeWindow, List<TbelCfTsDoubleVal> values) {
         long ts = System.currentTimeMillis();
-        this.timeWindow = new TbTimeWindow(ts - timeWindow, ts);
+        this.timeWindow = new JnksIotTimeWindow(ts - timeWindow, ts);
         this.values = Collections.unmodifiableList(values);
     }
 
@@ -275,15 +275,15 @@ public class TbelCfTsRollingArg implements TbelCfArg, Iterable<TbelCfTsDoubleVal
             ignoreNaN = Boolean.parseBoolean(settings.get("ignoreNaN").toString());
         }
 
-        TbTimeWindow timeWindow = null;
+        JnksIotTimeWindow timeWindow = null;
         if (settings != null && settings.containsKey("timeWindow")) {
             var twVar = settings.get("timeWindow");
-            if (twVar instanceof TbTimeWindow) {
-                timeWindow = (TbTimeWindow) settings.get("timeWindow");
+            if (twVar instanceof JnksIotTimeWindow) {
+                timeWindow = (JnksIotTimeWindow) settings.get("timeWindow");
             } else if (twVar instanceof Map twMap) {
-                timeWindow = new TbTimeWindow(Long.valueOf(twMap.get("startTs").toString()), Long.valueOf(twMap.get("endTs").toString()));
+                timeWindow = new JnksIotTimeWindow(Long.valueOf(twMap.get("startTs").toString()), Long.valueOf(twMap.get("endTs").toString()));
             } else {
-                timeWindow = JacksonUtil.fromString(settings.get("timeWindow").toString(), TbTimeWindow.class);
+                timeWindow = JacksonUtil.fromString(settings.get("timeWindow").toString(), JnksIotTimeWindow.class);
             }
         }
 
@@ -331,7 +331,7 @@ public class TbelCfTsRollingArg implements TbelCfArg, Iterable<TbelCfTsDoubleVal
             }
         }
 
-        return new TbelCfTsRollingData(timeWindow != null ? timeWindow : new TbTimeWindow(startTs, endTs), data);
+        return new TbelCfTsRollingData(timeWindow != null ? timeWindow : new JnksIotTimeWindow(startTs, endTs), data);
     }
 
 

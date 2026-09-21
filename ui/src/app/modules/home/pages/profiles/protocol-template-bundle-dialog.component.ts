@@ -39,7 +39,7 @@ export interface ProtocolTemplateBundleDialogData {
 }
 
 @Component({
-  selector: 'tb-protocol-template-bundle-dialog',
+  selector: 'jnks-iot-protocol-template-bundle-dialog',
   templateUrl: './protocol-template-bundle-dialog.component.html',
   styleUrls: ['./protocol-template-bundle-dialog.component.scss']
 })

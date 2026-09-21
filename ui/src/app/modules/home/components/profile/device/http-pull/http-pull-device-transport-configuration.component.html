@@ -1,9 +1,9 @@
 <form [formGroup]="form" class="http-pull-device-form">
-  <p class="tb-hint" translate>device-profile.http-pull.single-device-device-hint</p>
-  <p *ngIf="httpPullProfilePollUrl" class="tb-hint profile-poll-url-ref">
+  <p class="jnks-iot-hint" translate>device-profile.http-pull.single-device-device-hint</p>
+  <p *ngIf="httpPullProfilePollUrl" class="jnks-iot-hint profile-poll-url-ref">
     <span translate>device-profile.http-pull.profile-poll-url</span>：{{ httpPullProfilePollUrl }}
   </p>
-  <p *ngIf="effectivePollUrl" class="tb-hint effective-poll-url-ref">
+  <p *ngIf="effectivePollUrl" class="jnks-iot-hint effective-poll-url-ref">
     <span translate>device-profile.http-pull.effective-poll-url</span>：{{ effectivePollUrl }}
   </p>
   <mat-form-field class="mat-block">

@@ -1,0 +1,145 @@
+{
+  "ruleChain": {
+    "additionalInfo": {
+      "description": ""
+    },
+    "name": "Device Profile Rule Chain Template",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null
+  },
+  "metadata": {
+    "firstNodeIndex": 6,
+    "nodes": [
+      {
+        "additionalInfo": {
+          "layoutX": 822,
+          "layoutY": 294
+        },
+        "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode",
+        "name": "Save Timeseries",
+        "configurationVersion": 1,
+        "configuration": {
+          "defaultTTL": 0,
+          "useServerTs": false,
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          }
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 824,
+          "layoutY": 221
+        },
+        "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgAttributesNode",
+        "name": "Save Client Attributes",
+        "configurationVersion": 3,
+        "configuration": {
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          },
+          "scope": "CLIENT_SCOPE",
+          "notifyDevice": false,
+          "sendAttributesUpdatedNotification": false,
+          "updateAttributesOnlyOnValueChange": true
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 494,
+          "layoutY": 309
+        },
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotMsgTypeSwitchNode",
+        "name": "Message Type Switch",
+        "configuration": {
+          "version": 0
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 824,
+          "layoutY": 383
+        },
+        "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
+        "name": "Log RPC from Device",
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
+          "tbelScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 823,
+          "layoutY": 444
+        },
+        "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
+        "name": "Log Other",
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
+          "tbelScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 822,
+          "layoutY": 507
+        },
+        "type": "com.jnks.iot.rule.engine.rpc.JnksIotSendRPCRequestNode",
+        "name": "RPC Call Request",
+        "configuration": {
+          "timeoutInSeconds": 60
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 209,
+          "layoutY": 307
+        },
+        "type": "com.jnks.iot.rule.engine.profile.JnksIotDeviceProfileNode",
+        "name": "Device Profile Node",
+        "configuration": {
+          "persistAlarmRulesState": false,
+          "fetchAlarmRulesStateOnStart": false
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 2,
+        "toIndex": 4,
+        "type": "Other"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 1,
+        "type": "Post attributes"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 0,
+        "type": "Post telemetry"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 3,
+        "type": "RPC Request from Device"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 5,
+        "type": "RPC Request to Device"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 2,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

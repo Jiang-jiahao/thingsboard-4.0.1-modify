@@ -90,7 +90,7 @@ import { hidePageSizePixelValue } from '@shared/models/constants';
 import { AggregationType } from '@shared/models/time/time.models';
 import { FormBuilder } from '@angular/forms';
 import { DEFAULT_OVERLAY_POSITIONS } from '@shared/models/overlay.models';
-import { CompiledTbFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction } from '@shared/models/js-function.models';
 
 interface EntitiesTableWidgetSettings extends TableWidgetSettings {
   entitiesTitle: string;
@@ -104,7 +104,7 @@ interface EntitiesTableWidgetSettings extends TableWidgetSettings {
 }
 
 @Component({
-  selector: 'tb-entities-table-widget',
+  selector: 'jnks-iot-entities-table-widget',
   templateUrl: './entities-table-widget.component.html',
   styleUrls: ['./entities-table-widget.component.scss', './../table-widget.scss']
 })
@@ -415,7 +415,7 @@ export class EntitiesTableWidgetComponent extends PageComponent implements OnIni
       this.contentsInfo.entityType = {
         contentFunction: of({
           useCellContentFunction: true,
-          cellContentFunction: new CompiledTbFunction(
+          cellContentFunction: new CompiledJnksIotFunction(
             (entityType: EntityType) =>
               entityType ? this.translate.instant(entityTypeTranslations.get(entityType).type) : '',
             []
@@ -499,7 +499,7 @@ export class EntitiesTableWidgetComponent extends PageComponent implements OnIni
     }
     const target = $event.target || $event.currentTarget;
     const config = new OverlayConfig({
-      panelClass: 'tb-panel-container',
+      panelClass: 'jnks-iot-panel-container',
       backdropClass: 'cdk-overlay-transparent-backdrop',
       hasBackdrop: true,
       height: 'fit-content',

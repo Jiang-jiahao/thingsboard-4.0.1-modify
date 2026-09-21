@@ -1,13 +1,13 @@
 package com.jnks.iot.server.actors.service;
 
 import lombok.extern.slf4j.Slf4j;
-import com.jnks.iot.server.actors.AbstractTbActor;
+import com.jnks.iot.server.actors.AbstractJnksIotActor;
 import com.jnks.iot.server.actors.ActorSystemContext;
 import com.jnks.iot.server.actors.ProcessFailureStrategy;
-import com.jnks.iot.server.common.msg.TbActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
 
 @Slf4j
-public abstract class ContextAwareActor extends AbstractTbActor {
+public abstract class ContextAwareActor extends AbstractJnksIotActor {
 
     public static final int ENTITY_PACK_LIMIT = 1024;
 
@@ -19,7 +19,7 @@ public abstract class ContextAwareActor extends AbstractTbActor {
     }
 
     @Override
-    public boolean process(TbActorMsg msg) {
+    public boolean process(JnksIotActorMsg msg) {
         if (log.isDebugEnabled()) {
             log.debug("Processing msg: {}", msg);
         }
@@ -29,10 +29,10 @@ public abstract class ContextAwareActor extends AbstractTbActor {
         return false;
     }
 
-    protected abstract boolean doProcess(TbActorMsg msg);
+    protected abstract boolean doProcess(JnksIotActorMsg msg);
 
     @Override
-    public ProcessFailureStrategy onProcessFailure(TbActorMsg msg, Throwable t) {
+    public ProcessFailureStrategy onProcessFailure(JnksIotActorMsg msg, Throwable t) {
         log.debug("[{}] Processing failure for msg {}", getActorRef().getActorId(), msg, t);
         return doProcessFailure(t);
     }

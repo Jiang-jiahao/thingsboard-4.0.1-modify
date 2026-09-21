@@ -10,8 +10,8 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { ImageLinkType } from '@shared/components/image/gallery-image-input.component';
 import {
   ImageResourceInfo,
-  prependTbImagePrefixToUrls,
-  removeTbImagePrefixFromUrls,
+  prependJnksIotImagePrefixToUrls,
+  removeJnksIotImagePrefixFromUrls,
   ResourceSubType
 } from '@shared/models/resource.models';
 import { MatDialog } from '@angular/material/dialog';
@@ -21,7 +21,7 @@ import {
 } from '@shared/components/image/image-gallery-dialog.component';
 
 @Component({
-  selector: 'tb-multiple-gallery-image-input',
+  selector: 'jnks-iot-multiple-gallery-image-input',
   templateUrl: './multiple-gallery-image-input.component.html',
   styleUrls: ['./multiple-gallery-image-input.component.scss'],
   providers: [
@@ -78,12 +78,12 @@ export class MultipleGalleryImageInputComponent extends PageComponent implements
 
   writeValue(value: string[]): void {
     this.reset();
-    this.imageUrls = removeTbImagePrefixFromUrls(value);
+    this.imageUrls = removeJnksIotImagePrefixFromUrls(value);
   }
 
   private updateModel() {
     this.cd.markForCheck();
-    this.propagateChange(prependTbImagePrefixToUrls(this.imageUrls));
+    this.propagateChange(prependJnksIotImagePrefixToUrls(this.imageUrls));
   }
 
   private reset() {
@@ -127,7 +127,7 @@ export class MultipleGalleryImageInputComponent extends PageComponent implements
       ImageResourceInfo>(ImageGalleryDialogComponent, {
       autoFocus: false,
       disableClose: false,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         imageSubType: ResourceSubType.IMAGE
       }

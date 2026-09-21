@@ -1,32 +1,32 @@
-<div class="tb-image-map-source-settings tb-form-panel stroked" [formGroup]="imageMapSourceFormGroup">
+<div class="jnks-iot-image-map-source-settings jnks-iot-form-panel stroked" [formGroup]="imageMapSourceFormGroup">
   <div class="flex flex-row items-center justify-between">
-    <div class="tb-form-panel-title">
+    <div class="jnks-iot-form-panel-title">
       {{ 'widgets.maps.image.image-source' | translate }}
     </div>
-    <tb-toggle-select formControlName="sourceType">
-      <tb-toggle-option [value]="ImageSourceType.image">{{ 'widgets.maps.image.image-source-image' | translate }}</tb-toggle-option>
-      <tb-toggle-option [value]="ImageSourceType.entityKey">{{ 'widgets.maps.image.image-source-entity-key' | translate }}</tb-toggle-option>
-    </tb-toggle-select>
+    <jnks-iot-toggle-select formControlName="sourceType">
+      <jnks-iot-toggle-option [value]="ImageSourceType.image">{{ 'widgets.maps.image.image-source-image' | translate }}</jnks-iot-toggle-option>
+      <jnks-iot-toggle-option [value]="ImageSourceType.entityKey">{{ 'widgets.maps.image.image-source-entity-key' | translate }}</jnks-iot-toggle-option>
+    </jnks-iot-toggle-select>
   </div>
-  <tb-gallery-image-input *ngIf="ImageSourceType.image === imageMapSourceFormGroup.get('sourceType').value"
+  <jnks-iot-gallery-image-input *ngIf="ImageSourceType.image === imageMapSourceFormGroup.get('sourceType').value"
                           required
                           formControlName="url">
-  </tb-gallery-image-input>
+  </jnks-iot-gallery-image-input>
   <ng-container *ngIf="ImageSourceType.entityKey === imageMapSourceFormGroup.get('sourceType').value">
-    <div class="tb-form-row column-xs">
+    <div class="jnks-iot-form-row column-xs">
       <div class="fixed-title-width" translate>widgets.maps.image.source-entity-alias</div>
-      <tb-entity-alias-select
+      <jnks-iot-entity-alias-select
         class="flex-1"
-        tbRequired
+        jnksIotRequired
         inlineField
         [aliasController]="context.aliasController"
         formControlName="entityAliasId"
         [callbacks]="context.callbacks">
-      </tb-entity-alias-select>
+      </jnks-iot-entity-alias-select>
     </div>
-    <div class="tb-form-row tb-standard-fields column-xs">
+    <div class="jnks-iot-form-row jnks-iot-standard-fields column-xs">
       <div class="fixed-title-width" translate>widgets.maps.image.image-url-key</div>
-      <tb-data-key-input
+      <jnks-iot-data-key-input
         class="flex-1"
         required
         requiredText="widgets.maps.image.image-url-key-required"
@@ -39,7 +39,7 @@
         [generateKey]="context.generateDataKey"
         (keyEdit)="editKey()"
         formControlName="entityKey">
-      </tb-data-key-input>
+      </jnks-iot-data-key-input>
     </div>
   </ng-container>
 </div>

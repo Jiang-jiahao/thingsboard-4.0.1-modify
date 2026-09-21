@@ -26,11 +26,11 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 let defaultMarkdownStyle: string;
 
 @Component({
-  selector: 'tb-markdown',
+  selector: 'jnks-iot-markdown',
   templateUrl: './markdown.component.html',
   styleUrls: ['./markdown.component.scss']
 })
-export class TbMarkdownComponent implements OnChanges {
+export class JnksIotMarkdownComponent implements OnChanges {
 
   @ViewChild('markdownContainer', {read: ViewContainerRef, static: true}) markdownContainer: ViewContainerRef;
   @ViewChild('fallbackElement', {static: true}) fallbackElement: ElementRef<HTMLElement>;
@@ -69,8 +69,8 @@ export class TbMarkdownComponent implements OnChanges {
 
   error = null;
 
-  private tbMarkdownInstanceComponentRef: ComponentRef<any>;
-  private tbMarkdownInstanceComponentType: Type<any>;
+  private jnksIotMarkdownInstanceComponentRef: ComponentRef<any>;
+  private jnksIotMarkdownInstanceComponentType: Type<any>;
 
   constructor(private cd: ChangeDetectorRef,
               private zone: NgZone,
@@ -87,9 +87,9 @@ export class TbMarkdownComponent implements OnChanges {
           this.zone.run(() => this.render(this.data));
         }
       } else if (propName === 'context' && !change.firstChange) {
-        if (this.context && this.tbMarkdownInstanceComponentRef) {
+        if (this.context && this.jnksIotMarkdownInstanceComponentRef) {
           for (const propName of Object.keys(this.context)) {
-            this.tbMarkdownInstanceComponentRef.instance[propName] = this.context[propName];
+            this.jnksIotMarkdownInstanceComponentRef.instance[propName] = this.context[propName];
           }
         }
       }
@@ -98,7 +98,7 @@ export class TbMarkdownComponent implements OnChanges {
 
   private render(markdown: string) {
     const compiled = this.markdownService.parse(markdown, { decodeHtml: false });
-    let markdownClass = 'tb-markdown-view';
+    let markdownClass = 'jnks-iot-markdown-view';
     if (this.markdownClass) {
       markdownClass += ` ${this.markdownClass}`;
     }
@@ -122,7 +122,7 @@ export class TbMarkdownComponent implements OnChanges {
     let readyObservable: Observable<void>;
     if (this.applyDefaultMarkdownStyle) {
       if (!defaultMarkdownStyle) {
-        const compDef = this.dynamicComponentFactoryService.getComponentDef(TbMarkdownComponent);
+        const compDef = this.dynamicComponentFactoryService.getComponentDef(JnksIotMarkdownComponent);
         defaultMarkdownStyle = compDef.styles[0].replace(/\[_nghost-%COMP%]/g, '')
           .replace(/\[_ngcontent-%COMP%]/g, '');
       }
@@ -144,7 +144,7 @@ export class TbMarkdownComponent implements OnChanges {
         compileModules = compileModules.concat(this.additionalCompileModules);
       }
       this.dynamicComponentFactoryService.createDynamicComponent(
-        class TbMarkdownInstance {
+        class JnksIotMarkdownInstance {
           ngOnDestroy(): void {
             destroyMarkdownInstanceResources();
           }
@@ -154,19 +154,19 @@ export class TbMarkdownComponent implements OnChanges {
         true, styles
       ).subscribe({
         next: (componentType) => {
-          this.tbMarkdownInstanceComponentType = componentType;
+          this.jnksIotMarkdownInstanceComponentType = componentType;
           const injector: Injector = Injector.create({providers: [], parent: this.markdownContainer.injector});
           try {
-            this.tbMarkdownInstanceComponentRef =
-              this.markdownContainer.createComponent(this.tbMarkdownInstanceComponentType,
+            this.jnksIotMarkdownInstanceComponentRef =
+              this.markdownContainer.createComponent(this.jnksIotMarkdownInstanceComponentType,
                 {index: 0, injector});
             if (this.context) {
               for (const propName of Object.keys(this.context)) {
-                this.tbMarkdownInstanceComponentRef.instance[propName] = this.context[propName];
+                this.jnksIotMarkdownInstanceComponentRef.instance[propName] = this.context[propName];
               }
             }
-            this.tbMarkdownInstanceComponentRef.instance.style = this.style;
-            readyObservable = this.handleImages(this.tbMarkdownInstanceComponentRef.location.nativeElement);
+            this.jnksIotMarkdownInstanceComponentRef.instance.style = this.style;
+            readyObservable = this.handleImages(this.jnksIotMarkdownInstanceComponentRef.location.nativeElement);
             this.cd.detectChanges();
             this.error = null;
           } catch (error) {
@@ -202,10 +202,10 @@ export class TbMarkdownComponent implements OnChanges {
     const element = this.fallbackElement.nativeElement;
     let styleElement: any;
     if (styles?.length) {
-      const markdownClass = 'tb-markdown-view-' + guid();
+      const markdownClass = 'jnks-iot-markdown-view-' + guid();
       let innerStyle = styles.join('\n');
-      innerStyle = innerStyle.replace(/\.tb-markdown-view/g, '.' + markdownClass);
-      template = template.replace(/tb-markdown-view/g, markdownClass);
+      innerStyle = innerStyle.replace(/\.jnks-iot-markdown-view/g, '.' + markdownClass);
+      template = template.replace(/jnks-iot-markdown-view/g, markdownClass);
       styleElement = this.renderer.createElement('style');
       styleElement.innerHTML = innerStyle;
     }
@@ -255,10 +255,10 @@ export class TbMarkdownComponent implements OnChanges {
   }
 
   private destroyMarkdownInstanceResources() {
-    if (this.tbMarkdownInstanceComponentType) {
-      this.dynamicComponentFactoryService.destroyDynamicComponent(this.tbMarkdownInstanceComponentType);
-      this.tbMarkdownInstanceComponentType = null;
+    if (this.jnksIotMarkdownInstanceComponentType) {
+      this.dynamicComponentFactoryService.destroyDynamicComponent(this.jnksIotMarkdownInstanceComponentType);
+      this.jnksIotMarkdownInstanceComponentType = null;
     }
-    this.tbMarkdownInstanceComponentRef = null;
+    this.jnksIotMarkdownInstanceComponentRef = null;
   }
 }

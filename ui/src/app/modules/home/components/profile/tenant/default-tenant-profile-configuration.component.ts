@@ -11,7 +11,7 @@ import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'tb-default-tenant-profile-configuration',
+  selector: 'jnks-iot-default-tenant-profile-configuration',
   templateUrl: './default-tenant-profile-configuration.component.html',
   styleUrls: ['./default-tenant-profile-configuration.component.scss'],
   providers: [{

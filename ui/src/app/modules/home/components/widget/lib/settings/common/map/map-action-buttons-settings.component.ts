@@ -15,7 +15,7 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-map-action-button-settings',
+  selector: 'jnks-iot-map-action-button-settings',
   templateUrl: './map-action-buttons-settings.component.html',
   providers: [{
       provide: NG_VALUE_ACCESSOR,

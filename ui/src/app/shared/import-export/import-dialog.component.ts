@@ -18,7 +18,7 @@ export interface ImportDialogData {
 }
 
 @Component({
-  selector: 'tb-import-dialog',
+  selector: 'jnks-iot-import-dialog',
   templateUrl: './import-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: ImportDialogComponent}],
   styleUrls: []

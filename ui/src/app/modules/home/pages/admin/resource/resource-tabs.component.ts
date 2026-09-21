@@ -6,7 +6,7 @@ import { AppState } from '@core/core.state';
 import { NULL_UUID } from '@shared/models/id/has-uuid';
 
 @Component({
-  selector: 'tb-resource-tabs',
+  selector: 'jnks-iot-resource-tabs',
   templateUrl: './resource-tabs.component.html',
   styleUrls: []
 })

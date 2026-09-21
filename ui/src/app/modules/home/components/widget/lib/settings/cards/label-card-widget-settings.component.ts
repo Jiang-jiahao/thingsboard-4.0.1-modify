@@ -6,7 +6,7 @@ import { AppState } from '@core/core.state';
 import { labelCardWidgetDefaultSettings } from '@home/components/widget/lib/cards/label-card-widget.models';
 
 @Component({
-  selector: 'tb-label-card-widget-settings',
+  selector: 'jnks-iot-label-card-widget-settings',
   templateUrl: './label-card-widget-settings.component.html',
   styleUrls: []
 })

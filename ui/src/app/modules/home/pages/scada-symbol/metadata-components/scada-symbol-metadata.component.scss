@@ -1,10 +1,10 @@
 @import '../../../../../../scss/constants';
 
-.tb-scada-symbol-metadata {
+.jnks-iot-scada-symbol-metadata {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  .tb-scada-symbol-metadata-header {
+  .jnks-iot-scada-symbol-metadata-header {
     padding: 24px 24px 0;
     display: flex;
     gap: 12px;
@@ -16,7 +16,7 @@
       align-items: center;
       justify-content: space-between;
     }
-    .tb-scada-symbol-metadata-header-components {
+    .jnks-iot-scada-symbol-metadata-header-components {
       width: 100%;
       flex: 1;
       display: flex;
@@ -25,7 +25,7 @@
       justify-content: space-between;
     }
   }
-  .tb-scada-symbol-metadata-content {
+  .jnks-iot-scada-symbol-metadata-content {
     display: flex;
     & > .mat-content {
       padding-top: 8px;
@@ -50,8 +50,8 @@
         overflow: hidden;
       }
     }
-    .tb-form-panel {
-      .mat-expansion-panel.tb-settings {
+    .jnks-iot-form-panel {
+      .mat-expansion-panel.jnks-iot-settings {
         & > .mat-expansion-panel-header {
           font-weight: 400;
         }
@@ -60,7 +60,7 @@
   }
 }
 
-.tb-js-func {
+.jnks-iot-js-func {
   .ace_tb {
     &.ace_scada-symbol {
       &-ctx {

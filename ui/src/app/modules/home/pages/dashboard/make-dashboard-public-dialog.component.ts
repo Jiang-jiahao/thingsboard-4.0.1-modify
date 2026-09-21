@@ -15,7 +15,7 @@ export interface MakeDashboardPublicDialogData {
 }
 
 @Component({
-  selector: 'tb-make-dashboard-public-dialog',
+  selector: 'jnks-iot-make-dashboard-public-dialog',
   templateUrl: './make-dashboard-public-dialog.component.html',
   styleUrls: []
 })

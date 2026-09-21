@@ -1,7 +1,7 @@
 @import "../scss/constants";
 
 :host {
-  .tb-close-button {
+  .jnks-iot-close-button {
     position: absolute;
     top: 6px;
     right: 6px;
@@ -12,7 +12,7 @@
       overflow: hidden;
       padding: 12px 4px 12px 12px !important;
     }
-    .tb-color-picker-panel {
+    .jnks-iot-color-picker-panel {
       @media #{$mat-sm} {
         width: 342px;
         .color-input-container {

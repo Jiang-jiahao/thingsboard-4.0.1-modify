@@ -38,7 +38,7 @@ import { getCurrentAuthUser } from '@core/auth/auth.selectors';
 import { Authority } from '@shared/models/authority.enum';
 
 @Component({
-  selector: 'tb-device-profile-autocomplete',
+  selector: 'jnks-iot-device-profile-autocomplete',
   templateUrl: './device-profile-autocomplete.component.html',
   styleUrls: ['./device-profile-autocomplete.component.scss'],
   providers: [{
@@ -363,7 +363,7 @@ export class DeviceProfileAutocompleteComponent implements ControlValueAccessor,
       deviceProfileObservable = this.dialog.open<DeviceProfileDialogComponent, DeviceProfileDialogData,
         DeviceProfile>(DeviceProfileDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           isAdd: false,
           deviceProfile
@@ -373,7 +373,7 @@ export class DeviceProfileAutocompleteComponent implements ControlValueAccessor,
       deviceProfileObservable = this.dialog.open<AddDeviceProfileDialogComponent, AddDeviceProfileDialogData,
         DeviceProfile>(AddDeviceProfileDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog', 'tb-add-device-profile-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog', 'jnks-iot-add-device-profile-dialog'],
         width: '900px',
         maxWidth: '95vw',
         data: {

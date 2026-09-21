@@ -1,4 +1,4 @@
-<tb-dashboard-page *ngIf="stateExists"
+<jnks-iot-dashboard-page *ngIf="stateExists"
   [embedded]="true"
   [syncStateWithQueryParam]="false"
   [hideToolbar]="true"
@@ -6,7 +6,7 @@
   [dashboard]="dashboard"
   [parentDashboard]="parentDashboard"
   [parentAliasController]="parentAliasController">
-</tb-dashboard-page>
-<div class="tb-absolute-fill tb-widget-error" *ngIf="!stateExists">
+</jnks-iot-dashboard-page>
+<div class="jnks-iot-absolute-fill jnks-iot-widget-error" *ngIf="!stateExists">
   <span>{{ 'dashboard.non-existent-dashboard-state-error' | translate:{stateId} }}</span>
 </div>

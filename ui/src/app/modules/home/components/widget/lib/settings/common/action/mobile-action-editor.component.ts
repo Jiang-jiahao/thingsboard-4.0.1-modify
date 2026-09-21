@@ -26,11 +26,11 @@ import {
   getDefaultProvisionSuccessFunction
 } from '@home/components/widget/lib/settings/common/action/mobile-action-editor.models';
 import { WidgetService } from '@core/http/widget.service';
-import { TbFunction } from '@shared/models/js-function.models';
+import { JnksIotFunction } from '@shared/models/js-function.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-mobile-action-editor',
+  selector: 'jnks-iot-mobile-action-editor',
   templateUrl: './mobile-action-editor.component.html',
   styleUrls: [],
   providers: [{
@@ -151,7 +151,7 @@ export class MobileActionEditorComponent implements ControlValueAccessor, OnInit
     }
     this.mobileActionTypeFormGroup = this.fb.group({});
     if (type) {
-      let processLaunchResultFunction: TbFunction;
+      let processLaunchResultFunction: JnksIotFunction;
       switch (type) {
         case WidgetMobileActionType.takePictureFromGallery:
         case WidgetMobileActionType.takePhoto:

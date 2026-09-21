@@ -14,7 +14,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { isEmptyStr } from '@core/utils';
 
 @Component({
-  selector: 'tb-map-action-button-row',
+  selector: 'jnks-iot-map-action-button-row',
   templateUrl: 'map-action-button-row.component.html',
   providers: [{
       provide: NG_VALUE_ACCESSOR,

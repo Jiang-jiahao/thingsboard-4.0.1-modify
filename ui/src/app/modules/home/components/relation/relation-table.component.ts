@@ -36,7 +36,7 @@ import { hidePageSizePixelValue } from '@shared/models/constants';
 import { FormBuilder } from '@angular/forms';
 
 @Component({
-  selector: 'tb-relation-table',
+  selector: 'jnks-iot-relation-table',
   templateUrl: './relation-table.component.html',
   styleUrls: ['./relation-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -322,7 +322,7 @@ export class RelationTableComponent extends PageComponent implements AfterViewIn
 
     this.dialog.open<RelationDialogComponent, RelationDialogData, boolean>(RelationDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         direction: this.direction,

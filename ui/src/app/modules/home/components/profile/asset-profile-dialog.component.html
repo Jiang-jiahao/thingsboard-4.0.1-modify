@@ -12,12 +12,12 @@
   </mat-progress-bar>
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
   <div mat-dialog-content>
-    <tb-asset-profile
+    <jnks-iot-asset-profile
       #assetProfileComponent
       [standalone]="true"
       [entity]="assetProfile"
       [isEdit]="true">
-    </tb-asset-profile>
+    </jnks-iot-asset-profile>
   </div>
   <div mat-dialog-actions class="flex items-center justify-end">
     <button mat-button color="primary"

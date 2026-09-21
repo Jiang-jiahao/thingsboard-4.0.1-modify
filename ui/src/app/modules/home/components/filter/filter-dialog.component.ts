@@ -25,7 +25,7 @@ export interface FilterDialogData {
 }
 
 @Component({
-  selector: 'tb-filter-dialog',
+  selector: 'jnks-iot-filter-dialog',
   templateUrl: './filter-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: FilterDialogComponent}],
   styleUrls: ['./filter-dialog.component.scss']

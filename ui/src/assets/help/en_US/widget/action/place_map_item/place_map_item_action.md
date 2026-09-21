@@ -26,8 +26,8 @@ A JavaScript function triggered after a map item is placed. Optionally uses an H
       <li><b>coordinates:</b> <code>Coordinates</code> - Represents geographical coordinates of the placed map item. The actual format of this parameter depends on the type of the selected map item:
         <ul>
           <li><b>Marker:</b> <code>{x: number; y: number}</code>, where <code>x</code> represents latitude, and <code>y</code> represents longitude.</li>
-          <li><b>Polygon, Rectangle:</b> <code><a href="https://github.com/thingsboard/thingsboard/blob/61254a68507c6def8c055b7b3ae70413c456a4ac/ui-ngx/src/app/shared/models/widget/maps/map.models.ts#L1099" target="_blank">TbPolygonRawCoordinates</a></code> contains an array of points defining the shape boundaries.</li>
-          <li><b>Circle:</b> <code><a href="https://github.com/thingsboard/thingsboard/blob/61254a68507c6def8c055b7b3ae70413c456a4ac/ui-ngx/src/app/shared/models/widget/maps/map.models.ts#L1104" target="_blank">TbCircleData</a></code> contains center coordinates and radius information.</li>
+          <li><b>Polygon, Rectangle:</b> <code><a href="https://github.com/thingsboard/thingsboard/blob/61254a68507c6def8c055b7b3ae70413c456a4ac/ui-ngx/src/app/shared/models/widget/maps/map.models.ts#L1099" target="_blank">JnksIotPolygonRawCoordinates</a></code> contains an array of points defining the shape boundaries.</li>
+          <li><b>Circle:</b> <code><a href="https://github.com/thingsboard/thingsboard/blob/61254a68507c6def8c055b7b3ae70413c456a4ac/ui-ngx/src/app/shared/models/widget/maps/map.models.ts#L1104" target="_blank">JnksIotCircleData</a></code> contains center coordinates and radius information.</li>
         </ul>
         Note: The coordinates will be automatically converted according to the selected map type.
       </li>
@@ -48,9 +48,9 @@ A JavaScript function triggered after a map item is placed. Optionally uses an H
 <br>
 
 <div style="padding-left: 64px;"
-     tb-help-popup="widget/action/place_map_item/create_dialog_js"
-     tb-help-popup-placement="top"
-     [tb-help-popup-style]="{maxHeight: '50vh', maxWidth: '50vw'}"
+     jnks-iot-help-popup="widget/action/place_map_item/create_dialog_js"
+     jnks-iot-help-popup-placement="top"
+     [jnks-iot-help-popup-style]="{maxHeight: '50vh', maxWidth: '50vw'}"
      trigger-style="font-size: 16px;"
      trigger-text="JavaScript function">
 </div>
@@ -58,9 +58,9 @@ A JavaScript function triggered after a map item is placed. Optionally uses an H
 <br>
 
 <div style="padding-left: 64px;"
-     tb-help-popup="widget/action/place_map_item/create_dialog_html"
-     tb-help-popup-placement="top"
-     [tb-help-popup-style]="{maxHeight: '50vh', maxWidth: '50vw'}"
+     jnks-iot-help-popup="widget/action/place_map_item/create_dialog_html"
+     jnks-iot-help-popup-placement="top"
+     [jnks-iot-help-popup-style]="{maxHeight: '50vh', maxWidth: '50vw'}"
      trigger-style="font-size: 16px;"
      trigger-text="HTML code">
 </div>

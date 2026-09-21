@@ -38,7 +38,7 @@ export function updateAttributeGeneralDefaultSettings(hasLabelValue = true): Upd
 }
 
 @Component({
-  selector: 'tb-update-attribute-general-settings',
+  selector: 'jnks-iot-update-attribute-general-settings',
   templateUrl: './update-attribute-general-settings.component.html',
   styleUrls: ['./../widget-settings.scss'],
   providers: [

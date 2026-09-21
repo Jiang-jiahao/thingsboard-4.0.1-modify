@@ -13,7 +13,7 @@ import { NotificationService } from '@core/http/notification.service';
 import { isEqual } from '@core/utils';
 
 @Component({
-  selector: 'tb-slack-conversation-autocomplete',
+  selector: 'jnks-iot-slack-conversation-autocomplete',
   templateUrl: './slack-conversation-autocomplete.component.html',
   styleUrls: ['./slack-conversation-autocomplete.component.scss'],
   providers: [{

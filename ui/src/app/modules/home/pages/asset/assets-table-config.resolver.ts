@@ -291,7 +291,7 @@ export class AssetsTableConfigResolver  {
     this.dialog.open<AddEntitiesToCustomerDialogComponent, AddEntitiesToCustomerDialogData,
       boolean>(AddEntitiesToCustomerDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         customerId: this.customerId,
         entityType: EntityType.ASSET
@@ -333,7 +333,7 @@ export class AssetsTableConfigResolver  {
     this.dialog.open<AssignToCustomerDialogComponent, AssignToCustomerDialogData,
       boolean>(AssignToCustomerDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         entityIds: assetIds,
         entityType: EntityType.ASSET

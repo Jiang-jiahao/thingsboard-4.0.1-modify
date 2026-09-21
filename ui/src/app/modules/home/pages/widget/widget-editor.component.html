@@ -1,13 +1,13 @@
 <div class="flex flex-1 flex-col">
-  <div class="flex flex-1 flex-col" tb-fullscreen [fullscreen]="fullscreen" [tb-hotkeys]="hotKeys" [cheatSheet]="cheatSheetComponent">
-    <tb-hotkeys-cheatsheet #cheatSheetComponent></tb-hotkeys-cheatsheet>
-    <mat-toolbar class="mat-elevation-z1 tb-edit-toolbar mat-hue-3 gap-4 lt-xl:gap-2">
-      <mat-form-field class="tb-widget-title tb-appearance-transparent">
+  <div class="flex flex-1 flex-col" jnks-iot-fullscreen [fullscreen]="fullscreen" [jnks-iot-hotkeys]="hotKeys" [cheatSheet]="cheatSheetComponent">
+    <jnks-iot-hotkeys-cheatsheet #cheatSheetComponent></jnks-iot-hotkeys-cheatsheet>
+    <mat-toolbar class="mat-elevation-z1 jnks-iot-edit-toolbar mat-hue-3 gap-4 lt-xl:gap-2">
+      <mat-form-field class="jnks-iot-widget-title jnks-iot-appearance-transparent">
         <input [disabled]="isReadOnly" matInput required maxlength="255"
                [(ngModel)]="widget.widgetName" (ngModelChange)="isDirty = true"
                placeholder="{{ 'widget.widget-title' | translate }}"/>
       </mat-form-field>
-      <mat-form-field class="tb-appearance-transparent">
+      <mat-form-field class="jnks-iot-appearance-transparent">
         <mat-select [disabled]="isReadOnly" placeholder="{{ 'widget.type' | translate }}"
                     [(ngModel)]="widget.type" (ngModelChange)="widgetTypeChanged()">
           <mat-option *ngFor="let type of allWidgetTypes" [value]="type">
@@ -34,7 +34,7 @@
       <button *ngIf="!isReadOnly" mat-raised-button
               class="lt-md:!hidden" [disabled]="(isLoading$ | async) || saveDisabled()"
               (click)="saveWidget()"
-              [tb-circular-progress]="saveWidgetPending"
+              [jnks-iot-circular-progress]="saveWidgetPending"
               matTooltip="{{ 'widget.save' | translate }} (CTRL + S)"
               matTooltipPosition="below">
         <mat-icon>save</mat-icon>
@@ -43,7 +43,7 @@
       <button mat-raised-button
               class="lt-md:!hidden" [disabled]="(isLoading$ | async) || saveAsDisabled()"
               (click)="saveWidgetAs()"
-              [tb-circular-progress]="saveWidgetAsPending"
+              [jnks-iot-circular-progress]="saveWidgetAsPending"
               matTooltip="{{ 'widget.saveAs' | translate }} (Shift + CTRL + S)"
               matTooltipPosition="below">
         <mat-icon>save_as</mat-icon>
@@ -95,23 +95,23 @@
       </mat-menu>
     </mat-toolbar>
     <div class="flex-1" style="position: relative;">
-      <div class="tb-editor tb-absolute-fill">
-        <div #topPanel class="tb-split tb-split-vertical">
-          <div #topLeftPanel class="tb-split tb-content">
+      <div class="jnks-iot-editor jnks-iot-absolute-fill">
+        <div #topPanel class="jnks-iot-split jnks-iot-split-vertical">
+          <div #topLeftPanel class="jnks-iot-split jnks-iot-content">
             <mat-tab-group mat-stretch-tabs="false" selectedIndex="1" dynamicHeight="true" style="width: 100%; height: 100%;">
               <mat-tab label="{{ 'widget.resources' | translate }}">
-                <div class="tb-resize-container" style="background-color: #fff;">
+                <div class="jnks-iot-resize-container" style="background-color: #fff;">
                   <div class="mat-padding">
                     <div class="flex flex-1 flex-row items-center justify-start" style="max-height: 40px;"
                          *ngFor="let resource of widget.resources; let i = index" >
-                      <tb-resource-autocomplete class="mat-block resource-field flex-1"
+                      <jnks-iot-resource-autocomplete class="mat-block resource-field flex-1"
                                                 hideRequiredMarker required
                                                 subscriptSizing="dynamic"
                                                 [allowAutocomplete]="resource.isModule"
                                                 [(ngModel)]="resource.url"
                                                 (ngModelChange)="isDirty = true"
                                                 placeholder="{{ 'widget.resource-url' | translate }}">
-                      </tb-resource-autocomplete>
+                      </jnks-iot-resource-autocomplete>
                       <mat-checkbox [(ngModel)]="resource.isModule"
                                     (ngModelChange)="isDirty = true">
                         {{ 'widget.resource-is-extension' | translate }}
@@ -136,12 +136,12 @@
                 </div>
               </mat-tab>
               <mat-tab label="{{ 'widget.html' | translate }}">
-                <div class="tb-resize-container" tb-fullscreen [fullscreen]="htmlFullscreen">
-                  <div class="tb-editor-area-title-panel">
+                <div class="jnks-iot-resize-container" jnks-iot-fullscreen [fullscreen]="htmlFullscreen">
+                  <div class="jnks-iot-editor-area-title-panel">
                     <button mat-button (click)="beautifyHtml()">
                       {{ 'widget.tidy' | translate }}
                     </button>
-                    <button mat-icon-button class="tb-mat-32"
+                    <button mat-icon-button class="jnks-iot-mat-32"
                             (click)="htmlFullscreen = !htmlFullscreen"
                             matTooltip="{{(htmlFullscreen ? 'fullscreen.exit' : 'fullscreen.expand') | translate}}"
                             matTooltipPosition="above">
@@ -152,12 +152,12 @@
                 </div>
               </mat-tab>
               <mat-tab label="{{ 'widget.css' | translate }}">
-                <div class="tb-resize-container" tb-fullscreen [fullscreen]="cssFullscreen">
-                  <div class="tb-editor-area-title-panel">
+                <div class="jnks-iot-resize-container" jnks-iot-fullscreen [fullscreen]="cssFullscreen">
+                  <div class="jnks-iot-editor-area-title-panel">
                     <button mat-button (click)="beautifyCss()">
                       {{ 'widget.tidy' | translate }}
                     </button>
-                    <button mat-icon-button class="tb-mat-32"
+                    <button mat-icon-button class="jnks-iot-mat-32"
                             (click)="cssFullscreen = !cssFullscreen"
                             matTooltip="{{(cssFullscreen ? 'fullscreen.exit' : 'fullscreen.expand') | translate}}"
                             matTooltipPosition="above">
@@ -169,48 +169,48 @@
               </mat-tab>
             </mat-tab-group>
           </div>
-          <div #topRightPanel class="tb-split tb-content">
+          <div #topRightPanel class="jnks-iot-split jnks-iot-content">
             <mat-tab-group mat-stretch-tabs="false" dynamicHeight="true" style="width: 100%; height: 100%;">
               <mat-tab label="{{ 'widget.settings-form' | translate }}">
-                <div class="tb-resize-container" style="background-color: #fff;">
-                  <tb-dynamic-form-properties
+                <div class="jnks-iot-resize-container" style="background-color: #fff;">
+                  <jnks-iot-dynamic-form-properties
                     importExport
                     [exportFileName]="(widget.widgetName || 'widget') + '-settings-form'"
                     [(ngModel)]="widget.settingsForm"
                     (ngModelChange)="settingsFormUpdated()"
                     noBorder fillHeight>
-                  </tb-dynamic-form-properties>
+                  </jnks-iot-dynamic-form-properties>
                 </div>
               </mat-tab>
               <mat-tab label="{{ 'widget.data-key-settings-form' | translate }}">
-                <div class="tb-resize-container" style="background-color: #fff;">
-                  <tb-dynamic-form-properties
+                <div class="jnks-iot-resize-container" style="background-color: #fff;">
+                  <jnks-iot-dynamic-form-properties
                     importExport
                     [exportFileName]="(widget.widgetName || 'widget') + '-data-key-settings-form'"
                     [(ngModel)]="widget.dataKeySettingsForm"
                     (ngModelChange)="dataKeySettingsFormUpdated()"
                     noBorder fillHeight>
-                  </tb-dynamic-form-properties>
+                  </jnks-iot-dynamic-form-properties>
                 </div>
               </mat-tab>
               <mat-tab [aria-labelledby]="widget.type !== widgetTypes.timeseries ? 'hidden': ''" label="{{ 'widget.latest-data-key-settings-form' | translate }}">
-                <div class="tb-resize-container" style="background-color: #fff;">
-                  <tb-dynamic-form-properties
+                <div class="jnks-iot-resize-container" style="background-color: #fff;">
+                  <jnks-iot-dynamic-form-properties
                     importExport
                     [exportFileName]="(widget.widgetName || 'widget') + '-latest-data-key-settings-form'"
                     [(ngModel)]="widget.latestDataKeySettingsForm"
                     (ngModelChange)="latestDataKeySettingsFormUpdated()"
                     noBorder fillHeight>
-                  </tb-dynamic-form-properties>
+                  </jnks-iot-dynamic-form-properties>
                 </div>
               </mat-tab>
               <mat-tab label="{{ 'widget.widget-settings' | translate }}">
-                <div class="tb-resize-container" style="background-color: #fff;">
+                <div class="jnks-iot-resize-container" style="background-color: #fff;">
                   <div class="mat-padding">
-                    <tb-gallery-image-input class="flex-1" label="{{'widget.image-preview' | translate}}"
+                    <jnks-iot-gallery-image-input class="flex-1" label="{{'widget.image-preview' | translate}}"
                                     [(ngModel)]="widget.image"
                                     (ngModelChange)="isDirty = true" >
-                    </tb-gallery-image-input>
+                    </jnks-iot-gallery-image-input>
                     <mat-form-field class="mat-block">
                       <mat-label translate>widget.description</mat-label>
                       <textarea matInput #descriptionInput
@@ -219,11 +219,11 @@
                                 rows="2" maxlength="1024"></textarea>
                       <mat-hint align="end">{{descriptionInput.value?.length || 0}}/1024</mat-hint>
                     </mat-form-field>
-                    <tb-string-items-list
+                    <jnks-iot-string-items-list
                       label="{{ 'widget.tags' | translate }}"
                       [(ngModel)]="widget.tags"
                       (ngModelChange)="isDirty = true">
-                    </tb-string-items-list>
+                    </jnks-iot-string-items-list>
                     <div class="flex flex-col gap-4" style="padding-bottom: 16px;">
                       <mat-slide-toggle class="mat-block"
                                         [(ngModel)]="widget.scada"
@@ -271,23 +271,23 @@
             </mat-tab-group>
           </div>
         </div>
-        <div #bottomPanel class="tb-split tb-split-vertical">
-          <div #javascriptPanel class="tb-split tb-content" tb-toast toastTarget="javascriptPanel">
-            <div class="tb-resize-container" tb-fullscreen [fullscreen]="javascriptFullscreen">
-              <div class="tb-editor-area-title-panel">
+        <div #bottomPanel class="jnks-iot-split jnks-iot-split-vertical">
+          <div #javascriptPanel class="jnks-iot-split jnks-iot-content" jnks-iot-toast toastTarget="javascriptPanel">
+            <div class="jnks-iot-resize-container" jnks-iot-fullscreen [fullscreen]="javascriptFullscreen">
+              <div class="jnks-iot-editor-area-title-panel">
                 <label translate>widget.javascript</label>
-                <button mat-icon-button class="tb-mat-32"
+                <button mat-icon-button class="jnks-iot-mat-32"
                         #editModulesButton
                         (click)="editControllerScriptModules($event, editModulesButton)"
                         matTooltip="{{'js-func.modules' | translate}}"
                         matTooltipPosition="above">
-                  <tb-icon color="primary" matButtonIcon>mdi:application-braces-outline</tb-icon>
+                  <jnks-iot-icon color="primary" matButtonIcon>mdi:application-braces-outline</jnks-iot-icon>
                 </button>
                 <button mat-button (click)="beautifyJs()">
                   {{ 'widget.tidy' | translate }}
                 </button>
-                <span tb-help-popup="widget/editor/widget_js_fn" tb-help-popup-placement="top" [tb-help-popup-style]="{maxWidth: '1200px'}"></span>
-                <button mat-icon-button class="tb-mat-32"
+                <span jnks-iot-help-popup="widget/editor/widget_js_fn" jnks-iot-help-popup-placement="top" [jnks-iot-help-popup-style]="{maxWidth: '1200px'}"></span>
+                <button mat-icon-button class="jnks-iot-mat-32"
                         (click)="javascriptFullscreen = !javascriptFullscreen"
                         matTooltip="{{(javascriptFullscreen ? 'fullscreen.exit' : 'fullscreen.expand') | translate}}"
                         matTooltipPosition="above">
@@ -297,16 +297,16 @@
               <div #javascriptInput></div>
             </div>
           </div>
-          <div #framePanel class="tb-split tb-content" style="overflow-y: hidden; position: relative;">
-            <div class="mat-content tb-progress-cover flex flex-1 flex-col items-center justify-center"
+          <div #framePanel class="jnks-iot-split jnks-iot-content" style="overflow-y: hidden; position: relative;">
+            <div class="mat-content jnks-iot-progress-cover flex flex-1 flex-col items-center justify-center"
                  *ngIf="!iframeWidgetEditModeInited">
               <mat-spinner diameter="100" mode="indeterminate" color="warn"></mat-spinner>
             </div>
-            <div tb-fullscreen [fullscreen]="iFrameFullscreen" style="width: 100%; height: 100%;">
+            <div jnks-iot-fullscreen [fullscreen]="iFrameFullscreen" style="width: 100%; height: 100%;">
               <iframe #widgetIFrame style="border: 0;" height="100%" width="100%"></iframe>
               <div style="position: absolute; top: 10px; left: 10px; bottom: initial;">
                 <button mat-icon-button
-                        class="tb-fullscreen-button-style"
+                        class="jnks-iot-fullscreen-button-style"
                         (click)="iFrameFullscreen = !iFrameFullscreen"
                         matTooltip="{{(iFrameFullscreen ? 'fullscreen.exit' : 'fullscreen.expand') | translate}}"
                         matTooltipPosition="above">

@@ -23,7 +23,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-value-source-data-key',
+  selector: 'jnks-iot-value-source-data-key',
   templateUrl: './value-source-data-key.component.html',
   styleUrls: ['value-source-data-key.component.scss'],
   providers: [

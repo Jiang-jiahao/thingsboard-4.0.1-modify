@@ -12,7 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MediaBreakpoints } from '@shared/models/constants';
 
 @Component({
-  selector: 'tb-configured-features',
+  selector: 'jnks-iot-configured-features',
   templateUrl: './configured-features.component.html',
   styleUrls: ['./home-page-widget.scss', './configured-features.component.scss']
 })

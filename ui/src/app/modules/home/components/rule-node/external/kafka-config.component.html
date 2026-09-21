@@ -12,7 +12,7 @@
     <input matInput formControlName="keyPattern">
     <mat-hint translate>rule-node-config.general-pattern-hint</mat-hint>
   </mat-form-field>
-  <div class="tb-hint" translate>rule-node-config.key-pattern-hint</div>
+  <div class="jnks-iot-hint" translate>rule-node-config.key-pattern-hint</div>
   <mat-form-field class="mat-block">
     <mat-label translate>rule-node-config.bootstrap-servers</mat-label>
     <input required matInput formControlName="bootstrapServers">
@@ -56,19 +56,19 @@
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <label translate class="tb-title">rule-node-config.other-properties</label>
-  <tb-kv-map-config-old
+  <label translate class="jnks-iot-title">rule-node-config.other-properties</label>
+  <jnks-iot-kv-map-config-old
     required="false"
     formControlName="otherProperties"
     keyText="rule-node-config.key"
     keyRequiredText="rule-node-config.key-required"
     valText="rule-node-config.value"
     valRequiredText="rule-node-config.value-required">
-  </tb-kv-map-config-old>
+  </jnks-iot-kv-map-config-old>
   <mat-checkbox class="flex-1" formControlName="addMetadataKeyValuesAsKafkaHeaders">
     {{ 'rule-node-config.add-metadata-key-values-as-kafka-headers' | translate }}
   </mat-checkbox>
-  <div class="tb-hint" translate>rule-node-config.add-metadata-key-values-as-kafka-headers-hint</div>
+  <div class="jnks-iot-hint" translate>rule-node-config.add-metadata-key-values-as-kafka-headers-hint</div>
   <mat-form-field class="mat-block flex-1" *ngIf="kafkaConfigForm.get('addMetadataKeyValuesAsKafkaHeaders').value">
     <mat-label translate>rule-node-config.charset-encoding</mat-label>
     <mat-select formControlName="kafkaHeadersCharset" required>

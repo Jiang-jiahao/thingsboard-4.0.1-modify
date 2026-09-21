@@ -1,15 +1,15 @@
-<div class="tb-absolute-fill flex" [class]="legendContainerLayoutType">
-  <tb-legend *ngIf="displayLegend && isLegendFirst"
+<div class="jnks-iot-absolute-fill flex" [class]="legendContainerLayoutType">
+  <jnks-iot-legend *ngIf="displayLegend && isLegendFirst"
              [style]="legendStyle"
              [legendConfig]="legendConfig"
              [legendData]="legendData"
              (legendKeyHiddenChange)="onLegendKeyHiddenChange($event)">
-  </tb-legend>
+  </jnks-iot-legend>
   <div class="flex-1" #flotElement></div>
-  <tb-legend *ngIf="displayLegend && !isLegendFirst"
+  <jnks-iot-legend *ngIf="displayLegend && !isLegendFirst"
              [style]="legendStyle"
              [legendConfig]="legendConfig"
              [legendData]="legendData"
              (legendKeyHiddenChange)="onLegendKeyHiddenChange($event)">
-  </tb-legend>
+  </jnks-iot-legend>
 </div>

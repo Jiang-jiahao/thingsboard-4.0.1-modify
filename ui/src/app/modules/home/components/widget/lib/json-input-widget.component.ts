@@ -33,7 +33,7 @@ interface JsonInputWidgetSettings {
 }
 
 @Component({
-  selector: 'tb-json-input-widget ',
+  selector: 'jnks-iot-json-input-widget ',
   templateUrl: './json-input-widget.component.html',
   styleUrls: ['./json-input-widget.component.scss']
 })

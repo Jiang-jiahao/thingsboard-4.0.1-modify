@@ -1,12 +1,12 @@
 <form class="mat-elevation-z1"
       [formGroup]="attributeFormGroup" (ngSubmit)="update()" style="padding: 5px; width: 375px;">
   <fieldset [disabled]="isLoading$ | async">
-    <tb-value-input
+    <jnks-iot-value-input
       formControlName="value"
       requiredText="attribute.value-required">
-    </tb-value-input>
+    </jnks-iot-value-input>
   </fieldset>
-  <div class="tb-panel-actions flex flex-row">
+  <div class="jnks-iot-panel-actions flex flex-row">
     <span class="flex-1"></span>
     <button mat-button color="primary"
             type="button"

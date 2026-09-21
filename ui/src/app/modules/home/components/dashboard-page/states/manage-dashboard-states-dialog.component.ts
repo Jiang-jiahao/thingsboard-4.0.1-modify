@@ -33,7 +33,7 @@ export interface ManageDashboardStatesDialogData {
 }
 
 @Component({
-  selector: 'tb-manage-dashboard-states-dialog',
+  selector: 'jnks-iot-manage-dashboard-states-dialog',
   templateUrl: './manage-dashboard-states-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: ManageDashboardStatesDialogComponent}],
   styleUrls: ['./manage-dashboard-states-dialog.component.scss']
@@ -174,7 +174,7 @@ export class ManageDashboardStatesDialogComponent
     this.dialog.open<DashboardStateDialogComponent, DashboardStateDialogData,
       DashboardStateInfo>(DashboardStateDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         states: this.states,

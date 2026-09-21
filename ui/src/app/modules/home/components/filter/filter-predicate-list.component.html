@@ -10,14 +10,14 @@
       <div class="flex max-w-92% flex-full flex-row items-center justify-start gap-2">
         <div class="flex flex-1 flex-row gap-2">
           <div class="flex max-w-30% flex-full flex-row items-center justify-start gap-2">
-            <label translate class="tb-title no-padding flex-1">filter.operation.operation</label>
+            <label translate class="jnks-iot-title no-padding flex-1">filter.operation.operation</label>
             <label *ngIf="valueType === valueTypeEnum.STRING"
-                   translate class="tb-title no-padding" style="min-width: 70px;">filter.ignore-case</label>
+                   translate class="jnks-iot-title no-padding" style="min-width: 70px;">filter.ignore-case</label>
           </div>
-          <label translate class="tb-title no-padding max-w-70% flex-full">filter.value</label>
+          <label translate class="jnks-iot-title no-padding max-w-70% flex-full">filter.value</label>
         </div>
         <label *ngIf="displayUserParameters"
-               translate class="tb-title no-padding" style="width: 60px;">filter.user-parameters</label>
+               translate class="jnks-iot-title no-padding" style="width: 60px;">filter.user-parameters</label>
         <span [class.!hidden]="disabled" style="min-width: 40px;">&nbsp;</span>
       </div>
     </div>
@@ -31,7 +31,7 @@
         </div>
         <div class="flex max-w-92% min-w-147.5 flex-full flex-col">
           <div class="flex flex-1 flex-row items-center justify-start gap-2">
-            <tb-filter-predicate
+            <jnks-iot-filter-predicate
               class="flex-1"
               [valueType]="valueType"
               [displayUserParameters]="displayUserParameters"
@@ -39,7 +39,7 @@
               [onlyUserDynamicSource]="onlyUserDynamicSource"
               [key]="key"
               [formControl]="predicateControl">
-            </tb-filter-predicate>
+            </jnks-iot-filter-predicate>
             <button mat-icon-button color="primary"
                     [class.!hidden]="disabled"
                     type="button"

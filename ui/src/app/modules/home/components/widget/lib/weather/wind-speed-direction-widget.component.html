@@ -1,8 +1,8 @@
-<div class="tb-wind-speed-direction-panel" [style.padding]="padding" [style]="backgroundStyle$ | async" [class.tb-wind-speed-direction-pointer]="hasCardClickAction" (click)="cardClick($event)">
-  <div class="tb-wind-speed-direction-overlay" [style]="overlayStyle"></div>
+<div class="jnks-iot-wind-speed-direction-panel" [style.padding]="padding" [style]="backgroundStyle$ | async" [class.jnks-iot-wind-speed-direction-pointer]="hasCardClickAction" (click)="cardClick($event)">
+  <div class="jnks-iot-wind-speed-direction-overlay" [style]="overlayStyle"></div>
   <ng-container *ngTemplateOutlet="widgetTitlePanel"></ng-container>
-  <div class="tb-wind-speed-direction-content">
-    <div #windSpeedDirectionShape class="tb-wind-speed-direction-shape">
+  <div class="jnks-iot-wind-speed-direction-content">
+    <div #windSpeedDirectionShape class="jnks-iot-wind-speed-direction-shape">
     </div>
   </div>
 </div>

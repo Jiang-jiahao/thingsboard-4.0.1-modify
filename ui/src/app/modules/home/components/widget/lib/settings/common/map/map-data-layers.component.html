@@ -1,26 +1,26 @@
-<div class="tb-form-panel no-padding no-border">
-  <div class="tb-form-table tb-map-data-layers">
-    <div class="tb-form-table-header no-padding-right">
-      <div class="tb-form-table-header-cell tb-source-header" translate>widgets.maps.data-layer.source</div>
-      <div *ngIf="['trips', 'markers'].includes(dataLayerType)" class="tb-form-table-header-cell tb-x-pos-header">
+<div class="jnks-iot-form-panel no-padding no-border">
+  <div class="jnks-iot-form-table jnks-iot-map-data-layers">
+    <div class="jnks-iot-form-table-header no-padding-right">
+      <div class="jnks-iot-form-table-header-cell jnks-iot-source-header" translate>widgets.maps.data-layer.source</div>
+      <div *ngIf="['trips', 'markers'].includes(dataLayerType)" class="jnks-iot-form-table-header-cell jnks-iot-x-pos-header">
         {{ (mapType === MapType.geoMap ? 'widgets.maps.data-layer.marker.latitude-key' : 'widgets.maps.data-layer.marker.x-pos-key') | translate }}
       </div>
-      <div *ngIf="['trips', 'markers'].includes(dataLayerType)" class="tb-form-table-header-cell tb-y-pos-header">
+      <div *ngIf="['trips', 'markers'].includes(dataLayerType)" class="jnks-iot-form-table-header-cell jnks-iot-y-pos-header">
         {{ (mapType === MapType.geoMap ? 'widgets.maps.data-layer.marker.longitude-key' : 'widgets.maps.data-layer.marker.y-pos-key') | translate }}
       </div>
-      <div *ngIf="dataLayerType === 'polygons'" class="tb-form-table-header-cell tb-key-header" translate>widgets.maps.data-layer.polygon.polygon-key</div>
-      <div *ngIf="dataLayerType === 'circles'" class="tb-form-table-header-cell tb-key-header" translate>widgets.maps.data-layer.circle.circle-key</div>
-      <div class="tb-form-table-header-cell tb-actions-header"></div>
+      <div *ngIf="dataLayerType === 'polygons'" class="jnks-iot-form-table-header-cell jnks-iot-key-header" translate>widgets.maps.data-layer.polygon.polygon-key</div>
+      <div *ngIf="dataLayerType === 'circles'" class="jnks-iot-form-table-header-cell jnks-iot-key-header" translate>widgets.maps.data-layer.circle.circle-key</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-actions-header"></div>
     </div>
-    <div *ngIf="dataLayersFormArray().controls.length; else noDataLayers" class="tb-form-table-body">
+    <div *ngIf="dataLayersFormArray().controls.length; else noDataLayers" class="jnks-iot-form-table-body">
       <div *ngFor="let dataLayerControl of dataLayersFormArray().controls; trackBy: trackByDataLayer; let $index = index;">
-        <tb-map-data-layer-row class="flex-1"
+        <jnks-iot-map-data-layer-row class="flex-1"
                                [mapType]="mapType"
                                [dataLayerType]="dataLayerType"
                                [context]="context"
                                [formControl]="dataLayerControl"
                                (dataLayerRemoved)="removeDataLayer($index)">
-        </tb-map-data-layer-row>
+        </jnks-iot-map-data-layer-row>
       </div>
     </div>
   </div>
@@ -31,5 +31,5 @@
   </div>
 </div>
 <ng-template #noDataLayers>
-  <span class="tb-prompt flex items-center justify-center">{{ noDataLayersText | translate }}</span>
+  <span class="jnks-iot-prompt flex items-center justify-center">{{ noDataLayersText | translate }}</span>
 </ng-template>

@@ -19,7 +19,7 @@
   <ng-template matExpansionPanelContent>
     <div class="flex flex-col gap-2">
       <mat-divider></mat-divider>
-      <section class="tb-widget-settings flex flex-col">
+      <section class="jnks-iot-widget-settings flex flex-col">
         <mat-form-field style="padding-bottom: 16px;">
           <mat-label translate>widgets.label-widget.label-pattern</mat-label>
           <input required matInput formControlName="pattern">
@@ -41,14 +41,14 @@
             </mat-form-field>
           </section>
         </fieldset>
-        <tb-color-input
+        <jnks-iot-color-input
           formControlName="backgroundColor"
           icon="format_color_fill"
           label="{{ 'widgets.label-widget.background-color' | translate }}" openOnInput colorClearButton>
-        </tb-color-input>
+        </jnks-iot-color-input>
         <fieldset class="fields-group">
           <legend class="group-title" translate>widgets.label-widget.font-settings</legend>
-          <tb-widget-font formControlName="font" sizeTitle="widgets.widget-font.relative-font-size"></tb-widget-font>
+          <jnks-iot-widget-font formControlName="font" sizeTitle="widgets.widget-font.relative-font-size"></jnks-iot-widget-font>
         </fieldset>
       </section>
     </div>

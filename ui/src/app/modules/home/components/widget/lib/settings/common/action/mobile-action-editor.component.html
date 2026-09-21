@@ -1,5 +1,5 @@
-<div class="tb-form-panel no-padding no-border" [formGroup]="mobileActionFormGroup">
-  <div class="tb-form-row">
+<div class="jnks-iot-form-panel no-padding no-border" [formGroup]="mobileActionFormGroup">
+  <div class="jnks-iot-form-row">
     <div class="fixed-title-width">{{ 'widget-action.mobile.action-type' | translate }}*</div>
     <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
       <mat-select required formControlName="type" placeholder="{{ 'widget-action.mobile.select-action-type' | translate }}">
@@ -9,18 +9,18 @@
       </mat-select>
       <mat-icon matSuffix
                 matTooltipPosition="above"
-                matTooltipClass="tb-error-tooltip"
+                matTooltipClass="jnks-iot-error-tooltip"
                 [matTooltip]="'widget-action.mobile.action-type-required' | translate"
                 *ngIf="mobileActionFormGroup.get('type').hasError('required')
                        && mobileActionFormGroup.get('type').touched"
-                class="tb-error">
+                class="jnks-iot-error">
         warning
       </mat-icon>
     </mat-form-field>
   </div>
   <ng-container [formGroup]="mobileActionTypeFormGroup" [ngSwitch]="mobileActionFormGroup.get('type').value">
     <ng-template [ngSwitchCase]="mobileActionType.deviceProvision">
-      <tb-js-func
+      <jnks-iot-js-func
         formControlName="handleProvisionSuccessFunction"
         functionName="handleProvisionSuccess"
         withModules
@@ -28,12 +28,12 @@
         [globalVariables]="functionScopeVariables"
         [editorCompleter]="customActionEditorCompleter"
         hideBrackets
-      ></tb-js-func>
+      ></jnks-iot-js-func>
     </ng-template>
     <ng-template [ngSwitchCase]="mobileActionFormGroup.get('type').value === mobileActionType.mapDirection ||
                                  mobileActionFormGroup.get('type').value === mobileActionType.mapLocation ?
                                  mobileActionFormGroup.get('type').value : ''">
-      <tb-js-func
+      <jnks-iot-js-func
         formControlName="getLocationFunction"
         functionName="getLocation"
         withModules
@@ -42,10 +42,10 @@
         [editorCompleter]="customActionEditorCompleter"
         hideBrackets
         helpId="widget/action/mobile_get_location_fn"
-      ></tb-js-func>
+      ></jnks-iot-js-func>
     </ng-template>
     <ng-template [ngSwitchCase]="mobileActionType.makePhoneCall">
-      <tb-js-func
+      <jnks-iot-js-func
         formControlName="getPhoneNumberFunction"
         functionName="getPhoneNumber"
         withModules
@@ -54,13 +54,13 @@
         [editorCompleter]="customActionEditorCompleter"
         hideBrackets
         helpId="widget/action/mobile_get_phone_number_fn"
-      ></tb-js-func>
+      ></jnks-iot-js-func>
     </ng-template>
     <ng-template [ngSwitchCase]="mobileActionFormGroup.get('type').value === mobileActionType.takePhoto ||
                                  mobileActionFormGroup.get('type').value === mobileActionType.takePictureFromGallery ||
                                  mobileActionFormGroup.get('type').value === mobileActionType.takeScreenshot ?
                                  mobileActionFormGroup.get('type').value : ''">
-      <tb-js-func
+      <jnks-iot-js-func
         formControlName="processImageFunction"
         functionName="processImage"
         withModules
@@ -69,10 +69,10 @@
         [editorCompleter]="customActionEditorCompleter"
         hideBrackets
         helpId="widget/action/mobile_process_image_fn"
-      ></tb-js-func>
+      ></jnks-iot-js-func>
     </ng-template>
     <ng-template [ngSwitchCase]="mobileActionType.scanQrCode">
-      <tb-js-func
+      <jnks-iot-js-func
         formControlName="processQrCodeFunction"
         functionName="processQrCode"
         withModules
@@ -81,10 +81,10 @@
         [editorCompleter]="customActionEditorCompleter"
         hideBrackets
         helpId="widget/action/mobile_process_qr_code_fn"
-      ></tb-js-func>
+      ></jnks-iot-js-func>
     </ng-template>
     <ng-template [ngSwitchCase]="mobileActionType.getLocation">
-      <tb-js-func
+      <jnks-iot-js-func
         formControlName="processLocationFunction"
         functionName="processLocation"
         withModules
@@ -93,13 +93,13 @@
         [editorCompleter]="customActionEditorCompleter"
         hideBrackets
         helpId="widget/action/mobile_process_location_fn"
-      ></tb-js-func>
+      ></jnks-iot-js-func>
     </ng-template>
     <ng-template [ngSwitchCase]="mobileActionFormGroup.get('type').value === mobileActionType.mapDirection ||
                                  mobileActionFormGroup.get('type').value === mobileActionType.mapLocation ||
                                  mobileActionFormGroup.get('type').value === mobileActionType.makePhoneCall ?
                                  mobileActionFormGroup.get('type').value : ''">
-      <tb-js-func
+      <jnks-iot-js-func
         formControlName="processLaunchResultFunction"
         functionName="processLaunchResult"
         withModules
@@ -108,10 +108,10 @@
         [editorCompleter]="customActionEditorCompleter"
         hideBrackets
         helpId="widget/action/mobile_process_launch_result_fn"
-      ></tb-js-func>
+      ></jnks-iot-js-func>
     </ng-template>
   </ng-container>
-  <tb-js-func *ngIf="mobileActionFormGroup.get('type').value"
+  <jnks-iot-js-func *ngIf="mobileActionFormGroup.get('type').value"
               formControlName="handleEmptyResultFunction"
               functionName="handleEmptyResult"
               withModules
@@ -120,8 +120,8 @@
               [editorCompleter]="customActionEditorCompleter"
               hideBrackets
               helpId="widget/action/mobile_handle_empty_result_fn"
-  ></tb-js-func>
-  <tb-js-func *ngIf="mobileActionFormGroup.get('type').value"
+  ></jnks-iot-js-func>
+  <jnks-iot-js-func *ngIf="mobileActionFormGroup.get('type').value"
               formControlName="handleErrorFunction"
               functionName="handleError"
               withModules
@@ -130,5 +130,5 @@
               [editorCompleter]="customActionEditorCompleter"
               hideBrackets
               helpId="widget/action/mobile_handle_error_fn"
-  ></tb-js-func>
+  ></jnks-iot-js-func>
 </div>

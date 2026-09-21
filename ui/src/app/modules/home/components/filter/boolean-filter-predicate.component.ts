@@ -19,7 +19,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-boolean-filter-predicate',
+  selector: 'jnks-iot-boolean-filter-predicate',
   templateUrl: './boolean-filter-predicate.component.html',
   styleUrls: ['./filter-predicate.scss'],
   providers: [

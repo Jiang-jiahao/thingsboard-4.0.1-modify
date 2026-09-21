@@ -5,7 +5,7 @@ import { PageLink } from '@shared/models/page/page-link';
 import { Timewindow } from '@shared/models/time/time.models';
 import { EntitiesDataSource } from '@home/models/datasource/entity-datasource';
 import { ElementRef, EventEmitter, Renderer2, ViewContainerRef } from '@angular/core';
-import { TbAnchorComponent } from '@shared/components/tb-anchor.component';
+import { JnksIotAnchorComponent } from '@shared/components/jnks-iot-anchor.component';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { EntityAction } from '@home/models/entity/entity-component.models';
@@ -43,7 +43,7 @@ export interface IEntitiesTableComponent {
   dataSource: EntitiesDataSource<BaseData<HasId>>;
   isDetailsOpen: boolean;
   detailsPanelOpened: EventEmitter<boolean>;
-  entityTableHeaderAnchor: TbAnchorComponent;
+  entityTableHeaderAnchor: JnksIotAnchorComponent;
   searchInputField: ElementRef;
   paginator: MatPaginator;
   sort: MatSort;

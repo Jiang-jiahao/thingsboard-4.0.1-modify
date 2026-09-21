@@ -1,10 +1,10 @@
 <div [formGroup]="tenantProfileConfigurationFormGroup">
   <div [ngSwitch]="type">
     <ng-template [ngSwitchCase]="tenantProfileType.DEFAULT">
-      <tb-default-tenant-profile-configuration
+      <jnks-iot-default-tenant-profile-configuration
         [required]="required"
         formControlName="configuration">
-      </tb-default-tenant-profile-configuration>
+      </jnks-iot-default-tenant-profile-configuration>
     </ng-template>
   </div>
 </div>

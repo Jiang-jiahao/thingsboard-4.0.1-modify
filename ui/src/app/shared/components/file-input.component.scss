@@ -4,29 +4,29 @@ $previewSize: 100px !default;
 
 :host {
 
-  .tb-container {
+  .jnks-iot-container {
     margin-top: 0;
     padding: 0 0 16px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    label.tb-title {
+    label.jnks-iot-title {
       display: flex;
       padding-bottom: 0;
     }
-    &.tb-button {
+    &.jnks-iot-button {
       padding: 0;
       gap: 0;
-      .tb-title {
+      .jnks-iot-title {
         display: none;
       }
-      .tb-file-select-container {
+      .jnks-iot-file-select-container {
         width: auto;
         height: auto;
-        .tb-file-clear-container {
+        .jnks-iot-file-clear-container {
           display: none;
         }
-        .tb-flow-drop {
+        .jnks-iot-flow-drop {
           height: auto;
           border: none;
           border-radius: 0;
@@ -41,33 +41,33 @@ $previewSize: 100px !default;
           }
         }
       }
-      .tb-file-info-container {
+      .jnks-iot-file-info-container {
         display: none;
       }
     }
   }
 
-  .tb-file-select-container {
+  .jnks-iot-file-select-container {
     position: relative;
     width: 100%;
     height: $previewSize;
   }
 
-  .tb-file-preview {
+  .jnks-iot-file-preview {
     width: auto;
     max-width: $previewSize;
     height: auto;
     max-height: $previewSize;
   }
 
-  .tb-file-clear-container {
+  .jnks-iot-file-clear-container {
     position: relative;
     float: right;
     width: 48px;
     height: $previewSize;
   }
 
-  .tb-file-clear-btn {
+  .jnks-iot-file-clear-btn {
     position: absolute !important;
     top: 50%;
     transform: translate(0%, -50%) !important;
@@ -77,7 +77,7 @@ $previewSize: 100px !default;
     display: none;
   }
 
-  .tb-flow-drop {
+  .jnks-iot-flow-drop {
     position: relative;
     height: $previewSize;
     overflow: hidden;
@@ -103,7 +103,7 @@ $previewSize: 100px !default;
     }
   }
 
-  .tb-file-info-container {
+  .jnks-iot-file-info-container {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -113,12 +113,12 @@ $previewSize: 100px !default;
     letter-spacing: normal;
   }
 
-  .tb-file-name {
+  .jnks-iot-file-name {
     color: rgba(0, 0, 0, 0.54);
     font-weight: 500;
   }
 
-  .tb-file-hint {
+  .jnks-iot-file-hint {
     color: rgba(0, 0, 0, 0.38);
     font-weight: 400;
   }
@@ -126,7 +126,7 @@ $previewSize: 100px !default;
 
 :host ::ng-deep {
   button.mat-mdc-button.mat-mdc-button-base.browse-file {
-    &:not(.tb-ignore-browse-file-button-style) {
+    &:not(.jnks-iot-ignore-browse-file-button-style) {
       padding: 0;
       min-width: 0;
       height: 24px;

@@ -1,8 +1,8 @@
-<div class="tb-container">
-  <label class="tb-title" *ngIf="label" [class]="{'tb-error': !disabled && (required && !safeImageUrls.length), 'tb-required': !disabled && required}">{{label}}</label>
+<div class="jnks-iot-container">
+  <label class="jnks-iot-title" *ngIf="label" [class]="{'jnks-iot-error': !disabled && (required && !safeImageUrls.length), 'jnks-iot-required': !disabled && required}">{{label}}</label>
   <ng-container #flow="flow"
                 [flowConfig]="{allowDuplicateUploads: true}">
-    <div class="tb-image-select-container" #flowDrop="flowDrop" flowDrop [flow]="flow.flowJs">
+    <div class="jnks-iot-image-select-container" #flowDrop="flowDrop" flowDrop [flow]="flow.flowJs">
       <div class="images-container flex flex-row gap-2" dndDropzone [dndHorizontal]="true" dndEffectAllowed="move"
            [dndDisableIf]="disabled" (dndDrop)="imageDrop($event)"
            [class.no-images]="!safeImageUrls.length">
@@ -17,13 +17,13 @@
              class="image-card flex flex-col">
           <span class="image-title">{{ 'image-input.images' | translate }} [{{ $index }}]</span>
           <div class="image-content-container flex flex-row">
-            <div dndHandle *ngIf="!disabled" class="tb-image-action-container tb-drag-handle">
+            <div dndHandle *ngIf="!disabled" class="jnks-iot-image-action-container jnks-iot-drag-handle">
               <mat-icon color="primary">drag_indicator</mat-icon>
             </div>
-            <div class="tb-image-preview-container">
-              <img class="tb-image-preview" [src]="safeImageUrl" />
+            <div class="jnks-iot-image-preview-container">
+              <img class="jnks-iot-image-preview" [src]="safeImageUrl" />
             </div>
-            <div *ngIf="!disabled" class="tb-image-action-container">
+            <div *ngIf="!disabled" class="jnks-iot-image-action-container">
               <button mat-icon-button color="primary"
                       type="button"
                       (click)="clearImage($index)"
@@ -36,7 +36,7 @@
         </div>
         <div class="no-images-prompt" *ngIf="!safeImageUrls.length">{{ 'image-input.no-images' | translate }}</div>
       </div>
-      <div *ngIf="!disabled" class="drop-area tb-flow-drop">
+      <div *ngIf="!disabled" class="drop-area jnks-iot-flow-drop">
         <div class="upload-label">
           <mat-icon>cloud_upload</mat-icon>
           <span translate>image-input.drop-images-or</span>
@@ -48,5 +48,5 @@
       </div>
     </div>
   </ng-container>
-  <div class="tb-hint" *ngIf="maxSizeByte && !disabled" translate [translateParams]="{ size: maxSizeByte | fileSize}">dashboard.maximum-upload-file-size</div>
+  <div class="jnks-iot-hint" *ngIf="maxSizeByte && !disabled" translate [translateParams]="{ size: maxSizeByte | fileSize}">dashboard.maximum-upload-file-size</div>
 </div>

@@ -176,7 +176,7 @@ export class AlarmTableConfig extends EntityTableConfig<AlarmInfo, TimePageLink>
     (AlarmDetailsDialogComponent,
       {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           alarmId: entity.id.id,
           alarm: entity,

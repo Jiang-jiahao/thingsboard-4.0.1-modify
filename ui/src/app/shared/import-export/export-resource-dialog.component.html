@@ -10,7 +10,7 @@
 <mat-progress-bar color="warn" mode="indeterminate" *ngIf="(isLoading$ | async) && !ignoreLoading">
 </mat-progress-bar>
 <div mat-dialog-content>
-  <fieldset [disabled]="(isLoading$ | async) && !ignoreLoading" class="tb-form-row no-border no-padding">
+  <fieldset [disabled]="(isLoading$ | async) && !ignoreLoading" class="jnks-iot-form-row no-border no-padding">
     <mat-slide-toggle [formControl]="includeResourcesFormControl" class="mat-slide">{{ prompt | translate }}</mat-slide-toggle>
   </fieldset>
 </div>

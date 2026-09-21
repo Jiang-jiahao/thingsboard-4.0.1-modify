@@ -5,7 +5,7 @@
   flex-direction: column;
   height: 100%;
 
-  .tb-title {
+  .jnks-iot-title {
     font-weight: 600;
     font-size: 20px;
     line-height: 24px;
@@ -20,7 +20,7 @@
       padding-bottom: 20px;
     }
   }
-  .tb-get-started-container {
+  .jnks-iot-get-started-container {
     flex: 1;
     overflow: auto;
   }
@@ -28,30 +28,30 @@
 
 :host ::ng-deep {
 
-  .tb-get-started .mat-vertical-stepper-header {
+  .jnks-iot-get-started .mat-vertical-stepper-header {
     border-radius: 12px;
     padding: 12px;
     height: auto;
   }
 
-  .tb-get-started .mat-vertical-stepper-header[aria-selected="true"] {
+  .jnks-iot-get-started .mat-vertical-stepper-header[aria-selected="true"] {
     background: rgba(0, 0, 0, 0.03);
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
   }
 
-  .tb-get-started .mat-vertical-content-container {
+  .jnks-iot-get-started .mat-vertical-content-container {
     margin-left: 0;
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
     background: rgba(0, 0, 0, 0.03);
   }
 
-  .tb-get-started .mat-stepper-vertical-line::before {
+  .jnks-iot-get-started .mat-stepper-vertical-line::before {
     content: none;
   }
 
-  .tb-get-started .mat-step-label {
+  .jnks-iot-get-started .mat-step-label {
     width: 100%;
     white-space: inherit;
     font-weight: 400;
@@ -60,14 +60,14 @@
     color: rgba(0, 0, 0, 0.76);
   }
 
-  .tb-get-started .mat-step-label.mat-step-label-selected {
+  .jnks-iot-get-started .mat-step-label.mat-step-label-selected {
     font-weight: 500;
     font-size: 16px;
     line-height: 24px;
     color: rgba(0, 0, 0, 0.87);
   }
 
-  .tb-get-started .mat-vertical-content {
+  .jnks-iot-get-started .mat-vertical-content {
     p, li {
       font-style: normal;
       font-weight: 400;
@@ -85,7 +85,7 @@
     ul {
       padding-inline-start: 20px;
     }
-    .tb-bordered-content {
+    .jnks-iot-bordered-content {
       display: flex;
       flex-direction: column;
       align-items: stretch;
@@ -97,8 +97,8 @@
         margin-bottom: 8px;
       }
     }
-    .tb-markdown-view {
-      .tb-getting-started-code {
+    .jnks-iot-markdown-view {
+      .jnks-iot-getting-started-code {
         .code-wrapper {
           padding: 0;
           pre[class*=language-] {
@@ -163,28 +163,28 @@
       }
     }
     @media #{$mat-md-lg} {
-      .tb-bordered-content {
+      .jnks-iot-bordered-content {
         padding: 4px;
       }
     }
   }
 
   @media #{$mat-md-lg} {
-    .tb-get-started .mat-step-label {
+    .jnks-iot-get-started .mat-step-label {
       font-size: 12px;
       line-height: 16px;
     }
-    .tb-get-started .mat-step-label.mat-step-label-selected {
+    .jnks-iot-get-started .mat-step-label.mat-step-label-selected {
       font-size: 13px;
       line-height: 16px;
     }
 
-    .tb-get-started .mdc-button {
+    .jnks-iot-get-started .mdc-button {
       font-size: 12px;
       line-height: 16px;
     }
 
-    .tb-get-started .mat-vertical-content {
+    .jnks-iot-get-started .mat-vertical-content {
       p, li {
         font-size: 12px;
         line-height: 16px;
@@ -192,7 +192,7 @@
       }
     }
 
-    .tb-get-started .mat-vertical-content {
+    .jnks-iot-get-started .mat-vertical-content {
       padding: 0 16px 16px 16px;
     }
   }

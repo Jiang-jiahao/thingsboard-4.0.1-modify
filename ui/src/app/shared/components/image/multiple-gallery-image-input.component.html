@@ -1,5 +1,5 @@
-<div class="tb-container">
-  <label class="tb-title" *ngIf="label" [class]="{'tb-error': !disabled && (required && !imageUrls.length), 'tb-required': !disabled && required}">{{label}}</label>
+<div class="jnks-iot-container">
+  <label class="jnks-iot-title" *ngIf="label" [class]="{'jnks-iot-error': !disabled && (required && !imageUrls.length), 'jnks-iot-required': !disabled && required}">{{label}}</label>
   <div class="images-container flex flex-row gap-2" dndDropzone [dndHorizontal]="true" dndEffectAllowed="move"
        [class.no-images]="!imageUrls.length"
        [dndDisableIf]="disabled" (dndDrop)="imageDrop($event)">
@@ -14,13 +14,13 @@
          class="image-card flex flex-col">
       <span class="image-title">{{ 'image-input.images' | translate }} [{{ $index }}]</span>
       <div class="image-content-container flex flex-row">
-        <div dndHandle *ngIf="!disabled" class="tb-image-action-container tb-drag-handle">
+        <div dndHandle *ngIf="!disabled" class="jnks-iot-image-action-container jnks-iot-drag-handle">
           <mat-icon color="primary">drag_indicator</mat-icon>
         </div>
-        <div class="tb-image-preview-container">
-          <img class="tb-image-preview" [src]="imageUrl | image: {preview: true} | async" />
+        <div class="jnks-iot-image-preview-container">
+          <img class="jnks-iot-image-preview" [src]="imageUrl | image: {preview: true} | async" />
         </div>
-        <div *ngIf="!disabled" class="tb-image-action-container">
+        <div *ngIf="!disabled" class="jnks-iot-image-action-container">
           <button mat-icon-button color="primary"
                   type="button"
                   (click)="clearImage($index)"
@@ -33,20 +33,20 @@
     </div>
     <div class="no-images-prompt" *ngIf="!imageUrls.length">{{ 'image-input.no-images' | translate }}</div>
   </div>
-  <div *ngIf="!disabled" class="tb-image-select-container">
-    <div class="tb-image-container" *ngIf="linkType === ImageLinkType.external">
-      <img *ngIf="externalLinkControl.value; else noImage" class="tb-image-preview" [src]="externalLinkControl.value | image | async">
+  <div *ngIf="!disabled" class="jnks-iot-image-select-container">
+    <div class="jnks-iot-image-container" *ngIf="linkType === ImageLinkType.external">
+      <img *ngIf="externalLinkControl.value; else noImage" class="jnks-iot-image-preview" [src]="externalLinkControl.value | image | async">
     </div>
-    <div *ngIf="linkType === ImageLinkType.external" class="tb-image-info-container">
-      <div class="tb-external-image-container">
-        <div class="tb-external-link-label">
+    <div *ngIf="linkType === ImageLinkType.external" class="jnks-iot-image-info-container">
+      <div class="jnks-iot-external-image-container">
+        <div class="jnks-iot-external-link-label">
           {{ 'image.image-link' | translate }}
         </div>
-        <div class="tb-external-link-input-container">
-          <mat-form-field class="tb-inline-field" appearance="outline" subscriptSizing="dynamic">
+        <div class="jnks-iot-external-link-input-container">
+          <mat-form-field class="jnks-iot-inline-field" appearance="outline" subscriptSizing="dynamic">
             <input matInput [formControl]="externalLinkControl" placeholder="{{ 'widget-config.set' | translate }}">
           </mat-form-field>
-          <button class="tb-image-decline-btn"
+          <button class="jnks-iot-image-decline-btn"
                   type="button"
                   mat-icon-button
                   matTooltip="{{ 'action.decline' | translate }}"
@@ -54,7 +54,7 @@
                   (click)="declineLink($event)">
             <mat-icon>close</mat-icon>
           </button>
-          <button class="tb-image-apply-btn"
+          <button class="jnks-iot-image-apply-btn"
                   type="button"
                   [disabled]="!externalLinkControl.value"
                   color="primary"
@@ -67,21 +67,21 @@
         </div>
       </div>
     </div>
-    <div *ngIf="linkType === ImageLinkType.none" class="tb-image-select-buttons-container">
+    <div *ngIf="linkType === ImageLinkType.none" class="jnks-iot-image-select-buttons-container">
       <button mat-stroked-button
               type="button"
               color="primary"
-              class="tb-image-select-button"
+              class="jnks-iot-image-select-button"
               (click)="toggleGallery($event)">
-        <tb-icon matButtonIcon>filter</tb-icon>
+        <jnks-iot-icon matButtonIcon>filter</jnks-iot-icon>
         <span translate>image.browse-from-gallery</span>
       </button>
       <button mat-stroked-button
               type="button"
               color="primary"
-              class="tb-image-select-button"
+              class="jnks-iot-image-select-button"
               (click)="setLink($event)">
-        <tb-icon matButtonIcon>link</tb-icon>
+        <jnks-iot-icon matButtonIcon>link</jnks-iot-icon>
         <span translate>image.set-link</span>
       </button>
     </div>
@@ -89,5 +89,5 @@
 </div>
 
 <ng-template #noImage>
-  <div class="tb-no-image">{{ 'image.no-image-selected' | translate }}</div>
+  <div class="jnks-iot-no-image">{{ 'image.no-image-selected' | translate }}</div>
 </ng-template>

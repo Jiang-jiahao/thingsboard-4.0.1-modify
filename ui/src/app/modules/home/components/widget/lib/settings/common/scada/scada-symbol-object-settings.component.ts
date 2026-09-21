@@ -40,7 +40,7 @@ import { map } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-scada-symbol-object-settings',
+  selector: 'jnks-iot-scada-symbol-object-settings',
   templateUrl: './scada-symbol-object-settings.component.html',
   styleUrls: ['./scada-symbol-object-settings.component.scss', './../../widget-settings.scss'],
   providers: [

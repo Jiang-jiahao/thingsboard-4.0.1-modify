@@ -9,10 +9,10 @@
   <form [formGroup]="createVersionFormGroup" style="padding-top: 16px;">
     <fieldset [disabled]="isLoading$ | async">
       <div class="flex flex-1 flex-col">
-        <tb-branch-autocomplete
+        <jnks-iot-branch-autocomplete
           required
           formControlName="branch">
-        </tb-branch-autocomplete>
+        </jnks-iot-branch-autocomplete>
         <mat-form-field class="mat-block flex-1">
           <mat-label translate>version-control.version-name</mat-label>
           <input required matInput formControlName="versionName">

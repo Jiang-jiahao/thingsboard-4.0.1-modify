@@ -1,16 +1,16 @@
-<div class="tb-scada-symbol-editor-shape" [class.!hidden]="editorMode !== 'svg'" #scadaSymbolShape></div>
-<div class="tb-scada-symbol-editor-tooltips" [class.!hidden]="editorMode !== 'svg'" #tooltipsContainer>
-  <tb-anchor #tooltipsContainerComponent></tb-anchor>
+<div class="jnks-iot-scada-symbol-editor-shape" [class.!hidden]="editorMode !== 'svg'" #scadaSymbolShape></div>
+<div class="jnks-iot-scada-symbol-editor-tooltips" [class.!hidden]="editorMode !== 'svg'" #tooltipsContainer>
+  <jnks-iot-anchor #tooltipsContainerComponent></jnks-iot-anchor>
 </div>
-<div class="tb-scada-symbol-editor-svg-xml" [class.!hidden]="editorMode !== 'xml'">
-  <tb-svg-xml [formControl]="svgContentFormControl"
+<div class="jnks-iot-scada-symbol-editor-svg-xml" [class.!hidden]="editorMode !== 'xml'">
+  <jnks-iot-svg-xml [formControl]="svgContentFormControl"
               fillHeight
               noLabel>
-  </tb-svg-xml>
+  </jnks-iot-svg-xml>
 </div>
-<div class="tb-scada-symbol-editor-buttons">
-  <div class="tb-scada-symbol-editor-view-buttons">
-    <div class="tb-scada-symbol-editor-zoom-buttons tb-primary-fill" [class.!hidden]="editorMode !== 'svg'">
+<div class="jnks-iot-scada-symbol-editor-buttons">
+  <div class="jnks-iot-scada-symbol-editor-view-buttons">
+    <div class="jnks-iot-scada-symbol-editor-zoom-buttons jnks-iot-primary-fill" [class.!hidden]="editorMode !== 'svg'">
       <button mat-icon-button
               [disabled]="zoomInDisabled"
               (click)="zoomIn()"
@@ -26,7 +26,7 @@
         <mat-icon>remove</mat-icon>
       </button>
     </div>
-    <div *ngIf="displayShowHidden" [class.!hidden]="editorMode !== 'svg'" class="tb-primary-fill">
+    <div *ngIf="displayShowHidden" [class.!hidden]="editorMode !== 'svg'" class="jnks-iot-primary-fill">
       <button mat-icon-button
               (click)="toggleShowHidden()"
               matTooltip="{{ (showHiddenElements ? 'scada.hide-hidden-elements' : 'scada.show-hidden-elements') | translate }}"
@@ -35,8 +35,8 @@
       </button>
     </div>
   </div>
-  <div class="tb-scada-symbol-editor-right-buttons">
-    <div class="tb-primary-fill">
+  <div class="jnks-iot-scada-symbol-editor-right-buttons">
+    <div class="jnks-iot-primary-fill">
       <button mat-icon-button
               (click)="updateScadaSymbol.emit()"
               matTooltip="{{ 'scada.update-symbol' | translate }}"
@@ -44,7 +44,7 @@
         <mat-icon>file_upload</mat-icon>
       </button>
     </div>
-    <div class="tb-primary-fill">
+    <div class="jnks-iot-primary-fill">
       <button mat-icon-button
               (click)="downloadScadaSymbol.emit()"
               matTooltip="{{ 'scada.download-symbol' | translate }}"
@@ -52,14 +52,14 @@
         <mat-icon>download</mat-icon>
       </button>
     </div>
-    <tb-toggle-select appearance="fill"
+    <jnks-iot-toggle-select appearance="fill"
                       [disabled]="!readonly && !svgContentFormControl.valid"
                       fillHeight
                       extraPadding
                       primaryBackground
                       [(ngModel)]="editorMode">
-      <tb-toggle-option value="svg">{{ 'scada.mode-svg' | translate }}</tb-toggle-option>
-      <tb-toggle-option value="xml">{{ 'scada.mode-xml' | translate }}</tb-toggle-option>
-    </tb-toggle-select>
+      <jnks-iot-toggle-option value="svg">{{ 'scada.mode-svg' | translate }}</jnks-iot-toggle-option>
+      <jnks-iot-toggle-option value="xml">{{ 'scada.mode-xml' | translate }}</jnks-iot-toggle-option>
+    </jnks-iot-toggle-select>
   </div>
 </div>

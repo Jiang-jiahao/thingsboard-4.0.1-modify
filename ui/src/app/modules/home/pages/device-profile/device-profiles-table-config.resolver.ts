@@ -132,7 +132,7 @@ export class DeviceProfilesTableConfigResolver  {
     this.dialog.open<AddDeviceProfileDialogComponent, AddDeviceProfileDialogData,
       DeviceProfile>(AddDeviceProfileDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog', 'tb-add-device-profile-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog', 'jnks-iot-add-device-profile-dialog'],
       width: '900px',
       maxWidth: '95vw',
       data: {

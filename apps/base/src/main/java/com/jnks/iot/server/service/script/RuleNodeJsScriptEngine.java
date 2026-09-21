@@ -10,8 +10,8 @@ import com.jnks.iot.script.api.RuleNodeScriptFactory;
 import com.jnks.iot.script.api.js.JsInvokeService;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.common.data.id.TenantId;
-import com.jnks.iot.server.common.msg.TbMsg;
-import com.jnks.iot.server.common.msg.TbMsgMetaData;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
 
 import javax.script.ScriptException;
 import java.util.ArrayList;
@@ -30,16 +30,16 @@ public class RuleNodeJsScriptEngine extends RuleNodeScriptEngine<JsInvokeService
     }
 
     @Override
-    public ListenableFuture<JsonNode> executeJsonAsync(TbMsg msg) {
+    public ListenableFuture<JsonNode> executeJsonAsync(JnksIotMsg msg) {
         return executeScriptAsync(msg);
     }
 
     @Override
-    protected ListenableFuture<List<TbMsg>> executeUpdateTransform(TbMsg msg, JsonNode json) {
+    protected ListenableFuture<List<JnksIotMsg>> executeUpdateTransform(JnksIotMsg msg, JsonNode json) {
         if (json.isObject()) {
             return Futures.immediateFuture(Collections.singletonList(unbindMsg(json, msg)));
         } else if (json.isArray()) {
-            List<TbMsg> res = new ArrayList<>(json.size());
+            List<JnksIotMsg> res = new ArrayList<>(json.size());
             json.forEach(jsonObject -> res.add(unbindMsg(jsonObject, msg)));
             return Futures.immediateFuture(res);
         }
@@ -48,7 +48,7 @@ public class RuleNodeJsScriptEngine extends RuleNodeScriptEngine<JsInvokeService
     }
 
     @Override
-    protected ListenableFuture<TbMsg> executeGenerateTransform(TbMsg prevMsg, JsonNode result) {
+    protected ListenableFuture<JnksIotMsg> executeGenerateTransform(JnksIotMsg prevMsg, JsonNode result) {
         if (!result.isObject()) {
             log.warn("Wrong result type: {}", result.getNodeType());
             Futures.immediateFailedFuture(new ScriptException("Wrong result type: " + result.getNodeType()));
@@ -101,7 +101,7 @@ public class RuleNodeJsScriptEngine extends RuleNodeScriptEngine<JsInvokeService
     }
 
     @Override
-    protected Object[] prepareArgs(TbMsg msg) {
+    protected Object[] prepareArgs(JnksIotMsg msg) {
         String[] args = new String[3];
         if (msg.getData() != null) {
             args[0] = msg.getData();
@@ -113,7 +113,7 @@ public class RuleNodeJsScriptEngine extends RuleNodeScriptEngine<JsInvokeService
         return args;
     }
 
-    private static TbMsg unbindMsg(JsonNode msgData, TbMsg msg) {
+    private static JnksIotMsg unbindMsg(JsonNode msgData, JnksIotMsg msg) {
         String data = null;
         Map<String, String> metadata = null;
         String messageType = null;
@@ -130,7 +130,7 @@ public class RuleNodeJsScriptEngine extends RuleNodeScriptEngine<JsInvokeService
             messageType = msgData.get(RuleNodeScriptFactory.MSG_TYPE).asText();
         }
         String newData = data != null ? data : msg.getData();
-        TbMsgMetaData newMetadata = metadata != null ? new TbMsgMetaData(metadata) : msg.getMetaData().copy();
+        JnksIotMsgMetaData newMetadata = metadata != null ? new JnksIotMsgMetaData(metadata) : msg.getMetaData().copy();
         String newMessageType = !StringUtils.isEmpty(messageType) ? messageType : msg.getType();
         return msg.transform()
                 .type(newMessageType)

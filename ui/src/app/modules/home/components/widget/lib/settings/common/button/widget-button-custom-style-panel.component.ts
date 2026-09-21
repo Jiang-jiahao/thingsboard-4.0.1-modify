@@ -10,7 +10,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -30,7 +30,7 @@ import { WidgetButtonComponent } from '@shared/components/button/widget-button.c
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-widget-button-custom-style-panel',
+  selector: 'jnks-iot-widget-button-custom-style-panel',
   templateUrl: './widget-button-custom-style-panel.component.html',
   providers: [],
   styleUrls: ['./widget-button-custom-style-panel.component.scss'],
@@ -56,17 +56,17 @@ export class WidgetButtonCustomStylePanelComponent extends PageComponent impleme
   @Input()
   customStyle: WidgetButtonCustomStyle;
 
-  private popoverValue: TbPopoverComponent<WidgetButtonCustomStylePanelComponent>;
+  private popoverValue: JnksIotPopoverComponent<WidgetButtonCustomStylePanelComponent>;
 
   @Input()
-  set popover(popover: TbPopoverComponent<WidgetButtonCustomStylePanelComponent>) {
+  set popover(popover: JnksIotPopoverComponent<WidgetButtonCustomStylePanelComponent>) {
     this.popoverValue = popover;
-    popover.tbAnimationDone.subscribe(() => {
+    popover.jnksIotAnimationDone.subscribe(() => {
       this.widgetButtonPreview?.validateSize();
     });
   }
 
-  get popover(): TbPopoverComponent<WidgetButtonCustomStylePanelComponent> {
+  get popover(): JnksIotPopoverComponent<WidgetButtonCustomStylePanelComponent> {
     return this.popoverValue;
   }
 

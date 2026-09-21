@@ -1,7 +1,7 @@
 @import "../../../../../../../scss/constants";
 
 :host {
-  .tb-card-header {
+  .jnks-iot-card-header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -12,14 +12,14 @@
     }
   }
 
-  .tb-contact-us {
+  .jnks-iot-contact-us {
     @media #{$mat-md-lg} {
       height: 24px;
       font-size: 12px;
     }
   }
 
-  .tb-version-info-container {
+  .jnks-iot-version-info-container {
     border: 1px solid rgba(0, 0, 0, 0.05);
     box-shadow: 0 5px 16px rgba(0, 0, 0, 0.04);
     border-radius: 10px;
@@ -41,7 +41,7 @@
     }
   }
 
-  .tb-version-link {
+  .jnks-iot-version-link {
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
@@ -73,7 +73,7 @@
     }
   }
 
-  .tb-version {
+  .jnks-iot-version {
     font-weight: 500;
     font-size: 18px;
     line-height: 24px;
@@ -85,7 +85,7 @@
     }
   }
 
-  .tb-upgrade {
+  .jnks-iot-upgrade {
     @media #{$mat-md-lg} {
       height: 24px;
       font-size: 12px;

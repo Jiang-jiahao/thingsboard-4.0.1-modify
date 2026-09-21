@@ -11,15 +11,15 @@
     <mat-card-content style="padding-top: 16px;">
       <form [formGroup]="homeSettings" (ngSubmit)="save()">
         <fieldset [disabled]="isLoading$ | async">
-          <section class="tb-default-dashboard flex flex-1 flex-col">
+          <section class="jnks-iot-default-dashboard flex flex-1 flex-col">
             <section class="flex flex-1 flex-col gt-sm:flex-row">
-              <tb-dashboard-autocomplete
+              <jnks-iot-dashboard-autocomplete
                 class="flex-1"
                 label="{{ 'dashboard.home-dashboard' | translate }}"
                 formControlName="dashboardId"
                 [dashboardsScope]="'tenant'"
                 [selectFirstDashboard]="false"
-              ></tb-dashboard-autocomplete>
+              ></jnks-iot-dashboard-autocomplete>
               <mat-checkbox class="flex-1" formControlName="hideDashboardToolbar">
                 {{ 'dashboard.home-dashboard-hide-toolbar' | translate }}
               </mat-checkbox>

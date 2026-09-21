@@ -8,7 +8,7 @@ public class AssetPageElements extends OtherPageElements {
         super(driver);
     }
 
-    private static final String ASSET_DETAILS_VIEW = "//tb-details-panel";
+    private static final String ASSET_DETAILS_VIEW = "//jnks-iot-details-panel";
     private static final String ASSET_DETAILS_ALARMS = ASSET_DETAILS_VIEW + "//span[text()='Alarms']";
 
     public WebElement assetDetailsView() {

@@ -80,7 +80,7 @@ interface PersistentTableWidgetActionDescriptor extends TableCellButtonActionDes
 }
 
 @Component({
-  selector: 'tb-persistent-table-widget',
+  selector: 'jnks-iot-persistent-table-widget',
   templateUrl: './persistent-table.component.html',
   styleUrls: ['./persistent-table.component.scss' , '../table-widget.scss']
 })
@@ -329,7 +329,7 @@ export class PersistentTableComponent extends PageComponent implements OnInit, O
       (PersistentDetailsDialogComponent,
         {
           disableClose: true,
-          panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+          panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
           data: {
             persistentRequest: persistentRpc,
             allowDelete: this.allowDelete
@@ -352,7 +352,7 @@ export class PersistentTableComponent extends PageComponent implements OnInit, O
     (PersistentAddDialogComponent,
       {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
       }).afterClosed().subscribe(
       (requestData) => {
         if (requestData) {

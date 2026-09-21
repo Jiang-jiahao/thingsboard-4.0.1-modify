@@ -1,4 +1,4 @@
-.tb-signal-strength-panel {
+.jnks-iot-signal-strength-panel {
   width: 100%;
   height: 100%;
   position: relative;
@@ -6,39 +6,39 @@
   flex-direction: column;
   gap: 16px;
   padding: 20px 24px 24px 24px;
-  &.tb-signal-strength-pointer {
+  &.jnks-iot-signal-strength-pointer {
     cursor: pointer;
   }
-  > div:not(.tb-signal-strength-overlay) {
+  > div:not(.jnks-iot-signal-strength-overlay) {
     z-index: 1;
   }
-  .tb-signal-strength-overlay {
+  .jnks-iot-signal-strength-overlay {
     position: absolute;
     top: 12px;
     left: 12px;
     bottom: 12px;
     right: 12px;
   }
-  .tb-signal-strength-title-panel {
+  .jnks-iot-signal-strength-title-panel {
     display: flex;
     flex-direction: column;
-    .tb-widget-title {
+    .jnks-iot-widget-title {
       padding: 0;
     }
   }
-  .tb-signal-strength-content {
+  .jnks-iot-signal-strength-content {
     flex: 1;
     min-width: 0;
     min-height: 0;
     position: relative;
-    .tb-signal-strength-shape {
+    .jnks-iot-signal-strength-shape {
       width: 100%;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .tb-signal-strength-tooltip-container {
+    .jnks-iot-signal-strength-tooltip-container {
       z-index: 10;
       position: absolute;
       inset: 0;
@@ -46,11 +46,11 @@
       align-items: center;
       justify-content: center;
       &:hover {
-        .tb-signal-strength-tooltip {
+        .jnks-iot-signal-strength-tooltip {
           opacity: 1;
         }
       }
-      .tb-signal-strength-tooltip {
+      .jnks-iot-signal-strength-tooltip {
         position: absolute;
         z-index: 20;
         pointer-events: none;
@@ -62,7 +62,7 @@
         padding: 12px;
         opacity: 0;
         transition: opacity .35s;
-        .tb-signal-strength-tooltip-row {
+        .jnks-iot-signal-strength-tooltip-row {
           display: flex;
           justify-content: space-between;
           align-items: center;

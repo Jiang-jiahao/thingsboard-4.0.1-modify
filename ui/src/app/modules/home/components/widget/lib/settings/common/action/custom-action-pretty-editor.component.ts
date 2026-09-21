@@ -16,7 +16,7 @@ import {
 } from '@home/components/widget/lib/settings/common/action/custom-action.models';
 
 @Component({
-  selector: 'tb-custom-action-pretty-editor',
+  selector: 'jnks-iot-custom-action-pretty-editor',
   templateUrl: './custom-action-pretty-editor.component.html',
   styleUrls: ['./custom-action-pretty-editor.component.scss'],
   providers: [

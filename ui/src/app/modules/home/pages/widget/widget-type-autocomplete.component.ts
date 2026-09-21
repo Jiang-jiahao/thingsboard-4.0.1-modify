@@ -21,7 +21,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { WidgetService } from '@core/http/widget.service';
 
 @Component({
-  selector: 'tb-widget-type-autocomplete',
+  selector: 'jnks-iot-widget-type-autocomplete',
   templateUrl: './widget-type-autocomplete.component.html',
   styleUrls: ['./widget-type-autocomplete.component.scss'],
   providers: [{

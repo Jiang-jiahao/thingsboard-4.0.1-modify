@@ -7,7 +7,7 @@ import { badgePositionTranslationsMap } from '@shared/models/mobile-app.models';
 import { mobileAppQrCodeWidgetDefaultSettings } from '@home/components/widget/lib/cards/mobile-app-qr-code-widget.models';
 
 @Component({
-  selector: 'tb-mobile-app-qr-code-widget-settings',
+  selector: 'jnks-iot-mobile-app-qr-code-widget-settings',
   templateUrl: './mobile-app-qr-code-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

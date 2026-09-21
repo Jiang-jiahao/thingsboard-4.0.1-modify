@@ -1,36 +1,36 @@
-<div [formGroup]="valueSourceFormGroup" class="tb-value-source tb-form-row no-padding no-border">
-  <div class="tb-source-field">
-    <mat-form-field class="tb-type-field" appearance="outline" subscriptSizing="dynamic">
+<div [formGroup]="valueSourceFormGroup" class="jnks-iot-value-source jnks-iot-form-row no-padding no-border">
+  <div class="jnks-iot-source-field">
+    <mat-form-field class="jnks-iot-type-field" appearance="outline" subscriptSizing="dynamic">
       <mat-select formControlName="type">
         <mat-option *ngFor="let type of valueSourceDataKeyTypes" [value]="type">
           {{ valueSourceDataKeyTypeTranslation.get(type) | translate }}
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <tb-entity-alias-input
-      class="tb-entity-alias-field"
+    <jnks-iot-entity-alias-input
+      class="jnks-iot-entity-alias-field"
       *ngIf="valueSourceFormGroup.get('type').value === valueSourceDataKeyType.entity"
       [aliasController]="aliasController"
       required
       formControlName="entityAlias">
-    </tb-entity-alias-input>
+    </jnks-iot-entity-alias-input>
   </div>
-  <div class="tb-key-value-field">
+  <div class="jnks-iot-key-value-field">
     <mat-form-field *ngIf="valueSourceFormGroup.get('type').value === valueSourceDataKeyType.constant"
-                    appearance="outline" class="tb-constant-field number" subscriptSizing="dynamic"
-                    [class.tb-suffix-absolute]="!valueSourceFormGroup.get('value').value">
+                    appearance="outline" class="jnks-iot-constant-field number" subscriptSizing="dynamic"
+                    [class.jnks-iot-suffix-absolute]="!valueSourceFormGroup.get('value').value">
       <input required matInput formControlName="value" type="number" placeholder="{{ 'widget-config.set' | translate }}">
       <mat-icon matSuffix
                 matTooltipPosition="above"
-                matTooltipClass="tb-error-tooltip"
+                matTooltipClass="jnks-iot-error-tooltip"
                 [matTooltip]="'widgets.value-source.value-required' | translate"
                 *ngIf="valueSourceFormGroup.get('value').hasError('required')
                        && valueSourceFormGroup.get('value').touched"
-                class="tb-error">
+                class="jnks-iot-error">
         warning
       </mat-icon>
     </mat-form-field>
-    <tb-data-key-input
+    <jnks-iot-data-key-input
       *ngIf="valueSourceFormGroup.get('type').value === valueSourceDataKeyType.latestKey"
       required
       requiredText="widgets.value-source.key-required"
@@ -43,8 +43,8 @@
       [callbacks]="dataKeyCallbacks"
       [editable]="false"
       [formControl]="latestKeyFormControl">
-    </tb-data-key-input>
-    <tb-data-key-input
+    </jnks-iot-data-key-input>
+    <jnks-iot-data-key-input
       *ngIf="valueSourceFormGroup.get('type').value === valueSourceDataKeyType.entity"
       required
       requiredText="widgets.value-source.entity-key-required"
@@ -55,6 +55,6 @@
       [callbacks]="dataKeyCallbacks"
       [editable]="false"
       [formControl]="entityKeyFormControl">
-    </tb-data-key-input>
+    </jnks-iot-data-key-input>
   </div>
 </div>

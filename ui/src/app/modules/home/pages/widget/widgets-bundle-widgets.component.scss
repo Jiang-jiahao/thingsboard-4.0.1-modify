@@ -7,14 +7,14 @@
 }
 
 :host ::ng-deep {
-  .tb-bundle-widgets-card {
+  .jnks-iot-bundle-widgets-card {
     .mat-mdc-card-header-text {
       flex: 1;
     }
   }
 }
 
-.tb-bundle-widgets-card {
+.jnks-iot-bundle-widgets-card {
   padding: 0;
   width: 100%;
   height: 100%;
@@ -49,7 +49,7 @@
     gap: 8px;
   }
 
-  .tb-add-widget-button {
+  .jnks-iot-add-widget-button {
     min-height: 56px;
     cursor: pointer;
     display: flex;
@@ -62,13 +62,13 @@
     border-radius: 10px;
   }
 
-  .tb-add-widget-button-panel {
+  .jnks-iot-add-widget-button-panel {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    .tb-add-widget-button-with-text {
+    .jnks-iot-add-widget-button-with-text {
       cursor: pointer;
       display: flex;
       padding: 24px 40px 24px 24px;
@@ -77,18 +77,18 @@
       gap: 8px;
       border: 2px dashed rgba(0, 0, 0, 0.12);
       border-radius: 10px;
-      .tb-add-widget-button-text {
+      .jnks-iot-add-widget-button-text {
         font-size: 16px;
         font-style: normal;
         font-weight: 500;
         line-height: 24px;
         letter-spacing: 0.25px;
-        color: $tb-primary-color;
+        color: $jnks-iot-primary-color;
       }
     }
   }
 
-  .tb-add-bundle-widget-form {
+  .jnks-iot-add-bundle-widget-form {
     display: flex;
     padding: 16px;
     flex-direction: column;
@@ -98,7 +98,7 @@
     box-shadow: 0 5px 16px 0 rgba(0, 0, 0, 0.04);
   }
 
-  .tb-add-bundle-widget-actions {
+  .jnks-iot-add-bundle-widget-actions {
     display: flex;
     justify-content: flex-end;
     align-items: flex-start;
@@ -111,7 +111,7 @@
   }
 }
 
-.tb-bundle-widgets-container {
+.jnks-iot-bundle-widgets-container {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -121,7 +121,7 @@
   padding-bottom: 8px;
 }
 
-.tb-bundle-widget-row {
+.jnks-iot-bundle-widget-row {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -131,33 +131,33 @@
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 5px 16px 0 rgba(0, 0, 0, 0.04);
-  .tb-bundle-widget-row-details {
+  .jnks-iot-bundle-widget-row-details {
     flex: 1;
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 12px;
-    .tb-bundle-widget-image-preview {
+    .jnks-iot-bundle-widget-image-preview {
       width: 64px;
       max-height: 52px;
       height: 100%;
       object-fit: contain;
       border-radius: 6px;
     }
-    .tb-bundle-widget-details {
+    .jnks-iot-bundle-widget-details {
       padding: 18px 0;
       flex: 1;
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-      .tb-bundle-widget-title {
+      .jnks-iot-bundle-widget-title {
         font-size: 14px;
         font-weight: 400;
         letter-spacing: 0.2px;
         color: rgba(0, 0, 0, 0.76);
       }
-      .tb-bundle-widget-deprecated {
+      .jnks-iot-bundle-widget-deprecated {
         font-size: 13px;
         font-weight: 400;
         color: rgba(0, 0, 0, 0.54);

@@ -24,9 +24,9 @@ import com.jnks.iot.server.common.data.DataConstants;
 import com.jnks.iot.server.common.transport.config.ssl.SslCredentials;
 import com.jnks.iot.common.util.AfterStartUp;
 import com.jnks.iot.server.transport.lwm2m.config.LwM2MTransportServerConfig;
-import com.jnks.iot.server.transport.lwm2m.secure.TbLwM2MAuthorizer;
-import com.jnks.iot.server.transport.lwm2m.secure.TbLwM2MDtlsCertificateVerifier;
-import com.jnks.iot.server.transport.lwm2m.server.store.TbSecurityStore;
+import com.jnks.iot.server.transport.lwm2m.secure.JnksIotLwM2MAuthorizer;
+import com.jnks.iot.server.transport.lwm2m.secure.JnksIotLwM2MDtlsCertificateVerifier;
+import com.jnks.iot.server.transport.lwm2m.server.store.JnksIotSecurityStore;
 import com.jnks.iot.server.transport.lwm2m.server.uplink.LwM2mUplinkMsgHandler;
 
 import java.net.InetSocketAddress;
@@ -60,9 +60,9 @@ public class DefaultLwM2mTransportService implements LwM2MTransportService {
     private final OtaPackageDataCache otaPackageDataCache;
     private final LwM2mUplinkMsgHandler handler;
     private final RegistrationStore registrationStore;
-    private final TbSecurityStore securityStore;
-    private final TbLwM2MDtlsCertificateVerifier certificateVerifier;
-    private final TbLwM2MAuthorizer authorizer;
+    private final JnksIotSecurityStore securityStore;
+    private final JnksIotLwM2MDtlsCertificateVerifier certificateVerifier;
+    private final JnksIotLwM2MAuthorizer authorizer;
     private final LwM2mVersionedModelProvider modelProvider;
 
     private LeshanServer server;

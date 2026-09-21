@@ -22,7 +22,7 @@ import {
 } from '@home/components/widget/lib/button/action-button-widget.models';
 
 @Component({
-  selector: 'tb-action-button-basic-config',
+  selector: 'jnks-iot-action-button-basic-config',
   templateUrl: './action-button-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

@@ -2,15 +2,15 @@
 
 $edit-toolbar-height: 40px !default;
 
-tb-widget-editor {
+jnks-iot-widget-editor {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 
-.tb-editor {
-  .tb-split {
+.jnks-iot-editor {
+  .jnks-iot-split {
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: auto;
@@ -40,7 +40,7 @@ tb-widget-editor {
     font-size: 14px !important;
   }
 
-  .tb-content {
+  .jnks-iot-content {
     border: 1px solid #c0c0c0;
   }
 
@@ -61,16 +61,16 @@ tb-widget-editor {
     }
   }
 
-  .tb-split.tb-split-horizontal,
+  .jnks-iot-split.jnks-iot-split-horizontal,
   .gutter.gutter-horizontal {
     float: left;
     height: 100%;
   }
 
-  .tb-split.tb-split-vertical {
+  .jnks-iot-split.jnks-iot-split-vertical {
     display: flex;
 
-    .tb-split.tb-content {
+    .jnks-iot-split.jnks-iot-content {
       height: 100%;
     }
   }
@@ -88,7 +88,7 @@ tb-widget-editor {
 
 }
 
-.tb-split-vertical {
+.jnks-iot-split-vertical {
   .mat-mdc-tab-group {
     .mat-mdc-tab-body-wrapper {
       height: calc(100% - 49px);
@@ -103,7 +103,7 @@ tb-widget-editor {
   }
 }
 
-div.tb-editor-area-title-panel {
+div.jnks-iot-editor-area-title-panel {
   position: absolute;
   top: 5px;
   right: 20px;
@@ -124,7 +124,7 @@ div.tb-editor-area-title-panel {
     border-radius: 5px;
   }
 
-  button.mat-mdc-button-base, button.mat-mdc-button-base.tb-mat-32 {
+  button.mat-mdc-button-base, button.mat-mdc-button-base.jnks-iot-mat-32 {
     align-items: center;
     vertical-align: middle;
     min-width: 32px;
@@ -133,19 +133,19 @@ div.tb-editor-area-title-panel {
     font-size: .8rem;
     line-height: 15px;
     background: rgba(220, 220, 220, .35);
-    &:not(.tb-help-popup-button) {
+    &:not(.jnks-iot-help-popup-button) {
       color: #7b7b7b;
     }
   }
   button.mat-mdc-button-base:not(.mat-mdc-icon-button) {
     height: 23px;
   }
-  .tb-help-popup-button-loading {
+  .jnks-iot-help-popup-button-loading {
     background: #f3f3f3;
   }
 }
 
-.tb-resize-container {
+.jnks-iot-resize-container {
   position: relative;
   width: 100%;
   height: 100%;
@@ -156,7 +156,7 @@ div.tb-editor-area-title-panel {
   }
 }
 
-mat-toolbar.tb-edit-toolbar {
+mat-toolbar.jnks-iot-edit-toolbar {
 
   min-height: $edit-toolbar-height !important;
   max-height: $edit-toolbar-height !important;
@@ -183,13 +183,13 @@ mat-toolbar.tb-edit-toolbar {
       font-weight: 400;
       letter-spacing: .005em;
     }
-    &.tb-widget-title {
+    &.jnks-iot-widget-title {
       min-width: 250px;
     }
   }
 
   @media #{$mat-lt-lg} {
-    .mat-mdc-form-field.tb-widget-title {
+    .mat-mdc-form-field.jnks-iot-widget-title {
       min-width: 0;
     }
   }

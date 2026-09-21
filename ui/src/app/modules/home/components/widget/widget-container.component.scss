@@ -1,11 +1,11 @@
 @import '../scss/constants';
 
-.tb-widget-container {
+.jnks-iot-widget-container {
   position: absolute;
   inset: 0;
 }
 
-.tb-widget {
+.jnks-iot-widget {
   position: absolute;
   inset: 0;
   margin: 0;
@@ -14,25 +14,25 @@
 
   transition: all .2s ease-in-out;
 
-  &.tb-overflow-visible {
+  &.jnks-iot-overflow-visible {
     overflow: visible;
-    .tb-widget {
+    .jnks-iot-widget {
       overflow: visible;
     }
   }
 }
 
-div.tb-widget {
+div.jnks-iot-widget {
   display: flex;
   flex-direction: column;
-  .tb-widget-header {
+  .jnks-iot-widget-header {
     display: flex;
     flex-direction: row;
     place-content: flex-start space-between;
     align-items: flex-start;
   }
 
-  .tb-widget-title {
+  .jnks-iot-widget-title {
     display: flex;
     flex-direction: column;
     place-content: flex-start center;
@@ -42,7 +42,7 @@ div.tb-widget {
     padding-left: 5px;
     overflow: hidden;
 
-    tb-timewindow {
+    jnks-iot-timewindow {
       font-size: 14px;
       opacity: .85;
     }
@@ -66,7 +66,7 @@ div.tb-widget {
     }
   }
 
-  .tb-widget-actions {
+  .jnks-iot-widget-actions {
     display: flex;
     flex-direction: row;
     place-content: center flex-start;
@@ -111,45 +111,45 @@ div.tb-widget {
     }
   }
 
-  .tb-widget-title, .tb-widget-actions {
+  .jnks-iot-widget-title, .jnks-iot-widget-actions {
     .mat-icon {
       vertical-align: bottom;
     }
   }
 
-  .tb-widget-content {
+  .jnks-iot-widget-content {
     flex: 1;
     position: relative;
-    &.tb-no-interaction {
+    &.jnks-iot-no-interaction {
       pointer-events: none;
     }
   }
 
-  &.tb-highlighted {
+  &.jnks-iot-highlighted {
     border: 1px solid #039be5;
     box-shadow: 0 0 20px #039be5;
   }
 
-  &.tb-not-highlighted {
+  &.jnks-iot-not-highlighted {
     opacity: .5;
   }
 
-  &.tb-hover {
-    &:not(.tb-highlighted) {
+  &.jnks-iot-hover {
+    &:not(.jnks-iot-highlighted) {
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     }
   }
 
-  &.tb-edit {
+  &.jnks-iot-edit {
     cursor: pointer;
   }
 }
 
 gridster-item:hover {
-  .tb-widget-container {
-    div.tb-widget {
-      &.tb-edit {
-        &:not(.tb-highlighted) {
+  .jnks-iot-widget-container {
+    div.jnks-iot-widget {
+      &.jnks-iot-edit {
+        &:not(.jnks-iot-highlighted) {
           box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
       }
@@ -157,7 +157,7 @@ gridster-item:hover {
   }
 }
 
-.tooltipster-sidetip.tb-widget-edit-actions-tooltip {
+.tooltipster-sidetip.jnks-iot-widget-edit-actions-tooltip {
   position: absolute !important;
   .tooltipster-box {
     user-select: none;
@@ -170,26 +170,26 @@ gridster-item:hover {
       line-height: 12px;
       font-weight: 500;
       color: rgba(0, 0, 0, 0.76);
-      .tb-widget-action-container {
+      .jnks-iot-widget-action-container {
         display: flex;
         flex-direction: column;
         gap: 6px;
 
-        .tb-widget-actions-panel {
+        .jnks-iot-widget-actions-panel {
           display: flex;
           flex-direction: row;
           place-content: center space-between;
           align-items: center;
           gap: 8px;
         }
-        .tb-widget-reference-panel {
+        .jnks-iot-widget-reference-panel {
           display: flex;
           flex-direction: row;
           place-content: center space-between;
           align-items: center;
           gap: 8px;
           font-weight: normal;
-          color: $tb-primary-color;
+          color: $jnks-iot-primary-color;
           font-size: 11px;
           padding: 4px 4px 4px 6px;
           border-radius: 2px;

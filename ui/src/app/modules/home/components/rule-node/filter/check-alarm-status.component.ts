@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@app/shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-filter-node-check-alarm-status-config',
+  selector: 'jnks-iot-filter-node-check-alarm-status-config',
   templateUrl: './check-alarm-status.component.html',
   styleUrls: []
 })

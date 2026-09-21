@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import com.jnks.iot.common.util.JnksIotExecutors;
-import com.jnks.iot.server.cache.TbTransactionalCache;
+import com.jnks.iot.server.cache.JnksIotTransactionalCache;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.common.data.audit.ActionType;
 import com.jnks.iot.server.common.data.id.EntityId;
@@ -62,7 +62,7 @@ public class BaseRelationService implements RelationService {
 
     private final RelationDao relationDao;
     private final EntityService entityService;
-    private final TbTransactionalCache<RelationCacheKey, RelationCacheValue> cache;
+    private final JnksIotTransactionalCache<RelationCacheKey, RelationCacheValue> cache;
     private final ApplicationEventPublisher eventPublisher;
     private final JpaExecutorService executor;
     private final JpaRelationQueryExecutorService relationsExecutor;
@@ -72,7 +72,7 @@ public class BaseRelationService implements RelationService {
     private Integer relationQueryTimeout;
 
     public BaseRelationService(RelationDao relationDao, @Lazy EntityService entityService,
-                               TbTransactionalCache<RelationCacheKey, RelationCacheValue> cache,
+                               JnksIotTransactionalCache<RelationCacheKey, RelationCacheValue> cache,
                                ApplicationEventPublisher eventPublisher, JpaExecutorService executor,
                                JpaRelationQueryExecutorService relationsExecutor) {
         this.relationDao = relationDao;

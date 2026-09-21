@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-rpc-terminal-widget-settings',
+  selector: 'jnks-iot-rpc-terminal-widget-settings',
   templateUrl: './rpc-terminal-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

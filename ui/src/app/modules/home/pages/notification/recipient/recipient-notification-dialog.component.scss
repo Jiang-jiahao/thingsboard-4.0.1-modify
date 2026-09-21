@@ -1,7 +1,7 @@
 @import "../../../../../../scss/constants";
 
 :host {
-  form.tb-dialog-container {
+  form.jnks-iot-dialog-container {
     min-width: 600px;
     max-height: 100vh;
     color: rgba(0, 0, 0, 0.87);
@@ -11,12 +11,12 @@
     height: 85%;
   }
 
-  .tb-title {
+  .jnks-iot-title {
     display: block;
     padding-bottom: 6px;
   }
 
-  .tb-notification-tenant-group {
+  .jnks-iot-notification-tenant-group {
     width: 280px;
     margin-bottom: 16px;
   }

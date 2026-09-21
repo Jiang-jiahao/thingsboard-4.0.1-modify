@@ -1,9 +1,9 @@
 <section [formGroup]="unassignCustomerConfigForm" class="flex flex-col">
-  <div class="tb-form-panel no-padding no-border">
+  <div class="jnks-iot-form-panel no-padding no-border">
 
-    <div class="tb-form-panel stroked" [class.no-padding-bottom]="unassignCustomerConfigForm.get('unassignFromCustomer').value">
-      <div tb-hint-tooltip-icon="{{ 'rule-node-config.unassign-from-customer-tooltip' | translate }}"
-           class="tb-form-row no-border no-padding">
+    <div class="jnks-iot-form-panel stroked" [class.no-padding-bottom]="unassignCustomerConfigForm.get('unassignFromCustomer').value">
+      <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.unassign-from-customer-tooltip' | translate }}"
+           class="jnks-iot-form-row no-border no-padding">
         <mat-slide-toggle class="mat-slide" formControlName="unassignFromCustomer">
           {{ 'rule-node-config.unassign-from-customer' | translate }}
         </mat-slide-toggle>

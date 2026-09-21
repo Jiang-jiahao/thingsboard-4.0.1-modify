@@ -1,4 +1,4 @@
-<section class="tb-widget-settings flex flex-col" [formGroup]="persistentTableWidgetSettingsForm">
+<section class="jnks-iot-widget-settings flex flex-col" [formGroup]="persistentTableWidgetSettingsForm">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.persistent-table.general-settings</legend>
     <section class="flex flex-col gt-xs:flex-row gt-xs:gap-2">
@@ -26,50 +26,50 @@
       <mat-slide-toggle formControlName="allowDelete">
         {{ 'widgets.persistent-table.allow-delete-request' | translate }}
       </mat-slide-toggle>
-      <div class="tb-form-panel stroked">
-        <div class="tb-form-panel-title" translate>widgets.table.pagination</div>
+      <div class="jnks-iot-form-panel stroked">
+        <div class="jnks-iot-form-panel-title" translate>widgets.table.pagination</div>
         <mat-slide-toggle class="mat-slide" formControlName="displayPagination">
           {{ 'widgets.table.display-pagination' | translate }}
         </mat-slide-toggle>
-        <div class="tb-form-row space-between column-xs">
+        <div class="jnks-iot-form-row space-between column-xs">
           <div class="fixed-title-width !min-w-30">{{ 'widgets.table.page-step-settings' | translate }}</div>
           <div class="flex flex-row items-center justify-start gap-2">
-            <div class="tb-small-label" translate>widgets.table.page-step-increment</div>
+            <div class="jnks-iot-small-label" translate>widgets.table.page-step-increment</div>
             <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
               <input matInput formControlName="pageStepIncrement" type="number" min="1" step="1" required
                      placeholder="{{ 'widget-config.set' | translate }}">
               <mat-icon matSuffix
                         matTooltipPosition="above"
-                        matTooltipClass="tb-error-tooltip"
+                        matTooltipClass="jnks-iot-error-tooltip"
                         [matTooltip]="(persistentTableWidgetSettingsForm.get('pageStepIncrement').hasError('required')
                                      ? 'widgets.value-source.value-required'
                                      : 'widgets.table.page-step-increment-format-message') | translate"
                         *ngIf="persistentTableWidgetSettingsForm.get('pageStepIncrement').invalid
                         && persistentTableWidgetSettingsForm.get('pageStepIncrement').touched"
-                        class="tb-error">
+                        class="jnks-iot-error">
                 warning
               </mat-icon>
             </mat-form-field>
             <mat-divider vertical class="xs:hidden"></mat-divider>
-            <div class="tb-small-label" translate>widgets.table.page-step-count</div>
+            <div class="jnks-iot-small-label" translate>widgets.table.page-step-count</div>
             <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
               <input matInput formControlName="pageStepCount" type="number" min="1" max="100" step="1" required
                      placeholder="{{ 'widget-config.set' | translate }}">
               <mat-icon matSuffix
                         matTooltipPosition="above"
-                        matTooltipClass="tb-error-tooltip"
+                        matTooltipClass="jnks-iot-error-tooltip"
                         [matTooltip]="(persistentTableWidgetSettingsForm.get('pageStepCount').hasError('required')
                                      ? 'widgets.value-source.value-required'
                                      : 'widgets.table.page-step-count-format-message') | translate"
                         *ngIf="persistentTableWidgetSettingsForm.get('pageStepCount').invalid
                         && persistentTableWidgetSettingsForm.get('pageStepCount').touched"
-                        class="tb-error">
+                        class="jnks-iot-error">
                 warning
               </mat-icon>
             </mat-form-field>
           </div>
         </div>
-        <div class="tb-form-row space-between column-xs">
+        <div class="jnks-iot-form-row space-between column-xs">
           <div translate>widgets.table.default-page-size</div>
           <mat-form-field appearance="outline" subscriptSizing="dynamic">
             <mat-select formControlName="defaultPageSize" placeholder="{{ 'widget-config.set' | translate }}">
@@ -90,12 +90,12 @@
     <legend class="group-title" translate>widgets.persistent-table.columns-settings</legend>
     <mat-form-field class="mat-block flex-1">
       <mat-label translate>widgets.persistent-table.display-columns</mat-label>
-      <mat-chip-grid #columnsChipList class="tb-drop-list"
+      <mat-chip-grid #columnsChipList class="jnks-iot-drop-list"
                      required
                      cdkDropList
                      cdkDropListOrientation="horizontal"
                      (cdkDropListDropped)="columnDrop($event)">
-        <mat-chip-row class="tb-draggable" cdkDrag *ngFor="let column of persistentTableWidgetSettingsForm.get('displayColumns').value"
+        <mat-chip-row class="jnks-iot-draggable" cdkDrag *ngFor="let column of persistentTableWidgetSettingsForm.get('displayColumns').value"
                   [removable]="true" (removed)="onColumnRemoved(column)">
           {{ displayColumnFromValue(column)?.name }}
           <mat-icon matChipRemove>cancel</mat-icon>
@@ -114,14 +114,14 @@
                (matChipInputTokenEnd)="addColumnFromChipInput($event)">
       </mat-chip-grid>
       <mat-autocomplete #columnAutocomplete="matAutocomplete"
-                        class="tb-autocomplete"
+                        class="jnks-iot-autocomplete"
                         (optionSelected)="columnSelected($event)"
                         [displayWith]="displayColumnFn">
         <mat-option *ngFor="let column of filteredDisplayColumns | async" [value]="column">
           <span [innerHTML]="column.name | highlight:columnSearchText"></span>
         </mat-option>
-        <mat-option *ngIf="(filteredDisplayColumns | async)?.length === 0" [value]="null" class="tb-not-found">
-          <div class="tb-not-found-content" (click)="$event.stopPropagation()">
+        <mat-option *ngIf="(filteredDisplayColumns | async)?.length === 0" [value]="null" class="jnks-iot-not-found">
+          <div class="jnks-iot-not-found-content" (click)="$event.stopPropagation()">
             <div *ngIf="!textIsNotEmpty(columnSearchText); else searchNotEmpty">
               <span translate>widgets.persistent-table.no-columns-found</span>
             </div>

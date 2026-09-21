@@ -1,27 +1,27 @@
 @import '../../../../../../../../../scss/constants';
 
-.tb-map-layers {
-  .tb-form-table-header-cell {
-    &.tb-label-header {
+.jnks-iot-map-layers {
+  .jnks-iot-form-table-header-cell {
+    &.jnks-iot-label-header {
       flex: 1 1 33.33%;
     }
-    &.tb-provider-header {
+    &.jnks-iot-provider-header {
       flex: 1 1 33.33%;
     }
-    &.tb-layer-header {
+    &.jnks-iot-layer-header {
       flex: 1 1 33.33%;
       @media #{$mat-xs} {
         display: none;
       }
     }
-    &.tb-actions-header {
+    &.jnks-iot-actions-header {
       width: 120px;
       min-width: 120px;
     }
   }
 
-  .tb-form-table-body {
-    tb-map-layer-row {
+  .jnks-iot-form-table-body {
+    jnks-iot-map-layer-row {
       overflow: hidden;
     }
   }

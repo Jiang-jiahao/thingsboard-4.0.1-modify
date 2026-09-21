@@ -31,7 +31,7 @@ export interface AlarmDetailsDialogData {
 }
 
 @Component({
-  selector: 'tb-alarm-details-dialog',
+  selector: 'jnks-iot-alarm-details-dialog',
   templateUrl: './alarm-details-dialog.component.html',
   styleUrls: ['./alarm-details-dialog.component.scss']
 })

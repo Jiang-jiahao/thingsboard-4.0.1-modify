@@ -34,10 +34,10 @@ export class ResourcesLibraryTableConfigResolver  {
               private router: Router,
               private datePipe: DatePipe) {
 
-    this.config.entityType = EntityType.TB_RESOURCE;
+    this.config.entityType = EntityType.JNKS_IOT_RESOURCE;
     this.config.entityComponent = ResourcesLibraryComponent;
-    this.config.entityTranslations = entityTypeTranslations.get(EntityType.TB_RESOURCE);
-    this.config.entityResources = entityTypeResources.get(EntityType.TB_RESOURCE);
+    this.config.entityTranslations = entityTypeTranslations.get(EntityType.JNKS_IOT_RESOURCE);
+    this.config.entityResources = entityTypeResources.get(EntityType.JNKS_IOT_RESOURCE);
     this.config.headerComponent = ResourcesTableHeaderComponent;
 
     this.config.entityTitle = (resource) => resource ?

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class OtherServiceShutdownEvent extends TbApplicationEvent {
+public class OtherServiceShutdownEvent extends JnksIotApplicationEvent {
 
     private static final long serialVersionUID = -2441739930040282254L;
 

@@ -21,9 +21,9 @@ public class CassandraStatementTask implements AsyncTask {
     private final GuavaSession session;
     private final Statement statement;
 
-    public ListenableFuture<TbResultSet> executeAsync(Function<Statement, TbResultSetFuture> executeAsyncFunction) {
+    public ListenableFuture<JnksIotResultSet> executeAsync(Function<Statement, JnksIotResultSetFuture> executeAsyncFunction) {
         return Futures.transform(session.executeAsync(statement),
-                result -> new TbResultSet(statement, result, executeAsyncFunction),
+                result -> new JnksIotResultSet(statement, result, executeAsyncFunction),
                 MoreExecutors.directExecutor()
         );
     }

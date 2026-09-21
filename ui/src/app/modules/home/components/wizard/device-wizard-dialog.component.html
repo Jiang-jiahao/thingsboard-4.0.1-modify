@@ -1,7 +1,7 @@
 <mat-toolbar color="primary">
   <h2 translate>device.add-device-text</h2>
   <span class="flex-1"></span>
-  <div [tb-help]="'devices'"></div>
+  <div [jnks-iot-help]="'devices'"></div>
   <button mat-icon-button
           (click)="cancel()"
           type="button">
@@ -40,14 +40,14 @@
               {{ 'device.label-max-length' | translate }}
             </mat-error>
           </mat-form-field>
-          <tb-device-profile-autocomplete
+          <jnks-iot-device-profile-autocomplete
             required
             addNewProfile
             selectDefaultProfile
             formControlName="deviceProfileId"
             (deviceProfileChanged)="deviceProfileChanged($event)">
-          </tb-device-profile-autocomplete>
-          <tb-device-data
+          </jnks-iot-device-profile-autocomplete>
+          <jnks-iot-device-data
             formControlName="deviceData"
             [deviceProfile]="deviceWizardFormGroup.get('deviceProfileId').value"
             [tcpWireAuthenticationMode]="tcpProfileWireAuthMode"
@@ -58,7 +58,7 @@
             [mqttPullProfileActive]="mqttPullProfileActive"
             [deviceScope]="deviceWizardDeviceScope"
             required>
-          </tb-device-data>
+          </jnks-iot-device-data>
           <div *ngIf="gatewayUiEnabled" class="toggle-group">
             <mat-slide-toggle formControlName="gateway" style="min-width: 165px">
               {{ 'device.is-gateway' | translate }}
@@ -68,12 +68,12 @@
               {{ 'device.overwrite-activity-time' | translate }}
             </mat-slide-toggle>
           </div>
-          <tb-entity-autocomplete
+          <jnks-iot-entity-autocomplete
             useFullEntityId
             formControlName="customerId"
             labelText="device.assign-to-customer"
             [entityType]="entityType.CUSTOMER">
-          </tb-entity-autocomplete>
+          </jnks-iot-entity-autocomplete>
           <mat-form-field class="mat-block" subscriptSizing="dynamic">
             <mat-label translate>device.description</mat-label>
             <textarea matInput formControlName="description" rows="1"></textarea>
@@ -84,16 +84,16 @@
     <mat-step [stepControl]="credentialsFormGroup" [optional]="credentialsOptionalStep">
       <ng-template matStepLabel>{{ 'device.credentials' | translate }}</ng-template>
       <form [formGroup]="credentialsFormGroup" style="padding-bottom: 16px;">
-        <tb-device-credentials
+        <jnks-iot-device-credentials
           [deviceTransportType]="deviceTransportType"
           initAccessToken
           formControlName="credential">
-        </tb-device-credentials>
+        </jnks-iot-device-credentials>
       </form>
     </mat-step>
   </mat-horizontal-stepper>
 </div>
-<div mat-dialog-actions class="tb-dialog-actions">
+<div mat-dialog-actions class="jnks-iot-dialog-actions">
   <div class="dialog-actions-row">
     <button mat-stroked-button *ngIf="selectedIndex > 0"
             [disabled]="(isLoading$ | async)"

@@ -3,7 +3,7 @@ package com.jnks.iot.server.queue.common.state;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
-import com.jnks.iot.server.queue.TbQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueMsg;
 import com.jnks.iot.server.queue.common.consumer.PartitionedQueueConsumerManager;
 import com.jnks.iot.server.queue.discovery.QueueKey;
 
@@ -43,7 +43,7 @@ import static com.jnks.iot.server.common.msg.queue.TopicPartitionInfo.withTopic;
  * @see DefaultQueueStateService
  */
 @Slf4j
-public abstract class QueueStateService<E extends TbQueueMsg, S extends TbQueueMsg> {
+public abstract class QueueStateService<E extends JnksIotQueueMsg, S extends JnksIotQueueMsg> {
 
     /**
      * 事件（业务）分区消费者管理器。

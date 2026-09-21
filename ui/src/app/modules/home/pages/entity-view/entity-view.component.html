@@ -1,4 +1,4 @@
-<div class="tb-details-buttons xs:flex xs:flex-col">
+<div class="jnks-iot-details-buttons xs:flex xs:flex-col">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'open')"
@@ -47,7 +47,7 @@
     <mat-label translate>entity-view.assignedToCustomer</mat-label>
     <input matInput disabled [ngModel]="entity?.customerTitle">
   </mat-form-field>
-  <div class="tb-small" style="padding-bottom: 10px; padding-left: 2px;"
+  <div class="jnks-iot-small" style="padding-bottom: 10px; padding-left: 2px;"
        [class.!hidden]="isEdit || !entity?.customerIsPublic || (entityViewScope !== 'customer' && entityViewScope !== 'tenant')">
     {{ 'entity-view.entity-view-public' | translate }}
   </div>
@@ -63,78 +63,78 @@
           {{ 'entity-view.name-max-length' | translate }}
         </mat-error>
       </mat-form-field>
-      <tb-entity-subtype-autocomplete
+      <jnks-iot-entity-subtype-autocomplete
         formControlName="type"
         [required]="true"
         [entityType]="entityType.ENTITY_VIEW"
       >
-      </tb-entity-subtype-autocomplete>
+      </jnks-iot-entity-subtype-autocomplete>
       <section class="flex flex-col">
-        <label translate class="tb-title no-padding">entity-view.target-entity</label>
-        <tb-entity-select class="flex-1"
+        <label translate class="jnks-iot-title no-padding">entity-view.target-entity</label>
+        <jnks-iot-entity-select class="flex-1"
                           [required]="true"
                           [allowedEntityTypes]="allowedEntityTypes"
                           formControlName="entityId">
-        </tb-entity-select>
+        </jnks-iot-entity-select>
       </section>
       <div class="mat-accordion-container" formGroupName="keys">
         <mat-accordion [multi]="true">
           <mat-expansion-panel formGroupName="attributes" [expanded]="true">
             <mat-expansion-panel-header>
               <mat-panel-title>
-                <div class="tb-panel-title" translate>entity-view.attributes-propagation</div>
+                <div class="jnks-iot-panel-title" translate>entity-view.attributes-propagation</div>
               </mat-panel-title>
             </mat-expansion-panel-header>
-            <div translate class="tb-hint">entity-view.attributes-propagation-hint</div>
-            <label translate class="tb-title no-padding">entity-view.client-attributes</label>
-            <tb-entity-keys-list
+            <div translate class="jnks-iot-hint">entity-view.attributes-propagation-hint</div>
+            <label translate class="jnks-iot-title no-padding">entity-view.client-attributes</label>
+            <jnks-iot-entity-keys-list
               [entityId]="selectedEntityId | async"
               formControlName="cs"
               keysText="entity-view.client-attributes-placeholder"
               [dataKeyType]="dataKeyType.attribute">
-            </tb-entity-keys-list>
-            <label translate class="tb-title no-padding">entity-view.shared-attributes</label>
-            <tb-entity-keys-list
+            </jnks-iot-entity-keys-list>
+            <label translate class="jnks-iot-title no-padding">entity-view.shared-attributes</label>
+            <jnks-iot-entity-keys-list
               [entityId]="selectedEntityId | async"
               formControlName="sh"
               keysText="entity-view.shared-attributes-placeholder"
               [dataKeyType]="dataKeyType.attribute">
-            </tb-entity-keys-list>
-            <label translate class="tb-title no-padding">entity-view.server-attributes</label>
-            <tb-entity-keys-list
+            </jnks-iot-entity-keys-list>
+            <label translate class="jnks-iot-title no-padding">entity-view.server-attributes</label>
+            <jnks-iot-entity-keys-list
               [entityId]="selectedEntityId | async"
               formControlName="ss"
               keysText="entity-view.server-attributes-placeholder"
               [dataKeyType]="dataKeyType.attribute">
-            </tb-entity-keys-list>
+            </jnks-iot-entity-keys-list>
           </mat-expansion-panel>
           <mat-expansion-panel [expanded]="true">
             <mat-expansion-panel-header>
               <mat-panel-title>
-                <div class="tb-panel-title" translate>entity-view.timeseries-data</div>
+                <div class="jnks-iot-panel-title" translate>entity-view.timeseries-data</div>
               </mat-panel-title>
             </mat-expansion-panel-header>
-            <div translate class="tb-hint">entity-view.timeseries-data-hint</div>
-            <label translate class="tb-title no-padding">entity-view.timeseries</label>
-            <tb-entity-keys-list
+            <div translate class="jnks-iot-hint">entity-view.timeseries-data-hint</div>
+            <label translate class="jnks-iot-title no-padding">entity-view.timeseries</label>
+            <jnks-iot-entity-keys-list
               [entityId]="selectedEntityId | async"
               formControlName="timeseries"
               keysText="entity-view.timeseries-placeholder"
               [dataKeyType]="dataKeyType.timeseries">
-            </tb-entity-keys-list>
+            </jnks-iot-entity-keys-list>
           </mat-expansion-panel>
         </mat-accordion>
       </div>
-      <tb-datetime class="block"
+      <jnks-iot-datetime class="block"
                    dateText="{{ 'entity-view.start-ts' | translate }}"
                    [maxDate]="maxStartTimeMs | async"
                    formControlName="startTimeMs"
-      ></tb-datetime>
-      <tb-datetime class="block"
+      ></jnks-iot-datetime>
+      <jnks-iot-datetime class="block"
                    dateText="{{ 'entity-view.end-ts' | translate }}"
                    [minDate]="minEndTimeMs | async"
                    formControlName="endTimeMs"
-      ></tb-datetime>
+      ></jnks-iot-datetime>
       <div formGroupName="additionalInfo">
         <mat-form-field class="mat-block">
           <mat-label translate>entity-view.description</mat-label>

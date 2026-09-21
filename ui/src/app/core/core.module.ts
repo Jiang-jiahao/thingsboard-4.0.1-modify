@@ -15,7 +15,7 @@ import {
   TranslateModule,
   TranslateParser
 } from '@ngx-translate/core';
-import { TbMissingTranslationHandler } from './translate/missing-translate-handler';
+import { JnksIotMissingTranslationHandler } from './translate/missing-translate-handler';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DEFAULT_OPTIONS, MatDialogConfig, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -38,7 +38,7 @@ import { EntityConflictInterceptor } from '@core/interceptors/entity-conflict.in
             },
             missingTranslationHandler: {
                 provide: MissingTranslationHandler,
-                useClass: TbMissingTranslationHandler
+                useClass: JnksIotMissingTranslationHandler
             },
             compiler: {
                 provide: TranslateCompiler,

@@ -13,7 +13,7 @@ import {
 } from '@home/components/widget/config/timewindow-config-panel.component';
 
 @Component({
-  selector: 'tb-alarms-table-basic-config',
+  selector: 'jnks-iot-alarms-table-basic-config',
   templateUrl: './alarms-table-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

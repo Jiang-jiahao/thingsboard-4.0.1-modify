@@ -157,7 +157,7 @@ export class WidgetTypesTableConfigResolver  {
     this.dialog.open<SelectWidgetTypeDialogComponent, any,
       WidgetDataType>(SelectWidgetTypeDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
     }).afterClosed().subscribe(
       (type) => {
         if (type) {

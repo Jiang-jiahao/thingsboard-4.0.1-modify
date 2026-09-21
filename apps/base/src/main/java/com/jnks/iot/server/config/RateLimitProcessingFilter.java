@@ -15,7 +15,7 @@ import com.jnks.iot.server.cache.limits.RateLimitService;
 import com.jnks.iot.server.common.data.EntityType;
 import com.jnks.iot.server.common.data.exception.TenantProfileNotFoundException;
 import com.jnks.iot.server.common.data.limit.LimitedApi;
-import com.jnks.iot.server.common.msg.tools.TbRateLimitsException;
+import com.jnks.iot.server.common.msg.tools.JnksIotRateLimitsException;
 import com.jnks.iot.server.exception.JnksIotErrorResponseHandler;
 import com.jnks.iot.server.service.security.model.SecurityUser;
 
@@ -66,7 +66,7 @@ public class RateLimitProcessingFilter extends OncePerRequestFilter {
     }
 
     private void rateLimitExceeded(EntityType type, HttpServletResponse response) {
-        errorResponseHandler.handle(new TbRateLimitsException(type), response);
+        errorResponseHandler.handle(new JnksIotRateLimitsException(type), response);
     }
 
     protected SecurityUser getCurrentUser() {

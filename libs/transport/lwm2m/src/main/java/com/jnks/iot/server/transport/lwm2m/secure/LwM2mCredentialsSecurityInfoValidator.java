@@ -44,9 +44,9 @@ public class LwM2mCredentialsSecurityInfoValidator {
     private final LwM2mTransportContext context;
     private final LwM2MTransportServerConfig config;
 
-    public TbLwM2MSecurityInfo getEndpointSecurityInfoByCredentialsId(String credentialsId, LwM2mTypeServer keyValue) {
+    public JnksIotLwM2MSecurityInfo getEndpointSecurityInfoByCredentialsId(String credentialsId, LwM2mTypeServer keyValue) {
         CountDownLatch latch = new CountDownLatch(1);
-        final TbLwM2MSecurityInfo[] resultSecurityStore = new TbLwM2MSecurityInfo[1];
+        final JnksIotLwM2MSecurityInfo[] resultSecurityStore = new JnksIotLwM2MSecurityInfo[1];
         log.trace("Validating credentials [{}]", credentialsId);
         context.getTransportService().process(ValidateDeviceLwM2MCredentialsRequestMsg.newBuilder().setCredentialsId(credentialsId).build(),
                 new TransportServiceCallback<>() {
@@ -60,7 +60,7 @@ public class LwM2mCredentialsSecurityInfoValidator {
                     @Override
                     public void onError(Throwable e) {
                         log.info("[{}] [{}] Failed to process credentials ", credentialsId, e);
-                        TbLwM2MSecurityInfo result = new TbLwM2MSecurityInfo();
+                        JnksIotLwM2MSecurityInfo result = new JnksIotLwM2MSecurityInfo();
                         result.setEndpoint(credentialsId);
                         resultSecurityStore[0] = result;
                         latch.countDown();
@@ -72,7 +72,7 @@ public class LwM2mCredentialsSecurityInfoValidator {
             log.error("Failed to await credentials!", e);
         }
 
-        TbLwM2MSecurityInfo securityInfo = resultSecurityStore[0];
+        JnksIotLwM2MSecurityInfo securityInfo = resultSecurityStore[0];
         if (securityInfo.getSecurityMode() == null) {
             throw new LwM2MAuthException();
         }
@@ -84,8 +84,8 @@ public class LwM2mCredentialsSecurityInfoValidator {
      *
      * @return SecurityInfo
      */
-    private TbLwM2MSecurityInfo createSecurityInfo(String endpoint, ValidateDeviceCredentialsResponse msg, LwM2mTypeServer keyValue) {
-        TbLwM2MSecurityInfo result = new TbLwM2MSecurityInfo();
+    private JnksIotLwM2MSecurityInfo createSecurityInfo(String endpoint, ValidateDeviceCredentialsResponse msg, LwM2mTypeServer keyValue) {
+        JnksIotLwM2MSecurityInfo result = new JnksIotLwM2MSecurityInfo();
         LwM2MClientCredentials credentials = JacksonUtil.fromString(msg.getCredentials(), LwM2MClientCredentials.class);
         if (credentials != null) {
             result.setMsg(msg);
@@ -117,12 +117,12 @@ public class LwM2mCredentialsSecurityInfoValidator {
         return result;
     }
 
-    private void createClientSecurityInfoNoSec(TbLwM2MSecurityInfo result) {
+    private void createClientSecurityInfoNoSec(JnksIotLwM2MSecurityInfo result) {
         result.setSecurityInfo(null);
         result.setSecurityMode(NO_SEC);
     }
 
-    private void createClientSecurityInfoPSK(TbLwM2MSecurityInfo result, String endpoint, LwM2MClientCredential clientCredentialsConfig) {
+    private void createClientSecurityInfoPSK(JnksIotLwM2MSecurityInfo result, String endpoint, LwM2MClientCredential clientCredentialsConfig) {
         PSKClientCredential pskConfig = (PSKClientCredential) clientCredentialsConfig;
         if (StringUtils.isNotEmpty(pskConfig.getIdentity())) {
             try {
@@ -141,7 +141,7 @@ public class LwM2mCredentialsSecurityInfoValidator {
         }
     }
 
-    private void createClientSecurityInfoRPK(TbLwM2MSecurityInfo result, String endpoint, LwM2MClientCredential clientCredentialsConfig) {
+    private void createClientSecurityInfoRPK(JnksIotLwM2MSecurityInfo result, String endpoint, LwM2MClientCredential clientCredentialsConfig) {
         RPKClientCredential rpkConfig = (RPKClientCredential) clientCredentialsConfig;
         try {
             if (rpkConfig.getDecoded() != null) {
@@ -156,7 +156,7 @@ public class LwM2mCredentialsSecurityInfoValidator {
         }
     }
 
-    private void createClientSecurityInfoX509(TbLwM2MSecurityInfo result, String endpoint) {
+    private void createClientSecurityInfoX509(JnksIotLwM2MSecurityInfo result, String endpoint) {
         result.setSecurityInfo(SecurityInfo.newX509CertInfo(endpoint));
         result.setSecurityMode(X509);
     }

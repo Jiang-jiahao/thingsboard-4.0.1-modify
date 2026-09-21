@@ -15,21 +15,21 @@ public class TopicService {
     @Value("${queue.prefix:}")
     private String prefix;
 
-    @Value("${queue.core.notifications-topic:tb_core.notifications}")
-    private String tbCoreNotificationsTopic;
+    @Value("${queue.core.notifications-topic:jnks_iot_core.notifications}")
+    private String jnksIotCoreNotificationsTopic;
 
-    @Value("${queue.rule-engine.notifications-topic:tb_rule_engine.notifications}")
-    private String tbRuleEngineNotificationsTopic;
+    @Value("${queue.rule-engine.notifications-topic:jnks_iot_rule_engine.notifications}")
+    private String jnksIotRuleEngineNotificationsTopic;
 
-    @Value("${queue.transport.notifications-topic:tb_transport.notifications}")
-    private String tbTransportNotificationsTopic;
+    @Value("${queue.transport.notifications-topic:jnks_iot_transport.notifications}")
+    private String jnksIotTransportNotificationsTopic;
 
     @Value("${queue.calculated-fields.notifications-topic:calculated_field.notifications}")
-    private String tbCalculatedFieldNotificationsTopic;
+    private String jnksIotCalculatedFieldNotificationsTopic;
 
-    private final ConcurrentMap<String, TopicPartitionInfo> tbCoreNotificationTopics = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, TopicPartitionInfo> tbRuleEngineNotificationTopics = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, TopicPartitionInfo> tbCalculatedFieldNotificationTopics = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, TopicPartitionInfo> jnksIotCoreNotificationTopics = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, TopicPartitionInfo> jnksIotRuleEngineNotificationTopics = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, TopicPartitionInfo> jnksIotCalculatedFieldNotificationTopics = new ConcurrentHashMap<>();
 
     /**
      * Each Service should start a consumer for messages that target individual service instance based on serviceId.
@@ -40,11 +40,11 @@ public class TopicService {
      */
     public TopicPartitionInfo getNotificationsTopic(ServiceType serviceType, String serviceId) {
         return switch (serviceType) {
-            case TB_CORE -> tbCoreNotificationTopics.computeIfAbsent(serviceId,
-                    id -> buildNotificationsTopicPartitionInfo(tbCoreNotificationsTopic, serviceId));
-            case TB_RULE_ENGINE -> tbRuleEngineNotificationTopics.computeIfAbsent(serviceId,
-                    id -> buildNotificationsTopicPartitionInfo(tbRuleEngineNotificationsTopic, serviceId));
-            case TB_TRANSPORT -> buildNotificationsTopicPartitionInfo(tbTransportNotificationsTopic, serviceId);
+            case JNKS_IOT_CORE -> jnksIotCoreNotificationTopics.computeIfAbsent(serviceId,
+                    id -> buildNotificationsTopicPartitionInfo(jnksIotCoreNotificationsTopic, serviceId));
+            case JNKS_IOT_RULE_ENGINE -> jnksIotRuleEngineNotificationTopics.computeIfAbsent(serviceId,
+                    id -> buildNotificationsTopicPartitionInfo(jnksIotRuleEngineNotificationsTopic, serviceId));
+            case JNKS_IOT_TRANSPORT -> buildNotificationsTopicPartitionInfo(jnksIotTransportNotificationsTopic, serviceId);
             default -> throw new IllegalStateException("Unexpected service type: " + serviceType);
         };
     }
@@ -58,7 +58,7 @@ public class TopicService {
     }
 
     public TopicPartitionInfo getCalculatedFieldNotificationsTopic(String serviceId) {
-        return tbCalculatedFieldNotificationTopics.computeIfAbsent(serviceId, id -> buildNotificationsTopicPartitionInfo(tbCalculatedFieldNotificationsTopic, serviceId));
+        return jnksIotCalculatedFieldNotificationTopics.computeIfAbsent(serviceId, id -> buildNotificationsTopicPartitionInfo(jnksIotCalculatedFieldNotificationsTopic, serviceId));
     }
 
     public String buildTopicName(String topic) {

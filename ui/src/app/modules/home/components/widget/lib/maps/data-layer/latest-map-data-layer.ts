@@ -1,24 +1,24 @@
 import {
   DataLayerEditAction,
   MapDataLayerSettings,
-  TbMapDatasource
+  JnksIotMapDatasource
 } from '@shared/models/widget/maps/map.models';
-import { TbMap } from '@home/components/widget/lib/maps/map';
+import { JnksIotMap } from '@home/components/widget/lib/maps/map';
 import { FormattedData, WidgetActionType } from '@shared/models/widget.models';
 import { Observable } from 'rxjs';
 import L from 'leaflet';
 import { createTooltip, updateTooltip } from './data-layer-utils';
-import { TbDataLayerItem, TbMapDataLayer } from '@home/components/widget/lib/maps/data-layer/map-data-layer';
+import { JnksIotDataLayerItem, JnksIotMapDataLayer } from '@home/components/widget/lib/maps/data-layer/map-data-layer';
 
-export abstract class TbLatestDataLayerItem<S extends MapDataLayerSettings = MapDataLayerSettings,
-  D extends TbLatestMapDataLayer<S,D> = TbLatestMapDataLayer<any>, L extends L.Layer = L.Layer> extends TbDataLayerItem<S,D,L> {
+export abstract class JnksIotLatestDataLayerItem<S extends MapDataLayerSettings = MapDataLayerSettings,
+  D extends JnksIotLatestMapDataLayer<S,D> = JnksIotLatestMapDataLayer<any>, L extends L.Layer = L.Layer> extends JnksIotDataLayerItem<S,D,L> {
 
   protected tooltip: L.Popup;
-  protected data: FormattedData<TbMapDatasource>;
+  protected data: FormattedData<JnksIotMapDatasource>;
   protected selected = false;
 
-  protected constructor(data: FormattedData<TbMapDatasource>,
-                        dsData: FormattedData<TbMapDatasource>[],
+  protected constructor(data: FormattedData<JnksIotMapDatasource>,
+                        dsData: FormattedData<JnksIotMapDatasource>[],
                         settings: S,
                         dataLayer: D) {
     super(settings, dataLayer);
@@ -60,7 +60,7 @@ export abstract class TbLatestDataLayerItem<S extends MapDataLayerSettings = Map
               () => this.dataLayer.removeItem(this.data.entityId)
             );
           },
-          iconClass: 'tb-remove'
+          iconClass: 'jnks-iot-remove'
         });
       }
       return buttons;
@@ -103,15 +103,15 @@ export abstract class TbLatestDataLayerItem<S extends MapDataLayerSettings = Map
       if (this.dataLayer.allowDrag()) {
         this.disableDrag();
         this.enableDrag();
-        this.addItemClass('tb-draggable');
+        this.addItemClass('jnks-iot-draggable');
       } else {
         this.disableDrag();
-        this.removeItemClass('tb-draggable');
+        this.removeItemClass('jnks-iot-draggable');
       }
     }
   }
 
-  public update(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): void {
+  public update(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): void {
     this.data = data;
     this.doUpdate(data, dsData);
   }
@@ -146,41 +146,41 @@ export abstract class TbLatestDataLayerItem<S extends MapDataLayerSettings = Map
 
   protected enableEdit(): void {
     if (this.dataLayer.isHoverable()) {
-      this.addItemClass('tb-hoverable');
+      this.addItemClass('jnks-iot-hoverable');
     }
     if (this.dataLayer.allowDrag()) {
       this.disableDrag();
       this.enableDrag();
-      this.addItemClass('tb-draggable');
+      this.addItemClass('jnks-iot-draggable');
     }
   }
 
   protected disableEdit(): void {
     if (this.dataLayer.isHoverable()) {
-      this.removeItemClass('tb-hoverable');
+      this.removeItemClass('jnks-iot-hoverable');
     }
     if (this.dataLayer.isDragEnabled()) {
       this.disableDrag();
-      this.removeItemClass('tb-draggable');
+      this.removeItemClass('jnks-iot-draggable');
     }
   }
 
   protected updateSelectedState() {
     if (this.selected) {
-      this.addItemClass('tb-selected');
+      this.addItemClass('jnks-iot-selected');
     } else {
-      this.removeItemClass('tb-selected');
+      this.removeItemClass('jnks-iot-selected');
     }
   }
 
-  protected updateTooltip(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]) {
+  protected updateTooltip(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]) {
     if (this.settings.tooltip.show) {
       updateTooltip(this.dataLayer.getMap(), this.tooltip,
         this.settings.tooltip, this.dataLayer.dataLayerTooltipProcessor, data, dsData);
     }
   }
 
-  protected updateLabel(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]) {
+  protected updateLabel(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]) {
     if (this.settings.label.show) {
       this.unbindLabel();
       const label = this.dataLayer.dataLayerLabelProcessor.processPattern(data, dsData);
@@ -200,11 +200,11 @@ export abstract class TbLatestDataLayerItem<S extends MapDataLayerSettings = Map
 
   protected onDeselected(): void {}
 
-  protected abstract create(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): L;
+  protected abstract create(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): L;
 
-  protected abstract doUpdate(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): void;
+  protected abstract doUpdate(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): void;
 
-  protected abstract doInvalidateCoordinates(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): void;
+  protected abstract doInvalidateCoordinates(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): void;
 
   protected abstract unbindLabel(): void;
 
@@ -227,12 +227,12 @@ export abstract class TbLatestDataLayerItem<S extends MapDataLayerSettings = Map
 }
 
 export interface UnplacedMapDataItem {
-  entity: FormattedData<TbMapDatasource>;
-  dataLayer: TbLatestMapDataLayer;
+  entity: FormattedData<JnksIotMapDatasource>;
+  dataLayer: JnksIotLatestMapDataLayer;
 }
 
-export abstract class TbLatestMapDataLayer<S extends MapDataLayerSettings = MapDataLayerSettings,
-  D extends TbLatestMapDataLayer<S,D> = any, L extends L.Layer = L.Layer> extends TbMapDataLayer<S, TbLatestDataLayerItem<S,D,L>> implements L.TB.DataLayer {
+export abstract class JnksIotLatestMapDataLayer<S extends MapDataLayerSettings = MapDataLayerSettings,
+  D extends JnksIotLatestMapDataLayer<S,D> = any, L extends L.Layer = L.Layer> extends JnksIotMapDataLayer<S, JnksIotLatestDataLayerItem<S,D,L>> implements L.TB.DataLayer {
 
   protected addEnabled = false;
   protected dragEnabled = false;
@@ -247,7 +247,7 @@ export abstract class TbLatestMapDataLayer<S extends MapDataLayerSettings = MapD
 
   private unplacedItems: UnplacedMapDataItem[] = [];
 
-  protected constructor(map: TbMap<any>,
+  protected constructor(map: JnksIotMap<any>,
                         inputSettings: S) {
     super(map, inputSettings);
     if (this.settings.edit?.enabledActions) {
@@ -304,11 +304,11 @@ export abstract class TbLatestMapDataLayer<S extends MapDataLayerSettings = MapD
     return this.snappable;
   }
 
-  public updateData(dsData: FormattedData<TbMapDatasource>[]) {
+  public updateData(dsData: FormattedData<JnksIotMapDatasource>[]) {
     this.unplacedItems.length = 0;
     const layerData = dsData.filter(d => d.$datasource.mapDataIds.includes(this.mapDataId));
     const toDelete = new Set(Array.from(this.layerItems.keys()));
-    const updatedItems: TbLatestDataLayerItem<S,D,L>[] = [];
+    const updatedItems: JnksIotLatestDataLayerItem<S,D,L>[] = [];
     layerData.forEach((data) => {
       if (this.isValidLayerData(data)) {
         let layerItem = this.layerItems.get(data.entityId);
@@ -390,7 +390,7 @@ export abstract class TbLatestMapDataLayer<S extends MapDataLayerSettings = MapD
     }
   }
 
-  protected layerItemsUpdated(_updatedItems: TbLatestDataLayerItem<S,D,L>[]): void {
+  protected layerItemsUpdated(_updatedItems: JnksIotLatestDataLayerItem<S,D,L>[]): void {
   }
 
   private prepareUnplacedItems(): UnplacedMapDataItem[] {
@@ -418,8 +418,8 @@ export abstract class TbLatestMapDataLayer<S extends MapDataLayerSettings = MapD
 
   public abstract placeItem(item: UnplacedMapDataItem, layer: L.Layer): void;
 
-  protected abstract isValidLayerData(layerData: FormattedData<TbMapDatasource>): boolean;
+  protected abstract isValidLayerData(layerData: FormattedData<JnksIotMapDatasource>): boolean;
 
-  protected abstract createLayerItem(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): TbLatestDataLayerItem<S,D,L>;
+  protected abstract createLayerItem(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): JnksIotLatestDataLayerItem<S,D,L>;
 
 }

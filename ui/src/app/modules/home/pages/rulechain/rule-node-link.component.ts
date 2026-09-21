@@ -7,7 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-rule-node-link',
+  selector: 'jnks-iot-rule-node-link',
   templateUrl: './rule-node-link.component.html',
   styleUrls: [],
   providers: [{

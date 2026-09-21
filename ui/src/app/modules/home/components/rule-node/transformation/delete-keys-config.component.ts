@@ -6,7 +6,7 @@ import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@app/shar
 import { FetchTo, FetchToTranslation } from '@home/components/rule-node/rule-node-config.models';
 
 @Component({
-  selector: 'tb-transformation-node-delete-keys-config',
+  selector: 'jnks-iot-transformation-node-delete-keys-config',
   templateUrl: './delete-keys-config.component.html',
   styleUrls: []
 })

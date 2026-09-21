@@ -1,7 +1,7 @@
 @import '../../../../scss/constants';
 
 :host {
-  .tb-image-dialog {
+  .jnks-iot-image-dialog {
     @media #{$mat-gt-xs} {
       width: 50vh;
     }
@@ -14,7 +14,7 @@
       flex-direction: column;
     }
   }
-  .tb-image-container {
+  .jnks-iot-image-container {
     height: 100%;
     border-radius: 4px;
     border: 1px solid rgba(0, 0, 0, 0.05);
@@ -24,14 +24,14 @@
     align-items: flex-start;
     gap: 12px;
 
-    .tb-image-content {
+    .jnks-iot-image-content {
       height: 100%;
       width: 100%;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       gap: 8px;
-      .tb-image-preview-container {
+      .jnks-iot-image-preview-container {
         position: relative;
         width: 100%;
         height: 100%;
@@ -42,12 +42,12 @@
         align-items: center;
         justify-content: center;
         z-index: 1;
-        .tb-image-preview-spacer {
+        .jnks-iot-image-preview-spacer {
           @media #{$mat-gt-xs} {
             margin-top: 100%;
           }
         }
-        .tb-image-preview {
+        .jnks-iot-image-preview {
           position: absolute;
           inset: 0;
           width: 100%;
@@ -55,7 +55,7 @@
           object-fit: contain;
         }
       }
-      .tb-image-preview-details {
+      .jnks-iot-image-preview-details {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -68,7 +68,7 @@
           height: 20px;
         }
       }
-      .tb-image-actions {
+      .jnks-iot-image-actions {
         display: flex;
         align-items: center;
         align-self: stretch;

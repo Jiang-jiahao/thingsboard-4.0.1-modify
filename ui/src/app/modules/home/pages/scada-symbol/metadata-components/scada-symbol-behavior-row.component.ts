@@ -32,7 +32,7 @@ import {
 } from '@home/components/widget/lib/scada/scada-symbol.models';
 import { deepClone, isUndefinedOrNull } from '@core/utils';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import {
   ScadaSymbolBehaviorPanelComponent
 } from '@home/pages/scada-symbol/metadata-components/scada-symbol-behavior-panel.component';
@@ -42,7 +42,7 @@ import {
 } from '@home/pages/scada-symbol/metadata-components/scada-symbol-behaviors.component';
 import { IAliasController } from '@core/api/widget-api.models';
 import { WidgetActionCallbacks } from '@home/components/widget/action/manage-widget-actions.component.models';
-import { isNotEmptyTbFunction } from '@shared/models/js-function.models';
+import { isNotEmptyJnksIotFunction } from '@shared/models/js-function.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export const behaviorValid = (behavior: ScadaSymbolBehavior): boolean => {
@@ -64,7 +64,7 @@ export const behaviorValid = (behavior: ScadaSymbolBehavior): boolean => {
         return false;
       }
       if (behavior.defaultSetValueSettings.valueToData?.type === ValueToDataType.FUNCTION
-        && !isNotEmptyTbFunction(behavior.defaultSetValueSettings.valueToData?.valueToDataFunction)) {
+        && !isNotEmptyJnksIotFunction(behavior.defaultSetValueSettings.valueToData?.valueToDataFunction)) {
         return false;
       }
       break;
@@ -75,7 +75,7 @@ export const behaviorValid = (behavior: ScadaSymbolBehavior): boolean => {
 };
 
 @Component({
-  selector: 'tb-scada-symbol-metadata-behavior-row',
+  selector: 'jnks-iot-scada-symbol-metadata-behavior-row',
   templateUrl: './scada-symbol-behavior-row.component.html',
   styleUrls: ['./scada-symbol-behavior-row.component.scss'],
   providers: [
@@ -126,7 +126,7 @@ export class ScadaSymbolBehaviorRowComponent implements ControlValueAccessor, On
 
   constructor(private fb: UntypedFormBuilder,
               private cd: ChangeDetectorRef,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private behaviorsComponent: ScadaSymbolBehaviorsComponent,
@@ -202,8 +202,8 @@ export class ScadaSymbolBehaviorRowComponent implements ControlValueAccessor, On
         },
         isModal: true
       });
-      scadaSymbolBehaviorPanelPopover.tbComponentRef.instance.popover = scadaSymbolBehaviorPanelPopover;
-      scadaSymbolBehaviorPanelPopover.tbComponentRef.instance.behaviorSettingsApplied.subscribe((behavior) => {
+      scadaSymbolBehaviorPanelPopover.jnksIotComponentRef.instance.popover = scadaSymbolBehaviorPanelPopover;
+      scadaSymbolBehaviorPanelPopover.jnksIotComponentRef.instance.behaviorSettingsApplied.subscribe((behavior) => {
         scadaSymbolBehaviorPanelPopover.hide();
         this.behaviorRowFormGroup.patchValue(
           {
@@ -215,7 +215,7 @@ export class ScadaSymbolBehaviorRowComponent implements ControlValueAccessor, On
         this.modelValue = behavior;
         this.propagateChange(this.modelValue);
       });
-      scadaSymbolBehaviorPanelPopover.tbDestroy.subscribe(() => {
+      scadaSymbolBehaviorPanelPopover.jnksIotDestroy.subscribe(() => {
         if (!behaviorValid(this.modelValue)) {
           editCanceled();
         }

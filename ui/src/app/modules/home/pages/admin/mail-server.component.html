@@ -5,7 +5,7 @@
         <span class="mat-headline-5" translate>admin.outgoing-mail-settings</span>
       </mat-card-title>
       <span class="flex-1"></span>
-      <div tb-help="outgoingMailSettings"></div>
+      <div jnks-iot-help="outgoingMailSettings"></div>
     </mat-card-header>
     <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
     </mat-progress-bar>
@@ -120,7 +120,7 @@
                   <mat-form-field class="mat-block flex-1">
                     <mat-label translate>admin.proxy-password</mat-label>
                     <input matInput type="password" formControlName="proxyPassword" autocomplete="new-proxy-password">
-                    <tb-toggle-password matSuffix></tb-toggle-password>
+                    <jnks-iot-toggle-password matSuffix></jnks-iot-toggle-password>
                   </mat-form-field>
                 </div>
               </div>
@@ -135,12 +135,12 @@
                      autocomplete="new-username"/>
             </mat-form-field>
             <div class="flex items-center justify-between" style="height: 50px; padding-bottom: 20px" [class.!hidden]="mailSettings.get('providerId').value === 'SENDGRID'">
-              <tb-toggle-select class="w-52" formControlName="enableOauth2" appearance="fill">
-                <tb-toggle-option [value]=false>{{ 'admin.oauth2.basic' | translate }}</tb-toggle-option>
-                <tb-toggle-option [value]=true>{{ 'admin.oauth2.oauth2' | translate }}</tb-toggle-option>
-              </tb-toggle-select>
+              <jnks-iot-toggle-select class="w-52" formControlName="enableOauth2" appearance="fill">
+                <jnks-iot-toggle-option [value]=false>{{ 'admin.oauth2.basic' | translate }}</jnks-iot-toggle-option>
+                <jnks-iot-toggle-option [value]=true>{{ 'admin.oauth2.oauth2' | translate }}</jnks-iot-toggle-option>
+              </jnks-iot-toggle-select>
               <div class="details-buttons" *ngIf="helpLink && mailSettings.get('enableOauth2').value">
-                <div [tb-help]="helpLink"></div>
+                <div [jnks-iot-help]="helpLink"></div>
               </div>
             </div>
             <section *ngIf="!mailSettings.get('enableOauth2').value">
@@ -151,7 +151,7 @@
                 <mat-label translate>common.password</mat-label>
                 <input matInput formControlName="password" type="password"
                        placeholder="{{ 'common.enter-password' | translate }}" autocomplete="new-password"/>
-                <tb-toggle-password matSuffix></tb-toggle-password>
+                <jnks-iot-toggle-password matSuffix></jnks-iot-toggle-password>
               </mat-form-field>
             </section>
             <section *ngIf="mailSettings.get('enableOauth2').value">
@@ -226,11 +226,11 @@
                       </mat-error>
                     </mat-form-field>
                   </div>
-                  <tb-string-items-list
+                  <jnks-iot-string-items-list
                     formControlName="scope" required
                     label="{{ 'admin.oauth2.scope' | translate }}"
                     requiredText="{{ 'admin.oauth2.scope-required' | translate }}">
-                  </tb-string-items-list>
+                  </jnks-iot-string-items-list>
                 </ng-template>
               </mat-expansion-panel>
 
@@ -267,14 +267,14 @@
                     <mat-form-field class="mat-block flex-1">
                       <mat-label translate>admin.oauth2.redirect-uri-template</mat-label>
                       <input matInput formControlName="redirectUri" readonly>
-                      <tb-copy-button
+                      <jnks-iot-copy-button
                         matSuffix
                         color="primary"
                         [copyText]="mailSettings.get('redirectUri').value"
                         tooltipText="{{ 'admin.oauth2.copy-redirect-uri' | translate }}"
                         tooltipPosition="above"
                         icon="mdi:clipboard-arrow-left">
-                      </tb-copy-button>
+                      </jnks-iot-copy-button>
                     </mat-form-field>
                   </div>
                 </div>

@@ -16,7 +16,7 @@ import {
   BackgroundType,
   backgroundTypeTranslations, ComponentStyle
 } from '@shared/models/widget-settings.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -26,7 +26,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-background-settings-panel',
+  selector: 'jnks-iot-background-settings-panel',
   templateUrl: './background-settings-panel.component.html',
   providers: [],
   styleUrls: ['./background-settings-panel.component.scss'],
@@ -38,7 +38,7 @@ export class BackgroundSettingsPanelComponent extends PageComponent implements O
   backgroundSettings: BackgroundSettings;
 
   @Input()
-  popover: TbPopoverComponent<BackgroundSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<BackgroundSettingsPanelComponent>;
 
   @Output()
   backgroundSettingsApplied = new EventEmitter<BackgroundSettings>();

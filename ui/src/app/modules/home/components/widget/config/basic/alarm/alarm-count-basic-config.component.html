@@ -1,5 +1,5 @@
 <ng-container [formGroup]="alarmCountWidgetConfigForm">
-  <tb-datasources
+  <jnks-iot-datasources
     [configMode]="basicMode"
     hideDatasourcesMode
     hideDatasourceLabel
@@ -7,47 +7,47 @@
     hideAlarmFilter
     displayDatasourceFilterForBasicMode
     formControlName="datasources">
-  </tb-datasources>
-  <div class="tb-form-panel">
+  </jnks-iot-datasources>
+  <div class="jnks-iot-form-panel">
     <div class="flex flex-row items-center justify-between">
-      <div class="tb-form-panel-title" translate>alarm.filter</div>
+      <div class="jnks-iot-form-panel-title" translate>alarm.filter</div>
       <button mat-button color="primary"
               (click)="alarmFilterConfig.reset()">
         {{ 'action.reset' | translate }}
       </button>
     </div>
-    <tb-alarm-filter-config #alarmFilterConfig buttonMode="false"
+    <jnks-iot-alarm-filter-config #alarmFilterConfig buttonMode="false"
                             propagatedFilter="false"
                             formControlName="alarmFilterConfig"
-                            [initialAlarmFilterConfig]="{ statusList: [alarmSearchStatus.ACTIVE] }"></tb-alarm-filter-config>
+                            [initialAlarmFilterConfig]="{ statusList: [alarmSearchStatus.ACTIVE] }"></jnks-iot-alarm-filter-config>
   </div>
-  <div class="tb-form-panel">
-    <div class="tb-form-panel-title" translate>widget-config.appearance</div>
-    <tb-count-widget-settings alarmElseEntity="true" formControlName="settings"></tb-count-widget-settings>
+  <div class="jnks-iot-form-panel">
+    <div class="jnks-iot-form-panel-title" translate>widget-config.appearance</div>
+    <jnks-iot-count-widget-settings alarmElseEntity="true" formControlName="settings"></jnks-iot-count-widget-settings>
   </div>
-  <div class="tb-form-panel">
-    <div class="tb-form-panel-title" translate>widget-config.card-appearance</div>
-    <div class="tb-form-row space-between">
+  <div class="jnks-iot-form-panel">
+    <div class="jnks-iot-form-panel-title" translate>widget-config.card-appearance</div>
+    <div class="jnks-iot-form-row space-between">
       <div>{{ 'widgets.background.background' | translate }}</div>
-      <tb-color-input asBoxInput
+      <jnks-iot-color-input asBoxInput
                       colorClearButton
                       formControlName="backgroundColor">
-      </tb-color-input>
+      </jnks-iot-color-input>
     </div>
-    <div class="tb-form-row space-between column-lt-md">
+    <div class="jnks-iot-form-row space-between column-lt-md">
       <div translate>widget-config.show-card-buttons</div>
       <mat-chip-listbox multiple formControlName="cardButtons">
         <mat-chip-option value="fullscreen">{{ 'fullscreen.fullscreen' | translate }}</mat-chip-option>
       </mat-chip-listbox>
     </div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <div>{{ 'widget-config.card-border-radius' | translate }}</div>
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <input matInput formControlName="borderRadius" placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
     </div>
   </div>
-  <tb-widget-actions-panel
+  <jnks-iot-widget-actions-panel
     formControlName="actions">
-  </tb-widget-actions-panel>
+  </jnks-iot-widget-actions-panel>
 </ng-container>

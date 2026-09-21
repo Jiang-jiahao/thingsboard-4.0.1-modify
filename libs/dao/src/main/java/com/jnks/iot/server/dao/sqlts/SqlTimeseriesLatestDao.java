@@ -32,9 +32,9 @@ import com.jnks.iot.server.dao.model.sql.AbstractTsKvEntity;
 import com.jnks.iot.server.dao.model.sqlts.latest.TsKvLatestCompositeKey;
 import com.jnks.iot.server.dao.model.sqlts.latest.TsKvLatestEntity;
 import com.jnks.iot.server.dao.sql.ScheduledLogExecutorComponent;
-import com.jnks.iot.server.dao.sql.TbSqlBlockingQueueParams;
-import com.jnks.iot.server.dao.sql.TbSqlBlockingQueueWrapper;
-import com.jnks.iot.server.dao.sql.TbSqlQueueElement;
+import com.jnks.iot.server.dao.sql.JnksIotSqlBlockingQueueParams;
+import com.jnks.iot.server.dao.sql.JnksIotSqlBlockingQueueWrapper;
+import com.jnks.iot.server.dao.sql.JnksIotSqlQueueElement;
 import com.jnks.iot.server.dao.sqlts.insert.latest.InsertLatestTsRepository;
 import com.jnks.iot.server.dao.sqlts.latest.SearchTsKvLatestRepository;
 import com.jnks.iot.server.dao.sqlts.latest.TsKvLatestRepository;
@@ -70,7 +70,7 @@ public class SqlTimeseriesLatestDao extends BaseAbstractSqlTimeseriesDao impleme
     @Autowired
     private InsertLatestTsRepository insertLatestTsRepository;
 
-    private TbSqlBlockingQueueWrapper<TsKvLatestEntity, Long> tsLatestQueue;
+    private JnksIotSqlBlockingQueueWrapper<TsKvLatestEntity, Long> tsLatestQueue;
 
     @Value("${sql.ts_latest.batch_size:1000}")
     private int tsLatestBatchSize;
@@ -98,7 +98,7 @@ public class SqlTimeseriesLatestDao extends BaseAbstractSqlTimeseriesDao impleme
 
     @PostConstruct
     protected void init() {
-        TbSqlBlockingQueueParams tsLatestParams = TbSqlBlockingQueueParams.builder()
+        JnksIotSqlBlockingQueueParams tsLatestParams = JnksIotSqlBlockingQueueParams.builder()
                 .logName("TS Latest")
                 .batchSize(tsLatestBatchSize)
                 .maxDelay(tsLatestMaxDelay)
@@ -109,14 +109,14 @@ public class SqlTimeseriesLatestDao extends BaseAbstractSqlTimeseriesDao impleme
                 .build();
 
         java.util.function.Function<TsKvLatestEntity, Integer> hashcodeFunction = entity -> entity.getEntityId().hashCode();
-        tsLatestQueue = new TbSqlBlockingQueueWrapper<>(tsLatestParams, hashcodeFunction, tsLatestBatchThreads, statsFactory);
+        tsLatestQueue = new JnksIotSqlBlockingQueueWrapper<>(tsLatestParams, hashcodeFunction, tsLatestBatchThreads, statsFactory);
 
         tsLatestQueue.init(logExecutor,
                 v -> insertLatestTsRepository.saveOrUpdate(v),
                 Comparator.comparing((Function<TsKvLatestEntity, UUID>) AbstractTsKvEntity::getEntityId)
                         .thenComparingInt(AbstractTsKvEntity::getKey),
                 v -> {
-                    Map<TsKey, TbSqlQueueElement<TsKvLatestEntity, Long>> trueLatest = new HashMap<>();
+                    Map<TsKey, JnksIotSqlQueueElement<TsKvLatestEntity, Long>> trueLatest = new HashMap<>();
                     v.forEach(element -> {
                         var entity = element.getEntity();
                         TsKey key = new TsKey(entity.getEntityId(), entity.getKey());

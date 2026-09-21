@@ -1,14 +1,14 @@
 <section [formGroup]="mathFunctionConfigForm" class="flex flex-col">
-  <tb-math-function-autocomplete
+  <jnks-iot-math-function-autocomplete
     class="flex-full max-h-30% xs:max-h-full md:max-h-full"
     required
     formControlName="operation">
-  </tb-math-function-autocomplete>
+  </jnks-iot-math-function-autocomplete>
   <fieldset class="fields-group flex flex-col gap-2">
     <legend class="group-title" translate>rule-node-config.argument-tile</legend>
-    <tb-arguments-map-config formControlName="arguments"
+    <jnks-iot-arguments-map-config formControlName="arguments"
                              [function]="mathFunctionConfigForm.get('operation').value">
-    </tb-arguments-map-config>
+    </jnks-iot-arguments-map-config>
   </fieldset>
   <fieldset *ngIf="mathFunctionConfigForm.get('operation').value === MathFunction.CUSTOM"
             class="fields-group flex flex-col gap-2">
@@ -17,9 +17,9 @@
       <input matInput formControlName="customFunction" required/>
       <div  matSuffix
             class="pr-2"
-            [tb-help-popup]="'math/math-methods_fn'"
-            tb-help-popup-placement="left"
-            [tb-help-popup-style]="{maxWidth: '970px'}">
+            [jnks-iot-help-popup]="'math/math-methods_fn'"
+            jnks-iot-help-popup-placement="left"
+            [jnks-iot-help-popup-style]="{maxWidth: '970px'}">
       </div>
       <mat-error *ngIf="mathFunctionConfigForm.get('customFunction').hasError('required')" translate>
         rule-node-config.custom-expression-field-input-required

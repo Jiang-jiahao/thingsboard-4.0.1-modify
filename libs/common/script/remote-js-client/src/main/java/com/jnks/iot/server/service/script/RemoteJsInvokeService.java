@@ -14,15 +14,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 import com.jnks.iot.common.util.JnksIotThreadFactory;
-import com.jnks.iot.script.api.TbScriptException;
+import com.jnks.iot.script.api.JnksIotScriptException;
 import com.jnks.iot.script.api.js.AbstractJsInvokeService;
 import com.jnks.iot.script.api.js.JsScriptInfo;
-import com.jnks.iot.server.common.stats.TbApiUsageReportClient;
-import com.jnks.iot.server.common.stats.TbApiUsageStateClient;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageReportClient;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageStateClient;
 import com.jnks.iot.server.gen.js.JsInvokeProtos;
-import com.jnks.iot.server.queue.TbQueueRequestTemplate;
-import com.jnks.iot.server.queue.common.TbProtoJsQueueMsg;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueRequestTemplate;
+import com.jnks.iot.server.queue.common.JnksIotProtoJsQueueMsg;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
 
 import java.util.Map;
 import java.util.Optional;
@@ -67,7 +67,7 @@ public class RemoteJsInvokeService extends AbstractJsInvokeService {
     private final ExecutorService callbackExecutor = Executors.newFixedThreadPool(
             Runtime.getRuntime().availableProcessors(), JnksIotThreadFactory.forName("js-executor-remote-callback"));
 
-    public RemoteJsInvokeService(Optional<TbApiUsageStateClient> apiUsageStateClient, Optional<TbApiUsageReportClient> apiUsageClient) {
+    public RemoteJsInvokeService(Optional<JnksIotApiUsageStateClient> apiUsageStateClient, Optional<JnksIotApiUsageReportClient> apiUsageClient) {
         super(apiUsageStateClient, apiUsageClient);
     }
 
@@ -87,7 +87,7 @@ public class RemoteJsInvokeService extends AbstractJsInvokeService {
     }
 
     @Autowired
-    protected TbQueueRequestTemplate<TbProtoJsQueueMsg<JsInvokeProtos.RemoteJsRequest>, TbProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> requestTemplate;
+    protected JnksIotQueueRequestTemplate<JnksIotProtoJsQueueMsg<JsInvokeProtos.RemoteJsRequest>, JnksIotProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> requestTemplate;
 
     protected final Map<String, String> scriptHashToBodysMap = new ConcurrentHashMap<>();
     private final Lock scriptsLock = new ReentrantLock();
@@ -121,7 +121,7 @@ public class RemoteJsInvokeService extends AbstractJsInvokeService {
                 .build();
 
         log.trace("Post compile request for scriptId [{}] (hash: {})", scriptId, jsInfo.getHash());
-        ListenableFuture<TbProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> future = requestTemplate.send(new TbProtoJsQueueMsg<>(UUID.randomUUID(), jsRequestWrapper));
+        ListenableFuture<JnksIotProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> future = requestTemplate.send(new JnksIotProtoJsQueueMsg<>(UUID.randomUUID(), jsRequestWrapper));
         return Futures.transform(future, response -> {
             JsInvokeProtos.JsCompileResponse compilationResult = response.getValue().getCompileResponse();
             if (compilationResult.getSuccess()) {
@@ -136,7 +136,7 @@ public class RemoteJsInvokeService extends AbstractJsInvokeService {
             } else {
                 log.debug("[{}] (hash: {}) Failed to compile script due to [{}]: {}", scriptId, compilationResult.getScriptHash(),
                         compilationResult.getErrorCode().name(), compilationResult.getErrorDetails());
-                throw new TbScriptException(scriptId, TbScriptException.ErrorCode.COMPILATION, scriptBody, new RuntimeException(compilationResult.getErrorDetails()));
+                throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.COMPILATION, scriptBody, new RuntimeException(compilationResult.getErrorDetails()));
             }
         }, callbackExecutor);
     }
@@ -160,7 +160,7 @@ public class RemoteJsInvokeService extends AbstractJsInvokeService {
         }
 
         UUID requestKey = UUID.randomUUID();
-        ListenableFuture<TbProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> future = requestTemplate.send(new TbProtoJsQueueMsg<>(requestKey, jsRequestWrapper));
+        ListenableFuture<JnksIotProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> future = requestTemplate.send(new JnksIotProtoJsQueueMsg<>(requestKey, jsRequestWrapper));
         return Futures.transformAsync(future, response -> {
             if (log.isTraceEnabled()) {
                 stopWatch.stop();
@@ -200,15 +200,15 @@ public class RemoteJsInvokeService extends AbstractJsInvokeService {
         final RuntimeException e = new RuntimeException(errorDetails);
         log.debug("[{}] Failed to invoke function due to [{}]: {}", scriptId, errorCode.name(), errorDetails);
         if (JsInvokeProtos.JsInvokeErrorCode.TIMEOUT_ERROR.equals(errorCode)) {
-            throw new TbScriptException(scriptId, TbScriptException.ErrorCode.TIMEOUT, scriptBody, new TimeoutException());
+            throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.TIMEOUT, scriptBody, new TimeoutException());
         } else if (JsInvokeProtos.JsInvokeErrorCode.COMPILATION_ERROR.equals(errorCode)) {
-            throw new TbScriptException(scriptId, TbScriptException.ErrorCode.COMPILATION, scriptBody, e);
+            throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.COMPILATION, scriptBody, e);
         } else if (JsInvokeProtos.JsInvokeErrorCode.NOT_FOUND_ERROR.equals(errorCode)) {
             log.debug("[{}] Remote JS executor couldn't find the script", scriptId);
             if (scriptBody != null) {
                 JsInvokeProtos.RemoteJsRequest invokeRequestWithScriptBody = buildJsInvokeRequest(jsInfo, args, true, scriptBody);
                 log.debug("[{}] Sending invoke request again with script body", scriptId);
-                ListenableFuture<TbProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> future = requestTemplate.send(new TbProtoJsQueueMsg<>(requestKey, invokeRequestWithScriptBody));
+                ListenableFuture<JnksIotProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> future = requestTemplate.send(new JnksIotProtoJsQueueMsg<>(requestKey, invokeRequestWithScriptBody));
                 return Futures.transformAsync(future, response -> {
                     JsInvokeProtos.JsInvokeResponse result = response.getValue().getInvokeResponse();
                     if (result.getSuccess()) {
@@ -219,7 +219,7 @@ public class RemoteJsInvokeService extends AbstractJsInvokeService {
                 }, MoreExecutors.directExecutor());
             }
         }
-        throw new TbScriptException(scriptId, TbScriptException.ErrorCode.RUNTIME, scriptBody, e);
+        throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.RUNTIME, scriptBody, e);
     }
 
     @Override
@@ -237,7 +237,7 @@ public class RemoteJsInvokeService extends AbstractJsInvokeService {
                 .setReleaseRequest(jsRequest)
                 .build();
 
-        ListenableFuture<TbProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> future = requestTemplate.send(new TbProtoJsQueueMsg<>(UUID.randomUUID(), jsRequestWrapper));
+        ListenableFuture<JnksIotProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> future = requestTemplate.send(new JnksIotProtoJsQueueMsg<>(UUID.randomUUID(), jsRequestWrapper));
         if (getMaxInvokeRequestsTimeout() > 0) {
             future = Futures.withTimeout(future, getMaxInvokeRequestsTimeout(), TimeUnit.MILLISECONDS, timeoutExecutorService);
         }

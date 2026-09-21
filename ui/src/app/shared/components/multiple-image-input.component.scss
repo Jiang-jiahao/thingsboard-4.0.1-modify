@@ -34,14 +34,14 @@ $previewSize: 64px !default;
   height: $previewSize;
 }
 
-.tb-image-preview {
+.jnks-iot-image-preview {
   width: auto;
   max-width: $previewSize - 2px;
   height: auto;
   max-height: $previewSize  - 2px;
 }
 
-.tb-image-preview-container {
+.jnks-iot-image-preview-container {
   position: relative;
   width: $previewSize;
   height: $previewSize;
@@ -49,7 +49,7 @@ $previewSize: 64px !default;
   margin-bottom: -1px;
   border: 1px solid rgba(0, 0, 0, 0.54);
 
-  .tb-image-preview {
+  .jnks-iot-image-preview {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -57,7 +57,7 @@ $previewSize: 64px !default;
   }
 }
 
-.tb-image-action-container {
+.jnks-iot-image-action-container {
   position: relative;
   height: $previewSize - 2px;
   display: flex;
@@ -68,15 +68,15 @@ $previewSize: 64px !default;
 
 :host {
 
-  .tb-container {
+  .jnks-iot-container {
     margin-top: 0;
-    label.tb-title {
+    label.jnks-iot-title {
       display: block;
       padding-bottom: 8px;
     }
   }
 
-  .tb-image-select-container {
+  .jnks-iot-image-select-container {
     position: relative;
     width: 100%;
   }
@@ -104,7 +104,7 @@ $previewSize: 64px !default;
     display: none;
   }
 
-  .tb-flow-drop {
+  .jnks-iot-flow-drop {
     position: relative;
     height: $containerHeight;
     overflow: hidden;
@@ -133,7 +133,7 @@ $previewSize: 64px !default;
     }
   }
 
-  .tb-hint{
+  .jnks-iot-hint{
     margin-top: 8px;
   }
 }

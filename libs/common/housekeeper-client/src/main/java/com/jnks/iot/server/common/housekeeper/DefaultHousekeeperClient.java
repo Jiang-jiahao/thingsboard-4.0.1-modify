@@ -9,29 +9,29 @@ import com.jnks.iot.server.common.msg.housekeeper.HousekeeperClient;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
 import com.jnks.iot.server.gen.transport.TransportProtos;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToHousekeeperServiceMsg;
-import com.jnks.iot.server.queue.TbQueueCallback;
-import com.jnks.iot.server.queue.TbQueueMsgMetadata;
-import com.jnks.iot.server.queue.TbQueueProducer;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
-import com.jnks.iot.server.queue.provider.TbQueueProducerProvider;
+import com.jnks.iot.server.queue.JnksIotQueueCallback;
+import com.jnks.iot.server.queue.JnksIotQueueMsgMetadata;
+import com.jnks.iot.server.queue.JnksIotQueueProducer;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
+import com.jnks.iot.server.queue.provider.JnksIotQueueProducerProvider;
 
 @Service
 @Slf4j
 public class DefaultHousekeeperClient implements HousekeeperClient {
 
     private final HousekeeperConfig config;
-    private final TbQueueProducer<TbProtoQueueMsg<ToHousekeeperServiceMsg>> producer;
+    private final JnksIotQueueProducer<JnksIotProtoQueueMsg<ToHousekeeperServiceMsg>> producer;
     private final TopicPartitionInfo submitTpi;
-    private final TbQueueCallback submitCallback;
+    private final JnksIotQueueCallback submitCallback;
 
     public DefaultHousekeeperClient(HousekeeperConfig config,
-                                    TbQueueProducerProvider producerProvider) {
+                                    JnksIotQueueProducerProvider producerProvider) {
         this.config = config;
         this.producer = producerProvider.getHousekeeperMsgProducer();
         this.submitTpi = TopicPartitionInfo.builder().topic(producer.getDefaultTopic()).build();
-        this.submitCallback = new TbQueueCallback() {
+        this.submitCallback = new JnksIotQueueCallback() {
             @Override
-            public void onSuccess(TbQueueMsgMetadata metadata) {
+            public void onSuccess(JnksIotQueueMsgMetadata metadata) {
                 log.trace("Submitted Housekeeper task");
             }
 
@@ -56,7 +56,7 @@ public class DefaultHousekeeperClient implements HousekeeperClient {
          * e.g. on tenant deletion (entity id is tenant id), we need to clean up tenant entities in certain order
          * */
         try {
-            producer.send(submitTpi, new TbProtoQueueMsg<>(task.getEntityId().getId(), ToHousekeeperServiceMsg.newBuilder()
+            producer.send(submitTpi, new JnksIotProtoQueueMsg<>(task.getEntityId().getId(), ToHousekeeperServiceMsg.newBuilder()
                     .setTask(TransportProtos.HousekeeperTaskProto.newBuilder()
                             .setValue(JacksonUtil.toString(task))
                             .setTs(task.getTs())

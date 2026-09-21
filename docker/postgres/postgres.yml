@@ -20,23 +20,23 @@ services:
       - ../tb/postgres-data:/var/lib/postgresql/data
       # 只在数据目录为空时执行 —— 已经初始化过的库不会被重复初始化
       - ../postgres/init:/docker-entrypoint-initdb.d:ro
-  tb-core1:
+  jnks-iot-core1:
     env_file:
-      - ../postgres/tb-node.postgres.env
+      - ../postgres/jnks-iot-node.postgres.env
     depends_on:
       - postgres
-  tb-core2:
+  jnks-iot-core2:
     env_file:
-      - ../postgres/tb-node.postgres.env
+      - ../postgres/jnks-iot-node.postgres.env
     depends_on:
       - postgres
-  tb-rule-engine1:
+  jnks-iot-rule-engine1:
     env_file:
-      - ../postgres/tb-node.postgres.env
+      - ../postgres/jnks-iot-node.postgres.env
     depends_on:
       - postgres
-  tb-rule-engine2:
+  jnks-iot-rule-engine2:
     env_file:
-      - ../postgres/tb-node.postgres.env
+      - ../postgres/jnks-iot-node.postgres.env
     depends_on:
       - postgres

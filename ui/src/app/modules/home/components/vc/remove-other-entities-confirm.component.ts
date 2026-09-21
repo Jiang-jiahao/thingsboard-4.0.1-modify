@@ -7,7 +7,7 @@ import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
-  selector: 'tb-remove-other-entities-confirm',
+  selector: 'jnks-iot-remove-other-entities-confirm',
   templateUrl: './remove-other-entities-confirm.component.html',
   styleUrls: []
 })

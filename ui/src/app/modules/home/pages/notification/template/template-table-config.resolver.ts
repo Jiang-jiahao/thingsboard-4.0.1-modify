@@ -88,7 +88,7 @@ export class TemplateTableConfigResolver  {
     return this.dialog.open<TemplateNotificationDialogComponent, TemplateNotificationDialogData,
       NotificationTemplate>(TemplateNotificationDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         isCopy,

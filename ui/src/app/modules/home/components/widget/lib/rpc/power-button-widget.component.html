@@ -1,9 +1,9 @@
-<div class="tb-power-button-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
-  <div class="tb-power-button-overlay" [style]="overlayStyle"></div>
+<div class="jnks-iot-power-button-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
+  <div class="jnks-iot-power-button-overlay" [style]="overlayStyle"></div>
   <ng-container *ngTemplateOutlet="widgetTitlePanel"></ng-container>
-  <div class="tb-power-button-content">
-    <div #powerButtonShape class="tb-power-button-shape" [class.tb-power-button-pointer]="!disabled && (loading$ | async) === false">
+  <div class="jnks-iot-power-button-content">
+    <div #powerButtonShape class="jnks-iot-power-button-shape" [class.jnks-iot-power-button-pointer]="!disabled && (loading$ | async) === false">
     </div>
   </div>
-  <mat-progress-bar class="tb-action-widget-progress" style="height: 4px;" color="accent" mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+  <mat-progress-bar class="jnks-iot-action-widget-progress" style="height: 4px;" color="accent" mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
 </div>

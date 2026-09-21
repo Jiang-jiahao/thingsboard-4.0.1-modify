@@ -2,10 +2,10 @@ package com.jnks.iot.script.api.tbel;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import org.mvel2.ExecutionContext;
-import com.jnks.iot.script.api.TbScriptExecutionTask;
+import com.jnks.iot.script.api.JnksIotScriptExecutionTask;
 
 
-public class TbelScriptExecutionTask extends TbScriptExecutionTask {
+public class TbelScriptExecutionTask extends JnksIotScriptExecutionTask {
 
     private final ExecutionContext context;
 

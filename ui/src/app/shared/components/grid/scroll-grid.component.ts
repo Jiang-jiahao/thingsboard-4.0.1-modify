@@ -27,7 +27,7 @@ export interface ItemSizeStrategy {
 }
 
 @Component({
-  selector: 'tb-scroll-grid',
+  selector: 'jnks-iot-scroll-grid',
   templateUrl: './scroll-grid.component.html',
   styleUrls: ['./scroll-grid.component.scss'],
   encapsulation: ViewEncapsulation.None

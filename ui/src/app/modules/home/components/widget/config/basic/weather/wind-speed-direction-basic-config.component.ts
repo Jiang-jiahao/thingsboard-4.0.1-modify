@@ -29,7 +29,7 @@ import {
 } from '@home/components/widget/lib/weather/wind-speed-direction-widget.models';
 
 @Component({
-  selector: 'tb-wind-speed-direction-basic-config',
+  selector: 'jnks-iot-wind-speed-direction-basic-config',
   templateUrl: './wind-speed-direction-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

@@ -8,8 +8,8 @@ import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.stereotype.Service;
 import com.jnks.iot.server.cache.CacheSpecsMap;
 import com.jnks.iot.server.cache.TBRedisCacheConfiguration;
-import com.jnks.iot.server.cache.TbRedisSerializer;
-import com.jnks.iot.server.cache.VersionedRedisTbCache;
+import com.jnks.iot.server.cache.JnksIotRedisSerializer;
+import com.jnks.iot.server.cache.VersionedRedisJnksIotCache;
 import com.jnks.iot.server.common.data.CacheConstants;
 import com.jnks.iot.server.common.data.kv.TsKvEntry;
 import com.jnks.iot.server.common.util.KvProtoUtil;
@@ -18,10 +18,10 @@ import com.jnks.iot.server.gen.transport.TransportProtos;
 @ConditionalOnProperty(prefix = "cache", value = "type", havingValue = "redis")
 @Service("TsLatestCache")
 @Slf4j
-public class TsLatestRedisCache extends VersionedRedisTbCache<TsLatestCacheKey, TsKvEntry> {
+public class TsLatestRedisCache extends VersionedRedisJnksIotCache<TsLatestCacheKey, TsKvEntry> {
 
     public TsLatestRedisCache(TBRedisCacheConfiguration configuration, CacheSpecsMap cacheSpecsMap, RedisConnectionFactory connectionFactory) {
-        super(CacheConstants.TS_LATEST_CACHE, cacheSpecsMap, connectionFactory, configuration, new TbRedisSerializer<>() {
+        super(CacheConstants.TS_LATEST_CACHE, cacheSpecsMap, connectionFactory, configuration, new JnksIotRedisSerializer<>() {
             @Override
             public byte[] serialize(TsKvEntry tsKvEntry) throws SerializationException {
                 return KvProtoUtil.toTsKvProto(tsKvEntry.getTs(), tsKvEntry, tsKvEntry.getVersion()).toByteArray();

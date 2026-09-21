@@ -1,7 +1,7 @@
-<section class="tb-kv-map-config flex flex-col" [formGroup]="kvListFormGroup">
+<section class="jnks-iot-kv-map-config flex flex-col" [formGroup]="kvListFormGroup">
   <div class="header flex flex-1 flex-row gap-2">
-    <span class="cell tb-required flex-1">{{ keyText | translate }}</span>
-    <span class="cell tb-required flex-1">{{ valText | translate }}</span>
+    <span class="cell jnks-iot-required flex-1">{{ keyText | translate }}</span>
+    <span class="cell jnks-iot-required flex-1">{{ valText | translate }}</span>
     <span [class.!hidden]="disabled" style="width: 52px;" innerHTML="&nbsp"></span>
   </div>
   <div class="body">
@@ -32,12 +32,12 @@
         <mat-icon>close</mat-icon>
       </button>
     </div>
-    <div *ngIf="hintText" class="tb-hint" [innerHTML]="hintText | translate | safe: 'html'"></div>
+    <div *ngIf="hintText" class="jnks-iot-hint" [innerHTML]="hintText | translate | safe: 'html'"></div>
   </div>
-  <tb-error [error]="ngControl.hasError('kvMapRequired') || ngControl.hasError('uniqueKeyValuePair') ?
+  <jnks-iot-error [error]="ngControl.hasError('kvMapRequired') || ngControl.hasError('uniqueKeyValuePair') ?
                      (ngControl.hasError('kvMapRequired') ? translate.instant(requiredText) :
                      translate.instant('rule-node-config.key-val.unique-key-value-pair-error', {keyText: translate.instant(keyText),
-                     valText: translate.instant(valText)})) : ''"></tb-error>
+                     valText: translate.instant(valText)})) : ''"></jnks-iot-error>
   <div style="margin-top: 16px;">
     <button mat-button mat-raised-button color="primary"
             [class.!hidden]="disabled"

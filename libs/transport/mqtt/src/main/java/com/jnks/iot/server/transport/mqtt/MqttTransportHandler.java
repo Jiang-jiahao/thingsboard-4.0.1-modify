@@ -50,8 +50,8 @@ import com.jnks.iot.server.common.data.tenant.profile.DefaultTenantProfileConfig
 import com.jnks.iot.server.common.data.transport.http.HttpPullPollDataType;
 import com.jnks.iot.server.common.data.transport.mqtt.MqttUplinkTopicMapping;
 import com.jnks.iot.server.common.msg.EncryptionUtil;
-import com.jnks.iot.server.common.msg.TbMsgMetaData;
-import com.jnks.iot.server.common.msg.tools.TbRateLimitsException;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
+import com.jnks.iot.server.common.msg.tools.JnksIotRateLimitsException;
 import com.jnks.iot.server.common.transport.SessionMsgListener;
 import com.jnks.iot.server.common.transport.TransportService;
 import com.jnks.iot.server.common.transport.TransportServiceCallback;
@@ -799,9 +799,9 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
     /**
      * 获取元数据 - 如果是MQTT传输类型的设备，在元数据中添加MQTT主题信息
      */
-    private TbMsgMetaData getMetadata(DeviceSessionCtx ctx, String topicName) {
+    private JnksIotMsgMetaData getMetadata(DeviceSessionCtx ctx, String topicName) {
         if (ctx.isDeviceProfileMqttTransportType()) {
-            TbMsgMetaData md = new TbMsgMetaData();
+            JnksIotMsgMetaData md = new JnksIotMsgMetaData();
             md.putValue(DataConstants.MQTT_TOPIC, topicName);
             return md;
         } else {
@@ -1648,7 +1648,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
 
                 @Override
                 public void onError(Throwable e) {
-                    if (e instanceof TbRateLimitsException) {
+                    if (e instanceof JnksIotRateLimitsException) {
                         // 速率限制异常
                         log.trace("[{}] Failed to submit session event: {}", sessionId, e.getMessage());
                         ctx.writeAndFlush(createMqttConnAckMsg(MqttConnectReturnCode.CONNECTION_REFUSED_CONNECTION_RATE_EXCEEDED, connectMessage));

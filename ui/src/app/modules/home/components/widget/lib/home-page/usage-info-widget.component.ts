@@ -11,7 +11,7 @@ import { UsageInfoService } from '@core/http/usage-info.service';
 import { ShortNumberPipe } from '@shared/pipe/short-number.pipe';
 
 @Component({
-  selector: 'tb-usage-info-widget',
+  selector: 'jnks-iot-usage-info-widget',
   templateUrl: './usage-info-widget.component.html',
   styleUrls: ['./home-page-widget.scss', './usage-info-widget.component.scss']
 })

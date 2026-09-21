@@ -1,4 +1,4 @@
-<div class="tb-details-buttons xs:flex xs:flex-col" *ngIf="!standalone">
+<div class="jnks-iot-details-buttons xs:flex xs:flex-col" *ngIf="!standalone">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'open')"
@@ -42,14 +42,14 @@
         </mat-error>
       </mat-form-field>
       <div class="flex flex-col">
-        <mat-checkbox class="hinted-checkbox" formControlName="isolatedTbRuleEngine">
+        <mat-checkbox class="hinted-checkbox" formControlName="isolatedJnksIotRuleEngine">
           <div>{{ 'tenant.isolated-tb-rule-engine' | translate }}</div>
-          <div class="tb-hint">{{'tenant.isolated-tb-rule-engine-details' | translate}}</div>
+          <div class="jnks-iot-hint">{{'tenant.isolated-tb-rule-engine-details' | translate}}</div>
         </mat-checkbox>
       </div>
       <div class="expansion-panel-block">
         <mat-accordion formGroupName="profileData" multi>
-          <mat-expansion-panel [expanded]="true" *ngIf="entityForm.get('isolatedTbRuleEngine').value">
+          <mat-expansion-panel [expanded]="true" *ngIf="entityForm.get('isolatedJnksIotRuleEngine').value">
             <mat-expansion-panel-header>
               <mat-panel-title>
                 {{'tenant-profile.queues-with-count' | translate:
@@ -58,9 +58,9 @@
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <tb-tenant-profile-queues
+              <jnks-iot-tenant-profile-queues
                 formControlName="queueConfiguration"
-              ></tb-tenant-profile-queues>
+              ></jnks-iot-tenant-profile-queues>
             </ng-template>
           </mat-expansion-panel>
           <mat-expansion-panel [expanded]="true">
@@ -70,10 +70,10 @@
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <tb-tenant-profile-data
+              <jnks-iot-tenant-profile-data
                 formControlName="configuration"
                 required>
-              </tb-tenant-profile-data>
+              </jnks-iot-tenant-profile-data>
             </ng-template>
           </mat-expansion-panel>
         </mat-accordion>

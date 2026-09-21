@@ -17,7 +17,7 @@ import {
 import { isUndefined } from '@core/utils';
 
 @Component({
-  selector: 'tb-compass-gauge-basic-config',
+  selector: 'jnks-iot-compass-gauge-basic-config',
   templateUrl: './compass-gauge-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

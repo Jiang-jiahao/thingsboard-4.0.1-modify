@@ -27,27 +27,27 @@
       {{ 'rule-node-config.number-of-digits-after-floating-point-range' | translate }}
     </mat-error>
   </mat-form-field>
-  <div class="tb-form-panel no-padding no-border">
-    <div tb-hint-tooltip-icon="{{ 'rule-node-config.failure-if-delta-negative-tooltip' | translate }}"
-         class="tb-form-row same-padding">
+  <div class="jnks-iot-form-panel no-padding no-border">
+    <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.failure-if-delta-negative-tooltip' | translate }}"
+         class="jnks-iot-form-row same-padding">
       <mat-slide-toggle class="mat-slide margin" formControlName="tellFailureIfDeltaIsNegative">
         {{ 'rule-node-config.failure-if-delta-negative' | translate }}
       </mat-slide-toggle>
     </div>
-    <div tb-hint-tooltip-icon="{{ 'rule-node-config.use-caching-tooltip' | translate :
+    <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.use-caching-tooltip' | translate :
                        { inputValueKey: calculateDeltaConfigForm.get('inputValueKey').valid ?
                                 calculateDeltaConfigForm.get('inputValueKey').value : 'rule-node-config.input-value-key' | translate } }}"
-         class="tb-form-row same-padding">
+         class="jnks-iot-form-row same-padding">
       <mat-slide-toggle class="mat-slide margin" formControlName="useCache">
         {{ 'rule-node-config.use-caching' | translate }}
       </mat-slide-toggle>
     </div>
-    <div class="tb-form-panel stroked" [class.no-padding-bottom]="calculateDeltaConfigForm.get('addPeriodBetweenMsgs').value">
-      <div tb-hint-tooltip-icon="{{ 'rule-node-config.add-time-difference-between-readings-tooltip' | translate:
+    <div class="jnks-iot-form-panel stroked" [class.no-padding-bottom]="calculateDeltaConfigForm.get('addPeriodBetweenMsgs').value">
+      <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.add-time-difference-between-readings-tooltip' | translate:
                            { periodValueKey: (calculateDeltaConfigForm.get('periodValueKey').valid &&
                            calculateDeltaConfigForm.get('addPeriodBetweenMsgs').value) ? calculateDeltaConfigForm.get('periodValueKey').value :
                            'periodInMs' } }}"
-           class="tb-form-row no-border no-padding">
+           class="jnks-iot-form-row no-border no-padding">
         <mat-slide-toggle class="mat-slide" formControlName="addPeriodBetweenMsgs">
           {{ 'rule-node-config.add-time-difference-between-readings' | translate:
           { inputValueKey: calculateDeltaConfigForm.get('inputValueKey').valid ?
@@ -62,11 +62,11 @@
         </mat-error>
       </mat-form-field>
     </div>
-    <div tb-hint-tooltip-icon="{{ calculateDeltaConfigForm.get('addPeriodBetweenMsgs').value ? ('rule-node-config.exclude-zero-deltas-time-difference-hint'  | translate :{
+    <div jnks-iot-hint-tooltip-icon="{{ calculateDeltaConfigForm.get('addPeriodBetweenMsgs').value ? ('rule-node-config.exclude-zero-deltas-time-difference-hint'  | translate :{
             outputValueKey: calculateDeltaConfigForm.get('outputValueKey').valid ? calculateDeltaConfigForm.get('outputValueKey').value : 'rule-node-config.output-value-key' | translate,
             periodValueKey: calculateDeltaConfigForm.get('periodValueKey').valid ? calculateDeltaConfigForm.get('periodValueKey').value : 'rule-node-config.period-value-key' | translate
             }) : ('rule-node-config.exclude-zero-deltas-hint' | translate :{ outputValueKey: calculateDeltaConfigForm.get('outputValueKey').valid ? calculateDeltaConfigForm.get('outputValueKey').value : 'rule-node-config.output-value-key' | translate }) }}"
-         class="tb-form-row same-padding">
+         class="jnks-iot-form-row same-padding">
       <mat-slide-toggle class="mat-slide margin" formControlName="excludeZeroDeltas">
         {{ 'rule-node-config.exclude-zero-deltas' | translate }}
       </mat-slide-toggle>

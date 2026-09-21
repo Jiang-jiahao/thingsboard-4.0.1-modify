@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @ToString(callSuper = true)
-public class PartitionChangeEvent extends TbApplicationEvent {
+public class PartitionChangeEvent extends JnksIotApplicationEvent {
 
     @Serial
     private static final long serialVersionUID = -8731788167026510559L;
@@ -36,7 +36,7 @@ public class PartitionChangeEvent extends TbApplicationEvent {
     }
 
     public Set<TopicPartitionInfo> getCorePartitions() {
-        return getPartitionsByServiceTypeAndQueueName(ServiceType.TB_CORE, DataConstants.MAIN_QUEUE_NAME);
+        return getPartitionsByServiceTypeAndQueueName(ServiceType.JNKS_IOT_CORE, DataConstants.MAIN_QUEUE_NAME);
     }
 
     public Set<TopicPartitionInfo> getPartitions() {
@@ -44,7 +44,7 @@ public class PartitionChangeEvent extends TbApplicationEvent {
     }
 
     public Set<TopicPartitionInfo> getCfPartitions() {
-        return getPartitionsByServiceTypeAndQueueName(ServiceType.TB_RULE_ENGINE, DataConstants.CF_QUEUE_NAME);
+        return getPartitionsByServiceTypeAndQueueName(ServiceType.JNKS_IOT_RULE_ENGINE, DataConstants.CF_QUEUE_NAME);
     }
 
     public Set<TopicPartitionInfo> getPartitionsByServiceTypeAndQueueName(ServiceType serviceType, String queueName) {

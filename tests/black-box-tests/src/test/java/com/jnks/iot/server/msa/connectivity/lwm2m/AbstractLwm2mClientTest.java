@@ -20,7 +20,7 @@ import com.jnks.iot.server.common.data.DeviceProfileProvisionType;
 import com.jnks.iot.server.common.data.DeviceProfileType;
 import com.jnks.iot.server.common.data.DeviceTransportType;
 import com.jnks.iot.server.common.data.ResourceType;
-import com.jnks.iot.server.common.data.TbResource;
+import com.jnks.iot.server.common.data.JnksIotResource;
 import com.jnks.iot.server.common.data.device.credentials.lwm2m.LwM2MBootstrapClientCredentials;
 import com.jnks.iot.server.common.data.device.credentials.lwm2m.LwM2MClientCredential;
 import com.jnks.iot.server.common.data.device.credentials.lwm2m.LwM2MDeviceCredentials;
@@ -260,14 +260,14 @@ public class AbstractLwm2mClientTest extends AbstractContainerTest {
         tenantId = lwm2mDeviceProfile.getTenantId();
 
         for (String resourceName : resources) {
-            TbResource lwModel = new TbResource();
+            JnksIotResource lwModel = new JnksIotResource();
             lwModel.setResourceType(ResourceType.LWM2M_MODEL);
             lwModel.setTitle(resourceName);
             lwModel.setFileName(resourceName);
             lwModel.setTenantId(tenantId);
             byte[] bytes = IOUtils.toByteArray(AbstractLwm2mClientTest.class.getClassLoader().getResourceAsStream("lwm2m-registry/" + resourceName));
             lwModel.setData(bytes);
-            testRestClient.postTbResourceIfNotExists(lwModel);
+            testRestClient.postJnksIotResourceIfNotExists(lwModel);
         }
         return lwm2mDeviceProfile;
     }

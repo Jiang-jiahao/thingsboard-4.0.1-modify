@@ -131,10 +131,10 @@ import { IAliasController } from '@core/api/widget-api.models';
 import { MatButton } from '@angular/material/button';
 import { VersionControlComponent } from '@home/components/vc/version-control.component';
 import { VERSION_CONTROL_UI_ENABLED } from '@shared/models/device.models';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { catchError, distinctUntilChanged, map, skip, tap } from 'rxjs/operators';
 import { LayoutFixedSize, LayoutWidthType } from '@home/components/dashboard-page/layout/layout.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { HasDirtyFlag } from '@core/guards/confirm-on-exit.guard';
 import {
   MoveWidgetsDialogComponent,
@@ -144,7 +144,7 @@ import { HttpStatusCode } from '@angular/common/http';
 
 // @dynamic
 @Component({
-  selector: 'tb-dashboard-page',
+  selector: 'jnks-iot-dashboard-page',
   templateUrl: './dashboard-page.component.html',
   styleUrls: ['./dashboard-page.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -203,7 +203,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
   parentDashboard?: IDashboardComponent = null;
 
   @Input()
-  popoverComponent?: TbPopoverComponent = null;
+  popoverComponent?: JnksIotPopoverComponent = null;
 
   @Input()
   parentAliasController?: IAliasController = null;
@@ -242,7 +242,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
   editingWidgetSubtitle: string = null;
   editingLayoutCtx: DashboardPageLayoutContext = null;
 
-  jnksIotVersion: string = env.tbVersion;
+  jnksIotVersion: string = env.jnksIotVersion;
 
   translatedDashboardTitle: string;
 
@@ -336,7 +336,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
   set mobileDisplayRightLayoutFirst(mobileDisplayRightLayoutFirst: boolean) {
   }
 
-  @ViewChild('tbEditWidget') editWidgetComponent: EditWidgetComponent;
+  @ViewChild('jnksIotEditWidget') editWidgetComponent: EditWidgetComponent;
 
   @ViewChild('dashboardWidgetSelect') dashboardWidgetSelectComponent: DashboardWidgetSelectComponent;
 
@@ -359,7 +359,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
               private mobileService: MobileService,
               private dialog: MatDialog,
               public translate: TranslateService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private ngZone: NgZone,
               @Optional() @Inject('embeddedValue') private embeddedValue,
@@ -531,8 +531,8 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     if (isNotEmptyStr(cssString)) {
       const cssParser = new cssjs();
       cssParser.testMode = false;
-      this.dashboardPageClass  = 'tb-dashboard-page-css-' + guid();
-      cssParser.cssPreviewNamespace = 'tb-default .' + this.dashboardPageClass;
+      this.dashboardPageClass  = 'jnks-iot-dashboard-page-css-' + guid();
+      cssParser.cssPreviewNamespace = 'jnks-iot-default .' + this.dashboardPageClass;
       cssParser.createStyleElement(this.dashboardPageClass, cssString);
     }
   }
@@ -873,7 +873,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     this.dialog.open<EntityAliasesDialogComponent, EntityAliasesDialogData,
       EntityAliases>(EntityAliasesDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         entityAliases: deepClone(this.dashboard.configuration.entityAliases),
         widgets: this.dashboardUtils.getWidgetsArray(this.dashboard),
@@ -894,7 +894,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     this.dialog.open<FiltersDialogComponent, FiltersDialogData,
       Filters>(FiltersDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         filters: deepClone(this.dashboard.configuration.filters),
         widgets: this.dashboardUtils.getWidgetsArray(this.dashboard),
@@ -923,7 +923,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     this.dialog.open<DashboardSettingsDialogComponent, DashboardSettingsDialogData,
       DashboardSettingsDialogData>(DashboardSettingsDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         settings: deepClone(this.dashboard.configuration.settings),
         gridSettings,
@@ -953,7 +953,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     this.dialog.open<ManageDashboardStatesDialogComponent, ManageDashboardStatesDialogData,
       {states: {[id: string]: DashboardState}; widgets: {[id: string]: Widget}}>(ManageDashboardStatesDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         states: deepClone(this.dashboard.configuration.states),
         widgets: deepClone(this.dashboard.configuration.widgets) as {[id: string]: Widget}
@@ -977,7 +977,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     this.dialog.open<ManageDashboardLayoutsDialogComponent, ManageDashboardLayoutsDialogData,
       DashboardStateLayouts>(ManageDashboardLayoutsDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         layouts: deepClone(this.dashboard.configuration.states[this.dashboardCtx.state].layouts)
       }
@@ -997,7 +997,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     this.dialog.open<MoveWidgetsDialogComponent, any,
       MoveWidgetsDialogResult>(MoveWidgetsDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
     }).afterClosed().subscribe((result) => {
       this.layouts[layoutId].layoutCtx.displayGrid = 'onDrag&Resize';
       if (result) {
@@ -1053,7 +1053,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     return this.dialog.open<EntityAliasesDialogComponent, EntityAliasesDialogData,
       EntityAliases>(EntityAliasesDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         entityAliases: missingEntityAliases,
         widgets,
@@ -1301,7 +1301,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
       return this.dialog.open<SelectTargetLayoutDialogComponent, any,
         DashboardLayoutId>(SelectTargetLayoutDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
       }).afterClosed();
     } else {
       return of(layoutIds[0] as DashboardLayoutId);
@@ -1359,7 +1359,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
           this.dialog.open<AddWidgetDialogComponent, AddWidgetDialogData,
             Widget>(AddWidgetDialogComponent, {
             disableClose: true,
-            panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+            panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
             maxWidth: '95vw',
             injector: this.injector,
             data: {
@@ -1725,7 +1725,7 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     this.dialog.open<DashboardImageDialogComponent, DashboardImageDialogData,
       DashboardImageDialogResult>(DashboardImageDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         dashboardId: this.dashboard.id,
         currentImage: this.dashboard.image,
@@ -1762,8 +1762,8 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
               })
             )
         }, {}, {}, {}, true);
-      versionControlPopover.tbComponentRef.instance.popoverComponent = versionControlPopover;
-      versionControlPopover.tbComponentRef.instance.versionRestored.subscribe(() => {
+      versionControlPopover.jnksIotComponentRef.instance.popoverComponent = versionControlPopover;
+      versionControlPopover.jnksIotComponentRef.instance.versionRestored.subscribe(() => {
         this.dashboardService.getDashboard(this.currentDashboardId).subscribe((dashboard) => {
           dashboard = this.dashboardUtils.validateAndUpdateDashboard(dashboard);
           const data: DashboardPageInitData = {

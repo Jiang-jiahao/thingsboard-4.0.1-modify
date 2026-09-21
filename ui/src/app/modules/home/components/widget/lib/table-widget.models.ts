@@ -11,10 +11,10 @@ import { UtilsService } from '@core/services/utils.service';
 import { TranslateService } from '@ngx-translate/core';
 import { EntityType } from '@shared/models/entity-type.models';
 import {
-  CompiledTbFunction,
-  compileTbFunction,
-  isNotEmptyTbFunction,
-  TbFunction
+  CompiledJnksIotFunction,
+  compileJnksIotFunction,
+  isNotEmptyJnksIotFunction,
+  JnksIotFunction
 } from '@shared/models/js-function.models';
 import { forkJoin, Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, map, share } from 'rxjs/operators';
@@ -34,7 +34,7 @@ export interface TableWidgetSettings {
   pageStepIncrement: number;
   pageStepCount: number;
   useRowStyleFunction: boolean;
-  rowStyleFunction?: TbFunction;
+  rowStyleFunction?: JnksIotFunction;
   reserveSpaceForHiddenAction?: boolean;
 }
 
@@ -42,9 +42,9 @@ export interface TableWidgetDataKeySettings {
   customTitle?: string;
   columnWidth?: string;
   useCellStyleFunction: boolean;
-  cellStyleFunction?: TbFunction;
+  cellStyleFunction?: JnksIotFunction;
   useCellContentFunction: boolean;
-  cellContentFunction?: TbFunction;
+  cellContentFunction?: JnksIotFunction;
   defaultColumnVisibility?: ColumnVisibilityOptions;
   columnSelectionToDisplay?: ColumnSelectionOptions;
   disableSorting?: boolean;
@@ -54,7 +54,7 @@ export type ShowCellButtonActionFunction = (ctx: WidgetContext, data: EntityData
 
 export interface TableCellButtonActionDescriptor extends  WidgetActionDescriptor {
   useShowActionCellButtonFunction: boolean;
-  showActionCellButtonFunction: CompiledTbFunction<ShowCellButtonActionFunction>;
+  showActionCellButtonFunction: CompiledJnksIotFunction<ShowCellButtonActionFunction>;
 }
 
 export interface EntityData {
@@ -85,7 +85,7 @@ export type CellContentFunction = (...args: any[]) => string;
 
 export interface CellContentFunctionInfo {
   useCellContentFunction: boolean;
-  cellContentFunction?: CompiledTbFunction<CellContentFunction>;
+  cellContentFunction?: CompiledJnksIotFunction<CellContentFunction>;
 }
 
 export interface CellContentInfo {
@@ -98,14 +98,14 @@ export type CellStyleFunction = (...args: any[]) => any;
 
 export interface CellStyleInfo {
   useCellStyleFunction: boolean;
-  cellStyleFunction?: CompiledTbFunction<CellStyleFunction>;
+  cellStyleFunction?: CompiledJnksIotFunction<CellStyleFunction>;
 }
 
 export type RowStyleFunction = (...args: any[]) => any;
 
 export interface RowStyleInfo {
   useRowStyleFunction: boolean;
-  rowStyleFunction?: CompiledTbFunction<RowStyleFunction>;
+  rowStyleFunction?: CompiledJnksIotFunction<RowStyleFunction>;
 }
 
 
@@ -230,8 +230,8 @@ export function getAlarmValue(alarm: AlarmDataInfo, key: EntityColumn) {
 
 export function getRowStyleInfo(widgetContext: WidgetContext, settings: TableWidgetSettings, ...args: string[]): Observable<RowStyleInfo> {
   let rowStyleInfo$: Observable<RowStyleInfo>;
-  if (settings.useRowStyleFunction === true && isNotEmptyTbFunction(settings.rowStyleFunction)) {
-    rowStyleInfo$ = compileTbFunction<RowStyleFunction>(widgetContext.http, settings.rowStyleFunction, ...args).pipe(
+  if (settings.useRowStyleFunction === true && isNotEmptyJnksIotFunction(settings.rowStyleFunction)) {
+    rowStyleInfo$ = compileJnksIotFunction<RowStyleFunction>(widgetContext.http, settings.rowStyleFunction, ...args).pipe(
       catchError(() => { return of(null) }),
       map((rowStyleFunction) => {
         if (!rowStyleFunction) {
@@ -265,8 +265,8 @@ export function getRowStyleInfo(widgetContext: WidgetContext, settings: TableWid
 
 export function getCellStyleInfo(widgetContext: WidgetContext, keySettings: TableWidgetDataKeySettings, ...args: string[]): Observable<CellStyleInfo> {
   let cellStyleInfo$: Observable<CellStyleInfo>;
-  if (keySettings.useCellStyleFunction === true && isNotEmptyTbFunction(keySettings.cellStyleFunction)) {
-    cellStyleInfo$ = compileTbFunction<CellStyleFunction>(widgetContext.http, keySettings.cellStyleFunction, ...args).pipe(
+  if (keySettings.useCellStyleFunction === true && isNotEmptyJnksIotFunction(keySettings.cellStyleFunction)) {
+    cellStyleInfo$ = compileJnksIotFunction<CellStyleFunction>(widgetContext.http, keySettings.cellStyleFunction, ...args).pipe(
       catchError(() => { return of(null) }),
       map((cellStyleFunction) => {
         if (!cellStyleFunction) {
@@ -302,8 +302,8 @@ export function getCellStyleInfo(widgetContext: WidgetContext, keySettings: Tabl
 
 export function getCellContentFunctionInfo(widgetContext: WidgetContext, keySettings: TableWidgetDataKeySettings, ...args: string[]): Observable<CellContentFunctionInfo> {
   let cellContentFunctionInfo$: Observable<CellContentFunctionInfo>;
-  if (keySettings.useCellContentFunction === true && isNotEmptyTbFunction(keySettings.cellContentFunction)) {
-    cellContentFunctionInfo$ = compileTbFunction<CellContentFunction>(widgetContext.http, keySettings.cellContentFunction, ...args).pipe(
+  if (keySettings.useCellContentFunction === true && isNotEmptyJnksIotFunction(keySettings.cellContentFunction)) {
+    cellContentFunctionInfo$ = compileJnksIotFunction<CellContentFunction>(widgetContext.http, keySettings.cellContentFunction, ...args).pipe(
       catchError(() => { return of(null) }),
       map((cellContentFunction) => {
         if (!cellContentFunction) {
@@ -362,9 +362,9 @@ export function getColumnSelectionAvailability(keySettings: TableWidgetDataKeySe
 export function getTableCellButtonActions(widgetContext: WidgetContext): Observable<TableCellButtonActionDescriptor[]> {
   const actions$ = widgetContext.actionsApi.getActionDescriptors('actionCellButton').map(descriptor => {
     let useShowActionCellButtonFunction = descriptor.useShowWidgetActionFunction || false;
-    let showActionCellButtonFunction$: Observable<CompiledTbFunction<ShowCellButtonActionFunction>>;
-    if (useShowActionCellButtonFunction && isNotEmptyTbFunction(descriptor.showWidgetActionFunction)) {
-      showActionCellButtonFunction$ = compileTbFunction(widgetContext.http, descriptor.showWidgetActionFunction, 'widgetContext', 'data');
+    let showActionCellButtonFunction$: Observable<CompiledJnksIotFunction<ShowCellButtonActionFunction>>;
+    if (useShowActionCellButtonFunction && isNotEmptyJnksIotFunction(descriptor.showWidgetActionFunction)) {
+      showActionCellButtonFunction$ = compileJnksIotFunction(widgetContext.http, descriptor.showWidgetActionFunction, 'widgetContext', 'data');
     } else {
       showActionCellButtonFunction$ = of(null);
     }
@@ -484,22 +484,22 @@ export function constructTableCssString(widgetConfig: WidgetConfig): string {
     '.mat-mdc-table .mat-mdc-row .mat-mdc-cell.mat-mdc-table-sticky {\n' +
     'transition: background-color .2s;\n' +
     '}\n' +
-    '.mat-mdc-table .mat-mdc-row.tb-current-entity {\n' +
+    '.mat-mdc-table .mat-mdc-row.jnks-iot-current-entity {\n' +
     'background-color: ' + currentEntityColor + ';\n' +
     '}\n' +
-    '.mat-mdc-table .mat-mdc-row.tb-current-entity .mat-mdc-cell.mat-mdc-table-sticky {\n' +
+    '.mat-mdc-table .mat-mdc-row.jnks-iot-current-entity .mat-mdc-cell.mat-mdc-table-sticky {\n' +
     'background-color: ' + currentEntityStickyColor + ';\n' +
     '}\n' +
-    '.mat-mdc-table .mat-mdc-row:hover:not(.tb-current-entity) {\n' +
+    '.mat-mdc-table .mat-mdc-row:hover:not(.jnks-iot-current-entity) {\n' +
     'background-color: ' + hoverColor + ';\n' +
     '}\n' +
-    '.mat-mdc-table .mat-mdc-row:hover:not(.tb-current-entity) .mat-mdc-cell.mat-mdc-table-sticky {\n' +
+    '.mat-mdc-table .mat-mdc-row:hover:not(.jnks-iot-current-entity) .mat-mdc-cell.mat-mdc-table-sticky {\n' +
     'background-color: ' + hoverStickyColor + ';\n' +
     '}\n' +
-    '.mat-mdc-table .mat-mdc-row.mat-row-select.mat-selected:not(.tb-current-entity) {\n' +
+    '.mat-mdc-table .mat-mdc-row.mat-row-select.mat-selected:not(.jnks-iot-current-entity) {\n' +
     'background-color: ' + selectedColor + ';\n' +
     '}\n' +
-    '.mat-mdc-table .mat-mdc-row.mat-row-select.mat-selected:not(.tb-current-entity) .mat-mdc-cell.mat-mdc-table-sticky {\n' +
+    '.mat-mdc-table .mat-mdc-row.mat-row-select.mat-selected:not(.jnks-iot-current-entity) .mat-mdc-cell.mat-mdc-table-sticky {\n' +
     'background-color: ' + selectedStickyColor + ';\n' +
     '}\n' +
     '.mat-mdc-table .mat-mdc-row .mat-mdc-cell.mat-mdc-table-sticky, .mat-mdc-table .mat-mdc-header-cell.mat-mdc-table-sticky {\n' +
@@ -515,10 +515,10 @@ export function constructTableCssString(widgetConfig: WidgetConfig): string {
     '.mat-mdc-table .mat-mdc-cell button.mat-mdc-icon-button[disabled][disabled] mat-icon {\n' +
     'color: ' + mdDarkDisabled + ';\n' +
     '}\n' +
-    '.mat-mdc-table .mat-mdc-cell button.mat-mdc-icon-button tb-icon {\n' +
+    '.mat-mdc-table .mat-mdc-cell button.mat-mdc-icon-button jnks-iot-icon {\n' +
     'color: ' + mdDarkSecondary + ';\n' +
     '}\n' +
-    '.mat-mdc-table .mat-mdc-cell button.mat-mdc-icon-button[disabled][disabled] tb-icon {\n' +
+    '.mat-mdc-table .mat-mdc-cell button.mat-mdc-icon-button[disabled][disabled] jnks-iot-icon {\n' +
     'color: ' + mdDarkDisabled + ';\n' +
     '}\n' +
     '.mat-divider {\n' +

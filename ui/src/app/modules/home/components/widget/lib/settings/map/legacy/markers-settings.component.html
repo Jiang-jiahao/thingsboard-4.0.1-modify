@@ -1,4 +1,4 @@
-<section class="tb-widget-settings" [formGroup]="markersSettingsFormGroup">
+<section class="jnks-iot-widget-settings" [formGroup]="markersSettingsFormGroup">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.maps.markers-settings</legend>
     <section class="!flex flex-row xs:flex-col gt-xs:gap-2">
@@ -11,7 +11,7 @@
         <input matInput type="number" formControlName="markerOffsetY">
       </mat-form-field>
     </section>
-    <tb-js-func [class.!hidden]="provider !== mapProvider.image"
+    <jnks-iot-js-func [class.!hidden]="provider !== mapProvider.image"
                 formControlName="posFunction"
                 withModules
                 minHeight="100px"
@@ -19,13 +19,13 @@
                 [functionArgs]="['origXPos', 'origYPos', 'data', 'dsData', 'dsIndex', 'aspect']"
                 functionTitle="{{ 'widgets.maps.position-function' | translate }}"
                 helpId="widget/lib/map-legacy/position_fn">
-    </tb-js-func>
+    </jnks-iot-js-func>
     <mat-checkbox formControlName="draggableMarker">
       {{ 'widgets.maps.draggable-marker' | translate }}
     </mat-checkbox>
     <fieldset class="fields-group fields-group-slider">
       <legend class="group-title" translate>widgets.maps.label</legend>
-      <mat-expansion-panel class="tb-settings" [expanded]="markersSettingsFormGroup.get('showLabel').value">
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="markersSettingsFormGroup.get('showLabel').value">
         <mat-expansion-panel-header class="flex-wrap">
           <mat-panel-title>
             <mat-slide-toggle formControlName="showLabel" (click)="$event.stopPropagation()">
@@ -40,25 +40,25 @@
           <mat-slide-toggle formControlName="useLabelFunction" class="slide-block">
             {{ 'widgets.maps.use-label-function' | translate }}
           </mat-slide-toggle>
-          <tb-html [class.!hidden]="markersSettingsFormGroup.get('useLabelFunction').value"
+          <jnks-iot-html [class.!hidden]="markersSettingsFormGroup.get('useLabelFunction').value"
                    formControlName="label"
                    minHeight="100px"
                    label="{{ 'widgets.maps.label-pattern' | translate }}">
-          </tb-html>
-          <tb-js-func [class.!hidden]="!markersSettingsFormGroup.get('useLabelFunction').value"
+          </jnks-iot-html>
+          <jnks-iot-js-func [class.!hidden]="!markersSettingsFormGroup.get('useLabelFunction').value"
                       formControlName="labelFunction"
                       withModules
                       [globalVariables]="functionScopeVariables"
                       [functionArgs]="['data', 'dsData', 'dsIndex']"
                       functionTitle="{{ 'widgets.maps.label-function' | translate }}"
                       helpId="widget/lib/map-legacy/label_fn">
-          </tb-js-func>
+          </jnks-iot-js-func>
         </ng-template>
       </mat-expansion-panel>
     </fieldset>
     <fieldset class="fields-group fields-group-slider">
       <legend class="group-title" translate>widgets.maps.tooltip</legend>
-      <mat-expansion-panel class="tb-settings" [expanded]="markersSettingsFormGroup.get('showTooltip').value">
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="markersSettingsFormGroup.get('showTooltip').value">
         <mat-expansion-panel-header class="flex-wrap">
           <mat-panel-title>
             <mat-slide-toggle formControlName="showTooltip" (click)="$event.stopPropagation()">
@@ -84,19 +84,19 @@
           <mat-slide-toggle formControlName="useTooltipFunction" class="slide-block">
             {{ 'widgets.maps.use-tooltip-function' | translate }}
           </mat-slide-toggle>
-          <tb-html [class.!hidden]="markersSettingsFormGroup.get('useTooltipFunction').value"
+          <jnks-iot-html [class.!hidden]="markersSettingsFormGroup.get('useTooltipFunction').value"
                    formControlName="tooltipPattern"
                    minHeight="100px"
                    label="{{ 'widgets.maps.tooltip-pattern' | translate }}">
-          </tb-html>
-          <tb-js-func [class.!hidden]="!markersSettingsFormGroup.get('useTooltipFunction').value"
+          </jnks-iot-html>
+          <jnks-iot-js-func [class.!hidden]="!markersSettingsFormGroup.get('useTooltipFunction').value"
                       formControlName="tooltipFunction"
                       withModules
                       [globalVariables]="functionScopeVariables"
                       [functionArgs]="['data', 'dsData', 'dsIndex']"
                       functionTitle="{{ 'widgets.maps.tooltip-function' | translate }}"
                       helpId="widget/lib/map-legacy/tooltip_fn">
-          </tb-js-func>
+          </jnks-iot-js-func>
           <section class="flex flex-row xs:flex-col gt-xs:gap-2">
             <mat-form-field class="flex-1">
               <mat-label translate>widgets.maps.tooltip-offset-x</mat-label>
@@ -112,12 +112,12 @@
     </fieldset>
     <fieldset class="fields-group">
       <legend class="group-title" translate>widgets.maps.color</legend>
-      <tb-color-input
+      <jnks-iot-color-input
         formControlName="color"
         icon="format_color_fill"
         label="{{ 'widgets.maps.color' | translate }}" openOnInput colorClearButton>
-      </tb-color-input>
-      <mat-expansion-panel class="tb-settings" [expanded]="markersSettingsFormGroup.get('useColorFunction').value">
+      </jnks-iot-color-input>
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="markersSettingsFormGroup.get('useColorFunction').value">
         <mat-expansion-panel-header class="flex-wrap">
           <mat-panel-title>
             <mat-slide-toggle formControlName="useColorFunction" (click)="$event.stopPropagation()">
@@ -129,19 +129,19 @@
           </mat-panel-description>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <tb-js-func formControlName="colorFunction"
+          <jnks-iot-js-func formControlName="colorFunction"
                       withModules
                       [globalVariables]="functionScopeVariables"
                       [functionArgs]="['data', 'dsData', 'dsIndex']"
                       functionTitle="{{ 'widgets.maps.color-function' | translate }}"
                       helpId="widget/lib/map-legacy/color_fn">
-          </tb-js-func>
+          </jnks-iot-js-func>
         </ng-template>
       </mat-expansion-panel>
     </fieldset>
     <fieldset class="fields-group fields-group-slider">
       <legend class="group-title" translate>widgets.maps.marker-image</legend>
-      <mat-expansion-panel class="tb-settings" expanded>
+      <mat-expansion-panel class="jnks-iot-settings" expanded>
         <mat-expansion-panel-header class="flex-wrap">
           <mat-panel-title>
             <mat-slide-toggle formControlName="useMarkerImageFunction" (click)="$event.stopPropagation()">
@@ -153,27 +153,27 @@
           </mat-panel-description>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <tb-gallery-image-input [class.!hidden]="markersSettingsFormGroup.get('useMarkerImageFunction').value"
+          <jnks-iot-gallery-image-input [class.!hidden]="markersSettingsFormGroup.get('useMarkerImageFunction').value"
                           label="{{ 'widgets.maps.custom-marker-image' | translate }}"
                           formControlName="markerImage">
-          </tb-gallery-image-input>
+          </jnks-iot-gallery-image-input>
           <mat-form-field [class.!hidden]="markersSettingsFormGroup.get('useMarkerImageFunction').value"
                           class="mat-block">
             <mat-label translate>widgets.maps.custom-marker-image-size</mat-label>
             <input matInput type="number" min="1" formControlName="markerImageSize">
           </mat-form-field>
-          <tb-js-func [class.!hidden]="!markersSettingsFormGroup.get('useMarkerImageFunction').value"
+          <jnks-iot-js-func [class.!hidden]="!markersSettingsFormGroup.get('useMarkerImageFunction').value"
                       formControlName="markerImageFunction"
                       withModules
                       [globalVariables]="functionScopeVariables"
                       [functionArgs]="['data', 'images', 'dsData', 'dsIndex']"
                       functionTitle="{{ 'widgets.maps.marker-image-function' | translate }}"
                       helpId="widget/lib/map-legacy/marker_image_fn">
-          </tb-js-func>
-          <tb-multiple-gallery-image-input [class.!hidden]="!markersSettingsFormGroup.get('useMarkerImageFunction').value"
+          </jnks-iot-js-func>
+          <jnks-iot-multiple-gallery-image-input [class.!hidden]="!markersSettingsFormGroup.get('useMarkerImageFunction').value"
                                            label="{{ 'widgets.maps.marker-images' | translate }}"
                                            formControlName="markerImages">
-          </tb-multiple-gallery-image-input>
+          </jnks-iot-multiple-gallery-image-input>
         </ng-template>
       </mat-expansion-panel>
     </fieldset>

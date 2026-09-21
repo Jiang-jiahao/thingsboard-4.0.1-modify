@@ -3,7 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { RateLimits, rateLimitsArrayToHtml } from './rate-limits.models';
 
 @Component({
-  selector: 'tb-rate-limits-text',
+  selector: 'jnks-iot-rate-limits-text',
   templateUrl: './rate-limits-text.component.html',
   styleUrls: ['./rate-limits-text.component.scss']
 })

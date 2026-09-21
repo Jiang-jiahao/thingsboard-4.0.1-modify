@@ -18,7 +18,7 @@ import { deepClone } from '@core/utils';
 import printTemplate from './backup-code-print-template.raw';
 
 @Component({
-  selector: 'tb-backup-code-auth-dialog',
+  selector: 'jnks-iot-backup-code-auth-dialog',
   templateUrl: './backup-code-auth-dialog.component.html',
   styleUrls: ['./authentication-dialog.component.scss']
 })

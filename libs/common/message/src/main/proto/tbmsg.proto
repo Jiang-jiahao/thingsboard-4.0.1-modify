@@ -5,24 +5,24 @@ option java_package = "com.jnks.iot.server.common.msg.gen";
 option java_outer_classname = "MsgProtos";
 
 // Stores message metadata as map of strings
-message TbMsgMetaDataProto {
+message JnksIotMsgMetaDataProto {
     map<string, string> data = 1;
 }
 
 // Stores stack of nested (caller) rule chains
-message TbMsgProcessingStackItemProto {
+message JnksIotMsgProcessingStackItemProto {
     int64 ruleChainIdMSB = 1;
     int64 ruleChainIdLSB = 2;
     int64 ruleNodeIdMSB = 3;
     int64 ruleNodeIdLSB = 4;
 }
 
-message TbMsgProcessingCtxProto {
+message JnksIotMsgProcessingCtxProto {
     int32 ruleNodeExecCounter = 1;
-    repeated TbMsgProcessingStackItemProto stack = 2;
+    repeated JnksIotMsgProcessingStackItemProto stack = 2;
 }
 
-message TbMsgProto {
+message JnksIotMsgProto {
     string id = 1;
     string type = 2;
     string entityType = 3;
@@ -36,7 +36,7 @@ message TbMsgProto {
     int64 ruleNodeIdLSB = 9;
     int64 clusterPartition = 10;
 
-    TbMsgMetaDataProto metaData = 11;
+    JnksIotMsgMetaDataProto metaData = 11;
 
     // Transaction Data (12) was removed in 2.5
 
@@ -50,7 +50,7 @@ message TbMsgProto {
     int64 customerIdMSB = 17;
     int64 customerIdLSB = 18;
 
-    TbMsgProcessingCtxProto ctx = 19;
+    JnksIotMsgProcessingCtxProto ctx = 19;
 
     int64 correlationIdMSB = 20;
     int64 correlationIdLSB = 21;

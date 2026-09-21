@@ -11,11 +11,11 @@ import { MobileApp, MobileAppStatus, mobileAppStatusTranslations } from '@shared
 import { PlatformType, platformTypeTranslations } from '@shared/models/oauth2.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { EditorPanelComponent } from '@home/pages/mobile/common/editor-panel.component';
 
 @Component({
-  selector: 'tb-mobile-app',
+  selector: 'jnks-iot-mobile-app',
   templateUrl: './mobile-app.component.html',
   styleUrls: ['./mobile-app.component.scss']
 })
@@ -39,7 +39,7 @@ export class MobileAppComponent extends EntityComponent<MobileApp> {
               @Optional() @Inject('entitiesTableConfig') protected entitiesTableConfigValue: EntityTableConfig<MobileApp>,
               protected cd: ChangeDetectorRef,
               public fb: FormBuilder,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef) {
     super(store, fb, entityValue, entitiesTableConfigValue, cd);
@@ -161,8 +161,8 @@ export class MobileAppComponent extends EntityComponent<MobileApp> {
         popoverContentStyle: {padding: '16px 24px'},
         isModal: false
       });
-      releaseNotesPanelPopover.tbComponentRef.instance.popover = releaseNotesPanelPopover;
-      releaseNotesPanelPopover.tbComponentRef.instance.editorContentApplied.subscribe((releaseNotes) => {
+      releaseNotesPanelPopover.jnksIotComponentRef.instance.popover = releaseNotesPanelPopover;
+      releaseNotesPanelPopover.jnksIotComponentRef.instance.editorContentApplied.subscribe((releaseNotes) => {
         releaseNotesPanelPopover.hide();
         if (isLatest) {
           this.entityForm.get('versionInfo.latestVersionReleaseNotes').setValue(releaseNotes);

@@ -3,14 +3,14 @@
 #
 # 默认每种服务 2 个实例（同机端口自动错开）：
 #   1) 基础设施已就绪（ZK / Kafka / Postgres / Redis）
-#   2) tb-core × 2
-#   3) tb-rule-engine × 2
+#   2) jnks-iot-core × 2
+#   3) jnks-iot-rule-engine × 2
 #   4) HTTP / MQTT / TCP / UDP 传输各 × 2
 #
 # 用法（必须用 bash，不要用 sh）:
 #   bash start-microservices.sh start
-#   bash start-microservices.sh start tb-mqtt-transport2
-#   bash start-microservices.sh stop tb-mqtt-transport2
+#   bash start-microservices.sh start jnks-iot-mqtt-transport2
+#   bash start-microservices.sh stop jnks-iot-mqtt-transport2
 #   ./start-microservices.sh stop
 #   ./start-microservices.sh status
 #   ./start-microservices.sh restart [name]
@@ -26,7 +26,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)"
 RUN_DIR="${ROOT}/.run/microservices"
 LOG_DIR="${RUN_DIR}/logs"
 PID_DIR="${RUN_DIR}/pids"
-VERSION="${TB_VERSION:-4.0.1}"
+VERSION="${JNKS_IOT_VERSION:-4.0.1}"
 
 CORE_REPLICAS="${CORE_REPLICAS:-2}"
 RULE_ENGINE_REPLICAS="${RULE_ENGINE_REPLICAS:-2}"
@@ -349,15 +349,15 @@ stop_one() {
 # pid 丢失或已 DEAD 时，UDP/TCP 的 Java 仍可能占着 5684/5683。
 known_node_names() {
   local i
-  for (( i = 1; i <= CORE_REPLICAS; i++ )); do echo "tb-core${i}"; done
-  for (( i = 1; i <= RULE_ENGINE_REPLICAS; i++ )); do echo "tb-rule-engine${i}"; done
-  for (( i = 1; i <= HTTP_TRANSPORT_REPLICAS; i++ )); do echo "tb-http-transport${i}"; done
-  for (( i = 1; i <= MQTT_TRANSPORT_REPLICAS; i++ )); do echo "tb-mqtt-transport${i}"; done
-  for (( i = 1; i <= TCP_TRANSPORT_REPLICAS; i++ )); do echo "tb-tcp-transport${i}"; done
-  for (( i = 1; i <= UDP_TRANSPORT_REPLICAS; i++ )); do echo "tb-udp-transport${i}"; done
-  for (( i = 1; i <= COAP_TRANSPORT_REPLICAS; i++ )); do echo "tb-coap-transport${i}"; done
-  for (( i = 1; i <= SNMP_TRANSPORT_REPLICAS; i++ )); do echo "tb-snmp-transport${i}"; done
-  for (( i = 1; i <= LWM2M_TRANSPORT_REPLICAS; i++ )); do echo "tb-lwm2m-transport${i}"; done
+  for (( i = 1; i <= CORE_REPLICAS; i++ )); do echo "jnks-iot-core${i}"; done
+  for (( i = 1; i <= RULE_ENGINE_REPLICAS; i++ )); do echo "jnks-iot-rule-engine${i}"; done
+  for (( i = 1; i <= HTTP_TRANSPORT_REPLICAS; i++ )); do echo "jnks-iot-http-transport${i}"; done
+  for (( i = 1; i <= MQTT_TRANSPORT_REPLICAS; i++ )); do echo "jnks-iot-mqtt-transport${i}"; done
+  for (( i = 1; i <= TCP_TRANSPORT_REPLICAS; i++ )); do echo "jnks-iot-tcp-transport${i}"; done
+  for (( i = 1; i <= UDP_TRANSPORT_REPLICAS; i++ )); do echo "jnks-iot-udp-transport${i}"; done
+  for (( i = 1; i <= COAP_TRANSPORT_REPLICAS; i++ )); do echo "jnks-iot-coap-transport${i}"; done
+  for (( i = 1; i <= SNMP_TRANSPORT_REPLICAS; i++ )); do echo "jnks-iot-snmp-transport${i}"; done
+  for (( i = 1; i <= LWM2M_TRANSPORT_REPLICAS; i++ )); do echo "jnks-iot-lwm2m-transport${i}"; done
 }
 
 list_started_names() {
@@ -374,13 +374,13 @@ kill_orphan_boot_jars() {
   local jars=(
     "jnks-iot-core-${VERSION}-boot.jar"
     "jnks-iot-rule-engine-${VERSION}-boot.jar"
-    "tb-http-transport-${VERSION}-boot.jar"
-    "tb-mqtt-transport-${VERSION}-boot.jar"
-    "tb-tcp-transport-${VERSION}-boot.jar"
-    "tb-udp-transport-${VERSION}-boot.jar"
-    "tb-coap-transport-${VERSION}-boot.jar"
-    "tb-snmp-transport-${VERSION}-boot.jar"
-    "tb-lwm2m-transport-${VERSION}-boot.jar"
+    "jnks-iot-http-transport-${VERSION}-boot.jar"
+    "jnks-iot-mqtt-transport-${VERSION}-boot.jar"
+    "jnks-iot-tcp-transport-${VERSION}-boot.jar"
+    "jnks-iot-udp-transport-${VERSION}-boot.jar"
+    "jnks-iot-coap-transport-${VERSION}-boot.jar"
+    "jnks-iot-snmp-transport-${VERSION}-boot.jar"
+    "jnks-iot-lwm2m-transport-${VERSION}-boot.jar"
   )
   local jar pid pids
   for jar in "${jars[@]}"; do
@@ -426,182 +426,182 @@ check_infra() {
 
 start_core_replicas() {
   local jar
-  jar="$(find_boot_jar "apps/tb-core" "jnks-iot-core")"
+  jar="$(find_boot_jar "apps/jnks-iot-core" "jnks-iot-core")"
   local i http
   for (( i = 1; i <= CORE_REPLICAS; i++ )); do
     http="$(port_for_replica "${CORE_HTTP_BASE}" "${i}")"
-    start_java "tb-core${i}" "${jar}" "${CORE_XMX}" \
-      TB_SERVICE_ID="tb-core${i}" \
-      TB_SERVICE_TYPE="tb-core" \
+    start_java "jnks-iot-core${i}" "${jar}" "${CORE_XMX}" \
+      JNKS_IOT_SERVICE_ID="jnks-iot-core${i}" \
+      JNKS_IOT_SERVICE_TYPE="jnks-iot-core" \
       HTTP_BIND_PORT="${http}"
-    wait_ready "tb-core${i}" "${PID_DIR}/tb-core${i}.pid" "${CORE_WAIT_SEC}" "${http}"
+    wait_ready "jnks-iot-core${i}" "${PID_DIR}/jnks-iot-core${i}.pid" "${CORE_WAIT_SEC}" "${http}"
   done
 }
 
 start_re_replicas() {
   local jar
-  jar="$(find_boot_jar "apps/tb-rule-engine" "jnks-iot-rule-engine")"
+  jar="$(find_boot_jar "apps/jnks-iot-rule-engine" "jnks-iot-rule-engine")"
   local i http
   for (( i = 1; i <= RULE_ENGINE_REPLICAS; i++ )); do
     http="$(port_for_replica "${RE_HTTP_BASE}" "${i}")"
-    start_java "tb-rule-engine${i}" "${jar}" "${RE_XMX}" \
-      TB_SERVICE_ID="tb-rule-engine${i}" \
-      TB_SERVICE_TYPE="tb-rule-engine" \
+    start_java "jnks-iot-rule-engine${i}" "${jar}" "${RE_XMX}" \
+      JNKS_IOT_SERVICE_ID="jnks-iot-rule-engine${i}" \
+      JNKS_IOT_SERVICE_TYPE="jnks-iot-rule-engine" \
       HTTP_BIND_PORT="${http}"
-    wait_ready "tb-rule-engine${i}" "${PID_DIR}/tb-rule-engine${i}.pid" "${NODE_WAIT_SEC}" "${http}"
+    wait_ready "jnks-iot-rule-engine${i}" "${PID_DIR}/jnks-iot-rule-engine${i}.pid" "${NODE_WAIT_SEC}" "${http}"
   done
 }
 
 start_http_transport_replicas() {
   local jar
-  jar="$(find_boot_jar "apps/tb-transport/tb-http-transport" "tb-http-transport")"
+  jar="$(find_boot_jar "apps/jnks-iot-transport/jnks-iot-http-transport" "jnks-iot-http-transport")"
   local i http
   for (( i = 1; i <= HTTP_TRANSPORT_REPLICAS; i++ )); do
     http="$(port_for_replica "${HTTP_TRANSPORT_HTTP_BASE}" "${i}")"
-    start_java "tb-http-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
-      TB_SERVICE_ID="tb-http-transport${i}" \
+    start_java "jnks-iot-http-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
+      JNKS_IOT_SERVICE_ID="jnks-iot-http-transport${i}" \
       HTTP_BIND_PORT="${http}"
-    wait_ready "tb-http-transport${i}" "${PID_DIR}/tb-http-transport${i}.pid" "${NODE_WAIT_SEC}" "${http}"
+    wait_ready "jnks-iot-http-transport${i}" "${PID_DIR}/jnks-iot-http-transport${i}.pid" "${NODE_WAIT_SEC}" "${http}"
   done
 }
 
 start_mqtt_transport_replicas() {
   local jar
-  jar="$(find_boot_jar "apps/tb-transport/tb-mqtt-transport" "tb-mqtt-transport")"
+  jar="$(find_boot_jar "apps/jnks-iot-transport/jnks-iot-mqtt-transport" "jnks-iot-mqtt-transport")"
   local i http mqtt
   for (( i = 1; i <= MQTT_TRANSPORT_REPLICAS; i++ )); do
     http="$(port_for_replica "${MQTT_TRANSPORT_HTTP_BASE}" "${i}")"
     mqtt="$(mqtt_bind_for_replica "${i}")"
-    start_java "tb-mqtt-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
-      TB_SERVICE_ID="tb-mqtt-transport${i}" \
+    start_java "jnks-iot-mqtt-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
+      JNKS_IOT_SERVICE_ID="jnks-iot-mqtt-transport${i}" \
       HTTP_BIND_PORT="${http}" \
       MQTT_BIND_PORT="${mqtt}"
-    wait_ready "tb-mqtt-transport${i}" "${PID_DIR}/tb-mqtt-transport${i}.pid" "${NODE_WAIT_SEC}" "${mqtt}"
+    wait_ready "jnks-iot-mqtt-transport${i}" "${PID_DIR}/jnks-iot-mqtt-transport${i}.pid" "${NODE_WAIT_SEC}" "${mqtt}"
   done
 }
 
 start_tcp_transport_replicas() {
   local jar
-  jar="$(find_boot_jar "apps/tb-transport/tb-tcp-transport" "tb-tcp-transport")"
+  jar="$(find_boot_jar "apps/jnks-iot-transport/jnks-iot-tcp-transport" "jnks-iot-tcp-transport")"
   local i http tcp
   for (( i = 1; i <= TCP_TRANSPORT_REPLICAS; i++ )); do
     http="$(port_for_replica "${TCP_TRANSPORT_HTTP_BASE}" "${i}")"
     tcp="$(tcp_bind_for_replica "${i}")"
-    start_java "tb-tcp-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
-      TB_SERVICE_ID="tb-tcp-transport${i}" \
+    start_java "jnks-iot-tcp-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
+      JNKS_IOT_SERVICE_ID="jnks-iot-tcp-transport${i}" \
       HTTP_BIND_PORT="${http}" \
       TCP_BIND_PORT="${tcp}"
-    wait_ready "tb-tcp-transport${i}" "${PID_DIR}/tb-tcp-transport${i}.pid" "${NODE_WAIT_SEC}" "${tcp}"
+    wait_ready "jnks-iot-tcp-transport${i}" "${PID_DIR}/jnks-iot-tcp-transport${i}.pid" "${NODE_WAIT_SEC}" "${tcp}"
   done
 }
 
 start_udp_transport_replicas() {
   local jar
-  jar="$(find_boot_jar "apps/tb-transport/tb-udp-transport" "tb-udp-transport")"
+  jar="$(find_boot_jar "apps/jnks-iot-transport/jnks-iot-udp-transport" "jnks-iot-udp-transport")"
   local i http udp
   for (( i = 1; i <= UDP_TRANSPORT_REPLICAS; i++ )); do
     http="$(port_for_replica "${UDP_TRANSPORT_HTTP_BASE}" "${i}")"
     udp="$(udp_bind_for_replica "${i}")"
-    start_java "tb-udp-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
-      TB_SERVICE_ID="tb-udp-transport${i}" \
+    start_java "jnks-iot-udp-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
+      JNKS_IOT_SERVICE_ID="jnks-iot-udp-transport${i}" \
       HTTP_BIND_PORT="${http}" \
       UDP_BIND_PORT="${udp}"
-    wait_ready "tb-udp-transport${i}" "${PID_DIR}/tb-udp-transport${i}.pid" "${NODE_WAIT_SEC}" "${udp}"
+    wait_ready "jnks-iot-udp-transport${i}" "${PID_DIR}/jnks-iot-udp-transport${i}.pid" "${NODE_WAIT_SEC}" "${udp}"
   done
 }
 
 start_coap_transport_replicas() {
   local jar
-  jar="$(find_boot_jar "apps/tb-transport/tb-coap-transport" "tb-coap-transport")"
+  jar="$(find_boot_jar "apps/jnks-iot-transport/jnks-iot-coap-transport" "jnks-iot-coap-transport")"
   local i http
   for (( i = 1; i <= COAP_TRANSPORT_REPLICAS; i++ )); do
     http="$(port_for_replica "${COAP_TRANSPORT_HTTP_BASE}" "${i}")"
-    start_java "tb-coap-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
-      TB_SERVICE_ID="tb-coap-transport${i}" \
+    start_java "jnks-iot-coap-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
+      JNKS_IOT_SERVICE_ID="jnks-iot-coap-transport${i}" \
       HTTP_BIND_PORT="${http}"
-    wait_ready "tb-coap-transport${i}" "${PID_DIR}/tb-coap-transport${i}.pid" "${NODE_WAIT_SEC}" "${http}"
+    wait_ready "jnks-iot-coap-transport${i}" "${PID_DIR}/jnks-iot-coap-transport${i}.pid" "${NODE_WAIT_SEC}" "${http}"
   done
 }
 
 start_snmp_transport_replicas() {
   local jar
-  jar="$(find_boot_jar "apps/tb-transport/tb-snmp-transport" "tb-snmp-transport")"
+  jar="$(find_boot_jar "apps/jnks-iot-transport/jnks-iot-snmp-transport" "jnks-iot-snmp-transport")"
   local i http
   for (( i = 1; i <= SNMP_TRANSPORT_REPLICAS; i++ )); do
     http="$(port_for_replica "${SNMP_TRANSPORT_HTTP_BASE}" "${i}")"
-    start_java "tb-snmp-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
-      TB_SERVICE_ID="tb-snmp-transport${i}" \
+    start_java "jnks-iot-snmp-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
+      JNKS_IOT_SERVICE_ID="jnks-iot-snmp-transport${i}" \
       HTTP_BIND_PORT="${http}"
-    wait_ready "tb-snmp-transport${i}" "${PID_DIR}/tb-snmp-transport${i}.pid" "${NODE_WAIT_SEC}" "${http}"
+    wait_ready "jnks-iot-snmp-transport${i}" "${PID_DIR}/jnks-iot-snmp-transport${i}.pid" "${NODE_WAIT_SEC}" "${http}"
   done
 }
 
 start_lwm2m_transport_replicas() {
   local jar
-  jar="$(find_boot_jar "apps/tb-transport/tb-lwm2m-transport" "tb-lwm2m-transport")"
+  jar="$(find_boot_jar "apps/jnks-iot-transport/jnks-iot-lwm2m-transport" "jnks-iot-lwm2m-transport")"
   local i http
   for (( i = 1; i <= LWM2M_TRANSPORT_REPLICAS; i++ )); do
     http="$(port_for_replica "${LWM2M_TRANSPORT_HTTP_BASE}" "${i}")"
-    start_java "tb-lwm2m-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
-      TB_SERVICE_ID="tb-lwm2m-transport${i}" \
+    start_java "jnks-iot-lwm2m-transport${i}" "${jar}" "${TRANSPORT_XMX}" \
+      JNKS_IOT_SERVICE_ID="jnks-iot-lwm2m-transport${i}" \
       HTTP_BIND_PORT="${http}"
-    wait_ready "tb-lwm2m-transport${i}" "${PID_DIR}/tb-lwm2m-transport${i}.pid" "${NODE_WAIT_SEC}" "${http}"
+    wait_ready "jnks-iot-lwm2m-transport${i}" "${PID_DIR}/jnks-iot-lwm2m-transport${i}.pid" "${NODE_WAIT_SEC}" "${http}"
   done
 }
 
 start_named() {
   local name="$1"
   local idx jar http mqtt tcp udp
-  if [[ "${name}" =~ ^tb-core([0-9]+)$ ]]; then
+  if [[ "${name}" =~ ^jnks-iot-core([0-9]+)$ ]]; then
     idx="${BASH_REMATCH[1]}"
-    jar="$(find_boot_jar "apps/tb-core" "jnks-iot-core")"
+    jar="$(find_boot_jar "apps/jnks-iot-core" "jnks-iot-core")"
     [[ -n "${jar}" ]] || { echo "ERROR: boot jar not found for ${name}" >&2; return 1; }
     http="$(port_for_replica "${CORE_HTTP_BASE}" "${idx}")"
     start_java "${name}" "${jar}" "${CORE_XMX}" \
-      TB_SERVICE_ID="${name}" TB_SERVICE_TYPE="tb-core" HTTP_BIND_PORT="${http}"
+      JNKS_IOT_SERVICE_ID="${name}" JNKS_IOT_SERVICE_TYPE="jnks-iot-core" HTTP_BIND_PORT="${http}"
     wait_ready "${name}" "${PID_DIR}/${name}.pid" "${CORE_WAIT_SEC}" "${http}"
-  elif [[ "${name}" =~ ^tb-rule-engine([0-9]+)$ ]]; then
+  elif [[ "${name}" =~ ^jnks-iot-rule-engine([0-9]+)$ ]]; then
     idx="${BASH_REMATCH[1]}"
-    jar="$(find_boot_jar "apps/tb-rule-engine" "jnks-iot-rule-engine")"
+    jar="$(find_boot_jar "apps/jnks-iot-rule-engine" "jnks-iot-rule-engine")"
     [[ -n "${jar}" ]] || { echo "ERROR: boot jar not found for ${name}" >&2; return 1; }
     http="$(port_for_replica "${RE_HTTP_BASE}" "${idx}")"
     start_java "${name}" "${jar}" "${RE_XMX}" \
-      TB_SERVICE_ID="${name}" TB_SERVICE_TYPE="tb-rule-engine" HTTP_BIND_PORT="${http}"
+      JNKS_IOT_SERVICE_ID="${name}" JNKS_IOT_SERVICE_TYPE="jnks-iot-rule-engine" HTTP_BIND_PORT="${http}"
     wait_ready "${name}" "${PID_DIR}/${name}.pid" "${NODE_WAIT_SEC}" "${http}"
-  elif [[ "${name}" =~ ^tb-http-transport([0-9]+)$ ]]; then
+  elif [[ "${name}" =~ ^jnks-iot-http-transport([0-9]+)$ ]]; then
     idx="${BASH_REMATCH[1]}"
-    jar="$(find_boot_jar "apps/tb-transport/tb-http-transport" "tb-http-transport")"
+    jar="$(find_boot_jar "apps/jnks-iot-transport/jnks-iot-http-transport" "jnks-iot-http-transport")"
     [[ -n "${jar}" ]] || { echo "ERROR: boot jar not found for ${name}" >&2; return 1; }
     http="$(port_for_replica "${HTTP_TRANSPORT_HTTP_BASE}" "${idx}")"
     start_java "${name}" "${jar}" "${TRANSPORT_XMX}" \
-      TB_SERVICE_ID="${name}" HTTP_BIND_PORT="${http}"
+      JNKS_IOT_SERVICE_ID="${name}" HTTP_BIND_PORT="${http}"
     wait_ready "${name}" "${PID_DIR}/${name}.pid" "${NODE_WAIT_SEC}" "${http}"
-  elif [[ "${name}" =~ ^tb-mqtt-transport([0-9]+)$ ]]; then
+  elif [[ "${name}" =~ ^jnks-iot-mqtt-transport([0-9]+)$ ]]; then
     idx="${BASH_REMATCH[1]}"
-    jar="$(find_boot_jar "apps/tb-transport/tb-mqtt-transport" "tb-mqtt-transport")"
+    jar="$(find_boot_jar "apps/jnks-iot-transport/jnks-iot-mqtt-transport" "jnks-iot-mqtt-transport")"
     [[ -n "${jar}" ]] || { echo "ERROR: boot jar not found for ${name}" >&2; return 1; }
     http="$(port_for_replica "${MQTT_TRANSPORT_HTTP_BASE}" "${idx}")"
     mqtt="$(mqtt_bind_for_replica "${idx}")"
     start_java "${name}" "${jar}" "${TRANSPORT_XMX}" \
-      TB_SERVICE_ID="${name}" HTTP_BIND_PORT="${http}" MQTT_BIND_PORT="${mqtt}"
+      JNKS_IOT_SERVICE_ID="${name}" HTTP_BIND_PORT="${http}" MQTT_BIND_PORT="${mqtt}"
     wait_ready "${name}" "${PID_DIR}/${name}.pid" "${NODE_WAIT_SEC}" "${mqtt}"
-  elif [[ "${name}" =~ ^tb-tcp-transport([0-9]+)$ ]]; then
+  elif [[ "${name}" =~ ^jnks-iot-tcp-transport([0-9]+)$ ]]; then
     idx="${BASH_REMATCH[1]}"
-    jar="$(find_boot_jar "apps/tb-transport/tb-tcp-transport" "tb-tcp-transport")"
+    jar="$(find_boot_jar "apps/jnks-iot-transport/jnks-iot-tcp-transport" "jnks-iot-tcp-transport")"
     [[ -n "${jar}" ]] || { echo "ERROR: boot jar not found for ${name}" >&2; return 1; }
     http="$(port_for_replica "${TCP_TRANSPORT_HTTP_BASE}" "${idx}")"
     tcp="$(tcp_bind_for_replica "${idx}")"
     start_java "${name}" "${jar}" "${TRANSPORT_XMX}" \
-      TB_SERVICE_ID="${name}" HTTP_BIND_PORT="${http}" TCP_BIND_PORT="${tcp}"
+      JNKS_IOT_SERVICE_ID="${name}" HTTP_BIND_PORT="${http}" TCP_BIND_PORT="${tcp}"
     wait_ready "${name}" "${PID_DIR}/${name}.pid" "${NODE_WAIT_SEC}" "${tcp}"
-  elif [[ "${name}" =~ ^tb-udp-transport([0-9]+)$ ]]; then
+  elif [[ "${name}" =~ ^jnks-iot-udp-transport([0-9]+)$ ]]; then
     idx="${BASH_REMATCH[1]}"
-    jar="$(find_boot_jar "apps/tb-transport/tb-udp-transport" "tb-udp-transport")"
+    jar="$(find_boot_jar "apps/jnks-iot-transport/jnks-iot-udp-transport" "jnks-iot-udp-transport")"
     [[ -n "${jar}" ]] || { echo "ERROR: boot jar not found for ${name}" >&2; return 1; }
     http="$(port_for_replica "${UDP_TRANSPORT_HTTP_BASE}" "${idx}")"
     udp="$(udp_bind_for_replica "${idx}")"
     start_java "${name}" "${jar}" "${TRANSPORT_XMX}" \
-      TB_SERVICE_ID="${name}" HTTP_BIND_PORT="${http}" UDP_BIND_PORT="${udp}"
+      JNKS_IOT_SERVICE_ID="${name}" HTTP_BIND_PORT="${http}" UDP_BIND_PORT="${udp}"
     wait_ready "${name}" "${PID_DIR}/${name}.pid" "${NODE_WAIT_SEC}" "${udp}"
   else
     echo "ERROR: unknown node '${name}'" >&2
@@ -612,15 +612,15 @@ start_named() {
 
 collect_needed_jars() {
   local needed=()
-  if (( CORE_REPLICAS > 0 )); then needed+=("apps/tb-core:jnks-iot-core"); fi
-  if (( RULE_ENGINE_REPLICAS > 0 )); then needed+=("apps/tb-rule-engine:jnks-iot-rule-engine"); fi
-  if (( HTTP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/tb-transport/tb-http-transport:tb-http-transport"); fi
-  if (( MQTT_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/tb-transport/tb-mqtt-transport:tb-mqtt-transport"); fi
-  if (( TCP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/tb-transport/tb-tcp-transport:tb-tcp-transport"); fi
-  if (( UDP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/tb-transport/tb-udp-transport:tb-udp-transport"); fi
-  if (( COAP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/tb-transport/tb-coap-transport:tb-coap-transport"); fi
-  if (( SNMP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/tb-transport/tb-snmp-transport:tb-snmp-transport"); fi
-  if (( LWM2M_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/tb-transport/tb-lwm2m-transport:tb-lwm2m-transport"); fi
+  if (( CORE_REPLICAS > 0 )); then needed+=("apps/jnks-iot-core:jnks-iot-core"); fi
+  if (( RULE_ENGINE_REPLICAS > 0 )); then needed+=("apps/jnks-iot-rule-engine:jnks-iot-rule-engine"); fi
+  if (( HTTP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/jnks-iot-transport/jnks-iot-http-transport:jnks-iot-http-transport"); fi
+  if (( MQTT_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/jnks-iot-transport/jnks-iot-mqtt-transport:jnks-iot-mqtt-transport"); fi
+  if (( TCP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/jnks-iot-transport/jnks-iot-tcp-transport:jnks-iot-tcp-transport"); fi
+  if (( UDP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/jnks-iot-transport/jnks-iot-udp-transport:jnks-iot-udp-transport"); fi
+  if (( COAP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/jnks-iot-transport/jnks-iot-coap-transport:jnks-iot-coap-transport"); fi
+  if (( SNMP_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/jnks-iot-transport/jnks-iot-snmp-transport:jnks-iot-snmp-transport"); fi
+  if (( LWM2M_TRANSPORT_REPLICAS > 0 )); then needed+=("apps/jnks-iot-transport/jnks-iot-lwm2m-transport:jnks-iot-lwm2m-transport"); fi
   echo "${needed[*]}"
 }
 
@@ -636,46 +636,46 @@ do_start() {
   echo
 
   if (( CORE_REPLICAS > 0 )); then
-    echo "== 1/6 tb-core =="
+    echo "== 1/6 jnks-iot-core =="
     start_core_replicas
   fi
   if (( RULE_ENGINE_REPLICAS > 0 )); then
-    echo "== 2/6 tb-rule-engine =="
+    echo "== 2/6 jnks-iot-rule-engine =="
     start_re_replicas
   fi
   if (( HTTP_TRANSPORT_REPLICAS > 0 )); then
-    echo "== 3/6 tb-http-transport =="
+    echo "== 3/6 jnks-iot-http-transport =="
     start_http_transport_replicas
   fi
   if (( MQTT_TRANSPORT_REPLICAS > 0 )); then
-    echo "== 4/6 tb-mqtt-transport =="
+    echo "== 4/6 jnks-iot-mqtt-transport =="
     start_mqtt_transport_replicas
   fi
   if (( TCP_TRANSPORT_REPLICAS > 0 )); then
-    echo "== 5/6 tb-tcp-transport =="
+    echo "== 5/6 jnks-iot-tcp-transport =="
     start_tcp_transport_replicas
   fi
   if (( UDP_TRANSPORT_REPLICAS > 0 )); then
-    echo "== 6/6 tb-udp-transport =="
+    echo "== 6/6 jnks-iot-udp-transport =="
     start_udp_transport_replicas
   fi
   if (( COAP_TRANSPORT_REPLICAS > 0 )); then
-    echo "== extra tb-coap-transport =="
+    echo "== extra jnks-iot-coap-transport =="
     start_coap_transport_replicas
   fi
   if (( SNMP_TRANSPORT_REPLICAS > 0 )); then
-    echo "== extra tb-snmp-transport =="
+    echo "== extra jnks-iot-snmp-transport =="
     start_snmp_transport_replicas
   fi
   if (( LWM2M_TRANSPORT_REPLICAS > 0 )); then
-    echo "== extra tb-lwm2m-transport =="
+    echo "== extra jnks-iot-lwm2m-transport =="
     start_lwm2m_transport_replicas
   fi
 
   echo
   echo "All requested nodes started. Logs: ${LOG_DIR}"
-  echo "HTTP pull split: grep 'HTTP pull devices loaded' ${LOG_DIR}/tb-http-transport*.log"
-  echo "MQTT pull sessions: grep 'Established MQTT pull collector session' ${LOG_DIR}/tb-mqtt-transport*.log"
+  echo "HTTP pull split: grep 'HTTP pull devices loaded' ${LOG_DIR}/jnks-iot-http-transport*.log"
+  echo "MQTT pull sessions: grep 'Established MQTT pull collector session' ${LOG_DIR}/jnks-iot-mqtt-transport*.log"
   do_status
 }
 
@@ -720,17 +720,17 @@ Usage: $0 {start|stop|status|restart} [node]
 
 Examples:
   $0 start
-  $0 start tb-mqtt-transport2
-  $0 stop tb-mqtt-transport2
+  $0 start jnks-iot-mqtt-transport2
+  $0 stop jnks-iot-mqtt-transport2
   $0 status
 
 Default local topology (2 of each):
-  tb-core1 / tb-core2                      HTTP 8080 / 18080
-  tb-rule-engine1 / tb-rule-engine2        HTTP 8082 / 18082
-  tb-http-transport1 / tb-http-transport2  HTTP 8081 / 18081
-  tb-mqtt-transport1 / tb-mqtt-transport2  HTTP 8083 / 18083  MQTT 1883 / 1884
-  tb-tcp-transport1 / tb-tcp-transport2    HTTP 8087 / 18087  TCP 均监听 5683（SO_REUSEPORT 共享）
-  tb-udp-transport1 / tb-udp-transport2    HTTP 8088 / 18088  UDP 均监听 5684（SO_REUSEPORT 共享）
+  jnks-iot-core1 / jnks-iot-core2                      HTTP 8080 / 18080
+  jnks-iot-rule-engine1 / jnks-iot-rule-engine2        HTTP 8082 / 18082
+  jnks-iot-http-transport1 / jnks-iot-http-transport2  HTTP 8081 / 18081
+  jnks-iot-mqtt-transport1 / jnks-iot-mqtt-transport2  HTTP 8083 / 18083  MQTT 1883 / 1884
+  jnks-iot-tcp-transport1 / jnks-iot-tcp-transport2    HTTP 8087 / 18087  TCP 均监听 5683（SO_REUSEPORT 共享）
+  jnks-iot-udp-transport1 / jnks-iot-udp-transport2    HTTP 8088 / 18088  UDP 均监听 5684（SO_REUSEPORT 共享）
 
 Requires ZooKeeper + Postgres (and normally Kafka/Redis) already running.
 EOF

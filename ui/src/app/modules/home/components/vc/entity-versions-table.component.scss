@@ -4,21 +4,21 @@
   width: 100%;
   height: 100%;
   display: block;
-  .tb-entity-table {
+  .jnks-iot-entity-table {
 
-    &.tb-popover-mode {
+    &.jnks-iot-popover-mode {
       position: relative;
       width: 800px;
       height: 600px;
     }
 
-    .tb-entity-table-content {
+    .jnks-iot-entity-table-content {
       width: 100%;
       height: 100%;
       background: #fff;
       overflow: hidden;
 
-      &.tb-outlined-border {
+      &.jnks-iot-outlined-border {
         box-shadow: 0 0 0 0 rgb(0 0 0 / 20%), 0 0 0 0 rgb(0 0 0 / 14%), 0 0 0 0 rgb(0 0 0 / 12%);
         border: solid 1px #e0e0e0;
         border-radius: 4px;
@@ -32,7 +32,7 @@
         overflow: hidden;
       }
 
-      .tb-entity-table-title {
+      .jnks-iot-entity-table-title {
         padding-right: 20px;
         white-space: nowrap;
         overflow: hidden;
@@ -43,7 +43,7 @@
         overflow: auto;
       }
 
-      .tb-entity-table-info{
+      .jnks-iot-entity-table-info{
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -62,7 +62,7 @@
       height: auto;
       min-height: 100px;
 
-      .tb-entity-table-title{
+      .jnks-iot-entity-table-title{
         padding-bottom: 5px;
         width: 100%;
       }

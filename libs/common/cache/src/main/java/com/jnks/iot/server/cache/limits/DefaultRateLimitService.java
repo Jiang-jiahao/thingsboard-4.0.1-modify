@@ -15,7 +15,7 @@ import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.limit.LimitedApi;
 import com.jnks.iot.server.common.data.notification.rule.trigger.RateLimitsTrigger;
 import com.jnks.iot.server.common.msg.notification.NotificationRuleProcessor;
-import com.jnks.iot.server.common.msg.tools.TbRateLimits;
+import com.jnks.iot.server.common.msg.tools.JnksIotRateLimits;
 
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +26,7 @@ public class DefaultRateLimitService implements RateLimitService {
 
     private final TenantProfileProvider tenantProfileProvider;
     private final NotificationRuleProcessor notificationRuleProcessor;
-    private final Cache<RateLimitKey, TbRateLimits> rateLimits;
+    private final Cache<RateLimitKey, JnksIotRateLimits> rateLimits;
 
     public DefaultRateLimitService(TenantProfileProvider tenantProfileProvider,
                                    @Lazy NotificationRuleProcessor notificationRuleProcessor, // 延迟注入，防止循环依赖
@@ -90,9 +90,9 @@ public class DefaultRateLimitService implements RateLimitService {
         }
         log.trace("[{}] Checking rate limit for {} ({})", level, api, rateLimitConfig);
 
-        TbRateLimits rateLimit = rateLimits.asMap().compute(key, (k, limit) -> {
+        JnksIotRateLimits rateLimit = rateLimits.asMap().compute(key, (k, limit) -> {
             if (limit == null || !limit.getConfiguration().equals(rateLimitConfig)) {
-                limit = new TbRateLimits(rateLimitConfig, api.isRefillRateLimitIntervally());
+                limit = new JnksIotRateLimits(rateLimitConfig, api.isRefillRateLimitIntervally());
                 log.trace("[{}] Created new rate limit bucket for {} ({})", level, api, rateLimitConfig);
             }
             return limit;

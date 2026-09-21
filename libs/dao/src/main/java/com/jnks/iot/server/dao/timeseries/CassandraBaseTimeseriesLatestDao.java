@@ -25,7 +25,7 @@ import com.jnks.iot.server.common.data.page.PageData;
 import com.jnks.iot.server.common.data.page.PageLink;
 import com.jnks.iot.server.dao.model.ModelConstants;
 import com.jnks.iot.server.dao.model.sqlts.latest.TsKvLatestEntity;
-import com.jnks.iot.server.dao.nosql.TbResultSet;
+import com.jnks.iot.server.dao.nosql.JnksIotResultSet;
 import com.jnks.iot.server.dao.sqlts.AggregationTimeseriesDao;
 import com.jnks.iot.server.dao.util.NoSqlTsLatestDao;
 
@@ -58,7 +58,7 @@ public class CassandraBaseTimeseriesLatestDao extends AbstractCassandraBaseTimes
         return findLatest(tenantId, entityId, key, rs -> convertResultToTsKvEntry(key, rs.one()));
     }
 
-    private <T> ListenableFuture<T> findLatest(TenantId tenantId, EntityId entityId, String key, java.util.function.Function<TbResultSet, T> function) {
+    private <T> ListenableFuture<T> findLatest(TenantId tenantId, EntityId entityId, String key, java.util.function.Function<JnksIotResultSet, T> function) {
         BoundStatementBuilder stmtBuilder = new BoundStatementBuilder(getFindLatestStmt().bind());
         stmtBuilder.setString(0, entityId.getEntityType().name());
         stmtBuilder.setUuid(1, entityId.getId());
@@ -168,7 +168,7 @@ public class CassandraBaseTimeseriesLatestDao extends AbstractCassandraBaseTimes
         return getFuture(executeAsyncWrite(tenantId, delete), rs -> null);
     }
 
-    private ListenableFuture<List<TsKvEntry>> convertAsyncResultSetToTsKvEntryList(TbResultSet rs) {
+    private ListenableFuture<List<TsKvEntry>> convertAsyncResultSetToTsKvEntryList(JnksIotResultSet rs) {
         return Futures.transform(rs.allRows(readResultsProcessingExecutor),
                 rows -> this.convertResultToTsKvEntryList(rows), readResultsProcessingExecutor);
     }

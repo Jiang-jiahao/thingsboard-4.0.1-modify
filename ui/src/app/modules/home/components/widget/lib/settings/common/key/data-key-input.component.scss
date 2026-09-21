@@ -1,5 +1,5 @@
-.tb-data-key-input {
-  .mat-mdc-form-field.tb-key-field {
+.jnks-iot-data-key-input {
+  .mat-mdc-form-field.jnks-iot-key-field {
     width: 100%;
     &.mat-form-field-appearance-fill {
       .mdc-text-field--filled.mdc-text-field--disabled {
@@ -38,9 +38,9 @@
       }
     }
 
-    .mat-mdc-chip.mat-mdc-standard-chip.tb-datakey-chip {
-      .tb-attribute-chip {
-        .tb-chip-labels {
+    .mat-mdc-chip.mat-mdc-standard-chip.jnks-iot-datakey-chip {
+      .jnks-iot-attribute-chip {
+        .jnks-iot-chip-labels {
           background: transparent;
         }
       }

@@ -13,7 +13,7 @@ import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
 import com.jnks.iot.server.edqs.processor.EdqsProcessor;
 import com.jnks.iot.server.edqs.util.EdqsRocksDb;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToEdqsMsg;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
 import com.jnks.iot.server.queue.common.consumer.PartitionedQueueConsumerManager;
 import java.util.Set;
 
@@ -72,7 +72,7 @@ public class LocalEdqsStateService implements EdqsStateService {
      * 由 {@link #init} 注入；{@link #process} 中通过 {@code update} 做全量分区对齐
      *（本地模式不需要 Kafka 那套增量 state/event 编排）。
      */
-    private PartitionedQueueConsumerManager<TbProtoQueueMsg<ToEdqsMsg>> eventConsumer;
+    private PartitionedQueueConsumerManager<JnksIotProtoQueueMsg<ToEdqsMsg>> eventConsumer;
 
     /**
      * 最近一次 {@link #process} 收到的分区集合快照。
@@ -90,7 +90,7 @@ public class LocalEdqsStateService implements EdqsStateService {
      * @param eventConsumer EDQS 事件分区消费者
      */
     @Override
-    public void init(PartitionedQueueConsumerManager<TbProtoQueueMsg<ToEdqsMsg>> eventConsumer) {
+    public void init(PartitionedQueueConsumerManager<JnksIotProtoQueueMsg<ToEdqsMsg>> eventConsumer) {
         this.eventConsumer = eventConsumer;
     }
 

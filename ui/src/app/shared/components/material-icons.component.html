@@ -1,6 +1,6 @@
-<div class="tb-material-icons-panel">
-  <div *ngIf="showTitle" class="tb-material-icons-title" translate>icon.icons</div>
-  <mat-form-field class="tb-material-icons-search tb-inline-field" appearance="outline" subscriptSizing="dynamic">
+<div class="jnks-iot-material-icons-panel">
+  <div *ngIf="showTitle" class="jnks-iot-material-icons-title" translate>icon.icons</div>
+  <mat-form-field class="jnks-iot-material-icons-search jnks-iot-inline-field" appearance="outline" subscriptSizing="dynamic">
     <mat-icon matPrefix>search</mat-icon>
     <input matInput [formControl]="searchIconControl" placeholder="{{ 'icon.search-icon' | translate }}"/>
     <button *ngIf="searchIconControl.value"
@@ -11,40 +11,40 @@
     </button>
   </mat-form-field>
   <cdk-virtual-scroll-viewport [class.!hidden]="notFound" #iconsPanel
-                               [itemSize]="iconsRowHeight" class="tb-material-icons-viewport"
+                               [itemSize]="iconsRowHeight" class="jnks-iot-material-icons-viewport"
                                [style.width]="iconsPanelWidth"
                                [style.height]="iconsPanelHeight">
-    <div *cdkVirtualFor="let iconRow of iconRows$ | async" class="tb-material-icons-row">
+    <div *cdkVirtualFor="let iconRow of iconRows$ | async" class="jnks-iot-material-icons-row">
       <ng-container *ngFor="let icon of iconRow">
         <button *ngIf="icon.name === selectedIcon"
-                class="tb-select-icon-button"
+                class="jnks-iot-select-icon-button"
                 mat-raised-button
                 color="primary"
                 (click)="selectIcon(icon)"
                 matTooltip="{{ icon.displayName }}"
                 matTooltipPosition="above"
                 type="button">
-          <tb-icon matButtonIcon>{{icon.name}}</tb-icon>
+          <jnks-iot-icon matButtonIcon>{{icon.name}}</jnks-iot-icon>
         </button>
         <button *ngIf="icon.name !== selectedIcon"
-                class="tb-select-icon-button"
+                class="jnks-iot-select-icon-button"
                 mat-button
                 (click)="selectIcon(icon)"
                 matTooltip="{{ icon.displayName }}"
                 matTooltipPosition="above"
                 type="button">
-          <tb-icon matButtonIcon>{{icon.name}}</tb-icon>
+          <jnks-iot-icon matButtonIcon>{{icon.name}}</jnks-iot-icon>
         </button>
       </ng-container>
     </div>
   </cdk-virtual-scroll-viewport>
   <ng-container *ngIf="notFound">
-    <div class="tb-no-data-available" [style.width]="iconsPanelWidth">
-      <div class="tb-no-data-bg"></div>
-      <div class="tb-no-data-text">{{ 'icon.no-icons-found' | translate:{iconSearch: searchIconControl.value} }}</div>
+    <div class="jnks-iot-no-data-available" [style.width]="iconsPanelWidth">
+      <div class="jnks-iot-no-data-bg"></div>
+      <div class="jnks-iot-no-data-text">{{ 'icon.no-icons-found' | translate:{iconSearch: searchIconControl.value} }}</div>
     </div>
   </ng-container>
-  <div class="tb-material-icons-panel-buttons" *ngIf="iconClearButton || !showAllSubject.value">
+  <div class="jnks-iot-material-icons-panel-buttons" *ngIf="iconClearButton || !showAllSubject.value">
     <button *ngIf="iconClearButton"
             mat-button
             color="primary"
@@ -54,7 +54,7 @@
       {{ 'action.clear' | translate }}
     </button>
     <span class="flex-1"></span>
-    <button *ngIf="!showAllSubject.value" class="tb-material-icons-show-more" mat-button color="primary" (click)="showAllSubject.next(true)">
+    <button *ngIf="!showAllSubject.value" class="jnks-iot-material-icons-show-more" mat-button color="primary" (click)="showAllSubject.next(true)">
       {{ 'action.show-more' | translate }}
     </button>
   </div>

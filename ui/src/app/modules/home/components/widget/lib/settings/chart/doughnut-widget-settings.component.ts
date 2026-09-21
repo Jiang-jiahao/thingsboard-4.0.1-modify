@@ -13,7 +13,7 @@ import {
 } from '@home/components/widget/lib/settings/chart/latest-chart-widget-settings.component';
 
 @Component({
-  selector: 'tb-doughnut-widget-settings',
+  selector: 'jnks-iot-doughnut-widget-settings',
   templateUrl: './latest-chart-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

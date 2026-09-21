@@ -16,7 +16,7 @@ import {
 } from '@home/components/widget/lib/chart/bar-chart-with-labels-widget.models';
 
 @Component({
-  selector: 'tb-bar-chart-with-labels-widget-settings',
+  selector: 'jnks-iot-bar-chart-with-labels-widget-settings',
   templateUrl: './bar-chart-with-labels-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

@@ -11,7 +11,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { DashboardId } from '@shared/models/id/dashboard-id';
 
 @Component({
-  selector: 'tb-home-settings',
+  selector: 'jnks-iot-home-settings',
   templateUrl: './home-settings.component.html',
   styleUrls: ['./home-settings.component.scss', './settings-card.scss']
 })

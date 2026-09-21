@@ -23,7 +23,7 @@ public class TbelCfTsRollingArgTest {
     @BeforeEach
     void setUp() {
         rollingArg = new TbelCfTsRollingArg(
-                new TbTimeWindow(ts - 30000, ts - 10),
+                new JnksIotTimeWindow(ts - 30000, ts - 10),
                 List.of(
                         new TbelCfTsDoubleVal(ts - 10, Double.NaN),
                         new TbelCfTsDoubleVal(ts - 20, 2.0),
@@ -88,7 +88,7 @@ public class TbelCfTsRollingArgTest {
     void testFirstAndLastWhenOnlyNaNAndIgnoreNaNIsFalse() {
         assertThat(rollingArg.first()).isEqualTo(2.0);
         rollingArg = new TbelCfTsRollingArg(
-                new TbTimeWindow(ts - 30000, ts - 10),
+                new JnksIotTimeWindow(ts - 30000, ts - 10),
                 List.of(
                         new TbelCfTsDoubleVal(ts - 10, Double.NaN),
                         new TbelCfTsDoubleVal(ts - 40, Double.NaN),
@@ -107,7 +107,7 @@ public class TbelCfTsRollingArgTest {
 
     @Test
     void testEmptyValues() {
-        rollingArg = new TbelCfTsRollingArg(new TbTimeWindow(0, 10), List.of());
+        rollingArg = new TbelCfTsRollingArg(new JnksIotTimeWindow(0, 10), List.of());
         assertThatThrownBy(rollingArg::sum).isInstanceOf(IllegalArgumentException.class).hasMessage("Rolling argument values are empty.");
         assertThatThrownBy(rollingArg::max).isInstanceOf(IllegalArgumentException.class).hasMessage("Rolling argument values are empty.");
         assertThatThrownBy(rollingArg::min).isInstanceOf(IllegalArgumentException.class).hasMessage("Rolling argument values are empty.");
@@ -120,7 +120,7 @@ public class TbelCfTsRollingArgTest {
 
     @Test
     public void merge_two_rolling_args_ts_match_test() {
-        TbTimeWindow tw = new TbTimeWindow(0, 60000);
+        JnksIotTimeWindow tw = new JnksIotTimeWindow(0, 60000);
         TbelCfTsRollingArg arg1 = new TbelCfTsRollingArg(tw, Arrays.asList(new TbelCfTsDoubleVal(1000, 1), new TbelCfTsDoubleVal(5000, 2), new TbelCfTsDoubleVal(15000, 3)));
         TbelCfTsRollingArg arg2 = new TbelCfTsRollingArg(tw, Arrays.asList(new TbelCfTsDoubleVal(1000, 11), new TbelCfTsDoubleVal(5000, 12), new TbelCfTsDoubleVal(15000, 13)));
 
@@ -135,11 +135,11 @@ public class TbelCfTsRollingArgTest {
 
     @Test
     public void merge_two_rolling_args_with_timewindow_test() {
-        TbTimeWindow tw = new TbTimeWindow(0, 60000);
+        JnksIotTimeWindow tw = new JnksIotTimeWindow(0, 60000);
         TbelCfTsRollingArg arg1 = new TbelCfTsRollingArg(tw, Arrays.asList(new TbelCfTsDoubleVal(1000, 1), new TbelCfTsDoubleVal(5000, 2), new TbelCfTsDoubleVal(15000, 3)));
         TbelCfTsRollingArg arg2 = new TbelCfTsRollingArg(tw, Arrays.asList(new TbelCfTsDoubleVal(1000, 11), new TbelCfTsDoubleVal(5000, 12), new TbelCfTsDoubleVal(15000, 13)));
 
-        var result = arg1.merge(arg2, Collections.singletonMap("timeWindow", new TbTimeWindow(0, 10000)));
+        var result = arg1.merge(arg2, Collections.singletonMap("timeWindow", new JnksIotTimeWindow(0, 10000)));
         Assertions.assertEquals(2, result.getSize());
         Assertions.assertNotNull(result.getValues());
         Assertions.assertNotNull(result.getValues().get(0));
@@ -158,7 +158,7 @@ public class TbelCfTsRollingArgTest {
 
     @Test
     public void merge_two_rolling_args_ts_mismatch_default_test() {
-        TbTimeWindow tw = new TbTimeWindow(0, 60000);
+        JnksIotTimeWindow tw = new JnksIotTimeWindow(0, 60000);
         TbelCfTsRollingArg arg1 = new TbelCfTsRollingArg(tw, Arrays.asList(new TbelCfTsDoubleVal(100, 1), new TbelCfTsDoubleVal(5000, 2), new TbelCfTsDoubleVal(15000, 3)));
         TbelCfTsRollingArg arg2 = new TbelCfTsRollingArg(tw, Arrays.asList(new TbelCfTsDoubleVal(200, 11), new TbelCfTsDoubleVal(5000, 12), new TbelCfTsDoubleVal(15000, 13)));
 
@@ -175,7 +175,7 @@ public class TbelCfTsRollingArgTest {
 
     @Test
     public void merge_two_rolling_args_ts_mismatch_ignore_nan_disabled_test() {
-        TbTimeWindow tw = new TbTimeWindow(0, 60000);
+        JnksIotTimeWindow tw = new JnksIotTimeWindow(0, 60000);
         TbelCfTsRollingArg arg1 = new TbelCfTsRollingArg(tw, Arrays.asList(new TbelCfTsDoubleVal(100, 1), new TbelCfTsDoubleVal(5000, 2), new TbelCfTsDoubleVal(15000, 3)));
         TbelCfTsRollingArg arg2 = new TbelCfTsRollingArg(tw, Arrays.asList(new TbelCfTsDoubleVal(200, 11), new TbelCfTsDoubleVal(5000, 12), new TbelCfTsDoubleVal(15000, 13)));
 

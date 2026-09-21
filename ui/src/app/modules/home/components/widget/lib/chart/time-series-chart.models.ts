@@ -147,15 +147,15 @@ export const timeAxisBandWidthCalculator: TimeAxisBandWidthCalculator = (model) 
     }
   }
   if (!interval) {
-    const tbTimeWindow: WidgetTimewindow = (axisOption as any).tbTimeWindow;
-    if (isDefinedAndNotNull(tbTimeWindow)) {
+    const jnksIotTimeWindow: WidgetTimewindow = (axisOption as any).jnksIotTimeWindow;
+    if (isDefinedAndNotNull(jnksIotTimeWindow)) {
       if (axisOption.axisPointer?.value && typeof axisOption.axisPointer?.value === 'number') {
-        const intervalArray = calculateAggIntervalWithWidgetTimeWindow(tbTimeWindow, axisOption.axisPointer.value);
+        const intervalArray = calculateAggIntervalWithWidgetTimeWindow(jnksIotTimeWindow, axisOption.axisPointer.value);
         const start = intervalArray[0];
         const end = intervalArray[1];
         interval = Math.max(end - start, 1);
       } else {
-        interval = IntervalMath.numberValue(tbTimeWindow.interval);
+        interval = IntervalMath.numberValue(jnksIotTimeWindow.interval);
       }
     }
   }
@@ -1081,7 +1081,7 @@ export const updateXAxisTimeWindow = (option: XAXisOption,
                                       timeWindow: WidgetTimewindow) => {
   option.min = timeWindow.minTime;
   option.max = timeWindow.maxTime;
-  (option as any).tbTimeWindow = timeWindow;
+  (option as any).jnksIotTimeWindow = timeWindow;
 };
 
 export const generateChartData = (dataItems: TimeSeriesChartDataItem[],

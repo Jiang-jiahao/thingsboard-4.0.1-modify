@@ -503,7 +503,7 @@ export abstract class PowerButtonShape {
 
     this.drawShape();
 
-    this.hoverShape = this.svgShape.circle(powerButtonShapeSize).center(cx, cy).addClass('tb-hover-circle')
+    this.hoverShape = this.svgShape.circle(powerButtonShapeSize).center(cx, cy).addClass('jnks-iot-hover-circle')
     .fill({color: '#000000', opacity: 0});
     this.hoverShape.on('mouseover', () => {
       this.hovered = true;
@@ -948,14 +948,14 @@ class DefaultVolumePowerButtonShape extends PowerButtonShape {
 
   protected drawColorState(mainColor: PowerButtonColor){
     if (this.disabled) {
-      this.backgroundShape.removeClass('tb-small-shadow');
+      this.backgroundShape.removeClass('jnks-iot-small-shadow');
       if (!this.forcePressed) {
         this.innerShadow.hide();
       }
       this.outerBorder.attr({ fill: mainColor.hex, 'fill-opacity': mainColor.opacity});
       this.innerBorder.attr({fill: mainColor.hex, 'fill-opacity': mainColor.opacity});
     } else {
-      this.backgroundShape.addClass('tb-small-shadow');
+      this.backgroundShape.addClass('jnks-iot-small-shadow');
       this.innerShadow.show();
       this.outerBorder.fill(this.outerBorderGradient);
       this.outerBorder.attr({ 'fill-opacity': 1 });
@@ -1065,7 +1065,7 @@ class SimplifiedVolumePowerButtonShape extends PowerButtonShape {
 
   protected drawOff() {
     if (!this.pressed) {
-      this.backgroundShape.addClass('tb-shadow');
+      this.backgroundShape.addClass('jnks-iot-shadow');
     }
     this.innerShadow.hide();
     this.onCenterGroup.hide();
@@ -1073,7 +1073,7 @@ class SimplifiedVolumePowerButtonShape extends PowerButtonShape {
   }
 
   protected drawOn() {
-    this.backgroundShape.removeClass('tb-shadow');
+    this.backgroundShape.removeClass('jnks-iot-shadow');
     this.centerGroup.hide();
     this.onCenterGroup.show();
     this.innerShadow.show();
@@ -1083,7 +1083,7 @@ class SimplifiedVolumePowerButtonShape extends PowerButtonShape {
     this.pressedTimeline.finish();
     const pressedScale = 0.75;
     if (!this.value) {
-      this.backgroundShape.removeClass('tb-shadow');
+      this.backgroundShape.removeClass('jnks-iot-shadow');
     }
     powerButtonAnimation(this.centerGroup).transform({scale: pressedScale});
     powerButtonAnimation(this.onCenterGroup).transform({scale: pressedScale, origin: {x: cx, y: cy}});
@@ -1096,7 +1096,7 @@ class SimplifiedVolumePowerButtonShape extends PowerButtonShape {
     powerButtonAnimation(this.onCenterGroup).transform({scale: 1, origin: {x: cx, y: cy}});
     this.pressedShadow.animateRestore().after(() => {
       if (!this.value) {
-        this.backgroundShape.addClass('tb-shadow');
+        this.backgroundShape.addClass('jnks-iot-shadow');
       }
     });
   }
@@ -1167,7 +1167,7 @@ class OutlinedVolumePowerButtonShape extends PowerButtonShape {
     .addTo(this.onCenterGroup);
     this.drawOnCenter();
     this.pressedShadow = new InnerShadowCircle(this.svgShape, powerButtonShapeSize - 30, cx, cy, 0, 0);
-    this.backgroundShape.addClass('tb-small-shadow');
+    this.backgroundShape.addClass('jnks-iot-small-shadow');
 
     this.pressedTimeline = new Timeline();
     this.centerGroup.timeline(this.pressedTimeline);

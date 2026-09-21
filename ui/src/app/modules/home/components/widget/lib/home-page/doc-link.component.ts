@@ -13,7 +13,7 @@ import { DocumentationLink } from '@shared/models/user-settings.models';
 import { ErrorStateMatcher } from '@angular/material/core';
 
 @Component({
-  selector: 'tb-doc-link',
+  selector: 'jnks-iot-doc-link',
   templateUrl: './doc-link.component.html',
   styleUrls: ['./link.component.scss'],
   providers: [

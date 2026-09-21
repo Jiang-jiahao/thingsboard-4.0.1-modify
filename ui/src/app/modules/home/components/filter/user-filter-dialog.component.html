@@ -28,10 +28,10 @@
             </mat-form-field>
           </ng-template>
           <ng-template [ngSwitchCase]="valueTypeEnum.DATE_TIME">
-            <label class="tb-title no-padding tb-required">{{ userInputControl.get('label').value }}</label>
-            <tb-datetime [formControl]="userInputControl.get('value')"
+            <label class="jnks-iot-title no-padding jnks-iot-required">{{ userInputControl.get('label').value }}</label>
+            <jnks-iot-datetime [formControl]="userInputControl.get('value')"
                          dateText="{{ 'filter.date' | translate }}"
-                         required [showLabel]="false"></tb-datetime>
+                         required [showLabel]="false"></jnks-iot-datetime>
           </ng-template>
           <ng-template [ngSwitchCase]="valueTypeEnum.BOOLEAN">
             <mat-checkbox labelPosition="before" [formControl]="userInputControl.get('value')">

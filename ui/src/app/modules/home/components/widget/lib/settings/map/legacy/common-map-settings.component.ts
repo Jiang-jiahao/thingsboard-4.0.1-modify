@@ -18,7 +18,7 @@ import { Widget } from '@shared/models/widget.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-common-map-settings',
+  selector: 'jnks-iot-common-map-settings',
   templateUrl: './common-map-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

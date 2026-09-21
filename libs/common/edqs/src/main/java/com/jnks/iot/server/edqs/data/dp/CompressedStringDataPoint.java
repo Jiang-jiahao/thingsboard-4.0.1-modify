@@ -2,7 +2,7 @@ package com.jnks.iot.server.edqs.data.dp;
 
 import lombok.Getter;
 import lombok.SneakyThrows;
-import com.jnks.iot.common.util.TbBytePool;
+import com.jnks.iot.common.util.JnksIotBytePool;
 import com.jnks.iot.server.common.data.kv.DataType;
 
 import java.util.function.Function;
@@ -17,7 +17,7 @@ public class CompressedStringDataPoint extends AbstractDataPoint {
     @SneakyThrows
     public CompressedStringDataPoint(long ts, byte[] compressedValue, Function<byte[], String> uncompressor) {
         super(ts);
-        this.compressedValue = TbBytePool.intern(compressedValue);
+        this.compressedValue = JnksIotBytePool.intern(compressedValue);
         this.uncompressor = uncompressor;
     }
 

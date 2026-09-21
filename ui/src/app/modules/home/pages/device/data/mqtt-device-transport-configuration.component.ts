@@ -10,7 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-mqtt-device-transport-configuration',
+  selector: 'jnks-iot-mqtt-device-transport-configuration',
   templateUrl: './mqtt-device-transport-configuration.component.html',
   styleUrls: [],
   providers: [{

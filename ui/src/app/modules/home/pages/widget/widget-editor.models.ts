@@ -1,11 +1,11 @@
-import { TbEditorCompleter, TbEditorCompletions } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompleter, JnksIotEditorCompletions } from '@shared/models/ace/completion.models';
 import {
   widgetContextCompletions,
   widgetContextCompletionsWithSettings
 } from '@shared/models/ace/widget-completion.models';
 import { serviceCompletions } from '@shared/models/ace/service-completion.models';
 
-const widgetEditorCompletions = (settingsCompletions?: TbEditorCompletions): TbEditorCompletions => {
+const widgetEditorCompletions = (settingsCompletions?: JnksIotEditorCompletions): JnksIotEditorCompletions => {
   return {
     ... {self: {
         description: 'Built-in variable <b>self</b> that is a reference to the widget instance',
@@ -93,6 +93,6 @@ const widgetEditorCompletions = (settingsCompletions?: TbEditorCompletions): TbE
   }
 };
 
-export const widgetEditorCompleter = (settingsCompletions?: TbEditorCompletions): TbEditorCompleter => {
-  return new TbEditorCompleter(widgetEditorCompletions(settingsCompletions));
+export const widgetEditorCompleter = (settingsCompletions?: JnksIotEditorCompletions): JnksIotEditorCompleter => {
+  return new JnksIotEditorCompleter(widgetEditorCompletions(settingsCompletions));
 }

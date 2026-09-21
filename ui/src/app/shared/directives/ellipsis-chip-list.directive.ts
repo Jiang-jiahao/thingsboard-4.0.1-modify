@@ -14,7 +14,7 @@ import { takeUntil } from 'rxjs/operators';
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
-  selector: '[tb-ellipsis-chip-list]',
+  selector: '[jnks-iot-ellipsis-chip-list]',
   standalone: true,
 })
 export class EllipsisChipListDirective implements OnDestroy {
@@ -24,7 +24,7 @@ export class EllipsisChipListDirective implements OnDestroy {
   private destroy$ = new Subject<void>();
   private intersectionObserver: IntersectionObserver;
 
-  @Input('tb-ellipsis-chip-list')
+  @Input('jnks-iot-ellipsis-chip-list')
   set chips(value: string[]) {
     if (!isEqual(this.chipsValue, value)) {
       this.chipsValue = value;

@@ -10,7 +10,7 @@ import { Observable, of, Subject } from 'rxjs';
 import { map, mergeMap, share, startWith } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-navigation-cards-widget-settings',
+  selector: 'jnks-iot-navigation-cards-widget-settings',
   templateUrl: './navigation-cards-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

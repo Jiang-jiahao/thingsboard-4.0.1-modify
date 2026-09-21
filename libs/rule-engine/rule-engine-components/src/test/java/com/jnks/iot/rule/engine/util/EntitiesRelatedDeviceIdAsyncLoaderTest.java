@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.jnks.iot.common.util.ListeningExecutor;
 import com.jnks.iot.rule.engine.TestDbCallbackExecutor;
-import com.jnks.iot.rule.engine.api.TbContext;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
 import com.jnks.iot.rule.engine.data.DeviceRelationsQuery;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.device.DeviceSearchQuery;
@@ -36,7 +36,7 @@ public class EntitiesRelatedDeviceIdAsyncLoaderTest {
     private static final TenantId TENANT_ID = new TenantId(UUID.randomUUID());
     private static final ListeningExecutor DB_EXECUTOR = new TestDbCallbackExecutor();
     @Mock
-    private TbContext ctxMock;
+    private JnksIotContext ctxMock;
     @Mock
     private DeviceService deviceServiceMock;
 

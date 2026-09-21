@@ -1,4 +1,4 @@
-<section class="tb-widget-settings flex flex-col" [formGroup]="navigationCardsWidgetSettingsForm">
+<section class="jnks-iot-widget-settings flex flex-col" [formGroup]="navigationCardsWidgetSettingsForm">
   <section style="margin-bottom: 16px;">
     <div class="mat-caption" style="margin: -8px 0 8px;" translate>widgets.navigation.filter-type</div>
     <mat-radio-group formControlName="filterType" class="gap-4">
@@ -29,7 +29,7 @@
              (matChipInputTokenEnd)="addFilterItemFromChipInput($event)">
     </mat-chip-grid>
     <mat-autocomplete #filterItemAutocomplete="matAutocomplete"
-                      class="tb-autocomplete"
+                      class="jnks-iot-autocomplete"
                       (optionSelected)="filterItemSelected($event)">
       <mat-option *ngFor="let filterItem of filteredFilterItems | async" [value]="filterItem">
         <span [innerHTML]="filterItem | highlight:filterItemSearchText"></span>

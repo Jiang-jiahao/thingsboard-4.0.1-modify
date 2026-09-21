@@ -7,7 +7,7 @@ import {
 } from '@home/components/rule-node/rule-node-config.models';
 
 @Component({
-  selector: 'tb-external-node-kafka-config',
+  selector: 'jnks-iot-external-node-kafka-config',
   templateUrl: './kafka-config.component.html',
   styleUrls: []
 })

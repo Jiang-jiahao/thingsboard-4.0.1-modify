@@ -129,8 +129,8 @@ function rateLimitsToHtml(translate: TranslateService, rateLimit: RateLimits, is
   const operation = translate.instant('tenant-profile.rate-limits.messages-per');
   const seconds = translate.instant('tenant-profile.rate-limits.sec');
   const comma = isLast ? '' : ',';
-  return `<span class="tb-rate-limits-value">${value}</span>
+  return `<span class="jnks-iot-rate-limits-value">${value}</span>
           <span>${operation}</span>
-          <span class="tb-rate-limits-value"> ${time}</span>
+          <span class="jnks-iot-rate-limits-value"> ${time}</span>
           <span>${seconds}${comma}</span><br>`;
 }

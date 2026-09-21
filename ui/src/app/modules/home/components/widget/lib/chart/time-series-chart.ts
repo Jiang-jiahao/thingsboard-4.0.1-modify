@@ -67,7 +67,7 @@ import {
   TimeSeriesChartTooltipValueFormatFunction
 } from '@home/components/widget/lib/chart/time-series-chart-tooltip.models';
 
-export class TbTimeSeriesChart {
+export class JnksIotTimeSeriesChart {
 
   public static dataKeySettings(type = TimeSeriesChartType.default): DataKeySettingsFunction {
     return (_key, isLatestDataKey) => {
@@ -167,7 +167,7 @@ export class TbTimeSeriesChart {
       this.stateValueConverter = new TimeSeriesChartStateValueConverter(this.ctx.utilsService, this.settings.states);
       tooltipValueFormatFunction = this.stateValueConverter.tooltipFormatter;
     }
-    const $dashboardPageElement = this.ctx.$containerParent.parents('.tb-dashboard-page');
+    const $dashboardPageElement = this.ctx.$containerParent.parents('.jnks-iot-dashboard-page');
     const dashboardPageElement = $dashboardPageElement.length ? $($dashboardPageElement[$dashboardPageElement.length-1]) : null;
     this.darkMode = this.settings.darkMode || dashboardPageElement?.hasClass('dark');
     this.setupXAxes();
@@ -656,7 +656,7 @@ export class TbTimeSeriesChart {
         createTimeSeriesVisualMapOption(this.settings.visualMapSettings, this.visualMapSelectedRanges);
     }
 
-    this.timeSeriesChartOptions.xAxis[0].tbTimeWindow = this.ctx.defaultSubscription.timeWindow;
+    this.timeSeriesChartOptions.xAxis[0].jnksIotTimeWindow = this.ctx.defaultSubscription.timeWindow;
 
     this.updateSeries();
     if (this.updateYAxisScale(this.yAxisList)) {

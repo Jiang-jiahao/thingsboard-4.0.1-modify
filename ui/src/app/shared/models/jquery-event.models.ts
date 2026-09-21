@@ -1,6 +1,6 @@
 import Timeout = NodeJS.Timeout;
 
-export interface TbContextMenuEvent extends Event {
+export interface JnksIotContextMenuEvent extends Event {
   clientX: number;
   clientY: number;
   pageX: number;

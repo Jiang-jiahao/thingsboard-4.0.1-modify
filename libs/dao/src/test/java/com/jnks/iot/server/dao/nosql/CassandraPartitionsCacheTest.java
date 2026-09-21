@@ -71,7 +71,7 @@ public class CassandraPartitionsCacheTest {
         when(boundStatement.setUuid(anyInt(), any(UUID.class))).thenReturn(boundStatement);
         when(boundStatement.setLong(anyInt(), any(Long.class))).thenReturn(boundStatement);
 
-        willReturn(new TbResultSetFuture(SettableFuture.create())).given(cassandraBaseTimeseriesDao).executeAsyncWrite(any(), any());
+        willReturn(new JnksIotResultSetFuture(SettableFuture.create())).given(cassandraBaseTimeseriesDao).executeAsyncWrite(any(), any());
 
         doReturn(Futures.immediateFuture(0)).when(cassandraBaseTimeseriesDao).getFuture(any(), any());
     }

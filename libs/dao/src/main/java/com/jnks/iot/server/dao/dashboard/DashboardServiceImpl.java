@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import com.jnks.iot.server.cache.TbTransactionalCache;
+import com.jnks.iot.server.cache.JnksIotTransactionalCache;
 import com.jnks.iot.server.common.data.Customer;
 import com.jnks.iot.server.common.data.Dashboard;
 import com.jnks.iot.server.common.data.DashboardInfo;
@@ -69,7 +69,7 @@ public class DashboardServiceImpl extends AbstractEntityService implements Dashb
     private DataValidator<Dashboard> dashboardValidator;
 
     @Autowired
-    protected TbTransactionalCache<DashboardId, String> cache;
+    protected JnksIotTransactionalCache<DashboardId, String> cache;
 
     @Autowired
     private EntityCountService countService;

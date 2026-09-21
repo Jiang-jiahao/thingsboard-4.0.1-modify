@@ -23,7 +23,7 @@ import { AdditionalDebugActionConfig } from '@home/components/entity/debug/entit
 import { EntityType } from '@shared/models/entity-type.models';
 
 @Component({
-  selector: 'tb-entity-debug-settings-button',
+  selector: 'jnks-iot-entity-debug-settings-button',
   templateUrl: './entity-debug-settings-button.component.html',
   standalone: true,
   imports: [

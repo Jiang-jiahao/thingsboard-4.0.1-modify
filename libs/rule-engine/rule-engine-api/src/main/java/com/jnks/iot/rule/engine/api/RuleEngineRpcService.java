@@ -3,7 +3,7 @@ package com.jnks.iot.rule.engine.api;
 import com.jnks.iot.server.common.data.id.RpcId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.rpc.Rpc;
-import com.jnks.iot.server.common.msg.TbMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -17,7 +17,7 @@ public interface RuleEngineRpcService {
 
     void sendRpcRequestToDevice(RuleEngineDeviceRpcRequest request, Consumer<RuleEngineDeviceRpcResponse> consumer);
 
-    void sendRestApiCallReply(String serviceId, UUID requestId, TbMsg msg);
+    void sendRestApiCallReply(String serviceId, UUID requestId, JnksIotMsg msg);
 
     Rpc findRpcById(TenantId tenantId, RpcId id);
 }

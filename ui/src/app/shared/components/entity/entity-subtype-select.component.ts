@@ -13,7 +13,7 @@ import { EntityService } from '@core/http/entity.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-entity-subtype-select',
+  selector: 'jnks-iot-entity-subtype-select',
   templateUrl: './entity-subtype-select.component.html',
   styleUrls: ['./entity-subtype-select.component.scss'],
   providers: [{

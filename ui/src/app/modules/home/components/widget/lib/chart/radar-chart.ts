@@ -1,4 +1,4 @@
-import { TbLatestChart } from '@home/components/widget/lib/chart/latest-chart';
+import { JnksIotLatestChart } from '@home/components/widget/lib/chart/latest-chart';
 import { radarChartDefaultSettings, RadarChartSettings } from '@home/components/widget/lib/chart/radar-chart.models';
 import { WidgetContext } from '@home/models/widget-component.models';
 import { DeepPartial } from '@shared/models/common';
@@ -15,7 +15,7 @@ import { AreaStyleOption, SeriesLabelOption } from 'echarts/types/src/util/types
 import { RadarIndicatorOption } from 'echarts/types/src/coord/radar/RadarModel';
 import { DataKey } from '@shared/models/widget.models';
 
-export class TbRadarChart extends TbLatestChart<RadarChartSettings> {
+export class JnksIotRadarChart extends JnksIotLatestChart<RadarChartSettings> {
 
   constructor(ctx: WidgetContext,
               inputSettings: DeepPartial<RadarChartSettings>,

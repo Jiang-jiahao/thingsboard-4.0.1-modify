@@ -14,9 +14,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.jnks.iot.common.util.JnksIotExecutors;
-import com.jnks.iot.script.api.TbScriptException;
-import com.jnks.iot.server.common.stats.TbApiUsageReportClient;
-import com.jnks.iot.server.common.stats.TbApiUsageStateClient;
+import com.jnks.iot.script.api.JnksIotScriptException;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageReportClient;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageStateClient;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -71,7 +71,7 @@ public class NashornJsInvokeService extends AbstractJsInvokeService {
     @Value("${js.local.js_thread_pool_size:50}")
     private int jsExecutorThreadPoolSize;
 
-    public NashornJsInvokeService(Optional<TbApiUsageStateClient> apiUsageStateClient, Optional<TbApiUsageReportClient> apiUsageReportClient) {
+    public NashornJsInvokeService(Optional<JnksIotApiUsageStateClient> apiUsageStateClient, Optional<JnksIotApiUsageReportClient> apiUsageReportClient) {
         super(apiUsageStateClient, apiUsageReportClient);
     }
 
@@ -139,7 +139,7 @@ public class NashornJsInvokeService extends AbstractJsInvokeService {
                 scriptInfoMap.put(scriptId, scriptInfo);
                 return scriptId;
             } catch (Exception e) {
-                throw new TbScriptException(scriptId, TbScriptException.ErrorCode.COMPILATION, jsScript, e);
+                throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.COMPILATION, jsScript, e);
             }
         });
     }
@@ -154,9 +154,9 @@ public class NashornJsInvokeService extends AbstractJsInvokeService {
                     return ((Invocable) engine).invokeFunction(scriptInfo.getFunctionName(), args);
                 }
             } catch (ScriptException e) {
-                throw new TbScriptException(scriptId, TbScriptException.ErrorCode.RUNTIME, null, e);
+                throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.RUNTIME, null, e);
             } catch (Exception e) {
-                throw new TbScriptException(scriptId, TbScriptException.ErrorCode.OTHER, null, e);
+                throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.OTHER, null, e);
             }
         });
     }

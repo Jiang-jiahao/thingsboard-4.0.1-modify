@@ -6,7 +6,7 @@ import { EntityType } from '@shared/models/entity-type.models';
 import { EntityViewInfo } from '@app/shared/models/entity-view.models';
 
 @Component({
-  selector: 'tb-entity-view-table-header',
+  selector: 'jnks-iot-entity-view-table-header',
   templateUrl: './entity-view-table-header.component.html',
   styleUrls: []
 })

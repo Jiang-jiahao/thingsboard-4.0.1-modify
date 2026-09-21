@@ -8,9 +8,9 @@ import org.eclipse.californium.core.server.resources.CoapExchange;
 import com.jnks.iot.server.common.data.id.DeviceId;
 import com.jnks.iot.server.common.transport.SessionMsgListener;
 import com.jnks.iot.server.gen.transport.TransportProtos;
-import com.jnks.iot.server.transport.coap.client.TbCoapClientState;
-import com.jnks.iot.server.transport.coap.client.TbCoapContentFormatUtil;
-import com.jnks.iot.server.transport.coap.client.TbCoapObservationState;
+import com.jnks.iot.server.transport.coap.client.JnksIotCoapClientState;
+import com.jnks.iot.server.transport.coap.client.JnksIotCoapContentFormatUtil;
+import com.jnks.iot.server.transport.coap.client.JnksIotCoapObservationState;
 
 import java.util.UUID;
 
@@ -18,7 +18,7 @@ import java.util.UUID;
 @Slf4j
 public abstract class AbstractSyncSessionCallback implements SessionMsgListener {
 
-    protected final TbCoapClientState state;
+    protected final JnksIotCoapClientState state;
     protected final CoapExchange exchange;
     protected final Request request;
 
@@ -56,7 +56,7 @@ public abstract class AbstractSyncSessionCallback implements SessionMsgListener 
         log.trace("[{}] Ignore unsupported update: {}", state.getDeviceId(), update);
     }
 
-    public static boolean isConRequest(TbCoapObservationState state) {
+    public static boolean isConRequest(JnksIotCoapObservationState state) {
         if (state != null) {
             return state.getExchange().advanced().getRequest().isConfirmable();
         } else {
@@ -65,7 +65,7 @@ public abstract class AbstractSyncSessionCallback implements SessionMsgListener 
     }
 
     protected void respond(Response response) {
-        response.getOptions().setContentFormat(TbCoapContentFormatUtil.getContentFormat(exchange.getRequestOptions().getContentFormat(), state.getContentFormat()));
+        response.getOptions().setContentFormat(JnksIotCoapContentFormatUtil.getContentFormat(exchange.getRequestOptions().getContentFormat(), state.getContentFormat()));
         response.setConfirmable(exchange.advanced().getRequest().isConfirmable());
         exchange.respond(response);
     }

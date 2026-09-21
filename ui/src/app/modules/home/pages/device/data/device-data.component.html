@@ -1,9 +1,9 @@
 <div [formGroup]="deviceDataFormGroup" style="padding-bottom: 16px;">
   <div *ngIf="displayTransportConfiguration && showTcpProtocolTemplateHelp"
-       class="tb-hint mat-body-2 flex flex-col gap-1"
+       class="jnks-iot-hint mat-body-2 flex flex-col gap-1"
        style="margin-bottom: 12px; padding: 10px 12px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);">
     <span translate>device.protocol-template-device-panel-hint</span>
-    <a routerLink="/profiles/protocolTemplates" class="tb-link">{{ 'device-profile.tcp.protocol-template-library-link' | translate }}</a>
+    <a routerLink="/profiles/protocolTemplates" class="jnks-iot-link">{{ 'device-profile.tcp.protocol-template-library-link' | translate }}</a>
   </div>
   <mat-accordion multi="true">
     <mat-expansion-panel *ngIf="displayDeviceConfiguration" [expanded]="true">
@@ -12,10 +12,10 @@
           <div translate>device.device-configuration</div>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      <tb-device-configuration
+      <jnks-iot-device-configuration
         formControlName="configuration"
         required>
-      </tb-device-configuration>
+      </jnks-iot-device-configuration>
     </mat-expansion-panel>
     <mat-expansion-panel *ngIf="displayTransportConfiguration" [expanded]="true">
       <mat-expansion-panel-header>
@@ -23,7 +23,7 @@
           <div translate>device.transport-configuration</div>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      <tb-device-transport-configuration
+      <jnks-iot-device-transport-configuration
         formControlName="transportConfiguration"
         [profileTransportType]="profileUiTransportType"
         [tcpWireAuthenticationMode]="tcpWireAuthenticationMode"
@@ -33,7 +33,7 @@
         [httpPullProfilePollUrl]="httpPullProfilePollUrl"
         [mqttPullProfileActive]="mqttPullProfileActive"
         required>
-      </tb-device-transport-configuration>
+      </jnks-iot-device-transport-configuration>
     </mat-expansion-panel>
   </mat-accordion>
 </div>

@@ -7,7 +7,7 @@ import { GpioItem, gpioItemValidator } from '@home/components/widget/lib/setting
 import { ContentType } from '@shared/models/constants';
 
 @Component({
-  selector: 'tb-gpio-control-widget-settings',
+  selector: 'jnks-iot-gpio-control-widget-settings',
   templateUrl: './gpio-control-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

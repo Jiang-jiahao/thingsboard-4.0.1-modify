@@ -31,7 +31,7 @@ import {
   DataKeySettingsFunction
 } from '@home/components/widget/lib/settings/common/key/data-keys.component.models';
 import { WidgetConfigCallbacks } from '@home/components/widget/config/widget-config.component.models';
-import { TbFunction } from '@shared/models/js-function.models';
+import { JnksIotFunction } from '@shared/models/js-function.models';
 import { FormProperty, jsonFormSchemaToFormProperties } from '@shared/models/dynamic-form.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -141,7 +141,7 @@ export interface WidgetTypeDescriptor {
   resources: Array<WidgetResource>;
   templateHtml: string;
   templateCss: string;
-  controllerScript: TbFunction;
+  controllerScript: JnksIotFunction;
   settingsForm?: FormProperty[];
   dataKeySettingsForm?: FormProperty[];
   latestDataKeySettingsForm?: FormProperty[];
@@ -351,8 +351,8 @@ export interface KeyInfo {
   comparisonResultType?: ComparisonResultType;
   label?: string;
   color?: string;
-  funcBody?: TbFunction;
-  postFuncBody?: TbFunction;
+  funcBody?: JnksIotFunction;
+  postFuncBody?: JnksIotFunction;
   units?: string;
   decimals?: number;
 }
@@ -684,31 +684,31 @@ export interface WidgetMobileActionResult<T extends MobileActionResult> {
 }
 
 export interface ProvisionSuccessDescriptor {
-  handleProvisionSuccessFunction: TbFunction;
+  handleProvisionSuccessFunction: JnksIotFunction;
 }
 
 export interface ProcessImageDescriptor {
-  processImageFunction: TbFunction;
+  processImageFunction: JnksIotFunction;
 }
 
 export interface ProcessLaunchResultDescriptor {
-  processLaunchResultFunction?: TbFunction;
+  processLaunchResultFunction?: JnksIotFunction;
 }
 
 export interface LaunchMapDescriptor extends ProcessLaunchResultDescriptor {
-  getLocationFunction: TbFunction;
+  getLocationFunction: JnksIotFunction;
 }
 
 export interface ScanQrCodeDescriptor {
-  processQrCodeFunction: TbFunction;
+  processQrCodeFunction: JnksIotFunction;
 }
 
 export interface MakePhoneCallDescriptor extends ProcessLaunchResultDescriptor {
-  getPhoneNumberFunction: TbFunction;
+  getPhoneNumberFunction: JnksIotFunction;
 }
 
 export interface GetLocationDescriptor {
-  processLocationFunction: TbFunction;
+  processLocationFunction: JnksIotFunction;
 }
 
 export type WidgetMobileActionDescriptors = ProcessImageDescriptor &
@@ -720,12 +720,12 @@ export type WidgetMobileActionDescriptors = ProcessImageDescriptor &
 
 export interface WidgetMobileActionDescriptor extends WidgetMobileActionDescriptors {
   type: WidgetMobileActionType;
-  handleErrorFunction?: TbFunction;
-  handleEmptyResultFunction?: TbFunction;
+  handleErrorFunction?: JnksIotFunction;
+  handleEmptyResultFunction?: JnksIotFunction;
 }
 
 export interface CustomActionDescriptor {
-  customFunction?: TbFunction;
+  customFunction?: JnksIotFunction;
   customResources?: Array<WidgetResource>;
   customHtml?: string;
   customCss?: string;
@@ -793,7 +793,7 @@ export interface WidgetActionDescriptor extends WidgetAction {
   customButtonStyle?: {[key: string]: string};
   displayName?: string;
   useShowWidgetActionFunction?: boolean;
-  showWidgetActionFunction?: TbFunction;
+  showWidgetActionFunction?: JnksIotFunction;
   columnIndex?: number;
 }
 

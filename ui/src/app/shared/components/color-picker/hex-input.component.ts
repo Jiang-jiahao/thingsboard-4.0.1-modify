@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 import { Color } from '@iplab/ngx-color-picker';
 
 @Component({
-  selector: `tb-hex-input`,
+  selector: `jnks-iot-hex-input`,
   templateUrl: `./hex-input.component.html`,
   styleUrls: ['./hex-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

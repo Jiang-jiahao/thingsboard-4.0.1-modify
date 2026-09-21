@@ -20,20 +20,20 @@ public class JnksIotDbInstaller {
     final static boolean IS_REDIS_CLUSTER = Boolean.parseBoolean(System.getProperty("blackBoxTests.redisCluster"));
     final static boolean IS_REDIS_SENTINEL = Boolean.parseBoolean(System.getProperty("blackBoxTests.redisSentinel"));
     final static boolean IS_HYBRID_MODE = Boolean.parseBoolean(System.getProperty("blackBoxTests.hybridMode"));
-    private final static String POSTGRES_DATA_VOLUME = "tb-postgres-test-data-volume";
+    private final static String POSTGRES_DATA_VOLUME = "jnks-iot-postgres-test-data-volume";
 
-    private final static String CASSANDRA_DATA_VOLUME = "tb-cassandra-test-data-volume";
-    private final static String REDIS_DATA_VOLUME = "tb-redis-data-volume";
-    private final static String REDIS_CLUSTER_DATA_VOLUME = "tb-redis-cluster-data-volume";
-    private final static String REDIS_SENTINEL_DATA_VOLUME = "tb-redis-sentinel-data-volume";
-    private final static String TB_LOG_VOLUME = "tb-log-test-volume";
-    private final static String TB_COAP_TRANSPORT_LOG_VOLUME = "tb-coap-transport-log-test-volume";
-    private final static String TB_LWM2M_TRANSPORT_LOG_VOLUME = "tb-lwm2m-transport-log-test-volume";
-    private final static String TB_HTTP_TRANSPORT_LOG_VOLUME = "tb-http-transport-log-test-volume";
-    private final static String TB_MQTT_TRANSPORT_LOG_VOLUME = "tb-mqtt-transport-log-test-volume";
-    private final static String TB_SNMP_TRANSPORT_LOG_VOLUME = "tb-snmp-transport-log-test-volume";
-    private final static String TB_VC_EXECUTOR_LOG_VOLUME = "tb-vc-executor-log-test-volume";
-    private final static String TB_EDQS_LOG_VOLUME = "tb-edqs-log-test-volume";
+    private final static String CASSANDRA_DATA_VOLUME = "jnks-iot-cassandra-test-data-volume";
+    private final static String REDIS_DATA_VOLUME = "jnks-iot-redis-data-volume";
+    private final static String REDIS_CLUSTER_DATA_VOLUME = "jnks-iot-redis-cluster-data-volume";
+    private final static String REDIS_SENTINEL_DATA_VOLUME = "jnks-iot-redis-sentinel-data-volume";
+    private final static String JNKS_IOT_LOG_VOLUME = "jnks-iot-log-test-volume";
+    private final static String JNKS_IOT_COAP_TRANSPORT_LOG_VOLUME = "jnks-iot-coap-transport-log-test-volume";
+    private final static String JNKS_IOT_LWM2M_TRANSPORT_LOG_VOLUME = "jnks-iot-lwm2m-transport-log-test-volume";
+    private final static String JNKS_IOT_HTTP_TRANSPORT_LOG_VOLUME = "jnks-iot-http-transport-log-test-volume";
+    private final static String JNKS_IOT_MQTT_TRANSPORT_LOG_VOLUME = "jnks-iot-mqtt-transport-log-test-volume";
+    private final static String JNKS_IOT_SNMP_TRANSPORT_LOG_VOLUME = "jnks-iot-snmp-transport-log-test-volume";
+    private final static String JNKS_IOT_VC_EXECUTOR_LOG_VOLUME = "jnks-iot-vc-executor-log-test-volume";
+    private final static String JNKS_IOT_EDQS_LOG_VOLUME = "jnks-iot-edqs-log-test-volume";
     private final static String JAVA_OPTS = "-Xmx512m";
 
     private final DockerComposeExecutor dockerCompose;
@@ -44,14 +44,14 @@ public class JnksIotDbInstaller {
     private final String redisDataVolume;
     private final String redisClusterDataVolume;
     private final String redisSentinelDataVolume;
-    private final String tbLogVolume;
-    private final String tbCoapTransportLogVolume;
-    private final String tbLwm2mTransportLogVolume;
-    private final String tbHttpTransportLogVolume;
-    private final String tbMqttTransportLogVolume;
-    private final String tbSnmpTransportLogVolume;
-    private final String tbVcExecutorLogVolume;
-    private final String tbEdqsLogVolume;
+    private final String jnksIotLogVolume;
+    private final String jnksIotCoapTransportLogVolume;
+    private final String jnksIotLwm2mTransportLogVolume;
+    private final String jnksIotHttpTransportLogVolume;
+    private final String jnksIotMqttTransportLogVolume;
+    private final String jnksIotSnmpTransportLogVolume;
+    private final String jnksIotVcExecutorLogVolume;
+    private final String jnksIotEdqsLogVolume;
     private final Map<String, String> env;
 
     public JnksIotDbInstaller() {
@@ -83,14 +83,14 @@ public class JnksIotDbInstaller {
         redisDataVolume = project + "_" + REDIS_DATA_VOLUME;
         redisClusterDataVolume = project + "_" + REDIS_CLUSTER_DATA_VOLUME;
         redisSentinelDataVolume = project + "_" + REDIS_SENTINEL_DATA_VOLUME;
-        tbLogVolume = project + "_" + TB_LOG_VOLUME;
-        tbCoapTransportLogVolume = project + "_" + TB_COAP_TRANSPORT_LOG_VOLUME;
-        tbLwm2mTransportLogVolume = project + "_" + TB_LWM2M_TRANSPORT_LOG_VOLUME;
-        tbHttpTransportLogVolume = project + "_" + TB_HTTP_TRANSPORT_LOG_VOLUME;
-        tbMqttTransportLogVolume = project + "_" + TB_MQTT_TRANSPORT_LOG_VOLUME;
-        tbSnmpTransportLogVolume = project + "_" + TB_SNMP_TRANSPORT_LOG_VOLUME;
-        tbVcExecutorLogVolume = project + "_" + TB_VC_EXECUTOR_LOG_VOLUME;
-        tbEdqsLogVolume = project + "_" + TB_EDQS_LOG_VOLUME;
+        jnksIotLogVolume = project + "_" + JNKS_IOT_LOG_VOLUME;
+        jnksIotCoapTransportLogVolume = project + "_" + JNKS_IOT_COAP_TRANSPORT_LOG_VOLUME;
+        jnksIotLwm2mTransportLogVolume = project + "_" + JNKS_IOT_LWM2M_TRANSPORT_LOG_VOLUME;
+        jnksIotHttpTransportLogVolume = project + "_" + JNKS_IOT_HTTP_TRANSPORT_LOG_VOLUME;
+        jnksIotMqttTransportLogVolume = project + "_" + JNKS_IOT_MQTT_TRANSPORT_LOG_VOLUME;
+        jnksIotSnmpTransportLogVolume = project + "_" + JNKS_IOT_SNMP_TRANSPORT_LOG_VOLUME;
+        jnksIotVcExecutorLogVolume = project + "_" + JNKS_IOT_VC_EXECUTOR_LOG_VOLUME;
+        jnksIotEdqsLogVolume = project + "_" + JNKS_IOT_EDQS_LOG_VOLUME;
 
         dockerCompose = new DockerComposeExecutor(composeFiles, project);
 
@@ -100,14 +100,14 @@ public class JnksIotDbInstaller {
         if (IS_HYBRID_MODE) {
             env.put("CASSANDRA_DATA_VOLUME", cassandraDataVolume);
         }
-        env.put("TB_LOG_VOLUME", tbLogVolume);
-        env.put("TB_COAP_TRANSPORT_LOG_VOLUME", tbCoapTransportLogVolume);
-        env.put("TB_LWM2M_TRANSPORT_LOG_VOLUME", tbLwm2mTransportLogVolume);
-        env.put("TB_HTTP_TRANSPORT_LOG_VOLUME", tbHttpTransportLogVolume);
-        env.put("TB_MQTT_TRANSPORT_LOG_VOLUME", tbMqttTransportLogVolume);
-        env.put("TB_SNMP_TRANSPORT_LOG_VOLUME", tbSnmpTransportLogVolume);
-        env.put("TB_VC_EXECUTOR_LOG_VOLUME", tbVcExecutorLogVolume);
-        env.put("TB_EDQS_LOG_VOLUME", tbEdqsLogVolume);
+        env.put("JNKS_IOT_LOG_VOLUME", jnksIotLogVolume);
+        env.put("JNKS_IOT_COAP_TRANSPORT_LOG_VOLUME", jnksIotCoapTransportLogVolume);
+        env.put("JNKS_IOT_LWM2M_TRANSPORT_LOG_VOLUME", jnksIotLwm2mTransportLogVolume);
+        env.put("JNKS_IOT_HTTP_TRANSPORT_LOG_VOLUME", jnksIotHttpTransportLogVolume);
+        env.put("JNKS_IOT_MQTT_TRANSPORT_LOG_VOLUME", jnksIotMqttTransportLogVolume);
+        env.put("JNKS_IOT_SNMP_TRANSPORT_LOG_VOLUME", jnksIotSnmpTransportLogVolume);
+        env.put("JNKS_IOT_VC_EXECUTOR_LOG_VOLUME", jnksIotVcExecutorLogVolume);
+        env.put("JNKS_IOT_EDQS_LOG_VOLUME", jnksIotEdqsLogVolume);
         if (IS_REDIS_CLUSTER) {
             for (int i = 0; i < 6; i++) {
                 env.put("REDIS_CLUSTER_DATA_VOLUME_" + i, redisClusterDataVolume + '-' + i);
@@ -157,28 +157,28 @@ public class JnksIotDbInstaller {
                 dockerCompose.invokeDocker();
             }
 
-            dockerCompose.withCommand("volume create " + tbLogVolume);
+            dockerCompose.withCommand("volume create " + jnksIotLogVolume);
             dockerCompose.invokeDocker();
 
-            dockerCompose.withCommand("volume create " + tbCoapTransportLogVolume);
+            dockerCompose.withCommand("volume create " + jnksIotCoapTransportLogVolume);
             dockerCompose.invokeDocker();
 
-            dockerCompose.withCommand("volume create " + tbLwm2mTransportLogVolume);
+            dockerCompose.withCommand("volume create " + jnksIotLwm2mTransportLogVolume);
             dockerCompose.invokeDocker();
 
-            dockerCompose.withCommand("volume create " + tbHttpTransportLogVolume);
+            dockerCompose.withCommand("volume create " + jnksIotHttpTransportLogVolume);
             dockerCompose.invokeDocker();
 
-            dockerCompose.withCommand("volume create " + tbMqttTransportLogVolume);
+            dockerCompose.withCommand("volume create " + jnksIotMqttTransportLogVolume);
             dockerCompose.invokeDocker();
 
-            dockerCompose.withCommand("volume create " + tbSnmpTransportLogVolume);
+            dockerCompose.withCommand("volume create " + jnksIotSnmpTransportLogVolume);
             dockerCompose.invokeDocker();
 
-            dockerCompose.withCommand("volume create " + tbVcExecutorLogVolume);
+            dockerCompose.withCommand("volume create " + jnksIotVcExecutorLogVolume);
             dockerCompose.invokeDocker();
 
-            dockerCompose.withCommand("volume create " + tbEdqsLogVolume);
+            dockerCompose.withCommand("volume create " + jnksIotEdqsLogVolume);
             dockerCompose.invokeDocker();
 
             StringBuilder additionalServices = new StringBuilder();
@@ -213,7 +213,7 @@ public class JnksIotDbInstaller {
             dockerCompose.invokeCompose();
 
             dockerCompose.withCommand("run --no-deps --rm -e INSTALL_TB=true -e LOAD_DEMO=true " +
-                    "tb-core1");
+                    "jnks-iot-core1");
             dockerCompose.invokeCompose();
 
         } finally {
@@ -226,26 +226,26 @@ public class JnksIotDbInstaller {
     }
 
     public void savaLogsAndRemoveVolumes() {
-        copyLogs(tbLogVolume, "./target/tb-logs/");
-        copyLogs(tbCoapTransportLogVolume, "./target/tb-coap-transport-logs/");
-        copyLogs(tbLwm2mTransportLogVolume, "./target/tb-lwm2m-transport-logs/");
-        copyLogs(tbHttpTransportLogVolume, "./target/tb-http-transport-logs/");
-        copyLogs(tbMqttTransportLogVolume, "./target/tb-mqtt-transport-logs/");
-        copyLogs(tbSnmpTransportLogVolume, "./target/tb-snmp-transport-logs/");
-        copyLogs(tbVcExecutorLogVolume, "./target/tb-vc-executor-logs/");
-        copyLogs(tbEdqsLogVolume, "./target/tb-edqs-logs/");
+        copyLogs(jnksIotLogVolume, "./target/jnks-iot-logs/");
+        copyLogs(jnksIotCoapTransportLogVolume, "./target/jnks-iot-coap-transport-logs/");
+        copyLogs(jnksIotLwm2mTransportLogVolume, "./target/jnks-iot-lwm2m-transport-logs/");
+        copyLogs(jnksIotHttpTransportLogVolume, "./target/jnks-iot-http-transport-logs/");
+        copyLogs(jnksIotMqttTransportLogVolume, "./target/jnks-iot-mqtt-transport-logs/");
+        copyLogs(jnksIotSnmpTransportLogVolume, "./target/jnks-iot-snmp-transport-logs/");
+        copyLogs(jnksIotVcExecutorLogVolume, "./target/jnks-iot-vc-executor-logs/");
+        copyLogs(jnksIotEdqsLogVolume, "./target/jnks-iot-edqs-logs/");
 
         StringJoiner rmVolumesCommand = new StringJoiner(" ")
                 .add("volume rm -f")
                 .add(postgresDataVolume)
-                .add(tbLogVolume)
-                .add(tbCoapTransportLogVolume)
-                .add(tbLwm2mTransportLogVolume)
-                .add(tbHttpTransportLogVolume)
-                .add(tbMqttTransportLogVolume)
-                .add(tbSnmpTransportLogVolume)
-                .add(tbVcExecutorLogVolume)
-                .add(tbEdqsLogVolume)
+                .add(jnksIotLogVolume)
+                .add(jnksIotCoapTransportLogVolume)
+                .add(jnksIotLwm2mTransportLogVolume)
+                .add(jnksIotHttpTransportLogVolume)
+                .add(jnksIotMqttTransportLogVolume)
+                .add(jnksIotSnmpTransportLogVolume)
+                .add(jnksIotVcExecutorLogVolume)
+                .add(jnksIotEdqsLogVolume)
                 .add(resolveRedisComposeVolumeLog());
 
         if (IS_HYBRID_MODE) {
@@ -268,15 +268,15 @@ public class JnksIotDbInstaller {
     }
 
     private void copyLogs(String volumeName, String targetDir) {
-        File tbLogsDir = new File(targetDir);
-        tbLogsDir.mkdirs();
+        File jnksIotLogsDir = new File(targetDir);
+        jnksIotLogsDir.mkdirs();
 
-        String logsContainerName = "tb-logs-container-" + StringUtils.randomAlphanumeric(10);
+        String logsContainerName = "jnks-iot-logs-container-" + StringUtils.randomAlphanumeric(10);
 
         dockerCompose.withCommand("run -d --rm --name " + logsContainerName + " -v " + volumeName + ":/root alpine tail -f /dev/null");
         dockerCompose.invokeDocker();
 
-        dockerCompose.withCommand("cp " + logsContainerName + ":/root/. " + tbLogsDir.getAbsolutePath());
+        dockerCompose.withCommand("cp " + logsContainerName + ":/root/. " + jnksIotLogsDir.getAbsolutePath());
         dockerCompose.invokeDocker();
 
         dockerCompose.withCommand("rm -f " + logsContainerName);

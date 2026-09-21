@@ -8,17 +8,17 @@ import com.jnks.iot.server.common.stats.StatsFactory;
 import com.jnks.iot.server.common.stats.StatsType;
 import com.jnks.iot.server.gen.transport.TransportProtos.FromEdqsMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToEdqsMsg;
-import com.jnks.iot.server.queue.TbQueueAdmin;
+import com.jnks.iot.server.queue.JnksIotQueueAdmin;
 import com.jnks.iot.server.queue.edqs.EdqsConfig;
 import com.jnks.iot.server.queue.edqs.EdqsQueueFactory;
-import com.jnks.iot.server.queue.TbQueueConsumer;
-import com.jnks.iot.server.queue.TbQueueProducer;
-import com.jnks.iot.server.queue.TbQueueResponseTemplate;
-import com.jnks.iot.server.queue.common.DefaultTbQueueResponseTemplate;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueConsumer;
+import com.jnks.iot.server.queue.JnksIotQueueProducer;
+import com.jnks.iot.server.queue.JnksIotQueueResponseTemplate;
+import com.jnks.iot.server.queue.common.DefaultJnksIotQueueResponseTemplate;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
 import com.jnks.iot.server.queue.memory.InMemoryStorage;
-import com.jnks.iot.server.queue.memory.InMemoryTbQueueConsumer;
-import com.jnks.iot.server.queue.memory.InMemoryTbQueueProducer;
+import com.jnks.iot.server.queue.memory.InMemoryJnksIotQueueConsumer;
+import com.jnks.iot.server.queue.memory.InMemoryJnksIotQueueProducer;
 
 @Component
 @ConditionalOnExpression("'${queue.edqs.sync.enabled:true}'=='true' && '${queue.edqs.mode:null}'=='local' && '${queue.type:null}'=='in-memory'")
@@ -28,33 +28,33 @@ public class InMemoryEdqsQueueFactory implements EdqsQueueFactory {
     private final InMemoryStorage storage;
     private final EdqsConfig edqsConfig;
     private final StatsFactory statsFactory;
-    private final TbQueueAdmin queueAdmin;
+    private final JnksIotQueueAdmin queueAdmin;
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToEdqsMsg>> createEdqsEventsConsumer() {
-        return new InMemoryTbQueueConsumer<>(storage, edqsConfig.getEventsTopic());
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToEdqsMsg>> createEdqsEventsConsumer() {
+        return new InMemoryJnksIotQueueConsumer<>(storage, edqsConfig.getEventsTopic());
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToEdqsMsg>> createEdqsEventsToBackupConsumer() {
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToEdqsMsg>> createEdqsEventsToBackupConsumer() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToEdqsMsg>> createEdqsStateConsumer() {
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToEdqsMsg>> createEdqsStateConsumer() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToEdqsMsg>> createEdqsStateProducer() {
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToEdqsMsg>> createEdqsStateProducer() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public TbQueueResponseTemplate<TbProtoQueueMsg<ToEdqsMsg>, TbProtoQueueMsg<FromEdqsMsg>> createEdqsResponseTemplate() {
-        TbQueueConsumer<TbProtoQueueMsg<ToEdqsMsg>> requestConsumer = new InMemoryTbQueueConsumer<>(storage, edqsConfig.getRequestsTopic());
-        TbQueueProducer<TbProtoQueueMsg<FromEdqsMsg>> responseProducer = new InMemoryTbQueueProducer<>(storage, edqsConfig.getResponsesTopic());
-        return DefaultTbQueueResponseTemplate.<TbProtoQueueMsg<ToEdqsMsg>, TbProtoQueueMsg<FromEdqsMsg>>builder()
+    public JnksIotQueueResponseTemplate<JnksIotProtoQueueMsg<ToEdqsMsg>, JnksIotProtoQueueMsg<FromEdqsMsg>> createEdqsResponseTemplate() {
+        JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToEdqsMsg>> requestConsumer = new InMemoryJnksIotQueueConsumer<>(storage, edqsConfig.getRequestsTopic());
+        JnksIotQueueProducer<JnksIotProtoQueueMsg<FromEdqsMsg>> responseProducer = new InMemoryJnksIotQueueProducer<>(storage, edqsConfig.getResponsesTopic());
+        return DefaultJnksIotQueueResponseTemplate.<JnksIotProtoQueueMsg<ToEdqsMsg>, JnksIotProtoQueueMsg<FromEdqsMsg>>builder()
                 .requestTemplate(requestConsumer)
                 .responseTemplate(responseProducer)
                 .maxPendingRequests(edqsConfig.getMaxPendingRequests())
@@ -66,7 +66,7 @@ public class InMemoryEdqsQueueFactory implements EdqsQueueFactory {
     }
 
     @Override
-    public TbQueueAdmin getEdqsQueueAdmin() {
+    public JnksIotQueueAdmin getEdqsQueueAdmin() {
         return queueAdmin;
     }
 

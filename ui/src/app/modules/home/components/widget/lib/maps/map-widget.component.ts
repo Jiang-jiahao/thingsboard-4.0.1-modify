@@ -16,14 +16,14 @@ import {
 import { WidgetContext } from '@home/models/widget-component.models';
 import { Observable } from 'rxjs';
 import { backgroundStyle, ComponentStyle, overlayStyle } from '@shared/models/widget-settings.models';
-import { TbMap } from '@home/components/widget/lib/maps/map';
+import { JnksIotMap } from '@home/components/widget/lib/maps/map';
 import { MapSetting } from '@shared/models/widget/maps/map.models';
 import { WidgetComponent } from '@home/components/widget/widget.component';
 import { ImagePipe } from '@shared/pipe/image.pipe';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
-  selector: 'tb-map-widget',
+  selector: 'jnks-iot-map-widget',
   templateUrl: './map-widget.component.html',
   styleUrls: ['./map-widget.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -42,7 +42,7 @@ export class MapWidgetComponent implements OnInit, OnDestroy {
   overlayStyle: ComponentStyle = {};
   padding: string;
 
-  private map: TbMap<MapSetting>;
+  private map: JnksIotMap<MapSetting>;
 
   constructor(public widgetComponent: WidgetComponent,
               private imagePipe: ImagePipe,

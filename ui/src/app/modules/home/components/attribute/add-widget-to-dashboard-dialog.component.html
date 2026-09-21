@@ -16,10 +16,10 @@
         <mat-radio-button [value]="0" color="primary">
           <section class="flex flex-col" style="width: 300px;">
             <span translate>dashboard.select-existing</span>
-            <tb-dashboard-autocomplete formControlName="dashboardId"
+            <jnks-iot-dashboard-autocomplete formControlName="dashboardId"
                                        [required]="addWidgetFormGroup.get('addToDashboardType').value === 0"
                                        [selectFirstDashboard]="false">
-            </tb-dashboard-autocomplete>
+            </jnks-iot-dashboard-autocomplete>
           </section>
         </mat-radio-button>
         <mat-radio-button [value]="1" color="primary">

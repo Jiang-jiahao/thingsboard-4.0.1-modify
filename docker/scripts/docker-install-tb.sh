@@ -62,7 +62,7 @@ fi
 COMPOSE_ARGS="\
       -f docker-compose.yml ${ADDITIONAL_CACHE_ARGS} ${ADDITIONAL_COMPOSE_ARGS} ${ADDITIONAL_COMPOSE_QUEUE_ARGS} ${ADDITIONAL_COMPOSE_EDQS_ARGS} \
       run --no-deps --rm -e INSTALL_TB=true -e LOAD_DEMO=${loadDemo} \
-      tb-core1"
+      jnks-iot-core1"
 
 case $COMPOSE_VERSION in
     V2)

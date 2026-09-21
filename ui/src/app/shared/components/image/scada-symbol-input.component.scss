@@ -3,19 +3,19 @@
 $containerHeight: 96px !default;
 
 :host {
-  .tb-container {
+  .jnks-iot-container {
     margin-top: 0;
     padding: 0 0 16px;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    label.tb-title {
+    label.jnks-iot-title {
       display: block;
       padding-bottom: 0;
     }
   }
 
-  .tb-scada-symbol-select-container {
+  .jnks-iot-scada-symbol-select-container {
     width: 100%;
     height: $containerHeight;
     border-radius: 4px;
@@ -24,14 +24,14 @@ $containerHeight: 96px !default;
     align-items: center;
     &.disabled {
       width: $containerHeight;
-      .tb-scada-symbol-container {
+      .jnks-iot-scada-symbol-container {
         width: $containerHeight - 2px;
         border-right: none;
       }
     }
   }
 
-  .tb-scada-symbol-container {
+  .jnks-iot-scada-symbol-container {
     width: $containerHeight - 1px;
     height: $containerHeight - 2px;
     padding: 8px;
@@ -44,14 +44,14 @@ $containerHeight: 96px !default;
     overflow: hidden;
   }
 
-  .tb-scada-symbol-preview {
+  .jnks-iot-scada-symbol-preview {
     width: auto;
     max-width: $containerHeight - 2px;
     height: auto;
     max-height: $containerHeight  - 2px;
   }
 
-  .tb-no-symbol {
+  .jnks-iot-no-symbol {
     text-align: center;
     color: rgba(0, 0, 0, 0.38);
     font-size: 12px;
@@ -61,7 +61,7 @@ $containerHeight: 96px !default;
     letter-spacing: 0.4px;
   }
 
-  .tb-scada-symbol-info-container {
+  .jnks-iot-scada-symbol-info-container {
     display: flex;
     flex: 1;
     align-self: stretch;
@@ -69,7 +69,7 @@ $containerHeight: 96px !default;
     justify-content: flex-end;
     align-items: center;
     gap: 4px;
-    .tb-resource-scada-symbol-container {
+    .jnks-iot-resource-scada-symbol-container {
       padding: 8px;
       display: flex;
       flex: 1;
@@ -78,7 +78,7 @@ $containerHeight: 96px !default;
       align-items: flex-start;
       flex-direction: column;
       gap: 4px;
-      .tb-scada-symbol-title {
+      .jnks-iot-scada-symbol-title {
         overflow: hidden;
         text-overflow: ellipsis;
         -webkit-line-clamp: 2;
@@ -95,12 +95,12 @@ $containerHeight: 96px !default;
       }
     }
 
-    .tb-scada-symbol-clear-btn {
+    .jnks-iot-scada-symbol-clear-btn {
       color: rgba(0,0,0,0.38);
     }
   }
 
-  .tb-scada-symbol-select-buttons-container {
+  .jnks-iot-scada-symbol-select-buttons-container {
     display: flex;
     flex: 1;
     align-self: stretch;
@@ -108,7 +108,7 @@ $containerHeight: 96px !default;
     gap: 8px;
     justify-content: center;
     align-items: flex-start;
-    .tb-scada-symbol-select-button {
+    .jnks-iot-scada-symbol-select-button {
       width: 100%;
       height: 100%;
       align-self: stretch;

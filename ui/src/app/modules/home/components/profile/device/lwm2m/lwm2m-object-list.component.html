@@ -20,7 +20,7 @@
            [matChipInputFor]="chipList">
   </mat-chip-grid>
   <mat-autocomplete #objectAutocomplete="matAutocomplete"
-                    class="tb-autocomplete"
+                    class="jnks-iot-autocomplete"
                     [displayWith]="displayObjectLwm2mFn">
     <mat-option *ngFor="let objectLwm2m of filteredObjectsList | async" [value]="objectLwm2m">
       <span [innerHTML]="objectLwm2m.keyId + ': ' + (objectLwm2m.name  | highlight: searchText)"></span>

@@ -1,15 +1,15 @@
-<section [formGroup]="customerAttributesConfigForm" class="tb-form-panel stroked">
-  <div class="tb-form-panel-title" translate>rule-node-config.mapping-of-customers</div>
+<section [formGroup]="customerAttributesConfigForm" class="jnks-iot-form-panel stroked">
+  <div class="jnks-iot-form-panel-title" translate>rule-node-config.mapping-of-customers</div>
   <div class="flex flex-1 items-center justify-center">
     <div class="fetch-to-data-toggle">
-      <tb-toggle-select class="fetch-to-data-toggle" formControlName="dataToFetch" appearance="fill">
-        <tb-toggle-option *ngFor="let data of fetchToData" [value]="data.value">
+      <jnks-iot-toggle-select class="fetch-to-data-toggle" formControlName="dataToFetch" appearance="fill">
+        <jnks-iot-toggle-option *ngFor="let data of fetchToData" [value]="data.value">
           {{ data.name }}
-        </tb-toggle-option>
-      </tb-toggle-select>
+        </jnks-iot-toggle-option>
+      </jnks-iot-toggle-select>
     </div>
   </div>
-  <tb-kv-map-config
+  <jnks-iot-kv-map-config
     required
     formControlName="dataMapping"
     [requiredText]="'rule-node-config.attr-mapping-required' | translate"
@@ -20,10 +20,10 @@
     [valRequiredText]="'rule-node-config.target-key-required' | translate"
     [hintText]="'rule-node-config.kv-map-pattern-hint'"
     popupHelpLink="rulenode/customer_attributes_node_fields_templatization">
-  </tb-kv-map-config>
-  <tb-msg-metadata-chip
+  </jnks-iot-kv-map-config>
+  <jnks-iot-msg-metadata-chip
     [labelText]="customerAttributesConfigForm.get('dataToFetch').value === DataToFetch.LATEST_TELEMETRY ?
     ('rule-node-config.add-mapped-latest-telemetry-to' | translate) : ('rule-node-config.add-mapped-attribute-to' | translate)"
     formControlName="fetchTo">
-  </tb-msg-metadata-chip>
+  </jnks-iot-msg-metadata-chip>
 </section>

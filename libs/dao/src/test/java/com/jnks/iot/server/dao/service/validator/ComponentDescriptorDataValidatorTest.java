@@ -21,7 +21,7 @@ class ComponentDescriptorDataValidatorTest {
         plugin.setType(ComponentType.ENRICHMENT);
         plugin.setScope(ComponentScope.SYSTEM);
         plugin.setName("originator attributes");
-        plugin.setClazz("com.jnks.iot.rule.engine.metadata.TbGetAttributesNode");
+        plugin.setClazz("com.jnks.iot.rule.engine.metadata.JnksIotGetAttributesNode");
         validator.validateDataImpl(TenantId.SYS_TENANT_ID, plugin);
         verify(validator).validateString("Component name", plugin.getName());
     }

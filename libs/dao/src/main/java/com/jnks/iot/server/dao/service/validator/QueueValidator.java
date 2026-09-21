@@ -11,7 +11,7 @@ import com.jnks.iot.server.common.data.queue.SubmitStrategyType;
 import com.jnks.iot.server.dao.exception.DataValidationException;
 import com.jnks.iot.server.dao.queue.QueueDao;
 import com.jnks.iot.server.dao.service.DataValidator;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
 
 @Component
 public class QueueValidator extends DataValidator<Queue> {
@@ -20,7 +20,7 @@ public class QueueValidator extends DataValidator<Queue> {
     private QueueDao queueDao;
 
     @Autowired
-    private TbTenantProfileCache tenantProfileCache;
+    private JnksIotTenantProfileCache tenantProfileCache;
 
     @Override
     protected void validateCreate(TenantId tenantId, Queue queue) {
@@ -52,7 +52,7 @@ public class QueueValidator extends DataValidator<Queue> {
         if (!tenantId.equals(TenantId.SYS_TENANT_ID)) {
             TenantProfile tenantProfile = tenantProfileCache.get(tenantId);
 
-            if (!tenantProfile.isIsolatedTbRuleEngine()) {
+            if (!tenantProfile.isIsolatedJnksIotRuleEngine()) {
                 throw new DataValidationException("Tenant should be isolated!");
             }
         }

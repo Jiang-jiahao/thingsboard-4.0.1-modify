@@ -29,13 +29,13 @@ import {
 } from '@shared/models/calculated-field.models';
 import { CalculatedFieldArgumentPanelComponent } from '@home/components/calculated-fields/components/public-api';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EntityId } from '@shared/models/id/entity-id';
 import { EntityType, entityTypeTranslations } from '@shared/models/entity-type.models';
 import { getEntityDetailsPageURL, isEqual } from '@core/utils';
-import { TbPopoverComponent } from '@shared/components/popover.component';
-import { TbTableDatasource } from '@shared/components/table/table-datasource.abstract';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotTableDatasource } from '@shared/components/table/table-datasource.abstract';
 import { EntityService } from '@core/http/entity.service';
 import { MatSort } from '@angular/material/sort';
 import { getCurrentAuthState } from '@core/auth/auth.selectors';
@@ -46,7 +46,7 @@ import { NULL_UUID } from '@shared/models/id/has-uuid';
 import { BaseData } from '@shared/models/base-data';
 
 @Component({
-  selector: 'tb-calculated-field-arguments-table',
+  selector: 'jnks-iot-calculated-field-arguments-table',
   templateUrl: './calculated-field-arguments-table.component.html',
   styleUrls: [`calculated-field-arguments-table.component.scss`],
   providers: [
@@ -85,12 +85,12 @@ export class CalculatedFieldArgumentsTableComponent implements ControlValueAcces
   readonly maxArgumentsPerCF = getCurrentAuthState(this.store).maxArgumentsPerCF;
   readonly NULL_UUID = NULL_UUID;
 
-  private popoverComponent: TbPopoverComponent<CalculatedFieldArgumentPanelComponent>;
+  private popoverComponent: JnksIotPopoverComponent<CalculatedFieldArgumentPanelComponent>;
   private propagateChange: (argumentsObj: Record<string, CalculatedFieldArgument>) => void = () => {};
 
   constructor(
     private fb: FormBuilder,
-    private popoverService: TbPopoverService,
+    private popoverService: JnksIotPopoverService,
     private viewContainerRef: ViewContainerRef,
     private cd: ChangeDetectorRef,
     private renderer: Renderer2,
@@ -139,7 +139,7 @@ export class CalculatedFieldArgumentsTableComponent implements ControlValueAcces
 
   manageArgument($event: Event, matButton: MatButton, argument = {} as CalculatedFieldArgumentValue): void {
     $event?.stopPropagation();
-    if (this.popoverComponent && !this.popoverComponent.tbHidden) {
+    if (this.popoverComponent && !this.popoverComponent.jnksIotHidden) {
       this.popoverComponent.hide();
     }
     const trigger = matButton._elementRef.nativeElement;
@@ -167,7 +167,7 @@ export class CalculatedFieldArgumentsTableComponent implements ControlValueAcces
         context: ctx,
         isModal: true
       });
-      this.popoverComponent.tbComponentRef.instance.argumentsDataApplied.subscribe(({ entityName, ...value }) => {
+      this.popoverComponent.jnksIotComponentRef.instance.argumentsDataApplied.subscribe(({ entityName, ...value }) => {
         this.popoverComponent.hide();
         if (entityName) {
           this.entityNameMap.set(value.refEntityId.id, entityName);
@@ -296,7 +296,7 @@ export class CalculatedFieldArgumentsTableComponent implements ControlValueAcces
   }
 }
 
-class CalculatedFieldArgumentDatasource extends TbTableDatasource<CalculatedFieldArgumentValue> {
+class CalculatedFieldArgumentDatasource extends JnksIotTableDatasource<CalculatedFieldArgumentValue> {
   constructor() {
     super();
   }

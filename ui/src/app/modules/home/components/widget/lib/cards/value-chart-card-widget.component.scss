@@ -1,4 +1,4 @@
-.tb-value-chart-card-panel {
+.jnks-iot-value-chart-card-panel {
   width: 100%;
   height: 100%;
   position: relative;
@@ -6,20 +6,20 @@
   flex-direction: column;
   gap: 8px;
   padding: 20px 24px 24px 24px;
-  > div:not(.tb-value-chart-card-overlay) {
+  > div:not(.jnks-iot-value-chart-card-overlay) {
     z-index: 1;
   }
-  div.tb-widget-title {
+  div.jnks-iot-widget-title {
     padding: 0;
   }
-  .tb-value-chart-card-overlay {
+  .jnks-iot-value-chart-card-overlay {
     position: absolute;
     top: 12px;
     left: 12px;
     bottom: 12px;
     right: 12px;
   }
-  .tb-value-chart-card-content {
+  .jnks-iot-value-chart-card-content {
     min-height: 0;
     flex: 1;
     display: flex;
@@ -32,21 +32,21 @@
     &.right {
       flex-direction: row-reverse;
     }
-    .tb-value-chart-card-value {
+    .jnks-iot-value-chart-card-value {
       white-space: nowrap;
     }
-    .tb-value-chart-card-chart {
+    .jnks-iot-value-chart-card-chart {
       flex: 1;
       min-width: 0;
       height: 100%;
     }
     &.auto-scale {
-      .tb-value-chart-card-value-container {
+      .jnks-iot-value-chart-card-value-container {
         width: 35%;
         display: flex;
         justify-content: flex-start;
       }
-      .tb-value-chart-card-chart {
+      .jnks-iot-value-chart-card-chart {
         width: 65%;
       }
     }

@@ -1,12 +1,12 @@
 :host {
-  .tb-template-header {
+  .jnks-iot-template-header {
     position: sticky;
     top: 0;
     z-index: 5;
     padding-bottom: 12px;
     background-color: var(--mdc-dialog-container-color, white);
 
-    .tb-hint-available-params {
+    .jnks-iot-hint-available-params {
       color: rgba(0, 0, 0, 0.54);
       letter-spacing: 0.4px;
 
@@ -20,28 +20,28 @@
     gap: 12px;
     font-weight: normal;
 
-    tb-icon {
+    jnks-iot-icon {
       color: rgba(0, 0, 0, .38);
     }
   }
 
-  .tb-mat-error {
+  .jnks-iot-mat-error {
     font-size: 13px;
   }
 
-  .tb-title {
+  .jnks-iot-title {
     font-size: 16px;
     line-height: 24px;
 
-    &.tb-required::after {
+    &.jnks-iot-required::after {
       font-size: initial;
       content: "*";
     }
 
-    &.tb-error {
+    &.jnks-iot-error {
       color: var(--mdc-theme-error, #f44336);
 
-      &.tb-required::after {
+      &.jnks-iot-required::after {
         color: var(--mdc-theme-error, #f44336);
       }
     }
@@ -49,7 +49,7 @@
 }
 
 :host ::ng-deep {
-  .tb-form-panel .mat-expansion-panel.tb-settings {
+  .jnks-iot-form-panel .mat-expansion-panel.jnks-iot-settings {
     & > .mat-expansion-panel-content > .mat-expansion-panel-body {
       gap: 0;
     }

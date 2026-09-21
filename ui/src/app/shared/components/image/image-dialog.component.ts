@@ -21,7 +21,7 @@ export interface ImageDialogData {
 }
 
 @Component({
-  selector: 'tb-image-dialog',
+  selector: 'jnks-iot-image-dialog',
   templateUrl: './image-dialog.component.html',
   styleUrls: ['./image-dialog.component.scss']
 })
@@ -105,7 +105,7 @@ export class ImageDialogComponent extends
     this.dialog.open<EmbedImageDialogComponent, EmbedImageDialogData,
       ImageResourceInfo>(EmbedImageDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         image: this.image,
         readonly: this.readonly
@@ -128,7 +128,7 @@ export class ImageDialogComponent extends
     this.dialog.open<UploadImageDialogComponent, UploadImageDialogData,
       UploadImageDialogResult>(UploadImageDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         imageSubType: this.image.resourceSubType,
         image: this.image

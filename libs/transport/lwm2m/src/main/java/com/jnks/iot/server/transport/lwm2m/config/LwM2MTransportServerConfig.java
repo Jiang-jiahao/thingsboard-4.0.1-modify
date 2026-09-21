@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-import com.jnks.iot.server.common.data.TbProperty;
+import com.jnks.iot.server.common.data.JnksIotProperty;
 import com.jnks.iot.server.common.transport.config.ssl.SslCredentials;
 import com.jnks.iot.server.common.transport.config.ssl.SslCredentialsConfig;
 import com.jnks.iot.server.common.transport.lwm2m.LwM2MSecureServerConfig;
@@ -92,7 +92,7 @@ public class LwM2MTransportServerConfig implements LwM2MSecureServerConfig {
 
     @Getter
     @Setter
-    private List<TbProperty> networkConfig;
+    private List<JnksIotProperty> networkConfig;
 
     @Getter
     @Setter

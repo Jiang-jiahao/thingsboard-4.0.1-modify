@@ -10,7 +10,7 @@ import com.jnks.iot.server.common.data.tenant.profile.DefaultTenantProfileConfig
 import com.jnks.iot.server.dao.exception.DataValidationException;
 import com.jnks.iot.server.dao.ota.OtaPackageDao;
 import com.jnks.iot.server.dao.ota.OtaPackageService;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
 
 import static com.jnks.iot.server.common.data.EntityType.OTA_PACKAGE;
 
@@ -26,7 +26,7 @@ public class OtaPackageDataValidator extends BaseOtaPackageDataValidator<OtaPack
 
     @Autowired
     @Lazy
-    private TbTenantProfileCache tenantProfileCache;
+    private JnksIotTenantProfileCache tenantProfileCache;
 
     @Override
     protected void validateCreate(TenantId tenantId, OtaPackage otaPackage) {

@@ -12,7 +12,7 @@ import {
   Validators
 } from '@angular/forms';
 import { PageComponent } from '@shared/components/page.component';
-import { ChartType, TbFlotKeySettings, TbFlotKeyThreshold } from '@home/components/widget/lib/flot-widget.models';
+import { ChartType, JnksIotFlotKeySettings, JnksIotFlotKeyThreshold } from '@home/components/widget/lib/flot-widget.models';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { TranslateService } from '@ngx-translate/core';
@@ -21,8 +21,8 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { IAliasController } from 'src/app/core/api/widget-api.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-export function flotDataKeyDefaultSettings(chartType: ChartType): TbFlotKeySettings {
-  const settings: TbFlotKeySettings = {
+export function flotDataKeyDefaultSettings(chartType: ChartType): JnksIotFlotKeySettings {
+  const settings: JnksIotFlotKeySettings = {
     // Common settings
     hideDataByDefault: false,
     disableDataHiding: false,
@@ -75,7 +75,7 @@ export function flotDataKeyDefaultSettings(chartType: ChartType): TbFlotKeySetti
 }
 
 @Component({
-  selector: 'tb-flot-key-settings',
+  selector: 'jnks-iot-flot-key-settings',
   templateUrl: './flot-key-settings.component.html',
   styleUrls: ['./../widget-settings.scss'],
   providers: [
@@ -104,7 +104,7 @@ export class FlotKeySettingsComponent extends PageComponent implements OnInit, C
 
   functionScopeVariables = this.widgetService.getWidgetScopeVariables();
 
-  private modelValue: TbFlotKeySettings;
+  private modelValue: JnksIotFlotKeySettings;
 
   private propagateChange = null;
 
@@ -225,7 +225,7 @@ export class FlotKeySettingsComponent extends PageComponent implements OnInit, C
     }
   }
 
-  writeValue(value: TbFlotKeySettings): void {
+  writeValue(value: JnksIotFlotKeySettings): void {
     const thresholds = value?.thresholds;
     this.modelValue = value;
     this.flotKeySettingsFormGroup.patchValue(
@@ -250,7 +250,7 @@ export class FlotKeySettingsComponent extends PageComponent implements OnInit, C
   }
 
   private updateModel() {
-    const value: TbFlotKeySettings = this.flotKeySettingsFormGroup.value;
+    const value: JnksIotFlotKeySettings = this.flotKeySettingsFormGroup.value;
     this.modelValue = value;
     this.propagateChange(this.modelValue);
   }
@@ -319,7 +319,7 @@ export class FlotKeySettingsComponent extends PageComponent implements OnInit, C
   }
 
   public addThreshold() {
-    const threshold: TbFlotKeyThreshold = {
+    const threshold: JnksIotFlotKeyThreshold = {
       thresholdValueSource: 'predefinedValue',
       thresholdEntityAlias: null,
       thresholdAttribute: null,

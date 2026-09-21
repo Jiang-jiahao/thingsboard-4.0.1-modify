@@ -18,7 +18,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-mqtt-pull-subscribe-requests-config',
+  selector: 'jnks-iot-mqtt-pull-subscribe-requests-config',
   templateUrl: './mqtt-pull-subscribe-requests-config.component.html',
   styleUrls: ['./mqtt-pull-subscribe-requests-config.component.scss'],
   providers: [

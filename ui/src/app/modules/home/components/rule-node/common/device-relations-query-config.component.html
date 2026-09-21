@@ -25,18 +25,18 @@
       </mat-error>
     </mat-form-field>
   </div>
-  <div tb-hint-tooltip-icon="{{ 'rule-node-config.last-level-device-relation-tooltip' | translate }}"
+  <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.last-level-device-relation-tooltip' | translate }}"
        *ngIf="deviceRelationsQueryFormGroup.get('maxLevel').value > 1"
-       class="tb-form-row no-border no-padding last-level-slide-toggle">
+       class="jnks-iot-form-row no-border no-padding last-level-slide-toggle">
     <mat-slide-toggle class="mat-slide" formControlName="fetchLastLevelOnly">
       {{ 'alias.last-level-relation' | translate }}
     </mat-slide-toggle>
   </div>
-  <tb-relation-type-autocomplete
+  <jnks-iot-relation-type-autocomplete
     class="flex-1"
     formControlName="relationType">
-  </tb-relation-type-autocomplete>
-  <tb-entity-subtype-list
+  </jnks-iot-relation-type-autocomplete>
+  <jnks-iot-entity-subtype-list
     required
     [label]="'rule-node-config.device-profiles' | translate"
     [entityType]="entityType.DEVICE"
@@ -45,5 +45,5 @@
     formControlName="deviceTypes">
     <mat-icon matSuffix class="help-icon margin-8 cursor-pointer" aria-hidden="false" aria-label="help-icon" color="primary"
               matTooltip="{{ 'rule-node-config.chip-help' | translate: { inputName: 'rule-node-config.device-profile' | translate } }}">help</mat-icon>
-  </tb-entity-subtype-list>
+  </jnks-iot-entity-subtype-list>
 </section>

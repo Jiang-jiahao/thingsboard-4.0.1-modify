@@ -14,7 +14,7 @@ import { ImagePipe } from '@shared/pipe/image.pipe';
 import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
-  selector: 'tb-mobile-app-qrcode-widget',
+  selector: 'jnks-iot-mobile-app-qrcode-widget',
   templateUrl: './mobile-app-qrcode-widget.component.html',
   styleUrls: ['./mobile-app-qrcode-widget.component.scss']
 })

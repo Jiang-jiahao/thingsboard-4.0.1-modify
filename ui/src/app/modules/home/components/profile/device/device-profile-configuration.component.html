@@ -1,9 +1,9 @@
 <div [formGroup]="deviceProfileConfigurationFormGroup">
   <div [ngSwitch]="type">
     <ng-template [ngSwitchCase]="deviceProfileType.DEFAULT">
-      <tb-default-device-profile-configuration
+      <jnks-iot-default-device-profile-configuration
         formControlName="configuration">
-      </tb-default-device-profile-configuration>
+      </jnks-iot-default-device-profile-configuration>
     </ng-template>
   </div>
 </div>

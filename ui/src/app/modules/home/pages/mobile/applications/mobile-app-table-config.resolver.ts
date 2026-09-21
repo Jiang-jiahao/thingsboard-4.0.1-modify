@@ -128,7 +128,7 @@ export class MobileAppTableConfigResolver  {
       this.dialog.open<RemoveAppDialogComponent, MobileAppDeleteDialogData,
         MobileAppBundleInfo>(RemoveAppDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           id: entity.id.id
         }

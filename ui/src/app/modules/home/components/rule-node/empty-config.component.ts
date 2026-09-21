@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-node-empty-config',
+  selector: 'jnks-iot-node-empty-config',
   template: '<div></div>',
   styleUrls: []
 })

@@ -48,7 +48,7 @@
             </mat-error>
           </mat-form-field>
         </section>
-        <mat-form-field class="mat-block tb-value-type flex-full"
+        <mat-form-field class="mat-block jnks-iot-value-type flex-full"
                         [class]="{
                           'max-w-20%': isConstantKeyType,
                           'max-w-30%': !isConstantKeyType
@@ -56,11 +56,11 @@
           <mat-label translate>filter.value-type.value-type</mat-label>
           <mat-select formControlName="valueType">
             <mat-select-trigger>
-              <mat-icon class="tb-mat-18" svgIcon="{{ entityKeyValueTypes.get(keyFilterFormGroup.get('valueType').value)?.icon }}"></mat-icon>
+              <mat-icon class="jnks-iot-mat-18" svgIcon="{{ entityKeyValueTypes.get(keyFilterFormGroup.get('valueType').value)?.icon }}"></mat-icon>
               <span>{{ entityKeyValueTypes.get(keyFilterFormGroup.get('valueType').value)?.name | translate }}</span>
             </mat-select-trigger>
             <mat-option *ngFor="let valueType of entityKeyValueTypesKeys" [value]="valueType">
-              <mat-icon class="tb-mat-18" svgIcon="{{ entityKeyValueTypes.get(entityKeyValueTypeEnum[valueType]).icon }}"></mat-icon>
+              <mat-icon class="jnks-iot-mat-18" svgIcon="{{ entityKeyValueTypes.get(entityKeyValueTypeEnum[valueType]).icon }}"></mat-icon>
               <span>{{ entityKeyValueTypes.get(entityKeyValueTypeEnum[valueType]).name | translate }}</span>
             </mat-option>
           </mat-select>
@@ -83,9 +83,9 @@
               </mat-form-field>
             </ng-template>
             <ng-template [ngSwitchCase]="entityKeyValueTypeEnum.DATE_TIME">
-              <tb-datetime formControlName="value"
+              <jnks-iot-datetime formControlName="value"
                            dateText="{{ 'filter.date' | translate }}"
-                           required></tb-datetime>
+                           required></jnks-iot-datetime>
             </ng-template>
             <ng-template [ngSwitchCase]="entityKeyValueTypeEnum.BOOLEAN">
               <mat-checkbox formControlName="value" style="margin-top: 20px">
@@ -95,14 +95,14 @@
           </div>
         </div>
       </section>
-      <tb-filter-predicate-list *ngIf="keyFilterFormGroup.get('valueType').value"
+      <jnks-iot-filter-predicate-list *ngIf="keyFilterFormGroup.get('valueType').value"
                                 [allowUserDynamicSource]="data.allowUserDynamicSource"
                                 [onlyUserDynamicSource]="isConstantKeyType"
                                 [displayUserParameters]="data.displayUserParameters"
                                 [valueType]="keyFilterFormGroup.get('valueType').value"
                                 [key]="keyFilterFormGroup.get('key.key').value"
                                 formControlName="predicates">
-      </tb-filter-predicate-list>
+      </jnks-iot-filter-predicate-list>
     </fieldset>
   </div>
   <div mat-dialog-actions class="flex items-center justify-end">

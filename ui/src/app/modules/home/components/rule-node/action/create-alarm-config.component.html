@@ -7,8 +7,8 @@
   </mat-checkbox>
   <section class="flex flex-col" *ngIf="createAlarmConfigForm.get('useMessageAlarmData').value === false ||
                                     createAlarmConfigForm.get('overwriteAlarmDetails').value === true">
-    <tb-script-lang formControlName="scriptLang" *ngIf="tbelEnabled"></tb-script-lang>
-    <tb-js-func *ngIf="createAlarmConfigForm.get('scriptLang').value === scriptLanguage.JS"
+    <jnks-iot-script-lang formControlName="scriptLang" *ngIf="tbelEnabled"></jnks-iot-script-lang>
+    <jnks-iot-js-func *ngIf="createAlarmConfigForm.get('scriptLang').value === scriptLanguage.JS"
                 #jsFuncComponent
                 formControlName="alarmDetailsBuildJs"
                 functionName="Details"
@@ -19,12 +19,12 @@
               mat-icon-button
               matTooltip="{{ testScriptLabel | translate }}"
               matTooltipPosition="above"
-              class="tb-mat-32"
+              class="jnks-iot-mat-32"
               (click)="testScript()">
         <mat-icon class="material-icons" color="primary">bug_report</mat-icon>
       </button>
-    </tb-js-func>
-    <tb-js-func *ngIf="createAlarmConfigForm.get('scriptLang').value === scriptLanguage.TBEL"
+    </jnks-iot-js-func>
+    <jnks-iot-js-func *ngIf="createAlarmConfigForm.get('scriptLang').value === scriptLanguage.TBEL"
                 #tbelFuncComponent
                 formControlName="alarmDetailsBuildTbel"
                 functionName="Details"
@@ -37,11 +37,11 @@
               mat-icon-button
               matTooltip="{{ testScriptLabel | translate }}"
               matTooltipPosition="above"
-              class="tb-mat-32"
+              class="jnks-iot-mat-32"
               (click)="testScript()">
         <mat-icon class="material-icons" color="primary">bug_report</mat-icon>
       </button>
-    </tb-js-func>
+    </jnks-iot-js-func>
     <div class="flex flex-row" style="padding-bottom: 16px;">
       <button mat-button mat-raised-button color="primary" (click)="testScript()">
         {{ testScriptLabel | translate }}

@@ -8,14 +8,14 @@ import { WidgetContext } from '@home/models/widget-component.models';
 import { WidgetComponent } from '@home/components/widget/widget.component';
 import { TranslateService } from '@ngx-translate/core';
 import { isDefinedAndNotNull } from '@core/utils';
-import { TbPieChart } from '@home/components/widget/lib/chart/pie-chart';
+import { JnksIotPieChart } from '@home/components/widget/lib/chart/pie-chart';
 import {
   LatestChartComponent,
   LatestChartComponentCallbacks
 } from '@home/components/widget/lib/chart/latest-chart.component';
 
 @Component({
-  selector: 'tb-doughnut-widget',
+  selector: 'jnks-iot-doughnut-widget',
   templateUrl: './latest-chart-widget.component.html',
   styleUrls: [],
   encapsulation: ViewEncapsulation.None
@@ -47,7 +47,7 @@ export class DoughnutWidgetComponent implements OnInit {
     this.callbacks = {
       createChart: (chartShape, renderer) => {
         const settings = doughnutPieChartSettings(this.settings);
-        return new TbPieChart(this.ctx, settings, chartShape.nativeElement, renderer, this.translate, true);
+        return new JnksIotPieChart(this.ctx, settings, chartShape.nativeElement, renderer, this.translate, true);
       }
     };
   }

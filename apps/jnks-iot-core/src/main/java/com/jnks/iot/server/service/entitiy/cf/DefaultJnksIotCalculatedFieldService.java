@@ -1,0 +1,100 @@
+package com.jnks.iot.server.service.entitiy.cf;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.audit.ActionType;
+import com.jnks.iot.server.common.data.cf.CalculatedField;
+import com.jnks.iot.server.common.data.exception.JnksIotException;
+import com.jnks.iot.server.common.data.id.CalculatedFieldId;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.page.PageData;
+import com.jnks.iot.server.common.data.page.PageLink;
+import com.jnks.iot.server.dao.cf.CalculatedFieldService;
+import com.jnks.iot.server.service.entitiy.AbstractJnksIotEntityService;
+import com.jnks.iot.server.service.security.model.SecurityUser;
+
+import java.util.Optional;
+
+/**
+ * {@link JnksIotCalculatedFieldService} 的默认实现。
+ * <p>
+ * 由 CalculatedFieldController 调用，委托 {@link CalculatedFieldService} 落库；增删改写审计日志。
+ *
+ * @see JnksIotCalculatedFieldService
+ */
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class DefaultJnksIotCalculatedFieldService extends AbstractJnksIotEntityService implements JnksIotCalculatedFieldService {
+
+    private final CalculatedFieldService calculatedFieldService;
+
+    /** 保存计算字段并写审计。 */
+    @Override
+    public CalculatedField save(CalculatedField calculatedField, SecurityUser user) throws JnksIotException {
+        ActionType actionType = calculatedField.getId() == null ? ActionType.ADDED : ActionType.UPDATED;
+        TenantId tenantId = calculatedField.getTenantId();
+        try {
+            if (ActionType.UPDATED.equals(actionType)) {
+                CalculatedField existingCf = calculatedFieldService.findById(tenantId, calculatedField.getId());
+                checkForEntityChange(existingCf, calculatedField);
+            }
+            checkEntityExistence(tenantId, calculatedField.getEntityId());
+            CalculatedField savedCalculatedField = checkNotNull(calculatedFieldService.save(calculatedField));
+            logEntityActionService.logEntityAction(tenantId, savedCalculatedField.getId(), savedCalculatedField, actionType, user);
+            return savedCalculatedField;
+        } catch (JnksIotException e) {
+            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.CALCULATED_FIELD), calculatedField, actionType, user, e);
+            throw e;
+        }
+    }
+
+    /** 按 ID 查询计算字段。 */
+    @Override
+    public CalculatedField findById(CalculatedFieldId calculatedFieldId, SecurityUser user) {
+        return calculatedFieldService.findById(user.getTenantId(), calculatedFieldId);
+    }
+
+    /** 分页查询某实体上的计算字段。 */
+    @Override
+    public PageData<CalculatedField> findAllByTenantIdAndEntityId(EntityId entityId, SecurityUser user, PageLink pageLink) {
+        TenantId tenantId = user.getTenantId();
+        checkEntityExistence(tenantId, entityId);
+        return calculatedFieldService.findAllCalculatedFieldsByEntityId(tenantId, entityId, pageLink);
+    }
+
+    /** 删除计算字段并写 DELETED 审计。 */
+    @Override
+    @Transactional
+    public void delete(CalculatedField calculatedField, SecurityUser user) {
+        ActionType actionType = ActionType.DELETED;
+        TenantId tenantId = calculatedField.getTenantId();
+        CalculatedFieldId calculatedFieldId = calculatedField.getId();
+        try {
+            calculatedFieldService.deleteCalculatedField(tenantId, calculatedFieldId);
+            logEntityActionService.logEntityAction(tenantId, calculatedFieldId, calculatedField, actionType, user, calculatedFieldId.toString());
+        } catch (Exception e) {
+            logEntityActionService.logEntityAction(tenantId, emptyId(EntityType.CALCULATED_FIELD), actionType, user, e, calculatedFieldId.toString());
+            throw e;
+        }
+    }
+
+    private void checkForEntityChange(CalculatedField oldCalculatedField, CalculatedField newCalculatedField) {
+        if (!oldCalculatedField.getEntityId().equals(newCalculatedField.getEntityId())) {
+            throw new IllegalArgumentException("Changing the calculated field target entity after initialization is prohibited.");
+        }
+    }
+
+    private void checkEntityExistence(TenantId tenantId, EntityId entityId) {
+        switch (entityId.getEntityType()) {
+            case ASSET, DEVICE, ASSET_PROFILE, DEVICE_PROFILE -> Optional.ofNullable(entityService.fetchEntity(tenantId, entityId))
+                    .orElseThrow(() -> new IllegalArgumentException(entityId.getEntityType().getNormalName() + " with id [" + entityId.getId() + "] does not exist."));
+            default -> throw new IllegalArgumentException("Entity type '" + entityId.getEntityType() + "' does not support calculated fields.");
+        }
+    }
+
+}

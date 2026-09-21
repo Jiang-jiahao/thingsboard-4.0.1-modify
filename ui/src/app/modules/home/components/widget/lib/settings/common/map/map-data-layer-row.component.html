@@ -1,6 +1,6 @@
-<div [formGroup]="dataLayerFormGroup" class="tb-form-table-row tb-map-data-layer-row">
-  <div class="tb-source-field">
-    <mat-form-field class="tb-ds-type-field tb-inline-field" appearance="outline" subscriptSizing="dynamic">
+<div [formGroup]="dataLayerFormGroup" class="jnks-iot-form-table-row jnks-iot-map-data-layer-row">
+  <div class="jnks-iot-source-field">
+    <mat-form-field class="jnks-iot-ds-type-field jnks-iot-inline-field" appearance="outline" subscriptSizing="dynamic">
       <mat-select formControlName="dsType">
         <mat-option *ngFor="let type of datasourceTypes" [value]="type">
           {{ datasourceTypesTranslations.get(type) | translate }}
@@ -9,30 +9,30 @@
     </mat-form-field>
     <mat-form-field
       *ngIf="dataLayerFormGroup.get('dsType').value === DatasourceType.function"
-      class="tb-label-field tb-inline-field" appearance="outline" subscriptSizing="dynamic">
+      class="jnks-iot-label-field jnks-iot-inline-field" appearance="outline" subscriptSizing="dynamic">
       <input matInput formControlName="dsLabel" placeholder="{{ 'widget-config.set' | translate }}">
     </mat-form-field>
-    <tb-entity-autocomplete
-      class="tb-device-field"
+    <jnks-iot-entity-autocomplete
+      class="jnks-iot-device-field"
       *ngIf="dataLayerFormGroup.get('dsType').value === DatasourceType.device"
       required
       inlineField
       placeholder="{{ 'device.select-device' | translate }}"
       [entityType]="EntityType.DEVICE"
       formControlName="dsDeviceId">
-    </tb-entity-autocomplete>
-    <tb-entity-alias-select
-      class="tb-entity-alias-field"
+    </jnks-iot-entity-autocomplete>
+    <jnks-iot-entity-alias-select
+      class="jnks-iot-entity-alias-field"
       *ngIf="dataLayerFormGroup.get('dsType').value === DatasourceType.entity"
       inlineField
-      tbRequired
+      jnksIotRequired
       [aliasController]="context.aliasController"
       formControlName="dsEntityAliasId"
       [callbacks]="context.callbacks">
-    </tb-entity-alias-select>
+    </jnks-iot-entity-alias-select>
   </div>
-  <tb-data-key-input
-    class="tb-x-pos-field"
+  <jnks-iot-data-key-input
+    class="jnks-iot-x-pos-field"
     *ngIf="['trips', 'markers'].includes(dataLayerType)"
     required
     requiredText="{{ mapType === MapType.geoMap ? 'widgets.maps.data-layer.marker.latitude-key-required' : 'widgets.maps.data-layer.marker.x-pos-key-required' }}"
@@ -47,9 +47,9 @@
     [generateKey]="context.generateDataKey"
     (keyEdit)="editKey('xKey')"
     formControlName="xKey">
-  </tb-data-key-input>
-  <tb-data-key-input
-    class="tb-y-pos-field"
+  </jnks-iot-data-key-input>
+  <jnks-iot-data-key-input
+    class="jnks-iot-y-pos-field"
     *ngIf="['trips', 'markers'].includes(dataLayerType)"
     required
     requiredText="{{ mapType === MapType.geoMap ? 'widgets.maps.data-layer.marker.longitude-key-required' : 'widgets.maps.data-layer.marker.y-pos-key-required' }}"
@@ -64,9 +64,9 @@
     [generateKey]="context.generateDataKey"
     (keyEdit)="editKey('yKey')"
     formControlName="yKey">
-  </tb-data-key-input>
-  <tb-data-key-input
-    class="tb-key-field"
+  </jnks-iot-data-key-input>
+  <jnks-iot-data-key-input
+    class="jnks-iot-key-field"
     *ngIf="dataLayerType === 'polygons'"
     required
     requiredText="widgets.maps.data-layer.polygon.polygon-key-required"
@@ -81,9 +81,9 @@
     [generateKey]="context.generateDataKey"
     (keyEdit)="editKey('polygonKey')"
     formControlName="polygonKey">
-  </tb-data-key-input>
-  <tb-data-key-input
-    class="tb-key-field"
+  </jnks-iot-data-key-input>
+  <jnks-iot-data-key-input
+    class="jnks-iot-key-field"
     *ngIf="dataLayerType === 'circles'"
     required
     requiredText="widgets.maps.data-layer.circle.circle-key-required"
@@ -98,8 +98,8 @@
     [generateKey]="context.generateDataKey"
     (keyEdit)="editKey('circleKey')"
     formControlName="circleKey">
-  </tb-data-key-input>
-  <div class="tb-form-table-row-cell-buttons">
+  </jnks-iot-data-key-input>
+  <div class="jnks-iot-form-table-row-cell-buttons">
     <button type="button"
             mat-icon-button
             #matButton
@@ -108,7 +108,7 @@
             matTooltipPosition="above">
       <mat-icon>settings</mat-icon>
     </button>
-    <div class="tb-remove-button">
+    <div class="jnks-iot-remove-button">
       <button type="button"
               mat-icon-button
               (click)="dataLayerRemoved.emit()"

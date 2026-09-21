@@ -22,7 +22,7 @@ interface TimeUnitInputModel {
 }
 
 @Component({
-  selector: 'tb-time-unit-input',
+  selector: 'jnks-iot-time-unit-input',
   templateUrl: './time-unit-input.component.html',
   providers: [{
     provide: NG_VALUE_ACCESSOR,

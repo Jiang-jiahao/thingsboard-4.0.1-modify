@@ -33,11 +33,11 @@ public class ContainerTestSuite {
     final static boolean IS_HYBRID_MODE = Boolean.parseBoolean(System.getProperty("blackBoxTests.hybridMode"));
     final static String QUEUE_TYPE = System.getProperty("blackBoxTests.queue", "kafka");
     private static final String SOURCE_DIR = "./../../docker/";
-    private static final String TB_CORE_LOG_REGEXP = ".*Starting polling for events.*";
+    private static final String JNKS_IOT_CORE_LOG_REGEXP = ".*Starting polling for events.*";
     private static final String TRANSPORTS_LOG_REGEXP = ".*Going to recalculate partitions.*";
-    private static final String TB_VC_LOG_REGEXP = TRANSPORTS_LOG_REGEXP;
-    private static final String TB_EDQS_LOG_REGEXP = ".*All partitions processed.*";
-    private static final String TB_JS_EXECUTOR_LOG_REGEXP = ".*template started.*";
+    private static final String JNKS_IOT_VC_LOG_REGEXP = TRANSPORTS_LOG_REGEXP;
+    private static final String JNKS_IOT_EDQS_LOG_REGEXP = ".*All partitions processed.*";
+    private static final String JNKS_IOT_JS_EXECUTOR_LOG_REGEXP = ".*template started.*";
     private static final Duration CONTAINER_STARTUP_TIMEOUT = Duration.ofSeconds(400);
 
     private  DockerComposeContainer<?> testContainer;
@@ -94,8 +94,8 @@ public class ContainerTestSuite {
 
             if (IS_REDIS_SSL) {
                 addToFile(targetDir, "cache-redis.env",
-                        Map.of("TB_REDIS_SSL_ENABLED", "true",
-                                "TB_REDIS_SSL_PEM_CERT", "/redis/certs/redisCA.crt"));
+                        Map.of("JNKS_IOT_REDIS_SSL_ENABLED", "true",
+                                "JNKS_IOT_REDIS_SSL_PEM_CERT", "/redis/certs/redisCA.crt"));
             }
 
             List<File> composeFiles = new ArrayList<>(Arrays.asList(
@@ -114,7 +114,7 @@ public class ContainerTestSuite {
             ));
 
             Map<String, String> queueEnv = new HashMap<>();
-            queueEnv.put("TB_QUEUE_TYPE", QUEUE_TYPE);
+            queueEnv.put("JNKS_IOT_QUEUE_TYPE", QUEUE_TYPE);
             switch (QUEUE_TYPE) {
                 case "kafka":
                     composeFiles.add(new File(targetDir + "docker-compose.kafka.yml"));
@@ -160,21 +160,21 @@ public class ContainerTestSuite {
                     .withEnv("LOAD_BALANCER_NAME", "")
                     .withExposedService("nginx-gateway", 80, Wait.forHttp("/swagger-ui.html").withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
                     .withExposedService("broker", 1883)
-                    .waitingFor("tb-core1", Wait.forLogMessage(TB_CORE_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-core2", Wait.forLogMessage(TB_CORE_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-rule-engine1", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-rule-engine2", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-http-transport1", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-http-transport2", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-mqtt-transport1", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-mqtt-transport2", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-coap-transport", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-lwm2m-transport", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-vc-executor1", Wait.forLogMessage(TB_VC_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-vc-executor2", Wait.forLogMessage(TB_VC_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-js-executor", Wait.forLogMessage(TB_JS_EXECUTOR_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-edqs1", Wait.forLogMessage(TB_EDQS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
-                    .waitingFor("tb-edqs2", Wait.forLogMessage(TB_EDQS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT));
+                    .waitingFor("jnks-iot-core1", Wait.forLogMessage(JNKS_IOT_CORE_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-core2", Wait.forLogMessage(JNKS_IOT_CORE_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-rule-engine1", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-rule-engine2", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-http-transport1", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-http-transport2", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-mqtt-transport1", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-mqtt-transport2", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-coap-transport", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-lwm2m-transport", Wait.forLogMessage(TRANSPORTS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-vc-executor1", Wait.forLogMessage(JNKS_IOT_VC_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-vc-executor2", Wait.forLogMessage(JNKS_IOT_VC_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-js-executor", Wait.forLogMessage(JNKS_IOT_JS_EXECUTOR_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-edqs1", Wait.forLogMessage(JNKS_IOT_EDQS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT))
+                    .waitingFor("jnks-iot-edqs2", Wait.forLogMessage(JNKS_IOT_EDQS_LOG_REGEXP, 1).withStartupTimeout(CONTAINER_STARTUP_TIMEOUT));
             testContainer.start();
             setActive(true);
         } catch (Exception e) {

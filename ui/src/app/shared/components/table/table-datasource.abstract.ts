@@ -2,7 +2,7 @@ import { DataSource } from '@angular/cdk/collections';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-export abstract class TbTableDatasource<T> implements DataSource<T> {
+export abstract class JnksIotTableDatasource<T> implements DataSource<T> {
 
   protected dataSubject = new BehaviorSubject<Array<T>>([]);
 

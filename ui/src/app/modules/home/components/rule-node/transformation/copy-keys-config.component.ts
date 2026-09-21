@@ -6,7 +6,7 @@ import { FetchFromToTranslation, FetchTo } from '../rule-node-config.models';
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@app/shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-transformation-node-copy-keys-config',
+  selector: 'jnks-iot-transformation-node-copy-keys-config',
   templateUrl: './copy-keys-config.component.html',
   styleUrls: []
 })

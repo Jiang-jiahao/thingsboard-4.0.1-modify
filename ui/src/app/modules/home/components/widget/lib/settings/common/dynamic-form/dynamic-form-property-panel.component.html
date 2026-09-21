@@ -1,25 +1,25 @@
-<div class="tb-dynamic-form-property-settings-panel" [formGroup]="propertyFormGroup">
-  <div class="tb-dynamic-form-property-settings-title">{{ panelTitle | translate }}</div>
-  <div class="tb-dynamic-form-property-settings-panel-content">
-    <div class="tb-form-row">
+<div class="jnks-iot-dynamic-form-property-settings-panel" [formGroup]="propertyFormGroup">
+  <div class="jnks-iot-dynamic-form-property-settings-title">{{ panelTitle | translate }}</div>
+  <div class="jnks-iot-dynamic-form-property-settings-panel-content">
+    <div class="jnks-iot-form-row">
       <div class="fixed-title-width" translate>dynamic-form.property.id</div>
       <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
         <input required matInput formControlName="id" placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
     </div>
-    <div class="tb-form-row">
+    <div class="jnks-iot-form-row">
       <div class="fixed-title-width" translate>dynamic-form.property.name</div>
       <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
         <input required matInput formControlName="name" placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
     </div>
-    <div class="tb-form-row">
+    <div class="jnks-iot-form-row">
       <div class="fixed-title-width" translate>dynamic-form.property.group-title</div>
       <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
         <input matInput formControlName="group" placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
     </div>
-    <div class="tb-form-row">
+    <div class="jnks-iot-form-row">
       <div class="fixed-title-width" translate>dynamic-form.property.type</div>
       <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
         <mat-select formControlName="type">
@@ -29,9 +29,9 @@
         </mat-select>
       </mat-form-field>
     </div>
-    <div *ngIf="isArray" class="tb-form-panel stroked">
-      <div class="tb-form-panel-title" translate>dynamic-form.property.array-item</div>
-      <div class="tb-form-row">
+    <div *ngIf="isArray" class="jnks-iot-form-panel stroked">
+      <div class="jnks-iot-form-panel-title" translate>dynamic-form.property.array-item</div>
+      <div class="jnks-iot-form-row">
         <div class="fixed-title-width" translate>dynamic-form.property.item-type</div>
         <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
           <mat-select formControlName="arrayItemType">
@@ -41,7 +41,7 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <div class="fixed-title-width" translate>dynamic-form.property.item-name</div>
         <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
           <input matInput formControlName="arrayItemName" placeholder="{{ 'widget-config.set' | translate }}">
@@ -54,13 +54,13 @@
       <ng-container *ngTemplateOutlet="itemSettings">
       </ng-container>
     </ng-container>
-    <div *ngIf="![FormPropertyType.fieldset, FormPropertyType.htmlSection, FormPropertyType.array].includes(propertyFormGroup.get('type').value)" class="tb-form-row space-between">
+    <div *ngIf="![FormPropertyType.fieldset, FormPropertyType.htmlSection, FormPropertyType.array].includes(propertyFormGroup.get('type').value)" class="jnks-iot-form-row space-between">
       <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="required">
         {{ 'dynamic-form.property.value-required' | translate }}
       </mat-slide-toggle>
     </div>
-    <div class="tb-form-panel stroked">
-      <mat-expansion-panel class="tb-settings">
+    <div class="jnks-iot-form-panel stroked">
+      <mat-expansion-panel class="jnks-iot-settings">
         <mat-expansion-panel-header class="flex flex-row flex-wrap">
           <mat-panel-title>
             {{ 'dynamic-form.property.advanced-ui-settings' | translate }}
@@ -68,28 +68,28 @@
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
           <ng-container *ngIf="isPropertyTypeAllowedForRow(propertyFormGroup.get('type').value)">
-            <div class="tb-form-row space-between">
+            <div class="jnks-iot-form-row space-between">
               <div class="fixed-title-width" translate>dynamic-form.property.sub-label</div>
               <mat-form-field  class="flex"
                                appearance="outline" subscriptSizing="dynamic">
                 <input matInput formControlName="subLabel" placeholder="{{ 'widget-config.set' | translate }}">
               </mat-form-field>
             </div>
-            <div class="tb-form-row space-between">
+            <div class="jnks-iot-form-row space-between">
               <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="divider">
                 {{ 'dynamic-form.property.vertical-divider-after' | translate }}
               </mat-slide-toggle>
             </div>
           </ng-container>
           <div *ngIf="[FormPropertyType.number, FormPropertyType.text, FormPropertyType.password].includes(propertyItemType)"
-               class="tb-form-row space-between">
+               class="jnks-iot-form-row space-between">
             <div class="fixed-title-width" translate>dynamic-form.property.input-field-suffix</div>
             <mat-form-field  class="flex"
                              appearance="outline" subscriptSizing="dynamic">
               <input matInput formControlName="fieldSuffix" placeholder="{{ 'widget-config.set' | translate }}">
             </mat-form-field>
           </div>
-          <div *ngIf="propertyFormGroup.get('type').value !== FormPropertyType.htmlSection" class="tb-form-row space-between">
+          <div *ngIf="propertyFormGroup.get('type').value !== FormPropertyType.htmlSection" class="jnks-iot-form-row space-between">
             <div class="fixed-title-width" translate>dynamic-form.property.disable-on-property</div>
             <mat-form-field  class="flex" appearance="outline" subscriptSizing="dynamic">
               <mat-select formControlName="disableOnProperty" placeholder="{{ 'widget-config.set' | translate }}">
@@ -100,15 +100,15 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="tb-form-row">
-            <tb-js-func
+          <div class="jnks-iot-form-row">
+            <jnks-iot-js-func
               class="flex-1"
               formControlName="condition"
               [functionArgs]="['property', 'model']"
               functionTitle="{{ 'dynamic-form.property.display-condition-function' | translate }}">
-            </tb-js-func>
+            </jnks-iot-js-func>
           </div>
-          <tb-string-items-list *ngIf="isPropertyTypeAllowedForRow(propertyFormGroup.get('type').value)"
+          <jnks-iot-string-items-list *ngIf="isPropertyTypeAllowedForRow(propertyFormGroup.get('type').value)"
                                 class="flex-1"
                                 fieldClass="flex"
                                 floatLabel="always"
@@ -118,8 +118,8 @@
                                 formControlName="rowClass"
                                 appearance="outline"
                                 subscriptSizing="dynamic">
-          </tb-string-items-list>
-          <tb-string-items-list *ngIf="isPropertyTypeAllowedForRow(propertyFormGroup.get('type').value) && FormPropertyType.switch !== propertyFormGroup.get('type').value"
+          </jnks-iot-string-items-list>
+          <jnks-iot-string-items-list *ngIf="isPropertyTypeAllowedForRow(propertyFormGroup.get('type').value) && FormPropertyType.switch !== propertyFormGroup.get('type').value"
                                 class="flex-1"
                                 fieldClass="flex"
                                 floatLabel="always"
@@ -129,12 +129,12 @@
                                 formControlName="fieldClass"
                                 appearance="outline"
                                 subscriptSizing="dynamic">
-          </tb-string-items-list>
+          </jnks-iot-string-items-list>
         </ng-template>
       </mat-expansion-panel>
     </div>
   </div>
-  <div class="tb-dynamic-form-property-settings-panel-buttons">
+  <div class="jnks-iot-dynamic-form-property-settings-panel-buttons">
     <button mat-button
             color="primary"
             type="button"
@@ -154,84 +154,84 @@
 
 <ng-template #itemSettings>
   <ng-container [formGroup]="propertyFormGroup">
-    <div *ngIf="propertyItemType === FormPropertyType.textarea" class="tb-form-row space-between">
+    <div *ngIf="propertyItemType === FormPropertyType.textarea" class="jnks-iot-form-row space-between">
       <div translate>dynamic-form.property.textarea-rows</div>
       <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
         <input matInput formControlName="rows" min="1" step="1"
                type="number" placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
     </div>
-    <div *ngIf="propertyItemType === FormPropertyType.number" class="tb-form-row space-between">
+    <div *ngIf="propertyItemType === FormPropertyType.number" class="jnks-iot-form-row space-between">
       <div translate>dynamic-form.property.number-settings</div>
       <div class="flex flex-1 flex-row items-center justify-end gap-2">
-        <div class="tb-small-label" translate>dynamic-form.property.min</div>
+        <div class="jnks-iot-small-label" translate>dynamic-form.property.min</div>
         <mat-form-field appearance="outline" class="number flex" subscriptSizing="dynamic">
           <input matInput formControlName="min"
                  type="number" placeholder="{{ 'widget-config.set' | translate }}">
         </mat-form-field>
         <mat-divider vertical></mat-divider>
-        <div class="tb-small-label" translate>dynamic-form.property.max</div>
+        <div class="jnks-iot-small-label" translate>dynamic-form.property.max</div>
         <mat-form-field appearance="outline" class="number flex" subscriptSizing="dynamic">
           <input matInput formControlName="max"
                  type="number" placeholder="{{ 'widget-config.set' | translate }}">
         </mat-form-field>
         <mat-divider vertical></mat-divider>
-        <div class="tb-small-label" translate>dynamic-form.property.step</div>
+        <div class="jnks-iot-small-label" translate>dynamic-form.property.step</div>
         <mat-form-field appearance="outline" class="number flex" subscriptSizing="dynamic">
           <input matInput formControlName="step" min="0"
                  type="number" placeholder="{{ 'widget-config.set' | translate }}">
         </mat-form-field>
       </div>
     </div>
-    <div *ngIf="propertyItemType === FormPropertyType.fieldset" class="tb-form-panel stroked">
-      <mat-expansion-panel class="tb-settings" expanded>
+    <div *ngIf="propertyItemType === FormPropertyType.fieldset" class="jnks-iot-form-panel stroked">
+      <mat-expansion-panel class="jnks-iot-settings" expanded>
         <mat-expansion-panel-header class="flex flex-row flex-wrap">
           <mat-panel-title>
             {{ 'dynamic-form.property.properties' | translate }}
           </mat-panel-title>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <tb-dynamic-form-properties formControlName="properties" noBorder noMargin>
-          </tb-dynamic-form-properties>
+          <jnks-iot-dynamic-form-properties formControlName="properties" noBorder noMargin>
+          </jnks-iot-dynamic-form-properties>
         </ng-template>
       </mat-expansion-panel>
     </div>
-    <div *ngIf="propertyItemType === FormPropertyType.htmlSection" class="tb-form-panel stroked">
-      <mat-expansion-panel class="tb-settings" expanded>
+    <div *ngIf="propertyItemType === FormPropertyType.htmlSection" class="jnks-iot-form-panel stroked">
+      <mat-expansion-panel class="jnks-iot-settings" expanded>
         <mat-expansion-panel-header class="flex flex-row flex-wrap">
           <mat-panel-title>
             {{ 'dynamic-form.property.html-section-settings' | translate }}
           </mat-panel-title>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <div class="tb-form-row">
-            <tb-html
+          <div class="jnks-iot-form-row">
+            <jnks-iot-html
               class="flex-1"
               formControlName="htmlContent"
               label="{{ 'dynamic-form.property.html-section-content' | translate }}">
-            </tb-html>
+            </jnks-iot-html>
           </div>
-          <tb-string-items-list class="flex-1"
+          <jnks-iot-string-items-list class="flex-1"
                                 fieldClass="flex"
                                 floatLabel="always"
                                 label="{{ 'dynamic-form.property.html-section-classes' | translate }}"
                                 formControlName="htmlClassList"
                                 appearance="outline"
                                 subscriptSizing="dynamic">
-          </tb-string-items-list>
+          </jnks-iot-string-items-list>
         </ng-template>
       </mat-expansion-panel>
     </div>
     <ng-container *ngIf="[FormPropertyType.select, FormPropertyType.radios].includes(propertyItemType)">
-      <div class="tb-form-panel stroked">
-        <mat-expansion-panel class="tb-settings" expanded>
+      <div class="jnks-iot-form-panel stroked">
+        <mat-expansion-panel class="jnks-iot-settings" expanded>
           <mat-expansion-panel-header class="flex flex-row flex-wrap">
             <mat-panel-title>
               {{ (propertyFormGroup.get('type').value === FormPropertyType.select ? 'dynamic-form.property.select-options' : 'dynamic-form.property.radio-button-options') | translate }}
             </mat-panel-title>
           </mat-expansion-panel-header>
           <ng-template matExpansionPanelContent>
-            <div *ngIf="propertyItemType === FormPropertyType.radios" class="tb-form-row space-between">
+            <div *ngIf="propertyItemType === FormPropertyType.radios" class="jnks-iot-form-row space-between">
               <div translate>dynamic-form.property.buttons-direction</div>
               <mat-chip-listbox class="center-stretch" formControlName="direction">
                 <mat-chip-option [selectable]="propertyFormGroup.get('direction').value !== 'column'"
@@ -240,47 +240,47 @@
                                  value="row">{{ 'dynamic-form.property.direction-row' | translate }}</mat-chip-option>
               </mat-chip-listbox>
             </div>
-            <div *ngIf="propertyItemType === FormPropertyType.select" class="tb-form-row space-between">
+            <div *ngIf="propertyItemType === FormPropertyType.select" class="jnks-iot-form-row space-between">
               <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="multiple">
                 {{ 'dynamic-form.property.enable-multiple-select' | translate }}
               </mat-slide-toggle>
             </div>
-            <div *ngIf="propertyItemType === FormPropertyType.select && !propertyFormGroup.get('multiple').value" class="tb-form-row space-between">
+            <div *ngIf="propertyItemType === FormPropertyType.select && !propertyFormGroup.get('multiple').value" class="jnks-iot-form-row space-between">
               <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="allowEmptyOption">
                 {{ 'dynamic-form.property.allow-empty-select-option' | translate }}
               </mat-slide-toggle>
             </div>
-            <div *ngIf="propertyItemType === FormPropertyType.select && propertyFormGroup.get('multiple').value" class="tb-form-row space-between">
+            <div *ngIf="propertyItemType === FormPropertyType.select && propertyFormGroup.get('multiple').value" class="jnks-iot-form-row space-between">
               <div translate>dynamic-form.property.selected-options-limit</div>
               <div class="flex flex-1 flex-row items-center justify-end gap-2">
-                <div class="tb-small-label" translate>dynamic-form.property.min</div>
+                <div class="jnks-iot-small-label" translate>dynamic-form.property.min</div>
                 <mat-form-field appearance="outline" class="number flex" subscriptSizing="dynamic">
                   <input matInput formControlName="minItems"
                          type="number" placeholder="{{ 'widget-config.set' | translate }}">
                 </mat-form-field>
                 <mat-divider vertical></mat-divider>
-                <div class="tb-small-label" translate>dynamic-form.property.max</div>
+                <div class="jnks-iot-small-label" translate>dynamic-form.property.max</div>
                 <mat-form-field appearance="outline" class="number flex" subscriptSizing="dynamic">
                   <input matInput formControlName="maxItems"
                          type="number" placeholder="{{ 'widget-config.set' | translate }}">
                 </mat-form-field>
               </div>
             </div>
-            <tb-dynamic-form-select-items
+            <jnks-iot-dynamic-form-select-items
               formControlName="items">
-            </tb-dynamic-form-select-items>
+            </jnks-iot-dynamic-form-select-items>
           </ng-template>
         </mat-expansion-panel>
       </div>
     </ng-container>
-    <div *ngIf="[FormPropertyType.javascript, FormPropertyType.markdown].includes(propertyItemType)" class="tb-form-row">
+    <div *ngIf="[FormPropertyType.javascript, FormPropertyType.markdown].includes(propertyItemType)" class="jnks-iot-form-row">
       <div class="fixed-title-width" translate>dynamic-form.property.help-id</div>
       <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
         <input matInput formControlName="helpId" placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
     </div>
     <ng-container *ngIf="propertyItemType === FormPropertyType.datetime">
-      <div class="tb-form-row space-between">
+      <div class="jnks-iot-form-row space-between">
         <div translate>dynamic-form.property.datetime-type</div>
         <mat-chip-listbox class="center-stretch" formControlName="dateTimeType">
           <mat-chip-option [selectable]="propertyFormGroup.get('dateTimeType').value !== 'date'"
@@ -291,13 +291,13 @@
                            value="datetime">{{ 'dynamic-form.property.datetime-type-datetime' | translate }}</mat-chip-option>
         </mat-chip-listbox>
       </div>
-      <div class="tb-form-row space-between">
+      <div class="jnks-iot-form-row space-between">
         <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="allowClear">
           {{ 'dynamic-form.property.enable-clear-button' | translate }}
         </mat-slide-toggle>
       </div>
     </ng-container>
-    <div *ngIf="propertyItemType === FormPropertyType.textarea" class="tb-form-row no-border no-padding">
+    <div *ngIf="propertyItemType === FormPropertyType.textarea" class="jnks-iot-form-row no-border no-padding">
       <mat-form-field  class="flex"
                        floatLabel="always"
                        appearance="outline" subscriptSizing="dynamic">
@@ -307,78 +307,78 @@
                   formControlName="default" placeholder="{{ 'widget-config.set' | translate }}"></textarea>
       </mat-form-field>
     </div>
-    <div *ngIf="propertyItemType === FormPropertyType.javascript" class="tb-form-row" >
-      <tb-js-func
+    <div *ngIf="propertyItemType === FormPropertyType.javascript" class="jnks-iot-form-row" >
+      <jnks-iot-js-func
         class="flex-1"
         disableUndefinedCheck
         formControlName="default"
         [helpId]="propertyFormGroup.get('helpId').value"
         label="{{ 'dynamic-form.property.default-value' | translate }}">
-      </tb-js-func>
+      </jnks-iot-js-func>
     </div>
-    <div *ngIf="propertyItemType === FormPropertyType.json" class="tb-form-row" >
-      <tb-json-content
+    <div *ngIf="propertyItemType === FormPropertyType.json" class="jnks-iot-form-row" >
+      <jnks-iot-json-content
         class="flex-1"
         formControlName="default"
         [contentType]="ContentType.JSON"
         label="{{ 'dynamic-form.property.default-value' | translate }}">
-      </tb-json-content>
+      </jnks-iot-json-content>
     </div>
-    <div *ngIf="propertyItemType === FormPropertyType.html" class="tb-form-row" >
-      <tb-html
+    <div *ngIf="propertyItemType === FormPropertyType.html" class="jnks-iot-form-row" >
+      <jnks-iot-html
         class="flex-1"
         formControlName="default"
         label="{{ 'dynamic-form.property.default-value' | translate }}">
-      </tb-html>
+      </jnks-iot-html>
     </div>
-    <div *ngIf="propertyItemType === FormPropertyType.css" class="tb-form-row" >
-      <tb-css
+    <div *ngIf="propertyItemType === FormPropertyType.css" class="jnks-iot-form-row" >
+      <jnks-iot-css
         class="flex-1"
         formControlName="default"
         label="{{ 'dynamic-form.property.default-value' | translate }}">
-      </tb-css>
+      </jnks-iot-css>
     </div>
-    <div *ngIf="propertyItemType === FormPropertyType.markdown" class="tb-form-row" >
-      <tb-markdown-editor
+    <div *ngIf="propertyItemType === FormPropertyType.markdown" class="jnks-iot-form-row" >
+      <jnks-iot-markdown-editor
         class="flex-1"
         formControlName="default"
         [helpId]="propertyFormGroup.get('helpId').value"
         label="{{ 'dynamic-form.property.default-value' | translate }}">
-      </tb-markdown-editor>
+      </jnks-iot-markdown-editor>
     </div>
-    <div *ngIf="propertyItemType === FormPropertyType.image && !isArray" class="tb-form-row" >
-      <tb-gallery-image-input
+    <div *ngIf="propertyItemType === FormPropertyType.image && !isArray" class="jnks-iot-form-row" >
+      <jnks-iot-gallery-image-input
         class="flex-1"
         formControlName="default"
         label="{{ 'dynamic-form.property.default-value' | translate }}">
-      </tb-gallery-image-input>
+      </jnks-iot-gallery-image-input>
     </div>
     <div *ngIf="propertyItemType === FormPropertyType.radios"
-         class="tb-form-row tb-radios-property" [class.direction-column]="propertyFormGroup.get('direction').value === 'column'">
-      <div tbTruncateWithTooltip translate class="fixed-title-height">dynamic-form.property.default-value</div>
+         class="jnks-iot-form-row jnks-iot-radios-property" [class.direction-column]="propertyFormGroup.get('direction').value === 'column'">
+      <div jnksIotTruncateWithTooltip translate class="fixed-title-height">dynamic-form.property.default-value</div>
       <mat-radio-group class="flex flex-1 flex-wrap" [class.flex-col]="propertyFormGroup.get('direction').value === 'column'"
                        formControlName="default">
         <mat-radio-button *ngFor="let item of propertyFormGroup.get('items').value" [value]="item.value">
-          <div tbTruncateWithTooltip>{{ item.label | customTranslate }}</div>
+          <div jnksIotTruncateWithTooltip>{{ item.label | customTranslate }}</div>
         </mat-radio-button>
       </mat-radio-group>
     </div>
-    <div *ngIf="isPropertyTypeAllowedForRow(propertyItemType)" class="tb-form-row space-between">
+    <div *ngIf="isPropertyTypeAllowedForRow(propertyItemType)" class="jnks-iot-form-row space-between">
       <div class="fixed-title-width" translate>dynamic-form.property.default-value</div>
       <mat-form-field  *ngIf="[FormPropertyType.text, FormPropertyType.password].includes(propertyItemType)"
                        class="flex"
                        appearance="outline" subscriptSizing="dynamic">
         <input matInput [type]="propertyFormGroup.get('type').value" formControlName="default" placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
-      <tb-color-input *ngIf="propertyItemType === FormPropertyType.color"
+      <jnks-iot-color-input *ngIf="propertyItemType === FormPropertyType.color"
                       asBoxInput
                       colorClearButton
                       formControlName="default">
-      </tb-color-input>
-      <tb-color-settings *ngIf="propertyItemType === FormPropertyType.color_settings"
+      </jnks-iot-color-input>
+      <jnks-iot-color-settings *ngIf="propertyItemType === FormPropertyType.color_settings"
                          formControlName="default"
                          settingsKey="{{ propertyFormGroup.get('id').value }}">
-      </tb-color-settings>
+      </jnks-iot-color-settings>
       <mat-form-field  *ngIf="propertyItemType === FormPropertyType.number"
                        appearance="outline"
                        class="number"
@@ -389,20 +389,20 @@
                [step]="propertyFormGroup.get('step').value"
                type="number" placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
-      <tb-font-settings *ngIf="propertyItemType === FormPropertyType.font"
+      <jnks-iot-font-settings *ngIf="propertyItemType === FormPropertyType.font"
                         formControlName="default"
                         clearButton
                         disabledLineHeight>
-      </tb-font-settings>
-      <tb-unit-input *ngIf="propertyItemType === FormPropertyType.units"
-                     formControlName="default"></tb-unit-input>
-      <tb-value-input *ngIf="propertyItemType === FormPropertyType.switch"
+      </jnks-iot-font-settings>
+      <jnks-iot-unit-input *ngIf="propertyItemType === FormPropertyType.units"
+                     formControlName="default"></jnks-iot-unit-input>
+      <jnks-iot-value-input *ngIf="propertyItemType === FormPropertyType.switch"
                       [valueType]="ValueType.BOOLEAN"
-                      formControlName="default"></tb-value-input>
-      <tb-material-icon-select *ngIf="propertyItemType === FormPropertyType.icon"
+                      formControlName="default"></jnks-iot-value-input>
+      <jnks-iot-material-icon-select *ngIf="propertyItemType === FormPropertyType.icon"
                                asBoxInput
                                formControlName="default">
-      </tb-material-icon-select>
+      </jnks-iot-material-icon-select>
       <mat-form-field *ngIf="propertyItemType === FormPropertyType.select" class="medium-width"
                       appearance="outline" subscriptSizing="dynamic">
         <mat-select *ngIf="!propertyFormGroup.get('multiple').value" formControlName="default">
@@ -418,7 +418,7 @@
         </mat-select>
       </mat-form-field>
       <ng-container *ngIf="propertyItemType === FormPropertyType.datetime">
-        <tb-datetime *ngIf="propertyFormGroup.get('dateTimeType').value === 'date'"
+        <jnks-iot-datetime *ngIf="propertyFormGroup.get('dateTimeType').value === 'date'"
                      class="flex-1"
                      showLabel="false"
                      fieldClass="flex"
@@ -427,8 +427,8 @@
                      subscriptSizing="dynamic"
                      type="date"
                      formControlName="default"
-        ></tb-datetime>
-        <tb-datetime *ngIf="propertyFormGroup.get('dateTimeType').value === 'time'"
+        ></jnks-iot-datetime>
+        <jnks-iot-datetime *ngIf="propertyFormGroup.get('dateTimeType').value === 'time'"
                      class="flex-1"
                      showLabel="false"
                      fieldClass="flex"
@@ -437,8 +437,8 @@
                      subscriptSizing="dynamic"
                      type="time"
                      formControlName="default"
-        ></tb-datetime>
-        <tb-datetime *ngIf="propertyFormGroup.get('dateTimeType').value === 'datetime'"
+        ></jnks-iot-datetime>
+        <jnks-iot-datetime *ngIf="propertyFormGroup.get('dateTimeType').value === 'datetime'"
                      class="flex-1"
                      showLabel="false"
                      fieldClass="flex"
@@ -447,7 +447,7 @@
                      subscriptSizing="dynamic"
                      type="datetime"
                      formControlName="default"
-        ></tb-datetime>
+        ></jnks-iot-datetime>
       </ng-container>
     </div>
   </ng-container>

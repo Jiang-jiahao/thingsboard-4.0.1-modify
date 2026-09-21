@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.jnks.iot.common.util.JnksIotExecutors;
 import com.jnks.iot.server.cache.ota.OtaPackageDataCache;
 import com.jnks.iot.server.common.transport.limits.TransportRateLimitService;
-import com.jnks.iot.server.queue.discovery.TbServiceInfoProvider;
+import com.jnks.iot.server.queue.discovery.JnksIotServiceInfoProvider;
 import com.jnks.iot.server.common.scheduler.SchedulerComponent;
 
 import java.util.concurrent.ExecutorService;
@@ -28,7 +28,7 @@ public abstract class TransportContext {
     protected TransportService transportService;
 
     @Autowired
-    private TbServiceInfoProvider serviceInfoProvider;
+    private JnksIotServiceInfoProvider serviceInfoProvider;
 
     @Autowired
     private SchedulerComponent scheduler;

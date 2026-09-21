@@ -9,9 +9,9 @@
   </li>
   <li><b>additionalParams:</b> <code>{[key: string]: any}</code> - An optional key/value object holding additional entity parameters.
         <span style="padding-left: 4px;"
-             tb-help-popup="widget/action/custom_additional_params"
-             tb-help-popup-placement="top"
-             [tb-help-popup-style]="{maxHeight: '50vh', maxWidth: '50vw'}"
+             jnks-iot-help-popup="widget/action/custom_additional_params"
+             jnks-iot-help-popup-placement="top"
+             [jnks-iot-help-popup-style]="{maxHeight: '50vh', maxWidth: '50vw'}"
              trigger-text="Read more">
         </span>
   </li>

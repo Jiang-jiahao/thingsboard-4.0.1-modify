@@ -7,13 +7,13 @@ import {
   ImageSourceType,
   loadImageWithAspect,
   MapZoomAction,
-  TbCircleData, TbPolygonCoordinate, TbPolygonCoordinates, TbPolygonRawCoordinate, TbPolygonRawCoordinates
+  JnksIotCircleData, JnksIotPolygonCoordinate, JnksIotPolygonCoordinates, JnksIotPolygonRawCoordinate, JnksIotPolygonRawCoordinates
 } from '@shared/models/widget/maps/map.models';
 import { WidgetContext } from '@home/models/widget-component.models';
 import { DeepPartial } from '@shared/models/common';
 import { Observable, of, ReplaySubject, switchMap } from 'rxjs';
 import L from 'leaflet';
-import { TbMap } from '@home/components/widget/lib/maps/map';
+import { JnksIotMap } from '@home/components/widget/lib/maps/map';
 import { ImagePipe } from '@shared/pipe/image.pipe';
 import { catchError } from 'rxjs/operators';
 import { DataSet, widgetType } from '@shared/models/widget.models';
@@ -27,7 +27,7 @@ interface ImageLayerData {
   update?: boolean;
 }
 
-export class TbImageMap extends TbMap<ImageMapSettings> {
+export class JnksIotImageMap extends JnksIotMap<ImageMapSettings> {
 
   private maxZoom: number;
   private width: number;
@@ -124,27 +124,27 @@ export class TbImageMap extends TbMap<ImageMapSettings> {
     };
   }
 
-  public polygonDataToCoordinates(expression: TbPolygonRawCoordinates): TbPolygonRawCoordinates {
-    return expression.map((el: TbPolygonRawCoordinate) => {
+  public polygonDataToCoordinates(expression: JnksIotPolygonRawCoordinates): JnksIotPolygonRawCoordinates {
+    return expression.map((el: JnksIotPolygonRawCoordinate) => {
       if (!Array.isArray(el[0]) && !Array.isArray(el[1]) && el.length === 2) {
         const latLng = this.pointToLatLng(
           el[0] * this.width,
           el[1] * this.height
         );
-        return [latLng.lat, latLng.lng] as TbPolygonRawCoordinate;
+        return [latLng.lat, latLng.lng] as JnksIotPolygonRawCoordinate;
       } else if (Array.isArray(el) && el.length) {
-        return this.polygonDataToCoordinates(el as TbPolygonRawCoordinates) as TbPolygonRawCoordinate;
+        return this.polygonDataToCoordinates(el as JnksIotPolygonRawCoordinates) as JnksIotPolygonRawCoordinate;
       } else {
         return null;
       }
     }).filter(el => !!el);
   }
 
-  public coordinatesToPolygonData(coordinates: TbPolygonCoordinates): TbPolygonRawCoordinates {
+  public coordinatesToPolygonData(coordinates: JnksIotPolygonCoordinates): JnksIotPolygonRawCoordinates {
     if (coordinates.length) {
-      return coordinates.map((point: TbPolygonCoordinate) => {
+      return coordinates.map((point: JnksIotPolygonCoordinate) => {
         if (Array.isArray(point)) {
-          return this.coordinatesToPolygonData(point) as TbPolygonRawCoordinate;
+          return this.coordinatesToPolygonData(point) as JnksIotPolygonRawCoordinate;
         } else {
           const pos = this.latLngToPoint(point);
           return [calculateNewPointCoordinate(pos.x, this.width), calculateNewPointCoordinate(pos.y, this.height)];
@@ -155,7 +155,7 @@ export class TbImageMap extends TbMap<ImageMapSettings> {
     }
   }
 
-  public circleDataToCoordinates(circle: TbCircleData): TbCircleData {
+  public circleDataToCoordinates(circle: JnksIotCircleData): JnksIotCircleData {
     const centerPoint = this.pointToLatLng(circle.latitude * this.width, circle.longitude * this.height);
     circle.latitude = centerPoint.lat;
     circle.longitude = centerPoint.lng;
@@ -163,8 +163,8 @@ export class TbImageMap extends TbMap<ImageMapSettings> {
     return circle;
   }
 
-  public coordinatesToCircleData(center: L.LatLng, radius: number): TbCircleData {
-    let circleData: TbCircleData = null;
+  public coordinatesToCircleData(center: L.LatLng, radius: number): JnksIotCircleData {
+    let circleData: JnksIotCircleData = null;
     if (center) {
       const point = this.latLngToPoint(center);
       const posX = calculateNewPointCoordinate(point.x, this.width);

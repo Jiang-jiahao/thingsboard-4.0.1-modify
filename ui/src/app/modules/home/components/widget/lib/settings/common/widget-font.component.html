@@ -52,18 +52,18 @@
     </mat-form-field>
   </section>
   <section class="flex flex-row xs:flex-col gt-xs:gap-2">
-    <tb-color-input
+    <jnks-iot-color-input
       class="flex-1"
       formControlName="color"
       icon="format_color_fill"
       label="{{ 'widgets.widget-font.color' | translate }}" openOnInput colorClearButton>
-    </tb-color-input>
-    <tb-color-input
+    </jnks-iot-color-input>
+    <jnks-iot-color-input
       *ngIf="hasShadowColor"
       class="flex-1"
       formControlName="shadowColor"
       icon="format_color_fill"
       label="{{ 'widgets.widget-font.shadow-color' | translate }}" openOnInput colorClearButton>
-    </tb-color-input>
+    </jnks-iot-color-input>
   </section>
 </section>

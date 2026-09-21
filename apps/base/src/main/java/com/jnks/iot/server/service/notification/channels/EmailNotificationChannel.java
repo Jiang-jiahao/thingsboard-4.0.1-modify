@@ -3,7 +3,7 @@ package com.jnks.iot.server.service.notification.channels;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import com.jnks.iot.rule.engine.api.MailService;
-import com.jnks.iot.rule.engine.api.TbEmail;
+import com.jnks.iot.rule.engine.api.JnksIotEmail;
 import com.jnks.iot.server.common.data.User;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.notification.NotificationDeliveryMethod;
@@ -18,7 +18,7 @@ public class EmailNotificationChannel implements NotificationChannel<User, Email
 
     @Override
     public void sendNotification(User recipient, EmailDeliveryMethodNotificationTemplate processedTemplate, NotificationProcessingContext ctx) throws Exception {
-        mailService.send(ctx.getTenantId(), null, TbEmail.builder()
+        mailService.send(ctx.getTenantId(), null, JnksIotEmail.builder()
                 .to(recipient.getEmail())
                 .subject(processedTemplate.getSubject())
                 .body(processedTemplate.getBody())

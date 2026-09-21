@@ -11,7 +11,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ColorRange, ColorRangeSettings, ComponentStyle } from '@shared/models/widget-settings.models';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { ColorRangePanelComponent } from '@home/components/widget/lib/settings/common/color-range-panel.component';
 
 @Injectable()
@@ -42,7 +42,7 @@ export class ColorRangeSettingsComponentService {
 }
 
 @Component({
-  selector: 'tb-color-range-settings',
+  selector: 'jnks-iot-color-range-settings',
   templateUrl: './color-range-settings.component.html',
   styleUrls: [],
   providers: [
@@ -67,7 +67,7 @@ export class ColorRangeSettingsComponent implements OnInit, ControlValueAccessor
 
   private propagateChange = null;
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private colorSettingsComponentService: ColorRangeSettingsComponentService) {}
@@ -117,8 +117,8 @@ export class ColorRangeSettingsComponent implements OnInit, ControlValueAccessor
         },
         isModal: true
       });
-      colorRangeSettingsPanelPopover.tbComponentRef.instance.popover = colorRangeSettingsPanelPopover;
-      colorRangeSettingsPanelPopover.tbComponentRef.instance.colorRangeApplied.subscribe((colorRangeSettings: Array<ColorRange>) => {
+      colorRangeSettingsPanelPopover.jnksIotComponentRef.instance.popover = colorRangeSettingsPanelPopover;
+      colorRangeSettingsPanelPopover.jnksIotComponentRef.instance.colorRangeApplied.subscribe((colorRangeSettings: Array<ColorRange>) => {
         colorRangeSettingsPanelPopover.hide();
         this.modelValue = colorRangeSettings;
         this.updateColorStyle();

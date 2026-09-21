@@ -23,9 +23,9 @@ import org.eclipse.leshan.core.response.WriteAttributesResponse;
 import org.eclipse.leshan.core.response.WriteCompositeResponse;
 import org.eclipse.leshan.core.response.WriteResponse;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClient;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MCancelObserveCompositeRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MObserveCompositeRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MReadCompositeRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MCancelObserveCompositeRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MObserveCompositeRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MReadCompositeRequest;
 import com.jnks.iot.server.transport.lwm2m.server.rpc.composite.RpcWriteCompositeRequest;
 
 import java.util.List;
@@ -33,38 +33,38 @@ import java.util.Set;
 
 public interface LwM2mDownlinkMsgHandler {
 
-    void sendReadRequest(LwM2mClient client, TbLwM2MReadRequest request, DownlinkRequestCallback<ReadRequest, ReadResponse> callback);
+    void sendReadRequest(LwM2mClient client, JnksIotLwM2MReadRequest request, DownlinkRequestCallback<ReadRequest, ReadResponse> callback);
 
-    void sendReadCompositeRequest(LwM2mClient client, TbLwM2MReadCompositeRequest request, DownlinkRequestCallback<ReadCompositeRequest, ReadCompositeResponse> callback);
+    void sendReadCompositeRequest(LwM2mClient client, JnksIotLwM2MReadCompositeRequest request, DownlinkRequestCallback<ReadCompositeRequest, ReadCompositeResponse> callback);
 
-    void sendObserveRequest(LwM2mClient client, TbLwM2MObserveRequest request, DownlinkRequestCallback<ObserveRequest, ObserveResponse> callback);
+    void sendObserveRequest(LwM2mClient client, JnksIotLwM2MObserveRequest request, DownlinkRequestCallback<ObserveRequest, ObserveResponse> callback);
 
-    void sendObserveAllRequest(LwM2mClient client, TbLwM2MObserveAllRequest request, DownlinkRequestCallback<TbLwM2MObserveAllRequest, Set<String>> callback);
+    void sendObserveAllRequest(LwM2mClient client, JnksIotLwM2MObserveAllRequest request, DownlinkRequestCallback<JnksIotLwM2MObserveAllRequest, Set<String>> callback);
 
-    void sendExecuteRequest(LwM2mClient client, TbLwM2MExecuteRequest request, DownlinkRequestCallback<ExecuteRequest, ExecuteResponse> callback);
+    void sendExecuteRequest(LwM2mClient client, JnksIotLwM2MExecuteRequest request, DownlinkRequestCallback<ExecuteRequest, ExecuteResponse> callback);
 
-    void sendDeleteRequest(LwM2mClient client, TbLwM2MDeleteRequest request, DownlinkRequestCallback<DeleteRequest, DeleteResponse> callback);
+    void sendDeleteRequest(LwM2mClient client, JnksIotLwM2MDeleteRequest request, DownlinkRequestCallback<DeleteRequest, DeleteResponse> callback);
 
-    void sendCancelObserveRequest(LwM2mClient client, TbLwM2MCancelObserveRequest request, DownlinkRequestCallback<TbLwM2MCancelObserveRequest, Integer> callback);
+    void sendCancelObserveRequest(LwM2mClient client, JnksIotLwM2MCancelObserveRequest request, DownlinkRequestCallback<JnksIotLwM2MCancelObserveRequest, Integer> callback);
 
-    void sendCancelObserveAllRequest(LwM2mClient client, TbLwM2MCancelAllRequest request, DownlinkRequestCallback<TbLwM2MCancelAllRequest, Integer> callback);
+    void sendCancelObserveAllRequest(LwM2mClient client, JnksIotLwM2MCancelAllRequest request, DownlinkRequestCallback<JnksIotLwM2MCancelAllRequest, Integer> callback);
 
-    void sendObserveCompositeRequest(LwM2mClient client, TbLwM2MObserveCompositeRequest request, DownlinkRequestCallback<ObserveCompositeRequest, ObserveCompositeResponse> callback);
+    void sendObserveCompositeRequest(LwM2mClient client, JnksIotLwM2MObserveCompositeRequest request, DownlinkRequestCallback<ObserveCompositeRequest, ObserveCompositeResponse> callback);
 
-    void sendCancelObserveCompositeRequest(LwM2mClient client, TbLwM2MCancelObserveCompositeRequest request, DownlinkRequestCallback<TbLwM2MCancelObserveCompositeRequest, Integer> callback);
+    void sendCancelObserveCompositeRequest(LwM2mClient client, JnksIotLwM2MCancelObserveCompositeRequest request, DownlinkRequestCallback<JnksIotLwM2MCancelObserveCompositeRequest, Integer> callback);
 
-    void sendDiscoverRequest(LwM2mClient client, TbLwM2MDiscoverRequest request, DownlinkRequestCallback<DiscoverRequest, DiscoverResponse> callback);
+    void sendDiscoverRequest(LwM2mClient client, JnksIotLwM2MDiscoverRequest request, DownlinkRequestCallback<DiscoverRequest, DiscoverResponse> callback);
 
-    void sendDiscoverAllRequest(LwM2mClient client, TbLwM2MDiscoverAllRequest request, DownlinkRequestCallback<TbLwM2MDiscoverAllRequest, List<String>> callback);
+    void sendDiscoverAllRequest(LwM2mClient client, JnksIotLwM2MDiscoverAllRequest request, DownlinkRequestCallback<JnksIotLwM2MDiscoverAllRequest, List<String>> callback);
 
-    void sendWriteAttributesRequest(LwM2mClient client, TbLwM2MWriteAttributesRequest request, DownlinkRequestCallback<WriteAttributesRequest, WriteAttributesResponse> callback);
+    void sendWriteAttributesRequest(LwM2mClient client, JnksIotLwM2MWriteAttributesRequest request, DownlinkRequestCallback<WriteAttributesRequest, WriteAttributesResponse> callback);
 
-    void sendWriteReplaceRequest(LwM2mClient client, TbLwM2MWriteReplaceRequest request, DownlinkRequestCallback<WriteRequest, WriteResponse> callback);
+    void sendWriteReplaceRequest(LwM2mClient client, JnksIotLwM2MWriteReplaceRequest request, DownlinkRequestCallback<WriteRequest, WriteResponse> callback);
 
     void sendWriteCompositeRequest(LwM2mClient client, RpcWriteCompositeRequest nodes, DownlinkRequestCallback<WriteCompositeRequest, WriteCompositeResponse> callback);
 
-    void sendWriteUpdateRequest(LwM2mClient client, TbLwM2MWriteUpdateRequest request, DownlinkRequestCallback<WriteRequest, WriteResponse> callback);
+    void sendWriteUpdateRequest(LwM2mClient client, JnksIotLwM2MWriteUpdateRequest request, DownlinkRequestCallback<WriteRequest, WriteResponse> callback);
 
-    void sendCreateRequest(LwM2mClient client, TbLwM2MCreateRequest request, DownlinkRequestCallback<CreateRequest, CreateResponse> callback);
+    void sendCreateRequest(LwM2mClient client, JnksIotLwM2MCreateRequest request, DownlinkRequestCallback<CreateRequest, CreateResponse> callback);
 
 }

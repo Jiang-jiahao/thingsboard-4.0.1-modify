@@ -18,7 +18,7 @@ import {
   TimeSeriesChartYAxisSettings
 } from '@home/components/widget/lib/chart/time-series-chart.models';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { coerceBoolean } from '@shared/decorators/coercion';
 import {
   TimeSeriesChartAxisSettingsPanelComponent
@@ -28,7 +28,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-time-series-chart-y-axis-row',
+  selector: 'jnks-iot-time-series-chart-y-axis-row',
   templateUrl: './time-series-chart-y-axis-row.component.html',
   styleUrls: ['./time-series-chart-y-axis-row.component.scss'],
   providers: [
@@ -64,7 +64,7 @@ export class TimeSeriesChartYAxisRowComponent implements ControlValueAccessor, O
 
   constructor(private fb: UntypedFormBuilder,
               private translate: TranslateService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private cd: ChangeDetectorRef,
@@ -149,8 +149,8 @@ export class TimeSeriesChartYAxisRowComponent implements ControlValueAccessor, O
         },
         isModal: true
       });
-      yAxisSettingsPanelPopover.tbComponentRef.instance.popover = yAxisSettingsPanelPopover;
-      yAxisSettingsPanelPopover.tbComponentRef.instance.axisSettingsApplied.subscribe((yAxisSettings) => {
+      yAxisSettingsPanelPopover.jnksIotComponentRef.instance.popover = yAxisSettingsPanelPopover;
+      yAxisSettingsPanelPopover.jnksIotComponentRef.instance.axisSettingsApplied.subscribe((yAxisSettings) => {
         yAxisSettingsPanelPopover.hide();
         this.modelValue = {...this.modelValue, ...yAxisSettings};
         this.axisFormGroup.patchValue(

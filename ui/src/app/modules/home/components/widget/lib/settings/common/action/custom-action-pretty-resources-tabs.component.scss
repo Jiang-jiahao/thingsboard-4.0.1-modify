@@ -1,4 +1,4 @@
-.tb-custom-action-editor-container {
+.jnks-iot-custom-action-editor-container {
   .html-panel,
   .css-panel {
     width: 100%;
@@ -7,7 +7,7 @@
     min-height: 200px;
   }
 
-  div.tb-editor-area-title-panel {
+  div.jnks-iot-editor-area-title-panel {
     position: absolute;
     top: 5px;
     right: 20px;
@@ -25,7 +25,7 @@
       }
     }
 
-    button.mat-mdc-button-base, button.mat-icon-button-base.tb-mat-32 {
+    button.mat-mdc-button-base, button.mat-icon-button-base.jnks-iot-mat-32 {
       align-items: center;
       vertical-align: middle;
       min-width: 32px;

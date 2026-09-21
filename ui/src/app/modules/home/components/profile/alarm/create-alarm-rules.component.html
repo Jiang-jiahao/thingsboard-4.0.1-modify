@@ -18,8 +18,8 @@
         </mat-error>
       </mat-form-field>
       <mat-divider vertical></mat-divider>
-      <tb-alarm-rule formControlName="alarmRule" [deviceProfileId]="deviceProfileId" required class="flex-1">
-      </tb-alarm-rule>
+      <jnks-iot-alarm-rule formControlName="alarmRule" [deviceProfileId]="deviceProfileId" required class="flex-1">
+      </jnks-iot-alarm-rule>
     </div>
     <button *ngIf="!disabled"
             mat-icon-button color="primary" style="min-width: 40px;"
@@ -32,7 +32,7 @@
   </div>
   <div *ngIf="!createAlarmRulesFormArray().controls.length && !disabled">
       <span translate class="flex items-center justify-center" style="margin: 16px 0"
-            class="tb-prompt required">device-profile.add-create-alarm-rule-prompt</span>
+            class="jnks-iot-prompt required">device-profile.add-create-alarm-rule-prompt</span>
   </div>
   <div *ngIf="!disabled">
     <button mat-stroked-button color="primary"

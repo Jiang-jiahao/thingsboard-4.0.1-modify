@@ -9,7 +9,7 @@ import com.jnks.iot.server.common.data.id.AssetId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.page.PageData;
 import com.jnks.iot.server.common.data.page.PageLink;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.dao.Dao;
 import com.jnks.iot.server.dao.ExportableEntityDao;
 import com.jnks.iot.server.dao.TenantEntityDao;
@@ -200,7 +200,7 @@ public interface AssetDao extends Dao<Asset>, TenantEntityDao<Asset>, Exportable
      */
     PageData<Asset> findAssetsByTenantIdAndProfileId(UUID tenantId, UUID profileId, PageLink pageLink);
 
-    PageData<TbPair<UUID, String>> getAllAssetTypes(PageLink pageLink);
+    PageData<JnksIotPair<UUID, String>> getAllAssetTypes(PageLink pageLink);
 
     PageData<ProfileEntityIdInfo> findProfileEntityIdInfos(PageLink pageLink);
 

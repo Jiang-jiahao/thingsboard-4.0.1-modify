@@ -16,7 +16,7 @@ export interface MobileAppDialogData {
 }
 
 @Component({
-  selector: 'tb-mobile-app-dialog',
+  selector: 'jnks-iot-mobile-app-dialog',
   templateUrl: './mobile-app-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: MobileAppDialogComponent}],
   styleUrls: []

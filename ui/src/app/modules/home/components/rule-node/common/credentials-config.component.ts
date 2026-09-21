@@ -29,7 +29,7 @@ interface CredentialsConfig {
 }
 
 @Component({
-  selector: 'tb-credentials-config',
+  selector: 'jnks-iot-credentials-config',
   templateUrl: './credentials-config.component.html',
   styleUrls: [],
   providers: [

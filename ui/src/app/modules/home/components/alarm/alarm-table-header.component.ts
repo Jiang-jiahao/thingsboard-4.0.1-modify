@@ -7,7 +7,7 @@ import { AlarmTableConfig } from './alarm-table-config';
 import { AlarmFilterConfig } from '@shared/models/query/query.models';
 
 @Component({
-  selector: 'tb-alarm-table-header',
+  selector: 'jnks-iot-alarm-table-header',
   templateUrl: './alarm-table-header.component.html',
   styleUrls: ['./alarm-table-header.component.scss']
 })

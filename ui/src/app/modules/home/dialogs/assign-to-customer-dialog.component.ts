@@ -19,7 +19,7 @@ export interface AssignToCustomerDialogData {
 }
 
 @Component({
-  selector: 'tb-assign-to-customer-dialog',
+  selector: 'jnks-iot-assign-to-customer-dialog',
   templateUrl: './assign-to-customer-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: AssignToCustomerDialogComponent}],
   styleUrls: []

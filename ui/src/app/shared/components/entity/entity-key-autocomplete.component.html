@@ -1,4 +1,4 @@
-<mat-form-field class="tb-flex no-gap !w-full" appearance="outline" subscriptSizing="dynamic">
+<mat-form-field class="jnks-iot-flex no-gap !w-full" appearance="outline" subscriptSizing="dynamic">
   <input matInput type="text" placeholder="{{ 'action.set' | translate }}"
          #keyInput
          [formControl]="keyControl"
@@ -14,14 +14,14 @@
   } @else if (keyControl.hasError('required') && keyControl.touched) {
     <mat-icon matSuffix
               matTooltipPosition="above"
-              matTooltipClass="tb-error-tooltip"
+              matTooltipClass="jnks-iot-error-tooltip"
               [matTooltip]="'common.hint.key-required' | translate"
-              class="tb-error">
+              class="jnks-iot-error">
       warning
     </mat-icon>
   }
   <mat-autocomplete
-    class="tb-autocomplete"
+    class="jnks-iot-autocomplete"
     #keysAutocomplete="matAutocomplete">
     @for (key of filteredKeys$ | async; track key) {
       <mat-option [value]="key"><span [innerHTML]="key | highlight: searchText"></span></mat-option>

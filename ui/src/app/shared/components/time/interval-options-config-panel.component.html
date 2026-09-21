@@ -1,12 +1,12 @@
-<form [formGroup]="intervalOptionsConfigForm" class="tb-interval-options-form tb-form-panel no-border"
+<form [formGroup]="intervalOptionsConfigForm" class="jnks-iot-interval-options-form jnks-iot-form-panel no-border"
       [style]="aggregation ? {maxWidth: '600px'} : {maxWidth: '350px'}">
-  <div class="tb-form-panel-title">{{ 'timewindow.edit-intervals-list' | translate }}</div>
-  <div class="tb-form-hint tb-primary-fill">
+  <div class="jnks-iot-form-panel-title">{{ 'timewindow.edit-intervals-list' | translate }}</div>
+  <div class="jnks-iot-form-hint jnks-iot-primary-fill">
     {{ 'timewindow.edit-intervals-list-hint' | translate }} {{ aggregation ? ('timewindow.edit-grouping-intervals-list-hint' | translate) : '' }}
   </div>
-  <div class="tb-form-table">
-    <div class="tb-form-table-header">
-      <div class="tb-form-table-header-cell tb-interval" tbTruncateWithTooltip>
+  <div class="jnks-iot-form-table">
+    <div class="jnks-iot-form-table-header">
+      <div class="jnks-iot-form-table-header-cell jnks-iot-interval" jnksIotTruncateWithTooltip>
         <mat-checkbox color="warn"
                       (click)="$event.stopPropagation()"
                       [indeterminate]="getIndeterminate()"
@@ -16,28 +16,28 @@
         {{ "timewindow.interval" | translate }}
       </div>
       <ng-container *ngIf="aggregation">
-        <div class="tb-form-table-header-cell tb-agg-interval-header" tbTruncateWithTooltip>{{"timewindow.allowed-agg-intervals" | translate }}</div>
-        <div class="tb-form-table-header-cell tb-agg-interval-header" tbTruncateWithTooltip>{{"timewindow.default-agg-interval" | translate }}</div>
+        <div class="jnks-iot-form-table-header-cell jnks-iot-agg-interval-header" jnksIotTruncateWithTooltip>{{"timewindow.allowed-agg-intervals" | translate }}</div>
+        <div class="jnks-iot-form-table-header-cell jnks-iot-agg-interval-header" jnksIotTruncateWithTooltip>{{"timewindow.default-agg-interval" | translate }}</div>
       </ng-container>
     </div>
-    <div class="tb-form-table-body" formArrayName="intervals">
+    <div class="jnks-iot-form-table-body" formArrayName="intervals">
       <ng-container *ngFor="let interval of intervalsFormArray.controls; let i = index; trackBy: trackByElement">
-        <div [formGroupName]="i" class="tb-form-table-row">
-          <div class="tb-form-table-row-cell tb-interval">
-            <mat-checkbox class="tb-interval-option" formControlName="enabled" color="primary">
-              <mat-label tbTruncateWithTooltip>{{ interval.get('name').value }}</mat-label>
+        <div [formGroupName]="i" class="jnks-iot-form-table-row">
+          <div class="jnks-iot-form-table-row-cell jnks-iot-interval">
+            <mat-checkbox class="jnks-iot-interval-option" formControlName="enabled" color="primary">
+              <mat-label jnksIotTruncateWithTooltip>{{ interval.get('name').value }}</mat-label>
             </mat-checkbox>
           </div>
           <ng-container *ngIf="aggregation">
-            <div class="tb-form-table-row-cell tb-agg-interval">
-              <tb-grouping-interval-options
+            <div class="jnks-iot-form-table-row-cell jnks-iot-agg-interval">
+              <jnks-iot-grouping-interval-options
                 formControlName="aggIntervalsConfig"
                 [min]="minAggInterval(interval.get('value').value)"
                 [max]="maxAggInterval(interval.get('value').value)"
                 useCalendarIntervals
                 subscriptSizing="dynamic"
                 appearance="outline">
-              </tb-grouping-interval-options>
+              </jnks-iot-grouping-interval-options>
             </div>
           </ng-container>
         </div>

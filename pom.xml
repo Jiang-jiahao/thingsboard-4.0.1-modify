@@ -1058,42 +1058,42 @@
             </dependency>
             <dependency>
                 <groupId>com.jnks.iot.images</groupId>
-                <artifactId>tb-monolith-image</artifactId>
+                <artifactId>jnks-iot-monolith-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.jnks.iot.images.transport</groupId>
-                <artifactId>tb-coap-transport-image</artifactId>
+                <artifactId>jnks-iot-coap-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.jnks.iot.images.transport</groupId>
-                <artifactId>tb-http-transport-image</artifactId>
+                <artifactId>jnks-iot-http-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.jnks.iot.images.transport</groupId>
-                <artifactId>tb-mqtt-transport-image</artifactId>
+                <artifactId>jnks-iot-mqtt-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.jnks.iot.images.transport</groupId>
-                <artifactId>tb-lwm2m-transport-image</artifactId>
+                <artifactId>jnks-iot-lwm2m-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.jnks.iot.images.transport</groupId>
-                <artifactId>tb-snmp-transport-image</artifactId>
+                <artifactId>jnks-iot-snmp-transport-image</artifactId>
                 <version>${project.version}</version>
                 <type>docker-info</type>
                 <scope>test</scope>

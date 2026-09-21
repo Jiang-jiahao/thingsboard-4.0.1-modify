@@ -7,7 +7,7 @@ import { Observable, of } from 'rxjs';
 import { map, mergeMap, startWith } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-dashboard-state-widget-settings',
+  selector: 'jnks-iot-dashboard-state-widget-settings',
   templateUrl: './dashboard-state-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

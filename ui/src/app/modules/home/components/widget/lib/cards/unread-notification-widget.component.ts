@@ -38,7 +38,7 @@ import { select, Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-unread-notification-widget',
+  selector: 'jnks-iot-unread-notification-widget',
   templateUrl: './unread-notification-widget.component.html',
   styleUrls: ['unread-notification-widget.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -223,7 +223,7 @@ export class UnreadNotificationWidgetComponent implements OnInit, OnDestroy {
     }
     const target = $event.target || $event.currentTarget;
     const config = new OverlayConfig({
-      panelClass: 'tb-panel-container',
+      panelClass: 'jnks-iot-panel-container',
       backdropClass: 'cdk-overlay-transparent-backdrop',
       hasBackdrop: true,
       height: 'fit-content',

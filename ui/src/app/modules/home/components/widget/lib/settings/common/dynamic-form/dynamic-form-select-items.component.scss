@@ -1,13 +1,13 @@
-.tb-dynamic-form-select-items {
+.jnks-iot-dynamic-form-select-items {
   flex: 1;
-  .tb-form-table-header-cell {
-    &.tb-value-header {
+  .jnks-iot-form-table-header-cell {
+    &.jnks-iot-value-header {
       flex: 1 1 70%;
     }
-    &.tb-label-header {
+    &.jnks-iot-label-header {
       flex: 1 1 30%;
     }
-    &.tb-actions-header {
+    &.jnks-iot-actions-header {
       width: 80px;
       min-width: 80px;
       &.disabled {
@@ -16,12 +16,12 @@
       }
     }
   }
-  .tb-form-table {
+  .jnks-iot-form-table {
     overflow: hidden;
   }
-  .tb-form-table-body {
+  .jnks-iot-form-table-body {
     overflow: auto;
-    tb-dynamic-form-select-item-row {
+    jnks-iot-dynamic-form-select-item-row {
       overflow: hidden;
     }
   }

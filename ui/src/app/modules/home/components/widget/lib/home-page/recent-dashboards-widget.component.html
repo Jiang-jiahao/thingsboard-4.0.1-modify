@@ -1,12 +1,12 @@
-<div class="tb-card-content flex flex-col gap-2">
+<div class="jnks-iot-card-content flex flex-col gap-2">
   <ng-container *ngIf="hasDashboardsAccess; else noDataAvailable">
-    <div class="tb-card-header">
-      <a class="tb-title-link" routerLink="/dashboards">{{ 'widgets.recent-dashboards.title' | translate }}</a>
+    <div class="jnks-iot-card-header">
+      <a class="jnks-iot-title-link" routerLink="/dashboards">{{ 'widgets.recent-dashboards.title' | translate }}</a>
       <div class="flex flex-row items-center justify-start gap-2 lt-md:items-center lt-md:justify-between">
-        <tb-toggle-header #dashboardsToggle [value]="toggleValue" name="usageToggle" (valueChange)="toggleValueChange($event)">
-          <tb-toggle-option value="last">{{ 'widgets.recent-dashboards.last' | translate }}</tb-toggle-option>
-          <tb-toggle-option value="starred">{{ 'widgets.recent-dashboards.starred' | translate }}</tb-toggle-option>
-        </tb-toggle-header>
+        <jnks-iot-toggle-header #dashboardsToggle [value]="toggleValue" name="usageToggle" (valueChange)="toggleValueChange($event)">
+          <jnks-iot-toggle-option value="last">{{ 'widgets.recent-dashboards.last' | translate }}</jnks-iot-toggle-option>
+          <jnks-iot-toggle-option value="starred">{{ 'widgets.recent-dashboards.starred' | translate }}</jnks-iot-toggle-option>
+        </jnks-iot-toggle-header>
         <a *ngIf="authUser.authority === authority.TENANT_ADMIN" class="md:!hidden"
            mat-flat-button color="primary" routerLink="/dashboards" [queryParams]="{action: 'add'}">{{ 'dashboard.add' | translate }}</a>
       </div>
@@ -47,25 +47,25 @@
           </table>
         </div>
         <ng-template #noLastVisitedDashboards>
-          <div class="tb-no-dashboards">
-            <div class="tb-no-last-visited-bg"></div>
-            <div class="tb-no-last-visited-dashboards-text">{{ 'widgets.recent-dashboards.no-last-viewed-dashboards' | translate }}</div>
+          <div class="jnks-iot-no-dashboards">
+            <div class="jnks-iot-no-last-visited-bg"></div>
+            <div class="jnks-iot-no-last-visited-dashboards-text">{{ 'widgets.recent-dashboards.no-last-viewed-dashboards' | translate }}</div>
           </div>
         </ng-template>
       </ng-template>
       <ng-template [ngSwitchCase]="'starred'">
         <div style="overflow-y: auto;">
-          <div class="tb-starred-dashboard-row" *ngFor="let dashboard of userDashboardsInfo?.starred">
-            <div class="tb-cell star-cell">
+          <div class="jnks-iot-starred-dashboard-row" *ngFor="let dashboard of userDashboardsInfo?.starred">
+            <div class="jnks-iot-cell star-cell">
               <mat-icon (click)="toggleDashboardStar(dashboard)"
                         class="star" [class.starred]="dashboard.starred">{{ dashboard.starred ? 'star' : 'star_border' }}</mat-icon>
             </div>
-            <div class="tb-cell title">
+            <div class="jnks-iot-cell title">
               <a [routerLink]="createDashboardUrl(dashboard.id)">{{ dashboard.title | customTranslate }}</a>
             </div>
           </div>
         </div>
-        <tb-dashboard-autocomplete class="tb-star-dashboard-autocomplete"
+        <jnks-iot-dashboard-autocomplete class="jnks-iot-star-dashboard-autocomplete"
                                    #starDashboardAutocomplete
                                    subscriptSizing="dynamic"
                                    appearance="outline"
@@ -73,22 +73,22 @@
                                    [customerId]="customerId"
                                    label=""
                                    placeholder="{{ 'dashboard.select-dashboard' | translate }}"
-                                   [(ngModel)]="starredDashboardValue" (ngModelChange)="onStarDashboard($event)"></tb-dashboard-autocomplete>
+                                   [(ngModel)]="starredDashboardValue" (ngModelChange)="onStarDashboard($event)"></jnks-iot-dashboard-autocomplete>
       </ng-template>
     </ng-container>
     <ng-template #loading>
-      <div class="tb-no-dashboards">
+      <div class="jnks-iot-no-dashboards">
         <mat-spinner [diameter]="50" mode="indeterminate"></mat-spinner>
       </div>
     </ng-template>
   </ng-container>
   <ng-template #noDataAvailable>
-    <div class="tb-card-header">
-      <div class="tb-title">{{ 'widgets.recent-dashboards.title' | translate }}</div>
+    <div class="jnks-iot-card-header">
+      <div class="jnks-iot-title">{{ 'widgets.recent-dashboards.title' | translate }}</div>
     </div>
-    <div class="tb-no-data-available">
-      <div class="tb-no-data-bg"></div>
-      <div class="tb-no-data-text" translate>widgets.home.no-data-available</div>
+    <div class="jnks-iot-no-data-available">
+      <div class="jnks-iot-no-data-bg"></div>
+      <div class="jnks-iot-no-data-text" translate>widgets.home.no-data-available</div>
     </div>
   </ng-template>
 </div>

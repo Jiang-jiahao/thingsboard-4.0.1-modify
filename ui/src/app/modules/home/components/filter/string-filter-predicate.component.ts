@@ -19,7 +19,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-string-filter-predicate',
+  selector: 'jnks-iot-string-filter-predicate',
   templateUrl: './string-filter-predicate.component.html',
   styleUrls: ['./filter-predicate.scss'],
   providers: [

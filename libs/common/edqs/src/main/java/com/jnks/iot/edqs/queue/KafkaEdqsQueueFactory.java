@@ -7,20 +7,20 @@ import com.jnks.iot.server.common.stats.StatsFactory;
 import com.jnks.iot.server.common.stats.StatsType;
 import com.jnks.iot.server.gen.transport.TransportProtos.FromEdqsMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToEdqsMsg;
-import com.jnks.iot.server.queue.TbQueueProducer;
-import com.jnks.iot.server.queue.TbQueueResponseTemplate;
-import com.jnks.iot.server.queue.common.DefaultTbQueueResponseTemplate;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
-import com.jnks.iot.server.queue.discovery.TbServiceInfoProvider;
+import com.jnks.iot.server.queue.JnksIotQueueProducer;
+import com.jnks.iot.server.queue.JnksIotQueueResponseTemplate;
+import com.jnks.iot.server.queue.common.DefaultJnksIotQueueResponseTemplate;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
+import com.jnks.iot.server.queue.discovery.JnksIotServiceInfoProvider;
 import com.jnks.iot.server.queue.discovery.TopicService;
-import com.jnks.iot.server.queue.kafka.TbKafkaAdmin;
-import com.jnks.iot.server.queue.kafka.TbKafkaConsumerStatsService;
-import com.jnks.iot.server.queue.kafka.TbKafkaConsumerTemplate;
-import com.jnks.iot.server.queue.kafka.TbKafkaProducerTemplate;
-import com.jnks.iot.server.queue.kafka.TbKafkaSettings;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaAdmin;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaConsumerStatsService;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaConsumerTemplate;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaProducerTemplate;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaSettings;
 import com.jnks.iot.server.queue.edqs.EdqsConfig;
 import com.jnks.iot.server.queue.edqs.EdqsQueueFactory;
-import com.jnks.iot.server.queue.kafka.TbKafkaTopicConfigs;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaTopicConfigs;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,25 +28,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ConditionalOnExpression("'${queue.edqs.sync.enabled:true}'=='true' && '${queue.edqs.mode:null}'=='local' && '${queue.type:null}'=='kafka'")
 public class KafkaEdqsQueueFactory implements EdqsQueueFactory {
 
-    private final TbKafkaSettings kafkaSettings;
-    private final TbKafkaAdmin edqsEventsAdmin;
-    private final TbKafkaAdmin edqsRequestsAdmin;
-    private final TbKafkaAdmin edqsStateAdmin;
+    private final JnksIotKafkaSettings kafkaSettings;
+    private final JnksIotKafkaAdmin edqsEventsAdmin;
+    private final JnksIotKafkaAdmin edqsRequestsAdmin;
+    private final JnksIotKafkaAdmin edqsStateAdmin;
     private final EdqsConfig edqsConfig;
-    private final TbServiceInfoProvider serviceInfoProvider;
-    private final TbKafkaConsumerStatsService consumerStatsService;
+    private final JnksIotServiceInfoProvider serviceInfoProvider;
+    private final JnksIotKafkaConsumerStatsService consumerStatsService;
     private final TopicService topicService;
     private final StatsFactory statsFactory;
 
     private final AtomicInteger consumerCounter = new AtomicInteger();
 
-    public KafkaEdqsQueueFactory(TbKafkaSettings kafkaSettings, TbKafkaTopicConfigs topicConfigs,
-                                 EdqsConfig edqsConfig, TbServiceInfoProvider serviceInfoProvider,
-                                 TbKafkaConsumerStatsService consumerStatsService, TopicService topicService,
+    public KafkaEdqsQueueFactory(JnksIotKafkaSettings kafkaSettings, JnksIotKafkaTopicConfigs topicConfigs,
+                                 EdqsConfig edqsConfig, JnksIotServiceInfoProvider serviceInfoProvider,
+                                 JnksIotKafkaConsumerStatsService consumerStatsService, TopicService topicService,
                                  StatsFactory statsFactory) {
-        this.edqsEventsAdmin = new TbKafkaAdmin(kafkaSettings, topicConfigs.getEdqsEventsConfigs());
-        this.edqsRequestsAdmin = new TbKafkaAdmin(kafkaSettings, topicConfigs.getEdqsRequestsConfigs());
-        this.edqsStateAdmin = new TbKafkaAdmin(kafkaSettings, topicConfigs.getEdqsStateConfigs());
+        this.edqsEventsAdmin = new JnksIotKafkaAdmin(kafkaSettings, topicConfigs.getEdqsEventsConfigs());
+        this.edqsRequestsAdmin = new JnksIotKafkaAdmin(kafkaSettings, topicConfigs.getEdqsRequestsConfigs());
+        this.edqsStateAdmin = new JnksIotKafkaAdmin(kafkaSettings, topicConfigs.getEdqsStateConfigs());
         this.kafkaSettings = kafkaSettings;
         this.edqsConfig = edqsConfig;
         this.serviceInfoProvider = serviceInfoProvider;
@@ -56,7 +56,7 @@ public class KafkaEdqsQueueFactory implements EdqsQueueFactory {
     }
 
     @Override
-    public TbKafkaConsumerTemplate<TbProtoQueueMsg<ToEdqsMsg>> createEdqsEventsConsumer() {
+    public JnksIotKafkaConsumerTemplate<JnksIotProtoQueueMsg<ToEdqsMsg>> createEdqsEventsConsumer() {
         return createEdqsMsgConsumer(edqsConfig.getEventsTopic(),
                 "edqs-events-" + consumerCounter.getAndIncrement() + "-consumer-" + serviceInfoProvider.getServiceId(),
                 null, // not using consumer group management, offsets from the edqs-events-to-backup-consumer-group are used (see KafkaEdqsStateService)
@@ -64,7 +64,7 @@ public class KafkaEdqsQueueFactory implements EdqsQueueFactory {
     }
 
     @Override
-    public TbKafkaConsumerTemplate<TbProtoQueueMsg<ToEdqsMsg>> createEdqsEventsToBackupConsumer() {
+    public JnksIotKafkaConsumerTemplate<JnksIotProtoQueueMsg<ToEdqsMsg>> createEdqsEventsToBackupConsumer() {
         return createEdqsMsgConsumer(edqsConfig.getEventsTopic(),
                 "edqs-events-to-backup-consumer-" + serviceInfoProvider.getServiceId(),
                 "edqs-events-to-backup-consumer-group",
@@ -72,30 +72,30 @@ public class KafkaEdqsQueueFactory implements EdqsQueueFactory {
     }
 
     @Override
-    public TbKafkaConsumerTemplate<TbProtoQueueMsg<ToEdqsMsg>> createEdqsStateConsumer() {
+    public JnksIotKafkaConsumerTemplate<JnksIotProtoQueueMsg<ToEdqsMsg>> createEdqsStateConsumer() {
         return createEdqsMsgConsumer(edqsConfig.getStateTopic(),
                 "edqs-state-" + consumerCounter.getAndIncrement() + "-consumer-" + serviceInfoProvider.getServiceId(),
                 null, // not using consumer group management
                 true, edqsStateAdmin);
     }
 
-    public TbKafkaConsumerTemplate<TbProtoQueueMsg<ToEdqsMsg>> createEdqsMsgConsumer(String topic, String clientId, String group, boolean readFullAndStop, TbKafkaAdmin admin) {
-        return TbKafkaConsumerTemplate.<TbProtoQueueMsg<ToEdqsMsg>>builder()
+    public JnksIotKafkaConsumerTemplate<JnksIotProtoQueueMsg<ToEdqsMsg>> createEdqsMsgConsumer(String topic, String clientId, String group, boolean readFullAndStop, JnksIotKafkaAdmin admin) {
+        return JnksIotKafkaConsumerTemplate.<JnksIotProtoQueueMsg<ToEdqsMsg>>builder()
                 .settings(kafkaSettings)
                 .topic(topicService.buildTopicName(topic))
                 .readFromBeginning(readFullAndStop)
                 .stopWhenRead(readFullAndStop)
                 .clientId(clientId)
                 .groupId(topicService.buildTopicName(group))
-                .decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToEdqsMsg.parseFrom(msg.getData()), msg.getHeaders()))
+                .decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToEdqsMsg.parseFrom(msg.getData()), msg.getHeaders()))
                 .admin(admin)
                 .statsService(consumerStatsService)
                 .build();
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToEdqsMsg>> createEdqsStateProducer() {
-        return TbKafkaProducerTemplate.<TbProtoQueueMsg<ToEdqsMsg>>builder()
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToEdqsMsg>> createEdqsStateProducer() {
+        return JnksIotKafkaProducerTemplate.<JnksIotProtoQueueMsg<ToEdqsMsg>>builder()
                 .clientId("edqs-state-producer-" + serviceInfoProvider.getServiceId())
                 .defaultTopic(topicService.buildTopicName(edqsConfig.getStateTopic()))
                 .settings(kafkaSettings)
@@ -104,18 +104,18 @@ public class KafkaEdqsQueueFactory implements EdqsQueueFactory {
     }
 
     @Override
-    public TbQueueResponseTemplate<TbProtoQueueMsg<ToEdqsMsg>, TbProtoQueueMsg<FromEdqsMsg>> createEdqsResponseTemplate() {
+    public JnksIotQueueResponseTemplate<JnksIotProtoQueueMsg<ToEdqsMsg>, JnksIotProtoQueueMsg<FromEdqsMsg>> createEdqsResponseTemplate() {
         var requestConsumer = createEdqsMsgConsumer(edqsConfig.getRequestsTopic(),
                 "edqs-requests-consumer-" + serviceInfoProvider.getServiceId(),
                 "edqs-requests-consumer-group",
                 false, edqsRequestsAdmin);
-        var responseProducer = TbKafkaProducerTemplate.<TbProtoQueueMsg<FromEdqsMsg>>builder()
+        var responseProducer = JnksIotKafkaProducerTemplate.<JnksIotProtoQueueMsg<FromEdqsMsg>>builder()
                 .settings(kafkaSettings)
                 .clientId("edqs-response-producer-" + serviceInfoProvider.getServiceId())
                 .defaultTopic(topicService.buildTopicName(edqsConfig.getResponsesTopic()))
                 .admin(edqsRequestsAdmin)
                 .build();
-        return DefaultTbQueueResponseTemplate.<TbProtoQueueMsg<ToEdqsMsg>, TbProtoQueueMsg<FromEdqsMsg>>builder()
+        return DefaultJnksIotQueueResponseTemplate.<JnksIotProtoQueueMsg<ToEdqsMsg>, JnksIotProtoQueueMsg<FromEdqsMsg>>builder()
                 .requestTemplate(requestConsumer)
                 .responseTemplate(responseProducer)
                 .maxPendingRequests(edqsConfig.getMaxPendingRequests())
@@ -127,7 +127,7 @@ public class KafkaEdqsQueueFactory implements EdqsQueueFactory {
     }
 
     @Override
-    public TbKafkaAdmin getEdqsQueueAdmin() {
+    public JnksIotKafkaAdmin getEdqsQueueAdmin() {
         return edqsEventsAdmin;
     }
 

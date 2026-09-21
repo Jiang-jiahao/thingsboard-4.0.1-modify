@@ -1,0 +1,365 @@
+package com.jnks.iot.server.queue.common;
+
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
+import jakarta.annotation.Nullable;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import com.jnks.iot.common.util.JnksIotStopWatch;
+import com.jnks.iot.common.util.JnksIotThreadFactory;
+import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
+import com.jnks.iot.server.common.stats.MessagesStats;
+import com.jnks.iot.server.queue.JnksIotQueueAdmin;
+import com.jnks.iot.server.queue.JnksIotQueueCallback;
+import com.jnks.iot.server.queue.JnksIotQueueConsumer;
+import com.jnks.iot.server.queue.JnksIotQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueMsgMetadata;
+import com.jnks.iot.server.queue.JnksIotQueueProducer;
+import com.jnks.iot.server.queue.JnksIotQueueRequestTemplate;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * 默认的队列请求模板实现，用于基于消息队列的请求-响应模式通信
+ * 实现了类似RPC的异步消息通信机制
+ *
+ * @param <Request>  请求消息类型
+ * @param <Response> 响应消息类型
+ */
+@Slf4j
+public class DefaultJnksIotQueueRequestTemplate<Request extends JnksIotQueueMsg, Response extends JnksIotQueueMsg> extends AbstractJnksIotQueueTemplate
+        implements JnksIotQueueRequestTemplate<Request, Response> {
+
+    /**
+     * 队列管理组件，用于创建主题等管理操作
+     */
+    private final JnksIotQueueAdmin queueAdmin;
+
+    /**
+     * 请求消息生产者
+     */
+    private final JnksIotQueueProducer<Request> requestTemplate;
+
+    /**
+     * 响应消息消费者
+     */
+    private final JnksIotQueueConsumer<Response> responseTemplate;
+
+    /**
+     * 存储待处理的请求，key为请求ID，value为响应元数据（包含Future和超时信息）
+     */
+    final ConcurrentHashMap<UUID, DefaultJnksIotQueueRequestTemplate.ResponseMetaData<Response>> pendingRequests = new ConcurrentHashMap<>();
+
+    /**
+     *  标记是否使用内部创建的Executor
+     */
+    final boolean internalExecutor;
+
+    /**
+     * 用于执行响应轮询任务的线程池
+     */
+    final ExecutorService executor;
+
+    /**
+     * 最大请求超时时间（纳秒）
+     */
+    final long maxRequestTimeoutNs;
+
+    /**
+     * 最大请求超时时间（毫秒）
+     */
+    final long maxRequestTimeout;
+
+    /**
+     * 最大允许的待处理请求数量
+     */
+    final long maxPendingRequests;
+
+    /**
+     * 轮询响应消息的时间间隔
+     */
+    final long pollInterval;
+
+    /**
+     * 标记模板是否已停止
+     */
+    volatile boolean stopped = false;
+
+    /**
+     * 下一次清理超时请求的时间点（纳秒）
+     */
+    long nextCleanupNs = 0L;
+
+    /**
+     * 清理操作的锁，防止并发清理
+     */
+    private final Lock cleanerLock = new ReentrantLock();
+
+    /**
+     * 消息统计组件，用于监控消息发送状态
+     */
+    private MessagesStats messagesStats;
+
+    public static <Request extends JnksIotQueueMsg, Response extends JnksIotQueueMsg>
+            DefaultJnksIotQueueRequestTemplateBuilder<Request, Response> builder() {
+        return new DefaultJnksIotQueueRequestTemplateBuilder<>();
+    }
+
+    @Builder(builderMethodName = "lombokBuilder")
+    public DefaultJnksIotQueueRequestTemplate(JnksIotQueueAdmin queueAdmin,
+                                         JnksIotQueueProducer<Request> requestTemplate,
+                                         JnksIotQueueConsumer<Response> responseTemplate,
+                                         long maxRequestTimeout,
+                                         long maxPendingRequests,
+                                         long pollInterval,
+                                         @Nullable ExecutorService executor) {
+        this.queueAdmin = queueAdmin;
+        this.requestTemplate = requestTemplate;
+        this.responseTemplate = responseTemplate;
+        this.maxRequestTimeoutNs = TimeUnit.MILLISECONDS.toNanos(maxRequestTimeout);
+        this.maxRequestTimeout = maxRequestTimeout;
+        this.maxPendingRequests = maxPendingRequests;
+        this.pollInterval = pollInterval;
+        this.internalExecutor = (executor == null);
+        this.executor = internalExecutor ? createExecutor() : executor;
+    }
+
+    ExecutorService createExecutor() {
+        return Executors.newSingleThreadExecutor(JnksIotThreadFactory.forName("jnks-iot-queue-request-template-" + responseTemplate.getTopic()));
+    }
+
+    @Override
+    public void init() {
+        queueAdmin.createTopicIfNotExists(responseTemplate.getTopic());
+        requestTemplate.init();
+        responseTemplate.subscribe();
+        executor.submit(this::mainLoop);
+    }
+
+    void mainLoop() {
+        while (!stopped) {
+            JnksIotStopWatch sw = JnksIotStopWatch.create();
+            try {
+                fetchAndProcessResponses();
+            } catch (Throwable e) {
+                long sleepNanos = TimeUnit.MILLISECONDS.toNanos(this.pollInterval) - sw.stopAndGetTotalTimeNanos();
+                log.warn("Failed to obtain and process responses from queue. Going to sleep " + sleepNanos + "ns", e);
+                sleep(sleepNanos);
+            }
+        }
+    }
+
+    void fetchAndProcessResponses() {
+        final long pendingRequestsCount = pendingRequests.mappingCount();
+        log.trace("Starting template pool topic {}, for pendingRequests {}", responseTemplate.getTopic(), pendingRequestsCount);
+        List<Response> responses = doPoll(); //poll js responses
+        log.trace("Completed template poll topic {}, for pendingRequests [{}], received [{}] responses", responseTemplate.getTopic(), pendingRequestsCount, responses.size());
+        responses.forEach(this::processResponse); //this can take a long time
+        responseTemplate.commit();
+        // 清理过期的请求
+        tryCleanStaleRequests();
+    }
+
+    private boolean tryCleanStaleRequests() {
+        if (!cleanerLock.tryLock()) {
+            return false;
+        }
+        try {
+            log.trace("tryCleanStaleRequest...");
+            final long currentNs = getCurrentClockNs();
+            if (nextCleanupNs < currentNs) {
+                pendingRequests.forEach((key, value) -> {
+                    if (value.expTime < currentNs) {
+                        ResponseMetaData<Response> staleRequest = pendingRequests.remove(key);
+                        if (staleRequest != null) {
+                            setTimeoutException(key, staleRequest, currentNs);
+                        }
+                    }
+                });
+                setupNextCleanup();
+            }
+        } finally {
+            cleanerLock.unlock();
+        }
+        return true;
+    }
+
+    void setupNextCleanup() {
+        nextCleanupNs = getCurrentClockNs() + maxRequestTimeoutNs;
+        log.trace("setupNextCleanup {}", nextCleanupNs);
+    }
+
+    List<Response> doPoll() {
+        return responseTemplate.poll(pollInterval);
+    }
+
+    void sleep(long nanos) {
+        LockSupport.parkNanos(nanos);
+    }
+
+    void setTimeoutException(UUID key, ResponseMetaData<Response> staleRequest, long currentNs) {
+        if (currentNs >= staleRequest.getSubmitTime() + staleRequest.getTimeout()) {
+            log.debug("Request timeout detected, currentNs [{}], {}, key [{}]", currentNs, staleRequest, key);
+        } else {
+            log.info("Request timeout detected, currentNs [{}], {}, key [{}]", currentNs, staleRequest, key);
+        }
+        staleRequest.future.setException(new TimeoutException());
+    }
+
+    void processResponse(Response response) {
+        byte[] requestIdHeader = response.getHeaders().get(REQUEST_ID_HEADER);
+        UUID requestId;
+        if (requestIdHeader == null) {
+            log.error("[{}] Missing requestId in header and body", response);
+        } else {
+            requestId = bytesToUuid(requestIdHeader);
+            log.trace("[{}] Response received: {}", requestId, response);
+            ResponseMetaData<Response> expectedResponse = pendingRequests.remove(requestId);
+            if (expectedResponse == null) {
+                log.debug("[{}] Invalid or stale request, response: {}", requestId, String.valueOf(response).replace("\n", " "));
+            } else {
+                expectedResponse.future.set(response);
+            }
+        }
+    }
+
+    @Override
+    public void stop() {
+        stopped = true;
+
+        if (responseTemplate != null) {
+            responseTemplate.unsubscribe();
+        }
+
+        if (requestTemplate != null) {
+            requestTemplate.stop();
+        }
+
+        if (internalExecutor) {
+            executor.shutdownNow();
+        }
+    }
+
+    @Override
+    public void setMessagesStats(MessagesStats messagesStats) {
+        this.messagesStats = messagesStats;
+    }
+
+    @Override
+    public ListenableFuture<Response> send(Request request) {
+        return send(request, this.maxRequestTimeoutNs);
+    }
+
+    @Override
+    public ListenableFuture<Response> send(Request request, long requestTimeoutNs) {
+        return send(request, requestTimeoutNs, null);
+    }
+
+    @Override
+    public ListenableFuture<Response> send(Request request, Integer partition) {
+        return send(request, this.maxRequestTimeoutNs, partition);
+    }
+
+    private ListenableFuture<Response> send(Request request, long requestTimeoutNs, Integer partition) {
+        if (pendingRequests.mappingCount() >= maxPendingRequests) {
+            log.warn("Pending request map is full [{}]! Consider to increase maxPendingRequests or increase processing performance. Request is {}", maxPendingRequests, request);
+            return Futures.immediateFailedFuture(new RuntimeException("Pending request map is full!"));
+        }
+        UUID requestId = UUID.randomUUID();
+        request.getHeaders().put(REQUEST_ID_HEADER, uuidToBytes(requestId));
+        request.getHeaders().put(RESPONSE_TOPIC_HEADER, stringToBytes(responseTemplate.getTopic()));
+        request.getHeaders().put(EXPIRE_TS_HEADER, longToBytes(getCurrentTimeMs() + maxRequestTimeout));
+        long currentClockNs = getCurrentClockNs();
+        SettableFuture<Response> future = SettableFuture.create();
+        ResponseMetaData<Response> responseMetaData = new ResponseMetaData<>(currentClockNs + requestTimeoutNs, future, currentClockNs, requestTimeoutNs);
+        log.trace("pending {}", responseMetaData);
+        if (pendingRequests.putIfAbsent(requestId, responseMetaData) != null) {
+            log.warn("Pending request already exists [{}]!", maxPendingRequests);
+            return Futures.immediateFailedFuture(new RuntimeException("Pending request already exists !" + requestId));
+        }
+        sendToRequestTemplate(request, requestId, partition, future, responseMetaData);
+        return future;
+    }
+
+    /**
+     * MONOTONIC clock instead jumping wall clock.
+     * Wrapped into the method for the test purposes to travel through the time
+     * */
+    long getCurrentClockNs() {
+        return System.nanoTime();
+    }
+
+    /**
+     * Wall clock to send timestamp to an external service
+     * */
+    long getCurrentTimeMs() {
+        return System.currentTimeMillis();
+    }
+
+    void sendToRequestTemplate(Request request, UUID requestId, Integer partition, SettableFuture<Response> future, ResponseMetaData<Response> responseMetaData) {
+        log.trace("[{}] Sending request, key [{}], expTime [{}], request {}", requestId, request.getKey(), responseMetaData.expTime, request);
+        if (messagesStats != null) {
+            messagesStats.incrementTotal();
+        }
+        TopicPartitionInfo tpi = TopicPartitionInfo.builder()
+                .topic(requestTemplate.getDefaultTopic())
+                .partition(partition)
+                .build();
+        requestTemplate.send(tpi, request, new JnksIotQueueCallback() {
+            @Override
+            public void onSuccess(JnksIotQueueMsgMetadata metadata) {
+                if (messagesStats != null) {
+                    messagesStats.incrementSuccessful();
+                }
+                log.trace("[{}] Request sent: {}, request {}", requestId, metadata, request);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                if (messagesStats != null) {
+                    messagesStats.incrementFailed();
+                }
+                pendingRequests.remove(requestId);
+                future.setException(t);
+            }
+        });
+    }
+
+    @Getter
+    static class ResponseMetaData<T> {
+        private final long submitTime;
+        private final long timeout;
+        private final long expTime;
+        private final SettableFuture<T> future;
+
+        ResponseMetaData(long ts, SettableFuture<T> future, long submitTime, long timeout) {
+            this.submitTime = submitTime;
+            this.timeout = timeout;
+            this.expTime = ts;
+            this.future = future;
+        }
+
+        @Override
+        public String toString() {
+            return "ResponseMetaData{" +
+                    "submitTime=" + submitTime +
+                    ", calculatedExpTime=" + (submitTime + timeout) +
+                    ", deltaMs=" + (expTime - submitTime) +
+                    ", expTime=" + expTime +
+                    ", future=" + future +
+                    '}';
+        }
+    }
+
+}

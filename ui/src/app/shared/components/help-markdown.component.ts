@@ -12,7 +12,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { base64toString } from '@core/utils';
 
 @Component({
-  selector: 'tb-help-markdown',
+  selector: 'jnks-iot-help-markdown',
   templateUrl: './help-markdown.component.html',
   styleUrls: ['./help-markdown.component.scss']
 })

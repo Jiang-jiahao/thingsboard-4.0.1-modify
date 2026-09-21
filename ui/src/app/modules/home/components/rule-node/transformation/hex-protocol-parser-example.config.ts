@@ -1,5 +1,5 @@
 /**
- * 与 TbHexProtocolParserNodeConfiguration.defaultConfiguration() 一致（监控类 UDP 报文：总长/设备ID/类别/命令 UINT32 LE，
+ * 与 JnksIotHexProtocolParserNodeConfiguration.defaultConfiguration() 一致（监控类 UDP 报文：总长/设备ID/类别/命令 UINT32 LE，
  * 子命令体内 STRUCT+UNIT_LIST）。协议行 commandValue 为空表示匹配任意命令编号。
  */
 export const HEX_PARSER_DEFAULT_PROTOCOL_EXAMPLE = {

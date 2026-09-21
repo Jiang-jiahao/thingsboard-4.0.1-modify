@@ -1,5 +1,5 @@
-<div class="tb-scada-symbol-metadata-tag-function-panel" [formGroup]="tagFunctionFormGroup">
-  <div class="tb-scada-symbol-metadata-tag-function-title-container">
+<div class="jnks-iot-scada-symbol-metadata-tag-function-panel" [formGroup]="tagFunctionFormGroup">
+  <div class="jnks-iot-scada-symbol-metadata-tag-function-title-container">
     <mat-chip-set>
       <mat-chip>
           <span>
@@ -7,19 +7,19 @@
           </span>
       </mat-chip>
     </mat-chip-set>
-    <div class="tb-scada-symbol-metadata-tag-function-title">{{ panelTitle | translate }}</div>
+    <div class="jnks-iot-scada-symbol-metadata-tag-function-title">{{ panelTitle | translate }}</div>
   </div>
-  <div class="tb-scada-symbol-metadata-tag-function-panel-content">
-      <tb-js-func #tagFunctionComponent
+  <div class="jnks-iot-scada-symbol-metadata-tag-function-panel-content">
+      <jnks-iot-js-func #tagFunctionComponent
                   minHeight="300px"
                   formControlName="tagFunction"
                   [highlightRules]="highlightRules"
                   [editorCompleter]="completer"
                   [functionArgs]="tagFunctionArgs"
                   [helpId]="tagFunctionHelpId">
-      </tb-js-func>
+      </jnks-iot-js-func>
   </div>
-  <div class="tb-scada-symbol-metadata-tag-function-panel-buttons">
+  <div class="jnks-iot-scada-symbol-metadata-tag-function-panel-buttons">
     <button mat-button
             color="primary"
             type="button"

@@ -10,7 +10,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 
 @Component({
-  selector: 'tb-message-types-config',
+  selector: 'jnks-iot-message-types-config',
   templateUrl: './message-types-config.component.html',
   styleUrls: [],
   providers: [

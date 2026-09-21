@@ -14,11 +14,11 @@ import static com.jnks.iot.script.api.tbel.TbelCfTsDoubleVal.OBJ_SIZE;
 public class TbelCfTsRollingData implements TbelCfObject, Iterable<TbelCfTsMultiDoubleVal> {
 
     @Getter
-    private final TbTimeWindow timeWindow;
+    private final JnksIotTimeWindow timeWindow;
     @Getter
     private final List<TbelCfTsMultiDoubleVal> values;
 
-    public TbelCfTsRollingData(TbTimeWindow timeWindow, List<TbelCfTsMultiDoubleVal> values) {
+    public TbelCfTsRollingData(JnksIotTimeWindow timeWindow, List<TbelCfTsMultiDoubleVal> values) {
         this.timeWindow = timeWindow;
         this.values = Collections.unmodifiableList(values);
     }

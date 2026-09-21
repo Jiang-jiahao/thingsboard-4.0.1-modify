@@ -1,0 +1,116 @@
+-- UPDATE SAVE TIME SERIES NODES START
+
+UPDATE rule_node
+SET configuration = (
+    (configuration::jsonb - 'skipLatestPersistence')
+        || jsonb_build_object(
+            'processingSettings', jsonb_build_object(
+                    'type',       'ADVANCED',
+                    'timeseries',       jsonb_build_object('type', 'ON_EVERY_MESSAGE'),
+                    'latest',           jsonb_build_object('type', 'SKIP'),
+                    'webSockets',       jsonb_build_object('type', 'ON_EVERY_MESSAGE'),
+                    'calculatedFields', jsonb_build_object('type', 'ON_EVERY_MESSAGE')
+                                  )
+           )
+    )::text,
+    configuration_version = 1
+WHERE type = 'com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode'
+  AND configuration_version = 0
+  AND configuration::jsonb ->> 'skipLatestPersistence' = 'true';
+
+UPDATE rule_node
+SET configuration = (
+    (configuration::jsonb - 'skipLatestPersistence')
+        || jsonb_build_object(
+            'processingSettings', jsonb_build_object(
+                    'type', 'ON_EVERY_MESSAGE'
+                                  )
+           )
+    )::text,
+    configuration_version = 1
+WHERE type = 'com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode'
+  AND configuration_version = 0
+  AND (configuration::jsonb ->> 'skipLatestPersistence' != 'true' OR configuration::jsonb ->> 'skipLatestPersistence' IS NULL);
+
+-- UPDATE SAVE TIME SERIES NODES END
+
+-- UPDATE SAVE ATTRIBUTES NODES START
+
+UPDATE rule_node
+SET configuration = (
+    configuration::jsonb
+        || jsonb_build_object(
+            'processingSettings', jsonb_build_object('type', 'ON_EVERY_MESSAGE')
+           )
+    )::text,
+    configuration_version = 3
+WHERE type = 'com.jnks.iot.rule.engine.telemetry.JnksIotMsgAttributesNode'
+  AND configuration_version = 2;
+
+-- UPDATE SAVE ATTRIBUTES NODES END
+
+ALTER TABLE api_usage_state ADD COLUMN IF NOT EXISTS version BIGINT DEFAULT 1;
+
+-- UPDATE TENANT PROFILE CALCULATED FIELD LIMITS START
+
+UPDATE tenant_profile
+SET profile_data = profile_data
+    || jsonb_build_object(
+                           'configuration', profile_data->'configuration' || jsonb_build_object(
+                    'maxCalculatedFieldsPerEntity', COALESCE(profile_data->'configuration'->>'maxCalculatedFieldsPerEntity', '5')::bigint,
+                    'maxArgumentsPerCF', COALESCE(profile_data->'configuration'->>'maxArgumentsPerCF', '10')::bigint,
+                    'maxDataPointsPerRollingArg', COALESCE(profile_data->'configuration'->>'maxDataPointsPerRollingArg', '1000')::bigint,
+                    'maxStateSizeInKBytes', COALESCE(profile_data->'configuration'->>'maxStateSizeInKBytes', '32')::bigint,
+                    'maxSingleValueArgumentSizeInKBytes', COALESCE(profile_data->'configuration'->>'maxSingleValueArgumentSizeInKBytes', '2')::bigint
+                                                                             )
+       )
+WHERE profile_data->'configuration'->>'maxCalculatedFieldsPerEntity' IS NULL;
+
+-- UPDATE TENANT PROFILE CALCULATED FIELD LIMITS END
+
+-- UPDATE TENANT PROFILE DEBUG DURATION START
+
+UPDATE tenant_profile
+SET profile_data = jsonb_set(profile_data, '{configuration,maxDebugModeDurationMinutes}', '15', true)
+WHERE
+    profile_data->'configuration' ? 'maxDebugModeDurationMinutes' = false
+    OR (profile_data->'configuration'->>'maxDebugModeDurationMinutes')::int = 0;
+
+-- UPDATE TENANT PROFILE DEBUG DURATION END
+
+-- PROTOCOL TEMPLATE BUNDLE TABLE START
+-- 若存量库曾使用旧表名，请手工将表重命名为 protocol_template_bundle 后再升级。
+
+CREATE TABLE IF NOT EXISTS protocol_template_bundle (
+    id uuid NOT NULL CONSTRAINT protocol_template_bundle_pkey PRIMARY KEY,
+    created_time bigint NOT NULL,
+    tenant_id uuid NOT NULL,
+    name varchar(255),
+    description varchar(512),
+    bundle_data jsonb NOT NULL,
+    version BIGINT DEFAULT 1,
+    CONSTRAINT protocol_template_bundle_tenant_id_fkey FOREIGN KEY (tenant_id) REFERENCES tenant(id) ON DELETE CASCADE
+);
+
+-- 存量库：说明单独列；并从 bundle_data 迁出历史 description 键，避免与协议 JSON 混存
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'protocol_template_bundle' AND column_name = 'description'
+    ) THEN
+        ALTER TABLE protocol_template_bundle ADD COLUMN description varchar(512);
+    END IF;
+END$$;
+
+UPDATE protocol_template_bundle
+SET description = LEFT(TRIM(bundle_data->>'description'), 512)
+WHERE (description IS NULL OR TRIM(description) = '')
+  AND bundle_data ? 'description'
+  AND NULLIF(TRIM(bundle_data->>'description'), '') IS NOT NULL;
+
+UPDATE protocol_template_bundle
+SET bundle_data = bundle_data - 'description'
+WHERE bundle_data ? 'description';
+
+-- PROTOCOL TEMPLATE BUNDLE TABLE END

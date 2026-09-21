@@ -11,43 +11,43 @@ import {
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
-  selector: '[tbComponentOutlet]',
-  exportAs: 'tbComponentOutlet'
+  selector: '[jnksIotComponentOutlet]',
+  exportAs: 'jnksIotComponentOutlet'
 })
-export class TbComponentOutletDirective<_T = unknown> implements OnChanges {
+export class JnksIotComponentOutletDirective<_T = unknown> implements OnChanges {
   private componentRef: ComponentRef<any> | null = null;
-  private context = new TbComponentOutletContext();
-  @Input() tbComponentOutletContext: any | null = null;
-  @Input() tbComponentStyle: { [klass: string]: any } | null = null;
-  @Input() tbComponentInjector: Injector | null = null;
-  @Input() tbComponentOutlet: Type<any> = null;
+  private context = new JnksIotComponentOutletContext();
+  @Input() jnksIotComponentOutletContext: any | null = null;
+  @Input() jnksIotComponentStyle: { [klass: string]: any } | null = null;
+  @Input() jnksIotComponentInjector: Injector | null = null;
+  @Input() jnksIotComponentOutlet: Type<any> = null;
   @Output() componentChange = new EventEmitter<ComponentRef<any>>();
 
   static ngTemplateContextGuard<T>(
-    _dir: TbComponentOutletDirective<T>,
+    _dir: JnksIotComponentOutletDirective<T>,
     _ctx: any
-  ): _ctx is TbComponentOutletContext {
+  ): _ctx is JnksIotComponentOutletContext {
     return true;
   }
 
   private recreateComponent(): void {
     this.viewContainer.clear();
-    this.componentRef = this.viewContainer.createComponent(this.tbComponentOutlet, {index: 0, injector: this.tbComponentInjector});
+    this.componentRef = this.viewContainer.createComponent(this.jnksIotComponentOutlet, {index: 0, injector: this.jnksIotComponentInjector});
     this.componentChange.next(this.componentRef);
-    if (this.tbComponentOutletContext) {
-      for (const propName of Object.keys(this.tbComponentOutletContext)) {
-        this.componentRef.instance[propName] = this.tbComponentOutletContext[propName];
+    if (this.jnksIotComponentOutletContext) {
+      for (const propName of Object.keys(this.jnksIotComponentOutletContext)) {
+        this.componentRef.instance[propName] = this.jnksIotComponentOutletContext[propName];
       }
     }
-    if (this.tbComponentStyle) {
-      for (const propName of Object.keys(this.tbComponentStyle)) {
-        this.renderer.setStyle(this.componentRef.location.nativeElement, propName, this.tbComponentStyle[propName]);
+    if (this.jnksIotComponentStyle) {
+      for (const propName of Object.keys(this.jnksIotComponentStyle)) {
+        this.renderer.setStyle(this.componentRef.location.nativeElement, propName, this.jnksIotComponentStyle[propName]);
       }
     }
   }
 
   private updateContext(): void {
-    const newCtx = this.tbComponentOutletContext;
+    const newCtx = this.jnksIotComponentOutletContext;
     const oldCtx = this.componentRef.instance as any;
     if (newCtx) {
       for (const propName of Object.keys(newCtx)) {
@@ -60,15 +60,15 @@ export class TbComponentOutletDirective<_T = unknown> implements OnChanges {
               private renderer: Renderer2) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    const { tbComponentOutletContext, tbComponentOutlet } = changes;
+    const { jnksIotComponentOutletContext, jnksIotComponentOutlet } = changes;
     const shouldRecreateComponent = (): boolean => {
       let shouldOutletRecreate = false;
-      if (tbComponentOutlet) {
-        if (tbComponentOutlet.firstChange) {
+      if (jnksIotComponentOutlet) {
+        if (jnksIotComponentOutlet.firstChange) {
           shouldOutletRecreate = true;
         } else {
-          const isPreviousOutletTemplate = tbComponentOutlet.previousValue instanceof Type;
-          const isCurrentOutletTemplate = tbComponentOutlet.currentValue instanceof Type;
+          const isPreviousOutletTemplate = jnksIotComponentOutlet.previousValue instanceof Type;
+          const isCurrentOutletTemplate = jnksIotComponentOutlet.currentValue instanceof Type;
           shouldOutletRecreate = isPreviousOutletTemplate || isCurrentOutletTemplate;
         }
       }
@@ -87,12 +87,12 @@ export class TbComponentOutletDirective<_T = unknown> implements OnChanges {
         }
       };
       const shouldContextRecreate =
-        tbComponentOutletContext && hasContextShapeChanged(tbComponentOutletContext);
+        jnksIotComponentOutletContext && hasContextShapeChanged(jnksIotComponentOutletContext);
       return shouldContextRecreate || shouldOutletRecreate;
     };
 
-    if (tbComponentOutlet) {
-      this.context.$implicit = tbComponentOutlet.currentValue;
+    if (jnksIotComponentOutlet) {
+      this.context.$implicit = jnksIotComponentOutlet.currentValue;
     }
 
     const recreateComponent = shouldRecreateComponent();
@@ -104,6 +104,6 @@ export class TbComponentOutletDirective<_T = unknown> implements OnChanges {
   }
 }
 
-export class TbComponentOutletContext {
+export class JnksIotComponentOutletContext {
   public $implicit: any;
 }

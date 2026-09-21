@@ -1,19 +1,19 @@
-<div class="tb-form-panel tb-time-series-states-panel">
-  <div class="tb-form-panel-title">{{ 'widgets.time-series-chart.state.states' | translate }}</div>
-  <div class="tb-form-table">
-    <div class="tb-form-table-header">
-      <div class="tb-form-table-header-cell tb-state-label-header" translate>widgets.time-series-chart.state.label</div>
-      <div class="tb-form-table-header-cell tb-state-value-header" translate>widgets.time-series-chart.state.ticks-value</div>
-      <div class="tb-form-table-header-cell tb-state-source-header" translate>widgets.time-series-chart.state.source</div>
-      <div class="tb-form-table-header-cell tb-state-source-value-header" translate>widgets.time-series-chart.state.value-range</div>
-      <div class="tb-form-table-header-cell tb-actions-header"></div>
+<div class="jnks-iot-form-panel jnks-iot-time-series-states-panel">
+  <div class="jnks-iot-form-panel-title">{{ 'widgets.time-series-chart.state.states' | translate }}</div>
+  <div class="jnks-iot-form-table">
+    <div class="jnks-iot-form-table-header">
+      <div class="jnks-iot-form-table-header-cell jnks-iot-state-label-header" translate>widgets.time-series-chart.state.label</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-state-value-header" translate>widgets.time-series-chart.state.ticks-value</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-state-source-header" translate>widgets.time-series-chart.state.source</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-state-source-value-header" translate>widgets.time-series-chart.state.value-range</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-actions-header"></div>
     </div>
-    <div *ngIf="statesFormArray().controls.length; else noStates" class="tb-form-table-body">
+    <div *ngIf="statesFormArray().controls.length; else noStates" class="jnks-iot-form-table-body">
       <div *ngFor="let stateControl of statesFormArray().controls; trackBy: trackByState; let $index = index; let $last = last">
-        <tb-time-series-chart-state-row class="flex-1"
+        <jnks-iot-time-series-chart-state-row class="flex-1"
                                         [formControl]="stateControl"
                                         (stateRemoved)="removeState($index)">
-        </tb-time-series-chart-state-row>
+        </jnks-iot-time-series-chart-state-row>
         <mat-divider *ngIf="!$last"></mat-divider>
       </div>
     </div>
@@ -25,5 +25,5 @@
   </div>
 </div>
 <ng-template #noStates>
-  <span class="tb-prompt flex items-center justify-center">{{ 'widgets.time-series-chart.state.no-states' | translate }}</span>
+  <span class="jnks-iot-prompt flex items-center justify-center">{{ 'widgets.time-series-chart.state.no-states' | translate }}</span>
 </ng-template>

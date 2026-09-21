@@ -7,10 +7,10 @@ import { RepositorySettingsComponent } from '@home/components/vc/repository-sett
 import { UntypedFormGroup } from '@angular/forms';
 import { EntityId } from '@shared/models/id/entity-id';
 import { Observable } from 'rxjs';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 
 @Component({
-  selector: 'tb-version-control',
+  selector: 'jnks-iot-version-control',
   templateUrl: './version-control.component.html',
   styleUrls: ['./version-control.component.scss']
 })
@@ -22,7 +22,7 @@ export class VersionControlComponent implements OnInit, HasConfirmForm {
   detailsMode = false;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   @Input()
   active = true;

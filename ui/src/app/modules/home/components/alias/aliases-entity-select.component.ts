@@ -25,14 +25,14 @@ import { deepClone } from '@core/utils';
 import { AliasFilterType } from '@shared/models/alias.models';
 
 @Component({
-  selector: 'tb-aliases-entity-select',
+  selector: 'jnks-iot-aliases-entity-select',
   templateUrl: './aliases-entity-select.component.html',
   styleUrls: ['./aliases-entity-select.component.scss']
 })
 export class AliasesEntitySelectComponent implements OnInit, OnDestroy {
 
   @HostBinding('class')
-  aliasesEntitySelectClass = 'tb-hide';
+  aliasesEntitySelectClass = 'jnks-iot-hide';
 
   aliasControllerValue: IAliasController;
 
@@ -109,7 +109,7 @@ export class AliasesEntitySelectComponent implements OnInit, OnDestroy {
     }
     const position = this.overlay.position();
     const config = new OverlayConfig({
-      panelClass: 'tb-aliases-entity-select-panel',
+      panelClass: 'jnks-iot-aliases-entity-select-panel',
       backdropClass: 'cdk-overlay-transparent-backdrop',
       hasBackdrop: true,
     });
@@ -176,7 +176,7 @@ export class AliasesEntitySelectComponent implements OnInit, OnDestroy {
     const allEntityAliases = this.aliasController.getEntityAliases();
     this.entityAliasesInfo = {};
     this.hasSelectableAliasEntities = false;
-    this.aliasesEntitySelectClass = 'tb-hide';
+    this.aliasesEntitySelectClass = 'jnks-iot-hide';
     for (const aliasId of Object.keys(allEntityAliases)) {
       const aliasInfo = this.aliasController.getInstantAliasInfo(aliasId);
       if (aliasInfo && !aliasInfo.resolveMultiple && aliasInfo.currentEntity

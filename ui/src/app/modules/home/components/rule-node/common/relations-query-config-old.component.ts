@@ -6,7 +6,7 @@ import { RelationsQuery } from '../rule-node-config.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-relations-query-config-old',
+  selector: 'jnks-iot-relations-query-config-old',
   templateUrl: './relations-query-config-old.component.html',
   styleUrls: [],
   providers: [

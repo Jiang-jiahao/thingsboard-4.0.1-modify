@@ -1,23 +1,23 @@
-<section [formGroup]="getTelemetryFromDatabaseConfigForm" class="tb-form-panel no-padding no-border">
-  <tb-string-items-list class="mat-block" editable [placeholder]="'rule-node-config.add-timeseries-key' | translate"
+<section [formGroup]="getTelemetryFromDatabaseConfigForm" class="jnks-iot-form-panel no-padding no-border">
+  <jnks-iot-string-items-list class="mat-block" editable [placeholder]="'rule-node-config.add-timeseries-key' | translate"
                         subscriptSizing="dynamic" required
                         [requiredText]="'rule-node-config.timeseries-keys-required' | translate"
                         [label]="'rule-node-config.timeseries-keys' | translate" formControlName="latestTsKeyNames"
                         [hint]="'rule-node-config.general-pattern-hint' | translate">
-    <div matHintEnd class="see-example" tb-help-popup="{{'rulenode/originator_telemetry_node_fields_templatization'}}"
+    <div matHintEnd class="see-example" jnks-iot-help-popup="{{'rulenode/originator_telemetry_node_fields_templatization'}}"
          hintMode
-         tb-help-popup-placement="right"
+         jnks-iot-help-popup-placement="right"
          trigger-style="letter-spacing:0.25px; font-size:12px"
-         [tb-help-popup-style]="{maxWidth: '820px'}"
+         [jnks-iot-help-popup-style]="{maxWidth: '820px'}"
          trigger-text="{{ 'rule-node-config.key-val.see-examples' | translate }}"></div>
     <mat-icon matSuffix class="help-icon margin-8 cursor-pointer" aria-hidden="false" aria-label="help-icon" color="primary"
               matTooltip="{{ 'rule-node-config.chip-help' | translate: { inputName: 'rule-node-config.timeseries-key' | translate } }}">help
     </mat-icon>
-  </tb-string-items-list>
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" translate>rule-node-config.fetch-interval</div>
-    <div tb-hint-tooltip-icon="{{ 'rule-node-config.use-metadata-dynamic-interval-tooltip' | translate }}"
-         class="tb-form-row no-border no-padding">
+  </jnks-iot-string-items-list>
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" translate>rule-node-config.fetch-interval</div>
+    <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.use-metadata-dynamic-interval-tooltip' | translate }}"
+         class="jnks-iot-form-row no-border no-padding">
       <mat-slide-toggle class="mat-slide" formControlName="useMetadataIntervalPatterns">
         {{ 'rule-node-config.use-metadata-dynamic-interval' | translate }}
       </mat-slide-toggle>
@@ -70,7 +70,7 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <div class="description-block tb-primary-fill" [class.error]="getTelemetryFromDatabaseConfigForm.get('interval').invalid">
+      <div class="description-block jnks-iot-primary-fill" [class.error]="getTelemetryFromDatabaseConfigForm.get('interval').invalid">
         <mat-icon class="description-icon">error_outline</mat-icon>
         <div class="description-text">
           <ng-container *ngIf="getTelemetryFromDatabaseConfigForm.get('interval').valid; else invalidText">
@@ -106,23 +106,23 @@
             {{ 'rule-node-config.end-interval-required' | translate }}
           </mat-error>
         </mat-form-field>
-        <tb-example-hint [hintText]="'rule-node-config.metadata-dynamic-interval-hint'"
+        <jnks-iot-example-hint [hintText]="'rule-node-config.metadata-dynamic-interval-hint'"
                          popupHelpLink="rulenode/originator_telemetry_node_fields_templatization">
-        </tb-example-hint>
+        </jnks-iot-example-hint>
       </div>
     </ng-template>
   </div>
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" translate>rule-node-config.fetch-strategy</div>
-    <div class="tb-form-panel no-border no-padding item-center">
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" translate>rule-node-config.fetch-strategy</div>
+    <div class="jnks-iot-form-panel no-border no-padding item-center">
       <div class="fetch-mod-toggle">
-        <tb-toggle-select formControlName="fetchMode" appearance="fill">
-          <tb-toggle-option *ngFor="let data of headerOptions" [value]="data.value">
+        <jnks-iot-toggle-select formControlName="fetchMode" appearance="fill">
+          <jnks-iot-toggle-option *ngFor="let data of headerOptions" [value]="data.value">
             {{ data.name }}
-          </tb-toggle-option>
-        </tb-toggle-select>
+          </jnks-iot-toggle-option>
+        </jnks-iot-toggle-select>
       </div>
-      <div class="tb-form-hint tb-primary-fill hint-container">
+      <div class="jnks-iot-form-hint jnks-iot-primary-fill hint-container">
         {{ deduplicationStrategiesHintTranslations.get(getTelemetryFromDatabaseConfigForm.get('fetchMode').value) | translate }}
       </div>
     </div>

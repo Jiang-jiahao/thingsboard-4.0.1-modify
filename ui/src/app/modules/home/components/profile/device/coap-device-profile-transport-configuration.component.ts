@@ -30,7 +30,7 @@ import { takeUntil } from 'rxjs/operators';
 import { PowerMode } from '@home/components/profile/device/lwm2m/lwm2m-profile-config.models';
 
 @Component({
-  selector: 'tb-coap-device-profile-transport-configuration',
+  selector: 'jnks-iot-coap-device-profile-transport-configuration',
   templateUrl: './coap-device-profile-transport-configuration.component.html',
   styleUrls: ['./coap-device-profile-transport-configuration.component.scss'],
   providers: [

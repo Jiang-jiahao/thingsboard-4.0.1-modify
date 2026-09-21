@@ -1,4 +1,4 @@
-.tb-label-value-card-panel {
+.jnks-iot-label-value-card-panel {
   width: 100%;
   height: 100%;
   position: relative;
@@ -6,58 +6,58 @@
   align-items: center;
   justify-content: center;
   padding: 20px 24px;
-  &.tb-label-value-card-pointer {
+  &.jnks-iot-label-value-card-pointer {
     cursor: pointer;
   }
-  > div:not(.tb-label-value-card-overlay), > tb-icon {
+  > div:not(.jnks-iot-label-value-card-overlay), > jnks-iot-icon {
     z-index: 1;
   }
-  .tb-label-value-card-overlay {
+  .jnks-iot-label-value-card-overlay {
     position: absolute;
     top: 12px;
     left: 12px;
     bottom: 12px;
     right: 12px;
   }
-  > div.tb-label-value-card-title-panel {
+  > div.jnks-iot-label-value-card-title-panel {
     position: absolute;
     top: 12px;
     left: 12px;
     right: 12px;
     z-index: 2;
   }
-  div.tb-widget-title {
+  div.jnks-iot-widget-title {
     padding: 0;
   }
-  .tb-label-value-card-content {
+  .jnks-iot-label-value-card-content {
     width: 100%;
     height: 100%;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    .tb-label-value-card-row {
+    .jnks-iot-label-value-card-row {
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: center;
       gap: 16px;
     }
-    .tb-label-value-card-icon-label {
+    .jnks-iot-label-value-card-icon-label {
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: center;
       gap: 8px;
     }
-    .tb-label-value-card-label {
+    .jnks-iot-label-value-card-label {
       overflow: hidden;
       text-overflow: ellipsis;
       -webkit-line-clamp: 2;
       display: -webkit-box;
       -webkit-box-orient: vertical;
     }
-    .tb-label-value-card-value {
+    .jnks-iot-label-value-card-value {
       white-space: nowrap;
     }
   }

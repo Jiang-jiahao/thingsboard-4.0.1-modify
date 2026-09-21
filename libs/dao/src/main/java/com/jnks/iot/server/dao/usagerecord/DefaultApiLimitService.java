@@ -11,7 +11,7 @@ import com.jnks.iot.server.common.data.query.EntityCountQuery;
 import com.jnks.iot.server.common.data.query.EntityTypeFilter;
 import com.jnks.iot.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
 import com.jnks.iot.server.dao.entity.EntityService;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
 
 import java.util.function.Function;
 
@@ -20,7 +20,7 @@ import java.util.function.Function;
 public class DefaultApiLimitService implements ApiLimitService {
 
     private final EntityService entityService;
-    private final TbTenantProfileCache tenantProfileCache;
+    private final JnksIotTenantProfileCache tenantProfileCache;
 
     @Override
     public boolean checkEntitiesLimit(TenantId tenantId, EntityType entityType) {

@@ -1,4 +1,4 @@
-import { FunctionArg, FunctionArgType, TbEditorCompletions } from '@shared/models/ace/completion.models';
+import { FunctionArg, FunctionArgType, JnksIotEditorCompletions } from '@shared/models/ace/completion.models';
 
 export const entityIdHref = '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/id/entity-id.ts#L20" target="_blank">EntityId</a>';
 
@@ -152,7 +152,7 @@ export function observablePageDataReturnType(objectType: string): FunctionArgTyp
   };
 }
 
-export const serviceCompletions: TbEditorCompletions = {
+export const serviceCompletions: JnksIotEditorCompletions = {
   deviceService: {
     description: 'Device Service API<br>' +
       'See <a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/core/http/device.service.ts#L37" target="_blank">DeviceService</a> for API reference.',

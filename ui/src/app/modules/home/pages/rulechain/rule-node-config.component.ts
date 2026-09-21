@@ -29,7 +29,7 @@ import { deepClone } from '@core/utils';
 import { RuleChainType } from '@shared/models/rule-chain.models';
 
 @Component({
-  selector: 'tb-rule-node-config',
+  selector: 'jnks-iot-rule-node-config',
   templateUrl: './rule-node-config.component.html',
   styleUrls: ['./rule-node-config.component.scss'],
   providers: [{

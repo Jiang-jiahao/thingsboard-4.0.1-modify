@@ -19,10 +19,10 @@ import com.jnks.iot.common.util.JacksonUtil;
 import com.jnks.iot.common.util.ListeningExecutor;
 import com.jnks.iot.rule.engine.AbstractRuleNodeUpgradeTest;
 import com.jnks.iot.rule.engine.TestDbCallbackExecutor;
-import com.jnks.iot.rule.engine.api.TbContext;
-import com.jnks.iot.rule.engine.api.TbNode;
-import com.jnks.iot.rule.engine.api.TbNodeConfiguration;
-import com.jnks.iot.rule.engine.api.TbNodeException;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
+import com.jnks.iot.rule.engine.api.JnksIotNode;
+import com.jnks.iot.rule.engine.api.JnksIotNodeConfiguration;
+import com.jnks.iot.rule.engine.api.JnksIotNodeException;
 import com.jnks.iot.server.common.data.id.DeviceId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.kv.BasicTsKvEntry;
@@ -32,10 +32,10 @@ import com.jnks.iot.server.common.data.kv.JsonDataEntry;
 import com.jnks.iot.server.common.data.kv.LongDataEntry;
 import com.jnks.iot.server.common.data.kv.StringDataEntry;
 import com.jnks.iot.server.common.data.kv.TsKvEntry;
-import com.jnks.iot.server.common.data.msg.TbMsgType;
-import com.jnks.iot.server.common.data.msg.TbNodeConnectionType;
-import com.jnks.iot.server.common.msg.TbMsg;
-import com.jnks.iot.server.common.msg.TbMsgMetaData;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
+import com.jnks.iot.server.common.data.msg.JnksIotNodeConnectionType;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
 import com.jnks.iot.server.dao.timeseries.TimeseriesService;
 
 import java.util.List;
@@ -82,18 +82,18 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     private static final int DB_CALLBACK_POOL_SIZE = 3;
 
     @Mock
-    private TbContext ctxMock;
+    private JnksIotContext ctxMock;
     @Mock
     private TimeseriesService timeseriesServiceMock;
     @Spy
     private CalculateDeltaNode node;
     private CalculateDeltaNodeConfiguration config;
-    private TbNodeConfiguration nodeConfiguration;
+    private JnksIotNodeConfiguration nodeConfiguration;
 
     @BeforeEach
-    public void setUp() throws TbNodeException {
+    public void setUp() throws JnksIotNodeException {
         config = new CalculateDeltaNodeConfiguration().defaultConfiguration();
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
     }
 
     @Test
@@ -112,8 +112,8 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     @ValueSource(strings = {" "}) // blank value
     public void givenInvalidInputKey_whenInitThenThrowException(String key) {
         config.setInputValueKey(key);
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
-        var exception = assertThrows(TbNodeException.class, () -> node.init(ctxMock, nodeConfiguration));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
+        var exception = assertThrows(JnksIotNodeException.class, () -> node.init(ctxMock, nodeConfiguration));
         assertThat(exception).hasMessage("Input value key should be specified!");
         assertThat(exception.isUnrecoverable()).isTrue();
     }
@@ -123,8 +123,8 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     @ValueSource(strings = {" "}) // blank value
     public void givenInvalidOutputKey_whenInitThenThrowException(String key) {
         config.setOutputValueKey(key);
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
-        var exception = assertThrows(TbNodeException.class, () -> node.init(ctxMock, nodeConfiguration));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
+        var exception = assertThrows(JnksIotNodeException.class, () -> node.init(ctxMock, nodeConfiguration));
         assertThat(exception).hasMessage("Output value key should be specified!");
         assertThat(exception.isUnrecoverable()).isTrue();
     }
@@ -135,8 +135,8 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     public void givenInvalidPeriodKey_whenInitThenThrowException(String key) {
         config.setPeriodValueKey(key);
         config.setAddPeriodBetweenMsgs(true);
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
-        var exception = assertThrows(TbNodeException.class, () -> node.init(ctxMock, nodeConfiguration));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
+        var exception = assertThrows(JnksIotNodeException.class, () -> node.init(ctxMock, nodeConfiguration));
         assertThat(exception).hasMessage("Period value key should be specified!");
         assertThat(exception.isUnrecoverable()).isTrue();
     }
@@ -145,19 +145,19 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     public void givenInvalidPeriodKeyAndAddPeriodDisabled_whenInitThenNoExceptionThrown() {
         config.setPeriodValueKey(null);
         config.setAddPeriodBetweenMsgs(false);
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
         assertDoesNotThrow(() -> node.init(ctxMock, nodeConfiguration));
     }
 
     @Test
-    public void givenInvalidMsgType_whenOnMsg_thenShouldTellNextOther() throws TbNodeException {
+    public void givenInvalidMsgType_whenOnMsg_thenShouldTellNextOther() throws JnksIotNodeException {
         // GIVEN
         node.init(ctxMock, nodeConfiguration);
         var msgData = "{\"pulseCounter\": 42}";
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_ATTRIBUTES_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_ATTRIBUTES_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(msgData)
                 .build();
 
@@ -165,69 +165,69 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
         node.onMsg(ctxMock, msg);
 
         // THEN
-        verify(ctxMock).tellNext(eq(msg), eq(TbNodeConnectionType.OTHER));
+        verify(ctxMock).tellNext(eq(msg), eq(JnksIotNodeConnectionType.OTHER));
         verify(ctxMock, never()).tellSuccess(any());
         verify(ctxMock, never()).tellFailure(any(), any());
     }
 
     @Test
-    public void givenInvalidMsgDataType_whenOnMsg_thenShouldTellNextOther() throws TbNodeException {
+    public void givenInvalidMsgDataType_whenOnMsg_thenShouldTellNextOther() throws JnksIotNodeException {
         // GIVEN
         node.init(ctxMock, nodeConfiguration);
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
-                .data(TbMsg.EMPTY_JSON_ARRAY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
+                .data(JnksIotMsg.EMPTY_JSON_ARRAY)
                 .build();
 
         // WHEN
         node.onMsg(ctxMock, msg);
 
         // THEN
-        verify(ctxMock).tellNext(eq(msg), eq(TbNodeConnectionType.OTHER));
+        verify(ctxMock).tellNext(eq(msg), eq(JnksIotNodeConnectionType.OTHER));
         verify(ctxMock, never()).tellSuccess(any());
         verify(ctxMock, never()).tellFailure(any(), any());
     }
 
 
     @Test
-    public void givenInputKeyIsNotPresent_whenOnMsg_thenShouldTellNextOther() throws TbNodeException {
+    public void givenInputKeyIsNotPresent_whenOnMsg_thenShouldTellNextOther() throws JnksIotNodeException {
         // GIVEN
         node.init(ctxMock, nodeConfiguration);
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
-                .data(TbMsg.EMPTY_JSON_OBJECT)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
+                .data(JnksIotMsg.EMPTY_JSON_OBJECT)
                 .build();
 
         // WHEN
         node.onMsg(ctxMock, msg);
 
         // THEN
-        verify(ctxMock).tellNext(eq(msg), eq(TbNodeConnectionType.OTHER));
+        verify(ctxMock).tellNext(eq(msg), eq(JnksIotNodeConnectionType.OTHER));
         verify(ctxMock, never()).tellSuccess(any());
         verify(ctxMock, never()).tellFailure(any(), any());
     }
 
     @Test
-    public void givenDoubleValue_whenOnMsgAndCachingOff_thenShouldTellSuccess() throws TbNodeException {
+    public void givenDoubleValue_whenOnMsgAndCachingOff_thenShouldTellSuccess() throws JnksIotNodeException {
         // GIVEN
         config.setRound(1);
         config.setInputValueKey("temperature");
         config.setOutputValueKey("temp_delta");
         config.setUseCache(false);
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
         node.init(ctxMock, nodeConfiguration);
 
         mockFindLatestAsync(new BasicTsKvEntry(System.currentTimeMillis(), new DoubleDataEntry("temperature", 40.5)));
 
         var msgData = "{\"temperature\": 42,\"airPressure\":123}";
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(msgData)
                 .build();
 
@@ -235,7 +235,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
         node.onMsg(ctxMock, msg);
 
         // THEN
-        var actualMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+        var actualMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
 
         verify(ctxMock).tellSuccess(actualMsgCaptor.capture());
         verify(ctxMock, never()).tellNext(any(), anyString());
@@ -248,21 +248,21 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @Test
-    public void givenLongStringValue_whenOnMsgAndCachingOff_thenShouldTellSuccess() throws TbNodeException {
+    public void givenLongStringValue_whenOnMsgAndCachingOff_thenShouldTellSuccess() throws JnksIotNodeException {
         // GIVEN
         config.setInputValueKey("temperature");
         config.setOutputValueKey("temp_delta");
         config.setUseCache(false);
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
         node.init(ctxMock, nodeConfiguration);
 
         mockFindLatestAsync(new BasicTsKvEntry(System.currentTimeMillis(), new LongDataEntry("temperature", 40L)));
 
         var msgData = "{\"temperature\": 42,\"airPressure\":123}";
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(msgData)
                 .build();
 
@@ -270,7 +270,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
         node.onMsg(ctxMock, msg);
 
         // THEN
-        var actualMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+        var actualMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
 
         verify(ctxMock).tellSuccess(actualMsgCaptor.capture());
         verify(ctxMock, never()).tellNext(any(), anyString());
@@ -283,21 +283,21 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @Test
-    public void givenValidStringValue_whenOnMsgAndCachingOff_thenShouldTellSuccess() throws TbNodeException {
+    public void givenValidStringValue_whenOnMsgAndCachingOff_thenShouldTellSuccess() throws JnksIotNodeException {
         // GIVEN
         config.setInputValueKey("temperature");
         config.setOutputValueKey("temp_delta");
         config.setUseCache(false);
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
         node.init(ctxMock, nodeConfiguration);
 
         mockFindLatestAsync(new BasicTsKvEntry(System.currentTimeMillis(), new StringDataEntry("temperature", "40.0")));
 
         var msgData = "{\"temperature\": 42,\"airPressure\":123}";
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(msgData)
                 .build();
 
@@ -305,7 +305,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
         node.onMsg(ctxMock, msg);
 
         // THEN
-        var actualMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+        var actualMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
 
         verify(ctxMock).tellSuccess(actualMsgCaptor.capture());
         verify(ctxMock, never()).tellNext(any(), anyString());
@@ -318,23 +318,23 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @Test
-    public void givenTwoMessagesAndPeriodOnAndCachingOn_whenOnMsg_thenVerify() throws TbNodeException {
+    public void givenTwoMessagesAndPeriodOnAndCachingOn_whenOnMsg_thenVerify() throws JnksIotNodeException {
         // STAGE 1
         // GIVEN
         config.setInputValueKey("temperature");
         config.setOutputValueKey("temp_delta");
         config.setPeriodValueKey("ts_delta");
         config.setAddPeriodBetweenMsgs(true);
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
         node.init(ctxMock, nodeConfiguration);
 
         mockFindLatestAsync(new BasicTsKvEntry(1L, new DoubleDataEntry("temperature", 40.0)));
 
         var msgData = "{\"temperature\": 42,\"airPressure\":123}";
-        var firstMsgMetaData = new TbMsgMetaData();
+        var firstMsgMetaData = new JnksIotMsgMetaData();
         firstMsgMetaData.putValue("ts", String.valueOf(3L));
-        var firstMsg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var firstMsg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
                 .copyMetaData(firstMsgMetaData)
                 .data(msgData)
@@ -344,7 +344,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
         node.onMsg(ctxMock, firstMsg);
 
         // THEN
-        var actualMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+        var actualMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
 
         verify(ctxMock).tellSuccess(actualMsgCaptor.capture());
         verify(ctxMock, never()).tellNext(any(), anyString());
@@ -362,10 +362,10 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
 
         when(ctxMock.getDbCallbackExecutor()).thenReturn(DB_EXECUTOR);
 
-        var secondMsgMetaData = new TbMsgMetaData();
+        var secondMsgMetaData = new JnksIotMsgMetaData();
         secondMsgMetaData.putValue("ts", String.valueOf(6L));
-        var secondMsg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var secondMsg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
                 .copyMetaData(secondMsgMetaData)
                 .data(msgData)
@@ -375,7 +375,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
         node.onMsg(ctxMock, secondMsg);
 
         // THEN
-        actualMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+        actualMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
 
         verify(timeseriesServiceMock, never()).findLatest(any(), any(), anyList());
         verify(ctxMock).tellSuccess(actualMsgCaptor.capture());
@@ -389,21 +389,21 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @Test
-    public void givenLastValueIsNull_whenOnMsgAndCachingOff_thenDeltaShouldBeZero() throws TbNodeException {
+    public void givenLastValueIsNull_whenOnMsgAndCachingOff_thenDeltaShouldBeZero() throws JnksIotNodeException {
         // GIVEN
         config.setInputValueKey("temperature");
         config.setOutputValueKey("temp_delta");
         config.setUseCache(false);
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
         node.init(ctxMock, nodeConfiguration);
 
         mockFindLatestAsync(new BasicTsKvEntry(System.currentTimeMillis(), new DoubleDataEntry("temperature", null)));
 
         var msgData = "{\"temperature\": 42,\"airPressure\":123}";
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(msgData)
                 .build();
 
@@ -411,7 +411,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
         node.onMsg(ctxMock, msg);
 
         // THEN
-        var actualMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+        var actualMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
 
         verify(ctxMock).tellSuccess(actualMsgCaptor.capture());
         verify(ctxMock, never()).tellNext(any(), anyString());
@@ -424,19 +424,19 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @Test
-    public void givenNegativeDeltaAndTellFailureIfNegativeDeltaTrue_whenOnMsg_thenShouldTellFailure() throws TbNodeException {
+    public void givenNegativeDeltaAndTellFailureIfNegativeDeltaTrue_whenOnMsg_thenShouldTellFailure() throws JnksIotNodeException {
         // GIVEN
         config.setTellFailureIfDeltaIsNegative(true);
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
         node.init(ctxMock, nodeConfiguration);
 
         mockFindLatestAsync(new BasicTsKvEntry(System.currentTimeMillis(), new LongDataEntry("pulseCounter", 200L)));
 
         var msgData = "{\"pulseCounter\":\"123\"}";
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(msgData)
                 .build();
 
@@ -444,7 +444,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
         node.onMsg(ctxMock, msg);
 
         // THEN
-        var actualMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+        var actualMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
         var actualExceptionCaptor = ArgumentCaptor.forClass(Exception.class);
 
         verify(ctxMock).tellFailure(actualMsgCaptor.capture(), actualExceptionCaptor.capture());
@@ -461,19 +461,19 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @Test
-    public void givenNegativeDeltaAndTellFailureIfNegativeDeltaFalse_whenOnMsg_thenShouldTellSuccess() throws TbNodeException {
+    public void givenNegativeDeltaAndTellFailureIfNegativeDeltaFalse_whenOnMsg_thenShouldTellSuccess() throws JnksIotNodeException {
         // GIVEN
         config.setTellFailureIfDeltaIsNegative(false);
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
         node.init(ctxMock, nodeConfiguration);
 
         mockFindLatestAsync(new BasicTsKvEntry(System.currentTimeMillis(), new LongDataEntry("pulseCounter", 200L)));
 
         var msgData = "{\"pulseCounter\":\"123\"}";
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(msgData)
                 .build();
 
@@ -481,7 +481,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
         node.onMsg(ctxMock, msg);
 
         // THEN
-        var actualMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+        var actualMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
 
         verify(ctxMock).tellSuccess(actualMsgCaptor.capture());
         verify(ctxMock, never()).tellFailure(any(), any());
@@ -493,16 +493,16 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @Test
-    public void givenInvalidStringValue_whenOnMsg_thenException() throws TbNodeException {
+    public void givenInvalidStringValue_whenOnMsg_thenException() throws JnksIotNodeException {
         // GIVEN
         node.init(ctxMock, nodeConfiguration);
         mockFindLatestAsync(new BasicTsKvEntry(System.currentTimeMillis(), new StringDataEntry("pulseCounter", "high")));
 
         var msgData = "{\"pulseCounter\":\"123\"}";
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(msgData)
                 .build();
 
@@ -523,16 +523,16 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @Test
-    public void givenBooleanValue_whenOnMsg_thenException() throws TbNodeException {
+    public void givenBooleanValue_whenOnMsg_thenException() throws JnksIotNodeException {
         // GIVEN
         node.init(ctxMock, nodeConfiguration);
         mockFindLatestAsync(new BasicTsKvEntry(System.currentTimeMillis(), new BooleanDataEntry("pulseCounter", false)));
 
         var msgData = "{\"pulseCounter\":true}";
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(msgData)
                 .build();
 
@@ -553,16 +553,16 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @Test
-    public void givenJsonValue_whenOnMsg_thenException() throws TbNodeException {
+    public void givenJsonValue_whenOnMsg_thenException() throws JnksIotNodeException {
         // GIVEN
         node.init(ctxMock, nodeConfiguration);
         mockFindLatestAsync(new BasicTsKvEntry(System.currentTimeMillis(), new JsonDataEntry("pulseCounter", "{\"isActive\":false}")));
 
         var msgData = "{\"pulseCounter\":{\"isActive\":true}}";
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(msgData)
                 .build();
 
@@ -583,7 +583,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @Test
-    public void givenConcurrentAccess_whenOnMsg_thenGetFromDBInvokedOnce() throws TbNodeException, InterruptedException {
+    public void givenConcurrentAccess_whenOnMsg_thenGetFromDBInvokedOnce() throws JnksIotNodeException, InterruptedException {
         DBCallbackExecutor dbCallbackExecutor = new DBCallbackExecutor();
         dbCallbackExecutor.init();
 
@@ -592,7 +592,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
 
         assertThat(RULE_DISPATCHER_POOL_SIZE).as("dispatcher pool size have to be > 1").isGreaterThan(1);
 
-        final TbContext ctx = mock(TbContext.class);
+        final JnksIotContext ctx = mock(JnksIotContext.class);
         final TimeseriesService timeseriesService = mock(TimeseriesService.class);
 
         when(ctx.getTimeseriesService()).thenReturn(timeseriesService);
@@ -600,34 +600,34 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
         when(timeseriesService.findLatest(any(), any(), anyString())).thenReturn(Futures.immediateFuture(Optional.empty()));
 
         final CalculateDeltaNodeConfiguration config = new CalculateDeltaNodeConfiguration().defaultConfiguration();
-        final TbNodeConfiguration nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
+        final JnksIotNodeConfiguration nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
         final CalculateDeltaNode node = spy(CalculateDeltaNode.class);
 
         node.init(ctx, nodeConfiguration);
 
-        List<TbMsg> tbMsgList = IntStream.range(0, RULE_DISPATCHER_POOL_SIZE * 2).mapToObj(x -> {
+        List<JnksIotMsg> jnksIotMsgList = IntStream.range(0, RULE_DISPATCHER_POOL_SIZE * 2).mapToObj(x -> {
             var msgData = "{\"pulseCounter\":" + 2 + "}";
-            return TbMsg.newMsg()
-                    .type(TbMsgType.POST_TELEMETRY_REQUEST)
+            return JnksIotMsg.newMsg()
+                    .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                     .originator(DUMMY_DEVICE_ORIGINATOR)
-                    .copyMetaData(TbMsgMetaData.EMPTY)
+                    .copyMetaData(JnksIotMsgMetaData.EMPTY)
                     .data(msgData)
                     .build();
         }).toList();
 
-        CountDownLatch processingLatch = new CountDownLatch(tbMsgList.size());
+        CountDownLatch processingLatch = new CountDownLatch(jnksIotMsgList.size());
 
         willAnswer(invocation -> {
             processingLatch.countDown();
             return invocation.callRealMethod();
         }).given(node).processMsgAsync(any(), any());
 
-        tbMsgList.forEach(msg -> ruleEngineDispatcherExecutor.executeAsync(() -> node.onMsg(ctx, msg)));
+        jnksIotMsgList.forEach(msg -> ruleEngineDispatcherExecutor.executeAsync(() -> node.onMsg(ctx, msg)));
 
         assertThat(processingLatch.await(5, TimeUnit.SECONDS)).as("await on processingLatch").isTrue();
 
         verify(timeseriesService).findLatest(any(), any(), anyString());
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> verify(ctx, times(tbMsgList.size())).tellSuccess(any()));
+        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> verify(ctx, times(jnksIotMsgList.size())).tellSuccess(any()));
     }
 
     private static class RuleDispatcherExecutor extends AbstractListeningExecutor {
@@ -646,21 +646,21 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
 
     @ParameterizedTest
     @MethodSource("CalculateDeltaTestConfig")
-    public void givenCalculateDeltaConfig_whenOnMsg_thenVerify(CalculateDeltaTestConfig testConfig) throws TbNodeException {
+    public void givenCalculateDeltaConfig_whenOnMsg_thenVerify(CalculateDeltaTestConfig testConfig) throws JnksIotNodeException {
         // GIVEN
         config.setTellFailureIfDeltaIsNegative(testConfig.tellFailureIfDeltaIsNegative());
         config.setExcludeZeroDeltas(testConfig.excludeZeroDeltas());
         config.setInputValueKey("temperature");
-        nodeConfiguration = new TbNodeConfiguration(JacksonUtil.valueToTree(config));
+        nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
         node.init(ctxMock, nodeConfiguration);
 
         mockFindLatestAsync(new BasicTsKvEntry(1L, new DoubleDataEntry("temperature", testConfig.prevValue())));
 
         var msgData = "{\"temperature\":" + testConfig.currentValue() + ",\"airPressure\":123}";
-        var msg = TbMsg.newMsg()
-                .type(TbMsgType.POST_TELEMETRY_REQUEST)
+        var msg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_TELEMETRY_REQUEST)
                 .originator(DUMMY_DEVICE_ORIGINATOR)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(msgData)
                 .build();
 
@@ -689,7 +689,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
                 }),
                 // delta < 0, exclude zero deltas is set to true so it should return message with delta if delta is negative is set to false.
                 new CalculateDeltaTestConfig(false, true, 41, 40, (ctx, msg) -> {
-                    var actualMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+                    var actualMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
                     verify(ctx).tellSuccess(actualMsgCaptor.capture());
                     verify(ctx).getDbCallbackExecutor();
                     verifyNoMoreInteractions(ctx);
@@ -704,7 +704,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
                 }),
                 // delta > 0, exclude zero deltas is set to true so it should return message with delta.
                 new CalculateDeltaTestConfig(false, true, 39, 40, (ctx, msg) -> {
-                    var actualMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+                    var actualMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
                     verify(ctx).tellSuccess(actualMsgCaptor.capture());
                     verify(ctx).getDbCallbackExecutor();
                     verifyNoMoreInteractions(ctx);
@@ -713,7 +713,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
                 }),
                 // delta > 0, exclude zero deltas is set to false so it should return message with delta.
                 new CalculateDeltaTestConfig(false, false, 39, 40, (ctx, msg) -> {
-                    var actualMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+                    var actualMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
                     verify(ctx).tellSuccess(actualMsgCaptor.capture());
                     verify(ctx).getDbCallbackExecutor();
                     verifyNoMoreInteractions(ctx);
@@ -725,7 +725,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
 
     private record CalculateDeltaTestConfig(boolean tellFailureIfDeltaIsNegative, boolean excludeZeroDeltas,
                                             double prevValue, double currentValue,
-                                            BiConsumer<TbContext, TbMsg> verificationMethod) {
+                                            BiConsumer<JnksIotContext, JnksIotMsg> verificationMethod) {
     }
 
     private void mockFindLatestAsync(TsKvEntry tsKvEntry) {
@@ -754,7 +754,7 @@ public class CalculateDeltaNodeTest extends AbstractRuleNodeUpgradeTest {
     }
 
     @Override
-    protected TbNode getTestNode() {
+    protected JnksIotNode getTestNode() {
         return node;
     }
 }

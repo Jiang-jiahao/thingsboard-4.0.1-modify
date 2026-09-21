@@ -12,17 +12,17 @@ public class FailedToInitActor extends TestRootActor {
     int retryDelay;
     int attempts = 0;
 
-    public FailedToInitActor(TbActorId actorId, ActorTestCtx testCtx, int retryAttempts, int retryDelay) {
+    public FailedToInitActor(JnksIotActorId actorId, ActorTestCtx testCtx, int retryAttempts, int retryDelay) {
         super(actorId, testCtx);
         this.retryAttempts = retryAttempts;
         this.retryDelay = retryDelay;
     }
 
     @Override
-    public void init(TbActorCtx ctx) throws TbActorException {
+    public void init(JnksIotActorCtx ctx) throws JnksIotActorException {
         if (attempts < retryAttempts) {
             attempts++;
-            throw new TbActorException("Test attempt", new RuntimeException());
+            throw new JnksIotActorException("Test attempt", new RuntimeException());
         } else {
             super.init(ctx);
         }
@@ -33,9 +33,9 @@ public class FailedToInitActor extends TestRootActor {
         return InitFailureStrategy.retryWithDelay(retryDelay);
     }
 
-    public static class FailedToInitActorCreator implements TbActorCreator {
+    public static class FailedToInitActorCreator implements JnksIotActorCreator {
 
-        private final TbActorId actorId;
+        private final JnksIotActorId actorId;
         private final ActorTestCtx testCtx;
         private final int retryAttempts;
         /**
@@ -43,7 +43,7 @@ public class FailedToInitActor extends TestRootActor {
          */
         private final int retryDelay;
 
-        public FailedToInitActorCreator(TbActorId actorId, ActorTestCtx testCtx, int retryAttempts, int retryDelay) {
+        public FailedToInitActorCreator(JnksIotActorId actorId, ActorTestCtx testCtx, int retryAttempts, int retryDelay) {
             this.actorId = actorId;
             this.testCtx = testCtx;
             this.retryAttempts = retryAttempts;
@@ -51,12 +51,12 @@ public class FailedToInitActor extends TestRootActor {
         }
 
         @Override
-        public TbActorId createActorId() {
+        public JnksIotActorId createActorId() {
             return actorId;
         }
 
         @Override
-        public TbActor createActor() {
+        public JnksIotActor createActor() {
             return new FailedToInitActor(actorId, testCtx, retryAttempts, retryDelay);
         }
     }

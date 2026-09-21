@@ -35,7 +35,7 @@ export const HEX_GENERIC_LIST_LENGTH_MODES = [
 export const HEX_COUNT_FIELD_TYPES = ['UINT8', 'UINT16_LE', 'UINT16_BE', 'UINT32_LE', 'UINT32_BE'] as const;
 
 @Component({
-  selector: 'tb-transformation-node-hex-protocol-parser-config',
+  selector: 'jnks-iot-transformation-node-hex-protocol-parser-config',
   templateUrl: './hex-protocol-parser-config.component.html',
   styleUrls: ['./hex-protocol-parser-config.component.scss']
 })

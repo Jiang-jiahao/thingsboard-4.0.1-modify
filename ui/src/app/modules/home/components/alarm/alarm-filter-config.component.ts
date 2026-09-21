@@ -44,7 +44,7 @@ export interface AlarmFilterConfigData {
 
 // @dynamic
 @Component({
-  selector: 'tb-alarm-filter-config',
+  selector: 'jnks-iot-alarm-filter-config',
   templateUrl: './alarm-filter-config.component.html',
   styleUrls: ['./alarm-filter-config.component.scss'],
   providers: [
@@ -183,7 +183,7 @@ export class AlarmFilterConfigComponent implements OnInit, OnDestroy, ControlVal
       $event.stopPropagation();
     }
     const config = new OverlayConfig({
-      panelClass: 'tb-filter-panel',
+      panelClass: 'jnks-iot-filter-panel',
       backdropClass: 'cdk-overlay-transparent-backdrop',
       hasBackdrop: true,
       maxHeight: '80vh',

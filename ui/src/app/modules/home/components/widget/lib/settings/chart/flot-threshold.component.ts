@@ -20,11 +20,11 @@ import { PageComponent } from '@shared/components/page.component';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { IAliasController } from '@core/api/widget-api.models';
-import { TbFlotKeyThreshold } from '@home/components/widget/lib/flot-widget.models';
+import { JnksIotFlotKeyThreshold } from '@home/components/widget/lib/flot-widget.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-flot-threshold',
+  selector: 'jnks-iot-flot-threshold',
   templateUrl: './flot-threshold.component.html',
   styleUrls: [],
   providers: [
@@ -47,7 +47,7 @@ export class FlotThresholdComponent extends PageComponent implements OnInit, Con
   @Output()
   removeThreshold = new EventEmitter();
 
-  private modelValue: TbFlotKeyThreshold;
+  private modelValue: JnksIotFlotKeyThreshold;
 
   private propagateChange = null;
 
@@ -88,7 +88,7 @@ export class FlotThresholdComponent extends PageComponent implements OnInit, Con
     }
   }
 
-  writeValue(value: TbFlotKeyThreshold): void {
+  writeValue(value: JnksIotFlotKeyThreshold): void {
     this.modelValue = value;
     const valueSource: ValueSourceProperty = {
       valueSource: value?.thresholdValueSource,

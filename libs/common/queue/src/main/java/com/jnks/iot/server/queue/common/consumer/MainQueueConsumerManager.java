@@ -6,12 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.common.util.JnksIotThreadFactory;
 import com.jnks.iot.server.common.data.queue.QueueConfig;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
-import com.jnks.iot.server.queue.TbQueueConsumer;
-import com.jnks.iot.server.queue.TbQueueMsg;
-import com.jnks.iot.server.queue.common.consumer.TbQueueConsumerManagerTask.UpdateConfigTask;
-import com.jnks.iot.server.queue.common.consumer.TbQueueConsumerManagerTask.UpdatePartitionsTask;
+import com.jnks.iot.server.queue.JnksIotQueueConsumer;
+import com.jnks.iot.server.queue.JnksIotQueueMsg;
+import com.jnks.iot.server.queue.common.consumer.JnksIotQueueConsumerManagerTask.UpdateConfigTask;
+import com.jnks.iot.server.queue.common.consumer.JnksIotQueueConsumerManagerTask.UpdatePartitionsTask;
 import com.jnks.iot.server.queue.discovery.QueueKey;
-import com.jnks.iot.server.queue.kafka.TbKafkaConsumerTemplate;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaConsumerTemplate;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -58,14 +58,14 @@ import java.util.function.Function;
  * {@link PartitionedQueueConsumerManager} 继承本类，固定为每分区消费者模式，并扩展
  * 增删分区、删除 Topic 等细粒度任务（走 {@link #processTask} 钩子，不等待配置/分区合并）。
  *
- * @param <M> 队列消息类型，需实现 {@link TbQueueMsg}
+ * @param <M> 队列消息类型，需实现 {@link JnksIotQueueMsg}
  * @param <C> 队列配置类型，需继承 {@link QueueConfig}
  * @see PartitionedQueueConsumerManager
  * @see QueueConsumerManager
- * @see TbQueueConsumerManagerTask
+ * @see JnksIotQueueConsumerManagerTask
  */
 @Slf4j
-public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfig> {
+public class MainQueueConsumerManager<M extends JnksIotQueueMsg, C extends QueueConfig> {
 
     /**
      * 本管理器对应的队列唯一键。
@@ -96,15 +96,15 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      * 底层队列消费者工厂。
      * <p>
      * 参数：当前配置、目标分区信息（单消费者模式下分区参数可为 {@code null}）。
-     * 返回：已可订阅的 {@link TbQueueConsumer} 实例。
+     * 返回：已可订阅的 {@link JnksIotQueueConsumer} 实例。
      * 具体创建 Kafka / In-Memory 等实现由上层决定。
      */
-    protected final BiFunction<C, TopicPartitionInfo, TbQueueConsumer<M>> consumerCreator;
+    protected final BiFunction<C, TopicPartitionInfo, JnksIotQueueConsumer<M>> consumerCreator;
 
     /**
      * 执行消费循环（poll + process）的线程池。
      * <p>
-     * 每个 {@link TbQueueConsumerTask} 启动时会向该线程池提交一个长期运行的循环任务。
+     * 每个 {@link JnksIotQueueConsumerTask} 启动时会向该线程池提交一个长期运行的循环任务。
      */
     @Getter
     protected final ExecutorService consumerExecutor;
@@ -140,7 +140,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      * 存放配置更新、分区更新以及子类自定义任务。由 {@link #addTask} 入队，
      * {@link #tryProcessTasks} 出队并串行处理。
      */
-    private final java.util.Queue<TbQueueConsumerManagerTask> tasks = new ConcurrentLinkedQueue<>();
+    private final java.util.Queue<JnksIotQueueConsumerManagerTask> tasks = new ConcurrentLinkedQueue<>();
 
     /**
      * 任务处理互斥锁。
@@ -192,7 +192,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
     @Builder
     public MainQueueConsumerManager(QueueKey queueKey, C config,
                                     MsgPackProcessor<M, C> msgPackProcessor,
-                                    BiFunction<C, TopicPartitionInfo, TbQueueConsumer<M>> consumerCreator,
+                                    BiFunction<C, TopicPartitionInfo, JnksIotQueueConsumer<M>> consumerCreator,
                                     ExecutorService consumerExecutor,
                                     ScheduledExecutorService scheduler,
                                     ExecutorService taskExecutor,
@@ -275,7 +275,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      *
      * @param todo 待处理任务（配置更新、分区更新或子类扩展任务）
      */
-    protected void addTask(TbQueueConsumerManagerTask todo) {
+    protected void addTask(JnksIotQueueConsumerManagerTask todo) {
         if (stopped) {
             return;
         }
@@ -305,7 +305,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
                     C newConfig = null;
                     Set<TopicPartitionInfo> newPartitions = null;
                     while (!stopped) {
-                        TbQueueConsumerManagerTask task = tasks.poll();
+                        JnksIotQueueConsumerManagerTask task = tasks.poll();
                         if (task == null) {
                             break;
                         }
@@ -348,7 +348,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      *
      * @param task 待处理的自定义任务
      */
-    protected void processTask(TbQueueConsumerManagerTask task) {
+    protected void processTask(JnksIotQueueConsumerManagerTask task) {
     }
 
     /**
@@ -377,8 +377,8 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
         if (oldConfig == null) {
             init(config);
         } else if (newConfig.isConsumerPerPartition() != oldConfig.isConsumerPerPartition()) {
-            consumerWrapper.getConsumers().forEach(TbQueueConsumerTask::initiateStop);
-            consumerWrapper.getConsumers().forEach(TbQueueConsumerTask::awaitCompletion);
+            consumerWrapper.getConsumers().forEach(JnksIotQueueConsumerTask::initiateStop);
+            consumerWrapper.getConsumers().forEach(JnksIotQueueConsumerTask::awaitCompletion);
 
             init(config);
             if (partitions != null) {
@@ -412,7 +412,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      *
      * @param consumerTask 封装了底层消费者、Future 与停止回调的任务对象
      */
-    private void launchConsumer(TbQueueConsumerTask<M> consumerTask) {
+    private void launchConsumer(JnksIotQueueConsumerTask<M> consumerTask) {
         log.info("[{}] Launching consumer", consumerTask.getKey());
         Future<?> consumerLoop = consumerExecutor.submit(() -> {
             JnksIotThreadFactory.updateCurrentThreadName(consumerTask.getKey().toString());
@@ -442,7 +442,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      *
      * @param consumer 已订阅的底层队列消费者
      */
-    private void consumerLoop(TbQueueConsumer<M> consumer) {
+    private void consumerLoop(JnksIotQueueConsumer<M> consumer) {
         try {
             while (!stopped && !consumer.isStopped()) {
                 try {
@@ -485,7 +485,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      * @param config   当前队列配置
      * @throws Exception 业务处理失败时抛出，由 {@link #consumerLoop} 捕获并退避重试
      */
-    protected void processMsgs(List<M> msgs, TbQueueConsumer<M> consumer, C config) throws Exception {
+    protected void processMsgs(List<M> msgs, JnksIotQueueConsumer<M> consumer, C config) throws Exception {
         log.trace("Processing {} messages", msgs.size());
         msgPackProcessor.process(msgs, consumer, config);
         log.trace("Processed {} messages", msgs.size());
@@ -499,7 +499,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      */
     public void stop() {
         log.debug("[{}] Stopping consumers", queueKey);
-        consumerWrapper.getConsumers().forEach(TbQueueConsumerTask::initiateStop);
+        consumerWrapper.getConsumers().forEach(JnksIotQueueConsumerTask::initiateStop);
         stopped = true;
     }
 
@@ -515,7 +515,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
     /**
      * 等待本管理器下所有消费者任务结束。
      * <p>
-     * 对每个 {@link TbQueueConsumerTask} 调用 {@code awaitCompletion}，最长等待
+     * 对每个 {@link JnksIotQueueConsumerTask} 调用 {@code awaitCompletion}，最长等待
      * {@code timeoutSec} 秒。超时后仍可能有线程未结束，调用方需结合日志判断。
      *
      * @param timeoutSec 单个消费者等待完成的超时时间（秒）
@@ -530,12 +530,12 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      * 消息批次处理回调接口。
      * <p>
      * 由业务方实现，在消费循环中对一批消息执行处理，并负责在适当时机提交 offset
-     * （具体语义取决于底层 {@link TbQueueConsumer} 实现）。
+     * （具体语义取决于底层 {@link JnksIotQueueConsumer} 实现）。
      *
      * @param <M> 消息类型
      * @param <C> 配置类型
      */
-    public interface MsgPackProcessor<M extends TbQueueMsg, C extends QueueConfig> {
+    public interface MsgPackProcessor<M extends JnksIotQueueMsg, C extends QueueConfig> {
         /**
          * 处理一批从队列中拉取的消息。
          *
@@ -544,7 +544,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
          * @param config   当前配置
          * @throws Exception 处理失败时抛出，触发消费循环的退避重试
          */
-        void process(List<M> msgs, TbQueueConsumer<M> consumer, C config) throws Exception;
+        void process(List<M> msgs, JnksIotQueueConsumer<M> consumer, C config) throws Exception;
     }
 
     /**
@@ -558,7 +558,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      *
      * @param <M> 消息类型
      */
-    public interface ConsumerWrapper<M extends TbQueueMsg> {
+    public interface ConsumerWrapper<M extends JnksIotQueueMsg> {
 
         /**
          * 根据最新分区集合调整内部消费者：创建、停止或重新订阅。
@@ -572,14 +572,14 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
          *
          * @return 消费者任务集合；无消费者时可为空集合
          */
-        Collection<TbQueueConsumerTask<M>> getConsumers();
+        Collection<JnksIotQueueConsumerTask<M>> getConsumers();
 
     }
 
     /**
      * 每分区独立消费者模式的包装器。
      * <p>
-     * 内部维护 {@code TopicPartitionInfo → TbQueueConsumerTask} 映射。
+     * 内部维护 {@code TopicPartitionInfo → JnksIotQueueConsumerTask} 映射。
      * 分区增加时创建并启动新消费者（只订阅该分区）；分区移除时先发停止信号再等待
      * 线程结束并移除映射。该模式隔离性更好，单分区故障或积压不易拖垮其它分区，
      * 但占用更多线程与连接资源。
@@ -589,7 +589,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      */
     class ConsumerPerPartitionWrapper implements ConsumerWrapper<M> {
         /** 分区到消费者任务的映射表 */
-        private final Map<TopicPartitionInfo, TbQueueConsumerTask<M>> consumers = new HashMap<>();
+        private final Map<TopicPartitionInfo, JnksIotQueueConsumerTask<M>> consumers = new HashMap<>();
 
         /**
          * 全量对齐分区：计算相对当前映射的新增集与移除集，先删后增。
@@ -617,14 +617,14 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
          * @param removedPartitions 需要移除的分区集合
          */
         protected void removePartitions(Set<TopicPartitionInfo> removedPartitions) {
-            removedPartitions.forEach((tpi) -> Optional.ofNullable(consumers.get(tpi)).ifPresent(TbQueueConsumerTask::initiateStop));
-            removedPartitions.forEach((tpi) -> Optional.ofNullable(consumers.remove(tpi)).ifPresent(TbQueueConsumerTask::awaitCompletion));
+            removedPartitions.forEach((tpi) -> Optional.ofNullable(consumers.get(tpi)).ifPresent(JnksIotQueueConsumerTask::initiateStop));
+            removedPartitions.forEach((tpi) -> Optional.ofNullable(consumers.remove(tpi)).ifPresent(JnksIotQueueConsumerTask::awaitCompletion));
         }
 
         /**
          * 为新增分区创建消费者、订阅并启动消费循环。
          * <p>
-         * 每个分区对应一个 {@link TbQueueConsumerTask}，key 形如 {@code queueKey-partitionId}。
+         * 每个分区对应一个 {@link JnksIotQueueConsumerTask}，key 形如 {@code queueKey-partitionId}。
          * 若提供了 {@code startOffsetProvider} 且底层为 Kafka 消费者，会设置起始 offset，
          * 常用于需要从指定位点重放的场景。
          *
@@ -638,9 +638,9 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
                 Integer partitionId = tpi.getPartition().orElse(-1);
                 String key = queueKey + "-" + partitionId;
                 Runnable callback = onStop != null ? () -> onStop.accept(tpi) : null;
-                TbQueueConsumerTask<M> consumer = new TbQueueConsumerTask<>(key, () -> {
-                    TbQueueConsumer<M> queueConsumer = consumerCreator.apply(config, tpi);
-                    if (startOffsetProvider != null && queueConsumer instanceof TbKafkaConsumerTemplate<M> kafkaConsumer) {
+                JnksIotQueueConsumerTask<M> consumer = new JnksIotQueueConsumerTask<>(key, () -> {
+                    JnksIotQueueConsumer<M> queueConsumer = consumerCreator.apply(config, tpi);
+                    if (startOffsetProvider != null && queueConsumer instanceof JnksIotKafkaConsumerTemplate<M> kafkaConsumer) {
                         kafkaConsumer.setStartOffsetProvider(startOffsetProvider);
                     }
                     return queueConsumer;
@@ -655,7 +655,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
          * @return 当前所有分区消费者任务
          */
         @Override
-        public Collection<TbQueueConsumerTask<M>> getConsumers() {
+        public Collection<JnksIotQueueConsumerTask<M>> getConsumers() {
             return consumers.values();
         }
     }
@@ -670,7 +670,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
      */
     class SingleConsumerWrapper implements ConsumerWrapper<M> {
         /** 唯一的消费者任务；无分区分配时为 {@code null} */
-        private TbQueueConsumerTask<M> consumer;
+        private JnksIotQueueConsumerTask<M> consumer;
 
         /**
          * 根据最新分区集合调整唯一消费者的生命周期与订阅。
@@ -691,7 +691,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
 
             if (consumer == null) {
                 // 单消费者模式不按分区创建，故 partition 传 null
-                consumer = new TbQueueConsumerTask<>(queueKey, () -> consumerCreator.apply(config, null), null);
+                consumer = new JnksIotQueueConsumerTask<>(queueKey, () -> consumerCreator.apply(config, null), null);
             }
             consumer.subscribe(partitions);
             if (!consumer.isRunning()) {
@@ -703,7 +703,7 @@ public class MainQueueConsumerManager<M extends TbQueueMsg, C extends QueueConfi
          * @return 唯一消费者组成的列表；尚未创建时返回空列表
          */
         @Override
-        public Collection<TbQueueConsumerTask<M>> getConsumers() {
+        public Collection<JnksIotQueueConsumerTask<M>> getConsumers() {
             if (consumer == null) {
                 return Collections.emptyList();
             }

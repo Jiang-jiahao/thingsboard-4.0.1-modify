@@ -1,6 +1,6 @@
 <ng-container [formGroup]="patternSettingsFormGroup">
-  <div class="tb-form-panel stroked tb-slide-toggle">
-    <mat-expansion-panel #expansionPanel class="tb-settings" [expanded]="settingsExpanded"
+  <div class="jnks-iot-form-panel stroked jnks-iot-slide-toggle">
+    <mat-expansion-panel #expansionPanel class="jnks-iot-settings" [expanded]="settingsExpanded"
                          [disabled]="!patternSettingsFormGroup.get('show').value">
       <mat-expansion-panel-header class="flex flex-row flex-wrap">
         <mat-panel-title>
@@ -8,21 +8,21 @@
             <mat-slide-toggle class="mat-slide flex items-stretch justify-center" formControlName="show" (click)="$event.stopPropagation()">
               {{ patternTitle ? patternTitle : ((patternType === 'label' ? 'widgets.maps.data-layer.label' : 'widgets.maps.data-layer.tooltip') | translate) }}
             </mat-slide-toggle>
-            <tb-toggle-select [class.!hidden]="!expansionPanel.expanded" formControlName="type" (click)="$event.stopPropagation()">
-              <tb-toggle-option [value]="DataLayerPatternType.pattern">{{ 'widgets.maps.data-layer.pattern-type-pattern' | translate }}</tb-toggle-option>
-              <tb-toggle-option [value]="DataLayerPatternType.function">{{ 'widgets.maps.data-layer.pattern-type-function' | translate }}</tb-toggle-option>
-            </tb-toggle-select>
+            <jnks-iot-toggle-select [class.!hidden]="!expansionPanel.expanded" formControlName="type" (click)="$event.stopPropagation()">
+              <jnks-iot-toggle-option [value]="DataLayerPatternType.pattern">{{ 'widgets.maps.data-layer.pattern-type-pattern' | translate }}</jnks-iot-toggle-option>
+              <jnks-iot-toggle-option [value]="DataLayerPatternType.function">{{ 'widgets.maps.data-layer.pattern-type-function' | translate }}</jnks-iot-toggle-option>
+            </jnks-iot-toggle-select>
           </div>
         </mat-panel-title>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
-        <tb-html *ngIf="patternSettingsFormGroup.get('type').value === DataLayerPatternType.pattern"
+        <jnks-iot-html *ngIf="patternSettingsFormGroup.get('type').value === DataLayerPatternType.pattern"
                  formControlName="pattern"
                  required
                  minHeight="100px"
                  label="{{ (patternType === 'label' ? 'widgets.maps.data-layer.label-pattern' : 'widgets.maps.data-layer.tooltip-pattern') | translate }}">
-        </tb-html>
-        <tb-js-func *ngIf="patternSettingsFormGroup.get('type').value === DataLayerPatternType.function"
+        </jnks-iot-html>
+        <jnks-iot-js-func *ngIf="patternSettingsFormGroup.get('type').value === DataLayerPatternType.function"
                     formControlName="patternFunction"
                     required
                     withModules
@@ -31,9 +31,9 @@
                     functionTitle="{{ (patternType === 'label' ? 'widgets.maps.data-layer.label-function' : 'widgets.maps.data-layer.tooltip-function') | translate }}"
                     [helpId]="helpId"
                     [helpPopupStyle]="{width: '900px'}">
-        </tb-js-func>
+        </jnks-iot-js-func>
         <ng-container *ngIf="patternType === 'tooltip'">
-          <div class="tb-form-row space-between column-xs">
+          <div class="jnks-iot-form-row space-between column-xs">
             <div translate>widgets.maps.data-layer.tooltip-trigger</div>
             <mat-form-field class="medium-width" appearance="outline" subscriptSizing="dynamic">
               <mat-select formControlName="trigger">
@@ -43,23 +43,23 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <mat-slide-toggle class="mat-slide" formControlName="autoclose">
               {{ 'widgets.maps.data-layer.auto-close-tooltips' | translate }}
             </mat-slide-toggle>
           </div>
-          <div *ngIf="hasTooltipOffset" class="tb-form-row space-between column-lt-md">
+          <div *ngIf="hasTooltipOffset" class="jnks-iot-form-row space-between column-lt-md">
             <div translate>widgets.maps.data-layer.tooltip-offset</div>
             <div class="flex flex-row items-center justify-start gap-2 xs:flex-1 xs:flex-col xs:items-stretch">
               <div class="flex flex-row items-center justify-start gap-2 xs:flex-1">
-                <div class="tb-small-label xs:min-w-20" translate>widgets.maps.data-layer.tooltip-offset-horizontal</div>
+                <div class="jnks-iot-small-label xs:min-w-20" translate>widgets.maps.data-layer.tooltip-offset-horizontal</div>
                 <mat-form-field appearance="outline" class="number xs:flex-1" subscriptSizing="dynamic">
                   <input matInput formControlName="offsetX"
                          type="number" placeholder="{{ 'widget-config.set' | translate }}">
                 </mat-form-field>
               </div>
               <div class="flex flex-row items-center justify-start gap-2 xs:flex-1">
-                <div class="tb-small-label xs:min-w-20" translate>widgets.maps.data-layer.tooltip-offset-vertical</div>
+                <div class="jnks-iot-small-label xs:min-w-20" translate>widgets.maps.data-layer.tooltip-offset-vertical</div>
                 <mat-form-field appearance="outline" class="number xs:flex-1" subscriptSizing="dynamic">
                   <input matInput formControlName="offsetY"
                          type="number" placeholder="{{ 'widget-config.set' | translate }}">
@@ -67,10 +67,10 @@
               </div>
             </div>
           </div>
-          <tb-map-tooltip-tag-actions-panel
+          <jnks-iot-map-tooltip-tag-actions-panel
             [context]="context"
             formControlName="tagActions">
-          </tb-map-tooltip-tag-actions-panel>
+          </jnks-iot-map-tooltip-tag-actions-panel>
         </ng-container>
       </ng-template>
     </mat-expansion-panel>

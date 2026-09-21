@@ -17,7 +17,7 @@ import { first } from 'rxjs/operators';
 import { Authority } from '@shared/models/authority.enum';
 
 @Component({
-  selector: 'tb-getting-started-widget',
+  selector: 'jnks-iot-getting-started-widget',
   templateUrl: './getting-started-widget.component.html',
   styleUrls: ['./getting-started-widget.component.scss']
 })
@@ -95,7 +95,7 @@ export class GettingStartedWidgetComponent extends PageComponent implements OnIn
       void>(GettingStartedCompletedDialogComponent, {
       disableClose: true,
       autoFocus: false,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
     }).afterClosed().subscribe();
   }
 

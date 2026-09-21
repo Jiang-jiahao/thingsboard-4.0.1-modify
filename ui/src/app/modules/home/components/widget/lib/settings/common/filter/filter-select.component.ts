@@ -25,7 +25,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
 @Component({
-  selector: 'tb-filter-select',
+  selector: 'jnks-iot-filter-select',
   templateUrl: './filter-select.component.html',
   styleUrls: [],
   providers: [{
@@ -69,11 +69,11 @@ export class FilterSelectComponent implements ControlValueAccessor, OnInit, Afte
 
 
   private requiredValue: boolean;
-  get tbRequired(): boolean {
+  get jnksIotRequired(): boolean {
     return this.requiredValue;
   }
   @Input()
-  set tbRequired(value: boolean) {
+  set jnksIotRequired(value: boolean) {
     this.requiredValue = coerceBooleanProperty(value);
   }
 
@@ -139,7 +139,7 @@ export class FilterSelectComponent implements ControlValueAccessor, OnInit, Afte
 
   isErrorState(control: UntypedFormControl | null, form: FormGroupDirective | NgForm | null): boolean {
     const originalErrorState = this.errorStateMatcher.isErrorState(control, form);
-    const customErrorState = this.tbRequired && !this.modelValue;
+    const customErrorState = this.jnksIotRequired && !this.modelValue;
     return originalErrorState || customErrorState;
   }
 

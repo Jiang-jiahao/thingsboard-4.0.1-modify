@@ -23,7 +23,7 @@ import { Widget } from '@shared/models/widget.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-polygon-settings',
+  selector: 'jnks-iot-polygon-settings',
   templateUrl: './polygon-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

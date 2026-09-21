@@ -1,0 +1,575 @@
+package com.jnks.iot.rule.engine.action;
+
+import com.google.common.util.concurrent.Futures;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import com.jnks.iot.common.util.JacksonUtil;
+import com.jnks.iot.common.util.ListeningExecutor;
+import com.jnks.iot.rule.engine.AbstractRuleNodeUpgradeTest;
+import com.jnks.iot.rule.engine.TestDbCallbackExecutor;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
+import com.jnks.iot.rule.engine.api.JnksIotNode;
+import com.jnks.iot.rule.engine.api.JnksIotNodeConfiguration;
+import com.jnks.iot.rule.engine.api.JnksIotNodeException;
+import com.jnks.iot.server.common.data.Customer;
+import com.jnks.iot.server.common.data.Dashboard;
+import com.jnks.iot.server.common.data.Device;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.EntityView;
+import com.jnks.iot.server.common.data.Tenant;
+import com.jnks.iot.server.common.data.User;
+import com.jnks.iot.server.common.data.asset.Asset;
+import com.jnks.iot.server.common.data.id.AssetId;
+import com.jnks.iot.server.common.data.id.CustomerId;
+import com.jnks.iot.server.common.data.id.DashboardId;
+import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.common.data.id.EntityViewId;
+import com.jnks.iot.server.common.data.id.HasId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
+import com.jnks.iot.server.common.data.relation.EntityRelation;
+import com.jnks.iot.server.common.data.relation.EntitySearchDirection;
+import com.jnks.iot.server.common.data.relation.RelationTypeGroup;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
+import com.jnks.iot.server.dao.asset.AssetService;
+import com.jnks.iot.server.dao.customer.CustomerService;
+import com.jnks.iot.server.dao.dashboard.DashboardService;
+import com.jnks.iot.server.dao.device.DeviceService;
+import com.jnks.iot.server.dao.entityview.EntityViewService;
+import com.jnks.iot.server.dao.relation.RelationService;
+import com.jnks.iot.server.dao.user.UserService;
+
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+public class JnksIotDeleteRelationNodeTest extends AbstractRuleNodeUpgradeTest {
+
+    private static final Set<EntityType> supportedEntityTypes = EnumSet.of(EntityType.TENANT, EntityType.DEVICE,
+            EntityType.ASSET, EntityType.CUSTOMER, EntityType.ENTITY_VIEW, EntityType.DASHBOARD, EntityType.USER);
+
+    private static final String supportedEntityTypesStr = supportedEntityTypes.stream().map(Enum::name).collect(Collectors.joining(" ,"));
+
+    private static final Set<EntityType> unsupportedEntityTypes = Arrays.stream(EntityType.values())
+            .filter(type -> !supportedEntityTypes.contains(type)).collect(Collectors.toUnmodifiableSet());
+
+    private static Stream<Arguments> givenSupportedEntityType_whenOnMsg_thenVerifyEntityNotFoundExceptionThrown() {
+        return supportedEntityTypes.stream().filter(entityType -> !entityType.equals(EntityType.TENANT)).map(Arguments::of);
+    }
+
+    private static final TenantId tenantId = new TenantId(UUID.fromString("6fdb457d-0910-401c-8880-abc251e6a1e2"));
+    private static final DeviceId deviceId = new DeviceId(UUID.fromString("4eef91a7-8865-4c3c-837d-ed6f6577508b"));
+    private static final AssetId assetId = new AssetId(UUID.fromString("f4fd3b10-3f36-4d46-a162-5e62050774cc"));
+    private static final CustomerId customerId = new CustomerId(UUID.fromString("ab890af2-3622-41e0-ac94-14d50af84348"));
+    private static final EntityViewId entityViewId = new EntityViewId(UUID.fromString("39ce8d03-52a3-4aa8-b561-267d1d9d68b5"));
+    private static final DashboardId dashboardId = new DashboardId(UUID.fromString("fda72baa-c882-4723-9693-25995dc37bc5"));
+
+    private static Stream<Arguments> givenSupportedEntityType_whenOnMsg_thenVerifyConditions() {
+        return Stream.of(
+                Arguments.of(new Device(deviceId)),
+                Arguments.of(new Asset(assetId)),
+                Arguments.of(new Customer(customerId)),
+                Arguments.of(new EntityView(entityViewId)),
+                Arguments.of(new Dashboard(dashboardId)),
+                Arguments.of(new Tenant(tenantId))
+        );
+    }
+
+    private final DeviceId originatorId = new DeviceId(UUID.fromString("574c9840-0885-4d12-be69-f557d7471a78"));
+
+    private final ListeningExecutor dbExecutor = new TestDbCallbackExecutor();
+
+    @Mock
+    private JnksIotContext ctxMock;
+    @Mock
+    private AssetService assetServiceMock;
+    @Mock
+    private DeviceService deviceServiceMock;
+    @Mock
+    private EntityViewService entityViewServiceMock;
+    @Mock
+    private CustomerService customerServiceMock;
+    @Mock
+    private UserService userServiceMock;
+    @Mock
+    private DashboardService dashboardServiceMock;
+    @Mock
+    private RelationService relationServiceMock;
+
+
+    private JnksIotDeleteRelationNode node;
+    private JnksIotDeleteRelationNodeConfiguration config;
+
+    @BeforeEach
+    public void setUp() throws JnksIotNodeException {
+        node = spy(new JnksIotDeleteRelationNode());
+        config = new JnksIotDeleteRelationNodeConfiguration().defaultConfiguration();
+    }
+
+    @Test
+    void givenDefaultConfig_whenVerify_thenOK() {
+        var defaultConfig = new JnksIotDeleteRelationNodeConfiguration().defaultConfiguration();
+        assertThat(defaultConfig.getDirection()).isEqualTo(EntitySearchDirection.FROM);
+        assertThat(defaultConfig.getRelationType()).isEqualTo(EntityRelation.CONTAINS_TYPE);
+        assertThat(defaultConfig.getEntityNamePattern()).isEqualTo("");
+        assertThat(defaultConfig.getEntityTypePattern()).isEqualTo(null);
+        assertThat(defaultConfig.getEntityType()).isEqualTo(null);
+        assertThat(defaultConfig.isDeleteForSingleEntity()).isFalse();
+    }
+
+    @ParameterizedTest
+    @EnumSource(EntityType.class)
+    void givenEntityType_whenInit_thenVerifyExceptionThrownIfTypeIsUnsupported(EntityType entityType) {
+        // GIVEN
+        config.setEntityType(entityType);
+        config.setDeleteForSingleEntity(true);
+        var nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
+
+        // WHEN-THEN
+        if (unsupportedEntityTypes.contains(entityType)) {
+            assertThatThrownBy(() -> node.init(ctxMock, nodeConfiguration))
+                    .isInstanceOf(JnksIotNodeException.class)
+                    .hasMessage("Unsupported entity type '" + entityType +
+                            "'! Only " + supportedEntityTypesStr + " types are allowed.");
+        } else {
+            assertThatCode(() -> node.init(ctxMock, nodeConfiguration)).doesNotThrowAnyException();
+        }
+        verifyNoInteractions(ctxMock);
+    }
+
+    @ParameterizedTest
+    @MethodSource("givenSupportedEntityType_whenOnMsg_thenVerifyEntityNotFoundExceptionThrown")
+    void givenSupportedEntityType_whenOnMsgAndDeleteForSingleEntityIsTrue_thenVerifyEntityNotFoundExceptionThrown(EntityType entityType) throws JnksIotNodeException {
+        // GIVEN
+        config.setEntityType(entityType);
+        config.setEntityNamePattern("${name}");
+        config.setEntityTypePattern("${type}");
+        config.setDeleteForSingleEntity(true);
+
+        var nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
+        node.init(ctxMock, nodeConfiguration);
+
+        when(ctxMock.getTenantId()).thenReturn(tenantId);
+
+        var mockMethodCallsMap = mockEntityServiceCallsEntityNotFound();
+        mockMethodCallsMap.get(entityType).run();
+
+        var md = getMetadataWithNameTemplate();
+        var msg = getJnksIotMsg(originatorId, md);
+
+        node.onMsg(ctxMock, msg);
+        ArgumentCaptor<Throwable> throwableCaptor = ArgumentCaptor.forClass(Throwable.class);
+        verify(ctxMock).tellFailure(eq(msg), throwableCaptor.capture());
+        String validationField = switch (entityType) {
+            case CUSTOMER, DASHBOARD -> "title";
+            case USER -> "email";
+            default -> "name";
+        };
+        assertThat(throwableCaptor.getValue())
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("%s with %s 'EntityName' doesn't exist!", entityType.getNormalName(), validationField);
+    }
+
+    @ParameterizedTest
+    @MethodSource("givenSupportedEntityType_whenOnMsg_thenVerifyConditions")
+    void givenSupportedEntityType_whenOnMsgAndDeleteForSingleEntityIsTrue_thenVerifyRelationDeletedAndOutMsgSuccess(HasId entity) throws JnksIotNodeException {
+        // GIVEN
+        var entityId = (EntityId) entity.getId();
+        var entityType = entityId.getEntityType();
+
+        config.setEntityType(entityType);
+        config.setEntityNamePattern("${name}");
+        config.setEntityTypePattern("${type}");
+        config.setDeleteForSingleEntity(true);
+
+        var nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
+        node.init(ctxMock, nodeConfiguration);
+
+        when(ctxMock.getTenantId()).thenReturn(tenantId);
+        if (entityType.equals(EntityType.TENANT)) {
+            when(ctxMock.getDbCallbackExecutor()).thenReturn(dbExecutor);
+        }
+        when(ctxMock.getRelationService()).thenReturn(relationServiceMock);
+
+        var mockMethodCallsMap = mockEntityServiceCalls();
+        mockMethodCallsMap.get(entityType).accept(entity);
+
+        when(relationServiceMock.checkRelationAsync(any(), any(), any(), any(), any())).thenReturn(Futures.immediateFuture(true));
+        when(relationServiceMock.deleteRelationAsync(any(), any(), any(), any(), any())).thenReturn(Futures.immediateFuture(true));
+
+        var md = getMetadataWithNameTemplate();
+        var msg = getJnksIotMsg(originatorId, md);
+
+        // WHEN
+        node.onMsg(ctxMock, msg);
+
+        // THEN
+        var verifyMethodCallsMap = verifyEntityServiceCalls();
+        verifyMethodCallsMap.get(entityType).accept(entity);
+
+        verify(relationServiceMock).checkRelationAsync(eq(tenantId), eq(originatorId), eq(entityId), eq(EntityRelation.CONTAINS_TYPE), eq(RelationTypeGroup.COMMON));
+        verify(relationServiceMock).deleteRelationAsync(eq(tenantId), eq(originatorId), eq(entityId), eq(EntityRelation.CONTAINS_TYPE), eq(RelationTypeGroup.COMMON));
+
+        verify(ctxMock).tellSuccess(eq(msg));
+        verify(ctxMock, never()).tellNext(any(), anyString());
+        verify(ctxMock, never()).tellNext(any(), anySet());
+        verify(ctxMock, never()).tellFailure(any(), any());
+        if (entityType.equals(EntityType.TENANT)) {
+            verify(ctxMock).getDbCallbackExecutor();
+        }
+        verifyNoMoreInteractions(ctxMock, relationServiceMock);
+    }
+
+    @ParameterizedTest
+    @MethodSource("givenSupportedEntityType_whenOnMsg_thenVerifyConditions")
+    void givenSupportedEntityType_whenOnMsgAndDeleteForSingleEntityIsTrue_thenVerifyRelationFailedToDeleteAndOutMsgFailure(HasId entity) throws JnksIotNodeException {
+        // GIVEN
+        var entityId = (EntityId) entity.getId();
+        var entityType = entityId.getEntityType();
+
+        config.setEntityType(entityType);
+        config.setEntityNamePattern("${name}");
+        config.setEntityTypePattern("${type}");
+        config.setDeleteForSingleEntity(true);
+
+        var nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
+        node.init(ctxMock, nodeConfiguration);
+
+        when(ctxMock.getTenantId()).thenReturn(tenantId);
+        if (entityType.equals(EntityType.TENANT)) {
+            when(ctxMock.getDbCallbackExecutor()).thenReturn(dbExecutor);
+        }
+        when(ctxMock.getRelationService()).thenReturn(relationServiceMock);
+
+        var mockMethodCallsMap = mockEntityServiceCalls();
+        mockMethodCallsMap.get(entityType).accept(entity);
+
+        when(relationServiceMock.checkRelationAsync(any(), any(), any(), any(), any())).thenReturn(Futures.immediateFuture(true));
+        when(relationServiceMock.deleteRelationAsync(any(), any(), any(), any(), any())).thenReturn(Futures.immediateFuture(false));
+
+        var md = getMetadataWithNameTemplate();
+        var msg = getJnksIotMsg(originatorId, md);
+
+        // WHEN
+        node.onMsg(ctxMock, msg);
+
+        // THEN
+        var verifyMethodCallsMap = verifyEntityServiceCalls();
+        verifyMethodCallsMap.get(entityType).accept(entity);
+
+        verify(relationServiceMock).checkRelationAsync(eq(tenantId), eq(originatorId), eq(entityId), eq(EntityRelation.CONTAINS_TYPE), eq(RelationTypeGroup.COMMON));
+        verify(relationServiceMock).deleteRelationAsync(eq(tenantId), eq(originatorId), eq(entityId), eq(EntityRelation.CONTAINS_TYPE), eq(RelationTypeGroup.COMMON));
+
+        var throwableCaptor = ArgumentCaptor.forClass(Throwable.class);
+        verify(ctxMock).tellFailure(eq(msg), throwableCaptor.capture());
+        verify(ctxMock, never()).tellNext(any(), anyString());
+        verify(ctxMock, never()).tellNext(any(), anySet());
+        verify(ctxMock, never()).tellSuccess(any());
+        if (entityType.equals(EntityType.TENANT)) {
+            verify(ctxMock).getDbCallbackExecutor();
+        }
+        verifyNoMoreInteractions(ctxMock, relationServiceMock);
+        assertThat(throwableCaptor.getValue()).isInstanceOf(RuntimeException.class).hasMessage("Failed to delete relation(s) with originator!");
+    }
+
+    @ParameterizedTest
+    @MethodSource("givenSupportedEntityType_whenOnMsg_thenVerifyConditions")
+    void givenSupportedEntityType_whenOnMsgAndDeleteForSingleEntityIsTrue_thenVerifyRelationNotFoundAndOutMsgSuccess(HasId entity) throws JnksIotNodeException {
+        // GIVEN
+        var entityId = (EntityId) entity.getId();
+        var entityType = entityId.getEntityType();
+
+        config.setEntityType(entityType);
+        config.setEntityNamePattern("${name}");
+        config.setEntityTypePattern("${type}");
+        config.setDeleteForSingleEntity(true);
+
+        var nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
+        node.init(ctxMock, nodeConfiguration);
+
+        when(ctxMock.getTenantId()).thenReturn(tenantId);
+        if (entityType.equals(EntityType.TENANT)) {
+            when(ctxMock.getDbCallbackExecutor()).thenReturn(dbExecutor);
+        }
+        when(ctxMock.getRelationService()).thenReturn(relationServiceMock);
+
+        var mockMethodCallsMap = mockEntityServiceCalls();
+        mockMethodCallsMap.get(entityType).accept(entity);
+
+        when(relationServiceMock.checkRelationAsync(any(), any(), any(), any(), any())).thenReturn(Futures.immediateFuture(false));
+
+        var md = getMetadataWithNameTemplate();
+        var msg = getJnksIotMsg(originatorId, md);
+
+        // WHEN
+        node.onMsg(ctxMock, msg);
+
+        // THEN
+        var verifyMethodCallsMap = verifyEntityServiceCalls();
+        verifyMethodCallsMap.get(entityType).accept(entity);
+
+        verify(relationServiceMock).checkRelationAsync(eq(tenantId), eq(originatorId), eq(entityId), eq(EntityRelation.CONTAINS_TYPE), eq(RelationTypeGroup.COMMON));
+
+        verify(ctxMock).tellSuccess(eq(msg));
+        verify(ctxMock, never()).tellNext(any(), anyString());
+        verify(ctxMock, never()).tellNext(any(), anySet());
+        verify(ctxMock, never()).tellFailure(any(), any());
+        if (entityType.equals(EntityType.TENANT)) {
+            verify(ctxMock).getDbCallbackExecutor();
+        }
+        verifyNoMoreInteractions(ctxMock, relationServiceMock);
+    }
+
+    @Test
+    void givenSupportedEntityType_whenOnMsgAndDeleteForSingleEntityIsFalse_thenVerifyRelationsDeletedAndOutMsgSuccess() throws JnksIotNodeException {
+        // GIVEN
+
+        config.setEntityType(EntityType.DEVICE);
+        config.setEntityNamePattern("${name}");
+        config.setEntityTypePattern("${type}");
+
+        var nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
+        node.init(ctxMock, nodeConfiguration);
+
+        when(ctxMock.getTenantId()).thenReturn(tenantId);
+        when(ctxMock.getRelationService()).thenReturn(relationServiceMock);
+        when(ctxMock.getDbCallbackExecutor()).thenReturn(dbExecutor);
+
+        var relationToDelete = new EntityRelation();
+        when(relationServiceMock.findByFromAndTypeAsync(any(), any(), any(), any())).thenReturn(Futures.immediateFuture(List.of(relationToDelete)));
+        when(relationServiceMock.deleteRelationAsync(any(), any())).thenReturn(Futures.immediateFuture(true));
+
+        var md = getMetadataWithNameTemplate();
+        var msg = getJnksIotMsg(originatorId, md);
+
+        // WHEN
+        node.onMsg(ctxMock, msg);
+
+        verify(relationServiceMock).findByFromAndTypeAsync(eq(tenantId), eq(originatorId), eq(EntityRelation.CONTAINS_TYPE), eq(RelationTypeGroup.COMMON));
+        verify(relationServiceMock).deleteRelationAsync(eq(tenantId), eq(relationToDelete));
+
+        verify(ctxMock).tellSuccess(eq(msg));
+        verify(ctxMock, never()).tellNext(any(), anyString());
+        verify(ctxMock, never()).tellNext(any(), anySet());
+        verify(ctxMock, never()).tellFailure(any(), any());
+        verifyNoMoreInteractions(ctxMock, relationServiceMock);
+    }
+
+
+    @Test
+    void givenSupportedEntityType_whenOnMsgAndDeleteForSingleEntityIsFalse_thenVerifyRelationFailedToDeleteAndOutMsgFailure() throws JnksIotNodeException {
+        // GIVEN
+        config.setEntityType(EntityType.DEVICE);
+        config.setEntityNamePattern("${name}");
+        config.setEntityTypePattern("${type}");
+
+        var nodeConfiguration = new JnksIotNodeConfiguration(JacksonUtil.valueToTree(config));
+        node.init(ctxMock, nodeConfiguration);
+
+        when(ctxMock.getTenantId()).thenReturn(tenantId);
+        when(ctxMock.getRelationService()).thenReturn(relationServiceMock);
+        when(ctxMock.getDbCallbackExecutor()).thenReturn(dbExecutor);
+
+        var relationToDelete = new EntityRelation();
+        when(relationServiceMock.findByFromAndTypeAsync(any(), any(), any(), any())).thenReturn(Futures.immediateFuture(List.of(relationToDelete)));
+        when(relationServiceMock.deleteRelationAsync(any(), any())).thenReturn(Futures.immediateFuture(false));
+
+        var md = getMetadataWithNameTemplate();
+        var msg = getJnksIotMsg(originatorId, md);
+
+        // WHEN
+        node.onMsg(ctxMock, msg);
+
+        verify(relationServiceMock).findByFromAndTypeAsync(eq(tenantId), eq(originatorId), eq(EntityRelation.CONTAINS_TYPE), eq(RelationTypeGroup.COMMON));
+        verify(relationServiceMock).deleteRelationAsync(eq(tenantId), eq(relationToDelete));
+
+        var throwableCaptor = ArgumentCaptor.forClass(Throwable.class);
+        verify(ctxMock).tellFailure(eq(msg), throwableCaptor.capture());
+        verify(ctxMock, never()).tellNext(any(), anyString());
+        verify(ctxMock, never()).tellNext(any(), anySet());
+        verify(ctxMock, never()).tellSuccess(any());
+        verifyNoMoreInteractions(ctxMock, relationServiceMock);
+        assertThat(throwableCaptor.getValue()).isInstanceOf(RuntimeException.class).hasMessage("Failed to delete relation(s) with originator!");
+    }
+
+
+    private Map<EntityType, Runnable> mockEntityServiceCallsEntityNotFound() {
+        return Map.of(
+                EntityType.DEVICE, () -> {
+                    when(ctxMock.getDeviceService()).thenReturn(deviceServiceMock);
+                    when(deviceServiceMock.findDeviceByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(null));
+                },
+                EntityType.ASSET, () -> {
+                    when(ctxMock.getAssetService()).thenReturn(assetServiceMock);
+                    when(assetServiceMock.findAssetByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(null));
+                },
+                EntityType.CUSTOMER, () -> {
+                    when(ctxMock.getCustomerService()).thenReturn(customerServiceMock);
+                    when(customerServiceMock.findCustomerByTenantIdAndTitleAsync(any(), any())).thenReturn(Futures.immediateFuture(Optional.empty()));
+                },
+                EntityType.ENTITY_VIEW, () -> {
+                    when(ctxMock.getEntityViewService()).thenReturn(entityViewServiceMock);
+                    when(entityViewServiceMock.findEntityViewByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(null));
+                },
+                EntityType.USER, () -> {
+                    when(ctxMock.getUserService()).thenReturn(userServiceMock);
+                    when(userServiceMock.findUserByTenantIdAndEmailAsync(any(), any())).thenReturn(Futures.immediateFuture(null));
+                },
+                EntityType.DASHBOARD, () -> {
+                    when(ctxMock.getDashboardService()).thenReturn(dashboardServiceMock);
+                    when(dashboardServiceMock.findFirstDashboardInfoByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(null));
+                }
+        );
+    }
+
+    private Map<EntityType, Consumer<HasId>> mockEntityServiceCalls() {
+        return Map.of(
+                EntityType.DEVICE, hasId -> {
+                    var device = (Device) hasId;
+                    when(ctxMock.getDeviceService()).thenReturn(deviceServiceMock);
+                    when(deviceServiceMock.findDeviceByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(device));
+                },
+                EntityType.ASSET, hasId -> {
+                    var asset = (Asset) hasId;
+                    when(ctxMock.getAssetService()).thenReturn(assetServiceMock);
+                    when(assetServiceMock.findAssetByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(asset));
+                },
+                EntityType.CUSTOMER, hasId -> {
+                    var customer = (Customer) hasId;
+                    when(ctxMock.getCustomerService()).thenReturn(customerServiceMock);
+                    when(customerServiceMock.findCustomerByTenantIdAndTitleAsync(any(), any())).thenReturn(Futures.immediateFuture(Optional.ofNullable(customer)));
+                },
+                EntityType.ENTITY_VIEW, hasId -> {
+                    var entityView = (EntityView) hasId;
+                    when(ctxMock.getEntityViewService()).thenReturn(entityViewServiceMock);
+                    when(entityViewServiceMock.findEntityViewByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(entityView));
+                },
+                EntityType.USER, hasId -> {
+                    var user = (User) hasId;
+                    when(ctxMock.getUserService()).thenReturn(userServiceMock);
+                    when(userServiceMock.findUserByTenantIdAndEmailAsync(any(), any())).thenReturn(Futures.immediateFuture(user));
+                },
+                EntityType.DASHBOARD, hasId -> {
+                    var dashboard = (Dashboard) hasId;
+                    when(ctxMock.getDashboardService()).thenReturn(dashboardServiceMock);
+                    when(dashboardServiceMock.findFirstDashboardInfoByTenantIdAndNameAsync(any(), any())).thenReturn(Futures.immediateFuture(dashboard));
+                },
+                EntityType.TENANT, hasId -> {
+                    // do nothing. tenantId returned by ctxMock.
+                }
+        );
+    }
+
+    private Map<EntityType, Consumer<HasId>> verifyEntityServiceCalls() {
+        return Map.of(
+                EntityType.DEVICE, hasId -> {
+                    verify(deviceServiceMock).findDeviceByTenantIdAndNameAsync(eq(tenantId), eq("EntityName"));
+                    verifyNoMoreInteractions(deviceServiceMock);
+                },
+                EntityType.ASSET, hasId -> {
+                    verify(assetServiceMock).findAssetByTenantIdAndNameAsync(eq(tenantId), eq("EntityName"));
+                    verifyNoMoreInteractions(assetServiceMock);
+                },
+                EntityType.CUSTOMER, hasId -> {
+                    verify(customerServiceMock).findCustomerByTenantIdAndTitleAsync(eq(tenantId), eq("EntityName"));
+                    verifyNoMoreInteractions(customerServiceMock);
+                },
+                EntityType.ENTITY_VIEW, hasId -> {
+                    verify(entityViewServiceMock).findEntityViewByTenantIdAndNameAsync(eq(tenantId), eq("EntityName"));
+                    verifyNoMoreInteractions(entityViewServiceMock);
+                },
+                EntityType.USER, hasId -> {
+                    verify(userServiceMock).findUserByTenantIdAndEmailAsync(eq(tenantId), eq("EntityName"));
+                    verifyNoMoreInteractions(userServiceMock);
+                },
+                EntityType.DASHBOARD, hasId -> {
+                    verify(dashboardServiceMock).findFirstDashboardInfoByTenantIdAndNameAsync(eq(tenantId), eq("EntityName"));
+                    verifyNoMoreInteractions(dashboardServiceMock);
+                },
+                EntityType.TENANT, hasId -> {
+                }
+        );
+    }
+
+    private JnksIotMsg getJnksIotMsg(EntityId originator, JnksIotMsgMetaData metaData) {
+        return JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.NA)
+                .originator(originator)
+                .copyMetaData(metaData)
+                .data(JnksIotMsg.EMPTY_JSON_OBJECT)
+                .build();
+    }
+
+    private JnksIotMsgMetaData getMetadataWithNameTemplate() {
+        var metaData = new JnksIotMsgMetaData();
+        metaData.putValue("name", "EntityName");
+        return metaData;
+    }
+
+
+    @Override
+    protected JnksIotNode getTestNode() {
+        return node;
+    }
+
+    // Rule nodes upgrade
+    private static Stream<Arguments> givenFromVersionAndConfig_whenUpgrade_thenVerifyHasChangesAndConfig() {
+        return Stream.of(
+                // version 0 config, FROM direction.
+                Arguments.of(0,
+                        "{\"deleteForSingleEntity\":true,\"direction\":\"FROM\",\"entityType\":\"DEVICE\"," +
+                                "\"entityNamePattern\":\"$[name]\",\"relationType\":\"Contains\",\"entityCacheExpiration\":300}",
+                        true,
+                        "{\"deleteForSingleEntity\":true,\"direction\":\"TO\",\"entityType\":\"DEVICE\"," +
+                                "\"entityNamePattern\":\"$[name]\",\"relationType\":\"Contains\"}"),
+                // version 0 config, TO direction.
+                Arguments.of(0,
+                        "{\"deleteForSingleEntity\":true,\"direction\":\"TO\",\"entityType\":\"DEVICE\"," +
+                                "\"entityNamePattern\":\"$[name]\",\"relationType\":\"Contains\",\"entityCacheExpiration\":300}",
+                        true,
+                        "{\"deleteForSingleEntity\":true,\"direction\":\"FROM\",\"entityType\":\"DEVICE\"," +
+                                "\"entityNamePattern\":\"$[name]\",\"relationType\":\"Contains\"}"),
+                // config for version 1 with upgrade from version 0
+                Arguments.of(0,
+                        "{\"deleteForSingleEntity\":true,\"direction\":\"FROM\",\"entityType\":\"DEVICE\"," +
+                                "\"entityNamePattern\":\"$[name]\",\"relationType\":\"Contains\"}",
+                        false,
+                        "{\"deleteForSingleEntity\":true,\"direction\":\"FROM\",\"entityType\":\"DEVICE\"," +
+                                "\"entityNamePattern\":\"$[name]\",\"relationType\":\"Contains\"}")
+        );
+    }
+
+}

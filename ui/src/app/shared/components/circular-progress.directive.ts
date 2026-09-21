@@ -3,7 +3,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
-  selector: '[tb-circular-progress]'
+  selector: '[jnks-iot-circular-progress]'
 })
 export class CircularProgressDirective {
 
@@ -13,7 +13,7 @@ export class CircularProgressDirective {
 
   cssWidth: any;
 
-  @Input('tb-circular-progress')
+  @Input('jnks-iot-circular-progress')
   set showProgress(showProgress: boolean) {
     if (this.showProgressValue !== showProgress) {
       const element = this.elementRef.nativeElement;

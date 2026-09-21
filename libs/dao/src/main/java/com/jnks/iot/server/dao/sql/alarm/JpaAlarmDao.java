@@ -40,7 +40,7 @@ import com.jnks.iot.server.common.data.query.AlarmCountQuery;
 import com.jnks.iot.server.common.data.query.AlarmData;
 import com.jnks.iot.server.common.data.query.AlarmDataQuery;
 import com.jnks.iot.server.common.data.query.OriginatorAlarmFilter;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.dao.DaoUtil;
 import com.jnks.iot.server.dao.TenantEntityDao;
 import com.jnks.iot.server.dao.alarm.AlarmDao;
@@ -283,8 +283,8 @@ public class JpaAlarmDao extends JpaAbstractDao<AlarmEntity, Alarm> implements A
     }
 
     @Override
-    public PageData<TbPair<UUID, Long>> findAlarmIdsByAssigneeId(TenantId tenantId, UserId userId, long createdTimeOffset, AlarmId idOffset, int limit) {
-        Slice<TbPair<UUID, Long>> result;
+    public PageData<JnksIotPair<UUID, Long>> findAlarmIdsByAssigneeId(TenantId tenantId, UserId userId, long createdTimeOffset, AlarmId idOffset, int limit) {
+        Slice<JnksIotPair<UUID, Long>> result;
         Pageable pageRequest = toPageable(new PageLink(limit), List.of(SortOrder.of("createdTime", ASC), SortOrder.of("id", ASC)));
         if (idOffset == null) {
             result = alarmRepository.findAlarmIdsByAssigneeId(tenantId.getId(), userId.getId(), pageRequest);
@@ -295,8 +295,8 @@ public class JpaAlarmDao extends JpaAbstractDao<AlarmEntity, Alarm> implements A
     }
 
     @Override
-    public PageData<TbPair<UUID, Long>> findAlarmIdsByOriginatorId(TenantId tenantId, EntityId originatorId, long createdTimeOffset, AlarmId idOffset, int limit) {
-        Slice<TbPair<UUID, Long>> result;
+    public PageData<JnksIotPair<UUID, Long>> findAlarmIdsByOriginatorId(TenantId tenantId, EntityId originatorId, long createdTimeOffset, AlarmId idOffset, int limit) {
+        Slice<JnksIotPair<UUID, Long>> result;
         Pageable pageRequest = toPageable(new PageLink(limit), List.of(SortOrder.of("createdTime", ASC), SortOrder.of("id", ASC)));
         if (idOffset == null) {
             result = alarmRepository.findAlarmIdsByOriginatorId(originatorId.getId(), pageRequest);

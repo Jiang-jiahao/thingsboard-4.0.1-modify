@@ -1,24 +1,24 @@
-<div class="tb-js-func-modules-panel">
-  <div class="tb-js-func-modules-panel-title" translate>js-func.modules</div>
-  <div class="tb-js-func-modules-panel-content">
-    <div class="tb-form-panel no-border no-padding tb-js-func-modules">
-      <div class="tb-form-table">
-        <div class="tb-form-table-header">
-          <div class="tb-form-table-header-cell tb-alias-header" translate>js-func.module-alias</div>
-          <div class="tb-form-table-header-cell tb-module-link-header" translate>js-func.module-resource</div>
-          <div class="tb-form-table-header-cell tb-actions-header"></div>
+<div class="jnks-iot-js-func-modules-panel">
+  <div class="jnks-iot-js-func-modules-panel-title" translate>js-func.modules</div>
+  <div class="jnks-iot-js-func-modules-panel-content">
+    <div class="jnks-iot-form-panel no-border no-padding jnks-iot-js-func-modules">
+      <div class="jnks-iot-form-table">
+        <div class="jnks-iot-form-table-header">
+          <div class="jnks-iot-form-table-header-cell jnks-iot-alias-header" translate>js-func.module-alias</div>
+          <div class="jnks-iot-form-table-header-cell jnks-iot-module-link-header" translate>js-func.module-resource</div>
+          <div class="jnks-iot-form-table-header-cell jnks-iot-actions-header"></div>
         </div>
-        <div *ngIf="modulesFormArray().controls.length; else noModules" class="tb-form-table-body">
+        <div *ngIf="modulesFormArray().controls.length; else noModules" class="jnks-iot-form-table-body">
           <div *ngFor="let moduleControl of modulesFormArray().controls; trackBy: trackByModule; let $index = index;">
-            <tb-js-func-module-row class="flex"
+            <jnks-iot-js-func-module-row class="flex"
                                    [index]="$index"
                                    [formControl]="moduleControl"
                                    (moduleRemoved)="removeModule($index)">
-            </tb-js-func-module-row>
+            </jnks-iot-js-func-module-row>
           </div>
         </div>
-        <tb-error *ngIf="modulesFormGroup.hasError('moduleAliasNotUnique')"
-                  noMargin [error]="'js-func.not-unique-module-aliases-error' | translate" style="padding-left: 12px;"></tb-error>
+        <jnks-iot-error *ngIf="modulesFormGroup.hasError('moduleAliasNotUnique')"
+                  noMargin [error]="'js-func.not-unique-module-aliases-error' | translate" style="padding-left: 12px;"></jnks-iot-error>
       </div>
       <div>
         <button type="button" mat-stroked-button color="primary" (click)="addModule()">
@@ -27,7 +27,7 @@
       </div>
     </div>
   </div>
-  <div class="tb-js-func-modules-panel-buttons">
+  <div class="jnks-iot-js-func-modules-panel-buttons">
     <button mat-button
             color="primary"
             type="button"
@@ -45,5 +45,5 @@
 </div>
 
 <ng-template #noModules>
-  <span class="tb-prompt flex items-center justify-center">{{ 'js-func.no-modules' | translate }}</span>
+  <span class="jnks-iot-prompt flex items-center justify-center">{{ 'js-func.no-modules' | translate }}</span>
 </ng-template>

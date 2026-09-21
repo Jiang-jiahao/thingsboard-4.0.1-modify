@@ -4,10 +4,10 @@
   display: flex;
   flex: 1 1 0;
 
-  .tb-two-factor-auth-login-content {
+  .jnks-iot-two-factor-auth-login-content {
     background-color: #eee;
 
-    .tb-two-factor-auth-login-card {
+    .jnks-iot-two-factor-auth-login-card {
       padding: 48px 48px 48px 16px;
 
       @media #{$mat-gt-xs} {

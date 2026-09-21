@@ -1,9 +1,9 @@
 import L from 'leaflet';
 import { GenericFunction, ShowTooltipAction, WidgetToolipSettings } from './map-models';
 import { Datasource, FormattedData } from '@app/shared/models/widget.models';
-import { fillDataPattern, isDefinedAndNotNull, isString, processDataPattern, safeExecuteTbFunction } from '@core/utils';
+import { fillDataPattern, isDefinedAndNotNull, isString, processDataPattern, safeExecuteJnksIotFunction } from '@core/utils';
 import { parseWithTranslation } from '@home/components/widget/lib/maps-legacy/common-maps-utils';
-import { CompiledTbFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction } from '@shared/models/js-function.models';
 
 export function createTooltip(target: L.Layer,
                               settings: Partial<WidgetToolipSettings>,
@@ -39,7 +39,7 @@ export function createTooltip(target: L.Layer,
 
 export function bindPopupActions(popup: L.Popup, settings: Partial<WidgetToolipSettings>,
                                  datasource: Datasource) {
-  const actions = popup.getElement().getElementsByClassName('tb-custom-action');
+  const actions = popup.getElement().getElementsByClassName('jnks-iot-custom-action');
   Array.from(actions).forEach(
     (element: HTMLElement) => {
       const actionName = element.getAttribute('data-action-name');
@@ -72,7 +72,7 @@ export function isJSON(data: string): boolean {
 export interface LabelSettings {
   showLabel: boolean;
   useLabelFunction: boolean;
-  parsedLabelFunction: CompiledTbFunction<GenericFunction>;
+  parsedLabelFunction: CompiledJnksIotFunction<GenericFunction>;
   label: string;
 }
 
@@ -80,7 +80,7 @@ export function entitiesParseName(entities: FormattedData[], labelSettings: Labe
   const div = document.createElement('div');
   for (const entity of entities) {
     if (labelSettings?.showLabel) {
-      const pattern = labelSettings.useLabelFunction ? safeExecuteTbFunction(labelSettings.parsedLabelFunction,
+      const pattern = labelSettings.useLabelFunction ? safeExecuteJnksIotFunction(labelSettings.parsedLabelFunction,
         [entity, entities, entity.dsIndex]) : labelSettings.label;
       const markerLabelText = parseWithTranslation.prepareProcessPattern(pattern, true);
       const replaceInfoLabelMarker = processDataPattern(pattern, entity);

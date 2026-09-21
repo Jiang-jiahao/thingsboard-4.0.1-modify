@@ -28,8 +28,8 @@
             {{ 'device-profile.snmp.querying-frequency-invalid-format' | translate }}
           </mat-error>
         </mat-form-field>
-        <tb-snmp-device-profile-mapping formControlName="mappings">
-        </tb-snmp-device-profile-mapping>
+        <jnks-iot-snmp-device-profile-mapping formControlName="mappings">
+        </jnks-iot-snmp-device-profile-mapping>
       </section>
     </div>
     <button *ngIf="!disabled"
@@ -42,7 +42,7 @@
     </button>
   </div>
   <div *ngIf="!communicationConfigFormArray.controls.length && !disabled">
-      <span class="tb-prompt required required-text flex items-center justify-center" translate>device-profile.snmp.please-add-communication-config</span>
+      <span class="jnks-iot-prompt required required-text flex items-center justify-center" translate>device-profile.snmp.please-add-communication-config</span>
   </div>
   <div *ngIf="!disabled && isAddEnabled">
     <button mat-stroked-button color="primary"

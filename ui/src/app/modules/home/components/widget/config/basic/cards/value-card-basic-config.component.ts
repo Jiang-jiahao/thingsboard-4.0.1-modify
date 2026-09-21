@@ -33,7 +33,7 @@ import {
 } from '@home/components/widget/lib/cards/value-card-widget.models';
 
 @Component({
-  selector: 'tb-value-card-basic-config',
+  selector: 'jnks-iot-value-card-basic-config',
   templateUrl: './value-card-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

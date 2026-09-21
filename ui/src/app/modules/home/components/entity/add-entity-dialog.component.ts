@@ -7,7 +7,7 @@ import { UntypedFormControl, UntypedFormGroup, FormGroupDirective, NgForm } from
 import { EntityTypeResource, EntityTypeTranslation } from '@shared/models/entity-type.models';
 import { BaseData, HasId } from '@shared/models/base-data';
 import { EntityId } from '@shared/models/id/entity-id';
-import { TbAnchorComponent } from '@shared/components/tb-anchor.component';
+import { JnksIotAnchorComponent } from '@shared/components/jnks-iot-anchor.component';
 import { EntityComponent } from './entity.component';
 import { EntityTableConfig } from '@home/models/entity/entities-table-config.models';
 import { AddEntityDialogData } from '@home/models/entity/entity-component.models';
@@ -15,7 +15,7 @@ import { DialogComponent } from '@shared/components/dialog.component';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'tb-add-entity-dialog',
+  selector: 'jnks-iot-add-entity-dialog',
   templateUrl: './add-entity-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: AddEntityDialogComponent}],
   styleUrls: ['./add-entity-dialog.component.scss']
@@ -33,7 +33,7 @@ export class AddEntityDialogComponent extends
 
   submitted = false;
 
-  @ViewChild('entityDetailsForm', {static: true}) entityDetailsFormAnchor: TbAnchorComponent;
+  @ViewChild('entityDetailsForm', {static: true}) entityDetailsFormAnchor: JnksIotAnchorComponent;
 
   constructor(protected store: Store<AppState>,
               protected router: Router,

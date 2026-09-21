@@ -1,5 +1,5 @@
 <form [formGroup]="tcpDeviceProfileTransportConfigurationFormGroup" class="flex flex-col gap-2 pb-4">
-    <div class="tb-hint mat-body-2" style="margin: 0 0 8px; padding: 12px 14px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);">
+    <div class="jnks-iot-hint mat-body-2" style="margin: 0 0 8px; padding: 12px 14px; border-radius: 4px; border-left: 4px solid var(--tb-primary-color, #305680); background: rgba(0, 0, 0, 0.04);">
         <span translate>device-profile.tcp.profile-network-notice</span>
     </div>
     <div class="flex flex-row gap-2 xs:flex-col">
@@ -89,8 +89,8 @@
     </div>
     <div *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('dataType').value === TransportTcpDataType.RAW_BYTES"
          class="flex flex-col gap-3 mat-elevation-z1" style="padding: 12px; border-radius: 4px;">
-      <div class="tb-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.protocol-template-bundle-hint</div>
-      <div *ngIf="hexRequiresProtocolTemplateBundleHint()" class="tb-hint mat-body-2" style="margin: 0; color: var(--tb-warn-color, #f57c00);"
+      <div class="jnks-iot-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.protocol-template-bundle-hint</div>
+      <div *ngIf="hexRequiresProtocolTemplateBundleHint()" class="jnks-iot-hint mat-body-2" style="margin: 0; color: var(--tb-warn-color, #f57c00);"
            translate>device-profile.tcp.hex-requires-protocol-template-bundle</div>
       <mat-form-field class="mat-block" subscriptSizing="dynamic">
         <mat-label translate>device-profile.tcp.protocol-template-bundle</mat-label>
@@ -103,19 +103,19 @@
           <a routerLink="/profiles/protocolTemplates">{{ 'device-profile.tcp.protocol-template-library-link' | translate }}</a>
         </mat-hint>
       </mat-form-field>
-      <div *ngIf="protocolTemplateBundleSelectedButMissing" class="tb-hint mat-body-2" style="margin: 0; color: var(--tb-warn-color, #f57c00);"
+      <div *ngIf="protocolTemplateBundleSelectedButMissing" class="jnks-iot-hint mat-body-2" style="margin: 0; color: var(--tb-warn-color, #f57c00);"
            translate>device-profile.tcp.protocol-template-bundle-missing</div>
 
       <ng-container *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('protocolTemplateBundleId').value">
         <mat-divider></mat-divider>
-        <div class="tb-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-rules-from-bundle-applied</div>
+        <div class="jnks-iot-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-rules-from-bundle-applied</div>
       </ng-container>
 
       <ng-container *ngIf="showHexManualParsingSection">
       <mat-divider></mat-divider>
 
       <div class="mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-command-section-title</div>
-      <div class="tb-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-command-section-hint</div>
+      <div class="jnks-iot-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-command-section-hint</div>
       <div formArrayName="hexCommandProfiles">
         <mat-accordion multi="true">
           <ng-container *ngFor="let cgp of hexCommandProfilesArray.controls; let ci = index">
@@ -166,7 +166,7 @@
                     <input matInput type="number" formControlName="secondaryMatchValue">
                   </mat-form-field>
                 </div>
-                <div class="tb-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-cmd-secondary-hint</div>
+                <div class="jnks-iot-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-cmd-secondary-hint</div>
                 <div formArrayName="fields" class="flex flex-col gap-3">
                   <div *ngFor="let row of getCommandFieldsArray(ci).controls; let fi = index" [formGroupName]="fi"
                        class="flex flex-row flex-wrap gap-2 items-end">
@@ -241,7 +241,7 @@
 
       <mat-divider></mat-divider>
       <div class="mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-default-section-title</div>
-      <div class="tb-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-default-section-hint</div>
+      <div class="jnks-iot-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.hex-default-section-hint</div>
       <div formArrayName="hexProtocolFields" class="flex flex-col gap-3">
         <div *ngFor="let i of hexProtocolFieldIndicesSortedByByteOffset()" [formGroupName]="i"
              class="flex flex-row flex-wrap gap-2 items-end">
@@ -303,7 +303,7 @@
 
       <mat-divider></mat-divider>
       <div class="mat-body-2" style="margin: 8px 0 0;" translate>device-profile.tcp.protocol-template-checksum-title</div>
-      <div class="tb-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.protocol-template-checksum-hint</div>
+      <div class="jnks-iot-hint mat-body-2" style="margin: 0;" translate>device-profile.tcp.protocol-template-checksum-hint</div>
       <div class="flex flex-row flex-wrap gap-2 items-start">
         <mat-form-field class="flex-1" style="min-width: 200px;">
           <mat-label translate>device-profile.tcp.protocol-template-checksum-type</mat-label>
@@ -337,7 +337,7 @@
         <mat-expansion-panel-header>
           <mat-panel-title translate>device-profile.tcp.hex-ltv-section-title</mat-panel-title>
         </mat-expansion-panel-header>
-        <div class="tb-hint mat-body-2" style="margin-bottom: 12px;" translate>device-profile.tcp.hex-ltv-section-hint</div>
+        <div class="jnks-iot-hint mat-body-2" style="margin-bottom: 12px;" translate>device-profile.tcp.hex-ltv-section-hint</div>
         <mat-slide-toggle formControlName="hexLtvEnabled" color="primary" class="mb-3">
           <span translate>device-profile.tcp.hex-ltv-enable</span>
         </mat-slide-toggle>
@@ -346,13 +346,13 @@
                           (change)="onTcpHexLtvLengthIncludesTagChange($event.checked)">
           <span translate>device-profile.tcp.hex-ltv-length-includes-tag</span>
         </mat-slide-toggle>
-        <div *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled').value" class="tb-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-length-includes-tag-hint</div>
+        <div *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled').value" class="jnks-iot-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-length-includes-tag-hint</div>
         <mat-slide-toggle *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled').value"
                           formControlName="hexLtvLengthIncludesLengthField" color="primary" class="mb-2"
                           (change)="onTcpHexLtvLengthIncludesLengthFieldChange($event.checked)">
           <span translate>device-profile.tcp.hex-ltv-length-includes-length-field</span>
         </mat-slide-toggle>
-        <div *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled').value" class="tb-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-length-includes-length-field-hint</div>
+        <div *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled').value" class="jnks-iot-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-length-includes-length-field-hint</div>
         <div *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('hexLtvEnabled').value" class="flex flex-col gap-3">
           <div class="flex flex-row flex-wrap gap-2">
             <mat-form-field style="width: 110px;">
@@ -395,7 +395,7 @@
             </mat-form-field>
           </div>
           <div class="mat-body-2" translate>device-profile.tcp.hex-ltv-mappings-title</div>
-          <div class="tb-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-mappings-hint</div>
+          <div class="jnks-iot-hint mat-caption mb-2" translate>device-profile.tcp.hex-ltv-mappings-hint</div>
           <div formArrayName="hexLtvTagMappings" class="flex flex-col gap-2">
             <div *ngFor="let row of hexLtvTagMappingsArray.controls; let li = index" [formGroupName]="li"
                  class="flex flex-row flex-wrap gap-2 items-end">

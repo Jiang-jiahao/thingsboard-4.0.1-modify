@@ -7,8 +7,8 @@ import org.springframework.data.redis.serializer.SerializationException;
 import org.springframework.stereotype.Service;
 import com.jnks.iot.server.cache.CacheSpecsMap;
 import com.jnks.iot.server.cache.TBRedisCacheConfiguration;
-import com.jnks.iot.server.cache.TbRedisSerializer;
-import com.jnks.iot.server.cache.VersionedRedisTbCache;
+import com.jnks.iot.server.cache.JnksIotRedisSerializer;
+import com.jnks.iot.server.cache.VersionedRedisJnksIotCache;
 import com.jnks.iot.server.common.data.CacheConstants;
 import com.jnks.iot.server.common.data.kv.AttributeKvEntry;
 import com.jnks.iot.server.common.util.ProtoUtils;
@@ -16,10 +16,10 @@ import com.jnks.iot.server.gen.transport.TransportProtos.AttributeValueProto;
 
 @ConditionalOnProperty(prefix = "cache", value = "type", havingValue = "redis")
 @Service("AttributeCache")
-public class AttributeRedisCache extends VersionedRedisTbCache<AttributeCacheKey, AttributeKvEntry> {
+public class AttributeRedisCache extends VersionedRedisJnksIotCache<AttributeCacheKey, AttributeKvEntry> {
 
     public AttributeRedisCache(TBRedisCacheConfiguration configuration, CacheSpecsMap cacheSpecsMap, RedisConnectionFactory connectionFactory) {
-        super(CacheConstants.ATTRIBUTES_CACHE, cacheSpecsMap, connectionFactory, configuration, new TbRedisSerializer<>() {
+        super(CacheConstants.ATTRIBUTES_CACHE, cacheSpecsMap, connectionFactory, configuration, new JnksIotRedisSerializer<>() {
             @Override
             public byte[] serialize(AttributeKvEntry attributeKvEntry) throws SerializationException {
                 return ProtoUtils.toProto(attributeKvEntry).toByteArray();

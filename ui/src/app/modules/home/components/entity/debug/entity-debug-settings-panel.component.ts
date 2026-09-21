@@ -8,7 +8,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { FormBuilder } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SharedModule } from '@shared/shared.module';
@@ -23,7 +23,7 @@ import { EntityType, entityTypeTranslations } from '@shared/models/entity-type.m
 import { getCurrentAuthState } from '@core/auth/auth.selectors';
 
 @Component({
-  selector: 'tb-entity-debug-settings-panel',
+  selector: 'jnks-iot-entity-debug-settings-panel',
   templateUrl: './entity-debug-settings-panel.component.html',
   standalone: true,
   imports: [
@@ -70,7 +70,7 @@ export class EntityDebugSettingsPanelComponent extends PageComponent implements 
 
   constructor(private fb: FormBuilder,
               private cd: ChangeDetectorRef,
-              private popover: TbPopoverComponent<EntityDebugSettingsPanelComponent>) {
+              private popover: JnksIotPopoverComponent<EntityDebugSettingsPanelComponent>) {
     super();
 
     this.debugAllControl.valueChanges.pipe(

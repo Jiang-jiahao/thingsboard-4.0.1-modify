@@ -35,7 +35,7 @@ interface AlarmCommentsDisplayData {
 }
 
 @Component({
-  selector: 'tb-alarm-comment',
+  selector: 'jnks-iot-alarm-comment',
   templateUrl: './alarm-comment.component.html',
   styleUrls: ['./alarm-comment.component.scss']
 })

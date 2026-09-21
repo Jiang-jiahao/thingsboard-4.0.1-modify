@@ -19,12 +19,12 @@ function additionalComposeArgs() {
 function additionalComposeQueueArgs() {
     source .env
     ADDITIONAL_COMPOSE_QUEUE_ARGS=""
-    case $TB_QUEUE_TYPE in
+    case $JNKS_IOT_QUEUE_TYPE in
         kafka)
         ADDITIONAL_COMPOSE_QUEUE_ARGS="-f ../kafka/kafka.yml"
         ;;
         *)
-        echo "Unknown Queue service TB_QUEUE_TYPE value specified in the .env file: '${TB_QUEUE_TYPE}'. Should be 'kafka'." >&2
+        echo "Unknown Queue service JNKS_IOT_QUEUE_TYPE value specified in the .env file: '${JNKS_IOT_QUEUE_TYPE}'. Should be 'kafka'." >&2
         exit 1
     esac
     echo $ADDITIONAL_COMPOSE_QUEUE_ARGS
@@ -102,7 +102,7 @@ function additionalComposeEdqsArgs() {
 
     if [ "$EDQS_ENABLED" = true ]
     then
-      ADDITIONAL_COMPOSE_EDQS_ARGS="-f ../tb-edqs/edqs.yml"
+      ADDITIONAL_COMPOSE_EDQS_ARGS="-f ../jnks-iot-edqs/edqs.yml"
       echo $ADDITIONAL_COMPOSE_EDQS_ARGS
     else
       echo ""
@@ -111,17 +111,17 @@ function additionalComposeEdqsArgs() {
 
 function permissionList() {
     PERMISSION_LIST="
-      999  999  tb-core/log
-      999  999  tb-rule-engine/log
-      999  999  ../tb-monolith/log
-      999  999  tb-transports/lwm2m/log
-      999  999  tb-transports/http/log
-      999  999  tb-transports/mqtt/log
-      999  999  tb-transports/snmp/log
-      999  999  tb-transports/coap/log
-      999  999  tb-transports/tcp/log
-      999  999  tb-transports/udp/log
-      999  999  tb-vc-executor/log
+      999  999  jnks-iot-core/log
+      999  999  jnks-iot-rule-engine/log
+      999  999  ../jnks-iot-monolith/log
+      999  999  jnks-iot-transports/lwm2m/log
+      999  999  jnks-iot-transports/http/log
+      999  999  jnks-iot-transports/mqtt/log
+      999  999  jnks-iot-transports/snmp/log
+      999  999  jnks-iot-transports/coap/log
+      999  999  jnks-iot-transports/tcp/log
+      999  999  jnks-iot-transports/udp/log
+      999  999  jnks-iot-vc-executor/log
       999  999  ../tb/postgres-data
       "
 
@@ -129,13 +129,13 @@ function permissionList() {
 
     if [ "$DATABASE" = "hybrid" ]; then
       PERMISSION_LIST="$PERMISSION_LIST
-      999  999  ../tb-monolith/cassandra
+      999  999  ../jnks-iot-monolith/cassandra
       "
     fi
 
     if [ "$EDQS_ENABLED" = true ]; then
       PERMISSION_LIST="$PERMISSION_LIST
-      999  999  ../tb-edqs/log
+      999  999  ../jnks-iot-edqs/log
       "
     fi
 
@@ -148,19 +148,19 @@ function permissionList() {
         ;;
         redis-cluster)
           PERMISSION_LIST="$PERMISSION_LIST
-          1001 1001 ../tb-monolith/redis-cluster-data-0
-          1001 1001 ../tb-monolith/redis-cluster-data-1
-          1001 1001 ../tb-monolith/redis-cluster-data-2
-          1001 1001 ../tb-monolith/redis-cluster-data-3
-          1001 1001 ../tb-monolith/redis-cluster-data-4
-          1001 1001 ../tb-monolith/redis-cluster-data-5
+          1001 1001 ../jnks-iot-monolith/redis-cluster-data-0
+          1001 1001 ../jnks-iot-monolith/redis-cluster-data-1
+          1001 1001 ../jnks-iot-monolith/redis-cluster-data-2
+          1001 1001 ../jnks-iot-monolith/redis-cluster-data-3
+          1001 1001 ../jnks-iot-monolith/redis-cluster-data-4
+          1001 1001 ../jnks-iot-monolith/redis-cluster-data-5
           "
         ;;
         redis-sentinel)
           PERMISSION_LIST="$PERMISSION_LIST
-          1001 1001 ../tb-monolith/redis-sentinel-data-master
-          1001 1001 ../tb-monolith/redis-sentinel-data-slave
-          1001 1001 ../tb-monolith/redis-sentinel-data-sentinel
+          1001 1001 ../jnks-iot-monolith/redis-sentinel-data-master
+          1001 1001 ../jnks-iot-monolith/redis-sentinel-data-slave
+          1001 1001 ../jnks-iot-monolith/redis-sentinel-data-sentinel
           "
         ;;
         *)

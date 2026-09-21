@@ -39,9 +39,9 @@ import com.jnks.iot.server.gen.transport.TransportProtos;
 import com.jnks.iot.server.gen.transport.TransportProtos.EdqsEventMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.FromEdqsMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToEdqsMsg;
-import com.jnks.iot.server.queue.TbQueueHandler;
-import com.jnks.iot.server.queue.TbQueueResponseTemplate;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueHandler;
+import com.jnks.iot.server.queue.JnksIotQueueResponseTemplate;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
 import com.jnks.iot.server.queue.common.consumer.PartitionedQueueConsumerManager;
 import com.jnks.iot.server.queue.discovery.QueueKey;
 import com.jnks.iot.server.queue.discovery.event.PartitionChangeEvent;
@@ -70,7 +70,7 @@ import static com.jnks.iot.server.common.msg.queue.TopicPartitionInfo.withTopic;
  *   <li><b>事件侧</b>：创建并持有 events Topic 的 {@link PartitionedQueueConsumerManager}，
  *       将消息交给 {@link #process(ToEdqsMsg, boolean)} 更新 {@link EdqsRepository}；
  *       分区订阅由 {@link EdqsStateService} 在状态恢复完成后驱动；</li>
- *   <li><b>查询侧</b>：实现 {@link TbQueueHandler}，通过 {@link #responseTemplate}
+ *   <li><b>查询侧</b>：实现 {@link JnksIotQueueHandler}，通过 {@link #responseTemplate}
  *       订阅 requests Topic，异步执行实体数据 / 计数查询并回写响应。</li>
  * </ul>
  * <p>
@@ -90,7 +90,7 @@ import static com.jnks.iot.server.common.msg.queue.TopicPartitionInfo.withTopic;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EdqsProcessor implements TbQueueHandler<TbProtoQueueMsg<ToEdqsMsg>, TbProtoQueueMsg<FromEdqsMsg>> {
+public class EdqsProcessor implements JnksIotQueueHandler<JnksIotProtoQueueMsg<ToEdqsMsg>, JnksIotProtoQueueMsg<FromEdqsMsg>> {
 
     /**
      * EDQS 队列工厂：创建事件消费者、请求-响应模板及队列管理客户端等。
@@ -140,12 +140,12 @@ public class EdqsProcessor implements TbQueueHandler<TbProtoQueueMsg<ToEdqsMsg>,
      * 在 {@link #init} 中构建；实际 {@code addPartitions}/{@code update} 由
      * {@link EdqsStateService#process} 在状态就绪后触发，本类不直接改分区。
      */
-    private PartitionedQueueConsumerManager<TbProtoQueueMsg<ToEdqsMsg>> eventConsumer;
+    private PartitionedQueueConsumerManager<JnksIotProtoQueueMsg<ToEdqsMsg>> eventConsumer;
 
     /**
      * 请求-响应模板：订阅 requests Topic，将查询消息交给本类 {@link #handle}，再回写 FromEdqsMsg。
      */
-    private TbQueueResponseTemplate<TbProtoQueueMsg<ToEdqsMsg>, TbProtoQueueMsg<FromEdqsMsg>> responseTemplate;
+    private JnksIotQueueResponseTemplate<JnksIotProtoQueueMsg<ToEdqsMsg>, JnksIotProtoQueueMsg<FromEdqsMsg>> responseTemplate;
 
     /**
      * 事件 / 状态等消费循环使用的线程池（cached）。
@@ -210,12 +210,12 @@ public class EdqsProcessor implements TbQueueHandler<TbProtoQueueMsg<ToEdqsMsg>,
                         .execute(applicationContext::close);
             }
         };
-        eventConsumer = PartitionedQueueConsumerManager.<TbProtoQueueMsg<ToEdqsMsg>>create()
+        eventConsumer = PartitionedQueueConsumerManager.<JnksIotProtoQueueMsg<ToEdqsMsg>>create()
                 .queueKey(new QueueKey(ServiceType.EDQS, config.getEventsTopic()))
                 .topic(config.getEventsTopic())
                 .pollInterval(config.getPollInterval())
                 .msgPackProcessor((msgs, consumer, config) -> {
-                    for (TbProtoQueueMsg<ToEdqsMsg> queueMsg : msgs) {
+                    for (JnksIotProtoQueueMsg<ToEdqsMsg> queueMsg : msgs) {
                         if (consumer.isStopped()) {
                             return;
                         }
@@ -313,7 +313,7 @@ public class EdqsProcessor implements TbQueueHandler<TbProtoQueueMsg<ToEdqsMsg>,
      * @return 异步完成的响应消息 Future
      */
     @Override
-    public ListenableFuture<TbProtoQueueMsg<FromEdqsMsg>> handle(TbProtoQueueMsg<ToEdqsMsg> queueMsg) {
+    public ListenableFuture<JnksIotProtoQueueMsg<FromEdqsMsg>> handle(JnksIotProtoQueueMsg<ToEdqsMsg> queueMsg) {
         ToEdqsMsg toEdqsMsg = queueMsg.getValue();
         return requestExecutor.submit(() -> {
             EdqsRequest request;
@@ -329,7 +329,7 @@ public class EdqsProcessor implements TbQueueHandler<TbProtoQueueMsg<ToEdqsMsg>,
             }
 
             EdqsResponse response = processRequest(tenantId, customerId, request);
-            return new TbProtoQueueMsg<>(queueMsg.getKey(), FromEdqsMsg.newBuilder()
+            return new JnksIotProtoQueueMsg<>(queueMsg.getKey(), FromEdqsMsg.newBuilder()
                     .setResponseMsg(TransportProtos.EdqsResponseMsg.newBuilder()
                             .setValue(JacksonUtil.toString(response))
                             .build())

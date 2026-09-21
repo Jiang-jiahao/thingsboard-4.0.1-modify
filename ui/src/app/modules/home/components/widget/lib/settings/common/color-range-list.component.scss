@@ -11,19 +11,19 @@
   border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 6px;
 }
-.tb-add-color-range {
+.jnks-iot-add-color-range {
   button {
     width: 100%;
   }
 }
-.tb-value-range-text {
+.jnks-iot-value-range-text {
   width: 64px;
   font-size: 14px;
   color: rgba(0, 0, 0, 0.38);
   @media #{$mat-xs} {
     width: auto;
   }
-  &.tb-value-range-text-to {
+  &.jnks-iot-value-range-text-to {
     text-align: center;
   }
 }

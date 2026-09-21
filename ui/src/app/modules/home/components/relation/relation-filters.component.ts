@@ -17,7 +17,7 @@ import { takeUntil } from 'rxjs/operators';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-relation-filters',
+  selector: 'jnks-iot-relation-filters',
   templateUrl: './relation-filters.component.html',
   styleUrls: ['./relation-filters.component.scss'],
   providers: [

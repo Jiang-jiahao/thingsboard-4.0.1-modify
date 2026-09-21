@@ -27,7 +27,7 @@ export interface DashboardStateDialogData {
 }
 
 @Component({
-  selector: 'tb-dashboard-state-dialog',
+  selector: 'jnks-iot-dashboard-state-dialog',
   templateUrl: './dashboard-state-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: DashboardStateDialogComponent}],
   styleUrls: []

@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef } from '@angular/core';
 
 @Component({
-  selector: 'tb-toggle-password',
+  selector: 'jnks-iot-toggle-password',
   templateUrl: 'toggle-password.component.html',
   styleUrls: [],
 })

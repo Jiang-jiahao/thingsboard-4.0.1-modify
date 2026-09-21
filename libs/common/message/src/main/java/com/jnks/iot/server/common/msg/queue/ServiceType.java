@@ -7,11 +7,11 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum ServiceType {
 
-    TB_CORE("TB Core"),
-    TB_RULE_ENGINE("TB Rule Engine"),
-    TB_TRANSPORT("TB Transport"),
+    JNKS_IOT_CORE("TB Core"),
+    JNKS_IOT_RULE_ENGINE("TB Rule Engine"),
+    JNKS_IOT_TRANSPORT("TB Transport"),
     JS_EXECUTOR("JS Executor"),
-    TB_VC_EXECUTOR("TB VC Executor"),
+    JNKS_IOT_VC_EXECUTOR("TB VC Executor"),
     EDQS("TB Entity Data Query Service");
 
     private final String label;

@@ -13,11 +13,11 @@
     <name>apps</name>
     <modules>
         <module>base</module>
-        <module>tb-core</module>
-        <module>tb-rule-engine</module>
+        <module>jnks-iot-core</module>
+        <module>jnks-iot-rule-engine</module>
         <module>monolith</module>
-        <module>tb-transport</module>
-        <module>tb-edqs</module>
+        <module>jnks-iot-transport</module>
+        <module>jnks-iot-edqs</module>
         <module>vc-executor</module>
     </modules>
 

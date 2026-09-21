@@ -20,7 +20,7 @@ import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-smpp-sms-provider-configuration',
+  selector: 'jnks-iot-smpp-sms-provider-configuration',
   templateUrl: './smpp-sms-provider-configuration.component.html',
   styleUrls: [],
   providers: [{

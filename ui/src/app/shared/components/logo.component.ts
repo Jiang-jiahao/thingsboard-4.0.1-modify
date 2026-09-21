@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { environment as env } from '@env/environment';
 
 @Component({
-  selector: 'tb-logo',
+  selector: 'jnks-iot-logo',
   templateUrl: './logo.component.html',
   styleUrls: ['./logo.component.scss']
 })

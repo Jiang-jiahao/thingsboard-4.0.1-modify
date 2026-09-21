@@ -1,7 +1,7 @@
 <mat-toolbar color="primary">
   <h2>{{ dialogTitle | translate }}</h2>
   <span class="flex-1"></span>
-<!--  <div [tb-help]="'check-connectivity'"></div>-->
+<!--  <div [jnks-iot-help]="'check-connectivity'"></div>-->
   <button mat-icon-button
           (click)="close()"
           type="button">
@@ -9,53 +9,53 @@
   </button>
 </mat-toolbar>
 <div mat-dialog-content>
-  <section *ngIf="loadedCommand; else loadingCommand" class="tb-form-panel no-padding no-border">
-    <tb-toggle-header #transportProtocol
+  <section *ngIf="loadedCommand; else loadingCommand" class="jnks-iot-form-panel no-padding no-border">
+    <jnks-iot-toggle-header #transportProtocol
                       value="{{ selectTransportType }}"
                       name="TransportProtocol"
                       useSelectOnMdLg="false"
                       appearance="fill"
                       [class.!hidden]="allowTransportType.size < 2">
-      <tb-toggle-option
+      <jnks-iot-toggle-option
         *ngIf="allowTransportType.has(DeviceTransportType.HTTP_PULL)"
         [value]="DeviceTransportType.HTTP_PULL">
         {{ 'device-profile.http.mode-pull' | translate }}
-      </tb-toggle-option>
-      <tb-toggle-option
+      </jnks-iot-toggle-option>
+      <jnks-iot-toggle-option
         *ngIf="allowTransportType.has(BasicTransportType.HTTP)"
         [value]="BasicTransportType.HTTP">
         {{ deviceTransportTypeTranslationMap.get(BasicTransportType.HTTP) | translate }}
-      </tb-toggle-option>
-      <tb-toggle-option
+      </jnks-iot-toggle-option>
+      <jnks-iot-toggle-option
         *ngIf="allowTransportType.has(DeviceTransportType.MQTT)"
         [value]="DeviceTransportType.MQTT">
         {{ deviceTransportTypeTranslationMap.get(DeviceTransportType.MQTT) | translate }}
-      </tb-toggle-option>
-      <tb-toggle-option
+      </jnks-iot-toggle-option>
+      <jnks-iot-toggle-option
         *ngIf="allowTransportType.has(DeviceTransportType.COAP)"
         [value]="DeviceTransportType.COAP">
         {{ deviceTransportTypeTranslationMap.get(DeviceTransportType.COAP) | translate }}
-      </tb-toggle-option>
-      <tb-toggle-option
+      </jnks-iot-toggle-option>
+      <jnks-iot-toggle-option
         *ngIf="allowTransportType.has(DeviceTransportType.SNMP)"
         [value]="DeviceTransportType.SNMP">
         {{ deviceTransportTypeTranslationMap.get(DeviceTransportType.SNMP) | translate }}
-      </tb-toggle-option>
-      <tb-toggle-option
+      </jnks-iot-toggle-option>
+      <jnks-iot-toggle-option
         *ngIf="allowTransportType.has(DeviceTransportType.LWM2M)"
         [value]="DeviceTransportType.LWM2M">
         {{ deviceTransportTypeTranslationMap.get(DeviceTransportType.LWM2M) | translate }}
-      </tb-toggle-option>
-    </tb-toggle-header>
-    <div class="tb-form-panel no-padding no-border" [class.!hidden]="!allowTransportType.size">
+      </jnks-iot-toggle-option>
+    </jnks-iot-toggle-header>
+    <div class="jnks-iot-form-panel no-padding no-border" [class.!hidden]="!allowTransportType.size">
       <ng-container [ngSwitch]="transportProtocol.value">
         <ng-template [ngSwitchCase]="DeviceTransportType.HTTP_PULL">
-          <div class="tb-form-panel stroked">
-            <p class="tb-hint tb-font-14">{{ 'device.connectivity.http-pull-check-connectivity-hint' | translate }}</p>
+          <div class="jnks-iot-form-panel stroked">
+            <p class="jnks-iot-hint jnks-iot-font-14">{{ 'device.connectivity.http-pull-check-connectivity-hint' | translate }}</p>
           </div>
         </ng-template>
         <ng-template [ngSwitchCase]="BasicTransportType.HTTP">
-          <div class="tb-no-data-text">{{ 'device.connectivity.use-following-instructions' | translate }}</div>
+          <div class="jnks-iot-no-data-text">{{ 'device.connectivity.use-following-instructions' | translate }}</div>
           <mat-tab-group [(selectedIndex)]="httpTabIndex">
             <mat-tab>
               <ng-template mat-tab-label>
@@ -63,10 +63,10 @@
                 Windows
               </ng-template>
               <ng-template matTabContent>
-                <div class="tb-form-panel no-padding no-border tb-tab-body">
-                  <div class="tb-form-panel stroked">
-                    <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
-                    <div class="tb-install-instruction-text">{{ 'device.connectivity.install-curl-windows' | translate }}</div>
+                <div class="jnks-iot-form-panel no-padding no-border jnks-iot-tab-body">
+                  <div class="jnks-iot-form-panel stroked">
+                    <div class="jnks-iot-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
+                    <div class="jnks-iot-install-instruction-text">{{ 'device.connectivity.install-curl-windows' | translate }}</div>
                   </div>
                   <ng-container
                     *ngTemplateOutlet="executeCommand; context: {cmd: {
@@ -83,10 +83,10 @@
                 MacOS
               </ng-template>
               <ng-template matTabContent>
-                <div class="tb-form-panel no-padding no-border tb-tab-body">
-                  <div class="tb-form-panel stroked">
-                    <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
-                    <div class="tb-install-instruction-text">{{ 'device.connectivity.install-curl-macos' | translate }}</div>
+                <div class="jnks-iot-form-panel no-padding no-border jnks-iot-tab-body">
+                  <div class="jnks-iot-form-panel stroked">
+                    <div class="jnks-iot-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
+                    <div class="jnks-iot-install-instruction-text">{{ 'device.connectivity.install-curl-macos' | translate }}</div>
                   </div>
                   <ng-container
                     *ngTemplateOutlet="executeCommand; context: {cmd: {
@@ -103,11 +103,11 @@
                 Linux
               </ng-template>
               <ng-template matTabContent>
-                <div class="tb-form-panel no-padding no-border tb-tab-body">
-                  <div class="tb-form-panel stroked">
-                    <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
-                    <tb-markdown usePlainMarkdown containerClass="tb-command-code"
-                                 [data]='createMarkDownCommand("sudo apt-get install curl")'></tb-markdown>
+                <div class="jnks-iot-form-panel no-padding no-border jnks-iot-tab-body">
+                  <div class="jnks-iot-form-panel stroked">
+                    <div class="jnks-iot-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
+                    <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-command-code"
+                                 [data]='createMarkDownCommand("sudo apt-get install curl")'></jnks-iot-markdown>
                   </div>
                   <ng-container
                     *ngTemplateOutlet="executeCommand; context: {cmd: {
@@ -121,14 +121,14 @@
           </mat-tab-group>
         </ng-template>
         <ng-template [ngSwitchCase]="DeviceTransportType.MQTT">
-          <div *ngIf="commands.mqtt.sparkplug; else mqttCommands" class="tb-form-panel stroked">
+          <div *ngIf="commands.mqtt.sparkplug; else mqttCommands" class="jnks-iot-form-panel stroked">
             <ng-container
               *ngTemplateOutlet="seeDocumentation; context:
               {doc: {text: 'device.connectivity.sparkplug-command', href: 'https://iot.example.com/docs/reference/mqtt-sparkplug-api/'}}">
             </ng-container>
           </div>
           <ng-template #mqttCommands>
-            <div class="tb-no-data-text">{{ 'device.connectivity.use-following-instructions' | translate }}</div>
+            <div class="jnks-iot-no-data-text">{{ 'device.connectivity.use-following-instructions' | translate }}</div>
             <mat-tab-group [(selectedIndex)]="mqttTabIndex">
               <mat-tab>
                 <ng-template mat-tab-label>
@@ -136,10 +136,10 @@
                   Windows
                 </ng-template>
                 <ng-template matTabContent>
-                  <div class="tb-form-panel no-padding no-border tb-tab-body">
-                    <div class="tb-form-panel stroked">
-                      <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
-                      <div class="tb-install-instruction-text">
+                  <div class="jnks-iot-form-panel no-padding no-border jnks-iot-tab-body">
+                    <div class="jnks-iot-form-panel stroked">
+                      <div class="jnks-iot-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
+                      <div class="jnks-iot-install-instruction-text">
                         <ng-container *ngTemplateOutlet="seeDocumentation; context:
                         {doc: {text: 'device.connectivity.install-mqtt-windows',
                         href: 'https://iot.example.com/docs/reference/mqtt-api/?connectdevice=mqtt-windows#mqtt-connect'}}">
@@ -161,11 +161,11 @@
                   MacOS
                 </ng-template>
                 <ng-template matTabContent>
-                  <div class="tb-form-panel no-padding no-border tb-tab-body">
-                    <div class="tb-form-panel stroked">
-                      <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
-                      <tb-markdown usePlainMarkdown containerClass="tb-command-code"
-                                   [data]='createMarkDownCommand("brew install mosquitto")'></tb-markdown>
+                  <div class="jnks-iot-form-panel no-padding no-border jnks-iot-tab-body">
+                    <div class="jnks-iot-form-panel stroked">
+                      <div class="jnks-iot-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
+                      <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-command-code"
+                                   [data]='createMarkDownCommand("brew install mosquitto")'></jnks-iot-markdown>
                     </div>
                     <ng-container
                       *ngTemplateOutlet="executeCommand; context: {cmd: {
@@ -182,11 +182,11 @@
                   Linux
                 </ng-template>
                 <ng-template matTabContent>
-                  <div class="tb-form-panel no-padding no-border tb-tab-body">
-                    <div class="tb-form-panel stroked">
-                      <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
-                      <tb-markdown usePlainMarkdown containerClass="tb-command-code"
-                                   [data]='createMarkDownCommand("sudo apt-get install curl mosquitto-clients")'></tb-markdown>
+                  <div class="jnks-iot-form-panel no-padding no-border jnks-iot-tab-body">
+                    <div class="jnks-iot-form-panel stroked">
+                      <div class="jnks-iot-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
+                      <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-command-code"
+                                   [data]='createMarkDownCommand("sudo apt-get install curl mosquitto-clients")'></jnks-iot-markdown>
                     </div>
                     <ng-container
                       *ngTemplateOutlet="executeCommand; context: {cmd: {
@@ -203,7 +203,7 @@
                   Docker
                 </ng-template>
                 <ng-template matTabContent>
-                  <div class="tb-form-panel no-padding no-border tb-tab-body">
+                  <div class="jnks-iot-form-panel no-padding no-border jnks-iot-tab-body">
                     <ng-container
                       *ngTemplateOutlet="executeCommand; context: {cmd: {
                               noSecLabel: 'MQTT', noSec: commands.mqtt.docker.mqtt,
@@ -217,7 +217,7 @@
           </ng-template>
         </ng-template>
         <ng-template [ngSwitchCase]="DeviceTransportType.COAP">
-          <div class="tb-no-data-text">{{ 'device.connectivity.use-following-instructions' | translate }}</div>
+          <div class="jnks-iot-no-data-text">{{ 'device.connectivity.use-following-instructions' | translate }}</div>
           <mat-tab-group [(selectedIndex)]="coapTabIndex">
             <mat-tab>
               <ng-template mat-tab-label>
@@ -225,10 +225,10 @@
                 Linux
               </ng-template>
               <ng-template matTabContent>
-                <div class="tb-form-panel no-padding no-border tb-tab-body">
-                  <div class="tb-form-panel stroked" *ngIf="commands.coap.coaps !== 'Check documentation'">
-                    <div class="tb-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
-                    <div class="tb-install-instruction-text">
+                <div class="jnks-iot-form-panel no-padding no-border jnks-iot-tab-body">
+                  <div class="jnks-iot-form-panel stroked" *ngIf="commands.coap.coaps !== 'Check documentation'">
+                    <div class="jnks-iot-form-panel-title">{{ 'device.connectivity.install-necessary-client-tools' | translate }}</div>
+                    <div class="jnks-iot-install-instruction-text">
                       <ng-container *ngTemplateOutlet="seeDocumentation; context:
                         {doc: {text: 'device.connectivity.install-coap-client',
                         href: 'https://iot.example.com/docs/user-guide/ssl/coap-access-token/'}}">
@@ -250,7 +250,7 @@
                 Docker
               </ng-template>
               <ng-template matTabContent>
-                <div class="tb-form-panel no-padding no-border tb-tab-body">
+                <div class="jnks-iot-form-panel no-padding no-border jnks-iot-tab-body">
                   <ng-container
                     *ngTemplateOutlet="executeCommand; context: {cmd: {
                               noSecLabel: 'CoAP', noSec: commands.coap.docker.coap,
@@ -263,7 +263,7 @@
           </mat-tab-group>
         </ng-template>
         <ng-template [ngSwitchCase]="DeviceTransportType.SNMP">
-          <div class="tb-form-panel stroked">
+          <div class="jnks-iot-form-panel stroked">
             <ng-container
               *ngTemplateOutlet="seeDocumentation; context:
                 {doc: {text: 'device.connectivity.snmp-command', href: 'https://iot.example.com/docs/reference/snmp-api/'}}">
@@ -271,7 +271,7 @@
           </div>
         </ng-template>
         <ng-template [ngSwitchCase]="DeviceTransportType.LWM2M">
-          <div class="tb-form-panel stroked">
+          <div class="jnks-iot-form-panel stroked">
             <ng-container
               *ngTemplateOutlet="seeDocumentation; context:
                 {doc: {text: 'device.connectivity.lwm2m-command', href: 'https://iot.example.com/docs/reference/lwm2m-api/'}}">
@@ -280,32 +280,32 @@
         </ng-template>
       </ng-container>
     </div>
-    <div class="tb-form-panel stroked">
+    <div class="jnks-iot-form-panel stroked">
       <div class="flex flex-1 flex-row">
-        <div class="tb-form-panel-title">{{ 'device.state' | translate }}</div>
+        <div class="jnks-iot-form-panel-title">{{ 'device.state' | translate }}</div>
         <div class="status" [class.inactive]="!status" [class.hide]="status === undefined">
           {{ (status ? 'device.active' : 'device.inactive') | translate }}
         </div>
       </div>
-      <div class="tb-form-panel-hint tb-font-14">{{ 'attribute.latest-telemetry' | translate }}</div>
-      <div class="tb-form-table">
-        <div class="tb-form-table-header">
-          <div class="tb-form-table-header-cell flex-1">{{ 'device.time' | translate }}</div>
-          <div class="tb-form-table-header-cell flex-1">{{ 'attribute.key' | translate }}</div>
-          <div class="tb-form-table-header-cell flex-1">{{ 'attribute.value' | translate }}</div>
+      <div class="jnks-iot-form-panel-hint jnks-iot-font-14">{{ 'attribute.latest-telemetry' | translate }}</div>
+      <div class="jnks-iot-form-table">
+        <div class="jnks-iot-form-table-header">
+          <div class="jnks-iot-form-table-header-cell flex-1">{{ 'device.time' | translate }}</div>
+          <div class="jnks-iot-form-table-header-cell flex-1">{{ 'attribute.key' | translate }}</div>
+          <div class="jnks-iot-form-table-header-cell flex-1">{{ 'attribute.value' | translate }}</div>
         </div>
-        <div *ngIf="latestTelemetry.length; else noData" class="tb-form-table-body">
-          <div class="tb-form-table-row" *ngFor="let telemetry of latestTelemetry">
-            <div class="tb-form-table-row-cell flex-1">{{ telemetry.lastUpdateTs | date: 'yyyy-MM-dd HH:mm:ss' }}</div>
-            <div class="tb-form-table-row-cell flex-1">{{ telemetry.key }}</div>
-            <div class="tb-form-table-row-cell flex-1">{{ telemetry.value }}</div>
+        <div *ngIf="latestTelemetry.length; else noData" class="jnks-iot-form-table-body">
+          <div class="jnks-iot-form-table-row" *ngFor="let telemetry of latestTelemetry">
+            <div class="jnks-iot-form-table-row-cell flex-1">{{ telemetry.lastUpdateTs | date: 'yyyy-MM-dd HH:mm:ss' }}</div>
+            <div class="jnks-iot-form-table-row-cell flex-1">{{ telemetry.key }}</div>
+            <div class="jnks-iot-form-table-row-cell flex-1">{{ telemetry.value }}</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 </div>
-<div mat-dialog-actions class="tb-dialog-actions">
+<div mat-dialog-actions class="jnks-iot-dialog-actions">
   <mat-slide-toggle [class.!hidden]="!showDontShowAgain" [(ngModel)]="notShowAgain">{{ 'action.dont-show-again' | translate}}</mat-slide-toggle>
   <span class="flex-1"></span>
   <button mat-button
@@ -313,7 +313,7 @@
           (click)="close()">{{ 'action.close' | translate }}</button>
 </div>
 <ng-template #loadingCommand>
-  <div class="tb-loader">
+  <div class="jnks-iot-loader">
     <mat-spinner color="accent" diameter="65" strokeWidth="4"></mat-spinner>
     <span class="mat-subtitle-1 label">
         {{ 'device.connectivity.loading-check-connectivity-command' | translate }}
@@ -321,31 +321,31 @@
   </div>
 </ng-template>
 <ng-template #noData>
-  <div class="tb-no-data-available">
-    <div class="tb-no-data-bg"></div>
-    <div class="tb-no-data-text">{{ 'attribute.no-latest-telemetry' | translate }}</div>
+  <div class="jnks-iot-no-data-available">
+    <div class="jnks-iot-no-data-bg"></div>
+    <div class="jnks-iot-no-data-text">{{ 'attribute.no-latest-telemetry' | translate }}</div>
   </div>
 </ng-template>
 
 <ng-template #executeCommand let-cmd="cmd">
-  <div class="tb-form-panel stroked">
+  <div class="jnks-iot-form-panel stroked">
     <div class="flex flex-row items-center justify-between" [class.!hidden]="!(cmd.noSec || cmd.sec !== 'Check documentation')">
-      <div class="tb-form-panel-title">{{ 'device.connectivity.execute-following-command' | translate }}</div>
-      <tb-toggle-header #protocolType value="{{ cmd.noSec ? 'noSec' : 'sec'}}" name="protocolType" useSelectOnMdLg="false"
+      <div class="jnks-iot-form-panel-title">{{ 'device.connectivity.execute-following-command' | translate }}</div>
+      <jnks-iot-toggle-header #protocolType value="{{ cmd.noSec ? 'noSec' : 'sec'}}" name="protocolType" useSelectOnMdLg="false"
                         [class.!hidden]="!cmd.noSec || !cmd.sec">
-        <tb-toggle-option value="noSec">{{ cmd.noSecLabel }}</tb-toggle-option>
-        <tb-toggle-option value="sec">{{ cmd.secLabel }}</tb-toggle-option>
-      </tb-toggle-header>
+        <jnks-iot-toggle-option value="noSec">{{ cmd.noSecLabel }}</jnks-iot-toggle-option>
+        <jnks-iot-toggle-option value="sec">{{ cmd.secLabel }}</jnks-iot-toggle-option>
+      </jnks-iot-toggle-header>
     </div>
     <ng-container [ngSwitch]="protocolType.value">
       <ng-template [ngSwitchCase]="'noSec'">
-        <tb-markdown usePlainMarkdown containerClass="tb-command-code"
-                     [data]=createMarkDownCommand(cmd.noSec)></tb-markdown>
+        <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-command-code"
+                     [data]=createMarkDownCommand(cmd.noSec)></jnks-iot-markdown>
       </ng-template>
       <ng-template [ngSwitchCase]="'sec'">
         <div *ngIf="cmd.sec !== 'Check documentation'; else checkDocumentation">
-          <tb-markdown usePlainMarkdown containerClass="tb-command-code"
-                       [data]=createMarkDownCommand(cmd.sec)></tb-markdown>
+          <jnks-iot-markdown usePlainMarkdown containerClass="jnks-iot-command-code"
+                       [data]=createMarkDownCommand(cmd.sec)></jnks-iot-markdown>
         </div>
         <ng-template #checkDocumentation>
           <ng-container
@@ -359,8 +359,8 @@
 </ng-template>
 
 <ng-template #seeDocumentation let-doc="doc">
-  <div class="tb-form-row no-border no-padding space-between">
-    <div class="tb-font-14 tb-flex-1">{{ doc.text | translate }}</div>
+  <div class="jnks-iot-form-row no-border no-padding space-between">
+    <div class="jnks-iot-font-14 jnks-iot-flex-1">{{ doc.text | translate }}</div>
     <a mat-stroked-button color="primary" href="{{doc.href }}" target="_blank">
       <mat-icon>description</mat-icon>
       {{ 'common.documentation' | translate }}

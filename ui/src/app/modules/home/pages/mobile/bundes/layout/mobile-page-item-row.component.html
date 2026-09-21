@@ -1,49 +1,49 @@
-<div class="tb-mobile-page-item-row-component-container">
-  <div class="tb-mobile-page-item-row-component">
-    <div class="tb-form-row" [formGroup]="mobilePageRowForm">
-      <div class="tb-mobile-page-item-start-block">
-        <ng-content select=".tb-custom-menu-item-row-prefix"></ng-content>
-        <div class="tb-mobile-page-item-icon-name-block" [style.width]="iconNameBlockWidth">
+<div class="jnks-iot-mobile-page-item-row-component-container">
+  <div class="jnks-iot-mobile-page-item-row-component">
+    <div class="jnks-iot-form-row" [formGroup]="mobilePageRowForm">
+      <div class="jnks-iot-mobile-page-item-start-block">
+        <ng-content select=".jnks-iot-custom-menu-item-row-prefix"></ng-content>
+        <div class="jnks-iot-mobile-page-item-icon-name-block" [style.width]="iconNameBlockWidth">
           <mat-slide-toggle matTooltip="{{ (mobilePageRowForm.get('visible').value ? 'mobile.visible' : 'mobile.hidden') | translate }}"
                             matTooltipPosition="above"
                             formControlName="visible"></mat-slide-toggle>
-          <tb-material-icon-select asBoxInput
+          <jnks-iot-material-icon-select asBoxInput
                                    color="#305680"
                                    formControlName="icon">
-          </tb-material-icon-select>
-          <div tbTruncateWithTooltip> {{ itemName }} </div>
+          </jnks-iot-material-icon-select>
+          <div jnksIotTruncateWithTooltip> {{ itemName }} </div>
         </div>
       </div>
-      <div class="tb-mobile-page-item-input-block xs:!hidden">
-        <mat-form-field class="tb-suffix-absolute flex" appearance="outline" subscriptSizing="dynamic">
+      <div class="jnks-iot-mobile-page-item-input-block xs:!hidden">
+        <mat-form-field class="jnks-iot-suffix-absolute flex" appearance="outline" subscriptSizing="dynamic">
           <input matInput [required]="isCustomMenuItem" formControlName="label" placeholder="{{ itemNamePlaceholder }}">
           <mat-icon matSuffix
                     matTooltipPosition="above"
-                    matTooltipClass="tb-error-tooltip"
+                    matTooltipClass="jnks-iot-error-tooltip"
                     matTooltip="{{ 'mobile.page-name-required' | translate }}"
                     *ngIf="mobilePageRowForm.get('label').hasError('required') && mobilePageRowForm.get('label').touched"
-                    class="tb-error">
+                    class="jnks-iot-error">
             warning
           </mat-icon>
           <mat-icon matSuffix
                     matTooltipPosition="above"
-                    matTooltipClass="tb-error-tooltip"
+                    matTooltipClass="jnks-iot-error-tooltip"
                     matTooltip="{{ 'mobile.page-name-cannot-contain-only-spaces' | translate }}"
                     *ngIf="mobilePageRowForm.get('label').hasError('pattern') && mobilePageRowForm.get('label').touched"
-                    class="tb-error">
+                    class="jnks-iot-error">
             warning
           </mat-icon>
           <mat-icon matSuffix
                     matTooltipPosition="above"
-                    matTooltipClass="tb-error-tooltip"
+                    matTooltipClass="jnks-iot-error-tooltip"
                     matTooltip="{{ 'mobile.page-name-max-length' | translate }}"
                     *ngIf="mobilePageRowForm.get('label').hasError('maxlength') && mobilePageRowForm.get('label').touched"
-                    class="tb-error">
+                    class="jnks-iot-error">
             warning
           </mat-icon>
         </mat-form-field>
         <mat-form-field *ngIf="isCustomMenuItem"
-                        class="tb-mobile-page-item-info flex" appearance="outline" subscriptSizing="dynamic">
+                        class="jnks-iot-mobile-page-item-info flex" appearance="outline" subscriptSizing="dynamic">
           <input matInput readonly [placeholder]="itemInfo">
         </mat-form-field>
       </div>
@@ -62,7 +62,7 @@
             matTooltip="{{ 'mobile.reset-to-page-default' | translate }}"
             matTooltipPosition="above"
             (click)="cleanup()">
-      <tb-icon>mdi:broom</tb-icon>
+      <jnks-iot-icon>mdi:broom</jnks-iot-icon>
     </button>
     <button mat-icon-button *ngIf="!disabled && isCustomMenuItem"
             matTooltip="{{ 'mobile.delete-page' | translate }}"

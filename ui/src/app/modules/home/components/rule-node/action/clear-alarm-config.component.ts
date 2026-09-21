@@ -12,7 +12,7 @@ import type { JsFuncComponent } from '@app/shared/components/js-func.component';
 import { DebugRuleNodeEventBody } from '@shared/models/event.models';
 
 @Component({
-  selector: 'tb-action-node-clear-alarm-config',
+  selector: 'jnks-iot-action-node-clear-alarm-config',
   templateUrl: './clear-alarm-config.component.html',
   styleUrls: []
 })

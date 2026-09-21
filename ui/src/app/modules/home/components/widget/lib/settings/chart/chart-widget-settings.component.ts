@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-chart-widget-settings',
+  selector: 'jnks-iot-chart-widget-settings',
   templateUrl: './chart-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

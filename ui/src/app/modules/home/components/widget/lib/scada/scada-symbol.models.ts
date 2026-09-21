@@ -166,9 +166,9 @@ export const emptyMetadata = (width?: number, height?: number): ScadaSymbolMetad
 
 const svgPartsRegex = /(<svg.*?>)(.*)<\/svg>/gms;
 
-const tbNamespaceRegex = /<svg.*(xmlns:tb="https:\/\/iot.example.com\/svg").*>/gms;
+const jnksIotNamespaceRegex = /<svg.*(xmlns:tb="https:\/\/iot.example.com\/svg").*>/gms;
 
-const tbTagRegex = /tb:tag="([^"]*)"/gms;
+const jnksIotTagRegex = /tb:tag="([^"]*)"/gms;
 
 const generateElementId = () => {
   const id = guid();
@@ -180,7 +180,7 @@ const generateElementId = () => {
   }
 };
 
-export const applyTbNamespaceToSvgContent = (svgContent: string): string => {
+export const applyJnksIotNamespaceToSvgContent = (svgContent: string): string => {
   svgPartsRegex.lastIndex = 0;
   let svgRootNode: string;
   let innerSvg = '';
@@ -196,8 +196,8 @@ export const applyTbNamespaceToSvgContent = (svgContent: string): string => {
   if (!svgRootNode) {
     throw new Error('Invalid SVG document.');
   }
-  tbNamespaceRegex.lastIndex = 0;
-  match = tbNamespaceRegex.exec(svgRootNode);
+  jnksIotNamespaceRegex.lastIndex = 0;
+  match = jnksIotNamespaceRegex.exec(svgRootNode);
   if (match === null || !match.length) {
     svgRootNode = svgRootNode.slice(0, -1) + ' xmlns:tb="https://iot.example.com/svg">';
     return `${svgRootNode}\n${innerSvg}\n</svg>`;
@@ -207,7 +207,7 @@ export const applyTbNamespaceToSvgContent = (svgContent: string): string => {
 
 export const parseScadaSymbolMetadataFromContent = (svgContent: string): ScadaSymbolMetadata => {
   try {
-    svgContent = applyTbNamespaceToSvgContent(svgContent);
+    svgContent = applyJnksIotNamespaceToSvgContent(svgContent);
     const svgDoc = new DOMParser().parseFromString(svgContent, 'image/svg+xml');
     return parseScadaSymbolMetadataFromDom(svgDoc);
   } catch (_e) {
@@ -217,11 +217,11 @@ export const parseScadaSymbolMetadataFromContent = (svgContent: string): ScadaSy
 
 export const parseScadaSymbolsTagsFromContent = (svgContent: string): string[] => {
   const tags: string[] = [];
-  tbTagRegex.lastIndex = 0;
-  let tagsMatch = tbTagRegex.exec(svgContent);
+  jnksIotTagRegex.lastIndex = 0;
+  let tagsMatch = jnksIotTagRegex.exec(svgContent);
   while (tagsMatch !== null) {
     tags.push(tagsMatch[1]);
-    tagsMatch = tbTagRegex.exec(svgContent);
+    tagsMatch = jnksIotTagRegex.exec(svgContent);
   }
   return tags.filter((v, i, arr) => arr.indexOf(v) === i);
 };
@@ -251,7 +251,7 @@ const parseScadaSymbolMetadataFromDom = (svgDoc: Document): ScadaSymbolMetadata 
 };
 
 export const updateScadaSymbolMetadataInContent = (svgContent: string, metadata: ScadaSymbolMetadata): string => {
-  svgContent = applyTbNamespaceToSvgContent(svgContent);
+  svgContent = applyJnksIotNamespaceToSvgContent(svgContent);
   const svgDoc = new DOMParser().parseFromString(svgContent, 'image/svg+xml');
   const parsererror = svgDoc.getElementsByTagName('parsererror');
   if (parsererror?.length) {
@@ -276,7 +276,7 @@ const updateScadaSymbolMetadataInDom = (svgDoc: Document, metadata: ScadaSymbolM
   metadataElement.appendChild(cdata);
 };
 
-const tbMetadataRegex = /<tb:metadata[^>]*>.*<\/tb:metadata>/gs;
+const jnksIotMetadataRegex = /<tb:metadata[^>]*>.*<\/tb:metadata>/gs;
 
 export interface ScadaSymbolContentData {
   svgRootNode: string;
@@ -285,8 +285,8 @@ export interface ScadaSymbolContentData {
 
 export const removeScadaSymbolMetadata = (svgContent: string): string => {
   let result = svgContent;
-  tbMetadataRegex.lastIndex = 0;
-  const metadataMatch = tbMetadataRegex.exec(svgContent);
+  jnksIotMetadataRegex.lastIndex = 0;
+  const metadataMatch = jnksIotMetadataRegex.exec(svgContent);
   if (metadataMatch !== null && metadataMatch.length) {
     const metadata = metadataMatch[0];
     result = result.replace(metadata, '');
@@ -307,8 +307,8 @@ export const scadaSymbolContentData = (svgContent: string): ScadaSymbolContentDa
     }
     if (match.length > 2) {
       let innerSvgContent = match[2];
-      tbMetadataRegex.lastIndex = 0;
-      const metadataMatch = tbMetadataRegex.exec(svgContent);
+      jnksIotMetadataRegex.lastIndex = 0;
+      const metadataMatch = jnksIotMetadataRegex.exec(svgContent);
       if (metadataMatch !== null && metadataMatch.length) {
         const metadata = metadataMatch[0];
         innerSvgContent = innerSvgContent.replace(metadata, '');
@@ -497,7 +497,7 @@ export class ScadaSymbolObject {
     this.shapeResize$ = new ResizeObserver(() => {
       this.resize();
     });
-    this.svgContent = applyTbNamespaceToSvgContent(this.svgContent);
+    this.svgContent = applyJnksIotNamespaceToSvgContent(this.svgContent);
     const doc: XMLDocument = new DOMParser().parseFromString(this.svgContent, 'image/svg+xml');
     this.metadata = parseScadaSymbolMetadataFromDom(doc);
     const defaults = defaultScadaSymbolObjectSettings(this.metadata);

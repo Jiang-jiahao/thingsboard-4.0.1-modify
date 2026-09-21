@@ -1,16 +1,16 @@
-<form class="tb-add-quick-link-dialog" [formGroup]="addQuickLinkFormGroup">
+<form class="jnks-iot-add-quick-link-dialog" [formGroup]="addQuickLinkFormGroup">
   <mat-toolbar style="background: transparent;">
     <h2 translate>widgets.quick-links.add-link-title</h2>
     <span class="flex-1"></span>
     <button mat-icon-button
             (click)="cancel()"
             type="button">
-      <tb-icon>close</tb-icon>
+      <jnks-iot-icon>close</jnks-iot-icon>
     </button>
   </mat-toolbar>
   <div mat-dialog-content>
-    <tb-quick-link formControlName="link" [addOnly]="true"
+    <jnks-iot-quick-link formControlName="link" [addOnly]="true"
                  (quickLinkAdded)="add($event)">
-    </tb-quick-link>
+    </jnks-iot-quick-link>
   </div>
 </form>

@@ -5,7 +5,7 @@
   width: 100%;
   padding: 0;
 
-  .tb-rule-select {
+  .jnks-iot-rule-select {
     width: 100%;
 
     input {
@@ -25,25 +25,25 @@
   }
 }
 
-:host-context(.tb-rulechain-header-select) {
-  .tb-rule-select input {
+:host-context(.jnks-iot-rulechain-header-select) {
+  .jnks-iot-rule-select input {
     color: #fff;
   }
 }
 
-:host:not(:host-context(.tb-rulechain-header-select)) {
-  .tb-rule-select {
+:host:not(:host-context(.jnks-iot-rulechain-header-select)) {
+  .jnks-iot-rule-select {
     .mat-mdc-text-field-wrapper {
       border-radius: 10px;
       background-color: #f1f5f9;
     }
 
     input {
-      color: $tb-topbar-text;
+      color: $jnks-iot-topbar-text;
     }
 
     .mat-icon {
-      color: $tb-secondary-color;
+      color: $jnks-iot-secondary-color;
     }
   }
 }

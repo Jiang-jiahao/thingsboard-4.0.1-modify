@@ -4433,7 +4433,7 @@
                 "WHITE_LABELING": "العلامات البيضاء",
                 "AUDIT_LOG": "سجل التدقيق",
                 "API_USAGE_STATE": "حالة استخدام واجهة البرمجة",
-                "TB_RESOURCE": "المورد",
+                "JNKS_IOT_RESOURCE": "المورد",
                 "OTA_PACKAGE": "حزمة OTA",
                 "QUEUE": "الطابور",
                 "VERSION_CONTROL": "التحكم في الإصدارات",

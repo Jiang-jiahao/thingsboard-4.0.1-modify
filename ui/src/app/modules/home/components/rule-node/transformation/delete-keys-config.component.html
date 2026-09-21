@@ -1,9 +1,9 @@
-<section [formGroup]="deleteKeysConfigForm" class="tb-form-panel no-border no-padding">
-  <tb-msg-metadata-chip
+<section [formGroup]="deleteKeysConfigForm" class="jnks-iot-form-panel no-border no-padding">
+  <jnks-iot-msg-metadata-chip
     [labelText]="('rule-node-config.key-val.delete-key-values-from' | translate)"
     formControlName="deleteFrom">
-  </tb-msg-metadata-chip>
-  <tb-string-items-list class="mat-block"
+  </jnks-iot-msg-metadata-chip>
+  <jnks-iot-string-items-list class="mat-block"
                         required
                         [label]="'rule-node-config.keys' | translate"
                         [placeholder]="'rule-node-config.add-key' | translate"
@@ -14,5 +14,5 @@
               matTooltip="{{ 'rule-node-config.use-regular-expression-delete-hint' | translate }}">
       help
     </mat-icon>
-  </tb-string-items-list>
+  </jnks-iot-string-items-list>
 </section>

@@ -13,7 +13,7 @@ import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.kv.BasicTsKvEntry;
 import com.jnks.iot.server.common.data.kv.KvEntry;
 import com.jnks.iot.server.common.data.kv.TsKvEntry;
-import com.jnks.iot.server.common.data.msg.TbMsgType;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,8 +31,8 @@ public class TimeseriesSaveRequest implements CalculatedFieldSystemAwareRequest 
     private final long ttl;
     private final Strategy strategy;
     private final List<CalculatedFieldId> previousCalculatedFieldIds;
-    private final UUID tbMsgId;
-    private final TbMsgType tbMsgType;
+    private final UUID jnksIotMsgId;
+    private final JnksIotMsgType jnksIotMsgType;
     private final FutureCallback<Void> callback;
 
     public record Strategy(boolean saveTimeseries, boolean saveLatest, boolean sendWsUpdate, boolean processCalculatedFields) {
@@ -57,8 +57,8 @@ public class TimeseriesSaveRequest implements CalculatedFieldSystemAwareRequest 
         private long ttl;
         private Strategy strategy;
         private List<CalculatedFieldId> previousCalculatedFieldIds;
-        private UUID tbMsgId;
-        private TbMsgType tbMsgType;
+        private UUID jnksIotMsgId;
+        private JnksIotMsgType jnksIotMsgType;
         private FutureCallback<Void> callback;
 
         Builder() {}
@@ -106,13 +106,13 @@ public class TimeseriesSaveRequest implements CalculatedFieldSystemAwareRequest 
             return this;
         }
 
-        public Builder tbMsgId(UUID tbMsgId) {
-            this.tbMsgId = tbMsgId;
+        public Builder jnksIotMsgId(UUID jnksIotMsgId) {
+            this.jnksIotMsgId = jnksIotMsgId;
             return this;
         }
 
-        public Builder tbMsgType(TbMsgType tbMsgType) {
-            this.tbMsgType = tbMsgType;
+        public Builder jnksIotMsgType(JnksIotMsgType jnksIotMsgType) {
+            this.jnksIotMsgType = jnksIotMsgType;
             return this;
         }
 
@@ -138,7 +138,7 @@ public class TimeseriesSaveRequest implements CalculatedFieldSystemAwareRequest 
         public TimeseriesSaveRequest build() {
             return new TimeseriesSaveRequest(
                     tenantId, customerId, entityId, entries, ttl, requireNonNullElse(strategy, Strategy.PROCESS_ALL),
-                    previousCalculatedFieldIds, tbMsgId, tbMsgType, requireNonNullElse(callback, NoOpFutureCallback.instance())
+                    previousCalculatedFieldIds, jnksIotMsgId, jnksIotMsgType, requireNonNullElse(callback, NoOpFutureCallback.instance())
             );
         }
 

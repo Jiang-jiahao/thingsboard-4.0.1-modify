@@ -3,7 +3,7 @@ package com.jnks.iot.server.service.state;
 import org.springframework.context.ApplicationListener;
 import com.jnks.iot.server.common.data.id.DeviceId;
 import com.jnks.iot.server.common.data.id.TenantId;
-import com.jnks.iot.server.common.msg.queue.TbCallback;
+import com.jnks.iot.server.common.msg.queue.JnksIotCallback;
 import com.jnks.iot.server.gen.transport.TransportProtos;
 import com.jnks.iot.server.queue.discovery.event.PartitionChangeEvent;
 
@@ -35,6 +35,6 @@ public interface DeviceStateService extends ApplicationListener<PartitionChangeE
 
     void onDeviceInactivityTimeoutUpdate(TenantId tenantId, DeviceId deviceId, long inactivityTimeout);
 
-    void onQueueMsg(TransportProtos.DeviceStateServiceMsgProto proto, TbCallback bytes);
+    void onQueueMsg(TransportProtos.DeviceStateServiceMsgProto proto, JnksIotCallback bytes);
 
 }

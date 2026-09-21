@@ -6,7 +6,7 @@ import { MatDatetimepickerType } from '@mat-datetimepicker/core/datetimepicker/d
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-datetime',
+  selector: 'jnks-iot-datetime',
   templateUrl: './datetime.component.html',
   styleUrls: ['./datetime.component.scss'],
   providers: [

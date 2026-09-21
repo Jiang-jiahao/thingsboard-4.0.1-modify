@@ -40,7 +40,7 @@ export function initUserLanguage(translate: TranslateService, storageService: Lo
   };
 }
 
-export default class TbUrlSerializer implements UrlSerializer {
+export default class JnksIotUrlSerializer implements UrlSerializer {
   private _defaultUrlSerializer: DefaultUrlSerializer = new DefaultUrlSerializer();
 
   parse(url: string): UrlTree {
@@ -84,7 +84,7 @@ export class PageNotFoundRoutingModule { }
     PageNotFoundRoutingModule
   ],
   providers: [
-    { provide: UrlSerializer, useClass: TbUrlSerializer },
+    { provide: UrlSerializer, useClass: JnksIotUrlSerializer },
     {
       provide: APP_INITIALIZER,
       useFactory: initUserLanguage,

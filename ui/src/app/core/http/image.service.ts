@@ -12,7 +12,7 @@ import {
   IMAGES_URL_PREFIX,
   isImageResourceUrl,
   NO_IMAGE_DATA_URI,
-  removeTbImagePrefix,
+  removeJnksIotImagePrefix,
   ResourceSubType
 } from '@shared/models/resource.models';
 import { catchError, map, switchMap } from 'rxjs/operators';
@@ -122,7 +122,7 @@ export class ImageService {
   }
 
   public getImageString(imageUrl: string): Observable<string> {
-    imageUrl = removeTbImagePrefix(imageUrl);
+    imageUrl = removeJnksIotImagePrefix(imageUrl);
     let request: ReplaySubject<Blob>;
     if (this.imagesLoading[imageUrl]) {
       request = this.imagesLoading[imageUrl];
@@ -149,7 +149,7 @@ export class ImageService {
   }
 
   public resolveImageUrl(imageUrl: string, preview = false, asString = false, emptyUrl = NO_IMAGE_DATA_URI): Observable<SafeUrl | string> {
-    imageUrl = removeTbImagePrefix(imageUrl);
+    imageUrl = removeJnksIotImagePrefix(imageUrl);
     if (isImageResourceUrl(imageUrl)) {
       return this.getImageDataUrl(imageUrl, preview, asString, emptyUrl);
     } else {

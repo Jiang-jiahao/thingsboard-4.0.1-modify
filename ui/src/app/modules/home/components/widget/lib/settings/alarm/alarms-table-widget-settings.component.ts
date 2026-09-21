@@ -6,7 +6,7 @@ import { AppState } from '@core/core.state';
 import { buildPageStepSizeValues } from '@home/components/widget/lib/table-widget.models';
 
 @Component({
-  selector: 'tb-alarms-table-widget-settings',
+  selector: 'jnks-iot-alarms-table-widget-settings',
   templateUrl: './alarms-table-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

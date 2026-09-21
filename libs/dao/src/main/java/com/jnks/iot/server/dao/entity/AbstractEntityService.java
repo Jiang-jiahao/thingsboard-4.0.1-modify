@@ -19,7 +19,7 @@ import com.jnks.iot.server.dao.entityview.EntityViewService;
 import com.jnks.iot.server.dao.exception.DataValidationException;
 import com.jnks.iot.server.dao.housekeeper.CleanUpService;
 import com.jnks.iot.server.dao.relation.RelationService;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
 
 import java.util.Collections;
 import java.util.Map;
@@ -56,7 +56,7 @@ public abstract class AbstractEntityService {
 
     @Autowired
     @Lazy
-    private TbTenantProfileCache tbTenantProfileCache;
+    private JnksIotTenantProfileCache jnksIotTenantProfileCache;
 
     @Value("${debug.settings.default_duration:15}")
     private int defaultDebugDurationMinutes;
@@ -126,6 +126,6 @@ public abstract class AbstractEntityService {
     }
 
     private long getMaxDebugAllUntil(TenantId tenantId, long now) {
-        return now + TimeUnit.MINUTES.toMillis(DebugModeUtil.getMaxDebugAllDuration(tbTenantProfileCache.get(tenantId).getDefaultProfileConfiguration().getMaxDebugModeDurationMinutes(), defaultDebugDurationMinutes));
+        return now + TimeUnit.MINUTES.toMillis(DebugModeUtil.getMaxDebugAllDuration(jnksIotTenantProfileCache.get(tenantId).getDefaultProfileConfiguration().getMaxDebugModeDurationMinutes(), defaultDebugDurationMinutes));
     }
 }

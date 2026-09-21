@@ -1,16 +1,16 @@
-<section [formGroup]="relatedAttributesConfigForm" class="tb-form-panel no-padding no-border">
-  <tb-relations-query-config
+<section [formGroup]="relatedAttributesConfigForm" class="jnks-iot-form-panel no-padding no-border">
+  <jnks-iot-relations-query-config
     required
     formControlName="relationsQuery">
-  </tb-relations-query-config>
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" translate>rule-node-config.data-to-fetch</div>
-    <tb-toggle-select formControlName="dataToFetch" appearance="fill">
-      <tb-toggle-option *ngFor="let data of fetchToData" [value]="data.value">
+  </jnks-iot-relations-query-config>
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" translate>rule-node-config.data-to-fetch</div>
+    <jnks-iot-toggle-select formControlName="dataToFetch" appearance="fill">
+      <jnks-iot-toggle-option *ngFor="let data of fetchToData" [value]="data.value">
         {{ data.name }}
-      </tb-toggle-option>
-    </tb-toggle-select>
-    <tb-kv-map-config
+      </jnks-iot-toggle-option>
+    </jnks-iot-toggle-select>
+    <jnks-iot-kv-map-config
       [hidden]="relatedAttributesConfigForm.get('dataToFetch').value === DataToFetch.FIELDS"
       required
       formControlName="kvMap"
@@ -22,8 +22,8 @@
       [valRequiredText]="'rule-node-config.target-key-required' | translate"
       [hintText]="'rule-node-config.kv-map-pattern-hint'"
       popupHelpLink="rulenode/related_entity_data_node_fields_templatization">
-    </tb-kv-map-config>
-    <tb-sv-map-config
+    </jnks-iot-kv-map-config>
+    <jnks-iot-sv-map-config
       [hidden]="relatedAttributesConfigForm.get('dataToFetch').value !== DataToFetch.FIELDS"
       required
       [labelText]="'rule-node-config.fields-mapping' | translate"
@@ -37,9 +37,9 @@
       [valRequiredText]="'rule-node-config.target-key-required' | translate"
       [hintText]="'rule-node-config.sv-map-hint' | translate"
       popupHelpLink="rulenode/related_entity_data_node_fields_templatization">
-    </tb-sv-map-config>
-    <tb-msg-metadata-chip formControlName="fetchTo"
+    </jnks-iot-sv-map-config>
+    <jnks-iot-msg-metadata-chip formControlName="fetchTo"
                           [labelText]="msgMetadataLabelTranslations.get(relatedAttributesConfigForm.get('dataToFetch').value) | translate">
-    </tb-msg-metadata-chip>
+    </jnks-iot-msg-metadata-chip>
   </div>
 </section>

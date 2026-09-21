@@ -16,7 +16,7 @@ export interface LabelWidgetLabel {
 }
 
 @Component({
-  selector: 'tb-label-widget-label',
+  selector: 'jnks-iot-label-widget-label',
   templateUrl: './label-widget-label.component.html',
   styleUrls: ['./label-widget-label.component.scss'],
   providers: [

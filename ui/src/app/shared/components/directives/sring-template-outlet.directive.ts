@@ -11,37 +11,37 @@ import {
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
-  selector: '[tbStringTemplateOutlet]',
-  exportAs: 'tbStringTemplateOutlet'
+  selector: '[jnksIotStringTemplateOutlet]',
+  exportAs: 'jnksIotStringTemplateOutlet'
 })
-export class TbStringTemplateOutletDirective<_T = unknown> implements OnChanges {
+export class JnksIotStringTemplateOutletDirective<_T = unknown> implements OnChanges {
   private embeddedViewRef: EmbeddedViewRef<any> | null = null;
-  private context = new TbStringTemplateOutletContext();
-  @Input() tbStringTemplateOutletContext: any | null = null;
-  @Input() tbStringTemplateOutlet: any | TemplateRef<any> = null;
+  private context = new JnksIotStringTemplateOutletContext();
+  @Input() jnksIotStringTemplateOutletContext: any | null = null;
+  @Input() jnksIotStringTemplateOutlet: any | TemplateRef<any> = null;
 
   static ngTemplateContextGuard<T>(
     // eslint-disable-next-line @typescript-eslint/naming-convention,no-underscore-dangle,id-blacklist,id-match
-    _dir: TbStringTemplateOutletDirective<T>,
+    _dir: JnksIotStringTemplateOutletDirective<T>,
     // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle, id-blacklist, id-match
     _ctx: any
-  ): _ctx is TbStringTemplateOutletContext {
+  ): _ctx is JnksIotStringTemplateOutletContext {
     return true;
   }
 
   private recreateView(): void {
     this.viewContainer.clear();
-    const isTemplateRef = this.tbStringTemplateOutlet instanceof TemplateRef;
-    const templateRef = (isTemplateRef ? this.tbStringTemplateOutlet : this.templateRef) as any;
+    const isTemplateRef = this.jnksIotStringTemplateOutlet instanceof TemplateRef;
+    const templateRef = (isTemplateRef ? this.jnksIotStringTemplateOutlet : this.templateRef) as any;
     this.embeddedViewRef = this.viewContainer.createEmbeddedView(
       templateRef,
-      isTemplateRef ? this.tbStringTemplateOutletContext : this.context
+      isTemplateRef ? this.jnksIotStringTemplateOutletContext : this.context
     );
   }
 
   private updateContext(): void {
-    const isTemplateRef = this.tbStringTemplateOutlet instanceof TemplateRef;
-    const newCtx = isTemplateRef ? this.tbStringTemplateOutletContext : this.context;
+    const isTemplateRef = this.jnksIotStringTemplateOutlet instanceof TemplateRef;
+    const newCtx = isTemplateRef ? this.jnksIotStringTemplateOutletContext : this.context;
     const oldCtx = this.embeddedViewRef.context as any;
     if (newCtx) {
       for (const propName of Object.keys(newCtx)) {
@@ -53,15 +53,15 @@ export class TbStringTemplateOutletDirective<_T = unknown> implements OnChanges 
   constructor(private viewContainer: ViewContainerRef, private templateRef: TemplateRef<any>) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    const { tbStringTemplateOutletContext, tbStringTemplateOutlet } = changes;
+    const { jnksIotStringTemplateOutletContext, jnksIotStringTemplateOutlet } = changes;
     const shouldRecreateView = (): boolean => {
       let shouldOutletRecreate = false;
-      if (tbStringTemplateOutlet) {
-        if (tbStringTemplateOutlet.firstChange) {
+      if (jnksIotStringTemplateOutlet) {
+        if (jnksIotStringTemplateOutlet.firstChange) {
           shouldOutletRecreate = true;
         } else {
-          const isPreviousOutletTemplate = tbStringTemplateOutlet.previousValue instanceof TemplateRef;
-          const isCurrentOutletTemplate = tbStringTemplateOutlet.currentValue instanceof TemplateRef;
+          const isPreviousOutletTemplate = jnksIotStringTemplateOutlet.previousValue instanceof TemplateRef;
+          const isCurrentOutletTemplate = jnksIotStringTemplateOutlet.currentValue instanceof TemplateRef;
           shouldOutletRecreate = isPreviousOutletTemplate || isCurrentOutletTemplate;
         }
       }
@@ -80,12 +80,12 @@ export class TbStringTemplateOutletDirective<_T = unknown> implements OnChanges 
         }
       };
       const shouldContextRecreate =
-        tbStringTemplateOutletContext && hasContextShapeChanged(tbStringTemplateOutletContext);
+        jnksIotStringTemplateOutletContext && hasContextShapeChanged(jnksIotStringTemplateOutletContext);
       return shouldContextRecreate || shouldOutletRecreate;
     };
 
-    if (tbStringTemplateOutlet) {
-      this.context.$implicit = tbStringTemplateOutlet.currentValue;
+    if (jnksIotStringTemplateOutlet) {
+      this.context.$implicit = jnksIotStringTemplateOutlet.currentValue;
     }
 
     const recreateView = shouldRecreateView();
@@ -97,6 +97,6 @@ export class TbStringTemplateOutletDirective<_T = unknown> implements OnChanges 
   }
 }
 
-export class TbStringTemplateOutletContext {
+export class JnksIotStringTemplateOutletContext {
   public $implicit: any;
 }

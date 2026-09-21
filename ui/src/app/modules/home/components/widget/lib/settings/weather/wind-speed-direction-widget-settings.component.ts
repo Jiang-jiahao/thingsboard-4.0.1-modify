@@ -14,7 +14,7 @@ import {
 import { getDataKey } from '@shared/models/widget-settings.models';
 
 @Component({
-  selector: 'tb-wind-speed-direction-widget-settings',
+  selector: 'jnks-iot-wind-speed-direction-widget-settings',
   templateUrl: './wind-speed-direction-widget-settings.component.html',
   styleUrls: []
 })

@@ -10,7 +10,7 @@ import { EntityTableConfig } from '@home/models/entity/entities-table-config.mod
 import { ActionNotificationShow } from '@core/notification/notification.actions';
 
 @Component({
-  selector: 'tb-queue',
+  selector: 'jnks-iot-queue',
   templateUrl: './queue.component.html',
   styleUrls: []
 })

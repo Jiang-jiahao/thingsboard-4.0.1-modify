@@ -84,7 +84,7 @@ const dialogGridColumns: ScrollGridColumns = {
 };
 
 @Component({
-  selector: 'tb-image-gallery',
+  selector: 'jnks-iot-image-gallery',
   templateUrl: './image-gallery.component.html',
   styleUrls: ['./image-gallery.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -510,7 +510,7 @@ export class ImageGalleryComponent extends PageComponent implements OnInit, OnDe
               this.dialog.open<ResourcesInUseDialogComponent, ResourcesInUseDialogData,
                 ImageResourceInfo[]>(ResourcesInUseDialogComponent, {
                 disableClose: true,
-                panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+                panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
                 data
               }).afterClosed().subscribe((images) => {
                 if (images) {
@@ -577,7 +577,7 @@ export class ImageGalleryComponent extends PageComponent implements OnInit, OnDe
                 this.dialog.open<ResourcesInUseDialogComponent, ResourcesInUseDialogData,
                   ImageResourceInfo[]>(ResourcesInUseDialogComponent, {
                   disableClose: true,
-                  panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+                  panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
                   data
                 }).afterClosed().subscribe((forceDeleteImages) => {
                   if (forceDeleteImages && forceDeleteImages.length) {
@@ -655,7 +655,7 @@ export class ImageGalleryComponent extends PageComponent implements OnInit, OnDe
     this.dialog.open<UploadImageDialogComponent, UploadImageDialogData,
       UploadImageDialogResult>(UploadImageDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         imageSubType: this.imageSubType
       }
@@ -688,7 +688,7 @@ export class ImageGalleryComponent extends PageComponent implements OnInit, OnDe
       this.dialog.open<ImageDialogComponent, ImageDialogData,
         ImageResourceInfo>(ImageDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           image,
           readonly: this.readonly(image)
@@ -708,7 +708,7 @@ export class ImageGalleryComponent extends PageComponent implements OnInit, OnDe
     this.dialog.open<EmbedImageDialogComponent, EmbedImageDialogData,
       ImageResourceInfo>(EmbedImageDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         image,
         readonly: this.readonly(image)

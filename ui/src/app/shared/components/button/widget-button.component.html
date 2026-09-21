@@ -1,23 +1,23 @@
 <button #widgetButton
         mat-button
         type="button"
-        class="tb-widget-button"
+        class="jnks-iot-widget-button"
         (click)="clicked.emit($event)"
         (mousedown)="mousePressed = true"
         (mouseup)="mousePressed = false"
         (mouseleave)="mousePressed = false"
         [disabled]="disabled"
-        [class]="'tb-'+appearance.type"
-        [class.tb-icon-only]="appearance.showIcon && !appearance.showLabel"
-        [class.tb-pressed]="mousePressed"
-        [class.tb-pressed-state]="pressed"
-        [class.tb-hover-state]="hovered"
-        [class.tb-active-state]="activated"
-        [class.tb-disabled-state]="disabled"
+        [class]="'jnks-iot-'+appearance.type"
+        [class.jnks-iot-icon-only]="appearance.showIcon && !appearance.showLabel"
+        [class.jnks-iot-pressed]="mousePressed"
+        [class.jnks-iot-pressed-state]="pressed"
+        [class.jnks-iot-hover-state]="hovered"
+        [class.jnks-iot-active-state]="activated"
+        [class.jnks-iot-disabled-state]="disabled"
         [style.border-radius]="computedBorderRadius"
         [style.pointer-events]="disableEvents ? 'none' : ''">
-  <div #widgetButtonContent class="tb-widget-button-content" *ngIf="appearance.showIcon || appearance.showLabel">
-    <tb-icon matButtonIcon *ngIf="appearance.showIcon" [style]="iconStyle">{{ appearance.icon }}</tb-icon>
-    <span *ngIf="appearance.showLabel" class="tb-widget-button-label">{{ label$ | async }}</span>
+  <div #widgetButtonContent class="jnks-iot-widget-button-content" *ngIf="appearance.showIcon || appearance.showLabel">
+    <jnks-iot-icon matButtonIcon *ngIf="appearance.showIcon" [style]="iconStyle">{{ appearance.icon }}</jnks-iot-icon>
+    <span *ngIf="appearance.showLabel" class="jnks-iot-widget-button-label">{{ label$ | async }}</span>
   </div>
 </button>

@@ -4,13 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.leshan.core.model.InvalidDDFFileException;
 import org.eclipse.leshan.core.model.ObjectModel;
 import com.jnks.iot.server.common.data.ResourceType;
-import com.jnks.iot.server.common.data.TbResource;
+import com.jnks.iot.server.common.data.JnksIotResource;
 import com.jnks.iot.server.common.data.exception.JnksIotErrorCode;
 import com.jnks.iot.server.common.data.exception.JnksIotException;
 import com.jnks.iot.server.common.data.lwm2m.LwM2mInstance;
 import com.jnks.iot.server.common.data.lwm2m.LwM2mObject;
 import com.jnks.iot.server.common.data.lwm2m.LwM2mResourceObserve;
-import com.jnks.iot.server.common.data.util.TbDDFFileParser;
+import com.jnks.iot.server.common.data.util.JnksIotDDFFileParser;
 import com.jnks.iot.server.dao.exception.DataValidationException;
 
 import java.io.ByteArrayInputStream;
@@ -24,9 +24,9 @@ import static com.jnks.iot.server.common.data.lwm2m.LwM2mConstants.LWM2M_SEPARAT
 @Slf4j
 public class LwM2mObjectModelUtils {
 
-    private static final TbDDFFileParser ddfFileParser = new TbDDFFileParser();
+    private static final JnksIotDDFFileParser ddfFileParser = new JnksIotDDFFileParser();
 
-    public static void toLwm2mResource(TbResource resource) throws JnksIotException {
+    public static void toLwm2mResource(JnksIotResource resource) throws JnksIotException {
         try {
             List<ObjectModel> objectModels =
                     ddfFileParser.parse(new ByteArrayInputStream(resource.getData()), resource.getSearchText());
@@ -54,7 +54,7 @@ public class LwM2mObjectModelUtils {
         }
     }
 
-    public static LwM2mObject toLwM2mObject(TbResource resource, boolean isSave) {
+    public static LwM2mObject toLwM2mObject(JnksIotResource resource, boolean isSave) {
         try {
             List<ObjectModel> objectModels =
                     ddfFileParser.parse(new ByteArrayInputStream(resource.getData()), resource.getSearchText());

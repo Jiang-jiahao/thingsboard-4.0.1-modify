@@ -1,27 +1,27 @@
-.tb-marker-icon-shapes-panel {
+.jnks-iot-marker-icon-shapes-panel {
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  .tb-marker-icon-shapes-title {
+  .jnks-iot-marker-icon-shapes-title {
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
     color: rgba(0, 0, 0, 0.87);
   }
-  button.mat-mdc-button-base.tb-select-shape-button {
+  button.mat-mdc-button-base.jnks-iot-select-shape-button {
     width: 42px;
     min-width: 42px;
     height: 42px;
     padding: 4px;
-    div.tb-marker-shape {
+    div.jnks-iot-marker-shape {
       width: 34px;
       height: 34px;
       object-fit: contain;
     }
   }
-  .tb-marker-icon-shapes-panel-buttons {
+  .jnks-iot-marker-icon-shapes-panel-buttons {
     height: 40px;
     display: flex;
     flex-direction: row;

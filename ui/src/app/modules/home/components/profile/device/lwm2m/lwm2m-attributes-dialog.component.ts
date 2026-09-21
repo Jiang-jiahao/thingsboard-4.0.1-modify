@@ -16,7 +16,7 @@ export interface Lwm2mAttributesDialogData {
 }
 
 @Component({
-  selector: 'tb-lwm2m-attributes-dialog',
+  selector: 'jnks-iot-lwm2m-attributes-dialog',
   templateUrl: './lwm2m-attributes-dialog.component.html',
   styleUrls: [],
   providers: [{provide: ErrorStateMatcher, useExisting: Lwm2mAttributesDialogComponent}],

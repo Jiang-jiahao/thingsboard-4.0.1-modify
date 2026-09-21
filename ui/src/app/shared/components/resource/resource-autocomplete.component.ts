@@ -7,19 +7,19 @@ import { isDefinedAndNotNull, isEmptyStr, isEqual, isObject } from '@core/utils'
 import {
   extractParamsFromJSResourceUrl,
   isJSResource,
-  prependTbResourcePrefix,
-  removeTbResourcePrefix,
+  prependJnksIotResourcePrefix,
+  removeJnksIotResourcePrefix,
   ResourceInfo,
   ResourceSubType,
   ResourceType
 } from '@shared/models/resource.models';
-import { TbResourceId } from '@shared/models/id/tb-resource-id';
+import { JnksIotResourceId } from '@shared/models/id/jnks-iot-resource-id';
 import { ResourceService } from '@core/http/resource.service';
 import { PageLink } from '@shared/models/page/page-link';
 import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
 @Component({
-  selector: 'tb-resource-autocomplete',
+  selector: 'jnks-iot-resource-autocomplete',
   templateUrl: './resource-autocomplete.component.html',
   styleUrls: [],
   providers: [{
@@ -96,7 +96,7 @@ export class ResourceAutocompleteComponent implements ControlValueAccessor, OnIn
           let modelValue: string;
           if (isObject(value)) {
             this.resource = value as ResourceInfo;
-            modelValue = prependTbResourcePrefix(this.resource.link);
+            modelValue = prependJnksIotResourcePrefix(this.resource.link);
           } else if (isEmptyStr(value) || this.subType !== ResourceSubType.EXTENSION) {
             this.resource = null;
             modelValue = null;
@@ -131,14 +131,14 @@ export class ResourceAutocompleteComponent implements ControlValueAccessor, OnIn
     }
   }
 
-  writeValue(value: string | TbResourceId) {
+  writeValue(value: string | JnksIotResourceId) {
     if (isDefinedAndNotNull(value)) {
       this.searchText = '';
-      if (isObject(value) && typeof value !== 'string' && (value as TbResourceId).id) {
+      if (isObject(value) && typeof value !== 'string' && (value as JnksIotResourceId).id) {
         this.resourceService.getResourceInfoById(value.id, {ignoreLoading: true, ignoreErrors: true}).subscribe({
           next: resource => {
             this.resource = resource;
-            this.modelValue = prependTbResourcePrefix(resource.link);
+            this.modelValue = prependJnksIotResourcePrefix(resource.link);
             this.resourceFormGroup.get('resource').patchValue(resource, {emitEvent: false});
           },
           error: () => {
@@ -148,7 +148,7 @@ export class ResourceAutocompleteComponent implements ControlValueAccessor, OnIn
           }
         });
       } else if (typeof value === 'string' && isJSResource(value)) {
-        const url = removeTbResourcePrefix(value);
+        const url = removeJnksIotResourcePrefix(value);
         const params = extractParamsFromJSResourceUrl(url);
         this.resourceService.getResourceInfo(params.type, params.scope, params.key, {ignoreLoading: true, ignoreErrors: true}).subscribe({
           next: resource => {

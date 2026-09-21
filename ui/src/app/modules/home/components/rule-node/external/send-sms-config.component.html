@@ -18,9 +18,9 @@
   <mat-checkbox formControlName="useSystemSmsSettings">
     {{ 'rule-node-config.use-system-sms-settings' | translate }}
   </mat-checkbox>
-  <tb-sms-provider-configuration
+  <jnks-iot-sms-provider-configuration
     *ngIf="sendSmsConfigForm.get('useSystemSmsSettings').value === false"
     formControlName="smsProviderConfiguration"
     required>
-  </tb-sms-provider-configuration>
+  </jnks-iot-sms-provider-configuration>
 </section>

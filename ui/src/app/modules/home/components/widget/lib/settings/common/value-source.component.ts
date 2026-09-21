@@ -21,7 +21,7 @@ export interface ValueSourceProperty {
 }
 
 @Component({
-  selector: 'tb-value-source',
+  selector: 'jnks-iot-value-source',
   templateUrl: './value-source.component.html',
   styleUrls: ['./../widget-settings.scss'],
   providers: [

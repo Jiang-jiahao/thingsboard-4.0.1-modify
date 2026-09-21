@@ -7,11 +7,11 @@
         </encoder>
     </appender>
 
-    <!-- TbKafkaProducerTemplate will add headers for each message when log level:
+    <!-- JnksIotKafkaProducerTemplate will add headers for each message when log level:
            - DEBUG - producerId and thread name
            - TRACE - will add stacktrace.
          Kafka compression is highly recommended -->
-    <logger name="com.jnks.iot.server.queue.kafka.TbKafkaProducerTemplate" level="TRACE"/>
+    <logger name="com.jnks.iot.server.queue.kafka.JnksIotKafkaProducerTemplate" level="TRACE"/>
 
     <root level="INFO">
         <appender-ref ref="console"/>

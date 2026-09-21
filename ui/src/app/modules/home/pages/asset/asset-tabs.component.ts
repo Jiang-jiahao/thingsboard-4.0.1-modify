@@ -5,7 +5,7 @@ import { EntityTabsComponent } from '../../components/entity/entity-tabs.compone
 import { AssetInfo } from '@app/shared/models/asset.models';
 
 @Component({
-  selector: 'tb-asset-tabs',
+  selector: 'jnks-iot-asset-tabs',
   templateUrl: './asset-tabs.component.html',
   styleUrls: []
 })

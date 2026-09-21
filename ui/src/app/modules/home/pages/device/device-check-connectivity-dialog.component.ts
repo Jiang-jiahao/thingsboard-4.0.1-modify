@@ -34,7 +34,7 @@ export interface DeviceCheckConnectivityDialogData {
 }
 
 @Component({
-  selector: 'tb-device-check-connectivity-dialog',
+  selector: 'jnks-iot-device-check-connectivity-dialog',
   templateUrl: './device-check-connectivity-dialog.component.html',
   styleUrls: ['./device-check-connectivity-dialog.component.scss']
 })

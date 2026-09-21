@@ -24,7 +24,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-device-profile-provision-configuration',
+  selector: 'jnks-iot-device-profile-provision-configuration',
   templateUrl: './device-profile-provision-configuration.component.html',
   styleUrls: [],
   providers: [

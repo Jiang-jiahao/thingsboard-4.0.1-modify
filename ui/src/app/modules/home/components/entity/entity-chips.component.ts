@@ -5,7 +5,7 @@ import { baseDetailsPageByEntityType, EntityType } from '@app/shared/public-api'
 import { isEqual, isNotEmptyStr, isObject } from '@core/utils';
 
 @Component({
-  selector: 'tb-entity-chips',
+  selector: 'jnks-iot-entity-chips',
   templateUrl: './entity-chips.component.html',
   styleUrls: ['./entity-chips.component.scss']
 })

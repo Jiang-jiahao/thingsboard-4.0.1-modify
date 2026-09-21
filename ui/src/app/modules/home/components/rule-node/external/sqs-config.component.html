@@ -25,16 +25,16 @@
       {{ 'rule-node-config.max-delay-seconds-message' | translate }}
     </mat-error>
   </mat-form-field>
-  <label translate class="tb-title">rule-node-config.message-attributes</label>
-  <div class="tb-hint" [innerHTML]="'rule-node-config.message-attributes-hint' | translate | safe: 'html'"></div>
-  <tb-kv-map-config-old
+  <label translate class="jnks-iot-title">rule-node-config.message-attributes</label>
+  <div class="jnks-iot-hint" [innerHTML]="'rule-node-config.message-attributes-hint' | translate | safe: 'html'"></div>
+  <jnks-iot-kv-map-config-old
     required="false"
     formControlName="messageAttributes"
     keyText="rule-node-config.name"
     keyRequiredText="rule-node-config.name-required"
     valText="rule-node-config.value"
     valRequiredText="rule-node-config.value-required">
-  </tb-kv-map-config-old>
+  </jnks-iot-kv-map-config-old>
   <mat-form-field class="mat-block">
     <mat-label translate>rule-node-config.aws-access-key-id</mat-label>
     <input required matInput formControlName="accessKeyId">

@@ -1,5 +1,5 @@
 :host {
-  .tb-table-widget {
+  .jnks-iot-table-widget {
     .mat-mdc-table, .mat-mdc-paginator, mat-toolbar.mat-mdc-table-toolbar:not([color="primary"]) {
       background: transparent;
     }
@@ -32,8 +32,8 @@
   }
 }
 
-:host-context(.tb-has-timewindow) {
-  .tb-table-widget {
+:host-context(.jnks-iot-has-timewindow) {
+  .jnks-iot-table-widget {
     mat-toolbar {
       height: 65px;
       max-height: 65px;

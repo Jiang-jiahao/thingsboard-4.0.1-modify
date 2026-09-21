@@ -16,7 +16,7 @@ import { isUndefinedOrNull } from '@core/utils';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-snmp-device-profile-communication-config',
+  selector: 'jnks-iot-snmp-device-profile-communication-config',
   templateUrl: './snmp-device-profile-communication-config.component.html',
   styleUrls: ['./snmp-device-profile-communication-config.component.scss'],
   providers: [

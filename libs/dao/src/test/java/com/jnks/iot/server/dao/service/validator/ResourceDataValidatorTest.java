@@ -6,10 +6,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import com.jnks.iot.server.common.data.ResourceType;
-import com.jnks.iot.server.common.data.TbResource;
+import com.jnks.iot.server.common.data.JnksIotResource;
 import com.jnks.iot.server.common.data.id.TenantId;
-import com.jnks.iot.server.dao.resource.TbResourceDao;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
+import com.jnks.iot.server.dao.resource.JnksIotResourceDao;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
 import com.jnks.iot.server.dao.tenant.TenantService;
 import com.jnks.iot.server.dao.widget.WidgetTypeDao;
 
@@ -22,13 +22,13 @@ import static org.mockito.Mockito.verify;
 class ResourceDataValidatorTest {
 
     @MockBean
-    TbResourceDao resourceDao;
+    JnksIotResourceDao resourceDao;
     @MockBean
     WidgetTypeDao widgetTypeDao;
     @MockBean
     TenantService tenantService;
     @MockBean
-    TbTenantProfileCache tenantProfileCache;
+    JnksIotTenantProfileCache tenantProfileCache;
     @SpyBean
     ResourceDataValidator validator;
     TenantId tenantId = TenantId.fromUUID(UUID.fromString("9ef79cdf-37a8-4119-b682-2e7ed4e018da"));
@@ -40,7 +40,7 @@ class ResourceDataValidatorTest {
 
     @Test
     void testValidateNameInvocation() {
-        TbResource resource = new TbResource();
+        JnksIotResource resource = new JnksIotResource();
         resource.setTitle("rss");
         resource.setResourceType(ResourceType.PKCS_12);
         resource.setFileName("cert.pem");

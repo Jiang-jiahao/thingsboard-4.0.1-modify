@@ -2,14 +2,14 @@
   <mat-form-field appearance="outline" subscriptSizing="dynamic">
     <mat-label translate>mobile.mobile-package</mat-label>
     <input matInput required formControlName="pkgName">
-    <tb-copy-button
+    <jnks-iot-copy-button
       matSuffix
       miniButton="false"
       [copyText]="entityForm.get('pkgName').value"
       tooltipText="{{ 'mobile.copy-application-package' | translate }}"
       tooltipPosition="above"
       icon="content_copy">
-    </tb-copy-button>
+    </jnks-iot-copy-button>
     <mat-hint> </mat-hint>
     <mat-error *ngIf="entityForm.get('pkgName').hasError('required')">
       {{ 'mobile.mobile-package-required' | translate }}
@@ -40,15 +40,15 @@
               matTooltip="{{ 'mobile.generate-application-secret' | translate }}"
               matTooltipPosition="above"
               (click)="generateAppSecret($event)">
-        <tb-icon>cached</tb-icon>
+        <jnks-iot-icon>cached</jnks-iot-icon>
       </button>
-      <tb-copy-button
+      <jnks-iot-copy-button
         miniButton="false"
         [copyText]="entityForm.get('appSecret').value"
         tooltipText="{{ 'mobile.copy-application-secret' | translate }}"
         tooltipPosition="above"
         icon="content_copy">
-      </tb-copy-button>
+      </jnks-iot-copy-button>
     </div>
     <mat-hint> </mat-hint>
     <mat-error *ngIf="entityForm.get('appSecret').hasError('required')">
@@ -63,8 +63,8 @@
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <section class="tb-form-panel stroked no-padding-bottom" formGroupName="versionInfo" style="margin-bottom: 21px;">
-    <div class="tb-form-panel-title" translate>mobile.version-information</div>
+  <section class="jnks-iot-form-panel stroked no-padding-bottom" formGroupName="versionInfo" style="margin-bottom: 21px;">
+    <div class="jnks-iot-form-panel-title" translate>mobile.version-information</div>
     <section class="flex flex-col">
       <section class="flex flex-row">
         <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
@@ -82,7 +82,7 @@
                 matTooltipPosition="above"
                 #editMinReleaseNotesVersionButton
                 (click)="editReleaseNote($event, editMinReleaseNotesVersionButton, false)">
-          <tb-icon>mdi:text-box-edit</tb-icon>
+          <jnks-iot-icon>mdi:text-box-edit</jnks-iot-icon>
         </button>
       </section>
       <section class="flex flex-row">
@@ -101,27 +101,27 @@
                 matTooltipPosition="above"
                 #editLatestReleaseNotesVersionButton
                 (click)="editReleaseNote($event, editLatestReleaseNotesVersionButton, true)">
-          <tb-icon>mdi:text-box-edit</tb-icon>
+          <jnks-iot-icon>mdi:text-box-edit</jnks-iot-icon>
         </button>
       </section>
     </section>
   </section>
-  <section class="tb-form-panel stroked no-padding-bottom" formGroupName="storeInfo">
-    <div class="tb-form-panel-title" translate>mobile.store-information</div>
+  <section class="jnks-iot-form-panel stroked no-padding-bottom" formGroupName="storeInfo">
+    <div class="jnks-iot-form-panel-title" translate>mobile.store-information</div>
     <section class="flex flex-col">
       <mat-form-field appearance="outline">
         <mat-label>{{
             (entityForm.get('platformType').value === PlatformType.ANDROID ? 'mobile.google-play-link' : 'mobile.app-store-link') | translate
           }}</mat-label>
         <input matInput [required]="entityForm.get('status').value === MobileAppStatus.PUBLISHED" formControlName="storeLink">
-        <tb-copy-button
+        <jnks-iot-copy-button
           matSuffix
           miniButton="false"
           [copyText]="entityForm.get('storeInfo.storeLink').value"
           tooltipText="{{ (entityForm.get('platformType').value === PlatformType.ANDROID ? 'mobile.copy-google-play-link' : 'mobile.copy-app-store-link') | translate }}"
           tooltipPosition="above"
           icon="content_copy">
-        </tb-copy-button>
+        </jnks-iot-copy-button>
         <mat-error *ngIf="entityForm.get('storeInfo.storeLink').hasError('required')">
           {{ (entityForm.get('platformType').value === PlatformType.ANDROID ? 'mobile.google-play-link-required' : 'mobile.app-store-link-required')  | translate }}
         </mat-error>
@@ -132,14 +132,14 @@
       <mat-form-field appearance="outline" *ngIf="entityForm.get('platformType').value === PlatformType.ANDROID">
         <mat-label translate>mobile.sha256-certificate-fingerprints</mat-label>
         <input matInput [required]="entityForm.get('status').value === MobileAppStatus.PUBLISHED" formControlName="sha256CertFingerprints">
-        <tb-copy-button
+        <jnks-iot-copy-button
           matSuffix
           miniButton="false"
           [copyText]="entityForm.get('storeInfo.sha256CertFingerprints').value"
           tooltipText="{{ 'mobile.copy-sha256-certificate-fingerprints' | translate }}"
           tooltipPosition="above"
           icon="content_copy">
-        </tb-copy-button>
+        </jnks-iot-copy-button>
         <mat-error *ngIf="entityForm.get('storeInfo.sha256CertFingerprints').hasError('required')">
           {{ 'mobile.sha256-certificate-fingerprints-required' | translate }}
         </mat-error>
@@ -150,14 +150,14 @@
       <mat-form-field appearance="outline" *ngIf="entityForm.get('platformType').value === PlatformType.IOS">
         <mat-label translate>mobile.app-id</mat-label>
         <input matInput [required]="entityForm.get('status').value === MobileAppStatus.PUBLISHED" formControlName="appId">
-        <tb-copy-button
+        <jnks-iot-copy-button
           matSuffix
           miniButton="false"
           [copyText]="entityForm.get('storeInfo.appId').value"
           tooltipText="{{ 'mobile.copy-app-id' | translate }}"
           tooltipPosition="above"
           icon="content_copy">
-        </tb-copy-button>
+        </jnks-iot-copy-button>
         <mat-error *ngIf="entityForm.get('storeInfo.appId').hasError('required')">
           {{ 'mobile.app-id-required' | translate }}
         </mat-error>

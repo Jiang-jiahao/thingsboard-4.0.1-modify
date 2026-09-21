@@ -2,31 +2,31 @@ import {
   defaultBasePolygonsDataLayerSettings,
   isCutPolygon, isJSON, MapDataLayerType,
   PolygonsDataLayerSettings,
-  TbMapDatasource, TbPolyData, TbPolygonCoordinates, TbPolygonRawCoordinates
+  JnksIotMapDatasource, JnksIotPolyData, JnksIotPolygonCoordinates, JnksIotPolygonRawCoordinates
 } from '@shared/models/widget/maps/map.models';
 import L from 'leaflet';
 import { DataKey, FormattedData } from '@shared/models/widget.models';
-import { ShapeStyleInfo, TbShapesDataLayer } from '@home/components/widget/lib/maps/data-layer/shapes-data-layer';
-import { TbMap } from '@home/components/widget/lib/maps/map';
+import { ShapeStyleInfo, JnksIotShapesDataLayer } from '@home/components/widget/lib/maps/data-layer/shapes-data-layer';
+import { JnksIotMap } from '@home/components/widget/lib/maps/map';
 import { Observable } from 'rxjs';
 import { isNotEmptyStr, isString } from '@core/utils';
 import {
-  TbLatestDataLayerItem,
+  JnksIotLatestDataLayerItem,
   UnplacedMapDataItem
 } from '@home/components/widget/lib/maps/data-layer/latest-map-data-layer';
 import { map } from 'rxjs/operators';
 
-class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSettings, TbPolygonsDataLayer> {
+class JnksIotPolygonDataLayerItem extends JnksIotLatestDataLayerItem<PolygonsDataLayerSettings, JnksIotPolygonsDataLayer> {
 
   private polygonContainer: L.FeatureGroup;
   private polygon: L.Polygon;
   private polygonStyleInfo: ShapeStyleInfo;
   private editing = false;
 
-  constructor(data: FormattedData<TbMapDatasource>,
-              dsData: FormattedData<TbMapDatasource>[],
+  constructor(data: FormattedData<JnksIotMapDatasource>,
+              dsData: FormattedData<JnksIotMapDatasource>[],
               protected settings: PolygonsDataLayerSettings,
-              protected dataLayer: TbPolygonsDataLayer) {
+              protected dataLayer: JnksIotPolygonsDataLayer) {
     super(data, dsData, settings, dataLayer);
   }
 
@@ -45,10 +45,10 @@ class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSett
     }
   }
 
-  protected create(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): L.Layer {
+  protected create(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): L.Layer {
     const polyData = this.dataLayer.extractPolygonCoordinates(data);
     const polyConstructor = isCutPolygon(polyData) || polyData.length !== 2 ? L.polygon : L.rectangle;
-    this.polygon = polyConstructor(polyData as (TbPolygonRawCoordinates & L.LatLngTuple[]), {
+    this.polygon = polyConstructor(polyData as (JnksIotPolygonRawCoordinates & L.LatLngTuple[]), {
       noClip: true,
       snapIgnore: !this.dataLayer.isSnappable(),
       bubblingMouseEvents: !this.dataLayer.isEditMode()
@@ -73,11 +73,11 @@ class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSett
   }
 
   protected bindLabel(content: L.Content): void {
-    this.polygonContainer.bindTooltip(content, {className: 'tb-polygon-label', permanent: true, direction: 'center'})
+    this.polygonContainer.bindTooltip(content, {className: 'jnks-iot-polygon-label', permanent: true, direction: 'center'})
     .openTooltip(this.polygonContainer.getBounds().getCenter());
   }
 
-  protected doUpdate(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): void {
+  protected doUpdate(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): void {
     this.dataLayer.getShapeStyle(data, dsData, this.polygonStyleInfo?.patternId).subscribe((styleInfo) => {
       this.polygonStyleInfo = styleInfo;
       this.updatePolygonShape(data);
@@ -89,7 +89,7 @@ class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSett
     });
   }
 
-  protected doInvalidateCoordinates(data: FormattedData<TbMapDatasource>, _dsData: FormattedData<TbMapDatasource>[]): void {
+  protected doInvalidateCoordinates(data: FormattedData<JnksIotMapDatasource>, _dsData: FormattedData<JnksIotMapDatasource>[]): void {
     this.updatePolygonShape(data);
   }
 
@@ -138,7 +138,7 @@ class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSett
         {
           id: 'cut',
           title: this.getDataLayer().getCtx().translate.instant('widgets.maps.data-layer.polygon.cut'),
-          iconClass: 'tb-cut',
+          iconClass: 'jnks-iot-cut',
           click: (e, button) => {
             const map = this.dataLayer.getMap().getMap();
             if (!map.pm.globalCutModeEnabled()) {
@@ -154,7 +154,7 @@ class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSett
         {
           id: 'rotate',
           title: this.getDataLayer().getCtx().translate.instant('widgets.maps.data-layer.polygon.rotate'),
-          iconClass: 'tb-rotate',
+          iconClass: 'jnks-iot-rotate',
           click: (e, button) => {
             if (!this.polygon.pm.rotateEnabled()) {
               this.disablePolygonCutMode();
@@ -231,7 +231,7 @@ class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSett
     this.polygon.options.bubblingMouseEvents = true;
     this.polygon.setStyle({...this.polygonStyleInfo.style, dashArray: '5 5', weight: 3,
       color: '#3388ff', opacity: 1, fillColor: '#3388ff', fillOpacity: 0.2});
-    this.addItemClass('tb-cut-mode');
+    this.addItemClass('jnks-iot-cut-mode');
     this.polygon.once('pm:cut', (e) => {
       if (e.layer instanceof L.Polygon) {
         if (this.polygon instanceof L.Rectangle) {
@@ -270,7 +270,7 @@ class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSett
       layersToCut: [this.polygon]
     });
     // @ts-ignore
-    L.DomUtil.addClass(map.pm.Draw.Cut._hintMarker.getTooltip()._container, 'tb-place-item-label');
+    L.DomUtil.addClass(map.pm.Draw.Cut._hintMarker.getTooltip()._container, 'jnks-iot-place-item-label');
     cutButton?.setActive(true);
     map.once('pm:globalcutmodetoggled', (e) => {
       if (!e.enabled) {
@@ -284,7 +284,7 @@ class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSett
     this.editing = false;
     this.polygon.options.bubblingMouseEvents = !this.dataLayer.isEditMode();
     this.polygon.setStyle({...this.polygonStyleInfo.style, dashArray: null});
-    this.removeItemClass('tb-cut-mode');
+    this.removeItemClass('jnks-iot-cut-mode');
     this.polygon.off('pm:cut');
     const map = this.dataLayer.getMap().getMap();
     map.pm.disableGlobalCutMode();
@@ -314,9 +314,9 @@ class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSett
   }
 
   private savePolygonCoordinates() {
-    let coordinates: TbPolygonCoordinates = this.polygon.getLatLngs();
+    let coordinates: JnksIotPolygonCoordinates = this.polygon.getLatLngs();
     if (coordinates.length === 1) {
-      coordinates = coordinates[0] as TbPolygonCoordinates;
+      coordinates = coordinates[0] as JnksIotPolygonCoordinates;
     }
     if (this.polygon instanceof L.Rectangle && !isCutPolygon(coordinates)) {
       const bounds = this.polygon.getBounds();
@@ -328,11 +328,11 @@ class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSett
     this.dataLayer.savePolygonCoordinates(this.data, coordinates).subscribe();
   }
 
-  private updatePolygonShape(data: FormattedData<TbMapDatasource>) {
+  private updatePolygonShape(data: FormattedData<JnksIotMapDatasource>) {
     if (this.editing) {
       return;
     }
-    const polyData = this.dataLayer.extractPolygonCoordinates(data) as TbPolyData;
+    const polyData = this.dataLayer.extractPolygonCoordinates(data) as JnksIotPolyData;
     if (isCutPolygon(polyData) || polyData.length !== 2) {
       if (this.polygon instanceof L.Rectangle) {
         this.polygonContainer.removeLayer(this.polygon);
@@ -355,9 +355,9 @@ class TbPolygonDataLayerItem extends TbLatestDataLayerItem<PolygonsDataLayerSett
 
 }
 
-export class TbPolygonsDataLayer extends TbShapesDataLayer<PolygonsDataLayerSettings, TbPolygonsDataLayer> {
+export class JnksIotPolygonsDataLayer extends JnksIotShapesDataLayer<PolygonsDataLayerSettings, JnksIotPolygonsDataLayer> {
 
-  constructor(protected map: TbMap<any>,
+  constructor(protected map: JnksIotMap<any>,
               inputSettings: PolygonsDataLayerSettings) {
     super(map, inputSettings);
   }
@@ -368,14 +368,14 @@ export class TbPolygonsDataLayer extends TbShapesDataLayer<PolygonsDataLayerSett
 
   public placeItem(item: UnplacedMapDataItem, layer: L.Layer): void {
     if (layer instanceof L.Polygon) {
-      let coordinates: TbPolygonCoordinates;
+      let coordinates: JnksIotPolygonCoordinates;
       if (layer instanceof L.Rectangle) {
         const bounds = layer.getBounds();
         coordinates = [bounds.getNorthWest(), bounds.getSouthEast()];
       } else {
         coordinates = layer.getLatLngs();
         if (coordinates.length === 1) {
-          coordinates = coordinates[0] as TbPolygonCoordinates;
+          coordinates = coordinates[0] as JnksIotPolygonCoordinates;
         }
       }
       this.savePolygonCoordinates(item.entity, coordinates).subscribe(
@@ -389,7 +389,7 @@ export class TbPolygonsDataLayer extends TbShapesDataLayer<PolygonsDataLayerSett
     }
   }
 
-  public extractPolygonCoordinates(data: FormattedData<TbMapDatasource>): TbPolygonRawCoordinates {
+  public extractPolygonCoordinates(data: FormattedData<JnksIotMapDatasource>): JnksIotPolygonRawCoordinates {
     let rawPolyData = data[this.settings.polygonKey.label];
     if (isString(rawPolyData)) {
       rawPolyData = JSON.parse(rawPolyData);
@@ -397,7 +397,7 @@ export class TbPolygonsDataLayer extends TbShapesDataLayer<PolygonsDataLayerSett
     return this.map.polygonDataToCoordinates(rawPolyData);
   }
 
-  public savePolygonCoordinates(data: FormattedData<TbMapDatasource>, coordinates: TbPolygonCoordinates): Observable<TbPolygonRawCoordinates> {
+  public savePolygonCoordinates(data: FormattedData<JnksIotMapDatasource>, coordinates: JnksIotPolygonCoordinates): Observable<JnksIotPolygonRawCoordinates> {
     const converted = coordinates ? this.map.coordinatesToPolygonData(coordinates) : null;
     const polygonData = [
       {
@@ -414,7 +414,7 @@ export class TbPolygonsDataLayer extends TbShapesDataLayer<PolygonsDataLayerSett
     return [this.settings.polygonKey];
   }
 
-  protected defaultBaseSettings(map: TbMap<any>): Partial<PolygonsDataLayerSettings> {
+  protected defaultBaseSettings(map: JnksIotMap<any>): Partial<PolygonsDataLayerSettings> {
     return defaultBasePolygonsDataLayerSettings(map.type());
   }
 
@@ -422,13 +422,13 @@ export class TbPolygonsDataLayer extends TbShapesDataLayer<PolygonsDataLayerSett
     return super.doSetup();
   }
 
-  protected isValidLayerData(layerData: FormattedData<TbMapDatasource>): boolean {
+  protected isValidLayerData(layerData: FormattedData<JnksIotMapDatasource>): boolean {
     return layerData && ((isNotEmptyStr(layerData[this.settings.polygonKey.label]) && !isJSON(layerData[this.settings.polygonKey.label])
       || Array.isArray(layerData[this.settings.polygonKey.label])));
   }
 
-  protected createLayerItem(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): TbPolygonDataLayerItem {
-    return new TbPolygonDataLayerItem(data, dsData, this.settings, this);
+  protected createLayerItem(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): JnksIotPolygonDataLayerItem {
+    return new JnksIotPolygonDataLayerItem(data, dsData, this.settings, this);
   }
 
 }

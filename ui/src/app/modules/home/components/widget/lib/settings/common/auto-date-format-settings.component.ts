@@ -2,14 +2,14 @@ import { Component, forwardRef, Input, OnInit, Renderer2, ViewContainerRef } fro
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { AutoDateFormatSettings, defaultAutoDateFormatSettings } from '@shared/models/widget-settings.models';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { deepClone, mergeDeep } from '@core/utils';
 import {
   AutoDateFormatSettingsPanelComponent
 } from '@home/components/widget/lib/settings/common/auto-date-format-settings-panel.component';
 
 @Component({
-  selector: 'tb-auto-date-format-settings',
+  selector: 'jnks-iot-auto-date-format-settings',
   templateUrl: './auto-date-format-settings.component.html',
   styleUrls: [],
   providers: [
@@ -32,7 +32,7 @@ export class AutoDateFormatSettingsComponent implements OnInit, ControlValueAcce
 
   private propagateChange = null;
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef) {}
 
@@ -74,8 +74,8 @@ export class AutoDateFormatSettingsComponent implements OnInit, ControlValueAcce
         },
         isModal: true
       });
-      autoDateFormatSettingsPanelPopover.tbComponentRef.instance.popover = autoDateFormatSettingsPanelPopover;
-      autoDateFormatSettingsPanelPopover.tbComponentRef.instance.autoDateFormatSettingsApplied.subscribe((autoDateFormatSettings) => {
+      autoDateFormatSettingsPanelPopover.jnksIotComponentRef.instance.popover = autoDateFormatSettingsPanelPopover;
+      autoDateFormatSettingsPanelPopover.jnksIotComponentRef.instance.autoDateFormatSettingsApplied.subscribe((autoDateFormatSettings) => {
         autoDateFormatSettingsPanelPopover.hide();
         this.modelValue = autoDateFormatSettings;
         this.propagateChange(this.modelValue);

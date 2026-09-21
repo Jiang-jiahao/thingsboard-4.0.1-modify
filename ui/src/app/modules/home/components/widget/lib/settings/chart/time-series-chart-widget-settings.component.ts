@@ -26,7 +26,7 @@ import { WidgetService } from '@core/http/widget.service';
 import { TimeSeriesChartTooltipTrigger } from '@home/components/widget/lib/chart/time-series-chart-tooltip.models';
 
 @Component({
-  selector: 'tb-time-series-chart-widget-settings',
+  selector: 'jnks-iot-time-series-chart-widget-settings',
   templateUrl: './time-series-chart-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

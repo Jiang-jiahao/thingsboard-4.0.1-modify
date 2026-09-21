@@ -12,7 +12,7 @@ import { MenuSection, menuSectionMap } from '@core/services/menu.models';
 import { MenuService } from '@core/services/menu.service';
 
 @Component({
-  selector: 'tb-breadcrumb',
+  selector: 'jnks-iot-breadcrumb',
   templateUrl: './breadcrumb.component.html',
   styleUrls: ['./breadcrumb.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

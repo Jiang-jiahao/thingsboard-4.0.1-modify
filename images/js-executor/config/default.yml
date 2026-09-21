@@ -31,7 +31,7 @@ kafka:
 logger:
   level: "info"
   path: "logs"
-  filename: "tb-js-executor-%DATE%.log"
+  filename: "jnks-iot-js-executor-%DATE%.log"
 
 script:
   use_sandbox: "true"

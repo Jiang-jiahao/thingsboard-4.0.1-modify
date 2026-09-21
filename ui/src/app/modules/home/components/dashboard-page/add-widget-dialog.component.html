@@ -1,15 +1,15 @@
-<form class="tb-add-widget-dialog" [formGroup]="widgetFormGroup">
+<form class="jnks-iot-add-widget-dialog" [formGroup]="widgetFormGroup">
   <mat-toolbar color="primary">
-    <div class="tb-add-widget-toolbar">
+    <div class="jnks-iot-add-widget-toolbar">
       <h2>{{'widget.add' | translate}}:</h2>
       <span class="flex-1">{{data.widgetInfo.widgetName}}</span>
       <div class="flex flex-row items-center justify-start gt-xs:gap-4" style="min-width: fit-content;">
-        <tb-toggle-select *ngIf="widgetConfig.hasBasicMode" appearance="fill-invert" selectMediaBreakpoint="xs"
+        <jnks-iot-toggle-select *ngIf="widgetConfig.hasBasicMode" appearance="fill-invert" selectMediaBreakpoint="xs"
                           [(ngModel)]="widgetConfigMode" [ngModelOptions]="{standalone: true}">
-          <tb-toggle-option value="basic">{{ 'widget.basic-mode' | translate }}</tb-toggle-option>
-          <tb-toggle-option value="advanced">{{ 'widget.advanced-mode' | translate }}</tb-toggle-option>
-        </tb-toggle-select>
-        <div [tb-help]="helpLinkIdForWidgetType()"></div>
+          <jnks-iot-toggle-option value="basic">{{ 'widget.basic-mode' | translate }}</jnks-iot-toggle-option>
+          <jnks-iot-toggle-option value="advanced">{{ 'widget.advanced-mode' | translate }}</jnks-iot-toggle-option>
+        </jnks-iot-toggle-select>
+        <div [jnks-iot-help]="helpLinkIdForWidgetType()"></div>
       </div>
     </div>
     <button mat-icon-button
@@ -19,9 +19,9 @@
     </button>
   </mat-toolbar>
   <div mat-dialog-content>
-    <tb-widget-config
+    <jnks-iot-widget-config
       #widgetConfigComponent
-      class="tb-absolute-fill"
+      class="jnks-iot-absolute-fill"
       [aliasController]="aliasController"
       [functionsOnly]="false"
       [dashboard]="dashboard"
@@ -31,8 +31,8 @@
       [isDefaultBreakpoint]="isDefaultBreakpoint"
       isAdd
       formControlName="widgetConfig">
-    </tb-widget-config>
-    <tb-widget-preview *ngIf="previewMode" class="tb-absolute-fill"
+    </jnks-iot-widget-config>
+    <jnks-iot-widget-preview *ngIf="previewMode" class="jnks-iot-absolute-fill"
       [aliasController]="aliasController"
       [stateController]="stateController"
       [dashboardTimewindow]="dashboard.configuration.timewindow"
@@ -40,14 +40,14 @@
       [widgetConfig]="widgetFormGroup.get('widgetConfig').value.config"
       [previewWidth]="widgetConfig.typeParameters.previewWidth"
       [previewHeight]="widgetConfig.typeParameters.previewHeight">
-      <div class="tb-preview-panel-content">
+      <div class="jnks-iot-preview-panel-content">
         <button mat-button
                 (click)="previewMode = false">
           <mat-icon>chevron_left</mat-icon>
           {{ 'action.back' | translate }}
         </button>
       </div>
-    </tb-widget-preview>
+    </jnks-iot-widget-preview>
   </div>
   <div mat-dialog-actions class="flex items-center justify-between">
     <button mat-button color="primary"

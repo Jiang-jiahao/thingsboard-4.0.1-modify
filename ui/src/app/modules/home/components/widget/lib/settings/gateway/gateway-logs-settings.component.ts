@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-gateway-logs-settings',
+  selector: 'jnks-iot-gateway-logs-settings',
   templateUrl: './gateway-logs-settings.component.html',
   styleUrls: ['../widget-settings.scss']
 })

@@ -1,12 +1,12 @@
-<div class="tb-color-settings-panel" [formGroup]="colorRangeFormGroup">
-  <div class="tb-color-settings-title" translate>widgets.color.color-settings</div>
-  <div class="tb-color-settings-panel-body">
-    <tb-color-range-list class="tb-color-ranges-panel"
+<div class="jnks-iot-color-settings-panel" [formGroup]="colorRangeFormGroup">
+  <div class="jnks-iot-color-settings-title" translate>widgets.color.color-settings</div>
+  <div class="jnks-iot-color-settings-panel-body">
+    <jnks-iot-color-range-list class="jnks-iot-color-ranges-panel"
                          formControlName="rangeList"
                          [popover]="popover">
-    </tb-color-range-list>
+    </jnks-iot-color-range-list>
   </div>
-  <div class="tb-color-settings-panel-buttons">
+  <div class="jnks-iot-color-settings-panel-buttons">
       <button *ngIf="settingsComponents?.length"
               #copySettingsButton
               mat-stroked-button

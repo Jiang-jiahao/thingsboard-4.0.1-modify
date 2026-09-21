@@ -9,7 +9,7 @@ import { RuleChain } from '@shared/models/rule-chain.models';
 import { EntityTableConfig } from '@home/models/entity/entities-table-config.models';
 
 @Component({
-  selector: 'tb-rulechain',
+  selector: 'jnks-iot-rulechain',
   templateUrl: './rulechain.component.html',
   styleUrls: ['./rulechain.component.scss']
 })

@@ -102,7 +102,7 @@ import {
 
 @Component({
 
-  selector: 'tb-device-rpc-panel',
+  selector: 'jnks-iot-device-rpc-panel',
 
   templateUrl: './device-rpc-panel.component.html',
 

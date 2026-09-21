@@ -23,7 +23,7 @@ import { Authority } from '@shared/models/authority.enum';
 import { OTA_UI_ENABLED } from '@shared/models/device.models';
 
 @Component({
-  selector: 'tb-ota-package-autocomplete',
+  selector: 'jnks-iot-ota-package-autocomplete',
   templateUrl: './ota-package-autocomplete.component.html',
   styleUrls: ['./ota-package-autocomplete.component.scss'],
   providers: [{

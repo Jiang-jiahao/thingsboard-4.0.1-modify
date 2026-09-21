@@ -16,7 +16,7 @@ import com.jnks.iot.server.common.data.CacheConstants;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CacheSpecsMap.class, TbCaffeineCacheConfiguration.class})
+@ContextConfiguration(classes = {CacheSpecsMap.class, JnksIotCaffeineCacheConfiguration.class})
 @EnableConfigurationProperties
 @TestPropertySource(properties = {
         "cache.type=caffeine",

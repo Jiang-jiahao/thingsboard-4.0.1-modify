@@ -1,11 +1,11 @@
 <section [formGroup]="notificationConfigForm" class="flex flex-col">
-  <tb-template-autocomplete
+  <jnks-iot-template-autocomplete
     required
     allowCreate
     formControlName="templateId"
     [notificationTypes]="notificationType.RULE_NODE">
-  </tb-template-autocomplete>
-  <tb-entity-list
+  </jnks-iot-template-autocomplete>
+  <jnks-iot-entity-list
     required
     formControlName="targets"
     labelText="{{ 'notification.recipients' | translate }}"
@@ -13,5 +13,5 @@
     requiredText="{{ 'notification.recipients-required' | translate }}"
     entityType="{{ entityType.NOTIFICATION_TARGET }}"
     subType="{{ notificationType.RULE_NODE }}">
-  </tb-entity-list>
+  </jnks-iot-entity-list>
 </section>

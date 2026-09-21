@@ -1,7 +1,7 @@
-<section class="tb-widget-settings" [formGroup]="circleSettingsFormGroup">
+<section class="jnks-iot-widget-settings" [formGroup]="circleSettingsFormGroup">
   <fieldset class="fields-group fields-group-slider">
     <legend class="group-title" translate>widgets.maps.circle-settings</legend>
-    <mat-expansion-panel class="tb-settings" [expanded]="circleSettingsFormGroup.get('showCircle').value">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="circleSettingsFormGroup.get('showCircle').value">
       <mat-expansion-panel-header class="flex-wrap">
         <mat-panel-title>
           <mat-slide-toggle formControlName="showCircle" (click)="$event.stopPropagation()">
@@ -13,17 +13,17 @@
         </mat-panel-description>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
-        <tb-datasources-key-autocomplete required
+        <jnks-iot-datasources-key-autocomplete required
                                          [datasources]="widget?.config?.datasources"
                                          label="widgets.maps.circle-key-name"
                                          formControlName="circleKeyName">
-        </tb-datasources-key-autocomplete>
+        </jnks-iot-datasources-key-autocomplete>
         <mat-checkbox formControlName="editableCircle">
           {{ 'widgets.maps.enable-circle-edit' | translate }}
         </mat-checkbox>
         <fieldset class="fields-group fields-group-slider">
           <legend class="group-title" translate>widgets.maps.circle-label</legend>
-          <mat-expansion-panel class="tb-settings" [expanded]="circleSettingsFormGroup.get('showCircleLabel').value">
+          <mat-expansion-panel class="jnks-iot-settings" [expanded]="circleSettingsFormGroup.get('showCircleLabel').value">
             <mat-expansion-panel-header class="flex-wrap">
               <mat-panel-title>
                 <mat-slide-toggle formControlName="showCircleLabel" (click)="$event.stopPropagation()">
@@ -38,25 +38,25 @@
               <mat-slide-toggle formControlName="useCircleLabelFunction" class="slide-block">
                 {{ 'widgets.maps.use-circle-label-function' | translate }}
               </mat-slide-toggle>
-              <tb-html [class.!hidden]="circleSettingsFormGroup.get('useCircleLabelFunction').value"
+              <jnks-iot-html [class.!hidden]="circleSettingsFormGroup.get('useCircleLabelFunction').value"
                        formControlName="circleLabel"
                        minHeight="100px"
                        label="{{ 'widgets.maps.circle-label-pattern' | translate }}">
-              </tb-html>
-              <tb-js-func [class.!hidden]="!circleSettingsFormGroup.get('useCircleLabelFunction').value"
+              </jnks-iot-html>
+              <jnks-iot-js-func [class.!hidden]="!circleSettingsFormGroup.get('useCircleLabelFunction').value"
                           formControlName="circleLabelFunction"
                           withModules
                           [globalVariables]="functionScopeVariables"
                           [functionArgs]="['data', 'dsData', 'dsIndex']"
                           functionTitle="{{ 'widgets.maps.circle-label-function' | translate }}"
                           helpId="widget/lib/map-legacy/label_fn">
-              </tb-js-func>
+              </jnks-iot-js-func>
             </ng-template>
           </mat-expansion-panel>
         </fieldset>
         <fieldset class="fields-group fields-group-slider">
           <legend class="group-title" translate>widgets.maps.circle-tooltip</legend>
-          <mat-expansion-panel class="tb-settings" [expanded]="circleSettingsFormGroup.get('showCircleTooltip').value">
+          <mat-expansion-panel class="jnks-iot-settings" [expanded]="circleSettingsFormGroup.get('showCircleTooltip').value">
             <mat-expansion-panel-header class="flex-wrap">
               <mat-panel-title>
                 <mat-slide-toggle formControlName="showCircleTooltip" (click)="$event.stopPropagation()">
@@ -82,37 +82,37 @@
               <mat-slide-toggle formControlName="useCircleTooltipFunction" class="slide-block">
                 {{ 'widgets.maps.use-circle-tooltip-function' | translate }}
               </mat-slide-toggle>
-              <tb-html [class.!hidden]="circleSettingsFormGroup.get('useCircleTooltipFunction').value"
+              <jnks-iot-html [class.!hidden]="circleSettingsFormGroup.get('useCircleTooltipFunction').value"
                        formControlName="circleTooltipPattern"
                        minHeight="100px"
                        label="{{ 'widgets.maps.circle-tooltip-pattern' | translate }}">
-              </tb-html>
-              <tb-js-func [class.!hidden]="!circleSettingsFormGroup.get('useCircleTooltipFunction').value"
+              </jnks-iot-html>
+              <jnks-iot-js-func [class.!hidden]="!circleSettingsFormGroup.get('useCircleTooltipFunction').value"
                           formControlName="circleTooltipFunction"
                           withModules
                           [globalVariables]="functionScopeVariables"
                           [functionArgs]="['data', 'dsData', 'dsIndex']"
                           functionTitle="{{ 'widgets.maps.circle-tooltip-function' | translate }}"
                           helpId="widget/lib/map-legacy/polygon_tooltip_fn">
-              </tb-js-func>
+              </jnks-iot-js-func>
             </ng-template>
           </mat-expansion-panel>
         </fieldset>
         <fieldset class="fields-group">
           <legend class="group-title" translate>widgets.maps.circle-fill-color</legend>
           <section class="!flex flex-col gt-xs:flex-row gt-xs:gap-2">
-            <tb-color-input
+            <jnks-iot-color-input
               class="flex-1"
               formControlName="circleFillColor"
               icon="format_color_fill"
               label="{{ 'widgets.maps.circle-fill-color' | translate }}" openOnInput colorClearButton>
-            </tb-color-input>
+            </jnks-iot-color-input>
             <mat-form-field class="flex-1">
               <mat-label translate>widgets.maps.circle-fill-color-opacity</mat-label>
               <input matInput type="number" min="0" max="1" formControlName="circleFillColorOpacity">
             </mat-form-field>
           </section>
-          <mat-expansion-panel class="tb-settings" [expanded]="circleSettingsFormGroup.get('useCircleFillColorFunction').value">
+          <mat-expansion-panel class="jnks-iot-settings" [expanded]="circleSettingsFormGroup.get('useCircleFillColorFunction').value">
             <mat-expansion-panel-header class="flex-wrap">
               <mat-panel-title>
                 <mat-slide-toggle formControlName="useCircleFillColorFunction" (click)="$event.stopPropagation()">
@@ -124,25 +124,25 @@
               </mat-panel-description>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <tb-js-func formControlName="circleFillColorFunction"
+              <jnks-iot-js-func formControlName="circleFillColorFunction"
                           withModules
                           [globalVariables]="functionScopeVariables"
                           [functionArgs]="['data', 'dsData', 'dsIndex']"
                           functionTitle="{{ 'widgets.maps.circle-fill-color-function' | translate }}"
                           helpId="widget/lib/map-legacy/polygon_color_fn">
-              </tb-js-func>
+              </jnks-iot-js-func>
             </ng-template>
           </mat-expansion-panel>
         </fieldset>
         <fieldset class="fields-group">
           <legend class="group-title" translate>widgets.maps.circle-stroke</legend>
           <section class="!flex flex-col gt-xs:flex-row gt-xs:gap-2">
-            <tb-color-input
+            <jnks-iot-color-input
               class="flex-1"
               formControlName="circleStrokeColor"
               icon="format_color_fill"
               label="{{ 'widgets.maps.stroke-color' | translate }}" openOnInput colorClearButton>
-            </tb-color-input>
+            </jnks-iot-color-input>
             <mat-form-field class="flex-1">
               <mat-label translate>widgets.maps.stroke-opacity</mat-label>
               <input matInput type="number" min="0" max="1" formControlName="circleStrokeOpacity">
@@ -152,7 +152,7 @@
               <input matInput type="number" min="0" formControlName="circleStrokeWeight">
             </mat-form-field>
           </section>
-          <mat-expansion-panel class="tb-settings" [expanded]="circleSettingsFormGroup.get('useCircleStrokeColorFunction').value">
+          <mat-expansion-panel class="jnks-iot-settings" [expanded]="circleSettingsFormGroup.get('useCircleStrokeColorFunction').value">
             <mat-expansion-panel-header class="flex-wrap">
               <mat-panel-title>
                 <mat-slide-toggle formControlName="useCircleStrokeColorFunction" (click)="$event.stopPropagation()">
@@ -164,13 +164,13 @@
               </mat-panel-description>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <tb-js-func formControlName="circleStrokeColorFunction"
+              <jnks-iot-js-func formControlName="circleStrokeColorFunction"
                           withModules
                           [globalVariables]="functionScopeVariables"
                           [functionArgs]="['data', 'dsData', 'dsIndex']"
                           functionTitle="{{ 'widgets.maps.circle-stroke-color-function' | translate }}"
                           helpId="widget/lib/map-legacy/polygon_color_fn">
-              </tb-js-func>
+              </jnks-iot-js-func>
             </ng-template>
           </mat-expansion-panel>
         </fieldset>

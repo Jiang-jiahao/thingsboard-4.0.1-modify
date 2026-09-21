@@ -9,7 +9,7 @@
   grid-template-rows: min-content 4px minmax(auto, 1fr) min-content min-content;
 }
 
-:host-context(.tb-fullscreen-dialog .mat-mdc-dialog-container) {
+:host-context(.jnks-iot-fullscreen-dialog .mat-mdc-dialog-container) {
   .mat-mdc-dialog-content {
     grid-row: 3;
     display: flex;
@@ -19,7 +19,7 @@
     color: rgba(0, 0, 0, 0.87);
   }
 
-  .tb-dialog-actions {
+  .jnks-iot-dialog-actions {
     grid-row: 5;
     display: flex;
   }
@@ -28,32 +28,32 @@
     grid-row: 4;
   }
 
-  .tb-title {
+  .jnks-iot-title {
     font-size: 16px;
     line-height: 24px;
-    &.tb-required::after {
+    &.jnks-iot-required::after {
       font-size: initial;
       content: "*";
     }
 
-    &.tb-error {
+    &.jnks-iot-error {
       color: var(--mdc-theme-error, #f44336);
 
-      &.tb-required::after {
+      &.jnks-iot-required::after {
         color: var(--mdc-theme-error, #f44336);
       }
     }
   }
 
-  .tb-mat-error {
+  .jnks-iot-mat-error {
     font-size: 13px;
   }
 
-  .tb-form-hint {
+  .jnks-iot-form-hint {
     padding: 0 0 8px;
   }
 
-  .tb-hint-available-params {
+  .jnks-iot-hint-available-params {
     border-radius: 6px;
     background-color: rgba(48, 86, 128, 0.04);
     margin-bottom: 8px;
@@ -95,7 +95,7 @@
     margin-bottom: 16px;
   }
 
-  .tb-loader {
+  .jnks-iot-loader {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -108,7 +108,7 @@
     &.notification {
       background-color: #F3F6FA;
 
-      tb-icon, .tb-form-panel-title {
+      jnks-iot-icon, .jnks-iot-form-panel-title {
         color: rgba(0, 0, 0, .38);
       }
     }
@@ -141,8 +141,8 @@
       justify-content: center;
       display: flex;
 
-      tb-notification {
-        border: 1px groove $tb-primary-color;
+      jnks-iot-notification {
+        border: 1px groove $jnks-iot-primary-color;
         border-radius: 4px;
         max-width: 400px;
         width: 80%;
@@ -179,7 +179,7 @@
     }
   }
 
-  tb-toggle-select {
+  jnks-iot-toggle-select {
     margin-bottom: 24px;
     width: 320px;
   }

@@ -3,11 +3,11 @@
   background: #F3F6FA;
   display: flex;
   overflow: auto;
-  .tb-preview-dashboard {
+  .jnks-iot-preview-dashboard {
     position: relative;
     margin: auto;
   }
-  .tb-preview-panel {
+  .jnks-iot-preview-panel {
     position: absolute;
     top: 16px;
     left: 24px;
@@ -15,8 +15,8 @@
 }
 
 :host ::ng-deep {
-  tb-dashboard.tb-preview-dashboard {
-    .tb-dashboard-content {
+  jnks-iot-dashboard.jnks-iot-preview-dashboard {
+    .jnks-iot-dashboard-content {
       background-color: transparent !important;
     }
   }

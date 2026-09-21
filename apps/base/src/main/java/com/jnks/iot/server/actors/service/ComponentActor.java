@@ -2,15 +2,15 @@ package com.jnks.iot.server.actors.service;
 
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.actors.ActorSystemContext;
-import com.jnks.iot.server.actors.TbActorCtx;
-import com.jnks.iot.server.actors.TbActorException;
-import com.jnks.iot.server.actors.TbRuleNodeUpdateException;
+import com.jnks.iot.server.actors.JnksIotActorCtx;
+import com.jnks.iot.server.actors.JnksIotActorException;
+import com.jnks.iot.server.actors.JnksIotRuleNodeUpdateException;
 import com.jnks.iot.server.actors.shared.ComponentMsgProcessor;
 import com.jnks.iot.server.actors.stats.StatsPersistMsg;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
-import com.jnks.iot.server.common.msg.TbActorStopReason;
+import com.jnks.iot.server.common.msg.JnksIotActorStopReason;
 import com.jnks.iot.server.common.msg.plugin.ComponentLifecycleMsg;
 import com.jnks.iot.server.common.msg.queue.PartitionChangeMsg;
 
@@ -37,16 +37,16 @@ public abstract class ComponentActor<T extends EntityId, P extends ComponentMsgP
         this.id = id;
     }
 
-    abstract protected P createProcessor(TbActorCtx ctx);
+    abstract protected P createProcessor(JnksIotActorCtx ctx);
 
     @Override
-    public void init(TbActorCtx ctx) throws TbActorException {
+    public void init(JnksIotActorCtx ctx) throws JnksIotActorException {
         super.init(ctx);
         this.processor = createProcessor(ctx);
         initProcessor(ctx);
     }
 
-    protected void initProcessor(TbActorCtx ctx) throws TbActorException {
+    protected void initProcessor(JnksIotActorCtx ctx) throws JnksIotActorException {
         try {
             log.debug("[{}][{}][{}] Starting processor.", tenantId, id, id.getEntityType());
             processor.start(ctx);
@@ -59,7 +59,7 @@ public abstract class ComponentActor<T extends EntityId, P extends ComponentMsgP
             log.debug("[{}][{}] Failed to start {} processor.", tenantId, id, id.getEntityType(), e);
             logAndPersist("OnStart", e, true);
             logLifecycleEvent(ComponentLifecycleEvent.STARTED, e);
-            throw new TbActorException("Failed to init actor", e);
+            throw new JnksIotActorException("Failed to init actor", e);
         }
     }
 
@@ -73,7 +73,7 @@ public abstract class ComponentActor<T extends EntityId, P extends ComponentMsgP
     }
 
     @Override
-    public void destroy(TbActorStopReason stopReason, Throwable cause) {
+    public void destroy(JnksIotActorStopReason stopReason, Throwable cause) {
         try {
             log.debug("[{}][{}][{}] Stopping processor.", tenantId, id, id.getEntityType());
             if (processor != null) {
@@ -116,8 +116,8 @@ public abstract class ComponentActor<T extends EntityId, P extends ComponentMsgP
         } catch (Exception e) {
             logAndPersist("onLifecycleMsg", e, true);
             logLifecycleEvent(msg.getEvent(), e);
-            if (e instanceof TbRuleNodeUpdateException) {
-                throw (TbRuleNodeUpdateException) e;
+            if (e instanceof JnksIotRuleNodeUpdateException) {
+                throw (JnksIotRuleNodeUpdateException) e;
             }
         }
     }

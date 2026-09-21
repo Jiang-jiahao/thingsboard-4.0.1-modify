@@ -11,7 +11,7 @@ import { EntityId } from '@shared/models/id/entity-id';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'tb-dashboard-state',
+  selector: 'jnks-iot-dashboard-state',
   templateUrl: './dashboard-state.component.html',
   styleUrls: ['./dashboard-state.component.scss']
 })

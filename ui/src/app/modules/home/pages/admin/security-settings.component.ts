@@ -24,7 +24,7 @@ import { Observable, of } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-security-settings',
+  selector: 'jnks-iot-security-settings',
   templateUrl: './security-settings.component.html',
   styleUrls: ['./security-settings.component.scss', './settings-card.scss']
 })

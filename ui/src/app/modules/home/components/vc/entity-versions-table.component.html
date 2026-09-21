@@ -1,10 +1,10 @@
-<div class="mat-padding tb-entity-table tb-absolute-fill" [class.tb-popover-mode]="popoverComponent">
-  <div class="tb-entity-table-content flex flex-1 flex-col" [class.tb-outlined-border]="!popoverComponent">
+<div class="mat-padding jnks-iot-entity-table jnks-iot-absolute-fill" [class.jnks-iot-popover-mode]="popoverComponent">
+  <div class="jnks-iot-entity-table-content flex flex-1 flex-col" [class.jnks-iot-outlined-border]="!popoverComponent">
     <mat-toolbar class="mat-mdc-table-toolbar" [class.!hidden]="textSearchMode">
       <div class="mat-toolbar-tools">
         <div class="title-container flex flex-row items-center justify-start xs:flex-col xs:items-start xs:justify-center">
-          <span class="tb-entity-table-title">{{(singleEntityMode ? 'version-control.entity-versions' : 'version-control.versions') | translate}}</span>
-          <tb-branch-autocomplete
+          <span class="jnks-iot-entity-table-title">{{(singleEntityMode ? 'version-control.entity-versions' : 'version-control.versions') | translate}}</span>
+          <jnks-iot-branch-autocomplete
             #branchAutocompleteComponent
             subscriptSizing="dynamic"
             [selectionMode]="true"
@@ -12,7 +12,7 @@
             [disabled]="isLoading$ | async"
             [ngModel]="branch"
             (ngModelChange)="branchChanged($event)">
-          </tb-branch-autocomplete>
+          </jnks-iot-branch-autocomplete>
         </div>
         <span class="flex-1"></span>
         <div class="flex flex-row items-center justify-center xs:flex-col xs:items-end xs:justify-center">
@@ -80,7 +80,7 @@
           <mat-header-cell *matHeaderCellDef style="min-width: 100px; max-width: 100px; width: 100px;"> {{ 'version-control.version-id' | translate }} </mat-header-cell>
           <mat-cell *matCellDef="let entityVersion">
             <span style="display: inline-block; width: 54px;" [innerHTML]="versionIdContent(entityVersion)"></span>
-            <tb-copy-button
+            <jnks-iot-copy-button
               [disabled]="isLoading$ | async"
               [copyText]="entityVersion.id"
               tooltipText="{{ 'version-control.copy-full-version-id' | translate }}"
@@ -91,7 +91,7 @@
                  'font-size': '16px',
                  color: 'rgba(0,0,0,.87)'
               }">
-            </tb-copy-button>
+            </jnks-iot-copy-button>
           </mat-cell>
         </ng-container>
         <ng-container matColumnDef="name">

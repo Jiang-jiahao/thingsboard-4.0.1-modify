@@ -10,11 +10,11 @@
     <mat-checkbox class="flex flex-row items-stretch justify-center" formControlName="ignoreCase" style="min-width: 70px;">
     </mat-checkbox>
   </div>
-  <tb-filter-predicate-value [allowUserDynamicSource]="allowUserDynamicSource"
+  <jnks-iot-filter-predicate-value [allowUserDynamicSource]="allowUserDynamicSource"
                              [onlyUserDynamicSource]="onlyUserDynamicSource"
                              class="max-w-70% flex-full"
                              [valueType]="valueTypeEnum.STRING"
                              [operation]="stringFilterPredicateFormGroup.get('operation').value"
                              formControlName="value">
-  </tb-filter-predicate-value>
+  </jnks-iot-filter-predicate-value>
 </div>

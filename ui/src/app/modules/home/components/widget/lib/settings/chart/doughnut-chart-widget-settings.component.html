@@ -1,4 +1,4 @@
-<section class="tb-widget-settings flex flex-col" [formGroup]="doughnutChartWidgetSettingsForm">
+<section class="jnks-iot-widget-settings flex flex-col" [formGroup]="doughnutChartWidgetSettingsForm">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.chart.common-settings</legend>
     <mat-slide-toggle formControlName="showTooltip" class="slide-block">
@@ -12,16 +12,16 @@
         <mat-label translate>widgets.chart.border-width</mat-label>
         <input matInput type="number" min="0" formControlName="borderWidth">
       </mat-form-field>
-      <tb-color-input class="flex-1"
+      <jnks-iot-color-input class="flex-1"
                       formControlName="borderColor"
                       icon="format_color_fill"
                       label="{{ 'widgets.chart.border-color' | translate }}" openOnInput colorClearButton>
-      </tb-color-input>
+      </jnks-iot-color-input>
     </section>
   </fieldset>
   <fieldset class="fields-group fields-group-slider" formGroupName="legend">
     <legend class="group-title" translate>widgets.chart.legend-settings</legend>
-    <mat-expansion-panel class="tb-settings" [expanded]="doughnutChartWidgetSettingsForm.get('legend.display').value">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="doughnutChartWidgetSettingsForm.get('legend.display').value">
       <mat-expansion-panel-header class="flex flex-row flex-wrap">
         <mat-panel-title>
           <mat-slide-toggle formControlName="display" (click)="$event.stopPropagation()"
@@ -35,11 +35,11 @@
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
         <section class="flex flex-col">
-          <tb-color-input class="flex-1"
+          <jnks-iot-color-input class="flex-1"
                           formControlName="labelsFontColor"
                           icon="format_color_fill"
                           label="{{ 'widgets.chart.labels-font-color' | translate }}" openOnInput colorClearButton>
-          </tb-color-input>
+          </jnks-iot-color-input>
         </section>
       </ng-template>
     </mat-expansion-panel>

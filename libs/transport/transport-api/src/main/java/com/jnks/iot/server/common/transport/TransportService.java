@@ -6,7 +6,7 @@ import com.jnks.iot.server.common.data.id.DeviceId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
 import com.jnks.iot.server.common.data.rpc.RpcStatus;
-import com.jnks.iot.server.common.msg.TbMsgMetaData;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
 import com.jnks.iot.server.common.transport.auth.GetOrCreateDeviceFromGatewayResponse;
 import com.jnks.iot.server.common.transport.auth.ValidateDeviceCredentialsResponse;
 import com.jnks.iot.server.common.transport.service.SessionMetaData;
@@ -251,7 +251,7 @@ public interface TransportService {
      * @param md          元数据（如客户密钥、额外信息）
      * @param callback    回调
      */
-    void process(SessionInfoProto sessionInfo, PostTelemetryMsg msg, TbMsgMetaData md, TransportServiceCallback<Void> callback);
+    void process(SessionInfoProto sessionInfo, PostTelemetryMsg msg, JnksIotMsgMetaData md, TransportServiceCallback<Void> callback);
 
     /**
      * 处理设备属性上报。（往规则引擎发送）
@@ -270,7 +270,7 @@ public interface TransportService {
      * @param md          元数据
      * @param callback    回调
      */
-    void process(SessionInfoProto sessionInfo, PostAttributeMsg msg, TbMsgMetaData md, TransportServiceCallback<Void> callback);
+    void process(SessionInfoProto sessionInfo, PostAttributeMsg msg, JnksIotMsgMetaData md, TransportServiceCallback<Void> callback);
 
     /**
      * 处理设备属性获取请求。

@@ -1,13 +1,13 @@
-<div class="tb-form-row gap-4 column-xs">
+<div class="jnks-iot-form-row gap-4 column-xs">
   <div translate>widgets.maps.data-layer.tooltip-tag-actions</div>
   <div class="flex min-w-0 flex-1 flex-row items-center justify-end gap-4 xs:justify-between">
     <mat-chip-listbox class="min-w-0">
       <mat-chip *ngFor="let action of this.actionsFormGroup.get('actions').value; let $index = index;"
-                class="tb-tag-action-chip"
+                class="jnks-iot-tag-action-chip"
                 [removable]="!disabled" (removed)="removeAction($index)">
         <div class="flex flex-row items-center justify-start gap-1">
-          <div class="tb-chip-labels">
-            <div class="tb-chip-label tb-chip-text">
+          <div class="jnks-iot-chip-labels">
+            <div class="jnks-iot-chip-label jnks-iot-chip-text">
               <strong>
                 {{ action.name }}
               </strong>
@@ -17,20 +17,20 @@
                   #editButton
                   type="button"
                   mat-icon-button
-                  class="tb-mat-24"
+                  class="jnks-iot-mat-24"
                   matTooltip="{{ 'widgets.maps.data-layer.edit-tooltip-tag-action' | translate }}"
                   matTooltipPosition="above"
                   (click)="editAction($event, editButton, $index)">
-            <mat-icon class="tb-mat-18">edit</mat-icon>
+            <mat-icon class="jnks-iot-mat-18">edit</mat-icon>
           </button>
           <button *ngIf="!disabled"
                   matChipRemove
                   type="button"
                   mat-icon-button
-                  class="tb-mat-24"
+                  class="jnks-iot-mat-24"
                   matTooltip="{{ 'widgets.maps.data-layer.remove-tooltip-tag-action' | translate }}"
                   matTooltipPosition="above">
-            <mat-icon class="tb-mat-18">close</mat-icon>
+            <mat-icon class="jnks-iot-mat-18">close</mat-icon>
           </button>
         </div>
       </mat-chip>
@@ -39,7 +39,7 @@
             #addButton
             type="button"
             mat-icon-button
-            class="tb-mat-40"
+            class="jnks-iot-mat-40"
             color="primary"
             matTooltip="{{ 'widgets.maps.data-layer.add-tooltip-tag-action' | translate }}"
             matTooltipPosition="above"

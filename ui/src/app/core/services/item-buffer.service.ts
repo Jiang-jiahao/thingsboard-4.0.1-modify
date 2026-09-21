@@ -65,7 +65,7 @@ export interface RuleNodesReference {
 })
 export class ItemBufferService {
 
-  private namespace = 'tbBufferStore';
+  private namespace = 'jnksIotBufferStore';
   private delimiter = '.';
 
   constructor(private dashboardUtils: DashboardUtilsService,

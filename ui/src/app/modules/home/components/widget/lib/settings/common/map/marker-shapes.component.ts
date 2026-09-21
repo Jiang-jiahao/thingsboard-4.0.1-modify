@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import {
@@ -21,7 +21,7 @@ interface MarkerShapeInfo {
 }
 
 @Component({
-  selector: 'tb-marker-shapes',
+  selector: 'jnks-iot-marker-shapes',
   templateUrl: './marker-shapes.component.html',
   providers: [],
   styleUrls: ['./marker-shapes.component.scss'],
@@ -40,7 +40,7 @@ export class MarkerShapesComponent extends PageComponent implements OnInit {
   trip = false;
 
   @Input()
-  popover: TbPopoverComponent<MarkerShapesComponent>;
+  popover: JnksIotPopoverComponent<MarkerShapesComponent>;
 
   @Output()
   markerShapeSelected = new EventEmitter<MarkerShape>();

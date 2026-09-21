@@ -18,7 +18,7 @@ import { EntityFilter } from '@shared/models/query/query.models';
 import { isEqual } from '@core/utils';
 
 @Component({
-  selector: 'tb-entity-key-autocomplete',
+  selector: 'jnks-iot-entity-key-autocomplete',
   templateUrl: './entity-key-autocomplete.component.html',
   providers: [
     {

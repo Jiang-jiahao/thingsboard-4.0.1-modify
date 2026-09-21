@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-external-node-lambda-config',
+  selector: 'jnks-iot-external-node-lambda-config',
   templateUrl: './lambda-config.component.html',
   styleUrls: []
 })

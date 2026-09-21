@@ -1,63 +1,63 @@
 <div [formGroup]="deviceProfileTransportConfigurationFormGroup">
   <div [ngSwitch]="activeTransportType">
     <ng-template [ngSwitchCase]="deviceTransportType.DEFAULT">
-      <tb-default-device-profile-transport-configuration
+      <jnks-iot-default-device-profile-transport-configuration
         formControlName="configuration">
-      </tb-default-device-profile-transport-configuration>
+      </jnks-iot-default-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="basicTransportType.MQTT">
-      <tb-mqtt-device-profile-transport-configuration
+      <jnks-iot-mqtt-device-profile-transport-configuration
         formControlName="configuration"
         [entityTransportType]="entityTransportType"
         [mqttPullActive]="mqttPullActive">
-      </tb-mqtt-device-profile-transport-configuration>
+      </jnks-iot-mqtt-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.COAP">
-      <tb-coap-device-profile-transport-configuration
+      <jnks-iot-coap-device-profile-transport-configuration
         formControlName="configuration">
-      </tb-coap-device-profile-transport-configuration>
+      </jnks-iot-coap-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.LWM2M">
-      <tb-profile-lwm2m-device-transport-configuration
+      <jnks-iot-profile-lwm2m-device-transport-configuration
         [isAdd]="isAdd"
         formControlName="configuration">
-      </tb-profile-lwm2m-device-transport-configuration>
+      </jnks-iot-profile-lwm2m-device-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.SNMP">
-      <tb-snmp-device-profile-transport-configuration
+      <jnks-iot-snmp-device-profile-transport-configuration
         formControlName="configuration">
-      </tb-snmp-device-profile-transport-configuration>
+      </jnks-iot-snmp-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="basicTransportType.HTTP">
-      <tb-http-device-profile-transport-configuration
+      <jnks-iot-http-device-profile-transport-configuration
         formControlName="configuration"
         [entityTransportType]="entityTransportType"
         [httpPullActive]="httpPullActive">
-      </tb-http-device-profile-transport-configuration>
+      </jnks-iot-http-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.HTTP_PULL">
-      <tb-http-device-profile-transport-configuration
+      <jnks-iot-http-device-profile-transport-configuration
         formControlName="configuration"
         [entityTransportType]="entityTransportType"
         [httpPullActive]="httpPullActive">
-      </tb-http-device-profile-transport-configuration>
+      </jnks-iot-http-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.MQTT_PULL">
-      <tb-mqtt-device-profile-transport-configuration
+      <jnks-iot-mqtt-device-profile-transport-configuration
         formControlName="configuration"
         [entityTransportType]="entityTransportType"
         [mqttPullActive]="mqttPullActive">
-      </tb-mqtt-device-profile-transport-configuration>
+      </jnks-iot-mqtt-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.TCP">
-      <tb-tcp-device-profile-transport-configuration
+      <jnks-iot-tcp-device-profile-transport-configuration
         formControlName="configuration">
-      </tb-tcp-device-profile-transport-configuration>
+      </jnks-iot-tcp-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.UDP">
-      <tb-udp-device-profile-transport-configuration
+      <jnks-iot-udp-device-profile-transport-configuration
         formControlName="configuration">
-      </tb-udp-device-profile-transport-configuration>
+      </jnks-iot-udp-device-profile-transport-configuration>
     </ng-template>
   </div>
 </div>

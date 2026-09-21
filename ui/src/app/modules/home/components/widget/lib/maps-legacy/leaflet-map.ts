@@ -36,7 +36,7 @@ import {
   isNotEmptyStr,
   isString,
   mergeFormattedData,
-  safeExecuteTbFunction
+  safeExecuteJnksIotFunction
 } from '@core/utils';
 import { TranslateService } from '@ngx-translate/core';
 import {
@@ -125,19 +125,19 @@ export default abstract class LeafletMap {
         if (markerClusteringSettings.useIconCreateFunction && markerClusteringSettings.clusterMarkerFunction) {
           this.clusteringSettings.iconCreateFunction = (cluster) => {
             const childCount = cluster.getChildCount();
-            const formattedData = cluster.getAllChildMarkers().map(clusterMarker => clusterMarker.options.tbMarkerData);
+            const formattedData = cluster.getAllChildMarkers().map(clusterMarker => clusterMarker.options.jnksIotMarkerData);
             const markerColor = markerClusteringSettings.clusterMarkerFunction
-              ? safeExecuteTbFunction(markerClusteringSettings.parsedClusterMarkerFunction,
+              ? safeExecuteJnksIotFunction(markerClusteringSettings.parsedClusterMarkerFunction,
                 [formattedData, childCount])
               : null;
             if (isDefinedAndNotNull(markerColor) && tinycolor(markerColor).isValid()) {
               const parsedColor = tinycolor(markerColor);
               return L.divIcon({
                 html: `<div style="background-color: ${parsedColor.setAlpha(0.4).toRgbString()};" ` +
-                  `class="marker-cluster tb-cluster-marker-element">` +
+                  `class="marker-cluster jnks-iot-cluster-marker-element">` +
                   `<div style="background-color: ${parsedColor.setAlpha(0.9).toRgbString()};"><span>` + childCount + '</span></div></div>',
                 iconSize: new L.Point(40, 40),
-                className: 'tb-cluster-marker-container'
+                className: 'jnks-iot-cluster-marker-container'
               });
             } else {
               let c = ' marker-cluster-';
@@ -209,7 +209,7 @@ export default abstract class LeafletMap {
       return dialog.open<SelectEntityDialogComponent, SelectEntityDialogData, FormattedData>(SelectEntityDialogComponent,
         {
           disableClose: true,
-          panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+          panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
           data: {
             entities
           }
@@ -224,35 +224,35 @@ export default abstract class LeafletMap {
           let tooltipText: string;
           let customTranslation: L.PM.Translations;
           switch (type) {
-            case 'tbMarker':
+            case 'jnksIotMarker':
               tooltipText = this.translateService.instant('widgets.maps.tooltips.placeMarker', {entityName: data.entityParseName});
               // @ts-ignore
-              this.map.pm.Draw.tbMarker._hintMarker.setTooltipContent(tooltipText);
+              this.map.pm.Draw.jnksIotMarker._hintMarker.setTooltipContent(tooltipText);
               break;
-            case 'tbCircle':
+            case 'jnksIotCircle':
               tooltipText = this.translateService.instant('widgets.maps.tooltips.startCircle', {entityName: data.entityParseName});
               // @ts-ignore
-              this.map.pm.Draw.tbCircle._hintMarker.setTooltipContent(tooltipText);
+              this.map.pm.Draw.jnksIotCircle._hintMarker.setTooltipContent(tooltipText);
               customTranslation = {
                 tooltips: {
                   finishCircle: this.translateService.instant('widgets.maps.tooltips.finishCircle', {entityName: data.entityParseName})
                 }
               };
               break;
-            case 'tbRectangle':
+            case 'jnksIotRectangle':
               tooltipText = this.translateService.instant('widgets.maps.tooltips.firstVertex', {entityName: data.entityParseName});
               // @ts-ignore
-              this.map.pm.Draw.tbRectangle._hintMarker.setTooltipContent(tooltipText);
+              this.map.pm.Draw.jnksIotRectangle._hintMarker.setTooltipContent(tooltipText);
               customTranslation = {
                 tooltips: {
                   finishRect: this.translateService.instant('widgets.maps.tooltips.finishRect', {entityName: data.entityParseName})
                 }
               };
               break;
-            case 'tbPolygon':
+            case 'jnksIotPolygon':
               tooltipText = this.translateService.instant('widgets.maps.tooltips.firstVertex', {entityName: data.entityParseName});
               // @ts-ignore
-              this.map.pm.Draw.tbPolygon._hintMarker.setTooltipContent(tooltipText);
+              this.map.pm.Draw.jnksIotPolygon._hintMarker.setTooltipContent(tooltipText);
               customTranslation = {
                 tooltips: {
                   continueLine: this.translateService.instant('widgets.maps.tooltips.continueLine', {entityName: data.entityParseName}),
@@ -281,12 +281,12 @@ export default abstract class LeafletMap {
       if (this.options.draggableMarker && !this.options.hideDrawControlButton) {
         const actions = [{
           text: L.PM.Utils.getTranslation('actions.cancel'),
-          onClick: () => this.toggleDrawMode('tbMarker')
+          onClick: () => this.toggleDrawMode('jnksIotMarker')
         }];
 
         this.map.pm.Toolbar.copyDrawControl('Marker', {
-          name: 'tbMarker',
-          afterClick: () => this.selectEntityWithoutLocation('tbMarker'),
+          name: 'jnksIotMarker',
+          afterClick: () => this.selectEntityWithoutLocation('jnksIotMarker'),
           disabled: false,
           actions
         });
@@ -297,7 +297,7 @@ export default abstract class LeafletMap {
         const rectangleActions = [
           {
             text: L.PM.Utils.getTranslation('actions.cancel'),
-            onClick: () => this.toggleDrawMode('tbRectangle')
+            onClick: () => this.toggleDrawMode('jnksIotRectangle')
           }
         ];
 
@@ -306,20 +306,20 @@ export default abstract class LeafletMap {
           'removeLastVertex' as const,
           {
             text: L.PM.Utils.getTranslation('actions.cancel'),
-            onClick: () => this.toggleDrawMode('tbPolygon')
+            onClick: () => this.toggleDrawMode('jnksIotPolygon')
           }
         ];
 
         this.map.pm.Toolbar.copyDrawControl('Rectangle', {
-          name: 'tbRectangle',
-          afterClick: () => this.selectEntityWithoutLocation('tbRectangle'),
+          name: 'jnksIotRectangle',
+          afterClick: () => this.selectEntityWithoutLocation('jnksIotRectangle'),
           disabled: false,
           actions: rectangleActions
         });
 
         this.map.pm.Toolbar.copyDrawControl('Polygon', {
-          name: 'tbPolygon',
-          afterClick: () => this.selectEntityWithoutLocation('tbPolygon'),
+          name: 'jnksIotPolygon',
+          afterClick: () => this.selectEntityWithoutLocation('jnksIotPolygon'),
           disabled: false,
           actions: polygonActions
         });
@@ -329,12 +329,12 @@ export default abstract class LeafletMap {
       if (this.editCircle && !this.options.hideDrawControlButton) {
         const actions = [{
           text: L.PM.Utils.getTranslation('actions.cancel'),
-          onClick: () => this.toggleDrawMode('tbCircle')
+          onClick: () => this.toggleDrawMode('jnksIotCircle')
         }];
 
         this.map.pm.Toolbar.copyDrawControl('Circle', {
-          name: 'tbCircle',
-          afterClick: () => this.selectEntityWithoutLocation('tbCircle'),
+          name: 'jnksIotCircle',
+          afterClick: () => this.selectEntityWithoutLocation('jnksIotCircle'),
           disabled: false,
           actions
         });
@@ -342,7 +342,7 @@ export default abstract class LeafletMap {
 
       if (this.editPolygons && !this.options.hideEditControlButton) {
         this.map.pm.Toolbar.copyDrawControl('cutPolygon', {
-          name: 'tbCut',
+          name: 'jnksIotCut',
           title: this.translateService.instant('widgets.maps.buttonTitles.cutButton'),
           block: 'edit',
           onClick: () => {
@@ -364,8 +364,8 @@ export default abstract class LeafletMap {
             });
           },
         });
-        this.map.pm.Toolbar.changeControlOrder(['tbMarker', 'tbRectangle', 'tbPolygon', 'tbCircle',
-          'editMode', 'dragMode', 'tbCut', 'removalMode', 'rotateMode']);
+        this.map.pm.Toolbar.changeControlOrder(['jnksIotMarker', 'jnksIotRectangle', 'jnksIotPolygon', 'jnksIotCircle',
+          'editMode', 'dragMode', 'jnksIotCut', 'removalMode', 'rotateMode']);
       }
 
       this.map.pm.setLang('en', this.translateService.instant('widgets.maps'), 'en');
@@ -401,14 +401,14 @@ export default abstract class LeafletMap {
 
       this.map.on('pm:create', (e) => {
         switch (e.shape) {
-          case 'tbMarker':
+          case 'jnksIotMarker':
             // @ts-ignore
             this.saveLocation(this.selectedEntity, this.convertToCustomFormat(e.marker.getLatLng())).subscribe(() => {});
             break;
-          case 'tbRectangle':
-          case 'tbPolygon':
+          case 'jnksIotRectangle':
+          case 'jnksIotPolygon':
             let coordinates;
-            if (e.shape === 'tbRectangle') {
+            if (e.shape === 'jnksIotRectangle') {
               // @ts-ignore
               const bounds: L.LatLngBounds = e.layer.getBounds();
               coordinates = [bounds.getNorthWest(), bounds.getSouthEast()];
@@ -418,7 +418,7 @@ export default abstract class LeafletMap {
             }
             this.saveLocation(this.selectedEntity, this.convertPolygonToCustomFormat(coordinates)).subscribe(() => {});
             break;
-          case 'tbCircle':
+          case 'jnksIotCircle':
             // @ts-ignore
             this.saveLocation(this.selectedEntity, this.convertCircleToCustomFormat(e.layer.getLatLng(), e.layer.getRadius()))
               .subscribe(() => {});
@@ -750,8 +750,8 @@ export default abstract class LeafletMap {
               }
             }
             // @ts-ignore
-            if (this.map.pm.Toolbar.getButtons().tbMarker.disable !== foundEntityWithoutLocation) {
-              this.map.pm.Toolbar.setButtonDisabled('tbMarker', !foundEntityWithoutLocation);
+            if (this.map.pm.Toolbar.getButtons().jnksIotMarker.disable !== foundEntityWithoutLocation) {
+              this.map.pm.Toolbar.setButtonDisabled('jnksIotMarker', !foundEntityWithoutLocation);
             }
             this.datasources = formattedData;
           }
@@ -770,9 +770,9 @@ export default abstract class LeafletMap {
               }
             }
             // @ts-ignore
-            if (this.map.pm.Toolbar.getButtons().tbPolygon.disable !== foundEntityWithoutPolygon) {
-              this.map.pm.Toolbar.setButtonDisabled('tbPolygon', !foundEntityWithoutPolygon);
-              this.map.pm.Toolbar.setButtonDisabled('tbRectangle', !foundEntityWithoutPolygon);
+            if (this.map.pm.Toolbar.getButtons().jnksIotPolygon.disable !== foundEntityWithoutPolygon) {
+              this.map.pm.Toolbar.setButtonDisabled('jnksIotPolygon', !foundEntityWithoutPolygon);
+              this.map.pm.Toolbar.setButtonDisabled('jnksIotRectangle', !foundEntityWithoutPolygon);
             }
             this.datasources = formattedData;
           }
@@ -791,8 +791,8 @@ export default abstract class LeafletMap {
               }
             }
             // @ts-ignore
-            if (this.map.pm.Toolbar.getButtons().tbCircle.disable !== foundEntityWithoutCircle) {
-              this.map.pm.Toolbar.setButtonDisabled('tbCircle', !foundEntityWithoutCircle);
+            if (this.map.pm.Toolbar.getButtons().jnksIotCircle.disable !== foundEntityWithoutCircle) {
+              this.map.pm.Toolbar.setButtonDisabled('jnksIotCircle', !foundEntityWithoutCircle);
             }
             this.datasources = formattedData;
           }
@@ -815,8 +815,8 @@ export default abstract class LeafletMap {
                 this.map.pm.Toolbar.setButtonDisabled('editMode', !foundEntityWithPoly);
               }
               // @ts-ignore
-              if (this.editPolygons && this.map.pm.Toolbar.getButtons().tbCut.disable !== foundEntityWithPolygon) {
-                this.map.pm.Toolbar.setButtonDisabled('tbCut', !foundEntityWithPolygon);
+              if (this.editPolygons && this.map.pm.Toolbar.getButtons().jnksIotCut.disable !== foundEntityWithPolygon) {
+                this.map.pm.Toolbar.setButtonDisabled('jnksIotCut', !foundEntityWithPolygon);
                 this.map.pm.Toolbar.setButtonDisabled('rotateMode', !foundEntityWithPolygon);
               }
             }
@@ -877,7 +877,7 @@ export default abstract class LeafletMap {
       rawMarkers.forEach(data => {
         if (data.rotationAngle || data.rotationAngle === 0) {
           const currentImage: MarkerImageInfo = this.options.useMarkerImageFunction ?
-            safeExecuteTbFunction(this.options.parsedMarkerImageFunction,
+            safeExecuteJnksIotFunction(this.options.parsedMarkerImageFunction,
               [data, this.options.markerImages, markersData, data.dsIndex]) : this.options.currentImage;
           const imageUrl$ =
             currentImage
@@ -1020,7 +1020,7 @@ export default abstract class LeafletMap {
         if (!!this.extractPosition(pdata)) {
           const dsData = pointsData.map(ds => ds[tsIndex]);
           if (this.options.useColorPointFunction) {
-            pointColor = safeExecuteTbFunction(this.options.parsedColorPointFunction, [pdata, dsData, pdata.dsIndex]);
+            pointColor = safeExecuteJnksIotFunction(this.options.parsedColorPointFunction, [pdata, dsData, pdata.dsIndex]);
           }
           const point = L.circleMarker(this.convertPosition(pdata, dsData), {
             color: pointColor,

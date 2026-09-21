@@ -76,7 +76,7 @@ import { FormBuilder } from '@angular/forms';
 
 
 @Component({
-  selector: 'tb-attribute-table',
+  selector: 'jnks-iot-attribute-table',
   templateUrl: './attribute-table.component.html',
   styleUrls: ['./attribute-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -301,7 +301,7 @@ export class AttributeTableComponent extends PageComponent implements AfterViewI
     }
     this.dialog.open<AddAttributeDialogComponent, AddAttributeDialogData, boolean>(AddAttributeDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         entityId: this.entityIdValue,
         attributeScope: this.attributeScope
@@ -375,7 +375,7 @@ export class AttributeTableComponent extends PageComponent implements AfterViewI
     }
     const target = $event.target || $event.currentTarget;
     const config = new OverlayConfig({
-      panelClass: 'tb-filter-panel',
+      panelClass: 'jnks-iot-filter-panel',
       backdropClass: 'cdk-overlay-transparent-backdrop',
       hasBackdrop: true,
       maxWidth: 488,
@@ -597,7 +597,7 @@ export class AttributeTableComponent extends PageComponent implements AfterViewI
       this.dialog.open<AddWidgetToDashboardDialogComponent, AddWidgetToDashboardDialogData>
         (AddWidgetToDashboardDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           entityId: this.entityIdValue,
           entityName: this.entityName,

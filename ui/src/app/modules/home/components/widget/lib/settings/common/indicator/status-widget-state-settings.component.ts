@@ -8,7 +8,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-status-widget-state-settings',
+  selector: 'jnks-iot-status-widget-state-settings',
   templateUrl: './status-widget-state-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

@@ -1,12 +1,12 @@
-<section [formGroup]="deleteAttributesConfigForm" class="tb-form-panel no-border no-padding">
-  <div class="tb-form-panel stroked">
-    <tb-example-hint [hintText]="'rule-node-config.attributes-scope-hint'">
-    </tb-example-hint>
-    <div class="tb-form-row no-border no-padding tb-standard-fields">
+<section [formGroup]="deleteAttributesConfigForm" class="jnks-iot-form-panel no-border no-padding">
+  <div class="jnks-iot-form-panel stroked">
+    <jnks-iot-example-hint [hintText]="'rule-node-config.attributes-scope-hint'">
+    </jnks-iot-example-hint>
+    <div class="jnks-iot-form-row no-border no-padding jnks-iot-standard-fields">
       <mat-form-field class="flex">
         <mat-label>{{ 'rule-node-config.attributes-scope' | translate }}</mat-label>
         <mat-select required
-                    class="tb-entity-type-select" matInput formControlName="scope">
+                    class="jnks-iot-entity-type-select" matInput formControlName="scope">
           <mat-option *ngFor="let scope of attributeScopes" [value]="scope">
             {{ telemetryTypeTranslationsMap.get(scope) | translate }}
           </mat-option>
@@ -49,20 +49,20 @@
     <mat-hint translate>rule-node-config.general-pattern-hint</mat-hint>
   </mat-form-field>
 
-  <section class="tb-form-panel stroked">
-    <mat-expansion-panel class="tb-settings">
+  <section class="jnks-iot-form-panel stroked">
+    <mat-expansion-panel class="jnks-iot-settings">
       <mat-expansion-panel-header>
         <mat-panel-title translate>rule-node-config.advanced-settings</mat-panel-title>
       </mat-expansion-panel-header>
-      <div tb-hint-tooltip-icon="{{ 'rule-node-config.send-attributes-deleted-notification-hint' | translate }}"
-           class="tb-form-row no-border no-padding">
+      <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.send-attributes-deleted-notification-hint' | translate }}"
+           class="jnks-iot-form-row no-border no-padding">
         <mat-slide-toggle class="mat-slide" formControlName="sendAttributesDeletedNotification">
           {{ 'rule-node-config.send-attributes-deleted-notification' | translate }}
         </mat-slide-toggle>
       </div>
-      <div tb-hint-tooltip-icon="{{ 'rule-node-config.notify-device-on-delete-hint' | translate }}"
+      <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.notify-device-on-delete-hint' | translate }}"
            *ngIf="deleteAttributesConfigForm.get('scope').value === attributeScopeMap.SHARED_SCOPE"
-           class="tb-form-row no-border no-padding">
+           class="jnks-iot-form-row no-border no-padding">
         <mat-slide-toggle class="mat-slide" formControlName="notifyDevice">
           {{ 'rule-node-config.notify-device' | translate }}
         </mat-slide-toggle>

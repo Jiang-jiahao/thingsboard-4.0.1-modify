@@ -19,7 +19,7 @@ import { DeviceProfileService } from '@core/http/device-profile.service';
 import { Lwm2mSecurityType } from '@shared/models/lwm2m-security-config.models';
 
 @Component({
-  selector: 'tb-profile-lwm2m-bootstrap-config-servers',
+  selector: 'jnks-iot-profile-lwm2m-bootstrap-config-servers',
   templateUrl: './lwm2m-bootstrap-config-servers.component.html',
   providers: [
     {
@@ -145,7 +145,7 @@ export class Lwm2mBootstrapConfigServersComponent implements OnInit, ControlValu
     const addDialogObs = this.isBootstrapServerNotAvailable() ? of(false) :
       this.matDialog.open<Lwm2mBootstrapAddConfigServerDialogComponent>(Lwm2mBootstrapAddConfigServerDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
       }).afterClosed();
     const addServerConfigObs = addDialogObs.pipe(
       mergeMap((isBootstrap) => {

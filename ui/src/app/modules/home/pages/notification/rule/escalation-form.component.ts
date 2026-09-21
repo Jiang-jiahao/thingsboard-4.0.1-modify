@@ -26,7 +26,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
 
 @Component({
-  selector: 'tb-escalation-form',
+  selector: 'jnks-iot-escalation-form',
   templateUrl: './escalation-form.component.html',
   styleUrls: ['./escalation-form.component.scss'],
   providers: [
@@ -122,7 +122,7 @@ export class EscalationFormComponent implements ControlValueAccessor, OnInit, On
     this.dialog.open<RecipientNotificationDialogComponent, RecipientNotificationDialogData,
       NotificationTarget>(RecipientNotificationDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {}
     }).afterClosed()
       .subscribe((res) => {

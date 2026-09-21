@@ -8,7 +8,7 @@
     gap: 8px;
   }
 
-  .tb-widget-settings {
+  .jnks-iot-widget-settings {
     .fields-group {
       padding: 0 16px 8px;
       margin-bottom: 10px;
@@ -32,14 +32,14 @@
           margin-left: 16px;
         }
 
-        > .tb-settings {
+        > .jnks-iot-settings {
           margin-top: 0;
           padding: 0 16px 8px;
         }
       }
     }
 
-    .tb-control-list {
+    .jnks-iot-control-list {
       overflow-y: auto;
 
       &.mat-padding {
@@ -50,7 +50,7 @@
       }
     }
 
-    .tb-prompt {
+    .jnks-iot-prompt {
       margin: 30px 0;
     }
   }
@@ -68,9 +68,9 @@
 }
 
 :host ::ng-deep {
-  .tb-widget-settings {
+  .jnks-iot-widget-settings {
     .mat-expansion-panel {
-      &.tb-settings {
+      &.jnks-iot-settings {
         box-shadow: none;
 
         .mat-content {

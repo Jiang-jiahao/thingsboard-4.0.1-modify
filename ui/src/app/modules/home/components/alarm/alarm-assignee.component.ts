@@ -12,7 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { isNotEmptyStr } from '@core/utils';
 
 @Component({
-  selector: 'tb-alarm-assignee',
+  selector: 'jnks-iot-alarm-assignee',
   templateUrl: './alarm-assignee.component.html',
   styleUrls: ['./alarm-assignee.component.scss']
 })

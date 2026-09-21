@@ -9,7 +9,7 @@ import { selectHasRepository } from '@core/auth/auth.selectors';
 import { RepositorySettingsComponent } from '@home/components/vc/repository-settings.component';
 
 @Component({
-  selector: 'tb-auto-commit-admin-settings',
+  selector: 'jnks-iot-auto-commit-admin-settings',
   templateUrl: './auto-commit-admin-settings.component.html',
   styleUrls: []
 })

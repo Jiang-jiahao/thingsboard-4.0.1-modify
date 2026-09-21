@@ -15,7 +15,7 @@ import { Subscription } from 'rxjs';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-details-panel',
+  selector: 'jnks-iot-details-panel',
   templateUrl: './details-panel.component.html',
   styleUrls: ['./details-panel.component.scss']
 })

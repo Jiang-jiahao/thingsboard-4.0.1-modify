@@ -39,7 +39,7 @@ import { TimeSeriesChartTooltipTrigger } from '@home/components/widget/lib/chart
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-time-series-chart-basic-config',
+  selector: 'jnks-iot-time-series-chart-basic-config',
   templateUrl: './time-series-chart-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

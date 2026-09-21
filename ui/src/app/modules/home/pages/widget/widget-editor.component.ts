@@ -53,7 +53,7 @@ import { catchError, map, tap } from 'rxjs/operators';
 import { beautifyCss, beautifyHtml, beautifyJs } from '@shared/models/beautify.models';
 import { HttpClient, HttpStatusCode } from '@angular/common/http';
 import { loadModulesCompleter } from '@shared/models/js-function.models';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { JsFuncModulesComponent } from '@shared/components/js-func-modules.component';
 import { MatIconButton } from '@angular/material/button';
 import { formPropertyCompletions } from '@shared/models/dynamic-form.models';
@@ -62,7 +62,7 @@ import Timeout = NodeJS.Timeout;
 
 // @dynamic
 @Component({
-  selector: 'tb-widget-editor',
+  selector: 'jnks-iot-widget-editor',
   templateUrl: './widget-editor.component.html',
   styleUrls: ['./widget-editor.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -167,7 +167,7 @@ export class WidgetEditorComponent extends PageComponent implements OnInit, OnDe
               private translate: TranslateService,
               private raf: RafService,
               private dialog: MatDialog,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private customTranslate: CustomTranslatePipe,
@@ -562,7 +562,7 @@ export class WidgetEditorComponent extends PageComponent implements OnInit, OnDe
     this.dialog.open<SaveWidgetTypeAsDialogComponent, any,
       SaveWidgetTypeAsDialogResult>(SaveWidgetTypeAsDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
     }).afterClosed().subscribe(
       (saveWidgetAsData) => {
         if (saveWidgetAsData) {
@@ -809,8 +809,8 @@ export class WidgetEditorComponent extends PageComponent implements OnInit, OnDe
         context: ctx,
         isModal: true
       });
-      modulesPanelPopover.tbComponentRef.instance.popover = modulesPanelPopover;
-      modulesPanelPopover.tbComponentRef.instance.modulesApplied.subscribe((modules) => {
+      modulesPanelPopover.jnksIotComponentRef.instance.popover = modulesPanelPopover;
+      modulesPanelPopover.jnksIotComponentRef.instance.modulesApplied.subscribe((modules) => {
         modulesPanelPopover.hide();
         this.controllerScriptModules = modules;
         this.updateControllerScriptCompleters();

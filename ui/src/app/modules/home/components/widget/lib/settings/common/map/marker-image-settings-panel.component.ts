@@ -1,6 +1,6 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -9,7 +9,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MarkerImageSettings, MarkerImageType } from '@shared/models/widget/maps/map.models';
 
 @Component({
-  selector: 'tb-marker-image-settings-panel',
+  selector: 'jnks-iot-marker-image-settings-panel',
   templateUrl: './marker-image-settings-panel.component.html',
   providers: [],
   styleUrls: ['./marker-image-settings-panel.component.scss'],
@@ -21,7 +21,7 @@ export class MarkerImageSettingsPanelComponent extends PageComponent implements 
   markerImageSettings: MarkerImageSettings;
 
   @Input()
-  popover: TbPopoverComponent<MarkerImageSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<MarkerImageSettingsPanelComponent>;
 
   @Output()
   markerImageSettingsApplied = new EventEmitter<MarkerImageSettings>();

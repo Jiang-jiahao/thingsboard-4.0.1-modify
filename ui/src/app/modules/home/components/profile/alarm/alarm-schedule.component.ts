@@ -27,7 +27,7 @@ import { getDefaultTimezone } from '@shared/models/time/time.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-alarm-schedule',
+  selector: 'jnks-iot-alarm-schedule',
   templateUrl: './alarm-schedule.component.html',
   styleUrls: ['./alarm-schedule.component.scss'],
   providers: [{

@@ -1,9 +1,9 @@
 <ng-container [formGroup]="statusWidgetSettingsForm">
-  <div class="tb-form-panel">
-    <div class="tb-form-panel-title" translate>widgets.status-widget.behavior</div>
-    <div class="tb-form-row">
-      <div class="fixed-title-width" tb-hint-tooltip-icon="{{'widgets.rpc-state.initial-state-hint' | translate}}" translate>widgets.rpc-state.initial-state</div>
-      <tb-get-value-action-settings class="flex-1"
+  <div class="jnks-iot-form-panel">
+    <div class="jnks-iot-form-panel-title" translate>widgets.status-widget.behavior</div>
+    <div class="jnks-iot-form-row">
+      <div class="fixed-title-width" jnks-iot-hint-tooltip-icon="{{'widgets.rpc-state.initial-state-hint' | translate}}" translate>widgets.rpc-state.initial-state</div>
+      <jnks-iot-get-value-action-settings class="flex-1"
                                     panelTitle="{{ 'widgets.rpc-state.initial-state' | translate }}"
                                     [valueType]="valueType.BOOLEAN"
                                     trueLabel="{{ 'widgets.rpc-state.on' | translate }}"
@@ -12,56 +12,56 @@
                                     [aliasController]="aliasController"
                                     [targetDevice]="targetDevice"
                                     [widgetType]="widgetType"
-                                    formControlName="initialState"></tb-get-value-action-settings>
+                                    formControlName="initialState"></jnks-iot-get-value-action-settings>
     </div>
-    <div class="tb-form-row">
-      <div class="fixed-title-width" tb-hint-tooltip-icon="{{'widgets.rpc-state.disabled-state-hint' | translate}}" translate>widgets.rpc-state.disabled-state</div>
-      <tb-get-value-action-settings class="flex-1"
+    <div class="jnks-iot-form-row">
+      <div class="fixed-title-width" jnks-iot-hint-tooltip-icon="{{'widgets.rpc-state.disabled-state-hint' | translate}}" translate>widgets.rpc-state.disabled-state</div>
+      <jnks-iot-get-value-action-settings class="flex-1"
                                     panelTitle="{{ 'widgets.rpc-state.disabled-state' | translate }}"
                                     [valueType]="valueType.BOOLEAN"
                                     stateLabel="{{ 'widgets.rpc-state.disabled' | translate }}"
                                     [aliasController]="aliasController"
                                     [targetDevice]="targetDevice"
                                     [widgetType]="widgetType"
-                                    formControlName="disabledState"></tb-get-value-action-settings>
+                                    formControlName="disabledState"></jnks-iot-get-value-action-settings>
     </div>
   </div>
-  <div class="tb-form-panel">
-    <div class="tb-form-panel-title" translate>widget-config.appearance</div>
-    <tb-image-cards-select rowHeight="1:1"
+  <div class="jnks-iot-form-panel">
+    <div class="jnks-iot-form-panel-title" translate>widget-config.appearance</div>
+    <jnks-iot-image-cards-select rowHeight="1:1"
                            [cols]="{columns: 3,
                                     breakpoints: {
                                       'lt-sm': 1,
                                       'lt-md': 2
                                     }}"
                            label="{{ 'widgets.status-widget.layout' | translate }}" formControlName="layout">
-      <tb-image-cards-select-option *ngFor="let layout of statusWidgetLayouts"
+      <jnks-iot-image-cards-select-option *ngFor="let layout of statusWidgetLayouts"
                                     [value]="layout"
                                     [image]="statusWidgetLayoutImageMap.get(layout)">
         {{ statusWidgetLayoutTranslationMap.get(layout) | translate }}
-      </tb-image-cards-select-option>
-    </tb-image-cards-select>
+      </jnks-iot-image-cards-select-option>
+    </jnks-iot-image-cards-select>
   </div>
-  <div class="tb-form-panel">
+  <div class="jnks-iot-form-panel">
     <div class="flex flex-row items-center justify-between">
-      <div class="tb-form-panel-title" translate>widget-config.card-style</div>
-      <tb-toggle-select [(ngModel)]="cardStyleMode"
+      <div class="jnks-iot-form-panel-title" translate>widget-config.card-style</div>
+      <jnks-iot-toggle-select [(ngModel)]="cardStyleMode"
                         [ngModelOptions]="{ standalone: true }">
-        <tb-toggle-option value="on">{{ 'widgets.status-widget.on' | translate }}</tb-toggle-option>
-        <tb-toggle-option value="off">{{ 'widgets.status-widget.off' | translate }}</tb-toggle-option>
-      </tb-toggle-select>
+        <jnks-iot-toggle-option value="on">{{ 'widgets.status-widget.on' | translate }}</jnks-iot-toggle-option>
+        <jnks-iot-toggle-option value="off">{{ 'widgets.status-widget.off' | translate }}</jnks-iot-toggle-option>
+      </jnks-iot-toggle-select>
     </div>
-    <tb-status-widget-state-settings
+    <jnks-iot-status-widget-state-settings
         *ngIf="cardStyleMode === 'on'"
         [layout]="statusWidgetSettingsForm.get('layout').value"
         formControlName="onState">
-    </tb-status-widget-state-settings>
-    <tb-status-widget-state-settings
+    </jnks-iot-status-widget-state-settings>
+    <jnks-iot-status-widget-state-settings
         *ngIf="cardStyleMode === 'off'"
         [layout]="statusWidgetSettingsForm.get('layout').value"
         formControlName="offState">
-    </tb-status-widget-state-settings>
-    <div class="tb-form-row space-between">
+    </jnks-iot-status-widget-state-settings>
+    <div class="jnks-iot-form-row space-between">
       <div>{{ 'widget-config.card-padding' | translate }}</div>
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <input matInput formControlName="padding" placeholder="{{ 'widget-config.set' | translate }}">

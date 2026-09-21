@@ -1,12 +1,12 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { WidgetService } from '@core/http/widget.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ShapeFillImageSettings, ShapeFillImageType } from '@shared/models/widget/maps/map.models';
 
 @Component({
-  selector: 'tb-shape-fill-image-settings-panel',
+  selector: 'jnks-iot-shape-fill-image-settings-panel',
   templateUrl: './shape-fill-image-settings-panel.component.html',
   providers: [],
   styleUrls: ['./shape-fill-image-settings-panel.component.scss'],
@@ -27,7 +27,7 @@ export class ShapeFillImageSettingsPanelComponent implements OnInit {
   functionScopeVariables = this.widgetService.getWidgetScopeVariables();
 
   constructor(private fb: UntypedFormBuilder,
-              private popover: TbPopoverComponent,
+              private popover: JnksIotPopoverComponent,
               private widgetService: WidgetService,
               private destroyRef: DestroyRef) {
   }

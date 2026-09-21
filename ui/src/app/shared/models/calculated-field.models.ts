@@ -10,7 +10,7 @@ import { AttributeScope } from '@shared/models/telemetry/telemetry.models';
 import { EntityType } from '@shared/models/entity-type.models';
 import { AliasFilterType } from '@shared/models/alias.models';
 import { Observable } from 'rxjs';
-import { TbEditorCompleter } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompleter } from '@shared/models/ace/completion.models';
 import {
   AceHighlightRule,
   AceHighlightRules,
@@ -481,8 +481,8 @@ export const CalculatedFieldRollingValueArgumentAutocomplete = {
   },
 };
 
-export const getCalculatedFieldArgumentsEditorCompleter = (argumentsObj: Record<string, CalculatedFieldArgument>): TbEditorCompleter => {
-  return new TbEditorCompleter(Object.keys(argumentsObj).reduce((acc, key) => {
+export const getCalculatedFieldArgumentsEditorCompleter = (argumentsObj: Record<string, CalculatedFieldArgument>): JnksIotEditorCompleter => {
+  return new JnksIotEditorCompleter(Object.keys(argumentsObj).reduce((acc, key) => {
     switch (argumentsObj[key].refEntityKey.type) {
       case ArgumentType.Attribute:
         acc[key] = CalculatedFieldAttributeValueArgumentAutocomplete;

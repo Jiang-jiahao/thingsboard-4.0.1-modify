@@ -10,7 +10,7 @@ public class SlowCreateActor extends TestRootActor {
 
     public static final int TIMEOUT_AWAIT_MAX_MS = 5000;
 
-    public SlowCreateActor(TbActorId actorId, ActorTestCtx testCtx, CountDownLatch initLatch) {
+    public SlowCreateActor(JnksIotActorId actorId, ActorTestCtx testCtx, CountDownLatch initLatch) {
         super(actorId, testCtx);
         try {
             log.info("awaiting on latch {} ...", initLatch);
@@ -22,25 +22,25 @@ public class SlowCreateActor extends TestRootActor {
         log.info("finished {} ...", initLatch);
     }
 
-    public static class SlowCreateActorCreator implements TbActorCreator {
+    public static class SlowCreateActorCreator implements JnksIotActorCreator {
 
-        private final TbActorId actorId;
+        private final JnksIotActorId actorId;
         private final ActorTestCtx testCtx;
         private final CountDownLatch initLatch;
 
-        public SlowCreateActorCreator(TbActorId actorId, ActorTestCtx testCtx, CountDownLatch initLatch) {
+        public SlowCreateActorCreator(JnksIotActorId actorId, ActorTestCtx testCtx, CountDownLatch initLatch) {
             this.actorId = actorId;
             this.testCtx = testCtx;
             this.initLatch = initLatch;
         }
 
         @Override
-        public TbActorId createActorId() {
+        public JnksIotActorId createActorId() {
             return actorId;
         }
 
         @Override
-        public TbActor createActor() {
+        public JnksIotActor createActor() {
             log.info("creating slow actor...");
             SlowCreateActor slowCreateActor = new SlowCreateActor(actorId, testCtx, initLatch);
             log.info("created slow actor {}", slowCreateActor);

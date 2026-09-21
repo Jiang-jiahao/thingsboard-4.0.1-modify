@@ -15,15 +15,15 @@
   </section>
 
   <div [hidden]="form.get('httpMode').value !== httpTransportMode.PASSIVE">
-    <tb-http-passive-device-transport-configuration
+    <jnks-iot-http-passive-device-transport-configuration
       formControlName="passiveConfiguration"
       [httpPushRoutingMode]="httpPushRoutingMode">
-    </tb-http-passive-device-transport-configuration>
+    </jnks-iot-http-passive-device-transport-configuration>
   </div>
 
   <div [hidden]="form.get('httpMode').value !== httpTransportMode.PULL">
-    <tb-http-pull-device-transport-configuration
+    <jnks-iot-http-pull-device-transport-configuration
       formControlName="pullConfiguration">
-    </tb-http-pull-device-transport-configuration>
+    </jnks-iot-http-pull-device-transport-configuration>
   </div>
 </form>

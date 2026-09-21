@@ -1,0 +1,48 @@
+package com.jnks.iot.server.cache;
+
+import com.jnks.iot.server.common.data.HasVersion;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+public interface VersionedJnksIotCache<K extends VersionedCacheKey, V extends Serializable & HasVersion> extends JnksIotTransactionalCache<K, V> {
+
+    JnksIotCacheValueWrapper<V> get(K key);
+
+    default V get(K key, Supplier<V> supplier) {
+        return get(key, supplier, true);
+    }
+
+    default V get(K key, Supplier<V> supplier, boolean putToCache) {
+        return Optional.ofNullable(get(key))
+                .map(JnksIotCacheValueWrapper::get)
+                .orElseGet(() -> {
+                    V value = supplier.get();
+                    if (putToCache) {
+                        put(key, value);
+                    }
+                    return value;
+                });
+    }
+
+    void put(K key, V value);
+
+    void evict(K key);
+
+    void evict(Collection<K> keys);
+
+    void evict(K key, Long version);
+
+    default Long getVersion(V value) {
+        if (value == null) {
+            return 0L;
+        } else if (value.getVersion() != null) {
+            return value.getVersion();
+        } else {
+            return null;
+        }
+    }
+
+}

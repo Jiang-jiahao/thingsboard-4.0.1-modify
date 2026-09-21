@@ -22,7 +22,7 @@ import { EntityService } from '@core/http/entity.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-image-map-provider-settings',
+  selector: 'jnks-iot-image-map-provider-settings',
   templateUrl: './image-map-provider-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

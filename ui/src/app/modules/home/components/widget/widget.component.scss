@@ -1,5 +1,5 @@
-.tb-widget {
-  .tb-widget-error {
+.jnks-iot-widget {
+  .jnks-iot-widget-error {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -10,7 +10,7 @@
     }
   }
 
-  .tb-widget-no-data {
+  .jnks-iot-widget-no-data {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -23,19 +23,19 @@
     }
   }
 
-  .tb-widget-loading {
+  .jnks-iot-widget-loading {
     z-index: 3;
     background: rgba(255, 255, 255, .15);
   }
 
-  .tb-widget-error-container {
+  .jnks-iot-widget-error-container {
     position: absolute;
     width: 100%;
     height: 100%;
     background-color: #fff;
   }
 
-  .tb-widget-error-msg {
+  .jnks-iot-widget-error-msg {
     padding: 5px;
     font-size: 16px;
     color: #f00;

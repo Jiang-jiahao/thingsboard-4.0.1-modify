@@ -8,7 +8,7 @@ import {
   mapDataSourceSettingsToDatasource,
   MapStringFunction,
   MapType,
-  TbMapDatasource
+  JnksIotMapDatasource
 } from '@shared/models/widget/maps/map.models';
 import {
   createLabelFromPattern,
@@ -18,30 +18,30 @@ import {
   isNumber,
   isNumeric,
   mergeDeepIgnoreArray,
-  parseTbFunction,
-  safeExecuteTbFunction
+  parseJnksIotFunction,
+  safeExecuteJnksIotFunction
 } from '@core/utils';
 import L from 'leaflet';
-import { CompiledTbFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction } from '@shared/models/js-function.models';
 import { forkJoin, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DataKey, DatasourceType, FormattedData } from '@shared/models/widget.models';
 import { CustomTranslatePipe } from '@shared/pipe/custom-translate.pipe';
-import { TbMap } from '@home/components/widget/lib/maps/map';
+import { JnksIotMap } from '@home/components/widget/lib/maps/map';
 import { WidgetContext } from '@home/models/widget-component.models';
 import { ColorRange } from '@shared/models/widget-settings.models';
 
 export class DataLayerPatternProcessor {
 
-  private patternFunction: CompiledTbFunction<MapStringFunction>;
+  private patternFunction: CompiledJnksIotFunction<MapStringFunction>;
   private pattern: string;
 
-  constructor(private dataLayer: TbMapDataLayer,
+  constructor(private dataLayer: JnksIotMapDataLayer,
               private settings: DataLayerPatternSettings) {}
 
   public setup(): Observable<void> {
     if (this.settings.type === DataLayerPatternType.function) {
-      return parseTbFunction<MapStringFunction>(this.dataLayer.getCtx().http, this.settings.patternFunction, ['data', 'dsData']).pipe(
+      return parseJnksIotFunction<MapStringFunction>(this.dataLayer.getCtx().http, this.settings.patternFunction, ['data', 'dsData']).pipe(
         map((parsed) => {
           this.patternFunction = parsed;
           return null;
@@ -53,10 +53,10 @@ export class DataLayerPatternProcessor {
     }
   }
 
-  public processPattern(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): string {
+  public processPattern(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): string {
     let pattern: string;
     if (this.settings.type === DataLayerPatternType.function) {
-      pattern = safeExecuteTbFunction(this.patternFunction, [data, dsData]);
+      pattern = safeExecuteJnksIotFunction(this.patternFunction, [data, dsData]);
     } else {
       pattern = this.pattern;
     }
@@ -69,12 +69,12 @@ export class DataLayerPatternProcessor {
 
 export class DataLayerColorProcessor {
 
-  private colorFunction: CompiledTbFunction<MapStringFunction>;
+  private colorFunction: CompiledJnksIotFunction<MapStringFunction>;
   private color: string;
   private rangeKey: DataKey;
   private range: ColorRange[];
 
-  constructor(private dataLayer: TbMapDataLayer,
+  constructor(private dataLayer: JnksIotMapDataLayer,
               private settings: DataLayerColorSettings) {}
 
   public setup(): Observable<void> {
@@ -83,7 +83,7 @@ export class DataLayerColorProcessor {
       this.rangeKey = this.settings.rangeKey;
       this.range = this.settings.range;
     } else if (this.settings.type === DataLayerColorType.function) {
-      return parseTbFunction<MapStringFunction>(this.dataLayer.getCtx().http, this.settings.colorFunction, ['data', 'dsData']).pipe(
+      return parseJnksIotFunction<MapStringFunction>(this.dataLayer.getCtx().http, this.settings.colorFunction, ['data', 'dsData']).pipe(
         map((parsed) => {
           this.colorFunction = parsed;
           return null;
@@ -93,10 +93,10 @@ export class DataLayerColorProcessor {
     return of(null)
   }
 
-  public processColor(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): string {
+  public processColor(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): string {
     let color: string;
     if (this.settings.type === DataLayerColorType.function) {
-      color = safeExecuteTbFunction(this.colorFunction, [data, dsData]);
+      color = safeExecuteJnksIotFunction(this.colorFunction, [data, dsData]);
       if (!color) {
         color = this.color;
       }
@@ -129,7 +129,7 @@ export class DataLayerColorProcessor {
 
 }
 
-export abstract class TbDataLayerItem<S extends MapDataLayerSettings = MapDataLayerSettings, D extends TbMapDataLayer = TbMapDataLayer, L extends L.Layer = L.Layer> {
+export abstract class JnksIotDataLayerItem<S extends MapDataLayerSettings = MapDataLayerSettings, D extends JnksIotMapDataLayer = JnksIotMapDataLayer, L extends L.Layer = L.Layer> {
 
   protected layer: L;
 
@@ -150,11 +150,11 @@ export abstract class TbDataLayerItem<S extends MapDataLayerSettings = MapDataLa
 
 }
 
-export abstract class TbMapDataLayer<S extends MapDataLayerSettings = MapDataLayerSettings, I extends TbDataLayerItem = any> {
+export abstract class JnksIotMapDataLayer<S extends MapDataLayerSettings = MapDataLayerSettings, I extends JnksIotDataLayerItem = any> {
 
   protected settings: S;
 
-  protected dataSources: TbMapDatasource[];
+  protected dataSources: JnksIotMapDatasource[];
 
   protected mapDataId: string;
 
@@ -171,7 +171,7 @@ export abstract class TbMapDataLayer<S extends MapDataLayerSettings = MapDataLay
   public dataLayerLabelProcessor: DataLayerPatternProcessor;
   public dataLayerTooltipProcessor: DataLayerPatternProcessor;
 
-  protected constructor(protected map: TbMap<any>,
+  protected constructor(protected map: JnksIotMap<any>,
                         inputSettings: S) {
     this.settings = mergeDeepIgnoreArray({} as S, this.defaultBaseSettings(map) as S, inputSettings);
     if (this.settings.groups?.length) {
@@ -223,7 +223,7 @@ export abstract class TbMapDataLayer<S extends MapDataLayerSettings = MapDataLay
     return this.map.getCtx();
   }
 
-  public getMap(): TbMap<any> {
+  public getMap(): JnksIotMap<any> {
     return this.map;
   }
 
@@ -231,7 +231,7 @@ export abstract class TbMapDataLayer<S extends MapDataLayerSettings = MapDataLay
     return this.map.type();
   }
 
-  public getDataSources(): TbMapDatasource[] {
+  public getDataSources(): JnksIotMapDatasource[] {
     return this.dataSources;
   }
 
@@ -271,7 +271,7 @@ export abstract class TbMapDataLayer<S extends MapDataLayerSettings = MapDataLay
     return false;
   }
 
-  public hasData(data: FormattedData<TbMapDatasource>): boolean {
+  public hasData(data: FormattedData<JnksIotMapDatasource>): boolean {
     return data.$datasource.mapDataIds.includes(this.mapDataId);
   }
 
@@ -306,7 +306,7 @@ export abstract class TbMapDataLayer<S extends MapDataLayerSettings = MapDataLay
 
   public abstract dataLayerType(): MapDataLayerType;
 
-  protected abstract defaultBaseSettings(map: TbMap<any>): Partial<S>;
+  protected abstract defaultBaseSettings(map: JnksIotMap<any>): Partial<S>;
 
   protected abstract doSetup(): Observable<any>;
 

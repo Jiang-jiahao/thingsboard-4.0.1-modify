@@ -9,18 +9,18 @@ import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
 import com.jnks.iot.server.edqs.state.EdqsPartitionService;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToEdqsMsg;
-import com.jnks.iot.server.queue.TbQueueCallback;
-import com.jnks.iot.server.queue.TbQueueMsgMetadata;
-import com.jnks.iot.server.queue.TbQueueProducer;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
-import com.jnks.iot.server.queue.kafka.TbKafkaProducerTemplate;
+import com.jnks.iot.server.queue.JnksIotQueueCallback;
+import com.jnks.iot.server.queue.JnksIotQueueMsgMetadata;
+import com.jnks.iot.server.queue.JnksIotQueueProducer;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaProducerTemplate;
 
 @Slf4j
 @Builder
 @RequiredArgsConstructor
 public class EdqsProducer {
 
-    private final TbQueueProducer<TbProtoQueueMsg<ToEdqsMsg>> producer;
+    private final JnksIotQueueProducer<JnksIotProtoQueueMsg<ToEdqsMsg>> producer;
     private final EdqsPartitionService partitionService;
 
     public void send(TenantId tenantId, ObjectType type, String key, ToEdqsMsg msg) {
@@ -28,9 +28,9 @@ public class EdqsProducer {
                 .topic(producer.getDefaultTopic())
                 .partition(partitionService.resolvePartition(tenantId, key))
                 .build();
-        TbQueueCallback callback = new TbQueueCallback() {
+        JnksIotQueueCallback callback = new JnksIotQueueCallback() {
             @Override
-            public void onSuccess(TbQueueMsgMetadata metadata) {
+            public void onSuccess(JnksIotQueueMsgMetadata metadata) {
                 log.trace("[{}][{}][{}] Published msg to {}: {}", tenantId, type, key, tpi, msg);
             }
 
@@ -45,10 +45,10 @@ public class EdqsProducer {
                 log.warn("[{}][{}][{}] Failed to publish msg to {}: {}", tenantId, type, key, tpi, msg, t);
             }
         };
-        if (producer instanceof TbKafkaProducerTemplate<TbProtoQueueMsg<ToEdqsMsg>> kafkaProducer) {
-            kafkaProducer.send(tpi, key, new TbProtoQueueMsg<>(null, msg), callback); // specifying custom key for compaction
+        if (producer instanceof JnksIotKafkaProducerTemplate<JnksIotProtoQueueMsg<ToEdqsMsg>> kafkaProducer) {
+            kafkaProducer.send(tpi, key, new JnksIotProtoQueueMsg<>(null, msg), callback); // specifying custom key for compaction
         } else {
-            producer.send(tpi, new TbProtoQueueMsg<>(null, msg), callback);
+            producer.send(tpi, new JnksIotProtoQueueMsg<>(null, msg), callback);
         }
     }
 

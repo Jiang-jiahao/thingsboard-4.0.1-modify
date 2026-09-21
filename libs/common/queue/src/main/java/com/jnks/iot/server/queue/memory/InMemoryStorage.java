@@ -1,6 +1,6 @@
 package com.jnks.iot.server.queue.memory;
 
-import com.jnks.iot.server.queue.TbQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueMsg;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ public interface InMemoryStorage {
 
     int getLag(String topic);
 
-    boolean put(String topic, TbQueueMsg msg);
+    boolean put(String topic, JnksIotQueueMsg msg);
 
-    <T extends TbQueueMsg> List<T> get(String topic) throws InterruptedException;
+    <T extends JnksIotQueueMsg> List<T> get(String topic) throws InterruptedException;
 
 }

@@ -16,7 +16,7 @@ import { deepClone } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-comparison-key-row',
+  selector: 'jnks-iot-comparison-key-row',
   templateUrl: './comparison-key-row.component.html',
   styleUrls: ['./comparison-key-row.component.scss', '../../../lib/settings/common/key/data-keys.component.scss'],
   providers: [

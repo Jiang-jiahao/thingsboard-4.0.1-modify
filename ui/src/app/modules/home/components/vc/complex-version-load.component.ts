@@ -13,13 +13,13 @@ import { EntitiesVersionControlService } from '@core/http/entities-version-contr
 import { TranslateService } from '@ngx-translate/core';
 import { entityTypeTranslations } from '@shared/models/entity-type.models';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { Observable, Subscription } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { parseHttpErrorMessage } from '@core/utils';
 
 @Component({
-  selector: 'tb-complex-version-load',
+  selector: 'jnks-iot-complex-version-load',
   templateUrl: './complex-version-load.component.html',
   styleUrls: ['./version-control.scss']
 })
@@ -35,7 +35,7 @@ export class ComplexVersionLoadComponent extends PageComponent implements OnInit
   onClose: (result: VersionLoadResult | null) => void;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   loadVersionFormGroup: UntypedFormGroup;
 

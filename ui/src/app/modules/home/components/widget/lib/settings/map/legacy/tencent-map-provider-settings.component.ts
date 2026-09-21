@@ -21,7 +21,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-tencent-map-provider-settings',
+  selector: 'jnks-iot-tencent-map-provider-settings',
   templateUrl: './tencent-map-provider-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

@@ -71,7 +71,7 @@ import { WidgetService } from '@core/http/widget.service';
 import Timeout = NodeJS.Timeout;
 
 @Component({
-  selector: 'tb-widget-config',
+  selector: 'jnks-iot-widget-config',
   templateUrl: './widget-config.component.html',
   styleUrls: ['./widget-config.component.scss'],
   providers: [
@@ -806,7 +806,7 @@ export class WidgetConfigComponent extends PageComponent implements OnInit, OnDe
     return this.dialog.open<EntityAliasDialogComponent, EntityAliasDialogData,
       EntityAlias>(EntityAliasDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd: true,
         allowedEntityTypes,
@@ -827,7 +827,7 @@ export class WidgetConfigComponent extends PageComponent implements OnInit, OnDe
     return this.dialog.open<EntityAliasDialogComponent, EntityAliasDialogData,
       EntityAlias>(EntityAliasDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd: false,
         allowedEntityTypes,
@@ -849,7 +849,7 @@ export class WidgetConfigComponent extends PageComponent implements OnInit, OnDe
     return this.dialog.open<FilterDialogComponent, FilterDialogData,
       Filter>(FilterDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd: true,
         filters: this.dashboard.configuration.filters,

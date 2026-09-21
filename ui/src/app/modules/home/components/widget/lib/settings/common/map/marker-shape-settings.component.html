@@ -5,7 +5,7 @@
   </mat-form-field>
   <button type="button"
           mat-stroked-button
-          class="tb-box-button"
+          class="jnks-iot-box-button"
           [disabled]="disabled"
           #matButton
           (click)="openShapePopup($event, matButton)">
@@ -13,9 +13,9 @@
     <div *ngIf="markerType === MarkerType.icon" matButtonIcon style="object-fit: contain; width: 24px; height: 24px;" [innerHTML]="iconPreview$ | async" [class.disabled]="disabled">
     </div>
   </button>
-  <tb-data-layer-color-settings [context]="context"
+  <jnks-iot-data-layer-color-settings [context]="context"
                                 [dsType]="dsType"
                                 [dsEntityAliasId]="dsEntityAliasId"
                                 [dsDeviceId]="dsDeviceId"
-                                helpId="widget/lib/map/color_fn" formControlName="color"></tb-data-layer-color-settings>
+                                helpId="widget/lib/map/color_fn" formControlName="color"></jnks-iot-data-layer-color-settings>
 </div>

@@ -38,7 +38,7 @@ import { UserPasswordPolicy } from '@shared/models/settings.models';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 
 @Component({
-  selector: 'tb-security',
+  selector: 'jnks-iot-security',
   templateUrl: './security.component.html',
   styleUrls: ['./security.component.scss']
 })
@@ -270,7 +270,7 @@ export class SecurityComponent extends PageComponent implements OnInit, OnDestro
     const dialogData = provider === TwoFactorAuthProviderType.EMAIL ? {email: this.user.email} : {};
     this.dialog.open(authenticationDialogMap.get(provider), {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: dialogData
     }).afterClosed().subscribe(res => {
       if (isDefinedAndNotNull(res)) {

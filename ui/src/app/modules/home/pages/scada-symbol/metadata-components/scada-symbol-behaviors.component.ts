@@ -39,7 +39,7 @@ import { WidgetActionCallbacks } from '@home/components/widget/action/manage-wid
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-scada-symbol-metadata-behaviors',
+  selector: 'jnks-iot-scada-symbol-metadata-behaviors',
   templateUrl: './scada-symbol-behaviors.component.html',
   styleUrls: ['./scada-symbol-behaviors.component.scss'],
   providers: [

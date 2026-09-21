@@ -26,7 +26,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 
 @Component({
-  selector: 'tb-dashboard-autocomplete',
+  selector: 'jnks-iot-dashboard-autocomplete',
   templateUrl: './dashboard-autocomplete.component.html',
   styleUrls: [],
   providers: [{

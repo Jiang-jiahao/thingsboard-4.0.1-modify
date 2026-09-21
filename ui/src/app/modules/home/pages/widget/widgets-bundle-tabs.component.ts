@@ -6,7 +6,7 @@ import { WidgetsBundle } from '@shared/models/widgets-bundle.model';
 import { NULL_UUID } from '@shared/models/id/has-uuid';
 
 @Component({
-  selector: 'tb-widgets-bundle-tabs',
+  selector: 'jnks-iot-widgets-bundle-tabs',
   templateUrl: './widgets-bundle-tabs.component.html',
   styleUrls: []
 })

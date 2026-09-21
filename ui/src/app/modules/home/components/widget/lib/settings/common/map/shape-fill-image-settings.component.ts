@@ -1,14 +1,14 @@
 import { ChangeDetectorRef, Component, forwardRef, Input, Renderer2, ViewContainerRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { ShapeFillImageSettings, ShapeFillImageType } from '@shared/models/widget/maps/map.models';
 import {
   ShapeFillImageSettingsPanelComponent
 } from '@home/components/widget/lib/settings/common/map/shape-fill-image-settings-panel.component';
 
 @Component({
-  selector: 'tb-shape-fill-image-settings',
+  selector: 'jnks-iot-shape-fill-image-settings',
   templateUrl: './shape-fill-image-settings.component.html',
   styleUrls: [],
   providers: [
@@ -30,7 +30,7 @@ export class ShapeFillImageSettingsComponent implements ControlValueAccessor {
 
   private propagateChange: (v: any) => void = () => { };
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private cd: ChangeDetectorRef,
               private viewContainerRef: ViewContainerRef) {}
@@ -70,7 +70,7 @@ export class ShapeFillImageSettingsComponent implements ControlValueAccessor {
           shapeFillImageSettings: this.modelValue,
         },
         isModal: true
-      }).tbComponentRef.instance.shapeFillImageSettingsApplied.subscribe((shapeFillImageSettings) => {
+      }).jnksIotComponentRef.instance.shapeFillImageSettingsApplied.subscribe((shapeFillImageSettings) => {
         this.modelValue = shapeFillImageSettings;
         this.propagateChange(this.modelValue);
         this.cd.detectChanges();

@@ -1,20 +1,20 @@
 @import '../../../scss/constants';
 
-.tb-widgets-bundle-select {
+.jnks-iot-widgets-bundle-select {
   .mdc-list-item__primary-text {
     width: 100%;
   }
 }
 
-tb-widgets-bundle-select {
+jnks-iot-widgets-bundle-select {
   .mat-mdc-select-arrow {
     width: 18px;
   }
 }
 
-tb-widgets-bundle-select, .tb-widgets-bundle-select {
-  .tb-bundle-item {
-    .tb-bundle-system {
+jnks-iot-widgets-bundle-select, .jnks-iot-widgets-bundle-select {
+  .jnks-iot-bundle-item {
+    .jnks-iot-bundle-system {
       float: right;
       font-size: .8rem;
       opacity: .8;
@@ -23,7 +23,7 @@ tb-widgets-bundle-select, .tb-widgets-bundle-select {
 }
 
 mat-toolbar {
-  tb-widgets-bundle-select {
+  jnks-iot-widgets-bundle-select {
     .mat-mdc-text-field-wrapper {
       border-radius: 0;
       .mat-mdc-form-field-infix {

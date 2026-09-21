@@ -21,7 +21,7 @@ import { EntityDebugSettingsService } from '@home/components/entity/debug/entity
 import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'tb-calculated-fields-table',
+  selector: 'jnks-iot-calculated-fields-table',
   templateUrl: './calculated-fields-table.component.html',
   styleUrls: ['./calculated-fields-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

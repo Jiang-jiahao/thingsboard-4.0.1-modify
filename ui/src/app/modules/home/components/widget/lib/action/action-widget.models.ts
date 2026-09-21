@@ -40,7 +40,7 @@ import { EntityType, entityTypeTranslations } from '@shared/models/entity-type.m
 import { EntityId } from '@shared/models/id/entity-id';
 import { deepClone, isDefinedAndNotNull } from '@core/utils';
 import { parseError } from '@shared/models/error.models';
-import { CompiledTbFunction, compileTbFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction, compileJnksIotFunction } from '@shared/models/js-function.models';
 import { HttpClient } from '@angular/common/http';
 import { StateObject } from '@core/api/widget-api.models';
 
@@ -161,7 +161,7 @@ type DataToValueFunction<V> = (data: any) => V;
 
 export class DataToValueConverter<V> {
 
-  private readonly dataToValueFunction$: Observable<CompiledTbFunction<DataToValueFunction<V>>>;
+  private readonly dataToValueFunction$: Observable<CompiledJnksIotFunction<DataToValueFunction<V>>>;
   private readonly compareToValue: any;
 
   constructor(private http: HttpClient,
@@ -170,9 +170,9 @@ export class DataToValueConverter<V> {
     this.compareToValue = settings.compareToValue;
     switch (settings.type) {
       case DataToValueType.FUNCTION:
-        this.dataToValueFunction$ = compileTbFunction(this.http, settings.dataToValueFunction, 'data').pipe(
+        this.dataToValueFunction$ = compileJnksIotFunction(this.http, settings.dataToValueFunction, 'data').pipe(
           catchError(() => {
-            return of(new CompiledTbFunction((data: any) => data, []));
+            return of(new CompiledJnksIotFunction((data: any) => data, []));
           }),
           share({
             connector: () => new ReplaySubject(1),
@@ -319,7 +319,7 @@ type ValueToDataFunction<V> = (value: V) => any;
 export class ValueToDataConverter<V> {
 
   private readonly constantValue: any;
-  private readonly valueToDataFunction$: Observable<CompiledTbFunction<ValueToDataFunction<V>>>;
+  private readonly valueToDataFunction$: Observable<CompiledJnksIotFunction<ValueToDataFunction<V>>>;
 
   constructor(private http: HttpClient,
               private settings: ValueToDataSettings) {
@@ -330,9 +330,9 @@ export class ValueToDataConverter<V> {
         this.constantValue = this.settings.constantValue;
         break;
       case ValueToDataType.FUNCTION:
-        this.valueToDataFunction$ = compileTbFunction(this.http, settings.valueToDataFunction, 'value').pipe(
+        this.valueToDataFunction$ = compileJnksIotFunction(this.http, settings.valueToDataFunction, 'value').pipe(
           catchError(() => {
-            return of(new CompiledTbFunction((value: any) => value, []));
+            return of(new CompiledJnksIotFunction((value: any) => value, []));
           }),
           share({
             connector: () => new ReplaySubject(1),

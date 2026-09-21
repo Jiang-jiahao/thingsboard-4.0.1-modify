@@ -1,6 +1,6 @@
 <form [formGroup]="widgetFormGroup">
   <fieldset [disabled]="isLoading$ | async">
-    <tb-widget-config
+    <jnks-iot-widget-config
       #widgetConfigComponent
       [aliasController]="aliasController"
       [functionsOnly]="widgetEditMode"
@@ -10,7 +10,7 @@
       [showLayoutConfig]="showLayoutConfig"
       [isDefaultBreakpoint]="isDefaultBreakpoint"
       formControlName="widgetConfig">
-      <div class="tb-widget-config-header-prefix">
+      <div class="jnks-iot-widget-config-header-prefix">
         <button mat-button
                 *ngIf="previewMode"
                 (click)="previewMode = false">
@@ -26,7 +26,7 @@
           {{ 'widget-config.preview' | translate }}
         </button>
       </div>
-      <div class="tb-widget-config-header-suffix flex flex-row items-center justify-end gap-3 lt-md:flex-1">
+      <div class="jnks-iot-widget-config-header-suffix flex flex-row items-center justify-end gap-3 lt-md:flex-1">
         <button *ngIf="!previewMode"
                 class="lt-md:!hidden"
                 [disabled]="!widgetFormGroup.valid"
@@ -50,9 +50,9 @@
           </button>
         </div>
       </div>
-    </tb-widget-config>
+    </jnks-iot-widget-config>
     <div *ngIf="previewMode" class="widget-preview-background">
-      <tb-widget-preview class="widget-preview-section"
+      <jnks-iot-widget-preview class="widget-preview-section"
                          [aliasController]="aliasController"
                          [stateController]="stateController"
                          [dashboardTimewindow]="dashboard.configuration.timewindow"
@@ -60,7 +60,7 @@
                          [widgetConfig]="widgetFormGroup.get('widgetConfig').value.config"
                          [previewWidth]="widgetConfig.typeParameters.previewWidth"
                          [previewHeight]="widgetConfig.typeParameters.previewHeight">
-      </tb-widget-preview>
+      </jnks-iot-widget-preview>
     </div>
   </fieldset>
 </form>

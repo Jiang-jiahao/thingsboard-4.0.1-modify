@@ -1,14 +1,14 @@
 <mat-tab *ngIf="entity && authUser.authority === authorities.TENANT_ADMIN && !isEdit"
          label="{{ 'entity.type-calculated-fields' | translate }}" #calculatedFieldsTab="matTab">
-  <tb-calculated-fields-table [active]="calculatedFieldsTab.isActive" [entityId]="entity.id" [entityName]="entity.name"/>
+  <jnks-iot-calculated-fields-table [active]="calculatedFieldsTab.isActive" [entityId]="entity.id" [entityName]="entity.name"/>
 </mat-tab>
 <mat-tab *ngIf="entity && !isEdit" #auditLogsTab="matTab"
          label="{{ 'audit-log.audit-logs' | translate }}">
-  <tb-audit-log-table detailsMode="true" [active]="auditLogsTab.isActive" [auditLogMode]="auditLogModes.ENTITY" [entityId]="entity.id"></tb-audit-log-table>
+  <jnks-iot-audit-log-table detailsMode="true" [active]="auditLogsTab.isActive" [auditLogMode]="auditLogModes.ENTITY" [entityId]="entity.id"></jnks-iot-audit-log-table>
 </mat-tab>
 <mat-tab *ngIf="entity && authUser.authority === authorities.TENANT_ADMIN && !isEdit && versionControlUiEnabled"
          label="{{ 'version-control.version-control' | translate }}" #versionControlTab="matTab">
-  <tb-version-control detailsMode="true" singleEntityMode="true"
+  <jnks-iot-version-control detailsMode="true" singleEntityMode="true"
                       (versionRestored)="entitiesTableConfig.updateData()"
-                      [active]="versionControlTab.isActive" [entityId]="entity.id" [entityName]="entity.name" [externalEntityId]="entity.externalId || entity.id"></tb-version-control>
+                      [active]="versionControlTab.isActive" [entityId]="entity.id" [entityName]="entity.name" [externalEntityId]="entity.externalId || entity.id"></jnks-iot-version-control>
 </mat-tab>

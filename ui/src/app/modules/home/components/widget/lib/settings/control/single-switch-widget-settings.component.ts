@@ -12,7 +12,7 @@ import {
 import { ValueType } from '@shared/models/constants';
 
 @Component({
-  selector: 'tb-single-switch-widget-settings',
+  selector: 'jnks-iot-single-switch-widget-settings',
   templateUrl: './single-switch-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

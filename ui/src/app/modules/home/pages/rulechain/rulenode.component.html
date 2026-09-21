@@ -4,14 +4,14 @@
    (mouseenter)="userNodeCallbacks.mouseEnter($event, node)"
    (mouseleave)="userNodeCallbacks.mouseLeave($event, node)">
   <div class="fc-node-overlay"></div>
-  <div class="tb-rule-node {{node.nodeClass}}"
-       [class.tb-rule-node-highlighted]="node.highlighted"
-       [class.tb-rule-node-invalid]="node.error">
+  <div class="jnks-iot-rule-node {{node.nodeClass}}"
+       [class.jnks-iot-rule-node-highlighted]="node.highlighted"
+       [class.jnks-iot-rule-node-invalid]="node.error">
     <mat-icon *ngIf="!iconUrl" class="max-w-15% flex-full">{{node.icon}}</mat-icon>
     <img *ngIf="iconUrl" class="max-w-15% flex-full" [src]="iconUrl"/>
     <div class="flex max-w-85% flex-full flex-col items-stretch justify-center">
-      <span class="tb-node-type">{{ node.component.name }}</span>
-      <span class="tb-node-title" *ngIf="node.name">{{ node.name }}</span>
+      <span class="jnks-iot-node-type">{{ node.component.name }}</span>
+      <span class="jnks-iot-node-title" *ngIf="node.name">{{ node.name }}</span>
     </div>
     <div class="{{flowchartConstants.leftConnectorClass}}">
       <div fc-magnet [connector]="connector" [callbacks]="callbacks"

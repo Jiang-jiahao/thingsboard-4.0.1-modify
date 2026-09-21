@@ -50,7 +50,7 @@ const stateDisplayTypesTranslations = new Map<stateDisplayType, string>(
 );
 
 @Component({
-  selector: 'tb-widget-action',
+  selector: 'jnks-iot-widget-action',
   templateUrl: './widget-action.component.html',
   styleUrls: [],
   providers: [

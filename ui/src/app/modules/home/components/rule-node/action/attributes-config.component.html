@@ -1,14 +1,14 @@
-<section [formGroup]="attributesConfigForm" class="tb-form-panel no-border no-padding">
-  <div class="tb-form-panel stroked no-padding-bottom no-gap" formGroupName="processingSettings">
+<section [formGroup]="attributesConfigForm" class="jnks-iot-form-panel no-border no-padding">
+  <div class="jnks-iot-form-panel stroked no-padding-bottom no-gap" formGroupName="processingSettings">
     <div class="mb-4 flex flex-row items-center justify-between">
-      <div class="tb-form-panel-title" tb-hint-tooltip-icon="{{ 'rule-node-config.save-attribute.processing-settings-hint' | translate}}" translate>
+      <div class="jnks-iot-form-panel-title" jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.save-attribute.processing-settings-hint' | translate}}" translate>
         rule-node-config.save-attribute.processing-settings
       </div>
-      <tb-toggle-select appearance="fill" selectMediaBreakpoint="xs"
+      <jnks-iot-toggle-select appearance="fill" selectMediaBreakpoint="xs"
                         formControlName="isAdvanced">
-        <tb-toggle-option [value]=false>{{ 'rule-node-config.basic-mode' | translate}}</tb-toggle-option>
-        <tb-toggle-option [value]=true>{{ 'rule-node-config.advanced-mode' | translate }}</tb-toggle-option>
-      </tb-toggle-select>
+        <jnks-iot-toggle-option [value]=false>{{ 'rule-node-config.basic-mode' | translate}}</jnks-iot-toggle-option>
+        <jnks-iot-toggle-option [value]=true>{{ 'rule-node-config.advanced-mode' | translate }}</jnks-iot-toggle-option>
+      </jnks-iot-toggle-select>
     </div>
     @if(!attributesConfigForm.get('processingSettings.isAdvanced').value) {
       <mat-form-field>
@@ -21,7 +21,7 @@
       </mat-form-field>
 
       @if(attributesConfigForm.get('processingSettings.type').value === ProcessingType.DEDUPLICATE) {
-        <tb-time-unit-input
+        <jnks-iot-time-unit-input
           required
           labelText="{{ 'rule-node-config.save-attribute.deduplication-interval' | translate }}"
           requiredText="{{ 'rule-node-config.save-attribute.deduplication-interval-required' | translate }}"
@@ -30,26 +30,26 @@
           [maxTime]="maxDeduplicateTime"
           [minTime]="1"
           formControlName="deduplicationIntervalSecs">
-        </tb-time-unit-input>
+        </jnks-iot-time-unit-input>
       }
     } @else {
-      <tb-advanced-processing-settings
+      <jnks-iot-advanced-processing-settings
         class="mb-4"
         formControlName="advanced"
         attributes webSockets calculatedFields
-      ></tb-advanced-processing-settings>
+      ></jnks-iot-advanced-processing-settings>
     }
   </div>
 
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" tb-hint-tooltip-icon="{{ 'rule-node-config.attributes-scope-hint' | translate}}" translate>
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.attributes-scope-hint' | translate}}" translate>
       rule-node-config.save-attribute.scope
     </div>
-    <div class="tb-form-row no-border no-padding tb-standard-fields">
+    <div class="jnks-iot-form-row no-border no-padding jnks-iot-standard-fields">
       <mat-form-field class="flex" subscriptSizing="dynamic">
         <mat-label>{{ 'rule-node-config.attributes-scope' | translate }}</mat-label>
         <mat-select required
-                    class="tb-entity-type-select" matInput formControlName="scope">
+                    class="jnks-iot-entity-type-select" matInput formControlName="scope">
           <mat-option *ngFor="let scope of attributeScopes" [value]="scope">
             {{ telemetryTypeTranslationsMap.get(scope) | translate }}
           </mat-option>
@@ -73,29 +73,29 @@
     </div>
   </div>
 
-  <section class="tb-form-panel stroked">
-    <mat-expansion-panel class="tb-settings">
+  <section class="jnks-iot-form-panel stroked">
+    <mat-expansion-panel class="jnks-iot-settings">
       <mat-expansion-panel-header>
         <mat-panel-title translate>rule-node-config.advanced-settings</mat-panel-title>
       </mat-expansion-panel-header>
-      <div tb-hint-tooltip-icon="{{ (attributesConfigForm.get('updateAttributesOnlyOnValueChange').value
+      <div jnks-iot-hint-tooltip-icon="{{ (attributesConfigForm.get('updateAttributesOnlyOnValueChange').value
                                      ? 'rule-node-config.update-attributes-only-on-value-change-hint-enabled'
                                      : 'rule-node-config.update-attributes-only-on-value-change-hint') | translate }}"
-           class="tb-form-row no-border no-padding">
+           class="jnks-iot-form-row no-border no-padding">
         <mat-slide-toggle class="mat-slide" formControlName="updateAttributesOnlyOnValueChange">
           {{ 'rule-node-config.update-attributes-only-on-value-change' | translate }}
         </mat-slide-toggle>
       </div>
-      <div tb-hint-tooltip-icon="{{ 'rule-node-config.send-attributes-updated-notification-hint' | translate }}"
+      <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.send-attributes-updated-notification-hint' | translate }}"
            *ngIf="attributesConfigForm.get('scope').value !== attributeScopeMap.CLIENT_SCOPE"
-           class="tb-form-row no-border no-padding">
+           class="jnks-iot-form-row no-border no-padding">
         <mat-slide-toggle class="mat-slide" formControlName="sendAttributesUpdatedNotification">
           {{ 'rule-node-config.send-attributes-updated-notification' | translate }}
         </mat-slide-toggle>
       </div>
-      <div tb-hint-tooltip-icon="{{ 'rule-node-config.notify-device-on-update-hint' | translate }}"
+      <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.notify-device-on-update-hint' | translate }}"
            *ngIf="attributesConfigForm.get('scope').value === attributeScopeMap.SHARED_SCOPE"
-           class="tb-form-row no-border no-padding">
+           class="jnks-iot-form-row no-border no-padding">
         <mat-slide-toggle class="mat-slide" formControlName="notifyDevice">
           {{ 'rule-node-config.notify-device' | translate }}
         </mat-slide-toggle>

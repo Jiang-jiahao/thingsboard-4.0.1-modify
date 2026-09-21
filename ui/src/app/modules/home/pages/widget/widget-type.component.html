@@ -1,4 +1,4 @@
-<div class="tb-details-buttons xs:flex xs:flex-col">
+<div class="jnks-iot-details-buttons xs:flex xs:flex-col">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'edit')"
@@ -37,19 +37,19 @@
           {{ 'widget.title-max-length' | translate }}
         </mat-error>
       </mat-form-field>
-      <tb-gallery-image-input class="flex-1"
+      <jnks-iot-gallery-image-input class="flex-1"
                       label="{{'widget.image-preview' | translate}}"
                       formControlName="image">
-      </tb-gallery-image-input>
+      </jnks-iot-gallery-image-input>
       <mat-form-field class="mat-block">
         <mat-label translate>widget.description</mat-label>
         <textarea matInput formControlName="description" rows="2" maxlength="1024" #descriptionInput></textarea>
         <mat-hint align="end">{{descriptionInput.value?.length || 0}}/1024</mat-hint>
       </mat-form-field>
-      <tb-string-items-list
+      <jnks-iot-string-items-list
         label="{{ 'widget.tags' | translate }}"
         formControlName="tags">
-      </tb-string-items-list>
+      </jnks-iot-string-items-list>
       <div class="flex flex-col gap-4">
         <mat-slide-toggle formControlName="scada">
           {{ 'widget.scada' | translate }}

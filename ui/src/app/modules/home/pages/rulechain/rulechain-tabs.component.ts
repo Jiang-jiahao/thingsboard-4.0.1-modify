@@ -5,7 +5,7 @@ import { EntityTabsComponent } from '../../components/entity/entity-tabs.compone
 import { RuleChain } from '@shared/models/rule-chain.models';
 
 @Component({
-  selector: 'tb-rulechain-tabs',
+  selector: 'jnks-iot-rulechain-tabs',
   templateUrl: './rulechain-tabs.component.html',
   styleUrls: []
 })

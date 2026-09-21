@@ -84,7 +84,7 @@ interface DocLinksWidgetSettings {
 }
 
 @Component({
-  selector: 'tb-doc-links-widget',
+  selector: 'jnks-iot-doc-links-widget',
   templateUrl: './doc-links-widget.component.html',
   styleUrls: ['./home-page-widget.scss', './links-widget.component.scss']
 })
@@ -166,7 +166,7 @@ export class DocLinksWidgetComponent extends PageComponent implements OnInit, On
         mode: 'docs',
         links: this.documentationLinks
       },
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
     }).afterClosed().subscribe(
       (result) => {
         if (result) {
@@ -180,7 +180,7 @@ export class DocLinksWidgetComponent extends PageComponent implements OnInit, On
       DocumentationLink>(AddDocLinkDialogComponent, {
       disableClose: true,
       autoFocus: false,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
     }).afterClosed().subscribe(
       (docLink) => {
         if (docLink) {

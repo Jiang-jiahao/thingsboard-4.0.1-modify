@@ -1,22 +1,22 @@
-<div class="tb-form-panel no-padding no-border" [formGroup]="widgetActionFormGroup">
-  <div *ngIf="withName" class="tb-form-row">
+<div class="jnks-iot-form-panel no-padding no-border" [formGroup]="widgetActionFormGroup">
+  <div *ngIf="withName" class="jnks-iot-form-row">
     <div class="fixed-title-width">{{'widget-config.action-name' | translate}}*</div>
     <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
       <input required matInput formControlName="name" placeholder="{{ 'widget-config.set' | translate }}">
       <mat-icon matSuffix
                 matTooltipPosition="above"
-                matTooltipClass="tb-error-tooltip"
+                matTooltipClass="jnks-iot-error-tooltip"
                 [matTooltip]="(widgetActionFormGroup.get('name').hasError('required')
                                      ? 'widget-config.action-name-required'
                                      : 'widget-config.action-name-not-unique') | translate"
                 *ngIf="widgetActionFormGroup.get('name').invalid
                        && (widgetActionFormGroup.get('name').touched || widgetActionFormGroup.get('name').hasError('actionNameNotUnique'))"
-                class="tb-error">
+                class="jnks-iot-error">
         warning
       </mat-icon>
     </mat-form-field>
   </div>
-  <div class="tb-form-row">
+  <div class="jnks-iot-form-row">
     <div translate>widget-config.action</div>
     <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
       <mat-select required formControlName="type" placeholder="{{ 'widget-config.set' | translate }}">
@@ -28,29 +28,29 @@
   </div>
   <ng-container [formGroup]="actionTypeFormGroup" [ngSwitch]="widgetActionFormGroup.get('type').value">
     <ng-template [ngSwitchCase]="widgetActionType.openDashboard">
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <div class="fixed-title-width">{{ 'widget-action.target-dashboard' | translate }}*</div>
-        <tb-dashboard-autocomplete class="flex-1"
+        <jnks-iot-dashboard-autocomplete class="flex-1"
             formControlName="targetDashboardId"
             required
             requiredText="widget-action.target-dashboard-required"
             placeholder="{{ 'widget-action.select-target-dashboard' | translate }}"
             inlineField
             [selectFirstDashboard]="true"
-        ></tb-dashboard-autocomplete>
+        ></jnks-iot-dashboard-autocomplete>
       </div>
     </ng-template>
     <ng-template [ngSwitchCase]="widgetActionFormGroup.get('type').value === widgetActionType.openDashboardState ||
                                      widgetActionFormGroup.get('type').value === widgetActionType.updateDashboardState ||
                                      widgetActionFormGroup.get('type').value === widgetActionType.openDashboard ?
                                      widgetActionFormGroup.get('type').value : ''">
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <div class="fixed-title-width">
           <span>{{ 'widget-action.target-dashboard-state' | translate }}</span>
           <span *ngIf="widgetActionFormGroup.get('type').value === widgetActionType.openDashboardState">*</span>
         </div>
         <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic"
-                        [class.tb-suffix-absolute]="!actionTypeFormGroup.get('targetDashboardStateId').value">
+                        [class.jnks-iot-suffix-absolute]="!actionTypeFormGroup.get('targetDashboardStateId').value">
           <input matInput type="text" placeholder="{{ 'widget-action.target-dashboard-state' | translate }}"
                  #dashboardStateInput
                  formControlName="targetDashboardStateId"
@@ -65,15 +65,15 @@
           </button>
           <mat-icon matSuffix
                     matTooltipPosition="above"
-                    matTooltipClass="tb-error-tooltip"
+                    matTooltipClass="jnks-iot-error-tooltip"
                     [matTooltip]="'widget-action.target-dashboard-state-required' | translate"
                     *ngIf="actionTypeFormGroup.get('targetDashboardStateId').hasError('required')
                             && actionTypeFormGroup.get('targetDashboardStateId').touched"
-                    class="tb-error">
+                    class="jnks-iot-error">
             warning
           </mat-icon>
           <mat-autocomplete
-              class="tb-autocomplete"
+              class="jnks-iot-autocomplete"
               #targetDashboardStateAutocomplete="matAutocomplete">
             <mat-option *ngFor="let state of filteredDashboardStates | async" [value]="state">
               <span [innerHTML]="state | highlight:targetDashboardStateSearchText"></span>
@@ -83,16 +83,16 @@
       </div>
     </ng-template>
     <ng-template [ngSwitchCase]="widgetActionType.openURL">
-      <div class="tb-form-row">
-        <div class="tb-required">{{ 'widget-action.URL' | translate }}</div>
+      <div class="jnks-iot-form-row">
+        <div class="jnks-iot-required">{{ 'widget-action.URL' | translate }}</div>
         <mat-form-field class="flex-1" style="margin-left: 9px" appearance="outline" subscriptSizing="dynamic">
           <input matInput placeholder="{{ 'widget-config.set' | translate }}" formControlName="url">
           <mat-icon matSuffix
                     matTooltipPosition="above"
-                    matTooltipClass="tb-error-tooltip"
+                    matTooltipClass="jnks-iot-error-tooltip"
                     [matTooltip]="'widget-action.url-required' | translate"
                     *ngIf="actionTypeFormGroup.get('url').invalid && actionTypeFormGroup.get('url').touched"
-                    class="tb-error">
+                    class="jnks-iot-error">
             warning
           </mat-icon>
         </mat-form-field>
@@ -101,7 +101,7 @@
     <ng-template [ngSwitchCase]="widgetActionFormGroup.get('type').value === widgetActionType.openDashboardState ||
                                  widgetActionFormGroup.get('type').value === widgetActionType.updateDashboardState ?
                                  widgetActionFormGroup.get('type').value : ''">
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <mat-slide-toggle class="mat-slide" formControlName="openRightLayout">
           {{ 'widget-action.open-right-layout' | translate }}
         </mat-slide-toggle>
@@ -110,7 +110,7 @@
     <ng-template [ngSwitchCase]="widgetActionFormGroup.get('type').value === widgetActionType.openDashboard ||
                                  widgetActionFormGroup.get('type').value === widgetActionType.openURL ?
                                  widgetActionFormGroup.get('type').value : ''">
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <mat-slide-toggle class="mat-slide" formControlName="openNewBrowserTab">
           {{ 'widget-action.open-new-browser-tab' | translate }}
         </mat-slide-toggle>
@@ -120,12 +120,12 @@
                                  widgetActionFormGroup.get('type').value === widgetActionType.updateDashboardState ||
                                  widgetActionFormGroup.get('type').value === widgetActionType.openDashboard ?
                                  widgetActionFormGroup.get('type').value : ''">
-      <div class="tb-form-row" *ngIf="widgetType !== WidgetType.static">
+      <div class="jnks-iot-form-row" *ngIf="widgetType !== WidgetType.static">
         <mat-slide-toggle class="mat-slide" formControlName="setEntityId">
           {{ 'widget-action.set-entity-from-widget' | translate }}
         </mat-slide-toggle>
       </div>
-      <div class="tb-form-row" *ngIf="actionTypeFormGroup.get('setEntityId').value">
+      <div class="jnks-iot-form-row" *ngIf="actionTypeFormGroup.get('setEntityId').value">
         <div class="fixed-title-width">{{ 'alias.state-entity-parameter-name' | translate }}</div>
         <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
           <input matInput
@@ -136,7 +136,7 @@
     </ng-template>
     <ng-template [ngSwitchCase]="widgetActionFormGroup.get('type').value === widgetActionType.openDashboardState ?
                                  widgetActionFormGroup.get('type').value : ''">
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <div class="fixed-title-width">{{ 'widget-action.state-display-type' | translate }}</div>
         <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
           <mat-select formControlName="stateDisplayType">
@@ -148,48 +148,48 @@
       </div>
       <ng-container [formGroup]="stateDisplayTypeFormGroup" [ngSwitch]="actionTypeFormGroup.get('stateDisplayType').value">
         <ng-template [ngSwitchCase]="'separateDialog'">
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <div class="fixed-title-width">{{ 'widget-action.dialog-title' | translate }}</div>
             <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
               <input matInput placeholder="{{ 'widget-config.set' | translate }}" formControlName="dialogTitle">
             </mat-form-field>
           </div>
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <mat-slide-toggle class="mat-slide" formControlName="dialogHideDashboardToolbar">
               {{ 'widget-action.dialog-hide-dashboard-toolbar' | translate }}
             </mat-slide-toggle>
           </div>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'widget-action.dialog-width' | translate }}</div>
-            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="tb-suffix-absolute number">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="jnks-iot-suffix-absolute number">
               <input type="number" min="1" max="100" step="1" matInput formControlName="dialogWidth">
               <mat-icon matSuffix
                         matTooltipPosition="above"
-                        matTooltipClass="tb-error-tooltip"
+                        matTooltipClass="jnks-iot-error-tooltip"
                         [matTooltip]="'widget-action.dialog-size-range-error' | translate"
                         *ngIf="stateDisplayTypeFormGroup.get('dialogWidth').invalid && stateDisplayTypeFormGroup.get('dialogWidth').touched"
-                        class="tb-error">
+                        class="jnks-iot-error">
                 warning
               </mat-icon>
             </mat-form-field>
           </div>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'widget-action.dialog-height' | translate }}</div>
-            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="tb-suffix-absolute number">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="jnks-iot-suffix-absolute number">
               <input type="number" min="1" max="100" step="1" matInput formControlName="dialogHeight">
               <mat-icon matSuffix
                         matTooltipPosition="above"
-                        matTooltipClass="tb-error-tooltip"
+                        matTooltipClass="jnks-iot-error-tooltip"
                         [matTooltip]="'widget-action.dialog-size-range-error' | translate"
                         *ngIf="stateDisplayTypeFormGroup.get('dialogHeight').invalid && stateDisplayTypeFormGroup.get('dialogHeight').touched"
-                        class="tb-error">
+                        class="jnks-iot-error">
                 warning
               </mat-icon>
             </mat-form-field>
           </div>
         </ng-template>
         <ng-template [ngSwitchCase]="'popover'">
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <div class="fixed-title-width">{{ 'widget-action.popover-preferred-placement' | translate }}</div>
             <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
               <mat-select formControlName="popoverPreferredPlacement">
@@ -199,38 +199,38 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <mat-slide-toggle class="mat-slide" formControlName="popoverHideOnClickOutside">
               {{ 'widget-action.popover-hide-on-click-outside' | translate }}
             </mat-slide-toggle>
           </div>
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <mat-slide-toggle class="mat-slide" formControlName="popoverHideDashboardToolbar">
               {{ 'widget-action.popover-hide-dashboard-toolbar' | translate }}
             </mat-slide-toggle>
           </div>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'widget-action.popover-width' | translate }}</div>
-            <tb-css-size-input formControlName="popoverWidth">
-            </tb-css-size-input>
+            <jnks-iot-css-size-input formControlName="popoverWidth">
+            </jnks-iot-css-size-input>
           </div>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'widget-action.popover-height' | translate }}</div>
-            <tb-css-size-input formControlName="popoverHeight">
-            </tb-css-size-input>
+            <jnks-iot-css-size-input formControlName="popoverHeight">
+            </jnks-iot-css-size-input>
           </div>
-          <tb-json-object-edit
+          <jnks-iot-json-object-edit
               [editorStyle]="{minHeight: '100px'}"
               label="{{ 'widget-action.popover-style' | translate }}"
               formControlName="popoverStyle"
-          ></tb-json-object-edit>
+          ></jnks-iot-json-object-edit>
         </ng-template>
         <ng-template [ngSwitchCase]="'normal'">
         </ng-template>
       </ng-container>
     </ng-template>
     <ng-template [ngSwitchCase]="widgetActionType.custom">
-      <tb-js-func
+      <jnks-iot-js-func
           formControlName="customFunction"
           functionTitle="{{ 'widget-action.custom-action-function' | translate }}"
           [functionArgs]="['$event', 'widgetContext', 'entityId', 'entityName', 'additionalParams', 'entityLabel']"
@@ -240,10 +240,10 @@
           withModules
           helpId="widget/action/custom_action_fn"
           [helpPopupStyle]="{width: '900px'}"
-      ></tb-js-func>
+      ></jnks-iot-js-func>
     </ng-template>
     <ng-template [ngSwitchCase]="widgetActionType.placeMapItem">
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <div class="fixed-title-width">{{ 'widget-action.map-item-type' | translate }}</div>
         <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
           <mat-select placeholder="{{ 'widget-config.set' | translate }}" formControlName="mapItemType">
@@ -253,22 +253,22 @@
           </mat-select>
         </mat-form-field>
       </div>
-      <tb-map-item-tooltips
+      <jnks-iot-map-item-tooltips
         [mapItemType]="actionTypeFormGroup.get('mapItemType').value"
         formControlName="mapItemTooltips">
-      </tb-map-item-tooltips>
+      </jnks-iot-map-item-tooltips>
     </ng-template>
     <ng-template [ngSwitchCase]="widgetActionFormGroup.get('type').value === widgetActionType.customPretty
                                   || widgetActionFormGroup.get('type').value === widgetActionType.placeMapItem
                                   ? widgetActionFormGroup.get('type').value : ''">
-      <tb-custom-action-pretty-editor
+      <jnks-iot-custom-action-pretty-editor
         [widgetActionType]="widgetActionFormGroup.get('type').value"
         formControlName="customAction">
-      </tb-custom-action-pretty-editor>
+      </jnks-iot-custom-action-pretty-editor>
     </ng-template>
     <ng-template [ngSwitchCase]="widgetActionType.mobileAction">
-      <tb-mobile-action-editor formControlName="mobileAction">
-      </tb-mobile-action-editor>
+      <jnks-iot-mobile-action-editor formControlName="mobileAction">
+      </jnks-iot-mobile-action-editor>
     </ng-template>
   </ng-container>
 </div>

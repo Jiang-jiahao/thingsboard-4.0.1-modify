@@ -2,7 +2,7 @@ package com.jnks.iot.server.edqs.data.dp;
 
 import lombok.Getter;
 import com.jnks.iot.server.common.data.kv.DataType;
-import com.jnks.iot.common.util.TbStringPool;
+import com.jnks.iot.common.util.JnksIotStringPool;
 
 public class JsonDataPoint extends AbstractDataPoint {
 
@@ -11,7 +11,7 @@ public class JsonDataPoint extends AbstractDataPoint {
 
     public JsonDataPoint(long ts, String value) {
         super(ts);
-        this.value = TbStringPool.intern(value);
+        this.value = JnksIotStringPool.intern(value);
     }
 
     @Override

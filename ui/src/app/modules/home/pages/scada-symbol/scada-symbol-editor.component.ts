@@ -19,7 +19,7 @@ import {
   ScadaSymbolEditObject,
   ScadaSymbolEditObjectCallbacks
 } from '@home/pages/scada-symbol/scada-symbol-editor.models';
-import { TbAnchorComponent } from '@shared/components/tb-anchor.component';
+import { JnksIotAnchorComponent } from '@shared/components/jnks-iot-anchor.component';
 import { FormControl } from '@angular/forms';
 import {
   parseScadaSymbolsTagsFromContent,
@@ -34,7 +34,7 @@ export interface ScadaSymbolEditorData {
 type editorModeType = 'svg' | 'xml';
 
 @Component({
-  selector: 'tb-scada-symbol-editor',
+  selector: 'jnks-iot-scada-symbol-editor',
   templateUrl: './scada-symbol-editor.component.html',
   styleUrls: ['./scada-symbol-editor.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -48,7 +48,7 @@ export class ScadaSymbolEditorComponent implements OnInit, OnDestroy, AfterViewI
   tooltipsContainer: ElementRef<HTMLElement>;
 
   @ViewChild('tooltipsContainerComponent', {static: true})
-  tooltipsContainerComponent: TbAnchorComponent;
+  tooltipsContainerComponent: JnksIotAnchorComponent;
 
   @Input()
   data: ScadaSymbolEditorData;

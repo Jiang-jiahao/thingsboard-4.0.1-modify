@@ -1,18 +1,18 @@
-.tb-segmented-button-widget {
+.jnks-iot-segmented-button-widget {
   width: 100%;
   height: 100%;
   position: relative;
 
-  .tb-segmented-button-container {
+  .jnks-iot-segmented-button-container {
     height: 100%;
 
-    .tb-widget-button-toggle {
+    .jnks-iot-widget-button-toggle {
       display: block;
       height: 100%;
     }
   }
 
-  > div.tb-segmented-button-widget-title-panel {
+  > div.jnks-iot-segmented-button-widget-title-panel {
     position: absolute;
     top: 12px;
     left: 12px;

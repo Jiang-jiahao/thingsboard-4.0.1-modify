@@ -15,7 +15,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-general-settings',
+  selector: 'jnks-iot-general-settings',
   templateUrl: './general-settings.component.html',
   styleUrls: ['./general-settings.component.scss', './settings-card.scss']
 })

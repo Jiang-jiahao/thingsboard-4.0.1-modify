@@ -13,7 +13,7 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
   <mat-autocomplete
-    class="tb-autocomplete"
+    class="jnks-iot-autocomplete"
     #keyAutocomplete="matAutocomplete">
     <mat-option *ngFor="let key of filteredKeys | async" [value]="key">
       <span [innerHTML]="key | highlight:keySearchText"></span>

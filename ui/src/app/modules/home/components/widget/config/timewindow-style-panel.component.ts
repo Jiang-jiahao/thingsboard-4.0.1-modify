@@ -1,7 +1,7 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
 import { defaultTimewindowStyle, TimewindowStyle } from '@shared/models/widget-settings.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -10,7 +10,7 @@ import { deepClone } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-timewindow-style-panel',
+  selector: 'jnks-iot-timewindow-style-panel',
   templateUrl: './timewindow-style-panel.component.html',
   providers: [],
   styleUrls: ['./timewindow-style-panel.component.scss'],
@@ -25,7 +25,7 @@ export class TimewindowStylePanelComponent extends PageComponent implements OnIn
   previewValue: Timewindow;
 
   @Input()
-  popover: TbPopoverComponent<TimewindowStylePanelComponent>;
+  popover: JnksIotPopoverComponent<TimewindowStylePanelComponent>;
 
   @Output()
   timewindowStyleApplied = new EventEmitter<TimewindowStyle>();

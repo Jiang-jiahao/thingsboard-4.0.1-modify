@@ -8,17 +8,17 @@ import { distinctUntilChanged, filter, map, mergeMap, startWith, take } from 'rx
 import { merge, Observable } from 'rxjs';
 import { MenuSection } from '@core/services/menu.models';
 import { ActiveComponentService } from '@core/services/active-component.service';
-import { TbAnchorComponent } from '@shared/components/tb-anchor.component';
+import { JnksIotAnchorComponent } from '@shared/components/jnks-iot-anchor.component';
 import { getCurrentAuthUser } from '@core/auth/auth.selectors';
 
 @Component({
-  selector: 'tb-router-tabs',
+  selector: 'jnks-iot-router-tabs',
   templateUrl: './router-tabs.component.html',
   styleUrls: ['./router-tabs.component.scss']
 })
 export class RouterTabsComponent extends PageComponent implements OnInit {
 
-  @ViewChild('tabsHeaderComponent', {static: true}) tabsHeaderComponentAnchor: TbAnchorComponent;
+  @ViewChild('tabsHeaderComponent', {static: true}) tabsHeaderComponentAnchor: JnksIotAnchorComponent;
 
   tabsHeaderComponentRef: ComponentRef<any>;
 

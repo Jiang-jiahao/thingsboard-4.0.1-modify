@@ -34,7 +34,7 @@ import { DashboardInfo } from '@shared/models/dashboard.models';
 import { DashboardAutocompleteComponent } from '@shared/components/dashboard-autocomplete.component';
 
 @Component({
-  selector: 'tb-recent-dashboards-widget',
+  selector: 'jnks-iot-recent-dashboards-widget',
   templateUrl: './recent-dashboards-widget.component.html',
   styleUrls: ['./home-page-widget.scss', './recent-dashboards-widget.component.scss']
 })

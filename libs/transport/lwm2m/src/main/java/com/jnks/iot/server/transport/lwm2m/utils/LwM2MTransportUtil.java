@@ -20,7 +20,7 @@ import com.jnks.iot.server.common.data.device.profile.DeviceProfileTransportConf
 import com.jnks.iot.server.common.data.device.profile.Lwm2mDeviceProfileTransportConfiguration;
 import com.jnks.iot.server.common.data.device.profile.lwm2m.bootstrap.LwM2MBootstrapServerCredential;
 import com.jnks.iot.server.common.data.ota.OtaPackageKey;
-import com.jnks.iot.server.transport.lwm2m.config.TbLwM2mVersion;
+import com.jnks.iot.server.transport.lwm2m.config.JnksIotLwM2mVersion;
 import com.jnks.iot.server.transport.lwm2m.server.LwM2mOtaConvert;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClient;
 import com.jnks.iot.server.transport.lwm2m.server.client.ResourceValue;
@@ -146,7 +146,7 @@ public class LwM2MTransportUtil {
             try {
                 Integer objectId = Integer.valueOf((keyArray[1].split(LWM2M_SEPARATOR_KEY))[0]);
                 String ver = String.valueOf(lwM2MClient.getSupportedObjectVersion(objectId));
-                ver = ver != null ? ver : TbLwM2mVersion.VERSION_1_0.getVersion().toString();
+                ver = ver != null ? ver : JnksIotLwM2mVersion.VERSION_1_0.getVersion().toString();
                 keyArray[1] = String.valueOf(keyArray[1]).contains(LWM2M_SEPARATOR_KEY) ? keyArray[1] : keyArray[1] + LWM2M_SEPARATOR_KEY + ver;
                 return StringUtils.join(keyArray, LWM2M_SEPARATOR_PATH);
             } catch (Exception e) {

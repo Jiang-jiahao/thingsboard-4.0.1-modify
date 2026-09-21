@@ -8,7 +8,7 @@ import type { JsFuncComponent } from '@app/shared/components/js-func.component';
 import { DebugRuleNodeEventBody } from '@app/shared/models/event.models';
 
 @Component({
-  selector: 'tb-filter-node-script-config',
+  selector: 'jnks-iot-filter-node-script-config',
   templateUrl: './script-config.component.html',
   styleUrls: []
 })

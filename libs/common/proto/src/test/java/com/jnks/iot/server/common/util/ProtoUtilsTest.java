@@ -11,7 +11,7 @@ import com.jnks.iot.server.common.data.ApiUsageState;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.EntityType;
-import com.jnks.iot.server.common.data.TbResource;
+import com.jnks.iot.server.common.data.JnksIotResource;
 import com.jnks.iot.server.common.data.Tenant;
 import com.jnks.iot.server.common.data.TenantProfile;
 import com.jnks.iot.server.common.data.device.data.DefaultDeviceConfiguration;
@@ -198,10 +198,10 @@ class ProtoUtilsTest {
         TenantProfile actualTenantProfile = ProtoUtils.fromProto(tenantProfileProto);
         assertEqualDeserializedEntity(expectedTenantProfile, actualTenantProfile, "TenantProfile");
 
-        TbResource expectedResource = easyRandom.nextObject(TbResource.class);
-        TransportProtos.TbResourceProto resourceProto = ProtoUtils.toProto(expectedResource);
-        TbResource actualResource = ProtoUtils.fromProto(resourceProto);
-        assertEqualDeserializedEntity(expectedResource, actualResource, "TbResource");
+        JnksIotResource expectedResource = easyRandom.nextObject(JnksIotResource.class);
+        TransportProtos.JnksIotResourceProto resourceProto = ProtoUtils.toProto(expectedResource);
+        JnksIotResource actualResource = ProtoUtils.fromProto(resourceProto);
+        assertEqualDeserializedEntity(expectedResource, actualResource, "JnksIotResource");
 
         ApiUsageState expectedState = easyRandom.nextObject(ApiUsageState.class);
         TransportProtos.ApiUsageStateProto stateProto = ProtoUtils.toProto(expectedState);

@@ -36,7 +36,7 @@ ADDITIONAL_STARTUP_SERVICES=$(additionalStartupServices) || exit $?
 COMPOSE_ARGS_PULL="\
       -f docker-compose.yml ${ADDITIONAL_CACHE_ARGS} ${ADDITIONAL_COMPOSE_ARGS} ${ADDITIONAL_COMPOSE_QUEUE_ARGS} ${ADDITIONAL_COMPOSE_EDQS_ARGS} \
       pull \
-      tb-core1"
+      jnks-iot-core1"
 
 COMPOSE_ARGS_UP="\
       -f docker-compose.yml ${ADDITIONAL_CACHE_ARGS} ${ADDITIONAL_COMPOSE_ARGS} ${ADDITIONAL_COMPOSE_QUEUE_ARGS} ${ADDITIONAL_COMPOSE_EDQS_ARGS} \
@@ -45,7 +45,7 @@ COMPOSE_ARGS_UP="\
 COMPOSE_ARGS_RUN="\
       -f docker-compose.yml ${ADDITIONAL_CACHE_ARGS} ${ADDITIONAL_COMPOSE_ARGS} ${ADDITIONAL_COMPOSE_QUEUE_ARGS} ${ADDITIONAL_COMPOSE_EDQS_ARGS} \
       run --no-deps --rm -e UPGRADE_TB=true -e FROM_VERSION=${fromVersion} \
-      tb-core1"
+      jnks-iot-core1"
 
 case $COMPOSE_VERSION in
     V2)

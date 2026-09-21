@@ -9,5 +9,5 @@ public interface CoapServerService {
 
     CoapServer getCoapServer() throws UnknownHostException;
 
-    ConcurrentMap<TbCoapDtlsSessionKey, TbCoapDtlsSessionInfo> getDtlsSessionsMap();
+    ConcurrentMap<JnksIotCoapDtlsSessionKey, JnksIotCoapDtlsSessionInfo> getDtlsSessionsMap();
 }

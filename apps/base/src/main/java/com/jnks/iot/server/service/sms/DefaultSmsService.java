@@ -18,9 +18,9 @@ import com.jnks.iot.server.common.data.id.CustomerId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.sms.config.SmsProviderConfiguration;
 import com.jnks.iot.server.common.data.sms.config.TestSmsRequest;
-import com.jnks.iot.server.common.stats.TbApiUsageReportClient;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageReportClient;
 import com.jnks.iot.server.dao.settings.AdminSettingsService;
-import com.jnks.iot.server.service.apiusage.TbApiUsageStateService;
+import com.jnks.iot.server.service.apiusage.JnksIotApiUsageStateService;
 
 @Service
 @Slf4j
@@ -28,12 +28,12 @@ public class DefaultSmsService implements SmsService {
 
     private final SmsSenderFactory smsSenderFactory;
     private final AdminSettingsService adminSettingsService;
-    private final TbApiUsageStateService apiUsageStateService;
-    private final TbApiUsageReportClient apiUsageClient;
+    private final JnksIotApiUsageStateService apiUsageStateService;
+    private final JnksIotApiUsageReportClient apiUsageClient;
 
     private SmsSender smsSender;
 
-    public DefaultSmsService(SmsSenderFactory smsSenderFactory, AdminSettingsService adminSettingsService, TbApiUsageStateService apiUsageStateService, TbApiUsageReportClient apiUsageClient) {
+    public DefaultSmsService(SmsSenderFactory smsSenderFactory, AdminSettingsService adminSettingsService, JnksIotApiUsageStateService apiUsageStateService, JnksIotApiUsageReportClient apiUsageClient) {
         this.smsSenderFactory = smsSenderFactory;
         this.adminSettingsService = adminSettingsService;
         this.apiUsageStateService = apiUsageStateService;

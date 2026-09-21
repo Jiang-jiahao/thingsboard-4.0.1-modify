@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.jnks.iot.common.util.JacksonUtil;
-import com.jnks.iot.server.cache.CaffeineTbTransactionalCache;
+import com.jnks.iot.server.cache.CaffeineJnksIotTransactionalCache;
 import com.jnks.iot.server.common.data.Dashboard;
 import com.jnks.iot.server.common.data.DataConstants;
 import com.jnks.iot.server.common.data.EntityType;
@@ -21,12 +21,12 @@ import com.jnks.iot.server.common.data.ImageDescriptor;
 import com.jnks.iot.server.common.data.ResourceExportData;
 import com.jnks.iot.server.common.data.ResourceSubType;
 import com.jnks.iot.server.common.data.ResourceType;
-import com.jnks.iot.server.common.data.TbImageDeleteResult;
-import com.jnks.iot.server.common.data.TbResource;
-import com.jnks.iot.server.common.data.TbResourceInfo;
-import com.jnks.iot.server.common.data.TbResourceInfoFilter;
+import com.jnks.iot.server.common.data.JnksIotImageDeleteResult;
+import com.jnks.iot.server.common.data.JnksIotResource;
+import com.jnks.iot.server.common.data.JnksIotResourceInfo;
+import com.jnks.iot.server.common.data.JnksIotResourceInfoFilter;
 import com.jnks.iot.server.common.data.id.HasId;
-import com.jnks.iot.server.common.data.id.TbResourceId;
+import com.jnks.iot.server.common.data.id.JnksIotResourceId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.page.PageData;
 import com.jnks.iot.server.common.data.page.PageLink;
@@ -92,7 +92,7 @@ public class BaseImageService extends BaseResourceService implements ImageServic
     private final WidgetsBundleDao widgetsBundleDao;
     private final Map<EntityType, ImageContainerDao<?>> imageContainerDaoMap = new HashMap<>();
 
-    public BaseImageService(TbResourceDao resourceDao, TbResourceInfoDao resourceInfoDao, ResourceDataValidator resourceValidator,
+    public BaseImageService(JnksIotResourceDao resourceDao, JnksIotResourceInfoDao resourceInfoDao, ResourceDataValidator resourceValidator,
                             AssetProfileDao assetProfileDao, DeviceProfileDao deviceProfileDao, WidgetsBundleDao widgetsBundleDao,
                             WidgetTypeDao widgetTypeDao, DashboardInfoDao dashboardInfoDao) {
         super(resourceDao, resourceInfoDao, resourceValidator, widgetTypeDao, dashboardInfoDao);
@@ -112,14 +112,14 @@ public class BaseImageService extends BaseResourceService implements ImageServic
 
     @Override
     @SneakyThrows
-    public TbResourceInfo saveImage(TbResource image) {
+    public JnksIotResourceInfo saveImage(JnksIotResource image) {
         if (image.getId() == null) {
             image.setResourceKey(getUniqueKey(image.getTenantId(), ResourceType.IMAGE, StringUtils.defaultIfEmpty(image.getResourceKey(), image.getFileName())));
         }
         if (image.getResourceSubType() == null) {
             image.setResourceSubType(ResourceSubType.IMAGE);
         }
-        resourceValidator.validate(image, TbResourceInfo::getTenantId);
+        resourceValidator.validate(image, JnksIotResourceInfo::getTenantId);
 
         ImageDescriptor descriptor = image.getDescriptor(ImageDescriptor.class);
         Pair<ImageDescriptor, byte[]> result = processImage(image.getData(), descriptor);
@@ -133,7 +133,7 @@ public class BaseImageService extends BaseResourceService implements ImageServic
             image.setPublicResourceKey(generatePublicResourceKey());
         }
         log.debug("[{}] Creating image {} ('{}')", image.getTenantId(), image.getResourceKey(), image.getName());
-        return new TbResourceInfo(doSaveResource(image));
+        return new JnksIotResourceInfo(doSaveResource(image));
     }
 
     private Pair<ImageDescriptor, byte[]> processImage(byte[] data, ImageDescriptor descriptor) throws Exception {
@@ -161,26 +161,26 @@ public class BaseImageService extends BaseResourceService implements ImageServic
     }
 
     @Override
-    public TbResourceInfo saveImageInfo(TbResourceInfo imageInfo) {
+    public JnksIotResourceInfo saveImageInfo(JnksIotResourceInfo imageInfo) {
         log.trace("Executing saveImageInfo [{}] [{}]", imageInfo.getTenantId(), imageInfo.getId());
-        return saveResource(new TbResource(imageInfo));
+        return saveResource(new JnksIotResource(imageInfo));
     }
 
     @Override
-    public TbResourceInfo getImageInfoByTenantIdAndKey(TenantId tenantId, String key) {
+    public JnksIotResourceInfo getImageInfoByTenantIdAndKey(TenantId tenantId, String key) {
         log.trace("Executing getImageInfoByTenantIdAndKey [{}] [{}]", tenantId, key);
         return findResourceInfoByTenantIdAndKey(tenantId, ResourceType.IMAGE, key);
     }
 
     @Override
-    public TbResourceInfo getPublicImageInfoByKey(String publicResourceKey) {
+    public JnksIotResourceInfo getPublicImageInfoByKey(String publicResourceKey) {
         return resourceInfoDao.findPublicResourceByKey(ResourceType.IMAGE, publicResourceKey);
     }
 
     @Override
-    public PageData<TbResourceInfo> getImagesByTenantId(TenantId tenantId, ResourceSubType imageSubType, PageLink pageLink) {
+    public PageData<JnksIotResourceInfo> getImagesByTenantId(TenantId tenantId, ResourceSubType imageSubType, PageLink pageLink) {
         log.trace("Executing getImagesByTenantId [{}]", tenantId);
-        TbResourceInfoFilter filter = TbResourceInfoFilter.builder()
+        JnksIotResourceInfoFilter filter = JnksIotResourceInfoFilter.builder()
                 .tenantId(tenantId)
                 .resourceTypes(Set.of(ResourceType.IMAGE))
                 .resourceSubTypes(Set.of(imageSubType))
@@ -189,9 +189,9 @@ public class BaseImageService extends BaseResourceService implements ImageServic
     }
 
     @Override
-    public PageData<TbResourceInfo> getAllImagesByTenantId(TenantId tenantId, ResourceSubType imageSubType, PageLink pageLink) {
+    public PageData<JnksIotResourceInfo> getAllImagesByTenantId(TenantId tenantId, ResourceSubType imageSubType, PageLink pageLink) {
         log.trace("Executing getAllImagesByTenantId [{}]", tenantId);
-        TbResourceInfoFilter filter = TbResourceInfoFilter.builder()
+        JnksIotResourceInfoFilter filter = JnksIotResourceInfoFilter.builder()
                 .tenantId(tenantId)
                 .resourceTypes(Set.of(ResourceType.IMAGE))
                 .resourceSubTypes(Set.of(imageSubType))
@@ -200,18 +200,18 @@ public class BaseImageService extends BaseResourceService implements ImageServic
     }
 
     @Override
-    public byte[] getImageData(TenantId tenantId, TbResourceId imageId) {
+    public byte[] getImageData(TenantId tenantId, JnksIotResourceId imageId) {
         return getResourceData(tenantId, imageId);
     }
 
     @Override
-    public byte[] getImagePreview(TenantId tenantId, TbResourceId imageId) {
+    public byte[] getImagePreview(TenantId tenantId, JnksIotResourceId imageId) {
         log.trace("Executing getImagePreview [{}] [{}]", tenantId, imageId);
         return resourceDao.getResourcePreview(tenantId, imageId);
     }
 
     @Override
-    public ResourceExportData exportImage(TbResourceInfo imageInfo) {
+    public ResourceExportData exportImage(JnksIotResourceInfo imageInfo) {
         ImageDescriptor descriptor = imageInfo.getDescriptor(ImageDescriptor.class);
         byte[] data = getImageData(imageInfo.getTenantId(), imageInfo.getId());
         return ResourceExportData.builder()
@@ -229,18 +229,18 @@ public class BaseImageService extends BaseResourceService implements ImageServic
     }
 
     @Override
-    public TbResource toImage(TenantId tenantId, ResourceExportData imageData, boolean checkExisting) {
+    public JnksIotResource toImage(TenantId tenantId, ResourceExportData imageData, boolean checkExisting) {
         byte[] data = Base64.getDecoder().decode(imageData.getData());
         if (checkExisting) {
             String etag = calculateImageEtag(data);
-            TbResourceInfo existingImage = findSystemOrTenantImageByEtag(tenantId, etag);
+            JnksIotResourceInfo existingImage = findSystemOrTenantImageByEtag(tenantId, etag);
             if (existingImage != null) {
                 log.debug("[{}] Using existing image {}", tenantId, existingImage.getLink());
-                return new TbResource(existingImage);
+                return new JnksIotResource(existingImage);
             }
         }
 
-        TbResource image = new TbResource();
+        JnksIotResource image = new JnksIotResource();
         image.setTenantId(tenantId);
         image.setFileName(imageData.getFileName());
         if (isNotEmpty(imageData.getTitle())) {
@@ -266,15 +266,15 @@ public class BaseImageService extends BaseResourceService implements ImageServic
     }
 
     @Override
-    public TbImageDeleteResult deleteImage(TbResourceInfo imageInfo, boolean force) {
+    public JnksIotImageDeleteResult deleteImage(JnksIotResourceInfo imageInfo, boolean force) {
         var tenantId = imageInfo.getTenantId();
         var imageId = imageInfo.getId();
         log.trace("Executing deleteImage [{}] [{}]", tenantId, imageId);
         Validator.validateId(imageId, id -> INCORRECT_RESOURCE_ID + id);
-        TbImageDeleteResult.TbImageDeleteResultBuilder result = TbImageDeleteResult.builder();
+        JnksIotImageDeleteResult.JnksIotImageDeleteResultBuilder result = JnksIotImageDeleteResult.builder();
         boolean success = true;
         if (!force) {
-            var link = DataConstants.TB_IMAGE_PREFIX + imageInfo.getLink();
+            var link = DataConstants.JNKS_IOT_IMAGE_PREFIX + imageInfo.getLink();
             Map<String, List<? extends HasId<?>>> affectedEntities = new HashMap<>();
             imageContainerDaoMap.forEach((entityType, imageContainerDao) -> {
                 var entities = tenantId.isSysTenantId() ? imageContainerDao.findByImageLink(link, MAX_ENTITIES_TO_FIND) :
@@ -296,13 +296,13 @@ public class BaseImageService extends BaseResourceService implements ImageServic
     }
 
     @Override
-    public TbResourceInfo createOrUpdateSystemImage(String resourceKey, byte[] data) {
-        TbResource image;
-        TbResourceInfo existingImage = findResourceInfoByTenantIdAndKey(TenantId.SYS_TENANT_ID, ResourceType.IMAGE, resourceKey);
+    public JnksIotResourceInfo createOrUpdateSystemImage(String resourceKey, byte[] data) {
+        JnksIotResource image;
+        JnksIotResourceInfo existingImage = findResourceInfoByTenantIdAndKey(TenantId.SYS_TENANT_ID, ResourceType.IMAGE, resourceKey);
         if (existingImage != null) {
-            image = new TbResource(existingImage);
+            image = new JnksIotResource(existingImage);
         } else {
-            image = new TbResource();
+            image = new JnksIotResource();
             image.setTenantId(TenantId.SYS_TENANT_ID);
             image.setFileName(resourceKey);
             image.setTitle(resourceKey);
@@ -325,7 +325,7 @@ public class BaseImageService extends BaseResourceService implements ImageServic
     }
 
     @Override
-    public TbResourceInfo findSystemOrTenantImageByEtag(TenantId tenantId, String etag) {
+    public JnksIotResourceInfo findSystemOrTenantImageByEtag(TenantId tenantId, String etag) {
         return findSystemOrTenantResourceByEtag(tenantId, ResourceType.IMAGE, etag);
     }
 
@@ -405,7 +405,7 @@ public class BaseImageService extends BaseResourceService implements ImageServic
         return convertToImageUrl(tenantId, name, data, false, links);
     }
 
-    public static final Pattern TB_IMAGE_METADATA_PATTERN = Pattern.compile("^tb-image:([^;]+);data:(.*);.*");
+    public static final Pattern JNKS_IOT_IMAGE_METADATA_PATTERN = Pattern.compile("^jnks-iot-image:([^;]+);data:(.*);.*");
 
     private UpdateResult convertToImageUrl(TenantId tenantId, String name, String data, boolean strict, Map<String, String> imagesLinks) {
         if (StringUtils.isBlank(data)) {
@@ -418,7 +418,7 @@ public class BaseImageService extends BaseResourceService implements ImageServic
             if (newLink == null || newLink.equals(link)) {
                 return UpdateResult.of(false, data);
             } else {
-                return UpdateResult.of(true, DataConstants.TB_IMAGE_PREFIX + newLink);
+                return UpdateResult.of(true, DataConstants.JNKS_IOT_IMAGE_PREFIX + newLink);
             }
         }
 
@@ -427,7 +427,7 @@ public class BaseImageService extends BaseResourceService implements ImageServic
         String resourceSubType = null;
         String etag = null;
         String mediaType;
-        var matcher = TB_IMAGE_METADATA_PATTERN.matcher(data);
+        var matcher = JNKS_IOT_IMAGE_METADATA_PATTERN.matcher(data);
         if (matcher.matches()) {
             String[] metadata = matcher.group(1).split(":");
             resourceKey = decode(get(metadata, 0));
@@ -435,7 +435,7 @@ public class BaseImageService extends BaseResourceService implements ImageServic
             resourceSubType = decode(get(metadata, 2));
             etag = get(metadata, 3);
             mediaType = matcher.group(2);
-        } else if (data.startsWith(DataConstants.TB_IMAGE_PREFIX + "data:image/") || (!strict && data.startsWith("data:image/"))) {
+        } else if (data.startsWith(DataConstants.JNKS_IOT_IMAGE_PREFIX + "data:image/") || (!strict && data.startsWith("data:image/"))) {
             mediaType = StringUtils.substringBetween(data, "data:", ";base64");
         } else {
             return UpdateResult.of(false, data);
@@ -451,7 +451,7 @@ public class BaseImageService extends BaseResourceService implements ImageServic
             if (imageData == null) {
                 return UpdateResult.of(false, data);
             }
-            TbResource image = new TbResource();
+            JnksIotResource image = new JnksIotResource();
             image.setTenantId(tenantId);
             image.setResourceType(ResourceType.IMAGE);
             if (StringUtils.isBlank(resourceName)) {
@@ -491,7 +491,7 @@ public class BaseImageService extends BaseResourceService implements ImageServic
         } else {
             log.debug("[{}] Using existing image {} ({} - '{}') for '{}'", tenantId, imageInfo.getResourceKey(), imageInfo.getTenantId(), imageInfo.getName(), name);
         }
-        return UpdateResult.of(true, DataConstants.TB_IMAGE_PREFIX + imageInfo.getLink());
+        return UpdateResult.of(true, DataConstants.JNKS_IOT_IMAGE_PREFIX + imageInfo.getLink());
     }
 
     private boolean convertToImageUrls(TenantId tenantId, String title, JsonNode root, Map<String, String> links) {
@@ -512,7 +512,7 @@ public class BaseImageService extends BaseResourceService implements ImageServic
         if (StringUtils.isEmpty(entity.getImage())) {
             return entity;
         }
-        if (cache instanceof CaffeineTbTransactionalCache) {
+        if (cache instanceof CaffeineJnksIotTransactionalCache) {
             entity = JacksonUtil.clone(entity); // cloning the entity to avoid updating the cached one
         }
         entity.setImage(inlineImage(entity.getTenantId(), "image", entity.getImage(), true));
@@ -520,10 +520,10 @@ public class BaseImageService extends BaseResourceService implements ImageServic
     }
 
     @Override
-    public Collection<TbResourceInfo> getUsedImages(Dashboard dashboard) {
+    public Collection<JnksIotResourceInfo> getUsedImages(Dashboard dashboard) {
         TenantId tenantId = dashboard.getTenantId();
         log.trace("Executing getUsedImages [{}] [Dashboard] [{}]", tenantId, dashboard.getId());
-        Map<TbResourceId, TbResourceInfo> images = new HashMap<>();
+        Map<JnksIotResourceId, JnksIotResourceInfo> images = new HashMap<>();
         processImage(tenantId, "image", dashboard.getImage(), (key, imageInfo) -> {
             images.putIfAbsent(imageInfo.getId(), imageInfo);
             return null; // leaving the url as is
@@ -536,10 +536,10 @@ public class BaseImageService extends BaseResourceService implements ImageServic
     }
 
     @Override
-    public Collection<TbResourceInfo> getUsedImages(WidgetTypeDetails widgetTypeDetails) {
+    public Collection<JnksIotResourceInfo> getUsedImages(WidgetTypeDetails widgetTypeDetails) {
         TenantId tenantId = widgetTypeDetails.getTenantId();
         log.trace("Executing getUsedImages [{}] [WidgetTypeDetails] [{}]", tenantId, widgetTypeDetails.getId());
-        Map<TbResourceId, TbResourceInfo> images = new HashMap<>();
+        Map<JnksIotResourceId, JnksIotResourceInfo> images = new HashMap<>();
         processImage(tenantId, "image", widgetTypeDetails.getImage(), (key, imageInfo) -> {
             images.putIfAbsent(imageInfo.getId(), imageInfo);
             return null; // leaving the url as is
@@ -558,16 +558,16 @@ public class BaseImageService extends BaseResourceService implements ImageServic
         return images.values();
     }
 
-    private String inlineImage(TenantId tenantId, String path, String url, boolean addTbImagePrefix) {
+    private String inlineImage(TenantId tenantId, String path, String url, boolean addJnksIotImagePrefix) {
         return processImage(tenantId, path, url, (key, imageInfo) -> {
-            return inlineImage(key, imageInfo, addTbImagePrefix);
+            return inlineImage(key, imageInfo, addJnksIotImagePrefix);
         });
     }
 
-    private String inlineImage(ImageCacheKey key, TbResourceInfo imageInfo, boolean addTbImagePrefix) {
+    private String inlineImage(ImageCacheKey key, JnksIotResourceInfo imageInfo, boolean addJnksIotImagePrefix) {
         String value = "";
-        if (addTbImagePrefix) {
-            value = "tb-image:" + encode(imageInfo.getResourceKey()) + ":"
+        if (addJnksIotImagePrefix) {
+            value = "jnks-iot-image:" + encode(imageInfo.getResourceKey()) + ":"
                     + encode(imageInfo.getName()) + ":"
                     + encode(imageInfo.getResourceSubType().name()) + ";";
         }
@@ -577,13 +577,13 @@ public class BaseImageService extends BaseResourceService implements ImageServic
         return value + "data:" + descriptor.getMediaType() + ";base64," + encode(data);
     }
 
-    private void processImages(TenantId tenantId, JsonNode node, BiFunction<ImageCacheKey, TbResourceInfo, String> processor) {
+    private void processImages(TenantId tenantId, JsonNode node, BiFunction<ImageCacheKey, JnksIotResourceInfo, String> processor) {
         JacksonUtil.replaceAll(node, "", (path, value) -> {
             return processImage(tenantId, path, value, processor);
         });
     }
 
-    private String processImage(TenantId tenantId, String path, String imageUrl, BiFunction<ImageCacheKey, TbResourceInfo, String> processor) {
+    private String processImage(TenantId tenantId, String path, String imageUrl, BiFunction<ImageCacheKey, JnksIotResourceInfo, String> processor) {
         try {
             ImageCacheKey key = getKeyFromUrl(tenantId, imageUrl);
             if (key != null) {
@@ -603,7 +603,7 @@ public class BaseImageService extends BaseResourceService implements ImageServic
         return imageUrl;
     }
 
-    private ImageDescriptor getImageDescriptor(TbResourceInfo imageInfo, boolean preview) {
+    private ImageDescriptor getImageDescriptor(JnksIotResourceInfo imageInfo, boolean preview) {
         ImageDescriptor descriptor = imageInfo.getDescriptor(ImageDescriptor.class);
         return preview ? descriptor.getPreviewDescriptor() : descriptor;
     }
@@ -635,8 +635,8 @@ public class BaseImageService extends BaseResourceService implements ImageServic
     }
 
     private String getImageLink(String value) {
-        if (value.startsWith(DataConstants.TB_IMAGE_PREFIX + "/api/images")) {
-            return StringUtils.removeStart(value, DataConstants.TB_IMAGE_PREFIX);
+        if (value.startsWith(DataConstants.JNKS_IOT_IMAGE_PREFIX + "/api/images")) {
+            return StringUtils.removeStart(value, DataConstants.JNKS_IOT_IMAGE_PREFIX);
         } else {
             return null;
         }

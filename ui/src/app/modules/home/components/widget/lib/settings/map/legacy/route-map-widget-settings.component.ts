@@ -6,7 +6,7 @@ import { AppState } from '@core/core.state';
 import { defaultMapSettings } from 'src/app/modules/home/components/widget/lib/maps-legacy/map-models';
 
 @Component({
-  selector: 'tb-route-map-widget-settings',
+  selector: 'jnks-iot-route-map-widget-settings',
   templateUrl: './route-map-widget-settings.component.html',
   styleUrls: ['./../../widget-settings.scss']
 })

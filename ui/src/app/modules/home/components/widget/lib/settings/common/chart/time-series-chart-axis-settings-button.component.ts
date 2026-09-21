@@ -1,7 +1,7 @@
 import { Component, forwardRef, Input, OnInit, Renderer2, ViewContainerRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { coerceBoolean } from '@shared/decorators/coercion';
 import { TimeSeriesChartAxisSettings } from '@home/components/widget/lib/chart/time-series-chart.models';
 import {
@@ -9,7 +9,7 @@ import {
 } from '@home/components/widget/lib/settings/common/chart/time-series-chart-axis-settings-panel.component';
 
 @Component({
-  selector: 'tb-time-series-chart-axis-settings-button',
+  selector: 'jnks-iot-time-series-chart-axis-settings-button',
   templateUrl: './time-series-chart-axis-settings-button.component.html',
   styleUrls: [],
   providers: [
@@ -39,7 +39,7 @@ export class TimeSeriesChartAxisSettingsButtonComponent implements OnInit, Contr
 
   private propagateChange = null;
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef) {}
 
@@ -83,8 +83,8 @@ export class TimeSeriesChartAxisSettingsButtonComponent implements OnInit, Contr
         },
         isModal: true
       });
-      axisSettingsPanelPopover.tbComponentRef.instance.popover = axisSettingsPanelPopover;
-      axisSettingsPanelPopover.tbComponentRef.instance.axisSettingsApplied.subscribe((axisSettings) => {
+      axisSettingsPanelPopover.jnksIotComponentRef.instance.popover = axisSettingsPanelPopover;
+      axisSettingsPanelPopover.jnksIotComponentRef.instance.axisSettingsApplied.subscribe((axisSettings) => {
         axisSettingsPanelPopover.hide();
         this.modelValue = axisSettings;
         this.propagateChange(this.modelValue);

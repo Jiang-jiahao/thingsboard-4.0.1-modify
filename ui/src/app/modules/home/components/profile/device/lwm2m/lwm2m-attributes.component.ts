@@ -9,7 +9,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-profile-lwm2m-attributes',
+  selector: 'jnks-iot-profile-lwm2m-attributes',
   templateUrl: './lwm2m-attributes.component.html',
   styleUrls: [],
   providers: [{
@@ -122,7 +122,7 @@ export class Lwm2mAttributesComponent implements ControlValueAccessor, OnDestroy
     }
     this.dialog.open<Lwm2mAttributesDialogComponent, Lwm2mAttributesDialogData, AttributesNameValueMap>(Lwm2mAttributesDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         readonly: this.disabled,
         attributes: this.attributesValueMap,

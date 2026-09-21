@@ -7,7 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { isEqual } from '@core/utils';
 
 @Component({
-  selector: 'tb-quick-time-interval',
+  selector: 'jnks-iot-quick-time-interval',
   templateUrl: './quick-time-interval.component.html',
   styleUrls: ['./quick-time-interval.component.scss'],
   providers: [

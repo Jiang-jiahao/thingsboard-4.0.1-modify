@@ -1,4 +1,4 @@
-<div class="tb-map-timeline-panel" [class.col]="column">
+<div class="jnks-iot-map-timeline-panel" [class.col]="column">
   @if(hasData) {
     <mat-slider
       [disabled]="disabled"
@@ -6,43 +6,43 @@
       [max]="maxTimeIndex">
       <input matSliderThumb [(ngModel)]="index" (input)="onIndexChange(ngSliderThumb.value)" #ngSliderThumb="matSliderThumb">
     </mat-slider>
-    <div class="tb-timeline-controls">
+    <div class="jnks-iot-timeline-controls">
       <div class="flex flex-1 flex-row items-center justify-start">
-        <div class="tb-map-timeline-timestamp" *ngIf="settings.showTimestamp" [innerHTML]="timestampFormat.formatted"></div>
+        <div class="jnks-iot-map-timeline-timestamp" *ngIf="settings.showTimestamp" [innerHTML]="timestampFormat.formatted"></div>
       </div>
-      <div class="tb-timeline-buttons flex flex-1 flex-row items-center justify-center gap-3">
+      <div class="jnks-iot-timeline-buttons flex flex-1 flex-row items-center justify-center gap-3">
         <button mat-mini-fab color="primary"
                 [disabled]="index === minTimeIndex"
-                class="tb-timeline-button-32 tb-primary-fill"
+                class="jnks-iot-timeline-button-32 jnks-iot-primary-fill"
                 (click)="fastRewind()">
           <mat-icon>fast_rewind</mat-icon>
         </button>
         <button mat-mini-fab color="primary"
                 [disabled]="index === minTimeIndex"
-                class="tb-timeline-button-32 tb-primary-fill"
+                class="jnks-iot-timeline-button-32 jnks-iot-primary-fill"
                 (click)="movePrev()">
           <mat-icon>skip_previous</mat-icon>
         </button>
         @if(playing) {
-          <button mat-mini-fab color="primary" class="tb-primary-fill" (click)="pause()">
+          <button mat-mini-fab color="primary" class="jnks-iot-primary-fill" (click)="pause()">
             <mat-icon>pause</mat-icon>
           </button>
         } @else {
           <button mat-mini-fab color="primary"
                   [disabled]="index === maxTimeIndex"
-                  class="tb-primary-fill" (click)="play()">
+                  class="jnks-iot-primary-fill" (click)="play()">
             <mat-icon>play_arrow</mat-icon>
           </button>
         }
         <button mat-mini-fab color="primary"
                 [disabled]="index === maxTimeIndex"
-                class="tb-timeline-button-32 tb-primary-fill"
+                class="jnks-iot-timeline-button-32 jnks-iot-primary-fill"
                 (click)="moveNext()">
           <mat-icon>skip_next</mat-icon>
         </button>
         <button mat-mini-fab color="primary"
                 [disabled]="index === maxTimeIndex"
-                class="tb-timeline-button-32 tb-primary-fill"
+                class="jnks-iot-timeline-button-32 jnks-iot-primary-fill"
                 (click)="fastForward()">
           <mat-icon>fast_forward</mat-icon>
         </button>
@@ -55,6 +55,6 @@
       </div>
     </div>
   } @else {
-    <div class="tb-map-timeline-no-data flex flex-1 items-center justify-center" translate>widgets.maps.timeline.no-trips-data-available</div>
+    <div class="jnks-iot-map-timeline-no-data flex flex-1 items-center justify-center" translate>widgets.maps.timeline.no-trips-data-available</div>
   }
 </div>

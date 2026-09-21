@@ -23,8 +23,8 @@ import com.jnks.iot.server.transport.lwm2m.server.LwM2mTransportServerHelper;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClient;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClientContext;
 import com.jnks.iot.server.transport.lwm2m.server.downlink.LwM2mDownlinkMsgHandler;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteReplaceRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteResponseCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteReplaceRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteResponseCallback;
 import com.jnks.iot.server.transport.lwm2m.server.log.LwM2MTelemetryLogService;
 import com.jnks.iot.server.transport.lwm2m.server.ota.LwM2MOtaUpdateService;
 import com.jnks.iot.server.transport.lwm2m.server.uplink.LwM2mUplinkMsgHandler;
@@ -229,8 +229,8 @@ public class DefaultLwM2MAttributesService implements LwM2MAttributesService {
             logService.log(lwM2MClient, logMsg);
             log.error("Failed update resource [{}] [{}]", versionedId, "null");
         } else if ((oldValue == null) || !valueEquals(newValue, oldValue)) {
-            TbLwM2MWriteReplaceRequest request = TbLwM2MWriteReplaceRequest.builder().versionedId(versionedId).value(newValue).timeout(clientContext.getRequestTimeout(lwM2MClient)).build();
-            downlinkHandler.sendWriteReplaceRequest(lwM2MClient, request, new TbLwM2MWriteResponseCallback(uplinkHandler, logService, lwM2MClient, versionedId) {
+            JnksIotLwM2MWriteReplaceRequest request = JnksIotLwM2MWriteReplaceRequest.builder().versionedId(versionedId).value(newValue).timeout(clientContext.getRequestTimeout(lwM2MClient)).build();
+            downlinkHandler.sendWriteReplaceRequest(lwM2MClient, request, new JnksIotLwM2MWriteResponseCallback(uplinkHandler, logService, lwM2MClient, versionedId) {
                 @Override
                 public void onSuccess(WriteRequest request, WriteResponse response) {
                     client.getSharedAttributes().put(versionedId, tsKvProto);
@@ -260,8 +260,8 @@ public class DefaultLwM2MAttributesService implements LwM2MAttributesService {
         }
 
         if (newValues.size() > 0) {
-            TbLwM2MWriteReplaceRequest request = TbLwM2MWriteReplaceRequest.builder().versionedId(versionedId).value(newValues).timeout(this.config.getTimeout()).build();
-            downlinkHandler.sendWriteReplaceRequest(client, request, new TbLwM2MWriteResponseCallback(uplinkHandler, logService, client, versionedId) {
+            JnksIotLwM2MWriteReplaceRequest request = JnksIotLwM2MWriteReplaceRequest.builder().versionedId(versionedId).value(newValues).timeout(this.config.getTimeout()).build();
+            downlinkHandler.sendWriteReplaceRequest(client, request, new JnksIotLwM2MWriteResponseCallback(uplinkHandler, logService, client, versionedId) {
                 @Override
                 public void onSuccess(WriteRequest request, WriteResponse response) {
                     client.getSharedAttributes().put(versionedId, tsKvProto);

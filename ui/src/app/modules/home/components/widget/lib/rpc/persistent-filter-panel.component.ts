@@ -11,7 +11,7 @@ export interface PersistentFilterPanelData {
 }
 
 @Component({
-  selector: 'tb-persistent-filter-panel',
+  selector: 'jnks-iot-persistent-filter-panel',
   templateUrl: './persistent-filter-panel.component.html',
   styleUrls: ['./persistent-filter-panel.component.scss']
 })

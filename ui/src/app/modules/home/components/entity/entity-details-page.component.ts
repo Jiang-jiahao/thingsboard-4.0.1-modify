@@ -21,7 +21,7 @@ import { DialogService } from '@core/services/dialog.service';
 import { IEntityDetailsPageComponent } from '@home/models/entity/entity-details-page-component.models';
 
 @Component({
-  selector: 'tb-entity-details-page',
+  selector: 'jnks-iot-entity-details-page',
   templateUrl: './entity-details-page.component.html',
   styleUrls: ['./entity-details-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -50,7 +50,7 @@ export class EntityDetailsPageComponent extends EntityDetailsPanelComponent impl
     return this.entitiesTableConfigValue;
   }
 
-  @HostBinding('class') 'tb-absolute-fill';
+  @HostBinding('class') 'jnks-iot-absolute-fill';
 
   constructor(private route: ActivatedRoute,
               private router: Router,

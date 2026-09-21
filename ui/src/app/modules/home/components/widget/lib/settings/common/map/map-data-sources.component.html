@@ -1,17 +1,17 @@
-<div class="tb-form-panel no-padding no-border">
-  <div class="tb-form-table tb-map-data-sources">
-    <div class="tb-form-table-header no-padding-right">
-      <div class="tb-form-table-header-cell tb-source-header" translate>widgets.maps.data-layer.source</div>
-      <div class="tb-form-table-header-cell tb-filter-header" translate>widgets.maps.data-layer.filter</div>
-      <div class="tb-form-table-header-cell tb-actions-header"></div>
+<div class="jnks-iot-form-panel no-padding no-border">
+  <div class="jnks-iot-form-table jnks-iot-map-data-sources">
+    <div class="jnks-iot-form-table-header no-padding-right">
+      <div class="jnks-iot-form-table-header-cell jnks-iot-source-header" translate>widgets.maps.data-layer.source</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-filter-header" translate>widgets.maps.data-layer.filter</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-actions-header"></div>
     </div>
-    <div *ngIf="dataSourcesFormArray().controls.length; else noDataSources" class="tb-form-table-body">
+    <div *ngIf="dataSourcesFormArray().controls.length; else noDataSources" class="jnks-iot-form-table-body">
       <div *ngFor="let dataSourceControl of dataSourcesFormArray().controls; trackBy: trackByDataSource; let $index = index;">
-        <tb-map-data-source-row class="flex-1"
+        <jnks-iot-map-data-source-row class="flex-1"
                                 [context]="context"
                                 [formControl]="dataSourceControl"
                                 (dataSourceRemoved)="removeDataSource($index)">
-        </tb-map-data-source-row>
+        </jnks-iot-map-data-source-row>
       </div>
     </div>
   </div>
@@ -22,5 +22,5 @@
   </div>
 </div>
 <ng-template #noDataSources>
-  <span class="tb-prompt flex items-center justify-center">{{ 'widgets.maps.data-layer.no-datasources' | translate }}</span>
+  <span class="jnks-iot-prompt flex items-center justify-center">{{ 'widgets.maps.data-layer.no-datasources' | translate }}</span>
 </ng-template>

@@ -24,7 +24,7 @@ import { getEntityDetailsPageURL, isDefinedAndNotNull, isEqual } from '@core/uti
 import { coerceArray, coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-entity-autocomplete',
+  selector: 'jnks-iot-entity-autocomplete',
   templateUrl: './entity-autocomplete.component.html',
   styleUrls: [],
   providers: [{

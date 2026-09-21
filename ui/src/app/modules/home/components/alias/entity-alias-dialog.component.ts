@@ -30,7 +30,7 @@ export interface EntityAliasDialogData {
 }
 
 @Component({
-  selector: 'tb-entity-alias-dialog',
+  selector: 'jnks-iot-entity-alias-dialog',
   templateUrl: './entity-alias-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: EntityAliasDialogComponent}],
   styleUrls: ['./entity-alias-dialog.component.scss']

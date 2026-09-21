@@ -431,7 +431,7 @@ export class EntityService {
         pageLink.sortOrder.property = 'name';
         entitiesObservable = this.notificationService.getNotificationRules(pageLink, config);
         break;
-      case EntityType.TB_RESOURCE:
+      case EntityType.JNKS_IOT_RESOURCE:
         pageLink.sortOrder.property = 'title';
         entitiesObservable = this.resourceService.getTenantResources(pageLink, config);
         break;

@@ -7,19 +7,19 @@ import { ScriptLanguage } from '@shared/models/rule-node.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-script-lang',
+  selector: 'jnks-iot-script-lang',
   templateUrl: './script-lang.component.html',
   styleUrls: ['./script-lang.component.scss'],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => TbScriptLangComponent),
+      useExisting: forwardRef(() => JnksIotScriptLangComponent),
       multi: true
     }
   ],
   encapsulation: ViewEncapsulation.None
 })
-export class TbScriptLangComponent extends PageComponent implements ControlValueAccessor, OnInit {
+export class JnksIotScriptLangComponent extends PageComponent implements ControlValueAccessor, OnInit {
 
   scriptLangFormGroup: UntypedFormGroup;
 

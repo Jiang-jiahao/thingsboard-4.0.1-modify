@@ -12,8 +12,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-import com.jnks.iot.server.cache.TbCacheValueWrapper;
-import com.jnks.iot.server.cache.VersionedTbCache;
+import com.jnks.iot.server.cache.JnksIotCacheValueWrapper;
+import com.jnks.iot.server.cache.VersionedJnksIotCache;
 import com.jnks.iot.server.common.data.AttributeScope;
 import com.jnks.iot.server.common.data.ObjectType;
 import com.jnks.iot.server.common.data.StringUtils;
@@ -23,7 +23,7 @@ import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.kv.AttributeKvEntry;
 import com.jnks.iot.server.common.data.kv.BaseAttributeKvEntry;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.common.msg.edqs.EdqsService;
 import com.jnks.iot.server.common.stats.DefaultCounter;
 import com.jnks.iot.server.common.stats.StatsFactory;
@@ -59,7 +59,7 @@ public class CachedAttributesService implements AttributesService {
     private final EdqsService edqsService;
     private final DefaultCounter hitCounter;
     private final DefaultCounter missCounter;
-    private final VersionedTbCache<AttributeCacheKey, AttributeKvEntry> cache;
+    private final VersionedJnksIotCache<AttributeCacheKey, AttributeKvEntry> cache;
     private ListeningExecutorService cacheExecutor;
 
     @Value("${cache.type:caffeine}")
@@ -71,7 +71,7 @@ public class CachedAttributesService implements AttributesService {
                                    JpaExecutorService jpaExecutorService,
                                    @Lazy EdqsService edqsService, StatsFactory statsFactory,
                                    CacheExecutorService cacheExecutorService,
-                                   VersionedTbCache<AttributeCacheKey, AttributeKvEntry> cache) {
+                                   VersionedJnksIotCache<AttributeCacheKey, AttributeKvEntry> cache) {
         this.attributesDao = attributesDao;
         this.jpaExecutorService = jpaExecutorService;
         this.edqsService = edqsService;
@@ -108,7 +108,7 @@ public class CachedAttributesService implements AttributesService {
 
         return cacheExecutor.submit(() -> {
             AttributeCacheKey attributeCacheKey = new AttributeCacheKey(scope, entityId, attributeKey);
-            TbCacheValueWrapper<AttributeKvEntry> cachedAttributeValue = cache.get(attributeCacheKey);
+            JnksIotCacheValueWrapper<AttributeKvEntry> cachedAttributeValue = cache.get(attributeCacheKey);
             if (cachedAttributeValue != null) {
                 hitCounter.increment();
                 AttributeKvEntry cachedAttributeKvEntry = cachedAttributeValue.get();
@@ -133,7 +133,7 @@ public class CachedAttributesService implements AttributesService {
                 wrappedCachedAttributes -> {
 
                     List<AttributeKvEntry> cachedAttributes = wrappedCachedAttributes.values().stream()
-                            .map(TbCacheValueWrapper::get)
+                            .map(JnksIotCacheValueWrapper::get)
                             .filter(Objects::nonNull)
                             .collect(Collectors.toList());
                     if (wrappedCachedAttributes.size() == attributeKeys.size()) {
@@ -166,8 +166,8 @@ public class CachedAttributesService implements AttributesService {
                 }, MoreExecutors.directExecutor()); // cacheExecutor analyse and returns results or submit to DB executor
     }
 
-    private Map<String, TbCacheValueWrapper<AttributeKvEntry>> findCachedAttributes(EntityId entityId, AttributeScope scope, Collection<String> attributeKeys) {
-        Map<String, TbCacheValueWrapper<AttributeKvEntry>> cachedAttributes = new HashMap<>();
+    private Map<String, JnksIotCacheValueWrapper<AttributeKvEntry>> findCachedAttributes(EntityId entityId, AttributeScope scope, Collection<String> attributeKeys) {
+        Map<String, JnksIotCacheValueWrapper<AttributeKvEntry>> cachedAttributes = new HashMap<>();
         for (String attributeKey : attributeKeys) {
             var cachedAttributeValue = cache.get(new AttributeCacheKey(scope, entityId, attributeKey));
             if (cachedAttributeValue != null) {
@@ -246,7 +246,7 @@ public class CachedAttributesService implements AttributesService {
     @Override
     public ListenableFuture<List<String>> removeAll(TenantId tenantId, EntityId entityId, AttributeScope scope, List<String> attributeKeys) {
         validate(entityId, scope);
-        List<ListenableFuture<TbPair<String, Long>>> futures = attributesDao.removeAllWithVersions(tenantId, entityId, scope, attributeKeys);
+        List<ListenableFuture<JnksIotPair<String, Long>>> futures = attributesDao.removeAllWithVersions(tenantId, entityId, scope, attributeKeys);
         return Futures.allAsList(futures.stream().map(future -> Futures.transform(future, keyVersionPair -> {
             String key = keyVersionPair.getFirst();
             Long version = keyVersionPair.getSecond();

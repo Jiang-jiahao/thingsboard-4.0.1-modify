@@ -22,7 +22,7 @@ import { generateSecret, isDefinedAndNotNull } from '@core/utils';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-device-credentials',
+  selector: 'jnks-iot-device-credentials',
   templateUrl: './device-credentials.component.html',
   providers: [
     {

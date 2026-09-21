@@ -9,7 +9,7 @@ import {
 } from '@shared/models/rule-node.models';
 
 @Component({
-    selector: 'tb-action-node-device-state-config',
+    selector: 'jnks-iot-action-node-device-state-config',
     templateUrl: './device-state-config.component.html',
     styleUrls: []
 })

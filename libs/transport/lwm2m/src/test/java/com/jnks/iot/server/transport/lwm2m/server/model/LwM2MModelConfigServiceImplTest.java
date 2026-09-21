@@ -2,7 +2,7 @@ package com.jnks.iot.server.transport.lwm2m.server.model;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import com.jnks.iot.server.transport.lwm2m.server.store.TbLwM2MModelConfigStore;
+import com.jnks.iot.server.transport.lwm2m.server.store.JnksIotLwM2MModelConfigStore;
 
 import java.util.Collections;
 import java.util.List;
@@ -15,12 +15,12 @@ import static org.mockito.Mockito.mock;
 class LwM2MModelConfigServiceImplTest {
 
     LwM2MModelConfigServiceImpl service;
-    TbLwM2MModelConfigStore modelStore;
+    JnksIotLwM2MModelConfigStore modelStore;
 
     @BeforeEach
     void setUp() {
         service = new LwM2MModelConfigServiceImpl();
-        modelStore = mock(TbLwM2MModelConfigStore.class);
+        modelStore = mock(JnksIotLwM2MModelConfigStore.class);
         service.modelStore = modelStore;
     }
 

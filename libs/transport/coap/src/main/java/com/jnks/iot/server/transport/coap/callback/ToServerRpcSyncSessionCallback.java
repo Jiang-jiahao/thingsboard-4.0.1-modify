@@ -6,12 +6,12 @@ import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import com.jnks.iot.server.common.adaptor.AdaptorException;
 import com.jnks.iot.server.gen.transport.TransportProtos;
-import com.jnks.iot.server.transport.coap.client.TbCoapClientState;
+import com.jnks.iot.server.transport.coap.client.JnksIotCoapClientState;
 
 @Slf4j
 public class ToServerRpcSyncSessionCallback extends AbstractSyncSessionCallback {
 
-    public ToServerRpcSyncSessionCallback(TbCoapClientState state, CoapExchange exchange, Request request) {
+    public ToServerRpcSyncSessionCallback(JnksIotCoapClientState state, CoapExchange exchange, Request request) {
         super(state, exchange, request);
     }
 

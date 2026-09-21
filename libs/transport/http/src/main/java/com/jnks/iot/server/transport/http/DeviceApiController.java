@@ -35,7 +35,7 @@ import com.jnks.iot.server.common.data.device.profile.DeviceProfileRpcBindingTyp
 import com.jnks.iot.server.common.data.device.profile.DeviceProfileRpcMethod;
 import com.jnks.iot.server.common.data.transport.http.HttpPullDeviceRoutingConfiguration;
 import com.jnks.iot.server.common.data.transport.http.HttpPullRoutingMode;
-import com.jnks.iot.server.common.data.TbTransportService;
+import com.jnks.iot.server.common.data.JnksIotTransportService;
 import com.jnks.iot.server.common.data.id.DeviceId;
 import com.jnks.iot.server.common.data.id.DeviceProfileId;
 import com.jnks.iot.server.common.data.ota.OtaPackageType;
@@ -78,7 +78,7 @@ import java.util.function.Consumer;
 @RestController
 @RequestMapping("/api/v1")
 @Slf4j
-public class DeviceApiController implements TbTransportService {
+public class DeviceApiController implements JnksIotTransportService {
 
     private static final String MARKDOWN_CODE_BLOCK_START = "\n\n```json\n";
     private static final String MARKDOWN_CODE_BLOCK_END = "\n```\n\n";

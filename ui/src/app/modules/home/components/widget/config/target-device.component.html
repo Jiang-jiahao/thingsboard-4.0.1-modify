@@ -1,21 +1,21 @@
-<div [formGroup]="targetDeviceFormGroup" class="tb-form-panel">
+<div [formGroup]="targetDeviceFormGroup" class="jnks-iot-form-panel">
   <div class="flex flex-row items-center justify-between">
-    <div class="tb-form-panel-title" translate>widget-config.target-device</div>
-    <tb-toggle-select formControlName="type">
-      <tb-toggle-option [value]="targetDeviceType.device">{{ 'device.device' | translate }}</tb-toggle-option>
-      <tb-toggle-option [value]="targetDeviceType.entity">{{ 'entity.entity-alias' | translate }}</tb-toggle-option>
-    </tb-toggle-select>
+    <div class="jnks-iot-form-panel-title" translate>widget-config.target-device</div>
+    <jnks-iot-toggle-select formControlName="type">
+      <jnks-iot-toggle-option [value]="targetDeviceType.device">{{ 'device.device' | translate }}</jnks-iot-toggle-option>
+      <jnks-iot-toggle-option [value]="targetDeviceType.entity">{{ 'entity.entity-alias' | translate }}</jnks-iot-toggle-option>
+    </jnks-iot-toggle-select>
   </div>
-  <tb-entity-autocomplete *ngIf="targetDeviceFormGroup.get('type').value === targetDeviceType.device"
+  <jnks-iot-entity-autocomplete *ngIf="targetDeviceFormGroup.get('type').value === targetDeviceType.device"
                           [required]="(!widgetEditMode && !targetDeviceOptional)"
                           [entityType]="entityType.DEVICE"
                           formControlName="deviceId">
-  </tb-entity-autocomplete>
-  <tb-entity-alias-select
+  </jnks-iot-entity-autocomplete>
+  <jnks-iot-entity-alias-select
     *ngIf="targetDeviceFormGroup.get('type').value === targetDeviceType.entity"
-    [tbRequired]="(!widgetEditMode && !targetDeviceOptional)"
+    [jnksIotRequired]="(!widgetEditMode && !targetDeviceOptional)"
     [aliasController]="aliasController"
     [callbacks]="entityAliasSelectCallbacks"
     formControlName="entityAliasId">
-  </tb-entity-alias-select>
+  </jnks-iot-entity-alias-select>
 </div>

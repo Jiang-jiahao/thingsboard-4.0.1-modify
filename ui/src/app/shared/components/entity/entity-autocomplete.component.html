@@ -1,7 +1,7 @@
 <mat-form-field [formGroup]="selectEntityFormGroup"
-                [class.tb-inline-field]="inlineField"
+                [class.jnks-iot-inline-field]="inlineField"
                 [class.flex]="inlineField"
-                [class.tb-suffix-absolute]="inlineField && !selectEntityFormGroup.get('entity').value"
+                [class.jnks-iot-suffix-absolute]="inlineField && !selectEntityFormGroup.get('entity').value"
                 class="mat-block"
                 [appearance]="inlineField ? 'outline' : appearance"
                 [subscriptSizing]="inlineField ? 'dynamic' : subscriptSizing"
@@ -32,14 +32,14 @@
   </button>
   <mat-icon matSuffix
             matTooltipPosition="above"
-            matTooltipClass="tb-error-tooltip"
+            matTooltipClass="jnks-iot-error-tooltip"
             [matTooltip]="requiredErrorText | translate"
             *ngIf="inlineField && selectEntityFormGroup.get('entity').hasError('required')
                             && selectEntityFormGroup.get('entity').touched"
-            class="tb-error">
+            class="jnks-iot-error">
     warning
   </mat-icon>
-  <mat-autocomplete class="tb-autocomplete"
+  <mat-autocomplete class="jnks-iot-autocomplete"
                     #entityAutocomplete="matAutocomplete"
                     [displayWith]="displayEntityFn">
     <mat-option *ngFor="let entity of filteredEntities | async" [value]="entity">

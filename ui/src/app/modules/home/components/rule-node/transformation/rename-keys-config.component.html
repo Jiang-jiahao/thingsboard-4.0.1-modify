@@ -1,15 +1,15 @@
-<section [formGroup]="renameKeysConfigForm" class="tb-form-panel stroked">
-  <div class="tb-form-panel-title" translate>rule-node-config.rename-keys-in</div>
+<section [formGroup]="renameKeysConfigForm" class="jnks-iot-form-panel stroked">
+  <div class="jnks-iot-form-panel-title" translate>rule-node-config.rename-keys-in</div>
   <div class="fx-centered">
     <div class="fetch-to-data-toggle">
-      <tb-toggle-select class="fetch-to-data-toggle" formControlName="renameIn" appearance="fill">
-        <tb-toggle-option *ngFor="let data of renameIn" [value]="data.value">
+      <jnks-iot-toggle-select class="fetch-to-data-toggle" formControlName="renameIn" appearance="fill">
+        <jnks-iot-toggle-option *ngFor="let data of renameIn" [value]="data.value">
           {{ data.name }}
-        </tb-toggle-option>
-      </tb-toggle-select>
+        </jnks-iot-toggle-option>
+      </jnks-iot-toggle-select>
     </div>
   </div>
-  <tb-kv-map-config
+  <jnks-iot-kv-map-config
     required
     labelText="{{ translation.get(renameKeysConfigForm.get('renameIn').value) | translate }} {{'rule-node-config.keys-mapping' | translate}}"
     formControlName="renameKeysMapping"
@@ -19,5 +19,5 @@
     keyRequiredText="{{'rule-node-config.key-name-required' | translate}}"
     valText="{{'rule-node-config.new-key-name' | translate}}"
     valRequiredText="{{'rule-node-config.new-key-name-required' | translate}}">
-  </tb-kv-map-config>
+  </jnks-iot-kv-map-config>
 </section>

@@ -13,7 +13,7 @@ import { EntityService } from '@core/http/entity.service';
 import { BaseData, HasId } from '@shared/models/base-data';
 import { HasTenantId } from '@shared/models/entity.models';
 import { map } from 'rxjs/operators';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 
 interface ReferencedEntityInfo {
   entity: BaseData<HasId> & HasTenantId;
@@ -31,7 +31,7 @@ type ReferencedEntities = {[tenantId: string]: TenantReferencedEntities};
 type ReferencedEntitiesEntry = [string, TenantReferencedEntities];
 
 @Component({
-  selector: 'tb-image-references',
+  selector: 'jnks-iot-image-references',
   templateUrl: './image-references.component.html',
   styleUrls: ['./image-references.component.scss']
 })
@@ -40,7 +40,7 @@ export class ImageReferencesComponent implements OnInit {
   @Input()
   references: ResourceReferences;
 
-  popoverComponent: TbPopoverComponent<ImageReferencesComponent>;
+  popoverComponent: JnksIotPopoverComponent<ImageReferencesComponent>;
 
   contentReady = false;
 

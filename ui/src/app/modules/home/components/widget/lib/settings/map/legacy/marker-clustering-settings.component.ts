@@ -18,7 +18,7 @@ import { WidgetService } from '@core/http/widget.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-marker-clustering-settings',
+  selector: 'jnks-iot-marker-clustering-settings',
   templateUrl: './marker-clustering-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

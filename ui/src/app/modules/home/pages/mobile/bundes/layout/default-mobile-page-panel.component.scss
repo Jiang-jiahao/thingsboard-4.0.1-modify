@@ -1,6 +1,6 @@
 @import '../scss/constants';
 
-.tb-default-mobile-page-panel {
+.jnks-iot-default-mobile-page-panel {
   width: 500px;
   display: flex;
   flex-direction: column;
@@ -9,20 +9,20 @@
   @media #{$mat-lt-md} {
     width: 90vw;
   }
-  .tb-default-mobile-page-title-container {
+  .jnks-iot-default-mobile-page-title-container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
   }
-  .tb-default-mobile-page-title {
+  .jnks-iot-default-mobile-page-title {
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
     color: rgba(0, 0, 0, 0.87);
   }
-  .tb-default-mobile-page-panel-content {
+  .jnks-iot-default-mobile-page-panel-content {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -30,7 +30,7 @@
     margin: -10px;
     padding: 10px;
   }
-  .tb-default-mobile-page-panel-buttons {
+  .jnks-iot-default-mobile-page-panel-buttons {
     height: 40px;
     display: flex;
     flex-direction: row;

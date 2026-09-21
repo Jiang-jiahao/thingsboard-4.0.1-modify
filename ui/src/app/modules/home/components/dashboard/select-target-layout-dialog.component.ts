@@ -7,7 +7,7 @@ import { DialogComponent } from '@app/shared/components/dialog.component';
 import { DashboardLayoutId } from '@app/shared/models/dashboard.models';
 
 @Component({
-  selector: 'tb-select-target-layout-dialog',
+  selector: 'jnks-iot-select-target-layout-dialog',
   templateUrl: './select-target-layout-dialog.component.html',
   styleUrls: ['./layout-button.scss']
 })

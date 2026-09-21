@@ -60,7 +60,7 @@ export const dataKeyRowValidator = (control: AbstractControl): ValidationErrors 
 };
 
 @Component({
-  selector: 'tb-data-key-row',
+  selector: 'jnks-iot-data-key-row',
   templateUrl: './data-key-row.component.html',
   styleUrls: ['./data-key-row.component.scss', '../../../lib/settings/common/key/data-keys.component.scss'],
   providers: [
@@ -304,7 +304,7 @@ export class DataKeyRowComponent implements ControlValueAccessor, OnInit, OnChan
     this.dialog.open<DataKeyConfigDialogComponent, DataKeyConfigDialogData, DataKey>(DataKeyConfigDialogComponent,
       {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           dataKey: deepClone(this.modelValue),
           dataKeyConfigMode: advanced ? DataKeyConfigMode.advanced : DataKeyConfigMode.general,

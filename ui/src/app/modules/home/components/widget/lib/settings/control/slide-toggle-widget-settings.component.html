@@ -1,4 +1,4 @@
-<section class="tb-widget-settings flex flex-col" [formGroup]="slideToggleWidgetSettingsForm">
+<section class="jnks-iot-widget-settings flex flex-col" [formGroup]="slideToggleWidgetSettingsForm">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.rpc.common-settings</legend>
     <mat-form-field class="mat-block flex-1">
@@ -33,8 +33,8 @@
       </mat-form-field>
     </section>
   </fieldset>
-  <tb-switch-rpc-settings [aliasController]="aliasController"
+  <jnks-iot-switch-rpc-settings [aliasController]="aliasController"
                           [targetDevice]="targetDevice"
                           formControlName="switchRpcSettings">
-  </tb-switch-rpc-settings>
+  </jnks-iot-switch-rpc-settings>
 </section>

@@ -14,7 +14,7 @@ import {
 } from '@home/components/widget/config/timewindow-config-panel.component';
 
 @Component({
-  selector: 'tb-timeseries-table-basic-config',
+  selector: 'jnks-iot-timeseries-table-basic-config',
   templateUrl: './timeseries-table-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

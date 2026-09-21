@@ -15,7 +15,7 @@ import { defaultFormPropertyValue, FormProperty } from '@shared/models/dynamic-f
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 
 @Component({
-  selector: 'tb-dynamic-form-array',
+  selector: 'jnks-iot-dynamic-form-array',
   templateUrl: './dynamic-form-array.component.html',
   styleUrls: ['./dynamic-form-array.component.scss'],
   providers: [

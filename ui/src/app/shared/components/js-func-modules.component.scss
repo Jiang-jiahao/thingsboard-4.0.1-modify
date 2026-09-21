@@ -1,6 +1,6 @@
 @import '../../../scss/constants';
 
-.tb-js-func-modules-panel {
+.jnks-iot-js-func-modules-panel {
   width: 540px;
   display: flex;
   flex-direction: column;
@@ -8,7 +8,7 @@
   @media #{$mat-lt-md} {
     width: 90vw;
   }
-  .tb-js-func-modules-panel-content {
+  .jnks-iot-js-func-modules-panel-content {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -16,14 +16,14 @@
     margin: -10px;
     padding: 10px;
   }
-  .tb-js-func-modules-panel-title {
+  .jnks-iot-js-func-modules-panel-title {
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
     color: rgba(0, 0, 0, 0.87);
   }
-  .tb-js-func-modules-panel-buttons {
+  .jnks-iot-js-func-modules-panel-buttons {
     height: 40px;
     display: flex;
     flex-direction: row;
@@ -31,27 +31,27 @@
     justify-content: flex-end;
     align-items: flex-end;
   }
-  .tb-js-func-modules {
+  .jnks-iot-js-func-modules {
     flex: 1;
     margin: 12px;
-    .tb-form-table-header-cell {
-      &.tb-alias-header {
+    .jnks-iot-form-table-header-cell {
+      &.jnks-iot-alias-header {
         flex: 1 1 25%;
       }
-      &.tb-module-link-header {
+      &.jnks-iot-module-link-header {
         flex: 1 1 75%;
       }
-      &.tb-actions-header {
+      &.jnks-iot-actions-header {
         width: 120px;
         min-width: 120px;
       }
     }
-    .tb-form-table {
+    .jnks-iot-form-table {
       overflow: hidden;
     }
-    .tb-form-table-body {
+    .jnks-iot-form-table-body {
       overflow: auto;
-      tb-js-func-module-row {
+      jnks-iot-js-func-module-row {
         overflow: hidden;
       }
     }

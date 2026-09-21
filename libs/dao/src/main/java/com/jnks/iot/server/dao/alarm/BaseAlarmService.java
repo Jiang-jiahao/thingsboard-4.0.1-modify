@@ -44,7 +44,7 @@ import com.jnks.iot.server.common.data.relation.EntityRelation;
 import com.jnks.iot.server.common.data.relation.EntityRelationsQuery;
 import com.jnks.iot.server.common.data.relation.EntitySearchDirection;
 import com.jnks.iot.server.common.data.relation.RelationsSearchParameters;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.dao.entity.AbstractCachedEntityService;
 import com.jnks.iot.server.dao.entity.EntityService;
 import com.jnks.iot.server.dao.eventsourcing.ActionEntityEvent;
@@ -294,14 +294,14 @@ public class BaseAlarmService extends AbstractCachedEntityService<TenantId, Page
     }
 
     @Override
-    public List<TbPair<UUID, Long>> findAlarmIdsByAssigneeId(TenantId tenantId, UserId userId, long createdTimeOffset, AlarmId idOffset, int limit) {
+    public List<JnksIotPair<UUID, Long>> findAlarmIdsByAssigneeId(TenantId tenantId, UserId userId, long createdTimeOffset, AlarmId idOffset, int limit) {
         log.trace("[{}] Executing findAlarmIdsByAssigneeId [{}][{}]", tenantId, userId, idOffset);
         validateId(userId, id -> "Incorrect userId " + id);
         return alarmDao.findAlarmIdsByAssigneeId(tenantId, userId, createdTimeOffset, idOffset, limit).getData();
     }
 
     @Override
-    public List<TbPair<UUID, Long>> findAlarmIdsByOriginatorId(TenantId tenantId, EntityId originatorId, long createdTimeOffset, AlarmId idOffset, int limit) {
+    public List<JnksIotPair<UUID, Long>> findAlarmIdsByOriginatorId(TenantId tenantId, EntityId originatorId, long createdTimeOffset, AlarmId idOffset, int limit) {
         log.trace("[{}] Executing findAlarmIdsByOriginatorIdAndIdOffset [{}][{}]", tenantId, originatorId, idOffset);
         return alarmDao.findAlarmIdsByOriginatorId(tenantId, originatorId, createdTimeOffset, idOffset, limit).getData();
     }

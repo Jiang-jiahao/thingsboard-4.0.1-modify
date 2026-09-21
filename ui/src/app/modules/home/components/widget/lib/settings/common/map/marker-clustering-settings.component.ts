@@ -15,7 +15,7 @@ import { MarkerClusteringSettings } from '@shared/models/widget/maps/map.models'
 import { merge } from 'rxjs';
 
 @Component({
-  selector: 'tb-marker-clustering-settings',
+  selector: 'jnks-iot-marker-clustering-settings',
   templateUrl: './marker-clustering-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

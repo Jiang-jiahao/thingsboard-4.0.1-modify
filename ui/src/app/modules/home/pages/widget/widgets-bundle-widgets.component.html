@@ -1,4 +1,4 @@
-<mat-card appearance="outlined" class="tb-bundle-widgets-card">
+<mat-card appearance="outlined" class="jnks-iot-bundle-widgets-card">
   <mat-card-header>
     <mat-card-title>
       <div class="title-container">
@@ -40,15 +40,15 @@
   </mat-progress-bar>
   <div style="height: 4px;" *ngIf="(isLoading$ | async) === false"></div>
   <mat-card-content>
-    <div class="tb-drop-list tb-bundle-widgets-container" cdkDropList cdkDropListOrientation="vertical"
+    <div class="jnks-iot-drop-list jnks-iot-bundle-widgets-container" cdkDropList cdkDropListOrientation="vertical"
          (cdkDropListDropped)="widgetDrop($event)" [cdkDropListDisabled]="!editMode || widgets?.length < 2">
-      <div cdkDrag class="tb-draggable tb-bundle-widget-row" *ngFor="let widget of widgets; trackBy: trackByWidget;
+      <div cdkDrag class="jnks-iot-draggable jnks-iot-bundle-widget-row" *ngFor="let widget of widgets; trackBy: trackByWidget;
                let $index = index; last as isLast;">
-        <div class="tb-bundle-widget-row-details">
-          <img class="tb-bundle-widget-image-preview" [src]="widget.image | image: {preview: true, emptyUrl: '/assets/widget-preview-empty.svg'} | async" alt="{{ widget.name }}">
-          <div class="tb-bundle-widget-details">
-            <div class="tb-bundle-widget-title">{{ widget.name }}</div>
-            <div *ngIf="widget.deprecated" class="tb-bundle-widget-deprecated">{{ 'widget.deprecated' | translate }}</div>
+        <div class="jnks-iot-bundle-widget-row-details">
+          <img class="jnks-iot-bundle-widget-image-preview" [src]="widget.image | image: {preview: true, emptyUrl: '/assets/widget-preview-empty.svg'} | async" alt="{{ widget.name }}">
+          <div class="jnks-iot-bundle-widget-details">
+            <div class="jnks-iot-bundle-widget-title">{{ widget.name }}</div>
+            <div *ngIf="widget.deprecated" class="jnks-iot-bundle-widget-deprecated">{{ 'widget.deprecated' | translate }}</div>
           </div>
         </div>
         <button *ngIf="!editMode"
@@ -77,35 +77,35 @@
                 mat-icon-button
                 matTooltip="{{ 'action.drag' | translate }}"
                 matTooltipPosition="above"
-                class="tb-drag-handle">
-          <tb-icon>drag_indicator</tb-icon>
+                class="jnks-iot-drag-handle">
+          <jnks-iot-icon>drag_indicator</jnks-iot-icon>
         </button>
       </div>
     </div>
-    <div *ngIf="editMode && !addMode && widgets?.length" class="tb-add-widget-button"
+    <div *ngIf="editMode && !addMode && widgets?.length" class="jnks-iot-add-widget-button"
          matTooltip="{{ 'widget.add-existing-widget' | translate }}"
          matTooltipPosition="above"
          (click)="addWidgetMode()">
-      <tb-icon color="primary" class="tb-add-widget-icon">add</tb-icon>
+      <jnks-iot-icon color="primary" class="jnks-iot-add-widget-icon">add</jnks-iot-icon>
     </div>
-    <div *ngIf="editMode && !addMode && !widgets?.length" class="tb-add-widget-button-panel">
-      <div class="tb-add-widget-button-with-text" (click)="addWidgetMode()">
-        <tb-icon color="primary" class="tb-add-widget-icon">add</tb-icon>
-        <div class="tb-add-widget-button-text" translate>widget.add-existing-widget</div>
+    <div *ngIf="editMode && !addMode && !widgets?.length" class="jnks-iot-add-widget-button-panel">
+      <div class="jnks-iot-add-widget-button-with-text" (click)="addWidgetMode()">
+        <jnks-iot-icon color="primary" class="jnks-iot-add-widget-icon">add</jnks-iot-icon>
+        <div class="jnks-iot-add-widget-button-text" translate>widget.add-existing-widget</div>
       </div>
     </div>
-    <div *ngIf="isReadOnly && !widgets?.length" class="tb-no-data-available">
-      <div class="tb-no-data-bg"></div>
-      <div class="tb-no-data-text" translate>widget.no-widgets</div>
+    <div *ngIf="isReadOnly && !widgets?.length" class="jnks-iot-no-data-available">
+      <div class="jnks-iot-no-data-bg"></div>
+      <div class="jnks-iot-no-data-text" translate>widget.no-widgets</div>
     </div>
-    <div *ngIf="addMode" class="tb-add-bundle-widget-form">
-      <tb-widget-type-autocomplete
+    <div *ngIf="addMode" class="jnks-iot-add-bundle-widget-form">
+      <jnks-iot-widget-type-autocomplete
         required
         placeholder="{{ 'widget.select-widget' | translate }}"
         [excludeWidgetTypeIds]="excludeWidgetTypeIds"
         [formControl]="addWidgetFormControl">
-      </tb-widget-type-autocomplete>
-      <div class="tb-add-bundle-widget-actions">
+      </jnks-iot-widget-type-autocomplete>
+      <div class="jnks-iot-add-bundle-widget-actions">
         <button mat-button color="primary"
                 [disabled]="(isLoading$ | async)"
                 (click)="cancelAddWidgetMode()">{{'action.cancel' | translate}}

@@ -12,7 +12,7 @@ import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.msg.queue.ServiceType;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
 import com.jnks.iot.server.queue.discovery.PartitionService;
-import com.jnks.iot.server.queue.discovery.TbApplicationEventListener;
+import com.jnks.iot.server.queue.discovery.JnksIotApplicationEventListener;
 import com.jnks.iot.server.queue.discovery.event.PartitionChangeEvent;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
 @Slf4j
-public abstract class AbstractPartitionBasedService<T extends EntityId> extends TbApplicationEventListener<PartitionChangeEvent> {
+public abstract class AbstractPartitionBasedService<T extends EntityId> extends JnksIotApplicationEventListener<PartitionChangeEvent> {
 
     /**
      * 存储分区和对应的实体id，主要用于定时检查设备状态相关
@@ -58,7 +58,7 @@ public abstract class AbstractPartitionBasedService<T extends EntityId> extends 
     }
 
     protected ServiceType getServiceType() {
-        return ServiceType.TB_CORE;
+        return ServiceType.JNKS_IOT_CORE;
     }
 
     protected void stop() {
@@ -75,14 +75,14 @@ public abstract class AbstractPartitionBasedService<T extends EntityId> extends 
      * Any locks or delays in this module will affect DiscoveryService and entire system
      */
     @Override
-    protected void onTbApplicationEvent(PartitionChangeEvent partitionChangeEvent) {
-        log.debug("onTbApplicationEvent, processing event: {}", partitionChangeEvent);
+    protected void onJnksIotApplicationEvent(PartitionChangeEvent partitionChangeEvent) {
+        log.debug("onJnksIotApplicationEvent, processing event: {}", partitionChangeEvent);
         subscribeQueue.add(partitionChangeEvent.getCorePartitions());
         scheduledExecutor.submit(this::pollInitStateFromDB);
     }
 
     @Override
-    protected boolean filterTbApplicationEvent(PartitionChangeEvent event) {
+    protected boolean filterJnksIotApplicationEvent(PartitionChangeEvent event) {
         return event.getServiceType() == getServiceType();
     }
 

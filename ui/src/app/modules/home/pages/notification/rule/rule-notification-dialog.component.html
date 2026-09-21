@@ -1,7 +1,7 @@
 <mat-toolbar color="primary">
   <h2>{{ dialogTitle | translate }}</h2>
   <span class="flex-1"></span>
-  <div tb-help="ruleNotifications"></div>
+  <div jnks-iot-help="ruleNotifications"></div>
   <button mat-icon-button
           (click)="cancel()"
           type="button">
@@ -41,14 +41,14 @@
             {{ 'notification.trigger.trigger-required' | translate }}
           </mat-error>
         </mat-form-field>
-        <tb-template-autocomplete
+        <jnks-iot-template-autocomplete
           required allowCreate allowEdit
           formControlName="templateId"
           [notificationTypes]="ruleNotificationForm.get('triggerType').value">
-        </tb-template-autocomplete>
+        </jnks-iot-template-autocomplete>
         <section formGroupName="recipientsConfig"
                  *ngIf="ruleNotificationForm.get('triggerType').value !== triggerType.ALARM; else alarmTargesConfig">
-          <tb-entity-list
+          <jnks-iot-entity-list
             required
             formControlName="targets"
             subType="{{ ruleNotificationForm.get('triggerType').value }}"
@@ -61,13 +61,13 @@
                     (click)="createTarget($event, createTargetButton)">
               <span style="white-space: nowrap">{{ 'notification.create-new' | translate }}</span>
             </button>
-          </tb-entity-list>
+          </jnks-iot-entity-list>
         </section>
         <ng-template #alarmTargesConfig>
-          <fieldset class="fields-group tb-hierarchy" formGroupName="recipientsConfig">
+          <fieldset class="fields-group jnks-iot-hierarchy" formGroupName="recipientsConfig">
             <legend translate>notification.escalation-chain</legend>
             <div class="mat-body-2" translate>notification.recipients</div>
-            <tb-escalations-component formControlName="escalationTable"></tb-escalations-component>
+            <jnks-iot-escalations-component formControlName="escalationTable"></jnks-iot-escalations-component>
             <ng-container *ngTemplateOutlet="clearRules"></ng-container>
           </fieldset>
         </ng-template>
@@ -96,15 +96,15 @@
       <ng-template matStepLabel>{{ 'notification.alarm-trigger-settings' | translate }}</ng-template>
       <form [formGroup]="alarmTemplateForm">
         <section formGroupName="triggerConfig">
-          <fieldset class="fields-group tb-margin-before-field">
+          <fieldset class="fields-group jnks-iot-margin-before-field">
             <legend translate>notification.filter</legend>
-            <tb-string-items-list
+            <jnks-iot-string-items-list
               editable
               label="{{ 'alarm.alarm-type-list' | translate }}"
               placeholder="{{ !alarmTemplateForm.get('triggerConfig.alarmTypes').value?.length ? ('alarm.any-type' | translate) : '' }}"
               floatLabel="always"
               formControlName="alarmTypes">
-            </tb-string-items-list>
+            </jnks-iot-string-items-list>
 
             <mat-form-field class="mat-block flex-1" floatLabel="always">
               <mat-label translate>alarm.alarm-severity-list</mat-label>
@@ -145,30 +145,30 @@
       <form [formGroup]="deviceInactivityTemplateForm">
         <section formGroupName="triggerConfig">
           <div class="mb-4 flex justify-center">
-            <tb-toggle-select class="w-60" appearance="fill" formControlName="filterByDevice">
-              <tb-toggle-option [value]=true>{{ 'device.device' | translate }}</tb-toggle-option>
-              <tb-toggle-option [value]=false>{{ 'device-profile.device-profile' | translate }}</tb-toggle-option>
-            </tb-toggle-select>
+            <jnks-iot-toggle-select class="w-60" appearance="fill" formControlName="filterByDevice">
+              <jnks-iot-toggle-option [value]=true>{{ 'device.device' | translate }}</jnks-iot-toggle-option>
+              <jnks-iot-toggle-option [value]=false>{{ 'device-profile.device-profile' | translate }}</jnks-iot-toggle-option>
+            </jnks-iot-toggle-select>
           </div>
           <ng-container *ngIf="deviceInactivityTemplateForm.get('triggerConfig.filterByDevice').value; else deviceProfile">
-            <tb-entity-list
+            <jnks-iot-entity-list
               formControlName="devices"
               subscriptSizing="dynamic"
               labelText="{{ 'device.devices' | translate }}"
               placeholderText="{{ 'device.devices' | translate }}"
               hint="{{ 'notification.device-list-rule-hint' | translate }}"
               [entityType]="entityType.DEVICE">
-            </tb-entity-list>
+            </jnks-iot-entity-list>
           </ng-container>
           <ng-template #deviceProfile>
-            <tb-entity-list
+            <jnks-iot-entity-list
               formControlName="deviceProfiles"
               subscriptSizing="dynamic"
               labelText="{{ 'device-profile.device-profiles' | translate }}"
               placeholderText="{{ 'device-profile.device-profiles' | translate }}"
               hint="{{ 'notification.device-profiles-list-rule-hint' | translate }}"
               [entityType]="entityType.DEVICE_PROFILE">
-            </tb-entity-list>
+            </jnks-iot-entity-list>
           </ng-template>
           <mat-form-field class="mat-block flex-1">
             <mat-label translate>notification.notify-on</mat-label>
@@ -197,13 +197,13 @@
               [stepControl]="entityActionTemplateForm">
       <ng-template matStepLabel>{{ 'notification.entity-action-trigger-settings' | translate }}</ng-template>
       <form [formGroup]="entityActionTemplateForm">
-        <fieldset class="fields-group tb-margin" formGroupName="triggerConfig">
+        <fieldset class="fields-group jnks-iot-margin" formGroupName="triggerConfig">
           <legend translate>notification.filter</legend>
-          <tb-entity-type-list required
+          <jnks-iot-entity-type-list required
                                ignoreAuthorityFilter
                                [allowedEntityTypes]="allowEntityTypeForEntityAction"
                                formControlName="entityTypes">
-          </tb-entity-type-list>
+          </jnks-iot-entity-type-list>
           <section class="flex flex-col gap-2">
             <span class="flex-1" translate>notification.status</span>
             <mat-slide-toggle formControlName="created">{{ 'notification.created' | translate }}</mat-slide-toggle>
@@ -227,15 +227,15 @@
       <ng-template matStepLabel>{{ 'notification.alarm-comment-trigger-settings' | translate }}</ng-template>
       <form [formGroup]="alarmCommentTemplateForm">
         <section formGroupName="triggerConfig">
-          <fieldset class="fields-group tb-margin">
+          <fieldset class="fields-group jnks-iot-margin">
             <legend translate>notification.filter</legend>
-            <tb-string-items-list
+            <jnks-iot-string-items-list
               editable
               label="{{ 'alarm.alarm-type-list' | translate }}"
               placeholder="{{ !alarmCommentTemplateForm.get('triggerConfig.alarmTypes').value?.length ? ('alarm.any-type' | translate) : '' }}"
               floatLabel="always"
               formControlName="alarmTypes">
-            </tb-string-items-list>
+            </jnks-iot-string-items-list>
 
             <mat-form-field class="mat-block flex-1" floatLabel="always">
               <mat-label translate>alarm.alarm-severity-list</mat-label>
@@ -280,15 +280,15 @@
       <ng-template matStepLabel>{{ 'notification.alarm-assignment-trigger-settings' | translate }}</ng-template>
       <form [formGroup]="alarmAssignmentTemplateForm">
         <section formGroupName="triggerConfig">
-          <fieldset class="fields-group tb-margin">
+          <fieldset class="fields-group jnks-iot-margin">
             <legend translate>notification.filter</legend>
-            <tb-string-items-list
+            <jnks-iot-string-items-list
               editable
               label="{{ 'alarm.alarm-type-list' | translate }}"
               placeholder="{{ !alarmAssignmentTemplateForm.get('triggerConfig.alarmTypes').value?.length ? ('alarm.any-type' | translate) : '' }}"
               floatLabel="always"
               formControlName="alarmTypes">
-            </tb-string-items-list>
+            </jnks-iot-string-items-list>
 
             <mat-form-field class="mat-block flex-1" floatLabel="always">
               <mat-label translate>alarm.alarm-severity-list</mat-label>
@@ -336,16 +336,16 @@
       <ng-template matStepLabel>{{ 'notification.rule-engine-events-trigger-settings' | translate }}</ng-template>
       <form [formGroup]="ruleEngineEventsTemplateForm">
         <section formGroupName="triggerConfig">
-          <fieldset class="fields-group tb-margin">
+          <fieldset class="fields-group jnks-iot-margin">
             <legend translate>notification.rule-engine-filter</legend>
-            <tb-entity-list
+            <jnks-iot-entity-list
               formControlName="ruleChains"
               subscriptSizing="dynamic"
               labelText="{{ 'rulechain.rulechains' | translate }}"
               placeholderText="{{ 'rulechain.rulechains' | translate }}"
               hint="{{ 'notification.rule-chain-list-rule-hint' | translate }}"
               [entityType]="entityType.RULE_CHAIN">
-            </tb-entity-list>
+            </jnks-iot-entity-list>
             <mat-form-field class="mat-block flex-1" floatLabel="always">
               <mat-label translate>rulechain.rulechain-events</mat-label>
               <mat-select formControlName="ruleChainEvents" multiple
@@ -359,7 +359,7 @@
               {{ 'notification.only-rule-chain-lifecycle-failures' | translate }}
             </mat-slide-toggle>
           </fieldset>
-          <fieldset class="fields-group tb-margin">
+          <fieldset class="fields-group jnks-iot-margin">
             <legend translate>notification.rule-node-filter</legend>
             <mat-slide-toggle formControlName="trackRuleNodeEvents">
               {{ 'notification.track-rule-node-events' | translate }}
@@ -395,12 +395,12 @@
               [stepControl]="entitiesLimitTemplateForm">
       <ng-template matStepLabel>{{ 'notification.entities-limit-trigger-settings' | translate }}</ng-template>
       <form [formGroup]="entitiesLimitTemplateForm">
-        <fieldset class="fields-group tb-margin" formGroupName="triggerConfig">
+        <fieldset class="fields-group jnks-iot-margin" formGroupName="triggerConfig">
           <legend translate>notification.filter</legend>
-          <tb-entity-type-list formControlName="entityTypes"
+          <jnks-iot-entity-type-list formControlName="entityTypes"
                                ignoreAuthorityFilter
                                [allowedEntityTypes]="allowEntityTypeForEntitiesLimit">
-          </tb-entity-type-list>
+          </jnks-iot-entity-type-list>
           <div class="limit-slider-container flex flex-row items-center justify-start xs:flex-col xs:items-stretch">
             <label translate>notification.threshold</label>
             <div class="flex flex-1 flex-row items-center justify-start">
@@ -482,12 +482,12 @@
       <ng-template matStepLabel>{{ 'notification.rate-limits-trigger-settings' | translate }}</ng-template>
       <form [formGroup]="rateLimitsTemplateForm">
         <section formGroupName="triggerConfig">
-          <tb-string-items-list
+          <jnks-iot-string-items-list
             label="{{ 'notification.rate-limits' | translate }}"
             hint="{{ 'notification.api-feature-hint' | translate }}"
             [predefinedValues]="limitedApis"
             formControlName="apis">
-          </tb-string-items-list>
+          </jnks-iot-string-items-list>
         </section>
       </form>
       <form [formGroup]="ruleNotificationForm">

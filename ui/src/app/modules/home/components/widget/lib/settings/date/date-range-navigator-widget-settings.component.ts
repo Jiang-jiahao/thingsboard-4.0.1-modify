@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-date-range-navigator-widget-settings',
+  selector: 'jnks-iot-date-range-navigator-widget-settings',
   templateUrl: './date-range-navigator-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

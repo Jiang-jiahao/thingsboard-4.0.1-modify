@@ -24,7 +24,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-chart-bar-settings',
+  selector: 'jnks-iot-chart-bar-settings',
   templateUrl: './chart-bar-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

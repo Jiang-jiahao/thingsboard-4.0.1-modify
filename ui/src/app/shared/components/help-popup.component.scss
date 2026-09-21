@@ -1,4 +1,4 @@
-.tb-help-popup-button-container {
+.jnks-iot-help-popup-button-container {
   width: initial;
   display: inline-block;
   vertical-align: middle;
@@ -7,13 +7,13 @@
   }
 }
 
-.tb-help-popup-button-loading {
+.jnks-iot-help-popup-button-loading {
   background: #fff;
   border-radius: 50%;
   z-index: 1;
 }
 
-.tb-help-popup-button {
+.jnks-iot-help-popup-button {
   position: relative;
   .mat-mdc-progress-spinner {
     .mdc-circular-progress__indeterminate-container {
@@ -27,7 +27,7 @@
   }
 }
 
-.tb-help-popup-text-button.mat-mdc-button.mat-mdc-button-base {
+.jnks-iot-help-popup-text-button.mat-mdc-button.mat-mdc-button-base {
   position: relative;
   padding: 0 2px 0 8px;
   line-height: 28px;

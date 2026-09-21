@@ -3,16 +3,16 @@
 </ng-container>
 <ng-template #complexEntityReferences>
   <ng-container *ngIf="contentReady; else loading">
-    <ul class="tb-references">
+    <ul class="jnks-iot-references">
       <ng-container *ngFor="let entry of referencedEntitiesEntries">
-        <li class="tb-entities-container tb-primary-fill" *ngIf="isSystem(entry[0]); else tenantEntities">
-          <div class="tb-entities-title">{{ 'image.system-entities' | translate }}</div>
+        <li class="jnks-iot-entities-container jnks-iot-primary-fill" *ngIf="isSystem(entry[0]); else tenantEntities">
+          <div class="jnks-iot-entities-title">{{ 'image.system-entities' | translate }}</div>
           <ng-container *ngTemplateOutlet="referencesList; context:{entriesList: entry[1].entities, showDetailsLink: true}"></ng-container>
         </li>
         <ng-template #tenantEntities>
-          <li class="tb-entities-container tb-primary-fill">
-            <div class="tb-entities-title">
-              {{ 'tenant.tenant' | translate }} <a class="tb-reference" [routerLink]="entry[1].tenantDetailsUrl">{{ entry[1].tenantName }}</a> {{ 'image.entities' | translate }}
+          <li class="jnks-iot-entities-container jnks-iot-primary-fill">
+            <div class="jnks-iot-entities-title">
+              {{ 'tenant.tenant' | translate }} <a class="jnks-iot-reference" [routerLink]="entry[1].tenantDetailsUrl">{{ entry[1].tenantName }}</a> {{ 'image.entities' | translate }}
             </div>
             <ng-container *ngTemplateOutlet="referencesList; context:{entriesList: entry[1].entities, showDetailsLink: false}"></ng-container>
           </li>
@@ -22,11 +22,11 @@
   </ng-container>
 </ng-template>
 <ng-template #referencesList let-entriesList="entriesList" let-showDetailsLink="showDetailsLink">
-  <table class="tb-entities-list-table">
+  <table class="jnks-iot-entities-list-table">
     <tr *ngFor="let referencedEntity of entriesList">
-      <td class="tb-entity-type">{{ referencedEntity.typeName }}</td>
-      <td class="tb-entity-name">
-        <a *ngIf="showDetailsLink" class="tb-reference" [routerLink]="referencedEntity.detailsUrl">{{ referencedEntity.entity.name }}</a>
+      <td class="jnks-iot-entity-type">{{ referencedEntity.typeName }}</td>
+      <td class="jnks-iot-entity-name">
+        <a *ngIf="showDetailsLink" class="jnks-iot-reference" [routerLink]="referencedEntity.detailsUrl">{{ referencedEntity.entity.name }}</a>
         <span *ngIf="!showDetailsLink">{{ referencedEntity.entity.name }}</span>
       </td>
     </tr>

@@ -1,4 +1,4 @@
-<section [formGroup]="hexProtocolParserConfigForm" class="hex-parser-config tb-form-panel no-padding no-border">
+<section [formGroup]="hexProtocolParserConfigForm" class="hex-parser-config jnks-iot-form-panel no-padding no-border">
   <mat-form-field subscriptSizing="dynamic" class="mat-block">
     <mat-label>{{ 'rule-node-config.hex-input-key' | translate }}</mat-label>
     <input matInput formControlName="hexInputKey" required/>
@@ -26,13 +26,13 @@
     <p class="mat-caption hex-example-json-desc">{{ 'rule-node-config.hex-example-default-desc' | translate }}</p>
     <mat-form-field class="mat-block hex-example-json-field" subscriptSizing="dynamic" appearance="outline">
       <mat-label>{{ 'rule-node-config.hex-example-default-json-field-label' | translate }}</mat-label>
-      <textarea matInput readonly rows="18" class="tb-monospace hex-example-json-textarea"
+      <textarea matInput readonly rows="18" class="jnks-iot-monospace hex-example-json-textarea"
                 [value]="hexDefaultProtocolExampleJson"></textarea>
     </mat-form-field>
     <p class="mat-caption hex-example-json-footnote">{{ 'rule-node-config.hex-example-default-hint' | translate }}</p>
   </div>
 
-  <div class="tb-form-row space-between align-center hex-parser-protocols-header">
+  <div class="jnks-iot-form-row space-between align-center hex-parser-protocols-header">
     <span class="mat-body-1">{{ 'rule-node-config.hex-frame-templates-title' | translate }}</span>
     <button mat-stroked-button color="primary" type="button" (click)="addFrameTemplate()">
       <mat-icon>add</mat-icon>
@@ -67,7 +67,7 @@
           </mat-form-field>
         <span class="mat-body-2 hex-section-label">{{ 'rule-node-config.hex-frame-template-custom-header' | translate }}</span>
         <p class="mat-caption hex-template-custom-header-doc">{{ 'rule-node-config.hex-template-custom-header-doc' | translate }}</p>
-        <div class="tb-form-row space-between align-center hex-fields-header">
+        <div class="jnks-iot-form-row space-between align-center hex-fields-header">
           <span class="mat-caption">{{ 'rule-node-config.hex-template-header-fields' | translate }}</span>
           <button mat-stroked-button type="button" (click)="addTemplateHeaderField(ti)">
             <mat-icon>add</mat-icon>
@@ -77,7 +77,7 @@
         <div>
           <div *ngFor="let hfc of templateHeaderFieldsFormArray(ti).controls; let fi = index" [formGroup]="asFormGroup(hfc)"
                class="hex-field-row mat-elevation-z1">
-            <div class="tb-form-row gap-2 xs:flex-col align-start">
+            <div class="jnks-iot-form-row gap-2 xs:flex-col align-start">
               <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                 <mat-label>{{ 'rule-node-config.hex-field-name' | translate }}</mat-label>
                 <input matInput formControlName="name" required/>
@@ -132,7 +132,7 @@
                 <mat-hint>{{ 'rule-node-config.hex-struct-end-exclusive-hint' | translate }}</mat-hint>
               </mat-form-field>
               <div class="hex-list-item-fields mat-block" formArrayName="nestedFields">
-                <div class="tb-form-row space-between align-center">
+                <div class="jnks-iot-form-row space-between align-center">
                   <span class="mat-caption">{{ 'rule-node-config.hex-nested-fields-title' | translate }}</span>
                   <button mat-stroked-button type="button" (click)="addNestedFieldTemplate(ti, fi)">
                     <mat-icon>add</mat-icon>
@@ -143,7 +143,7 @@
               </div>
             </ng-container>
             <ng-container *ngIf="fieldTypeShowsRepeatBlock(templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value)">
-              <div class="tb-form-row gap-2 xs:flex-col">
+              <div class="jnks-iot-form-row gap-2 xs:flex-col">
                 <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                   <mat-label>{{ 'rule-node-config.hex-list-end' | translate }}</mat-label>
                   <input matInput type="number" formControlName="toOffsetExclusive"/>
@@ -151,7 +151,7 @@
                 </mat-form-field>
               </div>
               <ng-container *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'GENERIC_LIST'">
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-generic-list-count-mode' | translate }}</mat-label>
                     <mat-select formControlName="listCountMode">
@@ -163,7 +163,7 @@
                     <input matInput type="number" min="0" formControlName="listCount"/>
                   </mat-form-field>
                 </div>
-                <div *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('listCountMode')?.value === 'FROM_FIELD'" class="tb-form-row gap-2 xs:flex-col">
+                <div *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('listCountMode')?.value === 'FROM_FIELD'" class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-generic-list-count-offset' | translate }}</mat-label>
                     <input matInput type="number" min="0" formControlName="listCountFieldOffset"/>
@@ -175,7 +175,7 @@
                     </mat-select>
                   </mat-form-field>
                 </div>
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-generic-list-item-length-mode' | translate }}</mat-label>
                     <mat-select formControlName="listItemLengthMode">
@@ -190,7 +190,7 @@
                 <p class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-generic-list-doc' | translate }}</p>
               </ng-container>
               <ng-container *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'UNIT_LIST'">
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-unit-list-length-offset' | translate }}</mat-label>
                     <input matInput type="number" min="0" formControlName="unitLengthFieldOffset"/>
@@ -202,7 +202,7 @@
                     <mat-hint>{{ 'rule-node-config.hex-unit-list-id-bytes-hint' | translate }}</mat-hint>
                   </mat-form-field>
                 </div>
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-unit-list-data-key' | translate }}</mat-label>
                     <input matInput formControlName="unitDataOutputName"/>
@@ -218,7 +218,7 @@
               <p *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-list-format-note' | translate }}</p>
               <p *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'UNIT_LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-unit-list-format-note' | translate }}</p>
               <div *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value !== 'GENERIC_LIST'" class="hex-list-item-fields mat-block" formArrayName="listItemFields">
-                <div class="tb-form-row space-between align-center">
+                <div class="jnks-iot-form-row space-between align-center">
                   <span class="mat-caption">{{ 'rule-node-config.hex-list-under-fields-title' | translate }}</span>
                   <button mat-stroked-button type="button" (click)="addListItemFieldTemplate(ti, fi)">
                     <mat-icon>add</mat-icon>
@@ -230,7 +230,7 @@
                 <ng-container *ngTemplateOutlet="listItemFieldsRecursive; context: { $implicit: listItemFieldsTemplate(ti, fi) }"></ng-container>
               </div>
               <div *ngIf="templateHeaderFieldsFormArray(ti).at(fi).get('type')?.value === 'GENERIC_LIST'" class="hex-list-item-fields mat-block" formArrayName="listItemFields">
-                <div class="tb-form-row space-between align-center">
+                <div class="jnks-iot-form-row space-between align-center">
                   <span class="mat-caption">{{ 'rule-node-config.hex-generic-list-item-fields-title' | translate }}</span>
                   <button mat-stroked-button type="button" (click)="addListItemFieldTemplate(ti, fi)">
                     <mat-icon>add</mat-icon>
@@ -243,7 +243,7 @@
             </ng-container>
           </div>
         </div>
-          <div class="tb-form-row gap-2 xs:flex-col">
+          <div class="jnks-iot-form-row gap-2 xs:flex-col">
             <mat-form-field subscriptSizing="dynamic" class="flex-1">
               <mat-label>{{ 'rule-node-config.hex-command-match-offset' | translate }}</mat-label>
               <input matInput type="number" min="0" formControlName="commandMatchOffset"/>
@@ -261,7 +261,7 @@
           </div>
         <span class="mat-body-2 hex-section-label">{{ 'rule-node-config.hex-template-payload-title' | translate }}</span>
         <p class="mat-caption hex-template-payload-doc">{{ 'rule-node-config.hex-template-payload-doc' | translate }}</p>
-        <div class="tb-form-row space-between align-center hex-fields-header">
+        <div class="jnks-iot-form-row space-between align-center hex-fields-header">
           <span class="mat-caption">{{ 'rule-node-config.hex-template-payload-fields-title' | translate }}</span>
           <button mat-stroked-button type="button" (click)="addTemplatePayloadField(ti)">
             <mat-icon>add</mat-icon>
@@ -271,7 +271,7 @@
         <div>
           <div *ngFor="let pfc of templatePayloadFieldsFormArray(ti).controls; let pfi = index" [formGroup]="asFormGroup(pfc)"
                class="hex-field-row mat-elevation-z1">
-            <div class="tb-form-row gap-2 xs:flex-col align-start">
+            <div class="jnks-iot-form-row gap-2 xs:flex-col align-start">
               <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                 <mat-label>{{ 'rule-node-config.hex-field-name' | translate }}</mat-label>
                 <input matInput formControlName="name" required/>
@@ -328,7 +328,7 @@
                 <mat-hint>{{ 'rule-node-config.hex-struct-end-exclusive-hint' | translate }}</mat-hint>
               </mat-form-field>
               <div class="hex-list-item-fields mat-block" formArrayName="nestedFields">
-                <div class="tb-form-row space-between align-center">
+                <div class="jnks-iot-form-row space-between align-center">
                   <span class="mat-caption">{{ 'rule-node-config.hex-nested-fields-title' | translate }}</span>
                   <button mat-stroked-button type="button" (click)="addNestedFieldTemplatePayload(ti, pfi)">
                     <mat-icon>add</mat-icon>
@@ -339,7 +339,7 @@
               </div>
             </ng-container>
             <ng-container *ngIf="fieldTypeShowsRepeatBlock(templatePayloadFieldsFormArray(ti).at(pfi).get('type')?.value)">
-              <div class="tb-form-row gap-2 xs:flex-col">
+              <div class="jnks-iot-form-row gap-2 xs:flex-col">
                 <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                   <mat-label>{{ 'rule-node-config.hex-list-end' | translate }}</mat-label>
                   <input matInput type="number" formControlName="toOffsetExclusive"/>
@@ -347,7 +347,7 @@
                 </mat-form-field>
               </div>
               <ng-container *ngIf="templatePayloadFieldsFormArray(ti).at(pfi).get('type')?.value === 'GENERIC_LIST'">
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-generic-list-count-mode' | translate }}</mat-label>
                     <mat-select formControlName="listCountMode">
@@ -359,7 +359,7 @@
                     <input matInput type="number" min="0" formControlName="listCount"/>
                   </mat-form-field>
                 </div>
-                <div *ngIf="templatePayloadFieldsFormArray(ti).at(pfi).get('listCountMode')?.value === 'FROM_FIELD'" class="tb-form-row gap-2 xs:flex-col">
+                <div *ngIf="templatePayloadFieldsFormArray(ti).at(pfi).get('listCountMode')?.value === 'FROM_FIELD'" class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-generic-list-count-offset' | translate }}</mat-label>
                     <input matInput type="number" min="0" formControlName="listCountFieldOffset"/>
@@ -371,7 +371,7 @@
                     </mat-select>
                   </mat-form-field>
                 </div>
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-generic-list-item-length-mode' | translate }}</mat-label>
                     <mat-select formControlName="listItemLengthMode">
@@ -386,7 +386,7 @@
                 <p class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-generic-list-doc' | translate }}</p>
               </ng-container>
               <ng-container *ngIf="templatePayloadFieldsFormArray(ti).at(pfi).get('type')?.value === 'UNIT_LIST'">
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-unit-list-length-offset' | translate }}</mat-label>
                     <input matInput type="number" min="0" formControlName="unitLengthFieldOffset"/>
@@ -398,7 +398,7 @@
                     <mat-hint>{{ 'rule-node-config.hex-unit-list-id-bytes-hint' | translate }}</mat-hint>
                   </mat-form-field>
                 </div>
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-unit-list-data-key' | translate }}</mat-label>
                     <input matInput formControlName="unitDataOutputName"/>
@@ -414,7 +414,7 @@
               <p *ngIf="templatePayloadFieldsFormArray(ti).at(pfi).get('type')?.value === 'LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-list-format-note' | translate }}</p>
               <p *ngIf="templatePayloadFieldsFormArray(ti).at(pfi).get('type')?.value === 'UNIT_LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-unit-list-format-note' | translate }}</p>
               <div *ngIf="templatePayloadFieldsFormArray(ti).at(pfi).get('type')?.value !== 'GENERIC_LIST'" class="hex-list-item-fields mat-block" formArrayName="listItemFields">
-                <div class="tb-form-row space-between align-center">
+                <div class="jnks-iot-form-row space-between align-center">
                   <span class="mat-caption">{{ 'rule-node-config.hex-list-under-fields-title' | translate }}</span>
                   <button mat-stroked-button type="button" (click)="addListItemFieldTemplatePayload(ti, pfi)">
                     <mat-icon>add</mat-icon>
@@ -426,7 +426,7 @@
                 <ng-container *ngTemplateOutlet="listItemFieldsRecursive; context: { $implicit: listItemFieldsTemplatePayload(ti, pfi) }"></ng-container>
               </div>
               <div *ngIf="templatePayloadFieldsFormArray(ti).at(pfi).get('type')?.value === 'GENERIC_LIST'" class="hex-list-item-fields mat-block" formArrayName="listItemFields">
-                <div class="tb-form-row space-between align-center">
+                <div class="jnks-iot-form-row space-between align-center">
                   <span class="mat-caption">{{ 'rule-node-config.hex-generic-list-item-fields-title' | translate }}</span>
                   <button mat-stroked-button type="button" (click)="addListItemFieldTemplatePayload(ti, pfi)">
                     <mat-icon>add</mat-icon>
@@ -445,7 +445,7 @@
           </mat-checkbox>
           <p class="mat-caption hex-template-checksum-hint">{{ 'rule-node-config.hex-template-checksum-fallback-hint' | translate }}</p>
           <div *ngIf="frameTemplatesFormArray.at(ti).get('useChecksum')?.value" class="hex-checksum-block">
-            <div class="tb-form-row gap-2 xs:flex-col">
+            <div class="jnks-iot-form-row gap-2 xs:flex-col">
               <mat-form-field subscriptSizing="dynamic" class="flex-1">
                 <mat-label>{{ 'rule-node-config.hex-checksum-type' | translate }}</mat-label>
                 <mat-select formControlName="checksumType">
@@ -471,7 +471,7 @@
     </div>
   </div>
 
-  <div class="tb-form-row space-between align-center hex-parser-protocols-header">
+  <div class="jnks-iot-form-row space-between align-center hex-parser-protocols-header">
     <span class="mat-body-1">{{ 'rule-node-config.hex-protocols-title' | translate }}</span>
     <button mat-stroked-button color="primary" type="button" (click)="addProtocol()">
       <mat-icon>add</mat-icon>
@@ -508,21 +508,21 @@
         <mat-checkbox formControlName="payloadOffsetsRelative" class="mat-block hex-checkbox">
           {{ 'rule-node-config.hex-payload-offsets-relative' | translate }}
         </mat-checkbox>
-        <div *ngIf="!protocolsFormArray.at(pi).get('templateId')?.value" class="tb-form-row gap-2 xs:flex-col">
+        <div *ngIf="!protocolsFormArray.at(pi).get('templateId')?.value" class="jnks-iot-form-row gap-2 xs:flex-col">
           <mat-form-field subscriptSizing="dynamic" class="flex-1">
             <mat-label>{{ 'rule-node-config.hex-min-bytes' | translate }}</mat-label>
             <input matInput type="number" min="0" formControlName="minBytes"/>
             <mat-hint>{{ 'rule-node-config.hex-min-bytes-no-template-hint' | translate }}</mat-hint>
           </mat-form-field>
         </div>
-        <div *ngIf="protocolsFormArray.at(pi).get('templateId')?.value" class="tb-form-row gap-2 xs:flex-col">
+        <div *ngIf="protocolsFormArray.at(pi).get('templateId')?.value" class="jnks-iot-form-row gap-2 xs:flex-col">
           <mat-form-field subscriptSizing="dynamic" class="flex-1">
             <mat-label>{{ 'rule-node-config.hex-min-bytes' | translate }}</mat-label>
             <input matInput type="number" min="0" formControlName="minBytes"/>
             <mat-hint>{{ 'rule-node-config.hex-min-bytes-template-hint' | translate }}</mat-hint>
           </mat-form-field>
         </div>
-        <div class="tb-form-row gap-2 xs:flex-col">
+        <div class="jnks-iot-form-row gap-2 xs:flex-col">
           <mat-form-field subscriptSizing="dynamic" class="flex-1">
             <mat-label>{{ 'rule-node-config.hex-command-byte-offset' | translate }}</mat-label>
             <input matInput type="number" min="0" formControlName="commandByteOffset"/>
@@ -550,7 +550,7 @@
           {{ 'rule-node-config.hex-use-checksum-override-hint' | translate }}
         </p>
         <div *ngIf="protocolsFormArray.at(pi).get('useChecksum')?.value" class="hex-checksum-block">
-          <div class="tb-form-row gap-2 xs:flex-col">
+          <div class="jnks-iot-form-row gap-2 xs:flex-col">
             <mat-form-field subscriptSizing="dynamic" class="flex-1">
               <mat-label>{{ 'rule-node-config.hex-checksum-type' | translate }}</mat-label>
               <mat-select formControlName="checksumType">
@@ -573,7 +573,7 @@
         </div>
 
         <p class="mat-caption hex-fields-doc">{{ 'rule-node-config.hex-fields-doc' | translate }}</p>
-        <div class="tb-form-row space-between align-center hex-fields-header">
+        <div class="jnks-iot-form-row space-between align-center hex-fields-header">
           <span class="mat-body-2">{{ 'rule-node-config.hex-fields-title' | translate }}</span>
           <button mat-stroked-button type="button" (click)="addField(pi)">
             <mat-icon>add</mat-icon>
@@ -583,7 +583,7 @@
         <div>
           <div *ngFor="let fc of fieldsFormArray(pi).controls; let fi = index" [formGroup]="asFormGroup(fc)"
                class="hex-field-row mat-elevation-z1">
-            <div class="tb-form-row gap-2 xs:flex-col align-start">
+            <div class="jnks-iot-form-row gap-2 xs:flex-col align-start">
               <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                 <mat-label>{{ 'rule-node-config.hex-field-name' | translate }}</mat-label>
                 <input matInput formControlName="name" required/>
@@ -640,7 +640,7 @@
                 <mat-hint>{{ 'rule-node-config.hex-struct-end-exclusive-hint' | translate }}</mat-hint>
               </mat-form-field>
               <div class="hex-list-item-fields mat-block" formArrayName="nestedFields">
-                <div class="tb-form-row space-between align-center">
+                <div class="jnks-iot-form-row space-between align-center">
                   <span class="mat-caption">{{ 'rule-node-config.hex-nested-fields-title' | translate }}</span>
                   <button mat-stroked-button type="button" (click)="addNestedFieldProtocol(pi, fi)">
                     <mat-icon>add</mat-icon>
@@ -651,7 +651,7 @@
               </div>
             </ng-container>
             <ng-container *ngIf="fieldTypeShowsRepeatBlock(fieldsFormArray(pi).at(fi).get('type')?.value)">
-              <div class="tb-form-row gap-2 xs:flex-col">
+              <div class="jnks-iot-form-row gap-2 xs:flex-col">
                 <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                   <mat-label>{{ 'rule-node-config.hex-list-end' | translate }}</mat-label>
                   <input matInput type="number" formControlName="toOffsetExclusive"/>
@@ -659,7 +659,7 @@
                 </mat-form-field>
               </div>
               <ng-container *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'GENERIC_LIST'">
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-generic-list-count-mode' | translate }}</mat-label>
                     <mat-select formControlName="listCountMode">
@@ -671,7 +671,7 @@
                     <input matInput type="number" min="0" formControlName="listCount"/>
                   </mat-form-field>
                 </div>
-                <div *ngIf="fieldsFormArray(pi).at(fi).get('listCountMode')?.value === 'FROM_FIELD'" class="tb-form-row gap-2 xs:flex-col">
+                <div *ngIf="fieldsFormArray(pi).at(fi).get('listCountMode')?.value === 'FROM_FIELD'" class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-generic-list-count-offset' | translate }}</mat-label>
                     <input matInput type="number" min="0" formControlName="listCountFieldOffset"/>
@@ -683,7 +683,7 @@
                     </mat-select>
                   </mat-form-field>
                 </div>
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-generic-list-item-length-mode' | translate }}</mat-label>
                     <mat-select formControlName="listItemLengthMode">
@@ -698,7 +698,7 @@
                 <p class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-generic-list-doc' | translate }}</p>
               </ng-container>
               <ng-container *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'UNIT_LIST'">
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-unit-list-length-offset' | translate }}</mat-label>
                     <input matInput type="number" min="0" formControlName="unitLengthFieldOffset"/>
@@ -710,7 +710,7 @@
                     <mat-hint>{{ 'rule-node-config.hex-unit-list-id-bytes-hint' | translate }}</mat-hint>
                   </mat-form-field>
                 </div>
-                <div class="tb-form-row gap-2 xs:flex-col">
+                <div class="jnks-iot-form-row gap-2 xs:flex-col">
                   <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                     <mat-label>{{ 'rule-node-config.hex-unit-list-data-key' | translate }}</mat-label>
                     <input matInput formControlName="unitDataOutputName"/>
@@ -726,7 +726,7 @@
               <p *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-list-format-note' | translate }}</p>
               <p *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'UNIT_LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-unit-list-format-note' | translate }}</p>
               <div *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value !== 'GENERIC_LIST'" class="hex-list-item-fields mat-block" formArrayName="listItemFields">
-                <div class="tb-form-row space-between align-center">
+                <div class="jnks-iot-form-row space-between align-center">
                   <span class="mat-caption">{{ 'rule-node-config.hex-list-under-fields-title' | translate }}</span>
                   <button mat-stroked-button type="button" (click)="addListItemFieldProtocol(pi, fi)">
                     <mat-icon>add</mat-icon>
@@ -738,7 +738,7 @@
                 <ng-container *ngTemplateOutlet="listItemFieldsRecursive; context: { $implicit: listItemFieldsProtocol(pi, fi) }"></ng-container>
               </div>
               <div *ngIf="fieldsFormArray(pi).at(fi).get('type')?.value === 'GENERIC_LIST'" class="hex-list-item-fields mat-block" formArrayName="listItemFields">
-                <div class="tb-form-row space-between align-center">
+                <div class="jnks-iot-form-row space-between align-center">
                   <span class="mat-caption">{{ 'rule-node-config.hex-generic-list-item-fields-title' | translate }}</span>
                   <button mat-stroked-button type="button" (click)="addListItemFieldProtocol(pi, fi)">
                     <mat-icon>add</mat-icon>
@@ -761,14 +761,14 @@
   </mat-checkbox>
   <mat-form-field *ngIf="showGeneratedJson" subscriptSizing="dynamic" class="mat-block hex-generated-json-field" appearance="outline">
     <mat-label>{{ 'rule-node-config.hex-generated-json' | translate }}</mat-label>
-    <textarea matInput readonly rows="10" class="tb-monospace hex-generated-json-textarea" [value]="generatedProtocolsJson"></textarea>
+    <textarea matInput readonly rows="10" class="jnks-iot-monospace hex-generated-json-textarea" [value]="generatedProtocolsJson"></textarea>
     <mat-hint>{{ 'rule-node-config.hex-generated-json-hint' | translate }}</mat-hint>
   </mat-form-field>
 
   <ng-template #listItemFieldsRecursive let-fa>
     <ng-container *ngFor="let ctrl of fa.controls; let idx = index">
       <div [formGroup]="asFormGroup(ctrl)" class="hex-field-row mat-elevation-z1 hex-list-item-field-row hex-list-nested-level">
-        <div class="tb-form-row gap-2 xs:flex-col align-start">
+        <div class="jnks-iot-form-row gap-2 xs:flex-col align-start">
           <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
             <mat-label>{{ 'rule-node-config.hex-field-name' | translate }}</mat-label>
             <input matInput formControlName="name" required/>
@@ -821,7 +821,7 @@
             <mat-hint>{{ 'rule-node-config.hex-struct-end-exclusive-hint' | translate }}</mat-hint>
           </mat-form-field>
           <div class="hex-list-item-fields mat-block" formArrayName="nestedFields">
-            <div class="tb-form-row space-between align-center">
+            <div class="jnks-iot-form-row space-between align-center">
               <span class="mat-caption">{{ 'rule-node-config.hex-nested-fields-title' | translate }}</span>
               <button mat-stroked-button type="button" (click)="addNestedFieldToArray(asFormArray(fa.at(idx).get('nestedFields')))">
                 <mat-icon>add</mat-icon>
@@ -832,7 +832,7 @@
           </div>
         </ng-container>
         <ng-container *ngIf="fieldTypeShowsRepeatBlock(fa.at(idx).get('type')?.value)">
-          <div class="tb-form-row gap-2 xs:flex-col">
+          <div class="jnks-iot-form-row gap-2 xs:flex-col">
             <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
               <mat-label>{{ 'rule-node-config.hex-list-end' | translate }}</mat-label>
               <input matInput type="number" formControlName="toOffsetExclusive"/>
@@ -840,7 +840,7 @@
             </mat-form-field>
           </div>
           <ng-container *ngIf="fa.at(idx).get('type')?.value === 'GENERIC_LIST'">
-            <div class="tb-form-row gap-2 xs:flex-col">
+            <div class="jnks-iot-form-row gap-2 xs:flex-col">
               <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                 <mat-label>{{ 'rule-node-config.hex-generic-list-count-mode' | translate }}</mat-label>
                 <mat-select formControlName="listCountMode">
@@ -852,7 +852,7 @@
                 <input matInput type="number" min="0" formControlName="listCount"/>
               </mat-form-field>
             </div>
-            <div *ngIf="fa.at(idx).get('listCountMode')?.value === 'FROM_FIELD'" class="tb-form-row gap-2 xs:flex-col">
+            <div *ngIf="fa.at(idx).get('listCountMode')?.value === 'FROM_FIELD'" class="jnks-iot-form-row gap-2 xs:flex-col">
               <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                 <mat-label>{{ 'rule-node-config.hex-generic-list-count-offset' | translate }}</mat-label>
                 <input matInput type="number" min="0" formControlName="listCountFieldOffset"/>
@@ -864,7 +864,7 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <div class="tb-form-row gap-2 xs:flex-col">
+            <div class="jnks-iot-form-row gap-2 xs:flex-col">
               <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                 <mat-label>{{ 'rule-node-config.hex-generic-list-item-length-mode' | translate }}</mat-label>
                 <mat-select formControlName="listItemLengthMode">
@@ -879,7 +879,7 @@
             <p class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-generic-list-doc' | translate }}</p>
           </ng-container>
           <ng-container *ngIf="fa.at(idx).get('type')?.value === 'UNIT_LIST'">
-            <div class="tb-form-row gap-2 xs:flex-col">
+            <div class="jnks-iot-form-row gap-2 xs:flex-col">
               <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                 <mat-label>{{ 'rule-node-config.hex-unit-list-length-offset' | translate }}</mat-label>
                 <input matInput type="number" min="0" formControlName="unitLengthFieldOffset"/>
@@ -891,7 +891,7 @@
                 <mat-hint>{{ 'rule-node-config.hex-unit-list-id-bytes-hint' | translate }}</mat-hint>
               </mat-form-field>
             </div>
-            <div class="tb-form-row gap-2 xs:flex-col">
+            <div class="jnks-iot-form-row gap-2 xs:flex-col">
               <mat-form-field subscriptSizing="dynamic" class="flex-1 mat-block">
                 <mat-label>{{ 'rule-node-config.hex-unit-list-data-key' | translate }}</mat-label>
                 <input matInput formControlName="unitDataOutputName"/>
@@ -907,7 +907,7 @@
           <p *ngIf="fa.at(idx).get('type')?.value === 'LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-list-format-note' | translate }}</p>
           <p *ngIf="fa.at(idx).get('type')?.value === 'UNIT_LIST'" class="mat-caption hex-list-format-note">{{ 'rule-node-config.hex-unit-list-format-note' | translate }}</p>
           <div *ngIf="fa.at(idx).get('type')?.value !== 'GENERIC_LIST'" class="hex-list-item-fields mat-block" formArrayName="listItemFields">
-            <div class="tb-form-row space-between align-center">
+            <div class="jnks-iot-form-row space-between align-center">
               <span class="mat-caption">{{ 'rule-node-config.hex-list-under-fields-title' | translate }}</span>
               <button mat-stroked-button type="button" (click)="addListItemToArray(asFormArray(fa.at(idx).get('listItemFields')))">
                 <mat-icon>add</mat-icon>
@@ -919,7 +919,7 @@
             <ng-container *ngTemplateOutlet="listItemFieldsRecursive; context: { $implicit: asFormArray(fa.at(idx).get('listItemFields')) }"></ng-container>
           </div>
           <div *ngIf="fa.at(idx).get('type')?.value === 'GENERIC_LIST'" class="hex-list-item-fields mat-block" formArrayName="listItemFields">
-            <div class="tb-form-row space-between align-center">
+            <div class="jnks-iot-form-row space-between align-center">
               <span class="mat-caption">{{ 'rule-node-config.hex-generic-list-item-fields-title' | translate }}</span>
               <button mat-stroked-button type="button" (click)="addListItemToArray(asFormArray(fa.at(idx).get('listItemFields')))">
                 <mat-icon>add</mat-icon>

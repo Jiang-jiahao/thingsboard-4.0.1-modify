@@ -6,7 +6,7 @@ import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/m
 import { deepTrim, isDefinedAndNotNull } from '@app/core/utils';
 
 @Component({
-  selector: 'tb-enrichment-node-calculate-delta-config',
+  selector: 'jnks-iot-enrichment-node-calculate-delta-config',
   templateUrl: './calculate-delta-config.component.html'
 })
 export class CalculateDeltaConfigComponent extends RuleNodeConfigurationComponent {

@@ -1,11 +1,11 @@
-<a mat-button class="tb-button-toggle" (click)="toggleSection($event)">
-  <tb-icon matButtonIcon *ngIf="section.icon !== null">{{section.icon}}</tb-icon>
+<a mat-button class="jnks-iot-button-toggle" (click)="toggleSection($event)">
+  <jnks-iot-icon matButtonIcon *ngIf="section.icon !== null">{{section.icon}}</jnks-iot-icon>
   <span>{{section.customTranslate ? (section.name | customTranslate) : (section.name | translate)}}</span>
-  <span class="pull-right fa fa-chevron-down tb-toggle-icon"
-        [class.tb-toggled]="section.opened"></span>
+  <span class="pull-right fa fa-chevron-down jnks-iot-toggle-icon"
+        [class.jnks-iot-toggled]="section.opened"></span>
 </a>
-<ul id="docs-menu-{{section.name | nospace}}" class="tb-menu-toggle-list" [style.height]="sectionHeight()">
+<ul id="docs-menu-{{section.name | nospace}}" class="jnks-iot-menu-toggle-list" [style.height]="sectionHeight()">
   <li *ngFor="let page of section.pages; trackBy: trackBySectionPages">
-    <tb-menu-link [section]="page"></tb-menu-link>
+    <jnks-iot-menu-link [section]="page"></jnks-iot-menu-link>
   </li>
 </ul>

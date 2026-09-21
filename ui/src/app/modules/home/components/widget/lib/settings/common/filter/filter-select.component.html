@@ -1,5 +1,5 @@
 <mat-form-field [formGroup]="selectFilterFormGroup"
-                [class.tb-inline-field]="inlineField"
+                [class.jnks-iot-inline-field]="inlineField"
                 [class.flex]="inlineField"
                 class="mat-block"
                 [appearance]="inlineField ? 'outline' : appearance"
@@ -9,7 +9,7 @@
          #filterInput
          formControlName="filter"
          (focusin)="onFocus()"
-         [required]="tbRequired"
+         [required]="jnksIotRequired"
          (keydown)="filterEnter($event)"
          (keypress)="filterEnter($event)"
          [matAutocomplete]="filterAutocomplete">
@@ -21,11 +21,11 @@
       <mat-icon class="material-icons">close</mat-icon>
     </button>
     <mat-icon matTooltipPosition="above"
-              matTooltipClass="tb-error-tooltip"
+              matTooltipClass="jnks-iot-error-tooltip"
               [matTooltip]="'filter.filter-required' | translate"
-              *ngIf="inlineField && !modelValue && tbRequired
+              *ngIf="inlineField && !modelValue && jnksIotRequired
                             && selectFilterFormGroup.get('filter').touched"
-              class="tb-error">
+              class="jnks-iot-error">
       warning
     </mat-icon>
   </div>
@@ -36,14 +36,14 @@
           (click)="createFilter($event, searchText, false)">
     {{ 'filter.create-new' | translate }}
   </button>
-  <mat-autocomplete class="tb-autocomplete"
+  <mat-autocomplete class="jnks-iot-autocomplete"
                     #filterAutocomplete="matAutocomplete"
                     [displayWith]="displayFilterFn">
     <mat-option *ngFor="let filter of filteredFilters | async" [value]="filter">
       <span [innerHTML]="filter.filter | highlight:searchText"></span>
     </mat-option>
-    <mat-option *ngIf="!(filteredFilters | async)?.length" [value]="null" class="tb-not-found">
-      <div class="tb-not-found-content" (click)="$event.stopPropagation()">
+    <mat-option *ngIf="!(filteredFilters | async)?.length" [value]="null" class="jnks-iot-not-found">
+      <div class="jnks-iot-not-found-content" (click)="$event.stopPropagation()">
         <div *ngIf="!textIsNotEmpty(searchText); else searchNotEmpty">
           <span translate>filter.no-filters-found</span>
         </div>
@@ -59,7 +59,7 @@
       </div>
     </mat-option>
   </mat-autocomplete>
-  <mat-error *ngIf="!inlineField && !modelValue && tbRequired">
+  <mat-error *ngIf="!inlineField && !modelValue && jnksIotRequired">
     {{ 'filter.filter-required' | translate }}
   </mat-error>
 </mat-form-field>

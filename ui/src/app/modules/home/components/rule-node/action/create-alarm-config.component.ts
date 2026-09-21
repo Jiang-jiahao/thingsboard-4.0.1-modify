@@ -16,7 +16,7 @@ import { DebugRuleNodeEventBody } from '@shared/models/event.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-action-node-create-alarm-config',
+  selector: 'jnks-iot-action-node-create-alarm-config',
   templateUrl: './create-alarm-config.component.html',
   styleUrls: []
 })

@@ -62,7 +62,7 @@ public class TenantProfileServiceTest extends AbstractServiceTest {
     public void testSaveTenantProfile() {
         TenantProfile tenantProfile = this.createTenantProfile("Tenant Profile");
 
-        tenantProfile.setIsolatedTbRuleEngine(true);
+        tenantProfile.setIsolatedJnksIotRuleEngine(true);
 
         TenantProfileQueueConfiguration mainQueueConfiguration = new TenantProfileQueueConfiguration();
         mainQueueConfiguration.setName(DataConstants.MAIN_QUEUE_NAME);
@@ -93,7 +93,7 @@ public class TenantProfileServiceTest extends AbstractServiceTest {
         Assert.assertEquals(tenantProfile.getDescription(), savedTenantProfile.getDescription());
         Assert.assertEquals(tenantProfile.getProfileData(), savedTenantProfile.getProfileData());
         Assert.assertEquals(tenantProfile.isDefault(), savedTenantProfile.isDefault());
-        Assert.assertEquals(tenantProfile.isIsolatedTbRuleEngine(), savedTenantProfile.isIsolatedTbRuleEngine());
+        Assert.assertEquals(tenantProfile.isIsolatedJnksIotRuleEngine(), savedTenantProfile.isIsolatedJnksIotRuleEngine());
 
         savedTenantProfile.setName("New tenant profile");
         tenantProfileService.saveTenantProfile(TenantId.SYS_TENANT_ID, savedTenantProfile);
@@ -312,7 +312,7 @@ public class TenantProfileServiceTest extends AbstractServiceTest {
         profileData.setConfiguration(new DefaultTenantProfileConfiguration());
         tenantProfile.setProfileData(profileData);
         tenantProfile.setDefault(false);
-        tenantProfile.setIsolatedTbRuleEngine(false);
+        tenantProfile.setIsolatedJnksIotRuleEngine(false);
         return tenantProfile;
     }
 

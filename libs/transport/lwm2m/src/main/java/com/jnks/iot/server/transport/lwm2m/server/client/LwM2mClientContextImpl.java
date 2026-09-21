@@ -20,13 +20,13 @@ import com.jnks.iot.server.common.transport.auth.ValidateDeviceCredentialsRespon
 import com.jnks.iot.server.gen.transport.TransportProtos;
 import com.jnks.iot.common.util.AfterStartUp;
 import com.jnks.iot.server.transport.lwm2m.config.LwM2MTransportServerConfig;
-import com.jnks.iot.server.transport.lwm2m.secure.TbLwM2MSecurityInfo;
+import com.jnks.iot.server.transport.lwm2m.secure.JnksIotLwM2MSecurityInfo;
 import com.jnks.iot.server.transport.lwm2m.server.LwM2mTransportContext;
 import com.jnks.iot.server.transport.lwm2m.server.model.LwM2MModelConfigService;
 import com.jnks.iot.server.transport.lwm2m.server.ota.LwM2MOtaUpdateService;
 import com.jnks.iot.server.transport.lwm2m.server.session.LwM2MSessionManager;
-import com.jnks.iot.server.transport.lwm2m.server.store.TbLwM2MClientStore;
-import com.jnks.iot.server.transport.lwm2m.server.store.TbMainSecurityStore;
+import com.jnks.iot.server.transport.lwm2m.server.store.JnksIotLwM2MClientStore;
+import com.jnks.iot.server.transport.lwm2m.server.store.JnksIotMainSecurityStore;
 import com.jnks.iot.server.transport.lwm2m.server.uplink.LwM2mUplinkMsgHandler;
 import com.jnks.iot.server.transport.lwm2m.utils.LwM2MTransportUtil;
 
@@ -52,8 +52,8 @@ public class LwM2mClientContextImpl implements LwM2mClientContext {
 
     private final LwM2mTransportContext context;
     private final LwM2MTransportServerConfig config;
-    private final TbMainSecurityStore securityStore;
-    private final TbLwM2MClientStore clientStore;
+    private final JnksIotMainSecurityStore securityStore;
+    private final JnksIotLwM2MClientStore clientStore;
     private final LwM2MSessionManager sessionManager;
     private final TransportDeviceProfileCache deviceProfileCache;
     private final LwM2MModelConfigService modelConfigService;
@@ -125,7 +125,7 @@ public class LwM2mClientContextImpl implements LwM2mClientContext {
                 throw new LwM2MClientStateException(client.getState(), "Client is in invalid state.");
             }
             oldSession = client.getSession();
-            TbLwM2MSecurityInfo securityInfo = securityStore.getTbLwM2MSecurityInfoByEndpoint(client.getEndpoint());
+            JnksIotLwM2MSecurityInfo securityInfo = securityStore.getJnksIotLwM2MSecurityInfoByEndpoint(client.getEndpoint());
             if (securityInfo.getSecurityMode() != null) {
                 if (SecurityMode.X509.equals(securityInfo.getSecurityMode())) {
                     securityStore.registerX509(registration.getEndpoint(), registration.getId());

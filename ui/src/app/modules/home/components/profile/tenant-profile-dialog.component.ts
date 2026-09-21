@@ -16,7 +16,7 @@ export interface TenantProfileDialogData {
 }
 
 @Component({
-  selector: 'tb-tenant-profile-dialog',
+  selector: 'jnks-iot-tenant-profile-dialog',
   templateUrl: './tenant-profile-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: TenantProfileDialogComponent}],
   styleUrls: ['tenant-profile-dialog.component.scss']

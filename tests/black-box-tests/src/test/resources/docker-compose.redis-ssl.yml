@@ -17,95 +17,95 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - ./tb-node/redis-data:/bitnami/redis/data
+      - ./jnks-iot-node/redis-data:/bitnami/redis/data
       - ./redis-certs:/redis/certs
 
 # JnksIOT setup to use redis-standalone
-  tb-core1:
+  jnks-iot-core1:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-core2:
+  jnks-iot-core2:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-rule-engine1:
+  jnks-iot-rule-engine1:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-rule-engine2:
+  jnks-iot-rule-engine2:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-mqtt-transport1:
+  jnks-iot-mqtt-transport1:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-mqtt-transport2:
+  jnks-iot-mqtt-transport2:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-http-transport1:
+  jnks-iot-http-transport1:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-http-transport2:
+  jnks-iot-http-transport2:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-coap-transport:
+  jnks-iot-coap-transport:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-lwm2m-transport:
+  jnks-iot-lwm2m-transport:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-snmp-transport:
+  jnks-iot-snmp-transport:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-vc-executor1:
+  jnks-iot-vc-executor1:
     env_file:
       - cache-redis.env
     volumes:
       - ./redis-certs:/redis/certs
     depends_on:
       - redis
-  tb-vc-executor2:
+  jnks-iot-vc-executor2:
     env_file:
       - cache-redis.env
     volumes:

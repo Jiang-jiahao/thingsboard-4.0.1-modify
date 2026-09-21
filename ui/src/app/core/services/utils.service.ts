@@ -32,7 +32,7 @@ import { EntityId } from '@shared/models/id/entity-id';
 import { DatePipe, DOCUMENT } from '@angular/common';
 import { entityTypeTranslations } from '@shared/models/entity-type.models';
 import cssjs from '@core/css/css';
-import { isNotEmptyTbFunction } from '@shared/models/js-function.models';
+import { isNotEmptyJnksIotFunction } from '@shared/models/js-function.models';
 import { defaultFormProperties, FormProperty } from '@shared/models/dynamic-form.models';
 
 const i18nRegExp = new RegExp(`{${i18nPrefix}:[^{}]+}`, 'g');
@@ -266,7 +266,7 @@ export class UtilsService {
     } else if (index > -1) {
       dataKey.color = this.getMaterialColor(index);
     }
-    if (isNotEmptyTbFunction(keyInfo.postFuncBody)) {
+    if (isNotEmptyJnksIotFunction(keyInfo.postFuncBody)) {
       dataKey.usePostProcessing = true;
       dataKey.postFuncBody = keyInfo.postFuncBody;
     }

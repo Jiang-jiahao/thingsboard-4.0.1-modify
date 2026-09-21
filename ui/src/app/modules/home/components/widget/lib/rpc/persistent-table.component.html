@@ -1,5 +1,5 @@
-<div class="tb-table-widget tb-absolute-fill">
-  <div class="tb-absolute-fill flex flex-1 flex-col">
+<div class="jnks-iot-table-widget jnks-iot-absolute-fill">
+  <div class="jnks-iot-absolute-fill flex flex-1 flex-col">
     <div class="table-container flex-1">
       <table mat-table [dataSource]="persistentDatasource"
              matSort [matSortActive]="pageLink.sortOrder.property"
@@ -64,7 +64,7 @@
                         matTooltip="{{ actionDescriptor.displayName }}"
                         matTooltipPosition="above"
                         (click)="onActionButtonClick($event, column, actionDescriptor)">
-                  <tb-icon>{{ actionDescriptor.icon }}</tb-icon>
+                  <jnks-iot-icon>{{ actionDescriptor.icon }}</jnks-iot-icon>
                 </button>
               </ng-container>
             </div>
@@ -72,14 +72,14 @@
               <button mat-icon-button
                       (click)="$event.stopPropagation(); ctx.detectChanges();"
                       [matMenuTriggerFor]="cellActionsMenu">
-                <tb-icon>more_vert</tb-icon>
+                <jnks-iot-icon>more_vert</jnks-iot-icon>
               </button>
               <mat-menu #cellActionsMenu="matMenu" xPosition="before">
                 <ng-container *ngFor="let actionDescriptor of actionCellButtonAction">
                   <button mat-menu-item *ngIf="actionDescriptor.icon"
                           [disabled]="(isLoading$ | async)"
                           (click)="onActionButtonClick($event, column, actionDescriptor)">
-                    <tb-icon matMenuItemIcon>{{actionDescriptor.icon}}</tb-icon>
+                    <jnks-iot-icon matMenuItemIcon>{{actionDescriptor.icon}}</jnks-iot-icon>
                     <span>{{ actionDescriptor.displayName }}</span>
                   </button>
                 </ng-container>

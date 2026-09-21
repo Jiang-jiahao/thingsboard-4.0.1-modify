@@ -1,6 +1,6 @@
 import { animate, AnimationTriggerMetadata, style, transition, trigger } from '@angular/animations';
 import { ConnectedOverlayPositionChange } from '@angular/cdk/overlay';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { POSITION_MAP } from '@shared/models/overlay.models';
 import { ComponentRef, Injector, Renderer2, Type, ViewContainerRef } from '@angular/core';
 
@@ -71,7 +71,7 @@ export interface PropertyMapping {
 
 export interface PopoverWithTrigger {
   trigger: Element;
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 }
 
 export interface DisplayPopoverConfig<T> extends Omit<DisplayPopoverWithComponentRefConfig<T>, 'componentRef'>{
@@ -79,7 +79,7 @@ export interface DisplayPopoverConfig<T> extends Omit<DisplayPopoverWithComponen
 }
 
 export interface DisplayPopoverWithComponentRefConfig<T> {
-  componentRef: ComponentRef<TbPopoverComponent>
+  componentRef: ComponentRef<JnksIotPopoverComponent>
   trigger: Element;
   renderer: Renderer2;
   componentType: Type<T>;

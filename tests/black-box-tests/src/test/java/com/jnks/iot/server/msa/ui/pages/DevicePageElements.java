@@ -11,7 +11,7 @@ public class DevicePageElements extends OtherPageElementsHelper {
     }
 
     private static final String DEVICE = "//table//span[text()='%s']";
-    private static final String DEVICE_DETAILS_VIEW = "//tb-details-panel";
+    private static final String DEVICE_DETAILS_VIEW = "//jnks-iot-details-panel";
     private static final String DEVICE_DETAILS_ALARMS = DEVICE_DETAILS_VIEW + "//span[text()='Alarms']";
     private static final String ASSIGN_TO_CUSTOMER_BTN = "//mat-cell[contains(@class,'name')]/span[text()='%s']" +
             "/ancestor::mat-row//mat-icon[contains(text(),'assignment_ind')]/parent::button";
@@ -20,8 +20,8 @@ public class DevicePageElements extends OtherPageElementsHelper {
     private static final String CLOSE_DEVICE_DETAILS_VIEW = "//header//mat-icon[contains(text(),'close')]/parent::button";
     private static final String SUBMIT_BTN = "//button[@type='submit']";
     private static final String ADD_DEVICE_BTN = "//mat-icon[text() = 'insert_drive_file']/parent::button";
-    private static final String HEADER_NAME_VIEW = "//header//div[@class='tb-details-title']/span";
-    private static final String ADD_DEVICE_VIEW = "//tb-device-wizard";
+    private static final String HEADER_NAME_VIEW = "//header//div[@class='jnks-iot-details-title']/span";
+    private static final String ADD_DEVICE_VIEW = "//jnks-iot-device-wizard";
     private static final String DELETE_BTN_DETAILS_TAB = "//span[contains(text(),'Delete device')]/parent::button";
     private static final String CHECKBOX_GATEWAY_EDIT = "//mat-checkbox[@formcontrolname='gateway']//label";
     private static final String CHECKBOX_OVERWRITE_ACTIVITY_TIME_EDIT = "//mat-checkbox[@formcontrolname='overwriteActivityTime']//label";
@@ -40,9 +40,9 @@ public class DevicePageElements extends OtherPageElementsHelper {
     private static final String UNASSIGN_BTN_DETAILS_TAB = "//span[contains(text(),'Unassign from customer')]/parent::button";
     private static final String ASSIGNED_FIELD_DETAILS_TAB = "//mat-label[text() = 'Assigned to customer']/parent::label/parent::div/input";
     private static final String ASSIGN_MARKED_DEVICE_BTN = "//mat-icon[text() = 'assignment_ind']/parent::button";
-    private static final String FILTER_BTN = "//tb-device-info-filter/button";
+    private static final String FILTER_BTN = "//jnks-iot-device-info-filter/button";
     private static final String DEVICE_PROFILE_FIELD = "(//input[@formcontrolname='deviceProfile'])[2]";
-    private static final String DEVICE_STATE_SELECT = "//div[contains(@class,'tb-filter-panel')]//mat-select[@role='combobox']";
+    private static final String DEVICE_STATE_SELECT = "//div[contains(@class,'jnks-iot-filter-panel')]//mat-select[@role='combobox']";
     private static final String LIST_OF_DEVICES_STATE = "//div[@class='status']";
     private static final String LIST_OF_DEVICES_PROFILE = "//mat-cell[contains(@class,'deviceProfileName')]";
     private static final String MAKE_DEVICE_PUBLIC_BTN = DEVICE + "/ancestor::mat-row//mat-icon[contains(text(),'share')]/parent::button";

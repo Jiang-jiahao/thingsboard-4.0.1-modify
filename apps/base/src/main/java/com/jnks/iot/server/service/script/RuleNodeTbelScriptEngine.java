@@ -11,8 +11,8 @@ import com.jnks.iot.script.api.RuleNodeScriptFactory;
 import com.jnks.iot.script.api.tbel.TbelInvokeService;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.common.data.id.TenantId;
-import com.jnks.iot.server.common.msg.TbMsg;
-import com.jnks.iot.server.common.msg.TbMsgMetaData;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
 
 import javax.script.ScriptException;
 import java.util.ArrayList;
@@ -42,11 +42,11 @@ public class RuleNodeTbelScriptEngine extends RuleNodeScriptEngine<TbelInvokeSer
     }
 
     @Override
-    protected ListenableFuture<List<TbMsg>> executeUpdateTransform(TbMsg msg, Object result) {
+    protected ListenableFuture<List<JnksIotMsg>> executeUpdateTransform(JnksIotMsg msg, Object result) {
         if (result instanceof Map) {
             return Futures.immediateFuture(Collections.singletonList(unbindMsg((Map) result, msg)));
         } else if (result instanceof Collection) {
-            List<TbMsg> res = new ArrayList<>();
+            List<JnksIotMsg> res = new ArrayList<>();
             for (Object resObject : (Collection) result) {
                 if (resObject instanceof Map) {
                     res.add(unbindMsg((Map) resObject, msg));
@@ -60,7 +60,7 @@ public class RuleNodeTbelScriptEngine extends RuleNodeScriptEngine<TbelInvokeSer
     }
 
     @Override
-    protected ListenableFuture<TbMsg> executeGenerateTransform(TbMsg prevMsg, Object result) {
+    protected ListenableFuture<JnksIotMsg> executeGenerateTransform(JnksIotMsg prevMsg, Object result) {
         if (result instanceof Map) {
             return Futures.immediateFuture(unbindMsg((Map) result, prevMsg));
         }
@@ -95,7 +95,7 @@ public class RuleNodeTbelScriptEngine extends RuleNodeScriptEngine<TbelInvokeSer
     }
 
     @Override
-    public ListenableFuture<JsonNode> executeJsonAsync(TbMsg msg) {
+    public ListenableFuture<JsonNode> executeJsonAsync(JnksIotMsg msg) {
         return Futures.transform(executeScriptAsync(msg), JacksonUtil::valueToTree, MoreExecutors.directExecutor());
 
     }
@@ -106,7 +106,7 @@ public class RuleNodeTbelScriptEngine extends RuleNodeScriptEngine<TbelInvokeSer
     }
 
     @Override
-    protected Object[] prepareArgs(TbMsg msg) {
+    protected Object[] prepareArgs(JnksIotMsg msg) {
         Object[] args = new Object[3];
         if (msg.getData() != null) {
             args[0] = JacksonUtil.fromString(msg.getData(), Object.class);
@@ -118,7 +118,7 @@ public class RuleNodeTbelScriptEngine extends RuleNodeScriptEngine<TbelInvokeSer
         return args;
     }
 
-    private static TbMsg unbindMsg(Map msgData, TbMsg msg) {
+    private static JnksIotMsg unbindMsg(Map msgData, JnksIotMsg msg) {
         String data = null;
         Map<String, String> metadata = null;
         String messageType = null;
@@ -139,7 +139,7 @@ public class RuleNodeTbelScriptEngine extends RuleNodeScriptEngine<TbelInvokeSer
             messageType = msgData.get(RuleNodeScriptFactory.MSG_TYPE).toString();
         }
         String newData = data != null ? data : msg.getData();
-        TbMsgMetaData newMetadata = metadata != null ? new TbMsgMetaData(metadata) : msg.getMetaData().copy();
+        JnksIotMsgMetaData newMetadata = metadata != null ? new JnksIotMsgMetaData(metadata) : msg.getMetaData().copy();
         String newMessageType = !StringUtils.isEmpty(messageType) ? messageType : msg.getType();
         return msg.transform()
                 .type(newMessageType)

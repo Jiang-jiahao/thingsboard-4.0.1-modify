@@ -3,14 +3,14 @@ package com.jnks.iot.server.service.queue.processing;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.ApplicationEventPublisher;
 import com.jnks.iot.server.actors.ActorSystemContext;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
 import com.jnks.iot.server.queue.discovery.PartitionService;
 import com.jnks.iot.server.queue.discovery.event.PartitionChangeEvent;
 import com.jnks.iot.common.util.AfterStartUp;
-import com.jnks.iot.server.service.apiusage.TbApiUsageStateService;
+import com.jnks.iot.server.service.apiusage.JnksIotApiUsageStateService;
 import com.jnks.iot.server.service.cf.CalculatedFieldCache;
-import com.jnks.iot.server.service.profile.TbAssetProfileCache;
-import com.jnks.iot.server.service.profile.TbDeviceProfileCache;
+import com.jnks.iot.server.service.profile.JnksIotAssetProfileCache;
+import com.jnks.iot.server.service.profile.JnksIotDeviceProfileCache;
 import com.jnks.iot.server.service.security.auth.jwt.settings.JwtSettingsService;
 
 import java.util.ArrayList;
@@ -70,11 +70,11 @@ public abstract class AbstractPartitionBasedConsumerService<N extends com.google
      * 将依赖转交给 {@link AbstractConsumerService}；本类不额外持有业务依赖。
      */
     public AbstractPartitionBasedConsumerService(ActorSystemContext actorContext,
-                                                 TbTenantProfileCache tenantProfileCache,
-                                                 TbDeviceProfileCache deviceProfileCache,
-                                                 TbAssetProfileCache assetProfileCache,
+                                                 JnksIotTenantProfileCache tenantProfileCache,
+                                                 JnksIotDeviceProfileCache deviceProfileCache,
+                                                 JnksIotAssetProfileCache assetProfileCache,
                                                  CalculatedFieldCache calculatedFieldCache,
-                                                 TbApiUsageStateService apiUsageStateService,
+                                                 JnksIotApiUsageStateService apiUsageStateService,
                                                  PartitionService partitionService,
                                                  ApplicationEventPublisher eventPublisher,
                                                  Optional<JwtSettingsService> jwtSettingsService) {
@@ -102,7 +102,7 @@ public abstract class AbstractPartitionBasedConsumerService<N extends com.google
      *       {@link #onPartitionChangeEvent}（单条失败只记日志，继续后续事件）；</li>
      *   <li>置 {@code started = true}，并清空缓冲引用。</li>
      * </ol>
-     * 之后再到达的分区事件走 {@link #onTbApplicationEvent} 的快速路径，不再缓冲。
+     * 之后再到达的分区事件走 {@link #onJnksIotApplicationEvent} 的快速路径，不再缓冲。
      */
     @AfterStartUp(order = AfterStartUp.REGULAR_SERVICE)
     @Override
@@ -127,7 +127,7 @@ public abstract class AbstractPartitionBasedConsumerService<N extends com.google
     }
 
     /**
-     * 接收已通过父类 {@code filterTbApplicationEvent} 过滤的分区变更事件。
+     * 接收已通过父类 {@code filterJnksIotApplicationEvent} 过滤的分区变更事件。
      * <p>
      * 若尚未 {@code started}：加锁双重检查后写入 {@link #pendingEvents} 并返回
      * （避免与 {@link #afterStartUp()} 回放交叉时丢事件或提前处理）。
@@ -136,7 +136,7 @@ public abstract class AbstractPartitionBasedConsumerService<N extends com.google
      * @param event 本服务类型相关的分区变更事件
      */
     @Override
-    protected void onTbApplicationEvent(PartitionChangeEvent event) {
+    protected void onJnksIotApplicationEvent(PartitionChangeEvent event) {
         log.debug("Received partition change event: {}", event);
         if (!started) {
             startupLock.lock();
@@ -173,7 +173,7 @@ public abstract class AbstractPartitionBasedConsumerService<N extends com.google
 
     /**
      * @return 传给父类 {@link AbstractConsumerService#init(String)} 的线程名前缀
-     *         （如 {@code "tb-rule-engine"}）
+     *         （如 {@code "jnks-iot-rule-engine"}）
      */
     protected abstract String getPrefix();
 

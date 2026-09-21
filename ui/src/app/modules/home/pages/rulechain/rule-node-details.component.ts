@@ -23,7 +23,7 @@ import { ServiceType } from '@shared/models/queue.models';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-rule-node',
+  selector: 'jnks-iot-rule-node',
   templateUrl: './rule-node-details.component.html',
   styleUrls: ['./rule-node-details.component.scss']
 })
@@ -56,7 +56,7 @@ export class RuleNodeDetailsComponent extends PageComponent implements OnInit, O
 
   entityType = EntityType;
 
-  serviceType = ServiceType.TB_RULE_ENGINE;
+  serviceType = ServiceType.JNKS_IOT_RULE_ENGINE;
 
   ruleNodeFormGroup: UntypedFormGroup;
 

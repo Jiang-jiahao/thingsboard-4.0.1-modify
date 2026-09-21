@@ -81,7 +81,7 @@ public abstract class AbstractScriptInvokeService implements ScriptInvokeService
 
     protected abstract ListenableFuture<UUID> doEvalScript(TenantId tenantId, ScriptType scriptType, String scriptBody, UUID scriptId, String[] argNames);
 
-    protected abstract TbScriptExecutionTask doInvokeFunction(UUID scriptId, Object[] args);
+    protected abstract JnksIotScriptExecutionTask doInvokeFunction(UUID scriptId, Object[] args);
 
     protected abstract void doRelease(UUID scriptId) throws Exception;
 
@@ -142,7 +142,7 @@ public abstract class AbstractScriptInvokeService implements ScriptInvokeService
             }
             if (!isDisabled(scriptId)) {
                 if (argsSizeExceeded(args)) {
-                    TbScriptException t = new TbScriptException(scriptId, TbScriptException.ErrorCode.OTHER, null, new IllegalArgumentException(
+                    JnksIotScriptException t = new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.OTHER, null, new IllegalArgumentException(
                             format("Script input arguments exceed maximum allowed total args size of %s symbols", getMaxTotalArgsSize())
                     ));
                     return Futures.immediateFailedFuture(handleScriptException(scriptId, null, t));
@@ -155,7 +155,7 @@ public abstract class AbstractScriptInvokeService implements ScriptInvokeService
                 var resultFuture = Futures.transform(task.getResultFuture(), output -> {
                     String result = JacksonUtil.toString(output);
                     if (resultSizeExceeded(result)) {
-                        throw new TbScriptException(scriptId, TbScriptException.ErrorCode.OTHER, null, new RuntimeException(
+                        throw new JnksIotScriptException(scriptId, JnksIotScriptException.ErrorCode.OTHER, null, new RuntimeException(
                                 format("Script invocation result exceeds maximum allowed size of %s symbols", getMaxResultSize())
                         ));
                     }
@@ -174,7 +174,7 @@ public abstract class AbstractScriptInvokeService implements ScriptInvokeService
         }
     }
 
-    private <T extends V, V> ListenableFuture<T> withTimeoutAndStatsCallback(UUID scriptId, TbScriptExecutionTask task, ListenableFuture<T> future, FutureCallback<V> statsCallback, long timeout) {
+    private <T extends V, V> ListenableFuture<T> withTimeoutAndStatsCallback(UUID scriptId, JnksIotScriptExecutionTask task, ListenableFuture<T> future, FutureCallback<V> statsCallback, long timeout) {
         if (timeout > 0) {
             future = Futures.withTimeout(future, timeout, TimeUnit.MILLISECONDS, timeoutExecutorService);
         }
@@ -184,15 +184,15 @@ public abstract class AbstractScriptInvokeService implements ScriptInvokeService
                 MoreExecutors.directExecutor());
     }
 
-    private Throwable handleScriptException(UUID scriptId, TbScriptExecutionTask task, Throwable t) {
+    private Throwable handleScriptException(UUID scriptId, JnksIotScriptExecutionTask task, Throwable t) {
         boolean timeout = t instanceof TimeoutException || (t.getCause() != null && t.getCause() instanceof TimeoutException);
         if (timeout && task != null) {
             task.stop();
         }
         boolean blockList = timeout;
         String scriptBody = null;
-        if (t instanceof TbScriptException) {
-            var scriptException = (TbScriptException) t;
+        if (t instanceof JnksIotScriptException) {
+            var scriptException = (JnksIotScriptException) t;
             scriptBody = scriptException.getBody();
             var cause = scriptException.getCause();
             switch (scriptException.getErrorCode()) {
@@ -207,7 +207,7 @@ public abstract class AbstractScriptInvokeService implements ScriptInvokeService
                     log.debug("[{}] Failed to execute script: {}", scriptId, scriptException.getBody(), cause);
                     break;
             }
-            blockList = timeout || scriptException.getErrorCode() != TbScriptException.ErrorCode.RUNTIME;
+            blockList = timeout || scriptException.getErrorCode() != JnksIotScriptException.ErrorCode.RUNTIME;
         }
         if (blockList) {
             BlockedScriptInfo disableListInfo = disabledScripts.computeIfAbsent(scriptId, key -> new BlockedScriptInfo(getMaxBlackListDurationSec()));

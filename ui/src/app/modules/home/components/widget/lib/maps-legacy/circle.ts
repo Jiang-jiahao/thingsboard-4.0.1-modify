@@ -4,7 +4,7 @@ import { functionValueCalculator, parseWithTranslation } from '@home/components/
 import LeafletMap from '@home/components/widget/lib/maps-legacy/leaflet-map';
 import { createTooltip } from '@home/components/widget/lib/maps-legacy/maps-utils';
 import { FormattedData } from '@shared/models/widget.models';
-import { fillDataPattern, processDataPattern, safeExecuteTbFunction } from '@core/utils';
+import { fillDataPattern, processDataPattern, safeExecuteJnksIotFunction } from '@core/utils';
 
 export class Circle {
 
@@ -75,7 +75,7 @@ export class Circle {
     if (this.settings.showCircleLabel) {
       if (!this.map.circleLabelText || this.settings.useCircleLabelFunction) {
         const pattern = this.settings.useCircleLabelFunction ?
-          safeExecuteTbFunction(this.settings.parsedCircleLabelFunction,
+          safeExecuteJnksIotFunction(this.settings.parsedCircleLabelFunction,
             [this.data, this.dataSources, this.data.dsIndex]) : this.settings.circleLabel;
         this.map.circleLabelText = parseWithTranslation.prepareProcessPattern(pattern, true);
         this.map.replaceInfoTooltipCircle = processDataPattern(this.map.circleLabelText, this.data);
@@ -83,14 +83,14 @@ export class Circle {
       const circleLabelText = fillDataPattern(this.map.circleLabelText, this.map.replaceInfoTooltipCircle, this.data);
       const labelColor = this.map.ctx.widgetConfig.color;
       this.leafletCircle.bindTooltip(`<div style="color: ${labelColor};"><b>${circleLabelText}</b></div>`,
-        { className: 'tb-polygon-label', permanent: true, direction: 'center'})
+        { className: 'jnks-iot-polygon-label', permanent: true, direction: 'center'})
         .openTooltip(this.leafletCircle.getLatLng());
     }
   }
 
   private updateTooltip() {
     const pattern = this.settings.useCircleTooltipFunction ?
-      safeExecuteTbFunction(this.settings.parsedCircleTooltipFunction, [this.data, this.dataSources, this.data.dsIndex]) :
+      safeExecuteJnksIotFunction(this.settings.parsedCircleTooltipFunction, [this.data, this.dataSources, this.data.dsIndex]) :
       this.settings.circleTooltipPattern;
     this.tooltip.setContent(parseWithTranslation.parseTemplate(pattern, this.data, true));
   }

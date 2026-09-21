@@ -1,5 +1,5 @@
-<div class="tb-entities-hierarchy tb-absolute-fill" tb-toast toastTarget="{{ toastTargetId }}">
-  <div class="tb-absolute-fill flex flex-1 flex-col">
+<div class="jnks-iot-entities-hierarchy jnks-iot-absolute-fill" jnks-iot-toast toastTarget="{{ toastTargetId }}">
+  <div class="jnks-iot-absolute-fill flex flex-1 flex-col">
     <mat-toolbar class="mat-mdc-table-toolbar" [class.!hidden]="!textSearchMode">
       <div class="mat-toolbar-tools">
         <button mat-icon-button
@@ -20,15 +20,15 @@
         </button>
       </div>
     </mat-toolbar>
-    <div class="tb-entities-nav-tree-panel flex-1">
-      <tb-nav-tree
+    <div class="jnks-iot-entities-nav-tree-panel flex-1">
+      <jnks-iot-nav-tree
         [loadNodes]="loadNodes"
         [onNodeSelected]="onNodeSelected"
         [onNodesInserted]="onNodesInserted"
         [editCallbacks]="nodeEditCallbacks"
         enableSearch="true"
         [searchCallback]="searchCallback"
-      ></tb-nav-tree>
+      ></jnks-iot-nav-tree>
     </div>
   </div>
 </div>

@@ -26,7 +26,7 @@ import { EntityId } from '@shared/models/id/entity-id';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-key-filter-list',
+  selector: 'jnks-iot-key-filter-list',
   templateUrl: './key-filter-list.component.html',
   styleUrls: ['./key-filter-list.component.scss'],
   providers: [
@@ -173,7 +173,7 @@ export class KeyFilterListComponent implements ControlValueAccessor, Validator, 
     return this.dialog.open<KeyFilterDialogComponent, KeyFilterDialogData,
       KeyFilterInfo>(KeyFilterDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         keyFilter: keyFilter ? (this.disabled ? keyFilter : deepClone(keyFilter)) : null,
         isAdd,

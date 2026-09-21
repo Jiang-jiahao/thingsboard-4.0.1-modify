@@ -43,9 +43,9 @@ export class RuleNodeComponent extends FcNodeComponent implements OnInit {
       $event.stopPropagation();
     }
     this.userNodeCallbacks.mouseLeave($event, node);
-    const tooltipContent = '<div class="tb-rule-node-tooltip">' +
-      '<div id="tb-node-content">' +
-      '<div class="tb-node-description">' + this.translate.instant('rulechain.open-rulechain') + '</div></div></div>';
+    const tooltipContent = '<div class="jnks-iot-rule-node-tooltip">' +
+      '<div id="jnks-iot-node-content">' +
+      '<div class="jnks-iot-node-description">' + this.translate.instant('rulechain.open-rulechain') + '</div></div></div>';
     const element = $($event.target);
     element.tooltipster(
       {

@@ -3,14 +3,14 @@ package com.jnks.iot.server.actors.tenant;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.actors.ActorSystemContext;
 import com.jnks.iot.server.actors.ProcessFailureStrategy;
-import com.jnks.iot.server.actors.TbActor;
-import com.jnks.iot.server.actors.TbActorCtx;
-import com.jnks.iot.server.actors.TbActorException;
-import com.jnks.iot.server.actors.TbActorId;
-import com.jnks.iot.server.actors.TbActorNotRegisteredException;
-import com.jnks.iot.server.actors.TbActorRef;
-import com.jnks.iot.server.actors.TbEntityActorId;
-import com.jnks.iot.server.actors.TbEntityTypeActorIdPredicate;
+import com.jnks.iot.server.actors.JnksIotActor;
+import com.jnks.iot.server.actors.JnksIotActorCtx;
+import com.jnks.iot.server.actors.JnksIotActorException;
+import com.jnks.iot.server.actors.JnksIotActorId;
+import com.jnks.iot.server.actors.JnksIotActorNotRegisteredException;
+import com.jnks.iot.server.actors.JnksIotActorRef;
+import com.jnks.iot.server.actors.JnksIotEntityActorId;
+import com.jnks.iot.server.actors.JnksIotEntityTypeActorIdPredicate;
 import com.jnks.iot.server.actors.service.ContextAwareActor;
 import com.jnks.iot.server.actors.service.ContextBasedCreator;
 import com.jnks.iot.server.common.data.ApiUsageState;
@@ -24,9 +24,9 @@ import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
 import com.jnks.iot.server.common.data.rule.RuleChain;
 import com.jnks.iot.server.common.data.rule.RuleChainType;
 import com.jnks.iot.server.common.msg.MsgType;
-import com.jnks.iot.server.common.msg.TbActorMsg;
-import com.jnks.iot.server.common.msg.TbActorStopReason;
-import com.jnks.iot.server.common.msg.TbMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorStopReason;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
 import com.jnks.iot.server.common.msg.ToCalculatedFieldSystemMsg;
 import com.jnks.iot.server.common.msg.aware.DeviceAwareMsg;
 import com.jnks.iot.server.common.msg.aware.RuleChainAwareMsg;
@@ -58,7 +58,7 @@ public class TenantActor extends ContextAwareActor {
 
     private ApiUsageState apiUsageState;
     private final Set<DeviceId> deletedDevices;
-    private TbActorRef cfActor;
+    private JnksIotActorRef cfActor;
 
     private TenantActor(ActorSystemContext systemContext, TenantId tenantId) {
         super(systemContext);
@@ -71,7 +71,7 @@ public class TenantActor extends ContextAwareActor {
     }
 
     @Override
-    public void init(TbActorCtx ctx) throws TbActorException {
+    public void init(JnksIotActorCtx ctx) throws JnksIotActorException {
         super.init(ctx);
         log.debug("[{}] Starting tenant actor.", tenantId);
         try {
@@ -81,8 +81,8 @@ public class TenantActor extends ContextAwareActor {
                 log.info("[{}] Started tenant actor for missing tenant.", tenantId);
                 return;
             }
-            isCore = systemContext.getServiceInfoProvider().isService(ServiceType.TB_CORE);
-            isRuleEngine = systemContext.getServiceInfoProvider().isService(ServiceType.TB_RULE_ENGINE);
+            isCore = systemContext.getServiceInfoProvider().isService(ServiceType.JNKS_IOT_CORE);
+            isRuleEngine = systemContext.getServiceInfoProvider().isService(ServiceType.JNKS_IOT_RULE_ENGINE);
             if (isRuleEngine && systemContext.getPartitionService().isManagedByCurrentService(tenantId)) {
                 try {
                     cfActor = getOrCreateCalculatedFieldManagerActor();
@@ -111,7 +111,7 @@ public class TenantActor extends ContextAwareActor {
     }
 
     @Override
-    public void destroy(TbActorStopReason stopReason, Throwable cause) {
+    public void destroy(JnksIotActorStopReason stopReason, Throwable cause) {
         log.info("[{}] Stopping tenant actor.", tenantId);
         if (cfActor != null) {
             ctx.stop(cfActor.getActorId());
@@ -120,7 +120,7 @@ public class TenantActor extends ContextAwareActor {
     }
 
     @Override
-    protected boolean doProcess(TbActorMsg msg) {
+    protected boolean doProcess(JnksIotActorMsg msg) {
         if (cantFindTenant) {
             log.info("[{}] Processing missing Tenant msg: {}", tenantId, msg);
             if (msg.getMsgType().equals(MsgType.QUEUE_TO_RULE_ENGINE_MSG)) {
@@ -198,7 +198,7 @@ public class TenantActor extends ContextAwareActor {
     }
 
     private boolean isMyPartition(EntityId entityId) {
-        return systemContext.resolve(ServiceType.TB_CORE, tenantId, entityId).isMyPartition();
+        return systemContext.resolve(ServiceType.JNKS_IOT_CORE, tenantId, entityId).isMyPartition();
     }
 
     private void onQueueToRuleEngineMsg(QueueToRuleEngineMsg msg) {
@@ -206,27 +206,27 @@ public class TenantActor extends ContextAwareActor {
             log.warn("RECEIVED INVALID MESSAGE: {}", msg);
             return;
         }
-        TbMsg tbMsg = msg.getMsg();
+        JnksIotMsg jnksIotMsg = msg.getMsg();
         if (getApiUsageState().isReExecEnabled()) {
-            if (tbMsg.getRuleChainId() == null) {
-                TbActorRef rootChainActor = ruleEngineActorSupport.getRootChainActor();
+            if (jnksIotMsg.getRuleChainId() == null) {
+                JnksIotActorRef rootChainActor = ruleEngineActorSupport.getRootChainActor();
                 if (rootChainActor != null) {
                     rootChainActor.tell(msg);
                 } else {
-                    tbMsg.getCallback().onFailure(new RuleEngineException("No Root Rule Chain available!"));
+                    jnksIotMsg.getCallback().onFailure(new RuleEngineException("No Root Rule Chain available!"));
                     log.info("[{}] No Root Chain: {}", tenantId, msg);
                 }
             } else {
                 try {
-                    ctx.tell(new TbEntityActorId(tbMsg.getRuleChainId()), msg);
-                } catch (TbActorNotRegisteredException ex) {
-                    log.trace("Received message for non-existing rule chain: [{}]", tbMsg.getRuleChainId());
-                    tbMsg.getCallback().onSuccess();
+                    ctx.tell(new JnksIotEntityActorId(jnksIotMsg.getRuleChainId()), msg);
+                } catch (JnksIotActorNotRegisteredException ex) {
+                    log.trace("Received message for non-existing rule chain: [{}]", jnksIotMsg.getRuleChainId());
+                    jnksIotMsg.getCallback().onSuccess();
                 }
             }
         } else {
             log.trace("[{}] Ack message because Rule Engine is disabled", tenantId);
-            tbMsg.getCallback().onSuccess();
+            jnksIotMsg.getCallback().onSuccess();
         }
     }
 
@@ -244,7 +244,7 @@ public class TenantActor extends ContextAwareActor {
             log.debug("RECEIVED MESSAGE FOR DELETED DEVICE: {}", msg);
             return;
         }
-        TbActorRef deviceActor = getOrCreateDeviceActor(msg.getDeviceId());
+        JnksIotActorRef deviceActor = getOrCreateDeviceActor(msg.getDeviceId());
         if (deviceActor == null) {
             log.warn("[{}] Device actor support is not configured. Device id: {}", tenantId, msg.getDeviceId());
             return;
@@ -258,7 +258,7 @@ public class TenantActor extends ContextAwareActor {
 
     private void onPartitionChangeMsg(PartitionChangeMsg msg) {
         ServiceType serviceType = msg.getServiceType();
-        if (ServiceType.TB_RULE_ENGINE.equals(serviceType)) {
+        if (ServiceType.JNKS_IOT_RULE_ENGINE.equals(serviceType)) {
             if (systemContext.getPartitionService().isManagedByCurrentService(tenantId)) {
                 if (cfActor == null) {
                     try {
@@ -288,8 +288,8 @@ public class TenantActor extends ContextAwareActor {
             if (ruleEngineActorSupport != null) {
                 ruleEngineActorSupport.broadcastToRuleChains(ctx, msg);
             }
-        } else if (ServiceType.TB_CORE.equals(serviceType)) {
-            List<TbActorId> deviceActorIds = ctx.filterChildren(new TbEntityTypeActorIdPredicate(EntityType.DEVICE) {
+        } else if (ServiceType.JNKS_IOT_CORE.equals(serviceType)) {
+            List<JnksIotActorId> deviceActorIds = ctx.filterChildren(new JnksIotEntityTypeActorIdPredicate(EntityType.DEVICE) {
                 @Override
                 protected boolean testEntityId(EntityId entityId) {
                     return super.testEntityId(entityId) && !isMyPartition(entityId);
@@ -320,7 +320,7 @@ public class TenantActor extends ContextAwareActor {
         }
         if (isRuleEngine && ruleEngineActorSupport != null) {
             if (ruleChainsInitialized) {
-                TbActorRef target = ruleEngineActorSupport.getEntityActorRef(ctx, msg.getEntityId());
+                JnksIotActorRef target = ruleEngineActorSupport.getEntityActorRef(ctx, msg.getEntityId());
                 if (target != null) {
                     if (msg.getEntityId().getEntityType() == EntityType.RULE_CHAIN) {
                         RuleChain ruleChain = systemContext.getRuleChainService()
@@ -340,7 +340,7 @@ public class TenantActor extends ContextAwareActor {
         }
     }
 
-    private TbActorRef getOrCreateCalculatedFieldManagerActor() {
+    private JnksIotActorRef getOrCreateCalculatedFieldManagerActor() {
         return ruleEngineActorSupport != null ? ruleEngineActorSupport.getOrCreateCalculatedFieldManagerActor(ctx) : null;
     }
 
@@ -360,7 +360,7 @@ public class TenantActor extends ContextAwareActor {
         }
     }
 
-    private TbActorRef getOrCreateDeviceActor(DeviceId deviceId) {
+    private JnksIotActorRef getOrCreateDeviceActor(DeviceId deviceId) {
         return deviceActorSupport != null ? deviceActorSupport.getOrCreateDeviceActor(ctx, tenantId, deviceId) : null;
     }
 
@@ -372,7 +372,7 @@ public class TenantActor extends ContextAwareActor {
     }
 
     @Override
-    public ProcessFailureStrategy onProcessFailure(TbActorMsg msg, Throwable t) {
+    public ProcessFailureStrategy onProcessFailure(JnksIotActorMsg msg, Throwable t) {
         log.error("[{}] Failed to process msg: {}", tenantId, msg, t);
         return doProcessFailure(t);
     }
@@ -387,12 +387,12 @@ public class TenantActor extends ContextAwareActor {
         }
 
         @Override
-        public TbActorId createActorId() {
-            return new TbEntityActorId(tenantId);
+        public JnksIotActorId createActorId() {
+            return new JnksIotEntityActorId(tenantId);
         }
 
         @Override
-        public TbActor createActor() {
+        public JnksIotActor createActor() {
             return new TenantActor(context, tenantId);
         }
     }

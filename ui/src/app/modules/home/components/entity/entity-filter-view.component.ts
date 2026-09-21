@@ -5,7 +5,7 @@ import { AliasEntityType, EntityType, entityTypeTranslations } from '@shared/mod
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'tb-entity-filter-view',
+  selector: 'jnks-iot-entity-filter-view',
   templateUrl: './entity-filter-view.component.html',
   styleUrls: ['./entity-filter-view.component.scss'],
   providers: [

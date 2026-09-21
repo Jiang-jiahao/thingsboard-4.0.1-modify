@@ -19,7 +19,7 @@ import {
   Validators
 } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -44,7 +44,7 @@ import {
 } from '@home/components/widget/lib/settings/common/map/map-layer-settings-panel.component';
 
 @Component({
-  selector: 'tb-map-layer-row',
+  selector: 'jnks-iot-map-layer-row',
   templateUrl: './map-layer-row.component.html',
   styleUrls: ['./map-layer-row.component.scss'],
   providers: [
@@ -94,7 +94,7 @@ export class MapLayerRowComponent implements ControlValueAccessor, OnInit {
 
   constructor(private fb: UntypedFormBuilder,
               private translate: TranslateService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private cd: ChangeDetectorRef,
@@ -175,8 +175,8 @@ export class MapLayerRowComponent implements ControlValueAccessor, OnInit {
         },
         isModal: true
       });
-      mapLayerSettingsPanelPopover.tbComponentRef.instance.popover = mapLayerSettingsPanelPopover;
-      mapLayerSettingsPanelPopover.tbComponentRef.instance.mapLayerSettingsApplied.subscribe((layer) => {
+      mapLayerSettingsPanelPopover.jnksIotComponentRef.instance.popover = mapLayerSettingsPanelPopover;
+      mapLayerSettingsPanelPopover.jnksIotComponentRef.instance.mapLayerSettingsApplied.subscribe((layer) => {
         mapLayerSettingsPanelPopover.hide();
         this.layerFormGroup.patchValue(
           layer,

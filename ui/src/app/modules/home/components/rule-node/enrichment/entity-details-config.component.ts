@@ -10,7 +10,7 @@ import {
 } from '@home/components/rule-node/rule-node-config.models';
 
 @Component({
-  selector: 'tb-enrichment-node-entity-details-config',
+  selector: 'jnks-iot-enrichment-node-entity-details-config',
   templateUrl: './entity-details-config.component.html',
   styleUrls: []
 })

@@ -1,22 +1,22 @@
 :host {
-  .tb-value-source {
+  .jnks-iot-value-source {
     display: flex;
     gap: 12px;
   }
-  .tb-source-field {
+  .jnks-iot-source-field {
     display: flex;
     flex: 1;
     gap: 12px;
-    .tb-type-field, .tb-entity-alias-field {
+    .jnks-iot-type-field, .jnks-iot-entity-alias-field {
       flex: 1;
     }
   }
-  .tb-key-value-field, .tb-constant-field {
+  .jnks-iot-key-value-field, .jnks-iot-constant-field {
     display: flex;
     flex: 1;
   }
   ::ng-deep {
-    .tb-data-key-input {
+    .jnks-iot-data-key-input {
       flex: 1;
     }
   }

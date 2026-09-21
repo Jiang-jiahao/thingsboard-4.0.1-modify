@@ -13,7 +13,7 @@ import {
 import { DateFormatProcessor, DateFormatSettings } from '@shared/models/widget-settings.models';
 
 @Component({
-  selector: 'tb-signal-strength-widget-settings',
+  selector: 'jnks-iot-signal-strength-widget-settings',
   templateUrl: './signal-strength-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss'],
 })

@@ -1,0 +1,144 @@
+package com.jnks.iot.rule.engine.aws.sqs;
+
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.model.MessageAttributeValue;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
+import com.amazonaws.services.sqs.model.SendMessageResult;
+import com.google.common.util.concurrent.ListenableFuture;
+import lombok.extern.slf4j.Slf4j;
+import com.jnks.iot.rule.engine.api.RuleNode;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
+import com.jnks.iot.rule.engine.api.JnksIotNodeConfiguration;
+import com.jnks.iot.rule.engine.api.JnksIotNodeException;
+import com.jnks.iot.rule.engine.api.util.JnksIotNodeUtils;
+import com.jnks.iot.rule.engine.external.JnksIotAbstractExternalNode;
+import com.jnks.iot.server.common.data.StringUtils;
+import com.jnks.iot.server.common.data.plugin.ComponentType;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.jnks.iot.common.util.DonAsynchron.withCallback;
+
+@Slf4j
+@RuleNode(
+        type = ComponentType.EXTERNAL,
+        name = "aws sqs",
+        configClazz = JnksIotSqsNodeConfiguration.class,
+        nodeDescription = "Publish messages to the AWS SQS",
+        nodeDetails = "Will publish message payload and metadata attributes to the AWS SQS queue. Outbound message will contain " +
+                "response fields (<code>messageId</code>, <code>requestId</code>, <code>messageBodyMd5</code>, <code>messageAttributesMd5</code>" +
+                ", <code>sequenceNumber</code>) in the Message Metadata from the AWS SQS." +
+                " For example <b>requestId</b> field can be accessed with <code>metadata.requestId</code>.",
+        configDirective = "jnksIotExternalNodeSqsConfig",
+        iconUrl = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4Ij48cGF0aCBkPSJNMTMuMjMgMTAuNTZWMTBjLTEuOTQgMC0zLjk5LjM5LTMuOTkgMi42NyAwIDEuMTYuNjEgMS45NSAxLjYzIDEuOTUuNzYgMCAxLjQzLS40NyAxLjg2LTEuMjIuNTItLjkzLjUtMS44LjUtMi44NG0yLjcgNi41M2MtLjE4LjE2LS40My4xNy0uNjMuMDYtLjg5LS43NC0xLjA1LTEuMDgtMS41NC0xLjc5LTEuNDcgMS41LTIuNTEgMS45NS00LjQyIDEuOTUtMi4yNSAwLTQuMDEtMS4zOS00LjAxLTQuMTcgMC0yLjE4IDEuMTctMy42NCAyLjg2LTQuMzggMS40Ni0uNjQgMy40OS0uNzYgNS4wNC0uOTNWNy41YzAtLjY2LjA1LTEuNDEtLjMzLTEuOTYtLjMyLS40OS0uOTUtLjctMS41LS43LTEuMDIgMC0xLjkzLjUzLTIuMTUgMS42MS0uMDUuMjQtLjI1LjQ4LS40Ny40OWwtMi42LS4yOGMtLjIyLS4wNS0uNDYtLjIyLS40LS41Ni42LTMuMTUgMy40NS00LjEgNi00LjEgMS4zIDAgMyAuMzUgNC4wMyAxLjMzQzE3LjExIDQuNTUgMTcgNi4xOCAxNyA3Ljk1djQuMTdjMCAxLjI1LjUgMS44MSAxIDIuNDguMTcuMjUuMjEuNTQgMCAuNzFsLTIuMDYgMS43OGgtLjAxIj48L3BhdGg+PHBhdGggZD0iTTIwLjE2IDE5LjU0QzE4IDIxLjE0IDE0LjgyIDIyIDEyLjEgMjJjLTMuODEgMC03LjI1LTEuNDEtOS44NS0zLjc2LS4yLS4xOC0uMDItLjQzLjI1LS4yOSAyLjc4IDEuNjMgNi4yNSAyLjYxIDkuODMgMi42MSAyLjQxIDAgNS4wNy0uNSA3LjUxLTEuNTMuMzctLjE2LjY2LjI0LjMyLjUxIj48L3BhdGg+PHBhdGggZD0iTTIxLjA3IDE4LjVjLS4yOC0uMzYtMS44NS0uMTctMi41Ny0uMDgtLjE5LjAyLS4yMi0uMTYtLjAzLS4zIDEuMjQtLjg4IDMuMjktLjYyIDMuNTMtLjMzLjI0LjMtLjA3IDIuMzUtMS4yNCAzLjMyLS4xOC4xNi0uMzUuMDctLjI2LS4xMS4yNi0uNjcuODUtMi4xNC41Ny0yLjV6Ij48L3BhdGg+PC9zdmc+"
+)
+public class JnksIotSqsNode extends JnksIotAbstractExternalNode {
+
+    private static final String MESSAGE_ID = "messageId";
+    private static final String REQUEST_ID = "requestId";
+    private static final String MESSAGE_BODY_MD5 = "messageBodyMd5";
+    private static final String MESSAGE_ATTRIBUTES_MD5 = "messageAttributesMd5";
+    private static final String SEQUENCE_NUMBER = "sequenceNumber";
+    private static final String ERROR = "error";
+
+    private JnksIotSqsNodeConfiguration config;
+    private AmazonSQS sqsClient;
+
+    @Override
+    public void init(JnksIotContext ctx, JnksIotNodeConfiguration configuration) throws JnksIotNodeException {
+        super.init(ctx);
+        this.config = JnksIotNodeUtils.convert(configuration, JnksIotSqsNodeConfiguration.class);
+        AWSCredentials awsCredentials = new BasicAWSCredentials(this.config.getAccessKeyId(), this.config.getSecretAccessKey());
+        AWSStaticCredentialsProvider credProvider = new AWSStaticCredentialsProvider(awsCredentials);
+        try {
+            this.sqsClient = AmazonSQSClientBuilder.standard()
+                    .withCredentials(credProvider)
+                    .withRegion(this.config.getRegion())
+                    .withClientConfiguration(new ClientConfiguration()
+                            .withConnectionTimeout(10000)
+                            .withRequestTimeout(5000))
+                    .build();
+        } catch (Exception e) {
+            throw new JnksIotNodeException(e);
+        }
+    }
+
+    @Override
+    public void onMsg(JnksIotContext ctx, JnksIotMsg msg) {
+        var jnksIotMsg = ackIfNeeded(ctx, msg);
+        withCallback(publishMessageAsync(ctx, jnksIotMsg),
+                m -> tellSuccess(ctx, m),
+                t -> tellFailure(ctx, processException(jnksIotMsg, t), t));
+    }
+
+    private ListenableFuture<JnksIotMsg> publishMessageAsync(JnksIotContext ctx, JnksIotMsg msg) {
+        return ctx.getExternalCallExecutor().executeAsync(() -> publishMessage(msg));
+    }
+
+    private JnksIotMsg publishMessage(JnksIotMsg msg) {
+        String queueUrl = JnksIotNodeUtils.processPattern(this.config.getQueueUrlPattern(), msg);
+        SendMessageRequest sendMsgRequest =  new SendMessageRequest();
+        sendMsgRequest.withQueueUrl(queueUrl);
+        sendMsgRequest.withMessageBody(msg.getData());
+        Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
+        this.config.getMessageAttributes().forEach((k,v) -> {
+            String name = JnksIotNodeUtils.processPattern(k, msg);
+            String val = JnksIotNodeUtils.processPattern(v, msg);
+            messageAttributes.put(name, new MessageAttributeValue().withDataType("String").withStringValue(val));
+        });
+        sendMsgRequest.setMessageAttributes(messageAttributes);
+        if (this.config.getQueueType() == JnksIotSqsNodeConfiguration.QueueType.STANDARD) {
+            sendMsgRequest.withDelaySeconds(this.config.getDelaySeconds());
+        } else {
+            sendMsgRequest.withMessageDeduplicationId(msg.getId().toString());
+            sendMsgRequest.withMessageGroupId(msg.getOriginator().toString());
+        }
+        SendMessageResult result = this.sqsClient.sendMessage(sendMsgRequest);
+        return processSendMessageResult(msg, result);
+    }
+
+    private JnksIotMsg processSendMessageResult(JnksIotMsg origMsg, SendMessageResult result) {
+        JnksIotMsgMetaData metaData = origMsg.getMetaData().copy();
+        metaData.putValue(MESSAGE_ID, result.getMessageId());
+        metaData.putValue(REQUEST_ID, result.getSdkResponseMetadata().getRequestId());
+        if (!StringUtils.isEmpty(result.getMD5OfMessageBody())) {
+            metaData.putValue(MESSAGE_BODY_MD5, result.getMD5OfMessageBody());
+        }
+        if (!StringUtils.isEmpty(result.getMD5OfMessageAttributes())) {
+            metaData.putValue(MESSAGE_ATTRIBUTES_MD5, result.getMD5OfMessageAttributes());
+        }
+        if (!StringUtils.isEmpty(result.getSequenceNumber())) {
+            metaData.putValue(SEQUENCE_NUMBER, result.getSequenceNumber());
+        }
+        return origMsg.transform()
+                .metaData(metaData)
+                .build();
+    }
+
+    private JnksIotMsg processException(JnksIotMsg origMsg, Throwable t) {
+        JnksIotMsgMetaData metaData = origMsg.getMetaData().copy();
+        metaData.putValue(ERROR, t.getClass() + ": " + t.getMessage());
+        return origMsg.transform()
+                .metaData(metaData)
+                .build();
+    }
+
+    @Override
+    public void destroy() {
+        if (this.sqsClient != null) {
+            try {
+                this.sqsClient.shutdown();
+            } catch (Exception e) {
+                log.error("Failed to shutdown SQS client during destroy()", e);
+            }
+        }
+    }
+}

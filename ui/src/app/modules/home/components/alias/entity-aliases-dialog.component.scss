@@ -1,11 +1,11 @@
 :host {
 
-  .tb-aliases-header {
+  .jnks-iot-aliases-header {
     min-height: 40px;
     padding: 0 11px;
     margin: 5px;
 
-    .tb-header-label {
+    .jnks-iot-header-label {
       font-size: 14px;
       color: rgba(0, 0, 0, .570588);
     }
@@ -15,11 +15,11 @@
     margin: -1px -24px;
   }
 
-  .tb-alias {
+  .jnks-iot-alias {
     padding: 0 0 0 10px;
     margin: 5px;
 
-    .tb-resolve-multiple-switch {
+    .jnks-iot-resolve-multiple-switch {
       padding-left: 10px;
 
       .resolve-multiple-switch {

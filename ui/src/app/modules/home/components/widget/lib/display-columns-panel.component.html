@@ -1,5 +1,5 @@
 <div class="mat-content mat-padding flex flex-col">
-  <label class="tb-title" translate>entity.columns-to-display</label>
+  <label class="jnks-iot-title" translate>entity.columns-to-display</label>
   <mat-checkbox [(ngModel)]="column.display" *ngFor="let column of (columns | selectableColumns)"
                 (ngModelChange)="update()">
     {{ column.title }}

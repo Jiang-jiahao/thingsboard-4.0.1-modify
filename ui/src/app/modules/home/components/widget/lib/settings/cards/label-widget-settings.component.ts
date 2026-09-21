@@ -7,7 +7,7 @@ import { LabelWidgetLabel } from '@home/components/widget/lib/settings/cards/lab
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 
 @Component({
-  selector: 'tb-label-widget-settings',
+  selector: 'jnks-iot-label-widget-settings',
   templateUrl: './label-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

@@ -1,6 +1,6 @@
 <form class="mat-content mat-padding flex flex-1 flex-col" (ngSubmit)="update()">
-  <div class="tb-form-panel no-padding">
-    <div class="tb-form-row column-xs">
+  <div class="jnks-iot-form-panel no-padding">
+    <div class="jnks-iot-form-row column-xs">
       <div class="fixed-title-width" translate>widgets.notification.notification-types</div>
       <mat-form-field floatLabel="auto" appearance="outline" subscriptSizing="dynamic" class="fb-chips flex">
         <mat-chip-grid #chipList>
@@ -26,7 +26,7 @@
                  (matChipInputTokenEnd)="chipAdd($event)">
         </mat-chip-grid>
         <mat-autocomplete #NotificationTypeAutocomplete="matAutocomplete"
-                          class="tb-autocomplete"
+                          class="jnks-iot-autocomplete"
                           (optionSelected)="selected($event)"
                           [displayWith]="displayTypeFn">
           <mat-option *ngFor="let type of filteredNotificationTypesList | async" [value]="type">
@@ -37,7 +37,7 @@
     </div>
   </div>
 
-  <div class="tb-panel-actions flex flex-row items-center justify-end">
+  <div class="jnks-iot-panel-actions flex flex-row items-center justify-end">
     <button type="button"
             mat-button
             (click)="reset()"

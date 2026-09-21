@@ -16,7 +16,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
-  selector: 'tb-states-component'
+  selector: 'jnks-iot-states-component'
 })
 export class StatesComponentDirective implements OnInit, OnDestroy, OnChanges {
 

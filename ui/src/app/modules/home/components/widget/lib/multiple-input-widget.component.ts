@@ -118,7 +118,7 @@ interface MultipleInputWidgetSource {
 }
 
 @Component({
-  selector: 'tb-multiple-input-widget ',
+  selector: 'jnks-iot-multiple-input-widget ',
   templateUrl: './multiple-input-widget.component.html',
   styleUrls: ['./multiple-input-widget.component.scss']
 })
@@ -768,7 +768,7 @@ export class MultipleInputWidgetComponent extends PageComponent implements OnIni
     const formControl = this.multipleInputFormGroup.controls[key.formId];
     this.dialog.open<JsonObjectEditDialogComponent, JsonObjectEditDialogData, object>(JsonObjectEditDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         jsonValue: formControl.value,
         required: key.settings.required,

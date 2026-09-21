@@ -5,7 +5,7 @@ import { EntitySearchDirection } from '@app/shared/models/relation.models';
 import { EntityType } from '@app/shared/models/entity-type.models';
 
 @Component({
-  selector: 'tb-action-node-create-relation-config',
+  selector: 'jnks-iot-action-node-create-relation-config',
   templateUrl: './create-relation-config.component.html',
   styleUrls: []
 })

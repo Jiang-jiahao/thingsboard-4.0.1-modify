@@ -39,7 +39,7 @@ export const gpioItemValidator = (hasColor: boolean): ValidatorFn => (control: A
 };
 
 @Component({
-  selector: 'tb-gpio-item',
+  selector: 'jnks-iot-gpio-item',
   templateUrl: './gpio-item.component.html',
   styleUrls: ['./gpio-item.component.scss'],
   providers: [

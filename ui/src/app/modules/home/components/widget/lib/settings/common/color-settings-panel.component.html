@@ -1,23 +1,23 @@
-<div class="tb-color-settings-panel" [formGroup]="colorSettingsFormGroup">
-  <div class="tb-color-settings-title" translate>widgets.color.color-settings</div>
+<div class="jnks-iot-color-settings-panel" [formGroup]="colorSettingsFormGroup">
+  <div class="jnks-iot-color-settings-title" translate>widgets.color.color-settings</div>
   <div class="flex flex-row">
-    <tb-toggle-select formControlName="type" class="max-w-70% flex-full xs:flex-1">
-      <tb-toggle-option *ngFor="let type of colorTypes"
+    <jnks-iot-toggle-select formControlName="type" class="max-w-70% flex-full xs:flex-1">
+      <jnks-iot-toggle-option *ngFor="let type of colorTypes"
                         [value]="type">
         {{ colorTypeTranslationsMap.get(type) | translate }}
-      </tb-toggle-option>
-    </tb-toggle-select>
+      </jnks-iot-toggle-option>
+    </jnks-iot-toggle-select>
   </div>
-  <div class="tb-form-row space-between">
+  <div class="jnks-iot-form-row space-between">
     <div translate>widgets.color.color</div>
-    <tb-color-input asBoxInput
+    <jnks-iot-color-input asBoxInput
                     formControlName="color">
-    </tb-color-input>
+    </jnks-iot-color-input>
   </div>
-  <div class="tb-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== colorType.constant">
+  <div class="jnks-iot-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== colorType.constant">
   </div>
-  <div class="tb-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== colorType.gradient">
-    <tb-gradient class="tb-gradient-panel"
+  <div class="jnks-iot-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== colorType.gradient">
+    <jnks-iot-gradient class="jnks-iot-gradient-panel"
                  formControlName="gradient"
                  [minValue]="minValue"
                  [maxValue]="maxValue"
@@ -26,10 +26,10 @@
                  [dataKeyCallbacks]="dataKeyCallbacks"
                  [datasource]="datasource"
                  [popover]="popover">
-    </tb-gradient>
+    </jnks-iot-gradient>
   </div>
-  <div class="tb-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== colorType.range">
-    <tb-color-range-list class="tb-color-ranges-panel"
+  <div class="jnks-iot-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== colorType.range">
+    <jnks-iot-color-range-list class="jnks-iot-color-ranges-panel"
                          formControlName="rangeList"
                          panelTitle="{{ 'widgets.color.value-range' | translate }}"
                          [advancedMode]="rangeAdvancedMode"
@@ -37,12 +37,12 @@
                          [dataKeyCallbacks]="dataKeyCallbacks"
                          [datasource]="datasource"
                          [popover]="popover">
-    </tb-color-range-list>
+    </jnks-iot-color-range-list>
   </div>
-  <div class="tb-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== colorType.function">
+  <div class="jnks-iot-color-settings-panel-body" [class.!hidden]="colorSettingsFormGroup.get('type').value !== colorType.function">
     <ng-container *ngTemplateOutlet="function"></ng-container>
   </div>
-  <div class="tb-color-settings-panel-buttons">
+  <div class="jnks-iot-color-settings-panel-buttons">
     <button *ngIf="settingsComponents?.length"
             #copySettingsButton
             mat-stroked-button
@@ -77,12 +77,12 @@
 </div>
 
 <ng-template #function>
-  <div class="tb-form-panel no-padding no-border" [formGroup]="colorSettingsFormGroup">
-    <tb-js-func formControlName="colorFunction"
+  <div class="jnks-iot-form-panel no-padding no-border" [formGroup]="colorSettingsFormGroup">
+    <jnks-iot-js-func formControlName="colorFunction"
                 [functionArgs]="['value']"
                 [globalVariables]="functionScopeVariables"
                 functionTitle="{{ 'widgets.color.color-function' | translate }}"
                 helpId="widget/lib/card/value_color_fn">
-    </tb-js-func>
+    </jnks-iot-js-func>
   </div>
 </ng-template>

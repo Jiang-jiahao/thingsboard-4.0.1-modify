@@ -27,7 +27,7 @@
       font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
     }
 
-    .tb-loading-spinner {
+    .jnks-iot-loading-spinner {
       z-index: 9999;
       position: fixed;
       inset: 0;
@@ -38,7 +38,7 @@
       box-sizing: border-box;
     }
 
-    .tb-app-loader-card {
+    .jnks-iot-app-loader-card {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -51,10 +51,10 @@
         0 4px 24px rgba(12, 35, 64, 0.08),
         0 1px 3px rgba(15, 23, 42, 0.06);
       min-width: 220px;
-      animation: tb-loader-fade-in 0.35s ease-out both;
+      animation: jnks-iot-loader-fade-in 0.35s ease-out both;
     }
 
-    .tb-app-loader-emblem-wrap {
+    .jnks-iot-app-loader-emblem-wrap {
       position: relative;
       width: 72px;
       height: 72px;
@@ -63,17 +63,17 @@
       justify-content: center;
     }
 
-    .tb-app-loader-ring {
+    .jnks-iot-app-loader-ring {
       position: absolute;
       inset: 0;
       border-radius: 50%;
       border: 3px solid rgba(30, 73, 118, 0.12);
       border-top-color: #1e4976;
       border-right-color: #3b6ea8;
-      animation: tb-loader-spin 0.9s linear infinite;
+      animation: jnks-iot-loader-spin 0.9s linear infinite;
     }
 
-    .tb-app-loader-emblem {
+    .jnks-iot-app-loader-emblem {
       width: 56px;
       height: 56px;
       border-radius: 50%;
@@ -81,10 +81,10 @@
       background: #060f18;
       border: 2px solid rgba(255, 255, 255, 0.14);
       box-shadow: 0 2px 12px rgba(12, 35, 64, 0.2);
-      animation: tb-loader-emblem-pulse 2s ease-in-out infinite;
+      animation: jnks-iot-loader-emblem-pulse 2s ease-in-out infinite;
     }
 
-    .tb-app-loader-emblem img {
+    .jnks-iot-app-loader-emblem img {
       display: block;
       width: 100%;
       height: 100%;
@@ -92,7 +92,7 @@
       object-position: left center;
     }
 
-    .tb-app-loader-title {
+    .jnks-iot-app-loader-title {
       margin: 0;
       font-size: 15px;
       font-weight: 600;
@@ -100,14 +100,14 @@
       color: #0c2340;
     }
 
-    .tb-app-loader-subtitle {
+    .jnks-iot-app-loader-subtitle {
       margin: -14px 0 0;
       font-size: 12px;
       font-weight: 500;
       color: #64748b;
     }
 
-    .tb-app-loader-track {
+    .jnks-iot-app-loader-track {
       width: 168px;
       height: 4px;
       border-radius: 4px;
@@ -115,49 +115,49 @@
       overflow: hidden;
     }
 
-    .tb-app-loader-bar {
+    .jnks-iot-app-loader-bar {
       width: 42%;
       height: 100%;
       border-radius: 4px;
       background: linear-gradient(90deg, #0c2340, #1e4976 55%, #3b6ea8);
-      animation: tb-loader-slide 1.2s ease-in-out infinite;
+      animation: jnks-iot-loader-slide 1.2s ease-in-out infinite;
     }
 
-    @keyframes tb-loader-fade-in {
+    @keyframes jnks-iot-loader-fade-in {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes tb-loader-spin {
+    @keyframes jnks-iot-loader-spin {
       to { transform: rotate(360deg); }
     }
 
-    @keyframes tb-loader-emblem-pulse {
+    @keyframes jnks-iot-loader-emblem-pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.03); }
     }
 
-    @keyframes tb-loader-slide {
+    @keyframes jnks-iot-loader-slide {
       0% { transform: translateX(-120%); }
       100% { transform: translateX(320%); }
     }
 
   </style>
 </head>
-<body class="tb-default">
-  <tb-root></tb-root>
-  <div id="tb-loading-spinner" class="tb-loading-spinner" role="status" aria-live="polite" aria-label="正在加载">
-    <div class="tb-app-loader-card">
-      <div class="tb-app-loader-emblem-wrap">
-        <div class="tb-app-loader-ring" aria-hidden="true"></div>
-        <div class="tb-app-loader-emblem">
+<body class="jnks-iot-default">
+  <jnks-iot-root></jnks-iot-root>
+  <div id="jnks-iot-loading-spinner" class="jnks-iot-loading-spinner" role="status" aria-live="polite" aria-label="正在加载">
+    <div class="jnks-iot-app-loader-card">
+      <div class="jnks-iot-app-loader-emblem-wrap">
+        <div class="jnks-iot-app-loader-ring" aria-hidden="true"></div>
+        <div class="jnks-iot-app-loader-emblem">
           <img src="assets/jnks-brand-emblem.png" alt="" width="56" height="56"/>
         </div>
       </div>
-      <p class="tb-app-loader-title">JnksIOT</p>
-      <p class="tb-app-loader-subtitle">杰能科世物联网平台</p>
-      <div class="tb-app-loader-track" aria-hidden="true">
-        <div class="tb-app-loader-bar"></div>
+      <p class="jnks-iot-app-loader-title">JnksIOT</p>
+      <p class="jnks-iot-app-loader-subtitle">杰能科世物联网平台</p>
+      <div class="jnks-iot-app-loader-track" aria-hidden="true">
+        <div class="jnks-iot-app-loader-bar"></div>
       </div>
     </div>
   </div>

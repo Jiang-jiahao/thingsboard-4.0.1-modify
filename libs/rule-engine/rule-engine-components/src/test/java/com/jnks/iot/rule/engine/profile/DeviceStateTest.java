@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import com.jnks.iot.common.util.JacksonUtil;
 import com.jnks.iot.rule.engine.api.RuleEngineAlarmService;
-import com.jnks.iot.rule.engine.api.TbContext;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
 import com.jnks.iot.server.common.data.AttributeScope;
 import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.alarm.Alarm;
@@ -24,12 +24,12 @@ import com.jnks.iot.server.common.data.device.profile.DeviceProfileData;
 import com.jnks.iot.server.common.data.device.profile.SimpleAlarmConditionSpec;
 import com.jnks.iot.server.common.data.id.AlarmId;
 import com.jnks.iot.server.common.data.id.DeviceId;
-import com.jnks.iot.server.common.data.msg.TbMsgType;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
 import com.jnks.iot.server.common.data.query.BooleanFilterPredicate;
 import com.jnks.iot.server.common.data.query.EntityKeyValueType;
 import com.jnks.iot.server.common.data.query.FilterPredicateValue;
-import com.jnks.iot.server.common.msg.TbMsg;
-import com.jnks.iot.server.common.msg.TbMsgMetaData;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
 import com.jnks.iot.server.dao.attributes.AttributesService;
 import com.jnks.iot.server.dao.device.DeviceService;
 
@@ -52,11 +52,11 @@ import static org.mockito.Mockito.when;
 
 public class DeviceStateTest {
 
-    private TbContext ctx;
+    private JnksIotContext ctx;
 
     @BeforeEach
     public void beforeEach() {
-        ctx = mock(TbContext.class);
+        ctx = mock(JnksIotContext.class);
 
         when(ctx.getDeviceService()).thenReturn(mock(DeviceService.class));
 
@@ -77,12 +77,12 @@ public class DeviceStateTest {
         });
         when(ctx.getAlarmService()).thenReturn(alarmService);
 
-        when(ctx.newMsg(any(), any(TbMsgType.class), any(), any(), any(), any())).thenAnswer(invocationOnMock -> {
-            TbMsgType type = invocationOnMock.getArgument(1);
+        when(ctx.newMsg(any(), any(JnksIotMsgType.class), any(), any(), any(), any())).thenAnswer(invocationOnMock -> {
+            JnksIotMsgType type = invocationOnMock.getArgument(1);
             String data = invocationOnMock.getArgument(invocationOnMock.getArguments().length - 1);
-            return TbMsg.newMsg()
+            return JnksIotMsg.newMsg()
                     .type(type)
-                    .copyMetaData(TbMsgMetaData.EMPTY)
+                    .copyMetaData(JnksIotMsgMetaData.EMPTY)
                     .data(data)
                     .build();
         });
@@ -96,32 +96,32 @@ public class DeviceStateTest {
         DeviceId deviceId = new DeviceId(UUID.randomUUID());
         DeviceState deviceState = createDeviceState(deviceId, alarmConfig);
 
-        TbMsg attributeUpdateMsg = TbMsg.newMsg()
-                .type(TbMsgType.POST_ATTRIBUTES_REQUEST)
+        JnksIotMsg attributeUpdateMsg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_ATTRIBUTES_REQUEST)
                 .originator(deviceId)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data("{ \"enabled\": false }")
                 .build();
 
         deviceState.process(ctx, attributeUpdateMsg);
 
-        ArgumentCaptor<TbMsg> resultMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+        ArgumentCaptor<JnksIotMsg> resultMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
         verify(ctx).enqueueForTellNext(resultMsgCaptor.capture(), eq("Alarm Created"));
         Alarm alarm = JacksonUtil.fromString(resultMsgCaptor.getValue().getData(), Alarm.class);
 
-        deviceState.process(ctx, TbMsg.newMsg()
-                .type(TbMsgType.ALARM_CLEAR)
+        deviceState.process(ctx, JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.ALARM_CLEAR)
                 .originator(deviceId)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(JacksonUtil.toString(alarm))
                 .build());
         reset(ctx);
 
         String deletedAttributes = "{ \"attributes\": [ \"other\" ] }";
-        deviceState.process(ctx, TbMsg.newMsg()
-                .type(TbMsgType.ATTRIBUTES_DELETED)
+        deviceState.process(ctx, JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.ATTRIBUTES_DELETED)
                 .originator(deviceId)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(deletedAttributes)
                 .build());
         verify(ctx, never()).enqueueForTellNext(any(), anyString());
@@ -133,29 +133,29 @@ public class DeviceStateTest {
         DeviceId deviceId = new DeviceId(UUID.randomUUID());
         DeviceState deviceState = createDeviceState(deviceId, alarmConfig);
 
-        TbMsg attributeUpdateMsg = TbMsg.newMsg()
-                .type(TbMsgType.POST_ATTRIBUTES_REQUEST)
+        JnksIotMsg attributeUpdateMsg = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.POST_ATTRIBUTES_REQUEST)
                 .originator(deviceId)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data("{ \"enabled\": false }")
                 .build();
 
         deviceState.process(ctx, attributeUpdateMsg);
-        ArgumentCaptor<TbMsg> resultMsgCaptor = ArgumentCaptor.forClass(TbMsg.class);
+        ArgumentCaptor<JnksIotMsg> resultMsgCaptor = ArgumentCaptor.forClass(JnksIotMsg.class);
         verify(ctx).enqueueForTellNext(resultMsgCaptor.capture(), eq("Alarm Created"));
         Alarm alarm = JacksonUtil.fromString(resultMsgCaptor.getValue().getData(), Alarm.class);
 
-        deviceState.process(ctx, TbMsg.newMsg()
-                .type(TbMsgType.ALARM_CLEAR)
+        deviceState.process(ctx, JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.ALARM_CLEAR)
                 .originator(deviceId)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(JacksonUtil.toString(alarm))
                 .build());
 
-        TbMsg alarmDeleteNotification = TbMsg.newMsg()
-                .type(TbMsgType.ALARM_DELETE)
+        JnksIotMsg alarmDeleteNotification = JnksIotMsg.newMsg()
+                .type(JnksIotMsgType.ALARM_DELETE)
                 .originator(deviceId)
-                .copyMetaData(TbMsgMetaData.EMPTY)
+                .copyMetaData(JnksIotMsgMetaData.EMPTY)
                 .data(JacksonUtil.toString(alarm))
                 .build();
         assertDoesNotThrow(() -> {
@@ -171,7 +171,7 @@ public class DeviceStateTest {
         deviceProfile.setProfileData(profileData);
 
         ProfileState profileState = new ProfileState(deviceProfile);
-        return new DeviceState(ctx, new TbDeviceProfileNodeConfiguration(),
+        return new DeviceState(ctx, new JnksIotDeviceProfileNodeConfiguration(),
                 deviceId, profileState, null);
     }
 

@@ -17,7 +17,7 @@ import {
 } from '@home/components/rule-node/action/attributes-config.model';
 
 @Component({
-  selector: 'tb-action-node-attributes-config',
+  selector: 'jnks-iot-action-node-attributes-config',
   templateUrl: './attributes-config.component.html',
   styleUrls: []
 })

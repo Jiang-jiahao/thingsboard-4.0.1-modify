@@ -1,0 +1,29 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.jnks.iot</groupId>
+        <version>4.0.1</version>
+        <artifactId>images</artifactId>
+    </parent>
+    <groupId>com.jnks.iot.images</groupId>
+    <artifactId>jnks-iot-transport-images</artifactId>
+    <packaging>pom</packaging>
+
+    <name>jnks-iot-transport-images</name>
+    <url>https://iot.example.com</url>
+
+    <properties>
+        <main.dir>${basedir}/../..</main.dir>
+    </properties>
+
+    <modules>
+        <module>jnks-iot-mqtt-transport-image</module>
+        <module>jnks-iot-http-transport-image</module>
+        <module>jnks-iot-coap-transport-image</module>
+        <module>jnks-iot-lwm2m-transport-image</module>
+        <module>jnks-iot-snmp-transport-image</module>
+        <module>jnks-iot-tcp-transport-image</module>
+        <module>jnks-iot-udp-transport-image</module>
+    </modules>
+</project>

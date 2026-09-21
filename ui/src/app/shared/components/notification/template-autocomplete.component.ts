@@ -27,7 +27,7 @@ import { MatButton } from '@angular/material/button';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-template-autocomplete',
+  selector: 'jnks-iot-template-autocomplete',
   templateUrl: './template-autocomplete.component.html',
   styleUrls: ['./template-autocomplete.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -210,7 +210,7 @@ export class TemplateAutocompleteComponent implements ControlValueAccessor, OnIn
     this.dialog.open<TemplateNotificationDialogComponent, TemplateNotificationDialogData,
       NotificationTemplate>(TemplateNotificationDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: dialogData
     }).afterClosed()
       .subscribe((res) => {

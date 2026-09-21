@@ -688,7 +688,7 @@ export class ImportExportService {
           const ruleChainNode: RuleNode = {
             name: '',
             singletonMode: false,
-            type: 'com.jnks.iot.rule.engine.flow.TbRuleChainInputNode',
+            type: 'com.jnks.iot.rule.engine.flow.JnksIotRuleChainInputNode',
             configuration: {
               ruleChainId: ruleChainConnection.targetRuleChainId.id
             },
@@ -924,7 +924,7 @@ export class ImportExportService {
   private validateImportedTenantProfile(tenantProfile: TenantProfile): boolean {
     return isDefined(tenantProfile.name)
       && isDefined(tenantProfile.profileData)
-      && isDefined(tenantProfile.isolatedTbRuleEngine);
+      && isDefined(tenantProfile.isolatedJnksIotRuleEngine);
   }
 
   private sumObject<T>(obj1: T, obj2: T): T {
@@ -1142,7 +1142,7 @@ export class ImportExportService {
     return this.dialog.open<ImportDialogComponent, ImportDialogData,
       any>(ImportDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         importTitle,
         importFileLabel,
@@ -1258,7 +1258,7 @@ export class ImportExportService {
     return this.dialog.open<ExportResourceDialogComponent, ExportResourceDialogData, ExportResourceDialogDialogResult>(
       ExportResourceDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: { title, prompt, include: includeResources, ignoreLoading }
       }
     ).afterClosed();

@@ -19,7 +19,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { getCurrentAuthState } from '@core/auth/auth.selectors';
 
 @Component({
-  selector: 'tb-resources-library',
+  selector: 'jnks-iot-resources-library',
   templateUrl: './resources-library.component.html'
 })
 export class ResourcesLibraryComponent extends EntityComponent<Resource> implements OnInit, OnDestroy {

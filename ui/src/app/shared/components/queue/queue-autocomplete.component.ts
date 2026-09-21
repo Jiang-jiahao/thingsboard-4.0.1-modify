@@ -18,7 +18,7 @@ import { emptyPageData } from '@shared/models/page/page-data';
 import { SubscriptSizing } from '@angular/material/form-field';
 
 @Component({
-  selector: 'tb-queue-autocomplete',
+  selector: 'jnks-iot-queue-autocomplete',
   templateUrl: './queue-autocomplete.component.html',
   styleUrls: ['./queue-autocomplete.component.scss'],
   providers: [{

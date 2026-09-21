@@ -122,7 +122,7 @@ self.onDataUpdated = function() {
 
 ![image](${helpBaseUrl}/help/images/widget/editor/examples/alarm-widget-sample.png)
 
-In this example, the **alarmSource** and **alarms** properties of <span trigger-style="fontSize: 16px;" trigger-text="<b>subscription</b>" tb-help-popup="widget/editor/widget_js_subscription_object"></span> are assigned to **$scope** and become accessible within HTML template.
+In this example, the **alarmSource** and **alarms** properties of <span trigger-style="fontSize: 16px;" trigger-text="<b>subscription</b>" jnks-iot-help-popup="widget/editor/widget_js_subscription_object"></span> are assigned to **$scope** and become accessible within HTML template.
 
 Inside the HTML, a special [***ngFor**{:target="_blank"}](https://angular.io/api/common/NgForOf) structural angular directive is used in order to iterate over available alarm **dataKeys** of **alarmSource** and render corresponding columns.
 

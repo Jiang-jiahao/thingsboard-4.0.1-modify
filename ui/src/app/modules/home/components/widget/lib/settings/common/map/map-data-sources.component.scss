@@ -1,19 +1,19 @@
-.tb-map-data-sources {
-  .tb-form-table-header-cell {
-    &.tb-source-header {
+.jnks-iot-map-data-sources {
+  .jnks-iot-form-table-header-cell {
+    &.jnks-iot-source-header {
       flex: 1 1 70%;
     }
-    &.tb-filter-header {
+    &.jnks-iot-filter-header {
       flex: 1 1 30%;
     }
-    &.tb-actions-header {
+    &.jnks-iot-actions-header {
       width: 40px;
       min-width: 40px;
     }
   }
 
-  .tb-form-table-body {
-    tb-map-data-source-row {
+  .jnks-iot-form-table-body {
+    jnks-iot-map-data-source-row {
       overflow: hidden;
     }
   }

@@ -30,12 +30,12 @@
         padding: 0 8px;
       }
 
-      .tb-details-title-header {
+      .jnks-iot-details-title-header {
         min-width: 0;
         width: auto;
       }
 
-      .tb-details-title {
+      .jnks-iot-details-title {
         font-size: 1rem;
         font-weight: 500;
 
@@ -44,12 +44,12 @@
         }
       }
 
-      .tb-details-subtitle {
+      .jnks-iot-details-subtitle {
         font-size: 0.9rem;
         opacity: .8;
       }
 
-      .tb-ellipsis {
+      .jnks-iot-ellipsis {
         width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -65,13 +65,13 @@
       width: 60%;
     }
 
-    .tb-header-button {
-      .tb-btn-header {
+    .jnks-iot-header-button {
+      .jnks-iot-btn-header {
         position: relative !important;
-        animation: tbMoveFromTopFade .3s ease both;
+        animation: jnksIotMoveFromTopFade .3s ease both;
 
-        &.tb-hide {
-          animation: tbMoveToTopFade .3s ease both;
+        &.jnks-iot-hide {
+          animation: jnksIotMoveToTopFade .3s ease both;
         }
       }
     }
@@ -79,7 +79,7 @@
 }
 
 :host ::ng-deep {
-  .tb-help {
+  .jnks-iot-help {
     .mat-mdc-icon-button.mat-primary {
       color: rgba(0, 0, 0, 0.52);
     }
@@ -90,9 +90,9 @@
     overflow: hidden;
 
     > .mat-mdc-tab-group {
-      &.tb-tabs-fade {
+      &.jnks-iot-tabs-fade {
         .mat-mdc-tab-body.mat-mdc-tab-body-active .mat-mdc-tab-body-content {
-          animation: tbTabFadeIn 0.2s ease-out;
+          animation: jnksIotTabFadeIn 0.2s ease-out;
         }
       }
 
@@ -112,7 +112,7 @@
   }
 }
 
-@keyframes tbTabFadeIn {
+@keyframes jnksIotTabFadeIn {
   from {
     opacity: 0;
   }

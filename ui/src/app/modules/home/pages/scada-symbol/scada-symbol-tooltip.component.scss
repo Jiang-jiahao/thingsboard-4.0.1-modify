@@ -1,4 +1,4 @@
-.tb-scada-symbol-tooltip-panel {
+.jnks-iot-scada-symbol-tooltip-panel {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -10,7 +10,7 @@
     align-items: start;
   }
 
-  .tb-confirm-text {
+  .jnks-iot-confirm-text {
     font-size: 14px;
     line-height: 16px;
     text-align: center;
@@ -28,7 +28,7 @@
     }
   }
 
-  .mat-mdc-form-field.tb-inline-field {
+  .mat-mdc-form-field.jnks-iot-inline-field {
     font-size: 12px;
     line-height: 12px;
     .mat-mdc-text-field-wrapper {

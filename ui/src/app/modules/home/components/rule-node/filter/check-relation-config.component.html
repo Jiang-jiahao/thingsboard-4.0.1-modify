@@ -1,5 +1,5 @@
-<section [formGroup]="checkRelationConfigForm" class="tb-form-panel stroked no-padding-bottom">
-  <div class="tb-form-panel-title" translate>rule-node-config.relation-search-parameters</div>
+<section [formGroup]="checkRelationConfigForm" class="jnks-iot-form-panel stroked no-padding-bottom">
+  <div class="jnks-iot-form-panel-title" translate>rule-node-config.relation-search-parameters</div>
   <div class="flex flex-col">
     <mat-form-field class="mat-block" hideRequiredMarker>
       <mat-label>{{ 'relation.direction' | translate }}</mat-label>
@@ -9,30 +9,30 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <tb-relation-type-autocomplete
+    <jnks-iot-relation-type-autocomplete
       required
       formControlName="relationType">
-    </tb-relation-type-autocomplete>
-    <div tb-hint-tooltip-icon="{{ 'rule-node-config.check-relation-to-specific-entity-tooltip' | translate }}"
-         class="tb-form-row no-border no-padding slide-toggle">
+    </jnks-iot-relation-type-autocomplete>
+    <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.check-relation-to-specific-entity-tooltip' | translate }}"
+         class="jnks-iot-form-row no-border no-padding slide-toggle">
       <mat-slide-toggle class="mat-slide" formControlName="checkForSingleEntity">
         {{ 'rule-node-config.check-relation-to-specific-entity' | translate }}
       </mat-slide-toggle>
     </div>
     <div *ngIf="checkRelationConfigForm.get('checkForSingleEntity').value" class="same-width-component-row">
-      <tb-entity-type-select
+      <jnks-iot-entity-type-select
         style="min-width: 100px; flex: 1;"
         showLabel
         required
         formControlName="entityType">
-      </tb-entity-type-select>
-      <tb-entity-autocomplete
+      </jnks-iot-entity-type-select>
+      <jnks-iot-entity-autocomplete
         class="flex-1"
         required
         *ngIf="checkRelationConfigForm.get('entityType').value"
         [entityType]="checkRelationConfigForm.get('entityType').value"
         formControlName="entityId">
-      </tb-entity-autocomplete>
+      </jnks-iot-entity-autocomplete>
     </div>
   </div>
 </section>

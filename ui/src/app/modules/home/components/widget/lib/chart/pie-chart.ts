@@ -6,14 +6,14 @@ import { ColorProcessor, textStyle } from '@shared/models/widget-settings.models
 import { PieDataItemOption } from 'echarts/types/src/chart/pie/PieSeries';
 import { Text } from '@svgdotjs/svg.js';
 import { TranslateService } from '@ngx-translate/core';
-import { TbLatestChart } from '@home/components/widget/lib/chart/latest-chart';
+import { JnksIotLatestChart } from '@home/components/widget/lib/chart/latest-chart';
 import { formatValue } from '@core/utils';
 import { toAnimationOption } from '@home/components/widget/lib/chart/chart.models';
 
 const shapeSize = 134;
 const shapeSegmentWidth = 13.4;
 
-export class TbPieChart extends TbLatestChart<PieChartSettings> {
+export class JnksIotPieChart extends JnksIotLatestChart<PieChartSettings> {
 
   private totalValueColor: ColorProcessor;
   private totalTextNode: Text;

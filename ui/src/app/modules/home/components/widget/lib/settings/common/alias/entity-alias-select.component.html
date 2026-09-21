@@ -1,5 +1,5 @@
 <mat-form-field [formGroup]="selectEntityAliasFormGroup"
-                [class.tb-inline-field]="inlineField"
+                [class.jnks-iot-inline-field]="inlineField"
                 [class.flex]="inlineField"
                 class="mat-block"
                 [appearance]="inlineField ? 'outline' : appearance"
@@ -9,7 +9,7 @@
          #entityAliasInput
          formControlName="entityAlias"
          (focusin)="onFocus()"
-         [required]="tbRequired"
+         [required]="jnksIotRequired"
          (keydown)="entityAliasEnter($event)"
          (keypress)="entityAliasEnter($event)"
          [matAutocomplete]="entityAliasAutocomplete">
@@ -29,11 +29,11 @@
       <mat-icon class="material-icons">edit</mat-icon>
     </button>
     <mat-icon matTooltipPosition="above"
-              matTooltipClass="tb-error-tooltip"
+              matTooltipClass="jnks-iot-error-tooltip"
               [matTooltip]="'entity.alias-required' | translate"
-              *ngIf="inlineField && !modelValue && tbRequired
+              *ngIf="inlineField && !modelValue && jnksIotRequired
                             && selectEntityAliasFormGroup.get('entityAlias').touched"
-              class="tb-error">
+              class="jnks-iot-error">
       warning
     </mat-icon>
   </div>
@@ -44,14 +44,14 @@
           (click)="createEntityAlias($event, searchText, false)">
     {{ 'entity.create-new' | translate }}
   </button>
-  <mat-autocomplete class="tb-autocomplete"
+  <mat-autocomplete class="jnks-iot-autocomplete"
                     #entityAliasAutocomplete="matAutocomplete"
                     [displayWith]="displayEntityAliasFn">
     <mat-option *ngFor="let entityAlias of filteredEntityAliases | async" [value]="entityAlias">
       <span [innerHTML]="entityAlias.alias | highlight:searchText:true:'ig'"></span>
     </mat-option>
-    <mat-option *ngIf="!(filteredEntityAliases | async)?.length" [value]="null" class="tb-not-found">
-      <div class="tb-not-found-content" (click)="$event.stopPropagation()">
+    <mat-option *ngIf="!(filteredEntityAliases | async)?.length" [value]="null" class="jnks-iot-not-found">
+      <div class="jnks-iot-not-found-content" (click)="$event.stopPropagation()">
         <div *ngIf="!textIsNotEmpty(searchText); else searchNotEmpty">
           <span translate>entity.no-aliases-found</span>
         </div>
@@ -67,7 +67,7 @@
       </div>
     </mat-option>
   </mat-autocomplete>
-  <mat-error *ngIf="!inlineField && !modelValue && tbRequired">
+  <mat-error *ngIf="!inlineField && !modelValue && jnksIotRequired">
     {{ 'entity.alias-required' | translate }}
   </mat-error>
 </mat-form-field>

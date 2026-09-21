@@ -1,10 +1,10 @@
 @import "../../../../scss/constants";
 
-$tb-button-selected-color: rgb(255, 110, 64) !default;
+$jnks-iot-button-selected-color: rgb(255, 110, 64) !default;
 
-.tb-images {
+.jnks-iot-images {
 
-  &.tb-dialog-mode {
+  &.jnks-iot-dialog-mode {
     position: relative;
     width: 100%;
     height: 100%;
@@ -13,13 +13,13 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
     }
   }
 
-  .tb-images-content {
+  .jnks-iot-images-content {
     width: 100%;
     height: 100%;
     background: #fff;
     overflow: hidden;
 
-    &.tb-outlined-border {
+    &.jnks-iot-outlined-border {
       box-shadow: 0 0 0 0 rgb(0 0 0 / 20%), 0 0 0 0 rgb(0 0 0 / 14%), 0 0 0 0 rgb(0 0 0 / 12%);
       border: solid 1px #e0e0e0;
       border-radius: 4px;
@@ -39,45 +39,45 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
       }
     }
 
-    .tb-images-title {
+    .jnks-iot-images-title {
       padding-right: 20px;
       display: flex;
       align-items: center;
     }
 
-    .tb-images-view-type-toolbar {
+    .jnks-iot-images-view-type-toolbar {
       height: 55px;
       min-height: 55px;
       padding-right: 16px;
       background-color: transparent;
       box-shadow: none;
 
-      .tb-toolbar-button {
+      .jnks-iot-toolbar-button {
         height: 48px;
         button.mat-mdc-icon-button {
           margin: 0;
         }
-        &.tb-selected {
+        &.jnks-iot-selected {
           background-color: rgba(255, 255, 255, .15);
-          border-bottom: $tb-button-selected-color solid 4px;
+          border-bottom: $jnks-iot-button-selected-color solid 4px;
 
           button.mat-mdc-icon-button {
             margin-bottom: -4px;
 
             .mat-icon {
-              color: $tb-button-selected-color;
-              fill: $tb-button-selected-color;
+              color: $jnks-iot-button-selected-color;
+              fill: $jnks-iot-button-selected-color;
             }
           }
         }
       }
     }
 
-    .table-container, tb-scroll-grid {
+    .table-container, jnks-iot-scroll-grid {
       position: relative;
     }
 
-    .tb-no-images {
+    .jnks-iot-no-images {
       position: absolute;
       inset: 0;
       display: flex;
@@ -86,7 +86,7 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
       justify-content: center;
     }
 
-    .tb-image-card {
+    .jnks-iot-image-card {
       position: relative;
       height: 100%;
       border-radius: 4px;
@@ -97,7 +97,7 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
       flex-direction: column;
       cursor: pointer;
 
-      .tb-image-card-overlay {
+      .jnks-iot-image-card-overlay {
         position: absolute;
         pointer-events: none;
         inset: 0;
@@ -105,7 +105,7 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
         z-index: 2;
         display: flex;
         flex-direction: column;
-        .tb-image-card-overlay-buttons {
+        .jnks-iot-image-card-overlay-buttons {
           width: 100%;
           display: flex;
           justify-content: flex-end;
@@ -117,13 +117,13 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
       }
 
       &:hover {
-        .tb-image-card-overlay {
-          .tb-image-card-overlay-buttons {
+        .jnks-iot-image-card-overlay {
+          .jnks-iot-image-card-overlay-buttons {
             opacity: 1;
           }
         }
-        .tb-image-preview-container {
-          .tb-image-preview-overlay {
+        .jnks-iot-image-preview-container {
+          .jnks-iot-image-preview-overlay {
             background: rgba(245,245,245,0.6);
             backdrop-filter: blur(4px);
             .mdc-button {
@@ -133,9 +133,9 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
         }
       }
 
-      .tb-image-preview-container {
+      .jnks-iot-image-preview-container {
         position: relative;
-        .tb-image-preview-overlay {
+        .jnks-iot-image-preview-overlay {
           position: absolute;
           inset: 0;
           z-index: 1;
@@ -151,10 +151,10 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
             transition: opacity 0.5s;
           }
         }
-        .tb-image-preview-spacer {
+        .jnks-iot-image-preview-spacer {
           margin-top: 100%;
         }
-        .tb-image-preview {
+        .jnks-iot-image-preview {
           position: absolute;
           inset: 0;
           width: 100%;
@@ -162,7 +162,7 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
         }
       }
 
-      .tb-image-details {
+      .jnks-iot-image-details {
         min-height: 52px;
         flex: 1;
         display: flex;
@@ -171,12 +171,12 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
         justify-content: space-between;
         gap: 4px;
         align-self: stretch;
-        .tb-image-title-container {
+        .jnks-iot-image-title-container {
           display: flex;
           align-items: center;
           gap: 8px;
           align-self: stretch;
-          .tb-image-title {
+          .jnks-iot-image-title {
             flex: 1;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -189,7 +189,7 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
             font-weight: 500;
             line-height: 16px;
           }
-          .tb-image-sys {
+          .jnks-iot-image-sys {
             padding: 1px 4px;
             border-radius: 4px;
             background: rgba(236, 236, 236, 0.64);
@@ -201,7 +201,7 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
             letter-spacing: 0.017px;
           }
         }
-        .tb-image-info-container {
+        .jnks-iot-image-info-container {
           display: flex;
           align-items: center;
           gap: 8px;
@@ -217,7 +217,7 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
         }
       }
       &.loading-cell {
-        .tb-image-preview-container, .tb-image-details {
+        .jnks-iot-image-preview-container, .jnks-iot-image-details {
           background: linear-gradient(110deg, #ececec 8%, #f5f5f5 18%, #ececec 33%);
           border-radius: 5px;
           background-size: 200% 100%;
@@ -239,12 +239,12 @@ $tb-button-selected-color: rgb(255, 110, 64) !default;
       }
     }
 
-    .tb-image-preview-cell {
+    .jnks-iot-image-preview-cell {
       width: 50px;
       height: 50px;
     }
 
-    .tb-image-preview {
+    .jnks-iot-image-preview {
       width: 50px;
       height: 50px;
       object-fit: contain;

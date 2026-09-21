@@ -16,7 +16,7 @@ import {
 } from '@home/components/widget/config/basic/chart/latest-chart-basic-config.component';
 
 @Component({
-  selector: 'tb-doughnut-basic-config',
+  selector: 'jnks-iot-doughnut-basic-config',
   templateUrl: './latest-chart-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

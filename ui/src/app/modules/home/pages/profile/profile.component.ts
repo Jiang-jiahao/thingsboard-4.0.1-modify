@@ -17,7 +17,7 @@ import { getCurrentAuthUser } from '@core/auth/auth.selectors';
 import { AuthService } from '@core/auth/auth.service';
 
 @Component({
-  selector: 'tb-profile',
+  selector: 'jnks-iot-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss']
 })

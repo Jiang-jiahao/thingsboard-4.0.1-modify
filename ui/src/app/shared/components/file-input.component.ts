@@ -24,7 +24,7 @@ import { FileSizePipe } from '@shared/pipe/file-size.pipe';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-file-input',
+  selector: 'jnks-iot-file-input',
   templateUrl: './file-input.component.html',
   styleUrls: ['./file-input.component.scss'],
   providers: [

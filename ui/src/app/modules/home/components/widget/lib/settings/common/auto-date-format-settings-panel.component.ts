@@ -6,7 +6,7 @@ import {
   formatTimeUnits,
   formatTimeUnitTranslations
 } from '@shared/models/widget-settings.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -14,7 +14,7 @@ import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-auto-date-format-settings-panel',
+  selector: 'jnks-iot-auto-date-format-settings-panel',
   templateUrl: './auto-date-format-settings-panel.component.html',
   providers: [],
   styleUrls: ['./auto-date-format-settings-panel.component.scss'],
@@ -33,7 +33,7 @@ export class AutoDateFormatSettingsPanelComponent extends PageComponent implemen
   defaultValues = defaultAutoDateFormatSettings;
 
   @Input()
-  popover: TbPopoverComponent<AutoDateFormatSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<AutoDateFormatSettingsPanelComponent>;
 
   @Output()
   autoDateFormatSettingsApplied = new EventEmitter<AutoDateFormatSettings>();

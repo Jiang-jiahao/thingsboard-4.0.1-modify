@@ -472,7 +472,7 @@ export class EventTableConfig extends EntityTableConfig<Event, TimePageLink> {
     }
     this.dialog.open<EventContentDialogComponent, EventContentDialogData>(EventContentDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         content,
         title,
@@ -557,7 +557,7 @@ export class EventTableConfig extends EntityTableConfig<Event, TimePageLink> {
     }
     const target = $event.target || $event.currentTarget;
     const config = new OverlayConfig({
-      panelClass: 'tb-panel-container',
+      panelClass: 'jnks-iot-panel-container',
       backdropClass: 'cdk-overlay-transparent-backdrop',
       hasBackdrop: true,
       height: 'fit-content',

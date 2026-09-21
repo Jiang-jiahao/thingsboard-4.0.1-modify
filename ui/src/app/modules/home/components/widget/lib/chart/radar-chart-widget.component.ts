@@ -11,10 +11,10 @@ import {
   radarChartWidgetRadarChartSettings,
   RadarChartWidgetSettings
 } from '@home/components/widget/lib/chart/radar-chart-widget.models';
-import { TbRadarChart } from '@home/components/widget/lib/chart/radar-chart';
+import { JnksIotRadarChart } from '@home/components/widget/lib/chart/radar-chart';
 
 @Component({
-  selector: 'tb-radar-chart-widget',
+  selector: 'jnks-iot-radar-chart-widget',
   templateUrl: './latest-chart-widget.component.html',
   styleUrls: [],
   encapsulation: ViewEncapsulation.None
@@ -44,7 +44,7 @@ export class RadarChartWidgetComponent implements OnInit {
     this.callbacks = {
       createChart: (chartShape, renderer) => {
         const settings = radarChartWidgetRadarChartSettings(this.settings);
-        return new TbRadarChart(this.ctx, settings, chartShape.nativeElement, renderer, this.translate, true);
+        return new JnksIotRadarChart(this.ctx, settings, chartShape.nativeElement, renderer, this.translate, true);
       }
     };
   }

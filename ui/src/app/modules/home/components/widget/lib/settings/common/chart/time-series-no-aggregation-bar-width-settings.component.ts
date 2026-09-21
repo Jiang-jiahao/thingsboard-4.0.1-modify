@@ -17,7 +17,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-time-series-no-aggregation-bar-width-settings',
+  selector: 'jnks-iot-time-series-no-aggregation-bar-width-settings',
   templateUrl: './time-series-no-aggregation-bar-width-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

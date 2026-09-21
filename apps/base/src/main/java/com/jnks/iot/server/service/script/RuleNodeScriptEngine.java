@@ -9,7 +9,7 @@ import com.jnks.iot.script.api.ScriptInvokeService;
 import com.jnks.iot.script.api.ScriptType;
 import com.jnks.iot.server.common.data.id.CustomerId;
 import com.jnks.iot.server.common.data.id.TenantId;
-import com.jnks.iot.server.common.msg.TbMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
 
 import javax.script.ScriptException;
 import java.util.List;
@@ -40,35 +40,35 @@ public abstract class RuleNodeScriptEngine<T extends ScriptInvokeService, R> imp
         }
     }
 
-    protected abstract Object[] prepareArgs(TbMsg msg);
+    protected abstract Object[] prepareArgs(JnksIotMsg msg);
 
     @Override
-    public ListenableFuture<List<TbMsg>> executeUpdateAsync(TbMsg msg) {
+    public ListenableFuture<List<JnksIotMsg>> executeUpdateAsync(JnksIotMsg msg) {
         ListenableFuture<R> result = executeScriptAsync(msg);
         return Futures.transformAsync(result,
                 json -> executeUpdateTransform(msg, json),
                 MoreExecutors.directExecutor());
     }
 
-    protected abstract ListenableFuture<List<TbMsg>> executeUpdateTransform(TbMsg msg, R result);
+    protected abstract ListenableFuture<List<JnksIotMsg>> executeUpdateTransform(JnksIotMsg msg, R result);
 
     @Override
-    public ListenableFuture<TbMsg> executeGenerateAsync(TbMsg prevMsg) {
+    public ListenableFuture<JnksIotMsg> executeGenerateAsync(JnksIotMsg prevMsg) {
         return Futures.transformAsync(executeScriptAsync(prevMsg),
                 result -> executeGenerateTransform(prevMsg, result),
                 MoreExecutors.directExecutor());
     }
 
-    protected abstract ListenableFuture<TbMsg> executeGenerateTransform(TbMsg prevMsg, R result);
+    protected abstract ListenableFuture<JnksIotMsg> executeGenerateTransform(JnksIotMsg prevMsg, R result);
 
     @Override
-    public ListenableFuture<String> executeToStringAsync(TbMsg msg) {
+    public ListenableFuture<String> executeToStringAsync(JnksIotMsg msg) {
         return Futures.transformAsync(executeScriptAsync(msg), this::executeToStringTransform, MoreExecutors.directExecutor());
     }
 
 
     @Override
-    public ListenableFuture<Boolean> executeFilterAsync(TbMsg msg) {
+    public ListenableFuture<Boolean> executeFilterAsync(JnksIotMsg msg) {
         return Futures.transformAsync(executeScriptAsync(msg),
                 this::executeFilterTransform,
                 MoreExecutors.directExecutor());
@@ -81,13 +81,13 @@ public abstract class RuleNodeScriptEngine<T extends ScriptInvokeService, R> imp
     protected abstract ListenableFuture<Set<String>> executeSwitchTransform(R result);
 
     @Override
-    public ListenableFuture<Set<String>> executeSwitchAsync(TbMsg msg) {
+    public ListenableFuture<Set<String>> executeSwitchAsync(JnksIotMsg msg) {
         return Futures.transformAsync(executeScriptAsync(msg),
                 this::executeSwitchTransform,
                 MoreExecutors.directExecutor()); //usually runs in a callbackExecutor
     }
 
-    ListenableFuture<R> executeScriptAsync(TbMsg msg) {
+    ListenableFuture<R> executeScriptAsync(JnksIotMsg msg) {
         log.trace("execute script async, msg {}", msg);
         Object[] inArgs = prepareArgs(msg);
         return executeScriptAsync(msg.getCustomerId(), inArgs[0], inArgs[1], inArgs[2]);

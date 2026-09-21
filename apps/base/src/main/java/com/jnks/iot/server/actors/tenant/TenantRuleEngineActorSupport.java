@@ -1,33 +1,33 @@
 package com.jnks.iot.server.actors.tenant;
 
-import com.jnks.iot.server.actors.TbActorCtx;
-import com.jnks.iot.server.actors.TbActorRef;
+import com.jnks.iot.server.actors.JnksIotActorCtx;
+import com.jnks.iot.server.actors.JnksIotActorRef;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.RuleChainId;
 import com.jnks.iot.server.common.data.rule.RuleChain;
-import com.jnks.iot.server.common.msg.TbActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
 
 /**
  * Encapsulates rule-engine specific actor logic for tenant actor.
  */
 public interface TenantRuleEngineActorSupport {
 
-    TbActorRef getOrCreateCalculatedFieldManagerActor(TbActorCtx ctx);
+    JnksIotActorRef getOrCreateCalculatedFieldManagerActor(JnksIotActorCtx ctx);
 
-    void initRuleChains(TbActorCtx ctx);
+    void initRuleChains(JnksIotActorCtx ctx);
 
-    void destroyRuleChains(TbActorCtx ctx);
+    void destroyRuleChains(JnksIotActorCtx ctx);
 
     boolean isRuleChainsInitialized();
 
-    TbActorRef getRootChainActor();
+    JnksIotActorRef getRootChainActor();
 
-    TbActorRef getOrCreateRuleChainActor(TbActorCtx ctx, RuleChainId ruleChainId);
+    JnksIotActorRef getOrCreateRuleChainActor(JnksIotActorCtx ctx, RuleChainId ruleChainId);
 
-    TbActorRef getEntityActorRef(TbActorCtx ctx, EntityId entityId);
+    JnksIotActorRef getEntityActorRef(JnksIotActorCtx ctx, EntityId entityId);
 
-    void visit(RuleChain ruleChain, TbActorRef actorRef);
+    void visit(RuleChain ruleChain, JnksIotActorRef actorRef);
 
-    void broadcastToRuleChains(TbActorCtx ctx, TbActorMsg msg);
+    void broadcastToRuleChains(JnksIotActorCtx ctx, JnksIotActorMsg msg);
 
 }

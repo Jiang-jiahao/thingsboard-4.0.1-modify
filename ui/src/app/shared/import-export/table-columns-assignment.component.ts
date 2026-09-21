@@ -12,7 +12,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 
 @Component({
-  selector: 'tb-table-columns-assignment',
+  selector: 'jnks-iot-table-columns-assignment',
   templateUrl: './table-columns-assignment.component.html',
   styleUrls: ['./table-columns-assignment.component.scss'],
   providers: [

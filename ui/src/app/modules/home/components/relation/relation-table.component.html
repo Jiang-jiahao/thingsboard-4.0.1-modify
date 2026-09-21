@@ -1,12 +1,12 @@
-<div class="mat-padding tb-entity-table tb-absolute-fill">
-  <div class="tb-entity-table-content tb-outlined-border flex flex-1 flex-col">
+<div class="mat-padding jnks-iot-entity-table jnks-iot-absolute-fill">
+  <div class="jnks-iot-entity-table-content jnks-iot-outlined-border flex flex-1 flex-col">
     <mat-toolbar class="mat-mdc-table-toolbar" [class.!hidden]="textSearchMode || !dataSource.selection.isEmpty()">
       <div class="mat-toolbar-tools">
         <div class="title-container flex flex-row items-center justify-start xs:flex-col xs:items-start xs:justify-center">
-          <span class="tb-entity-table-title">
+          <span class="jnks-iot-entity-table-title">
             {{(direction == directions.FROM ? 'relation.from-relations' : 'relation.to-relations') | translate}}
           </span>
-          <mat-form-field class="mat-block tb-relation-direction">
+          <mat-form-field class="mat-block jnks-iot-relation-direction">
             <mat-label translate>relation.direction</mat-label>
             <mat-select [ngModel]="direction"
                         (ngModelChange)="directionChanged($event)">
@@ -57,7 +57,7 @@
     </mat-toolbar>
     <mat-toolbar class="mat-mdc-table-toolbar" color="primary" [class.!hidden]="dataSource.selection.isEmpty()">
       <div class="mat-toolbar-tools flex items-center justify-between">
-        <span class="tb-entity-table-info">
+        <span class="jnks-iot-entity-table-info">
           {{ 'relation.selected-relations' | translate:{count: dataSource.selection.selected.length} }}
         </span>
         <button mat-icon-button [disabled]="isLoading$ | async"

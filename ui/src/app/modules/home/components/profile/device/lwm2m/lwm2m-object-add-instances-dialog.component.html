@@ -13,10 +13,10 @@
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
   <div mat-dialog-content>
     <fieldset [disabled]="isLoading$ | async">
-      <tb-profile-lwm2m-object-add-instances-list
+      <jnks-iot-profile-lwm2m-object-add-instances-list
         required
         formControlName="instancesIds">
-      </tb-profile-lwm2m-object-add-instances-list>
+      </jnks-iot-profile-lwm2m-object-add-instances-list>
     </fieldset>
   </div>
   <div mat-dialog-actions class="flex flex-row items-center justify-end">

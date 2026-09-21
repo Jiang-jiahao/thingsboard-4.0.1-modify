@@ -1,7 +1,7 @@
 import { AceHighlightRule } from '@shared/models/ace/ace.models';
-import { TbEditorCompleter, TbEditorCompletions } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompleter, JnksIotEditorCompletions } from '@shared/models/ace/completion.models';
 
-const tbelEditorCompletions:TbEditorCompletions = {
+const tbelEditorCompletions:JnksIotEditorCompletions = {
   btoa: {
     meta: 'function',
     description: 'Encodes a string to Base64.',
@@ -1281,7 +1281,7 @@ const tbelEditorCompletions:TbEditorCompletions = {
   }
 }
 
-export const tbelUtilsAutocompletes = new TbEditorCompleter(tbelEditorCompletions);
+export const tbelUtilsAutocompletes = new JnksIotEditorCompleter(tbelEditorCompletions);
 
 const tbelUtilsFuncNames = Object.keys(tbelEditorCompletions);
 

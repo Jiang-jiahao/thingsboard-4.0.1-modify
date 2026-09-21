@@ -14,7 +14,7 @@ import {
 import { formatValue } from '@core/utils';
 
 @Component({
-  selector: 'tb-slider-widget-settings',
+  selector: 'jnks-iot-slider-widget-settings',
   templateUrl: './slider-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

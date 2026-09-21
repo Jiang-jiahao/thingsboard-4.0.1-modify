@@ -56,7 +56,7 @@ import { FormBuilder } from '@angular/forms';
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'tb-entities-hierarchy-widget',
+  selector: 'jnks-iot-entities-hierarchy-widget',
   templateUrl: './entities-hierarchy-widget.component.html',
   styleUrls: ['./entities-hierarchy-widget.component.scss']
 })

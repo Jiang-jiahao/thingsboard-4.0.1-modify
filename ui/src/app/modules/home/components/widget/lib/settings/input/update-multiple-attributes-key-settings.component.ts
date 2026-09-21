@@ -14,7 +14,7 @@ import {
 } from '@home/components/widget/lib/multiple-input-widget.component';
 
 @Component({
-  selector: 'tb-update-multiple-attributes-key-settings',
+  selector: 'jnks-iot-update-multiple-attributes-key-settings',
   templateUrl: './update-multiple-attributes-key-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

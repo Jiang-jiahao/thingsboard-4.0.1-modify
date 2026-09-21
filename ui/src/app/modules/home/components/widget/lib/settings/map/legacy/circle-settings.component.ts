@@ -23,7 +23,7 @@ import { Widget } from '@shared/models/widget.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-circle-settings',
+  selector: 'jnks-iot-circle-settings',
   templateUrl: './circle-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

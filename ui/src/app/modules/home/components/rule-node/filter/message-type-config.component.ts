@@ -4,7 +4,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-filter-node-message-type-config',
+  selector: 'jnks-iot-filter-node-message-type-config',
   templateUrl: './message-type-config.component.html',
   styleUrls: []
 })

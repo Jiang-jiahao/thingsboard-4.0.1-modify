@@ -9,7 +9,7 @@ import {
 } from '@home/components/widget/lib/settings/input/update-attribute-general-settings.component';
 
 @Component({
-  selector: 'tb-update-double-attribute-widget-settings',
+  selector: 'jnks-iot-update-double-attribute-widget-settings',
   templateUrl: './update-double-attribute-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

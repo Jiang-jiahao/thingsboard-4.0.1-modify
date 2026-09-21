@@ -1,5 +1,5 @@
 <div [formGroup]="entitySelectFormGroup">
-  <tb-entity-type-select
+  <jnks-iot-entity-type-select
     *ngIf="displayEntityTypeSelect"
     [showLabel]="true"
     [required]="required"
@@ -7,11 +7,11 @@
     [allowedEntityTypes]="allowedEntityTypes"
     [additionEntityTypes]="additionEntityTypes"
     formControlName="entityType">
-  </tb-entity-type-select>
-  <tb-entity-autocomplete
+  </jnks-iot-entity-type-select>
+  <jnks-iot-entity-autocomplete
     *ngIf="modelValue.entityType && !entityTypeNullUUID.has(modelValue.entityType)"
     [required]="required"
     [entityType]="modelValue.entityType"
     formControlName="entityId">
-  </tb-entity-autocomplete>
+  </jnks-iot-entity-autocomplete>
 </div>

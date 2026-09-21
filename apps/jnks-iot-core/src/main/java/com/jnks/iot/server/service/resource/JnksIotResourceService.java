@@ -1,0 +1,71 @@
+package com.jnks.iot.server.service.resource;
+
+import com.jnks.iot.server.common.data.*;
+import com.jnks.iot.server.common.data.exception.JnksIotException;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.lwm2m.LwM2mObject;
+import com.jnks.iot.server.common.data.page.PageLink;
+import com.jnks.iot.server.common.data.widget.WidgetTypeDetails;
+import com.jnks.iot.server.service.security.model.SecurityUser;
+
+import java.util.List;
+
+/**
+ * Core 侧通用资源（非图片）门面。
+ * <p>
+ * 负责 LwM2M 模型等资源的保存/删除审计、导出仪表板与部件所用资源，以及导入时的权限校验。
+ * 图片类型走 {@link JnksIotImageService}。
+ *
+ * @see DefaultJnksIotResourceService
+ */
+public interface JnksIotResourceService {
+
+    /**
+     * 保存资源（无操作用户上下文）。
+     */
+    default JnksIotResourceInfo save(JnksIotResource entity) throws Exception {
+        return save(entity, null);
+    }
+
+    /**
+     * 保存资源并记录实体动作审计。
+     */
+    JnksIotResourceInfo save(JnksIotResource entity, SecurityUser user) throws Exception;
+
+    /**
+     * 删除资源；{@code force} 为 true 时忽略引用检查。
+     */
+    JnksIotResourceDeleteResult delete(JnksIotResourceInfo entity, boolean force, User user);
+
+    /**
+     * 按 LwM2M objectId 列表查询并转换为对象模型。
+     */
+    List<LwM2mObject> findLwM2mObject(TenantId tenantId,
+                                      String sortOrder,
+                                      String sortProperty,
+                                      String[] objectIds);
+
+    /**
+     * 分页查询租户 LwM2M 模型并转换为对象模型。
+     */
+    List<LwM2mObject> findLwM2mObjectPage(TenantId tenantId,
+                                          String sortProperty,
+                                          String sortOrder,
+                                          PageLink pageLink);
+
+    /**
+     * 导出仪表板引用的图片与其它资源。
+     */
+    List<ResourceExportData> exportResources(Dashboard dashboard, SecurityUser user) throws JnksIotException;
+
+    /**
+     * 导出部件类型引用的图片与其它资源。
+     */
+    List<ResourceExportData> exportResources(WidgetTypeDetails widgetTypeDetails, SecurityUser user) throws JnksIotException;
+
+    /**
+     * 导入资源列表：图片走 {@link JnksIotImageService}，其余走本服务。
+     */
+    void importResources(List<ResourceExportData> resources, SecurityUser user) throws Exception;
+
+}

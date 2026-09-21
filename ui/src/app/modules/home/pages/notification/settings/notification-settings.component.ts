@@ -16,7 +16,7 @@ import { NotificationService } from '@core/http/notification.service';
 import { DialogService } from '@core/services/dialog.service';
 
 @Component({
-  selector: 'tb-notification-settings',
+  selector: 'jnks-iot-notification-settings',
   templateUrl: './notification-settings.component.html',
   styleUrls: ['./notification-settings.component.scss']
 })

@@ -16,9 +16,9 @@
     padding: 0;
     background: linear-gradient(
       125deg,
-      $tb-details-header-start 0%,
-      $tb-details-header-mid 48%,
-      $tb-details-header-end 100%
+      $jnks-iot-details-header-start 0%,
+      $jnks-iot-details-header-mid 48%,
+      $jnks-iot-details-header-end 100%
     ) !important;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
   }
@@ -35,22 +35,22 @@
     max-height: 88px;
     padding-right: 4px;
 
-    &.tb-details-title-header {
+    &.jnks-iot-details-title-header {
       min-width: 0;
       padding: 0 12px 0 16px;
     }
   }
 
-  .tb-details-action-btn,
-  .tb-details-close-btn {
+  .jnks-iot-details-action-btn,
+  .jnks-iot-details-close-btn {
     margin: 0 2px;
   }
 
-  .tb-details-close-btn .mat-icon {
+  .jnks-iot-details-close-btn .mat-icon {
     font-size: 22px;
   }
 
-  .tb-details-title {
+  .jnks-iot-details-title {
     width: inherit;
     margin: 12px 8px 0 0;
     font-size: 1.05rem;
@@ -62,21 +62,21 @@
     }
   }
 
-  .tb-details-subtitle {
+  .jnks-iot-details-subtitle {
     margin: 4px 0 10px;
     font-size: 0.85rem;
     opacity: 0.85;
   }
 
-  .tb-details-title-text, .tb-details-subtitle {
+  .jnks-iot-details-title-text, .jnks-iot-details-subtitle {
     width: inherit;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  tb-dashboard {
-    .tb-dashboard-content {
+  jnks-iot-dashboard {
+    .jnks-iot-dashboard-content {
       background-color: $primary-hue-3 !important;
     }
   }

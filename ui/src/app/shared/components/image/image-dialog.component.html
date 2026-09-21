@@ -1,4 +1,4 @@
-<form class="tb-image-dialog" [formGroup]="imageFormGroup">
+<form class="jnks-iot-image-dialog" [formGroup]="imageFormGroup">
   <mat-toolbar color="primary">
     <h2>{{ (readonly ? 'image.image-details' : 'image.edit-image') | translate }}</h2>
     <span class="flex-1"></span>
@@ -39,10 +39,10 @@
           <mat-icon>check</mat-icon>
         </button>
       </mat-form-field>
-      <div class="tb-image-container tb-primary-fill">
-        <div class="tb-image-content">
-          <div class="tb-image-actions">
-            <div class="tb-image-actions">
+      <div class="jnks-iot-image-container jnks-iot-primary-fill">
+        <div class="jnks-iot-image-content">
+          <div class="jnks-iot-image-actions">
+            <div class="jnks-iot-image-actions">
               <button type="button"
                       mat-icon-button [disabled]="isLoading$ | async"
                       matTooltip="{{ 'image.download-image' | translate }}"
@@ -55,7 +55,7 @@
                       matTooltip="{{ 'image.export-image' | translate }}"
                       matTooltipPosition="above"
                       (click)="exportImage($event)">
-                <tb-icon>mdi:file-export</tb-icon>
+                <jnks-iot-icon>mdi:file-export</jnks-iot-icon>
               </button>
               <button type="button"
                       mat-icon-button [disabled]="isLoading$ | async"
@@ -74,11 +74,11 @@
               {{ 'image.update-image' | translate }}
             </button>
           </div>
-          <div class="tb-image-preview-container">
-            <div class="tb-image-preview-spacer"></div>
-            <img class="tb-image-preview" [src]="imagePreviewData | image | async">
+          <div class="jnks-iot-image-preview-container">
+            <div class="jnks-iot-image-preview-spacer"></div>
+            <img class="jnks-iot-image-preview" [src]="imagePreviewData | image | async">
           </div>
-          <div class="tb-image-preview-details">
+          <div class="jnks-iot-image-preview-details">
             <div>{{ image.descriptor.width }}x{{ image.descriptor.height }}</div>
             <mat-divider vertical></mat-divider>
             <div>{{ image.descriptor.size | fileSize }}</div>

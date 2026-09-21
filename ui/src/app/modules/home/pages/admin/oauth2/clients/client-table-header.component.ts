@@ -6,7 +6,7 @@ import { OAuth2Client, OAuth2ClientInfo } from '@shared/models/oauth2.models';
 import { PageLink } from '@shared/models/page/page-link';
 
 @Component({
-  selector: 'tb-client-table-header',
+  selector: 'jnks-iot-client-table-header',
   templateUrl: './client-table-header.component.html',
   styleUrls: []
 })

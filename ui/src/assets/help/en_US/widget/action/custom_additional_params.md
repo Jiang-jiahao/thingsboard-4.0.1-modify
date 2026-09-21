@@ -55,10 +55,10 @@ An optional key/value object holding additional entity parameters depending on w
       </li>
     </ul>
   </li>
-  <li>Pie - Flot widget (deprecated) (<i>On slice click</i>) - <b>additionalParams:</b> <code><a href="https://github.com/thingsboard/thingsboard/blob/e264f7b8ddff05bda85c4833bf497f47f447496e/ui-ngx/src/app/modules/home/components/widget/lib/flot-widget.models.ts#L62" target="_blank">TbFlotPlotItem</a></code>:
+  <li>Pie - Flot widget (deprecated) (<i>On slice click</i>) - <b>additionalParams:</b> <code><a href="https://github.com/thingsboard/thingsboard/blob/e264f7b8ddff05bda85c4833bf497f47f447496e/ui-ngx/src/app/modules/home/components/widget/lib/flot-widget.models.ts#L62" target="_blank">JnksIotFlotPlotItem</a></code>:
     <ul>
-      <li><b>additionalParams:</b> <code><a href="https://github.com/thingsboard/thingsboard/blob/e264f7b8ddff05bda85c4833bf497f47f447496e/ui-ngx/src/app/modules/home/components/widget/lib/flot-widget.models.ts#L62" target="_blank">TbFlotPlotItem</a></code> - A 
-            <a href="https://github.com/thingsboard/thingsboard/blob/e264f7b8ddff05bda85c4833bf497f47f447496e/ui-ngx/src/app/modules/home/components/widget/lib/flot-widget.models.ts#L62" target="_blank">TbFlotPlotItem</a> object
+      <li><b>additionalParams:</b> <code><a href="https://github.com/thingsboard/thingsboard/blob/e264f7b8ddff05bda85c4833bf497f47f447496e/ui-ngx/src/app/modules/home/components/widget/lib/flot-widget.models.ts#L62" target="_blank">JnksIotFlotPlotItem</a></code> - A 
+            <a href="https://github.com/thingsboard/thingsboard/blob/e264f7b8ddff05bda85c4833bf497f47f447496e/ui-ngx/src/app/modules/home/components/widget/lib/flot-widget.models.ts#L62" target="_blank">JnksIotFlotPlotItem</a> object
             containing <code>series</code> field with information about datasource and <br> data key of clicked pie slice.
       </li>
     </ul>

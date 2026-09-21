@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-alarms-table-key-settings',
+  selector: 'jnks-iot-alarms-table-key-settings',
   templateUrl: './alarms-table-key-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

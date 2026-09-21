@@ -1,26 +1,26 @@
-.tb-device-rpc-panel {
+.jnks-iot-device-rpc-panel {
   max-width: 720px;
 }
 
-.tb-device-rpc-field-grid {
+.jnks-iot-device-rpc-field-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 8px 16px;
   margin-bottom: 8px;
 }
 
-.tb-device-rpc-actions {
+.jnks-iot-device-rpc-actions {
   margin-top: 8px;
 }
 
-.tb-device-rpc-mode {
+.jnks-iot-device-rpc-mode {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   color: var(--tb-text-disabled, rgba(0, 0, 0, 0.6));
 }
 
-.tb-device-rpc-mode-chip {
+.jnks-iot-device-rpc-mode-chip {
   display: inline-block;
   padding: 2px 10px;
   border-radius: 4px;
@@ -29,17 +29,17 @@
   line-height: 20px;
 }
 
-.tb-device-rpc-mode-chip-oneway {
+.jnks-iot-device-rpc-mode-chip-oneway {
   background: rgba(0, 0, 0, 0.06);
   color: var(--tb-text-primary, rgba(0, 0, 0, 0.87));
 }
 
-.tb-device-rpc-mode-chip-twoway {
+.jnks-iot-device-rpc-mode-chip-twoway {
   background: rgba(25, 118, 210, 0.12);
   color: var(--tb-primary-color, #1976d2);
 }
 
-.tb-device-rpc-pre {
+.jnks-iot-device-rpc-pre {
   font-size: 12px;
   white-space: pre-wrap;
   word-break: break-all;
@@ -51,16 +51,16 @@
   overflow: auto;
 }
 
-.tb-device-rpc-error {
+.jnks-iot-device-rpc-error {
   color: var(--tb-warn-color, #f57c00);
   margin-top: 12px;
 }
 
-.tb-device-rpc-result {
+.jnks-iot-device-rpc-result {
   margin-top: 16px;
 }
 
-.tb-device-rpc-fixed-editor {
+.jnks-iot-device-rpc-fixed-editor {
   .mat-expansion-panel-body {
     padding-top: 8px;
   }
@@ -72,6 +72,6 @@
   }
 }
 
-.tb-device-rpc-fixed-list {
+.jnks-iot-device-rpc-fixed-list {
   padding: 4px 0;
 }

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import com.jnks.iot.common.util.ListeningExecutor;
 import com.jnks.iot.rule.engine.TestDbCallbackExecutor;
-import com.jnks.iot.rule.engine.api.TbContext;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
 import com.jnks.iot.rule.engine.data.RelationsQuery;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.id.AssetId;
@@ -43,14 +43,14 @@ public class EntitiesRelatedEntityIdAsyncLoaderTest {
     private static final TenantId TENANT_ID = new TenantId(UUID.randomUUID());
     private static final ListeningExecutor DB_EXECUTOR = new TestDbCallbackExecutor();
 
-    private TbContext ctxMock;
+    private JnksIotContext ctxMock;
     private RelationService relationServiceMock;
 
     private RelationsQuery relationsQuery;
 
     @BeforeEach
     void setUp() {
-        ctxMock = mock(TbContext.class);
+        ctxMock = mock(JnksIotContext.class);
         relationServiceMock = mock(RelationService.class);
         when(ctxMock.getRelationService()).thenReturn(relationServiceMock);
         when(ctxMock.getDbCallbackExecutor()).thenReturn(DB_EXECUTOR);

@@ -7,7 +7,7 @@ import { TenantProfileData } from '@shared/models/tenant.model';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'tb-tenant-profile-data',
+  selector: 'jnks-iot-tenant-profile-data',
   templateUrl: './tenant-profile-data.component.html',
   styleUrls: [],
   providers: [{

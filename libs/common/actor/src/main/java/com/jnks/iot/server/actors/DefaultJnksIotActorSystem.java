@@ -1,0 +1,342 @@
+package com.jnks.iot.server.actors;
+
+import lombok.Data;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import com.jnks.iot.common.util.JnksIotExecutors;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Data
+public class DefaultJnksIotActorSystem implements JnksIotActorSystem {
+
+    /**
+     * 保存Dispatcher和其id的关系
+     * key: dispatcherId，value: Dispatcher对象
+     */
+    private final ConcurrentMap<String, Dispatcher> dispatchers = new ConcurrentHashMap<>();
+
+    /**
+     * 保存Actor封装类和其id的关系
+     * key: actorId，value: actor实际对象的封装对象
+     */
+    private final ConcurrentMap<JnksIotActorId, JnksIotActorMailbox> actors = new ConcurrentHashMap<>();
+
+    /**
+     * 保存actorId和对应的可重入锁的关系
+     * key: actorId，value: 该actor对应的可重入锁
+     */
+    private final ConcurrentMap<JnksIotActorId, ReentrantLock> actorCreationLocks = new ConcurrentHashMap<>();
+
+    /**
+     * 保存父级actorId和子actorId集合的关系
+     * key: 父级actorId，value: 子级actorId集合
+     */
+    private final ConcurrentMap<JnksIotActorId, Set<JnksIotActorId>> parentChildMap = new ConcurrentHashMap<>();
+
+    /**
+     * actor系统配置
+     */
+    @Getter
+    private final JnksIotActorSystemSettings settings;
+
+    /**
+     * actor系统的线程池
+     */
+    @Getter
+    private final ScheduledExecutorService scheduler;
+
+    public DefaultJnksIotActorSystem(JnksIotActorSystemSettings settings) {
+        this.settings = settings;
+        this.scheduler = JnksIotExecutors.newScheduledThreadPool(settings.getSchedulerPoolSize(), "actor-system-scheduler");
+    }
+
+    /**
+     * 创建一个调度器
+     * 如果已经存在对应 dispatcherId的调度器，则抛出异常。不存在则创建一个调度器
+     * @param dispatcherId 调度器唯一id
+     * @param executor 调度器的线程池
+     */
+    @Override
+    public void createDispatcher(String dispatcherId, ExecutorService executor) {
+        Dispatcher current = dispatchers.putIfAbsent(dispatcherId, new Dispatcher(dispatcherId, executor));
+        if (current != null) {
+            throw new RuntimeException("Dispatcher with id [" + dispatcherId + "] is already registered!");
+        }
+    }
+
+    /**
+     * 销毁一个调度器
+     * 如果不存在对应 dispatcherId的调度器，则抛出异常。存在则销毁一个调度器，并停止其内部的线程池
+     * @param dispatcherId 调度器唯一id
+     */
+    @Override
+    public void destroyDispatcher(String dispatcherId) {
+        Dispatcher dispatcher = dispatchers.remove(dispatcherId);
+        if (dispatcher != null) {
+            dispatcher.getExecutor().shutdownNow();
+        } else {
+            throw new RuntimeException("Dispatcher with id [" + dispatcherId + "] is not registered!");
+        }
+    }
+
+    /**
+     * 获取指定id的 actor
+     * @param actorId actor唯一id
+     * @return actor
+     */
+    @Override
+    public JnksIotActorRef getActor(JnksIotActorId actorId) {
+        return actors.get(actorId);
+    }
+
+    /**
+     * 创建一个根actor（也就是父actor）
+     * @param dispatcherId 调度器唯一id
+     * @param creator actor创建器
+     * @return actor
+     */
+    @Override
+    public JnksIotActorRef createRootActor(String dispatcherId, JnksIotActorCreator creator) {
+        return createActor(dispatcherId, creator, null);
+    }
+
+    /**
+     * 创建一个子actor
+     * @param dispatcherId 调度器唯一id
+     * @param creator actor创建器
+     * @param parent parentActorId
+     * @return actor
+     */
+    @Override
+    public JnksIotActorRef createChildActor(String dispatcherId, JnksIotActorCreator creator, JnksIotActorId parent) {
+        return createActor(dispatcherId, creator, parent);
+    }
+
+    /**
+     * 创建一个actor
+     * 一个创建actor的模板方法，具体实现由 {@link JnksIotActorCreator}控制
+     * @param dispatcherId 调度器唯一id
+     * @param creator actor创建器（实际上是一个抽象工厂，用于创建actor）
+     * @param parent actor的父级actorId
+     * @return actor
+     */
+    private JnksIotActorRef createActor(String dispatcherId, JnksIotActorCreator creator, JnksIotActorId parent) {
+        Dispatcher dispatcher = dispatchers.get(dispatcherId);
+        if (dispatcher == null) {
+            log.warn("Dispatcher with id [{}] is not registered!", dispatcherId);
+            throw new RuntimeException("Dispatcher with id [" + dispatcherId + "] is not registered!");
+        }
+
+        JnksIotActorId actorId = creator.createActorId();
+        JnksIotActorMailbox actorMailbox = actors.get(actorId);
+        // 如果对应的actor不存在，则创建。已经存在则提示错误
+        if (actorMailbox != null) {
+            log.debug("Actor with id [{}] is already registered!", actorId);
+        } else {
+            Lock actorCreationLock = actorCreationLocks.computeIfAbsent(actorId, id -> new ReentrantLock());
+            actorCreationLock.lock();
+            try {
+                // 再次检查（防止在加锁前已被其他线程创建）
+                actorMailbox = actors.get(actorId);
+                if (actorMailbox == null) {
+                    log.debug("Creating actor with id [{}]!", actorId);
+                    // 创建actor，由对应的具体工厂实现
+                    JnksIotActor actor = creator.createActor();
+                    JnksIotActorRef parentRef = null;
+                    if (parent != null) {
+                        // 判断parentActor是否已经创建，如果没有创建则抛出异常
+                        parentRef = getActor(parent);
+                        if (parentRef == null) {
+                            throw new JnksIotActorNotRegisteredException(parent, "Parent Actor with id [" + parent + "] is not registered!");
+                        }
+                    }
+                    // 创建并初始化actor的包装类
+                    JnksIotActorMailbox mailbox = new JnksIotActorMailbox(this, settings, actorId, parentRef, actor, dispatcher);
+                    actors.put(actorId, mailbox);
+                    mailbox.initActor();
+                    actorMailbox = mailbox;
+                    if (parent != null) {
+                        // 如果有parentId，则修改parentId和子级actorId的关联关系
+                        parentChildMap.computeIfAbsent(parent, id -> ConcurrentHashMap.newKeySet()).add(actorId);
+                    }
+                } else {
+                    log.debug("Actor with id [{}] is already registered!", actorId);
+                }
+            } finally {
+                actorCreationLock.unlock();
+                actorCreationLocks.remove(actorId);
+            }
+        }
+        return actorMailbox;
+    }
+
+    /**
+     * 给指定actorId的actor发送高优先级消息（该消息高优先级被指定actor处理）
+     * @param target actorId
+     * @param actorMsg actor消息
+     */
+    @Override
+    public void tellWithHighPriority(JnksIotActorId target, JnksIotActorMsg actorMsg) {
+        tell(target, actorMsg, true);
+    }
+
+    /**
+     * 给指定actorId的actor发送消息
+     * @param target actorId
+     * @param actorMsg actor消息
+     */
+    @Override
+    public void tell(JnksIotActorId target, JnksIotActorMsg actorMsg) {
+        tell(target, actorMsg, false);
+    }
+
+    /**
+     * 给指定actorId的actor发送消息（实际实现方法）
+     * @param target actorId
+     * @param actorMsg actor消息
+     * @param highPriority 是否高优先级
+     */
+    private void tell(JnksIotActorId target, JnksIotActorMsg actorMsg, boolean highPriority) {
+        JnksIotActorMailbox mailbox = actors.get(target);
+        if (mailbox == null) {
+            throw new JnksIotActorNotRegisteredException(target, "Actor with id [" + target + "] is not registered!");
+        }
+        if (highPriority) {
+            mailbox.tellWithHighPriority(actorMsg);
+        } else {
+            mailbox.tell(actorMsg);
+        }
+    }
+
+
+    /**
+     * 给指定actorId的actor的子级actor发送消息
+     * @param parent actorId
+     * @param msg actor消息
+     */
+    @Override
+    public void broadcastToChildren(JnksIotActorId parent, JnksIotActorMsg msg) {
+        broadcastToChildren(parent, msg, false);
+    }
+
+    /**
+     * 给指定actorId的actor的子级actor发送消息（可指定优先级）
+     * @param parent actorId
+     * @param msg actor消息
+     * @param highPriority 是否高优先级
+     */
+    @Override
+    public void broadcastToChildren(JnksIotActorId parent, JnksIotActorMsg msg, boolean highPriority) {
+        broadcastToChildren(parent, id -> true, msg, highPriority);
+    }
+
+    /**
+     * 给指定actorId的actor的部分子级actor发送消息（可指定子actor过滤器）
+     * @param parent 父级actorId
+     * @param childFilter 子级actorId过滤器
+     * @param msg actor消息
+     */
+    @Override
+    public void broadcastToChildren(JnksIotActorId parent, Predicate<JnksIotActorId> childFilter, JnksIotActorMsg msg) {
+        broadcastToChildren(parent, childFilter, msg, false);
+    }
+
+    /**
+     * 给指定actorId的actor的子级actor发送消息（广播的实际实现方法）
+     * @param parent 父级actorId
+     * @param childFilter 子级actorId过滤器
+     * @param msg actor消息
+     * @param highPriority 是否高优先级
+     */
+    private void broadcastToChildren(JnksIotActorId parent, Predicate<JnksIotActorId> childFilter, JnksIotActorMsg msg, boolean highPriority) {
+        Set<JnksIotActorId> children = parentChildMap.get(parent);
+        if (children != null) {
+            children.stream().filter(childFilter).forEach(id -> {
+                try {
+                    tell(id, msg, highPriority);
+                } catch (JnksIotActorNotRegisteredException e) {
+                    log.warn("Actor is missing for {}", id);
+                }
+            });
+        }
+    }
+
+    /**
+     * 获取指定actorId的actor的子级actorId
+     * @param parent 父级actorId
+     * @param childFilter 子级actor过滤器
+     * @return list 过滤后的子级actorId集合
+     */
+    @Override
+    public List<JnksIotActorId> filterChildren(JnksIotActorId parent, Predicate<JnksIotActorId> childFilter) {
+        Set<JnksIotActorId> children = parentChildMap.get(parent);
+        if (children != null) {
+            return children.stream().filter(childFilter).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 停止指定actorId的actor及其子actor
+     * @param actorRef actorId
+     */
+    @Override
+    public void stop(JnksIotActorRef actorRef) {
+        stop(actorRef.getActorId());
+    }
+
+    /**
+     * 停止指定actorId的actor及其子actor（实际实现方法）
+     * @param actorId actorId
+     */
+    @Override
+    public void stop(JnksIotActorId actorId) {
+        Set<JnksIotActorId> children = parentChildMap.remove(actorId);
+        if (children != null) {
+            for (JnksIotActorId child : children) {
+                stop(child);
+            }
+        }
+        parentChildMap.values().forEach(parentChildren -> parentChildren.remove(actorId));
+
+        JnksIotActorMailbox mailbox = actors.remove(actorId);
+        if (mailbox != null) {
+            mailbox.destroy(null);
+        }
+    }
+
+    /**
+     * 停止actor系统
+     */
+    @Override
+    public void stop() {
+        dispatchers.values().forEach(dispatcher -> {
+            dispatcher.getExecutor().shutdown();
+            try {
+                dispatcher.getExecutor().awaitTermination(3, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                log.warn("[{}] Failed to stop dispatcher", dispatcher.getDispatcherId(), e);
+            }
+        });
+        if (scheduler != null) {
+            scheduler.shutdownNow();
+        }
+        actors.clear();
+    }
+
+}

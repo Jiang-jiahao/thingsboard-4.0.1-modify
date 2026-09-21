@@ -1,4 +1,4 @@
-<section class="tb-widget-settings" [formGroup]="providerSettingsFormGroup">
+<section class="jnks-iot-widget-settings" [formGroup]="providerSettingsFormGroup">
   <mat-form-field class="mat-block">
     <mat-label translate>widgets.maps.openstreet-provider</mat-label>
     <mat-select required formControlName="mapProvider">
@@ -7,7 +7,7 @@
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <mat-expansion-panel class="tb-settings" [expanded]="providerSettingsFormGroup.get('useCustomProvider').value">
+  <mat-expansion-panel class="jnks-iot-settings" [expanded]="providerSettingsFormGroup.get('useCustomProvider').value">
     <mat-expansion-panel-header class="flex-wrap">
       <mat-panel-title>
         <mat-slide-toggle formControlName="useCustomProvider" (click)="$event.stopPropagation()">

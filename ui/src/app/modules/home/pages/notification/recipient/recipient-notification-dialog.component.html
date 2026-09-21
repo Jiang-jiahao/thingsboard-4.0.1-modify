@@ -1,8 +1,8 @@
-<form [formGroup]="targetNotificationForm" class="tb-dialog-container">
+<form [formGroup]="targetNotificationForm" class="jnks-iot-dialog-container">
   <mat-toolbar color="primary">
     <h2>{{ (isAdd ? 'notification.add-notification-recipients-group' : 'notification.edit-notification-recipients-group') | translate }}</h2>
     <span class="flex-1"></span>
-    <div tb-help="recipientNotifications"></div>
+    <div jnks-iot-help="recipientNotifications"></div>
     <button mat-icon-button
             (click)="cancel()"
             type="button">
@@ -21,7 +21,7 @@
       </mat-error>
     </mat-form-field>
     <section formGroupName="configuration">
-      <label class="tb-title">{{ 'notification.type' | translate }}</label>
+      <label class="jnks-iot-title">{{ 'notification.type' | translate }}</label>
       <mat-radio-group formControlName="type">
         <mat-radio-button *ngFor="let notificationTargetType of notificationTargetTypes" [value]="notificationTargetType">
           <div class="flex flex-col">
@@ -44,67 +44,67 @@
           <ng-container *ngSwitchCase="notificationTargetConfigType.TENANT_ADMINISTRATORS">
             <section *ngIf="isSysAdmin()">
               <div class="flex flex-1 items-center justify-center">
-                <tb-toggle-select class="tb-notification-tenant-group" appearance="fill"
+                <jnks-iot-toggle-select class="jnks-iot-notification-tenant-group" appearance="fill"
                                   formControlName="filterByTenants">
-                  <tb-toggle-option [value]="true">{{ 'tenant.tenant' | translate }}</tb-toggle-option>
-                  <tb-toggle-option [value]="false">{{ 'tenant-profile.tenant-profile' | translate }}</tb-toggle-option>
-                </tb-toggle-select>
+                  <jnks-iot-toggle-option [value]="true">{{ 'tenant.tenant' | translate }}</jnks-iot-toggle-option>
+                  <jnks-iot-toggle-option [value]="false">{{ 'tenant-profile.tenant-profile' | translate }}</jnks-iot-toggle-option>
+                </jnks-iot-toggle-select>
               </div>
               <ng-container *ngIf="targetNotificationForm.get('configuration.usersFilter.filterByTenants').value; else tenantProfiles">
-                <tb-entity-list
+                <jnks-iot-entity-list
                   formControlName="tenantsIds"
                   subscriptSizing="dynamic"
                   labelText="{{ 'tenant.tenants' | translate }}"
                   placeholderText="{{ 'tenant.tenants' | translate }}"
                   hint="{{ 'notification.tenants-list-rule-hint' | translate }}"
                   [entityType]="entityType.TENANT">
-                </tb-entity-list>
+                </jnks-iot-entity-list>
               </ng-container>
               <ng-template #tenantProfiles>
-                <tb-entity-list
+                <jnks-iot-entity-list
                   formControlName="tenantProfilesIds"
                   subscriptSizing="dynamic"
                   labelText="{{ 'tenant-profile.tenant-profiles' | translate }}"
                   placeholderText="{{ 'tenant-profile.tenant-profiles' | translate }}"
                   hint="{{ 'notification.tenant-profiles-list-rule-hint' | translate }}"
                   [entityType]="entityType.TENANT_PROFILE">
-                </tb-entity-list>
+                </jnks-iot-entity-list>
               </ng-template>
             </section>
           </ng-container>
           <ng-container *ngSwitchCase="notificationTargetConfigType.USER_LIST">
-            <tb-entity-list
+            <jnks-iot-entity-list
               required
               formControlName="usersIds"
               [entityType]="entityType.USER"
               labelText="{{ 'user.user-list' | translate }}"
               placeholderText="{{ 'user.user' | translate }}"
               requiredText="{{ 'user.user-list-required' | translate }}">
-            </tb-entity-list>
+            </jnks-iot-entity-list>
           </ng-container>
           <ng-container *ngSwitchCase="notificationTargetConfigType.CUSTOMER_USERS">
-            <tb-entity-autocomplete
+            <jnks-iot-entity-autocomplete
               required
               formControlName="customerId"
               [entityType]="entityType.CUSTOMER">
-            </tb-entity-autocomplete>
+            </jnks-iot-entity-autocomplete>
           </ng-container>
         </ng-container>
       </section>
       <section *ngIf="targetNotificationForm.get('configuration.type').value === notificationTargetType.SLACK">
-        <label class="tb-title">{{ 'notification.slack-chanel-type' | translate }}</label>
+        <label class="jnks-iot-title">{{ 'notification.slack-chanel-type' | translate }}</label>
         <mat-radio-group formControlName="conversationType">
           <mat-radio-button *ngFor="let slackChanelType of slackChanelTypes" [value]="slackChanelType">
              {{ slackChanelTypesTranslateMap.get(slackChanelType) | translate }}
           </mat-radio-button>
         </mat-radio-group>
-        <tb-slack-conversation-autocomplete
+        <jnks-iot-slack-conversation-autocomplete
           formControlName="conversation" required
           [slackChanelType]="targetNotificationForm.get('configuration.conversationType').value">
-        </tb-slack-conversation-autocomplete>
+        </jnks-iot-slack-conversation-autocomplete>
       </section>
       <section *ngIf="targetNotificationForm.get('configuration.type').value === notificationTargetType.MICROSOFT_TEAMS">
-        <section class="tb-form-row" style="margin-bottom: 16px">
+        <section class="jnks-iot-form-row" style="margin-bottom: 16px">
           <mat-slide-toggle class="mat-slide margin" formControlName="useOldApi">
             {{ "notification.use-old-api" | translate }}
           </mat-slide-toggle>
@@ -113,7 +113,7 @@
              target="_blank"
              matTooltip="{{ 'notification.use-deprecated-webhook-connectors' | translate }}"
              matTooltipPosition="above"
-             class="tb-mat-20">
+             class="jnks-iot-mat-20">
             <mat-icon>open_in_new</mat-icon>
           </a>
         </section>

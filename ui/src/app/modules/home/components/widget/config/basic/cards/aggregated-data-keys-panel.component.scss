@@ -1,28 +1,28 @@
 @import '../../../../../../../../scss/constants';
 
-.tb-aggregated-data-keys-panel {
-  .tb-form-table-header-cell {
-    &.tb-position-header {
+.jnks-iot-aggregated-data-keys-panel {
+  .jnks-iot-form-table-header-cell {
+    &.jnks-iot-position-header {
       width: 132px;
       min-width: 132px;
     }
 
-    &.tb-aggregation-header {
+    &.jnks-iot-aggregation-header {
       flex: 1;
       min-width: 120px;
     }
 
-    &.tb-units-header {
+    &.jnks-iot-units-header {
       width: 80px;
       min-width: 80px;
     }
 
-    &.tb-decimals-header {
+    &.jnks-iot-decimals-header {
       width: 60px;
       min-width: 60px;
     }
 
-    &.tb-font-header, &.tb-color-header, &.tb-arrow-header {
+    &.jnks-iot-font-header, &.jnks-iot-color-header, &.jnks-iot-arrow-header {
       width: 40px;
       min-width: 40px;
       display: none;
@@ -31,20 +31,20 @@
       }
     }
 
-    &.tb-actions-header {
+    &.jnks-iot-actions-header {
       width: 40px;
       min-width: 40px;
     }
 
-    &.tb-units-header, &.tb-decimals-header {
+    &.jnks-iot-units-header, &.jnks-iot-decimals-header {
       display: none;
       @media #{$mat-gt-sm} {
         display: block;
       }
     }
   }
-  .tb-form-table-body {
-    tb-aggregated-data-key-row {
+  .jnks-iot-form-table-body {
+    jnks-iot-aggregated-data-key-row {
       overflow: hidden;
     }
   }

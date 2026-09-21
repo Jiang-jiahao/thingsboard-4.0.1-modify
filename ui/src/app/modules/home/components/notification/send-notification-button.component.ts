@@ -14,7 +14,7 @@ import { getCurrentAuthUser } from '@core/auth/auth.selectors';
 import { Authority } from '@shared/models/authority.enum';
 
 @Component({
-  selector: 'tb-send-notification-button',
+  selector: 'jnks-iot-send-notification-button',
   templateUrl: './send-notification-button.component.html',
 })
 export class SendNotificationButtonComponent {
@@ -33,7 +33,7 @@ export class SendNotificationButtonComponent {
     this.dialog.open<SentNotificationDialogComponent, RequestNotificationDialogData,
       NotificationTemplate>(SentNotificationDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd: true
       }

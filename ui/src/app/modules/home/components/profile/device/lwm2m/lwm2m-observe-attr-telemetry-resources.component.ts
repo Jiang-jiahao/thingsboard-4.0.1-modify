@@ -17,7 +17,7 @@ import { combineLatest, Subject } from 'rxjs';
 import { startWith, takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-profile-lwm2m-observe-attr-telemetry-resource',
+  selector: 'jnks-iot-profile-lwm2m-observe-attr-telemetry-resource',
   templateUrl: './lwm2m-observe-attr-telemetry-resources.component.html',
   styleUrls: ['./lwm2m-observe-attr-telemetry-resources.component.scss'],
   providers: [

@@ -1,15 +1,15 @@
 <form [formGroup]="timezoneForm">
-  <section class="tb-form-row column-xs space-between">
+  <section class="jnks-iot-form-row column-xs space-between">
     <div>{{ 'timezone.timezone' | translate }}</div>
-    <tb-timezone-select [localBrowserTimezonePlaceholderOnEmpty]="localBrowserTimezonePlaceholderOnEmpty"
+    <jnks-iot-timezone-select [localBrowserTimezonePlaceholderOnEmpty]="localBrowserTimezonePlaceholderOnEmpty"
                         formControlName="timezone"
                         subscriptSizing="dynamic"
                         appearance="outline"
                         displayLabel="false" class="flex">
-    </tb-timezone-select>
+    </jnks-iot-timezone-select>
   </section>
 </form>
-<div class="tb-timezone-panel-actions tb-flex flex-end no-gap">
+<div class="jnks-iot-timezone-panel-actions jnks-iot-flex flex-end no-gap">
   <button type="button"
           mat-button
           [disabled]="(isLoading$ | async)"

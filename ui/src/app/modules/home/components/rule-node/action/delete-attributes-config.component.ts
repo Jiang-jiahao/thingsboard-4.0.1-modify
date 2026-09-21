@@ -7,7 +7,7 @@ import { AttributeScope, telemetryTypeTranslations } from '@shared/models/teleme
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-action-node-delete-attributes-config',
+  selector: 'jnks-iot-action-node-delete-attributes-config',
   templateUrl: './delete-attributes-config.component.html',
   styleUrls: []
 })

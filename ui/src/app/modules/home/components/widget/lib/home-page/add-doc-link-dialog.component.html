@@ -1,16 +1,16 @@
-<form class="tb-add-doc-link-dialog" [formGroup]="addDocLinkFormGroup">
+<form class="jnks-iot-add-doc-link-dialog" [formGroup]="addDocLinkFormGroup">
   <mat-toolbar style="background: transparent;">
     <h2 translate>widgets.documentation.add-link-title</h2>
     <span class="flex-1"></span>
     <button mat-icon-button
             (click)="cancel()"
             type="button">
-      <tb-icon>close</tb-icon>
+      <jnks-iot-icon>close</jnks-iot-icon>
     </button>
   </mat-toolbar>
   <div mat-dialog-content>
-    <tb-doc-link formControlName="docLink" [addOnly]="true"
+    <jnks-iot-doc-link formControlName="docLink" [addOnly]="true"
                       (docLinkAdded)="add($event)">
-    </tb-doc-link>
+    </jnks-iot-doc-link>
   </div>
 </form>

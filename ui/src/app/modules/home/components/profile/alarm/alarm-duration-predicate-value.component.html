@@ -48,12 +48,12 @@
     </div>
   </div>
   <button mat-icon-button
-          class="mat-elevation-z1 tb-mat-32"
+          class="mat-elevation-z1 jnks-iot-mat-32"
           color="primary"
           type="button"
           matTooltip="{{ (dynamicMode ? 'filter.switch-to-default-value' : 'filter.switch-to-dynamic-value') | translate }}"
           matTooltipPosition="above"
           (click)="dynamicMode = !dynamicMode">
-    <tb-icon class="tb-mat-20">{{ dynamicMode ? 'mdi:numeric' : 'mdi:variable' }}</tb-icon>
+    <jnks-iot-icon class="jnks-iot-mat-20">{{ dynamicMode ? 'mdi:numeric' : 'mdi:variable' }}</jnks-iot-icon>
   </button>
 </div>

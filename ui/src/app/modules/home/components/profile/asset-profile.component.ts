@@ -14,7 +14,7 @@ import { DashboardId } from '@shared/models/id/dashboard-id';
 import { AssetProfile } from '@shared/models/asset.models';
 
 @Component({
-  selector: 'tb-asset-profile',
+  selector: 'jnks-iot-asset-profile',
   templateUrl: './asset-profile.component.html',
   styleUrls: []
 })
@@ -25,7 +25,7 @@ export class AssetProfileComponent extends EntityComponent<AssetProfile> {
 
   entityType = EntityType;
 
-  serviceType = ServiceType.TB_RULE_ENGINE;
+  serviceType = ServiceType.JNKS_IOT_RULE_ENGINE;
 
   assetProfileId: EntityId;
 

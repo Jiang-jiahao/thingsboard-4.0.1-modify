@@ -13,7 +13,7 @@ import { ActionNotificationShow } from '@app/core/notification/notification.acti
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'tb-user',
+  selector: 'jnks-iot-user',
   templateUrl: './user.component.html',
   styleUrls: ['./user.component.scss']
 })

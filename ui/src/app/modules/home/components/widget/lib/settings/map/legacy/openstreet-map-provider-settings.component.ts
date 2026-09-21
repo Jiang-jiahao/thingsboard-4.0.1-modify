@@ -21,7 +21,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-openstreet-map-provider-settings',
+  selector: 'jnks-iot-openstreet-map-provider-settings',
   templateUrl: './openstreet-map-provider-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

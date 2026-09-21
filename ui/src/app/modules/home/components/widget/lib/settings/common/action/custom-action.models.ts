@@ -1,4 +1,4 @@
-import { TbEditorCompleter, TbEditorCompletions } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompleter, JnksIotEditorCompletions } from '@shared/models/ace/completion.models';
 import { widgetContextCompletions } from '@shared/models/ace/widget-completion.models';
 import { entityIdHref, entityTypeHref, serviceCompletions } from '@shared/models/ace/service-completion.models';
 import { CustomActionDescriptor, WidgetAction } from '@shared/models/widget.models';
@@ -9,7 +9,7 @@ import customSampleHtml from './custom-sample-html.raw';
 import placeMapItemSampleHtml from './place-map-item-sample-html.raw';
 import placeMapItemSampleJs from './place-map-item-sample-js.raw';
 
-const customActionCompletions: TbEditorCompletions = {
+const customActionCompletions: JnksIotEditorCompletions = {
   ...{
     $event: {
       meta: 'argument',
@@ -52,7 +52,7 @@ const customActionCompletions: TbEditorCompletions = {
   }
 };
 
-const customPrettyActionCompletions: TbEditorCompletions = {
+const customPrettyActionCompletions: JnksIotEditorCompletions = {
   ...{
     htmlTemplate: {
       meta: 'argument',
@@ -92,5 +92,5 @@ export const toPlaceMapItemAction = (action: WidgetAction): CustomActionDescript
   return result;
 };
 
-export const CustomActionEditorCompleter = new TbEditorCompleter(customActionCompletions);
-export const CustomPrettyActionEditorCompleter = new TbEditorCompleter(customPrettyActionCompletions);
+export const CustomActionEditorCompleter = new JnksIotEditorCompleter(customActionCompletions);
+export const CustomPrettyActionEditorCompleter = new JnksIotEditorCompleter(customPrettyActionCompletions);

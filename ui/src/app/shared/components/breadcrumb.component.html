@@ -1,4 +1,4 @@
-<div class="tb-breadcrumb flex flex-1 flex-row">
+<div class="jnks-iot-breadcrumb flex flex-1 flex-row">
   <h1 class="flex-1 gt-sm:!hidden" *ngIf="lastBreadcrumb$ | async; let breadcrumb">
     {{ breadcrumb.labelFunction ? breadcrumb.labelFunction() : (breadcrumb.customTranslate ? (breadcrumb.label | customTranslate) : (breadcrumb.label | translate)) }}
   </h1>
@@ -18,8 +18,8 @@
 </div>
 <ng-template #breadcrumbWithIcon let-breadcrumb="breadcrumb">
   <img *ngIf="breadcrumb.iconUrl" [src]="breadcrumb.iconUrl"/>
-  <tb-icon *ngIf="!breadcrumb.iconUrl">
+  <jnks-iot-icon *ngIf="!breadcrumb.iconUrl">
     {{ breadcrumb.icon }}
-  </tb-icon>
+  </jnks-iot-icon>
   {{ breadcrumb.labelFunction ? breadcrumb.labelFunction() : (breadcrumb.customTranslate ? (breadcrumb.label | customTranslate) : (breadcrumb.label | translate)) }}
 </ng-template>

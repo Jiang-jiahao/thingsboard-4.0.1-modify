@@ -1,4 +1,4 @@
-<form (ngSubmit)="save()" class="tb-map-data-layer-dialog" style="width: 750px;">
+<form (ngSubmit)="save()" class="jnks-iot-map-data-layer-dialog" style="width: 750px;">
   <mat-toolbar color="primary">
     <h2 translate>{{dialogTitle}}</h2>
     <span class="flex-1"></span>
@@ -8,13 +8,13 @@
       <mat-icon class="material-icons">close</mat-icon>
     </button>
   </mat-toolbar>
-  <div mat-dialog-content class="tb-form-panel no-border no-padding" [formGroup]="dataLayerFormGroup">
-    <div class="tb-form-panel">
+  <div mat-dialog-content class="jnks-iot-form-panel no-border no-padding" [formGroup]="dataLayerFormGroup">
+    <div class="jnks-iot-form-panel">
       <div class="flex flex-row items-center justify-between xs:flex-col xs:items-start xs:gap-3">
-        <div class="tb-form-panel-title">{{ 'widget-config.datasource' | translate }}</div>
-        <tb-toggle-select formControlName="dsType">
-          <tb-toggle-option *ngFor="let type of datasourceTypes" [value]="type">{{ datasourceTypesTranslations.get(type) | translate }}</tb-toggle-option>
-        </tb-toggle-select>
+        <div class="jnks-iot-form-panel-title">{{ 'widget-config.datasource' | translate }}</div>
+        <jnks-iot-toggle-select formControlName="dsType">
+          <jnks-iot-toggle-option *ngFor="let type of datasourceTypes" [value]="type">{{ datasourceTypesTranslations.get(type) | translate }}</jnks-iot-toggle-option>
+        </jnks-iot-toggle-select>
       </div>
       <div class="flex flex-col">
         <mat-form-field
@@ -23,49 +23,49 @@
           <mat-label translate>datasource.label</mat-label>
           <input matInput formControlName="dsLabel" placeholder="{{ 'widget-config.set' | translate }}">
         </mat-form-field>
-        <tb-entity-autocomplete
+        <jnks-iot-entity-autocomplete
           *ngIf="dataLayerFormGroup.get('dsType').value === DatasourceType.device"
           required
           appearance="outline"
           placeholder="{{ 'device.select-device' | translate }}"
           [entityType]="EntityType.DEVICE"
           formControlName="dsDeviceId">
-        </tb-entity-autocomplete>
-        <tb-entity-alias-select
+        </jnks-iot-entity-autocomplete>
+        <jnks-iot-entity-alias-select
           *ngIf="dataLayerFormGroup.get('dsType').value === DatasourceType.entity"
-          tbRequired
+          jnksIotRequired
           appearance="outline"
           [aliasController]="context.aliasController"
           formControlName="dsEntityAliasId"
           [callbacks]="context.callbacks">
-        </tb-entity-alias-select>
-        <tb-filter-select
+        </jnks-iot-entity-alias-select>
+        <jnks-iot-filter-select
           *ngIf="[DatasourceType.device, DatasourceType.entity].includes(dataLayerFormGroup.get('dsType').value)"
           showLabel
           appearance="outline"
           [aliasController]="context.aliasController"
           formControlName="dsFilterId"
           [callbacks]="context.callbacks">
-        </tb-filter-select>
+        </jnks-iot-filter-select>
       </div>
-      <mat-expansion-panel *ngIf="dataLayerFormGroup.get('dsType').value !== DatasourceType.function" class="tb-settings">
+      <mat-expansion-panel *ngIf="dataLayerFormGroup.get('dsType').value !== DatasourceType.function" class="jnks-iot-settings">
         <mat-expansion-panel-header>
           <mat-panel-description class="flex items-stretch justify-start" translate>
             widgets.maps.data-layer.more-datasources
           </mat-panel-description>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <tb-map-data-sources formControlName="additionalDataSources"
+          <jnks-iot-map-data-sources formControlName="additionalDataSources"
                                [context]="context">
-          </tb-map-data-sources>
+          </jnks-iot-map-data-sources>
         </ng-template>
       </mat-expansion-panel>
     </div>
-    <div class="tb-form-panel">
-      <div class="tb-form-panel-title">{{ 'datakey.keys' | translate }}</div>
+    <div class="jnks-iot-form-panel">
+      <div class="jnks-iot-form-panel-title">{{ 'datakey.keys' | translate }}</div>
       <div class="flex flex-col">
         <div *ngIf="['trips', 'markers'].includes(dataLayerType)" class="flex flex-row gap-3">
-          <tb-data-key-input
+          <jnks-iot-data-key-input
             class="min-w-0 flex-1"
             inlineField="false"
             appearance="outline"
@@ -84,8 +84,8 @@
             [generateKey]="context.generateDataKey"
             (keyEdit)="editKey('xKey')"
             formControlName="xKey">
-          </tb-data-key-input>
-          <tb-data-key-input
+          </jnks-iot-data-key-input>
+          <jnks-iot-data-key-input
             class="min-w-0 flex-1"
             inlineField="false"
             appearance="outline"
@@ -104,9 +104,9 @@
             [generateKey]="context.generateDataKey"
             (keyEdit)="editKey('yKey')"
             formControlName="yKey">
-          </tb-data-key-input>
+          </jnks-iot-data-key-input>
         </div>
-        <tb-data-key-input
+        <jnks-iot-data-key-input
           *ngIf="dataLayerType === 'polygons'"
           inlineField="false"
           appearance="outline"
@@ -125,8 +125,8 @@
           [generateKey]="context.generateDataKey"
           (keyEdit)="editKey('polygonKey')"
           formControlName="polygonKey">
-        </tb-data-key-input>
-        <tb-data-key-input
+        </jnks-iot-data-key-input>
+        <jnks-iot-data-key-input
           *ngIf="dataLayerType === 'circles'"
           inlineField="false"
           appearance="outline"
@@ -145,8 +145,8 @@
           [generateKey]="context.generateDataKey"
           (keyEdit)="editKey('circleKey')"
           formControlName="circleKey">
-        </tb-data-key-input>
-        <tb-data-keys
+        </jnks-iot-data-key-input>
+        <jnks-iot-data-keys
           formControlName="additionalDataKeys"
           appearance="outline"
           subscriptSizing="dynamic"
@@ -165,77 +165,77 @@
           [aliasController]="context.aliasController"
           [callbacks]="context.callbacks"
           [generateKey]="generateAdditionalDataKey">
-        </tb-data-keys>
+        </jnks-iot-data-keys>
       </div>
     </div>
-    <div class="tb-form-panel">
-      <div class="tb-form-panel-title">{{ 'widget-config.appearance' | translate }}</div>
+    <div class="jnks-iot-form-panel">
+      <div class="jnks-iot-form-panel-title">{{ 'widget-config.appearance' | translate }}</div>
       <ng-container *ngIf="['trips', 'markers'].includes(dataLayerType)">
-        <div class="tb-form-panel tb-slide-toggle stroked">
-          <mat-expansion-panel #markerExpansionPanel class="tb-settings" [expanded]="dataLayerType === 'markers' || dataLayerFormGroup.get('showMarker').value"
+        <div class="jnks-iot-form-panel jnks-iot-slide-toggle stroked">
+          <mat-expansion-panel #markerExpansionPanel class="jnks-iot-settings" [expanded]="dataLayerType === 'markers' || dataLayerFormGroup.get('showMarker').value"
                                [disabled]="dataLayerType === 'trips' && !dataLayerFormGroup.get('showMarker').value">
             <mat-expansion-panel-header class="flex flex-row flex-wrap">
               <mat-panel-title>
                 <div class="flex flex-1 flex-row items-center justify-between xs:flex-col xs:items-start xs:gap-3">
                   @if (dataLayerType === 'markers') {
-                    <div class="tb-form-panel-title">{{ 'widgets.maps.data-layer.marker.marker' | translate }}</div>
+                    <div class="jnks-iot-form-panel-title">{{ 'widgets.maps.data-layer.marker.marker' | translate }}</div>
                   } @else {
                     <mat-slide-toggle class="mat-slide flex items-stretch justify-center" formControlName="showMarker" (click)="$event.stopPropagation()">
-                      <div class="tb-form-panel-title">{{ 'widgets.maps.data-layer.marker.marker' | translate }}</div>
+                      <div class="jnks-iot-form-panel-title">{{ 'widgets.maps.data-layer.marker.marker' | translate }}</div>
                     </mat-slide-toggle>
                   }
-                  <tb-toggle-select [class.!hidden]="!markerExpansionPanel.expanded" formControlName="markerType" (click)="$event.stopPropagation()">
-                    <tb-toggle-option [value]="MarkerType.shape">{{ 'widgets.maps.data-layer.marker.marker-type-shape' | translate }}</tb-toggle-option>
-                    <tb-toggle-option [value]="MarkerType.icon">{{ 'widgets.maps.data-layer.marker.marker-type-icon' | translate }}</tb-toggle-option>
-                    <tb-toggle-option [value]="MarkerType.image">{{ 'widgets.maps.data-layer.marker.marker-type-image' | translate }}</tb-toggle-option>
-                  </tb-toggle-select>
+                  <jnks-iot-toggle-select [class.!hidden]="!markerExpansionPanel.expanded" formControlName="markerType" (click)="$event.stopPropagation()">
+                    <jnks-iot-toggle-option [value]="MarkerType.shape">{{ 'widgets.maps.data-layer.marker.marker-type-shape' | translate }}</jnks-iot-toggle-option>
+                    <jnks-iot-toggle-option [value]="MarkerType.icon">{{ 'widgets.maps.data-layer.marker.marker-type-icon' | translate }}</jnks-iot-toggle-option>
+                    <jnks-iot-toggle-option [value]="MarkerType.image">{{ 'widgets.maps.data-layer.marker.marker-type-image' | translate }}</jnks-iot-toggle-option>
+                  </jnks-iot-toggle-select>
                 </div>
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <div *ngIf="dataLayerFormGroup.get('markerType').value === MarkerType.shape" class="tb-form-row space-between column-xs">
+              <div *ngIf="dataLayerFormGroup.get('markerType').value === MarkerType.shape" class="jnks-iot-form-row space-between column-xs">
                 <div translate>widgets.maps.data-layer.marker.shape</div>
-                <tb-marker-shape-settings formControlName="markerShape"
+                <jnks-iot-marker-shape-settings formControlName="markerShape"
                                           [context]="context"
                                           [dsType]="dataLayerFormGroup.get('dsType').value"
                                           [dsEntityAliasId]="dataLayerFormGroup.get('dsEntityAliasId').value"
                                           [dsDeviceId]="dataLayerFormGroup.get('dsDeviceId').value"
-                                          [trip]="dataLayerType === 'trips'" [markerType]="MarkerType.shape"></tb-marker-shape-settings>
+                                          [trip]="dataLayerType === 'trips'" [markerType]="MarkerType.shape"></jnks-iot-marker-shape-settings>
               </div>
-              <div *ngIf="dataLayerFormGroup.get('markerType').value === MarkerType.icon" class="tb-form-row space-between column-xs">
+              <div *ngIf="dataLayerFormGroup.get('markerType').value === MarkerType.icon" class="jnks-iot-form-row space-between column-xs">
                 <div translate>widgets.maps.data-layer.marker.icon</div>
-                <tb-marker-shape-settings formControlName="markerIcon"
+                <jnks-iot-marker-shape-settings formControlName="markerIcon"
                                           [context]="context"
                                           [dsType]="dataLayerFormGroup.get('dsType').value"
                                           [dsEntityAliasId]="dataLayerFormGroup.get('dsEntityAliasId').value"
                                           [dsDeviceId]="dataLayerFormGroup.get('dsDeviceId').value"
-                                          [trip]="dataLayerType === 'trips'" [markerType]="MarkerType.icon"></tb-marker-shape-settings>
+                                          [trip]="dataLayerType === 'trips'" [markerType]="MarkerType.icon"></jnks-iot-marker-shape-settings>
               </div>
-              <div *ngIf="dataLayerFormGroup.get('markerType').value === MarkerType.image" class="tb-form-row space-between">
+              <div *ngIf="dataLayerFormGroup.get('markerType').value === MarkerType.image" class="jnks-iot-form-row space-between">
                 <div translate>widgets.maps.data-layer.marker.image</div>
-                <tb-marker-image-settings formControlName="markerImage"></tb-marker-image-settings>
+                <jnks-iot-marker-image-settings formControlName="markerImage"></jnks-iot-marker-image-settings>
               </div>
-              <div class="tb-form-row space-between column-lt-md">
+              <div class="jnks-iot-form-row space-between column-lt-md">
                 <div translate>widgets.maps.data-layer.marker.marker-offset</div>
                 <div class="flex flex-row items-center justify-start gap-2">
-                  <div class="tb-small-label" translate>widgets.maps.data-layer.marker.offset-horizontal</div>
+                  <div class="jnks-iot-small-label" translate>widgets.maps.data-layer.marker.offset-horizontal</div>
                   <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
                     <input matInput formControlName="markerOffsetX"
                            type="number" placeholder="{{ 'widget-config.set' | translate }}">
                   </mat-form-field>
-                  <div class="tb-small-label" translate>widgets.maps.data-layer.marker.offset-vertical</div>
+                  <div class="jnks-iot-small-label" translate>widgets.maps.data-layer.marker.offset-vertical</div>
                   <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
                     <input matInput formControlName="markerOffsetY"
                            type="number" placeholder="{{ 'widget-config.set' | translate }}">
                   </mat-form-field>
                 </div>
               </div>
-              <div *ngIf="dataLayerType === 'trips'" class="tb-form-row space-between column-xs">
+              <div *ngIf="dataLayerType === 'trips'" class="jnks-iot-form-row space-between column-xs">
                 <mat-slide-toggle class="mat-slide" formControlName="rotateMarker">
                   {{ 'widgets.maps.data-layer.marker.rotate-marker' | translate }}
                 </mat-slide-toggle>
                 <div class="flex flex-row items-center justify-start gap-2">
-                  <div class="tb-small-label" translate>widgets.maps.data-layer.marker.offset-angle</div>
+                  <div class="jnks-iot-small-label" translate>widgets.maps.data-layer.marker.offset-angle</div>
                   <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
                     <input matInput formControlName="offsetAngle" type="number" min="0" max="360" step="1" placeholder="{{ 'widget-config.set' | translate }}">
                     <div matSuffix>deg</div>
@@ -249,47 +249,47 @@
             </ng-template>
           </mat-expansion-panel>
         </div>
-        <div *ngIf="mapType === MapType.image" class="tb-form-panel stroked">
-          <div class="tb-form-panel-title" translate>widgets.maps.data-layer.marker.position-conversion</div>
-          <tb-js-func formControlName="positionFunction"
+        <div *ngIf="mapType === MapType.image" class="jnks-iot-form-panel stroked">
+          <div class="jnks-iot-form-panel-title" translate>widgets.maps.data-layer.marker.position-conversion</div>
+          <jnks-iot-js-func formControlName="positionFunction"
                       withModules
                       minHeight="100px"
                       [globalVariables]="functionScopeVariables"
                       [functionArgs]="['origXPos', 'origYPos', 'data', 'dsData', 'aspect']"
                       functionTitle="{{ 'widgets.maps.data-layer.marker.position-conversion-function' | translate }}"
                       helpId="widget/lib/map/position_fn">
-          </tb-js-func>
+          </jnks-iot-js-func>
         </div>
       </ng-container>
       <ng-container *ngIf="dataLayerType === 'trips'">
-        <div class="tb-form-panel tb-slide-toggle stroked">
-          <mat-expansion-panel class="tb-settings" [expanded]="dataLayerFormGroup.get('showPath').value"
+        <div class="jnks-iot-form-panel jnks-iot-slide-toggle stroked">
+          <mat-expansion-panel class="jnks-iot-settings" [expanded]="dataLayerFormGroup.get('showPath').value"
                                [disabled]="!dataLayerFormGroup.get('showPath').value">
             <mat-expansion-panel-header class="flex flex-row flex-wrap">
               <mat-panel-title>
                 <mat-slide-toggle class="mat-slide flex items-stretch justify-center" formControlName="showPath" (click)="$event.stopPropagation()">
-                  <div class="tb-form-panel-title">{{ 'widgets.maps.data-layer.path.path' | translate }}</div>
+                  <div class="jnks-iot-form-panel-title">{{ 'widgets.maps.data-layer.path.path' | translate }}</div>
                 </mat-slide-toggle>
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <div class="tb-form-row space-between">
+              <div class="jnks-iot-form-row space-between">
                 <div translate>widgets.maps.data-layer.path.path</div>
                 <div class="flex flex-row items-center gap-2">
                   <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
                     <input matInput type="number" min="0" formControlName="pathStrokeWeight" placeholder="{{ 'widget-config.set' | translate }}">
                     <span matSuffix>px</span>
                   </mat-form-field>
-                  <tb-data-layer-color-settings
+                  <jnks-iot-data-layer-color-settings
                     [context]="context"
                     [dsType]="dataLayerFormGroup.get('dsType').value"
                     [dsEntityAliasId]="dataLayerFormGroup.get('dsEntityAliasId').value"
                     [dsDeviceId]="dataLayerFormGroup.get('dsDeviceId').value"
-                    helpId="widget/lib/map/path_color_fn" formControlName="pathStrokeColor"></tb-data-layer-color-settings>
+                    helpId="widget/lib/map/path_color_fn" formControlName="pathStrokeColor"></jnks-iot-data-layer-color-settings>
                 </div>
               </div>
-              <div class="tb-form-panel tb-slide-toggle stroked">
-                <mat-expansion-panel class="tb-settings" [expanded]="dataLayerFormGroup.get('usePathDecorator').value"
+              <div class="jnks-iot-form-panel jnks-iot-slide-toggle stroked">
+                <mat-expansion-panel class="jnks-iot-settings" [expanded]="dataLayerFormGroup.get('usePathDecorator').value"
                                      [disabled]="!dataLayerFormGroup.get('usePathDecorator').value">
                   <mat-expansion-panel-header class="flex flex-row flex-wrap">
                     <mat-panel-title>
@@ -299,7 +299,7 @@
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <ng-template matExpansionPanelContent>
-                    <div class="tb-form-row space-between column-xs">
+                    <div class="jnks-iot-form-row space-between column-xs">
                       <div translate>widgets.maps.data-layer.path.decorator-symbol</div>
                       <div class="flex flex-1 flex-row items-center justify-start gap-2 lt-md:flex-col lt-md:items-stretch">
                         <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
@@ -314,32 +314,32 @@
                             <input matInput type="number" min="0" formControlName="pathDecoratorSymbolSize" placeholder="{{ 'widget-config.set' | translate }}">
                             <span matSuffix>px</span>
                           </mat-form-field>
-                          <tb-color-input asBoxInput
+                          <jnks-iot-color-input asBoxInput
                                           colorClearButton
                                           formControlName="pathDecoratorSymbolColor">
-                          </tb-color-input>
+                          </jnks-iot-color-input>
                         </div>
                       </div>
                     </div>
-                    <div class="tb-form-row space-between column-xs">
+                    <div class="jnks-iot-form-row space-between column-xs">
                       <div translate>widgets.maps.data-layer.path.decorator-arrangement</div>
                       <div class="flex flex-1 flex-row items-center justify-start gap-2 lt-md:flex-col lt-md:items-stretch">
                         <div class="flex flex-1 flex-row items-center justify-start gap-2">
-                          <div class="tb-small-label lt-md:min-w-11" translate>widgets.maps.data-layer.path.decorator-offset</div>
+                          <div class="jnks-iot-small-label lt-md:min-w-11" translate>widgets.maps.data-layer.path.decorator-offset</div>
                           <mat-form-field appearance="outline" class="number flex-1" subscriptSizing="dynamic">
                             <input matInput formControlName="pathDecoratorOffset" type="number" min="0" placeholder="{{ 'widget-config.set' | translate }}">
                             <div matSuffix>px</div>
                           </mat-form-field>
                         </div>
                         <div class="flex flex-1 flex-row items-center justify-start gap-2">
-                          <div class="tb-small-label lt-md:min-w-11" translate>widgets.maps.data-layer.path.decorator-end-offset</div>
+                          <div class="jnks-iot-small-label lt-md:min-w-11" translate>widgets.maps.data-layer.path.decorator-end-offset</div>
                           <mat-form-field appearance="outline" class="number flex-1" subscriptSizing="dynamic">
                             <input matInput formControlName="pathEndDecoratorOffset" type="number" min="0" placeholder="{{ 'widget-config.set' | translate }}">
                             <div matSuffix>px</div>
                           </mat-form-field>
                         </div>
                         <div class="flex flex-1 flex-row items-center justify-start gap-2">
-                          <div class="tb-small-label lt-md:min-w-11" translate>widgets.maps.data-layer.path.decorator-repeat</div>
+                          <div class="jnks-iot-small-label lt-md:min-w-11" translate>widgets.maps.data-layer.path.decorator-repeat</div>
                           <mat-form-field appearance="outline" class="number flex-1" subscriptSizing="dynamic">
                             <input matInput formControlName="pathDecoratorRepeat" type="number" min="0" placeholder="{{ 'widget-config.set' | translate }}">
                             <div matSuffix>px</div>
@@ -353,92 +353,92 @@
             </ng-template>
           </mat-expansion-panel>
         </div>
-        <div class="tb-form-panel tb-slide-toggle stroked">
-          <mat-expansion-panel class="tb-settings" [expanded]="dataLayerFormGroup.get('showPoints').value"
+        <div class="jnks-iot-form-panel jnks-iot-slide-toggle stroked">
+          <mat-expansion-panel class="jnks-iot-settings" [expanded]="dataLayerFormGroup.get('showPoints').value"
                                [disabled]="!dataLayerFormGroup.get('showPoints').value">
             <mat-expansion-panel-header class="flex flex-row flex-wrap">
               <mat-panel-title>
                 <mat-slide-toggle class="mat-slide flex items-stretch justify-center" formControlName="showPoints" (click)="$event.stopPropagation()">
-                  <div class="tb-form-panel-title">{{ 'widgets.maps.data-layer.points.points' | translate }}</div>
+                  <div class="jnks-iot-form-panel-title">{{ 'widgets.maps.data-layer.points.points' | translate }}</div>
                 </mat-slide-toggle>
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <div class="tb-form-row space-between">
+              <div class="jnks-iot-form-row space-between">
                 <div translate>widgets.maps.data-layer.points.points</div>
                 <div class="flex flex-row items-center gap-2">
                   <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
                     <input matInput type="number" min="0" formControlName="pointSize" placeholder="{{ 'widget-config.set' | translate }}">
                     <span matSuffix>px</span>
                   </mat-form-field>
-                  <tb-data-layer-color-settings
+                  <jnks-iot-data-layer-color-settings
                     [context]="context"
                     [dsType]="dataLayerFormGroup.get('dsType').value"
                     [dsEntityAliasId]="dataLayerFormGroup.get('dsEntityAliasId').value"
                     [dsDeviceId]="dataLayerFormGroup.get('dsDeviceId').value"
-                    helpId="widget/lib/map/path_point_color_fn" formControlName="pointColor"></tb-data-layer-color-settings>
+                    helpId="widget/lib/map/path_point_color_fn" formControlName="pointColor"></jnks-iot-data-layer-color-settings>
                 </div>
               </div>
-              <tb-data-layer-pattern-settings
+              <jnks-iot-data-layer-pattern-settings
                 patternType="tooltip"
                 patternTitle="{{ 'widgets.maps.data-layer.points.point-tooltip' | translate }}"
                 [context]="context"
                 [expand]="false"
                 helpId="widget/lib/map/path_point_tooltip_fn"
                 formControlName="pointTooltip">
-              </tb-data-layer-pattern-settings>
+              </jnks-iot-data-layer-pattern-settings>
             </ng-template>
           </mat-expansion-panel>
         </div>
       </ng-container>
       <ng-container *ngIf="['polygons', 'circles'].includes(dataLayerType)">
-        <div class="tb-form-panel stroked">
+        <div class="jnks-iot-form-panel stroked">
           <div class="flex flex-1 flex-row items-center justify-between xs:flex-col xs:items-start xs:gap-3">
-            <div class="tb-form-panel-title">{{ 'widgets.maps.data-layer.shape.fill' | translate }}</div>
-            <tb-toggle-select formControlName="fillType" (click)="$event.stopPropagation()">
-              <tb-toggle-option [value]="ShapeFillType.color">{{ 'widgets.maps.data-layer.shape.fill-type-color' | translate }}</tb-toggle-option>
-              <tb-toggle-option [value]="ShapeFillType.stripe">{{ 'widgets.maps.data-layer.shape.fill-type-stripe' | translate }}</tb-toggle-option>
-              <tb-toggle-option [value]="ShapeFillType.image">{{ 'widgets.maps.data-layer.shape.fill-type-image' | translate }}</tb-toggle-option>
-            </tb-toggle-select>
+            <div class="jnks-iot-form-panel-title">{{ 'widgets.maps.data-layer.shape.fill' | translate }}</div>
+            <jnks-iot-toggle-select formControlName="fillType" (click)="$event.stopPropagation()">
+              <jnks-iot-toggle-option [value]="ShapeFillType.color">{{ 'widgets.maps.data-layer.shape.fill-type-color' | translate }}</jnks-iot-toggle-option>
+              <jnks-iot-toggle-option [value]="ShapeFillType.stripe">{{ 'widgets.maps.data-layer.shape.fill-type-stripe' | translate }}</jnks-iot-toggle-option>
+              <jnks-iot-toggle-option [value]="ShapeFillType.image">{{ 'widgets.maps.data-layer.shape.fill-type-image' | translate }}</jnks-iot-toggle-option>
+            </jnks-iot-toggle-select>
           </div>
-          <div *ngIf="dataLayerFormGroup.get('fillType').value === ShapeFillType.color" class="tb-form-row space-between">
+          <div *ngIf="dataLayerFormGroup.get('fillType').value === ShapeFillType.color" class="jnks-iot-form-row space-between">
             <div translate>widgets.maps.data-layer.shape.color</div>
-            <tb-data-layer-color-settings
+            <jnks-iot-data-layer-color-settings
               [context]="context"
               [dsType]="dataLayerFormGroup.get('dsType').value"
               [dsEntityAliasId]="dataLayerFormGroup.get('dsEntityAliasId').value"
               [dsDeviceId]="dataLayerFormGroup.get('dsDeviceId').value"
-              helpId="{{ dataLayerType === 'polygons' ? 'widget/lib/map/polygon_fill_color_fn' : 'widget/lib/map/circle_fill_color_fn' }}" formControlName="fillColor"></tb-data-layer-color-settings>
+              helpId="{{ dataLayerType === 'polygons' ? 'widget/lib/map/polygon_fill_color_fn' : 'widget/lib/map/circle_fill_color_fn' }}" formControlName="fillColor"></jnks-iot-data-layer-color-settings>
           </div>
-          <div *ngIf="dataLayerFormGroup.get('fillType').value === ShapeFillType.stripe" class="tb-form-row space-between">
+          <div *ngIf="dataLayerFormGroup.get('fillType').value === ShapeFillType.stripe" class="jnks-iot-form-row space-between">
             <div translate>widgets.maps.data-layer.shape.stripe-pattern</div>
-            <tb-shape-fill-stripe-settings
+            <jnks-iot-shape-fill-stripe-settings
               [context]="context"
               [dsType]="dataLayerFormGroup.get('dsType').value"
               [dsEntityAliasId]="dataLayerFormGroup.get('dsEntityAliasId').value"
               [dsDeviceId]="dataLayerFormGroup.get('dsDeviceId').value"
               [dataLayerType]="dataLayerType"
               formControlName="fillStripe">
-            </tb-shape-fill-stripe-settings>
+            </jnks-iot-shape-fill-stripe-settings>
           </div>
-          <div *ngIf="dataLayerFormGroup.get('fillType').value === ShapeFillType.image" class="tb-form-row space-between">
+          <div *ngIf="dataLayerFormGroup.get('fillType').value === ShapeFillType.image" class="jnks-iot-form-row space-between">
             <div translate>widgets.maps.data-layer.shape.image</div>
-            <tb-shape-fill-image-settings formControlName="fillImage"></tb-shape-fill-image-settings>
+            <jnks-iot-shape-fill-image-settings formControlName="fillImage"></jnks-iot-shape-fill-image-settings>
           </div>
         </div>
-        <div class="tb-form-row space-between">
+        <div class="jnks-iot-form-row space-between">
           <div translate>widgets.maps.data-layer.shape.stroke</div>
           <div class="flex flex-row items-center gap-2">
             <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
               <input matInput type="number" min="0" formControlName="strokeWeight" placeholder="{{ 'widget-config.set' | translate }}">
               <span matSuffix>px</span>
             </mat-form-field>
-            <tb-data-layer-color-settings
+            <jnks-iot-data-layer-color-settings
               [context]="context"
               [dsType]="dataLayerFormGroup.get('dsType').value"
               [dsEntityAliasId]="dataLayerFormGroup.get('dsEntityAliasId').value"
               [dsDeviceId]="dataLayerFormGroup.get('dsDeviceId').value"
-              helpId="{{ dataLayerType === 'polygons' ? 'widget/lib/map/polygon_stroke_color_fn' : 'widget/lib/map/circle_stroke_color_fn' }}" formControlName="strokeColor"></tb-data-layer-color-settings>
+              helpId="{{ dataLayerType === 'polygons' ? 'widget/lib/map/polygon_stroke_color_fn' : 'widget/lib/map/circle_stroke_color_fn' }}" formControlName="strokeColor"></jnks-iot-data-layer-color-settings>
           </div>
         </div>
       </ng-container>
@@ -449,19 +449,19 @@
     @if (dataLayerType !== 'trips') {
       <ng-container *ngTemplateOutlet="behavior"></ng-container>
     }
-    <div class="tb-form-panel">
-      <div class="tb-form-panel-title" tb-hint-tooltip-icon="{{ 'widgets.maps.data-layer.groups-hint' | translate }}">{{ 'widgets.maps.data-layer.groups' | translate }}</div>
-      <tb-string-items-list class="tb-inline-chips"
+    <div class="jnks-iot-form-panel">
+      <div class="jnks-iot-form-panel-title" jnks-iot-hint-tooltip-icon="{{ 'widgets.maps.data-layer.groups-hint' | translate }}">{{ 'widgets.maps.data-layer.groups' | translate }}</div>
+      <jnks-iot-string-items-list class="jnks-iot-inline-chips"
                             editable
                             placeholder="{{'widgets.maps.data-layer.groups' | translate}}"
                             appearance="outline"
                             subscriptSizing="dynamic"
                             formControlName="groups">
-      </tb-string-items-list>
+      </jnks-iot-string-items-list>
     </div>
-    <div *ngIf="dataLayerType !== 'trips'" class="tb-form-panel" formGroupName="edit">
-      <div class="tb-form-panel-title">{{ dataLayerEditTitle | translate }}</div>
-      <div class="tb-form-row space-between column-lt-md">
+    <div *ngIf="dataLayerType !== 'trips'" class="jnks-iot-form-panel" formGroupName="edit">
+      <div class="jnks-iot-form-panel-title">{{ dataLayerEditTitle | translate }}</div>
+      <div class="jnks-iot-form-row space-between column-lt-md">
         <div translate>widgets.maps.data-layer.edit-instruments</div>
         <mat-chip-listbox multiple formControlName="enabledActions">
           <mat-chip-option *ngFor="let action of dataLayerEditActions" [value]="action">
@@ -469,29 +469,29 @@
           </mat-chip-option>
         </mat-chip-listbox>
       </div>
-      <div *ngIf="showEditAttributeScope" class="tb-form-row space-between column-lt-md">
+      <div *ngIf="showEditAttributeScope" class="jnks-iot-form-row space-between column-lt-md">
         <div translate>widgets.maps.data-layer.persist-location-attribute-scope</div>
-        <tb-toggle-select formControlName="attributeScope" appearance="fill">
-          <tb-toggle-option [value]="AttributeScope.SERVER_SCOPE">
+        <jnks-iot-toggle-select formControlName="attributeScope" appearance="fill">
+          <jnks-iot-toggle-option [value]="AttributeScope.SERVER_SCOPE">
             {{ telemetryTypeTranslationsShort.get(AttributeScope.SERVER_SCOPE) | translate }}
-          </tb-toggle-option>
-          <tb-toggle-option [value]="AttributeScope.SHARED_SCOPE">
+          </jnks-iot-toggle-option>
+          <jnks-iot-toggle-option [value]="AttributeScope.SHARED_SCOPE">
             {{ telemetryTypeTranslationsShort.get(AttributeScope.SHARED_SCOPE) | translate }}
-          </tb-toggle-option>
-        </tb-toggle-select>
+          </jnks-iot-toggle-option>
+        </jnks-iot-toggle-select>
       </div>
-      <div class="tb-form-row">
+      <div class="jnks-iot-form-row">
         <mat-slide-toggle class="mat-slide" formControlName="snappable">
-          <span tb-hint-tooltip-icon="{{ 'widgets.maps.data-layer.enable-snapping-hint' | translate }}">
+          <span jnks-iot-hint-tooltip-icon="{{ 'widgets.maps.data-layer.enable-snapping-hint' | translate }}">
             {{ 'widgets.maps.data-layer.enable-snapping' | translate }}
           </span>
         </mat-slide-toggle>
       </div>
     </div>
-    <tb-marker-clustering-settings
+    <jnks-iot-marker-clustering-settings
       *ngIf="dataLayerType === 'markers'"
       formControlName="markerClustering">
-    </tb-marker-clustering-settings>
+    </jnks-iot-marker-clustering-settings>
   </div>
   <div mat-dialog-actions class="flex items-center justify-between">
     <button mat-button color="primary"
@@ -510,36 +510,36 @@
 
 <ng-template #dataLayerLabelAndTooltip let-expand='expand'>
   <ng-container [formGroup]="dataLayerFormGroup">
-    <tb-data-layer-pattern-settings
+    <jnks-iot-data-layer-pattern-settings
       patternType="label"
       [context]="context"
       [helpId]="labelHelpId"
       [expand]="expand"
       formControlName="label">
-    </tb-data-layer-pattern-settings>
-    <tb-data-layer-pattern-settings
+    </jnks-iot-data-layer-pattern-settings>
+    <jnks-iot-data-layer-pattern-settings
       patternType="tooltip"
       [context]="context"
       [helpId]="tooltipHelpId"
       [expand]="expand"
       [hasTooltipOffset]="['trips', 'markers'].includes(dataLayerType)"
       formControlName="tooltip">
-    </tb-data-layer-pattern-settings>
+    </jnks-iot-data-layer-pattern-settings>
   </ng-container>
 </ng-template>
 
 <ng-template #behavior let-stroked="stroked">
   <ng-container [formGroup]="dataLayerFormGroup">
-    <div class="tb-form-panel" [class.stroked]="stroked">
-      <div class="tb-form-panel-title" translate>widgets.maps.data-layer.behavior</div>
-      <div class="tb-form-row">
-        <div class="fixed-title-width" tb-hint-tooltip-icon="{{'widgets.maps.data-layer.on-click-hint' | translate}}" translate>widgets.maps.data-layer.on-click</div>
-        <tb-widget-action-settings class="flex-1"
+    <div class="jnks-iot-form-panel" [class.stroked]="stroked">
+      <div class="jnks-iot-form-panel-title" translate>widgets.maps.data-layer.behavior</div>
+      <div class="jnks-iot-form-row">
+        <div class="fixed-title-width" jnks-iot-hint-tooltip-icon="{{'widgets.maps.data-layer.on-click-hint' | translate}}" translate>widgets.maps.data-layer.on-click</div>
+        <jnks-iot-widget-action-settings class="flex-1"
                                    panelTitle="{{ 'widgets.maps.data-layer.on-click' | translate }}"
                                    [callbacks]="context.callbacks"
                                    [widgetType]="widgetType.latest"
                                    formControlName="click">
-        </tb-widget-action-settings>
+        </jnks-iot-widget-action-settings>
       </div>
     </div>
   </ng-container>

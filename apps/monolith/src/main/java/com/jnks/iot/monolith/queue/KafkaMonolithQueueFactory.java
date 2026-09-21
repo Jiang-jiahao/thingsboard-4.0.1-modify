@@ -29,29 +29,29 @@ import com.jnks.iot.server.gen.transport.TransportProtos.ToUsageStatsServiceMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToVersionControlServiceMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.TransportApiRequestMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.TransportApiResponseMsg;
-import com.jnks.iot.server.queue.TbQueueAdmin;
-import com.jnks.iot.server.queue.TbQueueConsumer;
-import com.jnks.iot.server.queue.TbQueueProducer;
-import com.jnks.iot.server.queue.TbQueueRequestTemplate;
-import com.jnks.iot.server.queue.common.DefaultTbQueueRequestTemplate;
-import com.jnks.iot.server.queue.common.TbProtoJsQueueMsg;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
-import com.jnks.iot.server.queue.discovery.TbServiceInfoProvider;
+import com.jnks.iot.server.queue.JnksIotQueueAdmin;
+import com.jnks.iot.server.queue.JnksIotQueueConsumer;
+import com.jnks.iot.server.queue.JnksIotQueueProducer;
+import com.jnks.iot.server.queue.JnksIotQueueRequestTemplate;
+import com.jnks.iot.server.queue.common.DefaultJnksIotQueueRequestTemplate;
+import com.jnks.iot.server.queue.common.JnksIotProtoJsQueueMsg;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
+import com.jnks.iot.server.queue.discovery.JnksIotServiceInfoProvider;
 import com.jnks.iot.server.queue.discovery.TopicService;
 import com.jnks.iot.server.queue.edqs.EdqsConfig;
-import com.jnks.iot.server.queue.kafka.TbKafkaAdmin;
-import com.jnks.iot.server.queue.kafka.TbKafkaConsumerStatsService;
-import com.jnks.iot.server.queue.kafka.TbKafkaConsumerTemplate;
-import com.jnks.iot.server.queue.kafka.TbKafkaProducerTemplate;
-import com.jnks.iot.server.queue.kafka.TbKafkaSettings;
-import com.jnks.iot.server.queue.kafka.TbKafkaTopicConfigs;
-import com.jnks.iot.server.queue.settings.TbQueueCalculatedFieldSettings;
-import com.jnks.iot.server.queue.settings.TbQueueCoreSettings;
-import com.jnks.iot.server.queue.settings.TbQueueRemoteJsInvokeSettings;
-import com.jnks.iot.server.queue.settings.TbQueueRuleEngineSettings;
-import com.jnks.iot.server.queue.settings.TbQueueTransportApiSettings;
-import com.jnks.iot.server.queue.settings.TbQueueTransportNotificationSettings;
-import com.jnks.iot.server.queue.settings.TbQueueVersionControlSettings;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaAdmin;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaConsumerStatsService;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaConsumerTemplate;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaProducerTemplate;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaSettings;
+import com.jnks.iot.server.queue.kafka.JnksIotKafkaTopicConfigs;
+import com.jnks.iot.server.queue.settings.JnksIotQueueCalculatedFieldSettings;
+import com.jnks.iot.server.queue.settings.JnksIotQueueCoreSettings;
+import com.jnks.iot.server.queue.settings.JnksIotQueueRemoteJsInvokeSettings;
+import com.jnks.iot.server.queue.settings.JnksIotQueueRuleEngineSettings;
+import com.jnks.iot.server.queue.settings.JnksIotQueueTransportApiSettings;
+import com.jnks.iot.server.queue.settings.JnksIotQueueTransportNotificationSettings;
+import com.jnks.iot.server.queue.settings.JnksIotQueueVersionControlSettings;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicLong;
@@ -59,50 +59,50 @@ import java.util.concurrent.atomic.AtomicLong;
 // Kafka队列实现，但用于单体部署
 @Component
 @ConditionalOnExpression("'${queue.type:null}'=='kafka'")
-public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngineQueueFactory, TbVersionControlQueueFactory {
+public class KafkaMonolithQueueFactory implements JnksIotCoreQueueFactory, JnksIotRuleEngineQueueFactory, JnksIotVersionControlQueueFactory {
 
     private final TopicService topicService;
-    private final TbKafkaSettings kafkaSettings;
-    private final TbServiceInfoProvider serviceInfoProvider;
-    private final TbQueueCoreSettings coreSettings;
-    private final TbQueueRuleEngineSettings ruleEngineSettings;
-    private final TbQueueTransportApiSettings transportApiSettings;
-    private final TbQueueTransportNotificationSettings transportNotificationSettings;
-    private final TbQueueRemoteJsInvokeSettings jsInvokeSettings;
-    private final TbQueueVersionControlSettings vcSettings;
-    private final TbQueueCalculatedFieldSettings calculatedFieldSettings;
-    private final TbKafkaConsumerStatsService consumerStatsService;
+    private final JnksIotKafkaSettings kafkaSettings;
+    private final JnksIotServiceInfoProvider serviceInfoProvider;
+    private final JnksIotQueueCoreSettings coreSettings;
+    private final JnksIotQueueRuleEngineSettings ruleEngineSettings;
+    private final JnksIotQueueTransportApiSettings transportApiSettings;
+    private final JnksIotQueueTransportNotificationSettings transportNotificationSettings;
+    private final JnksIotQueueRemoteJsInvokeSettings jsInvokeSettings;
+    private final JnksIotQueueVersionControlSettings vcSettings;
+    private final JnksIotQueueCalculatedFieldSettings calculatedFieldSettings;
+    private final JnksIotKafkaConsumerStatsService consumerStatsService;
     private final EdqsConfig edqsConfig;
 
-    private final TbQueueAdmin coreAdmin;
-    private final TbKafkaAdmin ruleEngineAdmin;
-    private final TbQueueAdmin jsExecutorRequestAdmin;
-    private final TbQueueAdmin jsExecutorResponseAdmin;
-    private final TbQueueAdmin transportApiRequestAdmin;
-    private final TbQueueAdmin transportApiResponseAdmin;
-    private final TbQueueAdmin notificationAdmin;
-    private final TbQueueAdmin fwUpdatesAdmin;
-    private final TbQueueAdmin vcAdmin;
-    private final TbQueueAdmin housekeeperAdmin;
-    private final TbQueueAdmin housekeeperReprocessingAdmin;
-    private final TbQueueAdmin cfAdmin;
-    private final TbQueueAdmin cfStateAdmin;
-    private final TbQueueAdmin edqsEventsAdmin;
-    private final TbKafkaAdmin edqsRequestsAdmin;
+    private final JnksIotQueueAdmin coreAdmin;
+    private final JnksIotKafkaAdmin ruleEngineAdmin;
+    private final JnksIotQueueAdmin jsExecutorRequestAdmin;
+    private final JnksIotQueueAdmin jsExecutorResponseAdmin;
+    private final JnksIotQueueAdmin transportApiRequestAdmin;
+    private final JnksIotQueueAdmin transportApiResponseAdmin;
+    private final JnksIotQueueAdmin notificationAdmin;
+    private final JnksIotQueueAdmin fwUpdatesAdmin;
+    private final JnksIotQueueAdmin vcAdmin;
+    private final JnksIotQueueAdmin housekeeperAdmin;
+    private final JnksIotQueueAdmin housekeeperReprocessingAdmin;
+    private final JnksIotQueueAdmin cfAdmin;
+    private final JnksIotQueueAdmin cfStateAdmin;
+    private final JnksIotQueueAdmin edqsEventsAdmin;
+    private final JnksIotKafkaAdmin edqsRequestsAdmin;
 
     private final AtomicLong consumerCount = new AtomicLong();
 
-    public KafkaMonolithQueueFactory(TopicService topicService, TbKafkaSettings kafkaSettings,
-                                     TbServiceInfoProvider serviceInfoProvider,
-                                     TbQueueCoreSettings coreSettings,
-                                     TbQueueRuleEngineSettings ruleEngineSettings,
-                                     TbQueueTransportApiSettings transportApiSettings,
-                                     TbQueueTransportNotificationSettings transportNotificationSettings,
-                                     TbQueueRemoteJsInvokeSettings jsInvokeSettings,
-                                     TbQueueVersionControlSettings vcSettings,
-                                     TbQueueCalculatedFieldSettings calculatedFieldSettings,
-                                     TbKafkaConsumerStatsService consumerStatsService,
-                                     TbKafkaTopicConfigs kafkaTopicConfigs,
+    public KafkaMonolithQueueFactory(TopicService topicService, JnksIotKafkaSettings kafkaSettings,
+                                     JnksIotServiceInfoProvider serviceInfoProvider,
+                                     JnksIotQueueCoreSettings coreSettings,
+                                     JnksIotQueueRuleEngineSettings ruleEngineSettings,
+                                     JnksIotQueueTransportApiSettings transportApiSettings,
+                                     JnksIotQueueTransportNotificationSettings transportNotificationSettings,
+                                     JnksIotQueueRemoteJsInvokeSettings jsInvokeSettings,
+                                     JnksIotQueueVersionControlSettings vcSettings,
+                                     JnksIotQueueCalculatedFieldSettings calculatedFieldSettings,
+                                     JnksIotKafkaConsumerStatsService consumerStatsService,
+                                     JnksIotKafkaTopicConfigs kafkaTopicConfigs,
                                      EdqsConfig edqsConfig) {
         this.topicService = topicService;
         this.kafkaSettings = kafkaSettings;
@@ -117,26 +117,26 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
         this.calculatedFieldSettings = calculatedFieldSettings;
         this.edqsConfig = edqsConfig;
 
-        this.coreAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getCoreConfigs());
-        this.ruleEngineAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getRuleEngineConfigs());
-        this.jsExecutorRequestAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getJsExecutorRequestConfigs());
-        this.jsExecutorResponseAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getJsExecutorResponseConfigs());
-        this.transportApiRequestAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getTransportApiRequestConfigs());
-        this.transportApiResponseAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getTransportApiResponseConfigs());
-        this.notificationAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getNotificationsConfigs());
-        this.fwUpdatesAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getFwUpdatesConfigs());
-        this.vcAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getVcConfigs());
-        this.housekeeperAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getHousekeeperConfigs());
-        this.housekeeperReprocessingAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getHousekeeperReprocessingConfigs());
-        this.cfAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getCalculatedFieldConfigs());
-        this.cfStateAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getCalculatedFieldStateConfigs());
-        this.edqsEventsAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getEdqsEventsConfigs());
-        this.edqsRequestsAdmin = new TbKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getEdqsRequestsConfigs());
+        this.coreAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getCoreConfigs());
+        this.ruleEngineAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getRuleEngineConfigs());
+        this.jsExecutorRequestAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getJsExecutorRequestConfigs());
+        this.jsExecutorResponseAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getJsExecutorResponseConfigs());
+        this.transportApiRequestAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getTransportApiRequestConfigs());
+        this.transportApiResponseAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getTransportApiResponseConfigs());
+        this.notificationAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getNotificationsConfigs());
+        this.fwUpdatesAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getFwUpdatesConfigs());
+        this.vcAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getVcConfigs());
+        this.housekeeperAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getHousekeeperConfigs());
+        this.housekeeperReprocessingAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getHousekeeperReprocessingConfigs());
+        this.cfAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getCalculatedFieldConfigs());
+        this.cfStateAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getCalculatedFieldStateConfigs());
+        this.edqsEventsAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getEdqsEventsConfigs());
+        this.edqsRequestsAdmin = new JnksIotKafkaAdmin(kafkaSettings, kafkaTopicConfigs.getEdqsRequestsConfigs());
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToTransportMsg>> createTransportNotificationsMsgProducer() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoQueueMsg<ToTransportMsg>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToTransportMsg>> createTransportNotificationsMsgProducer() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoQueueMsg<ToTransportMsg>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("monolith-transport-notifications-" + serviceInfoProvider.getServiceId());
         requestBuilder.defaultTopic(topicService.buildTopicName(transportNotificationSettings.getNotificationsTopic()));
@@ -145,8 +145,8 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToRuleEngineMsg>> createRuleEngineMsgProducer() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoQueueMsg<ToRuleEngineMsg>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToRuleEngineMsg>> createRuleEngineMsgProducer() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoQueueMsg<ToRuleEngineMsg>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("monolith-rule-engine-" + serviceInfoProvider.getServiceId());
         requestBuilder.defaultTopic(topicService.buildTopicName(ruleEngineSettings.getTopic()));
@@ -155,8 +155,8 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToRuleEngineNotificationMsg>> createRuleEngineNotificationsMsgProducer() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoQueueMsg<ToRuleEngineNotificationMsg>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToRuleEngineNotificationMsg>> createRuleEngineNotificationsMsgProducer() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoQueueMsg<ToRuleEngineNotificationMsg>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("monolith-rule-engine-notifications-" + serviceInfoProvider.getServiceId());
         requestBuilder.defaultTopic(topicService.buildTopicName(ruleEngineSettings.getTopic()));
@@ -165,8 +165,8 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToCoreMsg>> createTbCoreMsgProducer() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoQueueMsg<ToCoreMsg>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToCoreMsg>> createJnksIotCoreMsgProducer() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoQueueMsg<ToCoreMsg>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("monolith-core-" + serviceInfoProvider.getServiceId());
         requestBuilder.defaultTopic(topicService.buildTopicName(coreSettings.getTopic()));
@@ -175,47 +175,47 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToCoreNotificationMsg>> createTbCoreNotificationsMsgProducer() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoQueueMsg<ToCoreNotificationMsg>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToCoreNotificationMsg>> createJnksIotCoreNotificationsMsgProducer() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoQueueMsg<ToCoreNotificationMsg>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("monolith-core-notifications-" + serviceInfoProvider.getServiceId());
-        requestBuilder.defaultTopic(topicService.getNotificationsTopic(ServiceType.TB_CORE, serviceInfoProvider.getServiceId()).getFullTopicName());
+        requestBuilder.defaultTopic(topicService.getNotificationsTopic(ServiceType.JNKS_IOT_CORE, serviceInfoProvider.getServiceId()).getFullTopicName());
         requestBuilder.admin(notificationAdmin);
         return requestBuilder.build();
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToVersionControlServiceMsg>> createToVersionControlMsgConsumer() {
-        TbKafkaConsumerTemplate.TbKafkaConsumerTemplateBuilder<TbProtoQueueMsg<ToVersionControlServiceMsg>> consumerBuilder = TbKafkaConsumerTemplate.builder();
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToVersionControlServiceMsg>> createToVersionControlMsgConsumer() {
+        JnksIotKafkaConsumerTemplate.JnksIotKafkaConsumerTemplateBuilder<JnksIotProtoQueueMsg<ToVersionControlServiceMsg>> consumerBuilder = JnksIotKafkaConsumerTemplate.builder();
         consumerBuilder.settings(kafkaSettings);
         consumerBuilder.topic(topicService.buildTopicName(vcSettings.getTopic()));
         consumerBuilder.clientId("monolith-vc-consumer-" + serviceInfoProvider.getServiceId());
         consumerBuilder.groupId(topicService.buildTopicName("monolith-vc-node"));
-        consumerBuilder.decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToVersionControlServiceMsg.parseFrom(msg.getData()), msg.getHeaders()));
+        consumerBuilder.decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToVersionControlServiceMsg.parseFrom(msg.getData()), msg.getHeaders()));
         consumerBuilder.admin(vcAdmin);
         consumerBuilder.statsService(consumerStatsService);
         return consumerBuilder.build();
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToRuleEngineMsg>> createToRuleEngineMsgConsumer(Queue configuration) {
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToRuleEngineMsg>> createToRuleEngineMsgConsumer(Queue configuration) {
         throw new UnsupportedOperationException("Rule engine consumer should use a partitionId");
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToRuleEngineMsg>> createToRuleEngineMsgConsumer(Queue configuration, Integer partitionId) {
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToRuleEngineMsg>> createToRuleEngineMsgConsumer(Queue configuration, Integer partitionId) {
         String queueName = configuration.getName();
         String groupId = topicService.buildConsumerGroupId("re-", configuration.getTenantId(), queueName, partitionId);
 
         ruleEngineAdmin.syncOffsets(topicService.buildConsumerGroupId("re-", configuration.getTenantId(), queueName, null), // the fat groupId
                 groupId, partitionId);
 
-        TbKafkaConsumerTemplate.TbKafkaConsumerTemplateBuilder<TbProtoQueueMsg<ToRuleEngineMsg>> consumerBuilder = TbKafkaConsumerTemplate.builder();
+        JnksIotKafkaConsumerTemplate.JnksIotKafkaConsumerTemplateBuilder<JnksIotProtoQueueMsg<ToRuleEngineMsg>> consumerBuilder = JnksIotKafkaConsumerTemplate.builder();
         consumerBuilder.settings(kafkaSettings);
         consumerBuilder.topic(topicService.buildTopicName(configuration.getTopic()));
         consumerBuilder.clientId("re-" + queueName + "-consumer-" + serviceInfoProvider.getServiceId() + "-" + consumerCount.incrementAndGet());
         consumerBuilder.groupId(groupId);
-        consumerBuilder.decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToRuleEngineMsg.parseFrom(msg.getData()), msg.getHeaders()));
+        consumerBuilder.decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToRuleEngineMsg.parseFrom(msg.getData()), msg.getHeaders()));
         consumerBuilder.admin(ruleEngineAdmin);
         consumerBuilder.statsService(consumerStatsService);
         return consumerBuilder.build();
@@ -223,60 +223,60 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
 
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToRuleEngineNotificationMsg>> createToRuleEngineNotificationsMsgConsumer() {
-        TbKafkaConsumerTemplate.TbKafkaConsumerTemplateBuilder<TbProtoQueueMsg<ToRuleEngineNotificationMsg>> consumerBuilder = TbKafkaConsumerTemplate.builder();
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToRuleEngineNotificationMsg>> createToRuleEngineNotificationsMsgConsumer() {
+        JnksIotKafkaConsumerTemplate.JnksIotKafkaConsumerTemplateBuilder<JnksIotProtoQueueMsg<ToRuleEngineNotificationMsg>> consumerBuilder = JnksIotKafkaConsumerTemplate.builder();
         consumerBuilder.settings(kafkaSettings);
-        consumerBuilder.topic(topicService.getNotificationsTopic(ServiceType.TB_RULE_ENGINE, serviceInfoProvider.getServiceId()).getFullTopicName());
+        consumerBuilder.topic(topicService.getNotificationsTopic(ServiceType.JNKS_IOT_RULE_ENGINE, serviceInfoProvider.getServiceId()).getFullTopicName());
         consumerBuilder.clientId("monolith-rule-engine-notifications-consumer-" + serviceInfoProvider.getServiceId());
         consumerBuilder.groupId(topicService.buildTopicName("monolith-rule-engine-notifications-consumer-" + serviceInfoProvider.getServiceId()));
-        consumerBuilder.decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToRuleEngineNotificationMsg.parseFrom(msg.getData()), msg.getHeaders()));
+        consumerBuilder.decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToRuleEngineNotificationMsg.parseFrom(msg.getData()), msg.getHeaders()));
         consumerBuilder.admin(notificationAdmin);
         consumerBuilder.statsService(consumerStatsService);
         return consumerBuilder.build();
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToCoreMsg>> createToCoreMsgConsumer() {
-        TbKafkaConsumerTemplate.TbKafkaConsumerTemplateBuilder<TbProtoQueueMsg<ToCoreMsg>> consumerBuilder = TbKafkaConsumerTemplate.builder();
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToCoreMsg>> createToCoreMsgConsumer() {
+        JnksIotKafkaConsumerTemplate.JnksIotKafkaConsumerTemplateBuilder<JnksIotProtoQueueMsg<ToCoreMsg>> consumerBuilder = JnksIotKafkaConsumerTemplate.builder();
         consumerBuilder.settings(kafkaSettings);
         consumerBuilder.topic(topicService.buildTopicName(coreSettings.getTopic()));
         consumerBuilder.clientId("monolith-core-consumer-" + serviceInfoProvider.getServiceId() + "-" + consumerCount.incrementAndGet());
         consumerBuilder.groupId(topicService.buildTopicName("monolith-core-consumer"));
-        consumerBuilder.decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToCoreMsg.parseFrom(msg.getData()), msg.getHeaders()));
+        consumerBuilder.decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToCoreMsg.parseFrom(msg.getData()), msg.getHeaders()));
         consumerBuilder.admin(coreAdmin);
         consumerBuilder.statsService(consumerStatsService);
         return consumerBuilder.build();
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToCoreNotificationMsg>> createToCoreNotificationsMsgConsumer() {
-        TbKafkaConsumerTemplate.TbKafkaConsumerTemplateBuilder<TbProtoQueueMsg<ToCoreNotificationMsg>> consumerBuilder = TbKafkaConsumerTemplate.builder();
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToCoreNotificationMsg>> createToCoreNotificationsMsgConsumer() {
+        JnksIotKafkaConsumerTemplate.JnksIotKafkaConsumerTemplateBuilder<JnksIotProtoQueueMsg<ToCoreNotificationMsg>> consumerBuilder = JnksIotKafkaConsumerTemplate.builder();
         consumerBuilder.settings(kafkaSettings);
-        consumerBuilder.topic(topicService.getNotificationsTopic(ServiceType.TB_CORE, serviceInfoProvider.getServiceId()).getFullTopicName());
+        consumerBuilder.topic(topicService.getNotificationsTopic(ServiceType.JNKS_IOT_CORE, serviceInfoProvider.getServiceId()).getFullTopicName());
         consumerBuilder.clientId("monolith-core-notifications-consumer-" + serviceInfoProvider.getServiceId());
         consumerBuilder.groupId(topicService.buildTopicName("monolith-core-notifications-consumer-" + serviceInfoProvider.getServiceId()));
-        consumerBuilder.decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToCoreNotificationMsg.parseFrom(msg.getData()), msg.getHeaders()));
+        consumerBuilder.decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToCoreNotificationMsg.parseFrom(msg.getData()), msg.getHeaders()));
         consumerBuilder.admin(notificationAdmin);
         consumerBuilder.statsService(consumerStatsService);
         return consumerBuilder.build();
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<TransportApiRequestMsg>> createTransportApiRequestConsumer() {
-        TbKafkaConsumerTemplate.TbKafkaConsumerTemplateBuilder<TbProtoQueueMsg<TransportApiRequestMsg>> consumerBuilder = TbKafkaConsumerTemplate.builder();
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<TransportApiRequestMsg>> createTransportApiRequestConsumer() {
+        JnksIotKafkaConsumerTemplate.JnksIotKafkaConsumerTemplateBuilder<JnksIotProtoQueueMsg<TransportApiRequestMsg>> consumerBuilder = JnksIotKafkaConsumerTemplate.builder();
         consumerBuilder.settings(kafkaSettings);
         consumerBuilder.topic(topicService.buildTopicName(transportApiSettings.getRequestsTopic()));
         consumerBuilder.clientId("monolith-transport-api-consumer-" + serviceInfoProvider.getServiceId());
         consumerBuilder.groupId(topicService.buildTopicName("monolith-transport-api-consumer"));
-        consumerBuilder.decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), TransportApiRequestMsg.parseFrom(msg.getData()), msg.getHeaders()));
+        consumerBuilder.decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), TransportApiRequestMsg.parseFrom(msg.getData()), msg.getHeaders()));
         consumerBuilder.admin(transportApiRequestAdmin);
         consumerBuilder.statsService(consumerStatsService);
         return consumerBuilder.build();
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<TransportApiResponseMsg>> createTransportApiResponseProducer() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoQueueMsg<TransportApiResponseMsg>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<TransportApiResponseMsg>> createTransportApiResponseProducer() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoQueueMsg<TransportApiResponseMsg>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("monolith-transport-api-producer-" + serviceInfoProvider.getServiceId());
         requestBuilder.defaultTopic(topicService.buildTopicName(transportApiSettings.getResponsesTopic()));
@@ -286,14 +286,14 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
 
     @Override
     @Bean
-    public TbQueueRequestTemplate<TbProtoJsQueueMsg<JsInvokeProtos.RemoteJsRequest>, TbProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> createRemoteJsRequestTemplate() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoJsQueueMsg<JsInvokeProtos.RemoteJsRequest>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueRequestTemplate<JnksIotProtoJsQueueMsg<JsInvokeProtos.RemoteJsRequest>, JnksIotProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> createRemoteJsRequestTemplate() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoJsQueueMsg<JsInvokeProtos.RemoteJsRequest>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("producer-js-invoke-" + serviceInfoProvider.getServiceId());
         requestBuilder.defaultTopic(jsInvokeSettings.getRequestTopic());
         requestBuilder.admin(jsExecutorRequestAdmin);
 
-        TbKafkaConsumerTemplate.TbKafkaConsumerTemplateBuilder<TbProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> responseBuilder = TbKafkaConsumerTemplate.builder();
+        JnksIotKafkaConsumerTemplate.JnksIotKafkaConsumerTemplateBuilder<JnksIotProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> responseBuilder = JnksIotKafkaConsumerTemplate.builder();
         responseBuilder.settings(kafkaSettings);
         responseBuilder.topic(jsInvokeSettings.getResponseTopic() + "." + serviceInfoProvider.getServiceId());
         responseBuilder.clientId("js-" + serviceInfoProvider.getServiceId());
@@ -301,14 +301,14 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
         responseBuilder.decoder(msg -> {
                     JsInvokeProtos.RemoteJsResponse.Builder builder = JsInvokeProtos.RemoteJsResponse.newBuilder();
                     JsonFormat.parser().ignoringUnknownFields().merge(new String(msg.getData(), StandardCharsets.UTF_8), builder);
-                    return new TbProtoQueueMsg<>(msg.getKey(), builder.build(), msg.getHeaders());
+                    return new JnksIotProtoQueueMsg<>(msg.getKey(), builder.build(), msg.getHeaders());
                 }
         );
         responseBuilder.statsService(consumerStatsService);
         responseBuilder.admin(jsExecutorResponseAdmin);
 
-        DefaultTbQueueRequestTemplate.DefaultTbQueueRequestTemplateBuilder
-                <TbProtoJsQueueMsg<JsInvokeProtos.RemoteJsRequest>, TbProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> builder = DefaultTbQueueRequestTemplate.builder();
+        DefaultJnksIotQueueRequestTemplate.DefaultJnksIotQueueRequestTemplateBuilder
+                <JnksIotProtoJsQueueMsg<JsInvokeProtos.RemoteJsRequest>, JnksIotProtoQueueMsg<JsInvokeProtos.RemoteJsResponse>> builder = DefaultJnksIotQueueRequestTemplate.builder();
         builder.queueAdmin(jsExecutorResponseAdmin);
         builder.requestTemplate(requestBuilder.build());
         builder.responseTemplate(responseBuilder.build());
@@ -319,34 +319,34 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToUsageStatsServiceMsg>> createToUsageStatsServiceMsgConsumer() {
-        TbKafkaConsumerTemplate.TbKafkaConsumerTemplateBuilder<TbProtoQueueMsg<ToUsageStatsServiceMsg>> consumerBuilder = TbKafkaConsumerTemplate.builder();
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToUsageStatsServiceMsg>> createToUsageStatsServiceMsgConsumer() {
+        JnksIotKafkaConsumerTemplate.JnksIotKafkaConsumerTemplateBuilder<JnksIotProtoQueueMsg<ToUsageStatsServiceMsg>> consumerBuilder = JnksIotKafkaConsumerTemplate.builder();
         consumerBuilder.settings(kafkaSettings);
         consumerBuilder.topic(topicService.buildTopicName(coreSettings.getUsageStatsTopic()));
         consumerBuilder.clientId("monolith-us-consumer-" + serviceInfoProvider.getServiceId());
         consumerBuilder.groupId(topicService.buildTopicName("monolith-us-consumer"));
-        consumerBuilder.decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToUsageStatsServiceMsg.parseFrom(msg.getData()), msg.getHeaders()));
+        consumerBuilder.decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToUsageStatsServiceMsg.parseFrom(msg.getData()), msg.getHeaders()));
         consumerBuilder.admin(coreAdmin);
         consumerBuilder.statsService(consumerStatsService);
         return consumerBuilder.build();
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToOtaPackageStateServiceMsg>> createToOtaPackageStateServiceMsgConsumer() {
-        TbKafkaConsumerTemplate.TbKafkaConsumerTemplateBuilder<TbProtoQueueMsg<ToOtaPackageStateServiceMsg>> consumerBuilder = TbKafkaConsumerTemplate.builder();
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToOtaPackageStateServiceMsg>> createToOtaPackageStateServiceMsgConsumer() {
+        JnksIotKafkaConsumerTemplate.JnksIotKafkaConsumerTemplateBuilder<JnksIotProtoQueueMsg<ToOtaPackageStateServiceMsg>> consumerBuilder = JnksIotKafkaConsumerTemplate.builder();
         consumerBuilder.settings(kafkaSettings);
         consumerBuilder.topic(topicService.buildTopicName(coreSettings.getOtaPackageTopic()));
         consumerBuilder.clientId("monolith-ota-consumer-" + serviceInfoProvider.getServiceId());
         consumerBuilder.groupId(topicService.buildTopicName("monolith-ota-consumer"));
-        consumerBuilder.decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToOtaPackageStateServiceMsg.parseFrom(msg.getData()), msg.getHeaders()));
+        consumerBuilder.decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToOtaPackageStateServiceMsg.parseFrom(msg.getData()), msg.getHeaders()));
         consumerBuilder.admin(fwUpdatesAdmin);
         consumerBuilder.statsService(consumerStatsService);
         return consumerBuilder.build();
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToOtaPackageStateServiceMsg>> createToOtaPackageStateServiceMsgProducer() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoQueueMsg<ToOtaPackageStateServiceMsg>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToOtaPackageStateServiceMsg>> createToOtaPackageStateServiceMsgProducer() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoQueueMsg<ToOtaPackageStateServiceMsg>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("monolith-ota-producer-" + serviceInfoProvider.getServiceId());
         requestBuilder.defaultTopic(topicService.buildTopicName(coreSettings.getOtaPackageTopic()));
@@ -355,8 +355,8 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToUsageStatsServiceMsg>> createToUsageStatsServiceMsgProducer() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoQueueMsg<ToUsageStatsServiceMsg>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToUsageStatsServiceMsg>> createToUsageStatsServiceMsgProducer() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoQueueMsg<ToUsageStatsServiceMsg>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("monolith-us-producer-" + serviceInfoProvider.getServiceId());
         requestBuilder.defaultTopic(topicService.buildTopicName(coreSettings.getUsageStatsTopic()));
@@ -365,8 +365,8 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToVersionControlServiceMsg>> createVersionControlMsgProducer() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoQueueMsg<ToVersionControlServiceMsg>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToVersionControlServiceMsg>> createVersionControlMsgProducer() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoQueueMsg<ToVersionControlServiceMsg>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("monolith-vc-producer-" + serviceInfoProvider.getServiceId());
         requestBuilder.defaultTopic(topicService.buildTopicName(vcSettings.getTopic()));
@@ -375,8 +375,8 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToHousekeeperServiceMsg>> createHousekeeperMsgProducer() {
-        return TbKafkaProducerTemplate.<TbProtoQueueMsg<ToHousekeeperServiceMsg>>builder()
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToHousekeeperServiceMsg>> createHousekeeperMsgProducer() {
+        return JnksIotKafkaProducerTemplate.<JnksIotProtoQueueMsg<ToHousekeeperServiceMsg>>builder()
                 .settings(kafkaSettings)
                 .clientId("monolith-housekeeper-producer-" + serviceInfoProvider.getServiceId())
                 .defaultTopic(topicService.buildTopicName(coreSettings.getHousekeeperTopic()))
@@ -385,21 +385,21 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToHousekeeperServiceMsg>> createHousekeeperMsgConsumer() {
-        return TbKafkaConsumerTemplate.<TbProtoQueueMsg<ToHousekeeperServiceMsg>>builder()
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToHousekeeperServiceMsg>> createHousekeeperMsgConsumer() {
+        return JnksIotKafkaConsumerTemplate.<JnksIotProtoQueueMsg<ToHousekeeperServiceMsg>>builder()
                 .settings(kafkaSettings)
                 .topic(topicService.buildTopicName(coreSettings.getHousekeeperTopic()))
                 .clientId("monolith-housekeeper-consumer-" + serviceInfoProvider.getServiceId())
                 .groupId(topicService.buildTopicName("monolith-housekeeper-consumer"))
-                .decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToHousekeeperServiceMsg.parseFrom(msg.getData()), msg.getHeaders()))
+                .decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToHousekeeperServiceMsg.parseFrom(msg.getData()), msg.getHeaders()))
                 .admin(housekeeperAdmin)
                 .statsService(consumerStatsService)
                 .build();
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToHousekeeperServiceMsg>> createHousekeeperReprocessingMsgProducer() {
-        return TbKafkaProducerTemplate.<TbProtoQueueMsg<ToHousekeeperServiceMsg>>builder()
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToHousekeeperServiceMsg>> createHousekeeperReprocessingMsgProducer() {
+        return JnksIotKafkaProducerTemplate.<JnksIotProtoQueueMsg<ToHousekeeperServiceMsg>>builder()
                 .settings(kafkaSettings)
                 .clientId("monolith-housekeeper-reprocessing-producer-" + serviceInfoProvider.getServiceId())
                 .defaultTopic(topicService.buildTopicName(coreSettings.getHousekeeperReprocessingTopic()))
@@ -408,20 +408,20 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToHousekeeperServiceMsg>> createHousekeeperReprocessingMsgConsumer() {
-        return TbKafkaConsumerTemplate.<TbProtoQueueMsg<ToHousekeeperServiceMsg>>builder()
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToHousekeeperServiceMsg>> createHousekeeperReprocessingMsgConsumer() {
+        return JnksIotKafkaConsumerTemplate.<JnksIotProtoQueueMsg<ToHousekeeperServiceMsg>>builder()
                 .settings(kafkaSettings)
                 .topic(topicService.buildTopicName(coreSettings.getHousekeeperReprocessingTopic()))
                 .clientId("monolith-housekeeper-reprocessing-consumer-" + serviceInfoProvider.getServiceId())
                 .groupId(topicService.buildTopicName("monolith-housekeeper-reprocessing-consumer"))
-                .decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToHousekeeperServiceMsg.parseFrom(msg.getData()), msg.getHeaders()))
+                .decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToHousekeeperServiceMsg.parseFrom(msg.getData()), msg.getHeaders()))
                 .admin(housekeeperReprocessingAdmin)
                 .statsService(consumerStatsService)
                 .build();
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToCalculatedFieldMsg>> createToCalculatedFieldMsgConsumer(TopicPartitionInfo tpi) {
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToCalculatedFieldMsg>> createToCalculatedFieldMsgConsumer(TopicPartitionInfo tpi) {
         String queueName = DataConstants.CF_QUEUE_NAME;
         if (tpi == null) {
             throw new IllegalArgumentException("TopicPartitionInfo is required.");
@@ -430,12 +430,12 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
         Integer partitionId = tpi.getPartition().orElseThrow(() -> new IllegalArgumentException("PartitionId is required."));
         String groupId = topicService.buildConsumerGroupId("cf-", tenantId, queueName, partitionId);
 
-        TbKafkaConsumerTemplate.TbKafkaConsumerTemplateBuilder<TbProtoQueueMsg<ToCalculatedFieldMsg>> consumerBuilder = TbKafkaConsumerTemplate.builder();
+        JnksIotKafkaConsumerTemplate.JnksIotKafkaConsumerTemplateBuilder<JnksIotProtoQueueMsg<ToCalculatedFieldMsg>> consumerBuilder = JnksIotKafkaConsumerTemplate.builder();
         consumerBuilder.settings(kafkaSettings);
         consumerBuilder.topic(topicService.buildTopicName(calculatedFieldSettings.getEventTopic()));
         consumerBuilder.clientId("cf-" + queueName + "-consumer-" + serviceInfoProvider.getServiceId() + "-" + consumerCount.incrementAndGet());
         consumerBuilder.groupId(groupId);
-        consumerBuilder.decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToCalculatedFieldMsg.parseFrom(msg.getData()), msg.getHeaders()));
+        consumerBuilder.decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToCalculatedFieldMsg.parseFrom(msg.getData()), msg.getHeaders()));
         consumerBuilder.admin(cfAdmin);
         consumerBuilder.statsService(consumerStatsService);
 
@@ -443,13 +443,13 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueAdmin getCalculatedFieldQueueAdmin() {
+    public JnksIotQueueAdmin getCalculatedFieldQueueAdmin() {
         return cfAdmin;
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToCalculatedFieldMsg>> createToCalculatedFieldMsgProducer() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoQueueMsg<ToCalculatedFieldMsg>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToCalculatedFieldMsg>> createToCalculatedFieldMsgProducer() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoQueueMsg<ToCalculatedFieldMsg>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("monolith-calculated-field-" + serviceInfoProvider.getServiceId());
         requestBuilder.defaultTopic(topicService.buildTopicName(calculatedFieldSettings.getEventTopic()));
@@ -458,21 +458,21 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<ToCalculatedFieldNotificationMsg>> createToCalculatedFieldNotificationMsgConsumer() {
-        TbKafkaConsumerTemplate.TbKafkaConsumerTemplateBuilder<TbProtoQueueMsg<ToCalculatedFieldNotificationMsg>> consumerBuilder = TbKafkaConsumerTemplate.builder();
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToCalculatedFieldNotificationMsg>> createToCalculatedFieldNotificationMsgConsumer() {
+        JnksIotKafkaConsumerTemplate.JnksIotKafkaConsumerTemplateBuilder<JnksIotProtoQueueMsg<ToCalculatedFieldNotificationMsg>> consumerBuilder = JnksIotKafkaConsumerTemplate.builder();
         consumerBuilder.settings(kafkaSettings);
         consumerBuilder.topic(topicService.getCalculatedFieldNotificationsTopic(serviceInfoProvider.getServiceId()).getFullTopicName());
         consumerBuilder.clientId("monolith-calculated-field-notifications-consumer-" + serviceInfoProvider.getServiceId());
         consumerBuilder.groupId(topicService.buildTopicName("monolith-calculated-field-notifications-consumer-" + serviceInfoProvider.getServiceId()));
-        consumerBuilder.decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), ToCalculatedFieldNotificationMsg.parseFrom(msg.getData()), msg.getHeaders()));
+        consumerBuilder.decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), ToCalculatedFieldNotificationMsg.parseFrom(msg.getData()), msg.getHeaders()));
         consumerBuilder.admin(notificationAdmin);
         consumerBuilder.statsService(consumerStatsService);
         return consumerBuilder.build();
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToCalculatedFieldNotificationMsg>> createToCalculatedFieldNotificationMsgProducer() {
-        TbKafkaProducerTemplate.TbKafkaProducerTemplateBuilder<TbProtoQueueMsg<ToCalculatedFieldNotificationMsg>> requestBuilder = TbKafkaProducerTemplate.builder();
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToCalculatedFieldNotificationMsg>> createToCalculatedFieldNotificationMsgProducer() {
+        JnksIotKafkaProducerTemplate.JnksIotKafkaProducerTemplateBuilder<JnksIotProtoQueueMsg<ToCalculatedFieldNotificationMsg>> requestBuilder = JnksIotKafkaProducerTemplate.builder();
         requestBuilder.settings(kafkaSettings);
         requestBuilder.clientId("monolith-calculated-field-notifications-" + serviceInfoProvider.getServiceId());
         requestBuilder.defaultTopic(topicService.buildTopicName(calculatedFieldSettings.getEventTopic()));
@@ -481,23 +481,23 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueConsumer<TbProtoQueueMsg<CalculatedFieldStateProto>> createCalculatedFieldStateConsumer() {
-        return TbKafkaConsumerTemplate.<TbProtoQueueMsg<CalculatedFieldStateProto>>builder()
+    public JnksIotQueueConsumer<JnksIotProtoQueueMsg<CalculatedFieldStateProto>> createCalculatedFieldStateConsumer() {
+        return JnksIotKafkaConsumerTemplate.<JnksIotProtoQueueMsg<CalculatedFieldStateProto>>builder()
                 .settings(kafkaSettings)
                 .topic(topicService.buildTopicName(calculatedFieldSettings.getStateTopic()))
                 .readFromBeginning(true)
                 .stopWhenRead(true)
                 .clientId("monolith-calculated-field-state-consumer-" + serviceInfoProvider.getServiceId() + "-" + consumerCount.incrementAndGet())
                 .groupId(null) // not using consumer group management
-                .decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), msg.getData() != null ? CalculatedFieldStateProto.parseFrom(msg.getData()) : null, msg.getHeaders()))
+                .decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), msg.getData() != null ? CalculatedFieldStateProto.parseFrom(msg.getData()) : null, msg.getHeaders()))
                 .admin(cfStateAdmin)
                 .statsService(consumerStatsService)
                 .build();
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<CalculatedFieldStateProto>> createCalculatedFieldStateProducer() {
-        return TbKafkaProducerTemplate.<TbProtoQueueMsg<CalculatedFieldStateProto>>builder()
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<CalculatedFieldStateProto>> createCalculatedFieldStateProducer() {
+        return JnksIotKafkaProducerTemplate.<JnksIotProtoQueueMsg<CalculatedFieldStateProto>>builder()
                 .settings(kafkaSettings)
                 .clientId("monolith-calculated-field-state-" + serviceInfoProvider.getServiceId())
                 .defaultTopic(topicService.buildTopicName(calculatedFieldSettings.getEventTopic()))
@@ -506,8 +506,8 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueProducer<TbProtoQueueMsg<ToEdqsMsg>> createEdqsEventsProducer() {
-        return TbKafkaProducerTemplate.<TbProtoQueueMsg<ToEdqsMsg>>builder()
+    public JnksIotQueueProducer<JnksIotProtoQueueMsg<ToEdqsMsg>> createEdqsEventsProducer() {
+        return JnksIotKafkaProducerTemplate.<JnksIotProtoQueueMsg<ToEdqsMsg>>builder()
                 .clientId("edqs-events-producer-" + serviceInfoProvider.getServiceId())
                 .defaultTopic(topicService.buildTopicName(edqsConfig.getEventsTopic()))
                 .settings(kafkaSettings)
@@ -516,23 +516,23 @@ public class KafkaMonolithQueueFactory implements TbCoreQueueFactory, TbRuleEngi
     }
 
     @Override
-    public TbQueueRequestTemplate<TbProtoQueueMsg<ToEdqsMsg>, TbProtoQueueMsg<FromEdqsMsg>> createEdqsRequestTemplate() {
-        var requestProducer = TbKafkaProducerTemplate.<TbProtoQueueMsg<ToEdqsMsg>>builder()
+    public JnksIotQueueRequestTemplate<JnksIotProtoQueueMsg<ToEdqsMsg>, JnksIotProtoQueueMsg<FromEdqsMsg>> createEdqsRequestTemplate() {
+        var requestProducer = JnksIotKafkaProducerTemplate.<JnksIotProtoQueueMsg<ToEdqsMsg>>builder()
                 .settings(kafkaSettings)
                 .clientId("edqs-request-" + serviceInfoProvider.getServiceId())
                 .defaultTopic(topicService.buildTopicName(edqsConfig.getRequestsTopic()))
                 .admin(edqsRequestsAdmin);
 
-        var responseConsumer = TbKafkaConsumerTemplate.<TbProtoQueueMsg<FromEdqsMsg>>builder()
+        var responseConsumer = JnksIotKafkaConsumerTemplate.<JnksIotProtoQueueMsg<FromEdqsMsg>>builder()
                 .settings(kafkaSettings)
                 .topic(topicService.buildTopicName(edqsConfig.getResponsesTopic() + "." + serviceInfoProvider.getServiceId()))
                 .clientId("monolith-edqs-response-consumer-" + serviceInfoProvider.getServiceId())
                 .groupId(topicService.buildTopicName("monolith-edqs-response-consumer-" + serviceInfoProvider.getServiceId()))
-                .decoder(msg -> new TbProtoQueueMsg<>(msg.getKey(), FromEdqsMsg.parseFrom(msg.getData()), msg.getHeaders()))
+                .decoder(msg -> new JnksIotProtoQueueMsg<>(msg.getKey(), FromEdqsMsg.parseFrom(msg.getData()), msg.getHeaders()))
                 .admin(edqsRequestsAdmin)
                 .statsService(consumerStatsService);
 
-        return DefaultTbQueueRequestTemplate.<TbProtoQueueMsg<ToEdqsMsg>, TbProtoQueueMsg<FromEdqsMsg>>builder()
+        return DefaultJnksIotQueueRequestTemplate.<JnksIotProtoQueueMsg<ToEdqsMsg>, JnksIotProtoQueueMsg<FromEdqsMsg>>builder()
                 .queueAdmin(edqsRequestsAdmin)
                 .requestTemplate(requestProducer.build())
                 .responseTemplate(responseConsumer.build())

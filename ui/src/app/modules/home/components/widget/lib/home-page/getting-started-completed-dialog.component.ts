@@ -7,7 +7,7 @@ import { DialogComponent } from '@shared/components/dialog.component';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'tb-getting-started-completed-dialog',
+  selector: 'jnks-iot-getting-started-completed-dialog',
   templateUrl: './getting-started-completed-dialog.component.html',
   styleUrls: ['./getting-started-completed-dialog.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -21,7 +21,7 @@ export class GettingStartedCompletedDialogComponent extends
               protected router: Router,
               public dialogRef: MatDialogRef<GettingStartedCompletedDialogComponent, void>) {
     super(store, router, dialogRef);
-    dialogRef.addPanelClass('tb-getting-started-completed-dialog');
+    dialogRef.addPanelClass('jnks-iot-getting-started-completed-dialog');
   }
 
   close(): void {

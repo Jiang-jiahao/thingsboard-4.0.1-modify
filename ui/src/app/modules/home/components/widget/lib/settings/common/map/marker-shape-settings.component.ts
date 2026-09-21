@@ -16,7 +16,7 @@ import {
   Validators
 } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { MarkerIconSettings, MarkerShapeSettings, MarkerType } from '@shared/models/widget/maps/map.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
@@ -37,7 +37,7 @@ import { MapSettingsContext } from '@home/components/widget/lib/settings/common/
 import { DatasourceType } from '@shared/models/widget.models';
 
 @Component({
-  selector: 'tb-marker-shape-settings',
+  selector: 'jnks-iot-marker-shape-settings',
   templateUrl: './marker-shape-settings.component.html',
   styleUrls: [],
   providers: [
@@ -83,7 +83,7 @@ export class MarkerShapeSettingsComponent implements ControlValueAccessor, OnIni
 
   private propagateChange: (v: any) => void = () => { };
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private fb: UntypedFormBuilder,
               private destroyRef: DestroyRef,
               private iconRegistry: MatIconRegistry,
@@ -153,8 +153,8 @@ export class MarkerShapeSettingsComponent implements ControlValueAccessor, OnIni
           ctx,
           {},
           {}, {}, true);
-        markerShapesPopover.tbComponentRef.instance.popover = markerShapesPopover;
-        markerShapesPopover.tbComponentRef.instance.markerShapeSelected.subscribe((shape) => {
+        markerShapesPopover.jnksIotComponentRef.instance.popover = markerShapesPopover;
+        markerShapesPopover.jnksIotComponentRef.instance.markerShapeSelected.subscribe((shape) => {
           markerShapesPopover.hide();
           this.shapeSettingsFormGroup.get('shape').patchValue(
             shape
@@ -175,8 +175,8 @@ export class MarkerShapeSettingsComponent implements ControlValueAccessor, OnIni
           },
           isModal: true
         });
-        markerIconShapesPopover.tbComponentRef.instance.popover = markerIconShapesPopover;
-        markerIconShapesPopover.tbComponentRef.instance.markerIconSelected.subscribe((iconInfo) => {
+        markerIconShapesPopover.jnksIotComponentRef.instance.popover = markerIconShapesPopover;
+        markerIconShapesPopover.jnksIotComponentRef.instance.markerIconSelected.subscribe((iconInfo) => {
           markerIconShapesPopover.hide();
           this.shapeSettingsFormGroup.get('iconContainer').patchValue(
             iconInfo.iconContainer, {emitEvent: false}

@@ -30,7 +30,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export const selectItemValid = (item: FormSelectItem): boolean => isDefinedAndNotNull(item.value) && !!item.label;
 
 @Component({
-  selector: 'tb-dynamic-form-select-item-row',
+  selector: 'jnks-iot-dynamic-form-select-item-row',
   templateUrl: './dynamic-form-select-item-row.component.html',
   styleUrls: ['./dynamic-form-select-item-row.component.scss'],
   providers: [

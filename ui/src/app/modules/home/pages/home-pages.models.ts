@@ -7,7 +7,7 @@ import { OtaPackage } from '@shared/models/ota-package.models';
 export const entityDetailsPageBreadcrumbLabelFunction: BreadCrumbLabelFunction<EntityDetailsPageComponent>
   = ((route, translate, component) => {
   switch (component.entitiesTableConfig.entityType) {
-    case EntityType.TB_RESOURCE:
+    case EntityType.JNKS_IOT_RESOURCE:
     case EntityType.OTA_PACKAGE:
       return (component.entity as ResourceInfo | OtaPackage)?.title;
     default:

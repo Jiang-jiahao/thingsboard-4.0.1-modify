@@ -1,40 +1,40 @@
 <section [formGroup]="customMobilePageForm" class="mobile-page-form">
-  <div class="tb-form-row space-between">
+  <div class="jnks-iot-form-row space-between">
     <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="visible">
       {{ 'mobile.visible' | translate }}
     </mat-slide-toggle>
   </div>
   <div class="flex items-center justify-center gap-2">
-    <tb-material-icon-select asBoxInput
+    <jnks-iot-material-icon-select asBoxInput
                              required
                              color="#305680"
                              formControlName="icon">
-    </tb-material-icon-select>
+    </jnks-iot-material-icon-select>
     <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
       <mat-label translate>mobile.page-name</mat-label>
       <input required matInput formControlName="label">
       <mat-icon matSuffix
                 matTooltipPosition="above"
-                matTooltipClass="tb-error-tooltip"
+                matTooltipClass="jnks-iot-error-tooltip"
                 matTooltip="{{ 'mobile.page-name-required' | translate }}"
                 *ngIf="customMobilePageForm.get('label').hasError('required') && customMobilePageForm.get('label').touched"
-                class="tb-error">
+                class="jnks-iot-error">
         warning
       </mat-icon>
       <mat-icon matSuffix
                 matTooltipPosition="above"
-                matTooltipClass="tb-error-tooltip"
+                matTooltipClass="jnks-iot-error-tooltip"
                 matTooltip="{{ 'mobile.page-name-cannot-contain-only-spaces' | translate }}"
                 *ngIf="customMobilePageForm.get('label').hasError('pattern') && customMobilePageForm.get('label').touched"
-                class="tb-error">
+                class="jnks-iot-error">
         warning
       </mat-icon>
       <mat-icon matSuffix
                 matTooltipPosition="above"
-                matTooltipClass="tb-error-tooltip"
+                matTooltipClass="jnks-iot-error-tooltip"
                 matTooltip="{{ 'mobile.page-name-max-length' | translate }}"
                 *ngIf="customMobilePageForm.get('label').hasError('maxlength') && customMobilePageForm.get('label').touched"
-                class="tb-error">
+                class="jnks-iot-error">
         warning
       </mat-icon>
     </mat-form-field>
@@ -48,7 +48,7 @@
     </mat-select>
   </mat-form-field>
   <ng-container *ngIf="customMobilePageForm.get('type').value === MobilePageType.DASHBOARD">
-    <tb-dashboard-autocomplete class="flex-1"
+    <jnks-iot-dashboard-autocomplete class="flex-1"
                                formControlName="dashboardId"
                                required
                                label="{{ 'dashboard.dashboard' | translate }}"
@@ -58,7 +58,7 @@
                                requiredText="dashboard.dashboard-required"
                                placeholder="{{ 'dashboard.select-dashboard' | translate }}"
                                [selectFirstDashboard]="false"
-    ></tb-dashboard-autocomplete>
+    ></jnks-iot-dashboard-autocomplete>
   </ng-container>
   <ng-container *ngIf="customMobilePageForm.get('type').value === MobilePageType.WEB_VIEW">
     <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">

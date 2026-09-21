@@ -31,7 +31,7 @@ import {
 import { TimeSeriesChartType } from '@home/components/widget/lib/chart/time-series-chart.models';
 
 @Component({
-  selector: 'tb-bar-chart-with-labels-basic-config',
+  selector: 'jnks-iot-bar-chart-with-labels-basic-config',
   templateUrl: './bar-chart-with-labels-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

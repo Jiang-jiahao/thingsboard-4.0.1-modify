@@ -19,7 +19,7 @@ export enum EntityType {
   WIDGETS_BUNDLE = 'WIDGETS_BUNDLE',
   WIDGET_TYPE = 'WIDGET_TYPE',
   API_USAGE_STATE = 'API_USAGE_STATE',
-  TB_RESOURCE = 'TB_RESOURCE',
+  JNKS_IOT_RESOURCE = 'JNKS_IOT_RESOURCE',
   OTA_PACKAGE = 'OTA_PACKAGE',
   RPC = 'RPC',
   QUEUE = 'QUEUE',
@@ -299,7 +299,7 @@ export const entityTypeTranslations = new Map<EntityType | AliasEntityType, Enti
       }
     ],
     [
-      EntityType.TB_RESOURCE,
+      EntityType.JNKS_IOT_RESOURCE,
       {
         type: 'entity.type-tb-resource',
         typePlural: 'entity.type-tb-resources',
@@ -545,7 +545,7 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
       }
     ],
     [
-      EntityType.TB_RESOURCE,
+      EntityType.JNKS_IOT_RESOURCE,
       {
         helpLinkId: 'lwm2mResourceLibrary'
       }
@@ -602,7 +602,7 @@ export const baseDetailsPageByEntityType = new Map<EntityType, string>([
   [EntityType.ASSET_PROFILE, '/profiles/assetProfiles'],
   [EntityType.RULE_CHAIN, '/ruleChains'],
   [EntityType.ENTITY_VIEW, '/entities/entityViews'],
-  [EntityType.TB_RESOURCE, '/resources/resources-library'],
+  [EntityType.JNKS_IOT_RESOURCE, '/resources/resources-library'],
   [EntityType.OTA_PACKAGE, '/features/otaUpdates'],
   [EntityType.QUEUE, '/settings/queues'],
   [EntityType.WIDGETS_BUNDLE, '/resources/widgets-library/widgets-bundles/details'],

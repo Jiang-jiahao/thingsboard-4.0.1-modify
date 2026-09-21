@@ -1,0 +1,36 @@
+package com.jnks.iot.rule.engine.debug;
+
+import lombok.Data;
+import com.jnks.iot.rule.engine.api.NodeConfiguration;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.script.ScriptLanguage;
+
+@Data
+public class JnksIotMsgGeneratorNodeConfiguration implements NodeConfiguration<JnksIotMsgGeneratorNodeConfiguration> {
+
+    public static final int UNLIMITED_MSG_COUNT = 0;
+    public static final String DEFAULT_SCRIPT = "var msg = { temp: 42, humidity: 77 };\n" +
+            "var metadata = { data: 40 };\n" +
+            "var msgType = \"POST_TELEMETRY_REQUEST\";\n\n" +
+            "return { msg: msg, metadata: metadata, msgType: msgType };";
+
+    private int msgCount;
+    private int periodInSeconds;
+    private String originatorId;
+    private EntityType originatorType;
+    private ScriptLanguage scriptLang;
+    private String jsScript;
+    private String tbelScript;
+
+    @Override
+    public JnksIotMsgGeneratorNodeConfiguration defaultConfiguration() {
+        JnksIotMsgGeneratorNodeConfiguration configuration = new JnksIotMsgGeneratorNodeConfiguration();
+        configuration.setMsgCount(UNLIMITED_MSG_COUNT);
+        configuration.setPeriodInSeconds(1);
+        configuration.setOriginatorType(EntityType.RULE_NODE);
+        configuration.setScriptLang(ScriptLanguage.TBEL);
+        configuration.setJsScript(DEFAULT_SCRIPT);
+        configuration.setTbelScript(DEFAULT_SCRIPT);
+        return configuration;
+    }
+}

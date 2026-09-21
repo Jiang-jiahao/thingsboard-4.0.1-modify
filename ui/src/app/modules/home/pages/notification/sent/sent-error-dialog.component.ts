@@ -15,7 +15,7 @@ export interface NotificationRequestErrorDialogData {
 }
 
 @Component({
-  selector: 'tb-notification-send-error-dialog',
+  selector: 'jnks-iot-notification-send-error-dialog',
   templateUrl: './sent-error-dialog.component.html',
   styleUrls: ['sent-error-dialog.component.scss']
 })

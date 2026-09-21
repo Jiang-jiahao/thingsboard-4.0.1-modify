@@ -1,4 +1,4 @@
-<div class="tb-details-buttons xs:flex xs:flex-col">
+<div class="jnks-iot-details-buttons xs:flex xs:flex-col">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'open')"
@@ -49,7 +49,7 @@
           {{ 'resource.title-max-length' | translate }}
         </mat-error>
       </mat-form-field>
-      <tb-file-input *ngIf="(isAdd || isEdit) && entityForm.get('resourceSubType').value === ResourceSubType.EXTENSION"
+      <jnks-iot-file-input *ngIf="(isAdd || isEdit) && entityForm.get('resourceSubType').value === ResourceSubType.EXTENSION"
                      formControlName="data"
                      [required]="isAdd"
                      label="{{ 'javascript.resource-file' | translate }}"
@@ -61,8 +61,8 @@
                      dropLabel="{{'javascript.drop-resource-file-or' | translate}}"
                      [existingFileName]="entityForm.get('fileName')?.value"
                      (fileNameChanged)="entityForm?.get('fileName').patchValue($event)">
-      </tb-file-input>
-      <tb-js-func *ngIf="entityForm.get('resourceSubType').value === ResourceSubType.MODULE"
+      </jnks-iot-file-input>
+      <jnks-iot-js-func *ngIf="entityForm.get('resourceSubType').value === ResourceSubType.MODULE"
                   [helpPopupStyle]="{ width: '1000px' }"
                   helpId="resource/js-resource-module_fn"
                   formControlName="content"
@@ -72,14 +72,14 @@
                   minHeight="300px">
         <div toolbarStartButton
              class="flex flex-row gap-4">
-          <label class="tb-title no-padding tb-required"
-                 [class.tb-error]="entityForm.get('content').invalid && entityForm.get('content').touched"
+          <label class="jnks-iot-title no-padding jnks-iot-required"
+                 [class.jnks-iot-error]="entityForm.get('content').invalid && entityForm.get('content').touched"
                  style="font-size: 16px;">
             {{ 'javascript.module-script' | translate }}</label>
-          <tb-file-input *ngIf="(isAdd || isEdit)"
+          <jnks-iot-file-input *ngIf="(isAdd || isEdit)"
                          asButton
                          uploadButtonText="{{ 'javascript.upload-from-file' | translate }}"
-                         uploadButtonClass="tb-ignore-browse-file-button-style"
+                         uploadButtonClass="jnks-iot-ignore-browse-file-button-style"
                          [maxSizeByte]="maxResourceSize"
                          [allowedExtensions]="getAllowedExtensions()"
                          [accept]="getAcceptType()"
@@ -87,9 +87,9 @@
                          [ngModelOptions]="{ standalone: true }"
                          (ngModelChange)="uploadContentFromFile($event)"
                          (fileNameChanged)="entityForm?.get('fileName').patchValue($event)">
-          </tb-file-input>
+          </jnks-iot-file-input>
         </div>
-      </tb-js-func>
+      </jnks-iot-js-func>
       <div *ngIf="!isAdd && !isEdit && entityForm.get('resourceSubType').value === ResourceSubType.EXTENSION" class="flex flex-row xs:flex-col sm:gap-2 md:flex-col gt-md:gap-2">
         <mat-form-field class="flex-1">
           <mat-label translate>resource.file-name</mat-label>

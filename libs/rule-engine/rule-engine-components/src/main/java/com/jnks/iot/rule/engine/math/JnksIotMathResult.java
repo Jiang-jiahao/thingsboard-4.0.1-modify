@@ -1,0 +1,20 @@
+package com.jnks.iot.rule.engine.math;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class JnksIotMathResult {
+
+    private JnksIotMathArgumentType type;
+    private String key;
+    // 0 means integer, x > 0 means x decimal points after ".";
+    private int resultValuePrecision;
+    private boolean addToBody;
+    private boolean addToMetadata;
+    private String attributeScope;
+
+}

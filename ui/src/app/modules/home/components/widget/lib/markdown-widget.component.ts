@@ -12,21 +12,21 @@ import {
   hashCode,
   isDefinedAndNotNull,
   isNotEmptyStr,
-  parseTbFunction,
-  safeExecuteTbFunction
+  parseJnksIotFunction,
+  safeExecuteJnksIotFunction
 } from '@core/utils';
 import cssjs from '@core/css/css';
 import { UtilsService } from '@core/services/utils.service';
 import { HOME_COMPONENTS_MODULE_TOKEN, WIDGET_COMPONENTS_MODULE_TOKEN } from '@home/components/tokens';
 import { EntityDataPageLink } from '@shared/models/query/query.models';
-import { CompiledTbFunction, TbFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction, JnksIotFunction } from '@shared/models/js-function.models';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 interface MarkdownWidgetSettings {
   markdownTextPattern: string;
   useMarkdownTextFunction: boolean;
-  markdownTextFunction: TbFunction;
+  markdownTextFunction: JnksIotFunction;
   applyDefaultMarkdownStyle: boolean;
   markdownCss: string;
 }
@@ -34,13 +34,13 @@ interface MarkdownWidgetSettings {
 type MarkdownTextFunction = (data: FormattedData[], ctx: WidgetContext) => string;
 
 @Component({
-  selector: 'tb-markdown-widget',
+  selector: 'jnks-iot-markdown-widget',
   templateUrl: './markdown-widget.component.html'
 })
 export class MarkdownWidgetComponent extends PageComponent implements OnInit {
 
   settings: MarkdownWidgetSettings;
-  markdownTextFunction: Observable<CompiledTbFunction<MarkdownTextFunction>>;
+  markdownTextFunction: Observable<CompiledJnksIotFunction<MarkdownTextFunction>>;
 
   markdownClass: string;
 
@@ -67,7 +67,7 @@ export class MarkdownWidgetComponent extends PageComponent implements OnInit {
     this.ctx.$scope.markdownWidget = this;
     this.settings = this.ctx.settings;
     this.markdownTextFunction = this.settings.useMarkdownTextFunction ?
-      parseTbFunction(this.ctx.http, this.settings.markdownTextFunction, ['data', 'ctx']) : of(null);
+      parseJnksIotFunction(this.ctx.http, this.settings.markdownTextFunction, ['data', 'ctx']) : of(null);
     let cssString = this.settings.markdownCss;
     if (isNotEmptyStr(cssString)) {
       const cssParser = new cssjs();
@@ -117,7 +117,7 @@ export class MarkdownWidgetComponent extends PageComponent implements OnInit {
     this.data = formattedDataFormDatasourceData(initialData);
 
     const markdownText = this.settings.useMarkdownTextFunction ?
-      this.markdownTextFunction.pipe(map(markdownTextFunction => safeExecuteTbFunction(markdownTextFunction, [this.data, this.ctx]))) : this.settings.markdownTextPattern;
+      this.markdownTextFunction.pipe(map(markdownTextFunction => safeExecuteJnksIotFunction(markdownTextFunction, [this.data, this.ctx]))) : this.settings.markdownTextPattern;
     if (typeof markdownText === 'string') {
       this.updateMarkdownText(markdownText, this.data);
     } else {

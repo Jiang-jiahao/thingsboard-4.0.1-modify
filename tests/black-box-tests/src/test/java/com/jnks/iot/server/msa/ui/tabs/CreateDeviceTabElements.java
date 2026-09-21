@@ -9,7 +9,7 @@ public class CreateDeviceTabElements extends AbstractBasePage {
         super(driver);
     }
 
-    private static final String CREATE_DEVICE_NAME_FIELD = "//tb-device-wizard//input[@formcontrolname='name']";
+    private static final String CREATE_DEVICE_NAME_FIELD = "//jnks-iot-device-wizard//input[@formcontrolname='name']";
     private static final String CREATE_NEW_DEVICE_PROFILE_RADIO_BTN = "//span[text() = 'Create new device profile']/ancestor::mat-radio-button";
     private static final String SELECT_EXISTING_DEVICE_PROFILE_RADIO_BTN = "//span[text() = 'Select existing device profile']/ancestor::mat-radio-button";
     private static final String DEVICE_PROFILE_TITLE_FIELD = "//input[@formcontrolname='newDeviceProfileTitle']";
@@ -19,10 +19,10 @@ public class CreateDeviceTabElements extends AbstractBasePage {
     private static final String ASSIGN_ON_CUSTOMER_FIELD = "//input[@formcontrolname='entity']";
     private static final String CUSTOMER_OPTION_BNT = "//div[text() = 'Customer']/ancestor::mat-step-header";
     private static final String CUSTOMER_FROM_DROPDOWN = "//div[@role='listbox']/mat-option//span[contains(text(),'%s')]";
-    private static final String DEVICE_LABEL_FIELD = "//tb-device-wizard//input[@formcontrolname='label']";
-    private static final String CHECKBOX_GATEWAY = "//tb-device-wizard//mat-checkbox[@formcontrolname='gateway']//label";
-    private static final String CHECKBOX_OVERWRITE_ACTIVITY_TIME = "//tb-device-wizard//mat-checkbox[@formcontrolname='overwriteActivityTime']//label";
-    private static final String DESCRIPTION_FIELD = "//tb-device-wizard//textarea[@formcontrolname='description']";
+    private static final String DEVICE_LABEL_FIELD = "//jnks-iot-device-wizard//input[@formcontrolname='label']";
+    private static final String CHECKBOX_GATEWAY = "//jnks-iot-device-wizard//mat-checkbox[@formcontrolname='gateway']//label";
+    private static final String CHECKBOX_OVERWRITE_ACTIVITY_TIME = "//jnks-iot-device-wizard//mat-checkbox[@formcontrolname='overwriteActivityTime']//label";
+    private static final String DESCRIPTION_FIELD = "//jnks-iot-device-wizard//textarea[@formcontrolname='description']";
 
     public WebElement nameField() {
         return waitUntilElementToBeClickable(CREATE_DEVICE_NAME_FIELD);

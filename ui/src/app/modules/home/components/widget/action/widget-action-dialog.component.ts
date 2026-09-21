@@ -50,7 +50,7 @@ export interface WidgetActionDialogData {
 }
 
 @Component({
-  selector: 'tb-widget-action-dialog',
+  selector: 'jnks-iot-widget-action-dialog',
   templateUrl: './widget-action-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: WidgetActionDialogComponent}],
   styleUrls: []

@@ -10,8 +10,8 @@
   margin: 0;
   padding: 12px 14px;
   border-radius: 10px;
-  border-left: 4px solid $tb-primary-color;
-  background: rgba($tb-primary-color, 0.06);
+  border-left: 4px solid $jnks-iot-primary-color;
+  background: rgba($jnks-iot-primary-color, 0.06);
   line-height: 1.5;
   color: #475569;
 }
@@ -141,8 +141,8 @@
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  color: $tb-primary-color;
-  background: rgba($tb-primary-color, 0.1);
+  color: $jnks-iot-primary-color;
+  background: rgba($jnks-iot-primary-color, 0.1);
   border-radius: 8px;
   line-height: 1;
 }

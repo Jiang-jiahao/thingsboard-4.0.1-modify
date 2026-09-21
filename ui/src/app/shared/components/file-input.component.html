@@ -1,27 +1,27 @@
-<div class="tb-container" [class.tb-button]="asButton">
-  <label class="tb-title" *ngIf="label"
-         [class.tb-required]="!disabled && required"
+<div class="jnks-iot-container" [class.jnks-iot-button]="asButton">
+  <label class="jnks-iot-title" *ngIf="label"
+         [class.jnks-iot-required]="!disabled && required"
          [class.pointer-event]="hint"
-         tb-hint-tooltip-icon="{{ hint }}">{{ label }}
+         jnks-iot-hint-tooltip-icon="{{ hint }}">{{ label }}
   </label>
   <ng-container #flow="flow"
                 [flowConfig]="{allowDuplicateUploads: true}">
-    <div class="tb-file-select-container">
-      <div class="tb-file-clear-container">
+    <div class="jnks-iot-file-select-container">
+      <div class="jnks-iot-file-clear-container">
         <button mat-icon-button color="primary"
                 type="button"
                 (click)="clearFile()"
-                class="tb-file-clear-btn"
+                class="jnks-iot-file-clear-btn"
                 matTooltip="{{ 'action.remove' | translate }}"
                 matTooltipPosition="above">
           <mat-icon>close</mat-icon>
         </button>
       </div>
-      <div class="drop-area tb-flow-drop"
+      <div class="drop-area jnks-iot-flow-drop"
            flowDrop
            [flow]="flow.flowJs">
         <div class="upload-label">
-          <mat-icon class="tb-mat-32 drop-label-icon">cloud_upload</mat-icon>
+          <mat-icon class="jnks-iot-mat-32 drop-label-icon">cloud_upload</mat-icon>
           <span class="drop-label-text">{{ dropLabel }}</span>
           <button type="button" mat-button color="primary" class="browse-file" [class]="uploadButtonClass">
             <label
@@ -33,10 +33,10 @@
       </div>
     </div>
   </ng-container>
-  <div class="tb-file-info-container">
-    <tb-error *ngIf="!fileName && required && requiredAsError" class="font-medium" error="{{ noFileText | translate }}"></tb-error>
-    <div *ngIf="!fileName && !requiredAsError" class="tb-file-name" tbTruncateWithTooltip translate>{{ noFileText }}</div>
-    <div *ngIf="fileName" class="tb-file-name" tbTruncateWithTooltip>{{ fileName }}</div>
-    <div *ngIf="maxSizeByte && !disabled" class="tb-file-hint" tbTruncateWithTooltip translate [translateParams]="{ size: maxSizeByte | fileSize }">dashboard.maximum-upload-file-size</div>
+  <div class="jnks-iot-file-info-container">
+    <jnks-iot-error *ngIf="!fileName && required && requiredAsError" class="font-medium" error="{{ noFileText | translate }}"></jnks-iot-error>
+    <div *ngIf="!fileName && !requiredAsError" class="jnks-iot-file-name" jnksIotTruncateWithTooltip translate>{{ noFileText }}</div>
+    <div *ngIf="fileName" class="jnks-iot-file-name" jnksIotTruncateWithTooltip>{{ fileName }}</div>
+    <div *ngIf="maxSizeByte && !disabled" class="jnks-iot-file-hint" jnksIotTruncateWithTooltip translate [translateParams]="{ size: maxSizeByte | fileSize }">dashboard.maximum-upload-file-size</div>
   </div>
 </div>

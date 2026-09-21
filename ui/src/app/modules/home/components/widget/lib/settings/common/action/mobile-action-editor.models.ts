@@ -1,7 +1,7 @@
 import { WidgetMobileActionType } from '@shared/models/widget.models';
-import { TbFunction } from '@shared/models/js-function.models';
+import { JnksIotFunction } from '@shared/models/js-function.models';
 
-const processImageFunctionTemplate: TbFunction =
+const processImageFunctionTemplate: JnksIotFunction =
   '// Function body to process image obtained as a result of mobile action (take photo, take image from gallery, etc.). \n' +
   '// - imageUrl - image URL in base64 data format\n\n' +
   'showImageDialog(\'--TITLE--\', imageUrl);\n' +
@@ -67,7 +67,7 @@ const processImageFunctionTemplate: TbFunction =
   '  }\n' +
   '}\n';
 
-const processLaunchResultFunctionTemplate: TbFunction =
+const processLaunchResultFunctionTemplate: JnksIotFunction =
   // eslint-disable-next-line max-len
   '// Optional function body to process result of attempt to launch external mobile application (for ex. map application or phone call application). \n' +
   '// - launched - boolean value indicating if the external application was successfully launched.\n\n' +
@@ -79,7 +79,7 @@ const processLaunchResultFunctionTemplate: TbFunction =
   '    }, 100);\n' +
   '}\n';
 
-const processQrCodeFunction: TbFunction =
+const processQrCodeFunction: JnksIotFunction =
   '// Function body to process result of QR code scanning. \n' +
   '// - code - scanned QR code\n' +
   '// - format - scanned QR code format\n\n' +
@@ -91,7 +91,7 @@ const processQrCodeFunction: TbFunction =
   '    }, 100);\n' +
   '}\n';
 
-const processLocationFunction: TbFunction =
+const processLocationFunction: JnksIotFunction =
   '// Function body to process current location of the phone. \n' +
   '// - latitude - phone location latitude\n' +
   '// - longitude - phone location longitude\n\n' +
@@ -122,7 +122,7 @@ const processLocationFunction: TbFunction =
   '    }, 100);\n' +
   '}';
 
-const provisionSuccessFunction: TbFunction =
+const provisionSuccessFunction: JnksIotFunction =
   '// Function body to handle device provision success. \n' +
   '// - deviceName - name of device that was successfully provisioned.\n' +
   '\n' +
@@ -134,7 +134,7 @@ const provisionSuccessFunction: TbFunction =
   '    }, 100);\n' +
   '}\n';
 
-const handleEmptyResultFunctionTemplate: TbFunction =
+const handleEmptyResultFunctionTemplate: JnksIotFunction =
   '// Optional function body to handle empty result. \n' +
   '// Usually this happens when user cancels the action (for ex. by pressing phone back button). \n\n' +
   'showEmptyResultDialog(\'--MESSAGE--\');\n' +
@@ -145,7 +145,7 @@ const handleEmptyResultFunctionTemplate: TbFunction =
   '    }, 100);\n' +
   '}\n';
 
-const handleErrorFunctionTemplate: TbFunction =
+const handleErrorFunctionTemplate: JnksIotFunction =
   '// Optional function body to handle error occurred while mobile action execution \n' +
   '// - error - Error message\n\n' +
   'showErrorDialog(\'--TITLE--\', error);\n' +
@@ -156,7 +156,7 @@ const handleErrorFunctionTemplate: TbFunction =
   '    }, 100);\n' +
   '}\n';
 
-const getLocationFunctionTemplate: TbFunction =
+const getLocationFunctionTemplate: JnksIotFunction =
   '// Function body that should return location as array of two numbers (latitude, longitude) for further processing by mobile action.\n' +
   '// Usually location can be obtained from entity attributes/telemetry. \n\n' +
   'return getLocationFromEntityAttributes();\n' +
@@ -179,7 +179,7 @@ const getLocationFunctionTemplate: TbFunction =
   '    }\n' +
   '}\n';
 
-const getPhoneNumberFunctionTemplate: TbFunction =
+const getPhoneNumberFunctionTemplate: JnksIotFunction =
   '// Function body that should return phone number for further processing by mobile action.\n' +
   '// Usually phone number can be obtained from entity attributes/telemetry. \n\n' +
   'return getPhoneNumberFromEntityAttributes();\n' +
@@ -201,7 +201,7 @@ const getPhoneNumberFunctionTemplate: TbFunction =
   '    }\n' +
   '}\n';
 
-export const getDefaultProcessImageFunction = (type: WidgetMobileActionType): TbFunction => {
+export const getDefaultProcessImageFunction = (type: WidgetMobileActionType): JnksIotFunction => {
   let title: string;
   switch (type) {
     case WidgetMobileActionType.takePictureFromGallery:
@@ -217,7 +217,7 @@ export const getDefaultProcessImageFunction = (type: WidgetMobileActionType): Tb
   return processImageFunctionTemplate.replace('--TITLE--', title);
 };
 
-export const getDefaultProcessLaunchResultFunction = (type: WidgetMobileActionType): TbFunction => {
+export const getDefaultProcessLaunchResultFunction = (type: WidgetMobileActionType): JnksIotFunction => {
   let title: string;
   switch (type) {
     case WidgetMobileActionType.mapLocation:
@@ -243,7 +243,7 @@ export const getDefaultGetLocationFunction = () => getLocationFunctionTemplate;
 
 export const getDefaultGetPhoneNumberFunction = () => getPhoneNumberFunctionTemplate;
 
-export const getDefaultHandleEmptyResultFunction = (type: WidgetMobileActionType): TbFunction => {
+export const getDefaultHandleEmptyResultFunction = (type: WidgetMobileActionType): JnksIotFunction => {
   let message = 'Mobile action was cancelled!';
   switch (type) {
     case WidgetMobileActionType.takePictureFromGallery:
@@ -277,7 +277,7 @@ export const getDefaultHandleEmptyResultFunction = (type: WidgetMobileActionType
   return handleEmptyResultFunctionTemplate.replace('--MESSAGE--', message);
 };
 
-export const getDefaultHandleErrorFunction = (type: WidgetMobileActionType): TbFunction => {
+export const getDefaultHandleErrorFunction = (type: WidgetMobileActionType): JnksIotFunction => {
   let title = 'Mobile action failed';
   switch (type) {
     case WidgetMobileActionType.takePictureFromGallery:

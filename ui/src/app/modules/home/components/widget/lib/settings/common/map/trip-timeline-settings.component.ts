@@ -17,7 +17,7 @@ import {
 } from '@shared/models/widget/maps/map.models';
 
 @Component({
-  selector: 'tb-trip-timeline-settings',
+  selector: 'jnks-iot-trip-timeline-settings',
   templateUrl: './trip-timeline-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

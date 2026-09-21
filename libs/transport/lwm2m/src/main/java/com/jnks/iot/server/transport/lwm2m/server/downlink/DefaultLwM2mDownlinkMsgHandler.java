@@ -63,9 +63,9 @@ import com.jnks.iot.server.transport.lwm2m.server.LwM2mVersionedModelProvider;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClient;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClientContext;
 import com.jnks.iot.server.transport.lwm2m.server.common.LwM2MExecutorAwareService;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MCancelObserveCompositeRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MObserveCompositeRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.TbLwM2MReadCompositeRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MCancelObserveCompositeRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MObserveCompositeRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.composite.JnksIotLwM2MReadCompositeRequest;
 import com.jnks.iot.server.transport.lwm2m.server.log.LwM2MTelemetryLogService;
 import com.jnks.iot.server.transport.lwm2m.server.rpc.composite.RpcWriteCompositeRequest;
 import com.jnks.iot.server.transport.lwm2m.utils.LwM2mValueConverterImpl;
@@ -141,14 +141,14 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
     }
 
     @Override
-    public void sendReadRequest(LwM2mClient client, TbLwM2MReadRequest request, DownlinkRequestCallback<ReadRequest, ReadResponse> callback) {
+    public void sendReadRequest(LwM2mClient client, JnksIotLwM2MReadRequest request, DownlinkRequestCallback<ReadRequest, ReadResponse> callback) {
         validateVersionedId(client, request);
         ReadRequest downlink = new ReadRequest(getRequestContentFormat(client, request.getVersionedId(), modelProvider), request.getObjectId());
         sendSimpleRequest(client, downlink, request.getTimeout(), callback);
     }
 
     @Override
-    public void sendReadCompositeRequest(LwM2mClient client, TbLwM2MReadCompositeRequest request,
+    public void sendReadCompositeRequest(LwM2mClient client, JnksIotLwM2MReadCompositeRequest request,
                                          DownlinkRequestCallback<ReadCompositeRequest, ReadCompositeResponse> callback) {
         try {
             ContentFormat compositeContentFormat = this.findFirstContentFormatForComposite(client.getClientSupportContentFormats());
@@ -163,7 +163,7 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
      * if resource in CompositeObservation is already registered - return BAD REQUEST
      */
     @Override
-    public void sendObserveRequest(LwM2mClient client, TbLwM2MObserveRequest request, DownlinkRequestCallback<ObserveRequest, ObserveResponse> callback) {
+    public void sendObserveRequest(LwM2mClient client, JnksIotLwM2MObserveRequest request, DownlinkRequestCallback<ObserveRequest, ObserveResponse> callback) {
         try {
             validateVersionedId(client, request);
             LwM2mPath resultIds = new LwM2mPath(request.getObjectId());
@@ -191,7 +191,7 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
     }
 
     @Override
-    public void sendObserveAllRequest(LwM2mClient client, TbLwM2MObserveAllRequest request, DownlinkRequestCallback<TbLwM2MObserveAllRequest, Set<String>> callback) {
+    public void sendObserveAllRequest(LwM2mClient client, JnksIotLwM2MObserveAllRequest request, DownlinkRequestCallback<JnksIotLwM2MObserveAllRequest, Set<String>> callback) {
         Set<Observation> observations = context.getServer().getObservationService().getObservations(client.getRegistration());
         Set<String> paths = new LinkedHashSet<>();
         observations.stream().forEach(observation -> {
@@ -209,7 +209,7 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
      * if resource (SingleObservation or in CompositeObservation) is already registered - return BAD REQUEST
      */
     @Override
-    public void sendObserveCompositeRequest(LwM2mClient client, TbLwM2MObserveCompositeRequest request, DownlinkRequestCallback<ObserveCompositeRequest,
+    public void sendObserveCompositeRequest(LwM2mClient client, JnksIotLwM2MObserveCompositeRequest request, DownlinkRequestCallback<ObserveCompositeRequest,
             ObserveCompositeResponse> callback) {
         try {
             ContentFormat compositeContentFormat = this.findFirstContentFormatForComposite(client.getClientSupportContentFormats());
@@ -227,7 +227,7 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
     }
 
     @Override
-    public void sendCancelObserveCompositeRequest(LwM2mClient client, TbLwM2MCancelObserveCompositeRequest request, DownlinkRequestCallback<TbLwM2MCancelObserveCompositeRequest, Integer> callback) {
+    public void sendCancelObserveCompositeRequest(LwM2mClient client, JnksIotLwM2MCancelObserveCompositeRequest request, DownlinkRequestCallback<JnksIotLwM2MCancelObserveCompositeRequest, Integer> callback) {
         try {
             log.trace("[{}] Send CancelObserveComposite: {}.", client.getEndpoint(), request.getVersionedIds());
             int cnt = context.getServer().getObservationService().cancelCompositeObservations(client.getRegistration(), request.getObjectIds());
@@ -242,12 +242,12 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
     }
 
     @Override
-    public void sendDiscoverAllRequest(LwM2mClient client, TbLwM2MDiscoverAllRequest request, DownlinkRequestCallback<TbLwM2MDiscoverAllRequest, List<String>> callback) {
+    public void sendDiscoverAllRequest(LwM2mClient client, JnksIotLwM2MDiscoverAllRequest request, DownlinkRequestCallback<JnksIotLwM2MDiscoverAllRequest, List<String>> callback) {
         callback.onSuccess(request, Arrays.stream(client.getRegistration().getSortedObjectLinks()).map(Link::toCoreLinkFormat).collect(Collectors.toList()));
     }
 
     @Override
-    public void sendExecuteRequest(LwM2mClient client, TbLwM2MExecuteRequest request, DownlinkRequestCallback<ExecuteRequest, ExecuteResponse> callback) {
+    public void sendExecuteRequest(LwM2mClient client, JnksIotLwM2MExecuteRequest request, DownlinkRequestCallback<ExecuteRequest, ExecuteResponse> callback) {
         try {
             validateVersionedId(client, request);
             LwM2mPath pathIds = new LwM2mPath(fromVersionedIdToObjectId(request.getVersionedId()));
@@ -280,7 +280,7 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
     }
 
     @Override
-    public void sendDeleteRequest(LwM2mClient client, TbLwM2MDeleteRequest request, DownlinkRequestCallback<DeleteRequest, DeleteResponse> callback) {
+    public void sendDeleteRequest(LwM2mClient client, JnksIotLwM2MDeleteRequest request, DownlinkRequestCallback<DeleteRequest, DeleteResponse> callback) {
         try {
             validateVersionedId(client, request);
             sendSimpleRequest(client, new DeleteRequest(request.getObjectId()), request.getTimeout(), callback);
@@ -290,7 +290,7 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
     }
 
     @Override
-    public void sendCancelObserveRequest(LwM2mClient client, TbLwM2MCancelObserveRequest request, DownlinkRequestCallback<TbLwM2MCancelObserveRequest, Integer> callback) {
+    public void sendCancelObserveRequest(LwM2mClient client, JnksIotLwM2MCancelObserveRequest request, DownlinkRequestCallback<JnksIotLwM2MCancelObserveRequest, Integer> callback) {
         try {
             log.trace("[{}] Send CancelObserve {}.", client.getEndpoint(), request.getVersionedId());
             int cnt = context.getServer().getObservationService().cancelObservations(client.getRegistration(), request.getObjectId());
@@ -305,13 +305,13 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
     }
 
     @Override
-    public void sendCancelObserveAllRequest(LwM2mClient client, TbLwM2MCancelAllRequest request, DownlinkRequestCallback<TbLwM2MCancelAllRequest, Integer> callback) {
+    public void sendCancelObserveAllRequest(LwM2mClient client, JnksIotLwM2MCancelAllRequest request, DownlinkRequestCallback<JnksIotLwM2MCancelAllRequest, Integer> callback) {
         int observeCancelCnt = context.getServer().getObservationService().cancelObservations(client.getRegistration());
         callback.onSuccess(request, observeCancelCnt);
     }
 
     @Override
-    public void sendDiscoverRequest(LwM2mClient client, TbLwM2MDiscoverRequest request, DownlinkRequestCallback<DiscoverRequest, DiscoverResponse> callback) {
+    public void sendDiscoverRequest(LwM2mClient client, JnksIotLwM2MDiscoverRequest request, DownlinkRequestCallback<DiscoverRequest, DiscoverResponse> callback) {
         validateVersionedId(client, request);
         sendSimpleRequest(client, new DiscoverRequest(request.getObjectId()), request.getTimeout(), callback);
     }
@@ -329,7 +329,7 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
      * addAttribute(attributes, OBJECT_VERSION, params.getVer(), StringUtils::isNotEmpty, Function.identity());
      */
     @Override
-    public void sendWriteAttributesRequest(LwM2mClient client, TbLwM2MWriteAttributesRequest request, DownlinkRequestCallback<WriteAttributesRequest, WriteAttributesResponse> callback) {
+    public void sendWriteAttributesRequest(LwM2mClient client, JnksIotLwM2MWriteAttributesRequest request, DownlinkRequestCallback<WriteAttributesRequest, WriteAttributesResponse> callback) {
         try {
             validateVersionedId(client, request);
             if (request.getAttributes() == null) {
@@ -370,7 +370,7 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
     }
 
     @Override
-    public void sendWriteReplaceRequest(LwM2mClient client, TbLwM2MWriteReplaceRequest request, DownlinkRequestCallback<WriteRequest, WriteResponse> callback) {
+    public void sendWriteReplaceRequest(LwM2mClient client, JnksIotLwM2MWriteReplaceRequest request, DownlinkRequestCallback<WriteRequest, WriteResponse> callback) {
         LwM2mPath resultIds = new LwM2mPath(request.getObjectId());
         if (resultIds.isResource() || resultIds.isResourceInstance()) {
             validateVersionedId(client, request);
@@ -434,7 +434,7 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
     }
 
     @Override
-    public void sendWriteUpdateRequest(LwM2mClient client, TbLwM2MWriteUpdateRequest request, DownlinkRequestCallback<WriteRequest, WriteResponse> callback) {
+    public void sendWriteUpdateRequest(LwM2mClient client, JnksIotLwM2MWriteUpdateRequest request, DownlinkRequestCallback<WriteRequest, WriteResponse> callback) {
         try {
             LwM2mPath resultIds = new LwM2mPath(request.getObjectId());
             if (resultIds.isObjectInstance() || resultIds.isResource()) {
@@ -491,7 +491,7 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
         }
     }
 
-    public void sendCreateRequest(LwM2mClient client, TbLwM2MCreateRequest request, DownlinkRequestCallback<CreateRequest, CreateResponse> callback) {
+    public void sendCreateRequest(LwM2mClient client, JnksIotLwM2MCreateRequest request, DownlinkRequestCallback<CreateRequest, CreateResponse> callback) {
         validateVersionedId(client, request);
         CreateRequest downlink = null;
         LwM2mPath resultIds = new LwM2mPath(request.getObjectId());
@@ -676,19 +676,19 @@ public class DefaultLwM2mDownlinkMsgHandler extends LwM2MExecutorAwareService im
         }
     }
 
-    private static ContentFormat getWriteRequestContentFormat(LwM2mClient client, TbLwM2MDownlinkRequest request, LwM2mModelProvider modelProvider) {
-        if (request instanceof TbLwM2MWriteReplaceRequest && ((TbLwM2MWriteReplaceRequest) request).getContentFormat() != null) {
-            return ((TbLwM2MWriteReplaceRequest) request).getContentFormat();
-        } else if (request instanceof TbLwM2MWriteUpdateRequest && ((TbLwM2MWriteUpdateRequest) request).getObjectContentFormat() != null) {
-            return ((TbLwM2MWriteUpdateRequest) request).getObjectContentFormat();
+    private static ContentFormat getWriteRequestContentFormat(LwM2mClient client, JnksIotLwM2MDownlinkRequest request, LwM2mModelProvider modelProvider) {
+        if (request instanceof JnksIotLwM2MWriteReplaceRequest && ((JnksIotLwM2MWriteReplaceRequest) request).getContentFormat() != null) {
+            return ((JnksIotLwM2MWriteReplaceRequest) request).getContentFormat();
+        } else if (request instanceof JnksIotLwM2MWriteUpdateRequest && ((JnksIotLwM2MWriteUpdateRequest) request).getObjectContentFormat() != null) {
+            return ((JnksIotLwM2MWriteUpdateRequest) request).getObjectContentFormat();
         } else {
             String versionedId = null;
-            if (request instanceof TbLwM2MWriteReplaceRequest) {
-                versionedId = ((TbLwM2MWriteReplaceRequest) request).getVersionedId();
-            } else if (request instanceof TbLwM2MWriteUpdateRequest) {
-                versionedId = ((TbLwM2MWriteUpdateRequest) request).getVersionedId();
-            } else if (request instanceof TbLwM2MCreateRequest) {
-                versionedId = ((TbLwM2MCreateRequest) request).getVersionedId();
+            if (request instanceof JnksIotLwM2MWriteReplaceRequest) {
+                versionedId = ((JnksIotLwM2MWriteReplaceRequest) request).getVersionedId();
+            } else if (request instanceof JnksIotLwM2MWriteUpdateRequest) {
+                versionedId = ((JnksIotLwM2MWriteUpdateRequest) request).getVersionedId();
+            } else if (request instanceof JnksIotLwM2MCreateRequest) {
+                versionedId = ((JnksIotLwM2MCreateRequest) request).getVersionedId();
             }
             return getRequestContentFormat(client, versionedId, modelProvider);
         }

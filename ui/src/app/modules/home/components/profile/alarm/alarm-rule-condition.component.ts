@@ -22,7 +22,7 @@ import { EntityId } from '@shared/models/id/entity-id';
 import { dynamicValueSourceTypeTranslationMap } from '@shared/models/query/query.models';
 
 @Component({
-  selector: 'tb-alarm-rule-condition',
+  selector: 'jnks-iot-alarm-rule-condition',
   templateUrl: './alarm-rule-condition.component.html',
   styleUrls: ['./alarm-rule-condition.component.scss'],
   providers: [
@@ -109,7 +109,7 @@ export class AlarmRuleConditionComponent implements ControlValueAccessor, OnInit
     this.dialog.open<AlarmRuleConditionDialogComponent, AlarmRuleConditionDialogData,
       AlarmCondition>(AlarmRuleConditionDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         readonly: this.disabled,
         condition: this.disabled ? this.modelValue : deepClone(this.modelValue),

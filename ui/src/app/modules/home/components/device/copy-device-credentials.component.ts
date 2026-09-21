@@ -12,7 +12,7 @@ import { AppState } from '@core/core.state';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'tb-copy-device-credentials',
+  selector: 'jnks-iot-copy-device-credentials',
   templateUrl: './copy-device-credentials.component.html',
   styleUrls: []
 })

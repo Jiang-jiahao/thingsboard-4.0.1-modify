@@ -12,14 +12,14 @@
   </mat-progress-bar>
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
   <div mat-dialog-content style="position: relative; height: 500px;">
-    <tb-manage-widget-actions
+    <jnks-iot-manage-widget-actions
       [callbacks]="data.callbacks"
       [widgetType] = "data.widgetType"
       [actionSources]="actionSources"
       [defaultIconColor]="data.defaultIconColor"
       [additionalWidgetActionTypes]="data.additionalWidgetActionTypes"
       formControlName="actions">
-    </tb-manage-widget-actions>
+    </jnks-iot-manage-widget-actions>
   </div>
   <div mat-dialog-actions class="flex items-center justify-end">
     <button mat-button color="primary"

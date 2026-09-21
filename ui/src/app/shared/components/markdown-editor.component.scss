@@ -1,27 +1,27 @@
 .markdown-content {
   min-width: 300px;
-  &.tb-edit-mode {
-    .tb-markdown-view-container {
+  &.jnks-iot-edit-mode {
+    .jnks-iot-markdown-view-container {
       border: 1px solid #c0c0c0;
     }
-    .tb-markdown-view {
+    .jnks-iot-markdown-view {
       padding: 20px;
     }
-    &:not(.tb-fullscreen) {
+    &:not(.jnks-iot-fullscreen) {
       padding-bottom: 15px;
       .markdown-content-editor {
         min-height: 200px;
         max-height: 200px;
         height: 200px;
       }
-      .tb-markdown-view-container {
+      .jnks-iot-markdown-view-container {
         min-height: 200px;
         max-height: 200px;
         height: 200px;
       }
     }
   }
-  &.tb-fullscreen {
+  &.jnks-iot-fullscreen {
     background: #fff;
     .markdown-content-editor {
       height: calc(100% - 40px);
@@ -31,7 +31,7 @@
     position: relative;
     height: 100%;
   }
-  .tb-markdown-editor {
+  .jnks-iot-markdown-editor {
     position: absolute;
     top: 0;
     left: 0;
@@ -39,7 +39,7 @@
     bottom: 0;
     border: 1px solid #c0c0c0;
   }
-  .tb-markdown-view-container {
+  .jnks-iot-markdown-view-container {
     overflow: auto;
     height: 100%;
   }
@@ -50,7 +50,7 @@
         margin-right: 4px;
       }
     }
-    button.mat-mdc-button-base, button.mat-mdc-button-base.tb-mat-32 {
+    button.mat-mdc-button-base, button.mat-mdc-button-base.jnks-iot-mat-32 {
       background: rgba(220, 220, 220, .35);
       align-items: center;
       vertical-align: middle;
@@ -59,14 +59,14 @@
       padding: 4px;
       font-size: .8rem;
       line-height: 15px;
-      &:not(.tb-help-popup-button) {
+      &:not(.jnks-iot-help-popup-button) {
         color: #7b7b7b;
       }
     }
     button.mat-mdc-button-base:not(.mat-mdc-icon-button) {
       height: 23px;
     }
-    .tb-help-popup-button-loading {
+    .jnks-iot-help-popup-button-loading {
       background: #f3f3f3;
     }
   }

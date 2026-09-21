@@ -7,9 +7,9 @@
       [expanded]="isExpend"
       [disabled]="isExpend">
       <mat-expansion-panel-header>
-        <mat-panel-title class="tb-panel flex flex-row">
+        <mat-panel-title class="jnks-iot-panel flex flex-row">
           <div class="flex max-w-30% flex-full items-center justify-start">
-            <span class="tb-panel-title">{{ 'device-profile.lwm2m.instance' | translate }}</span>&nbsp;#{{instances.get('id').value}}
+            <span class="jnks-iot-panel-title">{{ 'device-profile.lwm2m.instance' | translate }}</span>&nbsp;#{{instances.get('id').value}}
           </div>
           <div class="flex max-w-10% flex-full items-center justify-center">
             <mat-checkbox color="warn"
@@ -39,17 +39,17 @@
             </mat-checkbox>
           </div>
           <span class="flex-1"></span>
-          <tb-profile-lwm2m-attributes
+          <jnks-iot-profile-lwm2m-attributes
             formControlName="attributes"
             [isAttributeTelemetry]="disableObserveInstance(instances)"
             [modelName]="getNameInstance(instances.value)">
-          </tb-profile-lwm2m-attributes>
+          </jnks-iot-profile-lwm2m-attributes>
         </mat-panel-title>
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
-        <tb-profile-lwm2m-observe-attr-telemetry-resource
+        <jnks-iot-profile-lwm2m-observe-attr-telemetry-resource
           formControlName="resources">
-        </tb-profile-lwm2m-observe-attr-telemetry-resource>
+        </jnks-iot-profile-lwm2m-observe-attr-telemetry-resource>
       </ng-template>
     </mat-expansion-panel>
   </mat-accordion>

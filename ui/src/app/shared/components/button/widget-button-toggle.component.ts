@@ -30,7 +30,7 @@ const initialButtonHeight = 60;
 const horizontalLayoutPadding = 10;
 
 @Component({
-  selector: 'tb-widget-button-toggle',
+  selector: 'jnks-iot-widget-button-toggle',
   templateUrl: './widget-button-toggle.component.html',
   styleUrls: ['./widget-button-toggle.component.scss']
 })
@@ -157,7 +157,7 @@ export class WidgetButtonToggleComponent implements OnInit, AfterViewInit, OnDes
     const appearanceCss = generateWidgetButtonToggleAppearanceCss(this.appearance.selectedStyle, this.appearance.unselectedStyle);
     const layoutCss = generateWidgetButtonToggleBorderLayout(this.appearance.layout);
     this.appearanceCssClass = this.utils.applyCssToElement(this.renderer, this.elementRef.nativeElement,
-      'tb-widget-button', appearanceCss + layoutCss);
+      'jnks-iot-widget-button', appearanceCss + layoutCss);
     this.updateAutoScale();
   }
 

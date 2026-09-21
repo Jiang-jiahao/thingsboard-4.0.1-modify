@@ -1,7 +1,7 @@
 <mat-form-field [class]="fieldClass"
-                [class.tb-datetime-field]="!fieldClass && type === 'datetime'"
-                [class.tb-date-field]="!fieldClass && type === 'date'"
-                [class.tb-time-field]="!fieldClass && type === 'time'"
+                [class.jnks-iot-datetime-field]="!fieldClass && type === 'datetime'"
+                [class.jnks-iot-date-field]="!fieldClass && type === 'date'"
+                [class.jnks-iot-time-field]="!fieldClass && type === 'time'"
                 [class.with-clear]="allowClear"
                 [subscriptSizing]="subscriptSizing" [appearance]="appearance" [floatLabel]="floatLabel">
   <mat-label *ngIf="showLabel">{{ dateText }}</mat-label>

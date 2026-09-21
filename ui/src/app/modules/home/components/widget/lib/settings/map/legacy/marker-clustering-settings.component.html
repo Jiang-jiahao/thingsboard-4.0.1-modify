@@ -1,7 +1,7 @@
-<section class="tb-widget-settings" [formGroup]="markerClusteringSettingsFormGroup">
+<section class="jnks-iot-widget-settings" [formGroup]="markerClusteringSettingsFormGroup">
   <fieldset class="fields-group fields-group-slider">
     <legend class="group-title" translate>widgets.maps.markers-clustering-settings</legend>
-    <mat-expansion-panel class="tb-settings" [expanded]="markerClusteringSettingsFormGroup.get('useClusterMarkers').value">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="markerClusteringSettingsFormGroup.get('useClusterMarkers').value">
       <mat-expansion-panel-header class="flex-wrap">
         <mat-panel-title>
           <mat-slide-toggle formControlName="useClusterMarkers" (click)="$event.stopPropagation()">
@@ -48,7 +48,7 @@
         </fieldset>
         <fieldset class="fields-group fields-group-slider">
           <legend class="group-title" translate>widgets.maps.clustering-markers</legend>
-          <mat-expansion-panel class="tb-settings" [expanded]="markerClusteringSettingsFormGroup.get('useIconCreateFunction').value">
+          <mat-expansion-panel class="jnks-iot-settings" [expanded]="markerClusteringSettingsFormGroup.get('useIconCreateFunction').value">
             <mat-expansion-panel-header class="flex-wrap">
               <mat-panel-title>
                 <mat-slide-toggle formControlName="useIconCreateFunction" (click)="$event.stopPropagation()">
@@ -60,13 +60,13 @@
               </mat-panel-description>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <tb-js-func formControlName="clusterMarkerFunction"
+              <jnks-iot-js-func formControlName="clusterMarkerFunction"
                           withModules
                           [globalVariables]="functionScopeVariables"
                           [functionArgs]="['data', 'childCount']"
                           functionTitle="{{ 'widgets.maps.marker-color-function' | translate }}"
                           helpId="widget/lib/map-legacy/clustering_color_fn">
-              </tb-js-func>
+              </jnks-iot-js-func>
             </ng-template>
           </mat-expansion-panel>
         </fieldset>

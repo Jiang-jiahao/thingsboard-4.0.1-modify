@@ -12,7 +12,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-aws-sns-provider-configuration',
+  selector: 'jnks-iot-aws-sns-provider-configuration',
   templateUrl: './aws-sns-provider-configuration.component.html',
   styleUrls: [],
   providers: [{

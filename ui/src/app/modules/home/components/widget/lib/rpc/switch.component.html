@@ -1,4 +1,4 @@
-<div class="tb-switch flex flex-col" [style.pointer-events]="ctx.isEdit ? 'none' : 'all'" *ngIf="switchType === 'switch'; else slideToggle">
+<div class="jnks-iot-switch flex flex-col" [style.pointer-events]="ctx.isEdit ? 'none' : 'all'" *ngIf="switchType === 'switch'; else slideToggle">
   <div #switchErrorContainer class="error-container flex flex-row items-center justify-center" [style.background]="error?.length ? 'rgba(255,255,255,0.25)' : 'none'">
     <span #switchError class="switch-error">{{ error }}</span>
   </div>
@@ -25,13 +25,13 @@
   <div #textMeasure id="text-measure"></div>
 </div>
 <ng-template #slideToggle>
-  <div class="tb-absolute-fill flex flex-col items-center justify-center" [style.pointer-events]="ctx.isEdit ? 'none' : 'all'">
+  <div class="jnks-iot-absolute-fill flex flex-col items-center justify-center" [style.pointer-events]="ctx.isEdit ? 'none' : 'all'">
     <div>
       <mat-slide-toggle [disabled]="executingUpdateValue" [labelPosition]="labelPosition" [color]="sliderColor" [(ngModel)]="value" (change)="onValue()">{{title}}</mat-slide-toggle>
       <mat-progress-bar style="height: 2px;" [color]="sliderColor" mode="indeterminate" *ngIf="executingUpdateValue"></mat-progress-bar>
       <div style="height: 2px;" *ngIf="!executingUpdateValue"></div>
-      <tb-error style="margin-top: -6px; display: block; pointer-events: none;"
-                [error]="error"></tb-error>
+      <jnks-iot-error style="margin-top: -6px; display: block; pointer-events: none;"
+                [error]="error"></jnks-iot-error>
     </div>
   </div>
 </ng-template>

@@ -32,8 +32,8 @@ import {
   isDefined,
   isUndefined,
   mergeFormattedData,
-  parseTbFunction,
-  safeExecuteTbFunction
+  parseJnksIotFunction,
+  safeExecuteJnksIotFunction
 } from '@core/utils';
 import { MapWidgetInterface } from '@home/components/widget/lib/maps-legacy/map-widget.interface';
 import { firstValueFrom, from } from 'rxjs';
@@ -162,10 +162,10 @@ export class TripAnimationComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private async initializeFunctions(): Promise<void> {
-    this.settings.parsedPointAsAnchorFunction = await firstValueFrom(parseTbFunction(this.ctx.http, this.settings.pointAsAnchorFunction, ['data', 'dsData', 'dsIndex']));
-    this.settings.parsedTooltipFunction = await firstValueFrom(parseTbFunction(this.ctx.http, this.settings.tooltipFunction, ['data', 'dsData', 'dsIndex']));
-    this.settings.parsedLabelFunction = await firstValueFrom(parseTbFunction(this.ctx.http, this.settings.labelFunction, ['data', 'dsData', 'dsIndex']));
-    this.settings.parsedColorPointFunction = await firstValueFrom(parseTbFunction(this.ctx.http, this.settings.colorPointFunction, ['data', 'dsData', 'dsIndex']));
+    this.settings.parsedPointAsAnchorFunction = await firstValueFrom(parseJnksIotFunction(this.ctx.http, this.settings.pointAsAnchorFunction, ['data', 'dsData', 'dsIndex']));
+    this.settings.parsedTooltipFunction = await firstValueFrom(parseJnksIotFunction(this.ctx.http, this.settings.tooltipFunction, ['data', 'dsData', 'dsIndex']));
+    this.settings.parsedLabelFunction = await firstValueFrom(parseJnksIotFunction(this.ctx.http, this.settings.labelFunction, ['data', 'dsData', 'dsIndex']));
+    this.settings.parsedColorPointFunction = await firstValueFrom(parseJnksIotFunction(this.ctx.http, this.settings.colorPointFunction, ['data', 'dsData', 'dsIndex']));
   }
 
   private update() {
@@ -262,7 +262,7 @@ export class TripAnimationComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.useAnchors) {
       const anchorDate = Object.entries(_.union(this.interpolatedTimeData)[0]);
       this.anchors = anchorDate
-        .filter((data: [string, FormattedData], tsIndex) => safeExecuteTbFunction(this.settings.parsedPointAsAnchorFunction, [data[1],
+        .filter((data: [string, FormattedData], tsIndex) => safeExecuteJnksIotFunction(this.settings.parsedPointAsAnchorFunction, [data[1],
           this.formattedInterpolatedTimeData.map(ds => ds[tsIndex]), data[1].dsIndex]))
         .map(data => parseInt(data[0], 10));
     }
@@ -271,7 +271,7 @@ export class TripAnimationComponent implements OnInit, AfterViewInit, OnDestroy 
   calcTooltip = (point: FormattedData, points: FormattedData[]): string => {
     const data = point ? point : this.activeTrip;
     const tooltipPattern: string = this.settings.useTooltipFunction ?
-      safeExecuteTbFunction(this.settings.parsedTooltipFunction,
+      safeExecuteJnksIotFunction(this.settings.parsedTooltipFunction,
         [data, points, point.dsIndex]) : this.settings.tooltipPattern;
     return parseWithTranslation.parseTemplate(tooltipPattern, data, true);
   }
@@ -288,7 +288,7 @@ export class TripAnimationComponent implements OnInit, AfterViewInit, OnDestroy 
     if (this.activeTrip) {
       const data = points[this.activeTrip.dsIndex];
       const labelText: string = this.settings.useLabelFunction ?
-        safeExecuteTbFunction(this.settings.parsedLabelFunction, [data, points, data.dsIndex]) : this.settings.label;
+        safeExecuteJnksIotFunction(this.settings.parsedLabelFunction, [data, points, data.dsIndex]) : this.settings.label;
       this.label = this.sanitizer.bypassSecurityTrustHtml(parseWithTranslation.parseTemplate(labelText, data, true));
     }
   }
@@ -362,4 +362,4 @@ export class TripAnimationComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 }
 
-export const TbTripAnimationWidget = TripAnimationComponent;
+export const JnksIotTripAnimationWidget = TripAnimationComponent;

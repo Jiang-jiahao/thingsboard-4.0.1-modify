@@ -8,7 +8,7 @@ interface CircleElement extends RaphaelElement {
 }
 
 @Component({
-  selector: 'tb-led-light',
+  selector: 'jnks-iot-led-light',
   templateUrl: './led-light.component.html',
   styleUrls: []
 })

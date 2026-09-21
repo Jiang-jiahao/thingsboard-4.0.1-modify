@@ -1,38 +1,38 @@
 @import '../../../../../../../../../scss/constants';
 
-.tb-time-series-states-panel {
-  .tb-form-table {
+.jnks-iot-time-series-states-panel {
+  .jnks-iot-form-table {
     overflow-x: auto;
   }
-  .tb-form-table-header-cell {
-    &.tb-state-label-header {
+  .jnks-iot-form-table-header-cell {
+    &.jnks-iot-state-label-header {
       flex: 1;
       min-width: 80px;
     }
-    &.tb-state-value-header {
+    &.jnks-iot-state-value-header {
       width: 80px;
       min-width: 80px;
     }
-    &.tb-state-source-header {
+    &.jnks-iot-state-source-header {
       width: 100px;
       min-width: 100px;
     }
-    &.tb-state-source-value-header {
+    &.jnks-iot-state-source-value-header {
       flex: 1;
       min-width: 200px;
       @media #{$mat-gt-sm} {
         min-width: 358px;
       }
     }
-    &.tb-actions-header {
+    &.jnks-iot-actions-header {
       width: 40px;
       min-width: 40px;
     }
   }
-  .tb-form-table-header {
+  .jnks-iot-form-table-header {
     min-width: fit-content;
   }
-  .tb-form-table-body {
+  .jnks-iot-form-table-body {
     min-width: fit-content;
     .mat-divider {
       margin-top: 8px;

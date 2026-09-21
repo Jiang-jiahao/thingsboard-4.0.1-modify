@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Input, NgZone, OnDestroy } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { Notification, NotificationRequest } from '@shared/models/notification.models';
@@ -12,7 +12,7 @@ import { NotificationSubscriber } from '@shared/models/telemetry/telemetry.model
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-show-notification-popover',
+  selector: 'jnks-iot-show-notification-popover',
   templateUrl: './show-notification-popover.component.html',
   styleUrls: ['show-notification-popover.component.scss']
 })
@@ -25,7 +25,7 @@ export class ShowNotificationPopoverComponent extends PageComponent implements O
   counter: BehaviorSubject<number>;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   private notificationSubscriber = NotificationSubscriber.createNotificationsSubscription(this.notificationWsService, this.zone, 6);
 

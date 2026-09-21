@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionalEventListener;
-import com.jnks.iot.server.cache.TbTransactionalCache;
+import com.jnks.iot.server.cache.JnksIotTransactionalCache;
 import com.jnks.iot.server.common.data.EntityType;
 import com.jnks.iot.server.common.data.Tenant;
 import com.jnks.iot.server.common.data.TenantInfo;
@@ -68,7 +68,7 @@ public class TenantServiceImpl extends AbstractCachedEntityService<TenantId, Ten
     @Autowired
     private TenantDataValidator tenantValidator;
     @Autowired
-    protected TbTransactionalCache<TenantId, Boolean> existsTenantCache;
+    protected JnksIotTransactionalCache<TenantId, Boolean> existsTenantCache;
 
     @TransactionalEventListener(classes = TenantEvictEvent.class)
     @Override
@@ -160,7 +160,7 @@ public class TenantServiceImpl extends AbstractCachedEntityService<TenantId, Ten
                 EntityType.ENTITY_VIEW, EntityType.WIDGETS_BUNDLE, EntityType.WIDGET_TYPE,
                 EntityType.ASSET, EntityType.ASSET_PROFILE, EntityType.DEVICE, EntityType.DEVICE_PROFILE,
                 EntityType.DASHBOARD, EntityType.RULE_CHAIN, EntityType.API_USAGE_STATE,
-                EntityType.TB_RESOURCE, EntityType.OTA_PACKAGE, EntityType.RPC, EntityType.QUEUE,
+                EntityType.JNKS_IOT_RESOURCE, EntityType.OTA_PACKAGE, EntityType.RPC, EntityType.QUEUE,
                 EntityType.NOTIFICATION_REQUEST, EntityType.NOTIFICATION_RULE, EntityType.NOTIFICATION_TEMPLATE,
                 EntityType.NOTIFICATION_TARGET, EntityType.QUEUE_STATS, EntityType.CUSTOMER,
                 EntityType.DOMAIN, EntityType.MOBILE_APP_BUNDLE, EntityType.MOBILE_APP, EntityType.OAUTH2_CLIENT

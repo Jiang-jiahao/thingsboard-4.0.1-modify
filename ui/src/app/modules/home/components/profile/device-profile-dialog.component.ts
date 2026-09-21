@@ -16,7 +16,7 @@ export interface DeviceProfileDialogData {
 }
 
 @Component({
-  selector: 'tb-device-profile-dialog',
+  selector: 'jnks-iot-device-profile-dialog',
   templateUrl: './device-profile-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: DeviceProfileDialogComponent}],
   styleUrls: []

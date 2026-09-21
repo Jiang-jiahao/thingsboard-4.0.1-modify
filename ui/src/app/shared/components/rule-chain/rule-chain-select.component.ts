@@ -13,7 +13,7 @@ import { ComponentPortal } from '@angular/cdk/portal';
 import { POSITION_MAP } from '@shared/models/overlay.models';
 
 @Component({
-  selector: 'tb-rule-chain-select',
+  selector: 'jnks-iot-rule-chain-select',
   templateUrl: './rule-chain-select.component.html',
   styleUrls: ['./rule-chain-select.component.scss'],
   providers: [{
@@ -89,7 +89,7 @@ export class RuleChainSelectComponent implements ControlValueAccessor {
     if (!this.disabled) {
       const target = $event.currentTarget;
       const config = new OverlayConfig({
-        panelClass: 'tb-filter-panel',
+        panelClass: 'jnks-iot-filter-panel',
         backdropClass: 'cdk-overlay-transparent-backdrop',
         hasBackdrop: true,
         width: (target as HTMLElement).offsetWidth

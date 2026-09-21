@@ -27,7 +27,7 @@ import { COMPLEX_FILTER_PREDICATE_DIALOG_COMPONENT_TOKEN } from '@home/component
 import { ComplexFilterPredicateDialogData } from '@home/components/filter/filter-component.models';
 
 @Component({
-  selector: 'tb-filter-predicate-list',
+  selector: 'jnks-iot-filter-predicate-list',
   templateUrl: './filter-predicate-list.component.html',
   styleUrls: ['./filter-predicate-list.component.scss'],
   providers: [
@@ -156,7 +156,7 @@ export class FilterPredicateListComponent implements ControlValueAccessor, Valid
     return this.dialog.open<any, ComplexFilterPredicateDialogData,
       ComplexFilterPredicateInfo>(this.complexFilterPredicateDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         complexPredicate: predicate.keyFilterPredicate as ComplexFilterPredicateInfo,
         readonly: this.disabled,

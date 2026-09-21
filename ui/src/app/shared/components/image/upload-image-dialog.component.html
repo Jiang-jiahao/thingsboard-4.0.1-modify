@@ -12,8 +12,8 @@
   </mat-progress-bar>
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
   <div mat-dialog-content class="relative">
-    <fieldset [disabled]="isLoading$ | async" tb-toast toastTarget="uploadRoot" >
-      <tb-image-input resultAsFile
+    <fieldset [disabled]="isLoading$ | async" jnks-iot-toast toastTarget="uploadRoot" >
+      <jnks-iot-image-input resultAsFile
                       processImageApiLink
                       label="{{(isScada ? 'scada.symbol-preview' : 'image.image-preview') | translate}}"
                       [accept]="isScada ? 'image/svg+xml' : 'image/*'"
@@ -23,7 +23,7 @@
                       [maxSizeByte]="maxResourceSize"
                       [fileName]="data?.image?.fileName"
                       (fileNameChanged)="imageFileNameChanged($event)">
-      </tb-image-input>
+      </jnks-iot-image-input>
       <mat-form-field *ngIf="uploadImage && uploadImageFormGroup.get('file').value" class="mat-block">
         <mat-label translate>image.name</mat-label>
         <input matInput formControlName="title" required>

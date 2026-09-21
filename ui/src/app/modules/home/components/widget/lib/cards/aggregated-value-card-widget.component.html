@@ -1,6 +1,6 @@
-<div class="tb-aggregated-value-card-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
-  <div class="tb-aggregated-value-card-overlay" [style]="overlayStyle"></div>
-  <div class="tb-aggregated-value-card-title-panel">
+<div class="jnks-iot-aggregated-value-card-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
+  <div class="jnks-iot-aggregated-value-card-overlay" [style]="overlayStyle"></div>
+  <div class="jnks-iot-aggregated-value-card-title-panel">
     <ng-container *ngTemplateOutlet="widgetTitlePanel"></ng-container>
     <ng-container *ngTemplateOutlet="subtitleTpl"></ng-container>
   </div>
@@ -12,13 +12,13 @@
 </div>
 
 <ng-template #subtitleTpl>
-  <div *ngIf="showSubtitle" class="tb-aggregated-value-card-subtitle"
+  <div *ngIf="showSubtitle" class="jnks-iot-aggregated-value-card-subtitle"
        [style]="subtitleStyle" [style.color]="subtitleColor">{{ subtitle$ | async }}</div>
 </ng-template>
 <ng-template #valuesTpl>
-  <div #valueCardValues class="tb-aggregated-value-card-values">
-    <div #valueCardValueContainer class="tb-aggregated-value-card-values-container">
-      <div class="tb-aggregated-value-card-values-section left">
+  <div #valueCardValues class="jnks-iot-aggregated-value-card-values">
+    <div #valueCardValueContainer class="jnks-iot-aggregated-value-card-values-container">
+      <div class="jnks-iot-aggregated-value-card-values-section left">
         <ng-container *ngIf="values[aggregatedValueCardKeyPosition.leftTop]">
           <ng-container *ngTemplateOutlet="valueTpl; context:{value: values[aggregatedValueCardKeyPosition.leftTop]}"></ng-container>
         </ng-container>
@@ -26,12 +26,12 @@
           <ng-container *ngTemplateOutlet="valueTpl; context:{value: values[aggregatedValueCardKeyPosition.leftBottom]}"></ng-container>
         </ng-container>
       </div>
-      <div class="tb-aggregated-value-card-values-section center">
+      <div class="jnks-iot-aggregated-value-card-values-section center">
         <ng-container *ngIf="values[aggregatedValueCardKeyPosition.center]">
           <ng-container *ngTemplateOutlet="valueTpl; context:{value: values[aggregatedValueCardKeyPosition.center]}"></ng-container>
         </ng-container>
       </div>
-      <div class="tb-aggregated-value-card-values-section right">
+      <div class="jnks-iot-aggregated-value-card-values-section right">
         <ng-container *ngIf="values[aggregatedValueCardKeyPosition.rightTop]">
           <ng-container *ngTemplateOutlet="valueTpl; context:{value: values[aggregatedValueCardKeyPosition.rightTop]}"></ng-container>
         </ng-container>
@@ -43,17 +43,17 @@
   </div>
 </ng-template>
 <ng-template #chartTpl>
-  <div *ngIf="showChart" class="tb-aggregated-value-card-chart">
-    <div class="tb-aggregated-value-card-chart-ticks">
+  <div *ngIf="showChart" class="jnks-iot-aggregated-value-card-chart">
+    <div class="jnks-iot-aggregated-value-card-chart-ticks">
       <div>{{tickMax$ | async}}</div>
       <div>{{tickMin$ | async}}</div>
     </div>
-    <div class="tb-aggregated-value-card-chart-container">
-      <div class="tb-aggregated-value-card-chart-element" #chartElement></div>
-      <div class="tb-aggregated-value-card-chart-boundary top left"></div>
-      <div class="tb-aggregated-value-card-chart-boundary top right"></div>
-      <div class="tb-aggregated-value-card-chart-boundary bottom left"></div>
-      <div class="tb-aggregated-value-card-chart-boundary bottom right"></div>
+    <div class="jnks-iot-aggregated-value-card-chart-container">
+      <div class="jnks-iot-aggregated-value-card-chart-element" #chartElement></div>
+      <div class="jnks-iot-aggregated-value-card-chart-boundary top left"></div>
+      <div class="jnks-iot-aggregated-value-card-chart-boundary top right"></div>
+      <div class="jnks-iot-aggregated-value-card-chart-boundary bottom left"></div>
+      <div class="jnks-iot-aggregated-value-card-chart-boundary bottom right"></div>
     </div>
   </div>
 </ng-template>
@@ -61,11 +61,11 @@
   <div *ngIf="showDate" [style]="dateStyle" [style.color]="dateColor" [innerHTML]="dateFormat.formatted"></div>
 </ng-template>
 <ng-template #valueTpl let-value="value">
-  <div class="tb-aggregated-value-card-value" [style]="value.style" [style.color]="value.color.color">
+  <div class="jnks-iot-aggregated-value-card-value" [style]="value.style" [style.color]="value.color.color">
     <div *ngIf="value.showArrow" class="value-arrow-container">
       <span *ngIf="!value.upArrow && !value.downArrow" class="value-arrow"></span>
-      <tb-icon *ngIf="value.upArrow" class="value-arrow">arrow_upward</tb-icon>
-      <tb-icon *ngIf="value.downArrow" class="value-arrow">arrow_downward</tb-icon>
+      <jnks-iot-icon *ngIf="value.upArrow" class="value-arrow">arrow_upward</jnks-iot-icon>
+      <jnks-iot-icon *ngIf="value.downArrow" class="value-arrow">arrow_downward</jnks-iot-icon>
     </div>
     <div class="value-text">
       <span>{{ value.value }}</span>

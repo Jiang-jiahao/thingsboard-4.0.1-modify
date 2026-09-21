@@ -1,17 +1,17 @@
-<div [formGroup]="timewindowConfig" class="tb-form-panel">
+<div [formGroup]="timewindowConfig" class="jnks-iot-form-panel">
   <div class="flex flex-row items-center justify-between">
-    <div class="tb-form-panel-title" translate>timewindow.timewindow</div>
-    <tb-toggle-select formControlName="useDashboardTimewindow" selectMediaBreakpoint="xs">
-      <tb-toggle-option [value]="true">{{ 'widget-config.use-dashboard-timewindow' | translate }}</tb-toggle-option>
-      <tb-toggle-option [value]="false">{{ 'widget-config.use-widget-timewindow' | translate }}</tb-toggle-option>
-    </tb-toggle-select>
+    <div class="jnks-iot-form-panel-title" translate>timewindow.timewindow</div>
+    <jnks-iot-toggle-select formControlName="useDashboardTimewindow" selectMediaBreakpoint="xs">
+      <jnks-iot-toggle-option [value]="true">{{ 'widget-config.use-dashboard-timewindow' | translate }}</jnks-iot-toggle-option>
+      <jnks-iot-toggle-option [value]="false">{{ 'widget-config.use-widget-timewindow' | translate }}</jnks-iot-toggle-option>
+    </jnks-iot-toggle-select>
   </div>
-  <div class="tb-form-row column-xs">
+  <div class="jnks-iot-form-row column-xs">
     <mat-slide-toggle class="mat-slide" formControlName="displayTimewindow">
       {{ 'widget-config.display-timewindow' | translate }}
     </mat-slide-toggle>
     <div class="flex flex-1 flex-row items-center justify-between">
-      <tb-timewindow asButton="true"
+      <jnks-iot-timewindow asButton="true"
                      strokedButton
                      noMargin
                      isEdit="true"
@@ -20,10 +20,10 @@
                      [historyOnly]="onlyHistoryTimewindow"
                      quickIntervalOnly="{{ widgetType === widgetTypes.latest }}"
                      aggregation="{{ widgetType === widgetTypes.timeseries }}"
-                     formControlName="timewindow"></tb-timewindow>
-      <tb-timewindow-style formControlName="timewindowStyle"
+                     formControlName="timewindow"></jnks-iot-timewindow>
+      <jnks-iot-timewindow-style formControlName="timewindowStyle"
                            [previewValue]="timewindowConfig.get('timewindow').value">
-      </tb-timewindow-style>
+      </jnks-iot-timewindow-style>
     </div>
   </div>
 </div>

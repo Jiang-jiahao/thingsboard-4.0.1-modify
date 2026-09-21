@@ -16,7 +16,7 @@ export interface AlarmScheduleDialogData {
 }
 
 @Component({
-  selector: 'tb-alarm-schedule-dialog',
+  selector: 'jnks-iot-alarm-schedule-dialog',
   templateUrl: './alarm-schedule-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: AlarmScheduleDialogComponent}],
   styleUrls: []

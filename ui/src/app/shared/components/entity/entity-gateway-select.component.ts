@@ -16,7 +16,7 @@ import { getCurrentAuthUser } from '@core/auth/auth.selectors';
 import { Authority } from '@shared/models/authority.enum';
 
 @Component({
-  selector: 'tb-entity-gateway-select',
+  selector: 'jnks-iot-entity-gateway-select',
   templateUrl: './entity-gateway-select.component.html',
   styleUrls: [],
   providers: [{

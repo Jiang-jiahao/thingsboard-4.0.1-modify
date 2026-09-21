@@ -20,7 +20,7 @@ import { ActivatedRoute } from '@angular/router';
 import { isDefined, isDefinedAndNotNull } from '@core/utils';
 
 @Component({
-  selector: 'tb-home',
+  selector: 'jnks-iot-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })

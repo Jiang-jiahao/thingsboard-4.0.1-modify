@@ -15,12 +15,12 @@ import { EntityId } from '@shared/models/id/entity-id';
 import { TranslateService } from '@ngx-translate/core';
 import { Observable, of, Subscription } from 'rxjs';
 import { EntityType } from '@shared/models/entity-type.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { share } from 'rxjs/operators';
 import { parseHttpErrorMessage } from '@core/utils';
 
 @Component({
-  selector: 'tb-entity-version-create',
+  selector: 'jnks-iot-entity-version-create',
   templateUrl: './entity-version-create.component.html',
   styleUrls: ['./version-control.scss']
 })
@@ -42,7 +42,7 @@ export class EntityVersionCreateComponent extends PageComponent implements OnIni
   onBeforeCreateVersion: () => Observable<any>;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   createVersionFormGroup: UntypedFormGroup;
 

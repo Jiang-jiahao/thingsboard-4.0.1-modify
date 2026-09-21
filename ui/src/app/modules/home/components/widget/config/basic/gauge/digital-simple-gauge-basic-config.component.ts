@@ -28,7 +28,7 @@ import {
 import { ColorSettings, ColorType } from '@shared/models/widget-settings.models';
 
 @Component({
-  selector: 'tb-digital-simple-gauge-basic-config',
+  selector: 'jnks-iot-digital-simple-gauge-basic-config',
   templateUrl: './digital-simple-gauge-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

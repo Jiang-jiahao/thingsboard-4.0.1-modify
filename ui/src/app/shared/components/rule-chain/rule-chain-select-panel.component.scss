@@ -5,8 +5,8 @@
 }
 
 ::ng-deep {
-  .tb-autocomplete.tb-rule-chain-search {
-    .mat-mdc-option.tb-selected-option {
+  .jnks-iot-autocomplete.jnks-iot-rule-chain-search {
+    .mat-mdc-option.jnks-iot-selected-option {
       display: flex;
       flex-direction: row-reverse;
       background-color: rgba(0, 0, 0, .04);
@@ -14,11 +14,11 @@
       mat-icon {
         margin-right: 0;
         margin-left: 16px;
-        color: $tb-secondary-color;
+        color: $jnks-iot-secondary-color;
       }
 
       .mdc-list-item__primary-text {
-        color: $tb-secondary-color;
+        color: $jnks-iot-secondary-color;
         font-weight: 500;
       }
     }

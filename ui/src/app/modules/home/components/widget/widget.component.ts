@@ -102,16 +102,16 @@ import { ComponentType } from '@angular/cdk/portal';
 import { EMBED_DASHBOARD_DIALOG_TOKEN } from '@home/components/widget/dialog/embed-dashboard-dialog-token';
 import { MobileService } from '@core/services/mobile.service';
 import { PopoverPlacement } from '@shared/components/popover.models';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { DASHBOARD_PAGE_COMPONENT_TOKEN } from '@home/components/tokens';
 import { MODULES_MAP } from '@shared/models/constants';
 import { IModulesMap } from '@modules/common/modules-map.models';
 import { DashboardUtilsService } from '@core/services/dashboard-utils.service';
-import { CompiledTbFunction, compileTbFunction, isNotEmptyTbFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction, compileJnksIotFunction, isNotEmptyJnksIotFunction } from '@shared/models/js-function.models';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
-  selector: 'tb-widget',
+  selector: 'jnks-iot-widget',
   templateUrl: './widget.component.html',
   styleUrls: ['./widget.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -184,7 +184,7 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
               private injector: Injector,
               private dialog: MatDialog,
               private renderer: Renderer2,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               @Inject(EMBED_DASHBOARD_DIALOG_TOKEN) private embedDashboardDialogComponent: ComponentType<any>,
               @Inject(DASHBOARD_PAGE_COMPONENT_TOKEN) private dashboardPageComponent: ComponentType<any>,
               @Optional() @Inject(MODULES_MAP) private modulesMap: IModulesMap,
@@ -269,9 +269,9 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
 
     const customHeaderActions$ = headerActionsDescriptors.map((descriptor) => {
       let useShowWidgetHeaderActionFunction = descriptor.useShowWidgetActionFunction || false;
-      let showWidgetHeaderActionFunction$: Observable<CompiledTbFunction<ShowWidgetHeaderActionFunction>>;
-      if (useShowWidgetHeaderActionFunction && isNotEmptyTbFunction(descriptor.showWidgetActionFunction)) {
-        showWidgetHeaderActionFunction$ = compileTbFunction(this.http, descriptor.showWidgetActionFunction, 'widgetContext', 'data');
+      let showWidgetHeaderActionFunction$: Observable<CompiledJnksIotFunction<ShowWidgetHeaderActionFunction>>;
+      if (useShowWidgetHeaderActionFunction && isNotEmptyJnksIotFunction(descriptor.showWidgetActionFunction)) {
+        showWidgetHeaderActionFunction$ = compileJnksIotFunction(this.http, descriptor.showWidgetActionFunction, 'widgetContext', 'data');
       } else {
         showWidgetHeaderActionFunction$ = of(null);
       }
@@ -463,7 +463,7 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
     this.widgetContext.widgetNamespace =
       `widget-type-${this.widget.typeFullFqn.replace(/\./g, '-')}`;
     const elem = this.elementRef.nativeElement;
-    elem.classList.add('tb-widget');
+    elem.classList.add('jnks-iot-widget');
     elem.classList.add(this.widgetContext.widgetNamespace);
     this.widgetType = this.widgetInfo.widgetTypeFunction;
     this.typeParameters = this.widgetInfo.typeParameters;
@@ -1158,8 +1158,8 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
         break;
       case WidgetActionType.custom:
         const customFunction = descriptor.customFunction;
-        if (isNotEmptyTbFunction(customFunction)) {
-          compileTbFunction(this.http, customFunction, '$event', 'widgetContext', 'entityId',
+        if (isNotEmptyJnksIotFunction(customFunction)) {
+          compileJnksIotFunction(this.http, customFunction, '$event', 'widgetContext', 'entityId',
             'entityName', 'additionalParams', 'entityLabel').subscribe(
             {
               next: (compiled) => {
@@ -1211,7 +1211,7 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
         break;
       case WidgetMobileActionType.mapDirection:
       case WidgetMobileActionType.mapLocation:
-        argsObservable = compileTbFunction(this.http, mobileAction.getLocationFunction, '$event', 'widgetContext', 'entityId',
+        argsObservable = compileJnksIotFunction(this.http, mobileAction.getLocationFunction, '$event', 'widgetContext', 'entityId',
           'entityName', 'additionalParams', 'entityLabel').pipe(
           switchMap(getLocationFunction => {
             const locationArgs = getLocationFunction.execute($event, this.widgetContext, entityId, entityName, additionalParams, entityLabel);
@@ -1237,7 +1237,7 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
         );
         break;
       case WidgetMobileActionType.makePhoneCall:
-        argsObservable = compileTbFunction(this.http, mobileAction.getPhoneNumberFunction, '$event', 'widgetContext', 'entityId',
+        argsObservable = compileJnksIotFunction(this.http, mobileAction.getPhoneNumberFunction, '$event', 'widgetContext', 'entityId',
           'entityName', 'additionalParams', 'entityLabel').pipe(
           switchMap(getPhoneNumberFunction => {
             const phoneNumberArg = getPhoneNumberFunction.execute($event, this.widgetContext, entityId, entityName, additionalParams, entityLabel);
@@ -1278,8 +1278,8 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
                     case WidgetMobileActionType.takePhoto:
                     case WidgetMobileActionType.takeScreenshot:
                       const imageUrl = actionResult.imageUrl;
-                      if (isNotEmptyTbFunction(mobileAction.processImageFunction)) {
-                        compileTbFunction(this.http, mobileAction.processImageFunction, 'imageUrl', '$event', 'widgetContext', 'entityId',
+                      if (isNotEmptyJnksIotFunction(mobileAction.processImageFunction)) {
+                        compileJnksIotFunction(this.http, mobileAction.processImageFunction, 'imageUrl', '$event', 'widgetContext', 'entityId',
                           'entityName', 'additionalParams', 'entityLabel').subscribe(
                           {
                             next: (compiled) => {
@@ -1298,8 +1298,8 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
                       break;
                     case WidgetMobileActionType.deviceProvision:
                       const deviceName = actionResult.deviceName;
-                      if (isNotEmptyTbFunction(mobileAction.handleProvisionSuccessFunction)) {
-                        compileTbFunction(this.http, mobileAction.handleProvisionSuccessFunction, 'deviceName', '$event', 'widgetContext', 'entityId',
+                      if (isNotEmptyJnksIotFunction(mobileAction.handleProvisionSuccessFunction)) {
+                        compileJnksIotFunction(this.http, mobileAction.handleProvisionSuccessFunction, 'deviceName', '$event', 'widgetContext', 'entityId',
                           'entityName', 'additionalParams', 'entityLabel').subscribe(
                           {
                             next: (compiled) => {
@@ -1319,8 +1319,8 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
                     case WidgetMobileActionType.scanQrCode:
                       const code = actionResult.code;
                       const format = actionResult.format;
-                      if (isNotEmptyTbFunction(mobileAction.processQrCodeFunction)) {
-                        compileTbFunction(this.http, mobileAction.processQrCodeFunction, 'code', 'format', '$event', 'widgetContext', 'entityId',
+                      if (isNotEmptyJnksIotFunction(mobileAction.processQrCodeFunction)) {
+                        compileJnksIotFunction(this.http, mobileAction.processQrCodeFunction, 'code', 'format', '$event', 'widgetContext', 'entityId',
                           'entityName', 'additionalParams', 'entityLabel').subscribe(
                           {
                             next: (compiled) => {
@@ -1340,8 +1340,8 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
                     case WidgetMobileActionType.getLocation:
                       const latitude = actionResult.latitude;
                       const longitude = actionResult.longitude;
-                      if (isNotEmptyTbFunction(mobileAction.processLocationFunction)) {
-                        compileTbFunction(this.http, mobileAction.processLocationFunction, 'latitude', 'longitude', '$event', 'widgetContext', 'entityId',
+                      if (isNotEmptyJnksIotFunction(mobileAction.processLocationFunction)) {
+                        compileJnksIotFunction(this.http, mobileAction.processLocationFunction, 'latitude', 'longitude', '$event', 'widgetContext', 'entityId',
                           'entityName', 'additionalParams', 'entityLabel').subscribe(
                           {
                             next: (compiled) => {
@@ -1363,8 +1363,8 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
                     case WidgetMobileActionType.mapLocation:
                     case WidgetMobileActionType.makePhoneCall:
                       const launched = actionResult.launched;
-                      if (isNotEmptyTbFunction(mobileAction.processLaunchResultFunction)) {
-                        compileTbFunction(this.http, mobileAction.processLaunchResultFunction, 'launched', '$event', 'widgetContext', 'entityId',
+                      if (isNotEmptyJnksIotFunction(mobileAction.processLaunchResultFunction)) {
+                        compileJnksIotFunction(this.http, mobileAction.processLaunchResultFunction, 'launched', '$event', 'widgetContext', 'entityId',
                           'entityName', 'additionalParams', 'entityLabel').subscribe(
                           {
                             next: (compiled) => {
@@ -1384,8 +1384,8 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
                       break;
                   }
                 } else {
-                  if (isNotEmptyTbFunction(mobileAction.handleEmptyResultFunction)) {
-                    compileTbFunction(this.http, mobileAction.handleEmptyResultFunction, '$event', 'widgetContext', 'entityId',
+                  if (isNotEmptyJnksIotFunction(mobileAction.handleEmptyResultFunction)) {
+                    compileJnksIotFunction(this.http, mobileAction.handleEmptyResultFunction, '$event', 'widgetContext', 'entityId',
                       'entityName', 'additionalParams', 'entityLabel').subscribe(
                       {
                         next: (compiled) => {
@@ -1421,8 +1421,8 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
 
   private handleWidgetMobileActionError(error: string, $event: Event, mobileAction: WidgetMobileActionDescriptor,
                                         entityId?: EntityId, entityName?: string, additionalParams?: any, entityLabel?: string) {
-    if (isNotEmptyTbFunction(mobileAction.handleErrorFunction)) {
-      compileTbFunction(this.http, mobileAction.handleErrorFunction, 'error', '$event', 'widgetContext', 'entityId',
+    if (isNotEmptyJnksIotFunction(mobileAction.handleErrorFunction)) {
+      compileJnksIotFunction(this.http, mobileAction.handleErrorFunction, 'error', '$event', 'widgetContext', 'entityId',
         'entityName', 'additionalParams', 'entityLabel').subscribe(
         {
           next: (compiled) => {
@@ -1524,7 +1524,7 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
     }
     dashboard.dialogRef = this.dialog.open(this.embedDashboardDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       viewContainerRef: this.widgetContentContainer,
       data: {
         dashboard,
@@ -1593,8 +1593,8 @@ export class WidgetComponent extends PageComponent implements OnInit, OnChanges,
     }
     this.loadCustomActionResources(actionNamespace, customCss, customResources, descriptor).subscribe({
       next: () => {
-        if (isNotEmptyTbFunction(customPrettyFunction)) {
-          compileTbFunction(this.http, customPrettyFunction, '$event', 'widgetContext', 'entityId',
+        if (isNotEmptyJnksIotFunction(customPrettyFunction)) {
+          compileJnksIotFunction(this.http, customPrettyFunction, '$event', 'widgetContext', 'entityId',
             'entityName', 'htmlTemplate', 'additionalParams', 'entityLabel').subscribe({
             next: (compiled) => {
               try {

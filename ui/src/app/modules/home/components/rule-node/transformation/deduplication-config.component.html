@@ -12,38 +12,38 @@
               color="primary"
               matTooltip="{{ 'rule-node-config.interval-hint' | translate }}">help</mat-icon>
   </mat-form-field>
-  <div class="tb-form-panel no-padding no-border">
-    <div class="tb-form-panel stroked">
-      <div class="tb-form-panel-title  tb-required" translate>rule-node-config.strategy</div>
-      <tb-toggle-select class="fetch-to-data-toggle" formControlName="strategy" appearance="fill">
-        <tb-toggle-option *ngFor="let strategy of deduplicationStrategies" [value]="strategy">
+  <div class="jnks-iot-form-panel no-padding no-border">
+    <div class="jnks-iot-form-panel stroked">
+      <div class="jnks-iot-form-panel-title  jnks-iot-required" translate>rule-node-config.strategy</div>
+      <jnks-iot-toggle-select class="fetch-to-data-toggle" formControlName="strategy" appearance="fill">
+        <jnks-iot-toggle-option *ngFor="let strategy of deduplicationStrategies" [value]="strategy">
           {{ deduplicationStrategiesTranslations.get(strategy) | translate }}
-        </tb-toggle-option>
-      </tb-toggle-select>
-      <tb-example-hint [hintText]="'rule-node-config.strategy-all-hint'"
+        </jnks-iot-toggle-option>
+      </jnks-iot-toggle-select>
+      <jnks-iot-example-hint [hintText]="'rule-node-config.strategy-all-hint'"
                        *ngIf="deduplicationConfigForm.get('strategy').value === 'ALL'">
-      </tb-example-hint>
-      <tb-example-hint [hintText]="'rule-node-config.strategy-first-hint'"
+      </jnks-iot-example-hint>
+      <jnks-iot-example-hint [hintText]="'rule-node-config.strategy-first-hint'"
                         textAlign="'center'"
                        *ngIf="deduplicationConfigForm.get('strategy').value === 'FIRST'">
-      </tb-example-hint>
-      <tb-example-hint [hintText]="'rule-node-config.strategy-last-hint'"
+      </jnks-iot-example-hint>
+      <jnks-iot-example-hint [hintText]="'rule-node-config.strategy-last-hint'"
                         textAlign="'center'"
                        *ngIf="deduplicationConfigForm.get('strategy').value === 'LAST'">
-      </tb-example-hint>
+      </jnks-iot-example-hint>
       <div *ngIf="deduplicationConfigForm.get('strategy').value === deduplicationStrategie.ALL">
-        <tb-output-message-type-autocomplete
+        <jnks-iot-output-message-type-autocomplete
           required
           formControlName="outMsgType">
-        </tb-output-message-type-autocomplete>
+        </jnks-iot-output-message-type-autocomplete>
       </div>
     </div>
-    <section class="tb-form-panel stroked">
-      <mat-expansion-panel class="tb-settings">
+    <section class="jnks-iot-form-panel stroked">
+      <mat-expansion-panel class="jnks-iot-settings">
         <mat-expansion-panel-header>
           <mat-panel-title translate>rule-node-config.advanced-settings</mat-panel-title>
         </mat-expansion-panel-header>
-        <div class="tb-form-row no-border no-padding tb-standard-fields">
+        <div class="jnks-iot-form-row no-border no-padding jnks-iot-standard-fields">
           <mat-form-field class="flex">
             <mat-label>{{'rule-node-config.max-pending-msgs' | translate}}</mat-label>
             <input type = 'number' required matInput formControlName="maxPendingMsgs">

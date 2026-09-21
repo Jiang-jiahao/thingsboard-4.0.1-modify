@@ -5,13 +5,13 @@ import {
 } from '@home/components/widget/lib/analogue-compass.models';
 import { deepClone, isDefined } from '@core/utils';
 import { getFontFamily } from '@home/components/widget/lib/settings.models';
-import { TbBaseGauge } from '@home/components/widget/lib/analogue-gauge.models';
+import { JnksIotBaseGauge } from '@home/components/widget/lib/analogue-gauge.models';
 import RadialGaugeOptions = CanvasGauges.RadialGaugeOptions;
 import BaseGauge = CanvasGauges.BaseGauge;
 import RadialGauge = CanvasGauges.RadialGauge;
 
 // @dynamic
-export class TbAnalogueCompass extends TbBaseGauge<AnalogueCompassSettings, RadialGaugeOptions> {
+export class JnksIotAnalogueCompass extends JnksIotBaseGauge<AnalogueCompassSettings, RadialGaugeOptions> {
 
   constructor(ctx: WidgetContext, canvasId: string) {
     super(ctx, canvasId);

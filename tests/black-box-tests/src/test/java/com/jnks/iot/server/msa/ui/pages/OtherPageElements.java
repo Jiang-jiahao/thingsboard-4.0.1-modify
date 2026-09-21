@@ -16,8 +16,8 @@ public class OtherPageElements extends AbstractBasePage {
     protected static final String DELETE_BTN = ENTITY + "/ancestor::mat-row//mat-icon[contains(text(),'delete')]/ancestor::button";
     protected static final String DETAILS_BTN = ENTITY + "/../..//mat-icon[contains(text(),'edit')]/../..";
     private static final String ENTITY_COUNT = "//div[@class='mat-paginator-range-label']";
-    private static final String WARNING_DELETE_POPUP_YES = "//tb-confirm-dialog//button[2]";
-    private static final String WARNING_DELETE_POPUP_TITLE = "//tb-confirm-dialog/h2";
+    private static final String WARNING_DELETE_POPUP_YES = "//jnks-iot-confirm-dialog//button[2]";
+    private static final String WARNING_DELETE_POPUP_TITLE = "//jnks-iot-confirm-dialog/h2";
     private static final String REFRESH_BTN = "//mat-icon[contains(text(),'refresh')]/parent::button";
     private static final String HELP_BTN = "//mat-icon[contains(text(),'help')]/ancestor::button";
     private static final String CHECKBOX = "//mat-row//span[contains(text(),'%s')]/../..//mat-checkbox";
@@ -27,12 +27,12 @@ public class OtherPageElements extends AbstractBasePage {
     private static final String MARKS_CHECKBOX = "//mat-row[contains (@class,'mat-selected')]//mat-checkbox[contains(@class, 'checked')]";
     private static final String SELECT_ALL_CHECKBOX = "//thead//mat-checkbox";
     private static final String ALL_ENTITY = "//mat-row[@class='mat-mdc-row mdc-data-table__row cdk-row mat-row-select ng-star-inserted']";
-    private static final String EDIT_PENCIL_BTN = "//tb-details-panel//mat-icon[contains(text(),'edit')]/ancestor::button";
+    private static final String EDIT_PENCIL_BTN = "//jnks-iot-details-panel//mat-icon[contains(text(),'edit')]/ancestor::button";
     private static final String NAME_FIELD_EDIT_VIEW = "//input[@formcontrolname='name']";
-    private static final String HEADER_NAME_VIEW = "//header//div[@class='tb-details-title']/span";
+    private static final String HEADER_NAME_VIEW = "//header//div[@class='jnks-iot-details-title']/span";
     private static final String DONE_BTN_EDIT_VIEW = "//mat-icon[contains(text(),'done')]/ancestor::button";
     private static final String DESCRIPTION_ENTITY_VIEW = "//textarea";
-    private static final String DESCRIPTION_ADD_ENTITY_VIEW = "//tb-add-entity-dialog//textarea";
+    private static final String DESCRIPTION_ADD_ENTITY_VIEW = "//jnks-iot-add-entity-dialog//textarea";
     private static final String DEBUG_CHECKBOX_EDIT = "//mat-checkbox[@formcontrolname='debugMode']";
     private static final String DEBUG_CHECKBOX_VIEW = "//mat-checkbox[@formcontrolname='debugMode']//input";
     private static final String CLOSE_ENTITY_VIEW_BTN = "//header//mat-icon[contains(text(),'close')]/parent::button";
@@ -43,18 +43,18 @@ public class OtherPageElements extends AbstractBasePage {
     private static final String CREATED_TIME = "//tbody[@role='rowgroup']//mat-cell[2]/span";
     private static final String PLUS_BTN = "//mat-icon[contains(text(),'add')]/ancestor::button";
     private static final String CREATE_VIEW_ADD_BTN = "//span[contains(text(),'Add')]/..";
-    private static final String WARNING_MESSAGE = "//tb-snack-bar-component/div/div";
+    private static final String WARNING_MESSAGE = "//jnks-iot-snack-bar-component/div/div";
     private static final String ERROR_MESSAGE = "//mat-error";
-    private static final String ENTITY_VIEW_TITLE = "//div[@class='tb-details-title']//span";
+    private static final String ENTITY_VIEW_TITLE = "//div[@class='jnks-iot-details-title']//span";
     private static final String LIST_OF_ENTITY = "//div[@role='listbox']/mat-option";
     private static final String ENTITY_FROM_LIST = "//div[@role='listbox']/mat-option//span[contains(text(),'%s')]";
-    protected static final String ADD_ENTITY_VIEW = "//tb-add-entity-dialog";
-    protected static final String STATE_CONTROLLER = "//tb-entity-state-controller";
+    protected static final String ADD_ENTITY_VIEW = "//jnks-iot-add-entity-dialog";
+    protected static final String STATE_CONTROLLER = "//jnks-iot-entity-state-controller";
     private static final String SEARCH_FIELD = "//input[contains (@placeholder,'Search')]";
     private static final String BROWSE_FILE = "//input[@class='file-input']";
     private static final String IMPORT_BROWSE_FILE = "//mat-dialog-container//span[contains(text(),'Import')]/..";
     private static final String IMPORTING_FILE = "//div[contains(text(),'%s')]";
-    private static final String CLEAR_IMPORT_FILE_BTN = "//div[@class='tb-file-clear-container']//button";
+    private static final String CLEAR_IMPORT_FILE_BTN = "//div[@class='jnks-iot-file-clear-container']//button";
 
     public String getEntity(String entityName) {
         return String.format(ENTITY, entityName);

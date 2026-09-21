@@ -8,7 +8,7 @@ import { Subject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-entity-filter',
+  selector: 'jnks-iot-entity-filter',
   templateUrl: './entity-filter.component.html',
   styleUrls: ['./entity-filter.component.scss'],
   providers: [

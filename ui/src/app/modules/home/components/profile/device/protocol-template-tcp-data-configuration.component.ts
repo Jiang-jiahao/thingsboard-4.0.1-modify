@@ -41,7 +41,7 @@ interface HexFieldSortCacheEntry {
 }
 
 @Component({
-  selector: 'tb-protocol-template-tcp-data-configuration',
+  selector: 'jnks-iot-protocol-template-tcp-data-configuration',
   templateUrl: './protocol-template-tcp-data-configuration.component.html',
   styleUrls: ['./protocol-template-tcp-data-configuration.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -19,7 +19,7 @@ export interface CalculatedFieldDebugDialogData {
 }
 
 @Component({
-  selector: 'tb-calculated-field-debug-dialog',
+  selector: 'jnks-iot-calculated-field-debug-dialog',
   styleUrls: ['calculated-field-debug-dialog.component.scss'],
   templateUrl: './calculated-field-debug-dialog.component.html',
 })

@@ -14,9 +14,9 @@ public class ProfilesPageElements extends OtherPageElementsHelper {
     private static final String CREATE_ASSET_PROFILE_BTN = "//span[text()='Create new asset profile']";
     private static final String IMPORT_DEVICE_PROFILE_BTN = "//span[text()='Import device profile']";
     private static final String IMPORT_ASSET_PROFILE_BTN = "//span[text()='Import asset profile']";
-    private static final String ADD_DEVICE_PROFILE_VIEW = "//tb-add-device-profile-dialog";
-    private static final String ADD_ASSET_PROFILE_VIEW = "//tb-add-entity-dialog";
-    private static final String DEVICE_PROFILE_VIEW = "//tb-entity-details-panel";
+    private static final String ADD_DEVICE_PROFILE_VIEW = "//jnks-iot-add-device-profile-dialog";
+    private static final String ADD_ASSET_PROFILE_VIEW = "//jnks-iot-add-entity-dialog";
+    private static final String DEVICE_PROFILE_VIEW = "//jnks-iot-entity-details-panel";
     private static final String NAME_FIELD = "//input[@formcontrolname='name']";
     private static final String RULE_CHAIN_FIELD = "//input[@formcontrolname='ruleChainId']";
     private static final String DASHBOARD_FIELD = "//input[@formcontrolname='dashboard']";
@@ -24,8 +24,8 @@ public class ProfilesPageElements extends OtherPageElementsHelper {
     private static final String DESCRIPTION_FIELD = "//textarea[@formcontrolname='description']";
     private static final String ADD_DEVICE_PROFILE_ADD_BTN = "//span[text()='Add']";
     private static final String ADD_ASSET_PROFILE_ADD_BTN = "//button[@type='submit']";
-    private static final String DEVICE_PROFILE_VIEW_DELETE_BTN = "//tb-device-profile//span[contains(text(),'Delete')]";
-    private static final String ASSET_PROFILE_VIEW_DELETE_BTN = "//tb-entity-details-panel//span[contains(text(),'Delete')]";
+    private static final String DEVICE_PROFILE_VIEW_DELETE_BTN = "//jnks-iot-device-profile//span[contains(text(),'Delete')]";
+    private static final String ASSET_PROFILE_VIEW_DELETE_BTN = "//jnks-iot-entity-details-panel//span[contains(text(),'Delete')]";
     private static final String PROFILE_NAMES = "//tbody/mat-row/mat-cell[contains(@class,'name')]";
     private static final String MAKE_DEFAULT_BTN = ENTITY + "/../..//mat-icon[contains(text(),' flag')]/../..";
     private static final String DEFAULT = ENTITY + "/../..//mat-icon[text() = 'check_box']";

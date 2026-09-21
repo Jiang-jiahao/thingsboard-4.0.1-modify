@@ -11,7 +11,7 @@ import { DataKey, DatasourceType } from '@shared/models/widget.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-comparison-keys-table',
+  selector: 'jnks-iot-comparison-keys-table',
   templateUrl: './comparison-keys-table.component.html',
   styleUrls: ['./comparison-keys-table.component.scss'],
   providers: [

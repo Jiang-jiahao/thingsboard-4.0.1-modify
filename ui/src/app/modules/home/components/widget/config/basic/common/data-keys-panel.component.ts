@@ -34,7 +34,7 @@ import { FormProperty } from '@shared/models/dynamic-form.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-data-keys-panel',
+  selector: 'jnks-iot-data-keys-panel',
   templateUrl: './data-keys-panel.component.html',
   styleUrls: ['./data-keys-panel.component.scss'],
   providers: [

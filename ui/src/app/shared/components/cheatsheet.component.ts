@@ -4,9 +4,9 @@ import { MousetrapInstance } from 'mousetrap';
 import Mousetrap from 'mousetrap';
 
 @Component({
-  selector : 'tb-hotkeys-cheatsheet',
+  selector : 'jnks-iot-hotkeys-cheatsheet',
   styles : [`
-.tb-hotkeys-container {
+.jnks-iot-hotkeys-container {
   display: table !important;
   position: fixed;
   width: 100%;
@@ -18,7 +18,7 @@ import Mousetrap from 'mousetrap';
   background-color: rgba(255,255,255,0.9);
   outline: 0;
 }
-.tb-hotkeys-container.fade {
+.jnks-iot-hotkeys-container.fade {
   z-index: -1024;
   visibility: hidden;
   opacity: 0;
@@ -27,35 +27,35 @@ import Mousetrap from 'mousetrap';
   -o-transition: opacity 0.15s linear;
   transition: opacity 0.15s linear;
 }
-.tb-hotkeys-container.fade.in {
+.jnks-iot-hotkeys-container.fade.in {
   z-index: 10002;
   visibility: visible;
   opacity: 1;
 }
-.tb-hotkeys-title {
+.jnks-iot-hotkeys-title {
   font-weight: bold;
   text-align: center;
   font-size: 1.2em;
 }
-.tb-hotkeys {
+.jnks-iot-hotkeys {
   width: 100%;
   height: 100%;
   display: table-cell;
   vertical-align: middle;
 }
-.tb-hotkeys table {
+.jnks-iot-hotkeys table {
   margin: auto;
   color: #333;
 }
-.tb-content {
+.jnks-iot-content {
   display: table-cell;
   vertical-align: middle;
 }
-.tb-hotkeys-keys {
+.jnks-iot-hotkeys-keys {
   padding: 5px;
   text-align: right;
 }
-.tb-hotkeys-key {
+.jnks-iot-hotkeys-key {
   display: inline-block;
   color: #fff;
   background-color: #333;
@@ -67,11 +67,11 @@ import Mousetrap from 'mousetrap';
   padding: 5px 9px;
   font-size: 1em;
 }
-.tb-hotkeys-text {
+.jnks-iot-hotkeys-text {
   padding-left: 10px;
   font-size: 1em;
 }
-.tb-hotkeys-close {
+.jnks-iot-hotkeys-close {
   position: fixed;
   top: 20px;
   right: 20px;
@@ -84,34 +84,34 @@ import Mousetrap from 'mousetrap';
   min-width: 45px;
   text-align: center;
 }
-.tb-hotkeys-close:hover {
+.jnks-iot-hotkeys-close:hover {
   background-color: #fff;
   cursor: pointer;
 }
 @media all and (max-width: 500px) {
-  .tb-hotkeys {
+  .jnks-iot-hotkeys {
     font-size: 0.8em;
   }
 }
 @media all and (min-width: 750px) {
-  .tb-hotkeys {
+  .jnks-iot-hotkeys {
     font-size: 1.2em;
   }
 }  `],
-  template : `<div tabindex="-1" class="tb-hotkeys-container fade" [class.in]="helpVisible" style="display:none"><div class="tb-hotkeys">
-  <h4 class="tb-hotkeys-title">{{ title }}</h4>
+  template : `<div tabindex="-1" class="jnks-iot-hotkeys-container fade" [class.in]="helpVisible" style="display:none"><div class="jnks-iot-hotkeys">
+  <h4 class="jnks-iot-hotkeys-title">{{ title }}</h4>
   <table *ngIf="helpVisible"><tbody>
     <tr *ngFor="let hotkey of hotkeysList">
-      <td class="tb-hotkeys-keys">
-        <span *ngFor="let key of hotkey.formatted" class="tb-hotkeys-key">{{ key }}</span>
+      <td class="jnks-iot-hotkeys-keys">
+        <span *ngFor="let key of hotkey.formatted" class="jnks-iot-hotkeys-key">{{ key }}</span>
       </td>
-      <td class="tb-hotkeys-text">{{ hotkey.description }}</td>
+      <td class="jnks-iot-hotkeys-text">{{ hotkey.description }}</td>
     </tr>
   </tbody></table>
-  <div class="tb-hotkeys-close" (click)="toggleCheatSheet()">&#215;</div>
+  <div class="jnks-iot-hotkeys-close" (click)="toggleCheatSheet()">&#215;</div>
 </div></div>`,
 })
-export class TbCheatSheetComponent implements OnInit, OnDestroy {
+export class JnksIotCheatSheetComponent implements OnInit, OnDestroy {
 
   helpVisible = false;
   @Input() title = 'Keyboard Shortcuts:';

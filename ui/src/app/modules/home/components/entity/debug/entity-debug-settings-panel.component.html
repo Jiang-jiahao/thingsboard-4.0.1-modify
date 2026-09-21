@@ -1,26 +1,26 @@
 <div class="flex w-96 flex-col gap-3 p-2">
-  <div class="tb-form-panel-title" translate>debug-settings.label</div>
+  <div class="jnks-iot-form-panel-title" translate>debug-settings.label</div>
   @if (maxMessagesCount) {
     <div class="hint-container">
-      <div class="tb-form-hint tb-primary-fill tb-flex center">
+      <div class="jnks-iot-form-hint jnks-iot-primary-fill jnks-iot-flex center">
         {{ 'debug-settings.hint.main-limited' | translate: { entity: (entityLabel | translate | lowercase), msg: maxMessagesCount, time: (maxTimeFrameDuration | milliSecondsToTimeString: true : true) } }}
       </div>
     </div>
   }
   <div class="flex flex-col gap-3">
     <mat-slide-toggle class="mat-slide" [formControl]="onFailuresControl">
-      <div tb-hint-tooltip-icon="{{ 'debug-settings.hint.on-failure' | translate }}">
+      <div jnks-iot-hint-tooltip-icon="{{ 'debug-settings.hint.on-failure' | translate }}">
         {{ 'debug-settings.on-failure' | translate }}
       </div>
     </mat-slide-toggle>
     <div class="align-center flex justify-between">
       <mat-slide-toggle class="mat-slide" [formControl]="debugAllControl" (change)="debugAllControl.markAsTouched()">
-        <div tb-hint-tooltip-icon="{{ 'debug-settings.hint.all-messages' | translate }}">
+        <div jnks-iot-hint-tooltip-icon="{{ 'debug-settings.hint.all-messages' | translate }}">
           {{ 'debug-settings.all-messages' | translate: { time: (isDebugAllActive$ | async) && !allEnabled && debugAllControl.untouched ? (allEnabledUntil | durationLeft) : (maxDebugModeDuration | milliSecondsToTimeString: true : true) } }}
         </div>
       </mat-slide-toggle>
       <button mat-icon-button *ngIf="(isDebugAllActive$ | async) && !allEnabled && debugAllControl.untouched"
-              class="tb-mat-20"
+              class="jnks-iot-mat-20"
               matTooltip="{{ 'action.reset' | translate }}"
               matTooltipPosition="above"
               color="primary"

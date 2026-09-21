@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import com.jnks.iot.common.util.JacksonUtil;
-import com.jnks.iot.server.cluster.TbClusterService;
+import com.jnks.iot.server.cluster.JnksIotClusterService;
 import com.jnks.iot.server.common.data.AdminSettings;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
@@ -26,7 +26,7 @@ import java.util.Optional;
 public class DefaultJwtSettingsService implements JwtSettingsService {
 
     private final AdminSettingsService adminSettingsService;
-    private final Optional<TbClusterService> tbClusterService;
+    private final Optional<JnksIotClusterService> jnksIotClusterService;
     private final JwtSettingsValidator jwtSettingsValidator;
     private final ObjectProvider<ReloadListener> jwtSettingsReloadListeners;
 
@@ -44,7 +44,7 @@ public class DefaultJwtSettingsService implements JwtSettingsService {
         log.info("Saving new JWT admin settings. From this moment, the JWT parameters from YAML and ENV will be ignored");
         adminSettingsService.saveAdminSettings(TenantId.SYS_TENANT_ID, adminJwtSettings);
 
-        tbClusterService.ifPresent(cs -> cs.broadcastEntityStateChangeEvent(TenantId.SYS_TENANT_ID, TenantId.SYS_TENANT_ID, ComponentLifecycleEvent.UPDATED));
+        jnksIotClusterService.ifPresent(cs -> cs.broadcastEntityStateChangeEvent(TenantId.SYS_TENANT_ID, TenantId.SYS_TENANT_ID, ComponentLifecycleEvent.UPDATED));
         return reloadJwtSettings();
     }
 

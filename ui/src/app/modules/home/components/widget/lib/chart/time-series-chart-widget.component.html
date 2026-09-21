@@ -1,17 +1,17 @@
-<div class="tb-time-series-chart-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
-  <div class="tb-time-series-chart-overlay" [style]="overlayStyle"></div>
+<div class="jnks-iot-time-series-chart-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
+  <div class="jnks-iot-time-series-chart-overlay" [style]="overlayStyle"></div>
   @if (widgetComponent.dashboardWidget.showWidgetTitlePanel) {
-    <div class="tb-widget-title-row flex justify-between">
+    <div class="jnks-iot-widget-title-row flex justify-between">
       <ng-container *ngTemplateOutlet="widgetComponent.widgetTitlePanel"></ng-container>
       <ng-container *ngTemplateOutlet="widgetComponent.widgetHeaderActionsPanel"></ng-container>
     </div>
   } @else {
-    <ng-container class="tb-widget-actions-absolute" *ngTemplateOutlet="widgetComponent.widgetHeaderActionsPanel; context: {absolute: true}"></ng-container>
+    <ng-container class="jnks-iot-widget-actions-absolute" *ngTemplateOutlet="widgetComponent.widgetHeaderActionsPanel; context: {absolute: true}"></ng-container>
   }
-  <div class="tb-time-series-chart-content" [class]="legendClass">
-    <div #chartShape class="tb-time-series-chart-shape">
+  <div class="jnks-iot-time-series-chart-content" [class]="legendClass">
+    <div #chartShape class="jnks-iot-time-series-chart-shape">
     </div>
-    <div *ngIf="showLegend" class="tb-time-series-chart-legend" [class.tb-simple-legend]="!displayLegendValues">
+    <div *ngIf="showLegend" class="jnks-iot-time-series-chart-legend" [class.jnks-iot-simple-legend]="!displayLegendValues">
       <ng-container *ngIf="displayLegendValues; else simpleLegend">
         <ng-container *ngIf="horizontalLegendPosition; else verticalLegend">
           <ng-container *ngTemplateOutlet="horizontalLegend"></ng-container>
@@ -19,7 +19,7 @@
       </ng-container>
     </div>
     <ng-template #horizontalLegend>
-      <table class="tb-time-series-chart-legend-table">
+      <table class="jnks-iot-time-series-chart-legend-table">
         <thead>
         <tr>
           <th></th>
@@ -48,15 +48,15 @@
       </table>
     </ng-template>
     <ng-template #verticalLegend>
-      <table class="tb-time-series-chart-legend-table vertical">
+      <table class="jnks-iot-time-series-chart-legend-table vertical">
         <thead>
         <tr>
           <th></th>
-          <th class="tb-time-series-chart-legend-type-label right" [style]="legendColumnTitleStyle" *ngIf="legendConfig.showMin === true">{{ 'legend.Min' | translate }}</th>
-          <th class="tb-time-series-chart-legend-type-label right" [style]="legendColumnTitleStyle" *ngIf="legendConfig.showMax === true">{{ 'legend.Max' | translate }}</th>
-          <th class="tb-time-series-chart-legend-type-label right" [style]="legendColumnTitleStyle" *ngIf="legendConfig.showAvg === true">{{ 'legend.Avg' | translate }}</th>
-          <th class="tb-time-series-chart-legend-type-label right" [style]="legendColumnTitleStyle" *ngIf="legendConfig.showTotal === true">{{ 'legend.Total' | translate }}</th>
-          <th class="tb-time-series-chart-legend-type-label right" [style]="legendColumnTitleStyle" *ngIf="legendConfig.showLatest === true">{{ 'legend.Latest' | translate }}</th>
+          <th class="jnks-iot-time-series-chart-legend-type-label right" [style]="legendColumnTitleStyle" *ngIf="legendConfig.showMin === true">{{ 'legend.Min' | translate }}</th>
+          <th class="jnks-iot-time-series-chart-legend-type-label right" [style]="legendColumnTitleStyle" *ngIf="legendConfig.showMax === true">{{ 'legend.Max' | translate }}</th>
+          <th class="jnks-iot-time-series-chart-legend-type-label right" [style]="legendColumnTitleStyle" *ngIf="legendConfig.showAvg === true">{{ 'legend.Avg' | translate }}</th>
+          <th class="jnks-iot-time-series-chart-legend-type-label right" [style]="legendColumnTitleStyle" *ngIf="legendConfig.showTotal === true">{{ 'legend.Total' | translate }}</th>
+          <th class="jnks-iot-time-series-chart-legend-type-label right" [style]="legendColumnTitleStyle" *ngIf="legendConfig.showLatest === true">{{ 'legend.Latest' | translate }}</th>
         </tr>
         </thead>
         <tbody>
@@ -64,19 +64,19 @@
             <th>
               <ng-container *ngTemplateOutlet="legendItem; context:{legendKey: legendKey, left: true}"></ng-container>
             </th>
-            <td *ngIf="legendConfig.showMin === true" class="tb-time-series-chart-legend-value" [style]="legendValueStyle"
+            <td *ngIf="legendConfig.showMin === true" class="jnks-iot-time-series-chart-legend-value" [style]="legendValueStyle"
                 [innerHTML]="legendData.data[legendKey.dataIndex].min | safe: 'html'">
             </td>
-            <td *ngIf="legendConfig.showMax === true" class="tb-time-series-chart-legend-value" [style]="legendValueStyle"
+            <td *ngIf="legendConfig.showMax === true" class="jnks-iot-time-series-chart-legend-value" [style]="legendValueStyle"
                 [innerHTML]="legendData.data[legendKey.dataIndex].max | safe: 'html'">
             </td>
-            <td *ngIf="legendConfig.showAvg === true" class="tb-time-series-chart-legend-value" [style]="legendValueStyle"
+            <td *ngIf="legendConfig.showAvg === true" class="jnks-iot-time-series-chart-legend-value" [style]="legendValueStyle"
                 [innerHTML]="legendData.data[legendKey.dataIndex].avg | safe: 'html'">
             </td>
-            <td *ngIf="legendConfig.showTotal === true" class="tb-time-series-chart-legend-value" [style]="legendValueStyle"
+            <td *ngIf="legendConfig.showTotal === true" class="jnks-iot-time-series-chart-legend-value" [style]="legendValueStyle"
                 [innerHTML]="legendData.data[legendKey.dataIndex].total | safe: 'html'">
             </td>
-            <td *ngIf="legendConfig.showLatest === true" class="tb-time-series-chart-legend-value" [style]="legendValueStyle"
+            <td *ngIf="legendConfig.showLatest === true" class="jnks-iot-time-series-chart-legend-value" [style]="legendValueStyle"
                 [innerHTML]="legendData.data[legendKey.dataIndex].latest | safe: 'html'">
             </td>
           </tr>
@@ -89,21 +89,21 @@
       </ng-container>
     </ng-template>
     <ng-template #legendItem let-legendKey="legendKey" let-left="left">
-      <div class="tb-time-series-chart-legend-item"
+      <div class="jnks-iot-time-series-chart-legend-item"
            [class.left]="left">
-        <div class="tb-time-series-chart-legend-item-label"
+        <div class="jnks-iot-time-series-chart-legend-item-label"
              (mouseenter)="onLegendKeyEnter(legendKey)"
              (mouseleave)="onLegendKeyLeave(legendKey)"
              (click)="toggleLegendKey(legendKey)">
-          <div class="tb-time-series-chart-legend-item-label-circle" [style]="{background: !legendKey.dataKey.hidden ? legendKey.dataKey.color : null}"></div>
+          <div class="jnks-iot-time-series-chart-legend-item-label-circle" [style]="{background: !legendKey.dataKey.hidden ? legendKey.dataKey.color : null}"></div>
           <div [style]="!legendKey.dataKey.hidden ? legendLabelStyle : disabledLegendLabelStyle" [innerHTML]="legendKey.dataKey.label | safe: 'html'"></div>
         </div>
       </div>
     </ng-template>
     <ng-template #legendDataRow let-label="label" let-type="type">
       <tr>
-        <th class="tb-time-series-chart-legend-type-label" [style]="legendColumnTitleStyle">{{ label | translate }}</th>
-        <td *ngFor="let legendKey of legendKeys" class="tb-time-series-chart-legend-value" [style]="legendValueStyle"
+        <th class="jnks-iot-time-series-chart-legend-type-label" [style]="legendColumnTitleStyle">{{ label | translate }}</th>
+        <td *ngFor="let legendKey of legendKeys" class="jnks-iot-time-series-chart-legend-value" [style]="legendValueStyle"
             [innerHTML]="legendData.data[legendKey.dataIndex][type] | safe: 'html'">
         </td>
       </tr>

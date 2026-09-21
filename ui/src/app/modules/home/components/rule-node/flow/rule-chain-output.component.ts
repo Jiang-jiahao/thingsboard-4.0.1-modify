@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-flow-node-rule-chain-output-config',
+  selector: 'jnks-iot-flow-node-rule-chain-output-config',
   templateUrl: './rule-chain-output.component.html',
   styleUrls: []
 })

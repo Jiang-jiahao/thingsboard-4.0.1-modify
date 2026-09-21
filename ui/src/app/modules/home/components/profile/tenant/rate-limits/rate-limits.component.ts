@@ -23,7 +23,7 @@ import {
 import { isDefined } from '@core/utils';
 
 @Component({
-  selector: 'tb-rate-limits',
+  selector: 'jnks-iot-rate-limits',
   templateUrl: './rate-limits.component.html',
   styleUrls: ['./rate-limits.component.scss'],
   providers: [
@@ -103,7 +103,7 @@ export class RateLimitsComponent implements ControlValueAccessor, OnInit, Valida
     this.dialog.open<RateLimitsDetailsDialogComponent, RateLimitsDetailsDialogData,
       string>(RateLimitsDetailsDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         rateLimits: this.modelValue,
         title,

@@ -21,7 +21,7 @@ import { BaseData, HasId, hasIdEquals } from '@shared/models/base-data';
 import { EntityType, EntityTypeResource, EntityTypeTranslation } from '@shared/models/entity-type.models';
 import { UntypedFormGroup } from '@angular/forms';
 import { EntityComponent } from './entity.component';
-import { TbAnchorComponent } from '@shared/components/tb-anchor.component';
+import { JnksIotAnchorComponent } from '@shared/components/jnks-iot-anchor.component';
 import { EntityAction } from '@home/models/entity/entity-component.models';
 import { Observable, ReplaySubject, Subscription, throwError } from 'rxjs';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
@@ -31,7 +31,7 @@ import { catchError } from 'rxjs/operators';
 import { HttpStatusCode } from '@angular/common/http';
 
 @Component({
-  selector: 'tb-entity-details-panel',
+  selector: 'jnks-iot-entity-details-panel',
   templateUrl: './entity-details-panel.component.html',
   styleUrls: ['./entity-details-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -60,9 +60,9 @@ export class EntityDetailsPanelComponent extends PageComponent implements AfterV
 
   entityTypes = EntityType;
 
-  @ViewChild('entityDetailsForm', {static: true}) entityDetailsFormAnchor: TbAnchorComponent;
+  @ViewChild('entityDetailsForm', {static: true}) entityDetailsFormAnchor: JnksIotAnchorComponent;
 
-  @ViewChild('entityTabs', {static: true}) entityTabsAnchor: TbAnchorComponent;
+  @ViewChild('entityTabs', {static: true}) entityTabsAnchor: JnksIotAnchorComponent;
 
   @ViewChild(MatTabGroup, {static: true}) matTabGroup: MatTabGroup;
 

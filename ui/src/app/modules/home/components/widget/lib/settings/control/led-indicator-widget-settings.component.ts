@@ -7,7 +7,7 @@ import { WidgetService } from '@core/http/widget.service';
 import { DataKeyType } from '@shared/models/telemetry/telemetry.models';
 
 @Component({
-  selector: 'tb-led-indicator-widget-settings',
+  selector: 'jnks-iot-led-indicator-widget-settings',
   templateUrl: './led-indicator-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

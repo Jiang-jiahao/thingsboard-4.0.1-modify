@@ -13,13 +13,13 @@
   <div mat-dialog-content>
     <fieldset [disabled]="isLoading$ | async">
       <div class="flex flex-1 flex-col">
-        <tb-key-filter-list
+        <jnks-iot-key-filter-list
           [displayUserParameters]="false"
           [allowUserDynamicSource]="false"
           [telemetryKeysOnly]="true"
           [entityId]="entityId"
           formControlName="keyFilters">
-        </tb-key-filter-list>
+        </jnks-iot-key-filter-list>
         <section formGroupName="spec" style="margin-top: 1em">
           <mat-form-field class="mat-block" hideRequiredMarker>
             <mat-label translate>device-profile.condition-type</mat-label>
@@ -33,12 +33,12 @@
             </mat-error>
           </mat-form-field>
           <div class="flex flex-row xs:flex-col gt-xs:gap-4" *ngIf="conditionFormGroup.get('spec.type').value != AlarmConditionType.SIMPLE">
-            <tb-alarm-duration-predicate-value
+            <jnks-iot-alarm-duration-predicate-value
               class="flex flex-1 flex-row"
               formControlName="predicate"
               [alarmConditionType]="conditionFormGroup.get('spec.type').value"
             >
-            </tb-alarm-duration-predicate-value>
+            </jnks-iot-alarm-duration-predicate-value>
             <div class="max-w-23% flex-full" *ngIf="conditionFormGroup.get('spec.type').value == AlarmConditionType.DURATION">
               <mat-form-field class="mat-block" subscriptSizing="dynamic">
                 <mat-select formControlName="unit" required

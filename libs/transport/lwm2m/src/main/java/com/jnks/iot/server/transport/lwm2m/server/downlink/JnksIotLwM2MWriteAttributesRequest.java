@@ -1,0 +1,27 @@
+package com.jnks.iot.server.transport.lwm2m.server.downlink;
+
+import lombok.Builder;
+import lombok.Getter;
+import org.eclipse.leshan.core.response.WriteAttributesResponse;
+import com.jnks.iot.server.common.data.device.profile.lwm2m.ObjectAttributes;
+import com.jnks.iot.server.transport.lwm2m.server.LwM2MOperationType;
+
+public class JnksIotLwM2MWriteAttributesRequest extends AbstractJnksIotLwM2MTargetedDownlinkRequest<WriteAttributesResponse> {
+
+    @Getter
+    private final ObjectAttributes attributes;
+
+    @Builder
+    private JnksIotLwM2MWriteAttributesRequest(String versionedId, long timeout, ObjectAttributes attributes) {
+        super(versionedId, timeout);
+        this.attributes = attributes;
+    }
+
+    @Override
+    public LwM2MOperationType getType() {
+        return LwM2MOperationType.WRITE_ATTRIBUTES;
+    }
+
+
+
+}

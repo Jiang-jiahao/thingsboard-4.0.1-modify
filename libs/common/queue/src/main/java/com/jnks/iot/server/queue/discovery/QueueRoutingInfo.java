@@ -17,7 +17,7 @@ import java.util.UUID;
  * <p>
  * 与 {@link QueueKey} 的对应关系：
  * <ul>
- *   <li>{@code tenantId} + {@code queueName} + 固定 type=TB_RULE_ENGINE → QueueKey</li>
+ *   <li>{@code tenantId} + {@code queueName} + 固定 type=JNKS_IOT_RULE_ENGINE → QueueKey</li>
  *   <li>{@code queueTopic} / {@code partitions} → partitionTopicsMap / partitionSizesMap</li>
  *   <li>{@code duplicateMsgToAllPartitions} → HashPartitionService.QueueConfig</li>
  * </ul>

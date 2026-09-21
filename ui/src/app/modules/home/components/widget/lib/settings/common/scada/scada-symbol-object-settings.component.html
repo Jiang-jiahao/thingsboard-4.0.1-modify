@@ -1,12 +1,12 @@
 <ng-container [formGroup]="scadaSymbolObjectSettingsFormGroup">
-  <div *ngIf="behaviorGroups?.length" class="tb-form-panel" formGroupName="behavior">
-    <div class="tb-form-panel-title" translate>scada.behavior.behavior</div>
+  <div *ngIf="behaviorGroups?.length" class="jnks-iot-form-panel" formGroupName="behavior">
+    <div class="jnks-iot-form-panel-title" translate>scada.behavior.behavior</div>
     <ng-container *ngFor="let behaviorGroup of behaviorGroups">
-      <div *ngIf="behaviorGroup.title" class="tb-form-panel stroked">
-        <mat-expansion-panel class="tb-settings" expanded>
+      <div *ngIf="behaviorGroup.title" class="jnks-iot-form-panel stroked">
+        <mat-expansion-panel class="jnks-iot-settings" expanded>
           <mat-expansion-panel-header class="flex flex-row flex-wrap">
             <mat-panel-title>
-              <div class="tb-form-panel-title">{{ behaviorGroup.title | customTranslate }}</div>
+              <div class="jnks-iot-form-panel-title">{{ behaviorGroup.title | customTranslate }}</div>
             </mat-panel-title>
           </mat-expansion-panel-header>
           <ng-template matExpansionPanelContent>
@@ -19,11 +19,11 @@
       </ng-container>
     </ng-container>
   </div>
-  <tb-dynamic-form formControlName="properties"
+  <jnks-iot-dynamic-form formControlName="properties"
                    title="{{ 'widget-config.appearance' | translate }}"
                    [properties]="metadata?.properties">
-    <ng-container class="tb-properties-content"><ng-content select=".tb-scada-symbol-appearance-properties"></ng-content></ng-container>
-  </tb-dynamic-form>
+    <ng-container class="jnks-iot-properties-content"><ng-content select=".jnks-iot-scada-symbol-appearance-properties"></ng-content></ng-container>
+  </jnks-iot-dynamic-form>
 </ng-container>
 
 <ng-template #behaviorsTpl let-behaviors="behaviors">
@@ -34,10 +34,10 @@
 
 <ng-template #behaviorTpl let-behavior="behavior">
   <ng-container [formGroup]="scadaSymbolObjectSettingsFormGroup">
-    <div class="tb-form-row flex-wrap overflow-auto" formGroupName="behavior">
-      <div class="fixed-title-width fixed-title-height" tb-hint-tooltip-icon="{{ behavior.hint | customTranslate }}">{{ behavior.name | customTranslate }}</div>
-      <tb-get-value-action-settings *ngIf="behavior.type === ScadaSymbolBehaviorType.value"
-                                    class="tb-flex"
+    <div class="jnks-iot-form-row flex-wrap overflow-auto" formGroupName="behavior">
+      <div class="fixed-title-width fixed-title-height" jnks-iot-hint-tooltip-icon="{{ behavior.hint | customTranslate }}">{{ behavior.name | customTranslate }}</div>
+      <jnks-iot-get-value-action-settings *ngIf="behavior.type === ScadaSymbolBehaviorType.value"
+                                    class="jnks-iot-flex"
                                     panelTitle="{{ behavior.name | customTranslate }}"
                                     [valueType]="behavior.valueType"
                                     [trueLabel]="behavior.trueLabel | customTranslate"
@@ -47,23 +47,23 @@
                                     [targetDevice]="targetDevice"
                                     [widgetType]="widgetType"
                                     formControlName="{{ behavior.id }}">
-      </tb-get-value-action-settings>
-      <tb-set-value-action-settings *ngIf="behavior.type === ScadaSymbolBehaviorType.action"
-                                    class="tb-flex"
+      </jnks-iot-get-value-action-settings>
+      <jnks-iot-set-value-action-settings *ngIf="behavior.type === ScadaSymbolBehaviorType.action"
+                                    class="jnks-iot-flex"
                                     panelTitle="{{ behavior.name | customTranslate }}"
                                     [valueType]="behavior.valueType"
                                     [aliasController]="aliasController"
                                     [targetDevice]="targetDevice"
                                     [widgetType]="widgetType"
                                     formControlName="{{ behavior.id }}">
-      </tb-set-value-action-settings>
-      <tb-widget-action-settings *ngIf="behavior.type === ScadaSymbolBehaviorType.widgetAction"
-                                 class="tb-flex"
+      </jnks-iot-set-value-action-settings>
+      <jnks-iot-widget-action-settings *ngIf="behavior.type === ScadaSymbolBehaviorType.widgetAction"
+                                 class="jnks-iot-flex"
                                  panelTitle="{{ behavior.name | customTranslate }}"
                                  [callbacks]="callbacks"
                                  [widgetType]="widgetType"
                                  formControlName="{{ behavior.id }}">
-      </tb-widget-action-settings>
+      </jnks-iot-widget-action-settings>
     </div>
   </ng-container>
 </ng-template>

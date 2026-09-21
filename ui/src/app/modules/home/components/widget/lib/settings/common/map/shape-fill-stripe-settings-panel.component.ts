@@ -1,5 +1,5 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MapDataLayerType, ShapeFillStripeSettings } from '@shared/models/widget/maps/map.models';
@@ -12,7 +12,7 @@ import { MapSettingsContext } from '@home/components/widget/lib/settings/common/
 import { DatasourceType } from '@shared/models/widget.models';
 
 @Component({
-  selector: 'tb-shape-fill-stripe-settings-panel',
+  selector: 'jnks-iot-shape-fill-stripe-settings-panel',
   templateUrl: './shape-fill-stripe-settings-panel.component.html',
   providers: [],
   styleUrls: ['./shape-fill-stripe-settings-panel.component.scss'],
@@ -47,7 +47,7 @@ export class ShapeFillStripeSettingsPanelComponent implements OnInit {
 
   constructor(private fb: UntypedFormBuilder,
               private sanitizer: DomSanitizer,
-              private popover: TbPopoverComponent,
+              private popover: JnksIotPopoverComponent,
               private destroyRef: DestroyRef) {
   }
 

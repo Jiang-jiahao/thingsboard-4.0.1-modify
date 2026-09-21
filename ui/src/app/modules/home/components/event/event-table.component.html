@@ -1,6 +1,6 @@
-<div class="tb-event-table-outer" *ngIf="eventTableConfig">
-  <div class="tb-event-type-toolbar flex flex-row flex-wrap items-center gap-3">
-    <mat-form-field class="tb-event-type-field" subscriptSizing="dynamic">
+<div class="jnks-iot-event-table-outer" *ngIf="eventTableConfig">
+  <div class="jnks-iot-event-type-toolbar flex flex-row flex-wrap items-center gap-3">
+    <mat-form-field class="jnks-iot-event-type-field" subscriptSizing="dynamic">
       <mat-label>{{ 'event.event-type' | translate }}</mat-label>
       <mat-select [ngModel]="eventTableConfig.eventType"
                   (ngModelChange)="onEventTypeChanged($event)">
@@ -11,5 +11,5 @@
       <mat-hint>{{ 'event.device-event-type-hint' | translate }}</mat-hint>
     </mat-form-field>
   </div>
-  <tb-entities-table [entitiesTableConfig]="eventTableConfig"></tb-entities-table>
+  <jnks-iot-entities-table [entitiesTableConfig]="eventTableConfig"></jnks-iot-entities-table>
 </div>

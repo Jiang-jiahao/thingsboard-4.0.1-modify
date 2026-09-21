@@ -18,7 +18,7 @@ export interface PersistentDetailsDialogData {
 }
 
 @Component({
-  selector: 'tb-persistent-details-dialog',
+  selector: 'jnks-iot-persistent-details-dialog',
   templateUrl: './persistent-details-dialog.component.html',
   styleUrls: ['./persistent-details-dialog.component.scss']
 })

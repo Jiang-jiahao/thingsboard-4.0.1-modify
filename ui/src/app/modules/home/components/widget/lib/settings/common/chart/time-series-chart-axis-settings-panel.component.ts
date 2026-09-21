@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import {
   TimeSeriesChartAxisSettings,
@@ -8,7 +8,7 @@ import {
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-time-series-chart-axis-settings-panel',
+  selector: 'jnks-iot-time-series-chart-axis-settings-panel',
   templateUrl: './time-series-chart-axis-settings-panel.component.html',
   providers: [],
   styleUrls: ['./time-series-chart-axis-settings-panel.component.scss'],
@@ -30,7 +30,7 @@ export class TimeSeriesChartAxisSettingsPanelComponent implements OnInit {
   advanced = false;
 
   @Input()
-  popover: TbPopoverComponent<TimeSeriesChartAxisSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<TimeSeriesChartAxisSettingsPanelComponent>;
 
   @Output()
   axisSettingsApplied = new EventEmitter<TimeSeriesChartAxisSettings>();

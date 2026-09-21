@@ -15,7 +15,7 @@ export interface SendTestSmsDialogData {
 }
 
 @Component({
-  selector: 'tb-send-test-sms-dialog',
+  selector: 'jnks-iot-send-test-sms-dialog',
   templateUrl: './send-test-sms-dialog.component.html',
   styleUrls: []
 })

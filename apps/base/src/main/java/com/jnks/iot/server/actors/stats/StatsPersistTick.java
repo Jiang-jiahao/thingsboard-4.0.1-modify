@@ -1,9 +1,9 @@
 package com.jnks.iot.server.actors.stats;
 
 import com.jnks.iot.server.common.msg.MsgType;
-import com.jnks.iot.server.common.msg.TbActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
 
-public enum StatsPersistTick implements TbActorMsg {
+public enum StatsPersistTick implements JnksIotActorMsg {
     INSTANCE;
 
     @Override

@@ -1,7 +1,7 @@
 import { Injectable, Optional, Renderer2, ViewContainerRef } from '@angular/core';
 import { EntityDebugSettingsPanelComponent } from '@home/components/entity/debug/entity-debug-settings-panel.component';
 import { EntityDebugSettings } from '@shared/models/entity.models';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { TranslateService } from '@ngx-translate/core';
 import { DurationLeftPipe } from '@shared/pipe/duration-left.pipe';
 import { EntityDebugSettingPanelConfig } from '@home/components/entity/debug/entity-debug-settings.model';
@@ -10,7 +10,7 @@ import { EntityDebugSettingPanelConfig } from '@home/components/entity/debug/ent
 export class EntityDebugSettingsService {
 
   constructor(
-    private popoverService: TbPopoverService,
+    private popoverService: JnksIotPopoverService,
     @Optional() public renderer: Renderer2,
     @Optional() public viewContainerRef: ViewContainerRef,
     private translate: TranslateService,
@@ -33,7 +33,7 @@ export class EntityDebugSettingsService {
         },
         isModal: true,
       });
-      debugStrategyPopover.tbComponentRef.instance.onSettingsApplied.subscribe(settings => {
+      debugStrategyPopover.jnksIotComponentRef.instance.onSettingsApplied.subscribe(settings => {
         panelConfig.onSettingsAppliedFn(settings);
         debugStrategyPopover.hide();
       });

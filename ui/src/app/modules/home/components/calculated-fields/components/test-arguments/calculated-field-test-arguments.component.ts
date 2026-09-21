@@ -28,7 +28,7 @@ import { filter } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({
-  selector: 'tb-calculated-field-test-arguments',
+  selector: 'jnks-iot-calculated-field-test-arguments',
   templateUrl: './calculated-field-test-arguments.component.html',
   styleUrls: ['./calculated-field-test-arguments.component.scss'],
   providers: [
@@ -92,7 +92,7 @@ export class CalculatedFieldTestArgumentsComponent extends PageComponent impleme
       height: '760px',
       maxHeight: '70vh',
       minWidth: 'min(700px, 100%)',
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         jsonValue: this.argumentsTypeMap.get(group.get('argumentName').value) === ArgumentType.Rolling ? group.value.rollingJson : group.value,
         required: true,

@@ -23,7 +23,7 @@ import { EntityType } from '@shared/models/entity-type.models';
 import { MapSettingsContext } from '@home/components/widget/lib/settings/common/map/map-settings.component.models';
 
 @Component({
-  selector: 'tb-map-data-source-row',
+  selector: 'jnks-iot-map-data-source-row',
   templateUrl: './map-data-source-row.component.html',
   styleUrls: ['./map-data-source-row.component.scss'],
   providers: [

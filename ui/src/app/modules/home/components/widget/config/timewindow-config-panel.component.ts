@@ -33,7 +33,7 @@ export const setTimewindowConfig = (config: WidgetConfig, data: TimewindowConfig
 };
 
 @Component({
-  selector: 'tb-timewindow-config-panel',
+  selector: 'jnks-iot-timewindow-config-panel',
   templateUrl: './timewindow-config-panel.component.html',
   styleUrls: [],
   providers: [

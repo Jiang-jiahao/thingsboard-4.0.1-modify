@@ -1,0 +1,68 @@
+package com.jnks.iot.server.service.security.auth;
+
+import io.jsonwebtoken.Claims;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.server.cache.JnksIotTransactionalCache;
+import com.jnks.iot.server.common.data.StringUtils;
+import com.jnks.iot.server.common.data.id.UserId;
+import com.jnks.iot.server.common.data.security.event.UserAuthDataChangedEvent;
+import com.jnks.iot.server.service.security.model.token.JwtTokenFactory;
+
+import java.util.Optional;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
+/**
+ * {@link TokenOutdatingService} 默认实现。
+ * <p>
+ * 监听 {@link UserAuthDataChangedEvent}，把用户/会话 ID 与作废时间写入缓存；
+ * 校验时比较 JWT issuedAt 与缓存时间戳（秒级）。
+ *
+ * @see TokenOutdatingService
+ */
+@Service
+public class DefaultTokenOutdatingService implements TokenOutdatingService {
+
+    private final JnksIotTransactionalCache<String, Long> cache;
+    private final JwtTokenFactory tokenFactory;
+
+    public DefaultTokenOutdatingService(@Qualifier("UsersSessionInvalidation") JnksIotTransactionalCache<String, Long> cache, JwtTokenFactory tokenFactory) {
+        this.cache = cache;
+        this.tokenFactory = tokenFactory;
+    }
+
+    /**
+     * 用户认证数据变更时写入作废时间戳。
+     */
+    @EventListener(classes = UserAuthDataChangedEvent.class)
+    public void onUserAuthDataChanged(UserAuthDataChangedEvent event) {
+        if (StringUtils.hasText(event.getId())) {
+            cache.put(event.getId(), event.getTs());
+        }
+    }
+
+    /**
+     * 先按用户 ID、再按 JWT sessionId 判断令牌是否已作废。
+     */
+    @Override
+    public boolean isOutdated(String token, UserId userId) {
+        Claims claims = tokenFactory.parseTokenClaims(token).getBody();
+        long issueTime = claims.getIssuedAt().getTime();
+        String sessionId = claims.get("sessionId", String.class);
+        if (isTokenOutdated(issueTime, userId.toString())){
+             return true;
+        } else {
+             return sessionId != null && isTokenOutdated(issueTime, sessionId);
+        }
+    }
+
+    private Boolean isTokenOutdated(long issueTime, String sessionId) {
+        return Optional.ofNullable(cache.get(sessionId)).map(outdatageTime -> isTokenOutdated(issueTime, outdatageTime.get())).orElse(false);
+    }
+
+    private boolean isTokenOutdated(long issueTime, Long outdatageTime) {
+        return MILLISECONDS.toSeconds(issueTime) < MILLISECONDS.toSeconds(outdatageTime);
+    }
+}

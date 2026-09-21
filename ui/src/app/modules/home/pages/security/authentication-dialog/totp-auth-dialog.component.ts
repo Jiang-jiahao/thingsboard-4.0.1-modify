@@ -15,7 +15,7 @@ import { MatStepper } from '@angular/material/stepper';
 import { unwrapModule } from '@core/utils';
 
 @Component({
-  selector: 'tb-totp-auth-dialog',
+  selector: 'jnks-iot-totp-auth-dialog',
   templateUrl: './totp-auth-dialog.component.html',
   styleUrls: ['./authentication-dialog.component.scss']
 })

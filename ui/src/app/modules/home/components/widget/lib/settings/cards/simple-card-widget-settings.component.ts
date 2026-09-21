@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-simple-card-widget-settings',
+  selector: 'jnks-iot-simple-card-widget-settings',
   templateUrl: './simple-card-widget-settings.component.html',
   styleUrls: []
 })

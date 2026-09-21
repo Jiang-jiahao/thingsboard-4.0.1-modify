@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  important: ".tb-default",
+  important: ".jnks-iot-default",
   content: [
     "./src/**/*.{html,ts}",
   ],

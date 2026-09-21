@@ -6,7 +6,7 @@ import { AppState } from '@core/core.state';
 import { countDefaultSettings } from '@home/components/widget/lib/count/count-widget.models';
 
 @Component({
-  selector: 'tb-alarm-count-widget-settings',
+  selector: 'jnks-iot-alarm-count-widget-settings',
   templateUrl: './alarm-count-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

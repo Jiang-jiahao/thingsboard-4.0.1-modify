@@ -1,7 +1,7 @@
 @import "../../../../../../../scss/constants";
 
 :host {
-  .tb-card-header {
+  .jnks-iot-card-header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -13,14 +13,14 @@
     }
   }
 
-  .tb-usage-list {
+  .jnks-iot-usage-list {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     overflow-y: auto;
   }
 
-  .tb-usage-items, .tb-usage-items-counts, .tb-usage-items-progress {
+  .jnks-iot-usage-items, .jnks-iot-usage-items-counts, .jnks-iot-usage-items-progress {
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
@@ -28,7 +28,7 @@
     overflow: hidden;
   }
 
-  .tb-usage-items-progress {
+  .jnks-iot-usage-items-progress {
     --mdc-linear-progress-track-height: 8px;
     --mdc-linear-progress-active-indicator-height: 8px;
     width: 34px;
@@ -52,14 +52,14 @@
     }
   }
 
-  .tb-usage-items-values {
+  .jnks-iot-usage-items-values {
     display: flex;
     flex-direction: row;
     align-items: stretch;
     gap: 16px;
   }
 
-  .tb-usage-item, .tb-usage-item-counts {
+  .jnks-iot-usage-item, .jnks-iot-usage-item-counts {
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
@@ -77,11 +77,11 @@
     }
   }
 
-  .tb-usage-item {
+  .jnks-iot-usage-item {
     color: rgba(0, 0, 0, 0.38);
   }
 
-  .tb-usage-item-counts {
+  .jnks-iot-usage-item-counts {
     color: rgba(0, 0, 0, 0.76);
   }
 }

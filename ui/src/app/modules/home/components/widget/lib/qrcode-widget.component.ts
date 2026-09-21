@@ -11,31 +11,31 @@ import {
   formattedDataFormDatasourceData,
   isNumber,
   isObject,
-  parseTbFunction,
-  safeExecuteTbFunction,
+  parseJnksIotFunction,
+  safeExecuteJnksIotFunction,
   unwrapModule
 } from '@core/utils';
-import { CompiledTbFunction, TbFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction, JnksIotFunction } from '@shared/models/js-function.models';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 interface QrCodeWidgetSettings {
   qrCodeTextPattern: string;
   useQrCodeTextFunction: boolean;
-  qrCodeTextFunction: TbFunction;
+  qrCodeTextFunction: JnksIotFunction;
 }
 
 type QrCodeTextFunction = (data: FormattedData[]) => string;
 
 @Component({
-  selector: 'tb-qrcode-widget',
+  selector: 'jnks-iot-qrcode-widget',
   templateUrl: './qrcode-widget.component.html',
   styleUrls: []
 })
 export class QrCodeWidgetComponent extends PageComponent implements OnInit, AfterViewInit {
 
   settings: QrCodeWidgetSettings;
-  qrCodeTextFunction: Observable<CompiledTbFunction<QrCodeTextFunction>>;
+  qrCodeTextFunction: Observable<CompiledJnksIotFunction<QrCodeTextFunction>>;
 
   @Input()
   ctx: WidgetContext;
@@ -56,7 +56,7 @@ export class QrCodeWidgetComponent extends PageComponent implements OnInit, Afte
   ngOnInit(): void {
     this.ctx.$scope.qrCodeWidget = this;
     this.settings = this.ctx.settings;
-    this.qrCodeTextFunction = this.settings.useQrCodeTextFunction ? parseTbFunction(this.ctx.http, this.settings.qrCodeTextFunction, ['data']) : null;
+    this.qrCodeTextFunction = this.settings.useQrCodeTextFunction ? parseJnksIotFunction(this.ctx.http, this.settings.qrCodeTextFunction, ['data']) : null;
   }
 
   ngAfterViewInit(): void {
@@ -87,7 +87,7 @@ export class QrCodeWidgetComponent extends PageComponent implements OnInit, Afte
     }
     const data = formattedDataFormDatasourceData(initialData);
     const pattern = this.settings.useQrCodeTextFunction ?
-      this.qrCodeTextFunction.pipe(map(qrCodeTextFunction => safeExecuteTbFunction(qrCodeTextFunction, [data]))) : this.settings.qrCodeTextPattern;
+      this.qrCodeTextFunction.pipe(map(qrCodeTextFunction => safeExecuteJnksIotFunction(qrCodeTextFunction, [data]))) : this.settings.qrCodeTextPattern;
     if (typeof pattern === 'string') {
       this.updateQrCodeText(pattern, data);
     } else {

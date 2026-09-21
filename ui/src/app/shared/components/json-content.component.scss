@@ -1,16 +1,16 @@
-.tb-json-content {
+.jnks-iot-json-content {
   position: relative;
 
   &.fill-height {
     height: 100%;
   }
 
-  &:not(.tb-fullscreen) {
+  &:not(.jnks-iot-fullscreen) {
     padding-bottom: 15px;
   }
 
-  .tb-json-content-toolbar {
-    button.mat-mdc-button-base, button.mat-mdc-button-base.tb-mat-32 {
+  .jnks-iot-json-content-toolbar {
+    button.mat-mdc-button-base, button.mat-mdc-button-base.jnks-iot-mat-32 {
       align-items: center;
       vertical-align: middle;
       min-width: 32px;
@@ -30,11 +30,11 @@
     }
   }
 
-  .tb-json-content-panel {
+  .jnks-iot-json-content-panel {
     height: 100%;
     border: 1px solid #c0c0c0;
 
-    #tb-json-input {
+    #jnks-iot-json-input {
       width: 100%;
       min-width: 200px;
       height: 100%;

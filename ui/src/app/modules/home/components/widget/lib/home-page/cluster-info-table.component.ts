@@ -27,7 +27,7 @@ export interface SystemInfoData {
 }
 
 @Component({
-  selector: 'tb-cluster-info-table',
+  selector: 'jnks-iot-cluster-info-table',
   templateUrl: './cluster-info-table.component.html',
   styleUrls: ['./cluster-info-table.component.scss']
 })
@@ -71,9 +71,9 @@ export class ClusterInfoTableComponent extends PageComponent implements OnInit, 
   statusClass(value: number): string {
     let status = '';
     if (value > 85) {
-      status = 'tb-status-critical';
+      status = 'jnks-iot-status-critical';
     } else if (value > 75) {
-      status = 'tb-status-warn';
+      status = 'jnks-iot-status-warn';
     }
     return status;
   }

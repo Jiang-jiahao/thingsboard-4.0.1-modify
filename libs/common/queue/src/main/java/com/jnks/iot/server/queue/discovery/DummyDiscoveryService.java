@@ -21,11 +21,11 @@ import java.util.List;
 @DependsOn("environmentLogService")
 public class DummyDiscoveryService implements DiscoveryService {
 
-    private final TbServiceInfoProvider serviceInfoProvider;
+    private final JnksIotServiceInfoProvider serviceInfoProvider;
     private final PartitionService partitionService;
 
 
-    public DummyDiscoveryService(TbServiceInfoProvider serviceInfoProvider, PartitionService partitionService) {
+    public DummyDiscoveryService(JnksIotServiceInfoProvider serviceInfoProvider, PartitionService partitionService) {
         this.serviceInfoProvider = serviceInfoProvider;
         this.partitionService = partitionService;
     }

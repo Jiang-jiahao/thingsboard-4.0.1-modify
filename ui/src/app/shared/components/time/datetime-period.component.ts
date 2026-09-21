@@ -11,7 +11,7 @@ interface DateTimePeriod {
 }
 
 @Component({
-  selector: 'tb-datetime-period',
+  selector: 'jnks-iot-datetime-period',
   templateUrl: './datetime-period.component.html',
   styleUrls: ['./datetime-period.component.scss'],
   providers: [

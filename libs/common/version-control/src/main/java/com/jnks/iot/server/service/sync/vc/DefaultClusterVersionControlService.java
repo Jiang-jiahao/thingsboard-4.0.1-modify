@@ -50,16 +50,16 @@ import com.jnks.iot.server.gen.transport.TransportProtos.ToCoreNotificationMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToVersionControlServiceMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.VersionControlResponseMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.VersionedEntityInfoProto;
-import com.jnks.iot.server.queue.TbQueueConsumer;
-import com.jnks.iot.server.queue.TbQueueProducer;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueConsumer;
+import com.jnks.iot.server.queue.JnksIotQueueProducer;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
 import com.jnks.iot.server.queue.common.consumer.QueueConsumerManager;
 import com.jnks.iot.server.queue.discovery.PartitionService;
-import com.jnks.iot.server.queue.discovery.TbApplicationEventListener;
+import com.jnks.iot.server.queue.discovery.JnksIotApplicationEventListener;
 import com.jnks.iot.server.queue.discovery.TopicService;
 import com.jnks.iot.server.queue.discovery.event.PartitionChangeEvent;
-import com.jnks.iot.server.queue.provider.TbQueueProducerProvider;
-import com.jnks.iot.server.queue.provider.TbVersionControlQueueFactory;
+import com.jnks.iot.server.queue.provider.JnksIotQueueProducerProvider;
+import com.jnks.iot.server.queue.provider.JnksIotVersionControlQueueFactory;
 import com.jnks.iot.common.util.AfterStartUp;
 
 import java.io.IOException;
@@ -87,12 +87,12 @@ import static com.jnks.iot.server.service.sync.vc.DefaultGitRepositoryService.fr
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@ConditionalOnBean(TbVersionControlQueueFactory.class)
-public class DefaultClusterVersionControlService extends TbApplicationEventListener<PartitionChangeEvent> implements ClusterVersionControlService {
+@ConditionalOnBean(JnksIotVersionControlQueueFactory.class)
+public class DefaultClusterVersionControlService extends JnksIotApplicationEventListener<PartitionChangeEvent> implements ClusterVersionControlService {
 
     private final PartitionService partitionService;
-    private final TbQueueProducerProvider producerProvider;
-    private final TbVersionControlQueueFactory queueFactory;
+    private final JnksIotQueueProducerProvider producerProvider;
+    private final JnksIotVersionControlQueueFactory queueFactory;
     private final GitRepositoryService vcService;
     private final TopicService topicService;
 
@@ -100,8 +100,8 @@ public class DefaultClusterVersionControlService extends TbApplicationEventListe
     private final Map<TenantId, PendingCommit> pendingCommitMap = new HashMap<>();
 
     private volatile ExecutorService consumerExecutor;
-    private volatile QueueConsumerManager<TbProtoQueueMsg<ToVersionControlServiceMsg>> consumer;
-    private volatile TbQueueProducer<TbProtoQueueMsg<ToCoreNotificationMsg>> producer;
+    private volatile QueueConsumerManager<JnksIotProtoQueueMsg<ToVersionControlServiceMsg>> consumer;
+    private volatile JnksIotQueueProducer<JnksIotProtoQueueMsg<ToCoreNotificationMsg>> producer;
 
     @Value("${queue.vc.poll-interval:25}")
     private long pollDuration;
@@ -123,8 +123,8 @@ public class DefaultClusterVersionControlService extends TbApplicationEventListe
         for (int i = 0; i < ioPoolSize; i++) {
             ioThreads.add(MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor(threadFactory)));
         }
-        producer = producerProvider.getTbCoreNotificationsMsgProducer();
-        consumer = QueueConsumerManager.<TbProtoQueueMsg<ToVersionControlServiceMsg>>builder()
+        producer = producerProvider.getJnksIotCoreNotificationsMsgProducer();
+        consumer = QueueConsumerManager.<JnksIotProtoQueueMsg<ToVersionControlServiceMsg>>builder()
                 .name("TB Version Control")
                 .msgPackProcessor(this::processMsgs)
                 .pollInterval(pollDuration)
@@ -145,9 +145,9 @@ public class DefaultClusterVersionControlService extends TbApplicationEventListe
     }
 
     @Override
-    protected void onTbApplicationEvent(PartitionChangeEvent event) {
+    protected void onJnksIotApplicationEvent(PartitionChangeEvent event) {
         for (TenantId tenantId : vcService.getActiveRepositoryTenants()) {
-            if (!partitionService.isMyPartition(ServiceType.TB_VC_EXECUTOR, tenantId, tenantId)) {
+            if (!partitionService.isMyPartition(ServiceType.JNKS_IOT_VC_EXECUTOR, tenantId, tenantId)) {
                 var lock = getRepoLock(tenantId);
                 lock.lock();
                 try {
@@ -164,8 +164,8 @@ public class DefaultClusterVersionControlService extends TbApplicationEventListe
     }
 
     @Override
-    protected boolean filterTbApplicationEvent(PartitionChangeEvent event) {
-        return ServiceType.TB_VC_EXECUTOR.equals(event.getServiceType());
+    protected boolean filterJnksIotApplicationEvent(PartitionChangeEvent event) {
+        return ServiceType.JNKS_IOT_VC_EXECUTOR.equals(event.getServiceType());
     }
 
     @AfterStartUp(order = 2)
@@ -173,9 +173,9 @@ public class DefaultClusterVersionControlService extends TbApplicationEventListe
         consumer.launch();
     }
 
-    void processMsgs(List<TbProtoQueueMsg<ToVersionControlServiceMsg>> msgs, TbQueueConsumer<TbProtoQueueMsg<ToVersionControlServiceMsg>> consumer) throws Exception {
+    void processMsgs(List<JnksIotProtoQueueMsg<ToVersionControlServiceMsg>> msgs, JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToVersionControlServiceMsg>> consumer) throws Exception {
         List<ListenableFuture<?>> futures = new ArrayList<>();
-        for (TbProtoQueueMsg<ToVersionControlServiceMsg> msgWrapper : msgs) {
+        for (JnksIotProtoQueueMsg<ToVersionControlServiceMsg> msgWrapper : msgs) {
             ToVersionControlServiceMsg msg = msgWrapper.getValue();
             var ctx = new VersionControlRequestCtx(msg, msg.hasClearRepositoryRequest() ? null : ProtoUtils.fromProto(msg.getVcSettings()));
             long startTs = System.currentTimeMillis();
@@ -499,7 +499,7 @@ public class DefaultClusterVersionControlService extends TbApplicationEventListe
     }
 
     private void reply(VersionControlRequestCtx ctx, Optional<Exception> e, Function<VersionControlResponseMsg.Builder, VersionControlResponseMsg.Builder> enrichFunction) {
-        TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.TB_CORE, ctx.getNodeId());
+        TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.JNKS_IOT_CORE, ctx.getNodeId());
         VersionControlResponseMsg.Builder builder = VersionControlResponseMsg.newBuilder()
                 .setRequestIdMSB(ctx.getRequestId().getMostSignificantBits())
                 .setRequestIdLSB(ctx.getRequestId().getLeastSignificantBits());
@@ -518,7 +518,7 @@ public class DefaultClusterVersionControlService extends TbApplicationEventListe
 
         ToCoreNotificationMsg msg = ToCoreNotificationMsg.newBuilder().setVcResponseMsg(builder).build();
         log.trace("[{}][{}] PUSHING reply: {} to: {}", ctx.getTenantId(), ctx.getRequestId(), msg, tpi);
-        producer.send(tpi, new TbProtoQueueMsg<>(UUID.randomUUID(), msg), null);
+        producer.send(tpi, new JnksIotProtoQueueMsg<>(UUID.randomUUID(), msg), null);
     }
 
     private String getRelativePath(EntityType entityType, String entityId) {

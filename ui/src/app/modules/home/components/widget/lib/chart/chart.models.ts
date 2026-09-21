@@ -1,5 +1,5 @@
 import { isNumber } from '@core/utils';
-import { TbColorScheme } from '@shared/models/color.models';
+import { JnksIotColorScheme } from '@shared/models/color.models';
 import { LinearGradientObject } from 'zrender/lib/graphic/LinearGradient';
 import tinycolor from 'tinycolor2';
 import { ComponentStyle, Font, textStyle } from '@shared/models/widget-settings.models';
@@ -9,7 +9,7 @@ import { LabelLayoutOptionCallback } from 'echarts/types/dist/shared';
 import { BuiltinTextPosition } from 'zrender/src/core/types';
 import { WidgetContext } from '@home/models/widget-component.models';
 
-export const chartColorScheme: TbColorScheme = {
+export const chartColorScheme: JnksIotColorScheme = {
   'threshold.line': {
     light: 'rgba(0, 0, 0, 0.76)',
     dark: '#eee'

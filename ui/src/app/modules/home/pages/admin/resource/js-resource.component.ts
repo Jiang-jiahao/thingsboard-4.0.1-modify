@@ -20,7 +20,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { getCurrentAuthState } from '@core/auth/auth.selectors';
 
 @Component({
-  selector: 'tb-js-resource',
+  selector: 'jnks-iot-js-resource',
   templateUrl: './js-resource.component.html'
 })
 export class JsResourceComponent extends EntityComponent<Resource> implements OnInit, OnDestroy {

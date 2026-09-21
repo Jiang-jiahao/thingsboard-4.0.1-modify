@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, Input, OnInit, output, ViewChild } from '@angular/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { charsWithNumRegex, oneSpaceInsideRegex } from '@shared/models/regex.constants';
 import {
@@ -29,7 +29,7 @@ import { EntityAutocompleteComponent } from '@shared/components/entity/entity-au
 import { NULL_UUID } from '@shared/models/id/has-uuid';
 
 @Component({
-  selector: 'tb-calculated-field-argument-panel',
+  selector: 'jnks-iot-calculated-field-argument-panel',
   templateUrl: './calculated-field-argument-panel.component.html',
   styleUrls: ['./calculated-field-argument-panel.component.scss']
 })
@@ -86,7 +86,7 @@ export class CalculatedFieldArgumentPanelComponent implements OnInit, AfterViewI
   constructor(
     private fb: FormBuilder,
     private cd: ChangeDetectorRef,
-    private popover: TbPopoverComponent<CalculatedFieldArgumentPanelComponent>,
+    private popover: JnksIotPopoverComponent<CalculatedFieldArgumentPanelComponent>,
     private store: Store<AppState>
   ) {
     this.observeEntityFilterChanges();

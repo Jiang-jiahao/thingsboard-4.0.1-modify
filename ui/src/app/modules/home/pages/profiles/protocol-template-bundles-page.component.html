@@ -1,9 +1,9 @@
-<div class="mat-padding tb-protocol-template-bundles-page tb-entity-table">
-  <div class="tb-entity-table-content tb-outlined-border flex flex-col">
+<div class="mat-padding jnks-iot-protocol-template-bundles-page jnks-iot-entity-table">
+  <div class="jnks-iot-entity-table-content jnks-iot-outlined-border flex flex-col">
     <mat-toolbar class="mat-mdc-table-toolbar" *ngIf="!textSearchMode && selection.isEmpty()">
       <div class="mat-toolbar-tools w-full flex flex-row items-center min-h-14">
         <div class="title-container flex flex-row items-center justify-start min-w-0">
-          <span class="tb-entity-table-title">{{ 'profiles.protocol-templates-title' | translate }}</span>
+          <span class="jnks-iot-entity-table-title">{{ 'profiles.protocol-templates-title' | translate }}</span>
         </div>
         <span class="flex-1"></span>
         <button mat-stroked-button color="primary" type="button"
@@ -71,7 +71,7 @@
 
     <mat-toolbar class="mat-mdc-table-toolbar" color="primary" *ngIf="!selection.isEmpty()">
       <div class="mat-toolbar-tools w-full flex flex-row items-center">
-        <span class="tb-entity-table-info">
+        <span class="jnks-iot-entity-table-info">
           {{ 'profiles.protocol-templates-selected-count' | translate: { count: selection.selected.length } }}
         </span>
         <span class="flex-1"></span>
@@ -131,7 +131,7 @@
           <td mat-cell *matCellDef="let row" class="col-name">
             <span class="col-name-clamp"
                   [matTooltip]="bundleNameTooltipText(row)"
-                  matTooltipClass="tb-protocol-bundle-cell-tooltip"
+                  matTooltipClass="jnks-iot-protocol-bundle-cell-tooltip"
                   [matTooltipDisabled]="!bundleNameTooltipText(row)"
                   matTooltipShowDelay="400">{{ primaryTemplateId(row) }}</span>
           </td>
@@ -142,7 +142,7 @@
           <td mat-cell *matCellDef="let row" class="col-desc">
             <span class="col-desc-clamp"
                   [matTooltip]="rowDescriptionTooltipText(row)"
-                  matTooltipClass="tb-protocol-bundle-cell-tooltip"
+                  matTooltipClass="jnks-iot-protocol-bundle-cell-tooltip"
                   [matTooltipDisabled]="!rowDescriptionTooltipText(row)"
                   matTooltipShowDelay="400">{{ rowDescriptionText(row) }}</span>
           </td>

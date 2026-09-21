@@ -1,0 +1,47 @@
+version: '3.0'
+
+services:
+  jnks-iot-core1:
+    env_file:
+      - ../jnks-iot-edqs/jnks-iot-core-edqs.env
+  jnks-iot-core2:
+    env_file:
+      - ../jnks-iot-edqs/jnks-iot-core-edqs.env
+  jnks-iot-rule-engine1:
+    env_file:
+      - ../jnks-iot-edqs/jnks-iot-rule-engine-edqs.env
+  jnks-iot-rule-engine2:
+    env_file:
+      - ../jnks-iot-edqs/jnks-iot-rule-engine-edqs.env
+  jnks-iot-edqs1:
+    restart: always
+    image: "${DOCKER_REPO}/${EDQS_DOCKER_NAME}:${JNKS_IOT_VERSION}"
+    environment:
+      JNKS_IOT_SERVICE_ID: jnks-iot-edqs1
+      JAVA_OPTS: "${JAVA_OPTS}"
+    env_file:
+      - ../jnks-iot-edqs/jnks-iot-edqs.env
+    volumes:
+      - ../jnks-iot-edqs/conf:/usr/share/jnks-iot-edqs/conf
+      - ../jnks-iot-edqs/log:/var/log/jnks-iot-edqs
+    ports:
+      - "8080"
+    depends_on:
+      - zookeeper
+      - kafka
+  jnks-iot-edqs2:
+    restart: always
+    image: "${DOCKER_REPO}/${EDQS_DOCKER_NAME}:${JNKS_IOT_VERSION}"
+    environment:
+      JNKS_IOT_SERVICE_ID: jnks-iot-edqs2
+      JAVA_OPTS: "${JAVA_OPTS}"
+    env_file:
+      - ../jnks-iot-edqs/jnks-iot-edqs.env
+    volumes:
+      - ../jnks-iot-edqs/conf:/usr/share/jnks-iot-edqs/conf
+      - ../jnks-iot-edqs/log:/var/log/jnks-iot-edqs
+    ports:
+      - "8080"
+    depends_on:
+      - zookeeper
+      - kafka

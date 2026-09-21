@@ -14,7 +14,7 @@ import com.jnks.iot.server.common.data.device.profile.lwm2m.bootstrap.AbstractLw
 import com.jnks.iot.server.gen.transport.TransportProtos;
 import com.jnks.iot.server.transport.lwm2m.bootstrap.secure.LwM2MBootstrapConfig;
 import com.jnks.iot.server.transport.lwm2m.secure.LwM2mCredentialsSecurityInfoValidator;
-import com.jnks.iot.server.transport.lwm2m.secure.TbLwM2MSecurityInfo;
+import com.jnks.iot.server.transport.lwm2m.secure.JnksIotLwM2MSecurityInfo;
 import com.jnks.iot.server.transport.lwm2m.server.LwM2mSessionMsgListener;
 import com.jnks.iot.server.transport.lwm2m.server.LwM2mTransportContext;
 import com.jnks.iot.server.transport.lwm2m.server.LwM2mTransportServerHelper;
@@ -53,7 +53,7 @@ public class LwM2MBootstrapSecurityStore implements BootstrapSecurityStore {
 
     @Override
     public Iterator<SecurityInfo> getAllByEndpoint(String endpoint) {
-            TbLwM2MSecurityInfo store = lwM2MCredentialsSecurityInfoValidator.getEndpointSecurityInfoByCredentialsId(endpoint, BOOTSTRAP);
+            JnksIotLwM2MSecurityInfo store = lwM2MCredentialsSecurityInfoValidator.getEndpointSecurityInfoByCredentialsId(endpoint, BOOTSTRAP);
             SecurityInfo securityInfo = this.addValueToStore(store, endpoint);
             return securityInfo == null ? null : Collections.singletonList(store.getSecurityInfo()).iterator();
     }
@@ -61,7 +61,7 @@ public class LwM2MBootstrapSecurityStore implements BootstrapSecurityStore {
     @Override
     public SecurityInfo getByIdentity(String identity) {
         try {
-            TbLwM2MSecurityInfo store = lwM2MCredentialsSecurityInfoValidator.getEndpointSecurityInfoByCredentialsId(identity, BOOTSTRAP);
+            JnksIotLwM2MSecurityInfo store = lwM2MCredentialsSecurityInfoValidator.getEndpointSecurityInfoByCredentialsId(identity, BOOTSTRAP);
             if (store.getBootstrapCredentialConfig() != null && store.getSecurityMode() != null) {
                 /* add value to store  from BootstrapJson */
                 this.setBootstrapConfigSecurityInfo(store);
@@ -87,13 +87,13 @@ public class LwM2MBootstrapSecurityStore implements BootstrapSecurityStore {
         return null;
     }
 
-    public TbLwM2MSecurityInfo getX509ByEndpoint(String endPoint) {
-            TbLwM2MSecurityInfo store = lwM2MCredentialsSecurityInfoValidator.getEndpointSecurityInfoByCredentialsId(endPoint, BOOTSTRAP);
+    public JnksIotLwM2MSecurityInfo getX509ByEndpoint(String endPoint) {
+            JnksIotLwM2MSecurityInfo store = lwM2MCredentialsSecurityInfoValidator.getEndpointSecurityInfoByCredentialsId(endPoint, BOOTSTRAP);
             this.addValueToStore(store, store.getEndpoint());
             return store;
     }
 
-    private void setBootstrapConfigSecurityInfo(TbLwM2MSecurityInfo store) {
+    private void setBootstrapConfigSecurityInfo(JnksIotLwM2MSecurityInfo store) {
         /* BootstrapConfig */
         LwM2MBootstrapConfig lwM2MBootstrapConfig = this.getParametersBootstrap(store);
         if (lwM2MBootstrapConfig != null) {
@@ -102,7 +102,7 @@ public class LwM2MBootstrapSecurityStore implements BootstrapSecurityStore {
         }
     }
 
-    private LwM2MBootstrapConfig getParametersBootstrap(TbLwM2MSecurityInfo store) {
+    private LwM2MBootstrapConfig getParametersBootstrap(JnksIotLwM2MSecurityInfo store) {
         LwM2MBootstrapConfig lwM2MBootstrapConfig = store.getBootstrapCredentialConfig();
         if (lwM2MBootstrapConfig != null) {
             UUID sessionUUiD = UUID.randomUUID();
@@ -160,7 +160,7 @@ public class LwM2MBootstrapSecurityStore implements BootstrapSecurityStore {
         return bootstrapConfigStore.getAll().get(endpoint);
     }
 
-    public SecurityInfo addValueToStore(TbLwM2MSecurityInfo store, String endpoint) {
+    public SecurityInfo addValueToStore(JnksIotLwM2MSecurityInfo store, String endpoint) {
         /* add value to store  from BootstrapJson */
         SecurityInfo securityInfo = null;
         if (store != null && store.getBootstrapCredentialConfig() != null && store.getSecurityMode() != null) {

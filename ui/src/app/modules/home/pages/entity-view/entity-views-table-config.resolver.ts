@@ -254,7 +254,7 @@ export class EntityViewsTableConfigResolver  {
     this.dialog.open<AddEntitiesToCustomerDialogComponent, AddEntitiesToCustomerDialogData,
       boolean>(AddEntitiesToCustomerDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         customerId: this.customerId,
         entityType: EntityType.ENTITY_VIEW
@@ -304,7 +304,7 @@ export class EntityViewsTableConfigResolver  {
     this.dialog.open<AssignToCustomerDialogComponent, AssignToCustomerDialogData,
       boolean>(AssignToCustomerDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         entityIds: entityViewIds,
         entityType: EntityType.ENTITY_VIEW

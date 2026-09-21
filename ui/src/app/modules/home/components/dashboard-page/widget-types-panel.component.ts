@@ -14,7 +14,7 @@ export interface DisplayWidgetTypesPanelData {
 }
 
 @Component({
-  selector: 'tb-widget-types-panel',
+  selector: 'jnks-iot-widget-types-panel',
   templateUrl: './widget-types-panel.component.html',
   styleUrls: ['./widget-types-panel.component.scss']
 })

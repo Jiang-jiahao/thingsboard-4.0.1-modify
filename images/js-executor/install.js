@@ -7,10 +7,10 @@ let _projectRoot = null;
 
 (async() => {
     await fse.move(path.join(projectRoot(), 'target', 'jnks-iot-js-executor-linux'),
-                   path.join(targetPackageDir('linux'), 'bin', 'tb-js-executor'),
+                   path.join(targetPackageDir('linux'), 'bin', 'jnks-iot-js-executor'),
                    {overwrite: true});
     await fse.move(path.join(projectRoot(), 'target', 'jnks-iot-js-executor-win.exe'),
-                   path.join(targetPackageDir('windows'), 'bin', 'tb-js-executor.exe'),
+                   path.join(targetPackageDir('windows'), 'bin', 'jnks-iot-js-executor.exe'),
                    {overwrite: true});
 })();
 

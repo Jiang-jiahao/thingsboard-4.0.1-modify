@@ -8,10 +8,10 @@ import {
   MapType,
   mergeMapDatasources,
   parseCenterPosition,
-  TbCircleData,
-  TbMapDatasource,
-  TbPolygonCoordinates,
-  TbPolygonRawCoordinates
+  JnksIotCircleData,
+  JnksIotMapDatasource,
+  JnksIotPolygonCoordinates,
+  JnksIotPolygonRawCoordinates
 } from '@shared/models/widget/maps/map.models';
 import { WidgetContext } from '@home/models/widget-component.models';
 import {
@@ -21,7 +21,7 @@ import {
   isDefinedAndNotNull,
   isUndefined,
   mergeDeepIgnoreArray,
-  parseTbFunction
+  parseJnksIotFunction
 } from '@core/utils';
 import { DeepPartial } from '@shared/models/common';
 import L from 'leaflet';
@@ -29,8 +29,8 @@ import { EMPTY, forkJoin, Observable, of } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
 import '@home/components/widget/lib/maps/leaflet/leaflet-tb';
 import {
-  TbLatestDataLayerItem,
-  TbLatestMapDataLayer,
+  JnksIotLatestDataLayerItem,
+  JnksIotLatestMapDataLayer,
   UnplacedMapDataItem,
 } from '@home/components/widget/lib/maps/data-layer/latest-map-data-layer';
 import { IWidgetSubscription, PlaceMapItemActionData, WidgetSubscriptionOptions } from '@core/api/widget-api.models';
@@ -44,25 +44,25 @@ import {
 } from '@shared/models/widget.models';
 import { EntityDataPageLink } from '@shared/models/query/query.models';
 import { CustomTranslatePipe } from '@shared/pipe/custom-translate.pipe';
-import { TbMarkersDataLayer } from '@home/components/widget/lib/maps/data-layer/markers-data-layer';
-import { TbPolygonsDataLayer } from '@home/components/widget/lib/maps/data-layer/polygons-data-layer';
-import { TbCirclesDataLayer } from '@home/components/widget/lib/maps/data-layer/circles-data-layer';
+import { JnksIotMarkersDataLayer } from '@home/components/widget/lib/maps/data-layer/markers-data-layer';
+import { JnksIotPolygonsDataLayer } from '@home/components/widget/lib/maps/data-layer/polygons-data-layer';
+import { JnksIotCirclesDataLayer } from '@home/components/widget/lib/maps/data-layer/circles-data-layer';
 import { AttributeService } from '@core/http/attribute.service';
 import { AttributeData, AttributeScope, DataKeyType, LatestTelemetry } from '@shared/models/telemetry/telemetry.models';
 import { EntityId } from '@shared/models/id/entity-id';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import {
   SelectMapEntityPanelComponent
 } from '@home/components/widget/lib/maps/panels/select-map-entity-panel.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { createPlaceItemIcon } from '@shared/models/widget/maps/marker-shape.models';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MapTimelinePanelComponent } from '@home/components/widget/lib/maps/panels/map-timeline-panel.component';
 import { ComponentRef } from '@angular/core';
-import { TbTripsDataLayer } from '@home/components/widget/lib/maps/data-layer/trips-data-layer';
-import { CompiledTbFunction } from '@shared/models/js-function.models';
-import { TbMapDataLayer } from '@home/components/widget/lib/maps/data-layer/map-data-layer';
+import { JnksIotTripsDataLayer } from '@home/components/widget/lib/maps/data-layer/trips-data-layer';
+import { CompiledJnksIotFunction } from '@shared/models/js-function.models';
+import { JnksIotMapDataLayer } from '@home/components/widget/lib/maps/data-layer/map-data-layer';
 import { EntityType } from '@shared/models/entity-type.models';
 import ITooltipsterInstance = JQueryTooltipster.ITooltipsterInstance;
 import TooltipPositioningSide = JQueryTooltipster.TooltipPositioningSide;
@@ -70,7 +70,7 @@ import { ShapePatternStorage } from '@home/components/widget/lib/maps/data-layer
 
 type TooltipInstancesData = {root: HTMLElement, instances: ITooltipsterInstance[]};
 
-export abstract class TbMap<S extends BaseMapSettings> {
+export abstract class JnksIotMap<S extends BaseMapSettings> {
 
   protected settings: S;
   protected map: L.Map;
@@ -82,10 +82,10 @@ export abstract class TbMap<S extends BaseMapSettings> {
   protected southWest = new L.LatLng(-L.Projection.SphericalMercator['MAX_LATITUDE'], -180);
   protected northEast = new L.LatLng(L.Projection.SphericalMercator['MAX_LATITUDE'], 180);
 
-  protected dataLayers: TbMapDataLayer[];
-  protected latestDataLayers: TbLatestMapDataLayer[];
-  protected tripDataLayers: TbTripsDataLayer[];
-  protected dsData: FormattedData<TbMapDatasource>[] = [];
+  protected dataLayers: JnksIotMapDataLayer[];
+  protected latestDataLayers: JnksIotLatestMapDataLayer[];
+  protected tripDataLayers: JnksIotTripsDataLayer[];
+  protected dsData: FormattedData<JnksIotMapDatasource>[] = [];
 
   protected timeline = false;
   protected minTime: number;
@@ -93,7 +93,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
   protected timeStep: number;
   protected currentTime: number;
 
-  protected selectedDataItem: TbLatestDataLayerItem;
+  protected selectedDataItem: JnksIotLatestDataLayerItem;
 
   protected mapLayoutElement: HTMLElement;
   protected mapElement: HTMLElement;
@@ -111,11 +111,11 @@ export abstract class TbMap<S extends BaseMapSettings> {
 
   protected timeLineComponentRef: ComponentRef<MapTimelinePanelComponent>;
   protected timeLineComponent: MapTimelinePanelComponent;
-  protected locationSnapFilterFunction: CompiledTbFunction<MapBooleanFunction>;
+  protected locationSnapFilterFunction: CompiledJnksIotFunction<MapBooleanFunction>;
 
-  protected addMarkerDataLayers: TbLatestMapDataLayer<any>[];
-  protected addPolygonDataLayers: TbLatestMapDataLayer<any>[];
-  protected addCircleDataLayers: TbLatestMapDataLayer<any>[];
+  protected addMarkerDataLayers: JnksIotLatestMapDataLayer<any>[];
+  protected addPolygonDataLayers: JnksIotLatestMapDataLayer<any>[];
+  protected addCircleDataLayers: JnksIotLatestMapDataLayer<any>[];
 
   protected shapePatternStorage: ShapePatternStorage = {};
 
@@ -123,7 +123,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
 
   private tooltipInstances: TooltipInstancesData[] = [];
 
-  private currentPopover: TbPopoverComponent;
+  private currentPopover: JnksIotPopoverComponent;
   private currentEditButton: L.TB.ToolbarButton;
 
   private dragMode = true;
@@ -141,12 +141,12 @@ export abstract class TbMap<S extends BaseMapSettings> {
     this.settings = mergeDeepIgnoreArray({} as S, this.defaultSettings(), this.inputSettings as S);
 
     $(containerElement).empty();
-    $(containerElement).addClass('tb-map-container');
-    const mapLayoutElement = $('<div class="tb-map-layout"></div>');
+    $(containerElement).addClass('jnks-iot-map-container');
+    const mapLayoutElement = $('<div class="jnks-iot-map-layout"></div>');
     this.mapLayoutElement = mapLayoutElement[0];
     $(containerElement).append(mapLayoutElement);
 
-    const mapElement = $('<div class="tb-map"></div>');
+    const mapElement = $('<div class="jnks-iot-map"></div>');
     mapLayoutElement.append(mapElement);
 
     this.mapResize$ = new ResizeObserver(() => {
@@ -202,7 +202,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
     }
     const setup = [this.doSetupControls()];
     if (this.timeline && this.settings.tripTimeline.snapToRealLocation) {
-      setup.push(parseTbFunction<MapBooleanFunction>(this.getCtx().http, this.settings.tripTimeline.locationSnapFilter, ['data', 'dsData']).pipe(
+      setup.push(parseJnksIotFunction<MapBooleanFunction>(this.getCtx().http, this.settings.tripTimeline.locationSnapFilter, ['data', 'dsData']).pipe(
         map((parsed) => {
           this.locationSnapFilterFunction = parsed;
           return null;
@@ -244,22 +244,22 @@ export abstract class TbMap<S extends BaseMapSettings> {
     this.latestDataLayers = [];
     this.tripDataLayers = [];
     if (this.settings.markers) {
-      const markersDataLayers = this.settings.markers.map(settings => new TbMarkersDataLayer(this, settings));
+      const markersDataLayers = this.settings.markers.map(settings => new JnksIotMarkersDataLayer(this, settings));
       this.dataLayers.push(...markersDataLayers);
       this.latestDataLayers.push(...markersDataLayers);
     }
     if (this.settings.polygons) {
-      const polygonsDataLayers = this.settings.polygons.map(settings => new TbPolygonsDataLayer(this, settings));
+      const polygonsDataLayers = this.settings.polygons.map(settings => new JnksIotPolygonsDataLayer(this, settings));
       this.dataLayers.push(...polygonsDataLayers);
       this.latestDataLayers.push(...polygonsDataLayers);
     }
     if (this.settings.circles) {
-      const circlesDataLayers = this.settings.circles.map(settings => new TbCirclesDataLayer(this, settings));
+      const circlesDataLayers = this.settings.circles.map(settings => new JnksIotCirclesDataLayer(this, settings));
       this.dataLayers.push(...circlesDataLayers);
       this.latestDataLayers.push(...circlesDataLayers);
     }
     if (this.settings.trips) {
-      const tripsDataLayers = this.settings.trips.map(settings => new TbTripsDataLayer(this, settings));
+      const tripsDataLayers = this.settings.trips.map(settings => new JnksIotTripsDataLayer(this, settings));
       this.dataLayers.push(...tripsDataLayers);
       this.tripDataLayers.push(...tripsDataLayers);
     }
@@ -289,7 +289,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
           groups: groupDataLayers,
           sidebar,
           position: this.settings.controlsPosition,
-          uiClass: 'tb-groups',
+          uiClass: 'jnks-iot-groups',
           paneTitle: this.ctx.translate.instant('widgets.maps.data-layer.groups'),
           buttonTitle: this.ctx.translate.instant('widgets.maps.data-layer.groups'),
         }).addTo(this.map);
@@ -300,7 +300,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
       const setup = this.dataLayers.map(dl => dl.setup());
       forkJoin(setup).subscribe(
         () => {
-          let datasources: TbMapDatasource[];
+          let datasources: JnksIotMapDatasource[];
           for (const layerType of mapDataLayerTypes) {
             const typeDatasources = this.latestDataLayers.filter(dl => dl.dataLayerType() === layerType)
             .map(dl => dl.getDataSources()).flat();
@@ -432,7 +432,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
          this.dragModeButton = drawToolbar.toolbarButton({
            id: 'dragMode',
            title: this.ctx.translate.instant('widgets.maps.data-layer.drag-drop-mode'),
-           iconClass: 'tb-drag-mode',
+           iconClass: 'jnks-iot-drag-mode',
            click: (e, button) => {
              this.toggleDragMode(e, button);
            }
@@ -443,7 +443,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
          this.addMarkerButton = drawToolbar.toolbarButton({
            id: 'addMarker',
            title: this.ctx.translate.instant('widgets.maps.data-layer.marker.place-marker'),
-           iconClass: 'tb-place-marker',
+           iconClass: 'jnks-iot-place-marker',
            click: (e, button) => {
              this.placeMarker(e, button);
            }
@@ -456,7 +456,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
          this.addRectangleButton = drawToolbar.toolbarButton({
            id: 'addRectangle',
            title: this.ctx.translate.instant('widgets.maps.data-layer.polygon.draw-rectangle'),
-           iconClass: 'tb-draw-rectangle',
+           iconClass: 'jnks-iot-draw-rectangle',
            click: (e, button) => {
              this.drawRectangle(e, button);
            }
@@ -465,7 +465,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
          this.addPolygonButton = drawToolbar.toolbarButton({
            id: 'addPolygon',
            title: this.ctx.translate.instant('widgets.maps.data-layer.polygon.draw-polygon'),
-           iconClass: 'tb-draw-polygon',
+           iconClass: 'jnks-iot-draw-polygon',
            click: (e, button) => {
              this.drawPolygon(e, button);
            }
@@ -477,7 +477,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
          this.addCircleButton = drawToolbar.toolbarButton({
            id: 'addCircle',
            title: this.ctx.translate.instant('widgets.maps.data-layer.circle.draw-circle'),
-           iconClass: 'tb-draw-circle',
+           iconClass: 'jnks-iot-draw-circle',
            click: (e, button) => {
              this.drawCircle(e, button);
            }
@@ -497,7 +497,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
       this.editToolbar.open([
         {
           id: 'cancel',
-          iconClass: 'tb-close',
+          iconClass: 'jnks-iot-close',
           title: this.ctx.translate.instant('action.cancel'),
           showText: true,
           click: this.disableDragMode
@@ -541,7 +541,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
     }));
   }
 
-  private placeItem(e: MouseEvent, button: L.TB.ToolbarButton, dataLayers: TbLatestMapDataLayer[],
+  private placeItem(e: MouseEvent, button: L.TB.ToolbarButton, dataLayers: JnksIotLatestMapDataLayer[],
                     prepareDrawMode: (entity: UnplacedMapDataItem) => void): void {
     if (this.isPlacingItem) {
       this.finishAdd();
@@ -575,7 +575,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
         this.editToolbar.open([
           {
             id: 'cancel',
-            iconClass: 'tb-close',
+            iconClass: 'jnks-iot-close',
             title: this.ctx.translate.instant('action.cancel'),
             showText: true,
             click: this.finishAdd
@@ -595,7 +595,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
         e.stopPropagation();
       }
       const trigger = (e.target || e.srcElement || e.currentTarget) as Element;
-      const popoverService = this.ctx.$injector.get(TbPopoverService);
+      const popoverService = this.ctx.$injector.get(JnksIotPopoverService);
       const ctx: any = {
         entities
       };
@@ -606,7 +606,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
         {},
         {}, {}, false);
       this.currentPopover = selectMapEntityPanelPopover;
-      return selectMapEntityPanelPopover.tbComponentRef.instance.entitySelected.asObservable().pipe(
+      return selectMapEntityPanelPopover.jnksIotComponentRef.instance.entitySelected.asObservable().pipe(
         tap(() => {
           this.currentPopover = null;
         })
@@ -740,7 +740,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
     this.editToolbar.open([
       {
         id: 'cancel',
-        iconClass: 'tb-close',
+        iconClass: 'jnks-iot-close',
         title: this.ctx.translate.instant('action.cancel'),
         showText: true,
         click: this.finishCreatedItem
@@ -749,7 +749,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
 
     this.createMapItemActionId = actionId;
 
-    const convertLayerToCoordinates = (type: MapItemType, layer: L.Layer): {x: number; y: number} | TbPolygonRawCoordinates | TbCircleData => {
+    const convertLayerToCoordinates = (type: MapItemType, layer: L.Layer): {x: number; y: number} | JnksIotPolygonRawCoordinates | JnksIotCircleData => {
       switch (type) {
         case MapItemType.marker:
           if (layer instanceof L.Marker) {
@@ -801,7 +801,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
     this.map.pm.setLang('en', { tooltips: tooltipsTranslation }, 'en');
     this.map.pm.enableDraw(shape);
     // @ts-ignore
-    L.DomUtil.addClass(this.map.pm.Draw[shape]._hintMarker.getTooltip()._container, 'tb-place-item-label');
+    L.DomUtil.addClass(this.map.pm.Draw[shape]._hintMarker.getTooltip()._container, 'jnks-iot-place-item-label');
   }
 
   private updatePlaceItemState(editButton?: L.TB.ToolbarButton, disabled = false): void {
@@ -876,7 +876,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
   }
 
   private update(subscription: IWidgetSubscription) {
-    this.dsData = formattedDataFormDatasourceData<TbMapDatasource>(subscription.data,
+    this.dsData = formattedDataFormDatasourceData<JnksIotMapDatasource>(subscription.data,
       undefined, undefined, el => el.datasource.entityId + el.datasource.mapDataIds[0]);
     this.latestDataLayers.forEach(dl => dl.updateData(this.dsData));
     this.updateTripsAppearance();
@@ -886,8 +886,8 @@ export abstract class TbMap<S extends BaseMapSettings> {
   }
 
   private updateTrips(subscription: IWidgetSubscription) {
-    const tripsData = formattedDataArrayFromDatasourceData<TbMapDatasource>(subscription.data, el => el.datasource.entityId + el.datasource.mapDataIds[0]);
-    const tripsLatestData = formattedDataFormDatasourceData<TbMapDatasource>(subscription.latestData,
+    const tripsData = formattedDataArrayFromDatasourceData<JnksIotMapDatasource>(subscription.data, el => el.datasource.entityId + el.datasource.mapDataIds[0]);
+    const tripsLatestData = formattedDataFormDatasourceData<JnksIotMapDatasource>(subscription.latestData,
       undefined, undefined, el => el.datasource.entityId + el.datasource.mapDataIds[0]);
 
     let minTime = Infinity;
@@ -918,7 +918,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
   }
 
   private updateTripsWithLatestData(subscription: IWidgetSubscription) {
-    const tripsLatestData = formattedDataFormDatasourceData<TbMapDatasource>(subscription.latestData,
+    const tripsLatestData = formattedDataFormDatasourceData<JnksIotMapDatasource>(subscription.latestData,
       undefined, undefined, el => el.datasource.entityId + el.datasource.mapDataIds[0]);
     this.tripDataLayers.forEach(dl => dl.updateTripsLatestData(tripsLatestData));
     this.updateTripsAnchors();
@@ -1076,7 +1076,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
     return this.ctx;
   }
 
-  public getData(): FormattedData<TbMapDatasource>[] {
+  public getData(): FormattedData<JnksIotMapDatasource>[] {
     return this.dsData;
   }
 
@@ -1129,7 +1129,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
     this.updateTripsAnchors();
   }
 
-  public dataItemClick($event: Event, action: WidgetAction, data: FormattedData<TbMapDatasource>) {
+  public dataItemClick($event: Event, action: WidgetAction, data: FormattedData<JnksIotMapDatasource>) {
     if ($event) {
       $event.preventDefault();
       $event.stopPropagation();
@@ -1141,7 +1141,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
     }, entityName, data, entityLabel);
   }
 
-  public selectItem(item: TbLatestDataLayerItem, cancel = false, force = false): boolean {
+  public selectItem(item: JnksIotLatestDataLayerItem, cancel = false, force = false): boolean {
     if (this.isPlacingItem) {
       return false;
     }
@@ -1181,29 +1181,29 @@ export abstract class TbMap<S extends BaseMapSettings> {
     return this.dragMode;
   }
 
-  public saveMarkerLocation(data: FormattedData<TbMapDatasource>, lat?: number, lng?: number): Observable<any> {
+  public saveMarkerLocation(data: FormattedData<JnksIotMapDatasource>, lat?: number, lng?: number): Observable<any> {
     const targetDataLayer = this.latestDataLayers.find(dl => dl.dataLayerType() === 'markers' && dl.hasData(data));
     if (targetDataLayer) {
       let location: L.LatLng = null;
       if (isDefinedAndNotNull(lat) && isDefinedAndNotNull(lng)) {
         location = new L.LatLng(lat, lng);
       }
-      return (targetDataLayer as TbMarkersDataLayer).saveMarkerLocation(data, location);
+      return (targetDataLayer as JnksIotMarkersDataLayer).saveMarkerLocation(data, location);
     } else {
       return EMPTY;
     }
   }
 
-  public savePolygonLocation(data: FormattedData<TbMapDatasource>, coordinates?: TbPolygonCoordinates): Observable<any> {
+  public savePolygonLocation(data: FormattedData<JnksIotMapDatasource>, coordinates?: JnksIotPolygonCoordinates): Observable<any> {
     const targetDataLayer = this.latestDataLayers.find(dl => dl.dataLayerType() === 'polygons' && dl.hasData(data));
     if (targetDataLayer) {
-      return (targetDataLayer as TbPolygonsDataLayer).savePolygonCoordinates(data, coordinates);
+      return (targetDataLayer as JnksIotPolygonsDataLayer).savePolygonCoordinates(data, coordinates);
     } else {
       return EMPTY;
     }
   }
 
-  public saveLocation(data: FormattedData<TbMapDatasource>, values: {[key: string]: any}): Observable<any> {
+  public saveLocation(data: FormattedData<JnksIotMapDatasource>, values: {[key: string]: any}): Observable<any> {
     const datasource = data.$datasource;
     let dataKeys = datasource.dataKeys;
     if (datasource.latestDataKeys) {
@@ -1222,7 +1222,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
     return this.saveItemData(datasource, itemData, AttributeScope.SERVER_SCOPE);
   }
 
-  public saveItemData(datasource: TbMapDatasource, data: DataKeyValuePair[], attributeScope: AttributeScope): Observable<any> {
+  public saveItemData(datasource: JnksIotMapDatasource, data: DataKeyValuePair[], attributeScope: AttributeScope): Observable<any> {
     const attributeService = this.ctx.$injector.get(AttributeService);
     const attributes: AttributeData[] = [];
     const timeseries: AttributeData[] = [];
@@ -1292,7 +1292,7 @@ export abstract class TbMap<S extends BaseMapSettings> {
     return this.currentTime;
   }
 
-  public getLocationSnapFilterFunction(): CompiledTbFunction<MapBooleanFunction> {
+  public getLocationSnapFilterFunction(): CompiledJnksIotFunction<MapBooleanFunction> {
     return this.locationSnapFilterFunction;
   }
 
@@ -1317,13 +1317,13 @@ export abstract class TbMap<S extends BaseMapSettings> {
 
   public abstract latLngToLocationData(position: L.LatLng): {x: number; y: number};
 
-  public abstract polygonDataToCoordinates(coordinates: TbPolygonRawCoordinates): TbPolygonRawCoordinates;
+  public abstract polygonDataToCoordinates(coordinates: JnksIotPolygonRawCoordinates): JnksIotPolygonRawCoordinates;
 
-  public abstract coordinatesToPolygonData(coordinates: TbPolygonCoordinates): TbPolygonRawCoordinates;
+  public abstract coordinatesToPolygonData(coordinates: JnksIotPolygonCoordinates): JnksIotPolygonRawCoordinates;
 
-  public abstract circleDataToCoordinates(circle: TbCircleData): TbCircleData;
+  public abstract circleDataToCoordinates(circle: JnksIotCircleData): JnksIotCircleData;
 
-  public abstract coordinatesToCircleData(center: L.LatLng, radius: number): TbCircleData;
+  public abstract coordinatesToCircleData(center: L.LatLng, radius: number): JnksIotCircleData;
 
 
 

@@ -1,4 +1,4 @@
-<section class="tb-widget-settings flex flex-col" [formGroup]="qrCodeWidgetSettingsForm">
+<section class="jnks-iot-widget-settings flex flex-col" [formGroup]="qrCodeWidgetSettingsForm">
   <mat-slide-toggle class="mat-slide" formControlName="useQrCodeTextFunction">
     {{ 'widgets.qr-code.use-qr-code-text-function' | translate }}
   </mat-slide-toggle>
@@ -10,7 +10,7 @@
       {{ 'widgets.qr-code.qr-code-text-pattern-required' | translate }}
     </mat-error>
   </mat-form-field>
-  <tb-js-func required
+  <jnks-iot-js-func required
               [class.!hidden]="!qrCodeWidgetSettingsForm.get('useQrCodeTextFunction').value"
               formControlName="qrCodeTextFunction"
               withModules
@@ -18,5 +18,5 @@
               [functionArgs]="['data']"
               functionTitle="{{ 'widgets.qr-code.qr-code-text-function' | translate }}"
               helpId="widget/lib/qrcode/qrcode_text_fn">
-  </tb-js-func>
+  </jnks-iot-js-func>
 </section>

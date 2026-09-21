@@ -6,7 +6,7 @@ import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@app/shar
 import { FetchTo } from '@home/components/rule-node/rule-node-config.models';
 
 @Component({
-  selector: 'tb-enrichment-node-originator-attributes-config',
+  selector: 'jnks-iot-enrichment-node-originator-attributes-config',
   templateUrl: './originator-attributes-config.component.html',
   styleUrls: []
 })

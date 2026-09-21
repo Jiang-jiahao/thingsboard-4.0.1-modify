@@ -19,15 +19,15 @@ import {
   Validator
 } from '@angular/forms';
 import { ScadaSymbolTag } from '@home/components/widget/lib/scada/scada-symbol.models';
-import { TbEditorCompleter } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompleter } from '@shared/models/ace/completion.models';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import {
   ScadaSymbolMetadataTagFunctionPanelComponent
 } from '@home/pages/scada-symbol/metadata-components/scada-symbol-metadata-tag-function-panel.component';
 
 @Component({
-  selector: 'tb-scada-symbol-metadata-tag',
+  selector: 'jnks-iot-scada-symbol-metadata-tag',
   templateUrl: './scada-symbol-metadata-tag.component.html',
   styleUrls: ['./scada-symbol-metadata-tag.component.scss'],
   providers: [
@@ -56,10 +56,10 @@ export class ScadaSymbolMetadataTagComponent implements ControlValueAccessor, On
   disabled: boolean;
 
   @Input()
-  elementStateRenderFunctionCompleter: TbEditorCompleter;
+  elementStateRenderFunctionCompleter: JnksIotEditorCompleter;
 
   @Input()
-  clickActionFunctionCompleter: TbEditorCompleter;
+  clickActionFunctionCompleter: JnksIotEditorCompleter;
 
   tagFormGroup: UntypedFormGroup;
 
@@ -68,7 +68,7 @@ export class ScadaSymbolMetadataTagComponent implements ControlValueAccessor, On
   private propagateChange = (_val: any) => {};
 
   constructor(private fb: UntypedFormBuilder,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef) {
   }
@@ -134,7 +134,7 @@ export class ScadaSymbolMetadataTagComponent implements ControlValueAccessor, On
       this.popoverService.hidePopover(trigger);
     } else {
       let tagFunctionControl: AbstractControl;
-      let completer: TbEditorCompleter;
+      let completer: JnksIotEditorCompleter;
       if (tagFunctionType === 'renderFunction') {
         tagFunctionControl = this.tagFormGroup.get('stateRenderFunction');
         completer = this.elementStateRenderFunctionCompleter;
@@ -157,8 +157,8 @@ export class ScadaSymbolMetadataTagComponent implements ControlValueAccessor, On
         },
         isModal: true
       });
-      scadaSymbolTagFunctionPanelPopover.tbComponentRef.instance.popover = scadaSymbolTagFunctionPanelPopover;
-      scadaSymbolTagFunctionPanelPopover.tbComponentRef.instance.tagFunctionApplied.subscribe((tagFunction) => {
+      scadaSymbolTagFunctionPanelPopover.jnksIotComponentRef.instance.popover = scadaSymbolTagFunctionPanelPopover;
+      scadaSymbolTagFunctionPanelPopover.jnksIotComponentRef.instance.tagFunctionApplied.subscribe((tagFunction) => {
         scadaSymbolTagFunctionPanelPopover.hide();
         tagFunctionControl.patchValue(tagFunction, {emitEvent: false});
         this.updateModel();

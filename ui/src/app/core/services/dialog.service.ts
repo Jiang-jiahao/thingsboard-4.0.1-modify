@@ -44,7 +44,7 @@ export class DialogService {
       }
     };
     if (fullscreen) {
-      dialogConfig.panelClass = ['tb-fullscreen-dialog'];
+      dialogConfig.panelClass = ['jnks-iot-fullscreen-dialog'];
     }
     const dialogRef = this.dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(ConfirmDialogComponent, dialogConfig);
     return dialogRef.afterClosed();
@@ -60,7 +60,7 @@ export class DialogService {
       }
     };
     if (fullscreen) {
-      dialogConfig.panelClass = ['tb-fullscreen-dialog'];
+      dialogConfig.panelClass = ['jnks-iot-fullscreen-dialog'];
     }
     const dialogRef = this.dialog.open<AlertDialogComponent, AlertDialogData, boolean>(AlertDialogComponent, dialogConfig);
     return dialogRef.afterClosed();
@@ -77,7 +77,7 @@ export class DialogService {
       }
     };
     if (fullscreen) {
-      dialogConfig.panelClass = ['tb-fullscreen-dialog'];
+      dialogConfig.panelClass = ['jnks-iot-fullscreen-dialog'];
     }
     const dialogRef = this.dialog.open<ErrorAlertDialogComponent, ErrorAlertDialogData, boolean>(ErrorAlertDialogComponent, dialogConfig);
     return dialogRef.afterClosed();
@@ -87,7 +87,7 @@ export class DialogService {
     return this.dialog.open<ColorPickerDialogComponent, ColorPickerDialogData, ColorPickerDialogResult>(ColorPickerDialogComponent,
       {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           color,
           colorClearButton
@@ -100,7 +100,7 @@ export class DialogService {
     return this.dialog.open<MaterialIconsDialogComponent, MaterialIconsDialogData, MaterialIconsDialogResult>(MaterialIconsDialogComponent,
       {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           icon,
           iconClearButton
@@ -136,7 +136,7 @@ export class DialogService {
   todo(): Observable<any> {
     const dialogConfig: MatDialogConfig = {
       disableClose: true,
-      panelClass: ['tb-fullscreen-dialog']
+      panelClass: ['jnks-iot-fullscreen-dialog']
     };
     const dialogRef = this.dialog.open(TodoDialogComponent, dialogConfig);
     return dialogRef.afterClosed();

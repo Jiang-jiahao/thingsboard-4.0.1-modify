@@ -19,7 +19,7 @@ export interface ManageDashboardCustomersDialogData {
 }
 
 @Component({
-  selector: 'tb-manage-dashboard-customers-dialog',
+  selector: 'jnks-iot-manage-dashboard-customers-dialog',
   templateUrl: './manage-dashboard-customers-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: ManageDashboardCustomersDialogComponent}],
   styleUrls: []

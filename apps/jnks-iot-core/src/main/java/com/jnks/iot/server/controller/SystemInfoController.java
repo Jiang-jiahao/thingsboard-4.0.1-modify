@@ -1,0 +1,184 @@
+package com.jnks.iot.server.controller;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.swagger.v3.oas.annotations.Hidden;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.info.BuildProperties;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import com.jnks.iot.common.util.DebugModeUtil;
+import com.jnks.iot.common.util.JacksonUtil;
+import com.jnks.iot.server.common.data.DashboardInfo;
+import com.jnks.iot.server.common.data.SystemParams;
+import com.jnks.iot.server.common.data.exception.JnksIotException;
+import com.jnks.iot.server.common.data.id.CustomerId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.mobile.qrCodeSettings.QRCodeConfig;
+import com.jnks.iot.server.common.data.mobile.qrCodeSettings.QrCodeSettings;
+import com.jnks.iot.server.common.data.page.PageLink;
+import com.jnks.iot.server.common.data.settings.UserSettings;
+import com.jnks.iot.server.common.data.settings.UserSettingsType;
+import com.jnks.iot.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
+import com.jnks.iot.server.dao.mobile.QrCodeSettingService;
+import com.jnks.iot.server.service.security.model.SecurityUser;
+import com.jnks.iot.server.service.security.model.UserPrincipal;
+import com.jnks.iot.server.service.sync.vc.EntitiesVersionControlService;
+import com.jnks.iot.server.utils.DebugModeRateLimitsConfig;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+/**
+ * 系统构建信息与前端启动参数 REST 入口。
+ * <p>
+ * 仅在 jnks-iot-core 模块（Core / Monolith）中生效。{@code /system/info}
+ * 返回版本号；{@code /system/params} 按当前用户角色组装 UI 所需开关与配额。
+ */
+@Hidden
+@RestController
+@RequestMapping("/api")
+@Slf4j
+public class SystemInfoController extends BaseController {
+
+    @Value("${security.user_token_access_enabled}")
+    private boolean userTokenAccessEnabled;
+
+    @Value("${tbel.enabled:true}")
+    private boolean tbelEnabled;
+
+    @Value("${state.persistToTelemetry:false}")
+    private boolean persistToTelemetry;
+
+    @Value("${ui.dashboard.max_datapoints_limit}")
+    private long maxDatapointsLimit;
+
+    @Value("${debug.settings.default_duration:15}")
+    private int defaultDebugDurationMinutes;
+
+    @Autowired(required = false)
+    private BuildProperties buildProperties;
+
+    @Autowired
+    private EntitiesVersionControlService versionControlService;
+
+    @Autowired
+    private QrCodeSettingService qrCodeSettingService;
+
+    @Autowired
+    private DebugModeRateLimitsConfig debugModeRateLimitsConfig;
+
+    @PostConstruct
+    public void init() {
+        JsonNode info = buildInfoObject();
+        log.info("System build info: {}", info);
+    }
+
+    /**
+     * 返回当前构建版本、构件名与发行类型（CE）。
+     */
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
+    @RequestMapping(value = "/system/info", method = RequestMethod.GET)
+    @ResponseBody
+    public JsonNode getSystemVersionInfo() {
+        return buildInfoObject();
+    }
+
+    /**
+     * 按当前用户权限组装前端启动参数。
+     * <p>
+     * 含 Token 模拟开关、全屏仪表盘白名单、版本控制仓库、TBEL、设备状态落库、
+     * 用户菜单、遥测点数上限、资源/调试配额、移动端二维码等。
+     */
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN', 'TENANT_ADMIN', 'CUSTOMER_USER')")
+    @RequestMapping(value = "/system/params", method = RequestMethod.GET)
+    @ResponseBody
+    public SystemParams getSystemParams() throws JnksIotException {
+        SystemParams systemParams = new SystemParams();
+        SecurityUser currentUser = getCurrentUser();
+        TenantId tenantId = currentUser.getTenantId();
+        CustomerId customerId = currentUser.getCustomerId();
+        if (currentUser.isSystemAdmin() || currentUser.isTenantAdmin()) {
+            systemParams.setUserTokenAccessEnabled(userTokenAccessEnabled);
+        } else {
+            systemParams.setUserTokenAccessEnabled(false);
+        }
+        boolean forceFullscreen = isForceFullscreen(currentUser);
+        if (forceFullscreen && (currentUser.isTenantAdmin() || currentUser.isCustomerUser())) {
+            PageLink pageLink = new PageLink(100);
+            List<DashboardInfo> dashboards;
+            if (currentUser.isTenantAdmin()) {
+                dashboards = dashboardService.findDashboardsByTenantId(tenantId, pageLink).getData();
+            } else {
+                dashboards = dashboardService.findDashboardsByTenantIdAndCustomerId(tenantId, customerId, pageLink).getData();
+            }
+            systemParams.setAllowedDashboardIds(dashboards.stream().map(d -> d.getId().getId().toString()).collect(Collectors.toList()));
+        } else {
+            systemParams.setAllowedDashboardIds(Collections.emptyList());
+        }
+        if (currentUser.isTenantAdmin()) {
+            systemParams.setHasRepository(versionControlService.getVersionControlSettings(tenantId) != null);
+            systemParams.setTbelEnabled(tbelEnabled);
+        } else {
+            systemParams.setHasRepository(false);
+            systemParams.setTbelEnabled(false);
+        }
+        if (currentUser.isTenantAdmin() || currentUser.isCustomerUser()) {
+            systemParams.setPersistDeviceStateToTelemetry(persistToTelemetry);
+        } else {
+            systemParams.setPersistDeviceStateToTelemetry(false);
+        }
+        UserSettings userSettings = userSettingsService.findUserSettings(currentUser.getTenantId(), currentUser.getId(), UserSettingsType.GENERAL);
+        ObjectNode userSettingsNode = userSettings == null ? JacksonUtil.newObjectNode() : (ObjectNode) userSettings.getSettings();
+        if (!userSettingsNode.has("openedMenuSections")) {
+            userSettingsNode.set("openedMenuSections", JacksonUtil.newArrayNode());
+        }
+        systemParams.setUserSettings(userSettingsNode);
+        systemParams.setMaxDatapointsLimit(maxDatapointsLimit);
+        if (!currentUser.isSystemAdmin()) {
+            DefaultTenantProfileConfiguration tenantProfileConfiguration = tenantProfileCache.get(tenantId).getDefaultProfileConfiguration();
+            systemParams.setMaxResourceSize(tenantProfileConfiguration.getMaxResourceSize());
+            systemParams.setMaxDebugModeDurationMinutes(DebugModeUtil.getMaxDebugAllDuration(tenantProfileConfiguration.getMaxDebugModeDurationMinutes(), defaultDebugDurationMinutes));
+            if (debugModeRateLimitsConfig.isRuleChainDebugPerTenantLimitsEnabled()) {
+                systemParams.setRuleChainDebugPerTenantLimitsConfiguration(debugModeRateLimitsConfig.getRuleChainDebugPerTenantLimitsConfiguration());
+            }
+            if (debugModeRateLimitsConfig.isCalculatedFieldDebugPerTenantLimitsEnabled()) {
+                systemParams.setCalculatedFieldDebugPerTenantLimitsConfiguration(debugModeRateLimitsConfig.getCalculatedFieldDebugPerTenantLimitsConfiguration());
+            }
+            systemParams.setMaxArgumentsPerCF(tenantProfileConfiguration.getMaxArgumentsPerCF());
+            systemParams.setMaxDataPointsPerRollingArg(tenantProfileConfiguration.getMaxDataPointsPerRollingArg());
+        }
+        systemParams.setMobileQrEnabled(Optional.ofNullable(qrCodeSettingService.findQrCodeSettings(TenantId.SYS_TENANT_ID))
+                .map(QrCodeSettings::getQrCodeConfig).map(QRCodeConfig::isShowOnHomePage)
+                .orElse(false));
+        return systemParams;
+    }
+
+    private boolean isForceFullscreen(SecurityUser currentUser) {
+        return UserPrincipal.Type.PUBLIC_ID.equals(currentUser.getUserPrincipal().getType()) ||
+                (currentUser.getAdditionalInfo() != null &&
+                        currentUser.getAdditionalInfo().has("defaultDashboardFullscreen") &&
+                        currentUser.getAdditionalInfo().get("defaultDashboardFullscreen").booleanValue());
+    }
+
+    private JsonNode buildInfoObject() {
+        ObjectNode infoObject = JacksonUtil.newObjectNode();
+        if (buildProperties != null) {
+            infoObject.put("version", buildProperties.getVersion());
+            infoObject.put("artifact", buildProperties.getArtifact());
+            infoObject.put("name", buildProperties.getName());
+        } else {
+            infoObject.put("version", "unknown");
+        }
+        infoObject.put("type", "CE");
+        return infoObject;
+    }
+}

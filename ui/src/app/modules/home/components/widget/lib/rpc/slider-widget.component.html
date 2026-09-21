@@ -1,19 +1,19 @@
-<div class="tb-slider-panel" [class.no-pointer-events]="ctx.isEdit" [style.padding]="padding" [style]="backgroundStyle$ | async">
-  <div class="tb-slider-overlay" [style]="overlayStyle"></div>
-  <div *ngIf="showWidgetTitlePanel" class="tb-slider-title-panel">
+<div class="jnks-iot-slider-panel" [class.no-pointer-events]="ctx.isEdit" [style.padding]="padding" [style]="backgroundStyle$ | async">
+  <div class="jnks-iot-slider-overlay" [style]="overlayStyle"></div>
+  <div *ngIf="showWidgetTitlePanel" class="jnks-iot-slider-title-panel">
     <ng-container *ngTemplateOutlet="widgetTitlePanel"></ng-container>
   </div>
-  <div #sliderContent class="tb-slider-content">
-    <div #sliderValueContainer class="tb-slider-value-container" *ngIf="showValue" >
-      <div #sliderValue class="tb-slider-value" [style]="valueStyle">{{ valueText }}</div>
+  <div #sliderContent class="jnks-iot-slider-content">
+    <div #sliderValueContainer class="jnks-iot-slider-value-container" *ngIf="showValue" >
+      <div #sliderValue class="jnks-iot-slider-value" [style]="valueStyle">{{ valueText }}</div>
     </div>
-    <div class="tb-slider-container" [class.tb-min-height]="!showValue">
+    <div class="jnks-iot-slider-container" [class.jnks-iot-min-height]="!showValue">
       <div #leftSliderIconContainer *ngIf="showLeftRightIcon" >
-        <tb-icon #leftSliderIcon [style]="leftIconStyle"
-                 [style.color]="(disabled || (loading$ | async)) ? settings.mainColorDisabled : settings.leftIconColor">{{ leftIcon }}</tb-icon>
+        <jnks-iot-icon #leftSliderIcon [style]="leftIconStyle"
+                 [style.color]="(disabled || (loading$ | async)) ? settings.mainColorDisabled : settings.leftIconColor">{{ leftIcon }}</jnks-iot-icon>
       </div>
-      <div class="tb-slider-column">
-        <mat-slider class="tb-slider"
+      <div class="jnks-iot-slider-column">
+        <mat-slider class="jnks-iot-slider"
                     [disabled]="disabled || (loading$ | async)"
                     [displayWith]="sliderValueText"
                     [showTickMarks]="settings.showTickMarks"
@@ -23,7 +23,7 @@
                     discrete>
           <input matSliderThumb [(ngModel)]="value" (valueChange)="onSliderChange()">
         </mat-slider>
-        <div *ngIf="showTicks" class="tb-slider-ticks" [style]="ticksStyle">
+        <div *ngIf="showTicks" class="jnks-iot-slider-ticks" [style]="ticksStyle">
           <div #sliderTickMinContainer>
             <div #sliderTickMin>{{ settings.tickMin }}</div>
           </div>
@@ -33,10 +33,10 @@
         </div>
       </div>
       <div #rightSliderIconContainer *ngIf="showLeftRightIcon" >
-        <tb-icon #rightSliderIcon [style]="rightIconStyle"
-                 [style.color]="(disabled || (loading$ | async)) ? settings.mainColorDisabled : settings.rightIconColor">{{ rightIcon }}</tb-icon>
+        <jnks-iot-icon #rightSliderIcon [style]="rightIconStyle"
+                 [style.color]="(disabled || (loading$ | async)) ? settings.mainColorDisabled : settings.rightIconColor">{{ rightIcon }}</jnks-iot-icon>
       </div>
     </div>
   </div>
-  <mat-progress-bar class="tb-action-widget-progress" style="height: 4px;" color="accent" mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
+  <mat-progress-bar class="jnks-iot-action-widget-progress" style="height: 4px;" color="accent" mode="indeterminate" *ngIf="loading$ | async"></mat-progress-bar>
 </div>

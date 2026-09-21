@@ -329,7 +329,7 @@ export class DashboardsTableConfigResolver  {
     return this.dialog.open<EntityAliasesDialogComponent, EntityAliasesDialogData,
       EntityAliases>(EntityAliasesDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         entityAliases: missingEntityAliases,
         widgets,
@@ -362,7 +362,7 @@ export class DashboardsTableConfigResolver  {
     this.dialog.open<AddEntitiesToCustomerDialogComponent, AddEntitiesToCustomerDialogData,
       boolean>(AddEntitiesToCustomerDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         customerId: this.config.componentsData.customerId,
         entityType: EntityType.DASHBOARD
@@ -384,7 +384,7 @@ export class DashboardsTableConfigResolver  {
         this.dialog.open<MakeDashboardPublicDialogComponent, MakeDashboardPublicDialogData>
         (MakeDashboardPublicDialogComponent, {
           disableClose: true,
-          panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+          panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
           data: {
             dashboard: publicDashboard
           }
@@ -441,7 +441,7 @@ export class DashboardsTableConfigResolver  {
     this.dialog.open<ManageDashboardCustomersDialogComponent, ManageDashboardCustomersDialogData,
       boolean>(ManageDashboardCustomersDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         dashboardIds,
         actionType,

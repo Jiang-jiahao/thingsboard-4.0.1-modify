@@ -1,5 +1,5 @@
-<section class="tb-form-panel no-border no-padding" [formGroup]="timeintervalFormGroup">
-  <section class="tb-form-row column-xs no-border no-padding tb-standard-fields">
+<section class="jnks-iot-form-panel no-border no-padding" [formGroup]="timeintervalFormGroup">
+  <section class="jnks-iot-form-row column-xs no-border no-padding jnks-iot-standard-fields">
     <ng-content></ng-content>
     <mat-form-field class="flex flex-1" [subscriptSizing]="subscriptSizing" [appearance]="appearance">
       <mat-label *ngIf="predefinedName" translate>{{ predefinedName }}</mat-label>
@@ -13,10 +13,10 @@
       </ng-container>
     </mat-form-field>
   </section>
-  <section class="tb-form-row column-xs no-border no-padding tb-standard-fields advanced-input"
+  <section class="jnks-iot-form-row column-xs no-border no-padding jnks-iot-standard-fields advanced-input"
            formGroupName="customInterval"
            [class.!hidden]="!advanced">
-    <div class="tb-flex">
+    <div class="jnks-iot-flex">
       <mat-form-field class="number-input flex" [subscriptSizing]="subscriptSizing" [appearance]="appearance">
         <mat-label translate>timeinterval.days</mat-label>
         <input matInput type="number" step="1" min="0" formControlName="days" />
@@ -26,7 +26,7 @@
         <input matInput type="number" step="1" formControlName="hours" />
       </mat-form-field>
     </div>
-    <div class="tb-flex">
+    <div class="jnks-iot-flex">
       <mat-form-field class="number-input flex" [subscriptSizing]="subscriptSizing" [appearance]="appearance">
         <mat-label translate>timeinterval.minutes</mat-label>
         <input matInput type="number" step="1" formControlName="mins" />

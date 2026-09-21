@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { SetValueAction, SetValueSettings, ValueToDataType } from '@shared/models/action-widget-settings.models';
 import { TranslateService } from '@ngx-translate/core';
 import { IAliasController } from '@core/api/widget-api.models';
@@ -23,7 +23,7 @@ import {
 import { ValueType } from '@shared/models/constants';
 
 @Component({
-  selector: 'tb-set-value-action-settings',
+  selector: 'jnks-iot-set-value-action-settings',
   templateUrl: './action-settings-button.component.html',
   styleUrls: ['./action-settings-button.scss'],
   providers: [
@@ -65,7 +65,7 @@ export class SetValueActionSettingsComponent implements OnInit, ControlValueAcce
   private propagateChange = null;
 
   constructor(private translate: TranslateService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private cd: ChangeDetectorRef) {}
@@ -115,8 +115,8 @@ export class SetValueActionSettingsComponent implements OnInit, ControlValueAcce
        },
        isModal: true
      });
-      setValueSettingsPanelPopover.tbComponentRef.instance.popover = setValueSettingsPanelPopover;
-      setValueSettingsPanelPopover.tbComponentRef.instance.setValueSettingsApplied.subscribe((setValueSettings) => {
+      setValueSettingsPanelPopover.jnksIotComponentRef.instance.popover = setValueSettingsPanelPopover;
+      setValueSettingsPanelPopover.jnksIotComponentRef.instance.setValueSettingsApplied.subscribe((setValueSettings) => {
         setValueSettingsPanelPopover.hide();
         this.modelValue = setValueSettings;
         this.updateDisplayValue();

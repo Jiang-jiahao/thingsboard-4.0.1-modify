@@ -23,12 +23,12 @@ import { TranslateService } from '@ngx-translate/core';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { DialogService } from '@core/services/dialog.service';
 import { coerceBoolean } from '@shared/decorators/coercion';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { ColorPickerPanelComponent } from '@shared/components/color-picker/color-picker-panel.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-color-input',
+  selector: 'jnks-iot-color-input',
   templateUrl: './color-input.component.html',
   styleUrls: ['./color-input.component.scss'],
   providers: [
@@ -95,7 +95,7 @@ export class ColorInputComponent extends PageComponent implements OnInit, Contro
   constructor(protected store: Store<AppState>,
               private dialogs: DialogService,
               private translate: TranslateService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private fb: UntypedFormBuilder,
@@ -195,8 +195,8 @@ export class ColorInputComponent extends PageComponent implements OnInit, Contro
           popoverContentStyle: {padding: '12px 4px 12px 12px'},
           isModal: true
         })
-        colorPickerPopover.tbComponentRef.instance.popover = colorPickerPopover;
-        colorPickerPopover.tbComponentRef.instance.colorSelected.subscribe((color) => {
+        colorPickerPopover.jnksIotComponentRef.instance.popover = colorPickerPopover;
+        colorPickerPopover.jnksIotComponentRef.instance.colorSelected.subscribe((color) => {
           colorPickerPopover.hide();
           this.colorFormGroup.patchValue(
               {color}, {emitEvent: true}

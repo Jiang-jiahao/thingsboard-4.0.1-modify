@@ -7,7 +7,7 @@ import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/m
 
 
 @Component({
-  selector: 'tb-transformation-node-rename-keys-config',
+  selector: 'jnks-iot-transformation-node-rename-keys-config',
   templateUrl: './rename-keys-config.component.html',
   styleUrls: ['./rename-keys-config.component.scss']
 })

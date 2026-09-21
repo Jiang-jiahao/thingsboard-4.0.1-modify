@@ -1,6 +1,6 @@
-<section [formGroup]="geoFilterConfigForm" class="tb-form-panel no-border no-padding">
-  <section class="tb-form-panel stroked">
-    <div class="tb-form-panel-title" translate>rule-node-config.coordinate-field-names</div>
+<section [formGroup]="geoFilterConfigForm" class="jnks-iot-form-panel no-border no-padding">
+  <section class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-panel-title" translate>rule-node-config.coordinate-field-names</div>
     <section>
       <div class="flex flex-row gap-4">
         <mat-form-field class="mat-block max-w-50% flex-full">
@@ -18,11 +18,11 @@
           </mat-error>
         </mat-form-field>
       </div>
-    <div class="tb-form-hint tb-primary-fill" translate>rule-node-config.coordinate-field-hint</div>
+    <div class="jnks-iot-form-hint jnks-iot-primary-fill" translate>rule-node-config.coordinate-field-hint</div>
     </section>
   </section>
-  <section class="tb-form-panel stroked" [class.no-padding-bottom]="!defaultPaddingEnable">
-    <div class="tb-form-panel-title" translate>rule-node-config.geofence-configuration</div>
+  <section class="jnks-iot-form-panel stroked" [class.no-padding-bottom]="!defaultPaddingEnable">
+    <div class="jnks-iot-form-panel-title" translate>rule-node-config.geofence-configuration</div>
     <section class="flex flex-col">
       <mat-form-field class="mat-block flex-1" hideRequiredMarker>
         <mat-label>{{ 'rule-node-config.perimeter-type' | translate }}</mat-label>
@@ -32,7 +32,7 @@
           </mat-option>
         </mat-select>
       </mat-form-field>
-      <div tb-hint-tooltip-icon="{{ geoFilterConfigForm.get('perimeterType').value === perimeterType.CIRCLE
+      <div jnks-iot-hint-tooltip-icon="{{ geoFilterConfigForm.get('perimeterType').value === perimeterType.CIRCLE
         ? ('rule-node-config.fetch-circle-parameter-info-from-metadata-hint'
             | translate : { perimeterKeyName: geoFilterConfigForm.get('perimeterKeyName').valid
                               ? geoFilterConfigForm.get('perimeterKeyName').value
@@ -41,7 +41,7 @@
             | translate : { perimeterKeyName: geoFilterConfigForm.get('perimeterKeyName').valid
                               ? geoFilterConfigForm.get('perimeterKeyName').value
                               : 'ss_perimeter'}) }}"
-           class="tb-form-row no-border no-padding slide-toggle">
+           class="jnks-iot-form-row no-border no-padding slide-toggle">
         <mat-slide-toggle class="mat-slide" formControlName="fetchPerimeterInfoFromMessageMetadata">
           {{ 'rule-node-config.fetch-perimeter-info-from-metadata' | translate }}
         </mat-slide-toggle>

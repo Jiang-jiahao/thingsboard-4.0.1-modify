@@ -18,7 +18,7 @@ interface EntityTypeInfo {
 }
 
 @Component({
-  selector: 'tb-entity-type-list',
+  selector: 'jnks-iot-entity-type-list',
   templateUrl: './entity-type-list.component.html',
   styleUrls: [],
   providers: [

@@ -11,7 +11,7 @@ import { AssetInfo } from '@app/shared/models/asset.models';
 import { EntityTableConfig } from '@home/models/entity/entities-table-config.models';
 
 @Component({
-  selector: 'tb-asset',
+  selector: 'jnks-iot-asset',
   templateUrl: './asset.component.html',
   styleUrls: ['./asset.component.scss']
 })

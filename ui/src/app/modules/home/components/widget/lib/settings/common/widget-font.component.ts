@@ -16,7 +16,7 @@ export interface WidgetFont {
 }
 
 @Component({
-  selector: 'tb-widget-font',
+  selector: 'jnks-iot-widget-font',
   templateUrl: './widget-font.component.html',
   styleUrls: [],
   providers: [

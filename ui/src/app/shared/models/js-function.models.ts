@@ -1,64 +1,64 @@
 import { forkJoin, from, map, mergeMap, Observable, of, ReplaySubject, switchMap } from 'rxjs';
-import { removeTbResourcePrefix, ResourceInfo } from '@shared/models/resource.models';
+import { removeJnksIotResourcePrefix, ResourceInfo } from '@shared/models/resource.models';
 import { HttpClient } from '@angular/common/http';
 import { defaultHttpOptionsFromConfig } from '@core/http/http-utils';
-import { TbEditorCompleter, TbEditorCompletion } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompleter, JnksIotEditorCompletion } from '@shared/models/ace/completion.models';
 import { blobToText } from '@core/utils';
 import { catchError, finalize } from 'rxjs/operators';
 import { parseError } from '@shared/models/error.models';
 import { TranslateService } from '@ngx-translate/core';
 
-export interface TbFunctionWithModules {
+export interface JnksIotFunctionWithModules {
   body: string;
   modules: {[alias: string]: string };
 }
 
-export type TbFunction = string | TbFunctionWithModules;
+export type JnksIotFunction = string | JnksIotFunctionWithModules;
 
-export const isNotEmptyTbFunction = (tbFunction: TbFunction): boolean => {
-  if (tbFunction) {
-    if (typeof tbFunction === 'string') {
-      return tbFunction.trim().length > 0;
+export const isNotEmptyJnksIotFunction = (jnksIotFunction: JnksIotFunction): boolean => {
+  if (jnksIotFunction) {
+    if (typeof jnksIotFunction === 'string') {
+      return jnksIotFunction.trim().length > 0;
     } else {
-      return tbFunction.body && tbFunction.body.trim().length > 0;
+      return jnksIotFunction.body && jnksIotFunction.body.trim().length > 0;
     }
   } else {
     return false;
   }
 }
 
-export const compileTbFunction = <T extends GenericFunction>(http: HttpClient, tbFunction: TbFunction, ...args: string[]): Observable<CompiledTbFunction<T>> => {
+export const compileJnksIotFunction = <T extends GenericFunction>(http: HttpClient, jnksIotFunction: JnksIotFunction, ...args: string[]): Observable<CompiledJnksIotFunction<T>> => {
   let functionBody: string;
   let functionArgs: string[];
   let modules: {[alias: string]: string };
-  if (typeof tbFunction === 'string') {
-    functionBody = tbFunction;
+  if (typeof jnksIotFunction === 'string') {
+    functionBody = jnksIotFunction;
     functionArgs = args;
   } else {
-    functionBody = tbFunction.body;
-    modules = tbFunction.modules;
-    const modulesArgs = Object.keys(tbFunction.modules);
+    functionBody = jnksIotFunction.body;
+    modules = jnksIotFunction.modules;
+    const modulesArgs = Object.keys(jnksIotFunction.modules);
     functionArgs = args.concat(modulesArgs);
   }
   return loadFunctionModules(http, modules).pipe(
     map((compiledModules) => {
       const compiledFunction = new Function(...functionArgs, functionBody);
-      return new CompiledTbFunction<T>(compiledFunction, compiledModules);
+      return new CompiledJnksIotFunction<T>(compiledFunction, compiledModules);
     })
   );
 }
 
-export const loadModulesCompleter = (http: HttpClient, modules: {[alias: string]: string }): Observable<TbEditorCompleter | null> => {
+export const loadModulesCompleter = (http: HttpClient, modules: {[alias: string]: string }): Observable<JnksIotEditorCompleter | null> => {
   if (!modules || !Object.keys(modules).length) {
     return of(null);
   } else {
-    const modulesDescription: {[alias: string]: Observable<TbEditorCompletion>} = {};
+    const modulesDescription: {[alias: string]: Observable<JnksIotEditorCompletion>} = {};
     for (const alias of Object.keys(modules)) {
       modulesDescription[alias] = loadModuleCompletion(http, modules[alias]);
     }
     return forkJoin(modulesDescription).pipe(
       map((completions) => {
-        return new TbEditorCompleter(completions);
+        return new JnksIotEditorCompleter(completions);
       })
     );
   }
@@ -136,10 +136,10 @@ export const loadModuleMarkdownSourceCode = (http: HttpClient, translate: Transl
   );
 }
 
-const loadModuleCompletion = (http: HttpClient, moduleLink: string): Observable<TbEditorCompletion> => {
+const loadModuleCompletion = (http: HttpClient, moduleLink: string): Observable<JnksIotEditorCompletion> => {
   return loadFunctionModule(http, moduleLink).pipe(
     map((module) => {
-      const completion: TbEditorCompletion = {
+      const completion: JnksIotEditorCompletion = {
         meta: 'module',
         type: 'module',
         children: {}
@@ -147,7 +147,7 @@ const loadModuleCompletion = (http: HttpClient, moduleLink: string): Observable<
       for (const propName of Object.keys(module)) {
         const prop = module[propName];
         const type = typeof prop;
-        const propertyCompletion: TbEditorCompletion = {
+        const propertyCompletion: JnksIotEditorCompletion = {
           meta: type === 'function' ? 'function' : 'constant',
           type
         };
@@ -157,14 +157,14 @@ const loadModuleCompletion = (http: HttpClient, moduleLink: string): Observable<
           });
           propertyCompletion.return = { type: 'any'};
         } else if (type !== 'object') {
-          propertyCompletion.description = `<div class="tb-api-title">Constant value:</div><code class="title">${prop}</code>`;
+          propertyCompletion.description = `<div class="jnks-iot-api-title">Constant value:</div><code class="title">${prop}</code>`;
         }
         completion.children[propName] = propertyCompletion;
       }
       return completion;
     }),
     catchError(err => {
-      const completion: TbEditorCompletion = {
+      const completion: JnksIotEditorCompletion = {
         meta: 'module',
         type: 'module',
         children: {}
@@ -178,7 +178,7 @@ const loadModuleCompletion = (http: HttpClient, moduleLink: string): Observable<
 
 export type GenericFunction = (...args: any[]) => any;
 
-export class CompiledTbFunction<T extends GenericFunction> {
+export class CompiledJnksIotFunction<T extends GenericFunction> {
 
   public execute: T = this.executeImpl.bind(this);
 
@@ -222,7 +222,7 @@ const loadFunctionModules = (http: HttpClient, modules: {[alias: string]: string
 const modulesLoading: {[url: string]: ReplaySubject<System.Module>} = {};
 
 const loadFunctionModule = (http: HttpClient, moduleLink: string): Observable<System.Module> => {
-  const url = removeTbResourcePrefix(moduleLink);
+  const url = removeJnksIotResourcePrefix(moduleLink);
   let request: ReplaySubject<System.Module>;
   if (modulesLoading[url]) {
     request = modulesLoading[url];
@@ -255,13 +255,13 @@ const loadFunctionModule = (http: HttpClient, moduleLink: string): Observable<Sy
   return request;
 }
 
-interface TbModuleWithSource {
+interface JnksIotModuleWithSource {
   module: System.Module;
   source: string;
 }
 
-const loadFunctionModuleWithSource = (http: HttpClient, moduleLink: string): Observable<TbModuleWithSource> => {
-  const url = removeTbResourcePrefix(moduleLink);
+const loadFunctionModuleWithSource = (http: HttpClient, moduleLink: string): Observable<JnksIotModuleWithSource> => {
+  const url = removeJnksIotResourcePrefix(moduleLink);
   const options = defaultHttpOptionsFromConfig({ignoreLoading: true, ignoreErrors: true});
   return http.get(url, {...options, ...{ observe: 'response', responseType: 'blob' } }).pipe(
     switchMap((response) => {
@@ -277,7 +277,7 @@ const loadFunctionModuleWithSource = (http: HttpClient, moduleLink: string): Obs
 }
 
 const loadFunctionModuleSource = (http: HttpClient, moduleLink: string): Observable<string> => {
-  const url = removeTbResourcePrefix(moduleLink);
+  const url = removeJnksIotResourcePrefix(moduleLink);
   const options = defaultHttpOptionsFromConfig({ignoreLoading: true, ignoreErrors: true});
   return http.get(url, {...options, ...{ responseType: 'text' } });
 }

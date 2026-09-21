@@ -13,7 +13,7 @@ import { EntityKeyValueType, FilterPredicateType, KeyFilterPredicateInfo } from 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-filter-predicate',
+  selector: 'jnks-iot-filter-predicate',
   templateUrl: './filter-predicate.component.html',
   styleUrls: [],
   providers: [

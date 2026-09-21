@@ -29,7 +29,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-dynamic-form-select-items',
+  selector: 'jnks-iot-dynamic-form-select-items',
   templateUrl: './dynamic-form-select-items.component.html',
   styleUrls: ['./dynamic-form-select-items.component.scss'],
   providers: [

@@ -35,9 +35,9 @@ import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.common.data.id.DeviceId;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.common.msg.gateway.metrics.GatewayMetadata;
-import com.jnks.iot.server.common.msg.tools.TbRateLimitsException;
+import com.jnks.iot.server.common.msg.tools.JnksIotRateLimitsException;
 import com.jnks.iot.server.common.transport.TransportService;
 import com.jnks.iot.server.common.transport.TransportServiceCallback;
 import com.jnks.iot.server.common.transport.auth.GetOrCreateDeviceFromGatewayResponse;
@@ -548,7 +548,7 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
     private void processPostTelemetryMsg(T deviceCtx, JsonElement msg, String deviceName, int msgId) {
         try {
             long systemTs = System.currentTimeMillis();
-            TbPair<TransportProtos.PostTelemetryMsg, List<GatewayMetadata>> gatewayPayloadPair = JsonConverter.convertToGatewayTelemetry(msg.getAsJsonArray(), systemTs);
+            JnksIotPair<TransportProtos.PostTelemetryMsg, List<GatewayMetadata>> gatewayPayloadPair = JsonConverter.convertToGatewayTelemetry(msg.getAsJsonArray(), systemTs);
             TransportProtos.PostTelemetryMsg postTelemetryMsg = gatewayPayloadPair.getFirst();
             List<GatewayMetadata> metadata = gatewayPayloadPair.getSecond();
             if (!CollectionUtils.isEmpty(metadata)) {
@@ -918,7 +918,7 @@ public abstract class AbstractGatewaySessionHandler<T extends AbstractGatewayDev
             @Override
             public void onError(Throwable e) {
                 log.trace("[{}][{}][{}] Failed to publish msg: [{}] for device: [{}]", gateway.getTenantId(), gateway.getDeviceId(), sessionId, msg, deviceName, e);
-                if (e instanceof TbRateLimitsException) {
+                if (e instanceof JnksIotRateLimitsException) {
                     closeDeviceSession(deviceName, MqttReasonCodes.Disconnect.MESSAGE_RATE_TOO_HIGH);
                 } else {
                     closeDeviceSession(deviceName, MqttReasonCodes.Disconnect.UNSPECIFIED_ERROR);

@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import com.jnks.iot.common.util.JnksIotExecutors;
 import com.jnks.iot.rule.engine.api.MailService;
-import com.jnks.iot.rule.engine.api.TbEmail;
+import com.jnks.iot.rule.engine.api.JnksIotEmail;
 import com.jnks.iot.server.cache.limits.RateLimitService;
 import com.jnks.iot.server.common.data.AdminSettings;
 import com.jnks.iot.server.common.data.ApiFeature;
@@ -36,10 +36,10 @@ import com.jnks.iot.server.common.data.exception.JnksIotException;
 import com.jnks.iot.server.common.data.id.CustomerId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.limit.LimitedApi;
-import com.jnks.iot.server.common.stats.TbApiUsageReportClient;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageReportClient;
 import com.jnks.iot.server.dao.exception.IncorrectParameterException;
 import com.jnks.iot.server.dao.settings.AdminSettingsService;
-import com.jnks.iot.server.service.apiusage.TbApiUsageStateService;
+import com.jnks.iot.server.service.apiusage.JnksIotApiUsageStateService;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * 默认的邮件服务，实际调用TbMailSender进行发送
+ * 默认的邮件服务，实际调用JnksIotMailSender进行发送
  */
 @Service
 @Slf4j
@@ -62,13 +62,13 @@ public class DefaultMailService implements MailService {
     private final MessageSource messages;
     private final Configuration freemarkerConfig;
     private final AdminSettingsService adminSettingsService;
-    private final TbApiUsageReportClient apiUsageClient;
+    private final JnksIotApiUsageReportClient apiUsageClient;
 
     private static final long DEFAULT_TIMEOUT = 10_000;
 
     @Lazy
     @Autowired
-    private TbApiUsageStateService apiUsageStateService;
+    private JnksIotApiUsageStateService apiUsageStateService;
 
     @Autowired
     private MailSenderInternalExecutorService mailExecutorService;
@@ -77,7 +77,7 @@ public class DefaultMailService implements MailService {
     private PasswordResetExecutorService passwordResetExecutorService;
 
     @Autowired
-    private TbMailContextComponent ctx;
+    private JnksIotMailContextComponent ctx;
 
     @Autowired
     private RateLimitService rateLimitService;
@@ -87,13 +87,13 @@ public class DefaultMailService implements MailService {
 
     private final ScheduledExecutorService timeoutScheduler;
 
-    private TbMailSender mailSender;
+    private JnksIotMailSender mailSender;
 
     private String mailFrom;
 
     private long timeout;
 
-    public DefaultMailService(MessageSource messages, Configuration freemarkerConfig, AdminSettingsService adminSettingsService, TbApiUsageReportClient apiUsageClient) {
+    public DefaultMailService(MessageSource messages, Configuration freemarkerConfig, AdminSettingsService adminSettingsService, JnksIotApiUsageReportClient apiUsageClient) {
         this.messages = messages;
         this.freemarkerConfig = freemarkerConfig;
         this.adminSettingsService = adminSettingsService;
@@ -118,7 +118,7 @@ public class DefaultMailService implements MailService {
         AdminSettings settings = adminSettingsService.findAdminSettingsByKey(TenantId.SYS_TENANT_ID, "mail");
         if (settings != null) {
             JsonNode jsonConfig = settings.getJsonValue();
-            mailSender = new TbMailSender(ctx, jsonConfig);
+            mailSender = new JnksIotMailSender(ctx, jsonConfig);
             mailFrom = jsonConfig.get("mailFrom").asText();
             timeout = jsonConfig.get("timeout").asLong(DEFAULT_TIMEOUT);
         } else {
@@ -133,7 +133,7 @@ public class DefaultMailService implements MailService {
 
     @Override
     public void sendTestMail(JsonNode jsonConfig, String email) throws JnksIotException {
-        TbMailSender testMailSender = new TbMailSender(ctx, jsonConfig);
+        JnksIotMailSender testMailSender = new JnksIotMailSender(ctx, jsonConfig);
         String mailFrom = jsonConfig.get("mailFrom").asText();
         String subject = messages.getMessage("test.message.subject", null, Locale.US);
         long timeout = jsonConfig.get("timeout").asLong(DEFAULT_TIMEOUT);
@@ -215,16 +215,16 @@ public class DefaultMailService implements MailService {
     }
 
     @Override
-    public void send(TenantId tenantId, CustomerId customerId, TbEmail tbEmail) throws JnksIotException {
-        sendMail(tenantId, customerId, tbEmail, this.mailSender, timeout);
+    public void send(TenantId tenantId, CustomerId customerId, JnksIotEmail jnksIotEmail) throws JnksIotException {
+        sendMail(tenantId, customerId, jnksIotEmail, this.mailSender, timeout);
     }
 
     @Override
-    public void send(TenantId tenantId, CustomerId customerId, TbEmail tbEmail, JavaMailSender javaMailSender, long timeout) throws JnksIotException {
-        sendMail(tenantId, customerId, tbEmail, javaMailSender, timeout);
+    public void send(TenantId tenantId, CustomerId customerId, JnksIotEmail jnksIotEmail, JavaMailSender javaMailSender, long timeout) throws JnksIotException {
+        sendMail(tenantId, customerId, jnksIotEmail, javaMailSender, timeout);
     }
 
-    private void sendMail(TenantId tenantId, CustomerId customerId, TbEmail tbEmail, JavaMailSender javaMailSender, long timeout) throws JnksIotException {
+    private void sendMail(TenantId tenantId, CustomerId customerId, JnksIotEmail jnksIotEmail, JavaMailSender javaMailSender, long timeout) throws JnksIotException {
         if (apiUsageStateService.getApiUsageState(tenantId).isEmailSendEnabled()) {
             if (tenantId != null && !tenantId.isSysTenantId() && StringUtils.isNotEmpty(perTenantRateLimitConfig) &&
                     !rateLimitService.checkRateLimit(LimitedApi.EMAILS, (Object) tenantId, perTenantRateLimitConfig)) {
@@ -232,22 +232,22 @@ public class DefaultMailService implements MailService {
             }
             try {
                 MimeMessage mailMsg = javaMailSender.createMimeMessage();
-                boolean multipart = (tbEmail.getImages() != null && !tbEmail.getImages().isEmpty());
+                boolean multipart = (jnksIotEmail.getImages() != null && !jnksIotEmail.getImages().isEmpty());
                 MimeMessageHelper helper = new MimeMessageHelper(mailMsg, multipart, "UTF-8");
-                helper.setFrom(StringUtils.isBlank(tbEmail.getFrom()) ? mailFrom : tbEmail.getFrom());
-                helper.setTo(tbEmail.getTo().split("\\s*,\\s*"));
-                if (!StringUtils.isBlank(tbEmail.getCc())) {
-                    helper.setCc(tbEmail.getCc().split("\\s*,\\s*"));
+                helper.setFrom(StringUtils.isBlank(jnksIotEmail.getFrom()) ? mailFrom : jnksIotEmail.getFrom());
+                helper.setTo(jnksIotEmail.getTo().split("\\s*,\\s*"));
+                if (!StringUtils.isBlank(jnksIotEmail.getCc())) {
+                    helper.setCc(jnksIotEmail.getCc().split("\\s*,\\s*"));
                 }
-                if (!StringUtils.isBlank(tbEmail.getBcc())) {
-                    helper.setBcc(tbEmail.getBcc().split("\\s*,\\s*"));
+                if (!StringUtils.isBlank(jnksIotEmail.getBcc())) {
+                    helper.setBcc(jnksIotEmail.getBcc().split("\\s*,\\s*"));
                 }
-                helper.setSubject(tbEmail.getSubject());
-                helper.setText(tbEmail.getBody(), tbEmail.isHtml());
+                helper.setSubject(jnksIotEmail.getSubject());
+                helper.setText(jnksIotEmail.getBody(), jnksIotEmail.isHtml());
 
                 if (multipart) {
-                    for (String imgId : tbEmail.getImages().keySet()) {
-                        String imgValue = tbEmail.getImages().get(imgId);
+                    for (String imgId : jnksIotEmail.getImages().keySet()) {
+                        String imgValue = jnksIotEmail.getImages().get(imgId);
                         String value = imgValue.replaceFirst("^data:image/[^;]*;base64,?", "");
                         byte[] bytes = javax.xml.bind.DatatypeConverter.parseBase64Binary(value);
                         String contentType = helper.getFileTypeMap().getContentType(imgId);

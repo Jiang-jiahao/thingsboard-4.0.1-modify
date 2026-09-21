@@ -18,7 +18,7 @@ import { isEqual } from '@core/public-api';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-kv-map-config',
+  selector: 'jnks-iot-kv-map-config',
   templateUrl: './kv-map-config.component.html',
   styleUrls: ['./kv-map-config.component.scss'],
   providers: [

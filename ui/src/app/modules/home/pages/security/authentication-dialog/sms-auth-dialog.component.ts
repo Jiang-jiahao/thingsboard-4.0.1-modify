@@ -15,7 +15,7 @@ import { phoneNumberPattern } from '@shared/models/settings.models';
 import { MatStepper } from '@angular/material/stepper';
 
 @Component({
-  selector: 'tb-sms-auth-dialog',
+  selector: 'jnks-iot-sms-auth-dialog',
   templateUrl: './sms-auth-dialog.component.html',
   styleUrls: ['./authentication-dialog.component.scss']
 })

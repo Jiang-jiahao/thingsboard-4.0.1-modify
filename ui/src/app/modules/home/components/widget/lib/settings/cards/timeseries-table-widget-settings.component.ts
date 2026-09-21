@@ -6,7 +6,7 @@ import { AppState } from '@core/core.state';
 import { buildPageStepSizeValues } from '@home/components/widget/lib/table-widget.models';
 
 @Component({
-  selector: 'tb-timeseries-table-widget-settings',
+  selector: 'jnks-iot-timeseries-table-widget-settings',
   templateUrl: './timeseries-table-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

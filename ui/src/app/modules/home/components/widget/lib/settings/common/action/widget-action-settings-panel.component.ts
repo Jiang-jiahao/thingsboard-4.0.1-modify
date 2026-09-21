@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { WidgetAction, WidgetActionType, widgetType } from '@shared/models/widget.models';
 import { WidgetActionCallbacks } from '@home/components/widget/action/manage-widget-actions.component.models';
@@ -7,7 +7,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'tb-widget-action-settings-panel',
+  selector: 'jnks-iot-widget-action-settings-panel',
   templateUrl: './widget-action-settings-panel.component.html',
   providers: [],
   styleUrls: ['./action-settings-panel.component.scss'],
@@ -47,7 +47,7 @@ export class WidgetActionSettingsPanelComponent implements OnInit {
 
   constructor(private fb: UntypedFormBuilder,
               private translate: TranslateService,
-              private popover: TbPopoverComponent) {
+              private popover: JnksIotPopoverComponent) {
   }
 
   ngOnInit(): void {

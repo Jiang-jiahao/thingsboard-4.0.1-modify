@@ -39,32 +39,32 @@ public enum MsgType {
     QUEUE_TO_RULE_ENGINE_MSG,
 
     /**
-     * Message that is sent by RuleChainActor to RuleActor with command to process TbMsg.
+     * Message that is sent by RuleChainActor to RuleActor with command to process JnksIotMsg.
      */
     RULE_CHAIN_TO_RULE_MSG,
 
     /**
-     * Message that is sent by RuleChainActor to other RuleChainActor with command to process TbMsg.
+     * Message that is sent by RuleChainActor to other RuleChainActor with command to process JnksIotMsg.
      */
     RULE_CHAIN_TO_RULE_CHAIN_MSG,
 
     /**
-     * Message that is sent by RuleNodeActor as input to other RuleChain with command to process TbMsg.
+     * Message that is sent by RuleNodeActor as input to other RuleChain with command to process JnksIotMsg.
      */
     RULE_CHAIN_INPUT_MSG,
 
     /**
-     * Message that is sent by RuleNodeActor as output to RuleNode in other RuleChain with command to process TbMsg.
+     * Message that is sent by RuleNodeActor as output to RuleNode in other RuleChain with command to process JnksIotMsg.
      */
     RULE_CHAIN_OUTPUT_MSG,
 
     /**
-     * Message that is sent by RuleActor to RuleChainActor with command to process TbMsg by next nodes in chain.
+     * Message that is sent by RuleActor to RuleChainActor with command to process JnksIotMsg by next nodes in chain.
      */
     RULE_TO_RULE_CHAIN_TELL_NEXT_MSG,
 
     /**
-     * Message forwarded from original rule chain to remote rule chain due to change in the cluster structure or originator entity of the TbMsg.
+     * Message forwarded from original rule chain to remote rule chain due to change in the cluster structure or originator entity of the JnksIotMsg.
      */
     REMOTE_TO_RULE_CHAIN_TELL_NEXT_MSG,
 

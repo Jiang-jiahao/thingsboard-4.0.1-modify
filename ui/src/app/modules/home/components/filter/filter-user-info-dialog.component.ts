@@ -24,7 +24,7 @@ export interface FilterUserInfoDialogData {
 }
 
 @Component({
-  selector: 'tb-filter-user-info-dialog',
+  selector: 'jnks-iot-filter-user-info-dialog',
   templateUrl: './filter-user-info-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: FilterUserInfoDialogComponent}],
   styleUrls: []

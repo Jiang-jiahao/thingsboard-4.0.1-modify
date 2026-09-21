@@ -21,7 +21,7 @@
       }
     }
 
-    .tb-mobile-items-container {
+    .jnks-iot-mobile-items-container {
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -32,9 +32,9 @@
     }
   }
 
-  .tb-mobile-layout-button.mdc-button {
+  .jnks-iot-mobile-layout-button.mdc-button {
     min-width: 120px;
-    tb-icon {
+    jnks-iot-icon {
       min-width: 18px;
     }
     .mdc-button__label {
@@ -43,7 +43,7 @@
   }
 
   ::ng-deep {
-    .mat-mdc-button.mat-mdc-button-base.tb-add-mobile-item-button {
+    .mat-mdc-button.mat-mdc-button-base.jnks-iot-add-mobile-item-button {
       height: 24px;
       opacity: 0;
       transition: all 200ms;
@@ -53,7 +53,7 @@
           border-bottom-style: dashed;
           border-bottom-width: 1px;
         }
-        .tb-add-mobile-label-container {
+        .jnks-iot-add-mobile-label-container {
           vertical-align: middle;
           .mat-icon {
             display: none;
@@ -64,12 +64,12 @@
             border-bottom-style: inherit;
             border-bottom-width: inherit;
           }
-          .tb-add-mobile-label-container {
+          .jnks-iot-add-mobile-label-container {
             vertical-align: sub;
             .mat-icon {
               display: inline-block;
             }
-            .tb-mobile-divider-label {
+            .jnks-iot-mobile-divider-label {
               display: none;
             }
           }
@@ -98,13 +98,13 @@
             opacity: 0.48;
           }
         }
-        .tb-add-mobile-label-container {
+        .jnks-iot-add-mobile-label-container {
           &:after {
             opacity: 0.48;
           }
         }
       }
-      .tb-add-mobile-label-container {
+      .jnks-iot-add-mobile-label-container {
         display: inline-flex;
         padding: 3px;
         vertical-align: sub;
@@ -113,7 +113,7 @@
         .mat-icon {
           margin: 0;
         }
-        .tb-mobile-divider-label {
+        .jnks-iot-mobile-divider-label {
           line-height: 12px;
           font-size: 10px;
           font-weight: 400;
@@ -127,7 +127,7 @@
           inset: 0;
           opacity: 0.32;
           border-radius: 6px;
-          border: 1px solid $tb-primary-color;
+          border: 1px solid $jnks-iot-primary-color;
           pointer-events: none;
         }
       }
@@ -135,13 +135,13 @@
   }
 }
 
-.tb-mobile-item-row-container {
+.jnks-iot-mobile-item-row-container {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.tb-mobile-item-row {
+.jnks-iot-mobile-item-row {
   position: relative;
   display: flex;
   flex-direction: row;
@@ -152,7 +152,7 @@
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 5px 16px 0 rgba(0, 0, 0, 0.04);
-  .tb-mobile-item-label {
+  .jnks-iot-mobile-item-label {
     position: absolute;
     left: 8px;
     top: -8px;

@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
 import { backgroundStyle, ComponentStyle, overlayStyle } from '@shared/models/widget-settings.models';
 
 @Component({
-  selector: 'tb-toggle-button-widget',
+  selector: 'jnks-iot-toggle-button-widget',
   templateUrl: './toggle-button-widget.component.html',
   styleUrls: ['../action/action-widget.scss', './toggle-button-widget.component.scss'],
   encapsulation: ViewEncapsulation.None

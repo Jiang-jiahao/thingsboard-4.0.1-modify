@@ -32,7 +32,7 @@ export interface ImportDialogCsvData {
 }
 
 @Component({
-  selector: 'tb-import-csv-dialog',
+  selector: 'jnks-iot-import-csv-dialog',
   templateUrl: './import-dialog-csv.component.html',
   providers: [],
   styleUrls: ['./import-dialog-csv.component.scss']

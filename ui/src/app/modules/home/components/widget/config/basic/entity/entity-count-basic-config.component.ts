@@ -12,7 +12,7 @@ import { UtilsService } from '@core/services/utils.service';
 import { countDefaultSettings, CountWidgetSettings } from '@home/components/widget/lib/count/count-widget.models';
 
 @Component({
-  selector: 'tb-entity-count-basic-config',
+  selector: 'jnks-iot-entity-count-basic-config',
   templateUrl: './entity-count-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

@@ -14,11 +14,11 @@
   <div mat-dialog-content>
     <fieldset [disabled]="isLoading$ | async">
       <div style="padding-bottom: 0.5em;">{{ assignToCustomerText | translate }}</div>
-      <tb-entity-autocomplete
+      <jnks-iot-entity-autocomplete
         formControlName="customerId"
         required
         [entityType]="entityType.CUSTOMER">
-      </tb-entity-autocomplete>
+      </jnks-iot-entity-autocomplete>
     </fieldset>
   </div>
   <div mat-dialog-actions class="flex flex-row items-center justify-end">

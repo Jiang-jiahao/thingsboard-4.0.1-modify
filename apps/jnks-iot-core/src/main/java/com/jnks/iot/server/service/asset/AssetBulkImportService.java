@@ -1,0 +1,97 @@
+package com.jnks.iot.server.service.asset;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.StringUtils;
+import com.jnks.iot.server.common.data.asset.Asset;
+import com.jnks.iot.server.common.data.asset.AssetProfile;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.sync.ie.importing.csv.BulkImportColumnType;
+import com.jnks.iot.server.dao.asset.AssetProfileService;
+import com.jnks.iot.server.dao.asset.AssetService;
+import com.jnks.iot.server.service.entitiy.asset.JnksIotAssetService;
+import com.jnks.iot.server.service.security.model.SecurityUser;
+import com.jnks.iot.server.service.sync.ie.importing.csv.AbstractBulkImportService;
+
+import java.util.Map;
+import java.util.Optional;
+
+/**
+ * CSV 资产批量导入实现。
+ * <p>
+ * 由导入相关 Controller 调用，按列映射填充 {@link Asset}，解析或创建资产配置（Asset Profile），
+ * 再委托 {@link JnksIotAssetService} 落库。后者会写审计日志并触发规则引擎 / Edge 同步。
+ * 按名称查找已有资产走 {@link AssetService} DAO；找不到则新建。
+ *
+ * @see AbstractBulkImportService
+ * @see JnksIotAssetService
+ */
+@Service
+@RequiredArgsConstructor
+public class AssetBulkImportService extends AbstractBulkImportService<Asset> {
+    private final AssetService assetService;
+    private final JnksIotAssetService jnksIotAssetService;
+    private final AssetProfileService assetProfileService;
+
+    /** 将 CSV 列映射到资产名称、类型、标签与描述。 */
+    @Override
+    protected void setEntityFields(Asset entity, Map<BulkImportColumnType, String> fields) {
+        ObjectNode additionalInfo = getOrCreateAdditionalInfoObj(entity);
+        fields.forEach((columnType, value) -> {
+            switch (columnType) {
+                case NAME:
+                    entity.setName(value);
+                    break;
+                case TYPE:
+                    entity.setType(value);
+                    break;
+                case LABEL:
+                    entity.setLabel(value);
+                    break;
+                case DESCRIPTION:
+                    additionalInfo.set("description", new TextNode(value));
+                    break;
+            }
+        });
+        entity.setAdditionalInfo(additionalInfo);
+    }
+
+    /** 绑定资产配置后经 {@link JnksIotAssetService} 保存（含审计与同步副作用）。 */
+    @Override
+    @SneakyThrows
+    protected Asset saveEntity(SecurityUser user, Asset entity, Map<BulkImportColumnType, String> fields) {
+        AssetProfile assetProfile;
+        if (StringUtils.isNotEmpty(entity.getType())) {
+            assetProfile = assetProfileService.findOrCreateAssetProfile(entity.getTenantId(), entity.getType());
+        } else {
+            assetProfile = assetProfileService.findDefaultAssetProfile(entity.getTenantId());
+        }
+        entity.setAssetProfileId(assetProfile.getId());
+        return jnksIotAssetService.save(entity, user);
+    }
+
+    /** 按租户与名称查找资产，不存在则返回空对象供后续填充。 */
+    @Override
+    protected Asset findOrCreateEntity(TenantId tenantId, String name) {
+        return Optional.ofNullable(assetService.findAssetByTenantIdAndName(tenantId, name))
+                .orElseGet(Asset::new);
+    }
+
+    /** 将导入用户的租户与客户写到资产上。 */
+    @Override
+    protected void setOwners(Asset entity, SecurityUser user) {
+        entity.setTenantId(user.getTenantId());
+        entity.setCustomerId(user.getCustomerId());
+    }
+
+    /** 声明本导入器处理的实体类型为资产。 */
+    @Override
+    protected EntityType getEntityType() {
+        return EntityType.ASSET;
+    }
+
+}

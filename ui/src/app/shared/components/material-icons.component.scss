@@ -1,34 +1,34 @@
-.tb-material-icons-panel {
+.jnks-iot-material-icons-panel {
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
   align-items: center;
-  .tb-material-icons-title {
+  .jnks-iot-material-icons-title {
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
     color: rgba(0, 0, 0, 0.87);
   }
-  .tb-material-icons-title, .tb-material-icons-search {
+  .jnks-iot-material-icons-title, .jnks-iot-material-icons-search {
     width: 100%;
   }
-  .tb-material-icons-viewport {
+  .jnks-iot-material-icons-viewport {
     min-height: 144px;
   }
-  .tb-material-icons-row {
+  .jnks-iot-material-icons-row {
     display: flex;
     flex-direction: row;
     gap: 12px;
   }
-  .tb-material-icons-row + .tb-material-icons-row {
+  .jnks-iot-material-icons-row + .jnks-iot-material-icons-row {
     margin-top: 12px;
   }
-  .tb-no-data-available {
+  .jnks-iot-no-data-available {
     min-height: 144px;
   }
-  button.mat-mdc-button-base.tb-select-icon-button {
+  button.mat-mdc-button-base.jnks-iot-select-icon-button {
     width: 36px;
     min-width: 36px;
     height: 36px;
@@ -43,7 +43,7 @@
       margin: 0;
     }
   }
-  .tb-material-icons-panel-buttons {
+  .jnks-iot-material-icons-panel-buttons {
     height: 40px;
     display: flex;
     flex-direction: row;

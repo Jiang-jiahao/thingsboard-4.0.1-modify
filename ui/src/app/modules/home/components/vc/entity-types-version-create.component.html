@@ -26,13 +26,13 @@
         <div class="entity-type-config-content flex flex-col gap-2">
           <mat-divider></mat-divider>
           <div class="flex flex-row xs:flex-col gt-xs:gap-4">
-            <tb-entity-type-select
+            <jnks-iot-entity-type-select
               showLabel
               formControlName="entityType"
               required
               [filterAllowedEntityTypes]="false"
               [allowedEntityTypes]="allowedEntityTypes(entityTypeFormGroup)">
-            </tb-entity-type-select>
+            </jnks-iot-entity-type-select>
             <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4" formGroupName="config">
               <mat-form-field class="mat-block flex-1">
                 <mat-label translate>version-control.sync-strategy</mat-label>
@@ -66,20 +66,20 @@
             <mat-slide-toggle formControlName="allEntities">
               {{ 'version-control.all-entities' | translate }}
             </mat-slide-toggle>
-            <tb-entity-list
+            <jnks-iot-entity-list
               class="flex-1"
               [class.!hidden]="entityTypeFormGroup.get('config').get('allEntities').value"
               [entityType]="entityTypeFormGroup.get('entityType').value"
               required
               formControlName="entityIds">
-            </tb-entity-list>
+            </jnks-iot-entity-list>
           </div>
         </div>
       </mat-expansion-panel>
     </div>
     <div *ngIf="!entityTypesFormGroupArray().length">
           <span translate
-                class="tb-prompt flex items-center justify-center">version-control.no-entities-to-export-prompt</span>
+                class="jnks-iot-prompt flex items-center justify-center">version-control.no-entities-to-export-prompt</span>
     </div>
   </div>
   <div style="padding-top: 16px;" class="flex flex-row">

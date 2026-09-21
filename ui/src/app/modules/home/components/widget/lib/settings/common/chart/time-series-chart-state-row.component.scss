@@ -1,22 +1,22 @@
 @import '../../../../../../../../../scss/constants';
 
-.tb-form-table-row.tb-time-series-state-row {
+.jnks-iot-form-table-row.jnks-iot-time-series-state-row {
   @media #{$mat-lt-md} {
     align-items: flex-start;
   }
-  .tb-state-label-field {
+  .jnks-iot-state-label-field {
     flex: 1;
     min-width: 70px;
   }
-  .tb-state-value-field {
+  .jnks-iot-state-value-field {
     width: 80px;
     min-width: 80px;
   }
-  .tb-state-source-field {
+  .jnks-iot-state-source-field {
     width: 100px;
     min-width: 100px;
   }
-  .tb-state-source-value-field {
+  .jnks-iot-state-source-value-field {
     flex: 1;
     min-width: 200px;
     display: flex;
@@ -28,7 +28,7 @@
       align-items: center;
       gap: 12px;
     }
-    .tb-inline-field {
+    .jnks-iot-inline-field {
       flex: 1;
     }
   }

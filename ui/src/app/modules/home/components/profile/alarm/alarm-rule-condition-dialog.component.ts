@@ -20,7 +20,7 @@ export interface AlarmRuleConditionDialogData {
 }
 
 @Component({
-  selector: 'tb-alarm-rule-condition-dialog',
+  selector: 'jnks-iot-alarm-rule-condition-dialog',
   templateUrl: './alarm-rule-condition-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: AlarmRuleConditionDialogComponent}],
   styleUrls: ['./alarm-rule-condition-dialog.component.scss']

@@ -1,5 +1,5 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { merge } from 'rxjs';
 import {
@@ -19,7 +19,7 @@ import { WidgetActionCallbacks } from '@home/components/widget/action/manage-wid
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-scada-symbol-behavior-panel',
+  selector: 'jnks-iot-scada-symbol-behavior-panel',
   templateUrl: './scada-symbol-behavior-panel.component.html',
   styleUrls: ['./scada-symbol-behavior-panel.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -57,7 +57,7 @@ export class ScadaSymbolBehaviorPanelComponent implements OnInit {
   disabled: boolean;
 
   @Input()
-  popover: TbPopoverComponent<ScadaSymbolBehaviorPanelComponent>;
+  popover: JnksIotPopoverComponent<ScadaSymbolBehaviorPanelComponent>;
 
   @Output()
   behaviorSettingsApplied = new EventEmitter<ScadaSymbolBehavior>();

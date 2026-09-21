@@ -16,7 +16,7 @@ import { MapSettingsContext } from '@home/components/widget/lib/settings/common/
 import { DataKeyType } from '@shared/models/telemetry/telemetry.models';
 
 @Component({
-  selector: 'tb-image-map-source-settings',
+  selector: 'jnks-iot-image-map-source-settings',
   templateUrl: './image-map-source-settings.component.html',
   styleUrls: [],
   providers: [

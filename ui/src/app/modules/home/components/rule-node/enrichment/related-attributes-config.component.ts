@@ -14,7 +14,7 @@ import {
 import { entityFields } from '@shared/models/entity.models';
 
 @Component({
-  selector: 'tb-enrichment-node-related-attributes-config',
+  selector: 'jnks-iot-enrichment-node-related-attributes-config',
   templateUrl: './related-attributes-config.component.html',
   styleUrls: []
 })

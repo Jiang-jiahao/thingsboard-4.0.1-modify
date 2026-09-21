@@ -1,6 +1,6 @@
 import * as CanvasGauges from 'canvas-gauges';
 import { WidgetContext } from '@home/models/widget-component.models';
-import { TbAnalogueGauge } from '@home/components/widget/lib/analogue-gauge.models';
+import { JnksIotAnalogueGauge } from '@home/components/widget/lib/analogue-gauge.models';
 import {
   AnalogueLinearGaugeSettings
 } from '@home/components/widget/lib/analogue-linear-gauge.models';
@@ -11,7 +11,7 @@ import LinearGauge = CanvasGauges.LinearGauge;
 import BaseGauge = CanvasGauges.BaseGauge;
 
 // @dynamic
-export class TbAnalogueLinearGauge extends TbAnalogueGauge<AnalogueLinearGaugeSettings, LinearGaugeOptions>{
+export class JnksIotAnalogueLinearGauge extends JnksIotAnalogueGauge<AnalogueLinearGaugeSettings, LinearGaugeOptions>{
 
   constructor(ctx: WidgetContext, canvasId: string) {
     super(ctx, canvasId);

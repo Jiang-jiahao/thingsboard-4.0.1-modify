@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
 import { ColorRange, ColorRangeSettings } from '@shared/models/widget-settings.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -11,7 +11,7 @@ import {
 } from '@home/components/widget/lib/settings/common/color-range-settings.component';
 
 @Component({
-  selector: 'tb-color-range-panel',
+  selector: 'jnks-iot-color-range-panel',
   templateUrl: './color-range-panel.component.html',
   providers: [],
   styleUrls: ['./color-settings-panel.component.scss'],
@@ -23,7 +23,7 @@ export class ColorRangePanelComponent extends PageComponent implements OnInit {
   colorRangeSettings: Array<ColorRange>;
 
   @Input()
-  popover: TbPopoverComponent<ColorRangePanelComponent>;
+  popover: JnksIotPopoverComponent<ColorRangePanelComponent>;
 
   @Input()
   settingsComponents: ColorRangeSettingsComponent[];

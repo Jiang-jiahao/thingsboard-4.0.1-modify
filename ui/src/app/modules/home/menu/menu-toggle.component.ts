@@ -6,7 +6,7 @@ import { AppState } from '@core/core.state';
 import { ActionPreferencesUpdateOpenedMenuSection } from '@core/auth/auth.actions';
 
 @Component({
-  selector: 'tb-menu-toggle',
+  selector: 'jnks-iot-menu-toggle',
   templateUrl: './menu-toggle.component.html',
   styleUrls: ['./menu-toggle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

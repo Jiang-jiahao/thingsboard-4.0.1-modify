@@ -7,9 +7,9 @@
     color: rgba(0, 0, 0, 0.76);
   }
 
-  .tb-resource-usage {
+  .jnks-iot-resource-usage {
     cursor: default;
-    &.tb-status-warn, &.tb-status-critical {
+    &.jnks-iot-status-warn, &.jnks-iot-status-critical {
       position: relative;
       overflow: visible;
       &:before {
@@ -21,14 +21,14 @@
         line-height: 1;
       }
     }
-    &.tb-status-warn {
+    &.jnks-iot-status-warn {
       color: #FAA405;
       &:before {
         content: "warning";
         color: #FAA405;
       }
     }
-    &.tb-status-critical {
+    &.jnks-iot-status-critical {
       color: #D12730;
       &:before {
         content: "warning";

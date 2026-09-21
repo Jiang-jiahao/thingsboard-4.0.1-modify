@@ -21,7 +21,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-udp-device-transport-configuration',
+  selector: 'jnks-iot-udp-device-transport-configuration',
   templateUrl: './udp-device-transport-configuration.component.html',
   styleUrls: [],
   providers: [

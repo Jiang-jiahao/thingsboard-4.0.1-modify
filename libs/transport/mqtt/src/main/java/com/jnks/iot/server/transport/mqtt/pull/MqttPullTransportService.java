@@ -299,7 +299,7 @@ public class MqttPullTransportService {
             return deviceClientId.trim();
         }
         String suffix = ctx.getDeviceId().getId().toString().replace("-", "").substring(0, 8);
-        String clientId = "tb-mqtt-pull-" + suffix;
+        String clientId = "jnks-iot-mqtt-pull-" + suffix;
         return clientId.length() > 23 ? clientId.substring(0, 23) : clientId;
     }
 

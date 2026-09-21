@@ -1,8 +1,8 @@
 <div *ngIf="dataKeyConfigMode === dataKeyConfigModes.general; else advanced"
      [formGroup]="dataKeyFormGroup">
   <div class="mat-padding flex flex-col gap-4">
-    <div class="tb-form-panel">
-      <div class="tb-form-panel-title" translate>datakey.general</div>
+    <div class="jnks-iot-form-panel">
+      <div class="jnks-iot-form-panel-title" translate>datakey.general</div>
       <mat-form-field *ngIf="modelValue.type !== dataKeyTypes.function && !hideDataKeyName" subscriptSizing="dynamic">
         <mat-label>{{ 'entity.key' | translate }}</mat-label>
         <input matInput type="text" placeholder="{{ 'entity.key-name' | translate }}"
@@ -17,7 +17,7 @@
           <mat-icon class="material-icons">close</mat-icon>
         </button>
         <mat-autocomplete
-          class="tb-autocomplete"
+          class="jnks-iot-autocomplete"
           #keyAutocomplete="matAutocomplete">
           <mat-option *ngFor="let key of filteredKeys | async" [value]="key">
             <span [innerHTML]="key | highlight:keySearchText"></span>
@@ -29,29 +29,29 @@
         <input matInput formControlName="label" required>
       </mat-form-field>
       <ng-container *ngIf="modelValue.type !== dataKeyTypes.alarm">
-        <div class="tb-form-row space-between" *ngIf="!hideDataKeyUnits">
+        <div class="jnks-iot-form-row space-between" *ngIf="!hideDataKeyUnits">
           <div translate>widget-config.units-short</div>
-          <tb-unit-input
+          <jnks-iot-unit-input
             formControlName="units">
-          </tb-unit-input>
+          </jnks-iot-unit-input>
         </div>
-        <div class="tb-form-row space-between" *ngIf="!hideDataKeyDecimals">
+        <div class="jnks-iot-form-row space-between" *ngIf="!hideDataKeyDecimals">
           <div translate>widget-config.decimals-short</div>
           <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
             <input matInput formControlName="decimals" type="number" min="0" max="15" step="1" placeholder="{{ 'widget-config.set' | translate }}">
           </mat-form-field>
         </div>
       </ng-container>
-      <div class="tb-form-row space-between" *ngIf="!hideDataKeyColor">
+      <div class="jnks-iot-form-row space-between" *ngIf="!hideDataKeyColor">
         <div>{{ 'datakey.color' | translate }}</div>
-        <tb-color-input asBoxInput
+        <jnks-iot-color-input asBoxInput
                         formControlName="color">
-        </tb-color-input>
+        </jnks-iot-color-input>
       </div>
       <section class="flex flex-col" *ngIf="modelValue.type === dataKeyTypes.function">
         <span translate>datakey.data-generation-func</span>
         <br/>
-        <tb-js-func #funcBodyEdit
+        <jnks-iot-js-func #funcBodyEdit
                     [functionArgs]="['time', 'prevValue']"
                     [globalVariables]="functionScopeVariables"
                     [validationArgs]="[[1, 1],[1, '1']]"
@@ -59,11 +59,11 @@
                     resultType="any"
                     helpId="widget/config/datakey_generation_fn"
                     formControlName="funcBody">
-        </tb-js-func>
+        </jnks-iot-js-func>
       </section>
       <ng-container *ngIf="widgetType === widgetTypes.latest && modelValue.type === dataKeyTypes.timeseries">
-        <div class="tb-form-row column">
-          <div class="tb-form-row space-between no-border no-padding">
+        <div class="jnks-iot-form-row column">
+          <div class="jnks-iot-form-row space-between no-border no-padding">
             <div>{{ 'datakey.aggregation' | translate }}</div>
             <mat-form-field class="medium-width" subscriptSizing="dynamic" appearance="outline">
               <mat-select formControlName="aggregationType">
@@ -73,7 +73,7 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="tb-form-hint tb-primary-fill">
+          <div class="jnks-iot-form-hint jnks-iot-primary-fill">
             {{ dataKeyFormGroup.get('aggregationType').value ? (dataKeyAggregationTypeHintTranslations.get(aggregationTypes[dataKeyFormGroup.get('aggregationType').value]) | translate) : '' }}
             <section *ngIf="dataKeyFormGroup.get('aggregationType').value !== aggregationTypes.NONE">
               {{ 'datakey.aggregation-type-hint-common' | translate }}
@@ -83,21 +83,21 @@
       </ng-container>
     </div>
     <div *ngIf="dataKeyFormGroup.get('aggregationType').value && dataKeyFormGroup.get('aggregationType').value !== aggregationTypes.NONE"
-         class="tb-form-panel">
-      <div class="tb-form-panel-title" translate>datakey.delta-calculation</div>
-      <div class="tb-form-panel stroked tb-slide-toggle">
-        <mat-expansion-panel class="tb-settings" [expanded]="dataKeyFormGroup.get('comparisonEnabled').value" [disabled]="!dataKeyFormGroup.get('comparisonEnabled').value">
+         class="jnks-iot-form-panel">
+      <div class="jnks-iot-form-panel-title" translate>datakey.delta-calculation</div>
+      <div class="jnks-iot-form-panel stroked jnks-iot-slide-toggle">
+        <mat-expansion-panel class="jnks-iot-settings" [expanded]="dataKeyFormGroup.get('comparisonEnabled').value" [disabled]="!dataKeyFormGroup.get('comparisonEnabled').value">
         <mat-expansion-panel-header class="flex flex-row flex-wrap">
           <mat-panel-title class="flex flex-col items-start justify-center gap-2">
             <mat-slide-toggle class="mat-slide" formControlName="comparisonEnabled" (click)="$event.stopPropagation()">
               {{ 'datakey.enable-delta-calculation' | translate }}
             </mat-slide-toggle>
-            <mat-hint class="tb-form-hint tb-primary-fill">{{ 'datakey.enable-delta-calculation-hint' | translate }}</mat-hint>
+            <mat-hint class="jnks-iot-form-hint jnks-iot-primary-fill">{{ 'datakey.enable-delta-calculation-hint' | translate }}</mat-hint>
           </mat-panel-title>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
           <ng-container *ngIf="dataKeyFormGroup.get('comparisonEnabled').value">
-            <div class="tb-form-row space-between">
+            <div class="jnks-iot-form-row space-between">
               <div>{{ 'widgets.chart.time-for-comparison' | translate }}</div>
               <mat-form-field class="medium-width" subscriptSizing="dynamic" appearance="outline">
                 <mat-select formControlName="timeForComparison">
@@ -122,13 +122,13 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <div *ngIf="dataKeyFormGroup.get('timeForComparison').value === 'customInterval'" class="tb-form-row space-between">
+            <div *ngIf="dataKeyFormGroup.get('timeForComparison').value === 'customInterval'" class="jnks-iot-form-row space-between">
               <div>{{ 'widgets.chart.custom-interval-value' | translate }}</div>
               <mat-form-field class="medium-width number" subscriptSizing="dynamic" appearance="outline">
                 <input required matInput type="number" min="0" formControlName="comparisonCustomIntervalValue">
               </mat-form-field>
             </div>
-            <div class="tb-form-row space-between">
+            <div class="jnks-iot-form-row space-between">
               <div>{{ 'datakey.delta-calculation-result' | translate }}</div>
               <mat-form-field class="medium-width" subscriptSizing="dynamic" appearance="outline">
                 <mat-select formControlName="comparisonResultType" style="min-width: 150px;">
@@ -143,9 +143,9 @@
       </mat-expansion-panel>
       </div>
     </div>
-    <div class="tb-form-panel tb-slide-toggle"
+    <div class="jnks-iot-form-panel jnks-iot-slide-toggle"
          *ngIf="(modelValue.type === dataKeyTypes.timeseries || modelValue.type === dataKeyTypes.attribute || modelValue.type === dataKeyTypes.count) && showPostProcessing">
-      <mat-expansion-panel class="tb-settings" [expanded]="dataKeyFormGroup.get('usePostProcessing').value" [disabled]="!dataKeyFormGroup.get('usePostProcessing').value">
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="dataKeyFormGroup.get('usePostProcessing').value" [disabled]="!dataKeyFormGroup.get('usePostProcessing').value">
         <mat-expansion-panel-header class="flex flex-row flex-wrap">
           <mat-panel-title>
             <mat-slide-toggle class="mat-slide flex items-stretch justify-center" formControlName="usePostProcessing" (click)="$event.stopPropagation()">
@@ -154,7 +154,7 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <tb-js-func *ngIf="dataKeyFormGroup.get('usePostProcessing').value" #postFuncBodyEdit
+          <jnks-iot-js-func *ngIf="dataKeyFormGroup.get('usePostProcessing').value" #postFuncBodyEdit
                       [functionArgs]="['time', 'value', 'prevValue', 'timePrev', 'prevOrigValue']"
                       [globalVariables]="functionScopeVariables"
                       [validationArgs]="[[1, 1, 1, 1, 1],[1, '1', '1', 1, '1']]"
@@ -162,8 +162,8 @@
                       resultType="any"
                       helpId="widget/config/datakey_postprocess_fn"
                       formControlName="postFuncBody">
-          </tb-js-func>
-          <label *ngIf="dataKeyFormGroup.get('usePostProcessing').value" class="tb-title" style="margin-left: 15px;">
+          </jnks-iot-js-func>
+          <label *ngIf="dataKeyFormGroup.get('usePostProcessing').value" class="jnks-iot-title" style="margin-left: 15px;">
             time - {{ 'datakey.time-description' | translate }}<br/>
             value - {{ 'datakey.value-description' | translate }}<br/>
             prevValue - {{ 'datakey.prev-value-description' | translate }}<br/>
@@ -177,13 +177,13 @@
 </div>
 <ng-template #advanced>
   <div class="mat-padding flex flex-col" [formGroup]="dataKeySettingsFormGroup">
-    <tb-widget-settings
+    <jnks-iot-widget-settings
       [dashboard]="dashboard"
       [aliasController]="aliasController"
       [callbacks]="callbacks"
       [widget]="widget"
       [widgetConfig]="widgetConfig"
       formControlName="settings">
-    </tb-widget-settings>
+    </jnks-iot-widget-settings>
   </div>
 </ng-template>

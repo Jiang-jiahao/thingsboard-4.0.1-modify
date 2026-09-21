@@ -1,0 +1,157 @@
+package com.jnks.iot.rule.engine.action;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.ConcurrentReferenceHashMap;
+import com.jnks.iot.rule.engine.api.DeviceStateManager;
+import com.jnks.iot.rule.engine.api.RuleNode;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
+import com.jnks.iot.rule.engine.api.JnksIotNode;
+import com.jnks.iot.rule.engine.api.JnksIotNodeConfiguration;
+import com.jnks.iot.rule.engine.api.JnksIotNodeException;
+import com.jnks.iot.rule.engine.api.util.JnksIotNodeUtils;
+import com.jnks.iot.server.common.data.EntityType;
+import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
+import com.jnks.iot.server.common.data.msg.JnksIotNodeConnectionType;
+import com.jnks.iot.server.common.data.plugin.ComponentType;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
+import com.jnks.iot.server.common.msg.queue.PartitionChangeMsg;
+import com.jnks.iot.server.common.msg.queue.JnksIotCallback;
+import com.jnks.iot.server.common.msg.tools.JnksIotRateLimits;
+
+import java.util.EnumSet;
+import java.util.Set;
+
+@Slf4j
+@RuleNode(
+        type = ComponentType.ACTION,
+        name = "device state",
+        nodeDescription = "Triggers device connectivity events",
+        nodeDetails = "If incoming message originator is a device, registers configured event for that device in the Device State Service, which sends appropriate message to the Rule Engine." +
+                " If metadata <code>ts</code> property is present, it will be used as event timestamp. Otherwise, the message timestamp will be used." +
+                " If originator entity type is not <code>DEVICE</code> or unexpected error happened during processing, then incoming message is forwarded using <code>Failure</code> chain." +
+                " If rate of connectivity events for a given originator is too high, then incoming message is forwarded using <code>Rate limited</code> chain. " +
+                "<br>" +
+                "Supported device connectivity events are:" +
+                "<ul>" +
+                "<li>Connect event</li>" +
+                "<li>Disconnect event</li>" +
+                "<li>Activity event</li>" +
+                "<li>Inactivity event</li>" +
+                "</ul>" +
+                "This node is particularly useful when device isn't using transports to receive data, such as when fetching data from external API or computing new data within the rule chain.",
+        configClazz = JnksIotDeviceStateNodeConfiguration.class,
+        relationTypes = {JnksIotNodeConnectionType.SUCCESS, JnksIotNodeConnectionType.FAILURE, "Rate limited"},
+        configDirective = "jnksIotActionNodeDeviceStateConfig"
+)
+public class JnksIotDeviceStateNode implements JnksIotNode {
+
+    private static final Set<JnksIotMsgType> SUPPORTED_EVENTS = EnumSet.of(
+            JnksIotMsgType.CONNECT_EVENT, JnksIotMsgType.ACTIVITY_EVENT, JnksIotMsgType.DISCONNECT_EVENT, JnksIotMsgType.INACTIVITY_EVENT
+    );
+    private static final String DEFAULT_RATE_LIMIT_CONFIG = "1:1,30:60,60:3600";
+    private ConcurrentReferenceHashMap<DeviceId, JnksIotRateLimits> rateLimits;
+    private String rateLimitConfig;
+    private JnksIotMsgType event;
+
+    @Override
+    public void init(JnksIotContext ctx, JnksIotNodeConfiguration configuration) throws JnksIotNodeException {
+        JnksIotMsgType event = JnksIotNodeUtils.convert(configuration, JnksIotDeviceStateNodeConfiguration.class).getEvent();
+        if (event == null) {
+            throw new JnksIotNodeException("Event cannot be null!", true);
+        }
+        if (!SUPPORTED_EVENTS.contains(event)) {
+            throw new JnksIotNodeException("Unsupported event: " + event, true);
+        }
+        this.event = event;
+        rateLimits = new ConcurrentReferenceHashMap<>();
+        String deviceStateNodeRateLimitConfig = ctx.getDeviceStateNodeRateLimitConfig();
+        try {
+            rateLimitConfig = new JnksIotRateLimits(deviceStateNodeRateLimitConfig).getConfiguration();
+        } catch (Exception e) {
+            log.error("[{}][{}] Invalid rate limit configuration provided: [{}]. Will use default value [{}].",
+                    ctx.getTenantId().getId(), ctx.getSelfId().getId(), deviceStateNodeRateLimitConfig, DEFAULT_RATE_LIMIT_CONFIG, e);
+            rateLimitConfig = DEFAULT_RATE_LIMIT_CONFIG;
+        }
+    }
+
+    @Override
+    public void onMsg(JnksIotContext ctx, JnksIotMsg msg) {
+        EntityType originatorEntityType = msg.getOriginator().getEntityType();
+        if (!EntityType.DEVICE.equals(originatorEntityType)) {
+            ctx.tellFailure(msg, new IllegalArgumentException(
+                    "Unsupported originator entity type: [" + originatorEntityType + "]. Only DEVICE entity type is supported."
+            ));
+            return;
+        }
+        DeviceId originator = new DeviceId(msg.getOriginator().getId());
+        rateLimits.compute(originator, (__, rateLimit) -> {
+            if (rateLimit == null) {
+                rateLimit = new JnksIotRateLimits(rateLimitConfig);
+            }
+            boolean isNotRateLimited = rateLimit.tryConsume();
+            if (isNotRateLimited) {
+                sendEventAndTell(ctx, originator, msg);
+            } else {
+                ctx.tellNext(msg, "Rate limited");
+            }
+            return rateLimit;
+        });
+    }
+
+    private void sendEventAndTell(JnksIotContext ctx, DeviceId originator, JnksIotMsg msg) {
+        TenantId tenantId = ctx.getTenantId();
+        long eventTs = msg.getMetaDataTs();
+
+        DeviceStateManager deviceStateManager = ctx.getDeviceStateManager();
+        JnksIotCallback callback = getMsgEnqueuedCallback(ctx, msg);
+
+        switch (event) {
+            case CONNECT_EVENT:
+                deviceStateManager.onDeviceConnect(tenantId, originator, eventTs, callback);
+                break;
+            case ACTIVITY_EVENT:
+                deviceStateManager.onDeviceActivity(tenantId, originator, eventTs, callback);
+                break;
+            case DISCONNECT_EVENT:
+                deviceStateManager.onDeviceDisconnect(tenantId, originator, eventTs, callback);
+                break;
+            case INACTIVITY_EVENT:
+                deviceStateManager.onDeviceInactivity(tenantId, originator, eventTs, callback);
+                break;
+            default:
+                ctx.tellFailure(msg, new IllegalStateException("Configured event [" + event + "] is not supported!"));
+        }
+    }
+
+    private JnksIotCallback getMsgEnqueuedCallback(JnksIotContext ctx, JnksIotMsg msg) {
+        return new JnksIotCallback() {
+            @Override
+            public void onSuccess() {
+                ctx.tellSuccess(msg);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                ctx.tellFailure(msg, t);
+            }
+        };
+    }
+
+    @Override
+    public void onPartitionChangeMsg(JnksIotContext ctx, PartitionChangeMsg msg) {
+        rateLimits.entrySet().removeIf(entry -> !ctx.isLocalEntity(entry.getKey()));
+    }
+
+    @Override
+    public void destroy() {
+        if (rateLimits != null) {
+            rateLimits.clear();
+            rateLimits = null;
+        }
+        rateLimitConfig = null;
+        event = null;
+    }
+
+}

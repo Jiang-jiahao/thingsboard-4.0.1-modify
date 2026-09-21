@@ -1,38 +1,38 @@
-<div [formGroup]="axisFormGroup" class="tb-form-table-row tb-axis-row">
-  <div class="tb-axis-id-field">
+<div [formGroup]="axisFormGroup" class="jnks-iot-form-table-row jnks-iot-axis-row">
+  <div class="jnks-iot-axis-id-field">
     {{ modelValue.id }}
   </div>
-  <mat-checkbox class="tb-show-field" formControlName="show"></mat-checkbox>
-  <mat-form-field class="tb-inline-field tb-label-field" appearance="outline" subscriptSizing="dynamic">
+  <mat-checkbox class="jnks-iot-show-field" formControlName="show"></mat-checkbox>
+  <mat-form-field class="jnks-iot-inline-field jnks-iot-label-field" appearance="outline" subscriptSizing="dynamic">
     <input matInput formControlName="label" placeholder="{{ 'widget-config.set' | translate }}">
   </mat-form-field>
-  <mat-form-field class="tb-inline-field tb-position-field" appearance="outline" subscriptSizing="dynamic">
+  <mat-form-field class="jnks-iot-inline-field jnks-iot-position-field" appearance="outline" subscriptSizing="dynamic">
     <mat-select formControlName="position">
       <mat-option *ngFor="let position of axisPositions" [value]="position">
         {{ timeSeriesAxisPositionTranslations.get(position) | translate }}
       </mat-option>
     </mat-select>
   </mat-form-field>
-  <div class="tb-min-field">
-    <mat-form-field appearance="outline" class="tb-inline-field number" subscriptSizing="dynamic">
+  <div class="jnks-iot-min-field">
+    <mat-form-field appearance="outline" class="jnks-iot-inline-field number" subscriptSizing="dynamic">
       <input matInput formControlName="min" type="number" placeholder="{{ 'widgets.chart.chart-axis.scale-auto' | translate }}">
     </mat-form-field>
   </div>
-  <div class="tb-max-field">
-    <mat-form-field appearance="outline" class="tb-inline-field number" subscriptSizing="dynamic">
+  <div class="jnks-iot-max-field">
+    <mat-form-field appearance="outline" class="jnks-iot-inline-field number" subscriptSizing="dynamic">
       <input matInput formControlName="max" type="number" placeholder="{{ 'widgets.chart.chart-axis.scale-auto' | translate }}">
     </mat-form-field>
   </div>
-  <div class="tb-units-field">
-    <tb-unit-input formControlName="units">
-    </tb-unit-input>
+  <div class="jnks-iot-units-field">
+    <jnks-iot-unit-input formControlName="units">
+    </jnks-iot-unit-input>
   </div>
-  <div class="tb-decimals-field">
-    <mat-form-field appearance="outline" class="tb-inline-field number" subscriptSizing="dynamic">
+  <div class="jnks-iot-decimals-field">
+    <mat-form-field appearance="outline" class="jnks-iot-inline-field number" subscriptSizing="dynamic">
       <input matInput formControlName="decimals" type="number" min="0" max="15" step="1" placeholder="{{ 'widget-config.set' | translate }}">
     </mat-form-field>
   </div>
-  <div class="tb-form-table-row-cell-buttons">
+  <div class="jnks-iot-form-table-row-cell-buttons">
     <button type="button"
             mat-icon-button
             #matButton
@@ -41,7 +41,7 @@
             matTooltipPosition="above">
       <mat-icon>settings</mat-icon>
     </button>
-    <div class="tb-remove-button">
+    <div class="jnks-iot-remove-button">
       <button *ngIf="modelValue.id !== 'default'"
               type="button"
               mat-icon-button

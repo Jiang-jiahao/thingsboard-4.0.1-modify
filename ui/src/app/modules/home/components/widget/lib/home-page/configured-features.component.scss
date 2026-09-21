@@ -2,11 +2,11 @@
 
 :host {
 
-  .tb-title {
+  .jnks-iot-title {
     margin-top: 8px;
   }
 
-  .tb-info-icon {
+  .jnks-iot-info-icon {
     color: rgba(0, 0, 0, 0.12);
     font-size: 16px;
     width: 16px;
@@ -15,15 +15,15 @@
     vertical-align: middle;
   }
 
-  .tb-features-list {
+  .jnks-iot-features-list {
     overflow: auto;
   }
 
-  .mat-grid-tile.tb-feature-tile {
+  .mat-grid-tile.jnks-iot-feature-tile {
     overflow: visible;
   }
 
-  .tb-feature-button {
+  .jnks-iot-feature-button {
     height: 50px;
     display: flex;
     overflow: hidden;
@@ -42,7 +42,7 @@
       border: 1px solid rgba(0, 0, 0, 0.12);
       box-shadow: 0 4px 10px rgba(23, 33, 90, 0.08);
     }
-    .tb-feature-text {
+    .jnks-iot-feature-text {
       font-weight: 400;
       font-size: 14px;
       line-height: 20px;
@@ -55,7 +55,7 @@
         line-height: 16px;
       }
     }
-    .tb-feature-status {
+    .jnks-iot-feature-status {
       display: inline-block;
       font-family: 'Material Icons Round';
       font-size: 20px;
@@ -79,7 +79,7 @@
       }
     }
     &.configured {
-      .tb-feature-status {
+      .jnks-iot-feature-status {
         color: #198038;
         background: #F3F6FA;
       }

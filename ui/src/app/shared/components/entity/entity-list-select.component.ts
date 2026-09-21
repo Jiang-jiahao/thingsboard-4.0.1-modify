@@ -15,7 +15,7 @@ interface EntityListSelectModel {
 }
 
 @Component({
-  selector: 'tb-entity-list-select',
+  selector: 'jnks-iot-entity-list-select',
   templateUrl: './entity-list-select.component.html',
   styleUrls: ['./entity-list-select.component.scss'],
   providers: [{

@@ -8,13 +8,13 @@
 }
 
 :host ::ng-deep {
-  tb-entities-table {
+  jnks-iot-entities-table {
     flex: 1;
     min-height: 0;
     height: 100%;
 
-    &.tb-details-mode {
-      .tb-entities-table-container {
+    &.jnks-iot-details-mode {
+      .jnks-iot-entities-table-container {
         background-color: white;
       }
     }

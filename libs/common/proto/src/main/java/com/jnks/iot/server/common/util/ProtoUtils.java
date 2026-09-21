@@ -16,7 +16,7 @@ import com.jnks.iot.server.common.data.EntityType;
 import com.jnks.iot.server.common.data.ResourceSubType;
 import com.jnks.iot.server.common.data.ResourceType;
 import com.jnks.iot.server.common.data.StringUtils;
-import com.jnks.iot.server.common.data.TbResource;
+import com.jnks.iot.server.common.data.JnksIotResource;
 import com.jnks.iot.server.common.data.Tenant;
 import com.jnks.iot.server.common.data.TenantProfile;
 import com.jnks.iot.server.common.data.device.data.CoapDeviceTransportConfiguration;
@@ -33,7 +33,7 @@ import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.EntityIdFactory;
 import com.jnks.iot.server.common.data.id.OtaPackageId;
 import com.jnks.iot.server.common.data.id.RuleChainId;
-import com.jnks.iot.server.common.data.id.TbResourceId;
+import com.jnks.iot.server.common.data.id.JnksIotResourceId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.id.TenantProfileId;
 import com.jnks.iot.server.common.data.kv.AttributeKey;
@@ -851,7 +851,7 @@ public class ProtoUtils {
                 .setCreatedTime(tenantProfile.getCreatedTime())
                 .setName(tenantProfile.getName())
                 .setIsDefault(tenantProfile.isDefault())
-                .setIsolatedTbRuleEngine(tenantProfile.isIsolatedTbRuleEngine());
+                .setIsolatedJnksIotRuleEngine(tenantProfile.isIsolatedJnksIotRuleEngine());
 
         if (isNotNull(tenantProfile.getDescription())) {
             builder.setDescription(tenantProfile.getDescription());
@@ -867,7 +867,7 @@ public class ProtoUtils {
         tenantProfile.setCreatedTime(proto.getCreatedTime());
         tenantProfile.setName(proto.getName());
         tenantProfile.setDefault(proto.getIsDefault());
-        tenantProfile.setIsolatedTbRuleEngine(proto.getIsolatedTbRuleEngine());
+        tenantProfile.setIsolatedJnksIotRuleEngine(proto.getIsolatedJnksIotRuleEngine());
         if (proto.hasDescription()) {
             tenantProfile.setDescription(proto.getDescription());
         }
@@ -877,8 +877,8 @@ public class ProtoUtils {
         return tenantProfile;
     }
 
-    public static TransportProtos.TbResourceProto toProto(TbResource resource) {
-        var builder = TransportProtos.TbResourceProto.newBuilder()
+    public static TransportProtos.JnksIotResourceProto toProto(JnksIotResource resource) {
+        var builder = TransportProtos.JnksIotResourceProto.newBuilder()
                 .setTenantIdMSB(getMsb(resource.getTenantId()))
                 .setTenantIdLSB(getLsb(resource.getTenantId()))
                 .setResourceIdMSB(getMsb(resource.getId()))
@@ -915,8 +915,8 @@ public class ProtoUtils {
         return builder.build();
     }
 
-    public static TbResource fromProto(TransportProtos.TbResourceProto proto) {
-        TbResource resource = new TbResource(getEntityId(proto.getResourceIdMSB(), proto.getResourceIdLSB(), TbResourceId::new));
+    public static JnksIotResource fromProto(TransportProtos.JnksIotResourceProto proto) {
+        JnksIotResource resource = new JnksIotResource(getEntityId(proto.getResourceIdMSB(), proto.getResourceIdLSB(), JnksIotResourceId::new));
         resource.setTenantId(getEntityId(proto.getTenantIdMSB(), proto.getTenantIdLSB(), TenantId::new));
         resource.setCreatedTime(proto.getCreatedTime());
         resource.setTitle(proto.getTitle());
@@ -935,7 +935,7 @@ public class ProtoUtils {
             resource.setDescriptor(JacksonUtil.toJsonNode(proto.getResourceDescriptor()));
         }
         if (proto.hasExternalIdMSB() && proto.hasExternalIdLSB()) {
-            resource.setExternalId(getEntityId(proto.getExternalIdMSB(), proto.getExternalIdLSB(), TbResourceId::new));
+            resource.setExternalId(getEntityId(proto.getExternalIdMSB(), proto.getExternalIdLSB(), JnksIotResourceId::new));
         }
         if (proto.hasData()) {
             resource.setData(proto.getData().toByteArray());

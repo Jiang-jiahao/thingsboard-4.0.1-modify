@@ -42,7 +42,7 @@ const shapeHeight = 113;
 const shapeAspect = shapeWidth / shapeHeight;
 
 @Component({
-  selector: 'tb-signal-strength-widget',
+  selector: 'jnks-iot-signal-strength-widget',
   templateUrl: './signal-strength-widget.component.html',
   styleUrls: ['./signal-strength-widget.component.scss'],
   encapsulation: ViewEncapsulation.None

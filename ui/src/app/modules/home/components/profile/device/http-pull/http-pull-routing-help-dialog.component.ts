@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'tb-http-pull-routing-help-dialog',
+  selector: 'jnks-iot-http-pull-routing-help-dialog',
   templateUrl: './http-pull-routing-help-dialog.component.html',
   styleUrls: ['./http-pull-routing-help-dialog.component.scss']
 })

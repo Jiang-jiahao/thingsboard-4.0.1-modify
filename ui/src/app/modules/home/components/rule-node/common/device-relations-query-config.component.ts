@@ -15,7 +15,7 @@ interface DeviceRelationsQuery {
 }
 
 @Component({
-  selector: 'tb-device-relations-query-config',
+  selector: 'jnks-iot-device-relations-query-config',
   templateUrl: './device-relations-query-config.component.html',
   styleUrls: ['./device-relations-query-config.component.scss'],
   providers: [

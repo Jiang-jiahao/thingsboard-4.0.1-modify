@@ -7,11 +7,11 @@ import java.security.MessageDigest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class VersionedRedisTbCacheTest {
+class VersionedRedisJnksIotCacheTest {
 
     @Test
     void testUpsertTsLatestLUAScriptHash() {
-        assertThat(getSHA1(VersionedRedisTbCache.SET_VERSIONED_VALUE_LUA_SCRIPT)).isEqualTo(new String(VersionedRedisTbCache.SET_VERSIONED_VALUE_SHA));
+        assertThat(getSHA1(VersionedRedisJnksIotCache.SET_VERSIONED_VALUE_LUA_SCRIPT)).isEqualTo(new String(VersionedRedisJnksIotCache.SET_VERSIONED_VALUE_SHA));
     }
 
     @SneakyThrows

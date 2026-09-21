@@ -2,7 +2,7 @@ package com.jnks.iot.server.edqs.data.dp;
 
 import lombok.Getter;
 import com.jnks.iot.server.common.data.kv.DataType;
-import com.jnks.iot.common.util.TbStringPool;
+import com.jnks.iot.common.util.JnksIotStringPool;
 
 public class StringDataPoint extends AbstractDataPoint {
 
@@ -15,7 +15,7 @@ public class StringDataPoint extends AbstractDataPoint {
 
     public StringDataPoint(long ts, String value, boolean deduplicate) {
         super(ts);
-        this.value = deduplicate ? TbStringPool.intern(value) : value;
+        this.value = deduplicate ? JnksIotStringPool.intern(value) : value;
     }
 
     @Override

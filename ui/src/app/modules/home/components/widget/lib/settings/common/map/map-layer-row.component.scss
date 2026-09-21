@@ -1,23 +1,23 @@
 @import '../../../../../../../../../scss/constants';
 
-.tb-form-table-row.tb-map-layer-row {
+.jnks-iot-form-table-row.jnks-iot-map-layer-row {
 
-  .tb-label-field {
+  .jnks-iot-label-field {
     flex: 1 1 33.33%;
   }
 
-  .tb-provider-field {
+  .jnks-iot-provider-field {
     flex: 1 1 33.33%;
   }
 
-  .tb-layer-field {
+  .jnks-iot-layer-field {
     flex: 1 1 33.33%;
     @media #{$mat-xs} {
       display: none;
     }
   }
 
-  .tb-remove-button {
+  .jnks-iot-remove-button {
     width: 40px;
     min-width: 40px;
   }

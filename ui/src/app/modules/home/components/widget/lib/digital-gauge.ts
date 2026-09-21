@@ -14,7 +14,7 @@ import { ColorProcessor, createValueSubscription, ValueSourceType } from '@share
 import GenericOptions = CanvasGauges.GenericOptions;
 
 // @dynamic
-export class TbCanvasDigitalGauge {
+export class JnksIotCanvasDigitalGauge {
 
   constructor(protected ctx: WidgetContext, canvasId: string) {
     const gaugeElement = $('#' + canvasId, ctx.$container)[0];
@@ -61,7 +61,7 @@ export class TbCanvasDigitalGauge {
     this.localSettings.hideValue = settings.showValue !== true;
     this.localSettings.hideMinMax = settings.showMinMax !== true;
     this.localSettings.donutStartAngle = isDefinedAndNotNull(settings.donutStartAngle) ?
-      -TbCanvasDigitalGauge.toRadians(settings.donutStartAngle) : null;
+      -JnksIotCanvasDigitalGauge.toRadians(settings.donutStartAngle) : null;
 
     this.localSettings.title = ((settings.showTitle === true) ?
       (settings.title && settings.title.length > 0 ?

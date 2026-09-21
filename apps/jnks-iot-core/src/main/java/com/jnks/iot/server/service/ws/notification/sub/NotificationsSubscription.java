@@ -1,0 +1,71 @@
+package com.jnks.iot.server.service.ws.notification.sub;
+
+import lombok.Builder;
+import lombok.Getter;
+import org.apache.commons.collections4.CollectionUtils;
+import com.jnks.iot.server.common.data.BaseData;
+import com.jnks.iot.server.common.data.id.EntityId;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.notification.Notification;
+import com.jnks.iot.server.common.data.notification.NotificationType;
+import com.jnks.iot.server.service.subscription.JnksIotSubscription;
+import com.jnks.iot.server.service.subscription.JnksIotSubscriptionType;
+import com.jnks.iot.server.service.ws.notification.cmd.UnreadNotificationsUpdate;
+
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+
+@Getter
+public class NotificationsSubscription extends AbstractNotificationSubscription<NotificationsSubscriptionUpdate> {
+
+    private final Map<UUID, Notification> latestUnreadNotifications = new HashMap<>();
+    private final int limit;
+    private final Set<NotificationType> notificationTypes;
+
+    @Builder
+    public NotificationsSubscription(String serviceId, String sessionId, int subscriptionId, TenantId tenantId, EntityId entityId,
+                                     BiConsumer<JnksIotSubscription<NotificationsSubscriptionUpdate>, NotificationsSubscriptionUpdate> updateProcessor,
+                                     int limit, Set<NotificationType> notificationTypes) {
+        super(serviceId, sessionId, subscriptionId, tenantId, entityId, JnksIotSubscriptionType.NOTIFICATIONS, updateProcessor);
+        this.limit = limit;
+        this.notificationTypes = notificationTypes;
+    }
+
+    public boolean checkNotificationType(NotificationType type) {
+        return CollectionUtils.isEmpty(notificationTypes) || notificationTypes.contains(type);
+    }
+
+    public UnreadNotificationsUpdate createFullUpdate() {
+        return UnreadNotificationsUpdate.builder()
+                .cmdId(getSubscriptionId())
+                .notifications(getSortedNotifications())
+                .totalUnreadCount(totalUnreadCounter.get())
+                .sequenceNumber(sequence.incrementAndGet())
+                .build();
+    }
+
+    public List<Notification> getSortedNotifications() {
+        return latestUnreadNotifications.values().stream()
+                .sorted(Comparator.comparing(BaseData::getCreatedTime, Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+    }
+
+    public UnreadNotificationsUpdate createPartialUpdate(Notification notification) {
+        return UnreadNotificationsUpdate.builder()
+                .cmdId(getSubscriptionId())
+                .update(notification)
+                .totalUnreadCount(totalUnreadCounter.get())
+                .sequenceNumber(sequence.incrementAndGet())
+                .build();
+    }
+
+    public UnreadNotificationsUpdate createCountUpdate() {
+        return UnreadNotificationsUpdate.builder()
+                .cmdId(getSubscriptionId())
+                .totalUnreadCount(totalUnreadCounter.get())
+                .sequenceNumber(sequence.incrementAndGet())
+                .build();
+    }
+
+}

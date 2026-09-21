@@ -21,7 +21,7 @@ interface CountrySearchData extends Country {
 }
 
 @Component({
-  selector: 'tb-country-autocomplete',
+  selector: 'jnks-iot-country-autocomplete',
   templateUrl: 'country-autocomplete.component.html',
   providers: [
     CountryData,

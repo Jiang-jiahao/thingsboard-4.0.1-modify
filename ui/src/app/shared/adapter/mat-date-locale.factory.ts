@@ -1,4 +1,4 @@
-export function tbMatDateLocaleFactory(): string {
+export function jnksIotMatDateLocaleFactory(): string {
   try {
     const lang = (document.documentElement?.lang || '').toLowerCase();
     if (lang.startsWith('zh')) {

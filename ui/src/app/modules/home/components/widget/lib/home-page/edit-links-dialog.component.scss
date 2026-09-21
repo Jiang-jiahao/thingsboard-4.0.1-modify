@@ -1,5 +1,5 @@
 :host {
-  .tb-edit-links-dialog {
+  .jnks-iot-edit-links-dialog {
     width: 480px;
     .mat-mdc-dialog-content {
       max-height: 50vh;
@@ -20,14 +20,14 @@
       padding: 0 24px 24px;
     }
   }
-  .tb-drag-handle {
+  .jnks-iot-drag-handle {
     height: 24px;
     margin-left: 12px;
     .mat-icon {
       color: rgba(0, 0, 0, 0.38);
     }
   }
-  .tb-add-link-button {
+  .jnks-iot-add-link-button {
     height: 55px;
     cursor: pointer;
     display: flex;
@@ -38,11 +38,11 @@
     padding: 8px;
     border: 2px dashed rgba(0, 0, 0, 0.08);
     border-radius: 10px;
-    .tb-add-icon {
+    .jnks-iot-add-icon {
       color: rgba(0, 0, 0, 0.12);
     }
     &:hover {
-      .tb-add-icon {
+      .jnks-iot-add-icon {
         color: rgba(0, 0, 0, 0.38);
       }
     }

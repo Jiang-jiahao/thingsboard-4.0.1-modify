@@ -6,7 +6,7 @@ import { AppState } from '@core/core.state';
 import { buildPageStepSizeValues } from '@home/components/widget/lib/table-widget.models';
 
 @Component({
-  selector: 'tb-entities-table-widget-settings',
+  selector: 'jnks-iot-entities-table-widget-settings',
   templateUrl: './entities-table-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

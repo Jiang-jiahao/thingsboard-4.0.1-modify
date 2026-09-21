@@ -1,4 +1,4 @@
-.tb-latest-chart-panel {
+.jnks-iot-latest-chart-panel {
   width: 100%;
   height: 100%;
   position: relative;
@@ -6,20 +6,20 @@
   flex-direction: column;
   gap: 16px;
   padding: 20px 24px 24px 24px;
-  > div:not(.tb-latest-chart-overlay) {
+  > div:not(.jnks-iot-latest-chart-overlay) {
     z-index: 1;
   }
-  .tb-latest-chart-overlay {
+  .jnks-iot-latest-chart-overlay {
     position: absolute;
     top: 12px;
     left: 12px;
     bottom: 12px;
     right: 12px;
   }
-  div.tb-widget-title {
+  div.jnks-iot-widget-title {
     padding: 0;
   }
-  .tb-latest-chart-content {
+  .jnks-iot-latest-chart-content {
     flex: 1;
     min-width: 0;
     min-height: 0;
@@ -35,7 +35,7 @@
     &.legend-left {
       flex-direction: row-reverse;
     }
-    .tb-latest-chart-shape {
+    .jnks-iot-latest-chart-shape {
       flex: 1;
       min-width: 10px;
       min-height: 10px;
@@ -43,14 +43,14 @@
       align-items: center;
       justify-content: center;
     }
-    .tb-latest-chart-legend {
+    .jnks-iot-latest-chart-legend {
       display: flex;
       justify-content: space-around;
       align-items: center;
       align-self: stretch;
       flex-wrap: wrap;
       gap: 8px;
-      .tb-latest-chart-legend-item {
+      .jnks-iot-latest-chart-legend-item {
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -59,19 +59,19 @@
         &.pointer {
           cursor: pointer;
         }
-        .tb-latest-chart-legend-item-label {
+        .jnks-iot-latest-chart-legend-item-label {
           display: flex;
           align-items: center;
           gap: 4px;
           color: #ccc;
-          .tb-latest-chart-legend-item-label-circle {
+          .jnks-iot-latest-chart-legend-item-label-circle {
             width: 8px;
             height: 8px;
             border-radius: 50%;
             background-color: #ccc;
           }
         }
-        .tb-latest-chart-legend-item-value {
+        .jnks-iot-latest-chart-legend-item-value {
           padding-left: 12px;
           color: #ccc;
         }
@@ -79,11 +79,11 @@
     }
     &.legend-right, &.legend-left {
       gap: 24px;
-      .tb-latest-chart-legend {
+      .jnks-iot-latest-chart-legend {
         flex-direction: column;
         justify-content: center;
         align-items: stretch;
-        .tb-latest-chart-legend-item {
+        .jnks-iot-latest-chart-legend-item {
           flex-direction: row;
           justify-content: space-between;
           align-items: center;
@@ -92,10 +92,10 @@
     }
   }
 
-  .tb-widget-title-row .tb-widget-actions {
+  .jnks-iot-widget-title-row .jnks-iot-widget-actions {
     margin: 0;
   }
-  .tb-widget-actions.tb-widget-actions-absolute {
+  .jnks-iot-widget-actions.jnks-iot-widget-actions-absolute {
     z-index: 2;
   }
 }

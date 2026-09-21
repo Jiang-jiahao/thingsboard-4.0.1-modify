@@ -16,7 +16,7 @@ import com.jnks.iot.server.common.data.kv.LongDataEntry;
 import com.jnks.iot.server.common.data.kv.StringDataEntry;
 import com.jnks.iot.server.common.data.kv.TsKvEntry;
 import com.jnks.iot.server.common.data.kv.TsKvEntryAggWrapper;
-import com.jnks.iot.server.dao.nosql.TbResultSet;
+import com.jnks.iot.server.dao.nosql.JnksIotResultSet;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * Created by ashvayka on 20.02.17.
  */
 @Slf4j
-public class AggregatePartitionsFunction implements com.google.common.util.concurrent.AsyncFunction<List<TbResultSet>, Optional<TsKvEntryAggWrapper>> {
+public class AggregatePartitionsFunction implements com.google.common.util.concurrent.AsyncFunction<List<JnksIotResultSet>, Optional<TsKvEntryAggWrapper>> {
 
     private static final int LONG_CNT_POS = 0;
     private static final int DOUBLE_CNT_POS = 1;
@@ -55,7 +55,7 @@ public class AggregatePartitionsFunction implements com.google.common.util.concu
     }
 
     @Override
-    public ListenableFuture<Optional<TsKvEntryAggWrapper>> apply(@Nullable List<TbResultSet> rsList) {
+    public ListenableFuture<Optional<TsKvEntryAggWrapper>> apply(@Nullable List<JnksIotResultSet> rsList) {
         log.trace("[{}][{}][{}] Going to aggregate data", key, ts, aggregation);
         if (rsList == null || rsList.isEmpty()) {
             return Futures.immediateFuture(Optional.empty());

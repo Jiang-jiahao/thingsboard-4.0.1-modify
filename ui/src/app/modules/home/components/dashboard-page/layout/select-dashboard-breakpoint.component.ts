@@ -5,7 +5,7 @@ import { BreakpointId } from '@shared/models/dashboard.models';
 import { DashboardUtilsService } from '@core/services/dashboard-utils.service';
 
 @Component({
-  selector: 'tb-select-dashboard-breakpoint',
+  selector: 'jnks-iot-select-dashboard-breakpoint',
   templateUrl: './select-dashboard-breakpoint.component.html',
   styleUrls: ['./select-dashboard-breakpoint.component.scss']
 })

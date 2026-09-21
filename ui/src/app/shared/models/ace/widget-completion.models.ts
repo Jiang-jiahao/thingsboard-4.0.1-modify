@@ -1,7 +1,7 @@
-import { TbEditorCompletion, TbEditorCompletions } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompletion, JnksIotEditorCompletions } from '@shared/models/ace/completion.models';
 import { entityIdHref, serviceCompletions } from '@shared/models/ace/service-completion.models';
 
-export const timewindowCompletion: TbEditorCompletion = {
+export const timewindowCompletion: JnksIotEditorCompletion = {
   description: 'Timewindow configuration object',
   meta: 'property',
   type: '<a href="https://github.com/thingsboard/thingsboard/blob/13e6b10b7ab830e64d31b99614a9d95a1a25928a/ui-ngx/src/app/shared/models/time/time.models.ts#L80" target="_blank">Timewindow</a>',
@@ -112,7 +112,7 @@ export const timewindowCompletion: TbEditorCompletion = {
   }
 };
 
-export const widgetContextCompletionsWithSettings = (settingsCompletions?: TbEditorCompletions): TbEditorCompletions => {
+export const widgetContextCompletionsWithSettings = (settingsCompletions?: JnksIotEditorCompletions): JnksIotEditorCompletions => {
   return {
     ctx: {
       description: 'A reference to widget context that has all necessary API<br>and data used by widget instance.',
@@ -728,4 +728,4 @@ export const widgetContextCompletionsWithSettings = (settingsCompletions?: TbEdi
   }
 };
 
-export const widgetContextCompletions: TbEditorCompletions = widgetContextCompletionsWithSettings();
+export const widgetContextCompletions: JnksIotEditorCompletions = widgetContextCompletionsWithSettings();

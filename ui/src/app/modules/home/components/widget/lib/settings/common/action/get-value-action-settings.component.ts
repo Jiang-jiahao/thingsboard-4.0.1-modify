@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { DataToValueType, GetValueAction, GetValueSettings } from '@shared/models/action-widget-settings.models';
 import { TranslateService } from '@ngx-translate/core';
 import { ValueType } from '@shared/models/constants';
@@ -22,7 +22,7 @@ import { IAliasController } from '@core/api/widget-api.models';
 import { TargetDevice, widgetType } from '@shared/models/widget.models';
 
 @Component({
-  selector: 'tb-get-value-action-settings',
+  selector: 'jnks-iot-get-value-action-settings',
   templateUrl: './action-settings-button.component.html',
   styleUrls: ['./action-settings-button.scss'],
   providers: [
@@ -73,7 +73,7 @@ export class GetValueActionSettingsComponent implements OnInit, ControlValueAcce
   private propagateChange = null;
 
   constructor(private translate: TranslateService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private cd: ChangeDetectorRef) {}
@@ -132,8 +132,8 @@ export class GetValueActionSettingsComponent implements OnInit, ControlValueAcce
         },
         isModal: true
       });
-      getValueSettingsPanelPopover.tbComponentRef.instance.popover = getValueSettingsPanelPopover;
-      getValueSettingsPanelPopover.tbComponentRef.instance.getValueSettingsApplied.subscribe((getValueSettings) => {
+      getValueSettingsPanelPopover.jnksIotComponentRef.instance.popover = getValueSettingsPanelPopover;
+      getValueSettingsPanelPopover.jnksIotComponentRef.instance.getValueSettingsApplied.subscribe((getValueSettings) => {
         getValueSettingsPanelPopover.hide();
         this.modelValue = getValueSettings;
         this.updateDisplayValue();

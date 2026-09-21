@@ -1,4 +1,4 @@
-.tb-liquid-level-panel {
+.jnks-iot-liquid-level-panel {
   width: 100%;
   height: 100%;
   position: relative;
@@ -6,29 +6,29 @@
   flex-direction: column;
   gap: 16px;
   padding: 20px 24px 24px 24px;
-  &.tb-liquid-level-pointer {
+  &.jnks-iot-liquid-level-pointer {
     cursor: pointer;
   }
-  > div:not(.tb-liquid-level-overlay) {
+  > div:not(.jnks-iot-liquid-level-overlay) {
     z-index: 1;
   }
-  .tb-liquid-level-overlay {
+  .jnks-iot-liquid-level-overlay {
     position: absolute;
     top: 12px;
     left: 12px;
     bottom: 12px;
     right: 12px;
   }
-  div.tb-widget-title {
+  div.jnks-iot-widget-title {
     padding: 0;
   }
-  .tb-liquid-level-content {
+  .jnks-iot-liquid-level-content {
     min-height: 0;
     flex: 1;
     display: flex;
     justify-content: center;
   }
-  .tb-liquid-level-error {
+  .jnks-iot-liquid-level-error {
     position: absolute;
     display: flex;
     inset: 0;

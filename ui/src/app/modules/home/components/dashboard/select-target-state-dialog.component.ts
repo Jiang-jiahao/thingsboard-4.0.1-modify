@@ -14,7 +14,7 @@ export interface SelectTargetStateDialogData {
 }
 
 @Component({
-  selector: 'tb-select-target-state-dialog',
+  selector: 'jnks-iot-select-target-state-dialog',
   templateUrl: './select-target-state-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: SelectTargetStateDialogComponent}],
   styleUrls: []

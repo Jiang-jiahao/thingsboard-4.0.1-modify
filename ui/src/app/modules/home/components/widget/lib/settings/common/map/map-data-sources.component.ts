@@ -21,7 +21,7 @@ import {
 import { MapSettingsContext } from '@home/components/widget/lib/settings/common/map/map-settings.component.models';
 
 @Component({
-  selector: 'tb-map-data-sources',
+  selector: 'jnks-iot-map-data-sources',
   templateUrl: './map-data-sources.component.html',
   styleUrls: ['./map-data-sources.component.scss'],
   providers: [

@@ -35,14 +35,14 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButton } from '@angular/material/button';
 import { deepClone } from '@core/utils';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { CustomMobilePagePanelComponent } from '@home/pages/mobile/bundes/layout/custom-mobile-page-panel.component';
 import { DefaultMobilePagePanelComponent } from '@home/pages/mobile/bundes/layout/default-mobile-page-panel.component';
 import { TranslateService } from '@ngx-translate/core';
 import { DisplayPopoverConfig } from '@shared/components/popover.models';
 
 @Component({
-  selector: 'tb-mobile-menu-item-row',
+  selector: 'jnks-iot-mobile-menu-item-row',
   templateUrl: './mobile-page-item-row.component.html',
   styleUrls: ['./mobile-page-item-row.component.scss'],
   providers: [
@@ -98,7 +98,7 @@ export class MobilePageItemRowComponent implements ControlValueAccessor, OnInit,
 
   constructor(private fb: FormBuilder,
               private cd: ChangeDetectorRef,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private translate: TranslateService) {
@@ -224,16 +224,16 @@ export class MobilePageItemRowComponent implements ControlValueAccessor, OnInit,
       if (this.isDefaultMenuItem) {
         config.componentType = DefaultMobilePagePanelComponent;
         const defaultMobilePagePanelPopover = this.popoverService.displayPopover(config);
-        defaultMobilePagePanelPopover.tbComponentRef.instance.popover = defaultMobilePagePanelPopover;
-        defaultMobilePagePanelPopover.tbComponentRef.instance.defaultMobilePageApplied.subscribe((menuItem) => {
+        defaultMobilePagePanelPopover.jnksIotComponentRef.instance.popover = defaultMobilePagePanelPopover;
+        defaultMobilePagePanelPopover.jnksIotComponentRef.instance.defaultMobilePageApplied.subscribe((menuItem) => {
           defaultMobilePagePanelPopover.hide();
           this.afterPageEdit(menuItem);
         });
       } else {
         config.componentType = CustomMobilePagePanelComponent;
         const customMobilePagePanelPopover = this.popoverService.displayPopover(config);
-        customMobilePagePanelPopover.tbComponentRef.instance.popover = customMobilePagePanelPopover;
-        customMobilePagePanelPopover.tbComponentRef.instance.customMobilePageApplied.subscribe((page) => {
+        customMobilePagePanelPopover.jnksIotComponentRef.instance.popover = customMobilePagePanelPopover;
+        customMobilePagePanelPopover.jnksIotComponentRef.instance.customMobilePageApplied.subscribe((page) => {
           customMobilePagePanelPopover.hide();
           this.afterPageEdit(page);
         });

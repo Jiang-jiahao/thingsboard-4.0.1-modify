@@ -8,7 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import com.jnks.iot.server.cache.VersionedTbCache;
+import com.jnks.iot.server.cache.VersionedJnksIotCache;
 import com.jnks.iot.server.cache.device.DeviceCacheKey;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.id.DeviceId;
@@ -50,7 +50,7 @@ public class DeviceServiceImplCacheEvictTest {
     @Mock
     private JpaExecutorService executor;
     @Mock
-    private VersionedTbCache<DeviceCacheKey, Device> cache;
+    private VersionedJnksIotCache<DeviceCacheKey, Device> cache;
 
     @BeforeEach
     void injectVersionedCache() {

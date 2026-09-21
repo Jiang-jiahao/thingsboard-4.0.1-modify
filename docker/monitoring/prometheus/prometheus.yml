@@ -20,59 +20,59 @@ scrape_configs:
     static_configs:
      - targets: ['localhost:9090']
 
-  - job_name: 'tb-core1'
+  - job_name: 'jnks-iot-core1'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-core1:8080' ]
+      - targets: [ 'jnks-iot-core1:8080' ]
 
-  - job_name: 'tb-core2'
+  - job_name: 'jnks-iot-core2'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-core2:8080' ]
+      - targets: [ 'jnks-iot-core2:8080' ]
 
   # rule-engine 的 HTTP 端口是 8082（jnks-iot-rule-engine.yml 里 server.port 的默认值），
   # 不是 core 的 8080 —— 写成 8080 会一直 connection refused。
-  - job_name: 'tb-rule-engine1'
+  - job_name: 'jnks-iot-rule-engine1'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-rule-engine1:8082' ]
+      - targets: [ 'jnks-iot-rule-engine1:8082' ]
 
-  - job_name: 'tb-rule-engine2'
+  - job_name: 'jnks-iot-rule-engine2'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-rule-engine2:8082' ]
+      - targets: [ 'jnks-iot-rule-engine2:8082' ]
 
-  - job_name: 'tb-mqtt-transport1'
+  - job_name: 'jnks-iot-mqtt-transport1'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-mqtt-transport1:8081' ]
+      - targets: [ 'jnks-iot-mqtt-transport1:8081' ]
 
-  - job_name: 'tb-mqtt-transport2'
+  - job_name: 'jnks-iot-mqtt-transport2'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-mqtt-transport2:8081' ]
+      - targets: [ 'jnks-iot-mqtt-transport2:8081' ]
 
-  - job_name: 'tb-http-transport1'
+  - job_name: 'jnks-iot-http-transport1'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-http-transport1:8081' ]
+      - targets: [ 'jnks-iot-http-transport1:8081' ]
 
-  - job_name: 'tb-http-transport2'
+  - job_name: 'jnks-iot-http-transport2'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-http-transport2:8081' ]
+      - targets: [ 'jnks-iot-http-transport2:8081' ]
 
-  - job_name: 'tb-coap-transport'
+  - job_name: 'jnks-iot-coap-transport'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-coap-transport:8081' ]
+      - targets: [ 'jnks-iot-coap-transport:8081' ]
 
-  - job_name: 'tb-lwm2m-transport'
+  - job_name: 'jnks-iot-lwm2m-transport'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-lwm2m-transport:8081' ]
+      - targets: [ 'jnks-iot-lwm2m-transport:8081' ]
 
-  - job_name: 'tb-snmp-transport'
+  - job_name: 'jnks-iot-snmp-transport'
     metrics_path: /actuator/prometheus
     static_configs:
-      - targets: [ 'tb-snmp-transport:8081' ]
+      - targets: [ 'jnks-iot-snmp-transport:8081' ]

@@ -141,7 +141,7 @@ export class InboxTableConfigResolver  {
     this.dialog.open<InboxNotificationDialogComponent, InboxNotificationDialogData,
       string>(InboxNotificationDialogComponent, {
       disableClose: false,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         notification
       }

@@ -19,7 +19,7 @@ export interface FilterEntityColumn {
 
 
 @Component({
-  selector: 'tb-event-filter-panel',
+  selector: 'jnks-iot-event-filter-panel',
   templateUrl: './event-filter-panel.component.html',
   styleUrls: ['./event-filter-panel.component.scss']
 })

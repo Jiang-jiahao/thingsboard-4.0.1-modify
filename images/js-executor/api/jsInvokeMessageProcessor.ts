@@ -1,6 +1,6 @@
 import config from 'config';
 import { _logger } from '../config/logger';
-import { JsExecutor, TbScript } from './jsExecutor';
+import { JsExecutor, JnksIotScript } from './jsExecutor';
 import { performance } from 'perf_hooks';
 import { isString, parseJsErrorDetails, UUIDFromBuffer, UUIDToBits } from './utils';
 import { IQueue } from '../queue/queue.models';
@@ -13,7 +13,7 @@ import {
     JsReleaseResponse,
     RemoteJsRequest,
     RemoteJsResponse,
-    TbMessage
+    JnksIotMessage
 } from './jsExecutor.models';
 import Long from 'long';
 
@@ -36,7 +36,7 @@ export class JsInvokeMessageProcessor {
     private logger = _logger(`JsInvokeMessageProcessor`);
     private producer: IQueue;
     private executor = new JsExecutor(useSandbox);
-    private scriptMap = new Map<string, TbScript>();
+    private scriptMap = new Map<string, JnksIotScript>();
     private scriptIds: string[] = [];
     private executedScriptIdsCounter: number[] = [];
     private executedScriptsCounter = 0;
@@ -234,7 +234,7 @@ export class JsInvokeMessageProcessor {
         );
     }
 
-    getOrCompileScript(scriptId: string, scriptBody: string): Promise<TbScript> {
+    getOrCompileScript(scriptId: string, scriptBody: string): Promise<JnksIotScript> {
         const self = this;
         return new Promise(function (resolve, reject) {
             const script = self.scriptMap.get(scriptId);
@@ -264,7 +264,7 @@ export class JsInvokeMessageProcessor {
         });
     }
 
-    cacheScript(scriptId: string, script: TbScript) {
+    cacheScript(scriptId: string, script: JnksIotScript) {
         if (!this.scriptMap.has(scriptId)) {
             this.scriptIds.push(scriptId);
             this.executedScriptIdsCounter.push(0);
@@ -314,7 +314,7 @@ export class JsInvokeMessageProcessor {
         };
     }
 
-    private static getScriptId(request: TbMessage): string {
+    private static getScriptId(request: JnksIotMessage): string {
         return request.scriptHash;
     }
 

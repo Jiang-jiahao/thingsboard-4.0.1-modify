@@ -1,6 +1,6 @@
 import vm, { Script } from 'vm';
 
-export type TbScript = Script | Function;
+export type JnksIotScript = Script | Function;
 
 export class JsExecutor {
     useSandbox: boolean;
@@ -9,7 +9,7 @@ export class JsExecutor {
         this.useSandbox = useSandbox;
     }
 
-    compileScript(code: string): Promise<TbScript> {
+    compileScript(code: string): Promise<JnksIotScript> {
         if (this.useSandbox) {
             return this.createScript(code);
         } else {
@@ -17,7 +17,7 @@ export class JsExecutor {
         }
     }
 
-    executeScript(script: TbScript, args: string[], timeout?: number): Promise<any> {
+    executeScript(script: JnksIotScript, args: string[], timeout?: number): Promise<any> {
         if (this.useSandbox) {
             return this.invokeScript(script as Script, args, timeout);
         } else {

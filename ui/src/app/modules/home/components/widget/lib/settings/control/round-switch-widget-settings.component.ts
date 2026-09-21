@@ -7,7 +7,7 @@ import { switchRpcDefaultSettings } from '@home/components/widget/lib/settings/c
 import { deepClone } from '@core/utils';
 
 @Component({
-  selector: 'tb-round-switch-widget-settings',
+  selector: 'jnks-iot-round-switch-widget-settings',
   templateUrl: './round-switch-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

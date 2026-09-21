@@ -20,12 +20,12 @@ import com.jnks.iot.server.common.data.page.PageLink;
 import com.jnks.iot.server.common.data.query.AlarmData;
 import com.jnks.iot.server.common.data.query.AlarmDataQuery;
 import com.jnks.iot.server.common.msg.notification.NotificationRuleProcessor;
-import com.jnks.iot.server.common.msg.queue.TbCallback;
-import com.jnks.iot.server.common.stats.TbApiUsageReportClient;
+import com.jnks.iot.server.common.msg.queue.JnksIotCallback;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageReportClient;
 import com.jnks.iot.server.dao.alarm.AlarmService;
-import com.jnks.iot.server.service.apiusage.TbApiUsageStateService;
-import com.jnks.iot.server.service.entitiy.alarm.TbAlarmCommentService;
-import com.jnks.iot.server.service.subscription.TbSubscriptionUtils;
+import com.jnks.iot.server.service.apiusage.JnksIotApiUsageStateService;
+import com.jnks.iot.server.service.entitiy.alarm.JnksIotAlarmCommentService;
+import com.jnks.iot.server.service.subscription.JnksIotSubscriptionUtils;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -39,9 +39,9 @@ import java.util.Optional;
 public class DefaultAlarmSubscriptionService extends AbstractSubscriptionService implements AlarmSubscriptionService {
 
     private final AlarmService alarmService;
-    private final Optional<TbAlarmCommentService> alarmCommentService;
-    private final TbApiUsageReportClient apiUsageClient;
-    private final TbApiUsageStateService apiUsageStateService;
+    private final Optional<JnksIotAlarmCommentService> alarmCommentService;
+    private final JnksIotApiUsageReportClient apiUsageClient;
+    private final JnksIotApiUsageStateService apiUsageStateService;
     private final Optional<NotificationRuleProcessor> notificationRuleProcessor;
 
     @Override
@@ -157,8 +157,8 @@ public class DefaultAlarmSubscriptionService extends AbstractSubscriptionService
             TenantId tenantId = alarm.getTenantId();
             for (EntityId entityId : result.getPropagatedEntitiesList()) {
                 forwardToSubscriptionManagerService(tenantId, entityId, subscriptionManagerService -> {
-                            subscriptionManagerService.onAlarmUpdate(tenantId, entityId, alarm, TbCallback.EMPTY);
-                        }, () -> TbSubscriptionUtils.toAlarmUpdateProto(tenantId, entityId, alarm)
+                            subscriptionManagerService.onAlarmUpdate(tenantId, entityId, alarm, JnksIotCallback.EMPTY);
+                        }, () -> JnksIotSubscriptionUtils.toAlarmUpdateProto(tenantId, entityId, alarm)
                 );
             }
             notificationRuleProcessor.ifPresent(p -> p.process(AlarmTrigger.builder()
@@ -174,9 +174,9 @@ public class DefaultAlarmSubscriptionService extends AbstractSubscriptionService
             TenantId tenantId = alarm.getTenantId();
             for (EntityId entityId : result.getPropagatedEntitiesList()) {
                 forwardToSubscriptionManagerService(tenantId, entityId, subscriptionManagerService -> {
-                    subscriptionManagerService.onAlarmDeleted(tenantId, entityId, alarm, TbCallback.EMPTY);
+                    subscriptionManagerService.onAlarmDeleted(tenantId, entityId, alarm, JnksIotCallback.EMPTY);
                 }, () -> {
-                    return TbSubscriptionUtils.toAlarmDeletedProto(tenantId, entityId, alarm);
+                    return JnksIotSubscriptionUtils.toAlarmDeletedProto(tenantId, entityId, alarm);
                 });
             }
             notificationRuleProcessor.ifPresent(p -> p.process(AlarmTrigger.builder()

@@ -7,7 +7,7 @@ import { DateFormatProcessor, DateFormatSettings } from '@shared/models/widget-s
 import { aggregatedValueCardDefaultSettings } from '@home/components/widget/lib/cards/aggregated-value-card.models';
 
 @Component({
-  selector: 'tb-aggregated-value-card-widget-settings',
+  selector: 'jnks-iot-aggregated-value-card-widget-settings',
   templateUrl: './aggregated-value-card-widget-settings.component.html',
   styleUrls: []
 })

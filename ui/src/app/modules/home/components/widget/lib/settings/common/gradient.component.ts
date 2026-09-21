@@ -9,7 +9,7 @@ import {
   UntypedFormGroup
 } from '@angular/forms';
 import { AdvancedGradient, ColorGradientSettings, ValueSourceType } from '@shared/models/widget-settings.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
@@ -21,7 +21,7 @@ import { DataKeysCallbacks } from '@home/components/widget/lib/settings/common/k
 import { Datasource } from '@shared/models/widget.models';
 
 @Component({
-  selector: 'tb-gradient',
+  selector: 'jnks-iot-gradient',
   templateUrl: './gradient.component.html',
   styleUrls: ['color-settings-panel.component.scss', 'gradient.component.scss'],
   providers: [
@@ -40,7 +40,7 @@ export class GradientComponent implements OnInit, ControlValueAccessor, OnDestro
   disabled: boolean;
 
   @Input()
-  popover: TbPopoverComponent;
+  popover: JnksIotPopoverComponent;
 
   @Input()
   panelTitle: string;

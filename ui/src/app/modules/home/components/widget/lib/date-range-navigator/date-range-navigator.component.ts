@@ -34,7 +34,7 @@ import { HistoryWindowType, TimewindowType } from '@shared/models/time/time.mode
 import { isDefined } from '@core/utils';
 
 @Component({
-  selector: 'tb-date-range-navigator-widget',
+  selector: 'jnks-iot-date-range-navigator-widget',
   templateUrl: './date-range-navigator.component.html',
   styleUrls: ['./date-range-navigator.component.scss']
 })
@@ -114,7 +114,7 @@ export class DateRangeNavigatorWidgetComponent extends PageComponent implements 
     const config = new OverlayConfig();
     config.backdropClass = 'cdk-overlay-transparent-backdrop';
     config.hasBackdrop = true;
-    config.panelClass = 'tb-date-range-navigator-panel';
+    config.panelClass = 'jnks-iot-date-range-navigator-panel';
     const connectedPosition: ConnectedPosition = {
       originX: 'end',
       originY: 'bottom',
@@ -260,7 +260,7 @@ export interface DateRangeNavigatorPanelData {
 }
 
 @Component({
-  selector: 'tb-date-range-navigator-panel',
+  selector: 'jnks-iot-date-range-navigator-panel',
   templateUrl: './date-range-navigator-panel.component.html',
   styleUrls: ['./date-range-navigator-panel.component.scss'],
   encapsulation: ViewEncapsulation.None

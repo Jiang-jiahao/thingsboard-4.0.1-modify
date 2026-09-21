@@ -1,4 +1,4 @@
-.tb-nav-tree-container {
+.jnks-iot-nav-tree-container {
   padding: 15px;
   font-family: Roboto, "Helvetica Neue", sans-serif;
 
@@ -84,43 +84,43 @@
     border-bottom: none;
 
     i.jstree-themeicon-custom {
-      &.tb-user-group {
+      &.jnks-iot-user-group {
         &::before {
           content: "account_circle";
         }
       }
 
-      &.tb-customer-group {
+      &.jnks-iot-customer-group {
         &::before {
           content: "supervisor_account";
         }
       }
 
-      &.tb-asset-group {
+      &.jnks-iot-asset-group {
         &::before {
           content: "domain";
         }
       }
 
-      &.tb-device-group {
+      &.jnks-iot-device-group {
         &::before {
           content: "devices_other";
         }
       }
 
-      &.tb-entity-view-group {
+      &.jnks-iot-entity-view-group {
         &::before {
           content: "view_quilt";
         }
       }
 
-      &.tb-dashboard-group {
+      &.jnks-iot-dashboard-group {
         &::before {
           content: "dashboard";
         }
       }
 
-      &.tb-customer {
+      &.jnks-iot-customer {
         &::before {
           content: "supervisor_account";
         }
@@ -139,7 +139,7 @@
 }
 
 @media (max-width: 768px) {
-  .tb-nav-tree-container {
+  .jnks-iot-nav-tree-container {
     &.jstree-proton-responsive {
       .jstree-node,
       .jstree-icon,
@@ -333,13 +333,13 @@
   }
 }
 
-.tb-nav-tree .mat-mdc-button.tb-active {
+.jnks-iot-nav-tree .mat-mdc-button.jnks-iot-active {
   font-weight: 500;
   background-color: rgba(255, 255, 255, .15);
 }
 
-.tb-nav-tree,
-.tb-nav-tree ul {
+.jnks-iot-nav-tree,
+.jnks-iot-nav-tree ul {
   margin-top: 0;
   list-style: none;
 

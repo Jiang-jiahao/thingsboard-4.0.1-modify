@@ -12,22 +12,22 @@
   </mat-form-field>
   <div [ngSwitch]="smsProviderConfigurationFormGroup.get('type').value">
     <ng-template [ngSwitchCase]="smsProviderType.AWS_SNS">
-      <tb-aws-sns-provider-configuration
+      <jnks-iot-aws-sns-provider-configuration
         [required]="required"
         formControlName="configuration">
-      </tb-aws-sns-provider-configuration>
+      </jnks-iot-aws-sns-provider-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="smsProviderType.TWILIO">
-      <tb-twilio-sms-provider-configuration
+      <jnks-iot-twilio-sms-provider-configuration
         [required]="required"
         formControlName="configuration">
-      </tb-twilio-sms-provider-configuration>
+      </jnks-iot-twilio-sms-provider-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="smsProviderType.SMPP">
-      <tb-smpp-sms-provider-configuration
+      <jnks-iot-smpp-sms-provider-configuration
         [required]="required"
         formControlName="configuration">
-      </tb-smpp-sms-provider-configuration>
+      </jnks-iot-smpp-sms-provider-configuration>
     </ng-template>
   </div>
 </div>

@@ -1,6 +1,6 @@
 package com.jnks.iot.rule.engine.util;
 
-import com.jnks.iot.rule.engine.api.TbContext;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
 import com.jnks.iot.server.common.data.EntityType;
 import com.jnks.iot.server.common.data.HasTenantId;
 import com.jnks.iot.server.common.data.cf.CalculatedFieldLink;
@@ -30,7 +30,7 @@ import com.jnks.iot.server.common.data.id.QueueStatsId;
 import com.jnks.iot.server.common.data.id.RpcId;
 import com.jnks.iot.server.common.data.id.RuleChainId;
 import com.jnks.iot.server.common.data.id.RuleNodeId;
-import com.jnks.iot.server.common.data.id.TbResourceId;
+import com.jnks.iot.server.common.data.id.JnksIotResourceId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.id.UserId;
 import com.jnks.iot.server.common.data.id.WidgetTypeId;
@@ -41,7 +41,7 @@ import java.util.UUID;
 
 public class TenantIdLoader {
 
-    public static TenantId findTenantId(TbContext ctx, EntityId entityId) {
+    public static TenantId findTenantId(JnksIotContext ctx, EntityId entityId) {
         UUID id = entityId.getId();
         EntityType entityType = entityId.getEntityType();
         TenantId ctxTenantId = ctx.getTenantId();
@@ -98,8 +98,8 @@ public class TenantIdLoader {
             case API_USAGE_STATE:
                 tenantEntity = ctx.getRuleEngineApiUsageStateService().findApiUsageStateById(ctxTenantId, new ApiUsageStateId(id));
                 break;
-            case TB_RESOURCE:
-                tenantEntity = ctx.getResourceService().findResourceInfoById(ctxTenantId, new TbResourceId(id));
+            case JNKS_IOT_RESOURCE:
+                tenantEntity = ctx.getResourceService().findResourceInfoById(ctxTenantId, new JnksIotResourceId(id));
                 break;
             case RULE_NODE:
                 RuleNode ruleNode = ctx.getRuleChainService().findRuleNodeById(ctxTenantId, new RuleNodeId(id));

@@ -32,7 +32,7 @@ import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.transport.auth.ValidateDeviceCredentialsResponse;
 import com.jnks.iot.server.gen.transport.TransportProtos.SessionInfoProto;
 import com.jnks.iot.server.gen.transport.TransportProtos.TsKvProto;
-import com.jnks.iot.server.transport.lwm2m.config.TbLwM2mVersion;
+import com.jnks.iot.server.transport.lwm2m.config.JnksIotLwM2mVersion;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -398,7 +398,7 @@ public class LwM2mClient {
         if (registration == null) {
             return ContentFormat.DEFAULT;
         } else {
-            return TbLwM2mVersion.fromVersion(registration.getLwM2mVersion()).getContentFormat();
+            return JnksIotLwM2mVersion.fromVersion(registration.getLwM2mVersion()).getContentFormat();
         }
     }
 

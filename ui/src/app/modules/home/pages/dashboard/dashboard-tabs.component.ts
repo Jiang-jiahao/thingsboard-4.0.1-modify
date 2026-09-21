@@ -5,7 +5,7 @@ import { EntityTabsComponent } from '../../components/entity/entity-tabs.compone
 import { Dashboard } from '@shared/models/dashboard.models';
 
 @Component({
-  selector: 'tb-dashboard-tabs',
+  selector: 'jnks-iot-dashboard-tabs',
   templateUrl: './dashboard-tabs.component.html',
   styleUrls: []
 })

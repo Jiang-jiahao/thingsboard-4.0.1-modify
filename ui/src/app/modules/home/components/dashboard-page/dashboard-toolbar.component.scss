@@ -8,8 +8,8 @@ $mobile-toolbar-height-total: 84px !default;
 
 $mobile-app-toolbar-height: 40px !default;
 
-div.tb-dashboard-page.mobile-app {
-  tb-dashboard-toolbar {
+div.jnks-iot-dashboard-page.mobile-app {
+  jnks-iot-dashboard-toolbar {
     .mat-fab-toolbar {
       .mat-fab-toolbar-wrapper {
         height: $mobile-app-toolbar-height;
@@ -25,9 +25,9 @@ div.tb-dashboard-page.mobile-app {
             max-height: $mobile-app-toolbar-height;
             .mat-fab-action-item {
               height: $mobile-app-toolbar-height;
-              .tb-dashboard-action-panels {
+              .jnks-iot-dashboard-action-panels {
                 height: $mobile-app-toolbar-height;
-                .tb-dashboard-action-panel {
+                .jnks-iot-dashboard-action-panel {
                   height: $mobile-app-toolbar-height;
                   > div {
                     height: $mobile-app-toolbar-height;
@@ -42,7 +42,7 @@ div.tb-dashboard-page.mobile-app {
   }
 }
 
-tb-dashboard-toolbar {
+jnks-iot-dashboard-toolbar {
   .mat-fab-toolbar {
     mat-fab-trigger {
       .mat-mdc-fab {
@@ -126,14 +126,14 @@ tb-dashboard-toolbar {
               height: 46px;
             }
 
-            .tb-dashboard-action-panels {
+            .jnks-iot-dashboard-action-panels {
               height: $mobile-toolbar-height;
 
               @media #{$mat-gt-sm} {
                 height: 46px;
               }
 
-              .tb-dashboard-action-panel {
+              .jnks-iot-dashboard-action-panel {
                 min-width: 0;
                 height: $half-mobile-toolbar-height;
                 flex: 1 0 auto;
@@ -141,7 +141,7 @@ tb-dashboard-toolbar {
                 flex-direction: row-reverse;
                 place-content: center space-between;
                 align-items: center;
-                &.tb-left-panel {
+                &.jnks-iot-left-panel {
                   flex: 1 1 auto;
                 }
 
@@ -152,35 +152,35 @@ tb-dashboard-toolbar {
                 @media #{$mat-xs} {
                   gap: 3px;
                   padding-left: 0;
-                  &.tb-left-panel {
+                  &.jnks-iot-left-panel {
                     padding-left: 12px;
                   }
                 }
 
                 @media #{$mat-sm} {
                   gap: 6px;
-                  &.tb-left-panel {
+                  &.jnks-iot-left-panel {
                     gap: 3px;
                   }
                 }
 
                 @media #{$mat-md} {
                   gap: 3px;
-                  &.tb-left-panel {
+                  &.jnks-iot-left-panel {
                     gap: 1px;
                   }
                 }
 
                 @media #{$mat-gt-md} {
                   gap: 6px;
-                  &.tb-left-panel {
+                  &.jnks-iot-left-panel {
                     gap: 3px;
                   }
                 }
 
                 @media #{$mat-gt-sm} {
                   place-content: center flex-start;
-                  &.tb-left-panel {
+                  &.jnks-iot-left-panel {
                     place-content: center flex-end;
                   }
                   height: 46px;
@@ -194,8 +194,8 @@ tb-dashboard-toolbar {
                   }
                 }
 
-                tb-states-component,
-                tb-entity-state-controller {
+                jnks-iot-states-component,
+                jnks-iot-entity-state-controller {
                   pointer-events: all;
                 }
               }

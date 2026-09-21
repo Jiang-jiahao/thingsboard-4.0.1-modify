@@ -20,7 +20,7 @@ import { MatFormFieldAppearance } from '@angular/material/form-field';
 import { EntityService } from '@core/http/entity.service';
 
 @Component({
-  selector: 'tb-entity-subtype-autocomplete',
+  selector: 'jnks-iot-entity-subtype-autocomplete',
   templateUrl: './entity-subtype-autocomplete.component.html',
   styleUrls: [],
   providers: [{

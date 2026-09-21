@@ -1,21 +1,21 @@
-<div #progressBarPanel class="tb-progress-bar-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
-  <div class="tb-progress-bar-overlay" [style]="overlayStyle"></div>
-  <div #progressBarContainer class="tb-progress-bar-container" [class]="layoutClass">
+<div #progressBarPanel class="jnks-iot-progress-bar-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
+  <div class="jnks-iot-progress-bar-overlay" [style]="overlayStyle"></div>
+  <div #progressBarContainer class="jnks-iot-progress-bar-container" [class]="layoutClass">
     <ng-container *ngIf="layout === progressBarLayout.default">
       <ng-container *ngTemplateOutlet="widgetTitlePanel"></ng-container>
     </ng-container>
-    <div class="tb-progress-bar-content">
-      <div *ngIf="showTitleValueRow" class="tb-progress-bar-title-value-row" [class]="titleValueRowClass">
+    <div class="jnks-iot-progress-bar-content">
+      <div *ngIf="showTitleValueRow" class="jnks-iot-progress-bar-title-value-row" [class]="titleValueRowClass">
         <ng-container *ngIf="layout === progressBarLayout.simplified">
           <ng-container *ngTemplateOutlet="widgetTitlePanel"></ng-container>
         </ng-container>
-        <div *ngIf="showValue" class="tb-progress-bar-value" [style]="valueStyle" [style.color]="valueColor.color">{{ valueText }}</div>
+        <div *ngIf="showValue" class="jnks-iot-progress-bar-value" [style]="valueStyle" [style.color]="valueColor.color">{{ valueText }}</div>
       </div>
-      <div class="tb-progress-bar">
-        <div class="tb-progress-bar-background" [style.background-color]="settings.barBackground">
-          <div class="tb-progress-bar-progress" [style.background-color]="barColor.color" [style.width]="barWidth"></div>
+      <div class="jnks-iot-progress-bar">
+        <div class="jnks-iot-progress-bar-background" [style.background-color]="settings.barBackground">
+          <div class="jnks-iot-progress-bar-progress" [style.background-color]="barColor.color" [style.width]="barWidth"></div>
         </div>
-        <div *ngIf="showTicks" class="tb-progress-bar-ticks" [style]="ticksStyle">
+        <div *ngIf="showTicks" class="jnks-iot-progress-bar-ticks" [style]="ticksStyle">
           <div>{{ settings.tickMin }}</div>
           <div>{{ settings.tickMax }}</div>
         </div>

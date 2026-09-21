@@ -19,7 +19,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-time-series-chart-states-panel',
+  selector: 'jnks-iot-time-series-chart-states-panel',
   templateUrl: './time-series-chart-states-panel.component.html',
   styleUrls: ['./time-series-chart-states-panel.component.scss'],
   providers: [

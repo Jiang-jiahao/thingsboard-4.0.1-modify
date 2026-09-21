@@ -21,7 +21,7 @@ import { guid } from '@core/utils';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-tenant-profile-queues',
+  selector: 'jnks-iot-tenant-profile-queues',
   templateUrl: './tenant-profile-queues.component.html',
   styleUrls: ['./tenant-profile-queues.component.scss'],
   providers: [

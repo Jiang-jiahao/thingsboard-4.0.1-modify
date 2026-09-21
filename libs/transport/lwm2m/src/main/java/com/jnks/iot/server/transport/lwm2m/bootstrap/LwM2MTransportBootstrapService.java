@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import com.jnks.iot.server.common.transport.TransportService;
 import com.jnks.iot.server.common.transport.config.ssl.SslCredentials;
 import com.jnks.iot.server.transport.lwm2m.bootstrap.secure.LwM2mDefaultBootstrapSessionManager;
-import com.jnks.iot.server.transport.lwm2m.bootstrap.secure.TbLwM2MDtlsBootstrapCertificateVerifier;
+import com.jnks.iot.server.transport.lwm2m.bootstrap.secure.JnksIotLwM2MDtlsBootstrapCertificateVerifier;
 import com.jnks.iot.server.transport.lwm2m.bootstrap.store.LwM2MBootstrapSecurityStore;
 import com.jnks.iot.server.transport.lwm2m.bootstrap.store.LwM2MInMemoryBootstrapConfigStore;
 import com.jnks.iot.server.transport.lwm2m.config.LwM2MTransportBootstrapConfig;
@@ -45,7 +45,7 @@ public class LwM2MTransportBootstrapService {
     private final LwM2MBootstrapSecurityStore lwM2MBootstrapSecurityStore;
     private final LwM2MInMemoryBootstrapConfigStore lwM2MInMemoryBootstrapConfigStore;
     private final TransportService transportService;
-    private final TbLwM2MDtlsBootstrapCertificateVerifier certificateVerifier;
+    private final JnksIotLwM2MDtlsBootstrapCertificateVerifier certificateVerifier;
     private LeshanBootstrapServer server;
 
     @PostConstruct

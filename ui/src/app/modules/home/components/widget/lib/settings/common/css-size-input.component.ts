@@ -15,7 +15,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-css-size-input',
+  selector: 'jnks-iot-css-size-input',
   templateUrl: './css-size-input.component.html',
   styleUrls: [],
   providers: [

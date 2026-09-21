@@ -8,7 +8,7 @@ import { TenantProfileConfiguration, TenantProfileType } from '@shared/models/te
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-tenant-profile-configuration',
+  selector: 'jnks-iot-tenant-profile-configuration',
   templateUrl: './tenant-profile-configuration.component.html',
   styleUrls: [],
   providers: [{

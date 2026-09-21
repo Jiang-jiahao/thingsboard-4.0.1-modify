@@ -8,7 +8,7 @@ import {
   ViewContainerRef,
   ViewEncapsulation
 } from '@angular/core';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { PopoverPlacement } from '@shared/components/popover.models';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { isDefinedAndNotNull } from '@core/utils';
@@ -17,7 +17,7 @@ import { Observable } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: '[tb-help-popup], [tb-help-popup-content], [tb-help-popup-content-base64], [tb-help-popup-async-content]',
+  selector: '[jnks-iot-help-popup], [jnks-iot-help-popup-content], [jnks-iot-help-popup-content-base64], [jnks-iot-help-popup-async-content]',
   templateUrl: './help-popup.component.html',
   styleUrls: ['./help-popup.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -27,13 +27,13 @@ export class HelpPopupComponent implements OnChanges, OnDestroy {
   @ViewChild('toggleHelpButton', {read: ElementRef, static: false}) toggleHelpButton: ElementRef;
   @ViewChild('toggleHelpTextButton', {read: ElementRef, static: false}) toggleHelpTextButton: ElementRef;
 
-  @Input('tb-help-popup') helpId: string;
+  @Input('jnks-iot-help-popup') helpId: string;
 
-  @Input('tb-help-popup-content') helpContent: string;
+  @Input('jnks-iot-help-popup-content') helpContent: string;
 
-  @Input('tb-help-popup-content-base64') helpContentBase64: string;
+  @Input('jnks-iot-help-popup-content-base64') helpContentBase64: string;
 
-  @Input('tb-help-popup-async-content') asyncHelpContent: () => Observable<string> | null;
+  @Input('jnks-iot-help-popup-async-content') asyncHelpContent: () => Observable<string> | null;
 
   // eslint-disable-next-line @angular-eslint/no-input-rename
   @Input('help-icon') helpIcon = 'help_outline';
@@ -45,7 +45,7 @@ export class HelpPopupComponent implements OnChanges, OnDestroy {
   @Input('help-icon-tooltip') helpIconTooltip = this.translate.instant('help.show-help');
 
   // eslint-disable-next-line @angular-eslint/no-input-rename
-  @Input('help-icon-button-class') helpIconButtonClass = 'tb-mat-32';
+  @Input('help-icon-button-class') helpIconButtonClass = 'jnks-iot-mat-32';
 
   // eslint-disable-next-line @angular-eslint/no-input-rename
   @Input('trigger-text') triggerText: string;
@@ -54,10 +54,10 @@ export class HelpPopupComponent implements OnChanges, OnDestroy {
   @Input('trigger-style') triggerStyle: string;
 
   // eslint-disable-next-line @angular-eslint/no-input-rename
-  @Input('tb-help-popup-placement') helpPopupPlacement: PopoverPlacement;
+  @Input('jnks-iot-help-popup-placement') helpPopupPlacement: PopoverPlacement;
 
   // eslint-disable-next-line @angular-eslint/no-input-rename
-  @Input('tb-help-popup-style') helpPopupStyle: { [klass: string]: any } = {};
+  @Input('jnks-iot-help-popup-style') helpPopupStyle: { [klass: string]: any } = {};
 
   popoverVisible = false;
   popoverReady = true;
@@ -73,7 +73,7 @@ export class HelpPopupComponent implements OnChanges, OnDestroy {
   constructor(private viewContainerRef: ViewContainerRef,
               private sanitizer: DomSanitizer,
               private renderer: Renderer2,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private translate: TranslateService) {
   }
 

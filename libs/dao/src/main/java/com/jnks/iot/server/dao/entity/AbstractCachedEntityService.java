@@ -2,14 +2,14 @@ package com.jnks.iot.server.dao.entity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import com.jnks.iot.server.cache.TbTransactionalCache;
+import com.jnks.iot.server.cache.JnksIotTransactionalCache;
 
 import java.io.Serializable;
 
 public abstract class AbstractCachedEntityService<K extends Serializable, V extends Serializable, E> extends AbstractEntityService {
 
     @Autowired
-    protected TbTransactionalCache<K, V> cache;
+    protected JnksIotTransactionalCache<K, V> cache;
 
     protected void publishEvictEvent(E event) {
         // 判断当前线程是否在事务中

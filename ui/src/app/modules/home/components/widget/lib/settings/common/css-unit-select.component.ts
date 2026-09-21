@@ -5,7 +5,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-css-unit-select',
+  selector: 'jnks-iot-css-unit-select',
   templateUrl: './css-unit-select.component.html',
   styleUrls: [],
   providers: [

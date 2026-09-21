@@ -1,18 +1,18 @@
 <div class="flex flex-col">
-  <div class="tb-device-profile-alarms">
+  <div class="jnks-iot-device-profile-alarms">
     <div *ngFor="let alarmControl of alarmsFormArray.controls; trackBy: trackByAlarm;
                  let $index = index; last as isLast;"
          class="flex flex-col" [class.pb-2]="!isLast">
-      <tb-device-profile-alarm [formControl]="alarmControl"
+      <jnks-iot-device-profile-alarm [formControl]="alarmControl"
                                [expanded]="$index === 0"
                                [deviceProfileId]="deviceProfileId"
                                (removeAlarm)="removeAlarm($index)">
-      </tb-device-profile-alarm>
+      </jnks-iot-device-profile-alarm>
     </div>
   </div>
   <div *ngIf="!alarmsFormArray.controls.length">
       <span translate
-            class="tb-prompt flex items-center justify-center">device-profile.no-alarm-rules</span>
+            class="jnks-iot-prompt flex items-center justify-center">device-profile.no-alarm-rules</span>
   </div>
   <div *ngIf="!disabled" style="padding-top: 16px;">
     <button mat-raised-button color="primary"

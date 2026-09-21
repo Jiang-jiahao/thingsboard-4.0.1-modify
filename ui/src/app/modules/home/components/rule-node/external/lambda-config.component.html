@@ -1,12 +1,12 @@
-<section [formGroup]="lambdaConfigForm" class="tb-form-panel no-padding no-border">
-  <div class="tb-form-panel stroked">
-    <div class="tb-form-row no-padding no-border">
-      <div class="tb-form-panel-title tb-required" translate>rule-node-config.function-configuration</div>
+<section [formGroup]="lambdaConfigForm" class="jnks-iot-form-panel no-padding no-border">
+  <div class="jnks-iot-form-panel stroked">
+    <div class="jnks-iot-form-row no-padding no-border">
+      <div class="jnks-iot-form-panel-title jnks-iot-required" translate>rule-node-config.function-configuration</div>
     </div>
-    <tb-example-hint [hintText]="'rule-node-config.template-rules-hint'"
+    <jnks-iot-example-hint [hintText]="'rule-node-config.template-rules-hint'"
                      popupHelpLink="rulenode/node-templatization-doc">
-    </tb-example-hint>
-    <div class="tb-standard-fields">
+    </jnks-iot-example-hint>
+    <div class="jnks-iot-standard-fields">
       <mat-form-field class="mat-block">
         <mat-label>{{'rule-node-config.function-name' | translate}}</mat-label>
         <input required matInput formControlName="functionName">
@@ -22,12 +22,12 @@
     </div>
   </div>
 
-  <div class="tb-form-panel stroked">
-    <mat-expansion-panel class="tb-settings" expanded>
+  <div class="jnks-iot-form-panel stroked">
+    <mat-expansion-panel class="jnks-iot-settings" expanded>
       <mat-expansion-panel-header>
-        <mat-panel-title class="tb-form-panel-title tb-required" translate>rule-node-config.aws-credentials</mat-panel-title>
+        <mat-panel-title class="jnks-iot-form-panel-title jnks-iot-required" translate>rule-node-config.aws-credentials</mat-panel-title>
       </mat-expansion-panel-header>
-      <div class="tb-standard-fields">
+      <div class="jnks-iot-standard-fields">
         <mat-form-field class="mat-block">
           <mat-label translate>rule-node-config.aws-access-key-id</mat-label>
           <input required matInput formControlName="accessKey">
@@ -52,13 +52,13 @@
       </div>
     </mat-expansion-panel>
   </div>
-  <div class="tb-form-panel stroked no-padding">
-    <mat-expansion-panel class="tb-settings">
+  <div class="jnks-iot-form-panel stroked no-padding">
+    <mat-expansion-panel class="jnks-iot-settings">
       <mat-expansion-panel-header style="padding: 16px">
         <mat-panel-title translate>rule-node-config.advanced-settings</mat-panel-title>
       </mat-expansion-panel-header>
-      <div class="tb-form-panel no-border no-padding no-gap" style="margin-top: 0">
-        <div class="tb-form-row no-border same-padding tb-standard-fields">
+      <div class="jnks-iot-form-panel no-border no-padding no-gap" style="margin-top: 0">
+        <div class="jnks-iot-form-row no-border same-padding jnks-iot-standard-fields">
           <mat-form-field class="flex">
             <mat-label translate>rule-node-config.connection-timeout</mat-label>
             <input type="number" required min="0" matInput formControlName="connectionTimeout">
@@ -86,8 +86,8 @@
                       matTooltip="{{ 'rule-node-config.request-timeout-hint' | translate }}">help</mat-icon>
           </mat-form-field>
         </div>
-        <div tb-hint-tooltip-icon="{{ 'rule-node-config.tell-failure-aws-lambda-hint' | translate }}"
-             class="tb-form-row no-border" style="margin-bottom: 16px">
+        <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.tell-failure-aws-lambda-hint' | translate }}"
+             class="jnks-iot-form-row no-border" style="margin-bottom: 16px">
           <mat-slide-toggle class="mat-slide" formControlName="tellFailureIfFuncThrowsExc">
             {{ 'rule-node-config.tell-failure-aws-lambda' | translate }}
           </mat-slide-toggle>

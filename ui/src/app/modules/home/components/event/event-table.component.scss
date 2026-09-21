@@ -6,7 +6,7 @@
   min-height: 0;
 }
 
-.tb-event-table-outer {
+.jnks-iot-event-table-outer {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -14,19 +14,19 @@
   width: 100%;
 }
 
-.tb-event-type-toolbar {
+.jnks-iot-event-type-toolbar {
   flex-shrink: 0;
   padding: 8px 24px 0;
   z-index: 2;
 }
 
-.tb-event-type-field {
+.jnks-iot-event-type-field {
   min-width: 200px;
   max-width: 280px;
 }
 
 :host ::ng-deep {
-  tb-entities-table {
+  jnks-iot-entities-table {
     flex: 1;
     min-height: 0;
 
@@ -35,7 +35,7 @@
     }
 
     /* 工具栏内原有下拉在窄屏/弹窗中易被裁切，改由上方专用条展示 */
-    .title-container tb-event-table-header {
+    .title-container jnks-iot-event-table-header {
       display: none !important;
     }
   }

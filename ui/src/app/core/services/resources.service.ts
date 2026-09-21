@@ -14,7 +14,7 @@ import { DOCUMENT } from '@angular/common';
 import { forkJoin, from, Observable, ReplaySubject, throwError } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { IModulesMap } from '@modules/common/modules-map.models';
-import { TbResourceId } from '@shared/models/id/tb-resource-id';
+import { JnksIotResourceId } from '@shared/models/id/jnks-iot-resource-id';
 import { camelCase, isObject } from '@core/utils';
 import { AuthService } from '@core/auth/auth.service';
 import { select, Store } from '@ngrx/store';
@@ -22,7 +22,7 @@ import { selectIsAuthenticated } from '@core/auth/auth.selectors';
 import { AppState } from '@core/core.state';
 import { map, tap } from 'rxjs/operators';
 import { RequestConfig } from '@core/http/http-utils';
-import { isJSResource, removeTbResourcePrefix } from '@shared/models/resource.models';
+import { isJSResource, removeJnksIotResourcePrefix } from '@shared/models/resource.models';
 
 export interface ModuleInfo {
   module: ɵNgModuleDef<any>;
@@ -180,7 +180,7 @@ export class ResourcesService {
     );
   }
 
-  public loadModulesWithComponents(resourceId: string | TbResourceId, modulesMap: IModulesMap): Observable<ModulesWithComponents> {
+  public loadModulesWithComponents(resourceId: string | JnksIotResourceId, modulesMap: IModulesMap): Observable<ModulesWithComponents> {
     const url = this.getDownloadUrl(resourceId);
     if (this.loadedModulesWithComponents[url]) {
       return this.loadedModulesWithComponents[url].asObservable();
@@ -343,14 +343,14 @@ export class ResourcesService {
     return subject.asObservable();
   }
 
-  private getDownloadUrl(resourceId: string | TbResourceId): string {
+  private getDownloadUrl(resourceId: string | JnksIotResourceId): string {
     if (isObject(resourceId)) {
-      return `/api/resource/js/${(resourceId as TbResourceId).id}/download`;
+      return `/api/resource/js/${(resourceId as JnksIotResourceId).id}/download`;
     }
-    return removeTbResourcePrefix(resourceId as string);
+    return removeJnksIotResourcePrefix(resourceId as string);
   }
 
-  private getMetaInfo(resourceId: string | TbResourceId): object {
+  private getMetaInfo(resourceId: string | JnksIotResourceId): object {
     if (isObject(resourceId) || (typeof resourceId === 'string' && isJSResource(resourceId))) {
       return {
         additionalHeaders: {

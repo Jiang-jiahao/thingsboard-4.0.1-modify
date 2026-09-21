@@ -1,0 +1,32 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.jnks.iot</groupId>
+        <artifactId>apps</artifactId>
+        <version>4.0.1</version>
+    </parent>
+
+    <artifactId>jnks-iot-transport</artifactId>
+    <packaging>pom</packaging>
+    <name>jnks-iot-transport</name>
+    <modules>
+        <module>jnks-iot-coap-transport</module>
+        <module>jnks-iot-http-transport</module>
+        <module>jnks-iot-lwm2m-transport</module>
+        <module>jnks-iot-snmp-transport</module>
+        <module>jnks-iot-tcp-transport</module>
+        <module>jnks-iot-udp-transport</module>
+        <module>jnks-iot-mqtt-transport</module>
+        <module>transport-base</module>
+    </modules>
+
+    <properties>
+        <main.dir>${basedir}/../..</main.dir>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+</project>

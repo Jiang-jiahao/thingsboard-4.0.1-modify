@@ -14,7 +14,7 @@ import java.util.Arrays;
 public class JnksIotVersionControlExecutorApplication {
 
     private static final String SPRING_CONFIG_NAME_KEY = "--spring.config.name";
-    private static final String DEFAULT_SPRING_CONFIG_PARAM = SPRING_CONFIG_NAME_KEY + "=" + "tb-vc-executor";
+    private static final String DEFAULT_SPRING_CONFIG_PARAM = SPRING_CONFIG_NAME_KEY + "=" + "jnks-iot-vc-executor";
 
     public static void main(String[] args) {
         SpringApplication.run(JnksIotVersionControlExecutorApplication.class, updateArguments(args));

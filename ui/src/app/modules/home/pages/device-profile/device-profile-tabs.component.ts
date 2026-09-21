@@ -14,7 +14,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-device-profile-tabs',
+  selector: 'jnks-iot-device-profile-tabs',
   templateUrl: './device-profile-tabs.component.html',
   styleUrls: []
 })

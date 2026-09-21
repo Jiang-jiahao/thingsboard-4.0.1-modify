@@ -35,7 +35,7 @@ const squareLayoutSize = 160;
 const horizontalLayoutHeight = 80;
 
 @Component({
-  selector: 'tb-value-card-widget',
+  selector: 'jnks-iot-value-card-widget',
   templateUrl: './value-card-widget.component.html',
   styleUrls: ['./value-card-widget.component.scss']
 })

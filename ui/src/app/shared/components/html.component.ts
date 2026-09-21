@@ -21,7 +21,7 @@ import { CancelAnimationFrame, RafService } from '@core/services/raf.service';
 import { beautifyHtml } from '@shared/models/beautify.models';
 
 @Component({
-  selector: 'tb-html',
+  selector: 'jnks-iot-html',
   templateUrl: './html.component.html',
   styleUrls: ['./html.component.scss'],
   providers: [

@@ -1,34 +1,34 @@
-<div class="tb-entities-table-root">
+<div class="jnks-iot-entities-table-root">
   <div *ngIf="entitiesTableConfig.detailsPanelEnabled && isDetailsOpen"
-       class="tb-entity-details-overlay"
+       class="jnks-iot-entity-details-overlay"
        role="presentation"
        (click)="closeDetailsOnBackdrop($event)">
-    <div class="tb-entity-details-dialog mat-elevation-z8"
+    <div class="jnks-iot-entity-details-dialog mat-elevation-z8"
          role="dialog"
          aria-modal="true"
          (click)="$event.stopPropagation()">
-      <tb-entity-details-panel
+      <jnks-iot-entity-details-panel
         #entityDetailsPanel
         [entitiesTableConfig]="entitiesTableConfig"
         [entityId]="isDetailsOpen ? dataSource.currentEntity?.id : null"
         (closeEntityDetails)="closeEntityDetails()"
         (entityUpdated)="onEntityUpdated($event)"
         (entityAction)="onEntityAction($event)">
-      </tb-entity-details-panel>
+      </jnks-iot-entity-details-panel>
     </div>
   </div>
-  <mat-drawer-container hasBackdrop="false" class="tb-entities-table-container">
+  <mat-drawer-container hasBackdrop="false" class="jnks-iot-entities-table-container">
     <mat-drawer-content>
-      <div *ngIf="entitiesTableConfig" class="mat-padding tb-entity-table">
-      <div class="tb-entity-table-content tb-outlined-border flex flex-col">
+      <div *ngIf="entitiesTableConfig" class="mat-padding jnks-iot-entity-table">
+      <div class="jnks-iot-entity-table-content jnks-iot-outlined-border flex flex-col">
         <mat-toolbar class="mat-mdc-table-toolbar" [class.!hidden]="textSearchMode || !dataSource.selection.isEmpty()">
           <div class="mat-toolbar-tools">
             <div class="title-container flex flex-row items-center justify-start xs:flex-col xs:items-start xs:justify-center">
-              <span *ngIf="entitiesTableConfig.tableTitle" class="tb-entity-table-title">{{ entitiesTableConfig.tableTitle }}</span>
-              <tb-anchor #entityTableHeader></tb-anchor>
-              <tb-timewindow *ngIf="entitiesTableConfig.useTimePageLink" [(ngModel)]="timewindow"
+              <span *ngIf="entitiesTableConfig.tableTitle" class="jnks-iot-entity-table-title">{{ entitiesTableConfig.tableTitle }}</span>
+              <jnks-iot-anchor #entityTableHeader></jnks-iot-anchor>
+              <jnks-iot-timewindow *ngIf="entitiesTableConfig.useTimePageLink" [(ngModel)]="timewindow"
                               (ngModelChange)="onTimewindowChange()"
-                              asButton strokedButton historyOnly [forAllTimeEnabled]="entitiesTableConfig.forAllTimeEnabled"></tb-timewindow>
+                              asButton strokedButton historyOnly [forAllTimeEnabled]="entitiesTableConfig.forAllTimeEnabled"></jnks-iot-timewindow>
             </div>
             <span class="flex-1"></span>
             <div [class.!hidden]="!addEnabled()">
@@ -57,13 +57,13 @@
                           (click)="entitiesTableConfig.addActionDescriptors[0].onAction($event)"
                           matTooltip="{{ entitiesTableConfig.addActionDescriptors[0].name }}"
                           matTooltipPosition="above">
-                    <tb-icon>{{entitiesTableConfig.addActionDescriptors[0].icon}}</tb-icon>
+                    <jnks-iot-icon>{{entitiesTableConfig.addActionDescriptors[0].icon}}</jnks-iot-icon>
                   </button>
                   <button *ngIf="entitiesTableConfig.addAsTextButton && entitiesTableConfig.addActionDescriptors[0].isEnabled()"
                           mat-stroked-button color="primary"
                           [disabled]="isLoading$ | async"
                           (click)="entitiesTableConfig.addActionDescriptors[0].onAction($event)">
-                    <tb-icon>{{entitiesTableConfig.addActionDescriptors[0].icon}}</tb-icon>
+                    <jnks-iot-icon>{{entitiesTableConfig.addActionDescriptors[0].icon}}</jnks-iot-icon>
                     {{ entitiesTableConfig.addActionDescriptors[0].name }}
                   </button>
                 </ng-container>
@@ -79,7 +79,7 @@
                             [disabled]="isLoading$ | async"
                             [class.!hidden]="!actionDescriptor.isEnabled()"
                             (click)="actionDescriptor.onAction($event)">
-                      <tb-icon matMenuItemIcon>{{actionDescriptor.icon}}</tb-icon>
+                      <jnks-iot-icon matMenuItemIcon>{{actionDescriptor.icon}}</jnks-iot-icon>
                       <span>{{ actionDescriptor.name }}</span>
                     </button>
                   </mat-menu>
@@ -91,7 +91,7 @@
                     matTooltip="{{ actionDescriptor.name }}"
                     matTooltipPosition="above"
                     (click)="actionDescriptor.onAction($event)">
-              <tb-icon>{{actionDescriptor.icon}}</tb-icon>
+              <jnks-iot-icon>{{actionDescriptor.icon}}</jnks-iot-icon>
             </button>
             <button mat-icon-button [disabled]="isLoading$ | async" (click)="updateData()"
                     matTooltip="{{ 'action.refresh' | translate }}"
@@ -128,7 +128,7 @@
         </mat-toolbar>
         <mat-toolbar *ngIf="entitiesTableConfig.selectionEnabled" class="mat-mdc-table-toolbar" color="primary" [class.!hidden]="dataSource.selection.isEmpty()">
           <div class="mat-toolbar-tools">
-            <span class="tb-entity-table-info">
+            <span class="jnks-iot-entity-table-info">
               {{ translations.selectedEntities | translate:{count: dataSource.selection.selected.length} }}
             </span>
             <span class="flex-1"></span>
@@ -137,7 +137,7 @@
                     matTooltip="{{ actionDescriptor.name }}"
                     matTooltipPosition="above"
                     (click)="actionDescriptor.onAction($event, dataSource.selection.selected)">
-              <tb-icon>{{actionDescriptor.icon}}</tb-icon>
+              <jnks-iot-icon>{{actionDescriptor.icon}}</jnks-iot-icon>
             </button>
           </div>
         </mat-toolbar>
@@ -179,8 +179,8 @@
                        (click)="$event.stopPropagation();"></a>
                   </ng-template>
                   <ng-template [ngSwitchCase]="'entityChips'">
-                    <tb-entity-chips [entity]="entity" [key]="column.key"
-                                     [detailsPagePrefixUrl]="column.entityURL ? column.entityURL(entity) : ''"></tb-entity-chips>
+                    <jnks-iot-entity-chips [entity]="entity" [key]="column.key"
+                                     [detailsPagePrefixUrl]="column.entityURL ? column.entityURL(entity) : ''"></jnks-iot-entity-chips>
                   </ng-template>
                   <ng-template #defaultContent ngSwitchDefault>
                     <span [innerHTML]="cellContent(entity, column, row)"></span>
@@ -189,7 +189,7 @@
                 <ng-template [ngIf]="column.actionCell">
                   <ng-container [ngSwitch]="column.actionCell.type">
                     <ng-template [ngSwitchCase]="cellActionType.COPY_BUTTON">
-                      <tb-copy-button
+                      <jnks-iot-copy-button
                         class="copy-button"
                         [disabled]="isLoading$ | async"
                         [class.!hidden]="!column.actionCell.isEnabled(entity)"
@@ -200,7 +200,7 @@
                         (mouseleave)="cellMatTooltip.show()"
                         [icon]="column.actionCell.icon"
                         [style]="column.actionCell.style">
-                      </tb-copy-button>
+                      </jnks-iot-copy-button>
                     </ng-template>
                     <ng-template ngSwitchDefault>
                       <button mat-icon-button [disabled]="isLoading$ | async"
@@ -208,9 +208,9 @@
                               matTooltip="{{ column.actionCell.nameFunction ? column.actionCell.nameFunction(entity) : column.actionCell.name }}"
                               matTooltipPosition="above"
                               (click)="column.actionCell.onAction($event, entity)">
-                        <tb-icon [style]="column.actionCell.style">
+                        <jnks-iot-icon [style]="column.actionCell.style">
                           {{column.actionCell.icon}}
-                        </tb-icon>
+                        </jnks-iot-icon>
                       </button>
                     </ng-template>
                   </ng-container>
@@ -226,9 +226,9 @@
                         matTooltip="{{ column.actionDescriptor.nameFunction ? column.actionDescriptor.nameFunction(entity) : column.actionDescriptor.name }}"
                         matTooltipPosition="above"
                         (click)="column.actionDescriptor.onAction($event, entity)">
-                  <tb-icon [style]="column.actionDescriptor.style">
+                  <jnks-iot-icon [style]="column.actionDescriptor.style">
                     {{column.actionDescriptor.iconFunction ? column.actionDescriptor.iconFunction(entity) : column.actionDescriptor.icon}}
-                  </tb-icon>
+                  </jnks-iot-icon>
                 </button>
               </mat-cell>
             </ng-container>
@@ -253,9 +253,9 @@
                             matTooltip="{{ actionDescriptor.nameFunction ? actionDescriptor.nameFunction(entity) : actionDescriptor.name }}"
                             matTooltipPosition="above"
                             (click)="actionDescriptor.onAction($event, entity)">
-                      <tb-icon [style]="actionDescriptor.style">
+                      <jnks-iot-icon [style]="actionDescriptor.style">
                         {{actionDescriptor.iconFunction ?  actionDescriptor.iconFunction(entity) : actionDescriptor.icon}}
-                      </tb-icon>
+                      </jnks-iot-icon>
                     </button>
                   </div>
                   <div [class.!hidden]="cellActionDescriptors.length === 1" class="gt-md:!hidden">
@@ -269,9 +269,9 @@
                               [disabled]="isLoading$ | async"
                               [class.!hidden]="!actionDescriptor.isEnabled(entity)"
                               (click)="actionDescriptor.onAction($event, entity)">
-                        <tb-icon matMenuItemIcon [style]="actionDescriptor.style">
+                        <jnks-iot-icon matMenuItemIcon [style]="actionDescriptor.style">
                           {{actionDescriptor.iconFunction ?  actionDescriptor.iconFunction(entity) : actionDescriptor.icon}}
-                        </tb-icon>
+                        </jnks-iot-icon>
                         <span>{{ actionDescriptor.nameFunction ? actionDescriptor.nameFunction(entity) : actionDescriptor.name }}</span>
                       </button>
                     </mat-menu>
@@ -283,8 +283,8 @@
             <mat-row [class.!hidden]="dataSource.dataLoading"
                      [class.mat-row-select]="selectionEnabled"
                      [class.mat-selected]="dataSource.selection.isSelected(entity)"
-                     [class.tb-current-entity]="dataSource.isCurrentEntity(entity)"
-                     [class.tb-pointer]="entitiesTableConfig.rowPointer"
+                     [class.jnks-iot-current-entity]="dataSource.isCurrentEntity(entity)"
+                     [class.jnks-iot-pointer]="entitiesTableConfig.rowPointer"
                      *matRowDef="let entity; columns: displayedColumns;" (click)="onRowClick($event, entity)"></mat-row>
           </table>
           <span [class.!hidden]="(isLoading$ | async) || (dataSource.isEmpty() | async) === false || dataSource.dataLoading"

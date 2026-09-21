@@ -17,7 +17,7 @@ import { UtilsService } from '@core/services/utils.service';
 import { EntityService } from '@core/http/entity.service';
 
 @Component({
-  selector: 'tb-entity-subtype-list',
+  selector: 'jnks-iot-entity-subtype-list',
   templateUrl: './entity-subtype-list.component.html',
   styleUrls: [],
   providers: [

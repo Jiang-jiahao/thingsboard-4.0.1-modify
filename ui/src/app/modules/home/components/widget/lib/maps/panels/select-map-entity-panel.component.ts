@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UnplacedMapDataItem } from '@home/components/widget/lib/maps/data-layer/latest-map-data-layer';
 
 @Component({
-  selector: 'tb-select-map-entity-panel',
+  selector: 'jnks-iot-select-map-entity-panel',
   templateUrl: './select-map-entity-panel.component.html',
   providers: [],
   styleUrls: ['./select-map-entity-panel.component.scss'],
@@ -23,7 +23,7 @@ export class SelectMapEntityPanelComponent implements OnInit {
   selectedEntity: UnplacedMapDataItem = null;
 
   constructor(private fb: UntypedFormBuilder,
-              private popover: TbPopoverComponent) {
+              private popover: JnksIotPopoverComponent) {
   }
 
   ngOnInit(): void {
@@ -32,7 +32,7 @@ export class SelectMapEntityPanelComponent implements OnInit {
         entity: ['', Validators.required]
       }
     );
-    this.popover.tbDestroy.subscribe(() => {
+    this.popover.jnksIotDestroy.subscribe(() => {
       this.entitySelected.emit(this.selectedEntity);
     });
   }

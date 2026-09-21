@@ -1,9 +1,9 @@
-<div class="tb-js-func flex flex-col" style="background: #fff;" [class]="{'tb-disabled': disabled, 'fill-height': fillHeight, 'tb-hide-brackets': hideBrackets}"
-     tb-fullscreen
+<div class="jnks-iot-js-func flex flex-col" style="background: #fff;" [class]="{'jnks-iot-disabled': disabled, 'fill-height': fillHeight, 'jnks-iot-hide-brackets': hideBrackets}"
+     jnks-iot-fullscreen
      [fullscreen]="fullscreen">
-  <div style="min-height: 40px;" class="tb-js-func-toolbar flex flex-row items-center justify-start">
-    <label *ngIf="!hideLabel" class="tb-title no-padding"
-           [class]="{'tb-error': !disabled && (hasErrors || !functionValid || required && !modelValue), 'tb-required': !disabled && required}">
+  <div style="min-height: 40px;" class="jnks-iot-js-func-toolbar flex flex-row items-center justify-start">
+    <label *ngIf="!hideLabel" class="jnks-iot-title no-padding"
+           [class]="{'jnks-iot-error': !disabled && (hasErrors || !functionValid || required && !modelValue), 'jnks-iot-required': !disabled && required}">
       {{ functionLabel }}
     </label>
     <ng-content select="[toolbarStartButton]"></ng-content>
@@ -15,8 +15,8 @@
            style="border-radius: 50%"
            #editModulesButton
            (click)="editModules($event, editModulesButton)">
-        <button type='button' mat-icon-button class="tb-mat-32">
-          <tb-icon color="primary" matButtonIcon>mdi:application-braces-outline</tb-icon>
+        <button type='button' mat-icon-button class="jnks-iot-mat-32">
+          <jnks-iot-icon color="primary" matButtonIcon>mdi:application-braces-outline</jnks-iot-icon>
         </button>
       </div>
     </fieldset>
@@ -24,22 +24,22 @@
       {{'js-func.tidy' | translate }}
     </button>
     <ng-content select="[toolbarSuffixButton]"></ng-content>
-    <div *ngIf="helpId" [tb-help-popup]="helpId" [tb-help-popup-style]="helpPopupStyle"></div>
+    <div *ngIf="helpId" [jnks-iot-help-popup]="helpId" [jnks-iot-help-popup-style]="helpPopupStyle"></div>
     <fieldset style="width: initial">
       <div matTooltip="{{(fullscreen ? 'fullscreen.exit' : 'fullscreen.expand') | translate}}"
            matTooltipPosition="above"
            style="border-radius: 50%"
            (click)="fullscreen = !fullscreen">
-        <button type='button' mat-icon-button class="tb-mat-32">
+        <button type='button' mat-icon-button class="jnks-iot-mat-32">
           <mat-icon class="material-icons">{{ fullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
         </button>
       </div>
     </fieldset>
   </div>
-  <div id="tb-javascript-panel" class="tb-js-func-panel flex flex-col" tb-toast toastTarget="{{toastTargetId}}">
-    <div #javascriptEditor id="tb-javascript-input" [style]="fillHeight ? {} : {minHeight: minHeight}" [class.fill-height]="fillHeight"></div>
+  <div id="jnks-iot-javascript-panel" class="jnks-iot-js-func-panel flex flex-col" jnks-iot-toast toastTarget="{{toastTargetId}}">
+    <div #javascriptEditor id="jnks-iot-javascript-input" [style]="fillHeight ? {} : {minHeight: minHeight}" [class.fill-height]="fillHeight"></div>
   </div>
   <div *ngIf="!hideBrackets" class="flex flex-row items-center justify-start" style="height: 40px;">
-    <label class="tb-title no-padding" [class]="{'tb-error': hasErrors || !functionValid || required && !modelValue}">&#125;</label>
+    <label class="jnks-iot-title no-padding" [class]="{'jnks-iot-error': hasErrors || !functionValid || required && !modelValue}">&#125;</label>
   </div>
 </div>

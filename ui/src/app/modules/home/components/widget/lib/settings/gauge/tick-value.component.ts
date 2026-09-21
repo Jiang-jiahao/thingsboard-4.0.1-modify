@@ -11,7 +11,7 @@ import { Datasource } from '@shared/models/widget.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-tick-value',
+  selector: 'jnks-iot-tick-value',
   templateUrl: './tick-value.component.html',
   styleUrls: [],
   providers: [

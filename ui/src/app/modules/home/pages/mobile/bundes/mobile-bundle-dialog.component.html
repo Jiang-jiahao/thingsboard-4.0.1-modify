@@ -1,7 +1,7 @@
 <mat-toolbar color="primary">
   <h2>{{ dialogTitle | translate }}</h2>
   <span class="flex-1"></span>
-  <div tb-help="mobileBundle"></div>
+  <div jnks-iot-help="mobileBundle"></div>
   <button mat-icon-button
           (click)="cancel()"
           type="button">
@@ -34,7 +34,7 @@
             {{ 'mobile.title-max-length' | translate }}
           </mat-error>
         </mat-form-field>
-        <tb-entity-autocomplete
+        <jnks-iot-entity-autocomplete
           allowCreateNew
           useFullEntityId
           appearance="outline"
@@ -43,8 +43,8 @@
           [entitySubtype]="platformType.ANDROID"
           (createNew)="createApplication('androidAppId', platformType.ANDROID)"
           formControlName="androidAppId">
-        </tb-entity-autocomplete>
-        <tb-entity-autocomplete
+        </jnks-iot-entity-autocomplete>
+        <jnks-iot-entity-autocomplete
           allowCreateNew
           useFullEntityId
           appearance="outline"
@@ -53,7 +53,7 @@
           [entitySubtype]="platformType.IOS"
           (createNew)="createApplication('iosAppId', platformType.IOS)"
           formControlName="iosAppId">
-        </tb-entity-autocomplete>
+        </jnks-iot-entity-autocomplete>
         <mat-form-field appearance="outline">
           <mat-label translate>mobile.description</mat-label>
           <textarea matInput formControlName="description" rows="1"></textarea>
@@ -66,7 +66,7 @@
         <mat-slide-toggle formControlName="oauth2Enabled">
           {{ 'mobile.enable-oauth' | translate }}
         </mat-slide-toggle>
-        <tb-entity-list formControlName="oauth2ClientIds"
+        <jnks-iot-entity-list formControlName="oauth2ClientIds"
                         [entityType]="entityType.OAUTH2_CLIENT"
                         appearance="outline"
                         labelText="{{ 'admin.oauth2.clients' | translate }}"
@@ -76,14 +76,14 @@
                   (click)="createClient($event)">
             <span style="white-space: nowrap">{{ 'admin.oauth2.create-new' | translate }}</span>
           </button>
-        </tb-entity-list>
+        </jnks-iot-entity-list>
       </form>
     </mat-step>
     <mat-step [stepControl]="layoutForms">
       <ng-template matStepLabel>{{ 'mobile.layout' | translate }}</ng-template>
       <form [formGroup]="layoutForms" class="layout-form">
-        <tb-mobile-layout formControlName="layoutConfig">
-        </tb-mobile-layout>
+        <jnks-iot-mobile-layout formControlName="layoutConfig">
+        </jnks-iot-mobile-layout>
       </form>
     </mat-step>
   </mat-horizontal-stepper>

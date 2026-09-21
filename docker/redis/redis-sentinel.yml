@@ -6,7 +6,7 @@ services:
   redis-master:
     image: 'bitnami/redis:7.2'
     volumes:
-      - ../tb-monolith/redis-sentinel-data-master:/bitnami/redis/data
+      - ../jnks-iot-monolith/redis-sentinel-data-master:/bitnami/redis/data
     environment:
       - 'REDIS_REPLICATION_MODE=master'
       - 'REDIS_PASSWORD=jnks-iot'
@@ -14,7 +14,7 @@ services:
   redis-slave:
     image: 'bitnami/redis:7.2'
     volumes:
-      - ../tb-monolith/redis-sentinel-data-slave:/bitnami/redis/data
+      - ../jnks-iot-monolith/redis-sentinel-data-slave:/bitnami/redis/data
     environment:
       - 'REDIS_REPLICATION_MODE=slave'
       - 'REDIS_MASTER_HOST=redis-master'
@@ -26,7 +26,7 @@ services:
   redis-sentinel:
     image: 'bitnami/redis-sentinel:7.2'
     volumes:
-      - ../tb-monolith/redis-sentinel-data-sentinel:/bitnami/redis/data
+      - ../jnks-iot-monolith/redis-sentinel-data-sentinel:/bitnami/redis/data
     environment:
       - 'REDIS_MASTER_HOST=redis-master'
       - 'REDIS_MASTER_SET=mymaster'
@@ -37,67 +37,67 @@ services:
       - redis-slave
 
   # JnksIOT setup to use redis-sentinel
-  tb-core1:
+  jnks-iot-core1:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-core2:
+  jnks-iot-core2:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-rule-engine1:
+  jnks-iot-rule-engine1:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-rule-engine2:
+  jnks-iot-rule-engine2:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-mqtt-transport1:
+  jnks-iot-mqtt-transport1:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-mqtt-transport2:
+  jnks-iot-mqtt-transport2:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-http-transport1:
+  jnks-iot-http-transport1:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-http-transport2:
+  jnks-iot-http-transport2:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-coap-transport:
+  jnks-iot-coap-transport:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-lwm2m-transport:
+  jnks-iot-lwm2m-transport:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-snmp-transport:
+  jnks-iot-snmp-transport:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-vc-executor1:
+  jnks-iot-vc-executor1:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:
       - redis-sentinel
-  tb-vc-executor2:
+  jnks-iot-vc-executor2:
     env_file:
       - ../redis/cache-redis-sentinel.env
     depends_on:

@@ -28,7 +28,7 @@ interface FormGroupModel {
 }
 
 @Component({
-  selector: 'tb-time-unit-select',
+  selector: 'jnks-iot-time-unit-select',
   templateUrl: './time-unit-select.component.html',
   styleUrls: [],
   providers: [

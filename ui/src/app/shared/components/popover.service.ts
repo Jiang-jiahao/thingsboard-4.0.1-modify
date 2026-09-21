@@ -15,7 +15,7 @@ import {
   PopoverPreferredPlacement,
   PopoverWithTrigger
 } from '@shared/components/popover.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { ComponentType } from '@angular/cdk/portal';
 import { HELP_MARKDOWN_COMPONENT_TOKEN } from '@shared/components/tokens';
 import { CdkOverlayOrigin } from '@angular/cdk/overlay';
@@ -23,7 +23,7 @@ import { Observable } from 'rxjs';
 import { mergeDeep } from '@core/utils';
 
 @Injectable()
-export class TbPopoverService {
+export class JnksIotPopoverService {
 
   private popoverWithTriggers: PopoverWithTrigger[] = [];
 
@@ -36,8 +36,8 @@ export class TbPopoverService {
   }
 
   hidePopover(trigger: Element): boolean {
-    const component: TbPopoverComponent = this.findPopoverByTrigger(trigger);
-    if (component && component.tbVisible) {
+    const component: JnksIotPopoverComponent = this.findPopoverByTrigger(trigger);
+    if (component && component.jnksIotVisible) {
       component.hide();
       return true;
     } else {
@@ -45,23 +45,23 @@ export class TbPopoverService {
     }
   }
 
-  createPopoverRef(hostView: ViewContainerRef): ComponentRef<TbPopoverComponent> {
-    return hostView.createComponent(TbPopoverComponent);
+  createPopoverRef(hostView: ViewContainerRef): ComponentRef<JnksIotPopoverComponent> {
+    return hostView.createComponent(JnksIotPopoverComponent);
   }
 
-  displayPopover<T>(config: DisplayPopoverConfig<T>): TbPopoverComponent<T>;
+  displayPopover<T>(config: DisplayPopoverConfig<T>): JnksIotPopoverComponent<T>;
   displayPopover<T>(trigger: Element, renderer: Renderer2, hostView: ViewContainerRef,
                     componentType: Type<T>, preferredPlacement: PopoverPreferredPlacement,
                     hideOnClickOutside: boolean, injector?: Injector, context?: any, overlayStyle?: any,
                     popoverStyle?: any, style?: any,
                     showCloseButton?: boolean, visibleFn?: (visible: boolean) => void,
-                    popoverContentStyle?: any): TbPopoverComponent<T>;
+                    popoverContentStyle?: any): JnksIotPopoverComponent<T>;
   displayPopover<T>(config: Element | DisplayPopoverConfig<T>, renderer?: Renderer2, hostView?: ViewContainerRef,
                     componentType?: Type<T>, preferredPlacement?: PopoverPreferredPlacement,
                     hideOnClickOutside?: boolean, injector?: Injector, context?: any, overlayStyle?: any,
                     popoverStyle?: any, style?: any,
                     showCloseButton?: boolean, visibleFn?: (visible: boolean) => void,
-                    popoverContentStyle?: any): TbPopoverComponent<T> {
+                    popoverContentStyle?: any): JnksIotPopoverComponent<T> {
     if (!(config instanceof Element) && 'trigger' in config && 'renderer' in config && 'componentType' in config) {
       const componentRef = this.createPopoverRef(config.hostView);
       return this.displayPopoverWithComponentRef<T>({ ...config, componentRef })
@@ -74,19 +74,19 @@ export class TbPopoverService {
     }
   }
 
-  displayPopoverWithComponentRef<T>(config: DisplayPopoverWithComponentRefConfig<T>): TbPopoverComponent<T>;
-  displayPopoverWithComponentRef<T>(componentRef: ComponentRef<TbPopoverComponent>, trigger: Element, renderer: Renderer2,
+  displayPopoverWithComponentRef<T>(config: DisplayPopoverWithComponentRefConfig<T>): JnksIotPopoverComponent<T>;
+  displayPopoverWithComponentRef<T>(componentRef: ComponentRef<JnksIotPopoverComponent>, trigger: Element, renderer: Renderer2,
                                     componentType: Type<T>, preferredPlacement: PopoverPreferredPlacement,
                                     hideOnClickOutside: boolean, injector?: Injector, context?: any, overlayStyle?: any,
                                     popoverStyle?: any, style?: any, showCloseButton?: boolean,
-                                    visibleFn?: (visible: boolean) => void, popoverContentStyle?: any): TbPopoverComponent<T>;
-  displayPopoverWithComponentRef<T>(config: ComponentRef<TbPopoverComponent> | DisplayPopoverWithComponentRefConfig<T>,
+                                    visibleFn?: (visible: boolean) => void, popoverContentStyle?: any): JnksIotPopoverComponent<T>;
+  displayPopoverWithComponentRef<T>(config: ComponentRef<JnksIotPopoverComponent> | DisplayPopoverWithComponentRefConfig<T>,
                                     trigger?: Element, renderer?: Renderer2, componentType?: Type<T>,
                                     preferredPlacement?: PopoverPreferredPlacement, hideOnClickOutside?: boolean,
                                     injector?: Injector, context?: any, overlayStyle?: any,
                                     popoverStyle?: any, style?: any, showCloseButton?: boolean,
                                     visibleFn?: (visible: boolean) => void,
-                                    popoverContentStyle: any = {}): TbPopoverComponent<T> {
+                                    popoverContentStyle: any = {}): JnksIotPopoverComponent<T> {
     let popoverConfig: DisplayPopoverWithComponentRefConfig<T>;
     if (!(config instanceof ComponentRef) && 'trigger' in config && 'renderer' in config && 'componentType' in config) {
       popoverConfig = config;
@@ -115,7 +115,7 @@ export class TbPopoverService {
   }
 
 
-  private _displayPopoverWithComponentRef<T>(conf: DisplayPopoverWithComponentRefConfig<T>): TbPopoverComponent<T> {
+  private _displayPopoverWithComponentRef<T>(conf: DisplayPopoverWithComponentRefConfig<T>): JnksIotPopoverComponent<T> {
     const component = conf.componentRef.instance;
     this.popoverWithTriggers.push({
       trigger: conf.trigger,
@@ -127,26 +127,26 @@ export class TbPopoverService {
     );
     const originElementRef = new ElementRef(conf.trigger);
     component.setOverlayOrigin(new CdkOverlayOrigin(originElementRef));
-    component.tbPlacement = conf.preferredPlacement;
-    component.tbComponent = conf.componentType;
-    component.tbComponentInjector = conf.injector;
-    component.tbComponentContext = conf.context;
-    component.tbOverlayStyle = conf.overlayStyle;
-    component.tbModal = conf.isModal;
-    component.tbPopoverInnerStyle = conf.popoverStyle;
-    component.tbPopoverInnerContentStyle = conf.popoverContentStyle;
-    component.tbComponentStyle = conf.style;
-    component.tbHideOnClickOutside = conf.hideOnClickOutside;
-    component.tbShowCloseButton = conf.showCloseButton;
-    component.tbVisibleChange.subscribe((visible: boolean) => {
+    component.jnksIotPlacement = conf.preferredPlacement;
+    component.jnksIotComponent = conf.componentType;
+    component.jnksIotComponentInjector = conf.injector;
+    component.jnksIotComponentContext = conf.context;
+    component.jnksIotOverlayStyle = conf.overlayStyle;
+    component.jnksIotModal = conf.isModal;
+    component.jnksIotPopoverInnerStyle = conf.popoverStyle;
+    component.jnksIotPopoverInnerContentStyle = conf.popoverContentStyle;
+    component.jnksIotComponentStyle = conf.style;
+    component.jnksIotHideOnClickOutside = conf.hideOnClickOutside;
+    component.jnksIotShowCloseButton = conf.showCloseButton;
+    component.jnksIotVisibleChange.subscribe((visible: boolean) => {
       if (!visible) {
         conf.componentRef.destroy();
       }
     });
-    component.tbDestroy.subscribe(() => {
+    component.jnksIotDestroy.subscribe(() => {
       this.removePopoverByComponent(component);
     });
-    component.tbHideStart.subscribe(() => {
+    component.jnksIotHideStart.subscribe(() => {
       conf.visibleFn(false);
     });
     component.show();
@@ -169,7 +169,7 @@ export class TbPopoverService {
       const injector = Injector.create({
         parent: hostView.injector, providers: []
       });
-      const componentRef = hostView.createComponent(TbPopoverComponent);
+      const componentRef = hostView.createComponent(JnksIotPopoverComponent);
       const component = componentRef.instance;
       this.popoverWithTriggers.push({
         trigger,
@@ -180,13 +180,13 @@ export class TbPopoverService {
         componentRef.location.nativeElement
       );
       const originElementRef = new ElementRef(trigger);
-      component.tbAnimationState = 'void';
-      component.tbOverlayStyle = {...overlayStyle, opacity: '0' };
+      component.jnksIotAnimationState = 'void';
+      component.jnksIotOverlayStyle = {...overlayStyle, opacity: '0' };
       component.setOverlayOrigin(new CdkOverlayOrigin(originElementRef));
-      component.tbPlacement = preferredPlacement;
-      component.tbComponent = this.helpMarkdownComponent;
-      component.tbComponentInjector = injector;
-      component.tbComponentContext = {
+      component.jnksIotPlacement = preferredPlacement;
+      component.jnksIotComponent = this.helpMarkdownComponent;
+      component.jnksIotComponentInjector = injector;
+      component.jnksIotComponentContext = {
         helpId,
         helpContent,
         helpContentBase64,
@@ -194,19 +194,19 @@ export class TbPopoverService {
         style: helpStyle,
         visible: true
       };
-      component.tbHideOnClickOutside = true;
-      component.tbVisibleChange.subscribe((visible: boolean) => {
+      component.jnksIotHideOnClickOutside = true;
+      component.jnksIotVisibleChange.subscribe((visible: boolean) => {
         if (!visible) {
           visibleFn(false);
           componentRef.destroy();
         }
       });
-      component.tbDestroy.subscribe(() => {
+      component.jnksIotDestroy.subscribe(() => {
         this.removePopoverByComponent(component);
       });
       const showHelpMarkdownComponent = () => {
-        component.tbOverlayStyle = {...component.tbOverlayStyle, opacity: '1' };
-        component.tbAnimationState = 'active';
+        component.jnksIotOverlayStyle = {...component.jnksIotOverlayStyle, opacity: '1' };
+        component.jnksIotAnimationState = 'active';
         component.updatePosition();
         readyFn(true);
         setTimeout(() => {
@@ -222,10 +222,10 @@ export class TbPopoverService {
           });
         }
       };
-      if (component.tbComponentRef) {
-        setupHelpMarkdownComponent(component.tbComponentRef.instance);
+      if (component.jnksIotComponentRef) {
+        setupHelpMarkdownComponent(component.jnksIotComponentRef.instance);
       } else {
-        component.tbComponentChange.subscribe((helpMarkdownComponentRef) => {
+        component.jnksIotComponentChange.subscribe((helpMarkdownComponentRef) => {
           setupHelpMarkdownComponent(helpMarkdownComponentRef.instance);
         });
       }
@@ -234,7 +234,7 @@ export class TbPopoverService {
     }
   }
 
-  private findPopoverByTrigger(trigger: Element): TbPopoverComponent | null {
+  private findPopoverByTrigger(trigger: Element): JnksIotPopoverComponent | null {
     const res = this.popoverWithTriggers.find(val => this.elementsAreEqualOrDescendant(trigger, val.trigger));
     if (res) {
       return res.popoverComponent;
@@ -243,7 +243,7 @@ export class TbPopoverService {
     }
   }
 
-  private removePopoverByComponent(component: TbPopoverComponent): void {
+  private removePopoverByComponent(component: JnksIotPopoverComponent): void {
     const index = this.popoverWithTriggers.findIndex(val => val.popoverComponent === component);
     if (index > -1) {
       this.popoverWithTriggers.splice(index, 1);

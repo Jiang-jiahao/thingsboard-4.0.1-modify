@@ -1,17 +1,17 @@
-<section class="tb-widget-settings tb-form-panel no-border no-padding" [formGroup]="mobileAppQRCodeWidgetSettingsForm">
-  <div class="tb-form-panel no-border no-padding">
-    <div class="tb-form-row no-border no-padding-bottom">
+<section class="jnks-iot-widget-settings jnks-iot-form-panel no-border no-padding" [formGroup]="mobileAppQRCodeWidgetSettingsForm">
+  <div class="jnks-iot-form-panel no-border no-padding">
+    <div class="jnks-iot-form-row no-border no-padding-bottom">
       <mat-slide-toggle class="mat-slide" formControlName="useSystemSettings" (click)="$event.stopPropagation()">
         {{ 'admin.mobile-app.use-system-settings' | translate }}
       </mat-slide-toggle>
     </div>
   </div>
-  <div class="tb-form-panel no-border no-padding" *ngIf="!mobileAppQRCodeWidgetSettingsForm.get('useSystemSettings').value">
-    <div class="tb-form-panel" formGroupName="qrCodeConfig">
-      <div class="tb-form-panel-title" translate>widget-config.card-style</div>
-      <div class="tb-form-hint tb-primary-fill">{{ 'widgets.mobile-app-qr-code.configuration-hint' | translate }}</div>
-      <div class="tb-form-panel stroked no-padding no-gap">
-        <div class="tb-form-row space-between no-border no-padding-bottom column-xs">
+  <div class="jnks-iot-form-panel no-border no-padding" *ngIf="!mobileAppQRCodeWidgetSettingsForm.get('useSystemSettings').value">
+    <div class="jnks-iot-form-panel" formGroupName="qrCodeConfig">
+      <div class="jnks-iot-form-panel-title" translate>widget-config.card-style</div>
+      <div class="jnks-iot-form-hint jnks-iot-primary-fill">{{ 'widgets.mobile-app-qr-code.configuration-hint' | translate }}</div>
+      <div class="jnks-iot-form-panel stroked no-padding no-gap">
+        <div class="jnks-iot-form-row space-between no-border no-padding-bottom column-xs">
           <mat-slide-toggle class="mat-slide fixed-title-width-230" formControlName="badgeEnabled"
                             (click)="$event.stopPropagation()">
             {{ 'admin.mobile-app.badges' | translate }}
@@ -25,8 +25,8 @@
           </mat-form-field>
         </div>
       </div>
-      <div class="tb-form-panel stroked no-padding no-gap">
-        <div class="tb-form-row space-between no-border no-padding-bottom column-xs">
+      <div class="jnks-iot-form-panel stroked no-padding no-gap">
+        <div class="jnks-iot-form-row space-between no-border no-padding-bottom column-xs">
           <mat-slide-toggle class="mat-slide fixed-title-width-230" formControlName="qrCodeLabelEnabled" (click)="$event.stopPropagation()">
             {{ 'admin.mobile-app.label' | translate }}
           </mat-slide-toggle>
@@ -36,14 +36,14 @@
         </div>
       </div>
     </div>
-    <div class="tb-form-panel no-border no-padding">
-      <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-panel no-border no-padding">
+      <div class="jnks-iot-form-row space-between">
         <div>{{ 'widgets.background.background' | translate }}</div>
-        <tb-background-settings formControlName="background">
-        </tb-background-settings>
+        <jnks-iot-background-settings formControlName="background">
+        </jnks-iot-background-settings>
       </div>
     </div>
-    <div class="tb-form-row space-between">
+    <div class="jnks-iot-form-row space-between">
       <div>{{ 'widget-config.card-padding' | translate }}</div>
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <input matInput formControlName="padding" placeholder="{{ 'widget-config.set' | translate }}">

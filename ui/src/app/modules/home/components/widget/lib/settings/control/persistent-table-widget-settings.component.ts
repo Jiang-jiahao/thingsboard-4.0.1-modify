@@ -19,7 +19,7 @@ interface DisplayColumn {
 }
 
 @Component({
-  selector: 'tb-persistent-table-widget-settings',
+  selector: 'jnks-iot-persistent-table-widget-settings',
   templateUrl: './persistent-table-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

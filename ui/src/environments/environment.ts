@@ -7,7 +7,7 @@ export const environment = {
   brandName: 'JnksIOT',
   production: false,
 // @ts-ignore
-  tbVersion: TB_VERSION,
+  jnksIotVersion: JNKS_IOT_VERSION,
 // @ts-ignore
   supportedLangs: SUPPORTED_LANGS,
   defaultLang: 'en_US'

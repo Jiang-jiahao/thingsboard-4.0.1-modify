@@ -36,7 +36,7 @@ import { OtaUpdateType } from '@shared/models/ota-package.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-device',
+  selector: 'jnks-iot-device',
   templateUrl: './device.component.html',
   styleUrls: ['./device.component.scss']
 })

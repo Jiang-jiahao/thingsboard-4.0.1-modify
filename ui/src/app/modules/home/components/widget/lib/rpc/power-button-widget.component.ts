@@ -26,7 +26,7 @@ import { SVG, Svg } from '@svgdotjs/svg.js';
 import { MatIconRegistry } from '@angular/material/icon';
 
 @Component({
-  selector: 'tb-power-button-widget',
+  selector: 'jnks-iot-power-button-widget',
   templateUrl: './power-button-widget.component.html',
   styleUrls: ['../action/action-widget.scss', './power-button-widget.component.scss'],
   encapsulation: ViewEncapsulation.None

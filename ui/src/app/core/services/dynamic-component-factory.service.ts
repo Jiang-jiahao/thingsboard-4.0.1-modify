@@ -50,7 +50,7 @@ export class DynamicComponentFactoryService {
       preserveWhitespaces,
       styles,
       standalone: true,
-      selector: 'tb-dynamic-component#' + guid()
+      selector: 'jnks-iot-dynamic-component#' + guid()
     })(componentType);
     // Trigger component compilation
     return comp[ɵNG_COMP_DEF];

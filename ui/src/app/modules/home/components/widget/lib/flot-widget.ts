@@ -22,19 +22,19 @@ import {
 } from '@app/shared/models/widget.models';
 import {
   ChartType,
-  TbFlotAxisOptions,
-  TbFlotHoverInfo,
-  TbFlotKeySettings,
-  TbFlotLatestKeySettings,
-  TbFlotPlotAxis,
-  TbFlotPlotDataSeries,
-  TbFlotPlotItem,
-  TbFlotSeries,
-  TbFlotSeriesHoverInfo,
-  TbFlotSettings,
-  TbFlotThresholdKeySettings,
-  TbFlotThresholdMarking,
-  TbFlotTicksFormatterFunction,
+  JnksIotFlotAxisOptions,
+  JnksIotFlotHoverInfo,
+  JnksIotFlotKeySettings,
+  JnksIotFlotLatestKeySettings,
+  JnksIotFlotPlotAxis,
+  JnksIotFlotPlotDataSeries,
+  JnksIotFlotPlotItem,
+  JnksIotFlotSeries,
+  JnksIotFlotSeriesHoverInfo,
+  JnksIotFlotSettings,
+  JnksIotFlotThresholdKeySettings,
+  JnksIotFlotThresholdMarking,
+  JnksIotFlotTicksFormatterFunction,
   TooltipValueFormatFunction
 } from './flot-widget.models';
 import moment_ from 'moment';
@@ -48,19 +48,19 @@ import Timeout = NodeJS.Timeout;
 
 const moment = moment_;
 
-export class TbFlot {
+export class JnksIotFlot {
 
   private readonly utils: UtilsService;
 
-  private settings: TbFlotSettings;
+  private settings: JnksIotFlotSettings;
   private comparisonEnabled: boolean;
 
   private tooltip: JQuery<any>;
 
-  private readonly yAxisTickFormatter: TbFlotTicksFormatterFunction;
-  private readonly yaxis: TbFlotAxisOptions;
-  private readonly xaxis: TbFlotAxisOptions;
-  private yaxes: Array<TbFlotAxisOptions>;
+  private readonly yAxisTickFormatter: JnksIotFlotTicksFormatterFunction;
+  private readonly yaxis: JnksIotFlotAxisOptions;
+  private readonly xaxis: JnksIotFlotAxisOptions;
+  private yaxes: Array<JnksIotFlotAxisOptions>;
 
   private readonly options: JQueryPlotOptions;
   private subscription: IWidgetSubscription;
@@ -75,9 +75,9 @@ export class TbFlot {
   private readonly defaultBarWidth: number;
 
   private thresholdsSourcesSubscription: IWidgetSubscription;
-  private predefinedThresholds: TbFlotThresholdMarking[];
-  private latestDataThresholds: TbFlotThresholdMarking[];
-  private attributesThresholds: TbFlotThresholdMarking[];
+  private predefinedThresholds: JnksIotFlotThresholdMarking[];
+  private latestDataThresholds: JnksIotFlotThresholdMarking[];
+  private attributesThresholds: JnksIotFlotThresholdMarking[];
 
   private latestData: FormattedData[];
 
@@ -121,9 +121,9 @@ export class TbFlot {
   yMin$ = this.yMinSubject.asObservable();
   yMax$ = this.yMaxSubject.asObservable();
 
-  constructor(private ctx: WidgetContext, private readonly chartType: ChartType, private $flotElement?: JQuery<any>, settings?: TbFlotSettings) {
+  constructor(private ctx: WidgetContext, private readonly chartType: ChartType, private $flotElement?: JQuery<any>, settings?: JnksIotFlotSettings) {
     this.chartType = this.chartType || 'line';
-    this.settings = settings || (ctx.settings as TbFlotSettings);
+    this.settings = settings || (ctx.settings as JnksIotFlotSettings);
     this.utils = this.ctx.$injector.get(UtilsService);
     this.enableSelection = isDefined(this.settings.enableSelection) ? this.settings.enableSelection : true;
     this.selectionMode = this.enableSelection ? 'x' : null;
@@ -214,7 +214,7 @@ export class TbFlot {
         if (this.settings.yaxis.ticksFormatter && this.settings.yaxis.ticksFormatter.length) {
           try {
             this.yaxis.ticksFormatterFunction = new Function('value',
-                                               this.settings.yaxis.ticksFormatter) as TbFlotTicksFormatterFunction;
+                                               this.settings.yaxis.ticksFormatter) as JnksIotFlotTicksFormatterFunction;
           } catch (e) {
             this.yaxis.ticksFormatterFunction = null;
           }
@@ -366,8 +366,8 @@ export class TbFlot {
     }
     const colors: string[] = [];
     this.yaxes = [];
-    const yaxesMap: {[units: string]: TbFlotAxisOptions} = {};
-    const predefinedThresholds: TbFlotThresholdMarking[] = [];
+    const yaxesMap: {[units: string]: JnksIotFlotAxisOptions} = {};
+    const predefinedThresholds: JnksIotFlotThresholdMarking[] = [];
     const thresholdsDatasources: Datasource[] = [];
     if (this.settings.customLegendEnabled && this.settings.dataKeysListForLabels?.length) {
       this.labelPatternsSourcesData = [];
@@ -397,7 +397,7 @@ export class TbFlot {
     }
 
     for (let i = 0; i < this.subscription.data.length; i++) {
-      const series = this.subscription.data[i] as TbFlotSeries;
+      const series = this.subscription.data[i] as JnksIotFlotSeries;
       const keySettings = series.dataKey.settings;
       series.dataKey.tooltipValueFormatFunction = tooltipValueFormatFunction;
       if (keySettings.tooltipValueFormatter && keySettings.tooltipValueFormatter.length) {
@@ -464,7 +464,7 @@ export class TbFlot {
 
       if (this.yaxis) {
         const units = series.dataKey.units && series.dataKey.units.length ? series.dataKey.units : this.trackUnits;
-        let yaxis: TbFlotAxisOptions;
+        let yaxis: JnksIotFlotAxisOptions;
         if (keySettings.showSeparateAxis) {
           yaxis = this.createYAxis(keySettings, units);
           this.yaxes.push(yaxis);
@@ -506,7 +506,7 @@ export class TbFlot {
                   yaxis: series.yaxis,
                   lineWidth: threshold.lineWidth,
                   color: threshold.color
-                } as TbFlotThresholdKeySettings,
+                } as JnksIotFlotThresholdKeySettings,
                 _hash: Math.random()
               };
               if (datasource) {
@@ -596,7 +596,7 @@ export class TbFlot {
           let axisVisibilityChanged = false;
           if (this.yaxis) {
             for (let i = 0; i < this.subscription.data.length; i++) {
-              const series = this.subscription.data[i] as TbFlotSeries;
+              const series = this.subscription.data[i] as JnksIotFlotSeries;
               const yaxisIndex = series.yaxisIndex;
               if (this.yaxes[yaxisIndex].keysInfo[i].hidden !== series.dataKey.hidden) {
                 this.yaxes[yaxisIndex].keysInfo[i].hidden = series.dataKey.hidden;
@@ -624,7 +624,7 @@ export class TbFlot {
                 }
                 for (let k = 0; k < yaxis.keysInfo.length; k++) {
                   if (yaxis.keysInfo[k]) {
-                    (this.subscription.data[k] as TbFlotSeries).yaxis = newIndex;
+                    (this.subscription.data[k] as JnksIotFlotSeries).yaxis = newIndex;
                   }
                 }
 
@@ -715,7 +715,7 @@ export class TbFlot {
 
   public updateSeriesColor(color: string) {
     if (this.subscription?.data?.length) {
-      const series = this.subscription.data[0] as TbFlotSeries;
+      const series = this.subscription.data[0] as JnksIotFlotSeries;
       series.dataKey.color = color;
       series.color = color;
       series.highlightColor = tinycolor(color).setAlpha(.75).toRgbString();
@@ -862,7 +862,7 @@ export class TbFlot {
     }
   }
 
-  private createYAxis(keySettings: TbFlotKeySettings, units: string): TbFlotAxisOptions {
+  private createYAxis(keySettings: JnksIotFlotKeySettings, units: string): JnksIotFlotAxisOptions {
     const yaxis = deepClone(this.yaxis);
     let tickDecimals: number;
     let tickSize: number;
@@ -897,7 +897,7 @@ export class TbFlot {
 
     if (keySettings.axisTicksFormatter && keySettings.axisTicksFormatter.length) {
       try {
-        yaxis.ticksFormatterFunction = new Function('value', keySettings.axisTicksFormatter) as TbFlotTicksFormatterFunction;
+        yaxis.ticksFormatterFunction = new Function('value', keySettings.axisTicksFormatter) as JnksIotFlotTicksFormatterFunction;
       } catch (e) {
         yaxis.ticksFormatterFunction = this.yaxis.ticksFormatterFunction;
       }
@@ -932,9 +932,9 @@ export class TbFlot {
     );
   }
 
-  private thresholdsSourcesDataUpdated(existingThresholds: TbFlotThresholdMarking[], data: DatasourceData[],
-                                       isLatest = false): TbFlotThresholdMarking[] {
-    const thresholds: TbFlotThresholdMarking[] = [];
+  private thresholdsSourcesDataUpdated(existingThresholds: JnksIotFlotThresholdMarking[], data: DatasourceData[],
+                                       isLatest = false): JnksIotFlotThresholdMarking[] {
+    const thresholds: JnksIotFlotThresholdMarking[] = [];
     data.forEach((keyData) => {
       const skip = isLatest && !keyData.dataKey.settings.useAsThreshold;
       if (!skip && keyData && keyData.data && keyData.data[0]) {
@@ -961,8 +961,8 @@ export class TbFlot {
     return values;
   }
 
-  private processSingleDataValue(attrValue: number, keyData: DatasourceData, latestSettings: TbFlotLatestKeySettings,
-                                 existingThresholds: TbFlotThresholdMarking[], isLatest = false) {
+  private processSingleDataValue(attrValue: number, keyData: DatasourceData, latestSettings: JnksIotFlotLatestKeySettings,
+                                 existingThresholds: JnksIotFlotThresholdMarking[], isLatest = false) {
     if (isNumeric(attrValue) && isFinite(attrValue)) {
       let yaxis: number;
       let lineWidth: number;
@@ -972,7 +972,7 @@ export class TbFlot {
         lineWidth = latestSettings.thresholdLineWidth;
         color = latestSettings.thresholdColor || keyData.dataKey.color;
       } else {
-        const settings: TbFlotThresholdKeySettings = keyData.dataKey.settings;
+        const settings: JnksIotFlotThresholdKeySettings = keyData.dataKey.settings;
         yaxis = settings.yaxis;
         lineWidth = settings.lineWidth;
         color = settings.color || keyData.dataKey.color;
@@ -982,9 +982,9 @@ export class TbFlot {
     }
   }
 
-  private generateThreshold(existingThresholds: TbFlotThresholdMarking[], yaxis: number, lineWidth: number,
-                            color: string, defaultColorIndex: number, thresholdValue: number): TbFlotThresholdMarking {
-    const marking: TbFlotThresholdMarking = {};
+  private generateThreshold(existingThresholds: JnksIotFlotThresholdMarking[], yaxis: number, lineWidth: number,
+                            color: string, defaultColorIndex: number, thresholdValue: number): JnksIotFlotThresholdMarking {
+    const marking: JnksIotFlotThresholdMarking = {};
     let markingYAxis;
 
     if (isDefined(yaxis) && yaxis !== 1) {
@@ -1038,7 +1038,7 @@ export class TbFlot {
   private labelPatternsParamsDataUpdated(data: DatasourceData[]) {
     this.labelPatternsSourcesData = data;
     for (let i = 0; i < this.subscription.data.length; i++) {
-      const series = this.subscription.data[i] as TbFlotSeries;
+      const series = this.subscription.data[i] as JnksIotFlotSeries;
       this.substituteLabelPatterns(series, i);
     }
     if (this.plot) {
@@ -1047,7 +1047,7 @@ export class TbFlot {
     this.ctx.detectChanges();
   }
 
-  private substituteLabelPatterns(series: TbFlotSeries, seriesIndex: number) {
+  private substituteLabelPatterns(series: JnksIotFlotSeries, seriesIndex: number) {
     const seriesLabelPatternsSourcesData = this.labelPatternsSourcesData.filter((item) => {
       return item.datasource.entityId === series.datasource.entityId;
     });
@@ -1126,7 +1126,7 @@ export class TbFlot {
     return divElement;
   }
 
-  private seriesInfoDivFromInfo(seriesHoverInfo: TbFlotSeriesHoverInfo, seriesIndex: number): string {
+  private seriesInfoDivFromInfo(seriesHoverInfo: JnksIotFlotSeriesHoverInfo, seriesIndex: number): string {
     const units = seriesHoverInfo.units && seriesHoverInfo.units.length ? seriesHoverInfo.units : this.trackUnits;
     const decimals = isDefinedAndNotNull(seriesHoverInfo.decimals) ? seriesHoverInfo.decimals : this.trackDecimals;
     const divElement = this.seriesInfoDiv(seriesHoverInfo.label, seriesHoverInfo.color,
@@ -1154,7 +1154,7 @@ export class TbFlot {
     return tooltip;
   }
 
-  private formatPieTooltip(item: TbFlotPlotItem): string {
+  private formatPieTooltip(item: JnksIotFlotPlotItem): string {
     const units = item.series.dataKey.units && item.series.dataKey.units.length ? item.series.dataKey.units : this.trackUnits;
     const decimals = isDefinedAndNotNull(item.series.dataKey.decimals) ? item.series.dataKey.decimals : this.trackDecimals;
     const divElement = this.seriesInfoDiv(item.series.dataKey.label, item.series.dataKey.color,
@@ -1163,10 +1163,10 @@ export class TbFlot {
     return divElement.prop('outerHTML');
   }
 
-  private formatChartTooltip(hoverInfo: TbFlotHoverInfo[], seriesIndex: number): string {
+  private formatChartTooltip(hoverInfo: JnksIotFlotHoverInfo[], seriesIndex: number): string {
     let content = '';
     if (this.tooltipIndividual) {
-      let seriesHoverArray: TbFlotSeriesHoverInfo[];
+      let seriesHoverArray: JnksIotFlotSeriesHoverInfo[];
       if (hoverInfo[1] && hoverInfo[1].seriesHover.length) {
         seriesHoverArray = hoverInfo[0].seriesHover.concat(hoverInfo[1].seriesHover);
       } else {
@@ -1254,7 +1254,7 @@ export class TbFlot {
     return content;
   }
 
-  private formatYAxisTicks(value: number, axis?: TbFlotPlotAxis): string {
+  private formatYAxisTicks(value: number, axis?: JnksIotFlotPlotAxis): string {
     if (this.settings.yaxis && this.settings.yaxis.showLabels === false) {
       return '';
     }
@@ -1306,7 +1306,7 @@ export class TbFlot {
     this.$element.unbind('plotclick', this.flotClickHandler);
   }
 
-  private onFlotHover(e: any, pos: JQueryPlotPoint, item: TbFlotPlotItem) {
+  private onFlotHover(e: any, pos: JQueryPlotPoint, item: JnksIotFlotPlotItem) {
     if (!this.plot || !this.tooltip) {
       return;
     }
@@ -1319,7 +1319,7 @@ export class TbFlot {
       const pageY = pos.pageY;
 
       let tooltipHtml;
-      let hoverInfo: TbFlotHoverInfo[];
+      let hoverInfo: JnksIotFlotHoverInfo[];
 
       if (this.chartType === 'pie') {
         tooltipHtml = this.formatPieTooltip(item);
@@ -1405,28 +1405,28 @@ export class TbFlot {
     this.isMouseInteraction = false;
   }
 
-  private onFlotClick(e: any, pos: JQueryPlotPoint, item: TbFlotPlotItem) {
+  private onFlotClick(e: any, pos: JQueryPlotPoint, item: JnksIotFlotPlotItem) {
     if (!this.plot) {
       return;
     }
     this.onPieSliceClick(e, item);
   }
 
-  private getHoverInfo(seriesList: TbFlotPlotDataSeries[], pos: JQueryPlotPoint): TbFlotHoverInfo[] {
+  private getHoverInfo(seriesList: JnksIotFlotPlotDataSeries[], pos: JQueryPlotPoint): JnksIotFlotHoverInfo[] {
     let i: number;
-    let series: TbFlotPlotDataSeries;
+    let series: JnksIotFlotPlotDataSeries;
     let hoverIndex: number;
     let hoverDistance: number;
     let minDistance: number;
     let pointTime: any;
     let minTime: any;
     let minTimeHistorical: any;
-    let hoverData: TbFlotSeriesHoverInfo;
+    let hoverData: JnksIotFlotSeriesHoverInfo;
     let value: any;
     let lastValue = 0;
     let minDistanceHistorical: number;
     let deltaX = 0;
-    const results: TbFlotHoverInfo[] = [{
+    const results: JnksIotFlotHoverInfo[] = [{
       seriesHover: []
     }];
     if (this.comparisonEnabled) {
@@ -1509,7 +1509,7 @@ export class TbFlot {
     return results;
   }
 
-  private findHoverIndexFromData(posX: number, series: TbFlotPlotDataSeries): number {
+  private findHoverIndexFromData(posX: number, series: JnksIotFlotPlotDataSeries): number {
     let lower = 0;
     let upper = series.data.length - 1;
     let middle: number;
@@ -1529,7 +1529,7 @@ export class TbFlot {
     }
   }
 
-  private findHoverIndexFromDataPoints(posX: number, series: TbFlotPlotDataSeries, last: number): number {
+  private findHoverIndexFromDataPoints(posX: number, series: JnksIotFlotPlotDataSeries, last: number): number {
     const ps = series.datapoints.pointsize;
     const initial = last * ps;
     const len = series.datapoints.points.length;
@@ -1601,7 +1601,7 @@ export class TbFlot {
     this.plot.draw();
   }
 
-  private onPieSliceClick($event: any, item: TbFlotPlotItem) {
+  private onPieSliceClick($event: any, item: JnksIotFlotPlotItem) {
     const descriptors = this.ctx.actionsApi.getActionDescriptors('sliceClick');
     if ($event && descriptors.length) {
       $event.stopPropagation();

@@ -4,7 +4,7 @@ import { RuleNodeConfiguration, SlackChanelType, SlackChanelTypesTranslateMap } 
 import { RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-external-node-slack-config',
+  selector: 'jnks-iot-external-node-slack-config',
   templateUrl: './slack-config.component.html',
   styleUrls: ['./slack-config.component.scss']
 })

@@ -24,7 +24,7 @@ export interface AddUserDialogData {
 }
 
 @Component({
-  selector: 'tb-add-user-dialog',
+  selector: 'jnks-iot-add-user-dialog',
   templateUrl: './add-user-dialog.component.html',
   styleUrls: ['./add-user-dialog.component.scss']
 })
@@ -93,7 +93,7 @@ export class AddUserDialogComponent extends DialogComponent<AddUserDialogCompone
     return this.dialog.open<ActivationLinkDialogComponent, ActivationLinkDialogData,
       void>(ActivationLinkDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         activationLinkInfo
       }

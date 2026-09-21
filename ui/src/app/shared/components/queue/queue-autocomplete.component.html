@@ -13,7 +13,7 @@
           (click)="clear()">
     <mat-icon class="material-icons">close</mat-icon>
   </button>
-  <mat-autocomplete class="tb-autocomplete"
+  <mat-autocomplete class="jnks-iot-autocomplete"
                     #queueAutocomplete="matAutocomplete"
                     [displayWith]="displayQueueFn"
                     >
@@ -21,8 +21,8 @@
       <span [innerHTML]="queue.name | highlight:searchText"></span>
       <small class="queue-option-description">{{getDescription(queue)}}</small>
     </mat-option>
-    <mat-option *ngIf="!(filteredQueues | async)?.length" [value]="null" class="tb-not-found">
-      <div class="tb-not-found-content" (click)="$event.stopPropagation()">
+    <mat-option *ngIf="!(filteredQueues | async)?.length" [value]="null" class="jnks-iot-not-found">
+      <div class="jnks-iot-not-found-content" (click)="$event.stopPropagation()">
         <div *ngIf="!textIsNotEmpty(searchText); else searchNotEmpty">
           <span translate>queue.no-queues-found</span>
         </div>

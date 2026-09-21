@@ -43,7 +43,7 @@ export type NodeSelectedCallback = (node: NavTreeNode, event: Event) => void;
 export type NodesInsertedCallback = (nodes: string[], parent: string) => void;
 
 @Component({
-  selector: 'tb-nav-tree',
+  selector: 'jnks-iot-nav-tree',
   templateUrl: './nav-tree.component.html',
   styleUrls: ['./nav-tree.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -131,7 +131,7 @@ export class NavTreeComponent implements OnInit {
 
     import('jstree').then(() => {
 
-      this.treeElement = $('.tb-nav-tree-container', this.elementRef.nativeElement).jstree(config);
+      this.treeElement = $('.jnks-iot-nav-tree-container', this.elementRef.nativeElement).jstree(config);
 
       this.treeElement.on('changed.jstree', (e: any, data) => {
         if (this.onNodeSelected && data.action !== 'ready') {

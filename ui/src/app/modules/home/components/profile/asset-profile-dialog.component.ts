@@ -16,7 +16,7 @@ export interface AssetProfileDialogData {
 }
 
 @Component({
-  selector: 'tb-asset-profile-dialog',
+  selector: 'jnks-iot-asset-profile-dialog',
   templateUrl: './asset-profile-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: AssetProfileDialogComponent}],
   styleUrls: []

@@ -3,13 +3,13 @@ package com.jnks.iot.server.common.transport;
 import lombok.Getter;
 import com.jnks.iot.server.common.data.id.DeviceId;
 import com.jnks.iot.server.common.data.id.TenantId;
-import com.jnks.iot.server.queue.discovery.event.TbApplicationEvent;
+import com.jnks.iot.server.queue.discovery.event.JnksIotApplicationEvent;
 
 /**
  * Same-JVM inactivity signal so monolith Core can persist {@code active=false}
  * before in-memory queues disappear on restart.
  */
-public final class LocalDeviceInactivityEvent extends TbApplicationEvent {
+public final class LocalDeviceInactivityEvent extends JnksIotApplicationEvent {
 
     private static final long serialVersionUID = 1L;
 

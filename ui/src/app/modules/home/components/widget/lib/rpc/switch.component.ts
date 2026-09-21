@@ -35,7 +35,7 @@ interface SwitchSettings {
 }
 
 @Component({
-  selector: 'tb-switch',
+  selector: 'jnks-iot-switch',
   templateUrl: './switch.component.html',
   styleUrls: ['./switch.component.scss']
 })

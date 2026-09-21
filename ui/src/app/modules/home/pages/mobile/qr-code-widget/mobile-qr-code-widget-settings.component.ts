@@ -11,7 +11,7 @@ import { EntityType } from '@shared/models/entity-type.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-mobile-qr-code-widget',
+  selector: 'jnks-iot-mobile-qr-code-widget',
   templateUrl: './mobile-qr-code-widget-settings.component.html',
   styleUrls: ['mobile-qr-code-widget-settings.component.scss', '../../admin/settings-card.scss']
 })

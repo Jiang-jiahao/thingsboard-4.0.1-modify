@@ -1,7 +1,7 @@
 <mat-toolbar color="primary">
   <h2>{{ dialogTitle | translate }}</h2>
   <span class="flex-1"></span>
-  <div tb-help="templateNotifications"></div>
+  <div jnks-iot-help="templateNotifications"></div>
   <button mat-icon-button
           (click)="cancel()"
           type="button">
@@ -37,12 +37,12 @@
           </mat-select>
         </mat-form-field>
         <section formGroupName="configuration">
-          <label [class.tb-error]="templateNotificationForm.get('configuration.deliveryMethodsTemplates').hasError('atLeastOne')"
-            class="tb-title tb-required">{{ "notification.delivery-methods" | translate }}</label>
-          <div class="tb-hint" translate>notification.at-least-one-should-be-selected</div>
+          <label [class.jnks-iot-error]="templateNotificationForm.get('configuration.deliveryMethodsTemplates').hasError('atLeastOne')"
+            class="jnks-iot-title jnks-iot-required">{{ "notification.delivery-methods" | translate }}</label>
+          <div class="jnks-iot-hint" translate>notification.at-least-one-should-be-selected</div>
           <section formGroupName="deliveryMethodsTemplates" class="delivery-methods-container">
             <section *ngFor="let deliveryMethods of notificationDeliveryMethods"
-                     class="tb-form-panel stroked"
+                     class="jnks-iot-form-panel stroked"
                      [formGroupName]="deliveryMethods">
               <mat-slide-toggle formControlName="enabled">
                 {{ notificationDeliveryMethodInfoMap.get(deliveryMethods).name | translate }}
@@ -56,19 +56,19 @@
       <ng-template matStepLabel>{{ 'notification.compose' | translate }}</ng-template>
       <ng-template matStepContent>
         <form [formGroup]="notificationTemplateConfigurationForm">
-          <tb-template-configuration
+          <jnks-iot-template-configuration
             [notificationType]="templateNotificationForm.get('notificationType').value"
             [predefinedDeliveryMethodsTemplate]="deliveryConfiguration"
             [interacted]="composeStep.interacted"
             formControlName="deliveryMethodsTemplates">
-          </tb-template-configuration>
+          </jnks-iot-template-configuration>
         </form>
       </ng-template>
     </mat-step>
   </mat-horizontal-stepper>
 </div>
 <mat-divider></mat-divider>
-<div mat-dialog-actions class="tb-dialog-actions">
+<div mat-dialog-actions class="jnks-iot-dialog-actions">
   <button mat-stroked-button *ngIf="selectedIndex > 0"
           (click)="backStep()">{{ 'action.back' | translate }}</button>
   <span class="flex-1"></span>

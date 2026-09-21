@@ -14,7 +14,7 @@ export interface ConfirmDialogData {
 
 // @dynamic
 @Component({
-  selector: 'tb-confirm-dialog',
+  selector: 'jnks-iot-confirm-dialog',
   templateUrl: './confirm-dialog.component.html',
   styleUrls: ['./confirm-dialog.component.scss']
 })

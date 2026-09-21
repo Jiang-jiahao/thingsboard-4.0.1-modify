@@ -13,7 +13,7 @@ export interface ErrorAlertDialogData {
 }
 
 @Component({
-  selector: 'tb-error-alert-dialog',
+  selector: 'jnks-iot-error-alert-dialog',
   templateUrl: './error-alert-dialog.component.html',
   styleUrls: ['./error-alert-dialog.component.scss']
 })

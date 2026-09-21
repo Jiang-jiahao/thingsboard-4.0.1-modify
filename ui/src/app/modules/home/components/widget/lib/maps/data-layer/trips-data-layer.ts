@@ -5,7 +5,7 @@ import {
   findRotationAngle,
   interpolateLineSegment,
   MapDataLayerType, MarkerType,
-  TbMapDatasource,
+  JnksIotMapDatasource,
   TripsDataLayerSettings
 } from '@shared/models/widget/maps/map.models';
 import { forkJoin, Observable } from 'rxjs';
@@ -13,7 +13,7 @@ import { DataKey, FormattedData, WidgetActionType } from '@shared/models/widget.
 import { map } from 'rxjs/operators';
 import L from 'leaflet';
 import { deepClone, isDefined, isUndefined } from '@core/utils';
-import { TbMap } from '@home/components/widget/lib/maps/map';
+import { JnksIotMap } from '@home/components/widget/lib/maps/map';
 import { DataKeyType } from '@shared/models/telemetry/telemetry.models';
 import moment from 'moment/moment';
 import { createTooltip, updateTooltip } from '@home/components/widget/lib/maps/data-layer/data-layer-utils';
@@ -21,19 +21,19 @@ import _ from 'lodash';
 import {
   DataLayerColorProcessor,
   DataLayerPatternProcessor,
-  TbDataLayerItem,
-  TbMapDataLayer
+  JnksIotDataLayerItem,
+  JnksIotMapDataLayer
 } from '@home/components/widget/lib/maps/data-layer/map-data-layer';
 import { MarkerDataProcessor } from '@home/components/widget/lib/maps/data-layer/markers-data-layer';
 
-type TripRouteData = {[time: number]: FormattedData<TbMapDatasource>};
+type TripRouteData = {[time: number]: FormattedData<JnksIotMapDatasource>};
 
 interface PointItem {
   point: L.CircleMarker;
   tooltip?: L.Popup;
 }
 
-class TbTripDataItem extends TbDataLayerItem<TripsDataLayerSettings, TbTripsDataLayer, L.FeatureGroup> {
+class JnksIotTripDataItem extends JnksIotDataLayerItem<TripsDataLayerSettings, JnksIotTripsDataLayer, L.FeatureGroup> {
 
   private tripRouteData: TripRouteData;
 
@@ -47,19 +47,19 @@ class TbTripDataItem extends TbDataLayerItem<TripsDataLayerSettings, TbTripsData
   private points = new Map<string, PointItem>();
 
   private currentTime: number;
-  private currentPositionData: FormattedData<TbMapDatasource>;
-  private pointData: FormattedData<TbMapDatasource>;
+  private currentPositionData: FormattedData<JnksIotMapDatasource>;
+  private pointData: FormattedData<JnksIotMapDatasource>;
 
-  constructor(private rawRouteData: FormattedData<TbMapDatasource>[],
-              private latestData: FormattedData<TbMapDatasource>,
+  constructor(private rawRouteData: FormattedData<JnksIotMapDatasource>[],
+              private latestData: FormattedData<JnksIotMapDatasource>,
               settings: TripsDataLayerSettings,
-              dataLayer: TbTripsDataLayer) {
+              dataLayer: JnksIotTripsDataLayer) {
     super(settings, dataLayer);
     this.tripRouteData = this.prepareTripRouteData();
     this.create();
   }
 
-  public update(rawRouteData: FormattedData<TbMapDatasource>[]) {
+  public update(rawRouteData: FormattedData<JnksIotMapDatasource>[]) {
     this.rawRouteData = rawRouteData;
     this.tripRouteData = this.prepareTripRouteData();
     this.updateCurrentPosition(true);
@@ -72,7 +72,7 @@ class TbTripDataItem extends TbDataLayerItem<TripsDataLayerSettings, TbTripsData
     this.updateMarker();
   }
 
-  public updateLatestData(latestData: FormattedData<TbMapDatasource>) {
+  public updateLatestData(latestData: FormattedData<JnksIotMapDatasource>) {
     this.latestData = latestData;
     this.pointData = this.currentPositionData;
     if (this.latestData) {
@@ -150,7 +150,7 @@ class TbTripDataItem extends TbDataLayerItem<TripsDataLayerSettings, TbTripsData
       const dsData = this.dataLayer.getMap().getData();
       const location = this.dataLayer.dataProcessor.extractLocation(this.pointData, dsData);
       this.marker = L.marker(location, {
-        tbMarkerData: this.pointData,
+        jnksIotMarkerData: this.pointData,
         snapIgnore: true
       });
       this.marker.addTo(this.layer);
@@ -173,7 +173,7 @@ class TbTripDataItem extends TbDataLayerItem<TripsDataLayerSettings, TbTripsData
   private updateMarker() {
     if (this.settings.showMarker) {
       const dsData = this.dataLayer.getMap().getData();
-      this.marker.options.tbMarkerData = this.pointData;
+      this.marker.options.jnksIotMarkerData = this.pointData;
       this.updateMarkerLocation(this.pointData, dsData);
       if (this.settings.tooltip.show) {
         updateTooltip(this.dataLayer.getMap(), this.markerTooltip,
@@ -282,14 +282,14 @@ class TbTripDataItem extends TbDataLayerItem<TripsDataLayerSettings, TbTripsData
     }
   }
 
-  private updateMarkerLocation(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]) {
+  private updateMarkerLocation(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]) {
     const location = this.dataLayer.dataProcessor.extractLocation(data, dsData);
     if (!this.marker.getLatLng().equals(location)) {
       this.marker.setLatLng(location);
     }
   }
 
-  private updateMarkerIcon(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]) {
+  private updateMarkerIcon(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]) {
     if (this.settings.showMarker) {
       this.dataLayer.dataProcessor.createMarkerIcon(data, dsData, data.rotationAngle).subscribe(
         (iconInfo) => {
@@ -307,13 +307,13 @@ class TbTripDataItem extends TbDataLayerItem<TripsDataLayerSettings, TbTripsData
     }
   }
 
-  private updateMarkerLabel(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]) {
+  private updateMarkerLabel(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]) {
     if (this.settings.label.show) {
       this.marker.unbindTooltip();
       const label = this.dataLayer.dataLayerLabelProcessor.processPattern(data, dsData);
       const labelColor = this.dataLayer.getCtx().widgetConfig.color;
       const content: L.Content = `<div style="color: ${labelColor};"><b>${label}</b></div>`;
-      this.marker.bindTooltip(content, { className: 'tb-marker-label', permanent: true, direction: 'top', offset: this.labelOffset });
+      this.marker.bindTooltip(content, { className: 'jnks-iot-marker-label', permanent: true, direction: 'top', offset: this.labelOffset });
     }
   }
 
@@ -398,7 +398,7 @@ class TbTripDataItem extends TbDataLayerItem<TripsDataLayerSettings, TbTripsData
 
 }
 
-export class TbTripsDataLayer extends TbMapDataLayer<TripsDataLayerSettings, TbTripDataItem> {
+export class JnksIotTripsDataLayer extends JnksIotMapDataLayer<TripsDataLayerSettings, JnksIotTripDataItem> {
 
   public dataProcessor: MarkerDataProcessor;
 
@@ -409,10 +409,10 @@ export class TbTripsDataLayer extends TbMapDataLayer<TripsDataLayerSettings, TbT
   public pointColorProcessor: DataLayerColorProcessor;
   public pointTooltipProcessor: DataLayerPatternProcessor;
 
-  private rawTripsData: FormattedData<TbMapDatasource>[][];
-  private latestTripsData: FormattedData<TbMapDatasource>[];
+  private rawTripsData: FormattedData<JnksIotMapDatasource>[][];
+  private latestTripsData: FormattedData<JnksIotMapDatasource>[];
 
-  constructor(protected map: TbMap<any>,
+  constructor(protected map: JnksIotMap<any>,
               inputSettings: TripsDataLayerSettings) {
     super(map, inputSettings);
   }
@@ -425,7 +425,7 @@ export class TbTripsDataLayer extends TbMapDataLayer<TripsDataLayerSettings, TbT
     return this.settings.showMarker;
   }
 
-  public prepareTripsData(tripsData: FormattedData<TbMapDatasource>[][], tripsLatestData: FormattedData<TbMapDatasource>[]): {minTime: number; maxTime: number} {
+  public prepareTripsData(tripsData: FormattedData<JnksIotMapDatasource>[][], tripsLatestData: FormattedData<JnksIotMapDatasource>[]): {minTime: number; maxTime: number} {
     let minTime = Infinity;
     let maxTime = -Infinity;
     this.rawTripsData =
@@ -448,7 +448,7 @@ export class TbTripsDataLayer extends TbMapDataLayer<TripsDataLayerSettings, TbT
         tripItem.update(rawTripData);
       } else {
         const latestData = this.latestTripsData.find(d => d.entityId === entityId);
-        tripItem = new TbTripDataItem(rawTripData, latestData, this.settings, this);
+        tripItem = new JnksIotTripDataItem(rawTripData, latestData, this.settings, this);
         this.layerItems.set(entityId, tripItem);
       }
       toDelete.delete(entityId);
@@ -458,7 +458,7 @@ export class TbTripsDataLayer extends TbMapDataLayer<TripsDataLayerSettings, TbT
     });
   }
 
-  public updateTripsLatestData(tripsLatestData: FormattedData<TbMapDatasource>[]) {
+  public updateTripsLatestData(tripsLatestData: FormattedData<JnksIotMapDatasource>[]) {
     this.latestTripsData = tripsLatestData.filter(d => d.$datasource.mapDataIds.includes(this.mapDataId));
     this.layerItems.forEach((item, entityId) => {
       const latestData = this.latestTripsData.find(d => d.entityId === entityId);
@@ -487,7 +487,7 @@ export class TbTripsDataLayer extends TbMapDataLayer<TripsDataLayerSettings, TbT
     return anchors;
   }
 
-  public getPathStyle(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): L.PolylineOptions {
+  public getPathStyle(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): L.PolylineOptions {
     const pathStroke = this.pathStrokeColorProcessor.processColor(data, dsData);
     return {
       interactive: false,
@@ -566,7 +566,7 @@ export class TbTripsDataLayer extends TbMapDataLayer<TripsDataLayerSettings, TbT
     return colorSettings;
   }
 
-  protected defaultBaseSettings(map: TbMap<any>): Partial<TripsDataLayerSettings> {
+  protected defaultBaseSettings(map: JnksIotMap<any>): Partial<TripsDataLayerSettings> {
     return defaultBaseTripsDataLayerSettings(map.type());
   }
 
@@ -596,7 +596,7 @@ export class TbTripsDataLayer extends TbMapDataLayer<TripsDataLayerSettings, TbT
     return forkJoin(setup$).pipe(map(() => null));
   }
 
-  private clearIncorrectFirsLastDatapoint(dataSource: FormattedData<TbMapDatasource>[]): FormattedData<TbMapDatasource>[] {
+  private clearIncorrectFirsLastDatapoint(dataSource: FormattedData<JnksIotMapDatasource>[]): FormattedData<JnksIotMapDatasource>[] {
     const firstHistoricalDataIndexCoordinate = dataSource.findIndex(this.findFirstHistoricalDataIndexCoordinate);
     if (firstHistoricalDataIndexCoordinate === -1) {
       return [];
@@ -614,7 +614,7 @@ export class TbTripsDataLayer extends TbMapDataLayer<TripsDataLayerSettings, TbT
     return dataSource;
   }
 
-  private findFirstHistoricalDataIndexCoordinate = (item: FormattedData<TbMapDatasource>): boolean => {
+  private findFirstHistoricalDataIndexCoordinate = (item: FormattedData<JnksIotMapDatasource>): boolean => {
     return isDefined(item[this.settings.xKey.label]) && isDefined(item[this.settings.yKey.label]);
   }
 

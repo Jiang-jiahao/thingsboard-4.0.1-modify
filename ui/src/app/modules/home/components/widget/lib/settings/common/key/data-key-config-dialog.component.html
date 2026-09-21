@@ -2,10 +2,10 @@
   <mat-toolbar color="primary">
     <h2>{{ 'datakey.configuration' | translate }}</h2>
     <span class="flex-1"></span>
-    <tb-toggle-select *ngIf="hasAdvanced"
+    <jnks-iot-toggle-select *ngIf="hasAdvanced"
                       appearance="fill-invert" selectMediaBreakpoint="xs" [options]="dataKeyConfigHeaderOptions"
                       [(ngModel)]="dataKeyConfigMode" [ngModelOptions]="{ standalone: true }">
-    </tb-toggle-select>
+    </jnks-iot-toggle-select>
     <button mat-icon-button
             (click)="cancel()"
             type="button">
@@ -16,7 +16,7 @@
   </mat-progress-bar>
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
   <div mat-dialog-content style="padding: 0; height: 800px; overflow: auto;">
-    <tb-data-key-config #dataKeyConfig
+    <jnks-iot-data-key-config #dataKeyConfig
       [dataKeyConfigMode]="dataKeyConfigMode"
       [dataKeySettingsForm]="data.dataKeySettingsForm"
       [dataKeySettingsDirective]="data.dataKeySettingsDirective"
@@ -34,7 +34,7 @@
       [hideDataKeyUnits]="data.hideDataKeyUnits"
       [hideDataKeyDecimals]="data.hideDataKeyDecimals"
       formControlName="dataKey">
-    </tb-data-key-config>
+    </jnks-iot-data-key-config>
   </div>
   <div mat-dialog-actions class="flex items-center justify-end">
     <button mat-button color="primary"

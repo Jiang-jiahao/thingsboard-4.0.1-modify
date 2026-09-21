@@ -24,13 +24,13 @@ import com.jnks.iot.server.common.data.EntityType;
 import com.jnks.iot.server.common.data.ResourceExportData;
 import com.jnks.iot.server.common.data.ResourceSubType;
 import com.jnks.iot.server.common.data.ResourceType;
-import com.jnks.iot.server.common.data.TbResource;
-import com.jnks.iot.server.common.data.TbResourceDeleteResult;
-import com.jnks.iot.server.common.data.TbResourceInfo;
-import com.jnks.iot.server.common.data.TbResourceInfoFilter;
+import com.jnks.iot.server.common.data.JnksIotResource;
+import com.jnks.iot.server.common.data.JnksIotResourceDeleteResult;
+import com.jnks.iot.server.common.data.JnksIotResourceInfo;
+import com.jnks.iot.server.common.data.JnksIotResourceInfoFilter;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.HasId;
-import com.jnks.iot.server.common.data.id.TbResourceId;
+import com.jnks.iot.server.common.data.id.JnksIotResourceId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.page.PageData;
 import com.jnks.iot.server.common.data.page.PageLink;
@@ -65,15 +65,15 @@ import static com.jnks.iot.server.common.data.StringUtils.isNotEmpty;
 import static com.jnks.iot.server.dao.device.DeviceServiceImpl.INCORRECT_TENANT_ID;
 import static com.jnks.iot.server.dao.service.Validator.validateId;
 
-@Service("TbResourceDaoService")
+@Service("JnksIotResourceDaoService")
 @Slf4j
 @RequiredArgsConstructor
 @Primary
-public class BaseResourceService extends AbstractCachedEntityService<ResourceInfoCacheKey, TbResourceInfo, ResourceInfoEvictEvent> implements ResourceService {
+public class BaseResourceService extends AbstractCachedEntityService<ResourceInfoCacheKey, JnksIotResourceInfo, ResourceInfoEvictEvent> implements ResourceService {
 
     public static final String INCORRECT_RESOURCE_ID = "Incorrect resourceId ";
-    protected final TbResourceDao resourceDao;
-    protected final TbResourceInfoDao resourceInfoDao;
+    protected final JnksIotResourceDao resourceDao;
+    protected final JnksIotResourceInfoDao resourceInfoDao;
     protected final ResourceDataValidator resourceValidator;
     protected final WidgetTypeDao widgetTypeDao;
     protected final DashboardInfoDao dashboardInfoDao;
@@ -100,7 +100,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     );
 
     @Override
-    public TbResource saveResource(TbResource resource, boolean doValidate) {
+    public JnksIotResource saveResource(JnksIotResource resource, boolean doValidate) {
         log.trace("Executing saveResource [{}]", resource);
         if (resource.getTenantId() == null) {
             resource.setTenantId(TenantId.SYS_TENANT_ID);
@@ -109,7 +109,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
             resource.setResourceKey(getUniqueKey(resource.getTenantId(), resource.getResourceType(), StringUtils.defaultIfEmpty(resource.getResourceKey(), resource.getFileName())));
         }
         if (doValidate) {
-            resourceValidator.validate(resource, TbResourceInfo::getTenantId);
+            resourceValidator.validate(resource, JnksIotResourceInfo::getTenantId);
         }
         if (resource.getData() != null) {
             resource.setEtag(calculateEtag(resource.getData()));
@@ -118,19 +118,19 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     @Override
-    public TbResource saveResource(TbResource resource) {
+    public JnksIotResource saveResource(JnksIotResource resource) {
         return saveResource(resource, true);
     }
 
-    protected TbResource doSaveResource(TbResource resource) {
+    protected JnksIotResource doSaveResource(JnksIotResource resource) {
         TenantId tenantId = resource.getTenantId();
         try {
-            TbResource saved;
+            JnksIotResource saved;
             if (resource.getData() != null) {
                 saved = resourceDao.save(tenantId, resource);
             } else {
-                TbResourceInfo resourceInfo = saveResourceInfo(resource);
-                saved = new TbResource(resourceInfo);
+                JnksIotResourceInfo resourceInfo = saveResourceInfo(resource);
+                saved = new JnksIotResource(resourceInfo);
             }
             publishEvictEvent(new ResourceInfoEvictEvent(tenantId, resource.getId()));
             eventPublisher.publishEvent(SaveEntityEvent.builder().tenantId(saved.getTenantId()).entityId(saved.getId())
@@ -147,8 +147,8 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
         }
     }
 
-    private TbResourceInfo saveResourceInfo(TbResource resource) {
-        return resourceInfoDao.save(resource.getTenantId(), new TbResourceInfo(resource));
+    private JnksIotResourceInfo saveResourceInfo(JnksIotResource resource) {
+        return resourceInfoDao.save(resource.getTenantId(), new JnksIotResourceInfo(resource));
     }
 
     protected String getUniqueKey(TenantId tenantId, ResourceType resourceType, String filename) {
@@ -173,26 +173,26 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     @Override
-    public TbResource findResourceByTenantIdAndKey(TenantId tenantId, ResourceType resourceType, String resourceKey) {
+    public JnksIotResource findResourceByTenantIdAndKey(TenantId tenantId, ResourceType resourceType, String resourceKey) {
         log.trace("Executing findResourceByTenantIdAndKey [{}] [{}] [{}]", tenantId, resourceType, resourceKey);
         return resourceDao.findResourceByTenantIdAndKey(tenantId, resourceType, resourceKey);
     }
 
     @Override
-    public TbResource findResourceById(TenantId tenantId, TbResourceId resourceId) {
+    public JnksIotResource findResourceById(TenantId tenantId, JnksIotResourceId resourceId) {
         log.trace("Executing findResourceById [{}] [{}]", tenantId, resourceId);
         Validator.validateId(resourceId, id -> INCORRECT_RESOURCE_ID + id);
         return resourceDao.findById(tenantId, resourceId.getId());
     }
 
     @Override
-    public byte[] getResourceData(TenantId tenantId, TbResourceId resourceId) {
+    public byte[] getResourceData(TenantId tenantId, JnksIotResourceId resourceId) {
         log.trace("Executing getResourceData [{}] [{}]", tenantId, resourceId);
         return resourceDao.getResourceData(tenantId, resourceId);
     }
 
     @Override
-    public ResourceExportData exportResource(TbResourceInfo resourceInfo) {
+    public ResourceExportData exportResource(JnksIotResourceInfo resourceInfo) {
         byte[] data = getResourceData(resourceInfo.getTenantId(), resourceInfo.getId());
         return ResourceExportData.builder()
                 .link(resourceInfo.getLink())
@@ -207,9 +207,9 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     @Override
-    public List<ResourceExportData> exportResources(TenantId tenantId, Collection<TbResourceInfo> resources) {
+    public List<ResourceExportData> exportResources(TenantId tenantId, Collection<JnksIotResourceInfo> resources) {
         return resources.stream()
-                .sorted(Comparator.comparing(TbResourceInfo::getResourceType).thenComparing(TbResourceInfo::getResourceKey))
+                .sorted(Comparator.comparing(JnksIotResourceInfo::getResourceType).thenComparing(JnksIotResourceInfo::getResourceKey))
                 .map(resourceInfo -> {
                     if (resourceInfo.getResourceType() == ResourceType.IMAGE) {
                         ResourceExportData imageExportData = imageService.exportImage(resourceInfo);
@@ -229,7 +229,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
                 continue; // already imported
             }
 
-            TbResource resource;
+            JnksIotResource resource;
             if (resourceData.getType() == ResourceType.IMAGE) {
                 resource = imageService.toImage(tenantId, resourceData, true);
                 if (resource.getData() != null) {
@@ -246,7 +246,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     @Override
-    public TbResource toResource(TenantId tenantId, ResourceExportData exportData) {
+    public JnksIotResource toResource(TenantId tenantId, ResourceExportData exportData) {
         if (exportData.getType() == ResourceType.IMAGE || exportData.getSubType() == ResourceSubType.IMAGE
                 || exportData.getSubType() == ResourceSubType.SCADA_SYMBOL) {
             throw new IllegalArgumentException("Image import not supported");
@@ -255,7 +255,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
         byte[] data = Base64.getDecoder().decode(exportData.getData());
         String etag = calculateEtag(data);
 
-        TbResourceInfo existingResource;
+        JnksIotResourceInfo existingResource;
         boolean update = false;
         if (!tenantId.isSysTenantId()) {
             existingResource = findSystemOrTenantResourceByEtag(tenantId, exportData.getType(), etag);
@@ -264,7 +264,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
             update = true; // we overwrite system resource instead of creating new
         }
         if (existingResource != null) {
-            TbResource resource = new TbResource(existingResource);
+            JnksIotResource resource = new JnksIotResource(existingResource);
             if (update && !etag.equals(resource.getEtag())) {
                 resource.setData(data);
                 resource.setTitle(exportData.getTitle());
@@ -275,7 +275,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
             return resource;
         }
 
-        TbResource resource = new TbResource();
+        JnksIotResource resource = new JnksIotResource();
         resource.setTenantId(tenantId);
         resource.setFileName(exportData.getFileName());
         if (isNotEmpty(exportData.getTitle())) {
@@ -292,7 +292,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     @Override
-    public TbResourceInfo findResourceInfoById(TenantId tenantId, TbResourceId resourceId) {
+    public JnksIotResourceInfo findResourceInfoById(TenantId tenantId, JnksIotResourceId resourceId) {
         log.trace("Executing findResourceInfoById [{}] [{}]", tenantId, resourceId);
         Validator.validateId(resourceId, id -> INCORRECT_RESOURCE_ID + id);
 
@@ -301,25 +301,25 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     @Override
-    public TbResourceInfo findResourceInfoByTenantIdAndKey(TenantId tenantId, ResourceType resourceType, String resourceKey) {
+    public JnksIotResourceInfo findResourceInfoByTenantIdAndKey(TenantId tenantId, ResourceType resourceType, String resourceKey) {
         log.trace("Executing findResourceInfoByTenantIdAndKey [{}] [{}] [{}]", tenantId, resourceType, resourceKey);
         return resourceInfoDao.findByTenantIdAndKey(tenantId, resourceType, resourceKey);
     }
 
     @Override
-    public ListenableFuture<TbResourceInfo> findResourceInfoByIdAsync(TenantId tenantId, TbResourceId resourceId) {
+    public ListenableFuture<JnksIotResourceInfo> findResourceInfoByIdAsync(TenantId tenantId, JnksIotResourceId resourceId) {
         log.trace("Executing findResourceInfoById [{}] [{}]", tenantId, resourceId);
         Validator.validateId(resourceId, id -> INCORRECT_RESOURCE_ID + id);
         return resourceInfoDao.findByIdAsync(tenantId, resourceId.getId());
     }
 
     @Override
-    public TbResourceDeleteResult deleteResource(TenantId tenantId, TbResourceId resourceId, boolean force) {
+    public JnksIotResourceDeleteResult deleteResource(TenantId tenantId, JnksIotResourceId resourceId, boolean force) {
         log.trace("Executing deleteResource [{}] [{}]", tenantId, resourceId);
         Validator.validateId(resourceId, id -> INCORRECT_RESOURCE_ID + id);
-        TbResourceInfo resource = findResourceInfoById(tenantId, resourceId);
+        JnksIotResourceInfo resource = findResourceInfoById(tenantId, resourceId);
         boolean success = true;
-        var result = TbResourceDeleteResult.builder();
+        var result = JnksIotResourceDeleteResult.builder();
 
         if (resource == null) {
             if (!force) {
@@ -357,11 +357,11 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
 
     @Override
     public void deleteEntity(TenantId tenantId, EntityId id, boolean force) {
-        deleteResource(tenantId, (TbResourceId) id, force);
+        deleteResource(tenantId, (JnksIotResourceId) id, force);
     }
 
     @Override
-    public PageData<TbResourceInfo> findAllTenantResourcesByTenantId(TbResourceInfoFilter filter, PageLink pageLink) {
+    public PageData<JnksIotResourceInfo> findAllTenantResourcesByTenantId(JnksIotResourceInfoFilter filter, PageLink pageLink) {
         TenantId tenantId = filter.getTenantId();
         log.trace("Executing findAllTenantResourcesByTenantId [{}]", tenantId);
         validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
@@ -369,7 +369,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     @Override
-    public PageData<TbResourceInfo> findTenantResourcesByTenantId(TbResourceInfoFilter filter, PageLink pageLink) {
+    public PageData<JnksIotResourceInfo> findTenantResourcesByTenantId(JnksIotResourceInfoFilter filter, PageLink pageLink) {
         TenantId tenantId = filter.getTenantId();
         log.trace("Executing findTenantResourcesByTenantId [{}]", tenantId);
         validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
@@ -377,21 +377,21 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     @Override
-    public List<TbResource> findTenantResourcesByResourceTypeAndObjectIds(TenantId tenantId, ResourceType resourceType, String[] objectIds) {
+    public List<JnksIotResource> findTenantResourcesByResourceTypeAndObjectIds(TenantId tenantId, ResourceType resourceType, String[] objectIds) {
         log.trace("Executing findTenantResourcesByResourceTypeAndObjectIds [{}][{}][{}]", tenantId, resourceType, objectIds);
         validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
         return resourceDao.findResourcesByTenantIdAndResourceType(tenantId, resourceType, null, objectIds, null);
     }
 
     @Override
-    public PageData<TbResource> findAllTenantResources(TenantId tenantId, PageLink pageLink) {
+    public PageData<JnksIotResource> findAllTenantResources(TenantId tenantId, PageLink pageLink) {
         log.trace("Executing findAllTenantResources [{}][{}]", tenantId, pageLink);
         validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
         return resourceDao.findAllByTenantId(tenantId, pageLink);
     }
 
     @Override
-    public PageData<TbResource> findTenantResourcesByResourceTypeAndPageLink(TenantId tenantId, ResourceType resourceType, PageLink pageLink) {
+    public PageData<JnksIotResource> findTenantResourcesByResourceTypeAndPageLink(TenantId tenantId, ResourceType resourceType, PageLink pageLink) {
         log.trace("Executing findTenantResourcesByResourceTypeAndPageLink [{}][{}][{}]", tenantId, resourceType, pageLink);
         validateId(tenantId, id -> INCORRECT_TENANT_ID + id);
         return resourceDao.findResourcesByTenantIdAndResourceType(tenantId, resourceType, null, pageLink);
@@ -411,12 +411,12 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
 
     @Override
     public Optional<HasId<?>> findEntity(TenantId tenantId, EntityId entityId) {
-        return Optional.ofNullable(findResourceInfoById(tenantId, new TbResourceId(entityId.getId())));
+        return Optional.ofNullable(findResourceInfoById(tenantId, new JnksIotResourceId(entityId.getId())));
     }
 
     @Override
     public EntityType getEntityType() {
-        return EntityType.TB_RESOURCE;
+        return EntityType.JNKS_IOT_RESOURCE;
     }
 
     @Override
@@ -481,18 +481,18 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
                 if (newLink == null || newLink.equals(link)) {
                     return value; // leaving link as is
                 } else {
-                    return DataConstants.TB_RESOURCE_PREFIX + newLink;
+                    return DataConstants.JNKS_IOT_RESOURCE_PREFIX + newLink;
                 }
             } else { // probably importing an old dashboard json where resources are referenced by ids
-                TbResourceId resourceId;
+                JnksIotResourceId resourceId;
                 try {
-                    resourceId = new TbResourceId(UUID.fromString(value));
+                    resourceId = new JnksIotResourceId(UUID.fromString(value));
                 } catch (IllegalArgumentException e) {
                     return value;
                 }
-                TbResourceInfo resourceInfo = findResourceInfoById(tenantId, resourceId);
+                JnksIotResourceInfo resourceInfo = findResourceInfoById(tenantId, resourceId);
                 if (resourceInfo != null) {
-                    return DataConstants.TB_RESOURCE_PREFIX + resourceInfo.getLink();
+                    return DataConstants.JNKS_IOT_RESOURCE_PREFIX + resourceInfo.getLink();
                 } else {
                     log.warn("[{}] Couldn't find resource referenced as '{}'", tenantId, value);
                     return "";
@@ -502,12 +502,12 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     @Override
-    public Collection<TbResourceInfo> getUsedResources(TenantId tenantId, Dashboard dashboard) {
+    public Collection<JnksIotResourceInfo> getUsedResources(TenantId tenantId, Dashboard dashboard) {
         return getUsedResources(tenantId, List.of(dashboard.getConfiguration()), List.of(DASHBOARD_RESOURCES_MAPPING)).values();
     }
 
     @Override
-    public Collection<TbResourceInfo> getUsedResources(TenantId tenantId, WidgetTypeDetails widgetTypeDetails) {
+    public Collection<JnksIotResourceInfo> getUsedResources(TenantId tenantId, WidgetTypeDetails widgetTypeDetails) {
         List<JsonNode> jsonNodes = new ArrayList<>(2);
         List<Map<String, String>> mappings = new ArrayList<>(2);
 
@@ -523,8 +523,8 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
         return getUsedResources(tenantId, jsonNodes, mappings).values();
     }
 
-    private Map<TbResourceId, TbResourceInfo> getUsedResources(TenantId tenantId, List<JsonNode> jsonNodes, List<Map<String, String>> mappings) {
-        Map<TbResourceId, TbResourceInfo> resources = new HashMap<>();
+    private Map<JnksIotResourceId, JnksIotResourceInfo> getUsedResources(TenantId tenantId, List<JsonNode> jsonNodes, List<Map<String, String>> mappings) {
+        Map<JnksIotResourceId, JnksIotResourceInfo> resources = new HashMap<>();
         log.trace("[{}] getUsedResources for {}", tenantId, jsonNodes);
         processResources(jsonNodes, mappings, value -> {
             String link = getResourceLink(value);
@@ -546,7 +546,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
                 return value;
             }
 
-            TbResourceInfo resourceInfo = findResourceInfoByTenantIdAndKey(resourceTenantId, resourceType, resourceKey);
+            JnksIotResourceInfo resourceInfo = findResourceInfoByTenantIdAndKey(resourceTenantId, resourceType, resourceKey);
             if (resourceInfo != null) {
                 resources.putIfAbsent(resourceInfo.getId(), resourceInfo);
             } else {
@@ -558,8 +558,8 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     private String getResourceLink(String value) {
-        if (StringUtils.startsWith(value, DataConstants.TB_RESOURCE_PREFIX + "/api/resource/")) {
-            return StringUtils.removeStart(value, DataConstants.TB_RESOURCE_PREFIX);
+        if (StringUtils.startsWith(value, DataConstants.JNKS_IOT_RESOURCE_PREFIX + "/api/resource/")) {
+            return StringUtils.removeStart(value, DataConstants.JNKS_IOT_RESOURCE_PREFIX);
         } else {
             return null;
         }
@@ -601,7 +601,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
 
             // processing all
             JacksonUtil.replaceAll(jsonNode, "", (name, value) -> {
-                if (!StringUtils.startsWith(value, DataConstants.TB_RESOURCE_PREFIX + "/api/resource/")) {
+                if (!StringUtils.startsWith(value, DataConstants.JNKS_IOT_RESOURCE_PREFIX + "/api/resource/")) {
                     return value;
                 }
 
@@ -620,7 +620,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     @Override
-    public TbResource createOrUpdateSystemResource(ResourceType resourceType, ResourceSubType resourceSubType, String resourceKey, byte[] data) {
+    public JnksIotResource createOrUpdateSystemResource(ResourceType resourceType, ResourceSubType resourceSubType, String resourceKey, byte[] data) {
         if (resourceType == ResourceType.DASHBOARD) {
             Dashboard dashboard = JacksonUtil.fromBytes(data, Dashboard.class);
             dashboard.setTenantId(TenantId.SYS_TENANT_ID);
@@ -633,9 +633,9 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
             data = JacksonUtil.writeValueAsBytes(dashboard);
         }
 
-        TbResource resource = findResourceByTenantIdAndKey(TenantId.SYS_TENANT_ID, resourceType, resourceKey);
+        JnksIotResource resource = findResourceByTenantIdAndKey(TenantId.SYS_TENANT_ID, resourceType, resourceKey);
         if (resource == null) {
-            resource = new TbResource();
+            resource = new JnksIotResource();
             resource.setTenantId(TenantId.SYS_TENANT_ID);
             resource.setResourceType(resourceType);
             resource.setResourceSubType(resourceSubType);
@@ -654,7 +654,7 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
     }
 
     @Override
-    public TbResourceInfo findSystemOrTenantResourceByEtag(TenantId tenantId, ResourceType resourceType, String etag) {
+    public JnksIotResourceInfo findSystemOrTenantResourceByEtag(TenantId tenantId, ResourceType resourceType, String etag) {
         if (StringUtils.isEmpty(etag)) {
             return null;
         }
@@ -680,15 +680,15 @@ public class BaseResourceService extends AbstractCachedEntityService<ResourceInf
         return new String(Base64.getDecoder().decode(value), StandardCharsets.UTF_8);
     }
 
-    private final PaginatedRemover<TenantId, TbResourceId> tenantResourcesRemover = new PaginatedRemover<>() {
+    private final PaginatedRemover<TenantId, JnksIotResourceId> tenantResourcesRemover = new PaginatedRemover<>() {
 
         @Override
-        protected PageData<TbResourceId> findEntities(TenantId tenantId, TenantId id, PageLink pageLink) {
+        protected PageData<JnksIotResourceId> findEntities(TenantId tenantId, TenantId id, PageLink pageLink) {
             return resourceDao.findIdsByTenantId(id.getId(), pageLink);
         }
 
         @Override
-        protected void removeEntity(TenantId tenantId, TbResourceId resourceId) {
+        protected void removeEntity(TenantId tenantId, JnksIotResourceId resourceId) {
             deleteResource(tenantId, resourceId, true);
         }
     };

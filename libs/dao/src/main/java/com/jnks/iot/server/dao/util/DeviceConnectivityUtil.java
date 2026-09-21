@@ -82,9 +82,9 @@ public class DeviceConnectivityUtil {
         dockerComposeBuilder.append("version: '3.4'\n");
         dockerComposeBuilder.append("services:\n");
         dockerComposeBuilder.append("  # JnksIOT IoT Gateway Service Configuration\n");
-        dockerComposeBuilder.append("  tb-gateway:\n");
-        dockerComposeBuilder.append("    image: jnks-iot/tb-gateway:").append(gatewayImageVersion).append("\n");
-        dockerComposeBuilder.append("    container_name: tb-gateway\n");
+        dockerComposeBuilder.append("  jnks-iot-gateway:\n");
+        dockerComposeBuilder.append("    image: jnks-iot/jnks-iot-gateway:").append(gatewayImageVersion).append("\n");
+        dockerComposeBuilder.append("    container_name: jnks-iot-gateway\n");
         dockerComposeBuilder.append("    restart: always\n");
         dockerComposeBuilder.append("\n");
         dockerComposeBuilder.append("    # Ports bindings - required by some connectors\n");
@@ -127,18 +127,18 @@ public class DeviceConnectivityUtil {
         dockerComposeBuilder.append("\n");
         dockerComposeBuilder.append("    # Volumes bind\n");
         dockerComposeBuilder.append("    volumes:\n");
-        dockerComposeBuilder.append("      - tb-gw-config:/thingsboard_gateway/config\n");
-        dockerComposeBuilder.append("      - tb-gw-logs:/thingsboard_gateway/logs\n");
-        dockerComposeBuilder.append("      - tb-gw-extensions:/thingsboard_gateway/extensions\n");
+        dockerComposeBuilder.append("      - jnks-iot-gw-config:/thingsboard_gateway/config\n");
+        dockerComposeBuilder.append("      - jnks-iot-gw-logs:/thingsboard_gateway/logs\n");
+        dockerComposeBuilder.append("      - jnks-iot-gw-extensions:/thingsboard_gateway/extensions\n");
         dockerComposeBuilder.append("\n");
         dockerComposeBuilder.append("# Volumes declaration for configurations, extensions and configuration\n");
         dockerComposeBuilder.append("volumes:\n");
-        dockerComposeBuilder.append("  tb-gw-config:\n");
-        dockerComposeBuilder.append("    name: tb-gw-config\n");
-        dockerComposeBuilder.append("  tb-gw-logs:\n");
-        dockerComposeBuilder.append("    name: tb-gw-logs\n");
-        dockerComposeBuilder.append("  tb-gw-extensions:\n");
-        dockerComposeBuilder.append("    name: tb-gw-extensions\n");
+        dockerComposeBuilder.append("  jnks-iot-gw-config:\n");
+        dockerComposeBuilder.append("    name: jnks-iot-gw-config\n");
+        dockerComposeBuilder.append("  jnks-iot-gw-logs:\n");
+        dockerComposeBuilder.append("    name: jnks-iot-gw-logs\n");
+        dockerComposeBuilder.append("  jnks-iot-gw-extensions:\n");
+        dockerComposeBuilder.append("    name: jnks-iot-gw-extensions\n");
 
         return new ByteArrayResource(dockerComposeBuilder.toString().getBytes(StandardCharsets.UTF_8));
     }

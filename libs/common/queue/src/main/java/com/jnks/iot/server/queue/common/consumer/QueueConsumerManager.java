@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.common.util.JnksIotThreadFactory;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
-import com.jnks.iot.server.queue.TbQueueConsumer;
-import com.jnks.iot.server.queue.TbQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueConsumer;
+import com.jnks.iot.server.queue.JnksIotQueueMsg;
 
 import java.util.List;
 import java.util.Set;
@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
 /**
- * 轻量级「单消费者」管理器：把「创建一个 {@link TbQueueConsumer} + 订阅 + 在独立线程里跑 poll 循环 + 停机退订」
+ * 轻量级「单消费者」管理器：把「创建一个 {@link JnksIotQueueConsumer} + 订阅 + 在独立线程里跑 poll 循环 + 停机退订」
  * 这套最小生命周期封装成可复用组件。
  *
  * <h2>在消费者体系中的位置</h2>
@@ -56,13 +56,13 @@ import java.util.function.Supplier;
  *   <li>{@link #stopped} 为 {@code volatile}，保证 stop 与循环线程之间的可见性。</li>
  * </ul>
  *
- * @param <M> 队列消息类型，需实现 {@link TbQueueMsg}
+ * @param <M> 队列消息类型，需实现 {@link JnksIotQueueMsg}
  * @see MainQueueConsumerManager
  * @see PartitionedQueueConsumerManager
- * @see TbQueueConsumerTask
+ * @see JnksIotQueueConsumerTask
  */
 @Slf4j
-public class QueueConsumerManager<M extends TbQueueMsg> {
+public class QueueConsumerManager<M extends JnksIotQueueMsg> {
 
     /**
      * 管理器逻辑名称，主要用于日志前缀（例如队列名、业务模块名），便于多消费者场景下区分来源。
@@ -73,7 +73,7 @@ public class QueueConsumerManager<M extends TbQueueMsg> {
      * 消息批次业务处理器。
      * <p>
      * 由调用方在构建时注入；仅在 poll 得到<strong>非空</strong>消息列表后调用。
-     * 处理器内部通常负责业务处理，以及按需提交 offset / 确认消费（通过入参里的 {@link TbQueueConsumer}）。
+     * 处理器内部通常负责业务处理，以及按需提交 offset / 确认消费（通过入参里的 {@link JnksIotQueueConsumer}）。
      */
     private final MsgPackProcessor<M> msgPackProcessor;
 
@@ -82,7 +82,7 @@ public class QueueConsumerManager<M extends TbQueueMsg> {
      * <p>
      * 有两处用途：
      * <ol>
-     *   <li>传给 {@link TbQueueConsumer#poll(long)}，控制阻塞拉取的等待时长；</li>
+     *   <li>传给 {@link JnksIotQueueConsumer#poll(long)}，控制阻塞拉取的等待时长；</li>
      *   <li>批次处理失败后的退避休眠时间，避免异常风暴打满 CPU / 下游。</li>
      * </ol>
      */
@@ -112,7 +112,7 @@ public class QueueConsumerManager<M extends TbQueueMsg> {
      * subscribe / poll / unsubscribe 都作用在这一实例上。可通过 getter 暴露给外部做诊断或扩展操作。
      */
     @Getter
-    private final TbQueueConsumer<M> consumer;
+    private final JnksIotQueueConsumer<M> consumer;
 
     /**
      * 软停止标志。
@@ -125,7 +125,7 @@ public class QueueConsumerManager<M extends TbQueueMsg> {
     /**
      * 通过 Lombok {@link Builder} 构建管理器。
      * <p>
-     * <b>重要：</b>底层 {@link TbQueueConsumer} 在构造阶段就会被创建（调用一次 {@code consumerCreator}），
+     * <b>重要：</b>底层 {@link JnksIotQueueConsumer} 在构造阶段就会被创建（调用一次 {@code consumerCreator}），
      * 但此时尚未订阅、也尚未启动循环。调用方必须继续调用 {@link #subscribe()} / {@link #launch()}。
      *
      * @param name             日志用逻辑名称，建议与队列或业务模块对应
@@ -137,7 +137,7 @@ public class QueueConsumerManager<M extends TbQueueMsg> {
      */
     @Builder
     public QueueConsumerManager(String name, MsgPackProcessor<M> msgPackProcessor,
-                                long pollInterval, Supplier<TbQueueConsumer<M>> consumerCreator,
+                                long pollInterval, Supplier<JnksIotQueueConsumer<M>> consumerCreator,
                                 ExecutorService consumerExecutor, String threadPrefix) {
         this.name = name;
         this.pollInterval = pollInterval;
@@ -151,7 +151,7 @@ public class QueueConsumerManager<M extends TbQueueMsg> {
      * 按底层消费者的默认策略订阅。
      * <p>
      * 通常表示订阅配置中的完整 Topic，而不限定具体分区集合。
-     * 最终行为完全取决于 {@link TbQueueConsumer#subscribe()} 的实现（Kafka / in-memory 等可能不同）。
+     * 最终行为完全取决于 {@link JnksIotQueueConsumer#subscribe()} 的实现（Kafka / in-memory 等可能不同）。
      * <p>
      * 建议在 {@link #launch()} 之前调用；若在循环已运行时调用，是否安全取决于底层消费者是否支持运行时重订阅。
      */
@@ -164,7 +164,7 @@ public class QueueConsumerManager<M extends TbQueueMsg> {
      * <p>
      * 可在启动前调用，也可由调用方在运行期按需再次调用以调整订阅范围。
      * <b>本类没有内置分区变更任务队列或互斥锁</b>：若并发地一边 poll、一边改订阅，
-     * 线程安全与语义正确性完全依赖底层 {@link TbQueueConsumer#subscribe(Set)} 实现。
+     * 线程安全与语义正确性完全依赖底层 {@link JnksIotQueueConsumer#subscribe(Set)} 实现。
      *
      * @param partitions 目标分区集合（Topic + partition 信息）
      */
@@ -178,7 +178,7 @@ public class QueueConsumerManager<M extends TbQueueMsg> {
      * 向 {@link #consumerExecutor} 提交一个任务：
      * <ol>
      *   <li>若配置了 {@link #threadPrefix}，先给当前工作线程加上名称前缀；</li>
-     *   <li>进入 {@link #consumerLoop(TbQueueConsumer)}；</li>
+     *   <li>进入 {@link #consumerLoop(JnksIotQueueConsumer)}；</li>
      *   <li>若循环内抛出未捕获的 {@link Throwable}，记录 error 后结束任务（不会自动 restart）；</li>
      *   <li>无论正常因 stop 退出还是异常退出，最后都会打一条「Consumer stopped」info 日志。</li>
      * </ol>
@@ -221,7 +221,7 @@ public class QueueConsumerManager<M extends TbQueueMsg> {
      *
      * @param consumer 已创建的底层消费者（通常调用方已先完成 subscribe）
      */
-    private void consumerLoop(TbQueueConsumer<M> consumer) {
+    private void consumerLoop(JnksIotQueueConsumer<M> consumer) {
         while (!stopped && !consumer.isStopped()) {
             try {
                 List<M> msgs = consumer.poll(pollInterval);
@@ -268,7 +268,7 @@ public class QueueConsumerManager<M extends TbQueueMsg> {
      *
      * @param <M> 消息类型，与外层管理器一致
      */
-    public interface MsgPackProcessor<M extends TbQueueMsg> {
+    public interface MsgPackProcessor<M extends JnksIotQueueMsg> {
 
         /**
          * 处理一批从队列拉取的消息。
@@ -285,7 +285,7 @@ public class QueueConsumerManager<M extends TbQueueMsg> {
          * @param consumer 拉取这些消息的消费者
          * @throws Exception 处理失败时抛出，触发循环内 warn + sleep 退避
          */
-        void process(List<M> msgs, TbQueueConsumer<M> consumer) throws Exception;
+        void process(List<M> msgs, JnksIotQueueConsumer<M> consumer) throws Exception;
     }
 
 }

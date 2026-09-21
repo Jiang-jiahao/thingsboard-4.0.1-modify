@@ -23,7 +23,7 @@ import { Observable, of } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-entity-alias-input',
+  selector: 'jnks-iot-entity-alias-input',
   templateUrl: './entity-alias-input.component.html',
   styleUrls: ['./entity-alias-input.component.scss'],
   providers: [
@@ -38,7 +38,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class EntityAliasInputComponent implements ControlValueAccessor, OnInit {
 
   @HostBinding('class')
-  hostClass = 'tb-entity-alias-input';
+  hostClass = 'jnks-iot-entity-alias-input';
 
   @ViewChild('entityAliasInput') entityAliasInput: ElementRef;
 

@@ -50,7 +50,7 @@ const ticksTextMap: {[angle: number]: string} = {
 };
 
 @Component({
-  selector: 'tb-wind-speed-direction-widget',
+  selector: 'jnks-iot-wind-speed-direction-widget',
   templateUrl: './wind-speed-direction-widget.component.html',
   styleUrls: ['./wind-speed-direction-widget.component.scss'],
   encapsulation: ViewEncapsulation.None

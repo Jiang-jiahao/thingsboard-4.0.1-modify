@@ -1,5 +1,5 @@
-<div class="tb-table-widget tb-absolute-fill">
-  <div class="tb-absolute-fill flex flex-1 flex-col">
+<div class="jnks-iot-table-widget jnks-iot-absolute-fill">
+  <div class="jnks-iot-absolute-fill flex flex-1 flex-col">
     <mat-toolbar class="mat-mdc-table-toolbar" [class.!hidden]="!textSearchMode || !alarmsDatasource.selection.isEmpty()">
       <div class="mat-toolbar-tools">
         <button mat-icon-button
@@ -67,7 +67,7 @@
           <mat-cell *matCellDef="let alarm; let row = index"
                     [style]="cellStyle(alarm, column, row) | async"
                     (click)="onCellClick($event, alarm, column, $index)"
-                    [class.tb-pointer]="columnHasCellClick($index)">
+                    [class.jnks-iot-pointer]="columnHasCellClick($index)">
             <span [innerHTML]="cellContent(alarm, column, row) | async"></span>
             <ng-container *ngIf="column.entityKey.key === 'assignee'">
               <span class="assignee-cell flex flex-row items-center justify-start">
@@ -138,7 +138,7 @@
                     <button mat-menu-item *ngIf="actionDescriptor.icon"
                             [disabled]="(isLoading$ | async) || !actionEnabled(alarm, actionDescriptor)"
                             (click)="onActionButtonClick($event, alarm, actionDescriptor)">
-                      <tb-icon matMenuItemIcon>{{actionDescriptor.icon}}</tb-icon>
+                      <jnks-iot-icon matMenuItemIcon>{{actionDescriptor.icon}}</jnks-iot-icon>
                       <span>{{ actionDescriptor.displayName }}</span>
                     </button>
                   </ng-container>
@@ -150,9 +150,9 @@
         <mat-header-row [class.mat-row-select]="enableSelection" *matHeaderRowDef="displayedColumns; sticky: enableStickyHeader"></mat-header-row>
         <mat-row [class.mat-row-select]="enableSelection"
                  [class.mat-selected]="alarmsDatasource.isSelected(alarm)"
-                 [class.tb-current-entity]="alarmsDatasource.isCurrentAlarm(alarm)"
+                 [class.jnks-iot-current-entity]="alarmsDatasource.isCurrentAlarm(alarm)"
                  [class.invisible]="alarmsDatasource.dataLoading"
-                 [class.tb-pointer]="hasRowAction"
+                 [class.jnks-iot-pointer]="hasRowAction"
                  *matRowDef="let alarm; columns: displayedColumns; let row = index"
                  [style]="rowStyle(alarm, row) | async"
                  (click)="onRowClick($event, alarm)"></mat-row>

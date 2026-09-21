@@ -68,22 +68,22 @@ import com.jnks.iot.server.transport.lwm2m.server.client.ResultsAddKeyValueProto
 import com.jnks.iot.server.transport.lwm2m.server.common.LwM2MExecutorAwareService;
 import com.jnks.iot.server.transport.lwm2m.server.downlink.DownlinkRequestCallback;
 import com.jnks.iot.server.transport.lwm2m.server.downlink.LwM2mDownlinkMsgHandler;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MCancelObserveCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MCancelObserveRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MLatchCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MObserveCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MObserveRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MReadCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MReadRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteAttributesCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteAttributesRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MCancelObserveCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MCancelObserveRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MLatchCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MObserveCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MObserveRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MReadCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MReadRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteAttributesCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteAttributesRequest;
 import com.jnks.iot.server.transport.lwm2m.server.log.LwM2MTelemetryLogService;
 import com.jnks.iot.server.transport.lwm2m.server.model.LwM2MModelConfig;
 import com.jnks.iot.server.transport.lwm2m.server.model.LwM2MModelConfigService;
 import com.jnks.iot.server.transport.lwm2m.server.ota.LwM2MOtaUpdateService;
 import com.jnks.iot.server.transport.lwm2m.server.session.LwM2MSessionManager;
-import com.jnks.iot.server.transport.lwm2m.server.store.TbLwM2MDtlsSessionStore;
-import com.jnks.iot.server.transport.lwm2m.server.store.TbLwM2mSecurityStore;
+import com.jnks.iot.server.transport.lwm2m.server.store.JnksIotLwM2MDtlsSessionStore;
+import com.jnks.iot.server.transport.lwm2m.server.store.JnksIotLwM2mSecurityStore;
 import com.jnks.iot.server.transport.lwm2m.utils.LwM2MTransportUtil;
 import com.jnks.iot.server.transport.lwm2m.utils.LwM2mValueConverterImpl;
 
@@ -143,12 +143,12 @@ public class DefaultLwM2mUplinkMsgHandler extends LwM2MExecutorAwareService impl
     private final LwM2MTransportServerConfig config;
     private final LwM2MTelemetryLogService logService;
     private final LwM2mTransportServerHelper helper;
-    private final TbLwM2MDtlsSessionStore sessionStore;
+    private final JnksIotLwM2MDtlsSessionStore sessionStore;
     private final LwM2mClientContext clientContext;
     private final LwM2mDownlinkMsgHandler defaultLwM2MDownlinkMsgHandler; //Do not use Lazy because we need live executor to handle msgs
     private final LwM2mVersionedModelProvider modelProvider;
     private final RegistrationStore registrationStore;
-    private final TbLwM2mSecurityStore securityStore;
+    private final JnksIotLwM2mSecurityStore securityStore;
     private final LwM2MModelConfigService modelConfigService;
 
     @PostConstruct
@@ -474,7 +474,7 @@ public class DefaultLwM2mUplinkMsgHandler extends LwM2MExecutorAwareService impl
 
             CountDownLatch latch = new CountDownLatch(targetIds.size());
             targetIds.forEach(versionedId -> sendReadRequest(lwM2MClient, versionedId,
-                    new TbLwM2MLatchCallback<>(latch, new TbLwM2MReadCallback(this, logService, lwM2MClient, versionedId))));
+                    new JnksIotLwM2MLatchCallback<>(latch, new JnksIotLwM2MReadCallback(this, logService, lwM2MClient, versionedId))));
             latch.await(config.getTimeout(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             log.error("[{}] Failed to await Read requests!", lwM2MClient.getEndpoint(), e);
@@ -491,7 +491,7 @@ public class DefaultLwM2mUplinkMsgHandler extends LwM2MExecutorAwareService impl
 
             CountDownLatch latch = new CountDownLatch(targetIds.size());
             targetIds.forEach(targetId -> sendObserveRequest(lwM2MClient, targetId,
-                    new TbLwM2MLatchCallback<>(latch, new TbLwM2MObserveCallback(this, logService, lwM2MClient, targetId))));
+                    new JnksIotLwM2MLatchCallback<>(latch, new JnksIotLwM2MObserveCallback(this, logService, lwM2MClient, targetId))));
 
             latch.await(config.getTimeout(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
@@ -514,31 +514,31 @@ public class DefaultLwM2mUplinkMsgHandler extends LwM2MExecutorAwareService impl
     }
 
     private void sendReadRequest(LwM2mClient lwM2MClient, String versionedId) {
-        sendReadRequest(lwM2MClient, versionedId, new TbLwM2MReadCallback(this, logService, lwM2MClient, versionedId));
+        sendReadRequest(lwM2MClient, versionedId, new JnksIotLwM2MReadCallback(this, logService, lwM2MClient, versionedId));
     }
 
     private void sendReadRequest(LwM2mClient lwM2MClient, String versionedId, DownlinkRequestCallback<ReadRequest, ReadResponse> callback) {
-        TbLwM2MReadRequest request = TbLwM2MReadRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(lwM2MClient)).build();
+        JnksIotLwM2MReadRequest request = JnksIotLwM2MReadRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(lwM2MClient)).build();
         defaultLwM2MDownlinkMsgHandler.sendReadRequest(lwM2MClient, request, callback);
     }
 
     private void sendObserveRequest(LwM2mClient lwM2MClient, String versionedId) {
-        sendObserveRequest(lwM2MClient, versionedId, new TbLwM2MObserveCallback(this, logService, lwM2MClient, versionedId));
+        sendObserveRequest(lwM2MClient, versionedId, new JnksIotLwM2MObserveCallback(this, logService, lwM2MClient, versionedId));
     }
 
     private void sendObserveRequest(LwM2mClient lwM2MClient, String versionedId, DownlinkRequestCallback<ObserveRequest, ObserveResponse> callback) {
-        TbLwM2MObserveRequest request = TbLwM2MObserveRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(lwM2MClient)).build();
+        JnksIotLwM2MObserveRequest request = JnksIotLwM2MObserveRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(lwM2MClient)).build();
         defaultLwM2MDownlinkMsgHandler.sendObserveRequest(lwM2MClient, request, callback);
     }
 
     private void sendWriteAttributesRequest(LwM2mClient lwM2MClient, String targetId, ObjectAttributes params) {
-        TbLwM2MWriteAttributesRequest request = TbLwM2MWriteAttributesRequest.builder().versionedId(targetId).attributes(params).timeout(clientContext.getRequestTimeout(lwM2MClient)).build();
-        defaultLwM2MDownlinkMsgHandler.sendWriteAttributesRequest(lwM2MClient, request, new TbLwM2MWriteAttributesCallback(logService, lwM2MClient, targetId));
+        JnksIotLwM2MWriteAttributesRequest request = JnksIotLwM2MWriteAttributesRequest.builder().versionedId(targetId).attributes(params).timeout(clientContext.getRequestTimeout(lwM2MClient)).build();
+        defaultLwM2MDownlinkMsgHandler.sendWriteAttributesRequest(lwM2MClient, request, new JnksIotLwM2MWriteAttributesCallback(logService, lwM2MClient, targetId));
     }
 
     private void sendCancelObserveRequest(String versionedId, LwM2mClient client) {
-        TbLwM2MCancelObserveRequest request = TbLwM2MCancelObserveRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
-        defaultLwM2MDownlinkMsgHandler.sendCancelObserveRequest(client, request, new TbLwM2MCancelObserveCallback(logService, client, versionedId));
+        JnksIotLwM2MCancelObserveRequest request = JnksIotLwM2MCancelObserveRequest.builder().versionedId(versionedId).timeout(clientContext.getRequestTimeout(client)).build();
+        defaultLwM2MDownlinkMsgHandler.sendCancelObserveRequest(client, request, new JnksIotLwM2MCancelObserveCallback(logService, client, versionedId));
     }
 
     private void updateObjectResourceValue(LwM2mClient client, LwM2mObject lwM2mObject, String pathIdVer, int code) {

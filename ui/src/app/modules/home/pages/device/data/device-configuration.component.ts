@@ -8,7 +8,7 @@ import { deepClone } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-device-configuration',
+  selector: 'jnks-iot-device-configuration',
   templateUrl: './device-configuration.component.html',
   styleUrls: [],
   providers: [{

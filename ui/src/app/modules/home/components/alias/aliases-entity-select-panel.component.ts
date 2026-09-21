@@ -10,7 +10,7 @@ export interface AliasesEntitySelectPanelData {
 }
 
 @Component({
-  selector: 'tb-aliases-entity-select-panel',
+  selector: 'jnks-iot-aliases-entity-select-panel',
   templateUrl: './aliases-entity-select-panel.component.html',
   styleUrls: ['./aliases-entity-select-panel.component.scss']
 })

@@ -1,6 +1,6 @@
 @import "../scss/constants";
 
-.tb-color-picker-panel {
+.jnks-iot-color-picker-panel {
   width: 342px;
   display: flex;
   flex-direction: column;
@@ -9,18 +9,18 @@
   @media #{$mat-sm} {
     width: 578px;
   }
-  .tb-color-picker-title {
+  .jnks-iot-color-picker-title {
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
     color: rgba(0, 0, 0, 0.87);
   }
-  .tb-color-picker {
+  .jnks-iot-color-picker {
     padding-right: 4px;
     overflow-y: scroll;
   }
-  .tb-color-picker-panel-buttons {
+  .jnks-iot-color-picker-panel-buttons {
     height: 60px;
     padding: 8px 8px 0 0;
     display: flex;

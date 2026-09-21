@@ -1,7 +1,7 @@
 package com.jnks.iot.rule.engine.deduplication;
 
 import lombok.Data;
-import com.jnks.iot.server.common.msg.TbMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 public class DeduplicationData {
 
-    private final List<TbMsg> msgList;
+    private final List<JnksIotMsg> msgList;
     private boolean tickScheduled;
 
     public DeduplicationData() {
@@ -20,7 +20,7 @@ public class DeduplicationData {
         return msgList.size();
     }
 
-    public void add(TbMsg msg) {
+    public void add(JnksIotMsg msg) {
         msgList.add(msg);
     }
 

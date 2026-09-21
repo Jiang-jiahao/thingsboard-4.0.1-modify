@@ -18,7 +18,7 @@ import com.jnks.iot.server.common.data.id.DeviceProfileId;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.kv.AttributeKvEntry;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.common.msg.edqs.EdqsService;
 import com.jnks.iot.server.dao.service.Validator;
 
@@ -111,10 +111,10 @@ public class BaseAttributesService implements AttributesService {
     @Override
     public ListenableFuture<List<String>> removeAll(TenantId tenantId, EntityId entityId, AttributeScope scope, List<String> attributeKeys) {
         validate(entityId, scope);
-        List<ListenableFuture<TbPair<String, Long>>> futures = attributesDao.removeAllWithVersions(tenantId, entityId, scope, attributeKeys);
+        List<ListenableFuture<JnksIotPair<String, Long>>> futures = attributesDao.removeAllWithVersions(tenantId, entityId, scope, attributeKeys);
         return Futures.transform(Futures.allAsList(futures), result -> {
             List<String> keys = new ArrayList<>();
-            for (TbPair<String, Long> keyVersionPair : result) {
+            for (JnksIotPair<String, Long> keyVersionPair : result) {
                 String key = keyVersionPair.getFirst();
                 Long version = keyVersionPair.getSecond();
                 if (version != null) {

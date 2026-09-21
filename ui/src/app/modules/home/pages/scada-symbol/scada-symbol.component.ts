@@ -28,7 +28,7 @@ import {
   ScadaSymbolEditorData
 } from '@home/pages/scada-symbol/scada-symbol-editor.component';
 import { ImageService } from '@core/http/image.service';
-import { imageResourceType, IMAGES_URL_PREFIX, TB_IMAGE_PREFIX } from '@shared/models/resource.models';
+import { imageResourceType, IMAGES_URL_PREFIX, JNKS_IOT_IMAGE_PREFIX } from '@shared/models/resource.models';
 import { HasDirtyFlag } from '@core/guards/confirm-on-exit.guard';
 import { IAliasController, IStateController, StateParams } from '@core/api/widget-api.models';
 import { EntityAliases } from '@shared/models/alias.models';
@@ -66,7 +66,7 @@ import { WidgetService } from '@core/http/widget.service';
 import { ActionNotificationShow } from '@core/notification/notification.actions';
 
 @Component({
-  selector: 'tb-scada-symbol',
+  selector: 'jnks-iot-scada-symbol',
   templateUrl: './scada-symbol.component.html',
   styleUrls: ['./scada-symbol.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -342,7 +342,7 @@ export class ScadaSymbolComponent extends PageComponent
     this.dialog.open<UploadImageDialogComponent, UploadImageDialogData,
       UploadImageDialogResult>(UploadImageDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         imageSubType: this.symbolData.imageResource.resourceSubType,
         image: this.symbolData.imageResource
@@ -391,7 +391,7 @@ export class ScadaSymbolComponent extends PageComponent
     this.dialog.open<SaveWidgetTypeAsDialogComponent, SaveWidgetTypeAsDialogData,
       SaveWidgetTypeAsDialogResult>(SaveWidgetTypeAsDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         title: metadata.title,
         dialogTitle: 'scada.create-widget-from-symbol',
@@ -402,7 +402,7 @@ export class ScadaSymbolComponent extends PageComponent
         if (saveWidgetAsData) {
           this.widgetService.getWidgetType('system.scada_symbol').subscribe(
             (widgetTemplate) => {
-              const symbolUrl = TB_IMAGE_PREFIX + this.symbolData.imageResource.link;
+              const symbolUrl = JNKS_IOT_IMAGE_PREFIX + this.symbolData.imageResource.link;
               const widget: WidgetTypeDetails = {
                 image: symbolUrl,
                 description: metadata.description,

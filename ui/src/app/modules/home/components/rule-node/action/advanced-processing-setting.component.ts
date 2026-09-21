@@ -14,7 +14,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { AttributeAdvancedProcessingStrategy } from '@home/components/rule-node/action/attributes-config.model';
 
 @Component({
-  selector: 'tb-advanced-processing-settings',
+  selector: 'jnks-iot-advanced-processing-settings',
   templateUrl: './advanced-processing-setting.component.html',
   providers: [{
     provide: NG_VALUE_ACCESSOR,

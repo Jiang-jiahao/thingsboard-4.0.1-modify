@@ -21,7 +21,7 @@ import com.jnks.iot.server.dao.util.NoSqlAnyDao;
 @Component
 @Slf4j
 @NoSqlAnyDao
-public class CassandraBufferedRateWriteExecutor extends AbstractBufferedRateExecutor<CassandraStatementTask, TbResultSetFuture, TbResultSet> {
+public class CassandraBufferedRateWriteExecutor extends AbstractBufferedRateExecutor<CassandraStatementTask, JnksIotResultSetFuture, JnksIotResultSet> {
 
     static final String BUFFER_NAME = "Write";
 
@@ -58,17 +58,17 @@ public class CassandraBufferedRateWriteExecutor extends AbstractBufferedRateExec
     }
 
     @Override
-    protected SettableFuture<TbResultSet> create() {
+    protected SettableFuture<JnksIotResultSet> create() {
         return SettableFuture.create();
     }
 
     @Override
-    protected TbResultSetFuture wrap(CassandraStatementTask task, SettableFuture<TbResultSet> future) {
-        return new TbResultSetFuture(future);
+    protected JnksIotResultSetFuture wrap(CassandraStatementTask task, SettableFuture<JnksIotResultSet> future) {
+        return new JnksIotResultSetFuture(future);
     }
 
     @Override
-    protected ListenableFuture<TbResultSet> execute(AsyncTaskContext<CassandraStatementTask, TbResultSet> taskCtx) {
+    protected ListenableFuture<JnksIotResultSet> execute(AsyncTaskContext<CassandraStatementTask, JnksIotResultSet> taskCtx) {
         CassandraStatementTask task = taskCtx.getTask();
         return task.executeAsync(
                 statement ->

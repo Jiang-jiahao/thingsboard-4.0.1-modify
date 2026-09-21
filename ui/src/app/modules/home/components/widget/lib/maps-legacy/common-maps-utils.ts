@@ -13,7 +13,7 @@ import { map } from 'rxjs/operators';
 import { FormattedData } from '@shared/models/widget.models';
 import L from 'leaflet';
 import { ImagePipe } from '@shared/pipe/image.pipe';
-import { CompiledTbFunction, GenericFunction } from '@shared/models/js-function.models';
+import { CompiledJnksIotFunction, GenericFunction } from '@shared/models/js-function.models';
 
 export function getRatio(firsMoment: number, secondMoment: number, intermediateMoment: number): number {
   return (intermediateMoment - firsMoment) / (secondMoment - firsMoment);
@@ -116,11 +116,11 @@ const linkActionRegex = /<link-act name=['"]([^['"]*)['"]>([^<]*)<\/link-act>/g;
 const buttonActionRegex = /<button-act name=['"]([^['"]*)['"]>([^<]*)<\/button-act>/g;
 
 function createLinkElement(actionName: string, actionText: string): string {
-  return `<a href="javascript:void(0);" class="tb-custom-action" data-action-name="${actionName}">${actionText}</a>`;
+  return `<a href="javascript:void(0);" class="jnks-iot-custom-action" data-action-name="${actionName}">${actionText}</a>`;
 }
 
 function createButtonElement(actionName: string, actionText: string) {
-  return `<button mat-button class="tb-custom-action" data-action-name="${actionName}">${actionText}</button>`;
+  return `<button mat-button class="jnks-iot-custom-action" data-action-name="${actionName}">${actionText}</button>`;
 }
 
 function parseTemplate(template: string, data: FormattedData,
@@ -242,7 +242,7 @@ export const parseWithTranslation = {
   }
 };
 
-export function functionValueCalculator<T>(useFunction: boolean, func: CompiledTbFunction<GenericFunction>, params = [], defaultValue: T): T {
+export function functionValueCalculator<T>(useFunction: boolean, func: CompiledJnksIotFunction<GenericFunction>, params = [], defaultValue: T): T {
   let res: T;
   if (useFunction && isDefinedAndNotNull(func)) {
     try {

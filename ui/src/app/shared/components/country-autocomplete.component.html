@@ -13,15 +13,15 @@
           (click)="clear()">
     <mat-icon class="material-icons">close</mat-icon>
   </button>
-  <mat-autocomplete class="tb-autocomplete"
+  <mat-autocomplete class="jnks-iot-autocomplete"
                     #countryAutocomplete="matAutocomplete"
                     [displayWith]="displayCountryFn">
     <mat-option *ngFor="let country of filteredCountries | async" [value]="country">
       <span style="font-size: 20px;padding-right: 4px;">{{country.flag}}</span>
       <span [innerHTML]="country.name | highlight:searchText"></span>
     </mat-option>
-    <mat-option *ngIf="!(filteredCountries | async)?.length" [value]="null" class="tb-not-found">
-      <div class="tb-not-found-content" (click)="$event.stopPropagation()">
+    <mat-option *ngIf="!(filteredCountries | async)?.length" [value]="null" class="jnks-iot-not-found">
+      <div class="jnks-iot-not-found-content" (click)="$event.stopPropagation()">
         <div *ngIf="!textIsNotEmpty(searchText); else searchNotEmpty">
           <span translate>contact.no-country-found</span>
         </div>

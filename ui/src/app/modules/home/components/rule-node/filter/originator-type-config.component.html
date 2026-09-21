@@ -1,5 +1,5 @@
 <section [formGroup]="originatorTypeConfigForm">
-  <tb-entity-type-list class="flex-1"
+  <jnks-iot-entity-type-list class="flex-1"
                        formControlName="originatorTypes"
                        [allowedEntityTypes]="allowedEntityTypes"
                        [ignoreAuthorityFilter]="true"
@@ -10,5 +10,5 @@
     <mat-icon matSuffix class="help-icon margin-8 cursor-pointer" aria-hidden="false" aria-label="help-icon"
               color="primary"
               matTooltip="{{ 'rule-node-config.chip-help' | translate: { inputName: 'rule-node-config.entity-type' | translate } }}">help</mat-icon>
-  </tb-entity-type-list>
+  </jnks-iot-entity-type-list>
 </section>

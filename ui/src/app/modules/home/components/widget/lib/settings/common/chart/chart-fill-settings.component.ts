@@ -17,7 +17,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-chart-fill-settings',
+  selector: 'jnks-iot-chart-fill-settings',
   templateUrl: './chart-fill-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

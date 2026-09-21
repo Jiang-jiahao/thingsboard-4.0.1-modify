@@ -4,14 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.common.util.JacksonUtil;
 import com.jnks.iot.server.actors.ActorSystemContext;
-import com.jnks.iot.server.actors.TbActor;
-import com.jnks.iot.server.actors.TbActorId;
-import com.jnks.iot.server.actors.TbStringActorId;
+import com.jnks.iot.server.actors.JnksIotActor;
+import com.jnks.iot.server.actors.JnksIotActorId;
+import com.jnks.iot.server.actors.JnksIotStringActorId;
 import com.jnks.iot.server.actors.service.ContextAwareActor;
 import com.jnks.iot.server.actors.service.ContextBasedCreator;
 import com.jnks.iot.server.common.data.event.StatisticsEvent;
 import com.jnks.iot.server.common.msg.MsgType;
-import com.jnks.iot.server.common.msg.TbActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
 
 @Slf4j
 public class StatsActor extends ContextAwareActor {
@@ -21,7 +21,7 @@ public class StatsActor extends ContextAwareActor {
     }
 
     @Override
-    protected boolean doProcess(TbActorMsg msg) {
+    protected boolean doProcess(JnksIotActorMsg msg) {
         log.debug("Received message: {}", msg);
         if (msg.getMsgType().equals(MsgType.STATS_PERSIST_MSG)) {
             onStatsPersistMsg((StatsPersistMsg) msg);
@@ -58,12 +58,12 @@ public class StatsActor extends ContextAwareActor {
         }
 
         @Override
-        public TbActorId createActorId() {
-            return new TbStringActorId(actorId);
+        public JnksIotActorId createActorId() {
+            return new JnksIotStringActorId(actorId);
         }
 
         @Override
-        public TbActor createActor() {
+        public JnksIotActor createActor() {
             return new StatsActor(context);
         }
     }

@@ -13,7 +13,7 @@ import { catchError, map, mergeMap, share, startWith } from 'rxjs/operators';
 import { RuleChainService } from '@core/http/rule-chain.service';
 
 @Component({
-  selector: 'tb-link-labels',
+  selector: 'jnks-iot-link-labels',
   templateUrl: './link-labels.component.html',
   styleUrls: [],
   providers: [{

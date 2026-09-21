@@ -2,7 +2,7 @@ import { Component, Input, OnInit, TemplateRef, ViewChild, ViewEncapsulation } f
 import { WidgetContext } from '@home/models/widget-component.models';
 import { WidgetComponent } from '@home/components/widget/widget.component';
 import { TranslateService } from '@ngx-translate/core';
-import { TbPieChart } from '@home/components/widget/lib/chart/pie-chart';
+import { JnksIotPieChart } from '@home/components/widget/lib/chart/pie-chart';
 import {
   LatestChartComponent,
   LatestChartComponentCallbacks
@@ -14,7 +14,7 @@ import {
 } from '@home/components/widget/lib/chart/pie-chart-widget.models';
 
 @Component({
-  selector: 'tb-pie-chart-widget',
+  selector: 'jnks-iot-pie-chart-widget',
   templateUrl: './latest-chart-widget.component.html',
   styleUrls: [],
   encapsulation: ViewEncapsulation.None
@@ -44,7 +44,7 @@ export class PieChartWidgetComponent implements OnInit {
     this.callbacks = {
       createChart: (chartShape, renderer) => {
         const settings = pieChartWidgetPieChartSettings(this.settings);
-        return new TbPieChart(this.ctx, settings, chartShape.nativeElement, renderer, this.translate, true);
+        return new JnksIotPieChart(this.ctx, settings, chartShape.nativeElement, renderer, this.translate, true);
       },
       onItemClick: ($event: Event, item) => {
         const descriptors = this.ctx.actionsApi.getActionDescriptors('sliceClick');

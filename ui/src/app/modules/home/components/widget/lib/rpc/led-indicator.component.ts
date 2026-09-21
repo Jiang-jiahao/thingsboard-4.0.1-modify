@@ -30,7 +30,7 @@ interface LedIndicatorSettings {
 }
 
 @Component({
-  selector: 'tb-led-indicator',
+  selector: 'jnks-iot-led-indicator',
   templateUrl: './led-indicator.component.html',
   styleUrls: ['./led-indicator.component.scss']
 })

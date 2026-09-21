@@ -30,7 +30,7 @@ export interface RecipientNotificationDialogData {
 }
 
 @Component({
-  selector: 'tb-target-notification-dialog',
+  selector: 'jnks-iot-target-notification-dialog',
   templateUrl: './recipient-notification-dialog.component.html',
   styleUrls: ['recipient-notification-dialog.component.scss']
 })

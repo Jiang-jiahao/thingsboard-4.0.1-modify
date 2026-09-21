@@ -11,10 +11,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { serverErrorCodesTranslations } from '@shared/models/constants';
 import { SubscriptionEntityInfo } from '@core/api/widget-api.models';
 import {
-  CompiledTbFunction,
-  compileTbFunction, GenericFunction,
-  isNotEmptyTbFunction,
-  TbFunction
+  CompiledJnksIotFunction,
+  compileJnksIotFunction, GenericFunction,
+  isNotEmptyJnksIotFunction,
+  JnksIotFunction
 } from '@shared/models/js-function.models';
 
 const varsRegex = /\${([^}]*)}/g;
@@ -677,9 +677,9 @@ export function parseFunction(source: any, params: string[] = ['def']): (...args
   return res;
 }
 
-export function parseTbFunction<T extends GenericFunction>(http: HttpClient, source: TbFunction, params: string[] = ['def']): Observable<CompiledTbFunction<T>> {
-  if (isNotEmptyTbFunction(source)) {
-    return compileTbFunction<T>(http, source, ...params).pipe(
+export function parseJnksIotFunction<T extends GenericFunction>(http: HttpClient, source: JnksIotFunction, params: string[] = ['def']): Observable<CompiledJnksIotFunction<T>> {
+  if (isNotEmptyJnksIotFunction(source)) {
+    return compileJnksIotFunction<T>(http, source, ...params).pipe(
       catchError(() => {
         return of(null);
       }),
@@ -695,7 +695,7 @@ export function parseTbFunction<T extends GenericFunction>(http: HttpClient, sou
   }
 }
 
-export function safeExecuteTbFunction<T extends GenericFunction>(func: CompiledTbFunction<T>, params = []) {
+export function safeExecuteJnksIotFunction<T extends GenericFunction>(func: CompiledJnksIotFunction<T>, params = []) {
   let res = null;
   if (func) {
     try {

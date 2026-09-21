@@ -46,7 +46,7 @@ export interface TimewindowPanelData {
 export const TIMEWINDOW_PANEL_DATA = new InjectionToken<any>('TimewindowPanelData');
 
 @Component({
-  selector: 'tb-timewindow-panel',
+  selector: 'jnks-iot-timewindow-panel',
   templateUrl: './timewindow-panel.component.html',
   styleUrls: ['./timewindow-panel.component.scss', './timewindow-form.scss']
 })
@@ -508,7 +508,7 @@ export class TimewindowPanelComponent extends PageComponent implements OnInit, O
       TimewindowConfigDialogComponent, {
         autoFocus: false,
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           quickIntervalOnly: this.quickIntervalOnly,
           aggregation: this.aggregation,

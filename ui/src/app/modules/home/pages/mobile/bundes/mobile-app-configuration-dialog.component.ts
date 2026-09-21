@@ -14,7 +14,7 @@ export interface MobileAppConfigurationDialogData {
 }
 
 @Component({
-  selector: 'tb-mobile-app-configuration-dialog',
+  selector: 'jnks-iot-mobile-app-configuration-dialog',
   templateUrl: './mobile-app-configuration-dialog.component.html',
   styleUrls: ['./mobile-app-configuration-dialog.component.scss']
 })

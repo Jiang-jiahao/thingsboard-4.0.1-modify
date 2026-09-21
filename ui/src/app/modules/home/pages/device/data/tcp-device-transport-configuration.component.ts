@@ -21,7 +21,7 @@ import {
 import { isDefinedAndNotNull } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
-  selector: 'tb-tcp-device-transport-configuration',
+  selector: 'jnks-iot-tcp-device-transport-configuration',
   templateUrl: './tcp-device-transport-configuration.component.html',
   styleUrls: [],
   providers: [

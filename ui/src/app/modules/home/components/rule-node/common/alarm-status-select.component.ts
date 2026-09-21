@@ -4,7 +4,7 @@ import { ControlValueAccessor, FormBuilder, FormGroup, NG_VALUE_ACCESSOR } from 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-alarm-status-select',
+  selector: 'jnks-iot-alarm-status-select',
   templateUrl: './alarm-status-select.component.html',
   styleUrls: ['./alarm-status-select.component.scss'],
   providers: [{

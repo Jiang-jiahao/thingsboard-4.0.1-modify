@@ -91,18 +91,18 @@
                     Relation direction is required.
                   </mat-error>
                 </mat-form-field>
-                <tb-relation-type-autocomplete
+                <jnks-iot-relation-type-autocomplete
                   class="mat-block flex-1"
                   formControlName="relationType"
                   required="true">
-                </tb-relation-type-autocomplete>
+                </jnks-iot-relation-type-autocomplete>
               </div>
               <div class="flex flex-row xs:flex-col">
-                <tb-entity-select
+                <jnks-iot-entity-select
                   class="mat-block flex-1"
                   required="true"
                   formControlName="relatedEntity">
-                </tb-entity-select>
+                </jnks-iot-entity-select>
               </div>
             </div>
             <div class="flex flex-col items-center justify-center">
@@ -137,18 +137,18 @@
                     Relation direction is required.
                   </mat-error>
                 </mat-form-field>
-                <tb-relation-type-autocomplete
+                <jnks-iot-relation-type-autocomplete
                   class="mat-block flex-1"
                   formControlName="relationType"
                   [required]="true">
-                </tb-relation-type-autocomplete>
+                </jnks-iot-relation-type-autocomplete>
               </div>
               <div class="flex flex-row xs:flex-col">
-                <tb-entity-select
+                <jnks-iot-entity-select
                   class="mat-block flex-1"
                   [required]="true"
                   formControlName="relatedEntity">
-                </tb-entity-select>
+                </jnks-iot-entity-select>
               </div>
             </div>
             <div class="flex flex-col items-center justify-center">

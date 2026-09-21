@@ -17,7 +17,7 @@ import {
 } from '@shared/models/widget-settings.models';
 
 @Component({
-  selector: 'tb-value-card-widget-settings',
+  selector: 'jnks-iot-value-card-widget-settings',
   templateUrl: './value-card-widget-settings.component.html',
   styleUrls: []
 })

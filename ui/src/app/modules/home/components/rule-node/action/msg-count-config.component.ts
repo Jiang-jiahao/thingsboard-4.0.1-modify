@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-action-node-msg-count-config',
+  selector: 'jnks-iot-action-node-msg-count-config',
   templateUrl: './msg-count-config.component.html',
   styleUrls: []
 })

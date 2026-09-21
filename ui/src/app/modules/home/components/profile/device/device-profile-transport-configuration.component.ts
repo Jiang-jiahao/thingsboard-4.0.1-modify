@@ -25,7 +25,7 @@ import { deepClone } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-device-profile-transport-configuration',
+  selector: 'jnks-iot-device-profile-transport-configuration',
   templateUrl: './device-profile-transport-configuration.component.html',
   styleUrls: [],
   providers: [

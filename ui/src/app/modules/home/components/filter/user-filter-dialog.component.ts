@@ -29,7 +29,7 @@ export interface UserFilterDialogData {
 }
 
 @Component({
-  selector: 'tb-user-filter-dialog',
+  selector: 'jnks-iot-user-filter-dialog',
   templateUrl: './user-filter-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: UserFilterDialogComponent}],
   styleUrls: []

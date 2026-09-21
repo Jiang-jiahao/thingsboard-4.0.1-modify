@@ -20,7 +20,7 @@ import { Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-http-device-profile-transport-configuration',
+  selector: 'jnks-iot-http-device-profile-transport-configuration',
   templateUrl: './http-device-profile-transport-configuration.component.html',
   styleUrls: ['./http-device-profile-transport-configuration.component.scss'],
   providers: [

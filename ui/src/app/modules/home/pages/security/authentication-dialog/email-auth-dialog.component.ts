@@ -18,7 +18,7 @@ export interface EmailAuthDialogData {
 }
 
 @Component({
-  selector: 'tb-email-auth-dialog',
+  selector: 'jnks-iot-email-auth-dialog',
   templateUrl: './email-auth-dialog.component.html',
   styleUrls: ['./authentication-dialog.component.scss']
 })

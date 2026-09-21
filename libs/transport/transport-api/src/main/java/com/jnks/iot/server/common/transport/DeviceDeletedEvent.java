@@ -2,9 +2,9 @@ package com.jnks.iot.server.common.transport;
 
 import lombok.Getter;
 import com.jnks.iot.server.common.data.id.DeviceId;
-import com.jnks.iot.server.queue.discovery.event.TbApplicationEvent;
+import com.jnks.iot.server.queue.discovery.event.JnksIotApplicationEvent;
 
-public final class DeviceDeletedEvent extends TbApplicationEvent {
+public final class DeviceDeletedEvent extends JnksIotApplicationEvent {
 
     private static final long serialVersionUID = -7453664970966733857L;
     @Getter

@@ -103,11 +103,11 @@ let activationLinkDialogTemplate = `<form style="min-width: 400px; position: rel
   <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
   </mat-progress-bar>
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
-  <div mat-dialog-content tb-toast toastTarget="activationLinkDialogContent">
+  <div mat-dialog-content jnks-iot-toast toastTarget="activationLinkDialogContent">
     <div class="mat-content" class="flex flex-col">
       <span [innerHTML]="'user.activation-link-text' | translate: {activationLink: activationLink}"></span>
       <div class="flex flex-row items-center justify-start">
-        <pre class="tb-highlight flex-1"><code>{{ activationLink }}</code></pre>
+        <pre class="jnks-iot-highlight flex-1"><code>{{ activationLink }}</code></pre>
         <button mat-icon-button
                 color="primary"
                 ngxClipboard

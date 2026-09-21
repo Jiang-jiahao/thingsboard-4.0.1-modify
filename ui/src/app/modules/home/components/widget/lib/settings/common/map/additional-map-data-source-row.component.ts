@@ -25,7 +25,7 @@ import { genNextLabelForDataKeys } from '@core/utils';
 import { MapSettingsContext } from '@home/components/widget/lib/settings/common/map/map-settings.component.models';
 
 @Component({
-  selector: 'tb-additional-map-data-source-row',
+  selector: 'jnks-iot-additional-map-data-source-row',
   templateUrl: './additional-map-data-source-row.component.html',
   styleUrls: ['./additional-map-data-source-row.component.scss'],
   providers: [

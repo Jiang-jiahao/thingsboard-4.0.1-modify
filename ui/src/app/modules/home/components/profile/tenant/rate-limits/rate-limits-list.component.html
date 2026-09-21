@@ -1,6 +1,6 @@
-<section class="tb-rate-limits-form" [formGroup]="rateLimitsListFormGroup">
+<section class="jnks-iot-rate-limits-form" [formGroup]="rateLimitsListFormGroup">
   <div class="flex-1" [formGroup]="rateLimit" *ngFor="let rateLimit of rateLimitsFormArray.controls; let $index = index">
-    <div class="tb-rate-limits-operation" *ngIf="$index > 0 && rateLimitsFormArray.controls.length > 1" translate>
+    <div class="jnks-iot-rate-limits-operation" *ngIf="$index > 0 && rateLimitsFormArray.controls.length > 1" translate>
       tenant-profile.rate-limits.but-less-than
     </div>
     <div class="flex flex-1 flex-row gap-2">
@@ -27,7 +27,7 @@
         </mat-error>
       </mat-form-field>
       <button mat-icon-button type="button" color="primary"
-              class="tb-rate-limits-button"
+              class="jnks-iot-rate-limits-button"
               *ngIf="!rateLimitsFormArray.disabled"
               (click)="removeRateLimits($index)"
               [disabled]="disabled"
@@ -42,8 +42,8 @@
           [matTooltip]="'tenant-profile.rate-limits.add-limit' | translate" matTooltipPosition="above">
     <span translate>tenant-profile.rate-limits.add-limit</span>
   </button>
-  <div class="tb-rate-limits-preview flex flex-1 flex-col gap-2" [class.tb-rate-limits-preview-short]="!disabled">
+  <div class="jnks-iot-rate-limits-preview flex flex-1 flex-col gap-2" [class.jnks-iot-rate-limits-preview-short]="!disabled">
     <span translate>tenant-profile.rate-limits.preview</span>
-    <tb-rate-limits-text [rateLimitsArray]="rateLimitsArray" [disabled]="disabled"></tb-rate-limits-text>
+    <jnks-iot-rate-limits-text [rateLimitsArray]="rateLimitsArray" [disabled]="disabled"></jnks-iot-rate-limits-text>
   </div>
 </section>

@@ -27,7 +27,7 @@ import { ValueSourceType } from '@shared/models/widget-settings.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-time-series-chart-thresholds-panel',
+  selector: 'jnks-iot-time-series-chart-thresholds-panel',
   templateUrl: './time-series-chart-thresholds-panel.component.html',
   styleUrls: ['./time-series-chart-thresholds-panel.component.scss'],
   providers: [

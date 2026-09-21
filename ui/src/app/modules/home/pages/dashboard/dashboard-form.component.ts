@@ -17,7 +17,7 @@ import { isEqual } from '@core/utils';
 import { EntityType } from '@shared/models/entity-type.models';
 
 @Component({
-  selector: 'tb-dashboard-form',
+  selector: 'jnks-iot-dashboard-form',
   templateUrl: './dashboard-form.component.html',
   styleUrls: ['./dashboard-form.component.scss']
 })

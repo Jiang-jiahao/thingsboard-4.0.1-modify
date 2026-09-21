@@ -13,7 +13,7 @@ import {
 } from '@home/components/widget/lib/cards/progress-bar-widget.models';
 
 @Component({
-  selector: 'tb-progress-bar-widget-settings',
+  selector: 'jnks-iot-progress-bar-widget-settings',
   templateUrl: './progress-bar-widget-settings.component.html',
   styleUrls: []
 })

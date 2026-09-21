@@ -28,7 +28,7 @@ import { GridsterItemComponent } from 'angular-gridster2';
 import { UtilsService } from '@core/services/utils.service';
 import { from } from 'rxjs';
 import { DashboardUtilsService } from '@core/services/dashboard-utils.service';
-import { TbContextMenuEvent } from '@shared/models/jquery-event.models';
+import { JnksIotContextMenuEvent } from '@shared/models/jquery-event.models';
 import { WidgetHeaderActionButtonType } from '@shared/models/widget.models';
 import ITooltipsterInstance = JQueryTooltipster.ITooltipsterInstance;
 import ITooltipsterGeoHelper = JQueryTooltipster.ITooltipsterGeoHelper;
@@ -45,13 +45,13 @@ export enum WidgetComponentActionType {
 }
 
 export class WidgetComponentAction {
-  event: MouseEvent | TbContextMenuEvent;
+  event: MouseEvent | JnksIotContextMenuEvent;
   actionType: WidgetComponentActionType;
 }
 
 // @dynamic
 @Component({
-  selector: 'tb-widget-container',
+  selector: 'jnks-iot-widget-container',
   templateUrl: './widget-container.component.html',
   styleUrls: ['./widget-container.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -60,10 +60,10 @@ export class WidgetComponentAction {
 export class WidgetContainerComponent extends PageComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
 
   @HostBinding('class')
-  widgetContainerClass = 'tb-widget-container';
+  widgetContainerClass = 'jnks-iot-widget-container';
 
-  @ViewChild('tbWidgetElement', {static: true})
-  tbWidgetElement: ElementRef;
+  @ViewChild('jnksIotWidgetElement', {static: true})
+  jnksIotWidgetElement: ElementRef;
 
   @Input()
   gridsterItem: GridsterItemComponent;
@@ -136,11 +136,11 @@ export class WidgetContainerComponent extends PageComponent implements OnInit, O
     const cssString = this.widget.widget.config.widgetCss;
     if (isNotEmptyStr(cssString)) {
       this.cssClass =
-        this.utils.applyCssToElement(this.renderer, this.gridsterItem.el, 'tb-widget-css', cssString);
+        this.utils.applyCssToElement(this.renderer, this.gridsterItem.el, 'jnks-iot-widget-css', cssString);
     }
     $(this.gridsterItem.el).on('mousedown', (e) => this.onMouseDown(e.originalEvent));
     $(this.gridsterItem.el).on('click', (e) => this.onClicked(e.originalEvent));
-    $(this.gridsterItem.el).on('tbcontextmenu', (e: TbContextMenuEvent) => this.onContextMenu(e));
+    $(this.gridsterItem.el).on('tbcontextmenu', (e: JnksIotContextMenuEvent) => this.onContextMenu(e));
     const dashboardContentElement = this.widget.widgetContext.dashboardContentElement;
     if (dashboardContentElement) {
       this.initEditWidgetActionTooltip(dashboardContentElement);
@@ -148,7 +148,7 @@ export class WidgetContainerComponent extends PageComponent implements OnInit, O
   }
 
   ngAfterViewInit(): void {
-    this.widget.widgetContext.$widgetElement = $(this.tbWidgetElement.nativeElement);
+    this.widget.widgetContext.$widgetElement = $(this.jnksIotWidgetElement.nativeElement);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -184,9 +184,9 @@ export class WidgetContainerComponent extends PageComponent implements OnInit, O
 
   onFullscreenChanged(expanded: boolean) {
     if (expanded) {
-      this.renderer.addClass(this.tbWidgetElement.nativeElement, this.cssClass);
+      this.renderer.addClass(this.jnksIotWidgetElement.nativeElement, this.cssClass);
     } else {
-      this.renderer.removeClass(this.tbWidgetElement.nativeElement, this.cssClass);
+      this.renderer.removeClass(this.jnksIotWidgetElement.nativeElement, this.cssClass);
     }
     this.widgetFullscreenChanged.emit(expanded);
   }
@@ -217,7 +217,7 @@ export class WidgetContainerComponent extends PageComponent implements OnInit, O
     });
   }
 
-  onContextMenu(event: TbContextMenuEvent): void {
+  onContextMenu(event: JnksIotContextMenuEvent): void {
     if (event && this.isEdit) {
       event.stopPropagation();
     }
@@ -286,7 +286,7 @@ export class WidgetContainerComponent extends PageComponent implements OnInit, O
         distance: 2,
         zIndex: 151,
         arrow: false,
-        theme: ['tb-widget-edit-actions-tooltip'],
+        theme: ['jnks-iot-widget-edit-actions-tooltip'],
         interactive: true,
         trigger: 'custom',
         ignoreCloseOnScroll: true,
@@ -379,39 +379,39 @@ export class WidgetContainerComponent extends PageComponent implements OnInit, O
 
 @Component({
   template: `
-    <div class="tb-widget-action-container">
-      <div class="tb-widget-reference-panel tb-primary-fill" *ngIf="container.widget.isReference">
+    <div class="jnks-iot-widget-action-container">
+      <div class="jnks-iot-widget-reference-panel jnks-iot-primary-fill" *ngIf="container.widget.isReference">
         {{ 'widget.reference' | translate }}
-        <button mat-icon-button class="tb-mat-16"
+        <button mat-icon-button class="jnks-iot-mat-16"
                 color="primary"
                 [class.!hidden]="!container.isEditActionEnabled"
                 (click)="container.onReplaceReferenceWithWidgetCopy($event)"
                 matTooltip="{{ 'widget.replace-reference-with-widget-copy' | translate }}"
                 matTooltipPosition="above">
-          <tb-icon matButtonIcon>mdi:file-replace-outline</tb-icon>
+          <jnks-iot-icon matButtonIcon>mdi:file-replace-outline</jnks-iot-icon>
         </button>
       </div>
-      <div class="tb-widget-actions-panel">
-        <button mat-icon-button class="tb-mat-20"
+      <div class="jnks-iot-widget-actions-panel">
+        <button mat-icon-button class="jnks-iot-mat-20"
                 [class.!hidden]="!container.isEditActionEnabled"
                 (click)="container.onEdit($event)"
                 matTooltip="{{ 'widget.edit' | translate }}"
                 matTooltipPosition="above">
-          <tb-icon>edit</tb-icon>
+          <jnks-iot-icon>edit</jnks-iot-icon>
         </button>
-        <button mat-icon-button class="tb-mat-20"
+        <button mat-icon-button class="jnks-iot-mat-20"
                 [class.!hidden]="!container.isExportActionEnabled"
                 (click)="container.onExport($event)"
                 matTooltip="{{ 'widget.export' | translate }}"
                 matTooltipPosition="above">
-          <tb-icon>file_download</tb-icon>
+          <jnks-iot-icon>file_download</jnks-iot-icon>
         </button>
-        <button mat-icon-button class="tb-mat-20"
+        <button mat-icon-button class="jnks-iot-mat-20"
                 [class.!hidden]="!container.isRemoveActionEnabled"
                 (click)="container.onRemove($event);"
                 matTooltip="{{ 'widget.remove' | translate }}"
                 matTooltipPosition="above">
-          <tb-icon>close</tb-icon>
+          <jnks-iot-icon>close</jnks-iot-icon>
         </button>
       </div>
     </div>`,

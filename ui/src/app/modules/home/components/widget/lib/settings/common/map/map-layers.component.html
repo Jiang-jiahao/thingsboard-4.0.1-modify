@@ -1,23 +1,23 @@
-<div class="tb-form-panel no-padding no-border">
-  <div class="tb-form-table tb-map-layers">
-    <div class="tb-form-table-header no-padding-right">
-      <div class="tb-form-table-header-cell tb-label-header" translate>widgets.maps.layer.label</div>
-      <div class="tb-form-table-header-cell tb-provider-header" translate>widgets.maps.layer.provider.provider</div>
-      <div class="tb-form-table-header-cell tb-layer-header" translate>widgets.maps.layer.layer</div>
-      <div class="tb-form-table-header-cell tb-actions-header"></div>
+<div class="jnks-iot-form-panel no-padding no-border">
+  <div class="jnks-iot-form-table jnks-iot-map-layers">
+    <div class="jnks-iot-form-table-header no-padding-right">
+      <div class="jnks-iot-form-table-header-cell jnks-iot-label-header" translate>widgets.maps.layer.label</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-provider-header" translate>widgets.maps.layer.provider.provider</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-layer-header" translate>widgets.maps.layer.layer</div>
+      <div class="jnks-iot-form-table-header-cell jnks-iot-actions-header"></div>
     </div>
-    <div *ngIf="layersFormArray().controls.length; else noLayers" class="tb-form-table-body tb-drop-list max-h-64 overflow-y-auto"
+    <div *ngIf="layersFormArray().controls.length; else noLayers" class="jnks-iot-form-table-body jnks-iot-drop-list max-h-64 overflow-y-auto"
          cdkDropList cdkDropListOrientation="vertical"
          [cdkDropListDisabled]="!dragEnabled"
          (cdkDropListDropped)="layerDrop($event)">
       <div cdkDrag [cdkDragDisabled]="!dragEnabled"
-           class="tb-draggable-form-table-row"
+           class="jnks-iot-draggable-form-table-row"
            *ngFor="let layerControl of layersFormArray().controls; trackBy: trackByLayer; let $index = index;">
-        <tb-map-layer-row class="flex-1"
+        <jnks-iot-map-layer-row class="flex-1"
                           [formControl]="layerControl"
-                          (layerRemoved)="removeLayer($index)"></tb-map-layer-row>
-        <div class="tb-form-table-row-cell-buttons">
-          <button [class.tb-hidden]="!dragEnabled"
+                          (layerRemoved)="removeLayer($index)"></jnks-iot-map-layer-row>
+        <div class="jnks-iot-form-table-row-cell-buttons">
+          <button [class.jnks-iot-hidden]="!dragEnabled"
                   mat-icon-button
                   type="button"
                   cdkDragHandle
@@ -36,5 +36,5 @@
   </div>
 </div>
 <ng-template #noLayers>
-  <span class="tb-prompt flex items-center justify-center">{{ 'widgets.maps.layer.no-layers' | translate }}</span>
+  <span class="jnks-iot-prompt flex items-center justify-center">{{ 'widgets.maps.layer.no-layers' | translate }}</span>
 </ng-template>

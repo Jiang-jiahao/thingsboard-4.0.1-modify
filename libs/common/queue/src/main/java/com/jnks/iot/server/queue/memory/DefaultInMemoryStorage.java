@@ -2,7 +2,7 @@ package com.jnks.iot.server.queue.memory;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import com.jnks.iot.server.queue.TbQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueMsg;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +16,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Component
 @Slf4j
 public final class DefaultInMemoryStorage implements InMemoryStorage {
-    private final ConcurrentHashMap<String, BlockingQueue<TbQueueMsg>> storage = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, BlockingQueue<JnksIotQueueMsg>> storage = new ConcurrentHashMap<>();
 
     @Override
     public void printStats() {
@@ -40,20 +40,20 @@ public final class DefaultInMemoryStorage implements InMemoryStorage {
     }
 
     @Override
-    public boolean put(String topic, TbQueueMsg msg) {
+    public boolean put(String topic, JnksIotQueueMsg msg) {
         return storage.computeIfAbsent(topic, (t) -> new LinkedBlockingQueue<>()).add(msg);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends TbQueueMsg> List<T> get(String topic) throws InterruptedException {
-        final BlockingQueue<TbQueueMsg> queue = storage.get(topic);
+    public <T extends JnksIotQueueMsg> List<T> get(String topic) throws InterruptedException {
+        final BlockingQueue<JnksIotQueueMsg> queue = storage.get(topic);
         if (queue != null) {
-            final TbQueueMsg firstMsg = queue.poll();
+            final JnksIotQueueMsg firstMsg = queue.poll();
             if (firstMsg != null) {
                 final int queueSize = queue.size();
                 if (queueSize > 0) {
-                    final List<TbQueueMsg> entities = new ArrayList<>(Math.min(queueSize, 999) + 1);
+                    final List<JnksIotQueueMsg> entities = new ArrayList<>(Math.min(queueSize, 999) + 1);
                     entities.add(firstMsg);
                     queue.drainTo(entities, 999);
                     return (List<T>) entities;

@@ -68,7 +68,7 @@ public class MqttNodeTest extends AbstractContainerTest {
     public void telemetryUpload() throws Exception {
         RuleChainId defaultRuleChainId = getDefaultRuleChainId();
 
-        createRootRuleChainWithTestNode("MqttRuleNodeTestMetadata.json", "com.jnks.iot.rule.engine.mqtt.TbMqttNode", 2);
+        createRootRuleChainWithTestNode("MqttRuleNodeTestMetadata.json", "com.jnks.iot.rule.engine.mqtt.JnksIotMqttNode", 2);
 
         DeviceCredentials deviceCredentials = testRestClient.getDeviceCredentialsByDeviceId(device.getId());
 

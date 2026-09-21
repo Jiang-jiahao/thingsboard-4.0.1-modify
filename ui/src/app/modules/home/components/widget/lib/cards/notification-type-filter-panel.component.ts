@@ -16,7 +16,7 @@ export interface NotificationTypeFilterPanelData {
 }
 
 @Component({
-  selector: 'tb-notification-type-filter-panel',
+  selector: 'jnks-iot-notification-type-filter-panel',
   templateUrl: './notification-type-filter-panel.component.html',
   styleUrls: ['notification-type-filter-panel.component.scss']
 })

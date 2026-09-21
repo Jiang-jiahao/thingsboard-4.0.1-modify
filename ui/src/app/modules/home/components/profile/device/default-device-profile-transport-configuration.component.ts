@@ -16,7 +16,7 @@ import { DefaultDeviceProfileTransportConfiguration, DeviceTransportType } from 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-default-device-profile-transport-configuration',
+  selector: 'jnks-iot-default-device-profile-transport-configuration',
   templateUrl: './default-device-profile-transport-configuration.component.html',
   styleUrls: [],
   providers: [

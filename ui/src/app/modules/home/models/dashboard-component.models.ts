@@ -24,9 +24,9 @@ import { IterableDiffer, KeyValueDiffer } from '@angular/core';
 import { IAliasController, IStateController } from '@app/core/api/widget-api.models';
 import { enumerable } from '@shared/decorators/enumerable';
 import { UtilsService } from '@core/services/utils.service';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { ComponentStyle, iconStyle, textStyle } from '@shared/models/widget-settings.models';
-import { TbContextMenuEvent } from '@shared/models/jquery-event.models';
+import { JnksIotContextMenuEvent } from '@shared/models/jquery-event.models';
 
 export interface WidgetsData {
   widgets: Array<Widget>;
@@ -41,11 +41,11 @@ export interface ContextMenuItem {
 }
 
 export interface DashboardContextMenuItem extends ContextMenuItem {
-  action: (contextMenuEvent: TbContextMenuEvent) => void;
+  action: (contextMenuEvent: JnksIotContextMenuEvent) => void;
 }
 
 export interface WidgetContextMenuItem extends ContextMenuItem {
-  action: (contextMenuEvent: TbContextMenuEvent, widget: Widget) => void;
+  action: (contextMenuEvent: JnksIotContextMenuEvent, widget: Widget) => void;
 }
 
 export interface DashboardCallbacks {
@@ -79,7 +79,7 @@ export interface IDashboardComponent {
   highlightWidget(widgetId: string, delay?: number);
   selectWidget(widgetId: string, delay?: number);
   getSelectedWidget(): Widget;
-  getEventGridPosition(event: TbContextMenuEvent | KeyboardEvent): WidgetPosition;
+  getEventGridPosition(event: JnksIotContextMenuEvent | KeyboardEvent): WidgetPosition;
   notifyGridsterOptionsChanged();
   pauseChangeNotifications();
   resumeChangeNotifications();
@@ -108,7 +108,7 @@ export class DashboardWidgets implements Iterable<DashboardWidget> {
 
   parentDashboard?: IDashboardComponent;
 
-  popoverComponent?: TbPopoverComponent;
+  popoverComponent?: JnksIotPopoverComponent;
 
   [Symbol.iterator](): Iterator<DashboardWidget> {
     return this.activeDashboardWidgets[Symbol.iterator]();
@@ -554,7 +554,7 @@ export class DashboardWidget implements GridsterItem, IDashboardWidget {
     public widget: Widget,
     private widgetLayoutValue?: WidgetLayout,
     private parentDashboard?: IDashboardComponent,
-    private popoverComponent?: TbPopoverComponent) {
+    private popoverComponent?: JnksIotPopoverComponent) {
 
     this.widgetLayout = widgetLayoutValue;
 

@@ -1,23 +1,23 @@
 <mat-sidenav-container>
-  <mat-sidenav #sidenav class="tb-site-sidenav mat-elevation-z2"
+  <mat-sidenav #sidenav class="jnks-iot-site-sidenav mat-elevation-z2"
                [disableClose]="sidenavOpened"
                (click)="sidenavClicked()"
                [mode]="sidenavMode"
                [opened]="sidenavOpened && !forceFullscreen">
-    <header class="tb-nav-header">
-      <mat-toolbar color="primary" class="tb-nav-header-toolbar">
+    <header class="jnks-iot-nav-header">
+      <mat-toolbar color="primary" class="jnks-iot-nav-header-toolbar">
         <div class="flex flex-auto">
-          <tb-logo class="tb-nav-logo"></tb-logo>
+          <jnks-iot-logo class="jnks-iot-nav-logo"></jnks-iot-logo>
         </div>
       </mat-toolbar>
     </header>
-    <mat-toolbar color="primary" class="tb-side-menu-toolbar flex flex-1 flex-col" role="navigation">
-      <tb-side-menu></tb-side-menu>
+    <mat-toolbar color="primary" class="jnks-iot-side-menu-toolbar flex flex-1 flex-col" role="navigation">
+      <jnks-iot-side-menu></jnks-iot-side-menu>
     </mat-toolbar>
   </mat-sidenav>
   <mat-sidenav-content>
     <div class="flex flex-col" role="main" style="height: 100%;">
-      <mat-toolbar class="tb-primary-toolbar flex flex-row">
+      <mat-toolbar class="jnks-iot-primary-toolbar flex flex-row">
         <button mat-icon-button id="main"
                 [class.!hidden]="forceFullscreen || displaySearchMode()"
                 class="gt-sm:!hidden" (click)="sidenav.toggle()">
@@ -33,12 +33,12 @@
                 (click)="closeSearch()">
           <mat-icon class="material-icons">arrow_back</mat-icon>
         </button>
-        <tb-breadcrumb
+        <jnks-iot-breadcrumb
             [class.!hidden]="displaySearchMode()"
             class="mat-toolbar-tools flex-1">
-        </tb-breadcrumb>
-        <div [class.!hidden]="!displaySearchMode()" class="tb-dark flex flex-1 flex-row">
-          <mat-form-field class="tb-appearance-transparent flex-1">
+        </jnks-iot-breadcrumb>
+        <div [class.!hidden]="!displaySearchMode()" class="jnks-iot-dark flex flex-1 flex-row">
+          <mat-form-field class="jnks-iot-appearance-transparent flex-1">
             <input #searchInput matInput
                    [formControl]="textSearch"
                    placeholder="{{ 'common.enter-search' | translate }}"/>
@@ -54,13 +54,13 @@
                 mat-icon-button (click)="toggleFullscreen()">
           <mat-icon class="material-icons">{{ isFullscreen() ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
         </button>
-        <tb-notification-bell></tb-notification-bell>
-        <tb-user-menu [displayUserInfo]="!displaySearchMode()"></tb-user-menu>
+        <jnks-iot-notification-bell></jnks-iot-notification-bell>
+        <jnks-iot-user-menu [displayUserInfo]="!displaySearchMode()"></jnks-iot-user-menu>
       </mat-toolbar>
       <mat-progress-bar color="warn" style="z-index: 10; margin-bottom: -4px; width: 100%;" mode="indeterminate"
                         *ngIf="!hideLoadingBar && (isLoading$ | async)">
       </mat-progress-bar>
-      <div tb-toast class="tb-main-content flex flex-1 flex-col">
+      <div jnks-iot-toast class="jnks-iot-main-content flex flex-1 flex-col">
         <router-outlet (activate)="activeComponentChanged($event)"></router-outlet>
       </div>
     </div>

@@ -3,8 +3,8 @@
 This project provides the build for the JnksIOT single docker images.
 
 * `jnks-iot/tb` - single instance of JnksIOT with embedded HSQLDB database.
-* `jnks-iot/tb-postgres` - single instance of JnksIOT with PostgreSQL database.
-* `jnks-iot/tb-cassandra` - single instance of JnksIOT with Hybrid PostgreSQL (entities) and Cassandra (timeseries) database.
+* `jnks-iot/jnks-iot-postgres` - single instance of JnksIOT with PostgreSQL database.
+* `jnks-iot/jnks-iot-cassandra` - single instance of JnksIOT with Hybrid PostgreSQL (entities) and Cassandra (timeseries) database.
 
 ## Running
 
@@ -35,7 +35,7 @@ Where:
 - `-p 5686:5686`            - connect local port 5686 to exposed internal COAPS port 5686 (lwm2m) 
 - `-v ~/.mytb-data:/data`   - mounts the host's dir `~/.mytb-data` to JnksIOT DataBase data directory
 - `--name mytb`             - friendly local name of this machine
-- `jnks-iot/tb`          - docker image, can be also `jnks-iot/tb-postgres` or `jnks-iot/tb-cassandra`
+- `jnks-iot/tb`          - docker image, can be also `jnks-iot/jnks-iot-postgres` or `jnks-iot/jnks-iot-cassandra`
 
 > **NOTE**: **Windows** users should use docker managed volume instead of host's dir. Create docker volume (for ex. `mytb-data`) before executing `docker run` command:
 > ```
@@ -91,6 +91,6 @@ $ docker run -it -v ~/.mytb-data:/data --rm jnks-iot/tb upgrade-tb.sh
 $ docker start mytb
 ```
 
-**NOTE**: if you use different database change image name in all commands from `jnks-iot/tb` to `jnks-iot/tb-postgres` or `jnks-iot/tb-cassandra` correspondingly.
+**NOTE**: if you use different database change image name in all commands from `jnks-iot/tb` to `jnks-iot/jnks-iot-postgres` or `jnks-iot/jnks-iot-cassandra` correspondingly.
  
 **NOTE**: replace host's directory `~/.mytb-data` with directory used during container creation. 

@@ -1,6 +1,6 @@
 <ng-container [formGroup]="timeSeriesChartWidgetSettingsForm">
-  <div class="tb-form-panel">
-    <div class="tb-form-row no-border no-padding column-xs">
+  <div class="jnks-iot-form-panel">
+    <div class="jnks-iot-form-row no-border no-padding column-xs">
       <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="comparisonEnabled">
         {{ 'widgets.time-series-chart.comparison.comparison' | translate }}
       </mat-slide-toggle>
@@ -31,62 +31,62 @@
                         appearance="outline" class="number flex-lt-md" subscriptSizing="dynamic">
           <input matInput formControlName="comparisonCustomIntervalValue" type="number" min="0" placeholder="{{ 'widget-config.set' | translate }}">
         </mat-form-field>
-        <tb-time-series-chart-axis-settings-button
+        <jnks-iot-time-series-chart-axis-settings-button
           axisType="xAxis"
           panelTitle="{{ 'widgets.time-series-chart.axis.comparison-x-axis-settings' | translate }}"
           formControlName="comparisonXAxis">
-        </tb-time-series-chart-axis-settings-button>
+        </jnks-iot-time-series-chart-axis-settings-button>
       </div>
     </div>
   </div>
-  <tb-time-series-chart-states-panel
+  <jnks-iot-time-series-chart-states-panel
       *ngIf="chartType === TimeSeriesChartType.state"
       formControlName="states">
-  </tb-time-series-chart-states-panel>
-  <tb-time-series-chart-y-axes-panel
+  </jnks-iot-time-series-chart-states-panel>
+  <jnks-iot-time-series-chart-y-axes-panel
     formControlName="yAxes"
     (axisRemoved)="yAxisRemoved($event)"
     advanced>
-  </tb-time-series-chart-y-axes-panel>
-  <tb-time-series-chart-thresholds-panel
+  </jnks-iot-time-series-chart-y-axes-panel>
+  <jnks-iot-time-series-chart-thresholds-panel
       formControlName="thresholds"
       [aliasController]="aliasController"
       [dataKeyCallbacks]="dataKeyCallbacks"
       [datasource]="datasource"
       [widgetConfig]="widgetConfig?.config"
       [yAxisIds]="yAxisIds">
-  </tb-time-series-chart-thresholds-panel>
-  <div class="tb-form-panel">
-    <div class="tb-form-panel-title" translate>widgets.time-series-chart.chart-style</div>
-    <div class="tb-form-row">
+  </jnks-iot-time-series-chart-thresholds-panel>
+  <div class="jnks-iot-form-panel">
+    <div class="jnks-iot-form-panel-title" translate>widgets.time-series-chart.chart-style</div>
+    <div class="jnks-iot-form-row">
       <mat-slide-toggle class="mat-slide" formControlName="dataZoom">
         {{ 'widgets.time-series-chart.data-zoom' | translate }}
       </mat-slide-toggle>
     </div>
-    <tb-time-series-chart-grid-settings
+    <jnks-iot-time-series-chart-grid-settings
         formControlName="grid">
-    </tb-time-series-chart-grid-settings>
-    <div class="tb-form-row">
+    </jnks-iot-time-series-chart-grid-settings>
+    <div class="jnks-iot-form-row">
       <mat-slide-toggle class="mat-slide" formControlName="stack">
-        <div tb-hint-tooltip-icon="{{'widgets.time-series-chart.stack-mode-hint' | translate}}">
+        <div jnks-iot-hint-tooltip-icon="{{'widgets.time-series-chart.stack-mode-hint' | translate}}">
           {{ 'widgets.time-series-chart.stack-mode' | translate }}
         </div>
       </mat-slide-toggle>
     </div>
-    <div class="tb-form-panel">
-      <div class="tb-form-panel-title" translate>widgets.time-series-chart.axis.x-axis</div>
-      <tb-time-series-chart-axis-settings
+    <div class="jnks-iot-form-panel">
+      <div class="jnks-iot-form-panel-title" translate>widgets.time-series-chart.axis.x-axis</div>
+      <jnks-iot-time-series-chart-axis-settings
           formControlName="xAxis"
           advanced
           axisType="xAxis">
-      </tb-time-series-chart-axis-settings>
+      </jnks-iot-time-series-chart-axis-settings>
     </div>
-    <tb-time-series-no-aggregation-bar-width-settings
+    <jnks-iot-time-series-no-aggregation-bar-width-settings
       *ngIf="chartType === TimeSeriesChartType.default || chartType === TimeSeriesChartType.bar"
       formControlName="noAggregationBarWidthSettings">
-    </tb-time-series-no-aggregation-bar-width-settings>
-    <div class="tb-form-panel tb-slide-toggle">
-      <mat-expansion-panel class="tb-settings" [expanded]="timeSeriesChartWidgetSettingsForm.get('showLegend').value"
+    </jnks-iot-time-series-no-aggregation-bar-width-settings>
+    <div class="jnks-iot-form-panel jnks-iot-slide-toggle">
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="timeSeriesChartWidgetSettingsForm.get('showLegend').value"
                            [disabled]="!timeSeriesChartWidgetSettingsForm.get('showLegend').value">
         <mat-expansion-panel-header class="flex flex-row flex-wrap">
           <mat-panel-title>
@@ -96,53 +96,53 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'legend.label' | translate }}</div>
             <div class="flex flex-row items-center justify-start gap-2">
-              <tb-font-settings formControlName="legendLabelFont"
+              <jnks-iot-font-settings formControlName="legendLabelFont"
                                 [initialPreviewStyle]="{color: timeSeriesChartWidgetSettingsForm.get('legendLabelColor').value}"
                                 previewText="Temperature">
-              </tb-font-settings>
-              <tb-color-input asBoxInput
+              </jnks-iot-font-settings>
+              <jnks-iot-color-input asBoxInput
                               colorClearButton
                               formControlName="legendLabelColor">
-              </tb-color-input>
+              </jnks-iot-color-input>
             </div>
           </div>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'legend.value' | translate }}</div>
             <div class="flex flex-row items-center justify-start gap-2">
-              <tb-font-settings formControlName="legendValueFont"
+              <jnks-iot-font-settings formControlName="legendValueFont"
                                 [initialPreviewStyle]="{color: timeSeriesChartWidgetSettingsForm.get('legendValueColor').value}"
                                 previewText="22 °C">
-              </tb-font-settings>
-              <tb-color-input asBoxInput
+              </jnks-iot-font-settings>
+              <jnks-iot-color-input asBoxInput
                               colorClearButton
                               formControlName="legendValueColor">
-              </tb-color-input>
+              </jnks-iot-color-input>
             </div>
           </div>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'legend.column-title' | translate }}</div>
             <div class="flex flex-row items-center justify-start gap-2">
-              <tb-font-settings formControlName="legendColumnTitleFont"
+              <jnks-iot-font-settings formControlName="legendColumnTitleFont"
                                 [initialPreviewStyle]="{color: timeSeriesChartWidgetSettingsForm.get('legendColumnTitleColor').value}"
                                 previewText="{{ 'legend.Avg' | translate }}">
-              </tb-font-settings>
-              <tb-color-input asBoxInput
+              </jnks-iot-font-settings>
+              <jnks-iot-color-input asBoxInput
                               colorClearButton
                               formControlName="legendColumnTitleColor">
-              </tb-color-input>
+              </jnks-iot-color-input>
             </div>
           </div>
-          <tb-legend-config hideDirection
+          <jnks-iot-legend-config hideDirection
                             formControlName="legendConfig">
-          </tb-legend-config>
+          </jnks-iot-legend-config>
         </ng-template>
       </mat-expansion-panel>
     </div>
-    <div class="tb-form-panel tb-slide-toggle">
-      <mat-expansion-panel class="tb-settings" [expanded]="timeSeriesChartWidgetSettingsForm.get('showTooltip').value"
+    <div class="jnks-iot-form-panel jnks-iot-slide-toggle">
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="timeSeriesChartWidgetSettingsForm.get('showTooltip').value"
                            [disabled]="!timeSeriesChartWidgetSettingsForm.get('showTooltip').value">
         <mat-expansion-panel-header class="flex flex-row flex-wrap">
           <mat-panel-title>
@@ -152,7 +152,7 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'tooltip.trigger' | translate }}</div>
             <mat-chip-listbox class="center-stretch" formControlName="tooltipTrigger">
               <mat-chip-option [selectable]="timeSeriesChartWidgetSettingsForm.get('tooltipTrigger').value !== EChartsTooltipTrigger.point"
@@ -161,71 +161,71 @@
                                [value]="EChartsTooltipTrigger.axis">{{ 'tooltip.trigger-axis' | translate }}</mat-chip-option>
             </mat-chip-listbox>
           </div>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'tooltip.label' | translate }}</div>
             <div class="flex flex-row items-center justify-start gap-2">
-              <tb-font-settings formControlName="tooltipLabelFont"
+              <jnks-iot-font-settings formControlName="tooltipLabelFont"
                                 [initialPreviewStyle]="{ color: timeSeriesChartWidgetSettingsForm.get('tooltipLabelColor').value }"
                                 previewText="Temperature">
-              </tb-font-settings>
-              <tb-color-input asBoxInput
+              </jnks-iot-font-settings>
+              <jnks-iot-color-input asBoxInput
                               colorClearButton
                               formControlName="tooltipLabelColor">
-              </tb-color-input>
+              </jnks-iot-color-input>
             </div>
           </div>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'tooltip.value' | translate }}</div>
             <div class="flex flex-row items-center justify-start gap-2">
-              <tb-font-settings formControlName="tooltipValueFont"
+              <jnks-iot-font-settings formControlName="tooltipValueFont"
                                 [initialPreviewStyle]="{ color: timeSeriesChartWidgetSettingsForm.get('tooltipValueColor').value }"
                                 [previewText]="tooltipValuePreviewFn">
-              </tb-font-settings>
-              <tb-color-input asBoxInput
+              </jnks-iot-font-settings>
+              <jnks-iot-color-input asBoxInput
                               colorClearButton
                               formControlName="tooltipValueColor">
-              </tb-color-input>
+              </jnks-iot-color-input>
             </div>
           </div>
-          <tb-js-func
+          <jnks-iot-js-func
               formControlName="tooltipValueFormatter"
               [globalVariables]="functionScopeVariables"
               [functionArgs]="['value', 'latestData']"
               functionTitle="{{ 'widgets.chart.tooltip-value-format-function' | translate }}"
               helpId="widget/lib/flot/tooltip_value_format_fn">
-          </tb-js-func>
-          <div class="tb-form-row column-xs">
+          </jnks-iot-js-func>
+          <div class="jnks-iot-form-row column-xs">
             <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="tooltipShowDate">
               {{ 'tooltip.date' | translate }}
             </mat-slide-toggle>
             <div class="flex flex-row items-center justify-start gap-2 gt-xs:flex-1">
-              <tb-date-format-select class="flex-1" excludeLastUpdateAgo includeAuto
-                                     formControlName="tooltipDateFormat"></tb-date-format-select>
-              <tb-font-settings formControlName="tooltipDateFont"
+              <jnks-iot-date-format-select class="flex-1" excludeLastUpdateAgo includeAuto
+                                     formControlName="tooltipDateFormat"></jnks-iot-date-format-select>
+              <jnks-iot-font-settings formControlName="tooltipDateFont"
                                 [initialPreviewStyle]="{ color: timeSeriesChartWidgetSettingsForm.get('tooltipDateColor').value }"
                                 [previewText]="tooltipDatePreviewFn">
-              </tb-font-settings>
-              <tb-color-input asBoxInput
+              </jnks-iot-font-settings>
+              <jnks-iot-color-input asBoxInput
                               colorClearButton
                               formControlName="tooltipDateColor">
-              </tb-color-input>
+              </jnks-iot-color-input>
             </div>
           </div>
-          <div class="tb-form-row">
+          <div class="jnks-iot-form-row">
             <mat-slide-toggle class="mat-slide" formControlName="tooltipDateInterval">
-              <div tb-hint-tooltip-icon="{{'tooltip.show-date-time-interval-hint' | translate}}">
+              <div jnks-iot-hint-tooltip-icon="{{'tooltip.show-date-time-interval-hint' | translate}}">
                 {{ 'tooltip.show-date-time-interval' | translate }}
               </div>
             </mat-slide-toggle>
           </div>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'tooltip.background-color' | translate }}</div>
-            <tb-color-input asBoxInput
+            <jnks-iot-color-input asBoxInput
                             colorClearButton
                             formControlName="tooltipBackgroundColor">
-            </tb-color-input>
+            </jnks-iot-color-input>
           </div>
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{ 'tooltip.background-blur' | translate }}</div>
             <mat-form-field appearance="outline" class="number" subscriptSizing="dynamic">
               <input matInput formControlName="tooltipBackgroundBlur" type="number" min="0" step="1" placeholder="{{ 'widget-config.set' | translate }}">
@@ -235,17 +235,17 @@
         </ng-template>
       </mat-expansion-panel>
     </div>
-    <tb-chart-animation-settings
+    <jnks-iot-chart-animation-settings
       formControlName="animation">
-    </tb-chart-animation-settings>
-    <div class="tb-form-panel">
-      <div class="tb-form-panel-title" translate>widget-config.card-appearance</div>
-      <div class="tb-form-row space-between">
+    </jnks-iot-chart-animation-settings>
+    <div class="jnks-iot-form-panel">
+      <div class="jnks-iot-form-panel-title" translate>widget-config.card-appearance</div>
+      <div class="jnks-iot-form-row space-between">
         <div>{{ 'widgets.background.background' | translate }}</div>
-        <tb-background-settings formControlName="background">
-        </tb-background-settings>
+        <jnks-iot-background-settings formControlName="background">
+        </jnks-iot-background-settings>
       </div>
-      <div class="tb-form-row space-between">
+      <div class="jnks-iot-form-row space-between">
         <div>{{ 'widget-config.card-padding' | translate }}</div>
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <input matInput formControlName="padding" placeholder="{{ 'widget-config.set' | translate }}">

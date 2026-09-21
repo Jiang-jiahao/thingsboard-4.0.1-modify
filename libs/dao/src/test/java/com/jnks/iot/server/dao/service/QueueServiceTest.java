@@ -47,7 +47,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         tenantProfile.setDefault(false);
         tenantProfile.setName("Isolated TB Rule Engine");
         tenantProfile.setDescription("Isolated TB Rule Engine tenant profile");
-        tenantProfile.setIsolatedTbRuleEngine(true);
+        tenantProfile.setIsolatedJnksIotRuleEngine(true);
 
         TenantProfileQueueConfiguration mainQueueConfiguration = new TenantProfileQueueConfiguration();
         mainQueueConfiguration.setName(DataConstants.MAIN_QUEUE_NAME);
@@ -111,7 +111,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -138,7 +138,7 @@ public class QueueServiceTest extends AbstractServiceTest {
     public void testSaveQueueWithEmptyName() {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -154,7 +154,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test 1");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -201,7 +201,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
         queue.setSubmitStrategy(createTestSubmitStrategy());
@@ -216,7 +216,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPackProcessingTimeout(2000);
         queue.setSubmitStrategy(createTestSubmitStrategy());
@@ -231,7 +231,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setSubmitStrategy(createTestSubmitStrategy());
@@ -246,7 +246,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -261,7 +261,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -276,7 +276,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -293,7 +293,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -311,7 +311,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -328,7 +328,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -345,7 +345,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -362,7 +362,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -379,7 +379,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -401,7 +401,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(savedTenant.getId());
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -421,7 +421,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -446,7 +446,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -463,7 +463,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -482,7 +482,7 @@ public class QueueServiceTest extends AbstractServiceTest {
         Queue queue = new Queue();
         queue.setTenantId(tenantId);
         queue.setName("Test");
-        queue.setTopic("tb_rule_engine.test");
+        queue.setTopic("jnks_iot_rule_engine.test");
         queue.setPollInterval(25);
         queue.setPartitions(1);
         queue.setPackProcessingTimeout(2000);
@@ -502,7 +502,7 @@ public class QueueServiceTest extends AbstractServiceTest {
             Queue queue = new Queue();
             queue.setTenantId(tenantId);
             queue.setName("Test" + i);
-            queue.setTopic("tb_rule_engine.test" + i);
+            queue.setTopic("jnks_iot_rule_engine.test" + i);
             queue.setPollInterval(25);
             queue.setPartitions(1);
             queue.setPackProcessingTimeout(2000);

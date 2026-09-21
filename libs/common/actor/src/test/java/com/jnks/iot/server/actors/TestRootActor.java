@@ -2,14 +2,14 @@ package com.jnks.iot.server.actors;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import com.jnks.iot.server.common.msg.TbActorMsg;
-import com.jnks.iot.server.common.msg.TbActorStopReason;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorStopReason;
 
 @Slf4j
-public class TestRootActor extends AbstractTbActor {
+public class TestRootActor extends AbstractJnksIotActor {
 
     @Getter
-    private final TbActorId actorId;
+    private final JnksIotActorId actorId;
     @Getter
     private final ActorTestCtx testCtx;
 
@@ -17,21 +17,21 @@ public class TestRootActor extends AbstractTbActor {
     private long sum;
     private int count;
 
-    public TestRootActor(TbActorId actorId, ActorTestCtx testCtx) {
+    public TestRootActor(JnksIotActorId actorId, ActorTestCtx testCtx) {
         this.actorId = actorId;
         this.testCtx = testCtx;
     }
 
     @Override
-    public void init(TbActorCtx ctx) throws TbActorException {
+    public void init(JnksIotActorCtx ctx) throws JnksIotActorException {
         super.init(ctx);
         initialized = true;
     }
 
     @Override
-    public boolean process(TbActorMsg msg) {
+    public boolean process(JnksIotActorMsg msg) {
         if (initialized) {
-            int value = ((IntTbActorMsg) msg).getValue();
+            int value = ((IntJnksIotActorMsg) msg).getValue();
             sum += value;
             count += 1;
             // 当执行次数达到期望的执行次数的时候，进入设置结果，并countDown
@@ -47,27 +47,27 @@ public class TestRootActor extends AbstractTbActor {
     }
 
     @Override
-    public void destroy(TbActorStopReason stopReason, Throwable cause) {
+    public void destroy(JnksIotActorStopReason stopReason, Throwable cause) {
 
     }
 
-    public static class TestRootActorCreator implements TbActorCreator {
+    public static class TestRootActorCreator implements JnksIotActorCreator {
 
-        private final TbActorId actorId;
+        private final JnksIotActorId actorId;
         private final ActorTestCtx testCtx;
 
-        public TestRootActorCreator(TbActorId actorId, ActorTestCtx testCtx) {
+        public TestRootActorCreator(JnksIotActorId actorId, ActorTestCtx testCtx) {
             this.actorId = actorId;
             this.testCtx = testCtx;
         }
 
         @Override
-        public TbActorId createActorId() {
+        public JnksIotActorId createActorId() {
             return actorId;
         }
 
         @Override
-        public TbActor createActor() {
+        public JnksIotActor createActor() {
             return new TestRootActor(actorId, testCtx);
         }
     }

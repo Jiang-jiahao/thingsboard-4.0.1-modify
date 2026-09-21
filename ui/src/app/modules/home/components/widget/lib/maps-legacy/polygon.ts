@@ -3,7 +3,7 @@ import { createTooltip, isCutPolygon } from './maps-utils';
 import { functionValueCalculator, parseWithTranslation } from './common-maps-utils';
 import { WidgetPolygonSettings } from './map-models';
 import { FormattedData } from '@shared/models/widget.models';
-import { fillDataPattern, processDataPattern, safeExecuteTbFunction } from '@core/utils';
+import { fillDataPattern, processDataPattern, safeExecuteJnksIotFunction } from '@core/utils';
 import LeafletMap from '@home/components/widget/lib/maps-legacy/leaflet-map';
 
 export class Polygon {
@@ -73,7 +73,7 @@ export class Polygon {
 
     updateTooltip(data: FormattedData) {
         const pattern = this.settings.usePolygonTooltipFunction ?
-          safeExecuteTbFunction(this.settings.parsedPolygonTooltipFunction, [this.data, this.dataSources, this.data.dsIndex]) :
+          safeExecuteJnksIotFunction(this.settings.parsedPolygonTooltipFunction, [this.data, this.dataSources, this.data.dsIndex]) :
             this.settings.polygonTooltipPattern;
         this.tooltip.setContent(parseWithTranslation.parseTemplate(pattern, data, true));
     }
@@ -83,7 +83,7 @@ export class Polygon {
         if (settings.showPolygonLabel) {
             if (!this.map.polygonLabelText || settings.usePolygonLabelFunction) {
                 const pattern = settings.usePolygonLabelFunction ?
-                  safeExecuteTbFunction(settings.parsedPolygonLabelFunction,
+                  safeExecuteJnksIotFunction(settings.parsedPolygonLabelFunction,
                     [this.data, this.dataSources, this.data.dsIndex]) : settings.polygonLabel;
                 this.map.polygonLabelText = parseWithTranslation.prepareProcessPattern(pattern, true);
                 this.map.replaceInfoLabelPolygon = processDataPattern(this.map.polygonLabelText, this.data);
@@ -91,7 +91,7 @@ export class Polygon {
             const polygonLabelText = fillDataPattern(this.map.polygonLabelText, this.map.replaceInfoLabelPolygon, this.data);
             const labelColor = this.map.ctx.widgetConfig.color;
             this.leafletPoly.bindTooltip(`<div style="color: ${labelColor};"><b>${polygonLabelText}</b></div>`,
-              { className: 'tb-polygon-label', permanent: true, direction: 'center' })
+              { className: 'jnks-iot-polygon-label', permanent: true, direction: 'center' })
               .openTooltip(this.leafletPoly.getBounds().getCenter());
         }
     }

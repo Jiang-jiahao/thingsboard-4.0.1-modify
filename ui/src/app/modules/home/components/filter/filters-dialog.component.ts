@@ -36,7 +36,7 @@ export interface FiltersDialogData {
 }
 
 @Component({
-  selector: 'tb-filters-dialog',
+  selector: 'jnks-iot-filters-dialog',
   templateUrl: './filters-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: FiltersDialogComponent}],
   styleUrls: ['./filters-dialog.component.scss']
@@ -197,7 +197,7 @@ export class FiltersDialogComponent extends DialogComponent<FiltersDialogCompone
     this.dialog.open<FilterDialogComponent, FilterDialogData,
       Filter>(FilterDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         filters: filtersArray,

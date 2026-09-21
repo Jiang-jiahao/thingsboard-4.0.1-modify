@@ -10,7 +10,7 @@ import {
   ResourceInfo
 } from '@shared/models/resource.models';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { ImageReferencesComponent } from '@shared/components/image/image-references.component';
 import { TranslateService } from '@ngx-translate/core';
 import { Datasource } from "@shared/models/widget.models";
@@ -31,7 +31,7 @@ export interface ResourcesInUseDialogData {
 }
 
 @Component({
-  selector: 'tb-resources-in-use-dialog',
+  selector: 'jnks-iot-resources-in-use-dialog',
   templateUrl: './resources-in-use-dialog.component.html',
   styleUrls: ['./resources-in-use-dialog.component.scss']
 })
@@ -51,7 +51,7 @@ export class ResourcesInUseDialogComponent extends
               public translate: TranslateService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
-              private popoverService: TbPopoverService) {
+              private popoverService: JnksIotPopoverService) {
     super(store, router, dialogRef);
   }
 
@@ -103,7 +103,7 @@ export class ResourcesInUseDialogComponent extends
             this.renderer.removeClass(trigger, clazz);
           });
         });
-      referencesPopover.tbComponentRef.instance.popoverComponent = referencesPopover;
+      referencesPopover.jnksIotComponentRef.instance.popoverComponent = referencesPopover;
     }
   }
 }

@@ -12,8 +12,8 @@ import com.jnks.iot.server.common.data.ApiUsageRecordKey;
 import com.jnks.iot.server.common.data.id.CustomerId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.stats.StatsType;
-import com.jnks.iot.server.common.stats.TbApiUsageReportClient;
-import com.jnks.iot.server.common.stats.TbApiUsageStateClient;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageReportClient;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageStateClient;
 
 import java.util.Map;
 import java.util.Optional;
@@ -27,8 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class AbstractJsInvokeService extends AbstractScriptInvokeService implements JsInvokeService {
 
     protected final Map<UUID, JsScriptInfo> scriptInfoMap = new ConcurrentHashMap<>();
-    private final Optional<TbApiUsageStateClient> apiUsageStateClient;
-    private final Optional<TbApiUsageReportClient> apiUsageReportClient;
+    private final Optional<JnksIotApiUsageStateClient> apiUsageStateClient;
+    private final Optional<JnksIotApiUsageReportClient> apiUsageReportClient;
 
     @Getter
     @Value("${js.max_total_args_size:100000}")
@@ -40,7 +40,7 @@ public abstract class AbstractJsInvokeService extends AbstractScriptInvokeServic
     @Value("${js.max_script_body_size:50000}")
     private long maxScriptBodySize;
 
-    protected AbstractJsInvokeService(Optional<TbApiUsageStateClient> apiUsageStateClient, Optional<TbApiUsageReportClient> apiUsageReportClient) {
+    protected AbstractJsInvokeService(Optional<JnksIotApiUsageStateClient> apiUsageStateClient, Optional<JnksIotApiUsageReportClient> apiUsageReportClient) {
         this.apiUsageStateClient = apiUsageStateClient;
         this.apiUsageReportClient = apiUsageReportClient;
     }

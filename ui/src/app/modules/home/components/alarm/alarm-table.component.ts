@@ -26,7 +26,7 @@ interface AlarmPageQueryParams extends PageQueryParam {
 }
 
 @Component({
-  selector: 'tb-alarm-table',
+  selector: 'jnks-iot-alarm-table',
   templateUrl: './alarm-table.component.html',
   styleUrls: ['./alarm-table.component.scss']
 })

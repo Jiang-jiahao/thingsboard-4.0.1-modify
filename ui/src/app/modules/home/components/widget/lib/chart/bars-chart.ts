@@ -1,4 +1,4 @@
-import { TbLatestChart } from '@home/components/widget/lib/chart/latest-chart';
+import { JnksIotLatestChart } from '@home/components/widget/lib/chart/latest-chart';
 import { barsChartDefaultSettings, BarsChartSettings } from '@home/components/widget/lib/chart/bars-chart.models';
 import { WidgetContext } from '@home/models/widget-component.models';
 import { DeepPartial } from '@shared/models/common';
@@ -19,7 +19,7 @@ import {
 import { ValueAxisBaseOption } from 'echarts/types/src/coord/axisCommonTypes';
 import { RadiusAxisOption, YAXisOption } from 'echarts/types/dist/shared';
 
-export class TbBarsChart extends TbLatestChart<BarsChartSettings> {
+export class JnksIotBarsChart extends JnksIotLatestChart<BarsChartSettings> {
 
   constructor(ctx: WidgetContext,
               inputSettings: DeepPartial<PieChartSettings>,

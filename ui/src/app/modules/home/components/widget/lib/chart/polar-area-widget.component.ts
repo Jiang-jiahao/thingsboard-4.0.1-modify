@@ -6,7 +6,7 @@ import {
   LatestChartComponent,
   LatestChartComponentCallbacks
 } from '@home/components/widget/lib/chart/latest-chart.component';
-import { TbBarsChart } from '@home/components/widget/lib/chart/bars-chart';
+import { JnksIotBarsChart } from '@home/components/widget/lib/chart/bars-chart';
 import {
   polarAreaChartWidgetBarsChartSettings,
   polarAreaChartWidgetDefaultSettings,
@@ -14,7 +14,7 @@ import {
 } from '@home/components/widget/lib/chart/polar-area-widget.models';
 
 @Component({
-  selector: 'tb-polar-area-chart-widget',
+  selector: 'jnks-iot-polar-area-chart-widget',
   templateUrl: './latest-chart-widget.component.html',
   styleUrls: [],
   encapsulation: ViewEncapsulation.None
@@ -44,7 +44,7 @@ export class PolarAreaWidgetComponent implements OnInit {
     this.callbacks = {
       createChart: (chartShape, renderer) => {
         const settings = polarAreaChartWidgetBarsChartSettings(this.settings);
-        return new TbBarsChart(this.ctx, settings, chartShape.nativeElement, renderer, this.translate, true);
+        return new JnksIotBarsChart(this.ctx, settings, chartShape.nativeElement, renderer, this.translate, true);
       }
     };
   }

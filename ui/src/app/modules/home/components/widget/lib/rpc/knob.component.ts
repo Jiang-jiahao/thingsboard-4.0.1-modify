@@ -23,7 +23,7 @@ interface KnobSettings {
 }
 
 @Component({
-  selector: 'tb-knob',
+  selector: 'jnks-iot-knob',
   templateUrl: './knob.component.html',
   styleUrls: ['./knob.component.scss']
 })

@@ -16,12 +16,12 @@ import com.jnks.iot.common.util.JacksonUtil;
 import com.jnks.iot.rule.engine.api.NodeConfiguration;
 import com.jnks.iot.rule.engine.api.NodeDefinition;
 import com.jnks.iot.rule.engine.api.RuleNode;
-import com.jnks.iot.rule.engine.filter.TbMsgTypeSwitchNode;
-import com.jnks.iot.rule.engine.filter.TbOriginatorTypeSwitchNode;
+import com.jnks.iot.rule.engine.filter.JnksIotMsgTypeSwitchNode;
+import com.jnks.iot.rule.engine.filter.JnksIotOriginatorTypeSwitchNode;
 import com.jnks.iot.server.common.data.EntityType;
 import com.jnks.iot.server.common.data.id.TenantId;
-import com.jnks.iot.server.common.data.msg.TbMsgType;
-import com.jnks.iot.server.common.data.msg.TbNodeConnectionType;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
+import com.jnks.iot.server.common.data.msg.JnksIotNodeConnectionType;
 import com.jnks.iot.server.common.data.plugin.ComponentDescriptor;
 import com.jnks.iot.server.common.data.plugin.ComponentType;
 import com.jnks.iot.server.common.data.rule.RuleChainType;
@@ -220,15 +220,15 @@ public class AnnotationComponentDiscoveryService implements ComponentDiscoverySe
 
     private String[] getRelationTypesWithFailureRelation(Class<?> clazz, RuleNode nodeAnnotation) {
         List<String> relationTypes = new ArrayList<>(Arrays.asList(nodeAnnotation.relationTypes()));
-        if (TbOriginatorTypeSwitchNode.class.equals(clazz)) {
+        if (JnksIotOriginatorTypeSwitchNode.class.equals(clazz)) {
             relationTypes.addAll(EntityType.NORMAL_NAMES);
         }
-        if (TbMsgTypeSwitchNode.class.equals(clazz)) {
-            relationTypes.addAll(TbMsgType.NODE_CONNECTIONS);
-            relationTypes.add(TbNodeConnectionType.OTHER);
+        if (JnksIotMsgTypeSwitchNode.class.equals(clazz)) {
+            relationTypes.addAll(JnksIotMsgType.NODE_CONNECTIONS);
+            relationTypes.add(JnksIotNodeConnectionType.OTHER);
         }
-        if (!relationTypes.contains(TbNodeConnectionType.FAILURE)) {
-            relationTypes.add(TbNodeConnectionType.FAILURE);
+        if (!relationTypes.contains(JnksIotNodeConnectionType.FAILURE)) {
+            relationTypes.add(JnksIotNodeConnectionType.FAILURE);
         }
         return relationTypes.toArray(new String[relationTypes.size()]);
     }

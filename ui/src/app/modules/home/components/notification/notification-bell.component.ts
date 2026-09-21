@@ -11,7 +11,7 @@ import { NotificationWebsocketService } from '@core/ws/notification-websocket.se
 import { BehaviorSubject, ReplaySubject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, share, skip, tap } from 'rxjs/operators';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { ShowNotificationPopoverComponent } from '@home/components/notification/show-notification-popover.component';
 import { NotificationSubscriber } from '@shared/models/telemetry/telemetry.models';
 import { select, Store } from '@ngrx/store';
@@ -19,7 +19,7 @@ import { selectIsAuthenticated } from '@core/auth/auth.selectors';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-notification-bell',
+  selector: 'jnks-iot-notification-bell',
   templateUrl: './notification-bell.component.html',
   styleUrls: ['./notification-bell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -43,7 +43,7 @@ export class NotificationBellComponent implements OnDestroy {
     private notificationWsService: NotificationWebsocketService,
     private zone: NgZone,
     private cd: ChangeDetectorRef,
-    private popoverService: TbPopoverService,
+    private popoverService: JnksIotPopoverService,
     private renderer: Renderer2,
     private viewContainerRef: ViewContainerRef,
     private store: Store<AppState>,) {
@@ -79,7 +79,7 @@ export class NotificationBellComponent implements OnDestroy {
         {maxHeight: '90vh', height: '100%', padding: '10px'},
         {width: '400px', minWidth: '100%', maxWidth: '100%'},
         {height: '100%', flexDirection: 'column', boxSizing: 'border-box', display: 'flex', margin: '0 -16px'}, false);
-      showNotificationPopover.tbComponentRef.instance.popoverComponent = showNotificationPopover;
+      showNotificationPopover.jnksIotComponentRef.instance.popoverComponent = showNotificationPopover;
     }
   }
 

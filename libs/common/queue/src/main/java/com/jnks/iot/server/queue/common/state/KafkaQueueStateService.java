@@ -3,7 +3,7 @@ package com.jnks.iot.server.queue.common.state;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
-import com.jnks.iot.server.queue.TbQueueMsg;
+import com.jnks.iot.server.queue.JnksIotQueueMsg;
 import com.jnks.iot.server.queue.common.consumer.PartitionedQueueConsumerManager;
 import com.jnks.iot.server.queue.discovery.QueueKey;
 
@@ -35,7 +35,7 @@ import static com.jnks.iot.server.common.msg.queue.TopicPartitionInfo.withTopic;
  * @see DefaultQueueStateService
  */
 @Slf4j
-public class KafkaQueueStateService<E extends TbQueueMsg, S extends TbQueueMsg> extends QueueStateService<E, S> {
+public class KafkaQueueStateService<E extends JnksIotQueueMsg, S extends JnksIotQueueMsg> extends QueueStateService<E, S> {
 
     /**
      * 状态 Topic 的分区消费者。

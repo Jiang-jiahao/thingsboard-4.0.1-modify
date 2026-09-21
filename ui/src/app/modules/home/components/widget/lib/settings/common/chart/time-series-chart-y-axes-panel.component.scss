@@ -1,18 +1,18 @@
 @import '../../../../../../../../../scss/constants';
 
-.tb-y-axes-panel {
-  .tb-form-table-header-cell {
-    &.tb-axis-id-header {
+.jnks-iot-y-axes-panel {
+  .jnks-iot-form-table-header-cell {
+    &.jnks-iot-axis-id-header {
       width: 60px;
       min-width: 60px;
     }
 
-    &.tb-label-header {
+    &.jnks-iot-label-header {
       flex: 1 1 60%;
       min-width: 100px;
     }
 
-    &.tb-position-header {
+    &.jnks-iot-position-header {
       flex: 1;
       min-width: 60px;
       @media #{$mat-gt-md} {
@@ -20,27 +20,27 @@
       }
     }
 
-    &.tb-units-header {
+    &.jnks-iot-units-header {
       width: 80px;
       min-width: 80px;
     }
 
-    &.tb-decimals-header {
+    &.jnks-iot-decimals-header {
       width: 60px;
       min-width: 60px;
     }
 
-    &.tb-min-header, &.tb-max-header {
+    &.jnks-iot-min-header, &.jnks-iot-max-header {
       width: 80px;
       min-width: 80px;
     }
 
-    &.tb-show-header {
+    &.jnks-iot-show-header {
       width: 40px;
       min-width: 40px;
     }
 
-    &.tb-actions-header {
+    &.jnks-iot-actions-header {
       width: 80px;
       min-width: 80px;
       @media #{$mat-gt-md} {
@@ -49,14 +49,14 @@
       }
     }
 
-    &.tb-label-header, &.tb-units-header, &.tb-decimals-header {
+    &.jnks-iot-label-header, &.jnks-iot-units-header, &.jnks-iot-decimals-header {
       display: none;
       @media #{$mat-gt-md} {
         display: block;
       }
     }
 
-    &.tb-min-header, &.tb-max-header {
+    &.jnks-iot-min-header, &.jnks-iot-max-header {
       display: none;
       @media #{$mat-gt-xs} {
         display: block;
@@ -64,8 +64,8 @@
     }
   }
 
-  .tb-form-table-body {
-    tb-time-series-chart-y-axis-row {
+  .jnks-iot-form-table-body {
+    jnks-iot-time-series-chart-y-axis-row {
       overflow: hidden;
     }
   }

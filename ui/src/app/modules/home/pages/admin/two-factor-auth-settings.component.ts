@@ -18,7 +18,7 @@ import { takeUntil } from 'rxjs/operators';
 import { MatExpansionPanel } from '@angular/material/expansion';
 
 @Component({
-  selector: 'tb-2fa-settings',
+  selector: 'jnks-iot-2fa-settings',
   templateUrl: './two-factor-auth-settings.component.html',
   styleUrls: [ './settings-card.scss', './two-factor-auth-settings.component.scss']
 })

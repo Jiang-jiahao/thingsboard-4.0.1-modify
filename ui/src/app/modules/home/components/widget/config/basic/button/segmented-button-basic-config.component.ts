@@ -22,7 +22,7 @@ import {
 } from '@home/components/widget/lib/button/segmented-button-widget.models';
 
 @Component({
-  selector: 'tb-segmented-button-basic-config',
+  selector: 'jnks-iot-segmented-button-basic-config',
   templateUrl: './segmented-button-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

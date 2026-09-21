@@ -7,7 +7,7 @@ import { DatePipe } from '@angular/common';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 
 @Component({
-  selector: 'tb-filter-text',
+  selector: 'jnks-iot-filter-text',
   templateUrl: './filter-text.component.html',
   styleUrls: ['./filter-text.component.scss'],
   providers: [

@@ -28,7 +28,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-entity-types-version-create',
+  selector: 'jnks-iot-entity-types-version-create',
   templateUrl: './entity-types-version-create.component.html',
   styleUrls: ['./entity-types-version.component.scss'],
   providers: [

@@ -16,7 +16,7 @@ import {
   ColorRangeSettings,
   ValueSourceType
 } from '@shared/models/widget-settings.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { deepClone, isDefinedAndNotNull, isUndefined } from '@core/utils';
@@ -37,7 +37,7 @@ export function advancedRangeValidator(control: AbstractControl): ValidationErro
 }
 
 @Component({
-  selector: 'tb-color-range-list',
+  selector: 'jnks-iot-color-range-list',
   templateUrl: './color-range-list.component.html',
   styleUrls: ['color-settings-panel.component.scss', 'color-range-list.component.scss'],
   providers: [
@@ -55,7 +55,7 @@ export class ColorRangeListComponent implements OnInit, ControlValueAccessor, On
   disabled: boolean;
 
   @Input()
-  popover: TbPopoverComponent;
+  popover: JnksIotPopoverComponent;
 
   @Input()
   panelTitle: string;

@@ -17,14 +17,14 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import com.jnks.iot.server.common.data.DataConstants;
-import com.jnks.iot.server.common.data.TbTransportService;
+import com.jnks.iot.server.common.data.JnksIotTransportService;
 
 import java.net.InetSocketAddress;
 
 @Service("TcpTransportService")
 @ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.tcp.enabled:true}'=='true'")
 @Slf4j
-public class TcpTransportService implements TbTransportService {
+public class TcpTransportService implements JnksIotTransportService {
     @Value("${transport.tcp.server.enabled:true}")
     @Getter
     private boolean serverEnabled;

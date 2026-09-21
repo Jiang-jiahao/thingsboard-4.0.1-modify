@@ -1,4 +1,4 @@
-.tb-progress-bar-panel {
+.jnks-iot-progress-bar-panel {
   width: 100%;
   height: 100%;
   position: relative;
@@ -7,20 +7,20 @@
   align-items: center;
   justify-content: center;
   padding: 20px 24px 24px 24px;
-  > div:not(.tb-progress-bar-overlay) {
+  > div:not(.jnks-iot-progress-bar-overlay) {
     z-index: 1;
   }
-  .tb-progress-bar-overlay {
+  .jnks-iot-progress-bar-overlay {
     position: absolute;
     top: 12px;
     left: 12px;
     bottom: 12px;
     right: 12px;
   }
-  div.tb-widget-title {
+  div.jnks-iot-widget-title {
     padding: 0;
   }
-  .tb-progress-bar-container {
+  .jnks-iot-progress-bar-container {
     width: 100%;
     height: 100%;
     position: relative;
@@ -32,34 +32,34 @@
       justify-content: center;
     }
   }
-  .tb-progress-bar-content {
+  .jnks-iot-progress-bar-content {
     display: flex;
     flex-direction: column;
     align-self: stretch;
     gap: 4px;
-    .tb-progress-bar-title-value-row {
+    .jnks-iot-progress-bar-title-value-row {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
       &.flex-end {
         justify-content: flex-end;
       }
-      .tb-progress-bar-value {
+      .jnks-iot-progress-bar-value {
         white-space: nowrap;
       }
     }
-    .tb-progress-bar {
+    .jnks-iot-progress-bar {
       display: flex;
       flex-direction: column;
-      .tb-progress-bar-background {
+      .jnks-iot-progress-bar-background {
         border-radius: 12px;
-        .tb-progress-bar-progress {
+        .jnks-iot-progress-bar-progress {
           height: 5px;
           border-radius: 8px;
           transition: background-color .2s, width .2s;
         }
       }
-      .tb-progress-bar-ticks {
+      .jnks-iot-progress-bar-ticks {
         display: flex;
         flex-direction: row;
         justify-content: space-between;

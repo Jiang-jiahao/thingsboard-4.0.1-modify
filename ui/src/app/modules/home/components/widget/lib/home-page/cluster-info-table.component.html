@@ -23,7 +23,7 @@
     <mat-cell *matCellDef="let serviceData"
               [matTooltip]="infoTooltip(serviceData, 'cpu')"
               matTooltipPosition="above"
-              class="tb-resource-usage"
+              class="jnks-iot-resource-usage"
               [class]="statusClass(serviceData.cpuUsage)">
       {{ serviceData.cpuUsage }}%
     </mat-cell>
@@ -35,7 +35,7 @@
     <mat-cell *matCellDef="let serviceData"
               [matTooltip]="infoTooltip(serviceData, 'ram')"
               matTooltipPosition="above"
-              class="tb-resource-usage"
+              class="jnks-iot-resource-usage"
               [class]="statusClass(serviceData.memoryUsage)">
       {{ serviceData.memoryUsage }}%
     </mat-cell>
@@ -47,7 +47,7 @@
     <mat-cell *matCellDef="let serviceData"
               [matTooltip]="infoTooltip(serviceData, 'disc')"
               matTooltipPosition="above"
-              class="tb-resource-usage"
+              class="jnks-iot-resource-usage"
               [class]="statusClass(serviceData.discUsage)">
       {{ serviceData.discUsage }}%
     </mat-cell>

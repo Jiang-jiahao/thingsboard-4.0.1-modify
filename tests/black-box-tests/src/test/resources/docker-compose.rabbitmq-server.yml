@@ -9,45 +9,45 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: YOUR_USERNAME
       RABBITMQ_DEFAULT_PASS: YOUR_PASSWORD
-  tb-js-executor:
+  jnks-iot-js-executor:
     depends_on:
       - rabbitmq
-  tb-core1:
+  jnks-iot-core1:
     depends_on:
       - rabbitmq
-  tb-core2:
+  jnks-iot-core2:
     depends_on:
       - rabbitmq
-  tb-rule-engine1:
+  jnks-iot-rule-engine1:
     depends_on:
       - rabbitmq
-  tb-rule-engine2:
+  jnks-iot-rule-engine2:
     depends_on:
       - rabbitmq
-  tb-mqtt-transport1:
+  jnks-iot-mqtt-transport1:
     depends_on:
       - rabbitmq
-  tb-mqtt-transport2:
+  jnks-iot-mqtt-transport2:
     depends_on:
       - rabbitmq
-  tb-http-transport1:
+  jnks-iot-http-transport1:
     depends_on:
       - rabbitmq
-  tb-http-transport2:
+  jnks-iot-http-transport2:
     depends_on:
       - rabbitmq
-  tb-coap-transport:
+  jnks-iot-coap-transport:
     depends_on:
       - rabbitmq
-  tb-lwm2m-transport:
+  jnks-iot-lwm2m-transport:
     depends_on:
       - rabbitmq
-  tb-snmp-transport:
+  jnks-iot-snmp-transport:
     depends_on:
       - rabbitmq
-  tb-vc-executor1:
+  jnks-iot-vc-executor1:
     depends_on:
       - rabbitmq
-  tb-vc-executor2:
+  jnks-iot-vc-executor2:
     depends_on:
       - rabbitmq

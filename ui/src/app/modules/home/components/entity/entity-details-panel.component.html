@@ -1,4 +1,4 @@
-<tb-details-panel class="flex-1"
+<jnks-iot-details-panel class="flex-1"
                    [headerTitle]="entitiesTableConfig.entityTitle(entity)"
                    headerSubtitle="{{ translations.details | translate }}"
                    [isReadOnly]="entitiesTableConfig.detailsReadonly(entity)"
@@ -8,16 +8,16 @@
                    (applyDetails)="saveEntity()"
                    [theForm]="detailsForm">
   <div class="details-buttons">
-    <div [tb-help]="helpLinkId()"></div>
+    <div [jnks-iot-help]="helpLinkId()"></div>
   </div>
   <mat-tab-group mat-stretch-tabs="false"
                  animationDuration="0ms"
-                 class="tb-absolute-fill flex-1 tb-tabs-fade"
-                 [class.tb-headless]="hideDetailsTabs()"
+                 class="jnks-iot-absolute-fill flex-1 jnks-iot-tabs-fade"
+                 [class.jnks-iot-headless]="hideDetailsTabs()"
                  [(selectedIndex)]="selectedTab">
     <mat-tab label="{{ 'details.details' | translate }}">
-      <tb-anchor #entityDetailsForm></tb-anchor>
+      <jnks-iot-anchor #entityDetailsForm></jnks-iot-anchor>
     </mat-tab>
-    <tb-anchor #entityTabs></tb-anchor>
+    <jnks-iot-anchor #entityTabs></jnks-iot-anchor>
   </mat-tab-group>
-</tb-details-panel>
+</jnks-iot-details-panel>

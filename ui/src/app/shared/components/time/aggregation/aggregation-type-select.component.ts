@@ -8,7 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { isEqual } from '@core/utils';
 
 @Component({
-  selector: 'tb-aggregation-type-select',
+  selector: 'jnks-iot-aggregation-type-select',
   templateUrl: './aggregation-type-select.component.html',
   styleUrls: ['./aggregation-type-select.component.scss'],
   providers: [{

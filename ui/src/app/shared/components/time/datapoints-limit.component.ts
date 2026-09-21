@@ -15,7 +15,7 @@ import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'tb-datapoints-limit',
+  selector: 'jnks-iot-datapoints-limit',
   templateUrl: './datapoints-limit.component.html',
   styleUrls: ['./datapoints-limit.component.scss'],
   providers: [

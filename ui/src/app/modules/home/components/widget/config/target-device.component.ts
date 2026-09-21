@@ -19,7 +19,7 @@ import { EntityAliasSelectCallbacks } from '@home/components/widget/lib/settings
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-target-device',
+  selector: 'jnks-iot-target-device',
   templateUrl: './target-device.component.html',
   styleUrls: [],
   providers: [

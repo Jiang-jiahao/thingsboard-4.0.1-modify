@@ -5,7 +5,7 @@ import { DeviceInfo } from '@shared/models/device.models';
 import { EntityTabsComponent } from '../../components/entity/entity-tabs.component';
 
 @Component({
-  selector: 'tb-device-tabs',
+  selector: 'jnks-iot-device-tabs',
   templateUrl: './device-tabs.component.html',
   styleUrls: []
 })

@@ -8,7 +8,7 @@ import { DialogComponent } from '@shared/components/dialog.component';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'tb-add-quick-link-dialog',
+  selector: 'jnks-iot-add-quick-link-dialog',
   templateUrl: './add-quick-link-dialog.component.html',
   styleUrls: ['./add-quick-link-dialog.component.scss']
 })

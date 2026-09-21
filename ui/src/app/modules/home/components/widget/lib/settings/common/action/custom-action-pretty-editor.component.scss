@@ -1,11 +1,11 @@
-.tb-custom-action-pretty {
+.jnks-iot-custom-action-pretty {
   box-sizing: border-box;
   position: relative;
   padding: 8px;
   background-color: #fff;
 
-  .tb-fullscreen-panel {
-    .tb-custom-action-editor-container {
+  .jnks-iot-fullscreen-panel {
+    .jnks-iot-custom-action-editor-container {
       height: calc(100% - 40px);
     }
 
@@ -14,7 +14,7 @@
       padding-left: 3px;
     }
 
-    tb-js-func .tb-js-func-panel {
+    jnks-iot-js-func .jnks-iot-js-func-panel {
       box-sizing: border-box;
     }
 
@@ -31,13 +31,13 @@
     }
   }
 
-  .tb-split {
+  .jnks-iot-split {
     box-sizing: border-box;
     overflow-x: hidden;
     overflow-y: auto;
   }
 
-  .tb-content {
+  .jnks-iot-content {
     border: 1px solid #c0c0c0;
   }
 
@@ -52,18 +52,18 @@
     background-image: url("../../../../../../../../../assets/split.js/grips/vertical.png");
   }
 
-  .tb-split.tb-split-horizontal,
+  .jnks-iot-split.jnks-iot-split-horizontal,
   .gutter.gutter-horizontal {
     float: left;
     height: 100%;
   }
 
-  .tb-action-expand-button {
+  .jnks-iot-action-expand-button {
     position: absolute;
     right: 14px;
     z-index: 2;
 
-    &.tb-fullscreen-editor {
+    &.jnks-iot-fullscreen-editor {
       position: relative;
       right: 0;
      /* .mat-mdc-button {
@@ -82,8 +82,8 @@
     } */
   }
 
-  .tb-custom-action-editor {
-    &.tb-fullscreen-editor {
+  .jnks-iot-custom-action-editor {
+    &.jnks-iot-fullscreen-editor {
       height: 100%;
     }
   }

@@ -1,4 +1,4 @@
-<mat-form-field [formGroup]="entityListFormGroup" class="mat-block" [class.tb-chip-list]="!labelText" [appearance]="appearance" [subscriptSizing]="subscriptSizing">
+<mat-form-field [formGroup]="entityListFormGroup" class="mat-block" [class.jnks-iot-chip-list]="!labelText" [appearance]="appearance" [subscriptSizing]="subscriptSizing">
   <mat-label *ngIf="labelText">{{ labelText }}</mat-label>
   <mat-chip-grid #chipList formControlName="entities">
     <mat-chip-row
@@ -19,7 +19,7 @@
            [matChipInputFor]="chipList">
   </mat-chip-grid>
   <mat-autocomplete #entityAutocomplete="matAutocomplete"
-                    class="tb-autocomplete"
+                    class="jnks-iot-autocomplete"
                     [displayWith]="displayEntityFn">
     <mat-option *ngFor="let entity of filteredEntities | async" [value]="entity">
       <span [innerHTML]="entity.name | highlight:searchText"></span>

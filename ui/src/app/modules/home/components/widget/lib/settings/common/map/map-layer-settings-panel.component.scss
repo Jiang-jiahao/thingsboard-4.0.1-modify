@@ -1,6 +1,6 @@
 @import '../../../../../../../../../scss/constants';
 
-.tb-map-layer-settings-panel {
+.jnks-iot-map-layer-settings-panel {
   width: 540px;
   display: flex;
   flex-direction: column;
@@ -8,7 +8,7 @@
   @media #{$mat-lt-md} {
     width: 90vw;
   }
-  .tb-map-layer-settings-panel-content {
+  .jnks-iot-map-layer-settings-panel-content {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -16,14 +16,14 @@
     margin: -10px;
     padding: 10px;
   }
-  .tb-map-layer-settings-title {
+  .jnks-iot-map-layer-settings-title {
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
     color: rgba(0, 0, 0, 0.87);
   }
-  .tb-map-layer-settings-panel-buttons {
+  .jnks-iot-map-layer-settings-panel-buttons {
     height: 40px;
     display: flex;
     flex-direction: row;

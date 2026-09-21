@@ -12,7 +12,7 @@ import {
 } from '@home/components/widget/lib/cards/value-chart-card-widget.models';
 
 @Component({
-  selector: 'tb-value-chart-card-widget-settings',
+  selector: 'jnks-iot-value-chart-card-widget-settings',
   templateUrl: './value-chart-card-widget-settings.component.html',
   styleUrls: []
 })

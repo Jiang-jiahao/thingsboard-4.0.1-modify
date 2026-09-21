@@ -14,7 +14,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { TimeService } from '@core/services/time.service';
 
 @Component({
-  selector: 'tb-timezone-select',
+  selector: 'jnks-iot-timezone-select',
   templateUrl: './timezone-select.component.html',
   styleUrls: [],
   providers: [{

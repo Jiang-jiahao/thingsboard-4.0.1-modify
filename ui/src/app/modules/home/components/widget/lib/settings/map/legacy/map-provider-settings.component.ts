@@ -31,7 +31,7 @@ import { IAliasController } from '@core/api/widget-api.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-map-provider-settings',
+  selector: 'jnks-iot-map-provider-settings',
   templateUrl: './map-provider-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

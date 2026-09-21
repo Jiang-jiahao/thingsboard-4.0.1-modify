@@ -7,19 +7,19 @@
               (click)="goBack()">
         <mat-icon>arrow_back</mat-icon>
       </button>
-      <div class="tb-details-title-header flex flex-col items-start justify-center">
-        <div class="tb-details-title tb-ellipsis">{{ headerTitle }}</div>
-        <div class="tb-details-subtitle tb-ellipsis">{{ headerSubtitle }}</div>
+      <div class="jnks-iot-details-title-header flex flex-col items-start justify-center">
+        <div class="jnks-iot-details-title jnks-iot-ellipsis">{{ headerTitle }}</div>
+        <div class="jnks-iot-details-subtitle jnks-iot-ellipsis">{{ headerSubtitle }}</div>
       </div>
-      <div class="tb-help" [tb-help]="helpLinkId()"></div>
+      <div class="jnks-iot-help" [jnks-iot-help]="helpLinkId()"></div>
       <span class="flex-1"></span>
-      <section *ngIf="!isReadOnly" class="tb-header-button flex flex-row gap-2">
+      <section *ngIf="!isReadOnly" class="jnks-iot-header-button flex flex-row gap-2">
         <button [disabled]="(isLoading$ | async) || detailsForm.invalid || !detailsForm.dirty"
                 mat-fab
                 matTooltip="{{ 'action.apply-changes' | translate }}"
                 matTooltipPosition="above"
-                color="accent" class="tb-btn-header"
-                [class.tb-hide]="!isEdit"
+                color="accent" class="jnks-iot-btn-header"
+                [class.jnks-iot-hide]="!isEdit"
                 (click)="onApplyDetails()">
           <mat-icon class="material-icons">done</mat-icon>
         </button>
@@ -27,7 +27,7 @@
                 mat-fab
                 matTooltip="{{ (isEdit ? 'action.decline-changes' : 'details.toggle-edit-mode') | translate }}"
                 matTooltipPosition="above"
-                color="accent" class="tb-btn-header"
+                color="accent" class="jnks-iot-btn-header"
                 (click)="onToggleDetailsEditMode()">
           <mat-icon class="material-icons">{{isEdit ? 'close' : 'edit'}}</mat-icon>
         </button>
@@ -37,13 +37,13 @@
   <mat-card-content class="flex-full">
     <mat-tab-group mat-stretch-tabs="false"
                    animationDuration="0ms"
-                   class="tb-absolute-fill size-full tb-tabs-fade"
-                   [class.tb-headless]="hideDetailsTabs()"
+                   class="jnks-iot-absolute-fill size-full jnks-iot-tabs-fade"
+                   [class.jnks-iot-headless]="hideDetailsTabs()"
                    [(selectedIndex)]="selectedTab">
       <mat-tab label="{{ 'details.details' | translate }}">
-        <tb-anchor #entityDetailsForm></tb-anchor>
+        <jnks-iot-anchor #entityDetailsForm></jnks-iot-anchor>
       </mat-tab>
-      <tb-anchor #entityTabs></tb-anchor>
+      <jnks-iot-anchor #entityTabs></jnks-iot-anchor>
     </mat-tab-group>
   </mat-card-content>
 </mat-card>

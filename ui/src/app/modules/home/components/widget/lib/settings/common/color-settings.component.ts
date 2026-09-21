@@ -11,7 +11,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ColorRange, ColorSettings, ColorType, ComponentStyle } from '@shared/models/widget-settings.models';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import {
   ColorSettingsPanelComponent
 } from '@home/components/widget/lib/settings/common/color-settings-panel.component';
@@ -49,7 +49,7 @@ export class ColorSettingsComponentService {
 }
 
 @Component({
-  selector: 'tb-color-settings',
+  selector: 'jnks-iot-color-settings',
   templateUrl: './color-settings.component.html',
   styleUrls: [],
   providers: [
@@ -99,7 +99,7 @@ export class ColorSettingsComponent implements OnInit, ControlValueAccessor, OnD
 
   private propagateChange: (v: any) => void = () => { };
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private colorSettingsComponentService: ColorSettingsComponentService) {}
@@ -162,8 +162,8 @@ export class ColorSettingsComponent implements OnInit, ControlValueAccessor, OnD
         },
         isModal: true
       });
-      colorSettingsPanelPopover.tbComponentRef.instance.popover = colorSettingsPanelPopover;
-      colorSettingsPanelPopover.tbComponentRef.instance.colorSettingsApplied.subscribe((colorSettings) => {
+      colorSettingsPanelPopover.jnksIotComponentRef.instance.popover = colorSettingsPanelPopover;
+      colorSettingsPanelPopover.jnksIotComponentRef.instance.colorSettingsApplied.subscribe((colorSettings) => {
         colorSettingsPanelPopover.hide();
         this.modelValue = colorSettings;
         this.updateColorStyle();

@@ -9,12 +9,12 @@ import { OpenDashboardMessage, ReloadUserMessage, WindowMessage } from '@shared/
 import { Params, Router } from '@angular/router';
 import { AuthService } from '@core/auth/auth.service';
 
-const dashboardStateNameHandler = 'tbMobileDashboardStateNameHandler';
-const dashboardLoadedHandler = 'tbMobileDashboardLoadedHandler';
-const dashboardLayoutHandler = 'tbMobileDashboardLayoutHandler';
-const navigationHandler = 'tbMobileNavigationHandler';
-const mobileHandler = 'tbMobileHandler';
-const mobileReadyHandler = 'tbMobileReadyHandler';
+const dashboardStateNameHandler = 'jnksIotMobileDashboardStateNameHandler';
+const dashboardLoadedHandler = 'jnksIotMobileDashboardLoadedHandler';
+const dashboardLayoutHandler = 'jnksIotMobileDashboardLayoutHandler';
+const navigationHandler = 'jnksIotMobileNavigationHandler';
+const mobileHandler = 'jnksIotMobileHandler';
+const mobileReadyHandler = 'jnksIotMobileReadyHandler';
 
 // @dynamic
 @Injectable({

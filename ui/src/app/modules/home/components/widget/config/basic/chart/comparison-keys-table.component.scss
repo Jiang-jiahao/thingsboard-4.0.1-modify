@@ -1,14 +1,14 @@
 @import '../../../../../../../../scss/constants';
 
-.tb-comparison-keys-table {
-  .tb-form-table-header-cell {
+.jnks-iot-comparison-keys-table {
+  .jnks-iot-form-table-header-cell {
 
-    &.tb-show-header {
+    &.jnks-iot-show-header {
       width: 40px;
       min-width: 40px;
     }
 
-    &.tb-key-header {
+    &.jnks-iot-key-header {
       flex: 1;
       @media #{$mat-gt-xs} {
         min-width: 100px;
@@ -16,7 +16,7 @@
       }
     }
 
-    &.tb-label-header {
+    &.jnks-iot-label-header {
       flex: 1;
       @media #{$mat-gt-xs} {
         min-width: 150px;
@@ -24,14 +24,14 @@
       }
     }
 
-    &.tb-color-header {
+    &.jnks-iot-color-header {
       width: 40px;
       min-width: 40px;
     }
   }
 
-  .tb-form-table-body {
-    tb-comparison-key-row {
+  .jnks-iot-form-table-body {
+    jnks-iot-comparison-key-row {
       overflow: hidden;
     }
   }

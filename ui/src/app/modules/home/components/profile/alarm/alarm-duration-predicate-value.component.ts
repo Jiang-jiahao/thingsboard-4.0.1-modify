@@ -11,7 +11,7 @@ import { AlarmConditionType } from '@shared/models/device.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-alarm-duration-predicate-value',
+  selector: 'jnks-iot-alarm-duration-predicate-value',
   templateUrl: './alarm-duration-predicate-value.component.html',
   styleUrls: [],
   providers: [

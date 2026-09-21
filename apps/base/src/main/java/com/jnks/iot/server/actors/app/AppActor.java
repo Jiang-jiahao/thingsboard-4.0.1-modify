@@ -3,12 +3,12 @@ package com.jnks.iot.server.actors.app;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.actors.ActorSystemContext;
 import com.jnks.iot.server.actors.ProcessFailureStrategy;
-import com.jnks.iot.server.actors.TbActor;
-import com.jnks.iot.server.actors.TbActorCtx;
-import com.jnks.iot.server.actors.TbActorException;
-import com.jnks.iot.server.actors.TbActorId;
-import com.jnks.iot.server.actors.TbActorRef;
-import com.jnks.iot.server.actors.TbEntityActorId;
+import com.jnks.iot.server.actors.JnksIotActor;
+import com.jnks.iot.server.actors.JnksIotActorCtx;
+import com.jnks.iot.server.actors.JnksIotActorException;
+import com.jnks.iot.server.actors.JnksIotActorId;
+import com.jnks.iot.server.actors.JnksIotActorRef;
+import com.jnks.iot.server.actors.JnksIotEntityActorId;
 import com.jnks.iot.server.actors.service.ContextAwareActor;
 import com.jnks.iot.server.actors.service.ContextBasedCreator;
 import com.jnks.iot.server.actors.service.DefaultActorService;
@@ -20,7 +20,7 @@ import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.page.PageDataIterable;
 import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
 import com.jnks.iot.server.common.msg.MsgType;
-import com.jnks.iot.server.common.msg.TbActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
 import com.jnks.iot.server.common.msg.ToCalculatedFieldSystemMsg;
 import com.jnks.iot.server.common.msg.aware.TenantAwareMsg;
 import com.jnks.iot.server.common.msg.plugin.ComponentLifecycleMsg;
@@ -48,16 +48,16 @@ public class AppActor extends ContextAwareActor {
     }
 
     @Override
-    public void init(TbActorCtx ctx) throws TbActorException {
+    public void init(JnksIotActorCtx ctx) throws JnksIotActorException {
         super.init(ctx);
-        if (systemContext.getServiceInfoProvider().isService(ServiceType.TB_CORE)) {
+        if (systemContext.getServiceInfoProvider().isService(ServiceType.JNKS_IOT_CORE)) {
             systemContext.schedulePeriodicMsgWithDelay(ctx, SessionTimeoutCheckMsg.instance(),
                     systemContext.getSessionReportTimeout(), systemContext.getSessionReportTimeout());
         }
     }
 
     @Override
-    protected boolean doProcess(TbActorMsg msg) {
+    protected boolean doProcess(JnksIotActorMsg msg) {
         if (!ruleChainsInitialized) {
             if (MsgType.APP_INIT_MSG.equals(msg.getMsgType())) {
                 // 初始化所有租户Actor
@@ -148,7 +148,7 @@ public class AppActor extends ContextAwareActor {
     }
 
     private void onComponentLifecycleMsg(ComponentLifecycleMsg msg) {
-        TbActorRef target = null;
+        JnksIotActorRef target = null;
         if (TenantId.SYS_TENANT_ID.equals(msg.getTenantId())) {
             if (!EntityType.TENANT_PROFILE.equals(msg.getEntityId().getEntityType())) {
                 log.warn("Message has system tenant id: {}", msg);
@@ -159,7 +159,7 @@ public class AppActor extends ContextAwareActor {
                 if (msg.getEvent() == ComponentLifecycleEvent.DELETED) {
                     log.info("[{}] Handling tenant deleted notification: {}", msg.getTenantId(), msg);
                     deletedTenants.add(tenantId);
-                    ctx.stop(new TbEntityActorId(tenantId));
+                    ctx.stop(new JnksIotEntityActorId(tenantId));
                     return;
                 }
             }
@@ -202,18 +202,18 @@ public class AppActor extends ContextAwareActor {
         });
     }
 
-    private Optional<TbActorRef> getOrCreateTenantActor(TenantId tenantId) {
+    private Optional<JnksIotActorRef> getOrCreateTenantActor(TenantId tenantId) {
         if (deletedTenants.contains(tenantId)) {
             return Optional.empty();
         }
-        return Optional.ofNullable(ctx.getOrCreateChildActor(new TbEntityActorId(tenantId),
+        return Optional.ofNullable(ctx.getOrCreateChildActor(new JnksIotEntityActorId(tenantId),
                 () -> DefaultActorService.TENANT_DISPATCHER_NAME,
                 () -> new TenantActor.ActorCreator(systemContext, tenantId),
                 () -> true));
     }
 
     @Override
-    public ProcessFailureStrategy onProcessFailure(TbActorMsg msg, Throwable t) {
+    public ProcessFailureStrategy onProcessFailure(JnksIotActorMsg msg, Throwable t) {
         log.error("Failed to process msg: {}", msg, t);
         return doProcessFailure(t);
     }
@@ -225,12 +225,12 @@ public class AppActor extends ContextAwareActor {
         }
 
         @Override
-        public TbActorId createActorId() {
-            return new TbEntityActorId(TenantId.SYS_TENANT_ID);
+        public JnksIotActorId createActorId() {
+            return new JnksIotEntityActorId(TenantId.SYS_TENANT_ID);
         }
 
         @Override
-        public TbActor createActor() {
+        public JnksIotActor createActor() {
             return new AppActor(context);
         }
     }

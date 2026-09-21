@@ -1,9 +1,9 @@
 package com.jnks.iot.server.actors.service;
 
 import com.jnks.iot.server.actors.ActorSystemContext;
-import com.jnks.iot.server.actors.TbActorCreator;
+import com.jnks.iot.server.actors.JnksIotActorCreator;
 
-public abstract class ContextBasedCreator implements TbActorCreator {
+public abstract class ContextBasedCreator implements JnksIotActorCreator {
 
     protected final transient ActorSystemContext context;
 

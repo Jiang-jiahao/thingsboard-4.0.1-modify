@@ -1,16 +1,16 @@
-<div class="tb-image-gallery-dialog">
-  <button class="tb-image-gallery-close tb-mat-20"
+<div class="jnks-iot-image-gallery-dialog">
+  <button class="jnks-iot-image-gallery-close jnks-iot-mat-20"
           mat-icon-button
           (click)="cancel()"
           type="button">
     <mat-icon>close</mat-icon>
   </button>
-  <tb-image-gallery
+  <jnks-iot-image-gallery
     pageMode="false"
     [imageSubType]="data.imageSubType"
     dialogMode
     mode="grid"
     selectionMode
     (imageSelected)="imageSelected($event)">
-  </tb-image-gallery>
+  </jnks-iot-image-gallery>
 </div>

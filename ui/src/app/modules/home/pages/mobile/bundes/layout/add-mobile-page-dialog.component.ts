@@ -9,7 +9,7 @@ import { FormBuilder } from '@angular/forms';
 import { deepTrim } from '@core/utils';
 
 @Component({
-  selector: 'tb-add-mobile-page-dialog',
+  selector: 'jnks-iot-add-mobile-page-dialog',
   templateUrl: './add-mobile-page-dialog.component.html',
   styleUrls: ['./add-mobile-page-dialog.component.scss']
 })

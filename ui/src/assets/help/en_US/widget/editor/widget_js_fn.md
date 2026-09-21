@@ -13,15 +13,15 @@ In order to implement a new widget, the following JavaScript functions should be
 | {:auto} **Function**              | **Description**                                                                                                                                                                                                                                                                                                                                                                                                                       |
 |-----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | ``` onInit() ```                  | The first function which is called when widget is ready for initialization. Should be used to prepare widget DOM, process widget settings and initial subscription information.                                                                                                                                                                                                                                                       |
-| ``` onDataUpdated() ```           | Called when the new data is available from the widget subscription. Latest data can be accessed from the <span trigger-style="fontSize: 16px;" trigger-text="<b>defaultSubscription</b>" tb-help-popup="widget/editor/widget_js_subscription_object"></span> object of widget context (**ctx**).                                                                                                                                      |
+| ``` onDataUpdated() ```           | Called when the new data is available from the widget subscription. Latest data can be accessed from the <span trigger-style="fontSize: 16px;" trigger-text="<b>defaultSubscription</b>" jnks-iot-help-popup="widget/editor/widget_js_subscription_object"></span> object of widget context (**ctx**).                                                                                                                                      |
 | ``` onResize() ```                | Called when widget container is resized. Latest width and height can be obtained from widget context (**ctx**).                                                                                                                                                                                                                                                                                                                       |
 | ``` onEditModeChanged() ```       | Called when dashboard editing mode is changed. Latest mode is handled by isEdit property of **ctx**.                                                                                                                                                                                                                                                                                                                                  |
 | ``` onMobileModeChanged() ```     | Called when dashboard view width crosses mobile breakpoint. Latest state is handled by isMobile property of **ctx**.                                                                                                                                                                                                                                                                                                                  |
 | ``` onDestroy() ```               | Called when widget element is destroyed. Should be used to cleanup all resources if necessary.                                                                                                                                                                                                                                                                                                                                        |
 | ``` getSettingsForm() ```         | Optional function returning widget settings form array as alternative to **Settings form** tab of settings section.                                                                                                                                                                                                                                                                                                                   |
 | ``` getDataKeySettingsForm() ```  | Optional function returning particular data key settings form array as alternative to **Data key settings form** tab of settings section.                                                                                                                                                                                                                                                                                             |
-| ``` typeParameters() ```          | Returns [WidgetTypeParameters{:target="_blank"}](https://github.com/thingsboard/thingsboard/blob/2627fe51d491055d4140f16617ed543f7f5bd8f6/ui-ngx/src/app/shared/models/widget.models.ts#L151) object describing widget datasource parameters. See <span trigger-style="fontSize: 16px;" trigger-text="<b>Type parameters object</b>" tb-help-popup="widget/editor/widget_js_type_parameters_object"></span>                           |            |
-| ``` actionSources() ```           | Returns map describing available widget action sources ([WidgetActionSource{:target="_blank"}](https://github.com/thingsboard/thingsboard/blob/2627fe51d491055d4140f16617ed543f7f5bd8f6/ui-ngx/src/app/shared/models/widget.models.ts#L121)) used to define user actions. See <span trigger-style="fontSize: 16px;" trigger-text="<b>Action sources object</b>" tb-help-popup="widget/editor/widget_js_action_sources_object"></span> |
+| ``` typeParameters() ```          | Returns [WidgetTypeParameters{:target="_blank"}](https://github.com/thingsboard/thingsboard/blob/2627fe51d491055d4140f16617ed543f7f5bd8f6/ui-ngx/src/app/shared/models/widget.models.ts#L151) object describing widget datasource parameters. See <span trigger-style="fontSize: 16px;" trigger-text="<b>Type parameters object</b>" jnks-iot-help-popup="widget/editor/widget_js_type_parameters_object"></span>                           |            |
+| ``` actionSources() ```           | Returns map describing available widget action sources ([WidgetActionSource{:target="_blank"}](https://github.com/thingsboard/thingsboard/blob/2627fe51d491055d4140f16617ed543f7f5bd8f6/ui-ngx/src/app/shared/models/widget.models.ts#L121)) used to define user actions. See <span trigger-style="fontSize: 16px;" trigger-text="<b>Action sources object</b>" jnks-iot-help-popup="widget/editor/widget_js_action_sources_object"></span> |
 | ~~getSettingsSchema()~~           | **Deprecated**. Use getSettingsForm() function.                                                                                                                                                                                                                                                                                                                                                                                       |
 | ~~getDataKeySettingsSchema()~~    | **Deprecated**. Use getDataKeySettingsForm() function.                                                                                                                                                                                                                                                                                                                                                                                |
 
@@ -36,8 +36,8 @@ By the way, you can always use pure JavaScript or jQuery API in your widget code
 <br>
 
 <div style="padding-left: 64px;"
-     tb-help-popup="widget/editor/examples/latest_values_widget"
-     tb-help-popup-placement="top"
+     jnks-iot-help-popup="widget/editor/examples/latest_values_widget"
+     jnks-iot-help-popup-placement="top"
      trigger-style="font-size: 16px;"
      trigger-text="Sample Latest Values widget">
 </div>
@@ -45,8 +45,8 @@ By the way, you can always use pure JavaScript or jQuery API in your widget code
 <br>
 
 <div style="padding-left: 64px;"
-     tb-help-popup="widget/editor/examples/timeseries_widget"
-     tb-help-popup-placement="top"
+     jnks-iot-help-popup="widget/editor/examples/timeseries_widget"
+     jnks-iot-help-popup-placement="top"
      trigger-style="font-size: 16px;"
      trigger-text="Sample Time-Series widget">
 </div>
@@ -54,8 +54,8 @@ By the way, you can always use pure JavaScript or jQuery API in your widget code
 <br>
 
 <div style="padding-left: 64px;"
-     tb-help-popup="widget/editor/examples/rpc_widget"
-     tb-help-popup-placement="top"
+     jnks-iot-help-popup="widget/editor/examples/rpc_widget"
+     jnks-iot-help-popup-placement="top"
      trigger-style="font-size: 16px;"
      trigger-text="Sample RPC (Control) widget">
 </div>
@@ -63,8 +63,8 @@ By the way, you can always use pure JavaScript or jQuery API in your widget code
 <br>
 
 <div style="padding-left: 64px;"
-     tb-help-popup="widget/editor/examples/alarm_widget"
-     tb-help-popup-placement="top"
+     jnks-iot-help-popup="widget/editor/examples/alarm_widget"
+     jnks-iot-help-popup-placement="top"
      trigger-style="font-size: 16px;"
      trigger-text="Sample Alarm widget">
 </div>
@@ -72,8 +72,8 @@ By the way, you can always use pure JavaScript or jQuery API in your widget code
 <br>
 
 <div style="padding-left: 64px;"
-     tb-help-popup="widget/editor/examples/static_widget"
-     tb-help-popup-placement="top"
+     jnks-iot-help-popup="widget/editor/examples/static_widget"
+     jnks-iot-help-popup-placement="top"
      trigger-style="font-size: 16px;"
      trigger-text="Sample Static widget">
 </div>
@@ -89,8 +89,8 @@ Below are some examples demonstrating how external JavaScript libraries or exist
 <br>
 
 <div style="padding-left: 64px;"
-     tb-help-popup="widget/editor/examples/ext_latest_values_example"
-     tb-help-popup-placement="top"
+     jnks-iot-help-popup="widget/editor/examples/ext_latest_values_example"
+     jnks-iot-help-popup-placement="top"
      trigger-style="font-size: 16px;"
      trigger-text="Latest Values widget Example with gauge.js library">
 </div>
@@ -98,8 +98,8 @@ Below are some examples demonstrating how external JavaScript libraries or exist
 <br>
 
 <div style="padding-left: 64px;"
-     tb-help-popup="widget/editor/examples/ext_timeseries_example"
-     tb-help-popup-placement="top"
+     jnks-iot-help-popup="widget/editor/examples/ext_timeseries_example"
+     jnks-iot-help-popup-placement="top"
      trigger-style="font-size: 16px;"
      trigger-text="Time-Series widget Example with Chart.js library">
 </div>
@@ -109,8 +109,8 @@ Below are some examples demonstrating how external JavaScript libraries or exist
 <br>
 
 <div style="padding-left: 64px;"
-     tb-help-popup="widget/editor/widget_js_existing_code"
-     tb-help-popup-placement="top"
+     jnks-iot-help-popup="widget/editor/widget_js_existing_code"
+     jnks-iot-help-popup-placement="top"
      trigger-style="font-size: 16px;"
      trigger-text="Read more">
 </div>

@@ -31,7 +31,7 @@ import {
 } from '@shared/models/widget-settings.models';
 
 @Component({
-  selector: 'tb-digital-gauge-widget-settings',
+  selector: 'jnks-iot-digital-gauge-widget-settings',
   templateUrl: './digital-gauge-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

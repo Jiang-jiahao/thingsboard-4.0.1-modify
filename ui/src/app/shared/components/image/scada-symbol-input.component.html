@@ -1,24 +1,24 @@
-<div class="tb-container">
-  <label class="tb-title" *ngIf="label" [class]="{'tb-error': !disabled && (required && linkType === ScadaSymbolLinkType.none), 'tb-required': !disabled && required}">{{label}}</label>
-  <div class="tb-scada-symbol-select-container" [class]="{disabled: disabled && linkType === ScadaSymbolLinkType.none}">
-    <div class="tb-scada-symbol-container">
-      <img *ngIf="linkType !== ScadaSymbolLinkType.none && scadaSymbolUrl; else noSymbol" class="tb-scada-symbol-preview" [src]="scadaSymbolUrl | image: {preview: true} | async">
+<div class="jnks-iot-container">
+  <label class="jnks-iot-title" *ngIf="label" [class]="{'jnks-iot-error': !disabled && (required && linkType === ScadaSymbolLinkType.none), 'jnks-iot-required': !disabled && required}">{{label}}</label>
+  <div class="jnks-iot-scada-symbol-select-container" [class]="{disabled: disabled && linkType === ScadaSymbolLinkType.none}">
+    <div class="jnks-iot-scada-symbol-container">
+      <img *ngIf="linkType !== ScadaSymbolLinkType.none && scadaSymbolUrl; else noSymbol" class="jnks-iot-scada-symbol-preview" [src]="scadaSymbolUrl | image: {preview: true} | async">
     </div>
-    <div *ngIf="linkType !== ScadaSymbolLinkType.none && !disabled" class="tb-scada-symbol-info-container">
-      <div *ngIf="linkType === ScadaSymbolLinkType.resource" class="tb-resource-scada-symbol-container" [class]="{loading: loadingImageResource}">
+    <div *ngIf="linkType !== ScadaSymbolLinkType.none && !disabled" class="jnks-iot-scada-symbol-info-container">
+      <div *ngIf="linkType === ScadaSymbolLinkType.resource" class="jnks-iot-resource-scada-symbol-container" [class]="{loading: loadingImageResource}">
         <ng-container *ngIf="!loadingImageResource; else loading">
-          <div class="tb-scada-symbol-title">
+          <div class="jnks-iot-scada-symbol-title">
             {{ imageResource.title | customTranslate }}
           </div>
         </ng-container>
       </div>
-      <div *ngIf="linkType === ScadaSymbolLinkType.content" class="tb-resource-scada-symbol-container">
-        <div class="tb-scada-symbol-title">
+      <div *ngIf="linkType === ScadaSymbolLinkType.content" class="jnks-iot-resource-scada-symbol-container">
+        <div class="jnks-iot-scada-symbol-title">
           {{ scadaSymbolMetadata.title | customTranslate }}
         </div>
       </div>
       <button *ngIf="linkType === ScadaSymbolLinkType.resource && !disabled"
-              class="tb-scada-symbol-clear-btn"
+              class="jnks-iot-scada-symbol-clear-btn"
               type="button"
               mat-icon-button
               matTooltip="{{ 'scada.clear-symbol' | translate }}"
@@ -27,13 +27,13 @@
         <mat-icon>close</mat-icon>
       </button>
     </div>
-    <div *ngIf="linkType === ScadaSymbolLinkType.none && !disabled" class="tb-scada-symbol-select-buttons-container">
+    <div *ngIf="linkType === ScadaSymbolLinkType.none && !disabled" class="jnks-iot-scada-symbol-select-buttons-container">
       <button mat-stroked-button
               type="button"
               color="primary"
-              class="tb-scada-symbol-select-button"
+              class="jnks-iot-scada-symbol-select-button"
               (click)="openGallery($event)">
-        <tb-icon matButtonIcon>filter</tb-icon>
+        <jnks-iot-icon matButtonIcon>filter</jnks-iot-icon>
         <span translate>scada.browse-symbol-from-gallery</span>
       </button>
     </div>
@@ -41,7 +41,7 @@
 </div>
 
 <ng-template #noSymbol>
-  <div class="tb-no-symbol">{{ (disabled ? 'scada.no-symbol' : 'scada.no-symbol-selected') | translate }}</div>
+  <div class="jnks-iot-no-symbol">{{ (disabled ? 'scada.no-symbol' : 'scada.no-symbol-selected') | translate }}</div>
 </ng-template>
 <ng-template #loading>
   <mat-spinner [diameter]="80" strokeWidth="4"></mat-spinner>

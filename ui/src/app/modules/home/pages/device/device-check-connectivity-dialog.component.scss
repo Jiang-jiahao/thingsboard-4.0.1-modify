@@ -6,7 +6,7 @@
   display: grid;
   grid-template-rows: min-content minmax(auto, 1fr) min-content;
 
-  .tb-loader {
+  .jnks-iot-loader {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -38,7 +38,7 @@
     }
   }
 
-  .tb-hint-instruction {
+  .jnks-iot-hint-instruction {
     border-radius: 6px;
     background-color: rgba(48, 86, 128, 0.04);
     padding: 6px 16px;
@@ -48,32 +48,32 @@
     }
   }
 
-  .tb-font-14 {
+  .jnks-iot-font-14 {
     font-size: 14px;
   }
 
-  .tb-flex-1 {
+  .jnks-iot-flex-1 {
     flex: 1;
   }
 
-  .tb-form-table-body {
+  .jnks-iot-form-table-body {
     max-height: 108px;
     min-height: 108px;
     overflow-y: auto;
     scrollbar-gutter: stable;
 
-    .tb-form-table-row {
+    .jnks-iot-form-table-row {
       min-height: 38px;
     }
   }
 
-  .tb-no-data-available {
-    .tb-no-data-bg {
+  .jnks-iot-no-data-available {
+    .jnks-iot-no-data-bg {
       min-height: 68px;
     }
   }
 
-  .tb-install-instruction-text {
+  .jnks-iot-install-instruction-text {
     min-height: 42px;
   }
 
@@ -87,7 +87,7 @@
 }
 
 :host-context(.mat-mdc-dialog-container) {
-  .tb-dialog-actions {
+  .jnks-iot-dialog-actions {
     display: flex;
     gap: 8px;
     padding: 8px 16px;
@@ -100,8 +100,8 @@
 }
 
 :host ::ng-deep {
-  .tb-markdown-view {
-    .tb-command-code {
+  .jnks-iot-markdown-view {
+    .jnks-iot-command-code {
       .code-wrapper {
         padding: 0;
         pre[class*=language-] {
@@ -158,7 +158,7 @@
     margin-right: 8px;
   }
 
-  .tb-form-panel.tb-tab-body {
+  .jnks-iot-form-panel.jnks-iot-tab-body {
     padding: 16px 0 0;
   }
 }

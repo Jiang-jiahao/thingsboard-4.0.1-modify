@@ -8,7 +8,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-device-profile-configuration',
+  selector: 'jnks-iot-device-profile-configuration',
   templateUrl: './device-profile-configuration.component.html',
   styleUrls: [],
   providers: [{

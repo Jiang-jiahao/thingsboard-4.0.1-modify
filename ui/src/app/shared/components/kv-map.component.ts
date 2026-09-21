@@ -20,7 +20,7 @@ import { takeUntil } from 'rxjs/operators';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-key-val-map',
+  selector: 'jnks-iot-key-val-map',
   templateUrl: './kv-map.component.html',
   styleUrls: ['./kv-map.component.scss'],
   providers: [

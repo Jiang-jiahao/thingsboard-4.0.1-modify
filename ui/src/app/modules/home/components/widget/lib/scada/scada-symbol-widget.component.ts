@@ -28,7 +28,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { RafService } from '@core/services/raf.service';
 
 @Component({
-  selector: 'tb-scada-symbol-widget',
+  selector: 'jnks-iot-scada-symbol-widget',
   templateUrl: './scada-symbol-widget.component.html',
   styleUrls: ['../action/action-widget.scss', './scada-symbol-widget.component.scss'],
   encapsulation: ViewEncapsulation.None

@@ -21,7 +21,7 @@ import { CancelAnimationFrame, RafService } from '@core/services/raf.service';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-svg-xml',
+  selector: 'jnks-iot-svg-xml',
   templateUrl: './svg-xml.component.html',
   styleUrls: ['./svg-xml.component.scss'],
   providers: [

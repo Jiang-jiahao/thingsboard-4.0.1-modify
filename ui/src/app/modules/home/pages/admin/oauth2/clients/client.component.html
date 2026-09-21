@@ -1,5 +1,5 @@
-<section class="tb-form-panel no-gap no-border" [class.no-padding]="isAdd" [formGroup]="entityForm">
-  <div class="tb-form-row tb-standard-fields no-border no-padding">
+<section class="jnks-iot-form-panel no-gap no-border" [class.no-padding]="isAdd" [formGroup]="entityForm">
+  <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding">
     <mat-form-field class="flex">
       <mat-label translate>admin.oauth2.title</mat-label>
       <input matInput formControlName="title">
@@ -11,8 +11,8 @@
       </mat-error>
     </mat-form-field>
   </div>
-  <div class="tb-form-row tb-standard-fields no-border no-padding column-xs">
-    <div class="tb-flex" formGroupName="additionalInfo">
+  <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding column-xs">
+    <div class="jnks-iot-flex" formGroupName="additionalInfo">
       <mat-form-field class="flex">
         <mat-label translate>admin.oauth2.provider</mat-label>
         <mat-select formControlName="providerName">
@@ -31,7 +31,7 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div class="tb-form-row tb-standard-fields no-border no-padding column-xs">
+  <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding column-xs">
     <mat-form-field class="flex">
       <mat-label translate>admin.oauth2.client-id</mat-label>
       <input matInput formControlName="clientId">
@@ -60,17 +60,17 @@
       </mat-panel-title>
     </mat-expansion-panel-header>
     <ng-template matExpansionPanelContent>
-      <section class="tb-form-panel no-border no-padding">
-        <div class="tb-form-row column-xs no-border no-padding space-between">
+      <section class="jnks-iot-form-panel no-border no-padding">
+        <div class="jnks-iot-form-row column-xs no-border no-padding space-between">
           <span></span>
-          <tb-toggle-select appearance="fill" [(ngModel)]="generalSettingsMode" [ngModelOptions]="{ standalone: true }">
-            <tb-toggle-option [value]="true">{{ "admin.oauth2.general" | translate }}</tb-toggle-option>
-            <tb-toggle-option [value]="false">{{ 'admin.oauth2.mapper' | translate }}</tb-toggle-option>
-          </tb-toggle-select>
+          <jnks-iot-toggle-select appearance="fill" [(ngModel)]="generalSettingsMode" [ngModelOptions]="{ standalone: true }">
+            <jnks-iot-toggle-option [value]="true">{{ "admin.oauth2.general" | translate }}</jnks-iot-toggle-option>
+            <jnks-iot-toggle-option [value]="false">{{ 'admin.oauth2.mapper' | translate }}</jnks-iot-toggle-option>
+          </jnks-iot-toggle-select>
         </div>
-        <section class="tb-form-panel no-gap no-border no-padding" style="padding-bottom: 16px"
+        <section class="jnks-iot-form-panel no-gap no-border no-padding" style="padding-bottom: 16px"
                  *ngIf="generalSettingsMode">
-          <div class="tb-form-row tb-standard-fields no-border no-padding column-xs">
+          <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding column-xs">
             <mat-form-field class="flex">
               <mat-label translate>admin.oauth2.access-token-uri</mat-label>
               <input matInput formControlName="accessTokenUri">
@@ -92,7 +92,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-          <div class="tb-form-row tb-standard-fields no-border no-padding column-xs">
+          <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding column-xs">
             <mat-form-field class="flex">
               <mat-label translate>admin.oauth2.jwk-set-uri</mat-label>
               <input matInput formControlName="jwkSetUri">
@@ -108,7 +108,7 @@
               </mat-error>
             </mat-form-field>
           </div>
-          <div class="tb-form-row tb-standard-fields no-border no-padding">
+          <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding">
             <mat-form-field class="flex">
               <mat-label translate>admin.oauth2.client-authentication-method</mat-label>
               <mat-select formControlName="clientAuthenticationMethod">
@@ -119,7 +119,7 @@
               </mat-select>
             </mat-form-field>
           </div>
-          <div class="tb-form-row tb-standard-fields no-border no-padding column-xs" *ngIf="isCustomProvider()">
+          <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding column-xs" *ngIf="isCustomProvider()">
             <mat-form-field class="flex" floatLabel="always">
               <mat-label translate>admin.oauth2.login-button-label</mat-label>
               <input matInput formControlName="loginButtonLabel"
@@ -134,26 +134,26 @@
             </mat-form-field>
           </div>
           <section formGroupName="mapperConfig" style="margin-bottom: 22px">
-            <div class="tb-form-row no-border no-padding">
+            <div class="jnks-iot-form-row no-border no-padding">
               <mat-slide-toggle class="mat-slide" formControlName="allowUserCreation">
                 {{ 'admin.oauth2.allow-user-creation' | translate }}
               </mat-slide-toggle>
             </div>
-            <div class="tb-form-row no-border no-padding">
+            <div class="jnks-iot-form-row no-border no-padding">
               <mat-slide-toggle class="mat-slide" formControlName="activateUser">
                 {{ 'admin.oauth2.activate-user' | translate }}
               </mat-slide-toggle>
             </div>
           </section>
-          <tb-string-items-list
+          <jnks-iot-string-items-list
             formControlName="scope"
             label="{{ 'admin.oauth2.scope' | translate }}"
             requiredText="{{ 'admin.oauth2.scope-required' | translate }}"
             required>
-          </tb-string-items-list>
+          </jnks-iot-string-items-list>
         </section>
-        <section class="tb-form-panel no-border no-padding no-gap" *ngIf="!generalSettingsMode">
-          <div class="tb-form-row tb-standard-fields no-border no-padding">
+        <section class="jnks-iot-form-panel no-border no-padding no-gap" *ngIf="!generalSettingsMode">
+          <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding">
             <mat-form-field class="flex">
               <mat-label translate>admin.oauth2.user-name-attribute-name</mat-label>
               <input matInput formControlName="userNameAttributeName">
@@ -162,8 +162,8 @@
               </mat-error>
             </mat-form-field>
           </div>
-          <section class="tb-form-panel no-border no-padding no-gap" formGroupName="mapperConfig">
-            <div class="tb-form-row tb-standard-fields no-border no-padding">
+          <section class="jnks-iot-form-panel no-border no-padding no-gap" formGroupName="mapperConfig">
+            <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding">
               <mat-form-field class="flex">
                 <mat-label translate>admin.oauth2.type</mat-label>
                 <mat-select formControlName="type">
@@ -174,9 +174,9 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <section class="tb-form-panel no-border no-padding no-gap" formGroupName="basic"
+            <section class="jnks-iot-form-panel no-border no-padding no-gap" formGroupName="basic"
                      *ngIf="entityForm.get('mapperConfig.type').value !== mapperType.CUSTOM && entityForm.get('mapperConfig.basic')">
-              <div class="tb-form-row tb-standard-fields no-border no-padding"
+              <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding"
                    *ngIf="entityForm.get('mapperConfig.type').value !== mapperType.GITHUB">
                 <mat-form-field class="flex">
                   <mat-label translate>admin.oauth2.email-attribute-key</mat-label>
@@ -191,7 +191,7 @@
                   </mat-error>
                 </mat-form-field>
               </div>
-              <div class="tb-form-row tb-standard-fields no-border no-padding column-xs">
+              <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding column-xs">
                 <mat-form-field class="flex">
                   <mat-label translate>admin.oauth2.first-name-attribute-key</mat-label>
                   <input matInput formControlName="firstNameAttributeKey">
@@ -207,7 +207,7 @@
                   </mat-error>
                 </mat-form-field>
               </div>
-              <div class="tb-form-row tb-standard-fields no-border no-padding column-xs">
+              <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding column-xs">
                 <mat-form-field class="flex">
                   <mat-label translate>admin.oauth2.tenant-name-strategy</mat-label>
                   <mat-select formControlName="tenantNameStrategy">
@@ -232,7 +232,7 @@
                   </mat-error>
                 </mat-form-field>
               </div>
-              <div class="tb-form-row tb-standard-fields no-border no-padding">
+              <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding">
                 <mat-form-field class="flex">
                   <mat-label translate>admin.oauth2.customer-name-pattern</mat-label>
                   <input matInput formControlName="customerNamePattern">
@@ -241,7 +241,7 @@
                   </mat-error>
                 </mat-form-field>
               </div>
-              <div class="tb-form-row tb-standard-fields no-border no-padding column-xs">
+              <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding column-xs">
                 <mat-form-field class="flex">
                   <mat-label translate>admin.oauth2.default-dashboard-name</mat-label>
                   <input matInput formControlName="defaultDashboardName">
@@ -249,15 +249,15 @@
                     {{ 'admin.oauth2.default-dashboard-name-max-length' | translate }}
                   </mat-error>
                 </mat-form-field>
-                <mat-slide-toggle class="tb-flex mat-slide" style="margin-bottom: 16px"
+                <mat-slide-toggle class="jnks-iot-flex mat-slide" style="margin-bottom: 16px"
                                   formControlName="alwaysFullScreen">
                   {{ 'admin.oauth2.always-fullscreen' | translate}}
                 </mat-slide-toggle>
               </div>
             </section>
-            <section class="tb-form-panel no-border no-padding no-gap" formGroupName="custom"
+            <section class="jnks-iot-form-panel no-border no-padding no-gap" formGroupName="custom"
                      *ngIf="entityForm.get('mapperConfig.type').value === mapperType.CUSTOM && entityForm.get('mapperConfig.custom')">
-              <div class="tb-form-row tb-standard-fields no-border no-padding">
+              <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding">
                 <mat-form-field class="flex">
                   <mat-label translate>admin.oauth2.url</mat-label>
                   <input matInput formControlName="url">
@@ -272,7 +272,7 @@
                   </mat-error>
                 </mat-form-field>
               </div>
-              <div class="tb-form-row tb-standard-fields no-border no-padding column-xs">
+              <div class="jnks-iot-form-row jnks-iot-standard-fields no-border no-padding column-xs">
                 <mat-form-field class="flex">
                   <mat-label translate>common.username</mat-label>
                   <input matInput formControlName="username" autocomplete="new-username">
@@ -288,7 +288,7 @@
                   </mat-error>
                 </mat-form-field>
               </div>
-              <mat-slide-toggle class="tb-flex mat-slide" style="margin-bottom: 16px"
+              <mat-slide-toggle class="jnks-iot-flex mat-slide" style="margin-bottom: 16px"
                                 formControlName="sendToken">
                 {{ 'admin.oauth2.send-token' | translate}}
               </mat-slide-toggle>

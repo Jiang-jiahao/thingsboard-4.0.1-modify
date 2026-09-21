@@ -22,7 +22,7 @@ import {
 } from '@shared/models/widget/maps/map.models';
 
 @Component({
-  selector: 'tb-map-layers',
+  selector: 'jnks-iot-map-layers',
   templateUrl: './map-layers.component.html',
   styleUrls: ['./map-layers.component.scss'],
   providers: [

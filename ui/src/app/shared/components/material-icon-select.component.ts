@@ -16,13 +16,13 @@ import { DialogService } from '@core/services/dialog.service';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { TranslateService } from '@ngx-translate/core';
 import { coerceBoolean } from '@shared/decorators/coercion';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { MaterialIconsComponent } from '@shared/components/material-icons.component';
 import { MatButton } from '@angular/material/button';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-material-icon-select',
+  selector: 'jnks-iot-material-icon-select',
   templateUrl: './material-icon-select.component.html',
   styleUrls: ['./material-icon-select.component.scss'],
   providers: [
@@ -73,7 +73,7 @@ export class MaterialIconSelectComponent extends PageComponent implements OnInit
   constructor(protected store: Store<AppState>,
               private dialogs: DialogService,
               private translate: TranslateService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private fb: UntypedFormBuilder,
@@ -157,8 +157,8 @@ export class MaterialIconSelectComponent extends PageComponent implements OnInit
         },
         {},
         {}, {}, true);
-      materialIconsPopover.tbComponentRef.instance.popover = materialIconsPopover;
-      materialIconsPopover.tbComponentRef.instance.iconSelected.subscribe((icon) => {
+      materialIconsPopover.jnksIotComponentRef.instance.popover = materialIconsPopover;
+      materialIconsPopover.jnksIotComponentRef.instance.iconSelected.subscribe((icon) => {
         materialIconsPopover.hide();
         this.materialIconFormGroup.patchValue(
           {icon}, {emitEvent: true}

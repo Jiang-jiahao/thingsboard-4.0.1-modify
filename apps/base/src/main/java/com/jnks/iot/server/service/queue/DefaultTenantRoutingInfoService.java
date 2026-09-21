@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import com.jnks.iot.server.common.data.TenantProfile;
 import com.jnks.iot.server.common.data.exception.TenantNotFoundException;
 import com.jnks.iot.server.common.data.id.TenantId;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
 import com.jnks.iot.server.queue.discovery.TenantRoutingInfo;
 import com.jnks.iot.server.queue.discovery.TenantRoutingInfoService;
 
@@ -20,9 +20,9 @@ import com.jnks.iot.server.queue.discovery.TenantRoutingInfoService;
 @Service
 public class DefaultTenantRoutingInfoService implements TenantRoutingInfoService {
 
-    private final TbTenantProfileCache tenantProfileCache;
+    private final JnksIotTenantProfileCache tenantProfileCache;
 
-    public DefaultTenantRoutingInfoService(TbTenantProfileCache tenantProfileCache) {
+    public DefaultTenantRoutingInfoService(JnksIotTenantProfileCache tenantProfileCache) {
         this.tenantProfileCache = tenantProfileCache;
     }
 
@@ -33,7 +33,7 @@ public class DefaultTenantRoutingInfoService implements TenantRoutingInfoService
     public TenantRoutingInfo getRoutingInfo(TenantId tenantId) {
         TenantProfile tenantProfile = tenantProfileCache.get(tenantId);
         if (tenantProfile != null) {
-            return new TenantRoutingInfo(tenantId, tenantProfile.getId(), tenantProfile.isIsolatedTbRuleEngine());
+            return new TenantRoutingInfo(tenantId, tenantProfile.getId(), tenantProfile.isIsolatedJnksIotRuleEngine());
         } else {
             throw new TenantNotFoundException(tenantId);
         }

@@ -7,7 +7,7 @@ import { UntypedFormGroup } from '@angular/forms';
 import { RepositorySettingsComponent } from '@home/components/vc/repository-settings.component';
 
 @Component({
-  selector: 'tb-repository-admin-settings',
+  selector: 'jnks-iot-repository-admin-settings',
   templateUrl: './repository-admin-settings.component.html',
   styleUrls: []
 })

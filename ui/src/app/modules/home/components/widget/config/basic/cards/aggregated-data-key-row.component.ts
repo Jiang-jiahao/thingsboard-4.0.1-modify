@@ -41,7 +41,7 @@ import { FormProperty } from '@shared/models/dynamic-form.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-aggregated-data-key-row',
+  selector: 'jnks-iot-aggregated-data-key-row',
   templateUrl: './aggregated-data-key-row.component.html',
   styleUrls: ['./aggregated-data-key-row.component.scss', '../../../lib/settings/common/key/data-keys.component.scss'],
   providers: [
@@ -190,7 +190,7 @@ export class AggregatedDataKeyRowComponent implements ControlValueAccessor, OnIn
     this.dialog.open<DataKeyConfigDialogComponent, DataKeyConfigDialogData, DataKey>(DataKeyConfigDialogComponent,
       {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           dataKey: deepClone(this.modelValue),
           dataKeyConfigMode: DataKeyConfigMode.general,

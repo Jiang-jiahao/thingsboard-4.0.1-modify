@@ -9,7 +9,7 @@ import { isDefinedAndNotNull, isUndefined } from '@core/utils';
 import { getAce } from '@shared/models/ace/ace.models';
 
 @Component({
-  selector: 'tb-json-object-view',
+  selector: 'jnks-iot-json-object-view',
   templateUrl: './json-object-view.component.html',
   styleUrls: ['./json-object-view.component.scss'],
   providers: [

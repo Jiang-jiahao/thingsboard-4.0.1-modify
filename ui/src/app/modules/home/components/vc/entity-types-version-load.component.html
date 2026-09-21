@@ -26,14 +26,14 @@
         <div class="entity-type-config-content flex flex-col gap-2">
           <mat-divider></mat-divider>
           <div class="flex flex-row xs:flex-col gt-xs:gap-8">
-            <tb-entity-type-select
+            <jnks-iot-entity-type-select
               class="flex-1"
               showLabel
               formControlName="entityType"
               required
               [filterAllowedEntityTypes]="false"
               [allowedEntityTypes]="allowedEntityTypes(entityTypeFormGroup)">
-            </tb-entity-type-select>
+            </jnks-iot-entity-type-select>
             <div class="flex flex-1 flex-row xs:flex-col xs:gap-2 gt-xs:gap-4" formGroupName="config">
               <div class="flex flex-1 flex-col">
                 <mat-checkbox #removeOtherEntitiesCheckbox
@@ -66,7 +66,7 @@
     </div>
     <div *ngIf="!entityTypesFormGroupArray().length">
           <span translate
-                class="tb-prompt flex items-center justify-center">version-control.no-entities-to-restore-prompt</span>
+                class="jnks-iot-prompt flex items-center justify-center">version-control.no-entities-to-restore-prompt</span>
     </div>
   </div>
   <div style="padding-top: 16px;" class="flex flex-row">

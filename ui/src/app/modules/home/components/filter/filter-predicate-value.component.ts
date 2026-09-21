@@ -22,7 +22,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-filter-predicate-value',
+  selector: 'jnks-iot-filter-predicate-value',
   templateUrl: './filter-predicate-value.component.html',
   styleUrls: ['./filter-predicate.scss'],
   providers: [

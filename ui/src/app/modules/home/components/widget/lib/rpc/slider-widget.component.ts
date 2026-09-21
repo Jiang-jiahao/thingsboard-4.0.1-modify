@@ -32,7 +32,7 @@ import { WidgetComponent } from '@home/components/widget/widget.component';
 import tinycolor from 'tinycolor2';
 
 @Component({
-  selector: 'tb-slider-widget',
+  selector: 'jnks-iot-slider-widget',
   templateUrl: './slider-widget.component.html',
   styleUrls: ['../action/action-widget.scss', './slider-widget.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -168,7 +168,7 @@ export class SliderWidgetComponent extends
     const hoverRippleColor = mainColorInstance.clone().setAlpha(mainColorInstance.getAlpha() * 0.05).toRgbString();
     const focusRippleColor = mainColorInstance.clone().setAlpha(mainColorInstance.getAlpha() * 0.2).toRgbString();
 
-    const sliderVariablesCss = `.tb-slider-panel {\n`+
+    const sliderVariablesCss = `.jnks-iot-slider-panel {\n`+
       `--tb-slider-main-color: ${this.settings.mainColor};\n`+
       `--tb-slider-background-color: ${this.settings.backgroundColor};\n`+
       `--tb-slider-hover-ripple-color: ${hoverRippleColor};\n`+
@@ -178,7 +178,7 @@ export class SliderWidgetComponent extends
       `--tb-slider-background-disabled: ${this.settings.backgroundColorDisabled};\n`+
       `}`;
     this.sliderCssClass =
-      this.utils.applyCssToElement(this.renderer, this.elementRef.nativeElement, 'tb-slider', sliderVariablesCss);
+      this.utils.applyCssToElement(this.renderer, this.elementRef.nativeElement, 'jnks-iot-slider', sliderVariablesCss);
 
     const getInitialStateSettings =
       {...this.settings.initialState, actionLabel: this.ctx.translate.instant('widgets.slider.initial-value')};

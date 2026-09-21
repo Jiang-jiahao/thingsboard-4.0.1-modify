@@ -1,27 +1,27 @@
-<section [formGroup]="processingForm" class="tb-form-panel no-border no-padding">
-  <tb-example-hint
+<section [formGroup]="processingForm" class="jnks-iot-form-panel no-border no-padding">
+  <jnks-iot-example-hint
     [hintText]="'rule-node-config.save-time-series.advanced-settings-hint'"
     [popupHelpLink]="timeseries ? 'rulenode/save_timeseries_node_advanced' : 'rulenode/save_attributes_node_advanced'"
   >
-  </tb-example-hint>
-  <tb-advanced-processing-setting-row *ngIf="timeseries"
+  </jnks-iot-example-hint>
+  <jnks-iot-advanced-processing-setting-row *ngIf="timeseries"
     formControlName="timeseries"
     title="{{ 'rule-node-config.save-time-series.time-series' | translate }}"
-  ></tb-advanced-processing-setting-row>
-  <tb-advanced-processing-setting-row *ngIf="attributes"
+  ></jnks-iot-advanced-processing-setting-row>
+  <jnks-iot-advanced-processing-setting-row *ngIf="attributes"
     formControlName="attributes"
     title="{{ 'rule-node-config.save-attribute.attributes' | translate }}"
-  ></tb-advanced-processing-setting-row>
-  <tb-advanced-processing-setting-row *ngIf="latest"
+  ></jnks-iot-advanced-processing-setting-row>
+  <jnks-iot-advanced-processing-setting-row *ngIf="latest"
     formControlName="latest"
     title="{{ 'rule-node-config.save-time-series.latest' | translate }}"
-  ></tb-advanced-processing-setting-row>
-  <tb-advanced-processing-setting-row *ngIf="webSockets"
+  ></jnks-iot-advanced-processing-setting-row>
+  <jnks-iot-advanced-processing-setting-row *ngIf="webSockets"
     formControlName="webSockets"
     title="{{ 'rule-node-config.save-time-series.web-sockets' | translate }}"
-  ></tb-advanced-processing-setting-row>
-  <tb-advanced-processing-setting-row *ngIf="calculatedFields"
+  ></jnks-iot-advanced-processing-setting-row>
+  <jnks-iot-advanced-processing-setting-row *ngIf="calculatedFields"
     formControlName="calculatedFields"
     title="{{ 'rule-node-config.save-time-series.calculated-fields' | translate }}"
-  ></tb-advanced-processing-setting-row>
+  ></jnks-iot-advanced-processing-setting-row>
 </section>

@@ -24,7 +24,7 @@ import { MapSettingsComponent } from '@home/components/widget/lib/settings/commo
 import { MapSettingsContext } from '@home/components/widget/lib/settings/common/map/map-settings.component.models';
 
 @Component({
-  selector: 'tb-map-data-layers',
+  selector: 'jnks-iot-map-data-layers',
   templateUrl: './map-data-layers.component.html',
   styleUrls: ['./map-data-layers.component.scss'],
   providers: [

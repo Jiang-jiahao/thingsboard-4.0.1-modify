@@ -31,7 +31,7 @@ export interface AlarmAssigneeSelectPanelData {
 }
 
 @Component({
-  selector: 'tb-alarm-assignee-select-panel',
+  selector: 'jnks-iot-alarm-assignee-select-panel',
   templateUrl: './alarm-assignee-panel.component.html',
   styleUrls: ['./alarm-assignee-panel.component.scss']
 })

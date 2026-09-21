@@ -19,7 +19,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-http-device-routing-configuration',
+  selector: 'jnks-iot-http-device-routing-configuration',
   templateUrl: './http-device-routing-configuration.component.html',
   styleUrls: ['./http-pull-device-profile-transport-configuration.component.scss'],
   providers: [{
@@ -90,7 +90,7 @@ export class HttpDeviceRoutingConfigurationComponent implements OnInit, OnDestro
   openRoutingExample(event: Event): void {
     event.stopPropagation();
     this.dialog.open(HttpPullRoutingHelpDialogComponent, {
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       autoFocus: false,
       width: '560px',
       maxWidth: '95vw'

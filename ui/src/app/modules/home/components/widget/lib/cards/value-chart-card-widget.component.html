@@ -1,10 +1,10 @@
-<div class="tb-value-chart-card-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
-  <div class="tb-value-chart-card-overlay" [style]="overlayStyle"></div>
+<div class="jnks-iot-value-chart-card-panel" [style.padding]="padding" [style]="backgroundStyle$ | async">
+  <div class="jnks-iot-value-chart-card-overlay" [style]="overlayStyle"></div>
   <ng-container *ngTemplateOutlet="widgetTitlePanel"></ng-container>
-  <div #valueChartCardContent class="tb-value-chart-card-content" [class]="layout" [class.auto-scale]="autoScale && showValue">
-    <div *ngIf="showValue" class="tb-value-chart-card-value-container">
-      <div class="tb-value-chart-card-value" #valueChartCardValue [style]="valueStyle" [style.color]="valueColor.color">{{ valueText }}</div>
+  <div #valueChartCardContent class="jnks-iot-value-chart-card-content" [class]="layout" [class.auto-scale]="autoScale && showValue">
+    <div *ngIf="showValue" class="jnks-iot-value-chart-card-value-container">
+      <div class="jnks-iot-value-chart-card-value" #valueChartCardValue [style]="valueStyle" [style.color]="valueColor.color">{{ valueText }}</div>
     </div>
-    <div class="tb-value-chart-card-chart" #chartElement></div>
+    <div class="jnks-iot-value-chart-card-chart" #chartElement></div>
   </div>
 </div>

@@ -1,7 +1,7 @@
 <mat-form-field class="mat-block flex-1" [appearance]="inlineField ? 'outline': 'fill'"
                 [subscriptSizing]="inlineField ? 'dynamic' : 'fixed'"
-                [class]="{'tb-inline-field': inlineField, 'flex': inlineField,
-                          'tb-suffix-absolute': (inlineField && !deviceKeyFormGroup.get('key').value)}"
+                [class]="{'jnks-iot-inline-field': inlineField, 'flex': inlineField,
+                          'jnks-iot-suffix-absolute': (inlineField && !deviceKeyFormGroup.get('key').value)}"
                 [formGroup]="deviceKeyFormGroup">
   <mat-label *ngIf="!inlineField">{{ (keyType === dataKeyType.attribute
     ? attributeLabel
@@ -20,15 +20,15 @@
   </button>
   <mat-icon matSuffix
             matTooltipPosition="above"
-            matTooltipClass="tb-error-tooltip"
+            matTooltipClass="jnks-iot-error-tooltip"
             [matTooltip]="requiredText | translate"
             *ngIf="inlineField && requiredText && deviceKeyFormGroup.get('key').hasError('required')
                             && deviceKeyFormGroup.get('key').touched"
-            class="tb-error">
+            class="jnks-iot-error">
     warning
   </mat-icon>
   <mat-autocomplete
-    class="tb-autocomplete"
+    class="jnks-iot-autocomplete"
     #keyAutocomplete="matAutocomplete">
     <mat-option *ngFor="let key of filteredKeys | async" [value]="key">
       <span [innerHTML]="key | highlight:keySearchText"></span>

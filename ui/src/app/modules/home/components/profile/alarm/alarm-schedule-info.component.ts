@@ -15,7 +15,7 @@ import { deepClone, isDefinedAndNotNull } from '@core/utils';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'tb-alarm-schedule-info',
+  selector: 'jnks-iot-alarm-schedule-info',
   templateUrl: './alarm-schedule-info.component.html',
   styleUrls: ['./alarm-schedule-info.component.scss'],
   providers: [{
@@ -103,7 +103,7 @@ export class AlarmScheduleInfoComponent implements ControlValueAccessor, OnInit 
     this.dialog.open<AlarmScheduleDialogComponent, AlarmScheduleDialogData,
       AlarmSchedule>(AlarmScheduleDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         readonly: this.disabled,
         alarmSchedule: this.disabled ? this.modelValue : deepClone(this.modelValue)

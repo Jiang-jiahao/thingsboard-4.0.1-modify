@@ -9,7 +9,7 @@ export interface DisplayColumnsPanelData {
 }
 
 @Component({
-  selector: 'tb-display-columns-panel',
+  selector: 'jnks-iot-display-columns-panel',
   templateUrl: './display-columns-panel.component.html',
   styleUrls: ['./display-columns-panel.component.scss']
 })

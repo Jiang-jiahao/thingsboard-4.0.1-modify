@@ -13,7 +13,7 @@ import {
 } from '@home/components/widget/lib/indicator/battery-level-widget.models';
 
 @Component({
-  selector: 'tb-battery-level-widget-settings',
+  selector: 'jnks-iot-battery-level-widget-settings',
   templateUrl: './battery-level-widget-settings.component.html',
   styleUrls: []
 })

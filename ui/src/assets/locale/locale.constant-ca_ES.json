@@ -3512,7 +3512,7 @@
                 "WHITE_LABELING": "Etiquetat blanc",
                 "AUDIT_LOG": "Registre d'auditoria",
                 "API_USAGE_STATE": "Estat d'ús de l'API",
-                "TB_RESOURCE": "Recurs",
+                "JNKS_IOT_RESOURCE": "Recurs",
                 "OTA_PACKAGE": "Paquet Ota"
             }
         },

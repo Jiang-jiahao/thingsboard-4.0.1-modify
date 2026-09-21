@@ -15,7 +15,7 @@ export interface EditAlarmDetailsDialogData {
 }
 
 @Component({
-  selector: 'tb-edit-alarm-details-dialog',
+  selector: 'jnks-iot-edit-alarm-details-dialog',
   templateUrl: './edit-alarm-details-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: EditAlarmDetailsDialogComponent}],
   styleUrls: []

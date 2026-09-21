@@ -47,9 +47,9 @@ import com.jnks.iot.server.common.data.ResourceSubType;
 import com.jnks.iot.server.common.data.SaveDeviceWithCredentialsRequest;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.common.data.SystemInfo;
-import com.jnks.iot.server.common.data.TbImageDeleteResult;
-import com.jnks.iot.server.common.data.TbResource;
-import com.jnks.iot.server.common.data.TbResourceInfo;
+import com.jnks.iot.server.common.data.JnksIotImageDeleteResult;
+import com.jnks.iot.server.common.data.JnksIotResource;
+import com.jnks.iot.server.common.data.JnksIotResourceInfo;
 import com.jnks.iot.server.common.data.Tenant;
 import com.jnks.iot.server.common.data.TenantInfo;
 import com.jnks.iot.server.common.data.TenantProfile;
@@ -94,7 +94,7 @@ import com.jnks.iot.server.common.data.id.OtaPackageId;
 import com.jnks.iot.server.common.data.id.QueueId;
 import com.jnks.iot.server.common.data.id.RuleChainId;
 import com.jnks.iot.server.common.data.id.RuleNodeId;
-import com.jnks.iot.server.common.data.id.TbResourceId;
+import com.jnks.iot.server.common.data.id.JnksIotResourceId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.id.TenantProfileId;
 import com.jnks.iot.server.common.data.id.UserId;
@@ -3207,7 +3207,7 @@ public class RestClient implements Closeable {
                 }).getBody();
     }
 
-    public ResponseEntity<Resource> downloadResource(TbResourceId resourceId) {
+    public ResponseEntity<Resource> downloadResource(JnksIotResourceId resourceId) {
         Map<String, String> params = new HashMap<>();
         params.put("resourceId", resourceId.getId().toString());
 
@@ -3221,7 +3221,7 @@ public class RestClient implements Closeable {
         );
     }
 
-    public TbResourceInfo getResourceInfoById(TbResourceId resourceId) {
+    public JnksIotResourceInfo getResourceInfoById(JnksIotResourceId resourceId) {
         Map<String, String> params = new HashMap<>();
         params.put("resourceId", resourceId.getId().toString());
 
@@ -3229,13 +3229,13 @@ public class RestClient implements Closeable {
                 baseURL + "/api/resource/info/{resourceId}",
                 HttpMethod.GET,
                 HttpEntity.EMPTY,
-                new ParameterizedTypeReference<TbResourceInfo>() {
+                new ParameterizedTypeReference<JnksIotResourceInfo>() {
                 },
                 params
         ).getBody();
     }
 
-    public TbResource getResourceId(TbResourceId resourceId) {
+    public JnksIotResource getResourceId(JnksIotResourceId resourceId) {
         Map<String, String> params = new HashMap<>();
         params.put("resourceId", resourceId.getId().toString());
 
@@ -3243,49 +3243,49 @@ public class RestClient implements Closeable {
                 baseURL + "/api/resource/{resourceId}",
                 HttpMethod.GET,
                 HttpEntity.EMPTY,
-                new ParameterizedTypeReference<TbResource>() {
+                new ParameterizedTypeReference<JnksIotResource>() {
                 },
                 params
         ).getBody();
     }
 
-    public TbResource saveResource(TbResource resource) {
+    public JnksIotResource saveResource(JnksIotResource resource) {
         return restTemplate.postForEntity(
                 baseURL + "/api/resource",
                 resource,
-                TbResource.class
+                JnksIotResource.class
         ).getBody();
     }
 
-    public PageData<TbResourceInfo> getResources(PageLink pageLink) {
+    public PageData<JnksIotResourceInfo> getResources(PageLink pageLink) {
         Map<String, String> params = new HashMap<>();
         addPageLinkToParam(params, pageLink);
         return restTemplate.exchange(
                 baseURL + "/api/resource?" + getUrlParams(pageLink),
                 HttpMethod.GET,
                 HttpEntity.EMPTY,
-                new ParameterizedTypeReference<PageData<TbResourceInfo>>() {
+                new ParameterizedTypeReference<PageData<JnksIotResourceInfo>>() {
                 },
                 params
         ).getBody();
     }
 
-    public void deleteResource(TbResourceId resourceId) {
+    public void deleteResource(JnksIotResourceId resourceId) {
         restTemplate.delete("/api/resource/{resourceId}", resourceId.getId().toString());
     }
 
-    public TbResourceInfo getImageInfo(String type, String key) {
-        return restTemplate.getForObject(baseURL + "/api/images/{type}/{key}/info", TbResourceInfo.class, Map.of(
+    public JnksIotResourceInfo getImageInfo(String type, String key) {
+        return restTemplate.getForObject(baseURL + "/api/images/{type}/{key}/info", JnksIotResourceInfo.class, Map.of(
                 "type", type,
                 "key", key
         ));
     }
 
-    public PageData<TbResourceInfo> getImages(PageLink pageLink, boolean includeSystemImages) {
+    public PageData<JnksIotResourceInfo> getImages(PageLink pageLink, boolean includeSystemImages) {
        return this.getImages(pageLink, null, includeSystemImages);
     }
 
-    public PageData<TbResourceInfo> getImages(PageLink pageLink, ResourceSubType imageSubType, boolean includeSystemImages) {
+    public PageData<JnksIotResourceInfo> getImages(PageLink pageLink, ResourceSubType imageSubType, boolean includeSystemImages) {
         Map<String, String> params = new HashMap<>();
         var url = baseURL + "/api/images?includeSystemImages={includeSystemImages}&";
         addPageLinkToParam(params, pageLink);
@@ -3297,28 +3297,28 @@ public class RestClient implements Closeable {
         return restTemplate.exchange(url + getUrlParams(pageLink),
                 HttpMethod.GET,
                 HttpEntity.EMPTY,
-                new ParameterizedTypeReference<PageData<TbResourceInfo>>() {},
+                new ParameterizedTypeReference<PageData<JnksIotResourceInfo>>() {},
                 params
         ).getBody();
     }
 
-    public TbResourceInfo uploadImage(String fileName, byte[] data, String contentType, String title) {
+    public JnksIotResourceInfo uploadImage(String fileName, byte[] data, String contentType, String title) {
         HttpEntity<MultiValueMap<String, Object>> request = createMultipartRequest(fileName, data, contentType, Map.of(
                 "title", Strings.nullToEmpty(title)
         ));
-        return restTemplate.postForObject(baseURL + "/api/image", request, TbResourceInfo.class);
+        return restTemplate.postForObject(baseURL + "/api/image", request, JnksIotResourceInfo.class);
     }
 
-    public TbResourceInfo updateImage(String type, String key, String fileName, byte[] data, String contentType) {
+    public JnksIotResourceInfo updateImage(String type, String key, String fileName, byte[] data, String contentType) {
         HttpEntity<MultiValueMap<String, Object>> request = createMultipartRequest(fileName, data, contentType, Map.of());
-        return restTemplate.exchange(baseURL + "/api/images/{type}/{key}", HttpMethod.PUT, request, TbResourceInfo.class, Map.of(
+        return restTemplate.exchange(baseURL + "/api/images/{type}/{key}", HttpMethod.PUT, request, JnksIotResourceInfo.class, Map.of(
                 "type", type,
                 "key", key
         )).getBody();
     }
 
-    public TbResourceInfo updateImageInfo(String type, String key, TbResourceInfo request) {
-        return restTemplate.exchange(baseURL + "/api/images/{type}/{key}/info", HttpMethod.PUT, new HttpEntity<>(request), TbResourceInfo.class, Map.of(
+    public JnksIotResourceInfo updateImageInfo(String type, String key, JnksIotResourceInfo request) {
+        return restTemplate.exchange(baseURL + "/api/images/{type}/{key}/info", HttpMethod.PUT, new HttpEntity<>(request), JnksIotResourceInfo.class, Map.of(
                 "type", type,
                 "key", key
         )).getBody();
@@ -3362,12 +3362,12 @@ public class RestClient implements Closeable {
         ));
     }
 
-    public TbResourceInfo importImage(ResourceExportData exportData) {
-        return restTemplate.exchange(baseURL + "/api/image/import", HttpMethod.PUT, new HttpEntity<>(exportData), TbResourceInfo.class).getBody();
+    public JnksIotResourceInfo importImage(ResourceExportData exportData) {
+        return restTemplate.exchange(baseURL + "/api/image/import", HttpMethod.PUT, new HttpEntity<>(exportData), JnksIotResourceInfo.class).getBody();
     }
 
-    public TbImageDeleteResult deleteImage(String type, String key, boolean force) {
-        return restTemplate.exchange(baseURL + "/api/images/{type}/{key}?force={force}", HttpMethod.DELETE, null, TbImageDeleteResult.class, Map.of(
+    public JnksIotImageDeleteResult deleteImage(String type, String key, boolean force) {
+        return restTemplate.exchange(baseURL + "/api/images/{type}/{key}?force={force}", HttpMethod.DELETE, null, JnksIotImageDeleteResult.class, Map.of(
                 "type", type,
                 "key", key,
                 "force", force

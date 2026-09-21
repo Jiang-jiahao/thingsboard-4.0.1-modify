@@ -1,6 +1,6 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -12,7 +12,7 @@ import { DataKeyType } from '@shared/models/telemetry/telemetry.models';
 import { MapSettingsContext } from '@home/components/widget/lib/settings/common/map/map-settings.component.models';
 
 @Component({
-  selector: 'tb-data-layer-color-settings-panel',
+  selector: 'jnks-iot-data-layer-color-settings-panel',
   templateUrl: './data-layer-color-settings-panel.component.html',
   providers: [],
   styleUrls: ['./data-layer-color-settings-panel.component.scss'],
@@ -43,7 +43,7 @@ export class DataLayerColorSettingsPanelComponent extends PageComponent implemen
   helpId = 'widget/lib/map/color_fn';
 
   @Input()
-  popover: TbPopoverComponent<DataLayerColorSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<DataLayerColorSettingsPanelComponent>;
 
   @Output()
   colorSettingsApplied = new EventEmitter<DataLayerColorSettings>();

@@ -20,7 +20,7 @@ import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.EntityView;
 import com.jnks.iot.server.common.data.EventInfo;
-import com.jnks.iot.server.common.data.TbResource;
+import com.jnks.iot.server.common.data.JnksIotResource;
 import com.jnks.iot.server.common.data.Tenant;
 import com.jnks.iot.server.common.data.User;
 import com.jnks.iot.server.common.data.alarm.Alarm;
@@ -646,7 +646,7 @@ public class TestRestClient {
                 .as(new TypeRef<>() {});
     }
 
-    public ValidatableResponse postTbResourceIfNotExists(TbResource lwModel) {
+    public ValidatableResponse postJnksIotResourceIfNotExists(JnksIotResource lwModel) {
         return given().spec(requestSpec).body(lwModel)
                 .post("/api/resource")
                 .then()

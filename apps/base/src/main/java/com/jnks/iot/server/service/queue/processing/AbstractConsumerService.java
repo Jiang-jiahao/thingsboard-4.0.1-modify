@@ -20,21 +20,21 @@ import com.jnks.iot.server.common.data.id.TenantProfileId;
 import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
 import com.jnks.iot.server.common.msg.plugin.ComponentLifecycleMsg;
 import com.jnks.iot.server.common.msg.queue.ServiceType;
-import com.jnks.iot.server.common.msg.queue.TbCallback;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
-import com.jnks.iot.server.queue.TbQueueConsumer;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
+import com.jnks.iot.server.common.msg.queue.JnksIotCallback;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
+import com.jnks.iot.server.queue.JnksIotQueueConsumer;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
 import com.jnks.iot.server.queue.common.consumer.QueueConsumerManager;
 import com.jnks.iot.server.queue.discovery.PartitionService;
-import com.jnks.iot.server.queue.discovery.TbApplicationEventListener;
+import com.jnks.iot.server.queue.discovery.JnksIotApplicationEventListener;
 import com.jnks.iot.server.queue.discovery.event.PartitionChangeEvent;
 import com.jnks.iot.common.util.AfterStartUp;
-import com.jnks.iot.server.service.apiusage.TbApiUsageStateService;
+import com.jnks.iot.server.service.apiusage.JnksIotApiUsageStateService;
 import com.jnks.iot.server.service.cf.CalculatedFieldCache;
-import com.jnks.iot.server.service.profile.TbAssetProfileCache;
-import com.jnks.iot.server.service.profile.TbDeviceProfileCache;
-import com.jnks.iot.server.service.queue.TbPackCallback;
-import com.jnks.iot.server.service.queue.TbPackProcessingContext;
+import com.jnks.iot.server.service.profile.JnksIotAssetProfileCache;
+import com.jnks.iot.server.service.profile.JnksIotDeviceProfileCache;
+import com.jnks.iot.server.service.queue.JnksIotPackCallback;
+import com.jnks.iot.server.service.queue.JnksIotPackProcessingContext;
 import com.jnks.iot.server.service.security.auth.jwt.settings.JwtSettingsService;
 
 import java.util.List;
@@ -62,17 +62,17 @@ import java.util.stream.Collectors;
  *   <li>对 {@link PartitionChangeEvent} 的监听基座（按 {@link #getServiceType()} 过滤）；</li>
  *   <li>组件生命周期消息的公共缓存失效与 Actor 转发逻辑。</li>
  * </ul>
- * 典型子类：{@code DefaultTbCoreConsumerService}、{@code DefaultTbRuleEngineConsumerService} 等。
+ * 典型子类：{@code DefaultJnksIotCoreConsumerService}、{@code DefaultJnksIotRuleEngineConsumerService} 等。
  * 生命周期：子类 {@code @PostConstruct} 调用 {@link #init(String)} → 应用就绪后
  * {@link #afterStartUp()} 启动通知消费者 → {@link #destroy()} 停止并关闭线程池。
- * 分区变更的具体订阅更新由子类覆盖 {@code onTbApplicationEvent} 完成。
+ * 分区变更的具体订阅更新由子类覆盖 {@code onJnksIotApplicationEvent} 完成。
  *
  * @param <N> 通知队列中的 Protobuf 消息类型（如 {@code ToCoreNotificationMsg}）
  * @see QueueConsumerManager
  * @see PartitionChangeEvent
  */
 @RequiredArgsConstructor
-public abstract class AbstractConsumerService<N extends com.google.protobuf.GeneratedMessageV3> extends TbApplicationEventListener<PartitionChangeEvent> {
+public abstract class AbstractConsumerService<N extends com.google.protobuf.GeneratedMessageV3> extends JnksIotApplicationEventListener<PartitionChangeEvent> {
 
     /** 使用运行时子类名作为 logger 名，便于区分 Core / RE 等实现的日志 */
     protected final Logger log = LoggerFactory.getLogger(getClass());
@@ -81,19 +81,19 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
     protected final ActorSystemContext actorContext;
 
     /** 租户配置缓存：租户/租户配置变更时驱逐 */
-    protected final TbTenantProfileCache tenantProfileCache;
+    protected final JnksIotTenantProfileCache tenantProfileCache;
 
     /** 设备配置缓存：设备或设备配置变更时驱逐 */
-    protected final TbDeviceProfileCache deviceProfileCache;
+    protected final JnksIotDeviceProfileCache deviceProfileCache;
 
     /** 资产配置缓存：资产或资产配置变更时驱逐 */
-    protected final TbAssetProfileCache assetProfileCache;
+    protected final JnksIotAssetProfileCache assetProfileCache;
 
     /** 计算字段缓存：计算字段增删改时同步维护 */
     protected final CalculatedFieldCache calculatedFieldCache;
 
     /** API 用量状态：租户/配置/客户变更时刷新或清理用量相关状态 */
-    protected final TbApiUsageStateService apiUsageStateService;
+    protected final JnksIotApiUsageStateService apiUsageStateService;
 
     /** 分区与租户路由服务：驱逐租户路由、删除租户分区信息等 */
     protected final PartitionService partitionService;
@@ -115,7 +115,7 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
      * 订阅的是「按 serviceId 区分的通知 Topic」（点对点通知），与按实体哈希分区的主业务 Topic 不同。
      * 在 {@link #init(String)} 中构建，在 {@link #startConsumers()} 中 subscribe + launch。
      */
-    protected QueueConsumerManager<TbProtoQueueMsg<N>> nfConsumer;
+    protected QueueConsumerManager<JnksIotProtoQueueMsg<N>> nfConsumer;
 
     /**
      * 消息消费与批内提交逻辑使用的线程池（CachedThreadPool）。
@@ -145,7 +145,7 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
      * 由子类在 {@code @PostConstruct} 中调用。此处只 build 消费者，不启动；
      * 真正 subscribe/launch 在 {@link #afterStartUp()} → {@link #startConsumers()}。
      *
-     * @param prefix 线程名前缀（如 {@code "tb-core"}），实际线程名形如 {@code prefix-consumer} /
+     * @param prefix 线程名前缀（如 {@code "jnks-iot-core"}），实际线程名形如 {@code prefix-consumer} /
      *               {@code prefix-mgmt} / {@code prefix-consumer-scheduler}
      */
     public void init(String prefix) {
@@ -153,7 +153,7 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
         this.mgmtExecutor = JnksIotExecutors.newWorkStealingPool(getMgmtThreadPoolSize(), prefix + "-mgmt");
         this.scheduler = JnksIotExecutors.newSingleThreadScheduledExecutor(prefix + "-consumer-scheduler");
 
-        this.nfConsumer = QueueConsumerManager.<TbProtoQueueMsg<N>>builder()
+        this.nfConsumer = QueueConsumerManager.<JnksIotProtoQueueMsg<N>>builder()
                 .name(getServiceType().getLabel() + " Notifications")
                 .msgPackProcessor(this::processNotifications)
                 .pollInterval(getNotificationPollDuration())
@@ -188,14 +188,14 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
     /**
      * 只处理与本服务类型匹配的分区变更事件。
      * <p>
-     * 例如 Core 子类 {@code getServiceType() == TB_CORE} 时，忽略 Rule Engine 的
+     * 例如 Core 子类 {@code getServiceType() == JNKS_IOT_CORE} 时，忽略 Rule Engine 的
      * {@link PartitionChangeEvent}，避免无关重订阅。
      *
      * @param event 分区变更事件
      * @return {@code true} 表示事件应交给本监听器后续处理
      */
     @Override
-    protected boolean filterTbApplicationEvent(PartitionChangeEvent event) {
+    protected boolean filterJnksIotApplicationEvent(PartitionChangeEvent event) {
         return event.getServiceType() == getServiceType();
     }
 
@@ -233,15 +233,15 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
      *
      * @return 可被 {@link QueueConsumerManager} 托管的消费者
      */
-    protected abstract TbQueueConsumer<TbProtoQueueMsg<N>> createNotificationsConsumer();
+    protected abstract JnksIotQueueConsumer<JnksIotProtoQueueMsg<N>> createNotificationsConsumer();
 
     /**
      * 通知队列一批消息的通用处理模板。
      * <p>
      * 流程：
      * <ol>
-     *   <li>为每条消息分配 UUID，构建 pending 映射与 {@link TbPackProcessingContext}；</li>
-     *   <li>逐条调用 {@link #handleNotification}，通过 {@link TbPackCallback} 汇总成功/失败；</li>
+     *   <li>为每条消息分配 UUID，构建 pending 映射与 {@link JnksIotPackProcessingContext}；</li>
+     *   <li>逐条调用 {@link #handleNotification}，通过 {@link JnksIotPackCallback} 汇总成功/失败；</li>
      *   <li>等待整批完成，最长 {@link #getNotificationPackProcessingTimeout()}；</li>
      *   <li>超时则打印仍未完成或已失败的消息；</li>
      *   <li>无论是否超时，最后 {@code consumer.commit()}。</li>
@@ -253,18 +253,18 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
      * @param consumer 拉取本批消息的消费者，用于 commit
      * @throws Exception 等待 latch 被中断等场景可能抛出
      */
-    protected void processNotifications(List<TbProtoQueueMsg<N>> msgs, TbQueueConsumer<TbProtoQueueMsg<N>> consumer) throws Exception {
+    protected void processNotifications(List<JnksIotProtoQueueMsg<N>> msgs, JnksIotQueueConsumer<JnksIotProtoQueueMsg<N>> consumer) throws Exception {
         List<IdMsgPair<N>> orderedMsgList = msgs.stream().map(msg -> new IdMsgPair<>(UUID.randomUUID(), msg)).toList();
-        ConcurrentMap<UUID, TbProtoQueueMsg<N>> pendingMap = orderedMsgList.stream().collect(
+        ConcurrentMap<UUID, JnksIotProtoQueueMsg<N>> pendingMap = orderedMsgList.stream().collect(
                 Collectors.toConcurrentMap(IdMsgPair::getUuid, IdMsgPair::getMsg));
         CountDownLatch processingTimeoutLatch = new CountDownLatch(1);
-        TbPackProcessingContext<TbProtoQueueMsg<N>> ctx = new TbPackProcessingContext<>(
+        JnksIotPackProcessingContext<JnksIotProtoQueueMsg<N>> ctx = new JnksIotPackProcessingContext<>(
                 processingTimeoutLatch, pendingMap, new ConcurrentHashMap<>());
         orderedMsgList.forEach(element -> {
             UUID id = element.getUuid();
-            TbProtoQueueMsg<N> msg = element.getMsg();
+            JnksIotProtoQueueMsg<N> msg = element.getMsg();
             log.trace("[{}] Creating notification callback for message: {}", id, msg.getValue());
-            TbCallback callback = new TbPackCallback<>(id, ctx);
+            JnksIotCallback callback = new JnksIotPackCallback<>(id, ctx);
             try {
                 handleNotification(id, msg, callback);
             } catch (Throwable e) {
@@ -289,7 +289,7 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
      *   <li>系统租户实体：重新加载 JWT 设置后直接返回（不再走后续 Actor 转发前的租户分支逻辑）；</li>
      *   <li>普通租户：驱逐配置与路由缓存；UPDATED/DELETED 时更新或删除用量，DELETED 时移除租户分区信息；</li>
      *   <li>设备：驱逐设备实体缓存与设备 Profile 缓存；资产及其 Profile：驱逐对应缓存；</li>
-     *   <li>Entity View：委托 {@code TbEntityViewService}（若存在）；</li>
+     *   <li>Entity View：委托 {@code JnksIotEntityViewService}（若存在）；</li>
      *   <li>API 用量状态、客户删除、计算字段增删改：更新对应服务或缓存。</li>
      * </ul>
      * 子类在 {@link #handleNotification} 中解析出生命周期协议后，通常调用本方法完成公共副作用。
@@ -335,8 +335,8 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
         } else if (EntityType.ASSET.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
             assetProfileCache.evict(tenantId, new AssetId(componentLifecycleMsg.getEntityId().getId()));
         } else if (EntityType.ENTITY_VIEW.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
-            if (actorContext.getTbEntityViewService() != null) {
-                actorContext.getTbEntityViewService().onComponentLifecycleMsg(componentLifecycleMsg);
+            if (actorContext.getJnksIotEntityViewService() != null) {
+                actorContext.getJnksIotEntityViewService().onComponentLifecycleMsg(componentLifecycleMsg);
             }
         } else if (EntityType.API_USAGE_STATE.equals(componentLifecycleMsg.getEntityId().getEntityType())) {
             apiUsageStateService.onApiUsageStateUpdate(tenantId);
@@ -363,10 +363,10 @@ public abstract class AbstractConsumerService<N extends com.google.protobuf.Gene
      *
      * @param id       本条消息在批处理中的关联 ID
      * @param msg      队列封装的通知协议消息
-     * @param callback 成功/失败回调，驱动 {@link TbPackProcessingContext} 完成计数
+     * @param callback 成功/失败回调，驱动 {@link JnksIotPackProcessingContext} 完成计数
      * @throws Exception 处理失败且未自行调用 {@code callback.onFailure} 时可由框架捕获
      */
-    protected abstract void handleNotification(UUID id, TbProtoQueueMsg<N> msg, TbCallback callback) throws Exception;
+    protected abstract void handleNotification(UUID id, JnksIotProtoQueueMsg<N> msg, JnksIotCallback callback) throws Exception;
 
     /**
      * Bean 销毁：停止通知消费者并立即关闭三类线程池。

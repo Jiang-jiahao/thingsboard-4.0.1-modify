@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
-  selector: 'tb-contact',
+  selector: 'jnks-iot-contact',
   templateUrl: './contact.component.html'
 })
 export class ContactComponent {

@@ -2,7 +2,7 @@ import { NgModule, SecurityContext } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FooterComponent } from '@shared/components/footer.component';
 import { LogoComponent } from '@shared/components/logo.component';
-import { TbSnackBarComponent, ToastDirective } from '@shared/components/toast.directive';
+import { JnksIotSnackBarComponent, ToastDirective } from '@shared/components/toast.directive';
 import { BreadcrumbComponent } from '@shared/components/breadcrumb.component';
 import { FlowInjectionToken, NgxFlowModule } from '@flowjs/ngx-flow';
 import { NgxFlowchartModule } from 'ngx-flowchart';
@@ -54,9 +54,9 @@ import { TruncateWithTooltipDirective } from '@shared/directives/truncate-with-t
 import { ContextMenuDirective } from '@shared/directives/context-menu.directive';
 import { NospacePipe } from '@shared/pipe/nospace.pipe';
 import { TranslateModule } from '@ngx-translate/core';
-import { TbCheckboxComponent } from '@shared/components/tb-checkbox.component';
+import { JnksIotCheckboxComponent } from '@shared/components/jnks-iot-checkbox.component';
 import { HelpComponent } from '@shared/components/help.component';
-import { TbAnchorComponent } from '@shared/components/tb-anchor.component';
+import { JnksIotAnchorComponent } from '@shared/components/jnks-iot-anchor.component';
 import { MillisecondsToTimeStringPipe } from '@shared/pipe/milliseconds-to-time-string.pipe';
 import { TimewindowComponent } from '@shared/components/time/timewindow.component';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -97,11 +97,11 @@ import { DashboardSelectPanelComponent } from '@shared/components/dashboard-sele
 import { DashboardSelectComponent } from '@shared/components/dashboard-select.component';
 import { WidgetsBundleSelectComponent } from '@shared/components/widgets-bundle-select.component';
 import { KeyboardShortcutPipe } from '@shared/pipe/keyboard-shortcut.pipe';
-import { TbErrorComponent } from '@shared/components/tb-error.component';
+import { JnksIotErrorComponent } from '@shared/components/jnks-iot-error.component';
 import { EntityTypeListComponent } from '@shared/components/entity/entity-type-list.component';
 import { EntitySubTypeListComponent } from '@shared/components/entity/entity-subtype-list.component';
 import { TruncatePipe } from '@shared/pipe/truncate.pipe';
-import { TbJsonPipe } from '@shared/pipe/tbJson.pipe';
+import { JnksIotJsonPipe } from '@shared/pipe/jnksIotJson.pipe';
 import { ColorPickerDialogComponent } from '@shared/components/dialog/color-picker-dialog.component';
 import { ColorInputComponent } from '@shared/components/color-input.component';
 import { JsFuncComponent } from '@shared/components/js-func.component';
@@ -117,11 +117,11 @@ import { NodeScriptTestDialogComponent } from '@shared/components/dialog/node-sc
 import { MessageTypeAutocompleteComponent } from '@shared/components/message-type-autocomplete.component';
 import { JsonContentComponent } from '@shared/components/json-content.component';
 import { KeyValMapComponent } from '@shared/components/kv-map.component';
-import { TbCheatSheetComponent } from '@shared/components/cheatsheet.component';
-import { TbHotkeysDirective } from '@shared/components/hotkeys.directive';
+import { JnksIotCheatSheetComponent } from '@shared/components/cheatsheet.component';
+import { JnksIotHotkeysDirective } from '@shared/components/hotkeys.directive';
 import { NavTreeComponent } from '@shared/components/nav-tree.component';
 import { LedLightComponent } from '@shared/components/led-light.component';
-import { TbJsonToStringDirective } from '@shared/components/directives/tb-json-to-string.directive';
+import { JnksIotJsonToStringDirective } from '@shared/components/directives/jnks-iot-json-to-string.directive';
 import { JsonObjectEditDialogComponent } from '@shared/components/dialog/json-object-edit-dialog.component';
 import { HistorySelectorComponent } from '@shared/components/time/history-selector/history-selector.component';
 import { EntityGatewaySelectComponent } from '@shared/components/entity/entity-gateway-select.component';
@@ -139,14 +139,14 @@ import { CopyButtonComponent } from '@shared/components/button/copy-button.compo
 import { TogglePasswordComponent } from '@shared/components/button/toggle-password.component';
 import { WidgetButtonToggleComponent } from '@shared/components/button/widget-button-toggle.component';
 import { HelpPopupComponent } from '@shared/components/help-popup.component';
-import { TbPopoverComponent, TbPopoverDirective } from '@shared/components/popover.component';
-import { TbStringTemplateOutletDirective } from '@shared/components/directives/sring-template-outlet.directive';
-import { TbComponentOutletDirective } from '@shared/components/directives/component-outlet.directive';
+import { JnksIotPopoverComponent, JnksIotPopoverDirective } from '@shared/components/popover.component';
+import { JnksIotStringTemplateOutletDirective } from '@shared/components/directives/sring-template-outlet.directive';
+import { JnksIotComponentOutletDirective } from '@shared/components/directives/component-outlet.directive';
 import { HelpMarkdownComponent } from '@shared/components/help-markdown.component';
 import { MarkedOptionsService } from '@shared/components/marked-options.service';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { HELP_MARKDOWN_COMPONENT_TOKEN, SHARED_MODULE_TOKEN } from '@shared/components/tokens';
-import { TbMarkdownComponent } from '@shared/components/markdown.component';
+import { JnksIotMarkdownComponent } from '@shared/components/markdown.component';
 import { ProtobufContentComponent } from '@shared/components/protobuf-content.component';
 import { CssComponent } from '@shared/components/css.component';
 import { HtmlComponent } from '@shared/components/html.component';
@@ -156,9 +156,9 @@ import { MultipleImageInputComponent } from '@shared/components/multiple-image-i
 import { BranchAutocompleteComponent } from '@shared/components/vc/branch-autocomplete.component';
 import { PhoneInputComponent } from '@shared/components/phone-input.component';
 import { CustomDateAdapter } from '@shared/adapter/custom-datatime-adapter';
-import { tbMatDateLocaleFactory } from '@shared/adapter/mat-date-locale.factory';
+import { jnksIotMatDateLocaleFactory } from '@shared/adapter/mat-date-locale.factory';
 import { CustomPaginatorIntl } from '@shared/services/custom-paginator-intl';
-import { TbScriptLangComponent } from '@shared/components/script-lang.component';
+import { JnksIotScriptLangComponent } from '@shared/components/script-lang.component';
 import { NotificationComponent } from '@shared/components/notification/notification.component';
 import { TemplateAutocompleteComponent } from '@shared/components/notification/template-autocomplete.component';
 import { SlackConversationAutocompleteComponent } from '@shared/components/slack-conversation-autocomplete.component';
@@ -172,7 +172,7 @@ import { ToggleSelectComponent } from '@shared/components/toggle-select.componen
 import { UnitInputComponent } from '@shared/components/unit-input.component';
 import { MaterialIconsComponent } from '@shared/components/material-icons.component';
 import { ColorPickerPanelComponent } from '@shared/components/color-picker/color-picker-panel.component';
-import { TbIconComponent } from '@shared/components/icon.component';
+import { JnksIotIconComponent } from '@shared/components/icon.component';
 import { HintTooltipIconComponent } from '@shared/components/hint-tooltip-icon.component';
 import { StringAutocompleteComponent } from '@shared/components/string-autocomplete.component';
 import { ImagePipe } from '@shared/pipe/image.pipe';
@@ -223,7 +223,7 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     EnumToArrayPipe,
     HighlightPipe,
     TruncatePipe,
-    TbJsonPipe,
+    JnksIotJsonPipe,
     FileSizePipe,
     DateAgoPipe,
     SafePipe,
@@ -241,18 +241,18 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     },
     {
       provide: MAT_DATE_LOCALE,
-      useFactory: tbMatDateLocaleFactory
+      useFactory: jnksIotMatDateLocaleFactory
     },
     { provide: DatetimeAdapter, useClass: CustomDateAdapter },
     { provide: HELP_MARKDOWN_COMPONENT_TOKEN, useValue: HelpMarkdownComponent },
     { provide: SHARED_MODULE_TOKEN, useValue: SharedModule },
     { provide: MatPaginatorIntl, useClass: CustomPaginatorIntl },
-    TbPopoverService,
+    JnksIotPopoverService,
     ImportExportService,
     {
       provide: MAT_SELECT_CONFIG,
       useValue: {
-        overlayPanelClass: 'tb-select-overlay',
+        overlayPanelClass: 'jnks-iot-select-overlay',
         hideSingleSelectionIndicator: true
       }
     },
@@ -277,20 +277,20 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     ToastDirective,
     FullscreenDirective,
     CircularProgressDirective,
-    TbHotkeysDirective,
-    TbAnchorComponent,
-    TbPopoverComponent,
-    TbStringTemplateOutletDirective,
-    TbComponentOutletDirective,
-    TbPopoverDirective,
-    TbMarkdownComponent,
+    JnksIotHotkeysDirective,
+    JnksIotAnchorComponent,
+    JnksIotPopoverComponent,
+    JnksIotStringTemplateOutletDirective,
+    JnksIotComponentOutletDirective,
+    JnksIotPopoverDirective,
+    JnksIotMarkdownComponent,
     HelpComponent,
     HelpMarkdownComponent,
     HelpPopupComponent,
-    TbCheckboxComponent,
-    TbSnackBarComponent,
-    TbErrorComponent,
-    TbCheatSheetComponent,
+    JnksIotCheckboxComponent,
+    JnksIotSnackBarComponent,
+    JnksIotErrorComponent,
+    JnksIotCheatSheetComponent,
     BreadcrumbComponent,
     UserMenuComponent,
     TimewindowComponent,
@@ -364,7 +364,7 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     EnumToArrayPipe,
     HighlightPipe,
     TruncatePipe,
-    TbJsonPipe,
+    JnksIotJsonPipe,
     FileSizePipe,
     DateAgoPipe,
     ImagePipe,
@@ -373,7 +373,7 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     ShortNumberPipe,
     SelectableColumnsPipe,
     KeyboardShortcutPipe,
-    TbJsonToStringDirective,
+    JnksIotJsonToStringDirective,
     JsonObjectEditDialogComponent,
     HistorySelectorComponent,
     EntityGatewaySelectComponent,
@@ -387,7 +387,7 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     BranchAutocompleteComponent,
     CountryAutocompleteComponent,
     PhoneInputComponent,
-    TbScriptLangComponent,
+    JnksIotScriptLangComponent,
     NotificationComponent,
     TemplateAutocompleteComponent,
     SlackConversationAutocompleteComponent,
@@ -402,7 +402,7 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     MaterialIconsComponent,
     RuleChainSelectComponent,
     RuleChainSelectPanelComponent,
-    TbIconComponent,
+    JnksIotIconComponent,
     HintTooltipIconComponent,
     ImportDialogComponent,
     ImportDialogCsvComponent,
@@ -493,18 +493,18 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     ToastDirective,
     FullscreenDirective,
     CircularProgressDirective,
-    TbHotkeysDirective,
-    TbAnchorComponent,
-    TbStringTemplateOutletDirective,
-    TbComponentOutletDirective,
-    TbPopoverDirective,
-    TbMarkdownComponent,
+    JnksIotHotkeysDirective,
+    JnksIotAnchorComponent,
+    JnksIotStringTemplateOutletDirective,
+    JnksIotComponentOutletDirective,
+    JnksIotPopoverDirective,
+    JnksIotMarkdownComponent,
     HelpComponent,
     HelpMarkdownComponent,
     HelpPopupComponent,
-    TbCheckboxComponent,
-    TbErrorComponent,
-    TbCheatSheetComponent,
+    JnksIotCheckboxComponent,
+    JnksIotErrorComponent,
+    JnksIotCheatSheetComponent,
     BreadcrumbComponent,
     UserMenuComponent,
     TimewindowComponent,
@@ -550,7 +550,7 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     SvgXmlComponent,
     FabTriggerDirective,
     FabActionsDirective,
-    TbJsonToStringDirective,
+    JnksIotJsonToStringDirective,
     FabToolbarComponent,
     WidgetsBundleSelectComponent,
     ValueInputComponent,
@@ -627,7 +627,7 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     EnumToArrayPipe,
     HighlightPipe,
     TruncatePipe,
-    TbJsonPipe,
+    JnksIotJsonPipe,
     KeyboardShortcutPipe,
     FileSizePipe,
     DateAgoPipe,
@@ -651,7 +651,7 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     BranchAutocompleteComponent,
     CountryAutocompleteComponent,
     PhoneInputComponent,
-    TbScriptLangComponent,
+    JnksIotScriptLangComponent,
     NotificationComponent,
     TemplateAutocompleteComponent,
     SlackConversationAutocompleteComponent,
@@ -666,7 +666,7 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     MaterialIconsComponent,
     RuleChainSelectComponent,
     RuleChainSelectPanelComponent,
-    TbIconComponent,
+    JnksIotIconComponent,
     HintTooltipIconComponent,
     ImportDialogComponent,
     ImportDialogCsvComponent,

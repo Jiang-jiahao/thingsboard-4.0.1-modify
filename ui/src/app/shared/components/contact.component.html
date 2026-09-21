@@ -1,9 +1,9 @@
 <section [formGroup]="parentForm">
-  <tb-country-autocomplete
+  <jnks-iot-country-autocomplete
     formControlName="country"
     (selectCountryCode)="changeCountry($event)">
-  </tb-country-autocomplete>
-  <div class="tb-form-row column-xs tb-standard-fields no-border no-padding">
+  </jnks-iot-country-autocomplete>
+  <div class="jnks-iot-form-row column-xs jnks-iot-standard-fields no-border no-padding">
     <mat-form-field class="flex" subscriptSizing="dynamic">
       <mat-label translate>contact.city</mat-label>
       <input matInput formControlName="city">
@@ -37,12 +37,12 @@
     <mat-label translate>contact.address2</mat-label>
     <input matInput formControlName="address2">
   </mat-form-field>
-  <tb-phone-input [required]="false"
+  <jnks-iot-phone-input [required]="false"
                   [defaultCountry]="phoneInputDefaultCountry"
                   label="{{ 'contact.phone' | translate }}"
                   [enableFlagsSelect]="true"
                   formControlName="phone">
-  </tb-phone-input>
+  </jnks-iot-phone-input>
   <mat-form-field class="mat-block">
     <mat-label translate>contact.email</mat-label>
     <input matInput type="email" formControlName="email">

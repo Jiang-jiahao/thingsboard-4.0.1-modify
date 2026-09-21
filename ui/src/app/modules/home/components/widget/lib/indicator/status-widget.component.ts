@@ -32,7 +32,7 @@ import { ValueType } from '@shared/models/constants';
 const initialStatusWidgetSize = 147;
 
 @Component({
-  selector: 'tb-status-widget',
+  selector: 'jnks-iot-status-widget',
   templateUrl: './status-widget.component.html',
   styleUrls: ['../action/action-widget.scss', './status-widget.component.scss'],
   encapsulation: ViewEncapsulation.None

@@ -1,5 +1,5 @@
-<div class="tb-custom-action-pretty" tb-fullscreen [fullscreen]="fullscreen">
-  <div class="tb-action-expand-button flex flex-row items-center justify-end" [class.tb-fullscreen-editor]="fullscreen">
+<div class="jnks-iot-custom-action-pretty" jnks-iot-fullscreen [fullscreen]="fullscreen">
+  <div class="jnks-iot-action-expand-button flex flex-row items-center justify-end" [class.jnks-iot-fullscreen-editor]="fullscreen">
     <button *ngIf="!fullscreen"
             class="lt-md:!hidden"
             mat-icon-button
@@ -17,23 +17,23 @@
       <span translate>widget.toggle-fullscreen</span>
     </button>
   </div>
-  <div class="tb-custom-action-editor" [class.tb-fullscreen-editor]="fullscreen">
+  <div class="jnks-iot-custom-action-editor" [class.jnks-iot-fullscreen-editor]="fullscreen">
     <div *ngIf="!fullscreen; else fullscreenEditor">
-      <tb-custom-action-pretty-resources-tabs [hasCustomFunction]="true"
+      <jnks-iot-custom-action-pretty-resources-tabs [hasCustomFunction]="true"
                                               [helpId]="helpId"
                                               [action]="action" (actionUpdated)="onActionUpdated($event ? true : false)">
-      </tb-custom-action-pretty-resources-tabs>
+      </jnks-iot-custom-action-pretty-resources-tabs>
     </div>
     <ng-template #fullscreenEditor>
-      <div class="tb-fullscreen-panel tb-layout-fill flex flex-row">
-        <div #leftPanel class="tb-split tb-content">
-          <tb-custom-action-pretty-resources-tabs [hasCustomFunction]="false"
+      <div class="jnks-iot-fullscreen-panel jnks-iot-layout-fill flex flex-row">
+        <div #leftPanel class="jnks-iot-split jnks-iot-content">
+          <jnks-iot-custom-action-pretty-resources-tabs [hasCustomFunction]="false"
                                                   [helpId]="helpId"
                                                   [action]="action" (actionUpdated)="onActionUpdated($event ? true : false)">
-          </tb-custom-action-pretty-resources-tabs>
+          </jnks-iot-custom-action-pretty-resources-tabs>
         </div>
-        <div #rightPanel class="tb-split tb-content right-panel">
-          <tb-js-func
+        <div #rightPanel class="jnks-iot-split jnks-iot-content right-panel">
+          <jnks-iot-js-func
             [(ngModel)]="action.customFunction"
             (ngModelChange)="onActionUpdated()"
             withModules
@@ -45,7 +45,7 @@
             functionTitle="{{ 'widget-action.custom-pretty-function' | translate }}"
             [helpId]="helpId"
             [helpPopupStyle]="{width: '900px'}">
-          </tb-js-func>
+          </jnks-iot-js-func>
         </div>
       </div>
     </ng-template>

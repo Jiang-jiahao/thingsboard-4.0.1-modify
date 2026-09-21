@@ -8,7 +8,7 @@ import { EntityTableConfig } from '@home/models/entity/entities-table-config.mod
 import { WidgetTypeDetails } from '@shared/models/widget.models';
 
 @Component({
-  selector: 'tb-widget-type',
+  selector: 'jnks-iot-widget-type',
   templateUrl: './widget-type.component.html',
   styleUrls: []
 })

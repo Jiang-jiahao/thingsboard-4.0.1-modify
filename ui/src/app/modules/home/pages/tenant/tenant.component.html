@@ -1,4 +1,4 @@
-<div class="tb-details-buttons xs:flex xs:flex-col">
+<div class="jnks-iot-details-buttons xs:flex xs:flex-col">
   <button mat-raised-button color="primary"
           [disabled]="(isLoading$ | async)"
           (click)="onEntityAction($event, 'open')"
@@ -41,35 +41,35 @@
           {{ 'tenant.title-max-length' | translate }}
         </mat-error>
       </mat-form-field>
-      <tb-tenant-profile-autocomplete
+      <jnks-iot-tenant-profile-autocomplete
         [selectDefaultProfile]="isAdd"
         [showDetailsPageLink]="true"
         required
         formControlName="tenantProfileId"
         (tenantProfileUpdated)="onTenantProfileUpdated()">
-      </tb-tenant-profile-autocomplete>
+      </jnks-iot-tenant-profile-autocomplete>
       <div formGroupName="additionalInfo" class="flex flex-col">
         <mat-form-field class="mat-block">
           <mat-label translate>tenant.description</mat-label>
           <textarea matInput formControlName="description" rows="2"></textarea>
         </mat-form-field>
-        <section class="tb-default-dashboard flex flex-1 flex-col" *ngIf="entity?.id">
+        <section class="jnks-iot-default-dashboard flex flex-1 flex-col" *ngIf="entity?.id">
           <section class="flex flex-1 flex-col gt-sm:flex-row">
-            <tb-dashboard-autocomplete
+            <jnks-iot-dashboard-autocomplete
               class="flex-1"
               label="{{ 'dashboard.home-dashboard' | translate }}"
               formControlName="homeDashboardId"
               [dashboardsScope]="'tenant'"
               [tenantId]="entity?.id.id"
               [selectFirstDashboard]="false"
-            ></tb-dashboard-autocomplete>
+            ></jnks-iot-dashboard-autocomplete>
             <mat-checkbox class="flex-1" formControlName="homeDashboardHideToolbar">
               {{ 'dashboard.home-dashboard-hide-toolbar' | translate }}
             </mat-checkbox>
           </section>
         </section>
       </div>
-      <tb-contact [parentForm]="entityForm" [isEdit]="isEdit"></tb-contact>
+      <jnks-iot-contact [parentForm]="entityForm" [isEdit]="isEdit"></jnks-iot-contact>
     </fieldset>
   </form>
 </div>

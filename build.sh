@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e # exit on any error
 
-#PROJECTS="images/tb-node,images/web-ui,rule-engine-pe/rule-node-twilio-sms"
+#PROJECTS="images/jnks-iot-node,images/web-ui,rule-engine-pe/rule-node-twilio-sms"
 PROJECTS=""
 
 if [ "$1" ]; then

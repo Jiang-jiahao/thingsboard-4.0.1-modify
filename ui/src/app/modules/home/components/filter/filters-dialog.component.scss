@@ -1,11 +1,11 @@
 :host {
 
-  .tb-filters-header {
+  .jnks-iot-filters-header {
     min-height: 40px;
     padding: 0 11px;
     margin: 5px;
 
-    .tb-header-label {
+    .jnks-iot-header-label {
       font-size: 14px;
       color: rgba(0, 0, 0, .570588);
     }
@@ -15,11 +15,11 @@
     margin: -1px -24px;
   }
 
-  .tb-filter {
+  .jnks-iot-filter {
     padding: 0 0 0 10px;
     margin: 5px;
 
-    .tb-editable-switch {
+    .jnks-iot-editable-switch {
       padding-left: 10px;
 
       .editable-switch {

@@ -19,7 +19,7 @@ public class DefaultSchedulerComponent implements SchedulerComponent {
 
     @PostConstruct
     public void init() {
-        schedulerExecutor = JnksIotExecutors.newSingleThreadScheduledExecutor("tb-scheduler");
+        schedulerExecutor = JnksIotExecutors.newSingleThreadScheduledExecutor("jnks-iot-scheduler");
     }
 
     @PreDestroy

@@ -16,7 +16,7 @@ import { formatValue } from '@core/utils';
 type ButtonAppearanceType = 'left' | 'right';
 
 @Component({
-  selector: 'tb-value-stepper-widget-settings',
+  selector: 'jnks-iot-value-stepper-widget-settings',
   templateUrl: './value-stepper-widget-settings.component.html',
   styleUrls: ['../widget-settings.scss']
 })

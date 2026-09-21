@@ -17,7 +17,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-kv-map-config-old',
+  selector: 'jnks-iot-kv-map-config-old',
   templateUrl: './kv-map-config-old.component.html',
   styleUrls: ['./kv-map-config-old.component.scss'],
   providers: [

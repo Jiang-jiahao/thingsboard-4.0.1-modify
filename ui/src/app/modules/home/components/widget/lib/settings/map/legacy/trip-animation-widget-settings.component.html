@@ -1,28 +1,28 @@
-<section class="tb-widget-settings" [formGroup]="tripAnimationWidgetSettingsForm">
-  <tb-map-provider-settings
+<section class="jnks-iot-widget-settings" [formGroup]="tripAnimationWidgetSettingsForm">
+  <jnks-iot-map-provider-settings
     [ignoreImageMap]="true"
     [aliasController]="aliasController"
     formControlName="mapProviderSettings">
-  </tb-map-provider-settings>
-  <tb-trip-animation-common-settings
+  </jnks-iot-map-provider-settings>
+  <jnks-iot-trip-animation-common-settings
     [widget]="widget"
     formControlName="commonMapSettings">
-  </tb-trip-animation-common-settings>
-  <tb-trip-animation-marker-settings
+  </jnks-iot-trip-animation-common-settings>
+  <jnks-iot-trip-animation-marker-settings
     formControlName="markersSettings">
-  </tb-trip-animation-marker-settings>
-  <tb-trip-animation-path-settings
+  </jnks-iot-trip-animation-marker-settings>
+  <jnks-iot-trip-animation-path-settings
     formControlName="pathSettings">
-  </tb-trip-animation-path-settings>
-  <tb-trip-animation-point-settings
+  </jnks-iot-trip-animation-path-settings>
+  <jnks-iot-trip-animation-point-settings
     formControlName="pointSettings">
-  </tb-trip-animation-point-settings>
-  <tb-polygon-settings
+  </jnks-iot-trip-animation-point-settings>
+  <jnks-iot-polygon-settings
     [widget]="widget"
     formControlName="polygonSettings">
-  </tb-polygon-settings>
-  <tb-circle-settings
+  </jnks-iot-polygon-settings>
+  <jnks-iot-circle-settings
     [widget]="widget"
     formControlName="circleSettings">
-  </tb-circle-settings>
+  </jnks-iot-circle-settings>
 </section>

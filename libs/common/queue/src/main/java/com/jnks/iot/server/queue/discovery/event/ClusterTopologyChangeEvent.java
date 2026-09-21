@@ -5,7 +5,7 @@ import com.jnks.iot.server.queue.discovery.QueueKey;
 
 import java.util.Set;
 
-public class ClusterTopologyChangeEvent extends TbApplicationEvent {
+public class ClusterTopologyChangeEvent extends JnksIotApplicationEvent {
 
     private static final long serialVersionUID = -2441739930040282254L;
 

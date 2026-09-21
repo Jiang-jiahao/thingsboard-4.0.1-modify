@@ -1,6 +1,6 @@
 @import '../../../../../../scss/constants';
 
-.tb-scada-symbol-metadata-tag-function-panel {
+.jnks-iot-scada-symbol-metadata-tag-function-panel {
   width: 800px;
   display: flex;
   flex-direction: column;
@@ -8,7 +8,7 @@
   @media #{$mat-lt-md} {
     width: 90vw;
   }
-  .tb-scada-symbol-metadata-tag-function-panel-content {
+  .jnks-iot-scada-symbol-metadata-tag-function-panel-content {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -16,20 +16,20 @@
     margin: -10px;
     padding: 10px;
   }
-  .tb-scada-symbol-metadata-tag-function-title-container {
+  .jnks-iot-scada-symbol-metadata-tag-function-title-container {
     display: flex;
     flex-direction: row;
     gap: 16px;
     align-items: center;
   }
-  .tb-scada-symbol-metadata-tag-function-title {
+  .jnks-iot-scada-symbol-metadata-tag-function-title {
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
     color: rgba(0, 0, 0, 0.87);
   }
-  .tb-scada-symbol-metadata-tag-function-panel-buttons {
+  .jnks-iot-scada-symbol-metadata-tag-function-panel-buttons {
     height: 40px;
     display: flex;
     flex-direction: row;

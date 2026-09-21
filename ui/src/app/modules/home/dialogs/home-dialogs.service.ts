@@ -27,7 +27,7 @@ export class HomeDialogsService {
     return this.dialog.open<ImportDialogCsvComponent, ImportDialogCsvData,
       any>(ImportDialogCsvComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         entityType,
         importTitle,

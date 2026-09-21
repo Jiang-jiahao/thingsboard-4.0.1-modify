@@ -42,21 +42,21 @@ import com.jnks.iot.server.common.data.notification.template.NotificationTemplat
 import com.jnks.iot.server.common.data.notification.template.WebDeliveryMethodNotificationTemplate;
 import com.jnks.iot.server.common.data.page.PageDataIterable;
 import com.jnks.iot.server.common.msg.queue.ServiceType;
-import com.jnks.iot.server.common.msg.queue.TbCallback;
+import com.jnks.iot.server.common.msg.queue.JnksIotCallback;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
-import com.jnks.iot.server.common.msg.tools.TbRateLimitsException;
+import com.jnks.iot.server.common.msg.tools.JnksIotRateLimitsException;
 import com.jnks.iot.server.dao.notification.NotificationRequestService;
 import com.jnks.iot.server.dao.notification.NotificationService;
 import com.jnks.iot.server.dao.notification.NotificationSettingsService;
 import com.jnks.iot.server.dao.notification.NotificationTargetService;
 import com.jnks.iot.server.dao.notification.NotificationTemplateService;
 import com.jnks.iot.server.gen.transport.TransportProtos;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
 import com.jnks.iot.server.queue.discovery.TopicService;
-import com.jnks.iot.server.queue.provider.TbQueueProducerProvider;
+import com.jnks.iot.server.queue.provider.JnksIotQueueProducerProvider;
 import com.jnks.iot.server.service.executors.NotificationExecutorService;
 import com.jnks.iot.server.service.notification.channels.NotificationChannel;
-import com.jnks.iot.server.service.subscription.TbSubscriptionUtils;
+import com.jnks.iot.server.service.subscription.JnksIotSubscriptionUtils;
 import com.jnks.iot.server.service.telemetry.AbstractSubscriptionService;
 import com.jnks.iot.server.service.ws.notification.sub.NotificationRequestUpdate;
 import com.jnks.iot.server.service.ws.notification.sub.NotificationUpdate;
@@ -85,7 +85,7 @@ public class DefaultNotificationCenter extends AbstractSubscriptionService imple
     private final NotificationSettingsService notificationSettingsService;
     private final NotificationExecutorService notificationExecutor;
     private final TopicService topicService;
-    private final TbQueueProducerProvider producerProvider;
+    private final JnksIotQueueProducerProvider producerProvider;
     private final RateLimitService rateLimitService;
 
     private Map<NotificationDeliveryMethod, NotificationChannel> channels;
@@ -94,7 +94,7 @@ public class DefaultNotificationCenter extends AbstractSubscriptionService imple
     public NotificationRequest processNotificationRequest(TenantId tenantId, NotificationRequest request, FutureCallback<NotificationRequestStats> callback) {
         if (request.getRuleId() == null) {
             if (!rateLimitService.checkRateLimit(LimitedApi.NOTIFICATION_REQUESTS, tenantId)) {
-                throw new TbRateLimitsException(EntityType.TENANT);
+                throw new JnksIotRateLimitsException(EntityType.TENANT);
             }
         }
 
@@ -452,18 +452,18 @@ public class DefaultNotificationCenter extends AbstractSubscriptionService imple
     private void onNotificationUpdate(TenantId tenantId, UserId recipientId, NotificationUpdate update) {
         log.trace("Submitting notification update for recipient {}: {}", recipientId, update);
         forwardToSubscriptionManagerService(tenantId, recipientId, subscriptionManagerService -> {
-            subscriptionManagerService.onNotificationUpdate(tenantId, recipientId, update, TbCallback.EMPTY);
-        }, () -> TbSubscriptionUtils.notificationUpdateToProto(tenantId, recipientId, update));
+            subscriptionManagerService.onNotificationUpdate(tenantId, recipientId, update, JnksIotCallback.EMPTY);
+        }, () -> JnksIotSubscriptionUtils.notificationUpdateToProto(tenantId, recipientId, update));
     }
 
     private void onNotificationRequestUpdate(TenantId tenantId, NotificationRequestUpdate update) {
         log.trace("Submitting notification request update: {}", update);
         wsCallBackExecutor.submit(() -> {
-            TransportProtos.ToCoreNotificationMsg notificationRequestUpdateProto = TbSubscriptionUtils.notificationRequestUpdateToProto(tenantId, update);
-            Set<String> coreServices = new HashSet<>(partitionService.getAllServiceIds(ServiceType.TB_CORE));
+            TransportProtos.ToCoreNotificationMsg notificationRequestUpdateProto = JnksIotSubscriptionUtils.notificationRequestUpdateToProto(tenantId, update);
+            Set<String> coreServices = new HashSet<>(partitionService.getAllServiceIds(ServiceType.JNKS_IOT_CORE));
             for (String serviceId : coreServices) {
-                TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.TB_CORE, serviceId);
-                producerProvider.getTbCoreNotificationsMsgProducer().send(tpi, new TbProtoQueueMsg<>(UUID.randomUUID(), notificationRequestUpdateProto), null);
+                TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.JNKS_IOT_CORE, serviceId);
+                producerProvider.getJnksIotCoreNotificationsMsgProducer().send(tpi, new JnksIotProtoQueueMsg<>(UUID.randomUUID(), notificationRequestUpdateProto), null);
             }
         });
     }

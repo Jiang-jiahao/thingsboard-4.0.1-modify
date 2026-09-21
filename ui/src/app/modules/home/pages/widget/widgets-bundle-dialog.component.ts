@@ -15,7 +15,7 @@ export interface WidgetsBundleDialogData {
 }
 
 @Component({
-  selector: 'tb-widgets-bundle-dialog',
+  selector: 'jnks-iot-widgets-bundle-dialog',
   templateUrl: './widgets-bundle-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: WidgetsBundleDialogComponent}],
   styleUrls: ['widgets-bundle-dialog.component.scss']

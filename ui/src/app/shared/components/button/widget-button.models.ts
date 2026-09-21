@@ -230,7 +230,7 @@ const buttonStateCssGeneratorsMap = new Map<WidgetButtonState, ButtonStateCssGen
   ]
 );
 
-const widgetButtonCssSelector = '.mat-mdc-button.mat-mdc-button-base.tb-widget-button';
+const widgetButtonCssSelector = '.mat-mdc-button.mat-mdc-button-base.jnks-iot-widget-button';
 
 export const generateWidgetButtonAppearanceCss = (appearance: WidgetButtonAppearance): string => {
   let statesCss = '';

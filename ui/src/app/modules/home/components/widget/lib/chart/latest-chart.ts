@@ -16,7 +16,7 @@ import { CallbackDataParams } from 'echarts/types/dist/shared';
 import { SVG, Svg } from '@svgdotjs/svg.js';
 import { toAnimationOption } from '@home/components/widget/lib/chart/chart.models';
 
-export abstract class TbLatestChart<S extends LatestChartSettings> {
+export abstract class JnksIotLatestChart<S extends LatestChartSettings> {
 
   private readonly shapeResize$: ResizeObserver;
 

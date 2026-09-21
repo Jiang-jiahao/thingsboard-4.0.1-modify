@@ -7,9 +7,9 @@ $tickMarksColor: var(--tb-slider-tick-marks-color, #5469FF);
 $mainColorDisabled: var(--tb-slider-main-color-disabled, #9BA2B0);
 $backgroundColorDisabled: var(--tb-slider-background-color-disabled, #D5D7E5);
 
-.tb-slider-panel {
+.jnks-iot-slider-panel {
 
-  .mat-mdc-slider.mat-primary.tb-slider {
+  .mat-mdc-slider.mat-primary.jnks-iot-slider {
     --mdc-slider-active-track-color: #{$mainColor};
     --mdc-slider-handle-color: #{$mainColor};
     --mdc-slider-focus-handle-color: #{$mainColor};
@@ -40,24 +40,24 @@ $backgroundColorDisabled: var(--tb-slider-background-color-disabled, #D5D7E5);
   flex-direction: column;
   padding: 20px 24px 24px 24px;
   gap: 8px;
-  > div:not(.tb-slider-overlay), > tb-icon {
+  > div:not(.jnks-iot-slider-overlay), > jnks-iot-icon {
     z-index: 1;
   }
-  .tb-slider-overlay {
+  .jnks-iot-slider-overlay {
     position: absolute;
     inset: 12px;
   }
-  div.tb-slider-title-panel {
+  div.jnks-iot-slider-title-panel {
     z-index: 2;
   }
   &.no-pointer-events {
-    .mat-mdc-slider.tb-slider {
+    .mat-mdc-slider.jnks-iot-slider {
       .mdc-slider__input {
         pointer-events: none;
       }
     }
   }
-  .tb-slider-content {
+  .jnks-iot-slider-content {
     flex: 1;
     min-height: 0;
     display: flex;
@@ -66,27 +66,27 @@ $backgroundColorDisabled: var(--tb-slider-background-color-disabled, #D5D7E5);
     align-items: center;
     justify-content: center;
     gap: 12px;
-    .tb-slider-value-container {
+    .jnks-iot-slider-value-container {
       min-height: 0;
     }
-    .tb-slider-value {
+    .jnks-iot-slider-value {
       white-space: nowrap;
     }
-    .tb-slider-container {
+    .jnks-iot-slider-container {
       align-self: stretch;
       display: flex;
       flex-direction: row;
       align-items: flex-start;
       gap: 8px;
-      &.tb-min-height {
+      &.jnks-iot-min-height {
         height: 6px;
       }
-      .tb-slider-column {
+      .jnks-iot-slider-column {
         flex: 1;
         display: flex;
         flex-direction: column;
         gap: 4px;
-        .mat-mdc-slider.tb-slider {
+        .mat-mdc-slider.jnks-iot-slider {
           margin: 0;
           height: 6px;
           min-height: 6px;
@@ -115,7 +115,7 @@ $backgroundColorDisabled: var(--tb-slider-background-color-disabled, #D5D7E5);
             white-space: nowrap;
           }
         }
-        .tb-slider-ticks {
+        .jnks-iot-slider-ticks {
           display: flex;
           flex-direction: row;
           align-items: flex-start;

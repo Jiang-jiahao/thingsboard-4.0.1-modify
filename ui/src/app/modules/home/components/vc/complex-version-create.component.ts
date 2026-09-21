@@ -14,14 +14,14 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { EntitiesVersionControlService } from '@core/http/entities-version-control.service';
 import { TranslateService } from '@ngx-translate/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Observable, Subscription } from 'rxjs';
 import { share } from 'rxjs/operators';
 import { parseHttpErrorMessage } from '@core/utils';
 
 @Component({
-  selector: 'tb-complex-version-create',
+  selector: 'jnks-iot-complex-version-create',
   templateUrl: './complex-version-create.component.html',
   styleUrls: ['./version-control.scss']
 })
@@ -34,7 +34,7 @@ export class ComplexVersionCreateComponent extends PageComponent implements OnIn
   onClose: (result: VersionCreationResult | null, branch: string | null) => void;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   createVersionFormGroup: UntypedFormGroup;
 

@@ -26,7 +26,7 @@ import {
 } from '@angular/forms';
 import { deepClone } from '@core/utils';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import {
   defaultPropertyValue,
   FormProperty,
@@ -43,7 +43,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-dynamic-form-property-row',
+  selector: 'jnks-iot-dynamic-form-property-row',
   templateUrl: './dynamic-form-property-row.component.html',
   styleUrls: ['./dynamic-form-property-row.component.scss'],
   providers: [
@@ -91,7 +91,7 @@ export class DynamicFormPropertyRowComponent implements ControlValueAccessor, On
 
   constructor(private fb: UntypedFormBuilder,
               private cd: ChangeDetectorRef,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private propertiesComponent: DynamicFormPropertiesComponent,
@@ -166,8 +166,8 @@ export class DynamicFormPropertyRowComponent implements ControlValueAccessor, On
         },
         isModal: true
       });
-      dynamicFormPropertyPanelPopover.tbComponentRef.instance.popover = dynamicFormPropertyPanelPopover;
-      dynamicFormPropertyPanelPopover.tbComponentRef.instance.propertySettingsApplied.subscribe((property) => {
+      dynamicFormPropertyPanelPopover.jnksIotComponentRef.instance.popover = dynamicFormPropertyPanelPopover;
+      dynamicFormPropertyPanelPopover.jnksIotComponentRef.instance.propertySettingsApplied.subscribe((property) => {
         dynamicFormPropertyPanelPopover.hide();
         this.propertyRowFormGroup.patchValue(
           {
@@ -179,7 +179,7 @@ export class DynamicFormPropertyRowComponent implements ControlValueAccessor, On
         this.modelValue = property;
         this.propagateChange(this.modelValue);
       });
-      dynamicFormPropertyPanelPopover.tbDestroy.subscribe(() => {
+      dynamicFormPropertyPanelPopover.jnksIotDestroy.subscribe(() => {
         if (!propertyValid(this.modelValue)) {
           editCanceled();
         }

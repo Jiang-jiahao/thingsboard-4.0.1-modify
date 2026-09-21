@@ -2,15 +2,15 @@ import { Directive, ElementRef, Input, OnDestroy, OnInit } from '@angular/core';
 import { Hotkey } from 'angular2-hotkeys';
 import { MousetrapInstance } from 'mousetrap';
 import Mousetrap from 'mousetrap';
-import { TbCheatSheetComponent } from '@shared/components/cheatsheet.component';
+import { JnksIotCheatSheetComponent } from '@shared/components/cheatsheet.component';
 
 @Directive({
   // eslint-disable-next-line @angular-eslint/directive-selector
-  selector : '[tb-hotkeys]'
+  selector : '[jnks-iot-hotkeys]'
 })
-export class TbHotkeysDirective implements OnInit, OnDestroy {
-  @Input('tb-hotkeys') hotkeys: Hotkey[] = [];
-  @Input() cheatSheet: TbCheatSheetComponent;
+export class JnksIotHotkeysDirective implements OnInit, OnDestroy {
+  @Input('jnks-iot-hotkeys') hotkeys: Hotkey[] = [];
+  @Input() cheatSheet: JnksIotCheatSheetComponent;
 
   private mousetrap: MousetrapInstance;
   private hotkeysList: Hotkey[] = [];

@@ -39,20 +39,20 @@ import com.jnks.iot.server.common.data.id.RuleChainId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.id.TenantProfileId;
 import com.jnks.iot.server.common.data.limit.LimitedApi;
-import com.jnks.iot.server.common.data.msg.TbMsgType;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
 import com.jnks.iot.server.common.data.notification.rule.trigger.RateLimitsTrigger;
 import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
 import com.jnks.iot.server.common.data.rpc.RpcStatus;
-import com.jnks.iot.server.common.msg.TbMsg;
-import com.jnks.iot.server.common.msg.TbMsgMetaData;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
 import com.jnks.iot.server.common.msg.notification.NotificationRuleProcessor;
 import com.jnks.iot.server.common.msg.queue.ServiceType;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
-import com.jnks.iot.server.common.msg.tools.TbRateLimitsException;
+import com.jnks.iot.server.common.msg.tools.JnksIotRateLimitsException;
 import com.jnks.iot.server.common.stats.MessagesStats;
 import com.jnks.iot.server.common.stats.StatsFactory;
 import com.jnks.iot.server.common.stats.StatsType;
-import com.jnks.iot.server.common.stats.TbApiUsageReportClient;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageReportClient;
 import com.jnks.iot.server.common.transport.DeviceDeletedEvent;
 import com.jnks.iot.server.common.transport.DeviceProfileUpdatedEvent;
 import com.jnks.iot.server.common.transport.DeviceUpdatedEvent;
@@ -80,20 +80,20 @@ import com.jnks.iot.server.gen.transport.TransportProtos.ToTransportMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.TransportApiRequestMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.TransportApiResponseMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.TransportToDeviceActorMsg;
-import com.jnks.iot.server.queue.TbQueueCallback;
-import com.jnks.iot.server.queue.TbQueueConsumer;
-import com.jnks.iot.server.queue.TbQueueMsgMetadata;
-import com.jnks.iot.server.queue.TbQueueProducer;
-import com.jnks.iot.server.queue.TbQueueRequestTemplate;
+import com.jnks.iot.server.queue.JnksIotQueueCallback;
+import com.jnks.iot.server.queue.JnksIotQueueConsumer;
+import com.jnks.iot.server.queue.JnksIotQueueMsgMetadata;
+import com.jnks.iot.server.queue.JnksIotQueueProducer;
+import com.jnks.iot.server.queue.JnksIotQueueRequestTemplate;
 import com.jnks.iot.server.queue.common.AsyncCallbackTemplate;
-import com.jnks.iot.server.queue.common.TbProtoQueueMsg;
-import com.jnks.iot.server.common.ruleengine.TbRuleEngineProducerService;
+import com.jnks.iot.server.queue.common.JnksIotProtoQueueMsg;
+import com.jnks.iot.server.common.ruleengine.JnksIotRuleEngineProducerService;
 import com.jnks.iot.server.queue.common.consumer.QueueConsumerManager;
 import com.jnks.iot.server.queue.discovery.PartitionService;
-import com.jnks.iot.server.queue.discovery.TbServiceInfoProvider;
+import com.jnks.iot.server.queue.discovery.JnksIotServiceInfoProvider;
 import com.jnks.iot.server.queue.discovery.TopicService;
-import com.jnks.iot.server.queue.provider.TbQueueProducerProvider;
-import com.jnks.iot.server.queue.provider.TbTransportQueueFactory;
+import com.jnks.iot.server.queue.provider.JnksIotQueueProducerProvider;
+import com.jnks.iot.server.queue.provider.JnksIotTransportQueueFactory;
 import com.jnks.iot.server.common.scheduler.SchedulerComponent;
 import com.jnks.iot.common.util.AfterStartUp;
 
@@ -162,7 +162,7 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Autowired
     @Lazy
-    private TbApiUsageReportClient apiUsageClient;
+    private JnksIotApiUsageReportClient apiUsageClient;
 
     /** 用于定时打印统计信息的Map */
     private final Map<String, Number> statsMap = new LinkedHashMap<>();
@@ -172,16 +172,16 @@ public class DefaultTransportService extends TransportActivityManager implements
     private final PartitionService partitionService;
 
     /** 传输服务所需要的队列工厂类，用来生产和其他服务通信的生产者和消费者 */
-    private final TbTransportQueueFactory queueProvider;
+    private final JnksIotTransportQueueFactory queueProvider;
 
-    /** 生产者提供器，实际依赖TbTransportQueueFactory */
-    private final TbQueueProducerProvider producerProvider;
+    /** 生产者提供器，实际依赖JnksIotTransportQueueFactory */
+    private final JnksIotQueueProducerProvider producerProvider;
 
     /** 规则引擎消息生产者服务-实际实现依赖下面的ruleEngineMsgProducer */
-    private final TbRuleEngineProducerService ruleEngineProducerService;
+    private final JnksIotRuleEngineProducerService ruleEngineProducerService;
 
     private final TopicService topicService;
-    private final TbServiceInfoProvider serviceInfoProvider;
+    private final JnksIotServiceInfoProvider serviceInfoProvider;
     private final StatsFactory statsFactory;
     private final TransportDeviceProfileCache deviceProfileCache;
     private final TransportTenantProfileCache tenantProfileCache;
@@ -194,22 +194,22 @@ public class DefaultTransportService extends TransportActivityManager implements
     private final EntityLimitsCache entityLimitsCache;
 
     /** 传输API请求模板（用于与核心服务交互） */
-    protected TbQueueRequestTemplate<TbProtoQueueMsg<TransportApiRequestMsg>, TbProtoQueueMsg<TransportApiResponseMsg>> transportApiRequestTemplate;
+    protected JnksIotQueueRequestTemplate<JnksIotProtoQueueMsg<TransportApiRequestMsg>, JnksIotProtoQueueMsg<TransportApiResponseMsg>> transportApiRequestTemplate;
 
     /** 规则引擎消息生产者 */
-    protected TbQueueProducer<TbProtoQueueMsg<ToRuleEngineMsg>> ruleEngineMsgProducer;
+    protected JnksIotQueueProducer<JnksIotProtoQueueMsg<ToRuleEngineMsg>> ruleEngineMsgProducer;
 
     /** 核心服务消息生产者 */
-    protected TbQueueProducer<TbProtoQueueMsg<ToCoreMsg>> tbCoreMsgProducer;
+    protected JnksIotQueueProducer<JnksIotProtoQueueMsg<ToCoreMsg>> jnksIotCoreMsgProducer;
 
     /** 传输通知消费者管理器（处理来自核心的通知） */
-    protected QueueConsumerManager<TbProtoQueueMsg<ToTransportMsg>> transportNotificationsConsumer;
+    protected QueueConsumerManager<JnksIotProtoQueueMsg<ToTransportMsg>> transportNotificationsConsumer;
 
     /** 规则引擎消息统计 */
     protected MessagesStats ruleEngineProducerStats;
 
     /** 核心服务消息统计 */
-    protected MessagesStats tbCoreProducerStats;
+    protected MessagesStats jnksIotCoreProducerStats;
 
     /** 传输API消息统计 */
     protected MessagesStats transportApiStats;
@@ -227,7 +227,7 @@ public class DefaultTransportService extends TransportActivityManager implements
     public void init() {
         super.init();
         this.ruleEngineProducerStats = statsFactory.createMessagesStats(StatsType.RULE_ENGINE.getName() + ".producer");
-        this.tbCoreProducerStats = statsFactory.createMessagesStats(StatsType.CORE.getName() + ".producer");
+        this.jnksIotCoreProducerStats = statsFactory.createMessagesStats(StatsType.CORE.getName() + ".producer");
         this.transportApiStats = statsFactory.createMessagesStats(StatsType.TRANSPORT.getName() + ".producer");
         this.transportCallbackExecutor = JnksIotExecutors.newWorkStealingPool(20, getClass());
         this.scheduler.scheduleAtFixedRate(this::invalidateRateLimits, new Random().nextInt((int) sessionReportTimeout), sessionReportTimeout, TimeUnit.MILLISECONDS);
@@ -235,10 +235,10 @@ public class DefaultTransportService extends TransportActivityManager implements
         transportApiRequestTemplate.setMessagesStats(transportApiStats);
 
         ruleEngineMsgProducer = producerProvider.getRuleEngineMsgProducer();
-        tbCoreMsgProducer = producerProvider.getTbCoreMsgProducer();
+        jnksIotCoreMsgProducer = producerProvider.getJnksIotCoreMsgProducer();
         transportApiRequestTemplate.init();
         consumerExecutor = Executors.newSingleThreadExecutor(JnksIotThreadFactory.forName("transport-consumer"));
-        transportNotificationsConsumer = QueueConsumerManager.<TbProtoQueueMsg<ToTransportMsg>>builder()
+        transportNotificationsConsumer = QueueConsumerManager.<JnksIotProtoQueueMsg<ToTransportMsg>>builder()
                 .name("TB Transport")
                 .msgPackProcessor(this::processNotificationMsgs)
                 .pollInterval(notificationsPollDuration)
@@ -249,12 +249,12 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @AfterStartUp(order = AfterStartUp.TRANSPORT_SERVICE)
     public void start() {
-        TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.TB_TRANSPORT, serviceInfoProvider.getServiceId());
+        TopicPartitionInfo tpi = topicService.getNotificationsTopic(ServiceType.JNKS_IOT_TRANSPORT, serviceInfoProvider.getServiceId());
         transportNotificationsConsumer.subscribe(Set.of(tpi));
         transportNotificationsConsumer.launch();
     }
 
-    private void processNotificationMsgs(List<TbProtoQueueMsg<ToTransportMsg>> msgs, TbQueueConsumer<TbProtoQueueMsg<ToTransportMsg>> consumer) {
+    private void processNotificationMsgs(List<JnksIotProtoQueueMsg<ToTransportMsg>> msgs, JnksIotQueueConsumer<JnksIotProtoQueueMsg<ToTransportMsg>> consumer) {
         msgs.forEach(msg -> {
             try {
                 processToTransportMsg(msg.getValue());
@@ -292,10 +292,10 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetEntityProfileResponseMsg getEntityProfile(TransportProtos.GetEntityProfileRequestMsg msg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg =
-                new TbProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setEntityProfileRequestMsg(msg).build());
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg =
+                new JnksIotProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setEntityProfileRequestMsg(msg).build());
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getEntityProfileResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -304,10 +304,10 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public List<TransportProtos.GetQueueRoutingInfoResponseMsg> getQueueRoutingInfo(TransportProtos.GetAllQueueRoutingInfoRequestMsg msg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg =
-                new TbProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setGetAllQueueRoutingInfoRequestMsg(msg).build());
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg =
+                new JnksIotProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setGetAllQueueRoutingInfoRequestMsg(msg).build());
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getGetQueueRoutingInfoResponseMsgsList();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -316,10 +316,10 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetResourceResponseMsg getResource(TransportProtos.GetResourceRequestMsg msg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg =
-                new TbProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setResourceRequestMsg(msg).build());
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg =
+                new JnksIotProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setResourceRequestMsg(msg).build());
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getResourceResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -328,14 +328,14 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetSnmpDevicesResponseMsg getSnmpDevicesIds(TransportProtos.GetSnmpDevicesRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
                 .setSnmpDevicesRequestMsg(requestMsg)
                 .build()
         );
 
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getSnmpDevicesResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -344,13 +344,13 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetHttpPullDevicesResponseMsg getHttpPullDevicesIds(TransportProtos.GetHttpPullDevicesRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
                 .setHttpPullDevicesRequestMsg(requestMsg)
                 .build()
         );
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getHttpPullDevicesResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -359,13 +359,13 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetDeviceByTenantIdAndNameResponseMsg getDeviceByTenantIdAndName(TransportProtos.GetDeviceByTenantIdAndNameRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
                 .setDeviceByTenantIdAndNameRequestMsg(requestMsg)
                 .build()
         );
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getDeviceByTenantIdAndNameResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -374,13 +374,13 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetHttpPullRoutingTargetsResponseMsg getHttpPullRoutingTargets(TransportProtos.GetHttpPullRoutingTargetsRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
                 .setHttpPullRoutingTargetsRequestMsg(requestMsg)
                 .build()
         );
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getHttpPullRoutingTargetsResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -389,13 +389,13 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetMqttPullDevicesResponseMsg getMqttPullDevicesIds(TransportProtos.GetMqttPullDevicesRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
                 .setMqttPullDevicesRequestMsg(requestMsg)
                 .build()
         );
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getMqttPullDevicesResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -404,13 +404,13 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetTcpDevicesResponseMsg getTcpDevicesIds(TransportProtos.GetTcpDevicesRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
                 .setTcpDevicesRequestMsg(requestMsg)
                 .build()
         );
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getTcpDevicesResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -419,13 +419,13 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetUdpDevicesResponseMsg getUdpDevicesIds(TransportProtos.GetUdpDevicesRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
                 .setUdpDevicesRequestMsg(requestMsg)
                 .build()
         );
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getUdpDevicesResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -434,13 +434,13 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetTcpProfilesResponseMsg getTcpProfileIds(TransportProtos.GetTcpProfilesRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
                 .setTcpProfilesRequestMsg(requestMsg)
                 .build()
         );
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getTcpProfilesResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -449,13 +449,13 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetUdpProfilesResponseMsg getUdpProfileIds(TransportProtos.GetUdpProfilesRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
                 .setUdpProfilesRequestMsg(requestMsg)
                 .build()
         );
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getUdpProfilesResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -464,7 +464,7 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetDeviceResponseMsg getDevice(TransportProtos.GetDeviceRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
                 .setDeviceRequestMsg(requestMsg)
                 .build()
@@ -484,14 +484,14 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public TransportProtos.GetDeviceCredentialsResponseMsg getDeviceCredentials(TransportProtos.GetDeviceCredentialsRequestMsg requestMsg) {
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
                 .setDeviceCredentialsRequestMsg(requestMsg)
                 .build()
         );
 
         try {
-            TbProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
+            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
             return response.getValue().getDeviceCredentialsResponseMsg();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -502,7 +502,7 @@ public class DefaultTransportService extends TransportActivityManager implements
     public void process(DeviceTransportType transportType, TransportProtos.ValidateDeviceTokenRequestMsg msg,
                         TransportServiceCallback<ValidateDeviceCredentialsResponse> callback) {
         log.trace("Processing msg: {}", msg);
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(UUID.randomUUID(),
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(UUID.randomUUID(),
                 TransportApiRequestMsg.newBuilder().setValidateTokenRequestMsg(msg).build());
         doProcess(transportType, protoMsg, callback);
     }
@@ -511,7 +511,7 @@ public class DefaultTransportService extends TransportActivityManager implements
     public void process(DeviceTransportType transportType, TransportProtos.ValidateBasicMqttCredRequestMsg msg,
                         TransportServiceCallback<ValidateDeviceCredentialsResponse> callback) {
         log.trace("Processing msg: {}", msg);
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(UUID.randomUUID(),
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(UUID.randomUUID(),
                 TransportApiRequestMsg.newBuilder().setValidateBasicMqttCredRequestMsg(msg).build());
         doProcess(transportType, protoMsg, callback);
     }
@@ -519,7 +519,7 @@ public class DefaultTransportService extends TransportActivityManager implements
     @Override
     public void process(TransportProtos.ValidateDeviceLwM2MCredentialsRequestMsg requestMsg, TransportServiceCallback<ValidateDeviceCredentialsResponse> callback) {
         log.trace("Processing msg: {}", requestMsg);
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setValidateDeviceLwM2MCredentialsRequestMsg(requestMsg).build());
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setValidateDeviceLwM2MCredentialsRequestMsg(requestMsg).build());
         ListenableFuture<ValidateDeviceCredentialsResponse> response = Futures.transform(transportApiRequestTemplate.send(protoMsg), tmp -> {
             TransportProtos.ValidateDeviceCredentialsResponseMsg msg = tmp.getValue().getValidateCredResponseMsg();
             ValidateDeviceCredentialsResponse.ValidateDeviceCredentialsResponseBuilder result = ValidateDeviceCredentialsResponse.builder();
@@ -540,18 +540,18 @@ public class DefaultTransportService extends TransportActivityManager implements
     @Override
     public void process(DeviceTransportType transportType, TransportProtos.ValidateDeviceX509CertRequestMsg msg, TransportServiceCallback<ValidateDeviceCredentialsResponse> callback) {
         log.trace("Processing msg: {}", msg);
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setValidateX509CertRequestMsg(msg).build());
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setValidateX509CertRequestMsg(msg).build());
         doProcess(transportType, protoMsg, callback);
     }
 
     @Override
     public void process(DeviceTransportType transportType, TransportProtos.ValidateOrCreateDeviceX509CertRequestMsg msg, TransportServiceCallback<ValidateDeviceCredentialsResponse> callback) {
         log.trace("Processing msg: {}", msg);
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setValidateOrCreateX509CertRequestMsg(msg).build());
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setValidateOrCreateX509CertRequestMsg(msg).build());
         doProcess(transportType, protoMsg, callback);
     }
 
-    private void doProcess(DeviceTransportType transportType, TbProtoQueueMsg<TransportApiRequestMsg> protoMsg,
+    private void doProcess(DeviceTransportType transportType, JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg,
                            TransportServiceCallback<ValidateDeviceCredentialsResponse> callback) {
         ListenableFuture<ValidateDeviceCredentialsResponse> response = Futures.transform(transportApiRequestTemplate.send(protoMsg), tmp -> {
             TransportProtos.ValidateDeviceCredentialsResponseMsg msg = tmp.getValue().getValidateCredResponseMsg();
@@ -583,7 +583,7 @@ public class DefaultTransportService extends TransportActivityManager implements
             return;
         }
 
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setGetOrCreateDeviceRequestMsg(requestMsg).build());
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setGetOrCreateDeviceRequestMsg(requestMsg).build());
         var key = new EntityLimitKey(tenantId, StringUtils.truncate(requestMsg.getDeviceName(), 256));
         if (entityLimitsCache.get(key)) {
             transportCallbackExecutor.submit(() -> callback.onError(new RuntimeException(DataConstants.MAXIMUM_NUMBER_OF_DEVICES_REACHED)));
@@ -610,7 +610,7 @@ public class DefaultTransportService extends TransportActivityManager implements
     @Override
     public void process(TransportProtos.LwM2MRequestMsg msg, TransportServiceCallback<TransportProtos.LwM2MResponseMsg> callback) {
         log.trace("Processing msg: {}", msg);
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(UUID.randomUUID(),
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(UUID.randomUUID(),
                 TransportApiRequestMsg.newBuilder().setLwM2MRequestMsg(msg).build());
         AsyncCallbackTemplate.withCallback(transportApiRequestTemplate.send(protoMsg),
                 response -> callback.onSuccess(response.getValue().getLwM2MResponseMsg()), callback::onError, transportCallbackExecutor);
@@ -638,7 +638,7 @@ public class DefaultTransportService extends TransportActivityManager implements
     @Override
     public void process(ProvisionDeviceRequestMsg requestMsg, TransportServiceCallback<ProvisionDeviceResponseMsg> callback) {
         log.trace("Processing msg: {}", requestMsg);
-        TbProtoQueueMsg<TransportApiRequestMsg> protoMsg = new TbProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setProvisionDeviceRequestMsg(requestMsg).build());
+        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setProvisionDeviceRequestMsg(requestMsg).build());
         ListenableFuture<ProvisionDeviceResponseMsg> response = Futures.transform(transportApiRequestTemplate.send(protoMsg), tmp ->
                         tmp.getValue().getProvisionDeviceResponseMsg()
                 , MoreExecutors.directExecutor());
@@ -693,7 +693,7 @@ public class DefaultTransportService extends TransportActivityManager implements
     }
 
     @Override
-    public void process(TransportProtos.SessionInfoProto sessionInfo, TransportProtos.PostTelemetryMsg msg, TbMsgMetaData md, TransportServiceCallback<Void> callback) {
+    public void process(TransportProtos.SessionInfoProto sessionInfo, TransportProtos.PostTelemetryMsg msg, JnksIotMsgMetaData md, TransportServiceCallback<Void> callback) {
         int dataPoints = 0;
         for (TransportProtos.TsKvListProto tsKv : msg.getTsKvListList()) {
             dataPoints += tsKv.getKvCount();
@@ -705,12 +705,12 @@ public class DefaultTransportService extends TransportActivityManager implements
             CustomerId customerId = getCustomerId(sessionInfo);
             MsgPackCallback packCallback = new MsgPackCallback(msg.getTsKvListCount(), new ApiStatsProxyCallback<>(tenantId, customerId, dataPoints, callback));
             for (TransportProtos.TsKvListProto tsKv : msg.getTsKvListList()) {
-                TbMsgMetaData metaData = md != null ? md.copy() : new TbMsgMetaData();
+                JnksIotMsgMetaData metaData = md != null ? md.copy() : new JnksIotMsgMetaData();
                 metaData.putValue("deviceName", sessionInfo.getDeviceName());
                 metaData.putValue("deviceType", sessionInfo.getDeviceType());
                 metaData.putValue("ts", tsKv.getTs() + "");
                 JsonObject json = JsonUtils.getJsonObject(tsKv.getKvList());
-                sendToRuleEngine(tenantId, deviceId, customerId, sessionInfo, json, metaData, TbMsgType.POST_TELEMETRY_REQUEST, packCallback);
+                sendToRuleEngine(tenantId, deviceId, customerId, sessionInfo, json, metaData, JnksIotMsgType.POST_TELEMETRY_REQUEST, packCallback);
             }
         }
     }
@@ -721,13 +721,13 @@ public class DefaultTransportService extends TransportActivityManager implements
     }
 
     @Override
-    public void process(TransportProtos.SessionInfoProto sessionInfo, TransportProtos.PostAttributeMsg msg, TbMsgMetaData md, TransportServiceCallback<Void> callback) {
+    public void process(TransportProtos.SessionInfoProto sessionInfo, TransportProtos.PostAttributeMsg msg, JnksIotMsgMetaData md, TransportServiceCallback<Void> callback) {
         if (checkLimits(sessionInfo, msg, callback, msg.getKvCount())) {
             recordActivityInternal(sessionInfo);
             TenantId tenantId = getTenantId(sessionInfo);
             DeviceId deviceId = new DeviceId(new UUID(sessionInfo.getDeviceIdMSB(), sessionInfo.getDeviceIdLSB()));
             JsonObject json = JsonUtils.getJsonObject(msg.getKvList());
-            TbMsgMetaData metaData = md != null ? md.copy() : new TbMsgMetaData();
+            JnksIotMsgMetaData metaData = md != null ? md.copy() : new JnksIotMsgMetaData();
             metaData.putValue("deviceName", sessionInfo.getDeviceName());
             metaData.putValue("deviceType", sessionInfo.getDeviceType());
             if (msg.getShared()) {
@@ -735,8 +735,8 @@ public class DefaultTransportService extends TransportActivityManager implements
             }
             metaData.putValue(DataConstants.NOTIFY_DEVICE_METADATA_KEY, "false");
             CustomerId customerId = getCustomerId(sessionInfo);
-            sendToRuleEngine(tenantId, deviceId, customerId, sessionInfo, json, metaData, TbMsgType.POST_ATTRIBUTES_REQUEST,
-                    new TransportTbQueueCallback(new ApiStatsProxyCallback<>(tenantId, customerId, msg.getKvList().size(), callback)));
+            sendToRuleEngine(tenantId, deviceId, customerId, sessionInfo, json, metaData, JnksIotMsgType.POST_ATTRIBUTES_REQUEST,
+                    new TransportJnksIotQueueCallback(new ApiStatsProxyCallback<>(tenantId, customerId, msg.getKvList().size(), callback)));
         }
     }
 
@@ -848,14 +848,14 @@ public class DefaultTransportService extends TransportActivityManager implements
             json.addProperty("method", msg.getMethodName());
             json.add("params", JsonUtils.parse(msg.getParams()));
 
-            TbMsgMetaData metaData = new TbMsgMetaData();
+            JnksIotMsgMetaData metaData = new JnksIotMsgMetaData();
             metaData.putValue("deviceName", sessionInfo.getDeviceName());
             metaData.putValue("deviceType", sessionInfo.getDeviceType());
             metaData.putValue("requestId", Integer.toString(msg.getRequestId()));
             metaData.putValue("serviceId", serviceInfoProvider.getServiceId());
             metaData.putValue("sessionId", sessionId.toString());
             sendToRuleEngine(tenantId, deviceId, getCustomerId(sessionInfo), sessionInfo, json, metaData,
-                    TbMsgType.TO_SERVER_RPC_REQUEST, new TransportTbQueueCallback(callback));
+                    JnksIotMsgType.TO_SERVER_RPC_REQUEST, new TransportJnksIotQueueCallback(callback));
             String requestId = sessionId + "-" + msg.getRequestId();
             toServerRpcPendingMap.put(requestId, new RpcRequestMetadata(sessionId, msg.getRequestId()));
             scheduler.schedule(() -> processTimeout(requestId), clientSideRpcTimeout, TimeUnit.MILLISECONDS);
@@ -874,8 +874,8 @@ public class DefaultTransportService extends TransportActivityManager implements
     @Override
     public void process(TransportProtos.SessionInfoProto sessionInfo, TransportProtos.GetOtaPackageRequestMsg msg, TransportServiceCallback<TransportProtos.GetOtaPackageResponseMsg> callback) {
         if (checkLimits(sessionInfo, msg, callback)) {
-            TbProtoQueueMsg<TransportApiRequestMsg> protoMsg =
-                    new TbProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setOtaPackageRequestMsg(msg).build());
+            JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg =
+                    new JnksIotProtoQueueMsg<>(UUID.randomUUID(), TransportApiRequestMsg.newBuilder().setOtaPackageRequestMsg(msg).build());
 
             AsyncCallbackTemplate.withCallback(transportApiRequestTemplate.send(protoMsg), response -> {
                 callback.onSuccess(response.getValue().getOtaPackageResponseMsg());
@@ -1022,11 +1022,11 @@ public class DefaultTransportService extends TransportActivityManager implements
 
     @Override
     public void flushToCore() {
-        if (tbCoreMsgProducer == null) {
+        if (jnksIotCoreMsgProducer == null) {
             return;
         }
         try {
-            tbCoreMsgProducer.flush();
+            jnksIotCoreMsgProducer.flush();
         } catch (Exception e) {
             log.warn("Failed to flush messages to core", e);
         }
@@ -1081,7 +1081,7 @@ public class DefaultTransportService extends TransportActivityManager implements
         } else {
             var rateLimitedEntityType = rateLimitedPair.getFirst();
             if (callback != null) {
-                callback.onError(new TbRateLimitsException(rateLimitedEntityType));
+                callback.onError(new JnksIotRateLimitsException(rateLimitedEntityType));
             }
 
             if (rateLimitedEntityType == EntityType.DEVICE || rateLimitedEntityType == EntityType.TENANT) {
@@ -1340,7 +1340,7 @@ public class DefaultTransportService extends TransportActivityManager implements
     private void sendToCore(TenantId tenantId, EntityId entityId, ToCoreMsg msg, UUID routingKey, TransportServiceCallback<Void> callback) {
         TopicPartitionInfo tpi;
         try {
-            tpi = partitionService.resolve(ServiceType.TB_CORE, tenantId, entityId);
+            tpi = partitionService.resolve(ServiceType.JNKS_IOT_CORE, tenantId, entityId);
         } catch (Exception e) {
             log.warn("Failed to send message to core. Tenant with ID [{}], routingKey [{}], msg [{}]. Message delivery aborted.", tenantId, routingKey, msg, e);
             if (callback != null) {
@@ -1351,15 +1351,15 @@ public class DefaultTransportService extends TransportActivityManager implements
         if (log.isTraceEnabled()) {
             log.trace("[{}][{}] Pushing to topic {} message {}", tenantId, entityId, tpi.getFullTopicName(), msg);
         }
-        TransportTbQueueCallback transportTbQueueCallback = callback != null ?
-                new TransportTbQueueCallback(callback) : null;
-        tbCoreProducerStats.incrementTotal();
-        StatsCallback wrappedCallback = new StatsCallback(transportTbQueueCallback, tbCoreProducerStats);
-        tbCoreMsgProducer.send(tpi, new TbProtoQueueMsg<>(routingKey, msg), wrappedCallback);
+        TransportJnksIotQueueCallback transportJnksIotQueueCallback = callback != null ?
+                new TransportJnksIotQueueCallback(callback) : null;
+        jnksIotCoreProducerStats.incrementTotal();
+        StatsCallback wrappedCallback = new StatsCallback(transportJnksIotQueueCallback, jnksIotCoreProducerStats);
+        jnksIotCoreMsgProducer.send(tpi, new JnksIotProtoQueueMsg<>(routingKey, msg), wrappedCallback);
     }
 
     private void sendToRuleEngine(TenantId tenantId, DeviceId deviceId, CustomerId customerId, TransportProtos.SessionInfoProto sessionInfo, JsonObject json,
-                                  TbMsgMetaData metaData, TbMsgType tbMsgType, TbQueueCallback callback) {
+                                  JnksIotMsgMetaData metaData, JnksIotMsgType jnksIotMsgType, JnksIotQueueCallback callback) {
         DeviceProfileId deviceProfileId = new DeviceProfileId(new UUID(sessionInfo.getDeviceProfileIdMSB(), sessionInfo.getDeviceProfileIdLSB()));
         DeviceProfile deviceProfile = deviceProfileCache.get(deviceProfileId);
         RuleChainId ruleChainId;
@@ -1374,28 +1374,28 @@ public class DefaultTransportService extends TransportActivityManager implements
             queueName = deviceProfile.getDefaultQueueName();
         }
 
-        TbMsg tbMsg = TbMsg.newMsg()
+        JnksIotMsg jnksIotMsg = JnksIotMsg.newMsg()
                 .queueName(queueName)
-                .type(tbMsgType)
+                .type(jnksIotMsgType)
                 .originator(deviceId)
                 .customerId(customerId)
                 .copyMetaData(metaData)
                 .data(gson.toJson(json))
                 .ruleChainId(ruleChainId)
                 .build();
-        ruleEngineProducerService.sendToRuleEngine(ruleEngineMsgProducer, tenantId, tbMsg, new StatsCallback(callback, ruleEngineProducerStats));
+        ruleEngineProducerService.sendToRuleEngine(ruleEngineMsgProducer, tenantId, jnksIotMsg, new StatsCallback(callback, ruleEngineProducerStats));
         ruleEngineProducerStats.incrementTotal();
     }
 
-    private class TransportTbQueueCallback implements TbQueueCallback {
+    private class TransportJnksIotQueueCallback implements JnksIotQueueCallback {
         private final TransportServiceCallback<Void> callback;
 
-        private TransportTbQueueCallback(TransportServiceCallback<Void> callback) {
+        private TransportJnksIotQueueCallback(TransportServiceCallback<Void> callback) {
             this.callback = callback;
         }
 
         @Override
-        public void onSuccess(TbQueueMsgMetadata metadata) {
+        public void onSuccess(JnksIotQueueMsgMetadata metadata) {
             DefaultTransportService.this.transportCallbackExecutor.submit(() -> callback.onSuccess(null));
         }
 
@@ -1405,17 +1405,17 @@ public class DefaultTransportService extends TransportActivityManager implements
         }
     }
 
-    private static class StatsCallback implements TbQueueCallback {
-        private final TbQueueCallback callback;
+    private static class StatsCallback implements JnksIotQueueCallback {
+        private final JnksIotQueueCallback callback;
         private final MessagesStats stats;
 
-        private StatsCallback(TbQueueCallback callback, MessagesStats stats) {
+        private StatsCallback(JnksIotQueueCallback callback, MessagesStats stats) {
             this.callback = callback;
             this.stats = stats;
         }
 
         @Override
-        public void onSuccess(TbQueueMsgMetadata metadata) {
+        public void onSuccess(JnksIotQueueMsgMetadata metadata) {
             stats.incrementSuccessful();
             if (callback != null)
                 callback.onSuccess(metadata);
@@ -1429,7 +1429,7 @@ public class DefaultTransportService extends TransportActivityManager implements
         }
     }
 
-    private class MsgPackCallback implements TbQueueCallback {
+    private class MsgPackCallback implements JnksIotQueueCallback {
         private final AtomicInteger msgCount;
         private final TransportServiceCallback<Void> callback;
 
@@ -1439,7 +1439,7 @@ public class DefaultTransportService extends TransportActivityManager implements
         }
 
         @Override
-        public void onSuccess(TbQueueMsgMetadata metadata) {
+        public void onSuccess(JnksIotQueueMsgMetadata metadata) {
             if (msgCount.decrementAndGet() <= 0) {
                 DefaultTransportService.this.transportCallbackExecutor.submit(() -> callback.onSuccess(null));
             }

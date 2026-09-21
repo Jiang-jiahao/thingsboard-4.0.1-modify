@@ -13,7 +13,7 @@ import com.jnks.iot.rule.engine.api.RuleEngineApiUsageStateService;
 import com.jnks.iot.rule.engine.api.RuleEngineAssetProfileCache;
 import com.jnks.iot.rule.engine.api.RuleEngineDeviceProfileCache;
 import com.jnks.iot.rule.engine.api.RuleEngineRpcService;
-import com.jnks.iot.rule.engine.api.TbContext;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
 import com.jnks.iot.server.common.data.ApiUsageState;
 import com.jnks.iot.server.common.data.Customer;
 import com.jnks.iot.server.common.data.Dashboard;
@@ -22,7 +22,7 @@ import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.EntityType;
 import com.jnks.iot.server.common.data.EntityView;
 import com.jnks.iot.server.common.data.OtaPackage;
-import com.jnks.iot.server.common.data.TbResource;
+import com.jnks.iot.server.common.data.JnksIotResource;
 import com.jnks.iot.server.common.data.TenantProfile;
 import com.jnks.iot.server.common.data.User;
 import com.jnks.iot.server.common.data.alarm.Alarm;
@@ -86,7 +86,7 @@ import static org.mockito.Mockito.when;
 public class TenantIdLoaderTest {
 
     @Mock
-    private TbContext ctx;
+    private JnksIotContext ctx;
     @Mock
     private CustomerService customerService;
     @Mock
@@ -305,12 +305,12 @@ public class TenantIdLoaderTest {
                 doReturn(apiUsageState).when(ruleEngineApiUsageStateService).findApiUsageStateById(eq(tenantId), any());
 
                 break;
-            case TB_RESOURCE:
-                TbResource tbResource = new TbResource();
-                tbResource.setTenantId(tenantId);
+            case JNKS_IOT_RESOURCE:
+                JnksIotResource jnksIotResource = new JnksIotResource();
+                jnksIotResource.setTenantId(tenantId);
 
                 when(ctx.getResourceService()).thenReturn(resourceService);
-                doReturn(tbResource).when(resourceService).findResourceInfoById(eq(tenantId), any());
+                doReturn(jnksIotResource).when(resourceService).findResourceInfoById(eq(tenantId), any());
 
                 break;
             case RULE_NODE:

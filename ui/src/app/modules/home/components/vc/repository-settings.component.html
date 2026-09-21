@@ -7,7 +7,7 @@
         <span class="mat-headline-5" translate>admin.repository-settings</span>
       </mat-card-title>
       <span class="flex-1"></span>
-      <div tb-help="repositorySettings"></div>
+      <div jnks-iot-help="repositorySettings"></div>
     </mat-card-header>
     <mat-progress-bar color="warn" mode="indeterminate" *ngIf="!hideLoadingBar && isLoading$ | async">
     </mat-progress-bar>
@@ -58,18 +58,18 @@
                 <mat-label translate>admin.password-access-token</mat-label>
                 <input matInput formControlName="password" type="password"
                        placeholder="{{ 'common.enter-password' | translate }}" autocomplete="new-password"/>
-                <tb-toggle-password matSuffix></tb-toggle-password>
+                <jnks-iot-toggle-password matSuffix></jnks-iot-toggle-password>
                 <mat-hint [innerHTML] = "'admin.auth-method-username-password-hint' | translate"></mat-hint>
               </mat-form-field>
             </section>
             <section [class.!hidden]="repositorySettingsForm.get('authMethod').value !== repositoryAuthMethod.PRIVATE_KEY" class="flex flex-col">
-              <tb-file-input [existingFileName]="repositorySettingsForm.get('privateKeyFileName').value"
+              <jnks-iot-file-input [existingFileName]="repositorySettingsForm.get('privateKeyFileName').value"
                              required
                              formControlName="privateKey"
                              dropLabel="{{ 'admin.drop-private-key-file-or' | translate }}"
                              [label]="'admin.private-key' | translate"
                              (fileNameChanged)="repositorySettingsForm.get('privateKeyFileName').patchValue($event)">
-              </tb-file-input>
+              </jnks-iot-file-input>
               <mat-checkbox *ngIf="showChangePrivateKeyPassword" (change)="changePrivateKeyPasswordChanged()"
                             [(ngModel)]="changePrivateKeyPassword" [ngModelOptions]="{ standalone: true }">
                 {{ 'admin.change-passphrase' | translate }}
@@ -78,7 +78,7 @@
                 <mat-label translate>admin.passphrase</mat-label>
                 <input matInput formControlName="privateKeyPassword" type="password"
                        placeholder="{{ 'admin.enter-passphrase' | translate }}" autocomplete="new-password"/>
-                <tb-toggle-password matSuffix></tb-toggle-password>
+                <jnks-iot-toggle-password matSuffix></jnks-iot-toggle-password>
               </mat-form-field>
             </section>
           </fieldset>

@@ -2,8 +2,8 @@ package com.jnks.iot.rule.engine.util;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.jnks.iot.rule.engine.api.TbContext;
-import com.jnks.iot.rule.engine.api.TbNodeException;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
+import com.jnks.iot.rule.engine.api.JnksIotNodeException;
 import com.jnks.iot.server.common.data.BaseData;
 import com.jnks.iot.server.common.data.EntityFieldsData;
 import com.jnks.iot.server.common.data.id.AlarmId;
@@ -22,7 +22,7 @@ import java.util.function.Function;
 
 public class EntitiesFieldsAsyncLoader {
 
-    public static ListenableFuture<EntityFieldsData> findAsync(TbContext ctx, EntityId originatorId) {
+    public static ListenableFuture<EntityFieldsData> findAsync(JnksIotContext ctx, EntityId originatorId) {
         switch (originatorId.getEntityType()) {  // TODO: use EntityServiceRegistry
             case TENANT:
                 return toEntityFieldsDataAsync(ctx.getTenantService().findTenantByIdAsync(ctx.getTenantId(), (TenantId) originatorId),
@@ -49,14 +49,14 @@ public class EntitiesFieldsAsyncLoader {
                 return toEntityFieldsDataAsync(ctx.getEntityViewService().findEntityViewByIdAsync(ctx.getTenantId(), (EntityViewId) originatorId),
                         EntityFieldsData::new, ctx);
             default:
-                return Futures.immediateFailedFuture(new TbNodeException("Unexpected originator EntityType: " + originatorId.getEntityType()));
+                return Futures.immediateFailedFuture(new JnksIotNodeException("Unexpected originator EntityType: " + originatorId.getEntityType()));
         }
     }
 
     private static <T extends BaseData<? extends UUIDBased>> ListenableFuture<EntityFieldsData> toEntityFieldsDataAsync(
             ListenableFuture<T> future,
             Function<T, EntityFieldsData> converter,
-            TbContext ctx
+            JnksIotContext ctx
     ) {
         return Futures.transformAsync(future, in -> in != null ?
                 Futures.immediateFuture(converter.apply(in))

@@ -1,11 +1,11 @@
 :host {
 
-  .tb-multiple-input {
+  .jnks-iot-multiple-input {
     height: 100%;
     display: flex;
     flex-direction: column;
 
-    .tb-multiple-input-container {
+    .jnks-iot-multiple-input-container {
       padding: 8px 8px 0;
       flex: 1 1 100%;
       overflow-x: hidden;
@@ -22,7 +22,7 @@
       }
     }
 
-    .tb-multiple-input-layout {
+    .jnks-iot-multiple-input-layout {
       display: grid;
     }
 
@@ -59,7 +59,7 @@
 }
 
 :host ::ng-deep {
-  .tb-multiple-input {
+  .jnks-iot-multiple-input {
     .mat-mdc-slide-toggle, .mat-mdc-checkbox, .mat-mdc-radio-button {
       .mdc-form-field {
         width: 100%;

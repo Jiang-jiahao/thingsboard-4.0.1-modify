@@ -15,10 +15,10 @@
   <div style="height: 4px;" *ngIf="!(isLoading$ | async) && !loading"></div>
   <div mat-dialog-content class="flex flex-col">
     <div formGroupName="attributes" class="flex flex-col">
-      <tb-image-input
+      <jnks-iot-image-input
         label="Entity image"
         formControlName="image"
-      ></tb-image-input>
+      ></jnks-iot-image-input>
     </div>
   </div>
   <div mat-dialog-actions class="flex flex-row items-center justify-end">

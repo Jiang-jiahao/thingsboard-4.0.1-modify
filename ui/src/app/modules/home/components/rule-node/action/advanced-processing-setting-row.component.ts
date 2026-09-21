@@ -18,7 +18,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-advanced-processing-setting-row',
+  selector: 'jnks-iot-advanced-processing-setting-row',
   templateUrl: './advanced-processing-setting-row.component.html',
   providers: [{
     provide: NG_VALUE_ACCESSOR,

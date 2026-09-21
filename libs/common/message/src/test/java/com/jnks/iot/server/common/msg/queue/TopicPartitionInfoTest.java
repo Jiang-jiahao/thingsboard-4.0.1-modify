@@ -17,14 +17,14 @@ public class TopicPartitionInfoTest {
     public void givenTopicPartitionInfo_whenEquals_thenTrue() {
 
         TopicPartitionInfo tpiExpected = TopicPartitionInfo.builder()
-                .topic("tb_core")
+                .topic("jnks_iot_core")
                 .tenantId(null)
                 .partition(4)
                 .myPartition(true) //will ignored on equals
                 .build();
 
         assertThat(TopicPartitionInfo.builder()
-                        .topic("tb_core")
+                        .topic("jnks_iot_core")
                         .tenantId(null)
                         .partition(4)
                         .myPartition(true) //will ignored on equals
@@ -32,7 +32,7 @@ public class TopicPartitionInfoTest {
                 , is(tpiExpected));
 
         assertThat(TopicPartitionInfo.builder()
-                        .topic("tb_core")
+                        .topic("jnks_iot_core")
                         .tenantId(null)
                         .partition(4)
                         .myPartition(false) //will ignored on equals
@@ -40,13 +40,13 @@ public class TopicPartitionInfoTest {
                 , is(tpiExpected));
 
         assertThat(TopicPartitionInfo.builder()
-                        .topic("tb_core")
+                        .topic("jnks_iot_core")
                         .tenantId(tenantId)
                         .partition(4)
                         .myPartition(true) //will ignored on equals
                         .build()
                 , is(TopicPartitionInfo.builder()
-                        .topic("tb_core")
+                        .topic("jnks_iot_core")
                         .tenantId(tenantId)
                         .partition(4)
                         .myPartition(true) //will ignored on equals
@@ -58,14 +58,14 @@ public class TopicPartitionInfoTest {
     public void givenTopicPartitionInfo_whenEquals_thenFalse() {
 
         TopicPartitionInfo tpiExpected = TopicPartitionInfo.builder()
-                .topic("tb_core")
+                .topic("jnks_iot_core")
                 .tenantId(null)
                 .partition(4)
                 .myPartition(true) //will ignored on equals
                 .build();
 
         assertThat(TopicPartitionInfo.builder()
-                        .topic("tb_core")
+                        .topic("jnks_iot_core")
                         .tenantId(null)
                         .partition(1)
                         .myPartition(true) //will ignored on equals
@@ -73,7 +73,7 @@ public class TopicPartitionInfoTest {
                 , not(tpiExpected));
 
         assertThat(TopicPartitionInfo.builder()
-                        .topic("tb_core")
+                        .topic("jnks_iot_core")
                         .tenantId(null)
                         .partition(1)
                         .myPartition(false) //will ignored on equals
@@ -97,7 +97,7 @@ public class TopicPartitionInfoTest {
                 , not(tpiExpected));
 
         assertThat(TopicPartitionInfo.builder()
-                        .topic("tb_core")
+                        .topic("jnks_iot_core")
                         .tenantId(tenantId)
                         .partition(4)
                         .myPartition(true) //will ignored on equals
@@ -105,7 +105,7 @@ public class TopicPartitionInfoTest {
                 , not(tpiExpected));
 
         assertThat(TopicPartitionInfo.builder()
-                        .topic("tb_core")
+                        .topic("jnks_iot_core")
                         .tenantId(tenantId)
                         .partition(4)
                         .myPartition(false) //will ignored on equals

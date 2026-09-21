@@ -33,7 +33,7 @@
     }
   }
 
-  .tb-rule-node {
+  .jnks-iot-rule-node {
     box-sizing: content-box;
     display: flex;
     flex-direction: row;
@@ -53,20 +53,20 @@
 
     @include rule-node-colors();
 
-    &.tb-rule-node-highlighted:not(.tb-rule-node-invalid) {
+    &.jnks-iot-rule-node-highlighted:not(.jnks-iot-rule-node-invalid) {
       box-shadow: 0 0 10px 6px #51cbee;
 
-      .tb-node-title {
+      .jnks-iot-node-title {
         font-weight: 700;
         text-decoration: underline;
       }
     }
 
-    &.tb-rule-node-invalid {
+    &.jnks-iot-rule-node-invalid {
       box-shadow: 0 0 10px 6px #ff5c50;
     }
 
-    &.tb-input-type {
+    &.jnks-iot-input-type {
       user-select: none;
       background-color: #a3eaa9;
     }
@@ -81,12 +81,12 @@
       font-size: 20px;
     }
 
-    .tb-node-title {
+    .jnks-iot-node-title {
       font-weight: 500;
     }
 
-    .tb-node-type,
-    .tb-node-title {
+    .jnks-iot-node-type,
+    .jnks-iot-node-title {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;

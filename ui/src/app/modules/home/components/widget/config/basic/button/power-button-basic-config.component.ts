@@ -18,7 +18,7 @@ import {
 import { cssSizeToStrSize, resolveCssSize } from '@shared/models/widget-settings.models';
 
 @Component({
-  selector: 'tb-power-button-basic-config',
+  selector: 'jnks-iot-power-button-basic-config',
   templateUrl: './power-button-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

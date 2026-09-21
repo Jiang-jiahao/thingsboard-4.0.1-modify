@@ -1,5 +1,5 @@
-<section [formGroup]="processingSettingRowForm" class="tb-form-panel stroked no-gap no-padding-bottom">
-  <div class="tb-form-panel-title mb-4">{{ title }}</div>
+<section [formGroup]="processingSettingRowForm" class="jnks-iot-form-panel stroked no-gap no-padding-bottom">
+  <div class="jnks-iot-form-panel-title mb-4">{{ title }}</div>
   <mat-form-field>
     <mat-label translate>rule-node-config.save-time-series.strategy</mat-label>
     <mat-select formControlName="type">
@@ -9,7 +9,7 @@
     </mat-select>
   </mat-form-field>
   @if (processingSettingRowForm.get('type').value === ProcessingType.DEDUPLICATE) {
-    <tb-time-unit-input
+    <jnks-iot-time-unit-input
       required
       labelText="{{ 'rule-node-config.save-time-series.deduplication-interval' | translate }}"
       requiredText="{{ 'rule-node-config.save-time-series.deduplication-interval-required' | translate }}"
@@ -18,6 +18,6 @@
       [minTime]="1"
       [maxTime]="maxDeduplicateTime"
       formControlName="deduplicationIntervalSecs">
-    </tb-time-unit-input>
+    </jnks-iot-time-unit-input>
   }
 </section>

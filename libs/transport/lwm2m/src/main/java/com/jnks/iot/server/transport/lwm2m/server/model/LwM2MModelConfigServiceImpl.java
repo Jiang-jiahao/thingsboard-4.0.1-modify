@@ -12,16 +12,16 @@ import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClient;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClientContext;
 import com.jnks.iot.server.transport.lwm2m.server.downlink.DownlinkRequestCallback;
 import com.jnks.iot.server.transport.lwm2m.server.downlink.LwM2mDownlinkMsgHandler;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MCancelObserveCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MCancelObserveRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MObserveCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MObserveRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MReadCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MReadRequest;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteAttributesCallback;
-import com.jnks.iot.server.transport.lwm2m.server.downlink.TbLwM2MWriteAttributesRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MCancelObserveCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MCancelObserveRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MObserveCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MObserveRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MReadCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MReadRequest;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteAttributesCallback;
+import com.jnks.iot.server.transport.lwm2m.server.downlink.JnksIotLwM2MWriteAttributesRequest;
 import com.jnks.iot.server.transport.lwm2m.server.log.LwM2MTelemetryLogService;
-import com.jnks.iot.server.transport.lwm2m.server.store.TbLwM2MModelConfigStore;
+import com.jnks.iot.server.transport.lwm2m.server.store.JnksIotLwM2MModelConfigStore;
 import com.jnks.iot.server.transport.lwm2m.server.uplink.LwM2mUplinkMsgHandler;
 
 import java.util.List;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 public class LwM2MModelConfigServiceImpl implements LwM2MModelConfigService {
 
     @Autowired
-    TbLwM2MModelConfigStore modelStore;
+    JnksIotLwM2MModelConfigStore modelStore;
 
     @Autowired
     @Lazy
@@ -96,7 +96,7 @@ public class LwM2MModelConfigServiceImpl implements LwM2MModelConfigService {
 
         Map<String, ObjectAttributes> attrToAdd = modelConfig.getAttributesToAdd();
         attrToAdd.forEach((id, attributes) -> {
-            TbLwM2MWriteAttributesRequest request = TbLwM2MWriteAttributesRequest.builder().versionedId(id)
+            JnksIotLwM2MWriteAttributesRequest request = JnksIotLwM2MWriteAttributesRequest.builder().versionedId(id)
                     .attributes(attributes)
                     .timeout(clientContext.getRequestTimeout(lwM2mClient)).build();
             downlinkMsgHandler.sendWriteAttributesRequest(lwM2mClient, request,
@@ -105,13 +105,13 @@ public class LwM2MModelConfigServiceImpl implements LwM2MModelConfigService {
                         if (modelConfig.isEmpty()) {
                             modelStore.remove(endpoint);
                         }
-                    }, new TbLwM2MWriteAttributesCallback(logService, lwM2mClient, id))
+                    }, new JnksIotLwM2MWriteAttributesCallback(logService, lwM2mClient, id))
             );
         });
 
         Set<String> attrToRemove = modelConfig.getAttributesToRemove();
         attrToRemove.forEach((id) -> {
-            TbLwM2MWriteAttributesRequest request = TbLwM2MWriteAttributesRequest.builder().versionedId(id)
+            JnksIotLwM2MWriteAttributesRequest request = JnksIotLwM2MWriteAttributesRequest.builder().versionedId(id)
                     .attributes(new ObjectAttributes())
                     .timeout(clientContext.getRequestTimeout(lwM2mClient)).build();
             downlinkMsgHandler.sendWriteAttributesRequest(lwM2mClient, request,
@@ -120,13 +120,13 @@ public class LwM2MModelConfigServiceImpl implements LwM2MModelConfigService {
                         if (modelConfig.isEmpty()) {
                             modelStore.remove(endpoint);
                         }
-                    }, new TbLwM2MWriteAttributesCallback(logService, lwM2mClient, id))
+                    }, new JnksIotLwM2MWriteAttributesCallback(logService, lwM2mClient, id))
             );
         });
 
         Set<String> toRead = modelConfig.getToRead();
         toRead.forEach(id -> {
-            TbLwM2MReadRequest request = TbLwM2MReadRequest.builder().versionedId(id)
+            JnksIotLwM2MReadRequest request = JnksIotLwM2MReadRequest.builder().versionedId(id)
                     .timeout(clientContext.getRequestTimeout(lwM2mClient)).build();
             downlinkMsgHandler.sendReadRequest(lwM2mClient, request,
                     createDownlinkProxyCallback(() -> {
@@ -134,13 +134,13 @@ public class LwM2MModelConfigServiceImpl implements LwM2MModelConfigService {
                         if (modelConfig.isEmpty()) {
                             modelStore.remove(endpoint);
                         }
-                    }, new TbLwM2MReadCallback(uplinkMsgHandler, logService, lwM2mClient, id))
+                    }, new JnksIotLwM2MReadCallback(uplinkMsgHandler, logService, lwM2mClient, id))
             );
         });
 
         Set<String> toObserve = modelConfig.getToObserve();
         toObserve.forEach(id -> {
-            TbLwM2MObserveRequest request = TbLwM2MObserveRequest.builder().versionedId(id)
+            JnksIotLwM2MObserveRequest request = JnksIotLwM2MObserveRequest.builder().versionedId(id)
                     .timeout(clientContext.getRequestTimeout(lwM2mClient)).build();
             downlinkMsgHandler.sendObserveRequest(lwM2mClient, request,
                     createDownlinkProxyCallback(() -> {
@@ -148,13 +148,13 @@ public class LwM2MModelConfigServiceImpl implements LwM2MModelConfigService {
                         if (modelConfig.isEmpty()) {
                             modelStore.remove(endpoint);
                         }
-                    }, new TbLwM2MObserveCallback(uplinkMsgHandler, logService, lwM2mClient, id))
+                    }, new JnksIotLwM2MObserveCallback(uplinkMsgHandler, logService, lwM2mClient, id))
             );
         });
 
         Set<String> toCancelObserve = modelConfig.getToCancelObserve();
         toCancelObserve.forEach(id -> {
-            TbLwM2MCancelObserveRequest request = TbLwM2MCancelObserveRequest.builder().versionedId(id)
+            JnksIotLwM2MCancelObserveRequest request = JnksIotLwM2MCancelObserveRequest.builder().versionedId(id)
                     .timeout(clientContext.getRequestTimeout(lwM2mClient)).build();
             downlinkMsgHandler.sendCancelObserveRequest(lwM2mClient, request,
                     createDownlinkProxyCallback(() -> {
@@ -162,7 +162,7 @@ public class LwM2MModelConfigServiceImpl implements LwM2MModelConfigService {
                         if (modelConfig.isEmpty()) {
                             modelStore.remove(endpoint);
                         }
-                    }, new TbLwM2MCancelObserveCallback(logService, lwM2mClient, id))
+                    }, new JnksIotLwM2MCancelObserveCallback(logService, lwM2mClient, id))
             );
         });
     }

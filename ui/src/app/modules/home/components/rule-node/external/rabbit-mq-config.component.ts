@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-external-node-rabbit-mq-config',
+  selector: 'jnks-iot-external-node-rabbit-mq-config',
   templateUrl: './rabbit-mq-config.component.html',
   styleUrls: []
 })

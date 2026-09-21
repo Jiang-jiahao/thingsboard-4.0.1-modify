@@ -20,7 +20,7 @@ import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'tb-timeinterval',
+  selector: 'jnks-iot-timeinterval',
   templateUrl: './timeinterval.component.html',
   styleUrls: ['./timeinterval.component.scss'],
   providers: [

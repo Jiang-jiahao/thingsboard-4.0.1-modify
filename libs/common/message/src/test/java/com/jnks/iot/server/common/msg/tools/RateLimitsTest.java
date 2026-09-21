@@ -19,7 +19,7 @@ public class RateLimitsTest {
 
     private void testRateLimitWithGreedyRefill(int capacity, int period) {
         String rateLimitConfig = capacity + ":" + period;
-        TbRateLimits rateLimits = new TbRateLimits(rateLimitConfig);
+        JnksIotRateLimits rateLimits = new JnksIotRateLimits(rateLimitConfig);
 
         rateLimits.tryConsume(capacity);
         assertThat(rateLimits.tryConsume()).as("new token is available").isFalse();
@@ -48,7 +48,7 @@ public class RateLimitsTest {
 
     private void testRateLimitWithIntervalRefill(int capacity, int period) {
         String rateLimitConfig = capacity + ":" + period;
-        TbRateLimits rateLimits = new TbRateLimits(rateLimitConfig, true);
+        JnksIotRateLimits rateLimits = new JnksIotRateLimits(rateLimitConfig, true);
 
         rateLimits.tryConsume(capacity);
         assertThat(rateLimits.tryConsume()).as("new token is available").isFalse();

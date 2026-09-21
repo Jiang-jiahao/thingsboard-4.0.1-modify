@@ -30,7 +30,7 @@ export interface ValueInputLayout {
 }
 
 @Component({
-  selector: 'tb-value-input',
+  selector: 'jnks-iot-value-input',
   templateUrl: './value-input.component.html',
   styleUrls: ['./value-input.component.scss'],
   providers: [
@@ -153,7 +153,7 @@ export class ValueInputComponent implements OnInit, OnDestroy, OnChanges, Contro
     }
     this.dialog.open<JsonObjectEditDialogComponent, JsonObjectEditDialogData, object>(JsonObjectEditDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         jsonValue: this.modelValue,
         required: true

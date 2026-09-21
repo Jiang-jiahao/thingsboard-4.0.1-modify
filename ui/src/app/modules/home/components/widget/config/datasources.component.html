@@ -1,44 +1,44 @@
-<div [formGroup]="datasourcesFormGroup" class="tb-form-panel tb-datasources" [class.no-padding-bottom]="!showAddDatasource">
+<div [formGroup]="datasourcesFormGroup" class="jnks-iot-form-panel jnks-iot-datasources" [class.no-padding-bottom]="!showAddDatasource">
   <div class="flex flex-col">
     <div class="flex flex-row items-center justify-between">
-      <div class="tb-form-panel-title">{{ (singleDatasource ? (isAlarmSource ? 'widget-config.alarm-source' : 'widget-config.datasource') : 'widget-config.datasources') | translate }}</div>
+      <div class="jnks-iot-form-panel-title">{{ (singleDatasource ? (isAlarmSource ? 'widget-config.alarm-source' : 'widget-config.datasource') : 'widget-config.datasources') | translate }}</div>
       <div class="flex flex-1 flex-row items-center justify-center" *ngIf="timeseriesKeyError">
         <mat-error >{{ 'widget-config.timeseries-key-error' | translate }}</mat-error>
       </div>
-      <tb-toggle-select *ngIf="basicMode && !hideDatasourcesMode" [ngModel]="datasourcesMode" (ngModelChange)="datasourcesModeChange($event)"
+      <jnks-iot-toggle-select *ngIf="basicMode && !hideDatasourcesMode" [ngModel]="datasourcesMode" (ngModelChange)="datasourcesModeChange($event)"
                         [ngModelOptions]="{ standalone: true }">
-        <tb-toggle-option [value]="datasourceType.device">{{ 'device.device' | translate }}</tb-toggle-option>
-        <tb-toggle-option [value]="datasourceType.entity">{{ 'entity.entity-alias' | translate }}</tb-toggle-option>
-      </tb-toggle-select>
+        <jnks-iot-toggle-option [value]="datasourceType.device">{{ 'device.device' | translate }}</jnks-iot-toggle-option>
+        <jnks-iot-toggle-option [value]="datasourceType.entity">{{ 'entity.entity-alias' | translate }}</jnks-iot-toggle-option>
+      </jnks-iot-toggle-select>
     </div>
     <div *ngIf="maxDatasources > 1"
-         class="tb-form-panel-hint">{{ 'widget-config.maximum-datasources' | translate:{count: maxDatasources} }}</div>
+         class="jnks-iot-form-panel-hint">{{ 'widget-config.maximum-datasources' | translate:{count: maxDatasources} }}</div>
   </div>
   <div *ngIf="datasourcesFormArray.length === 0; else datasourcesTemplate">
                 <span translate
-                      class="tb-prompt flex items-center justify-center">datasource.add-datasource-prompt</span>
+                      class="jnks-iot-prompt flex items-center justify-center">datasource.add-datasource-prompt</span>
   </div>
   <ng-template #datasourcesTemplate>
     <div style="overflow: auto;">
-      <mat-list class="tb-drop-list"
+      <mat-list class="jnks-iot-drop-list"
                 cdkDropList
                 cdkDropListOrientation="vertical"
                 (cdkDropListDropped)="onDatasourceDrop($event)"
                 [cdkDropListDisabled]="dragDisabled"
                 formArrayName="datasources">
         <mat-list-item *ngFor="let datasourceControl of datasourcesControls; trackBy: trackByDatasource; let $index = index;"
-                       class="tb-datasource-list-item tb-draggable" cdkDrag
+                       class="jnks-iot-datasource-list-item jnks-iot-draggable" cdkDrag
                        [cdkDragDisabled]="dragDisabled">
-          <div class="tb-datasource-row">
-            <div *ngIf="!singleDatasource" class="tb-datasource-index-container">
-              <div class="tb-datasource-index">{{$index + 1}}</div>
+          <div class="jnks-iot-datasource-row">
+            <div *ngIf="!singleDatasource" class="jnks-iot-datasource-index-container">
+              <div class="jnks-iot-datasource-index">{{$index + 1}}</div>
             </div>
-            <div class="tb-datasource-params">
-              <div class="tb-datasource-item">
-                <tb-datasource [formControl]="datasourceControl">
-                </tb-datasource>
-                <div *ngIf="!singleDatasource && !disabled" class="tb-datasource-buttons">
-                  <button class="tb-box-button" type="button"
+            <div class="jnks-iot-datasource-params">
+              <div class="jnks-iot-datasource-item">
+                <jnks-iot-datasource [formControl]="datasourceControl">
+                </jnks-iot-datasource>
+                <div *ngIf="!singleDatasource && !disabled" class="jnks-iot-datasource-buttons">
+                  <button class="jnks-iot-box-button" type="button"
                           mat-icon-button
                           (click)="removeDatasource($index)"
                           matTooltip="{{ 'widget-config.remove-datasource' | translate }}"
@@ -46,7 +46,7 @@
                     <mat-icon>delete</mat-icon>
                   </button>
                   <button *ngIf="!dragDisabled"
-                          class="tb-box-button"
+                          class="jnks-iot-box-button"
                           mat-icon-button
                           type="button"
                           cdkDragHandle
@@ -56,7 +56,7 @@
                   </button>
                 </div>
               </div>
-              <tb-error class="tb-datasource-error" [error]="datasourceError[$index] ? datasourceError[$index] : ''"></tb-error>
+              <jnks-iot-error class="jnks-iot-datasource-error" [error]="datasourceError[$index] ? datasourceError[$index] : ''"></jnks-iot-error>
             </div>
           </div>
         </mat-list-item>

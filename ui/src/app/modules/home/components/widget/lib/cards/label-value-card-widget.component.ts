@@ -33,7 +33,7 @@ import {
 import { formatValue, isDefinedAndNotNull } from '@core/utils';
 
 @Component({
-  selector: 'tb-label-value-card-widget',
+  selector: 'jnks-iot-label-value-card-widget',
   templateUrl: './label-value-card-widget.component.html',
   styleUrls: ['./label-value-card-widget.component.scss'],
   encapsulation: ViewEncapsulation.None

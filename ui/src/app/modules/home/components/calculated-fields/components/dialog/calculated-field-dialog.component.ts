@@ -40,7 +40,7 @@ export interface CalculatedFieldDialogData {
 }
 
 @Component({
-  selector: 'tb-calculated-field-dialog',
+  selector: 'jnks-iot-calculated-field-dialog',
   templateUrl: './calculated-field-dialog.component.html',
   styleUrls: ['./calculated-field-dialog.component.scss'],
   encapsulation: ViewEncapsulation.None

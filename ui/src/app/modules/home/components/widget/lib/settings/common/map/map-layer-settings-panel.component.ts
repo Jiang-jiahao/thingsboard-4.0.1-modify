@@ -1,5 +1,5 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -21,7 +21,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
-  selector: 'tb-map-layer-settings-panel',
+  selector: 'jnks-iot-map-layer-settings-panel',
   templateUrl: './map-layer-settings-panel.component.html',
   providers: [],
   styleUrls: ['./map-layer-settings-panel.component.scss'],
@@ -59,7 +59,7 @@ export class MapLayerSettingsPanelComponent implements OnInit {
   mapLayerSettings: MapLayerSettings;
 
   @Input()
-  popover: TbPopoverComponent<MapLayerSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<MapLayerSettingsPanelComponent>;
 
   @Output()
   mapLayerSettingsApplied = new EventEmitter<MapLayerSettings>();

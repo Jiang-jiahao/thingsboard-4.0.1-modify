@@ -20,6 +20,6 @@ public class CoapServerContext {
 
     @Getter
     @Autowired(required = false)
-    private TbCoapDtlsSettings dtlsSettings;
+    private JnksIotCoapDtlsSettings dtlsSettings;
 
 }

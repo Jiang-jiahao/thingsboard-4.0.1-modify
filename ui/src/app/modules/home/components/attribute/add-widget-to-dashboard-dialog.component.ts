@@ -33,7 +33,7 @@ export interface AddWidgetToDashboardDialogData {
 }
 
 @Component({
-  selector: 'tb-add-widget-to-dashboard-dialog',
+  selector: 'jnks-iot-add-widget-to-dashboard-dialog',
   templateUrl: './add-widget-to-dashboard-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: AddWidgetToDashboardDialogComponent}],
   styleUrls: ['./add-widget-to-dashboard-dialog.component.scss']
@@ -136,7 +136,7 @@ export class AddWidgetToDashboardDialogComponent extends
       return this.dialog.open<SelectTargetStateDialogComponent, SelectTargetStateDialogData,
         string>(SelectTargetStateDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           states
         }
@@ -153,7 +153,7 @@ export class AddWidgetToDashboardDialogComponent extends
       return this.dialog.open<SelectTargetLayoutDialogComponent, any,
         DashboardLayoutId>(SelectTargetLayoutDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
       }).afterClosed();
     } else {
       return of(layoutIds[0] as DashboardLayoutId);

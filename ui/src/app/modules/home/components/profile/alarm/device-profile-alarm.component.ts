@@ -18,7 +18,7 @@ import { UtilsService } from '@core/services/utils.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-device-profile-alarm',
+  selector: 'jnks-iot-device-profile-alarm',
   templateUrl: './device-profile-alarm.component.html',
   styleUrls: ['./device-profile-alarm.component.scss'],
   providers: [

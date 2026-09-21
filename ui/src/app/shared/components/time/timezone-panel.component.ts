@@ -3,14 +3,14 @@ import { PageComponent } from '@shared/components/page.component';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 
 export interface TimezoneSelectionResult {
   timezone: string | null;
 }
 
 @Component({
-  selector: 'tb-timezone-panel',
+  selector: 'jnks-iot-timezone-panel',
   templateUrl: './timezone-panel.component.html',
   styleUrls: ['./timezone-panel.component.scss']
 })
@@ -32,7 +32,7 @@ export class TimezonePanelComponent extends PageComponent implements OnInit {
   onClose: (result: TimezoneSelectionResult | null) => void;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   timezoneForm: FormGroup;
 

@@ -1,0 +1,176 @@
+package com.jnks.iot.server.queue.discovery;
+
+import jakarta.annotation.PostConstruct;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+import com.jnks.iot.server.common.data.StringUtils;
+import com.jnks.iot.server.common.data.JnksIotTransportService;
+import com.jnks.iot.server.common.data.util.CollectionsUtil;
+import com.jnks.iot.server.common.msg.queue.ServiceType;
+import com.jnks.iot.server.gen.transport.TransportProtos;
+import com.jnks.iot.server.gen.transport.TransportProtos.ServiceInfo;
+import com.jnks.iot.common.util.AfterContextReady;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static com.jnks.iot.common.util.SystemUtil.*;
+
+
+@Component
+@Slf4j
+public class DefaultJnksIotServiceInfoProvider implements JnksIotServiceInfoProvider {
+
+    // 服务唯一标识符（可从配置注入，默认为主机名）
+    @Getter
+    @Value("${service.id:#{null}}")
+    private String serviceId;
+
+    // 服务类型（默认为monolith单体架构）
+    @Getter
+    @Value("${service.type:monolith}")
+    private String serviceType;
+
+    // 本服务实例分配的租户档案ID列表（仅对规则引擎服务有效），也就是这个实例只会处理assignedTenantProfiles包含的租户
+    @Getter
+    @Value("${service.rule_engine.assigned_tenant_profiles:}")
+    private Set<UUID> assignedTenantProfiles;
+
+    @Value("${service.edqs.label:}")
+    private String edqsLabel;
+
+    @Value("#{'${queue.edqs.partitioning_strategy:tenant}'.toUpperCase()}")
+    private String edqsPartitioningStrategy;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    // 当前服务支持的服务类型列表
+    private List<ServiceType> serviceTypes;
+
+    // 当前服务的信息对象（包含所有元数据）
+    private ServiceInfo serviceInfo;
+
+    @PostConstruct
+    public void init() {
+        // 生成服务ID（如果未配置）
+        if (StringUtils.isEmpty(serviceId)) {
+            try {
+                serviceId = InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                serviceId = StringUtils.randomAlphabetic(10);
+            }
+        }
+        log.info("Current Service ID: {}", serviceId);
+
+        // 解析服务类型
+        if (serviceType.equalsIgnoreCase("monolith")) {
+            // 单体服务支持所有服务类型
+            serviceTypes = List.of(ServiceType.values());
+        } else {
+            // 微服务模式只支持单一服务类型
+            serviceTypes = Collections.singletonList(ServiceType.of(serviceType));
+        }
+        // 处理租户档案分配
+        if (!serviceTypes.contains(ServiceType.JNKS_IOT_RULE_ENGINE) || assignedTenantProfiles == null) {
+            // 非规则引擎服务清空分配
+            assignedTenantProfiles = Collections.emptySet();
+        }
+        if (serviceTypes.contains(ServiceType.EDQS) && StringUtils.isBlank(edqsLabel)) {
+            edqsLabel = serviceId;
+        }
+        // 创建初始服务信息
+        generateNewServiceInfoWithCurrentSystemInfo();
+    }
+
+    @AfterContextReady
+    public void setTransports() {
+        // 获取该服务的所有传输服务，并更新当前服务信息
+        serviceInfo = ServiceInfo.newBuilder(serviceInfo)
+                .addAllTransports(getTransportServices().stream()
+                        .map(JnksIotTransportService::getName)
+                        .collect(Collectors.toSet()))
+                .build();
+    }
+
+    private Collection<JnksIotTransportService> getTransportServices() {
+        return applicationContext.getBeansOfType(JnksIotTransportService.class).values();
+    }
+
+    @Override
+    public ServiceInfo getServiceInfo() {
+        return serviceInfo;
+    }
+
+    /**
+     * 判断当前服务实例是否是传入的服务类型
+     * <p>
+     * 当单体启动的时候，则是规则引擎服务也是核心服务等
+     * @param serviceType 服务类型
+     * @return true 是属于该服务 false 否
+     */
+    @Override
+    public boolean isService(ServiceType serviceType) {
+        return serviceTypes.contains(serviceType);
+    }
+
+    /**
+     * 生成包含最新系统信息的服务信息。
+     * 心跳刷新只更新 systemInfo，必须保留已登记的 transports，
+     * 否则 MQTT/HTTP 等按传输类型做的设备分片会一直停留在第一次计算结果。
+     */
+    @Override
+    public ServiceInfo generateNewServiceInfoWithCurrentSystemInfo() {
+        TransportProtos.SystemInfoProto systemInfoProto = getCurrentSystemInfoProto();
+        if (serviceInfo != null) {
+            return serviceInfo = serviceInfo.toBuilder()
+                    .setSystemInfo(systemInfoProto)
+                    .build();
+        }
+        ServiceInfo.Builder builder = ServiceInfo.newBuilder()
+                .setServiceId(serviceId)
+                .addAllServiceTypes(serviceTypes.stream().map(ServiceType::name).collect(Collectors.toList()))
+                .setSystemInfo(systemInfoProto);
+        if (CollectionsUtil.isNotEmpty(assignedTenantProfiles)) {
+            builder.addAllAssignedTenantProfiles(assignedTenantProfiles.stream().map(UUID::toString).collect(Collectors.toList()));
+        }
+        builder.setLabel(resolveEdqsLabel());
+        return serviceInfo = builder.build();
+    }
+
+    private String resolveEdqsLabel() {
+        if ("NONE".equals(edqsPartitioningStrategy)) {
+            return "all";
+        }
+        return edqsLabel;
+    }
+
+    /**
+     * 获取当前系统资源信息的Protobuf对象
+     * @return 系统信息对象
+     */
+    private TransportProtos.SystemInfoProto getCurrentSystemInfoProto() {
+        TransportProtos.SystemInfoProto.Builder builder = TransportProtos.SystemInfoProto.newBuilder();
+
+        getCpuUsage().ifPresent(builder::setCpuUsage);
+        getMemoryUsage().ifPresent(builder::setMemoryUsage);
+        getDiscSpaceUsage().ifPresent(builder::setDiskUsage);
+
+        getCpuCount().ifPresent(builder::setCpuCount);
+        getTotalMemory().ifPresent(builder::setTotalMemory);
+        getTotalDiscSpace().ifPresent(builder::setTotalDiscSpace);
+
+        return builder.build();
+    }
+
+}

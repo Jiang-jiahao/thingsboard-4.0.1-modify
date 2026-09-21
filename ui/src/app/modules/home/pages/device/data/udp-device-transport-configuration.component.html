@@ -1,5 +1,5 @@
 <form [formGroup]="tcpDeviceTransportConfigurationFormGroup" class="flex flex-col gap-2 pb-4">
-    <div class="tb-hint" *ngIf="showUdpDeviceHint" translate>device-profile.udp.device-hint</div>
+    <div class="jnks-iot-hint" *ngIf="showUdpDeviceHint" translate>device-profile.udp.device-hint</div>
     <mat-form-field class="mat-block" *ngIf="showUdpSourceHostField">
       <mat-label translate>device-profile.udp.source-host</mat-label>
       <input matInput formControlName="sourceHost">

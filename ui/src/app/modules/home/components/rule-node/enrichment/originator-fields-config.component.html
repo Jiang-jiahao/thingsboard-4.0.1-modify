@@ -1,5 +1,5 @@
-<section [formGroup]="originatorFieldsConfigForm" class="tb-form-panel no-padding no-border">
-  <tb-sv-map-config
+<section [formGroup]="originatorFieldsConfigForm" class="jnks-iot-form-panel no-padding no-border">
+  <jnks-iot-sv-map-config
     required
     [selectOptions]="originatorFields"
     targetKeyPrefix="originator"
@@ -12,11 +12,11 @@
     [valRequiredText]="'rule-node-config.target-key-required' | translate"
     [hintText]="'rule-node-config.originator-fields-sv-map-hint' | translate"
     popupHelpLink="rulenode/originator_fields_node_fields_templatization">
-  </tb-sv-map-config>
-  <tb-msg-metadata-chip [labelText]="'rule-node-config.add-mapped-originator-fields-to' | translate"
+  </jnks-iot-sv-map-config>
+  <jnks-iot-msg-metadata-chip [labelText]="'rule-node-config.add-mapped-originator-fields-to' | translate"
                         formControlName="fetchTo">
-  </tb-msg-metadata-chip>
-  <div tb-hint-tooltip-icon="{{ 'rule-node-config.skip-empty-fields-tooltip' | translate }}" class="tb-form-row same-padding">
+  </jnks-iot-msg-metadata-chip>
+  <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.skip-empty-fields-tooltip' | translate }}" class="jnks-iot-form-row same-padding">
     <mat-slide-toggle class="mat-slide margin" formControlName="ignoreNullStrings">
       {{ 'rule-node-config.skip-empty-fields' | translate }}
     </mat-slide-toggle>

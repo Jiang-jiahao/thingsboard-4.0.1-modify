@@ -22,7 +22,7 @@ import { MatButton } from '@angular/material/button';
 import Timeout = NodeJS.Timeout;
 
 @Directive({
-  selector: '[tb-toast]'
+  selector: '[jnks-iot-toast]'
 })
 export class ToastDirective implements AfterViewInit, OnDestroy {
 
@@ -33,7 +33,7 @@ export class ToastDirective implements AfterViewInit, OnDestroy {
   private hideNotificationSubscription: Subscription = null;
 
   private snackBarRef: MatSnackBarRef<any> = null;
-  private toastComponentRef: ComponentRef<TbSnackBarComponent>;
+  private toastComponentRef: ComponentRef<JnksIotSnackBarComponent>;
   private currentMessage: NotificationMessage = null;
 
   private dismissTimeout: Timeout = null;
@@ -91,7 +91,7 @@ export class ToastDirective implements AfterViewInit, OnDestroy {
         this.viewContainerRef.detach(0);
         this.toastComponentRef.destroy();
       }
-      let panelClass = ['tb-toast-panel', 'toast-panel'];
+      let panelClass = ['jnks-iot-toast-panel', 'toast-panel'];
       if (notificationMessage.panelClass) {
         if (typeof notificationMessage.panelClass === 'string') {
           panelClass.push(notificationMessage.panelClass);
@@ -126,7 +126,7 @@ export class ToastDirective implements AfterViewInit, OnDestroy {
         {provide: MAT_SNACK_BAR_DATA, useValue: data}
       ];
       const injector = Injector.create({parent: this.viewContainerRef.injector, providers});
-      this.toastComponentRef = this.viewContainerRef.createComponent(TbSnackBarComponent, {index: 0, injector});
+      this.toastComponentRef = this.viewContainerRef.createComponent(JnksIotSnackBarComponent, {index: 0, injector});
       this.cd.detectChanges();
 
       if (notificationMessage.duration && notificationMessage.duration > 0) {
@@ -171,7 +171,7 @@ export class ToastDirective implements AfterViewInit, OnDestroy {
         panelClass: notificationMessage.panelClass,
         data
       };
-      this.snackBarRef = this.snackBar.openFromComponent(TbSnackBarComponent, config);
+      this.snackBarRef = this.snackBar.openFromComponent(JnksIotSnackBarComponent, config);
       if (notificationMessage.duration && notificationMessage.duration > 0 && notificationMessage.forceDismiss) {
         if (this.dismissTimeout !== null) {
           clearTimeout(this.dismissTimeout);
@@ -256,12 +256,12 @@ export const toastAnimations: {
 export type ToastAnimationState = 'default' | 'opened' | 'closing';
 
 @Component({
-  selector: 'tb-snack-bar-component',
+  selector: 'jnks-iot-snack-bar-component',
   templateUrl: 'snack-bar-component.html',
   styleUrls: ['snack-bar-component.scss'],
   animations: [toastAnimations.showHideToast]
 })
-export class TbSnackBarComponent implements AfterViewInit, OnDestroy {
+export class JnksIotSnackBarComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild('actionButton') actionButton: MatButton;
 
@@ -287,7 +287,7 @@ export class TbSnackBarComponent implements AfterViewInit, OnDestroy {
               private data: ToastPanelData,
               private elementRef: ElementRef,
               @Optional()
-              private snackBarRef: MatSnackBarRef<TbSnackBarComponent>) {
+              private snackBarRef: MatSnackBarRef<JnksIotSnackBarComponent>) {
     this.animationState = !!this.snackBarRef ? 'default' : 'opened';
     this.notification = data.notification;
   }

@@ -1,8 +1,8 @@
-export interface TbColor {
+export interface JnksIotColor {
   light: string;
   dark: string;
 }
 
-export interface TbColorScheme {
-  [key: string]: TbColor;
+export interface JnksIotColorScheme {
+  [key: string]: JnksIotColor;
 }

@@ -156,7 +156,7 @@ export interface TenantProfile extends BaseData<TenantProfileId>, ExportableEnti
   name: string;
   description?: string;
   default?: boolean;
-  isolatedTbRuleEngine?: boolean;
+  isolatedJnksIotRuleEngine?: boolean;
   profileData?: TenantProfileData;
 }
 

@@ -28,7 +28,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-time-series-chart-line-settings',
+  selector: 'jnks-iot-time-series-chart-line-settings',
   templateUrl: './time-series-chart-line-settings.component.html',
   styleUrls: ['./../widget-settings.scss'],
   providers: [

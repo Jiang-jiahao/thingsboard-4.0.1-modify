@@ -1,37 +1,37 @@
 @import '../../../../../../../../../scss/constants';
 
-.tb-additional-map-data-sources {
-  .tb-form-table-header-cell {
-    &.tb-source-header {
+.jnks-iot-additional-map-data-sources {
+  .jnks-iot-form-table-header-cell {
+    &.jnks-iot-source-header {
       flex: 1 1 50%;
     }
-    &.tb-data-keys-header {
+    &.jnks-iot-data-keys-header {
       flex: 1 1 50%;
     }
-    &.tb-actions-header {
+    &.jnks-iot-actions-header {
       width: 40px;
       min-width: 40px;
     }
     @media #{$mat-lt-lg} {
-      &.tb-source-header {
+      &.jnks-iot-source-header {
         flex: 1 1 30%;
       }
-      &.tb-data-keys-header {
+      &.jnks-iot-data-keys-header {
         flex: 1 1 70%;
       }
       @media #{$mat-lt-md} {
-        &.tb-source-header {
+        &.jnks-iot-source-header {
           flex: 1 1 50%;
         }
-        &.tb-data-keys-header {
+        &.jnks-iot-data-keys-header {
           flex: 1 1 50%;
         }
       }
     }
   }
 
-  .tb-form-table-body {
-    tb-additional-map-data-source-row {
+  .jnks-iot-form-table-body {
+    jnks-iot-additional-map-data-source-row {
       overflow: hidden;
     }
   }

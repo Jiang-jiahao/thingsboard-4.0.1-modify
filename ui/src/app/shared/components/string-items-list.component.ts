@@ -21,7 +21,7 @@ export interface StringItemsOption {
   value: any;
 }
 @Component({
-  selector: 'tb-string-items-list',
+  selector: 'jnks-iot-string-items-list',
   templateUrl: './string-items-list.component.html',
   styleUrls: ['./string-items-list.component.scss'],
   providers: [

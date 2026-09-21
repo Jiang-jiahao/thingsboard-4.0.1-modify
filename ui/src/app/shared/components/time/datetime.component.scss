@@ -1,23 +1,23 @@
 @import '../../../../scss/constants';
 
-:host-context(.tb-form-row) {
+:host-context(.jnks-iot-form-row) {
   :host {
     display: flex;
   }
   .mat-mdc-form-field {
-    &.tb-datetime-field {
+    &.jnks-iot-datetime-field {
       width: 200px;
       &.with-clear {
         width: 240px;
       }
     }
-    &.tb-date-field {
+    &.jnks-iot-date-field {
       width: 140px;
       &.with-clear {
         width: 180px;
       }
     }
-    &.tb-time-field {
+    &.jnks-iot-time-field {
       width: 100px;
       &.with-clear {
         width: 140px;
@@ -26,10 +26,10 @@
   }
 }
 
-:host-context(.tb-form-row.column-xs) {
+:host-context(.jnks-iot-form-row.column-xs) {
   @media #{$mat-xs} {
     .mat-mdc-form-field {
-      &.tb-datetime-field, &.tb-date-field, &.tb-time-field {
+      &.jnks-iot-datetime-field, &.jnks-iot-date-field, &.jnks-iot-time-field {
         width: auto;
         flex: 1;
       }

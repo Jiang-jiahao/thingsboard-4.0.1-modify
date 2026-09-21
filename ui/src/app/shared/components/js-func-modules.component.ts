@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { AbstractControl, UntypedFormArray, UntypedFormBuilder, UntypedFormGroup, ValidatorFn } from '@angular/forms';
 import { JsFuncModuleRow, moduleValid } from '@shared/components/js-func-module-row.component';
 
@@ -22,7 +22,7 @@ const modulesValidator: ValidatorFn = control => {
 };
 
 @Component({
-  selector: 'tb-js-func-modules',
+  selector: 'jnks-iot-js-func-modules',
   templateUrl: './js-func-modules.component.html',
   styleUrls: ['./js-func-modules.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -33,7 +33,7 @@ export class JsFuncModulesComponent implements OnInit {
   modules: {[alias: string]: string };
 
   @Input()
-  popover: TbPopoverComponent<JsFuncModulesComponent>;
+  popover: JnksIotPopoverComponent<JsFuncModulesComponent>;
 
   @Output()
   modulesApplied = new EventEmitter<{[alias: string]: string }>();

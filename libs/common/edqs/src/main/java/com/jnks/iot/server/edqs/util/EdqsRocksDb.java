@@ -8,14 +8,14 @@ import org.rocksdb.WriteOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
-import com.jnks.iot.common.util.TbRocksDb;
+import com.jnks.iot.common.util.JnksIotRocksDb;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Component
 @ConditionalOnExpression("'${queue.edqs.sync.enabled:true}'=='true' && '${queue.edqs.mode:null}'=='local' && '${queue.type:null}'=='in-memory'")
-public class EdqsRocksDb extends TbRocksDb {
+public class EdqsRocksDb extends JnksIotRocksDb {
 
     @Getter
     private boolean isNew;

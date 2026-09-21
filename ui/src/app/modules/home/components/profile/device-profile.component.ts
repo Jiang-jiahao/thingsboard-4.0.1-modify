@@ -42,7 +42,7 @@ import { DashboardId } from '@shared/models/id/dashboard-id';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-device-profile',
+  selector: 'jnks-iot-device-profile',
   templateUrl: './device-profile.component.html',
   styleUrls: []
 })
@@ -69,7 +69,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
 
   isTransportTypeChanged = false;
 
-  serviceType = ServiceType.TB_RULE_ENGINE;
+  serviceType = ServiceType.JNKS_IOT_RULE_ENGINE;
 
   readonly deviceProvisioningUiEnabled = DEVICE_PROVISIONING_UI_ENABLED;
 

@@ -16,7 +16,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-notification-action-button-configuration',
+  selector: 'jnks-iot-notification-action-button-configuration',
   templateUrl: './notification-action-button-configuration.component.html',
   providers: [
     {

@@ -1,17 +1,17 @@
 <div [formGroup]="cssSizeFormGroup" class="flex flex-row items-center justify-start gap-2">
-  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="tb-inline-field tb-suffix-absolute number" [class.flex]="flex">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="jnks-iot-inline-field jnks-iot-suffix-absolute number" [class.flex]="flex">
     <input matInput [required]="required"
            type="number" min="0" formControlName="size" placeholder="{{ 'widget-config.set' | translate }}">
     <mat-icon matSuffix
               matTooltipPosition="above"
-              matTooltipClass="tb-error-tooltip"
+              matTooltipClass="jnks-iot-error-tooltip"
               [matTooltip]="cssSizeFormGroup.get('size').hasError('required') ? ((requiredText ? requiredText : 'css-size.size-value-required') | translate) :
                                ('css-size.invalid-size-value' | translate)"
               *ngIf="cssSizeFormGroup.get('size').invalid && cssSizeFormGroup.get('size').touched"
-              class="tb-error">
+              class="jnks-iot-error">
       warning
     </mat-icon>
   </mat-form-field>
-  <tb-css-unit-select [allowEmpty]="allowEmptyUnit" [style.flex]="flex ? '1' : null"
-                      [width]="flex ? '100%' : ''" formControlName="unit"></tb-css-unit-select>
+  <jnks-iot-css-unit-select [allowEmpty]="allowEmptyUnit" [style.flex]="flex ? '1' : null"
+                      [width]="flex ? '100%' : ''" formControlName="unit"></jnks-iot-css-unit-select>
 </div>

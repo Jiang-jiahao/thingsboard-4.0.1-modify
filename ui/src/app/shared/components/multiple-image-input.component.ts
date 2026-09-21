@@ -16,7 +16,7 @@ import { DndDropEvent } from 'ngx-drag-drop';
 import { isUndefined } from '@core/utils';
 
 @Component({
-  selector: 'tb-multiple-image-input',
+  selector: 'jnks-iot-multiple-image-input',
   templateUrl: './multiple-image-input.component.html',
   styleUrls: ['./multiple-image-input.component.scss'],
   providers: [

@@ -9,8 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
-import com.jnks.iot.server.cache.TbCacheValueWrapper;
-import com.jnks.iot.server.cache.VersionedTbCache;
+import com.jnks.iot.server.cache.JnksIotCacheValueWrapper;
+import com.jnks.iot.server.cache.VersionedJnksIotCache;
 import com.jnks.iot.server.common.data.id.DeviceProfileId;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.TenantId;
@@ -38,7 +38,7 @@ public class CachedRedisSqlTimeseriesLatestDao extends BaseAbstractSqlTimeseries
     final CacheExecutorService cacheExecutorService;
     final SqlTimeseriesLatestDao sqlDao;
     final StatsFactory statsFactory;
-    final VersionedTbCache<TsLatestCacheKey, TsKvEntry> cache;
+    final VersionedJnksIotCache<TsLatestCacheKey, TsKvEntry> cache;
     DefaultCounter hitCounter;
     DefaultCounter missCounter;
 
@@ -119,7 +119,7 @@ public class CachedRedisSqlTimeseriesLatestDao extends BaseAbstractSqlTimeseries
 
     public ListenableFuture<Optional<TsKvEntry>> doFindLatest(TenantId tenantId, EntityId entityId, String key) {
         final TsLatestCacheKey cacheKey = new TsLatestCacheKey(entityId, key);
-        ListenableFuture<TbCacheValueWrapper<TsKvEntry>> cacheFuture = cacheExecutorService.submit(() -> cache.get(cacheKey));
+        ListenableFuture<JnksIotCacheValueWrapper<TsKvEntry>> cacheFuture = cacheExecutorService.submit(() -> cache.get(cacheKey));
 
         return Futures.transformAsync(cacheFuture, (cacheValueWrap) -> {
             if (cacheValueWrap != null) {

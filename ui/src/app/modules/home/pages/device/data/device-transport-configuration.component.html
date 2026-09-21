@@ -1,81 +1,81 @@
 <div [formGroup]="deviceTransportConfigurationFormGroup">
   <div [ngSwitch]="activeTransportType">
     <ng-template [ngSwitchCase]="deviceTransportType.DEFAULT">
-      <tb-default-device-transport-configuration
+      <jnks-iot-default-device-transport-configuration
         [required]="required"
         formControlName="configuration">
-      </tb-default-device-transport-configuration>
+      </jnks-iot-default-device-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="basicTransportType.MQTT">
       <ng-container *ngIf="mqttPullProfileActive; else mqttPassiveDeviceTransport">
-        <tb-mqtt-pull-device-transport-configuration
+        <jnks-iot-mqtt-pull-device-transport-configuration
           formControlName="configuration">
-        </tb-mqtt-pull-device-transport-configuration>
+        </jnks-iot-mqtt-pull-device-transport-configuration>
       </ng-container>
       <ng-template #mqttPassiveDeviceTransport>
-        <tb-mqtt-device-transport-configuration
+        <jnks-iot-mqtt-device-transport-configuration
           [required]="required"
           formControlName="configuration">
-        </tb-mqtt-device-transport-configuration>
+        </jnks-iot-mqtt-device-transport-configuration>
       </ng-template>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.LWM2M">
-      <tb-lwm2m-device-transport-configuration
+      <jnks-iot-lwm2m-device-transport-configuration
         [required]="required"
         formControlName="configuration">
-      </tb-lwm2m-device-transport-configuration>
+      </jnks-iot-lwm2m-device-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.COAP">
-      <tb-coap-device-transport-configuration
+      <jnks-iot-coap-device-transport-configuration
         [required]="required"
         formControlName="configuration">
-      </tb-coap-device-transport-configuration>
+      </jnks-iot-coap-device-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.SNMP">
-      <tb-snmp-device-transport-configuration
+      <jnks-iot-snmp-device-transport-configuration
         [required]="required"
         formControlName="configuration">
-      </tb-snmp-device-transport-configuration>
+      </jnks-iot-snmp-device-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="basicTransportType.HTTP">
       <ng-container *ngIf="httpPullProfilePollUrl; else httpPassiveDeviceTransport">
-        <tb-http-pull-device-transport-configuration
+        <jnks-iot-http-pull-device-transport-configuration
           [httpPullProfilePollUrl]="httpPullProfilePollUrl"
           formControlName="configuration">
-        </tb-http-pull-device-transport-configuration>
+        </jnks-iot-http-pull-device-transport-configuration>
       </ng-container>
       <ng-template #httpPassiveDeviceTransport>
-        <tb-http-passive-device-transport-configuration
+        <jnks-iot-http-passive-device-transport-configuration
           [httpPushRoutingMode]="httpPushRoutingMode"
           formControlName="configuration">
-        </tb-http-passive-device-transport-configuration>
+        </jnks-iot-http-passive-device-transport-configuration>
       </ng-template>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.HTTP_PULL">
-      <tb-http-pull-device-transport-configuration
+      <jnks-iot-http-pull-device-transport-configuration
         [httpPullProfilePollUrl]="httpPullProfilePollUrl"
         formControlName="configuration">
-      </tb-http-pull-device-transport-configuration>
+      </jnks-iot-http-pull-device-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.MQTT_PULL">
-      <tb-mqtt-pull-device-transport-configuration
+      <jnks-iot-mqtt-pull-device-transport-configuration
         formControlName="configuration">
-      </tb-mqtt-pull-device-transport-configuration>
+      </jnks-iot-mqtt-pull-device-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.TCP">
-      <tb-tcp-device-transport-configuration
+      <jnks-iot-tcp-device-transport-configuration
         [required]="required"
         [tcpWireAuthenticationMode]="tcpWireAuthenticationMode"
         [tcpProfileTransportConnectMode]="tcpProfileTransportConnectMode"
         formControlName="configuration">
-      </tb-tcp-device-transport-configuration>
+      </jnks-iot-tcp-device-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.UDP">
-      <tb-udp-device-transport-configuration
+      <jnks-iot-udp-device-transport-configuration
         [required]="required"
         [udpWireAuthenticationMode]="udpWireAuthenticationMode"
         formControlName="configuration">
-      </tb-udp-device-transport-configuration>
+      </jnks-iot-udp-device-transport-configuration>
     </ng-template>
   </div>
 </div>

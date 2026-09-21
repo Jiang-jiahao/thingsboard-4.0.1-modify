@@ -1,7 +1,7 @@
 $maxLegendWidth: 25%;
 $maxLegendHeight: 35%;
 
-.tb-time-series-chart-panel {
+.jnks-iot-time-series-chart-panel {
   width: 100%;
   height: 100%;
   position: relative;
@@ -9,20 +9,20 @@ $maxLegendHeight: 35%;
   flex-direction: column;
   gap: 8px;
   padding: 20px 24px 24px 24px;
-  > div:not(.tb-time-series-chart-overlay) {
+  > div:not(.jnks-iot-time-series-chart-overlay) {
     z-index: 1;
   }
-  .tb-time-series-chart-overlay {
+  .jnks-iot-time-series-chart-overlay {
     position: absolute;
     top: 12px;
     left: 12px;
     bottom: 12px;
     right: 12px;
   }
-  div.tb-widget-title {
+  div.jnks-iot-widget-title {
     padding: 0;
   }
-  .tb-time-series-chart-content {
+  .jnks-iot-time-series-chart-content {
     flex: 1;
     min-width: 0;
     min-height: 0;
@@ -38,7 +38,7 @@ $maxLegendHeight: 35%;
     &.legend-left {
       flex-direction: row-reverse;
     }
-    .tb-time-series-chart-shape {
+    .jnks-iot-time-series-chart-shape {
       flex: 1;
       min-width: 0;
       min-height: 0;
@@ -47,7 +47,7 @@ $maxLegendHeight: 35%;
       justify-content: center;
     }
     &.legend-right, &.legend-left {
-      .tb-time-series-chart-legend {
+      .jnks-iot-time-series-chart-legend {
         display: inline-grid;
         grid-auto-flow: column;
         grid-template-rows: repeat(auto-fit, minmax(16px, min-content));
@@ -57,17 +57,17 @@ $maxLegendHeight: 35%;
       }
     }
     &.legend-top, &.legend-bottom {
-      .tb-time-series-chart-legend {
+      .jnks-iot-time-series-chart-legend {
         align-self: center;
-        &.tb-simple-legend {
+        &.jnks-iot-simple-legend {
           justify-content: center;
         }
-        &:not(.tb-simple-legend) {
+        &:not(.jnks-iot-simple-legend) {
           width: 100%;
         }
       }
     }
-    .tb-time-series-chart-legend {
+    .jnks-iot-time-series-chart-legend {
       display: flex;
       align-items: flex-start;
       align-self: stretch;
@@ -78,7 +78,7 @@ $maxLegendHeight: 35%;
       width: fit-content;
       max-width: 100%;
       max-height: calc($maxLegendHeight - 8px);
-      .tb-time-series-chart-legend-table {
+      .jnks-iot-time-series-chart-legend-table {
         border-spacing: 0;
         table-layout: fixed;
         &.vertical {
@@ -100,27 +100,27 @@ $maxLegendHeight: 35%;
             padding-bottom: 8px;
           }
         }
-        .tb-time-series-chart-legend-item {
+        .jnks-iot-time-series-chart-legend-item {
           align-items: flex-end;
           &.left {
             align-items: flex-start;
           }
         }
       }
-      .tb-time-series-chart-legend-item {
+      .jnks-iot-time-series-chart-legend-item {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: flex-start;
         user-select: none;
-        .tb-time-series-chart-legend-item-label {
+        .jnks-iot-time-series-chart-legend-item-label {
           display: flex;
           align-items: center;
           gap: 4px;
           color: #ccc;
           white-space: nowrap;
           cursor: pointer;
-          .tb-time-series-chart-legend-item-label-circle {
+          .jnks-iot-time-series-chart-legend-item-label-circle {
             width: 8px;
             height: 8px;
             border-radius: 50%;
@@ -128,23 +128,23 @@ $maxLegendHeight: 35%;
           }
         }
       }
-      .tb-time-series-chart-legend-type-label {
+      .jnks-iot-time-series-chart-legend-type-label {
         white-space: nowrap;
         text-align: left;
         &.right {
           text-align: right;
         }
       }
-      .tb-time-series-chart-legend-value {
+      .jnks-iot-time-series-chart-legend-value {
         white-space: nowrap;
         text-align: right;
       }
     }
   }
-  .tb-widget-title-row .tb-widget-actions {
+  .jnks-iot-widget-title-row .jnks-iot-widget-actions {
     margin: 0;
   }
-  .tb-widget-actions.tb-widget-actions-absolute {
+  .jnks-iot-widget-actions.jnks-iot-widget-actions-absolute {
     z-index: 2;
   }
 }

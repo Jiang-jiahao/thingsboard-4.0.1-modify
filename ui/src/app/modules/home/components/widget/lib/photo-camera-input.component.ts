@@ -34,7 +34,7 @@ interface PhotoCameraInputWidgetSettings {
 
 // @dynamic
 @Component({
-  selector: 'tb-photo-camera-widget',
+  selector: 'jnks-iot-photo-camera-widget',
   templateUrl: './photo-camera-input.component.html',
   styleUrls: ['./photo-camera-input.component.scss'],
   encapsulation: ViewEncapsulation.None

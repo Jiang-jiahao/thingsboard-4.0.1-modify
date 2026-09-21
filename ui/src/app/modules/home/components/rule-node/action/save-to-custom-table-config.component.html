@@ -1,4 +1,4 @@
-<section [formGroup]="saveToCustomTableConfigForm" class="tb-form-panel no-border no-padding">
+<section [formGroup]="saveToCustomTableConfigForm" class="jnks-iot-form-panel no-border no-padding">
   <mat-form-field class="mat-block" subscriptSizing="dynamic">
     <mat-label translate>rule-node-config.custom-table-name</mat-label>
     <input required matInput formControlName="tableName">
@@ -14,7 +14,7 @@
       {{ 'rule-node-config.custom-table-name-required' | translate }}
     </mat-error>
   </mat-form-field>
-  <tb-kv-map-config
+  <jnks-iot-kv-map-config
     required
     formControlName="fieldsMapping"
     [labelText]="'rule-node-config.fields-mapping' | translate"
@@ -24,7 +24,7 @@
     [valText]="'rule-node-config.table-col' | translate"
     [valRequiredText]="'rule-node-config.table-col-required' | translate"
     [hintText]="'rule-node-config.fields-mapping-hint'">
-  </tb-kv-map-config>
+  </jnks-iot-kv-map-config>
   <mat-form-field class="mat-block flex-1">
     <mat-label translate>rule-node-config.default-ttl</mat-label>
     <input type="number" min="0" step="1" matInput formControlName="defaultTtl" required>

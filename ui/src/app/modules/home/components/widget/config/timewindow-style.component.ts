@@ -2,12 +2,12 @@ import { Component, forwardRef, Input, OnInit, Renderer2, ViewContainerRef } fro
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { TimewindowStyle } from '@shared/models/widget-settings.models';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { Timewindow } from '@shared/models/time/time.models';
 import { TimewindowStylePanelComponent } from '@home/components/widget/config/timewindow-style-panel.component';
 
 @Component({
-  selector: 'tb-timewindow-style',
+  selector: 'jnks-iot-timewindow-style',
   templateUrl: './timewindow-style.component.html',
   styleUrls: [],
   providers: [
@@ -30,7 +30,7 @@ export class TimewindowStyleComponent implements OnInit, ControlValueAccessor {
 
   private propagateChange = null;
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef) {}
 
@@ -73,8 +73,8 @@ export class TimewindowStyleComponent implements OnInit, ControlValueAccessor {
         context: ctx,
         isModal: true
       });
-      timewindowStylePanelPopover.tbComponentRef.instance.popover = timewindowStylePanelPopover;
-      timewindowStylePanelPopover.tbComponentRef.instance.timewindowStyleApplied.subscribe((timewindowStyle) => {
+      timewindowStylePanelPopover.jnksIotComponentRef.instance.popover = timewindowStylePanelPopover;
+      timewindowStylePanelPopover.jnksIotComponentRef.instance.timewindowStyleApplied.subscribe((timewindowStyle) => {
         timewindowStylePanelPopover.hide();
         this.modelValue = timewindowStyle;
         this.propagateChange(this.modelValue);

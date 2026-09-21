@@ -21,7 +21,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatAutocompleteTrigger } from '@angular/material/autocomplete';
 
 @Component({
-  selector: 'tb-profile-lwm2m-object-list',
+  selector: 'jnks-iot-profile-lwm2m-object-list',
   templateUrl: './lwm2m-object-list.component.html',
   providers: [
     {

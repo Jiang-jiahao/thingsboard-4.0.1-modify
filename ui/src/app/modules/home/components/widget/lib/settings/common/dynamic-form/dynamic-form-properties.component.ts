@@ -37,7 +37,7 @@ import { DialogService } from '@core/services/dialog.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-dynamic-form-properties',
+  selector: 'jnks-iot-dynamic-form-properties',
   templateUrl: './dynamic-form-properties.component.html',
   styleUrls: ['./dynamic-form-properties.component.scss'],
   providers: [

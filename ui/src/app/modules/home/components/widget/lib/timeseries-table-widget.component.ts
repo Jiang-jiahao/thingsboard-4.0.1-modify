@@ -138,7 +138,7 @@ interface TimeseriesTableSource {
 }
 
 @Component({
-  selector: 'tb-timeseries-table-widget',
+  selector: 'jnks-iot-timeseries-table-widget',
   templateUrl: './timeseries-table-widget.component.html',
   styleUrls: ['./timeseries-table-widget.component.scss', './table-widget.scss']
 })
@@ -362,7 +362,7 @@ export class TimeseriesTableWidgetComponent extends PageComponent implements OnI
     let cssString = constructTableCssString(this.widgetConfig);
 
     const origBackgroundColor = this.widgetConfig.backgroundColor || 'rgb(255, 255, 255)';
-    cssString += '.tb-table-widget mat-toolbar.mat-mdc-table-toolbar:not([color=primary]) {\n' +
+    cssString += '.jnks-iot-table-widget mat-toolbar.mat-mdc-table-toolbar:not([color=primary]) {\n' +
     'background-color: ' + origBackgroundColor + ' !important;\n' +
     '}\n';
 
@@ -441,7 +441,7 @@ export class TimeseriesTableWidgetComponent extends PageComponent implements OnI
     if (this.sources.length) {
       const target = $event.target || $event.currentTarget;
       const config = new OverlayConfig({
-        panelClass: 'tb-panel-container',
+        panelClass: 'jnks-iot-panel-container',
         backdropClass: 'cdk-overlay-transparent-backdrop',
         hasBackdrop: true,
         height: 'fit-content',

@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-knob-control-widget-settings',
+  selector: 'jnks-iot-knob-control-widget-settings',
   templateUrl: './knob-control-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

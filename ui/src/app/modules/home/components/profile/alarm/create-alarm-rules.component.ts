@@ -19,7 +19,7 @@ import { EntityId } from '@shared/models/id/entity-id';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-create-alarm-rules',
+  selector: 'jnks-iot-create-alarm-rules',
   templateUrl: './create-alarm-rules.component.html',
   styleUrls: ['./create-alarm-rules.component.scss'],
   providers: [

@@ -7,7 +7,7 @@
          [matAutocomplete]="optionsAutocomplete">
   <button *ngIf="selectionFormControl.value && !disabled"
           type="button"
-          class="tb-icon-24 mr-2"
+          class="jnks-iot-icon-24 mr-2"
           matSuffix mat-icon-button aria-label="Clear"
           (click)="clear()">
     <mat-icon class="material-icons">close</mat-icon>
@@ -17,7 +17,7 @@
             [matTooltip]="errorText"
             matTooltipPosition="above"
             [matTooltipClass]="tooltipClass"
-            class="material-icons tb-suffix-show-always tb-error">
+            class="material-icons jnks-iot-suffix-show-always jnks-iot-error">
     warning
   </mat-icon>
   <mat-error *ngIf="selectionFormControl.hasError('required') && showInlineError">
@@ -25,10 +25,10 @@
   </mat-error>
   <mat-autocomplete
     #optionsAutocomplete="matAutocomplete"
-    class="tb-autocomplete tb-options-input-autocomplete"
+    class="jnks-iot-autocomplete jnks-iot-options-input-autocomplete"
     panelWidth="fit-content">
     <mat-option *ngFor="let option of filteredOptions$ | async" [value]="option">
-      <span class="tb-option-name flex-1" [innerHTML]="option | highlight:searchText:true:'ig'"></span>
+      <span class="jnks-iot-option-name flex-1" [innerHTML]="option | highlight:searchText:true:'ig'"></span>
     </mat-option>
   </mat-autocomplete>
 </mat-form-field>

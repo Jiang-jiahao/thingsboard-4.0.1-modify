@@ -1,5 +1,5 @@
 <mat-form-field [class]="fieldClass"
-                [formGroup]="stringItemsForm" class="tb-string-items-list mat-block flex-1"
+                [formGroup]="stringItemsForm" class="jnks-iot-string-items-list mat-block flex-1"
                 [floatLabel]="floatLabel"
                 [appearance]="appearance"
                 [subscriptSizing]="subscriptSizing">
@@ -30,7 +30,7 @@
   </mat-chip-grid>
   <mat-autocomplete #stringItemAutocomplete="matAutocomplete"
                     [displayWith]="displayValueFn"
-                    class="tb-autocomplete">
+                    class="jnks-iot-autocomplete">
     @for (value of filteredValues | async; track value.value) {
       <mat-option [value]="value"><span [innerHTML]="value.name | highlight:searchText"></span></mat-option>
     } @empty {

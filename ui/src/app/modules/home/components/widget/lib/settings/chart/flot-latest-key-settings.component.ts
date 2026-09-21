@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-flot-latest-key-settings',
+  selector: 'jnks-iot-flot-latest-key-settings',
   templateUrl: './flot-latest-key-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

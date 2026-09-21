@@ -1,7 +1,7 @@
 <mat-toolbar color="primary">
   <h2 translate>device-profile.add</h2>
   <span class="flex-1"></span>
-  <div [tb-help]="'deviceProfiles'"></div>
+  <div [jnks-iot-help]="'deviceProfiles'"></div>
   <button mat-icon-button
           (click)="cancel()"
           type="button">
@@ -31,20 +31,20 @@
               {{ 'device-profile.name-max-length' | translate }}
             </mat-error>
           </mat-form-field>
-          <tb-rule-chain-autocomplete
+          <jnks-iot-rule-chain-autocomplete
             labelText="device-profile.default-rule-chain"
             formControlName="defaultRuleChainId">
-          </tb-rule-chain-autocomplete>
-          <tb-dashboard-autocomplete
+          </jnks-iot-rule-chain-autocomplete>
+          <jnks-iot-dashboard-autocomplete
             *ngIf="mobileUiEnabled"
             label="{{'device-profile.mobile-dashboard' | translate}}"
             formControlName="defaultDashboardId">
-            <span tb-hint>{{'device-profile.mobile-dashboard-hint' | translate}}</span>
-          </tb-dashboard-autocomplete>
-          <tb-queue-autocomplete
+            <span jnks-iot-hint>{{'device-profile.mobile-dashboard-hint' | translate}}</span>
+          </jnks-iot-dashboard-autocomplete>
+          <jnks-iot-queue-autocomplete
             [queueType]="serviceType"
             formControlName="defaultQueueName">
-          </tb-queue-autocomplete>
+          </jnks-iot-queue-autocomplete>
           <mat-form-field class="mat-block !hidden">
             <mat-label translate>device-profile.type</mat-label>
             <mat-select formControlName="type" required>
@@ -56,10 +56,10 @@
               {{ 'device-profile.type-required' | translate }}
             </mat-error>
           </mat-form-field>
-          <tb-gallery-image-input class="flex-1"
+          <jnks-iot-gallery-image-input class="flex-1"
                           label="{{'device-profile.image' | translate}}"
                           formControlName="image">
-          </tb-gallery-image-input>
+          </jnks-iot-gallery-image-input>
           <mat-form-field class="mat-block">
             <mat-label translate>device-profile.description</mat-label>
             <textarea matInput formControlName="description" rows="2"></textarea>
@@ -84,11 +84,11 @@
             {{ 'device-profile.transport-type-required' | translate }}
           </mat-error>
         </mat-form-field>
-        <tb-device-profile-transport-configuration
+        <jnks-iot-device-profile-transport-configuration
           formControlName="transportConfiguration"
           [selectedTransportType]="transportConfigFormGroup.get('transportType').value"
           isAdd="true">
-        </tb-device-profile-transport-configuration>
+        </jnks-iot-device-profile-transport-configuration>
       </form>
     </mat-step>
     <mat-step [stepControl]="alarmRulesFormGroup" [optional]="true">
@@ -96,18 +96,18 @@
         <ng-template matStepLabel>{{'device-profile.alarm-rules-with-count' | translate:
           {count: alarmRulesFormGroup.get('alarms').value ?
               alarmRulesFormGroup.get('alarms').value.length : 0} }}</ng-template>
-        <tb-device-profile-alarms
+        <jnks-iot-device-profile-alarms
           formControlName="alarms"
           [deviceProfileId]="null">
-        </tb-device-profile-alarms>
+        </jnks-iot-device-profile-alarms>
       </form>
     </mat-step>
     <mat-step *ngIf="deviceProvisioningUiEnabled" [stepControl]="provisionConfigFormGroup" [optional]="true">
       <form [formGroup]="provisionConfigFormGroup" style="padding-bottom: 16px;">
         <ng-template matStepLabel>{{ 'device-profile.device-provisioning' | translate }}</ng-template>
-        <tb-device-profile-provision-configuration
+        <jnks-iot-device-profile-provision-configuration
           formControlName="provisionConfiguration">
-        </tb-device-profile-provision-configuration>
+        </jnks-iot-device-profile-provision-configuration>
       </form>
     </mat-step>
   </mat-horizontal-stepper>

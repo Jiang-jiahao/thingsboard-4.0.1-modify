@@ -20,7 +20,7 @@ import {
 import { TranslateService } from '@ngx-translate/core';
 import { DatePipe } from '@angular/common';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { deepClone, mergeDeep } from '@core/utils';
 import {
   DateFormatSettingsPanelComponent
@@ -32,7 +32,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-date-format-select',
+  selector: 'jnks-iot-date-format-select',
   templateUrl: './date-format-select.component.html',
   styleUrls: [],
   providers: [
@@ -73,7 +73,7 @@ export class DateFormatSelectComponent implements OnInit, ControlValueAccessor {
 
   constructor(private translate: TranslateService,
               private date: DatePipe,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private destroyRef: DestroyRef) {}
@@ -156,8 +156,8 @@ export class DateFormatSelectComponent implements OnInit, ControlValueAccessor {
         },
         isModal: true
       });
-      dateFormatSettingsPanelPopover.tbComponentRef.instance.popover = dateFormatSettingsPanelPopover;
-      dateFormatSettingsPanelPopover.tbComponentRef.instance.dateFormatApplied.subscribe((dateFormat) => {
+      dateFormatSettingsPanelPopover.jnksIotComponentRef.instance.popover = dateFormatSettingsPanelPopover;
+      dateFormatSettingsPanelPopover.jnksIotComponentRef.instance.dateFormatApplied.subscribe((dateFormat) => {
         dateFormatSettingsPanelPopover.hide();
         this.modelValue = dateFormat;
         this.propagateChange(this.modelValue);
@@ -185,8 +185,8 @@ export class DateFormatSelectComponent implements OnInit, ControlValueAccessor {
         },
         isModal: true
       });
-      autoDateFormatSettingsPanelPopover.tbComponentRef.instance.popover = autoDateFormatSettingsPanelPopover;
-      autoDateFormatSettingsPanelPopover.tbComponentRef.instance.autoDateFormatSettingsApplied.subscribe((autoDateFormatSettings) => {
+      autoDateFormatSettingsPanelPopover.jnksIotComponentRef.instance.popover = autoDateFormatSettingsPanelPopover;
+      autoDateFormatSettingsPanelPopover.jnksIotComponentRef.instance.autoDateFormatSettingsApplied.subscribe((autoDateFormatSettings) => {
         autoDateFormatSettingsPanelPopover.hide();
         this.modelValue.autoDateFormatSettings = autoDateFormatSettings;
         this.propagateChange(this.modelValue);

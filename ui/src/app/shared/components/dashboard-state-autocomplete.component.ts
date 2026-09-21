@@ -12,7 +12,7 @@ import { FloatLabelType } from '@angular/material/form-field';
 import { DashboardUtilsService } from '@core/services/dashboard-utils.service';
 
 @Component({
-  selector: 'tb-dashboard-state-autocomplete',
+  selector: 'jnks-iot-dashboard-state-autocomplete',
   templateUrl: './dashboard-state-autocomplete.component.html',
   styleUrls: [],
   providers: [{

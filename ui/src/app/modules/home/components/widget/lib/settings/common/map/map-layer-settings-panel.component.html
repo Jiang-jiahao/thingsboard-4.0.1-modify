@@ -1,13 +1,13 @@
-<div class="tb-map-layer-settings-panel" [formGroup]="layerFormGroup">
-  <div class="tb-map-layer-settings-title" translate>widgets.maps.layer.layer-settings</div>
-  <div class="tb-map-layer-settings-panel-content">
-    <div class="tb-form-row space-between column-xs">
+<div class="jnks-iot-map-layer-settings-panel" [formGroup]="layerFormGroup">
+  <div class="jnks-iot-map-layer-settings-title" translate>widgets.maps.layer.layer-settings</div>
+  <div class="jnks-iot-map-layer-settings-panel-content">
+    <div class="jnks-iot-form-row space-between column-xs">
       <div class="fixed-title-width" translate>widgets.maps.layer.label</div>
       <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
         <input matInput formControlName="label" [placeholder]="labelPlaceholder()">
       </mat-form-field>
     </div>
-    <div class="tb-form-row space-between column-xs">
+    <div class="jnks-iot-form-row space-between column-xs">
       <div class="fixed-title-width" translate>widgets.maps.layer.provider.provider</div>
       <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
         <mat-select formControlName="provider" required>
@@ -17,7 +17,7 @@
         </mat-select>
       </mat-form-field>
     </div>
-    <div class="tb-form-row space-between column-xs">
+    <div class="jnks-iot-form-row space-between column-xs">
       <div class="fixed-title-width"> {{ (MapProvider.custom === layerFormGroup.get('provider').value ? 'widgets.maps.layer.provider.custom.tile-url' : 'widgets.maps.layer.layer') | translate }}</div>
       <mat-form-field *ngIf="MapProvider.openstreet === layerFormGroup.get('provider').value"
                       class="flex"  appearance="outline" subscriptSizing="dynamic">
@@ -56,16 +56,16 @@
         <input matInput formControlName="tileUrl" required placeholder="{{ 'widget-config.set' | translate }}">
       </mat-form-field>
     </div>
-    <div *ngIf="[MapProvider.google, MapProvider.here].includes(layerFormGroup.get('provider').value)" class="tb-form-panel stroked">
-      <div class="tb-form-panel-title" translate>widgets.maps.layer.credentials.credentials</div>
-      <div class="tb-form-row space-between column-xs">
+    <div *ngIf="[MapProvider.google, MapProvider.here].includes(layerFormGroup.get('provider').value)" class="jnks-iot-form-panel stroked">
+      <div class="jnks-iot-form-panel-title" translate>widgets.maps.layer.credentials.credentials</div>
+      <div class="jnks-iot-form-row space-between column-xs">
         <div class="fixed-title-width" translate>widgets.maps.layer.credentials.api-key</div>
         <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
           <input matInput formControlName="apiKey" required placeholder="{{ 'widget-config.set' | translate }}">
         </mat-form-field>
       </div>
     </div>
-    <div class="tb-form-row space-between column-xs">
+    <div class="jnks-iot-form-row space-between column-xs">
       <div class="fixed-title-width" translate>widgets.maps.layer.reference.reference-layer</div>
       <mat-form-field class="flex" appearance="outline" subscriptSizing="dynamic">
         <mat-select formControlName="referenceLayer" placeholder="{{'widgets.maps.layer.reference.no-layer' | translate}}">
@@ -77,7 +77,7 @@
       </mat-form-field>
     </div>
   </div>
-  <div class="tb-map-layer-settings-panel-buttons">
+  <div class="jnks-iot-map-layer-settings-panel-buttons">
     <button mat-button
             color="primary"
             type="button"

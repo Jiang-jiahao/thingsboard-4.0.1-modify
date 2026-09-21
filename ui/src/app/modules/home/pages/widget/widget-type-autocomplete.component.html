@@ -15,15 +15,15 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
   <mat-autocomplete
-    class="tb-autocomplete tb-widget-type-autocomplete"
+    class="jnks-iot-autocomplete jnks-iot-widget-type-autocomplete"
     #widgetTypeAutocomplete
     [displayWith]="displayWidgetTypeFn">
     <mat-option *ngFor="let widgetType of filteredWidgetTypes | async" [value]="widgetType">
-      <div class="tb-widget-type-option-container">
-        <img class="tb-widget-type-option-image-preview" [src]="widgetType.image | image: {preview: true, emptyUrl: '/assets/widget-preview-empty.svg'} | async" alt="{{ widgetType.name }}">
-        <div class="tb-widget-type-option-details">
-          <div class="tb-widget-type-option-text" [innerHTML]="widgetType.name | highlight:searchText:true"></div>
-          <div *ngIf="widgetType.deprecated" class="tb-widget-type-option-deprecated">{{ 'widget.deprecated' | translate }}</div>
+      <div class="jnks-iot-widget-type-option-container">
+        <img class="jnks-iot-widget-type-option-image-preview" [src]="widgetType.image | image: {preview: true, emptyUrl: '/assets/widget-preview-empty.svg'} | async" alt="{{ widgetType.name }}">
+        <div class="jnks-iot-widget-type-option-details">
+          <div class="jnks-iot-widget-type-option-text" [innerHTML]="widgetType.name | highlight:searchText:true"></div>
+          <div *ngIf="widgetType.deprecated" class="jnks-iot-widget-type-option-deprecated">{{ 'widget.deprecated' | translate }}</div>
         </div>
       </div>
     </mat-option>
@@ -41,9 +41,9 @@
     </mat-option>
   </mat-autocomplete>
   <mat-error>
-    <ng-content select="[tb-error]"></ng-content>
+    <ng-content select="[jnks-iot-error]"></ng-content>
   </mat-error>
   <mat-hint>
-    <ng-content select="[tb-hint]"></ng-content>
+    <ng-content select="[jnks-iot-hint]"></ng-content>
   </mat-hint>
 </mat-form-field>

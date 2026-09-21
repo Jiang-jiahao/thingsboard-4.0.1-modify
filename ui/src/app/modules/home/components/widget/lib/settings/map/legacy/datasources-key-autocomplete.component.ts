@@ -12,7 +12,7 @@ import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-datasources-key-autocomplete',
+  selector: 'jnks-iot-datasources-key-autocomplete',
   templateUrl: './datasources-key-autocomplete.component.html',
   styleUrls: [],
   providers: [

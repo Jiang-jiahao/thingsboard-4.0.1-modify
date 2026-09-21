@@ -19,7 +19,7 @@ import {
 type ButtonAppearanceType = 'left' | 'right';
 
 @Component({
-  selector: 'tb-value-stepper-basic-config',
+  selector: 'jnks-iot-value-stepper-basic-config',
   templateUrl: './value-stepper-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

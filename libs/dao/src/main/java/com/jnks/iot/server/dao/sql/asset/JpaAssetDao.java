@@ -17,7 +17,7 @@ import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.page.PageData;
 import com.jnks.iot.server.common.data.page.PageLink;
 import com.jnks.iot.server.common.data.page.SortOrder;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.dao.DaoUtil;
 import com.jnks.iot.server.dao.asset.AssetDao;
 import com.jnks.iot.server.dao.model.sql.AssetEntity;
@@ -214,7 +214,7 @@ public class JpaAssetDao extends JpaAbstractDao<AssetEntity, Asset> implements A
                         DaoUtil.toPageable(pageLink)));
     }
 
-    public PageData<TbPair<UUID, String>> getAllAssetTypes(PageLink pageLink) {
+    public PageData<JnksIotPair<UUID, String>> getAllAssetTypes(PageLink pageLink) {
         log.debug("Try to find all asset types and pageLink [{}]", pageLink);
         return DaoUtil.pageToPageData(assetRepository.getAllAssetTypes(
                 DaoUtil.toPageable(pageLink, Arrays.asList(new SortOrder("tenantId"), new SortOrder("type")))));

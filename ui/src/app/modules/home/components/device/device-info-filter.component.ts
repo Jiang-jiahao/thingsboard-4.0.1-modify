@@ -34,7 +34,7 @@ export interface DeviceFilterConfigData {
 
 // @dynamic
 @Component({
-  selector: 'tb-device-info-filter',
+  selector: 'jnks-iot-device-info-filter',
   templateUrl: './device-info-filter.component.html',
   styleUrls: ['./device-info-filter.component.scss'],
   providers: [
@@ -144,7 +144,7 @@ export class DeviceInfoFilterComponent implements OnInit, OnDestroy, ControlValu
       $event.stopPropagation();
     }
     const config = new OverlayConfig({
-      panelClass: 'tb-filter-panel',
+      panelClass: 'jnks-iot-filter-panel',
       backdropClass: 'cdk-overlay-transparent-backdrop',
       hasBackdrop: true,
       maxHeight: '80vh',

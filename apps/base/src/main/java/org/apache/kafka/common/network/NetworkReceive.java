@@ -40,8 +40,8 @@ public class NetworkReceive implements Receive {
 
     public static final String UNKNOWN_SOURCE = "";
     public static final int UNLIMITED = -1;
-    public static final int TB_MAX_REQUESTED_BUFFER_SIZE = 100 * 1024 * 1024;
-    public static final int TB_LOG_REQUESTED_BUFFER_SIZE = 10 * 1024 * 1024;
+    public static final int JNKS_IOT_MAX_REQUESTED_BUFFER_SIZE = 100 * 1024 * 1024;
+    public static final int JNKS_IOT_LOG_REQUESTED_BUFFER_SIZE = 10 * 1024 * 1024;
     private static final Logger log = LoggerFactory.getLogger(NetworkReceive.class);
     private static final ByteBuffer EMPTY_BUFFER = ByteBuffer.allocate(0);
 
@@ -54,12 +54,12 @@ public class NetworkReceive implements Receive {
 
 
     public NetworkReceive(String source, ByteBuffer buffer) {
-        this(TB_MAX_REQUESTED_BUFFER_SIZE, source);
+        this(JNKS_IOT_MAX_REQUESTED_BUFFER_SIZE, source);
         this.buffer = buffer;
     }
 
     public NetworkReceive(String source) {
-        this(TB_MAX_REQUESTED_BUFFER_SIZE, source);
+        this(JNKS_IOT_MAX_REQUESTED_BUFFER_SIZE, source);
     }
 
     public NetworkReceive(int maxSize, String source) {
@@ -110,7 +110,7 @@ public class NetworkReceive implements Receive {
             }
         }
         if (buffer == null && requestedBufferSize != -1) { //we know the size we want but havent been able to allocate it yet
-            if (requestedBufferSize > TB_LOG_REQUESTED_BUFFER_SIZE) {
+            if (requestedBufferSize > JNKS_IOT_LOG_REQUESTED_BUFFER_SIZE) {
                 String stackTrace = Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).collect(Collectors.joining("|"));
                 log.error("Allocating buffer of size {} for source {}", requestedBufferSize, source);
                 log.error("Stack Trace: {}", stackTrace);
@@ -167,7 +167,7 @@ public class NetworkReceive implements Receive {
     }
 
     private int getMaxSize(int maxSize) {
-        return maxSize == UNLIMITED ? TB_MAX_REQUESTED_BUFFER_SIZE : Math.min(maxSize, TB_MAX_REQUESTED_BUFFER_SIZE);
+        return maxSize == UNLIMITED ? JNKS_IOT_MAX_REQUESTED_BUFFER_SIZE : Math.min(maxSize, JNKS_IOT_MAX_REQUESTED_BUFFER_SIZE);
     }
 
 }

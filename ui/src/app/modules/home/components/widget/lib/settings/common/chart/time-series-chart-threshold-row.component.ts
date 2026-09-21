@@ -40,7 +40,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-time-series-chart-threshold-row',
+  selector: 'jnks-iot-time-series-chart-threshold-row',
   templateUrl: './time-series-chart-threshold-row.component.html',
   styleUrls: ['./time-series-chart-threshold-row.component.scss'],
   providers: [

@@ -4352,7 +4352,7 @@
                 "WHITE_LABELING": "White Labeling",
                 "AUDIT_LOG": "Dziennik kontroli",
                 "API_USAGE_STATE": "Stan użycia interfejsu API",
-                "TB_RESOURCE": "Biblioteka",
+                "JNKS_IOT_RESOURCE": "Biblioteka",
                 "OTA_PACKAGE": "Pakiet Ota",
                 "QUEUE": "Kolejka",
                 "VERSION_CONTROL": "Kontrola wersji",

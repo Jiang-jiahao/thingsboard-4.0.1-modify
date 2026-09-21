@@ -1,34 +1,34 @@
-<div class="tb-form-panel no-padding no-border" [formGroup]="attributeControlGroup">
-  <tb-example-hint [hintText]="'rule-node-config.kv-map-pattern-hint'"
-                   [popupHelpLink]="popupHelpLink"></tb-example-hint>
-  <tb-string-items-list subscriptSizing="dynamic" class="mat-block" editable
+<div class="jnks-iot-form-panel no-padding no-border" [formGroup]="attributeControlGroup">
+  <jnks-iot-example-hint [hintText]="'rule-node-config.kv-map-pattern-hint'"
+                   [popupHelpLink]="popupHelpLink"></jnks-iot-example-hint>
+  <jnks-iot-string-items-list subscriptSizing="dynamic" class="mat-block" editable
                         (focusout)="onTouched()"
                         [placeholder]="'rule-node-config.add-attribute-key' | translate"
                         [label]="'rule-node-config.client-attributes' | translate" formControlName="clientAttributeNames">
     <ng-container matSuffix *ngTemplateOutlet="helpIcon"></ng-container>
-  </tb-string-items-list>
-  <tb-string-items-list subscriptSizing="dynamic" class="mat-block" editable
+  </jnks-iot-string-items-list>
+  <jnks-iot-string-items-list subscriptSizing="dynamic" class="mat-block" editable
                         (focusout)="onTouched()"
                         [placeholder]="'rule-node-config.add-attribute-key' | translate"
                         [label]="'rule-node-config.shared-attributes' | translate" formControlName="sharedAttributeNames">
     <ng-container matSuffix *ngTemplateOutlet="helpIcon"></ng-container>
-  </tb-string-items-list>
-  <tb-string-items-list subscriptSizing="dynamic" class="mat-block" editable
+  </jnks-iot-string-items-list>
+  <jnks-iot-string-items-list subscriptSizing="dynamic" class="mat-block" editable
                         (focusout)="onTouched()"
                         [placeholder]="'rule-node-config.add-attribute-key' | translate"
                         [label]="'rule-node-config.server-attributes' | translate" formControlName="serverAttributeNames">
     <ng-container matSuffix *ngTemplateOutlet="helpIcon"></ng-container>
-  </tb-string-items-list>
-  <tb-string-items-list subscriptSizing="dynamic" editable class="mat-block"
+  </jnks-iot-string-items-list>
+  <jnks-iot-string-items-list subscriptSizing="dynamic" editable class="mat-block"
                         (focusout)="onTouched()"
                         [placeholder]="'rule-node-config.add-telemetry-key' | translate"
                         [label]="'rule-node-config.latest-telemetry' | translate" formControlName="latestTsKeyNames">
     <ng-container matSuffix *ngTemplateOutlet="helpIcon"></ng-container>
-  </tb-string-items-list>
-  <div tb-hint-tooltip-icon="{{ 'rule-node-config.fetch-latest-telemetry-with-timestamp-tooltip' | translate:
+  </jnks-iot-string-items-list>
+  <div jnks-iot-hint-tooltip-icon="{{ 'rule-node-config.fetch-latest-telemetry-with-timestamp-tooltip' | translate:
                          { latestTsKeyName:  attributeControlGroup.get('latestTsKeyNames').value[0]} }}"
        *ngIf="attributeControlGroup.get('latestTsKeyNames').value?.length > 0"
-       class="tb-form-row no-border no-padding">
+       class="jnks-iot-form-row no-border no-padding">
     <mat-slide-toggle class="mat-slide" formControlName="getLatestValueWithTs">
       {{ 'rule-node-config.fetch-latest-telemetry-with-timestamp' | translate }}
     </mat-slide-toggle>

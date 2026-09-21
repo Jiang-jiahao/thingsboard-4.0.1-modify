@@ -6,7 +6,7 @@ import { Resource, ResourceInfo, ResourceSubType, ResourceSubTypeTranslationMap 
 import { PageLink } from '@shared/models/page/page-link';
 
 @Component({
-  selector: 'tb-js-library-table-header',
+  selector: 'jnks-iot-js-library-table-header',
   templateUrl: './js-library-table-header.component.html',
   styleUrls: []
 })

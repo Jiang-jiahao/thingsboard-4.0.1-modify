@@ -14,13 +14,13 @@ import { TooltipPosition } from '@angular/material/tooltip';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import { coerceBoolean } from '@shared/decorators/coercion';
 import { TimezonePanelComponent, TimezoneSelectionResult } from '@shared/components/time/timezone-panel.component';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { getTimezoneInfo, TimezoneInfo } from '@shared/models/time/time.models';
 import { TimeService } from '@core/services/time.service';
 
 // @dynamic
 @Component({
-  selector: 'tb-timezone',
+  selector: 'jnks-iot-timezone',
   templateUrl: './timezone.component.html',
   styleUrls: ['./timezone.component.scss'],
   providers: [
@@ -120,7 +120,7 @@ export class TimezoneComponent implements ControlValueAccessor, OnInit {
   constructor(private translate: TranslateService,
               private cd: ChangeDetectorRef,
               public viewContainerRef: ViewContainerRef,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private timeService: TimeService) {
   }
@@ -164,7 +164,7 @@ export class TimezoneComponent implements ControlValueAccessor, OnInit {
         showCloseButton: false,
         isModal: true
       });
-      timezoneSelectionPopover.tbComponentRef.instance.popoverComponent = timezoneSelectionPopover;
+      timezoneSelectionPopover.jnksIotComponentRef.instance.popoverComponent = timezoneSelectionPopover;
     }
     this.cd.detectChanges();
   }

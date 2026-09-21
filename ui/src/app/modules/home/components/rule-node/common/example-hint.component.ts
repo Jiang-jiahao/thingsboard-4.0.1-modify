@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'tb-example-hint',
+  selector: 'jnks-iot-example-hint',
   templateUrl: './example-hint.component.html',
   styleUrls: []
 })

@@ -1,47 +1,47 @@
-<form [formGroup]="timewindowForm" mat-dialog-content  class="tb-timewindow-form">
+<form [formGroup]="timewindowForm" mat-dialog-content  class="jnks-iot-timewindow-form">
   <mat-toolbar color="primary">
     <h2>{{ 'timewindow.timewindow-settings' | translate }}</h2>
     <span class="flex-1"></span>
-      <div tb-help="timewindowSettings"></div>
+      <div jnks-iot-help="timewindowSettings"></div>
     <button mat-icon-button
             (click)="cancel()"
             type="button">
       <mat-icon class="material-icons">close</mat-icon>
     </button>
   </mat-toolbar>
-  <div class="tb-timewindow-form-header tb-form-panel no-border no-padding-bottom">
-    <tb-toggle-select class="tb-timewindow-form-type-options" appearance="fill"
+  <div class="jnks-iot-timewindow-form-header jnks-iot-form-panel no-border no-padding-bottom">
+    <jnks-iot-toggle-select class="jnks-iot-timewindow-form-type-options" appearance="fill"
                       [options]="timewindowTypeOptions" formControlName="selectedTab">
-    </tb-toggle-select>
+    </jnks-iot-toggle-select>
   </div>
-  <div class="tb-timewindow-form-content tb-form-panel no-border">
+  <div class="jnks-iot-timewindow-form-content jnks-iot-form-panel no-border">
     <section *ngIf="timewindowForm.get('selectedTab').value === timewindowTypes.REALTIME"
-             formGroupName="realtime" class="tb-form-panel">
-      <div class="tb-form-panel-title">{{ 'timewindow.timewindow' | translate }}</div>
-      <div class="tb-form-row">
+             formGroupName="realtime" class="jnks-iot-form-panel">
+      <div class="jnks-iot-form-panel-title">{{ 'timewindow.timewindow' | translate }}</div>
+      <div class="jnks-iot-form-row">
         <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="hideInterval">
           {{ 'timewindow.hide-timewindow-section' | translate }}
         </mat-slide-toggle>
       </div>
 
-      <tb-toggle-select *ngIf="realtimeTypeSelectionAvailable"
+      <jnks-iot-toggle-select *ngIf="realtimeTypeSelectionAvailable"
                         appearance="stroked" [options]="realtimeTimewindowOptions" formControlName="realtimeType">
-      </tb-toggle-select>
+      </jnks-iot-toggle-select>
 
       <ng-container *ngIf="timewindowForm.get('realtime.realtimeType').value === realtimeTypes.LAST_INTERVAL">
-        <div class="tb-form-row">
+        <div class="jnks-iot-form-row">
           <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="disableCustomInterval">
             {{ 'timewindow.disable-custom-interval' | translate }}
           </mat-slide-toggle>
         </div>
-        <div class="tb-form-row column-xs">
+        <div class="jnks-iot-form-row column-xs">
           <mat-slide-toggle *ngIf="!quickIntervalOnly"
                             class="mat-slide" formControlName="hideLastInterval">
-            <div tb-hint-tooltip-icon="{{'timewindow.hide-last-interval' | translate}}">
+            <div jnks-iot-hint-tooltip-icon="{{'timewindow.hide-last-interval' | translate}}">
               {{ 'timewindow.hide' | translate }}
             </div>
           </mat-slide-toggle>
-          <tb-timeinterval
+          <jnks-iot-timeinterval
             formControlName="timewindowMs"
             subscriptSizing="dynamic"
             appearance="outline"
@@ -55,19 +55,19 @@
                     (click)="configureRealtimeLastIntervalOptions($event)">
               <mat-icon>edit</mat-icon>
             </button>
-          </tb-timeinterval>
+          </jnks-iot-timeinterval>
         </div>
       </ng-container>
 
       <div *ngIf="timewindowForm.get('realtime.realtimeType').value === realtimeTypes.INTERVAL"
-           class="tb-form-row column-xs">
+           class="jnks-iot-form-row column-xs">
         <mat-slide-toggle *ngIf="!quickIntervalOnly"
                           class="mat-slide" formControlName="hideQuickInterval">
-          <div tb-hint-tooltip-icon="{{'timewindow.hide-relative-interval' | translate}}">
+          <div jnks-iot-hint-tooltip-icon="{{'timewindow.hide-relative-interval' | translate}}">
             {{ 'timewindow.hide' | translate }}
           </div>
         </mat-slide-toggle>
-        <tb-quick-time-interval
+        <jnks-iot-quick-time-interval
           displayLabel="false"
           formControlName="quickInterval"
           onlyCurrentInterval="true"
@@ -82,35 +82,35 @@
                   (click)="configureRealtimeQuickIntervalOptions($event)">
             <mat-icon>edit</mat-icon>
           </button>
-        </tb-quick-time-interval>
+        </jnks-iot-quick-time-interval>
       </div>
     </section>
 
     <section *ngIf="timewindowForm.get('selectedTab').value === timewindowTypes.HISTORY"
-             formGroupName="history" class="tb-form-panel">
-      <div class="tb-form-panel-title">{{ 'timewindow.timewindow' | translate }}</div>
-      <div class="tb-form-row">
+             formGroupName="history" class="jnks-iot-form-panel">
+      <div class="jnks-iot-form-panel-title">{{ 'timewindow.timewindow' | translate }}</div>
+      <div class="jnks-iot-form-row">
         <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="hideInterval">
           {{ 'timewindow.hide-timewindow-section' | translate }}
         </mat-slide-toggle>
       </div>
 
-      <tb-toggle-select appearance="stroked" [options]="historyTimewindowOptions" formControlName="historyType">
-      </tb-toggle-select>
+      <jnks-iot-toggle-select appearance="stroked" [options]="historyTimewindowOptions" formControlName="historyType">
+      </jnks-iot-toggle-select>
 
       <ng-container *ngIf="timewindowForm.get('history.historyType').value === historyTypes.LAST_INTERVAL">
-        <div class="tb-form-row">
+        <div class="jnks-iot-form-row">
           <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="disableCustomInterval">
             {{ 'timewindow.disable-custom-interval' | translate }}
           </mat-slide-toggle>
         </div>
-        <div class="tb-form-row column-xs">
+        <div class="jnks-iot-form-row column-xs">
           <mat-slide-toggle class="mat-slide" formControlName="hideLastInterval">
-            <div tb-hint-tooltip-icon="{{'timewindow.hide-last-interval' | translate}}">
+            <div jnks-iot-hint-tooltip-icon="{{'timewindow.hide-last-interval' | translate}}">
               {{ 'timewindow.hide' | translate }}
             </div>
           </mat-slide-toggle>
-          <tb-timeinterval
+          <jnks-iot-timeinterval
             formControlName="timewindowMs"
             subscriptSizing="dynamic"
             appearance="outline"
@@ -124,33 +124,33 @@
                     (click)="configureHistoryLastIntervalOptions($event)">
               <mat-icon>edit</mat-icon>
             </button>
-          </tb-timeinterval>
+          </jnks-iot-timeinterval>
         </div>
       </ng-container>
 
-      <div *ngIf="timewindowForm.get('history.historyType').value === historyTypes.FIXED" class="tb-form-row column-xs">
+      <div *ngIf="timewindowForm.get('history.historyType').value === historyTypes.FIXED" class="jnks-iot-form-row column-xs">
         <mat-slide-toggle class="mat-slide" formControlName="hideFixedInterval">
-          <div tb-hint-tooltip-icon="{{'timewindow.hide-fixed-interval' | translate}}">
+          <div jnks-iot-hint-tooltip-icon="{{'timewindow.hide-fixed-interval' | translate}}">
             {{ 'timewindow.hide' | translate }}
           </div>
         </mat-slide-toggle>
-        <tb-datetime-period
+        <jnks-iot-datetime-period
           formControlName="fixedTimewindow"
           subscriptSizing="dynamic"
           appearance="outline"
           class="history-time-input"
           [required]="timewindowForm.get('selectedTab').value === timewindowTypes.HISTORY &&
                         timewindowForm.get('history.historyType').value === historyTypes.FIXED">
-        </tb-datetime-period>
+        </jnks-iot-datetime-period>
       </div>
 
-      <div *ngIf="timewindowForm.get('history.historyType').value === historyTypes.INTERVAL" class="tb-form-row column-xs">
+      <div *ngIf="timewindowForm.get('history.historyType').value === historyTypes.INTERVAL" class="jnks-iot-form-row column-xs">
           <mat-slide-toggle class="mat-slide" formControlName="hideQuickInterval">
-            <div tb-hint-tooltip-icon="{{'timewindow.hide-relative-interval' | translate}}">
+            <div jnks-iot-hint-tooltip-icon="{{'timewindow.hide-relative-interval' | translate}}">
               {{ 'timewindow.hide' | translate }}
             </div>
           </mat-slide-toggle>
-          <tb-quick-time-interval
+          <jnks-iot-quick-time-interval
             displayLabel="false"
             formControlName="quickInterval"
             subscriptSizing="dynamic"
@@ -164,21 +164,21 @@
                     (click)="configureHistoryQuickIntervalOptions($event)">
               <mat-icon>edit</mat-icon>
             </button>
-          </tb-quick-time-interval>
+          </jnks-iot-quick-time-interval>
         </div>
     </section>
 
     <ng-container *ngIf="aggregation">
-      <section class="tb-form-panel">
-        <div class="tb-form-panel-title">{{ 'aggregation.aggregation' | translate }}</div>
-        <div class="tb-form-row column-xs">
+      <section class="jnks-iot-form-panel">
+        <div class="jnks-iot-form-panel-title">{{ 'aggregation.aggregation' | translate }}</div>
+        <div class="jnks-iot-form-row column-xs">
           <mat-slide-toggle class="mat-slide" formControlName="hideAggregation">
-            <div tb-hint-tooltip-icon="{{'timewindow.hide-aggregation' | translate}}">
+            <div jnks-iot-hint-tooltip-icon="{{'timewindow.hide-aggregation' | translate}}">
               {{ 'timewindow.hide' | translate }}
             </div>
           </mat-slide-toggle>
           <ng-container formGroupName="aggregation">
-            <tb-aggregation-type-select class="flex" subscriptSizing="dynamic" appearance="outline" displayLabel="false"
+            <jnks-iot-aggregation-type-select class="flex" subscriptSizing="dynamic" appearance="outline" displayLabel="false"
                                         formControlName="type"
                                         [allowedAggregationTypes]="timewindowForm.get('allowedAggTypes').value">
               <button *ngIf="!timewindowForm.get('hideAggregation').value"
@@ -186,43 +186,43 @@
                       (click)="openAggregationOptionsConfig($event)">
                 <mat-icon>edit</mat-icon>
               </button>
-            </tb-aggregation-type-select>
+            </jnks-iot-aggregation-type-select>
           </ng-container>
         </div>
       </section>
 
-      <section class="tb-form-panel"
+      <section class="jnks-iot-form-panel"
                *ngIf="timewindowForm.get('aggregation.type').value === aggregationTypes.NONE">
-        <div class="tb-form-panel-title">{{ 'aggregation.limit' | translate }}</div>
-        <div class="tb-form-row column-xs">
+        <div class="jnks-iot-form-panel-title">{{ 'aggregation.limit' | translate }}</div>
+        <div class="jnks-iot-form-row column-xs">
           <mat-slide-toggle class="mat-slide" formControlName="hideAggInterval">
-            <div tb-hint-tooltip-icon="{{'timewindow.hide-max-values' | translate}}">
+            <div jnks-iot-hint-tooltip-icon="{{'timewindow.hide-max-values' | translate}}">
               {{ 'timewindow.hide' | translate }}
             </div>
           </mat-slide-toggle>
           <ng-container formGroupName="aggregation">
-            <tb-datapoints-limit formControlName="limit"
+            <jnks-iot-datapoints-limit formControlName="limit"
                                  [required]="timewindowForm.get('aggregation.type').value === aggregationTypes.NONE">
-            </tb-datapoints-limit>
+            </jnks-iot-datapoints-limit>
           </ng-container>
         </div>
       </section>
 
-      <section class="tb-form-panel" [class.!hidden]="timewindowForm.get('aggregation.type').value === aggregationTypes.NONE">
-        <div class="tb-form-panel-title">{{ 'aggregation.group-interval' | translate }}</div>
+      <section class="jnks-iot-form-panel" [class.!hidden]="timewindowForm.get('aggregation.type').value === aggregationTypes.NONE">
+        <div class="jnks-iot-form-panel-title">{{ 'aggregation.group-interval' | translate }}</div>
 
         <ng-container *ngIf="timewindowForm.get('selectedTab').value === timewindowTypes.REALTIME">
-          <div class="tb-form-row" formGroupName="realtime">
+          <div class="jnks-iot-form-row" formGroupName="realtime">
             <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="disableCustomGroupInterval">
               {{ 'timewindow.disable-custom-interval' | translate }}
             </mat-slide-toggle>
           </div>
-          <div class="tb-form-row column-xs">
+          <div class="jnks-iot-form-row column-xs">
             <ng-container
               *ngTemplateOutlet="timewindowForm.get('aggregation.type').value !== aggregationTypes.NONE ? hideAggInterval : null">
             </ng-container>
             <ng-container formGroupName="realtime">
-              <tb-timeinterval
+              <jnks-iot-timeinterval
                 formControlName="interval"
                 [min]="minRealtimeAggInterval" [max]="maxRealtimeAggInterval"
                 [allowedIntervals]="realtimeAllowedAggIntervals"
@@ -230,22 +230,22 @@
                 subscriptSizing="dynamic"
                 appearance="outline"
                 [disabledAdvanced]="timewindowForm.get('realtime.disableCustomGroupInterval').value">
-              </tb-timeinterval>
+              </jnks-iot-timeinterval>
             </ng-container>
           </div>
         </ng-container>
         <ng-container *ngIf="timewindowForm.get('selectedTab').value === timewindowTypes.HISTORY">
-          <div class="tb-form-row" formGroupName="history">
+          <div class="jnks-iot-form-row" formGroupName="history">
             <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="disableCustomGroupInterval">
               {{ 'timewindow.disable-custom-interval' | translate }}
             </mat-slide-toggle>
           </div>
-          <div class="tb-form-row column-xs">
+          <div class="jnks-iot-form-row column-xs">
             <ng-container
               *ngTemplateOutlet="timewindowForm.get('aggregation.type').value !== aggregationTypes.NONE ? hideAggInterval : null">
             </ng-container>
             <ng-container formGroupName="history">
-              <tb-timeinterval
+              <jnks-iot-timeinterval
                 formControlName="interval"
                 [min]="minHistoryAggInterval" [max]="maxHistoryAggInterval"
                 [allowedIntervals]="historyAllowedAggIntervals"
@@ -253,14 +253,14 @@
                 subscriptSizing="dynamic"
                 appearance="outline"
                 [disabledAdvanced]="timewindowForm.get('history.disableCustomGroupInterval').value">
-              </tb-timeinterval>
+              </jnks-iot-timeinterval>
             </ng-container>
           </div>
         </ng-container>
 
         <ng-template #hideAggInterval>
           <mat-slide-toggle class="mat-slide" formControlName="hideAggInterval">
-            <div tb-hint-tooltip-icon="{{'timewindow.hide-group-interval' | translate}}">
+            <div jnks-iot-hint-tooltip-icon="{{'timewindow.hide-group-interval' | translate}}">
               {{ 'timewindow.hide' | translate }}
             </div>
           </mat-slide-toggle>
@@ -268,25 +268,25 @@
       </section>
     </ng-container>
 
-    <section class="tb-form-panel">
-      <div class="tb-form-panel-title">{{ 'timezone.timezone' | translate }}</div>
-      <div class="tb-form-row column-xs">
+    <section class="jnks-iot-form-panel">
+      <div class="jnks-iot-form-panel-title">{{ 'timezone.timezone' | translate }}</div>
+      <div class="jnks-iot-form-row column-xs">
         <mat-slide-toggle class="mat-slide" formControlName="hideTimezone">
-          <div tb-hint-tooltip-icon="{{'timewindow.hide-timezone' | translate}}">
+          <div jnks-iot-hint-tooltip-icon="{{'timewindow.hide-timezone' | translate}}">
             {{ 'timewindow.hide' | translate }}
           </div>
         </mat-slide-toggle>
-        <tb-timezone-select [localBrowserTimezonePlaceholderOnEmpty]="true"
+        <jnks-iot-timezone-select [localBrowserTimezonePlaceholderOnEmpty]="true"
                             formControlName="timezone"
                             subscriptSizing="dynamic"
                             appearance="outline"
                             displayLabel="false">
-        </tb-timezone-select>
+        </jnks-iot-timezone-select>
       </div>
     </section>
   </div>
   <mat-divider></mat-divider>
-  <div mat-dialog-actions class="tb-dialog-actions tb-flex flex-end no-gap">
+  <div mat-dialog-actions class="jnks-iot-dialog-actions jnks-iot-flex flex-end no-gap">
     <button type="button"
             mat-button
             [disabled]="(isLoading$ | async)"

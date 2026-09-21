@@ -1,4 +1,4 @@
-<mat-grid-list *ngIf="cols" class="tb-navigation-cards" [cols]="cols" rowHeight="280px">
+<mat-grid-list *ngIf="cols" class="jnks-iot-navigation-cards" [cols]="cols" rowHeight="280px">
   <mat-grid-tile [colspan]="sectionColspan(section)" *ngFor="let section of showHomeSections$| async">
     <mat-card appearance="outlined" style="width: 100%;">
       <mat-card-title>
@@ -7,8 +7,8 @@
       <mat-card-content>
         <mat-grid-list rowHeight="170px" [cols]="sectionPlaces(section).length">
           <mat-grid-tile *ngFor="let place of sectionPlaces(section)">
-            <a mat-raised-button color="primary" class="tb-card-button" href="{{place.path}}" (click)="navigate($event, place.path)">
-              <tb-icon matButtonIcon class="tb-mat-96">{{place.icon}}</tb-icon>
+            <a mat-raised-button color="primary" class="jnks-iot-card-button" href="{{place.path}}" (click)="navigate($event, place.path)">
+              <jnks-iot-icon matButtonIcon class="jnks-iot-mat-96">{{place.icon}}</jnks-iot-icon>
               <span>{{place.customTranslate ? (place.name | customTranslate) : (place.name | translate)}}</span>
             </a>
           </mat-grid-tile>

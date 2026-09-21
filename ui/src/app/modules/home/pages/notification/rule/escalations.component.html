@@ -1,12 +1,12 @@
 <div class="flex flex-col">
-  <div class="tb-tenant-profile-queues flex flex-row items-center"
+  <div class="jnks-iot-tenant-profile-queues flex flex-row items-center"
        *ngFor="let escalationControl of escalationsFormArray.controls;
        let $index = index; last as isLast;"
        [class.pb-2]="!isLast">
-    <tb-escalation-form class="flex-1"
+    <jnks-iot-escalation-form class="flex-1"
                         [formControl]="escalationControl"
                         [systemEscalation]="$index === 0">
-    </tb-escalation-form>
+    </jnks-iot-escalation-form>
     <span *ngIf="$index === 0" style="width: 48px;"></span>
     <button *ngIf="!($index === 0) && !disabled" mat-icon-button style="min-width: 40px;"
             type="button"
@@ -18,7 +18,7 @@
   </div>
   <div *ngIf="!escalationsFormArray.controls.length">
       <span translate
-            class="tb-prompt flex items-center justify-center">notification.no-rule</span>
+            class="jnks-iot-prompt flex items-center justify-center">notification.no-rule</span>
   </div>
   <div *ngIf="!disabled" style="padding: 16px 0;">
     <button mat-raised-button color="primary"

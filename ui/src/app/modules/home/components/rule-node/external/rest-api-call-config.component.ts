@@ -4,7 +4,7 @@ import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@app/shar
 import { HttpRequestType, IntLimit } from '../rule-node-config.models';
 
 @Component({
-  selector: 'tb-external-node-rest-api-call-config',
+  selector: 'jnks-iot-external-node-rest-api-call-config',
   templateUrl: './rest-api-call-config.component.html',
   styleUrls: []
 })

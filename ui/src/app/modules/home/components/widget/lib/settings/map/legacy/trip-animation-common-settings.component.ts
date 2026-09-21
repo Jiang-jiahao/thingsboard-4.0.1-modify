@@ -19,7 +19,7 @@ import { WidgetService } from '@core/http/widget.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-trip-animation-common-settings',
+  selector: 'jnks-iot-trip-animation-common-settings',
   templateUrl: './trip-animation-common-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

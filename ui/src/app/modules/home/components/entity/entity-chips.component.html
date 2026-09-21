@@ -1,4 +1,4 @@
-<a *ngFor="let subEntity of subEntities" class="tb-entity-chip"
+<a *ngFor="let subEntity of subEntities" class="jnks-iot-entity-chip"
    routerLink="{{entityDetailsPrefixUrl}}/{{subEntity.id.id}}" (click)="$event.stopPropagation();">
   {{ subEntity.name | customTranslate }}
 </a>

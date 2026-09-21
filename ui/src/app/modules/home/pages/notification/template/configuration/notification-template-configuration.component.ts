@@ -24,7 +24,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { EditorOptions } from 'tinymce';
 
 @Component({
-  selector: 'tb-template-configuration',
+  selector: 'jnks-iot-template-configuration',
   templateUrl: './notification-template-configuration.component.html',
   styleUrls: ['./notification-template-configuration.component.scss'],
   providers: [

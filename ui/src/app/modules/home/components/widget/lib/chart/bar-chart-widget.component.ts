@@ -11,10 +11,10 @@ import {
   barChartWidgetDefaultSettings,
   BarChartWidgetSettings
 } from '@home/components/widget/lib/chart/bar-chart-widget.models';
-import { TbBarsChart } from '@home/components/widget/lib/chart/bars-chart';
+import { JnksIotBarsChart } from '@home/components/widget/lib/chart/bars-chart';
 
 @Component({
-  selector: 'tb-bar-chart-widget',
+  selector: 'jnks-iot-bar-chart-widget',
   templateUrl: './latest-chart-widget.component.html',
   styleUrls: [],
   encapsulation: ViewEncapsulation.None
@@ -44,7 +44,7 @@ export class BarChartWidgetComponent implements OnInit {
     this.callbacks = {
       createChart: (chartShape, renderer) => {
         const settings = barChartWidgetBarsChartSettings(this.settings);
-        return new TbBarsChart(this.ctx, settings, chartShape.nativeElement, renderer, this.translate, true);
+        return new JnksIotBarsChart(this.ctx, settings, chartShape.nativeElement, renderer, this.translate, true);
       }
     };
   }

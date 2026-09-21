@@ -14,7 +14,7 @@ h2.protocol-template-dialog-title {
   font-weight: 500;
   letter-spacing: 0.01em;
   color: #fff;
-  background: linear-gradient(90deg, $tb-primary-color 0%, $tb-secondary-color 100%);
+  background: linear-gradient(90deg, $jnks-iot-primary-color 0%, $jnks-iot-secondary-color 100%);
   border-bottom: none;
 }
 
@@ -132,13 +132,13 @@ div[mat-dialog-actions] {
   gap: 8px;
 }
 
-@keyframes tbProtocolTabFadeIn {
+@keyframes jnksIotProtocolTabFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-:host ::ng-deep .protocol-template-bundle-tabs.tb-tabs-fade {
+:host ::ng-deep .protocol-template-bundle-tabs.jnks-iot-tabs-fade {
   .mat-mdc-tab-body.mat-mdc-tab-body-active .mat-mdc-tab-body-content {
-    animation: tbProtocolTabFadeIn 0.2s ease-out;
+    animation: jnksIotProtocolTabFadeIn 0.2s ease-out;
   }
 }

@@ -50,15 +50,15 @@ $borderUncheckedColorHovered: var(--tb-widget-button-toggle-border-unchecked-col
 
 :host {
   max-width: 100%;
-  .tb-toggle-container {
+  .jnks-iot-toggle-container {
     display: block;
     height: 100%;
   }
-  .tb-toggle-header {
+  .jnks-iot-toggle-header {
     transition: transform 500ms cubic-bezier(0.35, 0, 0.25, 1);
   }
 
-  .tb-widget-button-content {
+  .jnks-iot-widget-button-content {
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -68,7 +68,7 @@ $borderUncheckedColorHovered: var(--tb-widget-button-toggle-border-unchecked-col
     .mat-icon {
       margin: 0;
     }
-    span.tb-widget-button-label {
+    span.jnks-iot-widget-button-label {
       line-height: normal;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -78,7 +78,7 @@ $borderUncheckedColorHovered: var(--tb-widget-button-toggle-border-unchecked-col
 }
 
 :host ::ng-deep {
-  .mat-button-toggle-group.mat-button-toggle-group-appearance-standard.tb-toggle-header {
+  .mat-button-toggle-group.mat-button-toggle-group-appearance-standard.jnks-iot-toggle-header {
     overflow: visible;
     width: 100%;
     height: 100%;
@@ -93,7 +93,7 @@ $borderUncheckedColorHovered: var(--tb-widget-button-toggle-border-unchecked-col
       width: 50%;
       border-radius: $buttonBorderRadius;
 
-      &.tb-hover-state {
+      &.jnks-iot-hover-state {
         .mat-button-toggle-button {
           @include _tb-widget-button-styles($mainUncheckedColorHovered, $backgroundUncheckedColorHovered, $borderUncheckedColorHovered);
         }
@@ -125,7 +125,7 @@ $borderUncheckedColorHovered: var(--tb-widget-button-toggle-border-unchecked-col
       }
 
     }
-    &.tb-pointer-events {
+    &.jnks-iot-pointer-events {
       .mat-button-toggle.mat-button-toggle-appearance-standard {
         .mat-button-toggle-button {
           pointer-events: none;
@@ -135,7 +135,7 @@ $borderUncheckedColorHovered: var(--tb-widget-button-toggle-border-unchecked-col
         }
       }
     }
-    &:not(:disabled):not(.tb-disabled-state):not(.tb-pointer-events) {
+    &:not(:disabled):not(.jnks-iot-disabled-state):not(.jnks-iot-pointer-events) {
       .mat-button-toggle.mat-button-toggle-appearance-standard {
         &:hover {
           .mat-button-toggle-button {
@@ -149,7 +149,7 @@ $borderUncheckedColorHovered: var(--tb-widget-button-toggle-border-unchecked-col
         }
       }
     }
-    &:disabled, &.tb-disabled-state {
+    &:disabled, &.jnks-iot-disabled-state {
       pointer-events: none;
       .mat-button-toggle.mat-button-toggle-appearance-standard {
         .mat-button-toggle-button {

@@ -1,12 +1,12 @@
 @import '../../../../../../../../scss/constants';
 
-.tb-comparison-key-row {
-  .tb-show-field {
+.jnks-iot-comparison-key-row {
+  .jnks-iot-show-field {
     width: 40px;
     min-width: 40px;
   }
 
-  .tb-data-key-input {
+  .jnks-iot-data-key-input {
     flex: 1;
     @media #{$mat-gt-xs} {
       min-width: 100px;
@@ -14,17 +14,17 @@
     }
   }
 
-  .tb-label-field, .tb-color-field {
+  .jnks-iot-label-field, .jnks-iot-color-field {
     display: flex;
     flex-direction: row;
     place-content: center;
     align-items: center;
-    .tb-inline-field {
+    .jnks-iot-inline-field {
       flex: 1;
     }
   }
 
-  .tb-label-field {
+  .jnks-iot-label-field {
     flex: 1;
     @media #{$mat-gt-xs} {
       min-width: 150px;
@@ -32,7 +32,7 @@
     }
   }
 
-  .tb-color-field {
+  .jnks-iot-color-field {
     width: 40px;
     min-width: 40px;
   }

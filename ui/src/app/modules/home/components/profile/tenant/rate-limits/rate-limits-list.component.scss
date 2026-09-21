@@ -1,31 +1,31 @@
 @import "../../../../../../../scss/constants";
 
 :host {
-  .tb-rate-limits-form {
+  .jnks-iot-rate-limits-form {
     @media #{$mat-gt-sm} {
       min-width: 600px;
     }
   }
 
-  .tb-rate-limits-preview {
+  .jnks-iot-rate-limits-preview {
     margin-top: 1.5em;
     span {
       padding-left: 1em;
     }
-    tb-rate-limits-text {
+    jnks-iot-rate-limits-text {
       border: 1px groove rgba(0, 0, 0, .25);
       border-radius: 4px;
       padding: 1em;
     }
   }
 
-  .tb-rate-limits-operation {
+  .jnks-iot-rate-limits-operation {
     font-size: 12px;
     color: rgba(0,0,0,.54);
     margin-bottom: 16px;
   }
 
-  .tb-rate-limits-button {
+  .jnks-iot-rate-limits-button {
     margin-top: 0.5em;
   }
 }

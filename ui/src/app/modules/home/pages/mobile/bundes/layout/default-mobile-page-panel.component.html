@@ -1,51 +1,51 @@
-<div class="tb-default-mobile-page-panel" [formGroup]="mobilePageFormGroup">
-  <div class="tb-default-mobile-page-title-container">
-    <div class="tb-default-mobile-page-title" translate>mobile.edit-page</div>
+<div class="jnks-iot-default-mobile-page-panel" [formGroup]="mobilePageFormGroup">
+  <div class="jnks-iot-default-mobile-page-title-container">
+    <div class="jnks-iot-default-mobile-page-title" translate>mobile.edit-page</div>
     <button *ngIf="!disabled"
             [disabled]="!isCleanupEnabled"
             type="button"
             mat-stroked-button
-            class="tb-box-button"
+            class="jnks-iot-box-button"
             matTooltip="{{ 'mobile.reset-to-page-default' | translate }}"
             matTooltipPosition="above"
             (click)="cleanup()">
-      <tb-icon [color]="isCleanupEnabled ? 'primary' : null" matButtonIcon>mdi:broom</tb-icon>
+      <jnks-iot-icon [color]="isCleanupEnabled ? 'primary' : null" matButtonIcon>mdi:broom</jnks-iot-icon>
     </button>
   </div>
-  <div class="tb-default-mobile-page-panel-content">
-    <div class="tb-form-row space-between">
+  <div class="jnks-iot-default-mobile-page-panel-content">
+    <div class="jnks-iot-form-row space-between">
       <mat-slide-toggle class="mat-slide fixed-title-width" formControlName="visible">
         {{ 'mobile.visible' | translate }}
       </mat-slide-toggle>
     </div>
     <div class="flex items-center justify-center gap-2">
-      <tb-material-icon-select asBoxInput
+      <jnks-iot-material-icon-select asBoxInput
                                color="#305680"
                                formControlName="icon">
-      </tb-material-icon-select>
+      </jnks-iot-material-icon-select>
       <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic" floatLabel="always">
         <mat-label translate>mobile.page-name</mat-label>
         <input matInput formControlName="label" placeholder="{{ defaultItemName }}">
         <mat-icon matSuffix
                   matTooltipPosition="above"
-                  matTooltipClass="tb-error-tooltip"
+                  matTooltipClass="jnks-iot-error-tooltip"
                   matTooltip="{{ 'mobile.page-name-cannot-contain-only-spaces' | translate }}"
                   *ngIf="mobilePageFormGroup.get('label').hasError('pattern') && mobilePageFormGroup.get('label').touched"
-                  class="tb-error">
+                  class="jnks-iot-error">
           warning
         </mat-icon>
         <mat-icon matSuffix
                   matTooltipPosition="above"
-                  matTooltipClass="tb-error-tooltip"
+                  matTooltipClass="jnks-iot-error-tooltip"
                   matTooltip="{{ 'mobile.page-name-max-length' | translate }}"
                   *ngIf="mobilePageFormGroup.get('label').hasError('maxlength') && mobilePageFormGroup.get('label').touched"
-                  class="tb-error">
+                  class="jnks-iot-error">
           warning
         </mat-icon>
       </mat-form-field>
     </div>
   </div>
-  <div class="tb-default-mobile-page-panel-buttons">
+  <div class="jnks-iot-default-mobile-page-panel-buttons">
     <button mat-button
             color="primary"
             type="button"

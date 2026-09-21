@@ -13,7 +13,7 @@ export interface AlertDialogData {
 }
 
 @Component({
-  selector: 'tb-alert-dialog',
+  selector: 'jnks-iot-alert-dialog',
   templateUrl: './alert-dialog.component.html',
   styleUrls: ['./alert-dialog.component.scss']
 })

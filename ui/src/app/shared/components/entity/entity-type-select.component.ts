@@ -8,7 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatFormFieldAppearance } from '@angular/material/form-field';
 
 @Component({
-  selector: 'tb-entity-type-select',
+  selector: 'jnks-iot-entity-type-select',
   templateUrl: './entity-type-select.component.html',
   styleUrls: ['./entity-type-select.component.scss'],
   providers: [{

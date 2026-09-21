@@ -20,7 +20,7 @@ import {
   fontWeightTranslations, isFontPartiallySet,
   textStyle
 } from '@shared/models/widget-settings.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -30,7 +30,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-font-settings-panel',
+  selector: 'jnks-iot-font-settings-panel',
   templateUrl: './font-settings-panel.component.html',
   providers: [],
   styleUrls: ['./font-settings-panel.component.scss'],
@@ -63,7 +63,7 @@ export class FontSettingsPanelComponent extends PageComponent implements OnInit 
   forceSizeUnit: cssUnit;
 
   @Input()
-  popover: TbPopoverComponent<FontSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<FontSettingsPanelComponent>;
 
   @Output()
   fontApplied = new EventEmitter<Font>();

@@ -30,7 +30,7 @@ export function labelDataKeyValidator(control: AbstractControl): ValidationError
 }
 
 @Component({
-  selector: 'tb-label-data-key',
+  selector: 'jnks-iot-label-data-key',
   templateUrl: './label-data-key.component.html',
   styleUrls: ['./label-data-key.component.scss'],
   providers: [

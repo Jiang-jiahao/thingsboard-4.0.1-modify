@@ -7,7 +7,7 @@
         "layoutX": 626,
         "layoutY": 152
       },
-      "type": "com.jnks.iot.rule.engine.mqtt.TbMqttNode",
+      "type": "com.jnks.iot.rule.engine.mqtt.JnksIotMqttNode",
       "name": "test mqtt",
       "singletonMode": true,
       "queueName": "HighPriority",
@@ -33,7 +33,7 @@
         "layoutX": 949,
         "layoutY": 153
       },
-      "type": "com.jnks.iot.rule.engine.telemetry.TbMsgTimeseriesNode",
+      "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode",
       "name": "save timeseries",
       "singletonMode": false,
       "configurationVersion": 1,
@@ -52,7 +52,7 @@
         "layoutX": 305,
         "layoutY": 151
       },
-      "type": "com.jnks.iot.rule.engine.filter.TbMsgTypeSwitchNode",
+      "type": "com.jnks.iot.rule.engine.filter.JnksIotMsgTypeSwitchNode",
       "name": "switch",
       "singletonMode": false,
       "configurationVersion": 0,

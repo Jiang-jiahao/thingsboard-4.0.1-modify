@@ -4,9 +4,9 @@ import { QueueId } from '@shared/models/id/queue-id';
 import { HasTenantId } from '@shared/models/entity.models';
 
 export enum ServiceType {
-  TB_CORE = 'TB_CORE',
-  TB_RULE_ENGINE = 'TB_RULE_ENGINE',
-  TB_TRANSPORT = 'TB_TRANSPORT',
+  JNKS_IOT_CORE = 'JNKS_IOT_CORE',
+  JNKS_IOT_RULE_ENGINE = 'JNKS_IOT_RULE_ENGINE',
+  JNKS_IOT_TRANSPORT = 'JNKS_IOT_TRANSPORT',
   JS_EXECUTOR = 'JS_EXECUTOR'
 }
 

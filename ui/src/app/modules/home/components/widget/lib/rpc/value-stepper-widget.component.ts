@@ -35,7 +35,7 @@ import { UtilsService } from '@core/services/utils.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-value-stepper-widget',
+  selector: 'jnks-iot-value-stepper-widget',
   templateUrl: './value-stepper-widget.component.html',
   styleUrls: ['../action/action-widget.scss', './value-stepper-widget.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -127,13 +127,13 @@ export class ValueStepperWidgetComponent extends
     this.valueStyleColor = this.settings.appearance.valueColor;
 
     if (this.showValueBox) {
-      const valueBoxCss = `.tb-value-stepper-value-box {\n`+
+      const valueBoxCss = `.jnks-iot-value-stepper-value-box {\n`+
         `border: ${this.settings.appearance.showBorder ?
           `${this.settings.appearance.borderWidth}px solid ${this.settings.appearance.borderColor}` :
           'none'};\n`+
         `background-color: ${this.settings.appearance.valueBoxBackground}` +
         `}`;
-      this.utils.applyCssToElement(this.renderer, this.elementRef.nativeElement, 'tb-value-stepper-value-box', valueBoxCss);
+      this.utils.applyCssToElement(this.renderer, this.elementRef.nativeElement, 'jnks-iot-value-stepper-value-box', valueBoxCss);
     }
 
     const getInitialStateSettings =

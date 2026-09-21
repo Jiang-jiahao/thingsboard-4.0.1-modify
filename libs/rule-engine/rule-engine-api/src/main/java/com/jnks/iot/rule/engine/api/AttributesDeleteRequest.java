@@ -11,7 +11,7 @@ import com.jnks.iot.server.common.data.AttributeScope;
 import com.jnks.iot.server.common.data.id.CalculatedFieldId;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.TenantId;
-import com.jnks.iot.server.common.data.msg.TbMsgType;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,8 +29,8 @@ public class AttributesDeleteRequest implements CalculatedFieldSystemAwareReques
     private final List<String> keys;
     private final boolean notifyDevice;
     private final List<CalculatedFieldId> previousCalculatedFieldIds;
-    private final UUID tbMsgId;
-    private final TbMsgType tbMsgType;
+    private final UUID jnksIotMsgId;
+    private final JnksIotMsgType jnksIotMsgType;
     private final FutureCallback<Void> callback;
 
     public static Builder builder() {
@@ -45,8 +45,8 @@ public class AttributesDeleteRequest implements CalculatedFieldSystemAwareReques
         private List<String> keys;
         private boolean notifyDevice;
         private List<CalculatedFieldId> previousCalculatedFieldIds;
-        private UUID tbMsgId;
-        private TbMsgType tbMsgType;
+        private UUID jnksIotMsgId;
+        private JnksIotMsgType jnksIotMsgType;
         private FutureCallback<Void> callback;
 
         Builder() {}
@@ -91,13 +91,13 @@ public class AttributesDeleteRequest implements CalculatedFieldSystemAwareReques
             return this;
         }
 
-        public Builder tbMsgId(UUID tbMsgId) {
-            this.tbMsgId = tbMsgId;
+        public Builder jnksIotMsgId(UUID jnksIotMsgId) {
+            this.jnksIotMsgId = jnksIotMsgId;
             return this;
         }
 
-        public Builder tbMsgType(TbMsgType tbMsgType) {
-            this.tbMsgType = tbMsgType;
+        public Builder jnksIotMsgType(JnksIotMsgType jnksIotMsgType) {
+            this.jnksIotMsgType = jnksIotMsgType;
             return this;
         }
 
@@ -122,7 +122,7 @@ public class AttributesDeleteRequest implements CalculatedFieldSystemAwareReques
 
         public AttributesDeleteRequest build() {
             return new AttributesDeleteRequest(
-                    tenantId, entityId, scope, keys, notifyDevice, previousCalculatedFieldIds, tbMsgId, tbMsgType, requireNonNullElse(callback, NoOpFutureCallback.instance())
+                    tenantId, entityId, scope, keys, notifyDevice, previousCalculatedFieldIds, jnksIotMsgId, jnksIotMsgType, requireNonNullElse(callback, NoOpFutureCallback.instance())
             );
         }
 

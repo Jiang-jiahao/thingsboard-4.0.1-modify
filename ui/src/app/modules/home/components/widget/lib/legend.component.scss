@@ -1,23 +1,23 @@
 :host {
-  table.tb-legend {
+  table.jnks-iot-legend {
     font-size: 12px;
 
-    &.tb-legend-column {
+    &.jnks-iot-legend-column {
       width: 100%;
     }
 
-    &.tb-legend-row {
+    &.jnks-iot-legend-row {
       width: auto;
       margin-left: auto;
       margin-right: auto;
     }
 
-    .tb-legend-header,
-    .tb-legend-value {
+    .jnks-iot-legend-header,
+    .jnks-iot-legend-value {
       text-align: right;
     }
 
-    .tb-legend-header {
+    .jnks-iot-legend-header {
       th {
         padding: 0 10px 1px 0;
         color: rgb(255, 110, 64);
@@ -26,17 +26,17 @@
       }
     }
 
-    .tb-legend-keys {
+    .jnks-iot-legend-keys {
       td {
         font-size: 12px;
       }
-      td.tb-legend-label,
-      td.tb-legend-value {
+      td.jnks-iot-legend-label,
+      td.jnks-iot-legend-value {
         padding: 2px 10px;
         white-space: nowrap;
       }
 
-      .tb-legend-type {
+      .jnks-iot-legend-type {
         min-width: 50px;
         padding: 0 10px 1px 0;
         font-weight: 700;
@@ -45,31 +45,31 @@
         white-space: nowrap;
       }
 
-      .tb-legend-line {
+      .jnks-iot-legend-line {
         display: inline-block;
         width: 15px;
         height: 3px;
         vertical-align: middle;
       }
 
-      .tb-legend-label {
+      .jnks-iot-legend-label {
         padding: 2px 10px;
         text-align: left;
         white-space: nowrap;
         outline: none;
         cursor: pointer;
 
-        &.tb-horizontal {
+        &.jnks-iot-horizontal {
           width: 95%;
         }
 
-        &.tb-hidden-label {
+        &.jnks-iot-hidden-label {
           text-decoration: line-through;
           opacity: .6;
         }
       }
 
-      &.tb-row-direction {
+      &.jnks-iot-row-direction {
         display: inline-block;
       }
     }

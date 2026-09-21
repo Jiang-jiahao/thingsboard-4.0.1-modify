@@ -1,26 +1,26 @@
-<form [formGroup]="timewindowForm" class="tb-timewindow-form">
-  <div class="tb-timewindow-form-header tb-form-panel no-border no-padding-bottom" *ngIf="!historyOnly">
-    <tb-toggle-select class="tb-timewindow-form-type-options" appearance="fill"
+<form [formGroup]="timewindowForm" class="jnks-iot-timewindow-form">
+  <div class="jnks-iot-timewindow-form-header jnks-iot-form-panel no-border no-padding-bottom" *ngIf="!historyOnly">
+    <jnks-iot-toggle-select class="jnks-iot-timewindow-form-type-options" appearance="fill"
                       [options]="timewindowTypeOptions" formControlName="selectedTab">
-    </tb-toggle-select>
-    <button mat-icon-button type="button" class="tb-timewindow-form-settings-btn tb-mat-24"
+    </jnks-iot-toggle-select>
+    <button mat-icon-button type="button" class="jnks-iot-timewindow-form-settings-btn jnks-iot-mat-24"
             *ngIf="isEdit"
             (click)="openTimewindowConfig()">
       <mat-icon>settings</mat-icon>
     </button>
   </div>
 
-  <div class="tb-timewindow-form-content tb-form-panel no-border">
+  <div class="jnks-iot-timewindow-form-content jnks-iot-form-panel no-border">
     <ng-container *ngIf="timewindowForm.get('selectedTab').value === timewindowTypes.REALTIME">
-      <section class="tb-form-panel stroked" *ngIf="realtimeIntervalSelectionAvailable; else timezoneSelectionPanel">
-        <div class="tb-flex space-between"
+      <section class="jnks-iot-form-panel stroked" *ngIf="realtimeIntervalSelectionAvailable; else timezoneSelectionPanel">
+        <div class="jnks-iot-flex space-between"
              [class.align-end]="realtimeTypeSelectionAvailable"
              [class.align-center]="!realtimeTypeSelectionAvailable">
-          <div class="tb-flex-xs column">
-            <div class="tb-form-panel-title">{{ 'timewindow.timewindow' | translate }}</div>
+          <div class="jnks-iot-flex-xs column">
+            <div class="jnks-iot-form-panel-title">{{ 'timewindow.timewindow' | translate }}</div>
             <ng-container formGroupName="realtime" *ngIf="realtimeTypeSelectionAvailable">
-              <tb-toggle-select appearance="stroked" [options]="realtimeTimewindowOptions" formControlName="realtimeType">
-              </tb-toggle-select>
+              <jnks-iot-toggle-select appearance="stroked" [options]="realtimeTimewindowOptions" formControlName="realtimeType">
+              </jnks-iot-toggle-select>
             </ng-container>
           </div>
 
@@ -28,8 +28,8 @@
           </ng-container>
         </div>
 
-        <div class="tb-form-row no-border no-padding" formGroupName="realtime">
-          <tb-timeinterval
+        <div class="jnks-iot-form-row no-border no-padding" formGroupName="realtime">
+          <jnks-iot-timeinterval
             *ngIf="timewindowForm.get('realtime.realtimeType').value === realtimeTypes.LAST_INTERVAL"
             formControlName="timewindowMs"
             subscriptSizing="dynamic"
@@ -38,9 +38,9 @@
             [disabledAdvanced]="realtimeDisableCustomInterval"
             [required]="timewindowForm.get('selectedTab').value === timewindowTypes.REALTIME &&
                               timewindowForm.get('realtime.realtimeType').value === realtimeTypes.LAST_INTERVAL">
-          </tb-timeinterval>
+          </jnks-iot-timeinterval>
 
-          <tb-quick-time-interval
+          <jnks-iot-quick-time-interval
             *ngIf="timewindowForm.get('realtime.realtimeType').value === realtimeTypes.INTERVAL"
             displayLabel="false"
             formControlName="quickInterval"
@@ -50,21 +50,21 @@
             [allowedIntervals]="realtimeAllowedQuickIntervals"
             [required]="timewindowForm.get('selectedTab').value === timewindowTypes.REALTIME &&
                               timewindowForm.get('realtime.realtimeType').value === realtimeTypes.INTERVAL">
-          </tb-quick-time-interval>
+          </jnks-iot-quick-time-interval>
         </div>
       </section>
     </ng-container>
 
     <ng-container *ngIf="timewindowForm.get('selectedTab').value === timewindowTypes.HISTORY">
-      <section class="tb-form-panel stroked" *ngIf="historyIntervalSelectionAvailable; else timezoneSelectionPanel">
-        <div class="tb-flex space-between"
+      <section class="jnks-iot-form-panel stroked" *ngIf="historyIntervalSelectionAvailable; else timezoneSelectionPanel">
+        <div class="jnks-iot-flex space-between"
              [class.align-end]="historyTypeSelectionAvailable"
              [class.align-center]="!historyTypeSelectionAvailable">
-          <div class="tb-flex-xs column">
-            <div class="tb-form-panel-title">{{ 'timewindow.timewindow' | translate }}</div>
+          <div class="jnks-iot-flex-xs column">
+            <div class="jnks-iot-form-panel-title">{{ 'timewindow.timewindow' | translate }}</div>
             <ng-container formGroupName="history" *ngIf="historyTypeSelectionAvailable">
-              <tb-toggle-select appearance="stroked" [options]="historyTimewindowOptions" formControlName="historyType">
-              </tb-toggle-select>
+              <jnks-iot-toggle-select appearance="stroked" [options]="historyTimewindowOptions" formControlName="historyType">
+              </jnks-iot-toggle-select>
             </ng-container>
           </div>
 
@@ -72,10 +72,10 @@
           </ng-container>
         </div>
 
-        <div class="tb-form-row no-border no-padding"
+        <div class="jnks-iot-form-row no-border no-padding"
              formGroupName="history" *ngIf="historyIntervalSelectionAvailable &&
                                   timewindowForm.get('history.historyType').value !== historyTypes.FOR_ALL_TIME">
-          <tb-timeinterval
+          <jnks-iot-timeinterval
             *ngIf="timewindowForm.get('history.historyType').value === historyTypes.LAST_INTERVAL"
             formControlName="timewindowMs"
             subscriptSizing="dynamic"
@@ -84,9 +84,9 @@
             [disabledAdvanced]="historyDisableCustomInterval"
             [required]="timewindowForm.get('selectedTab').value === timewindowTypes.HISTORY &&
                             timewindowForm.get('history.historyType').value === historyTypes.LAST_INTERVAL">
-          </tb-timeinterval>
+          </jnks-iot-timeinterval>
 
-          <tb-datetime-period
+          <jnks-iot-datetime-period
             *ngIf="timewindowForm.get('history.historyType').value === historyTypes.FIXED"
             formControlName="fixedTimewindow"
             subscriptSizing="dynamic"
@@ -94,9 +94,9 @@
             class="history-time-input"
             [required]="timewindowForm.get('selectedTab').value === timewindowTypes.HISTORY &&
                             timewindowForm.get('history.historyType').value === historyTypes.FIXED">
-          </tb-datetime-period>
+          </jnks-iot-datetime-period>
 
-          <tb-quick-time-interval
+          <jnks-iot-quick-time-interval
             *ngIf="timewindowForm.get('history.historyType').value === historyTypes.INTERVAL"
             displayLabel="false"
             formControlName="quickInterval"
@@ -105,33 +105,33 @@
             [allowedIntervals]="historyAllowedQuickIntervals"
             [required]="timewindowForm.get('selectedTab').value === timewindowTypes.HISTORY &&
                           timewindowForm.get('history.historyType').value === historyTypes.INTERVAL">
-          </tb-quick-time-interval>
+          </jnks-iot-quick-time-interval>
         </div>
       </section>
     </ng-container>
 
     <ng-container *ngIf="aggregationOptionsAvailable">
       <ng-container formGroupName="aggregation">
-        <section class="tb-form-row column-xs space-between same-padding" *ngIf="isEdit || !timewindow.hideAggregation">
+        <section class="jnks-iot-form-row column-xs space-between same-padding" *ngIf="isEdit || !timewindow.hideAggregation">
           <div class="fixed-title-width-180">{{ 'aggregation.aggregation' | translate }}</div>
-          <tb-aggregation-type-select class="flex" subscriptSizing="dynamic" appearance="outline" displayLabel="false"
+          <jnks-iot-aggregation-type-select class="flex" subscriptSizing="dynamic" appearance="outline" displayLabel="false"
                                       formControlName="type" [allowedAggregationTypes]="allowedAggTypes">
-          </tb-aggregation-type-select>
+          </jnks-iot-aggregation-type-select>
         </section>
 
-        <section class="tb-form-row column-xs space-between same-padding"
+        <section class="jnks-iot-form-row column-xs space-between same-padding"
                  *ngIf="timewindowForm.get('aggregation.type').value === aggregationTypes.NONE && (isEdit || !timewindow.hideAggInterval)">
           <div>{{ 'aggregation.limit' | translate }}</div>
-          <tb-datapoints-limit formControlName="limit"
+          <jnks-iot-datapoints-limit formControlName="limit"
                                [required]="timewindowForm.get('aggregation.type').value === aggregationTypes.NONE">
-          </tb-datapoints-limit>
+          </jnks-iot-datapoints-limit>
         </section>
       </ng-container>
 
-      <section class="tb-form-row column-xs same-padding" *ngIf="timewindowForm.get('aggregation.type').value !== aggregationTypes.NONE"
+      <section class="jnks-iot-form-row column-xs same-padding" *ngIf="timewindowForm.get('aggregation.type').value !== aggregationTypes.NONE"
                [class.!hidden]="!(isEdit || !timewindow.hideAggInterval)">
         <ng-container formGroupName="realtime" *ngIf="timewindowForm.get('selectedTab').value === timewindowTypes.REALTIME">
-          <tb-timeinterval
+          <jnks-iot-timeinterval
             formControlName="interval"
             [min]="minRealtimeAggInterval" [max]="maxRealtimeAggInterval"
             [allowedIntervals]="realtimeAllowedAggIntervals"
@@ -140,10 +140,10 @@
             appearance="outline"
             [disabledAdvanced]="realtimeDisableCustomGroupInterval">
             <div class="fixed-title-width-180">{{ 'aggregation.group-interval' | translate }}</div>
-          </tb-timeinterval>
+          </jnks-iot-timeinterval>
         </ng-container>
         <ng-container formGroupName="history" *ngIf="timewindowForm.get('selectedTab').value === timewindowTypes.HISTORY">
-          <tb-timeinterval
+          <jnks-iot-timeinterval
             formControlName="interval"
             [min]="minHistoryAggInterval" [max]="maxHistoryAggInterval"
             [allowedIntervals]="historyAllowedAggIntervals"
@@ -152,28 +152,28 @@
             appearance="outline"
             [disabledAdvanced]="historyDisableCustomGroupInterval">
             <div class="fixed-title-width-180">{{ 'aggregation.group-interval' | translate }}</div>
-          </tb-timeinterval>
+          </jnks-iot-timeinterval>
         </ng-container>
       </section>
     </ng-container>
   </div>
 
   <ng-template #timezoneSelectionPanel>
-    <section class="tb-form-row space-between same-padding">
+    <section class="jnks-iot-form-row space-between same-padding">
       <div>{{ 'timezone.timezone' | translate }}</div>
       <ng-container *ngTemplateOutlet="timezoneSelection">
       </ng-container>
     </section>
   </ng-template>
   <ng-template #timezoneSelection>
-    <tb-timezone *ngIf="timezone && (isEdit || !timewindow.hideTimezone)"
+    <jnks-iot-timezone *ngIf="timezone && (isEdit || !timewindow.hideTimezone)"
                  asButton strokedButton noMargin
                  localBrowserTimezonePlaceholderOnEmpty="true"
                  formControlName="timezone">
-    </tb-timezone>
+    </jnks-iot-timezone>
   </ng-template>
   <mat-divider></mat-divider>
-  <div class="tb-panel-actions tb-flex flex-end no-gap">
+  <div class="jnks-iot-panel-actions jnks-iot-flex flex-end no-gap">
     <button type="button"
             mat-button
             [disabled]="(isLoading$ | async)"

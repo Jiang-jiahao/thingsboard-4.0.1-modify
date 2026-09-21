@@ -39,7 +39,7 @@ import { IAliasController } from '@core/api/widget-api.models';
 import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-field';
 
 @Component({
-  selector: 'tb-data-key-input',
+  selector: 'jnks-iot-data-key-input',
   templateUrl: './data-key-input.component.html',
   styleUrls: ['./data-key-input.component.scss', './data-keys.component.scss'],
   providers: [
@@ -54,7 +54,7 @@ import { MatFormFieldAppearance, SubscriptSizing } from '@angular/material/form-
 export class DataKeyInputComponent implements ControlValueAccessor, OnInit, OnChanges {
 
   @HostBinding('class')
-  hostClass = 'tb-data-key-input';
+  hostClass = 'jnks-iot-data-key-input';
 
   DataKeyType = DataKeyType;
 

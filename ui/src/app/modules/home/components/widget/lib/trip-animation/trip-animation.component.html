@@ -19,12 +19,12 @@
           </div>
         </div>
     </div>
-  <tb-history-selector *ngIf="historicalData"
+  <jnks-iot-history-selector *ngIf="historicalData"
                        [settings]="settings"
                        [minTime]="minTime"
                        [maxTime]="maxTime"
                        [step]="normalizationStep"
                        [anchors]="anchors"
                        [useAnchors]="useAnchors"
-                       (timeUpdated)="timeUpdated($event)"></tb-history-selector>
+                       (timeUpdated)="timeUpdated($event)"></jnks-iot-history-selector>
 </div>

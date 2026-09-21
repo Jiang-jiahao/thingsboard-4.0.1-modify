@@ -395,7 +395,7 @@ export function keyFiltersToText(translate: TranslateService, datePipe: DatePipe
   let result: string;
   if (filtersText.length > 1) {
     const andText = translate.instant('filter.operation.and');
-    result = filtersText.join(' <span class="tb-filter-complex-operation">' + andText + '</span> ');
+    result = filtersText.join(' <span class="jnks-iot-filter-complex-operation">' + andText + '</span> ');
   } else {
     result = filtersText[0];
   }
@@ -420,9 +420,9 @@ export function keyFilterPredicateToText(translate: TranslateService,
       complexPredicate.predicates.map(predicate => keyFilterPredicateToText(translate, datePipe, keyFilter, predicate, complexOperation));
     if (complexPredicatesText.length > 1) {
       const operationText = translate.instant(complexOperationTranslationMap.get(complexOperation));
-      let result = complexPredicatesText.join(' <span class="tb-filter-complex-operation">' + operationText + '</span> ');
+      let result = complexPredicatesText.join(' <span class="jnks-iot-filter-complex-operation">' + operationText + '</span> ');
       if (complexOperation === ComplexOperation.OR && parentComplexOperation && ComplexOperation.OR !== parentComplexOperation) {
-        result = `<span class="tb-filter-bracket"><span class="tb-left-bracket">(</span>${result}<span class="tb-right-bracket">)</span></span>`;
+        result = `<span class="jnks-iot-filter-bracket"><span class="jnks-iot-left-bracket">(</span>${result}<span class="jnks-iot-right-bracket">)</span></span>`;
       }
       return result;
     } else {
@@ -445,9 +445,9 @@ function simpleKeyFilterPredicateToText(translate: TranslateService,
   const val = keyFilterPredicate.value;
   const dynamicValue = !!val.dynamicValue && !!val.dynamicValue.sourceType;
   if (dynamicValue) {
-    value = '<span class="tb-filter-dynamic-value"><span class="tb-filter-dynamic-source">' +
+    value = '<span class="jnks-iot-filter-dynamic-value"><span class="jnks-iot-filter-dynamic-source">' +
     translate.instant(dynamicValueSourceTypeTranslationMap.get(val.dynamicValue.sourceType)) + '</span>';
-    value += '.<span class="tb-filter-value">' + val.dynamicValue.sourceAttribute + '</span></span>';
+    value += '.<span class="jnks-iot-filter-value">' + val.dynamicValue.sourceAttribute + '</span></span>';
   }
   switch (keyFilterPredicate.type) {
     case FilterPredicateType.STRING:
@@ -477,9 +477,9 @@ function simpleKeyFilterPredicateToText(translate: TranslateService,
       break;
   }
   if (!dynamicValue) {
-    value = `<span class="tb-filter-value">${value}</span>`;
+    value = `<span class="jnks-iot-filter-value">${value}</span>`;
   }
-  return `<span class="tb-filter-predicate"><span class="tb-filter-entity-key">${key}</span> <span class="tb-filter-simple-operation">${operation}</span> ${value}</span>`;
+  return `<span class="jnks-iot-filter-predicate"><span class="jnks-iot-filter-entity-key">${key}</span> <span class="jnks-iot-filter-simple-operation">${operation}</span> ${value}</span>`;
 }
 
 export function keyFilterInfosToKeyFilters(keyFilterInfos: Array<KeyFilterInfo>): Array<KeyFilter> {

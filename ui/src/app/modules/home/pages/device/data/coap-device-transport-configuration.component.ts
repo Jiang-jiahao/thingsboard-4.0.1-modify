@@ -13,7 +13,7 @@ import { takeUntil } from 'rxjs/operators';
 import { isDefinedAndNotNull } from '@core/utils';
 
 @Component({
-  selector: 'tb-coap-device-transport-configuration',
+  selector: 'jnks-iot-coap-device-transport-configuration',
   templateUrl: './coap-device-transport-configuration.component.html',
   styleUrls: [],
   providers: [{

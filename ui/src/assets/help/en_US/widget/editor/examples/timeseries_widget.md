@@ -77,7 +77,7 @@ self.onDataUpdated = function() {
 
 ![image](${helpBaseUrl}/help/images/widget/editor/examples/timeseries-widget-sample.png)
 
-In this example, the <span trigger-style="fontSize: 16px;" trigger-text="<b>subscription</b>" tb-help-popup="widget/editor/widget_js_subscription_object"></span> **datasources** and **data** properties are assigned to **$scope** and become accessible within the HTML template.
+In this example, the <span trigger-style="fontSize: 16px;" trigger-text="<b>subscription</b>" jnks-iot-help-popup="widget/editor/widget_js_subscription_object"></span> **datasources** and **data** properties are assigned to **$scope** and become accessible within the HTML template.
 
 The **$scope.datasourceData** property is introduced to map datasource specific dataKeys data by datasource index for flexible access within the HTML template.
 

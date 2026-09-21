@@ -16,7 +16,7 @@ import { getCurrentAuthUser } from '@core/auth/auth.selectors';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'tb-audit-log-table',
+  selector: 'jnks-iot-audit-log-table',
   templateUrl: './audit-log-table.component.html',
   styleUrls: ['./audit-log-table.component.scss']
 })

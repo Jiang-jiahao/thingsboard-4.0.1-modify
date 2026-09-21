@@ -1,7 +1,7 @@
 @import "../../../../../../../scss/constants";
 
 :host {
-  .tb-card-header {
+  .jnks-iot-card-header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -12,14 +12,14 @@
       gap: 12px;
     }
   }
-  .tb-no-dashboards {
+  .jnks-iot-no-dashboards {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
   }
-  .tb-no-last-visited-bg {
+  .jnks-iot-no-last-visited-bg {
     width: 60px;
     height: 60px;
     margin: 10px;
@@ -39,7 +39,7 @@
       mask-repeat: no-repeat;
     }
   }
-  .tb-no-last-visited-dashboards-text {
+  .jnks-iot-no-last-visited-dashboards-text {
     font-weight: 500;
     font-size: 14px;
     line-height: 20px;
@@ -47,7 +47,7 @@
     color: rgba(0, 0, 0, 0.54);
   }
 
-  .tb-starred-dashboard-row {
+  .jnks-iot-starred-dashboard-row {
     height: 40px;
     display: flex;
     flex-direction: row;
@@ -57,7 +57,7 @@
     }
   }
 
-  .tb-cell {
+  .jnks-iot-cell {
     box-sizing: content-box;
     &:first-child {
       padding: 0 12px;
@@ -67,7 +67,7 @@
     }
   }
 
-  .tb-star-dashboard-autocomplete {
+  .jnks-iot-star-dashboard-autocomplete {
     margin-left: 64px;
     margin-right: 64px;
     @media #{$mat-md-lg} {
@@ -95,7 +95,7 @@
     }
   }
 
-  .tb-cell:nth-child(n+2):nth-last-child(n+2) {
+  .jnks-iot-cell:nth-child(n+2):nth-last-child(n+2) {
     padding: 0 28px 0 0;
   }
 
@@ -105,7 +105,7 @@
     }
   }
 
-  .mat-mdc-header-cell, .mat-mdc-cell, .tb-cell {
+  .mat-mdc-header-cell, .mat-mdc-cell, .jnks-iot-cell {
     &.star-cell {
       width: 40px;
       min-width: 40px;
@@ -141,7 +141,7 @@
   .mat-mdc-cell.title {
     max-width: 0;
   }
-  .mat-mdc-cell, .tb-cell {
+  .mat-mdc-cell, .jnks-iot-cell {
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
@@ -181,7 +181,7 @@
       }
     }
   }
-  .tb-star-dashboard-autocomplete {
+  .jnks-iot-star-dashboard-autocomplete {
     .mat-mdc-form-field {
       font-weight: 400;
       font-size: 14px;

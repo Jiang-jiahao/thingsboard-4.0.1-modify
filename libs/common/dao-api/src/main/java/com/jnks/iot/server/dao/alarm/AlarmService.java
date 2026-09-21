@@ -24,7 +24,7 @@ import com.jnks.iot.server.common.data.query.AlarmCountQuery;
 import com.jnks.iot.server.common.data.query.AlarmData;
 import com.jnks.iot.server.common.data.query.AlarmDataQuery;
 import com.jnks.iot.server.common.data.query.OriginatorAlarmFilter;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.dao.entity.EntityDaoService;
 
 import java.util.Collection;
@@ -93,9 +93,9 @@ public interface AlarmService extends EntityDaoService {
     PageData<AlarmData> findAlarmDataByQueryForEntities(TenantId tenantId,
                                                         AlarmDataQuery query, Collection<EntityId> orderedEntityIds);
 
-    List<TbPair<UUID, Long>> findAlarmIdsByAssigneeId(TenantId tenantId, UserId userId, long createdTimeOffset, AlarmId idOffset, int limit);
+    List<JnksIotPair<UUID, Long>> findAlarmIdsByAssigneeId(TenantId tenantId, UserId userId, long createdTimeOffset, AlarmId idOffset, int limit);
 
-    List<TbPair<UUID, Long>> findAlarmIdsByOriginatorId(TenantId tenantId, EntityId originatorId, long createdTimeOffset, AlarmId idOffset, int limit);
+    List<JnksIotPair<UUID, Long>> findAlarmIdsByOriginatorId(TenantId tenantId, EntityId originatorId, long createdTimeOffset, AlarmId idOffset, int limit);
 
     int deleteEntityAlarmRecords(TenantId tenantId, EntityId entityId);
 

@@ -1,6 +1,6 @@
 package com.jnks.iot.rule.engine.api;
 
-import com.jnks.iot.server.common.data.msg.TbNodeConnectionType;
+import com.jnks.iot.server.common.data.msg.JnksIotNodeConnectionType;
 import com.jnks.iot.server.common.data.plugin.ComponentClusteringMode;
 import com.jnks.iot.server.common.data.plugin.ComponentScope;
 import com.jnks.iot.server.common.data.plugin.ComponentType;
@@ -35,7 +35,7 @@ public @interface RuleNode {
 
     ComponentScope scope() default ComponentScope.TENANT;
 
-    String[] relationTypes() default {TbNodeConnectionType.SUCCESS, TbNodeConnectionType.FAILURE};
+    String[] relationTypes() default {JnksIotNodeConnectionType.SUCCESS, JnksIotNodeConnectionType.FAILURE};
 
     String[] uiResources() default {};
 

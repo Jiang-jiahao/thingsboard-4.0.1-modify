@@ -1,6 +1,6 @@
 @import '../../../../../../../../scss/constants';
 
-.tb-background-settings-panel {
+.jnks-iot-background-settings-panel {
   width: 620px;
   min-height: 300px;
   max-height: 90vh;
@@ -10,20 +10,20 @@
   @media #{$mat-lt-md} {
     width: 90vw;
   }
-  .tb-background-settings-title {
+  .jnks-iot-background-settings-title {
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
     color: rgba(0, 0, 0, 0.87);
   }
-  .tb-background-form-panel {
+  .jnks-iot-background-form-panel {
     height: 192px;
-    .tb-background-color-field {
+    .jnks-iot-background-color-field {
       height: auto;
     }
   }
-  .tb-background-settings-preview {
+  .jnks-iot-background-settings-preview {
     flex: 1;
     background: rgba(0, 0, 0, 0.04);
     display: flex;
@@ -32,7 +32,7 @@
     align-items: center;
     gap: 12px;
   }
-  .tb-background-settings-preview-title {
+  .jnks-iot-background-settings-preview-title {
     align-self: stretch;
     font-size: 16px;
     font-style: normal;
@@ -40,13 +40,13 @@
     line-height: 24px;
     color: rgba(0, 0, 0, 0.38);
   }
-  .tb-background-settings-preview-box {
+  .jnks-iot-background-settings-preview-box {
     position: relative;
     width: 136px;
     height: 118px;
     border-radius: 2.666px;
   }
-  .tb-background-settings-preview-overlay {
+  .jnks-iot-background-settings-preview-overlay {
     position: absolute;
     border-radius: 2.666px;
     top: 7.998px;
@@ -54,7 +54,7 @@
     left: 7.998px;
     right: 7.998px;
   }
-  .tb-background-settings-panel-content {
+  .jnks-iot-background-settings-panel-content {
     display: flex;
     flex-direction: column;
     gap: 16px;
@@ -62,7 +62,7 @@
     margin: -10px;
     padding: 10px;
   }
-  .tb-background-settings-panel-buttons {
+  .jnks-iot-background-settings-panel-buttons {
     height: 40px;
     display: flex;
     flex-direction: row;

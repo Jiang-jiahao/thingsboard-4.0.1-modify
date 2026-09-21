@@ -1,6 +1,6 @@
 <mat-form-field [formGroup]="selectDashboardFormGroup"
-                [class]="{'tb-inline-field': inlineField, 'flex': inlineField,
-                          'tb-suffix-absolute': (inlineField && !selectDashboardFormGroup.get('dashboard').value)}"
+                [class]="{'jnks-iot-inline-field': inlineField, 'flex': inlineField,
+                          'jnks-iot-suffix-absolute': (inlineField && !selectDashboardFormGroup.get('dashboard').value)}"
                 class="mat-block"
                 [floatLabel]="floatLabel"
                 [appearance]="inlineField ? 'outline' : appearance"
@@ -27,15 +27,15 @@
   </button>
   <mat-icon matSuffix
             matTooltipPosition="above"
-            matTooltipClass="tb-error-tooltip"
+            matTooltipClass="jnks-iot-error-tooltip"
             [matTooltip]="requiredText | translate"
             *ngIf="inlineField && requiredText && selectDashboardFormGroup.get('dashboard').hasError('required')
                             && selectDashboardFormGroup.get('dashboard').touched"
-            class="tb-error">
+            class="jnks-iot-error">
     warning
   </mat-icon>
   <mat-autocomplete
-    class="tb-autocomplete"
+    class="jnks-iot-autocomplete"
     #dashboardAutocomplete="matAutocomplete"
     [displayWith]="displayDashboardFn">
     <mat-option *ngFor="let dashboard of filteredDashboards | async" [value]="dashboard">
@@ -55,9 +55,9 @@
     </mat-option>
   </mat-autocomplete>
   <mat-error *ngIf="!inlineField">
-    <ng-content select="[tb-error]"></ng-content>
+    <ng-content select="[jnks-iot-error]"></ng-content>
   </mat-error>
   <mat-hint *ngIf="!inlineField">
-    <ng-content select="[tb-hint]"></ng-content>
+    <ng-content select="[jnks-iot-hint]"></ng-content>
   </mat-hint>
 </mat-form-field>

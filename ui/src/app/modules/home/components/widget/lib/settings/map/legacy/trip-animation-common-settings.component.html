@@ -1,4 +1,4 @@
-<section class="tb-widget-settings" [formGroup]="tripAnimationCommonSettingsFormGroup">
+<section class="jnks-iot-widget-settings" [formGroup]="tripAnimationCommonSettingsFormGroup">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.maps.trip-animation-settings</legend>
     <mat-form-field class="mat-block">
@@ -6,22 +6,22 @@
       <input matInput type="number" min="1" formControlName="normalizationStep">
     </mat-form-field>
     <section class="flex flex-col gt-xs:flex-row gt-xs:gap-2">
-      <tb-datasources-key-autocomplete class="flex-1"
+      <jnks-iot-datasources-key-autocomplete class="flex-1"
                                        required
                                        [datasources]="widget?.config?.datasources"
                                        label="widgets.maps.latitude-key-name"
                                        formControlName="latKeyName">
-      </tb-datasources-key-autocomplete>
-      <tb-datasources-key-autocomplete class="flex-1"
+      </jnks-iot-datasources-key-autocomplete>
+      <jnks-iot-datasources-key-autocomplete class="flex-1"
                                        required
                                        [datasources]="widget?.config?.datasources"
                                        label="widgets.maps.longitude-key-name"
                                        formControlName="lngKeyName">
-      </tb-datasources-key-autocomplete>
+      </jnks-iot-datasources-key-autocomplete>
     </section>
     <fieldset class="fields-group fields-group-slider">
       <legend class="group-title" translate>widgets.maps.tooltip</legend>
-      <mat-expansion-panel class="tb-settings" [expanded]="tripAnimationCommonSettingsFormGroup.get('showTooltip').value">
+      <mat-expansion-panel class="jnks-iot-settings" [expanded]="tripAnimationCommonSettingsFormGroup.get('showTooltip').value">
         <mat-expansion-panel-header class="flex-wrap">
           <mat-panel-title>
             <mat-slide-toggle formControlName="showTooltip" (click)="$event.stopPropagation()">
@@ -34,18 +34,18 @@
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
           <section class="flex flex-col gt-xs:flex-row gt-xs:gap-2">
-            <tb-color-input
+            <jnks-iot-color-input
               class="flex-1"
               formControlName="tooltipColor"
               icon="format_color_fill"
               label="{{ 'widgets.maps.tooltip-background-color' | translate }}" openOnInput colorClearButton>
-            </tb-color-input>
-            <tb-color-input
+            </jnks-iot-color-input>
+            <jnks-iot-color-input
               class="flex-1"
               formControlName="tooltipFontColor"
               icon="format_color_fill"
               label="{{ 'widgets.maps.tooltip-font-color' | translate }}" openOnInput colorClearButton>
-            </tb-color-input>
+            </jnks-iot-color-input>
             <mat-form-field class="flex-1">
               <mat-label translate>widgets.maps.tooltip-opacity</mat-label>
               <input matInput type="number" min="0" max="1" formControlName="tooltipOpacity">
@@ -57,19 +57,19 @@
           <mat-slide-toggle formControlName="useTooltipFunction" class="slide-block">
             {{ 'widgets.maps.use-tooltip-function' | translate }}
           </mat-slide-toggle>
-          <tb-html [class.!hidden]="tripAnimationCommonSettingsFormGroup.get('useTooltipFunction').value"
+          <jnks-iot-html [class.!hidden]="tripAnimationCommonSettingsFormGroup.get('useTooltipFunction').value"
                    formControlName="tooltipPattern"
                    minHeight="100px"
                    label="{{ 'widgets.maps.tooltip-pattern' | translate }}">
-          </tb-html>
-          <tb-js-func [class.!hidden]="!tripAnimationCommonSettingsFormGroup.get('useTooltipFunction').value"
+          </jnks-iot-html>
+          <jnks-iot-js-func [class.!hidden]="!tripAnimationCommonSettingsFormGroup.get('useTooltipFunction').value"
                       formControlName="tooltipFunction"
                       withModules
                       [globalVariables]="functionScopeVariables"
                       [functionArgs]="['data', 'dsData', 'dsIndex']"
                       functionTitle="{{ 'widgets.maps.tooltip-function' | translate }}"
                       helpId="widget/lib/map-legacy/tooltip_fn">
-          </tb-js-func>
+          </jnks-iot-js-func>
         </ng-template>
       </mat-expansion-panel>
     </fieldset>

@@ -40,7 +40,7 @@ export interface MapDataLayerDialogData {
 }
 
 @Component({
-  selector: 'tb-map-data-layer-dialog',
+  selector: 'jnks-iot-map-data-layer-dialog',
   templateUrl: './map-data-layer-dialog.component.html',
   styleUrls: ['./map-data-layer-dialog.component.scss'],
   encapsulation: ViewEncapsulation.None

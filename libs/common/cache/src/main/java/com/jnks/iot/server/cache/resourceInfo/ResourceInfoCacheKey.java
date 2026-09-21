@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import com.jnks.iot.server.common.data.id.TbResourceId;
+import com.jnks.iot.server.common.data.id.JnksIotResourceId;
 import com.jnks.iot.server.common.data.id.TenantId;
 
 import java.io.Serial;
@@ -20,11 +20,11 @@ public class ResourceInfoCacheKey implements Serializable {
     private static final long serialVersionUID = 2100510964692846992L;
 
     private final TenantId tenantId;
-    private final TbResourceId tbResourceId;
+    private final JnksIotResourceId jnksIotResourceId;
 
     @Override
     public String toString() {
-        return tenantId + "_" + tbResourceId;
+        return tenantId + "_" + jnksIotResourceId;
     }
 
 }

@@ -40,7 +40,7 @@ import { DeviceProfileService } from '@core/http/device-profile.service';
 import { DeviceProfileId } from '@shared/models/id/device-profile-id';
 
 @Component({
-  selector: 'tb-device-wizard',
+  selector: 'jnks-iot-device-wizard',
   templateUrl: './device-wizard-dialog.component.html',
   styleUrls: ['./device-wizard-dialog.component.scss']
 })
@@ -66,7 +66,7 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
 
   private currentDeviceProfileTransportType = DeviceTransportType.DEFAULT;
 
-  /** 与设备详情页一致，供 tb-device-data 展示传输配置（含 TCP 协议设备 ID） */
+  /** 与设备详情页一致，供 jnks-iot-device-data 展示传输配置（含 TCP 协议设备 ID） */
   tcpProfileWireAuthMode: TcpWireAuthenticationMode | null = null;
 
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;

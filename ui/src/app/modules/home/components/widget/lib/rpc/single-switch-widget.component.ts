@@ -34,7 +34,7 @@ const horizontalLayoutPadding = 48;
 const verticalLayoutPadding = 36;
 
 @Component({
-  selector: 'tb-single-switch-widget',
+  selector: 'jnks-iot-single-switch-widget',
   templateUrl: './single-switch-widget.component.html',
   styleUrls: ['../action/action-widget.scss', './single-switch-widget.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -129,7 +129,7 @@ export class SingleSwitchWidgetComponent extends
     this.showOffLabel = this.settings.showOffLabel;
     this.offLabel = this.settings.offLabel;
     this.offLabelStyle = textStyle(this.settings.offLabelFont);
-    const switchVariablesCss = `.tb-single-switch-panel {\n`+
+    const switchVariablesCss = `.jnks-iot-single-switch-panel {\n`+
                                            `--tb-single-switch-tumbler-color-on: ${this.settings.tumblerColorOn};\n`+
                                            `--tb-single-switch-tumbler-color-off: ${this.settings.tumblerColorOff};\n`+
                                            `--tb-single-switch-tumbler-color-disabled: ${this.settings.tumblerColorDisabled};\n`+
@@ -138,7 +138,7 @@ export class SingleSwitchWidgetComponent extends
                                            `--tb-single-switch-color-disabled: ${this.settings.switchColorDisabled};\n`+
                                       `}`;
     this.singleSwitchCssClass =
-      this.utils.applyCssToElement(this.renderer, this.elementRef.nativeElement, 'tb-single-switch', switchVariablesCss);
+      this.utils.applyCssToElement(this.renderer, this.elementRef.nativeElement, 'jnks-iot-single-switch', switchVariablesCss);
 
     const getInitialStateSettings =
       {...this.settings.initialState, actionLabel: this.ctx.translate.instant('widgets.rpc-state.initial-state')};

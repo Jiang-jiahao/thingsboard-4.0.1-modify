@@ -1,5 +1,5 @@
-<section class="tb-kv-map flex flex-col" [formGroup]="kvListFormGroup">
-  <label translate class="tb-title">{{ titleText }}</label>
+<section class="jnks-iot-kv-map flex flex-col" [formGroup]="kvListFormGroup">
+  <label translate class="jnks-iot-title">{{ titleText }}</label>
   <div class="flex flex-row items-center justify-start gap-2"
        formArrayName="keyVals"
        *ngFor="let keyValControl of keyValsFormArray().controls; let $index = index">

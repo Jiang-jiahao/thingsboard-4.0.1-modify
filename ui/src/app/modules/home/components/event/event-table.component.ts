@@ -24,7 +24,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-event-table',
+  selector: 'jnks-iot-event-table',
   templateUrl: './event-table.component.html',
   styleUrls: ['./event-table.component.scss']
 })

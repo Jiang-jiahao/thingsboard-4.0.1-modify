@@ -1,5 +1,5 @@
 <section class="entity-version-diff-view flex flex-col" [class.content-ready]="contentReady"
-         tb-fullscreen [fullscreen]="isFullscreen" (fullscreenChanged)="onFullscreenChanged($event)"
+         jnks-iot-fullscreen [fullscreen]="isFullscreen" (fullscreenChanged)="onFullscreenChanged($event)"
          [style]="isFullscreen || !contentReady ? {} : {height: preferredDiffHeight}">
   <mat-toolbar *ngIf="contentReady">
     <h2>{{ 'version-control.diff-entity-with-version' | translate: {versionName} }}</h2>

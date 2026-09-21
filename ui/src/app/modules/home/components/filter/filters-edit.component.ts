@@ -26,14 +26,14 @@ import { UserFilterDialogComponent, UserFilterDialogData } from '@home/component
 import { MatDialog } from '@angular/material/dialog';
 
 @Component({
-  selector: 'tb-filters-edit',
+  selector: 'jnks-iot-filters-edit',
   templateUrl: './filters-edit.component.html',
   styleUrls: ['./filters-edit.component.scss']
 })
 export class FiltersEditComponent implements OnInit, OnDestroy {
 
   @HostBinding('class')
-  filtersEditClass = 'tb-hide';
+  filtersEditClass = 'jnks-iot-hide';
 
   aliasControllerValue: IAliasController;
 
@@ -107,7 +107,7 @@ export class FiltersEditComponent implements OnInit, OnDestroy {
       this.dialog.open<UserFilterDialogComponent, UserFilterDialogData,
         Filter>(UserFilterDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           filter: singleFilter
         }
@@ -121,7 +121,7 @@ export class FiltersEditComponent implements OnInit, OnDestroy {
     } else {
       const position = this.overlay.position();
       const config = new OverlayConfig({
-        panelClass: 'tb-filters-edit-panel',
+        panelClass: 'jnks-iot-filters-edit-panel',
         backdropClass: 'cdk-overlay-transparent-backdrop',
         hasBackdrop: true,
       });
@@ -161,7 +161,7 @@ export class FiltersEditComponent implements OnInit, OnDestroy {
     const allFilters = this.aliasController.getFilters();
     this.filtersInfo = {};
     this.hasEditableFilters = false;
-    this.filtersEditClass = 'tb-hide';
+    this.filtersEditClass = 'jnks-iot-hide';
     for (const filterId of Object.keys(allFilters)) {
       const filterInfo = this.aliasController.getFilterInfo(filterId);
       if (filterInfo && isFilterEditable(filterInfo)) {

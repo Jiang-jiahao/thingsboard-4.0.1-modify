@@ -27,7 +27,7 @@ export interface TemplateNotificationDialogData {
 }
 
 @Component({
-  selector: 'tb-template-notification-dialog',
+  selector: 'jnks-iot-template-notification-dialog',
   templateUrl: './template-notification-dialog.component.html',
   styleUrls: ['./template-notification-dialog.component.scss']
 })

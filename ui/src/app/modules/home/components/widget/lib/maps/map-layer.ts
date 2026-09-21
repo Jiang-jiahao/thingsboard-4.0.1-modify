@@ -34,27 +34,27 @@ const referenceLayerStyleUrlMap = new Map<ReferenceLayerType, string>(
 
 const referenceLayerCache = new Map<ReferenceLayerType, Observable<StyleSpecification>>();
 
-interface TbMapLayerData {
+interface JnksIotMapLayerData {
   layer: L.Layer;
   attribution: boolean;
 }
 
-export abstract class TbMapLayer<S extends MapLayerSettings> {
+export abstract class JnksIotMapLayer<S extends MapLayerSettings> {
 
   static fromSettings(ctx: WidgetContext,
                       inputSettings: DeepPartial<MapLayerSettings>) {
 
     switch (inputSettings.provider) {
       case MapProvider.openstreet:
-        return new TbOpenStreetMapLayer(ctx, inputSettings);
+        return new JnksIotOpenStreetMapLayer(ctx, inputSettings);
       case MapProvider.google:
-        return new TbGoogleMapLayer(ctx, inputSettings);
+        return new JnksIotGoogleMapLayer(ctx, inputSettings);
       case MapProvider.tencent:
-        return new TbTencentMapLayer(ctx, inputSettings);
+        return new JnksIotTencentMapLayer(ctx, inputSettings);
       case MapProvider.here:
-        return new TbHereMapLayer(ctx, inputSettings);
+        return new JnksIotHereMapLayer(ctx, inputSettings);
       case MapProvider.custom:
-        return new TbCustomMapLayer(ctx, inputSettings);
+        return new JnksIotCustomMapLayer(ctx, inputSettings);
     }
   }
 
@@ -91,7 +91,7 @@ export abstract class TbMapLayer<S extends MapLayerSettings> {
     );
   }
 
-  private generateLayer(): Observable<TbMapLayerData> {
+  private generateLayer(): Observable<JnksIotMapLayerData> {
     return this.createLayer().pipe(
       switchMap((baseLayer) => {
         if (baseLayer) {
@@ -185,7 +185,7 @@ export abstract class TbMapLayer<S extends MapLayerSettings> {
 
 }
 
-class TbOpenStreetMapLayer extends TbMapLayer<OpenStreetMapLayerSettings> {
+class JnksIotOpenStreetMapLayer extends JnksIotMapLayer<OpenStreetMapLayerSettings> {
 
   constructor(protected ctx: WidgetContext,
               protected inputSettings: DeepPartial<MapLayerSettings>) {
@@ -203,7 +203,7 @@ class TbOpenStreetMapLayer extends TbMapLayer<OpenStreetMapLayerSettings> {
 
 }
 
-class TbGoogleMapLayer extends TbMapLayer<GoogleMapLayerSettings> {
+class JnksIotGoogleMapLayer extends JnksIotMapLayer<GoogleMapLayerSettings> {
 
   static loadedApiKeysGlobal: {[key: string]: boolean} = {};
 
@@ -232,17 +232,17 @@ class TbGoogleMapLayer extends TbMapLayer<GoogleMapLayerSettings> {
 
   private loadGoogle(): Observable<boolean> {
     const apiKey = this.settings.apiKey || defaultGoogleMapLayerSettings.apiKey;
-    if (TbGoogleMapLayer.loadedApiKeysGlobal[apiKey]) {
+    if (JnksIotGoogleMapLayer.loadedApiKeysGlobal[apiKey]) {
       return of(true);
     } else {
       const resourceService = this.ctx.$injector.get(ResourcesService);
       return resourceService.loadResource(`https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async`).pipe(
         map(() => {
-          TbGoogleMapLayer.loadedApiKeysGlobal[apiKey] = true;
+          JnksIotGoogleMapLayer.loadedApiKeysGlobal[apiKey] = true;
           return true;
         }),
         catchError((e) => {
-          TbGoogleMapLayer.loadedApiKeysGlobal[apiKey] = false;
+          JnksIotGoogleMapLayer.loadedApiKeysGlobal[apiKey] = false;
           console.error(`Google map api load failed!`, e);
           return of(false);
         })
@@ -251,7 +251,7 @@ class TbGoogleMapLayer extends TbMapLayer<GoogleMapLayerSettings> {
   }
 }
 
-class TbTencentMapLayer extends TbMapLayer<TencentMapLayerSettings> {
+class JnksIotTencentMapLayer extends JnksIotMapLayer<TencentMapLayerSettings> {
 
   constructor(protected ctx: WidgetContext,
               protected inputSettings: DeepPartial<MapLayerSettings>) {
@@ -271,7 +271,7 @@ class TbTencentMapLayer extends TbMapLayer<TencentMapLayerSettings> {
 
 }
 
-class TbHereMapLayer extends TbMapLayer<HereMapLayerSettings> {
+class JnksIotHereMapLayer extends JnksIotMapLayer<HereMapLayerSettings> {
 
   constructor(protected ctx: WidgetContext,
               protected inputSettings: DeepPartial<MapLayerSettings>) {
@@ -290,7 +290,7 @@ class TbHereMapLayer extends TbMapLayer<HereMapLayerSettings> {
 
 }
 
-class TbCustomMapLayer extends TbMapLayer<CustomMapLayerSettings> {
+class JnksIotCustomMapLayer extends JnksIotMapLayer<CustomMapLayerSettings> {
 
   constructor(protected ctx: WidgetContext,
               protected inputSettings: DeepPartial<MapLayerSettings>) {

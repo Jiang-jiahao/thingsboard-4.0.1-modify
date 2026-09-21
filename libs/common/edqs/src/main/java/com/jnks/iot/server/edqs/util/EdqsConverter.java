@@ -14,7 +14,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.jnks.iot.common.util.TbStringPool;
+import com.jnks.iot.common.util.JnksIotStringPool;
 import com.jnks.iot.server.common.data.AttributeScope;
 import com.jnks.iot.server.common.data.EntityType;
 import com.jnks.iot.server.common.data.ObjectType;
@@ -274,7 +274,7 @@ public class EdqsConverter {
 
         @Override
         public String deserialize(JsonParser p, DeserializationContext ctx) throws IOException {
-            return TbStringPool.intern(p.getText());
+            return JnksIotStringPool.intern(p.getText());
         }
 
     }

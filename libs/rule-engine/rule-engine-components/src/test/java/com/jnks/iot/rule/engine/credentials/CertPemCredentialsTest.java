@@ -28,7 +28,7 @@ public class CertPemCredentialsTest {
 
     @Test
     public void testChainOfCertificates() throws Exception {
-        String fileContent = fileContent("pem/tb-cloud-chain.pem");
+        String fileContent = fileContent("pem/jnks-iot-cloud-chain.pem");
 
         List<X509Certificate> x509Certificates = SslUtil.readCertFile(fileContent);
 
@@ -45,7 +45,7 @@ public class CertPemCredentialsTest {
 
     @Test
     public void testSingleCertificate() throws Exception {
-        String fileContent = fileContent("pem/tb-cloud.pem");
+        String fileContent = fileContent("pem/jnks-iot-cloud.pem");
 
         List<X509Certificate> x509Certificates = SslUtil.readCertFile(fileContent);
 

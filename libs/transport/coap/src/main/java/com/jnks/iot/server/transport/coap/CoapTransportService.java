@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import com.jnks.iot.server.coapserver.CoapServerService;
 import com.jnks.iot.server.common.data.DataConstants;
-import com.jnks.iot.server.common.data.TbTransportService;
+import com.jnks.iot.server.common.data.JnksIotTransportService;
 import com.jnks.iot.server.common.data.ota.OtaPackageType;
 import com.jnks.iot.server.transport.coap.efento.CoapEfentoTransportResource;
 
@@ -19,7 +19,7 @@ import java.net.UnknownHostException;
 @Service("CoapTransportService")
 @ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${coap.server.enabled:true}'=='true' && '${transport.coap.enabled:true}'=='true'")
 @Slf4j
-public class CoapTransportService implements TbTransportService {
+public class CoapTransportService implements JnksIotTransportService {
 
     private static final String V1 = "v1";
     private static final String API = "api";

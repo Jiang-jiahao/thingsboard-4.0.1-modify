@@ -24,7 +24,7 @@
            [matChipInputFor]="chipList">
   </mat-chip-grid>
   <mat-autocomplete #entityTypeAutocomplete="matAutocomplete"
-                    class="tb-autocomplete"
+                    class="jnks-iot-autocomplete"
                     [displayWith]="displayEntityTypeFn">
     <mat-option *ngFor="let entityType of filteredEntityTypeList | async" [value]="entityType">
       <span [innerHTML]="entityType.name | highlight:searchText"></span>

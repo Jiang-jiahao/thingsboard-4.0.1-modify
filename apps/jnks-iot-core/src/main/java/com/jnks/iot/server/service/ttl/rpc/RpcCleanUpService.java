@@ -1,0 +1,73 @@
+package com.jnks.iot.server.service.ttl.rpc;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.page.PageData;
+import com.jnks.iot.server.common.data.page.PageLink;
+import com.jnks.iot.server.common.data.tenant.profile.DefaultTenantProfileConfiguration;
+import com.jnks.iot.server.common.msg.queue.ServiceType;
+import com.jnks.iot.server.dao.rpc.RpcDao;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
+import com.jnks.iot.server.dao.tenant.TenantService;
+import com.jnks.iot.server.queue.discovery.PartitionService;
+import java.util.Date;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * RPC TTL 清理服务：按租户配置删除过期的设备 RPC 记录。
+ * <p>
+ * <b>触发方式：</b>定时 TTL（{@code sql.ttl.rpc.checking_interval}）。
+ * <p>
+ * <b>清理对象：</b>超过租户 {@code rpcTtlDays} 的 RPC；仅处理本节点负责的租户分区。
+ */
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class RpcCleanUpService {
+    @Value("${sql.ttl.rpc.enabled}")
+    private boolean ttlTaskExecutionEnabled;
+
+    private final TenantService tenantService;
+    private final PartitionService partitionService;
+    private final JnksIotTenantProfileCache tenantProfileCache;
+    private final RpcDao rpcDao;
+
+    /** 按租户 RPC TTL 删除过期请求。 */
+    @Scheduled(initialDelayString = "#{T(org.apache.commons.lang3.RandomUtils).nextLong(0, ${sql.ttl.rpc.checking_interval})}", fixedDelayString = "${sql.ttl.rpc.checking_interval}")
+    public void cleanUp() {
+        if (ttlTaskExecutionEnabled) {
+            PageLink tenantsBatchRequest = new PageLink(10_000, 0);
+            PageData<TenantId> tenantsIds;
+            do {
+                tenantsIds = tenantService.findTenantsIds(tenantsBatchRequest);
+                for (TenantId tenantId : tenantsIds.getData()) {
+                    if (!partitionService.resolve(ServiceType.JNKS_IOT_CORE, tenantId, tenantId).isMyPartition()) {
+                        continue;
+                    }
+
+                    Optional<DefaultTenantProfileConfiguration> tenantProfileConfiguration = tenantProfileCache.get(tenantId).getProfileConfiguration();
+                    if (tenantProfileConfiguration.isEmpty() || tenantProfileConfiguration.get().getRpcTtlDays() == 0) {
+                        continue;
+                    }
+
+                    long ttl = TimeUnit.DAYS.toMillis(tenantProfileConfiguration.get().getRpcTtlDays());
+                    long expirationTime = System.currentTimeMillis() - ttl;
+
+                    int totalRemoved = rpcDao.deleteOutdatedRpcByTenantId(tenantId, expirationTime);
+
+                    if (totalRemoved > 0) {
+                        log.info("Removed {} outdated rpc(s) for tenant {} older than {}", totalRemoved, tenantId, new Date(expirationTime));
+                    }
+                }
+
+                tenantsBatchRequest = tenantsBatchRequest.nextPageLink();
+            } while (tenantsIds.hasNext());
+        }
+    }
+
+}

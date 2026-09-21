@@ -9,20 +9,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import com.jnks.iot.common.util.JacksonUtil;
 import com.jnks.iot.rule.engine.api.RuleNode;
-import com.jnks.iot.rule.engine.api.TbContext;
-import com.jnks.iot.rule.engine.api.TbNode;
-import com.jnks.iot.rule.engine.api.TbNodeConfiguration;
-import com.jnks.iot.rule.engine.api.TbNodeException;
-import com.jnks.iot.rule.engine.api.util.TbNodeUtils;
-import com.jnks.iot.rule.engine.util.SemaphoreWithTbMsgQueue;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
+import com.jnks.iot.rule.engine.api.JnksIotNode;
+import com.jnks.iot.rule.engine.api.JnksIotNodeConfiguration;
+import com.jnks.iot.rule.engine.api.JnksIotNodeException;
+import com.jnks.iot.rule.engine.api.util.JnksIotNodeUtils;
+import com.jnks.iot.rule.engine.util.SemaphoreWithJnksIotMsgQueue;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.kv.TsKvEntry;
-import com.jnks.iot.server.common.data.msg.TbMsgType;
-import com.jnks.iot.server.common.data.msg.TbNodeConnectionType;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
+import com.jnks.iot.server.common.data.msg.JnksIotNodeConnectionType;
 import com.jnks.iot.server.common.data.plugin.ComponentType;
-import com.jnks.iot.server.common.data.util.TbPair;
-import com.jnks.iot.server.common.msg.TbMsg;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -32,31 +32,31 @@ import java.util.Map;
 @RuleNode(type = ComponentType.ENRICHMENT,
         name = "calculate delta",
         version = 1,
-        relationTypes = {TbNodeConnectionType.SUCCESS, TbNodeConnectionType.FAILURE, TbNodeConnectionType.OTHER},
+        relationTypes = {JnksIotNodeConnectionType.SUCCESS, JnksIotNodeConnectionType.FAILURE, JnksIotNodeConnectionType.OTHER},
         configClazz = CalculateDeltaNodeConfiguration.class,
         nodeDescription = "Calculates delta and amount of time passed between previous timeseries key reading " +
                 "and current value for this key from the incoming message",
         nodeDetails = "Useful for metering use cases, when you need to calculate consumption based on pulse counter reading.<br><br>" +
                 "Output connections: <code>Success</code>, <code>Other</code> or <code>Failure</code>.",
-        configDirective = "tbEnrichmentNodeCalculateDeltaConfig")
-public class CalculateDeltaNode implements TbNode {
+        configDirective = "jnksIotEnrichmentNodeCalculateDeltaConfig")
+public class CalculateDeltaNode implements JnksIotNode {
 
     private Map<EntityId, ValueWithTs> cache;
-    private Map<EntityId, SemaphoreWithTbMsgQueue> locks;
+    private Map<EntityId, SemaphoreWithJnksIotMsgQueue> locks;
 
     private CalculateDeltaNodeConfiguration config;
 
     @Override
-    public void init(TbContext ctx, TbNodeConfiguration configuration) throws TbNodeException {
-        this.config = TbNodeUtils.convert(configuration, CalculateDeltaNodeConfiguration.class);
+    public void init(JnksIotContext ctx, JnksIotNodeConfiguration configuration) throws JnksIotNodeException {
+        this.config = JnksIotNodeUtils.convert(configuration, CalculateDeltaNodeConfiguration.class);
         if (StringUtils.isBlank(config.getInputValueKey())) {
-            throw new TbNodeException("Input value key should be specified!", true);
+            throw new JnksIotNodeException("Input value key should be specified!", true);
         }
         if (StringUtils.isBlank(config.getOutputValueKey())) {
-            throw new TbNodeException("Output value key should be specified!", true);
+            throw new JnksIotNodeException("Output value key should be specified!", true);
         }
         if (config.isAddPeriodBetweenMsgs() && StringUtils.isBlank(config.getPeriodValueKey())) {
-            throw new TbNodeException("Period value key should be specified!", true);
+            throw new JnksIotNodeException("Period value key should be specified!", true);
         }
         locks = new ConcurrentReferenceHashMap<>(16, ConcurrentReferenceHashMap.ReferenceType.WEAK);
         if (config.isUseCache()) {
@@ -65,17 +65,17 @@ public class CalculateDeltaNode implements TbNode {
     }
 
     @Override
-    public void onMsg(TbContext ctx, TbMsg msg) {
-        if (!msg.isTypeOf(TbMsgType.POST_TELEMETRY_REQUEST)) {
-            ctx.tellNext(msg, TbNodeConnectionType.OTHER);
+    public void onMsg(JnksIotContext ctx, JnksIotMsg msg) {
+        if (!msg.isTypeOf(JnksIotMsgType.POST_TELEMETRY_REQUEST)) {
+            ctx.tellNext(msg, JnksIotNodeConnectionType.OTHER);
             return;
         }
         JsonNode msgData = JacksonUtil.toJsonNode(msg.getData());
         if (msgData == null || !msgData.has(config.getInputValueKey())) {
-            ctx.tellNext(msg, TbNodeConnectionType.OTHER);
+            ctx.tellNext(msg, JnksIotNodeConnectionType.OTHER);
             return;
         }
-        locks.computeIfAbsent(msg.getOriginator(), SemaphoreWithTbMsgQueue::new)
+        locks.computeIfAbsent(msg.getOriginator(), SemaphoreWithJnksIotMsgQueue::new)
                 .addToQueueAndTryProcess(msg, ctx, this::processMsgAsync);
     }
 
@@ -88,7 +88,7 @@ public class CalculateDeltaNode implements TbNode {
     }
 
     @Override
-    public TbPair<Boolean, JsonNode> upgrade(int fromVersion, JsonNode oldConfiguration) throws TbNodeException {
+    public JnksIotPair<Boolean, JsonNode> upgrade(int fromVersion, JsonNode oldConfiguration) throws JnksIotNodeException {
         boolean hasChanges = false;
         switch (fromVersion) {
             case 0:
@@ -101,10 +101,10 @@ public class CalculateDeltaNode implements TbNode {
             default:
                 break;
         }
-        return new TbPair<>(hasChanges, oldConfiguration);
+        return new JnksIotPair<>(hasChanges, oldConfiguration);
     }
 
-    private ListenableFuture<ValueWithTs> fetchLatestValueAsync(TbContext ctx, EntityId entityId) {
+    private ListenableFuture<ValueWithTs> fetchLatestValueAsync(JnksIotContext ctx, EntityId entityId) {
         return Futures.transform(ctx.getTimeseriesService().findLatest(ctx.getTenantId(), entityId, config.getInputValueKey()),
                 tsKvEntryOpt -> tsKvEntryOpt.map(this::extractValue).orElse(null), MoreExecutors.directExecutor());
     }
@@ -132,7 +132,7 @@ public class CalculateDeltaNode implements TbNode {
         return new ValueWithTs(ts, result);
     }
 
-    protected ListenableFuture<TbMsg> processMsgAsync(TbContext ctx, TbMsg msg) {
+    protected ListenableFuture<JnksIotMsg> processMsgAsync(JnksIotContext ctx, JnksIotMsg msg) {
         ListenableFuture<ValueWithTs> latestValueFuture = getLatestFromCacheOrFetchFromDb(ctx, msg);
         return Futures.transform(latestValueFuture, previousData -> {
             ObjectNode json = (ObjectNode) JacksonUtil.toJsonNode(msg.getData());
@@ -165,7 +165,7 @@ public class CalculateDeltaNode implements TbNode {
         }, MoreExecutors.directExecutor());
     }
 
-    private ListenableFuture<ValueWithTs> getLatestFromCacheOrFetchFromDb(TbContext ctx, TbMsg msg) {
+    private ListenableFuture<ValueWithTs> getLatestFromCacheOrFetchFromDb(JnksIotContext ctx, JnksIotMsg msg) {
         EntityId originator = msg.getOriginator();
         if (config.isUseCache()) {
             ValueWithTs valueWithTs = cache.get(msg.getOriginator());

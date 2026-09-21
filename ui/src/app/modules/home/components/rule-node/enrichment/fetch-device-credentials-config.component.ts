@@ -5,7 +5,7 @@ import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/m
 import { FetchTo } from '@home/components/rule-node/rule-node-config.models';
 
 @Component({
-  selector: 'tb-enrichment-node-fetch-device-credentials-config',
+  selector: 'jnks-iot-enrichment-node-fetch-device-credentials-config',
   templateUrl: './fetch-device-credentials-config.component.html'
 })
 

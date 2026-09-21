@@ -13,7 +13,7 @@
     <mat-icon class="material-icons">close</mat-icon>
   </button>
   <mat-autocomplete
-    class="tb-autocomplete"
+    class="jnks-iot-autocomplete"
     #messageTypeAutocomplete="matAutocomplete"
     [displayWith]="displayMessageTypeFn">
     <mat-option *ngFor="let messageType of filteredMessageTypes | async" [value]="messageType">

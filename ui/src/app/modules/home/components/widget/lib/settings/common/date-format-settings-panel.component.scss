@@ -1,6 +1,6 @@
 @import '../../../../../../../../scss/constants';
 
-.tb-date-format-settings-panel {
+.jnks-iot-date-format-settings-panel {
   width: 500px;
   display: flex;
   flex-direction: column;
@@ -8,14 +8,14 @@
   @media #{$mat-xs} {
     width: 90vw;
   }
-  .tb-date-format-settings-title {
+  .jnks-iot-date-format-settings-title {
     font-size: 16px;
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
     color: rgba(0, 0, 0, 0.87);
   }
-  .tb-form-row {
+  .jnks-iot-form-row {
     .fixed-title-width {
       min-width: 120px;
     }
@@ -30,7 +30,7 @@
         color: rgba(0, 0, 0, 0.38);
       }
     }
-    .mat-mdc-form-field.tb-date-format-input {
+    .mat-mdc-form-field.jnks-iot-date-format-input {
       .mat-mdc-text-field-wrapper.mdc-text-field--outlined {
         .mat-mdc-form-field-flex {
           .mat-mdc-form-field-icon-suffix {
@@ -42,7 +42,7 @@
       }
     }
   }
-  .tb-date-format-settings-panel-buttons {
+  .jnks-iot-date-format-settings-panel-buttons {
     height: 60px;
     display: flex;
     flex-direction: row;

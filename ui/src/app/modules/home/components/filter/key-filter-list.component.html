@@ -9,8 +9,8 @@
       <div class="flex flex-row">
         <span class="max-w-8% flex-full"></span>
         <div class="flex max-w-92% flex-full flex-row items-center justify-start">
-          <label translate class="tb-title no-padding flex-1">filter.key-name</label>
-          <label translate class="tb-title no-padding flex-1">filter.key-type.key-type</label>
+          <label translate class="jnks-iot-title no-padding flex-1">filter.key-name</label>
+          <label translate class="jnks-iot-title no-padding flex-1">filter.key-type.key-type</label>
           <span [class.!hidden]="disabled" style="min-width: 80px;">&nbsp;</span>
           <span [class.!hidden]="!disabled" style="min-width: 40px;">&nbsp;</span>
         </div>
@@ -67,8 +67,8 @@
           <div translate>filter.preview</div>
         </mat-panel-title>
       </mat-expansion-panel-header>
-      <div class="tb-filter-preview">
-        <tb-filter-text [formControl]="keyFiltersControl"></tb-filter-text>
+      <div class="jnks-iot-filter-preview">
+        <jnks-iot-filter-text [formControl]="keyFiltersControl"></jnks-iot-filter-text>
       </div>
     </mat-expansion-panel>
   </mat-accordion>

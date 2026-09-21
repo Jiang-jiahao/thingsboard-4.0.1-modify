@@ -7,18 +7,18 @@
   min-height: 0;
 }
 
-.tb-protocol-template-bundles-page {
+.jnks-iot-protocol-template-bundles-page {
   height: 100%;
   box-sizing: border-box;
 
-  .tb-entity-table-content {
+  .jnks-iot-entity-table-content {
     width: 100%;
     height: 100%;
     min-height: 360px;
     background: #fff;
     overflow: hidden;
 
-    &.tb-outlined-border {
+    &.jnks-iot-outlined-border {
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
       border: solid 1px rgba(15, 23, 42, 0.08);
       border-radius: 14px;
@@ -29,7 +29,7 @@
       min-height: auto;
     }
 
-    .tb-entity-table-title {
+    .jnks-iot-entity-table-title {
       padding-right: 20px;
       white-space: nowrap;
       overflow: hidden;
@@ -38,7 +38,7 @@
       letter-spacing: 0.01em;
     }
 
-    .tb-entity-table-info {
+    .jnks-iot-entity-table-info {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -126,21 +126,21 @@
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: rgba($tb-secondary-color, 0.06);
+    background-color: rgba($jnks-iot-secondary-color, 0.06);
   }
 }
 
 @media #{$mat-xs} {
-  .tb-protocol-template-bundles-page .col-name {
+  .jnks-iot-protocol-template-bundles-page .col-name {
     max-width: none;
   }
 
-  .tb-protocol-template-bundles-page .col-desc {
+  .jnks-iot-protocol-template-bundles-page .col-desc {
     max-width: none;
   }
 }
 
-:host ::ng-deep .tb-protocol-bundle-cell-tooltip {
+:host ::ng-deep .jnks-iot-protocol-bundle-cell-tooltip {
   max-width: min(520px, 92vw);
   white-space: pre-wrap;
   word-break: break-word;

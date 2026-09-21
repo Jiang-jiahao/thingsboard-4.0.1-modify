@@ -6,7 +6,7 @@ import { Resource, ResourceInfo, ResourceType, ResourceTypeTranslationMap } from
 import { PageLink } from '@shared/models/page/page-link';
 
 @Component({
-  selector: 'tb-resources-table-header',
+  selector: 'jnks-iot-resources-table-header',
   templateUrl: './resources-table-header.component.html',
   styleUrls: []
 })

@@ -26,7 +26,7 @@ export interface OidMappingConfiguration {
 }
 
 @Component({
-  selector: 'tb-snmp-device-profile-transport-configuration',
+  selector: 'jnks-iot-snmp-device-profile-transport-configuration',
   templateUrl: './snmp-device-profile-transport-configuration.component.html',
   styleUrls: [],
   providers: [

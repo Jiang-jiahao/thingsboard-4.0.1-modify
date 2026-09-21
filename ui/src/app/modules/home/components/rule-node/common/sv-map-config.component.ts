@@ -20,7 +20,7 @@ import { OriginatorFieldsMappingValues, SvMapOption } from '../rule-node-config.
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-sv-map-config',
+  selector: 'jnks-iot-sv-map-config',
   templateUrl: './sv-map-config.component.html',
   styleUrls: ['./sv-map-config.component.scss'],
   providers: [

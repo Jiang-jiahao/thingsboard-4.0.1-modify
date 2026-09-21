@@ -4,21 +4,21 @@ import {
   GeoMapSettings,
   latLngPointToBounds,
   MapZoomAction,
-  TbCircleData,
-  TbPolygonCoordinate,
-  TbPolygonCoordinates,
-  TbPolygonRawCoordinate,
-  TbPolygonRawCoordinates
+  JnksIotCircleData,
+  JnksIotPolygonCoordinate,
+  JnksIotPolygonCoordinates,
+  JnksIotPolygonRawCoordinate,
+  JnksIotPolygonRawCoordinates
 } from '@shared/models/widget/maps/map.models';
 import { WidgetContext } from '@home/models/widget-component.models';
 import { DeepPartial } from '@shared/models/common';
 import { forkJoin, Observable, of } from 'rxjs';
 import L from 'leaflet';
 import { map, tap } from 'rxjs/operators';
-import { TbMapLayer } from '@home/components/widget/lib/maps/map-layer';
-import { TbMap } from '@home/components/widget/lib/maps/map';
+import { JnksIotMapLayer } from '@home/components/widget/lib/maps/map-layer';
+import { JnksIotMap } from '@home/components/widget/lib/maps/map';
 
-export class TbGeoMap extends TbMap<GeoMapSettings> {
+export class JnksIotGeoMap extends JnksIotMap<GeoMapSettings> {
 
   constructor(protected ctx: WidgetContext,
               protected inputSettings: DeepPartial<GeoMapSettings>,
@@ -85,7 +85,7 @@ export class TbGeoMap extends TbMap<GeoMapSettings> {
               layers,
               sidebar,
               position: this.settings.controlsPosition,
-              uiClass: 'tb-layers',
+              uiClass: 'jnks-iot-layers',
               paneTitle: this.ctx.translate.instant('widgets.maps.layer.map-layers'),
               buttonTitle: this.ctx.translate.instant('widgets.maps.layer.layers'),
             }).addTo(this.map);
@@ -97,7 +97,7 @@ export class TbGeoMap extends TbMap<GeoMapSettings> {
   }
 
   private loadLayers(): Observable<L.TB.LayerData[]> {
-    const layers = this.settings.layers.map(settings => TbMapLayer.fromSettings(this.ctx, settings));
+    const layers = this.settings.layers.map(settings => JnksIotMapLayer.fromSettings(this.ctx, settings));
     return forkJoin(layers.map(layer => layer.loadLayer(this.map))).pipe(
       map((layersData) => {
         return layersData.filter(l => l !== null);
@@ -117,23 +117,23 @@ export class TbGeoMap extends TbMap<GeoMapSettings> {
     }
   }
 
-  public polygonDataToCoordinates(expression: TbPolygonRawCoordinates): TbPolygonRawCoordinates {
-    return (expression).map((el: TbPolygonRawCoordinate) => {
+  public polygonDataToCoordinates(expression: JnksIotPolygonRawCoordinates): JnksIotPolygonRawCoordinates {
+    return (expression).map((el: JnksIotPolygonRawCoordinate) => {
       if (!Array.isArray(el[0]) && !Array.isArray(el[1]) && el.length === 2) {
         return el;
       } else if (Array.isArray(el) && el.length) {
-        return this.polygonDataToCoordinates(el as TbPolygonRawCoordinates) as TbPolygonRawCoordinate;
+        return this.polygonDataToCoordinates(el as JnksIotPolygonRawCoordinates) as JnksIotPolygonRawCoordinate;
       } else {
         return null;
       }
     }).filter(el => !!el);
   }
 
-  public coordinatesToPolygonData(coordinates: TbPolygonCoordinates): TbPolygonRawCoordinates {
+  public coordinatesToPolygonData(coordinates: JnksIotPolygonCoordinates): JnksIotPolygonRawCoordinates {
     if (coordinates.length) {
-      return coordinates.map((point: TbPolygonCoordinate) => {
+      return coordinates.map((point: JnksIotPolygonCoordinate) => {
         if (Array.isArray(point)) {
-          return this.coordinatesToPolygonData(point) as TbPolygonRawCoordinate;
+          return this.coordinatesToPolygonData(point) as JnksIotPolygonRawCoordinate;
         } else {
           const convertPoint = latLngPointToBounds(point, this.southWest, this.northEast);
           return [convertPoint.lat, convertPoint.lng];
@@ -143,15 +143,15 @@ export class TbGeoMap extends TbMap<GeoMapSettings> {
     return [];
   }
 
-  public circleDataToCoordinates(circle: TbCircleData): TbCircleData {
+  public circleDataToCoordinates(circle: JnksIotCircleData): JnksIotCircleData {
     const centerPoint = latLngPointToBounds(new L.LatLng(circle.latitude, circle.longitude), this.southWest, this.northEast);
     circle.latitude = centerPoint.lat;
     circle.longitude = centerPoint.lng;
     return circle;
   }
 
-  public coordinatesToCircleData(center: L.LatLng, radius: number): TbCircleData {
-    let circleData: TbCircleData = null;
+  public coordinatesToCircleData(center: L.LatLng, radius: number): JnksIotCircleData {
+    let circleData: JnksIotCircleData = null;
     if (center) {
       const position = latLngPointToBounds(center, this.southWest, this.northEast);
       circleData = {

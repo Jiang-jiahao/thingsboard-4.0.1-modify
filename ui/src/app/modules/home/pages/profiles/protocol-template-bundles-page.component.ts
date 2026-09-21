@@ -25,7 +25,7 @@ import { combineLatest, forkJoin } from 'rxjs';
 import { filter, switchMap, take } from 'rxjs/operators';
 
 @Component({
-  selector: 'tb-protocol-template-bundles-page',
+  selector: 'jnks-iot-protocol-template-bundles-page',
   templateUrl: './protocol-template-bundles-page.component.html',
   styleUrls: ['./protocol-template-bundles-page.component.scss']
 })
@@ -185,7 +185,7 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         maxHeight: '90vh',
         autoFocus: false,
         restoreFocus: false,
-        panelClass: ['tb-dialog', 'tb-protocol-template-hex-test-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-protocol-template-hex-test-dialog'],
         data: { bundles: this.bundles.slice() }
       }
     );
@@ -200,7 +200,7 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         maxHeight: '92vh',
         autoFocus: false,
         restoreFocus: false,
-        panelClass: ['tb-dialog', 'tb-protocol-template-bundle-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-protocol-template-bundle-dialog'],
         data: { bundle: null, isNew: true }
       }
     );
@@ -282,7 +282,7 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         maxHeight: '92vh',
         autoFocus: false,
         restoreFocus: false,
-        panelClass: ['tb-dialog', 'tb-protocol-template-bundle-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-protocol-template-bundle-dialog'],
         data: { bundle: payload as ProtocolTemplateBundle, isNew: true }
       }
     );
@@ -303,7 +303,7 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         maxHeight: '92vh',
         autoFocus: false,
         restoreFocus: false,
-        panelClass: ['tb-dialog', 'tb-protocol-template-bundle-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-protocol-template-bundle-dialog'],
         data: { bundle: { ...bundle }, isNew: false }
       }
     );

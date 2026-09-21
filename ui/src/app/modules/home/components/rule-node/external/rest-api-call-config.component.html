@@ -24,7 +24,7 @@
   <mat-checkbox formControlName="parseToPlainText">
     {{ 'rule-node-config.parse-to-plain-text' | translate }}
   </mat-checkbox>
-  <div class="tb-hint" style="padding-bottom: 5px;" translate>rule-node-config.parse-to-plain-text-hint</div>
+  <div class="jnks-iot-hint" style="padding-bottom: 5px;" translate>rule-node-config.parse-to-plain-text-hint</div>
   <mat-checkbox formControlName="ignoreRequestBody">
     {{ 'rule-node-config.ignore-request-body' | translate }}
   </mat-checkbox>
@@ -99,15 +99,15 @@
       {{ 'rule-node-config.memory-buffer-size-range' | translate: { max: MemoryBufferSizeInKbLimit } }}
     </mat-error>
   </mat-form-field>
-  <label translate class="tb-title">rule-node-config.headers</label>
-  <div class="tb-hint" [innerHTML]="'rule-node-config.headers-hint' | translate | safe: 'html'">  </div>
-  <tb-kv-map-config-old
+  <label translate class="jnks-iot-title">rule-node-config.headers</label>
+  <div class="jnks-iot-hint" [innerHTML]="'rule-node-config.headers-hint' | translate | safe: 'html'">  </div>
+  <jnks-iot-kv-map-config-old
     required="false"
     formControlName="headers"
     keyText="rule-node-config.header"
     keyRequiredText="rule-node-config.header-required"
     valText="rule-node-config.value"
     valRequiredText="rule-node-config.value-required">
-  </tb-kv-map-config-old>
-  <tb-credentials-config formControlName="credentials" [disableCertPemCredentials]="restApiCallConfigForm.get('useSimpleClientHttpFactory').value"></tb-credentials-config>
+  </jnks-iot-kv-map-config-old>
+  <jnks-iot-credentials-config formControlName="credentials" [disableCertPemCredentials]="restApiCallConfigForm.get('useSimpleClientHttpFactory').value"></jnks-iot-credentials-config>
 </section>

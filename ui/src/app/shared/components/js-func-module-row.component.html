@@ -1,16 +1,16 @@
-<div [formGroup]="moduleRowFormGroup" class="tb-form-table-row tb-js-func-module-row">
-  <mat-form-field class="tb-inline-field tb-alias-field" appearance="outline" subscriptSizing="dynamic">
+<div [formGroup]="moduleRowFormGroup" class="jnks-iot-form-table-row jnks-iot-js-func-module-row">
+  <mat-form-field class="jnks-iot-inline-field jnks-iot-alias-field" appearance="outline" subscriptSizing="dynamic">
     <input required matInput formControlName="alias" placeholder="{{ 'widget-config.set' | translate }}">
     <mat-icon matSuffix
               matTooltipPosition="above"
-              matTooltipClass="tb-error-tooltip"
+              matTooltipClass="jnks-iot-error-tooltip"
               [matTooltip]="'js-func.invalid-module-alias-name' | translate"
               *ngIf="moduleRowFormGroup.get('alias').invalid && moduleRowFormGroup.get('alias').touched"
-              class="tb-error">
+              class="jnks-iot-error">
       warning
     </mat-icon>
   </mat-form-field>
-  <tb-resource-autocomplete class="tb-module-link-field"
+  <jnks-iot-resource-autocomplete class="jnks-iot-module-link-field"
                             #resourceAutocomplete
                             formControlName="moduleLink"
                             inlineField
@@ -18,18 +18,18 @@
                             [subType]="ResourceSubType.MODULE"
                             [allowAutocomplete]="true"
                             placeholder="{{ 'widget-config.set' | translate }}">
-  </tb-resource-autocomplete>
-  <div class="tb-form-table-row-cell-buttons">
-    <div [tb-help-popup-async-content]="this.moduleRowFormGroup.get('moduleLink').value ? moduleDescription : null"
-         tb-help-popup-placement="top"
-         [tb-help-popup-style]="{marginTop: '8px'}"
+  </jnks-iot-resource-autocomplete>
+  <div class="jnks-iot-form-table-row-cell-buttons">
+    <div [jnks-iot-help-popup-async-content]="this.moduleRowFormGroup.get('moduleLink').value ? moduleDescription : null"
+         jnks-iot-help-popup-placement="top"
+         [jnks-iot-help-popup-style]="{marginTop: '8px'}"
          help-icon-button-class=""
          help-icon="info_outline"
          help-opened-icon="info"
          help-icon-tooltip="{{ 'js-func.show-module-info' | translate }}"></div>
-    <div [tb-help-popup-async-content]="this.moduleRowFormGroup.get('moduleLink').value ? moduleSourceCode : null"
-         tb-help-popup-placement="top"
-         [tb-help-popup-style]="{marginTop: '8px'}"
+    <div [jnks-iot-help-popup-async-content]="this.moduleRowFormGroup.get('moduleLink').value ? moduleSourceCode : null"
+         jnks-iot-help-popup-placement="top"
+         [jnks-iot-help-popup-style]="{marginTop: '8px'}"
          help-icon-button-class=""
          help-icon="mdi:application-brackets-outline"
          help-opened-icon="mdi:application-brackets"

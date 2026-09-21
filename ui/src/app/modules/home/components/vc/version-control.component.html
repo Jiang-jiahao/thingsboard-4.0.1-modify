@@ -1,16 +1,16 @@
-<tb-repository-settings #repositorySettingsComponent
+<jnks-iot-repository-settings #repositorySettingsComponent
                         [detailsMode]="detailsMode"
                         hideLoadingBar
                         [popoverComponent]="popoverComponent"
                         *ngIf="!(hasRepository$ | async); else versionsTable">
-</tb-repository-settings>
+</jnks-iot-repository-settings>
 <ng-template #versionsTable>
-  <tb-entity-versions-table [singleEntityMode]="singleEntityMode"
+  <jnks-iot-entity-versions-table [singleEntityMode]="singleEntityMode"
                             [popoverComponent]="popoverComponent"
                             [onBeforeCreateVersion]="onBeforeCreateVersion"
                             [active]="active"
                             [entityId]="entityId"
                             [entityName]="entityName"
                             [externalEntityId]="externalEntityId"
-                            (versionRestored)="versionRestored.emit()"></tb-entity-versions-table>
+                            (versionRestored)="versionRestored.emit()"></jnks-iot-entity-versions-table>
 </ng-template>

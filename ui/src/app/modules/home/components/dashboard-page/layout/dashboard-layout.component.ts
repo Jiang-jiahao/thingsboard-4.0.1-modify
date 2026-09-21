@@ -16,17 +16,17 @@ import { Hotkey } from 'angular2-hotkeys';
 import { TranslateService } from '@ngx-translate/core';
 import { ItemBufferService } from '@app/core/services/item-buffer.service';
 import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
-import { TbCheatSheetComponent } from '@shared/components/cheatsheet.component';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotCheatSheetComponent } from '@shared/components/cheatsheet.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { ImagePipe } from '@shared/pipe/image.pipe';
 import { map } from 'rxjs/operators';
 import { displayGrids } from 'angular-gridster2/lib/gridsterConfig.interface';
 import { BreakpointId, LayoutType, ViewFormatType } from '@shared/models/dashboard.models';
 import { isNotEmptyStr } from '@core/utils';
-import { TbContextMenuEvent } from '@shared/models/jquery-event.models';
+import { JnksIotContextMenuEvent } from '@shared/models/jquery-event.models';
 
 @Component({
-  selector: 'tb-dashboard-layout',
+  selector: 'jnks-iot-dashboard-layout',
   templateUrl: './dashboard-layout.component.html',
   styleUrls: ['./dashboard-layout.component.scss']
 })
@@ -38,7 +38,7 @@ export class DashboardLayoutComponent extends PageComponent implements ILayoutCo
 
   hotKeys: Hotkey[] = [];
 
-  @Input() dashboardCheatSheet: TbCheatSheetComponent;
+  @Input() dashboardCheatSheet: JnksIotCheatSheetComponent;
 
   @Input()
   set layoutCtx(val: DashboardPageLayoutContext) {
@@ -121,7 +121,7 @@ export class DashboardLayoutComponent extends PageComponent implements ILayoutCo
   parentDashboard?: IDashboardComponent = null;
 
   @Input()
-  popoverComponent?: TbPopoverComponent = null;
+  popoverComponent?: JnksIotPopoverComponent = null;
 
   @ViewChild('dashboard', {static: true}) dashboard: IDashboardComponent;
 
@@ -309,12 +309,12 @@ export class DashboardLayoutComponent extends PageComponent implements ILayoutCo
     this.layoutCtx.dashboardCtrl.copyWidgetReference($event, this.layoutCtx, widget);
   }
 
-  pasteWidget($event: TbContextMenuEvent | KeyboardEvent) {
+  pasteWidget($event: JnksIotContextMenuEvent | KeyboardEvent) {
     const pos = this.dashboard.getEventGridPosition($event);
     this.layoutCtx.dashboardCtrl.pasteWidget($event, this.layoutCtx, pos);
   }
 
-  pasteWidgetReference($event: TbContextMenuEvent | KeyboardEvent) {
+  pasteWidgetReference($event: JnksIotContextMenuEvent | KeyboardEvent) {
     const pos = this.dashboard.getEventGridPosition($event);
     this.layoutCtx.dashboardCtrl.pasteWidgetReference($event, this.layoutCtx, pos);
   }

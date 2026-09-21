@@ -17,7 +17,7 @@ import { AuthUser } from '@shared/models/user.model';
 import { getCurrentAuthUser } from '@core/auth/auth.selectors';
 
 @Component({
-  selector: 'tb-sms-provider',
+  selector: 'jnks-iot-sms-provider',
   templateUrl: './sms-provider.component.html',
   styleUrls: ['./sms-provider.component.scss', './settings-card.scss']
 })
@@ -74,7 +74,7 @@ export class SmsProviderComponent extends PageComponent implements HasConfirmFor
   sendTestSms(): void {
     this.dialog.open<SendTestSmsDialogComponent, SendTestSmsDialogData>(SendTestSmsDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         smsProviderConfiguration: this.smsProvider.value.configuration
       }

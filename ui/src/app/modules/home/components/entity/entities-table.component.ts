@@ -46,7 +46,7 @@ import { AddEntityDialogComponent } from './add-entity-dialog.component';
 import { AddEntityDialogData, EntityAction } from '@home/models/entity/entity-component.models';
 import { calculateIntervalStartEndTime, HistoryWindowType, Timewindow } from '@shared/models/time/time.models';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { TbAnchorComponent } from '@shared/components/tb-anchor.component';
+import { JnksIotAnchorComponent } from '@shared/components/jnks-iot-anchor.component';
 import { isDefined, isEqual, isNotEmptyStr, isUndefined } from '@core/utils';
 import { HasUUID } from '@shared/models/id/has-uuid';
 import { hidePageSizePixelValue } from '@shared/models/constants';
@@ -55,7 +55,7 @@ import { EntityDetailsPanelComponent } from '@home/components/entity/entity-deta
 import { FormBuilder } from '@angular/forms';
 
 @Component({
-  selector: 'tb-entities-table',
+  selector: 'jnks-iot-entities-table',
   templateUrl: './entities-table.component.html',
   styleUrls: ['./entities-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -100,7 +100,7 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
   isDetailsOpen = false;
   detailsPanelOpened = new EventEmitter<boolean>();
 
-  @ViewChild('entityTableHeader', {static: true}) entityTableHeaderAnchor: TbAnchorComponent;
+  @ViewChild('entityTableHeader', {static: true}) entityTableHeaderAnchor: JnksIotAnchorComponent;
 
   @ViewChild('searchInput') searchInputField: ElementRef;
 
@@ -529,7 +529,7 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
       entity$ = this.dialog.open<AddEntityDialogComponent, AddEntityDialogData<BaseData<HasId>>,
                                  BaseData<HasId>>(AddEntityDialogComponent, {
         disableClose: true,
-        panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+        panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
         data: {
           entitiesTableConfig: this.entitiesTableConfig
         }

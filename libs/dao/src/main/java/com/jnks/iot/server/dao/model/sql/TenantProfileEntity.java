@@ -34,7 +34,7 @@ public final class TenantProfileEntity extends BaseSqlEntity<TenantProfile> {
     private boolean isDefault;
 
     @Column(name = ModelConstants.TENANT_PROFILE_ISOLATED_TB_RULE_ENGINE)
-    private boolean isolatedTbRuleEngine;
+    private boolean isolatedJnksIotRuleEngine;
 
     @Convert(converter = JsonConverter.class)
     @JdbcType(PostgreSQLJsonPGObjectJsonbType.class)
@@ -53,7 +53,7 @@ public final class TenantProfileEntity extends BaseSqlEntity<TenantProfile> {
         this.name = tenantProfile.getName();
         this.description = tenantProfile.getDescription();
         this.isDefault = tenantProfile.isDefault();
-        this.isolatedTbRuleEngine = tenantProfile.isIsolatedTbRuleEngine();
+        this.isolatedJnksIotRuleEngine = tenantProfile.isIsolatedJnksIotRuleEngine();
         this.profileData = JacksonUtil.convertValue(tenantProfile.getProfileData(), ObjectNode.class);
     }
 
@@ -64,7 +64,7 @@ public final class TenantProfileEntity extends BaseSqlEntity<TenantProfile> {
         tenantProfile.setName(name);
         tenantProfile.setDescription(description);
         tenantProfile.setDefault(isDefault);
-        tenantProfile.setIsolatedTbRuleEngine(isolatedTbRuleEngine);
+        tenantProfile.setIsolatedJnksIotRuleEngine(isolatedJnksIotRuleEngine);
         tenantProfile.setProfileData(JacksonUtil.convertValue(profileData, TenantProfileData.class));
         return tenantProfile;
     }

@@ -4,7 +4,7 @@ import { filter } from 'rxjs/operators';
 import { HistorySelectSettings } from '@app/modules/home/components/widget/lib/maps-legacy/map-models';
 
 @Component({
-  selector: 'tb-history-selector',
+  selector: 'jnks-iot-history-selector',
   templateUrl: './history-selector.component.html',
   styleUrls: ['./history-selector.component.scss']
 })

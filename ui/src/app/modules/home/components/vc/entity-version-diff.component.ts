@@ -18,11 +18,11 @@ import { AppState } from '@core/core.state';
 import { EntitiesVersionControlService } from '@core/http/entities-version-control.service';
 import { EntityId } from '@shared/models/id/entity-id';
 import { getAceDiff } from '@shared/models/ace/ace.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { entityExportDataToJsonString, VersionLoadResult } from '@shared/models/vc.models';
 import { Ace } from 'ace-builds';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { EntityVersionRestoreComponent } from '@home/components/vc/entity-version-restore.component';
 
 interface DiffInfo {
@@ -33,7 +33,7 @@ interface DiffInfo {
 }
 
 @Component({
-  selector: 'tb-entity-version-diff',
+  selector: 'jnks-iot-entity-version-diff',
   templateUrl: './entity-version-diff.component.html',
   styleUrls: ['./entity-version-diff.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -62,7 +62,7 @@ export class EntityVersionDiffComponent extends PageComponent implements OnInit,
   onClose: () => void;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   differ: AceDiff;
 
@@ -83,7 +83,7 @@ export class EntityVersionDiffComponent extends PageComponent implements OnInit,
               private renderer: Renderer2,
               private elementRef: ElementRef,
               private viewContainerRef: ViewContainerRef,
-              private popoverService: TbPopoverService) {
+              private popoverService: JnksIotPopoverService) {
     super(store);
   }
 
@@ -309,7 +309,7 @@ export class EntityVersionDiffComponent extends PageComponent implements OnInit,
         showCloseButton: false,
         isModal: true
       });
-      restoreVersionPopover.tbComponentRef.instance.popoverComponent = restoreVersionPopover;
+      restoreVersionPopover.jnksIotComponentRef.instance.popoverComponent = restoreVersionPopover;
     }
   }
 }

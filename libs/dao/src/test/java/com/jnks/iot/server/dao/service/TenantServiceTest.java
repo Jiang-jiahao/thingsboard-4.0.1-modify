@@ -7,7 +7,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import com.jnks.iot.common.util.JacksonUtil;
-import com.jnks.iot.server.cache.TbTransactionalCache;
+import com.jnks.iot.server.cache.JnksIotTransactionalCache;
 import com.jnks.iot.server.common.data.Customer;
 import com.jnks.iot.server.common.data.Dashboard;
 import com.jnks.iot.server.common.data.DashboardInfo;
@@ -20,9 +20,9 @@ import com.jnks.iot.server.common.data.OtaPackage;
 import com.jnks.iot.server.common.data.OtaPackageInfo;
 import com.jnks.iot.server.common.data.ResourceType;
 import com.jnks.iot.server.common.data.StringUtils;
-import com.jnks.iot.server.common.data.TbResource;
-import com.jnks.iot.server.common.data.TbResourceInfo;
-import com.jnks.iot.server.common.data.TbResourceInfoFilter;
+import com.jnks.iot.server.common.data.JnksIotResource;
+import com.jnks.iot.server.common.data.JnksIotResourceInfo;
+import com.jnks.iot.server.common.data.JnksIotResourceInfoFilter;
 import com.jnks.iot.server.common.data.Tenant;
 import com.jnks.iot.server.common.data.TenantInfo;
 import com.jnks.iot.server.common.data.TenantProfile;
@@ -96,9 +96,9 @@ public class TenantServiceTest extends AbstractServiceTest {
     @Autowired
     RuleChainService ruleChainService;
     @Autowired
-    TbTransactionalCache<TenantId, Boolean> existsTenantCache;
+    JnksIotTransactionalCache<TenantId, Boolean> existsTenantCache;
     @Autowired
-    TbTransactionalCache<TenantId, Tenant> cache;
+    JnksIotTransactionalCache<TenantId, Tenant> cache;
     @Autowired
     TenantProfileService tenantProfileService;
     @Autowired
@@ -450,7 +450,7 @@ public class TenantServiceTest extends AbstractServiceTest {
         Dashboard dashboard = createAndSaveDashboardFor(tenant, customer);
         RuleChain ruleChain = createAndSaveRuleChainFor(tenant);
         OtaPackage otaPackage = createAndSaveOtaPackageFor(tenant, deviceProfile);
-        TbResource resource = createAndSaveResourceFor(tenant);
+        JnksIotResource resource = createAndSaveResourceFor(tenant);
         Rpc rpc = createAndSaveRpcFor(tenant, device);
 
         tenantService.deleteTenant(tenant.getId());
@@ -482,14 +482,14 @@ public class TenantServiceTest extends AbstractServiceTest {
         Assert.assertEquals(0, pageDataOta.getTotalElements());
     }
 
-    private void assertResourceIsDeleted(Tenant tenant, TbResource resource) {
+    private void assertResourceIsDeleted(Tenant tenant, JnksIotResource resource) {
         assertThat(resourceService.findResourceById(tenant.getId(), resource.getId()))
                 .as("resource").isNull();
         PageLink pageLinkResources = new PageLink(1);
-        TbResourceInfoFilter filter = TbResourceInfoFilter.builder()
+        JnksIotResourceInfoFilter filter = JnksIotResourceInfoFilter.builder()
                 .tenantId(tenantId)
                 .build();
-        PageData<TbResourceInfo> tenantResources =
+        PageData<JnksIotResourceInfo> tenantResources =
                 resourceService.findAllTenantResourcesByTenantId(filter, pageLinkResources);
         Assert.assertEquals(0, tenantResources.getTotalElements());
     }
@@ -580,8 +580,8 @@ public class TenantServiceTest extends AbstractServiceTest {
         return rpcService.save(rpc);
     }
 
-    private TbResource createAndSaveResourceFor(Tenant tenant) {
-        TbResource resource = new TbResource();
+    private JnksIotResource createAndSaveResourceFor(Tenant tenant) {
+        JnksIotResource resource = new JnksIotResource();
         resource.setTenantId(tenant.getId());
         resource.setTitle("Test resource");
         resource.setResourceType(ResourceType.LWM2M_MODEL);

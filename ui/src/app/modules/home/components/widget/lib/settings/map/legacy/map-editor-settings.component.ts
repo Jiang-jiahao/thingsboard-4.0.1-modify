@@ -17,7 +17,7 @@ import { WidgetService } from '@core/http/widget.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-map-editor-settings',
+  selector: 'jnks-iot-map-editor-settings',
   templateUrl: './map-editor-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

@@ -55,7 +55,7 @@ export class JsLibraryTableConfigResolver  {
               private router: Router,
               private datePipe: DatePipe) {
 
-    this.config.entityType = EntityType.TB_RESOURCE;
+    this.config.entityType = EntityType.JNKS_IOT_RESOURCE;
     this.config.entityComponent = JsResourceComponent;
     this.config.entityTabsComponent = ResourceTabsComponent;
     this.config.entityTranslations = {
@@ -65,7 +65,7 @@ export class JsLibraryTableConfigResolver  {
       search: 'javascript.search',
       selectedEntities: 'javascript.selected-javascript-resources'
     };
-    this.config.entityResources = entityTypeResources.get(EntityType.TB_RESOURCE);
+    this.config.entityResources = entityTypeResources.get(EntityType.JNKS_IOT_RESOURCE);
     this.config.headerComponent = JsLibraryTableHeaderComponent;
 
     this.config.entityTitle = (resource) => resource ?
@@ -206,7 +206,7 @@ export class JsLibraryTableConfigResolver  {
               this.dialog.open<ResourcesInUseDialogComponent, ResourcesInUseDialogData,
                 ResourceInfo[]>(ResourcesInUseDialogComponent, {
                  disableClose: true,
-                  panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+                  panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
                   data
               }).afterClosed().subscribe((resources) => {
                 if (resources) {
@@ -274,7 +274,7 @@ export class JsLibraryTableConfigResolver  {
                 this.dialog.open<ResourcesInUseDialogComponent, ResourcesInUseDialogData,
                   ResourceInfo[]>(ResourcesInUseDialogComponent, {
                     disableClose: true,
-                    panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+                    panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
                     data
                 }).afterClosed().subscribe((forceDeleteResources) => {
                   if (forceDeleteResources && forceDeleteResources.length) {

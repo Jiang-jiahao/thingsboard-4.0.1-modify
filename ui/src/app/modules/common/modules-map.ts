@@ -61,9 +61,9 @@ import * as MatDateTimePicker from '@mat-datetimepicker/core';
 import _moment from 'moment';
 import * as tslib from 'tslib';
 
-import * as TbCore from '@core/public-api';
-import * as TbShared from '@shared/public-api';
-import * as TbHomeComponents from '@home/components/public-api';
+import * as JnksIotCore from '@core/public-api';
+import * as JnksIotShared from '@shared/public-api';
+import * as JnksIotHomeComponents from '@home/components/public-api';
 
 import * as DateAgoPipe from '@shared/pipe/date-ago.pipe';
 import * as EnumToArrayPipe from '@shared/pipe/enum-to-array.pipe';
@@ -75,7 +75,7 @@ import * as NospacePipe from '@shared/pipe/nospace.pipe';
 import * as SafePipe from '@shared/pipe/safe.pipe';
 import * as SelectableColumnsPipe from '@shared/pipe/selectable-columns.pipe';
 import * as ShortNumberPipe from '@shared/pipe/short-number.pipe';
-import * as TbJsonPipe from '@shared/pipe/tbJson.pipe';
+import * as JnksIotJsonPipe from '@shared/pipe/jnksIotJson.pipe';
 import * as TruncatePipe from '@shared/pipe/truncate.pipe';
 import * as ImagePipe from '@shared/pipe/image.pipe';
 
@@ -90,19 +90,19 @@ import * as LogoComponent from '@shared/components/logo.component';
 import * as FooterFabButtonsComponent from '@shared/components/footer-fab-buttons.component';
 import * as FullscreenDirective from '@shared/components/fullscreen.directive';
 import * as CircularProgressDirective from '@shared/components/circular-progress.directive';
-import * as TbHotkeysDirective from '@shared/components/hotkeys.directive';
-import * as TbAnchorComponent from '@shared/components/tb-anchor.component';
-import * as TbPopoverComponent from '@shared/components/popover.component';
-import * as TbStringTemplateOutletDirective from '@shared/components/directives/sring-template-outlet.directive';
-import * as TbComponentOutletDirective from '@shared/components/directives/component-outlet.directive';
-import * as TbMarkdownComponent from '@shared/components/markdown.component';
+import * as JnksIotHotkeysDirective from '@shared/components/hotkeys.directive';
+import * as JnksIotAnchorComponent from '@shared/components/jnks-iot-anchor.component';
+import * as JnksIotPopoverComponent from '@shared/components/popover.component';
+import * as JnksIotStringTemplateOutletDirective from '@shared/components/directives/sring-template-outlet.directive';
+import * as JnksIotComponentOutletDirective from '@shared/components/directives/component-outlet.directive';
+import * as JnksIotMarkdownComponent from '@shared/components/markdown.component';
 import * as HelpComponent from '@shared/components/help.component';
 import * as HelpMarkdownComponent from '@shared/components/help-markdown.component';
 import * as HelpPopupComponent from '@shared/components/help-popup.component';
-import * as TbCheckboxComponent from '@shared/components/tb-checkbox.component';
-import * as TbToast from '@shared/components/toast.directive';
-import * as TbErrorComponent from '@shared/components/tb-error.component';
-import * as TbCheatSheetComponent from '@shared/components/cheatsheet.component';
+import * as JnksIotCheckboxComponent from '@shared/components/jnks-iot-checkbox.component';
+import * as JnksIotToast from '@shared/components/toast.directive';
+import * as JnksIotErrorComponent from '@shared/components/jnks-iot-error.component';
+import * as JnksIotCheatSheetComponent from '@shared/components/cheatsheet.component';
 import * as BreadcrumbComponent from '@shared/components/breadcrumb.component';
 import * as UserMenuComponent from '@shared/components/user-menu.component';
 import * as TimewindowComponent from '@shared/components/time/timewindow.component';
@@ -133,7 +133,7 @@ import * as JsonObjectEditComponent from '@shared/components/json-object-edit.co
 import * as JsonObjectViewComponent from '@shared/components/json-object-view.component';
 import * as JsonContentComponent from '@shared/components/json-content.component';
 import * as JsFuncComponent from '@shared/components/js-func.component';
-import * as TbScriptLangComponent from '@shared/components/script-lang.component';
+import * as JnksIotScriptLangComponent from '@shared/components/script-lang.component';
 import * as FabToolbarComponent from '@shared/components/fab-toolbar.component';
 import * as WidgetsBundleSelectComponent from '@shared/components/widgets-bundle-select.component';
 import * as ConfirmDialogComponent from '@shared/components/dialog/confirm-dialog.component';
@@ -153,7 +153,7 @@ import * as KeyValMapComponent from '@shared/components/kv-map.component';
 import * as MultipleImageInputComponent from '@shared/components/multiple-image-input.component';
 import * as NavTreeComponent from '@shared/components/nav-tree.component';
 import * as LedLightComponent from '@shared/components/led-light.component';
-import * as TbJsonToStringDirective from '@shared/components/directives/tb-json-to-string.directive';
+import * as JnksIotJsonToStringDirective from '@shared/components/directives/jnks-iot-json-to-string.directive';
 import * as JsonObjectEditDialogComponent from '@shared/components/dialog/json-object-edit-dialog.component';
 import * as HistorySelectorComponent from '@shared/components/time/history-selector/history-selector.component';
 import * as EntityGatewaySelectComponent from '@shared/components/entity/entity-gateway-select.component';
@@ -169,12 +169,12 @@ import * as ToggleHeaderComponent from '@shared/components/toggle-header.compone
 import * as ToggleSelectComponent from '@shared/components/toggle-select.component';
 import * as UnitInputComponent from '@shared/components/unit-input.component';
 import * as MaterialIconsComponent from '@shared/components/material-icons.component';
-import * as TbIconComponent from '@shared/components/icon.component';
+import * as JnksIotIconComponent from '@shared/components/icon.component';
 import * as HintTooltipIconComponent from '@shared/components/hint-tooltip-icon.component';
 import * as ScrollGridComponent from '@shared/components/grid/scroll-grid.component';
 import * as GalleryImageInputComponent from '@shared/components/image/gallery-image-input.component';
 import * as MultipleGalleryImageInputComponent from '@shared/components/image/multiple-gallery-image-input.component';
-import * as TbPopoverService from '@shared/components/popover.service';
+import * as JnksIotPopoverService from '@shared/components/popover.service';
 
 
 import * as CssUnitSelectComponent from '@home/components/widget/lib/settings/common/css-unit-select.component';
@@ -388,9 +388,9 @@ class ModulesMap implements IModulesMap {
     moment: _moment,
     tslib,
 
-    '@core/public-api': TbCore,
-    '@shared/public-api': TbShared,
-    '@home/components/public-api': TbHomeComponents,
+    '@core/public-api': JnksIotCore,
+    '@shared/public-api': JnksIotShared,
+    '@home/components/public-api': JnksIotHomeComponents,
 
     '@shared/pipe/date-ago.pipe': DateAgoPipe,
     '@shared/pipe/enum-to-array.pipe': EnumToArrayPipe,
@@ -402,7 +402,7 @@ class ModulesMap implements IModulesMap {
     '@shared/pipe/safe.pipe': SafePipe,
     '@shared/pipe/selectable-columns.pipe': SelectableColumnsPipe,
     '@shared/pipe/short-number.pipe': ShortNumberPipe,
-    '@shared/pipe/tbJson.pipe': TbJsonPipe,
+    '@shared/pipe/jnksIotJson.pipe': JnksIotJsonPipe,
     '@shared/pipe/truncate.pipe': TruncatePipe,
     '@shared/pipe/image.pipe': ImagePipe,
 
@@ -422,19 +422,19 @@ class ModulesMap implements IModulesMap {
     '@shared/components/footer-fab-buttons.component': FooterFabButtonsComponent,
     '@shared/components/fullscreen.directive': FullscreenDirective,
     '@shared/components/circular-progress.directive': CircularProgressDirective,
-    '@shared/components/hotkeys.directive': TbHotkeysDirective,
-    '@shared/components/tb-anchor.component': TbAnchorComponent,
-    '@shared/components/popover.component': TbPopoverComponent,
-    '@shared/components/directives/sring-template-outlet.directive': TbStringTemplateOutletDirective,
-    '@shared/components/directives/component-outlet.directive': TbComponentOutletDirective,
-    '@shared/components/markdown.component': TbMarkdownComponent,
+    '@shared/components/hotkeys.directive': JnksIotHotkeysDirective,
+    '@shared/components/jnks-iot-anchor.component': JnksIotAnchorComponent,
+    '@shared/components/popover.component': JnksIotPopoverComponent,
+    '@shared/components/directives/sring-template-outlet.directive': JnksIotStringTemplateOutletDirective,
+    '@shared/components/directives/component-outlet.directive': JnksIotComponentOutletDirective,
+    '@shared/components/markdown.component': JnksIotMarkdownComponent,
     '@shared/components/help.component': HelpComponent,
     '@shared/components/help-markdown.component': HelpMarkdownComponent,
     '@shared/components/help-popup.component': HelpPopupComponent,
-    '@shared/components/tb-checkbox.component': TbCheckboxComponent,
-    '@shared/components/toast.directive': TbToast,
-    '@shared/components/tb-error.component': TbErrorComponent,
-    '@shared/components/cheatsheet.component': TbCheatSheetComponent,
+    '@shared/components/jnks-iot-checkbox.component': JnksIotCheckboxComponent,
+    '@shared/components/toast.directive': JnksIotToast,
+    '@shared/components/jnks-iot-error.component': JnksIotErrorComponent,
+    '@shared/components/cheatsheet.component': JnksIotCheatSheetComponent,
     '@shared/components/breadcrumb.component': BreadcrumbComponent,
     '@shared/components/user-menu.component': UserMenuComponent,
     '@shared/components/time/timewindow.component': TimewindowComponent,
@@ -472,7 +472,7 @@ class ModulesMap implements IModulesMap {
     '@shared/components/json-object-view.component': JsonObjectViewComponent,
     '@shared/components/json-content.component': JsonContentComponent,
     '@shared/components/js-func.component': JsFuncComponent,
-    '@shared/components/script-lang.component': TbScriptLangComponent,
+    '@shared/components/script-lang.component': JnksIotScriptLangComponent,
     '@shared/components/fab-toolbar.component': FabToolbarComponent,
     '@shared/components/widgets-bundle-select.component': WidgetsBundleSelectComponent,
     '@shared/components/dialog/confirm-dialog.component': ConfirmDialogComponent,
@@ -492,7 +492,7 @@ class ModulesMap implements IModulesMap {
     '@shared/components/multiple-image-input.component': MultipleImageInputComponent,
     '@shared/components/nav-tree.component': NavTreeComponent,
     '@shared/components/led-light.component': LedLightComponent,
-    '@shared/components/directives/tb-json-to-string.directive': TbJsonToStringDirective,
+    '@shared/components/directives/jnks-iot-json-to-string.directive': JnksIotJsonToStringDirective,
     '@shared/components/dialog/json-object-edit-dialog.component': JsonObjectEditDialogComponent,
     '@shared/components/time/history-selector/history-selector.component': HistorySelectorComponent,
     '@shared/components/entity/entity-gateway-select.component': EntityGatewaySelectComponent,
@@ -508,12 +508,12 @@ class ModulesMap implements IModulesMap {
     '@shared/components/toggle-select.component': ToggleSelectComponent,
     '@shared/components/unit-input.component': UnitInputComponent,
     '@shared/components/material-icons.component': MaterialIconsComponent,
-    '@shared/components/icon.component': TbIconComponent,
+    '@shared/components/icon.component': JnksIotIconComponent,
     '@shared/components/hint-tooltip-icon.component': HintTooltipIconComponent,
     '@shared/components/grid/scroll-grid.component': ScrollGridComponent,
     '@shared/components/image/gallery-image-input.component': GalleryImageInputComponent,
     '@shared/components/image/multiple-gallery-image-input.component': MultipleGalleryImageInputComponent,
-    '@shared/components/popover.service': TbPopoverService,
+    '@shared/components/popover.service': JnksIotPopoverService,
 
 
     '@home/components/alarm/alarm-filter-config.component': AlarmFilterConfigComponent,

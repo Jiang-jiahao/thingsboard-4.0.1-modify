@@ -16,7 +16,7 @@ export interface ColorPickerDialogResult {
 }
 
 @Component({
-  selector: 'tb-color-picker-dialog',
+  selector: 'jnks-iot-color-picker-dialog',
   templateUrl: './color-picker-dialog.component.html',
   styleUrls: ['./color-picker-dialog.component.scss']
 })

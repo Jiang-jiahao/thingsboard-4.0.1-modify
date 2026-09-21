@@ -3,8 +3,8 @@
     <mat-icon *ngIf="icon">{{icon}}</mat-icon>
     <span *ngIf="label">{{label}}</span>
   </mat-label>
-  <div matPrefix class="tb-color-preview" (click)="!disabled && showColorPicker($event)">
-    <div class="tb-color-result" [style.background]="colorFormGroup.get('color').value"></div>
+  <div matPrefix class="jnks-iot-color-preview" (click)="!disabled && showColorPicker($event)">
+    <div class="jnks-iot-color-result" [style.background]="colorFormGroup.get('color').value"></div>
   </div>
   <input matInput formControlName="color" (keydown)="$event.preventDefault();" (click)="openOnInput && showColorPicker($event)" [required]="required">
   <button *ngIf="colorClearButton && !disabled"
@@ -20,13 +20,13 @@
 <ng-template #boxInput>
   <button type="button"
           mat-stroked-button
-          class="tb-box-button"
+          class="jnks-iot-box-button"
           [class.button-no-border]="noBorder"
           [disabled]="disabled"
           #matButton
           (click)="openColorPickerPopup($event, matButton._elementRef)">
-    <div class="tb-color-preview no-margin box" [class.disabled]="disabled">
-      <div class="tb-color-result" [style]="!disabled ? {background: colorFormGroup.get('color').value} : {}"></div>
+    <div class="jnks-iot-color-preview no-margin box" [class.disabled]="disabled">
+      <div class="jnks-iot-color-result" [style]="!disabled ? {background: colorFormGroup.get('color').value} : {}"></div>
     </div>
   </button>
 </ng-template>

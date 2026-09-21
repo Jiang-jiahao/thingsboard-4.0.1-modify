@@ -5,7 +5,7 @@ import { EntitySearchDirection } from '@app/shared/models/relation.models';
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@app/shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-action-node-delete-relation-config',
+  selector: 'jnks-iot-action-node-delete-relation-config',
   templateUrl: './delete-relation-config.component.html',
   styleUrls: []
 })

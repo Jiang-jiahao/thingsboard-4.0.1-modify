@@ -33,7 +33,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-device-key-autocomplete',
+  selector: 'jnks-iot-device-key-autocomplete',
   templateUrl: './device-key-autocomplete.component.html',
   styleUrls: [],
   providers: [

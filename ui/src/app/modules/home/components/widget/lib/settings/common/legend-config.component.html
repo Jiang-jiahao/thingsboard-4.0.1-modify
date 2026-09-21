@@ -1,5 +1,5 @@
 <ng-container [formGroup]="legendConfigForm">
-  <div *ngIf="!hideDirection" class="tb-form-row space-between">
+  <div *ngIf="!hideDirection" class="jnks-iot-form-row space-between">
     <div>{{ 'legend.direction' | translate }}</div>
     <mat-form-field class="medium-width" appearance="outline" subscriptSizing="dynamic">
       <mat-select formControlName="direction">
@@ -9,7 +9,7 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div class="tb-form-row space-between">
+  <div class="jnks-iot-form-row space-between">
     <div>{{ 'legend.position' | translate }}</div>
     <mat-form-field class="medium-width" appearance="outline" subscriptSizing="dynamic">
       <mat-select formControlName="position">
@@ -22,7 +22,7 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div class="tb-form-row space-between column-lt-md">
+  <div class="jnks-iot-form-row space-between column-lt-md">
     <div translate>legend.show-values</div>
     <mat-chip-listbox multiple formControlName="showValues">
       <mat-chip-option value="min">{{ 'legend.min-option' | translate }}</mat-chip-option>

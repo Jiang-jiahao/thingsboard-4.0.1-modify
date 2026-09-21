@@ -10,7 +10,7 @@ import org.eclipse.leshan.server.registration.Registration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import com.jnks.iot.server.common.data.TbResource;
+import com.jnks.iot.server.common.data.JnksIotResource;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClient;
 import com.jnks.iot.server.transport.lwm2m.server.client.LwM2mClientContext;
@@ -82,7 +82,7 @@ public class LwM2mVersionedModelProvider implements LwM2mModelProvider {
                 if (objectModel != null)
                     return objectModel.resources.get(resourceId);
                 else
-                    log.trace("Tenant hasn't such the TbResources: Object model with id [{}/0/{}].", objectId, resourceId);
+                    log.trace("Tenant hasn't such the JnksIotResources: Object model with id [{}/0/{}].", objectId, resourceId);
                 return null;
             } catch (Exception e) {
                 log.error("", e);
@@ -138,8 +138,8 @@ public class LwM2mVersionedModelProvider implements LwM2mModelProvider {
         }
 
         private ObjectModel getObjectModel(String key) {
-            Optional<TbResource> tbResource = context.getTransportResourceCache().get(this.tenantId, LWM2M_MODEL, key);
-            return tbResource.map(resource -> helper.parseFromXmlToObjectModel(resource.getData(),
+            Optional<JnksIotResource> jnksIotResource = context.getTransportResourceCache().get(this.tenantId, LWM2M_MODEL, key);
+            return jnksIotResource.map(resource -> helper.parseFromXmlToObjectModel(resource.getData(),
                     key + ".xml")).orElse(null);
         }
     }

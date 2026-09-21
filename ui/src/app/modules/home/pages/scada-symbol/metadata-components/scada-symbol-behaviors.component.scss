@@ -1,17 +1,17 @@
-.tb-scada-symbol-behaviors {
+.jnks-iot-scada-symbol-behaviors {
   flex: 1;
   margin: 12px;
-  .tb-form-table-header-cell {
-    &.tb-id-header {
+  .jnks-iot-form-table-header-cell {
+    &.jnks-iot-id-header {
       flex: 1 1 40%;
     }
-    &.tb-name-header {
+    &.jnks-iot-name-header {
       flex: 1 1 40%;
     }
-    &.tb-type-header {
+    &.jnks-iot-type-header {
       flex: 1 1 20%;
     }
-    &.tb-actions-header {
+    &.jnks-iot-actions-header {
       width: 120px;
       min-width: 120px;
       &.disabled {
@@ -20,12 +20,12 @@
       }
     }
   }
-  .tb-form-table {
+  .jnks-iot-form-table {
     overflow: hidden;
   }
-  .tb-form-table-body {
+  .jnks-iot-form-table-body {
     overflow: auto;
-    tb-scada-symbol-metadata-behavior-row {
+    jnks-iot-scada-symbol-metadata-behavior-row {
       overflow: hidden;
     }
   }

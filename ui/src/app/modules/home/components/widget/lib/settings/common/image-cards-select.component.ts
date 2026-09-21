@@ -35,7 +35,7 @@ export interface ImageCardsColumns {
 @Directive(
   {
     // eslint-disable-next-line @angular-eslint/directive-selector
-    selector: 'tb-image-cards-select-option',
+    selector: 'jnks-iot-image-cards-select-option',
   }
 )
 export class ImageCardsSelectOptionDirective {
@@ -54,7 +54,7 @@ export class ImageCardsSelectOptionDirective {
 }
 
 @Component({
-  selector: 'tb-image-cards-select',
+  selector: 'jnks-iot-image-cards-select',
   templateUrl: './image-cards-select.component.html',
   styleUrls: ['./image-cards-select.component.scss'],
   providers: [

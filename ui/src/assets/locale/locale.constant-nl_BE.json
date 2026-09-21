@@ -4375,7 +4375,7 @@
                 "WHITE_LABELING": "White labelling",
                 "AUDIT_LOG": "Controle logboek",
                 "API_USAGE_STATE": "Status API-gebruik",
-                "TB_RESOURCE": "Hulpbron",
+                "JNKS_IOT_RESOURCE": "Hulpbron",
                 "OTA_PACKAGE": "Ota-pakket",
                 "QUEUE": "Rij",
                 "VERSION_CONTROL": "Versiebeheer",

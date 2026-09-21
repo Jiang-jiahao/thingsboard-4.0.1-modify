@@ -52,10 +52,10 @@ import { firstValueFrom, from, Observable, of, ReplaySubject, Subject, Subscript
 import { EntityId } from '@shared/models/id/entity-id';
 import { TelemetryWebsocketService } from '@core/ws/telemetry-websocket.service';
 import {
-  CompiledTbFunction,
-  compileTbFunction,
-  isNotEmptyTbFunction,
-  TbFunction
+  CompiledJnksIotFunction,
+  compileJnksIotFunction,
+  isNotEmptyJnksIotFunction,
+  JnksIotFunction
 } from '@shared/models/js-function.models';
 import { HttpClient } from '@angular/common/http';
 import Timeout = NodeJS.Timeout;
@@ -74,10 +74,10 @@ export interface SubscriptionDataKey {
   timeForComparison?: ComparisonDuration;
   comparisonCustomIntervalValue?: number;
   comparisonResultType?: ComparisonResultType;
-  funcBody: TbFunction;
-  func?: CompiledTbFunction<DataKeyFunction>;
-  postFuncBody: TbFunction;
-  postFunc?: CompiledTbFunction<DataKeyPostFunction>;
+  funcBody: JnksIotFunction;
+  func?: CompiledJnksIotFunction<DataKeyFunction>;
+  postFuncBody: JnksIotFunction;
+  postFunc?: CompiledJnksIotFunction<DataKeyPostFunction>;
   index?: number;
   listIndex?: number;
   key?: string;
@@ -196,12 +196,12 @@ export class EntityDataSubscription {
       dataKey.index = i;
       if (this.datasourceType === DatasourceType.function) {
         if (!dataKey.func) {
-          dataKey.func = await firstValueFrom(compileTbFunction(this.http, dataKey.funcBody, 'time', 'prevValue'));
+          dataKey.func = await firstValueFrom(compileJnksIotFunction(this.http, dataKey.funcBody, 'time', 'prevValue'));
         }
       } else {
-        if (isNotEmptyTbFunction(dataKey.postFuncBody) && !dataKey.postFunc) {
+        if (isNotEmptyJnksIotFunction(dataKey.postFuncBody) && !dataKey.postFunc) {
           try {
-            dataKey.postFunc = await firstValueFrom(compileTbFunction(this.http, dataKey.postFuncBody, 'time', 'value', 'prevValue', 'timePrev', 'prevOrigValue'));
+            dataKey.postFunc = await firstValueFrom(compileJnksIotFunction(this.http, dataKey.postFuncBody, 'time', 'value', 'prevValue', 'timePrev', 'prevOrigValue'));
           } catch (e) {/**/}
         }
       }

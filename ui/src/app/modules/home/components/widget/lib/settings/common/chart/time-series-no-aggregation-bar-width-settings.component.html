@@ -1,11 +1,11 @@
-<div class="tb-form-panel" [class.stroked]="stroked" [formGroup]="barWidthSettingsFormGroup">
+<div class="jnks-iot-form-panel" [class.stroked]="stroked" [formGroup]="barWidthSettingsFormGroup">
   <div class="flex flex-row items-center justify-between">
     <div class="flex-1" translate>widgets.time-series-chart.no-aggregation-bar-width-strategy</div>
-    <tb-toggle-select formControlName="strategy" selectMediaBreakpoint="xs">
-      <tb-toggle-option *ngFor="let strategy of timeSeriesChartNoAggregationBarWidthStrategies" [value]="strategy">
+    <jnks-iot-toggle-select formControlName="strategy" selectMediaBreakpoint="xs">
+      <jnks-iot-toggle-option *ngFor="let strategy of timeSeriesChartNoAggregationBarWidthStrategies" [value]="strategy">
         {{ timeSeriesChartNoAggregationBarWidthStrategyTranslations.get(strategy) | translate }}
-      </tb-toggle-option>
-    </tb-toggle-select>
+      </jnks-iot-toggle-option>
+    </jnks-iot-toggle-select>
   </div>
   <ng-container *ngIf="barWidthSettingsFormGroup.get('strategy').value === TimeSeriesChartNoAggregationBarWidthStrategy.group">
     <ng-container
@@ -27,7 +27,7 @@
   </ng-container>
 </div>
 <ng-template #barWidth let-label="label" let-formGroup="formGroup">
-  <div class="tb-form-row space-between column-lt-md" [formGroup]="formGroup">
+  <div class="jnks-iot-form-row space-between column-lt-md" [formGroup]="formGroup">
     <div translate>{{ label }}</div>
     <div class="flex lt-md:flex-1 flex-row items-center justify-start gap-2">
       <mat-form-field class="medium-width lt-md:flex-1" appearance="outline" subscriptSizing="dynamic">

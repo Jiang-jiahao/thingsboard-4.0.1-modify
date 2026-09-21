@@ -17,7 +17,7 @@ import {
 } from '@home/components/widget/lib/indicator/status-widget.models';
 
 @Component({
-  selector: 'tb-status-widget-basic-config',
+  selector: 'jnks-iot-status-widget-basic-config',
   templateUrl: './status-widget-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

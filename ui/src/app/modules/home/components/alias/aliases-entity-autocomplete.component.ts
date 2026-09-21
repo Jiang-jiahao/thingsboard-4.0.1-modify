@@ -13,7 +13,7 @@ import { EntityService } from '@core/http/entity.service';
 import { isDefinedAndNotNull } from '@core/utils';
 
 @Component({
-  selector: 'tb-aliases-entity-autocomplete',
+  selector: 'jnks-iot-aliases-entity-autocomplete',
   templateUrl: './aliases-entity-autocomplete.component.html',
   styleUrls: [],
   providers: [{

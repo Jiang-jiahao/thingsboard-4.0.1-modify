@@ -18,7 +18,7 @@ import { Subscription } from 'rxjs';
 import { FloatLabelType, MatFormFieldAppearance } from '@angular/material/form-field';
 
 @Component({
-  selector: 'tb-phone-input',
+  selector: 'jnks-iot-phone-input',
   templateUrl: './phone-input.component.html',
   styleUrls: ['./phone-input.component.scss'],
   providers: [

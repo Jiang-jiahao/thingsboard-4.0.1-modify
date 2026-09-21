@@ -1,30 +1,30 @@
-<div class="tb-marker-icon-shapes-panel">
-  <div class="tb-marker-icon-shapes-title" translate>widgets.maps.data-layer.marker.marker-icon</div>
-  <tb-material-icons [selectedIcon]="icon" [iconClearButton]="false" [showTitle]="false"
-                     [popover]="popover" (iconSelected)="selectIcon($event)"></tb-material-icons>
-  <div class="tb-marker-icon-shapes-title" translate>widgets.maps.data-layer.marker.marker-appearance</div>
+<div class="jnks-iot-marker-icon-shapes-panel">
+  <div class="jnks-iot-marker-icon-shapes-title" translate>widgets.maps.data-layer.marker.marker-icon</div>
+  <jnks-iot-material-icons [selectedIcon]="icon" [iconClearButton]="false" [showTitle]="false"
+                     [popover]="popover" (iconSelected)="selectIcon($event)"></jnks-iot-material-icons>
+  <div class="jnks-iot-marker-icon-shapes-title" translate>widgets.maps.data-layer.marker.marker-appearance</div>
   <div class="flex flex-row flex-wrap gap-3">
     <ng-container *ngFor="let containerInfo of iconContainers">
       @if (containerInfo.iconContainer === iconContainer) {
-        <button class="tb-select-shape-button"
+        <button class="jnks-iot-select-shape-button"
                 mat-raised-button
                 (click)="selectIconContainer(containerInfo.iconContainer)"
                 type="button">
-          <div class="tb-marker-shape" matButtonIcon [innerHTML]="containerInfo.html$ | async">
+          <div class="jnks-iot-marker-shape" matButtonIcon [innerHTML]="containerInfo.html$ | async">
           </div>
         </button>
       } @else {
-        <button class="tb-select-shape-button"
+        <button class="jnks-iot-select-shape-button"
                 mat-button
                 (click)="selectIconContainer(containerInfo.iconContainer)"
                 type="button">
-          <div class="tb-marker-shape" matButtonIcon [innerHTML]="containerInfo.html$ | async">
+          <div class="jnks-iot-marker-shape" matButtonIcon [innerHTML]="containerInfo.html$ | async">
           </div>
         </button>
       }
     </ng-container>
   </div>
-  <div class="tb-marker-icon-shapes-panel-buttons">
+  <div class="jnks-iot-marker-icon-shapes-panel-buttons">
     <span class="flex-1"></span>
     <button mat-button
             color="primary"

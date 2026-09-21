@@ -1,8 +1,8 @@
 <div class="flex flex-row items-center justify-start"
      [@showHideAnimation]="{value: animationState, params: animationParams}"
      (@showHideAnimation.done)="onHideFinished($event)"
-     [class.tb-toast]="!notification.modern"
-     [class.tb-modern-toast]="notification.modern"
+     [class.jnks-iot-toast]="!notification.modern"
+     [class.jnks-iot-modern-toast]="notification.modern"
      [class.error-toast]="notification.type === 'error'"
      [class.warn-toast]="notification.type === 'warn'"
      [class.success-toast]="notification.type === 'success'"
@@ -12,13 +12,13 @@
     <button #actionButton type="button" mat-button (click)="action($event)">{{ 'action.close' | translate }}</button>
   </ng-container>
   <ng-template #modern>
-    <div class="tb-modern-toast-panel"
+    <div class="jnks-iot-modern-toast-panel"
          [class.error-toast]="notification.type === 'error'"
          [class.warn-toast]="notification.type === 'warn'"
          [class.success-toast]="notification.type === 'success'"
          [class.info-toast]="notification.type === 'info'">
       <div class="toast-text" [innerHTML]="notification.message | safe: 'html'"></div>
-      <button #actionButton class="tb-mat-20" mat-icon-button (click)="action($event)"><mat-icon>close</mat-icon></button>
+      <button #actionButton class="jnks-iot-mat-20" mat-icon-button (click)="action($event)"><mat-icon>close</mat-icon></button>
     </div>
   </ng-template>
 </div>

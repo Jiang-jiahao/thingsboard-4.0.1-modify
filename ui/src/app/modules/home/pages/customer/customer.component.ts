@@ -11,7 +11,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { CountryData } from '@shared/models/country.models';
 
 @Component({
-  selector: 'tb-customer',
+  selector: 'jnks-iot-customer',
   templateUrl: './customer.component.html',
   styleUrls: ['./customer.component.scss']
 })

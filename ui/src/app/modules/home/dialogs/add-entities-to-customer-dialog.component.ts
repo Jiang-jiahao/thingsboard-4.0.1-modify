@@ -19,7 +19,7 @@ export interface AddEntitiesToCustomerDialogData {
 }
 
 @Component({
-  selector: 'tb-add-entities-to-customer-dialog',
+  selector: 'jnks-iot-add-entities-to-customer-dialog',
   templateUrl: './add-entities-to-customer-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: AddEntitiesToCustomerDialogComponent}],
   styleUrls: []

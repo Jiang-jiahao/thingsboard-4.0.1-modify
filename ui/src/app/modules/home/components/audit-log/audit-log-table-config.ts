@@ -138,7 +138,7 @@ export class AuditLogTableConfig extends EntityTableConfig<AuditLog, TimePageLin
   showAuditLogDetails(entity: AuditLog) {
     this.dialog.open<AuditLogDetailsDialogComponent, AuditLogDetailsDialogData>(AuditLogDetailsDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         auditLog: entity
       }

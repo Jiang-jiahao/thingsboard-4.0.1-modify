@@ -59,7 +59,7 @@ export interface DashboardLayoutSettings {
 }
 
 @Component({
-  selector: 'tb-manage-dashboard-layouts-dialog',
+  selector: 'jnks-iot-manage-dashboard-layouts-dialog',
   templateUrl: './manage-dashboard-layouts-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: ManageDashboardLayoutsDialogComponent}],
   styleUrls: ['./manage-dashboard-layouts-dialog.component.scss', '../../../components/dashboard/layout-button.scss']
@@ -252,7 +252,7 @@ export class ManageDashboardLayoutsDialogComponent extends DialogComponent<Manag
     this.dialog.open<DashboardSettingsDialogComponent, DashboardSettingsDialogData,
       DashboardSettingsDialogData>(DashboardSettingsDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         settings: null,
         gridSettings,
@@ -367,9 +367,9 @@ export class ManageDashboardLayoutsDialogComponent extends DialogComponent<Manag
       }
 
       if (layoutSide === 'main') {
-        this.tooltip.tooltipClass = 'tb-layout-error-tooltip-main';
+        this.tooltip.tooltipClass = 'jnks-iot-layout-error-tooltip-main';
       } else {
-        this.tooltip.tooltipClass = 'tb-layout-error-tooltip-right';
+        this.tooltip.tooltipClass = 'jnks-iot-layout-error-tooltip-right';
       }
 
       this.tooltip.message = message;
@@ -383,9 +383,9 @@ export class ManageDashboardLayoutsDialogComponent extends DialogComponent<Manag
   layoutButtonClass(side: DashboardLayoutId, border: boolean = false): string {
     const formValues = this.layoutsFormGroup.value;
     if (this.isDividerLayout) {
-      let classString = border ? 'tb-layout-button-main ' : '';
+      let classString = border ? 'jnks-iot-layout-button-main ' : '';
       if (!(formValues.fixedLayout === side || formValues.type === LayoutWidthType.PERCENTAGE)) {
-        classString += 'tb-fixed-layout-button';
+        classString += 'jnks-iot-fixed-layout-button';
       }
       return classString;
     }
@@ -415,7 +415,7 @@ export class ManageDashboardLayoutsDialogComponent extends DialogComponent<Manag
     this.dialog.open<AddNewBreakpointDialogComponent, AddNewBreakpointDialogData,
       AddNewBreakpointDialogResult>(AddNewBreakpointDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         allowBreakpointIds: this.allowBreakpointIds,
         selectedBreakpointIds: this.selectedBreakpointIds

@@ -190,7 +190,7 @@ public class HexProtocolParserTest {
 
     @Test
     public void defaultConfigurationParsesDeviceDatagramLayout() {
-        TbHexProtocolParserNodeConfiguration cfg = new TbHexProtocolParserNodeConfiguration().defaultConfiguration();
+        JnksIotHexProtocolParserNodeConfiguration cfg = new JnksIotHexProtocolParserNodeConfiguration().defaultConfiguration();
         HexProtocolDefinition def = HexProtocolExpander.expand(cfg.getProtocols().get(0), cfg.getFrameTemplates());
         // 34 bytes: 16 header + subLen(4) + numberBlock(4) + unit(uint32 6 + id4 + data2)
         byte[] buf = new byte[34];

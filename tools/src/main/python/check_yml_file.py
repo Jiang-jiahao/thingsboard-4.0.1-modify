@@ -102,17 +102,17 @@ def check_yml(total_list, input_yaml_file):
 if __name__ == '__main__':
     sys.setrecursionlimit(10000)
     files_to_check = ["apps/monolith/src/main/resources/jnks-iot.yml",
-                      "apps/tb-core/src/main/resources/jnks-iot-core.yml",
-                      "apps/tb-rule-engine/src/main/resources/jnks-iot-rule-engine.yml",
-                      "apps/tb-transport/tb-http-transport/src/main/resources/tb-http-transport.yml",
-                      "apps/tb-transport/tb-mqtt-transport/src/main/resources/tb-mqtt-transport.yml",
-                      "apps/tb-transport/tb-coap-transport/src/main/resources/tb-coap-transport.yml",
-                      "apps/tb-transport/tb-lwm2m-transport/src/main/resources/tb-lwm2m-transport.yml",
-                      "apps/tb-transport/tb-snmp-transport/src/main/resources/tb-snmp-transport.yml",
-                      "apps/tb-transport/tb-tcp-transport/src/main/resources/tb-tcp-transport.yml",
-                      "apps/tb-transport/tb-udp-transport/src/main/resources/tb-udp-transport.yml",
-                      "apps/vc-executor/src/main/resources/tb-vc-executor.yml",
-                      "apps/tb-edqs/src/main/resources/tb-edqs.yml"]
+                      "apps/jnks-iot-core/src/main/resources/jnks-iot-core.yml",
+                      "apps/jnks-iot-rule-engine/src/main/resources/jnks-iot-rule-engine.yml",
+                      "apps/jnks-iot-transport/jnks-iot-http-transport/src/main/resources/jnks-iot-http-transport.yml",
+                      "apps/jnks-iot-transport/jnks-iot-mqtt-transport/src/main/resources/jnks-iot-mqtt-transport.yml",
+                      "apps/jnks-iot-transport/jnks-iot-coap-transport/src/main/resources/jnks-iot-coap-transport.yml",
+                      "apps/jnks-iot-transport/jnks-iot-lwm2m-transport/src/main/resources/jnks-iot-lwm2m-transport.yml",
+                      "apps/jnks-iot-transport/jnks-iot-snmp-transport/src/main/resources/jnks-iot-snmp-transport.yml",
+                      "apps/jnks-iot-transport/jnks-iot-tcp-transport/src/main/resources/jnks-iot-tcp-transport.yml",
+                      "apps/jnks-iot-transport/jnks-iot-udp-transport/src/main/resources/jnks-iot-udp-transport.yml",
+                      "apps/vc-executor/src/main/resources/jnks-iot-vc-executor.yml",
+                      "apps/jnks-iot-edqs/src/main/resources/jnks-iot-edqs.yml"]
 
     total_list = []
     for file in files_to_check:

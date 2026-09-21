@@ -31,45 +31,45 @@
           </mat-form-field>
           <div *ngIf="protoPayloadType" class="flex flex-col">
             <ng-container>
-              <tb-protobuf-content
+              <jnks-iot-protobuf-content
                 class="flex-1"
                 formControlName="deviceTelemetryProtoSchema"
                 label="{{ 'device-profile.telemetry-proto-schema' | translate }}"
                 [fillHeight]="true">
-              </tb-protobuf-content>
+              </jnks-iot-protobuf-content>
               <mat-error *ngIf="coapTransportConfigurationFormGroup.get('coapDeviceTypeConfiguration.transportPayloadTypeConfiguration.deviceTelemetryProtoSchema').hasError('required')">
                 {{ 'device-profile.telemetry-proto-schema-required' | translate}}
               </mat-error>
             </ng-container>
             <ng-container>
-              <tb-protobuf-content
+              <jnks-iot-protobuf-content
                 class="flex-1"
                 formControlName="deviceAttributesProtoSchema"
                 label="{{ 'device-profile.attributes-proto-schema' | translate }}"
                 [fillHeight]="true">
-              </tb-protobuf-content>
+              </jnks-iot-protobuf-content>
               <mat-error *ngIf="coapTransportConfigurationFormGroup.get('coapDeviceTypeConfiguration.transportPayloadTypeConfiguration.deviceAttributesProtoSchema').hasError('required')">
                 {{ 'device-profile.attributes-proto-schema-required' | translate}}
               </mat-error>
             </ng-container>
             <ng-container>
-              <tb-protobuf-content
+              <jnks-iot-protobuf-content
                 class="flex-1"
                 formControlName="deviceRpcRequestProtoSchema"
                 label="{{ 'device-profile.rpc-request-proto-schema' | translate }}"
                 [fillHeight]="true">
-              </tb-protobuf-content>
+              </jnks-iot-protobuf-content>
               <mat-error *ngIf="coapTransportConfigurationFormGroup.get('coapDeviceTypeConfiguration.transportPayloadTypeConfiguration.deviceRpcRequestProtoSchema').hasError('required')">
                 {{ 'device-profile.rpc-request-proto-schema-required' | translate}}
               </mat-error>
             </ng-container>
             <ng-container>
-              <tb-protobuf-content
+              <jnks-iot-protobuf-content
                 class="flex-1"
                 formControlName="deviceRpcResponseProtoSchema"
                 label="{{ 'device-profile.rpc-response-proto-schema' | translate }}"
                 [fillHeight]="true">
-              </tb-protobuf-content>
+              </jnks-iot-protobuf-content>
               <mat-error *ngIf="coapTransportConfigurationFormGroup.get('coapDeviceTypeConfiguration.transportPayloadTypeConfiguration.deviceRpcResponseProtoSchema').hasError('required')">
                 {{ 'device-profile.rpc-response-proto-schema-required' | translate}}
               </mat-error>
@@ -82,8 +82,8 @@
   <section formGroupName="clientSettings">
     <fieldset class="fields-group">
       <legend class="group-title" translate>device-profile.power-saving-mode</legend>
-      <tb-power-mode-settings [parentForm]="clientSettingsFormGroup">
-      </tb-power-mode-settings>
+      <jnks-iot-power-mode-settings [parentForm]="clientSettingsFormGroup">
+      </jnks-iot-power-mode-settings>
     </fieldset>
   </section>
 </form>

@@ -15,7 +15,7 @@ import com.jnks.iot.server.common.data.id.DeviceProfileId;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.kv.AttributeKvEntry;
-import com.jnks.iot.server.common.data.util.TbPair;
+import com.jnks.iot.server.common.data.util.JnksIotPair;
 import com.jnks.iot.server.common.stats.StatsFactory;
 import com.jnks.iot.server.dao.DaoUtil;
 import com.jnks.iot.server.dao.attributes.AttributesDao;
@@ -25,8 +25,8 @@ import com.jnks.iot.server.dao.model.sql.AttributeKvCompositeKey;
 import com.jnks.iot.server.dao.model.sql.AttributeKvEntity;
 import com.jnks.iot.server.dao.sql.JpaAbstractDaoListeningExecutorService;
 import com.jnks.iot.server.dao.sql.ScheduledLogExecutorComponent;
-import com.jnks.iot.server.dao.sql.TbSqlBlockingQueueParams;
-import com.jnks.iot.server.dao.sql.TbSqlBlockingQueueWrapper;
+import com.jnks.iot.server.dao.sql.JnksIotSqlBlockingQueueParams;
+import com.jnks.iot.server.dao.sql.JnksIotSqlBlockingQueueWrapper;
 import com.jnks.iot.server.dao.util.SqlDao;
 
 import java.util.ArrayList;
@@ -73,11 +73,11 @@ public class JpaAttributeDao extends JpaAbstractDaoListeningExecutorService impl
     @Value("${sql.batch_sort:true}")
     private boolean batchSortEnabled;
 
-    private TbSqlBlockingQueueWrapper<AttributeKvEntity, Long> queue;
+    private JnksIotSqlBlockingQueueWrapper<AttributeKvEntity, Long> queue;
 
     @PostConstruct
     private void init() {
-        TbSqlBlockingQueueParams params = TbSqlBlockingQueueParams.builder()
+        JnksIotSqlBlockingQueueParams params = JnksIotSqlBlockingQueueParams.builder()
                 .logName("Attributes")
                 .batchSize(batchSize)
                 .maxDelay(maxDelay)
@@ -88,7 +88,7 @@ public class JpaAttributeDao extends JpaAbstractDaoListeningExecutorService impl
                 .build();
 
         Function<AttributeKvEntity, Integer> hashcodeFunction = entity -> entity.getId().getEntityId().hashCode();
-        queue = new TbSqlBlockingQueueWrapper<>(params, hashcodeFunction, batchThreads, statsFactory);
+        queue = new JnksIotSqlBlockingQueueWrapper<>(params, hashcodeFunction, batchThreads, statsFactory);
         queue.init(logExecutor, v -> attributeKvInsertRepository.saveOrUpdate(v),
                 Comparator.comparing((AttributeKvEntity attributeKvEntity) -> attributeKvEntity.getId().getEntityId())
                         .thenComparing(attributeKvEntity -> attributeKvEntity.getId().getAttributeType())
@@ -198,14 +198,14 @@ public class JpaAttributeDao extends JpaAbstractDaoListeningExecutorService impl
     }
 
     @Override
-    public List<ListenableFuture<TbPair<String, Long>>> removeAllWithVersions(TenantId tenantId, EntityId entityId, AttributeScope attributeScope, List<String> keys) {
-        List<ListenableFuture<TbPair<String, Long>>> futuresList = new ArrayList<>(keys.size());
+    public List<ListenableFuture<JnksIotPair<String, Long>>> removeAllWithVersions(TenantId tenantId, EntityId entityId, AttributeScope attributeScope, List<String> keys) {
+        List<ListenableFuture<JnksIotPair<String, Long>>> futuresList = new ArrayList<>(keys.size());
         for (String key : keys) {
             futuresList.add(service.submit(() -> {
                 Long version = transactionTemplate.execute(status -> jdbcTemplate.query("DELETE FROM attribute_kv WHERE entity_id = ? AND attribute_type = ? " +
                                 "AND attribute_key = ? RETURNING nextval('attribute_kv_version_seq')",
                         rs -> rs.next() ? rs.getLong(1) : null, entityId.getId(), attributeScope.getId(), keyDictionaryDao.getOrSaveKeyId(key)));
-                return TbPair.of(key, version);
+                return JnksIotPair.of(key, version);
             }));
         }
         return futuresList;

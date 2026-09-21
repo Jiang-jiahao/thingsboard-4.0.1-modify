@@ -19,7 +19,7 @@ import com.jnks.iot.server.common.data.event.RuleChainDebugEventFilter;
 import com.jnks.iot.server.common.data.event.RuleNodeDebugEventFilter;
 import com.jnks.iot.server.common.data.event.StatisticsEventFilter;
 import com.jnks.iot.server.common.data.id.EventId;
-import com.jnks.iot.server.common.data.msg.TbNodeConnectionType;
+import com.jnks.iot.server.common.data.msg.JnksIotNodeConnectionType;
 import com.jnks.iot.server.common.data.page.PageData;
 import com.jnks.iot.server.common.data.page.TimePageLink;
 import com.jnks.iot.server.common.stats.StatsFactory;
@@ -28,8 +28,8 @@ import com.jnks.iot.server.dao.config.DefaultDataSource;
 import com.jnks.iot.server.dao.event.EventDao;
 import com.jnks.iot.server.dao.model.sql.EventEntity;
 import com.jnks.iot.server.dao.sql.ScheduledLogExecutorComponent;
-import com.jnks.iot.server.dao.sql.TbSqlBlockingQueueParams;
-import com.jnks.iot.server.dao.sql.TbSqlBlockingQueueWrapper;
+import com.jnks.iot.server.dao.sql.JnksIotSqlBlockingQueueParams;
+import com.jnks.iot.server.dao.sql.JnksIotSqlBlockingQueueWrapper;
 import com.jnks.iot.server.dao.sqlts.insert.sql.SqlPartitioningRepository;
 import com.jnks.iot.server.dao.util.SqlDao;
 
@@ -75,13 +75,13 @@ public class JpaBaseEventDao implements EventDao {
     @Value("${sql.batch_sort:true}")
     private boolean batchSortEnabled;
 
-    private TbSqlBlockingQueueWrapper<Event, Void> queue;
+    private JnksIotSqlBlockingQueueWrapper<Event, Void> queue;
 
     private final Map<EventType, EventRepository<?, ?>> repositories = new ConcurrentHashMap<>();
 
     @PostConstruct
     private void init() {
-        TbSqlBlockingQueueParams params = TbSqlBlockingQueueParams.builder()
+        JnksIotSqlBlockingQueueParams params = JnksIotSqlBlockingQueueParams.builder()
                 .logName("Events")
                 .batchSize(batchSize)
                 .maxDelay(maxDelay)
@@ -90,7 +90,7 @@ public class JpaBaseEventDao implements EventDao {
                 .batchSortEnabled(batchSortEnabled)
                 .build();
         Function<Event, Integer> hashcodeFunction = entity -> Objects.hash(super.hashCode(), entity.getTenantId(), entity.getEntityId());
-        queue = new TbSqlBlockingQueueWrapper<>(params, hashcodeFunction, batchThreads, statsFactory);
+        queue = new JnksIotSqlBlockingQueueWrapper<>(params, hashcodeFunction, batchThreads, statsFactory);
         queue.init(logExecutor, v -> eventInsertRepository.save(v), Comparator.comparing(Event::getCreatedTime));
         repositories.put(EventType.LC_EVENT, lcEventRepository);
         repositories.put(EventType.STATS, statsEventRepository);
@@ -247,7 +247,7 @@ public class JpaBaseEventDao implements EventDao {
 
     private PageData<? extends Event> findEventByFilter(UUID tenantId, UUID entityId, LifeCycleEventFilter eventFilter, TimePageLink pageLink) {
         boolean statusFilterEnabled = !StringUtils.isEmpty(eventFilter.getStatus());
-        boolean statusFilter = statusFilterEnabled && eventFilter.getStatus().equalsIgnoreCase(TbNodeConnectionType.SUCCESS);
+        boolean statusFilter = statusFilterEnabled && eventFilter.getStatus().equalsIgnoreCase(JnksIotNodeConnectionType.SUCCESS);
         return DaoUtil.toPageData(
                 lcEventRepository.findEvents(
                         tenantId,
@@ -348,7 +348,7 @@ public class JpaBaseEventDao implements EventDao {
 
     private void removeEventsByFilter(UUID tenantId, UUID entityId, LifeCycleEventFilter eventFilter, Long startTime, Long endTime) {
         boolean statusFilterEnabled = !StringUtils.isEmpty(eventFilter.getStatus());
-        boolean statusFilter = statusFilterEnabled && eventFilter.getStatus().equalsIgnoreCase(TbNodeConnectionType.SUCCESS);
+        boolean statusFilter = statusFilterEnabled && eventFilter.getStatus().equalsIgnoreCase(JnksIotNodeConnectionType.SUCCESS);
         lcEventRepository.removeEvents(
                 tenantId,
                 entityId,

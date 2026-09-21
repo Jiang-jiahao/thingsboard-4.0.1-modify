@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { LegendConfig, LegendData, LegendDirection, LegendKey, LegendPosition } from '@shared/models/widget.models';
 
 @Component({
-  selector: 'tb-legend',
+  selector: 'jnks-iot-legend',
   templateUrl: './legend.component.html',
   styleUrls: ['./legend.component.scss']
 })

@@ -39,7 +39,7 @@ import { hidePageSizePixelValue } from '@shared/models/constants';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
-  selector: 'tb-manage-widget-actions',
+  selector: 'jnks-iot-manage-widget-actions',
   templateUrl: './manage-widget-actions.component.html',
   styleUrls: ['./manage-widget-actions.component.scss'],
   providers: [
@@ -212,7 +212,7 @@ export class ManageWidgetActionsComponent extends PageComponent implements OnIni
     this.dialog.open<WidgetActionDialogComponent, WidgetActionDialogData,
       WidgetActionDescriptorInfo>(WidgetActionDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         isAdd,
         callbacks: this.callbacks,

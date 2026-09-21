@@ -1,7 +1,7 @@
 package com.jnks.iot.common.util;
 
 import com.jnks.iot.server.common.data.HasDebugSettings;
-import com.jnks.iot.server.common.data.msg.TbNodeConnectionType;
+import com.jnks.iot.server.common.data.msg.JnksIotNodeConnectionType;
 
 import java.util.Set;
 
@@ -30,7 +30,7 @@ public final class DebugModeUtil {
             return true;
         } else {
             var debugSettings = debugSettingsAware.getDebugSettings();
-            return debugSettings != null && debugSettings.isFailuresEnabled() && TbNodeConnectionType.FAILURE.equals(nodeConnection);
+            return debugSettings != null && debugSettings.isFailuresEnabled() && JnksIotNodeConnectionType.FAILURE.equals(nodeConnection);
         }
     }
 
@@ -39,7 +39,7 @@ public final class DebugModeUtil {
             return true;
         } else {
             var debugSettings = debugSettingsAware.getDebugSettings();
-            return debugSettings != null && nodeConnections != null && debugSettings.isFailuresEnabled() && nodeConnections.contains(TbNodeConnectionType.FAILURE);
+            return debugSettings != null && nodeConnections != null && debugSettings.isFailuresEnabled() && nodeConnections.contains(JnksIotNodeConnectionType.FAILURE);
         }
     }
 

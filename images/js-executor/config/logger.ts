@@ -41,7 +41,7 @@ if (process.env.NODE_ENV !== 'production' || process.env.DOCKER_MODE === 'true')
     loggerTransports.push(transport);
 }
 
-const tbFormat = printf(info => {
+const jnksIotFormat = printf(info => {
     return `${info.timestamp} [${info.label}] ${info.level.toUpperCase()}: ${info.message}`;
 });
 
@@ -52,7 +52,7 @@ export function _logger(moduleLabel: string) {
             splat(),
             label({ label: moduleLabel }),
             timestamp({format: 'YYYY-MM-DD HH:mm:ss,SSS'}),
-            tbFormat
+            jnksIotFormat
         ),
         transports: loggerTransports
     });

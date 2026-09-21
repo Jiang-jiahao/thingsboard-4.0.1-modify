@@ -1,5 +1,5 @@
 :host {
-  .tb-filter-text {
+  .jnks-iot-filter-text {
     overflow-y: auto;
     &.disabled {
       opacity: 0.7;
@@ -16,51 +16,51 @@
 }
 
 :host ::ng-deep {
-  .tb-filter-text {
+  .jnks-iot-filter-text {
     line-height: 1.8em;
     span {
       display: inline-block;
       vertical-align: middle;
       line-height: 1.4em;
     }
-    .tb-filter-predicate {
+    .jnks-iot-filter-predicate {
       padding-right: 4px;
       padding-left: 4px;
     }
-    .tb-filter-entity-key, .tb-filter-value, .tb-filter-dynamic-source {
+    .jnks-iot-filter-entity-key, .jnks-iot-filter-value, .jnks-iot-filter-dynamic-source {
       font-weight: bold;
       border: 1px groove rgba(0, 0, 0, .25);
       border-radius: 4px;
       padding-left: 4px;
       padding-right: 4px;
     }
-    .tb-filter-entity-key, .tb-filter-value {
+    .jnks-iot-filter-entity-key, .jnks-iot-filter-value {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 150px;
     }
-    .tb-filter-dynamic-source {
+    .jnks-iot-filter-dynamic-source {
     }
-    .tb-filter-entity-key {
+    .jnks-iot-filter-entity-key {
       color: #305680;
     }
-    .tb-filter-value {
+    .jnks-iot-filter-value {
       color: #ff5722;
     }
-    .tb-filter-simple-operation {
+    .jnks-iot-filter-simple-operation {
       font-size: 0.9em;
     }
-    .tb-filter-complex-operation {
+    .jnks-iot-filter-complex-operation {
       font-weight: bold;
     }
-    .tb-filter-dynamic-value {
-      .tb-filter-dynamic-source, .tb-filter-value {
+    .jnks-iot-filter-dynamic-value {
+      .jnks-iot-filter-dynamic-source, .jnks-iot-filter-value {
         color: #0c959c;
       }
     }
-    .tb-filter-bracket {
-      .tb-left-bracket, .tb-right-bracket {
+    .jnks-iot-filter-bracket {
+      .jnks-iot-left-bracket, .jnks-iot-right-bracket {
         font-size: 1.2em;
       }
     }

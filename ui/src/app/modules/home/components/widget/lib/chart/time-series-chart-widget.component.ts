@@ -21,7 +21,7 @@ import { backgroundStyle, ComponentStyle, overlayStyle, textStyle } from '@share
 import { ImagePipe } from '@shared/pipe/image.pipe';
 import { DomSanitizer } from '@angular/platform-browser';
 import { LegendConfig, LegendData, LegendKey, LegendPosition } from '@shared/models/widget.models';
-import { TbTimeSeriesChart } from '@home/components/widget/lib/chart/time-series-chart';
+import { JnksIotTimeSeriesChart } from '@home/components/widget/lib/chart/time-series-chart';
 import {
   timeSeriesChartWidgetDefaultSettings,
   TimeSeriesChartWidgetSettings
@@ -30,7 +30,7 @@ import { mergeDeep } from '@core/utils';
 import { WidgetComponent } from '@home/components/widget/widget.component';
 
 @Component({
-  selector: 'tb-time-series-chart-widget',
+  selector: 'jnks-iot-time-series-chart-widget',
   templateUrl: './time-series-chart-widget.component.html',
   styleUrls: ['./time-series-chart-widget.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -64,7 +64,7 @@ export class TimeSeriesChartWidgetComponent implements OnInit, OnDestroy, AfterV
 
   displayLegendValues = false;
 
-  private timeSeriesChart: TbTimeSeriesChart;
+  private timeSeriesChart: JnksIotTimeSeriesChart;
 
   constructor(public widgetComponent: WidgetComponent,
               private imagePipe: ImagePipe,
@@ -116,7 +116,7 @@ export class TimeSeriesChartWidgetComponent implements OnInit, OnDestroy, AfterV
   }
 
   ngAfterViewInit() {
-    this.timeSeriesChart = new TbTimeSeriesChart(this.ctx, this.settings, this.chartShape.nativeElement, this.renderer);
+    this.timeSeriesChart = new JnksIotTimeSeriesChart(this.ctx, this.settings, this.chartShape.nativeElement, this.renderer);
   }
 
   ngOnDestroy() {

@@ -26,7 +26,7 @@ import { isDefinedAndNotNull } from '@core/utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-snmp-device-transport-configuration',
+  selector: 'jnks-iot-snmp-device-transport-configuration',
   templateUrl: './snmp-device-transport-configuration.component.html',
   styleUrls: [],
   providers: [

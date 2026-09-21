@@ -1,5 +1,5 @@
 :host {
-  .tb-count-panel {
+  .jnks-iot-count-panel {
     width: 100%;
     height: 100%;
     position: relative;
@@ -7,10 +7,10 @@
     align-items: center;
     justify-content: center;
     padding: 12px;
-    &.tb-count-pointer {
+    &.jnks-iot-count-pointer {
       cursor: pointer;
     }
-    .tb-count-panel-content {
+    .jnks-iot-count-panel-content {
       width: 100%;
       height: 100%;
       position: relative;
@@ -18,21 +18,21 @@
       flex-direction: row;
       align-items: center;
       gap: 12px;
-      .tb-count-panel-column {
+      .jnks-iot-count-panel-column {
         flex: 1;
         display: flex;
         flex-direction: column;
         gap: 12px;
         overflow: hidden;
       }
-      .tb-count-panel-row {
+      .jnks-iot-count-panel-row {
         flex: 1;
         display: flex;
         flex-direction: row;
         align-items: center;
         gap: 12px;
       }
-      .tb-count-icon-panel {
+      .jnks-iot-count-icon-panel {
         position: relative;
         display: flex;
         flex-direction: column;
@@ -42,7 +42,7 @@
           z-index: 1;
         }
       }
-      .tb-count-icon-background-panel {
+      .jnks-iot-count-icon-background-panel {
         position: absolute;
         inset: 0;
         display: flex;
@@ -50,7 +50,7 @@
         align-items: center;
         justify-content: center;
       }
-      .tb-count-label-value-panel {
+      .jnks-iot-count-label-value-panel {
         flex: 1;
         display: flex;
         flex-direction: column;
@@ -58,11 +58,11 @@
         align-items: flex-start;
         gap: 0;
         overflow: hidden;
-        &.tb-count-layout-row {
+        &.jnks-iot-count-layout-row {
           flex-direction: row;
           align-items: center;
         }
-        .tb-count-label {
+        .jnks-iot-count-label {
           overflow: hidden;
           text-overflow: ellipsis;
           width: 100%;
@@ -73,8 +73,8 @@
 }
 
 :host ::ng-deep {
-  .tb-count-panel {
-    .tb-widget-title {
+  .jnks-iot-count-panel {
+    .jnks-iot-widget-title {
       padding: 0;
     }
   }

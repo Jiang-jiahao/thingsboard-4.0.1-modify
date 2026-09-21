@@ -5,7 +5,7 @@ import { PageComponent } from '@shared/components/page.component';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'tb-link-expired',
+  selector: 'jnks-iot-link-expired',
   templateUrl: './link-expired.component.html',
   styleUrls: ['./link-expired.component.scss']
 })

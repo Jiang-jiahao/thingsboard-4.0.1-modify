@@ -16,14 +16,14 @@
           (click)="clear()">
     <mat-icon class="material-icons">close</mat-icon>
   </button>
-  <mat-autocomplete class="tb-autocomplete"
+  <mat-autocomplete class="jnks-iot-autocomplete"
                     #ruleChainAutocomplete="matAutocomplete"
                     [displayWith]="displayRuleChainFn">
     <mat-option *ngFor="let ruleChain of filteredRuleChains | async" [value]="ruleChain">
       <span [innerHTML]="ruleChain.name | highlight:searchText"></span>
     </mat-option>
-    <mat-option *ngIf="!(filteredRuleChains | async)?.length" [value]="null" class="tb-not-found">
-      <div class="tb-not-found-content" (click)="$event.stopPropagation()">
+    <mat-option *ngIf="!(filteredRuleChains | async)?.length" [value]="null" class="jnks-iot-not-found">
+      <div class="jnks-iot-not-found-content" (click)="$event.stopPropagation()">
         <div *ngIf="!textIsNotEmpty(searchText); else searchNotEmpty">
           <span translate>rulechain.no-rulechains-text</span>
         </div>
@@ -43,6 +43,6 @@
     {{ 'rulechain.rulechain-required' | translate }}
   </mat-error>
   <mat-hint>
-    <ng-content select="[tb-hint]"></ng-content>
+    <ng-content select="[jnks-iot-hint]"></ng-content>
   </mat-hint>
 </mat-form-field>

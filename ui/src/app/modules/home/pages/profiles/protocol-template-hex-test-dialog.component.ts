@@ -39,7 +39,7 @@ export interface HexTestBuildFieldRow {
 }
 
 @Component({
-  selector: 'tb-protocol-template-hex-test-dialog',
+  selector: 'jnks-iot-protocol-template-hex-test-dialog',
   templateUrl: './protocol-template-hex-test-dialog.component.html',
   styleUrls: ['./protocol-template-hex-test-dialog.component.scss']
 })

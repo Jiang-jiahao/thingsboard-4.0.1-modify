@@ -1,40 +1,40 @@
-<div [formGroup]="dataSourceFormGroup" class="tb-form-table-row tb-map-data-source-row">
-  <div class="tb-source-field">
-    <mat-form-field class="tb-ds-type-field tb-inline-field" appearance="outline" subscriptSizing="dynamic">
+<div [formGroup]="dataSourceFormGroup" class="jnks-iot-form-table-row jnks-iot-map-data-source-row">
+  <div class="jnks-iot-source-field">
+    <mat-form-field class="jnks-iot-ds-type-field jnks-iot-inline-field" appearance="outline" subscriptSizing="dynamic">
       <mat-select formControlName="dsType">
         <mat-option *ngFor="let type of datasourceTypes" [value]="type">
           {{ datasourceTypesTranslations.get(type) | translate }}
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <tb-entity-autocomplete
-      class="tb-device-field"
+    <jnks-iot-entity-autocomplete
+      class="jnks-iot-device-field"
       *ngIf="dataSourceFormGroup.get('dsType').value === DatasourceType.device"
       required
       inlineField
       placeholder="{{ 'device.select-device' | translate }}"
       [entityType]="EntityType.DEVICE"
       formControlName="dsDeviceId">
-    </tb-entity-autocomplete>
-    <tb-entity-alias-select
-      class="tb-entity-alias-field"
+    </jnks-iot-entity-autocomplete>
+    <jnks-iot-entity-alias-select
+      class="jnks-iot-entity-alias-field"
       *ngIf="dataSourceFormGroup.get('dsType').value === DatasourceType.entity"
       inlineField
-      tbRequired
+      jnksIotRequired
       [aliasController]="context.aliasController"
       formControlName="dsEntityAliasId"
       [callbacks]="context.callbacks">
-    </tb-entity-alias-select>
+    </jnks-iot-entity-alias-select>
   </div>
-  <tb-filter-select
-    class="tb-filter-field"
+  <jnks-iot-filter-select
+    class="jnks-iot-filter-field"
     inlineField
     [aliasController]="context.aliasController"
     formControlName="dsFilterId"
     [callbacks]="context.callbacks">
-  </tb-filter-select>
-  <div class="tb-form-table-row-cell-buttons">
-    <div class="tb-remove-button">
+  </jnks-iot-filter-select>
+  <div class="jnks-iot-form-table-row-cell-buttons">
+    <div class="jnks-iot-remove-button">
       <button type="button"
               mat-icon-button
               (click)="dataSourceRemoved.emit()"

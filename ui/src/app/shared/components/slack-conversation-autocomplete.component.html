@@ -11,15 +11,15 @@
           (click)="clear()">
     <mat-icon class="material-icons">close</mat-icon>
   </button>
-  <mat-autocomplete class="tb-autocomplete"
+  <mat-autocomplete class="jnks-iot-autocomplete"
                     #slackAutocomplete="matAutocomplete"
                     [displayWith]="displaySlackConversationFn"
                     >
     <mat-option *ngFor="let template of slackConversation$ | async" [value]="template" class="template-option">
       <span [innerHTML]="template.title | highlight:slackSearchText"></span>
     </mat-option>
-    <mat-option *ngIf="!(slackConversation$ | async)?.length" [value]="null" class="tb-not-found">
-      <div class="tb-not-found-content" (click)="$event.stopPropagation()">
+    <mat-option *ngIf="!(slackConversation$ | async)?.length" [value]="null" class="jnks-iot-not-found">
+      <div class="jnks-iot-not-found-content" (click)="$event.stopPropagation()">
         <div *ngIf="!textIsNotEmpty(slackSearchText); else searchNotEmpty">
           <span translate>notification.not-found-slack-recipient</span>
         </div>

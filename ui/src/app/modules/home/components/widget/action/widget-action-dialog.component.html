@@ -13,8 +13,8 @@
   <div style="height: 4px;" *ngIf="(isLoading$ | async) === false"></div>
   <div mat-dialog-content>
     <fieldset [disabled]="isLoading$ | async">
-      <div class="tb-form-panel no-padding no-border">
-        <div class="tb-form-row">
+      <div class="jnks-iot-form-panel no-padding no-border">
+        <div class="jnks-iot-form-row">
           <div class="fixed-title-width">{{'widget-config.action-source' | translate}}*</div>
           <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
             <mat-select required formControlName="actionSourceId" placeholder="{{ 'widget-config.select-action-source' | translate }}">
@@ -24,16 +24,16 @@
             </mat-select>
             <mat-icon matSuffix
                       matTooltipPosition="above"
-                      matTooltipClass="tb-error-tooltip"
+                      matTooltipClass="jnks-iot-error-tooltip"
                       [matTooltip]="'widget-config.action-source-required' | translate"
                       *ngIf="widgetActionFormGroup.get('actionSourceId').hasError('required')
                        && widgetActionFormGroup.get('actionSourceId').touched"
-                      class="tb-error">
+                      class="jnks-iot-error">
               warning
             </mat-icon>
           </mat-form-field>
         </div>
-        <div class="tb-form-row" *ngIf="widgetActionFormGroup.get('actionSourceId').value === 'cellClick'">
+        <div class="jnks-iot-form-row" *ngIf="widgetActionFormGroup.get('actionSourceId').value === 'cellClick'">
           <div class="fixed-title-width">{{'widget-config.column-index' | translate}}*</div>
           <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
             <mat-select #columnIndexSelect formControlName="columnIndex" placeholder="{{ columnIndexPlaceholderText }}">
@@ -45,36 +45,36 @@
             </mat-select>
             <mat-icon matSuffix
                       matTooltipPosition="above"
-                      matTooltipClass="tb-error-tooltip"
+                      matTooltipClass="jnks-iot-error-tooltip"
                       [matTooltip]="'widget-config.column-index-required' | translate"
                       *ngIf="widgetActionFormGroup.get('columnIndex').hasError('required') &&
                              widgetActionFormGroup.get('columnIndex').touched"
-                      class="tb-error">
+                      class="jnks-iot-error">
               warning
             </mat-icon>
           </mat-form-field>
         </div>
-        <div class="tb-form-row">
+        <div class="jnks-iot-form-row">
           <div class="fixed-title-width">{{'widget-config.action-name' | translate}}*</div>
           <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
             <input required matInput formControlName="name" placeholder="{{ 'widget-config.set' | translate }}">
             <mat-icon matSuffix
                       matTooltipPosition="above"
-                      matTooltipClass="tb-error-tooltip"
+                      matTooltipClass="jnks-iot-error-tooltip"
                       [matTooltip]="(widgetActionFormGroup.get('name').hasError('required')
                                      ? 'widget-config.action-name-required'
                                      : 'widget-config.action-name-not-unique') | translate"
                       *ngIf="widgetActionFormGroup.get('name').invalid
                        && (widgetActionFormGroup.get('name').touched || widgetActionFormGroup.get('name').hasError('actionNameNotUnique'))"
-                      class="tb-error">
+                      class="jnks-iot-error">
               warning
             </mat-icon>
           </mat-form-field>
         </div>
         @if (widgetActionFormGroup.get('actionSourceId').value === 'headerButton') {
-          <div class="tb-form-panel stroked">
-            <div class="tb-form-panel-title" translate>widget-config.header-button.button-settings</div>
-            <div class="tb-form-row">
+          <div class="jnks-iot-form-panel stroked">
+            <div class="jnks-iot-form-panel-title" translate>widget-config.header-button.button-settings</div>
+            <div class="jnks-iot-form-row">
               <div class="fixed-title-width" translate>widget-config.header-button.button-type</div>
               <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
                 <mat-select required formControlName="buttonType" placeholder="{{ 'widget-config.set' | translate }}">
@@ -84,63 +84,63 @@
                 </mat-select>
               </mat-form-field>
             </div>
-            <div class="tb-form-row space-between">
+            <div class="jnks-iot-form-row space-between">
               <div class="flex flex-row items-center justify-start gap-2">
                 <mat-slide-toggle class="mat-slide" formControlName="showIcon">
                 </mat-slide-toggle>
                 <div translate>widget-config.icon</div>
               </div>
-              <tb-material-icon-select asBoxInput
+              <jnks-iot-material-icon-select asBoxInput
                                        formControlName="icon">
-              </tb-material-icon-select>
+              </jnks-iot-material-icon-select>
             </div>
-            <div class="tb-form-row space-between column-xs">
+            <div class="jnks-iot-form-row space-between column-xs">
               <div class="fixed-title-width">{{ 'widget-config.header-button.colors' | translate }}</div>
               <div class="flex flex-row items-center justify-start gap-2">
-                <div class="tb-small-label" translate>widget-config.header-button.color</div>
-                <tb-color-input asBoxInput
+                <div class="jnks-iot-small-label" translate>widget-config.header-button.color</div>
+                <jnks-iot-color-input asBoxInput
                                 formControlName="buttonColor">
-                </tb-color-input>
+                </jnks-iot-color-input>
                 <mat-divider vertical></mat-divider>
-                <div class="tb-small-label" translate>widget-config.header-button.background</div>
-                <tb-color-input asBoxInput
+                <div class="jnks-iot-small-label" translate>widget-config.header-button.background</div>
+                <jnks-iot-color-input asBoxInput
                                 formControlName="buttonFillColor">
-                </tb-color-input>
+                </jnks-iot-color-input>
                 <mat-divider vertical></mat-divider>
-                <div class="tb-small-label" translate>widget-config.header-button.border</div>
-                <tb-color-input asBoxInput
+                <div class="jnks-iot-small-label" translate>widget-config.header-button.border</div>
+                <jnks-iot-color-input asBoxInput
                                 formControlName="buttonBorderColor">
-                </tb-color-input>
+                </jnks-iot-color-input>
               </div>
             </div>
-            <div class="tb-form-panel stroked">
-              <mat-expansion-panel class="tb-settings">
+            <div class="jnks-iot-form-panel stroked">
+              <mat-expansion-panel class="jnks-iot-settings">
                 <mat-expansion-panel-header>
                   <mat-panel-description class="flex items-stretch justify-start" translate>
                     widget-config.header-button.advanced-button-style
                   </mat-panel-description>
                 </mat-expansion-panel-header>
                 <ng-template matExpansionPanelContent>
-                  <tb-json-object-edit
+                  <jnks-iot-json-object-edit
                     [editorStyle]="{minHeight: '100px'}"
                     label="{{ 'widget-config.header-button.button-style' | translate }}"
                     formControlName="customButtonStyle"
-                  ></tb-json-object-edit>
+                  ></jnks-iot-json-object-edit>
                 </ng-template>
               </mat-expansion-panel>
             </div>
           </div>
         } @else {
-          <div class="tb-form-row space-between">
+          <div class="jnks-iot-form-row space-between">
             <div>{{'widget-config.icon' | translate}}</div>
-            <tb-material-icon-select asBoxInput
+            <jnks-iot-material-icon-select asBoxInput
                                      formControlName="icon">
-            </tb-material-icon-select>
+            </jnks-iot-material-icon-select>
           </div>
         }
 
-        <div class="tb-form-panel stroked tb-slide-toggle" *ngIf="displayShowWidgetActionForm()">
-          <mat-expansion-panel class="tb-settings" [expanded]="widgetActionFormGroup.get('useShowWidgetActionFunction').value"
+        <div class="jnks-iot-form-panel stroked jnks-iot-slide-toggle" *ngIf="displayShowWidgetActionForm()">
+          <mat-expansion-panel class="jnks-iot-settings" [expanded]="widgetActionFormGroup.get('useShowWidgetActionFunction').value"
                                [disabled]="!widgetActionFormGroup.get('useShowWidgetActionFunction').value">
             <mat-expansion-panel-header class="flex flex-row flex-wrap">
               <mat-panel-title>
@@ -150,7 +150,7 @@
               </mat-panel-title>
             </mat-expansion-panel-header>
             <ng-template matExpansionPanelContent>
-              <tb-js-func formControlName="showWidgetActionFunction"
+              <jnks-iot-js-func formControlName="showWidgetActionFunction"
                           functionTitle="{{ 'widget-config.show-action-function' | translate }}"
                           withModules
                           [helpId]="getWidgetActionFunctionHelpId()"
@@ -159,16 +159,16 @@
                           [validationArgs]="[]"
                           [resultType]="'boolean'"
                           [editorCompleter]="customActionEditorCompleter"
-              ></tb-js-func>
+              ></jnks-iot-js-func>
             </ng-template>
           </mat-expansion-panel>
         </div>
-        <tb-widget-action
+        <jnks-iot-widget-action
             formControlName="widgetAction"
             [callbacks]="data.callbacks"
             [widgetType]="data.widgetType"
             [additionalWidgetActionTypes]="data.additionalWidgetActionTypes">
-        </tb-widget-action>
+        </jnks-iot-widget-action>
       </div>
     </fieldset>
   </div>

@@ -1,7 +1,7 @@
 import { Component, DestroyRef, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { PageComponent } from '@shared/components/page.component';
 import { DateFormatSettings } from '@shared/models/widget-settings.models';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { UntypedFormControl, Validators } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
@@ -9,7 +9,7 @@ import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-date-format-settings-panel',
+  selector: 'jnks-iot-date-format-settings-panel',
   templateUrl: './date-format-settings-panel.component.html',
   providers: [],
   styleUrls: ['./date-format-settings-panel.component.scss'],
@@ -21,7 +21,7 @@ export class DateFormatSettingsPanelComponent extends PageComponent implements O
   dateFormat: DateFormatSettings;
 
   @Input()
-  popover: TbPopoverComponent<DateFormatSettingsPanelComponent>;
+  popover: JnksIotPopoverComponent<DateFormatSettingsPanelComponent>;
 
   @Output()
   dateFormatApplied = new EventEmitter<DateFormatSettings>();

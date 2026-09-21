@@ -4,7 +4,7 @@ import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/m
 import { EntityType } from '@shared/models/entity-type.models';
 
 @Component({
-  selector: 'tb-flow-node-rule-chain-input-config',
+  selector: 'jnks-iot-flow-node-rule-chain-input-config',
   templateUrl: './rule-chain-input.component.html',
   styleUrls: []
 })

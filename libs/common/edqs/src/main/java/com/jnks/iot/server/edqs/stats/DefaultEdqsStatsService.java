@@ -6,8 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
-import com.jnks.iot.common.util.TbBytePool;
-import com.jnks.iot.common.util.TbStringPool;
+import com.jnks.iot.common.util.JnksIotBytePool;
+import com.jnks.iot.common.util.JnksIotStringPool;
 import com.jnks.iot.server.common.data.ObjectType;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.query.EntityCountQuery;
@@ -41,8 +41,8 @@ public class DefaultEdqsStatsService implements EdqsStatsService {
 
     @PostConstruct
     private void init() {
-        statsFactory.createGauge("edqsMapGauges", "stringPoolSize", TbStringPool.getPool(), Map::size);
-        statsFactory.createGauge("edqsMapGauges", "bytePoolSize", TbBytePool.getPool(), Map::size);
+        statsFactory.createGauge("edqsMapGauges", "stringPoolSize", JnksIotStringPool.getPool(), Map::size);
+        statsFactory.createGauge("edqsMapGauges", "bytePoolSize", JnksIotBytePool.getPool(), Map::size);
         statsFactory.createGauge("edqsMapGauges", "tenantReposSize", DefaultEdqsRepository.getRepos(), Map::size);
     }
 

@@ -12,8 +12,8 @@ import org.eclipse.californium.core.server.resources.ResourceObserver;
 import org.eclipse.californium.elements.EndpointContext;
 import org.eclipse.californium.elements.auth.X509CertPath;
 import com.jnks.iot.server.coapserver.CoapServerService;
-import com.jnks.iot.server.coapserver.TbCoapDtlsSessionKey;
-import com.jnks.iot.server.coapserver.TbCoapDtlsSessionInfo;
+import com.jnks.iot.server.coapserver.JnksIotCoapDtlsSessionKey;
+import com.jnks.iot.server.coapserver.JnksIotCoapDtlsSessionInfo;
 import com.jnks.iot.server.common.adaptor.AdaptorException;
 import com.jnks.iot.server.common.adaptor.JsonConverter;
 import com.jnks.iot.server.common.data.DataConstants;
@@ -32,7 +32,7 @@ import com.jnks.iot.server.transport.coap.callback.CoapResponseCodeCallback;
 import com.jnks.iot.server.transport.coap.callback.GetAttributesSyncSessionCallback;
 import com.jnks.iot.server.transport.coap.callback.ToServerRpcSyncSessionCallback;
 import com.jnks.iot.server.transport.coap.client.CoapClientContext;
-import com.jnks.iot.server.transport.coap.client.TbCoapClientState;
+import com.jnks.iot.server.transport.coap.client.JnksIotCoapClientState;
 
 import java.net.InetSocketAddress;
 import java.util.Base64;
@@ -55,7 +55,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
     private static final int FEATURE_TYPE_POSITION_CERTIFICATE_REQUEST = 3;
     private static final int REQUEST_ID_POSITION_CERTIFICATE_REQUEST = 4;
 
-    private final ConcurrentMap<TbCoapDtlsSessionKey, TbCoapDtlsSessionInfo> dtlsSessionsMap;
+    private final ConcurrentMap<JnksIotCoapDtlsSessionKey, JnksIotCoapDtlsSessionInfo> dtlsSessionsMap;
     private final long timeout;
     private final long piggybackTimeout;
     private final CoapClientContext clients;
@@ -167,9 +167,9 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
 
         var dtlsSessionId = request.getSourceContext().get(KEY_SESSION_ID);
         if (dtlsSessionsMap != null && dtlsSessionId != null && !dtlsSessionId.isEmpty()) {
-            TbCoapDtlsSessionInfo tbCoapDtlsSessionInfo = this.getCoapDtlsSessionInfo(request.getSourceContext());
-            if (tbCoapDtlsSessionInfo != null) {
-                processRequest(exchange, type, request, tbCoapDtlsSessionInfo.getMsg(), tbCoapDtlsSessionInfo.getDeviceProfile());
+            JnksIotCoapDtlsSessionInfo jnksIotCoapDtlsSessionInfo = this.getCoapDtlsSessionInfo(request.getSourceContext());
+            if (jnksIotCoapDtlsSessionInfo != null) {
+                processRequest(exchange, type, request, jnksIotCoapDtlsSessionInfo.getMsg(), jnksIotCoapDtlsSessionInfo.getDeviceProfile());
             } else {
                 processAccessTokenRequest(exchange, type, request);
             }
@@ -189,7 +189,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
     }
 
     private void processRequest(CoapExchange exchange, CoapSessionMsgType type, Request request, ValidateDeviceCredentialsResponse deviceCredentials, DeviceProfile deviceProfile) {
-        TbCoapClientState clientState = null;
+        JnksIotCoapClientState clientState = null;
         try {
             clientState = clients.getOrCreateClient(type, deviceCredentials, deviceProfile);
             clients.awake(clientState);
@@ -233,7 +233,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
         }
     }
 
-    private void handlePostAttributesRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
+    private void handlePostAttributesRequest(JnksIotCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
         TransportProtos.SessionInfoProto sessionInfo = clients.getNewSyncSession(clientState);
         UUID sessionId = toSessionId(sessionInfo);
         transportService.process(sessionInfo, clientState.getAdaptor().convertToPostAttributes(sessionId, request,
@@ -241,7 +241,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
                 new CoapResponseCodeCallback(exchange, CoAP.ResponseCode.CREATED, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
     }
 
-    private void handlePostTelemetryRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
+    private void handlePostTelemetryRequest(JnksIotCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
         TransportProtos.SessionInfoProto sessionInfo = clients.getNewSyncSession(clientState);
         UUID sessionId = toSessionId(sessionInfo);
         transportService.process(sessionInfo, clientState.getAdaptor().convertToPostTelemetry(sessionId, request,
@@ -249,7 +249,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
                 new CoapResponseCodeCallback(exchange, CoAP.ResponseCode.CREATED, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
     }
 
-    private void handleClaimRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
+    private void handleClaimRequest(JnksIotCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
         TransportProtos.SessionInfoProto sessionInfo = clients.getNewSyncSession(clientState);
         UUID sessionId = toSessionId(sessionInfo);
         transportService.process(sessionInfo,
@@ -257,22 +257,22 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
                 new CoapResponseCodeCallback(exchange, CoAP.ResponseCode.CREATED, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
     }
 
-    private void handleAttributeSubscribeRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) {
+    private void handleAttributeSubscribeRequest(JnksIotCoapClientState clientState, CoapExchange exchange, Request request) {
         String attrSubToken = getTokenFromRequest(request);
         if (!clients.registerAttributeObservation(clientState, attrSubToken, exchange)) {
             log.warn("[{}] Received duplicate attribute subscribe request for token: {}", clientState.getDeviceId(), attrSubToken);
         }
     }
 
-    private void handleAttributeUnsubscribeRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) {
+    private void handleAttributeUnsubscribeRequest(JnksIotCoapClientState clientState, CoapExchange exchange, Request request) {
         clients.deregisterAttributeObservation(clientState, getTokenFromRequest(request), exchange);
     }
 
-    private void handleRpcUnsubscribeRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) {
+    private void handleRpcUnsubscribeRequest(JnksIotCoapClientState clientState, CoapExchange exchange, Request request) {
         clients.deregisterRpcObservation(clientState, getTokenFromRequest(request), exchange);
     }
 
-    private void handleToDeviceRpcResponse(TbCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
+    private void handleToDeviceRpcResponse(JnksIotCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
         TransportProtos.SessionInfoProto session = clientState.getSession();
         if (session == null) {
             session = clients.getNewSyncSession(clientState);
@@ -283,14 +283,14 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
                 new CoapResponseCodeCallback(exchange, CoAP.ResponseCode.CREATED, CoAP.ResponseCode.INTERNAL_SERVER_ERROR));
     }
 
-    private void handleRpcSubscribeRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) {
+    private void handleRpcSubscribeRequest(JnksIotCoapClientState clientState, CoapExchange exchange, Request request) {
         String rpcSubToken = getTokenFromRequest(request);
         if (!clients.registerRpcObservation(clientState, rpcSubToken, exchange)) {
             log.warn("[{}] Received duplicate rpc subscribe request.", rpcSubToken);
         }
     }
 
-    private void handleGetAttributesRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
+    private void handleGetAttributesRequest(JnksIotCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
         TransportProtos.SessionInfoProto sessionInfo = clients.getNewSyncSession(clientState);
         UUID sessionId = toSessionId(sessionInfo);
         transportService.registerSyncSession(sessionInfo, new GetAttributesSyncSessionCallback(clientState, exchange, request), timeout);
@@ -299,7 +299,7 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
                 new CoapNoOpCallback(exchange));
     }
 
-    private void handleToServerRpcRequest(TbCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
+    private void handleToServerRpcRequest(JnksIotCoapClientState clientState, CoapExchange exchange, Request request) throws AdaptorException {
         TransportProtos.SessionInfoProto sessionInfo = clients.getNewSyncSession(clientState);
         UUID sessionId = toSessionId(sessionInfo);
         transportService.registerSyncSession(sessionInfo, new ToServerRpcSyncSessionCallback(clientState, exchange, request), timeout);
@@ -444,21 +444,21 @@ public class CoapTransportResource extends AbstractCoapTransportResource {
         }
     }
 
-    private TbCoapDtlsSessionInfo getCoapDtlsSessionInfo(EndpointContext endpointContext) {
+    private JnksIotCoapDtlsSessionInfo getCoapDtlsSessionInfo(EndpointContext endpointContext) {
         InetSocketAddress peerAddress = endpointContext.getPeerAddress();
         String certPemStr = getCertPem(endpointContext);
-        TbCoapDtlsSessionKey tbCoapDtlsSessionKey = StringUtils.isNotBlank(certPemStr) ? new TbCoapDtlsSessionKey(peerAddress, certPemStr) : null;
-        TbCoapDtlsSessionInfo tbCoapDtlsSessionInfo;
-        if (tbCoapDtlsSessionKey != null) {
-            tbCoapDtlsSessionInfo = dtlsSessionsMap
-                    .computeIfPresent(tbCoapDtlsSessionKey, (dtlsSessionIdStr, dtlsSessionInfo) -> {
+        JnksIotCoapDtlsSessionKey jnksIotCoapDtlsSessionKey = StringUtils.isNotBlank(certPemStr) ? new JnksIotCoapDtlsSessionKey(peerAddress, certPemStr) : null;
+        JnksIotCoapDtlsSessionInfo jnksIotCoapDtlsSessionInfo;
+        if (jnksIotCoapDtlsSessionKey != null) {
+            jnksIotCoapDtlsSessionInfo = dtlsSessionsMap
+                    .computeIfPresent(jnksIotCoapDtlsSessionKey, (dtlsSessionIdStr, dtlsSessionInfo) -> {
                         dtlsSessionInfo.setLastActivityTime(System.currentTimeMillis());
                         return dtlsSessionInfo;
                     });
         } else {
-            tbCoapDtlsSessionInfo = null;
+            jnksIotCoapDtlsSessionInfo = null;
         }
-        return tbCoapDtlsSessionInfo;
+        return jnksIotCoapDtlsSessionInfo;
     }
 
     private String getCertPem(EndpointContext endpointContext) {

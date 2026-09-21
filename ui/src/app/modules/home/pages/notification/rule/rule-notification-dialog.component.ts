@@ -60,7 +60,7 @@ export interface RuleNotificationDialogData {
 }
 
 @Component({
-  selector: 'tb-rule-notification-dialog',
+  selector: 'jnks-iot-rule-notification-dialog',
   templateUrl: './rule-notification-dialog.component.html',
   styleUrls: ['rule-notification-dialog.component.scss']
 })
@@ -426,7 +426,7 @@ export class RuleNotificationDialogComponent extends
     this.dialog.open<RecipientNotificationDialogComponent, RecipientNotificationDialogData,
       NotificationTarget>(RecipientNotificationDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {}
     }).afterClosed()
       .subscribe((res) => {

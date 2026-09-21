@@ -29,9 +29,9 @@ import com.jnks.iot.script.api.tbel.TbelInvokeService;
 import com.jnks.iot.server.actors.service.ActorService;
 import com.jnks.iot.server.actors.tenant.TenantDeviceActorSupport;
 import com.jnks.iot.server.actors.tenant.TenantRuleEngineActorSupportFactory;
-import com.jnks.iot.server.actors.tenant.DebugTbRateLimits;
+import com.jnks.iot.server.actors.tenant.DebugJnksIotRateLimits;
 import com.jnks.iot.server.cache.limits.RateLimitService;
-import com.jnks.iot.server.cluster.TbClusterService;
+import com.jnks.iot.server.cluster.JnksIotClusterService;
 import com.jnks.iot.server.common.data.event.CalculatedFieldDebugEvent;
 import com.jnks.iot.server.common.data.event.ErrorEvent;
 import com.jnks.iot.server.common.data.event.LifecycleEvent;
@@ -41,15 +41,15 @@ import com.jnks.iot.server.common.data.id.CalculatedFieldId;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.limit.LimitedApi;
-import com.jnks.iot.server.common.data.msg.TbMsgType;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
 import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
-import com.jnks.iot.server.common.msg.TbActorMsg;
-import com.jnks.iot.server.common.msg.TbMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
 import com.jnks.iot.server.common.msg.notification.NotificationRuleProcessor;
 import com.jnks.iot.server.common.msg.queue.ServiceType;
 import com.jnks.iot.server.common.msg.queue.TopicPartitionInfo;
-import com.jnks.iot.server.common.msg.tools.TbRateLimits;
-import com.jnks.iot.server.common.stats.TbApiUsageReportClient;
+import com.jnks.iot.server.common.msg.tools.JnksIotRateLimits;
+import com.jnks.iot.server.common.stats.JnksIotApiUsageReportClient;
 import com.jnks.iot.server.dao.alarm.AlarmCommentService;
 import com.jnks.iot.server.dao.asset.AssetProfileService;
 import com.jnks.iot.server.dao.asset.AssetService;
@@ -83,7 +83,7 @@ import com.jnks.iot.server.dao.relation.RelationService;
 import com.jnks.iot.server.dao.resource.ResourceService;
 import com.jnks.iot.server.dao.rule.RuleChainService;
 import com.jnks.iot.server.dao.rule.RuleNodeStateService;
-import com.jnks.iot.server.dao.tenant.TbTenantProfileCache;
+import com.jnks.iot.server.dao.tenant.JnksIotTenantProfileCache;
 import com.jnks.iot.server.dao.tenant.TenantProfileService;
 import com.jnks.iot.server.dao.tenant.TenantService;
 import com.jnks.iot.server.dao.timeseries.TimeseriesService;
@@ -93,28 +93,28 @@ import com.jnks.iot.server.dao.widget.WidgetTypeService;
 import com.jnks.iot.server.dao.widget.WidgetsBundleService;
 import com.jnks.iot.server.queue.discovery.DiscoveryService;
 import com.jnks.iot.server.queue.discovery.PartitionService;
-import com.jnks.iot.server.queue.discovery.TbServiceInfoProvider;
-import com.jnks.iot.server.queue.settings.TbQueueCalculatedFieldSettings;
-import com.jnks.iot.server.service.apiusage.TbApiUsageStateService;
+import com.jnks.iot.server.queue.discovery.JnksIotServiceInfoProvider;
+import com.jnks.iot.server.queue.settings.JnksIotQueueCalculatedFieldSettings;
+import com.jnks.iot.server.service.apiusage.JnksIotApiUsageStateService;
 import com.jnks.iot.server.service.cf.CalculatedFieldQueueService;
 import com.jnks.iot.server.service.component.ComponentDiscoveryService;
-import com.jnks.iot.server.service.entitiy.entityview.TbEntityViewService;
+import com.jnks.iot.server.service.entitiy.entityview.JnksIotEntityViewService;
 import com.jnks.iot.server.service.executors.DbCallbackExecutorService;
 import com.jnks.iot.server.service.executors.ExternalCallExecutorService;
 import com.jnks.iot.server.service.executors.NotificationExecutorService;
 import com.jnks.iot.server.service.executors.SharedEventLoopGroupService;
 import com.jnks.iot.server.service.mail.MailExecutorService;
-import com.jnks.iot.server.service.profile.TbAssetProfileCache;
-import com.jnks.iot.server.service.profile.TbDeviceProfileCache;
-import com.jnks.iot.server.service.rpc.TbCoreDeviceRpcService;
-import com.jnks.iot.server.service.rpc.TbRpcService;
-import com.jnks.iot.server.service.rpc.TbRuleEngineDeviceRpcService;
+import com.jnks.iot.server.service.profile.JnksIotAssetProfileCache;
+import com.jnks.iot.server.service.profile.JnksIotDeviceProfileCache;
+import com.jnks.iot.server.service.rpc.JnksIotCoreDeviceRpcService;
+import com.jnks.iot.server.service.rpc.JnksIotRpcService;
+import com.jnks.iot.server.service.rpc.JnksIotRuleEngineDeviceRpcService;
 import com.jnks.iot.server.service.session.DeviceSessionCacheService;
 import com.jnks.iot.server.service.sms.SmsExecutorService;
 import com.jnks.iot.server.service.state.DeviceStateService;
 import com.jnks.iot.server.service.telemetry.AlarmSubscriptionService;
 import com.jnks.iot.server.service.telemetry.TelemetrySubscriptionService;
-import com.jnks.iot.server.service.transport.TbCoreToTransportService;
+import com.jnks.iot.server.service.transport.JnksIotCoreToTransportService;
 import com.jnks.iot.server.utils.DebugModeRateLimitsConfig;
 
 import java.io.PrintWriter;
@@ -172,24 +172,24 @@ public class ActorSystemContext {
         }
     };
 
-    private final ConcurrentMap<TenantId, DebugTbRateLimits> debugPerTenantLimits = new ConcurrentHashMap<>();
+    private final ConcurrentMap<TenantId, DebugJnksIotRateLimits> debugPerTenantLimits = new ConcurrentHashMap<>();
 
-    public ConcurrentMap<TenantId, DebugTbRateLimits> getDebugPerTenantLimits() {
+    public ConcurrentMap<TenantId, DebugJnksIotRateLimits> getDebugPerTenantLimits() {
         return debugPerTenantLimits;
     }
 
     @Autowired
     @Getter
-    private TbApiUsageStateService apiUsageStateService;
+    private JnksIotApiUsageStateService apiUsageStateService;
 
     @Autowired
     @Getter
-    private TbApiUsageReportClient apiUsageClient;
+    private JnksIotApiUsageReportClient apiUsageClient;
 
     @Autowired
     @Getter
     @Setter
-    private TbServiceInfoProvider serviceInfoProvider;
+    private JnksIotServiceInfoProvider serviceInfoProvider;
 
     @Getter
     @Setter
@@ -226,15 +226,15 @@ public class ActorSystemContext {
 
     @Autowired
     @Getter
-    private TbTenantProfileCache tenantProfileCache;
+    private JnksIotTenantProfileCache tenantProfileCache;
 
     @Autowired
     @Getter
-    private TbDeviceProfileCache deviceProfileCache;
+    private JnksIotDeviceProfileCache deviceProfileCache;
 
     @Autowired
     @Getter
-    private TbAssetProfileCache assetProfileCache;
+    private JnksIotAssetProfileCache assetProfileCache;
 
     @Autowired
     @Getter
@@ -274,7 +274,7 @@ public class ActorSystemContext {
 
     @Autowired
     @Getter
-    private TbClusterService clusterService;
+    private JnksIotClusterService clusterService;
 
     @Autowired
     @Getter
@@ -303,7 +303,7 @@ public class ActorSystemContext {
     @Lazy
     @Autowired(required = false)
     @Getter
-    private TbEntityViewService tbEntityViewService;
+    private JnksIotEntityViewService jnksIotEntityViewService;
 
     @Lazy
     @Autowired
@@ -420,7 +420,7 @@ public class ActorSystemContext {
     @Getter
     private ClaimDevicesService claimDevicesService;
 
-    //TODO: separate context for TbCore and TbRuleEngine
+    //TODO: separate context for JnksIotCore and JnksIotRuleEngine
     @Autowired(required = false)
     @Getter
     private DeviceStateService deviceStateService;
@@ -431,7 +431,7 @@ public class ActorSystemContext {
 
     @Autowired(required = false)
     @Getter
-    private TbCoreToTransportService tbCoreToTransportService;
+    private JnksIotCoreToTransportService jnksIotCoreToTransportService;
 
     @Lazy
     @Autowired(required = false)
@@ -451,15 +451,15 @@ public class ActorSystemContext {
     @Lazy
     @Autowired(required = false)
     @Getter
-    private TbQueueCalculatedFieldSettings calculatedFieldSettings;
+    private JnksIotQueueCalculatedFieldSettings calculatedFieldSettings;
 
     /**
-     * The following Service will be null if we operate in tb-core mode
+     * The following Service will be null if we operate in jnks-iot-core mode
      */
     @Lazy
     @Autowired(required = false)
     @Getter
-    private TbRuleEngineDeviceRpcService tbRuleEngineDeviceRpcService;
+    private JnksIotRuleEngineDeviceRpcService jnksIotRuleEngineDeviceRpcService;
 
     @Autowired(required = false)
     @Getter
@@ -470,12 +470,12 @@ public class ActorSystemContext {
     private TenantRuleEngineActorSupportFactory tenantRuleEngineActorSupportFactory;
 
     /**
-     * The following Service will be null if we operate in tb-rule-engine mode
+     * The following Service will be null if we operate in jnks-iot-rule-engine mode
      */
     @Lazy
     @Autowired(required = false)
     @Getter
-    private TbCoreDeviceRpcService tbCoreDeviceRpcService;
+    private JnksIotCoreDeviceRpcService jnksIotCoreDeviceRpcService;
 
     @Lazy
     @Autowired(required = false)
@@ -490,7 +490,7 @@ public class ActorSystemContext {
     @Lazy
     @Autowired(required = false)
     @Getter
-    private TbRpcService tbRpcService;
+    private JnksIotRpcService jnksIotRpcService;
 
     @Lazy
     @Autowired(required = false)
@@ -620,14 +620,14 @@ public class ActorSystemContext {
 
     @Getter
     @Setter
-    private TbActorSystem actorSystem;
+    private JnksIotActorSystem actorSystem;
 
     @Setter
-    private TbActorRef appActor;
+    private JnksIotActorRef appActor;
 
     @Getter
     @Setter
-    private TbActorRef statsActor;
+    private JnksIotActorRef statsActor;
 
     @Autowired(required = false)
     @Getter
@@ -688,49 +688,49 @@ public class ActorSystemContext {
         return partitionService.resolve(serviceType, queueName, tenantId, entityId);
     }
 
-    public TopicPartitionInfo resolve(TenantId tenantId, EntityId entityId, TbMsg msg) {
-        return partitionService.resolve(ServiceType.TB_RULE_ENGINE, msg.getQueueName(), tenantId, entityId, msg.getPartition());
+    public TopicPartitionInfo resolve(TenantId tenantId, EntityId entityId, JnksIotMsg msg) {
+        return partitionService.resolve(ServiceType.JNKS_IOT_RULE_ENGINE, msg.getQueueName(), tenantId, entityId, msg.getPartition());
     }
 
     public String getServiceId() {
         return serviceInfoProvider.getServiceId();
     }
 
-    public void persistDebugInput(TenantId tenantId, EntityId entityId, TbMsg tbMsg, String relationType) {
-        persistDebugAsync(tenantId, entityId, "IN", tbMsg, relationType, null, null);
+    public void persistDebugInput(TenantId tenantId, EntityId entityId, JnksIotMsg jnksIotMsg, String relationType) {
+        persistDebugAsync(tenantId, entityId, "IN", jnksIotMsg, relationType, null, null);
     }
 
-    public void persistDebugInput(TenantId tenantId, EntityId entityId, TbMsg tbMsg, String relationType, Throwable error) {
-        persistDebugAsync(tenantId, entityId, "IN", tbMsg, relationType, error, null);
+    public void persistDebugInput(TenantId tenantId, EntityId entityId, JnksIotMsg jnksIotMsg, String relationType, Throwable error) {
+        persistDebugAsync(tenantId, entityId, "IN", jnksIotMsg, relationType, error, null);
     }
 
-    public void persistDebugOutput(TenantId tenantId, EntityId entityId, TbMsg tbMsg, String relationType, Throwable error, String failureMessage) {
-        persistDebugAsync(tenantId, entityId, "OUT", tbMsg, relationType, error, failureMessage);
+    public void persistDebugOutput(TenantId tenantId, EntityId entityId, JnksIotMsg jnksIotMsg, String relationType, Throwable error, String failureMessage) {
+        persistDebugAsync(tenantId, entityId, "OUT", jnksIotMsg, relationType, error, failureMessage);
     }
 
-    public void persistDebugOutput(TenantId tenantId, EntityId entityId, TbMsg tbMsg, String relationType, Throwable error) {
-        persistDebugAsync(tenantId, entityId, "OUT", tbMsg, relationType, error, null);
+    public void persistDebugOutput(TenantId tenantId, EntityId entityId, JnksIotMsg jnksIotMsg, String relationType, Throwable error) {
+        persistDebugAsync(tenantId, entityId, "OUT", jnksIotMsg, relationType, error, null);
     }
 
-    public void persistDebugOutput(TenantId tenantId, EntityId entityId, TbMsg tbMsg, String relationType) {
-        persistDebugAsync(tenantId, entityId, "OUT", tbMsg, relationType, null, null);
+    public void persistDebugOutput(TenantId tenantId, EntityId entityId, JnksIotMsg jnksIotMsg, String relationType) {
+        persistDebugAsync(tenantId, entityId, "OUT", jnksIotMsg, relationType, null, null);
     }
 
-    private void persistDebugAsync(TenantId tenantId, EntityId entityId, String type, TbMsg tbMsg, String relationType, Throwable error, String failureMessage) {
-        if (checkLimits(tenantId, tbMsg, error)) {
+    private void persistDebugAsync(TenantId tenantId, EntityId entityId, String type, JnksIotMsg jnksIotMsg, String relationType, Throwable error, String failureMessage) {
+        if (checkLimits(tenantId, jnksIotMsg, error)) {
             try {
                 RuleNodeDebugEvent.RuleNodeDebugEventBuilder event = RuleNodeDebugEvent.builder()
                         .tenantId(tenantId)
                         .entityId(entityId.getId())
                         .serviceId(getServiceId())
                         .eventType(type)
-                        .eventEntity(tbMsg.getOriginator())
-                        .msgId(tbMsg.getId())
-                        .msgType(tbMsg.getType())
-                        .dataType(tbMsg.getDataType().name())
+                        .eventEntity(jnksIotMsg.getOriginator())
+                        .msgId(jnksIotMsg.getId())
+                        .msgType(jnksIotMsg.getType())
+                        .dataType(jnksIotMsg.getDataType().name())
                         .relationType(relationType)
-                        .data(tbMsg.getData())
-                        .metadata(JacksonUtil.toString(tbMsg.getMetaData().getData()));
+                        .data(jnksIotMsg.getData())
+                        .metadata(JacksonUtil.toString(jnksIotMsg.getMetaData().getData()));
 
                 if (error != null) {
                     event.error(toString(error));
@@ -746,18 +746,18 @@ public class ActorSystemContext {
         }
     }
 
-    private boolean checkLimits(TenantId tenantId, TbMsg tbMsg, Throwable error) {
+    private boolean checkLimits(TenantId tenantId, JnksIotMsg jnksIotMsg, Throwable error) {
         if (debugModeRateLimitsConfig.isRuleChainDebugPerTenantLimitsEnabled()) {
-            DebugTbRateLimits debugTbRateLimits = debugPerTenantLimits.computeIfAbsent(tenantId, id ->
-                    new DebugTbRateLimits(new TbRateLimits(debugModeRateLimitsConfig.getRuleChainDebugPerTenantLimitsConfiguration()), false));
+            DebugJnksIotRateLimits debugJnksIotRateLimits = debugPerTenantLimits.computeIfAbsent(tenantId, id ->
+                    new DebugJnksIotRateLimits(new JnksIotRateLimits(debugModeRateLimitsConfig.getRuleChainDebugPerTenantLimitsConfiguration()), false));
 
-            if (!debugTbRateLimits.getTbRateLimits().tryConsume()) {
-                if (!debugTbRateLimits.isRuleChainEventSaved()) {
-                    persistRuleChainDebugModeEvent(tenantId, tbMsg.getRuleChainId(), error);
-                    debugTbRateLimits.setRuleChainEventSaved(true);
+            if (!debugJnksIotRateLimits.getJnksIotRateLimits().tryConsume()) {
+                if (!debugJnksIotRateLimits.isRuleChainEventSaved()) {
+                    persistRuleChainDebugModeEvent(tenantId, jnksIotMsg.getRuleChainId(), error);
+                    debugJnksIotRateLimits.setRuleChainEventSaved(true);
                 }
                 if (log.isTraceEnabled()) {
-                    log.trace("[{}] Tenant level debug mode rate limit detected: {}", tenantId, tbMsg);
+                    log.trace("[{}] Tenant level debug mode rate limit detected: {}", tenantId, jnksIotMsg);
                 }
                 return false;
             }
@@ -779,7 +779,7 @@ public class ActorSystemContext {
         Futures.addCallback(future, RULE_CHAIN_DEBUG_EVENT_ERROR_CALLBACK, MoreExecutors.directExecutor());
     }
 
-    public void persistCalculatedFieldDebugEvent(TenantId tenantId, CalculatedFieldId calculatedFieldId, EntityId entityId, Map<String, ?> arguments, UUID tbMsgId, TbMsgType tbMsgType, String result, String errorMessage) {
+    public void persistCalculatedFieldDebugEvent(TenantId tenantId, CalculatedFieldId calculatedFieldId, EntityId entityId, Map<String, ?> arguments, UUID jnksIotMsgId, JnksIotMsgType jnksIotMsgType, String result, String errorMessage) {
         if (checkLimits(tenantId)) {
             try {
                 CalculatedFieldDebugEvent.CalculatedFieldDebugEventBuilder eventBuilder = CalculatedFieldDebugEvent.builder()
@@ -788,11 +788,11 @@ public class ActorSystemContext {
                         .serviceId(getServiceId())
                         .calculatedFieldId(calculatedFieldId)
                         .eventEntity(entityId);
-                if (tbMsgId != null) {
-                    eventBuilder.msgId(tbMsgId);
+                if (jnksIotMsgId != null) {
+                    eventBuilder.msgId(jnksIotMsgId);
                 }
-                if (tbMsgType != null) {
-                    eventBuilder.msgType(tbMsgType.name());
+                if (jnksIotMsgType != null) {
+                    eventBuilder.msgType(jnksIotMsgType.name());
                 }
                 if (arguments != null) {
                     eventBuilder.arguments(JacksonUtil.toString(normalizeCalculatedFieldArguments(arguments)));
@@ -857,20 +857,20 @@ public class ActorSystemContext {
         return Exception.class.isInstance(error) ? (Exception) error : new Exception(error);
     }
 
-    public void tell(TbActorMsg tbActorMsg) {
-        appActor.tell(tbActorMsg);
+    public void tell(JnksIotActorMsg jnksIotActorMsg) {
+        appActor.tell(jnksIotActorMsg);
     }
 
-    public void tellWithHighPriority(TbActorMsg tbActorMsg) {
-        appActor.tellWithHighPriority(tbActorMsg);
+    public void tellWithHighPriority(JnksIotActorMsg jnksIotActorMsg) {
+        appActor.tellWithHighPriority(jnksIotActorMsg);
     }
 
-    public ScheduledFuture<?> schedulePeriodicMsgWithDelay(TbActorRef ctx, TbActorMsg msg, long delayInMs, long periodInMs) {
+    public ScheduledFuture<?> schedulePeriodicMsgWithDelay(JnksIotActorRef ctx, JnksIotActorMsg msg, long delayInMs, long periodInMs) {
         log.debug("Scheduling periodic msg {} every {} ms with delay {} ms", msg, periodInMs, delayInMs);
         return getScheduler().scheduleWithFixedDelay(() -> ctx.tell(msg), delayInMs, periodInMs, TimeUnit.MILLISECONDS);
     }
 
-    public void scheduleMsgWithDelay(TbActorRef ctx, TbActorMsg msg, long delayInMs) {
+    public void scheduleMsgWithDelay(JnksIotActorRef ctx, JnksIotActorMsg msg, long delayInMs) {
         log.debug("Scheduling msg {} with delay {} ms", msg, delayInMs);
         if (delayInMs > 0) {
             getScheduler().schedule(() -> ctx.tell(msg), delayInMs, TimeUnit.MILLISECONDS);

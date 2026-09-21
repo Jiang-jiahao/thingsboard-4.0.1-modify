@@ -31,7 +31,7 @@ import com.jnks.iot.server.common.data.device.profile.JsonTransportPayloadConfig
 import com.jnks.iot.server.common.data.device.profile.MqttDeviceProfileTransportConfiguration;
 import com.jnks.iot.server.common.data.transport.http.HttpPullPollDataType;
 import com.jnks.iot.server.common.data.transport.mqtt.MqttUplinkTopicMapping;
-import com.jnks.iot.server.common.msg.TbMsgMetaData;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
 import com.jnks.iot.server.common.transport.TransportService;
 import com.jnks.iot.server.gen.transport.TransportProtos;
 import com.jnks.iot.server.transport.mqtt.adaptors.JsonMqttAdaptor;
@@ -243,7 +243,7 @@ public class MqttTransportHandlerTest {
 
         handler.processRegularSessionMsg(ctx, message);
 
-        TbMsgMetaData expectedMd = new TbMsgMetaData();
+        JnksIotMsgMetaData expectedMd = new JnksIotMsgMetaData();
         expectedMd.putValue(DataConstants.MQTT_TOPIC, message.variableHeader().topicName());
 
         verify(transportService, times(1)).process(any(), (TransportProtos.PostTelemetryMsg) any(), eq(expectedMd), any());

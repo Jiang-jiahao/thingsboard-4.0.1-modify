@@ -15,7 +15,7 @@ import {
 } from '../rule-node-config.models';
 
 @Component({
-  selector: 'tb-enrichment-node-get-telemetry-from-database',
+  selector: 'jnks-iot-enrichment-node-get-telemetry-from-database',
   templateUrl: './get-telemetry-from-database-config.component.html',
   styleUrls: ['./get-telemetry-from-database-config.component.scss']
 })

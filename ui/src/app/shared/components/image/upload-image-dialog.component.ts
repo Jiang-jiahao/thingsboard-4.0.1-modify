@@ -38,7 +38,7 @@ export interface UploadImageDialogResult {
 }
 
 @Component({
-  selector: 'tb-upload-image-dialog',
+  selector: 'jnks-iot-upload-image-dialog',
   templateUrl: './upload-image-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: UploadImageDialogComponent}],
   styleUrls: []

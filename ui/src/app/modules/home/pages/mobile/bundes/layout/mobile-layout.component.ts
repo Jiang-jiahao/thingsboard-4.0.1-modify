@@ -28,7 +28,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AddMobilePageDialogComponent } from '@home/pages/mobile/bundes/layout/add-mobile-page-dialog.component';
 
 @Component({
-  selector: 'tb-mobile-layout',
+  selector: 'jnks-iot-mobile-layout',
   templateUrl: './mobile-layout.component.html',
   styleUrls: ['./mobile-layout.component.scss'],
   providers: [
@@ -153,7 +153,7 @@ export class MobileLayoutComponent implements ControlValueAccessor, Validator {
     this.dialog.open<AddMobilePageDialogComponent, null,
       CustomMobilePage>(AddMobilePageDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
     }).afterClosed().subscribe((menuItem) => {
       if (menuItem) {
         const menuItemsArray = this.pagesFormArray();

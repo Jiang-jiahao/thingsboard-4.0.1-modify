@@ -10,7 +10,7 @@ import { MessageType, messageTypeNames } from '@shared/models/rule-node.models';
 import { objectValues } from '@core/utils';
 
 @Component({
-  selector: 'tb-message-type-autocomplete',
+  selector: 'jnks-iot-message-type-autocomplete',
   templateUrl: './message-type-autocomplete.component.html',
   styleUrls: [],
   providers: [{

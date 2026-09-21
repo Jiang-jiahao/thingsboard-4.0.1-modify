@@ -2,8 +2,8 @@ package com.jnks.iot.rule.engine.telemetry;
 
 import jakarta.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
-import com.jnks.iot.rule.engine.api.TbContext;
-import com.jnks.iot.server.common.msg.TbMsg;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class AttributesDeleteNodeCallback extends TelemetryNodeCallback {
     private String scope;
     private List<String> keys;
 
-    public AttributesDeleteNodeCallback(TbContext ctx, TbMsg msg, String scope, List<String> keys) {
+    public AttributesDeleteNodeCallback(JnksIotContext ctx, JnksIotMsg msg, String scope, List<String> keys) {
         super(ctx, msg);
         this.scope = scope;
         this.keys = keys;
@@ -21,10 +21,10 @@ public class AttributesDeleteNodeCallback extends TelemetryNodeCallback {
 
     @Override
     public void onSuccess(@Nullable Void result) {
-        TbContext ctx = this.getCtx();
-        TbMsg tbMsg = this.getMsg();
-        ctx.enqueue(ctx.attributesDeletedActionMsg(tbMsg.getOriginator(), ctx.getSelfId(), scope, keys),
-                () -> ctx.tellSuccess(tbMsg),
-                throwable -> ctx.tellFailure(tbMsg, throwable));
+        JnksIotContext ctx = this.getCtx();
+        JnksIotMsg jnksIotMsg = this.getMsg();
+        ctx.enqueue(ctx.attributesDeletedActionMsg(jnksIotMsg.getOriginator(), ctx.getSelfId(), scope, keys),
+                () -> ctx.tellSuccess(jnksIotMsg),
+                throwable -> ctx.tellFailure(jnksIotMsg, throwable));
     }
 }

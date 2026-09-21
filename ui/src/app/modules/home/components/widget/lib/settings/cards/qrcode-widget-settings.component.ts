@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@core/core.state';
 
 @Component({
-  selector: 'tb-qrcode-widget-settings',
+  selector: 'jnks-iot-qrcode-widget-settings',
   templateUrl: './qrcode-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

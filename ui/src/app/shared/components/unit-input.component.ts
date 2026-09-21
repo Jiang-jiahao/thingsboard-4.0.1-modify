@@ -23,7 +23,7 @@ import { ResourcesService } from '@core/services/resources.service';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-unit-input',
+  selector: 'jnks-iot-unit-input',
   templateUrl: './unit-input.component.html',
   styleUrls: ['./unit-input.component.scss'],
   providers: [

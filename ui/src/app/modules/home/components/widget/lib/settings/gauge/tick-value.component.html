@@ -1,12 +1,12 @@
 <div class="flex flex-row" [formGroup]="tickValueFormGroup">
-  <tb-value-source-data-key class="flex-1"
+  <jnks-iot-value-source-data-key class="flex-1"
                             formControlName="tickValue"
                             [aliasController]="aliasController"
                             [dataKeyCallbacks]="dataKeyCallbacks"
                             [datasource]="datasource">
-  </tb-value-source-data-key>
+  </jnks-iot-value-source-data-key>
   <button *ngIf="!disabled" mat-icon-button
-          class="tb-box-button"
+          class="jnks-iot-box-button"
           type="button"
           (click)="removeTickValue.emit()"
           matTooltip="{{ 'action.remove' | translate }}"

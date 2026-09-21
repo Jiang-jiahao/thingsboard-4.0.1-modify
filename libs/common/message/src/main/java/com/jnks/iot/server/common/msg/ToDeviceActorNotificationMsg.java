@@ -8,6 +8,6 @@ import java.io.Serializable;
 /**
  * @author Andrew Shvayka
  */
-public interface ToDeviceActorNotificationMsg extends TbActorMsg, TenantAwareMsg, DeviceAwareMsg, Serializable {
+public interface ToDeviceActorNotificationMsg extends JnksIotActorMsg, TenantAwareMsg, DeviceAwareMsg, Serializable {
 
 }

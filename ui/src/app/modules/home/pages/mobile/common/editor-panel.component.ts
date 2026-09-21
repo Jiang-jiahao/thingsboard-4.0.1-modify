@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormControl } from '@angular/forms';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { EditorOptions } from 'tinymce';
 
 @Component({
-  selector: 'tb-release-notes-panel',
+  selector: 'jnks-iot-release-notes-panel',
   templateUrl: './editor-panel.component.html',
   styleUrls: ['./editor-panel.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -21,7 +21,7 @@ export class EditorPanelComponent implements OnInit {
   title: string;
 
   @Input()
-  popover: TbPopoverComponent<EditorPanelComponent>;
+  popover: JnksIotPopoverComponent<EditorPanelComponent>;
 
   @Output()
   editorContentApplied = new EventEmitter<string>();
@@ -43,7 +43,7 @@ export class EditorPanelComponent implements OnInit {
     resize: false,
     setup: (editor) => {
       editor.on('PostRender', function() {
-        const container = editor.getContainer().closest('.tb-popover-content');
+        const container = editor.getContainer().closest('.jnks-iot-popover-content');
         const uiContainer = document.querySelector('.tox.tox-tinymce-aux');
         container.parentNode.appendChild(uiContainer);
       });

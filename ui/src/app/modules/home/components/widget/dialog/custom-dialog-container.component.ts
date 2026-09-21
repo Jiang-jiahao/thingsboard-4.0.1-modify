@@ -28,7 +28,7 @@ export interface CustomDialogContainerData {
 }
 
 @Component({
-  selector: 'tb-custom-dialog-container-component',
+  selector: 'jnks-iot-custom-dialog-container-component',
   template: ''
 })
 export class CustomDialogContainerComponent extends DialogComponent<CustomDialogContainerComponent> implements OnDestroy {

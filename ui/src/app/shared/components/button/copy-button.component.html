@@ -6,9 +6,9 @@
         [matTooltip]="matTooltipText"
         [matTooltipPosition]="matTooltipPosition"
         (click)="copy($event)">
-  <tb-icon [style]="style" *ngIf="!copied; else copiedTemplate">
+  <jnks-iot-icon [style]="style" *ngIf="!copied; else copiedTemplate">
     {{  icon || mdiIcon }}
-  </tb-icon>
+  </jnks-iot-icon>
   <ng-template #copiedTemplate>
     <mat-icon [style]="style" class="copied">done</mat-icon>
   </ng-template>

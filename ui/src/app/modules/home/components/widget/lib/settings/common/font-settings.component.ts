@@ -2,13 +2,13 @@ import { Component, forwardRef, Input, OnInit, Renderer2, ViewContainerRef } fro
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ComponentStyle, cssUnit, Font } from '@shared/models/widget-settings.models';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { FontSettingsPanelComponent } from '@home/components/widget/lib/settings/common/font-settings-panel.component';
 import { isDefinedAndNotNull } from '@core/utils';
 import { coerceBoolean } from '@shared/decorators/coercion';
 
 @Component({
-  selector: 'tb-font-settings',
+  selector: 'jnks-iot-font-settings',
   templateUrl: './font-settings.component.html',
   styleUrls: [],
   providers: [
@@ -49,7 +49,7 @@ export class FontSettingsComponent implements OnInit, ControlValueAccessor {
 
   private propagateChange = null;
 
-  constructor(private popoverService: TbPopoverService,
+  constructor(private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef) {}
 
@@ -102,8 +102,8 @@ export class FontSettingsComponent implements OnInit, ControlValueAccessor {
         context: ctx,
         isModal: true
       });
-      fontSettingsPanelPopover.tbComponentRef.instance.popover = fontSettingsPanelPopover;
-      fontSettingsPanelPopover.tbComponentRef.instance.fontApplied.subscribe((font) => {
+      fontSettingsPanelPopover.jnksIotComponentRef.instance.popover = fontSettingsPanelPopover;
+      fontSettingsPanelPopover.jnksIotComponentRef.instance.fontApplied.subscribe((font) => {
         fontSettingsPanelPopover.hide();
         this.modelValue = font;
         this.propagateChange(this.modelValue);

@@ -6,7 +6,7 @@ import { AppState } from '@core/core.state';
 import { scadaSymbolWidgetDefaultSettings } from '@home/components/widget/lib/scada/scada-symbol-widget.models';
 
 @Component({
-  selector: 'tb-scada-symbol-widget-settings',
+  selector: 'jnks-iot-scada-symbol-widget-settings',
   templateUrl: './scada-symbol-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

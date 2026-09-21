@@ -11,7 +11,7 @@ import type { JsFuncComponent } from '@app/shared/components/js-func.component';
 import { DebugRuleNodeEventBody } from '@shared/models/event.models';
 
 @Component({
-  selector: 'tb-action-node-log-config',
+  selector: 'jnks-iot-action-node-log-config',
   templateUrl: './log-config.component.html',
   styleUrls: []
 })

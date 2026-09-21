@@ -6,12 +6,12 @@ import lombok.ToString;
 import com.jnks.iot.server.common.data.id.EntityId;
 import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.msg.MsgType;
-import com.jnks.iot.server.common.msg.TbActorMsg;
+import com.jnks.iot.server.common.msg.JnksIotActorMsg;
 
 @AllArgsConstructor
 @Getter
 @ToString
-public final class StatsPersistMsg implements TbActorMsg {
+public final class StatsPersistMsg implements JnksIotActorMsg {
 
     private final long messagesProcessed;
     private final long errorsOccurred;

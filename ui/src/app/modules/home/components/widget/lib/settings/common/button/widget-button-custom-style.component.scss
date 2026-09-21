@@ -1,6 +1,6 @@
 @import '../../../../../../../../../scss/constants';
 
-.tb-widget-button-custom-style {
+.jnks-iot-widget-button-custom-style {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -8,7 +8,7 @@
   button.mat-mdc-icon-button {
     color: rgba(0,0,0,0.56);
   }
-  .tb-widget-button-preview-panel {
+  .jnks-iot-widget-button-preview-panel {
     width: 148px;
     height: 48px;
     padding: 8px 12px;
@@ -17,13 +17,13 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    tb-widget-button {
+    jnks-iot-widget-button {
       width: 84px;
       height: 100%;
     }
     @media #{$mat-gt-xs} {
       width: 168px;
-      tb-widget-button {
+      jnks-iot-widget-button {
         width: 104px;
       }
     }

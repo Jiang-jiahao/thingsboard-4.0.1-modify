@@ -20,7 +20,7 @@ import { WidgetService } from '@core/http/widget.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-markers-settings',
+  selector: 'jnks-iot-markers-settings',
   templateUrl: './markers-settings.component.html',
   styleUrls: ['./../../widget-settings.scss'],
   providers: [

@@ -32,7 +32,7 @@ import {
 } from '@home/components/widget/lib/indicator/signal-strength-widget.models';
 
 @Component({
-  selector: 'tb-signal-strength-basic-config',
+  selector: 'jnks-iot-signal-strength-basic-config',
   templateUrl: './signal-strength-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

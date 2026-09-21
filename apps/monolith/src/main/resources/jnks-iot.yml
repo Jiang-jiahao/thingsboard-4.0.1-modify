@@ -47,33 +47,33 @@ server:
   log_controller_error_stack_trace: "${HTTP_LOG_CONTROLLER_ERROR_STACK_TRACE:false}"
   ws:
     # 向客户端 WebSocket 会话发送数据的超时时间（毫秒）
-    send_timeout: "${TB_SERVER_WS_SEND_TIMEOUT:5000}"
+    send_timeout: "${JNKS_IOT_SERVER_WS_SEND_TIMEOUT:5000}"
     # 建议超时时间 >= 30 秒。平台将在超时时间内尝试发送 3 次 'ping' 请求
-    ping_timeout: "${TB_SERVER_WS_PING_TIMEOUT:30000}"
+    ping_timeout: "${JNKS_IOT_SERVER_WS_PING_TIMEOUT:30000}"
     dynamic_page_link:
       # 动态告警及实体数据查询的刷新频率
-      refresh_interval: "${TB_SERVER_WS_DYNAMIC_PAGE_LINK_REFRESH_INTERVAL_SEC:60}"
+      refresh_interval: "${JNKS_IOT_SERVER_WS_DYNAMIC_PAGE_LINK_REFRESH_INTERVAL_SEC:60}"
       # 执行动态查询的线程池大小
-      refresh_pool_size: "${TB_SERVER_WS_DYNAMIC_PAGE_LINK_REFRESH_POOL_SIZE:1}"
+      refresh_pool_size: "${JNKS_IOT_SERVER_WS_DYNAMIC_PAGE_LINK_REFRESH_POOL_SIZE:1}"
       # 每个刷新间隔内动态查询的最大数量。例如，用户在所有浏览器中同时执行的告警查询不超过 10 个。
-      max_alarm_queries_per_refresh_interval: "${TB_SERVER_WS_MAX_ALARM_QUERIES_PER_REFRESH_INTERVAL:10}"
+      max_alarm_queries_per_refresh_interval: "${JNKS_IOT_SERVER_WS_MAX_ALARM_QUERIES_PER_REFRESH_INTERVAL:10}"
       # 每个用户的动态查询最大数量。例如，用户在所有浏览器中同时打开的告警组件不超过 10 个
-      max_per_user: "${TB_SERVER_WS_DYNAMIC_PAGE_LINK_MAX_PER_USER:10}"
+      max_per_user: "${JNKS_IOT_SERVER_WS_DYNAMIC_PAGE_LINK_MAX_PER_USER:10}"
     # 单个实体订阅返回的实体最大数量。例如，地图组件上不超过 10,000 个实体
-    max_entities_per_data_subscription: "${TB_SERVER_WS_MAX_ENTITIES_PER_DATA_SUBSCRIPTION:10000}"
+    max_entities_per_data_subscription: "${JNKS_IOT_SERVER_WS_MAX_ENTITIES_PER_DATA_SUBSCRIPTION:10000}"
     # 单个告警订阅返回的告警最大数量。例如，告警组件上不超过 10,000 条告警
-    max_entities_per_alarm_subscription: "${TB_SERVER_WS_MAX_ENTITIES_PER_ALARM_SUBSCRIPTION:10000}"
+    max_entities_per_alarm_subscription: "${JNKS_IOT_SERVER_WS_MAX_ENTITIES_PER_ALARM_SUBSCRIPTION:10000}"
     # 每个会话 WebSocket 更新的最大队列大小。此限制可防止 WS 无限更新
-    max_queue_messages_per_session: "${TB_SERVER_WS_DEFAULT_QUEUE_MESSAGES_PER_SESSION:1000}"
+    max_queue_messages_per_session: "${JNKS_IOT_SERVER_WS_DEFAULT_QUEUE_MESSAGES_PER_SESSION:1000}"
     # WS 会话打开与发送鉴权命令之间的最大时间
-    auth_timeout_ms: "${TB_SERVER_WS_AUTH_TIMEOUT_MS:10000}"
+    auth_timeout_ms: "${JNKS_IOT_SERVER_WS_AUTH_TIMEOUT_MS:10000}"
     rate_limits:
       # WS 订阅的每租户速率限制
-      subscriptions_per_tenant: "${TB_SERVER_WS_SUBSCRIPTIONS_PER_TENANT_RATE_LIMIT:}"
+      subscriptions_per_tenant: "${JNKS_IOT_SERVER_WS_SUBSCRIPTIONS_PER_TENANT_RATE_LIMIT:}"
       # WS 订阅的每用户速率限制
-      subscriptions_per_user: "${TB_SERVER_WS_SUBSCRIPTIONS_PER_USER_RATE_LIMIT:}"
+      subscriptions_per_user: "${JNKS_IOT_SERVER_WS_SUBSCRIPTIONS_PER_USER_RATE_LIMIT:}"
     # 单个告警状态订阅在缓存中保存的活动源告警 ID 最大数量。例如，告警组件上不超过 10 个告警 ID
-    alarms_per_alarm_status_subscription_cache_size: "${TB_ALARMS_PER_ALARM_STATUS_SUBSCRIPTION_CACHE_SIZE:10}"
+    alarms_per_alarm_status_subscription_cache_size: "${JNKS_IOT_ALARMS_PER_ALARM_STATUS_SUBSCRIPTION_CACHE_SIZE:10}"
   rest:
     server_side_rpc:
       # 服务端 RPC 超时的最小值。可覆盖 REST API 调用中提供的值。
@@ -114,9 +114,9 @@ zk:
 cluster:
   stats:
     # 启用/禁用集群统计。按类型计算集群节点之间发送的消息数量
-    enabled: "${TB_CLUSTER_STATS_ENABLED:false}"
+    enabled: "${JNKS_IOT_CLUSTER_STATS_ENABLED:false}"
     # 将集群统计信息打印到日志文件的间隔
-    print_interval_ms: "${TB_CLUSTER_STATS_PRINT_INTERVAL_MS:10000}"
+    print_interval_ms: "${JNKS_IOT_CLUSTER_STATS_PRINT_INTERVAL_MS:10000}"
 
 # 插件配置参数
 plugins:
@@ -676,15 +676,15 @@ redis:
   # SSL 配置
   ssl:
     # 启用/禁用安全连接
-    enabled: "${TB_REDIS_SSL_ENABLED:false}"
+    enabled: "${JNKS_IOT_REDIS_SSL_ENABLED:false}"
     # 服务端 SSL 凭证（仅支持 PEM 格式）
     credentials:
       # Redis 服务端（CA）证书路径
-      cert_file: "${TB_REDIS_SSL_PEM_CERT:}"
+      cert_file: "${JNKS_IOT_REDIS_SSL_PEM_CERT:}"
       # 用户证书文件路径。客户端可选，可用于客户端双向认证
-      user_cert_file: "${TB_REDIS_SSL_PEM_KEY:}"
+      user_cert_file: "${JNKS_IOT_REDIS_SSL_PEM_KEY:}"
       # 用户私钥文件路径。客户端可选，仅在配置了 'user_cert_file' 时需要
-      user_key_file: "${TB_REDIS_SSL_PEM_KEY_PASSWORD:}"
+      user_key_file: "${JNKS_IOT_REDIS_SSL_PEM_KEY_PASSWORD:}"
   # 连接池配置
   pool_config:
     # 连接池可分配的最大连接数
@@ -822,7 +822,7 @@ audit-log:
       "entity_view": "${AUDIT_LOG_MASK_ENTITY_VIEW:W}" # 实体视图日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
       "device_profile": "${AUDIT_LOG_MASK_DEVICE_PROFILE:W}" # 设备配置文件日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
       "asset_profile": "${AUDIT_LOG_MASK_ASSET_PROFILE:W}" # 资产配置文件日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
-      "tb_resource": "${AUDIT_LOG_MASK_RESOURCE:W}" # TB 资源日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
+      "jnks_iot_resource": "${AUDIT_LOG_MASK_RESOURCE:W}" # TB 资源日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
       "ota_package": "${AUDIT_LOG_MASK_OTA_PACKAGE:W}" # OTA 包日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
       "calculated_field": "${AUDIT_LOG_MASK_CALCULATED_FIELD:W}" # 计算字段日志级别。允许的值：OFF（禁用）、W（记录写操作）、RW（记录读写操作
   sink:
@@ -846,7 +846,7 @@ audit-log:
 state:
   # 设备不活动超时是全局配置参数，定义设备何时被服务器标记为「inactive」。
   # 参数值单位为秒。用户可通过设置服务端属性「inactivityTimeout」为单个设备覆盖此参数（注意：期望值为毫秒）。
-  # 建议此参数与会话不活动超时（"transport.sessions.inactivity_timeout" 或 TB_TRANSPORT_SESSIONS_INACTIVITY_TIMEOUT）参数保持一致
+  # 建议此参数与会话不活动超时（"transport.sessions.inactivity_timeout" 或 JNKS_IOT_TRANSPORT_SESSIONS_INACTIVITY_TIMEOUT）参数保持一致
   # 该参数负责检测过期的设备连接会话。
   # 会话不活动超时参数值应大于或等于设备不活动超时。
   # 注意：会话不活动超时以毫秒为单位，设备不活动超时以秒为单位。
@@ -895,9 +895,9 @@ tbel:
   compiled_scripts_cache_size: "${TBEL_COMPILED_SCRIPTS_CACHE_SIZE:1000}"
   stats:
     # 启用/禁用 TBEL 引擎统计收集
-    enabled: "${TB_TBEL_STATS_ENABLED:false}"
+    enabled: "${JNKS_IOT_TBEL_STATS_ENABLED:false}"
     # TBEL 统计日志输出间隔
-    print_interval_ms: "${TB_TBEL_STATS_PRINT_INTERVAL_MS:10000}"
+    print_interval_ms: "${JNKS_IOT_TBEL_STATS_PRINT_INTERVAL_MS:10000}"
 
 # JS 参数
 js:
@@ -929,9 +929,9 @@ js:
     max_black_list_duration_sec: "${LOCAL_JS_SANDBOX_MAX_BLACKLIST_DURATION_SEC:60}"
     stats:
       # 启用/禁用本地 JS 执行器统计收集
-      enabled: "${TB_JS_LOCAL_STATS_ENABLED:false}"
+      enabled: "${JNKS_IOT_JS_LOCAL_STATS_ENABLED:false}"
       # 本地 JS 执行器统计日志输出间隔
-      print_interval_ms: "${TB_JS_LOCAL_STATS_PRINT_INTERVAL_MS:10000}"
+      print_interval_ms: "${JNKS_IOT_JS_LOCAL_STATS_PRINT_INTERVAL_MS:10000}"
   # 远程 JavaScript 环境属性
   remote:
     # 指定 JavaScript 执行器服务的线程池大小
@@ -942,9 +942,9 @@ js:
     max_black_list_duration_sec: "${REMOTE_JS_SANDBOX_MAX_BLACKLIST_DURATION_SEC:60}"
     stats:
       # 启用/禁用远程 JS 执行器统计收集
-      enabled: "${TB_JS_REMOTE_STATS_ENABLED:false}"
+      enabled: "${JNKS_IOT_JS_REMOTE_STATS_ENABLED:false}"
       # 远程 JS 执行器统计日志输出间隔
-      print_interval_ms: "${TB_JS_REMOTE_STATS_PRINT_INTERVAL_MS:10000}"
+      print_interval_ms: "${JNKS_IOT_JS_REMOTE_STATS_PRINT_INTERVAL_MS:10000}"
 
 # 传输配置参数
 transport:
@@ -957,9 +957,9 @@ transport:
     # 该参数负责在平台核心服务中检测设备连接状态。
     # 会话不活动超时参数值应大于或等于设备不活动超时。
     # 注意：会话不活动超时以毫秒为单位，设备不活动超时以秒为单位。
-    inactivity_timeout: "${TB_TRANSPORT_SESSIONS_INACTIVITY_TIMEOUT:600000}"
+    inactivity_timeout: "${JNKS_IOT_TRANSPORT_SESSIONS_INACTIVITY_TIMEOUT:600000}"
     # 定期检查过期会话并上报会话最后活动时间变更的间隔
-    report_timeout: "${TB_TRANSPORT_SESSIONS_REPORT_TIMEOUT:3000}"
+    report_timeout: "${JNKS_IOT_TRANSPORT_SESSIONS_REPORT_TIMEOUT:3000}"
   activity:
     # 此属性指定每个上报周期内活动事件的上报策略。
     # 接受的值为 'FIRST'、'LAST'、'FIRST_AND_LAST' 和 'ALL'。
@@ -967,7 +967,7 @@ transport:
     # - 'LAST'：每个上报周期内仅上报最后一个 activity 事件。
     # - 'FIRST_AND_LAST'：上报周期内的第一个和最后一个 activity 事件均会上报。
     # - 'ALL'：上报周期内的所有 activity 事件均会上报。
-    reporting_strategy: "${TB_TRANSPORT_ACTIVITY_REPORTING_STRATEGY:LAST}"
+    reporting_strategy: "${JNKS_IOT_TRANSPORT_ACTIVITY_REPORTING_STRATEGY:LAST}"
   json:
     # 处理 Telemetry/Attributes JSON 时，尽可能将 String 类型转换为 Numeric
     type_cast_enabled: "${JSON_TYPE_CAST_ENABLED:true}"
@@ -977,19 +977,19 @@ transport:
     # 客户端侧 RPC 命令的处理超时间隔，单位为毫秒
     timeout: "${CLIENT_SIDE_RPC_TIMEOUT:60000}"
   # 启用/禁用 http/mqtt/coap/lwm2m 传输协议（优先级高于各协议自身的 enabled 属性）
-  api_enabled: "${TB_TRANSPORT_API_ENABLED:true}"
+  api_enabled: "${JNKS_IOT_TRANSPORT_API_ENABLED:true}"
   log:
     # 启用/禁用将传输消息记录到 telemetry 的日志，例如 LwM2M 注册更新日志
-    enabled: "${TB_TRANSPORT_LOG_ENABLED:true}"
+    enabled: "${JNKS_IOT_TRANSPORT_LOG_ENABLED:true}"
     # 日志消息的最大长度，超出时将截断至指定值
-    max_length: "${TB_TRANSPORT_LOG_MAX_LENGTH:1024}"
+    max_length: "${JNKS_IOT_TRANSPORT_LOG_MAX_LENGTH:1024}"
   rate_limits:
     # 启用或禁用通用速率限制；设备和租户级速率限制在 Tenant Profile 中配置
-    ip_limits_enabled: "${TB_TRANSPORT_IP_RATE_LIMITS_ENABLED:false}"
+    ip_limits_enabled: "${JNKS_IOT_TRANSPORT_IP_RATE_LIMITS_ENABLED:false}"
     # 使用无效凭据的最大连接尝试次数
-    max_wrong_credentials_per_ip: "${TB_TRANSPORT_MAX_WRONG_CREDENTIALS_PER_IP:10}"
+    max_wrong_credentials_per_ip: "${JNKS_IOT_TRANSPORT_MAX_WRONG_CREDENTIALS_PER_IP:10}"
     # IP 封禁过期时间（毫秒）
-    ip_block_timeout: "${TB_TRANSPORT_IP_BLOCK_TIMEOUT:60000}"
+    ip_block_timeout: "${JNKS_IOT_TRANSPORT_IP_BLOCK_TIMEOUT:60000}"
   tcp:
     enabled: "${TCP_TRANSPORT_ENABLED:true}"
     server:
@@ -1166,7 +1166,7 @@ transport:
             # 访问密钥的密码
             key_password: "${LWM2M_SERVER_KEY_PASSWORD:server_ks_password}"
         # 仅 Certificate_x509：
-        skip_validity_check_for_client_cert: "${TB_LWM2M_SERVER_SECURITY_SKIP_VALIDITY_CHECK_FOR_CLIENT_CERT:false}"
+        skip_validity_check_for_client_cert: "${JNKS_IOT_LWM2M_SERVER_SECURITY_SKIP_VALIDITY_CHECK_FOR_CLIENT_CERT:false}"
     bootstrap:
       # 启用/禁用 Bootstrap Server
       enabled: "${LWM2M_ENABLED_BS:true}"
@@ -1272,20 +1272,20 @@ transport:
     scheduler_thread_pool_size: "${SNMP_SCHEDULER_THREAD_POOL_SIZE:4}"
   stats:
     # 启用/禁用传输统计信息收集
-    enabled: "${TB_TRANSPORT_STATS_ENABLED:true}"
+    enabled: "${JNKS_IOT_TRANSPORT_STATS_ENABLED:true}"
     # 传输统计信息日志输出间隔
-    print-interval-ms: "${TB_TRANSPORT_STATS_PRINT_INTERVAL_MS:60000}"
+    print-interval-ms: "${JNKS_IOT_TRANSPORT_STATS_PRINT_INTERVAL_MS:60000}"
   gateway:
     dashboard:
       sync:
         # 启用/禁用网关仪表板与 Git 仓库同步
-        enabled: "${TB_GATEWAY_DASHBOARD_SYNC_ENABLED:true}"
+        enabled: "${JNKS_IOT_GATEWAY_DASHBOARD_SYNC_ENABLED:true}"
         # 网关仪表板仓库 URL
-        repository_url: "${TB_GATEWAY_DASHBOARD_SYNC_REPOSITORY_URL:https://github.com/thingsboard/gateway-management-extensions-dist.git}"
+        repository_url: "${JNKS_IOT_GATEWAY_DASHBOARD_SYNC_REPOSITORY_URL:https://github.com/thingsboard/gateway-management-extensions-dist.git}"
         # 网关仪表板仓库工作分支
-        branch: "${TB_GATEWAY_DASHBOARD_SYNC_BRANCH:release/4.0.0}"
+        branch: "${JNKS_IOT_GATEWAY_DASHBOARD_SYNC_BRANCH:release/4.0.0}"
         # 网关仪表板仓库拉取频率（小时）
-        fetch_frequency: "${TB_GATEWAY_DASHBOARD_SYNC_FETCH_FREQUENCY:24}"
+        fetch_frequency: "${JNKS_IOT_GATEWAY_DASHBOARD_SYNC_FETCH_FREQUENCY:24}"
 
 # CoAP 服务端参数
 coap:
@@ -1365,11 +1365,11 @@ coap:
         key_password: "${COAP_DTLS_KEY_PASSWORD:server_key_password}"
     x509:
       # 跳过对客户端证书的有效期检查
-      skip_validity_check_for_client_cert: "${TB_COAP_X509_DTLS_SKIP_VALIDITY_CHECK_FOR_CLIENT_CERT:false}"
+      skip_validity_check_for_client_cert: "${JNKS_IOT_COAP_X509_DTLS_SKIP_VALIDITY_CHECK_FOR_CLIENT_CERT:false}"
       # DTLS 会话不活动超时，用于清理缓存
-      dtls_session_inactivity_timeout: "${TB_COAP_X509_DTLS_SESSION_INACTIVITY_TIMEOUT:86400000}"
+      dtls_session_inactivity_timeout: "${JNKS_IOT_COAP_X509_DTLS_SESSION_INACTIVITY_TIMEOUT:86400000}"
       # 周期性驱逐超时 DTLS 会话的间隔
-      dtls_session_report_timeout: "${TB_COAP_X509_DTLS_SESSION_REPORT_TIMEOUT:1800000}"
+      dtls_session_report_timeout: "${JNKS_IOT_COAP_X509_DTLS_SESSION_REPORT_TIMEOUT:1800000}"
 
 # 设备连通性参数
 device:
@@ -1421,7 +1421,7 @@ device:
       # CoAP CA 根证书文件路径
       pem_cert_file: "${DEVICE_CONNECTIVITY_COAPS_CA_ROOT_CERT:cafile.pem}"
     gateway:
-      # docker-compose 中启动网关所使用的 jnks-iot/tb-gateway 镜像 docker tag
+      # docker-compose 中启动网关所使用的 jnks-iot/jnks-iot-gateway 镜像 docker tag
       image_version: "${DEVICE_CONNECTIVITY_GATEWAY_IMAGE_VERSION:3.7-stable}"
 
 
@@ -1463,271 +1463,271 @@ swagger:
 
 # 队列配置参数
 queue:
-  type: "${TB_QUEUE_TYPE:in-memory}" # in-memory 或 kafka (Apache Kafka)
-  prefix: "${TB_QUEUE_PREFIX:}" # 全局队列前缀。若指定，前缀将加在默认主题名之前：'prefix.default_topic_name'。前缀应用于所有主题（Kafka 还包括 consumer groups）。
+  type: "${JNKS_IOT_QUEUE_TYPE:in-memory}" # in-memory 或 kafka (Apache Kafka)
+  prefix: "${JNKS_IOT_QUEUE_PREFIX:}" # 全局队列前缀。若指定，前缀将加在默认主题名之前：'prefix.default_topic_name'。前缀应用于所有主题（Kafka 还包括 consumer groups）。
   in_memory:
     stats:
       # 用于 debug 级别
-      print-interval-ms: "${TB_QUEUE_IN_MEMORY_STATS_PRINT_INTERVAL_MS:60000}"
+      print-interval-ms: "${JNKS_IOT_QUEUE_IN_MEMORY_STATS_PRINT_INTERVAL_MS:60000}"
   kafka:
     # Kafka Bootstrap 节点，格式为 "host:port"
-    bootstrap.servers: "${TB_KAFKA_SERVERS:localhost:9092}"
+    bootstrap.servers: "${JNKS_IOT_KAFKA_SERVERS:localhost:9092}"
     ssl:
       # 启用/禁用 Kafka SSL 通信
-      enabled: "${TB_KAFKA_SSL_ENABLED:false}"
+      enabled: "${JNKS_IOT_KAFKA_SSL_ENABLED:false}"
       # trust store 文件的位置
-      truststore.location: "${TB_KAFKA_SSL_TRUSTSTORE_LOCATION:}"
+      truststore.location: "${JNKS_IOT_KAFKA_SSL_TRUSTSTORE_LOCATION:}"
       # 若指定则 trust store 文件的密码
-      truststore.password: "${TB_KAFKA_SSL_TRUSTSTORE_PASSWORD:}"
+      truststore.password: "${JNKS_IOT_KAFKA_SSL_TRUSTSTORE_PASSWORD:}"
       # key store 文件的位置。对客户端为可选，可用于客户端双向认证
-      keystore.location: "${TB_KAFKA_SSL_KEYSTORE_LOCATION:}"
+      keystore.location: "${JNKS_IOT_KAFKA_SSL_KEYSTORE_LOCATION:}"
       # key store 文件的 store 密码。对客户端为可选，仅在配置了 ‘ssl.keystore.location’ 时需要。PEM 格式不支持 key store 密码
-      keystore.password: "${TB_KAFKA_SSL_KEYSTORE_PASSWORD:}"
+      keystore.password: "${JNKS_IOT_KAFKA_SSL_KEYSTORE_PASSWORD:}"
       # key store 文件中私钥或 ‘keystore.key’ 指定的 PEM 密钥的密码
-      key.password: "${TB_KAFKA_SSL_KEY_PASSWORD:}"
+      key.password: "${JNKS_IOT_KAFKA_SSL_KEY_PASSWORD:}"
     # producer 认为请求完成前要求 leader 收到的确认数。控制发送记录的持久性。允许的值：0、1 和 all
-    acks: "${TB_KAFKA_ACKS:all}"
+    acks: "${JNKS_IOT_KAFKA_ACKS:all}"
     # 重试次数。对因可能为瞬时错误而发送失败的记录进行重发
-    retries: "${TB_KAFKA_RETRIES:1}"
+    retries: "${JNKS_IOT_KAFKA_RETRIES:1}"
     # producer 生成的所有数据的压缩类型。默认为 none（即不压缩）。有效值：none 或 gzip
-    compression.type: "${TB_KAFKA_COMPRESSION_TYPE:none}" # none 或 gzip
+    compression.type: "${JNKS_IOT_KAFKA_COMPRESSION_TYPE:none}" # none 或 gzip
     # 默认 batch 大小。此设置给出待发送 batch 大小的上限
-    batch.size: "${TB_KAFKA_BATCH_SIZE:16384}"
+    batch.size: "${JNKS_IOT_KAFKA_BATCH_SIZE:16384}"
     # 此变量产生少量人为延迟，即不会立即发送记录
-    linger.ms: "${TB_KAFKA_LINGER_MS:1}"
+    linger.ms: "${JNKS_IOT_KAFKA_LINGER_MS:1}"
     # 请求的最大字节大小。此设置限制 producer 在单次请求中发送的 record batch 数量，以避免发送过大请求
-    max.request.size: "${TB_KAFKA_MAX_REQUEST_SIZE:1048576}"
+    max.request.size: "${JNKS_IOT_KAFKA_MAX_REQUEST_SIZE:1048576}"
     # 客户端在阻塞前可在单条连接上发送的最大未确认请求数
-    max.in.flight.requests.per.connection: "${TB_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION:5}"
+    max.in.flight.requests.per.connection: "${JNKS_IOT_KAFKA_MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION:5}"
     # producer 可用于缓冲待发送到服务器的记录的内存总字节数
-    buffer.memory: "${TB_BUFFER_MEMORY:33554432}"
+    buffer.memory: "${JNKS_IOT_BUFFER_MEMORY:33554432}"
     # Kafka 多个 broker 上的数据副本数
-    replication_factor: "${TB_QUEUE_KAFKA_REPLICATION_FACTOR:1}"
+    replication_factor: "${JNKS_IOT_QUEUE_KAFKA_REPLICATION_FACTOR:1}"
     # 使用 consumer group 管理时 poll() 方法调用之间的最大延迟。限制 consumer 在获取更多记录前可空闲的最长时间
-    max_poll_interval_ms: "${TB_QUEUE_KAFKA_MAX_POLL_INTERVAL_MS:300000}"
+    max_poll_interval_ms: "${JNKS_IOT_QUEUE_KAFKA_MAX_POLL_INTERVAL_MS:300000}"
     # 单次 poll() 调用返回的最大记录数
-    max_poll_records: "${TB_QUEUE_KAFKA_MAX_POLL_RECORDS:8192}"
+    max_poll_records: "${JNKS_IOT_QUEUE_KAFKA_MAX_POLL_RECORDS:8192}"
     # 服务器每个分区返回的最大数据量。consumer 以 batch 方式获取记录
-    max_partition_fetch_bytes: "${TB_QUEUE_KAFKA_MAX_PARTITION_FETCH_BYTES:16777216}"
+    max_partition_fetch_bytes: "${JNKS_IOT_QUEUE_KAFKA_MAX_PARTITION_FETCH_BYTES:16777216}"
     # 服务器返回的最大数据量。consumer 以 batch 方式获取记录
-    fetch_max_bytes: "${TB_QUEUE_KAFKA_FETCH_MAX_BYTES:134217728}"
-    request.timeout.ms: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 秒) # 参见 https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
-    session.timeout.ms: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 秒) # 参见 https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
-    auto_offset_reset: "${TB_QUEUE_KAFKA_AUTO_OFFSET_RESET:earliest}" # earliest、latest 或 none
+    fetch_max_bytes: "${JNKS_IOT_QUEUE_KAFKA_FETCH_MAX_BYTES:134217728}"
+    request.timeout.ms: "${JNKS_IOT_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 秒) # 参见 https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
+    session.timeout.ms: "${JNKS_IOT_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 秒) # 参见 https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
+    auto_offset_reset: "${JNKS_IOT_QUEUE_KAFKA_AUTO_OFFSET_RESET:earliest}" # earliest、latest 或 none
     # 启用/禁用 Confluent Cloud
-    use_confluent_cloud: "${TB_QUEUE_KAFKA_USE_CONFLUENT_CLOUD:false}"
+    use_confluent_cloud: "${JNKS_IOT_QUEUE_KAFKA_USE_CONFLUENT_CLOUD:false}"
     confluent:
       # 客户端用于验证服务器主机名的端点识别算法。默认值为 https
-      ssl.algorithm: "${TB_QUEUE_KAFKA_CONFLUENT_SSL_ALGORITHM:https}"
+      ssl.algorithm: "${JNKS_IOT_QUEUE_KAFKA_CONFLUENT_SSL_ALGORITHM:https}"
       # 用于认证 Schema Registry 请求的机制。SASL/PLAIN 应仅与 TLS/SSL 传输层一起使用，以确保明文密码不会在未加密的情况下传输
-      sasl.mechanism: "${TB_QUEUE_KAFKA_CONFLUENT_SASL_MECHANISM:PLAIN}"
+      sasl.mechanism: "${JNKS_IOT_QUEUE_KAFKA_CONFLUENT_SASL_MECHANISM:PLAIN}"
       # 使用 JAAS 配置在 broker 上指定多个 SASL 机制
-      sasl.config: "${TB_QUEUE_KAFKA_CONFLUENT_SASL_JAAS_CONFIG:org.apache.kafka.common.security.plain.PlainLoginModule required username=\"CLUSTER_API_KEY\" password=\"CLUSTER_API_SECRET\";}"
+      sasl.config: "${JNKS_IOT_QUEUE_KAFKA_CONFLUENT_SASL_JAAS_CONFIG:org.apache.kafka.common.security.plain.PlainLoginModule required username=\"CLUSTER_API_KEY\" password=\"CLUSTER_API_SECRET\";}"
       # 与 broker 通信使用的协议。有效值：PLAINTEXT、SSL、SASL_PLAINTEXT、SASL_SSL
-      security.protocol: "${TB_QUEUE_KAFKA_CONFLUENT_SECURITY_PROTOCOL:SASL_SSL}"
-    # 按特定主题的 Kafka consumer 键值属性，例如 tb_ota_package 是 OTA 的主题名，tb_rule_engine.sq 是默认 SequentialByOriginator 队列的主题名。
-    # 参见 TB_QUEUE_CORE_OTA_TOPIC 和 TB_QUEUE_RE_SQ_TOPIC 参数
+      security.protocol: "${JNKS_IOT_QUEUE_KAFKA_CONFLUENT_SECURITY_PROTOCOL:SASL_SSL}"
+    # 按特定主题的 Kafka consumer 键值属性，例如 jnks_iot_ota_package 是 OTA 的主题名，jnks_iot_rule_engine.sq 是默认 SequentialByOriginator 队列的主题名。
+    # 参见 JNKS_IOT_QUEUE_CORE_OTA_TOPIC 和 JNKS_IOT_QUEUE_RE_SQ_TOPIC 参数
     consumer-properties-per-topic:
-      tb_ota_package:
-        # 按特定主题的 Kafka consumer 键值属性，例如 tb_ota_package 是 OTA 的主题名，tb_rule_engine.sq 是默认 SequentialByOriginator 队列的主题名。参见 TB_QUEUE_CORE_OTA_TOPIC 和 TB_QUEUE_RE_SQ_TOPIC 参数
+      jnks_iot_ota_package:
+        # 按特定主题的 Kafka consumer 键值属性，例如 jnks_iot_ota_package 是 OTA 的主题名，jnks_iot_rule_engine.sq 是默认 SequentialByOriginator 队列的主题名。参见 JNKS_IOT_QUEUE_CORE_OTA_TOPIC 和 JNKS_IOT_QUEUE_RE_SQ_TOPIC 参数
         - key: max.poll.records
           # 按主题指定 consumer 属性值的示例
-          value: "${TB_QUEUE_KAFKA_OTA_MAX_POLL_RECORDS:10}"
-      tb_version_control:
+          value: "${JNKS_IOT_QUEUE_KAFKA_OTA_MAX_POLL_RECORDS:10}"
+      jnks_iot_version_control:
         # 按主题指定 VC consumer 属性值的示例
         - key: max.poll.interval.ms
           # 按主题指定 VC consumer 属性值的示例
-          value: "${TB_QUEUE_KAFKA_VC_MAX_POLL_INTERVAL_MS:600000}"
-    #      tb_rule_engine.sq:
+          value: "${JNKS_IOT_QUEUE_KAFKA_VC_MAX_POLL_INTERVAL_MS:600000}"
+    #      jnks_iot_rule_engine.sq:
     #        - key: max.poll.records
-    #          value: "${TB_QUEUE_KAFKA_SQ_MAX_POLL_RECORDS:1024}"
-      tb_housekeeper:
+    #          value: "${JNKS_IOT_QUEUE_KAFKA_SQ_MAX_POLL_RECORDS:1024}"
+      jnks_iot_housekeeper:
         # Housekeeper 任务主题的 consumer 属性
         - key: max.poll.records
           # 单次 poll 返回的记录数。对于 Housekeeper 任务主题，应逐条消费消息（任务）
-          value: "${TB_QUEUE_KAFKA_HOUSEKEEPER_MAX_POLL_RECORDS:1}"
-      tb_housekeeper.reprocessing:
+          value: "${JNKS_IOT_QUEUE_KAFKA_HOUSEKEEPER_MAX_POLL_RECORDS:1}"
+      jnks_iot_housekeeper.reprocessing:
         # Housekeeper 重处理主题的 consumer 属性
         - key: max.poll.records
           # 单次 poll 返回的记录数。对于 Housekeeper 重处理主题，应逐条消费消息（任务）
-          value: "${TB_QUEUE_KAFKA_HOUSEKEEPER_REPROCESSING_MAX_POLL_RECORDS:1}"
+          value: "${JNKS_IOT_QUEUE_KAFKA_HOUSEKEEPER_REPROCESSING_MAX_POLL_RECORDS:1}"
       edqs.events:
         # edqs.events 主题的 Kafka consumer 键值属性
         - key: max.poll.records
           # edqs.events 主题的 max poll records
-          value: "${TB_QUEUE_KAFKA_EDQS_EVENTS_MAX_POLL_RECORDS:512}"
+          value: "${JNKS_IOT_QUEUE_KAFKA_EDQS_EVENTS_MAX_POLL_RECORDS:512}"
       edqs.state:
         # edqs.state 主题的 Kafka consumer 键值属性
         - key: max.poll.records
           # edqs.state 主题的 max poll records
-          value: "${TB_QUEUE_KAFKA_EDQS_STATE_MAX_POLL_RECORDS:512}"
-    other-inline: "${TB_QUEUE_KAFKA_OTHER_PROPERTIES:}" # 在此可指定 Kafka consumer/producer/admin 的自定义参数（分号分隔） # 示例 "metrics.recording.level:INFO;metrics.sample.window.ms:30000"
+          value: "${JNKS_IOT_QUEUE_KAFKA_EDQS_STATE_MAX_POLL_RECORDS:512}"
+    other-inline: "${JNKS_IOT_QUEUE_KAFKA_OTHER_PROPERTIES:}" # 在此可指定 Kafka consumer/producer/admin 的自定义参数（分号分隔） # 示例 "metrics.recording.level:INFO;metrics.sample.window.ms:30000"
     other: # 已弃用。在此可指定 Kafka consumer/producer 的自定义参数，并暴露环境变量以便外部配置
     #  - key: "request.timeout.ms" # 参见 https://docs.confluent.io/platform/current/installation/configuration/producer-configs.html#producerconfigs_request.timeout.ms
-    #    value: "${TB_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 秒)
+    #    value: "${JNKS_IOT_QUEUE_KAFKA_REQUEST_TIMEOUT_MS:30000}" # (30 秒)
     #  - key: "session.timeout.ms" # 参见 https://docs.confluent.io/platform/current/installation/configuration/consumer-configs.html#consumerconfigs_session.timeout.ms
-    #    value: "${TB_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 秒)
+    #    value: "${JNKS_IOT_QUEUE_KAFKA_SESSION_TIMEOUT_MS:10000}" # (10 秒)
     topic-properties:
       # Rule Engine 的 Kafka 属性
-      rule-engine: "${TB_QUEUE_KAFKA_RE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      rule-engine: "${JNKS_IOT_QUEUE_KAFKA_RE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
       # Core 主题的 Kafka 属性
-      core: "${TB_QUEUE_KAFKA_CORE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      core: "${JNKS_IOT_QUEUE_KAFKA_CORE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
       # Transport Api 主题的 Kafka 属性
-      transport-api: "${TB_QUEUE_KAFKA_TA_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
+      transport-api: "${JNKS_IOT_QUEUE_KAFKA_TA_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
       # Notifications 主题的 Kafka 属性
-      notifications: "${TB_QUEUE_KAFKA_NOTIFICATIONS_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      notifications: "${JNKS_IOT_QUEUE_KAFKA_NOTIFICATIONS_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
       # JS Executor 主题的 Kafka 属性
-      js-executor: "${TB_QUEUE_KAFKA_JE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:104857600;partitions:100;min.insync.replicas:1}"
+      js-executor: "${JNKS_IOT_QUEUE_KAFKA_JE_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:104857600;partitions:100;min.insync.replicas:1}"
       # OTA 更新主题的 Kafka 属性
-      ota-updates: "${TB_QUEUE_KAFKA_OTA_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
+      ota-updates: "${JNKS_IOT_QUEUE_KAFKA_OTA_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
       # Version Control 主题的 Kafka 属性
-      version-control: "${TB_QUEUE_KAFKA_VC_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      version-control: "${JNKS_IOT_QUEUE_KAFKA_VC_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
       # Housekeeper 任务主题的 Kafka 属性
-      housekeeper: "${TB_QUEUE_KAFKA_HOUSEKEEPER_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
+      housekeeper: "${JNKS_IOT_QUEUE_KAFKA_HOUSEKEEPER_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:10;min.insync.replicas:1}"
       # Housekeeper 重处理主题的 Kafka 属性；retention.ms 设为 90 天；partitions 设为 1，因为同一时间仅运行一个重处理服务
-      housekeeper-reprocessing: "${TB_QUEUE_KAFKA_HOUSEKEEPER_REPROCESSING_TOPIC_PROPERTIES:retention.ms:7776000000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      housekeeper-reprocessing: "${JNKS_IOT_QUEUE_KAFKA_HOUSEKEEPER_REPROCESSING_TOPIC_PROPERTIES:retention.ms:7776000000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
       # Calculated Field 主题的 Kafka 属性
-      calculated-field: "${TB_QUEUE_KAFKA_CF_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      calculated-field: "${JNKS_IOT_QUEUE_KAFKA_CF_TOPIC_PROPERTIES:retention.ms:604800000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
       # Calculated Field State 主题的 Kafka 属性
-      calculated-field-state: "${TB_QUEUE_KAFKA_CF_STATE_TOPIC_PROPERTIES:retention.ms:-1;segment.bytes:52428800;retention.bytes:104857600000;partitions:1;min.insync.replicas:1;cleanup.policy:compact}"
+      calculated-field-state: "${JNKS_IOT_QUEUE_KAFKA_CF_STATE_TOPIC_PROPERTIES:retention.ms:-1;segment.bytes:52428800;retention.bytes:104857600000;partitions:1;min.insync.replicas:1;cleanup.policy:compact}"
       # EDQS 事件主题的 Kafka 属性
-      edqs-events: "${TB_QUEUE_KAFKA_EDQS_EVENTS_TOPIC_PROPERTIES:retention.ms:86400000;segment.bytes:52428800;retention.bytes:-1;partitions:1;min.insync.replicas:1}"
+      edqs-events: "${JNKS_IOT_QUEUE_KAFKA_EDQS_EVENTS_TOPIC_PROPERTIES:retention.ms:86400000;segment.bytes:52428800;retention.bytes:-1;partitions:1;min.insync.replicas:1}"
       # EDQS 请求主题的 Kafka 属性（默认保留 3 分钟）
-      edqs-requests: "${TB_QUEUE_KAFKA_EDQS_REQUESTS_TOPIC_PROPERTIES:retention.ms:180000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
+      edqs-requests: "${JNKS_IOT_QUEUE_KAFKA_EDQS_REQUESTS_TOPIC_PROPERTIES:retention.ms:180000;segment.bytes:52428800;retention.bytes:1048576000;partitions:1;min.insync.replicas:1}"
       # EDQS 状态主题的 Kafka 属性（无限保留，compaction）
-      edqs-state: "${TB_QUEUE_KAFKA_EDQS_STATE_TOPIC_PROPERTIES:retention.ms:-1;segment.bytes:52428800;retention.bytes:-1;partitions:1;min.insync.replicas:1;cleanup.policy:compact}"
+      edqs-state: "${JNKS_IOT_QUEUE_KAFKA_EDQS_STATE_TOPIC_PROPERTIES:retention.ms:-1;segment.bytes:52428800;retention.bytes:-1;partitions:1;min.insync.replicas:1;cleanup.policy:compact}"
     consumer-stats:
       # 打印 Kafka 主题中 consumer group 偏移量与最后消息偏移量之间的 lag
-      enabled: "${TB_QUEUE_KAFKA_CONSUMER_STATS_ENABLED:true}"
+      enabled: "${JNKS_IOT_QUEUE_KAFKA_CONSUMER_STATS_ENABLED:true}"
       # Kafka consumer-groups 统计信息的打印间隔
-      print-interval-ms: "${TB_QUEUE_KAFKA_CONSUMER_STATS_MIN_PRINT_INTERVAL_MS:60000}"
+      print-interval-ms: "${JNKS_IOT_QUEUE_KAFKA_CONSUMER_STATS_MIN_PRINT_INTERVAL_MS:60000}"
       # 等待向 Kafka 发送的统计加载请求完成的时间
-      kafka-response-timeout-ms: "${TB_QUEUE_KAFKA_CONSUMER_STATS_RESPONSE_TIMEOUT_MS:1000}"
+      kafka-response-timeout-ms: "${JNKS_IOT_QUEUE_KAFKA_CONSUMER_STATS_RESPONSE_TIMEOUT_MS:1000}"
   partitions:
-    hash_function_name: "${TB_QUEUE_PARTITIONS_HASH_FUNCTION_NAME:murmur3_128}" # murmur3_32、murmur3_128 或 sha256
+    hash_function_name: "${JNKS_IOT_QUEUE_PARTITIONS_HASH_FUNCTION_NAME:murmur3_128}" # murmur3_32、murmur3_128 或 sha256
   transport_api:
     # 用于消费来自 transport 微服务 API 请求的主题
-    requests_topic: "${TB_QUEUE_TRANSPORT_API_REQUEST_TOPIC:tb_transport.api.requests}"
+    requests_topic: "${JNKS_IOT_QUEUE_TRANSPORT_API_REQUEST_TOPIC:jnks_iot_transport.api.requests}"
     # 用于向 transport 微服务生产 API 响应的主题
-    responses_topic: "${TB_QUEUE_TRANSPORT_API_RESPONSE_TOPIC:tb_transport.api.responses}"
+    responses_topic: "${JNKS_IOT_QUEUE_TRANSPORT_API_RESPONSE_TOPIC:jnks_iot_transport.api.responses}"
     # 服务器待处理的来自 transport 微服务的最大 API 请求数
-    max_pending_requests: "${TB_QUEUE_TRANSPORT_MAX_PENDING_REQUESTS:10000}"
+    max_pending_requests: "${JNKS_IOT_QUEUE_TRANSPORT_MAX_PENDING_REQUESTS:10000}"
     # 服务器处理来自 transport 微服务 API 请求的最大超时时间（毫秒）
-    max_requests_timeout: "${TB_QUEUE_TRANSPORT_MAX_REQUEST_TIMEOUT:10000}"
+    max_requests_timeout: "${JNKS_IOT_QUEUE_TRANSPORT_MAX_REQUEST_TIMEOUT:10000}"
     # 用于调用回调的线程数
-    max_callback_threads: "${TB_QUEUE_TRANSPORT_MAX_CALLBACK_THREADS:100}"
+    max_callback_threads: "${JNKS_IOT_QUEUE_TRANSPORT_MAX_CALLBACK_THREADS:100}"
     # 用于 transport API 请求的线程数
-    max_core_handler_threads: "${TB_QUEUE_TRANSPORT_MAX_CORE_HANDLER_THREADS:16}"
+    max_core_handler_threads: "${JNKS_IOT_QUEUE_TRANSPORT_MAX_CORE_HANDLER_THREADS:16}"
     # 从 transport 微服务轮询 API 请求的间隔（毫秒）
-    request_poll_interval: "${TB_QUEUE_TRANSPORT_REQUEST_POLL_INTERVAL_MS:25}"
+    request_poll_interval: "${JNKS_IOT_QUEUE_TRANSPORT_REQUEST_POLL_INTERVAL_MS:25}"
     # 从 transport 微服务轮询 API 响应的间隔（毫秒）
-    response_poll_interval: "${TB_QUEUE_TRANSPORT_RESPONSE_POLL_INTERVAL_MS:25}"
+    response_poll_interval: "${JNKS_IOT_QUEUE_TRANSPORT_RESPONSE_POLL_INTERVAL_MS:25}"
   core:
     # 默认主题名
-    topic: "${TB_QUEUE_CORE_TOPIC:tb_core}"
+    topic: "${JNKS_IOT_QUEUE_CORE_TOPIC:jnks_iot_core}"
     # 需要最低延迟和处理时间的高优先级通知
-    notifications_topic: "${TB_QUEUE_CORE_NOTIFICATIONS_TOPIC:tb_core.notifications}"
+    notifications_topic: "${JNKS_IOT_QUEUE_CORE_NOTIFICATIONS_TOPIC:jnks_iot_core.notifications}"
     # Core 微服务轮询消息的间隔（毫秒）
-    poll-interval: "${TB_QUEUE_CORE_POLL_INTERVAL_MS:25}"
+    poll-interval: "${JNKS_IOT_QUEUE_CORE_POLL_INTERVAL_MS:25}"
     # Core 微服务使用的分区数
-    partitions: "${TB_QUEUE_CORE_PARTITIONS:10}"
+    partitions: "${JNKS_IOT_QUEUE_CORE_PARTITIONS:10}"
     # Core 微服务处理消息包的超时时间
-    pack-processing-timeout: "${TB_QUEUE_CORE_PACK_PROCESSING_TIMEOUT_MS:2000}"
+    pack-processing-timeout: "${JNKS_IOT_QUEUE_CORE_PACK_PROCESSING_TIMEOUT_MS:2000}"
     # 为 Core 队列的每个分区启用/禁用独立 consumer
-    consumer-per-partition: "${TB_QUEUE_CORE_CONSUMER_PER_PARTITION:true}"
+    consumer-per-partition: "${JNKS_IOT_QUEUE_CORE_CONSUMER_PER_PARTITION:true}"
     ota:
       # 默认主题名 for OTA updates
-      topic: "${TB_QUEUE_CORE_OTA_TOPIC:tb_ota_package}"
+      topic: "${JNKS_IOT_QUEUE_CORE_OTA_TOPIC:jnks_iot_ota_package}"
       # 处理设备 OTA 更新的间隔。用于避免因大量并行 OTA 更新而对网络造成损害
-      pack-interval-ms: "${TB_QUEUE_CORE_OTA_PACK_INTERVAL_MS:60000}"
+      pack-interval-ms: "${JNKS_IOT_QUEUE_CORE_OTA_PACK_INTERVAL_MS:60000}"
       # 从队列获取的 OTA 更新通知数量。队列存储固件与设备 id 的配对
-      pack-size: "${TB_QUEUE_CORE_OTA_PACK_SIZE:100}"
+      pack-size: "${JNKS_IOT_QUEUE_CORE_OTA_PACK_SIZE:100}"
     # 统计主题名
-    usage-stats-topic: "${TB_QUEUE_US_TOPIC:tb_usage_stats}"
+    usage-stats-topic: "${JNKS_IOT_QUEUE_US_TOPIC:jnks_iot_usage_stats}"
     stats:
       # 启用/禁用 Core 微服务统计
-      enabled: "${TB_QUEUE_CORE_STATS_ENABLED:true}"
+      enabled: "${JNKS_IOT_QUEUE_CORE_STATS_ENABLED:true}"
       # Core 微服务统计信息打印间隔
-      print-interval-ms: "${TB_QUEUE_CORE_STATS_PRINT_INTERVAL_MS:60000}"
+      print-interval-ms: "${JNKS_IOT_QUEUE_CORE_STATS_PRINT_INTERVAL_MS:60000}"
     housekeeper:
       # Housekeeper 任务的主题名
-      topic: "${TB_HOUSEKEEPER_TOPIC:tb_housekeeper}"
+      topic: "${JNKS_IOT_HOUSEKEEPER_TOPIC:jnks_iot_housekeeper}"
       # 待重新处理的 Housekeeper 任务主题名
-      reprocessing-topic: "${TB_HOUSEKEEPER_REPROCESSING_TOPIC:tb_housekeeper.reprocessing}"
+      reprocessing-topic: "${JNKS_IOT_HOUSEKEEPER_REPROCESSING_TOPIC:jnks_iot_housekeeper.reprocessing}"
       # Housekeeper 相关主题的轮询间隔
-      poll-interval-ms: "${TB_HOUSEKEEPER_POLL_INTERVAL_MS:500}"
+      poll-interval-ms: "${JNKS_IOT_HOUSEKEEPER_POLL_INTERVAL_MS:500}"
       # 任务处理的超时时间（毫秒）。未按时完成的任务将提交重处理
-      task-processing-timeout-ms: "${TB_HOUSEKEEPER_TASK_PROCESSING_TIMEOUT_MS:120000}"
+      task-processing-timeout-ms: "${JNKS_IOT_HOUSEKEEPER_TASK_PROCESSING_TIMEOUT_MS:120000}"
       # 不应处理的任务类型列表（逗号分隔）。可用任务类型：
       # DELETE_ATTRIBUTES、DELETE_TELEMETRY（DELETE_LATEST_TS 和 DELETE_TS_HISTORY 均将被禁用），
       # DELETE_LATEST_TS、DELETE_TS_HISTORY、DELETE_EVENTS、DELETE_ALARMS、UNASSIGN_ALARMS
-      disabled-task-types: "${TB_HOUSEKEEPER_DISABLED_TASK_TYPES:}"
+      disabled-task-types: "${JNKS_IOT_HOUSEKEEPER_DISABLED_TASK_TYPES:}"
       # 任务重处理之间的延迟（毫秒）
-      task-reprocessing-delay-ms: "${TB_HOUSEKEEPER_TASK_REPROCESSING_DELAY_MS:3000}"
+      task-reprocessing-delay-ms: "${JNKS_IOT_HOUSEKEEPER_TASK_REPROCESSING_DELAY_MS:3000}"
       # 任务重处理的最大尝试次数。超出后任务将被丢弃
-      max-reprocessing-attempts: "${TB_HOUSEKEEPER_MAX_REPROCESSING_ATTEMPTS:10}"
+      max-reprocessing-attempts: "${JNKS_IOT_HOUSEKEEPER_MAX_REPROCESSING_ATTEMPTS:10}"
       stats:
         # 启用/禁用 Housekeeper 统计
-        enabled: "${TB_HOUSEKEEPER_STATS_ENABLED:true}"
+        enabled: "${JNKS_IOT_HOUSEKEEPER_STATS_ENABLED:true}"
         # Housekeeper 统计信息打印间隔
-        print-interval-ms: "${TB_HOUSEKEEPER_STATS_PRINT_INTERVAL_MS:60000}"
+        print-interval-ms: "${JNKS_IOT_HOUSEKEEPER_STATS_PRINT_INTERVAL_MS:60000}"
   edqs:
     sync:
       # 启用/禁用 EDQS 同步
-      enabled: "${TB_EDQS_SYNC_ENABLED:true}"
+      enabled: "${JNKS_IOT_EDQS_SYNC_ENABLED:true}"
       # 与 EDQS 同步的实体 batch 大小
-      entity_batch_size: "${TB_EDQS_SYNC_ENTITY_BATCH_SIZE:10000}"
+      entity_batch_size: "${JNKS_IOT_EDQS_SYNC_ENTITY_BATCH_SIZE:10000}"
       # 与 EDQS 同步的时序数据 batch 大小
-      ts_batch_size: "${TB_EDQS_SYNC_TS_BATCH_SIZE:10000}"
+      ts_batch_size: "${JNKS_IOT_EDQS_SYNC_TS_BATCH_SIZE:10000}"
     api:
       # 是否将实体数据查询请求转发到 EDQS（否则使用 PostgreSQL 实现）。
-      # Monolith 本地 EDQS：与 queue.edqs.sync.enabled=true 一起设为 true（DefaultEdqsService 位于 tb-core）。
-      supported: "${TB_EDQS_API_SUPPORTED:false}"
+      # Monolith 本地 EDQS：与 queue.edqs.sync.enabled=true 一起设为 true（DefaultEdqsService 位于 jnks-iot-core）。
+      supported: "${JNKS_IOT_EDQS_API_SUPPORTED:false}"
       # 当数据同步到 Kafka 完成后是否自动启用 EDQS API（若 queue.edqs.api.supported 为 true）
-      auto_enable: "${TB_EDQS_API_AUTO_ENABLE:true}"
+      auto_enable: "${JNKS_IOT_EDQS_API_AUTO_ENABLE:true}"
     # EDQS 模式：local（用于 monolith）或 remote（独立 EDQS 微服务）
-    mode: "${TB_EDQS_MODE:local}"
+    mode: "${JNKS_IOT_EDQS_MODE:local}"
     local:
       # 本地模式下 EDQS 备份的 RocksDB 路径
-      rocksdb_path: "${TB_EDQS_ROCKSDB_PATH:${user.home}/.rocksdb/edqs}"
+      rocksdb_path: "${JNKS_IOT_EDQS_ROCKSDB_PATH:${user.home}/.rocksdb/edqs}"
     # EDQS 主题的分区数
-    partitions: "${TB_EDQS_PARTITIONS:12}"
+    partitions: "${JNKS_IOT_EDQS_PARTITIONS:12}"
     # EDQS 分区策略：tenant（按租户 id 解析分区）或 none（无特定策略，按消息 key 解析）
-    partitioning_strategy: "${TB_EDQS_PARTITIONING_STRATEGY:tenant}"
+    partitioning_strategy: "${JNKS_IOT_EDQS_PARTITIONING_STRATEGY:tenant}"
     # EDQS 事件主题
-    events_topic: "${TB_EDQS_EVENTS_TOPIC:edqs.events}"
+    events_topic: "${JNKS_IOT_EDQS_EVENTS_TOPIC:edqs.events}"
     # EDQS 状态主题
-    state_topic: "${TB_EDQS_STATE_TOPIC:edqs.state}"
+    state_topic: "${JNKS_IOT_EDQS_STATE_TOPIC:edqs.state}"
     # EDQS 请求主题
-    requests_topic: "${TB_EDQS_REQUESTS_TOPIC:edqs.requests}"
+    requests_topic: "${JNKS_IOT_EDQS_REQUESTS_TOPIC:edqs.requests}"
     # EDQS 响应主题
-    responses_topic: "${TB_EDQS_RESPONSES_TOPIC:edqs.responses}"
+    responses_topic: "${JNKS_IOT_EDQS_RESPONSES_TOPIC:edqs.responses}"
     # EDQS 主题的轮询间隔
-    poll_interval: "${TB_EDQS_POLL_INTERVAL_MS:25}"
+    poll_interval: "${JNKS_IOT_EDQS_POLL_INTERVAL_MS:25}"
     # 发往 EDQS 的最大待处理请求数
-    max_pending_requests: "${TB_EDQS_MAX_PENDING_REQUESTS:10000}"
+    max_pending_requests: "${JNKS_IOT_EDQS_MAX_PENDING_REQUESTS:10000}"
     # 发往 EDQS 请求的最大超时时间
-    max_request_timeout: "${TB_EDQS_MAX_REQUEST_TIMEOUT:20000}"
+    max_request_timeout: "${JNKS_IOT_EDQS_MAX_REQUEST_TIMEOUT:20000}"
     # 超过此阈值的字符串将被压缩
-    string_compression_length_threshold: "${TB_EDQS_STRING_COMPRESSION_LENGTH_THRESHOLD:512}"
+    string_compression_length_threshold: "${JNKS_IOT_EDQS_STRING_COMPRESSION_LENGTH_THRESHOLD:512}"
     stats:
       # 启用/禁用 EDQS 统计
-      enabled: "${TB_EDQS_STATS_ENABLED:true}"
+      enabled: "${JNKS_IOT_EDQS_STATS_ENABLED:true}"
       # 慢查询日志阈值（毫秒）
-      slow_query_threshold: "${TB_EDQS_SLOW_QUERY_THRESHOLD_MS:3000}"
+      slow_query_threshold: "${JNKS_IOT_EDQS_SLOW_QUERY_THRESHOLD_MS:3000}"
   vc:
     # 默认主题名
-    topic: "${TB_QUEUE_VC_TOPIC:tb_version_control}"
+    topic: "${JNKS_IOT_QUEUE_VC_TOPIC:jnks_iot_version_control}"
     # 与此队列关联的分区数。用于扩展可并行处理的消息数量
-    partitions: "${TB_QUEUE_VC_PARTITIONS:10}"
+    partitions: "${JNKS_IOT_QUEUE_VC_PARTITIONS:10}"
     # 无新消息时轮询消息的间隔（毫秒）
-    poll-interval: "${TB_QUEUE_VC_INTERVAL_MS:25}"
+    poll-interval: "${JNKS_IOT_QUEUE_VC_INTERVAL_MS:25}"
     # 重试处理包中所有失败和超时消息前的等待时间
-    pack-processing-timeout: "${TB_QUEUE_VC_PACK_PROCESSING_TIMEOUT_MS:180000}"
+    pack-processing-timeout: "${JNKS_IOT_QUEUE_VC_PACK_PROCESSING_TIMEOUT_MS:180000}"
     # VC-executor 请求的超时时间（如实体版本请求、commit 提交等）
-    request-timeout: "${TB_QUEUE_VC_REQUEST_TIMEOUT:180000}"
+    request-timeout: "${JNKS_IOT_QUEUE_VC_REQUEST_TIMEOUT:180000}"
     # 单条队列消息的大小限制
-    msg-chunk-size: "${TB_QUEUE_VC_MSG_CHUNK_SIZE:250000}"
+    msg-chunk-size: "${JNKS_IOT_QUEUE_VC_MSG_CHUNK_SIZE:250000}"
   js:
     # JS Eval 请求主题
     request_topic: "${REMOTE_JS_EVAL_REQUEST_TOPIC:js_eval.requests}"
@@ -1745,67 +1745,67 @@ queue:
     response_poll_interval: "${REMOTE_JS_RESPONSE_POLL_INTERVAL_MS:25}"
   rule-engine:
     # 已弃用。将在近期版本中移除
-    topic: "${TB_QUEUE_RULE_ENGINE_TOPIC:tb_rule_engine}"
+    topic: "${JNKS_IOT_QUEUE_RULE_ENGINE_TOPIC:jnks_iot_rule_engine}"
     # 需要最低延迟和处理时间的高优先级通知
-    notifications_topic: "${TB_QUEUE_RULE_ENGINE_NOTIFICATIONS_TOPIC:tb_rule_engine.notifications}"
+    notifications_topic: "${JNKS_IOT_QUEUE_RULE_ENGINE_NOTIFICATIONS_TOPIC:jnks_iot_rule_engine.notifications}"
     # Rule Engine 轮询消息的间隔（毫秒）
-    poll-interval: "${TB_QUEUE_RULE_ENGINE_POLL_INTERVAL_MS:25}"
+    poll-interval: "${JNKS_IOT_QUEUE_RULE_ENGINE_POLL_INTERVAL_MS:25}"
     # Rule Engine 处理消息包的超时时间
-    pack-processing-timeout: "${TB_QUEUE_RULE_ENGINE_PACK_PROCESSING_TIMEOUT_MS:2000}"
+    pack-processing-timeout: "${JNKS_IOT_QUEUE_RULE_ENGINE_PACK_PROCESSING_TIMEOUT_MS:2000}"
     stats:
       # 启用/禁用 Rule Engine 统计
-      enabled: "${TB_QUEUE_RULE_ENGINE_STATS_ENABLED:true}"
+      enabled: "${JNKS_IOT_QUEUE_RULE_ENGINE_STATS_ENABLED:true}"
       # Rule Engine 统计信息打印间隔
-      print-interval-ms: "${TB_QUEUE_RULE_ENGINE_STATS_PRINT_INTERVAL_MS:60000}"
+      print-interval-ms: "${JNKS_IOT_QUEUE_RULE_ENGINE_STATS_PRINT_INTERVAL_MS:60000}"
       # 统计打印的错误消息最大长度
-      max-error-message-length: "${TB_QUEUE_RULE_ENGINE_MAX_ERROR_MESSAGE_LENGTH:4096}"
+      max-error-message-length: "${JNKS_IOT_QUEUE_RULE_ENGINE_MAX_ERROR_MESSAGE_LENGTH:4096}"
     # 队列删除后（或 profile 的 isolation 选项被禁用后），Rule Engine 将在此时间段内继续读取相关主题，然后再删除实际主题
-    topic-deletion-delay: "${TB_QUEUE_RULE_ENGINE_TOPIC_DELETION_DELAY_SEC:15}"
+    topic-deletion-delay: "${JNKS_IOT_QUEUE_RULE_ENGINE_TOPIC_DELETION_DELAY_SEC:15}"
     # 处理分区变更、配置更新、队列删除等操作的线程池大小
-    management-thread-pool-size: "${TB_QUEUE_RULE_ENGINE_MGMT_THREAD_POOL_SIZE:12}"
+    management-thread-pool-size: "${JNKS_IOT_QUEUE_RULE_ENGINE_MGMT_THREAD_POOL_SIZE:12}"
   calculated_fields:
     # 来自 Rule Engine 的 Calculated Field (CF) 事件主题名
-    event_topic: "${TB_QUEUE_CF_EVENT_TOPIC:tb_cf_event}"
+    event_topic: "${JNKS_IOT_QUEUE_CF_EVENT_TOPIC:jnks_iot_cf_event}"
     # Calculated Field (CF) compacted 状态主题名
-    state_topic: "${TB_QUEUE_CF_STATE_TOPIC:tb_cf_state}"
+    state_topic: "${JNKS_IOT_QUEUE_CF_STATE_TOPIC:jnks_iot_cf_state}"
     # 需要最低延迟和处理时间的高优先级通知
-    notifications_topic: "${TB_QUEUE_CF_NOTIFICATIONS_TOPIC:calculated_field.notifications}"
+    notifications_topic: "${JNKS_IOT_QUEUE_CF_NOTIFICATIONS_TOPIC:calculated_field.notifications}"
     # CF (Rule Engine) 微服务轮询消息的间隔（毫秒）
-    poll_interval: "${TB_QUEUE_CF_POLL_INTERVAL_MS:1000}"
+    poll_interval: "${JNKS_IOT_QUEUE_CF_POLL_INTERVAL_MS:1000}"
     # CF 微服务处理消息包的超时时间
-    pack_processing_timeout: "${TB_QUEUE_CF_PACK_PROCESSING_TIMEOUT_MS:60000}"
+    pack_processing_timeout: "${JNKS_IOT_QUEUE_CF_PACK_PROCESSING_TIMEOUT_MS:60000}"
     # 处理传入消息的线程池大小
-    pool_size: "${TB_QUEUE_CF_POOL_SIZE:8}"
+    pool_size: "${JNKS_IOT_QUEUE_CF_POOL_SIZE:8}"
     # 存储 CF 状态的 RocksDB 路径
-    rocks_db_path: "${TB_QUEUE_CF_ROCKS_DB_PATH:${user.home}/.rocksdb/cf_states}"
+    rocks_db_path: "${JNKS_IOT_QUEUE_CF_ROCKS_DB_PATH:${user.home}/.rocksdb/cf_states}"
     # fetch size 指定初始获取时每次请求从数据库获取的行数
-    init_fetch_pack_size: "${TB_QUEUE_CF_FETCH_PACK_SIZE:50000}"
+    init_fetch_pack_size: "${JNKS_IOT_QUEUE_CF_FETCH_PACK_SIZE:50000}"
     # fetch size 指定按租户获取时每次请求从数据库获取的行数
-    init_tenant_fetch_pack_size: "${TB_QUEUE_CF_TENANT_FETCH_PACK_SIZE:1000}"
+    init_tenant_fetch_pack_size: "${JNKS_IOT_QUEUE_CF_TENANT_FETCH_PACK_SIZE:1000}"
   transport:
     # 需要最低延迟和处理时间的高优先级通知
-    notifications_topic: "${TB_QUEUE_TRANSPORT_NOTIFICATIONS_TOPIC:tb_transport.notifications}"
+    notifications_topic: "${JNKS_IOT_QUEUE_TRANSPORT_NOTIFICATIONS_TOPIC:jnks_iot_transport.notifications}"
     # 轮询消息的间隔（毫秒）
-    poll_interval: "${TB_QUEUE_TRANSPORT_NOTIFICATIONS_POLL_INTERVAL_MS:25}"
+    poll_interval: "${JNKS_IOT_QUEUE_TRANSPORT_NOTIFICATIONS_POLL_INTERVAL_MS:25}"
 
 # 事件配置参数
 event:
   debug:
     # 每个 debug 事件的最大符号数。必要时将截断事件内容
-    max-symbols: "${TB_MAX_DEBUG_EVENT_SYMBOLS:4096}"
+    max-symbols: "${JNKS_IOT_MAX_DEBUG_EVENT_SYMBOLS:4096}"
 
 # 通用服务参数
 service:
-  type: "${TB_SERVICE_TYPE:monolith}" # monolith 或 tb-core 或 tb-rule-engine
+  type: "${JNKS_IOT_SERVICE_TYPE:monolith}" # monolith 或 jnks-iot-core 或 jnks-iot-rule-engine
   # 此服务的唯一 id（为空则自动生成）
-  id: "${TB_SERVICE_ID:}"
+  id: "${JNKS_IOT_SERVICE_ID:}"
   rule_engine:
     # 分配给此 Rule Engine 的租户 profile id 列表（逗号分隔）。
     # 此 Rule Engine 仅负责这些 profile 的租户（当 profile 中启用 'isolation' 选项时）。
-    assigned_tenant_profiles: "${TB_RULE_ENGINE_ASSIGNED_TENANT_PROFILES:}"
+    assigned_tenant_profiles: "${JNKS_IOT_RULE_ENGINE_ASSIGNED_TENANT_PROFILES:}"
     pubsub:
       # pubsub rule node executor provider 的线程池大小。若未设置则使用默认 pubsub executor provider 值（5 * 可用处理器数）
-      executor_thread_pool_size: "${TB_RULE_ENGINE_PUBSUB_EXECUTOR_THREAD_POOL_SIZE:0}"
+      executor_thread_pool_size: "${JNKS_IOT_RULE_ENGINE_PUBSUB_EXECUTOR_THREAD_POOL_SIZE:0}"
 
 # Metrics 参数
 metrics:
@@ -1823,20 +1823,20 @@ metrics:
 # Version Control 参数
 vc:
   # 处理导出任务的线程池大小
-  thread_pool_size: "${TB_VC_POOL_SIZE:6}"
+  thread_pool_size: "${JNKS_IOT_VC_POOL_SIZE:6}"
   git:
     # 处理 git IO 操作的线程池大小
-    io_pool_size: "${TB_VC_GIT_POOL_SIZE:3}"
+    io_pool_size: "${JNKS_IOT_VC_GIT_POOL_SIZE:3}"
     # 默认仓库存储路径
-    repositories-folder: "${TB_VC_GIT_REPOSITORIES_FOLDER:${java.io.tmpdir}/repositories}"
+    repositories-folder: "${JNKS_IOT_VC_GIT_REPOSITORIES_FOLDER:${java.io.tmpdir}/repositories}"
 
 # 通知系统参数
 notification_system:
   # 指定 Notification System 处理通知规则和发送通知的线程池大小。建议值 <= 10
-  thread_pool_size: "${TB_NOTIFICATION_SYSTEM_THREAD_POOL_SIZE:10}"
+  thread_pool_size: "${JNKS_IOT_NOTIFICATION_SYSTEM_THREAD_POOL_SIZE:10}"
   rules:
     # 触发类型的去重时长（毫秒，分号分隔）。格式：'NotificationRuleTriggerType1:123;NotificationRuleTriggerType2:456'
-    deduplication_durations: "${TB_NOTIFICATION_RULES_DEDUPLICATION_DURATIONS:NEW_PLATFORM_VERSION:0;RATE_LIMITS:14400000;}"
+    deduplication_durations: "${JNKS_IOT_NOTIFICATION_RULES_DEDUPLICATION_DURATIONS:NEW_PLATFORM_VERSION:0;RATE_LIMITS:14400000;}"
 
 # 通用 management 参数
 management:
@@ -1853,8 +1853,8 @@ management:
 # JnksIOT 移动应用的移动应用设置
 mobileApp:
   # JnksIOT Live 移动应用的服务器域名
-  domain: "${TB_MOBILE_APP_DOMAIN:demo.iot.example.com}"
+  domain: "${JNKS_IOT_MOBILE_APP_DOMAIN:demo.iot.example.com}"
   # JnksIOT Live 移动应用的 Google Play 商店链接
-  googlePlayLink: "${TB_MOBILE_APP_GOOGLE_PLAY_LINK:https://play.google.com/store/apps/details?id=com.jnks.iot.demo.app}"
+  googlePlayLink: "${JNKS_IOT_MOBILE_APP_GOOGLE_PLAY_LINK:https://play.google.com/store/apps/details?id=com.jnks.iot.demo.app}"
   # JnksIOT Live 移动应用的 App Store 链接
-  appStoreLink: "${TB_MOBILE_APP_APP_STORE_LINK:https://apps.apple.com/us/app/jnks-iot-live/id1594355695}"
+  appStoreLink: "${JNKS_IOT_MOBILE_APP_APP_STORE_LINK:https://apps.apple.com/us/app/jnks-iot-live/id1594355695}"

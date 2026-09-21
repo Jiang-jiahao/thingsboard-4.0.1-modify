@@ -5,7 +5,7 @@ import { AppState } from '@core/core.state';
 import { MobileApp } from '@shared/models/mobile-app.models';
 
 @Component({
-  selector: 'tb-mobile-app-table-header',
+  selector: 'jnks-iot-mobile-app-table-header',
   templateUrl: './mobile-app-table-header.component.html',
   styleUrls: ['./mobile-app-table-header.component.scss']
 })

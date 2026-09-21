@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.common.util.JacksonUtil;
-import com.jnks.iot.rule.engine.action.TbAlarmResult;
-import com.jnks.iot.rule.engine.api.TbContext;
+import com.jnks.iot.rule.engine.action.JnksIotAlarmResult;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
 import com.jnks.iot.rule.engine.profile.state.PersistedAlarmRuleState;
 import com.jnks.iot.rule.engine.profile.state.PersistedAlarmState;
 import com.jnks.iot.server.common.data.DataConstants;
@@ -21,9 +21,9 @@ import com.jnks.iot.server.common.data.device.profile.AlarmConditionSpecType;
 import com.jnks.iot.server.common.data.device.profile.DeviceProfileAlarm;
 import com.jnks.iot.server.common.data.id.DashboardId;
 import com.jnks.iot.server.common.data.id.EntityId;
-import com.jnks.iot.server.common.data.msg.TbMsgType;
-import com.jnks.iot.server.common.msg.TbMsg;
-import com.jnks.iot.server.common.msg.TbMsgMetaData;
+import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -43,7 +43,7 @@ class AlarmState {
     private volatile AlarmRuleState clearState;
     private volatile Alarm currentAlarm;
     private volatile boolean initialFetchDone;
-    private volatile TbMsgMetaData lastMsgMetaData;
+    private volatile JnksIotMsgMetaData lastMsgMetaData;
     private volatile String lastMsgQueueName;
     private volatile DataSnapshot dataSnapshot;
     private final DynamicPredicateValueCtx dynamicPredicateValueCtx;
@@ -55,7 +55,7 @@ class AlarmState {
         this.updateState(alarmDefinition, alarmState);
     }
 
-    public boolean process(TbContext ctx, TbMsg msg, DataSnapshot data, SnapshotUpdate update) throws ExecutionException, InterruptedException {
+    public boolean process(JnksIotContext ctx, JnksIotMsg msg, DataSnapshot data, SnapshotUpdate update) throws ExecutionException, InterruptedException {
         initCurrentAlarm(ctx);
         lastMsgMetaData = msg.getMetaData();
         lastMsgQueueName = msg.getQueueName();
@@ -67,7 +67,7 @@ class AlarmState {
         }
     }
 
-    public boolean process(TbContext ctx, long ts) throws ExecutionException, InterruptedException {
+    public boolean process(JnksIotContext ctx, long ts) throws ExecutionException, InterruptedException {
         initCurrentAlarm(ctx);
         try {
             return createOrClearAlarms(ctx, null, ts, null, (alarmState, tsParam) -> alarmState.eval(tsParam, dataSnapshot));
@@ -76,7 +76,7 @@ class AlarmState {
         }
     }
 
-    public <T> boolean createOrClearAlarms(TbContext ctx, TbMsg msg, T data, SnapshotUpdate update, BiFunction<AlarmRuleState, T, AlarmEvalResult> evalFunction) {
+    public <T> boolean createOrClearAlarms(JnksIotContext ctx, JnksIotMsg msg, T data, SnapshotUpdate update, BiFunction<AlarmRuleState, T, AlarmEvalResult> evalFunction) {
         boolean stateUpdate = false;
         AlarmRuleState resultState = null;
         log.debug("[{}] processing update: {}", alarmDefinition.getId(), data);
@@ -95,7 +95,7 @@ class AlarmState {
             }
         }
         if (resultState != null) {
-            TbAlarmResult result = calculateAlarmResult(ctx, resultState);
+            JnksIotAlarmResult result = calculateAlarmResult(ctx, resultState);
             if (result != null) {
                 pushMsg(ctx, msg, result, resultState);
             }
@@ -115,7 +115,7 @@ class AlarmState {
                         ctx.getTenantId(), currentAlarm.getId(), System.currentTimeMillis(), createDetails(clearState)
                 );
                 if (result.isCleared()) {
-                    pushMsg(ctx, msg, new TbAlarmResult(false, false, true, result.getAlarm()), clearState);
+                    pushMsg(ctx, msg, new JnksIotAlarmResult(false, false, true, result.getAlarm()), clearState);
                 }
                 currentAlarm = null;
             } else if (AlarmEvalResult.FALSE.equals(evalResult)) {
@@ -145,7 +145,7 @@ class AlarmState {
         return true;
     }
 
-    public void initCurrentAlarm(TbContext ctx) {
+    public void initCurrentAlarm(JnksIotContext ctx) {
         if (!initialFetchDone) {
             Alarm alarm = ctx.getAlarmService().findLatestActiveByOriginatorAndType(ctx.getTenantId(), originator, alarmDefinition.getAlarmType());
             if (alarm != null && !alarm.getStatus().isCleared()) {
@@ -155,10 +155,10 @@ class AlarmState {
         }
     }
 
-    public void pushMsg(TbContext ctx, TbMsg msg, TbAlarmResult alarmResult, AlarmRuleState ruleState) {
+    public void pushMsg(JnksIotContext ctx, JnksIotMsg msg, JnksIotAlarmResult alarmResult, AlarmRuleState ruleState) {
         JsonNode jsonNodes = JacksonUtil.valueToTree(alarmResult.getAlarm());
         String data = jsonNodes.toString();
-        TbMsgMetaData metaData = lastMsgMetaData != null ? lastMsgMetaData.copy() : new TbMsgMetaData();
+        JnksIotMsgMetaData metaData = lastMsgMetaData != null ? lastMsgMetaData.copy() : new JnksIotMsgMetaData();
         String relationType;
         if (alarmResult.isCreated()) {
             relationType = "Alarm Created";
@@ -175,12 +175,12 @@ class AlarmState {
             metaData.putValue(DataConstants.IS_CLEARED_ALARM, Boolean.TRUE.toString());
         }
         setAlarmConditionMetadata(ruleState, metaData);
-        TbMsg newMsg = ctx.newMsg(lastMsgQueueName != null ? lastMsgQueueName : null, TbMsgType.ALARM,
+        JnksIotMsg newMsg = ctx.newMsg(lastMsgQueueName != null ? lastMsgQueueName : null, JnksIotMsgType.ALARM,
                 originator, msg != null ? msg.getCustomerId() : null, metaData, data);
         ctx.enqueueForTellNext(newMsg, relationType);
     }
 
-    protected void setAlarmConditionMetadata(AlarmRuleState ruleState, TbMsgMetaData metaData) {
+    protected void setAlarmConditionMetadata(AlarmRuleState ruleState, JnksIotMsgMetaData metaData) {
         if (ruleState.getSpec().getType() == AlarmConditionSpecType.REPEATING) {
             metaData.putValue(DataConstants.ALARM_CONDITION_REPEATS, String.valueOf(ruleState.getState().getEventCount()));
         }
@@ -211,7 +211,7 @@ class AlarmState {
         }
     }
 
-    private TbAlarmResult calculateAlarmResult(TbContext ctx, AlarmRuleState ruleState) {
+    private JnksIotAlarmResult calculateAlarmResult(JnksIotContext ctx, AlarmRuleState ruleState) {
         AlarmSeverity severity = ruleState.getSeverity();
         if (currentAlarm != null) {
             // TODO: In some extremely rare cases, we might miss the event of alarm clear (If one use in-mem queue and restarted the server) or (if one manipulated the rule chain).
@@ -224,7 +224,7 @@ class AlarmState {
                 currentAlarm.setSeverity(severity);
                 AlarmApiCallResult result = ctx.getAlarmService().updateAlarm(AlarmUpdateRequest.fromAlarm(currentAlarm));
                 currentAlarm = result.getAlarm();
-                return TbAlarmResult.fromAlarmResult(result);
+                return JnksIotAlarmResult.fromAlarmResult(result);
             } else {
                 return null;
             }
@@ -252,7 +252,7 @@ class AlarmState {
             }
             AlarmApiCallResult result = ctx.getAlarmService().createAlarm(AlarmCreateOrUpdateActiveRequest.fromAlarm(newAlarm));
             currentAlarm = result.getAlarm();
-            return TbAlarmResult.fromAlarmResult(result);
+            return JnksIotAlarmResult.fromAlarmResult(result);
         }
     }
 
@@ -307,7 +307,7 @@ class AlarmState {
         return String.valueOf(result);
     }
 
-    public boolean processAlarmClear(TbContext ctx, Alarm alarmNf) {
+    public boolean processAlarmClear(JnksIotContext ctx, Alarm alarmNf) {
         boolean updated = false;
         if (currentAlarm != null && currentAlarm.getId().equals(alarmNf.getId())) {
             currentAlarm = null;

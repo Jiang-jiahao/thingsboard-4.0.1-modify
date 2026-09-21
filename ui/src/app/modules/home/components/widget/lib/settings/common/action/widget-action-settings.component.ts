@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { TranslateService } from '@ngx-translate/core';
 import {
   WidgetAction,
@@ -25,7 +25,7 @@ import {
 } from '@home/components/widget/lib/settings/common/action/widget-action-settings-panel.component';
 
 @Component({
-  selector: 'tb-widget-action-settings',
+  selector: 'jnks-iot-widget-action-settings',
   templateUrl: './action-settings-button.component.html',
   styleUrls: ['./action-settings-button.scss'],
   providers: [
@@ -64,7 +64,7 @@ export class WidgetActionSettingsComponent implements OnInit, ControlValueAccess
   private propagateChange = null;
 
   constructor(private translate: TranslateService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private cd: ChangeDetectorRef) {}
@@ -113,7 +113,7 @@ export class WidgetActionSettingsComponent implements OnInit, ControlValueAccess
         },
         isModal: true
       });
-      widgetActionSettingsPanelPopover.tbComponentRef.instance.widgetActionApplied.subscribe((widgetAction) => {
+      widgetActionSettingsPanelPopover.jnksIotComponentRef.instance.widgetActionApplied.subscribe((widgetAction) => {
         widgetActionSettingsPanelPopover.hide();
         this.modelValue = widgetAction;
         this.updateDisplayValue();

@@ -1,7 +1,7 @@
-.tb-css {
+.jnks-iot-css {
   position: relative;
 
-  &.tb-disabled {
+  &.jnks-iot-disabled {
     color: rgba(0, 0, 0, .38);
   }
 
@@ -9,11 +9,11 @@
     height: 100%;
   }
 
-  .tb-css-content-panel {
+  .jnks-iot-css-content-panel {
     height: calc(100% - 40px);
     border: 1px solid #c0c0c0;
 
-    #tb-css-input {
+    #jnks-iot-css-input {
       width: 100%;
       min-width: 200px;
       height: 100%;
@@ -24,13 +24,13 @@
     }
   }
 
-  .tb-css-toolbar {
+  .jnks-iot-css-toolbar {
     & > * {
       &:not(:last-child) {
         margin-right: 4px;
       }
     }
-    button.mat-mdc-button-base, button.mat-mdc-button-base.tb-mat-32 {
+    button.mat-mdc-button-base, button.mat-mdc-button-base.jnks-iot-mat-32 {
       background: rgba(220, 220, 220, .35);
       align-items: center;
       vertical-align: middle;
@@ -39,14 +39,14 @@
       padding: 4px;
       font-size: .8rem;
       line-height: 15px;
-      &:not(.tb-help-popup-button) {
+      &:not(.jnks-iot-help-popup-button) {
         color: #7b7b7b;
       }
     }
     button.mat-mdc-button-base:not(.mat-mdc-icon-button) {
       height: 23px;
     }
-    .tb-help-popup-button-loading {
+    .jnks-iot-help-popup-button-loading {
       background: #f3f3f3;
     }
   }

@@ -1,12 +1,12 @@
 package com.jnks.iot.server.common.msg;
 
 import com.jnks.iot.server.common.msg.aware.TenantAwareMsg;
-import com.jnks.iot.server.common.msg.queue.TbCallback;
+import com.jnks.iot.server.common.msg.queue.JnksIotCallback;
 
 public interface ToCalculatedFieldSystemMsg extends TenantAwareMsg {
 
-    default TbCallback getCallback() {
-        return TbCallback.EMPTY;
+    default JnksIotCallback getCallback() {
+        return JnksIotCallback.EMPTY;
     }
 
 }

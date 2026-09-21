@@ -1,11 +1,11 @@
-<section [formGroup]="alarmStatusConfigForm" class="tb-form-panel stroked">
-  <div class="tb-form-row no-padding no-border space-between">
-    <div class="tb-form-panel-title tb-required" translate>rule-node-config.alarm-status</div>
-    <div class="tb-form-panel-hint tb-error" translate [hidden]="alarmStatusConfigForm.get('alarmStatusList').valid">
+<section [formGroup]="alarmStatusConfigForm" class="jnks-iot-form-panel stroked">
+  <div class="jnks-iot-form-row no-padding no-border space-between">
+    <div class="jnks-iot-form-panel-title jnks-iot-required" translate>rule-node-config.alarm-status</div>
+    <div class="jnks-iot-form-panel-hint jnks-iot-error" translate [hidden]="alarmStatusConfigForm.get('alarmStatusList').valid">
       rule-node-config.alarm-required
     </div>
   </div>
-  <tb-alarm-status-select formControlName="alarmStatusList"></tb-alarm-status-select>
+  <jnks-iot-alarm-status-select formControlName="alarmStatusList"></jnks-iot-alarm-status-select>
 </section>
 
 

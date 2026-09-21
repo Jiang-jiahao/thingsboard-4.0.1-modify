@@ -18,7 +18,7 @@ import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-map-timeline-panel',
+  selector: 'jnks-iot-map-timeline-panel',
   templateUrl: './map-timeline-panel.component.html',
   styleUrls: ['./map-timeline-panel.component.scss'],
   encapsulation: ViewEncapsulation.None

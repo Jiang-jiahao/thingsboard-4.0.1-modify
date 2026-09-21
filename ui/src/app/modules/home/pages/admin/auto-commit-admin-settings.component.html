@@ -1,6 +1,6 @@
-<tb-repository-settings #repositorySettingsComponent
+<jnks-iot-repository-settings #repositorySettingsComponent
                         *ngIf="!(hasRepository$ | async); else autoCommitSettings">
-</tb-repository-settings>
+</jnks-iot-repository-settings>
 <ng-template #autoCommitSettings>
-  <tb-auto-commit-settings #autoCommitSettingsComponent></tb-auto-commit-settings>
+  <jnks-iot-auto-commit-settings #autoCommitSettingsComponent></jnks-iot-auto-commit-settings>
 </ng-template>

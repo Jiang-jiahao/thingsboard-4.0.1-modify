@@ -13,7 +13,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 
 // @dynamic
 @Component({
-  selector: 'tb-legend-config',
+  selector: 'jnks-iot-legend-config',
   templateUrl: './legend-config.component.html',
   styleUrls: ['./../widget-settings.scss'],
   providers: [

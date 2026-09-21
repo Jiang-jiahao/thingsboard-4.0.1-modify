@@ -11,7 +11,7 @@ import { coerceBoolean } from '@shared/decorators/coercion';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-entity-select',
+  selector: 'jnks-iot-entity-select',
   templateUrl: './entity-select.component.html',
   styleUrls: ['./entity-select.component.scss'],
   providers: [{

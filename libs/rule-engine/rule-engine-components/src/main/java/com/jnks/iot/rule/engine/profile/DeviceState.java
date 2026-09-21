@@ -3,7 +3,7 @@ package com.jnks.iot.rule.engine.profile;
 import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.common.util.JacksonUtil;
-import com.jnks.iot.rule.engine.api.TbContext;
+import com.jnks.iot.rule.engine.api.JnksIotContext;
 import com.jnks.iot.rule.engine.profile.state.PersistedAlarmState;
 import com.jnks.iot.rule.engine.profile.state.PersistedDeviceState;
 import com.jnks.iot.server.common.adaptor.JsonConverter;
@@ -26,7 +26,7 @@ import com.jnks.iot.server.common.data.kv.TsKvEntry;
 import com.jnks.iot.server.common.data.query.EntityKey;
 import com.jnks.iot.server.common.data.query.EntityKeyType;
 import com.jnks.iot.server.common.data.rule.RuleNodeState;
-import com.jnks.iot.server.common.msg.TbMsg;
+import com.jnks.iot.server.common.msg.JnksIotMsg;
 import com.jnks.iot.server.dao.sql.query.EntityKeyMapping;
 
 import java.util.ArrayList;
@@ -40,17 +40,17 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import static com.jnks.iot.server.common.data.msg.TbMsgType.ACTIVITY_EVENT;
-import static com.jnks.iot.server.common.data.msg.TbMsgType.ALARM_ACK;
-import static com.jnks.iot.server.common.data.msg.TbMsgType.ALARM_CLEAR;
-import static com.jnks.iot.server.common.data.msg.TbMsgType.ALARM_DELETE;
-import static com.jnks.iot.server.common.data.msg.TbMsgType.ATTRIBUTES_DELETED;
-import static com.jnks.iot.server.common.data.msg.TbMsgType.ATTRIBUTES_UPDATED;
-import static com.jnks.iot.server.common.data.msg.TbMsgType.ENTITY_ASSIGNED;
-import static com.jnks.iot.server.common.data.msg.TbMsgType.ENTITY_UNASSIGNED;
-import static com.jnks.iot.server.common.data.msg.TbMsgType.INACTIVITY_EVENT;
-import static com.jnks.iot.server.common.data.msg.TbMsgType.POST_ATTRIBUTES_REQUEST;
-import static com.jnks.iot.server.common.data.msg.TbMsgType.POST_TELEMETRY_REQUEST;
+import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.ACTIVITY_EVENT;
+import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.ALARM_ACK;
+import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.ALARM_CLEAR;
+import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.ALARM_DELETE;
+import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.ATTRIBUTES_DELETED;
+import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.ATTRIBUTES_UPDATED;
+import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.ENTITY_ASSIGNED;
+import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.ENTITY_UNASSIGNED;
+import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.INACTIVITY_EVENT;
+import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.POST_ATTRIBUTES_REQUEST;
+import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.POST_TELEMETRY_REQUEST;
 
 @Slf4j
 class DeviceState {
@@ -64,7 +64,7 @@ class DeviceState {
     private final ConcurrentMap<String, AlarmState> alarmStates = new ConcurrentHashMap<>();
     private final DynamicPredicateValueCtx dynamicPredicateValueCtx;
 
-    DeviceState(TbContext ctx, TbDeviceProfileNodeConfiguration config, DeviceId deviceId, ProfileState deviceProfile, RuleNodeState state) {
+    DeviceState(JnksIotContext ctx, JnksIotDeviceProfileNodeConfiguration config, DeviceId deviceId, ProfileState deviceProfile, RuleNodeState state) {
         this.persistState = config.isPersistAlarmRulesState();
         this.deviceId = deviceId;
         this.deviceProfile = deviceProfile;
@@ -95,7 +95,7 @@ class DeviceState {
         }
     }
 
-    public void updateProfile(TbContext ctx, DeviceProfile deviceProfile) throws ExecutionException, InterruptedException {
+    public void updateProfile(JnksIotContext ctx, DeviceProfile deviceProfile) throws ExecutionException, InterruptedException {
         Set<AlarmConditionFilterKey> oldKeys = Set.copyOf(this.deviceProfile.getEntityKeys());
         this.deviceProfile.updateDeviceProfile(deviceProfile);
         if (latestValues != null) {
@@ -116,7 +116,7 @@ class DeviceState {
         }
     }
 
-    public void harvestAlarms(TbContext ctx, long ts) throws ExecutionException, InterruptedException {
+    public void harvestAlarms(JnksIotContext ctx, long ts) throws ExecutionException, InterruptedException {
         log.debug("[{}] Going to harvest alarms: {}", ctx.getSelfId(), ts);
         boolean stateChanged = false;
         for (AlarmState state : alarmStates.values()) {
@@ -128,7 +128,7 @@ class DeviceState {
         }
     }
 
-    public void process(TbContext ctx, TbMsg msg) throws ExecutionException, InterruptedException {
+    public void process(JnksIotContext ctx, JnksIotMsg msg) throws ExecutionException, InterruptedException {
         if (latestValues == null) {
             latestValues = fetchLatestValues(ctx, deviceId);
         }
@@ -161,7 +161,7 @@ class DeviceState {
         }
     }
 
-    private boolean processDeviceActivityEvent(TbContext ctx, TbMsg msg) throws ExecutionException, InterruptedException {
+    private boolean processDeviceActivityEvent(JnksIotContext ctx, JnksIotMsg msg) throws ExecutionException, InterruptedException {
         String scope = msg.getMetaData().getValue(DataConstants.SCOPE);
         if (StringUtils.isEmpty(scope)) {
             return processTelemetry(ctx, msg);
@@ -170,7 +170,7 @@ class DeviceState {
         }
     }
 
-    private boolean processAlarmClearNotification(TbContext ctx, TbMsg msg) {
+    private boolean processAlarmClearNotification(JnksIotContext ctx, JnksIotMsg msg) {
         boolean stateChanged = false;
         Alarm alarmNf = JacksonUtil.fromString(msg.getData(), Alarm.class);
         for (DeviceProfileAlarm alarm : deviceProfile.getAlarmSettings()) {
@@ -182,7 +182,7 @@ class DeviceState {
         return stateChanged;
     }
 
-    private void processAlarmAckNotification(TbContext ctx, TbMsg msg) {
+    private void processAlarmAckNotification(JnksIotContext ctx, JnksIotMsg msg) {
         Alarm alarmNf = JacksonUtil.fromString(msg.getData(), Alarm.class);
         for (DeviceProfileAlarm alarm : deviceProfile.getAlarmSettings()) {
             AlarmState alarmState = alarmStates.computeIfAbsent(alarm.getId(),
@@ -192,14 +192,14 @@ class DeviceState {
         ctx.tellSuccess(msg);
     }
 
-    private void processAlarmDeleteNotification(TbContext ctx, TbMsg msg) {
+    private void processAlarmDeleteNotification(JnksIotContext ctx, JnksIotMsg msg) {
         Alarm alarm = JacksonUtil.fromString(msg.getData(), Alarm.class);
         alarmStates.values().removeIf(alarmState -> alarmState.getCurrentAlarm() != null
                 && alarmState.getCurrentAlarm().getId().equals(alarm.getId()));
         ctx.tellSuccess(msg);
     }
 
-    private boolean processAttributesUpdateNotification(TbContext ctx, TbMsg msg) throws ExecutionException, InterruptedException {
+    private boolean processAttributesUpdateNotification(JnksIotContext ctx, JnksIotMsg msg) throws ExecutionException, InterruptedException {
         String scope = msg.getMetaData().getValue(DataConstants.SCOPE);
         if (StringUtils.isEmpty(scope)) {
             scope = DataConstants.CLIENT_SCOPE;
@@ -207,7 +207,7 @@ class DeviceState {
         return processAttributes(ctx, msg, scope);
     }
 
-    private boolean processAttributesDeleteNotification(TbContext ctx, TbMsg msg) throws ExecutionException, InterruptedException {
+    private boolean processAttributesDeleteNotification(JnksIotContext ctx, JnksIotMsg msg) throws ExecutionException, InterruptedException {
         boolean stateChanged = false;
         List<String> keys = new ArrayList<>();
         JsonParser.parseString(msg.getData()).getAsJsonObject().get("attributes").getAsJsonArray().forEach(e -> keys.add(e.getAsString()));
@@ -232,11 +232,11 @@ class DeviceState {
         return stateChanged;
     }
 
-    protected boolean processAttributesUpdateRequest(TbContext ctx, TbMsg msg) throws ExecutionException, InterruptedException {
+    protected boolean processAttributesUpdateRequest(JnksIotContext ctx, JnksIotMsg msg) throws ExecutionException, InterruptedException {
         return processAttributes(ctx, msg, DataConstants.CLIENT_SCOPE);
     }
 
-    private boolean processAttributes(TbContext ctx, TbMsg msg, String scope) throws ExecutionException, InterruptedException {
+    private boolean processAttributes(JnksIotContext ctx, JnksIotMsg msg, String scope) throws ExecutionException, InterruptedException {
         boolean stateChanged = false;
         Set<AttributeKvEntry> attributes = JsonConverter.convertToAttributes(JsonParser.parseString(msg.getData()));
         if (!attributes.isEmpty()) {
@@ -251,7 +251,7 @@ class DeviceState {
         return stateChanged;
     }
 
-    protected boolean processTelemetry(TbContext ctx, TbMsg msg) throws ExecutionException, InterruptedException {
+    protected boolean processTelemetry(JnksIotContext ctx, JnksIotMsg msg) throws ExecutionException, InterruptedException {
         boolean stateChanged = false;
         Map<Long, List<KvEntry>> tsKvMap = JsonConverter.convertToSortedTelemetry(JsonParser.parseString(msg.getData()), msg.getMetaDataTs());
         // iterate over data by ts (ASC order).
@@ -314,14 +314,14 @@ class DeviceState {
         return EntityKeyType.ATTRIBUTE;
     }
 
-    private DataSnapshot fetchLatestValues(TbContext ctx, EntityId originator) throws ExecutionException, InterruptedException {
+    private DataSnapshot fetchLatestValues(JnksIotContext ctx, EntityId originator) throws ExecutionException, InterruptedException {
         Set<AlarmConditionFilterKey> entityKeysToFetch = deviceProfile.getEntityKeys();
         DataSnapshot result = new DataSnapshot(entityKeysToFetch);
         addEntityKeysToSnapshot(ctx, originator, entityKeysToFetch, result);
         return result;
     }
 
-    private void addEntityKeysToSnapshot(TbContext ctx, EntityId originator, Set<AlarmConditionFilterKey> entityKeysToFetch, DataSnapshot result) throws InterruptedException, ExecutionException {
+    private void addEntityKeysToSnapshot(JnksIotContext ctx, EntityId originator, Set<AlarmConditionFilterKey> entityKeysToFetch, DataSnapshot result) throws InterruptedException, ExecutionException {
         Set<String> attributeKeys = new HashSet<>();
         Set<String> latestTsKeys = new HashSet<>();
 

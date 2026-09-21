@@ -8,7 +8,7 @@ public class EntityViewPageElements extends OtherPageElementsHelper {
         super(driver);
     }
 
-    private static final String ENTITY_VIEW_DETAILS_VIEW = "//tb-details-panel";
+    private static final String ENTITY_VIEW_DETAILS_VIEW = "//jnks-iot-details-panel";
     private static final String ENTITY_VIEW_DETAILS_ALARMS = ENTITY_VIEW_DETAILS_VIEW + "//span[text()='Alarms']";
 
     public WebElement entityViewDetailsView() {

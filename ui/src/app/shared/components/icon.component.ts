@@ -18,7 +18,7 @@ import { take } from 'rxjs/operators';
 import { isSvgIcon, splitIconName } from '@shared/models/icon.models';
 import { ContentObserver } from '@angular/cdk/observers';
 
-const _TbIconBase = mixinColor(
+const _JnksIotIconBase = mixinColor(
   class {
     constructor(public _elementRef: ElementRef) {}
   },
@@ -45,8 +45,8 @@ const funcIriPattern = /^url\(['"]?#(.*?)['"]?\)$/;
 
 @Component({
   template: '<span style="display: none;" #iconNameContent><ng-content></ng-content></span>',
-  selector: 'tb-icon',
-  exportAs: 'tbIcon',
+  selector: 'jnks-iot-icon',
+  exportAs: 'jnksIotIcon',
   styleUrls: [],
   // eslint-disable-next-line @angular-eslint/no-inputs-metadata-property
   inputs: ['color'],
@@ -62,7 +62,7 @@ const funcIriPattern = /^url\(['"]?#(.*?)['"]?\)$/;
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TbIconComponent extends _TbIconBase
+export class JnksIotIconComponent extends _JnksIotIconBase
                              implements AfterContentInit, AfterViewChecked, CanColor, OnDestroy {
 
   @ViewChild('iconNameContent', {static: true})

@@ -28,12 +28,12 @@
     <dependencies>
         <dependency>
             <groupId>com.jnks.iot</groupId>
-            <artifactId>tb-core</artifactId>
+            <artifactId>jnks-iot-core</artifactId>
             <version>4.0.1</version>
         </dependency>
         <dependency>
             <groupId>com.jnks.iot</groupId>
-            <artifactId>tb-rule-engine</artifactId>
+            <artifactId>jnks-iot-rule-engine</artifactId>
             <version>4.0.1</version>
         </dependency>
         <dependency>

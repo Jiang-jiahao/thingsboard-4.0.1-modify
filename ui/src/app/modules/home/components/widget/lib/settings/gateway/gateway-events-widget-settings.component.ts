@@ -7,7 +7,7 @@ import { MatChipInputEvent } from '@angular/material/chips';
 import { COMMA, ENTER, SEMICOLON } from '@angular/cdk/keycodes';
 
 @Component({
-  selector: 'tb-gateway-events-widget-settings',
+  selector: 'jnks-iot-gateway-events-widget-settings',
   templateUrl: './gateway-events-widget-settings.component.html',
   styleUrls: ['./../widget-settings.scss']
 })

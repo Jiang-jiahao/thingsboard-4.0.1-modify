@@ -1,32 +1,32 @@
 @import '../../../../../../../../../scss/constants';
 
-.tb-form-table-row.tb-map-data-source-row {
+.jnks-iot-form-table-row.jnks-iot-map-data-source-row {
 
-  .tb-source-field {
+  .jnks-iot-source-field {
     flex: 1 1 70%;
     display: flex;
     gap: 12px;
-    .tb-ds-type-field, .tb-device-field, .tb-entity-alias-field {
+    .jnks-iot-ds-type-field, .jnks-iot-device-field, .jnks-iot-entity-alias-field {
       flex: 1;
     }
   }
 
-  .tb-filter-field {
+  .jnks-iot-filter-field {
     flex: 1 1 30%;
     min-width: 0;
   }
 
-  .tb-remove-button {
+  .jnks-iot-remove-button {
     width: 40px;
     min-width: 40px;
   }
 
   @media #{$mat-lt-sm} {
-    .tb-source-field {
+    .jnks-iot-source-field {
       flex: 1 1 60%;
       flex-direction: column;
     }
-    .tb-filter-field {
+    .jnks-iot-filter-field {
       flex: 1 1 40%;
     }
   }

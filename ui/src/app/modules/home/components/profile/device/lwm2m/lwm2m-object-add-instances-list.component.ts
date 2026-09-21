@@ -13,7 +13,7 @@ import { COMMA, ENTER, SEMICOLON } from '@angular/cdk/keycodes';
 import { MatChipInputEvent } from '@angular/material/chips';
 
 @Component({
-  selector: 'tb-profile-lwm2m-object-add-instances-list',
+  selector: 'jnks-iot-profile-lwm2m-object-add-instances-list',
   templateUrl: './lwm2m-object-add-instances-list.component.html',
   providers: [
     {

@@ -31,11 +31,11 @@ import {
 import { Observable } from 'rxjs';
 import { ImagePipe } from '@shared/pipe/image.pipe';
 import { DomSanitizer } from '@angular/platform-browser';
-import { TbTimeSeriesChart } from '@home/components/widget/lib/chart/time-series-chart';
+import { JnksIotTimeSeriesChart } from '@home/components/widget/lib/chart/time-series-chart';
 import { WidgetComponent } from '@home/components/widget/widget.component';
 
 @Component({
-  selector: 'tb-range-chart-widget',
+  selector: 'jnks-iot-range-chart-widget',
   templateUrl: './range-chart-widget.component.html',
   styleUrls: ['./range-chart-widget.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -66,7 +66,7 @@ export class RangeChartWidgetComponent implements OnInit, OnDestroy, AfterViewIn
 
   private rangeItems: RangeItem[];
 
-  private timeSeriesChart: TbTimeSeriesChart;
+  private timeSeriesChart: JnksIotTimeSeriesChart;
 
   constructor(public widgetComponent: WidgetComponent,
               private imagePipe: ImagePipe,
@@ -111,7 +111,7 @@ export class RangeChartWidgetComponent implements OnInit, OnDestroy, AfterViewIn
 
   ngAfterViewInit() {
     const settings = rangeChartTimeSeriesSettings(this.settings, this.rangeItems, this.decimals, this.units);
-    this.timeSeriesChart = new TbTimeSeriesChart(this.ctx, settings, this.chartShape.nativeElement, this.renderer);
+    this.timeSeriesChart = new JnksIotTimeSeriesChart(this.ctx, settings, this.chartShape.nativeElement, this.renderer);
   }
 
   ngOnDestroy() {

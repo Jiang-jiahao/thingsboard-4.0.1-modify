@@ -8,7 +8,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { UtilsService } from '@core/services/utils.service';
 import { EntityDataPageLink } from '@shared/models/query/query.models';
 import { providerClass } from '@home/components/widget/lib/maps-legacy/providers/public-api';
-import { isDefined, isDefinedAndNotNull, parseTbFunction } from '@core/utils';
+import { isDefined, isDefinedAndNotNull, parseJnksIotFunction } from '@core/utils';
 import L from 'leaflet';
 import { firstValueFrom, forkJoin, from, Observable, of } from 'rxjs';
 import { AttributeService } from '@core/http/attribute.service';
@@ -239,22 +239,22 @@ export class MapWidgetController implements MapWidgetInterface {
         this.provider = settings.provider || this.mapProvider;
         const parsedOptions: Partial<WidgetUnitedMapSettings> = {
             provider: this.provider,
-            parsedLabelFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.labelFunction, functionParams)),
-            parsedTooltipFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.tooltipFunction, functionParams)),
-            parsedColorFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.colorFunction, functionParams)),
-            parsedColorPointFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.colorPointFunction, functionParams)),
-            parsedStrokeOpacityFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.strokeOpacityFunction, functionParams)),
-            parsedStrokeWeightFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.strokeWeightFunction, functionParams)),
-            parsedPolygonLabelFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.polygonLabelFunction, functionParams)),
-            parsedPolygonColorFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.polygonColorFunction, functionParams)),
-            parsedPolygonStrokeColorFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.polygonStrokeColorFunction, functionParams)),
-            parsedPolygonTooltipFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.polygonTooltipFunction, functionParams)),
-            parsedCircleLabelFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.circleLabelFunction, functionParams)),
-            parsedCircleStrokeColorFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.circleStrokeColorFunction, functionParams)),
-            parsedCircleFillColorFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.circleFillColorFunction, functionParams)),
-            parsedCircleTooltipFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.circleTooltipFunction, functionParams)),
-            parsedMarkerImageFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.markerImageFunction, ['data', 'images', 'dsData', 'dsIndex'])),
-            parsedClusterMarkerFunction: await firstValueFrom(parseTbFunction(this.ctx.http, settings.clusterMarkerFunction, ['data', 'childCount'])),
+            parsedLabelFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.labelFunction, functionParams)),
+            parsedTooltipFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.tooltipFunction, functionParams)),
+            parsedColorFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.colorFunction, functionParams)),
+            parsedColorPointFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.colorPointFunction, functionParams)),
+            parsedStrokeOpacityFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.strokeOpacityFunction, functionParams)),
+            parsedStrokeWeightFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.strokeWeightFunction, functionParams)),
+            parsedPolygonLabelFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.polygonLabelFunction, functionParams)),
+            parsedPolygonColorFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.polygonColorFunction, functionParams)),
+            parsedPolygonStrokeColorFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.polygonStrokeColorFunction, functionParams)),
+            parsedPolygonTooltipFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.polygonTooltipFunction, functionParams)),
+            parsedCircleLabelFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.circleLabelFunction, functionParams)),
+            parsedCircleStrokeColorFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.circleStrokeColorFunction, functionParams)),
+            parsedCircleFillColorFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.circleFillColorFunction, functionParams)),
+            parsedCircleTooltipFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.circleTooltipFunction, functionParams)),
+            parsedMarkerImageFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.markerImageFunction, ['data', 'images', 'dsData', 'dsIndex'])),
+            parsedClusterMarkerFunction: await firstValueFrom(parseJnksIotFunction(this.ctx.http, settings.clusterMarkerFunction, ['data', 'childCount'])),
             // labelColor: this.ctx.widgetConfig.color,
             // polygonLabelColor: this.ctx.widgetConfig.color,
             polygonKeyName: (settings as any).polKeyName ? (settings as any).polKeyName : settings.polygonKeyName,
@@ -315,6 +315,6 @@ export class MapWidgetController implements MapWidgetInterface {
     }
 }
 
-export const TbMapWidgetV2: MapWidgetStaticInterface = MapWidgetController;
+export const JnksIotMapWidgetV2: MapWidgetStaticInterface = MapWidgetController;
 
 

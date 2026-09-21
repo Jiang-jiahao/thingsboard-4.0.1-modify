@@ -15,7 +15,7 @@ import {
 } from '@home/components/widget/config/basic/chart/latest-chart-basic-config.component';
 
 @Component({
-  selector: 'tb-radar-chart-basic-config',
+  selector: 'jnks-iot-radar-chart-basic-config',
   templateUrl: './latest-chart-basic-config.component.html',
   styleUrls: ['../basic-config.scss']
 })

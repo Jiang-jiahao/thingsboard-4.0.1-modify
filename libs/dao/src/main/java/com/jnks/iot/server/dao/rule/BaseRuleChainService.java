@@ -74,7 +74,7 @@ import static com.jnks.iot.server.dao.service.Validator.validateString;
 public class BaseRuleChainService extends AbstractEntityService implements RuleChainService {
 
     public static final String INCORRECT_TENANT_ID = "Incorrect tenantId ";
-    public static final String TB_RULE_CHAIN_INPUT_NODE = "com.jnks.iot.rule.engine.flow.TbRuleChainInputNode";
+    public static final String JNKS_IOT_RULE_CHAIN_INPUT_NODE = "com.jnks.iot.rule.engine.flow.JnksIotRuleChainInputNode";
     @Autowired
     private RuleChainDao ruleChainDao;
 
@@ -243,7 +243,7 @@ public class BaseRuleChainService extends AbstractEntityService implements RuleC
                     RuleNode targetNode = new RuleNode();
                     targetNode.setName(targetRuleChain != null ? targetRuleChain.getName() : "Rule Chain Input");
                     targetNode.setRuleChainId(ruleChainId);
-                    targetNode.setType("com.jnks.iot.rule.engine.flow.TbRuleChainInputNode");
+                    targetNode.setType("com.jnks.iot.rule.engine.flow.JnksIotRuleChainInputNode");
                     var configuration = JacksonUtil.newObjectNode();
                     configuration.put("ruleChainId", targetRuleChainId.getId().toString());
                     targetNode.setConfiguration(configuration);
@@ -588,7 +588,7 @@ public class BaseRuleChainService extends AbstractEntityService implements RuleC
             }
             if (!CollectionUtils.isEmpty(metaData.getNodes())) {
                 metaData.getNodes().stream()
-                        .filter(ruleNode -> ruleNode.getType().equals(TB_RULE_CHAIN_INPUT_NODE))
+                        .filter(ruleNode -> ruleNode.getType().equals(JNKS_IOT_RULE_CHAIN_INPUT_NODE))
                         .forEach(ruleNode -> {
                             ObjectNode configuration = (ObjectNode) ruleNode.getConfiguration();
                             if (configuration.has("ruleChainId")) {

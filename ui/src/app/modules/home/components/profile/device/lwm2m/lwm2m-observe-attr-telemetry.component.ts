@@ -23,7 +23,7 @@ import _ from 'lodash';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'tb-profile-lwm2m-observe-attr-telemetry',
+  selector: 'jnks-iot-profile-lwm2m-observe-attr-telemetry',
   templateUrl: './lwm2m-observe-attr-telemetry.component.html',
   styleUrls: [ './lwm2m-observe-attr-telemetry.component.scss'],
   providers: [
@@ -183,7 +183,7 @@ export class Lwm2mObserveAttrTelemetryComponent implements ControlValueAccessor,
     const instancesId: Set<number> = this.instancesToSetId(object.instances);
     this.dialog.open<Lwm2mObjectAddInstancesDialogComponent, Lwm2mObjectAddInstancesData>(Lwm2mObjectAddInstancesDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         instancesId: new Set(instancesId),
         objectName: object.name,

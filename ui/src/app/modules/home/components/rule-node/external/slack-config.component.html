@@ -17,16 +17,16 @@
       {{ 'rule-node-config.slack-api-token-required' | translate }}
     </mat-error>
   </mat-form-field>
-  <label class="tb-title">{{ 'notification.slack-chanel-type' | translate }}</label>
+  <label class="jnks-iot-title">{{ 'notification.slack-chanel-type' | translate }}</label>
   <mat-radio-group formControlName="conversationType">
     <mat-radio-button *ngFor="let slackChanelType of slackChanelTypes" [value]="slackChanelType">
       {{ slackChanelTypesTranslateMap.get(slackChanelType) | translate }}
     </mat-radio-button>
   </mat-radio-group>
-  <tb-slack-conversation-autocomplete
+  <jnks-iot-slack-conversation-autocomplete
     formControlName="conversation"
     required
     [token]="slackConfigForm.get('useSystemSettings').value ? '' : slackConfigForm.get('botToken').value"
     [slackChanelType]="slackConfigForm.get('conversationType').value">
-  </tb-slack-conversation-autocomplete>
+  </jnks-iot-slack-conversation-autocomplete>
 </section>

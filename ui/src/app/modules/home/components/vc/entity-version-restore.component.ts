@@ -12,14 +12,14 @@ import { AppState } from '@core/core.state';
 import { EntitiesVersionControlService } from '@core/http/entities-version-control.service';
 import { EntityId } from '@shared/models/id/entity-id';
 import { TranslateService } from '@ngx-translate/core';
-import { TbPopoverComponent } from '@shared/components/popover.component';
+import { JnksIotPopoverComponent } from '@shared/components/popover.component';
 import { delay, share } from 'rxjs/operators';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { Observable, Subscription } from 'rxjs';
 import { parseHttpErrorMessage } from '@core/utils';
 
 @Component({
-  selector: 'tb-entity-version-restore',
+  selector: 'jnks-iot-entity-version-restore',
   templateUrl: './entity-version-restore.component.html',
   styleUrls: ['./version-control.scss']
 })
@@ -38,7 +38,7 @@ export class EntityVersionRestoreComponent extends PageComponent implements OnIn
   onClose: (result: VersionLoadResult | null) => void;
 
   @Input()
-  popoverComponent: TbPopoverComponent;
+  popoverComponent: JnksIotPopoverComponent;
 
   entityDataInfo: EntityDataInfo = null;
 

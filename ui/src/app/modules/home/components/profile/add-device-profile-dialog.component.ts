@@ -43,7 +43,7 @@ export interface AddDeviceProfileDialogData {
 }
 
 @Component({
-  selector: 'tb-add-device-profile-dialog',
+  selector: 'jnks-iot-add-device-profile-dialog',
   templateUrl: './add-device-profile-dialog.component.html',
   providers: [],
   styleUrls: ['./add-device-profile-dialog.component.scss']
@@ -78,7 +78,7 @@ export class AddDeviceProfileDialogComponent extends
 
   provisionConfigFormGroup: UntypedFormGroup;
 
-  serviceType = ServiceType.TB_RULE_ENGINE;
+  serviceType = ServiceType.JNKS_IOT_RULE_ENGINE;
 
   readonly deviceProvisioningUiEnabled = DEVICE_PROVISIONING_UI_ENABLED;
 

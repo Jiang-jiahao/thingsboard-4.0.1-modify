@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { RuleNodeConfiguration, RuleNodeConfigurationComponent } from '@shared/models/rule-node.models';
 
 @Component({
-  selector: 'tb-action-node-device-profile-config',
+  selector: 'jnks-iot-action-node-device-profile-config',
   templateUrl: './device-profile-config.component.html',
   styleUrls: []
 })

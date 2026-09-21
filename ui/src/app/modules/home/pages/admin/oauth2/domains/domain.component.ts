@@ -14,7 +14,7 @@ import { ClientDialogComponent } from '@home/pages/admin/oauth2/clients/client-d
 import { EntityType } from '@shared/models/entity-type.models';
 
 @Component({
-  selector: 'tb-domain',
+  selector: 'jnks-iot-domain',
   templateUrl: './domain.component.html',
   styleUrls: []
 })
@@ -70,7 +70,7 @@ export class DomainComponent extends EntityComponent<DomainInfo> {
     }
     this.dialog.open<ClientDialogComponent>(ClientDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {}
     }).afterClosed()
       .subscribe((client) => {

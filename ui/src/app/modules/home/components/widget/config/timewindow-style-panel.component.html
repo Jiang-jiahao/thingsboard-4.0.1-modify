@@ -1,6 +1,6 @@
-<div class="tb-timewindow-style-panel" [formGroup]="timewindowStyleFormGroup">
-  <div class="tb-timewindow-style-title" translate>timewindow.style</div>
-  <div class="tb-form-row space-between">
+<div class="jnks-iot-timewindow-style-panel" [formGroup]="timewindowStyleFormGroup">
+  <div class="jnks-iot-timewindow-style-title" translate>timewindow.style</div>
+  <div class="jnks-iot-form-row space-between">
     <mat-slide-toggle class="mat-slide" formControlName="showIcon">
       {{ 'timewindow.icon' | translate }}
     </mat-slide-toggle>
@@ -8,13 +8,13 @@
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <input matInput formControlName="iconSize">
       </mat-form-field>
-      <tb-material-icon-select asBoxInput
+      <jnks-iot-material-icon-select asBoxInput
                                iconClearButton
                                formControlName="icon">
-      </tb-material-icon-select>
+      </jnks-iot-material-icon-select>
     </div>
   </div>
-  <div class="tb-form-row">
+  <div class="jnks-iot-form-row">
     <div class="fixed-title-width" translate>timewindow.icon-position</div>
     <mat-form-field class="flex-1" appearance="outline" subscriptSizing="dynamic">
       <mat-select formControlName="iconPosition" placeholder="{{ 'widget-config.set' | translate }}">
@@ -27,9 +27,9 @@
       </mat-select>
     </mat-form-field>
   </div>
-  <div class="tb-form-row space-between">
+  <div class="jnks-iot-form-row space-between">
     <div translate>timewindow.font</div>
-    <tb-font-settings
+    <jnks-iot-font-settings
       clearButton
       [previewText]="timewindowComponent.displayValue()"
       [initialPreviewStyle]="{fontSize: '14px',
@@ -38,25 +38,25 @@
                               lineHeight: 'normal',
                               letterSpacing: 'normal'}"
       formControlName="font">
-    </tb-font-settings>
+    </jnks-iot-font-settings>
   </div>
-  <div class="tb-form-row space-between">
+  <div class="jnks-iot-form-row space-between">
     <div translate>timewindow.color</div>
-    <tb-color-input
+    <jnks-iot-color-input
       formControlName="color"
       colorClearButton
       asBoxInput>
-    </tb-color-input>
+    </jnks-iot-color-input>
   </div>
-  <div class="tb-form-row">
+  <div class="jnks-iot-form-row">
     <mat-slide-toggle class="mat-slide" formControlName="displayTypePrefix">
       {{ 'timewindow.displayTypePrefix' | translate }}
     </mat-slide-toggle>
   </div>
   <mat-divider></mat-divider>
-  <div class="tb-form-row no-border no-padding timewindow-preview">
+  <div class="jnks-iot-form-row no-border no-padding timewindow-preview">
     <div class="fixed-title-width" translate>timewindow.preview</div>
-    <tb-timewindow #timewindowComponent
+    <jnks-iot-timewindow #timewindowComponent
                    disablePanel
                    alwaysDisplayTypePrefix
                    timezone="true"
@@ -65,9 +65,9 @@
                    [timewindowStyle]="previewTimewindowStyle"
                    [ngModel]="previewValue"
                    [ngModelOptions]="{standalone: true}">
-    </tb-timewindow>
+    </jnks-iot-timewindow>
   </div>
-  <div class="tb-timewindow-style-panel-buttons">
+  <div class="jnks-iot-timewindow-style-panel-buttons">
     <button mat-button
             color="primary"
             type="button"

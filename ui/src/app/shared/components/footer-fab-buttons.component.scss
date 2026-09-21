@@ -1,5 +1,5 @@
 :host {
-  section.tb-footer-fab-buttons {
+  section.jnks-iot-footer-fab-buttons {
     &:not(.relative-buttons) {
       position: fixed;
       right: 20px;
@@ -23,15 +23,15 @@
       }
     }
 
-    .tb-btn-footer {
+    .jnks-iot-btn-footer {
       &.fab-toggler {
         margin-top: 0;
       }
       position: relative !important;
-      animation: tbMoveFromBottomFade .3s ease both;
+      animation: jnksIotMoveFromBottomFade .3s ease both;
 
-      &.tb-hide {
-        animation: tbMoveToBottomFade .3s ease both;
+      &.jnks-iot-hide {
+        animation: jnksIotMoveToBottomFade .3s ease both;
       }
     }
   }

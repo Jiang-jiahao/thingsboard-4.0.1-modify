@@ -73,18 +73,18 @@ import { ItemBufferService, RuleNodeConnection } from '@core/services/item-buffe
 import { Hotkey } from 'angular2-hotkeys';
 import { DebugEventType, DebugRuleNodeEventBody, EventType } from '@shared/models/event.models';
 import { MatMiniFabButton } from '@angular/material/button';
-import { TbPopoverService } from '@shared/components/popover.service';
+import { JnksIotPopoverService } from '@shared/components/popover.service';
 import { VersionControlComponent } from '@home/components/vc/version-control.component';
 import { VERSION_CONTROL_UI_ENABLED } from '@shared/models/device.models';
 import { ComponentClusteringMode } from '@shared/models/component-descriptor.models';
 import { MatDrawer } from '@angular/material/sidenav';
 import { HttpStatusCode } from '@angular/common/http';
-import { TbContextMenuEvent } from '@shared/models/jquery-event.models';
+import { JnksIotContextMenuEvent } from '@shared/models/jquery-event.models';
 import { EntityDebugSettings } from '@shared/models/entity.models';
 import Timeout = NodeJS.Timeout;
 
 @Component({
-  selector: 'tb-rulechain-page',
+  selector: 'jnks-iot-rulechain-page',
   templateUrl: './rulechain-page.component.html',
   styleUrls: ['./rulechain-page.component.scss'],
   encapsulation: ViewEncapsulation.None
@@ -120,7 +120,7 @@ export class RuleChainPageComponent extends PageComponent
 
   ruleChainMenuPosition = { x: '0px', y: '0px' };
 
-  contextMenuEvent: TbContextMenuEvent;
+  contextMenuEvent: JnksIotContextMenuEvent;
 
   ruleNodeTypeDescriptorsMap = ruleNodeTypeDescriptors;
   ruleNodeTypesLibraryArray = ruleNodeTypesLibrary;
@@ -143,8 +143,8 @@ export class RuleChainPageComponent extends PageComponent
   editingRuleNodeSourceRuleChainId: string;
   ruleNodeTestButtonLabel: string;
 
-  @ViewChild('tbRuleNode') ruleNodeComponent: RuleNodeDetailsComponent;
-  @ViewChild('tbRuleNodeLink') ruleNodeLinkComponent: RuleNodeLinkComponent;
+  @ViewChild('jnksIotRuleNode') ruleNodeComponent: RuleNodeDetailsComponent;
+  @ViewChild('jnksIotRuleNodeLink') ruleNodeLinkComponent: RuleNodeLinkComponent;
 
   editingRuleNodeLink: FcRuleEdge = null;
   isEditingRuleNodeLink = false;
@@ -256,7 +256,7 @@ export class RuleChainPageComponent extends PageComponent
               private authService: AuthService,
               private translate: TranslateService,
               private itembuffer: ItemBufferService,
-              private popoverService: TbPopoverService,
+              private popoverService: JnksIotPopoverService,
               private renderer: Renderer2,
               private viewContainerRef: ViewContainerRef,
               private changeDetector: ChangeDetectorRef,
@@ -642,7 +642,7 @@ export class RuleChainPageComponent extends PageComponent
     this.validate();
   }
 
-  openRuleChainContextMenu($event: TbContextMenuEvent) {
+  openRuleChainContextMenu($event: JnksIotContextMenuEvent) {
     if (this.ruleChainCanvas.modelService && !$event.ctrlKey && !$event.metaKey) {
       const x = $event.clientX;
       const y = $event.clientY;
@@ -676,7 +676,7 @@ export class RuleChainPageComponent extends PageComponent
 
   private prepareRuleChainContextMenu(): RuleChainMenuContextInfo {
     const contextInfo: RuleChainMenuContextInfo = {
-      headerClass: 'tb-rulechain-header',
+      headerClass: 'jnks-iot-rulechain-header',
       icon: 'settings_ethernet',
       title: this.ruleChain.name,
       subtitle: this.translate.instant('rulechain.rulechain'),
@@ -837,7 +837,7 @@ export class RuleChainPageComponent extends PageComponent
 
   private prepareEdgeContextMenu(edge: FcRuleEdge): RuleChainMenuContextInfo {
     const contextInfo: RuleChainMenuContextInfo = {
-      headerClass: 'tb-link-header',
+      headerClass: 'jnks-iot-link-header',
       icon: 'trending_flat',
       title: edge.label,
       subtitle: this.translate.instant('rulenode.link'),
@@ -896,7 +896,7 @@ export class RuleChainPageComponent extends PageComponent
     this.dialog.open<CreateNestedRuleChainDialogComponent, CreateNestedRuleChainDialogData,
       RuleChain>(CreateNestedRuleChainDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         ruleChainType: this.ruleChainType
       }
@@ -1310,10 +1310,10 @@ export class RuleChainPageComponent extends PageComponent
   typeHeaderMouseEnter(event: MouseEvent, ruleNodeType: RuleNodeType) {
     const type = ruleNodeTypeDescriptors.get(ruleNodeType);
     this.displayTooltip(event,
-      '<div class="tb-rule-node-tooltip tb-lib-tooltip">' +
-      '<div id="tb-node-content">' +
-      '<div class="tb-node-title">' + this.translate.instant(type.name) + '</div>' +
-      '<div class="tb-node-details">' + this.translate.instant(type.details) + '</div>' +
+      '<div class="jnks-iot-rule-node-tooltip jnks-iot-lib-tooltip">' +
+      '<div id="jnks-iot-node-content">' +
+      '<div class="jnks-iot-node-title">' + this.translate.instant(type.name) + '</div>' +
+      '<div class="jnks-iot-node-details">' + this.translate.instant(type.details) + '</div>' +
       '</div>' +
       '</div>'
     );
@@ -1321,11 +1321,11 @@ export class RuleChainPageComponent extends PageComponent
 
   displayLibNodeDescriptionTooltip(event: MouseEvent, node: FcRuleNodeType) {
     this.displayTooltip(event,
-      '<div class="tb-rule-node-tooltip tb-lib-tooltip">' +
-      '<div id="tb-node-content">' +
-      '<div class="tb-node-title">' + node.component.name + '</div>' +
-      '<div class="tb-node-description">' + node.component.configurationDescriptor.nodeDefinition.description + '</div>' +
-      '<div class="tb-node-details">' + node.component.configurationDescriptor.nodeDefinition.details + '</div>' +
+      '<div class="jnks-iot-rule-node-tooltip jnks-iot-lib-tooltip">' +
+      '<div id="jnks-iot-node-content">' +
+      '<div class="jnks-iot-node-title">' + node.component.name + '</div>' +
+      '<div class="jnks-iot-node-description">' + node.component.configurationDescriptor.nodeDefinition.description + '</div>' +
+      '<div class="jnks-iot-node-details">' + node.component.configurationDescriptor.nodeDefinition.details + '</div>' +
       '</div>' +
       '</div>'
     );
@@ -1346,12 +1346,12 @@ export class RuleChainPageComponent extends PageComponent
           details = node.additionalInfo.description;
         }
       }
-      let tooltipContent = '<div class="tb-rule-node-tooltip">' +
-        '<div id="tb-node-content">' +
-        '<div class="tb-node-title">' + name + '</div>' +
-        '<div class="tb-node-description">' + desc + '</div>';
+      let tooltipContent = '<div class="jnks-iot-rule-node-tooltip">' +
+        '<div id="jnks-iot-node-content">' +
+        '<div class="jnks-iot-node-title">' + name + '</div>' +
+        '<div class="jnks-iot-node-description">' + desc + '</div>';
       if (details) {
-        tooltipContent += '<div class="tb-node-details">' + details + '</div>';
+        tooltipContent += '<div class="jnks-iot-node-details">' + details + '</div>';
       }
       tooltipContent += '</div>' +
         '</div>';
@@ -1545,7 +1545,7 @@ export class RuleChainPageComponent extends PageComponent
     this.dialog.open<AddRuleNodeDialogComponent, AddRuleNodeDialogData,
       FcRuleNode>(AddRuleNodeDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         ruleNode,
         ruleChainId,
@@ -1586,7 +1586,7 @@ export class RuleChainPageComponent extends PageComponent
     return this.dialog.open<AddRuleNodeLinkDialogComponent, AddRuleNodeLinkDialogData,
       FcRuleEdge>(AddRuleNodeLinkDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog'],
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog'],
       data: {
         link,
         labels,
@@ -1621,8 +1621,8 @@ export class RuleChainPageComponent extends PageComponent
             }
           }
         }, {}, {}, {}, true);
-      versionControlPopover.tbComponentRef.instance.popoverComponent = versionControlPopover;
-      versionControlPopover.tbComponentRef.instance.versionRestored.subscribe(() => {
+      versionControlPopover.jnksIotComponentRef.instance.popoverComponent = versionControlPopover;
+      versionControlPopover.jnksIotComponentRef.instance.versionRestored.subscribe(() => {
         this.reloadRuleChain();
       });
     }
@@ -1652,9 +1652,9 @@ export class RuleChainPageComponent extends PageComponent
             trackOrigin: true
           }
         );
-        const content = '<div class="tb-rule-node-error-tooltip">' +
+        const content = '<div class="jnks-iot-rule-node-error-tooltip">' +
           '<div id="tooltip-content">' +
-          '<div class="tb-node-details">' + node.error + '</div>' +
+          '<div class="jnks-iot-node-details">' + node.error + '</div>' +
           '</div>' +
           '</div>';
         const contentElement = $(content);
@@ -1725,7 +1725,7 @@ export interface AddRuleNodeLinkDialogData {
 }
 
 @Component({
-  selector: 'tb-add-rule-node-link-dialog',
+  selector: 'jnks-iot-add-rule-node-link-dialog',
   templateUrl: './add-rule-node-link-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: AddRuleNodeLinkDialogComponent}],
   styleUrls: ['./add-rule-node-link-dialog.component.scss']
@@ -1789,7 +1789,7 @@ export interface AddRuleNodeDialogData {
 }
 
 @Component({
-  selector: 'tb-add-rule-node-dialog',
+  selector: 'jnks-iot-add-rule-node-dialog',
   templateUrl: './add-rule-node-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: AddRuleNodeDialogComponent}],
   styleUrls: ['./add-rule-node-dialog.component.scss']
@@ -1797,7 +1797,7 @@ export interface AddRuleNodeDialogData {
 export class AddRuleNodeDialogComponent extends DialogComponent<AddRuleNodeDialogComponent, FcRuleNode>
   implements OnInit, ErrorStateMatcher {
 
-  @ViewChild('tbRuleNode', {static: true}) ruleNodeDetailsComponent: RuleNodeDetailsComponent;
+  @ViewChild('jnksIotRuleNode', {static: true}) ruleNodeDetailsComponent: RuleNodeDetailsComponent;
 
   ruleNode: FcRuleNode;
   ruleChainId: string;
@@ -1849,7 +1849,7 @@ export interface CreateNestedRuleChainDialogData {
 }
 
 @Component({
-  selector: 'tb-create-nested-rulechain-dialog',
+  selector: 'jnks-iot-create-nested-rulechain-dialog',
   templateUrl: './create-nested-rulechain-dialog.component.html',
   providers: [{provide: ErrorStateMatcher, useExisting: CreateNestedRuleChainDialogComponent}],
   styleUrls: []

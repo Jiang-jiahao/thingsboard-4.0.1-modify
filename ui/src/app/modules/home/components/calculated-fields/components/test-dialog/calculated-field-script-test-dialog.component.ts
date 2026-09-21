@@ -29,17 +29,17 @@ import {
   CalculatedFieldTestScriptInputParams,
   TestArgumentTypeMap
 } from '@shared/models/calculated-field.models';
-import { TbEditorCompleter } from '@shared/models/ace/completion.models';
+import { JnksIotEditorCompleter } from '@shared/models/ace/completion.models';
 import { AceHighlightRules } from '@shared/models/ace/ace.models';
 
 export interface CalculatedFieldTestScriptDialogData extends CalculatedFieldTestScriptInputParams {
-  argumentsEditorCompleter: TbEditorCompleter;
+  argumentsEditorCompleter: JnksIotEditorCompleter;
   argumentsHighlightRules: AceHighlightRules;
   openCalculatedFieldEdit?: boolean;
 }
 
 @Component({
-  selector: 'tb-calculated-field-script-test-dialog',
+  selector: 'jnks-iot-calculated-field-script-test-dialog',
   templateUrl: './calculated-field-script-test-dialog.component.html',
   styleUrls: ['./calculated-field-script-test-dialog.component.scss'],
   encapsulation: ViewEncapsulation.None

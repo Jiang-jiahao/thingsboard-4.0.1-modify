@@ -589,36 +589,36 @@
       {{ 'tenant-profile.rate-limits.rate-limits' | translate }}
     </legend>
     <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-      <tb-rate-limits class="flex-1" formControlName="transportTenantMsgRateLimit"
+      <jnks-iot-rate-limits class="flex-1" formControlName="transportTenantMsgRateLimit"
                       [type]="rateLimitsType.TENANT_MESSAGES">
-      </tb-rate-limits>
-      <tb-rate-limits class="flex-1" formControlName="transportDeviceMsgRateLimit"
+      </jnks-iot-rate-limits>
+      <jnks-iot-rate-limits class="flex-1" formControlName="transportDeviceMsgRateLimit"
                       [type]="rateLimitsType.DEVICE_MESSAGES">
-      </tb-rate-limits>
+      </jnks-iot-rate-limits>
     </div>
     <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-      <tb-rate-limits class="flex-1" formControlName="transportTenantTelemetryMsgRateLimit"
+      <jnks-iot-rate-limits class="flex-1" formControlName="transportTenantTelemetryMsgRateLimit"
                       [type]="rateLimitsType.TENANT_TELEMETRY_MESSAGES">
-      </tb-rate-limits>
-      <tb-rate-limits class="flex-1" formControlName="transportDeviceTelemetryMsgRateLimit"
+      </jnks-iot-rate-limits>
+      <jnks-iot-rate-limits class="flex-1" formControlName="transportDeviceTelemetryMsgRateLimit"
                       [type]="rateLimitsType.DEVICE_TELEMETRY_MESSAGES">
-      </tb-rate-limits>
+      </jnks-iot-rate-limits>
     </div>
     <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-      <tb-rate-limits class="flex-1" formControlName="transportGatewayMsgRateLimit"
+      <jnks-iot-rate-limits class="flex-1" formControlName="transportGatewayMsgRateLimit"
                       [type]="rateLimitsType.GATEWAY_MESSAGES">
-      </tb-rate-limits>
-      <tb-rate-limits class="flex-1" formControlName="transportGatewayDeviceMsgRateLimit"
+      </jnks-iot-rate-limits>
+      <jnks-iot-rate-limits class="flex-1" formControlName="transportGatewayDeviceMsgRateLimit"
                       [type]="rateLimitsType.GATEWAY_DEVICE_MESSAGES">
-      </tb-rate-limits>
+      </jnks-iot-rate-limits>
     </div>
     <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-      <tb-rate-limits class="flex-1" formControlName="transportGatewayTelemetryMsgRateLimit"
+      <jnks-iot-rate-limits class="flex-1" formControlName="transportGatewayTelemetryMsgRateLimit"
                       [type]="rateLimitsType.GATEWAY_TELEMETRY_MESSAGES">
-      </tb-rate-limits>
-      <tb-rate-limits class="flex-1" formControlName="transportGatewayDeviceTelemetryMsgRateLimit"
+      </jnks-iot-rate-limits>
+      <jnks-iot-rate-limits class="flex-1" formControlName="transportGatewayDeviceTelemetryMsgRateLimit"
                       [type]="rateLimitsType.GATEWAY_DEVICE_TELEMETRY_MESSAGES">
-      </tb-rate-limits>
+      </jnks-iot-rate-limits>
     </div>
     <mat-expansion-panel class="configuration-panel">
       <mat-expansion-panel-header>
@@ -628,57 +628,57 @@
       </mat-expansion-panel-header>
       <ng-template matExpansionPanelContent>
         <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-          <tb-rate-limits class="flex-1" formControlName="transportTenantTelemetryDataPointsRateLimit"
+          <jnks-iot-rate-limits class="flex-1" formControlName="transportTenantTelemetryDataPointsRateLimit"
                           [type]="rateLimitsType.TENANT_TELEMETRY_DATA_POINTS">
-          </tb-rate-limits>
-          <tb-rate-limits class="flex-1" formControlName="transportDeviceTelemetryDataPointsRateLimit"
+          </jnks-iot-rate-limits>
+          <jnks-iot-rate-limits class="flex-1" formControlName="transportDeviceTelemetryDataPointsRateLimit"
                           [type]="rateLimitsType.DEVICE_TELEMETRY_DATA_POINTS">
-          </tb-rate-limits>
+          </jnks-iot-rate-limits>
         </div>
         <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-          <tb-rate-limits class="flex-1" formControlName="transportGatewayTelemetryDataPointsRateLimit"
+          <jnks-iot-rate-limits class="flex-1" formControlName="transportGatewayTelemetryDataPointsRateLimit"
                           [type]="rateLimitsType.GATEWAY_TELEMETRY_DATA_POINTS">
-          </tb-rate-limits>
-          <tb-rate-limits class="flex-1" formControlName="transportGatewayDeviceTelemetryDataPointsRateLimit"
+          </jnks-iot-rate-limits>
+          <jnks-iot-rate-limits class="flex-1" formControlName="transportGatewayDeviceTelemetryDataPointsRateLimit"
                           [type]="rateLimitsType.GATEWAY_DEVICE_TELEMETRY_DATA_POINTS">
-          </tb-rate-limits>
+          </jnks-iot-rate-limits>
         </div>
         <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-          <tb-rate-limits class="flex-1" formControlName="tenantServerRestLimitsConfiguration"
+          <jnks-iot-rate-limits class="flex-1" formControlName="tenantServerRestLimitsConfiguration"
                           [type]="rateLimitsType.TENANT_SERVER_REST_LIMITS_CONFIGURATION">
-          </tb-rate-limits>
-          <tb-rate-limits class="flex-1" formControlName="customerServerRestLimitsConfiguration"
+          </jnks-iot-rate-limits>
+          <jnks-iot-rate-limits class="flex-1" formControlName="customerServerRestLimitsConfiguration"
                           [type]="rateLimitsType.CUSTOMER_SERVER_REST_LIMITS_CONFIGURATION">
-          </tb-rate-limits>
+          </jnks-iot-rate-limits>
         </div>
         <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-          <tb-rate-limits class="flex-1" formControlName="tenantEntityExportRateLimit"
+          <jnks-iot-rate-limits class="flex-1" formControlName="tenantEntityExportRateLimit"
                           [type]="rateLimitsType.TENANT_ENTITY_EXPORT_RATE_LIMIT">
-          </tb-rate-limits>
-          <tb-rate-limits class="flex-1" formControlName="tenantEntityImportRateLimit"
+          </jnks-iot-rate-limits>
+          <jnks-iot-rate-limits class="flex-1" formControlName="tenantEntityImportRateLimit"
                           [type]="rateLimitsType.TENANT_ENTITY_IMPORT_RATE_LIMIT">
-          </tb-rate-limits>
+          </jnks-iot-rate-limits>
         </div>
         <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-          <tb-rate-limits class="flex-1" formControlName="wsUpdatesPerSessionRateLimit"
+          <jnks-iot-rate-limits class="flex-1" formControlName="wsUpdatesPerSessionRateLimit"
                           [type]="rateLimitsType.WS_UPDATE_PER_SESSION_RATE_LIMIT">
-          </tb-rate-limits>
-          <tb-rate-limits class="flex-1" formControlName="cassandraQueryTenantRateLimitsConfiguration"
+          </jnks-iot-rate-limits>
+          <jnks-iot-rate-limits class="flex-1" formControlName="cassandraQueryTenantRateLimitsConfiguration"
                           [type]="rateLimitsType.CASSANDRA_QUERY_TENANT_RATE_LIMITS_CONFIGURATION">
-          </tb-rate-limits>
+          </jnks-iot-rate-limits>
         </div>
         <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-          <tb-rate-limits class="flex-1" formControlName="tenantNotificationRequestsRateLimit"
+          <jnks-iot-rate-limits class="flex-1" formControlName="tenantNotificationRequestsRateLimit"
                           [type]="rateLimitsType.TENANT_NOTIFICATION_REQUEST_RATE_LIMIT">
-          </tb-rate-limits>
-          <tb-rate-limits class="flex-1" formControlName="tenantNotificationRequestsPerRuleRateLimit"
+          </jnks-iot-rate-limits>
+          <jnks-iot-rate-limits class="flex-1" formControlName="tenantNotificationRequestsPerRuleRateLimit"
                           [type]="rateLimitsType.TENANT_NOTIFICATION_REQUESTS_PER_RULE_RATE_LIMIT">
-          </tb-rate-limits>
+          </jnks-iot-rate-limits>
         </div>
         <div class="flex flex-1 flex-row xs:flex-col gt-xs:gap-4">
-          <tb-rate-limits class="flex-1" formControlName="calculatedFieldDebugEventsRateLimit"
+          <jnks-iot-rate-limits class="flex-1" formControlName="calculatedFieldDebugEventsRateLimit"
                           [type]="rateLimitsType.CALCULATED_FIELD_DEBUG_EVENT_RATE_LIMIT">
-          </tb-rate-limits>
+          </jnks-iot-rate-limits>
           <div class="flex-1"></div>
         </div>
       </ng-template>

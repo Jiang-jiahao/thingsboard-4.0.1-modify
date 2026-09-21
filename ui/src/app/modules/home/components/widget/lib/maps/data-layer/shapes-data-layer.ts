@@ -8,17 +8,17 @@ import {
   ShapeFillImageType,
   ShapeFillStripeSettings,
   ShapeFillType,
-  TbMapDatasource
+  JnksIotMapDatasource
 } from '@shared/models/widget/maps/map.models';
 import L from 'leaflet';
-import { TbMap } from '@home/components/widget/lib/maps/map';
+import { JnksIotMap } from '@home/components/widget/lib/maps/map';
 import { forkJoin, Observable, of } from 'rxjs';
 import { FormattedData } from '@shared/models/widget.models';
-import { TbLatestMapDataLayer } from '@home/components/widget/lib/maps/data-layer/latest-map-data-layer';
-import { DataLayerColorProcessor, TbMapDataLayer } from './map-data-layer';
+import { JnksIotLatestMapDataLayer } from '@home/components/widget/lib/maps/data-layer/latest-map-data-layer';
+import { DataLayerColorProcessor, JnksIotMapDataLayer } from './map-data-layer';
 import { map } from 'rxjs/operators';
-import { isDefinedAndNotNull, objectHashCode, parseTbFunction, safeExecuteTbFunction } from '@core/utils';
-import { CompiledTbFunction } from '@shared/models/js-function.models';
+import { isDefinedAndNotNull, objectHashCode, parseJnksIotFunction, safeExecuteJnksIotFunction } from '@core/utils';
+import { CompiledJnksIotFunction } from '@shared/models/js-function.models';
 import { ImagePipe } from '@shared/pipe/image.pipe';
 
 export type ShapePatternStorage = {[id: string]: {
@@ -59,7 +59,7 @@ export interface ShapeStyleInfo {
 
 abstract class ShapePatternProcessor<S = any> {
 
-  static fromSettings(dataLayer: TbMapDataLayer,
+  static fromSettings(dataLayer: JnksIotMapDataLayer,
                       settings: ShapeDataLayerSettings): ShapePatternProcessor {
     switch (settings.fillType) {
       case ShapeFillType.color:
@@ -71,16 +71,16 @@ abstract class ShapePatternProcessor<S = any> {
     }
   }
 
-  protected constructor(protected dataLayer: TbMapDataLayer,
+  protected constructor(protected dataLayer: JnksIotMapDataLayer,
                         protected settings: S) {}
 
   public abstract setup(): Observable<any>;
 
-  protected abstract computePattern(data: FormattedData<TbMapDatasource>,
-                                    dsData: FormattedData<TbMapDatasource>[]): Observable<ShapePatternInfo>;
+  protected abstract computePattern(data: FormattedData<JnksIotMapDatasource>,
+                                    dsData: FormattedData<JnksIotMapDatasource>[]): Observable<ShapePatternInfo>;
 
-  public processPattern(data: FormattedData<TbMapDatasource>,
-                        dsData: FormattedData<TbMapDatasource>[], prevPatternId?: string): Observable<PatternWithId> {
+  public processPattern(data: FormattedData<JnksIotMapDatasource>,
+                        dsData: FormattedData<JnksIotMapDatasource>[], prevPatternId?: string): Observable<PatternWithId> {
     return this.computePattern(data, dsData).pipe(
       map((patternInfo) => this.patternFromPatternInfo(patternInfo, prevPatternId))
     );
@@ -167,7 +167,7 @@ class ShapeColorPatternProcessor extends ShapePatternProcessor<DataLayerColorSet
 
   private fillColorProcessor: DataLayerColorProcessor;
 
-  constructor(protected dataLayer: TbMapDataLayer,
+  constructor(protected dataLayer: JnksIotMapDataLayer,
               protected settings: DataLayerColorSettings) {
     super(dataLayer, settings);
   }
@@ -177,7 +177,7 @@ class ShapeColorPatternProcessor extends ShapePatternProcessor<DataLayerColorSet
     return this.fillColorProcessor.setup();
   }
 
-  protected computePattern(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): Observable<ShapePatternInfo> {
+  protected computePattern(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): Observable<ShapePatternInfo> {
     const fillColor = this.fillColorProcessor.processColor(data, dsData);
     const shapePatternInfo: ShapePatternInfo = {
       type: ShapeFillType.color,
@@ -190,16 +190,16 @@ class ShapeColorPatternProcessor extends ShapePatternProcessor<DataLayerColorSet
 
 class ShapeImagePatternProcessor extends ShapePatternProcessor<ShapeFillImageSettings> {
 
-  private shapeFillImageFunction: CompiledTbFunction<ShapeFillImageFunction>;
+  private shapeFillImageFunction: CompiledJnksIotFunction<ShapeFillImageFunction>;
 
-  constructor(protected dataLayer: TbMapDataLayer,
+  constructor(protected dataLayer: JnksIotMapDataLayer,
               protected settings: ShapeFillImageSettings) {
     super(dataLayer, settings);
   }
 
   public setup(): Observable<any> {
     if (this.settings.type === ShapeFillImageType.function) {
-      return parseTbFunction<ShapeFillImageFunction>(this.dataLayer.getCtx().http, this.settings.imageFunction, ['data', 'images', 'dsData']).pipe(
+      return parseJnksIotFunction<ShapeFillImageFunction>(this.dataLayer.getCtx().http, this.settings.imageFunction, ['data', 'images', 'dsData']).pipe(
         map((parsed) => {
           this.shapeFillImageFunction = parsed;
           return null;
@@ -210,10 +210,10 @@ class ShapeImagePatternProcessor extends ShapePatternProcessor<ShapeFillImageSet
     }
   }
 
-  protected computePattern(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): Observable<ShapePatternInfo> {
+  protected computePattern(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): Observable<ShapePatternInfo> {
     let currentImage: ShapeFillImageInfo;
     if (this.settings.type === ShapeFillImageType.function) {
-      currentImage = safeExecuteTbFunction(this.shapeFillImageFunction, [data, this.settings.images, dsData]);
+      currentImage = safeExecuteJnksIotFunction(this.shapeFillImageFunction, [data, this.settings.images, dsData]);
     }
     if (!currentImage?.url) {
       currentImage = {
@@ -257,7 +257,7 @@ class ShapeStripePatternProcessor extends ShapePatternProcessor<ShapeFillStripeS
   private colorProcessor: DataLayerColorProcessor;
   private spaceColorProcessor: DataLayerColorProcessor;
 
-  constructor(protected dataLayer: TbMapDataLayer,
+  constructor(protected dataLayer: JnksIotMapDataLayer,
               protected settings: ShapeFillStripeSettings) {
     super(dataLayer, settings);
   }
@@ -268,7 +268,7 @@ class ShapeStripePatternProcessor extends ShapePatternProcessor<ShapeFillStripeS
     return forkJoin([this.colorProcessor.setup(), this.spaceColorProcessor.setup()]);
   }
 
-  protected computePattern(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[]): Observable<ShapePatternInfo> {
+  protected computePattern(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[]): Observable<ShapePatternInfo> {
     const color = this.colorProcessor.processColor(data, dsData);
     const spaceColor = this.spaceColorProcessor.processColor(data, dsData);
     return of({
@@ -285,17 +285,17 @@ class ShapeStripePatternProcessor extends ShapePatternProcessor<ShapeFillStripeS
 
 }
 
-export abstract class TbShapesDataLayer<S extends ShapeDataLayerSettings, L extends TbLatestMapDataLayer<S,L>> extends TbLatestMapDataLayer<S, L> {
+export abstract class JnksIotShapesDataLayer<S extends ShapeDataLayerSettings, L extends JnksIotLatestMapDataLayer<S,L>> extends JnksIotLatestMapDataLayer<S, L> {
 
   private shapePatternProcessor: ShapePatternProcessor;
   private strokeColorProcessor: DataLayerColorProcessor;
 
-  protected constructor(protected map: TbMap<any>,
+  protected constructor(protected map: JnksIotMap<any>,
                         inputSettings: S) {
     super(map, inputSettings);
   }
 
-  public getShapeStyle(data: FormattedData<TbMapDatasource>, dsData: FormattedData<TbMapDatasource>[], fillPatternId: string): Observable<ShapeStyleInfo> {
+  public getShapeStyle(data: FormattedData<JnksIotMapDatasource>, dsData: FormattedData<JnksIotMapDatasource>[], fillPatternId: string): Observable<ShapeStyleInfo> {
     return this.shapePatternProcessor.processPattern(data, dsData, fillPatternId).pipe(
       map((patternWithId) => {
         const stroke = this.strokeColorProcessor.processColor(data, dsData);

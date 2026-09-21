@@ -20,7 +20,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 type WidgetTypeBundle = WithOptional<WidgetTypeInfo, 'widgetType'>;
 
 @Component({
-  selector: 'tb-widgets-bundle-widget',
+  selector: 'jnks-iot-widgets-bundle-widget',
   templateUrl: './widgets-bundle-widgets.component.html',
   styleUrls: ['./widgets-bundle-widgets.component.scss']
 })
@@ -165,7 +165,7 @@ export class WidgetsBundleWidgetsComponent extends PageComponent implements OnIn
     this.dialog.open<SelectWidgetTypeDialogComponent, any,
       WidgetDataType>(SelectWidgetTypeDialogComponent, {
       disableClose: true,
-      panelClass: ['tb-dialog', 'tb-fullscreen-dialog']
+      panelClass: ['jnks-iot-dialog', 'jnks-iot-fullscreen-dialog']
     }).afterClosed().subscribe(
       (type) => {
         if (type) {

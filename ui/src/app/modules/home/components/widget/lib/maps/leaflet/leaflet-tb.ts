@@ -82,13 +82,13 @@ class SidebarControl extends L.Control<TB.SidebarControlOptions> implements L.TB
 
   constructor(options: TB.SidebarControlOptions) {
     super(options);
-    this.sidebar = $('<div class="tb-map-sidebar"></div>');
+    this.sidebar = $('<div class="jnks-iot-map-sidebar"></div>');
     this.options.container.append(this.sidebar);
     const position = options?.position || 'topleft';
     if (['topleft', 'bottomleft'].includes(position)) {
-      this.options.container.addClass('tb-sidebar-left');
+      this.options.container.addClass('jnks-iot-sidebar-left');
     } else {
-      this.options.container.addClass('tb-sidebar-right');
+      this.options.container.addClass('jnks-iot-sidebar-right');
     }
   }
 
@@ -149,7 +149,7 @@ class SidebarPaneControl<O extends TB.SidebarPaneControlOptions> extends L.Contr
   addTo(map: L.Map): this {
 
     this.button = $("<a>")
-    .attr('class', 'tb-control-button')
+    .attr('class', 'jnks-iot-control-button')
     .attr('href', '#')
     .attr('role', 'button')
     .html('<div class="' + this.options.uiClass + '"></div>')
@@ -163,12 +163,12 @@ class SidebarPaneControl<O extends TB.SidebarPaneControlOptions> extends L.Contr
     this.$ui = $('<div>')
         .attr('class', this.options.uiClass);
 
-    $('<div class="tb-layers-title-container">')
+    $('<div class="jnks-iot-layers-title-container">')
     .appendTo(this.$ui)
-    .append($('<div class="tb-layers-title">')
+    .append($('<div class="jnks-iot-layers-title">')
     .text(this.options.paneTitle))
     .append($('<div>')
-    .append($('<button type="button" class="tb-button-close mdc-icon-button mat-mdc-icon-button">' +
+    .append($('<button type="button" class="jnks-iot-button-close mdc-icon-button mat-mdc-icon-button">' +
       '<span class="mat-mdc-button-persistent-ripple mdc-icon-button__ripple"></span>' +
       '<span class="material-icons">close</span>' +
       '</button>')
@@ -206,21 +206,21 @@ class LayersControl extends SidebarPaneControl<TB.LayersControlOptions> implemen
     const paneId = guid();
     const layers = this.options.layers;
     const baseSection = $("<div>")
-    .attr('class', 'tb-layers-container')
+    .attr('class', 'jnks-iot-layers-container')
     .appendTo($ui);
 
     layers.forEach((layerData, i) => {
       const id = `map-ui-layer-${paneId}-${i}`;
-      const buttonContainer = $('<div class="tb-layer-card">')
+      const buttonContainer = $('<div class="jnks-iot-layer-card">')
       .appendTo(baseSection);
-      const mapContainer = $('<div class="tb-layer-map">')
+      const mapContainer = $('<div class="jnks-iot-layer-map">')
       .appendTo(buttonContainer);
-      const input = $('<input type="radio" class="tb-layer-button" name="layer">')
+      const input = $('<input type="radio" class="jnks-iot-layer-button" name="layer">')
       .prop('id', id)
       .prop('checked', map.hasLayer(layerData.layer))
       .appendTo(buttonContainer);
 
-      const item = $('<label class="tb-layer-label">')
+      const item = $('<label class="jnks-iot-layer-label">')
       .prop('for', id)
       .append($('<span>').append(layerData.title))
       .appendTo(buttonContainer);
@@ -286,19 +286,19 @@ class GroupsControl extends SidebarPaneControl<TB.GroupsControlOptions> implemen
     const paneId = guid();
     const groups = this.options.groups;
     const baseSection = $("<div>")
-    .attr('class', 'tb-layers-container')
+    .attr('class', 'jnks-iot-layers-container')
     .appendTo($ui);
 
     groups.forEach((groupData, i) => {
       const id = `map-group-layer-${paneId}-${i}`;
-      const checkBoxContainer = $('<div class="tb-group-checkbox">')
+      const checkBoxContainer = $('<div class="jnks-iot-group-checkbox">')
       .appendTo(baseSection);
-      const input = $('<input type="checkbox" class="tb-group-button" name="group">')
+      const input = $('<input type="checkbox" class="jnks-iot-group-button" name="group">')
       .prop('id', id)
       .prop('checked', groupData.enabled)
       .appendTo(checkBoxContainer);
 
-      $('<label class="tb-group-label">')
+      $('<label class="jnks-iot-group-label">')
       .prop('title', groupData.title)
       .prop('for', id)
       .append($('<span>').append(groupData.title))
@@ -332,11 +332,11 @@ class TopToolbarButton implements L.TB.TopToolbarButton {
 
   constructor(private readonly options: TB.TopToolbarButtonOptions,
               private readonly iconRegistry: MatIconRegistry) {
-    const iconElement = $('<div class="tb-control-button-icon"></div>');
+    const iconElement = $('<div class="jnks-iot-control-button-icon"></div>');
     const setIcon = isNotEmptyStr(this.options.icon);
     const setTitle = isNotEmptyStr(this.options.title);
     this.button = $("<a>")
-    .attr('class', 'tb-control-button tb-control-text-button')
+    .attr('class', 'jnks-iot-control-button jnks-iot-control-text-button')
     .attr('href', '#')
     .attr('role', 'button');
     if (setIcon) {
@@ -344,7 +344,7 @@ class TopToolbarButton implements L.TB.TopToolbarButton {
       this.loadIcon(iconElement);
     }
     if (setTitle) {
-      this.button.append(`<div class="tb-control-text">${this.options.title}</div>`);
+      this.button.append(`<div class="jnks-iot-control-text">${this.options.title}</div>`);
     }
     this.button.css('--tb-map-control-color', this.options.color);
     this.button.css('--tb-map-control-active-color', this.options.color);
@@ -442,12 +442,12 @@ class ToolbarButton implements L.TB.ToolbarButton {
     this.id = options.id;
     const buttonText = this.options.showText ? this.options.title : null;
     this.button = $("<a>")
-    .attr('class', 'tb-control-button')
+    .attr('class', 'jnks-iot-control-button')
     .attr('href', '#')
     .attr('role', 'button')
-    .html('<div class="'+this.options.iconClass+'"></div>' + (buttonText ? `<div class="tb-control-text">${buttonText}</div>` : ''));
+    .html('<div class="'+this.options.iconClass+'"></div>' + (buttonText ? `<div class="jnks-iot-control-text">${buttonText}</div>` : ''));
     if (this.options.showText) {
-      L.DomUtil.addClass(this.button[0], 'tb-control-text-button');
+      L.DomUtil.addClass(this.button[0], 'jnks-iot-control-text-button');
     } else {
       this.button.attr('title', this.options.title);
     }
@@ -507,7 +507,7 @@ class TopToolbarControl implements L.TB.TopToolbarControl {
 
   constructor(private readonly options: TB.TopToolbarControlOptions) {
     const controlContainer = $('.leaflet-control-container', this.options.mapElement);
-    this.toolbarElement = $('<div class="tb-map-top-toolbar leaflet-top"></div>');
+    this.toolbarElement = $('<div class="jnks-iot-map-top-toolbar leaflet-top"></div>');
     this.toolbarElement.appendTo(controlContainer);
   }
 
@@ -564,7 +564,7 @@ class BottomToolbarControl implements L.TB.BottomToolbarControl {
 
   constructor(private readonly options: TB.BottomToolbarControlOptions) {
     const controlContainer = $('.leaflet-control-container', options.mapElement);
-    const toolbar = $('<div class="tb-map-bottom-toolbar leaflet-bottom"></div>');
+    const toolbar = $('<div class="jnks-iot-map-bottom-toolbar leaflet-bottom"></div>');
     toolbar.appendTo(controlContainer);
     this.buttonContainer = $('<div class="leaflet-bar leaflet-control"></div>');
     this.buttonContainer.appendTo(toolbar);
@@ -587,11 +587,11 @@ class BottomToolbarControl implements L.TB.BottomToolbarControl {
 
     if (showCloseButton) {
       const closeButton = $("<a>")
-      .attr('class', 'tb-control-button')
+      .attr('class', 'jnks-iot-control-button')
       .attr('href', '#')
       .attr('role', 'button')
       .attr('title', this.options.closeTitle)
-      .html('<div class="tb-close"></div>');
+      .html('<div class="jnks-iot-close"></div>');
 
       closeButton.on('click', (e) => {
         e.stopPropagation();

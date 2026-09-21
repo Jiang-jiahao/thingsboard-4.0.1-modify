@@ -13,7 +13,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-alarm-dynamic-value',
+  selector: 'jnks-iot-alarm-dynamic-value',
   templateUrl: './alarm-dynamic-value.component.html',
   providers: [{
     provide: NG_VALUE_ACCESSOR,

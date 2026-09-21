@@ -29,7 +29,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'tb-device-data',
+  selector: 'jnks-iot-device-data',
   templateUrl: './device-data.component.html',
   styleUrls: [],
   providers: [

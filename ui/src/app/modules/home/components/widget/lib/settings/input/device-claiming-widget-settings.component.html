@@ -1,4 +1,4 @@
-<section class="tb-widget-settings flex flex-col" [formGroup]="deviceClaimingWidgetSettingsForm">
+<section class="jnks-iot-widget-settings flex flex-col" [formGroup]="deviceClaimingWidgetSettingsForm">
   <fieldset class="fields-group">
     <legend class="group-title" translate>widgets.input-widgets.general-settings</legend>
     <mat-form-field class="mat-block flex-1">
@@ -15,7 +15,7 @@
   </fieldset>
   <fieldset class="fields-group fields-group-slider">
     <legend class="group-title" translate>widgets.input-widgets.labels-settings</legend>
-    <mat-expansion-panel class="tb-settings" [expanded]="deviceClaimingWidgetSettingsForm.get('showLabel').value">
+    <mat-expansion-panel class="jnks-iot-settings" [expanded]="deviceClaimingWidgetSettingsForm.get('showLabel').value">
       <mat-expansion-panel-header class="flex flex-row flex-wrap">
         <mat-panel-title>
           <mat-slide-toggle formControlName="showLabel" (click)="$event.stopPropagation()"

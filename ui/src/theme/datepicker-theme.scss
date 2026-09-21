@@ -54,7 +54,7 @@ $mat-datetimepicker-selected-today-box-shadow-width: 1px;
   }
 }
 
-// Datepicker popup is rendered in cdk-overlay (outside .tb-default) — keep calendar grid layout intact.
+// Datepicker popup is rendered in cdk-overlay (outside .jnks-iot-default) — keep calendar grid layout intact.
 .cdk-overlay-pane {
   &:has(.mat-datetimepicker-content) {
     z-index: 1300;

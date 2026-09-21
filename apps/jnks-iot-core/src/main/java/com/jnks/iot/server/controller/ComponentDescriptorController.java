@@ -1,0 +1,109 @@
+package com.jnks.iot.server.controller;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import com.jnks.iot.server.common.data.StringUtils;
+import com.jnks.iot.server.common.data.exception.JnksIotException;
+import com.jnks.iot.server.common.data.plugin.ComponentDescriptor;
+import com.jnks.iot.server.common.data.plugin.ComponentType;
+import com.jnks.iot.server.common.data.rule.RuleChainType;
+import com.jnks.iot.server.config.annotations.ApiOperation;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static com.jnks.iot.server.controller.ControllerConstants.SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH;
+
+/**
+ * 规则节点组件描述符查询 REST，给规则链 UI 渲染配置表单用。
+ * <p>
+ * 仅在 jnks-iot-core 模块 中生效。路径 {@code /api/component*}。
+ * SYS_ADMIN / TENANT_ADMIN 可调。描述符在启动时扫描 {@code @RuleNode} 后入库，
+ * 本类经 {@link BaseController} 的 {@code componentDescriptorService} 按类名或类型查询。
+ *
+ * @see com.jnks.iot.server.dao.component.ComponentDescriptorService
+ */
+@RestController
+@RequestMapping("/api")
+public class ComponentDescriptorController extends BaseController {
+
+    private static final String COMPONENT_DESCRIPTOR_DEFINITION = "Each Component Descriptor represents configuration of specific rule node (e.g. 'Save Timeseries' or 'Send Email'.). " +
+            "The Component Descriptors are used by the rule chain Web UI to build the configuration forms for the rule nodes. " +
+            "The Component Descriptors are discovered at runtime by scanning the class path and searching for @RuleNode annotation. " +
+            "Once discovered, the up to date list of descriptors is persisted to the database.";
+
+    /**
+     * 按规则节点实现类全名取一条组件描述符。
+     */
+    @ApiOperation(value = "Get Component Descriptor (getComponentDescriptorByClazz)",
+            notes = "Gets the Component Descriptor object using class name from the path parameters. " +
+                    COMPONENT_DESCRIPTOR_DEFINITION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN','TENANT_ADMIN')")
+    @RequestMapping(value = "/component/{componentDescriptorClazz:.+}", method = RequestMethod.GET)
+    @ResponseBody
+    public ComponentDescriptor getComponentDescriptorByClazz(
+            @Parameter(description = "Component Descriptor class name", required = true)
+            @PathVariable("componentDescriptorClazz") String strComponentDescriptorClazz) throws JnksIotException {
+        checkParameter("strComponentDescriptorClazz", strComponentDescriptorClazz);
+        return checkComponentDescriptorByClazz(strComponentDescriptorClazz);
+    }
+
+    /**
+     * 按规则节点类型（FILTER / ACTION 等）列出描述符，可再按规则链类型过滤（当前仅 CORE）。
+     */
+    @ApiOperation(value = "Get Component Descriptors (getComponentDescriptorsByType)",
+            notes = "Gets the Component Descriptors using rule node type and optional rule chain type request parameters. " +
+                    COMPONENT_DESCRIPTOR_DEFINITION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN','TENANT_ADMIN')")
+    @RequestMapping(value = "/components/{componentType}", method = RequestMethod.GET)
+    @ResponseBody
+    public List<ComponentDescriptor> getComponentDescriptorsByType(
+            @Parameter(description = "Type of the Rule Node", schema = @Schema(allowableValues = {"ENRICHMENT", "FILTER", "TRANSFORMATION", "ACTION", "EXTERNAL"}, requiredMode = Schema.RequiredMode.REQUIRED))
+            @PathVariable("componentType") String strComponentType,
+            @Parameter(description = "Type of the Rule Chain", schema = @Schema(allowableValues = {"CORE"}))
+            @RequestParam(value = "ruleChainType", required = false) String strRuleChainType) throws JnksIotException {
+        checkParameter("componentType", strComponentType);
+        return checkComponentDescriptorsByType(ComponentType.valueOf(strComponentType), getRuleChainType(strRuleChainType));
+    }
+
+    /**
+     * 按多个规则节点类型一次性列出描述符。
+     */
+    @ApiOperation(value = "Get Component Descriptors (getComponentDescriptorsByTypes)",
+            notes = "Gets the Component Descriptors using coma separated list of rule node types and optional rule chain type request parameters. " +
+                    COMPONENT_DESCRIPTOR_DEFINITION + SYSTEM_OR_TENANT_AUTHORITY_PARAGRAPH)
+    @PreAuthorize("hasAnyAuthority('SYS_ADMIN','TENANT_ADMIN')")
+    @RequestMapping(value = "/components", params = {"componentTypes"}, method = RequestMethod.GET)
+    @ResponseBody
+    public List<ComponentDescriptor> getComponentDescriptorsByTypes(
+            @Parameter(description = "List of types of the Rule Nodes, (ENRICHMENT, FILTER, TRANSFORMATION, ACTION or EXTERNAL)", array = @ArraySchema(schema = @Schema(type = "string")), required = true)
+            @RequestParam("componentTypes") String[] strComponentTypes,
+            @Parameter(description = "Type of the Rule Chain", schema = @Schema(allowableValues = {"CORE"}))
+            @RequestParam(value = "ruleChainType", required = false) String strRuleChainType) throws JnksIotException {
+        checkArrayParameter("componentTypes", strComponentTypes);
+        Set<ComponentType> componentTypes = new HashSet<>();
+        for (String strComponentType : strComponentTypes) {
+            componentTypes.add(ComponentType.valueOf(strComponentType));
+        }
+        return checkComponentDescriptorsByTypes(componentTypes, getRuleChainType(strRuleChainType));
+    }
+
+    private RuleChainType getRuleChainType(String strRuleChainType) {
+        RuleChainType ruleChainType;
+        if (StringUtils.isEmpty(strRuleChainType)) {
+            ruleChainType = RuleChainType.CORE;
+        } else {
+            ruleChainType = RuleChainType.valueOf(strRuleChainType);
+        }
+        return ruleChainType;
+    }
+
+}

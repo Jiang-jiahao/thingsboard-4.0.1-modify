@@ -41,7 +41,7 @@ public class ZkDiscoveryServiceTest {
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
     @Mock
-    private TbServiceInfoProvider serviceInfoProvider;
+    private JnksIotServiceInfoProvider serviceInfoProvider;
 
     @Mock
     private PartitionService partitionService;
@@ -59,9 +59,9 @@ public class ZkDiscoveryServiceTest {
 
     private static final long RECALCULATE_DELAY = 100L;
 
-    final TransportProtos.ServiceInfo currentInfo = TransportProtos.ServiceInfo.newBuilder().setServiceId("tb-rule-engine-0").build();
+    final TransportProtos.ServiceInfo currentInfo = TransportProtos.ServiceInfo.newBuilder().setServiceId("jnks-iot-rule-engine-0").build();
     final ChildData currentData = new ChildData("/jnks-iot/nodes/0000000010", null, currentInfo.toByteArray());
-    final TransportProtos.ServiceInfo childInfo = TransportProtos.ServiceInfo.newBuilder().setServiceId("tb-rule-engine-1").build();
+    final TransportProtos.ServiceInfo childInfo = TransportProtos.ServiceInfo.newBuilder().setServiceId("jnks-iot-rule-engine-1").build();
     final ChildData childData = new ChildData("/jnks-iot/nodes/0000000020", null, childInfo.toByteArray());
 
     @BeforeEach
@@ -136,7 +136,7 @@ public class ZkDiscoveryServiceTest {
 
     @Test
     public void startAnotherNodeDuringRestartTest() throws Exception {
-        var anotherInfo = TransportProtos.ServiceInfo.newBuilder().setServiceId("tb-transport").build();
+        var anotherInfo = TransportProtos.ServiceInfo.newBuilder().setServiceId("jnks-iot-transport").build();
         var anotherData = new ChildData("/jnks-iot/nodes/0000000030", null, anotherInfo.toByteArray());
 
         startNode(childData);
@@ -168,8 +168,8 @@ public class ZkDiscoveryServiceTest {
     @Test
     public void transportChildUpdatedRecalculatesOnlyWhenTransportsChange() throws Exception {
         var mqttInfo = TransportProtos.ServiceInfo.newBuilder()
-                .setServiceId("tb-mqtt-transport2")
-                .addServiceTypes("TB_TRANSPORT")
+                .setServiceId("jnks-iot-mqtt-transport2")
+                .addServiceTypes("JNKS_IOT_TRANSPORT")
                 .build();
         var mqttData = new ChildData("/jnks-iot/nodes/0000000040", null, mqttInfo.toByteArray());
 
@@ -208,8 +208,8 @@ public class ZkDiscoveryServiceTest {
     @Test
     public void firstChildUpdatedForUnknownTransportDoesNotRecalculate() throws Exception {
         var mqttInfo = TransportProtos.ServiceInfo.newBuilder()
-                .setServiceId("tb-mqtt-transport2")
-                .addServiceTypes("TB_TRANSPORT")
+                .setServiceId("jnks-iot-mqtt-transport2")
+                .addServiceTypes("JNKS_IOT_TRANSPORT")
                 .addTransports("MQTT")
                 .build();
         var mqttData = new ChildData("/jnks-iot/nodes/0000000050", null, mqttInfo.toByteArray());

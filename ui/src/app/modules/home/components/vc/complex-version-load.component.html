@@ -7,11 +7,11 @@
                     *ngIf="isLoading$ | async">
   </mat-progress-bar>
   <form [formGroup]="loadVersionFormGroup" class="flex flex-col" style="flex: 1; padding: 16px 0; overflow-y: auto; overflow-x: hidden">
-    <tb-entity-types-version-load
+    <jnks-iot-entity-types-version-load
       formControlName="entityTypes">
-    </tb-entity-types-version-load>
+    </jnks-iot-entity-types-version-load>
   </form>
-  <div tb-hint-tooltip-icon="{{ 'version-control.rollback-on-error-hint' | translate }}" [formGroup]="loadVersionFormGroup">
+  <div jnks-iot-hint-tooltip-icon="{{ 'version-control.rollback-on-error-hint' | translate }}" [formGroup]="loadVersionFormGroup">
     <mat-slide-toggle formControlName="rollbackOnError">
       {{ 'version-control.rollback-on-error' | translate }}
     </mat-slide-toggle>

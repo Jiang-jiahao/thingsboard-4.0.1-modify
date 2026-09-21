@@ -1,16 +1,16 @@
-<div class="tb-images tb-absolute-fill" [class.tb-dialog-mode]="dialogMode" [class.mat-padding]="!dialogMode">
-  <div class="tb-images-content flex flex-1 flex-col" [class.tb-outlined-border]="pageMode">
+<div class="jnks-iot-images jnks-iot-absolute-fill" [class.jnks-iot-dialog-mode]="dialogMode" [class.mat-padding]="!dialogMode">
+  <div class="jnks-iot-images-content flex flex-1 flex-col" [class.jnks-iot-outlined-border]="pageMode">
     <mat-toolbar class="mat-mdc-table-toolbar lt-lg:flex lt-lg:flex-col lt-lg:items-stretch lt-lg:justify-start"
                  [class.!hidden]="textSearchMode || !(mode === 'grid' || dataSource?.selection.isEmpty())"
                  [class.multi-row]="!isSysAdmin">
       <div class="flex flex-1 flex-row items-center justify-start">
         <div class="mat-toolbar-tools">
-          <div class="tb-images-title lt-md:!hidden">
-            <div tbTruncateWithTooltip>{{ (isScada ? 'scada.symbols' : 'image.gallery') | translate }}</div>
-            <div *ngIf="isScada" tb-help="scada"></div>
+          <div class="jnks-iot-images-title lt-md:!hidden">
+            <div jnksIotTruncateWithTooltip>{{ (isScada ? 'scada.symbols' : 'image.gallery') | translate }}</div>
+            <div *ngIf="isScada" jnks-iot-help="scada"></div>
           </div>
-          <div class="tb-images-view-type-toolbar flex flex-row items-center justify-start">
-            <div class="tb-toolbar-button" [class.tb-selected]="mode === 'list'">
+          <div class="jnks-iot-images-view-type-toolbar flex flex-row items-center justify-start">
+            <div class="jnks-iot-toolbar-button" [class.jnks-iot-selected]="mode === 'list'">
               <button mat-icon-button
                       (click)="setMode('list')"
                       matTooltip="{{'image.list-mode' | translate }}"
@@ -18,12 +18,12 @@
                 <mat-icon>view_list</mat-icon>
               </button>
             </div>
-            <div class="tb-toolbar-button" [class.tb-selected]="mode === 'grid'">
+            <div class="jnks-iot-toolbar-button" [class.jnks-iot-selected]="mode === 'grid'">
               <button mat-icon-button
                       (click)="setMode('grid');"
                       matTooltip="{{'image.grid-mode' | translate }}"
                       matTooltipPosition="below">
-                <tb-icon>mdi:view-grid</tb-icon>
+                <jnks-iot-icon>mdi:view-grid</jnks-iot-icon>
               </button>
             </div>
           </div>
@@ -54,7 +54,7 @@
                     (click)="importImage()"
                     matTooltip="{{ (isScada ? 'scada.import-symbol' : 'image.import-image' ) | translate }}"
                     matTooltipPosition="above">
-              <tb-icon>mdi:file-import</tb-icon>
+              <jnks-iot-icon>mdi:file-import</jnks-iot-icon>
             </button>
             <button [class.!hidden]="dialogMode && isScada"
                     class="gt-md:!hidden"
@@ -137,8 +137,8 @@
           <ng-container matColumnDef="preview">
             <mat-header-cell *matHeaderCellDef style="width: 50px; min-width: 50px;"></mat-header-cell>
             <mat-cell *matCellDef="let image">
-              <div class="tb-image-preview-cell">
-                <img class="tb-image-preview" [src]="image.link | image: {preview: true} | async" alt="{{ image.title }}">
+              <div class="jnks-iot-image-preview-cell">
+                <img class="jnks-iot-image-preview" [src]="image.link | image: {preview: true} | async" alt="{{ image.title }}">
               </div>
             </mat-cell>
           </ng-container>
@@ -199,7 +199,7 @@
                         matTooltip="{{ (isScada ? 'scada.export-symbol' : 'image.export-image' ) | translate }}"
                         matTooltipPosition="above"
                         (click)="exportImage($event, image)">
-                  <tb-icon>mdi:file-export</tb-icon>
+                  <jnks-iot-icon>mdi:file-export</jnks-iot-icon>
                 </button>
                 <button *ngIf="!isScada" mat-icon-button [disabled]="isLoading$ | async"
                         matTooltip="{{ 'image.embed-image' | translate }}"
@@ -236,7 +236,7 @@
                   <button mat-menu-item
                           [disabled]="isLoading$ | async"
                           (click)="exportImage($event, image)">
-                    <tb-icon matMenuItemIcon>mdi:file-export</tb-icon>
+                    <jnks-iot-icon matMenuItemIcon>mdi:file-export</jnks-iot-icon>
                     <span>{{ (isScada ? 'scada.export-symbol' : 'image.export-image' ) | translate }}</span>
                   </button>
                   <button *ngIf="!isScada" mat-menu-item
@@ -291,7 +291,7 @@
                      showFirstLastButtons></mat-paginator>
     </div>
     <div *ngIf="mode === 'grid'" class="flex flex-1 flex-col" [class.mat-padding]="!dialogMode">
-      <tb-scroll-grid class="flex-1"
+      <jnks-iot-scroll-grid class="flex-1"
         [columns]="gridColumns"
         [itemSize]="gridImagesItemSizeStrategy"
         [fetchFunction]="gridImagesFetchFunction"
@@ -300,27 +300,27 @@
         [loadingCell]="imageLoadingCard"
         [dataLoading]="loadingImages"
         [noData]="noImages">
-      </tb-scroll-grid>
+      </jnks-iot-scroll-grid>
     </div>
   </div>
 </div>
 <ng-template #loadingImages>
-  <div class="tb-absolute-fill flex flex-col items-center justify-center">
+  <div class="jnks-iot-absolute-fill flex flex-col items-center justify-center">
         <span>
           {{ 'common.loading' | translate }}
         </span>
   </div>
 </ng-template>
 <ng-template #noImages>
-  <div class="tb-no-images">
-    <div class="tb-no-data-bg"></div>
-    <div class="tb-no-data-text">{{ (isScada ? 'scada.no-symbols' : 'image.no-images') | translate }}</div>
+  <div class="jnks-iot-no-images">
+    <div class="jnks-iot-no-data-bg"></div>
+    <div class="jnks-iot-no-data-text">{{ (isScada ? 'scada.no-symbols' : 'image.no-images') | translate }}</div>
   </div>
 </ng-template>
 <ng-template #imageCard let-item="item" let-itemIndex="itemIndex">
-  <div class="tb-image-card tb-primary-fill">
-    <div class="tb-image-card-overlay">
-      <div *ngIf="!selectionMode" class="tb-image-card-overlay-buttons">
+  <div class="jnks-iot-image-card jnks-iot-primary-fill">
+    <div class="jnks-iot-image-card-overlay">
+      <div *ngIf="!selectionMode" class="jnks-iot-image-card-overlay-buttons">
         <button mat-icon-button [disabled]="isLoading$ | async"
                 matTooltip="{{ (isScada ? 'scada.download-symbol' : 'image.download-image' ) | translate }}"
                 matTooltipPosition="above"
@@ -331,7 +331,7 @@
                 matTooltip="{{ (isScada ? 'scada.export-symbol' : 'image.export-image' ) | translate }}"
                 matTooltipPosition="above"
                 (click)="exportImage($event, item)">
-          <tb-icon>mdi:file-export</tb-icon>
+          <jnks-iot-icon>mdi:file-export</jnks-iot-icon>
         </button>
         <button *ngIf="!isScada" mat-icon-button [disabled]="isLoading$ | async"
                 matTooltip="{{ 'image.embed-image' | translate }}"
@@ -348,8 +348,8 @@
         </button>
       </div>
     </div>
-    <div class="tb-image-preview-container">
-      <div class="tb-image-preview-overlay" (click)="selectionMode && selectImage($event, item)">
+    <div class="jnks-iot-image-preview-container">
+      <div class="jnks-iot-image-preview-overlay" (click)="selectionMode && selectImage($event, item)">
         <button
           *ngIf="!selectionMode"
           mat-flat-button
@@ -364,17 +364,17 @@
           (click)="selectImage($event, item)">{{ 'action.select' | translate }}
         </button>
       </div>
-      <div class="tb-image-preview-spacer"></div>
-      <img class="tb-image-preview" [src]="item.link | image: {preview: true} | async" alt="{{ item.title }}">
+      <div class="jnks-iot-image-preview-spacer"></div>
+      <img class="jnks-iot-image-preview" [src]="item.link | image: {preview: true} | async" alt="{{ item.title }}">
     </div>
-    <div class="tb-image-details">
-      <div class="tb-image-title-container">
-        <div class="tb-image-title">
+    <div class="jnks-iot-image-details">
+      <div class="jnks-iot-image-title-container">
+        <div class="jnks-iot-image-title">
           {{ item.title }}
         </div>
-        <div *ngIf="isSystem(item)" class="tb-image-sys">sys</div>
+        <div *ngIf="isSystem(item)" class="jnks-iot-image-sys">sys</div>
       </div>
-      <div class="tb-image-info-container">
+      <div class="jnks-iot-image-info-container">
         <div>{{ item.descriptor.width }}x{{ item.descriptor.height }}</div>
         <mat-divider vertical></mat-divider>
         <div>{{ item.descriptor.size | fileSize }}</div>
@@ -383,11 +383,11 @@
   </div>
 </ng-template>
 <ng-template #imageLoadingCard>
-  <div class="tb-image-card tb-primary-fill loading-cell">
-    <div class="tb-image-preview-container">
-      <div class="tb-image-preview-spacer"></div>
-      <div class="tb-image-preview"></div>
+  <div class="jnks-iot-image-card jnks-iot-primary-fill loading-cell">
+    <div class="jnks-iot-image-preview-container">
+      <div class="jnks-iot-image-preview-spacer"></div>
+      <div class="jnks-iot-image-preview"></div>
     </div>
-    <div class="tb-image-details"></div>
+    <div class="jnks-iot-image-details"></div>
   </div>
 </ng-template>
