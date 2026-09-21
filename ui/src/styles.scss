@@ -57,7 +57,7 @@ textarea,
 td,
 th {
   font-family: $jnks-iot-font-ui;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 body {
@@ -261,11 +261,9 @@ pre.jnks-iot-highlight {
 .jnks-iot-timewindow-panel, .jnks-iot-legend-config-panel, .jnks-iot-filter-panel, .jnks-iot-panel-container {
   overflow: hidden;
   background: #fff;
-  border-radius: 14px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  box-shadow:
-    0 8px 24px rgba(15, 23, 42, 0.1),
-    0 4px 12px rgba(15, 23, 42, 0.06);
+  border-radius: $jnks-iot-radius;
+  border: 1px solid $jnks-iot-line;
+  box-shadow: 0 12px 32px rgba(11, 27, 43, 0.14);
 }
 
 .jnks-iot-panel-actions {

@@ -81,25 +81,25 @@
     background: var(--tb-surface-elevated);
 
     .mat-mdc-header-row {
-      min-height: 40px;
+      min-height: 34px;
       background: transparent;
       border-bottom: 1px solid var(--tb-border);
 
       .mat-mdc-header-cell {
         color: $jnks-iot-text-muted;
-        font-size: 11.5px;
+        font-size: 11px;
         font-weight: 600;
         letter-spacing: 0.04em;
         text-transform: none;
         border-bottom: none;
-        padding-top: 10px;
-        padding-bottom: 10px;
+        padding-top: 8px;
+        padding-bottom: 8px;
         line-height: 1.4;
 
         .mat-sort-header-container,
         .mat-sort-header-content,
         button.mat-sort-header-button {
-          font-size: 11.5px;
+          font-size: 11px;
           font-weight: 600;
           letter-spacing: 0.04em;
         }
@@ -107,7 +107,7 @@
     }
 
     .mat-mdc-row {
-      min-height: 44px;
+      min-height: 34px;
       transition: background-color var(--tb-transition);
 
       &:hover {
@@ -115,7 +115,7 @@
       }
 
       .mat-mdc-cell {
-        font-size: 13.5px;
+        font-size: 13px;
         color: $jnks-iot-text;
         border-bottom-color: $jnks-iot-line;
         // 数字在任何列里都对齐，便于纵向比对
@@ -244,6 +244,25 @@
   // ── 进度条
   .mat-mdc-progress-bar {
     --mdc-linear-progress-active-indicator-color: #{$jnks-iot-primary-color};
+  }
+
+
+  // 密度：Material 默认单元格左右各 16px 内边距，是表格显得「稀」的主因
+  .mat-mdc-table {
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+  }
+
+  // 状态药丸按密度档一起收
+  .mat-mdc-chip {
+    height: 22px;
+    font-size: 12px;
+  }
+  .mat-mdc-standard-chip .mdc-evolution-chip__text-label {
+    font-size: 12px;
   }
 
   // ── 数字与标识符：等宽，便于纵向比对

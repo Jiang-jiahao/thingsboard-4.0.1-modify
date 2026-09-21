@@ -16,7 +16,7 @@
   }
 
   mat-sidenav.jnks-iot-site-sidenav {
-    width: 236px;
+    width: 220px;
     border-right: 1px solid $jnks-iot-sidebar-border !important;
     box-shadow: none;
     background: $jnks-iot-sidebar-bg !important;
@@ -31,7 +31,7 @@
       white-space: nowrap;
 
       .jnks-iot-nav-header-toolbar {
-        min-height: 64px;
+        min-height: 56px;
         height: inherit;
         padding: 0 20px;
         z-index: 2;
@@ -44,7 +44,7 @@
         & > div {
           display: flex;
           align-items: center;
-          min-height: 64px;
+          min-height: 56px;
           height: auto;
         }
       }
@@ -60,7 +60,7 @@
 
   .jnks-iot-primary-toolbar {
     z-index: 3;
-    min-height: 56px !important;
+    min-height: 48px !important;
     padding: 0 16px 0 8px !important;
     color: $jnks-iot-topbar-text !important;
     background: $jnks-iot-topbar-bg !important;
