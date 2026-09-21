@@ -70,7 +70,7 @@
        [class.!hidden]="isEdit || !entity?.customerIsPublic || (deviceScope !== 'customer' && deviceScope !== 'tenant')">
     {{ 'device.device-public' | translate }}
   </div>
-  <form [formGroup]="entityForm">
+  <form [formGroup]="entityForm" class="jnks-iot-details-form-grid">
     <fieldset [disabled]="(isLoading$ | async) || !isEdit">
       <mat-form-field class="mat-block">
         <mat-label translate>device.name</mat-label>
@@ -125,7 +125,7 @@
         [deviceScope]="deviceScope"
         required>
       </jnks-iot-device-data>
-      <div formGroupName="additionalInfo" class="flex flex-col">
+      <div formGroupName="additionalInfo" class="flex flex-col jnks-iot-full-row">
         <div *ngIf="gatewayUiEnabled" class="toggle-group">
           <mat-slide-toggle formControlName="gateway" style="min-width: 165px">
             {{ 'device.is-gateway' | translate }}

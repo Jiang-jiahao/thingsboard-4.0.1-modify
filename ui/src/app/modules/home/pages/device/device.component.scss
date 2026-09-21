@@ -7,3 +7,28 @@
     margin-bottom: 16px;
   }
 }
+
+// 「详情」页签的表单：两列。原来单列 + 卡片 60% 宽 → 右侧一大片留白、输入框还窄。
+:host ::ng-deep {
+  .jnks-iot-details-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+    row-gap: 2px;
+    align-items: start;
+  }
+
+  // 字段都包在 <fieldset> 里，栅格只有它一个子元素 → 让字段直接参与栅格。
+  // display: contents 只改布局，fieldset 的 disabled 语义照旧生效。
+  .jnks-iot-details-form-grid > fieldset {
+    display: contents;
+  }
+
+  // 需要占满整行的项（传输配置、附加信息等）
+  // 注意：fieldset 用了 display:contents，字段在 DOM 上仍是它的子元素，
+  // 所以这里必须用后代选择器，不能用 >。
+  .jnks-iot-details-form-grid jnks-iot-device-data,
+  .jnks-iot-details-form-grid .jnks-iot-full-row {
+    grid-column: 1 / -1;
+  }
+}

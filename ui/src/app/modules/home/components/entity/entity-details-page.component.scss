@@ -14,14 +14,14 @@
     height: calc(100% - 24px);
     display: flex;
     flex-direction: column;
-    border-radius: 14px;
+    border-radius: $jnks-iot-radius;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 16px rgba(15, 23, 42, 0.06);
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: none;
+    border: 1px solid $jnks-iot-line;
 
     .details-toolbar {
-      height: 84px;
-      min-height: 84px;
+      height: 56px;
+      min-height: 56px;
       border-radius: 0;
       background: #fff;
       border-bottom: 1px solid rgba(15, 23, 42, 0.08);
@@ -36,17 +36,13 @@
       }
 
       .jnks-iot-details-title {
-        font-size: 1rem;
-        font-weight: 500;
-
-        @media #{$mat-gt-sm} {
-          font-size: 1.2rem;
-        }
+        font-size: 15px;
+        font-weight: 600;
       }
 
       .jnks-iot-details-subtitle {
-        font-size: 0.9rem;
-        opacity: .8;
+        font-size: 12px;
+        color: $jnks-iot-text-muted;
       }
 
       .jnks-iot-ellipsis {
@@ -57,13 +53,8 @@
       }
     }
 
-    @media #{$mat-md} {
-      width: 80%;
-    }
-
-    @media #{$mat-gt-md} {
-      width: 60%;
-    }
+    // 原来是 ≥1280px 时写死 60% 宽，右侧四成永远空着、页签里的表格也被压窄。
+    // 控制台该占满可用宽度（表单宽度由栅格自己控制，不靠卡片宽度限制）。
 
     .jnks-iot-header-button {
       .jnks-iot-btn-header {
@@ -118,5 +109,66 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+/**
+ * 详情页的两处降噪（ISA-101：常态安静、层级靠大小与位置而非颜色）
+ *
+ * 1) 只读字段不再伪装成输入框：原来非编辑态是一排灰底方块，又重又像坏掉的控件。
+ *    只读就是文字——去掉底色与下划线，值用正文色。
+ * 2) 动作按钮不再是五个深色实心药丸挤在一起：详情页的主动作是右上角那个编辑按钮，
+ *    这些是辅助动作，收成描边；删除单独用朱砂描边（危险语义）。
+ */
+:host ::ng-deep {
+  .mat-mdc-form-field.mat-form-field-disabled {
+    .mdc-text-field {
+      background: transparent !important;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .mdc-line-ripple,
+    .mdc-notched-outline {
+      display: none;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    input,
+    textarea,
+    .mat-mdc-select-value-text {
+      color: $jnks-iot-text !important;
+      -webkit-text-fill-color: $jnks-iot-text !important;
+    }
+  }
+
+  .jnks-iot-details-buttons {
+    .mat-mdc-raised-button,
+    .mat-mdc-unelevated-button {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: 1px solid $jnks-iot-line-strong;
+      color: $jnks-iot-text !important;
+
+      &:hover:not(:disabled) {
+        background: $jnks-iot-surface-page !important;
+        border-color: $jnks-iot-text-faint;
+      }
+    }
+
+    // 删除：危险语义单独用朱砂
+    .mat-mdc-raised-button.mat-warn,
+    .mat-mdc-unelevated-button.mat-warn,
+    button[ng-reflect-color='warn'] {
+      border-color: rgba($jnks-iot-seal-color, 0.45);
+      color: $jnks-iot-seal-color !important;
+
+      &:hover:not(:disabled) {
+        background: rgba($jnks-iot-seal-color, 0.06) !important;
+      }
+    }
   }
 }
