@@ -23,12 +23,12 @@ const defaultDocLinksMap = new Map<Authority, DocumentationLinks>(
       links: [
         {
           icon: 'rocket',
-          name: 'Getting started',
+          name: '快速入门',
           link: 'https://iot.example.com/docs/getting-started-guides/helloworld/'
         },
         {
           icon: 'title',
-          name: 'Tenant profiles',
+          name: '租户配置',
           link: 'https://iot.example.com/docs/user-guide/tenant-profiles/'
         },
         {
@@ -38,7 +38,7 @@ const defaultDocLinksMap = new Map<Authority, DocumentationLinks>(
         },
         {
           icon: 'now_widgets',
-          name: 'Widgets Library',
+          name: '部件库',
           link: 'https://iot.example.com/docs/user-guide/ui/widget-library/'
         }
       ]
@@ -47,12 +47,12 @@ const defaultDocLinksMap = new Map<Authority, DocumentationLinks>(
       links: [
         {
           icon: 'rocket',
-          name: 'Getting started',
+          name: '快速入门',
           link: 'https://iot.example.com/docs/getting-started-guides/helloworld/'
         },
         {
           icon: 'settings_ethernet',
-          name: 'Rule engine',
+          name: '规则引擎',
           link: 'https://iot.example.com/docs/user-guide/rule-engine-2-0/re-getting-started/'
         },
         {
@@ -62,7 +62,7 @@ const defaultDocLinksMap = new Map<Authority, DocumentationLinks>(
         },
         {
           icon: 'devices',
-          name: 'Device profiles',
+          name: '设备配置',
           link: 'https://iot.example.com/docs/user-guide/device-profiles/'
         }
       ]
@@ -71,7 +71,7 @@ const defaultDocLinksMap = new Map<Authority, DocumentationLinks>(
       links: [
         {
           icon: 'rocket',
-          name: 'Getting started',
+          name: '快速入门',
           link: 'https://iot.example.com/docs/getting-started-guides/helloworld/'
         }
       ]
