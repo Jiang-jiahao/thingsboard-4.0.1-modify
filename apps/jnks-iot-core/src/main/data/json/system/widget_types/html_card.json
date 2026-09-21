@@ -1,9 +1,9 @@
 {
   "fqn": "cards.html_card",
-  "name": "HTML Card",
+  "name": "HTML 卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/html_card_system_widget_image.png",
-  "description": "Useful to inject custom HTML code. Designed to display static information only.",
+  "description": "用于注入自定义 HTML 代码。仅用于展示静态信息。",
   "descriptor": {
     "type": "static",
     "sizeX": 7.5,

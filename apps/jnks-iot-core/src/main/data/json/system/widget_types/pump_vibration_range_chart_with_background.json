@@ -1,9 +1,9 @@
 {
   "fqn": "pump_vibration_range_chart_with_background",
-  "name": "Vibration range chart with background",
+  "name": "振动区间图（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/vibration_range_chart_with_background.svg",
-  "description": "Displays changes to vibration data over time visualized with color ranges and background.",
+  "description": "以颜色区间和背景展示振动数据随时间的变化。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

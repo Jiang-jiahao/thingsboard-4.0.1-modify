@@ -1,9 +1,9 @@
 {
   "fqn": "power_consumption_card_with_background",
-  "name": "Power consumption card with background",
+  "name": "功耗卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/power_consumption_card_with_background.svg",
-  "description": "Displays the latest power consumption telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的功耗遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

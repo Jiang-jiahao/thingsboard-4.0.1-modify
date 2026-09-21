@@ -1,9 +1,9 @@
 {
   "fqn": "flow_rate_gauge",
-  "name": "Flow rate gauge",
+  "name": "流量仪表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/flow_rate_gauge.svg",
-  "description": "Flow rate gauge.",
+  "description": "流量仪表。",
   "descriptor": {
     "type": "latest",
     "sizeX": 6,

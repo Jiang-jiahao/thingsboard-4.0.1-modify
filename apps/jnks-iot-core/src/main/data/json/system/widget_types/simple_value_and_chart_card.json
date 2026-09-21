@@ -1,9 +1,9 @@
 {
   "fqn": "simple_value_and_chart_card",
-  "name": "Simple Value and chart card",
+  "name": "简版数值图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_value_and_chart_card_system_widget_image.png",
-  "description": "Displays a single entity historical telemetry values as a simplified chart. Optionally may display the corresponding latest telemetry value.",
+  "description": "以简版图表展示单个实体的历史遥测数据，可选显示对应的最新值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

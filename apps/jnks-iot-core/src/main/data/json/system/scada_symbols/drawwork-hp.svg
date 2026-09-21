@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="600" height="400" fill="none" version="1.1" viewBox="0 0 600 400"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Drawwork",
-  "description": "Drawwork with various states.",
+  "title": "高性能绞车",
+  "description": "绞车，支持多种状态。",
   "searchTags": [
     "drawwork"
   ],

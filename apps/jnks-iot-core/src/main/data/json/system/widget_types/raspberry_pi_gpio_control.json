@@ -1,9 +1,9 @@
 {
   "fqn": "gpio_widgets.raspberry_pi_gpio_control",
-  "name": "Raspberry Pi GPIO Control",
+  "name": "树莓派 GPIO 控制",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/raspberry_pi_gpio_control_system_widget_image.png",
-  "description": "Allows to display the state of the GPIO for the target Raspberry Pi device using the latest attribute values. You should set the label of the selected data key to the GPIO PIN (e.g., '1') and use boolean values for the widget to display the data.",
+  "description": "通过最新属性值展示目标树莓派设备的 GPIO 状态。需把所选数据键的标签设为 GPIO 引脚号（如 '1'），并使用布尔值才能正常展示。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 6,

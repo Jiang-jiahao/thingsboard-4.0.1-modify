@@ -1,9 +1,9 @@
 {
   "fqn": "rotational_speed_progress_bar",
-  "name": "Rotational speed progress bar",
+  "name": "转速进度条",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/rotational_speed_progress_bar.svg",
-  "description": "Displays rotational speed reading as a horizontal progress bar. Allows to configure value range, bar colors, and other settings.",
+  "description": "以横向进度条展示转速读数。可配置取值范围、进度条颜色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

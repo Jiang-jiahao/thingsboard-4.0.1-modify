@@ -1,9 +1,9 @@
 {
   "fqn": "carbon_monoxide_co_card_with_background",
-  "name": "Carbon monoxide (CO) card with background",
+  "name": "一氧化碳（CO）卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/CO-value-card-with-background.svg",
-  "description": "A colorless and odorless gas resulting from incomplete combustion, particularly in motor vehicles.",
+  "description": "一种无色无味的气体，由燃烧不充分产生，机动车尾气是主要来源。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

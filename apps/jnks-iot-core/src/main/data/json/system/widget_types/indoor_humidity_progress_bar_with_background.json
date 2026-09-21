@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_humidity_progress_bar_with_background",
-  "name": "Indoor humidity progress bar with background",
+  "name": "室内湿度进度条（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_humidity_progress_bar_with_background_system_widget_image.png",
-  "description": "Displays indoor humidity reading as a horizontal progress bar with background. Allows to configure value range, bar colors, and other settings.",
+  "description": "以带背景的横向进度条展示室内湿度读数。可配置取值范围、进度条颜色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

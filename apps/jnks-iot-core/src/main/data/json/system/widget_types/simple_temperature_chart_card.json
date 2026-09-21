@@ -1,9 +1,9 @@
 {
   "fqn": "simple_temperature_chart_card",
-  "name": "Simple temperature chart card",
+  "name": "简版温度图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_temperature_chart_card_system_widget_image.png",
-  "description": "Displays historical temperature values as a simplified chart. Optionally may display the corresponding latest temperature value.",
+  "description": "以简版图表展示历史温度数据，可选显示对应的最新温度值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

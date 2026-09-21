@@ -1,9 +1,9 @@
 {
   "fqn": "wind_speed_and_direction",
-  "name": "Wind speed and direction",
+  "name": "风速风向",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/wind_speed_and_direction_system_widget_image.png",
-  "description": "Displays the latest values of the wind speed and direction.",
+  "description": "展示风速风向的最新值。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

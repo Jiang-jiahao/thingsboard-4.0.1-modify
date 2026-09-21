@@ -1,9 +1,9 @@
 {
   "fqn": "input_widgets.update_server_image_attribute",
-  "name": "Update server image attribute",
+  "name": "更新服务端图片属性",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/update_shared_image_attribute_system_widget_image.png",
-  "description": "Simple form to input new image for pre-defined server-side attribute key.",
+  "description": "简单的表单，用于为预定义的服务端属性键输入新的图片。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

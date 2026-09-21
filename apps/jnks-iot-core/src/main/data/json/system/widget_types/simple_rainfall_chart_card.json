@@ -1,9 +1,9 @@
 {
   "fqn": "simple_rainfall_chart_card",
-  "name": "Simple rainfall chart card",
+  "name": "简版降雨量图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_rainfall_chart_card_system_widget_image.png",
-  "description": "Displays historical rainfall values as a simplified chart. Optionally may display the corresponding latest rainfall value.",
+  "description": "以简版图表展示历史降雨量数据，可选显示对应的最新降雨量值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

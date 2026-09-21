@@ -1,9 +1,9 @@
 {
   "fqn": "command_button",
-  "name": "Command button",
+  "name": "命令按钮",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/command-button.svg",
-  "description": "Allows single-click commands to devices or updates to attributes/time series. Settings enable definition of the on-click action and condition when the button is disabled. Supports multiple layouts and custom styles for different states.",
+  "description": "单击即可向设备下发命令或更新属性/时序数据。可配置点击动作以及按钮禁用的条件；支持多种布局和不同状态的样式。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 3,

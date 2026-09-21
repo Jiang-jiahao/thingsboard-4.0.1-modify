@@ -1,9 +1,9 @@
 {
   "fqn": "pump_vibration_card_with_background",
-  "name": "Vibration card with background",
+  "name": "振动卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/vibration_card_with_background.svg",
-  "description": "Displays the latest vibration telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的振动遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

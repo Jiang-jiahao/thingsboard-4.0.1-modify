@@ -1,9 +1,9 @@
 {
   "fqn": "radar",
-  "name": "Radar",
+  "name": "雷达图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/radar.svg",
-  "description": "Displays the latest values of the attributes or time series data in a radar chart. Supports numeric values only.",
+  "description": "以雷达图展示属性或时序数据的最新值。仅支持数值类型。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

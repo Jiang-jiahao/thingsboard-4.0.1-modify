@@ -1,9 +1,9 @@
 {
   "fqn": "bar_chart_with_labels",
-  "name": "Bar chart with labels",
+  "name": "带标签柱状图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/Bar-chart-with-labels.svg",
-  "description": "Displays changes to time series data over time visualized with value bars and labels — for example, daily water consumption for the last month.",
+  "description": "以数值柱和标签展示时序数据随时间的变化——例如最近一个月的每日用水量。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

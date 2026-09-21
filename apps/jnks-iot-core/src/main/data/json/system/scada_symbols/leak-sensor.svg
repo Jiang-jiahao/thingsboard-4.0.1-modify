@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="100" height="100" fill="none" version="1.1" viewBox="0 0 100 100"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Leak sensor",
-  "description": "Leak sensor for real-time detection and warning of fluid leakage.",
+  "title": "漏水传感器",
+  "description": "漏水传感器，实时检测并告警液体泄漏。",
   "searchTags": [
     "leak"
   ],

@@ -1,9 +1,9 @@
 {
   "fqn": "input_widgets.update_json_attribute",
-  "name": "Update JSON attribute",
+  "name": "更新 JSON 属性",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/update_json_attribute_system_widget_image.png",
-  "description": "Simple form to input new JSON value for pre-defined attribute/time series key.\nThe widget is deprecated. Use \"Update Multiple Attributes\" widget. JSON value type can be selected in widgets data key configuration.",
+  "description": "简单的表单，用于为预定义的属性/时序键输入新的 JSON 值。\n该部件已废弃，请改用「批量更新属性」。JSON 值类型可在部件的数据键配置中选择。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_temperature_card",
-  "name": "Indoor temperature card",
+  "name": "室内温度卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_temperature_card_system_widget_image.png",
-  "description": "Displays the latest indoor temperature telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的室内温度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

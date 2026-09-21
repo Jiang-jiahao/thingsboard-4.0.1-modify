@@ -1,9 +1,9 @@
 {
   "fqn": "rotational_speed_range_chart",
-  "name": "Rotational speed range chart",
+  "name": "转速区间图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/rotational_speed_range_chart.svg",
-  "description": "Displays changes to rotational speed data over time visualized with color ranges.",
+  "description": "以颜色区间展示转速数据随时间的变化。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

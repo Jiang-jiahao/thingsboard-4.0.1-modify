@@ -1,9 +1,9 @@
 {
   "fqn": "control_widgets.rpc_remote_shell",
-  "name": "RPC remote shell",
+  "name": "RPC 远程终端",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/rpc_remote_shell_system_widget_image.png",
-  "description": "Allows to emulate remote shell. Requires custom implementation on the target device to work correctly.",
+  "description": "模拟远程终端。需要在目标设备上自行实现相应处理才能正常工作。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 9.5,

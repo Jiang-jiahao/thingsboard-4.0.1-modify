@@ -1,9 +1,9 @@
 {
   "fqn": "simple_flow_rate_chart_card",
-  "name": "Simple flow rate chart card",
+  "name": "简版流量图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_flow_rate_chart_card_(1).svg",
-  "description": "Displays historical flow rate values as a simplified chart. Optionally may display the corresponding latest flow rate value.",
+  "description": "以简版图表展示历史流量数据，可选显示对应的最新流量值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

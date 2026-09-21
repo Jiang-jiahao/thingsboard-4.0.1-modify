@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="800" height="600" fill="none" version="1.1" viewBox="0 0 800 600"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Vertical short tank",
-  "description": "Vertical short tank with current volume value and level visualizations.",
+  "title": "立式短罐",
+  "description": "立式短罐，含当前容积数值和液位可视化。",
   "searchTags": [
     "tank",
     "short tank"

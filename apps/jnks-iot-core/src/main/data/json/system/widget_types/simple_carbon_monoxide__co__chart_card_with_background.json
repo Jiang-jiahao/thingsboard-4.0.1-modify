@@ -1,9 +1,9 @@
 {
   "fqn": "simple_carbon_monoxide_co_chart_card_with_background",
-  "name": "Simple carbon monoxide (CO) chart card with background",
+  "name": "简版一氧化碳（CO）图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/CO-simple-chart-value-card-with-background.svg",
-  "description": "A colorless and odorless gas resulting from incomplete combustion, particularly in motor vehicles. Results displayed by combining the latest and aggregated values and optional simplified chart.",
+  "description": "一种无色无味的气体，由燃烧不充分产生，机动车尾气是主要来源。展示时结合最新值与聚合值，并可选用简版图表。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

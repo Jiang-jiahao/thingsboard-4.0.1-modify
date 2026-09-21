@@ -1,9 +1,9 @@
 {
   "fqn": "charts.pie_chart_js",
-  "name": "Pie - Chart.js",
+  "name": "饼图 - Chart.js",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/pie_flot_system_widget_image.png",
-  "description": "Displays the latest values of the attributes or time series data for multiple entities in a pie chart. Supports numeric values only.",
+  "description": "以饼图展示多个实体的最新属性值或时序数据。仅支持数值类型。",
   "descriptor": {
     "type": "latest",
     "sizeX": 8,

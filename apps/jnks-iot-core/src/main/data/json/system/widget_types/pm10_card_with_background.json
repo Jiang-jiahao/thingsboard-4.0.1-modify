@@ -1,9 +1,9 @@
 {
   "fqn": "pm10_card_with_background",
-  "name": "PM10 card with background",
+  "name": "PM10卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/pm10_card_with_background_system_widget_image.png",
-  "description": "Displays the latest fine and coarse particulate matter (PM10) telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的可吸入颗粒物（PM10）遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

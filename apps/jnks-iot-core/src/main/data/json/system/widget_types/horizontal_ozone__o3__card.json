@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_ozone_o3_card",
-  "name": "Horizontal ozone (O3) card",
+  "name": "横向臭氧（O3）卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/ozone-value-card-horizontal.svg",
-  "description": "A beneficial layer in the upper atmosphere, but harmful when present near ground level. Results mainly from vehicle exhaust and industrial emissions.",
+  "description": "在大气高层是有益的保护层，但在地面附近则有害。主要来自机动车尾气和工业排放。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

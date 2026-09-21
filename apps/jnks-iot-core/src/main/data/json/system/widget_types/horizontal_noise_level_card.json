@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_noise_level_card",
-  "name": "Horizontal noise level card",
+  "name": "横向噪声卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_noise_level_card_system_widget_image.png",
-  "description": "Displays the latest noise level telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的噪声遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

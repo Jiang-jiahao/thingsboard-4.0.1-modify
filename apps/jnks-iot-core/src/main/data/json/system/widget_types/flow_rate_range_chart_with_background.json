@@ -1,9 +1,9 @@
 {
   "fqn": "flow_rate_range_chart_with_background",
-  "name": "Flow rate range chart with background",
+  "name": "流量区间图（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/flow_rate_range_chart_with_background.svg",
-  "description": "Displays changes to flow rate data over time visualized with color ranges and background.",
+  "description": "以颜色区间和背景展示流量数据随时间的变化。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

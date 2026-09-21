@@ -1,9 +1,9 @@
 {
   "fqn": "entity_count",
-  "name": "Entity count",
+  "name": "实体计数",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/entity_count_system_widget_image.png",
-  "description": "Displays the number of entities based on the selected alias and optional filter. The number of entities refreshes periodically and not in real-time.",
+  "description": "按所选别名和可选过滤条件显示实体数量。数量为周期性刷新，并非实时。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3.5,

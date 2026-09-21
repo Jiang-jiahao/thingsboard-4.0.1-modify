@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_flow_rate_card",
-  "name": "Horizontal flow rate card",
+  "name": "横向流量卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_flow_rate_card.svg",
-  "description": "Displays the latest flow rate telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的流量遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

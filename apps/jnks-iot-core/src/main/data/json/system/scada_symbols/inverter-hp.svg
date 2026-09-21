@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="600" height="600" fill="none" version="1.1" viewBox="0 0 600 600"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Inverter",
-  "description": "Inverter with various states.",
+  "title": "高性能逆变器",
+  "description": "逆变器，支持多种状态。",
   "searchTags": [
     "energy",
     "power",

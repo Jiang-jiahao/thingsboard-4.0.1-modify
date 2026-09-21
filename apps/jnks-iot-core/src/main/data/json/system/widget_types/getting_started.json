@@ -1,9 +1,9 @@
 {
   "fqn": "home_page_widgets.getting_started",
-  "name": "Getting started",
+  "name": "快速开始",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/getting_started_system_widget_image.png",
-  "description": "Displays the getting started instructions.",
+  "description": "展示快速开始指引。",
   "descriptor": {
     "type": "static",
     "sizeX": 7.5,

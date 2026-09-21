@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200" fill="none" version="1.1" viewBox="0 0 200 200"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Left tee pipe",
-  "description": "Left tee pipe with configurable left/top/bottom fluid and leak visualizations.",
+  "title": "左侧三通管",
+  "description": "左侧三通管，可配置左/上/下三个方向的流体和泄漏可视化。",
   "searchTags": [
     "pipe",
     "tee"

@@ -1,9 +1,9 @@
 {
   "fqn": "input_widgets.update_boolean_timeseries",
-  "name": "Update boolean timeseries",
+  "name": "更新布尔时序",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/update_shared_boolean_attribute_system_widget_image.png",
-  "description": "Simple form to input new boolean value for pre-defined timeseries key.\nThe widget is deprecated. Use \"Update Multiple Attributes\" widget. Timeseries key type and boolean value type can be selected in widgets data key configuration.",
+  "description": "简单的表单，用于为预定义的时序键输入新的布尔值。\n该部件已废弃，请改用「批量更新属性」。时序键类型和布尔值类型可在部件的数据键配置中选择。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

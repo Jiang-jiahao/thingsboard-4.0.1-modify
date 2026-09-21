@@ -1,9 +1,9 @@
 {
   "fqn": "efficiency_card_with_background",
-  "name": "Efficiency card with background",
+  "name": "效率卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/efficiency_card_with_background.svg",
-  "description": "Displays the latest efficiency telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的效率遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_solar_radiation_card",
-  "name": "Horizontal solar radiation card",
+  "name": "横向太阳辐射卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_solar_radiation_card_system_widget_image.png",
-  "description": "Displays the latest solar radiation telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的太阳辐射遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_temperature_card_with_background",
-  "name": "Indoor temperature card with background",
+  "name": "室内温度卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_temperature_card_with_background_system_widget_image.png",
-  "description": "Displays the latest indoor temperature telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的室内温度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

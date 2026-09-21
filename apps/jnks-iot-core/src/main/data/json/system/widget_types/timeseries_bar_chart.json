@@ -1,9 +1,9 @@
 {
   "fqn": "charts.timeseries_bars_flot",
-  "name": "Timeseries Bar Chart",
+  "name": "时序柱状图",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/timeseries_bar_chart_system_widget_image.png",
-  "description": "Displays changes to time series data over time—for example, daily water consumption for the last month.",
+  "description": "展示时序数据随时间的变化——例如最近一个月的每日用水量。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="800" height="1000" fill="none" version="1.1" viewBox="0 0 800 1000"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Gas wellhead",
-  "description": "Gas wellhead with various states.",
+  "title": "高性能气井井口",
+  "description": "气井井口，支持多种状态。",
   "searchTags": [
     "extraction"
   ],

@@ -1,9 +1,9 @@
 {
   "fqn": "mobile_app_qr_code",
-  "name": "Mobile app QR code",
+  "name": "移动端二维码",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/mobile_app_qr_code_widget.svg",
-  "description": "Enables users to open the JnksIOT mobile app by scanning the QR code from dashboard.",
+  "description": "用户扫描仪表盘上的二维码即可打开 JnksIOT 移动端应用。",
   "descriptor": {
     "type": "static",
     "sizeX": 7.5,

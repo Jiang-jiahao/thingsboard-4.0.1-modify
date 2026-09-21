@@ -1,9 +1,9 @@
 {
   "fqn": "efficiency_progress_bar",
-  "name": "Efficiency progress bar",
+  "name": "效率进度条",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/efficiency_progress_bar.svg",
-  "description": "Displays efficiency reading as a horizontal progress bar. Allows to configure value range, bar colors, and other settings.",
+  "description": "以横向进度条展示效率读数。可配置取值范围、进度条颜色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_sulfur_dioxide_so2_card",
-  "name": "Horizontal sulfur dioxide (SO2) card",
+  "name": "横向二氧化硫（SO2）卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/SO2-value-card-horizontal.svg",
-  "description": "Produced by volcanoes and industrial processes, particularly the burning of coal and oil.",
+  "description": "由火山活动和工业过程产生，尤其是煤炭和石油的燃烧。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

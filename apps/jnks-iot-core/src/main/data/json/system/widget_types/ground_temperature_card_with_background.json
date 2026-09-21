@@ -1,9 +1,9 @@
 {
   "fqn": "ground_temperature_card_with_background",
-  "name": "Ground temperature card with background",
+  "name": "地温卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/ground_temperature_card_with_background_system_widget_image.png",
-  "description": "Displays the latest ground temperature telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的地温遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

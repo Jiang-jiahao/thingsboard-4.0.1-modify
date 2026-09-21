@@ -1,9 +1,9 @@
 {
   "fqn": "control_widgets.rpc_debug_terminal",
-  "name": "RPC debug terminal",
+  "name": "RPC 调试终端",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/rpc_debug_terminal_system_widget_image.png",
-  "description": "Allows to send any RPC command using its name and parameters to the device. Useful for debugging.",
+  "description": "可按名称和参数向设备发送任意 RPC 命令，便于调试。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 9.5,

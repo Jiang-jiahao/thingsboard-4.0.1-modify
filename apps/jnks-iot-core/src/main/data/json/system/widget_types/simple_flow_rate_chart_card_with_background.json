@@ -1,9 +1,9 @@
 {
   "fqn": "simple_flow_rate_chart_card_with_background",
-  "name": "Simple flow rate chart card with background",
+  "name": "简版流量图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_flow_rate_chart_card_with_background.svg",
-  "description": "Displays historical flow rate values as a simplified chart with background. Optionally may display the corresponding latest flow rate value.",
+  "description": "以带背景的简版图表展示历史流量数据，可选显示对应的最新流量值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

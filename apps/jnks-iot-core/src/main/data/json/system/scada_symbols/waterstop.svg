@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="200" height="200" fill="none" version="1.1" viewBox="0 0 200 200"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Water stop",
-  "description": "Remotely controlled water shutoff valve with configurable connectors and various states.",
+  "title": "止水器",
+  "description": "远程控制的止水阀，接头可配置，支持多种状态。",
   "searchTags": [
     "water stop"
   ],

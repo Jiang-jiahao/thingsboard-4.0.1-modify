@@ -1,9 +1,9 @@
 {
   "fqn": "gpio_widgets.raspberry_pi_gpio_panel",
-  "name": "Raspberry Pi GPIO Panel",
+  "name": "树莓派 GPIO 面板",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/raspberry_pi_gpio_panel_system_widget_image.png",
-  "description": "Allows to change the state of the GPIO for Raspberry Pi devices using RPC commands. Requires handling of the RPC commands in the device firmware. Uses 'getGpioStatus' and 'setGpioStatus' RPC calls",
+  "description": "通过 RPC 命令改变树莓派设备的 GPIO 状态。需要在设备固件中处理这两个 RPC 调用：'getGpioStatus' 和 'setGpioStatus'。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7,

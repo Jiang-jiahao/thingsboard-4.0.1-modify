@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_rotational_speed_card",
-  "name": "Horizontal rotational speed card",
+  "name": "横向转速卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_rotational_speed_card.svg",
-  "description": "Displays the latest rotational speed telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的转速遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

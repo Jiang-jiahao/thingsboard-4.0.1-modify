@@ -1,9 +1,9 @@
 {
   "fqn": "fluid_pressure_card",
-  "name": "Pressure card",
+  "name": "压力卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/pressure_card.svg",
-  "description": "Displays the latest fluid pressure telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的流体压力遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

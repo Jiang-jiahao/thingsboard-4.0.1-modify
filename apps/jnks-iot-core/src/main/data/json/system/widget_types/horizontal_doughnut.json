@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_doughnut",
-  "name": "Horizontal doughnut",
+  "name": "横向环形图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_doughnut_system_widget_image.png",
-  "description": "Displays the latest values of the attributes or time series data in a doughnut chart using horizontal layout. Supports numeric values only.",
+  "description": "以横向布局的环形图展示属性或时序数据的最新值。仅支持数值类型。",
   "descriptor": {
     "type": "latest",
     "sizeX": 4,

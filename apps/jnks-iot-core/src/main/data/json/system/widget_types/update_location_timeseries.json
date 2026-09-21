@@ -1,9 +1,9 @@
 {
   "fqn": "input_widgets.update_location_timeseries",
-  "name": "Update location timeseries",
+  "name": "更新位置时序",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/update_shared_location_attribute_system_widget_image.png",
-  "description": "Simple form to input new location for pre-defined timeseries keys.",
+  "description": "简单的表单，用于为预定义的时序键输入新的位置。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

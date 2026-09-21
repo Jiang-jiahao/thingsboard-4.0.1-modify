@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_rainfall_card",
-  "name": "Horizontal rainfall card",
+  "name": "横向降雨量卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_rainfall_card_system_widget_image.png",
-  "description": "Displays the latest rainfall telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的降雨量遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

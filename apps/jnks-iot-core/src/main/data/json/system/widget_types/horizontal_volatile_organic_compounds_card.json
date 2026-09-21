@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_volatile_organic_compounds_card",
-  "name": "Horizontal volatile organic compounds card",
+  "name": "横向挥发性有机物卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_volatile_organic_compounds_card_system_widget_image.png",
-  "description": "Displays the latest volatile organic compounds (VOCs) telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的挥发性有机物（VOCs）遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

@@ -1,9 +1,9 @@
 {
   "fqn": "simple_ground_temperature_chart_card",
-  "name": "Simple ground temperature chart card",
+  "name": "简版地温图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_ground_temperature_chart_card_system_widget_image.png",
-  "description": "Displays historical ground temperature values as a simplified chart. Optionally may display the corresponding latest ground temperature value.",
+  "description": "以简版图表展示历史地温数据，可选显示对应的最新地温值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

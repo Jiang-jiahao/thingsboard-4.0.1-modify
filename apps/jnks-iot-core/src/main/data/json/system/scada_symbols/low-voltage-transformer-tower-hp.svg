@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="800" fill="none" version="1.1" viewBox="0 0 400 800"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Low voltage transformer tower",
-  "description": "Low voltage transformer tower with various states.",
+  "title": "高性能低压变压器塔",
+  "description": "低压变压器塔，支持多种状态。",
   "searchTags": [
     "power",
     "energy"

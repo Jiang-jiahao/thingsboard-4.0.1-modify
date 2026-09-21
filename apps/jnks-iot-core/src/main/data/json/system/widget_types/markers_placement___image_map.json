@@ -1,9 +1,9 @@
 {
   "fqn": "input_widgets.markers_placement_image_map",
-  "name": "Markers Placement - Image Map",
+  "name": "标记点布设 - 图片地图",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/markers_placement_image_map_system_widget_image.png",
-  "description": "Allows configuring the location of the selected entities on the Image map. By default, store the location using 'xPos' and 'yPos' server-side attributes with values of 0.0 to 1.0.",
+  "description": "配置所选实体在图片地图上的位置。默认使用服务端属性 'xPos' 和 'yPos' 存储坐标，取值范围 0.0 到 1.0。",
   "descriptor": {
     "type": "latest",
     "sizeX": 8.5,

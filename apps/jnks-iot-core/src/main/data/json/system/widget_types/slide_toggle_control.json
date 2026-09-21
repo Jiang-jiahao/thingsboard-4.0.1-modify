@@ -1,9 +1,9 @@
 {
   "fqn": "control_widgets.slide_toggle_control",
-  "name": "Slide Toggle Control",
+  "name": "滑动开关控制",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/slide_toggle_control_system_widget_image.png",
-  "description": "Sends the RPC call to the device when the user toggles the slider. Appearance widget settings will enable you to configure how to fetch the initial value of the slider.",
+  "description": "用户拨动滑块时向设备发送 RPC 调用。外观设置可配置滑块初始值的获取方式。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 3,

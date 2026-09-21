@@ -1,9 +1,9 @@
 {
   "fqn": "gateway_widgets.gateway_general_chart_statistics",
-  "name": "Gateway general chart statistics",
+  "name": "网关通用图表统计",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/gateway_general_chart_statistics_system_widget_image.png",
-  "description": "Provides a real-time chart with statistical data. Displays one of the following: bytes sent to the platform, bytes received from the platform, CPU, RAM, Disk, etc.",
+  "description": "以实时图表展示统计数据，可选：发往平台的字节数、从平台接收的字节数、CPU、内存、磁盘等。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

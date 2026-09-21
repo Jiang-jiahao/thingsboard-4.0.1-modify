@@ -1,9 +1,9 @@
 {
   "fqn": "home_page_widgets.quick_links",
-  "name": "Quick links",
+  "name": "快捷链接",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/quick_links_system_widget_image.png",
-  "description": "Configure and display quick links to the platform's UI components.",
+  "description": "配置并展示指向平台各界面模块的快捷链接。",
   "descriptor": {
     "type": "static",
     "sizeX": 7.5,

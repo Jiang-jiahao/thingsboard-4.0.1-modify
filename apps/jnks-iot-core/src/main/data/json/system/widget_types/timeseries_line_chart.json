@@ -1,9 +1,9 @@
 {
   "fqn": "charts.basic_timeseries",
-  "name": "Timeseries Line Chart",
+  "name": "时序折线图",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/gateway_general_chart_statistics_system_widget_image.png",
-  "description": "Displays changes to time series data over time—for example, temperature or humidity readings.",
+  "description": "展示时序数据随时间的变化——例如温度读数。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

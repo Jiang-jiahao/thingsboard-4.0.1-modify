@@ -1,9 +1,9 @@
 {
   "fqn": "volatile_organic_compounds_card_with_background",
-  "name": "Volatile organic compounds card with background",
+  "name": "挥发性有机物卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/volatile_organic_compounds_card_with_background_system_widget_image.png",
-  "description": "Displays the latest volatile organic compounds (VOCs) telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的挥发性有机物（VOCs）遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

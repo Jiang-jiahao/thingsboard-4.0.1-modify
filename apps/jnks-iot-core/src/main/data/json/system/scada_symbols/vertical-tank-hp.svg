@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="600" height="1e3" fill="none" version="1.1" viewBox="0 0 600 1e3"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Vertical tank",
-  "description": "Vertical tank with level visualizations.",
+  "title": "高性能立式罐",
+  "description": "立式罐，含液位可视化。",
   "searchTags": [
     "vertical tank",
     "high performance"

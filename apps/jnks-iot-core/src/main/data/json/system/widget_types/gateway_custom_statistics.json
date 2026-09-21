@@ -1,9 +1,9 @@
 {
   "fqn": "gateway_widgets.gateway_custom_statistics",
-  "name": "Gateway custom statistics",
+  "name": "网关自定义统计",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/gateway_custom_statistics_system_widget_image.png",
-  "description": "Allows users to create and display custom statistic data for the gateway in real-time.",
+  "description": "实时创建并展示网关的自定义统计数据。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

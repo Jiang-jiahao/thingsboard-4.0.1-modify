@@ -1,9 +1,9 @@
 {
   "fqn": "efficiency_range_chart",
-  "name": "Efficiency range chart",
+  "name": "效率区间图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/efficiency_range_chart.svg",
-  "description": "Displays changes to efficiency data over time visualized with color ranges.",
+  "description": "以颜色区间展示效率数据随时间的变化。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

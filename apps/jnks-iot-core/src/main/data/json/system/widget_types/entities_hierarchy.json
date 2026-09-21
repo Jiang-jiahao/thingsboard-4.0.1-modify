@@ -1,9 +1,9 @@
 {
   "fqn": "cards.entities_hierarchy",
-  "name": "Entities hierarchy",
+  "name": "实体层级",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/entities_hierarchy_system_widget_image.png",
-  "description": "Displays the hierarchy of entities based on their relations. The root of the hierarchy is defined using entity alias. By default, displays entities related using \"Contains\" relation. You may change the behavior using advanced settings.",
+  "description": "按实体间的关系展示层级结构。层级根节点由实体别名指定；默认展示通过「包含」关系关联的实体，可在高级设置中调整。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

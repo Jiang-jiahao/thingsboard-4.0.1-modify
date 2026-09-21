@@ -1,9 +1,9 @@
 {
   "fqn": "rotational_speed_chart_card",
-  "name": "Rotational speed chart card",
+  "name": "转速图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/rotational_speed_chart_card.svg",
-  "description": "Displays rotational speed data by combining the latest and aggregated values with an optional simplified chart.",
+  "description": "结合最新值与聚合值，配以可选的简版图表来展示转速数据。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

@@ -1,9 +1,9 @@
 {
   "fqn": "gateway_widgets.attributes_card",
-  "name": "Gateway events",
+  "name": "网关事件",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/gateway_events_system_widget_image.png",
-  "description": "Allows to browse events reported by the gateway.",
+  "description": "浏览网关上报的事件。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

@@ -1,9 +1,9 @@
 {
   "fqn": "navigation_widgets.navigation_cards",
-  "name": "Navigation cards",
+  "name": "导航卡片组",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/navigation_cards_system_widget_image.png",
-  "description": "Displays multiple links to the platform page as separate buttons. The link is configured as the relative path in the appearance settings of the widget.",
+  "description": "以多个独立按钮展示平台页面的链接。链接在部件外观设置中按相对路径配置。",
   "descriptor": {
     "type": "static",
     "sizeX": 7,

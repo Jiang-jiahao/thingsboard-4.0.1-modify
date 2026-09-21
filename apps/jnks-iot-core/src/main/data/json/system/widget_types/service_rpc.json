@@ -1,9 +1,9 @@
 {
   "fqn": "gateway_widgets.service_rpc",
-  "name": "Service RPC",
+  "name": "服务端 RPC",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/service_rpc_system_widget_image.png",
-  "description": "Allow users to send RPC requests to specific devices through the gateway.",
+  "description": "允许用户通过网关向指定设备发送 RPC 请求。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 8.5,

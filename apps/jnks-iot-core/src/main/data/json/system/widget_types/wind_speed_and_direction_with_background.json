@@ -1,9 +1,9 @@
 {
   "fqn": "wind_speed_and_direction_with_background",
-  "name": "Wind speed and direction with background",
+  "name": "风速风向（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/wind_speed_and_direction_with_background_system_widget_image.png",
-  "description": "Displays the latest values of the wind speed and direction with background.",
+  "description": "以带背景的方式展示风速风向的最新值。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

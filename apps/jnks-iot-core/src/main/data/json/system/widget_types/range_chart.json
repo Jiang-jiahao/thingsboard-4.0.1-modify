@@ -1,9 +1,9 @@
 {
   "fqn": "range_chart",
-  "name": "Range chart",
+  "name": "区间图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/range_chart_system_widget_image.png",
-  "description": "Displays changes to time series data over time visualized with color ranges — for example, temperature or humidity readings.",
+  "description": "以颜色区间展示时序数据随时间的变化——例如温度或湿度读数。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

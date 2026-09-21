@@ -1,9 +1,9 @@
 {
   "fqn": "cards.simple_card",
-  "name": "Simple card",
+  "name": "简版卡片",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/simple_card_system_widget_image.png",
-  "description": "Designed to display single value of the selected attribute or timeseries data. Widget styles are customizable.\nWidget is deprecated. Use \"Value card\" widget.",
+  "description": "用于展示所选属性或时序数据的单一数值，样式可定制。\n该部件已废弃，请改用「数值卡片」。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

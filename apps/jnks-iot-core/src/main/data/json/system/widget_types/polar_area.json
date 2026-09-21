@@ -1,9 +1,9 @@
 {
   "fqn": "polar_area",
-  "name": "Polar area",
+  "name": "极区图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/polar-area.svg",
-  "description": "Displays the latest values of the attributes or time series data in a polar area chart. Supports numeric values only.",
+  "description": "以极区图展示属性或时序数据的最新值。仅支持数值类型。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

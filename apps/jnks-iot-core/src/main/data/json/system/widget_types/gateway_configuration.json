@@ -1,9 +1,9 @@
 {
   "fqn": "gateway_widgets.gateway_configuration",
-  "name": "Gateway Configuration",
+  "name": "网关配置",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/gateway_configuration_system_widget_image.png",
-  "description": "Allows to define configuration for a single gateway.",
+  "description": "为单个网关定义配置。",
   "descriptor": {
     "type": "static",
     "sizeX": 8,

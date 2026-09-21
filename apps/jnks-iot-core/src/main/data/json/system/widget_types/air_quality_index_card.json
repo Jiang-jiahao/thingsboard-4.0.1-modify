@@ -1,9 +1,9 @@
 {
   "fqn": "air_quality_card",
-  "name": "Air quality index card",
+  "name": "空气质量指数卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/air_quality_index_card_system_widget_image.png",
-  "description": "Displays the latest air quality index telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的空气质量指数遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

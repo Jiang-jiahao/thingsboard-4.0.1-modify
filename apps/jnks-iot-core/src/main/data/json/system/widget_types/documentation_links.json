@@ -1,9 +1,9 @@
 {
   "fqn": "home_page_widgets.documentation_links",
-  "name": "Documentation links",
+  "name": "文档链接",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/documentation_links_system_widget_image.png",
-  "description": "Configure and display links to documentation or any other resources.",
+  "description": "配置并展示指向文档或其他资源的链接。",
   "descriptor": {
     "type": "static",
     "sizeX": 7.5,

@@ -1,9 +1,9 @@
 {
   "fqn": "input_widgets.device_claiming_widget",
-  "name": "Device claiming widget",
+  "name": "设备认领部件",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/device_claiming_widget_system_widget_image.png",
-  "description": "Allows to claim the device using name and optional secret key.",
+  "description": "通过设备名称和可选的密钥认领设备。",
   "descriptor": {
     "type": "static",
     "sizeX": 7.5,

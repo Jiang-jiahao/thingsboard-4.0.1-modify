@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="400" fill="none" version="1.1" viewBox="0 0 400 400"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP 3 phase voltage relay",
-  "description": "Three phase voltage relay with various states and inications.",
+  "title": "高性能三相电压继电器",
+  "description": "三相电压继电器，支持多种状态和指示。",
   "searchTags": [
     "energy",
     "power",

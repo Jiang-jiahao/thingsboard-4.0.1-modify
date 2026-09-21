@@ -1,9 +1,9 @@
 {
   "fqn": "simple_solar_radiation_chart_card",
-  "name": "Simple solar radiation chart card",
+  "name": "简版太阳辐射图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_solar_radiation_chart_card_system_widget_image.png",
-  "description": "Displays historical solar radiation values as a simplified chart. Optionally may display the corresponding latest solar radiation value.",
+  "description": "以简版图表展示历史太阳辐射数据，可选显示对应的最新太阳辐射值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

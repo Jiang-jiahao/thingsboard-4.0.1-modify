@@ -1,9 +1,9 @@
 {
   "fqn": "value_stepper",
-  "name": "Value stepper",
+  "name": "数值步进器",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/value-stepper-widget.svg",
-  "description": "Allows users to click the buttons to send commands to devices or update attributes/time series data. Configurable settings let users define how to retrieve the initial state and specify actions for each button.",
+  "description": "通过点击按钮向设备下发命令或更新属性/时序数据。可配置初始状态的获取方式，并为每个按钮指定动作。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 3.5,

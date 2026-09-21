@@ -1,9 +1,9 @@
 {
   "fqn": "input_widgets.update_server_date_attribute",
-  "name": "Update server date attribute",
+  "name": "更新服务端日期属性",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/update_shared_date_attribute_system_widget_image.png",
-  "description": "Simple form to input new date value for pre-defined server-side attribute key.\nThe widget is deprecated. Use \"Update Multiple Attributes\" widget. Attribute type and date value type can be selected in widgets data key configuration.",
+  "description": "简单的表单，用于为预定义的服务端属性键输入新的日期值。\n该部件已废弃，请改用「批量更新属性」。属性类型和日期值类型可在部件的数据键配置中选择。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

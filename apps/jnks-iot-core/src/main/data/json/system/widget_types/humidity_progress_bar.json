@@ -1,9 +1,9 @@
 {
   "fqn": "humidity_progress_bar",
-  "name": "Humidity progress bar",
+  "name": "湿度进度条",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/humidity_progress_bar_system_widget_image.png",
-  "description": "Displays humidity reading as a horizontal progress bar. Allows to configure value range, bar colors, and other settings.",
+  "description": "以横向进度条展示湿度读数。可配置取值范围、进度条颜色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

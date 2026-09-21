@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="200" height="400" fill="none" version="1.1" viewBox="0 0 200 400"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Filter",
-  "description": "Filter with various states.",
+  "title": "高性能过滤器",
+  "description": "过滤器，支持多种状态。",
   "searchTags": [
     "filter"
   ],

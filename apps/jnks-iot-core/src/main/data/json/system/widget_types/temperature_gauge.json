@@ -1,9 +1,9 @@
 {
   "fqn": "temperature_gauge",
-  "name": "Temperature gauge",
+  "name": "温度仪表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/Temperature_gauge.svg",
-  "description": "Temperature gauge.",
+  "description": "温度仪表。",
   "descriptor": {
     "type": "latest",
     "sizeX": 6,

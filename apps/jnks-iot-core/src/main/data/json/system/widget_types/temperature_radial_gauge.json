@@ -1,9 +1,9 @@
 {
   "fqn": "analogue_gauges.temperature_radial_gauge_canvas_gauges",
-  "name": "Temperature radial gauge",
+  "name": "温度径向仪表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/temperature_radial_gauge_system_widget_image.png",
-  "description": "Preconfigured gauge to display temperature. Allows to configure temperature range, gradient colors, and other settings.",
+  "description": "预配置仪表，用于展示温度。可配置温度范围、渐变色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 6,

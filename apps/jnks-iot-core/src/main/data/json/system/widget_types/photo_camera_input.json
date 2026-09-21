@@ -1,9 +1,9 @@
 {
   "fqn": "input_widgets.web_camera_input",
-  "name": "Photo camera input",
+  "name": "摄像头输入",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/photo_camera_input_system_widget_image.png",
-  "description": "A simple form to take web camera images or upload photos. The taken picture is stored in a configurable format converted to Base64 data as the target entity's server-side attribute or telemetry value. ",
+  "description": "简单的表单，用于拍摄摄像头画面或上传照片。图片按可配置的格式转为 Base64，存为目标实体的服务端属性或遥测值。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

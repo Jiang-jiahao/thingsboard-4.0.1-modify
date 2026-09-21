@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_nitrogen_dioxide_no2_card_with_background",
-  "name": "Horizontal nitrogen dioxide (NO2) card with background",
+  "name": "横向二氧化氮（NO2）卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/NO2-horizontal-value-card-with-background.svg",
-  "description": "A gas produced from vehicle emissions and the burning of fossil fuels.",
+  "description": "一种由机动车尾气和化石燃料燃烧产生的气体。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

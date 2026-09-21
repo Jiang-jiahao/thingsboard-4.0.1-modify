@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="200" fill="none" version="1.1" viewBox="0 0 400 200"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Control panel",
-  "description": "Sends the command to the device or updates attribute/time series when the user pushes the button. Widget settings will enable you to configure behavior, how to fetch the initial state, and what to trigger when power on/off states.",
+  "title": "高性能控制柜",
+  "description": "用户按下按钮时，向设备发送命令或更新属性/时序数据。部件设置可配置初始状态的获取方式，以及开机/关机各自触发的动作。",
   "searchTags": [
     "control"
   ],

@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_co2_card_with_background",
-  "name": "Horizontal CO2 card with background",
+  "name": "横向二氧化碳卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_co2_card_with_background_system_widget_image.png",
-  "description": "Displays the latest CO2 level telemetry in a scalable horizontal layout with the background image.",
+  "description": "在带背景图的可缩放横向布局中显示最新的二氧化碳浓度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

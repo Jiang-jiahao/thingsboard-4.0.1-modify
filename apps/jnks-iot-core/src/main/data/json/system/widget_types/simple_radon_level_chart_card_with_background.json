@@ -1,9 +1,9 @@
 {
   "fqn": "simple_radon_level_chart_card_with_background",
-  "name": "Simple radon level chart card with background",
+  "name": "简版氡浓度图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_radon_level_chart_card_with_background_system_widget_image.png",
-  "description": "Displays historical radon level values as a simplified chart with background. Optionally may display the corresponding latest radon level value.",
+  "description": "以带背景的简版图表展示历史氡浓度数据，可选显示对应的最新氡浓度值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

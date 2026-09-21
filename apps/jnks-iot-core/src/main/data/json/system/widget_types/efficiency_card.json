@@ -1,9 +1,9 @@
 {
   "fqn": "efficiency_card",
-  "name": "Efficiency card",
+  "name": "效率卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/efficiency_card.svg",
-  "description": "Displays the latest efficiency telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的效率遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

@@ -1,9 +1,9 @@
 {
   "fqn": "power_consumption_range_chart",
-  "name": "Power consumption range chart",
+  "name": "功耗区间图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/power_consumption_range_chart.svg",
-  "description": "Displays changes to power consumption data over time visualized with color ranges.",
+  "description": "以颜色区间展示功耗数据随时间的变化。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

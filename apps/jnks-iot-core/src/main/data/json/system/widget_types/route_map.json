@@ -1,9 +1,9 @@
 {
   "fqn": "route_map",
-  "name": "Route Map",
+  "name": "路线图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/route-map-widget.png",
-  "description": "Displays an entity's trip on various map providers. Supports custom markers, marker tooltips, widget actions, polygons, and circles for enhanced spatial representation.",
+  "description": "在多种地图服务上展示实体行程。支持自定义标记、标记浮窗、部件动作、多边形和圆形，以便更好地表达空间关系。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8.5,

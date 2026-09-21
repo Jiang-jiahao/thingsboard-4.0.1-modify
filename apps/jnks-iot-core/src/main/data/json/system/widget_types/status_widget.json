@@ -1,9 +1,9 @@
 {
   "fqn": "status_widget",
-  "name": "Status widget",
+  "name": "状态部件",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/status-widget_(3).svg",
-  "description": "Displays current status.",
+  "description": "展示当前状态。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 2,

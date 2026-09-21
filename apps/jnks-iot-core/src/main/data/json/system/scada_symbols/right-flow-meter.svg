@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="400" fill="none" version="1.1" viewBox="0 0 400 400"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Right flow meter",
-  "description": "Right flow meter component used to display flow related value and render various states. Includes pipe fluid and leak visualizations.",
+  "title": "右侧流量计",
+  "description": "右侧流量计组件，用于展示流量相关数值并呈现多种状态，含管内流体和泄漏的可视化。",
   "searchTags": [
     "meter",
     "flow meter"

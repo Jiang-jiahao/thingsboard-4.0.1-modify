@@ -1,9 +1,9 @@
 {
   "fqn": "navigation_widgets.navigation_card",
-  "name": "Navigation card",
+  "name": "导航卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/navigation_card_system_widget_image.png",
-  "description": "Displays the link to the platform page as a button. The link is configured as the relative path in the appearance settings of the widget.",
+  "description": "以按钮形式展示平台页面的链接。链接在部件外观设置中按相对路径配置。",
   "descriptor": {
     "type": "static",
     "sizeX": 2.5,

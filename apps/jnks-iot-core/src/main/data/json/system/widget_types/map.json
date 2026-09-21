@@ -1,9 +1,9 @@
 {
   "fqn": "map",
-  "name": "Map",
+  "name": "地图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/map-widget.png",
-  "description": "Displays the location of the entities on Map. Allows to choose among existing tile providers or configure own server. Supports markers, marker tooltips, widget actions, polygons, and circles for enhanced spatial representation.",
+  "description": "在地图上展示实体位置。可在现成的瓦片服务商中选择，也可自行配置服务器。支持标记、标记浮窗、部件动作、多边形和圆形，以便更好地表达空间关系。",
   "descriptor": {
     "type": "latest",
     "sizeX": 8.5,

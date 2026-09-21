@@ -1,9 +1,9 @@
 {
   "fqn": "cards.html_value_card",
-  "name": "HTML Value Card",
+  "name": "HTML 数值卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/html_value_card_system_widget_image.png",
-  "description": "Displays configurable HTML with the ability to inject values from the selected data source. For example, display single or multiple attribute values.",
+  "description": "展示可配置的 HTML，并能注入来自所选数据源的值。例如展示单个或多个属性值。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

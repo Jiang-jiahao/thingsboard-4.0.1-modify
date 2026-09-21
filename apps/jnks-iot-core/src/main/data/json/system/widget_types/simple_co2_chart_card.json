@@ -1,9 +1,9 @@
 {
   "fqn": "simple_co2_chart_card",
-  "name": "Simple CO2 chart card",
+  "name": "简版二氧化碳图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_co2_chart_card_system_widget_image.png",
-  "description": "Displays historical CO2 level values as a simplified chart. Optionally may display the corresponding latest CO2 level value.",
+  "description": "以简版图表展示历史二氧化碳浓度数据，可选显示对应的最新二氧化碳浓度值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

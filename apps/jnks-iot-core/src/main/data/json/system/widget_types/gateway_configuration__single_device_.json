@@ -1,9 +1,9 @@
 {
   "fqn": "gateway_widgets.config_form_latest",
-  "name": "Gateway configuration (Single device)",
+  "name": "网关配置（单设备）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/gateway_configuration_single_device_system_widget_image.png",
-  "description": "Allows to create or choose the gateway and edit its configuration.",
+  "description": "创建或选择网关并编辑其配置。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

@@ -1,9 +1,9 @@
 {
   "fqn": "fluid_pressure_card_with_background",
-  "name": "Pressure card with background",
+  "name": "压力卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/pressure_card_with_background.svg",
-  "description": "Displays the latest fluid pressure telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的流体压力遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

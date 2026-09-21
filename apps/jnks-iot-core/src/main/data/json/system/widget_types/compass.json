@@ -1,9 +1,9 @@
 {
   "fqn": "analogue_gauges.analogue_compass",
-  "name": "Compass",
+  "name": "指南针",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/compass_system_widget_image.png",
-  "description": "Displays latest value of the attribute or time series data on the compass. Expects value to be in range of 0 to 360.",
+  "description": "在指南针上显示属性或时序数据的最新值。取值需在 0 到 360 之间。",
   "descriptor": {
     "type": "latest",
     "sizeX": 6,

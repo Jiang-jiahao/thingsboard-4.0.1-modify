@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200" fill="none" version="1.1" viewBox="0 0 200 200"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Cross pipe",
-  "description": "Cross pipe with configurable left/right/top/bottom fluid and leak visualizations.",
+  "title": "十字管",
+  "description": "十字管，可配置左/右/上/下四个方向的流体和泄漏可视化。",
   "searchTags": [
     "pipe",
     "cross"

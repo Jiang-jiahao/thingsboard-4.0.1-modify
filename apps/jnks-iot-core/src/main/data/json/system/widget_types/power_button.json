@@ -1,9 +1,9 @@
 {
   "fqn": "power_button",
-  "name": "Power button",
+  "name": "电源按钮",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/power-button.svg",
-  "description": "Sends the command to the device or updates attribute/time series when the user pushes the button. Widget settings will enable you to configure behavior how to fetch the initial state and what to trigger when power on/off states.",
+  "description": "用户按下按钮时，向设备发送命令或更新属性/时序数据。部件设置可配置初始状态的获取方式，以及开机/关机各自触发的动作。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 3.5,

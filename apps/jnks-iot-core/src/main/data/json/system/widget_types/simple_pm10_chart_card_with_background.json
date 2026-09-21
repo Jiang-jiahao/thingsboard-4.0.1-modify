@@ -1,9 +1,9 @@
 {
   "fqn": "simple_pm10_chart_card_with_background",
-  "name": "Simple PM10 chart card with background",
+  "name": "简版PM10图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_pm10_chart_card_with_background_system_widget_image.png",
-  "description": "Displays historical fine and coarse particulate matter (PM10) values as a simplified chart with background. Optionally may display the corresponding latest PM10 value.",
+  "description": "以带背景的简版图表展示历史可吸入颗粒物（PM10）数据，可选显示对应的最新PM10值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

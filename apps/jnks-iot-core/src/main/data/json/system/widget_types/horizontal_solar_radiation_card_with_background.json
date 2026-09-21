@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_solar_radiation_card_with_background",
-  "name": "Horizontal solar radiation card with background",
+  "name": "横向太阳辐射卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_solar_radiation_card_with_background_system_widget_image.png",
-  "description": "Displays the latest solar radiation telemetry in a scalable horizontal layout with the background image.",
+  "description": "在带背景图的可缩放横向布局中显示最新的太阳辐射遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

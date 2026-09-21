@@ -1,9 +1,9 @@
 {
   "fqn": "cards.entities_table",
-  "name": "Entities table",
+  "name": "实体表格",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/entities_table_system_widget_image.png",
-  "description": "Displays a list of entities that match the selected alias and optional filter. Provides the ability for full-text search and pagination, except for columns with post-processing or cell content functions. Highly customizable using widget styles, data source keys, and widget actions.",
+  "description": "展示匹配所选别名和可选过滤条件的实体列表。支持全文搜索和分页（使用后处理或单元格内容函数的列除外）。可通过部件样式、数据源键和部件动作高度定制。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

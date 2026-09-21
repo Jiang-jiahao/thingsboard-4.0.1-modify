@@ -1,9 +1,9 @@
 {
   "fqn": "control_widgets.led_indicator",
-  "name": "Led indicator",
+  "name": "LED 指示灯",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/led_indicator_system_widget_image.png",
-  "description": "Visualize the state of the device. Fetches the value from the device from the attribute or using RPC.",
+  "description": "可视化设备状态。通过属性或 RPC 从设备获取当前值。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 2.5,

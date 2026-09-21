@@ -1,9 +1,9 @@
 {
   "fqn": "home_page_widgets.dashboards",
-  "name": "Dashboards",
+  "name": "仪表盘",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/dashboards_system_widget_image.png",
-  "description": "Display and manage the 'last viewed' or 'starred' dashboard lists.",
+  "description": "展示并管理「最近查看」和「已收藏」的仪表盘列表。",
   "descriptor": {
     "type": "static",
     "sizeX": 7.5,

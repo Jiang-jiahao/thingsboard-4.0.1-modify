@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="200" height="200" fill="none" version="1.1" viewBox="0 0 200 200"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Power socket",
-  "description": "Power socket with various states.",
+  "title": "高性能电源插座",
+  "description": "电源插座，支持多种状态。",
   "searchTags": [
     "EU socket",
     "US socket",

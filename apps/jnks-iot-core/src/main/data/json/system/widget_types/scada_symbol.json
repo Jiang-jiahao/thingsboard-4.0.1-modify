@@ -1,9 +1,9 @@
 {
   "fqn": "scada_symbol",
-  "name": "SCADA symbol",
+  "name": "SCADA 符号",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/new_scada_symbols_system_widget_image_(1).svg",
-  "description": "Use for uploading SVG symbols to your SCADA dashboard",
+  "description": "用于向 SCADA 仪表盘上传 SVG 符号",
   "descriptor": {
     "type": "rpc",
     "sizeX": 3,

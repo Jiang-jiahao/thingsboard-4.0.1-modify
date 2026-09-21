@@ -1,9 +1,9 @@
 {
   "fqn": "wind_speed_card_with_background",
-  "name": "Wind speed card with background",
+  "name": "风速卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/wind_speed_card_with_background_system_widget_image.png",
-  "description": "Displays the latest wind speed telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的风速遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

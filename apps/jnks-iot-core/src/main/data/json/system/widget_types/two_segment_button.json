@@ -1,9 +1,9 @@
 {
   "fqn": "two_segment_button",
-  "name": "Two-segment button",
+  "name": "双段按钮",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/two-segment-button.svg",
-  "description": "Facilitates navigation to other dashboards, states, or custom actions. Configurable settings allow for on-click action definition and conditions for button activation or deactivation. It offers various layouts and custom styling options for different stat",
+  "description": "支持跳转到其他仪表盘、状态或自定义动作。可配置点击动作，以及按钮启用/禁用的条件；提供多种布局和状态样式。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

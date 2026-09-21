@@ -1,9 +1,9 @@
 {
   "fqn": "image_map",
-  "name": "Image Map",
+  "name": "图片地图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/image-map-widget.png",
-  "description": "Displays the indoor or relative location of entities on an image map, making it ideal for floor plans, smart parking, and more. Entity coordinates are expected to range from 0 to 1. Supports markers, marker tooltips, widget actions, polygons, and circles for enhanced spatial representation.",
+  "description": "在图片地图上展示实体的室内或相对位置，适用于楼层平面图、智能停车等场景。实体坐标取值范围为 0 到 1。支持标记、标记浮窗、部件动作、多边形和圆形，以便更好地表达空间关系。",
   "descriptor": {
     "type": "latest",
     "sizeX": 8.5,

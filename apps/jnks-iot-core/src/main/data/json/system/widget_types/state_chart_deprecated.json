@@ -1,9 +1,9 @@
 {
   "fqn": "charts.state_chart",
-  "name": "State Chart",
+  "name": "状态图",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/state_chart_system_widget_image.png",
-  "description": "Displays changes to the state of the entity over time. For example, online and offline.",
+  "description": "展示实体状态随时间的变化，例如在线与离线。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

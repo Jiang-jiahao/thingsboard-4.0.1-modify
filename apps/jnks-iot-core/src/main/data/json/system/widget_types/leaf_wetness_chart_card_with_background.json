@@ -1,9 +1,9 @@
 {
   "fqn": "leaf_wetness_chart_card_with_background",
-  "name": "Leaf wetness chart card with background",
+  "name": "叶面湿度图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/leaf_wetness_chart_card_with_background_system_widget_image.png",
-  "description": "Displays a leaf wetness data by combining the latest and aggregated values with the background image and optional simplified chart.",
+  "description": "结合最新值与聚合值，配以背景图和可选的简版图表来展示叶面湿度数据。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

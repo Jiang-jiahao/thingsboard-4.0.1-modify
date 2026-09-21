@@ -1,9 +1,9 @@
 {
   "fqn": "analogue_gauges.speed_gauge_canvas_gauges",
-  "name": "Speed gauge",
+  "name": "速度仪表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/speed_gauge_system_widget_image.png",
-  "description": "Preconfigured gauge to display speed. Allows to configure speed range, gradient colors, and other settings.",
+  "description": "预配置仪表，用于展示速度。可配置速度范围、渐变色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7,

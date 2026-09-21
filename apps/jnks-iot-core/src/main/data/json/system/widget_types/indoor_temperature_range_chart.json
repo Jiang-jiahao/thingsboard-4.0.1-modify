@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_temperature_range_chart",
-  "name": "Indoor temperature range chart",
+  "name": "室内温度区间图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_temperature_range_chart.svg",
-  "description": "Displays changes to indoor temperature data over time visualized with color ranges.",
+  "description": "以颜色区间展示室内温度数据随时间的变化。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

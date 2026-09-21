@@ -1,9 +1,9 @@
 {
   "fqn": "uv_index_card_with_background",
-  "name": "UV Index card with background",
+  "name": "紫外线指数卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/uv_index_card_with_background_system_widget_image.png",
-  "description": "Displays the latest UV index telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的紫外线指数遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

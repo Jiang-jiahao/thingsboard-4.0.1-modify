@@ -1,9 +1,9 @@
 {
   "fqn": "simple_ozone_o3_chart_card",
-  "name": "Simple ozone (O3) chart card",
+  "name": "简版臭氧（O3）图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple-ozone-value-and-chart-card.svg",
-  "description": "A beneficial layer in the upper atmosphere, but harmful when present near ground level. Results displays mainly from vehicle exhaust and industrial emissions by combining the latest and aggregated values and optional simplified chart. ",
+  "description": "在大气高层是有益的保护层，但在地面附近则有害，主要来自机动车尾气和工业排放。展示时结合最新值与聚合值，并可选用简版图表。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

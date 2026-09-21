@@ -1,9 +1,9 @@
 {
   "fqn": "trip_map",
-  "name": "Trip Map",
+  "name": "行程地图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/trip-map-widget.png",
-  "description": "Displays an entity's trip on various map providers, allowing scrolling and animated movement. Supports custom markers, marker tooltips, widget actions, polygons, and circles for enhanced spatial representation.",
+  "description": "在多种地图服务上展示实体行程，支持滚动和动画演示移动过程。支持自定义标记、标记浮窗、部件动作、多边形和圆形，以便更好地表达空间关系。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8.5,

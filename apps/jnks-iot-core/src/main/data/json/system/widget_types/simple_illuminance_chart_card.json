@@ -1,9 +1,9 @@
 {
   "fqn": "simple_illuminance_chart_card",
-  "name": "Simple illuminance chart card",
+  "name": "简版照度图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_illuminance_chart_card_system_widget_image.png",
-  "description": "Displays historical illuminance values as a simplified chart. Optionally may display the corresponding latest illuminance value.",
+  "description": "以简版图表展示历史照度数据，可选显示对应的最新照度值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

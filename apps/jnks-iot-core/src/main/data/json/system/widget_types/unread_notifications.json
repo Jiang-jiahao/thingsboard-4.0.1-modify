@@ -1,6 +1,6 @@
 {
   "fqn": "unread_notifications",
-  "name": "Unread notifications",
+  "name": "未读通知",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/unread_notification_system_widget_image.png",
   "descriptor": {

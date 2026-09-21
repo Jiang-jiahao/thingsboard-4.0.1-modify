@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="600" height="1e3" fill="none" version="1.1" viewBox="0 0 600 1e3"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Sand filter",
-  "description": "Sand filter with configurable filtration mode option and various states.",
+  "title": "高性能砂滤器",
+  "description": "砂滤器，可配置过滤模式选项并支持多种状态。",
   "searchTags": [
     "filter",
     "sand",

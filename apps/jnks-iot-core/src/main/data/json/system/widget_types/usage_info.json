@@ -1,9 +1,9 @@
 {
   "fqn": "home_page_widgets.usage_info",
-  "name": "Usage info",
+  "name": "使用情况",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/usage_info_system_widget_image.png",
-  "description": "Display statistics about the number of entities and API usage.",
+  "description": "展示实体数量与 API 使用情况的统计。",
   "descriptor": {
     "type": "static",
     "sizeX": 7.5,

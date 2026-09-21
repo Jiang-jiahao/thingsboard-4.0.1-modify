@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="200" height="400" fill="none" version="1.1" viewBox="0 0 200 400">
 <tb:metadata xmlns=""><![CDATA[{
-  "title": "Short top filter",
-  "description": "Short top filter with configurable click actions for custom operations, dashboard manipulation, etc.",
+  "title": "短顶部过滤器",
+  "description": "短顶部过滤器，点击动作可配置，用于自定义操作、仪表盘交互等。",
   "searchTags": [
     "filter"
   ],

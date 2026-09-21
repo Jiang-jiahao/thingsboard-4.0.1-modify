@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_fluid_pressure_card",
-  "name": "Horizontal pressure card",
+  "name": "横向压力卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_pressure_card.svg",
-  "description": "Displays the latest fluid pressure telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的流体压力遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

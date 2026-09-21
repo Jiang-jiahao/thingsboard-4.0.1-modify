@@ -1,9 +1,9 @@
 {
   "fqn": "control_widgets.round_switch",
-  "name": "Round switch",
+  "name": "圆形开关",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/round_switch_system_widget_image.png",
-  "description": "Sends the RPC call to the device when the user toggles the switch. Appearance settings will enable you to configure how to fetch the initial value of the switch.",
+  "description": "用户切换开关时向设备发送 RPC 调用。外观设置可配置开关初始值的获取方式。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 2.5,

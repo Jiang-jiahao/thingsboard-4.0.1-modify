@@ -1,9 +1,9 @@
 {
   "fqn": "cards.attributes_card",
-  "name": "Attributes card",
+  "name": "属性卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/attributes_card_system_widget_image.png",
-  "description": "Displays one or more attributes or the latest telemetry values of the entity. Supports multiple entities as separate bars.",
+  "description": "展示实体的一个或多个属性值或最新遥测值。支持多实体，各自以独立条形展示。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

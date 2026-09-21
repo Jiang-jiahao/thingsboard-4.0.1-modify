@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="200" fill="none" version="1.1" viewBox="0 0 400 200"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Horizontal circuit breaker",
-  "description": "Horizontal circuit breaker with various states.",
+  "title": "高性能横向断路器",
+  "description": "横向断路器，支持多种状态。",
   "searchTags": [
     "energy",
     "power",

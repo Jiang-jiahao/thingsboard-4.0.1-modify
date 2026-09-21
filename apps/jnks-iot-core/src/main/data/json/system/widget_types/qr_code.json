@@ -1,9 +1,9 @@
 {
   "fqn": "cards.qr_code",
-  "name": "QR Code",
+  "name": "二维码",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/qr_code_system_widget_image.png",
-  "description": "Displays the QR code. The code is calculated using a configured pattern or function based on the values of the selected entity attributes or the latest telemetry data.",
+  "description": "展示二维码。二维码内容按配置的模板或函数，根据所选实体的属性值或最新遥测数据计算得出。",
   "descriptor": {
     "type": "latest",
     "sizeX": 4,

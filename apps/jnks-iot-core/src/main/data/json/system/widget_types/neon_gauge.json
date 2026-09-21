@@ -1,9 +1,9 @@
 {
   "fqn": "digital_gauges.neon_gauge_justgage",
-  "name": "Neon gauge",
+  "name": "霓虹仪表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/neon_gauge_system_widget_image.png",
-  "description": "Preconfigured gauge to display any value reading as an arc. Allows to configure value range, gradient colors, and other settings.",
+  "description": "预配置仪表，以弧形展示任意读数。可配置取值范围、渐变色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

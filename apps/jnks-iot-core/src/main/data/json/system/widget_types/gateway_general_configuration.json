@@ -1,9 +1,9 @@
 {
   "fqn": "gateway_widgets.gateway_general_configuration",
-  "name": "Gateway general configuration",
+  "name": "网关通用配置",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/gateway_general_configuration_system_widget_image.png",
-  "description": "Allows to create or edit general gateway configuration.",
+  "description": "创建或编辑网关的通用配置。",
   "descriptor": {
     "type": "latest",
     "sizeX": 11,

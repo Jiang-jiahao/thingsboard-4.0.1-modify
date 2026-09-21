@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="800" height="200" fill="none" version="1.1" viewBox="0 0 800 200"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Extra long horizontal pipe",
-  "description": "Extra long horizontal pipe with fluid and leak visualizations.",
+  "title": "超长横管",
+  "description": "超长横管，含流体和泄漏的可视化。",
   "searchTags": [
     "pipe",
     "horizontal pipe",

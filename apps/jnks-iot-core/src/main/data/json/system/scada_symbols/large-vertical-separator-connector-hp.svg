@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="600" height="1000" fill="none" version="1.1" viewBox="0 0 600 1000"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Large vertical separator with connector",
-  "description": "Large vertical separator with connector with various states.",
+  "title": "高性能大型立式分离器（带接头）",
+  "description": "大型立式分离器（带接头），支持多种状态。",
   "searchTags": [
     "extraction"
   ],

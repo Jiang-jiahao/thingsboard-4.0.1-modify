@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_cylinder_tank",
-  "name": "Horizontal cylinder tank",
+  "name": "卧式圆筒罐",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_cylinder_tank_system_widget_image.png",
-  "description": "Widget indicates the level of liquid in Horizontal cylinder tank.",
+  "description": "展示卧式圆筒罐内的液位。",
   "descriptor": {
     "type": "latest",
     "sizeX": 4,

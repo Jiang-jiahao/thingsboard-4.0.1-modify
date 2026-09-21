@@ -1,9 +1,9 @@
 {
   "fqn": "input_widgets.markers_placement_openstreetmap",
-  "name": "Markers Placement - OpenStreetMap",
+  "name": "标记点布设 - OpenStreetMap",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/markers_placement_openstreetmap_system_widget_image.png",
-  "description": "Allows configuring the location of the selected entities on OpenStreetMap. By default, store the location using 'latitude' and 'longitude' server-side attributes.",
+  "description": "配置所选实体在 OpenStreetMap 上的位置。默认使用服务端属性 'latitude' 和 'longitude' 存储坐标。",
   "descriptor": {
     "type": "latest",
     "sizeX": 8.5,

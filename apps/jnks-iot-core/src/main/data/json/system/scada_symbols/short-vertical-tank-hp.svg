@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="600" height="600" fill="none" version="1.1" viewBox="0 0 600 600"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Short vertical tank",
-  "description": "Short vertical tank with level visualizations.",
+  "title": "高性能短立式罐",
+  "description": "短立式罐，含液位可视化。",
   "searchTags": [
     "short tank",
     "high performance"

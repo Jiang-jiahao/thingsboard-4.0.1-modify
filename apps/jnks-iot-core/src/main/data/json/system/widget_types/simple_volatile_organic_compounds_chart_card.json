@@ -1,9 +1,9 @@
 {
   "fqn": "simple_volatile_organic_compounds_chart_card",
-  "name": "Simple volatile organic compounds chart card",
+  "name": "简版挥发性有机物图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_volatile_organic_compounds_chart_card_system_widget_image.png",
-  "description": "Displays historical volatile organic compounds (VOCs) values as a simplified chart. Optionally may display the corresponding latest VOCs value.",
+  "description": "以简版图表展示挥发性有机物（VOCs）的历史数据，可选显示对应的最新值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

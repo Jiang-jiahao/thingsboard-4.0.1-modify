@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_soil_moisture_card",
-  "name": "Horizontal soil moisture card",
+  "name": "横向土壤湿度卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_soil_moisture_card_system_widget_image.png",
-  "description": "Displays the latest soil moisture telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的土壤湿度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

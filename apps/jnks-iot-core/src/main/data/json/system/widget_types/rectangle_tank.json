@@ -1,9 +1,9 @@
 {
   "fqn": "rectangle_tank",
-  "name": "Rectangle tank",
+  "name": "矩形罐",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/rectangle_tank_system_widget_image.png",
-  "description": "Widget indicates the level of liquid in Rectangle tank.",
+  "description": "展示矩形罐内的液位。",
   "descriptor": {
     "type": "latest",
     "sizeX": 4,

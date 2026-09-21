@@ -1,9 +1,9 @@
 {
   "fqn": "gpio_widgets.basic_gpio_control",
-  "name": "Basic GPIO Control",
+  "name": "基础 GPIO 控制",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/basic_gpio_control_system_widget_image.png",
-  "description": "Allows to change state of the GPIO for target device using RPC commands. Requires handling of the RPC commands in the device firmware. Uses 'getGpioStatus' and 'setGpioStatus' RPC calls",
+  "description": "通过 RPC 命令改变目标设备的 GPIO 状态。需要在设备固件中处理这两个 RPC 调用：'getGpioStatus' 和 'setGpioStatus'。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 4,

@@ -1,9 +1,9 @@
 {
   "fqn": "simple_soil_moisture_chart_card",
-  "name": "Simple soil moisture chart card",
+  "name": "简版土壤湿度图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_soil_moisture_chart_card_system_widget_image.png",
-  "description": "Displays historical soil moisture values as a simplified chart. Optionally may display the corresponding latest soil moisture value.",
+  "description": "以简版图表展示历史土壤湿度数据，可选显示对应的最新土壤湿度值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

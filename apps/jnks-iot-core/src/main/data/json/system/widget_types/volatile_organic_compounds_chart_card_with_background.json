@@ -1,9 +1,9 @@
 {
   "fqn": "volatile_organic_compounds_chart_card_with_background",
-  "name": "Volatile organic compounds chart card with background",
+  "name": "挥发性有机物图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/volatile_organic_compounds_chart_card_with_background_system_widget_image.png",
-  "description": "Displays a volatile organic compounds (VOCs) data by combining the latest and aggregated values with the background image and optional simplified chart.",
+  "description": "结合最新值与聚合值，配以背景图和可选的简版图表来展示挥发性有机物（VOCs）数据。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

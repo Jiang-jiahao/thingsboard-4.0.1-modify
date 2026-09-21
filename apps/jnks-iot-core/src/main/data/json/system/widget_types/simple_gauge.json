@@ -1,9 +1,9 @@
 {
   "fqn": "digital_gauges.simple_gauge_justgage",
-  "name": "Simple gauge",
+  "name": "简版仪表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_gauge_system_widget_image.png",
-  "description": "Preconfigured gauge to display any value reading as a circle. Allows to configure value range, gradient colors, and other settings.",
+  "description": "预配置仪表，以圆形展示任意读数。可配置取值范围、渐变色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 2,

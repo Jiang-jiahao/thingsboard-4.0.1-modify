@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="400" fill="none" version="1.1" viewBox="0 0 400 400"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Centrifugal pump",
-  "description": "Centrifugal pump with configurable connectors, running animation and various states.",
+  "title": "离心泵",
+  "description": "离心泵，接头可配置，含运行动画和多种状态。",
   "searchTags": [
     "pump",
     "centrifugal"

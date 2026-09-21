@@ -1,9 +1,9 @@
 {
   "fqn": "alarm_count",
-  "name": "Alarm count",
+  "name": "告警计数",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/alarm_count_system_widget_image.png",
-  "description": "Displays the number of alarms based on the selected filter.",
+  "description": "按所选过滤条件显示告警数量。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3.5,

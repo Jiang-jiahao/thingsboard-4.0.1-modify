@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="600" height="1200" fill="none" version="1.1" viewBox="0 0 600 1200"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Stand cylindrical tank",
-  "description": "Stand cylindrical tank with current volume value and level visualizations.",
+  "title": "立式圆筒罐",
+  "description": "立式圆筒罐，含当前容积数值和液位可视化。",
   "searchTags": [
     "tank",
     "stand tank"

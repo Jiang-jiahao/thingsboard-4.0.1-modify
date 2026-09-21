@@ -1,9 +1,9 @@
 {
   "fqn": "input_widgets.update_shared_location_attribute",
-  "name": "Update shared location attribute",
+  "name": "更新共享位置属性",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/update_shared_location_attribute_system_widget_image.png",
-  "description": "Simple form to input new location for pre-defined shared attribute key.",
+  "description": "简单的表单，用于为预定义的共享属性键输入新的位置。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

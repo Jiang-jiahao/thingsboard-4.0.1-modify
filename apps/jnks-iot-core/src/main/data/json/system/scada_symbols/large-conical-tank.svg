@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="1e3" height="1400" fill="none" version="1.1" viewBox="0 0 1e3 1400"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Large conical tank",
-  "description": "Large conical tank with current volume value and level visualizations.",
+  "title": "大型锥形罐",
+  "description": "大型锥形罐，含当前容积数值和液位可视化。",
   "searchTags": [
     "conical tank",
     "stand tank",

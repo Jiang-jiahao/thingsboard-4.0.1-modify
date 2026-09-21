@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_temperature_gauge",
-  "name": "Indoor temperature gauge",
+  "name": "室内温度仪表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_temperature_gauge.svg",
-  "description": "Indoor temperatue gauge.",
+  "description": "室内温度仪表。",
   "descriptor": {
     "type": "latest",
     "sizeX": 6,

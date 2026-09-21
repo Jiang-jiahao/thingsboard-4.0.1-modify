@@ -1,9 +1,9 @@
 {
   "fqn": "action_button",
-  "name": "Action button",
+  "name": "动作按钮",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/action-button.svg",
-  "description": "Facilitates single-click navigation to other dashboards, states, or custom actions. Configurable settings allow for on-click action definition and conditions for button activation or deactivation. It offers various layouts and custom styling options for different states.",
+  "description": "支持一键跳转到其他仪表盘、状态或自定义动作。可配置点击动作，以及按钮启用/禁用的条件；提供多种布局和状态样式。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

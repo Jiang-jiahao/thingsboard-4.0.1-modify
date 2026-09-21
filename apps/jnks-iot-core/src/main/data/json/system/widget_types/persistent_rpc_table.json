@@ -1,9 +1,9 @@
 {
   "fqn": "control_widgets.persistent_table",
-  "name": "Persistent RPC table",
+  "name": "持久化 RPC 表格",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/persistent_rpc_table_system_widget_image.png",
-  "description": "Displays Persistent RPC requests based on entity alias and optional filter with the ability of pagination. It also allows to resend or delete selected RPC requests.",
+  "description": "按实体别名和可选过滤条件展示持久化 RPC 请求，支持分页，并可重发或删除选中的请求。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 7.5,

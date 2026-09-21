@@ -1,9 +1,9 @@
 {
   "fqn": "simple_visibility_chart_card",
-  "name": "Simple visibility chart card",
+  "name": "简版能见度图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_visibility_chart_card_system_widget_image.png",
-  "description": "Displays historical visibility values as a simplified chart. Optionally may display the corresponding latest visibility value.",
+  "description": "以简版图表展示历史能见度数据，可选显示对应的最新能见度值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

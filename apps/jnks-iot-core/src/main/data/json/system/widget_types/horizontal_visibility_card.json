@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_visibility_card",
-  "name": "Horizontal visibility card",
+  "name": "横向能见度卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_visibility_card_system_widget_image.png",
-  "description": "Displays the latest visibility telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的能见度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

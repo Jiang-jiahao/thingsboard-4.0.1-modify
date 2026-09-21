@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_horizontal_humidity_card_with_background",
-  "name": "Indoor horizontal humidity card with background",
+  "name": "室内横向湿度卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_horizontal_humidity_card_with_background_system_widget_image.png",
-  "description": "Displays the latest indoor humidity telemetry in a scalable horizontal layout with the background image.",
+  "description": "在带背景图的可缩放横向布局中显示最新的室内湿度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

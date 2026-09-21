@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_pm10_chart_card",
-  "name": "Indoor PM10 chart card",
+  "name": "室内PM10图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_pm10_chart_card_system_widget_image.png",
-  "description": "Displays a indoor fine and coarse particulate matter (PM10) data by combining the latest and aggregated values with an optional simplified chart.",
+  "description": "结合最新值与聚合值，配以可选的简版图表来展示室内可吸入颗粒物（PM10）数据。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

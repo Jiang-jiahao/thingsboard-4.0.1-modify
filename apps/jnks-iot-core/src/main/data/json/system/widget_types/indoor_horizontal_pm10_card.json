@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_horizontal_pm10_card",
-  "name": "Indoor horizontal PM10 card",
+  "name": "室内横向PM10卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_horizontal_pm10_card_system_widget_image.png",
-  "description": "Displays the latest indoor fine and coarse particulate matter (PM10) telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的室内可吸入颗粒物（PM10）遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

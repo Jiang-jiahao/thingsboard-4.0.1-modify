@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_pm2_5_card_with_background",
-  "name": "Indoor PM2.5 card with background",
+  "name": "室内PM2.5卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_pm2_5_card_with_background_system_widget_image.png",
-  "description": "Displays the latest indoor fine particulate matter (PM2.5) telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的室内细颗粒物（PM2.5）遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

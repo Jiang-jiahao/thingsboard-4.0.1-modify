@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_simple_humidity_chart_card",
-  "name": "Indoor simple humidity chart card",
+  "name": "室内简版湿度图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_simple_humidity_chart_card_system_widget_image.png",
-  "description": "Displays historical indoor humidity values as a simplified chart. Optionally may display the corresponding latest indoor humidity value.",
+  "description": "以简版图表展示室内湿度的历史数据，可选显示对应的最新值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

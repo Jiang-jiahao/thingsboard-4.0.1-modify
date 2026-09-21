@@ -1,9 +1,9 @@
 {
   "fqn": "vibration_chart_card_with_background",
-  "name": "Vibration chart card with background",
+  "name": "振动图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/vibration_chart_card_with_background_system_widget_image.png",
-  "description": "Displays a vibration data by combining the latest and aggregated values with the background image and optional simplified chart.",
+  "description": "结合最新值与聚合值，配以背景图和可选的简版图表来展示振动数据。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

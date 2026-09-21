@@ -1,9 +1,9 @@
 {
   "fqn": "single_switch",
-  "name": "Single Switch",
+  "name": "单开关",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/single-switch.svg",
-  "description": "Allows users to toggle a slider to send commands to devices or update attributes/time series data. Configurable settings let users define how to retrieve the initial state and specify actions for the on/off toggle.",
+  "description": "通过拨动滑块向设备发送命令或更新属性/时序数据。可配置初始状态的获取方式，以及开/关各自触发的动作。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 3.5,

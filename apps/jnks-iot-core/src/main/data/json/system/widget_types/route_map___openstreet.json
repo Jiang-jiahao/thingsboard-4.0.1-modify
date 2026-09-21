@@ -1,9 +1,9 @@
 {
   "fqn": "maps_v2.route_map_openstreetmap",
-  "name": "Route Map - OpenStreet",
+  "name": "路线图 - OpenStreetMap",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/route_map_openstreet_system_widget_image.png",
-  "description": "Visualize the entity trip on OpenStreetMap. Allows to visualize location history. Use the Trip Animation widget for advanced features.",
+  "description": "在 OpenStreetMap 上可视化实体行程，可展示历史轨迹。需要更高级的功能请使用「行程动画」部件。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8.5,

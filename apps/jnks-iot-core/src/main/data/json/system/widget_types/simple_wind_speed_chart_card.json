@@ -1,9 +1,9 @@
 {
   "fqn": "simple_wind_speed_chart_card",
-  "name": "Simple wind speed chart card",
+  "name": "简版风速图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_wind_speed_chart_card_system_widget_image.png",
-  "description": "Displays historical wind speed values as a simplified chart. Optionally may display the corresponding latest wind speed value.",
+  "description": "以简版图表展示历史风速数据，可选显示对应的最新风速值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

@@ -1,9 +1,9 @@
 {
   "fqn": "flow_rate_card",
-  "name": "Flow rate card",
+  "name": "流量卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/flow_rate_card.svg",
-  "description": "Displays the latest flow rate telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的流量遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

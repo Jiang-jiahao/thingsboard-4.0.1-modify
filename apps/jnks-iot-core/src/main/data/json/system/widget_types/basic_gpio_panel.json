@@ -1,9 +1,9 @@
 {
   "fqn": "gpio_widgets.gpio_panel",
-  "name": "Basic GPIO Panel",
+  "name": "基础 GPIO 面板",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/basic_gpio_panel_system_widget_image.png",
-  "description": "Allows to display state of the GPIO for target device using latest attribute values. You should set the label of the selected data key to GPIO pin number (e.g. '1') and use boolean values for widget to display the data.",
+  "description": "通过最新属性值展示目标设备的 GPIO 状态。需把所选数据键的标签设为 GPIO 引脚号（如 '1'），并使用布尔值才能正常展示。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

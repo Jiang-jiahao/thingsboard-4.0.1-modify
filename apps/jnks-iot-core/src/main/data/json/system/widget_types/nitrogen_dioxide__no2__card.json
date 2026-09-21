@@ -1,9 +1,9 @@
 {
   "fqn": "nitrogen_dioxide_no2_card",
-  "name": "Nitrogen dioxide (NO2) card",
+  "name": "二氧化氮（NO2）卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/NO2-value-card.svg",
-  "description": "A gas produced from vehicle emissions and the burning of fossil fuels.",
+  "description": "一种由机动车尾气和化石燃料燃烧产生的气体。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

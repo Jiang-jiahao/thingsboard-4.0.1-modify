@@ -1,9 +1,9 @@
 {
   "fqn": "illuminance_card",
-  "name": "Illuminance card",
+  "name": "照度卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/illuminance_card_system_widget_image.png",
-  "description": "Displays the latest illuminance telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的照度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

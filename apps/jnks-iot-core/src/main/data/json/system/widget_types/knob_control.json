@@ -1,9 +1,9 @@
 {
   "fqn": "control_widgets.knob_control",
-  "name": "Knob Control",
+  "name": "旋钮控制",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/knob_control_system_widget_image.png",
-  "description": "Sends the command to the device each time the user changes the value. Uses 'setValue' and 'getValue' RPC calls by default. The name of the RPC calls is configurable in advanced settings.",
+  "description": "用户每次改变数值时向设备下发命令。默认使用 'setValue' 和 'getValue' 两个 RPC 调用，其名称可在高级设置中修改。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 5,

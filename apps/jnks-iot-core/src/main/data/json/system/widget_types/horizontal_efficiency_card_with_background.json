@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_efficiency_card_with_background",
-  "name": "Horizontal efficiency card with background",
+  "name": "横向效率卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_efficiency_card_with_background.svg",
-  "description": "Displays the latest efficiency telemetry in a scalable horizontal layout with the background image.",
+  "description": "在带背景图的可缩放横向布局中显示最新的效率遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

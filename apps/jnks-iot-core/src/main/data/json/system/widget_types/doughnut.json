@@ -1,9 +1,9 @@
 {
   "fqn": "doughnut",
-  "name": "Doughnut",
+  "name": "环形图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/doughnut_system_widget_image_(1).png",
-  "description": "Displays the latest values of the attributes or time series data in a doughnut chart. Supports numeric values only.",
+  "description": "以环形图展示属性或时序数据的最新值。仅支持数值类型。",
   "descriptor": {
     "type": "latest",
     "sizeX": 4,

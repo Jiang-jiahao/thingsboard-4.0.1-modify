@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="800" fill="none" version="1.1" viewBox="0 0 400 800"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Simple vertical scale",
-  "description": "Simple vertical scale with current volume value and configurable warning and critical scale.",
+  "title": "高性能简版纵向标尺",
+  "description": "简版纵向标尺，含当前容积数值，以及可配置的预警和临界刻度。",
   "searchTags": [
     "scale"
   ],

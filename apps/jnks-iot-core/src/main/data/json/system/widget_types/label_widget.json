@@ -1,9 +1,9 @@
 {
   "fqn": "cards.label_widget",
-  "name": "Label widget",
+  "name": "标签部件",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/label_widget_system_widget_image.png",
-  "description": "Displays attributes or the latest telemetry values as an overlay on the configured image. The position of the values is configurable using appearance settings.",
+  "description": "把属性值或最新遥测值叠加到配置的图片上，数值位置可在外观设置中调整。",
   "descriptor": {
     "type": "latest",
     "sizeX": 4.5,

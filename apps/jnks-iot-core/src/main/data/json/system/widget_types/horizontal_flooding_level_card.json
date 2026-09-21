@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_flooding_level_card",
-  "name": "Horizontal flooding level card",
+  "name": "横向水位卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_flooding_level_card_system_widget_image.png",
-  "description": "Displays the latest flooding level telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的水位遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

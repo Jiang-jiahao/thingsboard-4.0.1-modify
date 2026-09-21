@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="2400" height="800" fill="none" version="1.1" viewBox="0 0 2400 800"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Pool",
-  "description": "Pool with level visualizations.",
+  "title": "高性能池",
+  "description": "池，含液位可视化。",
   "searchTags": [
     "pool",
     "high performance"

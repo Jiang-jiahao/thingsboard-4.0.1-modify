@@ -1,9 +1,9 @@
 {
   "fqn": "gateway_widgets.gateway_connectors",
-  "name": "Gateway connectors",
+  "name": "网关连接器",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/gateway_connectors_system_widget_image.png",
-  "description": "Allows to create and manage gateway connectors.",
+  "description": "创建并管理网关连接器。",
   "descriptor": {
     "type": "latest",
     "sizeX": 11,

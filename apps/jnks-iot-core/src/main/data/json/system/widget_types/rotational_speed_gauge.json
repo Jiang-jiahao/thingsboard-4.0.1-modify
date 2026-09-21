@@ -1,9 +1,9 @@
 {
   "fqn": "rotational_speed_gauge",
-  "name": "Rotational speed gauge",
+  "name": "转速仪表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/rotational_speed_gauge.svg",
-  "description": "Rotational speed gauge.",
+  "description": "转速仪表。",
   "descriptor": {
     "type": "latest",
     "sizeX": 6,

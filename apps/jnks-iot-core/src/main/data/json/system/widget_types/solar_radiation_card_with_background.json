@@ -1,9 +1,9 @@
 {
   "fqn": "solar_radiation_card_with_background",
-  "name": "Solar radiation card with background",
+  "name": "太阳辐射卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/solar_radiation_card_with_background_system_widget_image.png",
-  "description": "Displays the latest solar radiation telemetry in a scalable rectangle card with the background image.",
+  "description": "在带背景图的可缩放矩形卡片中显示最新的太阳辐射遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

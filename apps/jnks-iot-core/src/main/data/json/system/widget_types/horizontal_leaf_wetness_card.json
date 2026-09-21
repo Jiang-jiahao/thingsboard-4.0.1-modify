@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_leaf_wetness_card",
-  "name": "Horizontal leaf wetness card",
+  "name": "横向叶面湿度卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_leaf_wetness_card_system_widget_image.png",
-  "description": "Displays the latest leaf wetness telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的叶面湿度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

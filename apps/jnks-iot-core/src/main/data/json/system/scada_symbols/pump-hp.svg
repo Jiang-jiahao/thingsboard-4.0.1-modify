@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="400" fill="none" version="1.1" viewBox="0 0 400 400"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Centrifugal pump",
-  "description": "Centrifugal pump with configurable connectors and various states.",
+  "title": "高性能离心泵",
+  "description": "离心泵，接头可配置，支持多种状态。",
   "searchTags": [
     "pump",
     "centrifugal",

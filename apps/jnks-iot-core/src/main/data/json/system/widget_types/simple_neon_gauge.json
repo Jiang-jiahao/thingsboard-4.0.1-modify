@@ -1,9 +1,9 @@
 {
   "fqn": "digital_gauges.simple_neon_gauge_justgage",
-  "name": "Simple neon gauge",
+  "name": "简版霓虹仪表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_neon_gauge_system_widget_image.png",
-  "description": "Preconfigured gauge to display any value reading as a doughnut. Allows to configure value range, gradient colors, and other settings.",
+  "description": "预配置仪表，以环形展示任意读数。可配置取值范围、渐变色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

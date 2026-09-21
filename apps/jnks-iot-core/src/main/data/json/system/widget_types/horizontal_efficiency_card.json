@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_efficiency_card",
-  "name": "Horizontal efficiency card",
+  "name": "横向效率卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_efficiency_card.svg",
-  "description": "Displays the latest efficiency telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的效率遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

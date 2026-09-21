@@ -1,9 +1,9 @@
 {
   "fqn": "label_value_card",
-  "name": "Label & value card",
+  "name": "标签数值卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/labelValueCard.svg",
-  "description": "Displays a single entity attribute or the latest telemetry with optional label and icon.",
+  "description": "展示单个实体的属性值或最新遥测数据，可选配标签和图标。",
   "descriptor": {
     "type": "latest",
     "sizeX": 4.5,

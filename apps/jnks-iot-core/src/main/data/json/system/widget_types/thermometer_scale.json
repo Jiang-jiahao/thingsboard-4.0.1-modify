@@ -1,9 +1,9 @@
 {
   "fqn": "analogue_gauges.temperature_gauge_canvas_gauges",
-  "name": "Thermometer scale",
+  "name": "温度计",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/thermometer_scale_system_widget_image.png",
-  "description": "Preconfigured widget to display temperature. Allows to configure temperature range, gradient colors, and other settings.",
+  "description": "预配置部件，用于展示温度。可配置温度范围、渐变色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7,

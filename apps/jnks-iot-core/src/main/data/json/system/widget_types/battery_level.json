@@ -1,9 +1,9 @@
 {
   "fqn": "battery_level",
-  "name": "Battery level",
+  "name": "电量",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/battery_level_system_widget_image.png",
-  "description": "Displays the current battery level of the device.",
+  "description": "显示设备的当前电量。",
   "descriptor": {
     "type": "latest",
     "sizeX": 2.5,

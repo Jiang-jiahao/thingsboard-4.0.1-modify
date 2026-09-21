@@ -1,9 +1,9 @@
 {
   "fqn": "simple_pressure_chart_card",
-  "name": "Simple pressure chart card",
+  "name": "简版压力图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_pressure_chart_card_system_widget_image.png",
-  "description": "Displays historical pressure values as a simplified chart. Optionally may display the corresponding latest pressure value.",
+  "description": "以简版图表展示历史压力数据，可选显示对应的最新压力值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_rainfall_card_with_background",
-  "name": "Horizontal rainfall card with background",
+  "name": "横向降雨量卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_rainfall_card_with_background_system_widget_image.png",
-  "description": "Displays the latest rainfall telemetry in a scalable horizontal layout with the background image.",
+  "description": "在带背景图的可缩放横向布局中显示最新的降雨量遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

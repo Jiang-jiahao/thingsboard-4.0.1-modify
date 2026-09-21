@@ -1,9 +1,9 @@
 {
   "fqn": "simple_power_consumption_chart_card_with_background",
-  "name": "Simple power consumption chart card with background",
+  "name": "简版功耗图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_power_consumption_chart_card_with_background.svg",
-  "description": "Displays historical power consumption values as a simplified chart with background. Optionally may display the corresponding latest power consumption value.",
+  "description": "以带背景的简版图表展示历史功耗数据，可选显示对应的最新功耗值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

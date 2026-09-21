@@ -1,9 +1,9 @@
 {
   "fqn": "simple_efficiency_chart_card_with_background",
-  "name": "Simple efficiency chart card with background",
+  "name": "简版效率图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_efficiency_chart_card_with_background.svg",
-  "description": "Displays historical efficiency values as a simplified chart with background. Optionally may display the corresponding efficiency value.",
+  "description": "以带背景的简版图表展示效率的历史数据，可选显示对应的最新值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

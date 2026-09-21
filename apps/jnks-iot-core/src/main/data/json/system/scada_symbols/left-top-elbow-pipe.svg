@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200" fill="none" version="1.1" viewBox="0 0 200 200"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Left top elbow pipe",
-  "description": "Left top elbow pipe with fluid and leak visualizations.",
+  "title": "左上弯管",
+  "description": "左上弯管，含流体和泄漏的可视化。",
   "searchTags": [
     "pipe",
     "elbow"

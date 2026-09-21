@@ -1,9 +1,9 @@
 {
   "fqn": "temperature_range_chart_with_background",
-  "name": "Temperature range chart with background",
+  "name": "温度区间图（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/temperature_range_chart_with_background.svg",
-  "description": "Displays changes to temperature data over time visualized with color ranges and background.",
+  "description": "以颜色区间和背景展示温度数据随时间的变化。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

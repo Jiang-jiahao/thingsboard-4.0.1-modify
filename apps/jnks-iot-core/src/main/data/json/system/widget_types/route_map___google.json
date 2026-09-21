@@ -1,9 +1,9 @@
 {
   "fqn": "maps_v2.route_map",
-  "name": "Route Map - Google",
+  "name": "路线图 - 谷歌",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/route_map_google_system_widget_image.png",
-  "description": "Visualize the entity trip on Google Maps. Allows to visualize location history. Use the Trip Animation widget for advanced features.",
+  "description": "在谷歌地图上可视化实体行程，可展示历史轨迹。需要更高级的功能请使用「行程动画」部件。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8.5,

@@ -1,9 +1,9 @@
 {
   "fqn": "fluid_pressure_gauge",
-  "name": "Pressure gauge",
+  "name": "压力仪表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/pressure_gauge.svg",
-  "description": "Fluid pressure gauge.",
+  "description": "流体压力仪表。",
   "descriptor": {
     "type": "latest",
     "sizeX": 6,

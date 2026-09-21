@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_simple_temperature_chart_card_with_background",
-  "name": "Indoor simple temperature chart card with background",
+  "name": "室内简版温度图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_simple_temperature_chart_card_with_background_system_widget_image.png",
-  "description": "Displays historical indoor temperature values as a simplified chart with background. Optionally may display the corresponding latest indoor temperature value.",
+  "description": "以带背景的简版图表展示室内温度的历史数据，可选显示对应的最新值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

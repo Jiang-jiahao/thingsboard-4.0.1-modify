@@ -1,9 +1,9 @@
 {
   "fqn": "maps_v2.route_map_tencent_maps",
-  "name": "Route Map - Tencent",
+  "name": "路线图 - 腾讯",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/route_map_tencent_system_widget_image.png",
-  "description": "Visualize the entity trip on Tencent Maps. Allows to visualize location history. Use the Trip Animation widget for advanced features.",
+  "description": "在腾讯地图上可视化实体行程，可展示历史轨迹。需要更高级的功能请使用「行程动画」部件。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8.5,

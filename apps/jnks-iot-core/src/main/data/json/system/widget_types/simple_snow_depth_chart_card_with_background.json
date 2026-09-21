@@ -1,9 +1,9 @@
 {
   "fqn": "simple_snow_depth_chart_card_with_background",
-  "name": "Simple snow depth chart card with background",
+  "name": "简版积雪深度图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_snow_depth_chart_card_with_background_system_widget_image.png",
-  "description": "Displays historical snow depth values as a simplified chart with background. Optionally may display the corresponding latest snow depth value.",
+  "description": "以带背景的简版图表展示历史积雪深度数据，可选显示对应的最新积雪深度值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

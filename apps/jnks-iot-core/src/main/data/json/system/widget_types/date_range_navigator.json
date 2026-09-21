@@ -1,9 +1,9 @@
 {
   "fqn": "date.date_range_navigator",
-  "name": "Date-range-navigator",
+  "name": "日期范围导航",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/date_range_navigator_system_widget_image.png",
-  "description": "The date-time stepper to change the time window of the dashboard. The change affects all widgets that use the dashboard time window.",
+  "description": "用于调整仪表盘时间窗口的日期时间步进器。调整会作用于所有使用仪表盘时间窗口的部件。",
   "descriptor": {
     "type": "static",
     "sizeX": 5,

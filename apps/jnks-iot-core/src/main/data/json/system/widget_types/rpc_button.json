@@ -1,9 +1,9 @@
 {
   "fqn": "control_widgets.rpcbutton",
-  "name": "RPC Button",
+  "name": "RPC 按钮",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/rpc_button_system_widget_image.png",
-  "description": "Allows to send RPC command when the user presses the button.",
+  "description": "用户按下按钮时发送 RPC 命令。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 4,

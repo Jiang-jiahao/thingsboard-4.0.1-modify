@@ -1,9 +1,9 @@
 {
   "fqn": "flooding_level_progress_bar_with_background",
-  "name": "Flooding level progress bar with background",
+  "name": "水位进度条（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/flooding_level_progress_bar_with_background_system_widget_image.png",
-  "description": "Displays flooding level reading as a horizontal progress bar with the background image. Allows to configure value range, bar colors, and other settings.",
+  "description": "以带背景图的横向进度条展示水位读数。可配置取值范围、进度条颜色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

@@ -1,9 +1,9 @@
 {
   "fqn": "power_consumption_card",
-  "name": "Power consumption card",
+  "name": "功耗卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/power_consumption_card.svg",
-  "description": "Displays the latest power consumption telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的功耗遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

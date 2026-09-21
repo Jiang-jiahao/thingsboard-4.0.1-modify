@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_wind_speed_card",
-  "name": "Horizontal wind speed card",
+  "name": "横向风速卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_wind_speed_card_system_widget_image.png",
-  "description": "Displays the latest wind speed telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的风速遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

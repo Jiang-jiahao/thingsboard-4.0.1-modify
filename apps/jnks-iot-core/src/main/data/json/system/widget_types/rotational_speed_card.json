@@ -1,9 +1,9 @@
 {
   "fqn": "rotational_speed_card",
-  "name": "Rotational speed card",
+  "name": "转速卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/rotational_speed_card.svg",
-  "description": "Displays the latest rotational speed telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的转速遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_illuminance_card",
-  "name": "Indoor illuminance card",
+  "name": "室内照度卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_illuminance_card_system_widget_image.png",
-  "description": "Displays the latest indoor illuminance telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的室内照度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

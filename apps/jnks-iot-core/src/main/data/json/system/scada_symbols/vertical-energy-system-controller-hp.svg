@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="600" fill="none" version="1.1" viewBox="0 0 400 600"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Vertical energy systems controller",
-  "description": "Vertical energy systems controller with various states.",
+  "title": "高性能纵向能源系统控制器",
+  "description": "纵向能源系统控制器，支持多种状态。",
   "searchTags": [
     "energy",
     "power",

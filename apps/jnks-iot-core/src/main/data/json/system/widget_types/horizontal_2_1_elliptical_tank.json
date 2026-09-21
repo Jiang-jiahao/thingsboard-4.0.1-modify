@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_2_1_elliptical_tank",
-  "name": "Horizontal 2:1 elliptical tank",
+  "name": "卧式 2:1 椭圆罐",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_2_1_elliptical_tank_system_widget_image.png",
-  "description": "Widget indicates the level of liquid in Horizontal 2:1 elliptical tank.",
+  "description": "展示卧式 2:1 椭圆罐内的液位。",
   "descriptor": {
     "type": "latest",
     "sizeX": 4,

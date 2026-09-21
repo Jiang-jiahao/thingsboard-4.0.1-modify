@@ -1,9 +1,9 @@
 {
   "fqn": "charts.doughnut_chart_js",
-  "name": "Doughnut",
+  "name": "环形图",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/doughnut_system_widget_image.png",
-  "description": "Displays the latest values of the attributes or time series data for multiple entities in a doughnut chart. Supports numeric values only.",
+  "description": "以环形图展示多个实体的属性或时序数据的最新值。仅支持数值类型。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7,

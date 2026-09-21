@@ -1,9 +1,9 @@
 {
   "fqn": "pressure_chart_card_with_background",
-  "name": "Pressure chart card with background",
+  "name": "压力图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/pressure_chart_card_with_background_system_widget_image.png",
-  "description": "Displays a pressure data by combining the latest and aggregated values with the background image and optional simplified chart.",
+  "description": "结合最新值与聚合值，配以背景图和可选的简版图表来展示压力数据。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

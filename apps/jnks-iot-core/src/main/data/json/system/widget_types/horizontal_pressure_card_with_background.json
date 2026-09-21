@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_pressure_card_with_background",
-  "name": "Horizontal pressure card with background",
+  "name": "横向压力卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_pressure_card_with_background_system_widget_image.png",
-  "description": "Displays the latest pressure telemetry in a scalable horizontal layout with the background image.",
+  "description": "在带背景图的可缩放横向布局中显示最新的压力遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

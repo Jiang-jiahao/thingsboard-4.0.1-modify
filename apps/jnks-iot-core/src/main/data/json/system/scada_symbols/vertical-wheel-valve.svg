@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="200" height="400" fill="none" version="1.1" viewBox="0 0 200 400"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Vertical wheel valve",
-  "description": "Vertical wheel valve with open/close animation and state colors.",
+  "title": "立式轮阀",
+  "description": "立式轮阀，含开闭动画和状态配色。",
   "searchTags": [
     "valve",
     "wheel"

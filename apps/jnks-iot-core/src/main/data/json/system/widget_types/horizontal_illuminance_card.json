@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_illuminance_card",
-  "name": "Horizontal illuminance card",
+  "name": "横向照度卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_illuminance_card_system_widget_image.png",
-  "description": "Displays the latest illuminance telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的照度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

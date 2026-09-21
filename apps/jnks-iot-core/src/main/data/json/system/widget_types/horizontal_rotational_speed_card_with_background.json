@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_rotational_speed_card_with_background",
-  "name": "Horizontal rotational speed card with background",
+  "name": "横向转速卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_rotational_speed_card_with_background.svg",
-  "description": "Displays the latest rotational speed telemetry in a scalable horizontal layout with the background image.",
+  "description": "在带背景图的可缩放横向布局中显示最新的转速遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

@@ -1,9 +1,9 @@
 {
   "fqn": "charts.bars",
-  "name": "Bars",
+  "name": "柱状序列",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/bars_system_widget_image.png",
-  "description": "Displays latest values of the attributes or time series data for multiple entities as separate bars.",
+  "description": "以独立条形展示多个实体的属性或时序数据的最新值。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7,

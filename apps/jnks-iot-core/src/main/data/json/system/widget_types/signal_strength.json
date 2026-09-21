@@ -1,9 +1,9 @@
 {
   "fqn": "signal_strength",
-  "name": "Signal strength",
+  "name": "信号强度",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/signal_strength_system_widget_image.png",
-  "description": "Presents the current signal strength as WiFi or Cellular Bar.",
+  "description": "以 WiFi 或蜂窝信号格的形式展示当前信号强度。",
   "descriptor": {
     "type": "latest",
     "sizeX": 2.5,

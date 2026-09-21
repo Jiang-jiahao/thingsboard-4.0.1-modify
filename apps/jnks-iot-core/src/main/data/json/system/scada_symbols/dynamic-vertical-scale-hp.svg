@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="800" fill="none" version="1.1" viewBox="0 0 400 800"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Dynamic vertical scale",
-  "description": "Dynamic vertical scale with current volume value and dynamically configurable warning and critical scale.",
+  "title": "高性能动态纵向标尺",
+  "description": "动态纵向标尺，含当前容积数值，以及可动态配置的预警和临界刻度。",
   "searchTags": [
     "scale"
   ],

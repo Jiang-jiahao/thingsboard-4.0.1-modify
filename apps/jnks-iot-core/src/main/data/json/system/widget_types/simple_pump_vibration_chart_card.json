@@ -1,9 +1,9 @@
 {
   "fqn": "simple_pump_vibration_chart_card",
-  "name": "Simple vibration chart card",
+  "name": "简版振动图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_vibration_chart_card_(1).svg",
-  "description": "Displays historical vibration values as a simplified chart. Optionally may display the corresponding latest vibration value.",
+  "description": "以简版图表展示历史振动数据，可选显示对应的最新振动值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

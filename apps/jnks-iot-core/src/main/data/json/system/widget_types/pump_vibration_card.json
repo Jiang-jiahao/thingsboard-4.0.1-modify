@@ -1,9 +1,9 @@
 {
   "fqn": "pump_vibration_card",
-  "name": "Vibration card",
+  "name": "振动卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/vibration_card.svg",
-  "description": "Displays the latest vibration telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的振动遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

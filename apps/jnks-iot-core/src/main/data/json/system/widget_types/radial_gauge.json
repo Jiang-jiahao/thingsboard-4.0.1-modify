@@ -1,9 +1,9 @@
 {
   "fqn": "analogue_gauges.radial_gauge_canvas_gauges",
-  "name": "Radial gauge",
+  "name": "径向仪表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/radial_gauge_system_widget_image.png",
-  "description": "Preconfigured gauge to display any value reading. Allows to configure value range, gradient colors, and other settings.",
+  "description": "预配置仪表，可展示任意读数。可配置取值范围、渐变色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 6,

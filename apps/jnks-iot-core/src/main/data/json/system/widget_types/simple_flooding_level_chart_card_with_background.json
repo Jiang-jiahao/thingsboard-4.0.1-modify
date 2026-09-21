@@ -1,9 +1,9 @@
 {
   "fqn": "simple_flooding_level_chart_card_with_background",
-  "name": "Simple flooding level chart card with background",
+  "name": "简版水位图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_flooding_level_chart_card_with_background_system_widget_image.png",
-  "description": "Displays historical flooding level values as a simplified chart with background. Optionally may display the corresponding latest flooding level value.",
+  "description": "以带背景的简版图表展示历史水位数据，可选显示对应的最新水位值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

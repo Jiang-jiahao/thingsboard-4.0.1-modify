@@ -1,9 +1,9 @@
 {
   "fqn": "maps_v2.here_map",
-  "name": "HERE Map",
+  "name": "HERE 地图",
   "deprecated": true,
   "image": "jnks-iot-image;/api/images/system/here_map_system_widget_image.png",
-  "description": "Displays the location of the entities on HERE Maps. Requires the HERE map key to work properly. Highly customizable via custom markers, marker tooltips, and widget actions.",
+  "description": "在 HERE 地图上展示实体位置。需要配置 HERE 地图密钥才能正常使用。可通过自定义标记、标记浮窗和部件动作高度定制。",
   "descriptor": {
     "type": "latest",
     "sizeX": 9.5,

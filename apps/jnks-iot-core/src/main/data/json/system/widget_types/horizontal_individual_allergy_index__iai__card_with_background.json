@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_individual_allergy_index_iai_card_with_background",
-  "name": "Horizontal individual allergy index (IAI) card with background",
+  "name": "横向个体过敏指数（IAI）卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/IAI-value-card-horizontal-with-background.svg",
-  "description": "Indicates the concentration of airborne allergens, including pollen and mold spores, which can trigger allergic reactions in sensitive individuals.",
+  "description": "表示空气中的过敏原浓度，包括花粉和霉菌孢子，可诱发敏感人群的过敏反应。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

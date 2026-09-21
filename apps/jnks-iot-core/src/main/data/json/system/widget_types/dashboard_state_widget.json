@@ -1,9 +1,9 @@
 {
   "fqn": "cards.dashboard_state_widget",
-  "name": "Dashboard state widget",
+  "name": "仪表盘状态部件",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/dashboard_state_widget_system_widget_image.png",
-  "description": "Displays specified dashboard state inside widget. Advanced widget settings allows you to configure target dashboard state to be displayed.",
+  "description": "在部件内展示指定的仪表盘状态。通过高级设置可配置要展示的目标状态。",
   "descriptor": {
     "type": "static",
     "sizeX": 7.5,

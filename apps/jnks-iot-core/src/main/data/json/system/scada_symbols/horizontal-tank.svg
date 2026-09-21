@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="1e3" height="600" fill="none" version="1.1" viewBox="0 0 1e3 600"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Horizontal tank",
-  "description": "Horizontal tank with current volume value and level visualizations.",
+  "title": "卧式罐",
+  "description": "卧式罐，含当前容积数值和液位可视化。",
   "searchTags": [
     "tank"
   ],

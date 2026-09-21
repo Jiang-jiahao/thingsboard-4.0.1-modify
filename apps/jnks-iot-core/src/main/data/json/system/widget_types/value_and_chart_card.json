@@ -1,9 +1,9 @@
 {
   "fqn": "cards.aggregated_value_card",
-  "name": "Value and chart card",
+  "name": "数值图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/value_and_chart_card_system_widget_image.png",
-  "description": "Displays a single entity telemetry as a combination of the latest and aggregated values. Optionally may display the corresponding historical values as a simplified chart.",
+  "description": "以最新值与聚合值相结合的方式展示单个实体的遥测数据，可选以简版图表展示对应的历史值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

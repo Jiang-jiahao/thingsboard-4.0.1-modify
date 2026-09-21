@@ -1,9 +1,9 @@
 {
   "fqn": "control_widgets.update_attributes",
-  "name": "Update device attribute",
+  "name": "更新设备属性",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/update_device_attribute_system_widget_image.png",
-  "description": "Allows to send shared attribute update when user press the button.",
+  "description": "用户按下按钮时发送共享属性更新。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 4,

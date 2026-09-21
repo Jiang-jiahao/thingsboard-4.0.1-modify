@@ -1,9 +1,9 @@
 {
   "fqn": "pie",
-  "name": "Pie",
+  "name": "饼图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/pie_chart.svg",
-  "description": "Displays the latest values of the attributes or time series data in a pie chart. Supports numeric values only.",
+  "description": "以饼图展示属性或时序数据的最新值。仅支持数值类型。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

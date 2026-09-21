@@ -1,9 +1,9 @@
 {
   "fqn": "snow_depth_card",
-  "name": "Snow depth card",
+  "name": "积雪深度卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/snow_depth_card_system_widget_image.png",
-  "description": "Displays the latest snow depth telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的积雪深度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

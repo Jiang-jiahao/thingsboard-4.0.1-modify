@@ -1,9 +1,9 @@
 {
   "fqn": "indoor_simple_pm10_chart_card_with_background",
-  "name": "Indoor simple PM10 chart card with background",
+  "name": "室内简版PM10图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/indoor_simple_pm10_chart_card_with_background_system_widget_image.png",
-  "description": "Displays historical indoor fine and coarse particulate matter (PM10) values as a simplified chart with background. Optionally may display the corresponding latest indoor PM10 value.",
+  "description": "以带背景的简版图表展示室内可吸入颗粒物（PM10）的历史数据，可选显示对应的最新值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

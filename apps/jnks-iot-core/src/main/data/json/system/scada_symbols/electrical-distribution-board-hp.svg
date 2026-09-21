@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="400" height="600" fill="none" version="1.1" viewBox="0 0 400 600"><tb:metadata xmlns=""><![CDATA[{
-  "title": "HP Electrical distribution board",
-  "description": "Electrical distribution board with various states.",
+  "title": "高性能配电柜",
+  "description": "配电柜，支持多种状态。",
   "searchTags": [
     "energy",
     "power",

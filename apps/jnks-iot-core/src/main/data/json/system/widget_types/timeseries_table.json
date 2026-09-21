@@ -1,9 +1,9 @@
 {
   "fqn": "cards.timeseries_table",
-  "name": "Timeseries table",
+  "name": "时序表格",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/timeseries_table_system_widget_image.png",
-  "description": "Displays time series data for one or more entities. Data for each entity is displayed in a separate tab. Columns are configured to display entity fields, attributes, or telemetry data. Highly customizable via cell content functions and row style functions.",
+  "description": "展示一个或多个实体的时序数据，每个实体各自一个标签页。可配置列来展示实体字段、属性或遥测数据；通过单元格内容函数和行样式函数高度定制。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

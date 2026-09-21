@@ -1,9 +1,9 @@
 {
   "fqn": "entity_admin_widgets.asset_admin_table",
-  "name": "Asset admin table",
+  "name": "资产管理表格",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/asset_admin_table_system_widget_image.png",
-  "description": "Customized entity table widget with preconfigured actions to create, update and delete assets.",
+  "description": "定制化的实体表格部件，预置了创建资产、更新资产和删除资产的动作。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

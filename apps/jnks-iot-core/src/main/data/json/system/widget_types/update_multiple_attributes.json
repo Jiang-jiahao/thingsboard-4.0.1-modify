@@ -1,9 +1,9 @@
 {
   "fqn": "input_widgets.update_multiple_attributes",
-  "name": "Update Multiple Attributes",
+  "name": "批量更新属性",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/update_multiple_attributes_system_widget_image.png",
-  "description": "Allows to create an input form and set multiple values of the entity. Each input value may be stored as an attribute or time series data.\nEach input field is highly customizable via input types, value conversion functions, etc.",
+  "description": "生成输入表单，用于设置实体的多个值。每个输入值都可存为属性或时序数据。\n每个输入字段可通过输入类型、值转换函数等高度定制。",
   "descriptor": {
     "type": "latest",
     "sizeX": 7.5,

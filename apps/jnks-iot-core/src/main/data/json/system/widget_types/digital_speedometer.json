@@ -1,9 +1,9 @@
 {
   "fqn": "digital_gauges.digital_speedometer",
-  "name": "Digital speedometer",
+  "name": "数字速度表",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/digital_speedometer_system_widget_image.png",
-  "description": "Preconfigured gauge to display speed. Allows to configure speed range, gradient colors, and other settings.",
+  "description": "预配置仪表，用于展示速度。可配置速度范围、渐变色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

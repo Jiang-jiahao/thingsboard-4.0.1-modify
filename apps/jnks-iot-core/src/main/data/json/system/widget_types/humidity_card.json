@@ -1,9 +1,9 @@
 {
   "fqn": "humidity_card",
-  "name": "Humidity card",
+  "name": "湿度卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/humidity_card_system_widget_image.png",
-  "description": "Displays the latest humidity telemetry in a scalable rectangle card.",
+  "description": "在可缩放的矩形卡片中显示最新的湿度遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

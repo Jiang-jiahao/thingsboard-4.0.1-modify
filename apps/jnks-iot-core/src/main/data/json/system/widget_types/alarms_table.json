@@ -1,9 +1,9 @@
 {
   "fqn": "alarm_widgets.alarms_table",
-  "name": "Alarms table",
+  "name": "告警表格",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/alarms_table_system_widget_image.png",
-  "description": "Displays alarms based on the defined time window and other filters. Allows the display of alarm fields, entity fields, attributes, and telemetry. Highly customizable via cell content functions and row style functions.",
+  "description": "按指定的时间窗口和其他过滤条件展示告警。可显示告警字段、实体字段、属性和遥测；通过单元格内容函数和行样式函数高度定制。",
   "descriptor": {
     "type": "alarm",
     "sizeX": 10.5,

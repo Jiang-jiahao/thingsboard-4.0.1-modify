@@ -1,9 +1,9 @@
 {
   "fqn": "label_card",
-  "name": "Label card",
+  "name": "标签卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/labelCard.svg",
-  "description": "Displays a single label with optional icon.",
+  "description": "展示单个标签，可选配图标。",
   "descriptor": {
     "type": "static",
     "sizeX": 4.5,

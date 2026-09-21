@@ -1,9 +1,9 @@
 {
   "fqn": "cards.horizontal_value_card",
-  "name": "Horizontal value card",
+  "name": "横向数值卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_value_card_system_widget_image.png",
-  "description": "Displays a single entity attribute or the latest telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中展示单个实体的属性值或最新遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

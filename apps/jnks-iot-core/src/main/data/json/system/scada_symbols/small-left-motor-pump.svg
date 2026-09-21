@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:tb="https://iot.example.com/svg" width="600" height="400" fill="none" version="1.1" viewBox="0 0 600 400"><tb:metadata xmlns=""><![CDATA[{
-  "title": "Small left motor pump",
-  "description": "Small left motor pump with configurable states.",
+  "title": "左侧小电动泵",
+  "description": "左侧小电动泵，状态可配置。",
   "searchTags": [
     "motor",
     "pump"

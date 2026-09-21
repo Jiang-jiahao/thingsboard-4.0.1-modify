@@ -1,9 +1,9 @@
 {
   "fqn": "simple_uv_index_chart_card",
-  "name": "Simple UV Index chart card",
+  "name": "简版紫外线指数图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_uv_index_chart_card_system_widget_image.png",
-  "description": "Displays historical UV index values as a simplified chart. Optionally may display the corresponding latest UV index value.",
+  "description": "以简版图表展示历史紫外线指数数据，可选显示对应的最新紫外线指数值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

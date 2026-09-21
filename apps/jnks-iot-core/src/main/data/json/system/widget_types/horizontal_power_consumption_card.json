@@ -1,9 +1,9 @@
 {
   "fqn": "horizontal_power_consumption_card",
-  "name": "Horizontal power consumption card",
+  "name": "横向功耗卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/horizontal_power_consumption_card.svg",
-  "description": "Displays the latest power consumption telemetry in a scalable horizontal layout.",
+  "description": "在可缩放的横向布局中显示最新的功耗遥测数据。",
   "descriptor": {
     "type": "latest",
     "sizeX": 5,

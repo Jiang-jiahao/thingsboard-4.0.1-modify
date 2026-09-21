@@ -1,9 +1,9 @@
 {
   "fqn": "soil_moisture_progress_bar",
-  "name": "Soil moisture progress bar",
+  "name": "土壤湿度进度条",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/soil_moisture_progress_bar_system_widget_image.png",
-  "description": "Displays soil moisture reading as a horizontal progress bar. Allows to configure value range, bar colors, and other settings.",
+  "description": "以横向进度条展示土壤湿度读数。可配置取值范围、进度条颜色等。",
   "descriptor": {
     "type": "latest",
     "sizeX": 3,

@@ -1,9 +1,9 @@
 {
   "fqn": "nitrogen_dioxide_no2_chart_card_with_background",
-  "name": "Nitrogen dioxide (NO2) chart card with background",
+  "name": "二氧化氮（NO2）图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/NO2-value-chart-card-with-background.svg",
-  "description": "A gas produced from vehicle emissions and the burning of fossil fuels. Results displayed by combining the latest and aggregated values and optional simplified chart.",
+  "description": "一种由机动车尾气和化石燃料燃烧产生的气体。展示时结合最新值与聚合值，并可选用简版图表。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

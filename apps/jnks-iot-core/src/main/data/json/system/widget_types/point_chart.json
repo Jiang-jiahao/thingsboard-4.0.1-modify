@@ -1,9 +1,9 @@
 {
   "fqn": "point_chart",
-  "name": "Point chart",
+  "name": "点图",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/chart_(3).svg",
-  "description": "Displays changes to time series data over time—for example, temperature or humidity readings.",
+  "description": "展示时序数据随时间的变化——例如温度读数。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 8,

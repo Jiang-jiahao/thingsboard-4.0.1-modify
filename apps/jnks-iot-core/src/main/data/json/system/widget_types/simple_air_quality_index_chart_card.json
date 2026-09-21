@@ -1,9 +1,9 @@
 {
   "fqn": "simple_air_quality_chart_card",
-  "name": "Simple air quality index chart card",
+  "name": "简版空气质量指数图表卡片",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/simple_air_quality_index_chart_card_system_widget_image.png",
-  "description": "Displays historical air quality index values as a simplified chart. Optionally may display the corresponding latest air quality index value.",
+  "description": "以简版图表展示历史空气质量指数数据，可选显示对应的最新空气质量指数值。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,

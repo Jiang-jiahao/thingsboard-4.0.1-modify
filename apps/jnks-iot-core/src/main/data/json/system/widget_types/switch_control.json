@@ -1,9 +1,9 @@
 {
   "fqn": "control_widgets.switch_control",
-  "name": "Switch Control",
+  "name": "开关控制",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/switch_control_system_widget_image.png",
-  "description": "Sends the RPC call to the device when the user toggles the switch. Appearance widget settings will enable you to configure how to fetch the initial value of the switch.",
+  "description": "用户切换开关时向设备发送 RPC 调用。外观设置可配置开关初始值的获取方式。",
   "descriptor": {
     "type": "rpc",
     "sizeX": 4,

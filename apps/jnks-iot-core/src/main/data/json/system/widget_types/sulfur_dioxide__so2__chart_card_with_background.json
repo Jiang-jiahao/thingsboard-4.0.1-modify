@@ -1,9 +1,9 @@
 {
   "fqn": "sulfur_dioxide_so2_chart_card_with_background",
-  "name": "Sulfur dioxide (SO2) chart card with background",
+  "name": "二氧化硫（SO2）图表卡片（带背景）",
   "deprecated": false,
   "image": "jnks-iot-image;/api/images/system/SO2-value-chart-card-with-background.svg",
-  "description": "Produced by volcanoes and industrial processes, particularly the burning of coal and oil. Results displayed by combining the latest and aggregated values and optional simplified chart. ",
+  "description": "由火山活动和工业过程产生，尤其是煤炭和石油的燃烧。展示时结合最新值与聚合值，并可选用简版图表。",
   "descriptor": {
     "type": "timeseries",
     "sizeX": 4.5,
