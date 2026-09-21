@@ -72,7 +72,7 @@ public class DefaultNotifications {
                     .triggerConfig(EntitiesLimitNotificationRuleTriggerConfig.builder()
                             .entityTypes(null).threshold(0.8f)
                             .build())
-                    .description("Send notification to system admins when count of entities of some type reached 80% threshold of the limit for a tenant")
+                    .description("租户的某类实体数量达到上限的 80% 时通知系统管理员")
                     .build())
             .build();
     public static final DefaultNotification entitiesLimitForTenant = entitiesLimitForSysadmin.toBuilder()
@@ -80,7 +80,7 @@ public class DefaultNotifications {
             .subject("警告：${entityType}s 数量即将达到上限")
             .rule(entitiesLimitForSysadmin.getRule().toBuilder()
                     .name("实体数量上限预警")
-                    .description("Send notification to tenant admins when count of entities of some type reached 80% threshold of the limit")
+                    .description("某类实体数量达到上限的 80% 时通知租户管理员")
                     .build())
             .build();
 
@@ -96,7 +96,7 @@ public class DefaultNotifications {
                             .apiFeatures(null)
                             .notifyOn(Set.of(ApiUsageStateValue.WARNING))
                             .build())
-                    .description("Send notification to system admins on API feature usage WARNING state for a tenant")
+                    .description("租户的 API 功能用量进入预警状态时通知系统管理员")
                     .build())
             .build();
     public static final DefaultNotification apiFeatureWarningForTenant = apiFeatureWarningForSysadmin.toBuilder()
@@ -104,7 +104,7 @@ public class DefaultNotifications {
             .subject("警告：${feature} 功能即将被禁用")
             .rule(apiFeatureWarningForSysadmin.getRule().toBuilder()
                     .name("API 功能用量预警")
-                    .description("Send notification to tenant admins on API feature usage WARNING state")
+                    .description("API 功能用量进入预警状态时通知租户管理员")
                     .build())
             .build();
     public static final DefaultNotification apiFeatureDisabledForSysadmin = DefaultNotification.builder()
@@ -119,7 +119,7 @@ public class DefaultNotifications {
                             .apiFeatures(null)
                             .notifyOn(Set.of(ApiUsageStateValue.DISABLED))
                             .build())
-                    .description("Send notification to system admins when API feature is disabled for a tenant")
+                    .description("租户的 API 功能被禁用时通知系统管理员")
                     .build())
             .build();
     public static final DefaultNotification apiFeatureDisabledForTenant = apiFeatureDisabledForSysadmin.toBuilder()
@@ -127,7 +127,7 @@ public class DefaultNotifications {
             .subject("${feature} 功能已被禁用")
             .rule(apiFeatureDisabledForSysadmin.getRule().toBuilder()
                     .name("API 功能被禁用")
-                    .description("Send notification to tenant admins when API feature is disabled")
+                    .description("API 功能被禁用时通知租户管理员")
                     .build())
             .build();
 
@@ -145,7 +145,7 @@ public class DefaultNotifications {
                                     .filter(api -> api.getLabel() != null)
                                     .collect(Collectors.toSet()))
                             .build())
-                    .description("Send notification to tenant admins when some per-tenant rate limit is exceeded")
+                    .description("超出任一单租户限流时通知租户管理员")
                     .build())
             .build();
     public static final DefaultNotification exceededPerEntityRateLimits = DefaultNotification.builder()
@@ -162,7 +162,7 @@ public class DefaultNotifications {
                                     .filter(api -> api.getLabel() != null)
                                     .collect(Collectors.toSet()))
                             .build())
-                    .description("Send notification to tenant admins when some per-entity rate limit is exceeded for an entity")
+                    .description("某实体的单实体限流被超出时通知租户管理员")
                     .build())
             .build();
     public static final DefaultNotification exceededRateLimitsForSysadmin = exceededRateLimits.toBuilder()
@@ -171,7 +171,7 @@ public class DefaultNotifications {
             .button("Go to tenant").link("/tenants/${tenantId}")
             .rule(exceededRateLimits.getRule().toBuilder()
                     .name("超出单租户限流（系统管理员）")
-                    .description("Send notification to system admins when a tenant exceeds some per-tenant rate limit")
+                    .description("租户超出任一单租户限流时通知系统管理员")
                     .build())
             .build();
 
@@ -184,7 +184,7 @@ public class DefaultNotifications {
             .rule(DefaultRule.builder()
                     .name("平台新版本")
                     .triggerConfig(new NewPlatformVersionNotificationRuleTriggerConfig())
-                    .description("Send notification to system admins when new platform version is available")
+                    .description("有新平台版本可用时通知系统管理员")
                     .build())
             .build();
 
@@ -201,7 +201,7 @@ public class DefaultNotifications {
                             .alarmSeverities(null)
                             .notifyOn(Set.of(AlarmAction.CREATED))
                             .build())
-                    .description("Send notification to tenant admins when an alarm is created")
+                    .description("产生新告警时通知租户管理员")
                     .build())
             .build();
     public static final DefaultNotification alarmUpdate = DefaultNotification.builder()
@@ -217,7 +217,7 @@ public class DefaultNotifications {
                             .alarmSeverities(null)
                             .notifyOn(Set.of(AlarmAction.SEVERITY_CHANGED, AlarmAction.ACKNOWLEDGED, AlarmAction.CLEARED))
                             .build())
-                    .description("Send notification to tenant admins when any alarm is updated or cleared")
+                    .description("告警被更新或清除时通知租户管理员")
                     .build())
             .build();
     public static final DefaultNotification entityAction = DefaultNotification.builder()
@@ -235,7 +235,7 @@ public class DefaultNotifications {
                             .updated(false)
                             .deleted(false)
                             .build())
-                    .description("Send notification to tenant admins when device is created")
+                    .description("创建设备时通知租户管理员")
                     .build())
             .build();
     public static final DefaultNotification deviceActivity = DefaultNotification.builder()
@@ -253,7 +253,7 @@ public class DefaultNotifications {
                             .deviceProfiles(null)
                             .notifyOn(Set.of(DeviceEvent.ACTIVE, DeviceEvent.INACTIVE))
                             .build())
-                    .description("Send notification to tenant admins when any device changes its activity state")
+                    .description("设备活动状态变化时通知租户管理员")
                     .build())
             .build();
     public static final DefaultNotification alarmComment = DefaultNotification.builder()
@@ -271,7 +271,7 @@ public class DefaultNotifications {
                             .onlyUserComments(true)
                             .notifyOnCommentUpdate(false)
                             .build())
-                    .description("Send notification to tenant admins when comment is added by user on active alarm")
+                    .description("用户在活动告警上添加评论时通知租户管理员")
                     .build())
             .build();
     public static final DefaultNotification alarmAssignment = DefaultNotification.builder()
@@ -288,7 +288,7 @@ public class DefaultNotifications {
                             .alarmStatuses(null)
                             .notifyOn(Set.of(AlarmAssignmentNotificationRuleTriggerConfig.Action.ASSIGNED))
                             .build())
-                    .description("Send notification to user when any alarm was assigned to him")
+                    .description("告警被指派给某用户时通知该用户")
                     .build())
             .build();
     public static final DefaultNotification ruleEngineComponentLifecycleFailure = DefaultNotification.builder()
@@ -308,7 +308,7 @@ public class DefaultNotifications {
                             .ruleNodeEvents(Set.of(ComponentLifecycleEvent.STARTED, ComponentLifecycleEvent.UPDATED, ComponentLifecycleEvent.STOPPED))
                             .onlyRuleNodeLifecycleFailures(true)
                             .build())
-                    .description("Send notification to tenant admins when any Rule chain or Rule node failed to start, update or stop")
+                    .description("规则链或规则节点启动、更新、停止失败时通知租户管理员")
                     .build())
             .build();
 
@@ -321,7 +321,7 @@ public class DefaultNotifications {
             .rule(DefaultRule.builder()
                     .name("任务处理失败")
                     .triggerConfig(TaskProcessingFailureNotificationRuleTriggerConfig.builder().build())
-                    .description("Send notification to system admins when task processing fails")
+                    .description("任务处理失败时通知系统管理员")
                     .build())
             .build();
 

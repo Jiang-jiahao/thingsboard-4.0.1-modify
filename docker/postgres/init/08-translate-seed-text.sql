@@ -1523,6 +1523,33 @@ UPDATE notification_target t
        ) AS v(src, dst)
  WHERE t.configuration::jsonb->>'description' = v.src;
 
+-- notification_rule.additional_config 里的 description: 18 条
+UPDATE notification_rule t
+   SET additional_config = replace(t.additional_config,
+           '"description":"' || v.src || '"',
+           '"description":"' || v.dst || '"')
+  FROM (VALUES
+    ('Send notification to system admins on API feature usage WARNING state for a tenant', '租户的 API 功能用量进入预警状态时通知系统管理员'),
+    ('Send notification to system admins when API feature is disabled for a tenant', '租户的 API 功能被禁用时通知系统管理员'),
+    ('Send notification to system admins when a tenant exceeds some per-tenant rate limit', '租户超出任一单租户限流时通知系统管理员'),
+    ('Send notification to system admins when count of entities of some type reached 80% threshold of the limit for a tenant', '租户的某类实体数量达到上限的 80% 时通知系统管理员'),
+    ('Send notification to system admins when new platform version is available', '有新平台版本可用时通知系统管理员'),
+    ('Send notification to system admins when task processing fails', '任务处理失败时通知系统管理员'),
+    ('Send notification to tenant admins on API feature usage WARNING state', 'API 功能用量进入预警状态时通知租户管理员'),
+    ('Send notification to tenant admins when API feature is disabled', 'API 功能被禁用时通知租户管理员'),
+    ('Send notification to tenant admins when an alarm is created', '产生新告警时通知租户管理员'),
+    ('Send notification to tenant admins when any Rule chain or Rule node failed to start, update or stop', '规则链或规则节点启动、更新、停止失败时通知租户管理员'),
+    ('Send notification to tenant admins when any alarm is updated or cleared', '告警被更新或清除时通知租户管理员'),
+    ('Send notification to tenant admins when any device changes its activity state', '设备活动状态变化时通知租户管理员'),
+    ('Send notification to tenant admins when comment is added by user on active alarm', '用户在活动告警上添加评论时通知租户管理员'),
+    ('Send notification to tenant admins when count of entities of some type reached 80% threshold of the limit', '某类实体数量达到上限的 80% 时通知租户管理员'),
+    ('Send notification to tenant admins when device is created', '创建设备时通知租户管理员'),
+    ('Send notification to tenant admins when some per-entity rate limit is exceeded for an entity', '某实体的单实体限流被超出时通知租户管理员'),
+    ('Send notification to tenant admins when some per-tenant rate limit is exceeded', '超出任一单租户限流时通知租户管理员'),
+    ('Send notification to user when any alarm was assigned to him', '告警被指派给某用户时通知该用户')
+       ) AS v(src, dst)
+ WHERE t.additional_config::jsonb->>'description' = v.src;
+
 -- tenant_profile: 2 条
 UPDATE tenant_profile t
    SET description = v.description, name = v.name
