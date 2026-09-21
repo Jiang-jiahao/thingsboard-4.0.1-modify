@@ -79,9 +79,10 @@
     width: min(100%, 300px);
     height: 72px;
     border-radius: 12px;
-    border: 1px solid rgba(15, 23, 42, 0.1);
-    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
-    background: #000;
+    // 显式清空，否则会继承上方基础规则的白色描边与投影
+    background: none;
+    border: none;
+    box-shadow: none;
   }
 
   .tb-logo-brand-img {

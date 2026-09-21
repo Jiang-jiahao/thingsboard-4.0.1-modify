@@ -8,7 +8,7 @@ import { environment as env } from '@env/environment';
 })
 export class LogoComponent {
 
-  brandLogo = 'assets/jnks-brand-emblem.png';
+  brandLogo = 'assets/jnks-logo-white.png';
   brandName = env.brandName;
   brandSubtitle = env.appTitle;
 
