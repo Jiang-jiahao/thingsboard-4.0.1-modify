@@ -47,7 +47,7 @@ import { AddEntityDialogData, EntityAction } from '@home/models/entity/entity-co
 import { calculateIntervalStartEndTime, HistoryWindowType, Timewindow } from '@shared/models/time/time.models';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { JnksIotAnchorComponent } from '@shared/components/jnks-iot-anchor.component';
-import { isDefined, isEqual, isNotEmptyStr, isUndefined } from '@core/utils';
+import { getEntityDetailsPageURL, isDefined, isEqual, isNotEmptyStr, isUndefined } from '@core/utils';
 import { HasUUID } from '@shared/models/id/has-uuid';
 import { hidePageSizePixelValue } from '@shared/models/constants';
 import { EntitiesTableAction, IEntitiesTableComponent } from '@home/models/entity/entity-table-component.models';
@@ -476,8 +476,16 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
   }
 
   onRowClick($event: Event, entity) {
-    if (!this.entitiesTableConfig.handleRowClick($event, entity)) {
-      this.toggleEntityDetails($event, entity);
+    if (this.entitiesTableConfig.handleRowClick($event, entity)) {
+      return;
+    }
+    // 详情改成独立整页：整行点击直接进入该实体的详情页，不再从侧面弹出子页面。
+    // 没有对应详情页的实体类型（getEntityDetailsPageURL 返回空）则不动作。
+    // 注意：部件类型/部件包/仪表盘/规则链四页各自定义了 handleRowClick（开编辑器），
+    // 上面已经 return，不受影响。
+    const detailsPageURL = getEntityDetailsPageURL(entity.id.id, entity.id.entityType);
+    if (detailsPageURL) {
+      this.router.navigateByUrl(detailsPageURL);
     }
   }
 

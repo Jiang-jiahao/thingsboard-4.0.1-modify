@@ -45,66 +45,61 @@
     box-sizing: border-box;
   }
 
-  /**
-   * 详情：右侧停靠面板，不再用居中模态盖住列表。
-   * 依据 ISA-101「一屏呈现一个工艺段，反对弹窗」——列表与详情同屏，
-   * 点另一行可直接切换；关闭用面板自带的关闭按钮，也不再点背景误关。
-   */
   .jnks-iot-entity-details-overlay {
-    // 占位而非浮层：不再遮挡列表右侧的列，列表自动收窄，两边都完整可见
-    order: 2;
-    flex: none;
-    width: min(480px, 44vw);
-    height: 100%;
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
     display: flex;
-    align-items: stretch;
-    background: transparent;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    animation: jnksIotEntityOverlayIn 0.22s ease-out;
   }
 
   .jnks-iot-entity-details-dialog {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    width: min(1040px, 100%);
     max-width: 100%;
-    height: 100%;
+    height: min(88vh, 900px);
     max-height: 100%;
-    border-radius: 0;
+    border-radius: $jnks-iot-radius;
     overflow: hidden;
     background: #fff;
-    border-left: 1px solid $jnks-iot-line;
-    box-shadow: -8px 0 24px rgba(11, 27, 43, 0.1);
-    animation: jnksIotEntityDockIn 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    border: 1px solid $jnks-iot-line;
+    box-shadow: 0 12px 32px rgba(11, 27, 43, 0.16);
+    animation: jnksIotEntityDialogIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  @keyframes jnksIotEntityDockIn {
+  @keyframes jnksIotEntityOverlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes jnksIotEntityDialogIn {
     from {
-      opacity: 0.5;
-      transform: translateX(20px);
+      opacity: 0;
+      transform: scale(0.96) translateY(12px);
     }
     to {
       opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .jnks-iot-entity-details-dialog {
-      animation: none;
+      transform: scale(1) translateY(0);
     }
   }
 
   @media #{$mat-lt-md} {
-    // 窄屏：详情仍用浮层盖住（并排会挤到无法阅读）
     .jnks-iot-entity-details-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1200;
-      width: 100%;
-      order: 0;
+      padding: 0;
+      align-items: stretch;
     }
 
     .jnks-iot-entity-details-dialog {
-      border-left: none;
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      border-radius: 0;
     }
   }
 
