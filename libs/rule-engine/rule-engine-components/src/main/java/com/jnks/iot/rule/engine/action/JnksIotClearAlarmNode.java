@@ -19,15 +19,15 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "clear alarm", relationTypes = {"Cleared", "False"},
+        name = "清除告警", relationTypes = {"Cleared", "False"},
         configClazz = JnksIotClearAlarmNodeConfiguration.class,
-        nodeDescription = "Clear Alarm",
+        nodeDescription = "清除告警",
         nodeDetails =
-                "Details - JS function that creates JSON object based on incoming message. This object will be added into Alarm.details field.\n" +
-                        "Node output:\n" +
-                        "If alarm was not cleared, original message is returned. Otherwise new Message returned with type 'ALARM', Alarm object in 'msg' property and 'metadata' will contains 'isClearedAlarm' property. " +
-                        "Message payload can be accessed via <code>msg</code> property. For example <code>'temperature = ' + msg.temperature ;</code>. " +
-                        "Message metadata can be accessed via <code>metadata</code> property. For example <code>'name = ' + metadata.customerName;</code>.",
+                "详情 - 基于传入消息创建 JSON 对象的 JS 函数。该对象将被添加到 Alarm.details 字段中。\n" +
+                        "节点输出：\n" +
+                        "如果告警未被清除，则返回原始消息。否则返回新的 Message，其类型为 'ALARM'，'msg' 属性中包含 Alarm 对象，'metadata' 中将包含 'isClearedAlarm' 属性。 " +
+                        "消息负载可通过 <code>msg</code> 属性访问。例如 <code>'temperature = ' + msg.temperature ;</code>。 " +
+                        "消息元数据可通过 <code>metadata</code> 属性访问。例如 <code>'name = ' + metadata.customerName;</code>。",
         configDirective = "jnksIotActionNodeClearAlarmConfig",
         icon = "notifications_off"
 )

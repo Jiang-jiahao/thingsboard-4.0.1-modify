@@ -18,15 +18,15 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
 
 @Slf4j
 @RuleNode(type = ComponentType.ENRICHMENT,
-        name = "related device attributes",
+        name = "关联设备属性",
         configClazz = JnksIotGetDeviceAttrNodeConfiguration.class,
         version = 1,
-        nodeDescription = "Add originators related device attributes and/or latest telemetry values into message or message metadata",
-        nodeDetails = "Related device lookup based on the configured relation query. " +
-                "If multiple related devices are found, only first device is used for message enrichment, other entities are discarded. " +
-                "Useful when you need to retrieve attributes and/or latest telemetry values from device that has a relation " +
-                "to the message originator and use them for further message processing.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将来源方关联设备的属性和/或最新遥测值添加到消息或消息元数据中",
+        nodeDetails = "根据配置的关系查询查找关联设备。 " +
+                "如果找到多个关联设备，仅使用第一个设备来扩充消息，其他实体将被丢弃。 " +
+                "当你需要从与消息来源方存在关系的设备中获取属性和/或最新遥测值， " +
+                "并将其用于后续消息处理时非常有用。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotEnrichmentNodeDeviceAttributesConfig")
 public class JnksIotGetDeviceAttrNode extends JnksIotAbstractGetAttributesNode<JnksIotGetDeviceAttrNodeConfiguration, DeviceId> {
 

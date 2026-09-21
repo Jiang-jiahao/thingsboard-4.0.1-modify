@@ -17,10 +17,10 @@ import java.util.UUID;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "rpc call reply",
+        name = "RPC 调用回复",
         configClazz = JnksIotSendRpcReplyNodeConfiguration.class,
-        nodeDescription = "Sends reply to RPC call from device",
-        nodeDetails = "Expects messages with any message type. Will forward message body to the device.",
+        nodeDescription = "向来自设备的 RPC 调用发送回复",
+        nodeDetails = "接收任意消息类型的消息。将消息正文转发给设备。",
         configDirective = "jnksIotActionNodeRpcReplyConfig",
         icon = "call_merge"
 )

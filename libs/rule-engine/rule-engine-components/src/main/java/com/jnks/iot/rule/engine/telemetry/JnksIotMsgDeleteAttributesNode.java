@@ -23,13 +23,13 @@ import static com.jnks.iot.server.common.data.DataConstants.SCOPE;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "delete attributes",
+        name = "删除属性",
         configClazz = JnksIotMsgDeleteAttributesNodeConfiguration.class,
-        nodeDescription = "Delete attributes for Message Originator.",
-        nodeDetails = "Attempt to remove attributes by selected keys. If msg originator doesn't have an attribute with " +
-                " a key selected in the configuration, it will be ignored. If delete operation is completed successfully, " +
-                " rule node will send the \"Attributes Deleted\" event to the root chain of the message originator and " +
-                " send the incoming message via <b>Success</b> chain, otherwise, <b>Failure</b> chain is used.",
+        nodeDescription = "删除消息来源方的属性。",
+        nodeDetails = "尝试按选中的键删除属性。若消息来源方没有具有 " +
+                " 配置中所选键的属性，则该键将被忽略。若删除操作成功完成， " +
+                " 规则节点将向消息来源方的根链发送 \"Attributes Deleted\" 事件，并 " +
+                " 通过 <b>Success</b> 链发送传入消息，否则使用 <b>Failure</b> 链。",
         configDirective = "jnksIotActionNodeDeleteAttributesConfig",
         icon = "remove_circle"
 )

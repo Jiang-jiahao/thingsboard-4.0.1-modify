@@ -21,11 +21,11 @@ import com.jnks.iot.server.common.data.plugin.ComponentType;
 @Slf4j
 @RuleNode(
         type = ComponentType.EXTERNAL,
-        name = "azure iot hub",
+        name = "Azure IoT Hub",
         configClazz = JnksIotAzureIotHubNodeConfiguration.class,
         clusteringMode = ComponentClusteringMode.SINGLETON,
-        nodeDescription = "Publish messages to the Azure IoT Hub",
-        nodeDetails = "Will publish message payload to the Azure IoT Hub with QoS <b>AT_LEAST_ONCE</b>.",
+        nodeDescription = "将消息发布到 Azure IoT Hub",
+        nodeDetails = "将以 QoS <b>AT_LEAST_ONCE</b> 将消息负载发布到 Azure IoT Hub。",
         configDirective = "jnksIotExternalNodeAzureIotHubConfig"
 )
 public class JnksIotAzureIotHubNode extends JnksIotMqttNode {

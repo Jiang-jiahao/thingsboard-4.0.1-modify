@@ -43,17 +43,17 @@ import static com.jnks.iot.common.util.DonAsynchron.withCallback;
 
 @Slf4j
 @RuleNode(type = ComponentType.ACTION,
-        name = "save to custom table",
+        name = "保存到自定义表",
         configClazz = JnksIotSaveToCustomCassandraTableNodeConfiguration.class,
         version = 1,
-        nodeDescription = "Node stores data from incoming Message payload to the Cassandra database into the predefined custom table" +
-                " that should have <b>cs_tb_</b> prefix, to avoid the data insertion to the common TB tables.<br>" +
-                "<b>Note:</b> rule node can be used only for Cassandra DB.",
-        nodeDetails = "Administrator should set the custom table name without prefix: <b>cs_tb_</b>. <br>" +
-                "Administrator can configure the mapping between the Message field names and Table columns name.<br>" +
-                "<b>Note:</b>If the mapping key is <b>$entity_id</b>, that is identified by the Message Originator, then to the appropriate column name(mapping value) will be write the message originator id.<br><br>" +
-                "If specified message field does not exist or is not a JSON Primitive, the outbound message will be routed via <b>failure</b> chain," +
-                " otherwise, the message will be routed via <b>success</b> chain.",
+        nodeDescription = "节点将传入消息负载中的数据存储到 Cassandra 数据库的预定义自定义表中" +
+                " 该表应带有 <b>cs_tb_</b> 前缀，以避免将数据插入到公共的 TB 表中。<br>" +
+                "<b>注意：</b>该规则节点只能用于 Cassandra 数据库。",
+        nodeDetails = "管理员应设置不带前缀的自定义表名：<b>cs_tb_</b>。 <br>" +
+                "管理员可以配置消息字段名与表列名之间的映射。<br>" +
+                "<b>注意：</b>如果映射键为 <b>$entity_id</b>（由消息来源方标识），则会向对应的列名（映射值）写入消息来源方 id。<br><br>" +
+                "如果指定的消息字段不存在或不是 JSON Primitive，则出站消息将经由 <b>failure</b> 链路由，" +
+                " 否则，消息将经由 <b>success</b> 链路由。",
         configDirective = "jnksIotActionNodeCustomTableConfig",
         icon = "file_upload",
         ruleChainTypes = RuleChainType.CORE)

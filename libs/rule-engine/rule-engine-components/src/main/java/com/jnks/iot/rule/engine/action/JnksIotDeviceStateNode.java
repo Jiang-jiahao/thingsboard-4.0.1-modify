@@ -26,21 +26,21 @@ import java.util.Set;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "device state",
-        nodeDescription = "Triggers device connectivity events",
-        nodeDetails = "If incoming message originator is a device, registers configured event for that device in the Device State Service, which sends appropriate message to the Rule Engine." +
-                " If metadata <code>ts</code> property is present, it will be used as event timestamp. Otherwise, the message timestamp will be used." +
-                " If originator entity type is not <code>DEVICE</code> or unexpected error happened during processing, then incoming message is forwarded using <code>Failure</code> chain." +
-                " If rate of connectivity events for a given originator is too high, then incoming message is forwarded using <code>Rate limited</code> chain. " +
+        name = "设备状态",
+        nodeDescription = "触发设备连接事件",
+        nodeDetails = "若传入消息来源方是设备，则在设备状态服务中为该设备注册配置的事件，设备状态服务会向规则引擎发送相应的消息。" +
+                " 若存在元数据 <code>ts</code> 属性，则将其用作事件时间戳。否则，将使用消息时间戳。" +
+                " 若来源方实体类型不是 <code>DEVICE</code>，或处理过程中发生意外错误，则传入消息将通过 <code>Failure</code> 链转发。" +
+                " 若给定来源方的连接事件频率过高，则传入消息将通过 <code>Rate limited</code> 链转发。 " +
                 "<br>" +
-                "Supported device connectivity events are:" +
+                "支持的设备连接事件包括：" +
                 "<ul>" +
-                "<li>Connect event</li>" +
-                "<li>Disconnect event</li>" +
-                "<li>Activity event</li>" +
-                "<li>Inactivity event</li>" +
+                "<li>连接事件</li>" +
+                "<li>断开连接事件</li>" +
+                "<li>活动事件</li>" +
+                "<li>不活动事件</li>" +
                 "</ul>" +
-                "This node is particularly useful when device isn't using transports to receive data, such as when fetching data from external API or computing new data within the rule chain.",
+                "当设备未使用传输（transports）接收数据时，此节点特别有用，例如从外部 API 获取数据或在规则链内计算新数据时。",
         configClazz = JnksIotDeviceStateNodeConfiguration.class,
         relationTypes = {JnksIotNodeConnectionType.SUCCESS, JnksIotNodeConnectionType.FAILURE, "Rate limited"},
         configDirective = "jnksIotActionNodeDeviceStateConfig"

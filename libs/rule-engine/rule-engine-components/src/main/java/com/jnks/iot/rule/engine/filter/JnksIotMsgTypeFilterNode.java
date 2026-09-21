@@ -17,12 +17,12 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
 @Slf4j
 @RuleNode(
         type = ComponentType.FILTER,
-        name = "message type filter",
+        name = "消息类型过滤",
         configClazz = JnksIotMsgTypeFilterNodeConfiguration.class,
         relationTypes = {JnksIotNodeConnectionType.TRUE, JnksIotNodeConnectionType.FALSE},
-        nodeDescription = "Filter incoming messages by Message Type",
-        nodeDetails = "If incoming message type is expected - send Message via <b>True</b> chain, otherwise <b>False</b> chain is used.<br><br>" +
-                "Output connections: <code>True</code>, <code>False</code>, <code>Failure</code>",
+        nodeDescription = "按消息类型过滤传入消息",
+        nodeDetails = "如果传入消息类型符合预期，则通过 <b>True</b> 链发送消息，否则使用 <b>False</b> 链。<br><br>" +
+                "输出连接：<code>True</code>、<code>False</code>、<code>Failure</code>",
         configDirective = "jnksIotFilterNodeMessageTypeConfig")
 public class JnksIotMsgTypeFilterNode implements JnksIotNode {
 

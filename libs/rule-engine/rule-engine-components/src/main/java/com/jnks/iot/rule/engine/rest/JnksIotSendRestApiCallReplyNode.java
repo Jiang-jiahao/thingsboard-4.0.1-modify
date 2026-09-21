@@ -16,10 +16,10 @@ import java.util.UUID;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "rest call reply",
+        name = "REST 调用回复",
         configClazz = JnksIotSendRestApiCallReplyNodeConfiguration.class,
-        nodeDescription = "Sends reply to REST API call to rule engine",
-        nodeDetails = "Expects messages with any message type. Forwards incoming message as a reply to REST API call sent to rule engine.",
+        nodeDescription = "向发送到规则引擎的 REST API 调用发送回复",
+        nodeDetails = "接收任意消息类型的消息。将传入消息作为对发送到规则引擎的 REST API 调用的回复转发出去。",
         configDirective = "jnksIotActionNodeSendRestApiCallReplyConfig",
         icon = "call_merge"
 )

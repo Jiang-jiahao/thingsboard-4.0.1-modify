@@ -19,14 +19,14 @@ import java.util.Arrays;
 @Slf4j
 @RuleNode(
         type = ComponentType.ENRICHMENT,
-        name = "related entity data",
+        name = "相关实体数据",
         configClazz = JnksIotGetRelatedDataNodeConfiguration.class,
         version = 1,
-        nodeDescription = "Adds originators related entity attributes or latest telemetry or fields into message or message metadata",
-        nodeDetails = "Related entity lookup based on the configured relation query. " +
-                "If multiple related entities are found, only first entity is used for message enrichment, other entities are discarded. " +
-                "Useful when you need to retrieve data from an entity that has a relation to the message originator and use them for further message processing.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将来源方相关实体的属性、最新遥测或字段添加到消息或消息元数据中",
+        nodeDetails = "根据配置的关系查询查找相关实体。 " +
+                "若找到多个相关实体，则仅使用第一个实体进行消息增强，其他实体将被丢弃。 " +
+                "当你需要从与消息来源方存在关系的实体检索数据，并将其用于后续消息处理时非常有用。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotEnrichmentNodeRelatedAttributesConfig")
 public class JnksIotGetRelatedAttributeNode extends JnksIotAbstractGetEntityDataNode<EntityId> {
 

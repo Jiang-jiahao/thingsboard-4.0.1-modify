@@ -45,52 +45,52 @@ import static com.jnks.iot.server.common.data.msg.JnksIotMsgType.POST_ATTRIBUTES
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "save attributes",
+        name = "保存属性",
         configClazz = JnksIotMsgAttributesNodeConfiguration.class,
         version = 3,
         nodeDescription = """
-                Saves attribute data with a configurable scope and according to configured processing strategies.
+                按配置的作用域和处理策略保存属性数据。
                 """,
         nodeDetails = """
-                Node performs three <strong>actions:</strong>
+                节点执行三项<strong>动作：</strong>
                 <ul>
-                  <li><strong>Attributes:</strong> save attribute data to a database.</li>
-                  <li><strong>WebSockets:</strong> notify WebSockets subscriptions about attribute data updates.</li>
-                  <li><strong>Calculated fields:</strong> notify calculated fields about attribute data updates.</li>
+                  <li><strong>属性：</strong>把属性数据写入数据库。</li>
+                  <li><strong>WebSockets：</strong>通知 WebSockets 订阅方属性数据已更新。</li>
+                  <li><strong>计算字段：</strong>通知计算字段属性数据已更新。</li>
                 </ul>
                 
-                For each <em>action</em>, three <strong>processing strategies</strong> are available:
+                每项<em>动作</em>都有三种<strong>处理策略</strong>：
                 <ul>
-                  <li><strong>On every message:</strong> perform the action for every message.</li>
-                  <li><strong>Deduplicate:</strong> perform the action only for the first message from a particular originator within a configurable interval.</li>
-                  <li><strong>Skip:</strong> never perform the action.</li>
+                  <li><strong>每条消息都执行：</strong>对每条消息都执行该动作。</li>
+                  <li><strong>去重：</strong>在可配置的时间间隔内，只对同一来源方的首条消息执行该动作。</li>
+                  <li><strong>跳过：</strong>从不执行该动作。</li>
                 </ul>
                 
-                <strong>Processing strategies</strong> are configured using <em>processing settings</em>, which support two modes:
+                <strong>处理策略</strong>通过<em>处理设置</em>配置，支持两种模式：
                 <ul>
-                  <li><strong>Basic</strong>
+                  <li><strong>基础</strong>
                     <ul>
-                      <li><strong>On every message:</strong> applies the "On every message" strategy to all actions.</li>
-                      <li><strong>Deduplicate:</strong> applies the "Deduplicate" strategy (with a specified interval) to all actions.</li>
-                      <li><strong>WebSockets only:</strong> for all actions except WebSocket notifications, the "Skip" strategy is applied, while WebSocket notifications use the "On every message" strategy.</li>
+                      <li><strong>每条消息都执行：</strong>对所有动作应用「每条消息都执行」策略。</li>
+                      <li><strong>去重：</strong>对所有动作应用「去重」策略（可指定时间间隔）。</li>
+                      <li><strong>仅 WebSockets：</strong>除 WebSocket 通知外，其余动作应用「跳过」策略，WebSocket 通知则应用「每条消息都执行」策略。</li>
                     </ul>
                   </li>
-                  <li><strong>Advanced:</strong> configure each action’s strategy independently.</li>
+                  <li><strong>高级：</strong>为每项动作单独配置策略。</li>
                 </ul>
                 
-                The node supports three attribute scopes: <strong>Client attributes</strong>, <strong>Shared attributes</strong>, and <strong>Server attributes</strong>.
-                You can set the default scope in the node configuration, or override it by specifying a valid <code>scope</code> property in the message metadata.
+                该节点支持三种属性作用域：<strong>客户端属性</strong>、<strong>共享属性</strong>和<strong>服务端属性</strong>。
+                默认作用域可在节点配置里设置，也可以在消息元数据里指定合法的 <code>scope</code> 属性来覆盖。
                 <br><br>
-                Additionally:
+                此外：
                 <ul>
-                  <li>If <b>Save attributes only if the value changes</b> is enabled, the rule node compares the received attribute value with the current stored value and skips the save operation if they match.</li>
-                  <li>If <b>Send attributes updated notification</b> is enabled, the rule node will put the <b>Attributes Updated</b> event for <code>SHARED_SCOPE</code> and <code>SERVER_SCOPE</code> attribute updates to the queue named <code>Main</code>.</li>
-                  <li>If <b>Force notification to the device</b> is enabled, then rule node will always notify device about <code>SHARED_SCOPE</code> attribute updates, regardless of the value of <code>notifyDevice</code> metadata property.</li>
+                  <li>启用<b>仅在属性值变化时保存</b>后，规则节点会比较收到的属性值与当前已存值，两者相同时跳过保存。</li>
+                  <li>启用<b>发送属性更新通知</b>后，规则节点会把 <code>SHARED_SCOPE</code> 和 <code>SERVER_SCOPE</code> 属性更新的 <b>Attributes Updated</b> 事件投递到名为 <code>Main</code> 的队列。</li>
+                  <li>启用<b>强制通知设备</b>后，无论元数据里的 <code>notifyDevice</code> 属性为何值，规则节点都会把 <code>SHARED_SCOPE</code> 属性更新通知给设备。</li>
                 </ul>
                 
-                This node expects messages of type <code>POST_ATTRIBUTES_REQUEST</code>.
+                该节点期望的消息类型是 <code>POST_ATTRIBUTES_REQUEST</code>。
                 <br><br>
-                Output connections: <code>Success</code>, <code>Failure</code>.
+                输出连接：<code>Success</code>、<code>Failure</code>。
                 """,
         configDirective = "jnksIotActionNodeAttributesConfig",
         icon = "file_upload"

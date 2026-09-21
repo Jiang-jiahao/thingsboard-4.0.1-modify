@@ -30,14 +30,14 @@ import java.util.Map;
 
 @Slf4j
 @RuleNode(type = ComponentType.ENRICHMENT,
-        name = "calculate delta",
+        name = "计算增量",
         version = 1,
         relationTypes = {JnksIotNodeConnectionType.SUCCESS, JnksIotNodeConnectionType.FAILURE, JnksIotNodeConnectionType.OTHER},
         configClazz = CalculateDeltaNodeConfiguration.class,
-        nodeDescription = "Calculates delta and amount of time passed between previous timeseries key reading " +
-                "and current value for this key from the incoming message",
-        nodeDetails = "Useful for metering use cases, when you need to calculate consumption based on pulse counter reading.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Other</code> or <code>Failure</code>.",
+        nodeDescription = "计算此前时序数据键读数与 " +
+                "传入消息中该键当前值之间的增量和经过的时间",
+        nodeDetails = "适用于计量场景，此时你需要根据脉冲计数器读数计算消耗量。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Other</code> 或 <code>Failure</code>。",
         configDirective = "jnksIotEnrichmentNodeCalculateDeltaConfig")
 public class CalculateDeltaNode implements JnksIotNode {
 

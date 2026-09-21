@@ -19,13 +19,13 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
 
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "unassign from customer",
+        name = "取消客户分配",
         configClazz = JnksIotUnassignFromCustomerNodeConfiguration.class,
-        nodeDescription = "Unassign message originator entity from customer",
-        nodeDetails = "If the message originator is not assigned to any customer, rule node will do nothing. <br><br>" +
-                "If the incoming message originator is a dashboard, will try to search for the customer by title specified in the configuration. " +
-                "If customer doesn't exist, the exception will be thrown. Otherwise will unassign the dashboard from retrieved customer.<br><br>" +
-                "Other entities can be assigned only to one customer, so specified customer title in the configuration will be ignored if the originator isn't a dashboard.",
+        nodeDescription = "取消消息来源方实体与客户的分配关系",
+        nodeDetails = "若消息来源方未分配给任何客户，规则节点将不做任何操作。<br><br>" +
+                "若传入消息来源方是仪表板，将尝试根据配置中指定的标题查找客户。 " +
+                "若客户不存在，将抛出异常。否则将仪表板从查找到的客户中解除分配。<br><br>" +
+                "其他实体只能分配给一个客户，因此若来源方不是仪表板，配置中指定的客户标题将被忽略。",
         configDirective = "jnksIotActionNodeUnAssignToCustomerConfig",
         icon = "remove_circle",
         version = 1

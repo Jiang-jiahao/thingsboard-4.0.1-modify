@@ -21,30 +21,30 @@ import static com.jnks.iot.common.util.DonAsynchron.withCallback;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "create relation",
+        name = "创建关系",
         configClazz = JnksIotCreateRelationNodeConfiguration.class,
-        nodeDescription = "Finds target entity specified in the configuration and creates a relation with the " +
-                "incoming message originator based on the configured direction and type.",
-        nodeDetails = "Useful when you need to create relations between entities dynamically depending on " +
-                "incoming message payload, message originator type, name, etc.<br><br>" +
-                "Target entity configuration: " +
-                "<ul><li><strong>Device</strong> - use a device with the specified name as the target entity to create a relation with. " +
-                "When selected, rule node allows us to use advanced mode to enable device creation if it doesn't exist. " +
-                "In advanced mode, device profile name should be specified.</li>" +
-                "<li><strong>Asset</strong> - use an asset with the specified name as the target entity to create a relation with. " +
-                "When selected, rule node allows us to use advanced mode to enable device creation if it doesn't exist. " +
-                "In advanced mode, asset profile name should be specified.</li>" +
-                "<li><strong>Entity View</strong> - use entity view with the specified name as the target entity to create a relation with.</li>" +
-                "<li><strong>Tenant</strong> - use current tenant as target entity to create a relation with.</li>" +
-                "<li><strong>Customer</strong> - use customer with the specified title as the target entity to create a relation with. " +
-                "When selected, rule node allows us to use advanced mode to enable customer creation if it doesn't exist.</li>" +
-                "<li><strong>Dashboard</strong> - use a dashboard with the specified title as the target entity to create a relation with.</li>" +
-                "<li><strong>User</strong> - use a user with the specified email as the target entity to create a relation with.</li></ul>" +
-                "Advanced settings: " +
-                "<ul><li><strong>Remove current relations</strong> - removes current relations with originator of the incoming message based on direction and type. " +
-                "Useful in GPS tracking use cases where relation acts as a temporary indicator of a tracker presence in specific geofence.</li>" +
-                "<li><strong>Change originator to target entity</strong> - useful when you need to process submitted message as a message from target entity.</li></ul>" +
-                "Output connections: <code>Success</code> - if the relation already exists or successfully created, otherwise <code>Failure</code>.",
+        nodeDescription = "查找配置中指定的目标实体，并根据配置的方向和类型与 " +
+                "传入消息的来源方创建关系。",
+        nodeDetails = "当你需要根据传入消息负载、 " +
+                "消息来源方类型、名称等动态创建实体间关系时非常有用。<br><br>" +
+                "目标实体配置： " +
+                "<ul><li><strong>设备</strong> - 使用指定名称的设备作为目标实体来创建关系。 " +
+                "选中后，规则节点允许使用高级模式，在设备不存在时自动创建设备。 " +
+                "在高级模式下，需要指定设备档案名称。</li>" +
+                "<li><strong>资产</strong> - 使用指定名称的资产作为目标实体来创建关系。 " +
+                "选中后，规则节点允许使用高级模式，在设备不存在时自动创建设备。 " +
+                "在高级模式下，需要指定资产档案名称。</li>" +
+                "<li><strong>实体视图</strong> - 使用指定名称的实体视图作为目标实体来创建关系。</li>" +
+                "<li><strong>租户</strong> - 使用当前租户作为目标实体来创建关系。</li>" +
+                "<li><strong>客户</strong> - 使用指定标题的客户作为目标实体来创建关系。 " +
+                "选中后，规则节点允许使用高级模式，在客户不存在时自动创建客户。</li>" +
+                "<li><strong>仪表板</strong> - 使用指定标题的仪表板作为目标实体来创建关系。</li>" +
+                "<li><strong>用户</strong> - 使用指定邮箱的用户作为目标实体来创建关系。</li></ul>" +
+                "高级设置： " +
+                "<ul><li><strong>移除当前关系</strong> - 根据方向和类型移除与传入消息来源方的当前关系。 " +
+                "适用于 GPS 追踪场景，此时关系可作为追踪器出现在特定地理围栏中的临时标识。</li>" +
+                "<li><strong>将来源方更改为目标实体</strong> - 当你需要将提交的消息作为来自目标实体的消息处理时非常有用。</li></ul>" +
+                "输出连接：<code>Success</code> - 若关系已存在或创建成功，否则为 <code>Failure</code>。",
         configDirective = "jnksIotActionNodeCreateRelationConfig",
         icon = "add_circle",
         version = 1

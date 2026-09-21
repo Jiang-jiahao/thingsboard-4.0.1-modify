@@ -22,11 +22,11 @@ import java.util.Map;
 @Slf4j
 @RuleNode(
         type = ComponentType.TRANSFORMATION,
-        name = "to email",
+        name = "转为邮件",
         configClazz = JnksIotMsgToEmailNodeConfiguration.class,
-        nodeDescription = "Transforms message to email message",
-        nodeDetails = "Transforms message to email message. If transformation completed successfully output message type will be set to <code>SEND_EMAIL</code>.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将消息转换为邮件消息",
+        nodeDetails = "将消息转换为邮件消息。若转换成功完成，输出消息类型将设置为 <code>SEND_EMAIL</code>。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotTransformationNodeToEmailConfig",
         icon = "email"
 )

@@ -21,15 +21,15 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @RuleNode(
         type = ComponentType.ENRICHMENT,
-        name = "fetch device credentials",
+        name = "获取设备凭证",
         version = 1,
         configClazz = JnksIotFetchDeviceCredentialsNodeConfiguration.class,
-        nodeDescription = "Adds device credentials to the message or message metadata",
-        nodeDetails = "if message originator type is Device and device credentials was successfully fetched, " +
-                "rule node enriches message or message metadata with <i>credentialsType</i> and <i>credentials</i> properties. " +
-                "Useful when you need to fetch device credentials and use them for further message processing. " +
-                "For example, use device credentials to interact with external systems.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将设备凭证添加到消息或消息元数据中",
+        nodeDetails = "如果消息来源方类型为设备，且成功获取了设备凭证， " +
+                "则规则节点会使用 <i>credentialsType</i> 和 <i>credentials</i> 属性扩充消息或消息元数据。 " +
+                "当你需要获取设备凭证并将其用于后续消息处理时非常有用。 " +
+                "例如，使用设备凭证与外部系统交互。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotEnrichmentNodeFetchDeviceCredentialsConfig")
 public class JnksIotFetchDeviceCredentialsNode extends JnksIotAbstractNodeWithFetchTo<JnksIotFetchDeviceCredentialsNodeConfiguration> {
 

@@ -21,13 +21,13 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 @RuleNode(type = ComponentType.ENRICHMENT,
-        name = "originator fields",
+        name = "来源方字段",
         configClazz = JnksIotGetOriginatorFieldsConfiguration.class,
         version = 1,
-        nodeDescription = "Adds message originator fields values into message or message metadata",
-        nodeDetails = "Fetches fields values specified in the mapping. If specified field is not part of originator fields it will be ignored. " +
-                "Useful when you need to retrieve originator fields and use them for further message processing.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将消息来源方的字段值添加到消息或消息元数据中",
+        nodeDetails = "获取映射中指定的字段值。如果指定的字段不属于来源方字段，则会被忽略。 " +
+                "当你需要获取来源方字段并将其用于后续消息处理时非常有用。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotEnrichmentNodeOriginatorFieldsConfig")
 public class JnksIotGetOriginatorFieldsNode extends JnksIotAbstractGetMappedDataNode<EntityId, JnksIotGetOriginatorFieldsConfiguration> {
 

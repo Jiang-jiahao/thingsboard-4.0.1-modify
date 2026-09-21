@@ -22,12 +22,12 @@ import java.util.Objects;
 @Slf4j
 @RuleNode(
         type = ComponentType.FILTER,
-        name = "alarm status filter",
+        name = "告警状态过滤",
         configClazz = JnksIotCheckAlarmStatusNodeConfig.class,
         relationTypes = {JnksIotNodeConnectionType.TRUE, JnksIotNodeConnectionType.FALSE},
-        nodeDescription = "Checks alarm status.",
-        nodeDetails = "Checks the alarm status to match one of the specified statuses.<br><br>" +
-                "Output connections: <code>True</code>, <code>False</code>, <code>Failure</code>.",
+        nodeDescription = "检查告警状态。",
+        nodeDetails = "检查告警状态是否匹配指定的某个状态。<br><br>" +
+                "输出连接：<code>True</code>、<code>False</code>、<code>Failure</code>。",
         configDirective = "jnksIotFilterNodeCheckAlarmStatusConfig")
 public class JnksIotCheckAlarmStatusNode implements JnksIotNode {
 

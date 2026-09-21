@@ -22,10 +22,10 @@ import java.util.concurrent.ExecutionException;
 
 @RuleNode(
         type = ComponentType.EXTERNAL,
-        name = "send notification",
+        name = "发送通知",
         configClazz = JnksIotNotificationNodeConfiguration.class,
-        nodeDescription = "Sends notification to targets using the template",
-        nodeDetails = "Will send notification to the specified targets using the template",
+        nodeDescription = "使用模板向目标对象发送通知",
+        nodeDetails = "将使用模板向指定的目标对象发送通知",
         configDirective = "jnksIotExternalNodeNotificationConfig",
         icon = "notifications"
 )

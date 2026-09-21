@@ -22,12 +22,12 @@ import java.util.Objects;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "log",
+        name = "日志",
         configClazz = JnksIotLogNodeConfiguration.class,
-        nodeDescription = "Log incoming messages using JS script for transformation Message into String",
-        nodeDetails = "Transform incoming Message with configured JS function to String and log final value into JnksIOT log file. " +
-                "Message payload can be accessed via <code>msg</code> property. For example <code>'temperature = ' + msg.temperature ;</code>. " +
-                "Message metadata can be accessed via <code>metadata</code> property. For example <code>'name = ' + metadata.customerName;</code>.",
+        nodeDescription = "使用 JS 脚本将传入消息转换为字符串并记录日志",
+        nodeDetails = "使用配置的 JS 函数将传入消息转换为字符串，并将最终值记录到 JnksIOT 日志文件中。 " +
+                "消息负载可通过 <code>msg</code> 属性访问。例如 <code>'temperature = ' + msg.temperature ;</code>。 " +
+                "消息元数据可通过 <code>metadata</code> 属性访问。例如 <code>'name = ' + metadata.customerName;</code>。",
         configDirective = "jnksIotActionNodeLogConfig",
         icon = "menu"
 )

@@ -29,13 +29,13 @@ import static com.jnks.iot.server.common.data.DataConstants.SCOPE;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "calculated fields",
+        name = "计算字段",
         configClazz = EmptyNodeConfiguration.class,
-        nodeDescription = "Pushes incoming messages to calculated fields service",
-        nodeDetails = "Node enables the processing of calculated fields without persisting incoming messages to the database. " +
-                "By default, the processing of calculated fields is triggered by the <b>save attributes</b> and <b>save time series</b> nodes. " +
-                "This rule node accepts the same messages as these nodes but allows you to trigger the processing of calculated " +
-                "fields independently, ensuring that derived data can be computed and utilized in real time without storing the original message in the database.",
+        nodeDescription = "将传入消息推送到计算字段服务",
+        nodeDetails = "该节点支持处理计算字段，而无需将传入消息持久化到数据库。 " +
+                "默认情况下，计算字段的处理由 <b>保存属性</b> 和 <b>保存时序数据</b> 节点触发。 " +
+                "该规则节点接受与这些节点相同的消息，但允许您独立触发计算 " +
+                "字段的处理，确保派生数据可以实时计算和使用，而无需将原始消息存储到数据库中。",
         configDirective = "jnksIotNodeEmptyConfig",
         icon = "published_with_changes"
 )

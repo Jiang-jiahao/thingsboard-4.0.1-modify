@@ -15,12 +15,12 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
 @Slf4j
 @RuleNode(
         type = ComponentType.FILTER,
-        name = "entity type filter",
+        name = "实体类型过滤",
         configClazz = JnksIotOriginatorTypeFilterNodeConfiguration.class,
         relationTypes = {JnksIotNodeConnectionType.TRUE, JnksIotNodeConnectionType.FALSE},
-        nodeDescription = "Filter incoming messages by the type of message originator entity",
-        nodeDetails = "Checks that the entity type of the incoming message originator matches one of the values specified in the filter.<br><br>" +
-                "Output connections: <code>True</code>, <code>False</code>, <code>Failure</code>",
+        nodeDescription = "按消息来源方实体的类型过滤传入消息",
+        nodeDetails = "检查传入消息来源方的实体类型是否与过滤器中指定的某个值匹配。<br><br>" +
+                "输出连接：<code>True</code>、<code>False</code>、<code>Failure</code>",
         configDirective = "jnksIotFilterNodeOriginatorTypeConfig")
 public class JnksIotOriginatorTypeFilterNode implements JnksIotNode {
 

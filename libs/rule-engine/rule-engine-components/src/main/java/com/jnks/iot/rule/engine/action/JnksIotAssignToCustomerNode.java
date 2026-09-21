@@ -19,11 +19,11 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "assign to customer",
+        name = "分配给客户",
         configClazz = JnksIotAssignToCustomerNodeConfiguration.class,
-        nodeDescription = "Assign message originator entity to customer",
-        nodeDetails = "Finds target customer by title and assign message originator entity to this customer. " +
-                "Rule node will create a new customer if it doesn't exist, and 'Create new customer if it doesn't exist' enabled.",
+        nodeDescription = "将消息来源方实体分配给客户",
+        nodeDetails = "根据标题查找目标客户，并将消息来源方实体分配给该客户。 " +
+                "若启用「客户不存在时创建新客户」，规则节点会在客户不存在时创建新客户。",
         configDirective = "jnksIotActionNodeAssignToCustomerConfig",
         icon = "add_circle",
         version = 1

@@ -40,12 +40,12 @@ import static com.jnks.iot.server.common.data.DataConstants.QUEUE_NAME;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "generator",
+        name = "生成器",
         configClazz = JnksIotMsgGeneratorNodeConfiguration.class,
         version = 2,
         hasQueueName = true,
-        nodeDescription = "Periodically generates messages",
-        nodeDetails = "Generates messages with configurable period. Javascript function used for message generation.",
+        nodeDescription = "周期性生成消息",
+        nodeDetails = "按可配置的周期生成消息。使用 Javascript 函数生成消息。",
         inEnabled = false,
         configDirective = "jnksIotActionNodeGeneratorConfig",
         icon = "repeat"

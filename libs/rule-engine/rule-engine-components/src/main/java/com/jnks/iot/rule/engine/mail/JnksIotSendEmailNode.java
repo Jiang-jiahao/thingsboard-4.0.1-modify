@@ -23,12 +23,12 @@ import static com.jnks.iot.common.util.DonAsynchron.withCallback;
 @Slf4j
 @RuleNode(
         type = ComponentType.EXTERNAL,
-        name = "send email",
+        name = "发送邮件",
         configClazz = JnksIotSendEmailNodeConfiguration.class,
-        nodeDescription = "Sends email message via SMTP server.",
-        nodeDetails = "Expects messages with <b>SEND_EMAIL</b> type. Node works only with messages that " +
-                " where created using <code>to Email</code> transformation Node, please connect this Node " +
-                "with <code>to Email</code> Node using <code>Successful</code> chain.",
+        nodeDescription = "通过 SMTP 服务器发送电子邮件。",
+        nodeDetails = "接收类型为 <b>SEND_EMAIL</b> 的消息。该节点仅处理 " +
+                " 通过 <code>to Email</code> 转换节点创建的消息，请将该节点 " +
+                "与 <code>to Email</code> 节点使用 <code>Successful</code> 链连接。",
         configDirective = "jnksIotExternalNodeSendEmailConfig",
         icon = "send"
 )

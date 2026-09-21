@@ -10,12 +10,12 @@ import com.jnks.iot.server.common.data.plugin.ComponentType;
 @Slf4j
 @RuleNode(
         type = ComponentType.FILTER,
-        name = "entity type switch",
+        name = "实体类型分流",
         configClazz = EmptyNodeConfiguration.class,
         relationTypes = {}, // should always be empty. We add the relation types for this node in AnnotationComponentDiscoveryService.
         nodeDescription = "Route incoming messages by Message Originator Type",
-        nodeDetails = "Routes messages to chain according to the entity type ('Device', 'Asset', etc.).<br><br>" +
-                "Output connections: <i>Message originator type</i> or <code>Failure</code>",
+        nodeDetails = "根据实体类型（'Device'、'Asset' 等）将消息路由到相应的链。<br><br>" +
+                "输出连接：<i>消息来源方类型</i> 或 <code>Failure</code>",
         configDirective = "jnksIotNodeEmptyConfig")
 public class JnksIotOriginatorTypeSwitchNode extends JnksIotAbstractTypeSwitchNode {
 

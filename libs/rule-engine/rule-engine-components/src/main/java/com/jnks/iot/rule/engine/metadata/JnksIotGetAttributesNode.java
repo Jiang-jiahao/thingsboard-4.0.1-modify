@@ -20,14 +20,14 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
  */
 @Slf4j
 @RuleNode(type = ComponentType.ENRICHMENT,
-        name = "originator attributes",
+        name = "来源方属性",
         configClazz = JnksIotGetAttributesNodeConfiguration.class,
         version = 1,
-        nodeDescription = "Adds attributes and/or latest timeseries data for the message originator to the message or message metadata",
-        nodeDetails = "Useful when you need to retrieve some attributes or the latest telemetry readings from the message originator " +
-                "that are not included in the incoming message to use them for further message processing. " +
-                "For example to filter messages based on the threshold value stored in the attributes.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将消息来源方的属性和/或最新时序数据添加到消息或消息元数据中",
+        nodeDetails = "当你需要从消息来源方检索 " +
+                "那些未包含在传入消息中的某些属性或最新遥测读数，以便将其用于后续消息处理时非常有用。 " +
+                "例如根据属性中存储的阈值过滤消息。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotEnrichmentNodeOriginatorAttributesConfig")
 public class JnksIotGetAttributesNode extends JnksIotAbstractGetAttributesNode<JnksIotGetAttributesNodeConfiguration, EntityId> {
 

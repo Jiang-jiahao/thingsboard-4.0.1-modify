@@ -22,13 +22,13 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "delay (deprecated)",
+        name = "延迟（已弃用）",
         configClazz = JnksIotMsgDelayNodeConfiguration.class,
-        nodeDescription = "Delays incoming message (deprecated)",
-        nodeDetails = "Delays messages for a configurable period. " +
-                "Please note, this node acknowledges the message from the current queue (message will be removed from queue). " +
-                "Deprecated because the acknowledged message still stays in memory (to be delayed) and this " +
-                "does not guarantee that message will be processed even if the \"retry failures and timeouts\" processing strategy will be chosen.",
+        nodeDescription = "延迟传入消息（已弃用）",
+        nodeDetails = "将消息延迟一段可配置的时间。 " +
+                "请注意，该节点会确认当前队列中的消息（消息将从队列中移除）。 " +
+                "已弃用，因为已确认的消息仍保留在内存中（以便延迟处理），这 " +
+                "无法保证即使选择了 \"retry failures and timeouts\" 处理策略，消息也会被处理。",
         icon = "pause",
         configDirective = "jnksIotActionNodeMsgDelayConfig"
 )

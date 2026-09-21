@@ -19,12 +19,12 @@ import static com.jnks.iot.server.common.data.DataConstants.QUEUE_NAME;
 @Slf4j
 @RuleNode(
         type = ComponentType.FLOW,
-        name = "checkpoint",
+        name = "检查点",
         configClazz = EmptyNodeConfiguration.class,
         version = 1,
         hasQueueName = true,
-        nodeDescription = "transfers the message to another queue",
-        nodeDetails = "After successful transfer incoming message is automatically acknowledged. Queue name is configurable.",
+        nodeDescription = "将消息转移到另一个队列",
+        nodeDetails = "成功转移后，传入消息将被自动确认。队列名称可配置。",
         configDirective = "jnksIotNodeEmptyConfig"
 )
 public class JnksIotCheckpointNode implements JnksIotNode {

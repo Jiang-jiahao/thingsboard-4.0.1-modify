@@ -33,16 +33,16 @@ import static com.jnks.iot.server.common.data.DataConstants.QUEUE_NAME;
 
 @RuleNode(
         type = ComponentType.TRANSFORMATION,
-        name = "deduplication",
+        name = "消息去重",
         configClazz = JnksIotMsgDeduplicationNodeConfiguration.class,
         version = 1,
         hasQueueName = true,
-        nodeDescription = "Deduplicate messages within the same originator entity for a configurable period " +
-                "based on a specified deduplication strategy.",
-        nodeDetails = "Deduplication strategies: <ul><li><strong>FIRST</strong> - return first message that arrived during deduplication period.</li>" +
-                "<li><strong>LAST</strong> - return last message that arrived during deduplication period.</li>" +
-                "<li><strong>ALL</strong> - return all messages as a single JSON array message. " +
-                "Where each element represents object with <strong><i>msg</i></strong> and <strong><i>metadata</i></strong> inner properties.</li></ul>",
+        nodeDescription = "在同一来源方实体内，按可配置的时间段对消息去重， " +
+                "依据指定的去重策略。",
+        nodeDetails = "去重策略：<ul><li><strong>FIRST</strong> - 返回去重时间段内到达的首条消息。</li>" +
+                "<li><strong>LAST</strong> - 返回去重时间段内到达的最后一条消息。</li>" +
+                "<li><strong>ALL</strong> - 将所有消息作为单个 JSON 数组消息返回。 " +
+                "其中每个元素都是一个对象，包含 <strong><i>msg</i></strong> 和 <strong><i>metadata</i></strong> 两个内部属性。</li></ul>",
         icon = "content_copy",
         configDirective = "jnksIotTransformationNodeDeduplicationConfig"
 )

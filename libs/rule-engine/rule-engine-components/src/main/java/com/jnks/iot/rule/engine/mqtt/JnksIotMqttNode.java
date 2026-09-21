@@ -36,12 +36,12 @@ import java.util.concurrent.TimeoutException;
 @Slf4j
 @RuleNode(
         type = ComponentType.EXTERNAL,
-        name = "mqtt",
+        name = "MQTT",
         configClazz = JnksIotMqttNodeConfiguration.class,
         version = 1,
         clusteringMode = ComponentClusteringMode.USER_PREFERENCE,
-        nodeDescription = "Publish messages to the MQTT broker",
-        nodeDetails = "Will publish message payload to the MQTT broker with QoS <b>AT_LEAST_ONCE</b>.",
+        nodeDescription = "将消息发布到 MQTT 代理",
+        nodeDetails = "将消息负载以 QoS <b>AT_LEAST_ONCE</b> 发布到 MQTT 代理。",
         configDirective = "jnksIotExternalNodeMqttConfig",
         icon = "call_split"
 )

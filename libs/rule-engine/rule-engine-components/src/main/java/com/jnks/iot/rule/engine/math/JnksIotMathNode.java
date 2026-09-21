@@ -45,23 +45,23 @@ import static com.jnks.iot.rule.engine.math.JnksIotMathArgumentType.CONSTANT;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "math function",
+        name = "数学函数",
         configClazz = JnksIotMathNodeConfiguration.class,
-        nodeDescription = "Apply math function and save the result into the message and/or database",
-        nodeDetails = "Supports math operations like: ADD, SUB, MULT, DIV, etc and functions: SIN, COS, TAN, SEC, etc. " +
-                "Use 'CUSTOM' operation to specify complex math expressions." +
+        nodeDescription = "应用数学函数，并将结果保存到消息和/或数据库",
+        nodeDetails = "支持 ADD、SUB、MULT、DIV 等数学运算，以及 SIN、COS、TAN、SEC 等函数。 " +
+                "可使用 'CUSTOM' 运算指定复杂的数学表达式。" +
                 "<br/><br/>" +
-                "You may use constant, message field, metadata field, attribute, and latest time-series as an arguments values. " +
-                "The result of the function may be also stored to message field, metadata field, attribute or time-series value." +
+                "可以使用常量、消息字段、元数据字段、属性和最新时序数据作为参数值。 " +
+                "函数结果也可以存储到消息字段、元数据字段、属性或时序数据值中。" +
                 "<br/><br/>" +
-                "Primary use case for this rule node is to take one or more values from the database and modify them based on data from the message. " +
-                "For example, you may increase `totalWaterConsumption` based on the `deltaWaterConsumption` reported by device." +
+                "该规则节点的主要用例是从数据库读取一个或多个值，并根据消息中的数据修改它们。 " +
+                "例如，可以根据设备上报的 `deltaWaterConsumption` 增加 `totalWaterConsumption`。" +
                 "<br/><br/>" +
-                "Alternative use case is the replacement of simple JS `script` nodes with more light-weight and performant implementation. " +
-                "For example, you may transform Fahrenheit to Celsius (C = (F - 32) / 1.8) using CUSTOM operation and expression: (x - 32) / 1.8)." +
+                "另一个用例是用更轻量、更高性能的实现替代简单的 JS `script` 节点。 " +
+                "例如，可以使用 CUSTOM 运算和表达式 (x - 32) / 1.8) 将华氏度转换为摄氏度（C = (F - 32) / 1.8）。" +
                 "<br/><br/>" +
-                "The execution is synchronized in scope of message originator (e.g. device) and server node. " +
-                "If you have rule nodes in different rule chains, they will process messages from the same originator synchronously in the scope of the server node.",
+                "执行在消息来源方（例如设备）和服务器节点的范围内同步。 " +
+                "如果不同规则链中存在这些规则节点，它们将在服务器节点范围内同步处理来自同一来源方的消息。",
         configDirective = "jnksIotActionNodeMathFunctionConfig",
         icon = "calculate"
 

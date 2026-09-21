@@ -14,13 +14,13 @@ import com.jnks.iot.server.common.data.plugin.ComponentType;
 @Slf4j
 @RuleNode(
         type = ComponentType.FILTER,
-        name = "asset profile switch",
+        name = "资产档案分支",
         customRelations = true,
         relationTypes = {"default"},
         configClazz = EmptyNodeConfiguration.class,
-        nodeDescription = "Route incoming messages based on the name of the asset profile",
-        nodeDetails = "Route incoming messages based on the name of the asset profile. The asset profile name is case-sensitive.<br><br>" +
-                "Output connections: <i>Asset profile name</i> or <code>Failure</code>",
+        nodeDescription = "根据资产档案的名称路由传入消息",
+        nodeDetails = "根据资产档案的名称路由传入消息。资产档案名称区分大小写。<br><br>" +
+                "输出连接：<i>资产档案名称</i>或 <code>Failure</code>",
         configDirective = "jnksIotNodeEmptyConfig")
 public class JnksIotAssetTypeSwitchNode extends JnksIotAbstractTypeSwitchNode {
 

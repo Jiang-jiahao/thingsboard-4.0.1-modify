@@ -13,12 +13,12 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "synchronization start",
+        name = "同步开始",
         configClazz = EmptyNodeConfiguration.class,
-        nodeDescription = "This Node is now deprecated. Use \"Checkpoint\" instead.",
-        nodeDetails = "This node should be used together with \"synchronization end\" node. \n This node will put messages into queue based on message originator id. \n" +
-                "Subsequent messages will not be processed until the previous message processing is completed or timeout event occurs.\n" +
-                "Size of the queue per originator and timeout values are configurable on a system level",
+        nodeDescription = "此节点已弃用。请改用 \"Checkpoint\"。",
+        nodeDetails = "此节点应与 \"synchronization end\" 节点配合使用。 \n 此节点将根据消息来源方 id 将消息放入队列。 \n" +
+                "在之前的消息处理完成或发生超时事件之前，后续消息将不会被处理。\n" +
+                "每个来源方的队列大小和超时值可在系统级别配置",
         configDirective = "jnksIotNodeEmptyConfig")
 @Deprecated
 public class JnksIotSynchronizationBeginNode implements JnksIotNode {

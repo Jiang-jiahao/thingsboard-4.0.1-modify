@@ -13,9 +13,9 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "synchronization end",
+        name = "同步结束",
         configClazz = EmptyNodeConfiguration.class,
-        nodeDescription = "This Node is now deprecated. Use \"Checkpoint\" instead.",
+        nodeDescription = "该节点现已弃用。请改用 \"Checkpoint\"。",
         nodeDetails = "",
         configDirective = ("jnksIotNodeEmptyConfig")
 )

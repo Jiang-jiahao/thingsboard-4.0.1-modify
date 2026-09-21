@@ -17,13 +17,13 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
 
 @Slf4j
 @RuleNode(type = ComponentType.ENRICHMENT,
-        name = "tenant details",
+        name = "租户详情",
         configClazz = JnksIotGetTenantDetailsNodeConfiguration.class,
         version = 1,
-        nodeDescription = "Adds message originator tenant details into message or message metadata",
-        nodeDetails = "Useful when we need to retrieve contact information from your tenant " +
-                "such as email, phone, address, etc., for notifications via email, SMS, and other notification providers.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将消息来源方所属租户的详情添加到消息或消息元数据中",
+        nodeDetails = "当需要从租户中获取联系信息时很有用， " +
+                "例如邮箱、电话、地址等，用于通过电子邮件、短信及其他通知渠道发送通知。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotEnrichmentNodeEntityDetailsConfig")
 public class JnksIotGetTenantDetailsNode extends JnksIotAbstractGetEntityDetailsNode<JnksIotGetTenantDetailsNodeConfiguration, TenantId> {
 

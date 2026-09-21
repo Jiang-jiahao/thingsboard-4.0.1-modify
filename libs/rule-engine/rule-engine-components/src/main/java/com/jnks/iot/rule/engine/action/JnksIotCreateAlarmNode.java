@@ -27,15 +27,15 @@ import java.util.List;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "create alarm", relationTypes = {"Created", "Updated", "False"},
+        name = "创建告警", relationTypes = {"Created", "Updated", "False"},
         configClazz = JnksIotCreateAlarmNodeConfiguration.class,
-        nodeDescription = "Create or Update Alarm",
+        nodeDescription = "创建或更新告警",
         nodeDetails =
-                "Details - JS function that creates JSON object based on incoming message. This object will be added into Alarm.details field.\n" +
-                        "Node output:\n" +
-                        "If alarm was not created, original message is returned. Otherwise new Message returned with type 'ALARM', Alarm object in 'msg' property and 'metadata' will contains one of those properties 'isNewAlarm/isExistingAlarm'. " +
-                        "Message payload can be accessed via <code>msg</code> property. For example <code>'temperature = ' + msg.temperature ;</code>. " +
-                        "Message metadata can be accessed via <code>metadata</code> property. For example <code>'name = ' + metadata.customerName;</code>.",
+                "Details - 用于根据传入消息创建 JSON 对象的 JS 函数。该对象将加入 Alarm.details 字段。\n" +
+                        "节点输出：\n" +
+                        "若未创建告警，则返回原始消息。否则返回新的 Message，类型为 'ALARM'，'msg' 属性中包含 Alarm 对象，且 'metadata' 将包含 'isNewAlarm/isExistingAlarm' 其中之一。 " +
+                        "可通过 <code>msg</code> 属性访问消息负载。例如 <code>'temperature = ' + msg.temperature ;</code>。 " +
+                        "可通过 <code>metadata</code> 属性访问消息元数据。例如 <code>'name = ' + metadata.customerName;</code>。",
         configDirective = "jnksIotActionNodeCreateAlarmConfig",
         icon = "notifications_active"
 )

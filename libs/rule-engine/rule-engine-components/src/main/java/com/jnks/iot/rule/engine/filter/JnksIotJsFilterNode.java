@@ -18,17 +18,17 @@ import static com.jnks.iot.common.util.DonAsynchron.withCallback;
 @Slf4j
 @RuleNode(
         type = ComponentType.FILTER,
-        name = "script",
+        name = "脚本过滤",
         relationTypes = {JnksIotNodeConnectionType.TRUE, JnksIotNodeConnectionType.FALSE},
         configClazz = JnksIotJsFilterNodeConfiguration.class,
-        nodeDescription = "Filter incoming messages using TBEL or JS script",
-        nodeDetails = "Evaluates boolean function using incoming message. " +
-                "The function may be written using TBEL or plain JavaScript. " +
-                "Script function should return boolean value and accepts three parameters: <br/>" +
-                "Message payload can be accessed via <code>msg</code> property. For example <code>msg.temperature < 10;</code><br/>" +
-                "Message metadata can be accessed via <code>metadata</code> property. For example <code>metadata.customerName === 'John';</code><br/>" +
-                "Message type can be accessed via <code>msgType</code> property.<br><br>" +
-                "Output connections: <code>True</code>, <code>False</code>, <code>Failure</code>",
+        nodeDescription = "使用 TBEL 或 JS 脚本过滤传入消息",
+        nodeDetails = "使用传入消息求值布尔函数。 " +
+                "该函数可用 TBEL 或纯 JavaScript 编写。 " +
+                "脚本函数应返回布尔值，并接受三个参数：<br/>" +
+                "可通过 <code>msg</code> 属性访问消息负载。例如 <code>msg.temperature < 10;</code><br/>" +
+                "可通过 <code>metadata</code> 属性访问消息元数据。例如 <code>metadata.customerName === 'John';</code><br/>" +
+                "可通过 <code>msgType</code> 属性访问消息类型。<br><br>" +
+                "输出连接：<code>True</code>、<code>False</code>、<code>Failure</code>",
         configDirective = "jnksIotFilterNodeScriptConfig"
 )
 public class JnksIotJsFilterNode implements JnksIotNode {

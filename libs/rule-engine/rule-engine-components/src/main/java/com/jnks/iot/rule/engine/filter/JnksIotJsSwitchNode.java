@@ -21,16 +21,16 @@ import java.util.Set;
 @Slf4j
 @RuleNode(
         type = ComponentType.FILTER,
-        name = "switch", customRelations = true,
+        name = "分支", customRelations = true,
         relationTypes = {},
         configClazz = JnksIotJsSwitchNodeConfiguration.class,
-        nodeDescription = "Routes incoming message to one OR multiple output connections.",
-        nodeDetails = "Node executes configured TBEL(recommended) or JavaScript function that returns array of strings (connection names). " +
-                "If Array is empty - message not routed to next Node. " +
-                "Message payload can be accessed via <code>msg</code> property. For example <code>msg.temperature < 10;</code><br/>" +
-                "Message metadata can be accessed via <code>metadata</code> property. For example <code>metadata.customerName === 'John';</code><br/>" +
-                "Message type can be accessed via <code>msgType</code> property.<br><br>" +
-                "Output connections: <i>Custom connection(s) defined by switch node</i> or <code>Failure</code>",
+        nodeDescription = "将传入消息路由到一个或多个输出连接。",
+        nodeDetails = "节点执行已配置的 TBEL（推荐）或 JavaScript 函数，该函数返回字符串数组（连接名称）。 " +
+                "如果数组为空，则消息不会路由到下一个节点。 " +
+                "可以通过 <code>msg</code> 属性访问消息负载。例如 <code>msg.temperature < 10;</code><br/>" +
+                "可以通过 <code>metadata</code> 属性访问消息元数据。例如 <code>metadata.customerName === 'John';</code><br/>" +
+                "可以通过 <code>msgType</code> 属性访问消息类型。<br><br>" +
+                "输出连接：<i>由分支节点定义的自定义连接</i>或 <code>Failure</code>",
         configDirective = "jnksIotFilterNodeSwitchConfig")
 public class JnksIotJsSwitchNode implements JnksIotNode {
 

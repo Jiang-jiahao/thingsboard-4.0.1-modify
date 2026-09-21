@@ -32,15 +32,15 @@ import static com.jnks.iot.common.util.DonAsynchron.withCallback;
 @Slf4j
 @RuleNode(
         type = ComponentType.FILTER,
-        name = "check relation presence",
+        name = "关系存在性检查",
         configClazz = JnksIotCheckRelationNodeConfiguration.class,
         version = 1,
         relationTypes = {JnksIotNodeConnectionType.TRUE, JnksIotNodeConnectionType.FALSE},
-        nodeDescription = "Checks the presence of the relation between the originator of the message and other entities.",
-        nodeDetails = "If 'check relation to specific entity' is selected, you should specify a related entity. " +
-                "Otherwise, the rule node checks the presence of a relation to any entity. " +
-                "In both cases, relation lookup is based on configured direction and type.<br><br>" +
-                "Output connections: <code>True</code>, <code>False</code>, <code>Failure</code>",
+        nodeDescription = "检查消息来源方与其他实体之间是否存在关系。",
+        nodeDetails = "若选择「检查与特定实体的关系」，则需指定关联实体。 " +
+                "否则，规则节点检查是否存在与任意实体的关系。 " +
+                "两种情况下，关系查找都基于配置的方向和类型。<br><br>" +
+                "输出连接：<code>True</code>、<code>False</code>、<code>Failure</code>",
         configDirective = "jnksIotFilterNodeCheckRelationConfig")
 public class JnksIotCheckRelationNode implements JnksIotNode {
 

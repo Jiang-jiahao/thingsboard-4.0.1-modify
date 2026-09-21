@@ -22,10 +22,10 @@ import java.util.concurrent.atomic.AtomicLong;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "message count",
+        name = "消息计数",
         configClazz = JnksIotMsgCountNodeConfiguration.class,
-        nodeDescription = "Count incoming messages",
-        nodeDetails = "Count incoming messages for specified interval and produces POST_TELEMETRY_REQUEST msg with messages count",
+        nodeDescription = "统计收到的消息数量",
+        nodeDetails = "按指定间隔统计收到的消息数量，并生成带有消息计数的 POST_TELEMETRY_REQUEST 消息",
         icon = "functions",
         configDirective = "jnksIotActionNodeMsgCountConfig"
 )

@@ -16,10 +16,10 @@ import static com.jnks.iot.common.util.DonAsynchron.withCallback;
 @Slf4j
 @RuleNode(
         type = ComponentType.EXTERNAL,
-        name = "send sms",
+        name = "发送短信",
         configClazz = JnksIotSendSmsNodeConfiguration.class,
-        nodeDescription = "Sends SMS message via SMS provider.",
-        nodeDetails = "Will send SMS message by populating target phone numbers and sms message fields using values derived from message metadata.",
+        nodeDescription = "通过短信服务商发送短信消息。",
+        nodeDetails = "将使用从消息元数据中获取的值填充目标电话号码和短信消息字段，从而发送短信。",
         configDirective = "jnksIotExternalNodeSendSmsConfig",
         icon = "sms"
 )

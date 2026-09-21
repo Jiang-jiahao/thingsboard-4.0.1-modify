@@ -28,19 +28,19 @@ import java.util.Optional;
 @Slf4j
 @RuleNode(
         type = ComponentType.TRANSFORMATION,
-        name = "Hex protocol parser",
+        name = "Hex 协议解析器",
         configClazz = JnksIotHexProtocolParserNodeConfiguration.class,
-        nodeDescription = "Parses binary payloads from a continuous hex string using configurable protocol definitions.",
-        nodeDetails = "Reads <code>hexInputKey</code> from incoming JSON message body. " +
-                "Frame templates define sync, header fields, payload layout hints, optional default checksum; each protocol variant picks a <code>templateId</code> and defines response-specific payload fields (or full layout without template). " +
-                "Match: <code>syncHex</code> (or from template), optional <code>commandByteOffset</code> + <code>commandValue</code> (<code>commandMatchWidth</code>=4 for uint32 LE); headless with <code>commandValue</code> omitted matches any command (shared layout). " +
-                "If <code>protocolIdKey</code> is set, that <code>id</code> is used only when the buffer also matches; otherwise auto-detection. " +
-                "Output under <code>resultObjectKey</code> (default <code>parsed</code>) or merge with prefix. " +
-                "Scalar / slice types: UINT8, UINT16_LE/BE, UINT32_LE/BE, FLOAT32/64 LE/BE, HEX_SLICE, HEX_SLICE_LEN_U16LE, BOOL_BIT. " +
-                "Composable: STRUCT (nested <code>nestedFields</code>, offsets relative to struct start), TLV_LIST (UI label LIST), UNIT_LIST, " +
-                "GENERIC_LIST (region + count mode FIXED | FROM_FIELD | UNTIL_END, item length FIXED or PREFIX_UINT8/UINT16/UINT32, <code>listItemFields</code> as sub-protocol per element). " +
-                "Checksum: SUM8, CRC16_MODBUS, CRC16_CCITT, CRC32, NONE.<br/><br/>" +
-                "Output: <code>Success</code> / <code>Failure</code>.",
+        nodeDescription = "使用可配置的协议定义，从连续的十六进制字符串中解析二进制负载。",
+        nodeDetails = "从传入的 JSON 消息正文中读取 <code>hexInputKey</code>。 " +
+                "帧模板定义同步字、头部字段、负载布局提示以及可选的默认校验和；每个协议变体选择一个 <code>templateId</code>，并定义特定于响应的负载字段（或不使用模板定义完整布局）。 " +
+                "匹配：<code>syncHex</code>（或来自模板），可选的 <code>commandByteOffset</code> + <code>commandValue</code>（对于 uint32 LE，<code>commandMatchWidth</code>=4）；省略 <code>commandValue</code> 的 headless 模式可匹配任意命令（共享布局）。 " +
+                "如果设置了 <code>protocolIdKey</code>，则仅当缓冲区也匹配时才使用该 <code>id</code>；否则自动检测。 " +
+                "输出到 <code>resultObjectKey</code> 下（默认 <code>parsed</code>），或使用前缀合并。 " +
+                "标量 / 切片类型：UINT8、UINT16_LE/BE、UINT32_LE/BE、FLOAT32/64 LE/BE、HEX_SLICE、HEX_SLICE_LEN_U16LE、BOOL_BIT。 " +
+                "可组合类型：STRUCT（嵌套 <code>nestedFields</code>，偏移量相对于结构体起始位置）、TLV_LIST（UI 标签 LIST）、UNIT_LIST， " +
+                "GENERIC_LIST（区域 + 计数模式 FIXED | FROM_FIELD | UNTIL_END，条目长度为 FIXED 或 PREFIX_UINT8/UINT16/UINT32，<code>listItemFields</code> 作为每个元素的子协议）。 " +
+                "校验和：SUM8、CRC16_MODBUS、CRC16_CCITT、CRC32、NONE。<br/><br/>" +
+                "输出：<code>Success</code> / <code>Failure</code>。",
         configDirective = "jnksIotTransformationNodeHexProtocolParserConfig",
         icon = "developer_board"
 )

@@ -27,13 +27,13 @@ import java.util.NoSuchElementException;
 
 @Slf4j
 @RuleNode(type = ComponentType.ENRICHMENT,
-        name = "customer details",
+        name = "客户详情",
         configClazz = JnksIotGetCustomerDetailsNodeConfiguration.class,
         version = 1,
-        nodeDescription = "Adds message originator customer details into message or message metadata",
-        nodeDetails = "Useful in multi-customer solutions where we need dynamically use customer contact information " +
-                "such as email, phone, address, etc., for notifications via email, SMS, and other notification providers.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将消息来源方的客户详情添加到消息或消息元数据中",
+        nodeDetails = "适用于需要动态使用客户联系信息的多客户解决方案， " +
+                "例如电子邮件、电话、地址等，用于通过电子邮件、短信和其他通知渠道发送通知。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotEnrichmentNodeEntityDetailsConfig")
 public class JnksIotGetCustomerDetailsNode extends JnksIotAbstractGetEntityDetailsNode<JnksIotGetCustomerDetailsNodeConfiguration, CustomerId> {
 

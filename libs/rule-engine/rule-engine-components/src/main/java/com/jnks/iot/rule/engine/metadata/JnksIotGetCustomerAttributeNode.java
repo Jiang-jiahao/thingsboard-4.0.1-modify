@@ -18,14 +18,14 @@ import com.jnks.iot.server.common.data.util.JnksIotPair;
 @Slf4j
 @RuleNode(
         type = ComponentType.ENRICHMENT,
-        name = "customer attributes",
+        name = "客户属性",
         configClazz = JnksIotGetEntityDataNodeConfiguration.class,
         version = 1,
-        nodeDescription = "Adds message originator customer attributes or latest telemetry into message or message metadata",
-        nodeDetails = "Useful in multi-customer solutions where each customer has a different configuration or threshold set " +
-                "that is stored as customer attributes or telemetry data and used for dynamic message filtering, transformation, " +
-                "or actions such as alarm creation if the threshold is exceeded.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将消息来源方所属客户的属性或最新遥测添加到消息或消息元数据中",
+        nodeDetails = "适用于多客户解决方案：每个客户都有不同的配置或阈值， " +
+                "这些配置或阈值以客户属性或遥测数据的形式存储，用于动态的消息过滤、转换， " +
+                "或在超过阈值时执行创建告警等动作。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotEnrichmentNodeCustomerAttributesConfig")
 public class JnksIotGetCustomerAttributeNode extends JnksIotAbstractGetEntityDataNode<CustomerId> {
 

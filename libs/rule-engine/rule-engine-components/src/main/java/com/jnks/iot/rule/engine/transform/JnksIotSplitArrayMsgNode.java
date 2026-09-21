@@ -22,12 +22,12 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @RuleNode(
         type = ComponentType.TRANSFORMATION,
-        name = "split array msg",
+        name = "拆分数组消息",
         configClazz = EmptyNodeConfiguration.class,
-        nodeDescription = "Split array message into several messages",
-        nodeDetails = "Splits an array message into individual elements, with each element sent as a separate message. " +
-                "All outbound messages will have the same type and metadata as the original array message.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将数组消息拆分为多条消息",
+        nodeDetails = "将数组消息拆分为单个元素，每个元素作为独立消息发送。 " +
+                "所有出站消息将具有与原始数组消息相同的类型和元数据。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         icon = "content_copy",
         configDirective = "jnksIotNodeEmptyConfig"
 )

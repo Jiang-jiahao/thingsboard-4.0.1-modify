@@ -18,13 +18,13 @@ import java.util.Map;
 @Slf4j
 @RuleNode(
         type = ComponentType.FILTER,
-        name = "check fields presence",
+        name = "检查字段是否存在",
         relationTypes = {JnksIotNodeConnectionType.TRUE, JnksIotNodeConnectionType.FALSE},
         configClazz = JnksIotCheckMessageNodeConfiguration.class,
-        nodeDescription = "Checks the presence of the specified fields in the message and/or metadata.",
-        nodeDetails = "By default, the rule node checks that all specified fields are present. " +
-                "Uncheck the 'Check that all selected fields are present' if the presence of at least one field is sufficient.<br><br>" +
-                "Output connections: <code>True</code>, <code>False</code>, <code>Failure</code>",
+        nodeDescription = "检查消息和/或元数据中是否存在指定字段。",
+        nodeDetails = "默认情况下，规则节点会检查所有指定字段是否都存在。 " +
+                "如果只需至少一个字段存在即可，请取消勾选「检查所有选定字段是否都存在」。<br><br>" +
+                "输出连接：<code>True</code>、<code>False</code>、<code>Failure</code>",
         configDirective = "jnksIotFilterNodeCheckMessageConfig")
 public class JnksIotCheckMessageNode implements JnksIotNode {
 

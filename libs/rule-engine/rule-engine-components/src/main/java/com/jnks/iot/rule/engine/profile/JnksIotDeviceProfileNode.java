@@ -36,14 +36,14 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "device profile",
+        name = "设备档案",
         customRelations = true,
         relationTypes = {"Alarm Created", "Alarm Updated", "Alarm Severity Updated", "Alarm Cleared", "Success", "Failure"},
         version = 1,
         configClazz = JnksIotDeviceProfileNodeConfiguration.class,
-        nodeDescription = "Process device messages based on device profile settings",
-        nodeDetails = "Create and clear alarms based on alarm rules defined in device profile. The output relation type is either " +
-                "'Alarm Created', 'Alarm Updated', 'Alarm Severity Updated' and 'Alarm Cleared' or simply 'Success' if no alarms were affected.",
+        nodeDescription = "根据设备档案设置处理设备消息",
+        nodeDetails = "根据设备档案中定义的告警规则创建和清除告警。输出关系类型为 " +
+                "'Alarm Created'、'Alarm Updated'、'Alarm Severity Updated' 和 'Alarm Cleared'，如果未影响任何告警则为 'Success'。",
         configDirective = "jnksIotActionNodeDeviceProfileConfig"
 )
 public class JnksIotDeviceProfileNode implements JnksIotNode {

@@ -24,13 +24,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @RuleNode(
         type = ComponentType.TRANSFORMATION,
-        name = "delete key-value pairs",
+        name = "删除键值对",
         version = 2,
         configClazz = JnksIotDeleteKeysNodeConfiguration.class,
-        nodeDescription = "Deletes key-value pairs from message or message metadata.",
-        nodeDetails = "Deletes key-value pairs from the message or message metadata according to the configured " +
-                "keys and/or regular expressions.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "从消息或消息元数据中删除键值对。",
+        nodeDetails = "根据配置的 " +
+                "键和/或正则表达式，从消息或消息元数据中删除键值对。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotTransformationNodeDeleteKeysConfig",
         icon = "remove_circle"
 )

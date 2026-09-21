@@ -14,13 +14,13 @@ import com.jnks.iot.server.common.data.plugin.ComponentType;
 @Slf4j
 @RuleNode(
         type = ComponentType.FILTER,
-        name = "device profile switch",
+        name = "设备档案切换",
         customRelations = true,
         relationTypes = {"default"},
         configClazz = EmptyNodeConfiguration.class,
-        nodeDescription = "Route incoming messages based on the name of the device profile",
-        nodeDetails = "Route incoming messages based on the name of the device profile. The device profile name is case-sensitive<br><br>" +
-                "Output connections: <i>Device profile name</i> or <code>Failure</code>",
+        nodeDescription = "根据设备档案名称路由传入消息",
+        nodeDetails = "根据设备档案名称路由传入消息。设备档案名称区分大小写。<br><br>" +
+                "输出连接：<i>设备档案名称</i> 或 <code>Failure</code>",
         configDirective = "jnksIotNodeEmptyConfig")
 public class JnksIotDeviceTypeSwitchNode extends JnksIotAbstractTypeSwitchNode {
 

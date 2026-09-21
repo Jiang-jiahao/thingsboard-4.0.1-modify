@@ -14,10 +14,10 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
 @Slf4j
 @RuleNode(
         type = ComponentType.FLOW,
-        name = "acknowledge",
+        name = "确认",
         configClazz = EmptyNodeConfiguration.class,
-        nodeDescription = "Acknowledges the incoming message",
-        nodeDetails = "After acknowledgement, the message is pushed to related rule nodes. Useful if you don't care what happens to this message next.",
+        nodeDescription = "确认传入消息",
+        nodeDetails = "确认后，消息会被推送到相关的规则节点。如果不关心该消息后续如何处理，可使用此节点。",
         configDirective = "jnksIotNodeEmptyConfig"
 )
 public class JnksIotAckNode implements JnksIotNode {

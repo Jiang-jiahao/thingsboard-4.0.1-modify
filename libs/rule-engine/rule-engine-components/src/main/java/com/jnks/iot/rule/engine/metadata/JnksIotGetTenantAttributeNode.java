@@ -17,13 +17,13 @@ import com.jnks.iot.server.common.data.util.JnksIotPair;
 @Slf4j
 @RuleNode(
         type = ComponentType.ENRICHMENT,
-        name = "tenant attributes",
+        name = "租户属性",
         configClazz = JnksIotGetEntityDataNodeConfiguration.class,
         version = 1,
-        nodeDescription = "Adds message originator tenant attributes or latest telemetry into message or message metadata",
-        nodeDetails = "Useful when you need to retrieve some common configuration or threshold set " +
-                "that is stored as tenant attributes or telemetry data and use it for further message processing.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将消息来源方所属租户的属性或最新遥测添加到消息或消息元数据中",
+        nodeDetails = "当需要获取某些公共配置或阈值时很有用， " +
+                "这些公共配置或阈值以租户属性或遥测数据的形式存储，可用于后续的消息处理。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotEnrichmentNodeTenantAttributesConfig")
 public class JnksIotGetTenantAttributeNode extends JnksIotAbstractGetEntityDataNode<TenantId> {
 

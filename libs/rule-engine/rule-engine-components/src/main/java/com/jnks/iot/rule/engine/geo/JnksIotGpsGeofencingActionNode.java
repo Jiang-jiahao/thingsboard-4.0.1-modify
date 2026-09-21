@@ -38,19 +38,19 @@ import static com.jnks.iot.rule.engine.util.GpsGeofencingEvents.OUTSIDE;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "gps geofencing events",
+        name = "GPS 地理围栏事件",
         version = 1,
         configClazz = JnksIotGpsGeofencingActionNodeConfiguration.class,
         relationTypes = {"Success", "Entered", "Left", "Inside", "Outside"},
-        nodeDescription = "Produces incoming messages using GPS based geofencing",
-        nodeDetails = "Extracts latitude and longitude parameters from incoming message and returns different events based on configuration parameters. " +
+        nodeDescription = "基于 GPS 地理围栏产生消息事件",
+        nodeDetails = "从传入消息中提取纬度和经度参数，并根据配置参数返回不同的事件。 " +
                 "<br><br>" +
-                "If an object with coordinates extracted from incoming message enters the geofence, sends a message with the type <code>Entered</code>. " +
-                "If an object leaves the geofence, sends a message with the type <code>Left</code>. " +
-                "If the presence monitoring strategy <b>\"On first message\"</b> is selected, sends messages via rule node connection type <code>Inside</code> or <code>Outside</code> only the first time the geofencing and duration conditions are satisfied; otherwise sends messages via rule node connection type <code>Success</code>. " +
-                "If the presence monitoring strategy <b>\"On each message\"</b> is selected, sends messages via rule node connection type <code>Inside</code> or <code>Outside</code> every time the geofencing condition is satisfied. " +
+                "若从传入消息中提取出坐标的对象进入地理围栏，则发送类型为 <code>Entered</code> 的消息。 " +
+                "若对象离开地理围栏，则发送类型为 <code>Left</code> 的消息。 " +
+                "若选择存在性监控策略 <b>\"首条消息时\"</b>，则仅在首次满足地理围栏和持续时间条件时，通过规则节点连接类型 <code>Inside</code> 或 <code>Outside</code> 发送消息；否则通过规则节点连接类型 <code>Success</code> 发送消息。 " +
+                "若选择存在性监控策略 <b>\"每条消息时\"</b>，则每次满足地理围栏条件时，都通过规则节点连接类型 <code>Inside</code> 或 <code>Outside</code> 发送消息。 " +
                 "<br><br>" +
-                "Output connections: <code>Entered</code>, <code>Left</code>, <code>Inside</code>, <code>Outside</code>, <code>Success</code>",
+                "输出连接：<code>Entered</code>、<code>Left</code>、<code>Inside</code>、<code>Outside</code>、<code>Success</code>",
         configDirective = "jnksIotActionNodeGpsGeofencingConfig"
 )
 public class JnksIotGpsGeofencingActionNode extends AbstractGeofencingNode<JnksIotGpsGeofencingActionNodeConfiguration> {

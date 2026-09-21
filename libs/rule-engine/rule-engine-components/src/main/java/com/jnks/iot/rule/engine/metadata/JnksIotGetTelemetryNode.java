@@ -35,14 +35,14 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RuleNode(type = ComponentType.ENRICHMENT,
-        name = "originator telemetry",
+        name = "来源方遥测",
         configClazz = JnksIotGetTelemetryNodeConfiguration.class,
         version = 2,
-        nodeDescription = "Adds message originator telemetry for selected time range into message metadata",
-        nodeDetails = "Useful when you need to get telemetry data set from the message originator for a specific time range " +
-                "instead of fetching just the latest telemetry or if you need to get the closest telemetry to the fetch interval start or end. " +
-                "Also, this node can be used for telemetry aggregation within configured fetch interval.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "将所选时间范围内消息来源方的遥测数据添加到消息元数据中",
+        nodeDetails = "当您需要获取消息来源方在特定时间范围内的遥测数据集时非常有用， " +
+                "而不是仅获取最新的遥测，或者当您需要获取最接近获取区间起点或终点的遥测时。 " +
+                "此外，该节点还可用于在配置的获取区间内聚合遥测。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotEnrichmentNodeGetTelemetryFromDatabase")
 public class JnksIotGetTelemetryNode implements JnksIotNode {
 

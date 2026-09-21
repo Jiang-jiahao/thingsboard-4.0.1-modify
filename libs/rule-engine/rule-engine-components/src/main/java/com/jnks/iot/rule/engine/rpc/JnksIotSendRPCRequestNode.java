@@ -29,11 +29,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "rpc call request",
+        name = "RPC 调用请求",
         configClazz = JnksIotSendRpcRequestNodeConfiguration.class,
-        nodeDescription = "Sends RPC call to device",
-        nodeDetails = "Expects messages with \"method\" and \"params\". Will forward response from device to next nodes." +
-                "If the RPC call request is originated by REST API call from user, will forward the response to user immediately.",
+        nodeDescription = "向设备发送 RPC 调用",
+        nodeDetails = "接收带有 \"method\" 和 \"params\" 的消息。将设备返回的响应转发到下一个节点。" +
+                "如果该 RPC 调用请求是由用户发起的 REST API 调用产生的，则立即将响应转发给用户。",
         configDirective = "jnksIotActionNodeRpcRequestConfig",
         icon = "call_made"
 )

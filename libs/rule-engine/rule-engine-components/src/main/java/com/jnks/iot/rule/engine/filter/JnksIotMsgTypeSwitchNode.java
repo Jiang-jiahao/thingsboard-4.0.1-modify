@@ -14,13 +14,13 @@ import com.jnks.iot.server.common.msg.JnksIotMsg;
 @Slf4j
 @RuleNode(
         type = ComponentType.FILTER,
-        name = "message type switch",
+        name = "消息类型切换",
         configClazz = EmptyNodeConfiguration.class,
         relationTypes = {}, // should always be empty. We add the relation types for this node in AnnotationComponentDiscoveryService.
         nodeDescription = "Route incoming messages by Message Type",
-        nodeDetails = "Sends messages with message types <b>\"Post attributes\", \"Post telemetry\", \"RPC Request\"</b>" +
-                " etc. via corresponding chain, otherwise <b>Other</b> chain is used.<br><br>" +
-                "Output connections: <i>Message type connection</i>, <code>Other</code> - if message type is custom or <code>Failure</code>",
+        nodeDetails = "通过相应的链发送消息类型为 <b>\"Post attributes\"、\"Post telemetry\"、\"RPC Request\"</b>" +
+                " 等的消息，否则使用 <b>Other</b> 链。<br><br>" +
+                "输出连接：<i>消息类型连接</i>、<code>Other</code>（若消息类型为自定义）或 <code>Failure</code>",
         configDirective = "jnksIotNodeEmptyConfig")
 public class JnksIotMsgTypeSwitchNode implements JnksIotNode {
 

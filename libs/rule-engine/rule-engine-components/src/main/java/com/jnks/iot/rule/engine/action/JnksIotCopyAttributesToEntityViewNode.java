@@ -42,12 +42,12 @@ import static com.jnks.iot.server.common.data.msg.JnksIotNodeConnectionType.SUCC
 @Slf4j
 @RuleNode(
         type = ComponentType.ACTION,
-        name = "copy to view",
+        name = "复制到视图",
         configClazz = EmptyNodeConfiguration.class,
-        nodeDescription = "Copy attributes from asset/device to entity view and changes message originator to related entity view",
-        nodeDetails = "Copy attributes from asset/device to related entity view according to entity view configuration. \n " +
-                "Copy will be done only for attributes that are between start and end dates and according to attribute keys configuration. \n" +
-                "Changes message originator to related entity view and produces new messages according to count of updated entity views",
+        nodeDescription = "将资产/设备的属性复制到实体视图，并将消息来源方改为关联的实体视图",
+        nodeDetails = "根据实体视图配置，将资产/设备的属性复制到关联的实体视图。 \n " +
+                "仅对处于开始和结束日期之间的属性、且符合属性键配置的属性执行复制。 \n" +
+                "将消息来源方改为关联的实体视图，并根据更新的实体视图数量生成新消息",
         configDirective = "jnksIotNodeEmptyConfig",
         icon = "content_copy"
 )

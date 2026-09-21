@@ -24,13 +24,13 @@ import java.util.stream.Collectors;
 @Slf4j
 @RuleNode(
         type = ComponentType.TRANSFORMATION,
-        name = "copy key-value pairs",
+        name = "复制键值对",
         version = 2,
         configClazz = JnksIotCopyKeysNodeConfiguration.class,
-        nodeDescription = "Copies key-value pairs from message to message metadata or vice-versa.",
-        nodeDetails = "Copies key-value pairs from the message to message metadata, or vice-versa, according to the configured direction and keys. " +
-                "Regular expressions can be used to define which keys-value pairs to copy. Any configured key not found in the source will be ignored.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "在消息与消息元数据之间复制键值对。",
+        nodeDetails = "根据配置的方向和键，在消息与消息元数据之间双向复制键值对。 " +
+                "可使用正则表达式指定要复制的键值对。源中不存在的已配置键将被忽略。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         configDirective = "jnksIotTransformationNodeCopyKeysConfig",
         icon = "content_copy"
 )

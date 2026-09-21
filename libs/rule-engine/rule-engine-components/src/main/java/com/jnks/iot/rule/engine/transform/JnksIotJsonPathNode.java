@@ -20,11 +20,11 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @RuleNode(
         type = ComponentType.TRANSFORMATION,
-        name = "json path",
+        name = "JSON 路径",
         configClazz = JnksIotJsonPathNodeConfiguration.class,
-        nodeDescription = "Transforms incoming message body using JSONPath expression.",
-        nodeDetails = "JSONPath expression specifies a path to an element or a set of elements in a JSON structure.<br><br>" +
-                "Output connections: <code>Success</code>, <code>Failure</code>.",
+        nodeDescription = "使用 JSONPath 表达式转换传入消息体。",
+        nodeDetails = "JSONPath 表达式用于指定 JSON 结构中某个元素或某组元素的路径。<br><br>" +
+                "输出连接：<code>Success</code>、<code>Failure</code>。",
         icon = "functions",
         configDirective = "jnksIotTransformationNodeJsonPathConfig"
 )

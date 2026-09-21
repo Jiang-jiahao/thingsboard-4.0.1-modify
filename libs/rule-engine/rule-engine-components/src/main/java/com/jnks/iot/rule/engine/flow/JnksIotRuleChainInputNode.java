@@ -22,15 +22,15 @@ import java.util.UUID;
 @Slf4j
 @RuleNode(
         type = ComponentType.FLOW,
-        name = "rule chain",
+        name = "子规则链",
         configClazz = JnksIotRuleChainInputNodeConfiguration.class,
         version = 1,
-        nodeDescription = "Transfers the message to another rule chain",
-        nodeDetails = "The incoming message is forwarded to the input node of target rule chain. " +
-                "If 'Forward message to the originator's default rule chain' is enabled, " +
-                "then target rule chain might be resolved dynamically based on incoming message originator. " +
-                "In this case rule chain specified in the configuration will be used as fallback rule chain.<br><br>" +
-                "Output connections: <i>Any connection(s) produced by output node(s) in the target rule chain.</i>",
+        nodeDescription = "将消息传输到另一个规则链",
+        nodeDetails = "传入消息会被转发到目标规则链的输入节点。 " +
+                "若启用「将消息转发到来源方的默认规则链」， " +
+                "则目标规则链可能会根据传入消息的来源方动态解析。 " +
+                "此时，配置中指定的规则链将作为备选规则链。<br><br>" +
+                "输出连接：<i>目标规则链中输出节点产生的任意连接。</i>",
         configDirective = "jnksIotFlowNodeRuleChainInputConfig",
         relationTypes = {},
         ruleChainNode = true,
