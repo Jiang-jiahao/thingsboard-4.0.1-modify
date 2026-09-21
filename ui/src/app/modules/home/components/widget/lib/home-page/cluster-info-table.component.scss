@@ -1,38 +1,56 @@
+@import "../../../../../../../scss/constants";
+
+/**
+ * 服务实例表：控制台里最需要能「纵向比对」的一张表。
+ * 原来每行挂一个橙色/红色三角图标，且服务 ID 会折成三行；
+ * 现在：服务 ID 等宽不折行，用量数字等宽右对齐，状态降级成一个小圆点。
+ */
 :host {
+  display: block;
+  overflow-x: auto;
+
   span.no-data-found {
     font-weight: 400;
-    font-size: 14px;
+    font-size: 13.5px;
     line-height: 20px;
-    letter-spacing: 0.2px;
-    color: rgba(0, 0, 0, 0.76);
+    color: $jnks-iot-text-muted;
   }
 
   .jnks-iot-resource-usage {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
     cursor: default;
-    &.jnks-iot-status-warn, &.jnks-iot-status-critical {
-      position: relative;
-      overflow: visible;
-      &:before {
-        position: absolute;
-        top: 15px;
-        left: -24px;
-        font-family: 'Material Icons Round';
-        font-size: 20px;
-        line-height: 1;
-      }
-    }
-    &.jnks-iot-status-warn {
-      color: #FAA405;
-      &:before {
-        content: "warning";
-        color: #FAA405;
-      }
-    }
+    font-family: $jnks-iot-font-data;
+    font-variant-numeric: tabular-nums;
+    font-size: 13.5px;
+    color: $jnks-iot-text;
+
+    &.jnks-iot-status-warn,
     &.jnks-iot-status-critical {
-      color: #D12730;
       &:before {
-        content: "warning";
-        color: #D12730;
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        flex: none;
+      }
+    }
+
+    &.jnks-iot-status-warn {
+      color: $jnks-iot-status-warn;
+
+      &:before {
+        background: $jnks-iot-status-warn;
+      }
+    }
+
+    &.jnks-iot-status-critical {
+      color: $jnks-iot-seal-color;
+
+      &:before {
+        background: $jnks-iot-seal-color;
       }
     }
   }
@@ -40,17 +58,62 @@
 
 :host ::ng-deep {
   .mdc-data-table__header-cell {
-    font-weight: 500;
-    font-size: 11px;
+    font-weight: 600;
+    font-size: 11.5px;
     line-height: 20px;
-    letter-spacing: 0.25px;
-    color: rgba(0, 0, 0, 0.54);
+    letter-spacing: 0.04em;
+    color: $jnks-iot-text-muted;
   }
+
   .mdc-data-table__cell {
     font-weight: 400;
-    font-size: 14px;
+    font-size: 13.5px;
     line-height: 20px;
-    letter-spacing: 0.2px;
-    color: rgba(0, 0, 0, 0.76);
+    color: $jnks-iot-text;
+  }
+
+  .mdc-data-table__header-row {
+    height: 40px;
+  }
+
+  // 行高用 min-height：设死 height 会让挤压的单元格换行、行被撑得很高
+  .mdc-data-table__row,
+  .mat-mdc-row {
+    min-height: 44px;
+  }
+
+  .mat-mdc-row,
+  .mat-mdc-header-row {
+    flex-wrap: nowrap;
+  }
+
+  .mat-mdc-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // 表格给一个最小宽度、容器横向可滚：硬压列宽会让用量列缩成 0（试过），
+  // 宁可让它在窄卡片里横向滚动，也别把数据挤没了
+  .mat-mdc-table {
+    min-width: 470px;
+  }
+
+  // 服务 ID：等宽、不折行（原来的 jnks-iot-coap-transport 会被断成三行）
+  .mat-column-serviceId {
+    font-family: $jnks-iot-font-data;
+  }
+
+  .mat-column-serviceType {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // 用量三列右对齐，方便一眼看出哪一个偏高
+  .mat-column-cpuUsage,
+  .mat-column-memoryUsage,
+  .mat-column-discUsage {
+    justify-content: flex-end;
+    text-align: right;
   }
 }

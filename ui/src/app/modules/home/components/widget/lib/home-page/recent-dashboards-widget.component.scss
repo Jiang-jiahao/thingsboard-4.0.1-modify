@@ -26,7 +26,7 @@
     position: relative;
     &:before {
       content: "";
-      border-radius: 8px;
+      border-radius: $jnks-iot-radius;
       position: absolute;
       top: 0;
       left: 0;
@@ -44,7 +44,7 @@
     font-size: 14px;
     line-height: 20px;
     letter-spacing: 0.25px;
-    color: rgba(0, 0, 0, 0.54);
+    color: $jnks-iot-text-muted;
   }
 
   .jnks-iot-starred-dashboard-row {
@@ -133,7 +133,7 @@
     font-size: 12px;
     line-height: 16px;
     letter-spacing: 0.25px;
-    color: rgba(0, 0, 0, 0.38);
+    color: $jnks-iot-text-faint;
     @media #{$mat-md-lg} {
       font-size: 11px;
     }
@@ -155,7 +155,7 @@
       text-overflow: ellipsis;
       white-space: nowrap;
       a {
-        color: rgba(0, 0, 0, 0.87);
+        color: $jnks-iot-text;
         border-bottom: none;
         &:hover, &:focus {
           border-bottom: none;
@@ -164,7 +164,7 @@
     }
     &.last-visited {
       cursor: default;
-      color: rgba(0, 0, 0, 0.54);
+      color: $jnks-iot-text-muted;
     }
     .star {
       cursor: pointer;
@@ -187,7 +187,7 @@
       font-size: 14px;
       line-height: 20px;
       letter-spacing: 0.2px;
-      color: rgba(0, 0, 0, 0.54);
+      color: $jnks-iot-text-muted;
       @media #{$mat-md-lg} {
         font-size: 11px;
         line-height: 16px;

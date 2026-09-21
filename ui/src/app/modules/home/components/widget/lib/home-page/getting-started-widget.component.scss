@@ -10,7 +10,7 @@
     font-size: 20px;
     line-height: 24px;
     letter-spacing: 0.1px;
-    color: rgba(0, 0, 0, 0.76);
+    color: $jnks-iot-text;
     padding-bottom: 24px;
     @media #{$mat-md-lg} {
       font-weight: 500;
@@ -57,14 +57,14 @@
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
-    color: rgba(0, 0, 0, 0.76);
+    color: $jnks-iot-text;
   }
 
   .jnks-iot-get-started .mat-step-label.mat-step-label-selected {
     font-weight: 500;
     font-size: 16px;
     line-height: 24px;
-    color: rgba(0, 0, 0, 0.87);
+    color: $jnks-iot-text;
   }
 
   .jnks-iot-get-started .mat-vertical-content {
@@ -74,12 +74,12 @@
       font-size: 14px;
       line-height: 20px;
       letter-spacing: 0.2px;
-      color: rgba(0, 0, 0, 0.54);
+      color: $jnks-iot-text-muted;
       em {
         font-style: normal;
         font-weight: 500;
         font-size: 13px;
-        color: rgba(0, 0, 0, 0.38);
+        color: $jnks-iot-text-faint;
       }
     }
     ul {
@@ -89,8 +89,8 @@
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      border-radius: 8px;
+      border: 1px solid $jnks-iot-line;
+      border-radius: $jnks-iot-radius;
       padding: 16px;
       p {
         margin-top: 16px;
@@ -115,12 +115,12 @@
             font-size: 12px;
             line-height: 16px;
             letter-spacing: 0.25px;
-            color: rgba(0, 0, 0, 0.38);
+            color: $jnks-iot-text-faint;
             overflow: hidden;
             white-space: break-spaces;
             word-break: break-all;
             & * {
-              color: rgba(0, 0, 0, 0.38);
+              color: $jnks-iot-text-faint;
               cursor: inherit;
               background: transparent;
             }

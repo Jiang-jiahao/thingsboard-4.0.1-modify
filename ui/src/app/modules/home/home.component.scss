@@ -1,5 +1,10 @@
 @import '../../../scss/constants';
 
+/**
+ * 外壳：左墨侧栏 + 右纸工作区。
+ * 收掉了原来的三处装饰：品牌头的径向渐变、主内容区的两层径向渐变、顶栏的投影。
+ * 层级只靠 1px 描边表达。
+ */
 :host {
   display: flex;
   width: 100%;
@@ -11,9 +16,9 @@
   }
 
   mat-sidenav.jnks-iot-site-sidenav {
-    width: 288px;
+    width: 236px;
     border-right: 1px solid $jnks-iot-sidebar-border !important;
-    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.18);
+    box-shadow: none;
     background: $jnks-iot-sidebar-bg !important;
 
     @media (max-width:456px) {
@@ -26,22 +31,20 @@
       white-space: nowrap;
 
       .jnks-iot-nav-header-toolbar {
-        min-height: 88px;
+        min-height: 64px;
         height: inherit;
-        padding: 10px 16px;
+        padding: 0 20px;
         z-index: 2;
         flex-shrink: 0;
         white-space: nowrap;
         border-bottom: 1px solid $jnks-iot-sidebar-border;
-        background:
-          radial-gradient(ellipse 100% 120% at 0% -20%, rgba($jnks-iot-accent-color, 0.22) 0%, transparent 50%),
-          linear-gradient(180deg, lighten($jnks-iot-sidebar-header-bg, 3%) 0%, $jnks-iot-sidebar-header-bg 100%);
+        background: $jnks-iot-sidebar-bg;
         box-shadow: none;
 
         & > div {
           display: flex;
           align-items: center;
-          min-height: 68px;
+          min-height: 64px;
           height: auto;
         }
       }
@@ -50,19 +53,19 @@
     .jnks-iot-side-menu-toolbar {
       overflow-y: auto;
       height: inherit;
-      padding: 12px 0 20px;
+      padding: 10px 0 20px;
       background: $jnks-iot-sidebar-bg !important;
     }
   }
 
   .jnks-iot-primary-toolbar {
     z-index: 3;
-    min-height: 60px !important;
-    padding: 0 12px 0 8px !important;
+    min-height: 56px !important;
+    padding: 0 16px 0 8px !important;
     color: $jnks-iot-topbar-text !important;
     background: $jnks-iot-topbar-bg !important;
-    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
-    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+    border-bottom: 1px solid $jnks-iot-line;
+    box-shadow: none !important;
 
     // 覆盖全局 .mat-toolbar.mat-primary { .mat-icon { color: white } }
     &.mat-primary,
@@ -75,12 +78,12 @@
 
     .mat-mdc-icon-button {
       color: $jnks-iot-topbar-text !important;
-      border-radius: 10px;
-      transition: background-color 0.2s ease, color 0.2s ease;
+      border-radius: $jnks-iot-radius;
+      transition: background-color 0.15s ease, color 0.15s ease;
 
       &:hover {
         color: $jnks-iot-primary-color !important;
-        background: rgba($jnks-iot-secondary-color, 0.1) !important;
+        background: rgba($jnks-iot-primary-color, 0.05) !important;
 
         .mat-icon {
           color: $jnks-iot-primary-color !important;
@@ -88,9 +91,9 @@
       }
 
       .mat-icon {
-        font-size: 24px;
-        width: 24px;
-        height: 24px;
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
         color: $jnks-iot-topbar-text !important;
       }
     }
@@ -108,11 +111,12 @@
         }
 
         a:hover, a:focus {
-          color: $jnks-iot-secondary-color;
+          color: $jnks-iot-primary-color;
         }
 
         h1 {
           font-weight: 600;
+          font-size: 16px;
           color: $jnks-iot-topbar-text;
         }
       }
@@ -141,10 +145,7 @@
   .jnks-iot-main-content {
     overflow: auto;
     position: relative;
-    background:
-      radial-gradient(ellipse 70% 50% at 0% 0%, rgba($jnks-iot-secondary-color, 0.07) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 40% at 100% 100%, rgba($jnks-iot-primary-color, 0.05) 0%, transparent 50%),
-      $jnks-iot-surface-page;
+    background: $jnks-iot-surface-page;
 
     > :not(router-outlet) {
       flex: 1;

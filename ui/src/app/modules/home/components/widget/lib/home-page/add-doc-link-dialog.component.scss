@@ -1,3 +1,5 @@
+@import "../../../../../../../scss/constants";
+
 :host {
   .jnks-iot-add-doc-link-dialog {
     width: 480px;
@@ -5,10 +7,10 @@
       padding: 0 24px;
     }
     h2 {
-      color: rgba(0, 0, 0, 0.76);
+      color: $jnks-iot-text;
     }
     .mat-icon {
-      color: rgba(0, 0, 0, 0.54);
+      color: $jnks-iot-text-muted;
     }
   }
 }

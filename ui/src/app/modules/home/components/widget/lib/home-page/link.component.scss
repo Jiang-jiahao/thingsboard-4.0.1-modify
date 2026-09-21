@@ -1,9 +1,11 @@
+@import "../../../../../../../scss/constants";
+
 :host {
   .jnks-iot-edit-link {
     padding: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.04);
-    border-radius: 10px;
+    border: 1px solid $jnks-iot-line;
+    box-shadow: none;
+    border-radius: $jnks-iot-radius;
     &.edit-mode {
       border: 1px solid rgba(48, 86, 128, 0.32);
     }
@@ -15,9 +17,9 @@
     justify-content: center;
     padding: 8px;
     background: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.04);
-    border-radius: 10px;
+    border: 1px solid $jnks-iot-line;
+    box-shadow: none;
+    border-radius: $jnks-iot-radius;
     .jnks-iot-link-container {
       display: flex;
       flex-direction: row;
@@ -25,7 +27,7 @@
       .jnks-iot-link-icon-container {
         height: 40px;
         padding: 8px;
-        background: #F3F6FA;
+        background: $jnks-iot-surface-page;
         border-radius: 6px;
         margin-right: 8px;
       }
@@ -34,13 +36,13 @@
         font-size: 14px;
         line-height: 20px;
         letter-spacing: 0.2px;
-        color: rgba(0, 0, 0, 0.87);
+        color: $jnks-iot-text;
       }
     }
   }
   .jnks-iot-edit-buttons {
     .mat-icon {
-      color: rgba(0, 0, 0, 0.38);
+      color: $jnks-iot-text-faint;
     }
   }
 }

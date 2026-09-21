@@ -1,55 +1,67 @@
-<div class="jnks-iot-login-content mat-app-background jnks-iot-dark flex flex-1 items-center justify-center">
-  <mat-card appearance="raised" style="max-height: 80vh; overflow-y: auto;">
-    <mat-card-content>
-      <form class="jnks-iot-login-form" [formGroup]="loginFormGroup" (ngSubmit)="login()">
-        <fieldset class="flex flex-col">
-          <div class="flex flex-col items-center justify-start" style="padding: 15px 0;">
-            <jnks-iot-logo class="login-logo"></jnks-iot-logo>
-          </div>
-          <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
-          </mat-progress-bar>
-          <span style="height: 4px;" *ngIf="!(isLoading$ | async)"></span>
-          <div jnks-iot-toast class="layout-padding flex flex-col">
-            <span style="height: 50px;"></span>
-            <div class="oauth-container jnks-iot-default flex flex-col gap-4" *ngIf="oauth2Clients?.length">
-              <ng-container *ngFor="let oauth2Client of oauth2Clients">
-                <a mat-raised-button class="login-with-button" href="{{ getOAuth2Uri(oauth2Client) }}">
-                  <mat-icon class="icon" svgIcon="{{ oauth2Client.icon }}"></mat-icon>
-                  {{ 'login.login-with' | translate: {name: oauth2Client.name} }}
-                </a>
-              </ng-container>
-              <div class="container-divider">
-                <div class="line"><mat-divider></mat-divider></div>
-                <div class="text mat-typography">{{ "login.or" | translate | uppercase }}</div>
-                <div class="line"><mat-divider></mat-divider></div>
-              </div>
-            </div>
-            <mat-form-field class="jnks-iot-appearance-transparent">
-              <mat-label translate>login.username</mat-label>
-              <input id="username-input" matInput type="email" autofocus formControlName="username" email required/>
-              <mat-icon matPrefix>email</mat-icon>
-              <mat-error *ngIf="loginFormGroup.get('username').invalid">
-                {{ 'login.invalid-email-format' | translate }}
-              </mat-error>
-            </mat-form-field>
-            <mat-form-field class="jnks-iot-appearance-transparent">
-              <mat-label translate>common.password</mat-label>
-              <input id="password-input" matInput type="password" formControlName="password"/>
-              <jnks-iot-toggle-password matSuffix></jnks-iot-toggle-password>
-              <mat-icon matPrefix>lock</mat-icon>
-            </mat-form-field>
-            <div class="forgot-password flex items-center justify-end">
-              <button class="jnks-iot-reset-password" mat-button type="button" routerLink="/login/resetPasswordRequest">
-                {{ (passwordViolation ? 'login.reset-password' : 'login.forgot-password') | translate }}
-              </button>
-            </div>
-            <div class="jnks-iot-action-button flex flex-col">
-              <button mat-raised-button color="accent" [disabled]="(isLoading$ | async)"
-                      type="submit">{{ 'login.login' | translate }}</button>
+<div class="jnks-iot-login-page">
+  <!-- 左：墨。品牌与产品定位压在整块墨面上，右缘一条印边收口 -->
+  <section class="login-brand">
+    <div class="login-brand-top">
+      <jnks-iot-logo class="login-logo"></jnks-iot-logo>
+    </div>
+    <div class="login-claim">
+      <h1>工业设备的接入、<br>治理与运行</h1>
+      <p>从设备接入到规则编排，从遥测采集到组态监视，一套平台管到底。</p>
+    </div>
+  </section>
+
+  <!-- 右：纸。表单安静、标签外露（不靠 placeholder 当标签） -->
+  <section class="login-form-side">
+    <form class="jnks-iot-login-form" [formGroup]="loginFormGroup" (ngSubmit)="login()">
+      <fieldset class="login-fieldset">
+        <h2>登录平台</h2>
+        <p class="login-sub">请使用机构分配的平台账号</p>
+
+        <mat-progress-bar mode="indeterminate" *ngIf="isLoading$ | async"></mat-progress-bar>
+        <span class="progress-spacer" *ngIf="!(isLoading$ | async)"></span>
+
+        <div jnks-iot-toast class="login-toast">
+          <div class="oauth-container" *ngIf="oauth2Clients?.length">
+            <ng-container *ngFor="let oauth2Client of oauth2Clients">
+              <a mat-raised-button class="login-with-button" href="{{ getOAuth2Uri(oauth2Client) }}">
+                <mat-icon class="icon" svgIcon="{{ oauth2Client.icon }}"></mat-icon>
+                {{ 'login.login-with' | translate: {name: oauth2Client.name} }}
+              </a>
+            </ng-container>
+            <div class="container-divider">
+              <div class="line"><mat-divider></mat-divider></div>
+              <div class="text">{{ "login.or" | translate }}</div>
+              <div class="line"><mat-divider></mat-divider></div>
             </div>
           </div>
-        </fieldset>
-      </form>
-    </mat-card-content>
-  </mat-card>
+
+          <mat-form-field appearance="outline">
+            <mat-label translate>login.username</mat-label>
+            <input id="username-input" matInput type="email" autofocus formControlName="username" email required/>
+            <mat-error *ngIf="loginFormGroup.get('username').invalid">
+              {{ 'login.invalid-email-format' | translate }}
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label translate>common.password</mat-label>
+            <input id="password-input" matInput type="password" formControlName="password"/>
+            <jnks-iot-toggle-password matSuffix></jnks-iot-toggle-password>
+          </mat-form-field>
+
+          <div class="forgot-password">
+            <button class="jnks-iot-reset-password" mat-button type="button" routerLink="/login/resetPasswordRequest">
+              {{ (passwordViolation ? 'login.reset-password' : 'login.forgot-password') | translate }}
+            </button>
+          </div>
+
+          <div class="jnks-iot-action-button">
+            <button mat-raised-button color="primary" [disabled]="(isLoading$ | async)"
+                    type="submit">{{ 'login.login' | translate }}</button>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+    <div class="login-legal">仅限授权人员访问</div>
+  </section>
 </div>

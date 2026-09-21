@@ -1,3 +1,5 @@
+@import "../../../../../../../scss/constants";
+
 :host {
   .jnks-iot-edit-links-dialog {
     width: 480px;
@@ -8,10 +10,10 @@
       padding: 0 24px;
     }
     h2 {
-      color: rgba(0, 0, 0, 0.76);
+      color: $jnks-iot-text;
     }
     .mat-icon {
-      color: rgba(0, 0, 0, 0.54);
+      color: $jnks-iot-text-muted;
     }
     .mat-mdc-dialog-content {
       padding: 24px 24px 8px 24px;
@@ -24,7 +26,7 @@
     height: 24px;
     margin-left: 12px;
     .mat-icon {
-      color: rgba(0, 0, 0, 0.38);
+      color: $jnks-iot-text-faint;
     }
   }
   .jnks-iot-add-link-button {
@@ -37,13 +39,13 @@
     background: #FFFFFF;
     padding: 8px;
     border: 2px dashed rgba(0, 0, 0, 0.08);
-    border-radius: 10px;
+    border-radius: $jnks-iot-radius;
     .jnks-iot-add-icon {
       color: rgba(0, 0, 0, 0.12);
     }
     &:hover {
       .jnks-iot-add-icon {
-        color: rgba(0, 0, 0, 0.38);
+        color: $jnks-iot-text-faint;
       }
     }
   }

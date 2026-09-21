@@ -20,9 +20,9 @@
   }
 
   .jnks-iot-version-info-container {
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.04);
-    border-radius: 10px;
+    border: 1px solid $jnks-iot-line;
+    box-shadow: none;
+    border-radius: $jnks-iot-radius;
     padding: 8px 16px 4px 16px;
     overflow: hidden;
     white-space: nowrap;
@@ -35,7 +35,7 @@
     &.up-to-date {
       box-shadow: none;
       border: none;
-      background: #F3F6FA;
+      background: $jnks-iot-surface-page;
       white-space: initial;
       text-align: center;
     }
@@ -46,7 +46,7 @@
     font-size: 14px;
     line-height: 20px;
     letter-spacing: 0.2px;
-    color: rgba(0, 0, 0, 0.76);
+    color: $jnks-iot-text;
     position: relative;
     border-bottom: none;
     @media #{$mat-md-lg} {
@@ -78,7 +78,7 @@
     font-size: 18px;
     line-height: 24px;
     letter-spacing: 0.15px;
-    color: rgba(0, 0, 0, 0.87);
+    color: $jnks-iot-text;
     @media #{$mat-md-lg} {
       font-size: 12px;
       line-height: 14px;
@@ -107,7 +107,7 @@
     font-size: 14px;
     line-height: 20px;
     letter-spacing: 0.2px;
-    color: rgba(0, 0, 0, 0.76);
+    color: $jnks-iot-text;
     @media #{$mat-md-lg} {
       font-size: 11px;
       line-height: 16px;

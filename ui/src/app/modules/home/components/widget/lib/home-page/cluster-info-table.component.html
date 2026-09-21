@@ -1,7 +1,7 @@
 <table mat-table [dataSource]="dataSource" matSort [matSortActive]="pageLink.sortOrder?.property"
        [matSortDirection]="pageLink.sortDirection()" matSortDisableClear>
   <ng-container matColumnDef="serviceId">
-    <mat-header-cell *matHeaderCellDef style="width: 35%;" mat-sort-header>
+    <mat-header-cell *matHeaderCellDef style="width: 34%;" mat-sort-header>
       {{ 'widgets.cluster-info.service-id' | translate }}
     </mat-header-cell>
     <mat-cell *matCellDef="let serviceData">
@@ -9,7 +9,7 @@
     </mat-cell>
   </ng-container>
   <ng-container matColumnDef="serviceType">
-    <mat-header-cell *matHeaderCellDef style="width: 35%;" mat-sort-header>
+    <mat-header-cell *matHeaderCellDef style="width: 22%;" mat-sort-header>
       {{ 'widgets.cluster-info.service-type' | translate }}
     </mat-header-cell>
     <mat-cell *matCellDef="let serviceData">
@@ -17,7 +17,7 @@
     </mat-cell>
   </ng-container>
   <ng-container matColumnDef="cpuUsage">
-    <mat-header-cell *matHeaderCellDef style="width: 10%;" mat-sort-header>
+    <mat-header-cell *matHeaderCellDef style="width: 14%;" mat-sort-header>
       {{ 'widgets.system-info.cpu' | translate }}
     </mat-header-cell>
     <mat-cell *matCellDef="let serviceData"
@@ -29,7 +29,7 @@
     </mat-cell>
   </ng-container>
   <ng-container matColumnDef="memoryUsage">
-    <mat-header-cell *matHeaderCellDef style="width: 10%;" mat-sort-header>
+    <mat-header-cell *matHeaderCellDef style="width: 15%;" mat-sort-header>
       {{ 'widgets.system-info.ram' | translate }}
     </mat-header-cell>
     <mat-cell *matCellDef="let serviceData"
@@ -41,7 +41,7 @@
     </mat-cell>
   </ng-container>
   <ng-container matColumnDef="discUsage">
-    <mat-header-cell *matHeaderCellDef style="width: 10%;" mat-sort-header>
+    <mat-header-cell *matHeaderCellDef style="width: 15%;" mat-sort-header>
       {{ 'widgets.system-info.disk' | translate }}
     </mat-header-cell>
     <mat-cell *matCellDef="let serviceData"

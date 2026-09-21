@@ -16,27 +16,68 @@ $mat-md-lg: "screen and (min-width: 960px) and (max-width: 1819px)";
 
 $primary-hue-3: rgb(207, 216, 220) !default;
 
-// JnksIOT — premium navy / steel blue (no bright teal)
-$jnks-iot-primary-color: #0c2340;
-$jnks-iot-secondary-color: #1e4976;
-$jnks-iot-accent-color: #3b6ea8;
-$jnks-iot-hue3-color: #94b8e0;
+// ─────────────────────────────────────────────────────────────
+// 杰能科世 — 印与墨
+// 取色来自标识本身：标识是一枚圆章（GENENKOSY/杰能科世），
+// 所以深面用墨、强调用印泥朱砂、中性面用瓷白纸灰。
+// 朱砂只给三处：当前项、严重、危险（不再满地红）。
+// ─────────────────────────────────────────────────────────────
 
-$jnks-iot-dark-primary-color: #5b9bd5;
+$jnks-iot-primary-color: #0b1b2b;      // 墨：主色，主要动作与深面
+$jnks-iot-secondary-color: #12283d;    // 墨·浅
+$jnks-iot-accent-color: #1c3853;       // accent 槽给墨的中档
+$jnks-iot-hue3-color: #cbd5e1;
 
-$jnks-iot-sidebar-bg: #060f18;
-$jnks-iot-sidebar-header-bg: #0a1624;
-$jnks-iot-sidebar-text: rgba(255, 255, 255, 0.88);
-$jnks-iot-sidebar-text-muted: rgba(255, 255, 255, 0.55);
-$jnks-iot-sidebar-active-bg: rgba(59, 111, 168, 0.2);
-$jnks-iot-sidebar-border: rgba(148, 163, 184, 0.14);
+$jnks-iot-dark-primary-color: #7fa6c9; // 深色主题下提亮的主色
+
+// 朱砂（印泥）—— 品牌强调 + 危险语义合并
+$jnks-iot-seal-color: #c1272d;
+$jnks-iot-seal-soft: rgba(193, 39, 45, 0.08);
+
+// 状态四态：正常 / 偏高 / 严重 / 停用
+$jnks-iot-status-ok: #0e7265;
+$jnks-iot-status-warn: #a16207;
+$jnks-iot-status-crit: #c1272d;
+$jnks-iot-status-idle: #64748b;
+
+// 中性：瓷白与纸灰
+$jnks-iot-text: #16232e;
+$jnks-iot-text-muted: #5c6b7a;
+$jnks-iot-text-faint: #8a98a6;
+$jnks-iot-line: #e5e9f0;
+$jnks-iot-line-strong: #d4dbe5;
+$jnks-iot-surface-card: #ffffff;
+$jnks-iot-surface-page: #f6f8fa;
+
+$jnks-iot-sidebar-bg: #0b1b2b;
+$jnks-iot-sidebar-header-bg: #0f2233;
+$jnks-iot-sidebar-text: rgba(255, 255, 255, 0.86);
+$jnks-iot-sidebar-text-muted: rgba(255, 255, 255, 0.42);
+$jnks-iot-sidebar-active-bg: rgba(255, 255, 255, 0.06);
+$jnks-iot-sidebar-border: rgba(255, 255, 255, 0.1);
 
 $jnks-iot-topbar-bg: #ffffff;
-$jnks-iot-topbar-text: #0f172a;
-$jnks-iot-topbar-muted: #64748b;
-$jnks-iot-surface-page: #eef2f7;
+$jnks-iot-topbar-text: #16232e;
+$jnks-iot-topbar-muted: #5c6b7a;
 
 // Entity details / dialogs
-$jnks-iot-details-header-start: #0a1624;
-$jnks-iot-details-header-mid: #0c2340;
-$jnks-iot-details-header-end: #1a3d66;
+$jnks-iot-details-header-start: #0b1b2b;
+$jnks-iot-details-header-mid: #12283d;
+$jnks-iot-details-header-end: #1c3853;
+
+// 整站只有一个圆角
+$jnks-iot-radius: 6px;
+
+// 字体三件套：
+//   UI  —— 中文系统黑体（Roboto / Plus Jakarta Sans 都没有中文字形，
+//          之前中文全部靠系统回落，与拉丁数字是两套字面）
+//   标题位 —— 宋体，接住标识里的书法主标（中文界面极少这么做）
+//   数据 —— 等宽，设备 ID / 时间 / 百分比靠它对齐
+$jnks-iot-font-ui: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Source Han Sans SC",
+  system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+$jnks-iot-font-display: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif CJK SC", serif;
+$jnks-iot-font-data: "SF Mono", "JetBrains Mono", Menlo, Consolas, "Courier New", monospace;
+
+// 给 Material 用：它会把字体塞进 `font:` 简写，那里不能出现 system-ui 这类关键字，
+// 所以单独留一份「全是带引号字族名」的字符串
+$jnks-iot-material-font: '"PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Source Han Sans SC", Roboto, "Helvetica Neue", sans-serif';

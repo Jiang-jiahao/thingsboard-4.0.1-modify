@@ -31,22 +31,22 @@
     justify-content: center;
     padding: 12px;
     background: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.04);
-    border-radius: 10px;
+    border: 1px solid $jnks-iot-line;
+    box-shadow: none;
+    border-radius: $jnks-iot-radius;
     @media #{$mat-md-lg} {
       height: 22px;
       padding: 0 8px;
     }
     &:hover {
-      border: 1px solid rgba(0, 0, 0, 0.12);
-      box-shadow: 0 4px 10px rgba(23, 33, 90, 0.08);
+      border: 1px solid $jnks-iot-line-strong;
+      box-shadow: none;
     }
     .jnks-iot-feature-text {
       font-weight: 400;
       font-size: 14px;
       line-height: 20px;
-      color: rgba(0, 0, 0, 0.87);
+      color: $jnks-iot-text;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -81,7 +81,7 @@
     &.configured {
       .jnks-iot-feature-status {
         color: #198038;
-        background: #F3F6FA;
+        background: $jnks-iot-surface-page;
       }
     }
   }
