@@ -18,7 +18,7 @@
           "layoutY": 294
         },
         "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode",
-        "name": "Save Timeseries",
+        "name": "保存时序数据",
         "configurationVersion": 1,
         "configuration": {
           "defaultTTL": 0,
@@ -34,7 +34,7 @@
           "layoutY": 221
         },
         "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgAttributesNode",
-        "name": "Save Client Attributes",
+        "name": "保存客户端属性",
         "configurationVersion": 3,
         "configuration": {
           "processingSettings": {
@@ -52,7 +52,7 @@
           "layoutY": 309
         },
         "type": "com.jnks.iot.rule.engine.filter.JnksIotMsgTypeSwitchNode",
-        "name": "Message Type Switch",
+        "name": "消息类型分流",
         "configuration": {
           "version": 0
         }
@@ -63,7 +63,7 @@
           "layoutY": 383
         },
         "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
-        "name": "Log RPC from Device",
+        "name": "记录设备 RPC",
         "configuration": {
           "scriptLang": "TBEL",
           "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
@@ -76,7 +76,7 @@
           "layoutY": 444
         },
         "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
-        "name": "Log Other",
+        "name": "记录其它消息",
         "configuration": {
           "scriptLang": "TBEL",
           "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
@@ -89,7 +89,7 @@
           "layoutY": 507
         },
         "type": "com.jnks.iot.rule.engine.rpc.JnksIotSendRPCRequestNode",
-        "name": "RPC Call Request",
+        "name": "RPC 请求调用",
         "configuration": {
           "timeoutInSeconds": 60
         }
@@ -101,7 +101,7 @@
           "layoutY": 307
         },
         "type": "com.jnks.iot.rule.engine.profile.JnksIotDeviceProfileNode",
-        "name": "Device Profile Node",
+        "name": "设备档案节点",
         "configuration": {
           "persistAlarmRulesState": false,
           "fetchAlarmRulesStateOnStart": false

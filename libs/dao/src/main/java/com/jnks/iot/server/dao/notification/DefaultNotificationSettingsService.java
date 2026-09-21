@@ -147,16 +147,16 @@ public class DefaultNotificationSettingsService implements NotificationSettingsS
     @Transactional
     @Override
     public void createDefaultNotificationConfigs(TenantId tenantId) {
-        NotificationTarget allUsers = createTarget(tenantId, "All users", new AllUsersFilter(),
-                tenantId.isSysTenantId() ? "All platform users" : "All users in scope of the tenant");
-        NotificationTarget tenantAdmins = createTarget(tenantId, "Tenant administrators", new TenantAdministratorsFilter(),
-                tenantId.isSysTenantId() ? "All tenant administrators" : "Tenant administrators");
+        NotificationTarget allUsers = createTarget(tenantId, "所有用户", new AllUsersFilter(),
+                tenantId.isSysTenantId() ? "平台所有用户" : "租户范围内的所有用户");
+        NotificationTarget tenantAdmins = createTarget(tenantId, "租户管理员", new TenantAdministratorsFilter(),
+                tenantId.isSysTenantId() ? "所有租户管理员" : "租户管理员");
 
         defaultNotifications.create(tenantId, DefaultNotifications.maintenanceWork);
 
         if (tenantId.isSysTenantId()) {
-            NotificationTarget sysAdmins = createTarget(tenantId, "System administrators", new SystemAdministratorsFilter(), "All system administrators");
-            NotificationTarget affectedTenantAdmins = createTarget(tenantId, "Affected tenant's administrators", new AffectedTenantAdministratorsFilter(), "");
+            NotificationTarget sysAdmins = createTarget(tenantId, "系统管理员", new SystemAdministratorsFilter(), "所有系统管理员");
+            NotificationTarget affectedTenantAdmins = createTarget(tenantId, "受影响的租户管理员", new AffectedTenantAdministratorsFilter(), "");
 
             defaultNotifications.create(tenantId, DefaultNotifications.entitiesLimitForSysadmin, sysAdmins.getId());
             defaultNotifications.create(tenantId, DefaultNotifications.entitiesLimitForTenant, affectedTenantAdmins.getId());
@@ -172,10 +172,10 @@ public class DefaultNotificationSettingsService implements NotificationSettingsS
             return;
         }
 
-        NotificationTarget originatorEntityOwnerUsers = createTarget(tenantId, "Users of the entity owner", new OriginatorEntityOwnerUsersFilter(),
-                "In case trigger entity (e.g. created device or alarm) is owned by customer, then recipients are this customer's users, otherwise tenant admins");
-        NotificationTarget affectedUser = createTarget(tenantId, "Affected user", new AffectedUserFilter(),
-                "If rule trigger is an action that affects some user (e.g. alarm assigned to user) - this user");
+        NotificationTarget originatorEntityOwnerUsers = createTarget(tenantId, "实体所属方的用户", new OriginatorEntityOwnerUsersFilter(),
+                "若触发实体（如新建的设备或告警）归属于客户，则接收方为该客户的用户，否则为租户管理员");
+        NotificationTarget affectedUser = createTarget(tenantId, "受影响的用户", new AffectedUserFilter(),
+                "若规则触发的是影响某个用户的动作（如把告警指派给用户），则接收方为该用户");
 
         defaultNotifications.create(tenantId, DefaultNotifications.newAlarm, tenantAdmins.getId());
         defaultNotifications.create(tenantId, DefaultNotifications.alarmUpdate, tenantAdmins.getId());
@@ -190,9 +190,9 @@ public class DefaultNotificationSettingsService implements NotificationSettingsS
     public void updateDefaultNotificationConfigs(TenantId tenantId) {
         if (tenantId.isSysTenantId()) {
             NotificationTarget sysAdmins = notificationTargetService.findNotificationTargetsByTenantIdAndUsersFilterType(tenantId, UsersFilterType.SYSTEM_ADMINISTRATORS).stream()
-                    .findFirst().orElseGet(() -> createTarget(tenantId, "System administrators", new SystemAdministratorsFilter(), "All system administrators"));
+                    .findFirst().orElseGet(() -> createTarget(tenantId, "系统管理员", new SystemAdministratorsFilter(), "所有系统管理员"));
             NotificationTarget affectedTenantAdmins = notificationTargetService.findNotificationTargetsByTenantIdAndUsersFilterType(tenantId, UsersFilterType.AFFECTED_TENANT_ADMINISTRATORS).stream()
-                    .findFirst().orElseGet(() -> createTarget(tenantId, "Affected tenant's administrators", new AffectedTenantAdministratorsFilter(), ""));
+                    .findFirst().orElseGet(() -> createTarget(tenantId, "受影响的租户管理员", new AffectedTenantAdministratorsFilter(), ""));
 
             if (!isNotificationConfigured(tenantId, NotificationType.RATE_LIMITS)) {
                 defaultNotifications.create(tenantId, DefaultNotifications.exceededRateLimits, affectedTenantAdmins.getId());

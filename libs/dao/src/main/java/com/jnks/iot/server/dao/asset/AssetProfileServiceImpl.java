@@ -246,7 +246,7 @@ public class AssetProfileServiceImpl extends CachedVersionedEntityService<AssetP
         assetProfile.setTenantId(tenantId);
         assetProfile.setDefault(defaultProfile);
         assetProfile.setName(profileName);
-        assetProfile.setDescription("Default asset profile");
+        assetProfile.setDescription("默认资产档案");
         return saveAssetProfile(assetProfile, true, publishSaveEvent);
     }
 

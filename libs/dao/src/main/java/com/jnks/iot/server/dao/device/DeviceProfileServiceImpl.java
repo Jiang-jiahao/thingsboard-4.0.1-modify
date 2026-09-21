@@ -292,7 +292,7 @@ public class DeviceProfileServiceImpl extends CachedVersionedEntityService<Devic
         deviceProfile.setType(DeviceProfileType.DEFAULT);
         deviceProfile.setTransportType(DeviceTransportType.DEFAULT);
         deviceProfile.setProvisionType(DeviceProfileProvisionType.DISABLED);
-        deviceProfile.setDescription("Default device profile");
+        deviceProfile.setDescription("默认设备档案");
         DeviceProfileData deviceProfileData = new DeviceProfileData();
         DefaultDeviceProfileConfiguration configuration = new DefaultDeviceProfileConfiguration();
         DefaultDeviceProfileTransportConfiguration transportConfiguration = new DefaultDeviceProfileTransportConfiguration();

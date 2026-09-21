@@ -144,13 +144,13 @@ public class TenantProfileServiceImpl extends AbstractCachedEntityService<Tenant
         if (defaultTenantProfile == null) {
             defaultTenantProfile = new TenantProfile();
             defaultTenantProfile.setDefault(true);
-            defaultTenantProfile.setName("Default");
+            defaultTenantProfile.setName("默认");
             TenantProfileData profileData = new TenantProfileData();
             DefaultTenantProfileConfiguration configuration = new DefaultTenantProfileConfiguration();
             configuration.setMaxDebugModeDurationMinutes(DEBUG_MODE_DEFAULT_DURATION_MINUTES);
             profileData.setConfiguration(configuration);
             defaultTenantProfile.setProfileData(profileData);
-            defaultTenantProfile.setDescription("Default tenant profile");
+            defaultTenantProfile.setDescription("默认租户档案");
             defaultTenantProfile.setIsolatedJnksIotRuleEngine(false);
             defaultTenantProfile = saveTenantProfile(tenantId, defaultTenantProfile);
         }
