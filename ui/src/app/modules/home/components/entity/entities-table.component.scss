@@ -10,7 +10,9 @@
 
   .jnks-iot-entities-table-root {
     display: flex;
-    flex-direction: column;
+    // 详情停靠时与列表并排（详情未打开时只有一个子元素，不影响原状）
+    flex-direction: row;
+    align-items: stretch;
     flex: 1;
     min-height: 0;
     width: 100%;
@@ -20,9 +22,10 @@
   }
 
   mat-drawer-container.jnks-iot-entities-table-container {
-    flex: 1;
+    // width: 100% 会让它在并排时不肯收缩，把详情面板挤出屏幕；靠 flex 分配宽度
+    flex: 1 1 0;
+    min-width: 0;
     min-height: 0;
-    width: 100%;
     height: 100%;
     overflow: clip;
 
@@ -42,61 +45,66 @@
     box-sizing: border-box;
   }
 
+  /**
+   * 详情：右侧停靠面板，不再用居中模态盖住列表。
+   * 依据 ISA-101「一屏呈现一个工艺段，反对弹窗」——列表与详情同屏，
+   * 点另一行可直接切换；关闭用面板自带的关闭按钮，也不再点背景误关。
+   */
   .jnks-iot-entity-details-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1200;
+    // 占位而非浮层：不再遮挡列表右侧的列，列表自动收窄，两边都完整可见
+    order: 2;
+    flex: none;
+    width: min(480px, 44vw);
+    height: 100%;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px 16px;
-    background: rgba(15, 23, 42, 0.45);
-    backdrop-filter: blur(4px);
-    animation: jnksIotEntityOverlayIn 0.22s ease-out;
+    align-items: stretch;
+    background: transparent;
   }
 
   .jnks-iot-entity-details-dialog {
     display: flex;
     flex-direction: column;
-    width: min(1040px, 100%);
+    width: 100%;
     max-width: 100%;
-    height: min(88vh, 900px);
+    height: 100%;
     max-height: 100%;
-    border-radius: $jnks-iot-radius;
+    border-radius: 0;
     overflow: hidden;
     background: #fff;
-    border: 1px solid $jnks-iot-line;
-    box-shadow: 0 12px 32px rgba(11, 27, 43, 0.16);
-    animation: jnksIotEntityDialogIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    border-left: 1px solid $jnks-iot-line;
+    box-shadow: -8px 0 24px rgba(11, 27, 43, 0.1);
+    animation: jnksIotEntityDockIn 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  @keyframes jnksIotEntityOverlayIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes jnksIotEntityDialogIn {
+  @keyframes jnksIotEntityDockIn {
     from {
-      opacity: 0;
-      transform: scale(0.96) translateY(12px);
+      opacity: 0.5;
+      transform: translateX(20px);
     }
     to {
       opacity: 1;
-      transform: scale(1) translateY(0);
+      transform: translateX(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .jnks-iot-entity-details-dialog {
+      animation: none;
     }
   }
 
   @media #{$mat-lt-md} {
+    // 窄屏：详情仍用浮层盖住（并排会挤到无法阅读）
     .jnks-iot-entity-details-overlay {
-      padding: 0;
-      align-items: stretch;
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      width: 100%;
+      order: 0;
     }
 
     .jnks-iot-entity-details-dialog {
-      width: 100%;
-      height: 100%;
-      max-height: 100%;
-      border-radius: 0;
+      border-left: none;
     }
   }
 
@@ -108,8 +116,8 @@
       overflow: hidden;
 
       &.jnks-iot-outlined-border {
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06), 0 12px 36px rgba($jnks-iot-secondary-color, 0.08);
-        border: solid 1px rgba($jnks-iot-secondary-color, 0.12);
+        box-shadow: none;
+        border: 1px solid $jnks-iot-line;
         border-radius: $jnks-iot-radius;
         overflow: hidden;
         background: #fff;
@@ -237,6 +245,10 @@
 //    改成不换行 + 省略号；单元格本就带 tooltip，悬停仍能看全名
 :host ::ng-deep {
   .mat-mdc-table {
+    // 表格必须按容器宽度收缩：nowrap 之后它的自然宽度会超过容器（实测 1401px vs 容器 950px），
+    // 把行操作列推到可视区外。fixed 布局让列宽服从声明的百分比，内容溢出走省略号（tooltip 仍在）。
+    table-layout: fixed;
+
     // 实测：Material 主题里的 density 没作用到表格，单元格实测 52px。
     // 变量压不动它，只能对行高直接定值并 !important。
     --mat-table-row-item-container-height: 34px;
