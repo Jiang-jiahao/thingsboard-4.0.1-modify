@@ -1,7 +1,7 @@
 /** SYSTEM **/
 
 /** System admin **/
-INSERT INTO tb_user ( id, created_time, tenant_id, customer_id, email, authority )
+INSERT INTO jnks_iot_user ( id, created_time, tenant_id, customer_id, email, authority )
 VALUES ( '5a797660-4612-11e7-a919-92ebcb67fe33', 1592576748000, '13814000-1dd2-11b2-8080-808080808080', '13814000-1dd2-11b2-8080-808080808080', 'sysadmin@jnks-iot.org', 'SYS_ADMIN' );
 
 INSERT INTO user_credentials ( id, created_time, user_id, enabled, password )

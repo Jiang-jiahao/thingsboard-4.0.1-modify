@@ -4,6 +4,7 @@
 -- 这里处理的是纯文本：部件名称与说明、OAuth 登录模板说明、默认管理员账号、JWT 签发者。
 -- 同样是上游导出的种子数据，Docker 装库走的是这份二进制转储，sed 碰不到。
 --
+-- 顺序：本文件排在 05-rename-tb-tables.sql **之后**，所以这里用的是改名后的表名。
 -- 幂等：WHERE 限定在仍含旧字样的行，重复执行是空操作。
 
 -- ── 1) 部件元数据 ────────────────────────────────────────────────
@@ -29,7 +30,7 @@ WHERE comment LIKE '%ThingsBoard%';
 -- ── 3) 默认系统管理员账号 ────────────────────────────────────────
 -- 改的是邮箱（登录名），**密码不变，仍是 sysadmin**。
 -- 若你们已对外公布过 sysadmin@thingsboard.org 这个账号，删掉这段。
-UPDATE tb_user
+UPDATE jnks_iot_user
 SET email = replace(email, '@thingsboard.org', '@jnks-iot.org')
 WHERE email LIKE '%@thingsboard.org';
 

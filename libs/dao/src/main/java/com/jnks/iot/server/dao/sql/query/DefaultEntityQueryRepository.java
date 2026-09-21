@@ -53,7 +53,7 @@ public class DefaultEntityQueryRepository implements EntityQueryRepository {
     private static final Map<EntityType, String> entityNameColumns = new HashMap<>();
     private static final String SELECT_PHONE = " CASE WHEN entity.entity_type = 'TENANT' THEN (select phone from tenant where id = entity_id)" +
             " WHEN entity.entity_type = 'CUSTOMER' THEN (select phone from customer where id = entity_id)" +
-            " WHEN entity.entity_type = 'USER' THEN (select phone from tb_user where id = entity_id) END as phone";
+            " WHEN entity.entity_type = 'USER' THEN (select phone from jnks_iot_user where id = entity_id) END as phone";
     private static final String SELECT_ZIP = " CASE WHEN entity.entity_type = 'TENANT' THEN (select zip from tenant where id = entity_id)" +
             " WHEN entity.entity_type = 'CUSTOMER' THEN (select zip from customer where id = entity_id) END as zip";
     private static final String SELECT_ADDRESS_2 = " CASE WHEN entity.entity_type = 'TENANT'" +
@@ -75,9 +75,9 @@ public class DefaultEntityQueryRepository implements EntityQueryRepository {
             " THEN (select title from tenant where id = entity_id) WHEN entity.entity_type = 'CUSTOMER' " +
             " THEN (select title from customer where id = entity_id) END as title";
     private static final String SELECT_LAST_NAME = " CASE WHEN entity.entity_type = 'USER'" +
-            " THEN (select last_name from tb_user where id = entity_id) END as last_name";
+            " THEN (select last_name from jnks_iot_user where id = entity_id) END as last_name";
     private static final String SELECT_FIRST_NAME = " CASE WHEN entity.entity_type = 'USER'" +
-            " THEN (select first_name from tb_user where id = entity_id) END as first_name";
+            " THEN (select first_name from jnks_iot_user where id = entity_id) END as first_name";
     private static final String SELECT_REGION = " CASE WHEN entity.entity_type = 'TENANT'" +
             " THEN (select region from tenant where id = entity_id) END as region";
     private static final String SELECT_EMAIL = " CASE" +
@@ -86,14 +86,14 @@ public class DefaultEntityQueryRepository implements EntityQueryRepository {
             " WHEN entity.entity_type = 'CUSTOMER' " +
             " THEN (select email from customer where id = entity_id)" +
             " WHEN entity.entity_type = 'USER'" +
-            " THEN (select email from tb_user where id = entity_id)" +
+            " THEN (select email from jnks_iot_user where id = entity_id)" +
             " END as email";
     private static final String SELECT_CUSTOMER_ID = "CASE" +
             " WHEN entity.entity_type = 'TENANT'" +
             " THEN UUID('" + TenantId.NULL_UUID + "')" +
             " WHEN entity.entity_type = 'CUSTOMER' THEN entity_id" +
             " WHEN entity.entity_type = 'USER'" +
-            " THEN (select customer_id from tb_user where id = entity_id)" +
+            " THEN (select customer_id from jnks_iot_user where id = entity_id)" +
             " WHEN entity.entity_type = 'DASHBOARD'" +
             //TODO: parse assigned customers or use contains?
             " THEN NULL" +
@@ -109,7 +109,7 @@ public class DefaultEntityQueryRepository implements EntityQueryRepository {
             " WHEN entity.entity_type = 'CUSTOMER'" +
             " THEN (select tenant_id from customer where id = entity_id)" +
             " WHEN entity.entity_type = 'USER'" +
-            " THEN (select tenant_id from tb_user where id = entity_id)" +
+            " THEN (select tenant_id from jnks_iot_user where id = entity_id)" +
             " WHEN entity.entity_type = 'DASHBOARD'" +
             " THEN (select tenant_id from dashboard where id = entity_id)" +
             " WHEN entity.entity_type = 'ASSET'" +
@@ -125,7 +125,7 @@ public class DefaultEntityQueryRepository implements EntityQueryRepository {
             " WHEN entity.entity_type = 'CUSTOMER' " +
             " THEN (select created_time from customer where id = entity_id)" +
             " WHEN entity.entity_type = 'USER'" +
-            " THEN (select created_time from tb_user where id = entity_id)" +
+            " THEN (select created_time from jnks_iot_user where id = entity_id)" +
             " WHEN entity.entity_type = 'DASHBOARD'" +
             " THEN (select created_time from dashboard where id = entity_id)" +
             " WHEN entity.entity_type = 'ASSET'" +
@@ -141,7 +141,7 @@ public class DefaultEntityQueryRepository implements EntityQueryRepository {
             " WHEN entity.entity_type = 'CUSTOMER' " +
             " THEN (select title from customer where id = entity_id)" +
             " WHEN entity.entity_type = 'USER'" +
-            " THEN (select CONCAT (first_name, ' ', last_name) from tb_user where id = entity_id)" +
+            " THEN (select CONCAT (first_name, ' ', last_name) from jnks_iot_user where id = entity_id)" +
             " WHEN entity.entity_type = 'DASHBOARD'" +
             " THEN (select title from dashboard where id = entity_id)" +
             " WHEN entity.entity_type = 'ASSET'" +
@@ -153,7 +153,7 @@ public class DefaultEntityQueryRepository implements EntityQueryRepository {
             " END as name";
     private static final String SELECT_TYPE = " CASE" +
             " WHEN entity.entity_type = 'USER'" +
-            " THEN (select authority from tb_user where id = entity_id)" +
+            " THEN (select authority from jnks_iot_user where id = entity_id)" +
             " WHEN entity.entity_type = 'ASSET'" +
             " THEN (select type from asset where id = entity_id)" +
             " WHEN entity.entity_type = 'DEVICE'" +
@@ -167,7 +167,7 @@ public class DefaultEntityQueryRepository implements EntityQueryRepository {
             " WHEN entity.entity_type = 'CUSTOMER' " +
             " THEN (select title from customer where id = entity_id)" +
             " WHEN entity.entity_type = 'USER'" +
-            " THEN (select CONCAT (first_name, ' ', last_name) from tb_user where id = entity_id)" +
+            " THEN (select CONCAT (first_name, ' ', last_name) from jnks_iot_user where id = entity_id)" +
             " WHEN entity.entity_type = 'DASHBOARD'" +
             " THEN (select title from dashboard where id = entity_id)" +
             " WHEN entity.entity_type = 'ASSET'" +
@@ -183,7 +183,7 @@ public class DefaultEntityQueryRepository implements EntityQueryRepository {
             " WHEN entity.entity_type = 'CUSTOMER' " +
             " THEN (select additional_info from customer where id = entity_id)" +
             " WHEN entity.entity_type = 'USER'" +
-            " THEN (select additional_info from tb_user where id = entity_id)" +
+            " THEN (select additional_info from jnks_iot_user where id = entity_id)" +
             " WHEN entity.entity_type = 'DASHBOARD'" +
             " THEN (select '' from dashboard where id = entity_id)" +
             " WHEN entity.entity_type = 'ASSET'" +
@@ -206,7 +206,7 @@ public class DefaultEntityQueryRepository implements EntityQueryRepository {
         entityTableMap.put(EntityType.ENTITY_VIEW, "entity_view");
         entityTableMap.put(EntityType.DASHBOARD, "dashboard");
         entityTableMap.put(EntityType.CUSTOMER, "customer");
-        entityTableMap.put(EntityType.USER, "tb_user");
+        entityTableMap.put(EntityType.USER, "jnks_iot_user");
         entityTableMap.put(EntityType.TENANT, "tenant");
         entityTableMap.put(EntityType.API_USAGE_STATE, SELECT_API_USAGE_STATE);
         entityTableMap.put(EntityType.RULE_CHAIN, "rule_chain");

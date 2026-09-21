@@ -94,7 +94,7 @@ public abstract class AbstractEntityService {
         if (exOpt.isPresent()) {
             var ex = exOpt.get();
             var constraintName = ex.getConstraintName();
-            // PostgreSQL 的报错文本会跟随服务端 locale 本地化（中文库返回「重复键违反唯一约束"tb_user_email_key"」），
+            // PostgreSQL 的报错文本会跟随服务端 locale 本地化（中文库返回「重复键违反唯一约束"jnks_iot_user_email_key"」），
             // 而 Hibernate 是用英文正则从消息里提取约束名的，本地化后提取不到（返回 null），
             // 导致下面按名字精确匹配全部落空、原始 SQL 直接漏给前端。此时退回在根因异常文本里找。
             var fallbackMessage = StringUtils.isEmpty(constraintName) ? rootCauseMessage(t) : null;

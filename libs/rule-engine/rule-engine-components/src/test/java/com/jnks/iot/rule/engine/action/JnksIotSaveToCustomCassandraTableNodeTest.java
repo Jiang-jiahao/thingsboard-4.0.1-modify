@@ -143,7 +143,7 @@ public class JnksIotSaveToCustomCassandraTableNodeTest extends AbstractRuleNodeU
 
         assertThatThrownBy(() -> node.init(ctxMock, configuration))
                 .isInstanceOf(JnksIotNodeException.class)
-                .hasMessage("Table 'cs_tb_test_table' does not exist in Cassandra cluster.")
+                .hasMessage("Table 'cs_jnks_iot_test_table' does not exist in Cassandra cluster.")
                 .extracting(e -> ((JnksIotNodeException) e).isUnrecoverable())
                 .isEqualTo(false);
     }
@@ -263,11 +263,11 @@ public class JnksIotSaveToCustomCassandraTableNodeTest extends AbstractRuleNodeU
 
     private static Stream<Arguments> givenTtl_whenOnMsg_thenVerifyStatement() {
         return Stream.of(
-                Arguments.of(0, "INSERT INTO cs_tb_readings(entityIdTableColumn) VALUES(?)",
+                Arguments.of(0, "INSERT INTO cs_jnks_iot_readings(entityIdTableColumn) VALUES(?)",
                         (Consumer<BoundStatementBuilder>) builder -> {
                             then(builder).should(never()).setInt(anyInt(), anyInt());
                         }),
-                Arguments.of(20, "INSERT INTO cs_tb_readings(entityIdTableColumn) VALUES(?) USING TTL ?",
+                Arguments.of(20, "INSERT INTO cs_jnks_iot_readings(entityIdTableColumn) VALUES(?) USING TTL ?",
                         (Consumer<BoundStatementBuilder>) builder -> {
                             then(builder).should().setInt(1, 20);
                         })

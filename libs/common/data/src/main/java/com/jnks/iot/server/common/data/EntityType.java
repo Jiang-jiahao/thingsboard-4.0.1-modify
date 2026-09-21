@@ -12,7 +12,7 @@ import java.util.List;
 public enum EntityType {
     TENANT(1),
     CUSTOMER(2),
-    USER(3, "tb_user"),
+    USER(3, "jnks_iot_user"),
     DASHBOARD(4),
     ASSET(5),
     DEVICE(6),

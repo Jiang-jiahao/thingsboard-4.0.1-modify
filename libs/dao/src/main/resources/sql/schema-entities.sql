@@ -1,8 +1,8 @@
-CREATE TABLE IF NOT EXISTS tb_schema_settings
+CREATE TABLE IF NOT EXISTS jnks_iot_schema_settings
 (
     schema_version bigint NOT NULL,
     product varchar(2) NOT NULL,
-    CONSTRAINT tb_schema_settings_pkey PRIMARY KEY (schema_version)
+    CONSTRAINT jnks_iot_schema_settings_pkey PRIMARY KEY (schema_version)
 );
 
 CREATE TABLE IF NOT EXISTS admin_settings (
@@ -411,8 +411,8 @@ CREATE TABLE IF NOT EXISTS relation (
     CONSTRAINT relation_pkey PRIMARY KEY (from_id, from_type, relation_type_group, relation_type, to_id, to_type)
 );
 
-CREATE TABLE IF NOT EXISTS tb_user (
-    id uuid NOT NULL CONSTRAINT tb_user_pkey PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS jnks_iot_user (
+    id uuid NOT NULL CONSTRAINT jnks_iot_user_pkey PRIMARY KEY,
     created_time bigint NOT NULL,
     additional_info varchar,
     authority varchar(255),
@@ -432,8 +432,8 @@ CREATE TABLE IF NOT EXISTS tenant_profile (
     profile_data jsonb,
     description varchar,
     is_default boolean,
-    isolated_tb_core boolean,
-    isolated_tb_rule_engine boolean,
+    isolated_jnks_iot_core boolean,
+    isolated_jnks_iot_rule_engine boolean,
     CONSTRAINT tenant_profile_name_unq_key UNIQUE (name)
 );
 
@@ -729,7 +729,7 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE IF NOT EXISTS user_auth_settings (
     id uuid NOT NULL CONSTRAINT user_auth_settings_pkey PRIMARY KEY,
     created_time bigint NOT NULL,
-    user_id uuid UNIQUE NOT NULL CONSTRAINT fk_user_auth_settings_user_id REFERENCES tb_user(id),
+    user_id uuid UNIQUE NOT NULL CONSTRAINT fk_user_auth_settings_user_id REFERENCES jnks_iot_user(id),
     two_fa_settings varchar
 );
 
@@ -805,7 +805,7 @@ CREATE TABLE IF NOT EXISTS user_settings (
     user_id uuid NOT NULL,
     type VARCHAR(50) NOT NULL,
     settings jsonb,
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES tb_user(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES jnks_iot_user(id) ON DELETE CASCADE,
     CONSTRAINT user_settings_pkey PRIMARY KEY (user_id, type)
 );
 

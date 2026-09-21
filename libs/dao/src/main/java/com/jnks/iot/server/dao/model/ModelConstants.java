@@ -49,7 +49,7 @@ public class ModelConstants {
     /**
      * User constants.
      */
-    public static final String USER_PG_HIBERNATE_TABLE_NAME = "tb_user";
+    public static final String USER_PG_HIBERNATE_TABLE_NAME = "jnks_iot_user";
     public static final String USER_TENANT_ID_PROPERTY = TENANT_ID_PROPERTY;
     public static final String USER_CUSTOMER_ID_PROPERTY = CUSTOMER_ID_PROPERTY;
     public static final String USER_EMAIL_PROPERTY = "email";
@@ -118,7 +118,7 @@ public class ModelConstants {
     public static final String TENANT_PROFILE_PROFILE_DATA_PROPERTY = "profile_data";
     public static final String TENANT_PROFILE_DESCRIPTION_PROPERTY = "description";
     public static final String TENANT_PROFILE_IS_DEFAULT_PROPERTY = "is_default";
-    public static final String TENANT_PROFILE_ISOLATED_TB_RULE_ENGINE = "isolated_tb_rule_engine";
+    public static final String TENANT_PROFILE_ISOLATED_TB_RULE_ENGINE = "isolated_jnks_iot_rule_engine";
 
     /**
      * Customer constants.

@@ -22,7 +22,7 @@ public class RelatedEntitiesParser {
             Map.entry("COPY public.rule_chain ", EntityType.RULE_CHAIN),
             Map.entry("COPY public.rule_node ", EntityType.RULE_NODE),
             Map.entry("COPY public.tenant ", EntityType.TENANT),
-            Map.entry("COPY public.tb_user ", EntityType.USER),
+            Map.entry("COPY public.jnks_iot_user ", EntityType.USER),
             Map.entry("COPY public.entity_view ", EntityType.ENTITY_VIEW),
             Map.entry("COPY public.widgets_bundle ", EntityType.WIDGETS_BUNDLE),
             Map.entry("COPY public.widget_type ", EntityType.WIDGET_TYPE),

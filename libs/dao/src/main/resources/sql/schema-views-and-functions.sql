@@ -32,7 +32,7 @@ SELECT a.*,
       WHEN NOT a.acknowledged AND NOT a.cleared THEN 'ACTIVE_UNACK' END) as status,
 COALESCE(CASE WHEN a.originator_type = 0 THEN (select title from tenant where id = a.originator_id)
               WHEN a.originator_type = 1 THEN (select title from customer where id = a.originator_id)
-              WHEN a.originator_type = 2 THEN (select email from tb_user where id = a.originator_id)
+              WHEN a.originator_type = 2 THEN (select email from jnks_iot_user where id = a.originator_id)
               WHEN a.originator_type = 3 THEN (select title from dashboard where id = a.originator_id)
               WHEN a.originator_type = 4 THEN (select name from asset where id = a.originator_id)
               WHEN a.originator_type = 5 THEN (select name from device where id = a.originator_id)
@@ -42,7 +42,7 @@ COALESCE(CASE WHEN a.originator_type = 0 THEN (select title from tenant where id
     , 'Deleted') originator_name,
 COALESCE(CASE WHEN a.originator_type = 0 THEN (select title from tenant where id = a.originator_id)
               WHEN a.originator_type = 1 THEN (select COALESCE(NULLIF(title, ''), email) from customer where id = a.originator_id)
-              WHEN a.originator_type = 2 THEN (select email from tb_user where id = a.originator_id)
+              WHEN a.originator_type = 2 THEN (select email from jnks_iot_user where id = a.originator_id)
               WHEN a.originator_type = 3 THEN (select title from dashboard where id = a.originator_id)
               WHEN a.originator_type = 4 THEN (select COALESCE(NULLIF(label, ''), name) from asset where id = a.originator_id)
               WHEN a.originator_type = 5 THEN (select COALESCE(NULLIF(label, ''), name) from device where id = a.originator_id)
@@ -52,7 +52,7 @@ COALESCE(CASE WHEN a.originator_type = 0 THEN (select title from tenant where id
     , 'Deleted') as originator_label,
 u.first_name as assignee_first_name, u.last_name as assignee_last_name, u.email as assignee_email
 FROM alarm a
-LEFT JOIN tb_user u ON u.id = a.assignee_id;
+LEFT JOIN jnks_iot_user u ON u.id = a.assignee_id;
 
 CREATE OR REPLACE FUNCTION create_or_update_active_alarm(
                                         t_id uuid, c_id uuid, a_id uuid, a_created_ts bigint,

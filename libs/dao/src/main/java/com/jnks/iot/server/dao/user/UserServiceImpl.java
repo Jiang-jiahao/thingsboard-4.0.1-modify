@@ -171,7 +171,7 @@ public class UserServiceImpl extends AbstractCachedEntityService<UserCacheKey, U
                     .created(user.getId() == null).build());
         } catch (Exception t) {
             handleEvictEvent(evictEvent);
-            checkConstraintViolation(t, "tb_user_email_key", "User with email '" + user.getEmail() + "' already present in database!");
+            checkConstraintViolation(t, "jnks_iot_user_email_key", "User with email '" + user.getEmail() + "' already present in database!");
             throw t;
         }
         return savedUser;
