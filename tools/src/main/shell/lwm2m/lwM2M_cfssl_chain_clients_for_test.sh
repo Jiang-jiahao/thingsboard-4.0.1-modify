@@ -25,7 +25,7 @@ readonly CLIENT_JKS_FOR_TEST="lwm2mclient"
 readonly CLIENT_CERT_KEY_PREF="LwX509"
 readonly CLIENT_CERT_ALIAS_PREF="client_alias_"
 readonly CLIENT_STORE_PWD="client_ks_password"
-readonly CLIENT_HOST_NAME="jnks-iot_test.io"
+readonly CLIENT_HOST_NAME="jnks_iot_test.io"
 
 readonly TRUST_NO_PATH="TrustNo"
 readonly CA_ROOT_NO_ALIAS="root-no"
