@@ -2,7 +2,6 @@
   <mat-toolbar class="flex flex-row" color="primary">
     <h2 translate>{{ importTitle }}</h2>
     <span class="flex-1"></span>
-    <div [jnks-iot-help]="'entitiesImport'"></div>
     <button mat-icon-button
             (click)="cancel()"
             [disabled]="isImportData"

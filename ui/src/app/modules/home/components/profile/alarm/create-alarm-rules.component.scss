@@ -1,6 +1,6 @@
 :host {
   .create-alarm-rule {
-    border: 2px groove rgba(0, 0, 0, .45);
+    border: 2px groove var(--jnks-iot-line);
     border-radius: 4px;
     padding: 8px;
     min-width: 0;

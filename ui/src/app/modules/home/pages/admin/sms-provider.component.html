@@ -4,7 +4,6 @@
       <span class="mat-headline-5" translate>admin.sms-provider-settings</span>
     </mat-card-title>
     <span class="flex-1"></span>
-    <div jnks-iot-help="smsProviderSettings"></div>
   </mat-card-header>
   <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
   </mat-progress-bar>
@@ -34,7 +33,6 @@
         <span class="mat-headline-5" translate>admin.slack-settings</span>
       </mat-card-title>
       <span class="flex-1"></span>
-      <div jnks-iot-help="slackSettings"></div>
     </mat-card-header>
     <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
     </mat-progress-bar>
@@ -50,7 +48,7 @@
         <span class="mat-headline-5" translate>admin.mobile-settings</span>
       </mat-card-title>
       <span class="flex-1"></span>
-      <!--    <div jnks-iot-help="mobileSettings"></div>-->
+      <!---->
     </mat-card-header>
     <mat-card-content formGroupName="MOBILE_APP" *ngIf="isSysAdmin()">
       <jnks-iot-file-input formControlName="firebaseServiceAccountCredentials"

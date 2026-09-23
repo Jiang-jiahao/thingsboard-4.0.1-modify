@@ -8,7 +8,7 @@
     }
   }
   .mat-button-toggle {
-    --mat-standard-button-toggle-disabled-selected-state-background-color: rgba(0, 0, 0, 0.06);
+    --mat-standard-button-toggle-disabled-selected-state-background-color: var(--jnks-iot-text-faint);
     background: rgba(0, 0, 0, 0.06);
     height: 36px;
     align-items: center;

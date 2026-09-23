@@ -5,7 +5,6 @@
         <span class="mat-headline-5" translate>admin.outgoing-mail-settings</span>
       </mat-card-title>
       <span class="flex-1"></span>
-      <div jnks-iot-help="outgoingMailSettings"></div>
     </mat-card-header>
     <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
     </mat-progress-bar>
@@ -140,7 +139,6 @@
                 <jnks-iot-toggle-option [value]=true>{{ 'admin.oauth2.oauth2' | translate }}</jnks-iot-toggle-option>
               </jnks-iot-toggle-select>
               <div class="details-buttons" *ngIf="helpLink && mailSettings.get('enableOauth2').value">
-                <div [jnks-iot-help]="helpLink"></div>
               </div>
             </div>
             <section *ngIf="!mailSettings.get('enableOauth2').value">

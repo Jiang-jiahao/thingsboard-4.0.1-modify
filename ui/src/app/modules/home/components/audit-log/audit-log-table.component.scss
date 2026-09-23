@@ -15,7 +15,7 @@
 
     &.jnks-iot-details-mode {
       .jnks-iot-entities-table-container {
-        background-color: white;
+        background-color: var(--jnks-iot-surface-card);
       }
     }
   }

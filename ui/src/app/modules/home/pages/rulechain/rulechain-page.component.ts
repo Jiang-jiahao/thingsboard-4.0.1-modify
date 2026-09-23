@@ -49,7 +49,6 @@ import {
   FcRuleEdge,
   FcRuleNode,
   FcRuleNodeType,
-  getRuleNodeHelpLink,
   LinkLabel,
   outputNodeClazz,
   ruleChainNodeClazz,
@@ -1079,14 +1078,6 @@ export class RuleChainPageComponent extends PageComponent
     this.validate();
   }
 
-  helpLinkIdForRuleNodeType(): string {
-    let component: RuleNodeComponentDescriptor = null;
-    if (this.editingRuleNode) {
-      component = this.editingRuleNode.component;
-    }
-    return getRuleNodeHelpLink(component);
-  }
-
   openNodeDetails(node: FcRuleNode) {
     if (node.component.type !== RuleNodeType.INPUT) {
       this.enableHotKeys = false;
@@ -1824,10 +1815,6 @@ export class AddRuleNodeDialogComponent extends DialogComponent<AddRuleNodeDialo
     const originalErrorState = this.errorStateMatcher.isErrorState(control, form);
     const customErrorState = !!(control && control.invalid && this.submitted);
     return originalErrorState || customErrorState;
-  }
-
-  helpLinkIdForRuleNodeType(): string {
-    return getRuleNodeHelpLink(this.ruleNode.component);
   }
 
   cancel(): void {

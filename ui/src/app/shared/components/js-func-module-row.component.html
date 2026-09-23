@@ -20,20 +20,6 @@
                             placeholder="{{ 'widget-config.set' | translate }}">
   </jnks-iot-resource-autocomplete>
   <div class="jnks-iot-form-table-row-cell-buttons">
-    <div [jnks-iot-help-popup-async-content]="this.moduleRowFormGroup.get('moduleLink').value ? moduleDescription : null"
-         jnks-iot-help-popup-placement="top"
-         [jnks-iot-help-popup-style]="{marginTop: '8px'}"
-         help-icon-button-class=""
-         help-icon="info_outline"
-         help-opened-icon="info"
-         help-icon-tooltip="{{ 'js-func.show-module-info' | translate }}"></div>
-    <div [jnks-iot-help-popup-async-content]="this.moduleRowFormGroup.get('moduleLink').value ? moduleSourceCode : null"
-         jnks-iot-help-popup-placement="top"
-         [jnks-iot-help-popup-style]="{marginTop: '8px'}"
-         help-icon-button-class=""
-         help-icon="mdi:application-brackets-outline"
-         help-opened-icon="mdi:application-brackets"
-         help-icon-tooltip="{{ 'js-func.show-module-source-code' | translate }}"></div>
     <button type="button"
             mat-icon-button
             (click)="moduleRemoved.emit()"

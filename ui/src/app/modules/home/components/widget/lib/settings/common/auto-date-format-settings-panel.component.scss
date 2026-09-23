@@ -13,7 +13,7 @@
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--jnks-iot-text);
   }
   .jnks-iot-auto-date-format-settings-panel-content {
     display: flex;
@@ -44,7 +44,7 @@
       font-weight: 400;
       line-height: 20px;
       letter-spacing: 0.2px;
-      color: rgba(0, 0, 0, 0.38);
+      color: var(--jnks-iot-text-faint);
     }
   }
   .jnks-iot-auto-date-format-settings-panel-buttons {

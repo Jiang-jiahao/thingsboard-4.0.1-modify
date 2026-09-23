@@ -96,7 +96,6 @@ import * as JnksIotPopoverComponent from '@shared/components/popover.component';
 import * as JnksIotStringTemplateOutletDirective from '@shared/components/directives/sring-template-outlet.directive';
 import * as JnksIotComponentOutletDirective from '@shared/components/directives/component-outlet.directive';
 import * as JnksIotMarkdownComponent from '@shared/components/markdown.component';
-import * as HelpComponent from '@shared/components/help.component';
 import * as HelpMarkdownComponent from '@shared/components/help-markdown.component';
 import * as HelpPopupComponent from '@shared/components/help-popup.component';
 import * as JnksIotCheckboxComponent from '@shared/components/jnks-iot-checkbox.component';
@@ -428,7 +427,6 @@ class ModulesMap implements IModulesMap {
     '@shared/components/directives/sring-template-outlet.directive': JnksIotStringTemplateOutletDirective,
     '@shared/components/directives/component-outlet.directive': JnksIotComponentOutletDirective,
     '@shared/components/markdown.component': JnksIotMarkdownComponent,
-    '@shared/components/help.component': HelpComponent,
     '@shared/components/help-markdown.component': HelpMarkdownComponent,
     '@shared/components/help-popup.component': HelpPopupComponent,
     '@shared/components/jnks-iot-checkbox.component': JnksIotCheckboxComponent,

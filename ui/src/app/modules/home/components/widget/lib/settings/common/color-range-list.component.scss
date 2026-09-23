@@ -8,7 +8,7 @@
   gap: 12px;
   padding: 8px;
   margin-right: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--jnks-iot-line);
   border-radius: 6px;
 }
 .jnks-iot-add-color-range {
@@ -19,7 +19,7 @@
 .jnks-iot-value-range-text {
   width: 64px;
   font-size: 14px;
-  color: rgba(0, 0, 0, 0.38);
+  color: var(--jnks-iot-text-faint);
   @media #{$mat-xs} {
     width: auto;
   }

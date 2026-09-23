@@ -1,6 +1,6 @@
 import { TenantId } from './id/tenant-id';
 import { BaseData, HasId } from '@shared/models/base-data';
-import { getProviderHelpLink, OAuth2Client } from '@shared/models/oauth2.models';
+import { OAuth2Client } from '@shared/models/oauth2.models';
 
 export enum EntityType {
   TENANT = 'TENANT',
@@ -56,8 +56,6 @@ export interface EntityTypeTranslation {
 }
 
 export interface EntityTypeResource<T> {
-  helpLinkId: string;
-  helpLinkIdForEntity?(entity: T): string;
 }
 
 export const entityTypeTranslations = new Map<EntityType | AliasEntityType, EntityTypeTranslation>(
@@ -469,122 +467,101 @@ export const entityTypeResources = new Map<EntityType, EntityTypeResource<BaseDa
     [
       EntityType.TENANT,
       {
-        helpLinkId: 'tenants'
       }
     ],
     [
       EntityType.TENANT_PROFILE,
       {
-        helpLinkId: 'tenantProfiles'
       }
     ],
     [
       EntityType.CUSTOMER,
       {
-        helpLinkId: 'customers'
       }
     ],
     [
       EntityType.USER,
       {
-        helpLinkId: 'users'
       }
     ],
     [
       EntityType.DEVICE,
       {
-        helpLinkId: 'devices'
       }
     ],
     [
       EntityType.DEVICE_PROFILE,
       {
-        helpLinkId: 'deviceProfiles'
       }
     ],
     [
       EntityType.ASSET_PROFILE,
       {
-        helpLinkId: 'assetProfiles'
       }
     ],
     [
       EntityType.ASSET,
       {
-        helpLinkId: 'assets'
       }
     ],
     [
       EntityType.ENTITY_VIEW,
       {
-        helpLinkId: 'entityViews'
       }
     ],
     [
       EntityType.RULE_CHAIN,
       {
-        helpLinkId: 'rulechains'
       }
     ],
     [
       EntityType.DASHBOARD,
       {
-        helpLinkId: 'dashboards'
       }
     ],
     [
       EntityType.WIDGET_TYPE,
       {
-        helpLinkId: 'widgetTypes'
       }
     ],
     [
       EntityType.WIDGETS_BUNDLE,
       {
-        helpLinkId: 'widgetsBundles'
       }
     ],
     [
       EntityType.JNKS_IOT_RESOURCE,
       {
-        helpLinkId: 'lwm2mResourceLibrary'
       }
     ],
     [
       EntityType.OTA_PACKAGE,
       {
-        helpLinkId: 'otaUpdates'
       }
     ],
     [
       EntityType.QUEUE,
       {
-        helpLinkId: 'queue'
       }
     ],
     [
       EntityType.OAUTH2_CLIENT,
       {
-        helpLinkId: 'oauth2Settings',
-        helpLinkIdForEntity: (entity: OAuth2Client) => getProviderHelpLink(entity.additionalInfo.providerName)
       }
     ],
     [
       EntityType.DOMAIN,
       {
-        helpLinkId: 'domains'
       }
     ],
     [
       EntityType.MOBILE_APP,
       {
-        helpLinkId: 'mobileApplication'
       }
     ],
     [
       EntityType.MOBILE_APP_BUNDLE,
       {
-        helpLinkId: 'mobileBundle'
       }
     ]
   ]

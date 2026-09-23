@@ -31,7 +31,7 @@
     min-height: 0;
 
     .mat-drawer-container {
-      background-color: white;
+      background-color: var(--jnks-iot-surface-card);
     }
 
     /* 工具栏内原有下拉在窄屏/弹窗中易被裁切，改由上方专用条展示 */

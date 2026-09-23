@@ -4,12 +4,6 @@
                         [requiredText]="'rule-node-config.timeseries-keys-required' | translate"
                         [label]="'rule-node-config.timeseries-keys' | translate" formControlName="latestTsKeyNames"
                         [hint]="'rule-node-config.general-pattern-hint' | translate">
-    <div matHintEnd class="see-example" jnks-iot-help-popup="{{'rulenode/originator_telemetry_node_fields_templatization'}}"
-         hintMode
-         jnks-iot-help-popup-placement="right"
-         trigger-style="letter-spacing:0.25px; font-size:12px"
-         [jnks-iot-help-popup-style]="{maxWidth: '820px'}"
-         trigger-text="{{ 'rule-node-config.key-val.see-examples' | translate }}"></div>
     <mat-icon matSuffix class="help-icon margin-8 cursor-pointer" aria-hidden="false" aria-label="help-icon" color="primary"
               matTooltip="{{ 'rule-node-config.chip-help' | translate: { inputName: 'rule-node-config.timeseries-key' | translate } }}">help
     </mat-icon>

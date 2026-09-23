@@ -161,15 +161,15 @@ gridster-item:hover {
   position: absolute !important;
   .tooltipster-box {
     user-select: none;
-    background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.38);
+    background: var(--jnks-iot-surface-card);
+    border: 1px solid var(--jnks-iot-text-faint);
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
     .tooltipster-content {
       padding: 4px 8px;
       font-size: 12px;
       line-height: 12px;
       font-weight: 500;
-      color: rgba(0, 0, 0, 0.76);
+      color: var(--jnks-iot-text);
       .jnks-iot-widget-action-container {
         display: flex;
         flex-direction: column;
@@ -189,7 +189,7 @@ gridster-item:hover {
           align-items: center;
           gap: 8px;
           font-weight: normal;
-          color: $jnks-iot-primary-color;
+          color: var(--jnks-iot-primary-color);
           font-size: 11px;
           padding: 4px 4px 4px 6px;
           border-radius: 2px;
@@ -209,7 +209,7 @@ gridster-item:hover {
       bottom: -1px;
       .tooltipster-arrow-uncropped {
         .tooltipster-arrow-border {
-          border-top-color: rgba(0, 0, 0, 0.38);
+          border-top-color: var(--jnks-iot-text-faint);
         }
         .tooltipster-arrow-background {
           border-top-color: #fff;

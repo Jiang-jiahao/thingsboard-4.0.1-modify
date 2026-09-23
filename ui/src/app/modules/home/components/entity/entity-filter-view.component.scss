@@ -9,13 +9,13 @@
     .entity-filter-type {
       font-size: 14px;
       line-height: 16px;
-      color: rgba(0, 0, 0, .570588);
+      color: var(--jnks-iot-text-faint);
     }
 
     .entity-filter-value {
       font-size: 14px;
       line-height: 16px;
-      color: rgba(0, 0, 0, .570588);
+      color: var(--jnks-iot-text-faint);
     }
   }
 }

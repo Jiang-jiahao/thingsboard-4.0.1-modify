@@ -4,7 +4,6 @@
       <span class="mat-headline-5" translate>admin.security-settings</span>
     </mat-card-title>
     <span class="flex-1"></span>
-    <div jnks-iot-help="securitySettings"></div>
   </mat-card-header>
   <mat-progress-bar color="warn" mode="indeterminate" *ngIf="isLoading$ | async">
   </mat-progress-bar>
@@ -206,7 +205,6 @@
       <span class="mat-headline-5" translate>admin.jwt.security-settings</span>
     </mat-card-title>
     <span class="flex-1"></span>
-    <div jnks-iot-help="jwtSecuritySettings"></div>
   </mat-card-header>
   <mat-card-content style="padding-top: 16px;">
     <form [formGroup]="jwtSecuritySettingsFormGroup" (ngSubmit)="saveJwtSettings()" autocomplete="off">

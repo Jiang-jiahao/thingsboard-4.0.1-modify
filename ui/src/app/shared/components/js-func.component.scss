@@ -2,7 +2,7 @@
   position: relative;
 
   &.jnks-iot-disabled {
-    color: rgba(0, 0, 0, .38);
+    color: var(--jnks-iot-text-faint);
   }
 
   &.fill-height {
@@ -23,8 +23,8 @@
 
   .jnks-iot-js-func-panel {
     height: calc(100% - 80px);
-    border: 1px solid #c0c0c0;
-
+    // 描边和圆角由 ace 编辑器自己带（见 scss/ui-refinements.scss 的代码编辑器一段），
+    // 这里再画一圈就成了双线
     #jnks-iot-javascript-input {
       width: 100%;
       min-width: 200px;
@@ -45,7 +45,6 @@
       }
     }
     button.mat-mdc-button-base, button.mat-mdc-button-base.jnks-iot-mat-32 {
-      background: rgba(220, 220, 220, .35);
       align-items: center;
       vertical-align: middle;
       min-width: 32px;
@@ -53,15 +52,12 @@
       padding: 4px;
       font-size: .8rem;
       line-height: 15px;
-      &:not(.jnks-iot-help-popup-button) {
-        color: #7b7b7b;
-      }
     }
     button.mat-mdc-button-base:not(.mat-mdc-icon-button) {
       height: 23px;
     }
     .jnks-iot-help-popup-button-loading {
-      background: #f3f3f3;
+      background: var(--tb-surface-hover);
     }
   }
 

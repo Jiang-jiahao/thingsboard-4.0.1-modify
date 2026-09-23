@@ -100,7 +100,10 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
   isDetailsOpen = false;
   detailsPanelOpened = new EventEmitter<boolean>();
 
-  @ViewChild('entityTableHeader', {static: true}) entityTableHeaderAnchor: JnksIotAnchorComponent;
+  // 锚点在模板里位于 *ngIf="entitiesTableConfig" 之内，而静态查询（static: true）看不到
+  // 嵌入视图里的元素 —— 那样 setupHeaderComponent() 拿不到 viewContainerRef 就直接返回，
+  // 全站表格头（收件箱的未读/全部、设备信息筛选、告警筛选…）都不会渲染。必须用动态查询。
+  @ViewChild('entityTableHeader') entityTableHeaderAnchor: JnksIotAnchorComponent;
 
   @ViewChild('searchInput') searchInputField: ElementRef;
 
@@ -181,6 +184,7 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
     this.isDetailsOpen = false;
     this.syncDetailsBodyScroll();
     this.entitiesTableConfig = entitiesTableConfig;
+    this.loadColumnWidths();
     this.pageMode = this.entitiesTableConfig.pageMode;
 
     this.entitiesTableConfig.setTable(this);
@@ -688,14 +692,102 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
     this.cellActionDescriptors = [...this.entitiesTableConfig.cellActionDescriptors];
   }
 
+  // ── 列宽可拖：拖表头右边缘调宽，双击把手恢复默认。
+  // 拖过的宽度按「实体类型 + 列 key」记在 localStorage，翻页/刷新后保持。
+  private static readonly COLUMN_WIDTHS_KEY = 'jnks-iot.tableColumnWidths.';
+  private columnWidthOverrides: {[key: string]: string} = {};
+  private resizing: {key: string, startX: number, startWidth: number, padding: number} = null;
+
+  private columnWidth(column: EntityColumn<BaseData<HasId>>): string {
+    return this.columnWidthOverrides[column.key] || column.width;
+  }
+
+  private clearStyleCaches(): void {
+    this.headerCellStyleCache.length = 0;
+    this.cellStyleCache.length = 0;
+  }
+
+  private loadColumnWidths(): void {
+    this.columnWidthOverrides = {};
+    const entityType = this.entitiesTableConfig?.entityType;
+    if (!entityType) {
+      return;
+    }
+    try {
+      this.columnWidthOverrides =
+        JSON.parse(localStorage.getItem(EntitiesTableComponent.COLUMN_WIDTHS_KEY + entityType) || '{}') || {};
+    } catch (e) {
+      this.columnWidthOverrides = {};
+    }
+  }
+
+  private saveColumnWidths(): void {
+    const entityType = this.entitiesTableConfig?.entityType;
+    if (!entityType) {
+      return;
+    }
+    try {
+      localStorage.setItem(EntitiesTableComponent.COLUMN_WIDTHS_KEY + entityType,
+        JSON.stringify(this.columnWidthOverrides));
+    } catch (e) {
+      // 存不下不影响拖拽本身
+    }
+  }
+
+  startColumnResize(event: PointerEvent, column: EntityColumn<BaseData<HasId>>): void {
+    // 阻止冒泡：表头还挂着 mat-sort-header，别让拖动变成排序
+    event.preventDefault();
+    event.stopPropagation();
+    // 用 closest 找表头单元格：mat-sort-header 会把单元格内容包进自己的容器里，
+    // 直接取 parentElement 拿到的是那层容器（宽度不是列宽）
+    const handle = event.currentTarget as HTMLElement;
+    const cell = handle.closest('.mat-mdc-header-cell') as HTMLElement;
+    const startWidth = cell ? cell.getBoundingClientRect().width : 0;
+    // 声明的是内容宽（外框 = 内容 + 内边距），要让「拖多少变多少」，得把这层内边距扣掉
+    const padding = cell ? cell.offsetWidth - parseFloat(getComputedStyle(cell).width) : 0;
+    this.resizing = {key: column.key, startX: event.clientX, startWidth, padding};
+    const move = (e: PointerEvent) => this.moveColumnResize(e);
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      this.resizing = null;
+      this.saveColumnWidths();
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  }
+
+  private moveColumnResize(event: PointerEvent): void {
+    if (!this.resizing) {
+      return;
+    }
+    const rendered = Math.max(60, this.resizing.startWidth + (event.clientX - this.resizing.startX));
+    this.columnWidthOverrides[this.resizing.key] = `${Math.round(rendered - this.resizing.padding)}px`;
+    this.clearStyleCaches();
+    this.cd.detectChanges();
+  }
+
+  resetColumnWidth(event: Event, column: EntityColumn<BaseData<HasId>>): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (!this.columnWidthOverrides[column.key]) {
+      return;
+    }
+    delete this.columnWidthOverrides[column.key];
+    this.clearStyleCaches();
+    this.saveColumnWidths();
+    this.cd.detectChanges();
+  }
+
   headerCellStyle(column: EntityColumn<BaseData<HasId>>) {
     const index = this.entitiesTableConfig.columns.indexOf(column);
     let res = this.headerCellStyleCache[index];
     if (!res) {
-      const widthStyle: any = {width: column.width};
-      if (column.width !== '0px') {
-        widthStyle.minWidth = column.width;
-        widthStyle.maxWidth = column.width;
+      const width = this.columnWidth(column);
+      const widthStyle: any = {width};
+      if (width !== '0px') {
+        widthStyle.minWidth = width;
+        widthStyle.maxWidth = width;
       }
       if (column instanceof EntityTableColumn) {
         res = {...column.headerCellStyleFunction(column.key), ...widthStyle};
@@ -751,10 +843,11 @@ export class EntitiesTableComponent extends PageComponent implements IEntitiesTa
     const index = row * this.entitiesTableConfig.columns.length + col;
     let res = this.cellStyleCache[index];
     if (!res) {
-      const widthStyle: any = {width: column.width};
-      if (column.width !== '0px') {
-        widthStyle.minWidth = column.width;
-        widthStyle.maxWidth = column.width;
+      const width = this.columnWidth(column);
+      const widthStyle: any = {width};
+      if (width !== '0px') {
+        widthStyle.minWidth = width;
+        widthStyle.maxWidth = width;
       }
       if (column instanceof EntityTableColumn) {
         res = {...column.cellStyleFunction(entity, column.key), ...widthStyle};

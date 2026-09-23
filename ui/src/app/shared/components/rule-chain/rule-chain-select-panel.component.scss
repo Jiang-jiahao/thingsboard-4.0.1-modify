@@ -9,16 +9,16 @@
     .mat-mdc-option.jnks-iot-selected-option {
       display: flex;
       flex-direction: row-reverse;
-      background-color: rgba(0, 0, 0, .04);
+      background-color: var(--jnks-iot-text-faint);
 
       mat-icon {
         margin-right: 0;
         margin-left: 16px;
-        color: $jnks-iot-secondary-color;
+        color: var(--jnks-iot-secondary-color);
       }
 
       .mdc-list-item__primary-text {
-        color: $jnks-iot-secondary-color;
+        color: var(--jnks-iot-secondary-color);
         font-weight: 500;
       }
     }

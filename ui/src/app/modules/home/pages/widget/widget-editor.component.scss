@@ -79,10 +79,16 @@ jnks-iot-widget-editor {
     width: 100%;
     height: 100%;
   }
+  // 非时序部件的「最新数据键设置表单」页签靠这里收掉（模板里把它标成
+  // aria-labelledby='hidden'）。宽度为 0 必须连内边距一起清掉，而全局页签样式
+  // 给 .mat-mdc-tab 加了 `padding: 0 14px !important`（scss/ui-refinements.scss），
+  // 所以这四条非加 !important 不可 —— 否则会留下一条 28px 的窄条，
+  // 只露出标签的一小截，看着像多出一个「数据键设置表单」。
   .mdc-tab[aria-labelledby='hidden'] {
     width: 0 !important;
-    min-width: 0;
-    padding:  0;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
     overflow: hidden;
   }
 
@@ -108,6 +114,8 @@ div.jnks-iot-editor-area-title-panel {
   top: 5px;
   right: 20px;
   z-index: 5;
+  display: flex;
+  align-items: center;
   font-size: .8rem;
   font-weight: 500;
 
@@ -117,31 +125,33 @@ div.jnks-iot-editor-area-title-panel {
     }
   }
 
+  // 语言名：一行安静的标签，不再是青色字 + 灰底的 chip
   label {
-    padding: 4px;
-    color: #00acc1;
-    background: rgba(220, 220, 220, .35);
-    border-radius: 5px;
+    padding: 0 2px;
+    color: var(--tb-text-muted);
+    font-weight: 600;
+    letter-spacing: .02em;
   }
 
+  // 工具按钮：跟站内图标按钮同一套（透明底、悬停浅底），不再是一排灰方块
   button.mat-mdc-button-base, button.mat-mdc-button-base.jnks-iot-mat-32 {
     align-items: center;
     vertical-align: middle;
-    min-width: 32px;
-    min-height: 15px;
+    min-width: 28px;
     padding: 4px;
     font-size: .8rem;
     line-height: 15px;
-    background: rgba(220, 220, 220, .35);
-    &:not(.jnks-iot-help-popup-button) {
-      color: #7b7b7b;
+    color: var(--tb-text-muted);
+
+    &:hover {
+      color: var(--tb-text);
     }
   }
   button.mat-mdc-button-base:not(.mat-mdc-icon-button) {
     height: 23px;
   }
   .jnks-iot-help-popup-button-loading {
-    background: #f3f3f3;
+    background: var(--tb-surface-hover);
   }
 }
 
@@ -153,6 +163,31 @@ div.jnks-iot-editor-area-title-panel {
 
   .ace_editor {
     height: 100%;
+  }
+
+  // 带标题行的代码面板（资源之外的三类：HTML / CSS / JS）：
+  // 原来标题行是绝对定位浮在代码上的，整理/全屏会压住第一行代码。改成独立一行，
+  // 代码区扣掉这一行的高度。只在真的带标题行的容器上生效，设置表单那些不受影响。
+  &:has(> div.jnks-iot-editor-area-title-panel) {
+    > div.jnks-iot-editor-area-title-panel {
+      position: static;
+      top: auto;
+      right: auto;
+      height: 32px;
+      padding: 0 8px 0 12px;
+      border-bottom: 1px solid var(--tb-border);
+      background: var(--tb-surface);
+
+      // 语言名靠左，工具按钮推到右边
+      > label:first-child {
+        margin-right: auto;
+      }
+    }
+
+    // 编辑器容器（ace 会把 .ace_editor 加在这一层上，初始化前后都得吃到这个高度）
+    > div:last-child {
+      height: calc(100% - 32px);
+    }
   }
 }
 

@@ -78,10 +78,10 @@
   }
 
   .jnks-iot-usage-item {
-    color: $jnks-iot-text-faint;
+    color: var(--jnks-iot-text-faint);
   }
 
   .jnks-iot-usage-item-counts {
-    color: $jnks-iot-text;
+    color: var(--jnks-iot-text);
   }
 }

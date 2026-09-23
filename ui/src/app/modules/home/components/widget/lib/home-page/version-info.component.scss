@@ -20,9 +20,9 @@
   }
 
   .jnks-iot-version-info-container {
-    border: 1px solid $jnks-iot-line;
+    border: 1px solid var(--jnks-iot-line);
     box-shadow: none;
-    border-radius: $jnks-iot-radius;
+    border-radius: var(--jnks-iot-radius);
     padding: 8px 16px 4px 16px;
     overflow: hidden;
     white-space: nowrap;
@@ -35,18 +35,20 @@
     &.up-to-date {
       box-shadow: none;
       border: none;
-      background: $jnks-iot-surface-page;
+      background: var(--jnks-iot-surface-page);
       white-space: initial;
       text-align: center;
     }
   }
 
+  // 与 home-page-widget.scss 的 .jnks-iot-title-link 同一处理：
+  // 去掉标题后的 ↗（rotate(315deg) 的 arrow_forward），它和设计稿不一致。
   .jnks-iot-version-link {
     font-weight: 400;
     font-size: 14px;
     line-height: 20px;
     letter-spacing: 0.2px;
-    color: $jnks-iot-text;
+    color: var(--jnks-iot-text);
     position: relative;
     border-bottom: none;
     @media #{$mat-md-lg} {
@@ -55,21 +57,7 @@
     }
     &:hover, &:focus {
       border-bottom: none;
-    }
-    &::after {
-      content: 'arrow_forward';
-      display: inline-block;
-      transform: rotate(315deg);
-      font-family: 'Material Icons';
-      font-weight: normal;
-      font-style: normal;
-      font-size: 18px;
-      color: rgba(0, 0, 0, 0.12);
-      vertical-align: bottom;
-      margin-left: 6px;
-    }
-    &:hover::after {
-      color: inherit;
+      color: var(--jnks-iot-text-muted);
     }
   }
 
@@ -78,7 +66,7 @@
     font-size: 18px;
     line-height: 24px;
     letter-spacing: 0.15px;
-    color: $jnks-iot-text;
+    color: var(--jnks-iot-text);
     @media #{$mat-md-lg} {
       font-size: 12px;
       line-height: 14px;
@@ -107,7 +95,7 @@
     font-size: 14px;
     line-height: 20px;
     letter-spacing: 0.2px;
-    color: $jnks-iot-text;
+    color: var(--jnks-iot-text);
     @media #{$mat-md-lg} {
       font-size: 11px;
       line-height: 16px;

@@ -42,6 +42,8 @@
         "decline-changes": "撤销更改",
         "decline": "撤销",
         "close": "关闭",
+        "copied": "已复制",
+        "copyHint": "点击复制这条提示",
         "back": "后退",
         "run": "运行",
         "sign-in": "登录！",
@@ -4525,7 +4527,6 @@
         "scroll-to-top": "滚动到顶部"
     },
     "help": {
-        "goto-help-page": "查看帮助",
         "show-help": "显示帮助"
     },
     "home": {

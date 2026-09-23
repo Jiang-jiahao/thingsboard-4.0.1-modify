@@ -1,17 +1,10 @@
 <mat-card appearance="outlined" class="settings-card">
   <mat-toolbar class="details-toolbar">
     <div class="mat-toolbar-tools flex flex-row items-center justify-start gap-2">
-      <button mat-icon-button
-              matTooltip="{{ 'action.back' | translate }}"
-              matTooltipPosition="above"
-              (click)="goBack()">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
       <div class="jnks-iot-details-title-header flex flex-col items-start justify-center">
         <div class="jnks-iot-details-title jnks-iot-ellipsis">{{ headerTitle }}</div>
         <div class="jnks-iot-details-subtitle jnks-iot-ellipsis">{{ headerSubtitle }}</div>
       </div>
-      <div class="jnks-iot-help" [jnks-iot-help]="helpLinkId()"></div>
       <span class="flex-1"></span>
       <section *ngIf="!isReadOnly" class="jnks-iot-header-button flex flex-row gap-2">
         <button [disabled]="(isLoading$ | async) || detailsForm.invalid || !detailsForm.dirty"

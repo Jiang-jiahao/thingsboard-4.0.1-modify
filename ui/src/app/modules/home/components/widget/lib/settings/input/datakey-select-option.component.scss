@@ -3,7 +3,7 @@
   .mat-expansion-panel {
     box-shadow: none;
     &.datakey-select-option {
-      border: 1px groove rgba(0, 0, 0, .25);
+      border: 1px groove var(--jnks-iot-line);
       .mat-expansion-panel-header {
         padding: 0 24px 0 8px;
         &.mat-expanded {

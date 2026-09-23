@@ -1,3 +1,23 @@
+/* 杰能科世图标字体
+ *
+ * 原来直接用 Material Icons（填充式）。这套设计用的是细描边图标，
+ * 所以自建了一份字形 —— 绘制源与生成脚本在 .run/icon-font/（未入库，属构建期工具）。
+ *
+ * 作图空间是 24×24、描边宽 2、圆头圆角，和一个 Material 字形同尺寸，
+ * 因此**引用处一行都不用改**：模板里依旧是 <mat-icon>home</mat-icon>，
+ * MatIcon 按 ligature 查字形，只是查到了我们这份字体上。
+ *
+ * ⚠️ 新增图标名必须同时补画字形，否则那个位置会**空白**。
+ *
+ * 字体栈里虽然写了 'Material Icons' 兜底，但**实测这个兜底不起作用**：
+ * 我们的字体为支持 ligature 把 a–z 都放进了 cmap，于是缺名时浏览器不会
+ * 回退到下一个字体，直接渲染成空。更糟的是 ligature 会「部分匹配」——
+ * 输入 check_box 会命中 check 那条规则，渲染出一个勾而不是空。
+ * 也就是说：漏画不会报错，只会静默画错或画空。加图标时务必同步补字形。
+ *
+ * 名字来源不止模板：**后端规则引擎节点也在提供图标名**
+ * （libs/rule-engine/**/*.java 里的 `icon = "..."`），改后端节点时要一并检查。
+ */
 @font-face {
   font-family: 'Material Icons';
   font-style: normal;
@@ -12,16 +32,16 @@
   font-style: normal;
   font-weight: 400;
   src: local('Material Icons Round'),
-  local('MaterialIconsRound-Regular'),
-  url(MaterialIconsRound-Regular.otf) format('truetype');
+       local('MaterialIconsRound-Regular'),
+       url(MaterialIconsRound-Regular.otf) format('truetype');
 }
 
 .material-icons {
-  font-family: 'Material Icons';
+  font-family: 'JnksIotIcons', 'Material Icons';
 }
 
 .material-icons-round {
-  font-family: 'Material Icons Round';
+  font-family: 'JnksIotIcons', 'Material Icons Round';
 }
 
 .material-icons, .material-icons-round {

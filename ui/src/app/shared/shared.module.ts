@@ -55,7 +55,6 @@ import { ContextMenuDirective } from '@shared/directives/context-menu.directive'
 import { NospacePipe } from '@shared/pipe/nospace.pipe';
 import { TranslateModule } from '@ngx-translate/core';
 import { JnksIotCheckboxComponent } from '@shared/components/jnks-iot-checkbox.component';
-import { HelpComponent } from '@shared/components/help.component';
 import { JnksIotAnchorComponent } from '@shared/components/jnks-iot-anchor.component';
 import { MillisecondsToTimeStringPipe } from '@shared/pipe/milliseconds-to-time-string.pipe';
 import { TimewindowComponent } from '@shared/components/time/timewindow.component';
@@ -284,7 +283,6 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     JnksIotComponentOutletDirective,
     JnksIotPopoverDirective,
     JnksIotMarkdownComponent,
-    HelpComponent,
     HelpMarkdownComponent,
     HelpPopupComponent,
     JnksIotCheckboxComponent,
@@ -499,7 +497,6 @@ export function MarkedOptionsFactory(markedOptionsService: MarkedOptionsService)
     JnksIotComponentOutletDirective,
     JnksIotPopoverDirective,
     JnksIotMarkdownComponent,
-    HelpComponent,
     HelpMarkdownComponent,
     HelpPopupComponent,
     JnksIotCheckboxComponent,

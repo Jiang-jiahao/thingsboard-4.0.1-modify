@@ -57,7 +57,9 @@
         <jnks-iot-notification-bell></jnks-iot-notification-bell>
         <jnks-iot-user-menu [displayUserInfo]="!displaySearchMode()"></jnks-iot-user-menu>
       </mat-toolbar>
-      <mat-progress-bar color="warn" style="z-index: 10; margin-bottom: -4px; width: 100%;" mode="indeterminate"
+      <!-- 顶部加载指示：样式在 ui-refinements.scss 的 .jnks-iot-top-loading（扫描光带），
+           不要 color="warn"（Material 的 warn 是红，加载不是异常）。 -->
+      <mat-progress-bar class="jnks-iot-top-loading" style="z-index: 10; margin-bottom: -4px; width: 100%;" mode="indeterminate"
                         *ngIf="!hideLoadingBar && (isLoading$ | async)">
       </mat-progress-bar>
       <div jnks-iot-toast class="jnks-iot-main-content flex flex-1 flex-col">

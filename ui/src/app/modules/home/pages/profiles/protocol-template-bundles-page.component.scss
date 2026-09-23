@@ -15,7 +15,7 @@
     width: 100%;
     height: 100%;
     min-height: 360px;
-    background: #fff;
+    background: var(--jnks-iot-surface-card);
     overflow: hidden;
 
     &.jnks-iot-outlined-border {
@@ -126,7 +126,7 @@
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: rgba($jnks-iot-secondary-color, 0.06);
+    background-color: rgb(var(--jnks-iot-secondary-color-rgb) / 0.06);
   }
 }
 

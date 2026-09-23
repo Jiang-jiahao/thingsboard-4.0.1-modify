@@ -16,7 +16,7 @@
     flex-direction: column;
     height: 100%;
     padding: 0;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--jnks-iot-text);
   }
 
   .jnks-iot-dialog-actions {
@@ -109,7 +109,7 @@
       background-color: #F3F6FA;
 
       jnks-iot-icon, .jnks-iot-form-panel-title {
-        color: rgba(0, 0, 0, .38);
+        color: var(--jnks-iot-text-faint);
       }
     }
 
@@ -142,18 +142,18 @@
       display: flex;
 
       jnks-iot-notification {
-        border: 1px groove $jnks-iot-primary-color;
+        border: 1px groove var(--jnks-iot-primary-color);
         border-radius: 4px;
         max-width: 400px;
         width: 80%;
-        background-color: #fff;
+        background-color: var(--jnks-iot-surface-card);
       }
     }
 
     .notification-content {
-      border: 1px solid rgba(0, 0, 0, 0.1);
+      border: 1px solid var(--jnks-iot-line);
       border-radius: 4px;
-      background: #fff;
+      background: var(--jnks-iot-surface-card);
       padding: 12px 16px;
       display: inline-grid;
       width: 100%;

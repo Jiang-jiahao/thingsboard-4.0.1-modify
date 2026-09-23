@@ -8,6 +8,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Constants } from '@shared/models/constants';
 import { Router } from '@angular/router';
 import { OAuth2ClientLoginInfo } from '@shared/models/oauth2.models';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'jnks-iot-login',
@@ -23,6 +24,10 @@ export class LoginComponent extends PageComponent implements OnInit {
     password: ''
   });
   oauth2Clients: Array<OAuth2ClientLoginInfo> = null;
+
+  // 登录页右下角显示的版本号 —— 来自构建期注入的 environment.jnksIotVersion，
+  // 不写死（原来原型里那句「版本 4.0.1」是硬编码的示范值）
+  readonly version = environment.jnksIotVersion;
 
   constructor(protected store: Store<AppState>,
               private authService: AuthService,

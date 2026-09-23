@@ -1,7 +1,7 @@
 :host ::ng-deep {
   jnks-iot-entities-table {
     .mat-drawer-container {
-      background-color: white;
+      background-color: var(--jnks-iot-surface-card);
     }
   }
 }

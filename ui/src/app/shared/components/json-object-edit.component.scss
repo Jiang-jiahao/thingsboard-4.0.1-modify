@@ -16,8 +16,6 @@
     margin: 0;
     font-size: .8rem;
     line-height: 15px;
-    color: #7b7b7b;
-    background: rgba(220, 220, 220, .35);
 
     &:not(:last-child) {
       margin-right: 4px;
@@ -31,7 +29,6 @@
 .jnks-iot-json-object-panel {
   height: 100%;
   margin-left: 15px;
-  border: 1px solid #c0c0c0;
 
   #jnks-iot-json-input {
     width: 100%;

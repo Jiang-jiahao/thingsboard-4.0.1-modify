@@ -8,11 +8,11 @@
       font-size: 14px;
       font-weight: 400;
       line-height: 20px;
-      color: rgba(0,0,0,0.54);
+      color: var(--jnks-iot-text-muted);
       letter-spacing: 0.2px;
     }
     .jnks-iot-form-panel-title {
-      color: rgba(0, 0, 0, 0.87);
+      color: var(--jnks-iot-text);
     }
   }
 }

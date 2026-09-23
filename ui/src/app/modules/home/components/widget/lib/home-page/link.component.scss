@@ -3,9 +3,9 @@
 :host {
   .jnks-iot-edit-link {
     padding: 16px;
-    border: 1px solid $jnks-iot-line;
+    border: 1px solid var(--jnks-iot-line);
     box-shadow: none;
-    border-radius: $jnks-iot-radius;
+    border-radius: var(--jnks-iot-radius);
     &.edit-mode {
       border: 1px solid rgba(48, 86, 128, 0.32);
     }
@@ -16,10 +16,10 @@
     flex-direction: column;
     justify-content: center;
     padding: 8px;
-    background: #FFFFFF;
-    border: 1px solid $jnks-iot-line;
+    background: var(--jnks-iot-surface-card);
+    border: 1px solid var(--jnks-iot-line);
     box-shadow: none;
-    border-radius: $jnks-iot-radius;
+    border-radius: var(--jnks-iot-radius);
     .jnks-iot-link-container {
       display: flex;
       flex-direction: row;
@@ -27,7 +27,7 @@
       .jnks-iot-link-icon-container {
         height: 40px;
         padding: 8px;
-        background: $jnks-iot-surface-page;
+        background: var(--jnks-iot-surface-page);
         border-radius: 6px;
         margin-right: 8px;
       }
@@ -36,13 +36,13 @@
         font-size: 14px;
         line-height: 20px;
         letter-spacing: 0.2px;
-        color: $jnks-iot-text;
+        color: var(--jnks-iot-text);
       }
     }
   }
   .jnks-iot-edit-buttons {
     .mat-icon {
-      color: $jnks-iot-text-faint;
+      color: var(--jnks-iot-text-faint);
     }
   }
 }

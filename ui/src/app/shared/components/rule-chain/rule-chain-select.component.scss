@@ -9,7 +9,7 @@
     width: 100%;
 
     input {
-      color: #fff;
+      color: var(--jnks-iot-text);
       cursor: pointer;
       text-overflow: ellipsis;
       pointer-events: none;
@@ -26,8 +26,10 @@
 }
 
 :host-context(.jnks-iot-rulechain-header-select) {
+  // 原来是写死的 #fff —— 那是给旧版**深色**抽屉头配的。改造后抽屉头是浅色，
+  // 白字直接看不见（实测 input 的 color 与 -webkit-text-fill-color 都是白色）。
   .jnks-iot-rule-select input {
-    color: #fff;
+    color: var(--jnks-iot-text);
   }
 }
 
@@ -39,11 +41,11 @@
     }
 
     input {
-      color: $jnks-iot-topbar-text;
+      color: var(--jnks-iot-topbar-text);
     }
 
     .mat-icon {
-      color: $jnks-iot-secondary-color;
+      color: var(--jnks-iot-secondary-color);
     }
   }
 }

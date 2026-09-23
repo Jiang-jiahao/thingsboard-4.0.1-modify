@@ -7,7 +7,6 @@
         <div class="mat-toolbar-tools">
           <div class="jnks-iot-images-title lt-md:!hidden">
             <div jnksIotTruncateWithTooltip>{{ (isScada ? 'scada.symbols' : 'image.gallery') | translate }}</div>
-            <div *ngIf="isScada" jnks-iot-help="scada"></div>
           </div>
           <div class="jnks-iot-images-view-type-toolbar flex flex-row items-center justify-start">
             <div class="jnks-iot-toolbar-button" [class.jnks-iot-selected]="mode === 'list'">
@@ -89,7 +88,6 @@
           <mat-icon>search</mat-icon>
         </button>
         <mat-form-field class="flex-1">
-          <mat-label>&nbsp;</mat-label>
           <input #searchInput matInput
                  [formControl]="textSearch"
                  placeholder="{{ (isScada ? 'scada.search' : 'image.search' ) | translate }}"/>

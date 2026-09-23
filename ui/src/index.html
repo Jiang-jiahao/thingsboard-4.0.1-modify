@@ -142,6 +142,21 @@
   </style>
 </head>
 <body class="jnks-iot-default">
+  <script>
+    // 主题：在 Angular 启动前，把持久化的偏好先贴到 <body> 上。
+    // 不这样做的话登录页会闪一下默认主题 —— 登录页没有用户菜单，
+    // ThemeService 要到进入主界面后才被注入。
+    // key 与类名必须和 app/core/services/theme.service.ts 保持一致。
+    (function () {
+      try {
+        if (JSON.parse(localStorage.getItem('TB-uiTheme')) === 'dark') {
+          document.body.classList.add('jnks-iot-dark');
+        }
+      } catch (e) {
+        // 读不到或不是合法 JSON —— 用默认的浅色主题
+      }
+    })();
+  </script>
   <jnks-iot-root></jnks-iot-root>
   <div id="jnks-iot-loading-spinner" class="jnks-iot-loading-spinner" role="status" aria-live="polite" aria-label="正在加载">
     <div class="jnks-iot-app-loader-card">

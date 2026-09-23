@@ -54,7 +54,7 @@
         position: absolute;
         z-index: 20;
         pointer-events: none;
-        border: 1px solid rgba(0, 0, 0, 0.12);
+        border: 1px solid var(--jnks-iot-line);
         border-radius: 4px;
         display: flex;
         flex-direction: column;

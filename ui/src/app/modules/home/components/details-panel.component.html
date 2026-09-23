@@ -40,7 +40,9 @@
                 matTooltipPosition="below"
                 class="jnks-iot-details-action-btn"
                 (click)="onToggleDetailsEditMode()">
-          <mat-icon class="material-icons">{{isEdit ? 'close' : 'edit'}}</mat-icon>
+          <!-- 编辑态用 undo（放弃修改）而不是 close：右边本来就有一个 ✗ 是「关闭面板」，
+               两个一模一样的 ✗ 并排会被读成同一个动作。 -->
+          <mat-icon class="material-icons">{{isEdit ? 'undo' : 'edit'}}</mat-icon>
         </button>
       </ng-container>
       <button *ngIf="showCloseDetails" mat-icon-button class="jnks-iot-details-close-btn" (click)="onCloseDetails()">

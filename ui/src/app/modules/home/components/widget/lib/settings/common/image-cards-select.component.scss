@@ -23,7 +23,7 @@
         .jnks-iot-form-row {
           font-weight: normal;
           font-size: 16px;
-          color: rgba(0, 0, 0, 0.87);
+          color: var(--jnks-iot-text);
         }
         .mat-expansion-indicator {
           display: none;
@@ -71,7 +71,7 @@
       font-weight: 400;
       line-height: 16px;
       letter-spacing: 0.25px;
-      color: rgba(0, 0, 0, 0.54);
+      color: var(--jnks-iot-text-muted);
     }
     .jnks-iot-image-cards-option-image-container {
       z-index: 1;

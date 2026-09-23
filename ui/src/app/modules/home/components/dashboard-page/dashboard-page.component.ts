@@ -1237,14 +1237,6 @@ export class DashboardPageComponent extends PageComponent implements IDashboardC
     }
   }
 
-  helpLinkIdForWidgetType(): string {
-    let link = 'widgetsConfig';
-    if (this.editingWidget && this.editingWidget.type) {
-      link = widgetTypesData.get(this.editingWidget.type).configHelpLinkId;
-    }
-    return link;
-  }
-
   addWidget($event: Event, layoutCtx?: DashboardPageLayoutContext) {
     if ($event) {
       $event.stopPropagation();

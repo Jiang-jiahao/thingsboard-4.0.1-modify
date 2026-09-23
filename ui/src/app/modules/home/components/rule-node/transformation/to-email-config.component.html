@@ -10,13 +10,6 @@
         </mat-hint>
         <mat-hint align="end">
           <div class="input-bottom-double-hint">
-            <div class="see-example"
-                hintMode
-                jnks-iot-help-popup="{{'rulenode/to_email_node_fields_templatization'}}"
-                jnks-iot-help-popup-placement="right"
-                trigger-style="letter-spacing:0.25px; font-size:12px;"
-                [jnks-iot-help-popup-style]="{maxWidth: '820px'}"
-                trigger-text="{{ 'rule-node-config.key-val.see-examples' | translate }}"></div>
           </div>
         </mat-hint>
         <mat-error *ngIf="toEmailConfigForm.get('fromTemplate').hasError('required')">

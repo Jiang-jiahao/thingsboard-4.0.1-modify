@@ -5,7 +5,7 @@ import { AppState } from '@core/core.state';
 import { Router } from '@angular/router';
 import { MatDialogRef } from '@angular/material/dialog';
 import { FormGroupDirective, NgForm, UntypedFormControl } from '@angular/forms';
-import { getProviderHelpLink, OAuth2Client } from '@shared/models/oauth2.models';
+import { OAuth2Client } from '@shared/models/oauth2.models';
 import { OAuth2Service } from '@core/http/oauth2.service';
 import { ClientComponent } from '@home/pages/admin/oauth2/clients/client.component';
 import { ErrorStateMatcher } from '@angular/material/core';
@@ -57,7 +57,4 @@ export class ClientDialogComponent extends DialogComponent<ClientDialogComponent
     }
   }
 
-  helpLinkId() {
-    return getProviderHelpLink(this.clientComponent.entityForm.get('additionalInfo.providerName')?.value);
-  }
 }

@@ -8,7 +8,7 @@
   }
   &.jnks-iot-draggable {
     &.cdk-drag-preview {
-      background: #fff;
+      background: var(--jnks-iot-surface-card);
     }
   }
 }
@@ -41,7 +41,7 @@
   font-weight: 400;
   font-size: 16px;
   text-align: center;
-  color: $jnks-iot-primary-color;
+  color: var(--jnks-iot-primary-color);
   &:before {
     content: "";
     display: block;
@@ -50,7 +50,7 @@
     position: absolute;
     left: 0;
     top: 0;
-    background-color: $jnks-iot-primary-color;
+    background-color: var(--jnks-iot-primary-color);
     opacity: 0.06;
     border-radius: 100%;
   }

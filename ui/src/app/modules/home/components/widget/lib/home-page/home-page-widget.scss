@@ -13,20 +13,24 @@
     font-size: 14px;
     line-height: 20px;
     letter-spacing: 0.25px;
-    color: $jnks-iot-text-muted;
+    color: var(--jnks-iot-text-muted);
     @media #{$mat-md-lg} {
       font-size: 12px;
       line-height: 16px;
     }
   }
 
+  // 部件标题的链接。
+  // 原来标题后面缀一个 rotate(315deg) 的 arrow_forward（即 ↗），用来暗示
+  // 「这个标题可以点进去」—— 但它和设计稿不一致，且首页每个部件标题都挂一个，
+  // 一屏里就是一片小箭头。标题本身的可点性由 hover 颜色变化承担。
   .jnks-iot-title-link {
     font-style: normal;
     font-weight: 500;
     font-size: 14px;
     line-height: 20px;
     letter-spacing: 0.25px;
-    color: $jnks-iot-text-muted;
+    color: var(--jnks-iot-text-muted);
     position: relative;
     border-bottom: none;
     @media #{$mat-md-lg} {
@@ -35,21 +39,7 @@
     }
     &:hover, &:focus {
       border-bottom: none;
-    }
-    &::after {
-      content: 'arrow_forward';
-      display: inline-block;
-      transform: rotate(315deg);
-      font-family: 'Material Icons';
-      font-weight: normal;
-      font-style: normal;
-      font-size: 18px;
-      color: rgba(0, 0, 0, 0.12);
-      vertical-align: bottom;
-      margin-left: 6px;
-    }
-    &:hover::after {
-      color: inherit;
+      color: var(--jnks-iot-text);
     }
   }
 }

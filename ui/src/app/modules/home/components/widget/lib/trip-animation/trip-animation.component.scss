@@ -60,7 +60,7 @@
       right: 0;
       z-index: 1000;
       padding: 5px;
-      background-color: #fff;
+      background-color: var(--jnks-iot-surface-card);
       transition: 0.3s ease-in-out;
 
       &-hidden {

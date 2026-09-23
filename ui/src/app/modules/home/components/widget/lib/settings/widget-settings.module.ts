@@ -244,9 +244,6 @@ import {
   GatewayServiceRPCSettingsComponent
 } from '@home/components/widget/lib/settings/gateway/gateway-service-rpc-settings.component';
 import {
-  DocLinksWidgetSettingsComponent
-} from '@home/components/widget/lib/settings/home-page/doc-links-widget-settings.component';
-import {
   QuickLinksWidgetSettingsComponent
 } from '@home/components/widget/lib/settings/home-page/quick-links-widget-settings.component';
 import {
@@ -335,9 +332,6 @@ import {
   RadarChartWidgetSettingsComponent
 } from '@home/components/widget/lib/settings/chart/radar-chart-widget-settings.component';
 import {
-  MobileAppQrCodeWidgetSettingsComponent
-} from '@home/components/widget/lib/settings/cards/mobile-app-qr-code-widget-settings.component';
-import {
   LabelCardWidgetSettingsComponent
 } from '@home/components/widget/lib/settings/cards/label-card-widget-settings.component';
 import {
@@ -360,7 +354,6 @@ import { MapWidgetSettingsComponent } from '@home/components/widget/lib/settings
 @NgModule({
   declarations: [
     QrCodeWidgetSettingsComponent,
-    MobileAppQrCodeWidgetSettingsComponent,
     TimeseriesTableWidgetSettingsComponent,
     TimeseriesTableKeySettingsComponent,
     TimeseriesTableLatestKeySettingsComponent,
@@ -452,7 +445,6 @@ import { MapWidgetSettingsComponent } from '@home/components/widget/lib/settings
     GatewayLogsSettingsComponent,
     GatewayServiceRPCSettingsComponent,
     TripAnimationWidgetSettingsComponent,
-    DocLinksWidgetSettingsComponent,
     QuickLinksWidgetSettingsComponent,
     ValueCardWidgetSettingsComponent,
     AggregatedValueCardKeySettingsComponent,
@@ -498,7 +490,6 @@ import { MapWidgetSettingsComponent } from '@home/components/widget/lib/settings
   ],
   exports: [
     QrCodeWidgetSettingsComponent,
-    MobileAppQrCodeWidgetSettingsComponent,
     TimeseriesTableWidgetSettingsComponent,
     TimeseriesTableKeySettingsComponent,
     TimeseriesTableLatestKeySettingsComponent,
@@ -590,7 +581,6 @@ import { MapWidgetSettingsComponent } from '@home/components/widget/lib/settings
     GatewayLogsSettingsComponent,
     GatewayServiceRPCSettingsComponent,
     TripAnimationWidgetSettingsComponent,
-    DocLinksWidgetSettingsComponent,
     QuickLinksWidgetSettingsComponent,
     ValueCardWidgetSettingsComponent,
     AggregatedValueCardKeySettingsComponent,

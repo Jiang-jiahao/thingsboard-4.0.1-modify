@@ -10,10 +10,10 @@
       padding: 0 24px;
     }
     h2 {
-      color: $jnks-iot-text;
+      color: var(--jnks-iot-text);
     }
     .mat-icon {
-      color: $jnks-iot-text-muted;
+      color: var(--jnks-iot-text-muted);
     }
     .mat-mdc-dialog-content {
       padding: 24px 24px 8px 24px;
@@ -26,7 +26,7 @@
     height: 24px;
     margin-left: 12px;
     .mat-icon {
-      color: $jnks-iot-text-faint;
+      color: var(--jnks-iot-text-faint);
     }
   }
   .jnks-iot-add-link-button {
@@ -36,16 +36,16 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #FFFFFF;
+    background: var(--jnks-iot-surface-card);
     padding: 8px;
-    border: 2px dashed rgba(0, 0, 0, 0.08);
-    border-radius: $jnks-iot-radius;
+    border: 2px dashed var(--jnks-iot-line);
+    border-radius: var(--jnks-iot-radius);
     .jnks-iot-add-icon {
-      color: rgba(0, 0, 0, 0.12);
+      color: var(--jnks-iot-text-faint);
     }
     &:hover {
       .jnks-iot-add-icon {
-        color: $jnks-iot-text-faint;
+        color: var(--jnks-iot-text-faint);
       }
     }
   }

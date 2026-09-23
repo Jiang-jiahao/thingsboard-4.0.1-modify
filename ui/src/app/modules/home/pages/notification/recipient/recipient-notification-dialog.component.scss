@@ -4,7 +4,7 @@
   form.jnks-iot-dialog-container {
     min-width: 600px;
     max-height: 100vh;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--jnks-iot-text);
   }
 
   .mat-dialog-content {
@@ -32,7 +32,7 @@
     .mat-mdc-radio-button {
       flex: 1 1 100%;
       padding: 4px;
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--jnks-iot-line);
       border-radius: 6px;
     }
   }

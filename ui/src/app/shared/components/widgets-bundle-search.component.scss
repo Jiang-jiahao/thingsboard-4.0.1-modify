@@ -23,8 +23,8 @@
   }
 
   &.focus {
-    background: #fff;
-    color: rgba(0,0,0,.54);
+    background: var(--jnks-iot-surface-card);
+    color: var(--jnks-iot-text-muted);
 
     input {
       color: #000;

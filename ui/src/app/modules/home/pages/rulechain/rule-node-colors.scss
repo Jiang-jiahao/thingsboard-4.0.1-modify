@@ -1,30 +1,41 @@
+// 节点类型色 —— 只当**类型编码**用：左侧 3px 竖条 + 图标色。
+//
+// 上游实现是直接把整块节点背景填成这几种颜色（background-color 一家一个）。
+// 浅底上勉强能看，落到深色主题就成了一桌子糖果块：类型色、品牌色、状态色
+// 混在同一屏里，「颜色只给异常」这条就废了，节点类型反而更难分辨。
+// 改成竖条 + 图标编码后类型照样一眼可辨，底色回到卡片。
+//
+// 取值照着设计稿 .rc-node.* 的 --type，深浅两个主题共用一套。
 @mixin rule-node-colors {
   &.jnks-iot-filter-type {
-    background-color: #f1e861;
+    --jnks-iot-node-type: #d8cf6a;
   }
 
   &.jnks-iot-enrichment-type {
-    background-color: #cdf14e;
+    --jnks-iot-node-type: #b9d95f;
   }
 
   &.jnks-iot-transformation-type {
-    background-color: #79cef1;
+    --jnks-iot-node-type: #7cc2e0;
   }
 
   &.jnks-iot-action-type {
-    background-color: #f1928f;
+    --jnks-iot-node-type: #e08d8a;
   }
 
   &.jnks-iot-external-type {
-    background-color: #fbc766;
+    --jnks-iot-node-type: #e0b264;
   }
 
   &.jnks-iot-flow-type {
-    background-color: #d6c4f1;
+    --jnks-iot-node-type: #c0aee0;
+  }
+
+  &.jnks-iot-input-type {
+    --jnks-iot-node-type: #8fd497;
   }
 
   &.jnks-iot-unknown-type {
-    background-color: #f16c29;
+    --jnks-iot-node-type: #e08a55;
   }
-
 }

@@ -16,15 +16,15 @@
     padding: 0;
     background: linear-gradient(
       125deg,
-      $jnks-iot-details-header-start 0%,
-      $jnks-iot-details-header-mid 48%,
-      $jnks-iot-details-header-end 100%
+      var(--jnks-iot-details-header-start) 0%,
+      var(--jnks-iot-details-header-mid) 48%,
+      var(--jnks-iot-details-header-end) 100%
     ) !important;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
   }
 
   .mat-content {
-    background: #f8fafc !important;
+    background: var(--jnks-iot-surface-page) !important;
   }
 }
 

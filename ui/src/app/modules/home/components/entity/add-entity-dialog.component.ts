@@ -72,14 +72,6 @@ export class AddEntityDialogComponent extends
     this.detailsForm = this.entityComponent.entityForm;
   }
 
-  helpLinkId(): string {
-    if (this.resources.helpLinkIdForEntity && this.entityComponent.entityForm) {
-      return this.resources.helpLinkIdForEntity(this.entityComponent.entityForm.getRawValue());
-    } else {
-      return this.resources.helpLinkId;
-    }
-  }
-
   isErrorState(control: UntypedFormControl | null, form: FormGroupDirective | NgForm | null): boolean {
     const originalErrorState = this.errorStateMatcher.isErrorState(control, form);
     const customErrorState = !!(control && control.invalid && this.submitted);

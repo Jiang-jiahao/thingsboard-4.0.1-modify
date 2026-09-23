@@ -62,22 +62,25 @@
       }
     }
 
+    // 语言名与工具按钮：与部件编辑器那套一致（见 ui-refinements.scss 的代码编辑器一段）
     label {
-      padding: 4px;
-      color: #00acc1;
-      background: rgba(220, 220, 220, .35);
-      border-radius: 5px;
+      padding: 0 2px;
+      color: var(--tb-text-muted);
+      font-weight: 600;
+      letter-spacing: .02em;
     }
 
     .mat-mdc-button {
-      min-width: 32px;
-      min-height: 15px;
+      min-width: 28px;
       padding: 4px;
       margin: 0;
       font-size: .8rem;
       line-height: 15px;
-      color: #7b7b7b;
-      background: rgba(220, 220, 220, .35);
+      color: var(--tb-text-muted);
+
+      &:hover {
+        color: var(--tb-text);
+      }
     }
   }
 

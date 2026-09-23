@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  --mdc-outlined-text-field-outline-color: rgba(0,0,0,0.12);
+  --mdc-outlined-text-field-outline-color: var(--jnks-iot-text-faint);
   @media #{$mat-lt-md} {
     width: 90vw;
   }
@@ -20,7 +20,7 @@
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--jnks-iot-text);
   }
   .jnks-iot-default-mobile-page-panel-content {
     display: flex;

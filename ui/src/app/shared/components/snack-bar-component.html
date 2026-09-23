@@ -1,4 +1,4 @@
-<div class="flex flex-row items-center justify-start"
+<div class="jnks-iot-toast-card"
      [@showHideAnimation]="{value: animationState, params: animationParams}"
      (@showHideAnimation.done)="onHideFinished($event)"
      [class.jnks-iot-toast]="!notification.modern"
@@ -6,19 +6,17 @@
      [class.error-toast]="notification.type === 'error'"
      [class.warn-toast]="notification.type === 'warn'"
      [class.success-toast]="notification.type === 'success'"
-     [class.info-toast]="notification.type === 'info'">
-  <ng-container *ngIf="!notification.modern; else modern">
+     [class.info-toast]="notification.type === 'info'"
+     [class.copied]="copied"
+     [class.paused]="paused"
+     (click)="copyMessage()"
+     [attr.title]="copied ? null : ('action.copyHint' | translate)">
+  <span class="toast-icon" aria-hidden="true"></span>
+  <div class="toast-content">
     <div class="toast-text" [innerHTML]="notification.message | safe: 'html'"></div>
-    <button #actionButton type="button" mat-button (click)="action($event)">{{ 'action.close' | translate }}</button>
-  </ng-container>
-  <ng-template #modern>
-    <div class="jnks-iot-modern-toast-panel"
-         [class.error-toast]="notification.type === 'error'"
-         [class.warn-toast]="notification.type === 'warn'"
-         [class.success-toast]="notification.type === 'success'"
-         [class.info-toast]="notification.type === 'info'">
-      <div class="toast-text" [innerHTML]="notification.message | safe: 'html'"></div>
-      <button #actionButton class="jnks-iot-mat-20" mat-icon-button (click)="action($event)"><mat-icon>close</mat-icon></button>
-    </div>
-  </ng-template>
+    <span class="toast-copied-hint" *ngIf="copied" translate>action.copied</span>
+  </div>
+  <button type="button" class="toast-close" (click)="action($event)"
+          [attr.aria-label]="'action.close' | translate"><mat-icon>close</mat-icon></button>
+  <div class="toast-progress" *ngIf="progressMs > 0" [style.animation-duration.ms]="progressMs"></div>
 </div>

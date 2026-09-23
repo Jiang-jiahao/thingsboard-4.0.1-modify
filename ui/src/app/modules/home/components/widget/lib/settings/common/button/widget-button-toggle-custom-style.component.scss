@@ -6,7 +6,7 @@
   align-items: center;
   gap: 12px;
   button.mat-mdc-icon-button {
-    color: rgba(0,0,0,0.56);
+    color: var(--jnks-iot-text-faint);
   }
   .jnks-iot-widget-button-preview-panel {
     width: 148px;

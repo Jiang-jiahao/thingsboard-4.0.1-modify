@@ -1,7 +1,7 @@
 @import "../../../../../../../scss/constants";
 
 .jnks-iot-no-notification-svg-color {
-  color: $jnks-iot-primary-color;
+  color: var(--jnks-iot-primary-color);
 }
 
 .jnks-iot-unread-notification-panel {
@@ -34,7 +34,7 @@
     .jnks-iot-no-notification-text {
       text-align: center;
       margin-bottom: 12px;
-      color: rgba(0, 0, 0, 0.38);
+      color: var(--jnks-iot-text-faint);
     }
   }
   .notification-counter {

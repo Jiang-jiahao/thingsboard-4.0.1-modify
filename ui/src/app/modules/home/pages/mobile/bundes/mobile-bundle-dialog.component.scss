@@ -7,7 +7,7 @@
   max-height: 100vh;
   display: grid;
   grid-template-rows: min-content 4px minmax(auto, 1fr) min-content;
-  --mdc-outlined-text-field-outline-color: rgba(0,0,0,0.12);
+  --mdc-outlined-text-field-outline-color: var(--jnks-iot-text-faint);
 
   .mat-mdc-slide-toggle {
     margin-bottom: 16px;
@@ -26,7 +26,7 @@
       flex-direction: column;
       height: 100%;
       padding: 0 !important;
-      color: rgba(0, 0, 0, 0.87);
+      color: var(--jnks-iot-text);
 
       .mat-stepper-horizontal {
         display: flex;

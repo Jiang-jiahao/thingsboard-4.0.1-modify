@@ -9,7 +9,7 @@
   }
 
   .jnks-iot-title-icon {
-    color: $jnks-iot-text-faint;
+    color: var(--jnks-iot-text-faint);
     width: 32px;
     height: 32px;
     padding: 4px;
@@ -30,16 +30,16 @@
     flex-direction: column;
     justify-content: center;
     padding: 8px;
-    background: #FFFFFF;
-    border: 1px solid $jnks-iot-line;
+    background: var(--jnks-iot-surface-card);
+    border: 1px solid var(--jnks-iot-line);
     box-shadow: none;
-    border-radius: $jnks-iot-radius;
+    border-radius: var(--jnks-iot-radius);
     @media #{$mat-md-lg} {
       height: 18px;
       padding: 0 8px;
     }
     &:hover {
-      border: 1px solid $jnks-iot-line-strong;
+      border: 1px solid var(--jnks-iot-line-strong);
       box-shadow: none;
     }
     .jnks-iot-link-container {
@@ -49,7 +49,7 @@
       .jnks-iot-link-icon-container {
         height: 40px;
         padding: 8px;
-        background: $jnks-iot-surface-page;
+        background: var(--jnks-iot-surface-page);
         border-radius: 6px;
         margin-right: 8px;
         @media #{$mat-md-lg} {
@@ -61,7 +61,7 @@
         font-size: 14px;
         line-height: 20px;
         letter-spacing: 0.2px;
-        color: $jnks-iot-text;
+        color: var(--jnks-iot-text);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -80,10 +80,10 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #FFFFFF;
+    background: var(--jnks-iot-surface-card);
     padding: 8px;
-    border: 2px dashed rgba(0, 0, 0, 0.08);
-    border-radius: $jnks-iot-radius;
+    border: 2px dashed var(--jnks-iot-line);
+    border-radius: var(--jnks-iot-radius);
     @media #{$mat-md-lg} {
       height: 18px;
       padding: 0 8px;
@@ -94,11 +94,11 @@
       }
     }
     .jnks-iot-add-icon {
-      color: rgba(0, 0, 0, 0.12);
+      color: var(--jnks-iot-text-faint);
     }
     &:hover {
       .jnks-iot-add-icon {
-        color: $jnks-iot-text-faint;
+        color: var(--jnks-iot-text-faint);
       }
     }
   }

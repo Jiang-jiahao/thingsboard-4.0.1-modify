@@ -65,7 +65,7 @@ div.jnks-iot-widget .jnks-iot-widget-content.jnks-iot-no-interaction {
           &:not(.leaflet-disabled) {
             &:hover, &.active {
               border-bottom: none;
-              color: var(--tb-map-control-active-color, $jnks-iot-primary-color); // primary color
+              color: var(--tb-map-control-active-color, var(--jnks-iot-primary-color)); // primary color
               &:before {
                 content: "";
                 position: absolute;
@@ -105,9 +105,9 @@ div.jnks-iot-widget .jnks-iot-widget-content.jnks-iot-no-interaction {
                   border-radius: 15px;
                 }
                 > div:not(.jnks-iot-control-text):not(.jnks-iot-close) {
-                  background-color: var(--tb-map-control-active-color, $jnks-iot-primary-color);
+                  background-color: var(--tb-map-control-active-color, var(--jnks-iot-primary-color));
                   svg {
-                    fill: var(--tb-map-control-active-color, $jnks-iot-primary-color);
+                    fill: var(--tb-map-control-active-color, var(--jnks-iot-primary-color));
                   }
                 }
               }
@@ -352,7 +352,7 @@ div.jnks-iot-widget .jnks-iot-widget-content.jnks-iot-no-interaction {
             clip: rect(0, 0, 0, 0);
             pointer-events: none;
             &:checked+label.jnks-iot-layer-label {
-              border: 3px solid $jnks-iot-primary-color;
+              border: 3px solid var(--jnks-iot-primary-color);
               box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.30), 0 2px 6px 2px rgba(0, 0, 0, 0.15);
               margin: 0;
             }
@@ -365,7 +365,7 @@ div.jnks-iot-widget .jnks-iot-widget-content.jnks-iot-no-interaction {
             border: 1px solid rgba(0, 0, 0, 0.12);
             margin: 2px;
             &:hover {
-              border: 3px solid $jnks-iot-primary-color;
+              border: 3px solid var(--jnks-iot-primary-color);
               box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.30), 0 2px 6px 2px rgba(0, 0, 0, 0.15);
               margin: 0;
             }

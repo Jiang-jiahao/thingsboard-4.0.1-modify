@@ -2,7 +2,6 @@
   min-width: 300px;
   &.jnks-iot-edit-mode {
     .jnks-iot-markdown-view-container {
-      border: 1px solid #c0c0c0;
     }
     .jnks-iot-markdown-view {
       padding: 20px;
@@ -22,7 +21,7 @@
     }
   }
   &.jnks-iot-fullscreen {
-    background: #fff;
+    background: var(--jnks-iot-surface-card);
     .markdown-content-editor {
       height: calc(100% - 40px);
     }
@@ -37,7 +36,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    border: 1px solid #c0c0c0;
   }
   .jnks-iot-markdown-view-container {
     overflow: auto;
@@ -51,7 +49,6 @@
       }
     }
     button.mat-mdc-button-base, button.mat-mdc-button-base.jnks-iot-mat-32 {
-      background: rgba(220, 220, 220, .35);
       align-items: center;
       vertical-align: middle;
       min-width: 32px;
@@ -60,7 +57,6 @@
       font-size: .8rem;
       line-height: 15px;
       &:not(.jnks-iot-help-popup-button) {
-        color: #7b7b7b;
       }
     }
     button.mat-mdc-button-base:not(.mat-mdc-icon-button) {

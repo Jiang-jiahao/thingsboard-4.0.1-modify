@@ -36,7 +36,7 @@
       padding: 0 12px;
       border-radius: 4px;
       &-disabled {
-        border-color: rgba(0, 0, 0, 0.38);
+        border-color: var(--jnks-iot-text-faint);
       }
     }
     .jnks-iot-button-shape {

@@ -104,13 +104,13 @@
 
   &.jnks-iot-datakey-chip-dnd-placeholder {
     min-width: 120px;
-    border: 2px dashed rgba(0, 0, 0, 0.2);
+    border: 2px dashed var(--jnks-iot-line);
   }
   &.jnks-iot-chip-dragging {
     display: none;
   }
   .jnks-iot-dragging-chip-image-fill {
-    background-color: rgba(0,0,0,0.3);
+    background-color: var(--jnks-iot-text-faint);
     border-radius: var(--mdc-chip-container-shape-radius, 16px 16px 16px 16px);
     display: none;
     pointer-events: none;

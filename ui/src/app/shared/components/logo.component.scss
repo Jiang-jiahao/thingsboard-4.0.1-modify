@@ -4,6 +4,9 @@
  * 横版标识本身已经包含圆章、书法主标「杰能科世」与 GENENKOSY，
  * 单独用它就够。旧版是「圆形裁切徽标 + 另写一遍 JnksIOT（还加了渐变文字）」，
  * 等于把品牌名说了两遍，且第三个名字和主标不是同一个词。
+ *
+ * 侧栏另有一套：横版整体缩到 26px 高时中文只剩 8px，读不出来，
+ * 所以那里只取左侧方章，产品名改用文字（见 .jnks-iot-nav-logo 那段）。
  */
 :host {
   display: flex;
@@ -23,10 +26,46 @@
     max-width: 100%;
     object-fit: contain;
   }
+
+  // 产品名文字只在侧栏出现，其它位置的横版标识里已经写了品牌名
+  .jnks-iot-logo-name {
+    display: none;
+  }
 }
 
 :host-context(.login-logo) {
   .jnks-iot-brand-logo .jnks-iot-logo-full {
     height: 40px;
+  }
+}
+
+// 侧栏品牌：方章 + 产品名
+//
+// 横版标识是 1024×253 的横排（章 + 中英文字），缩到 26px 高时中文只剩 8px。
+// 所以这里用 object-fit:cover 从左边裁出正方形（只剩那个章），右边补产品名文字 ——
+// 与设计稿一致。
+:host-context(.jnks-iot-nav-logo) {
+  .jnks-iot-brand-logo {
+    gap: 11px;
+
+    .jnks-iot-logo-full {
+      width: 26px;
+      height: 26px;
+      object-fit: cover;
+      object-position: left center;
+      flex: none;
+    }
+
+    .jnks-iot-logo-name {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--jnks-iot-sidebar-text);
+    }
   }
 }

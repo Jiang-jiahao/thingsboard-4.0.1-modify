@@ -1,5 +1,5 @@
 <div class="jnks-iot-login-page">
-  <!-- 左：墨。品牌与产品定位压在整块墨面上，右缘一条印边收口 -->
+  <!-- 左：墨。品牌与产品定位压在整块墨面上，底部一条刻度尺收口 -->
   <section class="login-brand">
     <div class="login-brand-top">
       <jnks-iot-logo class="login-logo"></jnks-iot-logo>
@@ -7,7 +7,14 @@
     <div class="login-claim">
       <h1>工业设备的接入、<br>治理与运行</h1>
       <p>从设备接入到规则编排，从遥测采集到组态监视，一套平台管到底。</p>
+      <div class="login-spec">
+        <div>
+          <span class="lbl">协议</span>
+          <span class="num">MQTT · CoAP · LwM2M · SNMP · Modbus · HTTP · UDP · TCP</span>
+        </div>
+      </div>
     </div>
+    <div class="login-scale"></div>
   </section>
 
   <!-- 右：纸。表单安静、标签外露（不靠 placeholder 当标签） -->
@@ -35,33 +42,50 @@
             </div>
           </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label translate>login.username</mat-label>
-            <input id="username-input" matInput type="email" autofocus formControlName="username" email required/>
-            <mat-error *ngIf="loginFormGroup.get('username').invalid">
-              {{ 'login.invalid-email-format' | translate }}
-            </mat-error>
-          </mat-form-field>
+          <!-- 标签用模板里的普通 <label>，不用 mat-label ——
+               Material 的浮动标签会把标签骑到描边上并留一个缺口，与设计里的平铺字段不是一回事。 -->
+          <div class="login-field">
+            <label class="login-field-label" for="username-input" translate>login.username</label>
+            <mat-form-field appearance="outline">
+              <!-- 不做邮箱格式校验：账号只要求填了就行（原来非邮箱格式会挡在「email格式无效。」上）。
+                   type 用 text + inputmode=email —— 手机上仍给邮箱键盘，但不会触发浏览器原生校验。 -->
+              <input id="username-input" matInput type="text" inputmode="email" autocomplete="username"
+                     autofocus formControlName="username" required/>
+              <mat-error *ngIf="loginFormGroup.get('username').hasError('required')">
+                {{ 'login.username-required' | translate }}
+              </mat-error>
+            </mat-form-field>
+          </div>
 
-          <mat-form-field appearance="outline">
-            <mat-label translate>common.password</mat-label>
-            <input id="password-input" matInput type="password" formControlName="password"/>
-            <jnks-iot-toggle-password matSuffix></jnks-iot-toggle-password>
-          </mat-form-field>
-
-          <div class="forgot-password">
-            <button class="jnks-iot-reset-password" mat-button type="button" routerLink="/login/resetPasswordRequest">
-              {{ (passwordViolation ? 'login.reset-password' : 'login.forgot-password') | translate }}
-            </button>
+          <div class="login-field">
+            <div class="login-field-head">
+              <label class="login-field-label" for="password-input" translate>common.password</label>
+              <button class="jnks-iot-reset-password" mat-button type="button"
+                      routerLink="/login/resetPasswordRequest">
+                {{ (passwordViolation ? 'login.reset-password' : 'login.forgot-password') | translate }}
+              </button>
+            </div>
+            <mat-form-field appearance="outline">
+              <!-- 密码框不留占位符：`••••••••` 会让空框看起来像已经填过 -->
+              <input id="password-input" matInput type="password" autocomplete="current-password"
+                     formControlName="password" required/>
+              <mat-error *ngIf="loginFormGroup.get('password').hasError('required')">
+                {{ 'login.password-required' | translate }}
+              </mat-error>
+              <jnks-iot-toggle-password matSuffix></jnks-iot-toggle-password>
+            </mat-form-field>
           </div>
 
           <div class="jnks-iot-action-button">
             <button mat-raised-button color="primary" [disabled]="(isLoading$ | async)"
                     type="submit">{{ 'login.login' | translate }}</button>
           </div>
+          <div class="login-version">
+            <span class="lbl">版本 {{ version }}</span>
+            <span class="lbl">仅限授权人员</span>
+          </div>
         </div>
       </fieldset>
     </form>
-    <div class="login-legal">仅限授权人员访问</div>
   </section>
 </div>

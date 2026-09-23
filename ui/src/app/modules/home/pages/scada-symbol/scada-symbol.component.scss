@@ -47,7 +47,7 @@
     min-height: 0;
     width: 50%;
     max-width: 50%;
-    background: #fff;
+    background: var(--jnks-iot-surface-card);
     &.preview {
       #gridster-parent {
         #gridster-background {

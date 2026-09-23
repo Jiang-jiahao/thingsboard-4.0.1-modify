@@ -5,7 +5,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: #fff;
+    background: var(--jnks-iot-surface-card);
     z-index: 5;
   }
   .widget-preview-section {
@@ -14,7 +14,7 @@
     left: 16px;
     right: 16px;
     bottom: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--jnks-iot-line);
     border-radius: 4px;
   }
 }

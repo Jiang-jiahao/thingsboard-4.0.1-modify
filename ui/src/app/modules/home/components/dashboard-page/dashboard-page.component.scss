@@ -14,7 +14,9 @@ jnks-iot-dashboard-page {
 div.jnks-iot-dashboard-page {
   &.mat-content {
     overflow: hidden;
-    background-color: #eee;
+    // 原来是写死的 #eee —— 亮色下勉强能看，暗色主题下就是一块亮灰底，
+    // 整个仪表盘页穿帮（/usage 这类「仪表盘型」页面首当其冲）。
+    background-color: var(--jnks-iot-surface-page);
   }
   section.jnks-iot-dashboard-title {
     position: relative;

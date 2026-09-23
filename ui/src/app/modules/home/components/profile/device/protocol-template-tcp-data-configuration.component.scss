@@ -8,26 +8,30 @@
 
 .protocol-template-intro-banner {
   margin: 0;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-radius: 10px;
-  border-left: 4px solid $jnks-iot-primary-color;
-  background: rgba($jnks-iot-primary-color, 0.06);
+  // 中性提示块：品牌色只留给实心主动作，这里用发丝描边 + 左侧一条灰阶标线
+  border: 1px solid var(--tb-border);
+  border-left: 3px solid var(--tb-border-strong);
+  background: var(--tb-surface-hover);
   line-height: 1.5;
-  color: #475569;
+  color: var(--tb-text-muted);
 }
 
+// 外层内容区已经是卡片（有描边、圆角、内边距），这层再画一张「卡中卡」会让里面
+// 的字段比外面的名称/说明多缩进两级、右边缘也对不齐。退化成普通容器，全部对齐同一列。
 .protocol-template-editor-card {
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .protocol-template-hint-compact {
   line-height: 1.5;
   margin: 0;
-  color: #64748b;
+  color: var(--tb-text-muted);
   font-size: 13px;
 }
 
@@ -36,10 +40,10 @@
   flex-direction: column;
   gap: 4px;
   margin-bottom: 14px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: var(--tb-surface-hover);
+  border: 1px solid var(--tb-border);
 }
 
 .protocol-template-ltv-toggle-hint {
@@ -52,7 +56,7 @@
   display: block;
   line-height: 1.5;
   max-width: 100%;
-  color: #64748b;
+  color: var(--tb-text-muted);
   font-size: 13px;
 }
 
@@ -60,15 +64,15 @@
   margin-top: 8px;
   margin-bottom: 4px;
   font-weight: 600;
-  color: rgba(15, 23, 42, 0.88);
+  color: var(--tb-text);
 }
 
 .protocol-template-cmd-row-block {
   min-width: 0;
   padding: 14px 16px;
   border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: var(--tb-surface-hover);
+  border: 1px solid var(--tb-border);
 }
 
 .protocol-template-global-cmd-match {
@@ -105,10 +109,10 @@
 }
 
 .protocol-template-hex-field-compact {
-  padding: 14px 16px 12px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 14px 16px;
+  border: 1px solid var(--tb-border);
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--tb-surface-hover);
 }
 
 .protocol-template-hex-field-compact__primary,
@@ -141,8 +145,8 @@
   text-align: center;
   font-size: 12px;
   font-weight: 600;
-  color: $jnks-iot-primary-color;
-  background: rgba($jnks-iot-primary-color, 0.1);
+  color: var(--jnks-iot-primary-color);
+  background: rgb(var(--jnks-iot-primary-color-rgb) / 0.1);
   border-radius: 8px;
   line-height: 1;
 }
@@ -190,11 +194,11 @@
 .protocol-template-hex-field-compact__bytes {
   flex-direction: row;
   flex-wrap: wrap;
-  padding: 12px 14px;
+  padding: 14px 16px;
   margin-top: 8px;
   border-radius: 8px;
-  background: #fff;
-  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: var(--jnks-iot-surface-card);
+  border: 1px solid var(--tb-border);
 }
 
 .protocol-template-hex-field-compact__len-mode {
@@ -238,17 +242,17 @@
 
 .protocol-template-command-meta {
   min-width: 0;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: var(--tb-surface-hover);
+  border: 1px solid var(--tb-border);
 }
 
 :host ::ng-deep {
   .mat-expansion-panel {
     border-radius: 10px !important;
-    border: 1px solid rgba(15, 23, 42, 0.08) !important;
-    background: #fff !important;
+    border: 1px solid var(--tb-border) !important;
+    background: var(--jnks-iot-surface-card) !important;
     box-shadow: none !important;
     margin-bottom: 8px;
   }

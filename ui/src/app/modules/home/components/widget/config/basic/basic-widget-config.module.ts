@@ -116,7 +116,6 @@ import {
 import {
   DigitalSimpleGaugeBasicConfigComponent
 } from '@home/components/widget/config/basic/gauge/digital-simple-gauge-basic-config.component';
-import { MobileAppQrCodeBasicConfigComponent } from '@home/components/widget/config/basic/cards/mobile-app-qr-code-basic-config.component';
 import {
   LabelCardBasicConfigComponent
 } from '@home/components/widget/config/basic/cards/label-card-basic-config.component';
@@ -180,7 +179,6 @@ import { MapBasicConfigComponent } from '@home/components/widget/config/basic/ma
     PolarAreaChartBasicConfigComponent,
     RadarChartBasicConfigComponent,
     DigitalSimpleGaugeBasicConfigComponent,
-    MobileAppQrCodeBasicConfigComponent,
     LabelCardBasicConfigComponent,
     LabelValueCardBasicConfigComponent,
     UnreadNotificationBasicConfigComponent,
@@ -235,7 +233,6 @@ import { MapBasicConfigComponent } from '@home/components/widget/config/basic/ma
     RadarChartBasicConfigComponent,
     ScadaSymbolBasicConfigComponent,
     DigitalSimpleGaugeBasicConfigComponent,
-    MobileAppQrCodeBasicConfigComponent,
     LabelCardBasicConfigComponent,
     LabelValueCardBasicConfigComponent,
     UnreadNotificationBasicConfigComponent,

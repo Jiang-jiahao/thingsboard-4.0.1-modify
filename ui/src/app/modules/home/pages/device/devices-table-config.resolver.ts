@@ -210,14 +210,15 @@ export class DevicesTableConfigResolver  {
   }
 
   /**
-   * 状态：按 ISA-101，正常态不给颜色 —— 表格里每个设备都挂彩色药丸，画面就一直在「响」，
-   * 真正异常反而跳不出来。所以活动=实心灰点、非活动=空心灰点，颜色只留给告警。
+   * 状态：绿点=活跃、空心灰点=非活动，一眼分得开；
+   * 黄/红仍然只留给告警，状态列不去抢那个语义。
    * 顺带把高度从 32px 药丸压到一行文字，行高才降得下来。
    */
   private deviceState(device: DeviceInfo): string {
     const translateKey = device.active ? 'device.active' : 'device.inactive';
-    const dotClass = device.active ? 'jnks-iot-state-dot' : 'jnks-iot-state-dot off';
-    return `<span class="jnks-iot-state"><i class="${dotClass}"></i>${this.translate.instant(translateKey)}</span>`;
+    const wrapperClass = device.active ? 'jnks-iot-state on' : 'jnks-iot-state off';
+    const dotClass = device.active ? 'jnks-iot-state-dot on' : 'jnks-iot-state-dot off';
+    return `<span class="${wrapperClass}"><i class="${dotClass}"></i>${this.translate.instant(translateKey)}</span>`;
   }
 
   private deviceStateStyle(device: DeviceInfo): object {

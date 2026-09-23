@@ -7,7 +7,7 @@
     background-color: var(--mdc-dialog-container-color, white);
 
     .jnks-iot-hint-available-params {
-      color: rgba(0, 0, 0, 0.54);
+      color: var(--jnks-iot-text-muted);
       letter-spacing: 0.4px;
 
       .content {
@@ -21,7 +21,7 @@
     font-weight: normal;
 
     jnks-iot-icon {
-      color: rgba(0, 0, 0, .38);
+      color: var(--jnks-iot-text-faint);
     }
   }
 

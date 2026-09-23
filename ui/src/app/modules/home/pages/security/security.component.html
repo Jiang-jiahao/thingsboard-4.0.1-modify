@@ -14,7 +14,7 @@
     </div>
   </mat-card>
   <mat-card appearance="outlined" class="profile-card flex flex-col">
-    <div class="change-password" jnks-iot-toast toastTarget="changePassword">
+    <div class="change-password" jnks-iot-toast>
       <form #changePasswordForm="ngForm" [formGroup]="changePassword" (ngSubmit)="onChangePassword(changePasswordForm)">
         <div class="flex flex-row gap-6.25 xs:flex-col xs:gap-0">
           <div class="min-w-72.5 max-w-72.5 flex-1 basis-72.5 xs:min-w-0 xs:max-w-full xs:basis-full sm:min-w-62.5 sm:max-w-62.5 sm:basis-62.5">

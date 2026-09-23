@@ -3,7 +3,7 @@
   height: 100%;
   min-width: 200px;
   overflow: hidden;
-  background: #fff;
+  background: var(--jnks-iot-surface-card);
   border-radius: 4px;
   box-shadow:
     0 7px 8px -4px rgba(0, 0, 0, .2),
@@ -12,7 +12,7 @@
 
   .mat-content {
     overflow: hidden;
-    background-color: #fff;
+    background-color: var(--jnks-iot-surface-card);
   }
 
   .mat-padding {

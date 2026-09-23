@@ -35,7 +35,7 @@
     align-self: center;
     text-align: center;
     font-size: 14px;
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--jnks-iot-text-muted);
   }
 
   .jnks-iot-qrcode {
@@ -44,6 +44,9 @@
     min-width: 100px;
     padding: 3px;
     border-radius: 6px;
+    // 恒定白底，不跟主题 —— 生成的 SVG 自带全幅白底 + 纯黑模块，
+    // 换成深色衬垫就等于把二维码废掉了（扫不出来）。这一层只是给
+    // SVG 四周留一圈白边，让它在深色卡面上也有干净的边界。
     background-color: #fff;
   }
 

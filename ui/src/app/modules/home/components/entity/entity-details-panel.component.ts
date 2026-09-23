@@ -253,14 +253,6 @@ export class EntityDetailsPanelComponent extends PageComponent implements AfterV
     }
   }
 
-  helpLinkId(): string {
-    if (this.resources.helpLinkIdForEntity && this.entityComponent.entityForm) {
-      return this.resources.helpLinkIdForEntity(this.entityComponent.entityForm.getRawValue());
-    } else {
-      return this.resources.helpLinkId;
-    }
-  }
-
   saveEntity(emitEntityUpdated = true): Observable<BaseData<HasId>> {
     const saveEntitySubject = new ReplaySubject<BaseData<HasId>>();
     if (this.detailsForm.valid) {

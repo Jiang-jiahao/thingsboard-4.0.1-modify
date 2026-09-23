@@ -15,7 +15,7 @@
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--jnks-iot-text);
   }
   .jnks-iot-background-form-panel {
     height: 192px;
@@ -38,7 +38,7 @@
     font-style: normal;
     font-weight: 500;
     line-height: 24px;
-    color: rgba(0, 0, 0, 0.38);
+    color: var(--jnks-iot-text-faint);
   }
   .jnks-iot-background-settings-preview-box {
     position: relative;

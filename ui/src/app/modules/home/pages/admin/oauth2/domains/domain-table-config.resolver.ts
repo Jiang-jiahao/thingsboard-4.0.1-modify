@@ -50,7 +50,11 @@ export class DomainTableConfigResolver  {
           iconFunction: (domain) => domain.oauth2Enabled ? 'mdi:toggle-switch' : 'mdi:toggle-switch-off-outline',
           isEnabled: () => true,
           onAction: ($event, entity) => this.toggleEnableOAuth($event, entity)
-        })
+        },
+        // EntityActionTableColumn 的宽度形参默认是 '0px'，在 table-layout: fixed 下
+        // 只能吃剩饭 —— 实测这一列只有 49px，而表头「启用OAuth2.0设置」需要 98px，
+        // 被截成「启用OAut」。
+        '140px')
     );
 
     this.config.deleteEntityTitle = (domain) => this.translate.instant('admin.oauth2.delete-domain-title', {domainName: domain.name});

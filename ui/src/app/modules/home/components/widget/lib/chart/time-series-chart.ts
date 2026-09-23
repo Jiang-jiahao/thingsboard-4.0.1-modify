@@ -169,7 +169,12 @@ export class JnksIotTimeSeriesChart {
     }
     const $dashboardPageElement = this.ctx.$containerParent.parents('.jnks-iot-dashboard-page');
     const dashboardPageElement = $dashboardPageElement.length ? $($dashboardPageElement[$dashboardPageElement.length-1]) : null;
-    this.darkMode = this.settings.darkMode || dashboardPageElement?.hasClass('dark');
+    // 暗色判断：先看 dashboard 页元素上的 .dark（旧约定），再回落到 body 上的主题类。
+    // 主题现在挂在 <body>（见 core/services/theme.service.ts），只认前者的话，
+    // 新渲染出来的图表会一直是浅色。
+    this.darkMode = this.settings.darkMode
+      || dashboardPageElement?.hasClass('dark')
+      || $('body').hasClass('jnks-iot-dark');
     this.setupXAxes();
     this.setupYAxes();
     this.setupData();
@@ -204,7 +209,7 @@ export class JnksIotTimeSeriesChart {
       this.darkModeObserver = new MutationObserver(mutations => {
         for (const mutation of mutations) {
           if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            const darkMode = dashboardPageElement.hasClass('dark');
+            const darkMode = dashboardPageElement.hasClass('dark') || $('body').hasClass('jnks-iot-dark');
             this.setDarkMode(darkMode);
           }
         }

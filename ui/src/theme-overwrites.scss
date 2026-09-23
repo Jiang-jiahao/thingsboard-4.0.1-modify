@@ -17,7 +17,10 @@
         position: absolute;
         left: 0;
         top: 0;
-        background-color: mat.m2-get-color-from-palette($primary);
+        // 填充式字段的底色。原来取的是「品牌色 + 低透明度」，
+        // 于是整片字段都带蓝调 —— 字段底色应当是中性面。
+        // 改用文字色做低透明度底：亮色下是浅灰，暗色下是浅色微提，两边都对。
+        background-color: var(--jnks-iot-text);
         border-radius: 10px 10px 0 0;
       }
       background-color: transparent;

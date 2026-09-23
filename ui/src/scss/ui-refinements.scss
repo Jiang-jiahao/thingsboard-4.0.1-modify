@@ -13,23 +13,102 @@
 @import './constants';
 
 .jnks-iot-default {
-  --tb-surface: #{$jnks-iot-surface-page};
-  --tb-surface-elevated: #{$jnks-iot-surface-card};
-  --tb-border: #{$jnks-iot-line};
-  --tb-border-strong: #{$jnks-iot-line-strong};
-  --tb-text: #{$jnks-iot-text};
-  --tb-text-muted: #{$jnks-iot-text-muted};
-  --tb-text-faint: #{$jnks-iot-text-faint};
-  --tb-shadow-sm: 0 1px 2px rgba(11, 27, 43, 0.04);
-  --tb-shadow-md: 0 4px 12px rgba(11, 27, 43, 0.08);
-  --tb-shadow-lg: 0 12px 32px rgba(11, 27, 43, 0.16);
-  --tb-radius: #{$jnks-iot-radius};
-  --tb-radius-lg: #{$jnks-iot-radius};
+  --tb-surface: #{var(--jnks-iot-surface-page)};
+  --tb-surface-elevated: #{var(--jnks-iot-surface-card)};
+  --tb-surface-hover: #{var(--jnks-iot-surface-hover)};
+  --tb-border: #{var(--jnks-iot-line)};
+  --tb-border-strong: #{var(--jnks-iot-line-strong)};
+  --tb-text: #{var(--jnks-iot-text)};
+  --tb-text-muted: #{var(--jnks-iot-text-muted)};
+  --tb-text-faint: #{var(--jnks-iot-text-faint)};
+  // 主按钮是「反向无彩」的一块：浅色下就是品牌蓝，暗色下是浅色块 + 深字。
+  // 暗色那份覆盖见文件末尾的 .jnks-iot-dark 块。
+  --tb-inv-bg: #{var(--jnks-iot-primary-color)};
+  --tb-inv-fg: #ffffff;
+  --tb-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --tb-shadow-md: 0 6px 24px rgba(15, 23, 42, 0.07);
+  --tb-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.16);
+  --tb-radius: #{var(--jnks-iot-radius)};
+  --tb-radius-lg: #{var(--jnks-iot-radius)};
   --tb-radius-pill: 999px;
   --tb-transition: 0.15s ease;
-  --tb-ok: #{$jnks-iot-status-ok};
-  --tb-warn: #{$jnks-iot-status-warn};
-  --tb-crit: #{$jnks-iot-seal-color};
+  --tb-ok: #{var(--jnks-iot-status-ok)};
+  --tb-warn: #{var(--jnks-iot-status-warn)};
+  --tb-crit: #{var(--jnks-iot-seal-color)};
+
+  // ── 提示（toast）：位置在屏幕中间偏上，容器挂在 document.body 上，
+  // 所以样式必须是全局的，不能写在组件里
+  .jnks-iot-toast-stack {
+    position: fixed;
+    inset: 0;
+    // 高于 cdk-overlay（1000）：对话框开着时提示也要看得见
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    // 底部多留一块 = 整组中心上移它的一半。
+    // 60vh ⇒ 中心落在约 20% 高度（16px 是安全边距，中心 = (100% - 60vh) / 2）
+    padding: 16px 16px calc(16px + 60vh);
+    box-sizing: border-box;
+    // 容器铺满全屏但不挡鼠标，只有卡片本身可点
+    pointer-events: none;
+
+    > * {
+      pointer-events: auto;
+    }
+  }
+
+  // ── 代码编辑器（Ace）：JS / HTML / CSS / JSON / TBEL 共用一套皮
+  //
+  // 上游用的是 ace 默认的 textmate 主题（纯白底黑字）＋一堆写死的灰：
+  // #c0c0c0 描边、#00acc1 标签、rgba(220,220,220,.35) 按钮底 —— 暗色主题下
+  // 就是一块白板。这里统一：底色/描边走令牌，等宽字体用 $jnks-iot-font-data；
+  // 语法配色亮色沿用 textmate（本来就是给浅底调的），暗色换一套见文件末尾。
+  .ace_editor {
+    box-sizing: border-box;
+    border: 1px solid var(--tb-border);
+    border-radius: var(--tb-radius);
+    overflow: hidden;
+    font-family: $jnks-iot-font-data;
+    font-size: 13px;
+    background-color: var(--tb-surface-elevated);
+    color: var(--tb-text);
+
+    .ace_gutter {
+      background: var(--tb-surface);
+      color: var(--tb-text-faint);
+      border-right: 1px solid var(--tb-border);
+    }
+
+    // 80 列打印边距那条竖线，控制台里没人用
+    .ace_print-margin {
+      display: none;
+    }
+
+    .ace_cursor {
+      color: var(--jnks-iot-primary-color);
+    }
+
+    .ace_marker-layer {
+      .ace_active-line {
+        background: rgb(var(--jnks-iot-primary-color-rgb) / 0.06);
+      }
+
+      .ace_selection {
+        background: rgb(var(--jnks-iot-primary-color-rgb) / 0.18);
+      }
+    }
+
+    .ace_gutter-active-line {
+      background: transparent;
+    }
+
+    .ace_invisible {
+      color: var(--tb-text-faint);
+    }
+  }
 
   font-family: $jnks-iot-font-ui;
 
@@ -54,27 +133,309 @@
 
     &:not(.mat-expanded) {
       .mat-expansion-panel-header:hover {
-        background: rgba($jnks-iot-primary-color, 0.03);
+        background: rgb(var(--jnks-iot-primary-color-rgb) / 0.03);
       }
     }
   }
 
-  // ── 表单
+  // 折叠面板「先撑开、几百毫秒后又收回去」的那一跳。
+  //
+  // Material 给内容写内联 `height: 0; visibility: hidden` 是在首次变更检测之后；
+  // 在那之前内容按自然高度铺开 —— 规则链节点详情这类抽屉一打开就看到面板先展开、
+  // 约 800ms 后收起（实测 104px → 48px）。
+  // 这里只在「还没有内联高度」的那段窗口里按收起处理，不动其它时刻：
+  // 展开时 Material 已写好内联高度并带上 `.mat-expanded`（本条不匹配），
+  // 收起动画期间也有内联高度在变，动画都不受影响（实测展开仍是逐帧过渡 48→104）。
+  .mat-expansion-panel:not(.mat-expanded) > .mat-expansion-panel-content:not([style*='height']) {
+    height: 0 !important;
+    visibility: hidden;
+    overflow: hidden;
+  }
+
+  // TB 全局给 .mat-content 设了 overflow:auto（那是给模板里当布局类用的），
+  // 落到展开面板表头上就成了滚动容器：表头文字的行盒比 line-height 高出不到 1px，
+  // 而本主题把滚动条画成常驻的 6px 竖条 → 表头右侧多出一条小滚动条。
+  // 这里恢复 Material 自己的 overflow:hidden。
+  .mat-expansion-panel-header > .mat-content {
+    overflow: hidden;
+  }
+
+  // ── 表单控件：输入框 / 选择框 / 文本域
+  //
+  // Material 给了两套外观，都要收敛到同一件事上：
+  //   · outline —— 描边 + 给浮动标签留的那个「缺口」
+  //   · fill    —— 只有上面两个角的平灰底、没有描边
+  // 这套设计里的字段应该是「四角圆角 + 1px 描边 + 中性底」。
+  // 做法：把 Material 自己的描边层和底色层全部哑掉，由 wrapper 画一条边框；
+  // 浮动标签照旧浮到框线上，但它身下垫一块与卡片同色的底把边框「切断」——
+  // 这样不需要缺口，也和手绘稿里的字段一致。
   .mat-mdc-form-field {
-    .mdc-text-field--outlined .mdc-notched-outline__leading,
-    .mdc-text-field--outlined .mdc-notched-outline__notch,
-    .mdc-text-field--outlined .mdc-notched-outline__trailing {
-      border-radius: var(--tb-radius);
+    // 哑掉 Material 的缺口描边
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: transparent !important;
+      border-width: 0 !important;
     }
 
-    &.mat-focused .mdc-notched-outline__leading,
-    &.mat-focused .mdc-notched-outline__notch,
-    &.mat-focused .mdc-notched-outline__trailing {
-      border-color: $jnks-iot-primary-color !important;
+    // 哑掉 fill 那层灰底
+    .mdc-text-field--filled::before,
+    .mat-mdc-form-field-focus-overlay::before {
+      background: transparent !important;
+      opacity: 0 !important;
+    }
+
+    // 哑掉 fill 外观自带的底部下划线（.mdc-line-ripple）。
+    // 常态它是一条 1px 中性线，正好压在我们 wrapper 的描边上，看不出来；
+    // 但**校验失败**时 Material 会把它变红、加粗到 2px 并做展开动画 ——
+    // 结果一条红线横穿整个字段、两端戳出圆角描边之外（必填项留空即可复现）。
+    // 外观已经由 wrapper 的整圈描边承担，这条下划线一律不要。
+    .mdc-line-ripple {
+      display: none;
+    }
+
+    // 出错状态改由 wrapper 表达：朱砂描边，聚焦时再叠一圈同色淡环
+    &.mat-form-field-invalid .mat-mdc-text-field-wrapper {
+      border-color: var(--jnks-iot-seal-color);
+    }
+
+    &.mat-form-field-invalid.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: var(--jnks-iot-seal-color);
+      box-shadow: 0 0 0 2px rgb(var(--jnks-iot-seal-color-rgb) / 0.16);
+    }
+
+    // 由 wrapper 承担外观。文本域不锁高（它要按 rows 撑开）
+    .mat-mdc-text-field-wrapper {
+      border: 1px solid var(--tb-border-strong);
+      border-radius: var(--tb-radius) !important;
+      background: var(--tb-surface-elevated);
+      transition: border-color var(--tb-transition), box-shadow var(--tb-transition);
+
+      &:not(:has(textarea)) {
+        height: 36px;
+      }
+
+      &:hover {
+        border-color: var(--tb-text-faint);
+      }
+    }
+
+    // 聚焦：品牌色描边 + 一圈很淡的环，不是 Material 那种粗蓝框
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: var(--jnks-iot-primary-color);
+      box-shadow: 0 0 0 2px rgb(var(--jnks-iot-primary-color-rgb) / 0.14);
+    }
+
+    &.mat-form-field-disabled .mat-mdc-text-field-wrapper {
+      background: var(--tb-surface);
+      border-color: var(--tb-border);
+    }
+
+    .mat-mdc-form-field-flex {
+      align-items: center;
+
+      &:not(:has(textarea)) {
+        height: 34px;
+      }
+    }
+
+    .mat-mdc-form-field-infix {
+      min-height: 0;
+      padding: 0;
+      border-top: 0;
+    }
+
+    // 标签浮到框线上时，用一块卡片底色把描边切开（替代缺口）
+    .mdc-floating-label {
+      font-size: 13px;
+
+      &--float-above {
+        background: var(--tb-surface-elevated);
+        padding: 0 4px;
+        margin-left: -4px;
+      }
+    }
+
+    // fill 外观下 Material 把标签整个藏了（`--mat-form-field-filled-label-display` 被设成 none，
+    // 全仓没有地方设过这个变量，是它自己的默认），结果空字段就是一根光秃秃的灰条，
+    // 用户看不出该填什么。这里扳回来。
+    .mdc-text-field--filled .mat-mdc-floating-label {
+      display: block !important;
+    }
+
+    // 未上浮时（字段为空、未聚焦），标签就是「占位文字」——要在框里垂直居中。
+    // TB 把它定在 top:24px，而框只有 36 高，标签下半截会被裁掉。
+    .mdc-text-field--filled .mdc-floating-label:not(.mdc-floating-label--float-above) {
+      top: 50% !important;
+      transform: translateY(-50%) !important;
+      color: var(--tb-text-muted) !important;
+    }
+
+    // ── fill 外观 + 有标签的字段：标签放到框**外**（小标签在上、框只装值）
+    //
+    // Material 的 fill 外观把浮动标签摆在框**内**顶部（实测 top:24px +
+    // scale(.75)），而上面把 wrapper 压到了 36px —— 两者一挤，标签和值就落在
+    // 同一格里。**凡是填了内容**的表单字段都会重叠，不只是详情页：
+    // 实测客户对话框 label 232..246 而 infix 228..248。
+    //
+    // 改成设计里的写法（与登录页、详情页只读态一致）：标签在框上方，框只装值。
+    // 用 :has 把范围收在「真的有 label」的字段上 —— 表格工具栏的搜索框也是 fill
+    // 外观但没有 label，不能被平白抬高一截。
+    // 用 & 复合成同一个元素上的类：`mat-form-field-appearance-fill` 和
+    // `mat-mdc-form-field` 是**同一个元素**上的两个类，写成后代选择器永远匹配不到。
+    &.mat-form-field-appearance-fill:has(.mat-mdc-form-field-infix > .mdc-floating-label) {
+      // 标签挪到框外之后，字段从 36px 变成 ~62px；多数表单的容器是
+      // `display: grid; gap: normal`（=0），于是相邻字段首尾相接、
+      // 这一块的标签紧贴上一块的框底。补一点下边距把它们分组分开。
+      margin-bottom: 6px;
+
+      .mat-mdc-text-field-wrapper {
+        height: auto !important;
+        // 标签要站到框外，wrapper 默认 overflow:hidden 会把它裁掉
+        overflow: visible;
+      }
+
+      .mat-mdc-form-field-flex {
+        height: auto !important;
+      }
+
+      .mat-mdc-form-field-infix {
+        position: relative;
+        // 给框外那行标签留出位置
+        margin-top: 20px;
+      }
+
+      .mat-mdc-form-field-infix > .mdc-floating-label {
+        // !important 顶掉 Material 的框内定位（top:24px + translateY(-19px)）
+        top: -20px !important;
+        transform: none !important;
+        margin: 0;
+        max-width: 100%;
+        font-size: 11.5px;
+        line-height: 16px;
+
+        // 标签已经不在框上了，不需要「垫底切断描边」那一套
+        &--float-above {
+          background: transparent;
+          padding: 0;
+          margin-left: 0;
+        }
+      }
+    }
+
+    input,
+    textarea {
+      font-size: 13px;
+      caret-color: var(--jnks-iot-primary-color);
+    }
+
+    textarea {
+      padding: 7px 0;
+    }
+
+    .mat-mdc-select {
+      font-size: 13px;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      font-size: 11.5px;
+    }
+  }
+
+  // ── 表格工具栏里的字段
+  //
+  // 工具栏是固定的 56px，而 TB 给这里的字段留了 `padding-top: 28px`（那是为
+  // 「标签在框内」预留的位置），上面那套「标签挪到框外」又各加了 20px——
+  // 两种布局的余量叠在一起，字段必然撑破工具栏：
+  //   · 带标签的下拉（属性页签左上角「设备属性范围」）撑到 76px，从顶部溢出，
+  //     被 `.jnks-iot-entity-table-content` 的 overflow:hidden 切掉半个框；
+  //   · 无标签的搜索框则是框高 36px 却带着 28px 的顶部内边距，文字比框中心低 7px，
+  //     框本身又压在工具栏顶部（比中心高 10.5px），整个是歪的。
+  // 所以工具栏里的字段一律去掉这些余量，按各自形态归位。
+  .mat-toolbar.mat-mdc-table-toolbar .mat-mdc-form-field {
+    margin-bottom: 0 !important;
+
+    // 空占位会把字段再撑高 14px（Material 用它保持有/无提示时的高度一致）
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+    }
+
+    // TB 把工具栏字段的 wrapper 内边距清零过（原本是给框内标签留位的），
+    // 值文本于是紧贴框的左边框（实测只差 1px）。左右内边距补回来，
+    // 与别处字段一致 —— 翻页器那个下拉同样是 17px。
+    .mat-mdc-form-field-infix {
+      margin-top: 0 !important;
+      padding: 0 16px !important;
+    }
+  }
+
+  // 带标签的下拉（属性页签的「设备属性范围」、关联页签的「方向」）：
+  // 工具栏左边已经有一个同值的标题，框内再摆一遍小标签既重复又占高度，所以视觉上收掉它，
+  // 框收到和别处字段一样的 36px，单行显示值 + 箭头。
+  .mat-toolbar.mat-mdc-table-toolbar
+    .mat-mdc-form-field.mat-form-field-appearance-fill:has(.mat-mdc-form-field-infix > .mdc-floating-label) {
+    .mat-mdc-text-field-wrapper {
+      height: 36px !important;
+      overflow: hidden;
+      // Material 默认 baseline 对齐：36px 的框里 24px 的内容会贴着顶部
+      align-items: center !important;
+    }
+
+    .mat-mdc-form-field-flex {
+      // 上面「标签在框外」那条把 flex 设成了 height:auto，这里要顶回去
+      height: 34px !important;
+    }
+
+    // 1×1 裁剪而不是 display:none —— label 还在无障碍树里，
+    // mat-select 的 aria-labelledby 就指着它（实测 aria-labelledby 仍然有效）。
+    .mat-mdc-form-field-infix > .mdc-floating-label {
+      position: absolute !important;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+      transform: none !important;
+      margin: 0 !important;
+    }
+  }
+
+  // 工具栏里的 `.title-container` 是 TB 上游的 overflow:hidden，而它和字段一样宽高 ——
+  // 聚焦时字段外那圈 2px 淡蓝光晕会被它切掉，四边不齐（实测左 2px、右 0、上 0、下 1）。
+  // 标题自己的省略号已经由 span 上的 text-overflow 负责，这里放开让光晕画全。
+  // 必须 !important：TB 把它写在三层 _ngcontent 属性选择器里（0,7,0），压不过。
+  .mat-toolbar.mat-mdc-table-toolbar .title-container:has(.mat-mdc-form-field) {
+    overflow: visible !important;
+  }
+
+  // TB 的「透明外观」字段（规则链的「查找节点」、顶栏搜索等）多是**没有标签**的搜索框，
+  // 却同样带着为「框内标签」预留的 padding-top:28px —— 文字被压到框底，下半截被裁掉
+  // （实测文字中心比框中心低 12px）。这里把预留位清零。
+  // 注意只收无标签的：有标签的透明字段走上面「标签在框外」那套，是有意为之。
+  .mat-mdc-form-field.jnks-iot-appearance-transparent:not(:has(.mdc-floating-label)) {
+    .mat-mdc-form-field-infix {
+      margin-top: 0 !important;
+      padding: 0 !important;
+    }
+
+    // 空占位还会把字段撑高 20px，于是字段（56px）比它所在的搜索栏（49px）还高，
+    // 36px 的框被顶到搜索栏上沿之外。
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none;
     }
   }
 
   // ── 表格：表头安静，行高一致，数字可比
+  // 只读状态列的标记（见 entities-table-config.models.ts 的 checkBoxCell）：
+  // 是 → 无框对勾，否 → 淡短横。都不用方框，避免看着像能勾选的复选框。
+  .mat-mdc-cell mat-icon.jnks-iot-flag-on {
+    color: var(--tb-text);
+  }
+
+  .mat-mdc-cell mat-icon.jnks-iot-flag-off {
+    color: var(--tb-text-faint);
+  }
+
   .mat-mdc-table {
     border-radius: 0;
     overflow: hidden;
@@ -86,7 +447,7 @@
       border-bottom: 1px solid var(--tb-border);
 
       .mat-mdc-header-cell {
-        color: $jnks-iot-text-muted;
+        color: var(--jnks-iot-text-muted);
         font-size: 11px;
         font-weight: 600;
         letter-spacing: 0.04em;
@@ -111,13 +472,13 @@
       transition: background-color var(--tb-transition);
 
       &:hover {
-        background-color: rgba($jnks-iot-primary-color, 0.025) !important;
+        background-color: rgb(var(--jnks-iot-primary-color-rgb) / 0.025) !important;
       }
 
       .mat-mdc-cell {
         font-size: 13px;
-        color: $jnks-iot-text;
-        border-bottom-color: $jnks-iot-line;
+        color: var(--jnks-iot-text);
+        border-bottom-color: var(--jnks-iot-line);
         // 数字在任何列里都对齐，便于纵向比对
         font-variant-numeric: tabular-nums;
       }
@@ -142,7 +503,15 @@
     border-bottom: 1px solid var(--tb-border);
   }
 
-  // ── 按钮：实心为墨，无阴影无位移
+  // ── 按钮
+  //
+  // 三档，尺寸统一：
+  //   主按钮   品牌色实心      32px 高 · 内边距 0 16
+  //   次按钮   1px 中性描边    同上
+  //   文字按钮 无边框          同上，悬停才给底
+  // 危险操作用朱砂实心，一眼可辨。
+  // TB 到处在用的 `.jnks-iot-small` 收到 28px。
+  // 共同规则：圆角 --tb-radius、无阴影、无位移、不做大写。
   .mat-mdc-raised-button,
   .mat-mdc-unelevated-button,
   .mat-mdc-outlined-button,
@@ -150,49 +519,304 @@
     border-radius: var(--tb-radius) !important;
     text-transform: none;
     letter-spacing: 0.01em;
+    font-weight: 500;
+
+    &:not(.jnks-iot-small) {
+      height: 32px;
+      padding: 0 16px;
+      font-size: 13px;
+    }
   }
 
+  .mat-mdc-button.jnks-iot-small,
+  .mat-mdc-outlined-button.jnks-iot-small,
+  .mat-mdc-raised-button.jnks-iot-small,
+  .mat-mdc-unelevated-button.jnks-iot-small {
+    height: 28px;
+    padding: 0 12px;
+    font-size: 12.5px;
+  }
+
+  // 主按钮：反向无彩块。浅色主题下 --tb-inv-bg 就是品牌蓝，
+  // 暗色主题下它是浅色 —— 暗底上再放一块蓝，一屏会有好几个蓝色实心块，
+  // 颜色就再也读不出「异常」这层意思了。
   .mat-mdc-raised-button.mat-primary,
   .mat-mdc-unelevated-button.mat-primary {
-    background: $jnks-iot-primary-color !important;
+    background: var(--tb-inv-bg) !important;
+    color: var(--tb-inv-fg) !important;
     box-shadow: none !important;
 
     &:not(:disabled):hover {
-      background: $jnks-iot-secondary-color !important;
+      background: var(--tb-inv-bg) !important;
+      opacity: 0.88;
+    }
+
+    // 禁用态必须自己给颜色。
+    // 上面两条 background/color 都是 !important，会连 Material 的禁用配色一起盖掉，
+    // 于是禁用中的主按钮看着仍是一块实心蓝（像能点）。而这里的 color 实测算出来是
+    // 品牌蓝（不是 --tb-inv-fg），蓝底蓝字，文字等于看不见 ——
+    // /settings 的「保存」就是这个状态：蓝色按钮上一个字都没有。
+    &:disabled {
+      background: var(--tb-border) !important;
+      color: var(--tb-text-faint) !important;
+      opacity: 1;
+
+      // 文字颜色必须直接写在 label 上：只改按钮的 color 压不住，
+      // 实测禁用态下按钮和 label 的 color 仍算作品牌蓝。
+      .mdc-button__label {
+        color: var(--tb-text-faint) !important;
+      }
     }
   }
 
+  // 「卡片按钮」：同一套 `mat-raised-button color="primary"` 被当卡片用 ——
+  // 选部件类型对话框、导航卡部件、首页链接三处。它们是**可选项 / 入口**，不是主按钮，
+  // 被上面的主按钮规则刷成整块品牌蓝之后，五个并排就是一堵蓝墙，
+  // 与「品牌色只给实心主动作和当前项」直接冲突。
+  // 统一回设计稿的中性卡片：卡片面 + 发丝描边，品牌色只落在图标上。
+  .jnks-iot-card-button.mat-mdc-raised-button.mat-primary {
+    background: var(--tb-surface-elevated) !important;
+    color: var(--tb-text) !important;
+    border: 1px solid var(--tb-border-strong);
+    box-shadow: none !important;
+
+    &:hover {
+      background: var(--tb-surface-hover) !important;
+      border-color: var(--tb-text-faint);
+    }
+
+    .mat-icon,
+    jnks-iot-icon {
+      color: var(--jnks-iot-primary-color);
+    }
+
+    .mat-ripple-element {
+      background-color: rgb(var(--jnks-iot-primary-color-rgb) / 0.12) !important;
+      opacity: 1 !important;
+    }
+  }
+
+  // 危险按钮：朱砂实心
   .mat-mdc-raised-button.mat-warn,
   .mat-mdc-unelevated-button.mat-warn {
+    background: var(--jnks-iot-seal-color) !important;
+    color: #fff !important;
     box-shadow: none !important;
-  }
-
-  .mat-mdc-outlined-button.mat-primary {
-    border-color: rgba($jnks-iot-primary-color, 0.3) !important;
-    color: $jnks-iot-primary-color !important;
 
     &:not(:disabled):hover {
-      background: rgba($jnks-iot-primary-color, 0.04) !important;
+      background: rgb(var(--jnks-iot-seal-color-rgb) / 0.86) !important;
     }
   }
 
-  .mat-mdc-icon-button {
-    border-radius: var(--tb-radius) !important;
-    transition: background-color var(--tb-transition), color var(--tb-transition);
+  // 次按钮：一律中性描边。**不给 primary 上色** —— 品牌色只留给实心的主动作，
+  // 否则一屏里到处都是蓝色描边，主次就分不出来了。
+  .mat-mdc-outlined-button {
+    border-color: var(--tb-border-strong) !important;
+    color: var(--tb-text) !important;
+
+    &:not(:disabled):hover {
+      background: var(--tb-surface-hover) !important;
+      border-color: var(--tb-text-faint) !important;
+    }
+
+    // 例外：危险操作用朱砂描边
+    &.mat-warn {
+      border-color: rgb(var(--jnks-iot-seal-color-rgb) / 0.45) !important;
+      color: var(--jnks-iot-seal-color) !important;
+
+      &:not(:disabled):hover {
+        background: rgb(var(--jnks-iot-seal-color-rgb) / 0.06) !important;
+        border-color: rgb(var(--jnks-iot-seal-color-rgb) / 0.7) !important;
+      }
+    }
   }
 
-  // ── 页签：一条实心指示线，不用渐变
+  // 文字按钮
+  .mat-mdc-button:not(.mat-mdc-icon-button) {
+    color: var(--tb-text) !important;
+
+    &:not(:disabled):hover {
+      background: var(--tb-surface-hover) !important;
+    }
+
+    &.mat-primary { color: var(--jnks-iot-primary-color) !important; }
+    &.mat-warn    { color: var(--jnks-iot-seal-color) !important; }
+  }
+
+  // 图标按钮：正圆，悬停才给底
+  .mat-mdc-icon-button {
+    // 圆角必须是 50%，不能是 --tb-radius：Material 自带的状态层
+    // （`.mdc-icon-button__ripple::before`，悬停时黑 4%）是正圆，
+    // 按钮做成方块就会变成「方块里套个圆」两层。
+    border-radius: 50% !important;
+    // 图标居中必须自己来：Material 假设图标 24px、正好填满 40px 按钮的 8px 内边距，
+    // 我们把图标收到 20px 后多出 4px，被行盒按基线分配，图标整体下沉 3px（横向是正的）。
+    // 实测改成 flex 居中后图标盒中心与按钮中心完全重合。
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    transition: background-color var(--tb-transition), color var(--tb-transition);
+
+    .mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    &:not(:disabled):hover {
+      background: var(--tb-surface-hover) !important;
+    }
+  }
+
+  // 切换组件（toggle-header）的分页箭头：组件本身是「内容放不下才显示」
+  // （靠 .jnks-iot-toggle-header-pagination-controls-enabled 切换 display），
+  // 但它的 `display: none` 顶不过上面那条 !important —— 于是每个窄一点的切换
+  // 都常驻一对 ‹ ›，看着像可以拖动的把手。这里按组件自己的开关还原：
+  // 默认不显示，只有组件启用分页时才显示（必须排在图标按钮那条之后）。
+  .jnks-iot-toggle-header-pagination-button {
+    display: none !important;
+  }
+
+  .jnks-iot-toggle-header-pagination-controls-enabled .jnks-iot-toggle-header-pagination-button {
+    display: inline-flex !important;
+  }
+
+  // FAB：TB 默认 56px 偏大，收到 48；mini-fab 收到 40
+  button.mat-mdc-fab:not(.mdc-fab--extended) {
+    width: 48px;
+    height: 48px;
+    box-shadow: var(--tb-shadow-md) !important;
+  }
+
+  // FAB：TB 默认 56px 偏大，收到 48；mini-fab 收到 40。
+  // 规则链那个「开合节点库」的竖标签（`.jnks-iot-library-node-btn`）不算在内 ——
+  // TB 和参考稿都明确规定它是 20×90、只圆右侧的贴边标签，它上下还各挂了一个
+  // 伪元素画凹口，尺寸是照着 20px 宽算的；被这里刷成 40×40 就变成一个蓝疙瘩。
+  button.mat-mdc-mini-fab:not(.jnks-iot-library-node-btn) {
+    width: 40px;
+    height: 40px;
+    box-shadow: var(--tb-shadow-sm) !important;
+  }
+
+  // 主色/强调色 FAB 与主按钮同一块「反向无彩」：浅色下是品牌蓝，暗色下是浅色块 + 深字。
+  // 详情页右上角那个编辑钮（MatFabButton + mat-accent）是最显眼的一处 ——
+  // 暗色下若仍是蓝的，一屏里就只剩它在抢注意力，而颜色本该留给异常。
+  // 必须连 accent 一起收：那个钮在模板里写的是 accent，只收 primary 会漏掉它。
+  button.mat-mdc-fab.mat-primary,
+  button.mat-mdc-fab.mat-accent,
+  button.mat-mdc-mini-fab.mat-primary,
+  button.mat-mdc-mini-fab.mat-accent {
+    background: var(--tb-inv-bg) !important;
+    color: var(--tb-inv-fg) !important;
+
+    // 禁用态必须自己给颜色：上面的 background/color 都是 !important，
+    // 会连 Material 的禁用配色一起盖掉 —— 于是「有未保存改动才可点」的那排按钮
+    // （规则链右下角的应用/撤销、以及调试开关）禁用和启用长得一模一样，
+    // 用户看不到任何状态变化。配色与主按钮的禁用态一致。
+    &:disabled {
+      background: var(--tb-border) !important;
+      color: var(--tb-text-faint) !important;
+      box-shadow: none !important;
+
+      .mat-icon {
+        color: var(--tb-text-faint) !important;
+      }
+    }
+  }
+
+  // ── 页签
+  //
+  // Material 给页签 24px 的左右内边距：标题短的时候页签显得空、下划线也拉得长
+  // （页签整宽画线，实测「部件」下面拖着一条 200px 的黑条）。
+  // 参考稿的页签是 `padding:0 13px` + 下划线左右各缩进同样的值，这里收到 14px 并统一：
+  // 页签自身的内边距与下划线的缩进**必须是同一个数**。
+  .mat-mdc-tab,
+  .mat-mdc-tab-link {
+    padding: 0 14px !important;
+  }
+
+  .mdc-tab-indicator__content--underline {
+    // 它是 static 定位（由绝对定位的 .mdc-tab-indicator 撑满），left/right 不生效，只能用 margin
+    margin: 0 14px;
+  }
+
+  // 用 Material 自己的主题变量来收敛，不要靠选择器去盖具体的类 ——
+  // 选中态的类是 `mdc-tab--active`，不是 `mat-mdc-tab-active`，写后者是空规则
+  // （这条曾经挂在这里很久没人发现）。而**未激活**标签的颜色来自 Material 的
+  // 默认值 rgba(0,0,0,.6)：暗色主题下就是深灰落在深底上，几乎看不见。
+  // 两个问题一次解决：把 5 个变量指到令牌上。
+  //
+  // 指示线用中性色而非品牌色：设计稿里「当前项」已经由粗体和位置表达，
+  // 品牌色只留给实心主动作（页签上再涂一遍蓝，一屏会有三个蓝色在抢注意力）。
+  .mat-mdc-tab-group,
+  .mat-mdc-tab-nav-bar {
+    --mat-tab-header-active-label-text-color: var(--jnks-iot-text);
+    --mat-tab-header-active-focus-label-text-color: var(--jnks-iot-text);
+    --mat-tab-header-active-hover-label-text-color: var(--jnks-iot-text);
+    --mat-tab-header-inactive-label-text-color: var(--jnks-iot-text-muted);
+    --mat-tab-header-inactive-focus-label-text-color: var(--jnks-iot-text);
+    --mat-tab-header-inactive-hover-label-text-color: var(--jnks-iot-text);
+    --mat-tab-header-divider-color: var(--jnks-iot-line);
+    --mdc-tab-indicator-active-indicator-color: var(--jnks-iot-text);
+  }
+
   .mat-mdc-tab-group {
-    .mat-mdc-tab.mat-mdc-tab-active {
-      color: $jnks-iot-primary-color;
-      font-weight: 600;
+    .mat-mdc-tab {
+      font-weight: 500;
     }
 
     .mdc-tab-indicator__content--underline {
       border-radius: 0;
       height: 2px;
-      background: $jnks-iot-seal-color;
-      border-top-color: $jnks-iot-seal-color;
+    }
+  }
+
+  // ── 仪表盘的悬浮工具条
+  //
+  // `mat-fab-toolbar color="primary"` 展开后是一条**整块品牌蓝**的横条
+  // （/usage 那类「仪表盘型」页面顶部最显眼）。与对话框标题栏同一处理：
+  // 品牌色只留给实心主动作，工具条回到中性面 + 一条发丝描边。
+  .mat-fab-toolbar .mat-toolbar.mat-primary {
+    background: var(--tb-surface-elevated) !important;
+    color: var(--tb-text) !important;
+    border: 1px solid var(--tb-border);
+  }
+
+  // ── 详情抽屉的头部工具条
+  //
+  // 它的渐变令牌（`--jnks-iot-details-header-*`）在浅色主题里已经是近白（#ffffff→#eef4ff），
+  // 但文字和图标仍来自 `mat-toolbar.mat-primary` 的反色 —— 白底白字，规则链的节点详情、
+  // 连线详情头部整块看不见（选中文字才勉强看出来）。
+  // 用 & :not(.jnks-iot-dark) 限定浅色主题：暗色主题的令牌本身是深色渐变，白字仍然是对的。
+  // 注意必须写 `&:not(...)` —— 直接写 `.jnks-iot-default:not(...)` 会被嵌套编译成
+  // `.jnks-iot-default .jnks-iot-default:not(...)`，永远匹配不到（这条踩过一次）。
+  &:not(.jnks-iot-dark) .mat-toolbar.details-toolbar {
+    --mat-toolbar-container-text-color: var(--tb-text) !important;
+    color: var(--tb-text) !important;
+
+    // 图标必须 !important：styles.scss 里那条
+    // `.mat-toolbar.mat-primary:not(.jnks-iot-primary-toolbar) button.mat-mdc-icon-button .mat-icon{color:#fff}`
+    // 与本条特异度完全相等（都是 0,6,1），而它在源码里排在后面，按顺序会赢。
+    button.mat-mdc-icon-button .mat-icon {
+      color: var(--tb-text-muted) !important;
+    }
+
+    // 禁用态（没改动时「应用/撤销」是不可点的）必须和启用态区分开；
+    // 上面那条会把 Material 的禁用配色一起盖掉。
+    button.mat-mdc-icon-button:disabled .mat-icon {
+      color: var(--tb-text-faint) !important;
+    }
+
+    // 「应用修改 / 放弃修改」这两个动作钮：可点时给**品牌色**，禁用时保持淡灰。
+    // 之前两者只差一档灰（#5b6b85 对 #9aa4b2），"现在能存了"几乎看不出来；
+    // 这两个钮只在表单有未保存改动时才可点，所以蓝色本身就等于"有改动待处理"。
+    // 只针对模板上带 .jnks-iot-details-action-btn 的这两个，帮助(?)和关闭面板(✗)不受影响。
+    .jnks-iot-details-action-btn:not(:disabled) .mat-icon {
+      color: var(--jnks-iot-primary-color) !important;
+    }
+
+    .jnks-iot-details-action-btn:disabled .mat-icon {
+      color: var(--tb-text-faint) !important;
     }
   }
 
@@ -215,6 +839,97 @@
       .mat-mdc-dialog-container .mdc-dialog__surface {
         min-width: min(900px, 95vw);
       }
+    }
+  }
+
+  // ── 下拉面板与选项
+  // Material 默认：选项高 48px、14px 字、重投影 —— 和表格的 34px 行高完全不搭，
+  // 一拉开就像另一个应用。收到同一档密度，投影降到浮层那一级，补一条发丝描边。
+  .mat-mdc-select-panel,
+  .mat-mdc-autocomplete-panel {
+    border: 1px solid var(--tb-border);
+    box-shadow: var(--tb-shadow-md) !important;
+    padding: 4px 0 !important;
+  }
+
+  // 异步下拉的空状态「未找到 xxx」：请求在途时先压住不显示。
+  //
+  // 这些下拉用 `!(filteredX | async)?.length` 判断空状态，而**请求在途时数组同样是空的**，
+  // 于是点开面板会先闪一下「未找到 xxx」，数据回来才换成真实选项
+  // （实测「设备配置」下拉：0–180ms 显示「未找到设备配置。」）。
+  // 这里给这个空状态加 300ms 延迟：数据在这段时间内回来，它根本不出现；
+  // 列表确实是空的时候，延迟后照常显示。
+  //
+  // 注意这是**时序遮挡**，不是真正的 loading 态 —— 更准的做法是给每个下拉加 loading 信号，
+  // 但全仓有 19 处同样的写法，先按覆盖面最大的方式收敛。
+  .cdk-overlay-pane .jnks-iot-not-found {
+    animation: jnks-iot-not-found-delay 0s 300ms both;
+  }
+
+  @keyframes jnks-iot-not-found-delay {
+    from {
+      opacity: 0;
+      visibility: hidden;
+      max-height: 0;
+      overflow: hidden;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+    to {
+      opacity: 1;
+      visibility: visible;
+      max-height: none;
+      overflow: visible;
+    }
+  }
+
+  .mat-mdc-option {
+    min-height: 32px !important;
+    padding: 0 12px !important;
+    font-size: 13px;
+
+    .mdc-list-item__primary-text {
+      font-size: 13px;
+    }
+
+    // 选中项：品牌色浅底 + 主色文字。Material 默认只给灰底，
+    // 在当前这套以蓝为强调的体系里读不出「这是当前项」
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      background: rgb(var(--jnks-iot-primary-color-rgb) / 0.08);
+
+      .mdc-list-item__primary-text {
+        color: var(--jnks-iot-primary-color);
+        font-weight: 500;
+      }
+    }
+
+    &:hover:not(.mdc-list-item--disabled):not(.mdc-list-item--selected) {
+      background: var(--tb-surface-hover);
+    }
+  }
+
+  // 分页器的「每页数量」：与表头同一档字号
+  .mat-mdc-paginator .mat-mdc-select-trigger {
+    font-size: 13px;
+  }
+
+  // ── 展开面板里的表单字段
+  // 详情页顶层的字段在栅格容器里，靠容器的 gap 拉开；展开面板（如「传输配置」）
+  // 里的字段不在栅格中，margin 又是 0，于是标签、值、下一个标签全部贴死，
+  // 只读态（标签在上、值在下）尤其糊成一团。这里补一行间距。
+  //
+  // 但 `+` 是**按 DOM 顺序**取的，分不清「上下相邻」还是「左右并排」：
+  // MQTT 传输配置里的「用户名 / 密码」是 `flex flex-row gap-2`（并排，容器自带
+  // 7px 间距），第二个字段被这条规则压低 14px，两个框一高一低。
+  // 所以并排的情形要把 margin 让回给容器的 gap。
+  .mat-expansion-panel-body {
+    .mat-mdc-form-field + .mat-mdc-form-field {
+      margin-top: 14px;
+    }
+
+    .flex-row > .mat-mdc-form-field + .mat-mdc-form-field,
+    .flex-row-reverse > .mat-mdc-form-field + .mat-mdc-form-field {
+      margin-top: 0;
     }
   }
 
@@ -243,7 +958,7 @@
 
   // ── 进度条
   .mat-mdc-progress-bar {
-    --mdc-linear-progress-active-indicator-color: #{$jnks-iot-primary-color};
+    --mdc-linear-progress-active-indicator-color: #{var(--jnks-iot-primary-color)};
   }
 
 
@@ -265,13 +980,13 @@
     font-size: 12px;
   }
 
-  // ── 状态点：ISA-101 的第一条——正常态不给颜色，颜色只留给异常
+  // ── 状态点：只用绿 / 灰两级区分通断，颜色不抢告警的语义
   .jnks-iot-state {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: $jnks-iot-text-muted;
+    color: var(--jnks-iot-text-muted);
   }
 
   .jnks-iot-state-dot {
@@ -279,19 +994,28 @@
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: $jnks-iot-text-faint;
+    background: var(--jnks-iot-text-faint);
     flex: none;
   }
 
-  // 非活动：空心点，仍然中性（不是异常，只是状态）
+  // 活跃：实心绿点 + 正文色文字
+  .jnks-iot-state.on {
+    color: var(--jnks-iot-text);
+  }
+
+  .jnks-iot-state-dot.on {
+    background: var(--jnks-iot-status-ok);
+  }
+
+  // 非活动：空心灰点，保持中性
   .jnks-iot-state-dot.off {
     background: transparent;
-    box-shadow: inset 0 0 0 1.5px $jnks-iot-line-strong;
+    box-shadow: inset 0 0 0 1.5px var(--jnks-iot-line-strong);
   }
 
   // 真异常才上色
-  .jnks-iot-state-dot.warn { background: $jnks-iot-status-warn; }
-  .jnks-iot-state-dot.crit { background: $jnks-iot-seal-color; }
+  .jnks-iot-state-dot.warn { background: var(--jnks-iot-status-warn); }
+  .jnks-iot-state-dot.crit { background: var(--jnks-iot-seal-color); }
 
   // ── 数字与标识符：等宽，便于纵向比对
   .jnks-iot-num {
@@ -304,5 +1028,304 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  // ── 勾选 / 单选
+  // Material 默认用灰色描边 + 紫色/蓝色选中，颜色取自各自的主题槽；
+  // 这里统一到品牌色，并把标签字号压到正文同一档。
+  .mat-mdc-checkbox,
+  .mat-mdc-radio-button {
+    .mdc-checkbox__background,
+    .mdc-radio__outer-circle {
+      border-color: var(--tb-border-strong) !important;
+    }
+
+    .mdc-checkbox__background {
+      border-radius: 4px !important;
+    }
+
+    &.mat-mdc-checkbox-checked .mdc-checkbox__background {
+      background: var(--jnks-iot-primary-color) !important;
+      border-color: var(--jnks-iot-primary-color) !important;
+    }
+
+    &.mat-mdc-radio-checked .mdc-radio__outer-circle,
+    &.mat-mdc-radio-checked .mdc-radio__inner-circle {
+      border-color: var(--jnks-iot-primary-color) !important;
+    }
+
+    .mdc-label {
+      font-size: 13px;
+      color: var(--tb-text);
+    }
+  }
+
+  // ── 开关
+  //
+  // 这里每一行都必须 !important，两个原因：
+  //   1. Material 会按调色板**为每个 color 变体单独生成一条规则**（`.mat-accent` / `.mat-primary`…），
+  //      只写 `.mat-mdc-slide-toggle` 的话，模板里带 `color="accent"` 的开关（规则链节点详情里的就是）
+  //      会走调色板那套「浅蓝轨道 + 蓝手柄」，而不是我们要的「品牌蓝轨道 + 白手柄」；
+  //   2. 主题的默认值发在 `body`（`.jnks-iot-default`）上，实测同名变量写在元素自己身上
+  //      **仍然被它盖住**（`--mdc-switch-unselected-focus-handle-color` 解析出来是 body 的 #212121，
+  //      加 !important 立刻变回 #fff）。不深究原因，用 !important 一劳永逸。
+  //
+  // 未选中态的悬停/聚焦/按下三个变量尤其不能漏：Material 未设时会回落到
+  // `--mat-app-on-surface`（深色），开关点过之后保持 focus，手柄就变成一个黑圆。
+  .mat-mdc-slide-toggle,
+  .mat-mdc-slide-toggle.mat-accent,
+  .mat-mdc-slide-toggle.mat-primary {
+    --mdc-switch-selected-track-color: var(--jnks-iot-primary-color) !important;
+    --mdc-switch-selected-hover-track-color: var(--jnks-iot-primary-color) !important;
+    --mdc-switch-selected-focus-track-color: var(--jnks-iot-primary-color) !important;
+    --mdc-switch-selected-pressed-track-color: var(--jnks-iot-primary-color) !important;
+    --mdc-switch-selected-handle-color: #fff !important;
+    --mdc-switch-selected-hover-handle-color: #fff !important;
+    --mdc-switch-selected-focus-handle-color: #fff !important;
+    --mdc-switch-selected-pressed-handle-color: #fff !important;
+    // 白手柄上的勾：不指定就会取调色板给的值，可能是白勾 → 白底白勾
+    --mdc-switch-selected-icon-color: var(--jnks-iot-primary-color) !important;
+    --mdc-switch-unselected-track-color: var(--tb-border-strong) !important;
+    --mdc-switch-unselected-hover-track-color: var(--tb-border-strong) !important;
+    --mdc-switch-unselected-focus-track-color: var(--tb-border-strong) !important;
+    --mdc-switch-unselected-pressed-track-color: var(--tb-border-strong) !important;
+    --mdc-switch-unselected-handle-color: #fff !important;
+    --mdc-switch-unselected-hover-handle-color: #fff !important;
+    --mdc-switch-unselected-focus-handle-color: #fff !important;
+    --mdc-switch-unselected-pressed-handle-color: #fff !important;
+    --mdc-switch-unselected-icon-color: var(--tb-text-muted) !important;
+
+    .mdc-label {
+      font-size: 13px;
+      color: var(--tb-text);
+    }
+  }
+
+  // ── 菜单项：与下拉选项同一档密度
+  .mat-mdc-menu-item {
+    min-height: 36px;
+    height: 36px;
+    font-size: 13px;
+    color: var(--tb-text);
+
+    .mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: var(--tb-text-muted);
+    }
+
+    &:not([disabled]):hover {
+      background: var(--tb-surface-hover);
+    }
+  }
+
+  // ── 提示气泡：永远是「反色」的一块，两套主题下都与页面区分开
+  .mat-mdc-tooltip .mdc-tooltip__surface {
+    background: var(--jnks-iot-surface-deep);
+    color: var(--jnks-iot-on-deep);
+    font-size: 12px;
+    line-height: 18px;
+    border-radius: var(--tb-radius);
+    padding: 6px 10px;
+    box-shadow: none;
+  }
+
+  // ── 分页器
+  .mat-mdc-paginator {
+    background: var(--tb-surface-elevated);
+    color: var(--tb-text-muted);
+    font-size: 12px;
+
+    .mat-mdc-select-trigger {
+      font-size: 12.5px;
+    }
+  }
+
+  // ── 进度条 / 转圈
+  .mat-mdc-progress-bar {
+    --mdc-linear-progress-active-indicator-color: var(--jnks-iot-primary-color);
+    --mdc-linear-progress-track-color: var(--tb-border);
+    border-radius: var(--tb-radius-pill);
+  }
+
+  // 顶栏的全局加载条：模板原来写 color="warn"（Material 的 warn = 红），
+  // 那是 TB 旧品牌色，而「加载」不是异常 —— 本套里颜色只留给异常状态。
+  // 模板里已经去掉该属性，这里再兜一层：万一还有带颜色类的进度条，也收回品牌色。
+  .mat-mdc-progress-bar.mat-warn,
+  .mat-mdc-progress-bar.mat-accent {
+    --mdc-linear-progress-active-indicator-color: var(--jnks-iot-primary-color);
+  }
+
+  // 顶部的全局加载指示：换成一道「扫描光带」。
+  // Material 的 indeterminate 是两根实心方块在平移，方头方脑、还带自己的轨道色；
+  // 这里把它的内部条全部关掉，只留一条极淡的基线 + 一道两端渐隐的品牌色光带，
+  // 从左扫到右。加载是「系统在忙」，不该抢注意力 —— 所以只有 2px、且不吃点击。
+  .jnks-iot-top-loading {
+    height: 2px !important;
+    background: rgb(var(--jnks-iot-primary-color-rgb) / 0.08) !important;
+    overflow: hidden;
+    pointer-events: none;
+
+    // 关掉 Material 自己的条与缓冲条
+    .mdc-linear-progress__bar,
+    .mdc-linear-progress__buffer,
+    .mdc-linear-progress__bar-inner {
+      display: none !important;
+    }
+
+    // 光带：两端渐隐，扫过整条
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 40%;
+      background: linear-gradient(
+        90deg,
+        rgb(var(--jnks-iot-primary-color-rgb) / 0),
+        var(--jnks-iot-primary-color) 50%,
+        rgb(var(--jnks-iot-primary-color-rgb) / 0)
+      );
+      // 光带底下垫一层很淡的辉光：让它在浅底上「亮」起来，而不是一条平的色块
+      box-shadow: 0 0 8px rgb(var(--jnks-iot-primary-color-rgb) / 0.45);
+      animation: jnks-iot-loading-sweep 1.15s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  }
+
+  @keyframes jnks-iot-loading-sweep {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(350%); }
+  }
+
+  .mat-mdc-progress-spinner {
+    --mdc-circular-progress-active-indicator-color: var(--jnks-iot-primary-color);
+  }
+
+  // ── 对话框：一条描边 + 浮层阴影，内容区留白统一
+  .mat-mdc-dialog-container {
+    // 标题栏：TB 用 `mat-toolbar color="primary"`，于是对话框顶着一条整块品牌蓝。
+    // 这不是这套设计的语汇（品牌色只给实心按钮和当前项），改成中性面 + 发丝分隔。
+    mat-toolbar.mat-primary {
+      background: var(--tb-surface-elevated) !important;
+      color: var(--tb-text) !important;
+      border-bottom: 1px solid var(--tb-border);
+      box-shadow: none !important;
+      height: 48px;
+      min-height: 48px;
+      font-size: 15px;
+      font-weight: 600;
+
+      .mat-icon,
+      button.mat-mdc-icon-button {
+        color: var(--tb-text-muted) !important;
+      }
+    }
+
+    .mdc-dialog__surface {
+      border: 1px solid var(--tb-border);
+      border-radius: var(--tb-radius) !important;
+      box-shadow: var(--tb-shadow-lg) !important;
+    }
+
+    .mdc-dialog__title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--tb-text);
+      padding-bottom: 8px;
+    }
+
+    .mdc-dialog__content {
+      font-size: 13px;
+      color: var(--tb-text);
+    }
+
+    .mdc-dialog__actions {
+      padding: 8px 16px 16px;
+      gap: 8px;
+    }
+  }
+}
+
+// ── 暗色主题覆盖
+// 只放「亮色下没有对应概念」的两样东西，其余令牌都在 constants.scss 的
+// .jnks-iot-dark 里。这里必须排在 .jnks-iot-default 之后 —— 两个类同时挂在
+// <body> 上，同优先级下靠源码顺序决胜。
+.jnks-iot-dark {
+  // 主按钮翻过来：浅色块 + 深字
+  --tb-inv-bg: #{var(--jnks-iot-text)};
+  --tb-inv-fg: #{var(--jnks-iot-surface-page)};
+  // 暗底上的阴影必须是黑的。原来那三个是给浅色调的蓝灰，
+  // 落到 #0e1013 上等于没有阴影，对话框和菜单会「粘」在背景上。
+  --tb-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --tb-shadow-md: 0 10px 28px rgba(0, 0, 0, 0.55);
+  --tb-shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.66);
+
+  // ── 代码编辑器：只换语法配色
+  // 底色、行号槽、光标、选中态前面那层规则走的是令牌，切到暗色自动就对；
+  // 但 token 颜色是 textmate 自带的「浅底配色」（关键字深蓝、注释深灰），
+  // 落在暗底上基本看不清，所以这里换成 Tomorrow Night 那套低饱和配色。
+  .ace_editor {
+    .ace_comment {
+      color: #969896;
+    }
+
+    .ace_keyword,
+    .ace_storage,
+    .ace_meta {
+      color: #b294bb;
+    }
+
+    .ace_string {
+      color: #b5bd68;
+    }
+
+    .ace_constant,
+    .ace_numeric,
+    .ace_boolean {
+      color: #de935f;
+    }
+
+    .ace_support.ace_function,
+    .ace_entity.ace_name.ace_function {
+      color: #81a2be;
+    }
+
+    .ace_entity.ace_name.ace_tag {
+      color: #cc6666;
+    }
+
+    .ace_operator {
+      color: #8abeb7;
+    }
+
+    .ace_variable,
+    .ace_identifier,
+    .ace_parameter,
+    .ace_paren,
+    .ace_punctuation {
+      color: #c5c8c6;
+    }
+
+    .ace_invalid {
+      color: #1d1f21;
+      background: #cc6666;
+    }
+  }
+}
+
+// ── SaaS 主题覆盖（= 亮色那一套）
+// 参考稿在两个主题里对次按钮用了两种处理：暗色下是 1px 描边，
+// 浅色下是「浅底填充 + 无描边」。这里只补浅色那份。
+// 选择器必须排除 .jnks-iot-dark —— 两个类同时挂在 <body> 上。
+.jnks-iot-default:not(.jnks-iot-dark) {
+  .mat-mdc-outlined-button:not(.mat-warn) {
+    background: var(--tb-surface-hover) !important;
+    border-color: transparent !important;
+
+    &:not(:disabled):hover {
+      background: #e3ecf9 !important;
+    }
   }
 }

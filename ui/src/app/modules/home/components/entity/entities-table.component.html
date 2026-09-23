@@ -114,7 +114,6 @@
               <mat-icon>search</mat-icon>
             </button>
             <mat-form-field class="flex-1">
-              <mat-label>&nbsp;</mat-label>
               <input #searchInput matInput
                      [formControl]="textSearch"
                      placeholder="{{ translations.search | translate }}"/>
@@ -163,7 +162,13 @@
               <mat-header-cell [class.mat-number-cell]="column.isNumberColumn"
                                [class.lt-lg:!hidden]="column.mobileHide"
                                *matHeaderCellDef [style]="headerCellStyle(column)" mat-sort-header [disabled]="!column.sortable">
-                {{ column.ignoreTranslate ? column.title : (column.title | translate) }} </mat-header-cell>
+                {{ column.ignoreTranslate ? column.title : (column.title | translate) }}
+                <!-- 拖右边缘调宽；双击恢复默认（宽度记在 localStorage） -->
+                <div class="jnks-iot-col-resize"
+                     (pointerdown)="startColumnResize($event, column)"
+                     (click)="$event.stopPropagation()"
+                     (dblclick)="resetColumnWidth($event, column)"></div>
+              </mat-header-cell>
               <mat-cell [class.mat-number-cell]="column.isNumberColumn"
                         [class.cell-action]="column.actionCell?.type === cellActionType.COPY_BUTTON"
                         [class.lt-lg:!hidden]="column.mobileHide"
@@ -233,21 +238,21 @@
               </mat-cell>
             </ng-container>
             <ng-container matColumnDef="actions" stickyEnd>
-              <mat-header-cell *matHeaderCellDef>
+              <mat-header-cell *matHeaderCellDef [style.width.px]="cellActionDescriptors.length * 28 + 16">
                 <ng-container *ngIf="cellActionDescriptors.length">
-                  <div class="gt-md:!hidden" style="min-width: 48px;">
+                  <div class="gt-md:!hidden" style="min-width: 32px;">
                     {{ entitiesTableConfig.actionsColumnTitle ? (entitiesTableConfig.actionsColumnTitle | translate) : '' }}
                   </div>
                   <div class="lt-lg:!hidden"
-                       [style.min-width]="(cellActionDescriptors.length * 48) + 'px'">
+                       [style.min-width]="(cellActionDescriptors.length * 32) + 'px'">
                     {{ entitiesTableConfig.actionsColumnTitle ? (entitiesTableConfig.actionsColumnTitle | translate) : '' }}
                   </div>
                 </ng-container>
               </mat-header-cell>
-              <mat-cell *matCellDef="let entity">
+              <mat-cell *matCellDef="let entity" [style.width.px]="cellActionDescriptors.length * 28 + 16">
                 <ng-container *ngIf="cellActionDescriptors.length">
                   <div [class.lt-lg:!hidden]="cellActionDescriptors.length !== 1" class="flex flex-row items-stretch justify-end"
-                       [style.min-width]="(cellActionDescriptors.length * 48) + 'px'">
+                       [style.min-width]="(cellActionDescriptors.length * 32) + 'px'">
                     <button mat-icon-button [disabled]="(isLoading$ | async) || !actionDescriptor.isEnabled(entity)"
                             *ngFor="let actionDescriptor of cellActionDescriptors"
                             matTooltip="{{ actionDescriptor.nameFunction ? actionDescriptor.nameFunction(entity) : actionDescriptor.name }}"

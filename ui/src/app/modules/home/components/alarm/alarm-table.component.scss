@@ -15,7 +15,7 @@
 
     &.jnks-iot-details-mode {
       .jnks-iot-entities-table-container {
-        background-color: white;
+        background-color: var(--jnks-iot-surface-card);
       }
     }
     .assignee-cell {
@@ -50,7 +50,7 @@
           height: 28px;
           font-size: 28px;
           margin-right: 8px;
-          color: rgba(0, 0, 0, 0.38);
+          color: var(--jnks-iot-text-faint);
           overflow: visible;
         }
       }

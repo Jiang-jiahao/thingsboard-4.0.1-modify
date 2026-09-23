@@ -22,12 +22,12 @@
     }
     &:not(:disabled) {
       .mat-icon {
-        color: rgba(0, 0, 0, 0.54);
+        color: var(--jnks-iot-text-muted);
       }
     }
     &:disabled {
       .mat-icon {
-        color: rgba(0, 0, 0, 0.12);
+        color: var(--jnks-iot-text-faint);
       }
     }
   }
@@ -59,10 +59,10 @@
     input.mdc-text-field__input {
       cursor: default;
       &::placeholder {
-        color: $jnks-iot-primary-color;
+        color: var(--jnks-iot-primary-color);
       }
       &:-ms-input-placeholder {
-        color: $jnks-iot-primary-color;
+        color: var(--jnks-iot-primary-color);
       }
     }
   }

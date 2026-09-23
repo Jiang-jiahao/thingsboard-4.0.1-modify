@@ -56,9 +56,9 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #FFFFFF;
+    background: var(--jnks-iot-surface-card);
     padding: 8px;
-    border: 2px dashed rgba(0, 0, 0, 0.08);
+    border: 2px dashed var(--jnks-iot-line);
     border-radius: 10px;
   }
 
@@ -75,7 +75,7 @@
       justify-content: center;
       align-items: center;
       gap: 8px;
-      border: 2px dashed rgba(0, 0, 0, 0.12);
+      border: 2px dashed var(--jnks-iot-line);
       border-radius: 10px;
       .jnks-iot-add-widget-button-text {
         font-size: 16px;
@@ -83,7 +83,7 @@
         font-weight: 500;
         line-height: 24px;
         letter-spacing: 0.25px;
-        color: $jnks-iot-primary-color;
+        color: var(--jnks-iot-primary-color);
       }
     }
   }
@@ -94,7 +94,7 @@
     flex-direction: column;
     gap: 12px;
     border-radius: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--jnks-iot-line);
     box-shadow: 0 5px 16px 0 rgba(0, 0, 0, 0.04);
   }
 
@@ -126,10 +126,10 @@
   flex-direction: row;
   align-items: center;
   padding: 6px 12px 6px 6px;
-  background: #fff;
+  background: var(--jnks-iot-surface-card);
   gap: 12px;
   border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--jnks-iot-line);
   box-shadow: 0 5px 16px 0 rgba(0, 0, 0, 0.04);
   .jnks-iot-bundle-widget-row-details {
     flex: 1;
@@ -155,16 +155,16 @@
         font-size: 14px;
         font-weight: 400;
         letter-spacing: 0.2px;
-        color: rgba(0, 0, 0, 0.76);
+        color: var(--jnks-iot-text);
       }
       .jnks-iot-bundle-widget-deprecated {
         font-size: 13px;
         font-weight: 400;
-        color: rgba(0, 0, 0, 0.54);
+        color: var(--jnks-iot-text-muted);
       }
     }
   }
   .mat-icon {
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--jnks-iot-text-muted);
   }
 }

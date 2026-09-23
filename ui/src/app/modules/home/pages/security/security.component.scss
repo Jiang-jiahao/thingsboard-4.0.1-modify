@@ -43,7 +43,7 @@
       .password-requirements > p {
         margin: 0 0 8px;
         letter-spacing: 0.25px;
-        color: rgba(0, 0, 0, 0.87);
+        color: var(--jnks-iot-text);
       }
 
       .mat-icon[data-mat-icon-name="check"] {
@@ -68,7 +68,7 @@
   }
 
   .description {
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--jnks-iot-text-muted);
     letter-spacing: 0.25px;
     margin-right: 8px;
   }

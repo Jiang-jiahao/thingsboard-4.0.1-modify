@@ -24,7 +24,10 @@ export class MenuToggleComponent implements OnInit {
 
   sectionHeight(): string {
     if (this.section.opened) {
-      return this.section.pages.length * 40 + 'px';
+      // 展开高度 = 条目数 × 行高。行高必须跟 side-menu.component.scss 里
+      // `.jnks-iot-side-menu ul a.mat-mdc-button` 的 height 一致，否则每项会多出
+      // 一截死区（上游是 40px，我们收到 28px 后没同步这儿，实体/配置之间就空了一大块）。
+      return this.section.pages.length * 28 + 'px';
     } else {
       return '0px';
     }

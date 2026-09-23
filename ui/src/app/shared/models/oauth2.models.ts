@@ -145,12 +145,6 @@ export interface OAuth2ClientLoginInfo {
   url: string;
 }
 
-export function getProviderHelpLink(provider: Provider): string {
-  if (providerHelpLinkMap.has(provider)) {
-    return providerHelpLinkMap.get(provider);
-  }
-  return 'oauth2Settings';
-}
 
 export enum Provider {
   CUSTOM = 'Custom',
@@ -159,13 +153,3 @@ export enum Provider {
   GITHUB = 'Github',
   APPLE = 'Apple'
 }
-
-const providerHelpLinkMap = new Map<Provider, string>(
-  [
-    [Provider.CUSTOM, 'oauth2Settings'],
-    [Provider.APPLE, 'oauth2Apple'],
-    [Provider.FACEBOOK, 'oauth2Facebook'],
-    [Provider.GITHUB, 'oauth2Github'],
-    [Provider.GOOGLE, 'oauth2Google'],
-  ]
-)

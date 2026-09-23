@@ -12,7 +12,7 @@
   </mat-progress-bar>
   <div style="height: 4px;" *ngIf="!(isLoading$ | async)"></div>
   <div mat-dialog-content class="relative">
-    <fieldset [disabled]="isLoading$ | async" jnks-iot-toast toastTarget="uploadRoot" >
+    <fieldset [disabled]="isLoading$ | async" jnks-iot-toast >
       <jnks-iot-image-input resultAsFile
                       processImageApiLink
                       label="{{(isScada ? 'scada.symbol-preview' : 'image.image-preview') | translate}}"

@@ -15,7 +15,7 @@
 
   .fields-group {
     padding: 0 16px;
-    border: 1px groove rgba(0, 0, 0, .25);
+    border: 1px groove var(--jnks-iot-line);
     border-radius: 4px;
 
     &.jnks-iot-margin {
@@ -32,13 +32,13 @@
 
     legend {
       margin-bottom: 8px;
-      color: rgba(0, 0, 0, .7);
+      color: var(--jnks-iot-text-muted);
       width: fit-content;
     }
 
     .mat-body-2 {
       margin-bottom: 8px;
-      color: rgba(0,0,0,.76);
+      color: var(--jnks-iot-text);
     }
 
     .clear-button-space {
@@ -81,7 +81,7 @@
       flex-direction: column;
       height: 100%;
       padding: 0 !important;
-      color: rgba(0, 0, 0, 0.87);
+      color: var(--jnks-iot-text);
 
       .mat-stepper-horizontal {
         display: flex;

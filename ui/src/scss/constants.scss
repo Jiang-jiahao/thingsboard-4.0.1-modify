@@ -1,3 +1,7 @@
+// ─────────────────────────────────────────────────────────────
+// 断点（SCSS 变量：编译期，不随主题变，也不能变成 CSS 变量 ——
+// 它们要出现在 @media 里，那里不认 var()）
+// ─────────────────────────────────────────────────────────────
 $mat-xs: "screen and (max-width: 599px)";
 $mat-sm: "screen and (min-width: 600px) and (max-width: 959px)";
 $mat-md: "screen and (min-width: 960px) and (max-width: 1279px)";
@@ -14,70 +18,169 @@ $mat-gt-xmd: "screen and (min-width: 1600px)";
 $mat-gt-xl: "screen and (min-width: 1920px)";
 $mat-md-lg: "screen and (min-width: 960px) and (max-width: 1819px)";
 
-$primary-hue-3: rgb(207, 216, 220) !default;
-
 // ─────────────────────────────────────────────────────────────
-// 杰能科世 — 印与墨
-// 取色来自标识本身：标识是一枚圆章（GENENKOSY/杰能科世），
-// 所以深面用墨、强调用印泥朱砂、中性面用瓷白纸灰。
-// 朱砂只给三处：当前项、严重、危险（不再满地红）。
+// 字体（SCSS 变量：两套主题共用，不切换）
+// 这四个必须保持 SCSS 变量 —— $jnks-iot-material-font 要被喂进
+// mat.m2-define-typography-config()，那是编译期的 SCSS 函数，收不了 var()
 // ─────────────────────────────────────────────────────────────
-
-$jnks-iot-primary-color: #0b1b2b;      // 墨：主色，主要动作与深面
-$jnks-iot-secondary-color: #12283d;    // 墨·浅
-$jnks-iot-accent-color: #1c3853;       // accent 槽给墨的中档
-$jnks-iot-hue3-color: #cbd5e1;
-
-$jnks-iot-dark-primary-color: #7fa6c9; // 深色主题下提亮的主色
-
-// 朱砂（印泥）—— 品牌强调 + 危险语义合并
-$jnks-iot-seal-color: #c1272d;
-$jnks-iot-seal-soft: rgba(193, 39, 45, 0.08);
-
-// 状态四态：正常 / 偏高 / 严重 / 停用
-$jnks-iot-status-ok: #0e7265;
-$jnks-iot-status-warn: #a16207;
-$jnks-iot-status-crit: #c1272d;
-$jnks-iot-status-idle: #64748b;
-
-// 中性：瓷白与纸灰
-$jnks-iot-text: #16232e;
-$jnks-iot-text-muted: #5c6b7a;
-$jnks-iot-text-faint: #8a98a6;
-$jnks-iot-line: #e5e9f0;
-$jnks-iot-line-strong: #d4dbe5;
-$jnks-iot-surface-card: #ffffff;
-$jnks-iot-surface-page: #f6f8fa;
-
-$jnks-iot-sidebar-bg: #0b1b2b;
-$jnks-iot-sidebar-header-bg: #0f2233;
-$jnks-iot-sidebar-text: rgba(255, 255, 255, 0.86);
-$jnks-iot-sidebar-text-muted: rgba(255, 255, 255, 0.42);
-$jnks-iot-sidebar-active-bg: rgba(255, 255, 255, 0.06);
-$jnks-iot-sidebar-border: rgba(255, 255, 255, 0.1);
-
-$jnks-iot-topbar-bg: #ffffff;
-$jnks-iot-topbar-text: #16232e;
-$jnks-iot-topbar-muted: #5c6b7a;
-
-// Entity details / dialogs
-$jnks-iot-details-header-start: #0b1b2b;
-$jnks-iot-details-header-mid: #12283d;
-$jnks-iot-details-header-end: #1c3853;
-
-// 整站只有一个圆角
-$jnks-iot-radius: 6px;
-
-// 字体三件套：
-//   UI  —— 中文系统黑体（Roboto / Plus Jakarta Sans 都没有中文字形，
-//          之前中文全部靠系统回落，与拉丁数字是两套字面）
-//   标题位 —— 宋体，接住标识里的书法主标（中文界面极少这么做）
-//   数据 —— 等宽，设备 ID / 时间 / 百分比靠它对齐
 $jnks-iot-font-ui: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Source Han Sans SC",
   system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-$jnks-iot-font-display: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif CJK SC", serif;
+// 标题位：早期「印与墨」用宋体。新方案不用衬线，这里指向同一套无衬线，
+// 保留变量名是为了不动那十几处引用。
+$jnks-iot-font-display: $jnks-iot-font-ui;
 $jnks-iot-font-data: "SF Mono", "JetBrains Mono", Menlo, Consolas, "Courier New", monospace;
-
-// 给 Material 用：它会把字体塞进 `font:` 简写，那里不能出现 system-ui 这类关键字，
-// 所以单独留一份「全是带引号字族名」的字符串
 $jnks-iot-material-font: '"PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Source Han Sans SC", Roboto, "Helvetica Neue", sans-serif';
+
+// 兼容旧引用：原来是个写死的浅灰（rgb(207,216,220)），现在指向主题令牌，
+// 这样它也跟着亮/暗切换。只有 details-panel.component.scss 一处用它。
+$primary-hue-3: var(--jnks-iot-hue3-color);
+
+// ═════════════════════════════════════════════════════════════
+// 主题令牌 —— CSS 自定义属性，**运行时可切换**
+//
+// 为什么改：原来是 SCSS 变量（编译期常量），两套主题只能各编译一份 CSS。
+// 换成自定义属性后，切主题只是给 <body> 加/去一个类。
+//
+// 命名规则：旧的 `$jnks-iot-foo` 一律变成 `var(--jnks-iot-foo)`，
+// 名字原样保留，所以 50 个文件里的 364 处引用可以机械替换。
+//
+// `-rgb` 后缀的那几个是**通道三元组**，专供需要 alpha 的场景：
+//   rgba($jnks-iot-primary-color, .25)  →  rgb(var(--jnks-iot-primary-color-rgb) / .25)
+// 因为 SCSS 的 rgba() 是编译期函数，喂不了 var()（var 是整段颜色，不是通道）。
+// 只有真的在颜色函数里用过的 6 个颜色才配了 `-rgb` 伴生变量。
+// ═════════════════════════════════════════════════════════════
+
+// ── 主题一：SaaS 分析风（浅色，默认）
+// 来源：https://uupm.cc/demo/saas-analytics-dashboard
+@mixin jnks-iot-tokens-saas {
+  // 品牌与强调
+  --jnks-iot-primary-color: #2563eb;          // 蓝：主按钮、当前项、链接
+  --jnks-iot-primary-color-rgb: 37 99 235;
+  --jnks-iot-secondary-color: #1d4ed8;        // 蓝·深（渐变、tint 基底）
+  --jnks-iot-secondary-color-rgb: 29 78 216;
+  --jnks-iot-accent-color: #3b82f6;           // 强调（与主色同族；原本按参考稿设成紫，界面里太跳）
+  --jnks-iot-accent-color-rgb: 59 130 246;
+  --jnks-iot-hue3-color: #eef4ff;
+  --jnks-iot-dark-primary-color: #4a9eea;     // 暗色主题下的主色（给调色板用）
+
+  // 危险 / 状态（ISA-101：正常不上色，颜色只给异常）
+  --jnks-iot-seal-color: #ef4444;
+  --jnks-iot-seal-color-rgb: 239 68 68;
+  --jnks-iot-seal-soft: rgb(239 68 68 / 0.08);
+  --jnks-iot-status-ok: #22c55e;
+  --jnks-iot-status-warn: #f59e0b;
+  --jnks-iot-status-warn-rgb: 245 158 11;
+  --jnks-iot-status-crit: #ef4444;
+  --jnks-iot-status-idle: #94a3b8;
+
+  // 中性
+  --jnks-iot-text: #0f172a;
+  --jnks-iot-text-muted: #5b6b85;
+  --jnks-iot-text-faint: #8b9ab3;
+  --jnks-iot-line: #e8eef6;
+  --jnks-iot-line-strong: #d7e0ec;
+  --jnks-iot-surface-card: #ffffff;
+  --jnks-iot-surface-page: #f5f8fd;
+  // 悬停 / 输入框 / 次级按钮的填充面。**不是** surface-page 的别名：
+  // 暗色下页面底比卡片还暗，拿它当悬停底会把元素越悬越黑。
+  --jnks-iot-surface-hover: #eef3fa;
+  // 「深面」：原来是 primary-color 兼任（墨色面板）。新方案品牌色是蓝，
+  // 不能再兼任深底，所以单独立一个令牌。**只被登录页左屏使用。**
+  //
+  // 注意：亮色主题下它是**浅**的 —— 一开始我在两套主题里都给了深色，
+  // 结果 SaaS 主题下登录页和旧的「印与墨」长得一样（左屏都是深蓝墨），
+  // 用户会以为界面根本没换。深面必须跟着主题走。
+  --jnks-iot-surface-deep: #eff4fc;
+  // 深面上的文字：暗色下深面是暗的 → 白字；亮色下深面是浅的 → 深字
+  --jnks-iot-on-deep: #0f172a;
+  --jnks-iot-on-deep-muted: #5b6b85;
+  --jnks-iot-on-deep-faint: #8b9ab3;
+
+  // 外壳：侧栏与顶栏
+  --jnks-iot-sidebar-bg: #ffffff;
+  --jnks-iot-sidebar-header-bg: #f8fafd;
+  --jnks-iot-sidebar-header-bg-rgb: 248 250 253;
+  --jnks-iot-sidebar-text: #0f172a;
+  --jnks-iot-sidebar-text-muted: #64748b;
+  --jnks-iot-sidebar-active-bg: #eef4ff;
+  --jnks-iot-sidebar-border: #e8eef6;
+  --jnks-iot-topbar-bg: #ffffff;
+  --jnks-iot-topbar-text: #0f172a;
+  --jnks-iot-topbar-muted: #5b6b85;
+
+  // 详情页头渐变的三个停点
+  --jnks-iot-details-header-start: #ffffff;
+  --jnks-iot-details-header-mid: #f4f8ff;
+  --jnks-iot-details-header-end: #eef4ff;
+
+  // 形状
+  --jnks-iot-radius: 8px;
+}
+
+// ── 主题二：暗黑（原「仪表」暗色优先）
+@mixin jnks-iot-tokens-dark {
+  --jnks-iot-primary-color: #4a9eea;
+  --jnks-iot-primary-color-rgb: 74 158 234;
+  --jnks-iot-secondary-color: #3b82d6;
+  --jnks-iot-secondary-color-rgb: 59 130 214;
+  --jnks-iot-accent-color: #8b7fd4;
+  --jnks-iot-accent-color-rgb: 139 127 212;
+  --jnks-iot-hue3-color: #1f252d;
+  --jnks-iot-dark-primary-color: #7fa6c9;
+
+  --jnks-iot-seal-color: #e15b5b;
+  --jnks-iot-seal-color-rgb: 225 91 91;
+  --jnks-iot-seal-soft: rgb(225 91 91 / 0.1);
+  --jnks-iot-status-ok: #3fb98a;
+  --jnks-iot-status-warn: #d9a441;
+  --jnks-iot-status-warn-rgb: 217 164 65;
+  --jnks-iot-status-crit: #e15b5b;
+  --jnks-iot-status-idle: #6b7684;
+
+  --jnks-iot-text: #e7eaef;
+  --jnks-iot-text-muted: #9aa4b2;
+  --jnks-iot-text-faint: #69737f;
+  --jnks-iot-line: #262c34;
+  --jnks-iot-line-strong: #39424e;
+  --jnks-iot-surface-card: #191d23;
+  --jnks-iot-surface-page: #0e1013;
+  --jnks-iot-surface-hover: #22272f;
+  --jnks-iot-surface-deep: #0e1013;
+  --jnks-iot-on-deep: #ffffff;
+  --jnks-iot-on-deep-muted: rgba(255, 255, 255, 0.62);
+  --jnks-iot-on-deep-faint: rgba(255, 255, 255, 0.45);
+
+  --jnks-iot-sidebar-bg: #14171c;
+  --jnks-iot-sidebar-header-bg: #191d23;
+  --jnks-iot-sidebar-header-bg-rgb: 25 29 35;
+  --jnks-iot-sidebar-text: rgba(255, 255, 255, 0.86);
+  --jnks-iot-sidebar-text-muted: rgba(255, 255, 255, 0.42);
+  --jnks-iot-sidebar-active-bg: rgba(255, 255, 255, 0.06);
+  --jnks-iot-sidebar-border: rgba(255, 255, 255, 0.1);
+  --jnks-iot-topbar-bg: #14171c;
+  --jnks-iot-topbar-text: #e7eaef;
+  --jnks-iot-topbar-muted: #9aa4b2;
+
+  --jnks-iot-details-header-start: #0e1013;
+  --jnks-iot-details-header-mid: #14171c;
+  --jnks-iot-details-header-end: #191d23;
+
+  --jnks-iot-radius: 2px;
+}
+
+// 兜底：Material 的 overlay 容器（对话框/菜单）挂在 <body> 下，能继承到 body 上的令牌；
+// :root 这一层是给 body 之外的元素用的（理论上没有，但便宜）。
+:root {
+  @include jnks-iot-tokens-saas;
+}
+
+// <body> 上**始终**带 .jnks-iot-default（Tailwind 的 important 作用域、
+// styles.scss/form.scss 的联合作用域、以及 5 个组件 scss 都依赖它）。
+// 切到暗色时**额外**加上 .jnks-iot-dark —— 它在源码里排在后面，同优先级下后者胜。
+.jnks-iot-default {
+  @include jnks-iot-tokens-saas;
+}
+
+.jnks-iot-dark {
+  @include jnks-iot-tokens-dark;
+}

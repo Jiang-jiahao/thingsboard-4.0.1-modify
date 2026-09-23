@@ -17,7 +17,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--tb-text-disabled, rgba(0, 0, 0, 0.6));
+  color: var(--tb-text-disabled, var(--jnks-iot-line));
 }
 
 .jnks-iot-device-rpc-mode-chip {
@@ -31,7 +31,7 @@
 
 .jnks-iot-device-rpc-mode-chip-oneway {
   background: rgba(0, 0, 0, 0.06);
-  color: var(--tb-text-primary, rgba(0, 0, 0, 0.87));
+  color: var(--tb-text-primary, var(--jnks-iot-text));
 }
 
 .jnks-iot-device-rpc-mode-chip-twoway {

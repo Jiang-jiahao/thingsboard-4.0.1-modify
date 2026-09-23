@@ -1,4 +1,4 @@
-<div class="jnks-iot-entities-hierarchy jnks-iot-absolute-fill" jnks-iot-toast toastTarget="{{ toastTargetId }}">
+<div class="jnks-iot-entities-hierarchy jnks-iot-absolute-fill" jnks-iot-toast>
   <div class="jnks-iot-absolute-fill flex flex-1 flex-col">
     <mat-toolbar class="mat-mdc-table-toolbar" [class.!hidden]="!textSearchMode">
       <div class="mat-toolbar-tools">
@@ -8,7 +8,6 @@
           <mat-icon>search</mat-icon>
         </button>
         <mat-form-field class="flex-1">
-          <mat-label>&nbsp;</mat-label>
           <input #searchInput matInput
                  [formControl]="textSearch"
                  placeholder="{{ 'entity.search' | translate }}"/>

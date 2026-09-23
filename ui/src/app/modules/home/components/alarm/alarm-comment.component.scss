@@ -60,7 +60,7 @@ $border: 1px solid mat.m2-get-color-from-palette($jnks-iot-primary);
       z-index: 1;
       position: sticky;
       top: -24px;
-      background-color: white;
+      background-color: var(--jnks-iot-surface-card);
 
       &.activity-only {
         top: 0;
@@ -87,13 +87,13 @@ $border: 1px solid mat.m2-get-color-from-palette($jnks-iot-primary);
         }
 
         .header-title {
-          color: rgba(0, 0, 0, 0.76);
+          color: var(--jnks-iot-text);
           letter-spacing: 0.25px;
           font-weight: 500;
         }
 
         .mat-icon {
-          color: rgba(0, 0, 0, 0.38);
+          color: var(--jnks-iot-text-faint);
         }
       }
     }
@@ -122,7 +122,7 @@ $border: 1px solid mat.m2-get-color-from-palette($jnks-iot-primary);
 
       .mat-icon {
         align-self: start;
-        color: rgba(0, 0, 0, 0.38);
+        color: var(--jnks-iot-text-faint);
       }
     }
 
@@ -139,7 +139,7 @@ $border: 1px solid mat.m2-get-color-from-palette($jnks-iot-primary);
 
     .user-name {
       font-size: 16px;
-      color: rgba(0, 0, 0, 0.76);
+      color: var(--jnks-iot-text);
       font-weight: 500;
       letter-spacing: 0.25px;
     }
@@ -147,7 +147,7 @@ $border: 1px solid mat.m2-get-color-from-palette($jnks-iot-primary);
     .time {
       font-size: 14px;
       font-weight: 400;
-      color: rgba(0, 0, 0, 0.38);
+      color: var(--jnks-iot-text-faint);
       letter-spacing: 0.2px;
       border-radius: 16px;
       padding: 0 3px;
@@ -167,7 +167,7 @@ $border: 1px solid mat.m2-get-color-from-palette($jnks-iot-primary);
       font-weight: 500;
       font-size: 14px;
       letter-spacing: 0.25px;
-      color: rgba(0, 0, 0, 0.38);
+      color: var(--jnks-iot-text-faint);
     }
 
     .text {
@@ -175,13 +175,13 @@ $border: 1px solid mat.m2-get-color-from-palette($jnks-iot-primary);
       word-break: break-word;
       font-size: 16px;
       letter-spacing: 0.15px;
-      color: rgba(0, 0, 0, 0.54);
+      color: var(--jnks-iot-text-muted);
     }
 
     .action-buttons {
       visibility: hidden;
       .mat-icon {
-        color: rgba(0, 0, 0, 0.38);
+        color: var(--jnks-iot-text-faint);
       }
     }
 
@@ -200,7 +200,7 @@ $border: 1px solid mat.m2-get-color-from-palette($jnks-iot-primary);
     .mat-form-field {
       font-size: 16px;
       letter-spacing: 0.15px;
-      color: rgba(0, 0, 0, 0.76);
+      color: var(--jnks-iot-text);
     }
 
     textarea {

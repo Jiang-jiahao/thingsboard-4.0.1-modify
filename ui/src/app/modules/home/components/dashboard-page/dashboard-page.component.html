@@ -251,7 +251,7 @@
     </jnks-iot-dashboard-toolbar>
   </section>
   <section class="jnks-iot-dashboard-container jnks-iot-absolute-fill"
-           jnks-iot-toast toastTarget="dashboardRoot"
+           jnks-iot-toast
            #dashboardContainer
            [class.is-fullscreen]="forceFullscreen"
            [class.jnks-iot-dashboard-toolbar-opened]="toolbarOpened"
@@ -368,7 +368,6 @@
               <jnks-iot-toggle-option value="basic">{{ 'widget.basic-mode' | translate }}</jnks-iot-toggle-option>
               <jnks-iot-toggle-option value="advanced">{{ 'widget.advanced-mode' | translate }}</jnks-iot-toggle-option>
             </jnks-iot-toggle-select>
-            <div [jnks-iot-help]="helpLinkIdForWidgetType()"></div>
           </div>
           <jnks-iot-edit-widget #jnksIotEditWidget
                           [dashboard]="dashboard"

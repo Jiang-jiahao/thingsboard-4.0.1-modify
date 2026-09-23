@@ -7,10 +7,10 @@
       padding: 0 24px;
     }
     h2 {
-      color: $jnks-iot-text;
+      color: var(--jnks-iot-text);
     }
     .mat-icon {
-      color: $jnks-iot-text-muted;
+      color: var(--jnks-iot-text-muted);
     }
   }
 }

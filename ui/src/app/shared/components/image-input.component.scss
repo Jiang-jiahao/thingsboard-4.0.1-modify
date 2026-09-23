@@ -28,7 +28,7 @@ $previewSize: 78px !default;
   .image-container {
     background: #F3F6FA;
     border-radius: 4px;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--jnks-iot-line);
     padding: 8px 12px 8px 8px;
     display: flex;
     align-items: center;
@@ -41,8 +41,8 @@ $previewSize: 78px !default;
   .jnks-iot-image-preview-container {
     width: $previewSize;
     height: $previewSize;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    background: #fff;
+    border: 1px solid var(--jnks-iot-line);
+    background: var(--jnks-iot-surface-card);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -71,14 +71,14 @@ $previewSize: 78px !default;
 
   .jnks-iot-image-file-name {
     width: 136px;
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--jnks-iot-text-muted);
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .jnks-iot-image-file-hint {
-    color: rgba(0, 0, 0, 0.38);
+    color: var(--jnks-iot-text-faint);
     font-weight: 400;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -92,7 +92,7 @@ $previewSize: 78px !default;
     height: 100%;
     flex: 1;
     overflow: hidden;
-    border: 2px dashed rgba(0, 0, 0, 0.2);
+    border: 2px dashed var(--jnks-iot-line);
     border-radius: 4px;
     box-sizing: border-box;
 
@@ -106,7 +106,7 @@ $previewSize: 78px !default;
       align-items: center;
       gap: 8px;
       .mat-icon {
-        color: rgba(0,0,0,0.12);
+        color: var(--jnks-iot-text-faint);
       }
       .upload-text-area {
         display: flex;
@@ -114,7 +114,7 @@ $previewSize: 78px !default;
         align-items: center;
         font-size: 16px;
         line-height: 24px;
-        color: rgba(0, 0, 0, 0.54);
+        color: var(--jnks-iot-text-muted);
         text-align: center;
         .hide-xs {
           @media #{$mat-xs} {

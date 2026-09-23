@@ -36,6 +36,8 @@
         "enter-edit-mode": "進入編輯模式",
         "decline-changes": "取消更改",
         "close": "關閉",
+        "copied": "已複製",
+        "copyHint": "點擊複製這則提示",
         "back": "返回",
         "run": "執行",
         "sign-in": "登入！",
@@ -2102,7 +2104,6 @@
         "scroll-to-top": "滾動到頂部"
     },
     "help": {
-        "goto-help-page": "轉到幫助頁面",
         "show-help": "顯示幫助"
     },
     "home": {

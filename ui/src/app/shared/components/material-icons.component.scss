@@ -9,7 +9,7 @@
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--jnks-iot-text);
   }
   .jnks-iot-material-icons-title, .jnks-iot-material-icons-search {
     width: 100%;
@@ -34,7 +34,7 @@
     height: 36px;
     padding: 6px;
     &:not(.mat-primary) {
-      color: rgba(0, 0, 0, 0.54);
+      color: var(--jnks-iot-text-muted);
     }
     > .mat-icon {
       width: 24px;

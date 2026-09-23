@@ -9,7 +9,7 @@ $previewSize: 64px !default;
   &.image-dnd-placeholder {
     height: 82px;
     width: 146px;
-    border: 2px dashed rgba(0, 0, 0, 0.2);
+    border: 2px dashed var(--jnks-iot-line);
     background: rgba(0, 0, 0, 0.1);
     border-radius: 4px;
   }
@@ -20,13 +20,13 @@ $previewSize: 64px !default;
     font-size: 11px;
     font-weight: 400;
     line-height: 14px;
-    color: rgba(0, 0, 0, 0.6);
+    color: var(--jnks-iot-text-faint);
     padding-bottom: 4px;
   }
 
   .image-content-container {
-    background: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.2);
+    background: var(--jnks-iot-surface-card);
+    border: 1px solid var(--jnks-iot-line);
     border-radius: 4px;
     height: $previewSize;
   }
@@ -44,7 +44,7 @@ $previewSize: 64px !default;
     height: $previewSize;
     margin-top: -1px;
     margin-bottom: -1px;
-    border: 1px solid rgba(0, 0, 0, 0.54);
+    border: 1px solid var(--jnks-iot-text-muted);
 
     .jnks-iot-image-preview {
       position: absolute;
@@ -93,14 +93,14 @@ $previewSize: 64px !default;
 
   .no-images-prompt {
     font-size: 18px;
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--jnks-iot-text-muted);
   }
 
   .jnks-iot-image-select-container {
     width: 100%;
     height: $selectContainerHeight;
     border-radius: 4px;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--jnks-iot-line);
     display: flex;
     align-items: center;
 
@@ -111,8 +111,8 @@ $previewSize: 64px !default;
       justify-content: center;
       align-items: center;
       border-radius: 4px;
-      border-right: 1px solid rgba(0, 0, 0, 0.12);
-      background: #fff;
+      border-right: 1px solid var(--jnks-iot-line);
+      background: var(--jnks-iot-surface-card);
       overflow: hidden;
 
       .jnks-iot-image-preview {
@@ -124,7 +124,7 @@ $previewSize: 64px !default;
 
       .jnks-iot-no-image {
         text-align: center;
-        color: rgba(0, 0, 0, 0.38);
+        color: var(--jnks-iot-text-faint);
         font-size: 12px;
         font-style: normal;
         font-weight: 400;
@@ -151,7 +151,7 @@ $previewSize: 64px !default;
         align-items: flex-start;
         gap: 4px;
         .jnks-iot-external-link-label {
-          color: rgba(0, 0, 0, 0.54);
+          color: var(--jnks-iot-text-muted);
           font-size: 12px;
           font-style: normal;
           font-weight: 400;
@@ -168,7 +168,7 @@ $previewSize: 64px !default;
             width: 100%;
           }
           .jnks-iot-image-decline-btn {
-            color: rgba(0,0,0,0.38);
+            color: var(--jnks-iot-text-faint);
           }
         }
       }

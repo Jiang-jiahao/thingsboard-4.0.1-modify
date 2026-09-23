@@ -72,7 +72,7 @@
         font-size: 11px;
         line-height: 16px;
         font-weight: 400;
-        color: rgba(0, 0, 0, 0.38);
+        color: var(--jnks-iot-text-faint);
       }
       .jnks-iot-aggregated-value-card-chart-container {
         position: relative;
@@ -90,19 +90,19 @@
           height: 6px;
           &.top {
             top: 0;
-            border-top: 2px solid rgba(0,0,0,0.38);
+            border-top: 2px solid var(--jnks-iot-text-faint);
           }
           &.left {
             left: 0;
-            border-left: 2px solid rgba(0,0,0,0.38);
+            border-left: 2px solid var(--jnks-iot-text-faint);
           }
           &.right {
             right: 0;
-            border-right: 2px solid rgba(0,0,0,0.38);
+            border-right: 2px solid var(--jnks-iot-text-faint);
           }
           &.bottom {
             bottom: 0;
-            border-bottom: 2px solid rgba(0,0,0,0.38);
+            border-bottom: 2px solid var(--jnks-iot-text-faint);
           }
         }
       }

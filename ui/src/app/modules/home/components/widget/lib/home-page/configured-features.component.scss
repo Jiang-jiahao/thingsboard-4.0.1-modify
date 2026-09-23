@@ -7,7 +7,7 @@
   }
 
   .jnks-iot-info-icon {
-    color: rgba(0, 0, 0, 0.12);
+    color: var(--jnks-iot-text-faint);
     font-size: 16px;
     width: 16px;
     height: 16px;
@@ -30,23 +30,23 @@
     flex-direction: column;
     justify-content: center;
     padding: 12px;
-    background: #FFFFFF;
-    border: 1px solid $jnks-iot-line;
+    background: var(--jnks-iot-surface-card);
+    border: 1px solid var(--jnks-iot-line);
     box-shadow: none;
-    border-radius: $jnks-iot-radius;
+    border-radius: var(--jnks-iot-radius);
     @media #{$mat-md-lg} {
       height: 22px;
       padding: 0 8px;
     }
     &:hover {
-      border: 1px solid $jnks-iot-line-strong;
+      border: 1px solid var(--jnks-iot-line-strong);
       box-shadow: none;
     }
     .jnks-iot-feature-text {
       font-weight: 400;
       font-size: 14px;
       line-height: 20px;
-      color: $jnks-iot-text;
+      color: var(--jnks-iot-text);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -60,7 +60,7 @@
       font-family: 'Material Icons Round';
       font-size: 20px;
       line-height: 20px;
-      color: rgba(0, 0, 0, 0.12);
+      color: var(--jnks-iot-text-faint);
       font-weight: 600;
       position: relative;
       background: #F4F4F4;
@@ -81,7 +81,7 @@
     &.configured {
       .jnks-iot-feature-status {
         color: #198038;
-        background: $jnks-iot-surface-page;
+        background: var(--jnks-iot-surface-page);
       }
     }
   }

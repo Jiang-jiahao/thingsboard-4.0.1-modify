@@ -42,6 +42,8 @@
         "decline-changes": "Decline changes",
         "decline": "Decline",
         "close": "Close",
+        "copied": "Copied",
+        "copyHint": "Click to copy this message",
         "back": "Back",
         "run": "Run",
         "sign-in": "Sign in!",
@@ -3559,7 +3561,6 @@
         "scroll-to-top": "Scroll to top"
     },
     "help": {
-        "goto-help-page": "Go to help page",
         "show-help": "Show help"
     },
     "home": {

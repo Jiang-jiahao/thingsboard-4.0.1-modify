@@ -10,7 +10,7 @@
     right: 0;
     bottom: 0;
     background-color: #000;
-    border-radius: 5px;
+    border-radius: 8px;
     opacity: 0;
   }
 
@@ -33,23 +33,30 @@
     }
   }
 
+  // 节点：卡片底 + 1px 描边 + 左侧 3px 类型色条。
+  // 类型色由 rule-node-colors 的 --jnks-iot-node-type 提供，只出现在
+  // 左边那条竖线和图标上 —— 整块填色的做法见 rule-node-colors.scss 的说明。
   .jnks-iot-rule-node {
-    box-sizing: content-box;
+    box-sizing: border-box;
     display: flex;
     flex-direction: row;
-    min-width: 150px;
-    max-width: 150px;
-    height: 32px;
-    min-height: 32px;
-    max-height: 32px;
-    padding: 5px 10px;
+    align-items: center;
+    gap: 9px;
+    min-width: 170px;
+    max-width: 170px;
+    height: 50px;
+    min-height: 50px;
+    max-height: 50px;
+    padding: 0 10px 0 8px;
     font-size: 12px;
-    line-height: 16px;
-    color: #333;
+    line-height: 1.4;
+    color: var(--jnks-iot-text);
     pointer-events: none;
-    background-color: #f15b26;
-    border: solid 1px #777;
-    border-radius: 5px;
+    background-color: var(--jnks-iot-surface-card);
+    border: 1px solid var(--jnks-iot-line-strong);
+    border-left: 3px solid var(--jnks-iot-node-type, var(--jnks-iot-line-strong));
+    border-radius: 8px;
+    transition: border-color 0.12s ease, box-shadow 0.12s ease;
 
     @include rule-node-colors();
 
@@ -66,31 +73,35 @@
       box-shadow: 0 0 10px 6px #ff5c50;
     }
 
-    &.jnks-iot-input-type {
-      user-select: none;
-      background-color: #a3eaa9;
+    .mat-icon, img {
+      margin: 0;
+      width: 18px;
+      min-width: 18px;
+      height: 18px;
+      min-height: 18px;
+      font-size: 18px;
+      // 图标承担类型编码，和左边的竖条同色
+      color: var(--jnks-iot-node-type, var(--jnks-iot-text-muted));
     }
 
-    .mat-icon, img {
-      margin: auto;
-      width: 20px;
-      min-width: 20px;
-      height: 20px;
-      min-height: 20px;
-      padding-right: 4px;
-      font-size: 20px;
+    .jnks-iot-node-type {
+      font-size: 11px;
+      color: var(--jnks-iot-text-muted);
     }
 
     .jnks-iot-node-title {
       font-weight: 500;
+      color: var(--jnks-iot-text);
     }
 
     .jnks-iot-node-type,
     .jnks-iot-node-title {
+      display: block;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
     .fc-leftConnectors,
     .fc-rightConnectors {
       position: absolute;
@@ -119,21 +130,22 @@
       display: flex;
       flex-grow: 1;
       justify-content: center;
-      height: 60px;
+      height: 50px;
     }
 
     .fc-connector {
-      width: 14px;
-      height: 14px;
+      width: 11px;
+      height: 11px;
       margin: 10px;
       pointer-events: all;
-      background-color: #ccc;
-      border: 1px solid #333;
-      border-radius: 5px;
+      background-color: var(--jnks-iot-surface-hover);
+      border: 1px solid var(--jnks-iot-line-strong);
+      border-radius: 3px;
     }
 
     .fc-connector.fc-hover {
-      background-color: #000;
+      background-color: var(--jnks-iot-primary-color);
+      border-color: var(--jnks-iot-primary-color);
     }
   }
 }

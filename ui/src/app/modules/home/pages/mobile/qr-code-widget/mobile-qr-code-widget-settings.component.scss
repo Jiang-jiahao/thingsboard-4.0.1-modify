@@ -1,8 +1,8 @@
 .jnks-iot-qrcode-preview {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: var(--jnks-iot-text-faint);
   box-shadow: none;
 
   .jnks-iot-form-panel-title {
-    color: rgba(0, 0, 0, 0.38);
+    color: var(--jnks-iot-text-faint);
   }
 }

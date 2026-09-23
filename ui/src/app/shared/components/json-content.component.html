@@ -1,4 +1,4 @@
-<div class="jnks-iot-json-content flex flex-col" style="background: #fff;" [class]="{'fill-height': fillHeight}"
+<div class="jnks-iot-json-content flex flex-col"  [class]="{'fill-height': fillHeight}"
      jnks-iot-fullscreen
      [fullscreen]="fullscreen" (fullscreenChanged)="onFullscreen()">
   <div style="height: 40px;" class="jnks-iot-json-content-toolbar flex flex-row items-center justify-start" *ngIf="!hideToolbar">
@@ -23,7 +23,7 @@
       </div>
     </fieldset>
   </div>
-  <div id="jnks-iot-json-panel" jnks-iot-toast toastTarget="{{toastTargetId}}"
+  <div id="jnks-iot-json-panel" jnks-iot-toast
        class="jnks-iot-json-content-panel flex flex-col">
     <div #jsonEditor id="jnks-iot-json-input" [style]="editorStyle" [class.fill-height]="fillHeight"></div>
   </div>

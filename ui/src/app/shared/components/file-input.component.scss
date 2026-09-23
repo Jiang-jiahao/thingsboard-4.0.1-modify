@@ -81,7 +81,7 @@ $previewSize: 100px !default;
     position: relative;
     height: $previewSize;
     overflow: hidden;
-    border: 2px dashed rgba(0, 0, 0, 0.2);
+    border: 2px dashed var(--jnks-iot-line);
     border-radius: 4px;
     box-sizing: border-box;
 
@@ -94,11 +94,11 @@ $previewSize: 100px !default;
       justify-content: center;
       align-items: center;
       font-size: 16px;
-      color: rgba(0, 0, 0, 0.54);
+      color: var(--jnks-iot-text-muted);
       text-align: center;
       .mat-icon {
         margin-right: 17px;
-        color: rgba(0,0,0,0.12);
+        color: var(--jnks-iot-text-faint);
       }
     }
   }
@@ -114,12 +114,12 @@ $previewSize: 100px !default;
   }
 
   .jnks-iot-file-name {
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--jnks-iot-text-muted);
     font-weight: 500;
   }
 
   .jnks-iot-file-hint {
-    color: rgba(0, 0, 0, 0.38);
+    color: var(--jnks-iot-text-faint);
     font-weight: 400;
   }
 }

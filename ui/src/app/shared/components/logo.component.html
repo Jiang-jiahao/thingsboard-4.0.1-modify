@@ -1,3 +1,4 @@
 <div class="jnks-iot-brand-logo" aria-label="logo">
-  <img [src]="brandLogo" alt="杰能科世 GENENKOSY" class="jnks-iot-logo-full"/>
+  <img [src]="brandLogo$ | async" alt="杰能科世 GENENKOSY" class="jnks-iot-logo-full"/>
+  <span class="jnks-iot-logo-name">{{ brandSubtitle }}</span>
 </div>

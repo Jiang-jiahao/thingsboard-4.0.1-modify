@@ -13,10 +13,12 @@
 
 .jnks-iot-login-page {
   display: grid;
-  grid-template-columns: 44% 56%;
+  // 与设计一致：左屏占满剩余宽度、表单固定 460px 一列。
+  // 原来是 44% / 56% 的对分，看起来像「一半一半」，和设计里的带宽差很多。
+  grid-template-columns: 1fr 460px;
   width: 100%;
   min-height: 100%;
-  background: $jnks-iot-surface-card;
+  background: var(--jnks-iot-surface-card);
 }
 
 // ── 左：墨
@@ -26,19 +28,49 @@
   flex-direction: column;
   justify-content: space-between;
   padding: 44px 48px;
-  background: $jnks-iot-primary-color;
-  color: #fff;
+  // 「深面」—— 明暗由主题决定（亮色主题下它是浅的，暗色主题下是深的），
+  // 所以文字不能用写死的白，否则浅色主题下整屏看不见。
+  background: var(--jnks-iot-surface-deep);
+  color: var(--jnks-iot-on-deep);
+}
 
-  // 印边：一枚章的边沿，作为墨面的收口
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 1px;
-    background: rgba($jnks-iot-seal-color, 0.55);
-  }
+// 标定纸底纹：48px 一格，压到刚好看得见。再多就成装饰了。
+.login-brand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    repeating-linear-gradient(0deg, transparent 0 47px, var(--jnks-iot-line) 47px 48px),
+    repeating-linear-gradient(90deg, transparent 0 47px, var(--jnks-iot-line) 47px 48px);
+}
+
+// 右缘发丝线。原来是 1px 朱砂「印边」—— 红色是危险色，不该当装饰用
+.login-brand::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--jnks-iot-line-strong);
+}
+
+// 亮色主题下左屏加一点柔和渐变。纯平色在这个尺寸下显得空。
+:host-context(body:not(.jnks-iot-dark)) .login-brand {
+  background:
+    radial-gradient(ellipse 70% 55% at 12% 8%, rgb(var(--jnks-iot-primary-color-rgb) / 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 62% 52% at 92% 88%, rgb(var(--jnks-iot-accent-color-rgb) / 0.09) 0%, transparent 62%),
+    var(--jnks-iot-surface-deep);
+}
+
+// 内容压在底纹之上（底纹是 inset:0 的绝对定位伪元素）
+.login-brand-top,
+.login-claim,
+.login-scale {
+  position: relative;
+  z-index: 1;
 }
 
 .login-claim {
@@ -60,8 +92,52 @@
     max-width: 24em;
     font-size: 14px;
     line-height: 1.6;
-    color: rgba(255, 255, 255, 0.62);
+    color: var(--jnks-iot-on-deep-muted);
   }
+}
+
+// 规格行：把「这套平台支持什么」摆成两栏，压在主张下面
+.login-spec {
+  display: flex;
+  gap: 34px;
+  margin-top: 36px;
+  padding-top: 18px;
+  border-top: 1px solid var(--jnks-iot-line);
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  > div > span:last-child {
+    font-size: 12.5px;
+    color: var(--jnks-iot-on-deep-muted);
+  }
+
+  .lbl {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    color: var(--jnks-iot-on-deep-faint);
+  }
+
+  .num {
+    font-family: $jnks-iot-font-data;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// 刻度尺：墨面底部的收口，1px 刻线每 9px 一道。
+// 负外边距把它拉齐到面板边沿（抵消 .login-brand 的 padding）
+.login-scale {
+  height: 5px;
+  flex: none;
+  margin: 0 -48px -44px;
+  opacity: 0.75;
+  background-image: repeating-linear-gradient(90deg, var(--jnks-iot-line-strong) 0 1px, transparent 1px 9px);
+  background-size: auto 3px;
+  background-repeat: repeat-x;
 }
 
 // ── 右：纸
@@ -72,60 +148,94 @@
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background: $jnks-iot-surface-card;
+  background: var(--jnks-iot-surface-card);
 }
 
 .jnks-iot-login-form {
-  width: 352px;
-  max-width: 100%;
-}
-
-.login-fieldset {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  min-width: 0;
-}
-
-.jnks-iot-login-form h2 {
-  margin: 0 0 6px;
-  font-size: 21px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: $jnks-iot-text;
-}
-
-.login-sub {
-  margin: 0 0 28px;
-  font-size: 13.5px;
-  color: $jnks-iot-text-muted;
-}
-
-.progress-spacer {
-  display: block;
-  height: 4px;
-}
-
-.login-toast {
-  display: flex;
-  flex-direction: column;
-}
-
-.jnks-iot-login-form {
-  mat-form-field {
-    width: 100%;
-    margin-bottom: 2px;
+  // 字段：按设计做成「小标签在上、朴素输入框在下」。
+  // 标签是模板里的普通 <label>，不是 mat-label —— Material 的浮动标签会把标签
+  // 骑到描边上并留一个缺口，读起来是「表单控件」而不是设计里这种平铺字段。
+  .login-field {
+    margin-bottom: 18px;
   }
 
-  .forgot-password {
+  .login-field-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 11.5px;
+    line-height: 16px;
+    letter-spacing: 0.03em;
+    color: var(--jnks-iot-text-faint);
+  }
+
+  // 「忘记密码？」与密码标签同一行、右对齐（与设计一致）
+  .login-field-head {
     display: flex;
-    justify-content: flex-end;
-    padding: 0;
-    margin-bottom: 12px;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
 
     .jnks-iot-reset-password {
-      padding: 0 6px;
+      padding: 0;
+      min-width: 0;
+      line-height: 16px;
+      font-size: 12.5px;
+      color: var(--jnks-iot-primary-color);
+    }
+  }
+
+  mat-form-field {
+    width: 100%;
+  }
+
+  // 字段内部（wrapper / infix）属于 **MatFormField 组件的模板**，不在本组件模板里 ——
+  // Angular 的视图封装不会给它们加本组件的属性，直接写选择器匹配不到。必须 ::ng-deep。
+  ::ng-deep {
+    // 错误提示是流内的（不再用 Material 的绝对定位），压掉它预留的高度
+    .mat-mdc-form-field-subscript-wrapper {
+      padding-top: 4px;
+    }
+
+    // 干掉 outline 字段的描边与缺口
+    .mdc-notched-outline {
+      display: none;
+    }
+
+    // 由 wrapper 承担朴素边框
+    .mat-mdc-text-field-wrapper {
+      height: 36px;
+      border: 1px solid var(--jnks-iot-line-strong);
+      border-radius: var(--jnks-iot-radius);
+      background: var(--jnks-iot-surface-card);
+      transition: border-color 120ms ease;
+
+      &:hover {
+        border-color: var(--jnks-iot-text-faint);
+      }
+    }
+
+    .mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: var(--jnks-iot-primary-color);
+    }
+
+    .mat-mdc-form-field-flex {
+      height: 34px;
+      align-items: center;
+    }
+
+    .mat-mdc-form-field-infix {
+      min-height: 0;
+      padding: 0;
+      border-top: 0;
+      width: auto;
+      display: flex;
+      align-items: center;
+    }
+
+    input {
       font-size: 13px;
+      color: var(--jnks-iot-text);
+      caret-color: var(--jnks-iot-primary-color);
     }
   }
 
@@ -142,12 +252,52 @@
   }
 }
 
-.login-legal {
-  position: absolute;
-  right: 48px;
-  bottom: 26px;
-  font-size: 12px;
-  color: $jnks-iot-text-faint;
+.login-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.jnks-iot-login-form h2 {
+  margin: 0 0 6px;
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--jnks-iot-text);
+}
+
+.login-sub {
+  margin: 0 0 28px;
+  font-size: 13.5px;
+  color: var(--jnks-iot-text-muted);
+}
+
+.progress-spacer {
+  display: block;
+  height: 4px;
+}
+
+.login-toast {
+  display: flex;
+  flex-direction: column;
+}
+
+
+// 版本行：贴在登录按钮下方，与表单同宽
+.login-version {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 26px;
+  padding-top: 14px;
+  border-top: 1px solid var(--jnks-iot-line);
+
+  .lbl {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    color: var(--jnks-iot-text-faint);
+  }
 }
 
 // OAuth2 登录入口
@@ -171,7 +321,7 @@
     .text {
       padding: 0 10px;
       font-size: 12px;
-      color: $jnks-iot-text-faint;
+      color: var(--jnks-iot-text-faint);
     }
   }
 
@@ -181,12 +331,12 @@
   }
 
   a.login-with-button {
-    color: $jnks-iot-text;
-    background-color: $jnks-iot-surface-page;
-    border: 1px solid $jnks-iot-line;
+    color: var(--jnks-iot-text);
+    background-color: var(--jnks-iot-surface-page);
+    border: 1px solid var(--jnks-iot-line);
 
     &:hover {
-      border-bottom: 1px solid $jnks-iot-line-strong;
+      border-bottom: 1px solid var(--jnks-iot-line-strong);
       background-color: #f0f3f7;
     }
 
@@ -226,8 +376,8 @@
     padding: 32px 24px 64px;
   }
 
-  .login-legal {
-    right: 24px;
-    bottom: 16px;
+  // 墨面收成顶栏后不需要底部的刻度尺
+  .login-scale {
+    display: none;
   }
 }

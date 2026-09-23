@@ -378,45 +378,45 @@
           "main": {
             "widgets": {
               "867f82cf-ecf2-2d5c-35cb-08c6f2edc3a4": {
-                "sizeX": 42,
-                "sizeY": 16,
-                "row": 42,
                 "col": 78,
+                "row": 30,
+                "sizeX": 42,
+                "sizeY": 17,
                 "mobileHide": false,
                 "mobileOrder": 4,
                 "mobileHeight": 7
               },
               "9e3ef045-d8bc-1640-a3f4-2dd10b19d50e": {
-                "sizeX": 42,
-                "sizeY": 16,
-                "row": 26,
                 "col": 78,
+                "row": 13,
+                "sizeX": 42,
+                "sizeY": 17,
                 "mobileHide": false,
                 "mobileOrder": 3,
                 "mobileHeight": 7
               },
               "6d6e2b1d-6ce7-4678-3745-c6b0897b2674": {
-                "sizeX": 78,
-                "sizeY": 58,
-                "row": 0,
                 "col": 0,
+                "row": 13,
+                "sizeX": 78,
+                "sizeY": 34,
                 "mobileOrder": 2,
                 "mobileHeight": 10
               },
               "35d3ac3b-f1af-dc3d-a1d1-11f351d16fc6": {
-                "sizeX": 42,
+                "col": 60,
+                "row": 0,
+                "sizeX": 60,
                 "sizeY": 13,
-                "row": 13,
-                "col": 78,
                 "mobileHeight": 9,
                 "mobileOrder": 1
               },
               "7ac20b6a-dc40-b18e-9f5f-bca20bc693bb": {
-                "sizeX": 42,
+                "col": 0,
+                "row": 0,
+                "sizeX": 60,
                 "sizeY": 13,
                 "mobileHeight": 9,
-                "row": 0,
-                "col": 78,
                 "mobileOrder": 0
               }
             },
@@ -564,7 +564,7 @@
       "hideToolbar": true,
       "showFilters": true,
       "showUpdateDashboardImage": true,
-      "dashboardCss": ".jnks-iot-widget-container > .jnks-iot-widget {\n    border: 1px solid rgba(0, 0, 0, 0.05);\n    box-shadow: 0px 5px 16px rgba(0, 0, 0, 0.04);\n    border-radius: 12px;\n}\n\n.jnks-iot-widget-container > .jnks-iot-widget:not([style*=\"padding: 0\"]) {\n    padding: 16px !important;\n}\n\n.jnks-iot-card-title {\n    display: grid;\n}\n\n.jnks-iot-home-widget-title {\n    font-style: normal;\n    font-weight: 500;\n    font-size: 14px;\n    line-height: 20px;\n    letter-spacing: 0.25px;\n    color: rgba(0, 0, 0, 0.54);\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n}\n\n.jnks-iot-home-widget-link {\n    position: relative;\n    border-bottom: none;\n}\n\n.jnks-iot-home-widget-link:hover {\n    border-bottom: none;\n}\n\n.jnks-iot-home-widget-link:focus {\n    border-bottom: none;\n}\n\n.jnks-iot-home-widget-link::after {\n    content: 'arrow_forward';\n    display: inline-block;\n    transform: rotate(315deg);\n    font-family: 'Material Icons';\n    font-weight: normal;\n    font-style: normal;\n    font-size: 18px;\n    color: rgba(0, 0, 0, 0.12);\n    vertical-align: bottom;\n    margin-left: 6px;    \n}\n\n.jnks-iot-home-widget-link:hover::after {\n    color: inherit;\n}\n\n.jnks-iot-home-widget-info-icon {\n    color: rgba(0, 0, 0, 0.12);\n    font-size: 16px;\n    width: 16px;\n    height: 16px;\n    line-height: 15px;\n    vertical-align: middle;\n}\n\n.jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-timewindow {\n    font-size: 14px;\n    line-height: 20px;\n    letter-spacing: 0.25px;\n    color: rgba(0, 0, 0, 0.54);\n    padding: 0;\n}\n\n.jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-legend-keys .jnks-iot-legend-label {\n    cursor: pointer;\n    user-select: none;\n    font-weight: 400;\n    font-size: 14px;\n    line-height: 20px;\n    letter-spacing: 0.2px;\n    color: rgba(0, 0, 0, 0.54);\n}\n\n@media screen and (min-width: 960px) and (max-width: 1279px) {\n    .jnks-iot-widget-container > .jnks-iot-widget {\n        border-radius: 4px;\n    }\n    .jnks-iot-widget-container > .jnks-iot-widget:not([style*=\"padding: 0\"]) {\n        padding: 2px !important;\n    }\n    .jnks-iot-hide-md {\n        display: none;\n    }\n}\n\n@media screen and (min-width: 1280px) and (max-width: 1819px) {\n    .jnks-iot-widget-container > .jnks-iot-widget:not([style*=\"padding: 0\"]) {\n        padding: 8px !important;\n    }\n    .jnks-iot-hide-lg {\n        display: none;\n    }\n}\n\n@media screen and (min-width: 960px) and (max-width: 1819px) {\n    .jnks-iot-hide-md-lg {\n        display: none;\n    }\n\n    .jnks-iot-home-widget-title {\n        font-size: 12px;\n        line-height: 16px;\n    }\n    \n    .jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-widget-title {\n        padding: 0;\n    }\n\n    .jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-timewindow {\n        font-size: 12px;\n        line-height: 16px;\n        min-height: 24px;\n        padding: 0;\n    }\n\n    .jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-timewindow .mat-mdc-icon-button.jnks-iot-mat-32 {\n        width: 24px;\n        height: 24px;\n        line-height: 24px;\n    }\n\n    .jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-timewindow .mat-mdc-icon-button.jnks-iot-mat-32 .mat-icon {\n        width: 18px;\n        height: 18px;\n        font-size: 18px;\n    }\n    \n    .jnks-iot-widget-container > .jnks-iot-widget jnks-iot-legend {\n        padding-bottom: 0 !important;\n    }\n    \n    .jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-legend-keys .jnks-iot-legend-label {\n        font-size: 11px;\n        line-height: 16px;\n        letter-spacing: 0.25px;\n    }\n}\n\n@media screen and (max-width: 959px), screen and (min-width: 1820px) {\n    .jnks-iot-hide-not-md-lg {\n        display: none;\n    }\n}\n"
+      "dashboardCss": ".jnks-iot-widget-container > .jnks-iot-widget {\n    border: 1px solid var(--jnks-iot-line);\n    box-shadow: 0px 5px 16px rgba(0, 0, 0, 0.04);\n    border-radius: 12px;\n}\n\n.jnks-iot-widget-container > .jnks-iot-widget:not([style*=\"padding: 0\"]) {\n    padding: 16px !important;\n}\n\n.jnks-iot-card-title {\n    display: grid;\n}\n\n.jnks-iot-home-widget-title {\n    font-style: normal;\n    font-weight: 500;\n    font-size: 14px;\n    line-height: 20px;\n    letter-spacing: 0.25px;\n    color: var(--jnks-iot-text-muted);\n    white-space: nowrap;\n    overflow: hidden;\n    text-overflow: ellipsis;\n}\n\n.jnks-iot-home-widget-link {\n    position: relative;\n    border-bottom: none;\n}\n\n.jnks-iot-home-widget-link:hover {\n    border-bottom: none;\n}\n\n.jnks-iot-home-widget-link:focus {\n    border-bottom: none;\n}\n\n.jnks-iot-home-widget-info-icon {\n    color: var(--jnks-iot-text-faint);\n    font-size: 16px;\n    width: 16px;\n    height: 16px;\n    line-height: 15px;\n    vertical-align: middle;\n}\n\n.jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-timewindow {\n    font-size: 14px;\n    line-height: 20px;\n    letter-spacing: 0.25px;\n    color: var(--jnks-iot-text-muted);\n    padding: 0;\n}\n\n.jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-legend-keys .jnks-iot-legend-label {\n    cursor: pointer;\n    user-select: none;\n    font-weight: 400;\n    font-size: 14px;\n    line-height: 20px;\n    letter-spacing: 0.2px;\n    color: var(--jnks-iot-text-muted);\n}\n\n@media screen and (min-width: 960px) and (max-width: 1279px) {\n    .jnks-iot-widget-container > .jnks-iot-widget {\n        border-radius: 4px;\n    }\n    .jnks-iot-widget-container > .jnks-iot-widget:not([style*=\"padding: 0\"]) {\n        padding: 2px !important;\n    }\n    .jnks-iot-hide-md {\n        display: none;\n    }\n}\n\n@media screen and (min-width: 1280px) and (max-width: 1819px) {\n    .jnks-iot-widget-container > .jnks-iot-widget:not([style*=\"padding: 0\"]) {\n        padding: 8px !important;\n    }\n    .jnks-iot-hide-lg {\n        display: none;\n    }\n}\n\n@media screen and (min-width: 960px) and (max-width: 1819px) {\n    .jnks-iot-hide-md-lg {\n        display: none;\n    }\n\n    .jnks-iot-home-widget-title {\n        font-size: 12px;\n        line-height: 16px;\n    }\n    \n    .jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-widget-title {\n        padding: 0;\n    }\n\n    .jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-timewindow {\n        font-size: 12px;\n        line-height: 16px;\n        min-height: 24px;\n        padding: 0;\n    }\n\n    .jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-timewindow .mat-mdc-icon-button.jnks-iot-mat-32 {\n        width: 24px;\n        height: 24px;\n        line-height: 24px;\n    }\n\n    .jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-timewindow .mat-mdc-icon-button.jnks-iot-mat-32 .mat-icon {\n        width: 18px;\n        height: 18px;\n        font-size: 18px;\n    }\n    \n    .jnks-iot-widget-container > .jnks-iot-widget jnks-iot-legend {\n        padding-bottom: 0 !important;\n    }\n    \n    .jnks-iot-widget-container > .jnks-iot-widget .jnks-iot-legend-keys .jnks-iot-legend-label {\n        font-size: 11px;\n        line-height: 16px;\n        letter-spacing: 0.25px;\n    }\n}\n\n@media screen and (max-width: 959px), screen and (min-width: 1820px) {\n    .jnks-iot-hide-not-md-lg {\n        display: none;\n    }\n}\n"
     }
   },
   "externalId": null,

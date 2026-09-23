@@ -4,14 +4,8 @@ import { SharedModule } from '@app/shared/shared.module';
 import { ClusterInfoTableComponent } from '@home/components/widget/lib/home-page/cluster-info-table.component';
 import { ConfiguredFeaturesComponent } from '@home/components/widget/lib/home-page/configured-features.component';
 import { VersionInfoComponent } from '@home/components/widget/lib/home-page/version-info.component';
-import { DocLinksWidgetComponent } from '@home/components/widget/lib/home-page/doc-links-widget.component';
 import { DocLinkComponent } from '@home/components/widget/lib/home-page/doc-link.component';
-import { AddDocLinkDialogComponent } from '@home/components/widget/lib/home-page/add-doc-link-dialog.component';
 import { EditLinksDialogComponent } from '@home/components/widget/lib/home-page/edit-links-dialog.component';
-import { GettingStartedWidgetComponent } from '@home/components/widget/lib/home-page/getting-started-widget.component';
-import {
-  GettingStartedCompletedDialogComponent
-} from '@home/components/widget/lib/home-page/getting-started-completed-dialog.component';
 import { UsageInfoWidgetComponent } from '@home/components/widget/lib/home-page/usage-info-widget.component';
 import { QuickLinksWidgetComponent } from '@home/components/widget/lib/home-page/quick-links-widget.component';
 import { QuickLinkComponent } from '@home/components/widget/lib/home-page/quick-link.component';
@@ -26,12 +20,8 @@ import {
       ClusterInfoTableComponent,
       ConfiguredFeaturesComponent,
       VersionInfoComponent,
-      DocLinksWidgetComponent,
       DocLinkComponent,
-      AddDocLinkDialogComponent,
       EditLinksDialogComponent,
-      GettingStartedWidgetComponent,
-      GettingStartedCompletedDialogComponent,
       UsageInfoWidgetComponent,
       QuickLinksWidgetComponent,
       QuickLinkComponent,
@@ -46,12 +36,8 @@ import {
     ClusterInfoTableComponent,
     ConfiguredFeaturesComponent,
     VersionInfoComponent,
-    DocLinksWidgetComponent,
     DocLinkComponent,
-    AddDocLinkDialogComponent,
     EditLinksDialogComponent,
-    GettingStartedWidgetComponent,
-    GettingStartedCompletedDialogComponent,
     UsageInfoWidgetComponent,
     QuickLinksWidgetComponent,
     QuickLinkComponent,

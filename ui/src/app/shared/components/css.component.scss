@@ -2,7 +2,7 @@
   position: relative;
 
   &.jnks-iot-disabled {
-    color: rgba(0, 0, 0, .38);
+    color: var(--jnks-iot-text-faint);
   }
 
   &.fill-height {
@@ -11,7 +11,6 @@
 
   .jnks-iot-css-content-panel {
     height: calc(100% - 40px);
-    border: 1px solid #c0c0c0;
 
     #jnks-iot-css-input {
       width: 100%;
@@ -31,7 +30,6 @@
       }
     }
     button.mat-mdc-button-base, button.mat-mdc-button-base.jnks-iot-mat-32 {
-      background: rgba(220, 220, 220, .35);
       align-items: center;
       vertical-align: middle;
       min-width: 32px;
@@ -40,7 +38,6 @@
       font-size: .8rem;
       line-height: 15px;
       &:not(.jnks-iot-help-popup-button) {
-        color: #7b7b7b;
       }
     }
     button.mat-mdc-button-base:not(.mat-mdc-icon-button) {

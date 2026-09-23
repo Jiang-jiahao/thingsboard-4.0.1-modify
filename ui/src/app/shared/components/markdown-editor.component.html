@@ -9,7 +9,6 @@
     <button [class.!hidden]="!editorMode"
             type="button"
             mat-button (click)="toggleEditMode()">{{ 'markdown.preview' | translate }}</button>
-    <div *ngIf = "helpId" [jnks-iot-help-popup]="helpId"></div>
     <fieldset style="width: initial">
       <div matTooltip="{{(fullscreen ? 'fullscreen.exit' : 'fullscreen.expand') | translate}}"
            matTooltipPosition="above"

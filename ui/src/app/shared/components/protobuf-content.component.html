@@ -1,4 +1,4 @@
-<div class="flex flex-col" style="background: #fff;" [class.fill-height]="fillHeight"
+<div class="flex flex-col"  [class.fill-height]="fillHeight"
      jnks-iot-fullscreen
      [fullscreen]="fullscreen" (fullscreenChanged)="onFullscreen()">
   <div style="height: 40px;" class="jnks-iot-protobuf-content-toolbar flex flex-row items-center justify-start">
@@ -19,7 +19,7 @@
       </div>
     </fieldset>
   </div>
-  <div id="jnks-iot-protobuf-panel" jnks-iot-toast toastTarget="{{toastTargetId}}"
+  <div id="jnks-iot-protobuf-panel" jnks-iot-toast
        class="jnks-iot-protobuf-content-panel flex flex-col">
     <div #protobufEditor id="jnks-iot-protobuf-input" [style]="editorStyle" [class.fill-height]="fillHeight"></div>
   </div>

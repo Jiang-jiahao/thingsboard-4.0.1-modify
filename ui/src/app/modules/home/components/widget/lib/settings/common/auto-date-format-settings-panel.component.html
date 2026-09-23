@@ -6,7 +6,6 @@
       <div class="flex flex-1 flex-col gap-2 gt-xs:flex-row gt-xs:items-center gt-xs:justify-start gt-xs:gap-4">
         <mat-form-field class="jnks-iot-date-format-input flex" appearance="outline" subscriptSizing="dynamic">
           <input required matInput [formControlName]="unit" placeholder="{{ 'widget-config.set' | translate }}">
-          <div matIconSuffix jnks-iot-help-popup="date/date-format" [jnks-iot-help-popup-style]="{width: '800px'}"></div>
         </mat-form-field>
         <mat-divider class="lt-sm:!hidden" vertical></mat-divider>
         <div class="preview-text flex-1">{{ previewText[unit] }}</div>

@@ -9,13 +9,14 @@
 
 h2.protocol-template-dialog-title {
   margin: 0;
-  padding: 16px 24px;
-  font-size: 18px;
-  font-weight: 500;
+  // 与站内其它对话框一致：中性面 + 发丝分隔（原来是一条品牌蓝渐变，很扎眼）
+  padding: 16px 20px;
+  font-size: 16px;
+  font-weight: 600;
   letter-spacing: 0.01em;
-  color: #fff;
-  background: linear-gradient(90deg, $jnks-iot-primary-color 0%, $jnks-iot-secondary-color 100%);
-  border-bottom: none;
+  color: var(--tb-text);
+  background: none;
+  border-bottom: 1px solid var(--tb-border);
 }
 
 .protocol-template-bundle-dialog-content {
@@ -27,7 +28,7 @@ h2.protocol-template-dialog-title {
   max-height: min(78vh, 760px);
   min-height: 0;
   box-sizing: border-box;
-  background: #f8fafc;
+  background: var(--tb-surface);
 }
 
 .protocol-template-bundle-tabs-shell {
@@ -35,7 +36,7 @@ h2.protocol-template-dialog-title {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: #fff;
+  background: var(--jnks-iot-surface-card);
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 12px;
   overflow: hidden;
@@ -55,7 +56,7 @@ h2.protocol-template-dialog-title {
   }
 
   ::ng-deep .mat-mdc-tab-header {
-    background: #fff;
+    background: var(--jnks-iot-surface-card);
     border-bottom: 1px solid rgba(15, 23, 42, 0.08);
     padding: 0 8px;
   }
@@ -128,7 +129,7 @@ div[mat-dialog-actions] {
   padding: 12px 20px 16px !important;
   margin: 0;
   border-top: 1px solid rgba(15, 23, 42, 0.08);
-  background: #fff;
+  background: var(--jnks-iot-surface-card);
   gap: 8px;
 }
 

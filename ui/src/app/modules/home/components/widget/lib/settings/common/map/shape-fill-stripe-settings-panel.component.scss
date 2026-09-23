@@ -16,7 +16,7 @@
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--jnks-iot-text);
   }
   .jnks-iot-form-row {
     height: auto;
@@ -30,9 +30,9 @@
   }
   .jnks-iot-shape-fill-stripe-settings-preview {
     flex: 1;
-    background: #fff;
+    background: var(--jnks-iot-surface-card);
     border-radius: 4px;
-    border: 1px solid rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--jnks-iot-line);
     display: flex;
     flex-direction: column;
     padding: 12px 16px 24px 16px;
@@ -45,7 +45,7 @@
     font-style: normal;
     font-weight: 500;
     line-height: 24px;
-    color: rgba(0, 0, 0, 0.38);
+    color: var(--jnks-iot-text-faint);
   }
   .jnks-iot-shape-fill-stripe-settings-preview-box {
     position: relative;

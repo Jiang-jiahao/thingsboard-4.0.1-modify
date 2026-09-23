@@ -64,12 +64,12 @@
 .protocol-template-hex-field-list {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 1px solid var(--jnks-iot-line);
 }
 
 .protocol-template-hex-field-compact {
   padding: 8px 0 10px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--jnks-iot-line);
 }
 
 .protocol-template-hex-field-compact__primary,
@@ -97,7 +97,7 @@
   text-align: center;
   font-size: 11px;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.45);
+  color: var(--jnks-iot-text-faint);
   line-height: 1;
 }
 

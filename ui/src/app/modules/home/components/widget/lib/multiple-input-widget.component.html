@@ -1,6 +1,6 @@
 <form #formContainer class="jnks-iot-multiple-input"
       [formGroup]="multipleInputFormGroup"
-      jnks-iot-toast toastTarget="{{ toastTargetId }}"
+      jnks-iot-toast
       (ngSubmit)="saveForm()" novalidate autocomplete="off">
   <div class="jnks-iot-multiple-input-container" *ngIf="entityDetected && isAllParametersValid">
     <fieldset *ngFor="let source of sources" [class.fields-group]="settings.showGroupTitle">

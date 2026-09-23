@@ -50,7 +50,6 @@ export interface WidgetTypeTemplate {
 export interface WidgetTypeData {
   name: string;
   icon: string;
-  configHelpLinkId: string;
   template: WidgetTypeTemplate;
 }
 
@@ -61,7 +60,6 @@ export const widgetTypesData = new Map<widgetType, WidgetTypeData>(
       {
         name: 'widget.timeseries',
         icon: 'timeline',
-        configHelpLinkId: 'widgetsConfigTimeseries',
         template: {
           fullFqn: 'system.time_series_chart'
         }
@@ -72,7 +70,6 @@ export const widgetTypesData = new Map<widgetType, WidgetTypeData>(
       {
         name: 'widget.latest',
         icon: 'track_changes',
-        configHelpLinkId: 'widgetsConfigLatest',
         template: {
           fullFqn: 'system.cards.attributes_card'
         }
@@ -83,7 +80,6 @@ export const widgetTypesData = new Map<widgetType, WidgetTypeData>(
       {
         name: 'widget.rpc',
         icon: 'mdi:developer-board',
-        configHelpLinkId: 'widgetsConfigRpc',
         template: {
           fullFqn: 'system.gpio_widgets.basic_gpio_control'
         }
@@ -94,7 +90,6 @@ export const widgetTypesData = new Map<widgetType, WidgetTypeData>(
       {
         name: 'widget.alarm',
         icon: 'error',
-        configHelpLinkId: 'widgetsConfigAlarm',
         template: {
           fullFqn: 'system.alarm_widgets.alarms_table'
         }
@@ -105,7 +100,6 @@ export const widgetTypesData = new Map<widgetType, WidgetTypeData>(
       {
         name: 'widget.static',
         icon: 'font_download',
-        configHelpLinkId: 'widgetsConfigStatic',
         template: {
           fullFqn: 'system.cards.html_card'
         }

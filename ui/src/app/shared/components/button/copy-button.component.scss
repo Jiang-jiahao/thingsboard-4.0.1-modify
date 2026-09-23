@@ -14,7 +14,7 @@
   }
   &:hover{
     .mat-icon{
-      color: $jnks-iot-primary-color !important;
+      color: var(--jnks-iot-primary-color) !important;
     }
   }
 }

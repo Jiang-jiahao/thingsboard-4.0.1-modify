@@ -8,13 +8,13 @@
     width: 44px;
     height: 44px;
     padding: 10px;
-    color: $jnks-iot-topbar-text !important;
+    color: var(--jnks-iot-topbar-text) !important;
     border-radius: 10px;
     transition: background-color 0.2s ease, color 0.2s ease;
 
     &:hover {
-      color: $jnks-iot-primary-color !important;
-      background: rgba($jnks-iot-secondary-color, 0.12) !important;
+      color: var(--jnks-iot-primary-color) !important;
+      background: rgb(var(--jnks-iot-secondary-color-rgb) / 0.12) !important;
     }
 
     .mat-icon,
@@ -23,12 +23,12 @@
       width: 26px;
       height: 26px;
       line-height: 26px;
-      color: $jnks-iot-topbar-text !important;
+      color: var(--jnks-iot-topbar-text) !important;
     }
 
     &:hover .mat-icon,
     &:hover .jnks-iot-notification-bell-icon {
-      color: $jnks-iot-primary-color !important;
+      color: var(--jnks-iot-primary-color) !important;
     }
   }
 

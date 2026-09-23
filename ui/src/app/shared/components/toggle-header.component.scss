@@ -81,7 +81,7 @@
     }
     .mat-button-toggle.mat-button-toggle-appearance-standard {
       flex: 1;
-      color: rgba(0, 0, 0, 0.38);
+      color: var(--jnks-iot-text-faint);
       background: transparent;
 
       .mat-button-toggle-focus-overlay, .mat-button-toggle-ripple {
@@ -102,8 +102,8 @@
       &.mat-button-toggle-checked {
         .mat-button-toggle-button {
           background: #F3F6FA;
-          color: $jnks-iot-primary-color;
-          border: 1px solid $jnks-iot-primary-color;
+          color: var(--jnks-iot-primary-color);
+          border: 1px solid var(--jnks-iot-primary-color);
           border-radius: 20px;
 
           .mat-button-toggle-label-content {
@@ -117,7 +117,7 @@
       .mat-button-toggle.mat-button-toggle-appearance-standard {
         &.mat-button-toggle-checked {
           .mat-button-toggle-button {
-            background: $jnks-iot-primary-color;
+            background: var(--jnks-iot-primary-color);
             color: #FFFFFF;
           }
         }
@@ -127,8 +127,8 @@
           color: rgba(255, 255, 255, 0.8);
           &.mat-button-toggle-checked {
             .mat-button-toggle-button {
-              background: #FFFFFF;
-              color: $jnks-iot-primary-color;
+              background: var(--jnks-iot-surface-card);
+              color: var(--jnks-iot-primary-color);
             }
           }
         }
@@ -139,13 +139,13 @@
       background: rgba(0, 0, 0, 0.03);
 
       .mat-button-toggle.mat-button-toggle-appearance-standard {
-        color: rgba(0, 0, 0, 0.28);
+        color: var(--jnks-iot-text-faint);
 
         &.mat-button-toggle-checked {
           .mat-button-toggle-button {
             background: transparent;
-            color: rgba(0, 0, 0, 0.38);
-            border-color: rgba(0, 0, 0, 0.38);
+            color: var(--jnks-iot-text-faint);
+            border-color: var(--jnks-iot-text-faint);
           }
         }
 
@@ -158,7 +158,7 @@
           &.mat-button-toggle-checked {
             .mat-button-toggle-button {
               background: rgba(0, 0, 0, 0.12);
-              color: rgba(0, 0, 0, 0.38);
+              color: var(--jnks-iot-text-faint);
               border: transparent;
             }
           }
@@ -189,37 +189,63 @@
       }
     }
   }
+  // 选择框：渲染成描边按钮，而不是 Material 的 outline 表单字段。
+  //
+  // 原因：outline 字段会为浮动标签在描边上留一个缺口，而这些 select 根本没有标签，
+  // 于是左上角永远挂着一个空缺口；聚焦时又是粗蓝框，读起来像「输入框」而不是「下拉」。
+  // 设计里的同类控件是 .btn —— 中性描边、圆角 8、高 28、字 12.5。
   .jnks-iot-toggle-header-select {
     &.mat-mdc-form-field {
       line-height: 16px;
-      font-size: 12px;
-      &.fill-height {
-        .mat-mdc-text-field-wrapper {
-          .mat-mdc-form-field-flex {
-            margin: auto;
-          }
-        }
-        .mat-mdc-form-field-subscript-wrapper {
-          display: none;
-        }
+      font-size: 12.5px;
+
+      &.fill-height .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex {
+        margin: auto;
       }
     }
-    .mat-mdc-text-field-wrapper.mdc-text-field--outlined .mat-mdc-form-field-infix {
+
+    // 干掉 Material 的缺口描边 —— 这是那个「小台阶」的来源
+    .mdc-notched-outline {
+      display: none;
+    }
+
+    .mat-mdc-text-field-wrapper {
+      height: 28px;
+      border: 1px solid var(--jnks-iot-line-strong);
+      border-radius: var(--jnks-iot-radius);
+      background: transparent;
+      transition: border-color 120ms ease, background-color 120ms ease;
+
+      &:hover {
+        background: var(--jnks-iot-surface-page);
+      }
+    }
+
+    // 聚焦给一圈细环，不用 Material 那根粗蓝框
+    &.mat-focused .mat-mdc-text-field-wrapper {
+      border-color: var(--jnks-iot-primary-color);
+      box-shadow: 0 0 0 2px rgb(var(--jnks-iot-primary-color-rgb) / 0.16);
+    }
+
+    .mat-mdc-form-field-flex {
+      height: 26px;
+      align-items: center;
+    }
+
+    .mat-mdc-form-field-infix {
       min-height: 0;
       width: auto;
-      padding-top: 8px;
-      padding-bottom: 8px;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-top: 0;
     }
-    .mdc-text-field--outlined {
-      padding-left: 8px;
-      padding-right: 6px;
-    }
+
     .mat-mdc-select {
       font-weight: 400;
-      font-size: 12px;
+      font-size: 12.5px;
       line-height: 16px;
-      letter-spacing: 0.25px;
     }
+
     .mat-mdc-select-arrow-wrapper {
       height: 12px;
       padding-left: 6px;
@@ -231,7 +257,10 @@
         display: none;
       }
       &:after {
-        font-family: 'Material Icons';
+        // 必须用自建图标字体：改造后主题里已经没有 'Material Icons' 这个名字的字体了，
+        // 字体匹配失败时连字不生效，会把 "expand_more" 当普通文字画出来，
+        // 再被 12px 的框裁成 "exp"（首页那三个选择框就是这个）。
+        font-family: 'JnksIotIcons', 'Material Icons';
         content: "expand_more";
         position: absolute;
         display: inline-block;
@@ -241,7 +270,7 @@
         left: -6px;
         right: 0;
         bottom: 0;
-        color: rgba(0, 0, 0, 0.38);
+        color: var(--jnks-iot-text-faint);
       }
     }
   }

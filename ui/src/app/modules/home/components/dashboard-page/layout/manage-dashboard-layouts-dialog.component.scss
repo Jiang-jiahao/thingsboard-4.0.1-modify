@@ -2,7 +2,8 @@
 @import '../theme.scss';
 @import '../scss/constants.scss';
 
-$jnks-iot-warn: mat.m2-get-color-from-palette(map-get($jnks-iot-theme, warn), text);
+// 主题变量已改名：$jnks-iot-theme → $jnks-iot-saas-theme（两套主题并存了）
+$jnks-iot-warn: mat.m2-get-color-from-palette(map-get($jnks-iot-saas-theme, warn), text);
 
 :host {
   .jnks-iot-layout-fixed-container {
@@ -31,7 +32,7 @@ $jnks-iot-warn: mat.m2-get-color-from-palette(map-get($jnks-iot-theme, warn), te
         cursor: pointer;
 
         .mat-icon {
-          color: rgba(0, 0, 0, 0.38);
+          color: var(--jnks-iot-text-faint);
         }
 
         &:hover {
@@ -148,9 +149,9 @@ $jnks-iot-warn: mat.m2-get-color-from-palette(map-get($jnks-iot-theme, warn), te
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #FFFFFF;
+    background: var(--jnks-iot-surface-card);
     padding: 8px;
-    border: 2px dashed rgba(0, 0, 0, 0.08);
+    border: 2px dashed var(--jnks-iot-line);
     border-radius: 10px;
   }
 }
@@ -159,7 +160,7 @@ $jnks-iot-warn: mat.m2-get-color-from-palette(map-get($jnks-iot-theme, warn), te
   .mat-button-toggle-group {
     width: 100%;
     min-width: 354px;
-    border: 2px solid rgba(0, 0, 0, 0.06);
+    border: 2px solid var(--jnks-iot-line);
     .mat-button-toggle-checked  {
       background: rgba(0, 0, 0, 0.06);
     }

@@ -15,6 +15,12 @@
         <mat-icon class="material-icons">account_circle</mat-icon>
         <span translate>account.account</span>
       </button>
+      <ng-container *ngIf="theme$ | async as theme">
+        <button mat-menu-item (click)="toggleTheme()">
+          <mat-icon class="material-icons">{{ theme === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+          <span>{{ (theme === 'dark' ? 'home.switch-to-light-theme' : 'home.switch-to-dark-theme') | translate }}</span>
+        </button>
+      </ng-container>
       <button mat-menu-item (click)="logout()">
         <mat-icon class="material-icons">exit_to_app</mat-icon>
         <span translate>home.logout</span>

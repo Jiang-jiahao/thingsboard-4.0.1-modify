@@ -14,20 +14,22 @@
     height: calc(100% - 24px);
     display: flex;
     flex-direction: column;
-    border-radius: $jnks-iot-radius;
+    border-radius: var(--jnks-iot-radius);
     overflow: hidden;
     box-shadow: none;
-    border: 1px solid $jnks-iot-line;
+    border: 1px solid var(--jnks-iot-line);
 
     .details-toolbar {
       height: 56px;
       min-height: 56px;
       border-radius: 0;
-      background: #fff;
-      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      background: var(--jnks-iot-surface-card);
+      border-bottom: 1px solid var(--jnks-iot-line);
 
       .mat-toolbar-tools {
-        padding: 0 8px;
+        // 左边不留内边距：标题要和下面的表单字段左对齐（工具栏自己已有 16px 内边距）。
+        // 原来这 8px 是给返回按钮留的，按钮去掉后就成了 8px 的错位。
+        padding: 0 8px 0 0;
       }
 
       .jnks-iot-details-title-header {
@@ -42,7 +44,7 @@
 
       .jnks-iot-details-subtitle {
         font-size: 12px;
-        color: $jnks-iot-text-muted;
+        color: var(--jnks-iot-text-muted);
       }
 
       .jnks-iot-ellipsis {
@@ -72,7 +74,7 @@
 :host ::ng-deep {
   .jnks-iot-help {
     .mat-mdc-icon-button.mat-primary {
-      color: rgba(0, 0, 0, 0.52);
+      color: var(--jnks-iot-text-faint);
     }
   }
 
@@ -137,7 +139,7 @@
       margin: 0 0 2px;
       font-size: 12px;
       line-height: 16px;
-      color: $jnks-iot-text-muted !important;
+      color: var(--jnks-iot-text-muted) !important;
     }
 
     // 灰底来自 --mdc-filled-text-field-container-color，但 Material 是把这个变量
@@ -162,11 +164,53 @@
       min-height: 0;
     }
 
+    // 只读值 = 设计稿里的「填充式值框」：浅底、圆角、有内边距。
+    //
+    // 底画在 infix 上、不画在 wrapper 上 —— 多数字段的浮动标签也在 wrapper 里，
+    // 画在外层会把标签一起涂上；画在 infix（只包着值）上，标签自然留在框外。
     .mat-mdc-form-field-infix {
-      padding: 0 !important;
-      min-height: 0;
+      box-sizing: border-box;
+      min-height: 34px;
       width: auto;
+      // 左内边距对齐编辑态：编辑态的外观由 wrapper 的 1px 描边 + 16px 内边距承担，
+      // 内容（标签与值）落在字段左缘 +17px。只读态没有那圈描边，得在这里自己补，
+      // 否则标签贴着框左缘、和值文本也差 10px。
+      padding: 6px 16px !important;
       border-top: 0;
+      border-radius: var(--jnks-iot-radius);
+      background: var(--jnks-iot-surface-hover);
+      position: relative;
+    }
+
+    // **但 Material 有两种 DOM**：多数字段把浮动标签放在 .mat-mdc-form-field-flex 里，
+    // 带 autocomplete 的字段（设备配置的「默认规则链」「队列」）却把标签直接放进 infix。
+    // 后者套上面的写法会出问题 —— 标签在 infix 内，而 wrapper 是固定 36px +
+    // overflow:hidden、flex 也是固定 34px，标签会被裁掉顶上一截。
+    // 这里把三处固定高放开，并把标签绝对定位提到值框上沿之上（infix 自己是
+    // position:relative），标签就同样落在框外，值框的外观两种 DOM 完全一致。
+    &:has(.mat-mdc-form-field-infix > .mdc-floating-label) {
+      .mat-mdc-text-field-wrapper {
+        height: auto !important;
+        overflow: visible;
+      }
+
+      .mat-mdc-form-field-flex {
+        height: auto !important;
+      }
+
+      .mat-mdc-form-field-infix {
+        margin-top: 22px;
+
+        > .mdc-floating-label {
+          position: absolute !important;
+          // 也必须 !important：autocomplete 那类字段上另有一条把标签压到
+          // top:17px 的规则（Material/TB 的未上浮定位），不加就顶不过它。
+          top: -22px !important;
+          // 与 infix 的左内边距同值：标签要跟值文本左对齐（= 编辑态的位置）
+          left: 16px;
+          margin: 0;
+        }
+      }
     }
 
     .mdc-line-ripple,
@@ -184,22 +228,27 @@
       padding: 0;
       font-size: 13.5px;
       line-height: 20px;
-      color: $jnks-iot-text !important;
-      -webkit-text-fill-color: $jnks-iot-text !important;
+      color: var(--jnks-iot-text) !important;
+      -webkit-text-fill-color: var(--jnks-iot-text) !important;
     }
   }
+
+  // 编辑态（可编辑字段）的「标签在框上方」已上提到全局收敛层
+  // （`ui-refinements.scss` 的 `.mat-mdc-form-field-appearance-fill:has(...)`）——
+  // 那是所有表单共用的根因（fill 外观 + 36px 的 wrapper 挤在一起），
+  // 不只详情页。这里不再重复一份，免得两处数值打架。
 
   .jnks-iot-details-buttons {
     .mat-mdc-raised-button,
     .mat-mdc-unelevated-button {
       background: transparent !important;
       box-shadow: none !important;
-      border: 1px solid $jnks-iot-line-strong;
-      color: $jnks-iot-text !important;
+      border: 1px solid var(--jnks-iot-line-strong);
+      color: var(--jnks-iot-text) !important;
 
       &:hover:not(:disabled) {
-        background: $jnks-iot-surface-page !important;
-        border-color: $jnks-iot-text-faint;
+        background: var(--jnks-iot-surface-page) !important;
+        border-color: var(--jnks-iot-text-faint);
       }
     }
 
@@ -207,11 +256,11 @@
     .mat-mdc-raised-button.mat-warn,
     .mat-mdc-unelevated-button.mat-warn,
     button[ng-reflect-color='warn'] {
-      border-color: rgba($jnks-iot-seal-color, 0.45);
-      color: $jnks-iot-seal-color !important;
+      border-color: rgb(var(--jnks-iot-seal-color-rgb) / 0.45);
+      color: var(--jnks-iot-seal-color) !important;
 
       &:hover:not(:disabled) {
-        background: rgba($jnks-iot-seal-color, 0.06) !important;
+        background: rgb(var(--jnks-iot-seal-color-rgb) / 0.06) !important;
       }
     }
   }

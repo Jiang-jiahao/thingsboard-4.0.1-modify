@@ -16,7 +16,7 @@
     font-weight: 500;
     line-height: 24px;
     letter-spacing: 0.25px;
-    color: rgba(0, 0, 0, 0.87);
+    color: var(--jnks-iot-text);
   }
   .jnks-iot-gradient-panel {
     flex: 1;
@@ -43,10 +43,10 @@
   }
   button.mat-mdc-button-base.jnks-iot-add-color-range {
     &:not(:disabled) {
-      color: rgba(0, 0, 0, 0.54);
+      color: var(--jnks-iot-text-muted);
     }
     &:disabled {
-      color: rgba(0, 0, 0, 0.12);
+      color: var(--jnks-iot-text-faint);
     }
   }
   .jnks-iot-color-settings-panel-body {

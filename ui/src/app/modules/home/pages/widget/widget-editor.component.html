@@ -100,7 +100,7 @@
           <div #topLeftPanel class="jnks-iot-split jnks-iot-content">
             <mat-tab-group mat-stretch-tabs="false" selectedIndex="1" dynamicHeight="true" style="width: 100%; height: 100%;">
               <mat-tab label="{{ 'widget.resources' | translate }}">
-                <div class="jnks-iot-resize-container" style="background-color: #fff;">
+                <div class="jnks-iot-resize-container" style="background-color: var(--tb-surface-elevated);">
                   <div class="mat-padding">
                     <div class="flex flex-1 flex-row items-center justify-start" style="max-height: 40px;"
                          *ngFor="let resource of widget.resources; let i = index" >
@@ -172,7 +172,7 @@
           <div #topRightPanel class="jnks-iot-split jnks-iot-content">
             <mat-tab-group mat-stretch-tabs="false" dynamicHeight="true" style="width: 100%; height: 100%;">
               <mat-tab label="{{ 'widget.settings-form' | translate }}">
-                <div class="jnks-iot-resize-container" style="background-color: #fff;">
+                <div class="jnks-iot-resize-container" style="background-color: var(--tb-surface-elevated);">
                   <jnks-iot-dynamic-form-properties
                     importExport
                     [exportFileName]="(widget.widgetName || 'widget') + '-settings-form'"
@@ -183,7 +183,7 @@
                 </div>
               </mat-tab>
               <mat-tab label="{{ 'widget.data-key-settings-form' | translate }}">
-                <div class="jnks-iot-resize-container" style="background-color: #fff;">
+                <div class="jnks-iot-resize-container" style="background-color: var(--tb-surface-elevated);">
                   <jnks-iot-dynamic-form-properties
                     importExport
                     [exportFileName]="(widget.widgetName || 'widget') + '-data-key-settings-form'"
@@ -194,7 +194,7 @@
                 </div>
               </mat-tab>
               <mat-tab [aria-labelledby]="widget.type !== widgetTypes.timeseries ? 'hidden': ''" label="{{ 'widget.latest-data-key-settings-form' | translate }}">
-                <div class="jnks-iot-resize-container" style="background-color: #fff;">
+                <div class="jnks-iot-resize-container" style="background-color: var(--tb-surface-elevated);">
                   <jnks-iot-dynamic-form-properties
                     importExport
                     [exportFileName]="(widget.widgetName || 'widget') + '-latest-data-key-settings-form'"
@@ -205,7 +205,7 @@
                 </div>
               </mat-tab>
               <mat-tab label="{{ 'widget.widget-settings' | translate }}">
-                <div class="jnks-iot-resize-container" style="background-color: #fff;">
+                <div class="jnks-iot-resize-container" style="background-color: var(--tb-surface-elevated);">
                   <div class="mat-padding">
                     <jnks-iot-gallery-image-input class="flex-1" label="{{'widget.image-preview' | translate}}"
                                     [(ngModel)]="widget.image"
@@ -272,7 +272,7 @@
           </div>
         </div>
         <div #bottomPanel class="jnks-iot-split jnks-iot-split-vertical">
-          <div #javascriptPanel class="jnks-iot-split jnks-iot-content" jnks-iot-toast toastTarget="javascriptPanel">
+          <div #javascriptPanel class="jnks-iot-split jnks-iot-content" jnks-iot-toast>
             <div class="jnks-iot-resize-container" jnks-iot-fullscreen [fullscreen]="javascriptFullscreen">
               <div class="jnks-iot-editor-area-title-panel">
                 <label translate>widget.javascript</label>

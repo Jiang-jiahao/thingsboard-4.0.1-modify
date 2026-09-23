@@ -65,10 +65,10 @@
     max-width: 100%;
     height: min(88vh, 900px);
     max-height: 100%;
-    border-radius: $jnks-iot-radius;
+    border-radius: var(--jnks-iot-radius);
     overflow: hidden;
-    background: #fff;
-    border: 1px solid $jnks-iot-line;
+    background: var(--jnks-iot-surface-card);
+    border: 1px solid var(--jnks-iot-line);
     box-shadow: 0 12px 32px rgba(11, 27, 43, 0.16);
     animation: jnksIotEntityDialogIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   }
@@ -107,22 +107,22 @@
     .jnks-iot-entity-table-content {
       width: 100%;
       height: 100%;
-      background: #fff;
+      background: var(--jnks-iot-surface-card);
       overflow: hidden;
 
       &.jnks-iot-outlined-border {
         box-shadow: none;
-        border: 1px solid $jnks-iot-line;
-        border-radius: $jnks-iot-radius;
+        border: 1px solid var(--jnks-iot-line);
+        border-radius: var(--jnks-iot-radius);
         overflow: hidden;
-        background: #fff;
+        background: var(--jnks-iot-surface-card);
       }
 
       .mat-mdc-table-toolbar {
         min-height: 44px;
         padding: 0 12px;
-        background: #ffffff !important;
-        border-bottom: 1px solid rgba($jnks-iot-secondary-color, 0.12);
+        background: var(--jnks-iot-surface-card) !important;
+        border-bottom: 1px solid var(--jnks-iot-line);
       }
 
       .mat-toolbar-tools {
@@ -144,7 +144,7 @@
         font-size: 16px;
         font-weight: 600;
         letter-spacing: 0.02em;
-        color: #0f172a;
+        color: var(--jnks-iot-text);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -158,7 +158,9 @@
           width: 2px;
           height: 18px;
           border-radius: 0;
-          background: $jnks-iot-seal-color;
+          // 原来是 seal-color（印泥朱砂）—— 那是危险色，不该当装饰用。
+          // 这正是本方案要修的那类「品牌色与语义色混用」，改成品牌色。
+          background: var(--jnks-iot-primary-color);
           box-shadow: none;
         }
       }
@@ -171,8 +173,8 @@
           border-radius: 8px;
 
           &:hover:not(:disabled) {
-            background: rgba($jnks-iot-secondary-color, 0.12);
-            color: $jnks-iot-primary-color;
+            background: rgb(var(--jnks-iot-secondary-color-rgb) / 0.12);
+            color: var(--jnks-iot-primary-color);
           }
         }
 
@@ -270,6 +272,56 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    // ── 列宽拖拽把手：贴着表头单元格右边缘的一条 6px 细条，悬停时画出一条品牌色细线。
+    // 只给「带把手的单元格」建立定位上下文（用 :has 而不是给所有表头设 relative）——
+    // 选择列 / 操作列是 sticky，position 被改成 relative 就不粘了。
+    .mat-mdc-header-cell:has(> .jnks-iot-col-resize) {
+      position: relative;
+    }
+
+    .jnks-iot-col-resize {
+      position: absolute;
+      top: 0;
+      right: -3px;
+      width: 6px;
+      height: 100%;
+      z-index: 2;
+      cursor: col-resize;
+      touch-action: none;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 4px;
+        bottom: 4px;
+        left: 2px;
+        width: 2px;
+        border-radius: 1px;
+        background: transparent;
+        transition: background-color var(--tb-transition);
+      }
+
+      &:hover::after {
+        background: var(--jnks-iot-primary-color);
+      }
+    }
+
+    // 行操作列必须自己声明宽度。
+    //
+    // 各实体表的列是用 `150px` + 若干个 `20%` / `33%` 声明的，加起来**超过 100%**
+    // （上游用 table-layout: auto，多出来的部分由表格自己撑开，所以看不出问题）。
+    // 这一层把布局改成 fixed 之后，Chromium 会把超出表宽的列按比例压回去，
+    // 而**没有声明宽度的列只能吃剩下的 0** —— 实测动作列被压成 16px，里面的
+    // 容器溢出到表格右缘之外，按钮直接落在视口外（一键登录、删除全部点不到）。
+    //
+    // 宽度由模板按操作个数算出来（`cellActionDescriptors.length * 30 + 16`，
+    // 见 entities-table.component.html），个数是变的：租户表 2 个、设备表 6 个，
+    // 写死一个值必然有一边不合适。这里只兜底 min-width，实际宽度走内联样式。
+    .mat-mdc-header-cell.mat-column-actions,
+    .mat-mdc-cell.mat-column-actions {
+      min-width: 32px;
     }
 
     .mat-mdc-row {

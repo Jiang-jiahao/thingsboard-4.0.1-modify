@@ -9,7 +9,11 @@
       align-items: center;
       overflow: hidden;
       line-height: 40px;
-      min-width: 200px;
+      // 原来是 min-width: 200px —— 页签被撑到 200px，而 Material 的下划线是页签**整宽**，
+      // 于是「部件」这种短标题下面拖着一条 200px 的长黑条、两边全是空的。
+      // 这里让页签按内容宽；下划线的收进（页签内边距 + margin）统一在
+      // ui-refinements.scss 的「页签」一节里做，全局一套。
+      min-width: auto;
       border-bottom: none;
       .mat-icon {
         margin-right: 8px;

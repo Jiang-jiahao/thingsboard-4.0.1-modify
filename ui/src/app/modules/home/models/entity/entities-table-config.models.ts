@@ -251,5 +251,10 @@ export class EntityTableConfig<T extends BaseData<HasId>, P extends PageLink = P
   }
 }
 
+// 只读的布尔状态列（公开 / 默认 / 系统 / 弃用…）。
+// 原来用 check_box 与 check_box_outline_blank 两个方框图标，看着像能勾选的复选框，
+// 实际点不动，容易误导。改成：是 → 一个不带方框的对勾；否 → 一条极淡的短横。
 export const checkBoxCell =
-  (value: boolean): string => `<mat-icon class="material-icons mat-icon">${value ? 'check_box' : 'check_box_outline_blank'}</mat-icon>`;
+  (value: boolean): string => value
+    ? '<mat-icon class="material-icons mat-icon jnks-iot-flag-on">check</mat-icon>'
+    : '<mat-icon class="material-icons mat-icon jnks-iot-flag-off">remove</mat-icon>';

@@ -54,7 +54,7 @@
     width: 60px;
     min-width: 60px;
     .mat-icon {
-      color: rgba(0,0,0,0.76);
+      color: var(--jnks-iot-text);
     }
   }
 
@@ -109,7 +109,7 @@
 .jnks-iot-time-series-type-field {
   .mat-mdc-option:not(.mdc-list-item--selected) {
     .mat-icon {
-      color: rgba(0,0,0,0.54);
+      color: var(--jnks-iot-text-muted);
     }
   }
 }

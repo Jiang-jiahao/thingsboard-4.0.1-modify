@@ -1,4 +1,4 @@
-<div class="flex flex-col" style="background: #fff;" [class.fill-height]="fillHeight"
+<div class="flex flex-col"  [class.fill-height]="fillHeight"
      jnks-iot-fullscreen
      [fullscreen]="fullscreen" (fullscreenChanged)="onFullscreen()">
   <div class="jnks-iot-json-object-toolbar flex flex-row items-center justify-start">
@@ -21,7 +21,7 @@
       <mat-icon class="material-icons">{{ fullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
     </button>
   </div>
-  <div id="jnks-iot-json-panel" jnks-iot-toast toastTarget="{{toastTargetId}}"
+  <div id="jnks-iot-json-panel" jnks-iot-toast
        class="jnks-iot-json-object-panel flex flex-col">
     <div #jsonEditor id="jnks-iot-json-input" [style]="editorStyle" [class.fill-height]="fillHeight"></div>
   </div>

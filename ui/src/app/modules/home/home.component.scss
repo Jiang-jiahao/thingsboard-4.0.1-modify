@@ -12,14 +12,14 @@
 
   mat-sidenav-container {
     flex: 1;
-    background: $jnks-iot-surface-page;
+    background: var(--jnks-iot-surface-page);
   }
 
   mat-sidenav.jnks-iot-site-sidenav {
-    width: 220px;
-    border-right: 1px solid $jnks-iot-sidebar-border !important;
+    width: 212px;
+    border-right: 1px solid var(--jnks-iot-sidebar-border) !important;
     box-shadow: none;
-    background: $jnks-iot-sidebar-bg !important;
+    background: var(--jnks-iot-sidebar-bg) !important;
 
     @media (max-width:456px) {
       width: calc(100% - 56px);
@@ -37,8 +37,8 @@
         z-index: 2;
         flex-shrink: 0;
         white-space: nowrap;
-        border-bottom: 1px solid $jnks-iot-sidebar-border;
-        background: $jnks-iot-sidebar-bg;
+        border-bottom: 1px solid var(--jnks-iot-sidebar-border);
+        background: var(--jnks-iot-sidebar-bg);
         box-shadow: none;
 
         & > div {
@@ -54,17 +54,20 @@
       overflow-y: auto;
       height: inherit;
       padding: 10px 0 20px;
-      background: $jnks-iot-sidebar-bg !important;
+      background: var(--jnks-iot-sidebar-bg) !important;
     }
   }
 
   .jnks-iot-primary-toolbar {
     z-index: 3;
-    min-height: 48px !important;
+    // 顶栏收到设计稿的 46px。Material 自己给 .mat-toolbar 的高度更高，
+    // 所以 height 和 min-height 都要盖。
+    height: 46px !important;
+    min-height: 46px !important;
     padding: 0 16px 0 8px !important;
-    color: $jnks-iot-topbar-text !important;
-    background: $jnks-iot-topbar-bg !important;
-    border-bottom: 1px solid $jnks-iot-line;
+    color: var(--jnks-iot-topbar-text) !important;
+    background: var(--jnks-iot-topbar-bg) !important;
+    border-bottom: 1px solid var(--jnks-iot-line);
     box-shadow: none !important;
 
     // 覆盖全局 .mat-toolbar.mat-primary { .mat-icon { color: white } }
@@ -72,58 +75,61 @@
     & {
       button.mat-mdc-icon-button .mat-icon,
       .mat-mdc-icon-button .mat-icon {
-        color: $jnks-iot-topbar-text !important;
+        color: var(--jnks-iot-topbar-text) !important;
       }
     }
 
     .mat-mdc-icon-button {
-      color: $jnks-iot-topbar-text !important;
-      border-radius: $jnks-iot-radius;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      color: var(--jnks-iot-topbar-text) !important;
+      border-radius: var(--jnks-iot-radius);
       transition: background-color 0.15s ease, color 0.15s ease;
 
       &:hover {
-        color: $jnks-iot-primary-color !important;
-        background: rgba($jnks-iot-primary-color, 0.05) !important;
+        color: var(--jnks-iot-primary-color) !important;
+        background: rgb(var(--jnks-iot-primary-color-rgb) / 0.05) !important;
 
         .mat-icon {
-          color: $jnks-iot-primary-color !important;
+          color: var(--jnks-iot-primary-color) !important;
         }
       }
 
       .mat-icon {
-        font-size: 22px;
-        width: 22px;
-        height: 22px;
-        color: $jnks-iot-topbar-text !important;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: var(--jnks-iot-topbar-text) !important;
       }
     }
 
     ::ng-deep {
       jnks-iot-breadcrumb {
-        color: $jnks-iot-topbar-text;
+        color: var(--jnks-iot-topbar-text);
 
         h1, a, span:not(.divider) {
           color: inherit;
         }
 
         a {
-          color: $jnks-iot-topbar-muted;
+          color: var(--jnks-iot-topbar-muted);
         }
 
         a:hover, a:focus {
-          color: $jnks-iot-primary-color;
+          color: var(--jnks-iot-primary-color);
         }
 
         h1 {
           font-weight: 600;
-          font-size: 16px;
-          color: $jnks-iot-topbar-text;
+          font-size: 14px;
+          color: var(--jnks-iot-topbar-text);
         }
       }
 
       jnks-iot-notification-bell {
         .mat-mdc-icon-button {
-          color: $jnks-iot-topbar-text !important;
+          color: var(--jnks-iot-topbar-text) !important;
         }
       }
 
@@ -131,11 +137,11 @@
         .jnks-iot-user-display-name,
         .jnks-iot-user-authority,
         .mat-icon.jnks-iot-mini-avatar {
-          color: $jnks-iot-topbar-text;
+          color: var(--jnks-iot-topbar-text);
         }
 
         .jnks-iot-user-authority {
-          color: $jnks-iot-topbar-muted !important;
+          color: var(--jnks-iot-topbar-muted) !important;
           opacity: 1;
         }
       }
@@ -145,7 +151,7 @@
   .jnks-iot-main-content {
     overflow: auto;
     position: relative;
-    background: $jnks-iot-surface-page;
+    background: var(--jnks-iot-surface-page);
 
     > :not(router-outlet) {
       flex: 1;

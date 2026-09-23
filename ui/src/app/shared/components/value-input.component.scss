@@ -25,7 +25,7 @@
         justify-content: flex-start;
         gap: 10px;
         .mat-icon {
-          color: rgba(0, 0, 0, 0.38);
+          color: var(--jnks-iot-text-faint);
           vertical-align: bottom;
         }
       }

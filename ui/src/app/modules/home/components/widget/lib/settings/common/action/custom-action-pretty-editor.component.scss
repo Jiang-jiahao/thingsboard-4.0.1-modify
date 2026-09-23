@@ -2,7 +2,7 @@
   box-sizing: border-box;
   position: relative;
   padding: 8px;
-  background-color: #fff;
+  background-color: var(--jnks-iot-surface-card);
 
   .jnks-iot-fullscreen-panel {
     .jnks-iot-custom-action-editor-container {

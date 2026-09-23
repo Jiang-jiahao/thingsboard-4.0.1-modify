@@ -9,6 +9,61 @@
 @import './scss/fonts';
 @import './scss/ui-refinements';
 
+/*
+ * 图标字体的 @font-face 放在这里（带哈希的样式包内），**不要**放回
+ * assets/fonts/material-icons.css —— 那个文件由 index.html 直接 <link>，URL 不带哈希，
+ * 浏览器会连 CSS 一起缓存，于是重新生成字体后页面毫无变化（2026-09-23 实际踩过：
+ * 侧栏那批图标一直显示旧字形的实心版，只有硬刷新才恢复）。
+ * 放在这里 Angular 会给字体文件也加上内容哈希（url("./JnksIotIcons-<hash>.ttf")），
+ * 以后重新生成字体自动换 URL，无需手工维护版本号。
+ */
+@font-face {
+  font-family: 'JnksIotIcons';
+  font-style: normal;
+  font-weight: 400;
+  src: url('assets/fonts/JnksIotIcons.ttf') format('truetype');
+}
+
+// 品牌标识的明暗由 LogoComponent 按主题换图处理
+// （shared/components/logo.component.ts），不再需要 CSS 反相或深色底板 ——
+// 那两处 hack 已随组件改造一起删掉。
+
+// ─────────────────────────────────────────────────────────────
+// 暗色主题下的 widget 卡面
+//
+// widget 的背景色**不是来自样式表**，而是内联样式：`[style]="widget.style"`
+// （widget-container.component.html:13），内容来自 dashboard 定义里的
+// config.backgroundColor —— 也就是**存在数据库里**的每个 widget 的配置。
+// 默认是 `rgb(255,255,255)`，同时内联的 `color` 是 `rgba(0,0,0,.87)`。
+// 所以换令牌换不到它：不带 !important 的样式表规则赢不了内联样式。
+//
+// 取舍：**只在暗色主题里覆盖**。亮色主题下不动 —— 用户自己在 widget 配置里
+// 设的背景色是有效设定，应该被尊重；而默认的白色在亮色下本来就是对的。
+// 暗色下这些配置几乎必然失效（默认白 + 深色文字在深色外壳里很突兀），
+// 与其让每张卡都穿帮，不如统一到主题卡面。
+// ─────────────────────────────────────────────────────────────
+.jnks-iot-dark .jnks-iot-widget {
+  background-color: var(--jnks-iot-surface-card) !important;
+  color: var(--jnks-iot-text) !important;
+}
+
+// 图表 widget 的绘图面板：背景同样来自 widget 配置（`[style]="backgroundStyle$"`，
+// time-series-chart-widget.component.html:1）。只覆盖背景**色**，不碰背景图。
+// 图表自身的坐标轴/线色由 chart 的暗色模式处理 —— 见 time-series-chart.ts 的 darkMode。
+.jnks-iot-dark .jnks-iot-time-series-chart-panel {
+  background-color: var(--jnks-iot-surface-card) !important;
+}
+
+// 二维码 widget：面板自己还有一层内联背景（`[style]="backgroundStyle$"`，
+// mobile-app-qrcode-widget.component.html:3），默认白 —— 只覆盖外层
+// .jnks-iot-widget 盖不到它，暗色下整块会是一张白卡。
+//
+// 二维码本身不受影响：qrcode 库生成的 SVG 自带 `<path fill="#ffffff">` 全幅白底，
+// 模块是纯黑，所以换底之后照样能扫（.jnks-iot-qrcode 也在组件里补了一层白衬垫）。
+.jnks-iot-dark .jnks-iot-mobile-app-qrcode-panel {
+  background-color: var(--jnks-iot-surface-card) !important;
+}
+
 body, html {
   height: 100%;
   min-height: 100%;
@@ -26,7 +81,7 @@ body, html {
 body {
   margin: 0;
   padding: 0;
-  background-color: $jnks-iot-surface-page;
+  background-color: var(--jnks-iot-surface-page);
   overflow: hidden;
 }
 
@@ -66,9 +121,9 @@ body {
 
 a:not(.mat-mdc-button-base, .mdc-tab) {
   font-weight: 500;
-  color: $jnks-iot-primary-color;
+  color: var(--jnks-iot-primary-color);
   text-decoration: none;
-  border-bottom: 1px solid rgba($jnks-iot-primary-color, .25);
+  border-bottom: 1px solid rgb(var(--jnks-iot-primary-color-rgb) / .25);
   transition: color .2s ease, border-bottom-color .2s ease;
 }
 
@@ -261,8 +316,8 @@ pre.jnks-iot-highlight {
 .jnks-iot-timewindow-panel, .jnks-iot-legend-config-panel, .jnks-iot-filter-panel, .jnks-iot-panel-container {
   overflow: hidden;
   background: #fff;
-  border-radius: $jnks-iot-radius;
-  border: 1px solid $jnks-iot-line;
+  border-radius: var(--jnks-iot-radius);
+  border: 1px solid var(--jnks-iot-line);
   box-shadow: 0 12px 32px rgba(11, 27, 43, 0.14);
 }
 
@@ -939,29 +994,6 @@ pre.jnks-iot-highlight {
     }
   }
 
-  .mat-mdc-snack-bar-container {
-    position: absolute;
-    background: none;
-    box-shadow: none;
-    margin: 0;
-    padding: 0;
-    border: none;
-    border-radius: inherit;
-    max-width: inherit;
-    min-width: inherit;
-    pointer-events: none;
-    display: flex;
-    .mdc-snackbar__surface {
-      padding: 0;
-      border: none;
-      background: none;
-      box-shadow: none;
-    }
-    .mdc-snackbar__label {
-      padding: 0;
-    }
-  }
-
   .mat-drawer-side {
     border: none;
   }
@@ -1206,10 +1238,6 @@ pre.jnks-iot-highlight {
     button:not(.mat-mdc-menu-item):not(.mat-sort-header-button) {
       text-transform: none;
     }
-  }
-
-  .jnks-iot-toast-panel {
-    pointer-events: none !important;
   }
 
   .jnks-iot-draggable {

@@ -99,13 +99,18 @@
           overflow: visible;
         }
         > .mat-expansion-panel-header {
+          // 按参考稿 `.exp-h`：一行 46px 高、左右 14px 内边距、标题 13.5px。
+          // 原来是 fit-content + padding:0 + 16px，标题会顶在卡片左上角、和页面大标题一样大，
+          // 既没有呼吸感也读不出层级。
           height: fit-content;
+          min-height: 46px;
+          align-items: center;
           user-select: none;
           font-weight: 500;
-          font-size: 16px;
-          line-height: 24px;
+          font-size: 13.5px;
+          line-height: 18px;
           letter-spacing: 0.25px;
-          padding: 0;
+          padding: 0 14px;
           &:hover {
             background: none;
           }
@@ -123,7 +128,11 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            padding: 0 !important;
+            // 参考稿 `.exp-b` 的 padding 是 2px 14px 16px。底部那 16px 是必需的：
+            // 面板是 overflow:hidden + 1px 描边，内容贴着下边框时，比自身盒子高一点的控件
+            // （开关的圆形手柄、输入框的聚焦光晕）会被边框切掉 ——
+            // 规则链节点详情里「高级设置」那个开关就是这么被切了下缘的。
+            padding: 0 14px 16px !important;
             > :first-child {
               margin-top: 16px;
               @media #{$mat-xs} {
@@ -690,7 +699,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: $jnks-iot-primary-color;
+      background: var(--jnks-iot-primary-color);
       mask-image: url(assets/home/no_data_folder_bg.svg);
       -webkit-mask-image: url(assets/home/no_data_folder_bg.svg);
       mask-repeat: no-repeat;
@@ -726,7 +735,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: $jnks-iot-primary-color;
+      background: var(--jnks-iot-primary-color);
       opacity: 0.04;
       pointer-events: none;
     }

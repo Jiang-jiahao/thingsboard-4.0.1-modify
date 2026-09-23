@@ -84,7 +84,6 @@
                             (applyDetails)="saveRuleNode()"
                             [theForm]="jnksIotRuleNode.ruleNodeFormGroup">
             <div class="details-buttons">
-              <div [jnks-iot-help]="helpLinkIdForRuleNodeType()"></div>
             </div>
             <mat-tab-group mat-stretch-tabs="false" class="jnks-iot-absolute-fill jnks-iot-rulenode-details flex-1" [(selectedIndex)]="selectedRuleNodeTabIndex">
               <mat-tab label="{{ 'rulenode.details' | translate }}">
@@ -129,7 +128,6 @@
                             (applyDetails)="saveRuleNodeLink()"
                             [theForm]="jnksIotRuleNodeLink.ruleNodeLinkFormGroup">
             <div class="details-buttons">
-              <div [jnks-iot-help]="'ruleEngine'"></div>
             </div>
             <jnks-iot-rule-node-link
               class="flex-1"

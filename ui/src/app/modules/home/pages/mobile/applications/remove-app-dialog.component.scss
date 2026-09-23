@@ -5,5 +5,5 @@
   max-height: 100vh;
   display: grid;
   grid-template-rows: min-content 4px minmax(auto, 1fr) min-content;
-  --mdc-outlined-text-field-outline-color: rgba(0,0,0,0.12);
+  --mdc-outlined-text-field-outline-color: var(--jnks-iot-text-faint);
 }

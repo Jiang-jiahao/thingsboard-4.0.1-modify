@@ -19,13 +19,13 @@
   }
   &.jnks-iot-fullscreen {
     height: 100%;
-    background: #fff;
+    background: var(--jnks-iot-surface-card);
     .bottom-panel {
       margin-bottom: 16px;
     }
   }
   .mat-toolbar {
-    background: #fff;
+    background: var(--jnks-iot-surface-card);
     .mat-divider-vertical {
       height: 40px;
       margin-right: 16px;

@@ -7,6 +7,7 @@ import { selectAuthUser, selectUserDetails } from '@core/auth/auth.selectors';
 import { map } from 'rxjs/operators';
 import { AuthService } from '@core/auth/auth.service';
 import { Router } from '@angular/router';
+import { ThemeService } from '@core/services/theme.service';
 
 @Component({
   selector: 'jnks-iot-user-menu',
@@ -35,9 +36,15 @@ export class UserMenuComponent implements OnInit, OnDestroy {
     map((user) => this.getUserDisplayName(user))
   );
 
+  // 主题：两套（SaaS 分析风 / 暗黑），选择持久化在 localStorage。
+  // 注意暴露的是**主题字符串**而不是布尔 —— 模板里要用 *ngIf 接住它，
+  // 而 *ngIf 收到 false 会把整块隐藏掉（亮色下按钮会消失）。
+  theme$ = this.themeService.theme$;
+
   constructor(private store: Store<AppState>,
               private router: Router,
-              private authService: AuthService) {
+              private authService: AuthService,
+              private themeService: ThemeService) {
   }
 
   ngOnInit(): void {
@@ -88,6 +95,10 @@ export class UserMenuComponent implements OnInit, OnDestroy {
 
   openAccount(): void {
     this.router.navigate(['account']);
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggle();
   }
 
   logout(): void {

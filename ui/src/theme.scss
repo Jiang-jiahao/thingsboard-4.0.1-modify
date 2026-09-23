@@ -5,9 +5,10 @@
 
 @include mat.core();
 
-// 全站字体：中文走系统黑体；Material 组件同样继承（它默认 Roboto，没有中文字形，
-// 之前中文都靠回落，拉丁数字和汉字是两套字面）
+// ─────────────────────────────────────────────────────────────
+// 排版：两套主题共用（新方案里字体与字号不随主题变）
 // 字号整体比 Material 默认收一档：控制台要在一屏里放更多东西
+// ─────────────────────────────────────────────────────────────
 $jnks-iot-typography: mat.m2-define-typography-config(
   $font-family: $jnks-iot-material-font,
   $headline-5: mat.m2-define-typography-level(20px, 26px, 600),
@@ -23,100 +24,64 @@ $jnks-iot-typography: mat.m2-define-typography-config(
 
 @include mat.all-component-typographies($jnks-iot-typography);
 
-$jnks-iot-mat-indigo: (
-  50: #f2f5f8,
-  100: #e3e9f0,
-  200: #c6d2df,
-  300: #9fb3c8,
-  400: #6e8aa6,
-  500: $jnks-iot-primary-color,
-  600: $jnks-iot-secondary-color,
-  700: #1c3853,
-  800: #28506f,
-  900: #06121e,
-  A100: #cbd5e1,
-  A200: #94a9bd,
-  A400: #5c7a99,
-  A700: #12283d,
+// ═════════════════════════════════════════════════════════════
+// 主题一：SaaS 分析风（浅色，默认）
+//   蓝主色 + 紫强调 + 红警告；圆角与间距由 ui-refinements.scss 走 CSS 变量
+// ═════════════════════════════════════════════════════════════
+$jnks-iot-mat-blue: (
+  50: #eff4ff,  100: #dbe6fe, 200: #bfd3fe, 300: #93b4fd, 400: #6090fa,
+  500: #2563eb, 600: #1d4ed8, 700: #1e40af, 800: #1e3a8a, 900: #172554,
+  A100: #dbe6fe, A200: #bfd3fe, A400: #6090fa, A700: #1d4ed8,
   contrast: (
-    50: rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: rgba(black, 0.87),
-    400: white,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-    A100: rgba(black, 0.87),
-    A200: rgba(black, 0.87),
-    A400: white,
-    A700: white,
+    50: rgba(black, .87), 100: rgba(black, .87), 200: rgba(black, .87), 300: rgba(black, .87),
+    400: white, 500: white, 600: white, 700: white, 800: white, 900: white,
+    A100: rgba(black, .87), A200: rgba(black, .87), A400: white, A700: white,
   )
 );
+$jnks-iot-primary: mat.m2-define-palette($jnks-iot-mat-blue);
 
-$jnks-iot-primary: mat.m2-define-palette($jnks-iot-mat-indigo);
-$jnks-iot-mat-steel: (
-  50: #f2f5f8,
-  100: #e3e9f0,
-  200: #c6d2df,
-  300: #9fb3c8,
-  400: #6e8aa6,
-  500: $jnks-iot-accent-color,
-  600: #28506f,
-  700: #1c3853,
-  800: $jnks-iot-secondary-color,
-  900: $jnks-iot-primary-color,
+// 兼容旧引用：styles.scss 里还有两处直接用了 $primary（1139、1280 行）。
+// 指向 CSS 变量而不是编译期色值 —— 这样它们在暗色主题下也跟着变。
+// 这两处都只是普通赋值，没进 SCSS 颜色函数，所以 var() 是安全的。
+$primary: var(--jnks-iot-primary-color);
+$accent: var(--jnks-iot-accent-color);
+
+// 强调槽（accent）驱动的是 **界面元素**：FAB、复选框、单选、滑块、进度条。
+// 最初按参考稿设成了紫色，实测下来详情页那个编辑 FAB 变成紫的 —— 太跳，不像这套设计。
+// 改成与主色同族的蓝：界面里所有强调都落在同一个色相上。
+// （图表序列色不受影响：那套颜色来自 chart.models.ts 的 chartColorScheme，不走 Material 调色板。）
+$jnks-iot-mat-violet: (
+  50: #eff6ff,  100: #dbeafe, 200: #bfdbfe, 300: #93c5fd, 400: #60a5fa,
+  500: #3b82f6, 600: #2563eb, 700: #1d4ed8, 800: #1e40af, 900: #1e3a8a,
+  A100: #dbeafe, A200: #bfdbfe, A400: #60a5fa, A700: #2563eb,
   contrast: (
-    50: rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: rgba(black, 0.87),
-    400: white,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
+    50: rgba(black, .87), 100: rgba(black, .87), 200: rgba(black, .87), 300: rgba(black, .87),
+    400: rgba(black, .87), 500: white, 600: white, 700: white, 800: white, 900: white,
+    A100: rgba(black, .87), A200: rgba(black, .87), A400: rgba(black, .87), A700: white,
   )
 );
+$jnks-iot-accent: mat.m2-define-palette($jnks-iot-mat-violet);
 
-$jnks-iot-accent: mat.m2-define-palette($jnks-iot-mat-steel);
-
-// 朱砂：既是品牌强调，也是危险语义（warn 槽），一处定义两处使用
-$jnks-iot-mat-seal: (
-  50: #fcf0f0,
-  100: #f7d9da,
-  200: #efb1b3,
-  300: #e38488,
-  400: #d2545a,
-  500: $jnks-iot-seal-color,
-  600: #a81f25,
-  700: #8c191e,
-  800: #701317,
-  900: #4e0d10,
+$jnks-iot-mat-red: (
+  50: #fef2f2,  100: #fee2e2, 200: #fecaca, 300: #fca5a5, 400: #f87171,
+  500: #ef4444, 600: #dc2626, 700: #b91c1c, 800: #991b1b, 900: #7f1d1d,
   contrast: (
-    50: rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: rgba(black, 0.87),
-    400: white,
-    500: white,
-    600: white,
-    700: white,
-    800: white,
-    900: white,
+    50: rgba(black, .87), 100: rgba(black, .87), 200: rgba(black, .87), 300: rgba(black, .87),
+    400: rgba(black, .87), 500: white, 600: white, 700: white, 800: white, 900: white,
   )
 );
+$jnks-iot-warn: mat.m2-define-palette($jnks-iot-mat-red);
 
-$jnks-iot-warn: mat.m2-define-palette($jnks-iot-mat-seal);
+// 背景色必须是**字面色**：Material 的主题校验会拿它去做 mix()/rgba()，
+// var() 过不了（实测报 "$color1: var(...) is not a color"）。
+// 两套主题各输出一份，所以直接写字面值就行，不需要变量化。
+$jnks-iot-saas-theme-background: map_merge(mat.$m2-light-theme-background-palette, (
+  background: #f5f8fd,
+  card:       #ffffff,
+  dialog:     #ffffff,
+));
 
-$background: (background: $jnks-iot-surface-page);
-
-$jnks-iot-theme-background: map_merge(mat.$m2-light-theme-background-palette, $background);
-
-$jnks-iot-mat-theme: mat.m2-define-light-theme((
+$jnks-iot-saas-theme: mat.m2-define-light-theme((
   color: (
     primary: $jnks-iot-primary,
     accent: $jnks-iot-accent,
@@ -126,63 +91,39 @@ $jnks-iot-mat-theme: mat.m2-define-light-theme((
   density: -2
 ));
 
-$color: map_get($jnks-iot-mat-theme, color);
-$color: map_merge($color, (background: $jnks-iot-theme-background));
-$jnks-iot-mat-theme: map_merge($jnks-iot-mat-theme, (color: $color));
-$jnks-iot-theme: map_merge($jnks-iot-mat-theme, $color);
+$__c: map_merge(map_get($jnks-iot-saas-theme, color), (background: $jnks-iot-saas-theme-background));
+$jnks-iot-saas-theme: map_merge($jnks-iot-saas-theme, (color: $__c));
 
-$primary: mat.m2-get-color-from-palette($jnks-iot-primary);
-$accent: mat.m2-get-color-from-palette($jnks-iot-accent);
-
-$jnks-iot-dark-mat-indigo: (
-  50: #f2f5f8,
-  100: #e3e9f0,
-  200: #c6d2df,
-  300: #9fb3c8,
-  400: #6e8aa6,
-  500: $jnks-iot-dark-primary-color,
-  600: $jnks-iot-secondary-color,
-  700: #1c3853,
-  800: $jnks-iot-primary-color,
-  900: #06121e,
-  A100: #cbd5e1,
-  A200: #94a9bd,
-  A400: #5c7a99,
-  A700: #12283d,
+// ═════════════════════════════════════════════════════════════
+// 主题二：暗黑
+//   同一套语义，只是明度阶梯反过来；主色提亮到能在深底上站住
+// ═════════════════════════════════════════════════════════════
+$jnks-iot-dark-mat-blue: (
+  50: #eaf3fc,  100: #cfe4f8, 200: #a8cff2, 300: #7fb8ea, 400: #5aa8e8,
+  500: #4a9eea, 600: #3b82d6, 700: #2f6cb0, 800: #24558b, 900: #1a3f68,
+  A100: #cfe4f8, A200: #a8cff2, A400: #5aa8e8, A700: #3b82d6,
   contrast: (
-    50: rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: rgba(black, 0.87),
-    400: rgba(black, 0.87),
-    500: map_get($jnks-iot-mat-indigo, 900),
-    600: white,
-    700: white,
-    800: white,
-    900: white,
-    A100: rgba(black, 0.87),
-    A200: rgba(black, 0.87),
-    A400: rgba(black, 0.87),
-    A700: rgba(black, 0.87),
+    50: rgba(black, .87), 100: rgba(black, .87), 200: rgba(black, .87), 300: rgba(black, .87),
+    400: #0e1013, 500: #0e1013, 600: white, 700: white, 800: white, 900: white,
+    A100: rgba(black, .87), A200: rgba(black, .87), A400: #0e1013, A700: white,
   )
 );
-
-$jnks-iot-dark-primary: mat.m2-define-palette($jnks-iot-dark-mat-indigo);
+$jnks-iot-dark-primary: mat.m2-define-palette($jnks-iot-dark-mat-blue);
 
 $jnks-iot-dark-theme-background: (
   status-bar: black,
-  app-bar:    map_get($jnks-iot-dark-mat-indigo, 900),
-  background: map_get($jnks-iot-dark-mat-indigo, 800),
+  app-bar:    #14171c,
+  background: #0e1013,
   hover:      rgba(white, 0.04),
-  card:       map_get($jnks-iot-dark-mat-indigo, 800),
-  dialog:     map_get($jnks-iot-dark-mat-indigo, 800),
+  card:       #191d23,
+  dialog:     #191d23,
   disabled-button: rgba(white, 0.12),
-  raised-button: map-get($jnks-iot-dark-mat-indigo, 50),
+  raised-button: #e7eaef,
   focused-button: rgba(white, 0.12),
-  selected-button: map_get($jnks-iot-dark-mat-indigo, 900),
-  selected-disabled-button: map_get($jnks-iot-dark-mat-indigo, 800),
+  selected-button: #0e1013,
+  selected-disabled-button: #191d23,
   disabled-button-toggle: black,
-  unselected-chip: map_get($jnks-iot-dark-mat-indigo, 700),
+  unselected-chip: #22272f,
   disabled-list-option: black,
   tooltip: map_get(mat.$m2-grey-palette, 700),
 );
@@ -197,11 +138,12 @@ $jnks-iot-dark-theme: mat.m2-define-dark-theme((
   density: -2
 ));
 
-$color: map_get($jnks-iot-dark-theme, color);
-$color: map_merge($color, (background: $jnks-iot-dark-theme-background));
-$jnks-iot-dark-theme: map_merge($jnks-iot-dark-theme, (color: $color));
-$jnks-iot-dark-theme: map_merge($jnks-iot-dark-theme, $color);
+$__dc: map_merge(map_get($jnks-iot-dark-theme, color), (background: $jnks-iot-dark-theme-background));
+$jnks-iot-dark-theme: map_merge($jnks-iot-dark-theme, (color: $__dc));
 
+// ─────────────────────────────────────────────────────────────
+// 组件级混入（两套主题共用同一份实现，只是喂进去的 theme 不同）
+// ─────────────────────────────────────────────────────────────
 @mixin mat-fab-toolbar-theme($theme) {
   $primary: map-get($theme, primary);
   $accent: map-get($theme, accent);
@@ -214,23 +156,17 @@ $jnks-iot-dark-theme: map_merge($jnks-iot-dark-theme, $color);
       background: mat.m2-get-color-from-palette($background, app-bar);
       color: mat.m2-get-color-from-palette($foreground, text);
     }
-    &.mat-primary {
-      .mat-fab-toolbar-background {
-        background: mat.m2-get-color-from-palette($primary);
-        color: mat.m2-get-color-from-palette($primary, default-contrast);
-      }
+    &.mat-primary .mat-fab-toolbar-background {
+      background: mat.m2-get-color-from-palette($primary);
+      color: mat.m2-get-color-from-palette($primary, default-contrast);
     }
-    &.mat-accent {
-      .mat-fab-toolbar-background {
-        background: mat.m2-get-color-from-palette($accent);
-        color: mat.m2-get-color-from-palette($accent, default-contrast);
-      }
+    &.mat-accent .mat-fab-toolbar-background {
+      background: mat.m2-get-color-from-palette($accent);
+      color: mat.m2-get-color-from-palette($accent, default-contrast);
     }
-    &.mat-warn {
-      .mat-fab-toolbar-background {
-        background: mat.m2-get-color-from-palette($warn);
-        color: mat.m2-get-color-from-palette($warn, default-contrast);
-      }
+    &.mat-warn .mat-fab-toolbar-background {
+      background: mat.m2-get-color-from-palette($warn);
+      color: mat.m2-get-color-from-palette($warn, default-contrast);
     }
   }
 }
@@ -252,73 +188,66 @@ $jnks-iot-dark-theme: map_merge($jnks-iot-dark-theme, $color);
       background: mat.m2-get-color-from-palette($background, app-bar);
       color: mat.m2-get-color-from-palette($foreground, text);
     }
-    &.mat-primary {
-      .mat-fab-toolbar-background {
-        @include _mat-toolbar-inverse-color($primary);
-      }
+    &.mat-primary .mat-fab-toolbar-background {
+      @include _mat-toolbar-inverse-color($primary);
     }
-    mat-toolbar {
-      &.mat-primary {
-        @include _mat-toolbar-inverse-color($primary);
-        button.mat-mdc-icon-button {
-          .mat-icon {
-            color: mat.m2-get-color-from-palette($primary);
-          }
-        }
-      }
-    }
-    .mat-mdc-fab {
-      &.mat-primary {
-        background: mat.m2-get-color-from-palette($primary, default-contrast);
+    mat-toolbar.mat-primary {
+      @include _mat-toolbar-inverse-color($primary);
+      button.mat-mdc-icon-button .mat-icon {
         color: mat.m2-get-color-from-palette($primary);
       }
     }
+    .mat-mdc-fab.mat-primary {
+      background: mat.m2-get-color-from-palette($primary, default-contrast);
+      color: mat.m2-get-color-from-palette($primary);
+    }
   }
-
 }
 
 @mixin jnks-iot-components-theme($theme) {
   $primary: map-get($theme, primary);
-  $warn: map-get($theme, warn);
 
-  mat-toolbar{
-    &.mat-hue-3 {
-      background-color: mat.m2-get-color-from-palette($primary, 'A100');
-    }
+  mat-toolbar.mat-hue-3 {
+    background-color: mat.m2-get-color-from-palette($primary, 'A100');
   }
 
-  @include mat-fab-toolbar-theme($jnks-iot-theme);
+  @include mat-fab-toolbar-theme($theme);
 
   div.jnks-iot-dashboard-page.mobile-app {
-    @include mat-fab-toolbar-inverse-theme($jnks-iot-theme);
+    @include mat-fab-toolbar-inverse-theme($theme);
   }
 
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
-
   ::-webkit-scrollbar-track {
     background: transparent;
   }
-
   ::-webkit-scrollbar-thumb {
-    background: rgba($jnks-iot-primary-color, 0.22);
+    background: rgb(var(--jnks-iot-primary-color-rgb) / 0.22);
     border-radius: 6px;
     &:hover {
-      background: rgba($jnks-iot-primary-color, 0.38);
+      background: rgb(var(--jnks-iot-primary-color-rgb) / 0.38);
     }
   }
 }
 
+// ═════════════════════════════════════════════════════════════
+// 落到 <body> 上。`.jnks-iot-default` **始终**在 body 上（Tailwind 的
+// important 作用域、styles.scss/form.scss 的联合作用域、以及 5 个组件 scss 都依赖它）；
+// 暗色时**额外**加 `.jnks-iot-dark`，它排在后面，同优先级下后者胜。
+// ═════════════════════════════════════════════════════════════
 .jnks-iot-default {
-  @include mat.all-component-themes($jnks-iot-theme);
-  @include mat-datetimepicker-theme($jnks-iot-theme);
-  @include jnks-iot-components-theme($jnks-iot-theme);
-  @include overwrites.theme-overwrites($jnks-iot-primary, $jnks-iot-theme);
-  @include mat.typography-hierarchy($jnks-iot-theme);
+  @include mat.all-component-themes($jnks-iot-saas-theme);
+  @include mat-datetimepicker-theme($jnks-iot-saas-theme);
+  @include jnks-iot-components-theme($jnks-iot-saas-theme);
+  @include overwrites.theme-overwrites($jnks-iot-primary, $jnks-iot-saas-theme);
+  @include mat.typography-hierarchy($jnks-iot-saas-theme);
 }
 
 .jnks-iot-dark {
+  // 只覆盖颜色：排版与密度两套主题相同，不必重复输出一遍
   @include mat.all-component-colors($jnks-iot-dark-theme);
+  @include jnks-iot-components-theme($jnks-iot-dark-theme);
 }

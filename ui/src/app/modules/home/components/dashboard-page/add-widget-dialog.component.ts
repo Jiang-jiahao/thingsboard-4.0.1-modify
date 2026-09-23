@@ -143,14 +143,6 @@ export class AddWidgetDialogComponent extends DialogComponent<AddWidgetDialogCom
     return originalErrorState || customErrorState;
   }
 
-  helpLinkIdForWidgetType(): string {
-    let link = 'widgetsConfig';
-    if (this.widget && this.widget.type) {
-      link = widgetTypesData.get(this.widget.type).configHelpLinkId;
-    }
-    return link;
-  }
-
   cancel(): void {
     this.dialogRef.close(null);
   }

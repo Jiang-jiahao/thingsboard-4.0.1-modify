@@ -107,7 +107,7 @@ jnks-iot-rulechain-page {
       content: "";
       pointer-events: none;
       border-radius: 0 0 0 15px;
-      box-shadow: -10px 0px 0 0px $jnks-iot-sidebar-bg;
+      box-shadow: -10px 0px 0 0px var(--jnks-iot-sidebar-bg);
       border: none;
     }
     &:after {
@@ -119,7 +119,7 @@ jnks-iot-rulechain-page {
       content: "";
       pointer-events: none;
       border-top-left-radius: 15px;
-      box-shadow: -10px 0px 0px 0px $jnks-iot-sidebar-bg;
+      box-shadow: -10px 0px 0px 0px var(--jnks-iot-sidebar-bg);
       border: none;
     }
   }
@@ -128,7 +128,7 @@ jnks-iot-rulechain-page {
     z-index: 1;
     width: 260px;
     min-width: 260px;
-    background: #f8fafc;
+    background: var(--jnks-iot-surface-page);
     border-right: 1px solid rgba(15, 23, 42, 0.08);
     box-shadow: 4px 0 20px rgba(15, 23, 42, 0.06);
     display: flex;
@@ -140,16 +140,19 @@ jnks-iot-rulechain-page {
       height: auto;
       padding: 10px 12px;
       background:
-        radial-gradient(ellipse 100% 120% at 0% -20%, rgba($jnks-iot-accent-color, 0.2) 0%, transparent 50%),
-        linear-gradient(180deg, lighten($jnks-iot-sidebar-header-bg, 3%) 0%, $jnks-iot-sidebar-header-bg 100%) !important;
-      border-bottom: 1px solid $jnks-iot-sidebar-border;
-      color: #fff;
+        radial-gradient(ellipse 100% 120% at 0% -20%, rgb(var(--jnks-iot-accent-color-rgb) / 0.2) 0%, transparent 50%),
+        var(--jnks-iot-sidebar-header-bg) !important;
+      border-bottom: 1px solid var(--jnks-iot-sidebar-border);
+      // 原来是写死的 #fff —— 那时侧栏头部恒为深色。浅色主题下头部是浅底，
+      // 白字会看不见，所以改用侧栏文字令牌跟随主题。
+      // （顺便去掉了 lighten(..., 3%) 那 3% 的渐变步进，肉眼不可见。）
+      color: var(--jnks-iot-sidebar-text);
     }
 
     .jnks-iot-rulechain-search-toolbar {
-      background: #fff !important;
+      background: var(--jnks-iot-surface-card) !important;
       border-bottom: 1px solid rgba(15, 23, 42, 0.08);
-      color: $jnks-iot-topbar-text;
+      color: var(--jnks-iot-topbar-text);
     }
 
     .mat-toolbar {
@@ -163,11 +166,11 @@ jnks-iot-rulechain-page {
 
         .mat-mdc-icon-button {
           margin: 0;
-          color: $jnks-iot-topbar-muted;
+          color: var(--jnks-iot-topbar-muted);
 
           &:hover {
-            background: rgba($jnks-iot-secondary-color, 0.1);
-            color: $jnks-iot-primary-color;
+            background: rgb(var(--jnks-iot-secondary-color-rgb) / 0.1);
+            color: var(--jnks-iot-primary-color);
           }
 
           &.jnks-iot-small {
@@ -190,10 +193,12 @@ jnks-iot-rulechain-page {
     }
 
     ::ng-deep jnks-iot-rule-chain-select.jnks-iot-rulechain-header-select .jnks-iot-rule-select {
+        // 这里是给旧版**深色**抽屉头配的「毛玻璃」：半透明白底 + 半透明白描边。
+        // 抽屉头改成浅色之后两者都看不见了，一并换成令牌。
         .mat-mdc-text-field-wrapper {
-          background-color: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
-          border: 1px solid rgba(255, 255, 255, 0.18);
+          background-color: var(--jnks-iot-surface-page);
+          border-radius: var(--jnks-iot-radius);
+          border: 1px solid var(--jnks-iot-line-strong);
         }
 
         .mat-mdc-form-field-focus-overlay {
@@ -216,7 +221,7 @@ jnks-iot-rulechain-page {
         }
 
         .mat-icon {
-          color: rgba(255, 255, 255, 0.9);
+          color: var(--jnks-iot-text-muted);
         }
 
         input {
@@ -237,12 +242,12 @@ jnks-iot-rulechain-page {
           margin-bottom: 5px;
         }
         .mat-expansion-panel-header {
-          background: #fff;
+          background: var(--jnks-iot-surface-card);
           border-bottom: 1px solid rgba(15, 23, 42, 0.06);
           transition: background-color 0.2s ease;
 
           &:hover {
-            background: rgba($jnks-iot-secondary-color, 0.06);
+            background: rgb(var(--jnks-iot-secondary-color-rgb) / 0.06);
           }
 
           .mat-expansion-panel-header-title {
@@ -250,12 +255,12 @@ jnks-iot-rulechain-page {
             height: 48px;
             overflow: hidden;
             font-weight: 500;
-            color: $jnks-iot-topbar-text;
+            color: var(--jnks-iot-topbar-text);
 
             .mat-icon {
               min-width: 24px;
               margin: auto 8px auto 0;
-              color: $jnks-iot-secondary-color;
+              color: var(--jnks-iot-secondary-color);
             }
             .jnks-iot-panel-title {
               min-width: 130px;
@@ -265,8 +270,8 @@ jnks-iot-rulechain-page {
         }
         &.mat-expanded {
           .mat-expansion-panel-header {
-            border-bottom: 1px solid rgba($jnks-iot-secondary-color, 0.2);
-            background: rgba($jnks-iot-secondary-color, 0.05);
+            border-bottom: 1px solid rgb(var(--jnks-iot-secondary-color-rgb) / 0.2);
+            background: rgb(var(--jnks-iot-secondary-color-rgb) / 0.05);
           }
         }
       }
@@ -274,7 +279,7 @@ jnks-iot-rulechain-page {
         padding: 0;
       }
       .fc-canvas {
-        background: #f9f9f9;
+        background: var(--jnks-iot-surface-page);
       }
     }
   }
@@ -370,7 +375,7 @@ jnks-iot-rulechain-page {
     }
 
     .edge-endpoint {
-      fill: #808080;
+      fill: var(--jnks-iot-line-strong);
     }
 
     .fc-edge-label {
@@ -379,24 +384,31 @@ jnks-iot-rulechain-page {
         outline: 0;
       }
 
+      // 选中态：唯一允许上品牌色的地方（它表达的是「你选中了它」，
+      // 不是数据语义）。原来是写死的红。
       &.fc-selected {
         .fc-edge-label-text {
           span {
-            color: #fff !important;
-            background-color: #f00 !important;
-            border: solid #f00 !important;
+            color: var(--jnks-iot-on-deep) !important;
+            background-color: var(--jnks-iot-primary-color) !important;
+            border-color: var(--jnks-iot-primary-color) !important;
           }
         }
       }
 
+      // 连线标签：一根发丝描边的中性小牌子。
+      // 原来字号 14/加粗、字色写死 #003a79（旧主题的深蓝）、描边 2px —— 一路是
+      // 旧「印与墨」的残留，在这套设计里既重又不跟主题。
       .fc-edge-label-text {
-        font-size: 14px !important;
-        font-weight: 600 !important;
+        font-size: 11px !important;
+        font-weight: 400 !important;
 
         span {
-          background-color: #fff !important;
-          color: #003a79 !important;
-          border: solid 2px #003a79 !important;
+          padding: 1px 7px;
+          border-radius: 2px;
+          background-color: var(--jnks-iot-surface-card) !important;
+          color: var(--jnks-iot-text-muted) !important;
+          border: solid 1px var(--jnks-iot-line-strong) !important;
         }
       }
     }
@@ -491,12 +503,14 @@ jnks-iot-rulechain-page {
     @include rule-node-colors();
 
     &.jnks-iot-rulechain-header {
-      background: linear-gradient(90deg, $jnks-iot-primary-color 0%, $jnks-iot-secondary-color 100%);
+      background: linear-gradient(90deg, var(--jnks-iot-primary-color) 0%, var(--jnks-iot-secondary-color) 100%);
       color: #fff;
     }
 
     &.jnks-iot-link-header {
-      background: linear-gradient(90deg, darken($jnks-iot-secondary-color, 8%) 0%, $jnks-iot-accent-color 100%);
+      // 原为 darken(var(--jnks-iot-secondary-color), 8%)：CSS 变量喂不了 SCSS 颜色函数，
+      // 8% 的明度差肉眼不可见，直接用本色。
+      background: linear-gradient(90deg, var(--jnks-iot-secondary-color) 0%, var(--jnks-iot-accent-color) 100%);
       color: #fff;
     }
 
