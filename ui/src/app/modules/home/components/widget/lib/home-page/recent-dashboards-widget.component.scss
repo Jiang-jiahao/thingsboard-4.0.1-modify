@@ -20,8 +20,11 @@
     justify-content: center;
   }
   .jnks-iot-no-last-visited-bg {
-    width: 60px;
-    height: 60px;
+    // 首页卡片高度随视口拉伸，插图固定 60px 时整张卡看着像一块空白。
+    // 改成随卡片缩放：宽度取卡片宽度的比例，高度由 aspect-ratio 推出。
+    width: min(40%, 260px);
+    height: auto;
+    aspect-ratio: 1 / 1;
     margin: 10px;
     position: relative;
     &:before {
@@ -35,14 +38,16 @@
       background: #305680;
       -webkit-mask-image: url(/assets/home/no_data_bg.svg);
       -webkit-mask-repeat: no-repeat;
+      -webkit-mask-size: contain;
       mask-image: url(/assets/home/no_data_bg.svg);
       mask-repeat: no-repeat;
+      mask-size: contain;
     }
   }
   .jnks-iot-no-last-visited-dashboards-text {
     font-weight: 500;
-    font-size: 14px;
-    line-height: 20px;
+    font-size: 15px;
+    line-height: 22px;
     letter-spacing: 0.25px;
     color: var(--jnks-iot-text-muted);
   }

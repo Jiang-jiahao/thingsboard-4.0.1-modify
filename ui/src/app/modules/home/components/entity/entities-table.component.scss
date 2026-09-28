@@ -121,8 +121,14 @@
       .mat-mdc-table-toolbar {
         min-height: 44px;
         padding: 0 12px;
-        background: var(--jnks-iot-surface-card) !important;
         border-bottom: 1px solid var(--jnks-iot-line);
+
+        // 只给普通工具栏（搜索/标题，深色文字）刷卡片白底。
+        // "已选择 N 项"那条工具栏是 mat-primary（白字白图标），一起刷成白底会变成白底白字，
+        // 批量操作按钮（删除/分配）看着就"消失"了。
+        &:not(.mat-primary) {
+          background: var(--jnks-iot-surface-card) !important;
+        }
       }
 
       .mat-toolbar-tools {
