@@ -997,9 +997,8 @@ transport:
       # SERVER 入站首帧分帧（鉴权）。鉴权成功后切换为设备配置文件中的 tcpTransportFramingMode。
       auth_framing_mode: "${TCP_SERVER_AUTH_FRAMING_MODE:LINE}"
       auth_fixed_frame_length: "${TCP_SERVER_AUTH_FIXED_FRAME_LENGTH:512}"
-    # 所有 TCP transport 实例监听同一地址端口；多实例由前置 LB 分派，同主机多实例靠 reuse_port（SO_REUSEPORT）。
+    # 监听端口由各设备档案的 tcpProfileServerBindPort 声明，平台没有共享默认端口。
     bind_address: "${TCP_BIND_ADDRESS:0.0.0.0}"
-    bind_port: "${TCP_BIND_PORT:5683}"
     reuse_port: "${TCP_REUSE_PORT:true}"
     netty:
       leak_detector_level: "${TCP_NETTY_LEAK_DETECTOR_LEVEL:PARANOID}"
@@ -1013,9 +1012,8 @@ transport:
       enabled: "${UDP_SERVER_ENABLED:true}"
       auth_framing_mode: "${UDP_SERVER_AUTH_FRAMING_MODE:NONE}"
       auth_fixed_frame_length: "${UDP_SERVER_AUTH_FIXED_FRAME_LENGTH:512}"
-    # 所有 UDP transport 实例监听同一地址端口；多实例由前置 LB 分派（需按源地址粘性），同主机多实例靠 reuse_port。
+    # 监听端口由各设备档案的 udpProfileServerBindPort 声明，平台没有共享默认端口。
     bind_address: "${UDP_BIND_ADDRESS:0.0.0.0}"
-    bind_port: "${UDP_BIND_PORT:5684}"
     reuse_port: "${UDP_REUSE_PORT:true}"
     netty:
       leak_detector_level: "${UDP_NETTY_LEAK_DETECTOR_LEVEL:PARANOID}"

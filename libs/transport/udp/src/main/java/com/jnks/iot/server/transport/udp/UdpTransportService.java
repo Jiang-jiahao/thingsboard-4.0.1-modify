@@ -19,7 +19,12 @@ import com.jnks.iot.server.common.data.DataConstants;
 import com.jnks.iot.server.common.data.JnksIotTransportService;
 import com.jnks.iot.server.common.data.device.profile.UdpTransportFramingMode;
 
-import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service("UdpTransportService")
 @ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.udp.enabled:true}'=='true'")
@@ -31,8 +36,6 @@ public class UdpTransportService implements JnksIotTransportService {
     private boolean serverEnabled;
     @Value("${transport.udp.bind_address:0.0.0.0}")
     private String host;
-    @Value("${transport.udp.bind_port:5684}")
-    private int port;
     @Value("${transport.udp.netty.leak_detector_level:PARANOID}")
     private String leakDetectorLevel;
     @Value("${transport.udp.netty.worker_group_thread_count:0}")
@@ -51,10 +54,10 @@ public class UdpTransportService implements JnksIotTransportService {
     @Lazy
     private UdpTransportContext context;
 
-    private Channel serverChannel;
+    /** 本节点当前监听的全部端口：即各档案声明的监听端口。 */
+    private final Map<Integer, Channel> listenChannels = new ConcurrentHashMap<>();
     @Getter
     private EventLoopGroup workerGroup;
-
     @PostConstruct
     public void init() throws Exception {
         log.info("Setting UDP resource leak detector level to {}", leakDetectorLevel);
@@ -66,9 +69,58 @@ public class UdpTransportService implements JnksIotTransportService {
             log.info("UDP server is disabled (transport.udp.server.enabled=false)");
             return;
         }
-        log.info("Starting UDP transport server on {}:{} ...", host, port);
-        serverChannel = bindDatagramSocket(port);
-        log.info("UDP transport server listening on {}", serverChannel.localAddress());
+        // 监听端口全部来自设备档案（见 UdpListenPortRegistry），平台**没有**共享默认端口：
+        // 这里先不绑任何端口，启动完成、档案端口加载后由 syncListenPorts 负责绑定。
+        log.info("UDP transport has no shared default port; listen ports come from device profiles");
+    }
+
+    /**
+     * 本节点当前监听的全部端口：即各档案声明的监听端口。
+     */
+    public Set<Integer> getListenPorts() {
+        return Set.copyOf(listenChannels.keySet());
+    }
+
+    /**
+     * 把监听端口同步为「默认共享端口 ∪ 档案声明的自定义端口」。
+     * <p>
+     * 所有 transport 实例都监听同一组端口（SO_REUSEPORT），不做按档案分片的归属计算，
+     * 因此设备把数据报发到网关/LB 的任一端口都能落到任一实例。每个端口单独 try/catch。
+     */
+    public synchronized void syncListenPorts(Collection<Integer> profilePorts) {
+        if (!serverEnabled) {
+            return;
+        }
+        Set<Integer> desired = new HashSet<>(profilePorts);
+        for (Integer boundPort : new ArrayList<>(listenChannels.keySet())) {
+            if (desired.contains(boundPort)) {
+                continue;
+            }
+            Channel ch = listenChannels.remove(boundPort);
+            if (ch == null) {
+                continue;
+            }
+            // 仅关闭监听 socket 不会结束已建立的会话，需先按本地端口关闭该端口上的入站会话。
+            context.closeInboundSessionsOnLocalPort(boundPort);
+            try {
+                ch.close().sync();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            log.info("Stopped UDP listen on {}:{}", host, boundPort);
+        }
+        for (Integer bindPort : desired) {
+            if (bindPort == null || listenChannels.containsKey(bindPort)) {
+                continue;
+            }
+            try {
+                Channel ch = bindDatagramSocket(bindPort);
+                listenChannels.put(bindPort, ch);
+                log.info("UDP transport listening on {}", ch.localAddress());
+            } catch (Exception e) {
+                log.error("Failed to bind UDP listen port {}:{} - {}", host, bindPort, e.getMessage());
+            }
+        }
     }
 
     private Channel bindDatagramSocket(int bindPort) throws InterruptedException {
@@ -85,14 +137,13 @@ public class UdpTransportService implements JnksIotTransportService {
     public void shutdown() throws InterruptedException {
         log.info("Stopping UDP transport");
         try {
-            if (serverChannel != null) {
+            for (Map.Entry<Integer, Channel> entry : listenChannels.entrySet()) {
                 // 共享监听端口：本节点退出会切断落在本节点上的全部设备会话，主动上报会话关闭与非活跃，
                 // 避免 Core 侧要等 transport.sessions.inactivity_timeout（默认 600s）。
-                if (serverChannel.localAddress() instanceof InetSocketAddress isa) {
-                    context.closeInboundSessionsOnLocalPort(isa.getPort());
-                }
-                serverChannel.close().sync();
+                context.closeInboundSessionsOnLocalPort(entry.getKey());
+                entry.getValue().close().sync();
             }
+            listenChannels.clear();
             if (context.getTransportService() != null) {
                 context.getTransportService().closeLocalSessionsAndReportInactivity();
                 context.getTransportService().flushToCore();

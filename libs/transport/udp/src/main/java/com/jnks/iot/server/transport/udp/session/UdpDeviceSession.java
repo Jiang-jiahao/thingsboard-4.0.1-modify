@@ -59,6 +59,10 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
     @Getter
     @Setter
     private volatile InetSocketAddress remoteAddress;
+    /** 最近一次收到该设备数据报的时间；档案配了 udpReadIdleTimeoutSec 时由空闲清理任务据此关会话。 */
+    @Getter
+    @Setter
+    private volatile long lastUplinkMs = System.currentTimeMillis();
     /**
      * 平台已向 Core 完成鉴权并注册会话（CLIENT 在出站 TCP 建连成功且 {@code channelActive} 中注册后为 true；SERVER 在收到首行 token 后为 true）。
      */
@@ -178,7 +182,8 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
 
     public void writeByteBuf(ByteBuf buf) {
         Channel ch = this.channel;
-        InetSocketAddress remote = this.remoteAddress;
+        // 下行目的地：设备配置里的固定下行地址优先，否则回发设备最近上报的源地址
+        InetSocketAddress remote = udpTransportContext.resolveDownlinkAddress(getDeviceId(), this.remoteAddress);
         if (ch != null && ch.isActive() && remote != null) {
             ch.eventLoop().execute(() -> {
                 if (ch.isActive()) {

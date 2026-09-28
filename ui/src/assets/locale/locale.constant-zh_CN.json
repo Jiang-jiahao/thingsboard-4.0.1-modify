@@ -2531,6 +2531,10 @@
             "wire-auth": "链路上鉴权",
             "wire-auth-none": "无（按端口/源 IP 绑定）",
             "wire-auth-deferred-device-id": "延迟（负载 JSON 中的 JSON 键名）",
+            "profile-server-bind-port": "自定义监听端口（档案）",
+            "profile-server-bind-port-hint": "必填。本档案的设备连网关的这个端口；每个 transport 实例都会监听它，因此经负载均衡打到任一实例都可以。须与其他 TCP 档案不同；平台不提供共享默认端口。",
+            "profile-server-bind-port-required": "请填写该设备配置的监听端口。",
+            "profile-server-bind-port-invalid": "端口须在 1–65535 之间。",
             "deferred-token-json-key": "负载身份 JSON 键名（延迟模式）",
             "deferred-token-json-key-hint": "解析后 JSON 对象中的键名。值须与本设备在相同监听端口上配置的 tcpWireAuthPayloadDeviceId 一致。注册后该键会从解析副本中移除。",
             "deferred-token-json-key-required": "请填写负载身份字段的 JSON 键名。",
@@ -2732,6 +2736,10 @@
             "wire-auth": "链路上鉴权",
             "wire-auth-none": "无（按端口/源 IP 绑定）",
             "wire-auth-deferred-device-id": "延迟（负载 JSON 中的 JSON 键名）",
+            "profile-server-bind-port": "自定义监听端口（档案）",
+            "profile-server-bind-port-hint": "必填。本档案的设备把数据报发到网关的这个端口；每个 transport 实例都会监听它（内核会把同一设备固定到同一实例）。须与其他 UDP 档案不同；平台不提供共享默认端口。",
+            "profile-server-bind-port-required": "请填写该设备配置的 UDP 监听端口。",
+            "profile-server-bind-port-invalid": "端口须在 1–65535 之间。",
             "deferred-token-json-key": "负载身份 JSON 键名（延迟模式）",
             "deferred-token-json-key-hint": "解析后 JSON 对象中的键名。值须与本设备在相同监听端口上配置的 udpWireAuthPayloadDeviceId 一致。注册后该键会从解析副本中移除。",
             "deferred-token-json-key-required": "请填写负载身份字段的 JSON 键名。",
@@ -2914,7 +2922,13 @@
             "source-host-hint": "非空则与入站数据报的源 IP 一致。NONE 鉴权时每台须配置不同且合法的源 IP；经负载均衡器时传输侧看到的是 LB 地址。",
             "payload-device-id": "协议设备 ID（协议设备 ID 延迟档案时使用）",
             "payload-device-id-hint": "须与上行 JSON 中档案所配键的值完全一致，且同一租户内唯一（共享监听端口不再参与消歧）。",
-            "payload-device-id-required": "该设备档案要求填写协议设备 ID。"
+            "payload-device-id-required": "该设备档案要求填写协议设备 ID。",
+            "downlink-host": "固定下行地址（可选）",
+            "downlink-host-hint": "可选。填了之后，下发（RPC / 属性 / 定时 RPC）不再回发到设备最近上报的源地址，而是发到这个固定地址 —— 设备从临时或 NAT 端口上报、但固定端口收指令时用它。",
+            "downlink-port": "固定下行端口（可选）",
+            "downlink-port-hint": "可选。须与下行地址成对填写；可以与设备的上报源端口不同。",
+            "downlink-pair-required": "地址与端口须成对填写。",
+            "downlink-port-invalid": "端口须在 1–65535 之间。"
         }
     },
     "dialog": {
@@ -4535,7 +4549,9 @@
         "logout": "注销",
         "menu": "菜单",
         "avatar": "头像",
-        "open-user-menu": "打开用户菜单"
+        "open-user-menu": "打开用户菜单",
+        "switch-to-dark-theme": "切换到深色主题",
+        "switch-to-light-theme": "切换到浅色主题"
     },
     "file-input": {
         "browse-file": "浏览文件",

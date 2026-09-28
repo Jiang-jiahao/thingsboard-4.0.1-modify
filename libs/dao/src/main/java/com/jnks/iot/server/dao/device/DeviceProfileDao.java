@@ -27,6 +27,9 @@ public interface DeviceProfileDao extends Dao<DeviceProfile>, ExportableEntityDa
 
     PageData<UUID> findProfileIdsByTransportType(DeviceTransportType transportType, PageLink pageLink);
 
+    /** 跨租户枚举某传输类型的档案（含 profileData），用于监听端口等全局资源的冲突校验。 */
+    PageData<DeviceProfile> findDeviceProfilesByTransportType(DeviceTransportType transportType, PageLink pageLink);
+
     PageData<DeviceProfileInfo> findDeviceProfileInfos(TenantId tenantId, PageLink pageLink, String transportType);
 
     DeviceProfile findDefaultDeviceProfile(TenantId tenantId);

@@ -21,6 +21,7 @@ import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.DeviceTransportType;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.transport.tcp.service.TcpDeferredAuthCatalog;
+import com.jnks.iot.server.transport.tcp.service.TcpListenPortRegistry;
 import com.jnks.iot.server.transport.tcp.service.TcpProtocolDeviceIdRegistry;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -81,12 +82,16 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
 
     /**
      * 所有入站（SERVER）会话：含尚未写入 {@link #serverSessions} 的鉴权中连接。
-     * 用于在专用监听端口解绑或设备/档案变更时主动断开；仅关闭 Netty 的 ServerChannel 不会自动关闭已接受的子 TCP 连接。
+     * 用于在监听端口解绑或设备/档案变更时主动断开；仅关闭 Netty 的 ServerChannel 不会自动关闭已接受的子 TCP 连接。
      */
     private final Set<TcpDeviceSession> inboundSessions = ConcurrentHashMap.newKeySet();
 
     @Autowired
     private SchedulerComponent scheduler;
+
+    @Autowired
+    @Lazy
+    private TcpListenPortRegistry tcpListenPortRegistry;
 
     public TcpTransportContext(TransportDeviceProfileCache deviceProfileCache,
                                TransportService transportService,
@@ -147,6 +152,16 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
 
     public TcpDeviceSession newInboundDeviceSession() {
         return new TcpDeviceSession(UUID.randomUUID(), this, false);
+    }
+
+    /**
+     * 该本地端口是否由某个档案声明的自定义监听端口；命中时入站连接在鉴权前即可按该档案分帧。
+     * 共享默认端口与未知端口返回空。
+     */
+    public Optional<DeviceProfile> resolveInboundProfileForLocalPort(int localPort) {
+        return tcpListenPortRegistry == null
+                ? Optional.empty()
+                : tcpListenPortRegistry.profileForListenPort(localPort);
     }
     public void afterSuccessfulAuth(ChannelHandlerContext ctx, TcpDeviceSession session, ValidateDeviceCredentialsResponse msg) {
         completeSessionRegistration(session, msg);
@@ -274,6 +289,15 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
         }
         return ((TcpDeviceProfileTransportConfiguration) profile.getProfileData().getTransportConfiguration())
                 .getEffectiveTcpReadIdleTimeoutSec();
+    }
+
+    /** 档案的链路上鉴权模式；非 TCP 档案按 NONE 兜底（与 {@link TcpDeviceSession} 的取值口径一致）。 */
+    private static TcpWireAuthenticationMode wireAuthModeOf(DeviceProfile profile) {
+        if (profile == null || profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration ptc)) {
+            return TcpWireAuthenticationMode.NONE;
+        }
+        return ptc.getTcpWireAuthenticationMode();
     }
 
     public void resetClientReconnectFailureCount(DeviceId deviceId) {
@@ -539,6 +563,12 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
      * @return true 表示已走异步注册，此时须保持 autoRead=false 直至回调中打开
      */
     public boolean startServerWireAuth(ChannelHandlerContext ctx, TcpDeviceSession session) {
+        DeviceProfile bound = session.getDeviceProfile();
+        // 本端口所属档案不是 NONE 鉴权时，绝不走"按源 IP 认领"：源地址绑定只按 IP 索引、不看端口，
+        // 否则同一 IP 连到本档案端口的连接会被别的 NONE 档案设备抢走。
+        if (bound != null && wireAuthModeOf(bound) != TcpWireAuthenticationMode.NONE) {
+            return false;
+        }
         var deviceIdOpt = tcpSourceBindingService.findDeviceIdForRemoteAddress(ctx.channel().remoteAddress());
         if (deviceIdOpt.isEmpty()) {
             return false;
@@ -547,12 +577,16 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
         if (device == null) {
             return false;
         }
+        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
+        // 候选设备必须就是本端口所属档案的设备（NONE 档案之间也不能跨档案认领）
+        if (bound != null && (profile == null || !bound.getId().equals(profile.getId()))) {
+            return false;
+        }
         if (!sourceHostMatchesIfRequired(device, ctx.channel().remoteAddress())) {
             log.warn("[{}] TCP NONE: sourceHost mismatch, closing", device.getId());
             ctx.close();
             return true;
         }
-        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
         if (profile == null || profile.getProfileData() == null
                 || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration)) {
             return false;

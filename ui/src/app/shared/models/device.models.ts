@@ -1365,33 +1365,62 @@ export enum TransportTcpDataType {
   ASCII = 'ASCII'
 }
 
+/**
+ * 后端 Jackson 子类型名 → 前端负载编码枚举名。
+ * 两边是同一件事的不同叫法：后端 `JSON`/`HEX`，前端 `UTF8`/`RAW_BYTES`。
+ * 不做这层转换，读档案时后端值会被当成"未识别"，界面回落成 UTF-8，
+ * 再保存一次就把「原始字节」档案悄悄改成 UTF-8。
+ */
+export function toFormTransportDataTypeName(v: string | null | undefined): string | undefined {
+  if (v == null || v === '') {
+    return undefined;
+  }
+  if (v === 'JSON') {
+    return 'UTF8';
+  }
+  if (v === 'HEX') {
+    return 'RAW_BYTES';
+  }
+  if (v === 'MONITORING_PROTOCOL') {
+    return 'PROTOCOL_TEMPLATE';
+  }
+  return v;
+}
+
+/** 前端枚举名 → 后端 Jackson 子类型名（后端只认 JSON/HEX，发 UTF8/RAW_BYTES 会 500）。 */
+export function toWireTransportDataTypeName(v: string | null | undefined): string | undefined {
+  if (v == null || v === '') {
+    return undefined;
+  }
+  if (v === 'UTF8') {
+    return 'JSON';
+  }
+  if (v === 'RAW_BYTES') {
+    return 'HEX';
+  }
+  if (v === 'MONITORING_PROTOCOL') {
+    return 'PROTOCOL_TEMPLATE';
+  }
+  return v;
+}
+
 /** 将历史字符串 MONITORING_PROTOCOL 规范为 PROTOCOL_TEMPLATE */
 export function normalizeTransportTcpDataType(
   v: string | TransportTcpDataType | undefined | null
 ): TransportTcpDataType | undefined {
-  if (v == null || v === '') {
-    return undefined;
-  }
-  if (v === 'MONITORING_PROTOCOL') {
-    return TransportTcpDataType.PROTOCOL_TEMPLATE;
-  }
-  return v as TransportTcpDataType;
+  return toFormTransportDataTypeName(v) as TransportTcpDataType | undefined;
 }
 
 export function normalizeTransportUdpDataType(
   v: string | TransportUdpDataType | undefined | null
 ): TransportUdpDataType | undefined {
-  if (v == null || v === '') {
+  const s = toFormTransportDataTypeName(v);
+  if (s == null) {
     return undefined;
   }
-  if (v === 'MONITORING_PROTOCOL') {
-    return TransportUdpDataType.PROTOCOL_TEMPLATE;
-  }
-  const s = String(v);
-  if ((Object.values(TransportUdpDataType) as string[]).includes(s)) {
-    return s as TransportUdpDataType;
-  }
-  return undefined;
+  return (Object.values(TransportUdpDataType) as string[]).includes(s)
+    ? s as TransportUdpDataType
+    : undefined;
 }
 
 /** 协议模板命令方向（与后端 ProtocolTemplateCommandDirection 一致） */
@@ -1768,6 +1797,8 @@ export interface TcpDeviceProfileTransportConfiguration {
   tcpTransportFramingMode?: TcpTransportFramingMode;
   tcpFixedFrameLength?: number;
   tcpWireAuthenticationMode?: TcpWireAuthenticationMode;
+  /** SERVER：档案级自定义监听端口；每个 transport 实例都会监听它，留空则只用平台默认共享端口 */
+  tcpProfileServerBindPort?: number;
   /** 协议设备号在负载 JSON 中的字段名 */
   tcpDeferredWireAuthTokenJsonKey?: string;
   /** CLIENT：断线/建连失败后重连间隔（秒）；空=后端默认 30；0=不重连 */
@@ -1852,6 +1883,8 @@ export interface UdpDeviceProfileTransportConfiguration {
   udpTransportFramingMode?: UdpTransportFramingMode;
   udpFixedFrameLength?: number;
   udpWireAuthenticationMode?: UdpWireAuthenticationMode;
+  /** 档案级自定义监听端口；每个 transport 实例都会监听它，留空则只用平台默认共享端口 */
+  udpProfileServerBindPort?: number;
   udpDeferredWireAuthTokenJsonKey?: string;
   udpOutboundReconnectIntervalSec?: number;
   udpOutboundReconnectMaxAttempts?: number;
@@ -1869,6 +1902,10 @@ export interface UdpDeviceTransportConfiguration {
   port?: number;
   sourceHost?: string;
   udpWireAuthPayloadDeviceId?: string;
+  /** 固定下行地址（可选，与 udpDownlinkPort 成对）：留空则回发到设备最近上报的源地址 */
+  udpDownlinkHost?: string;
+  /** 固定下行端口（可选，与 udpDownlinkHost 成对） */
+  udpDownlinkPort?: number;
 }
 
 export const SnmpSpecTypeTranslationMap = new Map<SnmpSpecType, string>([

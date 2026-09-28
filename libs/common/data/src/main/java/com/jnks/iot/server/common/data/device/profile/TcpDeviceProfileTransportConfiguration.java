@@ -12,9 +12,10 @@ import java.util.Objects;
  * @author jiahaozz
  * TCP 传输配置：接入模式（平台作服务端或客户端）、分帧解码、负载编码（UTF-8 文本 / 原始字节 / ASCII）、链路上鉴权等。
  * <p>
- * {@link TcpTransportConnectMode#SERVER} 时平台监听全局配置的 {@code transport.tcp.bind_address:bind_port}（默认 {@code 0.0.0.0:5683}），
- * 入站连接自<strong>首帧</strong>起按全局 {@code transport.tcp.server.auth_framing_mode} 解码，鉴权完成后切换到本档案的分帧与负载类型。
- * 同一个共享端口可同时服务多个档案（设备身份由 token / 协议设备号解析）；多实例由前置 LB 或 SO_REUSEPORT 分派连接。
+ * {@link TcpTransportConnectMode#SERVER} 时平台监听各档案用 {@link #tcpProfileServerBindPort} 声明的端口
+ * （绑定地址取 {@code transport.tcp.bind_address}，默认 {@code 0.0.0.0}）；<strong>每个</strong> transport 实例都监听全部端口
+ * （SO_REUSEPORT），因此设备连网关/LB 的任一端口都能落到任一实例。平台<strong>不提供</strong>共享默认端口。
+ * 入站连接自<strong>首帧</strong>起即按所属档案的分帧解码（端口与档案一一对应），鉴权完成后无需再切换。
  */
 @Data
 public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTransportConfiguration {
@@ -38,6 +39,14 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
      * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 为从业务负载（任意一帧，见枚举说明）解析协议设备号后再注册会话。
      */
     private TcpWireAuthenticationMode tcpWireAuthenticationMode;
+
+    /**
+     * SERVER：档案自己的入站监听端口（1–65535，<strong>必填</strong>；CLIENT 模式必须为空）。
+     * 每个 transport 实例都监听该端口（SO_REUSEPORT），设备连网关/LB 的该端口即可落到任一实例；
+     * 端口只服务本档案，入站<strong>首帧</strong>即按本档案的分帧解码。同一协议内该端口须全局唯一。
+     * 平台不提供共享默认端口。
+     */
+    private Integer tcpProfileServerBindPort;
 
     /**
      * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：解析得到的 JSON 中存放<strong>协议设备 ID</strong>的字段名（与设备传输配置
@@ -159,6 +168,19 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
                 throw new IllegalArgumentException(
                         "tcpDeferredWireAuthTokenJsonKey is required when tcpWireAuthenticationMode is DEFERRED_PAYLOAD_DEVICE_ID");
             }
+        }
+        if (getTcpTransportConnectMode() == TcpTransportConnectMode.SERVER) {
+            if (tcpProfileServerBindPort == null) {
+                throw new IllegalArgumentException(
+                        "tcpProfileServerBindPort is required when tcpTransportConnectMode is SERVER: "
+                                + "each TCP device profile must declare its own inbound listen port");
+            }
+            if (tcpProfileServerBindPort < 1 || tcpProfileServerBindPort > 65535) {
+                throw new IllegalArgumentException("tcpProfileServerBindPort must be between 1 and 65535");
+            }
+        } else if (tcpProfileServerBindPort != null) {
+            throw new IllegalArgumentException(
+                    "tcpProfileServerBindPort is not allowed when tcpTransportConnectMode is CLIENT (CLIENT mode dials out to the device)");
         }
     }
 

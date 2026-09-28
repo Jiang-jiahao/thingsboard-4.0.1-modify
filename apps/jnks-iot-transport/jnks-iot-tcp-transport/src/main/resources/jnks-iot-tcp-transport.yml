@@ -223,13 +223,14 @@ transport:
     enabled: "${TCP_TRANSPORT_ENABLED:true}"
     server:
       enabled: "${TCP_SERVER_ENABLED:true}"
-      # SERVER 入站首帧分帧（鉴权）。鉴权成功后切换为设备配置文件中的 tcpTransportFramingMode。
+      # 兜底首帧分帧：正常路径下端口与档案一一对应，首帧直接用该档案的 tcpTransportFramingMode；
+      # 仅当连接落在未知端口（理论上不会发生）时才用这里的全局值。
       auth_framing_mode: "${TCP_SERVER_AUTH_FRAMING_MODE:LINE}"
       auth_fixed_frame_length: "${TCP_SERVER_AUTH_FIXED_FRAME_LENGTH:512}"
-    # 所有 TCP transport 实例监听同一地址端口；多实例由前置 LB 分派连接，
-    # 同主机多实例则靠 reuse_port（SO_REUSEPORT，需要 epoll/kqueue 原生传输）共享同一 IP:端口。
+    # 监听端口**不是**这里配的：每个设备档案用自己的 tcpProfileServerBindPort 声明入站端口，
+    # 平台没有共享默认端口。所有 TCP transport 实例都监听全部档案端口；
+    # 多实例由前置 LB 分派连接，同主机多实例则靠 reuse_port（SO_REUSEPORT，需要 epoll/kqueue 原生传输）共享同一 IP:端口。
     bind_address: "${TCP_BIND_ADDRESS:0.0.0.0}"
-    bind_port: "${TCP_BIND_PORT:5683}"
     reuse_port: "${TCP_REUSE_PORT:true}"
     netty:
       leak_detector_level: "${TCP_NETTY_LEAK_DETECTOR_LEVEL:PARANOID}"

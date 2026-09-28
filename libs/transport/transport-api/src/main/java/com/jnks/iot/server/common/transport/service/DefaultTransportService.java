@@ -55,6 +55,7 @@ import com.jnks.iot.server.common.stats.StatsType;
 import com.jnks.iot.server.common.stats.JnksIotApiUsageReportClient;
 import com.jnks.iot.server.common.transport.DeviceDeletedEvent;
 import com.jnks.iot.server.common.transport.DeviceProfileUpdatedEvent;
+import com.jnks.iot.server.common.transport.DeviceProfileDeletedEvent;
 import com.jnks.iot.server.common.transport.DeviceUpdatedEvent;
 import com.jnks.iot.server.common.transport.LocalDeviceInactivityEvent;
 import com.jnks.iot.server.common.transport.SessionMsgListener;
@@ -1152,7 +1153,9 @@ public class DefaultTransportService extends TransportActivityManager implements
                 EntityType entityType = EntityType.valueOf(msg.getEntityType());
                 UUID entityUuid = new UUID(msg.getEntityIdMSB(), msg.getEntityIdLSB());
                 if (EntityType.DEVICE_PROFILE.equals(entityType)) {
-                    deviceProfileCache.evict(new DeviceProfileId(new UUID(msg.getEntityIdMSB(), msg.getEntityIdLSB())));
+                    DeviceProfileId deviceProfileId = new DeviceProfileId(new UUID(msg.getEntityIdMSB(), msg.getEntityIdLSB()));
+                    deviceProfileCache.evict(deviceProfileId);
+                    eventPublisher.publishEvent(new DeviceProfileDeletedEvent(deviceProfileId));
                 } else if (EntityType.TENANT_PROFILE.equals(entityType)) {
                     tenantProfileCache.remove(new TenantProfileId(entityUuid));
                 } else if (EntityType.TENANT.equals(entityType)) {

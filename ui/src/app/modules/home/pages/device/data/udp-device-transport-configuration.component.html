@@ -5,6 +5,25 @@
       <input matInput formControlName="sourceHost">
       <mat-hint translate>device-profile.udp.source-host-hint</mat-hint>
     </mat-form-field>
+    <div class="flex flex-row gap-2 xs:flex-col">
+      <mat-form-field class="flex-1">
+        <mat-label translate>device-profile.udp.downlink-host</mat-label>
+        <input matInput formControlName="udpDownlinkHost">
+        <mat-hint translate>device-profile.udp.downlink-host-hint</mat-hint>
+        <mat-error *ngIf="tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkHost').hasError('required')"
+                   translate>device-profile.udp.downlink-pair-required</mat-error>
+      </mat-form-field>
+      <mat-form-field class="flex-1">
+        <mat-label translate>device-profile.udp.downlink-port</mat-label>
+        <input matInput type="number" min="1" max="65535" formControlName="udpDownlinkPort">
+        <mat-hint translate>device-profile.udp.downlink-port-hint</mat-hint>
+        <mat-error *ngIf="tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkPort').hasError('required')"
+                   translate>device-profile.udp.downlink-pair-required</mat-error>
+        <mat-error *ngIf="tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkPort').hasError('min')
+                       || tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkPort').hasError('max')"
+                   translate>device-profile.udp.downlink-port-invalid</mat-error>
+      </mat-form-field>
+    </div>
     <mat-form-field class="mat-block" *ngIf="showUdpWireAuthPayloadDeviceId">
       <mat-label translate>device-profile.udp.payload-device-id</mat-label>
       <input matInput formControlName="udpWireAuthPayloadDeviceId" required>

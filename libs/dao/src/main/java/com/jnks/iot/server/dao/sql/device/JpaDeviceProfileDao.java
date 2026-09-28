@@ -65,6 +65,12 @@ public class JpaDeviceProfileDao extends JpaAbstractDao<DeviceProfileEntity, Dev
     }
 
     @Override
+    public PageData<DeviceProfile> findDeviceProfilesByTransportType(DeviceTransportType transportType, PageLink pageLink) {
+        return DaoUtil.toPageData(
+                deviceProfileRepository.findByTransportType(transportType, DaoUtil.toPageable(pageLink)));
+    }
+
+    @Override
     public PageData<DeviceProfileInfo> findDeviceProfileInfos(TenantId tenantId, PageLink pageLink, String transportType) {
         if (StringUtils.isNotEmpty(transportType)) {
             return DaoUtil.pageToPageData(

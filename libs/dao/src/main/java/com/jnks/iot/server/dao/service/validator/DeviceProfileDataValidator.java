@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 import com.jnks.iot.server.common.data.DashboardInfo;
 import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.DeviceProfileProvisionType;
+import com.jnks.iot.server.common.data.DeviceTransportType;
 import com.jnks.iot.server.common.data.DynamicProtoUtils;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.common.data.device.credentials.lwm2m.LwM2MSecurityMode;
@@ -25,11 +26,15 @@ import com.jnks.iot.server.common.data.device.profile.Lwm2mDeviceProfileTranspor
 import com.jnks.iot.server.common.data.device.profile.MqttDeviceProfileTransportConfiguration;
 import com.jnks.iot.server.common.data.device.profile.ProtoTransportPayloadConfiguration;
 import com.jnks.iot.server.common.data.device.profile.TransportPayloadTypeConfiguration;
+import com.jnks.iot.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
+import com.jnks.iot.server.common.data.device.profile.UdpDeviceProfileTransportConfiguration;
 import com.jnks.iot.server.common.data.device.profile.lwm2m.bootstrap.AbstractLwM2MBootstrapServerCredential;
 import com.jnks.iot.server.common.data.device.profile.lwm2m.bootstrap.LwM2MBootstrapServerCredential;
 import com.jnks.iot.server.common.data.device.profile.lwm2m.bootstrap.RPKLwM2MBootstrapServerCredential;
 import com.jnks.iot.server.common.data.device.profile.lwm2m.bootstrap.X509LwM2MBootstrapServerCredential;
 import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.page.PageData;
+import com.jnks.iot.server.common.data.page.PageLink;
 import com.jnks.iot.server.common.data.queue.Queue;
 import com.jnks.iot.server.common.data.rule.RuleChain;
 import com.jnks.iot.server.common.msg.EncryptionUtil;
@@ -159,6 +164,8 @@ public class DeviceProfileDataValidator extends AbstractHasOtaPackageValidator<D
             }
         }
 
+        validateProfileServerBindPort(deviceProfile, transportConfiguration);
+
         List<DeviceProfileAlarm> profileAlarms = deviceProfile.getProfileData().getAlarms();
 
         if (!CollectionUtils.isEmpty(profileAlarms)) {
@@ -195,6 +202,61 @@ public class DeviceProfileDataValidator extends AbstractHasOtaPackageValidator<D
         }
 
         validateOtaPackage(tenantId, deviceProfile, deviceProfile.getId());
+    }
+
+    /**
+     * TCP/UDP 自定义监听端口是宿主机级资源：每个 transport 实例都会绑定它，因此同协议内必须全局唯一
+     * （跨租户一并校验——两个租户声明同一端口时，必然有一个档案的设备接入异常）。
+     */
+    private void validateProfileServerBindPort(DeviceProfile deviceProfile,
+                                               DeviceProfileTransportConfiguration transportConfiguration) {
+        Integer requestedPort = resolveProfileServerBindPort(transportConfiguration);
+        DeviceTransportType transportType = resolveServerBindPortTransportType(transportConfiguration);
+        if (requestedPort == null || transportType == null) {
+            return;
+        }
+        PageLink pageLink = new PageLink(128);
+        boolean hasNext;
+        do {
+            PageData<DeviceProfile> profiles = deviceProfileDao.findDeviceProfilesByTransportType(transportType, pageLink);
+            if (CollectionUtils.isEmpty(profiles.getData())) {
+                return;
+            }
+            for (DeviceProfile existing : profiles.getData()) {
+                if (existing.getId() != null && existing.getId().equals(deviceProfile.getId())) {
+                    continue;
+                }
+                Integer existingPort = existing.getProfileData() == null ? null
+                        : resolveProfileServerBindPort(existing.getProfileData().getTransportConfiguration());
+                if (requestedPort.equals(existingPort)) {
+                    throw new DataValidationException(transportType + " listen port " + requestedPort
+                            + " is already declared by device profile \"" + existing.getName()
+                            + "\"; a custom listen port may only be declared by one device profile.");
+                }
+            }
+            hasNext = profiles.hasNext();
+            pageLink = pageLink.nextPageLink();
+        } while (hasNext);
+    }
+
+    private Integer resolveProfileServerBindPort(DeviceProfileTransportConfiguration transportConfiguration) {
+        if (transportConfiguration instanceof TcpDeviceProfileTransportConfiguration tcp) {
+            return tcp.getTcpProfileServerBindPort();
+        }
+        if (transportConfiguration instanceof UdpDeviceProfileTransportConfiguration udp) {
+            return udp.getUdpProfileServerBindPort();
+        }
+        return null;
+    }
+
+    private DeviceTransportType resolveServerBindPortTransportType(DeviceProfileTransportConfiguration transportConfiguration) {
+        if (transportConfiguration instanceof TcpDeviceProfileTransportConfiguration) {
+            return DeviceTransportType.TCP;
+        }
+        if (transportConfiguration instanceof UdpDeviceProfileTransportConfiguration) {
+            return DeviceTransportType.UDP;
+        }
+        return null;
     }
 
     @Override

@@ -15,6 +15,8 @@ import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * UDP 侧的 Netty 传输实现选择，与 {@code TcpNettyTransport} 同构：
  * 优先原生 epoll（Linux）/ kqueue（macOS、BSD），否则回落 NIO。
@@ -24,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public final class UdpNettyTransport {
+
+    private static final AtomicBoolean REUSE_PORT_NIO_WARNED = new AtomicBoolean();
 
     private UdpNettyTransport() {
     }
@@ -71,8 +75,10 @@ public final class UdpNettyTransport {
         if (KQueue.isAvailable()) {
             return bootstrap.option(KQueueChannelOption.SO_REUSEPORT, true);
         }
-        log.warn("transport.udp.reuse_port=true but the transport runs on NIO (no epoll/kqueue native library); "
-                + "multiple UDP transport instances on the same host cannot share the same port");
+        if (REUSE_PORT_NIO_WARNED.compareAndSet(false, true)) {
+            log.warn("transport.udp.reuse_port=true but the transport runs on NIO (no epoll/kqueue native library); "
+                    + "multiple UDP transport instances on the same host cannot share the same port");
+        }
         return bootstrap;
     }
 }

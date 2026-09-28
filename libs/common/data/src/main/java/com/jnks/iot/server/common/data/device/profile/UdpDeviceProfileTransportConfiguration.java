@@ -7,10 +7,12 @@ import com.jnks.iot.server.common.data.StringUtils;
 import java.util.Objects;
 
 /**
- * UDP 传输配置：设备向平台监听端口（全局 {@code transport.udp.bind_address:bind_port}，默认 {@code 0.0.0.0:5684}）发送<strong>数据报</strong>
- * （无 TCP 式 CLIENT/SERVER 建连，也无半包/粘包分帧）。
+ * UDP 传输配置：设备向本档案声明的 {@link #udpProfileServerBindPort}（绑定地址取 {@code transport.udp.bind_address}，
+ * 默认 {@code 0.0.0.0}）发送<strong>数据报</strong>（无 TCP 式 CLIENT/SERVER 建连，也无半包/粘包分帧）。
+ * 平台<strong>不提供</strong>共享默认端口。
  * <p>
- * 每个 UDP 报文即一条业务负载；多实例由前置 LB（需按源地址粘性）或 SO_REUSEPORT 分派。
+ * 每个 UDP 报文即一条业务负载；<strong>每个</strong> transport 实例都监听全部档案端口（SO_REUSEPORT），
+ * 设备发到网关/LB 的任一端口都能落到任一实例（经 LB 时需按源地址粘性）。
  */
 @Data
 public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTransportConfiguration {
@@ -28,6 +30,13 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
      * {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 为从业务负载（任意一帧，见枚举说明）解析协议设备号后再注册会话。
      */
     private UdpWireAuthenticationMode udpWireAuthenticationMode;
+
+    /**
+     * 档案自己的 UDP 入站监听端口（1–65535，<strong>必填</strong>）。每个 transport 实例都监听该端口（SO_REUSEPORT），
+     * 设备把数据报发到网关/LB 的该端口即可落到任一实例，且该端口只服务本档案。
+     * 同一协议内该端口须全局唯一；平台不提供共享默认端口。
+     */
+    private Integer udpProfileServerBindPort;
 
     /**
      * {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：解析得到的 JSON 中存放<strong>协议设备 ID</strong>的字段名（与设备传输配置
@@ -153,6 +162,13 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
         }
         if (udpTransportFramingMode != null && udpTransportFramingMode != UdpTransportFramingMode.NONE) {
             throw new IllegalArgumentException("UDP transport does not support stream framing (LINE/LENGTH_PREFIX/FIXED_LENGTH); each datagram is one payload.");
+        }
+        if (udpProfileServerBindPort == null) {
+            throw new IllegalArgumentException(
+                    "udpProfileServerBindPort is required: each UDP device profile must declare its own listen port");
+        }
+        if (udpProfileServerBindPort < 1 || udpProfileServerBindPort > 65535) {
+            throw new IllegalArgumentException("udpProfileServerBindPort must be between 1 and 65535");
         }
     }
 

@@ -360,6 +360,9 @@ services:
      - "1883:1883"
      - "5683:5683"
      - "5684:5684/udp"
+     # 档案级自定义监听端口（档案「udp测试设备配置」声明了 55566）；
+     # 转发与真实源地址传递（PROXY protocol）见 nginx.conf 的 stream 段
+     - "55566:55566/udp"
     volumes:
      - ./nginx/config/nginx.conf:/etc/nginx/nginx.conf:ro
      - ./nginx/config:/etc/nginx/tbconf:ro

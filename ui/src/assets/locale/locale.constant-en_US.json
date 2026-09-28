@@ -2517,6 +2517,10 @@
             "wire-auth": "Wire authentication",
             "wire-auth-none": "None (bind by port / source IP)",
             "wire-auth-deferred-device-id": "Deferred (JSON key name in payload)",
+            "profile-server-bind-port": "Custom listen port (profile)",
+            "profile-server-bind-port-hint": "Required. Devices of this profile connect to the gateway on this port. Every transport instance listens on it, so a load balancer may route the connection to any instance. Must be unique among TCP device profiles; the platform has no shared default port.",
+            "profile-server-bind-port-required": "Please enter the listen port for this device profile.",
+            "profile-server-bind-port-invalid": "Port must be between 1 and 65535.",
             "deferred-token-json-key": "Payload identity JSON key (deferred modes)",
             "deferred-token-json-key-hint": "JSON object key for the value read before Core registration. The string must match this device's tcpWireAuthPayloadDeviceId on the same listen port. After registration the key is removed from parsed payloads.",
             "deferred-token-json-key-required": "Please enter the JSON key for the payload identity field.",
@@ -2718,6 +2722,10 @@
             "wire-auth": "Wire authentication",
             "wire-auth-none": "None (bind by port / source IP)",
             "wire-auth-deferred-device-id": "Deferred (JSON key name in payload)",
+            "profile-server-bind-port": "UDP listen port (profile)",
+            "profile-server-bind-port-hint": "Required. Devices of this profile send datagrams to the gateway on this port. Every transport instance listens on it (the kernel keeps one device on one instance). Must be unique among UDP device profiles; the platform has no shared default port.",
+            "profile-server-bind-port-required": "Please enter the UDP listen port for this device profile.",
+            "profile-server-bind-port-invalid": "Port must be between 1 and 65535.",
             "deferred-token-json-key": "Payload identity JSON key (deferred modes)",
             "deferred-token-json-key-hint": "JSON object key for the value read before Core registration. The string must match this device's udpWireAuthPayloadDeviceId on the same listen port. After registration the key is removed from parsed payloads.",
             "deferred-token-json-key-required": "Please enter the JSON key for the payload identity field.",
@@ -2900,7 +2908,13 @@
             "source-host-hint": "If set, must match the datagram source address. With NONE, each device needs a distinct valid source IP; behind a load balancer the transport sees the LB address.",
             "payload-device-id": "Protocol device id (for DEFERRED device-id profile)",
             "payload-device-id-hint": "Must exactly match the JSON field value on uplinks. The value must be unique within the tenant.",
-            "payload-device-id-required": "Protocol device id is required for this device profile."
+            "payload-device-id-required": "Protocol device id is required for this device profile.",
+            "downlink-host": "Fixed downlink host (optional)",
+            "downlink-host-hint": "Optional. Downlink (RPC / attributes / scheduled RPC) is sent here instead of replying to the source address of the last uplink. Use it when the device reports from a temporary/NAT port but listens for commands on a fixed one.",
+            "downlink-port": "Fixed downlink port (optional)",
+            "downlink-port-hint": "Optional. Must be filled together with the downlink host. May differ from the uplink source port.",
+            "downlink-pair-required": "Host and port must be filled together.",
+            "downlink-port-invalid": "Port must be between 1 and 65535."
         }
     },
     "dialog": {
@@ -3569,7 +3583,9 @@
         "logout": "Logout",
         "menu": "Menu",
         "avatar": "Avatar",
-        "open-user-menu": "Open user menu"
+        "open-user-menu": "Open user menu",
+        "switch-to-dark-theme": "Switch to dark theme",
+        "switch-to-light-theme": "Switch to light theme"
     },
     "file-input": {
         "browse-file": "Browse file",

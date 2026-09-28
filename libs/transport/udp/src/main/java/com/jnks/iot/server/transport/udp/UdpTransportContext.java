@@ -21,6 +21,8 @@ import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.DeviceTransportType;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.transport.udp.service.UdpDeferredAuthCatalog;
+import com.jnks.iot.server.transport.udp.service.UdpDownlinkAddressRegistry;
+import com.jnks.iot.server.transport.udp.service.UdpListenPortRegistry;
 import com.jnks.iot.server.transport.udp.service.UdpProtocolDeviceIdRegistry;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -32,6 +34,7 @@ import com.jnks.iot.server.common.data.device.profile.UdpDeviceProfileTransportC
 import com.jnks.iot.server.common.data.device.profile.UdpWireAuthenticationMode;
 import com.jnks.iot.server.transport.udp.service.UdpProtoTransportEntityService;
 import com.jnks.iot.server.transport.udp.service.UdpSourceBindingService;
+import com.jnks.iot.server.transport.udp.util.UdpProxiedClientRegistry;
 import com.jnks.iot.server.common.data.device.profile.UdpTransportConnectMode;
 import com.jnks.iot.server.common.data.device.profile.UdpTransportFramingMode;
 import com.jnks.iot.server.common.data.id.DeviceId;
@@ -96,6 +99,45 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
     @Autowired
     private SchedulerComponent scheduler;
 
+    @Autowired
+    private UdpDownlinkAddressRegistry udpDownlinkAddressRegistry;
+
+    @Autowired
+    @Lazy
+    private UdpListenPortRegistry udpListenPortRegistry;
+
+    /** 代理侧对端 → 真实客户端地址（nginx 的 UDP 代理只在会话首包带 PROXY 头，后续包靠这里恢复）。 */
+    @Getter
+    private final UdpProxiedClientRegistry proxiedClients = new UdpProxiedClientRegistry();
+
+    /** 记住某个代理侧对端（nginx）对应的真实客户端地址。 */
+    public void rememberProxiedClient(InetSocketAddress proxyPeer, InetSocketAddress realClient) {
+        proxiedClients.remember(proxyPeer, realClient);
+    }
+
+    /** 该对端是否是已知的代理侧对端；是则返回其真实客户端地址，否则 null。 */
+    public InetSocketAddress proxiedClientFor(InetSocketAddress peer) {
+        return proxiedClients.realClientFor(peer);
+    }
+
+    /**
+     * 该本地端口所属的档案（自定义端口与档案一一对应）；未命中返回空。
+     */
+    public Optional<DeviceProfile> resolveInboundProfileForLocalPort(int localPort) {
+        return udpListenPortRegistry == null
+                ? Optional.empty()
+                : udpListenPortRegistry.profileForListenPort(localPort);
+    }
+
+    /**
+     * 下行目的地：设备连接配置里指定了固定下行地址（{@code udpDownlinkHost/Port}）就用它，
+     * 否则回发会话记录的"设备最近上报的源地址"。
+     */
+    public InetSocketAddress resolveDownlinkAddress(DeviceId deviceId, InetSocketAddress reportedAddress) {
+        InetSocketAddress fixed = udpDownlinkAddressRegistry == null ? null : udpDownlinkAddressRegistry.resolve(deviceId);
+        return fixed != null ? fixed : reportedAddress;
+    }
+
     public UdpTransportContext(TransportDeviceProfileCache deviceProfileCache,
                                TransportService transportService,
                                UdpProtoTransportEntityService protoEntityService,
@@ -118,6 +160,16 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
     @AfterStartUp(order = AfterStartUp.AFTER_TRANSPORT_SERVICE)
     public void fetchDevicesAndEstablishClientSessions() {
         // UDP 无平台主动 outbound 建连；设备向档案监听端口发数据报即可。
+    }
+
+    /**
+     * 启动读空闲清理任务（每隔 10 秒扫一遍；档案没配 udpReadIdleTimeoutSec 的会话不受影响）。
+     */
+    @AfterStartUp(order = AfterStartUp.AFTER_TRANSPORT_SERVICE)
+    public void startReadIdleSweeper() {
+        long periodSec = 10L;
+        scheduler.scheduleAtFixedRate(this::sweepIdleInboundSessions, periodSec, periodSec, TimeUnit.SECONDS);
+        log.info("UDP read-idle sweeper started (every {}s)", periodSec);
     }
     private boolean isClientProfile(Device device) {
         DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
@@ -153,7 +205,11 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
             UdpDeviceSession session = newInboundDeviceSession();
             session.setChannel(channel);
             session.setRemoteAddress(sender);
-            // 共享监听端口 + 每个数据报即一帧：分帧恒为 NONE，无需按端口解析档案
+            session.setLastUplinkMs(System.currentTimeMillis());
+            // 自定义端口与档案一一对应：鉴权前就绑定档案，后续鉴权/解析都按该档案走，
+            // 也避免"按源 IP 认领"把别的档案端口上的报文抢走。
+            resolveInboundProfileForLocalPort(localPort).ifPresent(session::setDeviceProfile);
+            // 每个 UDP 数据报即一帧：分帧恒为 NONE，无需按端口解析档案
             session.setInboundPipelineFramingMode(UdpTransportFramingMode.NONE);
             session.setInboundPipelineFixedFrameLength(0);
             trackInboundSession(session);
@@ -276,6 +332,34 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
         }
         return ((UdpDeviceProfileTransportConfiguration) profile.getProfileData().getTransportConfiguration())
                 .getEffectiveUdpReadIdleTimeoutSec();
+    }
+
+    /** 档案的链路上鉴权模式；非 UDP 档案按 NONE 兜底（与 {@link UdpDeviceSession} 的取值口径一致）。 */
+    private static UdpWireAuthenticationMode wireAuthModeOf(DeviceProfile profile) {
+        if (profile == null || profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration ptc)) {
+            return UdpWireAuthenticationMode.NONE;
+        }
+        return ptc.getUdpWireAuthenticationMode();
+    }
+
+    /**
+     * 读空闲清理：档案配了 {@code udpReadIdleTimeoutSec} 时，超过该秒数没收到该设备的数据报就关掉会话
+     * （设备下次发包会重新鉴权建会话）。1 秒以下按 1 秒算，避免配置成 0.x 之类的意外值。
+     */
+    private void sweepIdleInboundSessions() {
+        long now = System.currentTimeMillis();
+        for (UdpDeviceSession s : new ArrayList<>(inboundSessions)) {
+            int idleSec = readIdleSecFromProfile(s.getDeviceProfile());
+            if (idleSec <= 0) {
+                continue;
+            }
+            if (now - s.getLastUplinkMs() > idleSec * 1000L) {
+                log.info("[{}] Closing UDP session: no datagram for {}s (profile udpReadIdleTimeoutSec)",
+                        s.getSessionId(), idleSec);
+                s.close();
+            }
+        }
     }
 
     public void resetClientReconnectFailureCount(DeviceId deviceId) {
@@ -527,6 +611,12 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
      * @return true 表示已走异步注册，此时须保持 autoRead=false 直至回调中打开
      */
     public boolean startServerWireAuth(ChannelHandlerContext ctx, UdpDeviceSession session, InetSocketAddress remote) {
+        DeviceProfile bound = session.getDeviceProfile();
+        // 本端口所属档案不是 NONE 鉴权时，绝不走"按源 IP 认领"：源地址绑定只按 IP 索引、不看端口，
+        // 否则同一 IP 发往本档案端口的报文会被别的 NONE 档案设备抢走。
+        if (bound != null && wireAuthModeOf(bound) != UdpWireAuthenticationMode.NONE) {
+            return false;
+        }
         var deviceIdOpt = udpSourceBindingService.findDeviceIdForRemoteAddress(remote);
         if (deviceIdOpt.isEmpty()) {
             return false;
@@ -535,12 +625,16 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
         if (device == null) {
             return false;
         }
+        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
+        // 候选设备必须就是本端口所属档案的设备（NONE 档案之间也不能跨档案认领）
+        if (bound != null && (profile == null || !bound.getId().equals(profile.getId()))) {
+            return false;
+        }
         if (!sourceHostMatchesIfRequired(device, remote)) {
             log.warn("[{}] UDP NONE: sourceHost mismatch", device.getId());
             failInboundSession(session);
             return true;
         }
-        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
         if (profile == null || profile.getProfileData() == null
                 || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration)) {
             return false;

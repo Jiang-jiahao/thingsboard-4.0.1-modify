@@ -58,7 +58,8 @@ import {
   UdpTransportFramingMode,
   UdpWireAuthenticationMode,
   TransportUdpDataType,
-  normalizeTransportUdpDataType
+  normalizeTransportUdpDataType,
+  toWireTransportDataTypeName
 } from '@shared/models/device.models';
 import { isDefinedAndNotNull } from '@core/utils';
 import { Subject } from 'rxjs';
@@ -149,6 +150,7 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
 
     this.tcpDeviceProfileTransportConfigurationFormGroup = this.fb.group({
       udpWireAuthenticationMode: [UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID, Validators.required],
+      udpProfileServerBindPort: [null, [Validators.required, Validators.min(1), Validators.max(65535)]],
       udpDeferredWireAuthTokenJsonKey: [''],
       udpReadIdleTimeoutSec: [null, [Validators.min(0)]],
       udpOpaqueRuleEngineKey: ['udpOpaquePayload'],
@@ -805,6 +807,7 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
         : rawType;
       this.tcpDeviceProfileTransportConfigurationFormGroup.patchValue({
         udpWireAuthenticationMode: value.udpWireAuthenticationMode,
+        udpProfileServerBindPort: value.udpProfileServerBindPort ?? null,
         udpDeferredWireAuthTokenJsonKey: value.udpDeferredWireAuthTokenJsonKey ?? '',
         udpReadIdleTimeoutSec: value.udpReadIdleTimeoutSec,
         udpOpaqueRuleEngineKey: value.udpOpaqueRuleEngineKey || 'udpOpaquePayload',
@@ -880,7 +883,7 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
     if (v.dataType === TransportUdpDataType.RAW_BYTES) {
       const usePt = this.usesProtocolTemplatePayload(v);
       if (usePt) {
-        transportUdpDataTypeConfiguration.transportUdpDataType = TransportUdpDataType.PROTOCOL_TEMPLATE;
+        transportUdpDataTypeConfiguration.transportUdpDataType = toWireTransportDataTypeName(TransportUdpDataType.PROTOCOL_TEMPLATE) as TransportUdpDataType;
         const templates: ProtocolTemplateDefinition[] = [];
         const tplRows = (this.protocolTemplatesArray?.getRawValue() ?? []) as Array<Record<string, unknown>>;
         const row = tplRows[0];
@@ -1007,7 +1010,7 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
           transportUdpDataTypeConfiguration.protocolTemplateBundleId = bundleId;
         }
       } else {
-        transportUdpDataTypeConfiguration.transportUdpDataType = TransportUdpDataType.RAW_BYTES;
+        transportUdpDataTypeConfiguration.transportUdpDataType = toWireTransportDataTypeName(TransportUdpDataType.RAW_BYTES) as TransportUdpDataType;
         const cmdRows = (this.hexCommandProfilesArray?.getRawValue() ?? []) as Array<Record<string, unknown>>;
         const profiles: TcpHexCommandProfile[] = [];
         for (const row of cmdRows) {
@@ -1081,7 +1084,7 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
         }
       }
     } else {
-      transportUdpDataTypeConfiguration.transportUdpDataType = v.dataType;
+      transportUdpDataTypeConfiguration.transportUdpDataType = toWireTransportDataTypeName(v.dataType) as TransportUdpDataType;
     }
     const textLikePayload = v.dataType === TransportUdpDataType.UTF8 || v.dataType === TransportUdpDataType.ASCII;
     const configuration: UdpDeviceProfileTransportConfiguration = {
@@ -1096,6 +1099,10 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
     };
     if (v.udpReadIdleTimeoutSec != null && v.udpReadIdleTimeoutSec !== '') {
       configuration.udpReadIdleTimeoutSec = Number(v.udpReadIdleTimeoutSec);
+    }
+    const bindPort = this.optionalFormNumber(v.udpProfileServerBindPort);
+    if (bindPort != null) {
+      configuration.udpProfileServerBindPort = bindPort;
     }
     if (v.udpWireAuthenticationMode === UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
       const dk = String(v.udpDeferredWireAuthTokenJsonKey ?? '').trim();

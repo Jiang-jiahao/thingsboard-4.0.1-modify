@@ -20,6 +20,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Netty 传输实现选择：优先原生 epoll（Linux）/ kqueue（macOS、BSD），否则回落到 JDK NIO。
  * <p>
@@ -28,6 +30,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public final class TcpNettyTransport {
+
+    private static final AtomicBoolean REUSE_PORT_NIO_WARNED = new AtomicBoolean();
 
     private TcpNettyTransport() {
     }
@@ -85,9 +89,16 @@ public final class TcpNettyTransport {
         if (KQueue.isAvailable()) {
             return bootstrap.option(KQueueChannelOption.SO_REUSEPORT, true);
         }
-        log.warn("transport.tcp.reuse_port=true but the transport runs on NIO (no epoll/kqueue native library); "
+        logReusePortUnavailable("transport.tcp.reuse_port=true but the transport runs on NIO (no epoll/kqueue native library); "
                 + "multiple TCP transport instances on the same host cannot share the same port");
         return bootstrap;
+    }
+
+    /** 每个监听端口都会调用一次 {@link #applyReusePort}，只在首次回落 NIO 时提示，避免端口多时刷屏。 */
+    static void logReusePortUnavailable(String message) {
+        if (REUSE_PORT_NIO_WARNED.compareAndSet(false, true)) {
+            log.warn(message);
+        }
     }
 
     /**

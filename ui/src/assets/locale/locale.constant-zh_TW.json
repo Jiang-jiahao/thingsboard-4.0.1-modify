@@ -2112,7 +2112,9 @@
         "logout": "註銷",
         "menu": "菜單",
         "avatar": "頭像",
-        "open-user-menu": "打開用戶菜單"
+        "open-user-menu": "打開用戶菜單",
+        "switch-to-dark-theme": "切換到深色主題",
+        "switch-to-light-theme": "切換到淺色主題"
     },
     "file-input": {
         "browse-file": "瀏覽文件",

@@ -59,7 +59,8 @@ import {
   TcpTransportFramingMode,
   TcpWireAuthenticationMode,
   TransportTcpDataType,
-  normalizeTransportTcpDataType
+  normalizeTransportTcpDataType,
+  toWireTransportDataTypeName
 } from '@shared/models/device.models';
 import { isDefinedAndNotNull } from '@core/utils';
 import { Subject } from 'rxjs';
@@ -154,6 +155,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       tcpTransportFramingMode: [TcpTransportFramingMode.LINE, Validators.required],
       tcpFixedFrameLength: [null],
       tcpWireAuthenticationMode: [TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID, Validators.required],
+      tcpProfileServerBindPort: [null, [Validators.min(1), Validators.max(65535)]],
       tcpDeferredWireAuthTokenJsonKey: [''],
       tcpOutboundReconnectIntervalSec: [null, [Validators.min(0)]],
       tcpOutboundReconnectMaxAttempts: [null, [Validators.min(0)]],
@@ -203,6 +205,12 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     this.tcpDeviceProfileTransportConfigurationFormGroup.get('tcpTransportConnectMode').valueChanges.pipe(
       takeUntil(this.destroy$)
     ).subscribe((cm: TcpTransportConnectMode) => {
+      if (cm === TcpTransportConnectMode.CLIENT) {
+        // CLIENT 是平台主动连设备，没有入站监听端口
+        this.tcpDeviceProfileTransportConfigurationFormGroup.patchValue(
+          { tcpProfileServerBindPort: null }, { emitEvent: false });
+      }
+      this.applyTcpProfileServerBindPortValidators();
       this.notifyValidatorChange();
     });
     this.tcpDeviceProfileTransportConfigurationFormGroup.statusChanges.pipe(
@@ -246,6 +254,24 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     this.applyDeferredWireAuthTokenKeyValidators(
       this.tcpDeviceProfileTransportConfigurationFormGroup.get('tcpWireAuthenticationMode').value
     );
+    this.applyTcpProfileServerBindPortValidators();
+  }
+
+  /**
+   * SERVER 模式必须填监听端口（平台没有共享默认端口）；CLIENT 模式平台不监听，不校验。
+   */
+  private applyTcpProfileServerBindPortValidators(): void {
+    const grp = this.tcpDeviceProfileTransportConfigurationFormGroup;
+    const portCtrl = grp.get('tcpProfileServerBindPort');
+    if (!portCtrl) {
+      return;
+    }
+    if (grp.get('tcpTransportConnectMode').value === TcpTransportConnectMode.SERVER) {
+      portCtrl.setValidators([Validators.required, Validators.min(1), Validators.max(65535)]);
+    } else {
+      portCtrl.clearValidators();
+    }
+    portCtrl.updateValueAndValidity({ emitEvent: false });
   }
 
   private applyDeferredWireAuthTokenKeyValidators(mode: TcpWireAuthenticationMode): void {
@@ -833,6 +859,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         tcpTransportFramingMode: value.tcpTransportFramingMode,
         tcpFixedFrameLength: value.tcpFixedFrameLength,
         tcpWireAuthenticationMode: value.tcpWireAuthenticationMode,
+        tcpProfileServerBindPort: value.tcpProfileServerBindPort ?? null,
         tcpDeferredWireAuthTokenJsonKey: value.tcpDeferredWireAuthTokenJsonKey ?? '',
         tcpOutboundReconnectIntervalSec: value.tcpOutboundReconnectIntervalSec,
         tcpOutboundReconnectMaxAttempts: value.tcpOutboundReconnectMaxAttempts,
@@ -907,6 +934,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       fixedCtrl.updateValueAndValidity({emitEvent: false});
       this.applyTcpOpaqueKeyValidators(formDataType);
       this.applyDeferredWireAuthTokenKeyValidators(value.tcpWireAuthenticationMode);
+      this.applyTcpProfileServerBindPortValidators();
       this.scheduleSyncHexLtvPanelExpanded();
       this.notifyValidatorChange();
     }
@@ -918,7 +946,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     if (v.dataType === TransportTcpDataType.RAW_BYTES) {
       const usePt = this.usesProtocolTemplatePayload(v);
       if (usePt) {
-        transportTcpDataTypeConfiguration.transportTcpDataType = TransportTcpDataType.PROTOCOL_TEMPLATE;
+        transportTcpDataTypeConfiguration.transportTcpDataType = toWireTransportDataTypeName(TransportTcpDataType.PROTOCOL_TEMPLATE) as TransportTcpDataType;
         const templates: ProtocolTemplateDefinition[] = [];
         const tplRows = (this.protocolTemplatesArray?.getRawValue() ?? []) as Array<Record<string, unknown>>;
         const row = tplRows[0];
@@ -1045,7 +1073,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           transportTcpDataTypeConfiguration.protocolTemplateBundleId = bundleId;
         }
       } else {
-        transportTcpDataTypeConfiguration.transportTcpDataType = TransportTcpDataType.RAW_BYTES;
+        transportTcpDataTypeConfiguration.transportTcpDataType = toWireTransportDataTypeName(TransportTcpDataType.RAW_BYTES) as TransportTcpDataType;
         const cmdRows = (this.hexCommandProfilesArray?.getRawValue() ?? []) as Array<Record<string, unknown>>;
         const profiles: TcpHexCommandProfile[] = [];
         for (const row of cmdRows) {
@@ -1119,7 +1147,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
         }
       }
     } else {
-      transportTcpDataTypeConfiguration.transportTcpDataType = v.dataType;
+      transportTcpDataTypeConfiguration.transportTcpDataType = toWireTransportDataTypeName(v.dataType) as TransportTcpDataType;
     }
     const textLikePayload = v.dataType === TransportTcpDataType.UTF8 || v.dataType === TransportTcpDataType.ASCII;
     const configuration: TcpDeviceProfileTransportConfiguration = {
@@ -1146,6 +1174,12 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
     }
     if (v.tcpReadIdleTimeoutSec != null && v.tcpReadIdleTimeoutSec !== '') {
       configuration.tcpReadIdleTimeoutSec = Number(v.tcpReadIdleTimeoutSec);
+    }
+    if (v.tcpTransportConnectMode === TcpTransportConnectMode.SERVER) {
+      const bindPort = this.optionalFormNumber(v.tcpProfileServerBindPort);
+      if (bindPort != null) {
+        configuration.tcpProfileServerBindPort = bindPort;
+      }
     }
     if (v.tcpWireAuthenticationMode === TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
       const dk = String(v.tcpDeferredWireAuthTokenJsonKey ?? '').trim();
