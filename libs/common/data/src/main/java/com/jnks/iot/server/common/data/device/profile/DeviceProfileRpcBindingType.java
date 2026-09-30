@@ -23,5 +23,10 @@ public enum DeviceProfileRpcBindingType {
     /**
      * MQTT 自定义数据格式：按档案配置的请求/响应主题与 payload 模板下发（MQTT 服务端与 MQTT Pull 客户端均可用）。
      */
-    MQTT_CUSTOM
+    MQTT_CUSTOM,
+    /**
+     * TCP/UDP 自定义 JSON：{@code params} 即负载，按 UTF-8 原样发出，<strong>不包 {@code {method,requestId,...}} 信封</strong>。
+     * 因为没有 requestId、与设备响应无法对应，只能单向（{@code oneWay} 必须为 true）。
+     */
+    CUSTOM_JSON
 }

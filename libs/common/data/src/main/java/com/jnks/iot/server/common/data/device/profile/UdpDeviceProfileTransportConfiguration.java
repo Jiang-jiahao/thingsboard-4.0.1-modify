@@ -17,9 +17,6 @@ import java.util.Objects;
 @Data
 public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTransportConfiguration {
 
-    /** @deprecated 历史 JSON；UDP 仅平台监听，运行时固定为 {@link UdpTransportConnectMode#SERVER} */
-    private UdpTransportConnectMode udpTransportConnectMode;
-
     /** @deprecated 历史 JSON；UDP 以数据报为界，运行时固定为 {@link UdpTransportFramingMode#NONE} */
     private UdpTransportFramingMode udpTransportFramingMode;
     /** @deprecated 历史 JSON，已不再使用 */
@@ -73,11 +70,6 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
 
     public TransportUdpDataTypeConfiguration getTransportUdpDataTypeConfiguration() {
         return Objects.requireNonNullElseGet(transportUdpDataTypeConfiguration, HexTransportUdpDataConfiguration::new);
-    }
-
-    /** UDP 无客户端/服务端建连模式，恒为平台监听入站。 */
-    public UdpTransportConnectMode getUdpTransportConnectMode() {
-        return UdpTransportConnectMode.SERVER;
     }
 
     /** 每个 UDP 数据报即一帧，不做流式分帧。 */
@@ -156,9 +148,6 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
                 throw new IllegalArgumentException(
                         "udpDeferredWireAuthTokenJsonKey is required when udpWireAuthenticationMode is DEFERRED_PAYLOAD_DEVICE_ID");
             }
-        }
-        if (udpTransportConnectMode == UdpTransportConnectMode.CLIENT) {
-            throw new IllegalArgumentException("UDP transport does not support CLIENT connect mode; devices send datagrams to the platform listen port.");
         }
         if (udpTransportFramingMode != null && udpTransportFramingMode != UdpTransportFramingMode.NONE) {
             throw new IllegalArgumentException("UDP transport does not support stream framing (LINE/LENGTH_PREFIX/FIXED_LENGTH); each datagram is one payload.");

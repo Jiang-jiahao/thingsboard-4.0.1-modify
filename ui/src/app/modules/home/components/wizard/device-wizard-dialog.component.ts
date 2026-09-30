@@ -73,6 +73,8 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
 
   udpProfileWireAuthMode: UdpWireAuthenticationMode | null = null;
 
+  /** 当前所选设备档案的 UDP 连接模式（CLIENT/SERVER） */
+
   httpPushProfileRoutingMode: HttpPullRoutingMode | null = null;
 
   httpPullProfilePollUrl: string | null = null;

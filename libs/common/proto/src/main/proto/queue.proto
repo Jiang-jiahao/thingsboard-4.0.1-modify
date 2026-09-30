@@ -965,6 +965,10 @@ message SubscriptionInfoProto {
 message SessionSubscriptionInfoProto {
   SessionInfoProto sessionInfo = 1;
   SubscriptionInfoProto subscriptionInfo = 2;
+  // 只订阅、从未发过 SESSION_EVENT_MSG_OPEN 的"虚拟会话"（例如 UDP 为被动设备建的出站会话）。
+  // 这类会话不进 Core 的 sessions（否则会被 onDeviceActivity 误标活跃），但它的订阅必须一起缓存，
+  // 否则 Core 重启后恢复不出来，该设备的 RPC 就再也投不出去。
+  bool subscriptionOnly = 3;
 }
 
 message DeviceSessionsCacheEntry {

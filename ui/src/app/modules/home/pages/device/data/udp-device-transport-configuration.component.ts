@@ -56,15 +56,15 @@ export class UdpDeviceTransportConfigurationComponent implements ControlValueAcc
   set udpWireAuthenticationMode(mode: UdpWireAuthenticationMode | null) {
     const prev = this.udpWireAuthMode;
     this.udpWireAuthMode = mode;
-    if (this.tcpDeviceTransportConfigurationFormGroup
+    const grp = this.tcpDeviceTransportConfigurationFormGroup;
+    // 只在**确实填过值**时才清空回写：加载时 prev 还是 undefined，这段不该凭空产生一次"改动"
+    if (grp
         && prev === UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID
-        && mode !== UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
-      this.tcpDeviceTransportConfigurationFormGroup.patchValue(
-        { udpWireAuthPayloadDeviceId: '' },
-        { emitEvent: true }
-      );
+        && mode !== UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID
+        && String(grp.get('udpWireAuthPayloadDeviceId').value ?? '').length > 0) {
+      grp.patchValue({ udpWireAuthPayloadDeviceId: '' }, { emitEvent: true });
     }
-    this.applyDeferredPayloadDeviceIdValidators();
+    this.runWithoutModelUpdate(() => this.applyDeferredPayloadDeviceIdValidators());
   }
 
   get showUdpWireAuthPayloadDeviceId(): boolean {
@@ -82,6 +82,9 @@ export class UdpDeviceTransportConfigurationComponent implements ControlValueAcc
 
   private propagateChange = (v: any) => { };
 
+  /** 见 {@link #runWithoutModelUpdate}：初始化/写入期间抑制回写，否则父表单会被标脏。 */
+  private suppressModelUpdate = false;
+
   constructor(private store: Store<AppState>,
               private fb: UntypedFormBuilder,
               private destroyRef: DestroyRef) {
@@ -98,7 +101,7 @@ export class UdpDeviceTransportConfigurationComponent implements ControlValueAcc
     this.tcpDeviceTransportConfigurationFormGroup = this.fb.group({
       sourceHost: [''],
       udpWireAuthPayloadDeviceId: [''],
-      // 固定下行地址（可选）：设备从临时/NAT 端口上报、但固定端口收指令时填写
+      // 下行地址（可选）：设备从临时/NAT 端口上报、但固定端口收指令时填写；留空则回发上报源地址
       udpDownlinkHost: [''],
       udpDownlinkPort: [null, [Validators.min(1), Validators.max(65535)]]
     });
@@ -106,20 +109,47 @@ export class UdpDeviceTransportConfigurationComponent implements ControlValueAcc
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
       this.applyDownlinkPairValidators();
-      this.updateModel();
+      if (!this.suppressModelUpdate) {
+        this.updateModel();
+      }
     });
-    this.applyDeferredPayloadDeviceIdValidators();
-    this.applyDownlinkPairValidators();
+    this.runWithoutModelUpdate(() => {
+      this.applyDeferredPayloadDeviceIdValidators();
+      this.applyDownlinkPairValidators();
+    });
   }
 
   /**
-   * 固定下行地址与端口必须成对填写：只填一个时把另一个标成必填，
-   * 校验不通过时 {@link #updateModel} 会放弃这次变更（不会把半个地址存进去）。
+   * 初始化与 {@link #writeValue} 期间**不能**回写模型。
+   * <p>
+   * `applyDeferredPayloadDeviceIdValidators()` 内部用 `updateValueAndValidity({emitEvent: true})` 刷新校验，
+   * 这会触发本组件的 valueChanges；若此时调 {@link #updateModel} → `propagateChange(...)`，就等于在加载阶段
+   * 往父表单的 `configuration` 控件写了一次值。Angular 把这次子→父写入记成"用户改动"，
+   * 于是刚打开设备详情、什么都没编辑，顶层表单已经是 `ng-dirty` —— 离开时会弹「有未保存的更改」。
+   */
+  private runWithoutModelUpdate(action: () => void): void {
+    this.suppressModelUpdate = true;
+    try {
+      action();
+    } finally {
+      this.suppressModelUpdate = false;
+    }
+  }
+
+  /**
+   * 下行地址**可选**：两个都留空 = "回发设备最近一次上报的源地址"；只填一个时把另一个标成必填，
+   * 校验不过时 {@link #updateModel} 放弃这次变更（不会把半个地址存进去）。
    */
   private applyDownlinkPairValidators(): void {
     const grp = this.tcpDeviceTransportConfigurationFormGroup;
+    if (!grp) {
+      return;
+    }
     const hostCtrl = grp.get('udpDownlinkHost');
     const portCtrl = grp.get('udpDownlinkPort');
+    if (!hostCtrl || !portCtrl) {
+      return;
+    }
     const hostSet = String(hostCtrl.value ?? '').trim().length > 0;
     const portVal = portCtrl.value;
     const portSet = portVal !== null && portVal !== undefined && portVal !== '';
@@ -166,8 +196,10 @@ export class UdpDeviceTransportConfigurationComponent implements ControlValueAcc
         udpDownlinkPort: value.udpDownlinkPort ?? null
       }, {emitEvent: false});
     }
-    this.applyDeferredPayloadDeviceIdValidators();
-    this.applyDownlinkPairValidators();
+    this.runWithoutModelUpdate(() => {
+      this.applyDeferredPayloadDeviceIdValidators();
+      this.applyDownlinkPairValidators();
+    });
   }
 
   validate(): ValidationErrors | null {

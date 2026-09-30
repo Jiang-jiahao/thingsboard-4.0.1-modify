@@ -107,6 +107,31 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
 
   private propagateChange = (v: any) => {
   };
+
+  /**
+   * 加载期**不能**回写模型。
+   * <p>
+   * `writeValue` 尾部会调 `applyTcpOpaqueKeyValidators()` → `notifyValidatorChange()` 让父级重跑校验；
+   * 父级 `updateValueAndValidity()` 之后仍可能把值写回本组件（重新触发 `writeValue`）并发射 valueChanges，
+   * 于是本组件的 `updateModel() → propagateChange(...)` 在加载阶段往父表单写了一次值 ——
+   * Angular 记成"用户改动"，刚打开档案页、什么都没编辑，顶层表单已经是 `ng-dirty`，离开时会弹「有未保存的更改」。
+   * <p>
+   * 构造起就抑制，**首次写入之后的下一轮消息**才放开：`notifyValidatorChange` 的连锁反应可能是延迟的，
+   * 纯同步窗口盖不住。放开之后用户的编辑照常回写。
+   */
+  private static readonly SUPPRESSION_QUIET_MS = 50;
+  private suppressModelUpdate = true;
+  private releaseTimer: ReturnType<typeof setTimeout> | null = null;
+
+  private armModelUpdateSuppression(): void {
+    this.suppressModelUpdate = true;
+    if (this.releaseTimer !== null) {
+      clearTimeout(this.releaseTimer);
+    }
+    this.releaseTimer = setTimeout(() => {
+      this.suppressModelUpdate = false;
+    }, UdpDeviceProfileTransportConfigurationComponent.SUPPRESSION_QUIET_MS);
+  }
   /** 通知父级 FormControl 重新执行本组件提供的 Validator（仅靠 valueChanges 不足以在「仅校验器变化」时刷新） */
   private onValidatorChange = () => {
   };
@@ -188,7 +213,9 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
     this.tcpDeviceProfileTransportConfigurationFormGroup.valueChanges.pipe(
       takeUntil(this.destroy$)
     ).subscribe(() => {
-      this.updateModel();
+      if (!this.suppressModelUpdate) {
+        this.updateModel();
+      }
     });
     this.tcpDeviceProfileTransportConfigurationFormGroup.get('dataType').valueChanges.pipe(
       takeUntil(this.destroy$)
@@ -237,6 +264,7 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
     }
     keyCtrl.updateValueAndValidity({emitEvent: false});
   }
+
   private usesProtocolTemplatePayload(v: Record<string, unknown>): boolean {
     if (v['dataType'] !== TransportUdpDataType.RAW_BYTES) {
       return false;
@@ -798,6 +826,7 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
     }
   }
   writeValue(value: UdpDeviceProfileTransportConfiguration | null): void {
+    this.armModelUpdateSuppression();
     if (isDefinedAndNotNull(value)) {
       const rawType = normalizeTransportUdpDataType(
         value.transportUdpDataTypeConfiguration?.transportUdpDataType
@@ -872,11 +901,17 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
       }
       this.applyTcpOpaqueKeyValidators(formDataType);
       this.applyDeferredWireAuthTokenKeyValidators(value.udpWireAuthenticationMode);
+      // 必须按**加载进来的**接入模式刷新监听端口的校验器：表单是带着 SERVER 的 required 建的（见 ngOnInit），
+      // 而 writeValue 用 emitEvent:false patch，不会触发上面那个「模式变化」订阅 ——
+      // CLIENT 档案的监听端口被隐藏且为空，required 一直挂着，整个表单永远 invalid，保存按钮点不亮。
       this.scheduleSyncHexLtvPanelExpanded();
       this.notifyValidatorChange();
     }
   }
   private updateModel() {
+    if (this.suppressModelUpdate) {
+      return;
+    }
     const v = this.tcpDeviceProfileTransportConfigurationFormGroup.getRawValue();
     const transportUdpDataTypeConfiguration: UdpDeviceProfileTransportConfiguration['transportUdpDataTypeConfiguration'] = {};
 

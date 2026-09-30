@@ -163,6 +163,20 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
                 ? Optional.empty()
                 : tcpListenPortRegistry.profileForListenPort(localPort);
     }
+
+    /**
+     * 该档案声明的自定义监听端口（服务端模式）；CLIENT 模式或没配返回 {@code null}。
+     * <p>
+     * 与 {@link #resolveInboundProfileForLocalPort(int)} 方向相反，且**不依赖端口注册表是否已热** ——
+     * 延迟鉴权兜底要靠它判断"命中档案是不是本监听端口所属档案"。
+     */
+    public Integer resolveProfileListenPort(DeviceProfile profile) {
+        if (profile == null || profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration cfg)) {
+            return null;
+        }
+        return cfg.getTcpProfileServerBindPort();
+    }
     public void afterSuccessfulAuth(ChannelHandlerContext ctx, TcpDeviceSession session, ValidateDeviceCredentialsResponse msg) {
         completeSessionRegistration(session, msg);
         if (!session.isOutboundClient() && session.getDeviceId() != null) {

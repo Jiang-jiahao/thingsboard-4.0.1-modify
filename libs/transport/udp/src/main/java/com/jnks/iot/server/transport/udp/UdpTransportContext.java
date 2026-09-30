@@ -1,15 +1,8 @@
 package com.jnks.iot.server.transport.udp;
-import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.socket.SocketChannel;
-import com.jnks.iot.server.transport.udp.netty.UdpNettyTransport;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import com.jnks.iot.server.transport.udp.netty.UdpPipelineBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
@@ -34,8 +27,6 @@ import com.jnks.iot.server.common.data.device.profile.UdpDeviceProfileTransportC
 import com.jnks.iot.server.common.data.device.profile.UdpWireAuthenticationMode;
 import com.jnks.iot.server.transport.udp.service.UdpProtoTransportEntityService;
 import com.jnks.iot.server.transport.udp.service.UdpSourceBindingService;
-import com.jnks.iot.server.transport.udp.util.UdpProxiedClientRegistry;
-import com.jnks.iot.server.common.data.device.profile.UdpTransportConnectMode;
 import com.jnks.iot.server.common.data.device.profile.UdpTransportFramingMode;
 import com.jnks.iot.server.common.data.id.DeviceId;
 import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
@@ -51,15 +42,12 @@ import com.jnks.iot.server.common.transport.auth.ValidateDeviceCredentialsRespon
 import com.jnks.iot.server.common.transport.service.DefaultTransportService;
 import com.jnks.iot.server.gen.transport.TransportProtos;
 import com.jnks.iot.common.util.AfterStartUp;
-import com.jnks.iot.server.transport.udp.event.UdpTransportListChangedEvent;
 import com.jnks.iot.server.transport.udp.session.UdpDeviceSession;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 @ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.udp.enabled:true}'=='true'")
 @Component
 @Slf4j
@@ -76,17 +64,22 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
 
     private final UdpTransportService udpTransportService;
 
-    private final Map<DeviceId, UdpDeviceSession> clientSessions = new ConcurrentHashMap<>();
     private final Map<DeviceId, UdpDeviceSession> serverSessions = new ConcurrentHashMap<>();
     private final Collection<DeviceId> allUdpDeviceIds = new ConcurrentLinkedDeque<>();
-    private final Map<DeviceId, AtomicInteger> clientReconnectFailureCount = new ConcurrentHashMap<>();
-    private final Map<DeviceId, ScheduledFuture<?>> clientReconnectTasks = new ConcurrentHashMap<>();
 
     /**
      * 所有入站（SERVER）会话：含尚未写入 {@link #serverSessions} 的鉴权中连接。
      * 用于在专用监听端口解绑或设备/档案变更时主动断开；仅关闭 Netty 的 ServerChannel 不会自动关闭已接受的子 TCP 连接。
      */
-    private final Set<UdpDeviceSession> inboundSessions = ConcurrentHashMap.newKeySet();
+    /**
+     * 入站会话（含鉴权完成前），键是 sessionId。
+     * <p>
+     * **不能**用 Set 存 {@link UdpDeviceSession}：它继承的 {@code DeviceAwareSessionContext} 带 Lombok @Data，
+     * equals/hashCode 覆盖全部字段，而 {@code lastUplinkMs} 每个数据报都在变 —— 作为哈希集合的键时
+     * add 会重复插入同一对象、remove 又找不回来（集合只增不减，读空闲扫描每 10 秒重复关同一批会话）。
+     * sessionId 是构造时生成的 UUID，不可变，适合做键。
+     */
+    private final ConcurrentHashMap<UUID, UdpDeviceSession> inboundSessions = new ConcurrentHashMap<>();
 
     private record UdpPeerKey(int localPort, String host, int port) {
         static UdpPeerKey of(int localPort, InetSocketAddress remote) {
@@ -106,20 +99,6 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
     @Lazy
     private UdpListenPortRegistry udpListenPortRegistry;
 
-    /** 代理侧对端 → 真实客户端地址（nginx 的 UDP 代理只在会话首包带 PROXY 头，后续包靠这里恢复）。 */
-    @Getter
-    private final UdpProxiedClientRegistry proxiedClients = new UdpProxiedClientRegistry();
-
-    /** 记住某个代理侧对端（nginx）对应的真实客户端地址。 */
-    public void rememberProxiedClient(InetSocketAddress proxyPeer, InetSocketAddress realClient) {
-        proxiedClients.remember(proxyPeer, realClient);
-    }
-
-    /** 该对端是否是已知的代理侧对端；是则返回其真实客户端地址，否则 null。 */
-    public InetSocketAddress proxiedClientFor(InetSocketAddress peer) {
-        return proxiedClients.realClientFor(peer);
-    }
-
     /**
      * 该本地端口所属的档案（自定义端口与档案一一对应）；未命中返回空。
      */
@@ -130,12 +109,39 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
     }
 
     /**
-     * 下行目的地：设备连接配置里指定了固定下行地址（{@code udpDownlinkHost/Port}）就用它，
-     * 否则回发会话记录的"设备最近上报的源地址"。
+     * SERVER 模式的下行目的地：设备连接配置里填了固定下行地址（{@code udpDownlinkHost/Port}）就用它，
+     * **没配就回发设备最近一次上报的源地址**。
+     * <p>
+     * 优先用配置地址：设备从临时/NAT 端口上报、另开固定端口收指令时，上报地址的端口对不上
+     * （经透明绑定网关接入时上游源端口也由网关决定，只有配置地址是可靠的）。
+     * 没配就回退到上报地址 —— 透明绑定下那个地址通常就是设备的真实 IP+端口，能通。
      */
     public InetSocketAddress resolveDownlinkAddress(DeviceId deviceId, InetSocketAddress reportedAddress) {
-        InetSocketAddress fixed = udpDownlinkAddressRegistry == null ? null : udpDownlinkAddressRegistry.resolve(deviceId);
-        return fixed != null ? fixed : reportedAddress;
+        InetSocketAddress configured = udpDownlinkAddressRegistry == null
+                ? null
+                : udpDownlinkAddressRegistry.resolve(deviceId);
+        return configured != null ? configured : reportedAddress;
+    }
+
+    /**
+     * 该设备当前是否有**真实**的入站会话（出站会话不算 —— 那是"设备还没开口时"为了下发而建的，
+     * 见 {@code com.jnks.iot.server.transport.udp.outbound.UdpOutboundTransportContext}）。
+     */
+    public boolean hasActiveServerSession(DeviceId deviceId) {
+        if (deviceId == null) {
+            return false;
+        }
+        UdpDeviceSession session = serverSessions.get(deviceId);
+        return session != null && session.isConnected();
+    }
+
+    /** 该档案声明的自定义监听端口（服务端模式）；CLIENT 模式或没配返回 {@code null}。 */
+    public Integer resolveProfileListenPort(DeviceProfile profile) {
+        if (profile == null || profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration cfg)) {
+            return null;
+        }
+        return cfg.getUdpProfileServerBindPort();
     }
 
     public UdpTransportContext(TransportDeviceProfileCache deviceProfileCache,
@@ -158,42 +164,81 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
         this.udpTransportService = udpTransportService;
     }
     @AfterStartUp(order = AfterStartUp.AFTER_TRANSPORT_SERVICE)
-    public void fetchDevicesAndEstablishClientSessions() {
-        // UDP 无平台主动 outbound 建连；设备向档案监听端口发数据报即可。
-    }
-
-    /**
-     * 启动读空闲清理任务（每隔 10 秒扫一遍；档案没配 udpReadIdleTimeoutSec 的会话不受影响）。
-     */
-    @AfterStartUp(order = AfterStartUp.AFTER_TRANSPORT_SERVICE)
     public void startReadIdleSweeper() {
         long periodSec = 10L;
         scheduler.scheduleAtFixedRate(this::sweepIdleInboundSessions, periodSec, periodSec, TimeUnit.SECONDS);
         log.info("UDP read-idle sweeper started (every {}s)", periodSec);
     }
-    private boolean isClientProfile(Device device) {
-        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
-        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
-            return false;
+
+    /**
+     * 预热"已知的 UDP 设备"集合。
+     * <p>
+     * {@link #onDeviceUpdatedOrCreated} 用它区分"第一次听到某台设备"和"后续更新"，只有后者才会去关它的旧会话。
+     * 不预热的话，本实例重启后收到的**第一条**设备更新会被当成"新设备"、直接跳过关闭 ——
+     * 于是重启后设备先连上、再改配置时，旧会话不会被关（既不产生 STOPPED，也不通知 Core）。
+     */
+    @AfterStartUp(order = AfterStartUp.AFTER_TRANSPORT_SERVICE)
+    public void loadKnownUdpDeviceIds() {
+        try {
+            int page = 0;
+            boolean hasNext;
+            do {
+                TransportProtos.GetUdpDevicesResponseMsg response = protoEntityService.getUdpDevicesIds(page, 512);
+                for (String id : response.getIdsList()) {
+                    allUdpDeviceIds.add(new DeviceId(UUID.fromString(id)));
+                }
+                hasNext = response.getHasNextPage();
+                page++;
+            } while (hasNext);
+            log.info("UDP known device ids loaded: {}", allUdpDeviceIds.size());
+        } catch (Exception e) {
+            log.warn("Failed to load UDP device ids", e);
         }
-        var tc = profile.getProfileData().getTransportConfiguration();
-        if (tc instanceof UdpDeviceProfileTransportConfiguration) {
-            UdpDeviceProfileTransportConfiguration udpCfg = (UdpDeviceProfileTransportConfiguration) tc;
-            return udpCfg.getUdpTransportConnectMode() == UdpTransportConnectMode.CLIENT;
-        }
-        return false;
     }
 
     private void failInboundSession(UdpDeviceSession session) {
         session.endServerAuth();
         evictInboundPeerSession(session);
     }
+
+    /**
+     * 关闭一个**已通过鉴权**的入站会话：本地清理 + 通知 Core 会话已结束 + 补写 STOPPED 生命周期事件。
+     * <p>
+     * UDP 没有连接级 close，会话是被"读空闲回收 / 档案端口变更 / 档案或设备更新"关掉的，
+     * 这几条路原先只做本地清理（{@link UdpDeviceSession#close()}），Core 收不到
+     * {@code SESSION_CLOSED}、{@code lc_event} 里也永远不会出现 STOPPED。
+     * {@link #onChannelClosed} 里那套 STOPPED 只对 CLIENT 模式可达，服务端模式（设备主动上报）走不到。
+     * <p>
+     * **Core 主动要求关会话**（非活跃超时 / 并发上限）时也走这里 —— 见
+     * {@link UdpDeviceSession#onRemoteSessionCloseCommand(UUID, TransportProtos.SessionCloseNotificationProto)}：
+     * 那条路同样是"真正的会话终结"，不补 STOPPED 的话 STARTED 与 STOPPED 永远配不上对。
+     * <p>
+     * 鉴权未完成的会话（{@code sessionInfo == null}）只做本地清理，不会凭空产生 STOPPED。
+     * <p>
+     * 幂等：只在会话**由连通转为关闭**那一次上报。读空闲扫描是每 10 秒一轮的快照遍历，
+     * 若会话因别的原因没能从集合里摘掉（见 {@link #untrackInboundSession}），
+     * 没有这道闸就会反复给 Core 发 SESSION_CLOSED / STOPPED。
+     */
+    public void closeRegisteredInboundSession(UdpDeviceSession session) {
+        boolean wasConnected = session.isConnected();
+        session.close();
+        TransportProtos.SessionInfoProto sessionInfo = session.getSessionInfo();
+        if (!wasConnected || sessionInfo == null || session.getDeviceId() == null) {
+            return;
+        }
+        transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_CLOSED, null);
+        transportService.deregisterSession(sessionInfo);
+        transportService.lifecycleEvent(session.getTenantId(), session.getDeviceId(),
+                ComponentLifecycleEvent.STOPPED, true, null);
+        serverSessions.remove(session.getDeviceId(), session);
+    }
+
     public UdpDeferredAuthCatalog getDeferredAuthCatalog() {
         return udpDeferredAuthCatalog;
     }
 
     public UdpDeviceSession newInboundDeviceSession() {
-        return new UdpDeviceSession(UUID.randomUUID(), this, false);
+        return new UdpDeviceSession(UUID.randomUUID(), this);
     }
 
     /**
@@ -219,7 +264,7 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
 
     public void afterSuccessfulAuth(ChannelHandlerContext ctx, UdpDeviceSession session, ValidateDeviceCredentialsResponse msg) {
         completeSessionRegistration(session, msg);
-        if (!session.isOutboundClient() && session.getDeviceId() != null) {
+        if (session.getDeviceId() != null) {
             UdpDeviceSession oldSession = serverSessions.put(session.getDeviceId(), session);
             if (oldSession != null && oldSession != session) {
                 log.info("[{}] Closing previous server session due to new inbound datagram peer", session.getDeviceId());
@@ -232,20 +277,6 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
     public void evictInboundPeerSession(UdpDeviceSession session) {
         inboundSessionByPeer.entrySet().removeIf(e -> e.getValue() == session);
         untrackInboundSession(session);
-    }
-    /**
-     * 出站 CLIENT：在 TCP 已激活后向 Core 注册会话并加入 {@link #clientSessions}。
-     */
-    public void finishOutboundUdpClientRegistration(UdpDeviceSession session) {
-        if (!session.isOutboundClient() || session.getSessionInfo() != null) {
-            return;
-        }
-        ValidateDeviceCredentialsResponse msg = session.takePendingOutboundCredentials();
-        if (msg == null || !msg.hasDeviceInfo()) {
-            return;
-        }
-        completeSessionRegistration(session, msg);
-        clientSessions.put(session.getDeviceId(), session);
     }
 
     private void completeSessionRegistration(UdpDeviceSession session, ValidateDeviceCredentialsResponse msg) {
@@ -267,64 +298,6 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
         session.setConnected(true);
         transportService.lifecycleEvent(session.getTenantId(), session.getDeviceId(), ComponentLifecycleEvent.STARTED, true, null);
     }
-    private void establishClientDeviceSession(Device device) {
-        if (device == null) {
-            return;
-        }
-        cancelClientReconnectTask(device.getId());
-        log.info("Establishing UDP CLIENT session for device {}", device.getId());
-        DeviceProfile deviceProfile = deviceProfileCache.get(device.getDeviceProfileId());
-        DeviceCredentials credentials = protoEntityService.getDeviceCredentialsByDeviceId(device.getId());
-        if (credentials.getCredentialsType() != DeviceCredentialsType.ACCESS_TOKEN) {
-            log.warn("[{}] Expected ACCESS_TOKEN credentials", device.getId());
-            return;
-        }
-        UdpDeviceTransportConfiguration deviceCfg = (UdpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
-        UdpDeviceSession session = new UdpDeviceSession(UUID.randomUUID(), this, true);
-        session.setDeviceProfile(deviceProfile);
-        transportService.process(DeviceTransportType.UDP,
-                TransportProtos.ValidateDeviceTokenRequestMsg.newBuilder().setToken(credentials.getCredentialsId()).build(),
-                new TransportServiceCallback<>() {
-                    @Override
-                    public void onSuccess(ValidateDeviceCredentialsResponse msg) {
-                        if (msg.hasDeviceInfo()) {
-                            session.setDeviceInfo(msg.getDeviceInfo());
-                            session.setDeviceProfile(msg.getDeviceProfile());
-                            session.stashPendingOutboundCredentials(msg);
-                            openOutboundConnection(device.getId(), session, deviceCfg.getHost(), deviceCfg.getPort());
-                        } else {
-                            log.warn("[{}] TCP client auth failed", device.getId());
-                        }
-                    }
-                    @Override
-                    public void onError(Throwable e) {
-                        log.warn("[{}] TCP client auth error", device.getId(), e);
-                        transportService.lifecycleEvent(device.getTenantId(), device.getId(), ComponentLifecycleEvent.STARTED, false, e);
-                    }
-                });
-    }
-    private void openOutboundConnection(DeviceId deviceId, UdpDeviceSession session, String host, int port) {
-        int readIdleSec = readIdleSecFromProfile(session.getDeviceProfile());
-        Bootstrap b = new Bootstrap();
-        b.group(udpTransportService.getWorkerGroup())
-                .channel(UdpNettyTransport.datagramChannelClass())
-                .handler(new ChannelInitializer<io.netty.channel.socket.DatagramChannel>() {
-                    @Override
-                    protected void initChannel(io.netty.channel.socket.DatagramChannel ch) {
-                        UdpPipelineBuilder.installReadIdleHandlerFirst(ch.pipeline(), readIdleSec);
-                        ch.pipeline().addLast(UdpPipelineBuilder.INBOUND_HANDLER_NAME,
-                                new UdpClientInboundHandler(UdpTransportContext.this, session, udpTransportService));
-                    }
-                });
-        b.connect(host, port).addListener((ChannelFutureListener) future -> {
-            if (!future.isSuccess()) {
-                log.error("[{}] Outbound UDP connect failed to {}:{}", deviceId, host, port, future.cause());
-                transportService.errorEvent(session.getTenantId(), deviceId, "udpClientConnect", future.cause());
-                onChannelClosed(session);
-            }
-        });
-    }
-
     private static int readIdleSecFromProfile(DeviceProfile profile) {
         if (profile == null || profile.getProfileData() == null
                 || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration)) {
@@ -349,7 +322,7 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
      */
     private void sweepIdleInboundSessions() {
         long now = System.currentTimeMillis();
-        for (UdpDeviceSession s : new ArrayList<>(inboundSessions)) {
+        for (UdpDeviceSession s : new ArrayList<>(inboundSessions.values())) {
             int idleSec = readIdleSecFromProfile(s.getDeviceProfile());
             if (idleSec <= 0) {
                 continue;
@@ -357,91 +330,15 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
             if (now - s.getLastUplinkMs() > idleSec * 1000L) {
                 log.info("[{}] Closing UDP session: no datagram for {}s (profile udpReadIdleTimeoutSec)",
                         s.getSessionId(), idleSec);
-                s.close();
+                closeRegisteredInboundSession(s);
             }
         }
     }
 
-    public void resetClientReconnectFailureCount(DeviceId deviceId) {
-        clientReconnectFailureCount.remove(deviceId);
-    }
-
-    private void cancelClientReconnectTask(DeviceId deviceId) {
-        ScheduledFuture<?> f = clientReconnectTasks.remove(deviceId);
-        if (f != null) {
-            f.cancel(false);
-        }
-    }
-
-    private void scheduleClientReconnect(DeviceId deviceId) {
-        if (!balancingService.isManagedByCurrentTransport(deviceId.getId())) {
-            return;
-        }
-        Device device = protoEntityService.getDeviceById(deviceId);
-        if (device == null) {
-            return;
-        }
-        DeviceProfile profile = deviceProfileCache.get(device.getDeviceProfileId());
-        if (profile == null || profile.getProfileData() == null
-                || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration)) {
-            return;
-        }
-        UdpDeviceProfileTransportConfiguration cfg = (UdpDeviceProfileTransportConfiguration) profile.getProfileData().getTransportConfiguration();
-        if (cfg.getUdpTransportConnectMode() != UdpTransportConnectMode.CLIENT) {
-            return;
-        }
-        if (cfg.isUdpOutboundReconnectDisabled()) {
-            return;
-        }
-        int maxAttempts = cfg.getEffectiveUdpOutboundReconnectMaxAttempts();
-        if (maxAttempts > 0) {
-            int n = clientReconnectFailureCount.computeIfAbsent(deviceId, d -> new AtomicInteger(0)).incrementAndGet();
-            if (n > maxAttempts) {
-                log.warn("[{}] TCP outbound reconnect stopped after {} failure(s) (max {})", deviceId, n, maxAttempts);
-                clientReconnectFailureCount.remove(deviceId);
-                return;
-            }
-        }
-        int intervalSec = cfg.getEffectiveUdpOutboundReconnectIntervalSec();
-        cancelClientReconnectTask(deviceId);
-        ScheduledFuture<?> scheduled = scheduler.schedule(() -> {
-            try {
-                Device reloaded = protoEntityService.getDeviceById(deviceId);
-                if (reloaded != null && isClientProfile(reloaded)) {
-                    establishClientDeviceSession(reloaded);
-                }
-            } catch (Exception e) {
-                log.warn("[{}] TCP outbound reconnect task failed", deviceId, e);
-            } finally {
-                clientReconnectTasks.remove(deviceId);
-            }
-        }, intervalSec, TimeUnit.SECONDS);
-        clientReconnectTasks.put(deviceId, scheduled);
-        log.info("[{}] Scheduled TCP outbound reconnect in {} s", deviceId, intervalSec);
-    }
-
-    public void onChannelClosed(UdpDeviceSession session) {
-        if (!session.isOutboundClient()) {
-            untrackInboundSession(session);
-        }
-        TransportProtos.SessionInfoProto sessionInfo = session.getSessionInfo();
-        if (sessionInfo != null) {
-            transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_CLOSED, null);
-            transportService.deregisterSession(sessionInfo);
-            transportService.lifecycleEvent(session.getTenantId(), session.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
-        }
-        if (session.getDeviceId() != null) {
-            clientSessions.remove(session.getDeviceId());
-            serverSessions.remove(session.getDeviceId(), session);
-        }
-        session.setConnected(false);
-        session.endServerAuth();
-        if (session.isOutboundClient() && session.getDeviceId() != null) {
-            scheduleClientReconnect(session.getDeviceId());
-        }
-    }
     public void onUdpSessionDeviceDeleted(UdpDeviceSession session) {
-        session.close();
+        // 与其它关闭路径统一：走 closeRegisteredInboundSession —— 它会通知 Core、注销传输层会话、
+        // 并补一条 STOPPED。原先的裸 close() 这三样全漏，设备被删后会留下 Core 侧订阅与一个悬挂的会话。
+        closeRegisteredInboundSession(session);
     }
     public void onUdpDeviceProfileUpdated(UdpDeviceSession session, DeviceProfile deviceProfile) {
         session.setDeviceProfile(deviceProfile);
@@ -451,10 +348,12 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
     }
 
     private void closeServerSessionIfExists(DeviceId deviceId) {
-        UdpDeviceSession serverSession = serverSessions.remove(deviceId);
+        // 用 get 而不是 remove：摘除由统一关闭路径负责，否则会话已从集合里消失、
+        // 后面的 closeInboundSessionsAffectedByDeviceUpdate 也补不上，STOPPED 与 SESSION_CLOSED 都会丢。
+        UdpDeviceSession serverSession = serverSessions.get(deviceId);
         if (serverSession != null) {
             log.info("[{}] Closing server session due to device/profile update", deviceId);
-            serverSession.close();
+            closeRegisteredInboundSession(serverSession);
         }
     }
 
@@ -462,18 +361,18 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
      * 登记入站会话（含鉴权完成前），便于在端口解绑或配置变更时主动 {@link UdpDeviceSession#close()}。
      */
     public void trackInboundSession(UdpDeviceSession session) {
-        inboundSessions.add(session);
+        inboundSessions.put(session.getSessionId(), session);
     }
 
     public void untrackInboundSession(UdpDeviceSession session) {
-        inboundSessions.remove(session);
+        inboundSessions.remove(session.getSessionId(), session);
     }
 
     /**
      * 解绑专用本地端口之前调用：Netty 关闭 {@code ServerChannel} 后，已 accept 的子 TCP 连接仍可能保持打开。
      */
     public void closeInboundSessionsOnLocalPort(int localPort) {
-        for (UdpDeviceSession s : new ArrayList<>(inboundSessions)) {
+        for (UdpDeviceSession s : new ArrayList<>(inboundSessions.values())) {
             Channel ch = s.getChannel();
             if (ch == null || !ch.isOpen()) {
                 continue;
@@ -481,7 +380,7 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
             SocketAddress la = ch.localAddress();
             if (la instanceof InetSocketAddress isa && isa.getPort() == localPort) {
                 log.info("[{}] Closing inbound TCP on local port {} (dedicated listen stopping)", s.getSessionId(), localPort);
-                s.close();
+                closeRegisteredInboundSession(s);
             }
         }
     }
@@ -490,11 +389,11 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
         if (profile == null || profile.getId() == null) {
             return;
         }
-        for (UdpDeviceSession s : new ArrayList<>(inboundSessions)) {
+        for (UdpDeviceSession s : new ArrayList<>(inboundSessions.values())) {
             DeviceProfile sp = s.getDeviceProfile();
             if (sp != null && profile.getId().equals(sp.getId())) {
                 log.info("[{}] Closing inbound TCP due to device profile update ({})", s.getSessionId(), profile.getId());
-                s.close();
+                closeRegisteredInboundSession(s);
             }
         }
     }
@@ -508,16 +407,16 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
         if (deviceProfileId == null) {
             return;
         }
-        for (UdpDeviceSession s : new ArrayList<>(inboundSessions)) {
+        for (UdpDeviceSession s : new ArrayList<>(inboundSessions.values())) {
             if (s.getDeviceId() != null && s.getDeviceId().equals(device.getId())) {
                 log.info("[{}] Closing inbound TCP due to device update", s.getSessionId());
-                s.close();
+                closeRegisteredInboundSession(s);
                 continue;
             }
             DeviceProfile sp = s.getDeviceProfile();
             if (sp != null && !deviceProfileId.equals(sp.getId())) {
                 log.info("[{}] Closing inbound TCP (stale profile vs device after update)", s.getSessionId());
-                s.close();
+                closeRegisteredInboundSession(s);
             }
         }
     }
@@ -542,48 +441,12 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
                 return;
             }
             allUdpDeviceIds.add(device.getId());
-            if (balancingService.isManagedByCurrentTransport(device.getId().getId()) && isClientProfile(device)) {
-                establishClientDeviceSession(device);
-            }
         } else {
-            if (balancingService.isManagedByCurrentTransport(device.getId().getId())) {
-                UdpDeviceSession session = clientSessions.get(device.getId());
-                if (transportType == DeviceTransportType.UDP && isClientProfile(device)) {
-                    if (session != null) {
-                        session.close();
-                        clientSessions.remove(device.getId());
-                    }
-                    establishClientDeviceSession(device);
-                } else if (session != null) {
-                    session.close();
-                    clientSessions.remove(device.getId());
-                }
-            }
             closeServerSessionIfExists(device.getId());
             closeInboundSessionsAffectedByDeviceUpdate(device);
         }
     }
 
-    @EventListener
-    public void onTcpTransportListChanged(UdpTransportListChangedEvent event) {
-        log.trace("UDP transport list changed, refreshing client sessions");
-        List<DeviceId> deleted = new LinkedList<>();
-        for (DeviceId deviceId : allUdpDeviceIds) {
-            if (balancingService.isManagedByCurrentTransport(deviceId.getId())) {
-                if (!clientSessions.containsKey(deviceId)) {
-                    Device device = protoEntityService.getDeviceById(deviceId);
-                    if (device != null && isClientProfile(device)) {
-                        establishClientDeviceSession(device);
-                    } else {
-                        deleted.add(deviceId);
-                    }
-                }
-            } else {
-                Optional.ofNullable(clientSessions.remove(deviceId)).ifPresent(UdpDeviceSession::close);
-            }
-        }
-        allUdpDeviceIds.removeAll(deleted);
-    }
     /**
      * 每收到一帧已分帧的业务数据即记活动，与 JSON/模板解析是否成功无关。
      * 否则 RAW_BYTES / 协议模板未命中时不会走 {@code transportService.process(...)}，设备会一直不活跃。
@@ -600,9 +463,6 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
 
     public UdpProtoTransportEntityService getProtoEntityService() {
         return protoEntityService;
-    }
-    public Collection<UdpDeviceSession> getClientSessions() {
-        return clientSessions.values();
     }
 
     /**

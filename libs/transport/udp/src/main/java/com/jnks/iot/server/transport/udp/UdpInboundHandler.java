@@ -7,14 +7,13 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.device.profile.UdpTransportFramingMode;
 import com.jnks.iot.server.transport.udp.session.UdpDeviceSession;
 import com.jnks.iot.server.transport.udp.util.UdpPayloadUtil;
-import com.jnks.iot.server.transport.udp.util.UdpProxyProtocol;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -35,29 +34,9 @@ public class UdpInboundHandler extends SimpleChannelInboundHandler<DatagramPacke
             log.warn("UDP datagram too large from {} on port {}: {} bytes", sender, localPort, data.length);
             return;
         }
-        // 前面挂了 L4 代理（nginx stream 的 proxy_protocol on）时，真实源地址在 PROXY v2 头里：
-        // 用它替代 socket 对端地址，源 IP 判定（NONE/sourceHost）与下行回包地址都按真实设备走。
-        // 没有协议头的数据报原样处理（设备直连平台时就是这样）。
-        if (UdpProxyProtocol.looksLikeHeader(data)) {
-            UdpProxyProtocol.Header proxyHeader = UdpProxyProtocol.parse(data);
-            if (proxyHeader != null) {
-                log.debug("UDP PROXY protocol: real source {} on port {} (gateway peer {})",
-                        proxyHeader.source(), localPort, packet.sender());
-                sender = proxyHeader.source();
-                data = Arrays.copyOfRange(data, proxyHeader.payloadOffset(), data.length);
-                udpTransportContext.rememberProxiedClient(packet.sender(), sender);
-            } else {
-                log.warn("UDP datagram from {} on port {} looks like a PROXY protocol header but could not be parsed (head={}); treated as payload",
-                        packet.sender(), localPort, headHex(data));
-            }
-        } else {
-            // nginx 的 UDP 代理**只在会话首包**带 PROXY 头：同会话后续数据报没有头，
-            // 这里用首包记住的真实客户端地址还原，保证会话键与源 IP 判定在整个会话内一致。
-            InetSocketAddress proxiedClient = udpTransportContext.proxiedClientFor(packet.sender());
-            if (proxiedClient != null) {
-                sender = proxiedClient;
-            }
-        }
+        // 前面挂的是**透明绑定**的 L4 网关（nginx stream 的 proxy_bind ... transparent）：网关用设备
+        // 自己的源地址做上游 socket 的源地址，因此 socket 对端就是真实设备 —— 不解析任何协议头，
+        // 也不需要记住「代理侧对端 → 真实客户端」的映射（设备直连平台时同样成立）。
         UdpDeviceSession session = udpTransportContext.resolveOrCreateInboundSession(ctx.channel(), localPort, sender);
         session.setLastUplinkMs(System.currentTimeMillis());   // 读空闲清理据此判断"多久没收到该设备的数据报"
         try {
@@ -70,7 +49,7 @@ public class UdpInboundHandler extends SimpleChannelInboundHandler<DatagramPacke
                     return;
                 }
                 // 共享端口下鉴权前不知道档案：命中已配置的"延迟鉴权键"时走延迟鉴权。
-                if (tryDeferredAuthFromCatalog(ctx, session, data)) {
+                if (tryDeferredAuthFromCatalog(ctx, session, data, localPort)) {
                     return;
                 }
                 // 既没有已绑定的延迟鉴权档案、也匹配不上任何延迟鉴权键：身份无从确定，丢弃这一包。
@@ -104,18 +83,15 @@ public class UdpInboundHandler extends SimpleChannelInboundHandler<DatagramPacke
         }
     }
 
-    /** 解析失败时把头部若干字节打进日志，免得只能靠猜。 */
-    private static String headHex(byte[] data) {
-        int n = Math.min(data.length, 24);
-        StringBuilder sb = new StringBuilder(n * 3);
-        for (int i = 0; i < n; i++) {
-            sb.append(String.format("%02x", data[i]));
-        }
-        return sb.toString();
-    }
-
-    /** 命中"已配置的延迟鉴权键"时走延迟鉴权并返回 true；否则返回 false 交给 NONE 路径。 */
-    private boolean tryDeferredAuthFromCatalog(ChannelHandlerContext ctx, UdpDeviceSession session, byte[] data) {
+    /**
+     * 命中"已配置的延迟鉴权键"时走延迟鉴权并返回 true；否则返回 false 交给 NONE 路径。
+     * <p>
+     * 命中的档案必须**就是本监听端口声明的档案**：端口与档案一一对应（见
+     * {@code UdpListenPortRegistry}），否则同一台设备发往 NONE 档案端口的一帧，
+     * 只要负载里带了别的延迟鉴权档案配置的键名，就会被改绑成那个档案的设备。
+     */
+    private boolean tryDeferredAuthFromCatalog(ChannelHandlerContext ctx, UdpDeviceSession session, byte[] data,
+                                               int localPort) {
         try {
             String authJson = new String(data, StandardCharsets.UTF_8).trim();
             if (!authJson.startsWith("{")) {
@@ -126,7 +102,15 @@ public class UdpInboundHandler extends SimpleChannelInboundHandler<DatagramPacke
             if (deferred.isEmpty()) {
                 return false;
             }
-            udpTransportContext.completeDeferredWireAuthServerAuth(ctx, session, data, deferred.get().profile());
+            DeviceProfile matched = deferred.get().profile();
+            Integer matchedPort = udpTransportContext.resolveProfileListenPort(matched);
+            if (matchedPort == null || matchedPort != localPort) {
+                log.warn("[{}] Deferred auth catalog matched profile {} (listen port {}), but this session is on port {};"
+                                + " refusing to re-bind across device profiles",
+                        session.getSessionId(), matched.getId(), matchedPort, localPort);
+                return false;
+            }
+            udpTransportContext.completeDeferredWireAuthServerAuth(ctx, session, data, matched);
             return true;
         } catch (Exception e) {
             log.debug("[{}] deferred auth catalog lookup skipped: {}", session.getSessionId(), e.getMessage());

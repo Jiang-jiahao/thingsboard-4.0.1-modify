@@ -15,6 +15,7 @@ import {
   DeviceProfileRpcMethod,
   DeviceProfileTransportConfiguration,
   DeviceTransportType,
+  isCustomJsonRpcBinding,
   isHttpOutboundRpcBinding,
   isHttpPassiveProfileTransport,
   isHttpPullProfileTransport,
@@ -90,8 +91,20 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
               private destroyRef: DestroyRef) {
   }
 
-  get templateBindingOnly(): boolean {
+  /** TCP/UDP：可选协议模板或自定义 JSON 两种线下发绑定 */
+  get wireRpcTransport(): boolean {
     return isProtocolTemplateWireTransport(this.effectiveTransportType);
+  }
+
+  /** 当前绑定是协议模板（TCP/UDP 且未选自定义 JSON） */
+  get templateBindingOnly(): boolean {
+    return this.wireRpcTransport && !this.customJsonBinding;
+  }
+
+  /** 当前绑定是自定义 JSON：params 即负载、不加信封、只能单向 */
+  get customJsonBinding(): boolean {
+    const bt = this.rpcMethodFormGroup?.get('bindingType')?.value as DeviceProfileRpcBindingType;
+    return this.wireRpcTransport && isCustomJsonRpcBinding(bt);
   }
 
   get effectiveTransportType(): DeviceTransportType {
@@ -131,7 +144,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
   }
 
   get nativeBindingOnly(): boolean {
-    if (this.templateBindingOnly) {
+    if (this.templateBindingOnly || this.customJsonBinding) {
       return false;
     }
     if (this.httpRpcTransport || this.mqttRpcTransport) {
@@ -142,8 +155,13 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
   }
 
   get bindingTypeSelectable(): boolean {
-    return this.httpRpcTransport || this.mqttRpcTransport;
+    return this.httpRpcTransport || this.mqttRpcTransport || this.wireRpcTransport;
   }
+
+  readonly wireRpcBindingTypes = [
+    DeviceProfileRpcBindingType.TCP_TEMPLATE,
+    DeviceProfileRpcBindingType.CUSTOM_JSON
+  ];
 
   readonly httpRpcBindingTypes = [
     DeviceProfileRpcBindingType.HTTP_OUTBOUND,
@@ -189,7 +207,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
   }
 
   ngOnInit(): void {
-    const defaultBinding = this.templateBindingOnly
+    const defaultBinding = this.wireRpcTransport
       ? DeviceProfileRpcBindingType.TCP_TEMPLATE
       : (this.httpPullRpcTransport
         ? DeviceProfileRpcBindingType.HTTP_OUTBOUND
@@ -261,6 +279,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     const templateFields = ['templateCommandRef', 'paramMapJson'];
     const mqttTopicFields = ['mqttRequestTopic', 'mqttResponseTopic', 'mqttQos'];
     const mqttCustomFields = ['mqttPayloadTemplate'];
+    const customJsonFields = ['paramsTemplateJson'];
 
     const disableAll = (fields: string[]) => fields.forEach(f => this.rpcMethodFormGroup.get(f)?.disable({ emitEvent: false }));
     const enableAll = (fields: string[]) => fields.forEach(f => this.rpcMethodFormGroup.get(f)?.enable({ emitEvent: false }));
@@ -271,7 +290,12 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     this.rpcMethodFormGroup.get('mqttResponseTopic').clearValidators();
     this.rpcMethodFormGroup.get('mqttPayloadTemplate').clearValidators();
 
-    if (this.templateBindingOnly) {
+    if (this.wireRpcTransport && isCustomJsonRpcBinding(bindingType)) {
+      enableAll(customJsonFields);
+      this.rpcMethodFormGroup.get('templateCommandRef').clearValidators();
+      this.rpcMethodFormGroup.get('deviceMethod').clearValidators();
+      this.rpcMethodFormGroup.get('httpUrl').clearValidators();
+    } else if (this.wireRpcTransport) {
       enableAll(templateFields);
       this.rpcMethodFormGroup.get('templateCommandRef').setValidators([Validators.required]);
       this.rpcMethodFormGroup.get('deviceMethod').clearValidators();
@@ -295,6 +319,16 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       this.rpcMethodFormGroup.get('httpUrl').clearValidators();
       this.rpcMethodFormGroup.get('httpMethod').clearValidators();
       // NATIVE MQTT：不配置主题，后端固定 v1/devices/me/rpc/*
+    }
+    // 裸发不带 requestId，与设备响应无法对应 —— 自定义 JSON 强制单向
+    const oneWayCtrl = this.rpcMethodFormGroup.get('oneWay');
+    if (this.wireRpcTransport && isCustomJsonRpcBinding(bindingType)) {
+      if (!this.isLocked) {
+        oneWayCtrl.setValue(true, { emitEvent: false });
+        oneWayCtrl.disable({ emitEvent: false });
+      }
+    } else if (!this.isLocked) {
+      oneWayCtrl.enable({ emitEvent: false });
     }
     this.rpcMethodFormGroup.get('deviceMethod').updateValueAndValidity({ emitEvent: false });
     this.rpcMethodFormGroup.get('httpUrl').updateValueAndValidity({ emitEvent: false });
@@ -340,7 +374,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       displayName: value.displayName ?? '',
       oneWay: value.oneWay !== false,
       timeoutMs: value.timeoutMs ?? null,
-      bindingType: value.bindingType ?? (this.templateBindingOnly
+      bindingType: value.bindingType ?? (this.wireRpcTransport
         ? DeviceProfileRpcBindingType.TCP_TEMPLATE
         : (this.httpPullRpcTransport ? DeviceProfileRpcBindingType.HTTP_OUTBOUND : DeviceProfileRpcBindingType.NATIVE)),
       templateCommandRef: ref,
@@ -363,8 +397,12 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
   private updateModel(): void {
     const raw = this.rpcMethodFormGroup.getRawValue();
     let bindingType = raw.bindingType as DeviceProfileRpcBindingType;
-    if (this.templateBindingOnly) {
-      bindingType = DeviceProfileRpcBindingType.TCP_TEMPLATE;
+    const isCustomJson = this.wireRpcTransport && isCustomJsonRpcBinding(bindingType);
+    if (this.wireRpcTransport) {
+      // 老数据里的 UDP_TEMPLATE 与 TCP_TEMPLATE 等价，统一存 TCP_TEMPLATE
+      if (!isCustomJson) {
+        bindingType = DeviceProfileRpcBindingType.TCP_TEMPLATE;
+      }
     } else if (!this.httpRpcTransport && !this.mqttRpcTransport) {
       bindingType = DeviceProfileRpcBindingType.NATIVE;
     }
@@ -372,7 +410,8 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     const out: DeviceProfileRpcMethod = {
       id: (raw.id as string)?.trim(),
       displayName: (raw.displayName as string)?.trim() || undefined,
-      oneWay: !!raw.oneWay,
+      // 裸发不带 requestId，后端也强制单向，这里直接写死
+      oneWay: isCustomJson ? true : !!raw.oneWay,
       timeoutMs: raw.timeoutMs != null && raw.timeoutMs !== '' ? Number(raw.timeoutMs) : undefined,
       bindingType
     };
@@ -388,6 +427,10 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       if (pm) {
         out.paramMap = pm;
       }
+    } else if (isCustomJsonRpcBinding(bindingType)) {
+      // 默认下发体：调用时预填，下发时原样发出
+      const pt = (raw.paramsTemplateJson as string)?.trim();
+      out.paramsTemplateJson = pt || undefined;
     } else if (isHttpOutboundRpcBinding(bindingType)) {
       out.httpUrl = (raw.httpUrl as string)?.trim();
       out.httpMethod = (raw.httpMethod as string)?.trim() || 'POST';
@@ -426,7 +469,13 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       return { rpcMethod: { valid: false } };
     }
     const raw = this.rpcMethodFormGroup.getRawValue();
-    if (this.templateBindingOnly) {
+    const bt = raw.bindingType as DeviceProfileRpcBindingType;
+    if (this.wireRpcTransport && isCustomJsonRpcBinding(bt)) {
+      const pt = (raw.paramsTemplateJson as string)?.trim();
+      if (pt && !isValidJson(pt)) {
+        return { paramsTemplateJson: true };
+      }
+    } else if (this.wireRpcTransport) {
       if (parseJsonObject(raw.paramMapJson) === null && (raw.paramMapJson as string)?.trim()) {
         return { paramMapJson: true };
       }

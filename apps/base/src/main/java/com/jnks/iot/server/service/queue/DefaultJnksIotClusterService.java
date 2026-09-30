@@ -636,7 +636,12 @@ public class DefaultJnksIotClusterService implements JnksIotClusterService {
                 || (entityType.equals(EntityType.ASSET) && msg.getEvent() == ComponentLifecycleEvent.UPDATED)
                 || entityType.equals(EntityType.ASSET_PROFILE)
                 || entityType.equals(EntityType.API_USAGE_STATE)
-                || (entityType.equals(EntityType.DEVICE) && msg.getEvent() == ComponentLifecycleEvent.UPDATED)
+                // DEVICE 的**所有**事件都要通知 Core：Core 侧 DefaultDeviceProfileScheduledRpcService
+                // 靠 CREATED/UPDATED/DELETED 在**持有该设备分区的节点**上挂/摘定时 RPC。
+                // 早先这里只放行 UPDATED，导致"新建一台已配好 scheduledRpcs 的设备"时
+                // 若分区不在保存节点上，另一个 Core 永远收不到通知、定时任务永远不挂
+                // （实测 6 台里 2 台静默不生效）。ASSET 保留原限制不动。
+                || entityType.equals(EntityType.DEVICE)
                 || entityType.equals(EntityType.ENTITY_VIEW)
                 || entityType.equals(EntityType.NOTIFICATION_RULE)
                 || entityType.equals(EntityType.CALCULATED_FIELD)

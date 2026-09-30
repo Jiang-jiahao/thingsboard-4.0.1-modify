@@ -79,6 +79,7 @@ import {
   protocolTemplateBundleIdFromTcpProfile,
   protocolTemplateBundleIdFromWireProfile,
   isHttpOutboundRpcBinding,
+  isCustomJsonRpcBinding,
   isMqttCustomRpcBinding,
   isProtocolTemplateRpcBinding,
 
@@ -151,6 +152,11 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
   get selectedMethodScheduleHidesParams(): boolean {
     return isHttpOutboundRpcBinding(this.selectedMethod?.bindingType);
+  }
+
+  /** 自定义 JSON：params 即负载，调用时直接填 JSON */
+  get selectedMethodUsesCustomJson(): boolean {
+    return isCustomJsonRpcBinding(this.selectedMethod?.bindingType);
   }
 
   get editableInvokeKeys(): string[] {
@@ -615,7 +621,11 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
 
 
-    if (isProtocolTemplateRpcBinding(this.selectedMethod.bindingType)) {
+    if (isCustomJsonRpcBinding(this.selectedMethod.bindingType)) {
+
+      this.sendCustomJson(deviceId, timeout);
+
+    } else if (isProtocolTemplateRpcBinding(this.selectedMethod.bindingType)) {
 
       this.sendTcpTemplate(deviceId, oneWay, timeout);
 
@@ -982,6 +992,80 @@ export class DeviceRpcPanelComponent implements OnChanges {
   }
 
 
+
+  /**
+   * 自定义 JSON：params 就是负载，不走协议模板组帧、不加 RPC 信封。
+   * 只用单向 —— 裸发没有 requestId，双向的响应无法对应（后端也强制单向）。
+   */
+  private sendCustomJson(deviceId: string, timeout: number): void {
+
+    const m = this.selectedMethod!;
+
+    const userParams = parseNativeParamsJson(this.nativeParamsJson);
+
+    if (userParams === null) {
+
+      this.notifyError('device.rpc.params-invalid');
+
+      return;
+
+    }
+
+    const params = mergeRpcPlatformValues(this.deviceRpcParamDefaults, userParams);
+
+    const requestBody = {
+
+      method: m.id,
+
+      params,
+
+      timeout
+
+    };
+
+    this.sending = true;
+
+    this.lastError = null;
+
+    this.lastResponse = null;
+
+    this.cd.markForCheck();
+
+    this.deviceService.sendOneWayRpcCommand(deviceId, requestBody).pipe(
+
+      defaultIfEmpty(null),
+
+      finalize(() => {
+
+        this.sending = false;
+
+        this.cd.markForCheck();
+
+      }),
+
+      takeUntilDestroyed(this.destroyRef)
+
+    ).subscribe({
+
+      next: (res) => {
+
+        this.lastResponse = res;
+
+        this.notifySuccess('device.rpc.send-success');
+
+      },
+
+      error: (err) => {
+
+        this.lastError = err?.error?.message || err?.message || String(err);
+
+        this.notifyError('device.rpc.send-failed', { detail: this.lastError });
+
+      }
+
+    });
+
+  }
 
   private sendNative(deviceId: string, oneWay: boolean, timeout: number): void {
 

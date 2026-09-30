@@ -203,6 +203,15 @@ public class HttpOutboundTransportContext extends TransportContext {
         outboundSessions.remove(ctx.getDeviceId(), ctx);
         SessionInfoProto sessionInfo = ctx.getSessionInfo();
         if (sessionInfo != null) {
+            // 必须显式退订：deregisterSession 只清传输层本地的会话表，不通知 Core。
+            // 不退订的话 Core 侧的 rpcSubscriptions 会一直留着这条已死的会话（每次重建都是新 sessionId）
+            // → 陈旧订阅越积越多，下发时还会照投一份（再被传输层丢弃）。
+            transportService.process(sessionInfo,
+                    TransportProtos.SubscribeToRPCMsg.newBuilder().setUnsubscribe(true).build(),
+                    TransportServiceCallback.EMPTY);
+            transportService.process(sessionInfo,
+                    TransportProtos.SubscribeToAttributeUpdatesMsg.newBuilder().setUnsubscribe(true).build(),
+                    TransportServiceCallback.EMPTY);
             transportService.deregisterSession(sessionInfo);
         }
         transportService.lifecycleEvent(ctx.getTenantId(), ctx.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);

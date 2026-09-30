@@ -41,6 +41,7 @@ import java.nio.charset.StandardCharsets;
 
 import io.netty.buffer.Unpooled;
 import com.jnks.iot.server.transport.udp.util.UdpPayloadUtil;
+import com.jnks.iot.server.transport.udp.util.UdpRpcFrameEncoder;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
@@ -71,27 +72,12 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
     private volatile boolean coreSessionReady;
 
     /**
-     * CLIENT：令牌校验通过后暂存，在 Netty {@code channelActive} 时再向 Core 注册，避免未建连即显示在线。
-     */
-    private final AtomicReference<ValidateDeviceCredentialsResponse> pendingOutboundCredentials = new AtomicReference<>();
-
-    public void stashPendingOutboundCredentials(ValidateDeviceCredentialsResponse msg) {
-        pendingOutboundCredentials.set(msg);
-    }
-
-    public ValidateDeviceCredentialsResponse takePendingOutboundCredentials() {
-        return pendingOutboundCredentials.getAndSet(null);
-    }
-    /**
-     * SERVER 模式下设备已通过首行 token 完成接入认证。
+     * 设备已通过链路上鉴权完成接入认证。
      */
     @Getter
     @Setter
     private volatile boolean deviceWireAuthenticated;
 
-
-    @Getter
-    private final boolean outboundClient;
 
     private final AtomicBoolean serverAuthInFlight = new AtomicBoolean(false);
     private final AtomicLong serverAuthStartedAt = new AtomicLong(0);
@@ -113,11 +99,10 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
     @Setter
     private volatile int inboundPipelineFixedFrameLength;
 
-    public UdpDeviceSession(UUID sessionId, UdpTransportContext udpTransportContext, boolean outboundClient) {
+    public UdpDeviceSession(UUID sessionId, UdpTransportContext udpTransportContext) {
         super(sessionId);
         this.udpTransportContext = udpTransportContext;
         this.transportService = udpTransportContext.getTransportService();
-        this.outboundClient = outboundClient;
     }
 
     public TransportUdpDataType getPayloadDataType() {
@@ -182,19 +167,24 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
 
     public void writeByteBuf(ByteBuf buf) {
         Channel ch = this.channel;
-        // 下行目的地：设备配置里的固定下行地址优先，否则回发设备最近上报的源地址
+        // 下行目的地：设备配置里填了下行地址就用它，没配就回发"设备最近上报的源地址"。
         InetSocketAddress remote = udpTransportContext.resolveDownlinkAddress(getDeviceId(), this.remoteAddress);
-        if (ch != null && ch.isActive() && remote != null) {
-            ch.eventLoop().execute(() -> {
-                if (ch.isActive()) {
-                    ch.writeAndFlush(new DatagramPacket(buf, remote));
-                } else {
-                    buf.release();
-                }
-            });
-        } else {
+        if (remote == null) {
+            log.warn("[{}] No UDP downlink address for device {}; dropping downlink frame", getSessionId(), getDeviceId());
             buf.release();
+            return;
         }
+        if (ch == null || !ch.isActive()) {
+            buf.release();
+            return;
+        }
+        ch.eventLoop().execute(() -> {
+            if (ch.isActive()) {
+                ch.writeAndFlush(new DatagramPacket(buf, remote));
+            } else {
+                buf.release();
+            }
+        });
     }
 
     public void writeRaw(String text) {
@@ -234,33 +224,16 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
         msg.addProperty("reason", sessionCloseNotification.getReason().name());
         msg.addProperty("message", sessionCloseNotification.getMessage());
         sendJsonPayload(msg);
-        // Core 要求关闭会话时，主动断开 TCP 通道，确保 CLIENT 能按现有策略重连。
-        close();
+        // 走传输层的统一关闭：补 SESSION_CLOSED 与 STOPPED ——
+        // Core 因非活跃超时 / 并发上限主动关会话走的就是这条路，只做本地清理的话
+        // lc_event 里永远没有配对的 STOPPED。
+        udpTransportContext.closeRegisteredInboundSession(this);
     }
 
     @Override
     public void onToDeviceRpcRequest(UUID sessionId, ToDeviceRpcRequestMsg rpcRequest) {
-        String params = rpcRequest.getParams();
-        TransportUdpDataType dataType = getPayloadDataType();
-        // 协议模板 / 原始字节：params.hex 已由 UI buildHex 组好，线上只发 decode 后的原始字节，不再包 RPC 信封 JSON。
-        if ((dataType == TransportUdpDataType.RAW_BYTES || dataType == TransportUdpDataType.PROTOCOL_TEMPLATE)
-                && UdpPayloadUtil.isHexTemplateRpcParams(params)) {
-            ByteBuf buf = UdpPayloadUtil.encodeBusinessFrame(
-                    dataType,
-                    getUdpTransportFramingMode(),
-                    getUdpFixedFrameLengthForFraming(),
-                    params);
-            writeByteBuf(buf);
-            return;
-        }
-        JsonObject msg = new JsonObject();
-        msg.addProperty("method", "rpc");
-        msg.addProperty("requestId", rpcRequest.getRequestId());
-        msg.addProperty("name", rpcRequest.getMethodName());
-        msg.addProperty("params", params);
-        msg.addProperty("expirationTime", rpcRequest.getExpirationTime());
-        msg.addProperty("oneway", rpcRequest.getOneway());
-        sendJsonPayload(msg);
+        // 编码与"设备还没有会话时由出站会话直接发"共用同一条路径，见 UdpRpcFrameEncoder
+        writeByteBuf(UdpRpcFrameEncoder.encode(getDeviceProfile(), rpcRequest));
     }
 
     @Override

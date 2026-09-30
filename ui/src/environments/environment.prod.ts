@@ -6,5 +6,5 @@ export const environment = {
   jnksIotVersion: JNKS_IOT_VERSION,
 // @ts-ignore
   supportedLangs: SUPPORTED_LANGS,
-  defaultLang: 'en_US'
+  defaultLang: 'zh_CN'
 };

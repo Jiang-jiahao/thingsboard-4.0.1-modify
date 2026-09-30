@@ -6,6 +6,7 @@
     <mat-panel-description *ngIf="rpcMethodFormGroup.get('id').value as mid">
       <span class="mat-caption">{{ mid }}</span>
       <span class="mat-caption" *ngIf="templateBindingOnly" translate>device-profile.rpc-binding-tcp-template</span>
+      <span class="mat-caption" *ngIf="customJsonBinding" translate>device-profile.rpc-binding-custom-json</span>
       <span class="mat-caption" *ngIf="httpOutboundBinding" translate>device-profile.rpc-binding-http-outbound</span>
       <span class="mat-caption" *ngIf="mqttCustomBinding" translate>device-profile.rpc-binding-mqtt-custom</span>
       <span class="mat-caption" *ngIf="nativeBindingOnly" translate>device-profile.rpc-binding-native</span>
@@ -41,6 +42,18 @@
         <input matInput type="number" formControlName="timeoutMs" min="0"/>
       </mat-form-field>
     </div>
+
+    <ng-container *ngIf="wireRpcTransport">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-binding-type</mat-label>
+        <mat-select formControlName="bindingType" [disabled]="isLocked">
+          <mat-option *ngFor="let bt of wireRpcBindingTypes" [value]="bt">
+            <span *ngIf="bt === 'TCP_TEMPLATE'" translate>device-profile.rpc-binding-tcp-template</span>
+            <span *ngIf="bt === 'CUSTOM_JSON'" translate>device-profile.rpc-binding-custom-json</span>
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
 
     <ng-container *ngIf="httpRpcTransport">
       <mat-form-field class="mat-block">
@@ -86,6 +99,13 @@
         <mat-label translate>device-profile.rpc-param-map</mat-label>
         <textarea matInput formControlName="paramMapJson" rows="2"></textarea>
         <mat-hint translate>device-profile.rpc-param-map-hint</mat-hint>
+      </mat-form-field>
+    </ng-container>
+
+    <ng-container *ngIf="customJsonBinding">
+      <mat-form-field class="mat-block">
+        <mat-label translate>device-profile.rpc-params-template</mat-label>
+        <textarea matInput formControlName="paramsTemplateJson" rows="3"></textarea>
       </mat-form-field>
     </ng-container>
 

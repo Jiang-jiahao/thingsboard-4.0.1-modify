@@ -168,9 +168,10 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         boolean sent = false;
         int requestId = rpcRequest.getRequestId();
         if (isSendNewRpcAvailable()) {
-            sent = !rpcSubscriptions.isEmpty();
+            Map<UUID, SessionInfo> targets = rpcDispatchTargets();
+            sent = !targets.isEmpty();
             Set<UUID> syncSessionSet = new HashSet<>();
-            rpcSubscriptions.forEach((sessionId, sessionInfo) -> {
+            targets.forEach((sessionId, sessionInfo) -> {
                 log.debug("[{}][{}][{}][{}] send RPC request to transport ...", deviceId, sessionId, rpcId, requestId);
                 sendToTransport(rpcRequest, sessionId, sessionInfo.getNodeId());
                 if (SessionType.SYNC == sessionInfo.getType()) {
@@ -350,8 +351,31 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
     private void sendNextPendingRequest(UUID rpcId, int requestId, String logMessage) {
         log.debug("[{}][{}][{}] {} Going to send next pending request ...", deviceId, rpcId, requestId, logMessage);
         if (rpcSequential) {
-            rpcSubscriptions.forEach((id, s) -> sendPendingRequests(id, s.getNodeId()));
+            rpcDispatchTargets().forEach((id, s) -> sendPendingRequests(id, s.getNodeId()));
         }
+    }
+
+    /**
+     * 本次下发要投递的 RPC 订阅。
+     * <p>
+     * 有的传输层会给"设备还没开口"的设备建**虚拟会话** —— 只发 RPC 订阅、**不发**
+     * {@code SESSION_EVENT_MSG_OPEN}（例如 UDP 为被动设备建的出站会话，见
+     * {@code UdpOutboundTransportContext}）。这类会话不在 {@link #sessions} 里，
+     * 因此不受"每设备最大并发会话数"的淘汰约束；设备随后真开口时，真实会话与虚拟会话
+     * 会**同时**留在 {@code rpcSubscriptions} 里，逐个投递就会把同一条 RPC 下发两次
+     * （实测：真实会话与出站会话各收到一次）。
+     * <p>
+     * 所以优先只投给有真实会话的订阅；设备当前没有任何真实会话时才回退到虚拟订阅
+     * —— 那时它是唯一的通道（设备一开口就会被上面这条规则让位）。
+     */
+    private Map<UUID, SessionInfo> rpcDispatchTargets() {
+        Map<UUID, SessionInfo> live = new HashMap<>();
+        rpcSubscriptions.forEach((sessionId, sessionInfo) -> {
+            if (sessions.containsKey(sessionId)) {
+                live.put(sessionId, sessionInfo);
+            }
+        });
+        return live.isEmpty() ? rpcSubscriptions : live;
     }
 
     private Consumer<Map.Entry<Integer, ToDeviceRpcRequestMetadata>> processPendingRpc(UUID sessionId, String nodeId, Set<Integer> sentOneWayIds) {
@@ -537,8 +561,21 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         return new HashSet<>(strings);
     }
 
+    /**
+     * 会话类型。在 {@link #sessions} 里的按 ASYNC（与原行为一致）；不在里面的才回落到
+     * **订阅里记录的类型**。
+     * <p>
+     * 原先一律"不在 {@code sessions} 里就算 SYNC"，这对"只订阅、不发 OPEN"的**虚拟会话**是错的 ——
+     * 例如 UDP 为被动设备建的出站会话（{@code UdpOutboundTransportContext}）永远不入 {@code sessions}，
+     * 于是被当成 SYNC；而 {@link #sendPendingRequests} 见到 SYNC 就把它的 RPC 订阅摘掉，
+     * 结果这条通道每建立一次只投得出一条 RPC（实测：被动设备的 5 秒定时 RPC 只到 1 帧）。
+     */
     private SessionType getSessionType(UUID sessionId) {
-        return sessions.containsKey(sessionId) ? SessionType.ASYNC : SessionType.SYNC;
+        if (sessions.containsKey(sessionId)) {
+            return SessionType.ASYNC;
+        }
+        SessionInfo subscription = rpcSubscriptions.get(sessionId);
+        return subscription != null ? subscription.getType() : SessionType.SYNC;
     }
 
     void processAttributesUpdate(DeviceAttributesEventNotificationMsg msg) {
@@ -684,6 +721,7 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
         if (subscribeCmd.getUnsubscribe()) {
             log.debug("[{}] Canceling attributes subscription for session: [{}]", deviceId, sessionId);
             attributeSubscriptions.remove(sessionId);
+            dumpSessions();
         } else {
             SessionInfoMetaData sessionMD = sessions.get(sessionId);
             if (sessionMD == null) {
@@ -706,6 +744,9 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
             log.debug("[{}] Canceling RPC subscription for session: [{}]", deviceId, sessionId);
             rpcSubscriptions.remove(sessionId);
             clearAwaitRpcResponseScheduler();
+            // 同步刷一次缓存：出站会话退场时会显式退订，不刷的话缓存里会留着这条已退掉的订阅，
+            // Core 重启后又被恢复回来（见 dumpSubscriptionOnlySessions）。
+            dumpSessions();
         } else {
             SessionInfoMetaData sessionMD = sessions.get(sessionId);
             if (sessionMD == null) {
@@ -787,7 +828,9 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
                 rpcSubscriptions.putIfAbsent(sessionId, sessionMD.getSessionInfo());
             }
         }
-        systemContext.getDeviceStateService().onDeviceActivity(tenantId, deviceId, subscriptionInfo.getLastActivityTime());
+        // 这里**不再**记活动：会话打开时（processSessionStateMsgs 的 OPEN 分支）已经记过一次，
+        // 对真实设备是重复记；而 UDP 的"出站会话"（为从不发包的被动设备建的下发通道）**不发 OPEN**，
+        // 只发订阅 —— 在这里记活动会把"一个包都没发"的设备标成活跃，与"收到数据才算活跃"矛盾。
         if (sessionMD != null) {
             dumpSessions();
         }
@@ -895,6 +938,18 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
             UUID sessionId = getSessionId(sessionInfoProto);
             SessionInfo sessionInfo = new SessionInfo(SessionType.ASYNC, sessionInfoProto.getNodeId());
             SubscriptionInfoProto subInfo = sessionSubscriptionInfoProto.getSubscriptionInfo();
+            // "只订阅、没发过 OPEN"的虚拟会话（如 UDP 出站会话）只还原订阅，**不**放进 sessions ——
+            // 它本来就不在那里，放进去会占用并发上限、并让设备被判活跃。
+            if (sessionSubscriptionInfoProto.getSubscriptionOnly()) {
+                if (subInfo.getAttributeSubscription()) {
+                    attributeSubscriptions.put(sessionId, sessionInfo);
+                }
+                if (subInfo.getRpcSubscription()) {
+                    rpcSubscriptions.put(sessionId, sessionInfo);
+                }
+                log.debug("[{}] Restored subscription-only session: {}", deviceId, sessionId);
+                continue;
+            }
             SessionInfoMetaData sessionMD = new SessionInfoMetaData(sessionInfo, subInfo.getLastActivityTime());
             sessions.put(sessionId, sessionMD);
             if (subInfo.getAttributeSubscription()) {
@@ -934,9 +989,43 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
                     .setSubscriptionInfo(subscriptionInfoProto).build());
             log.debug("[{}] Dumping session: {}", deviceId, sessionMD);
         });
+        dumpSubscriptionOnlySessions(sessionsList);
         systemContext.getDeviceSessionCacheService()
                 .put(deviceId, DeviceSessionsCacheEntry.newBuilder()
                         .addAllSessions(sessionsList).build());
+    }
+
+    /**
+     * 把"只在订阅表里、不在 {@link #sessions} 里"的**虚拟会话**也写进缓存。
+     * <p>
+     * 目前唯一的来源是 UDP 为被动设备建的出站会话（{@code UdpOutboundTransportContext}）——
+     * 它**只发 RPC 订阅、不发 {@code SESSION_EVENT_MSG_OPEN}**（为的是不被 {@code onDeviceActivity}
+     * 把"一个包都没发"的设备标成活跃），所以永远不在 {@code sessions} 里。
+     * 不把它一起缓存的话，Core 重启后 {@link #restoreSessions()} 恢复不出这条订阅，
+     * 该设备的 RPC 就再也投不出去（实测：被动设备的定时 RPC 在 Core 重启后永久失效）。
+     */
+    private void dumpSubscriptionOnlySessions(List<SessionSubscriptionInfoProto> sessionsList) {
+        Set<UUID> subscriptionOnlyIds = new HashSet<>(rpcSubscriptions.keySet());
+        subscriptionOnlyIds.addAll(attributeSubscriptions.keySet());
+        subscriptionOnlyIds.removeAll(sessions.keySet());
+        for (UUID sessionId : subscriptionOnlyIds) {
+            SessionInfo sessionInfo = rpcSubscriptions.getOrDefault(sessionId, attributeSubscriptions.get(sessionId));
+            if (sessionInfo == null || sessionInfo.getNodeId() == null) {
+                continue;
+            }
+            sessionsList.add(SessionSubscriptionInfoProto.newBuilder()
+                    .setSessionInfo(SessionInfoProto.newBuilder()
+                            .setSessionIdMSB(sessionId.getMostSignificantBits())
+                            .setSessionIdLSB(sessionId.getLeastSignificantBits())
+                            .setNodeId(sessionInfo.getNodeId()).build())
+                    .setSubscriptionInfo(SubscriptionInfoProto.newBuilder()
+                            .setLastActivityTime(0)
+                            .setAttributeSubscription(attributeSubscriptions.containsKey(sessionId))
+                            .setRpcSubscription(rpcSubscriptions.containsKey(sessionId)).build())
+                    .setSubscriptionOnly(true)
+                    .build());
+            log.debug("[{}] Dumping subscription-only session: {}", deviceId, sessionId);
+        }
     }
 
     void init(JnksIotActorCtx ctx) {

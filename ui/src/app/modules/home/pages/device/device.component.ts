@@ -57,6 +57,8 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   /** 当前所选设备档案的 TCP 连接模式（CLIENT/SERVER），用于设备传输页表单项显隐 */
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
 
+  /** 当前所选设备档案的 UDP 连接模式（CLIENT/SERVER）：CLIENT 时设备页要填平台 dial 的 host/port */
+
   httpPushProfileRoutingMode: HttpPullRoutingMode | null = null;
 
   httpPullProfilePollUrl: string | null = null;

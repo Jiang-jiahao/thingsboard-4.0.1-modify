@@ -17,6 +17,8 @@ const defineJnksIotVariablesPlugin: Plugin = {
       langs.push(item.name.slice(item.name.lastIndexOf("-") + 1, -5));
     });
     options.define.JNKS_IOT_VERSION = JSON.stringify(packageJson.version);
+    /* 构建时间戳：词条文件的 URL 会带上它，保证每次重建浏览器都会重新拉词条（见 translate-default-loader） */
+    options.define.JNKS_IOT_BUILD_TS = JSON.stringify(String(Date.now()));
     options.define.SUPPORTED_LANGS = JSON.stringify(langs);
     options.define.ngJitMode = 'true';
   },

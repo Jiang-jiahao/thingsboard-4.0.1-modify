@@ -236,7 +236,7 @@
 
 
 
-          <ng-container *ngIf="selectedMethod.bindingType === DeviceProfileRpcBindingType.NATIVE">
+          <ng-container *ngIf="selectedMethod.bindingType === DeviceProfileRpcBindingType.NATIVE || selectedMethodUsesCustomJson">
 
             <mat-form-field class="mat-block">
 

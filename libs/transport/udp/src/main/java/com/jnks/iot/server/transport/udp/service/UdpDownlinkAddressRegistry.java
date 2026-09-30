@@ -26,10 +26,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * 设备配置里指定的 UDP <strong>固定下行地址</strong>（{@code udpDownlinkHost} + {@code udpDownlinkPort}）。
+ * 设备配置里指定的 UDP <strong>下行地址</strong>（{@code udpDownlinkHost} + {@code udpDownlinkPort}，可选）。
  * <p>
- * 默认下行是"回发到设备最近一次上报的源地址"，对"设备从临时/ NAT 端口上报、但固定监听某个端口收指令"
- * 这类设备不成立；这些设备在设备连接配置里填固定下行地址后，RPC / 共享属性等下发就发到该地址。
+ * 默认下行是"回发设备最近一次上报的源地址"（透明绑定下那就是设备的真实 IP+端口），对"设备从临时/NAT
+ * 端口上报、但固定监听某个端口收指令"这类设备不成立；这些设备填了下行地址后，RPC / 共享属性等下发就发到该地址。
+ * <p>
+ * CLIENT 模式的设备配置里没有这两个字段 —— 它们的下行走连接对端（{@code host}/{@code port}），
+ * 见 {@code UdpDeviceSession#writeByteBuf}。
  * <p>
  * 与 {@code UdpListenPortRegistry} 同一套模式：启动时全量加载（分页拉 UDP 设备）+ 设备事件增量更新，
  * 下发路径只读内存映射，不产生 RPC。
@@ -66,7 +69,7 @@ public class UdpDownlinkAddressRegistry {
     }
 
     /**
-     * 命中则返回配置的固定下行地址；未配置（或设备未知）返回 {@code null}，调用方回落到会话记录的上报地址。
+     * 命中则返回配置的下行地址；未配置（或设备未知）返回 {@code null}，调用方回落到上报的源地址。
      */
     public InetSocketAddress resolve(DeviceId deviceId) {
         return deviceId == null ? null : downlinkByDevice.get(deviceId);

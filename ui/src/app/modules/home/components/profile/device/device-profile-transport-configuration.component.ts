@@ -101,8 +101,37 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
     this.deviceProfileTransportConfigurationFormGroup.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
-      this.updateModel();
+      if (!this.suppressModelUpdate) {
+        this.updateModel();
+      }
     });
+  }
+
+  /**
+   * 加载期**不能**回写模型。
+   * <p>
+   * 子组件（TCP/UDP 的档案传输配置）在 `writeValue()` 里会调 `notifyValidatorChange()` 让本组件的
+   * `configuration` 控件重跑校验；`updateValueAndValidity()` 会发射 valueChanges，于是走到本组件的
+   * `updateModel() → propagateChange(configuration)` —— 在加载阶段往自己的宿主控件
+   * （`profileData.transportConfiguration`）写了一次值，Angular 记成"用户改动"，
+   * 打开档案页点「编辑」、什么都没改，顶层表单就是 `ng-dirty`，保存按钮直接可点。
+   * <p>
+   * **每次写入都重新起算**，并在**写入安静下来之后**（见 {@link #SUPPRESSION_QUIET_MS}）才放开：
+   * 一次加载会分几轮写入 —— 本组件一轮、子组件在 `setTimeout(0)` 里再一轮，
+   * 只包住同步那一段挡不住后面那轮（踩过：包同步段后点编辑仍然 dirty）。
+   */
+  private static readonly SUPPRESSION_QUIET_MS = 50;
+  private suppressModelUpdate = true;
+  private releaseTimer: ReturnType<typeof setTimeout> | null = null;
+
+  private armModelUpdateSuppression(): void {
+    this.suppressModelUpdate = true;
+    if (this.releaseTimer !== null) {
+      clearTimeout(this.releaseTimer);
+    }
+    this.releaseTimer = setTimeout(() => {
+      this.suppressModelUpdate = false;
+    }, DeviceProfileTransportConfigurationComponent.SUPPRESSION_QUIET_MS);
   }
 
   setDisabledState(isDisabled: boolean): void {
@@ -115,6 +144,7 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
   }
 
   writeValue(value: DeviceProfileTransportConfiguration | null): void {
+    this.armModelUpdateSuppression();
     if (!value) {
       return;
     }
@@ -136,11 +166,14 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
       }
     };
     patchConfiguration();
-    // HTTP 子组件在 ngSwitch 下晚于首次 writeValue 挂载，补一次写入
+    // HTTP 子组件在 ngSwitch 下晚于首次 writeValue 挂载，补一次写入（抑制期由 arm 的静默计时兜住）
     setTimeout(() => patchConfiguration(), 0);
   }
 
   private updateModel() {
+    if (this.suppressModelUpdate) {
+      return;
+    }
     const configuration = this.deviceProfileTransportConfigurationFormGroup.getRawValue().configuration;
     if (configuration == null) {
       return;

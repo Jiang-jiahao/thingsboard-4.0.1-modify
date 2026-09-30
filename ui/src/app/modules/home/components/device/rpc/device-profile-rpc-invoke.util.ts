@@ -18,6 +18,7 @@ import {
   TcpHexValueType,
   TcpDeviceProfileTransportConfiguration,
   UdpDeviceProfileTransportConfiguration,
+  isCustomJsonRpcBinding,
   isHttpOutboundRpcBinding,
   isMqttCustomRpcBinding,
   isProtocolTemplateWireTransport,
@@ -25,7 +26,7 @@ import {
   wireProfileProtocolTemplateBundleId
 } from '@shared/models/device.models';
 
-export { isProtocolTemplateRpcBinding, isHttpOutboundRpcBinding, isMqttCustomRpcBinding };
+export { isProtocolTemplateRpcBinding, isHttpOutboundRpcBinding, isMqttCustomRpcBinding, isCustomJsonRpcBinding };
 
 export interface DeviceRpcInvokeFieldRow {
   /** 协议模板字段 key（模块侧） */

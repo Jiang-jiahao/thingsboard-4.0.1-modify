@@ -68,7 +68,7 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
         { emitEvent: true }
       );
     }
-    this.applyDeferredPayloadDeviceIdValidators();
+    this.runWithoutModelUpdate(() => this.applyDeferredPayloadDeviceIdValidators());
   }
 
   get showTcpWireAuthPayloadDeviceId(): boolean {
@@ -79,12 +79,12 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
   @Input()
   set tcpProfileTransportConnectMode(mode: TcpTransportConnectMode | null) {
     this.tcpProfileTransportConnectModeValue = mode;
-    if (this.tcpDeviceTransportConfigurationFormGroup
-        && mode === TcpTransportConnectMode.CLIENT) {
-      this.tcpDeviceTransportConfigurationFormGroup.patchValue(
-        { sourceHost: '' },
-        { emitEvent: true }
-      );
+    const grp = this.tcpDeviceTransportConfigurationFormGroup;
+    // CLIENT 档案下 sourceHost 无意义；只在**确实填过值**时才清空回写 ——
+    // 无条件 patchValue(emitEvent:true) 会在加载阶段凭空产生一次"改动"，把父表单标脏。
+    if (grp && mode === TcpTransportConnectMode.CLIENT
+        && String(grp.get('sourceHost').value ?? '').length > 0) {
+      grp.patchValue({ sourceHost: '' }, { emitEvent: true });
     }
   }
 
@@ -123,6 +123,28 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
   }
 
   private propagateChange = (v: any) => { };
+
+  /** 见 {@link #runWithoutModelUpdate}：初始化/写入期间抑制回写，否则父表单会被标脏。 */
+  private suppressModelUpdate = false;
+
+  /**
+   * 初始化、{@link #writeValue} 以及档案输入变化期间**不能**回写模型。
+   * <p>
+   * `applyDeferredPayloadDeviceIdValidators()` 用 `updateValueAndValidity({emitEvent: true})` 刷新校验，
+   * 这会触发本组件的 valueChanges；若此时调 {@link #updateModel} → `propagateChange(...)`，就等于在加载阶段
+   * 往父表单的 `configuration` 控件写了一次值。Angular 把这次子→父写入记成"用户改动"，
+   * 于是刚打开设备详情、什么都没编辑，顶层表单已经是 `ng-dirty` —— 离开时会弹「有未保存的更改」。
+   * <p>
+   * `emitEvent: true` 本身要保留：父级靠它重跑校验，只是不该顺带回写值。
+   */
+  private runWithoutModelUpdate(action: () => void): void {
+    this.suppressModelUpdate = true;
+    try {
+      action();
+    } finally {
+      this.suppressModelUpdate = false;
+    }
+  }
   constructor(private store: Store<AppState>,
               private fb: UntypedFormBuilder,
               private destroyRef: DestroyRef) {
@@ -142,9 +164,11 @@ export class TcpDeviceTransportConfigurationComponent implements ControlValueAcc
     this.tcpDeviceTransportConfigurationFormGroup.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
-      this.updateModel();
+      if (!this.suppressModelUpdate) {
+        this.updateModel();
+      }
     });
-    this.applyDeferredPayloadDeviceIdValidators();
+    this.runWithoutModelUpdate(() => this.applyDeferredPayloadDeviceIdValidators());
   }
 
   /** 协议设备 ID 延迟档案：新增设备时须能填写且须非空，否则无法保存且易在共端口下产生脏数据。 */

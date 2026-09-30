@@ -60,6 +60,9 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   @Input()
   udpWireAuthenticationMode: UdpWireAuthenticationMode | null = null;
 
+  /** 档案的 UDP 连接模式：CLIENT 时设备页显隐 host/port */
+  @Input()
+
   /** 来自设备页：当前设备档案的 TCP CLIENT/SERVER（用于隐藏 SERVER 档案下无意义的 CLIENT 对端表单项） */
   @Input()
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;

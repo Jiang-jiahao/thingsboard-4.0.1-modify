@@ -1145,7 +1145,9 @@ export enum DeviceProfileRpcBindingType {
   /** HTTP Pull：平台主动调用厂家 HTTP 接口（与拉取共用鉴权） */
   HTTP_OUTBOUND = 'HTTP_OUTBOUND',
   /** MQTT 自定义数据格式：自定义请求/响应主题与 payload 模板 */
-  MQTT_CUSTOM = 'MQTT_CUSTOM'
+  MQTT_CUSTOM = 'MQTT_CUSTOM',
+  /** TCP/UDP 自定义 JSON：params 即负载、不加 RPC 信封，只能单向 */
+  CUSTOM_JSON = 'CUSTOM_JSON'
 }
 
 export function createUavMqttPlatformSubscribeRequests(): MqttPullSubscribeRequest[] {
@@ -1829,12 +1831,6 @@ export const UDP_HEX_LTV_TAG_VALUE_TYPES = TCP_HEX_LTV_TAG_VALUE_TYPES;
 export const isUdpHexVariableByteSlice = isTcpHexVariableByteSlice;
 export const migrateLegacyLtvTagValueTypeUdp = migrateLegacyLtvTagValueType;
 
-/** @deprecated 历史 JSON；UDP 仅设备向平台监听端口发数据报，无 CLIENT/SERVER 建连 */
-export enum UdpTransportConnectMode {
-  SERVER = 'SERVER',
-  CLIENT = 'CLIENT'
-}
-
 export enum UdpTransportFramingMode {
   NONE = 'NONE',
   LINE = 'LINE',
@@ -1878,8 +1874,6 @@ export interface TransportUdpDataTypeConfiguration {
 export interface UdpDeviceProfileTransportConfiguration {
   type?: DeviceTransportType;
   /** @deprecated 历史字段，保存时固定为 NONE */
-  udpTransportConnectMode?: UdpTransportConnectMode;
-  /** @deprecated 历史字段，保存时固定为 NONE */
   udpTransportFramingMode?: UdpTransportFramingMode;
   udpFixedFrameLength?: number;
   udpWireAuthenticationMode?: UdpWireAuthenticationMode;
@@ -1896,15 +1890,11 @@ export interface UdpDeviceProfileTransportConfiguration {
 
 export interface UdpDeviceTransportConfiguration {
   type?: DeviceTransportType;
-  /** @deprecated 历史 CLIENT 模式字段 */
-  host?: string;
-  /** @deprecated 历史 CLIENT 模式字段 */
-  port?: number;
   sourceHost?: string;
   udpWireAuthPayloadDeviceId?: string;
-  /** 固定下行地址（可选，与 udpDownlinkPort 成对）：留空则回发到设备最近上报的源地址 */
+  /** 可选（与 udpDownlinkPort 成对）：填了则下行发这里，留空则回发设备最近上报的源地址 */
   udpDownlinkHost?: string;
-  /** 固定下行端口（可选，与 udpDownlinkHost 成对） */
+  /** 可选（与 udpDownlinkHost 成对） */
   udpDownlinkPort?: number;
 }
 
@@ -2289,6 +2279,11 @@ export function isProtocolTemplateWireTransport(type: DeviceTransportType | null
 export function isProtocolTemplateRpcBinding(bindingType: DeviceProfileRpcBindingType | null | undefined): boolean {
   return bindingType === DeviceProfileRpcBindingType.TCP_TEMPLATE
     || bindingType === DeviceProfileRpcBindingType.UDP_TEMPLATE;
+}
+
+/** TCP/UDP 档案 RPC：自定义 JSON 绑定（params 即负载、无信封、单向） */
+export function isCustomJsonRpcBinding(bindingType: DeviceProfileRpcBindingType | null | undefined): boolean {
+  return bindingType === DeviceProfileRpcBindingType.CUSTOM_JSON;
 }
 
 export function isHttpPullProfileTransport(

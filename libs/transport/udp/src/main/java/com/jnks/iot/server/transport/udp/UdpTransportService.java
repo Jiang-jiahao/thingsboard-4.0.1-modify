@@ -82,6 +82,16 @@ public class UdpTransportService implements JnksIotTransportService {
     }
 
     /**
+     * 取某个监听端口对应的通道；没绑定该端口返回 {@code null}。
+     * <p>
+     * 出站会话在**设备还没有会话**时用它把下行发出去：从平台监听的端口发，设备回包才会落回同一个端口
+     * （见 {@code com.jnks.iot.server.transport.udp.outbound}）。
+     */
+    public Channel getListenChannel(int port) {
+        return listenChannels.get(port);
+    }
+
+    /**
      * 把监听端口同步为「默认共享端口 ∪ 档案声明的自定义端口」。
      * <p>
      * 所有 transport 实例都监听同一组端口（SO_REUSEPORT），不做按档案分片的归属计算，

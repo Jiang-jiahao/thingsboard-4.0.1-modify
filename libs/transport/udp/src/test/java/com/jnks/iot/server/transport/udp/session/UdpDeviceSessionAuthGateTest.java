@@ -25,7 +25,7 @@ class UdpDeviceSessionAuthGateTest {
 
     @BeforeEach
     void setUp() {
-        session = new UdpDeviceSession(UUID.randomUUID(), udpTransportContext, false);
+        session = new UdpDeviceSession(UUID.randomUUID(), udpTransportContext);
     }
 
     @Test
