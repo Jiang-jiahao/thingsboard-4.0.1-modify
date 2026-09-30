@@ -268,7 +268,12 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
             UdpDeviceSession oldSession = serverSessions.put(session.getDeviceId(), session);
             if (oldSession != null && oldSession != session) {
                 log.info("[{}] Closing previous server session due to new inbound datagram peer", session.getDeviceId());
-                oldSession.close();
+                // 必须走统一关闭路径：裸 close() 只做本地清理，Core 收不到 SESSION_CLOSED、lc_event 里
+                // 也不会出现 STOPPED（实测换源端口重连后 STARTED 多一条、STOPPED 少一条），
+                // 而且旧会话会留在活动管理器里、10 分钟后被判过期并把 sessionClose 误发给设备。
+                // closeRegisteredInboundSession 内部是 serverSessions.remove(deviceId, oldSession)，
+                // 上面刚 put 进去的是**新**会话、值不相等，所以那里的 remove 是空操作，不会误删新会话。
+                closeRegisteredInboundSession(oldSession);
             }
         }
         session.endServerAuth();

@@ -1626,7 +1626,7 @@
         "events": "Events",
         "rpc": {
             "tab": "RPC",
-            "hint": "Pick a method from the device profile RPC catalog and send. Fix per-device parameters and optional scheduled auto-calls on this tab (audit user is System). TCP frames are built as HEX automatically.",
+            "hint": "Pick a method from the device profile RPC catalog and send. Fix per-device parameters and optional scheduled auto-calls on this tab (audit user is System). Methods bound to a protocol template are framed from that template.",
             "all-params-fixed": "All parameters are fixed on this device. You can send directly.",
             "no-catalog": "No RPC methods in this device profile. Add them on the device profile RPC methods tab first.",
             "select-method": "RPC method",
@@ -1662,7 +1662,7 @@
             "add-fixed-field": "Field",
             "add-fixed": "Add",
             "fixed-param-parse-error": "Invalid fixed parameter value for one or more fields",
-            "no-method-fields": "This method has no declared parameters. Check the RPC method binding on the device profile.",
+            "no-method-fields": "This method declares no fixed parameters. For native RPC just fill in the params JSON below.",
             "platform-param-name": "Platform parameter"
         },
         "rpc-param-defaults": {
