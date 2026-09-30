@@ -5,7 +5,7 @@
     </mat-panel-title>
     <mat-panel-description *ngIf="rpcMethodFormGroup.get('id').value as mid">
       <span class="mat-caption">{{ mid }}</span>
-      <span class="mat-caption" *ngIf="templateBindingOnly" translate>device-profile.rpc-binding-tcp-template</span>
+      <span class="mat-caption" *ngIf="templateBindingOnly">{{ templateBindingLabel | translate }}</span>
       <span class="mat-caption" *ngIf="customJsonBinding" translate>device-profile.rpc-binding-custom-json</span>
       <span class="mat-caption" *ngIf="httpOutboundBinding" translate>device-profile.rpc-binding-http-outbound</span>
       <span class="mat-caption" *ngIf="mqttCustomBinding" translate>device-profile.rpc-binding-mqtt-custom</span>
@@ -49,6 +49,8 @@
         <mat-select formControlName="bindingType" [disabled]="isLocked">
           <mat-option *ngFor="let bt of wireRpcBindingTypes" [value]="bt">
             <span *ngIf="bt === 'TCP_TEMPLATE'" translate>device-profile.rpc-binding-tcp-template</span>
+            <span *ngIf="bt === 'UDP_TEMPLATE'" translate>device-profile.rpc-binding-udp-template</span>
+            <span *ngIf="bt === 'NATIVE'" translate>device-profile.rpc-binding-native</span>
             <span *ngIf="bt === 'CUSTOM_JSON'" translate>device-profile.rpc-binding-custom-json</span>
           </mat-option>
         </mat-select>

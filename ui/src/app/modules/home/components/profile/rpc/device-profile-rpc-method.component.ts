@@ -96,9 +96,13 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     return isProtocolTemplateWireTransport(this.effectiveTransportType);
   }
 
-  /** 当前绑定是协议模板（TCP/UDP 且未选自定义 JSON） */
+  /**
+   * 当前绑定是「协议模板」（UDP_TEMPLATE / TCP_TEMPLATE 任一别名都算）。
+   * 注意不能用 `!customJsonBinding` 来推 —— 那样 NATIVE 也会被当成协议模板。
+   */
   get templateBindingOnly(): boolean {
-    return this.wireRpcTransport && !this.customJsonBinding;
+    const bt = this.rpcMethodFormGroup?.get('bindingType')?.value as DeviceProfileRpcBindingType;
+    return this.wireRpcTransport && isProtocolTemplateRpcBinding(bt);
   }
 
   /** 当前绑定是自定义 JSON：params 即负载、不加信封、只能单向 */
@@ -154,14 +158,35 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     return true;
   }
 
+  /**
+   * TCP/UDP 的「协议模板」绑定值随传输不同：UDP 存 {@code UDP_TEMPLATE}、TCP 存 {@code TCP_TEMPLATE}。
+   * 下拉框必须给出与档案传输匹配的那一个，否则存量方法（例如演示档案里的 UDP_TEMPLATE）
+   * 会因为选项列表里没有对应值而**显示空白**。
+   */
+  get wireTemplateBindingType(): DeviceProfileRpcBindingType {
+    return this.effectiveTransportType === DeviceTransportType.UDP
+      ? DeviceProfileRpcBindingType.UDP_TEMPLATE
+      : DeviceProfileRpcBindingType.TCP_TEMPLATE;
+  }
+
+  /** 折叠标题上「协议模板」这一档的文案 key（UDP / TCP 各一） */
+  get templateBindingLabel(): string {
+    return this.wireTemplateBindingType === DeviceProfileRpcBindingType.UDP_TEMPLATE
+      ? 'device-profile.rpc-binding-udp-template'
+      : 'device-profile.rpc-binding-tcp-template';
+  }
+
   get bindingTypeSelectable(): boolean {
     return this.httpRpcTransport || this.mqttRpcTransport || this.wireRpcTransport;
   }
 
-  readonly wireRpcBindingTypes = [
-    DeviceProfileRpcBindingType.TCP_TEMPLATE,
-    DeviceProfileRpcBindingType.CUSTOM_JSON
-  ];
+  get wireRpcBindingTypes(): DeviceProfileRpcBindingType[] {
+    return [
+      this.wireTemplateBindingType,
+      DeviceProfileRpcBindingType.NATIVE,
+      DeviceProfileRpcBindingType.CUSTOM_JSON
+    ];
+  }
 
   readonly httpRpcBindingTypes = [
     DeviceProfileRpcBindingType.HTTP_OUTBOUND,
@@ -208,7 +233,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
 
   ngOnInit(): void {
     const defaultBinding = this.wireRpcTransport
-      ? DeviceProfileRpcBindingType.TCP_TEMPLATE
+      ? this.wireTemplateBindingType
       : (this.httpPullRpcTransport
         ? DeviceProfileRpcBindingType.HTTP_OUTBOUND
         : DeviceProfileRpcBindingType.NATIVE);
@@ -295,7 +320,7 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       this.rpcMethodFormGroup.get('templateCommandRef').clearValidators();
       this.rpcMethodFormGroup.get('deviceMethod').clearValidators();
       this.rpcMethodFormGroup.get('httpUrl').clearValidators();
-    } else if (this.wireRpcTransport) {
+    } else if (this.wireRpcTransport && isProtocolTemplateRpcBinding(bindingType)) {
       enableAll(templateFields);
       this.rpcMethodFormGroup.get('templateCommandRef').setValidators([Validators.required]);
       this.rpcMethodFormGroup.get('deviceMethod').clearValidators();
@@ -374,9 +399,10 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
       displayName: value.displayName ?? '',
       oneWay: value.oneWay !== false,
       timeoutMs: value.timeoutMs ?? null,
-      bindingType: value.bindingType ?? (this.wireRpcTransport
-        ? DeviceProfileRpcBindingType.TCP_TEMPLATE
-        : (this.httpPullRpcTransport ? DeviceProfileRpcBindingType.HTTP_OUTBOUND : DeviceProfileRpcBindingType.NATIVE)),
+      bindingType: this.normalizeWireBinding(value.bindingType)
+        ?? (this.wireRpcTransport
+          ? this.wireTemplateBindingType
+          : (this.httpPullRpcTransport ? DeviceProfileRpcBindingType.HTTP_OUTBOUND : DeviceProfileRpcBindingType.NATIVE)),
       templateCommandRef: ref,
       paramMapJson,
       deviceMethod: value.deviceMethod ?? '',
@@ -394,16 +420,23 @@ export class DeviceProfileRpcMethodComponent implements ControlValueAccessor, On
     this.applyFormDisabledState();
   }
 
+  /**
+   * 把存量里的「协议模板」绑定归一到本传输对应的那一档。
+   * TCP_TEMPLATE 与 UDP_TEMPLATE 语义等价，但下拉框每个值只能有一个选项 ——
+   * 不归一的话，档案里存的另一个别名会因为选不中而**显示空白**。
+   */
+  private normalizeWireBinding(bt?: DeviceProfileRpcBindingType | null): DeviceProfileRpcBindingType | null {
+    if (!this.wireRpcTransport || !bt) {
+      return bt ?? null;
+    }
+    return isProtocolTemplateRpcBinding(bt) ? this.wireTemplateBindingType : bt;
+  }
+
   private updateModel(): void {
     const raw = this.rpcMethodFormGroup.getRawValue();
     let bindingType = raw.bindingType as DeviceProfileRpcBindingType;
     const isCustomJson = this.wireRpcTransport && isCustomJsonRpcBinding(bindingType);
-    if (this.wireRpcTransport) {
-      // 老数据里的 UDP_TEMPLATE 与 TCP_TEMPLATE 等价，统一存 TCP_TEMPLATE
-      if (!isCustomJson) {
-        bindingType = DeviceProfileRpcBindingType.TCP_TEMPLATE;
-      }
-    } else if (!this.httpRpcTransport && !this.mqttRpcTransport) {
+    if (!this.wireRpcTransport && !this.httpRpcTransport && !this.mqttRpcTransport) {
       bindingType = DeviceProfileRpcBindingType.NATIVE;
     }
 
