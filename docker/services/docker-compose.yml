@@ -365,6 +365,8 @@ services:
      - "55566:55566/udp"
      # 演示用第二个档案端口（见 nginx.conf 的同号 upstream）
      - "55570:55570/udp"
+     # 测试档案「qa-defer」的端口（见 nginx.conf 的同号 upstream）
+     - "15602:15602/udp"
     # 透明绑定（proxy_bind ... transparent）要 bind 非本机地址，需要 CAP_NET_ADMIN。
     # 少了这一条，55566 的每个数据报都会因 EPERM 发不出去（nginx error.log 里能看到 bind 失败）。
     cap_add:
