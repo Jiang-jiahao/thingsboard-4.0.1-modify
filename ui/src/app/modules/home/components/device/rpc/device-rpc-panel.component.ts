@@ -275,6 +275,11 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
   }
 
+  /** 本方法既没有已固定的、也没有还能新增的字段时，这块编辑器没内容可编，整块隐藏 */
+  get hasEditableFixedParams(): boolean {
+    return this.methodFixedEntries.length > 0 || this.availableKeysToAdd.length > 0;
+  }
+
   templateFieldLabel(platformKey: string): string {
     return templateFieldKeyForPlatformKey(platformKey, this.selectedMethod?.paramMap);
   }

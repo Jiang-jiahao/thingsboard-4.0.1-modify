@@ -46,7 +46,7 @@
 
         <ng-container *ngIf="selectedMethod">
 
-          <mat-expansion-panel class="jnks-iot-device-rpc-fixed-editor" [expanded]="true">
+          <mat-expansion-panel *ngIf="hasEditableFixedParams" class="jnks-iot-device-rpc-fixed-editor" [expanded]="true">
 
             <mat-expansion-panel-header>
 
