@@ -128,6 +128,9 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
      * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 靠协议设备号识别设备，因此这两种模式的身份串
      * 必须在<strong>租户内</strong>唯一（原先的范围是"同一专用监听端口内"）。与旧行为一致：仅当该模式下租户内
      * 存在多台设备时才强制校验（且不得为空）。
+     * <p>
+     * {@link TcpTransportConnectMode#CLIENT} 不适用：出站模式下平台主动 dial 设备的 {@code host}/{@code port}，
+     * 没有共享监听端口，也不存在"从入站报文按源 IP / 协议设备号认领设备"的场景，身份串无从起作用。
      */
     private void validateTcpWireIdentityUniquePerTenant(TenantId tenantId, Device device) {
         if (device.getDeviceData() == null
@@ -137,6 +140,9 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
         DeviceProfile profile = deviceProfileService.findDeviceProfileById(tenantId, device.getDeviceProfileId(), false);
         if (profile == null || profile.getProfileData() == null
                 || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration ptc)) {
+            return;
+        }
+        if (ptc.getTcpTransportConnectMode() == TcpTransportConnectMode.CLIENT) {
             return;
         }
         TcpWireAuthenticationMode wireMode = ptc.getTcpWireAuthenticationMode();
