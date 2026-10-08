@@ -9,20 +9,25 @@
       <mat-form-field class="flex-1">
         <mat-label translate>device-profile.udp.downlink-host</mat-label>
         <input matInput formControlName="udpDownlinkHost">
-        <mat-hint translate>device-profile.udp.downlink-host-hint</mat-hint>
         <mat-error *ngIf="tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkHost').hasError('required')"
                    translate>device-profile.udp.downlink-pair-required</mat-error>
       </mat-form-field>
       <mat-form-field class="flex-1">
         <mat-label translate>device-profile.udp.downlink-port</mat-label>
         <input matInput type="number" min="1" max="65535" formControlName="udpDownlinkPort">
-        <mat-hint translate>device-profile.udp.downlink-port-hint</mat-hint>
         <mat-error *ngIf="tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkPort').hasError('required')"
                    translate>device-profile.udp.downlink-pair-required</mat-error>
         <mat-error *ngIf="tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkPort').hasError('min')
                        || tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkPort').hasError('max')"
                    translate>device-profile.udp.downlink-port-invalid</mat-error>
       </mat-form-field>
+    </div>
+    <!-- 两条提示都超过一行，不能放进框里当 mat-hint：Material 的 subscript 只预留一行的
+         固定高度（20px），多出来的行会溢出框外、压住下一个字段（实测左栏提示高 36px）。
+         按本仓既有做法移到框外单独成行（列与上面的字段对齐）。 -->
+    <div class="flex flex-row gap-2 xs:flex-col">
+      <div class="flex-1 jnks-iot-hint mat-caption" translate>device-profile.udp.downlink-host-hint</div>
+      <div class="flex-1 jnks-iot-hint mat-caption" translate>device-profile.udp.downlink-port-hint</div>
     </div>
     <mat-form-field class="mat-block" *ngIf="showUdpWireAuthPayloadDeviceId">
       <mat-label translate>device-profile.udp.payload-device-id</mat-label>
