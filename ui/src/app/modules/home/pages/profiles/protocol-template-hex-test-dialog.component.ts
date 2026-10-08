@@ -20,6 +20,7 @@ import {
   buildDownlinkFieldValuesSkeleton,
   defaultDownlinkFieldInputText,
   defaultJsonValueForHexField,
+  downlinkFieldOptionsFor,
   formatDownlinkFieldEcho,
   formatFixedWireIntegralFromModel,
   listDownlinkEditableHexFields,
@@ -137,15 +138,7 @@ export class ProtocolTemplateHexTestDialogComponent {
       return;
     }
     const merged = mergeTemplateAndCommandFields(tpl.hexProtocolFields, cmd.fields);
-    const cmdOff = tpl.commandByteOffset ?? 12;
-    const matchVt = cmd.matchValueType ?? TcpHexValueType.UINT32_LE;
-    const tplCmdW = tpl.commandMatchWidth === 1 ? 1 : 4;
-    const opts = {
-      commandByteOffset: cmdOff,
-      commandMatchValueType: matchVt,
-      commandMatchWireByteWidth: isTcpHexVariableByteSlice(matchVt) ? tplCmdW : undefined,
-      command: cmd
-    };
+    const opts = downlinkFieldOptionsFor(tpl, cmd);
     const fields = listDownlinkEditableHexFields(merged, opts);
     const skeleton = buildDownlinkFieldValuesSkeleton(merged, opts);
     for (const f of fields) {

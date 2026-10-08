@@ -149,7 +149,17 @@ public class ProtocolTemplateHexBuildService {
             return out;
         }
 
-        TcpHexValueType matchVt = cmd.getMatchValueType() != null ? cmd.getMatchValueType() : TcpHexValueType.UINT32_LE;
+        // 命令的读取类型没配时，用模板声明的「命令匹配宽度」兜底（1 字节 或 小端 uint32），
+        // 而不是一律按 UINT32_LE 处理 —— 否则 1 字节命令会被当成 4 字节：命令字多写 3 个字节，
+        // 偏移 1~3 的下行字段还会被判成「与命令字重叠」丢掉
+        // （实测：宽度 1 的模板 + 未配读取类型，下发 01 07 变成了 01 00 00 00）。
+        // 读取类型显式配了仍以它为准 —— 它可能是 UINT16/UINT64，而「命令匹配宽度」只有 1/4。
+        // 前端 downlinkFieldOptionsFor 是同一条规则，改这里要两边一起改。
+        TcpHexValueType matchVt = cmd.getMatchValueType() != null
+                ? cmd.getMatchValueType()
+                : (tpl.getCommandMatchWidth() != null && tpl.getCommandMatchWidth() == 1
+                        ? TcpHexValueType.UINT8
+                        : TcpHexValueType.UINT32_LE);
         int cmdOff = tpl.getCommandByteOffset() != null ? tpl.getCommandByteOffset() : 12;
         int cmdW = TcpHexCommandProfile.isByteSliceCommandMatchType(matchVt)
                 ? (tpl.getCommandMatchWidth() != null && tpl.getCommandMatchWidth() == 1 ? 1 : 4)

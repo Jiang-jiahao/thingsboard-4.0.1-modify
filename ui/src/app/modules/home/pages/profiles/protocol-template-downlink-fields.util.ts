@@ -346,6 +346,34 @@ export interface DownlinkSkeletonOptions {
 }
 
 /**
+ * 由帧模板 + 命令推导下行字段解析选项（设备 RPC 面板与 HEX 测试对话框共用，避免两处规则漂移）。
+ *
+ * **命令的读取类型没配（`matchValueType` 为 null）时，命令占几个字节按模板的「命令匹配宽度」算**
+ * （1 字节 或 小端 uint32），而不是一律当成 UINT32_LE 的 4 字节 —— 否则 1 字节命令会被判成占了
+ * 偏移 0~3，把偏移 1~3 的下行字段整片当成「与命令字重叠」丢掉
+ * （表现为设备 RPC 页只剩大文本 JSON、固定参数也没字段可选）。
+ *
+ * 读取类型**显式配了**就仍以它为准：它是任意宽度的整型（可能是 UINT16/UINT64），
+ * 而「命令匹配宽度」只有 1/4 两种取值，硬覆盖会把 2/8 字节的命令弄坏。
+ * 后端 `ProtocolTemplateHexBuildService` 用同一口径，改这里要两边一起改。
+ */
+export function downlinkFieldOptionsFor(
+  tpl: { commandByteOffset?: number; commandMatchWidth?: number },
+  cmd: ProtocolTemplateCommandDefinition
+): DownlinkSkeletonOptions {
+  const matchVt = cmd.matchValueType ?? TcpHexValueType.UINT32_LE;
+  const tplCmdW = tpl.commandMatchWidth === 1 ? 1 : 4;
+  return {
+    commandByteOffset: tpl.commandByteOffset ?? 12,
+    commandMatchValueType: matchVt,
+    commandMatchWireByteWidth: cmd.matchValueType == null || isTcpHexVariableByteSlice(matchVt)
+      ? tplCmdW
+      : undefined,
+    command: cmd
+  };
+}
+
+/**
  * 下行组帧需用户填值的字段（与 {@link buildDownlinkFieldValuesSkeleton} 规则一致，不含自动参长/固定线值/与命令字重叠等）。
  * 变长 BYTES_AS_UTF8（无 byteLength）亦列出，默认空串，与 HEX 测试逐行输入及组帧 values 一致。
  */
