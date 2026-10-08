@@ -922,13 +922,18 @@
   // MQTT 传输配置里的「用户名 / 密码」是 `flex flex-row gap-2`（并排，容器自带
   // 7px 间距），第二个字段被这条规则压低 14px，两个框一高一低。
   // 所以并排的情形要把 margin 让回给容器的 gap。
+  //
+  // 协议模板的字段行（`__primary` / `__row`，都是 flex row + gap）同理：
+  // 每行的第 2、3 个输入框会被压低 14px，跟第一个对不齐。
   .mat-expansion-panel-body {
     .mat-mdc-form-field + .mat-mdc-form-field {
       margin-top: 14px;
     }
 
     .flex-row > .mat-mdc-form-field + .mat-mdc-form-field,
-    .flex-row-reverse > .mat-mdc-form-field + .mat-mdc-form-field {
+    .flex-row-reverse > .mat-mdc-form-field + .mat-mdc-form-field,
+    .protocol-template-hex-field-compact__primary > .mat-mdc-form-field + .mat-mdc-form-field,
+    .protocol-template-hex-field-compact__row > .mat-mdc-form-field + .mat-mdc-form-field {
       margin-top: 0;
     }
   }
