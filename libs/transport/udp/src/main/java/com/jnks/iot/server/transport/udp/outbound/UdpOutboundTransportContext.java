@@ -16,7 +16,6 @@ import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.DeviceTransportType;
 import com.jnks.iot.server.common.data.device.profile.UdpDeviceProfileTransportConfiguration;
 import com.jnks.iot.server.common.data.id.DeviceId;
-import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
 import com.jnks.iot.server.common.data.security.DeviceCredentials;
 import com.jnks.iot.server.common.data.security.DeviceCredentialsType;
 import com.jnks.iot.server.common.transport.DeviceDeletedEvent;
@@ -194,7 +193,6 @@ public class UdpOutboundTransportContext extends TransportContext {
                 return;
             }
             UdpOutboundSessionContext ctx = UdpOutboundSessionContext.builder()
-                    .tenantId(profile.getTenantId())
                     .device(device)
                     .deviceProfile(profile)
                     .token(credentials.getCredentialsId())
@@ -231,8 +229,9 @@ public class UdpOutboundTransportContext extends TransportContext {
                                 // 与"收到数据才算活跃"矛盾。RPC 下发靠的是下面这条订阅（rpcSubscriptions）。
                                 transportService.process(sessionInfo, DefaultTransportService.SUBSCRIBE_TO_RPC_ASYNC_MSG,
                                         TransportServiceCallback.EMPTY);
-                                transportService.lifecycleEvent(ctx.getTenantId(), deviceId,
-                                        ComponentLifecycleEvent.STARTED, true, null);
+                                // 刻意**不发**生命周期事件：它记录的是"设备连上了"，而这里设备一个包都没发过 ——
+                                // 发了就是误导（而且配了固定下行地址 + 真实会话落在别的实例时，
+                                // 这条 STARTED 永远等不到 STOPPED，见下面 destroySession 的说明）。
                                 log.info("[{}] Established UDP outbound session (device has no session yet)", deviceId);
                             } finally {
                                 establishing.remove(deviceId);
@@ -300,7 +299,7 @@ public class UdpOutboundTransportContext extends TransportContext {
                     TransportServiceCallback.EMPTY);
             transportService.deregisterSession(sessionInfo);
         }
-        transportService.lifecycleEvent(ctx.getTenantId(), ctx.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
+        // 与建立时对称：虚拟会话不写生命周期事件（否则会留下一条配不上对的 STOPPED）。
         log.info("[{}] Destroyed UDP outbound session", ctx.getDeviceId());
     }
 
