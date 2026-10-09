@@ -1,6 +1,5 @@
 package com.jnks.iot.server.common.data.device.profile;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import com.jnks.iot.server.common.data.DeviceTransportType;
 import com.jnks.iot.server.common.data.transport.snmp.config.SnmpCommunicationConfig;
@@ -20,16 +19,33 @@ public class SnmpDeviceProfileTransportConfiguration implements DeviceProfileTra
 
     @Override
     public void validate() {
-        if (!isValid()) {
-            throw new IllegalArgumentException("SNMP transport configuration is not valid");
+        if (timeoutMs == null) {
+            throw new IllegalArgumentException("timeoutMs is required");
         }
-    }
-
-    @JsonIgnore
-    private boolean isValid() {
-        return timeoutMs != null && timeoutMs >= 0 && retries != null && retries >= 0
-                && communicationConfigs != null
-                && communicationConfigs.stream().allMatch(config -> config != null && config.isValid());
+        if (timeoutMs < 0) {
+            throw new IllegalArgumentException("timeoutMs must be >= 0");
+        }
+        if (retries == null) {
+            throw new IllegalArgumentException("retries is required");
+        }
+        if (retries < 0) {
+            throw new IllegalArgumentException("retries must be >= 0");
+        }
+        if (communicationConfigs == null || communicationConfigs.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "communicationConfigs must contain at least one SNMP communication configuration");
+        }
+        for (int i = 0; i < communicationConfigs.size(); i++) {
+            SnmpCommunicationConfig config = communicationConfigs.get(i);
+            if (config == null) {
+                throw new IllegalArgumentException("communicationConfigs[" + i + "] must not be null");
+            }
+            if (!config.isValid()) {
+                throw new IllegalArgumentException(
+                        "communicationConfigs[" + i + "] is not valid: mappings must not be empty"
+                                + " and queryingFrequencyMs (when applicable) must be greater than 0");
+            }
+        }
     }
 
 }
