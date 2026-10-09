@@ -1,6 +1,6 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Store } from '@ngrx/store';
@@ -21,7 +21,7 @@ import {
   ProtocolTemplateHexTestDialogData
 } from '@home/pages/profiles/protocol-template-hex-test-dialog.component';
 import { parseProtocolTemplateBundlesFromImportedJson } from '@home/pages/profiles/protocol-template-bundle-import.util';
-import { combineLatest, forkJoin } from 'rxjs';
+import { combineLatest, forkJoin, fromEvent } from 'rxjs';
 import { filter, switchMap, take } from 'rxjs/operators';
 
 @Component({
@@ -176,8 +176,24 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
     return s !== '—' ? s : '';
   }
 
+  /**
+   * `disableClose: true` 会把「点遮罩关」和「Esc 关」一起禁掉 —— Material 只有这一个开关。
+   * 这里把 Esc 单独接回来：点遮罩仍然不关（编辑内容会丢），按 Esc 关。
+   *
+   * 注意不能用 `ref.keydownEvents()`：Material 的 dialog 容器只在 `!disableClose` 时
+   * 才把 Esc 转进那个流，开着 disableClose 时它永远不发。所以在 document 上自己听。
+   */
+  private closeOnEscape<T>(ref: MatDialogRef<T>): void {
+    const sub = fromEvent<KeyboardEvent>(document, 'keydown').subscribe(event => {
+      if (event.key === 'Escape') {
+        ref.close();
+      }
+    });
+    ref.afterClosed().subscribe(() => sub.unsubscribe());
+  }
+
   openHexTestDialog(): void {
-    this.dialog.open<ProtocolTemplateHexTestDialogComponent, ProtocolTemplateHexTestDialogData, void>(
+    const ref = this.dialog.open<ProtocolTemplateHexTestDialogComponent, ProtocolTemplateHexTestDialogData, void>(
       ProtocolTemplateHexTestDialogComponent,
       {
         width: '720px',
@@ -191,6 +207,7 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         data: { bundles: this.bundles.slice() }
       }
     );
+    this.closeOnEscape(ref);
   }
 
   openCreateDialog(): void {
@@ -208,6 +225,7 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         data: { bundle: null, isNew: true }
       }
     );
+    this.closeOnEscape(ref);
     ref.afterClosed().subscribe(result => {
       if (result) {
         this.persistBundle(result);
@@ -292,6 +310,7 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         data: { bundle: payload as ProtocolTemplateBundle, isNew: true }
       }
     );
+    this.closeOnEscape(ref);
     ref.afterClosed().subscribe(res => {
       if (res) {
         this.persistBundle(res);
@@ -315,6 +334,7 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         data: { bundle: { ...bundle }, isNew: false }
       }
     );
+    this.closeOnEscape(ref);
     ref.afterClosed().subscribe(result => {
       if (result) {
         this.persistBundle(result);
