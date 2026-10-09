@@ -209,7 +209,12 @@ export class WidgetEditorComponent extends PageComponent implements OnInit, OnDe
     this.iframe = $(this.widgetIFrameElmRef.nativeElement);
     this.window.addEventListener('message', this.onWindowMessageListener);
     this.iframe.attr('data-widget', JSON.stringify(this.widget));
-    this.iframe.attr('src', '/jnks-iot/widget-editor');
+    // 预览 iframe 的地址必须按应用的 base href 拼。原来写死 '/jnks-iot/widget-editor'，
+    // 而本套部署的 base href 是 '/' —— 该路径命中 SPA 回退后路由又匹配不上，iframe 掉回首页，
+    // 渲染的是首页那几张默认卡片（它们各自的脚本报错），正在编辑的部件永远不渲染、一直转圈。
+    // 用 baseURI 拼：base href 为 '/' 时得到 '/widget-editor'，为 '/jnks-iot/' 时回到原值。
+    const base = document.baseURI.replace(/\/+$/, '');
+    this.iframe.attr('src', `${base}/widget-editor`);
   }
 
   ngOnDestroy(): void {
