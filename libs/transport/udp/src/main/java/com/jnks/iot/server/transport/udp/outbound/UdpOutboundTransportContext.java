@@ -103,11 +103,12 @@ public class UdpOutboundTransportContext extends TransportContext {
                     destroySession(outboundSessions.get(deviceId));
                     continue;
                 }
-                // 设备已经有真实会话：出站会话不需要，留给正常链路
+                // 设备已经有真实会话：出站会话则销毁（当设备未上报数据的时候，设备需要下发rpc请求，这个时候需要伪造一个出站会话来订阅rpc）
                 if (udpTransportContext != null && udpTransportContext.hasActiveServerSession(deviceId)) {
                     destroySession(outboundSessions.get(deviceId));
                     continue;
                 }
+                // 如果出站会话不存在，则创建出站会话
                 if (!outboundSessions.containsKey(deviceId) && !establishing.contains(deviceId)) {
                     Device device = protoEntityService.getDeviceById(deviceId);
                     if (device != null) {
@@ -127,7 +128,7 @@ public class UdpOutboundTransportContext extends TransportContext {
     }
 
     /**
-     * 候选 = 本实例上"UDP + 服务端模式 + 配了固定下行地址"的设备。
+     * 候选 = 本实例上"UDP + 配了固定下行地址"的设备。
      * 下行地址直接查 {@link UdpDownlinkAddressRegistry}（内存映射，不发 RPC）。
      */
     private void reloadCandidateDeviceIds() {
