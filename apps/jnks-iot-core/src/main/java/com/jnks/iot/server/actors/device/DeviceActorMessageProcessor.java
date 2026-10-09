@@ -367,11 +367,19 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
      * <p>
      * 所以优先只投给有真实会话的订阅；设备当前没有任何真实会话时才回退到虚拟订阅
      * —— 那时它是唯一的通道（设备一开口就会被上面这条规则让位）。
+     * <p>
+     * 例外：{@link SessionType#SYNC} 的订阅必须始终保留。SYNC 会话由传输层
+     * {@code registerSyncSession} 注册（如 HTTP 长轮询 {@code GET /api/v1/{token}/rpc}），
+     * 同样**不发** {@code SESSION_EVENT_MSG_OPEN}，因此也不在 {@link #sessions} 里 ——
+     * 但它是一次性的**真实下发目标**，不是本规则要消除的虚拟会话。若把它一并排除，
+     * 当该设备同时还有出站/拉取会话时（后者在 {@code sessions} 里），长轮询订阅会被丢弃，
+     * NATIVE RPC 就永远到不了设备（HTTP 实测：twoway 504、长轮询 408）。
+     * 排除虚拟会话（BUG-3 场景）不会因此回退：虚拟会话经 BUG-4 修复后是 ASYNC。
      */
     private Map<UUID, SessionInfo> rpcDispatchTargets() {
         Map<UUID, SessionInfo> live = new HashMap<>();
         rpcSubscriptions.forEach((sessionId, sessionInfo) -> {
-            if (sessions.containsKey(sessionId)) {
+            if (sessions.containsKey(sessionId) || SessionType.SYNC == sessionInfo.getType()) {
                 live.put(sessionId, sessionInfo);
             }
         });
