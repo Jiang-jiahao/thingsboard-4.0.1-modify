@@ -3,39 +3,75 @@
 :host {
   display: block;
   width: 100%;
-  height: 100%;
-  min-height: 0;
 }
 
 .jnks-iot-protocol-template-bundles-page {
-  height: 100%;
   box-sizing: border-box;
+  // 不再撑满视口 + 内层滚动：内容多长就多长，滚动交给外层 .jnks-iot-main-content（整页滚动）。
 
   .jnks-iot-entity-table-content {
     width: 100%;
-    height: 100%;
     min-height: 360px;
     background: var(--jnks-iot-surface-card);
-    overflow: hidden;
 
+    // 与共享表格（设备/设备配置列表）完全一致的卡片外观
     &.jnks-iot-outlined-border {
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
-      border: solid 1px rgba(15, 23, 42, 0.08);
-      border-radius: 14px;
-      overflow: hidden;
+      box-shadow: none;
+      border: 1px solid var(--jnks-iot-line);
+      border-radius: var(--jnks-iot-radius);
+      background: var(--jnks-iot-surface-card);
+    }
+
+    // 工具条：与共享表格同一套度量（min-height 44 / 左右 12 / 发丝下边线 / 非 primary 白底）
+    .mat-mdc-table-toolbar {
+      min-height: 44px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--jnks-iot-line);
+
+      &:not(.mat-primary) {
+        background: var(--jnks-iot-surface-card) !important;
+      }
     }
 
     .mat-toolbar-tools {
-      min-height: auto;
+      min-height: 40px;
+      width: 100%;
+      gap: 4px;
     }
 
+    // 与共享表格（设备列表）一致：标题左侧 2px 主色强调条
     .jnks-iot-entity-table-title {
-      padding-right: 20px;
+      position: relative;
+      padding: 0 0 0 12px;
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--jnks-iot-text);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-weight: 500;
-      letter-spacing: 0.01em;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2px;
+        height: 18px;
+        background: var(--jnks-iot-primary-color);
+      }
+    }
+
+    // 与共享表格一致的图标按钮外观（圆角 8px + 悬停底色）
+    .mat-toolbar-tools > .mat-mdc-icon-button {
+      border-radius: 8px;
+
+      &:hover:not(:disabled) {
+        background: rgb(var(--jnks-iot-secondary-color-rgb) / 0.12);
+        color: var(--jnks-iot-primary-color);
+      }
     }
 
     .jnks-iot-entity-table-info {
@@ -46,7 +82,7 @@
   }
 
   .table-container {
-    overflow: auto;
+    overflow: visible;
   }
 
   .text-muted {
@@ -63,14 +99,52 @@
 
 .protocol-templates-table {
   width: 100%;
+  // 与共享表格（设备/设备配置列表）一致：表格自身透出卡片底色，表头行不刷底色。
+  // （原来这里给表头行刷了一条 #f8fafc→#f1f5f9 的灰色渐变，和别的列表一比颜色明显不同。）
+  background: transparent;
+
+  // 与共享表格同一套行度量。行高其实是被「操作图标按钮」撑起来的：
+  // Material 图标按钮默认 48px（密度 -2 仍 40px），比一行文字高得多，
+  // 所以按钮必须一起收小到 28px，行高才真正落下来。
+  --mat-table-row-item-container-height: 34px;
+  --mat-table-header-container-height: 32px;
+  --mat-table-row-item-label-text-size: 13px;
+
+  .mat-mdc-row {
+    height: 34px !important;
+    min-height: 34px !important;
+  }
 
   .mat-mdc-header-row {
-    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    height: 32px !important;
+    min-height: 32px !important;
+    background: transparent;
   }
 
   .mat-mdc-header-cell,
   .mat-mdc-cell {
-    padding: 0 12px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .mat-mdc-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: 28px;
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+    line-height: 1;
+
+    .mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
   }
 
   .col-select {
@@ -83,35 +157,24 @@
     min-width: 156px;
   }
 
-  .col-name {
-    max-width: min(320px, 28vw);
+  // 与共享表格（设备/设备配置列表）一致：单元格**单行**显示、超出省略号，
+  // 完整内容走已有的 matTooltip。原来是限宽 + 折 2/3 行，文本一长整行就被撑高。
+  .col-name,
+  .col-desc {
     min-width: 0;
     vertical-align: middle;
-
-    .col-name-clamp {
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2;
-      overflow: hidden;
-      word-break: break-word;
-      line-height: 1.45;
-    }
   }
 
-  .col-desc {
-    max-width: min(380px, 36vw);
-    min-width: 0;
-    vertical-align: middle;
+  .col-name-clamp,
+  .col-desc-clamp {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-    .col-desc-clamp {
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 3;
-      overflow: hidden;
-      word-break: break-word;
-      line-height: 1.45;
-      color: #64748b;
-    }
+  .col-desc-clamp {
+    color: #64748b;
   }
 
   .col-actions {
@@ -127,16 +190,6 @@
 
   &:hover {
     background-color: rgb(var(--jnks-iot-secondary-color-rgb) / 0.06);
-  }
-}
-
-@media #{$mat-xs} {
-  .jnks-iot-protocol-template-bundles-page .col-name {
-    max-width: none;
-  }
-
-  .jnks-iot-protocol-template-bundles-page .col-desc {
-    max-width: none;
   }
 }
 

@@ -25,14 +25,20 @@ h2.protocol-template-dialog-title {
   padding: 16px 20px 12px !important;
   display: flex;
   flex-direction: column;
-  max-height: min(78vh, 760px);
+  // 对话框整体上限是 92vh（openBundleDialog 的 maxHeight）。标题(≈54)+内容+底部按钮(≈64)
+  // 必须一起装进去，否则窗口一矮，底部的「取消/保存」就被裁掉、显示不全。
+  // 所以这里按「92vh 减去标题与按钮」算，而不是原来那条与窗口高度无关的 78vh。
+  max-height: min(calc(92vh - 124px), 760px);
   min-height: 0;
   box-sizing: border-box;
   background: var(--tb-surface);
 }
 
 .protocol-template-bundle-tabs-shell {
-  flex: 1 1 auto;
+  // 不能再用 flex:1 1 auto + min-height:0 去「抢剩余高度」：那样它会被限高、里面的内容
+  // 又被 overflow:hidden 裁掉 —— 既不内滚、也撑不高外层，结果整个对话框滚不动。
+  // 改成按内容撑高，让滚动落到 mat-dialog-content 上（整块对话框内容一起滚）。
+  flex: 0 0 auto;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -73,23 +79,21 @@ h2.protocol-template-dialog-title {
   }
 
   ::ng-deep .mat-mdc-tab-body.mat-mdc-tab-body-active {
-    overflow: hidden;
+    overflow: visible;
   }
 
   ::ng-deep .mat-mdc-tab-body-content {
-    height: 100%;
-    max-height: 100%;
-    overflow: hidden;
+    height: auto;
+    max-height: none;
+    overflow: visible;
     box-sizing: border-box;
     padding: 0;
   }
 }
 
+// 不再在 tab 区内自成滚动区：内容多长就多长，整块对话框内容一起滚
+// （原来是「中间一个子页面这样下拉」）。
 .tab-scroll {
-  height: 100%;
-  max-height: 100%;
-  min-height: 0;
-  overflow: auto;
   padding: 16px;
   min-width: 0;
 }

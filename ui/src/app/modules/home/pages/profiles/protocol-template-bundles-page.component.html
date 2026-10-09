@@ -6,24 +6,24 @@
           <span class="jnks-iot-entity-table-title">{{ 'profiles.protocol-templates-title' | translate }}</span>
         </div>
         <span class="flex-1"></span>
-        <button mat-stroked-button color="primary" type="button"
+        <button mat-icon-button type="button"
                 [disabled]="isLoading"
                 (click)="openHexTestDialog()"
-                style="margin-right: 8px;">
+                matTooltip="{{ 'profiles.protocol-hex-test-open' | translate }}"
+                matTooltipPosition="above">
           <mat-icon>science</mat-icon>
-          <span translate>profiles.protocol-hex-test-open</span>
         </button>
         <input #importJsonFileInput
                type="file"
                accept=".json,application/json"
                style="display:none"
                (change)="onImportJsonFileSelected($event)"/>
-        <button mat-stroked-button color="primary" type="button"
+        <button mat-icon-button type="button"
                 [disabled]="isLoading"
                 (click)="triggerImportJson()"
-                style="margin-right: 8px;">
+                matTooltip="{{ 'profiles.protocol-templates-import' | translate }}"
+                matTooltipPosition="above">
           <mat-icon>file_upload</mat-icon>
-          <span translate>profiles.protocol-templates-import</span>
         </button>
         <button mat-icon-button type="button"
                 [disabled]="isLoading"

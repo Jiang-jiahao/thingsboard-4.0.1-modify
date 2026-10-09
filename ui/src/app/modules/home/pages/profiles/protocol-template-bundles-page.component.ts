@@ -183,6 +183,8 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         width: '720px',
         maxWidth: '96vw',
         maxHeight: '90vh',
+        // 点遮罩不直接关：这几个对话框里都是会丢失的编辑内容，必须先点「取消」显式放弃。
+        disableClose: true,
         autoFocus: false,
         restoreFocus: false,
         panelClass: ['jnks-iot-dialog', 'jnks-iot-protocol-template-hex-test-dialog'],
@@ -198,6 +200,8 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         width: '980px',
         maxWidth: '96vw',
         maxHeight: '92vh',
+        // 点遮罩不直接关：这几个对话框里都是会丢失的编辑内容，必须先点「取消」显式放弃。
+        disableClose: true,
         autoFocus: false,
         restoreFocus: false,
         panelClass: ['jnks-iot-dialog', 'jnks-iot-protocol-template-bundle-dialog'],
@@ -280,6 +284,8 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         width: '980px',
         maxWidth: '96vw',
         maxHeight: '92vh',
+        // 点遮罩不直接关：这几个对话框里都是会丢失的编辑内容，必须先点「取消」显式放弃。
+        disableClose: true,
         autoFocus: false,
         restoreFocus: false,
         panelClass: ['jnks-iot-dialog', 'jnks-iot-protocol-template-bundle-dialog'],
@@ -301,6 +307,8 @@ export class ProtocolTemplateBundlesPageComponent implements OnInit, AfterViewIn
         width: '980px',
         maxWidth: '96vw',
         maxHeight: '92vh',
+        // 点遮罩不直接关：这几个对话框里都是会丢失的编辑内容，必须先点「取消」显式放弃。
+        disableClose: true,
         autoFocus: false,
         restoreFocus: false,
         panelClass: ['jnks-iot-dialog', 'jnks-iot-protocol-template-bundle-dialog'],
