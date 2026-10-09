@@ -312,6 +312,9 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
   }
 
   allValid(): boolean {
+    // 提交前刷新 deviceData 的校验：嵌套 CVA 的内部表单不在本表单的控制树里，
+    // 不触发这一下，子组件的无效态不会体现在 stepControl.invalid 上。
+    this.deviceWizardFormGroup.get('deviceData')?.updateValueAndValidity({emitEvent: false});
     return !this.addDeviceWizardStepper.steps.find((item, index) => {
       if (item.stepControl.invalid) {
         item.interacted = true;

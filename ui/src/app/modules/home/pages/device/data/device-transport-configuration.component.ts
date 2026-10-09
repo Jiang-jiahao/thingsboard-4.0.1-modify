@@ -152,6 +152,9 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
   }
 
   validate(): ValidationErrors | null {
+    // 先刷新子 CVA 的校验：嵌套 CVA 的内部表单不在本组件的控制树里，
+    // 不主动触发的话，子组件的无效态永远反映不到本组件的 group.valid 上。
+    this.deviceTransportConfigurationFormGroup.get('configuration')?.updateValueAndValidity({emitEvent: false});
     return this.deviceTransportConfigurationFormGroup.valid ? null : {
       deviceTransportConfiguration: false
     };

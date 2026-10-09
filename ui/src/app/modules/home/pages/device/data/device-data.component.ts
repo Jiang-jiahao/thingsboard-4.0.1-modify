@@ -199,6 +199,9 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   }
 
   validate(): ValidationErrors | null {
+    // 先刷新子 CVA 的校验（嵌套 CVA 的内部表单不在本组件控制树里，见同目录 device-transport-configuration 的说明）
+    this.deviceDataFormGroup.get('configuration')?.updateValueAndValidity({emitEvent: false});
+    this.deviceDataFormGroup.get('transportConfiguration')?.updateValueAndValidity({emitEvent: false});
     return this.deviceDataFormGroup.valid ? null : {
       deviceDataForm: false
     };
