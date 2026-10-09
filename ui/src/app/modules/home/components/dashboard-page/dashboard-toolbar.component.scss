@@ -43,6 +43,18 @@ div.jnks-iot-dashboard-page.mobile-app {
 }
 
 jnks-iot-dashboard-toolbar {
+  // 覆盖全局 `.mat-toolbar.mat-primary .mat-icon { color: #fff }`：
+  // 本工具条的底是**浅色**（主题令牌给的白底深字），Material 那条全局规则会把里面的
+  // 图标一律刷成白色 —— 白底白图标，整排看不见（实测：全屏按钮只剩一个空心圆）。
+  // 顶栏 `.jnks-iot-primary-toolbar` 早先已覆盖过同一处坑，这里是漏掉的第二处。
+  // 用 inherit 跟随工具条自身的前景色，深/浅两套主题都对。
+  mat-toolbar.mat-primary {
+    .mat-mdc-icon-button .mat-icon,
+    button .mat-icon {
+      color: inherit !important;
+    }
+  }
+
   .mat-fab-toolbar {
     mat-fab-trigger {
       .mat-mdc-fab {
