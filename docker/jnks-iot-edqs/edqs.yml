@@ -23,7 +23,7 @@ services:
       - ../jnks-iot-edqs/jnks-iot-edqs.env
     volumes:
       - ../jnks-iot-edqs/conf:/usr/share/jnks-iot-edqs/conf
-      - ../jnks-iot-edqs/log:/var/log/jnks-iot-edqs
+      - ../log/jnks-iot-edqs:/var/log/jnks-iot-edqs
     ports:
       - "8080"
     depends_on:
@@ -39,7 +39,7 @@ services:
       - ../jnks-iot-edqs/jnks-iot-edqs.env
     volumes:
       - ../jnks-iot-edqs/conf:/usr/share/jnks-iot-edqs/conf
-      - ../jnks-iot-edqs/log:/var/log/jnks-iot-edqs
+      - ../log/jnks-iot-edqs:/var/log/jnks-iot-edqs
     ports:
       - "8080"
     depends_on:

@@ -1,12 +1,9 @@
 services/nginx/certs/**
-services/jnks-iot-core/log/**
-services/jnks-iot-rule-engine/log/**
-jnks-iot-monolith/log/**
+# 运行日志统一挂在 docker/log/（bind mount 产物，见 DEPLOY.md §目录结构）
+/log/
 jnks-iot-monolith/db/**
 jnks-iot-monolith/postgres/**
 jnks-iot-monolith/cassandra/**
-services/jnks-iot-transports/*/log
-services/jnks-iot-vc-executor/log/**
 jnks-iot-monolith/redis-cluster-data-0/**
 jnks-iot-monolith/redis-cluster-data-1/**
 jnks-iot-monolith/redis-cluster-data-2/**
@@ -17,8 +14,7 @@ jnks-iot-monolith/redis-sentinel-data-master/**
 jnks-iot-monolith/redis-sentinel-data-slave/**
 jnks-iot-monolith/redis-sentinel-data-sentinel/**
 jnks-iot-monolith/redis-data/**
-tb/redis-data/**
-tb/postgres-data/**
-tb/postgres/**
+# 运行时数据（PG / Redis 数据目录，bind mount 产物，见 DEPLOY.md §目录结构）
+/data/
 
 !services/.env

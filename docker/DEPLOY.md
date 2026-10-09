@@ -13,13 +13,21 @@ docker/
 ├── services/               ← 主 docker-compose.yml 的项目目录，只放主 compose 用到的
 │   ├── docker-compose.yml  主编排（-f 必须排第一）
 │   ├── .env                项目变量
-│   ├── jnks-iot-core/            jnks-iot-core.env + conf/ log/
-│   ├── jnks-iot-rule-engine/     jnks-iot-rule-engine.env + conf/ log/
+│   ├── jnks-iot-core/            jnks-iot-core.env + conf/
+│   ├── jnks-iot-rule-engine/     jnks-iot-rule-engine.env + conf/
 │   ├── jnks-iot-js-executor/     jnks-iot-js-executor.env
-│   ├── jnks-iot-vc-executor/     jnks-iot-vc-executor.env + conf/ log/
+│   ├── jnks-iot-vc-executor/     jnks-iot-vc-executor.env + conf/
 │   ├── jnks-iot-transports/      各协议一个目录：coap/ http/ lwm2m/ mqtt/ snmp/ tcp/ udp/
-│   │                       （各有 jnks-iot-<协议>-transport.env + conf/ log/）
+│   │                       （各有 jnks-iot-<协议>-transport.env + conf/）
 │   └── nginx/              入口网关配置与证书
+│
+├── log/                    ← 所有服务的运行日志（bind mount 产物，已 gitignore）
+│   ├── jnks-iot-core/  jnks-iot-rule-engine/  jnks-iot-vc-executor/
+│   ├── jnks-iot-transports/{coap,http,lwm2m,mqtt,snmp,tcp,udp}/
+│   └── jnks-iot-monolith/  jnks-iot-edqs/
+│
+├── data/                   ← 运行时数据目录（bind mount 产物，已 gitignore）
+│                            postgres-data/（PG 数据，PGDATA 在其下 db/）  redis-data/
 │
 └── 以下是**附加组件**：不在主 compose 里，各自一份 compose + env，由 .env 开关按需加载
     ├── postgres/           postgres.yml  hybrid.yml + jnks-iot-node.{postgres,hybrid}.env
@@ -28,16 +36,15 @@ docker/
     ├── kafka/              kafka.yml + kafka.env（Kafka 容器配置）kafka-client.env（TB 侧连接配置）
     ├── jnks-iot-edqs/            edqs.yml + jnks-iot-edqs.env  jnks-iot-core-edqs.env  jnks-iot-rule-engine-edqs.env
     ├── monitoring/         prometheus-grafana.yml（+ grafana/ prometheus/）
-    ├── jnks-iot-monolith/        单体形态的 conf/ log/
-    └── tb/                 运行时数据目录：postgres-data/（PG 数据，PGDATA 在其下 db/）redis-data/
+    └── jnks-iot-monolith/        单体形态的 conf/（日志见 docker/log/jnks-iot-monolith/）
 ```
 
 **分界线**：`services/` 里的东西全部出现在主 `docker-compose.yml` 中；不出现的（可选数据库/缓存/队列/EDQS/监控、单体）都放在外面，各自成目录。
 
 
-**`services/` 是主 compose 的项目目录**：`-f` 必须让 `docker-compose.yml` 排第一，外加的附加组件写成 `-f ../postgres/postgres.yml` 这种形式（相对路径一律以 `services/` 为基准），`./jnks-iot-core/conf`、`redis/cache-redis.env` 这些相对路径都以它为基准 —— compose 与用到的目录同层，路径才不用互相迁就。
+**`services/` 是主 compose 的项目目录**：`-f` 必须让 `docker-compose.yml` 排第一，外加的附加组件写成 `-f ../postgres/postgres.yml` 这种形式（相对路径一律以 `services/` 为基准），`./jnks-iot-core/conf`、`redis/cache-redis.env` 这些相对路径都以它为基准 —— compose 与用到的目录同层，路径才不用互相迁就。**日志是唯一例外**：它不跟服务目录同址，统一挂在 `../log/<服务>/`（见上）。
 
-**可选组件是「compose + 它的 env」成对放在一个目录里**，按 `.env` 的开关自动加载：`DATABASE`→`postgres/`，`CACHE`→`redis/`，`JNKS_IOT_QUEUE_TYPE`→`kafka/`，`MONITORING_ENABLED`→`monitoring/`，`EDQS_ENABLED`→`jnks-iot-edqs/`。改哪块就进哪个目录；服务目录里的 `conf/` 会被挂进容器，`log/` 是被 gitignore 的运行产物。
+**可选组件是「compose + 它的 env」成对放在一个目录里**，按 `.env` 的开关自动加载：`DATABASE`→`postgres/`，`CACHE`→`redis/`，`JNKS_IOT_QUEUE_TYPE`→`kafka/`，`MONITORING_ENABLED`→`monitoring/`，`EDQS_ENABLED`→`jnks-iot-edqs/`。改哪块就进哪个目录；服务目录里的 `conf/` 会被挂进容器，日志则统一落到 `docker/log/<服务>/`（gitignore 的运行产物）——配置（入库、按服务就近）与运行产物（不入库、集中一处）分开。
 
 ## 部署步骤概览
 
@@ -178,7 +185,7 @@ docker/scripts/docker-start-services.sh           # = docker compose -f docker-c
 
 入口网关启动时要读 `docker/services/nginx/certs/tls.pem` 和 `tls.key`：没有就先生成自签（上一条），或者把正式证书按这两个文件名放进去。
 
-`docker-create-log-folders.sh` 用的是 `compose-utils.sh` 里的权限清单：日志目录 chown 给 **999**（= 镜像里 `jnks-iot` 用户的 uid，由基础镜像 `jnks-iot/openjdk17` 定义），Postgres 数据目录（`docker/tb/postgres-data`）**999**，Redis 数据目录（`docker/tb/redis-data`）**999:1000**。**如果直接手工 `docker compose up`，这些目录会被 Docker 以 root 建出来，容器内的非 root 用户写不进去**，所以这一步别省（macOS 上宿主属主不影响容器内可见的属主，见 §7）。
+`docker-create-log-folders.sh` 用的是 `compose-utils.sh` 里的权限清单：日志目录 chown 给 **999**（= 镜像里 `jnks-iot` 用户的 uid，由基础镜像 `jnks-iot/openjdk17` 定义），Postgres 数据目录（`docker/data/postgres-data`）**999**，Redis 数据目录（`docker/data/redis-data`）**999:1000**。**如果直接手工 `docker compose up`，这些目录会被 Docker 以 root 建出来，容器内的非 root 用户写不进去**，所以这一步别省（macOS 上宿主属主不影响容器内可见的属主，见 §7）。
 
 ## 6. 验证与访问地址
 
@@ -217,7 +224,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
 - 目前**没有数据库升级/安装入口**（见第 1 节），版本升级需要自己处理 schema 迁移。
 - 前端 `web-ui` 是独立镜像，由 **nginx 直接发静态文件**（`nginx.conf` 做 SPA 回退 + gzip）。它不转发 `/api`，API 路由由入口网关负责。前端产物来自 `ui/` 的 `ng build`（`ui/target/generated-resources/public`），`ui` 不在 Maven reactor 里，要单独构建；构建 web-ui 镜像前这个目录必须存在。镜像约 **266MB**（nginx 基础 77MB + 前端产物 156MB，其中 57MB 是 source map；不需要浏览器调试就可以把这 57MB 排除掉）。两个副本只是为了重启/升级时界面不断，跟吞吐无关。
 - **Kafka 用官方 `apache/kafka:3.7.0`**（KRaft 单节点，`kafka.env` 里是标准 `KAFKA_*` 变量）。两个坑：① **`KAFKA_LOG_DIRS` 不能省** —— 官方镜像只要拿到任意 `KAFKA_*` 变量就会重写 `server.properties` 且只写 env 派生的项，缺了它 `log.dirs` 为空、启动直接 `ConfigException`；② KRaft 存储的格式化是镜像自己在每次启动时做的，不需要额外初始化步骤。`kafka.yml` 把 9092 发布到宿主，方便本机工具直连 —— 起栈前确认宿主没有别的 Kafka 占着这个端口。
-- **postgres 的数据目录在宿主上**（`docker/tb/postgres-data`），但 `postgres.yml` 里有两个反直觉的设置是为 macOS 准备的：① `PGDATA=/var/lib/postgresql/data/db`（挂载点下的**子目录**，不是挂载点本身）；② 容器直接 `user: "999:999"`，不走 entrypoint 的 root→gosu 降权。原因：Docker Desktop 的文件共享层里**「容器内看到的属主 = 创建该文件的 uid，chown 是空操作」，宿主上建出来的目录（含挂载点）一律显示成 root**。postgres 启动时会校验数据目录属主必须是它自己，拿挂载点当 PGDATA 就会报 `data directory has wrong ownership` 并**跳过整个初始化**（连 `/docker-entrypoint-initdb.d` 里的建库脚本都不执行，库是空的）。让 999 自己创建这个子目录就没问题。代价是宿主目录要能被 999 写（Linux 上由 `scripts/docker-create-log-folders.sh` 负责 chown）。
+- **postgres 的数据目录在宿主上**（`docker/data/postgres-data`），但 `postgres.yml` 里有两个反直觉的设置是为 macOS 准备的：① `PGDATA=/var/lib/postgresql/data/db`（挂载点下的**子目录**，不是挂载点本身）；② 容器直接 `user: "999:999"`，不走 entrypoint 的 root→gosu 降权。原因：Docker Desktop 的文件共享层里**「容器内看到的属主 = 创建该文件的 uid，chown 是空操作」，宿主上建出来的目录（含挂载点）一律显示成 root**。postgres 启动时会校验数据目录属主必须是它自己，拿挂载点当 PGDATA 就会报 `data directory has wrong ownership` 并**跳过整个初始化**（连 `/docker-entrypoint-initdb.d` 里的建库脚本都不执行，库是空的）。让 999 自己创建这个子目录就没问题。代价是宿主目录要能被 999 写（Linux 上由 `scripts/docker-create-log-folders.sh` 负责 chown）。
 - **Redis 用官方 `redis:7-alpine`**（TB 侧本来就没配密码）。**`redis-cluster` / `redis-sentinel` 两个变体仍是 bitnami**，要用它们得先在能拉 bitnami 的网络里拉镜像或同样换掉。
 - **内存配额必须算够（这是本栈最容易踩的坑）**：整套实测约 **9G**（34 个容器，见 §0 表），Docker VM 默认只分到宿主一半 —— 不够时的表现很有迷惑性：**内核 OOM 杀掉 JVM，但容器日志里没有任何错误、`docker inspect` 的 `OOMKilled` 也是 false**，只会看到 core/rule-engine 反复重启、`RestartCount` 一直涨，用户侧表现为**登录接口间歇 502**。判断方法：`docker stats` 看总量是否顶到 `docker info` 里的 MemTotal。**解法是给 VM 加内存（或调小各服务堆），不是停掉多实例副本** —— transport 的 `*1/*2`、core 的 `*1/*2` 都是刻意的多实例部署。堆参数现状：core/rule-engine `-Xmx768M`、transport `JAVA_OPTS_TRANSPORT=-Xmx256M`、Kafka `KAFKA_HEAP_OPTS=-Xmx512M`（Kafka 不设堆上限会默认吃掉 VM 内存的 1/4）。
 - `js-executor` 是 JS 规则节点的执行器，compose 里写的是 `deploy.replicas: 10`（这套拓扑里 10 个实例实测约占 0.5G，是刻意的多实例，不是冗余）。
@@ -229,7 +236,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
 ```bash
 docker run -d --name jnks-iot-monolith -p 8080:8080 \
   -v "$PWD/docker/jnks-iot-monolith/conf:/config" \
-  -v "$PWD/docker/jnks-iot-monolith/log:/var/log/jnks-iot" \
+  -v "$PWD/docker/log/jnks-iot-monolith:/var/log/jnks-iot" \
   -e SPRING_DRIVER_CLASS_NAME=org.postgresql.Driver \
   -e SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/jnks_iot \
   -e SPRING_DATASOURCE_USERNAME=<user> -e SPRING_DATASOURCE_PASSWORD=<password> \

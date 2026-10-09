@@ -35,7 +35,7 @@ services:
       - jnks-iot-core/jnks-iot-core.env
     volumes:
       - ./jnks-iot-core/conf:/config
-      - ./jnks-iot-core/log:/var/log/jnks-iot-core
+      - ../log/jnks-iot-core:/var/log/jnks-iot-core
     depends_on:
       - zookeeper
       - jnks-iot-js-executor
@@ -58,7 +58,7 @@ services:
       - jnks-iot-core/jnks-iot-core.env
     volumes:
       - ./jnks-iot-core/conf:/config
-      - ./jnks-iot-core/log:/var/log/jnks-iot-core
+      - ../log/jnks-iot-core:/var/log/jnks-iot-core
     depends_on:
       - zookeeper
       - jnks-iot-js-executor
@@ -81,7 +81,7 @@ services:
       - jnks-iot-rule-engine/jnks-iot-rule-engine.env
     volumes:
       - ./jnks-iot-rule-engine/conf:/config
-      - ./jnks-iot-rule-engine/log:/var/log/jnks-iot-rule-engine
+      - ../log/jnks-iot-rule-engine:/var/log/jnks-iot-rule-engine
     depends_on:
       - zookeeper
       - jnks-iot-js-executor
@@ -102,7 +102,7 @@ services:
       - jnks-iot-rule-engine/jnks-iot-rule-engine.env
     volumes:
       - ./jnks-iot-rule-engine/conf:/config
-      - ./jnks-iot-rule-engine/log:/var/log/jnks-iot-rule-engine
+      - ../log/jnks-iot-rule-engine:/var/log/jnks-iot-rule-engine
     depends_on:
       - zookeeper
       - jnks-iot-js-executor
@@ -118,7 +118,7 @@ services:
       - jnks-iot-transports/mqtt/jnks-iot-mqtt-transport.env
     volumes:
       - ./jnks-iot-transports/mqtt/conf:/config
-      - ./jnks-iot-transports/mqtt/log:/var/log/jnks-iot-mqtt-transport
+      - ../log/jnks-iot-transports/mqtt:/var/log/jnks-iot-mqtt-transport
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -135,7 +135,7 @@ services:
       - jnks-iot-transports/mqtt/jnks-iot-mqtt-transport.env
     volumes:
       - ./jnks-iot-transports/mqtt/conf:/config
-      - ./jnks-iot-transports/mqtt/log:/var/log/jnks-iot-mqtt-transport
+      - ../log/jnks-iot-transports/mqtt:/var/log/jnks-iot-mqtt-transport
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -152,7 +152,7 @@ services:
       - jnks-iot-transports/http/jnks-iot-http-transport.env
     volumes:
       - ./jnks-iot-transports/http/conf:/config
-      - ./jnks-iot-transports/http/log:/var/log/jnks-iot-http-transport
+      - ../log/jnks-iot-transports/http:/var/log/jnks-iot-http-transport
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -169,7 +169,7 @@ services:
       - jnks-iot-transports/http/jnks-iot-http-transport.env
     volumes:
       - ./jnks-iot-transports/http/conf:/config
-      - ./jnks-iot-transports/http/log:/var/log/jnks-iot-http-transport
+      - ../log/jnks-iot-transports/http:/var/log/jnks-iot-http-transport
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -186,7 +186,7 @@ services:
       - jnks-iot-transports/coap/jnks-iot-coap-transport.env
     volumes:
       - ./jnks-iot-transports/coap/conf:/config
-      - ./jnks-iot-transports/coap/log:/var/log/jnks-iot-coap-transport
+      - ../log/jnks-iot-transports/coap:/var/log/jnks-iot-coap-transport
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -204,7 +204,7 @@ services:
       - jnks-iot-transports/lwm2m/jnks-iot-lwm2m-transport.env
     volumes:
       - ./jnks-iot-transports/lwm2m/conf:/config
-      - ./jnks-iot-transports/lwm2m/log:/var/log/jnks-iot-lwm2m-transport
+      - ../log/jnks-iot-transports/lwm2m:/var/log/jnks-iot-lwm2m-transport
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -221,7 +221,7 @@ services:
       - jnks-iot-transports/snmp/jnks-iot-snmp-transport.env
     volumes:
       - ./jnks-iot-transports/snmp/conf:/config
-      - ./jnks-iot-transports/snmp/log:/var/log/jnks-iot-snmp-transport
+      - ../log/jnks-iot-transports/snmp:/var/log/jnks-iot-snmp-transport
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -240,7 +240,7 @@ services:
       - jnks-iot-transports/tcp/jnks-iot-tcp-transport.env
     volumes:
       - ./jnks-iot-transports/tcp/conf:/config
-      - ./jnks-iot-transports/tcp/log:/var/log/jnks-iot-tcp-transport
+      - ../log/jnks-iot-transports/tcp:/var/log/jnks-iot-tcp-transport
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -258,7 +258,7 @@ services:
       - jnks-iot-transports/tcp/jnks-iot-tcp-transport.env
     volumes:
       - ./jnks-iot-transports/tcp/conf:/config
-      - ./jnks-iot-transports/tcp/log:/var/log/jnks-iot-tcp-transport
+      - ../log/jnks-iot-transports/tcp:/var/log/jnks-iot-tcp-transport
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -277,7 +277,7 @@ services:
       - jnks-iot-transports/udp/jnks-iot-udp-transport.env
     volumes:
       - ./jnks-iot-transports/udp/conf:/config
-      - ./jnks-iot-transports/udp/log:/var/log/jnks-iot-udp-transport
+      - ../log/jnks-iot-transports/udp:/var/log/jnks-iot-udp-transport
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -295,7 +295,7 @@ services:
       - jnks-iot-transports/udp/jnks-iot-udp-transport.env
     volumes:
       - ./jnks-iot-transports/udp/conf:/config
-      - ./jnks-iot-transports/udp/log:/var/log/jnks-iot-udp-transport
+      - ../log/jnks-iot-transports/udp:/var/log/jnks-iot-udp-transport
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -324,7 +324,7 @@ services:
       - jnks-iot-vc-executor/jnks-iot-vc-executor.env
     volumes:
       - ./jnks-iot-vc-executor/conf:/config
-      - ./jnks-iot-vc-executor/log:/var/log/jnks-iot-vc-executor
+      - ../log/jnks-iot-vc-executor:/var/log/jnks-iot-vc-executor
     depends_on:
       - zookeeper
       - jnks-iot-core1
@@ -341,7 +341,7 @@ services:
       - jnks-iot-vc-executor/jnks-iot-vc-executor.env
     volumes:
       - ./jnks-iot-vc-executor/conf:/config
-      - ./jnks-iot-vc-executor/log:/var/log/jnks-iot-vc-executor
+      - ../log/jnks-iot-vc-executor:/var/log/jnks-iot-vc-executor
     depends_on:
       - zookeeper
       - jnks-iot-core1

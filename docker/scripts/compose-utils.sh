@@ -111,18 +111,18 @@ function additionalComposeEdqsArgs() {
 
 function permissionList() {
     PERMISSION_LIST="
-      999  999  jnks-iot-core/log
-      999  999  jnks-iot-rule-engine/log
-      999  999  ../jnks-iot-monolith/log
-      999  999  jnks-iot-transports/lwm2m/log
-      999  999  jnks-iot-transports/http/log
-      999  999  jnks-iot-transports/mqtt/log
-      999  999  jnks-iot-transports/snmp/log
-      999  999  jnks-iot-transports/coap/log
-      999  999  jnks-iot-transports/tcp/log
-      999  999  jnks-iot-transports/udp/log
-      999  999  jnks-iot-vc-executor/log
-      999  999  ../tb/postgres-data
+      999  999  ../log/jnks-iot-core
+      999  999  ../log/jnks-iot-rule-engine
+      999  999  ../log/jnks-iot-monolith
+      999  999  ../log/jnks-iot-transports/lwm2m
+      999  999  ../log/jnks-iot-transports/http
+      999  999  ../log/jnks-iot-transports/mqtt
+      999  999  ../log/jnks-iot-transports/snmp
+      999  999  ../log/jnks-iot-transports/coap
+      999  999  ../log/jnks-iot-transports/tcp
+      999  999  ../log/jnks-iot-transports/udp
+      999  999  ../log/jnks-iot-vc-executor
+      999  999  ../data/postgres-data
       "
 
     source .env
@@ -135,7 +135,7 @@ function permissionList() {
 
     if [ "$EDQS_ENABLED" = true ]; then
       PERMISSION_LIST="$PERMISSION_LIST
-      999  999  ../jnks-iot-edqs/log
+      999  999  ../log/jnks-iot-edqs
       "
     fi
 
@@ -143,7 +143,7 @@ function permissionList() {
     case $CACHE in
         redis)
           PERMISSION_LIST="$PERMISSION_LIST
-          999 1000 ../tb/redis-data
+          999 1000 ../data/redis-data
           "
         ;;
         redis-cluster)
