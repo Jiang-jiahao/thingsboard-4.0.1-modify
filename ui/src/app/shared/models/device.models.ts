@@ -526,18 +526,6 @@ export enum HttpPullRoutingMode {
   AUTO = 'AUTO'
 }
 
-/** 界面可选的路由模式（不含已废弃的 AUTO） */
-export const HTTP_PULL_ROUTING_MODE_OPTIONS = [
-  HttpPullRoutingMode.SINGLE_DEVICE,
-  HttpPullRoutingMode.MULTI_DEVICE
-];
-
-export function normalizeHttpPullRoutingMode(mode?: HttpPullRoutingMode | null): HttpPullRoutingMode {
-  return mode === HttpPullRoutingMode.MULTI_DEVICE || mode === HttpPullRoutingMode.AUTO
-    ? HttpPullRoutingMode.MULTI_DEVICE
-    : HttpPullRoutingMode.SINGLE_DEVICE;
-}
-
 export enum HttpPullDeviceIdMatchStrategy {
   DEVICE_NAME = 'DEVICE_NAME',
   DEVICE_LABEL = 'DEVICE_LABEL',
