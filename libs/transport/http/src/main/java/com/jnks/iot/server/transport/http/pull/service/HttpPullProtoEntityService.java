@@ -8,7 +8,6 @@ import com.jnks.iot.server.common.data.device.data.DeviceData;
 import com.jnks.iot.server.common.data.device.data.DeviceTransportConfiguration;
 import com.jnks.iot.server.common.data.id.DeviceId;
 import com.jnks.iot.server.common.data.id.DeviceProfileId;
-import com.jnks.iot.server.common.data.id.TenantId;
 import com.jnks.iot.server.common.data.security.DeviceCredentials;
 import com.jnks.iot.server.common.transport.TransportService;
 import com.jnks.iot.server.common.util.ProtoUtils;
@@ -71,16 +70,5 @@ public class HttpPullProtoEntityService {
             builder.setTransportType(transportType);
         }
         return transportService.getHttpPullDevicesIds(builder.build());
-    }
-
-    public TransportProtos.GetHttpPullRoutingTargetsResponseMsg getRoutingTargets(TenantId tenantId, DeviceProfileId profileId, int page, int pageSize) {
-        return transportService.getHttpPullRoutingTargets(TransportProtos.GetHttpPullRoutingTargetsRequestMsg.newBuilder()
-                .setTenantIdMSB(tenantId.getId().getMostSignificantBits())
-                .setTenantIdLSB(tenantId.getId().getLeastSignificantBits())
-                .setDeviceProfileIdMSB(profileId.getId().getMostSignificantBits())
-                .setDeviceProfileIdLSB(profileId.getId().getLeastSignificantBits())
-                .setPage(page)
-                .setPageSize(pageSize)
-                .build());
     }
 }

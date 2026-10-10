@@ -98,8 +98,6 @@ public interface TransportService {
 
     TransportProtos.GetDeviceByTenantIdAndNameResponseMsg getDeviceByTenantIdAndName(TransportProtos.GetDeviceByTenantIdAndNameRequestMsg requestMsg);
 
-    TransportProtos.GetHttpPullRoutingTargetsResponseMsg getHttpPullRoutingTargets(TransportProtos.GetHttpPullRoutingTargetsRequestMsg requestMsg);
-
     TransportProtos.GetMqttPullDevicesResponseMsg getMqttPullDevicesIds(TransportProtos.GetMqttPullDevicesRequestMsg requestMsg);
 
     /**

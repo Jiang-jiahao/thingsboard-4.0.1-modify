@@ -16,7 +16,6 @@ import {
   BasicTransportType,
   DeviceTransportConfiguration,
   DeviceTransportType,
-  HttpPullRoutingMode,
   normalizeDeviceTransportConfigurationForSave,
   TcpTransportConnectMode,
   TcpWireAuthenticationMode,
@@ -71,12 +70,6 @@ export class DeviceTransportConfigurationComponent implements ControlValueAccess
 
   @Input()
   udpWireAuthenticationMode: UdpWireAuthenticationMode | null = null;
-
-  /** 档案的 UDP 连接模式：CLIENT 时设备页要填平台 dial 的 host/port */
-  @Input()
-
-  @Input()
-  httpPushRoutingMode: HttpPullRoutingMode | null = null;
 
   @Input()
   httpPullProfilePollUrl: string | null = null;

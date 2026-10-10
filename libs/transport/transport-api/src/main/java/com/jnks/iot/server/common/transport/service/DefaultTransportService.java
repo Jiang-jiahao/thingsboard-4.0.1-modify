@@ -374,21 +374,6 @@ public class DefaultTransportService extends TransportActivityManager implements
     }
 
     @Override
-    public TransportProtos.GetHttpPullRoutingTargetsResponseMsg getHttpPullRoutingTargets(TransportProtos.GetHttpPullRoutingTargetsRequestMsg requestMsg) {
-        JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
-                UUID.randomUUID(), TransportApiRequestMsg.newBuilder()
-                .setHttpPullRoutingTargetsRequestMsg(requestMsg)
-                .build()
-        );
-        try {
-            JnksIotProtoQueueMsg<TransportApiResponseMsg> response = transportApiRequestTemplate.send(protoMsg).get();
-            return response.getValue().getHttpPullRoutingTargetsResponseMsg();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public TransportProtos.GetMqttPullDevicesResponseMsg getMqttPullDevicesIds(TransportProtos.GetMqttPullDevicesRequestMsg requestMsg) {
         JnksIotProtoQueueMsg<TransportApiRequestMsg> protoMsg = new JnksIotProtoQueueMsg<>(
                 UUID.randomUUID(), TransportApiRequestMsg.newBuilder()

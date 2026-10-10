@@ -2,7 +2,6 @@ package com.jnks.iot.server.common.data.device.profile;
 
 import lombok.Data;
 import com.jnks.iot.server.common.data.DeviceTransportType;
-import com.jnks.iot.server.common.data.transport.http.HttpPullDeviceRoutingConfiguration;
 
 @Data
 public class DefaultDeviceProfileTransportConfiguration implements DeviceProfileTransportConfiguration {
@@ -12,11 +11,6 @@ public class DefaultDeviceProfileTransportConfiguration implements DeviceProfile
      */
     private String httpTransportMode;
 
-    /**
-     * HTTP Push（设备主动上报）数据路由；未配置时为 null，走标准遥测解析。
-     */
-    private HttpPullDeviceRoutingConfiguration routing;
-
     @Override
     public DeviceTransportType getType() {
         return DeviceTransportType.DEFAULT;
@@ -24,9 +18,6 @@ public class DefaultDeviceProfileTransportConfiguration implements DeviceProfile
 
     @Override
     public void validate() {
-        if (routing != null) {
-            routing.validate();
-        }
     }
 
 }

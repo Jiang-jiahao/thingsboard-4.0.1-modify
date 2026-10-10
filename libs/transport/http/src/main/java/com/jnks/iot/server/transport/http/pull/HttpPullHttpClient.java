@@ -51,6 +51,17 @@ public class HttpPullHttpClient {
                 .build();
     }
 
+    /**
+     * HTTP 头名不区分大小写，但 {@link HttpRequest.Builder#header} 会为大小写不同的同名头各加一个值，
+     * 导致发出两个 Content-Type。配置里的键是人工填的，比较时必须忽略大小写。
+     */
+    public static boolean hasHeader(Map<String, String> headers, String name) {
+        if (headers == null || headers.isEmpty()) {
+            return false;
+        }
+        return headers.keySet().stream().anyMatch(k -> k != null && k.equalsIgnoreCase(name));
+    }
+
     private static HttpRequest.BodyPublisher bodyPublisher(String body) {
         if (StringUtils.isBlank(body)) {
             return HttpRequest.BodyPublishers.noBody();

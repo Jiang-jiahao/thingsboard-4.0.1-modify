@@ -1,4 +1,4 @@
-import { Component, forwardRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { Component, forwardRef, Input, OnInit } from '@angular/core';
 import {
   ControlValueAccessor,
   NG_VALIDATORS,
@@ -10,11 +10,8 @@ import {
 } from '@angular/forms';
 import {
   DefaultDeviceTransportConfiguration,
-  DeviceTransportType,
-  HttpPullRoutingMode
+  DeviceTransportType
 } from '@shared/models/device.models';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'jnks-iot-http-passive-device-transport-configuration',
@@ -33,40 +30,21 @@ import { takeUntil } from 'rxjs/operators';
     }
   ]
 })
-export class HttpPassiveDeviceTransportConfigurationComponent implements OnInit, OnDestroy, OnChanges, ControlValueAccessor, Validator {
+export class HttpPassiveDeviceTransportConfigurationComponent implements OnInit, ControlValueAccessor, Validator {
 
   @Input() disabled: boolean;
-  @Input() httpPushRoutingMode: HttpPullRoutingMode | null = null;
 
   form: UntypedFormGroup;
 
-  private destroy$ = new Subject<void>();
   private propagateChange: (v: DefaultDeviceTransportConfiguration) => void = () => {};
+  private formReady = false;
 
   constructor(private fb: UntypedFormBuilder) {}
 
-  get singleDeviceMode(): boolean {
-    return this.httpPushRoutingMode === HttpPullRoutingMode.SINGLE_DEVICE
-      || this.httpPushRoutingMode == null;
-  }
-
   ngOnInit(): void {
-    this.form = this.fb.group({
-      gateway: [true],
-      externalDeviceId: ['']
-    });
-    this.form.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => this.updateModel());
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.httpPushRoutingMode && this.form) {
-      this.updateModel();
-    }
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.form = this.fb.group({});
+    this.formReady = true;
+    this.updateModel();
   }
 
   registerOnChange(fn: any): void {
@@ -83,11 +61,10 @@ export class HttpPassiveDeviceTransportConfigurationComponent implements OnInit,
     }
   }
 
-  writeValue(value: DefaultDeviceTransportConfiguration | null): void {
-    this.form.patchValue({
-      gateway: value?.gateway !== false,
-      externalDeviceId: value?.externalDeviceId || ''
-    }, { emitEvent: false });
+  writeValue(_value: DefaultDeviceTransportConfiguration | null): void {
+    if (this.formReady) {
+      this.updateModel();
+    }
   }
 
   validate(): ValidationErrors | null {
@@ -95,11 +72,6 @@ export class HttpPassiveDeviceTransportConfigurationComponent implements OnInit,
   }
 
   private updateModel(): void {
-    const v = this.form.value;
-    this.propagateChange({
-      type: DeviceTransportType.DEFAULT,
-      gateway: v.gateway,
-      externalDeviceId: v.externalDeviceId || undefined
-    });
+    this.propagateChange({ type: DeviceTransportType.DEFAULT });
   }
 }

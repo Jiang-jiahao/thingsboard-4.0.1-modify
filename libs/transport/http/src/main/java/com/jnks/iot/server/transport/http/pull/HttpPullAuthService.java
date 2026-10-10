@@ -123,7 +123,7 @@ public class HttpPullAuthService {
         if (auth.getLoginHeaders() != null) {
             headers.putAll(auth.getLoginHeaders());
         }
-        if (!headers.containsKey("Content-Type")) {
+        if (!HttpPullHttpClient.hasHeader(headers, "Content-Type")) {
             headers.put("Content-Type", "application/json");
         }
         HttpPullHttpClient.HttpPullResponse response = sharedHttpClient.execute(HttpPullHttpClient.HttpPullRequest.builder()
@@ -275,11 +275,18 @@ public class HttpPullAuthService {
         return "Basic " + Base64.getEncoder().encodeToString(raw.getBytes(StandardCharsets.UTF_8));
     }
 
+    /**
+     * 只有未配置（null）才回退默认前缀；空串表示明确「不加前缀」，用于把凭证原样放进
+     * 自定义请求头（如 {@code Cookie: CRY_SESSION=xxx}）的场景。
+     */
     private static String prefix(String configured, String fallback) {
-        if (StringUtils.isBlank(configured)) {
+        if (configured == null) {
             return fallback;
         }
-        return configured.endsWith(" ") ? configured : configured + " ";
+        if (configured.isEmpty() || configured.endsWith(" ")) {
+            return configured;
+        }
+        return configured + " ";
     }
 
     private static String urlEncode(String v) {

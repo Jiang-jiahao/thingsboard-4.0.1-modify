@@ -11,6 +11,7 @@ import {
 } from '@angular/forms';
 import {
   DeviceTransportType,
+  HttpPullAuthConfiguration,
   HttpPullAuthType,
   HttpPullDeviceProfileTransportConfiguration,
   HttpPullPollDataType,
@@ -64,7 +65,11 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
       bearerToken: [''],
       loginUrl: [''],
       loginBody: [''],
+      loginHeadersJson: ['{}'],
       accessTokenJsonPath: ['$.token'],
+      tokenHeader: ['Authorization'],
+      tokenPrefix: ['Bearer '],
+      defaultTokenTtlSec: [3600, [Validators.min(1)]],
       tokenUrl: [''],
       clientId: [''],
       clientSecret: [''],
@@ -127,7 +132,11 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
       bearerToken: auth.bearerToken,
       loginUrl: auth.loginUrl,
       loginBody: auth.loginBody,
+      loginHeadersJson: auth.loginHeaders && Object.keys(auth.loginHeaders).length ? JSON.stringify(auth.loginHeaders) : '{}',
       accessTokenJsonPath: auth.accessTokenJsonPath,
+      tokenHeader: auth.tokenHeader ?? 'Authorization',
+      tokenPrefix: auth.tokenPrefix ?? 'Bearer ',
+      defaultTokenTtlSec: auth.defaultTokenTtlSec ?? 3600,
       tokenUrl: auth.tokenUrl,
       clientId: auth.clientId,
       clientSecret: auth.clientSecret,
@@ -137,11 +146,42 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
   }
 
   validate(): ValidationErrors | null {
-    return this.form.valid ? null : { httpPull: true };
+    if (!this.form.valid) {
+      return { httpPull: true };
+    }
+    if (parseJsonObject(this.form.get('loginHeadersJson').value) === null) {
+      return { loginHeadersJson: true };
+    }
+    return null;
   }
 
   private updateModel(): void {
     const v = this.form.value;
+    const auth: HttpPullAuthConfiguration = {
+      authType: v.authType,
+      apiKeyHeader: v.apiKeyHeader,
+      apiKeyValue: v.apiKeyValue,
+      apiKeyInQuery: v.apiKeyInQuery,
+      username: v.username,
+      password: v.password,
+      bearerToken: v.bearerToken,
+      loginUrl: v.loginUrl,
+      loginBody: v.loginBody,
+      accessTokenJsonPath: v.accessTokenJsonPath,
+      // 空串表示「不加前缀」，不能回退成 Bearer
+      tokenHeader: v.tokenHeader || undefined,
+      tokenPrefix: v.tokenPrefix,
+      defaultTokenTtlSec: v.defaultTokenTtlSec,
+      tokenUrl: v.tokenUrl,
+      clientId: v.clientId,
+      clientSecret: v.clientSecret,
+      oauthUsername: v.oauthUsername,
+      oauthPassword: v.oauthPassword
+    };
+    const loginHeaders = parseJsonObject(v.loginHeadersJson);
+    if (loginHeaders) {
+      auth.loginHeaders = loginHeaders;
+    }
     const model: HttpPullDeviceProfileTransportConfiguration & { type: DeviceTransportType } = {
       type: DeviceTransportType.HTTP_PULL,
       httpTransportMode: HttpTransportMode.PULL,
@@ -149,24 +189,28 @@ export class HttpPullDeviceProfileTransportConfigurationComponent implements OnI
       readTimeoutMs: v.readTimeoutMs,
       queryingFrequencyMs: v.queryingFrequencyMs,
       pollRequests: v.pollRequests,
-      auth: {
-        authType: v.authType,
-        apiKeyHeader: v.apiKeyHeader,
-        apiKeyValue: v.apiKeyValue,
-        apiKeyInQuery: v.apiKeyInQuery,
-        username: v.username,
-        password: v.password,
-        bearerToken: v.bearerToken,
-        loginUrl: v.loginUrl,
-        loginBody: v.loginBody,
-        accessTokenJsonPath: v.accessTokenJsonPath,
-        tokenUrl: v.tokenUrl,
-        clientId: v.clientId,
-        clientSecret: v.clientSecret,
-        oauthUsername: v.oauthUsername,
-        oauthPassword: v.oauthPassword
-      }
+      auth
     };
     this.propagateChange(model);
+  }
+}
+
+function parseJsonObject(text: string): Record<string, string> | null {
+  const t = (text ?? '').trim();
+  if (!t || t === '{}') {
+    return {};
+  }
+  try {
+    const v = JSON.parse(t);
+    if (v && typeof v === 'object' && !Array.isArray(v)) {
+      const out: Record<string, string> = {};
+      for (const k of Object.keys(v)) {
+        out[k] = String(v[k]);
+      }
+      return out;
+    }
+    return null;
+  } catch {
+    return null;
   }
 }

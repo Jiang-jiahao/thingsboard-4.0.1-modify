@@ -1,4 +1,4 @@
-import { Component, forwardRef, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, forwardRef, Input, OnInit } from '@angular/core';
 import {
   ControlValueAccessor,
   NG_VALIDATORS,
@@ -11,12 +11,8 @@ import {
 import {
   DefaultDeviceProfileTransportConfiguration,
   DeviceTransportType,
-  HttpPullDeviceRoutingConfiguration,
-  HttpPullRoutingMode,
   HttpTransportMode
 } from '@shared/models/device.models';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'jnks-iot-http-passive-device-profile-transport-configuration',
@@ -35,27 +31,21 @@ import { takeUntil } from 'rxjs/operators';
     }
   ]
 })
-export class HttpPassiveDeviceProfileTransportConfigurationComponent implements OnInit, OnDestroy, ControlValueAccessor, Validator {
+export class HttpPassiveDeviceProfileTransportConfigurationComponent implements OnInit, ControlValueAccessor, Validator {
 
   @Input() disabled: boolean;
 
   form: UntypedFormGroup;
 
-  private destroy$ = new Subject<void>();
   private propagateChange: (v: DefaultDeviceProfileTransportConfiguration) => void = () => {};
+  private formReady = false;
 
   constructor(private fb: UntypedFormBuilder) {}
 
   ngOnInit(): void {
-    this.form = this.fb.group({
-      routing: [null as HttpPullDeviceRoutingConfiguration | null]
-    });
-    this.form.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => this.updateModel());
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.form = this.fb.group({});
+    this.formReady = true;
+    this.updateModel();
   }
 
   registerOnChange(fn: any): void {
@@ -72,10 +62,10 @@ export class HttpPassiveDeviceProfileTransportConfigurationComponent implements 
     }
   }
 
-  writeValue(value: DefaultDeviceProfileTransportConfiguration | null): void {
-    this.form.patchValue({
-      routing: value?.routing || null
-    }, { emitEvent: false });
+  writeValue(_value: DefaultDeviceProfileTransportConfiguration | null): void {
+    if (this.formReady) {
+      this.updateModel();
+    }
   }
 
   validate(): ValidationErrors | null {
@@ -83,14 +73,9 @@ export class HttpPassiveDeviceProfileTransportConfigurationComponent implements 
   }
 
   private updateModel(): void {
-    const routing = this.form.get('routing').value as HttpPullDeviceRoutingConfiguration | null;
-    const model: DefaultDeviceProfileTransportConfiguration = {
+    this.propagateChange({
       type: DeviceTransportType.DEFAULT,
       httpTransportMode: HttpTransportMode.PASSIVE
-    };
-    if (routing?.routingMode === HttpPullRoutingMode.MULTI_DEVICE) {
-      model.routing = routing;
-    }
-    this.propagateChange(model);
+    });
   }
 }

@@ -101,7 +101,9 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
     this.deviceProfileTransportConfigurationFormGroup.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
-      if (!this.suppressModelUpdate) {
+      // isAdd（新建档案 / 刚切换传输类型）时不抑制：此时「用户没选完」这类无效态必须能传到上层，
+      // 否则保存拦不住；防脏只对「打开已保存档案」这件场景有意义。
+      if (!this.suppressModelUpdate || this.isAdd) {
         this.updateModel();
       }
     });
@@ -171,7 +173,7 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
   }
 
   private updateModel() {
-    if (this.suppressModelUpdate) {
+    if (this.suppressModelUpdate && !this.isAdd) {
       return;
     }
     const configuration = this.deviceProfileTransportConfigurationFormGroup.getRawValue().configuration;
@@ -182,6 +184,9 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
   }
 
   public validate(c: UntypedFormControl): ValidationErrors | null {
+    // 嵌套子 CVA（HTTP/TCP/UDP 等）的内部表单不在本组件的控制树里，
+    // 不主动触发的话，子组件的无效态（如「HTTP 工作模式未选」）反映不到 group.valid 上，保存就拦不住。
+    this.deviceProfileTransportConfigurationFormGroup.get('configuration')?.updateValueAndValidity({ emitEvent: false });
     return (this.deviceProfileTransportConfigurationFormGroup.valid) ? null : {
       configuration: {
         valid: false,

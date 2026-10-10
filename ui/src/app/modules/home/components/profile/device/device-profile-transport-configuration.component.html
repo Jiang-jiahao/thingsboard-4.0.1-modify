@@ -32,14 +32,16 @@
       <jnks-iot-http-device-profile-transport-configuration
         formControlName="configuration"
         [entityTransportType]="entityTransportType"
-        [httpPullActive]="httpPullActive">
+        [httpPullActive]="httpPullActive"
+        [isAdd]="isAdd">
       </jnks-iot-http-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.HTTP_PULL">
       <jnks-iot-http-device-profile-transport-configuration
         formControlName="configuration"
         [entityTransportType]="entityTransportType"
-        [httpPullActive]="httpPullActive">
+        [httpPullActive]="httpPullActive"
+        [isAdd]="isAdd">
       </jnks-iot-http-device-profile-transport-configuration>
     </ng-template>
     <ng-template [ngSwitchCase]="deviceTransportType.MQTT_PULL">

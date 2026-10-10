@@ -223,8 +223,6 @@ public class DefaultTransportApiService implements TransportApiService {
             return handle(transportApiRequestMsg.getHttpPullDevicesRequestMsg());
         } else if (transportApiRequestMsg.hasDeviceByTenantIdAndNameRequestMsg()) {
             return handle(transportApiRequestMsg.getDeviceByTenantIdAndNameRequestMsg());
-        } else if (transportApiRequestMsg.hasHttpPullRoutingTargetsRequestMsg()) {
-            return handle(transportApiRequestMsg.getHttpPullRoutingTargetsRequestMsg());
         } else if (transportApiRequestMsg.hasMqttPullDevicesRequestMsg()) {
             return handle(transportApiRequestMsg.getMqttPullDevicesRequestMsg());
         }
@@ -596,40 +594,6 @@ public class DefaultTransportApiService implements TransportApiService {
                 .setLabel(device.getLabel() != null ? device.getLabel() : "")
                 .build();
         return TransportApiResponseMsg.newBuilder().setDeviceByTenantIdAndNameResponseMsg(response).build();
-    }
-
-    private TransportApiResponseMsg handle(TransportProtos.GetHttpPullRoutingTargetsRequestMsg requestMsg) {
-        TenantId tenantId = TenantId.fromUUID(new UUID(requestMsg.getTenantIdMSB(), requestMsg.getTenantIdLSB()));
-        DeviceProfileId profileId = new DeviceProfileId(new UUID(requestMsg.getDeviceProfileIdMSB(), requestMsg.getDeviceProfileIdLSB()));
-        PageLink pageLink = new PageLink(requestMsg.getPageSize(), requestMsg.getPage());
-        PageData<DeviceId> deviceIds = deviceService.findDeviceIdsByTenantIdAndDeviceProfileId(tenantId, profileId, pageLink);
-        TransportProtos.GetHttpPullRoutingTargetsResponseMsg.Builder builder = TransportProtos.GetHttpPullRoutingTargetsResponseMsg.newBuilder();
-        for (DeviceId deviceId : deviceIds.getData()) {
-            Device device = deviceService.findDeviceById(tenantId, deviceId);
-            if (device == null) {
-                continue;
-            }
-            String externalDeviceId = "";
-            String collectorDeviceId = "";
-            if (device.getDeviceData() != null && device.getDeviceData().getTransportConfiguration() != null) {
-                var tc = device.getDeviceData().getTransportConfiguration();
-                if (tc instanceof com.jnks.iot.server.common.data.device.data.HttpPullDeviceTransportConfiguration) {
-                    continue;
-                } else if (tc instanceof com.jnks.iot.server.common.data.device.data.DefaultDeviceTransportConfiguration httpPush) {
-                    externalDeviceId = httpPush.getExternalDeviceId() != null ? httpPush.getExternalDeviceId() : "";
-                }
-            }
-            builder.addTargets(TransportProtos.HttpPullRoutingTargetProto.newBuilder()
-                    .setDeviceIdMSB(deviceId.getId().getMostSignificantBits())
-                    .setDeviceIdLSB(deviceId.getId().getLeastSignificantBits())
-                    .setName(device.getName() != null ? device.getName() : "")
-                    .setLabel(device.getLabel() != null ? device.getLabel() : "")
-                    .setExternalDeviceId(externalDeviceId)
-                    .setCollectorDeviceId(collectorDeviceId)
-                    .build());
-        }
-        builder.setHasNextPage(deviceIds.hasNext());
-        return TransportApiResponseMsg.newBuilder().setHttpPullRoutingTargetsResponseMsg(builder.build()).build();
     }
 
     private TransportApiResponseMsg handle(TransportProtos.GetMqttPullDevicesRequestMsg requestMsg) {

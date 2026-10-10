@@ -70,9 +70,28 @@
           <textarea matInput formControlName="loginBody" rows="2"></textarea>
         </mat-form-field>
         <mat-form-field class="mat-block">
+          <mat-label translate>device-profile.http-pull.login-headers</mat-label>
+          <textarea matInput formControlName="loginHeadersJson" rows="2"></textarea>
+          <mat-hint translate>device-profile.http-pull.login-headers-hint</mat-hint>
+        </mat-form-field>
+        <mat-form-field class="mat-block">
           <mat-label translate>device-profile.http-pull.credential-json-path</mat-label>
           <input matInput formControlName="accessTokenJsonPath" placeholder="$.token">
           <mat-hint translate>device-profile.http-pull.credential-json-path-hint</mat-hint>
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-profile.http-pull.token-header</mat-label>
+          <input matInput formControlName="tokenHeader">
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-profile.http-pull.token-prefix</mat-label>
+          <input matInput formControlName="tokenPrefix">
+          <mat-hint translate>device-profile.http-pull.token-prefix-hint</mat-hint>
+        </mat-form-field>
+        <mat-form-field class="mat-block">
+          <mat-label translate>device-profile.http-pull.token-ttl-sec</mat-label>
+          <input matInput type="number" formControlName="defaultTokenTtlSec">
+          <mat-hint translate>device-profile.http-pull.token-ttl-sec-hint</mat-hint>
         </mat-form-field>
       </ng-container>
       <ng-container *ngSwitchCase="'OAUTH2_CLIENT_CREDENTIALS'">

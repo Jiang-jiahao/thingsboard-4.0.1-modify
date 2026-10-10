@@ -308,9 +308,6 @@ export function normalizeHttpProfileTransportConfigurationForSave(
     type: DeviceTransportType.DEFAULT,
     httpTransportMode: mode
   };
-  if (transportConfiguration.routing) {
-    passive.routing = transportConfiguration.routing;
-  }
   return passive;
 }
 
@@ -465,7 +462,6 @@ export interface DeviceProfileConfiguration extends DeviceProfileConfigurations 
 }
 
 export interface DefaultDeviceProfileTransportConfiguration {
-  routing?: HttpPullDeviceRoutingConfiguration;
   [key: string]: any;
 }
 
@@ -699,27 +695,6 @@ export function extractHttpPullProfileContext(dp: DeviceProfile | null | undefin
   const firstPoll = raw.pollRequests?.[0];
   return {
     pollUrl: firstPoll?.pollUrl ?? raw.pollUrl ?? null
-  };
-}
-
-/** 从 HTTP 档案（被动上报 / DEFAULT 传输）解析数据路由模式 */
-export function extractHttpPushProfileContext(dp: DeviceProfile | null | undefined): { routingMode: HttpPullRoutingMode } | null {
-  if (!dp || dp.transportType === DeviceTransportType.HTTP_PULL) {
-    return null;
-  }
-  if (toUiTransportType(dp.transportType) !== BasicTransportType.HTTP) {
-    return null;
-  }
-  const raw = dp.profileData?.transportConfiguration as DefaultDeviceProfileTransportConfiguration | undefined;
-  if (!raw) {
-    return { routingMode: HttpPullRoutingMode.SINGLE_DEVICE };
-  }
-  const pullCfg = raw as HttpPullDeviceProfileTransportConfiguration;
-  if (pullCfg.pollUrl != null) {
-    return null;
-  }
-  return {
-    routingMode: raw.routing?.routingMode ?? HttpPullRoutingMode.SINGLE_DEVICE
   };
 }
 
@@ -2432,8 +2407,6 @@ export interface DeviceConfiguration extends DeviceConfigurations {
 }
 
 export interface DefaultDeviceTransportConfiguration {
-  gateway?: boolean;
-  externalDeviceId?: string;
   [key: string]: any;
 }
 

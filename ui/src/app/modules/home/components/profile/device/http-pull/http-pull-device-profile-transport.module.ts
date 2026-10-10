@@ -4,9 +4,6 @@ import { CommonModule } from '@angular/common';
 import { HttpPullDeviceProfileTransportConfigurationComponent } from './http-pull-device-profile-transport-configuration.component';
 import { HttpPullDeviceTransportConfigurationComponent } from './http-pull-device-transport-configuration.component';
 import { HttpDeviceProfileTransportConfigurationComponent } from './http-device-profile-transport-configuration.component';
-import { HttpDeviceTransportConfigurationComponent } from './http-device-transport-configuration.component';
-import { HttpPullRoutingHelpDialogComponent } from './http-pull-routing-help-dialog.component';
-import { HttpDeviceRoutingConfigurationComponent } from './http-device-routing-configuration.component';
 import { HttpPassiveDeviceProfileTransportConfigurationComponent } from './http-passive-device-profile-transport-configuration.component';
 import { HttpPassiveDeviceTransportConfigurationComponent } from './http-passive-device-transport-configuration.component';
 import { HttpPullPollRequestsConfigComponent } from './http-pull-poll-requests-config.component';
@@ -16,9 +13,6 @@ import { HttpPullPollRequestsConfigComponent } from './http-pull-poll-requests-c
     HttpPullDeviceProfileTransportConfigurationComponent,
     HttpPullDeviceTransportConfigurationComponent,
     HttpDeviceProfileTransportConfigurationComponent,
-    HttpDeviceTransportConfigurationComponent,
-    HttpPullRoutingHelpDialogComponent,
-    HttpDeviceRoutingConfigurationComponent,
     HttpPassiveDeviceProfileTransportConfigurationComponent,
     HttpPassiveDeviceTransportConfigurationComponent,
     HttpPullPollRequestsConfigComponent
@@ -31,10 +25,8 @@ import { HttpPullPollRequestsConfigComponent } from './http-pull-poll-requests-c
     HttpPullDeviceProfileTransportConfigurationComponent,
     HttpPullDeviceTransportConfigurationComponent,
     HttpDeviceProfileTransportConfigurationComponent,
-    HttpDeviceTransportConfigurationComponent,
     HttpPassiveDeviceProfileTransportConfigurationComponent,
-    HttpPassiveDeviceTransportConfigurationComponent,
-    HttpPullRoutingHelpDialogComponent
+    HttpPassiveDeviceTransportConfigurationComponent
   ]
 })
 export class HttpPullDeviceProfileTransportModule { }

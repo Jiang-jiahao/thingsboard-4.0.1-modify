@@ -164,7 +164,7 @@ public class HttpPullTransportService {
             headers.putAll(authCtx.getHeaders());
         }
         String body = pollRequest.getPollBody();
-        if (!headers.containsKey("Content-Type") && StringUtils.isNotBlank(body)) {
+        if (!HttpPullHttpClient.hasHeader(headers, "Content-Type") && StringUtils.isNotBlank(body)) {
             headers.put("Content-Type", "application/json");
         }
         return httpClient.execute(HttpPullHttpClient.HttpPullRequest.builder()
@@ -240,15 +240,6 @@ public class HttpPullTransportService {
     private String resolvePollUrlOverride(HttpPullCollectorSessionContext ctx) {
         return ctx.getDeviceTransportConfiguration() != null
                 ? ctx.getDeviceTransportConfiguration().getPollUrlOverride() : null;
-    }
-
-    public static String buildMatchKey(com.jnks.iot.server.common.data.transport.http.HttpPullDeviceIdMatchStrategy strategy,
-                                       TransportProtos.HttpPullRoutingTargetProto target) {
-        return switch (strategy) {
-            case DEVICE_LABEL -> target.getLabel();
-            case EXTERNAL_DEVICE_ID -> target.getExternalDeviceId();
-            default -> target.getName();
-        };
     }
 
     private static String truncate(String s) {

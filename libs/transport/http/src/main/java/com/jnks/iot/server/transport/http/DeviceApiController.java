@@ -33,8 +33,6 @@ import com.jnks.iot.server.common.data.DeviceTransportType;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.common.data.device.profile.DeviceProfileRpcBindingType;
 import com.jnks.iot.server.common.data.device.profile.DeviceProfileRpcMethod;
-import com.jnks.iot.server.common.data.transport.http.HttpPullDeviceRoutingConfiguration;
-import com.jnks.iot.server.common.data.transport.http.HttpPullRoutingMode;
 import com.jnks.iot.server.common.data.JnksIotTransportService;
 import com.jnks.iot.server.common.data.id.DeviceId;
 import com.jnks.iot.server.common.data.id.DeviceProfileId;
@@ -62,9 +60,6 @@ import com.jnks.iot.server.gen.transport.TransportProtos.ToDeviceRpcResponseMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToServerRpcRequestMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.ToServerRpcResponseMsg;
 import com.jnks.iot.server.gen.transport.TransportProtos.ValidateDeviceTokenRequestMsg;
-import com.jnks.iot.server.transport.http.push.HttpPushRoutingService;
-import com.jnks.iot.server.transport.http.push.HttpPushTransportContext;
-import com.jnks.iot.server.transport.http.push.session.HttpPushGatewaySessionContext;
 
 import java.util.Arrays;
 import java.util.List;
@@ -129,12 +124,6 @@ public class DeviceApiController implements JnksIotTransportService {
 
     @Autowired
     private TransportDeviceProfileCache deviceProfileCache;
-
-    @Autowired(required = false)
-    private HttpPushTransportContext httpPushTransportContext;
-
-    @Autowired(required = false)
-    private HttpPushRoutingService httpPushRoutingService;
 
     @Operation(summary = "Get attributes (getDeviceAttributes)",
             description = "Returns all attributes that belong to device. "
@@ -205,39 +194,15 @@ public class DeviceApiController implements JnksIotTransportService {
     public DeferredResult<ResponseEntity> postTelemetry(
             @Parameter(description = ACCESS_TOKEN_PARAM_DESCRIPTION, required = true , schema = @Schema(defaultValue = "YOUR_DEVICE_ACCESS_TOKEN"))
             @PathVariable("deviceToken") String deviceToken,
-            @RequestBody String json, HttpServletRequest request) {
+            @RequestBody String json) {
         DeferredResult<ResponseEntity> responseWriter = new DeferredResult<ResponseEntity>();
         transportContext.getTransportService().process(DeviceTransportType.DEFAULT, ValidateDeviceTokenRequestMsg.newBuilder().setToken(deviceToken).build(),
                 new DeviceAuthCallback(transportContext, responseWriter, sessionInfo -> {
-                    if (tryDispatchHttpPushRouting(sessionInfo, json, responseWriter)) {
-                        return;
-                    }
                     TransportService transportService = transportContext.getTransportService();
                     transportService.process(sessionInfo, JsonConverter.convertToTelemetryProto(JsonParser.parseString(json)),
                             new HttpOkCallback(responseWriter));
                 }));
         return responseWriter;
-    }
-
-    private boolean tryDispatchHttpPushRouting(SessionInfoProto sessionInfo, String json,
-                                               DeferredResult<ResponseEntity> responseWriter) {
-        if (httpPushTransportContext == null || httpPushRoutingService == null) {
-            return false;
-        }
-        DeviceId gatewayDeviceId = new DeviceId(new UUID(sessionInfo.getDeviceIdMSB(), sessionInfo.getDeviceIdLSB()));
-        HttpPushGatewaySessionContext gatewayCtx = httpPushTransportContext.getOrCreateGatewayContext(gatewayDeviceId, sessionInfo);
-        if (gatewayCtx == null || gatewayCtx.getProfileTransportConfiguration() == null) {
-            return false;
-        }
-        HttpPullDeviceRoutingConfiguration routing = gatewayCtx.getProfileTransportConfiguration().getRouting();
-        if (routing == null) {
-            return false;
-        }
-        if (routing.getRoutingMode() == HttpPullRoutingMode.MULTI_DEVICE) {
-            httpPushRoutingService.dispatchTelemetry(gatewayCtx, json, new HttpOkCallback(responseWriter));
-            return true;
-        }
-        return false;
     }
 
     @Operation(summary = "Save claiming information (claimDevice)",

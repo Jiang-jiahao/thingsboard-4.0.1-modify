@@ -17,7 +17,6 @@ import {
   DeviceData,
   DeviceProfileInfo,
   DeviceTransportType,
-  HttpPullRoutingMode,
   hasDeviceTransportConfiguration,
   TcpTransportConnectMode,
   TcpWireAuthenticationMode,
@@ -66,9 +65,6 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   /** 来自设备页：当前设备档案的 TCP CLIENT/SERVER（用于隐藏 SERVER 档案下无意义的 CLIENT 对端表单项） */
   @Input()
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
-
-  @Input()
-  httpPushRoutingMode: HttpPullRoutingMode | null = null;
 
   @Input()
   httpPullProfilePollUrl: string | null = null;

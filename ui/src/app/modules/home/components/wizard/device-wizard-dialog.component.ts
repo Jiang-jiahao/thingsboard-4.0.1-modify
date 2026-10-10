@@ -15,9 +15,7 @@ import {
   DeviceProfileType,
   DeviceTransportType,
   extractHttpPullProfileContext,
-  extractHttpPushProfileContext,
   extractMqttPullProfileContext,
-  HttpPullRoutingMode,
   TcpDeviceProfileTransportConfiguration,
   UdpDeviceProfileTransportConfiguration,
   TcpTransportConnectMode,
@@ -74,8 +72,6 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
   udpProfileWireAuthMode: UdpWireAuthenticationMode | null = null;
 
   /** 当前所选设备档案的 UDP 连接模式（CLIENT/SERVER） */
-
-  httpPushProfileRoutingMode: HttpPullRoutingMode | null = null;
 
   httpPullProfilePollUrl: string | null = null;
 
@@ -247,7 +243,6 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
     this.tcpProfileWireAuthMode = null;
     this.tcpProfileTransportConnectMode = null;
     this.udpProfileWireAuthMode = null;
-    this.httpPushProfileRoutingMode = null;
     this.httpPullProfilePollUrl = null;
     this.mqttPullProfileActive = false;
     if (!dp) {
@@ -258,10 +253,6 @@ export class DeviceWizardDialogComponent extends DialogComponent<DeviceWizardDia
       this.httpPullProfilePollUrl = httpPullCtx.pollUrl;
     }
     this.mqttPullProfileActive = extractMqttPullProfileContext(dp) != null;
-    const httpPushCtx = extractHttpPushProfileContext(dp);
-    if (httpPushCtx) {
-      this.httpPushProfileRoutingMode = httpPushCtx.routingMode;
-    }
     if (dp.transportType === DeviceTransportType.TCP) {
       const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;
       if (raw && (raw.type === DeviceTransportType.TCP || raw.type == null || raw.type === undefined)) {

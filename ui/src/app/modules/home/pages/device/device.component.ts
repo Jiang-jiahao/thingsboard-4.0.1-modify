@@ -13,9 +13,7 @@ import {
   DeviceProfileType,
   DeviceTransportType,
   extractHttpPullProfileContext,
-  extractHttpPushProfileContext,
   extractMqttPullProfileContext,
-  HttpPullRoutingMode,
   TcpDeviceProfileTransportConfiguration,
   UdpDeviceProfileTransportConfiguration,
   UdpWireAuthenticationMode,
@@ -58,8 +56,6 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   tcpProfileTransportConnectMode: TcpTransportConnectMode | null = null;
 
   /** 当前所选设备档案的 UDP 连接模式（CLIENT/SERVER）：CLIENT 时设备页要填平台 dial 的 host/port */
-
-  httpPushProfileRoutingMode: HttpPullRoutingMode | null = null;
 
   httpPullProfilePollUrl: string | null = null;
 
@@ -286,7 +282,6 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     this.tcpProfileWireAuthMode = null;
     this.tcpProfileTransportConnectMode = null;
     this.udpProfileWireAuthMode = null;
-    this.httpPushProfileRoutingMode = null;
     this.httpPullProfilePollUrl = null;
     this.mqttPullProfileActive = false;
     if (!dp) {
@@ -297,10 +292,6 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
       this.httpPullProfilePollUrl = httpPullCtx.pollUrl;
     }
     this.mqttPullProfileActive = extractMqttPullProfileContext(dp) != null;
-    const httpPushCtx = extractHttpPushProfileContext(dp);
-    if (httpPushCtx) {
-      this.httpPushProfileRoutingMode = httpPushCtx.routingMode;
-    }
     if (dp.transportType === DeviceTransportType.TCP) {
       const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;
       if (raw && (raw.type === DeviceTransportType.TCP || raw.type == null || raw.type === undefined)) {

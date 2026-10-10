@@ -6,8 +6,6 @@ import com.google.gson.JsonParser;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.StringUtils;
-import com.jnks.iot.server.common.data.device.data.DefaultDeviceTransportConfiguration;
-import com.jnks.iot.server.common.data.device.data.DeviceTransportConfiguration;
 import com.jnks.iot.server.common.data.device.data.HttpPullDeviceTransportConfiguration;
 
 import java.util.HashMap;
@@ -18,7 +16,7 @@ import java.util.regex.Pattern;
 /**
  * HTTP 出站 URL / body / header 模板占位符，能力与
  * {@code MqttRpcTemplateResolver} 对齐：{@code ${params}}、{@code ${params.xxx}}、
- * {@code ${device.name}}、{@code ${device.label}}、{@code ${device.externalDeviceId}}、
+ * {@code ${device.name}}、{@code ${device.label}}、
  * {@code ${requestId}}、{@code ${method}}（后两者也接受 {@code rpc.} 前缀）。
  */
 @Slf4j
@@ -92,14 +90,12 @@ final class HttpPullTemplateResolver {
             return switch (deviceKey) {
                 case "name" -> deviceName(device);
                 case "label" -> device != null ? StringUtils.defaultString(device.getLabel(), "") : "";
-                case "externalDeviceId" -> externalDeviceId(device);
                 default -> unknown(key);
             };
         }
         return switch (key) {
             case "deviceName" -> deviceName(device);
             case "deviceLabel" -> device != null ? StringUtils.defaultString(device.getLabel(), "") : "";
-            case "externalDeviceId" -> externalDeviceId(device);
             case "requestId", "rpc.requestId" -> Integer.toString(requestId);
             case "method", "rpc.method" -> method != null ? method : "";
             default -> unknown(key);
@@ -108,18 +104,6 @@ final class HttpPullTemplateResolver {
 
     private static String deviceName(Device device) {
         return device != null ? StringUtils.defaultString(device.getName(), "") : "";
-    }
-
-    private static String externalDeviceId(Device device) {
-        if (device == null || device.getDeviceData() == null) {
-            return "";
-        }
-        DeviceTransportConfiguration cfg = device.getDeviceData().getTransportConfiguration();
-        if (cfg instanceof DefaultDeviceTransportConfiguration def
-                && StringUtils.isNotBlank(def.getExternalDeviceId())) {
-            return def.getExternalDeviceId().trim();
-        }
-        return "";
     }
 
     /** 未知占位符保持原样替换为空串的老行为，但要留下日志，避免静默匹配失败难以排查。 */
