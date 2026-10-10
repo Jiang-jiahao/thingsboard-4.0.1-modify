@@ -174,6 +174,8 @@ function permissionList() {
 function checkFolders() {
   CREATE=false
   SKIP_CHOWN=false
+  # 本身已经是 root 就别再套 sudo（有些精简系统没装 sudo）
+  if [ "$(id -u)" -eq 0 ]; then SUDO=""; else SUDO="sudo"; fi
   for i in "$@"
     do
       case $i in
@@ -233,13 +235,13 @@ function checkFolders() {
         echo "...will create dir ${DIR}"
         if [ "$SKIP_CHOWN" = false ]; then
         echo "...will change ownership to user ${USR} group ${GRP} for dir ${DIR}"
-          mkdir -p "$DIR" && sudo chown -R "$USR":"$GRP" "$DIR" && echo "> OK"
+          mkdir -p "$DIR" && ${SUDO} chown -R "$USR":"$GRP" "$DIR" && echo "> OK"
         else
           mkdir -p "$DIR" && echo "> OK"
         fi
       elif [ "$IS_OWNER_CHECK_PASSED" = false ] && [ "$SKIP_CHOWN" = false ]; then
         echo "...will change ownership to user ${USR} group ${GRP} for dir ${DIR}"
-        sudo chown -R "$USR":"$GRP" "$DIR" && echo "> OK"
+        ${SUDO} chown -R "$USR":"$GRP" "$DIR" && echo "> OK"
       fi
     fi
 

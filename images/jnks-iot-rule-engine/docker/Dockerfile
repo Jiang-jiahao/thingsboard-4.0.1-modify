@@ -1,4 +1,4 @@
-FROM thingsboard/openjdk17:bookworm-slim
+FROM eclipse-temurin:17-jdk-jammy
 
 # 直接使用 Maven 产出的 jnks-iot-rule-engine boot jar（不再装 deb）；配置由 compose 挂载到 /config。
 COPY start-tb-rule-engine.sh ${pkg.name}.jar /tmp/

@@ -1,4 +1,4 @@
-FROM thingsboard/node:20.18.0-bookworm-slim
+FROM node:20-bookworm-slim
 
 ENV NODE_ENV production
 ENV DOCKER_MODE true

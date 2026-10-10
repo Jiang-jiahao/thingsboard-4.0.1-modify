@@ -1,4 +1,4 @@
-FROM thingsboard/openjdk17:bookworm-slim
+FROM eclipse-temurin:17-jdk-jammy
 
 # 直接使用 Maven 产出的 boot jar（不再装 deb）。/config 由 compose 挂载提供，
 # 启动脚本会 source /config/${pkg.name}.conf 并 -Dlogging.config=/config/logback.xml。

@@ -1,4 +1,4 @@
-FROM thingsboard/openjdk17:bookworm-slim
+FROM eclipse-temurin:17-jdk-jammy
 
 # 直接使用 Maven 产出的 boot jar（不再装 deb）；配置目录由 compose 挂载提供。
 COPY start-tb-edqs.sh ${pkg.name}.jar /tmp/

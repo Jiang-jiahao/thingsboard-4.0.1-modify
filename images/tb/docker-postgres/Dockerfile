@@ -1,4 +1,4 @@
-FROM thingsboard/openjdk17:bookworm-slim
+FROM eclipse-temurin:17-jdk-jammy
 
 ENV PG_MAJOR 12
 
