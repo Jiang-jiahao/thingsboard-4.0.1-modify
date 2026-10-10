@@ -158,7 +158,6 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     if (entity && !entity.id) {
       form.get('type').patchValue(DeviceProfileType.DEFAULT, {emitEvent: true});
       form.get('transportType').patchValue(DeviceTransportType.DEFAULT, {emitEvent: true});
-      form.get('provisionType').patchValue(DeviceProvisionType.DISABLED, {emitEvent: true});
     }
   }
 
