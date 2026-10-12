@@ -54,7 +54,6 @@ import {
   isTcpHexVariableByteSlice,
   UDP_HEX_LTV_TAG_VALUE_OPTIONS,
   migrateLegacyLtvTagValueType,
-  UdpJsonWithoutMethodMode,
   UdpTransportFramingMode,
   UdpWireAuthenticationMode,
   TransportUdpDataType,
@@ -177,7 +176,6 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
       udpWireAuthenticationMode: [UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID, Validators.required],
       udpProfileServerBindPort: [null, [Validators.required, Validators.min(1), Validators.max(65535)]],
       udpDeferredWireAuthTokenJsonKey: [''],
-      udpReadIdleTimeoutSec: [null, [Validators.min(0)]],
       udpOpaqueRuleEngineKey: ['udpOpaquePayload'],
       dataType: [TransportUdpDataType.UTF8, Validators.required],
       hexCommandProfiles: this.fb.array([]),
@@ -838,7 +836,6 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
         udpWireAuthenticationMode: value.udpWireAuthenticationMode,
         udpProfileServerBindPort: value.udpProfileServerBindPort ?? null,
         udpDeferredWireAuthTokenJsonKey: value.udpDeferredWireAuthTokenJsonKey ?? '',
-        udpReadIdleTimeoutSec: value.udpReadIdleTimeoutSec,
         udpOpaqueRuleEngineKey: value.udpOpaqueRuleEngineKey || 'udpOpaquePayload',
         dataType: formDataType
       }, {emitEvent: false});
@@ -1125,16 +1122,12 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
     const configuration: UdpDeviceProfileTransportConfiguration = {
       udpTransportFramingMode: UdpTransportFramingMode.NONE,
       udpWireAuthenticationMode: v.udpWireAuthenticationMode,
-      udpJsonWithoutMethodMode: UdpJsonWithoutMethodMode.TELEMETRY_FLAT,
       udpOpaqueRuleEngineKey: textLikePayload
         ? (String(v.udpOpaqueRuleEngineKey ?? '').trim() || 'udpOpaquePayload')
         : undefined,
       transportUdpDataTypeConfiguration,
       type: DeviceTransportType.UDP
     };
-    if (v.udpReadIdleTimeoutSec != null && v.udpReadIdleTimeoutSec !== '') {
-      configuration.udpReadIdleTimeoutSec = Number(v.udpReadIdleTimeoutSec);
-    }
     const bindPort = this.optionalFormNumber(v.udpProfileServerBindPort);
     if (bindPort != null) {
       configuration.udpProfileServerBindPort = bindPort;

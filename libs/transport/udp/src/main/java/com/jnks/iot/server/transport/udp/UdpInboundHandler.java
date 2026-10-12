@@ -8,9 +8,7 @@ import io.netty.channel.socket.DatagramPacket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.common.data.DeviceProfile;
-import com.jnks.iot.server.common.data.device.profile.UdpTransportFramingMode;
 import com.jnks.iot.server.transport.udp.session.UdpDeviceSession;
-import com.jnks.iot.server.transport.udp.util.UdpPayloadUtil;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -38,14 +36,13 @@ public class UdpInboundHandler extends SimpleChannelInboundHandler<DatagramPacke
         // 自己的源地址做上游 socket 的源地址，因此 socket 对端就是真实设备 —— 不解析任何协议头，
         // 也不需要记住「代理侧对端 → 真实客户端」的映射（设备直连平台时同样成立）。
         UdpDeviceSession session = udpTransportContext.resolveOrCreateInboundSession(ctx.channel(), localPort, sender);
-        session.setLastUplinkMs(System.currentTimeMillis());   // 读空闲清理据此判断"多久没收到该设备的数据报"
         try {
             if (!session.isCoreSessionReady()) {
                 if (session.isDeferredPayloadWireAuth()) {
                     udpTransportContext.completeDeferredWireAuthServerAuth(ctx, session, data);
                     return;
                 }
-                if (udpTransportContext.startServerWireAuth(ctx, session, sender)) {
+                if (udpTransportContext.startServerWireAuth(ctx, session, sender, data)) {
                     return;
                 }
                 // 共享端口下鉴权前不知道档案：命中已配置的"延迟鉴权键"时走延迟鉴权。
@@ -64,20 +61,7 @@ public class UdpInboundHandler extends SimpleChannelInboundHandler<DatagramPacke
                 }
                 return;
             }
-            udpTransportContext.recordUplinkFrameActivity(session);
-            UdpTransportFramingMode framing = session.getInboundPipelineFramingMode() != null
-                    ? session.getInboundPipelineFramingMode()
-                    : session.getUdpTransportFramingMode();
-            int fixedLen = session.getInboundPipelineFixedFrameLength() > 0
-                    ? session.getInboundPipelineFixedFrameLength()
-                    : session.getUdpFixedFrameLengthForFraming();
-            byte[] frame = UdpPayloadUtil.extractSingleFrame(data, framing, fixedLen, udpTransportService.getMaxDatagramLength());
-            if (frame == null) {
-                log.warn("[{}] Invalid UDP frame from {}", session.getSessionId(), sender);
-                return;
-            }
-            String jsonPayload = UdpPayloadUtil.decodePayloadBytes(session.getPayloadDataType(), frame);
-            session.processIncomingJsonLine(jsonPayload);
+            udpTransportContext.processUplinkFrame(session, data);
         } catch (Exception e) {
             log.warn("[{}] Bad UDP datagram from {}", session.getSessionId(), sender, e);
         }

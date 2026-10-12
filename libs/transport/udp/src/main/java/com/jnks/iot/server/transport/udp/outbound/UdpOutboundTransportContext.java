@@ -46,21 +46,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
- * UDP **服务端模式**下，给"设备还没开口（没有会话）、但已经配好固定下行地址"的设备建一个
- * **出站会话**，让下发的 RPC 有地方可去。
+ * UDP **服务端模式**下，给"档案里显式配好固定下行地址"的设备建一个**出站会话**，
+ * 它是这类**唯一**的 RPC 下发通道。
  * <p>
- * 为什么需要：Core 只会把 RPC 投给它**认识会话**的设备（{@code rpcSubscriptions} 非空），
- * 否则消息留在 pending。被动设备从不发包 → 平台永远没有它的会话 → 定时 RPC 永远发不出去。
- * HTTP 侧用同样的办法解决（{@code HttpOutboundTransportContext} 给 DEFAULT 设备建"虚拟会话"，
- * 让平台可以主动出站调用），这里照搬那个模式。
+ * 为什么需要：UDP 的真实会话不是下发通道 —— 它只做"免重复鉴权 + 刷新活跃"，
+ * 不订阅 RPC（见 {@code UdpTransportContext#completeSessionRegistration}）。
+ * 设备和 HTTP 一样不保持连接，靠会话残留当通道会造出"显示活跃却发不到"的窗口，
+ * 所以"能不能下发"改成**显式配置**：档案里填了 {@code udpDownlinkHost/Port} 才建出站会话。
+ * HTTP 侧的 pull / outbound 是同一套思路。
  * <p>
  * 关键区别与约束：
  * <ul>
  *   <li>**不代表设备在线**：Core 判活跃只看 {@code lastActivityTime}（有没有收到数据），
  *       建会话不刷新它。所以"收到回包才算活跃"的语义不变。</li>
- *   <li>**只在设备没有真实会话时建**：设备真开口后（回包落在监听端口 → 建真实会话），
- *       这里的出站会话会被 Core 因并发上限踢掉（{@link UdpOutboundRpcSessionListener} 收到即销毁），
- *       之后的 RPC 走真实会话的正常链路。</li>
+ *   <li>**与真实会话并存**（2026-10-12 起）：设备开口后真实会话照旧建，但出站会话**不销毁** ——
+ *       真实会话不再占 RPC 订阅，出站会话是唯一的下发通道，拆了就没通道了。</li>
  *   <li>**下发必须从档案的监听端口发出**：设备回包才会落回同一个端口、按源 IP / 协议设备 ID 认领。</li>
  * </ul>
  */
@@ -103,16 +103,14 @@ public class UdpOutboundTransportContext extends TransportContext {
                     destroySession(outboundSessions.get(deviceId));
                     continue;
                 }
-                // 设备已经有真实会话：出站会话则销毁（当设备未上报数据的时候，设备需要下发rpc请求，这个时候需要伪造一个出站会话来订阅rpc）
-                if (udpTransportContext != null && udpTransportContext.hasActiveServerSession(deviceId)) {
-                    destroySession(outboundSessions.get(deviceId));
-                    continue;
-                }
+                // 设备已经有真实会话：出站会话照样保留 —— 真实会话在 UDP 里只做鉴权缓存与刷活跃，
+                // **不是**下发通道（见 UdpTransportContext#completeSessionRegistration），
+                // 所以这里不能因为设备开口就把它拆掉，否则设备一上报就没有可下发的通道了。
                 // 如果出站会话不存在，则创建出站会话
                 if (!outboundSessions.containsKey(deviceId) && !establishing.contains(deviceId)) {
                     Device device = protoEntityService.getDeviceById(deviceId);
                     if (device != null) {
-                        getExecutor().execute(() -> tryEstablish(device));
+                        getExecutor().execute(() -> tryEstablish(device, false));
                     }
                 }
             }
@@ -168,7 +166,12 @@ public class UdpOutboundTransportContext extends TransportContext {
                         instanceof UdpDeviceProfileTransportConfiguration;
     }
 
-    private void tryEstablish(Device device) {
+    /**
+     * @param force 设备/档案刚变更时传 true：**先建后拆**（新建的会话在原位把旧的换掉，见下方 auth 回调里的
+     *              {@code put + destroy(previous)}），避免"先拆后建"之间那段没有通道的窗口 —— 那时 Core 还留着
+     *              订阅、RPC 照回 200，但传输层已经没有会话可发（实测 12 发丢 1~4 条，静默丢）。
+     */
+    private void tryEstablish(Device device, boolean force) {
         if (device == null || device.getId() == null) {
             return;
         }
@@ -180,10 +183,7 @@ public class UdpOutboundTransportContext extends TransportContext {
         if (!balancingService.isManagedByCurrentTransport(deviceId.getId())) {
             return;
         }
-        if (udpTransportContext != null && udpTransportContext.hasActiveServerSession(deviceId)) {
-            return;
-        }
-        if (outboundSessions.containsKey(deviceId) || !establishing.add(deviceId)) {
+        if ((!force && outboundSessions.containsKey(deviceId)) || !establishing.add(deviceId)) {
             return;
         }
         boolean submitted = false;
@@ -209,9 +209,6 @@ public class UdpOutboundTransportContext extends TransportContext {
                                         || !balancingService.isManagedByCurrentTransport(deviceId.getId())) {
                                     return;
                                 }
-                                if (udpTransportContext != null && udpTransportContext.hasActiveServerSession(deviceId)) {
-                                    return;
-                                }
                                 if (downlinkAddressRegistry.resolve(deviceId) == null) {
                                     return;
                                 }
@@ -219,7 +216,9 @@ public class UdpOutboundTransportContext extends TransportContext {
                                         msg, UdpOutboundTransportContext.this, UUID.randomUUID());
                                 SessionMsgListener listener = new UdpOutboundRpcSessionListener(ctx);
                                 ctx.setSessionInfo(sessionInfo);
-                                transportService.registerAsyncSession(sessionInfo, listener);
+                                // 它按设计**不报活动**（不伪造设备活跃）→ 必须豁免"不活动过期"，
+                                // 否则每 transport.sessions.inactivity_timeout 就被收一次、打断唯一的下发通道。
+                                transportService.registerAsyncSession(sessionInfo, listener).setExpiryExempt(true);
                                 UdpOutboundSessionContext previous = outboundSessions.put(deviceId, ctx);
                                 if (previous != null && previous != ctx) {
                                     destroySession(previous);
@@ -233,7 +232,8 @@ public class UdpOutboundTransportContext extends TransportContext {
                                 // 刻意**不发**生命周期事件：它记录的是"设备连上了"，而这里设备一个包都没发过 ——
                                 // 发了就是误导（而且配了固定下行地址 + 真实会话落在别的实例时，
                                 // 这条 STARTED 永远等不到 STOPPED，见下面 destroySession 的说明）。
-                                log.info("[{}] Established UDP outbound session (device has no session yet)", deviceId);
+                                log.info("[{}] Established UDP outbound session ({})", deviceId,
+                                        previous == null ? "new" : "rebuilt, previous replaced");
                             } finally {
                                 establishing.remove(deviceId);
                             }
@@ -277,13 +277,34 @@ public class UdpOutboundTransportContext extends TransportContext {
             return;
         }
         ByteBuf frame = UdpRpcFrameEncoder.encode(ctx.getDeviceProfile(), rpcRequest);
-        log.debug("[{}] Sending RPC [{}] without session: listen port {} -> {}", deviceId,
-                rpcRequest.getMethodName(), listenPort, target);
-        channel.writeAndFlush(new DatagramPacket(frame, target));
+        // 排查"下发成功但设备收不到"的关键一行：平台确实把帧写进 socket 了、发去了哪里。
+        // 设备侧没收到时拿它对齐——目的地址是档案里配的固定下行地址，路上被 NAT/防火墙丢掉的话
+        // 平台侧只有这一行可对照（UDP 没有回执）。查完记得把级别调回去。
+        log.info("[{}] UDP downlink RPC [{}] requestId={} oneway={} via listen port {} -> {}", deviceId,
+                rpcRequest.getMethodName(), rpcRequest.getRequestId(), rpcRequest.getOneway(),
+                listenPort, target);
+        channel.writeAndFlush(new DatagramPacket(frame, target)).addListener(f -> {
+            if (!f.isSuccess()) {
+                log.warn("[{}] UDP downlink RPC [{}] requestId={} write failed -> {}: {}", deviceId,
+                        rpcRequest.getMethodName(), rpcRequest.getRequestId(), target, f.cause());
+            }
+        });
     }
 
-    public void destroySession(UdpOutboundSessionContext ctx) {
-        if (ctx == null) {
+    /**
+     * 立刻重建该设备的出站会话（不等 30 秒一轮的 reconcile）。
+     * <p>
+     * 用于"通道刚丢"的场景 —— 目前是会话因不活动过期（虚拟会话从不报活动，所以必然发生）：
+     * 不立刻重建的话，那段窗口里的 RPC 会 NO_ACTIVE_CONNECTION、已进队列的会被静默丢弃。
+     */
+    public void reestablishNow(Device device) {
+        if (device == null) {
+            return;
+        }
+        getExecutor().execute(() -> tryEstablish(device, true));
+    }
+
+    public void destroySession(UdpOutboundSessionContext ctx) {        if (ctx == null) {
             return;
         }
         outboundSessions.remove(ctx.getDeviceId(), ctx);
@@ -294,9 +315,6 @@ public class UdpOutboundTransportContext extends TransportContext {
             // （每次重建出站会话都是新 sessionId）→ 陈旧订阅越积越多，下发时还会照投一份（再被传输层丢弃）。
             transportService.process(sessionInfo,
                     TransportProtos.SubscribeToRPCMsg.newBuilder().setUnsubscribe(true).build(),
-                    TransportServiceCallback.EMPTY);
-            transportService.process(sessionInfo,
-                    TransportProtos.SubscribeToAttributeUpdatesMsg.newBuilder().setUnsubscribe(true).build(),
                     TransportServiceCallback.EMPTY);
             transportService.deregisterSession(sessionInfo);
         }
@@ -316,8 +334,8 @@ public class UdpOutboundTransportContext extends TransportContext {
             destroySession(outboundSessions.get(deviceId));
             return;
         }
-        destroySession(outboundSessions.get(deviceId));
-        getExecutor().execute(() -> tryEstablish(device));
+        // 仍符合条件：**先建后拆** —— 不能先 destroy，那几秒里 Core 还留着订阅、RPC 会回 200 却发不出去
+        getExecutor().execute(() -> tryEstablish(device, true));
     }
 
     @EventListener(DeviceDeletedEvent.class)
@@ -335,8 +353,14 @@ public class UdpOutboundTransportContext extends TransportContext {
                 .filter(ctx -> ctx.getDeviceProfile() != null && profile.getId().equals(ctx.getDeviceProfile().getId()))
                 .toList();
         for (UdpOutboundSessionContext ctx : affected) {
-            destroySession(ctx);
+            Device device = protoEntityService.getDeviceById(ctx.getDeviceId());
+            if (device != null) {
+                // **先建后拆**：原先是"destroy + 3 秒后 reconcile"，留下最长 3 秒无通道的窗口，
+                // 那期间 RPC 照回 200 却发不出去（实测 12 发丢 4 条）。
+                getExecutor().execute(() -> tryEstablish(device, true));
+            }
         }
+        // 兜底：新建失败的（读不到设备等）下一轮 reconcile 会补上
         getScheduler().schedule(this::reconcile, 3, TimeUnit.SECONDS);
     }
 

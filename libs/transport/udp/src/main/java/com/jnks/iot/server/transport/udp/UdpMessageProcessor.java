@@ -37,7 +37,7 @@ public class UdpMessageProcessor {
             log.warn("[{}] Session not ready", session.getSessionId());
             return;
         }
-        JsonObject work = stripDeferredWireAuthTokenField(session, root);
+        JsonObject work = root;
         if (work.has("method")) {
             String method = work.get("method").getAsString();
             switch (method) {
@@ -58,9 +58,6 @@ public class UdpMessageProcessor {
                     break;
                 case "getAttributes":
                     processGetAttributes(session, work);
-                    break;
-                case "subscribeAttr":
-                    processSubscribeAttr(session, work);
                     break;
                 case "subscribeRpc":
                     processSubscribeRpc(session, work);
@@ -100,7 +97,7 @@ public class UdpMessageProcessor {
                 return;
             }
             var parsed = parsedOpt.get();
-            JsonObject payloadForCore = stripDeferredWireAuthTokenField(session, parsed.getPayload());
+            JsonObject payloadForCore = parsed.getPayload();
             String matchedProfile = payloadForCore.has("hexCmdProfile")
                     ? payloadForCore.get("hexCmdProfile").getAsString()
                     : "<default-template-fallback>";
@@ -122,9 +119,6 @@ public class UdpMessageProcessor {
                 telemetryKey = "tcpOpaquePayload";
             }
             JsonElement inner = payload;
-            if (payload.isJsonObject()) {
-                inner = stripDeferredWireAuthTokenField(session, payload.getAsJsonObject());
-            }
             JsonObject wrap = new JsonObject();
             wrap.add(telemetryKey, inner);
             transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(wrap),
@@ -215,15 +209,6 @@ public class UdpMessageProcessor {
         }
         return keys;
     }
-    private void processSubscribeAttr(UdpDeviceSession session, JsonObject root) {
-        boolean unsubscribe = root.has("unsubscribe") && root.get("unsubscribe").getAsBoolean();
-        transportService.process(session.getSessionInfo(),
-                TransportProtos.SubscribeToAttributeUpdatesMsg.newBuilder()
-                        .setUnsubscribe(unsubscribe)
-                        .setSessionType(TransportProtos.SessionType.ASYNC)
-                        .build(),
-                TransportServiceCallback.EMPTY);
-    }
     private void processSubscribeRpc(UdpDeviceSession session, JsonObject root) {
         boolean unsubscribe = root.has("unsubscribe") && root.get("unsubscribe").getAsBoolean();
         transportService.process(session.getSessionInfo(),
@@ -232,37 +217,6 @@ public class UdpMessageProcessor {
                         .setSessionType(TransportProtos.SessionType.ASYNC)
                         .build(),
                 TransportServiceCallback.EMPTY);
-    }
-
-    /**
-     * DEFERRED 模式且会话已就绪时，从 JSON 对象副本中移除档案配置的身份字段，避免写入遥测/属性。
-     */
-    private JsonObject stripDeferredWireAuthTokenField(UdpDeviceSession session, JsonObject root) {
-        if (session.getUdpWireAuthenticationMode() != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
-            return root;
-        }
-        Optional<String> keyOpt = deferredWireAuthPayloadIdentityJsonKey(session.getDeviceProfile());
-        if (keyOpt.isEmpty() || !root.has(keyOpt.get())) {
-            return root;
-        }
-        JsonObject copy = root.deepCopy();
-        copy.remove(keyOpt.get());
-        return copy;
-    }
-
-    private static Optional<String> deferredWireAuthPayloadIdentityJsonKey(DeviceProfile profile) {
-        if (profile == null || profile.getProfileData() == null
-                || !(profile.getProfileData().getTransportConfiguration() instanceof UdpDeviceProfileTransportConfiguration ptc)) {
-            return Optional.empty();
-        }
-        if (ptc.getUdpWireAuthenticationMode() != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
-            return Optional.empty();
-        }
-        String k = ptc.getUdpDeferredWireAuthTokenJsonKey();
-        if (StringUtils.isBlank(k)) {
-            return Optional.empty();
-        }
-        return Optional.of(k.trim());
     }
 
     /**
@@ -365,7 +319,7 @@ public class UdpMessageProcessor {
     }
 
     /**
-     * 鉴权成功后重放<strong>触发鉴权的那一帧</strong>上行：从 JSON 副本中移除令牌字段，再按原逻辑入库。
+     * 鉴权成功后重放<strong>触发鉴权的那一帧</strong>上行：整帧按原逻辑入库，**身份字段保留**。
      */
     public void replayDeferredUplinkAfterAuth(UdpDeviceSession session, byte[] rawFrame) {
         if (!session.isCoreSessionReady() || rawFrame == null) {
@@ -383,14 +337,10 @@ public class UdpMessageProcessor {
         if (StringUtils.isBlank(key)) {
             return;
         }
-        // 身份帧是 JSON 文本（含 HEX / 协议模板档案）：剥掉身份字段后按普通上行重放。
+        // 身份帧是 JSON 文本（含 HEX / 协议模板档案）：按普通上行重放（身份字段保留）。
         Optional<JsonObject> identityFrame = identityJsonText(rawFrame, key);
         if (identityFrame.isPresent()) {
             JsonObject o = identityFrame.get().deepCopy();
-            o.remove(key);
-            if (o.size() == 0) {
-                return;
-            }
             if (o.has("method")) {
                 processUplinkJson(session, o);
             } else {
@@ -415,10 +365,6 @@ public class UdpMessageProcessor {
                 return;
             }
             JsonObject o = root.getAsJsonObject().deepCopy();
-            o.remove(key);
-            if (o.size() == 0) {
-                return;
-            }
             if (o.has("method")) {
                 processUplinkJson(session, o);
             } else {
@@ -440,7 +386,6 @@ public class UdpMessageProcessor {
             }
             var parsed = parsedOpt.get();
             JsonObject body = parsed.getPayload().deepCopy();
-            body.remove(key);
             if (body.size() == 0) {
                 return;
             }

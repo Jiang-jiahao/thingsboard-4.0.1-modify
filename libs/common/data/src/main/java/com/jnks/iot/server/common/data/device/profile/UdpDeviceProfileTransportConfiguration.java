@@ -37,24 +37,14 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
 
     /**
      * {@link UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：解析得到的 JSON 中存放<strong>协议设备 ID</strong>的字段名（与设备传输配置
-     * {@link com.jnks.iot.server.common.data.device.data.UdpDeviceTransportConfiguration#getUdpWireAuthPayloadDeviceId() udpWireAuthPayloadDeviceId} 比对，并结合入站监听端口定位设备）。<br>
-     * 校验成功后该字段会从本帧重放及后续上行的副本中移除。
-     */
+     * {@link com.jnks.iot.server.common.data.device.data.UdpDeviceTransportConfiguration#getUdpWireAuthPayloadDeviceId() udpWireAuthPayloadDeviceId} 比对，并结合入站监听端口定位设备）。<br>     */
     private String udpDeferredWireAuthTokenJsonKey;
 
     /** @deprecated 历史 CLIENT 模式字段，已不再使用 */
     private Integer udpOutboundReconnectIntervalSec;
     /** @deprecated 历史 CLIENT 模式字段，已不再使用 */
     private Integer udpOutboundReconnectMaxAttempts;
-    /**
-     * 超过该秒数未从对端收到任何 UDP 报文则关闭会话；{@code null} 或 {@code 0} 表示不启用。
-     */
-    private Integer udpReadIdleTimeoutSec;
 
-    /**
-     * 历史字段；当前 Udp 在 UTF-8/ASCII 下无 {@code method} 时统一写入 {@link #udpOpaqueRuleEngineKey} 单键。反序列化兼容保留。
-     */
-    private UdpJsonWithoutMethodMode udpJsonWithoutMethodMode;
     /**
      * 无 {@code method} 的 UTF-8/ASCII 上行写入的<strong>单一遥测键名</strong>（默认 {@code udpOpaquePayload}，与历史字段名一致）。
      */
@@ -85,9 +75,6 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
     }
 
 
-    public UdpJsonWithoutMethodMode getUdpJsonWithoutMethodMode() {
-        return Objects.requireNonNullElse(udpJsonWithoutMethodMode, UdpJsonWithoutMethodMode.TELEMETRY_FLAT);
-    }
     public String getUdpOpaqueRuleEngineKey() {
         return Objects.requireNonNullElse(udpOpaqueRuleEngineKey, "udpOpaquePayload");
     }
@@ -116,16 +103,6 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
         return udpOutboundReconnectMaxAttempts;
     }
 
-    /**
-     * {@code null} 或 {@code 0}：不启用读空闲断开。
-     */
-    public int getEffectiveUdpReadIdleTimeoutSec() {
-        if (udpReadIdleTimeoutSec == null || udpReadIdleTimeoutSec <= 0) {
-            return 0;
-        }
-        return udpReadIdleTimeoutSec;
-    }
-
     @Override
     public void validate() {
         if (getTransportUdpDataTypeConfiguration() instanceof HexTransportUdpDataConfiguration hexCfg) {
@@ -139,9 +116,6 @@ public class UdpDeviceProfileTransportConfiguration implements DeviceProfileTran
         }
         if (udpOutboundReconnectMaxAttempts != null && udpOutboundReconnectMaxAttempts < 0) {
             throw new IllegalArgumentException("udpOutboundReconnectMaxAttempts must be >= 0");
-        }
-        if (udpReadIdleTimeoutSec != null && udpReadIdleTimeoutSec < 0) {
-            throw new IllegalArgumentException("udpReadIdleTimeoutSec must be >= 0");
         }
         if (getUdpWireAuthenticationMode() == UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             if (StringUtils.isBlank(udpDeferredWireAuthTokenJsonKey)) {

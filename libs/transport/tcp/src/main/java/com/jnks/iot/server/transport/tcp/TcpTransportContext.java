@@ -51,6 +51,7 @@ import com.jnks.iot.server.gen.transport.TransportProtos;
 import com.jnks.iot.common.util.AfterStartUp;
 import com.jnks.iot.server.transport.tcp.event.TcpTransportListChangedEvent;
 import com.jnks.iot.server.transport.tcp.session.TcpDeviceSession;
+import com.jnks.iot.server.transport.tcp.util.TcpPayloadUtil;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -564,6 +565,20 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
         }
     }
 
+    /**
+     * 会话就绪后处理一帧上行（帧已由 pipeline 的分帧器切好）。
+     * <p>
+     * 鉴权成功后补处理「触发鉴权的那一帧」也走这里 —— 与后续帧**完全同一条路**，
+     * 否则这一帧的数据白丢。
+     */
+    public void processUplinkFrame(TcpDeviceSession session, byte[] data) {
+        if (session == null || data == null) {
+            return;
+        }
+        recordUplinkFrameActivity(session);
+        session.processIncomingJsonLine(TcpPayloadUtil.decodePayloadBytes(session.getPayloadDataType(), data));
+    }
+
     public TcpProtoTransportEntityService getProtoEntityService() {
         return protoEntityService;
     }
@@ -627,11 +642,19 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
                         ctx.channel().eventLoop().execute(() -> {
                             afterSuccessfulAuth(ctx, session, response);
                             ctx.channel().config().setAutoRead(true);
+                            session.endServerAuth();
+                            // 触发鉴权的那一帧照样入库（连接建立时没认领成功、由某一帧重试才行的话，
+                            // 那一帧会被扣下带过来）—— 不补处理的话它永远丢。
+                            byte[] pending = session.takePendingUnauthFrame();
+                            if (pending != null) {
+                                processUplinkFrame(session, pending);
+                            }
                         });
                     }
                     @Override
                     public void onError(Throwable e) {
                         log.warn("[{}] NONE wire auth error", device.getId(), e);
+                        session.endServerAuth();
                         ctx.close();
                     }
                 });

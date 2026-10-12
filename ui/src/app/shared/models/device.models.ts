@@ -1314,10 +1314,6 @@ export enum TcpWireAuthenticationMode {
   NONE = 'NONE',
   DEFERRED_PAYLOAD_DEVICE_ID = 'DEFERRED_PAYLOAD_DEVICE_ID'
 }
-export enum TcpJsonWithoutMethodMode {
-  TELEMETRY_FLAT = 'TELEMETRY_FLAT',
-  OPAQUE_FOR_RULE_ENGINE = 'OPAQUE_FOR_RULE_ENGINE'
-}
 export enum TransportTcpDataType {
   /** 界面展示为 UTF-8；链路上为 UTF-8 文本行并按 JSON 解析 */
   UTF8 = 'UTF8',
@@ -1772,7 +1768,6 @@ export interface TcpDeviceProfileTransportConfiguration {
   tcpOutboundReconnectMaxAttempts?: number;
   /** CLIENT/SERVER：超过该秒数无上行数据则断开；空或 0=不启用 */
   tcpReadIdleTimeoutSec?: number;
-  tcpJsonWithoutMethodMode?: TcpJsonWithoutMethodMode;
   tcpOpaqueRuleEngineKey?: string;
   transportTcpDataTypeConfiguration?: TransportTcpDataTypeConfiguration;
 }
@@ -1805,11 +1800,6 @@ export enum UdpTransportFramingMode {
 export enum UdpWireAuthenticationMode {
   NONE = 'NONE',
   DEFERRED_PAYLOAD_DEVICE_ID = 'DEFERRED_PAYLOAD_DEVICE_ID'
-}
-
-export enum UdpJsonWithoutMethodMode {
-  TELEMETRY_FLAT = 'TELEMETRY_FLAT',
-  ATTRIBUTES_FLAT = 'ATTRIBUTES_FLAT'
 }
 
 export enum TransportUdpDataType {
@@ -1845,8 +1835,6 @@ export interface UdpDeviceProfileTransportConfiguration {
   udpDeferredWireAuthTokenJsonKey?: string;
   udpOutboundReconnectIntervalSec?: number;
   udpOutboundReconnectMaxAttempts?: number;
-  udpReadIdleTimeoutSec?: number;
-  udpJsonWithoutMethodMode?: UdpJsonWithoutMethodMode;
   udpOpaqueRuleEngineKey?: string;
   transportUdpDataTypeConfiguration?: TransportUdpDataTypeConfiguration;
 }
@@ -2022,7 +2010,6 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
           tcpTransportFramingMode: TcpTransportFramingMode.LINE,
           tcpFixedFrameLength: null,
           tcpWireAuthenticationMode: TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID,
-          tcpJsonWithoutMethodMode: TcpJsonWithoutMethodMode.TELEMETRY_FLAT,
           tcpOpaqueRuleEngineKey: 'tcpOpaquePayload',
           transportTcpDataTypeConfiguration: {
             transportTcpDataType: TransportTcpDataType.UTF8
@@ -2035,7 +2022,6 @@ export const createDeviceProfileTransportConfiguration = (type: TransportType): 
           udpTransportFramingMode: UdpTransportFramingMode.NONE,
           udpFixedFrameLength: null,
           udpWireAuthenticationMode: UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID,
-          udpJsonWithoutMethodMode: UdpJsonWithoutMethodMode.TELEMETRY_FLAT,
           udpOpaqueRuleEngineKey: 'udpOpaquePayload',
           transportUdpDataTypeConfiguration: {
             transportUdpDataType: TransportUdpDataType.UTF8

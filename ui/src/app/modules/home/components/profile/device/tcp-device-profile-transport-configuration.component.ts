@@ -54,7 +54,6 @@ import {
   isTcpHexVariableByteSlice,
   TCP_HEX_LTV_TAG_VALUE_OPTIONS,
   migrateLegacyLtvTagValueType,
-  TcpJsonWithoutMethodMode,
   TcpTransportConnectMode,
   TcpTransportFramingMode,
   TcpWireAuthenticationMode,
@@ -1185,7 +1184,6 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       tcpTransportConnectMode: v.tcpTransportConnectMode,
       tcpTransportFramingMode: v.tcpTransportFramingMode,
       tcpWireAuthenticationMode: v.tcpWireAuthenticationMode,
-      tcpJsonWithoutMethodMode: TcpJsonWithoutMethodMode.TELEMETRY_FLAT,
       tcpOpaqueRuleEngineKey: textLikePayload
         ? (String(v.tcpOpaqueRuleEngineKey ?? '').trim() || 'tcpOpaquePayload')
         : undefined,

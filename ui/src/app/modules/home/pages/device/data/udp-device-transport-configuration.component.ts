@@ -101,21 +101,19 @@ export class UdpDeviceTransportConfigurationComponent implements ControlValueAcc
     this.tcpDeviceTransportConfigurationFormGroup = this.fb.group({
       sourceHost: [''],
       udpWireAuthPayloadDeviceId: [''],
-      // 下行地址（可选）：设备从临时/NAT 端口上报、但固定端口收指令时填写；留空则回发上报源地址
-      udpDownlinkHost: [''],
-      udpDownlinkPort: [null, [Validators.min(1), Validators.max(65535)]]
+      // 下行地址（必填）：平台只发到这里；没配就收不到 RPC/属性下发（不再回发上报的源地址）
+      udpDownlinkHost: ['', Validators.required],
+      udpDownlinkPort: [null, [Validators.required, Validators.min(1), Validators.max(65535)]]
     });
     this.tcpDeviceTransportConfigurationFormGroup.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(() => {
-      this.applyDownlinkPairValidators();
       if (!this.suppressModelUpdate) {
         this.updateModel();
       }
     });
     this.runWithoutModelUpdate(() => {
       this.applyDeferredPayloadDeviceIdValidators();
-      this.applyDownlinkPairValidators();
     });
   }
 
@@ -134,31 +132,6 @@ export class UdpDeviceTransportConfigurationComponent implements ControlValueAcc
     } finally {
       this.suppressModelUpdate = false;
     }
-  }
-
-  /**
-   * 下行地址**可选**：两个都留空 = "回发设备最近一次上报的源地址"；只填一个时把另一个标成必填，
-   * 校验不过时 {@link #updateModel} 放弃这次变更（不会把半个地址存进去）。
-   */
-  private applyDownlinkPairValidators(): void {
-    const grp = this.tcpDeviceTransportConfigurationFormGroup;
-    if (!grp) {
-      return;
-    }
-    const hostCtrl = grp.get('udpDownlinkHost');
-    const portCtrl = grp.get('udpDownlinkPort');
-    if (!hostCtrl || !portCtrl) {
-      return;
-    }
-    const hostSet = String(hostCtrl.value ?? '').trim().length > 0;
-    const portVal = portCtrl.value;
-    const portSet = portVal !== null && portVal !== undefined && portVal !== '';
-    hostCtrl.setValidators(portSet && !hostSet ? [Validators.required] : []);
-    portCtrl.setValidators(hostSet && !portSet
-      ? [Validators.required, Validators.min(1), Validators.max(65535)]
-      : [Validators.min(1), Validators.max(65535)]);
-    hostCtrl.updateValueAndValidity({emitEvent: false});
-    portCtrl.updateValueAndValidity({emitEvent: false});
   }
 
   private applyDeferredPayloadDeviceIdValidators(): void {
@@ -198,7 +171,6 @@ export class UdpDeviceTransportConfigurationComponent implements ControlValueAcc
     }
     this.runWithoutModelUpdate(() => {
       this.applyDeferredPayloadDeviceIdValidators();
-      this.applyDownlinkPairValidators();
     });
   }
 

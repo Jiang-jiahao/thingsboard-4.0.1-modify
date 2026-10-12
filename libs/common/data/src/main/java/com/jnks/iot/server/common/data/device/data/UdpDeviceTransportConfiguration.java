@@ -13,8 +13,9 @@ import com.jnks.iot.server.common.data.StringUtils;
  * 链路上鉴权 {@link com.jnks.iot.server.common.data.device.profile.UdpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时须配置
  * {@link #udpWireAuthPayloadDeviceId}：与负载 JSON 中档案所配字段值一致，且在同一租户内多设备时值须互异。
  * <p>
- * 下行地址（SERVER 模式，可选）：填了 {@link #udpDownlinkHost} + {@link #udpDownlinkPort} 就发到那里，
- * 没填则回发设备最近一次上报的源地址（经透明绑定网关接入时那就是设备的真实 IP+端口）。
+ * 下行地址（<strong>必填</strong>）：平台下行只会发到 {@link #udpDownlinkHost} + {@link #udpDownlinkPort}
+ * —— 没配地址的设备**收不到** RPC/属性下发（2026-10-12 起不再回退到"回发上报的源地址"，
+ * 与 HTTP 一样：下发要显式配置）。
  */
 @Data
 @ToString(of = {"sourceHost", "udpWireAuthPayloadDeviceId", "udpDownlinkHost", "udpDownlinkPort"})
@@ -32,15 +33,13 @@ public class UdpDeviceTransportConfiguration implements DeviceTransportConfigura
     private String udpWireAuthPayloadDeviceId;
 
     /**
-     * 可选：SERVER 模式平台<strong>下行</strong>的目标地址（IPv4/IPv6），与 {@link #udpDownlinkPort} 成对出现。
-     * 填了之后 RPC / 共享属性等下发就发到这里，不再回发设备上报的源地址
-     * （设备从临时/NAT 端口上报、但固定监听某个端口收指令时，上报地址的端口对不上）。
-     * 留空则沿用"回发设备最近一次上报的源地址"。
+     * <strong>必填</strong>：平台<strong>下行</strong>的目标地址（IPv4/IPv6），与 {@link #udpDownlinkPort} 成对。
+     * RPC / 属性响应等下发都发到这里（设备从临时/NAT 端口上报、但固定监听某个端口收指令时，上报地址的端口也对不上）。
      */
     private String udpDownlinkHost;
 
     /**
-     * 可选：与 {@link #udpDownlinkHost} 成对的下行端口（1–65535）。
+     * <strong>必填</strong>：与 {@link #udpDownlinkHost} 成对的下行端口（1–65535）。
      */
     private Integer udpDownlinkPort;
 
@@ -51,12 +50,11 @@ public class UdpDeviceTransportConfiguration implements DeviceTransportConfigura
 
     @Override
     public void validate() {
-        boolean hostSet = StringUtils.isNotBlank(udpDownlinkHost);
-        boolean portSet = udpDownlinkPort != null;
-        if (hostSet != portSet) {
-            throw new IllegalArgumentException("udpDownlinkHost and udpDownlinkPort must be set together (or both left empty)");
+        if (StringUtils.isBlank(udpDownlinkHost) || udpDownlinkPort == null) {
+            throw new IllegalArgumentException(
+                    "udpDownlinkHost and udpDownlinkPort are required: the platform only sends UDP downlink frames to this fixed address");
         }
-        if (portSet && (udpDownlinkPort < 1 || udpDownlinkPort > 65535)) {
+        if (udpDownlinkPort < 1 || udpDownlinkPort > 65535) {
             throw new IllegalArgumentException("udpDownlinkPort must be between 1 and 65535");
         }
     }

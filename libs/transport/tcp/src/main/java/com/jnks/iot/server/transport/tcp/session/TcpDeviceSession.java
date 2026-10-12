@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.common.adaptor.JsonConverter;
 import io.netty.buffer.ByteBuf;
 import com.google.gson.JsonElement;
-import com.jnks.iot.server.common.data.device.profile.TcpJsonWithoutMethodMode;
 import com.jnks.iot.server.common.data.device.profile.TcpTransportFramingMode;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.DeviceProfile;
@@ -61,6 +60,23 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
     @Getter
     @Setter
     private volatile boolean coreSessionReady;
+
+    /**
+     * 连接建立时没认领成功（设备记录 / 源 IP 绑定刚建好、注册表还没热等），由某一帧触发重试鉴权时
+     * 暂存这一帧；鉴权成功后补处理，避免这一帧的数据白丢。
+     */
+    private volatile byte[] pendingUnauthFrame;
+
+    /** 取走并清空暂存帧（保证只补处理一次）。 */
+    public byte[] takePendingUnauthFrame() {
+        byte[] f = pendingUnauthFrame;
+        pendingUnauthFrame = null;
+        return f;
+    }
+
+    public void setPendingUnauthFrame(byte[] frame) {
+        this.pendingUnauthFrame = frame;
+    }
 
     /**
      * CLIENT：令牌校验通过后暂存，在 Netty {@code channelActive} 时再向 Core 注册，避免未建连即显示在线。
@@ -408,17 +424,6 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
     }
 
 
-    public TcpJsonWithoutMethodMode getTcpJsonWithoutMethodMode() {
-        DeviceProfile profile = getDeviceProfile();
-        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
-            return TcpJsonWithoutMethodMode.TELEMETRY_FLAT;
-        }
-        var tc = profile.getProfileData().getTransportConfiguration();
-        if (tc instanceof TcpDeviceProfileTransportConfiguration) {
-            return ((TcpDeviceProfileTransportConfiguration) tc).getTcpJsonWithoutMethodMode();
-        }
-        return TcpJsonWithoutMethodMode.TELEMETRY_FLAT;
-    }
     public String getTcpOpaqueRuleEngineKey() {
         DeviceProfile profile = getDeviceProfile();
         if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {

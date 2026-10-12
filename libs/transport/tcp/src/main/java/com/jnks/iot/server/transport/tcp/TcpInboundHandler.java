@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.transport.tcp.session.TcpDeviceSession;
-import com.jnks.iot.server.transport.tcp.util.TcpPayloadUtil;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
@@ -74,18 +73,29 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 if (tryDeferredAuthFromCatalog(ctx, session, data, localPort(ctx))) {
                     return;
                 }
-                // 既没有已绑定的延迟鉴权档案、也匹配不上任何延迟鉴权键：身份无从确定，丢弃这一帧。
-                // 不关连接——延迟鉴权目录是异步刷新的，目录热起来后设备重发的帧仍能被识别。
+                // 连接建立时没认领成功（设备记录 / 源 IP 绑定刚建好、注册表还没热等）：逐帧再试一次
+                // 按源 IP 认领，并把这一帧扣下、等鉴权成功后补处理 —— 否则同一连接上的数据会一直丢，
+                // 只有断开重连才能恢复（UDP 侧逐报文重试天然自愈）。
+                if (session.tryBeginServerAuth()) {
+                    session.setPendingUnauthFrame(data);
+                    if (tcpTransportContext.startServerWireAuth(ctx, session)) {
+                        return;
+                    }
+                    session.setPendingUnauthFrame(null);
+                    session.endServerAuth();
+                }
+                // 身份仍旧无从确定：丢弃这一帧。不关连接——延迟鉴权目录是异步刷新的，
+                // 目录热起来后设备重发的帧仍能被识别。
                 if (session.shouldLogPreAuthDrop()) {
-                    log.warn("[{}] TCP pre-auth frame dropped: no deferred device-id key matched", session.getSessionId());
+                    log.warn("[{}] TCP pre-auth frame dropped: no device with this source IP, no deferred device-id key matched",
+                            session.getSessionId());
                 } else {
-                    log.debug("[{}] TCP pre-auth frame dropped: no deferred device-id key matched", session.getSessionId());
+                    log.debug("[{}] TCP pre-auth frame dropped: no device with this source IP, no deferred device-id key matched",
+                            session.getSessionId());
                 }
                 return;
             }
-            tcpTransportContext.recordUplinkFrameActivity(session);
-            String jsonPayload = TcpPayloadUtil.decodePayloadBytes(session.getPayloadDataType(), data);
-            session.processIncomingJsonLine(jsonPayload);
+            tcpTransportContext.processUplinkFrame(session, data);
         } catch (Exception e) {
             log.warn("[{}] Bad TCP frame", session.getSessionId(), e);
             ctx.close();

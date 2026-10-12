@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.common.adaptor.JsonConverter;
 import io.netty.buffer.ByteBuf;
 import com.google.gson.JsonElement;
-import com.jnks.iot.server.common.data.device.profile.UdpJsonWithoutMethodMode;
 import com.jnks.iot.server.common.data.device.profile.UdpTransportFramingMode;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.DeviceProfile;
@@ -57,13 +56,6 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
     @Getter
     @Setter
     private volatile Channel channel;
-    @Getter
-    @Setter
-    private volatile InetSocketAddress remoteAddress;
-    /** 最近一次收到该设备数据报的时间；档案配了 udpReadIdleTimeoutSec 时由空闲清理任务据此关会话。 */
-    @Getter
-    @Setter
-    private volatile long lastUplinkMs = System.currentTimeMillis();
     /**
      * 平台已向 Core 完成鉴权并注册会话（CLIENT 在出站 TCP 建连成功且 {@code channelActive} 中注册后为 true；SERVER 在收到首行 token 后为 true）。
      */
@@ -167,10 +159,11 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
 
     public void writeByteBuf(ByteBuf buf) {
         Channel ch = this.channel;
-        // 下行目的地：设备配置里填了下行地址就用它，没配就回发"设备最近上报的源地址"。
-        InetSocketAddress remote = udpTransportContext.resolveDownlinkAddress(getDeviceId(), this.remoteAddress);
+        // 下行目的地：**只**用设备配置里的固定下行地址（必填；不再回退到上报的源地址）。
+        InetSocketAddress remote = udpTransportContext.resolveDownlinkAddress(getDeviceId());
         if (remote == null) {
-            log.warn("[{}] No UDP downlink address for device {}; dropping downlink frame", getSessionId(), getDeviceId());
+            log.warn("[{}] Device {} has no UDP downlink address configured (required); dropping downlink frame",
+                    getSessionId(), getDeviceId());
             buf.release();
             return;
         }
@@ -180,6 +173,7 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
         }
         ch.eventLoop().execute(() -> {
             if (ch.isActive()) {
+                log.debug("[{}] UDP downlink frame -> {} ({} bytes)", getSessionId(), remote, buf.readableBytes());
                 ch.writeAndFlush(new DatagramPacket(buf, remote));
             } else {
                 buf.release();
@@ -209,12 +203,13 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
         sendJsonPayload(msg);
     }
 
+    /**
+     * UDP 不支持共享属性下发：会话不订阅属性更新（见 {@code UdpTransportContext#completeSessionRegistration}），
+     * 所以这个回调不会触发。设备要拿共享属性请发 {@code {"method":"getAttributes"}} 主动拉取。
+     * 保留空实现仅为满足 {@link SessionMsgListener} 接口。
+     */
     @Override
     public void onAttributeUpdate(UUID sessionId, AttributeUpdateNotificationMsg attributeUpdateNotification) {
-        JsonObject msg = new JsonObject();
-        msg.addProperty("method", "attributeUpdate");
-        msg.add("data", JsonConverter.toJson(attributeUpdateNotification));
-        sendJsonPayload(msg);
     }
 
     @Override
@@ -345,17 +340,6 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
     }
 
 
-    public UdpJsonWithoutMethodMode getUdpJsonWithoutMethodMode() {
-        DeviceProfile profile = getDeviceProfile();
-        if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {
-            return UdpJsonWithoutMethodMode.TELEMETRY_FLAT;
-        }
-        var tc = profile.getProfileData().getTransportConfiguration();
-        if (tc instanceof UdpDeviceProfileTransportConfiguration) {
-            return ((UdpDeviceProfileTransportConfiguration) tc).getUdpJsonWithoutMethodMode();
-        }
-        return UdpJsonWithoutMethodMode.TELEMETRY_FLAT;
-    }
     public String getUdpOpaqueRuleEngineKey() {
         DeviceProfile profile = getDeviceProfile();
         if (profile == null || profile.getProfileData() == null || profile.getProfileData().getTransportConfiguration() == null) {

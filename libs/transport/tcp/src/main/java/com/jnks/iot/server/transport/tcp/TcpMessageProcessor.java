@@ -37,7 +37,7 @@ public class TcpMessageProcessor {
             log.warn("[{}] Session not ready", session.getSessionId());
             return;
         }
-        JsonObject work = stripDeferredWireAuthTokenField(session, root);
+        JsonObject work = root;
         if (work.has("method")) {
             String method = work.get("method").getAsString();
             switch (method) {
@@ -100,7 +100,7 @@ public class TcpMessageProcessor {
                 return;
             }
             var parsed = parsedOpt.get();
-            JsonObject payloadForCore = stripDeferredWireAuthTokenField(session, parsed.getPayload());
+            JsonObject payloadForCore = parsed.getPayload();
             String matchedProfile = payloadForCore.has("hexCmdProfile")
                     ? payloadForCore.get("hexCmdProfile").getAsString()
                     : "<default-template-fallback>";
@@ -122,9 +122,6 @@ public class TcpMessageProcessor {
                 telemetryKey = "tcpOpaquePayload";
             }
             JsonElement inner = payload;
-            if (payload.isJsonObject()) {
-                inner = stripDeferredWireAuthTokenField(session, payload.getAsJsonObject());
-            }
             JsonObject wrap = new JsonObject();
             wrap.add(telemetryKey, inner);
             transportService.process(session.getSessionInfo(), JsonConverter.convertToTelemetryProto(wrap),
@@ -235,39 +232,6 @@ public class TcpMessageProcessor {
     }
 
     /**
-     * DEFERRED 模式且会话已就绪时，从 JSON 对象副本中移除档案配置的身份字段，避免写入遥测/属性。
-     */
-    private JsonObject stripDeferredWireAuthTokenField(TcpDeviceSession session, JsonObject root) {
-        TcpWireAuthenticationMode mode = session.getTcpWireAuthenticationMode();
-        if (mode != TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
-            return root;
-        }
-        Optional<String> keyOpt = deferredWireAuthPayloadIdentityJsonKey(session.getDeviceProfile());
-        if (keyOpt.isEmpty() || !root.has(keyOpt.get())) {
-            return root;
-        }
-        JsonObject copy = root.deepCopy();
-        copy.remove(keyOpt.get());
-        return copy;
-    }
-
-    private static Optional<String> deferredWireAuthPayloadIdentityJsonKey(DeviceProfile profile) {
-        if (profile == null || profile.getProfileData() == null
-                || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration ptc)) {
-            return Optional.empty();
-        }
-        TcpWireAuthenticationMode mode = ptc.getTcpWireAuthenticationMode();
-        if (mode != TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
-            return Optional.empty();
-        }
-        String k = ptc.getTcpDeferredWireAuthTokenJsonKey();
-        if (StringUtils.isBlank(k)) {
-            return Optional.empty();
-        }
-        return Optional.of(k.trim());
-    }
-
-    /**
      * SERVER 延迟链路上鉴权：从<strong>当前帧</strong>按业务类型解码后的 JSON 中取档案配置的字段字符串
      * （{@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 为协议设备 ID）。未注册前可多次尝试，无字段的帧忽略。
      */
@@ -367,7 +331,7 @@ public class TcpMessageProcessor {
     }
 
     /**
-     * 鉴权成功后重放<strong>触发鉴权的那一帧</strong>上行：从 JSON 副本中移除令牌字段，再按原逻辑入库。
+     * 鉴权成功后重放<strong>触发鉴权的那一帧</strong>上行：整帧按原逻辑入库，**身份字段保留**。
      */
     public void replayDeferredUplinkAfterAuth(TcpDeviceSession session, byte[] rawFrame) {
         if (!session.isCoreSessionReady() || rawFrame == null) {
@@ -386,14 +350,10 @@ public class TcpMessageProcessor {
         if (StringUtils.isBlank(key)) {
             return;
         }
-        // 身份帧是 JSON 文本（含 HEX / 协议模板档案）：剥掉身份字段后按普通上行重放。
+        // 身份帧是 JSON 文本（含 HEX / 协议模板档案）：按普通上行重放（身份字段保留）。
         Optional<JsonObject> identityFrame = identityJsonText(rawFrame, key);
         if (identityFrame.isPresent()) {
             JsonObject o = identityFrame.get().deepCopy();
-            o.remove(key);
-            if (o.size() == 0) {
-                return;
-            }
             if (o.has("method")) {
                 processUplinkJson(session, o);
             } else {
@@ -418,10 +378,6 @@ public class TcpMessageProcessor {
                 return;
             }
             JsonObject o = root.getAsJsonObject().deepCopy();
-            o.remove(key);
-            if (o.size() == 0) {
-                return;
-            }
             if (o.has("method")) {
                 processUplinkJson(session, o);
             } else {
@@ -443,7 +399,6 @@ public class TcpMessageProcessor {
             }
             var parsed = parsedOpt.get();
             JsonObject body = parsed.getPayload().deepCopy();
-            body.remove(key);
             if (body.size() == 0) {
                 return;
             }

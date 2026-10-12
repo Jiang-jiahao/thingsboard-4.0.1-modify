@@ -60,6 +60,12 @@ public abstract class TransportActivityManager extends AbstractActivityManager<U
         }
 
         state.setMetadata(session.getSessionInfo());
+        if (session.isExpiryExempt()) {
+            // 豁免会话（如 UDP 给"从不开口"的被动设备建的虚拟下发会话）不参与"不活动过期"：
+            // 把时间戳往前拨 → hasExpired 永不为真 → 不销毁，也就不会周期性打断下发通道。
+            state.setLastRecordedTime(getCurrentTimeMillis());
+            return state;
+        }
         var sessionInfo = state.getMetadata();
 
         if (sessionInfo.getGwSessionIdMSB() == 0L || sessionInfo.getGwSessionIdLSB() == 0L) {

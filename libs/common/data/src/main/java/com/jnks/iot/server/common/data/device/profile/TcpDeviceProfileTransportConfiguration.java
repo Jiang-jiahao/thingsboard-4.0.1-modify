@@ -50,8 +50,7 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
 
     /**
      * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：解析得到的 JSON 中存放<strong>协议设备 ID</strong>的字段名（与设备传输配置
-     * {@link com.jnks.iot.server.common.data.device.data.TcpDeviceTransportConfiguration#getTcpWireAuthPayloadDeviceId() tcpWireAuthPayloadDeviceId} 比对，同一租户内须唯一）。<br>
-     * 校验成功后该字段会从本帧重放及后续上行的副本中移除。
+     * {@link com.jnks.iot.server.common.data.device.data.TcpDeviceTransportConfiguration#getTcpWireAuthPayloadDeviceId() tcpWireAuthPayloadDeviceId} 比对，同一租户内须唯一）。
      */
     private String tcpDeferredWireAuthTokenJsonKey;
 
@@ -68,10 +67,6 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
      */
     private Integer tcpReadIdleTimeoutSec;
 
-    /**
-     * 历史字段；当前 TCP 在 UTF-8/ASCII 下无 {@code method} 时统一写入 {@link #tcpOpaqueRuleEngineKey} 单键。反序列化兼容保留。
-     */
-    private TcpJsonWithoutMethodMode tcpJsonWithoutMethodMode;
     /**
      * 无 {@code method} 的 UTF-8/ASCII 上行写入的<strong>单一遥测键名</strong>（默认 {@code tcpOpaquePayload}，与历史字段名一致）。
      */
@@ -105,9 +100,6 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
     }
 
 
-    public TcpJsonWithoutMethodMode getTcpJsonWithoutMethodMode() {
-        return Objects.requireNonNullElse(tcpJsonWithoutMethodMode, TcpJsonWithoutMethodMode.TELEMETRY_FLAT);
-    }
     public String getTcpOpaqueRuleEngineKey() {
         return Objects.requireNonNullElse(tcpOpaqueRuleEngineKey, "tcpOpaquePayload");
     }

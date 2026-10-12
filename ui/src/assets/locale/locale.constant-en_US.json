@@ -2661,8 +2661,6 @@
         },
         "udp": {
             "profile-network-notice": "UDP is connectionless: each datagram is one payload (no stream framing). Wire authentication, payload encoding and the listen port are configured here: devices send datagrams to this profile's listen port; when the platform sends downlink it uses that same port and targets the device's configured downlink address. Expected source IP, downlink address/port and protocol device id are set on the device.",
-            "read-idle-timeout-sec": "Read idle timeout (sec)",
-            "read-idle-timeout-hint": "Close the session if no datagram is received from the device for this long (the device re-authenticates on its next datagram); empty or 0 = disabled.",
             "wire-auth": "Wire authentication",
             "wire-auth-none": "None (bind by port / source IP)",
             "wire-auth-deferred-device-id": "Deferred (JSON key name in payload)",
@@ -2853,11 +2851,11 @@
             "payload-device-id": "Protocol device id (for DEFERRED device-id profile)",
             "payload-device-id-hint": "Must exactly match the JSON field value on uplinks. The value must be unique within the tenant.",
             "payload-device-id-required": "Protocol device id is required for this device profile.",
-            "downlink-host": "Fixed downlink host (optional)",
-            "downlink-host-hint": "Optional. Downlink (RPC / attributes / scheduled RPC) is sent here instead of replying to the source address of the last uplink. Use it when the device reports from a temporary/NAT port but listens for commands on a fixed one.",
-            "downlink-port": "Fixed downlink port (optional)",
-            "downlink-port-hint": "Optional. Must be filled together with the downlink host. May differ from the uplink source port.",
-            "downlink-pair-required": "Host and port must be filled together.",
+            "downlink-host": "Fixed downlink host",
+            "downlink-host-hint": "Required. All downlink (RPC / attributes / scheduled RPC) is sent here — the platform no longer replies to the source address of the last uplink; without it the device receives nothing. May differ from the uplink source port.",
+            "downlink-port": "Fixed downlink port",
+            "downlink-port-hint": "Required. Must be filled together with the downlink host. May differ from the uplink source port.",
+            "downlink-required": "Required: the platform only sends downlink frames here.",
             "downlink-port-invalid": "Port must be between 1 and 65535."
         }
     },

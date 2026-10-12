@@ -2675,8 +2675,6 @@
         },
         "udp": {
             "profile-network-notice": "UDP 为无连接数据报，每个报文即一条业务负载（无半包/粘包分帧）。链路上鉴权、负载编码、监听端口在此配置：设备把数据报发到本档案的**监听端口**；平台要主动下发时，从同一个端口发到设备配置的**下行地址**。期望源 IP、下行地址/端口、协议设备 ID 在「设备」详情的传输配置里填。",
-            "read-idle-timeout-sec": "读空闲超时（秒）",
-            "read-idle-timeout-hint": "超过该时间没收到设备的数据报就回收会话（设备下次发包会重新鉴权）；留空或 0 表示不启用。",
             "wire-auth": "链路上鉴权",
             "wire-auth-none": "无（按端口/源 IP 绑定）",
             "wire-auth-deferred-device-id": "延迟（负载 JSON 中的 JSON 键名）",
@@ -2867,11 +2865,11 @@
             "payload-device-id": "协议设备 ID（延迟鉴权档案使用）",
             "payload-device-id-hint": "须与上行 JSON 中档案所配键的值完全一致，且同一租户内唯一（共享监听端口不再参与消歧）。",
             "payload-device-id-required": "该设备档案要求填写协议设备 ID。",
-            "downlink-host": "固定下行地址（可选）",
-            "downlink-host-hint": "可选。填了之后，下发（RPC / 属性 / 定时 RPC）不再回发到设备最近上报的源地址，而是发到这个固定地址 —— 设备从临时或 NAT 端口上报、但固定端口收指令时用它。",
-            "downlink-port": "固定下行端口（可选）",
-            "downlink-port-hint": "可选。须与下行地址成对填写；可以与设备的上报源端口不同。",
-            "downlink-pair-required": "地址与端口须成对填写。",
+            "downlink-host": "固定下行地址",
+            "downlink-host-hint": "必填。平台的下行（RPC / 属性 / 定时 RPC）只发到这里 —— 不再回发设备上报的源地址；没填就收不到下发。可与设备的上报源端口不同。",
+            "downlink-port": "固定下行端口",
+            "downlink-port-hint": "必填。须与下行地址成对填写；可以与设备的上报源端口不同。",
+            "downlink-required": "必填：平台只向该地址下发。",
             "downlink-port-invalid": "端口须在 1–65535 之间。"
         }
     },

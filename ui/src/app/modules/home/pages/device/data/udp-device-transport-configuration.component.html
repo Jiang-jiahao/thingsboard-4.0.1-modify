@@ -10,13 +10,13 @@
         <mat-label translate>device-profile.udp.downlink-host</mat-label>
         <input matInput formControlName="udpDownlinkHost">
         <mat-error *ngIf="tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkHost').hasError('required')"
-                   translate>device-profile.udp.downlink-pair-required</mat-error>
+                   translate>device-profile.udp.downlink-required</mat-error>
       </mat-form-field>
       <mat-form-field class="flex-1">
         <mat-label translate>device-profile.udp.downlink-port</mat-label>
         <input matInput type="number" min="1" max="65535" formControlName="udpDownlinkPort">
         <mat-error *ngIf="tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkPort').hasError('required')"
-                   translate>device-profile.udp.downlink-pair-required</mat-error>
+                   translate>device-profile.udp.downlink-required</mat-error>
         <mat-error *ngIf="tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkPort').hasError('min')
                        || tcpDeviceTransportConfigurationFormGroup.get('udpDownlinkPort').hasError('max')"
                    translate>device-profile.udp.downlink-port-invalid</mat-error>

@@ -37,13 +37,6 @@
     </div>
     <div class="flex flex-row gap-2 xs:flex-col">
       <mat-form-field class="flex-1">
-        <mat-label translate>device-profile.udp.read-idle-timeout-sec</mat-label>
-        <input matInput type="number" min="0" formControlName="udpReadIdleTimeoutSec">
-        <mat-hint translate>device-profile.udp.read-idle-timeout-hint</mat-hint>
-      </mat-form-field>
-    </div>
-    <div class="flex flex-row gap-2 xs:flex-col">
-      <mat-form-field class="flex-1">
         <mat-label translate>device-profile.udp.payload-type</mat-label>
         <mat-select formControlName="dataType" required>
           <mat-option [value]="TransportUdpDataType.UTF8">{{ 'device-profile.udp.payload-type-utf8' | translate }}</mat-option>
