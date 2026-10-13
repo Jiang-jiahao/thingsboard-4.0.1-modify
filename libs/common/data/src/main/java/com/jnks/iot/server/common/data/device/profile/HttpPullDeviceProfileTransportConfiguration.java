@@ -20,8 +20,11 @@ public class HttpPullDeviceProfileTransportConfiguration implements DeviceProfil
 
     /**
      * UI 工作模式标记：PULL=主动拉取（与 {@link #getType()} 一致，便于 JSON 多态缺失时回显）。
+     * <p>
+     * 刻意**不给字段默认值**：工作模式必须由调用方显式声明（与"HTTP 工作模式必须手选"的口径一致），
+     * 缺省时应被 {@link #isValid()} 判为无效，而不是静默落到 PULL。
      */
-    private String httpTransportMode = "PULL";
+    private String httpTransportMode;
 
     private Integer timeoutMs = 10000;
     private Integer readTimeoutMs = 10000;
@@ -78,10 +81,14 @@ public class HttpPullDeviceProfileTransportConfiguration implements DeviceProfil
 
     @JsonIgnore
     private boolean isValid() {
+        if (StringUtils.isBlank(httpTransportMode)) {
+            return false;
+        }
         if (timeoutMs == null || timeoutMs < 0 || readTimeoutMs == null || readTimeoutMs < 0) {
             return false;
         }
-        if (queryingFrequencyMs == null || queryingFrequencyMs <= 0) {
+        // 与请求级（HttpPullPollRequest）和前端一致：档案级轮询间隔下限也是 1000ms
+        if (queryingFrequencyMs == null || queryingFrequencyMs < 1000) {
             return false;
         }
         List<HttpPullPollRequest> requests = effectivePollRequests();

@@ -19,6 +19,8 @@ import com.jnks.iot.server.common.data.device.profile.DefaultDeviceProfileConfig
 import com.jnks.iot.server.common.data.device.profile.DefaultDeviceProfileTransportConfiguration;
 import com.jnks.iot.server.common.data.device.profile.DeviceProfileData;
 import com.jnks.iot.server.common.data.device.profile.DisabledDeviceProfileProvisionConfiguration;
+import com.jnks.iot.server.common.data.device.profile.TcpDeviceProfileTransportConfiguration;
+import com.jnks.iot.server.common.data.device.profile.TcpTransportFramingMode;
 import com.jnks.iot.server.common.data.device.profile.X509CertificateChainProvisionConfiguration;
 import com.jnks.iot.server.common.data.id.DeviceProfileId;
 import com.jnks.iot.server.common.data.id.EntityId;
@@ -156,6 +158,7 @@ public class DeviceProfileServiceImpl extends CachedVersionedEntityService<Devic
                 formatDeviceProfileCertificate(deviceProfile, x509Configuration);
             }
         }
+        normalizeTcpFixedFrameLength(deviceProfile);
         DeviceProfile oldDeviceProfile = null;
         if (doValidate) {
             oldDeviceProfile = deviceProfileValidator.validate(deviceProfile, DeviceProfile::getTenantId);
@@ -393,6 +396,20 @@ public class DeviceProfileServiceImpl extends CachedVersionedEntityService<Devic
     private DeviceProfileInfo toDeviceProfileInfo(DeviceProfile profile) {
         return profile == null ? null : new DeviceProfileInfo(profile.getId(), profile.getTenantId(), profile.getName(), profile.getImage(),
                 profile.getDefaultDashboardId(), profile.getType(), profile.getTransportType());
+    }
+
+    /**
+     * 非定长分帧时 {@code tcpFixedFrameLength} 无意义：保存前清空，避免前端未清空或直调 API
+     * 留下的残留值被持久化（与前端在切换分帧方式时清空该字段的行为对齐）。
+     */
+    private void normalizeTcpFixedFrameLength(DeviceProfile deviceProfile) {
+        if (deviceProfile == null || deviceProfile.getProfileData() == null
+                || !(deviceProfile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration tcp)) {
+            return;
+        }
+        if (tcp.getTcpTransportFramingMode() != TcpTransportFramingMode.FIXED_LENGTH) {
+            tcp.setTcpFixedFrameLength(null);
+        }
     }
 
     private void formatDeviceProfileCertificate(DeviceProfile deviceProfile, X509CertificateChainProvisionConfiguration x509Configuration) {

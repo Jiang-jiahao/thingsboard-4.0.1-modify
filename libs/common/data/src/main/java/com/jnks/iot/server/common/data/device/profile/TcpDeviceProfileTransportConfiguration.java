@@ -141,6 +141,17 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
 
     @Override
     public void validate() {
+        // 必须显式声明负载数据类型：getter 在字段为空时会静默兜底成 HEX，
+        // 直接用它判断会让"没传 dataType"的配置一路过校验，落到与前端意图不符的分支。
+        if (transportTcpDataTypeConfiguration == null) {
+            throw new IllegalArgumentException(
+                    "transportTcpDataTypeConfiguration is required: declare the TCP payload data type explicitly");
+        }
+        if (getTcpTransportFramingMode() == TcpTransportFramingMode.FIXED_LENGTH
+                && (tcpFixedFrameLength == null || tcpFixedFrameLength < 1)) {
+            throw new IllegalArgumentException(
+                    "tcpFixedFrameLength is required and must be >= 1 when tcpTransportFramingMode is FIXED_LENGTH");
+        }
         if (getTransportTcpDataTypeConfiguration() instanceof HexTransportTcpDataConfiguration hexCfg) {
             hexCfg.validateHexProtocolFields();
         }

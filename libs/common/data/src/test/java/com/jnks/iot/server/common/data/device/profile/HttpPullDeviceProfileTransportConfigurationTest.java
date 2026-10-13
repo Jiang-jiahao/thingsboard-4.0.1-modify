@@ -67,6 +67,7 @@ class HttpPullDeviceProfileTransportConfigurationTest {
         String json = """
                 {
                   "type": "HTTP_PULL",
+                  "httpTransportMode": "PULL",
                   "queryingFrequencyMs": 15000,
                   "timeoutMs": 10000,
                   "readTimeoutMs": 10000,
@@ -112,6 +113,8 @@ class HttpPullDeviceProfileTransportConfigurationTest {
 
     private static HttpPullDeviceProfileTransportConfiguration profileWithRequests(HttpPullPollRequest... requests) {
         HttpPullDeviceProfileTransportConfiguration cfg = new HttpPullDeviceProfileTransportConfiguration();
+        // 工作模式必须显式声明（后端已不再给默认值，缺省即无效）
+        cfg.setHttpTransportMode("PULL");
         cfg.setPollRequests(List.of(requests));
         return cfg;
     }
