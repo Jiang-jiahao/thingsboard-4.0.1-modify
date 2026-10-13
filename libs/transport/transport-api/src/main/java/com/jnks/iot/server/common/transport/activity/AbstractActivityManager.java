@@ -48,6 +48,16 @@ public abstract class AbstractActivityManager<Key, Metadata> implements Activity
 
     protected abstract void reportActivity(Key key, Metadata metadata, long timeToReport, ActivityReportCallback<Key> callback);
 
+    /**
+     * 该 key 对应的会话是否豁免"不活动过期"。
+     * <p>
+     * 豁免会话（UDP/HTTP 给从不开口的设备建的**虚拟**下发/采集会话）同时**不产生活动上报** ——
+     * 它本来就不是设备连接，Core 侧也没有它的会话，上报过去只会被丢弃。
+     */
+    protected boolean isExpiryExempt(Key key) {
+        return false;
+    }
+
     @Override
     public void onActivity(Key key, Metadata metadata, long newLastRecordedTime) {
         if (key == null) {
@@ -78,7 +88,8 @@ public abstract class AbstractActivityManager<Key, Metadata> implements Activity
             return stateWrapper;
         });
 
-        if (shouldReport.get() && lastReportedTime.get() < lastRecordedTime.get()) {
+        // shouldReport 放前面短路：默认策略（LAST）下它是 false，这样每个报文都不用去查会话表。
+        if (shouldReport.get() && !isExpiryExempt(key) && lastReportedTime.get() < lastRecordedTime.get()) {
             log.debug("Going to report first activity event for key: [{}]. Event time: [{}].", key, lastRecordedTime.get());
             reportActivity(key, metadata, lastRecordedTime.get(), new ActivityReportCallback<>() {
                 @Override
@@ -119,11 +130,12 @@ public abstract class AbstractActivityManager<Key, Metadata> implements Activity
         boolean shouldReport;
 
         var updatedState = updateState(key, currentState);
+        boolean expiryExempt = isExpiryExempt(key);
         if (updatedState != null) {
             stateWrapper.setState(updatedState);
             lastRecordedTime = updatedState.getLastRecordedTime();
             metadata = updatedState.getMetadata();
-            hasExpired = hasExpired(lastRecordedTime);
+            hasExpired = !expiryExempt && hasExpired(lastRecordedTime);
             shouldReport = stateWrapper.getStrategy().onReportingPeriodEnd();
         } else {
             states.remove(key);
@@ -137,7 +149,7 @@ public abstract class AbstractActivityManager<Key, Metadata> implements Activity
             shouldReport = true;
         }
 
-        if (shouldReport && lastReportedTime < lastRecordedTime) {
+        if (!expiryExempt && shouldReport && lastReportedTime < lastRecordedTime) {
             long timeToReport = lastRecordedTime;
             log.debug("Going to report last activity event for key: [{}]. Event time: [{}].", key, timeToReport);
             reportActivity(key, metadata, timeToReport, new ActivityReportCallback<>() {
