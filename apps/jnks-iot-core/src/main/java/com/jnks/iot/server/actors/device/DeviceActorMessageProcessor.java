@@ -836,15 +836,20 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
                 rpcSubscriptions.putIfAbsent(sessionId, sessionMD.getSessionInfo());
             }
         }
-        // 只有"真实会话"（发过 OPEN、因此还在 sessions 里）才把活动续到设备状态上。
-        // 传输层每 report_timeout（默认 3s）把会话的最后活动时间报上来，靠这句把绿点续上；
-        // 不加这句，持续上报的设备也会在 inactivityTimeout 之后被 60s 状态扫描判成非活跃。
-        // 虚拟会话（UDP/HTTP 出站、采集）只发订阅、不发 OPEN，不在 sessions 里
-        // （见 dumpSubscriptionOnlySessions），到不了这里 —— 所以"一个包都没发"的被动设备不会被误标活跃。
+        // 任何一次活动上报都代表"设备刚有过动作"，无条件续到设备状态上 —— 与上游一致。
+        // 不能只在 sessionMD != null（= 发过 OPEN）时记：**HTTP 被动每请求注册一个 SYNC 会话
+        // （DeviceApiController#registerSyncSession，存活 transport.http.request_timeout）却从不发 OPEN**，
+        // 在 Core 的 sessions 里查不到它，只能在这一层记；否则 HTTP 设备的绿点永远不亮
+        // （上游就是无条件记的，bdb3157b 删掉之后 HTTP 一直没再亮过）。
+        // 虚拟会话（UDP/HTTP 出站、采集）**不产生活动上报**（AbstractActivityManager#isExpiryExempt），
+        // 到不了这里；采集会话在首次成功拉取前也不记活动（activateHttpPullDeviceSession 与首次上报同时发生）
+        // —— 所以"一个包都没发"的设备不会被误标活跃。
         // 用上报的时间（而不是当前时间）是有意的：设备刚判非活跃时，迟到的旧上报会因
         // onDeviceActivity 里的 lastInactivityAlarmTime 判断被丢掉，不会把设备错误地拉回活跃。
-        if (sessionMD != null) {
+        if (subscriptionInfo.getLastActivityTime() > 0) {
             systemContext.getDeviceStateService().onDeviceActivity(tenantId, deviceId, subscriptionInfo.getLastActivityTime());
+        }
+        if (sessionMD != null) {
             dumpSessions();
         }
     }
