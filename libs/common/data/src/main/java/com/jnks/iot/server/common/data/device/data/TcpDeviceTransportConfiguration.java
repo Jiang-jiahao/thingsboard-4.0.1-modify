@@ -30,7 +30,7 @@ public class TcpDeviceTransportConfiguration implements DeviceTransportConfigura
 
     /**
      * 当设备档案为 {@link com.jnks.iot.server.common.data.device.profile.TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：
-     * 与上行解析 JSON 中「协议设备 ID」字段值一致，用于区分 TB 设备（同一租户内须唯一）。
+     * 与上行解析 JSON 中「协议设备 ID」字段值一致，用于区分 TB 设备（同一档案内须唯一）。
      */
     private String tcpWireAuthPayloadDeviceId;
 

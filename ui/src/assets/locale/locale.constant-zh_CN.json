@@ -2670,7 +2670,7 @@
             "source-host": "期望源 IP（SERVER）",
             "source-host-hint": "非空则与 Socket 远端 IP 一致。NONE 鉴权时每台须配置不同且合法的源 IP；经负载均衡器时传输侧看到的是 LB 地址，该模式需透明代理。",
             "payload-device-id": "协议设备 ID（延迟鉴权档案使用）",
-            "payload-device-id-hint": "须与上行 JSON 中档案所配键的值完全一致，且同一租户内唯一（共享监听端口不再参与消歧）。",
+            "payload-device-id-hint": "须与上行 JSON 中档案所配键的值完全一致，且同一档案内唯一。",
             "payload-device-id-required": "该设备档案要求填写协议设备 ID。"
         },
         "udp": {
@@ -2863,7 +2863,7 @@
             "source-host": "期望源 IP",
             "source-host-hint": "非空则与入站数据报的源 IP 一致。NONE 鉴权时每台须配置不同且合法的源 IP；经负载均衡器时传输侧看到的是 LB 地址。",
             "payload-device-id": "协议设备 ID（延迟鉴权档案使用）",
-            "payload-device-id-hint": "须与上行 JSON 中档案所配键的值完全一致，且同一租户内唯一（共享监听端口不再参与消歧）。",
+            "payload-device-id-hint": "须与上行 JSON 中档案所配键的值完全一致，且同一档案内唯一。",
             "payload-device-id-required": "该设备档案要求填写协议设备 ID。",
             "downlink-host": "固定下行地址",
             "downlink-host-hint": "必填。平台的下行（RPC / 属性 / 定时 RPC）只发到这里 —— 不再回发设备上报的源地址；没填就收不到下发。可与设备的上报源端口不同。",

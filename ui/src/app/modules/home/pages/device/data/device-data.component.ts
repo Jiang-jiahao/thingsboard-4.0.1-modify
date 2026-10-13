@@ -13,6 +13,7 @@ import { Store } from '@ngrx/store';
 import { AppState } from '@app/core/core.state';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
 import {
+  BasicTransportType,
   createDeviceTransportConfiguration,
   DeviceData,
   DeviceProfileInfo,
@@ -72,6 +73,10 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   @Input()
   mqttPullProfileActive = false;
 
+  /** 当前档案是「HTTP 被动接收」（transportType 存为 DEFAULT）：设备页据此显示 HTTP 被动面板，而不是当成默认 */
+  @Input()
+  httpPassiveProfileActive = false;
+
   /** 来自设备详情页：tenant | customer | customer_user */
   @Input()
   deviceScope: string;
@@ -100,6 +105,9 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
   }
 
   get profileUiTransportType(): TransportType | null {
+    if (this.httpPassiveProfileActive) {
+      return BasicTransportType.HTTP;
+    }
     const fromProfile = this.deviceProfile?.transportType;
     if (fromProfile) {
       return toUiTransportType(fromProfile);
@@ -145,7 +153,7 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
 
   
   ngOnChanges(changes: SimpleChanges): void {
-    if ((changes.deviceProfile || changes.mqttPullProfileActive) && this.deviceDataFormGroup) {
+    if ((changes.deviceProfile || changes.mqttPullProfileActive || changes.httpPassiveProfileActive) && this.deviceDataFormGroup) {
       this.applyVisibilityFromValue(this.lastWrittenValue);
       this.ensureTransportConfigurationForProfile();
     }
@@ -179,7 +187,9 @@ export class DeviceDataComponent implements ControlValueAccessor, OnInit, OnChan
     const profileType = value?.configuration?.type ?? this.deviceProfile?.type;
     const profileInfo = profileType && deviceProfileTypeConfigurationInfoMap.get(profileType);
     this.displayDeviceConfiguration = !!(profileInfo?.hasDeviceConfiguration);
-    const transportType = value?.transportConfiguration?.type ?? this.deviceProfile?.transportType;
+    const transportType = this.httpPassiveProfileActive
+      ? BasicTransportType.HTTP
+      : (value?.transportConfiguration?.type ?? this.deviceProfile?.transportType);
     this.displayTransportConfiguration = this.needsDeviceTransportConfiguration(transportType as DeviceTransportType);
   }
 

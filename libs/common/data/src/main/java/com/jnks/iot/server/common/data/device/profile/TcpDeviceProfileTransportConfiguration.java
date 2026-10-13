@@ -50,7 +50,8 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
 
     /**
      * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 时：解析得到的 JSON 中存放<strong>协议设备 ID</strong>的字段名（与设备传输配置
-     * {@link com.jnks.iot.server.common.data.device.data.TcpDeviceTransportConfiguration#getTcpWireAuthPayloadDeviceId() tcpWireAuthPayloadDeviceId} 比对，同一租户内须唯一）。
+     * {@link com.jnks.iot.server.common.data.device.data.TcpDeviceTransportConfiguration#getTcpWireAuthPayloadDeviceId() tcpWireAuthPayloadDeviceId} 比对；
+     * 键名只需在本档案内唯一，多个档案可复用同一个键名，匹配时按入站监听端口区分。
      */
     private String tcpDeferredWireAuthTokenJsonKey;
 

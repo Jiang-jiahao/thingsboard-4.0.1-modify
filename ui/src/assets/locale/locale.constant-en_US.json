@@ -2656,7 +2656,7 @@
             "source-host": "Expected source IP (SERVER)",
             "source-host-hint": "If set, must match the socket remote address. With NONE, each device needs a distinct valid source IP; behind a load balancer the transport sees the LB address, so this mode requires a transparent proxy.",
             "payload-device-id": "Protocol device id (for DEFERRED device-id profile)",
-            "payload-device-id-hint": "Must exactly match the JSON field value on uplinks. The value must be unique within the tenant (the shared listen port no longer disambiguates).",
+            "payload-device-id-hint": "Must exactly match the JSON field value on uplinks. The value must be unique within the same device profile.",
             "payload-device-id-required": "Protocol device id is required for this device profile."
         },
         "udp": {
@@ -2849,7 +2849,7 @@
             "source-host": "Expected source IP",
             "source-host-hint": "If set, must match the datagram source address. With NONE, each device needs a distinct valid source IP; behind a load balancer the transport sees the LB address.",
             "payload-device-id": "Protocol device id (for DEFERRED device-id profile)",
-            "payload-device-id-hint": "Must exactly match the JSON field value on uplinks. The value must be unique within the tenant.",
+            "payload-device-id-hint": "Must exactly match the JSON field value on uplinks. The value must be unique within the same device profile.",
             "payload-device-id-required": "Protocol device id is required for this device profile.",
             "downlink-host": "Fixed downlink host",
             "downlink-host-hint": "Required. All downlink (RPC / attributes / scheduled RPC) is sent here — the platform no longer replies to the source address of the last uplink; without it the device receives nothing. May differ from the uplink source port.",

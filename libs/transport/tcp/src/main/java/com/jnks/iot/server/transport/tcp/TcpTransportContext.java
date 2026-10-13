@@ -701,7 +701,7 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
             return;
         }
         String fieldValue = fieldValueOpt.get().trim();
-        Optional<DeviceId> deviceIdOpt = tcpProtocolDeviceIdRegistry.findByProtocolDeviceId(fieldValue);
+        Optional<DeviceId> deviceIdOpt = tcpProtocolDeviceIdRegistry.findByProtocolDeviceId(profile.getId(), fieldValue);
         if (deviceIdOpt.isEmpty()) {
             log.warn("[{}] DEFERRED_PAYLOAD_DEVICE_ID: no TB device for payload device id [{}]",
                     session.getSessionId(), fieldValue);

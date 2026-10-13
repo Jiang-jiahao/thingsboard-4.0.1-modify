@@ -11,6 +11,7 @@ import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.common.data.device.data.UdpDeviceTransportConfiguration;
 import com.jnks.iot.server.common.data.id.DeviceId;
+import com.jnks.iot.server.common.data.id.DeviceProfileId;
 import com.jnks.iot.server.common.transport.DeviceDeletedEvent;
 import com.jnks.iot.server.common.transport.DeviceUpdatedEvent;
 import com.jnks.iot.server.gen.transport.TransportProtos;
@@ -26,7 +27,8 @@ import java.util.concurrent.Executors;
  * {@code DEFERRED_PAYLOAD_DEVICE_ID} 模式下，用设备上报的"协议设备 ID"
  * （设备传输配置 {@code udpWireAuthPayloadDeviceId}）定位 JnksIOT 设备。
  * <p>
- * 共享监听端口下端口不再参与消歧，因此该标识必须在部署内唯一：同一标识被多台设备占用时只保留先出现的那个并打 ERROR。
+ * 定位按**档案**分域：协议设备 ID 只需在同一档案内唯一，不同档案可复用同一个值
+ * （各档案有各自的监听端口、各自的负载键名，互不干扰）。
  */
 @Service
 @ConditionalOnExpression("'${transport.api_enabled:true}'=='true' && '${transport.udp.enabled:true}'=='true'")
@@ -35,7 +37,7 @@ import java.util.concurrent.Executors;
 public class UdpProtocolDeviceIdRegistry {
 
     private final UdpProtoTransportEntityService protoEntityService;
-    private final Map<String, DeviceId> protocolDeviceIdToDeviceId = new ConcurrentHashMap<>();
+    private final Map<DeviceProfileId, Map<String, DeviceId>> protocolDeviceIdToDeviceId = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "udp-protocol-device-id-registry");
         t.setDaemon(true);
@@ -63,16 +65,17 @@ public class UdpProtocolDeviceIdRegistry {
         executor.execute(() -> remove(event.getDeviceId()));
     }
 
-    public Optional<DeviceId> findByProtocolDeviceId(String protocolDeviceId) {
-        if (StringUtils.isBlank(protocolDeviceId)) {
+    public Optional<DeviceId> findByProtocolDeviceId(DeviceProfileId profileId, String protocolDeviceId) {
+        if (profileId == null || StringUtils.isBlank(protocolDeviceId)) {
             return Optional.empty();
         }
-        return Optional.ofNullable(protocolDeviceIdToDeviceId.get(protocolDeviceId.trim()));
+        Map<String, DeviceId> byValue = protocolDeviceIdToDeviceId.get(profileId);
+        return byValue == null ? Optional.empty() : Optional.ofNullable(byValue.get(protocolDeviceId.trim()));
     }
 
     private void reloadAll() {
         try {
-            Map<String, DeviceId> loaded = new ConcurrentHashMap<>();
+            Map<DeviceProfileId, Map<String, DeviceId>> loaded = new ConcurrentHashMap<>();
             int page = 0;
             int pageSize = 512;
             boolean hasNext;
@@ -90,8 +93,12 @@ public class UdpProtocolDeviceIdRegistry {
             // 只增不删：扫描依赖"设备列表 + 档案缓存"的即时快照，刚建好的设备/尚未热的档案都可能漏。
             // 早先的 clear + putAll 会把已索引的设备号抹掉，导致该实例上设备号鉴权失效。
             // 设备被删后条目会残留，但解析时会因设备不存在而被拒（协议设备号在租户内唯一，不会误配到别人）。
-            loaded.forEach(protocolDeviceIdToDeviceId::putIfAbsent);
-            log.info("UDP protocol device ids loaded: {} entr(ies)", protocolDeviceIdToDeviceId.size());
+            loaded.forEach((profileId, byValue) -> {
+                Map<String, DeviceId> target = protocolDeviceIdToDeviceId.computeIfAbsent(profileId, __ -> new ConcurrentHashMap<>());
+                byValue.forEach(target::putIfAbsent);
+            });
+            log.info("UDP protocol device ids loaded: {} entr(ies)",
+                    protocolDeviceIdToDeviceId.values().stream().mapToInt(Map::size).sum());
         } catch (Exception e) {
             log.warn("Failed to load UDP protocol device ids", e);
         }
@@ -103,8 +110,9 @@ public class UdpProtocolDeviceIdRegistry {
         }
     }
 
-    private void upsertInto(Map<String, DeviceId> target, Device device) {
+    private void upsertInto(Map<DeviceProfileId, Map<String, DeviceId>> target, Device device) {
         if (device == null || device.getId() == null || device.getDeviceData() == null
+                || device.getDeviceProfileId() == null
                 || !(device.getDeviceData().getTransportConfiguration() instanceof UdpDeviceTransportConfiguration cfg)) {
             return;
         }
@@ -112,11 +120,12 @@ public class UdpProtocolDeviceIdRegistry {
         if (StringUtils.isBlank(protocolDeviceId)) {
             return;
         }
-        DeviceId previous = target.putIfAbsent(protocolDeviceId.trim(), device.getId());
+        Map<String, DeviceId> byValue = target.computeIfAbsent(device.getDeviceProfileId(), __ -> new ConcurrentHashMap<>());
+        DeviceId previous = byValue.putIfAbsent(protocolDeviceId.trim(), device.getId());
         if (previous != null && !previous.equals(device.getId())) {
-            log.error("Protocol device id [{}] is used by more than one device ({} and {}); "
-                            + "DEFERRED_PAYLOAD_DEVICE_ID requires a unique value, keeping {}",
-                    protocolDeviceId, previous, device.getId(), previous);
+            log.error("Protocol device id [{}] is used by more than one device ({}) in profile [{}]; "
+                            + "DEFERRED_PAYLOAD_DEVICE_ID requires a unique value within the same device profile, keeping {}",
+                    protocolDeviceId, previous + "/" + device.getId(), device.getDeviceProfileId(), previous);
         }
     }
 
@@ -124,7 +133,7 @@ public class UdpProtocolDeviceIdRegistry {
         if (deviceId == null) {
             return;
         }
-        protocolDeviceIdToDeviceId.values().removeIf(deviceId::equals);
+        protocolDeviceIdToDeviceId.values().forEach(byValue -> byValue.values().removeIf(deviceId::equals));
     }
 
     @PreDestroy

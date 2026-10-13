@@ -1,5 +1,13 @@
 .jnks-iot-device-rpc-panel {
   max-width: 720px;
+
+  // Material 的 mat-spinner 默认是块级元素，放进 button 里会顶出按钮上沿（实测高出约 3px）。
+  // 统一的按钮内旋转指示器：行内块 + 垂直居中 + 与图标一样的右间距。
+  button mat-spinner {
+    display: inline-block;
+    margin: 0 6px 0 0;
+    vertical-align: middle;
+  }
 }
 
 .jnks-iot-device-rpc-field-grid {
@@ -17,7 +25,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--tb-text-disabled, var(--jnks-iot-line));
+  // 原来用的 --tb-text-disabled 并没有定义，回退到 --jnks-iot-line（#e8eef6，一条浅描边色），
+  // 白底上「调用方式」几乎看不见。改用可读的次级文字色。
+  color: var(--tb-text-muted, #5b6b85);
 }
 
 .jnks-iot-device-rpc-mode-chip {
@@ -63,12 +73,6 @@
 .jnks-iot-device-rpc-fixed-editor {
   .mat-expansion-panel-body {
     padding-top: 8px;
-  }
-
-  button mat-spinner {
-    display: inline-block;
-    margin-right: 6px;
-    vertical-align: middle;
   }
 }
 

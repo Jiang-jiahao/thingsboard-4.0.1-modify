@@ -262,6 +262,23 @@ export function resolveHttpProfileTransportTypeForDisplay(
   return (entityTransportType as DeviceTransportType) ?? DeviceTransportType.DEFAULT;
 }
 
+/**
+ * 档案回显用的 UI 传输类型。
+ * <p>
+ * HTTP 被动接收的档案，后端存下来的 {@code transportType} 是 DEFAULT（见 {@link resolveTransportTypeForSave}），
+ * 只在 {@code transportConfiguration} 上留了 {@code httpTransportMode=PASSIVE} 作标记。回显时若不看这个标记，
+ * 传输方式会显示成「默认」、面板也渲染成默认面板 —— 用户明明配的是 HTTP。普通 DEFAULT 档案没有这个标记，仍显示「默认」。
+ */
+export function resolveProfileUiTransportTypeForDisplay(
+  entityTransportType: DeviceTransportType | string | null | undefined,
+  transportConfiguration?: { httpTransportMode?: HttpTransportMode } | null
+): TransportType | null {
+  if (transportConfiguration?.httpTransportMode === HttpTransportMode.PASSIVE) {
+    return BasicTransportType.HTTP;
+  }
+  return toUiTransportType(entityTransportType as DeviceTransportType);
+}
+
 /** 从 API 加载后补齐工作模式，保证编辑页回显「主动拉取」 */
 export function normalizeHttpProfileTransportConfigurationForDisplay(
   transportType: DeviceTransportType | string | null | undefined,

@@ -82,7 +82,7 @@ public class UdpInboundHandler extends SimpleChannelInboundHandler<DatagramPacke
                 return false;
             }
             JsonObject root = JsonParser.parseString(authJson).getAsJsonObject();
-            var deferred = udpTransportContext.getDeferredAuthCatalog().match(root);
+            var deferred = udpTransportContext.getDeferredAuthCatalog().match(root, localPort);
             if (deferred.isEmpty()) {
                 return false;
             }

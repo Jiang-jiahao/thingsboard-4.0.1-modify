@@ -25,12 +25,13 @@ import {
   deviceTransportTypeHintMap,
   deviceTransportTypeTranslationMap,
   hasDeviceProfileTransportConfiguration,
+  HttpTransportMode,
   isMqttPullProfileTransportConfiguration,
   normalizeProfileTransportConfigurationForDisplay,
   normalizeProfileTransportConfigurationForSave,
   resolveHttpProfileTransportTypeForDisplay,
+  resolveProfileUiTransportTypeForDisplay,
   resolveTransportTypeForSave,
-  toUiTransportType,
   TransportType
 } from '@shared/models/device.models';
 import { EntityType } from '@shared/models/entity-type.models';
@@ -79,6 +80,12 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     return resolveHttpProfileTransportTypeForDisplay(this.entity?.transportType, cfg);
   }
 
+  /** 传输方式回显：HTTP 被动档案的 transportType 存为 DEFAULT，要靠 transportConfiguration 上的工作模式标记才能显示成 HTTP */
+  private resolveUiTransportTypeForDisplay(entity: DeviceProfile | null | undefined): TransportType | null {
+    const cfg = entity?.profileData?.transportConfiguration as { httpTransportMode?: HttpTransportMode } | undefined;
+    return resolveProfileUiTransportTypeForDisplay(entity?.transportType, cfg);
+  }
+
   deviceProfileId: EntityId;
 
   otaUpdateType = OtaUpdateType;
@@ -106,7 +113,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     this.displayProfileConfiguration = entity && entity.type &&
       deviceProfileTypeConfigurationInfoMap.get(entity.type).hasProfileConfiguration;
     this.displayTransportConfiguration = entity && entity.transportType &&
-      hasDeviceProfileTransportConfiguration(toUiTransportType(entity.transportType));
+      hasDeviceProfileTransportConfiguration(this.resolveUiTransportTypeForDisplay(entity));
     const deviceProvisionConfiguration: DeviceProvisionConfiguration = DEVICE_PROVISIONING_UI_ENABLED ? {
       type: entity?.provisionType ? entity.provisionType : DeviceProvisionType.DISABLED,
       provisionDeviceKey: entity?.provisionDeviceKey,
@@ -119,7 +126,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
         name: [entity ? entity.name : '', [Validators.required, Validators.maxLength(255)]],
         type: [entity ? entity.type : null, [Validators.required]],
         image: [entity ? entity.image : null],
-        transportType: [entity ? toUiTransportType(entity.transportType) : null, [Validators.required]],
+        transportType: [entity ? this.resolveUiTransportTypeForDisplay(entity) : null, [Validators.required]],
         profileData: this.fb.group({
           configuration: [entity && !this.isAdd ? entity.profileData?.configuration : {}, Validators.required],
           transportConfiguration: [entity && !this.isAdd
@@ -200,7 +207,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     this.displayProfileConfiguration = entity.type &&
       deviceProfileTypeConfigurationInfoMap.get(entity.type).hasProfileConfiguration;
     this.displayTransportConfiguration = entity.transportType &&
-      hasDeviceProfileTransportConfiguration(toUiTransportType(entity.transportType));
+      hasDeviceProfileTransportConfiguration(this.resolveUiTransportTypeForDisplay(entity));
     const deviceProvisionConfiguration: DeviceProvisionConfiguration = {
       type: entity?.provisionType ? entity.provisionType : DeviceProvisionType.DISABLED,
       provisionDeviceKey: entity?.provisionDeviceKey,
@@ -211,7 +218,7 @@ export class DeviceProfileComponent extends EntityComponent<DeviceProfile> {
     this.entityForm.patchValue({name: entity.name});
     this.entityForm.patchValue({type: entity.type}, {emitEvent: false});
     this.entityForm.patchValue({image: entity.image}, {emitEvent: false});
-    this.entityForm.patchValue({transportType: toUiTransportType(entity.transportType)}, {emitEvent: false});
+    this.entityForm.patchValue({transportType: this.resolveUiTransportTypeForDisplay(entity)}, {emitEvent: false});
     this.entityForm.patchValue({provisionType: entity.provisionType}, {emitEvent: false});
     this.entityForm.patchValue({provisionDeviceKey: entity.provisionDeviceKey}, {emitEvent: false});
     const transportConfiguration = normalizeProfileTransportConfigurationForDisplay(

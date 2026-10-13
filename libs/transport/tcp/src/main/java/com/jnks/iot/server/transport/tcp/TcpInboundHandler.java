@@ -123,7 +123,7 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 return false;
             }
             JsonObject root = JsonParser.parseString(authJson).getAsJsonObject();
-            var deferred = tcpTransportContext.getDeferredAuthCatalog().match(root);
+            var deferred = tcpTransportContext.getDeferredAuthCatalog().match(root, localPort);
             if (deferred.isEmpty()) {
                 return false;
             }

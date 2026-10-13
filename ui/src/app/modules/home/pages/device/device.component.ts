@@ -6,6 +6,7 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import {
   createDeviceConfiguration,
   createDeviceTransportConfiguration, DeviceCredentials,
+  BasicTransportType,
   DeviceData,
   DeviceInfo,
   DeviceProfile,
@@ -14,6 +15,8 @@ import {
   DeviceTransportType,
   extractHttpPullProfileContext,
   extractMqttPullProfileContext,
+  HttpTransportMode,
+  resolveProfileUiTransportTypeForDisplay,
   TcpDeviceProfileTransportConfiguration,
   UdpDeviceProfileTransportConfiguration,
   UdpWireAuthenticationMode,
@@ -60,6 +63,9 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
   httpPullProfilePollUrl: string | null = null;
 
   mqttPullProfileActive = false;
+
+  /** 当前设备档案是「HTTP 被动接收」：该档案的 transportType 存为 DEFAULT，需靠配置标记识别，设备页据此显示 HTTP 被动面板 */
+  httpPassiveProfileActive = false;
 
   readonly gatewayUiEnabled = GATEWAY_UI_ENABLED;
 
@@ -256,7 +262,9 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     }
     // 勿依赖 profileInfo.transportType：设备页自动完成可能只带 id/name，transportType 为空会导致永远不拉档案
     const transportType = profileInfo && 'transportType' in profileInfo ? profileInfo.transportType : undefined;
+    // DEFAULT 也要拉：HTTP 被动档案的 transportType 就是 DEFAULT，不看完整档案识别不出它是 HTTP
     const needsFullProfile = !transportType
+      || transportType === DeviceTransportType.DEFAULT
       || transportType === DeviceTransportType.TCP
       || transportType === DeviceTransportType.UDP
       || transportType === DeviceTransportType.HTTP_PULL
@@ -284,6 +292,7 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
     this.udpProfileWireAuthMode = null;
     this.httpPullProfilePollUrl = null;
     this.mqttPullProfileActive = false;
+    this.httpPassiveProfileActive = false;
     if (!dp) {
       return;
     }
@@ -292,6 +301,10 @@ export class DeviceComponent extends EntityComponent<DeviceInfo> {
       this.httpPullProfilePollUrl = httpPullCtx.pollUrl;
     }
     this.mqttPullProfileActive = extractMqttPullProfileContext(dp) != null;
+    this.httpPassiveProfileActive = resolveProfileUiTransportTypeForDisplay(
+      dp.transportType,
+      dp.profileData?.transportConfiguration as { httpTransportMode?: HttpTransportMode } | undefined
+    ) === BasicTransportType.HTTP;
     if (dp.transportType === DeviceTransportType.TCP) {
       const raw = dp.profileData?.transportConfiguration as TcpDeviceProfileTransportConfiguration | undefined;
       if (raw && (raw.type === DeviceTransportType.TCP || raw.type == null || raw.type === undefined)) {

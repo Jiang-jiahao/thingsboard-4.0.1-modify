@@ -124,10 +124,13 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
 
 
     /**
-     * 共享监听端口下端口不再起消歧作用：{@link TcpWireAuthenticationMode#NONE} 靠 {@code sourceHost}、
-     * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 靠协议设备号识别设备，因此这两种模式的身份串
-     * 必须在<strong>租户内</strong>唯一（原先的范围是"同一专用监听端口内"）。与旧行为一致：仅当该模式下租户内
-     * 存在多台设备时才强制校验（且不得为空）。
+     * {@link TcpWireAuthenticationMode#NONE} 靠 {@code sourceHost} 识别设备，其身份串必须在<strong>租户内</strong>唯一。
+     * <p>
+     * {@link TcpWireAuthenticationMode#DEFERRED_PAYLOAD_DEVICE_ID} 靠"负载 JSON 里某个键的值"（协议设备号）识别设备，
+     * 而每个档案有各自的监听端口与各自的负载键名，所以协议设备号只需在<strong>同一设备档案内</strong>唯一 ——
+     * 不同档案可以复用同一个键名与同一个值，互不干扰。
+     * <p>
+     * 与旧行为一致：仅当范围内存在多台该模式的设备时才强制校验（且不得为空）。
      * <p>
      * {@link TcpTransportConnectMode#CLIENT} 不适用：出站模式下平台主动 dial 设备的 {@code host}/{@code port}，
      * 没有共享监听端口，也不存在"从入站报文按源 IP / 协议设备号认领设备"的场景，身份串无从起作用。
@@ -150,6 +153,9 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
                 && wireMode != TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             return;
         }
+        // 负载 JSON 模式只需在本档案内唯一；源 IP 模式仍是租户内唯一。
+        boolean scopeToProfile = wireMode == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID
+                && device.getDeviceProfileId() != null;
         String field = wireMode == TcpWireAuthenticationMode.NONE ? "sourceHost" : "tcpWireAuthPayloadDeviceId";
         String identity = normalizeTcpWireIdentity(wireMode, current);
         UUID selfUuid = device.getId() != null ? device.getId().getId() : null;
@@ -161,6 +167,9 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
             page = deviceDao.findDevicesByTenantId(tenantId.getId(), pageLink);
             for (Device other : page.getData()) {
                 if (selfUuid != null && selfUuid.equals(other.getId().getId())) {
+                    continue;
+                }
+                if (scopeToProfile && !device.getDeviceProfileId().equals(other.getDeviceProfileId())) {
                     continue;
                 }
                 if (other.getDeviceData() == null
@@ -192,8 +201,10 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
                     + " must set a non-empty " + field + " (it is the only way to identify the device).");
         }
         if (others.contains(identity)) {
-            throw new DataValidationException("Duplicate " + field + " '" + identity
-                    + "' within the tenant: with a shared TCP listen port the identity must be unique per tenant.");
+            throw new DataValidationException("Duplicate " + field + " '" + identity + "' "
+                    + (scopeToProfile
+                    ? "within the same device profile: in DEFERRED_PAYLOAD_DEVICE_ID mode the identity must be unique per device profile."
+                    : "within the tenant: with a shared TCP listen port the identity must be unique per tenant."));
         }
     }
 
@@ -208,7 +219,8 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
     }
 
     /**
-     * UDP 侧与 TCP 同构，见 {@link #validateTcpWireIdentityUniquePerTenant}。
+     * UDP 侧与 TCP 同构，见 {@link #validateTcpWireIdentityUniquePerTenant}：
+     * NONE（sourceHost）租户内唯一，DEFERRED_PAYLOAD_DEVICE_ID（负载 JSON 键值）只需在同一设备档案内唯一。
      */
     private void validateUdpWireIdentityUniquePerTenant(TenantId tenantId, Device device) {
         if (device.getDeviceData() == null
@@ -225,6 +237,8 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
                 && wireMode != UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             return;
         }
+        boolean scopeToProfile = wireMode == UdpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID
+                && device.getDeviceProfileId() != null;
         String field = wireMode == UdpWireAuthenticationMode.NONE ? "sourceHost" : "udpWireAuthPayloadDeviceId";
         String identity = normalizeUdpWireIdentity(wireMode, current);
         UUID selfUuid = device.getId() != null ? device.getId().getId() : null;
@@ -236,6 +250,9 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
             page = deviceDao.findDevicesByTenantId(tenantId.getId(), pageLink);
             for (Device other : page.getData()) {
                 if (selfUuid != null && selfUuid.equals(other.getId().getId())) {
+                    continue;
+                }
+                if (scopeToProfile && !device.getDeviceProfileId().equals(other.getDeviceProfileId())) {
                     continue;
                 }
                 if (other.getDeviceData() == null
@@ -267,8 +284,10 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
                     + " must set a non-empty " + field + " (it is the only way to identify the device).");
         }
         if (others.contains(identity)) {
-            throw new DataValidationException("Duplicate " + field + " '" + identity
-                    + "' within the tenant: with a shared UDP listen port the identity must be unique per tenant.");
+            throw new DataValidationException("Duplicate " + field + " '" + identity + "' "
+                    + (scopeToProfile
+                    ? "within the same device profile: in DEFERRED_PAYLOAD_DEVICE_ID mode the identity must be unique per device profile."
+                    : "within the tenant: with a shared UDP listen port the identity must be unique per tenant."));
         }
     }
 
@@ -332,7 +351,7 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
         TcpDeviceTransportConfiguration tcp = (TcpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
         if (StringUtils.isBlank(tcp.getTcpWireAuthPayloadDeviceId())) {
             throw new DataValidationException(
-                    "TCP DEFERRED_PAYLOAD_DEVICE_ID requires tcpWireAuthPayloadDeviceId on the device transport configuration (must match the payload JSON field value; the value must be unique within the tenant).");
+                    "TCP DEFERRED_PAYLOAD_DEVICE_ID requires tcpWireAuthPayloadDeviceId on the device transport configuration (must match the payload JSON field value; the value must be unique within the same device profile).");
         }
     }
 
@@ -377,7 +396,7 @@ public class DeviceDataValidator extends AbstractHasOtaPackageValidator<Device> 
         UdpDeviceTransportConfiguration udp = (UdpDeviceTransportConfiguration) device.getDeviceData().getTransportConfiguration();
         if (StringUtils.isBlank(udp.getUdpWireAuthPayloadDeviceId())) {
             throw new DataValidationException(
-                    "UDP DEFERRED_PAYLOAD_DEVICE_ID requires udpWireAuthPayloadDeviceId on the device transport configuration (must match the payload JSON field value; the value must be unique within the tenant).");
+                    "UDP DEFERRED_PAYLOAD_DEVICE_ID requires udpWireAuthPayloadDeviceId on the device transport configuration (must match the payload JSON field value; the value must be unique within the same device profile).");
         }
     }
 

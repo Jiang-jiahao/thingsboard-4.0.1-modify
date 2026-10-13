@@ -14,9 +14,9 @@ import { EntityAction } from '@home/models/entity/entity-component.models';
 import { DialogService } from '@core/services/dialog.service';
 import {
   DeviceProfile,
-  deviceProfileTypeTranslationMap,
   deviceTransportTypeTranslationMap,
-  toUiTransportType
+  HttpTransportMode,
+  resolveProfileUiTransportTypeForDisplay
 } from '@shared/models/device.models';
 import { DeviceProfileService } from '@core/http/device-profile.service';
 import { DeviceProfileComponent } from '@home/components/profile/device-profile.component';
@@ -56,11 +56,12 @@ export class DeviceProfilesTableConfigResolver  {
     this.config.columns.push(
       new DateEntityTableColumn<DeviceProfile>('createdTime', 'common.created-time', this.datePipe, '150px'),
       new EntityTableColumn<DeviceProfile>('name', 'device-profile.name', '20%'),
-      new EntityTableColumn<DeviceProfile>('type', 'device-profile.type', '20%', (deviceProfile) => {
-        return this.translate.instant(deviceProfileTypeTranslationMap.get(deviceProfile.type));
-      }),
       new EntityTableColumn<DeviceProfile>('transportType', 'device-profile.transport-type', '20%', (deviceProfile) => {
-        const uiType = toUiTransportType(deviceProfile.transportType);
+        // 列表接口 (/api/deviceProfiles) 返回的是完整档案，工作模式标记就在 profileData 里
+        const uiType = resolveProfileUiTransportTypeForDisplay(
+          deviceProfile.transportType,
+          deviceProfile.profileData?.transportConfiguration as { httpTransportMode?: HttpTransportMode } | undefined
+        );
         return this.translate.instant(deviceTransportTypeTranslationMap.get(uiType));
       }),
       new EntityTableColumn<DeviceProfile>('description', 'device-profile.description', '40%',

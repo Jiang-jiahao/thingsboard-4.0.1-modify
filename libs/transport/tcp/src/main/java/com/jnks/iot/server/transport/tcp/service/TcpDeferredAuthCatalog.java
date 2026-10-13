@@ -25,6 +25,7 @@ import com.jnks.iot.server.gen.transport.TransportProtos;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -48,7 +49,11 @@ public class TcpDeferredAuthCatalog {
 
     private final TcpProtoTransportEntityService protoEntityService;
     private final TransportDeviceProfileCache deviceProfileCache;
-    private final Map<String, DeviceProfileId> deferredKeyToProfile = new ConcurrentHashMap<>();
+    /**
+     * 键名 → 该键名下所有延迟鉴权档案。键名**不必租户内唯一**：同键名可被多个档案使用，
+     * 匹配时再按"本会话监听端口"落回唯一档案（端口与档案一一对应）。
+     */
+    private final Map<String, Set<DeviceProfileId>> deferredKeyToProfiles = new ConcurrentHashMap<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "tcp-deferred-auth-catalog");
         t.setDaemon(true);
@@ -77,13 +82,15 @@ public class TcpDeferredAuthCatalog {
 
     /**
      * 按帧里出现的已配置延迟鉴权键对齐档案；多个键同时命中时取第一个并告警。
+     * <p>
+     * 键名可能被多个档案共用，因此**必须**按本会话监听端口收敛到唯一档案（端口与档案一一对应）。
      */
-    public Optional<Match> match(JsonObject frame) {
-        if (frame == null || frame.size() == 0 || deferredKeyToProfile.isEmpty()) {
+    public Optional<Match> match(JsonObject frame, int localPort) {
+        if (frame == null || frame.size() == 0 || deferredKeyToProfiles.isEmpty()) {
             return Optional.empty();
         }
         ArrayList<Match> matches = new ArrayList<>(2);
-        for (Map.Entry<String, DeviceProfileId> entry : deferredKeyToProfile.entrySet()) {
+        for (Map.Entry<String, Set<DeviceProfileId>> entry : deferredKeyToProfiles.entrySet()) {
             JsonElement el = frame.get(entry.getKey());
             if (el == null || !el.isJsonPrimitive()) {
                 continue;
@@ -92,12 +99,8 @@ public class TcpDeferredAuthCatalog {
             if (StringUtils.isBlank(value)) {
                 continue;
             }
-            DeviceProfile profile = deviceProfileCache.get(entry.getValue());
-            if (profile == null || profile.getProfileData() == null
-                    || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration ptc)) {
-                continue;
-            }
-            if (ptc.getTcpWireAuthenticationMode() != TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+            DeviceProfile profile = profileOnPort(entry.getValue(), localPort);
+            if (profile == null) {
                 continue;
             }
             matches.add(new Match(profile, entry.getKey(), value));
@@ -112,9 +115,28 @@ public class TcpDeferredAuthCatalog {
         return matches.isEmpty() ? Optional.empty() : Optional.of(matches.get(0));
     }
 
+    /** 该键名下、落在本监听端口上的延迟鉴权档案（端口与档案一一对应，故至多一个）。 */
+    private DeviceProfile profileOnPort(Set<DeviceProfileId> profileIds, int localPort) {
+        for (DeviceProfileId profileId : profileIds) {
+            DeviceProfile profile = deviceProfileCache.get(profileId);
+            if (profile == null || profile.getProfileData() == null
+                    || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration ptc)) {
+                continue;
+            }
+            if (ptc.getTcpWireAuthenticationMode() != TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+                continue;
+            }
+            Integer port = ptc.getTcpProfileServerBindPort();
+            if (port != null && port == localPort) {
+                return profile;
+            }
+        }
+        return null;
+    }
+
     private void reloadAll() {
         try {
-            Map<String, DeviceProfileId> loaded = new ConcurrentHashMap<>();
+            Map<String, Set<DeviceProfileId>> loaded = new ConcurrentHashMap<>();
             int page = 0;
             int pageSize = 512;
             boolean hasNext;
@@ -130,8 +152,9 @@ public class TcpDeferredAuthCatalog {
             // 只增不删：扫描结果依赖档案缓存，冷启动/缓存未热时会漏掉设备。早先的"clear + putAll"
             // 会让一次不完整的扫描把已热的映射清空，该实例上所有设备号鉴权瞬间失效（设备连不上、要重试到缓存热起来）。
             // 档案被删或改成其它模式时，match() 会重新校验档案并跳过，因此残留条目无害。
-            loaded.forEach(deferredKeyToProfile::put);
-            log.info("TCP deferred payload auth keys loaded: {}", deferredKeyToProfile.keySet());
+            loaded.forEach((key, ids) ->
+                    deferredKeyToProfiles.computeIfAbsent(key, __ -> ConcurrentHashMap.newKeySet()).addAll(ids));
+            log.info("TCP deferred payload auth keys loaded: {}", deferredKeyToProfiles.keySet());
         } catch (Exception e) {
             log.warn("Failed to load TCP deferred payload auth keys", e);
         }
@@ -148,18 +171,18 @@ public class TcpDeferredAuthCatalog {
         if (profile == null || profile.getId() == null) {
             return;
         }
-        deferredKeyToProfile.values().removeIf(profile.getId()::equals);
-        putIfDeferred(deferredKeyToProfile, profile);
+        deferredKeyToProfiles.values().forEach(ids -> ids.remove(profile.getId()));
+        putIfDeferred(deferredKeyToProfiles, profile);
     }
 
-    private void putIfDeferred(Map<String, DeviceProfileId> target, Device device) {
+    private void putIfDeferred(Map<String, Set<DeviceProfileId>> target, Device device) {
         if (device == null || device.getDeviceProfileId() == null) {
             return;
         }
         putIfDeferred(target, deviceProfileCache.get(device.getDeviceProfileId()));
     }
 
-    private void putIfDeferred(Map<String, DeviceProfileId> target, DeviceProfile profile) {
+    private void putIfDeferred(Map<String, Set<DeviceProfileId>> target, DeviceProfile profile) {
         if (profile == null || profile.getId() == null || profile.getProfileData() == null
                 || !(profile.getProfileData().getTransportConfiguration() instanceof TcpDeviceProfileTransportConfiguration ptc)) {
             return;
@@ -171,7 +194,7 @@ public class TcpDeferredAuthCatalog {
         if (StringUtils.isBlank(key)) {
             return;
         }
-        target.put(key.trim(), profile.getId());
+        target.computeIfAbsent(key.trim(), __ -> ConcurrentHashMap.newKeySet()).add(profile.getId());
     }
 
     @PreDestroy
