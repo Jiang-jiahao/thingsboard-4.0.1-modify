@@ -202,6 +202,16 @@ public class UdpTransportContext extends com.jnks.iot.server.common.transport.Tr
         serverSessions.remove(session.getDeviceId(), session);
     }
 
+    /**
+     * 该会话是否仍是这台设备当前的入站会话。
+     * <p>
+     * 换源端口重连时新会话会顶掉旧会话（旧会话已被 {@link #closeRegisteredInboundSession} 关掉、不会走到过期），
+     * 这里只是给"过期即报非活跃"加一道防并发竞态的闸：会话已不是当前会话时不要再替设备报非活跃。
+     */
+    public boolean isCurrentServerSession(UdpDeviceSession session) {
+        return session.getDeviceId() != null && serverSessions.get(session.getDeviceId()) == session;
+    }
+
     public UdpDeferredAuthCatalog getDeferredAuthCatalog() {
         return udpDeferredAuthCatalog;
     }

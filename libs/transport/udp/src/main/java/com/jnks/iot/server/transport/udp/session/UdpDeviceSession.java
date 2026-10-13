@@ -219,10 +219,22 @@ public class UdpDeviceSession extends DeviceAwareSessionContext implements Sessi
         msg.addProperty("reason", sessionCloseNotification.getReason().name());
         msg.addProperty("message", sessionCloseNotification.getMessage());
         sendJsonPayload(msg);
+        // 因"不活跃超时"关会话时，顺手显式上报一次设备非活跃（照 MQTT 断开时的 reportDeviceInactivity 做法），
+        // 免得绿点再等 Core 的 60s 状态扫描、和会话关闭错开最多一个扫描周期。
+        // UNKNOWN_REASON 来自 TransportActivityManager#onStateExpiry（传输层自身过期），SESSION_TIMEOUT 来自
+        // Core 的会话超时 —— 两者都是"静默到点"。其余 reason（换新会话顶掉旧的、改凭证、并发上限、RPC 超时）
+        // 都不代表设备不活跃，一律不报。
+        var reason = sessionCloseNotification.getReason();
+        boolean idleExpiry = reason == TransportProtos.SessionCloseReason.UNKNOWN_REASON
+                || reason == TransportProtos.SessionCloseReason.SESSION_TIMEOUT;
+        boolean currentSession = udpTransportContext.isCurrentServerSession(this);
         // 走传输层的统一关闭：补 SESSION_CLOSED 与 STOPPED ——
         // Core 因非活跃超时 / 并发上限主动关会话走的就是这条路，只做本地清理的话
         // lc_event 里永远没有配对的 STOPPED。
         udpTransportContext.closeRegisteredInboundSession(this);
+        if (idleExpiry && currentSession && getTenantId() != null && getDeviceId() != null) {
+            transportService.reportDeviceInactivity(getTenantId(), getDeviceId());
+        }
     }
 
     @Override
