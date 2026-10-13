@@ -221,6 +221,9 @@ redis:
 transport:
   tcp:
     enabled: "${TCP_TRANSPORT_ENABLED:true}"
+    # TCP 会话断开后延迟多久标为非活跃（毫秒）；0 = 立即上报。
+    # 短延迟覆盖闪断重连：窗口内重连会取消这次上报，避免绿点抖动。
+    disconnect_inactivity_delay_ms: "${TCP_DISCONNECT_INACTIVITY_DELAY_MS:5000}"
     server:
       enabled: "${TCP_SERVER_ENABLED:true}"
       # 兜底首帧分帧：正常路径下端口与档案一一对应，首帧直接用该档案的 tcpTransportFramingMode；

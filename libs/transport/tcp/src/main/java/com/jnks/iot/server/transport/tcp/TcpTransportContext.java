@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.transport.tcp.netty.TcpPipelineBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -80,6 +81,18 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
     private final Collection<DeviceId> allTcpDeviceIds = new ConcurrentLinkedDeque<>();
     private final Map<DeviceId, AtomicInteger> clientReconnectFailureCount = new ConcurrentHashMap<>();
     private final Map<DeviceId, ScheduledFuture<?>> clientReconnectTasks = new ConcurrentHashMap<>();
+
+    /**
+     * TCP 会话断开后延迟多久标为非活跃（毫秒）。0 表示立即上报。
+     * <p>
+     * 短延迟用于闪断重连：设备断开后短时间内重连会被 {@link #cancelDisconnectInactivity} 取消，
+     * 避免绿点在"立刻非活跃"和"重连又活跃"之间来回抖动。与 MQTT 的 disconnect_inactivity_delay_ms 同一套语义。
+     */
+    @Value("${transport.tcp.disconnect_inactivity_delay_ms:5000}")
+    private long disconnectInactivityDelayMs;
+
+    /** 待生效的"断开即非活跃"任务，按设备存；设备重连时取消。 */
+    private final Map<DeviceId, ScheduledFuture<?>> pendingDisconnectInactivity = new ConcurrentHashMap<>();
 
     /**
      * 所有入站（SERVER）会话：含尚未写入 {@link #serverSessions} 的鉴权中连接。
@@ -187,6 +200,8 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
                 oldSession.close();
             }
         }
+        // 重连了：别让上一次断开触发的"延迟非活跃"再把自己标成非活跃。
+        cancelDisconnectInactivity(session.getDeviceId());
         session.endServerAuth();
         int readIdleSec = readIdleSecFromProfile(session.getDeviceProfile());
         ctx.channel().eventLoop().execute(() -> {
@@ -212,6 +227,8 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
         }
         completeSessionRegistration(session, msg);
         clientSessions.put(session.getDeviceId(), session);
+        // 重连了：别让上一次断开触发的"延迟非活跃"再把自己标成非活跃。
+        cancelDisconnectInactivity(session.getDeviceId());
     }
 
     private void completeSessionRegistration(TcpDeviceSession session, ValidateDeviceCredentialsResponse msg) {
@@ -394,9 +411,63 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
         }
         session.setConnected(false);
         session.endServerAuth();
+        // 断开即（延迟）非活跃：不这么做的话，TCP 断开后绿点要等 Core 的 60s 状态扫描或会话超时才灭。
+        scheduleDisconnectInactivity(session);
         if (session.isOutboundClient() && session.getDeviceId() != null) {
             scheduleClientReconnect(session.getDeviceId());
         }
+    }
+
+    /**
+     * 断开后延迟上报设备非活跃（照 MQTT 的做法）。
+     * <p>
+     * 设备若在延迟窗口内重连，{@link #cancelDisconnectInactivity} 会取消这次上报；
+     * 该设备还有别的活会话（例如新连接顶掉旧连接）时也不上报。
+     * STOPPED 生命周期事件由 {@link #onChannelClosed} 负责，这里只补"设备非活跃"，不重复写事件。
+     */
+    public void scheduleDisconnectInactivity(TcpDeviceSession session) {
+        var tenantId = session.getTenantId();
+        var deviceId = session.getDeviceId();
+        if (tenantId == null || deviceId == null) {
+            return;
+        }
+        if (hasOtherConnectedSession(deviceId)) {
+            cancelDisconnectInactivity(deviceId);
+            return;
+        }
+        cancelDisconnectInactivity(deviceId);
+        if (disconnectInactivityDelayMs <= 0) {
+            transportService.reportDeviceInactivity(tenantId, deviceId);
+            return;
+        }
+        ScheduledFuture<?>[] holder = new ScheduledFuture<?>[1];
+        holder[0] = scheduler.schedule(() -> {
+            try {
+                // 只有"这次断开"的任务还在 map 里才上报；重连已把它换掉/取消了就跳过。
+                if (pendingDisconnectInactivity.remove(deviceId, holder[0])) {
+                    log.debug("[{}] TCP session disconnected, reporting device inactivity", deviceId);
+                    transportService.reportDeviceInactivity(tenantId, deviceId);
+                }
+            } catch (Exception e) {
+                log.warn("[{}] Failed to report TCP disconnect inactivity", deviceId, e);
+            }
+        }, disconnectInactivityDelayMs, TimeUnit.MILLISECONDS);
+        pendingDisconnectInactivity.put(deviceId, holder[0]);
+    }
+
+    /** 设备重连（或已有别的活会话）时取消待生效的"断开即非活跃"。 */
+    public void cancelDisconnectInactivity(DeviceId deviceId) {
+        if (deviceId == null) {
+            return;
+        }
+        ScheduledFuture<?> pending = pendingDisconnectInactivity.remove(deviceId);
+        if (pending != null) {
+            pending.cancel(false);
+        }
+    }
+
+    private boolean hasOtherConnectedSession(DeviceId deviceId) {
+        return clientSessions.containsKey(deviceId) || serverSessions.containsKey(deviceId);
     }
 
     /** 仅在实际异常时写入 ERROR；正常断开由 lifecycle STOPPED 记录。 */
