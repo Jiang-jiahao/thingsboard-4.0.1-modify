@@ -836,10 +836,15 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
                 rpcSubscriptions.putIfAbsent(sessionId, sessionMD.getSessionInfo());
             }
         }
-        // 这里**不再**记活动：会话打开时（processSessionStateMsgs 的 OPEN 分支）已经记过一次，
-        // 对真实设备是重复记；而 UDP 的"出站会话"（为从不发包的被动设备建的下发通道）**不发 OPEN**，
-        // 只发订阅 —— 在这里记活动会把"一个包都没发"的设备标成活跃，与"收到数据才算活跃"矛盾。
+        // 只有"真实会话"（发过 OPEN、因此还在 sessions 里）才把活动续到设备状态上。
+        // 传输层每 report_timeout（默认 3s）把会话的最后活动时间报上来，靠这句把绿点续上；
+        // 不加这句，持续上报的设备也会在 inactivityTimeout 之后被 60s 状态扫描判成非活跃。
+        // 虚拟会话（UDP/HTTP 出站、采集）只发订阅、不发 OPEN，不在 sessions 里
+        // （见 dumpSubscriptionOnlySessions），到不了这里 —— 所以"一个包都没发"的被动设备不会被误标活跃。
+        // 用上报的时间（而不是当前时间）是有意的：设备刚判非活跃时，迟到的旧上报会因
+        // onDeviceActivity 里的 lastInactivityAlarmTime 判断被丢掉，不会把设备错误地拉回活跃。
         if (sessionMD != null) {
+            systemContext.getDeviceStateService().onDeviceActivity(tenantId, deviceId, subscriptionInfo.getLastActivityTime());
             dumpSessions();
         }
     }
