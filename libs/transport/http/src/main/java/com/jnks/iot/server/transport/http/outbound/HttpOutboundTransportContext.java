@@ -64,8 +64,8 @@ public class HttpOutboundTransportContext extends TransportContext {
     public void initOutboundSessions() {
         log.info("Initializing HTTP outbound sessions for DEFAULT devices");
         reconcile();
-        getScheduler().schedule(this::reconcile, 5, TimeUnit.SECONDS);
-        getScheduler().schedule(this::reconcile, 15, TimeUnit.SECONDS);
+        // 周期性重建：设备被判空闲回收后，还要能再次给它发 RPC
+        getScheduler().scheduleWithFixedDelay(this::reconcile, 30, 30, TimeUnit.SECONDS);
     }
 
     private synchronized void reconcile() {
@@ -167,7 +167,7 @@ public class HttpOutboundTransportContext extends TransportContext {
                                 SessionInfoProto sessionInfo = SessionInfoCreator.create(msg, HttpOutboundTransportContext.this, UUID.randomUUID());
                                 SessionMsgListener listener = new HttpOutboundRpcSessionListener(httpPullRpcService, ctx);
                                 ctx.setSessionInfo(sessionInfo);
-                                transportService.registerAsyncSession(sessionInfo, listener);
+                                transportService.registerAsyncSession(sessionInfo, listener).setExpiryExempt(true);
                                 HttpOutboundSessionContext previous = outboundSessions.put(deviceId, ctx);
                                 if (previous != null && previous != ctx) {
                                     destroySession(previous);
@@ -196,7 +196,7 @@ public class HttpOutboundTransportContext extends TransportContext {
         }
     }
 
-    private void destroySession(HttpOutboundSessionContext ctx) {
+    public void destroySession(HttpOutboundSessionContext ctx) {
         if (ctx == null) {
             return;
         }
@@ -216,6 +216,19 @@ public class HttpOutboundTransportContext extends TransportContext {
         }
         transportService.lifecycleEvent(ctx.getTenantId(), ctx.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
         log.info("Destroyed HTTP outbound session for {}", ctx.getDeviceId());
+    }
+
+    /**
+     * 立刻重建该设备的出站会话（不等 reconcile）。
+     * <p>
+     * 用于"通道刚丢"的场景 —— 会话因不活动过期（虚拟会话从不报活动，所以必然发生）：
+     * 不立刻重建的话，那段窗口里的 RPC 会 NO_ACTIVE_CONNECTION。
+     */
+    public void reestablishNow(Device device) {
+        if (device == null) {
+            return;
+        }
+        getExecutor().execute(() -> tryEstablish(device));
     }
 
     static boolean profileHasHttpOutbound(DeviceProfile profile) {
