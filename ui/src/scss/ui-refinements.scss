@@ -245,6 +245,26 @@
       border-top: 0;
     }
 
+    // 长提示换行后会溢出去压住下一个字段。
+    // 原因：Material 把提示容器（hint-wrapper）**绝对定位**（好让它与错误信息共用同一块位置），
+    // 于是 subscript 只按「单行」预留高度，第二行起就画到框外——窄屏尤其明显。
+    // 这里让**确有提示**的字段把提示放回常规流，并去掉 Material 用于预留单行高度的两层占位
+    //（bottom-align 的 ::before 与 hint-spacer），字段高度就随提示行数自然增长。
+    // 只对 `:has(mat-hint)` 生效：没有提示的字段保持原样，不会在校验出错时抖动。
+    &:has(mat-hint) {
+      .mat-mdc-form-field-hint-wrapper {
+        position: static;
+      }
+
+      .mat-mdc-form-field-subscript-wrapper.mat-mdc-form-field-bottom-align::before {
+        display: none;
+      }
+
+      .mat-mdc-form-field-hint-spacer {
+        display: none;
+      }
+    }
+
     // 标签浮到框线上时，用一块卡片底色把描边切开（替代缺口）
     .mdc-floating-label {
       font-size: 13px;

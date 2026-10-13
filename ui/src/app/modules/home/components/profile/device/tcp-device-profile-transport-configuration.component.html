@@ -10,7 +10,10 @@
             <mat-option [value]="'CLIENT'">{{ 'device-profile.tcp.connect-mode-client' | translate }}</mat-option>
         </mat-select>
       </mat-form-field>
-      <mat-form-field class="flex-1">
+      <!-- 链路鉴权只在 SERVER（设备连入平台）下有意义：CLIENT 是平台主动 dial 已知设备，
+           身份由拨号目标决定，与源 IP / 负载协议号无关，后端校验器也早已对 CLIENT 直接跳过 -->
+      <mat-form-field class="flex-1"
+                      *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpTransportConnectMode').value === 'SERVER'">
         <mat-label translate>device-profile.tcp.wire-auth</mat-label>
         <mat-select formControlName="tcpWireAuthenticationMode" required>
             <mat-option [value]="'NONE'">{{ 'device-profile.tcp.wire-auth-none' | translate }}</mat-option>
@@ -32,7 +35,7 @@
         </mat-error>
       </mat-form-field>
     </div>
-    <div class="flex flex-row gap-2 xs:flex-col" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpWireAuthenticationMode').value === 'DEFERRED_PAYLOAD_DEVICE_ID'">
+    <div class="flex flex-row gap-2 xs:flex-col" *ngIf="tcpDeviceProfileTransportConfigurationFormGroup.get('tcpTransportConnectMode').value === 'SERVER' && tcpDeviceProfileTransportConfigurationFormGroup.get('tcpWireAuthenticationMode').value === 'DEFERRED_PAYLOAD_DEVICE_ID'">
       <mat-form-field class="flex-1">
         <mat-label translate>device-profile.tcp.deferred-token-json-key</mat-label>
         <input matInput formControlName="tcpDeferredWireAuthTokenJsonKey" placeholder="deviceId">

@@ -167,7 +167,10 @@ public class TcpDeviceProfileTransportConfiguration implements DeviceProfileTran
         if (tcpReadIdleTimeoutSec != null && tcpReadIdleTimeoutSec < 0) {
             throw new IllegalArgumentException("tcpReadIdleTimeoutSec must be >= 0");
         }
-        if (getTcpWireAuthenticationMode() == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
+        // 链路鉴权只在 SERVER（设备连入平台）下适用：CLIENT 是平台主动 dial 已知设备，
+        // 身份由拨号目标决定，源 IP / 负载协议号都用不上（DeviceDataValidator 对 CLIENT 也直接跳过）。
+        if (getTcpTransportConnectMode() == TcpTransportConnectMode.SERVER
+                && getTcpWireAuthenticationMode() == TcpWireAuthenticationMode.DEFERRED_PAYLOAD_DEVICE_ID) {
             if (StringUtils.isBlank(tcpDeferredWireAuthTokenJsonKey)) {
                 throw new IllegalArgumentException(
                         "tcpDeferredWireAuthTokenJsonKey is required when tcpWireAuthenticationMode is DEFERRED_PAYLOAD_DEVICE_ID");

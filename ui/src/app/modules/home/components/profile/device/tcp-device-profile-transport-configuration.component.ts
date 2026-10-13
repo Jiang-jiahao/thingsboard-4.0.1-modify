@@ -235,6 +235,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           { tcpProfileServerBindPort: null }, { emitEvent: false });
       }
       this.applyTcpProfileServerBindPortValidators();
+      this.applyWireAuthValidators();
       this.notifyValidatorChange();
     });
     this.tcpDeviceProfileTransportConfigurationFormGroup.statusChanges.pipe(
@@ -298,6 +299,28 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       portCtrl.clearValidators();
     }
     portCtrl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  /**
+   * 链路鉴权只在 SERVER 下有意义：CLIENT 是平台主动 dial 已知设备，身份由拨号目标决定，
+   * 源 IP / 负载协议号都用不上（后端校验器也早已对 CLIENT 直接跳过）。
+   * 所以 CLIENT 下把模式归一到 NONE 并去掉必填 —— 否则会把无意义的 DEFERRED 存进档案，
+   * 还会撞上后端"DEFERRED 必须有键名"的校验而根本存不进去。
+   */
+  private applyWireAuthValidators(): void {
+    const grp = this.tcpDeviceProfileTransportConfigurationFormGroup;
+    const modeCtrl = grp.get('tcpWireAuthenticationMode');
+    if (!modeCtrl) {
+      return;
+    }
+    if (grp.get('tcpTransportConnectMode').value === TcpTransportConnectMode.SERVER) {
+      modeCtrl.setValidators([Validators.required]);
+    } else {
+      modeCtrl.setValue(TcpWireAuthenticationMode.NONE, { emitEvent: false });
+      modeCtrl.clearValidators();
+      this.applyDeferredWireAuthTokenKeyValidators(TcpWireAuthenticationMode.NONE);
+    }
+    modeCtrl.updateValueAndValidity({ emitEvent: false });
   }
 
   private applyDeferredWireAuthTokenKeyValidators(mode: TcpWireAuthenticationMode): void {
@@ -961,6 +984,7 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       fixedCtrl.updateValueAndValidity({emitEvent: false});
       this.applyTcpOpaqueKeyValidators(formDataType);
       this.applyDeferredWireAuthTokenKeyValidators(value.tcpWireAuthenticationMode);
+      this.applyWireAuthValidators();
       this.applyTcpProfileServerBindPortValidators();
       this.scheduleSyncHexLtvPanelExpanded();
       this.notifyValidatorChange();
