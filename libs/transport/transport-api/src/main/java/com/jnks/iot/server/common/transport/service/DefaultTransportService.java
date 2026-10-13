@@ -949,6 +949,27 @@ public class DefaultTransportService extends TransportActivityManager implements
     }
 
     @Override
+    public void reportDeviceActivity(TenantId tenantId, DeviceId deviceId) {
+        if (tenantId == null || deviceId == null) {
+            return;
+        }
+        ToCoreMsg msg = ToCoreMsg.newBuilder()
+                .setDeviceActivityMsg(TransportProtos.DeviceActivityProto.newBuilder()
+                        .setTenantIdMSB(tenantId.getId().getMostSignificantBits())
+                        .setTenantIdLSB(tenantId.getId().getLeastSignificantBits())
+                        .setDeviceIdMSB(deviceId.getId().getMostSignificantBits())
+                        .setDeviceIdLSB(deviceId.getId().getLeastSignificantBits())
+                        .setLastActivityTime(getCurrentTimeMillis())
+                        .build())
+                .build();
+        try {
+            sendToCore(tenantId, deviceId, msg, deviceId.getId(), TransportServiceCallback.EMPTY);
+        } catch (Exception e) {
+            log.error("[{}][{}] Failed to send device activity to core", tenantId, deviceId, e);
+        }
+    }
+
+    @Override
     public void closeSessionWithoutReportingActivity(TransportProtos.SessionInfoProto sessionInfo) {
         if (sessionInfo == null) {
             return;

@@ -388,6 +388,15 @@ public interface TransportService {
     void reportDeviceInactivity(TenantId tenantId, DeviceId deviceId);
 
     /**
+     * 向 Core 显式上报一次设备活跃。
+     * <p>
+     * 用于"没有长会话、也不发 OPEN"的传输（HTTP 被动）：请求成功即算活跃。
+     * 否则绿点只能靠长轮询会话的周期上报点亮，POST 遥测/属性这类秒回请求点不亮。
+     * 与 {@link #reportDeviceInactivity} 对称，Core 侧走同一条 {@code DeviceActivityProto} 通道。
+     */
+    void reportDeviceActivity(TenantId tenantId, DeviceId deviceId);
+
+    /**
      * 关闭 Core 侧会话，但不记录传输层活动（避免断开瞬间把设备重新标成活跃）。
      */
     void closeSessionWithoutReportingActivity(SessionInfoProto sessionInfo);

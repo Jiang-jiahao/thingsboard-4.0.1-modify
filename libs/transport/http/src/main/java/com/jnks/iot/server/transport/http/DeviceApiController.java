@@ -448,6 +448,12 @@ public class DeviceApiController implements JnksIotTransportService {
         @Override
         public void onSuccess(ValidateDeviceCredentialsResponse msg) {
             if (msg.hasDeviceInfo()) {
+                // 鉴权成功 = 设备刚发起过一次真实请求 —— 显式报一次活跃。
+                // HTTP 被动既不发 OPEN、也没有常驻会话（秒回的 SYNC 会话在响应交付时就被注销了，
+                // 见 DefaultTransportService#processToTransportMsg），光靠传输层的活动上报点不亮绿点，
+                // 于是 POST 遥测/属性这类请求从来不会让设备变活跃。这里在唯一入口统一补上。
+                transportContext.getTransportService().reportDeviceActivity(
+                        msg.getDeviceInfo().getTenantId(), msg.getDeviceInfo().getDeviceId());
                 onSuccess.accept(SessionInfoCreator.create(msg, transportContext, UUID.randomUUID()));
             } else {
                 responseWriter.setResult(new ResponseEntity<>(HttpStatus.UNAUTHORIZED));
