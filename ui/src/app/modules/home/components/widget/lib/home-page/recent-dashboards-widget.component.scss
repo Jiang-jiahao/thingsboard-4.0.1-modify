@@ -18,18 +18,21 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    // 允许子项在被压缩时不撑破自己（配合下面插图的 flex-shrink）
+    min-height: 0;
   }
   .jnks-iot-no-last-visited-bg {
     // 首页卡片高度随视口拉伸，插图固定 60px 时整张卡看着像一块空白。
     // 改成随卡片缩放：宽度取卡片宽度的比例，高度由 aspect-ratio 推出。
     width: min(40%, 260px);
     height: auto;
-    // 高度也必须随卡片收敛：只按**宽度**取值时，卡片一变矮（矮视口 / 布局压缩），
-    // 260px 见方的插图加上下面那行字就撑破这个居中的弹性列，文字被挤到卡片底边以外、
-    // 被祖先裁掉（实测：容器压到 200px 时内容 251px，文本底超出容器底 51px →「显示不全」）。
-    // 这里给下面那行字留出 22px 行高 + 上下 margin 的余量。
-    max-height: calc(100% - 44px);
     aspect-ratio: 1 / 1;
+    // 但高度必须**可被压缩**：只按宽度取值时，卡片一变矮（矮视口 / 布局压缩），
+    // 这一块就会把下面那行字挤出卡片、被祖先裁掉（实测：容器压到 200px 时
+    // 内容高 251px、文本底超出容器底 51px →「显示不全」）。
+    // 列方向下 flex-shrink 压的是**高度**；文字侧声明 flex:none，于是永远优先保住文字。
+    flex: 0 1 auto;
+    min-height: 0;
     margin: 10px;
     position: relative;
     &:before {
@@ -50,6 +53,8 @@
     }
   }
   .jnks-iot-no-last-visited-dashboards-text {
+    // 不可压缩：卡片再矮也先保住这行字（插图侧用 flex-shrink 让位）
+    flex: none;
     font-weight: 500;
     font-size: 15px;
     line-height: 22px;
