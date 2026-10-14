@@ -62,7 +62,9 @@ export class HttpDeviceProfileTransportConfigurationComponent implements OnInit,
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      httpMode: [null, Validators.required],
+      // 默认「被动接收」，不空着：空着既是无效态、保存也会被拦。
+      // （后端要求工作模式显式声明，所以这里给的是真实选择，不是占位。）
+      httpMode: [HttpTransportMode.PASSIVE, Validators.required],
       pullConfiguration: [createDeviceProfileTransportConfiguration(DeviceTransportType.HTTP_PULL)],
       passiveConfiguration: [createDeviceProfileTransportConfiguration(DeviceTransportType.DEFAULT)]
     });
@@ -80,6 +82,11 @@ export class HttpDeviceProfileTransportConfigurationComponent implements OnInit,
     ).subscribe(() => this.updateModel());
     this.formReady = true;
     this.applyPendingValue();
+    // 没有待回显的值（新建档案 / 刚切到 HTTP）时要把默认值报给父级 ——
+    // 否则父级的 transportConfiguration 仍是 null，保存会被它的 Validators.required 拦住。
+    if (!this.pendingValue) {
+      this.updateModel();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -139,13 +146,14 @@ export class HttpDeviceProfileTransportConfigurationComponent implements OnInit,
   /**
    * 解析应回显的工作模式。
    * <p>
-   * 已保存的档案按配置里的标记/形状回显；新建档案（或刚切换传输类型）**不预选**——
-   * HTTP 的默认配置本身就是「拉取形状」（带 poll-1），父级的规范化会据此盖上 PULL 标记，
-   * 那种推断不能当成用户的选择，否则会默认成主动采集。用户手选之后才按标记回显。
+   * 已保存的档案按配置里的标记/形状回显；新建档案（或刚切换传输类型）默认**被动接收** ——
+   * 不能靠"拉取形状"去推断（HTTP 的默认配置本身就带 poll-1，推成主动采集会误导），
+   * 但也不能留空（空的值会被后端以"工作模式必须显式声明"拒绝，父级也会因 required 存不了）。
+   * 父级若已判定必须是拉取档案（`httpPullActive`），则默认主动采集。
    */
-  private resolveMode(value: DeviceProfileTransportConfiguration): HttpTransportMode | null {
+  private resolveMode(value: DeviceProfileTransportConfiguration): HttpTransportMode {
     if (this.isAdd && !this.modeChosen) {
-      return null;
+      return this.httpPullActive ? HttpTransportMode.PULL : HttpTransportMode.PASSIVE;
     }
     if (value.httpTransportMode === HttpTransportMode.PULL) {
       return HttpTransportMode.PULL;
