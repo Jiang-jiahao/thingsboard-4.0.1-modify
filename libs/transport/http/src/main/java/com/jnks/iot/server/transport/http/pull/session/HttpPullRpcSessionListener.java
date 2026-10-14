@@ -24,6 +24,13 @@ public class HttpPullRpcSessionListener implements SessionMsgListener {
 
     @Override
     public void onRemoteSessionCloseCommand(UUID sessionId, TransportProtos.SessionCloseNotificationProto sessionCloseNotification) {
+        // Core 会话超时 / 传输层不活动过期都会走这里。采集会话没有"断开重连"的机会：
+        // 不处理的话 ctx 会一直挂着一个已死的 sessionInfo —— 平台继续拉、数据也落库，
+        // 但活动上报因为会话已不在传输层会话表里发不出去，设备会显示「非活跃」。
+        // 交给 context 用新 sessionId 重建（见 HttpPullTransportContext#onTransportSessionClosed）。
+        if (collectorCtx != null && collectorCtx.getTransportContext() != null) {
+            collectorCtx.getTransportContext().onTransportSessionClosed(collectorCtx, sessionId);
+        }
     }
 
     @Override

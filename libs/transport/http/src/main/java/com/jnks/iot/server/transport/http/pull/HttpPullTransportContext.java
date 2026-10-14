@@ -377,6 +377,39 @@ public class HttpPullTransportContext extends TransportContext {
         activatedTransportSessions.remove(new UUID(sessionInfo.getSessionIdMSB(), sessionInfo.getSessionIdLSB()));
     }
 
+    /**
+     * 采集会话被关闭（Core 会话超时 / 传输层不活动过期）后：用**新的 sessionId** 重新注册。
+     * <p>
+     * 同一 sessionId 再次 OPEN 会被 DeviceActor 当成重复事件丢掉，所以必须换 id —— 与 MQTT 采集的
+     * {@code renewMqttPullTransportSession} 一致。
+     * <p>
+     * 这里**不发 OPEN、不激活**：只有下一次成功拉取才会走 {@link #activateHttpPullDeviceSession} 发 OPEN。
+     * 这样既不会让"厂家实际不通"的设备显示活跃（与首次激活同一套前提），厂家一直不通时也只是
+     * 每过一轮会话超时重建一次（一条不上报的活动状态，很便宜）。
+     */
+    public void onTransportSessionClosed(HttpPullCollectorSessionContext ctx, UUID sessionId) {
+        if (ctx == null || sessionId == null) {
+            return;
+        }
+        SessionInfoProto previous = ctx.getSessionInfo();
+        if (previous == null
+                || previous.getSessionIdMSB() != sessionId.getMostSignificantBits()
+                || previous.getSessionIdLSB() != sessionId.getLeastSignificantBits()) {
+            return; // 不是当前会话（已经重建过），忽略
+        }
+        forgetActivatedTransportSession(previous);
+        transportService.deregisterSession(previous);
+        UUID newId = UUID.randomUUID();
+        SessionInfoProto next = previous.toBuilder()
+                .setSessionIdMSB(newId.getMostSignificantBits())
+                .setSessionIdLSB(newId.getLeastSignificantBits())
+                .build();
+        ctx.setSessionInfo(next);
+        registerHttpPullTransportSession(next, new HttpPullRpcSessionListener(httpPullRpcService, ctx));
+        log.info("[{}] HTTP pull session closed, re-registered with a new sessionId [{}] -> [{}]",
+                ctx.getDeviceId(), sessionId, newId);
+    }
+
     private void destroyCollector(HttpPullCollectorSessionContext ctx) {
         destroyCollector(ctx, true);
     }
