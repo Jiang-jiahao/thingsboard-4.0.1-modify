@@ -77,20 +77,24 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
                 // 按源 IP 认领，并把这一帧扣下、等鉴权成功后补处理 —— 否则同一连接上的数据会一直丢，
                 // 只有断开重连才能恢复（UDP 侧逐报文重试天然自愈）。
                 if (session.tryBeginServerAuth()) {
-                    session.setPendingUnauthFrame(data);
+                    session.enqueueUnauthFrame(data);
                     if (tcpTransportContext.startServerWireAuth(ctx, session)) {
                         return;
                     }
-                    session.setPendingUnauthFrame(null);
+                    session.clearPendingUnauthFrames();
                     session.endServerAuth();
+                } else {
+                    // 鉴权正在途中：这一帧同样不能丢 —— 入队，等鉴权成功后一起补处理。
+                    // （原先这里直接丢弃，实测在"设备先连、记录后建"场景下会稳定丢帧。）
+                    session.enqueueUnauthFrame(data);
                 }
-                // 身份仍旧无从确定：丢弃这一帧。不关连接——延迟鉴权目录是异步刷新的，
-                // 目录热起来后设备重发的帧仍能被识别。
+                // 身份此刻仍无从确定。已入队的帧若鉴权最终失败会随会话一起丢弃；不关连接 ——
+                // 延迟鉴权目录是异步刷新的，目录热起来后设备重发的帧仍能被识别。
                 if (session.shouldLogPreAuthDrop()) {
-                    log.warn("[{}] TCP pre-auth frame dropped: no device with this source IP, no deferred device-id key matched",
+                    log.warn("[{}] TCP pre-auth frame queued (no device for this source IP yet, or wire auth in flight)",
                             session.getSessionId());
                 } else {
-                    log.debug("[{}] TCP pre-auth frame dropped: no device with this source IP, no deferred device-id key matched",
+                    log.debug("[{}] TCP pre-auth frame queued (no device for this source IP yet, or wire auth in flight)",
                             session.getSessionId());
                 }
                 return;

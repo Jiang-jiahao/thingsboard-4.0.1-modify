@@ -41,6 +41,10 @@ import java.nio.charset.StandardCharsets;
 import io.netty.buffer.Unpooled;
 import com.jnks.iot.server.transport.tcp.util.TcpPayloadUtil;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,19 +67,38 @@ public class TcpDeviceSession extends DeviceAwareSessionContext implements Sessi
 
     /**
      * 连接建立时没认领成功（设备记录 / 源 IP 绑定刚建好、注册表还没热等），由某一帧触发重试鉴权时
-     * 暂存这一帧；鉴权成功后补处理，避免这一帧的数据白丢。
+     * 暂存这些帧；鉴权成功后按序补处理，避免白丢数据。
+     * <p>
+     * 必须是**队列**而不是单个槽位：鉴权是异步的，往返期间到达的帧同样不能丢。
+     * 原先只有一个槽位、且"鉴权在途"时直接把后续帧丢弃（见 {@code TcpInboundHandler#channelRead0}），
+     * 实测在"设备先连、记录后建"场景下会稳定丢帧。
      */
-    private volatile byte[] pendingUnauthFrame;
+    private static final int MAX_PENDING_UNAUTH_FRAMES = 128;
+    private final Deque<byte[]> pendingUnauthFrames = new ArrayDeque<>();
 
-    /** 取走并清空暂存帧（保证只补处理一次）。 */
-    public byte[] takePendingUnauthFrame() {
-        byte[] f = pendingUnauthFrame;
-        pendingUnauthFrame = null;
-        return f;
+    /** 鉴权未就绪期间暂存一帧（有界：超限丢最旧的并告警，避免设备狂发把内存撑爆）。 */
+    public synchronized void enqueueUnauthFrame(byte[] frame) {
+        if (pendingUnauthFrames.size() >= MAX_PENDING_UNAUTH_FRAMES) {
+            pendingUnauthFrames.pollFirst();
+            log.warn("[{}] Too many frames pending wire auth (>{}) — dropped the oldest one",
+                    getSessionId(), MAX_PENDING_UNAUTH_FRAMES);
+        }
+        pendingUnauthFrames.addLast(frame);
     }
 
-    public void setPendingUnauthFrame(byte[] frame) {
-        this.pendingUnauthFrame = frame;
+    /** 取走并清空全部暂存帧（保证只补处理一次），FIFO 顺序。 */
+    public synchronized List<byte[]> takePendingUnauthFrames() {
+        if (pendingUnauthFrames.isEmpty()) {
+            return List.of();
+        }
+        List<byte[]> out = new ArrayList<>(pendingUnauthFrames);
+        pendingUnauthFrames.clear();
+        return out;
+    }
+
+    /** 丢弃全部暂存帧（鉴权根本发起不起来时用）。 */
+    public synchronized void clearPendingUnauthFrames() {
+        pendingUnauthFrames.clear();
     }
 
     /**

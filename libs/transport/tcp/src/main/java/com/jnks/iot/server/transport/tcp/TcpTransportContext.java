@@ -714,11 +714,15 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
                             afterSuccessfulAuth(ctx, session, response);
                             ctx.channel().config().setAutoRead(true);
                             session.endServerAuth();
-                            // 触发鉴权的那一帧照样入库（连接建立时没认领成功、由某一帧重试才行的话，
-                            // 那一帧会被扣下带过来）—— 不补处理的话它永远丢。
-                            byte[] pending = session.takePendingUnauthFrame();
-                            if (pending != null) {
-                                processUplinkFrame(session, pending);
+                            // 触发鉴权的那一帧、以及鉴权往返期间到达的其它帧，全都按序补处理 ——
+                            // 不补的话它们会白丢（都已入队，见 TcpDeviceSession#enqueueUnauthFrame）。
+                            for (byte[] pending : session.takePendingUnauthFrames()) {
+                                try {
+                                    processUplinkFrame(session, pending);
+                                } catch (Exception e) {
+                                    log.warn("[{}] Failed to process a frame that was queued before wire auth",
+                                            session.getSessionId(), e);
+                                }
                             }
                         });
                     }
