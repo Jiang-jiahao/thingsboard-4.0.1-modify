@@ -566,6 +566,14 @@
     color: var(--tb-inv-fg) !important;
     box-shadow: none !important;
 
+    // 文字颜色必须直接写在 label 上（与下面的禁用态同理）：模板里普遍写的是
+    // `mat-button mat-raised-button`，按钮因此同时带上 mat-mdc-button（**扁平**按钮）类，
+    // Material 的扁平按钮令牌会把 label 的颜色定成**主色**，压过按钮自己的 color ——
+    // 蓝底蓝字，文字看不见（/settings/2fa 的「保存」就是这个状态）。
+    .mdc-button__label {
+      color: var(--tb-inv-fg) !important;
+    }
+
     &:not(:disabled):hover {
       background: var(--tb-inv-bg) !important;
       opacity: 0.88;
