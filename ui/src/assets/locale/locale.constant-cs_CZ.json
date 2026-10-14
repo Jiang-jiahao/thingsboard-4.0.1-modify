@@ -1980,6 +1980,8 @@
         "password-again": "Heslo znovu",
         "sign-in": "Prosím zaregistrujte se",
         "username": "Uživatelské jméno (email)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "Zapamatovat si mě",
         "forgot-password": "Zapomněli jste heslo?",
         "password-reset": "Reset hesla",

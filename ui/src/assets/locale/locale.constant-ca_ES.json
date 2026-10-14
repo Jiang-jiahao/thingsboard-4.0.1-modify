@@ -2997,6 +2997,8 @@
         "password-again": "Repetiu la contrasenya de nou",
         "sign-in": "Per favor, inicieu sessió",
         "username": "Nom d'usuari (correu electrònic)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "Recordar-me",
         "forgot-password": "Ha oblidat la contrasenya?",
         "password-reset": "Restablir contrasenya",

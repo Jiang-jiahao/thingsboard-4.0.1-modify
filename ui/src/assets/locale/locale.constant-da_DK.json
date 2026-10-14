@@ -2445,6 +2445,8 @@
     "password-again": "Gentag adgangskode",
     "sign-in": "Log på",
     "username": "Brugernavn (e-mail)",
+    "username-required": "Username is required.",
+    "password-required": "Password is required.",
     "remember-me": "Husk mig",
     "forgot-password": "Glemt adgangskode?",
     "password-reset": "Nulstilling af adgangskode",

@@ -2235,6 +2235,8 @@
         "password-again": "再次輸入密碼",
         "sign-in": "登入 ",
         "username": "用戶名（電子郵件）",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "記住我",
         "forgot-password": "忘記密碼？",
         "password-reset": "密碼重置",

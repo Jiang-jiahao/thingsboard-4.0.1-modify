@@ -3519,6 +3519,8 @@
         "password-again": "Slaptažodį įveskite dar kartą",
         "sign-in": "Prisijunkite",
         "username": "Vartoto vardas (el. paštas)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "Prisiminti mane",
         "forgot-password": "Pamiršote slaptažodį?",
         "password-reset": "Slaptažodis atstatytas",

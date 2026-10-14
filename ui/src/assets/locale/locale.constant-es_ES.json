@@ -2634,6 +2634,8 @@
         "password-again": "Repita la contraseña de nuevo",
         "sign-in": "Por favor, inicie sesión",
         "username": "Nombre de usuario (correo electrónico)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "Recordarme",
         "forgot-password": "¿Olvidó la contraseña?",
         "password-reset": "Restablecer contraseña",

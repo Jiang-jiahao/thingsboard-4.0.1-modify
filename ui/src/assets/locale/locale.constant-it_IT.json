@@ -1167,6 +1167,8 @@
         "password-again": "Ripeti Password",
         "sign-in": "Please sign in",
         "username": "Nome utente (email)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "Ricordami",
         "forgot-password": "Password dimenticata?",
         "password-reset": "Password reset",

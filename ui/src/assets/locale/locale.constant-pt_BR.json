@@ -1385,6 +1385,8 @@
     "password-again": "Repetir senha",
     "sign-in": "Inscreva-se",
     "username": "Nome de usuário (e-mail)",
+    "username-required": "Username is required.",
+    "password-required": "Password is required.",
     "remember-me": "Lembrar-me",
     "forgot-password": "Esqueceu a senha?",
     "password-reset": "Redefinir senha",

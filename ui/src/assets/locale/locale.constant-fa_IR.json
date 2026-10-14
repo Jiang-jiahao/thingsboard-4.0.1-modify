@@ -1132,6 +1132,8 @@
         "password-again": "رمز عبور دوباره",
         "sign-in": "لطفا وارد شويد",
         "username": "(نام کاربري (پست الکترونيک",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "مرا به خاطر داشته باش",
         "forgot-password": "رمز عبور را فراموش کرده ايد؟",
         "password-reset": "بازنشاني رمز عبور",

@@ -4120,6 +4120,8 @@
         "password-again": "Password again",
         "sign-in": "Please sign in",
         "username": "Username (email)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "Remember me",
         "forgot-password": "Forgot Password?",
         "password-reset": "Password reset",

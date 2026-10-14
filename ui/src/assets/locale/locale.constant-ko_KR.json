@@ -1710,6 +1710,8 @@
         "password-again": "비밀번호 확인",
         "sign-in": "로그인",
         "username": "사용자명 (이메일)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "아이디 저장",
         "forgot-password": "비밀번호찾기",
         "password-reset": "비밀번호 재설정",

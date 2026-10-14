@@ -3581,6 +3581,8 @@
         "password-again": "Wachtwoord opnieuw ingeven",
         "sign-in": "Gelieve in te loggen",
         "username": "Gebruikersnaam (e-mail)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "Onthoud mij",
         "forgot-password": "Wachtwoord vergeten?",
         "password-reset": "Wachtwoord opnieuw instellen",

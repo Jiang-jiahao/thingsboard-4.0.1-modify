@@ -5086,6 +5086,8 @@
         "password-again": "再次输入密码",
         "sign-in": "登录 ",
         "username": "用户名（电子邮件）",
+        "username-required": "用户名必填。",
+        "password-required": "密码必填。",
         "remember-me": "记住我",
         "forgot-password": "忘记密码？",
         "password-reset": "密码重置",

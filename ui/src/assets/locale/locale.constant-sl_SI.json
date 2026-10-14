@@ -1710,6 +1710,8 @@
     "password-again": "Ponovi geslo",
     "sign-in": "Prosimo, prijavite se",
     "username": "Uporabniško ime (e-pošta)",
+    "username-required": "Username is required.",
+    "password-required": "Password is required.",
     "remember-me": "Zapomni si me",
     "forgot-password": "Ste pozabili geslo?",
     "password-reset": "Resetiranje gesla",

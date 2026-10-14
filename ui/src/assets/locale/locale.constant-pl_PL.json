@@ -3534,6 +3534,8 @@
         "password-again": "Hasło ponownie",
         "sign-in": "proszę, zaloguj się",
         "username": "Nazwa użytkownika (e-mail)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "Zapamiętaj mnie",
         "forgot-password": "Zapomniałeś hasła?",
         "password-reset": "Resetowania hasła",

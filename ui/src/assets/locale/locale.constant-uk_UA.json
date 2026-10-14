@@ -1789,6 +1789,8 @@
         "password-again": "Введіть пароль ще раз",
         "sign-in": "Будь ласка, увійдіть в систему",
         "username": "Ім'я користувача (ел. пошта)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "Запам'ятати мене",
         "forgot-password": "Забули пароль?",
         "password-reset": "Скидання пароля",

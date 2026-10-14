@@ -1696,6 +1696,8 @@
     "password-again": "Επανάληψη κωδικού πρόσβασης",
     "sign-in": "Παρακαλώ, συνδεθείτε",
     "username": "Όνομα Χρήστη (email)",
+    "username-required": "Username is required.",
+    "password-required": "Password is required.",
     "remember-me": "Να με Θυμάσαι",
     "forgot-password": "Ξεχάσατε τον κωδικό πρόσβασης;",
     "password-reset": "Επαναφορά κωδικού πρόσβασης",

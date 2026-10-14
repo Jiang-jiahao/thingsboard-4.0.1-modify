@@ -1996,6 +1996,8 @@
     "password-again": "Parola tekrarı",
     "sign-in": "Lütfen girişi yapın",
     "username": "Kullanıcı adı (e-posta)",
+    "username-required": "Username is required.",
+    "password-required": "Password is required.",
     "remember-me": "Beni hatırla",
     "forgot-password": "Parolamı unuttum",
     "password-reset": "Parola sıfırla",

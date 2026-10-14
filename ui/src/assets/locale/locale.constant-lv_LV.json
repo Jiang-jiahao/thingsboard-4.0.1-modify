@@ -1179,6 +1179,8 @@
         "password-again": "Atkārtot paroli",
         "sign-in": "Lūdzu pierakstīties",
         "username": "Lietotājvārds (email)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "Atcerēties mani",
         "forgot-password": "Aizmirsu paroli?",
         "password-reset": "Paroli atiestatīt",

@@ -1314,6 +1314,8 @@
     "password-again": "Passwort wiederholen",
     "sign-in": "Bitte anmelden",
     "username": "Benutzername (E-Mail)",
+    "username-required": "Username is required.",
+    "password-required": "Password is required.",
     "remember-me": "Login speichern",
     "forgot-password": "Passwort vergessen?",
     "password-reset": "Passwort zurücksetzen",

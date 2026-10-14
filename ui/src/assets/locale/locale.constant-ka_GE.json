@@ -1251,6 +1251,8 @@
     "password-again": "შეიყვანეთ პაროლი თავიდა",
     "sign-in": "სისტემაში შესვლა",
     "username": "მომხმარებლის სახელი",
+    "username-required": "Username is required.",
+    "password-required": "Password is required.",
     "remember-me": "დამახსოვრება",
     "forgot-password": " დაგავიწყდა პაროლი?",
     "password-reset": "პაროლის აღდგენა",

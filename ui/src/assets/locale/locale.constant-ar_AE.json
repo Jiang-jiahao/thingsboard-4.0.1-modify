@@ -3614,6 +3614,8 @@
         "password-again": "إعادة كلمة المرور",
         "sign-in": "الرجاء تسجيل الدخول",
         "username": "اسم المستخدم (البريد الإلكتروني)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "remember-me": "تذكرني",
         "forgot-password": "نسيت كلمة المرور؟",
         "password-reset": "إعادة تعيين كلمة المرور",

@@ -1602,6 +1602,8 @@
         "reset-password": "Réinitialiser le mot de passe",
         "sign-in": "Veuillez vous connecter",
         "username": "Nom d'utilisateur (courriel)",
+        "username-required": "Username is required.",
+        "password-required": "Password is required.",
         "login-with": "Se connecter avec {{name}}",
         "or": "ou"
     },
