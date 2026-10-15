@@ -12,7 +12,6 @@ import com.jnks.iot.server.common.data.DeviceTransportType;
 import com.jnks.iot.server.common.data.device.profile.DeviceProfileRpcBindingType;
 import com.jnks.iot.server.common.data.device.profile.DeviceProfileRpcMethod;
 import com.jnks.iot.server.common.data.id.DeviceId;
-import com.jnks.iot.server.common.data.plugin.ComponentLifecycleEvent;
 import com.jnks.iot.server.common.data.security.DeviceCredentials;
 import com.jnks.iot.server.common.data.security.DeviceCredentialsType;
 import com.jnks.iot.server.common.transport.DeviceDeletedEvent;
@@ -172,10 +171,12 @@ public class HttpOutboundTransportContext extends TransportContext {
                                 if (previous != null && previous != ctx) {
                                     destroySession(previous);
                                 }
-                                // 出站会话立即订阅 RPC（无需等待遥测连通）
-                                transportService.process(sessionInfo, DefaultTransportService.SESSION_EVENT_MSG_OPEN, null);
-                                transportService.process(sessionInfo, DefaultTransportService.SUBSCRIBE_TO_RPC_ASYNC_MSG, TransportServiceCallback.EMPTY);
-                                transportService.lifecycleEvent(ctx.getTenantId(), deviceId, ComponentLifecycleEvent.STARTED, true, null);
+                                // 只订阅 RPC，**不发 SESSION_EVENT_MSG_OPEN** ——
+                                // Core 收到会话打开会顺手记一次活动（DeviceActorMessageProcessor 里
+                                // `onDeviceActivity(now)`），那会让"一次都没跟平台说过话"的设备显示活跃。
+                                // 与 UDP 出站会话（UdpOutboundTransportContext）同一套约定。
+                                transportService.process(sessionInfo, DefaultTransportService.SUBSCRIBE_TO_RPC_ASYNC_MSG,
+                                        TransportServiceCallback.EMPTY);
                                 log.info("Established HTTP outbound session for {}", deviceId);
                             } finally {
                                 establishing.remove(deviceId);
@@ -214,7 +215,9 @@ public class HttpOutboundTransportContext extends TransportContext {
                     TransportServiceCallback.EMPTY);
             transportService.deregisterSession(sessionInfo);
         }
-        transportService.lifecycleEvent(ctx.getTenantId(), ctx.getDeviceId(), ComponentLifecycleEvent.STOPPED, true, null);
+        // 刻意**不发**生命周期事件：与建立时对称。它记录的是"设备连上了"，而这条通道只是平台
+        // 自己去调厂家 HTTP 接口用的，设备可能一次都没连过 —— 发了就是误导，而且改一次档案/重启一次
+        // transport 就会多一对 STARTED/STOPPED。UDP 出站会话同样不发。
         log.info("Destroyed HTTP outbound session for {}", ctx.getDeviceId());
     }
 

@@ -359,27 +359,34 @@ public class DeviceActorMessageProcessor extends AbstractContextAwareMsgProcesso
      * 本次下发要投递的 RPC 订阅。
      * <p>
      * 有的传输层会给"设备还没开口"的设备建**虚拟会话** —— 只发 RPC 订阅、**不发**
-     * {@code SESSION_EVENT_MSG_OPEN}（例如 UDP 为被动设备建的出站会话，见
-     * {@code UdpOutboundTransportContext}）。这类会话不在 {@link #sessions} 里，
-     * 因此不受"每设备最大并发会话数"的淘汰约束；设备随后真开口时，真实会话与虚拟会话
+     * {@code SESSION_EVENT_MSG_OPEN}（例如 UDP / HTTP 为被动设备建的出站会话，见
+     * {@code UdpOutboundTransportContext}、{@code HttpOutboundTransportContext}）。这类会话不在
+     * {@link #sessions} 里，因此不受"每设备最大并发会话数"的淘汰约束；设备随后真开口时，真实会话与虚拟会话
      * 会**同时**留在 {@code rpcSubscriptions} 里，逐个投递就会把同一条 RPC 下发两次
      * （实测：真实会话与出站会话各收到一次）。
      * <p>
-     * 所以优先只投给有真实会话的订阅；设备当前没有任何真实会话时才回退到虚拟订阅
-     * —— 那时它是唯一的通道（设备一开口就会被上面这条规则让位）。
+     * 所以**存在真实订阅时**只投给"真实订阅 + SYNC 订阅"，把虚拟的让开（设备一开口就自动让位）；
+     * 一个真实订阅都没有时全投 —— 那时虚拟订阅就是唯一通道。
      * <p>
-     * 例外：{@link SessionType#SYNC} 的订阅必须始终保留。SYNC 会话由传输层
+     * {@link SessionType#SYNC} 的订阅必须始终保留。SYNC 会话由传输层
      * {@code registerSyncSession} 注册（如 HTTP 长轮询 {@code GET /api/v1/{token}/rpc}），
      * 同样**不发** {@code SESSION_EVENT_MSG_OPEN}，因此也不在 {@link #sessions} 里 ——
      * 但它是一次性的**真实下发目标**，不是本规则要消除的虚拟会话。若把它一并排除，
      * 当该设备同时还有出站/拉取会话时（后者在 {@code sessions} 里），长轮询订阅会被丢弃，
      * NATIVE RPC 就永远到不了设备（HTTP 实测：twoway 504、长轮询 408）。
      * 排除虚拟会话（BUG-3 场景）不会因此回退：虚拟会话经 BUG-4 修复后是 ASYNC。
+     * <p>
+     * 判据是"是否存在**真实 ASYNC** 订阅"（即在 {@link #sessions} 里的订阅），而不是"是否存在任何订阅"：
+     * HTTP 被动设备上，长轮询（SYNC）与 HTTP 出站订阅照顾的是**不同的 RPC** —— 长轮询只接 NATIVE，
+     * 见到 HTTP_OUTBOUND 会静默忽略（{@code DeviceApiController.HttpSessionListener}）。长轮询不在
+     * {@link #sessions} 里，所以它不会把出站订阅挤掉；真有 ASYNC 上行会话时才让位。
+     * 若按"有任何订阅就让位"，HTTP_OUTBOUND 只会投给长轮询然后被丢掉，出站执行器永远收不到。
      */
     private Map<UUID, SessionInfo> rpcDispatchTargets() {
+        boolean hasRealAsyncSubscription = rpcSubscriptions.keySet().stream().anyMatch(sessions::containsKey);
         Map<UUID, SessionInfo> live = new HashMap<>();
         rpcSubscriptions.forEach((sessionId, sessionInfo) -> {
-            if (sessions.containsKey(sessionId) || SessionType.SYNC == sessionInfo.getType()) {
+            if (!hasRealAsyncSubscription || sessions.containsKey(sessionId) || SessionType.SYNC == sessionInfo.getType()) {
                 live.put(sessionId, sessionInfo);
             }
         });
