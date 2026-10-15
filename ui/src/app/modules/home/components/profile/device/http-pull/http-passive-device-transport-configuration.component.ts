@@ -37,14 +37,11 @@ export class HttpPassiveDeviceTransportConfigurationComponent implements OnInit,
   form: UntypedFormGroup;
 
   private propagateChange: (v: DefaultDeviceTransportConfiguration) => void = () => {};
-  private formReady = false;
 
   constructor(private fb: UntypedFormBuilder) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({});
-    this.formReady = true;
-    this.updateModel();
   }
 
   registerOnChange(fn: any): void {
@@ -61,17 +58,19 @@ export class HttpPassiveDeviceTransportConfigurationComponent implements OnInit,
     }
   }
 
-  writeValue(_value: DefaultDeviceTransportConfiguration | null): void {
-    if (this.formReady) {
-      this.updateModel();
+  /**
+   * 本组件没有任何可编辑字段，被动模式的配置是个常量，所以**只在父级还没有值时补一次默认值**。
+   * <p>
+   * 不能无条件回写：CVA 调 `propagateChange(...)` 会让 Angular 把控件标脏，于是刚打开设备详情、
+   * 什么都没编辑，顶层表单就已经是 `ng-dirty`，离开时会弹「有未保存的更改」。
+   */
+  writeValue(value: DefaultDeviceTransportConfiguration | null): void {
+    if (value == null) {
+      this.propagateChange({ type: DeviceTransportType.DEFAULT });
     }
   }
 
   validate(): ValidationErrors | null {
     return this.form.valid ? null : { httpPassiveDevice: true };
-  }
-
-  private updateModel(): void {
-    this.propagateChange({ type: DeviceTransportType.DEFAULT });
   }
 }
