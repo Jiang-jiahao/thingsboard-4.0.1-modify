@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.jnks.iot</groupId>
         <artifactId>apps</artifactId>
-        <version>4.0.1</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>monolith</artifactId>
@@ -29,17 +29,17 @@
         <dependency>
             <groupId>com.jnks.iot</groupId>
             <artifactId>jnks-iot-core</artifactId>
-            <version>4.0.1</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.jnks.iot</groupId>
             <artifactId>jnks-iot-rule-engine</artifactId>
-            <version>4.0.1</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.jnks.iot</groupId>
             <artifactId>transport-base</artifactId>
-            <version>4.0.1</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.jnks.iot.transport</groupId>

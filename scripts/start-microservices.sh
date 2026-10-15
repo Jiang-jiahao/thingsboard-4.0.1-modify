@@ -26,7 +26,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)"
 RUN_DIR="${ROOT}/.run/microservices"
 LOG_DIR="${RUN_DIR}/logs"
 PID_DIR="${RUN_DIR}/pids"
-VERSION="${JNKS_IOT_VERSION:-4.0.1}"
+VERSION="${JNKS_IOT_VERSION:-1.0.0}"
 
 CORE_REPLICAS="${CORE_REPLICAS:-2}"
 RULE_ENGINE_REPLICAS="${RULE_ENGINE_REPLICAS:-2}"

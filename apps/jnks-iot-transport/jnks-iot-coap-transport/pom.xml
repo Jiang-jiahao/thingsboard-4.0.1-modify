@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.jnks.iot</groupId>
         <artifactId>jnks-iot-transport</artifactId>
-        <version>4.0.1</version>
+        <version>1.0.0</version>
     </parent>
 
     <artifactId>jnks-iot-coap-transport</artifactId>
@@ -34,7 +34,7 @@
         <dependency>
             <groupId>com.jnks.iot</groupId>
             <artifactId>transport-base</artifactId>
-            <version>4.0.1</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.jnks.iot.common</groupId>
