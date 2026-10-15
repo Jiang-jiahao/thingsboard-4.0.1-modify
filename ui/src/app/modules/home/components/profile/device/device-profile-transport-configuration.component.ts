@@ -126,6 +126,17 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
   private suppressModelUpdate = true;
   private releaseTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /**
+   * 上一次「收到或发出」的配置（序列化后），用来丢掉**等值回写**。
+   * <p>
+   * 加载期子组件会重跑校验、连带把同一个配置再算一遍回写上来；那一次回写值没变，
+   * 但 CVA 只要调 `propagateChange` 就会让 Angular 把宿主控件标脏，于是打开档案、
+   * 什么都没改，顶层表单已经是 `ng-dirty`，离开时弹「有未保存的更改」。
+   * 只靠上面那个静默窗口挡是不够的 —— 它是纯时序（50ms），慢机器、慢网络、
+   * 或者走了 `isAdd` 旁路时那一次回写就漏出去了。等值判断与时序无关，才是可靠的那道闸。
+   */
+  private lastModelValue: string | null = null;
+
   private armModelUpdateSuppression(): void {
     this.suppressModelUpdate = true;
     if (this.releaseTimer !== null) {
@@ -147,6 +158,7 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
 
   writeValue(value: DeviceProfileTransportConfiguration | null): void {
     this.armModelUpdateSuppression();
+    this.lastModelValue = null;
     if (!value) {
       return;
     }
@@ -162,6 +174,8 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
       this.configurationTransportType,
       deepClone(value) as Record<string, unknown>
     );
+    // 记住这次写进去的值，加载期子组件把同一个值再回写上来时按等值丢掉
+    this.lastModelValue = JSON.stringify(configuration);
     const patchConfiguration = () => {
       if (this.deviceProfileTransportConfigurationFormGroup) {
         this.deviceProfileTransportConfigurationFormGroup.patchValue({configuration}, {emitEvent: false});
@@ -180,6 +194,13 @@ export class DeviceProfileTransportConfigurationComponent implements ControlValu
     if (configuration == null) {
       return;
     }
+    // 等值就不回写：加载期子组件重跑校验会连带把同一个配置再算一遍回写上来，
+    // 那一次回写值没变、却会把宿主控件标脏（见 lastModelValue 的注释）。
+    const serialized = JSON.stringify(configuration);
+    if (serialized === this.lastModelValue) {
+      return;
+    }
+    this.lastModelValue = serialized;
     this.propagateChange(configuration);
   }
 
