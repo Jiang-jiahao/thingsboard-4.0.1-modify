@@ -246,6 +246,14 @@
       border: 1px solid var(--jnks-iot-line-strong);
       color: var(--jnks-iot-text) !important;
 
+      // 文字色必须也写到 label 上。全局主按钮规则（ui-refinements.scss）会把
+      // .mat-mdc-raised-button.mat-primary 的 .mdc-button__label 钉成 --tb-inv-fg（白）
+      // 且带 !important，压过按钮自己的 color —— 这里按钮是透明描边的中性样式，
+      // 白字等于看不见，整排按钮会变成一串空白方块。
+      .mdc-button__label {
+        color: var(--jnks-iot-text) !important;
+      }
+
       &:hover:not(:disabled) {
         background: var(--jnks-iot-surface-page) !important;
         border-color: var(--jnks-iot-text-faint);
@@ -258,6 +266,10 @@
     button[ng-reflect-color='warn'] {
       border-color: rgb(var(--jnks-iot-seal-color-rgb) / 0.45);
       color: var(--jnks-iot-seal-color) !important;
+
+      .mdc-button__label {
+        color: var(--jnks-iot-seal-color) !important;
+      }
 
       &:hover:not(:disabled) {
         background: rgb(var(--jnks-iot-seal-color-rgb) / 0.06) !important;
