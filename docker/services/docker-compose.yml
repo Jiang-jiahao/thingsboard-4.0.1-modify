@@ -346,7 +346,7 @@ services:
       - zookeeper
       - jnks-iot-core1
       - jnks-iot-core2
-  # 统一入口网关（nginx）：80/443 路由 + TLS、1883 MQTT、5683/5684 TCP/UDP，全部入口就这一个容器。
+  # 统一入口网关（nginx）：4200/443 路由 + TLS、18883 MQTT、5683/5684 TCP/UDP，全部入口就这一个容器。
   # 替代了原来的两个代理 —— haproxy-certbot（80/443/1883 + certbot 自动证书）与 nginx-tcpudp（5683/5684）。
   # 配置：./nginx/config/（nginx.conf + locations.conf + proxy-headers.conf）
   # 证书：./nginx/certs/（首次用 bash nginx/gen-self-signed-cert.sh 生成自签，生产换成真实证书）
@@ -355,9 +355,13 @@ services:
     container_name: "${LOAD_BALANCER_NAME}"
     image: "${NGINX_GATEWAY_IMAGE}"
     ports:
-     - "80:80"
+     # HTTP 只发 loopback：宿主上已有一个统一入口 nginx 占着 4200（/jnks/nginx/），
+     # 它按路径前缀挂了多个项目，本网关作为它的一个后端，由它反代进来。
+     # 直接写 "4200:4200" 会和宿主 nginx 抢端口。
+     - "127.0.0.1:8088:4200"
      - "443:443"
-     - "1883:1883"
+     # 对外 18883；MQTT transport 容器内仍是 1883，由 nginx 转发（见 nginx.conf 的 stream 段）
+     - "18883:18883"
      - "5683:5683"
      - "5684:5684/udp"
      # 档案级自定义监听端口（档案「udp测试设备配置」声明了 55566）；

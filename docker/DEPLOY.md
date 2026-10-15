@@ -107,7 +107,7 @@ DATABASE_TS_TYPE=sql
 ## 2. 取代码
 
 ```bash
-git clone <仓库地址> && cd jnks-iot-4.0.1-modify
+git clone <仓库地址> && cd jnks-iot
 ```
 
 注意 `.mvn/maven.config` 必须一起带上（里面有 `-Dpkg.package.phase=none`，缺了会去跑 deb/assembly 打包）。
@@ -200,10 +200,10 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
 
 | 地址 | 去向 |
 |---|---|
-| `http://<host>/` | JnksIOT 管理界面（jnks-iot-web-ui1/2 的 nginx 静态服务） |
-| `http://<host>/api/**` | jnks-iot-core1/2（REST API）。其中 `/api/v1/**` 转给 jnks-iot-http-transport1/2（设备 HTTP 接入）、`/api/images/**` 也转 core 但限流更宽 |
+| `http://<host>:4200/` | JnksIOT 管理界面（jnks-iot-web-ui1/2 的 nginx 静态服务） |
+| `http://<host>:4200/api/**` | jnks-iot-core1/2（REST API）。其中 `/api/v1/**` 转给 jnks-iot-http-transport1/2（设备 HTTP 接入）、`/api/images/**` 也转 core 但限流更宽 |
 | `https://<host>/` | 同上走 443；证书来自 `docker/services/nginx/certs/`（默认是自签，浏览器会提示不受信任 —— 要正式证书就换成真实证书或接 certbot） |
-| `<host>:1883` | MQTT 设备接入（转给 jnks-iot-mqtt-transport1/2） |
+| `<host>:18883` | MQTT 设备接入（转给 jnks-iot-mqtt-transport1/2，容器内仍是 1883） |
 | `<host>:5683` | TCP 设备接入（转给 jnks-iot-tcp-transport1/2） |
 | `<host>:5684/udp` | UDP 设备接入（转给 jnks-iot-udp-transport1/2） |
 
@@ -211,7 +211,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
 
 **注意 UI 必须和 API 同源**：界面里的请求打到同源的 `/api/...`，而 web-ui 镜像只发静态文件、不转发 `/api`（原来 Node 版有个可选的代理开关，现在由入口网关承担）。所以入口只能走网关（或其它把 `/` 与 `/api` 收在同一端口的反向代理）—— 直接把 web-ui 容器的端口当入口用是不行的，那样页面能打开但登录和所有数据都会 404。
 
-设备接入端口：`1883`(MQTT)、`5683`(TCP)、`5684/udp`(UDP)，以及 80/443（管理界面与设备 HTTP 都走这两个）。
+设备接入端口：`18883`(MQTT)、`5683`(TCP)、`5684/udp`(UDP)，以及 4200/443（管理界面与设备 HTTP 都走这两个）。
 **防火墙/安全组要把这些放开**（5684 是 UDP，别只开 TCP）。
 
 ## 7. 已知限制与坑
