@@ -73,18 +73,19 @@ export class UserMenuComponent implements OnInit, OnDestroy {
   }
 
   getUserDisplayName(user: User): string {
+    // 姓在前、名在后（中文习惯；上游是 first + last 的西式顺序）
     let name = '';
     if (user) {
-      if ((user.firstName && user.firstName.length > 0) ||
-        (user.lastName && user.lastName.length > 0)) {
-        if (user.firstName) {
-          name += user.firstName;
-        }
+      if ((user.lastName && user.lastName.length > 0) ||
+        (user.firstName && user.firstName.length > 0)) {
         if (user.lastName) {
+          name += user.lastName;
+        }
+        if (user.firstName) {
           if (name.length > 0) {
             name += ' ';
           }
-          name += user.lastName;
+          name += user.firstName;
         }
       } else {
         name = user.email;

@@ -337,16 +337,17 @@ export class AlarmQueryV2 {
 }
 
 export const getUserDisplayName = (alarmAssignee: AlarmAssignee |  AlarmCommentInfo) => {
+  // 姓在前、名在后（中文习惯；上游是 first + last 的西式顺序）
   let displayName = '';
-  if (isNotEmptyStr(alarmAssignee.firstName) || isNotEmptyStr(alarmAssignee.lastName)) {
-    if (alarmAssignee.firstName) {
-      displayName += alarmAssignee.firstName;
-    }
+  if (isNotEmptyStr(alarmAssignee.lastName) || isNotEmptyStr(alarmAssignee.firstName)) {
     if (alarmAssignee.lastName) {
+      displayName += alarmAssignee.lastName;
+    }
+    if (alarmAssignee.firstName) {
       if (displayName.length > 0) {
         displayName += ' ';
       }
-      displayName += alarmAssignee.lastName;
+      displayName += alarmAssignee.firstName;
     }
   } else {
     displayName = alarmAssignee.email;

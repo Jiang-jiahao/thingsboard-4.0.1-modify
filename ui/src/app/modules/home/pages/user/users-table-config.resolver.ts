@@ -68,8 +68,9 @@ export class UsersTableConfigResolver  {
 
     this.config.columns.push(
       new DateEntityTableColumn<User>('createdTime', 'common.created-time', this.datePipe, '150px'),
-      new EntityTableColumn<User>('firstName', 'user.first-name', '33%'),
+      // 姓在名前：中文习惯，平台面向国内用户（原来照搬上游的 first/last 顺序）
       new EntityTableColumn<User>('lastName', 'user.last-name', '33%'),
+      new EntityTableColumn<User>('firstName', 'user.first-name', '33%'),
       new EntityTableColumn<User>('email', 'user.email', '33%')
     );
 

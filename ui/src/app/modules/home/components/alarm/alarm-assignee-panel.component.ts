@@ -176,17 +176,18 @@ export class AlarmAssigneePanelComponent implements  OnInit, AfterViewInit, OnDe
   }
 
   getFullName(entity: UserEmailInfo): string {
+    // 姓在前、名在后（中文习惯；上游是 first + last 的西式顺序）
     let fullName = '';
-    if ((entity.firstName && entity.firstName.length > 0) ||
-      (entity.lastName && entity.lastName.length > 0)) {
-      if (entity.firstName) {
-        fullName += entity.firstName;
-      }
+    if ((entity.lastName && entity.lastName.length > 0) ||
+      (entity.firstName && entity.firstName.length > 0)) {
       if (entity.lastName) {
+        fullName += entity.lastName;
+      }
+      if (entity.firstName) {
         if (fullName.length > 0) {
           fullName += ' ';
         }
-        fullName += entity.lastName;
+        fullName += entity.firstName;
       }
     }
     return fullName;
