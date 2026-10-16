@@ -84,6 +84,22 @@ $primary-hue-3: var(--jnks-iot-hue3-color);
   // 悬停 / 输入框 / 次级按钮的填充面。**不是** surface-page 的别名：
   // 暗色下页面底比卡片还暗，拿它当悬停底会把元素越悬越黑。
   --jnks-iot-surface-hover: #eef3fa;
+  // 规则链编辑器：节点类型色只作**类型编码**（左侧竖条 + 图标），要一眼可辨就需要足够的彩度；
+  // 设计稿给的是粉彩色，在深色底上正好，落到浅底就发飘（"太淡、看不清"）。
+  // 所以浅色主题用同色相的**墨色**版，深色主题保留粉彩 —— 两套值同名不同主题。
+  --jnks-iot-node-type-filter: #b9a52c;
+  --jnks-iot-node-type-enrichment: #86a824;
+  --jnks-iot-node-type-transformation: #2f8fbf;
+  --jnks-iot-node-type-action: #cc5a55;
+  --jnks-iot-node-type-external: #c98a1f;
+  --jnks-iot-node-type-flow: #8b6fc9;
+  --jnks-iot-node-type-input: #3f9e56;
+  --jnks-iot-node-type-unknown: #c96a2a;
+  // 画布比页面底再深一档：白卡片能"浮"起来，也压掉满屏浅底的眩光
+  --jnks-iot-rc-canvas: #e9eef7;
+  --jnks-iot-rc-node-border: #c3cfe0;
+  --jnks-iot-rc-node-shadow: 0 1px 2px rgba(15, 23, 42, 0.07);
+  --jnks-iot-rc-connector-bg: #dbe3ef;
   // 「深面」：原来是 primary-color 兼任（墨色面板）。新方案品牌色是蓝，
   // 不能再兼任深底，所以单独立一个令牌。**只被登录页左屏使用。**
   //
@@ -145,6 +161,20 @@ $primary-hue-3: var(--jnks-iot-hue3-color);
   --jnks-iot-surface-card: #191d23;
   --jnks-iot-surface-page: #0e1013;
   --jnks-iot-surface-hover: #22272f;
+  // 规则链节点类型色：深色主题保留设计稿的粉彩色系（深底上正合适），
+  // 与浅色主题的墨色版同名 —— 见 jnks-iot-tokens-saas 里的说明。
+  --jnks-iot-node-type-filter: #d8cf6a;
+  --jnks-iot-node-type-enrichment: #b9d95f;
+  --jnks-iot-node-type-transformation: #7cc2e0;
+  --jnks-iot-node-type-action: #e08d8a;
+  --jnks-iot-node-type-external: #e0b264;
+  --jnks-iot-node-type-flow: #c0aee0;
+  --jnks-iot-node-type-input: #8fd497;
+  --jnks-iot-node-type-unknown: #e08a55;
+  --jnks-iot-rc-canvas: #0e1013;
+  --jnks-iot-rc-node-border: #39424e;
+  --jnks-iot-rc-node-shadow: none;
+  --jnks-iot-rc-connector-bg: #22272f;
   --jnks-iot-surface-deep: #0e1013;
   --jnks-iot-on-deep: #ffffff;
   --jnks-iot-on-deep-muted: rgba(255, 255, 255, 0.62);

@@ -33,9 +33,11 @@
     }
   }
 
-  // 节点：卡片底 + 1px 描边 + 左侧 3px 类型色条。
+  // 节点：卡片底 + 1px 描边 + 左侧 4px 类型色条。
   // 类型色由 rule-node-colors 的 --jnks-iot-node-type 提供，只出现在
   // 左边那条竖线和图标上 —— 整块填色的做法见 rule-node-colors.scss 的说明。
+  // 描边/投影走 --jnks-iot-rc-* 令牌：浅色主题下页面底与卡片都浅，
+  // 需要更实的描边 + 一层微投影才能把节点从画布上拎出来。
   .jnks-iot-rule-node {
     box-sizing: border-box;
     display: flex;
@@ -53,9 +55,10 @@
     color: var(--jnks-iot-text);
     pointer-events: none;
     background-color: var(--jnks-iot-surface-card);
-    border: 1px solid var(--jnks-iot-line-strong);
-    border-left: 3px solid var(--jnks-iot-node-type, var(--jnks-iot-line-strong));
+    border: 1px solid var(--jnks-iot-rc-node-border, var(--jnks-iot-line-strong));
+    border-left: 4px solid var(--jnks-iot-node-type, var(--jnks-iot-line-strong));
     border-radius: 8px;
+    box-shadow: var(--jnks-iot-rc-node-shadow, none);
     transition: border-color 0.12s ease, box-shadow 0.12s ease;
 
     @include rule-node-colors();
@@ -138,8 +141,8 @@
       height: 11px;
       margin: 10px;
       pointer-events: all;
-      background-color: var(--jnks-iot-surface-hover);
-      border: 1px solid var(--jnks-iot-line-strong);
+      background-color: var(--jnks-iot-rc-connector-bg, var(--jnks-iot-surface-hover));
+      border: 1px solid var(--jnks-iot-rc-node-border, var(--jnks-iot-line-strong));
       border-radius: 3px;
     }
 

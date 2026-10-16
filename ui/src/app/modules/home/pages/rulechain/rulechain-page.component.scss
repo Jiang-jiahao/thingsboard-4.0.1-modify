@@ -279,7 +279,7 @@ jnks-iot-rulechain-page {
         padding: 0;
       }
       .fc-canvas {
-        background: var(--jnks-iot-surface-page);
+        background: var(--jnks-iot-rc-canvas, var(--jnks-iot-surface-page));
       }
     }
   }
@@ -290,6 +290,8 @@ jnks-iot-rulechain-page {
     height: 100%;
     overflow: hidden;
     z-index: 0;
+    // 图区那层 .fc-canvas 自身是透明的（只画网格），底色来自这里。
+    background: var(--jnks-iot-rc-canvas, var(--jnks-iot-surface-page));
 
     .jnks-iot-rulechain-graph {
       z-index: 0;

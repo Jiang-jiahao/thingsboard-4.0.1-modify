@@ -1,41 +1,42 @@
-// 节点类型色 —— 只当**类型编码**用：左侧 3px 竖条 + 图标色。
+// 节点类型色 —— 只当**类型编码**用：左侧竖条 + 图标色。
 //
 // 上游实现是直接把整块节点背景填成这几种颜色（background-color 一家一个）。
 // 浅底上勉强能看，落到深色主题就成了一桌子糖果块：类型色、品牌色、状态色
 // 混在同一屏里，「颜色只给异常」这条就废了，节点类型反而更难分辨。
 // 改成竖条 + 图标编码后类型照样一眼可辨，底色回到卡片。
 //
-// 取值照着设计稿 .rc-node.* 的 --type，深浅两个主题共用一套。
+// 取值来自主题令牌（constants.scss 的 --jnks-iot-node-type-*）：
+// 浅色主题是**墨色**版（设计稿的粉彩在浅底上发飘、发淡），深色主题保留粉彩版。
 @mixin rule-node-colors {
   &.jnks-iot-filter-type {
-    --jnks-iot-node-type: #d8cf6a;
+    --jnks-iot-node-type: var(--jnks-iot-node-type-filter);
   }
 
   &.jnks-iot-enrichment-type {
-    --jnks-iot-node-type: #b9d95f;
+    --jnks-iot-node-type: var(--jnks-iot-node-type-enrichment);
   }
 
   &.jnks-iot-transformation-type {
-    --jnks-iot-node-type: #7cc2e0;
+    --jnks-iot-node-type: var(--jnks-iot-node-type-transformation);
   }
 
   &.jnks-iot-action-type {
-    --jnks-iot-node-type: #e08d8a;
+    --jnks-iot-node-type: var(--jnks-iot-node-type-action);
   }
 
   &.jnks-iot-external-type {
-    --jnks-iot-node-type: #e0b264;
+    --jnks-iot-node-type: var(--jnks-iot-node-type-external);
   }
 
   &.jnks-iot-flow-type {
-    --jnks-iot-node-type: #c0aee0;
+    --jnks-iot-node-type: var(--jnks-iot-node-type-flow);
   }
 
   &.jnks-iot-input-type {
-    --jnks-iot-node-type: #8fd497;
+    --jnks-iot-node-type: var(--jnks-iot-node-type-input);
   }
 
   &.jnks-iot-unknown-type {
-    --jnks-iot-node-type: #e08a55;
+    --jnks-iot-node-type: var(--jnks-iot-node-type-unknown);
   }
 }
