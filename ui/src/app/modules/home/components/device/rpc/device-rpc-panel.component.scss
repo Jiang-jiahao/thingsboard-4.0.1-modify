@@ -79,3 +79,40 @@
 .jnks-iot-device-rpc-fixed-list {
   padding: 4px 0;
 }
+
+// 本面板被投影进「详情页」的 RPC 页签，而详情页把**所有禁用字段**统一渲染成只读规格行
+// （标签在上、浅底值框在下，见 entity-details-page.component.scss 的 :host ::ng-deep）。
+// 那套样式漏进来后，固定参数这一行左边只读的「参数字段」比右边可编辑的「固定值」低 11px、
+// 两种控件长相也不同 —— 看着就是歪的（2026-10-16 用户截图反馈）。
+//
+// 这里把本行的禁用字段还原成与相邻字段一致的紧凑输入框：外层高度本来就是内容撑的
+// （两处共用 height:auto !important），所以只要把「只读值框」那几条撤销，并把
+// 详情页为只读字段隐藏掉的 subscript 占位还回来（邻居有那 20px，缺了就会差一截）。
+//
+// 必须走 ::ng-deep：要改的是 Material 内部元素（.mdc-text-field / infix / 浮动标签），
+// 它们带的是 Material 自己那套封装属性，组件默认封装下的选择器匹配不到（实测不生效）。
+// .jnks-iot-device-rpc-panel 那层是为了压过详情页那条带组件 host 的规则。
+:host ::ng-deep {
+  .jnks-iot-device-rpc-panel .jnks-iot-device-rpc-fixed-list mat-form-field.mat-form-field-disabled {
+    .mdc-text-field {
+      flex-direction: row;
+      align-items: baseline;
+      padding: 0 16px;
+    }
+
+    .mat-mdc-form-field-infix {
+      min-height: 0;
+      padding: 0 !important;
+      background: transparent;
+      border-radius: 0;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      display: block !important;
+    }
+
+    .mdc-floating-label {
+      order: 0;
+    }
+  }
+}
