@@ -6,11 +6,15 @@
   <base href="/">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="favicon.ico" sizes="any">
-  <link rel="preload" href="assets/jnks-brand-emblem.png" as="image" type="image/png"/>
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/jnks-favicon-32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="assets/jnks-favicon-16.png">
+  <!-- 标签页图标：徽标本身透明底，按浏览器明暗给两版 —— 浅色标签栏用墨色徽标，深色标签栏用白色徽标。
+       原先只有一份白徽标 + 纯黑底，深色标签栏上看起来就是一块黑方块（2026-10-16 用户反馈）。
+       favicon.ico 仍保留（部分浏览器/系统会直接取它），已重做成透明底。 -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/jnks-favicon-32-ink.png" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/jnks-favicon-16-ink.png" media="(prefers-color-scheme: light)">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/jnks-favicon-32.png" media="(prefers-color-scheme: dark)">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/jnks-favicon-16.png" media="(prefers-color-scheme: dark)">
   <link rel="apple-touch-icon" sizes="48x48" href="assets/jnks-favicon-48.png">
+  <link rel="preload" href="assets/jnks-brand-emblem.png" as="image" type="image/png"/>
   <link rel="preload" href="assets/fonts/MaterialIcons-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous" />
   <link rel="preload" href="assets/fonts/MaterialIconsRound-Regular.otf" as="font" type="font/otf" crossorigin="anonymous" />
   <link rel="stylesheet" href="assets/fonts/material-icons.css" />
