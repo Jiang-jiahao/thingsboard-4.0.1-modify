@@ -1,5 +1,5 @@
-<div class="jnks-iot-event-table-outer" *ngIf="eventTableConfig">
-  <div class="jnks-iot-event-type-toolbar flex flex-row flex-wrap items-center gap-3">
+<div class="jnks-iot-event-table-outer">
+  <div *ngIf="eventTableConfig" class="jnks-iot-event-type-toolbar flex flex-row flex-wrap items-center gap-3">
     <mat-form-field class="jnks-iot-event-type-field" subscriptSizing="dynamic">
       <mat-label>{{ 'event.event-type' | translate }}</mat-label>
       <mat-select [ngModel]="eventTableConfig.eventType"
