@@ -58,8 +58,10 @@
         <jnks-iot-user-menu [displayUserInfo]="!displaySearchMode()"></jnks-iot-user-menu>
       </mat-toolbar>
       <!-- 顶部加载指示：样式在 ui-refinements.scss 的 .jnks-iot-top-loading（扫描光带），
-           不要 color="warn"（Material 的 warn 是红，加载不是异常）。 -->
-      <mat-progress-bar class="jnks-iot-top-loading" style="z-index: 10; margin-bottom: -4px; width: 100%;" mode="indeterminate"
+           不要 color="warn"（Material 的 warn 是红，加载不是异常）。
+           也不要在这里写内联样式：它会盖掉那条「负 margin 抵掉高度」的规则，
+           结果每次导航整页被拽 2px（点一下抖一下）。 -->
+      <mat-progress-bar class="jnks-iot-top-loading" mode="indeterminate"
                         *ngIf="!hideLoadingBar && (isLoading$ | async)">
       </mat-progress-bar>
       <div jnks-iot-toast class="jnks-iot-main-content flex flex-1 flex-col">

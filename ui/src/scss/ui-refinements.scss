@@ -1195,7 +1195,14 @@
   // 这里把它的内部条全部关掉，只留一条极淡的基线 + 一道两端渐隐的品牌色光带，
   // 从左扫到右。加载是「系统在忙」，不该抢注意力 —— 所以只有 2px、且不吃点击。
   .jnks-iot-top-loading {
+    // 这条光带**完全不参与布局**：高度用等量的负 margin 抵消掉。
+    // 它挂在内容列里、随 *ngIf 出现消失，只要净高度不为 0，每次导航都会把整个内容区
+    // 上下拽一下 —— 看着就是「点一下抖一下」（原先 margin-bottom 写死 -4px，对着
+    // Material 默认的 4px 高；后来高度被改成 2px，这里没跟着改，于是净高 -2px）。
     height: 2px !important;
+    margin-bottom: -2px;
+    width: 100%;
+    z-index: 10;
     background: rgb(var(--jnks-iot-primary-color-rgb) / 0.08) !important;
     overflow: hidden;
     pointer-events: none;
