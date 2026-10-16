@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -207,13 +209,14 @@ public class DefaultSystemInfoService extends JnksIotApplicationEventListener<Pa
     }
 
     private List<SystemInfoData> getSystemData(ServiceInfo serviceInfo) {
-        List<SystemInfoData> clusterSystemData = new ArrayList<>();
-        clusterSystemData.add(createSystemInfoData(serviceInfo));
-        this.discoveryService.getOtherServers()
-                .stream()
-                .map(this::createSystemInfoData)
-                .forEach(clusterSystemData::add);
-        return clusterSystemData;
+        // 按 serviceId 去重：服务重建（换容器/重启）后，ZooKeeper 里同一 serviceId 的新旧节点会并存一段时间，
+        // 直接铺开就会在集群信息表里出现两行同名服务。proto 里没有时间戳可比新旧，所以先到先留 ——
+        // 本地节点排在最前，其余按 discovery 返回顺序。
+        Map<String, SystemInfoData> byServiceId = new LinkedHashMap<>();
+        byServiceId.put(serviceInfo.getServiceId(), createSystemInfoData(serviceInfo));
+        discoveryService.getOtherServers()
+                .forEach(otherService -> byServiceId.putIfAbsent(otherService.getServiceId(), createSystemInfoData(otherService)));
+        return new ArrayList<>(byServiceId.values());
     }
 
     private SystemInfoData createSystemInfoData(ServiceInfo serviceInfo) {
