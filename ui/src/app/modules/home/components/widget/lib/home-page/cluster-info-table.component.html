@@ -1,19 +1,19 @@
 <table mat-table [dataSource]="dataSource" matSort [matSortActive]="pageLink.sortOrder?.property"
        [matSortDirection]="pageLink.sortDirection()" matSortDisableClear>
-  <ng-container matColumnDef="serviceId">
-    <mat-header-cell *matHeaderCellDef style="width: 34%;" mat-sort-header>
-      {{ 'widgets.cluster-info.service-id' | translate }}
-    </mat-header-cell>
-    <mat-cell *matCellDef="let serviceData">
-      {{ serviceData.serviceId }}
-    </mat-cell>
-  </ng-container>
   <ng-container matColumnDef="serviceType">
     <mat-header-cell *matHeaderCellDef style="width: 22%;" mat-sort-header>
       {{ 'widgets.cluster-info.service-type' | translate }}
     </mat-header-cell>
     <mat-cell *matCellDef="let serviceData">
       {{ serviceData.serviceType }}
+    </mat-cell>
+  </ng-container>
+  <ng-container matColumnDef="serviceId">
+    <mat-header-cell *matHeaderCellDef style="width: 34%;" mat-sort-header>
+      {{ 'widgets.cluster-info.service-id' | translate }}
+    </mat-header-cell>
+    <mat-cell *matCellDef="let serviceData">
+      {{ serviceData.serviceId }}
     </mat-cell>
   </ng-container>
   <ng-container matColumnDef="cpuUsage">

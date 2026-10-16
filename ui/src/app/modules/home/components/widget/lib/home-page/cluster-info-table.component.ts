@@ -35,7 +35,8 @@ export class ClusterInfoTableComponent extends PageComponent implements OnInit, 
 
   @ViewChild(MatSort) sort: MatSort;
 
-  displayedColumns = ['serviceId', 'serviceType', 'cpuUsage', 'memoryUsage', 'discUsage'];
+  // 类型在前、实例 ID 在后：先看"是干什么的"，再看具体是哪一个副本
+  displayedColumns = ['serviceType', 'serviceId', 'cpuUsage', 'memoryUsage', 'discUsage'];
 
   dataSource: SystemInfoDataSource;
 

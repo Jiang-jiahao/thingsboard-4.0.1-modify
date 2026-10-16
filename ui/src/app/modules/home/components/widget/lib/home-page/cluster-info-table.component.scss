@@ -115,5 +115,15 @@
   .mat-column-memoryUsage,
   .mat-column-discUsage {
     text-align: right;
+
+    // 表头必须跟着靠右：Material 的排序容器（.mat-sort-header-container）是 flex，
+    // 只占内容宽、始终贴单元格左边，光给单元格 text-align: right 移不动它 ——
+    // 结果表头标签贴左、数字贴右，上下对不上（2026-10-16 用户截图反馈）。
+    // row-reverse 把箭头排到标签左侧，标签右缘正好与数字右缘对齐。
+    .mat-sort-header-container {
+      width: 100%;
+      flex-direction: row-reverse;
+      justify-content: flex-start;
+    }
   }
 }
