@@ -344,6 +344,10 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
     }
 
     private void scheduleClientReconnect(DeviceId deviceId) {
+        if (hasLiveClientSession(deviceId)) {
+            log.debug("[{}] Skip TCP outbound reconnect: session is already active", deviceId);
+            return;
+        }
         if (!balancingService.isManagedByCurrentTransport(deviceId.getId())) {
             return;
         }
@@ -376,6 +380,11 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
         cancelClientReconnectTask(deviceId);
         ScheduledFuture<?> scheduled = scheduler.schedule(() -> {
             try {
+                // 等重连的这 30 秒里新会话可能已经建好，别再重复拨号。
+                if (hasLiveClientSession(deviceId)) {
+                    log.debug("[{}] Skip TCP outbound reconnect task: session is already active", deviceId);
+                    return;
+                }
                 Device reloaded = protoEntityService.getDeviceById(deviceId);
                 if (reloaded != null && isClientProfile(reloaded)) {
                     establishClientDeviceSession(reloaded);
@@ -388,6 +397,16 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
         }, intervalSec, TimeUnit.SECONDS);
         clientReconnectTasks.put(deviceId, scheduled);
         log.info("[{}] Scheduled TCP outbound reconnect in {} s", deviceId, intervalSec);
+    }
+
+    /**
+     * 该设备是否已有活着的出站会话。旧会话异步关闭与新会话建立之间存在窗口，
+     * 光看 {@link #clientSessions} 里有没有 key 不够，还要确认通道仍然 active。
+     */
+    private boolean hasLiveClientSession(DeviceId deviceId) {
+        TcpDeviceSession current = clientSessions.get(deviceId);
+        return current != null && current.isConnected()
+                && current.getChannel() != null && current.getChannel().isActive();
     }
 
     public void onChannelClosed(TcpDeviceSession session, Throwable cause) {
@@ -406,7 +425,8 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
                     cause != null ? cause : null);
         }
         if (session.getDeviceId() != null) {
-            clientSessions.remove(session.getDeviceId());
+            // 旧会话异步关闭时，同设备的新会话可能已经登记：只删自己，别把新会话从跟踪表里删掉。
+            clientSessions.remove(session.getDeviceId(), session);
             serverSessions.remove(session.getDeviceId(), session);
         }
         session.setConnected(false);
@@ -589,12 +609,12 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
                 if (transportType == DeviceTransportType.TCP && isClientProfile(device)) {
                     if (session != null) {
                         session.close();
-                        clientSessions.remove(device.getId());
+                        clientSessions.remove(device.getId(), session);
                     }
                     establishClientDeviceSession(device);
                 } else if (session != null) {
                     session.close();
-                    clientSessions.remove(device.getId());
+                    clientSessions.remove(device.getId(), session);
                 }
             }
             closeServerSessionIfExists(device.getId());
