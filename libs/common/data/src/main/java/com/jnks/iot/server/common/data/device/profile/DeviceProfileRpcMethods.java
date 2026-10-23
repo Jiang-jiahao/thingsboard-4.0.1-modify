@@ -15,13 +15,13 @@ public final class DeviceProfileRpcMethods {
     }
 
     /**
-     * 按平台侧方法名（{@link DeviceProfileRpcMethod#getId()}）判断该次下发是否走「自定义 JSON」：
+     * 按平台侧方法名（{@link DeviceProfileRpcMethod#getId()}）判断该次下发是否走「自定义负载」：
      * {@code params} 即负载、不加 RPC 信封。
      * <p>
      * 方法不在目录（仪表板/规则链发起的 ad-hoc 调用）、档案尚未同步到本实例等情况下返回 {@code false}，
      * 调用方回退到默认下发形态。档案更新到会话拿到新 profile 之间有异步窗口，窗口内同样是这个安全方向。
      */
-    public static boolean isCustomJsonDownlink(DeviceProfile profile, String methodName) {
+    public static boolean isCustomPayloadDownlink(DeviceProfile profile, String methodName) {
         if (StringUtils.isBlank(methodName) || profile == null || profile.getProfileData() == null) {
             return false;
         }
@@ -31,7 +31,7 @@ public final class DeviceProfileRpcMethods {
         }
         for (DeviceProfileRpcMethod m : methods) {
             if (m != null && methodName.equals(m.getId())) {
-                return m.getBindingType() == DeviceProfileRpcBindingType.CUSTOM_JSON;
+                return m.getBindingType() == DeviceProfileRpcBindingType.CUSTOM_PAYLOAD;
             }
         }
         return false;

@@ -1126,8 +1126,11 @@ export enum DeviceProfileRpcBindingType {
   HTTP_OUTBOUND = 'HTTP_OUTBOUND',
   /** MQTT 自定义数据格式：自定义请求/响应主题与 payload 模板 */
   MQTT_CUSTOM = 'MQTT_CUSTOM',
-  /** TCP/UDP 自定义 JSON：params 即负载、不加 RPC 信封，只能单向 */
-  CUSTOM_JSON = 'CUSTOM_JSON'
+  /**
+   * TCP/UDP 自定义负载：params 即负载（任意 UTF-8 文本）、不加 RPC 信封，只能单向。
+   * 线上/存储值仍为 CUSTOM_JSON（存量档案沿用），仅常量名改为 CUSTOM_PAYLOAD。
+   */
+  CUSTOM_PAYLOAD = 'CUSTOM_JSON'
 }
 
 export function createUavMqttPlatformSubscribeRequests(): MqttPullSubscribeRequest[] {
@@ -2247,9 +2250,9 @@ export function isProtocolTemplateRpcBinding(bindingType: DeviceProfileRpcBindin
     || bindingType === DeviceProfileRpcBindingType.UDP_TEMPLATE;
 }
 
-/** TCP/UDP 档案 RPC：自定义 JSON 绑定（params 即负载、无信封、单向） */
-export function isCustomJsonRpcBinding(bindingType: DeviceProfileRpcBindingType | null | undefined): boolean {
-  return bindingType === DeviceProfileRpcBindingType.CUSTOM_JSON;
+/** TCP/UDP 档案 RPC：自定义负载绑定（params 即负载、无信封、单向） */
+export function isCustomPayloadRpcBinding(bindingType: DeviceProfileRpcBindingType | null | undefined): boolean {
+  return bindingType === DeviceProfileRpcBindingType.CUSTOM_PAYLOAD;
 }
 
 export function isHttpPullProfileTransport(

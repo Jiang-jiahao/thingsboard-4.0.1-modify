@@ -62,8 +62,9 @@ public class DeviceProfileRpcMethod implements Serializable {
      */
     private String deviceMethod;
     /**
-     * 可选：默认 params JSON 字符串（运维参考或预填；下发时可与调用方 params 合并）。
-     * {@link DeviceProfileRpcBindingType#CUSTOM_JSON} 下即"默认下发体"，下发时原样发出、不与调用方合并。
+     * 可选：默认 params（NATIVE 为 JSON，供运维参考或预填；下发时可与调用方 params 合并）。
+     * {@link DeviceProfileRpcBindingType#CUSTOM_PAYLOAD} 下即"默认负载"，可为任意 UTF-8 文本，
+     * 下发时原样发出、不与调用方合并。
      */
     private String paramsTemplateJson;
 
@@ -137,10 +138,10 @@ public class DeviceProfileRpcMethod implements Serializable {
                     throw new IllegalArgumentException("MQTT_CUSTOM RPC method requires mqttPayloadTemplate: " + id);
                 }
             }
-            case CUSTOM_JSON -> {
+            case CUSTOM_PAYLOAD -> {
                 // 裸发不带 requestId，设备响应无法对应；定时 RPC 直接读 oneWay，只靠界面禁用能被绕过。
                 if (!Boolean.TRUE.equals(oneWay)) {
-                    throw new IllegalArgumentException("CUSTOM_JSON RPC method must be one-way: " + id);
+                    throw new IllegalArgumentException("CUSTOM_PAYLOAD RPC method must be one-way: " + id);
                 }
             }
         }

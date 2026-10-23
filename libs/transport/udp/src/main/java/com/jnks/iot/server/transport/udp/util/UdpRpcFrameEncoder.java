@@ -28,9 +28,9 @@ public final class UdpRpcFrameEncoder {
     public static ByteBuf encode(DeviceProfile profile, ToDeviceRpcRequestMsg rpcRequest) {
         TransportUdpDataType dataType = payloadDataTypeOf(profile);
         String params = rpcRequest.getParams();
-        // 自定义 JSON：params 就是负载，原样发 UTF-8 字节。
+        // 自定义负载：params 就是负载，原样发 UTF-8 字节。
         // 不走 bodyBytesForDataType —— 负载编码是原始字节/协议模板时它会把含 "hex" 键的 JSON 解码成裸字节、破坏内容。
-        if (DeviceProfileRpcMethods.isCustomJsonDownlink(profile, rpcRequest.getMethodName())) {
+        if (DeviceProfileRpcMethods.isCustomPayloadDownlink(profile, rpcRequest.getMethodName())) {
             return Unpooled.wrappedBuffer(params == null ? new byte[0] : params.getBytes(StandardCharsets.UTF_8));
         }
         // 协议模板 / 原始字节：params.hex 已由 UI buildHex 组好，线上只发 decode 后的原始字节，不再包 RPC 信封 JSON。

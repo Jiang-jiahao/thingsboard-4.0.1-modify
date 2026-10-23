@@ -79,7 +79,7 @@ import {
   protocolTemplateBundleIdFromTcpProfile,
   protocolTemplateBundleIdFromWireProfile,
   isHttpOutboundRpcBinding,
-  isCustomJsonRpcBinding,
+  isCustomPayloadRpcBinding,
   isMqttCustomRpcBinding,
   isProtocolTemplateRpcBinding,
 
@@ -154,9 +154,9 @@ export class DeviceRpcPanelComponent implements OnChanges {
     return isHttpOutboundRpcBinding(this.selectedMethod?.bindingType);
   }
 
-  /** 自定义 JSON：params 即负载，调用时直接填 JSON */
-  get selectedMethodUsesCustomJson(): boolean {
-    return isCustomJsonRpcBinding(this.selectedMethod?.bindingType);
+  /** 自定义负载：params 即负载，可填任意 UTF-8 文本 */
+  get selectedMethodUsesCustomPayload(): boolean {
+    return isCustomPayloadRpcBinding(this.selectedMethod?.bindingType);
   }
 
   get editableInvokeKeys(): string[] {
@@ -540,12 +540,16 @@ export class DeviceRpcPanelComponent implements OnChanges {
     let paramsJson: string | undefined;
     if (!this.selectedMethodScheduleHidesParams) {
       const trimmed = (this.scheduleParamsJson ?? '').trim();
+      // 自定义负载支持任意 UTF-8 原文，不做 JSON 校验
+      const rawPayload = isCustomPayloadRpcBinding(this.selectedMethod?.bindingType);
       if (trimmed && trimmed !== '{}') {
-        try {
-          JSON.parse(trimmed);
-        } catch {
-          this.notifyError('device.rpc.schedule-params-invalid');
-          return;
+        if (!rawPayload) {
+          try {
+            JSON.parse(trimmed);
+          } catch {
+            this.notifyError('device.rpc.schedule-params-invalid');
+            return;
+          }
         }
         paramsJson = trimmed;
       }
@@ -626,9 +630,9 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
 
 
-    if (isCustomJsonRpcBinding(this.selectedMethod.bindingType)) {
+    if (isCustomPayloadRpcBinding(this.selectedMethod.bindingType)) {
 
-      this.sendCustomJson(deviceId, timeout);
+      this.sendCustomPayload(deviceId, timeout);
 
     } else if (isProtocolTemplateRpcBinding(this.selectedMethod.bindingType)) {
 
@@ -710,6 +714,17 @@ export class DeviceRpcPanelComponent implements OnChanges {
       }
 
       this.nativeParamsJson = Object.keys(editableOnly).length ? JSON.stringify(editableOnly, null, 2) : '{}';
+
+      this.fixedParamSummary = Object.entries(this.deviceRpcParamDefaults)
+
+        .map(([k, v]) => `${k}=${v}`);
+
+    } else if (isCustomPayloadRpcBinding(m.bindingType)
+      && (m.paramsTemplateJson ?? '').trim()
+      && parseNativeParamsJson(m.paramsTemplateJson ?? '') === null) {
+
+      // 自定义负载：默认负载是任意 UTF-8 文本时直接预填原文
+      this.nativeParamsJson = (m.paramsTemplateJson ?? '').trim();
 
       this.fixedParamSummary = Object.entries(this.deviceRpcParamDefaults)
 
@@ -999,24 +1014,21 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
 
   /**
-   * 自定义 JSON：params 就是负载，不走协议模板组帧、不加 RPC 信封。
+   * 自定义负载：params 就是负载，不走协议模板组帧、不加 RPC 信封。
+   * 能解析成 JSON 对象时按对象下发（与固定参数合并）；否则按原文发任意 UTF-8 文本（空文本即空负载）。
    * 只用单向 —— 裸发没有 requestId，双向的响应无法对应（后端也强制单向）。
    */
-  private sendCustomJson(deviceId: string, timeout: number): void {
+  private sendCustomPayload(deviceId: string, timeout: number): void {
 
     const m = this.selectedMethod!;
 
-    const userParams = parseNativeParamsJson(this.nativeParamsJson);
+    const text = (this.nativeParamsJson ?? '').trim();
 
-    if (userParams === null) {
+    const userParams = text ? parseNativeParamsJson(text) : null;
 
-      this.notifyError('device.rpc.params-invalid');
-
-      return;
-
-    }
-
-    const params = mergeRpcPlatformValues(this.deviceRpcParamDefaults, userParams);
+    const params = userParams !== null
+      ? mergeRpcPlatformValues(this.deviceRpcParamDefaults, userParams)
+      : text;
 
     const requestBody = {
 

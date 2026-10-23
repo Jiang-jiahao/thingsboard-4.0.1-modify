@@ -236,15 +236,15 @@
 
 
 
-          <ng-container *ngIf="selectedMethod.bindingType === DeviceProfileRpcBindingType.NATIVE || selectedMethodUsesCustomJson">
+          <ng-container *ngIf="selectedMethod.bindingType === DeviceProfileRpcBindingType.NATIVE || selectedMethodUsesCustomPayload">
 
             <mat-form-field class="mat-block">
 
-              <mat-label translate>device.rpc.params-json</mat-label>
+              <mat-label>{{ (selectedMethodUsesCustomPayload ? 'device.rpc.custom-payload' : 'device.rpc.params-json') | translate }}</mat-label>
 
               <textarea matInput rows="8" [(ngModel)]="nativeParamsJson" [ngModelOptions]="{standalone: true}"></textarea>
 
-              <mat-hint translate>device.rpc.native-params-hint</mat-hint>
+              <mat-hint>{{ (selectedMethodUsesCustomPayload ? 'device.rpc.custom-payload-hint' : 'device.rpc.native-params-hint') | translate }}</mat-hint>
 
             </mat-form-field>
 
@@ -311,11 +311,11 @@
               </mat-form-field>
             </div>
             <mat-form-field class="mat-block" *ngIf="scheduleEnabled && !selectedMethodScheduleHidesParams" style="margin-top: 8px;">
-              <mat-label translate>device.rpc.schedule-params</mat-label>
+              <mat-label>{{ (selectedMethodUsesCustomPayload ? 'device.rpc.schedule-payload' : 'device.rpc.schedule-params') | translate }}</mat-label>
               <textarea matInput rows="2"
                         [(ngModel)]="scheduleParamsJson" [ngModelOptions]="{standalone: true}"
                         placeholder='{"pin":7,"value":1}'></textarea>
-              <mat-hint translate>device.rpc.schedule-params-hint</mat-hint>
+              <mat-hint>{{ (selectedMethodUsesCustomPayload ? 'device.rpc.schedule-payload-hint' : 'device.rpc.schedule-params-hint') | translate }}</mat-hint>
             </mat-form-field>
             <div class="jnks-iot-hint mat-caption" *ngIf="scheduleEnabled && selectedMethodScheduleHidesParams"
                  style="margin-top: 8px;" translate>device.rpc.schedule-params-http-hint</div>

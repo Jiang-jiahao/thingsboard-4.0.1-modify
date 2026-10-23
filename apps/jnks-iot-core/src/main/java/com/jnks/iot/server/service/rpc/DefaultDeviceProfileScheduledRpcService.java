@@ -388,7 +388,8 @@ public class DefaultDeviceProfileScheduledRpcService extends JnksIotApplicationE
                 return overrideJson;
             }
             if (over == null || !over.isObject()) {
-                return baseJson;
+                // 非 JSON 对象（自定义负载的原文）整体覆盖默认负载
+                return overrideJson;
             }
             ObjectNode merged = ((ObjectNode) base).deepCopy();
             over.fields().forEachRemaining(e -> merged.set(e.getKey(), e.getValue()));

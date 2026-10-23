@@ -72,7 +72,13 @@ public abstract class AbstractRpcController extends BaseController {
     protected DeferredResult<ResponseEntity> handleDeviceRPCRequest(boolean oneWay, DeviceId deviceId, String requestBody, HttpStatus timeoutStatus, HttpStatus noActiveConnectionStatus) throws JnksIotException {
         try {
             JsonNode rpcRequestBody = JacksonUtil.toJsonNode(requestBody);
-            ToDeviceRpcRequestBody body = new ToDeviceRpcRequestBody(rpcRequestBody.get("method").asText(), JacksonUtil.toString(rpcRequestBody.get("params")));
+            // params 是字符串原语时原样透传（自定义负载可直接下发任意 UTF-8 文本）；
+            // 只有对象/数组才序列化，避免给纯文本套上 JSON 引号，与规则链 RPC 节点语义一致。
+            JsonNode paramsNode = rpcRequestBody.get("params");
+            String paramsRaw = paramsNode == null || paramsNode.isNull()
+                    ? null
+                    : (paramsNode.isValueNode() ? paramsNode.asText() : JacksonUtil.toString(paramsNode));
+            ToDeviceRpcRequestBody body = new ToDeviceRpcRequestBody(rpcRequestBody.get("method").asText(), paramsRaw);
             SecurityUser currentUser = getCurrentUser();
             TenantId tenantId = currentUser.getTenantId();
             final DeferredResult<ResponseEntity> response = new DeferredResult<>();

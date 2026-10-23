@@ -1,5 +1,7 @@
 package com.jnks.iot.server.common.data.device.profile;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * 设备档案 RPC 方法目录条目的线下发绑定类型。
  */
@@ -25,8 +27,13 @@ public enum DeviceProfileRpcBindingType {
      */
     MQTT_CUSTOM,
     /**
-     * TCP/UDP 自定义 JSON：{@code params} 即负载，按 UTF-8 原样发出，<strong>不包 {@code {method,requestId,...}} 信封</strong>。
+     * TCP/UDP 自定义负载：{@code params} 即负载，按 UTF-8 原样发出（可为任意文本，不限于 JSON），
+     * <strong>不包 {@code {method,requestId,...}} 信封</strong>。
      * 因为没有 requestId、与设备响应无法对应，只能单向（{@code oneWay} 必须为 true）。
+     * <p>
+     * 对外存储值仍为 {@code CUSTOM_JSON}（存量档案沿用的名字），仅 Java 常量改名为
+     * {@code CUSTOM_PAYLOAD}；Jackson 依赖该注解读写，不要删除。
      */
-    CUSTOM_JSON
+    @JsonProperty("CUSTOM_JSON")
+    CUSTOM_PAYLOAD
 }
