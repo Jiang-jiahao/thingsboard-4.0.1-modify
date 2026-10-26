@@ -34,6 +34,11 @@ public class ProtocolTemplateCommandDefinition implements Serializable {
      */
     private String commandMatchBytesHex;
     /**
+     * 可选：命令级第二校验（如嵌套 Pelco-D 云台帧）。在写外层模板 checksum 之前按本定义计算并写入；
+     * 下标均为整帧绝对偏移，负数为相对帧尾。
+     */
+    private TcpHexChecksumDefinition innerChecksum;
+    /**
      * 默认 UINT32_LE；整型或 BYTES_AS_HEX / BYTES_AS_UTF8（定长原始字节，与帧模板一致）。
      */
     private TcpHexValueType matchValueType;

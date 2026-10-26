@@ -257,6 +257,7 @@ export class ProtocolTemplateHexTestDialogComponent {
     const buildBody: Parameters<ProtocolTemplateBundleService['buildHex']>[0] = {
       bundleId: id,
       templateId: cmd.templateId,
+      commandName: cmd.name,
       values
     };
     if (isTcpHexVariableByteSlice(matchVt)) {

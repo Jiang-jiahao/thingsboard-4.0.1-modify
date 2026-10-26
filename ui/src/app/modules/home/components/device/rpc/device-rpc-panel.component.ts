@@ -923,6 +923,8 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
       templateId: cmd.templateId,
 
+      commandName: cmd.name,
+
       values
 
     };

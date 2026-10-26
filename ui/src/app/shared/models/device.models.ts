@@ -1443,6 +1443,8 @@ export interface ProtocolTemplateCommandDefinition {
   commandValue: number;
   /** 命令读取类型为 BYTES_AS_HEX / BYTES_AS_UTF8 时的定长线期望值（十六进制串，位数 = 帧模板命令匹配宽度×2） */
   commandMatchBytesHex?: string;
+  /** 可选：命令级第二校验（如嵌套 Pelco-D 云台帧），在写外层模板校验之前计算。 */
+  innerChecksum?: TcpHexChecksumDefinition;
   matchValueType?: TcpHexValueType;
   /** 仅 UPLINK/BOTH 生效：命中后上行结果写入遥测或属性。 */
   uplinkDataDestination?: ProtocolTemplateUplinkDataDestination;

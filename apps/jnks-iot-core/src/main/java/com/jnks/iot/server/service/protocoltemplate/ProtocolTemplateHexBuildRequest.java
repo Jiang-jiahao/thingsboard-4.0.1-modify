@@ -24,6 +24,11 @@ public class ProtocolTemplateHexBuildRequest {
      */
     private String templateId;
     /**
+     * 可选：命令行名称（{@link com.jnks.iot.server.common.data.device.profile.ProtocolTemplateCommandDefinition#getName()}）。
+     * 同一 commandValue/templateId 有多条命令（如多个 0x60 云台动作）时用它唯一定位。
+     */
+    private String commandName;
+    /**
      * 字段键 → 数值或 BYTES_AS_HEX 的连续十六进制字符串（与解析侧遥测语义一致：整数/浮点已乘 scale）。
      */
     private Map<String, Object> values;

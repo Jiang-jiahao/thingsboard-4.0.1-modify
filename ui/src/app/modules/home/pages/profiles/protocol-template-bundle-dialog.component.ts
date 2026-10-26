@@ -312,6 +312,15 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
       if (cn) {
         cmd.name = cn;
       }
+      const icsType = String(row['innerChecksumType'] ?? 'NONE').trim();
+      if (icsType && icsType.toUpperCase() !== 'NONE') {
+        cmd.innerChecksum = {
+          type: icsType,
+          fromByte: this.optionalFormNumber(row['innerChecksumFromByte']) ?? 0,
+          toExclusive: this.optionalFormNumber(row['innerChecksumToExclusive']) ?? 0,
+          checksumByteIndex: this.optionalFormNumber(row['innerChecksumByteIndex']) ?? -1
+        };
+      }
       if (this.isFormBooleanTrue(row['downlinkPayloadLengthAuto'])) {
         cmd.downlinkPayloadLengthAuto = true;
       }

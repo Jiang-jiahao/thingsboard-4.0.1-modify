@@ -99,6 +99,7 @@ export class ProtocolTemplateBundleService {
       commandValue?: number | null;
       commandMatchBytesHex?: string | null;
       templateId?: string;
+      commandName?: string;
       values?: Record<string, unknown>;
     },
     config?: RequestConfig

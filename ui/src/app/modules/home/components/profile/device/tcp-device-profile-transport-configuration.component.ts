@@ -678,6 +678,10 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
       secondaryMatchValue: [secWire],
       direction: [c?.direction ?? ProtocolTemplateCommandDirection.UPLINK, Validators.required],
       uplinkDataDestination: [c?.uplinkDataDestination ?? ProtocolTemplateUplinkDataDestination.TELEMETRY],
+      innerChecksumType: [c?.innerChecksum?.type ?? 'NONE'],
+      innerChecksumFromByte: [c?.innerChecksum?.fromByte ?? 0],
+      innerChecksumToExclusive: [c?.innerChecksum?.toExclusive ?? 0],
+      innerChecksumByteIndex: [c?.innerChecksum?.checksumByteIndex ?? -1],
       overrideFields: overrideArr
     });
   }
@@ -1111,6 +1115,15 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
           const cn = String(row['name'] ?? '').trim();
           if (cn) {
             cmd.name = cn;
+          }
+          const icsType = String(row['innerChecksumType'] ?? 'NONE').trim();
+          if (icsType && icsType.toUpperCase() !== 'NONE') {
+            cmd.innerChecksum = {
+              type: icsType,
+              fromByte: this.optionalFormNumber(row['innerChecksumFromByte']) ?? 0,
+              toExclusive: this.optionalFormNumber(row['innerChecksumToExclusive']) ?? 0,
+              checksumByteIndex: this.optionalFormNumber(row['innerChecksumByteIndex']) ?? -1
+            };
           }
           const overrideRows = (row['overrideFields'] as Array<Record<string, unknown>>) ?? [];
           const overrides = this.fieldsFromHexRows(overrideRows);

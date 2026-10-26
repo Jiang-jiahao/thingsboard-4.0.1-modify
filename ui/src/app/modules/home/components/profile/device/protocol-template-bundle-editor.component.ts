@@ -237,6 +237,10 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       uplinkDataDestination: [c?.uplinkDataDestination ?? ProtocolTemplateUplinkDataDestination.TELEMETRY],
       downlinkPayloadLengthAuto: [!!c?.downlinkPayloadLengthAuto],
       downlinkPayloadLengthFieldKey: [c?.downlinkPayloadLengthFieldKey ?? ''],
+      innerChecksumType: [c?.innerChecksum?.type ?? 'NONE'],
+      innerChecksumFromByte: [c?.innerChecksum?.fromByte ?? 0],
+      innerChecksumToExclusive: [c?.innerChecksum?.toExclusive ?? 0],
+      innerChecksumByteIndex: [c?.innerChecksum?.checksumByteIndex ?? -1],
       overrideFields: overrideArr
     }, { validators: [this.protocolCommandPrimaryWireValidator, this.protocolCommandSecondaryWireValidator] });
   }

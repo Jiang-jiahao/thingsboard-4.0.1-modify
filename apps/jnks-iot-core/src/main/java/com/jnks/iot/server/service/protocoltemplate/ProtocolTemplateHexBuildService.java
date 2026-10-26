@@ -81,6 +81,7 @@ public class ProtocolTemplateHexBuildService {
                 : List.of();
         Long cv = request.getCommandValue();
         String tidFilter = request.getTemplateId() != null ? request.getTemplateId().trim() : null;
+        String nameFilter = request.getCommandName() != null ? request.getCommandName().trim() : null;
         List<ProtocolTemplateCommandDefinition> matches = new ArrayList<>();
         for (ProtocolTemplateCommandDefinition c : cmds) {
             if (c == null) {
@@ -114,15 +115,18 @@ public class ProtocolTemplateHexBuildService {
             if (tidFilter != null && !tidFilter.equals(c.getTemplateId())) {
                 continue;
             }
+            if (nameFilter != null && !nameFilter.isEmpty() && !nameFilter.equals(c.getName())) {
+                continue;
+            }
             matches.add(c);
         }
         if (matches.isEmpty()) {
             out.setErrorMessage("No DOWNLINK/BOTH command with this commandValue in the bundle");
             return out;
         }
-        if (matches.size() > 1 && (tidFilter == null || tidFilter.isEmpty())) {
-            out.setErrorMessage("Ambiguous commandValue: set templateId to pick one of: "
-                    + matches.stream().map(ProtocolTemplateCommandDefinition::getTemplateId).distinct().toList());
+        if (matches.size() > 1) {
+            out.setErrorMessage("Ambiguous command: set commandName to pick one of: "
+                    + matches.stream().map(ProtocolTemplateCommandDefinition::getName).toList());
             return out;
         }
         ProtocolTemplateCommandDefinition cmd = matches.get(0);
@@ -243,6 +247,9 @@ public class ProtocolTemplateHexBuildService {
             }
             writeAutoDownlinkPayloadLengthFields(buf, merged, cmd, cmdOff, cmdW, values);
             writeAutoDownlinkTotalFrameLengthFields(buf, merged);
+            if (cmd.getInnerChecksum() != null) {
+                TcpHexProtocolParser.applyChecksumToFrame(cmd.getInnerChecksum(), buf);
+            }
             TcpHexProtocolParser.applyChecksumToFrame(checksum, buf);
         } catch (IllegalArgumentException | ArithmeticException e) {
             out.setErrorMessage(e.getMessage());
@@ -761,7 +768,7 @@ public class ProtocolTemplateHexBuildService {
 
         switch (vt) {
             case UINT8, INT8, UINT16_BE, UINT16_LE, INT16_BE, INT16_LE, UINT32_BE, UINT32_LE, INT32_BE, INT32_LE -> {
-                long lv = raw != null ? toLongForIntegral(raw, f.getKey()) : 0L;
+                double lv = raw != null ? toDouble(raw, f.getKey()) : 0.0;
                 long rawInt = scaleToRawLong(lv, scale, f.getKey());
                 TcpHexProtocolParser.writeIntegralAt(buf, off, vt, rawInt);
             }
@@ -779,7 +786,7 @@ public class ProtocolTemplateHexBuildService {
         }
     }
 
-    private static long scaleToRawLong(long logicalScaled, double scale, String key) {
+    private static long scaleToRawLong(double logicalScaled, double scale, String key) {
         if (scale == 0.0 || Double.isNaN(scale) || Double.isInfinite(scale)) {
             throw new IllegalArgumentException("Field [" + key + "]: invalid scale");
         }
@@ -807,7 +814,7 @@ public class ProtocolTemplateHexBuildService {
         if (o instanceof String s) {
             return Double.parseDouble(s.trim());
         }
-        throw new IllegalArgumentException("Field [" + key + "]: expected number for float/double type");
+        throw new IllegalArgumentException("Field [" + key + "]: expected number");
     }
 
     private static ProtocolTemplateDefinition findTemplateInBundle(ProtocolTemplateBundle bundle, String templateId) {
