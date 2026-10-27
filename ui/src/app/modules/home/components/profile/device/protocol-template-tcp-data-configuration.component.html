@@ -306,6 +306,10 @@
           <mat-panel-title>
             {{ 'device-profile.tcp.protocol-template-command' | translate }} {{ ci + 1 }}
             <span *ngIf="asFormGroup(cCtrl).get('name')?.value"> — {{ asFormGroup(cCtrl).get('name')?.value }}</span>
+            <span *ngIf="asFormGroup(cCtrl).get('innerChecksumType')?.value && asFormGroup(cCtrl).get('innerChecksumType')?.value !== 'NONE'"
+                  class="mat-caption" style="margin-left: 6px;">
+              · {{ 'device-profile.tcp.protocol-template-inner-checksum-badge' | translate }} {{ asFormGroup(cCtrl).get('innerChecksumType')?.value }}
+            </span>
           </mat-panel-title>
         </mat-expansion-panel-header>
         <ng-template matExpansionPanelContent>
@@ -406,6 +410,38 @@
                 <mat-hint translate>device-profile.tcp.protocol-template-downlink-len-field-hint</mat-hint>
               </mat-form-field>
             </div>
+            <ng-container *ngIf="isDownlinkOrBothForCommand(ci)">
+              <mat-divider></mat-divider>
+              <div class="mat-body-2" translate>device-profile.tcp.protocol-template-inner-checksum-title</div>
+              <div class="jnks-iot-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-inner-checksum-hint</div>
+              <div class="flex flex-row flex-wrap gap-2 items-start">
+                <mat-form-field class="flex-1" style="min-width: 200px;" subscriptSizing="dynamic">
+                  <mat-label translate>device-profile.tcp.protocol-template-checksum-type</mat-label>
+                  <mat-select formControlName="innerChecksumType">
+                    <mat-option value="NONE">{{ 'device-profile.tcp.protocol-template-checksum-none' | translate }}</mat-option>
+                    <mat-option value="SUM8">SUM8</mat-option>
+                    <mat-option value="CRC16_MODBUS">CRC16_MODBUS</mat-option>
+                    <mat-option value="CRC16_CCITT">CRC16_CCITT</mat-option>
+                    <mat-option value="CRC32">CRC32</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <ng-container *ngIf="asFormGroup(cCtrl).get('innerChecksumType')?.value !== 'NONE'">
+                  <mat-form-field style="width: 110px;" subscriptSizing="dynamic">
+                    <mat-label translate>device-profile.tcp.protocol-template-checksum-from</mat-label>
+                    <input matInput type="number" formControlName="innerChecksumFromByte">
+                  </mat-form-field>
+                  <mat-form-field style="width: 120px;" subscriptSizing="dynamic">
+                    <mat-label translate>device-profile.tcp.protocol-template-checksum-to-exc</mat-label>
+                    <input matInput type="number" formControlName="innerChecksumToExclusive">
+                  </mat-form-field>
+                  <mat-form-field class="flex-1" style="min-width: 140px;" subscriptSizing="dynamic">
+                    <mat-label translate>device-profile.tcp.protocol-template-checksum-at</mat-label>
+                    <input matInput type="number" formControlName="innerChecksumByteIndex">
+                    <mat-hint translate>device-profile.tcp.protocol-template-checksum-at-hint</mat-hint>
+                  </mat-form-field>
+                </ng-container>
+              </div>
+            </ng-container>
             <div *ngIf="!singleTemplateMode" class="jnks-iot-hint mat-caption protocol-template-inline-hint" translate>device-profile.tcp.protocol-template-cmd-template-hint</div>
           </div>
 
