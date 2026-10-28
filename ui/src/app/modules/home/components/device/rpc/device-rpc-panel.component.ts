@@ -39,6 +39,7 @@ import {
   ProtocolTemplateBundle,
 
   TcpDeviceProfileTransportConfiguration,
+  TcpHexValueType,
   UdpDeviceProfileTransportConfiguration,
   isProtocolTemplateWireTransport
 
@@ -194,6 +195,9 @@ export class DeviceRpcPanelComponent implements OnChanges {
   scheduleEnabled = false;
   scheduleIntervalMs: number | null = null;
   scheduleParamsJson = '{}';
+  /** 协议模板方法：定时参数也用字段表单，保存时再拼成 JSON */
+  scheduleFieldRows: DeviceRpcInvokeFieldRow[] = [];
+  scheduleUsesFieldInputs = false;
   savingSchedule = false;
   private scheduledRpcs: DeviceScheduledRpc[] = [];
 
@@ -539,19 +543,33 @@ export class DeviceRpcPanelComponent implements OnChanges {
     }
     let paramsJson: string | undefined;
     if (!this.selectedMethodScheduleHidesParams) {
-      const trimmed = (this.scheduleParamsJson ?? '').trim();
-      // 自定义负载支持任意 UTF-8 原文，不做 JSON 校验
-      const rawPayload = isCustomPayloadRpcBinding(this.selectedMethod?.bindingType);
-      if (trimmed && trimmed !== '{}') {
-        if (!rawPayload) {
-          try {
-            JSON.parse(trimmed);
-          } catch {
-            this.notifyError('device.rpc.schedule-params-invalid');
+      if (this.scheduleUsesFieldInputs) {
+        const values: Record<string, unknown> = {};
+        for (const row of this.scheduleFieldRows) {
+          const parsed = parseDownlinkFieldInput(row.inputText, row.valueType, row.byteLength);
+          if (parsed.ok !== true) {
+            this.notifyError('profiles.protocol-hex-test-field-parse-error',
+              { key: row.templateFieldKey, detail: parsed.error });
             return;
           }
+          values[row.platformKey] = parsed.value;
         }
-        paramsJson = trimmed;
+        paramsJson = JSON.stringify(values);
+      } else {
+        const trimmed = (this.scheduleParamsJson ?? '').trim();
+        // 自定义负载支持任意 UTF-8 原文，不做 JSON 校验
+        const rawPayload = isCustomPayloadRpcBinding(this.selectedMethod?.bindingType);
+        if (trimmed && trimmed !== '{}') {
+          if (!rawPayload) {
+            try {
+              JSON.parse(trimmed);
+            } catch {
+              this.notifyError('device.rpc.schedule-params-invalid');
+              return;
+            }
+          }
+          paramsJson = trimmed;
+        }
       }
     }
     const intervalNum = Number(this.scheduleIntervalMs);
@@ -606,6 +624,39 @@ export class DeviceRpcPanelComponent implements OnChanges {
     this.scheduleEnabled = !!found?.enabled;
     this.scheduleIntervalMs = found?.intervalMs ?? null;
     this.scheduleParamsJson = found?.paramsJson?.trim() || '{}';
+    this.applyScheduleFieldsForMethod(this.scheduleParamsJson);
+  }
+
+  /**
+   * 协议模板方法的定时参数也用调用区那套字段表单：字段来自方法绑定的模板命令，
+   * 已保存的 paramsJson 按平台参数名回填（兼容历史直接写模板字段 key 的配置）。
+   * 服务端定时下发不会合并设备的「固定参数」，所以用 allRows（含固定项），保存时整份写进 paramsJson。
+   */
+  private applyScheduleFieldsForMethod(savedJson: string): void {
+    this.scheduleFieldRows = [];
+    this.scheduleUsesFieldInputs = false;
+    const m = this.selectedMethod;
+    if (!m || !this.bundle || !isProtocolTemplateRpcBinding(m.bindingType)) {
+      return;
+    }
+    const built = buildInvokeFieldRows(this.bundle, m);
+    if (!built.usesFieldInputs) {
+      return;
+    }
+    const applied = applyDeviceRpcParamDefaults(built.rows, this.deviceRpcParamDefaults, this.methodFieldMeta);
+    const saved = parseNativeParamsJson(savedJson) ?? {};
+    this.scheduleFieldRows = applied.allRows.map(row => {
+      const hasPlatform = Object.prototype.hasOwnProperty.call(saved, row.platformKey);
+      const raw = hasPlatform
+        ? saved[row.platformKey]
+        : (Object.prototype.hasOwnProperty.call(saved, row.templateFieldKey) ? saved[row.templateFieldKey] : undefined);
+      if (raw === undefined) {
+        return { ...row };
+      }
+      const echoMode = row.valueType === TcpHexValueType.BYTES_AS_HEX ? 'bytesPlain' as const : undefined;
+      return { ...row, inputText: formatDownlinkFieldEcho(raw, row.valueType, echoMode, row.byteLength) };
+    });
+    this.scheduleUsesFieldInputs = true;
   }
 
 

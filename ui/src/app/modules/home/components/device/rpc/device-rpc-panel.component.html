@@ -310,13 +310,26 @@
                 <mat-hint translate>device.rpc.schedule-interval-min</mat-hint>
               </mat-form-field>
             </div>
-            <mat-form-field class="mat-block" *ngIf="scheduleEnabled && !selectedMethodScheduleHidesParams" style="margin-top: 8px;">
+            <mat-form-field class="mat-block" *ngIf="scheduleEnabled && !selectedMethodScheduleHidesParams && !scheduleUsesFieldInputs" style="margin-top: 8px;">
               <mat-label>{{ (selectedMethodUsesCustomPayload ? 'device.rpc.schedule-payload' : 'device.rpc.schedule-params') | translate }}</mat-label>
               <textarea matInput rows="2"
                         [(ngModel)]="scheduleParamsJson" [ngModelOptions]="{standalone: true}"
                         placeholder='{"pin":7,"value":1}'></textarea>
               <mat-hint>{{ (selectedMethodUsesCustomPayload ? 'device.rpc.schedule-payload-hint' : 'device.rpc.schedule-params-hint') | translate }}</mat-hint>
             </mat-form-field>
+            <ng-container *ngIf="scheduleEnabled && scheduleUsesFieldInputs">
+              <div class="mat-subtitle-2" style="margin-top: 8px;" translate>device.rpc.params</div>
+              <div class="jnks-iot-hint mat-body-2" style="margin-bottom: 8px;" translate>device.rpc.schedule-params-fields-hint</div>
+              <div class="jnks-iot-device-rpc-field-grid">
+                <mat-form-field *ngFor="let row of scheduleFieldRows" class="mat-block">
+                  <mat-label>{{ row.templateFieldKey }}</mat-label>
+                  <input matInput [(ngModel)]="row.inputText" [ngModelOptions]="{standalone: true}"/>
+                  <mat-hint *ngIf="row.platformKey !== row.templateFieldKey">
+                    <span translate>device.rpc.platform-param-name</span>: {{ row.platformKey }}
+                  </mat-hint>
+                </mat-form-field>
+              </div>
+            </ng-container>
             <div class="jnks-iot-hint mat-caption" *ngIf="scheduleEnabled && selectedMethodScheduleHidesParams"
                  style="margin-top: 8px;" translate>device.rpc.schedule-params-http-hint</div>
             <div style="margin-top: 24px;">
