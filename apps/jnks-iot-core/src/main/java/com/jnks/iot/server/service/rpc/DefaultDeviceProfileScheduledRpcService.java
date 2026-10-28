@@ -44,6 +44,7 @@ import com.jnks.iot.server.dao.tenant.TenantService;
 import com.jnks.iot.server.queue.discovery.PartitionService;
 import com.jnks.iot.server.queue.discovery.JnksIotApplicationEventListener;
 import com.jnks.iot.server.queue.discovery.event.PartitionChangeEvent;
+import com.jnks.iot.server.service.protocoltemplate.ProtocolTemplateRpcFramer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,6 +74,7 @@ public class DefaultDeviceProfileScheduledRpcService extends JnksIotApplicationE
     private final PartitionService partitionService;
     private final JnksIotCoreDeviceRpcService deviceRpcService;
     private final AuditLogService auditLogService;
+    private final ProtocolTemplateRpcFramer protocolTemplateRpcFramer;
 
     private final Map<String, ScheduledFuture<?>> tasks = new ConcurrentHashMap<>();
     private ScheduledExecutorService scheduler;
@@ -82,13 +84,15 @@ public class DefaultDeviceProfileScheduledRpcService extends JnksIotApplicationE
                                                    TenantService tenantService,
                                                    PartitionService partitionService,
                                                    @Lazy JnksIotCoreDeviceRpcService deviceRpcService,
-                                                   AuditLogService auditLogService) {
+                                                   AuditLogService auditLogService,
+                                                   ProtocolTemplateRpcFramer protocolTemplateRpcFramer) {
         this.deviceService = deviceService;
         this.deviceProfileService = deviceProfileService;
         this.tenantService = tenantService;
         this.partitionService = partitionService;
         this.deviceRpcService = deviceRpcService;
         this.auditLogService = auditLogService;
+        this.protocolTemplateRpcFramer = protocolTemplateRpcFramer;
     }
 
     @PostConstruct
@@ -269,11 +273,12 @@ public class DefaultDeviceProfileScheduledRpcService extends JnksIotApplicationE
                 log.debug("[{}] Scheduled RPC method [{}] not found on profile", device.getId(), schedule.getMethodId());
                 continue;
             }
-            scheduleTask(device, method, schedule);
+            scheduleTask(device, profile, method, schedule);
         }
     }
 
-    private void scheduleTask(Device device, DeviceProfileRpcMethod method, DeviceScheduledRpc schedule) {
+    private void scheduleTask(Device device, DeviceProfile profile, DeviceProfileRpcMethod method,
+                              DeviceScheduledRpc schedule) {
         String key = taskKey(device.getId(), method.getId());
         cancelKey(key);
         long interval = schedule.getIntervalMs();
@@ -282,14 +287,15 @@ public class DefaultDeviceProfileScheduledRpcService extends JnksIotApplicationE
         CustomerId customerId = device.getCustomerId();
         String deviceName = device.getName();
         ScheduledFuture<?> future = scheduler.scheduleWithFixedDelay(
-                () -> fireScheduledRpc(tenantId, deviceId, customerId, deviceName, method, schedule),
+                () -> fireScheduledRpc(tenantId, deviceId, customerId, deviceName, profile, method, schedule),
                 interval, interval, TimeUnit.MILLISECONDS);
         tasks.put(key, future);
         log.info("[{}] Scheduled device RPC [{}] every {} ms", deviceId, method.getId(), interval);
     }
 
     private void fireScheduledRpc(TenantId tenantId, DeviceId deviceId, CustomerId customerId,
-                                  String deviceName, DeviceProfileRpcMethod method, DeviceScheduledRpc schedule) {
+                                  String deviceName, DeviceProfile profile, DeviceProfileRpcMethod method,
+                                  DeviceScheduledRpc schedule) {
         if (!isMyPartition(tenantId, deviceId)) {
             cancelKey(taskKey(deviceId, method.getId()));
             return;
@@ -297,10 +303,20 @@ public class DefaultDeviceProfileScheduledRpcService extends JnksIotApplicationE
         String params = resolveScheduledParams(method, schedule);
         String rpcMethodName = resolveRpcMethodName(method);
         boolean oneWay = method.getOneWay() == null || Boolean.TRUE.equals(method.getOneWay());
+        String framedParams;
+        try {
+            framedParams = protocolTemplateRpcFramer.frameIfNeeded(tenantId, profile, method, params);
+        } catch (IllegalArgumentException e) {
+            log.warn("[{}] Scheduled RPC [{}] cannot build protocol template frame: {}",
+                    deviceId, method.getId(), e.getMessage());
+            logScheduledAudit(tenantId, customerId, deviceId, deviceName, oneWay, rpcMethodName, params,
+                    Optional.of(RpcError.INTERNAL));
+            return;
+        }
         try {
             long timeoutMs = method.getTimeoutMs() != null && method.getTimeoutMs() > 0
                     ? method.getTimeoutMs() : DEFAULT_TIMEOUT_MS;
-            ToDeviceRpcRequestBody body = new ToDeviceRpcRequestBody(rpcMethodName, params);
+            ToDeviceRpcRequestBody body = new ToDeviceRpcRequestBody(rpcMethodName, framedParams);
             ToDeviceRpcRequest request = new ToDeviceRpcRequest(
                     UUID.randomUUID(),
                     tenantId,
