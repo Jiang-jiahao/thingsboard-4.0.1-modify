@@ -190,7 +190,7 @@
 
             </ng-container>
 
-            <mat-form-field *ngIf="!usesFieldInputs" class="mat-block">
+            <mat-form-field *ngIf="!usesFieldInputs && !templateRpcHasNoParams" class="mat-block">
 
               <mat-label translate>device.rpc.params-json</mat-label>
 
@@ -310,7 +310,7 @@
                 <mat-hint translate>device.rpc.schedule-interval-min</mat-hint>
               </mat-form-field>
             </div>
-            <mat-form-field class="mat-block" *ngIf="scheduleEnabled && !selectedMethodScheduleHidesParams && !scheduleUsesFieldInputs" style="margin-top: 8px;">
+            <mat-form-field class="mat-block" *ngIf="scheduleEnabled && !selectedMethodScheduleHidesParams && !scheduleUsesFieldInputs && !templateRpcHasNoParams" style="margin-top: 8px;">
               <mat-label>{{ (selectedMethodUsesCustomPayload ? 'device.rpc.schedule-payload' : 'device.rpc.schedule-params') | translate }}</mat-label>
               <textarea matInput rows="2"
                         [(ngModel)]="scheduleParamsJson" [ngModelOptions]="{standalone: true}"

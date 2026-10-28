@@ -205,6 +205,9 @@ export class DeviceRpcPanelComponent implements OnChanges {
 
   usesFieldInputs = false;
 
+  /** 协议模板方法：模板/命令里没有任何可填参数（整帧由模板常量决定），不再显示 JSON 输入框 */
+  templateRpcHasNoParams = false;
+
   valuesJson = '{}';
 
   nativeParamsJson = '{}';
@@ -335,6 +338,8 @@ export class DeviceRpcPanelComponent implements OnChanges {
     this.fixedParamSummary = [];
 
     this.usesFieldInputs = false;
+
+    this.templateRpcHasNoParams = false;
 
     this.valuesJson = '{}';
 
@@ -721,6 +726,10 @@ export class DeviceRpcPanelComponent implements OnChanges {
       this.fixedParamSummary = applied.fixedSummary;
 
       this.usesFieldInputs = built.usesFieldInputs;
+
+      // 模板 + 命令都没有可填字段：整帧由模板常量决定，不显示参数输入
+      const fallbackParams = parseNativeParamsJson(built.valuesJsonFallback) ?? {};
+      this.templateRpcHasNoParams = !built.usesFieldInputs && Object.keys(fallbackParams).length === 0;
 
       if (this.usesFieldInputs) {
 
