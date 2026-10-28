@@ -249,6 +249,12 @@
 }
 
 :host ::ng-deep {
+  // 输入框内容高 20px、mat-select 触发区 24px，同一行混排时底边差 4px；
+  // 抬 infix 会被 .jnks-iot-default .mat-mdc-form-field .mat-mdc-form-field-infix{min-height:0} 压掉，所以抬输入框本身
+  .mat-mdc-input-element {
+    min-height: 24px;
+  }
+
   .mat-expansion-panel {
     border-radius: 10px !important;
     border: 1px solid var(--tb-border) !important;

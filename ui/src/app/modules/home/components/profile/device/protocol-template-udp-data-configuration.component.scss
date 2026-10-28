@@ -187,3 +187,8 @@
 .protocol-template-command-meta {
   min-width: 0;
 }
+
+// 输入框内容高 20px、mat-select 触发区 24px，同一行混排时底边差 4px
+:host ::ng-deep .mat-mdc-input-element {
+  min-height: 24px;
+}
