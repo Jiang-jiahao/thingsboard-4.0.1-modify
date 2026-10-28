@@ -557,24 +557,19 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
         }
     }
 
+    /**
+     * 设备被修改后，只关闭它自己的入站会话，让设备按新配置重新鉴权。
+     * <p>早先这里还有一段"会话档案 ≠ 本设备档案就关"的判断，会把同一租户下**其它档案**的
+     * 在线设备一起踢下线，已删除。
+     */
     private void closeInboundSessionsAffectedByDeviceUpdate(Device device) {
         if (device.getDeviceData() == null
                 || !(device.getDeviceData().getTransportConfiguration() instanceof TcpDeviceTransportConfiguration)) {
             return;
         }
-        var deviceProfileId = device.getDeviceProfileId();
-        if (deviceProfileId == null) {
-            return;
-        }
         for (TcpDeviceSession s : new ArrayList<>(inboundSessions)) {
             if (s.getDeviceId() != null && s.getDeviceId().equals(device.getId())) {
                 log.info("[{}] Closing inbound TCP due to device update", s.getSessionId());
-                s.close();
-                continue;
-            }
-            DeviceProfile sp = s.getDeviceProfile();
-            if (sp != null && !deviceProfileId.equals(sp.getId())) {
-                log.info("[{}] Closing inbound TCP (stale profile vs device after update)", s.getSessionId());
                 s.close();
             }
         }
