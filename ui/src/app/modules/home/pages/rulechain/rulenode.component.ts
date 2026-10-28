@@ -1,5 +1,6 @@
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Component, OnInit } from '@angular/core';
+import $ from 'jquery';
 import { FcNodeComponent } from 'ngx-flowchart';
 import { FcRuleNode, RuleNodeType } from '@shared/models/rule-node.models';
 import { Router } from '@angular/router';

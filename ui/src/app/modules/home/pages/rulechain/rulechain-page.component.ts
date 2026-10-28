@@ -45,6 +45,7 @@ import {
   RuleChainType
 } from '@shared/models/rule-chain.models';
 import { FcItemInfo, FlowchartConstants, NgxFlowchartComponent, UserCallbacks } from 'ngx-flowchart';
+import $ from 'jquery';
 import {
   FcRuleEdge,
   FcRuleNode,
@@ -1355,7 +1356,12 @@ export class RuleChainPageComponent extends PageComponent
       clearTimeout(this.tooltipTimeout);
       this.tooltipTimeout = null;
     }
-    const instances = $.tooltipster.instances();
+    // 这个方法挂在节点 mousedown 上：插件没加载时抛异常会让浏览器放弃拖拽（节点就"拖动不出来"）
+    const tooltipster = ($ as any).tooltipster;
+    if (!tooltipster || typeof tooltipster.instances !== 'function') {
+      return;
+    }
+    const instances = tooltipster.instances();
     instances.forEach((instance) => {
       if (!instance.isErrorTooltip) {
         instance.destroy();
