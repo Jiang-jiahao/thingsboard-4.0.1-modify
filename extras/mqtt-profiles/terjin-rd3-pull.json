@@ -1,0 +1,77 @@
+{
+  "id": {
+    "entityType": "DEVICE_PROFILE",
+    "id": "87b6ff80-d280-11f1-9715-73e5cff2e8c5"
+  },
+  "createdTime": 1793158489976,
+  "tenantId": {
+    "entityType": "TENANT",
+    "id": "21b8b490-c465-11f1-9109-b33b8fd7b0ce"
+  },
+  "name": "特金 RD3 设备配置（主动采集）",
+  "description": "特金 TERJIN MQTT V1.1（RD3）：平台作为 MQTT 客户端主动连接特金 Broker，订阅 system/locate/detect，整包落键后由规则链解析。",
+  "image": null,
+  "type": "DEFAULT",
+  "transportType": "MQTT_PULL",
+  "provisionType": "DISABLED",
+  "defaultRuleChainId": {
+    "entityType": "RULE_CHAIN",
+    "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
+  },
+  "defaultDashboardId": null,
+  "defaultQueueName": null,
+  "provisionDeviceKey": null,
+  "firmwareId": null,
+  "softwareId": null,
+  "externalId": null,
+  "version": 2,
+  "default": false,
+  "profileData": {
+    "configuration": {
+      "type": "DEFAULT"
+    },
+    "transportConfiguration": {
+      "type": "MQTT_PULL",
+      "mqttTransportMode": "PULL",
+      "connectTimeoutMs": 10000,
+      "keepAliveSec": 60,
+      "cleanSession": true,
+      "reconnectIntervalMs": 5000,
+      "subscribeRequests": [
+        {
+          "id": "f68191a7-acaf-4a65-b333-a350ef2eeda2",
+          "name": "system",
+          "enabled": true,
+          "topic": "server/chan/+/api/system",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "terjinSystem"
+        },
+        {
+          "id": "95ddf566-146a-4f6a-8c9c-43f3979d9c76",
+          "name": "locate",
+          "enabled": true,
+          "topic": "server/chan/+/api/locate",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "terjinLocate"
+        },
+        {
+          "id": "750f9d5f-96c5-489a-93a2-57a44644c305",
+          "name": "detect",
+          "enabled": true,
+          "topic": "server/chan/+/api/detect",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "terjinDetect"
+        }
+      ]
+    },
+    "provisionConfiguration": {
+      "type": "DISABLED",
+      "provisionDeviceSecret": null
+    },
+    "alarms": [],
+    "rpcMethods": []
+  }
+}

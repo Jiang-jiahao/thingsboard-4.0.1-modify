@@ -21,8 +21,10 @@ import com.jnks.iot.mqtt.MqttClientCallback;
 import com.jnks.iot.mqtt.MqttClientConfig;
 import com.jnks.iot.mqtt.MqttConnectResult;
 import com.jnks.iot.server.common.adaptor.JsonConverter;
+import com.jnks.iot.server.common.data.DataConstants;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.common.data.device.profile.MqttPullDeviceProfileTransportConfiguration;
+import com.jnks.iot.server.common.msg.JnksIotMsgMetaData;
 import com.jnks.iot.server.common.data.transport.http.HttpPullPollDataType;
 import com.jnks.iot.server.common.data.transport.mqtt.MqttPullAuthConfiguration;
 import com.jnks.iot.server.common.data.transport.mqtt.MqttPullAuthType;
@@ -221,7 +223,7 @@ public class MqttPullTransportService {
                     sessionContext.getDeviceId(), topic, request.getName(), body.length());
             HttpPullPollDataType dataType = request.getDataType() != null ? request.getDataType() : HttpPullPollDataType.TELEMETRY;
             if (dataType == HttpPullPollDataType.TELEMETRY) {
-                postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, request.resolveTelemetryPayloadKey());
+                postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, request.resolveTelemetryPayloadKey(), topic);
             } else {
                 postAttributes(sessionContext, sessionContext.getSessionInfo(), body,
                         dataType == HttpPullPollDataType.SHARED_ATTRIBUTES);
@@ -233,7 +235,8 @@ public class MqttPullTransportService {
     }
 
     private void postTelemetry(MqttPullCollectorSessionContext collectorCtx,
-                               TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, String telemetryKey) {
+                               TransportProtos.SessionInfoProto sessionInfo, String jsonPayload,
+                               String telemetryKey, String topic) {
         if (sessionInfo == null) {
             log.warn("[{}] Skip telemetry: MQTT pull session is not ready", collectorCtx.getDeviceId());
             return;
@@ -249,7 +252,10 @@ public class MqttPullTransportService {
             wrapper.addProperty(key, jsonPayload);
         }
         TransportProtos.PostTelemetryMsg msg = JsonConverter.convertToTelemetryProto(wrapper);
-        transportService.process(sessionInfo, msg, TransportServiceCallback.EMPTY);
+        // 与直连模式一致：把来源 topic 放进消息元数据，规则链据此区分防区等主题维度
+        JnksIotMsgMetaData md = new JnksIotMsgMetaData();
+        md.putValue(DataConstants.MQTT_TOPIC, topic);
+        transportService.process(sessionInfo, msg, md, TransportServiceCallback.EMPTY);
     }
 
     private void postAttributes(MqttPullCollectorSessionContext collectorCtx,
