@@ -1,0 +1,306 @@
+{
+  "name": "卫星导航设备接口协议 v1",
+  "description": "《设备接口控制协议》TCP 二进制帧。帧头 16 字节 + 数据段 71 字节，共 87 字节。已用真实报文核对：线序为小端，帧头线上字节 34 12 34 12，Length 偏移 12 小端（57 00 = 87），Check 偏移 14 小端；Class=101、No=18 位于偏移 10/11。CurLong/CurLat/CurHeight 为 IEEE754 小端 double；SN 为 16 字节二进制而非文本；CurDate/CurTime 为 BCD（实测 CurDate=2026-10-16、CurTime=14:29:01），平台无 BCD 类型，故保留原始 hex。协议校验「Check 置 0 后按 uint32 逐字异或取低 16 位」平台不支持，未启用整帧校验。心跳 www.keeplive.org（16 字节）不匹配任何命令，模板默认字段为空，不会产生遥测。另含 Class=101/No=1 大数据帧（Head 线上 cc aa bb ff，320 字节）：仅解析 SN、两组日期时间与两组经纬高，偏移 96 之后协议未定义，以 restHex 原样保留。",
+  "protocolTemplates": [
+    {
+      "id": "gnss_device_interface_v1",
+      "name": "卫星导航设备帧模板（16 字节帧头）",
+      "commandByteOffset": 10,
+      "commandMatchWidth": 1,
+      "hexProtocolFields": []
+    }
+  ],
+  "protocolCommands": [
+    {
+      "templateId": "gnss_device_interface_v1",
+      "name": "大数据上报（Class=101 / No=1）",
+      "commandValue": 101,
+      "matchValueType": "UINT8",
+      "secondaryMatchByteOffset": 11,
+      "secondaryMatchValueType": "UINT8",
+      "secondaryMatchValue": 1,
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "frameHead",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "ccaabbff"
+        },
+        {
+          "key": "reserved",
+          "byteOffset": 4,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 6
+        },
+        {
+          "key": "frameClass",
+          "byteOffset": 10,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 101
+        },
+        {
+          "key": "frameNo",
+          "byteOffset": 11,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 1
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 12,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameCheck",
+          "byteOffset": 14,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "sn",
+          "byteOffset": 16,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 16
+        },
+        {
+          "key": "curDate1",
+          "byteOffset": 32,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4
+        },
+        {
+          "key": "curTime1",
+          "byteOffset": 36,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4
+        },
+        {
+          "key": "curLong1",
+          "byteOffset": 40,
+          "valueType": "DOUBLE_LE"
+        },
+        {
+          "key": "curLat1",
+          "byteOffset": 48,
+          "valueType": "DOUBLE_LE"
+        },
+        {
+          "key": "curHeight1",
+          "byteOffset": 56,
+          "valueType": "DOUBLE_LE"
+        },
+        {
+          "key": "curDate2",
+          "byteOffset": 64,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4
+        },
+        {
+          "key": "curTime2",
+          "byteOffset": 68,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4
+        },
+        {
+          "key": "curLong2",
+          "byteOffset": 72,
+          "valueType": "DOUBLE_LE"
+        },
+        {
+          "key": "curLat2",
+          "byteOffset": 80,
+          "valueType": "DOUBLE_LE"
+        },
+        {
+          "key": "curHeight2",
+          "byteOffset": 88,
+          "valueType": "DOUBLE_LE"
+        },
+        {
+          "key": "restHex",
+          "byteOffset": 96,
+          "valueType": "BYTES_AS_HEX",
+          "byteLengthFromByteOffset": 12,
+          "byteLengthFromValueType": "UINT16_LE",
+          "byteLengthFromIntegralSubtract": 96
+        }
+      ]
+    },
+    {
+      "templateId": "gnss_device_interface_v1",
+      "name": "设备状态信息上报（Class=101 / No=18）",
+      "commandValue": 101,
+      "matchValueType": "UINT8",
+      "secondaryMatchByteOffset": 11,
+      "secondaryMatchValueType": "UINT8",
+      "secondaryMatchValue": 18,
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "frameHead",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "34123412"
+        },
+        {
+          "key": "reserved",
+          "byteOffset": 4,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 6
+        },
+        {
+          "key": "frameClass",
+          "byteOffset": 10,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 101
+        },
+        {
+          "key": "frameNo",
+          "byteOffset": 11,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 18
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 12,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameCheck",
+          "byteOffset": 14,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "sn",
+          "byteOffset": 16,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 16
+        },
+        {
+          "key": "curDate",
+          "byteOffset": 32,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4
+        },
+        {
+          "key": "curTime",
+          "byteOffset": 36,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4
+        },
+        {
+          "key": "curLong",
+          "byteOffset": 40,
+          "valueType": "DOUBLE_LE"
+        },
+        {
+          "key": "curLat",
+          "byteOffset": 48,
+          "valueType": "DOUBLE_LE"
+        },
+        {
+          "key": "curHeight",
+          "byteOffset": 56,
+          "valueType": "DOUBLE_LE"
+        },
+        {
+          "key": "gpsFreqState",
+          "byteOffset": 64,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "gloFreqState",
+          "byteOffset": 65,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "bdFreqState",
+          "byteOffset": 66,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "gpsEphState",
+          "byteOffset": 67,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "gloEphState",
+          "byteOffset": 68,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "bdEphState",
+          "byteOffset": 69,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "simState",
+          "byteOffset": 70,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "bak",
+          "byteOffset": 71,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 16
+        }
+      ]
+    },
+    {
+      "templateId": "gnss_device_interface_v1",
+      "name": "信号开关控制（Class=2 / No=4）",
+      "commandValue": 2,
+      "matchValueType": "UINT8",
+      "secondaryMatchByteOffset": 11,
+      "secondaryMatchValueType": "UINT8",
+      "secondaryMatchValue": 4,
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "frameHead",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "ccaabbff"
+        },
+        {
+          "key": "reserved",
+          "byteOffset": 4,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 6
+        },
+        {
+          "key": "frameNo",
+          "byteOffset": 11,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 4
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 12,
+          "valueType": "UINT16_LE",
+          "autoDownlinkTotalFrameLength": true
+        },
+        {
+          "key": "frameCheck",
+          "byteOffset": 14,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "type",
+          "byteOffset": 16,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 0
+        },
+        {
+          "key": "enabled",
+          "byteOffset": 17,
+          "valueType": "UINT8"
+        }
+      ]
+    }
+  ]
+}

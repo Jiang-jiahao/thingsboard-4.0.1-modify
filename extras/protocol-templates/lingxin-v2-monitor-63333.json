@@ -1,0 +1,436 @@
+{
+  "name": "灵信定向 V2 亚冬版监控协议（含云台）",
+  "description": "《灵信定向V2亚冬版监控通信协议202410（含云台）》+ 2026-10-22 设备实报文核对。UDP，后台监听 63333。帧：0 长度(4,LE,整包总字节,含自身) + 4 设备ID(4,LE) + 8 设备类别(4,BE,恒 1) + 12 命令编号(4,LE) + 16 子命令体。子命令体为重复信息单元：长度(4,LE) + 编号(4) + 数据(4,LE)；实测长度值 = 12，即「长度字段 4 + 编号 4 + 数据 4」整段总字节（含长度字段自身）。编号低字节起为 模块字段(2,LE)、模块编号(1)、模块类型(1)，按大端读成 uint32 后：功放N字段0x0001 = 0x01000N01。模块类型：1 功放、5 云台、6/0x0F 整机（实测整机为 0x0F，已同时映射 0x06 兼容）。实测设备为 6 个功放模块，每模块上报 7 个字段，另有整机打击时长/间隔；本帧 44 个单元 × 12 = 528 + 16 = 544 字节。category 线上字节为 00 00 00 01，故按 UINT32_BE 读；下行组帧 values 仍需传 category=1、deviceId。下行 0x02 设置命令的 subUnitLen 按实测上行语义自动写 12（若设备拒绝设置，改为 8 再试）。0x0A 返航、0x0B 迫降文档未定义子命令体，按 16 字节无体帧配置。0x15 监控列表回复不是 LTV 结构，已用超界起始偏移关闭继承的 LTV，避免产生多余遥测。",
+  "protocolTemplates": [
+    {
+      "id": "lingxin_v2_monitor",
+      "name": "灵信 V2 监控帧（UDP）",
+      "commandByteOffset": 12,
+      "commandMatchWidth": 4,
+      "hexProtocolFields": [
+        {
+          "key": "packetLen",
+          "byteOffset": 0,
+          "valueType": "UINT32_LE",
+          "autoDownlinkTotalFrameLength": true
+        },
+        {
+          "key": "deviceId",
+          "byteOffset": 4,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "category",
+          "byteOffset": 8,
+          "valueType": "UINT32_BE"
+        },
+        {
+          "key": "commandNumber",
+          "byteOffset": 12,
+          "valueType": "UINT32_LE"
+        }
+      ],
+      "hexLtvRepeating": {
+        "startByteOffset": 16,
+        "lengthFieldType": "UINT32_LE",
+        "tagFieldType": "UINT32_BE",
+        "chunkOrder": "LTV",
+        "lengthIncludesLengthField": true,
+        "keyPrefix": "lx",
+        "maxItems": 128,
+        "unknownTagMode": "EMIT_HEX",
+        "tagMappings": [
+          {
+            "tagValue": 16777473,
+            "telemetryKey": "gf1PaSwitch",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 50331905,
+            "telemetryKey": "gf1TemperatureC",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 67109121,
+            "telemetryKey": "gf1VswrTenth",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 83886337,
+            "telemetryKey": "gf1OutputPowerDbm",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 100663553,
+            "telemetryKey": "gf1AlarmStatus",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 117440769,
+            "telemetryKey": "gf1VoltageV",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 134217985,
+            "telemetryKey": "gf1CurrentA",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 16777729,
+            "telemetryKey": "gf2PaSwitch",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 50332161,
+            "telemetryKey": "gf2TemperatureC",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 67109377,
+            "telemetryKey": "gf2VswrTenth",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 83886593,
+            "telemetryKey": "gf2OutputPowerDbm",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 100663809,
+            "telemetryKey": "gf2AlarmStatus",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 117441025,
+            "telemetryKey": "gf2VoltageV",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 134218241,
+            "telemetryKey": "gf2CurrentA",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 16777985,
+            "telemetryKey": "gf3PaSwitch",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 50332417,
+            "telemetryKey": "gf3TemperatureC",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 67109633,
+            "telemetryKey": "gf3VswrTenth",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 83886849,
+            "telemetryKey": "gf3OutputPowerDbm",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 100664065,
+            "telemetryKey": "gf3AlarmStatus",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 117441281,
+            "telemetryKey": "gf3VoltageV",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 134218497,
+            "telemetryKey": "gf3CurrentA",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 16778241,
+            "telemetryKey": "gf4PaSwitch",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 50332673,
+            "telemetryKey": "gf4TemperatureC",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 67109889,
+            "telemetryKey": "gf4VswrTenth",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 83887105,
+            "telemetryKey": "gf4OutputPowerDbm",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 100664321,
+            "telemetryKey": "gf4AlarmStatus",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 117441537,
+            "telemetryKey": "gf4VoltageV",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 134218753,
+            "telemetryKey": "gf4CurrentA",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 16778497,
+            "telemetryKey": "gf5PaSwitch",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 50332929,
+            "telemetryKey": "gf5TemperatureC",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 67110145,
+            "telemetryKey": "gf5VswrTenth",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 83887361,
+            "telemetryKey": "gf5OutputPowerDbm",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 100664577,
+            "telemetryKey": "gf5AlarmStatus",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 117441793,
+            "telemetryKey": "gf5VoltageV",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 134219009,
+            "telemetryKey": "gf5CurrentA",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 16778753,
+            "telemetryKey": "gf6PaSwitch",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 50333185,
+            "telemetryKey": "gf6TemperatureC",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 67110401,
+            "telemetryKey": "gf6VswrTenth",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 83887617,
+            "telemetryKey": "gf6OutputPowerDbm",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 100664833,
+            "telemetryKey": "gf6AlarmStatus",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 117442049,
+            "telemetryKey": "gf6VoltageV",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 134219265,
+            "telemetryKey": "gf6CurrentA",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 16777477,
+            "telemetryKey": "ptzPanDeg",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 33554693,
+            "telemetryKey": "ptzTiltDeg",
+            "valueType": "INT_AUTO_LE"
+          },
+          {
+            "tagValue": 50331909,
+            "telemetryKey": "ptzPanSpeed",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 67109125,
+            "telemetryKey": "ptzTiltSpeed",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 268435727,
+            "telemetryKey": "strikeDurationSec",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 268435718,
+            "telemetryKey": "strikeDurationSec",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 285212943,
+            "telemetryKey": "strikeIntervalSec",
+            "valueType": "UINT_AUTO_LE"
+          },
+          {
+            "tagValue": 285212934,
+            "telemetryKey": "strikeIntervalSec",
+            "valueType": "UINT_AUTO_LE"
+          }
+        ]
+      }
+    }
+  ],
+  "protocolCommands": [
+    {
+      "templateId": "lingxin_v2_monitor",
+      "name": "0x01 状态获取",
+      "commandValue": 1,
+      "matchValueType": "UINT32_LE",
+      "direction": "DOWNLINK"
+    },
+    {
+      "templateId": "lingxin_v2_monitor",
+      "name": "0x02 设置命令",
+      "commandValue": 2,
+      "matchValueType": "UINT32_LE",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "subUnitLen",
+          "byteOffset": 16,
+          "valueType": "UINT32_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "moduleField",
+          "byteOffset": 20,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "currentModuleNo",
+          "byteOffset": 22,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "moduleType",
+          "byteOffset": 23,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "dataU32",
+          "byteOffset": 24,
+          "valueType": "UINT32_LE",
+          "includeInDownlinkPayloadLength": true
+        }
+      ],
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "subUnitLen"
+    },
+    {
+      "templateId": "lingxin_v2_monitor",
+      "name": "0x05 监控列表查询",
+      "commandValue": 5,
+      "matchValueType": "UINT32_LE",
+      "direction": "DOWNLINK"
+    },
+    {
+      "templateId": "lingxin_v2_monitor",
+      "name": "0x07 关闭",
+      "commandValue": 7,
+      "matchValueType": "UINT32_LE",
+      "direction": "DOWNLINK"
+    },
+    {
+      "templateId": "lingxin_v2_monitor",
+      "name": "0x08 重启",
+      "commandValue": 8,
+      "matchValueType": "UINT32_LE",
+      "direction": "DOWNLINK"
+    },
+    {
+      "templateId": "lingxin_v2_monitor",
+      "name": "0x0A 返航开启",
+      "commandValue": 10,
+      "matchValueType": "UINT32_LE",
+      "direction": "DOWNLINK"
+    },
+    {
+      "templateId": "lingxin_v2_monitor",
+      "name": "0x0B 迫降开启",
+      "commandValue": 11,
+      "matchValueType": "UINT32_LE",
+      "direction": "DOWNLINK"
+    },
+    {
+      "templateId": "lingxin_v2_monitor",
+      "name": "0x03 状态上报",
+      "commandValue": 3,
+      "matchValueType": "UINT32_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY"
+    },
+    {
+      "templateId": "lingxin_v2_monitor",
+      "name": "0x12 设置回复",
+      "commandValue": 18,
+      "matchValueType": "UINT32_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY"
+    },
+    {
+      "templateId": "lingxin_v2_monitor",
+      "name": "0x15 监控列表回复",
+      "commandValue": 21,
+      "matchValueType": "UINT32_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "monitorListTotalLen",
+          "byteOffset": 16,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "supportedCapabilityIdsHex",
+          "byteOffset": 20,
+          "valueType": "BYTES_AS_HEX",
+          "byteLengthFromByteOffset": 16,
+          "byteLengthFromValueType": "UINT32_LE"
+        }
+      ],
+      "ltvRepeating": {
+        "startByteOffset": 65535,
+        "lengthFieldType": "UINT32_LE",
+        "tagFieldType": "UINT32_BE",
+        "chunkOrder": "LTV",
+        "keyPrefix": "lx",
+        "unknownTagMode": "SKIP"
+      }
+    },
+    {
+      "templateId": "lingxin_v2_monitor",
+      "name": "0x18 重启回复",
+      "commandValue": 24,
+      "matchValueType": "UINT32_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY"
+    }
+  ]
+}

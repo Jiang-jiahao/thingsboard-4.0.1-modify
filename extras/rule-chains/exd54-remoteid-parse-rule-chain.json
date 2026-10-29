@@ -1,0 +1,75 @@
+{
+  "ruleChain": {
+    "additionalInfo": {
+      "description": "EXD54-LS/LG 远程识别地面站：仅处理遥测。把无 method 的 JSON 遥测键 exd54Payload 拆成 devId/osid/经纬度/高度/速度/操作员位置等字段（心跳拆出 count），再由保存时序节点入库。"
+    },
+    "name": "EXD54 远程识别地面站解析规则链",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "externalId": null
+  },
+  "metadata": {
+    "firstNodeIndex": 0,
+    "nodes": [
+      {
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotMsgTypeFilterNode",
+        "name": "仅放行遥测上报",
+        "configurationVersion": 0,
+        "configuration": {
+          "messageTypes": [
+            "POST_TELEMETRY_REQUEST"
+          ]
+        },
+        "additionalInfo": {
+          "layoutX": 440,
+          "layoutY": 200
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.transform.JnksIotTransformMsgNode",
+        "name": "解析 exd54Payload",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var p = msg.exd54Payload;\nif (p == null) {\n  return {msg: msg, metadata: metadata, msgType: msgType};\n}\nif (typeof p === 'string') {\n  try { p = JSON.parse(p); } catch (e) { return {msg: msg, metadata: metadata, msgType: msgType}; }\n}\nvar out = {};\nif (p.devId !== undefined) { out.devId = p.devId; }\nif (p.data != null && typeof p.data === 'object') {\n  var d = p.data;\n  out.msgKind = 'detect';\n  if (d.osid !== undefined) { out.osid = d.osid; }\n  if (d.UAType !== undefined) { out.uavType = d.UAType; }\n  if (d.Status !== undefined) { out.flightStatus = d.Status; }\n  if (d.Heading !== undefined) { out.heading = d.Heading; }\n  if (d.Speed !== undefined) { out.speed = d.Speed; }\n  if (d.Uprate !== undefined) { out.uprate = d.Uprate; }\n  if (d.Lon !== undefined) { out.lon = d.Lon; }\n  if (d.Lat !== undefined) { out.lat = d.Lat; }\n  if (d.AltGeo !== undefined) { out.altGeo = d.AltGeo; }\n  if (d.AltBaro !== undefined) { out.altBaro = d.AltBaro; }\n  if (d.Height !== undefined) { out.height = d.Height; }\n  if (d.Op_Lon !== undefined) { out.opLon = d.Op_Lon; }\n  if (d.Op_Lat !== undefined) { out.opLat = d.Op_Lat; }\n  if (d.Op_Alt !== undefined) { out.opAlt = d.Op_Alt; }\n} else if (p.count !== undefined) {\n  out.msgKind = 'heartbeat';\n  out.count = p.count;\n} else {\n  out.msgKind = 'unknown';\n}\nreturn {msg: out, metadata: metadata, msgType: msgType};\n"
+        },
+        "additionalInfo": {
+          "layoutX": 710,
+          "layoutY": 200
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode",
+        "name": "保存遥测数据",
+        "configurationVersion": 1,
+        "configuration": {
+          "defaultTTL": 0,
+          "useServerTs": false,
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          }
+        },
+        "additionalInfo": {
+          "layoutX": 980,
+          "layoutY": 200
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 1,
+        "type": "True"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 2,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

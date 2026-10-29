@@ -1,0 +1,282 @@
+{
+  "说明": "灵信定向 V2 云台控制与反制 RPC 方法。云台方法绑定 0x02 设置命令；returnHome/forceLand 绑定 0x0A/0x0B；strikeStop 绑定 0x07 关闭。反制三条均无参数，按 16 字节帧下发（文档未定义子命令体）。",
+  "rpcMethods": [
+    {
+      "id": "ptzPan",
+      "displayName": "云台-水平位置",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "angle": "dataU32"
+      }
+    },
+    {
+      "id": "ptzTilt",
+      "displayName": "云台-俯仰位置",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "angle": "dataU32"
+      }
+    },
+    {
+      "id": "ptzPanSpeed",
+      "displayName": "云台-水平速度",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "speed": "dataU32"
+      }
+    },
+    {
+      "id": "ptzTiltSpeed",
+      "displayName": "云台-俯仰速度",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "speed": "dataU32"
+      }
+    },
+    {
+      "id": "ptzRight",
+      "displayName": "云台-向右转",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "value": "dataU32"
+      }
+    },
+    {
+      "id": "ptzLeft",
+      "displayName": "云台-向左转",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "value": "dataU32"
+      }
+    },
+    {
+      "id": "ptzUp",
+      "displayName": "云台-向仰转",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "value": "dataU32"
+      }
+    },
+    {
+      "id": "ptzDown",
+      "displayName": "云台-向俯转",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "value": "dataU32"
+      }
+    },
+    {
+      "id": "ptzStop",
+      "displayName": "云台-停止",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "value": "dataU32"
+      }
+    },
+    {
+      "id": "ptzPresetSet",
+      "displayName": "云台-设置预置位",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "presetNo": "dataU32"
+      }
+    },
+    {
+      "id": "ptzPresetCall",
+      "displayName": "云台-调用预置位",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "presetNo": "dataU32"
+      }
+    },
+    {
+      "id": "ptzPresetDelete",
+      "displayName": "云台-删除预置位",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 2,
+      "templateCommandName": "0x02 设置命令",
+      "paramMap": {
+        "presetNo": "dataU32"
+      }
+    },
+    {
+      "id": "returnHome",
+      "displayName": "反制-驱离（返航）",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 10,
+      "templateCommandName": "0x0A 返航开启"
+    },
+    {
+      "id": "forceLand",
+      "displayName": "反制-迫降",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 11,
+      "templateCommandName": "0x0B 迫降开启"
+    },
+    {
+      "id": "strikeStop",
+      "displayName": "反制-关闭",
+      "oneWay": true,
+      "bindingType": "UDP_TEMPLATE",
+      "templateId": "lingxin_v2_monitor",
+      "commandValue": 7,
+      "templateCommandName": "0x07 关闭"
+    }
+  ],
+  "deviceRpcParamDefaultsByMethod": {
+    "ptzPan": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 1
+    },
+    "ptzTilt": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 2
+    },
+    "ptzPanSpeed": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 3
+    },
+    "ptzTiltSpeed": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 4
+    },
+    "ptzRight": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 5
+    },
+    "ptzLeft": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 6
+    },
+    "ptzUp": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 7
+    },
+    "ptzDown": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 8
+    },
+    "ptzStop": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 9
+    },
+    "ptzPresetSet": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 10
+    },
+    "ptzPresetCall": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 11
+    },
+    "ptzPresetDelete": {
+      "deviceId": 510020,
+      "category": 1,
+      "moduleType": 5,
+      "currentModuleNo": 1,
+      "moduleField": 12
+    },
+    "returnHome": {
+      "deviceId": 510017,
+      "category": 1
+    },
+    "forceLand": {
+      "deviceId": 510017,
+      "category": 1
+    },
+    "strikeStop": {
+      "deviceId": 510017,
+      "category": 1
+    }
+  },
+  "取值说明": {
+    "ptzPan.angle": "0~360，单位度",
+    "ptzTilt.angle": "-25~45，单位度（负值按有符号 32 位下发）",
+    "ptzPanSpeed.speed": "1~63",
+    "ptzTiltSpeed.speed": "1~63",
+    "ptzRight/Left/Up/Down/Stop.value": "固定填 1 表示开始动作",
+    "ptzPresetSet/Call/Delete.presetNo": "1~110"
+  }
+}

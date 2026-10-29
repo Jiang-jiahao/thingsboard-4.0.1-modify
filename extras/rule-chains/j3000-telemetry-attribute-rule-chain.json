@@ -1,0 +1,231 @@
+{
+  "ruleChain": {
+    "additionalInfo": {
+      "description": "J3000+ 定向/全向共用：协议模板按命令配置 uplinkDataDestination（属性/遥测），本链只按消息类型分流。属性消息先分组再拆平：只保留协议字段（temperature/tempStatus/amp*/jammingOn/ptz* 及配置参数），去掉 startCode/srcAddr/dstAddr/cmd/paramLength/origCmd 等模板键后存 CLIENT_SCOPE 属性；遥测消息仍按 cmd_0xNN 分组存时序。只放行已识别且关键字段完整的命令，未知/部分帧丢弃。"
+    },
+    "name": "华诺 J3000+ 遥测/属性分类规则链",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "externalId": null
+  },
+  "metadata": {
+    "firstNodeIndex": 10,
+    "nodes": [
+      {
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotJsFilterNode",
+        "name": "仅放行已识别命令",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "if (msg.hexCmdProfile == null) {\n    return false;\n}\nvar code = msg.cmd;\nvar orig = msg.origCmd;\nvar logical = (code === 0xA2 && orig != null) ? orig : code;\nif (logical == null) {\n    return false;\n}\nvar h = logical.toString(16);\nif (h.length < 2) {\n    h = '0' + h;\n}\nvar hx = '0x' + h;\nif (hx === '0x21') {\n    return msg.interferenceStatusHex != null;\n}\nif (hx === '0x49') {\n    return msg.temperature != null;\n}\nif (hx === '0x06') {\n    return msg.ptzAzimuth != null;\n}\nif (hx === '0x41') {\n    return msg.serialNumber != null;\n}\nif (hx === '0x42') {\n    return msg.ipHex != null;\n}\nif (hx === '0x44') {\n    return msg.hwVersionHex != null;\n}\nif (hx === '0x1f') {\n    return msg.monostableSec != null;\n}\nif (hx === '0x47') {\n    return msg.tempHigh != null;\n}\nif (hx === '0x37') {\n    return msg.freqBandsHex != null;\n}\nif (hx === '0x39') {\n    return msg.presetGradesHex != null;\n}\nif (hx === '0x3d') {\n    return msg.sweepAttenCh1 != null;\n}\nif (hx === '0x3f') {\n    return msg.freqPointsHex != null;\n}\nreturn true;",
+          "tbelScript": null
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 248,
+          "layoutY": 547
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.transform.JnksIotTransformMsgNode",
+        "name": "按命令分组",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var code = msg.cmd;\nvar orig = msg.origCmd;\nvar logical = (code === 0xA2 && orig != null) ? orig : code;\nif (logical == null) {\n  return {msg: msg, metadata: metadata, msgType: msgType};\n}\nvar h = logical.toString(16);\nif (h.length < 2) { h = '0' + h; }\n\nfunction normHex(v, bytes) {\n  if (v == null) return null;\n  var s = String(v).toLowerCase();\n  if (s.indexOf('0x') === 0) { s = s.substring(2); }\n  var need = bytes * 2;\n  if (s.length > need) { s = s.substring(s.length - need); }\n  while (s.length < need) { s = '0' + s; }\n  return s;\n}\nfunction hexByte(h, i) { return parseInt(h.substring(i * 2, i * 2 + 2), 16); }\nfunction ipStr(h) { return hexByte(h,0)+'.'+hexByte(h,1)+'.'+hexByte(h,2)+'.'+hexByte(h,3); }\nfunction macStr(h) {\n  var parts = [];\n  for (var i = 0; i < 6; i++) {\n    var x = hexByte(h, i).toString(16).toUpperCase();\n    if (x.length < 2) { x = '0' + x; }\n    parts.push(x);\n  }\n  return parts.join(':');\n}\nfunction verStr(h) { return 'V' + hexByte(h,1) + '.' + hexByte(h,2) + '.' + hexByte(h,3); }\nfunction bandLabel(i) { return ['L','GPS','5.8G','2.4G'][i]; }\nfunction pointsStr(h) {\n  var out = [];\n  for (var c = 0; c < 4; c++) {\n    var vals = [];\n    for (var p = 0; p < 8; p++) {\n      var off = (c * 8 + p) * 4;\n      var v = parseInt(h.substring(off, off + 4), 16);\n      if (v > 0) { vals.push(v); }\n    }\n    out.push(bandLabel(c) + ': ' + (vals.length ? vals.join(', ') : '-'));\n  }\n  return out.join('; ');\n}\nfunction bandsStr(h) {\n  var out = [];\n  for (var c = 0; c < 4; c++) {\n    var vals = [];\n    for (var b = 0; b < 8; b++) {\n      var off = (c * 8 + b) * 8;\n      var st = parseInt(h.substring(off, off + 4), 16);\n      var en = parseInt(h.substring(off + 4, off + 8), 16);\n      if (st > 0 || en > 0) { vals.push(st + '-' + en); }\n    }\n    out.push(bandLabel(c) + ': ' + (vals.length ? vals.join(', ') : '-'));\n  }\n  return out.join('; ');\n}\nfunction gradesStr(h) {\n  var out = [];\n  for (var c = 0; c < 4; c++) {\n    var vals = [];\n    for (var g = 0; g < 4; g++) {\n      var off = (c * 4 + g) * 4;\n      vals.push(parseInt(h.substring(off, off + 4), 16) / 1000);\n    }\n    out.push(bandLabel(c) + ': ' + vals.join(', ') + ' dB');\n  }\n  return out.join('; ');\n}\nfunction pulseStr(h) {\n  var names = ['5.8G','2.4G','GPS','900M'];\n  var out = [];\n  for (var i = 0; i < 4; i++) {\n    var off = i * 10;\n    var mode = parseInt(h.substring(off, off + 2), 16);\n    var period = parseInt(h.substring(off + 2, off + 6), 16);\n    var duty = parseInt(h.substring(off + 6, off + 10), 16);\n    out.push(names[i] + ': ' + (mode ? 'on' : 'off') + ', ' + period + 'ms, ' + duty + '‰');\n  }\n  return out.join('; ');\n}\nfunction fmtAndMove(flat, src, dst, fn) {\n  if (flat[src] != null) {\n    var val = fn(flat[src]);\n    delete flat[src];\n    flat[dst] = val;\n  }\n}\n\nif (msgType === 'POST_ATTRIBUTES_REQUEST') {\n  var flat = {};\n  var skip = {'hexCmdProfile':1,'startCode':1,'srcAddr':1,'dstAddr':1,'cmd':1,'paramLength':1,'origCmd':1,\n              'interferenceStatusHex':1,'amp1Switch':1,'amp2Switch':1,'amp3Switch':1,'amp4Switch':1,'amp5Switch':1,\n              'reserved':1,'reservedHex':1,'result':1,'resultRestHex':1};\n  for (var k in msg) {\n    if (!skip[k]) { flat[k] = msg[k]; }\n  }\n  if (h === '21') {\n    var any = 0;\n    for (var i = 1; i <= 5; i++) {\n      var w = msg['amp' + i + 'Switch'];\n      if (w != null) {\n        any = any | w;\n        flat['amp' + i + '_900M'] = (w & 8) ? true : false;\n        flat['amp' + i + '_GPS'] = (w & 4) ? true : false;\n        flat['amp' + i + '_2G4'] = (w & 2) ? true : false;\n        flat['amp' + i + '_5G8'] = (w & 1) ? true : false;\n      }\n    }\n    flat['jammingOn'] = any !== 0;\n  }\n  fmtAndMove(flat, 'ipHex', 'ip', function(v){ return ipStr(normHex(v,4)); });\n  fmtAndMove(flat, 'netmaskHex', 'netmask', function(v){ return ipStr(normHex(v,4)); });\n  fmtAndMove(flat, 'gatewayHex', 'gateway', function(v){ return ipStr(normHex(v,4)); });\n  fmtAndMove(flat, 'macHex', 'mac', function(v){ return macStr(normHex(v,6)); });\n  fmtAndMove(flat, 'hwVersionHex', 'hwVersion', function(v){ return verStr(normHex(v,4)); });\n  fmtAndMove(flat, 'bootVersionHex', 'bootVersion', function(v){ return verStr(normHex(v,4)); });\n  fmtAndMove(flat, 'appVersionHex', 'appVersion', function(v){ return verStr(normHex(v,4)); });\n  fmtAndMove(flat, 'freqBandsHex', 'freqBands', function(v){ return bandsStr(normHex(v,128)); });\n  fmtAndMove(flat, 'freqPointsHex', 'freqPoints', function(v){ return pointsStr(normHex(v,64)); });\n  fmtAndMove(flat, 'presetGradesHex', 'presetGrades', function(v){ return gradesStr(normHex(v,32)); });\n  fmtAndMove(flat, 'pulseModesHex', 'pulseModes', function(v){ return pulseStr(normHex(v,20)); });\n  return {msg: flat, metadata: metadata, msgType: msgType};\n}\nvar key = 'cmd_0x' + h;\nvar group = {};\nfor (var k2 in msg) {\n  if (k2 !== 'hexCmdProfile') { group[k2] = msg[k2]; }\n}\nif (h === '21') {\n  var any2 = 0;\n  for (var j = 1; j <= 5; j++) {\n    var w2 = group['amp' + j + 'Switch'];\n    if (w2 != null) {\n      any2 = any2 | w2;\n      group['amp' + j + '_900M'] = (w2 & 8) ? true : false;\n      group['amp' + j + '_GPS'] = (w2 & 4) ? true : false;\n      group['amp' + j + '_2G4'] = (w2 & 2) ? true : false;\n      group['amp' + j + '_5G8'] = (w2 & 1) ? true : false;\n    }\n  }\n  group['jammingOn'] = any2 !== 0;\n}\nvar out = {};\nout[key] = group;\nreturn {msg: out, metadata: metadata, msgType: msgType};\n"
+        },
+        "additionalInfo": {
+          "layoutX": 468,
+          "layoutY": 543
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotJsSwitchNode",
+        "name": "属性/遥测分流",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "return [msgType === 'POST_ATTRIBUTES_REQUEST' ? 'attr' : 'tele'];\n"
+        },
+        "additionalInfo": {
+          "layoutX": 713,
+          "layoutY": 550
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.transform.JnksIotTransformMsgNode",
+        "name": "属性字段拆平",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var group = msg;\nvar keys = Object.keys(msg);\nif (keys.length === 1 && keys[0].indexOf('cmd_0x') === 0 && msg[keys[0]] != null && typeof msg[keys[0]] === 'object') {\n  group = msg[keys[0]];\n}\nvar drop = {'startCode':1,'srcAddr':1,'dstAddr':1,'cmd':1,'paramLength':1,'origCmd':1,'hexCmdProfile':1,'result':1,'resultRestHex':1};\nvar out = {};\nfor (var k in group) {\n  if (drop[k]) { continue; }\n  if (k.indexOf('reserved') === 0) { continue; }\n  out[k] = group[k];\n}\nreturn {msg: out, metadata: metadata, msgType: 'POST_ATTRIBUTES_REQUEST'};\n"
+        },
+        "additionalInfo": {
+          "layoutX": 967,
+          "layoutY": 513
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgAttributesNode",
+        "name": "保存属性数据",
+        "configurationVersion": 3,
+        "configuration": {
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          },
+          "scope": "CLIENT_SCOPE",
+          "notifyDevice": false,
+          "sendAttributesUpdatedNotification": false,
+          "updateAttributesOnlyOnValueChange": true
+        },
+        "additionalInfo": {
+          "layoutX": 1205,
+          "layoutY": 512
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode",
+        "name": "保存遥测数据",
+        "configurationVersion": 1,
+        "configuration": {
+          "defaultTTL": 0,
+          "useServerTs": false,
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          }
+        },
+        "additionalInfo": {
+          "layoutX": 983,
+          "layoutY": 676
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotMsgTypeSwitchNode",
+        "name": "消息类型分流",
+        "configurationVersion": 0,
+        "configuration": {
+          "version": 0
+        },
+        "additionalInfo": {
+          "layoutX": 426,
+          "layoutY": 57
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
+        "name": "记录设备 RPC",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
+          "tbelScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+        },
+        "additionalInfo": {
+          "layoutX": 928,
+          "layoutY": 73
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
+        "name": "记录其它消息",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
+          "tbelScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+        },
+        "additionalInfo": {
+          "layoutX": 925,
+          "layoutY": 191
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.rpc.JnksIotSendRPCRequestNode",
+        "name": "RPC 请求调用",
+        "configurationVersion": 0,
+        "configuration": {
+          "timeoutInSeconds": 60
+        },
+        "additionalInfo": {
+          "layoutX": 933,
+          "layoutY": 337
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.profile.JnksIotDeviceProfileNode",
+        "name": "设备档案节点",
+        "configurationVersion": 1,
+        "configuration": {
+          "persistAlarmRulesState": false,
+          "fetchAlarmRulesStateOnStart": false
+        },
+        "additionalInfo": {
+          "description": "Process incoming messages from devices with the alarm rules defined in the device profile. Dispatch all incoming messages with \"Success\" relation type.",
+          "layoutX": 283,
+          "layoutY": 148
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 1,
+        "type": "True"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 2,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 3,
+        "type": "attr"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 5,
+        "type": "tele"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 4,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 0,
+        "type": "Post attributes"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 0,
+        "type": "Post telemetry"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 7,
+        "type": "RPC Request from Device"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 8,
+        "type": "Other"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 9,
+        "type": "RPC Request to Device"
+      },
+      {
+        "fromIndex": 10,
+        "toIndex": 6,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

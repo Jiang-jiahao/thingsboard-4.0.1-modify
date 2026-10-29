@@ -1,0 +1,201 @@
+{
+  "ruleChain": {
+    "additionalInfo": {
+      "description": "ADS2100C 工作状态上报：仅处理设备遥测，忽略所有属性保存消息；保存时序与 No=18 状态帧的客户端属性；按设备每 30 秒去重一次（取窗口内最后一条），再从客户端属性读取 simState/gpsFreqState/curLong/curLat，构造 HwtTcpWorkstatusVO 调 REST 接口。"
+    },
+    "name": "HWT 设备工作状态上报（30s 节流）",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "externalId": null
+  },
+  "metadata": {
+    "firstNodeIndex": 0,
+    "nodes": [
+      {
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotMsgTypeFilterNode",
+        "name": "仅放行遥测上报",
+        "configurationVersion": 0,
+        "configuration": {
+          "messageTypes": [
+            "POST_TELEMETRY_REQUEST"
+          ]
+        },
+        "additionalInfo": {
+          "layoutX": 440,
+          "layoutY": 200
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode",
+        "name": "保存时序数据",
+        "configurationVersion": 1,
+        "configuration": {
+          "defaultTTL": 0,
+          "useServerTs": false,
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          }
+        },
+        "additionalInfo": {
+          "layoutX": 710,
+          "layoutY": 200
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotJsFilterNode",
+        "name": "仅放行设备状态帧(No=18)",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "return msg.simState != null && msg.gpsFreqState != null && msg.curLong != null && msg.curLat != null;"
+        },
+        "additionalInfo": {
+          "layoutX": 980,
+          "layoutY": 200
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgAttributesNode",
+        "name": "保存客户端属性",
+        "configurationVersion": 3,
+        "configuration": {
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          },
+          "scope": "CLIENT_SCOPE",
+          "notifyDevice": false,
+          "sendAttributesUpdatedNotification": false,
+          "updateAttributesOnlyOnValueChange": true
+        },
+        "additionalInfo": {
+          "layoutX": 1250,
+          "layoutY": 200
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.deduplication.JnksIotMsgDeduplicationNode",
+        "name": "30 秒节流(取最后一条)",
+        "configurationVersion": 1,
+        "configuration": {
+          "interval": 30,
+          "strategy": "LAST",
+          "maxPendingMsgs": 100,
+          "maxRetries": 3
+        },
+        "additionalInfo": {
+          "layoutX": 1250,
+          "layoutY": 480
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.transform.JnksIotTransformMsgNode",
+        "name": "构造 HwtTcpWorkstatusVO",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var body = { deviceId: metadata.deviceId, deviceStatus: msg.cs_simState === 3 ? 1 : 0, jammingState: msg.cs_gpsFreqState === 0 ? 0 : 1, gpsLong: msg.cs_curLong, gpsLat: msg.cs_curLat }; return { msg: body, metadata: metadata, msgType: msgType };"
+        },
+        "additionalInfo": {
+          "layoutX": 710,
+          "layoutY": 480
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.rest.JnksIotRestApiCallNode",
+        "name": "上报工作状态 REST",
+        "configurationVersion": 1,
+        "configuration": {
+          "restEndpointUrlPattern": "http://127.0.0.1:18080/api/hwt-tcp/workstatus",
+          "requestMethod": "POST",
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "useSimpleClientHttpFactory": false,
+          "readTimeoutMs": 5000,
+          "maxParallelRequestsCount": 0,
+          "parseToPlainText": false,
+          "enableProxy": false,
+          "useSystemProxyProperties": false,
+          "proxyHost": "",
+          "proxyPort": 0,
+          "proxyUser": "",
+          "proxyPassword": "",
+          "proxyScheme": "",
+          "credentials": {
+            "type": "anonymous"
+          },
+          "ignoreRequestBody": false,
+          "maxInMemoryBufferSizeInKb": 256
+        },
+        "additionalInfo": {
+          "layoutX": 440,
+          "layoutY": 480
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.metadata.JnksIotGetAttributesNode",
+        "name": "读取客户端属性",
+        "configurationVersion": 1,
+        "configuration": {
+          "clientAttributeNames": [
+            "simState",
+            "gpsFreqState",
+            "curLong",
+            "curLat"
+          ],
+          "sharedAttributeNames": [],
+          "serverAttributeNames": [],
+          "latestTsKeyNames": [],
+          "tellFailureIfAbsent": false,
+          "getLatestValueWithTs": false,
+          "fetchTo": "DATA"
+        },
+        "additionalInfo": {
+          "layoutX": 980,
+          "layoutY": 480
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 1,
+        "type": "True"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 2,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 3,
+        "type": "True"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 4,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 7,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 5,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 6,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

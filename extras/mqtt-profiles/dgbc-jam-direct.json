@@ -1,0 +1,99 @@
+{
+  "name": "大公博创 干扰类（DG-W2003B / DG-W2003C）（设备直连）",
+  "description": "大公博创 V2.1 通用平台接口协议，干扰类（DG-W2003B / DG-W2003C），设备直连本平台 MQTT Broker。设备发布 dgb/{deviceid}/status/*，平台按通配主题入库（整段负载包在对应遥测键下）。下行控制走 dgb/${params.deviceId}/request/*，等待 response/* 应答。",
+  "type": "DEFAULT",
+  "transportType": "MQTT",
+  "profileData": {
+    "configuration": {
+      "type": "DEFAULT"
+    },
+    "transportConfiguration": {
+      "type": "MQTT",
+      "deviceTelemetryTopic": "dgb/+/status/status_report",
+      "deviceAttributesTopic": "v1/devices/me/attributes",
+      "deviceAttributesSubscribeTopic": "v1/devices/me/attributes",
+      "uplinkTopicMappings": [
+        {
+          "name": "status_report",
+          "enabled": true,
+          "topic": "dgb/+/status/status_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "status"
+        },
+        {
+          "name": "ability_status",
+          "enabled": true,
+          "topic": "dgb/+/status/ability_status",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "ability"
+        },
+        {
+          "name": "switch_report",
+          "enabled": true,
+          "topic": "dgb/+/status/switch_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "switch"
+        },
+        {
+          "name": "channel_report",
+          "enabled": true,
+          "topic": "dgb/+/status/channel_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "channel"
+        },
+        {
+          "name": "dev_alarm_report",
+          "enabled": true,
+          "topic": "dgb/+/status/dev_alarm_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "alarm"
+        }
+      ],
+      "transportPayloadTypeConfiguration": {
+        "transportPayloadType": "JSON"
+      },
+      "sparkplug": false,
+      "sparkplugAttributesMetricNames": [
+        "Properties/*",
+        "Device Control/*",
+        "Node Control/*"
+      ],
+      "sendAckOnValidationException": false
+    },
+    "provisionConfiguration": {
+      "type": "DISABLED"
+    },
+    "alarms": [],
+    "rpcMethods": [
+      {
+        "id": "channelOpen",
+        "displayName": "干扰通道开启",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/channel_open",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/channel_set",
+        "mqttPayloadTemplate": "{\"suppressChannels\":[{\"suppressDirection\":\"${params.direction}\",\"channel\":[${params.channels}]}],\"sustainTime\":${params.sustainTime}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\", \"direction\": \"1\", \"channels\": \"\\\"2400\\\",\\\"5800\\\"\", \"sustainTime\": 30}"
+      },
+      {
+        "id": "channelClose",
+        "displayName": "干扰通道关闭",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/channel_close",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/channel_close",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\"}"
+      }
+    ]
+  }
+}

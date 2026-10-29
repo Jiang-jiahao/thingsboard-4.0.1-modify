@@ -1,0 +1,988 @@
+{
+  "name": "凡双固定式无人机侦测设备 V2.3.6 TCP 协议",
+  "description": "《固定式无人机侦测设备通信协议V2.3.6》TCP 二进制帧：4 字节 0xEEEEEEEE 起始 + 25 字节帧头 + 数据 + 1 字节 SUM8 + 4 字节 0xAAAAAAAA。命令字为帧头偏移 19 的小端 uint16（nDataType）。已用文档中 type=1 / type=56 / type=8 / type=9 报文核对偏移与校验：SUM8 = 字节[4, 尾部前 5 字节) 累加取低字节。type=56 的目标信息为变长 UTF-8 名称，平台字段偏移固定，故名称之后的位置/频率等以 targetRestHex 原样保留。",
+  "protocolTemplates": [
+    {
+      "id": "fanshuang_rmtp_v236",
+      "name": "凡双固定式无人机侦测设备帧模板（EEEEEEEE … AAAAAAAA）",
+      "commandByteOffset": 19,
+      "commandMatchWidth": 1,
+      "checksum": {
+        "type": "SUM8",
+        "fromByte": 4,
+        "toExclusive": -5,
+        "checksumByteIndex": -5
+      },
+      "hexProtocolFields": []
+    }
+  ],
+  "protocolCommands": [
+    {
+      "templateId": "fanshuang_rmtp_v236",
+      "name": "监测设备信息（心跳/设备状态）",
+      "commandValue": 1,
+      "matchValueType": "UINT16_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "startFlag",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "eeeeeeee"
+        },
+        {
+          "key": "protocolVersion",
+          "byteOffset": 4,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 6,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "tsYear",
+          "byteOffset": 10,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "tsMonth",
+          "byteOffset": 12,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsDay",
+          "byteOffset": 13,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsHour",
+          "byteOffset": 14,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMinute",
+          "byteOffset": 15,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsSecond",
+          "byteOffset": 16,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMillisecond",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "dataType",
+          "byteOffset": 19,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "packetNumber",
+          "byteOffset": 21,
+          "valueType": "UINT64_LE"
+        },
+        {
+          "key": "deviceId",
+          "byteOffset": 29,
+          "valueType": "INT32_LE"
+        },
+        {
+          "key": "deviceName",
+          "byteOffset": 33,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLength": 20
+        },
+        {
+          "key": "longitude",
+          "byteOffset": 53,
+          "valueType": "FLOAT_LE"
+        },
+        {
+          "key": "latitude",
+          "byteOffset": 57,
+          "valueType": "FLOAT_LE"
+        },
+        {
+          "key": "altitude",
+          "byteOffset": 61,
+          "valueType": "FLOAT_LE"
+        },
+        {
+          "key": "workState",
+          "byteOffset": 65,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "azimuth",
+          "byteOffset": 67,
+          "valueType": "FLOAT_LE"
+        },
+        {
+          "key": "deviceType",
+          "byteOffset": 71,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLength": 4
+        },
+        {
+          "key": "runStateHex",
+          "byteOffset": 75,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4
+        },
+        {
+          "key": "compassState",
+          "byteOffset": 75,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLength": 1
+        },
+        {
+          "key": "gpsState",
+          "byteOffset": 76,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLength": 1
+        },
+        {
+          "key": "rfSwitchState",
+          "byteOffset": 77,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLength": 1
+        },
+        {
+          "key": "antennaLinkState",
+          "byteOffset": 78,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLength": 1
+        },
+        {
+          "key": "antennaCoverage",
+          "byteOffset": 79,
+          "valueType": "INT32_LE"
+        },
+        {
+          "key": "receiverDeviceId",
+          "byteOffset": 83,
+          "valueType": "INT32_LE"
+        },
+        {
+          "key": "temperature",
+          "byteOffset": 87,
+          "valueType": "FLOAT_LE"
+        },
+        {
+          "key": "humidity",
+          "byteOffset": 91,
+          "valueType": "FLOAT_LE"
+        },
+        {
+          "key": "signalParam3",
+          "byteOffset": 95,
+          "valueType": "INT32_LE"
+        },
+        {
+          "key": "siteId",
+          "byteOffset": 99,
+          "valueType": "INT32_LE"
+        },
+        {
+          "key": "checksum",
+          "byteOffset": 103,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tailFlag",
+          "byteOffset": 104,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "aaaaaaaa"
+        }
+      ]
+    },
+    {
+      "templateId": "fanshuang_rmtp_v236",
+      "name": "识别的无人机数据",
+      "commandValue": 56,
+      "matchValueType": "UINT16_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "startFlag",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "eeeeeeee"
+        },
+        {
+          "key": "protocolVersion",
+          "byteOffset": 4,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 6,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "tsYear",
+          "byteOffset": 10,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "tsMonth",
+          "byteOffset": 12,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsDay",
+          "byteOffset": 13,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsHour",
+          "byteOffset": 14,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMinute",
+          "byteOffset": 15,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsSecond",
+          "byteOffset": 16,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMillisecond",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "dataType",
+          "byteOffset": 19,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "packetNumber",
+          "byteOffset": 21,
+          "valueType": "UINT64_LE"
+        },
+        {
+          "key": "uavUniqueId",
+          "byteOffset": 29,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLength": 16
+        },
+        {
+          "key": "targetId",
+          "byteOffset": 45,
+          "valueType": "INT32_LE"
+        },
+        {
+          "key": "targetInfoLength",
+          "byteOffset": 49,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "targetName",
+          "byteOffset": 53,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLengthFromByteOffset": 49,
+          "byteLengthFromValueType": "UINT32_LE"
+        },
+        {
+          "key": "targetRestHex",
+          "byteOffset": 53,
+          "valueType": "BYTES_AS_HEX",
+          "byteLengthFromByteOffset": 6,
+          "byteLengthFromValueType": "UINT32_LE",
+          "byteLengthFromIntegralSubtract": 58
+        }
+      ]
+    },
+    {
+      "templateId": "fanshuang_rmtp_v236",
+      "name": "参数设置应答",
+      "commandValue": 9,
+      "matchValueType": "UINT16_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "startFlag",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "eeeeeeee"
+        },
+        {
+          "key": "protocolVersion",
+          "byteOffset": 4,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 6,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "tsYear",
+          "byteOffset": 10,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "tsMonth",
+          "byteOffset": 12,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsDay",
+          "byteOffset": 13,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsHour",
+          "byteOffset": 14,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMinute",
+          "byteOffset": 15,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsSecond",
+          "byteOffset": 16,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMillisecond",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "dataType",
+          "byteOffset": 19,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "packetNumber",
+          "byteOffset": 21,
+          "valueType": "UINT64_LE"
+        },
+        {
+          "key": "resultText",
+          "byteOffset": 29,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLengthFromByteOffset": 6,
+          "byteLengthFromValueType": "UINT32_LE",
+          "byteLengthFromIntegralSubtract": 34
+        }
+      ]
+    },
+    {
+      "templateId": "fanshuang_rmtp_v236",
+      "name": "参数查询应答",
+      "commandValue": 11,
+      "matchValueType": "UINT16_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "startFlag",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "eeeeeeee"
+        },
+        {
+          "key": "protocolVersion",
+          "byteOffset": 4,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 6,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "tsYear",
+          "byteOffset": 10,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "tsMonth",
+          "byteOffset": 12,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsDay",
+          "byteOffset": 13,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsHour",
+          "byteOffset": 14,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMinute",
+          "byteOffset": 15,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsSecond",
+          "byteOffset": 16,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMillisecond",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "dataType",
+          "byteOffset": 19,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "packetNumber",
+          "byteOffset": 21,
+          "valueType": "UINT64_LE"
+        },
+        {
+          "key": "bandCount",
+          "byteOffset": 29,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "bandsHex",
+          "byteOffset": 31,
+          "valueType": "BYTES_AS_HEX",
+          "byteLengthFromByteOffset": 6,
+          "byteLengthFromValueType": "UINT32_LE",
+          "byteLengthFromIntegralSubtract": 36
+        }
+      ]
+    },
+    {
+      "templateId": "fanshuang_rmtp_v236",
+      "name": "设置系统时间应答",
+      "commandValue": 17,
+      "matchValueType": "UINT16_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "startFlag",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "eeeeeeee"
+        },
+        {
+          "key": "protocolVersion",
+          "byteOffset": 4,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 6,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "tsYear",
+          "byteOffset": 10,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "tsMonth",
+          "byteOffset": 12,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsDay",
+          "byteOffset": 13,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsHour",
+          "byteOffset": 14,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMinute",
+          "byteOffset": 15,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsSecond",
+          "byteOffset": 16,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMillisecond",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "dataType",
+          "byteOffset": 19,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "packetNumber",
+          "byteOffset": 21,
+          "valueType": "UINT64_LE"
+        },
+        {
+          "key": "resultText",
+          "byteOffset": 29,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLengthFromByteOffset": 6,
+          "byteLengthFromValueType": "UINT32_LE",
+          "byteLengthFromIntegralSubtract": 34
+        }
+      ]
+    },
+    {
+      "templateId": "fanshuang_rmtp_v236",
+      "name": "IP 地址设置应答",
+      "commandValue": 26,
+      "matchValueType": "UINT16_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "startFlag",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "eeeeeeee"
+        },
+        {
+          "key": "protocolVersion",
+          "byteOffset": 4,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 6,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "tsYear",
+          "byteOffset": 10,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "tsMonth",
+          "byteOffset": 12,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsDay",
+          "byteOffset": 13,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsHour",
+          "byteOffset": 14,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMinute",
+          "byteOffset": 15,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsSecond",
+          "byteOffset": 16,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMillisecond",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "dataType",
+          "byteOffset": 19,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "packetNumber",
+          "byteOffset": 21,
+          "valueType": "UINT64_LE"
+        },
+        {
+          "key": "resultText",
+          "byteOffset": 29,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLengthFromByteOffset": 6,
+          "byteLengthFromValueType": "UINT32_LE",
+          "byteLengthFromIntegralSubtract": 34
+        }
+      ]
+    },
+    {
+      "templateId": "fanshuang_rmtp_v236",
+      "name": "IP 地址设置查询应答",
+      "commandValue": 28,
+      "matchValueType": "UINT16_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "startFlag",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "eeeeeeee"
+        },
+        {
+          "key": "protocolVersion",
+          "byteOffset": 4,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 6,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "tsYear",
+          "byteOffset": 10,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "tsMonth",
+          "byteOffset": 12,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsDay",
+          "byteOffset": 13,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsHour",
+          "byteOffset": 14,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMinute",
+          "byteOffset": 15,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsSecond",
+          "byteOffset": 16,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMillisecond",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "dataType",
+          "byteOffset": 19,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "packetNumber",
+          "byteOffset": 21,
+          "valueType": "UINT64_LE"
+        },
+        {
+          "key": "ipHex",
+          "byteOffset": 29,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4
+        },
+        {
+          "key": "port",
+          "byteOffset": 33,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "netmaskHex",
+          "byteOffset": 35,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4
+        },
+        {
+          "key": "gatewayHex",
+          "byteOffset": 39,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4
+        },
+        {
+          "key": "dnsHex",
+          "byteOffset": 43,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4
+        },
+        {
+          "key": "checksum",
+          "byteOffset": 47,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tailFlag",
+          "byteOffset": 48,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "aaaaaaaa"
+        }
+      ]
+    },
+    {
+      "templateId": "fanshuang_rmtp_v236",
+      "name": "重启设备应答",
+      "commandValue": 30,
+      "matchValueType": "UINT16_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "startFlag",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "eeeeeeee"
+        },
+        {
+          "key": "protocolVersion",
+          "byteOffset": 4,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 6,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "tsYear",
+          "byteOffset": 10,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "tsMonth",
+          "byteOffset": 12,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsDay",
+          "byteOffset": 13,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsHour",
+          "byteOffset": 14,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMinute",
+          "byteOffset": 15,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsSecond",
+          "byteOffset": 16,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMillisecond",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "dataType",
+          "byteOffset": 19,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "packetNumber",
+          "byteOffset": 21,
+          "valueType": "UINT64_LE"
+        },
+        {
+          "key": "resultText",
+          "byteOffset": 29,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLengthFromByteOffset": 6,
+          "byteLengthFromValueType": "UINT32_LE",
+          "byteLengthFromIntegralSubtract": 34
+        }
+      ]
+    },
+    {
+      "templateId": "fanshuang_rmtp_v236",
+      "name": "打开射频模块开关应答",
+      "commandValue": 71,
+      "matchValueType": "UINT16_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "startFlag",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "eeeeeeee"
+        },
+        {
+          "key": "protocolVersion",
+          "byteOffset": 4,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 6,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "tsYear",
+          "byteOffset": 10,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "tsMonth",
+          "byteOffset": 12,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsDay",
+          "byteOffset": 13,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsHour",
+          "byteOffset": 14,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMinute",
+          "byteOffset": 15,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsSecond",
+          "byteOffset": 16,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMillisecond",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "dataType",
+          "byteOffset": 19,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "packetNumber",
+          "byteOffset": 21,
+          "valueType": "UINT64_LE"
+        },
+        {
+          "key": "resultText",
+          "byteOffset": 29,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLengthFromByteOffset": 6,
+          "byteLengthFromValueType": "UINT32_LE",
+          "byteLengthFromIntegralSubtract": 34
+        }
+      ]
+    },
+    {
+      "templateId": "fanshuang_rmtp_v236",
+      "name": "关闭射频模块开关应答",
+      "commandValue": 73,
+      "matchValueType": "UINT16_LE",
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [
+        {
+          "key": "startFlag",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_HEX",
+          "byteLength": 4,
+          "fixedBytesHex": "eeeeeeee"
+        },
+        {
+          "key": "protocolVersion",
+          "byteOffset": 4,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 6,
+          "valueType": "UINT32_LE"
+        },
+        {
+          "key": "tsYear",
+          "byteOffset": 10,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "tsMonth",
+          "byteOffset": 12,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsDay",
+          "byteOffset": 13,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsHour",
+          "byteOffset": 14,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMinute",
+          "byteOffset": 15,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsSecond",
+          "byteOffset": 16,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "tsMillisecond",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "dataType",
+          "byteOffset": 19,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "packetNumber",
+          "byteOffset": 21,
+          "valueType": "UINT64_LE"
+        },
+        {
+          "key": "resultText",
+          "byteOffset": 29,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLengthFromByteOffset": 6,
+          "byteLengthFromValueType": "UINT32_LE",
+          "byteLengthFromIntegralSubtract": 34
+        }
+      ]
+    }
+  ]
+}

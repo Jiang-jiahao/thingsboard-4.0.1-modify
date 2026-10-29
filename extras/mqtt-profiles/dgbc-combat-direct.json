@@ -1,0 +1,191 @@
+{
+  "name": "大公博创 察打一体（DG-W3002A / DG-W3003A / DG-W3003B / DG-W3005B）（设备直连）",
+  "description": "大公博创 V2.1 通用平台接口协议，察打一体（DG-W3002A / DG-W3003A / DG-W3003B / DG-W3005B），设备直连本平台 MQTT Broker。设备发布 dgb/{deviceid}/status/*，平台按通配主题入库（整段负载包在对应遥测键下）。下行控制走 dgb/${params.deviceId}/request/*，等待 response/* 应答。",
+  "type": "DEFAULT",
+  "transportType": "MQTT",
+  "profileData": {
+    "configuration": {
+      "type": "DEFAULT"
+    },
+    "transportConfiguration": {
+      "type": "MQTT",
+      "deviceTelemetryTopic": "dgb/+/status/status_report",
+      "deviceAttributesTopic": "v1/devices/me/attributes",
+      "deviceAttributesSubscribeTopic": "v1/devices/me/attributes",
+      "uplinkTopicMappings": [
+        {
+          "name": "status_report",
+          "enabled": true,
+          "topic": "dgb/+/status/status_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "status"
+        },
+        {
+          "name": "ability_status",
+          "enabled": true,
+          "topic": "dgb/+/status/ability_status",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "ability"
+        },
+        {
+          "name": "detect_report",
+          "enabled": true,
+          "topic": "dgb/+/status/detect_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "detect"
+        },
+        {
+          "name": "oc4_report",
+          "enabled": true,
+          "topic": "dgb/+/status/oc4_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "oc4"
+        },
+        {
+          "name": "spectrum_report",
+          "enabled": true,
+          "topic": "dgb/+/status/spectrum_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "spectrum"
+        },
+        {
+          "name": "lna_report",
+          "enabled": true,
+          "topic": "dgb/+/status/lna_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "lna"
+        },
+        {
+          "name": "channel_report",
+          "enabled": true,
+          "topic": "dgb/+/status/channel_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "channel"
+        },
+        {
+          "name": "switch_report",
+          "enabled": true,
+          "topic": "dgb/+/status/switch_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "switch"
+        },
+        {
+          "name": "dev_alarm_report",
+          "enabled": true,
+          "topic": "dgb/+/status/dev_alarm_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "alarm"
+        }
+      ],
+      "transportPayloadTypeConfiguration": {
+        "transportPayloadType": "JSON"
+      },
+      "sparkplug": false,
+      "sparkplugAttributesMetricNames": [
+        "Properties/*",
+        "Device Control/*",
+        "Node Control/*"
+      ],
+      "sendAckOnValidationException": false
+    },
+    "provisionConfiguration": {
+      "type": "DISABLED"
+    },
+    "alarms": [],
+    "rpcMethods": [
+      {
+        "id": "detectOpen",
+        "displayName": "侦测开启",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/detect_open",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/detect_open",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\"}"
+      },
+      {
+        "id": "detectClose",
+        "displayName": "侦测关闭",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/detect_close",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/detect_close",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\"}"
+      },
+      {
+        "id": "recvgainSet",
+        "displayName": "设置接收增益",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/recvgain_set",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/recvgain_set",
+        "mqttPayloadTemplate": "{\"recvGain\":${params.recvGain}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\", \"recvGain\": 47}"
+      },
+      {
+        "id": "channelOpen",
+        "displayName": "干扰通道开启",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/channel_open",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/channel_set",
+        "mqttPayloadTemplate": "{\"suppressChannels\":[{\"suppressDirection\":\"${params.direction}\",\"channel\":[${params.channels}]}],\"sustainTime\":${params.sustainTime}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\", \"direction\": \"1\", \"channels\": \"\\\"2400\\\",\\\"5800\\\"\", \"sustainTime\": 30}"
+      },
+      {
+        "id": "channelClose",
+        "displayName": "干扰通道关闭",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/channel_close",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/channel_close",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\"}"
+      },
+      {
+        "id": "noflyzoneSet",
+        "displayName": "禁飞区诱骗开启",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/noflyzone_set",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/noflyzone_set",
+        "mqttPayloadTemplate": "{\"freq\":[${params.freq}],\"atten\":${params.atten},\"dbLon\":${params.dbLon},\"dbLat\":${params.dbLat},\"dbAlt\":${params.dbAlt},\"sustainTime\":${params.sustainTime}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\", \"freq\": \"\\\"GPS-ALL\\\",\\\"BDS-ALL\\\"\", \"atten\": 60, \"dbLon\": 103.95233, \"dbLat\": 30.567618, \"dbAlt\": 500, \"sustainTime\": 30}"
+      },
+      {
+        "id": "stop",
+        "displayName": "诱骗关闭",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/stop",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/stop",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\"}"
+      }
+    ]
+  }
+}

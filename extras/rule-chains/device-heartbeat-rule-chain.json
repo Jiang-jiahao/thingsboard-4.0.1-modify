@@ -1,0 +1,57 @@
+{
+  "ruleChain": {
+    "additionalInfo": {
+      "description": "定时向单个设备发送 RPC 心跳：生成器每 30 秒产出一条 { method, params } 消息，RPC 调用请求节点按设备档案的 CUSTOM_JSON 绑定把 www.keeplive.org 裸发到 TCP/UDP 链路。导入后必须把生成器的 originatorId（当前为全 0 占位 UUID）改成目标设备 ID；设备档案中需存在 id=heartbeat、绑定类型 CUSTOM_JSON、单向的 RPC 方法。若档案负载编码是 PROTOCOL_TEMPLATE/RAW_BYTES，请把脚本里的 params 改成 { hex: \"7777772e6b6565706c6976652e6f7267\" }。"
+    },
+    "name": "设备心跳（定时 RPC）",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "externalId": null
+  },
+  "metadata": {
+    "firstNodeIndex": 0,
+    "nodes": [
+      {
+        "type": "com.jnks.iot.rule.engine.debug.JnksIotMsgGeneratorNode",
+        "name": "每 30 秒生成心跳",
+        "configurationVersion": 2,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 30,
+          "originatorId": "00000000-0000-0000-0000-000000000000",
+          "originatorType": "DEVICE",
+          "scriptLang": "JS",
+          "jsScript": "var msg = { method: \"heartbeat\", params: \"www.keeplive.org\" };\nvar metadata = { oneway: \"true\" };\nvar msgType = \"POST_TELEMETRY_REQUEST\";\nreturn { msg: msg, metadata: metadata, msgType: msgType };",
+          "tbelScript": ""
+        },
+        "additionalInfo": {
+          "layoutX": 440,
+          "layoutY": 200
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.rpc.JnksIotSendRPCRequestNode",
+        "name": "RPC 调用请求（心跳）",
+        "configurationVersion": 0,
+        "configuration": {
+          "timeoutInSeconds": 10
+        },
+        "additionalInfo": {
+          "layoutX": 710,
+          "layoutY": 200
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 1,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

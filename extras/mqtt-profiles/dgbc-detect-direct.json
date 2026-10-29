@@ -1,0 +1,215 @@
+{
+  "name": "大公博创 侦测类（DG-W1005 / DG-W1014）（设备直连）",
+  "description": "大公博创 V2.1 通用平台接口协议，侦测类（DG-W1005 / DG-W1014），设备直连本平台 MQTT Broker。设备发布 dgb/{deviceid}/status/*，平台按通配主题入库（整段负载包在对应遥测键下）。下行控制走 dgb/${params.deviceId}/request/*，等待 response/* 应答。",
+  "image": null,
+  "type": "DEFAULT",
+  "transportType": "MQTT",
+  "provisionType": "DISABLED",
+  "defaultDashboardId": null,
+  "defaultQueueName": null,
+  "provisionDeviceKey": null,
+  "firmwareId": null,
+  "softwareId": null,
+  "default": false,
+  "profileData": {
+    "configuration": {
+      "type": "DEFAULT"
+    },
+    "transportConfiguration": {
+      "type": "MQTT",
+      "deviceTelemetryTopic": "dgb/+/status/status_report",
+      "deviceAttributesTopic": "v1/devices/me/attributes",
+      "deviceAttributesSubscribeTopic": "v1/devices/me/attributes",
+      "uplinkTopicMappings": [
+        {
+          "id": "91bfb7d4-d93c-4fa5-996b-c25d539d48fb",
+          "name": "status_report",
+          "enabled": true,
+          "topic": "dgb/+/status/status_report",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "status"
+        },
+        {
+          "id": "12505e65-ad9e-42b8-a6fe-f2671b335c79",
+          "name": "ability_status",
+          "enabled": true,
+          "topic": "dgb/+/status/ability_status",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "ability"
+        },
+        {
+          "id": "3c7655ec-31b0-4244-84af-f71088dd672b",
+          "name": "detect_report",
+          "enabled": true,
+          "topic": "dgb/+/status/detect_report",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "detect"
+        },
+        {
+          "id": "1931c702-ab72-4e96-b177-7003fedd7fcc",
+          "name": "oc4_report",
+          "enabled": true,
+          "topic": "dgb/+/status/oc4_report",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "oc4"
+        },
+        {
+          "id": "b3d4dc46-e390-4ae1-a8f0-5a21e69b17e6",
+          "name": "spectrum_report",
+          "enabled": true,
+          "topic": "dgb/+/status/spectrum_report",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "spectrum"
+        },
+        {
+          "id": "bfd121f4-a3fc-437c-b692-5ad7cab81cc8",
+          "name": "lna_report",
+          "enabled": true,
+          "topic": "dgb/+/status/lna_report",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "lna"
+        },
+        {
+          "id": "15dcc951-5a49-4b18-a879-6bd91e931f02",
+          "name": "aoa_location",
+          "enabled": true,
+          "topic": "dgb/+/status/aoa_location",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "aoa"
+        },
+        {
+          "id": "4bca47c9-9703-4425-a485-299b3f268a41",
+          "name": "dev_alarm_report",
+          "enabled": true,
+          "topic": "dgb/+/status/dev_alarm_report",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "alarm"
+        },
+        {
+          "id": "52a5e8b4-fecd-444e-b83d-a81fb7f85bd2",
+          "name": "direction_report",
+          "enabled": true,
+          "topic": "dgb/+/status/direction_report",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "direction"
+        },
+        {
+          "id": "00f6cf4a-8fb0-49d1-ad08-9bb871c505e4",
+          "name": "dev_status_report",
+          "enabled": true,
+          "topic": "dgb/+/status/dev_status_report",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "devStatus"
+        },
+        {
+          "id": "4af8733c-aefb-4bed-b224-60a35db89706",
+          "name": "config_report",
+          "enabled": true,
+          "topic": "dgb/+/status/config_report",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "config"
+        },
+        {
+          "id": "b0965f51-906c-4a37-8d67-f936de833c68",
+          "name": "satnum_report",
+          "enabled": true,
+          "topic": "dgb/+/status/satnum_report",
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "satnum"
+        }
+      ],
+      "transportPayloadTypeConfiguration": {
+        "transportPayloadType": "JSON"
+      },
+      "sparkplug": false,
+      "sparkplugAttributesMetricNames": [
+        "Properties/*",
+        "Device Control/*",
+        "Node Control/*"
+      ],
+      "sendAckOnValidationException": false
+    },
+    "provisionConfiguration": {
+      "type": "DISABLED",
+      "provisionDeviceSecret": null
+    },
+    "alarms": [],
+    "rpcMethods": [
+      {
+        "id": "detectOpen",
+        "displayName": "侦测开启",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "scheduleEnabled": null,
+        "scheduleIntervalMs": null,
+        "scheduleParamsJson": null,
+        "bindingType": "MQTT_CUSTOM",
+        "templateCommandName": null,
+        "commandValue": null,
+        "templateId": null,
+        "paramMap": null,
+        "deviceMethod": null,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\"}",
+        "httpUrl": null,
+        "httpMethod": "POST",
+        "httpBody": null,
+        "httpHeaders": {},
+        "requiresAuth": null,
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/detect_open",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/detect_open",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1
+      },
+      {
+        "id": "detectClose",
+        "displayName": "侦测关闭",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "scheduleEnabled": null,
+        "scheduleIntervalMs": null,
+        "scheduleParamsJson": null,
+        "bindingType": "MQTT_CUSTOM",
+        "templateCommandName": null,
+        "commandValue": null,
+        "templateId": null,
+        "paramMap": null,
+        "deviceMethod": null,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\"}",
+        "httpUrl": null,
+        "httpMethod": "POST",
+        "httpBody": null,
+        "httpHeaders": {},
+        "requiresAuth": null,
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/detect_close",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/detect_close",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1
+      },
+      {
+        "id": "recvgainSet",
+        "displayName": "设置接收增益",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "scheduleEnabled": null,
+        "scheduleIntervalMs": null,
+        "scheduleParamsJson": null,
+        "bindingType": "MQTT_CUSTOM",
+        "templateCommandName": null,
+        "commandValue": null,
+        "templateId": null,
+        "paramMap": null,
+        "deviceMethod": null,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\", \"recvGain\": 47}",
+        "httpUrl": null,
+        "httpMethod": "POST",
+        "httpBody": null,
+        "httpHeaders": {},
+        "requiresAuth": null,
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/recvgain_set",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/recvgain_set",
+        "mqttPayloadTemplate": "{\"recvGain\":${params.recvGain}}",
+        "mqttQos": 1
+      }
+    ]
+  }
+}

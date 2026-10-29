@@ -1,0 +1,441 @@
+{
+  "ruleChain": {
+    "name": "灵信定向SUS0445规则链",
+    "type": "CORE",
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "externalId": null,
+    "additionalInfo": {
+      "description": "灵信定向 SUS0445（含云台）状态上报：0x03 状态帧每 30 秒节流一次，从遥测取 6 路功放开关/告警与云台角度，设备属性取站点、IP、经纬度，构造 StrikeDXStatusVO（jammerD 单元素数组）POST 到 /device/workstatus/dx/report。"
+    }
+  },
+  "metadata": {
+    "firstNodeIndex": 11,
+    "nodes": [
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e79079d0-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141101,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotJsFilterNode",
+        "name": "仅放行状态帧(0x03)",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "externalId": null,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var marker = 'gf1PaSwitch';\nif (msg.commandNumber == null || Number(msg.commandNumber) !== 3) return false;\nfor (var k in msg) { if (k.length >= marker.length && k.slice(-marker.length) === marker) return true; }\nreturn false;",
+          "tbelScript": null
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 659,
+          "layoutY": 600
+        }
+      },
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e79079d1-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141101,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgAttributesNode",
+        "name": "保存客户端属性",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 3,
+        "externalId": null,
+        "configuration": {
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          },
+          "scope": "CLIENT_SCOPE",
+          "notifyDevice": false,
+          "sendAttributesUpdatedNotification": false,
+          "updateAttributesOnlyOnValueChange": true
+        },
+        "additionalInfo": {
+          "layoutX": 413,
+          "layoutY": 598
+        }
+      },
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e79079d2-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141101,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.deduplication.JnksIotMsgDeduplicationNode",
+        "name": "30 秒节流(取最后一条)",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "externalId": null,
+        "configuration": {
+          "interval": 30,
+          "strategy": "LAST",
+          "maxPendingMsgs": 100,
+          "maxRetries": 3
+        },
+        "additionalInfo": {
+          "layoutX": 381,
+          "layoutY": 767
+        }
+      },
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e79079d3-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141101,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.transform.JnksIotTransformMsgNode",
+        "name": "构造 StrikeDXStatusVO",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "externalId": null,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "function pick(suffix) {\n  for (var k in msg) {\n    if (k.length > suffix.length && k.slice(-suffix.length) === suffix) return msg[k];\n  }\n  return null;\n}\nfunction gf(n, suffix) { return pick('gf' + n + suffix); }\nvar jamming = 0;\nfor (var i = 1; i <= 6; i++) { if (gf(i, 'PaSwitch') === 1) { jamming = 1; break; } }\nvar body = {\n  station_id: msg.ss_stationId == null ? '' : String(msg.ss_stationId),\n  jammerD: [{\n    id: msg.deviceId == null ? '' : String(msg.deviceId),\n    ip: msg.cs_ip == null ? null : String(msg.cs_ip),\n    link_state: 1,\n    jamming_state: jamming,\n    jamming_mode: 0,\n    jamming_trigger_mode: 0,\n    rtsp_address: null,\n    horizontal_heading_angle: pick('ptzPanDeg'),\n    vertical_heading_angle: pick('ptzTiltDeg'),\n    zoom_level: null,\n    longitude: msg.cs_lon == null ? null : msg.cs_lon,\n    latitude: msg.cs_lat == null ? null : msg.cs_lat,\n    height: msg.cs_height == null ? null : msg.cs_height\n  }]\n};\nreturn { msg: body, metadata: metadata, msgType: msgType };",
+          "tbelScript": null
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 910,
+          "layoutY": 761
+        }
+      },
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e79079d4-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141101,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.rest.JnksIotRestApiCallNode",
+        "name": "上报工作状态 REST",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 3,
+        "externalId": null,
+        "configuration": {
+          "restEndpointUrlPattern": "http://192.168.222.45:9097/device/workstatus/dx/report",
+          "requestMethod": "POST",
+          "useSimpleClientHttpFactory": false,
+          "parseToPlainText": true,
+          "ignoreRequestBody": false,
+          "enableProxy": false,
+          "useSystemProxyProperties": false,
+          "proxyScheme": "",
+          "proxyHost": "",
+          "proxyPort": 0,
+          "proxyUser": "",
+          "proxyPassword": "",
+          "readTimeoutMs": 5000,
+          "maxParallelRequestsCount": 0,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "credentials": {
+            "type": "anonymous"
+          },
+          "maxInMemoryBufferSizeInKb": 256
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 1169,
+          "layoutY": 698
+        }
+      },
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e790a0e0-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141102,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.metadata.JnksIotGetAttributesNode",
+        "name": "读取设备属性",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "externalId": null,
+        "configuration": {
+          "tellFailureIfAbsent": false,
+          "fetchTo": "DATA",
+          "clientAttributeNames": [
+            "ip",
+            "lon",
+            "lat",
+            "height"
+          ],
+          "sharedAttributeNames": [],
+          "serverAttributeNames": [
+            "stationId"
+          ],
+          "latestTsKeyNames": [],
+          "getLatestValueWithTs": false
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 657,
+          "layoutY": 760
+        }
+      },
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e790a0e1-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141102,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode",
+        "name": "保存时序数据",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "externalId": null,
+        "configuration": {
+          "defaultTTL": 0,
+          "useServerTs": false,
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          }
+        },
+        "additionalInfo": {
+          "layoutX": 907,
+          "layoutY": 179
+        }
+      },
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e790a0e2-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141102,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotMsgTypeSwitchNode",
+        "name": "消息类型分流",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "externalId": null,
+        "configuration": {
+          "version": 0
+        },
+        "additionalInfo": {
+          "layoutX": 430,
+          "layoutY": 172
+        }
+      },
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e790a0e3-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141102,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
+        "name": "记录设备 RPC",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "externalId": null,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
+          "tbelScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+        },
+        "additionalInfo": {
+          "layoutX": 908,
+          "layoutY": 289
+        }
+      },
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e790a0e4-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141102,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
+        "name": "记录其它消息",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "externalId": null,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
+          "tbelScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+        },
+        "additionalInfo": {
+          "layoutX": 908,
+          "layoutY": 402
+        }
+      },
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e790a0e5-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141102,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.rpc.JnksIotSendRPCRequestNode",
+        "name": "RPC 请求调用",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "externalId": null,
+        "configuration": {
+          "timeoutInSeconds": 60
+        },
+        "additionalInfo": {
+          "layoutX": 908,
+          "layoutY": 491
+        }
+      },
+      {
+        "id": {
+          "entityType": "RULE_NODE",
+          "id": "e790a0e6-ce8a-11f1-b719-3b29b9b1c274"
+        },
+        "createdTime": 1792723141102,
+        "ruleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "e7292c80-ce8a-11f1-b447-f738991a5c1e"
+        },
+        "type": "com.jnks.iot.rule.engine.profile.JnksIotDeviceProfileNode",
+        "name": "设备档案节点",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "externalId": null,
+        "configuration": {
+          "persistAlarmRulesState": false,
+          "fetchAlarmRulesStateOnStart": false
+        },
+        "additionalInfo": {
+          "description": "Process incoming messages from devices with the alarm rules defined in the device profile. Dispatch all incoming messages with \"Success\" relation type.",
+          "layoutX": 287,
+          "layoutY": 263
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 2,
+        "type": "True"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 0,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 5,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 4,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 3,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 0,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 1,
+        "type": "Post attributes"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 6,
+        "type": "Post telemetry"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 8,
+        "type": "RPC Request from Device"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 9,
+        "type": "Other"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 10,
+        "type": "RPC Request to Device"
+      },
+      {
+        "fromIndex": 11,
+        "toIndex": 7,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "ruleChains": [
+    {
+      "additionalInfo": {
+        "description": "华诺无人机诱骗设备 HN(A版) V1.6：UDP 主从应答，解析器输出 hn_* 参数键，本链还原键名、拆出状态位，写入遥测与服务端属性。"
+      },
+      "name": "华诺无人机诱骗设备规则链",
+      "type": "CORE",
+      "firstRuleNodeId": null,
+      "root": false,
+      "debugMode": false,
+      "configuration": null,
+      "externalId": null
+    }
+  ],
+  "metadata": [
+    {
+      "firstNodeIndex": 0,
+      "nodes": [
+        {
+          "type": "com.jnks.iot.rule.engine.filter.JnksIotMsgTypeFilterNode",
+          "name": "仅放行遥测上报",
+          "configurationVersion": 0,
+          "configuration": {
+            "messageTypes": [
+              "POST_TELEMETRY_REQUEST"
+            ]
+          },
+          "additionalInfo": {
+            "layoutX": 220,
+            "layoutY": 200
+          }
+        },
+        {
+          "type": "com.jnks.iot.rule.engine.transform.JnksIotTransformMsgNode",
+          "name": "规范化华诺参数",
+          "configurationVersion": 0,
+          "configuration": {
+            "scriptLang": "JS",
+            "jsScript": "var out = {};\nif (msg.deviceCode != null) { out.deviceCode = msg.deviceCode; }\nif (msg.deviceTypeId != null) { out.deviceTypeId = msg.deviceTypeId; }\nif (msg.functionCode != null) { out.functionCode = msg.functionCode; }\n\n// 解析器把参数输出成 hn_<序号>_<键名>，这里还原成原始键名\nfor (var k in msg) {\n  if (k.indexOf('hn_') !== 0) { continue; }\n  var p = k.split('_');\n  out[p.slice(2).join('_')] = msg[k];\n}\n\nfunction bit(v, n) { return ((v >> n) & 1); }\n\n// 0x2036 GPS 伪卫星状态\nif (out.gpsSvStatus != null) {\n  out.svClockAlarm = bit(out.gpsSvStatus, 0);\n  out.svBcodeAlarm = bit(out.gpsSvStatus, 1);\n  out.svEphValid = bit(out.gpsSvStatus, 2);\n  out.svRfAlarm = bit(out.gpsSvStatus, 3);\n  out.svTxOn = bit(out.gpsSvStatus, 4);\n  out.svChannelAlarm = bit(out.gpsSvStatus, 5);\n  out.svFpgaAlarm = bit(out.gpsSvStatus, 6);\n}\n\n// 0x0201 授时同步状态（0 正常 / 1 异常）\nif (out.timeSyncStatus != null) {\n  out.rxWorkAlarm = bit(out.timeSyncStatus, 0);\n  out.rxFixAlarm = bit(out.timeSyncStatus, 1);\n  out.rxLeapAlarm = bit(out.timeSyncStatus, 2);\n  out.timeSyncAlarm = bit(out.timeSyncStatus, 3);\n}\n\n// 0x0020 设备类型 ID\nif (out.deviceTypeBits != null) {\n  out.hasGpsL1 = bit(out.deviceTypeBits, 0);\n  out.hasBds = bit(out.deviceTypeBits, 1);\n  out.hasGloR1 = bit(out.deviceTypeBits, 2);\n  out.hasGal = bit(out.deviceTypeBits, 3);\n  out.hasGpsL2 = bit(out.deviceTypeBits, 4);\n  out.hasGloR2 = bit(out.deviceTypeBits, 5);\n}\n\nreturn {msg: out, metadata: metadata, msgType: msgType};"
+          },
+          "additionalInfo": {
+            "layoutX": 480,
+            "layoutY": 200
+          }
+        },
+        {
+          "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode",
+          "name": "保存遥测数据",
+          "configurationVersion": 0,
+          "configuration": {
+            "defaultTTL": 0,
+            "useServerTs": false,
+            "processingSettings": {
+              "type": "ON_EVERY_MESSAGE"
+            }
+          },
+          "additionalInfo": {
+            "layoutX": 760,
+            "layoutY": 120
+          }
+        },
+        {
+          "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgAttributesNode",
+          "name": "保存设备状态属性",
+          "configurationVersion": 0,
+          "configuration": {
+            "scope": "SERVER_SCOPE",
+            "notifyDevice": false,
+            "sendAttributesUpdatedNotification": false,
+            "updateAttributesOnlyOnValueChange": true,
+            "processingSettings": {
+              "type": "ON_EVERY_MESSAGE"
+            }
+          },
+          "additionalInfo": {
+            "layoutX": 760,
+            "layoutY": 300
+          }
+        }
+      ],
+      "connections": [
+        {
+          "fromIndex": 0,
+          "toIndex": 1,
+          "type": "True"
+        },
+        {
+          "fromIndex": 1,
+          "toIndex": 2,
+          "type": "Success"
+        },
+        {
+          "fromIndex": 1,
+          "toIndex": 3,
+          "type": "Success"
+        }
+      ],
+      "ruleChainConnections": []
+    }
+  ]
+}

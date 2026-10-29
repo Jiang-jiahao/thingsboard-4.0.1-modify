@@ -1,0 +1,115 @@
+{
+  "name": "大公博创 诱骗类（DG-W2002B）（订阅对方平台）",
+  "description": "大公博创 V2.1 通用平台接口协议，诱骗类（DG-W2002B），本平台作为 MQTT 客户端订阅对方通用平台。订阅 dgb/+/status/*，整段负载包在对应遥测键下；下行控制走 dgb/${params.deviceId}/request/*。",
+  "type": "DEFAULT",
+  "transportType": "MQTT_PULL",
+  "profileData": {
+    "configuration": {
+      "type": "DEFAULT"
+    },
+    "transportConfiguration": {
+      "type": "MQTT_PULL",
+      "mqttTransportMode": "PULL",
+      "connectTimeoutMs": 10000,
+      "keepAliveSec": 60,
+      "cleanSession": true,
+      "reconnectIntervalMs": 5000,
+      "subscribeRequests": [
+        {
+          "name": "status_report",
+          "enabled": true,
+          "topic": "dgb/+/status/status_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "status"
+        },
+        {
+          "name": "ability_status",
+          "enabled": true,
+          "topic": "dgb/+/status/ability_status",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "ability"
+        },
+        {
+          "name": "switch_report",
+          "enabled": true,
+          "topic": "dgb/+/status/switch_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "switch"
+        },
+        {
+          "name": "channel_report",
+          "enabled": true,
+          "topic": "dgb/+/status/channel_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "channel"
+        },
+        {
+          "name": "dev_alarm_report",
+          "enabled": true,
+          "topic": "dgb/+/status/dev_alarm_report",
+          "qos": 1,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "alarm"
+        }
+      ]
+    },
+    "provisionConfiguration": {
+      "type": "DISABLED"
+    },
+    "alarms": [],
+    "rpcMethods": [
+      {
+        "id": "noflyzoneSet",
+        "displayName": "禁飞区诱骗开启",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/noflyzone_set",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/noflyzone_set",
+        "mqttPayloadTemplate": "{\"freq\":[${params.freq}],\"atten\":${params.atten},\"dbLon\":${params.dbLon},\"dbLat\":${params.dbLat},\"dbAlt\":${params.dbAlt},\"sustainTime\":${params.sustainTime}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\", \"freq\": \"\\\"GPS-ALL\\\",\\\"BDS-ALL\\\"\", \"atten\": 60, \"dbLon\": 103.95233, \"dbLat\": 30.567618, \"dbAlt\": 500, \"sustainTime\": 30}"
+      },
+      {
+        "id": "speedheadSet",
+        "displayName": "航向诱骗开启",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/speedhead_set",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/speedhead_set",
+        "mqttPayloadTemplate": "{\"freq\":[${params.freq}],\"direction\":${params.direction},\"speed\":${params.speed},\"atten\":${params.atten},\"installLon\":${params.installLon},\"installLat\":${params.installLat},\"sustainTime\":${params.sustainTime}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\", \"freq\": \"\\\"GPS-L1\\\",\\\"BDS-B1I\\\",\\\"GLO-G1\\\",\\\"GAL-E1\\\"\", \"direction\": 70, \"speed\": 1, \"atten\": 60, \"installLon\": 103.956184, \"installLat\": 30.580666, \"sustainTime\": 30}"
+      },
+      {
+        "id": "gnssSet",
+        "displayName": "GPS 屏蔽开启",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/gnss_set",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/gnss_set",
+        "mqttPayloadTemplate": "{\"freq\":[${params.freq}],\"atten\":${params.atten},\"sustainTime\":${params.sustainTime}}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\", \"freq\": \"\\\"GPS-L1\\\",\\\"BDS-B1I\\\",\\\"GLO-G1\\\",\\\"GAL-E1\\\"\", \"atten\": 60, \"sustainTime\": 30}"
+      },
+      {
+        "id": "stop",
+        "displayName": "诱骗关闭",
+        "oneWay": false,
+        "timeoutMs": 15000,
+        "bindingType": "MQTT_CUSTOM",
+        "mqttRequestTopic": "dgb/${params.deviceId}/request/stop",
+        "mqttResponseTopic": "dgb/${params.deviceId}/response/stop",
+        "mqttPayloadTemplate": "{}",
+        "mqttQos": 1,
+        "paramsTemplateJson": "{\"deviceId\": \"00010001\"}"
+      }
+    ]
+  }
+}
