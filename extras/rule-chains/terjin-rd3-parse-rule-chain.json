@@ -10,7 +10,7 @@
         "entityType": "TENANT",
         "id": "21b8b490-c465-11f1-9109-b33b8fd7b0ce"
       },
-      "name": "特金 RD3 解析规则链",
+      "name": "特金设备平台MQTT V1.1规则链",
       "type": "CORE",
       "firstRuleNodeId": {
         "entityType": "RULE_NODE",
@@ -19,10 +19,10 @@
       "root": false,
       "debugMode": false,
       "externalId": null,
-      "version": 5,
+      "version": 25,
       "configuration": null,
       "additionalInfo": {
-        "description": "特金 TERJIN MQTT V1.1：system 拆成设备属性（在线/温度/电压/GPS/统计），locate 与 detect 拆成遥测（取最新目标 + 数量），按 metadata.terjinKind 分流。"
+        "description": "特金 TERJIN MQTT V1.1"
       }
     }
   ],
@@ -32,36 +32,9 @@
         "entityType": "RULE_CHAIN",
         "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
       },
-      "version": 5,
+      "version": 25,
       "firstNodeIndex": 0,
       "nodes": [
-        {
-          "id": {
-            "entityType": "RULE_NODE",
-            "id": "24a37ae0-d27b-11f1-9715-73e5cff2e8c5"
-          },
-          "createdTime": 1793156176270,
-          "ruleChainId": {
-            "entityType": "RULE_CHAIN",
-            "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
-          },
-          "type": "com.jnks.iot.rule.engine.filter.JnksIotMsgTypeFilterNode",
-          "name": "放行遥测上报",
-          "debugSettings": null,
-          "singletonMode": false,
-          "queueName": null,
-          "configurationVersion": 0,
-          "externalId": null,
-          "configuration": {
-            "messageTypes": [
-              "POST_TELEMETRY_REQUEST"
-            ]
-          },
-          "additionalInfo": {
-            "layoutX": 200,
-            "layoutY": 240
-          }
-        },
         {
           "id": {
             "entityType": "RULE_NODE",
@@ -73,45 +46,24 @@
             "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
           },
           "type": "com.jnks.iot.rule.engine.transform.JnksIotTransformMsgNode",
-          "name": "解析 system/locate/detect（按防区）",
-          "debugSettings": null,
+          "name": "解析 locate/detect（防区前缀遥测）",
+          "debugSettings": {
+            "failuresEnabled": false,
+            "allEnabled": false,
+            "allEnabledUntil": 0
+          },
           "singletonMode": false,
           "queueName": null,
           "configurationVersion": 0,
           "externalId": null,
           "configuration": {
             "scriptLang": "JS",
-            "jsScript": "var out = {};\nvar kind = null;\n\n// 来源 topic：server/chan/{防区}/api/xxx，第 3 段即防区号\nvar topic = metadata.mqttTopic || '';\nvar tp = topic.split('/');\nvar zone = (tp.length >= 3 && tp[2]) ? tp[2] : '';\nvar p = zone ? ('z' + zone + '_') : '';\n\nfunction asObj(v) {\n  if (v == null) { return null; }\n  if (typeof v === 'string') {\n    try { return JSON.parse(v); } catch (e) { return null; }\n  }\n  return v;\n}\n\nvar sys = asObj(msg.terjinSystem);\nvar loc = asObj(msg.terjinLocate);\nvar det = asObj(msg.terjinDetect);\n\n// ---- /api/system：设备信息 -> 属性（按防区落键）----\nif (sys != null && sys.Devices != null && sys.Devices.length > 0) {\n  kind = 'attributes';\n  var byId = {};\n  var ids = [];\n  var online = 0;\n  var lastTs = 0;\n  for (var i = 0; i < sys.Devices.length; i++) {\n    var d = sys.Devices[i];\n    if (d.DeviceId != null) { byId[d.DeviceId] = d; ids.push(d.DeviceId); }\n    if (d.Online) { online++; }\n    if ((d.LastReport || 0) > lastTs) { lastTs = d.LastReport || 0; }\n  }\n  out[p + 'devices'] = JSON.stringify(byId);\n  out[p + 'deviceIds'] = ids.join(',');\n  out[p + 'deviceCount'] = sys.Devices.length;\n  out[p + 'onlineCount'] = online;\n  out[p + 'totalDevice'] = sys.TotalDevice;\n  out[p + 'detectCount'] = sys.DetectCount;\n  out[p + 'warningCount'] = sys.WarningCount;\n  out[p + 'jammingCount'] = sys.JammingCount;\n  if (lastTs) { out[p + 'lastReportMs'] = lastTs * 1000; }\n  if (zone) { out.zoneId = zone; }\n  out.msgTopic = topic;\n}\n\n// ---- /api/locate：无人机定位 -> 遥测 ----\nif (loc != null && loc.DronePos != null) {\n  kind = 'telemetry';\n  var lids = [];\n  for (var k in loc.DronePos) { if (loc.DronePos.hasOwnProperty(k)) { lids.push(k); } }\n  out[p + 'uavCount'] = lids.length;\n  var best = null, bestK = null;\n  for (var j = 0; j < lids.length; j++) {\n    var q = loc.DronePos[lids[j]];\n    if (best == null || (q.tsp || 0) > (best.tsp || 0)) { best = q; bestK = lids[j]; }\n  }\n  if (best != null) {\n    out[p + 'uavId'] = best.uavId != null ? best.uavId : bestK;\n    out[p + 'uavLon'] = best.uavLon;\n    out[p + 'uavLat'] = best.uavLat;\n    out[p + 'uavAlt'] = best.uavAlt;\n    out[p + 'uavHeight'] = best.uavHeight;\n    out[p + 'velocity'] = best.velocity;\n    out[p + 'yaw'] = best.yaw;\n    out[p + 'frequencyHz'] = best.frequency;\n    out[p + 'bandHz'] = best.band;\n    out[p + 'uavModel'] = best.uavModel;\n    out[p + 'uavModelNo'] = best.uavModelNo;\n    out[p + 'pilotLon'] = best.pilotLon;\n    out[p + 'pilotLat'] = best.pilotLat;\n    out[p + 'areaFlag'] = best.areaFlag;\n    out[p + 'whiteListId'] = best.whiteListId;\n    out[p + 'targetType'] = best.TargetType;\n    if (best.tsp) { out[p + 'uavTspMs'] = best.tsp; }\n  }\n  if (loc.Tsp) { out[p + 'msgTspMs'] = loc.Tsp; }\n  if (zone) { out.zoneId = zone; }\n}\n\n// ---- /api/detect：侦测事件 -> 遥测 ----\nif (det != null && det.Drones != null) {\n  kind = 'telemetry';\n  out[p + 'droneCount'] = det.Drones.length;\n  var bd = null;\n  for (var m = 0; m < det.Drones.length; m++) {\n    if (bd == null || (det.Drones[m].tspMs || 0) > (bd.tspMs || 0)) { bd = det.Drones[m]; }\n  }\n  if (bd != null) {\n    out[p + 'uavId'] = bd.uavId;\n    out[p + 'uavModelText'] = bd.uavModelText;\n    out[p + 'uavModelNo'] = bd.uavModelNo;\n    out[p + 'frequencyHz'] = bd.frequency;\n    out[p + 'bandHz'] = bd.band;\n    out[p + 'rssi'] = bd.rssi;\n    out[p + 'snr'] = bd.snr;\n    out[p + 'papr'] = bd.papr;\n    out[p + 'uavAzimuth'] = bd.uavAzimuth;\n    if (bd.tspMs) { out[p + 'detectTspMs'] = bd.tspMs; }\n    var ud = bd.useDevice;\n    if (ud != null) {\n      out[p + 'sensorId'] = ud.sensorId;\n      out[p + 'sensorLon'] = ud.sensorLongitude;\n      out[p + 'sensorLat'] = ud.sensorLatitude;\n      out[p + 'sensorAlt'] = ud.sensorAltitude;\n    }\n  }\n  if (det.Tsp) { out[p + 'msgTspMs'] = det.Tsp; }\n  if (zone) { out.zoneId = zone; }\n}\n\nmetadata.terjinKind = kind;\nreturn {msg: out, metadata: metadata, msgType: msgType};"
+            "jsScript": "var out = {};\n\n// 来源 topic：server/chan/{防区}/api/xxx\nvar topic = metadata.mqttTopic || '';\nvar tp = topic.split('/');\nvar zone = (tp.length >= 3 && tp[2]) ? tp[2] : '';\nvar p = zone ? (zone + '_') : '';\n\nfunction asObj(v) {\n  if (v == null) { return null; }\n  if (typeof v === 'string') {\n    try { return JSON.parse(v); } catch (e) { return null; }\n  }\n  return v;\n}\n\nvar loc = asObj(msg.terjinLocate);\nvar det = asObj(msg.terjinDetect);\nvar rid = asObj(msg.terjinRid);\n\n// ---- /api/locate 与 /api/rid：无人机定位（结构相同）----\nvar pos = null;\nvar src = null;\nif (loc != null && loc.DronePos != null) { pos = loc; src = 'locate'; }\nelse if (rid != null && rid.DronePos != null) { pos = rid; src = 'rid'; }\nif (pos != null) {\n  var kids = [];\n  for (var k in pos.DronePos) { if (pos.DronePos.hasOwnProperty(k)) { kids.push(k); } }\n  out[p + 'uavCount'] = kids.length;\n  out[p + 'uavSource'] = src;\n  var best = null, bestK = null;\n  for (var j = 0; j < kids.length; j++) {\n    var q = pos.DronePos[kids[j]];\n    if (best == null || (q.tsp || 0) > (best.tsp || 0)) { best = q; bestK = kids[j]; }\n  }\n  if (best != null) {\n    out[p + 'uavId'] = best.uavId != null ? best.uavId : bestK;\n    out[p + 'uavLon'] = best.uavLon;\n    out[p + 'uavLat'] = best.uavLat;\n    out[p + 'uavAlt'] = best.uavAlt;\n    out[p + 'uavHeight'] = best.uavHeight;\n    out[p + 'velocity'] = best.velocity;\n    out[p + 'yaw'] = best.yaw;\n    out[p + 'frequencyHz'] = best.frequency;\n    out[p + 'bandHz'] = best.band;\n    out[p + 'uavModel'] = best.uavModel;\n    out[p + 'uavModelNo'] = best.uavModelNo;\n    out[p + 'pilotLon'] = best.pilotLon;\n    out[p + 'pilotLat'] = best.pilotLat;\n    out[p + 'areaFlag'] = best.areaFlag;\n    out[p + 'whiteListId'] = best.whiteListId;\n    out[p + 'targetType'] = best.TargetType;\n    if (best.tsp) { out[p + 'uavTspMs'] = best.tsp; }\n  }\n  if (pos.Tsp) { out[p + 'msgTspMs'] = pos.Tsp; }\n}\n\n// ---- /api/detect：侦测事件 ----\nif (det != null && det.Drones != null) {\n  out[p + 'droneCount'] = det.Drones.length;\n  var bd = null;\n  for (var m = 0; m < det.Drones.length; m++) {\n    if (bd == null || (det.Drones[m].tspMs || 0) > (bd.tspMs || 0)) { bd = det.Drones[m]; }\n  }\n  if (bd != null) {\n    out[p + 'uavId'] = bd.uavId;\n    out[p + 'uavModelText'] = bd.uavModelText;\n    out[p + 'uavModelNo'] = bd.uavModelNo;\n    out[p + 'frequencyHz'] = bd.frequency;\n    out[p + 'bandHz'] = bd.band;\n    out[p + 'rssi'] = bd.rssi;\n    out[p + 'snr'] = bd.snr;\n    out[p + 'papr'] = bd.papr;\n    out[p + 'uavAzimuth'] = bd.uavAzimuth;\n    if (bd.tspMs) { out[p + 'detectTspMs'] = bd.tspMs; }\n    var ud = bd.useDevice;\n    if (ud != null) {\n      out[p + 'sensorId'] = ud.sensorId;\n      out[p + 'sensorLon'] = ud.sensorLongitude;\n      out[p + 'sensorLat'] = ud.sensorLatitude;\n      out[p + 'sensorAlt'] = ud.sensorAltitude;\n    }\n  }\n  if (det.Tsp) { out[p + 'msgTspMs'] = det.Tsp; }\n}\n\nreturn {msg: out, metadata: metadata, msgType: msgType};"
           },
           "additionalInfo": {
-            "layoutX": 440,
-            "layoutY": 240
-          }
-        },
-        {
-          "id": {
-            "entityType": "RULE_NODE",
-            "id": "24a37ae2-d27b-11f1-9715-73e5cff2e8c5"
-          },
-          "createdTime": 1793156176270,
-          "ruleChainId": {
-            "entityType": "RULE_CHAIN",
-            "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
-          },
-          "type": "com.jnks.iot.rule.engine.filter.JnksIotJsFilterNode",
-          "name": "是否遥测数据",
-          "debugSettings": null,
-          "singletonMode": false,
-          "queueName": null,
-          "configurationVersion": 0,
-          "externalId": null,
-          "configuration": {
-            "scriptLang": "JS",
-            "jsScript": "return metadata.terjinKind === 'telemetry';"
-          },
-          "additionalInfo": {
-            "layoutX": 700,
-            "layoutY": 140
+            "description": null,
+            "layoutX": 149,
+            "layoutY": 510
           }
         },
         {
@@ -139,34 +91,8 @@
             }
           },
           "additionalInfo": {
-            "layoutX": 960,
-            "layoutY": 100
-          }
-        },
-        {
-          "id": {
-            "entityType": "RULE_NODE",
-            "id": "24a3a1f1-d27b-11f1-9715-73e5cff2e8c5"
-          },
-          "createdTime": 1793156176271,
-          "ruleChainId": {
-            "entityType": "RULE_CHAIN",
-            "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
-          },
-          "type": "com.jnks.iot.rule.engine.filter.JnksIotJsFilterNode",
-          "name": "是否设备属性",
-          "debugSettings": null,
-          "singletonMode": false,
-          "queueName": null,
-          "configurationVersion": 0,
-          "externalId": null,
-          "configuration": {
-            "scriptLang": "JS",
-            "jsScript": "return metadata.terjinKind === 'attributes';"
-          },
-          "additionalInfo": {
-            "layoutX": 700,
-            "layoutY": 340
+            "layoutX": 474,
+            "layoutY": 508
           }
         },
         {
@@ -187,7 +113,7 @@
           "configurationVersion": 3,
           "externalId": null,
           "configuration": {
-            "scope": "SERVER_SCOPE",
+            "scope": "CLIENT_SCOPE",
             "notifyDevice": false,
             "sendAttributesUpdatedNotification": false,
             "updateAttributesOnlyOnValueChange": true,
@@ -196,8 +122,190 @@
             }
           },
           "additionalInfo": {
-            "layoutX": 960,
-            "layoutY": 340
+            "layoutX": 390,
+            "layoutY": 680
+          }
+        },
+        {
+          "id": {
+            "entityType": "RULE_NODE",
+            "id": "1cdc1150-d343-11f1-9d83-6505cf028e1c"
+          },
+          "createdTime": 1793242062565,
+          "ruleChainId": {
+            "entityType": "RULE_CHAIN",
+            "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
+          },
+          "type": "com.jnks.iot.rule.engine.filter.JnksIotMsgTypeSwitchNode",
+          "name": "消息类型分流",
+          "debugSettings": {
+            "failuresEnabled": false,
+            "allEnabled": false,
+            "allEnabledUntil": 0
+          },
+          "singletonMode": false,
+          "queueName": null,
+          "configurationVersion": 0,
+          "externalId": null,
+          "configuration": {
+            "version": 0
+          },
+          "additionalInfo": {
+            "layoutX": 503,
+            "layoutY": 102
+          }
+        },
+        {
+          "id": {
+            "entityType": "RULE_NODE",
+            "id": "1cdc3860-d343-11f1-9d83-6505cf028e1c"
+          },
+          "createdTime": 1793242062566,
+          "ruleChainId": {
+            "entityType": "RULE_CHAIN",
+            "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
+          },
+          "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
+          "name": "记录设备 RPC",
+          "debugSettings": {
+            "failuresEnabled": false,
+            "allEnabled": false,
+            "allEnabledUntil": 0
+          },
+          "singletonMode": false,
+          "queueName": null,
+          "configurationVersion": 0,
+          "externalId": null,
+          "configuration": {
+            "scriptLang": "TBEL",
+            "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
+            "tbelScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+          },
+          "additionalInfo": {
+            "layoutX": 1005,
+            "layoutY": 118
+          }
+        },
+        {
+          "id": {
+            "entityType": "RULE_NODE",
+            "id": "1cdc3861-d343-11f1-9d83-6505cf028e1c"
+          },
+          "createdTime": 1793242062566,
+          "ruleChainId": {
+            "entityType": "RULE_CHAIN",
+            "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
+          },
+          "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
+          "name": "记录其它消息",
+          "debugSettings": {
+            "failuresEnabled": false,
+            "allEnabled": false,
+            "allEnabledUntil": 0
+          },
+          "singletonMode": false,
+          "queueName": null,
+          "configurationVersion": 0,
+          "externalId": null,
+          "configuration": {
+            "scriptLang": "TBEL",
+            "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
+            "tbelScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+          },
+          "additionalInfo": {
+            "layoutX": 1002,
+            "layoutY": 236
+          }
+        },
+        {
+          "id": {
+            "entityType": "RULE_NODE",
+            "id": "1cdc5f70-d343-11f1-9d83-6505cf028e1c"
+          },
+          "createdTime": 1793242062567,
+          "ruleChainId": {
+            "entityType": "RULE_CHAIN",
+            "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
+          },
+          "type": "com.jnks.iot.rule.engine.rpc.JnksIotSendRPCRequestNode",
+          "name": "RPC 请求调用",
+          "debugSettings": {
+            "failuresEnabled": false,
+            "allEnabled": false,
+            "allEnabledUntil": 0
+          },
+          "singletonMode": false,
+          "queueName": null,
+          "configurationVersion": 0,
+          "externalId": null,
+          "configuration": {
+            "timeoutInSeconds": 60
+          },
+          "additionalInfo": {
+            "layoutX": 1010,
+            "layoutY": 382
+          }
+        },
+        {
+          "id": {
+            "entityType": "RULE_NODE",
+            "id": "1cdc8680-d343-11f1-9d83-6505cf028e1c"
+          },
+          "createdTime": 1793242062568,
+          "ruleChainId": {
+            "entityType": "RULE_CHAIN",
+            "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
+          },
+          "type": "com.jnks.iot.rule.engine.profile.JnksIotDeviceProfileNode",
+          "name": "设备档案节点",
+          "debugSettings": {
+            "failuresEnabled": false,
+            "allEnabled": false,
+            "allEnabledUntil": 0
+          },
+          "singletonMode": false,
+          "queueName": null,
+          "configurationVersion": 1,
+          "externalId": null,
+          "configuration": {
+            "persistAlarmRulesState": false,
+            "fetchAlarmRulesStateOnStart": false
+          },
+          "additionalInfo": {
+            "description": "Process incoming messages from devices with the alarm rules defined in the device profile. Dispatch all incoming messages with \"Success\" relation type.",
+            "layoutX": 360,
+            "layoutY": 193
+          }
+        },
+        {
+          "id": {
+            "entityType": "RULE_NODE",
+            "id": "1cdc8681-d343-11f1-9d83-6505cf028e1c"
+          },
+          "createdTime": 1793242062568,
+          "ruleChainId": {
+            "entityType": "RULE_CHAIN",
+            "id": "2445a370-d27b-11f1-9a8d-3b1a29b0a61e"
+          },
+          "type": "com.jnks.iot.rule.engine.transform.JnksIotTransformMsgNode",
+          "name": "解析 system（属性 key=防区号）",
+          "debugSettings": {
+            "failuresEnabled": false,
+            "allEnabled": false,
+            "allEnabledUntil": 0
+          },
+          "singletonMode": false,
+          "queueName": null,
+          "configurationVersion": 0,
+          "externalId": null,
+          "configuration": {
+            "scriptLang": "JS",
+            "jsScript": "// /api/system：设备信息 -> 一条属性，key 为防区号（如 100303），value 为设备信息 JSON\nvar topic = metadata.mqttTopic || '';\nvar tp = topic.split('/');\nvar zone = (tp.length >= 3 && tp[2]) ? tp[2] : '';\n// 拿不到来源 topic 时退回固定 key，避免报文丢失\nvar key = zone || 'stationId';\n\nfunction asObj(v) {\n  if (v == null) { return null; }\n  if (typeof v === 'string') {\n    try { return JSON.parse(v); } catch (e) { return null; }\n  }\n  return v;\n}\n\nvar sys = asObj(msg.terjinSystem);\nif (sys == null) { sys = asObj(msg); }\n\nvar out = {};\nif (sys != null && sys.Devices != null && sys.Devices.length > 0) {\n  var byId = {};\n  var ids = [];\n  var online = 0;\n  var lastTs = 0;\n  for (var i = 0; i < sys.Devices.length; i++) {\n    var d = sys.Devices[i];\n    if (d.DeviceId != null) { byId[d.DeviceId] = d; ids.push(d.DeviceId); }\n    if (d.Online) { online++; }\n    if ((d.LastReport || 0) > lastTs) { lastTs = d.LastReport || 0; }\n  }\n  out[key] = JSON.stringify({\n    devices: byId,\n    deviceIds: ids,\n    deviceCount: sys.Devices.length,\n    onlineCount: online,\n    totalDevice: sys.TotalDevice,\n    onlineDevice: sys.OnlineDevice,\n    lastReportMs: lastTs ? lastTs * 1000 : null\n  });\n}\n\nreturn {msg: out, metadata: metadata, msgType: msgType};"
+          },
+          "additionalInfo": {
+            "description": null,
+            "layoutX": 114,
+            "layoutY": 679
           }
         }
       ],
@@ -205,27 +313,42 @@
         {
           "fromIndex": 0,
           "toIndex": 1,
-          "type": "True"
-        },
-        {
-          "fromIndex": 1,
-          "toIndex": 2,
           "type": "Success"
         },
         {
-          "fromIndex": 2,
-          "toIndex": 3,
-          "type": "True"
+          "fromIndex": 3,
+          "toIndex": 0,
+          "type": "Post telemetry"
         },
         {
-          "fromIndex": 2,
+          "fromIndex": 3,
           "toIndex": 4,
-          "type": "False"
+          "type": "RPC Request from Device"
         },
         {
-          "fromIndex": 4,
+          "fromIndex": 3,
           "toIndex": 5,
-          "type": "True"
+          "type": "Other"
+        },
+        {
+          "fromIndex": 3,
+          "toIndex": 6,
+          "type": "RPC Request to Device"
+        },
+        {
+          "fromIndex": 3,
+          "toIndex": 8,
+          "type": "Post attributes"
+        },
+        {
+          "fromIndex": 7,
+          "toIndex": 3,
+          "type": "Success"
+        },
+        {
+          "fromIndex": 8,
+          "toIndex": 2,
+          "type": "Success"
         }
       ],
       "ruleChainConnections": null

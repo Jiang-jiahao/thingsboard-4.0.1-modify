@@ -226,7 +226,7 @@ public class MqttPullTransportService {
                 postTelemetry(sessionContext, sessionContext.getSessionInfo(), body, request.resolveTelemetryPayloadKey(), topic);
             } else {
                 postAttributes(sessionContext, sessionContext.getSessionInfo(), body,
-                        dataType == HttpPullPollDataType.SHARED_ATTRIBUTES);
+                        dataType == HttpPullPollDataType.SHARED_ATTRIBUTES, topic);
             }
         } catch (Exception e) {
             log.warn("[{}] Failed to process MQTT pull message on topic [{}] request [{}]",
@@ -259,7 +259,8 @@ public class MqttPullTransportService {
     }
 
     private void postAttributes(MqttPullCollectorSessionContext collectorCtx,
-                                TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, boolean shared) {
+                                TransportProtos.SessionInfoProto sessionInfo, String jsonPayload, boolean shared,
+                                String topic) {
         if (sessionInfo == null) {
             log.warn("[{}] Skip attributes: MQTT pull session is not ready", collectorCtx.getDeviceId());
             return;
@@ -280,7 +281,10 @@ public class MqttPullTransportService {
         }
         TransportProtos.PostAttributeMsg.Builder builder = JsonConverter.convertToAttributesProto(parsed).toBuilder();
         builder.setShared(shared);
-        transportService.process(sessionInfo, builder.build(), TransportServiceCallback.EMPTY);
+        // 与遥测一致：属性消息也带来源 topic，规则链可据 topic 区分防区
+        JnksIotMsgMetaData md = new JnksIotMsgMetaData();
+        md.putValue(DataConstants.MQTT_TOPIC, topic);
+        transportService.process(sessionInfo, builder.build(), md, TransportServiceCallback.EMPTY);
     }
 
     private String resolveBrokerUrl(MqttPullCollectorSessionContext ctx) {
