@@ -187,6 +187,11 @@ usage:
 
 # UI 设置参数
 ui:
+  # 前端部署前缀，必须与 ui/package.json 里 `build:prod` 的 --base-href 一致。
+  # 后端生成的前端页面跳转（激活 / 重置密码 / 链接过期页）会拼上这个前缀：
+  # 前端挂在子路径下时，跳转若仍指向根路径，宿主 nginx 上没有该 location，用户会拿到 404。
+  # 留空表示前端部署在根路径。
+  base-path: "${UI_BASE_PATH:}"
   # 仪表板参数
   dashboard:
     # 组件获取数据点的最大允许数量

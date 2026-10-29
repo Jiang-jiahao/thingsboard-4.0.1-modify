@@ -208,6 +208,12 @@ public abstract class BaseController {
 
     protected static final String DASHBOARD_ID = "dashboardId";
 
+    /**
+     * 前端部署前缀（ui.base-path），与前端构建的 --base-href 一致；空表示部署在根路径。
+     */
+    @Value("${ui.base-path:}")
+    protected String uiBasePath;
+
     protected static final String HOME_DASHBOARD_ID = "homeDashboardId";
     protected static final String HOME_DASHBOARD_HIDE_TOOLBAR = "homeDashboardHideToolbar";
 
@@ -1096,10 +1102,25 @@ public abstract class BaseController {
         return ResponseEntity.status(status).build();
     }
 
+    /**
+     * 把前端页面路径补上部署前缀。只处理站内绝对路径（"/" 开头），
+     * 完整 URL 和协议相对地址原样返回，避免把外部地址拼坏。
+     */
+    protected String withUiBasePath(String location) {
+        if (StringUtils.isBlank(uiBasePath) || location == null || !location.startsWith("/") || location.startsWith("//")) {
+            return location;
+        }
+        String basePath = uiBasePath.endsWith("/") ? uiBasePath.substring(0, uiBasePath.length() - 1) : uiBasePath;
+        if (!basePath.startsWith("/")) {
+            basePath = "/" + basePath;
+        }
+        return basePath + location;
+    }
+
     protected <T> ResponseEntity<T> redirectTo(String location) {
         URI uri;
         try {
-            uri = URI.create(location);
+            uri = URI.create(withUiBasePath(location));
         } catch (IllegalArgumentException e) {
             log.error("Failed to create URI from '{}'", location, e);
             throw e;
