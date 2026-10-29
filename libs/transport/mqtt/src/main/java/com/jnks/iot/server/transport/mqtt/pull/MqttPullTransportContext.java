@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import com.jnks.iot.common.util.JacksonUtil;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.DeviceTransportType;
@@ -41,6 +42,7 @@ import com.jnks.iot.server.transport.mqtt.pull.session.MqttPullRpcSessionListene
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -307,12 +309,42 @@ public class MqttPullTransportContext extends TransportContext {
             establishingCollectors.remove(device.getId());
             return;
         }
+        if (existing != null) {
+            DeviceProfile currentProfile = deviceProfileCache.get(device.getDeviceProfileId());
+            if (isSameCollectorConfig(existing, device, currentProfile)) {
+                // 设备/档案被保存过但连接参数没变：只刷新引用，不要重建连接。
+                // 否则每次保存设备都会断开 Broker 链路并写一对 STOPPED/STARTED。
+                existing.setDevice(device);
+                existing.setDeviceProfile(currentProfile);
+                return;
+            }
+        }
         // 取消进行中的建立，避免「先无 brokerUrl、后补配置」时被 establishing 互斥挡住
         establishingCollectors.remove(device.getId());
         if (existing != null) {
             destroyCollector(existing, false);
         }
         tryEstablishCollector(device);
+    }
+
+    /**
+     * 连接参数是否与当前采集器一致：档案 id、档案的 MQTT PULL 配置、设备的连接配置都没变，就不需要重连。
+     * 设备名/标签、RPC 方法、其它传输配置的改动都不影响已建立的 MQTT 链路。
+     */
+    private static boolean isSameCollectorConfig(MqttPullCollectorSessionContext ctx, Device device, DeviceProfile profile) {
+        if (profile == null || ctx.getDeviceProfile() == null
+                || !ctx.getDeviceProfile().getId().equals(profile.getId())) {
+            return false;
+        }
+        if (profile.getProfileData() == null
+                || !(profile.getProfileData().getTransportConfiguration() instanceof MqttPullDeviceProfileTransportConfiguration profileCfg)) {
+            return false;
+        }
+        MqttPullDeviceTransportConfiguration deviceCfg = device.getDeviceData() != null
+                && device.getDeviceData().getTransportConfiguration() instanceof MqttPullDeviceTransportConfiguration m
+                ? m : null;
+        return Objects.equals(JacksonUtil.toString(ctx.getProfileTransportConfiguration()), JacksonUtil.toString(profileCfg))
+                && Objects.equals(JacksonUtil.toString(ctx.getDeviceTransportConfiguration()), JacksonUtil.toString(deviceCfg));
     }
 
     @EventListener(MqttTransportListChangedEvent.class)
