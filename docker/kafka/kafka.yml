@@ -2,6 +2,8 @@ version: '3.0'
 
 services:
   kafka:
+    environment:
+      TZ: Asia/Shanghai
     restart: always
     image: "apache/kafka:3.7.0"
     ports:

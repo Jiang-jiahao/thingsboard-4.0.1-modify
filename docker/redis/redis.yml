@@ -4,6 +4,8 @@ services:
 # Redis standalone
 # TB 侧不用改：cache-redis.env 只给了 REDIS_HOST=redis、没有密码，而官方镜像默认就是无密码。
   redis:
+    environment:
+      TZ: Asia/Shanghai
     restart: always
     image: redis:7-alpine
     ports:

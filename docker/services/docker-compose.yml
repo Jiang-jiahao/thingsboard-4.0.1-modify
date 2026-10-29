@@ -8,10 +8,13 @@ services:
     ports:
       - "2181"
     environment:
+      TZ: Asia/Shanghai
       ZOO_MY_ID: 1
       ZOO_SERVERS: server.1=zookeeper:2888:3888;zookeeper:2181
       ZOO_ADMINSERVER_ENABLED: "false"
   jnks-iot-js-executor:
+    environment:
+      TZ: Asia/Shanghai
     restart: always
     image: "${DOCKER_REPO}/${JS_EXECUTOR_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     deploy:
@@ -29,6 +32,7 @@ services:
         max-size: "200m"
         max-file: "30"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-core1
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
@@ -52,6 +56,7 @@ services:
         max-size: "200m"
         max-file: "30"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-core2
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
@@ -75,6 +80,7 @@ services:
         max-size: "200m"
         max-file: "30"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-rule-engine1
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
@@ -96,6 +102,7 @@ services:
         max-size: "200m"
         max-file: "30"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-rule-engine2
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
@@ -112,6 +119,7 @@ services:
     ports:
       - "1883"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-mqtt-transport1
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
@@ -129,6 +137,7 @@ services:
     ports:
       - "1883"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-mqtt-transport2
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
@@ -146,6 +155,7 @@ services:
     ports:
       - "8081"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-http-transport1
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
@@ -163,6 +173,7 @@ services:
     ports:
       - "8081"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-http-transport2
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
@@ -180,6 +191,7 @@ services:
     ports:
       - "5683:5683/udp"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-coap-transport
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
@@ -198,6 +210,7 @@ services:
       - "5685:5685/udp"
       - "5686:5686/udp"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-lwm2m-transport
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
@@ -215,6 +228,7 @@ services:
     ports:
       - "1620:1620/udp"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-snmp-transport
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
@@ -234,6 +248,7 @@ services:
       - "5683"
       - "8087"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-tcp-transport1
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
@@ -252,6 +267,7 @@ services:
       - "5683"
       - "8087"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-tcp-transport2
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
@@ -271,6 +287,7 @@ services:
       - "5684/udp"
       - "8088"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-udp-transport1
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
@@ -289,6 +306,7 @@ services:
       - "5684/udp"
       - "8088"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-udp-transport2
       JAVA_OPTS: "${JAVA_OPTS_TRANSPORT:--Xmx256M -Xms128M}"
     env_file:
@@ -303,11 +321,15 @@ services:
   # Web UI：nginx 直接发静态文件（前端产物已打进镜像），不再是 Node/Express 服务，也不需要 env 文件。
   # 两个副本纯粹是为了重启/升级时界面不断（入口网关按 least_conn 分发）。
   jnks-iot-web-ui1:
+    environment:
+      TZ: Asia/Shanghai
     restart: always
     image: "${DOCKER_REPO}/${WEB_UI_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
       - "8080"
   jnks-iot-web-ui2:
+    environment:
+      TZ: Asia/Shanghai
     restart: always
     image: "${DOCKER_REPO}/${WEB_UI_DOCKER_NAME}:${JNKS_IOT_VERSION}"
     ports:
@@ -318,6 +340,7 @@ services:
     ports:
       - "8081"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-vc-executor1
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
@@ -335,6 +358,7 @@ services:
     ports:
       - "8081"
     environment:
+      TZ: Asia/Shanghai
       JNKS_IOT_SERVICE_ID: jnks-iot-vc-executor2
       JAVA_OPTS: "${JAVA_OPTS}"
     env_file:
@@ -351,6 +375,8 @@ services:
   # 配置：./nginx/config/（nginx.conf + locations.conf + proxy-headers.conf）
   # 证书：./nginx/certs/（首次用 bash nginx/gen-self-signed-cert.sh 生成自签，生产换成真实证书）
   nginx-gateway:
+    environment:
+      TZ: Asia/Shanghai
     restart: always
     container_name: "${LOAD_BALANCER_NAME}"
     image: "${NGINX_GATEWAY_IMAGE}"

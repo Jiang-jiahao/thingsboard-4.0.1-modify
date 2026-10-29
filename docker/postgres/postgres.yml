@@ -7,6 +7,7 @@ services:
     ports:
     - "5432"
     environment:
+      TZ: Asia/Shanghai
       POSTGRES_DB: jnks_iot
       POSTGRES_PASSWORD: postgres
       # 数据目录是挂载点下的子目录，且容器以 postgres(999) 身份直接跑 —— 这两条是为 macOS 准备的：
