@@ -99,6 +99,32 @@ export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges,
   @Input()
   singleTemplateMode = true;
 
+  selectedTemplateIndex = 0;
+
+  onSelectedTemplateChange(index: number): void {
+    this.selectedTemplateIndex = this.clampTemplateIndex(index);
+    this.expandTemplateLtvPanelIfEnabled();
+    this.cdr.markForCheck();
+  }
+
+  templateOptionLabel(index: number): string {
+    const g = this.templatesArray?.at(index) as UntypedFormGroup | undefined;
+    const name = String(g?.get('name')?.value ?? '').trim();
+    const id = String(g?.get('id')?.value ?? '').trim();
+    const label = name || id;
+    return label ? `${index + 1}. ${label}` : `${index + 1}`;
+  }
+
+  private clampSelectedTemplateIndex(): void {
+    this.selectedTemplateIndex = this.clampTemplateIndex(this.selectedTemplateIndex);
+  }
+
+  private clampTemplateIndex(index: number): number {
+    const max = Math.max(0, (this.templatesArray?.length ?? 1) - 1);
+    const i = Number.isFinite(index) ? Math.trunc(index) : 0;
+    return Math.min(Math.max(0, i), max);
+  }
+
   @Output() addTemplateField = new EventEmitter<number>();
   @Output() removeTemplateField = new EventEmitter<{ templateIndex: number; fieldIndex: number }>();
   @Output() addTemplateLtvMapping = new EventEmitter<number>();
@@ -114,6 +140,7 @@ export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges,
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['templatesArray']) {
       this.invalidateFieldSortCaches();
+      this.clampSelectedTemplateIndex();
       this.wireTemplateLtvPanelSync();
       this.scheduleExpandTemplateLtvPanel();
     }
@@ -179,7 +206,7 @@ export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges,
     if (!this.templatesArray?.length) {
       return '';
     }
-    return this.hexFieldsFingerprint(this.getTemplateFieldsArray(0));
+    return this.hexFieldsFingerprint(this.getTemplateFieldsArray(this.selectedTemplateIndex));
   }
 
   /**
@@ -194,7 +221,11 @@ export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges,
     this.templatesArraySub = this.templatesArray.valueChanges.pipe(
       startWith(this.templatesArray.value),
       takeUntil(this.destroy$)
-    ).subscribe(() => this.expandTemplateLtvPanelIfEnabled());
+    ).subscribe(() => {
+      this.clampSelectedTemplateIndex();
+      this.expandTemplateLtvPanelIfEnabled();
+      this.cdr.markForCheck();
+    });
   }
 
   private scheduleExpandTemplateLtvPanel(): void {
@@ -208,7 +239,7 @@ export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges,
     if (!this.templatesArray?.length) {
       return;
     }
-    const g = this.templatesArray.at(0) as UntypedFormGroup;
+    const g = this.templatesArray.at(this.selectedTemplateIndex) as UntypedFormGroup;
     if (g?.get('hexLtvEnabled')?.value === true) {
       this.templateHexLtvPanelExpanded = true;
       this.cdr.markForCheck();
@@ -227,7 +258,7 @@ export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges,
     if (!checked || !this.templatesArray?.length) {
       return;
     }
-    const g = this.templatesArray.at(0) as UntypedFormGroup;
+    const g = this.templatesArray.at(this.selectedTemplateIndex) as UntypedFormGroup;
     g.get('hexLtvLengthIncludesLengthField')?.setValue(false, { emitEvent: false });
     this.cdr.markForCheck();
   }
@@ -236,7 +267,7 @@ export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges,
     if (!checked || !this.templatesArray?.length) {
       return;
     }
-    const g = this.templatesArray.at(0) as UntypedFormGroup;
+    const g = this.templatesArray.at(this.selectedTemplateIndex) as UntypedFormGroup;
     g.get('hexLtvLengthIncludesTag')?.setValue(false, { emitEvent: false });
     this.cdr.markForCheck();
   }
@@ -251,14 +282,11 @@ export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges,
 
   /** 列表按字节偏移升序展示；下标仍为 FormArray 真实索引，便于绑定与删除 */
   templateFieldIndicesSortedByByteOffset(ti: number): number[] {
-    if (ti !== 0) {
-      return this.sortedHexFieldIndicesByByteOffset(this.getTemplateFieldsArray(ti));
-    }
-    const fp = this.hexFieldsFingerprint(this.getTemplateFieldsArray(0));
+    const fp = this.hexFieldsFingerprint(this.getTemplateFieldsArray(ti));
     if (this.templateFieldSortCache?.fingerprint === fp) {
       return this.templateFieldSortCache.indices;
     }
-    const indices = this.sortedHexFieldIndicesByByteOffset(this.getTemplateFieldsArray(0));
+    const indices = this.sortedHexFieldIndicesByByteOffset(this.getTemplateFieldsArray(ti));
     this.templateFieldSortCache = { fingerprint: fp, indices };
     return indices;
   }
@@ -309,7 +337,7 @@ export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges,
   }
 
   isIntegralHexFieldTemplateRow(fi: number): boolean {
-    const g = this.getTemplateFieldsArray(0).at(fi) as UntypedFormGroup;
+    const g = this.getTemplateFieldsArray(this.selectedTemplateIndex).at(fi) as UntypedFormGroup;
     return this.isIntegralHexValueType(g.get('valueType')?.value as TcpHexValueType);
   }
 
@@ -388,9 +416,9 @@ export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges,
     return ids;
   }
 
-  /** 「上下行命令」Tab 中与首帧模板共享命令偏移/宽度，避免与帧模板 Tab 重复嵌套 [formGroup] */
-  firstTemplateGroup(): UntypedFormGroup {
-    return this.templatesArray.at(0) as UntypedFormGroup;
+  /** 「上下行命令」Tab 中与当前选中帧模板共享命令偏移/宽度，避免与帧模板 Tab 重复嵌套 [formGroup] */
+  selectedTemplateGroup(): UntypedFormGroup {
+    return this.templatesArray.at(this.selectedTemplateIndex) as UntypedFormGroup;
   }
 
   getHexFieldLengthModeTemplate(ti: number, fi: number): 'fixed' | 'fromFrame' {
@@ -548,7 +576,7 @@ export class ProtocolTemplateUdpDataConfigurationComponent implements OnChanges,
       }
     };
     if (this.templatesArray?.length) {
-      const fa = this.getTemplateFieldsArray(0);
+      const fa = this.getTemplateFieldsArray(this.selectedTemplateIndex);
       for (let i = 0; i < fa.length; i++) {
         addIntegral(fa.at(i) as UntypedFormGroup);
       }
