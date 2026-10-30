@@ -59,6 +59,10 @@ public class TcpHexCommandProfile implements Serializable {
      */
     private TcpHexLtvRepeatingConfig ltvRepeating;
     /**
+     * 该命令所属帧模板的整帧校验定义。多模板包里每个模板可以不同；为空表示该模板不校验整帧。
+     */
+    private TcpHexChecksumDefinition checksum;
+    /**
      * 仅协议模板上行命令展开时使用：命中后解析结果写入遥测或属性。
      */
     private ProtocolTemplateUplinkDataDestination uplinkDataDestination;

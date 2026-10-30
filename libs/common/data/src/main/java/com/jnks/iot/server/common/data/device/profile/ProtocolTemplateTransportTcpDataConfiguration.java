@@ -117,6 +117,7 @@ public class ProtocolTemplateTransportTcpDataConfiguration implements TransportT
         }
 
         p.setFields(mergeTemplateAndCommandFields(tpl.getHexProtocolFields(), cmd.getFields()));
+        p.setChecksum(tpl.getChecksum());
 
         TcpHexLtvRepeatingConfig ltv = cmd.getLtvRepeating() != null ? cmd.getLtvRepeating() : tpl.getHexLtvRepeating();
         p.setLtvRepeating(ltv);

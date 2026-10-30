@@ -137,4 +137,47 @@ class ProtocolTemplateTransportTcpDataConfigurationTest {
         f.setValueType(vt);
         return f;
     }
+
+    @Test
+    void expandCarriesPerTemplateChecksumOnEachCommandProfile() {
+        TcpHexChecksumDefinition sum8 = new TcpHexChecksumDefinition();
+        sum8.setType("SUM8");
+        sum8.setFromByte(0);
+        sum8.setToExclusive(-1);
+        sum8.setChecksumByteIndex(-1);
+
+        TcpHexFieldDefinition f = new TcpHexFieldDefinition();
+        f.setKey("len");
+        f.setByteOffset(0);
+        f.setValueType(TcpHexValueType.UINT8);
+
+        ProtocolTemplateDefinition first = new ProtocolTemplateDefinition();
+        first.setId("a");
+        first.setChecksum(sum8);
+        first.setHexProtocolFields(List.of(f));
+        ProtocolTemplateDefinition second = new ProtocolTemplateDefinition();
+        second.setId("b");
+        second.setHexProtocolFields(List.of(f));
+
+        ProtocolTemplateCommandDefinition c1 = new ProtocolTemplateCommandDefinition();
+        c1.setTemplateId("a");
+        c1.setCommandValue(1);
+        c1.setMatchValueType(TcpHexValueType.UINT8);
+        c1.setDirection(ProtocolTemplateCommandDirection.UPLINK);
+        ProtocolTemplateCommandDefinition c2 = new ProtocolTemplateCommandDefinition();
+        c2.setTemplateId("b");
+        c2.setCommandValue(2);
+        c2.setMatchValueType(TcpHexValueType.UINT8);
+        c2.setDirection(ProtocolTemplateCommandDirection.UPLINK);
+
+        ProtocolTemplateTransportTcpDataConfiguration cfg = new ProtocolTemplateTransportTcpDataConfiguration();
+        cfg.setProtocolTemplates(List.of(first, second));
+        cfg.setProtocolCommands(List.of(c1, c2));
+
+        HexTransportTcpDataConfiguration hex = cfg.expandToHexTransportTcpDataConfiguration();
+        assertThat(hex.getChecksum()).isSameAs(sum8);
+        assertThat(hex.getHexCommandProfiles()).hasSize(2);
+        assertThat(hex.getHexCommandProfiles().get(0).getChecksum()).isSameAs(sum8);
+        assertThat(hex.getHexCommandProfiles().get(1).getChecksum()).isNull();
+    }
 }

@@ -66,12 +66,6 @@ public final class UdpHexProtocolParser {
         if (frame == null) {
             return Optional.empty();
         }
-        try {
-            validateFrameChecksum(checksum, frame);
-        } catch (IllegalArgumentException e) {
-            log.debug("[{}] Hex frame checksum: {}", sessionId, e.getMessage());
-            return Optional.empty();
-        }
         if (commandProfiles != null) {
             for (TcpHexCommandProfile rule : commandProfiles) {
                 if (rule == null) {
@@ -81,6 +75,13 @@ public final class UdpHexProtocolParser {
                     rule.validate();
                 } catch (IllegalArgumentException e) {
                     log.warn("[{}] Invalid hex command profile: {}", sessionId, e.getMessage());
+                    continue;
+                }
+                // 多帧模板包：每条命令按自己所属模板的校验定义验帧（该模板没配校验则不验）
+                try {
+                    validateFrameChecksum(rule.getChecksum(), frame);
+                } catch (IllegalArgumentException e) {
+                    log.debug("[{}] Hex frame checksum (rule {}): {}", sessionId, rule.getName(), e.getMessage());
                     continue;
                 }
                 if (matchesCommand(frame, rule, sessionId)) {
@@ -100,6 +101,13 @@ public final class UdpHexProtocolParser {
                     }
                 }
             }
+        }
+        // 未命中任何命令：默认字段来自第一个模板，回退解析前按它的校验定义验帧
+        try {
+            validateFrameChecksum(checksum, frame);
+        } catch (IllegalArgumentException e) {
+            log.debug("[{}] Hex frame checksum: {}", sessionId, e.getMessage());
+            return Optional.empty();
         }
         JsonObject out = buildTelemetryForRule(frame, defaultFields, defaultLtvRepeating, null, sessionId, false);
         if (out.size() > 0) {

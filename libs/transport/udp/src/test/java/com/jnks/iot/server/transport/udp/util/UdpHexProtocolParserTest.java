@@ -2,6 +2,7 @@ package com.jnks.iot.server.transport.udp.util;
 
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
+import com.jnks.iot.server.common.data.device.profile.TcpHexChecksumDefinition;
 import com.jnks.iot.server.common.data.device.profile.TcpHexCommandProfile;
 import com.jnks.iot.server.common.data.device.profile.TcpHexFieldDefinition;
 import com.jnks.iot.server.common.data.device.profile.TcpHexLtvChunkOrder;
@@ -503,5 +504,46 @@ class UdpHexProtocolParserTest {
         var out = UdpHexProtocolParser.tryParseTelemetryFromHexPayload(payload, null, null, ltv, null, UUID.randomUUID());
         assertThat(out).isPresent();
         assertThat(out.get().get("p_0_raw").getAsString()).isEqualTo("aabbcc");
+    }
+
+    @Test
+    void laterTemplateFrameIsJudgedByItsOwnTemplateChecksum() {
+        // 第一个模板（默认字段所在模板）用 SUM8：字节和 == 末字节
+        TcpHexChecksumDefinition firstTemplateChecksum = new TcpHexChecksumDefinition();
+        firstTemplateChecksum.setType("SUM8");
+        firstTemplateChecksum.setFromByte(0);
+        firstTemplateChecksum.setToExclusive(-1);
+        firstTemplateChecksum.setChecksumByteIndex(-1);
+
+        TcpHexFieldDefinition cmdField = new TcpHexFieldDefinition();
+        cmdField.setKey("cmd");
+        cmdField.setByteOffset(0);
+        cmdField.setValueType(TcpHexValueType.UINT8);
+        TcpHexFieldDefinition tempField = new TcpHexFieldDefinition();
+        tempField.setKey("temp");
+        tempField.setByteOffset(1);
+        tempField.setValueType(TcpHexValueType.UINT8);
+
+        TcpHexCommandProfile secondTemplateRule = new TcpHexCommandProfile();
+        secondTemplateRule.setName("tpl2");
+        secondTemplateRule.setMatchByteOffset(0);
+        secondTemplateRule.setMatchValueType(TcpHexValueType.UINT8);
+        secondTemplateRule.setCommandMatchWidth(1);
+        secondTemplateRule.setMatchValue(2);
+        secondTemplateRule.setFields(List.of(cmdField, tempField));
+        secondTemplateRule.setChecksum(null);   // 第二个模板不配置整帧校验
+
+        // 2+26+0=28 ≠ 末字节 0：不满足第一个模板的 SUM8
+        var payload = JsonParser.parseString("{\"hex\":\"021a0000\"}");
+        var parsed = UdpHexProtocolParser.tryParseTelemetryFromHexPayload(
+                payload, List.of(secondTemplateRule), null, null, firstTemplateChecksum, UUID.randomUUID());
+        assertThat(parsed).isPresent();
+        assertThat(parsed.get().get("temp").getAsInt()).isEqualTo(26);
+
+        // 若该模板自己配了同样校验（=旧的单模板行为），该帧必须被拒
+        secondTemplateRule.setChecksum(firstTemplateChecksum);
+        var rejected = UdpHexProtocolParser.tryParseTelemetryFromHexPayload(
+                payload, List.of(secondTemplateRule), null, null, firstTemplateChecksum, UUID.randomUUID());
+        assertThat(rejected).isEmpty();
     }
 }
