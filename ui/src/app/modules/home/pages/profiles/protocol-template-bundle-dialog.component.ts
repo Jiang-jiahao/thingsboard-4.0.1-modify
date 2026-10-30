@@ -141,6 +141,22 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
 
   save(): void {
     const displayName = String(this.bundleMetaForm.get('name')?.value ?? '').trim();
+    const tplArr = this.bundleContentForm.get('protocolTemplates') as UntypedFormArray;
+    const tplRows = (tplArr?.getRawValue() ?? []) as Array<Record<string, unknown>>;
+    const nonEmptyIds = tplRows.map(r => String(r['id'] ?? '').trim()).filter(Boolean);
+    const duplicateIds = new Set(nonEmptyIds).size !== nonEmptyIds.length;
+    // 单模板时 ID 可回退到包展示名；多模板必须每个都有 ID
+    const missingIds = tplRows.length > 1 && nonEmptyIds.length !== tplRows.length;
+    if (duplicateIds || missingIds) {
+      this.store.dispatch(new ActionNotificationShow({
+        message: this.translate.instant('profiles.protocol-templates-template-id-invalid'),
+        type: 'warn',
+        duration: 4000,
+        verticalPosition: 'top',
+        horizontalPosition: 'right'
+      }));
+      return;
+    }
     const templates = this.serializeTemplates();
     const commands = this.serializeCommands();
     const tLen = templates.length;
@@ -192,14 +208,22 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
     const displayName = String(this.bundleMetaForm.get('name')?.value ?? '').trim();
     const tplArr = this.bundleContentForm.get('protocolTemplates') as UntypedFormArray;
     const tplRows = (tplArr?.getRawValue() ?? []) as Array<Record<string, unknown>>;
-    const row = tplRows[0];
-    if (!row) {
-      return [];
+    const out: ProtocolTemplateDefinition[] = [];
+    for (const row of tplRows) {
+      const t = this.templateFromHexRow(row, displayName, tplRows.length);
+      if (t) {
+        out.push(t);
+      }
     }
-    /** 与命令行 templateId 一致：优先表单隐藏字段 id，避免仅改展示名时与命令引用错位 */
-    const templateId = String(row['id'] ?? '').trim() || displayName;
+    return out;
+  }
+
+  private templateFromHexRow(row: Record<string, unknown>, displayName: string,
+                             totalRows: number): ProtocolTemplateDefinition | undefined {
+    /** 与命令行 templateId 一致：优先表单隐藏字段 id；单模板时允许回退到包展示名 */
+    const templateId = String(row['id'] ?? '').trim() || (totalRows <= 1 ? displayName : '');
     if (!templateId) {
-      return [];
+      return undefined;
     }
     const fieldRows = (row['hexProtocolFields'] as Array<Record<string, unknown>>) ?? [];
     const fields = this.fieldsFromHexRows(fieldRows);
@@ -208,6 +232,10 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
       commandByteOffset: Number(row['commandByteOffset']) ?? 12,
       commandMatchWidth: Number(row['commandMatchWidth']) === 1 ? 1 : 4
     };
+    const templateName = String(row['name'] ?? '').trim();
+    if (templateName) {
+      t.name = templateName;
+    }
     const csType = String(row['checksumType'] ?? 'NONE').trim();
     if (csType && csType.toUpperCase() !== 'NONE') {
       const cs: TcpHexChecksumDefinition = {
@@ -248,7 +276,7 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
       ltv.unknownTagTelemetryKeyHexLiteral = unknownTagTelemetryKeyHexLiteralFromMappings(tagMappings);
       t.hexLtvRepeating = ltv;
     }
-    return [t];
+    return t;
   }
 
   private ltvTagMappingsFromRows(rows: Array<Record<string, unknown>>): TcpHexLtvTagMapping[] {
@@ -347,6 +375,10 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
           byteOffset: Number(r['byteOffset']) || 0,
           valueType: r['valueType'] as TcpHexValueType
         };
+        const scale = this.optionalFormNumber(r['scale']);
+        if (scale !== undefined && scale !== 0) {
+          def.scale = scale;
+        }
         const vt = def.valueType;
         if (isTcpHexVariableByteSlice(vt)) {
           const mode = String(r['hexFieldLengthMode'] ?? 'fixed').trim();

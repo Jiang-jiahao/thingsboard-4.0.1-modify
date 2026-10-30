@@ -55,7 +55,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
   tcpHexValueTypes = TCP_HEX_FRAME_FIELD_VALUE_TYPES;
   tcpHexLtvTagValueOptions = TCP_HEX_LTV_TAG_VALUE_OPTIONS;
 
-  private templateIdSubscription?: Subscription;
+  private templateIdSubscriptions: Subscription[] = [];
 
   private readonly ltvTagWireTextValidator = (control: AbstractControl): ValidationErrors | null => {
     const v = parseLtvTagWireTextToNumber(control.value);
@@ -68,15 +68,28 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.templateIdSubscription?.unsubscribe();
+    this.templateIdSubscriptions.forEach(s => s.unsubscribe());
+    this.templateIdSubscriptions = [];
+  }
+
+  /**
+   * 单帧模板：模板 ID 由对话顶部「名称」决定、命令的 templateId 随之同步。
+   * 多帧模板：每个模板各自有 ID，命令用下拉选择归属。
+   */
+  get singleTemplateMode(): boolean {
+    return (this.protocolTemplatesArray?.length ?? 0) <= 1;
   }
 
   /**
    * 与对话框顶部「名称」同步：作为唯一展示名，并写入隐藏字段 id，供命令 templateId 关联。
    */
   applyBundleDisplayNameAsTemplateId(displayName: string): void {
+    const arr = this.protocolTemplatesArray;
+    if (!arr || arr.length > 1) {
+      return;
+    }
     const tid = String(displayName ?? '').trim();
-    const g = this.protocolTemplatesArray?.at(0) as UntypedFormGroup;
+    const g = arr.at(0) as UntypedFormGroup;
     if (!g) {
       return;
     }
@@ -135,12 +148,54 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     return (this.protocolCommandsArray.at(commandIndex) as UntypedFormGroup).get('overrideFields') as UntypedFormArray;
   }
 
+  addProtocolTemplate(): void {
+    const arr = this.protocolTemplatesArray;
+    if (!arr) {
+      return;
+    }
+    const used = new Set(arr.controls
+      .map(c => String((c as UntypedFormGroup).get('id')?.value ?? '').trim()));
+    let n = arr.length + 1;
+    let id = `template${n}`;
+    while (used.has(id)) {
+      n += 1;
+      id = `template${n}`;
+    }
+    arr.push(this.createProtocolTemplateGroup({ id } as ProtocolTemplateDefinition));
+    this.wireTemplateIdSync();
+    this.protocolTemplateFormGroup?.updateValueAndValidity({ emitEvent: true });
+  }
+
+  removeProtocolTemplate(index: number): void {
+    const arr = this.protocolTemplatesArray;
+    if (!arr || arr.length <= 1) {
+      return;
+    }
+    const i = Math.min(Math.max(0, Number(index) || 0), arr.length - 1);
+    const removedId = String((arr.at(i) as UntypedFormGroup).get('id')?.value ?? '').trim();
+    arr.removeAt(i);
+    // 被删模板名下的命令改指剩下的第一个模板，避免留下悬空 templateId
+    const fallbackId = String((arr.at(0) as UntypedFormGroup).get('id')?.value ?? '').trim();
+    if (removedId && fallbackId) {
+      for (let c = 0; c < this.protocolCommandsArray.length; c++) {
+        const ctl = (this.protocolCommandsArray.at(c) as UntypedFormGroup).get('templateId');
+        if (ctl && String(ctl.value ?? '').trim() === removedId) {
+          ctl.patchValue(fallbackId, { emitEvent: false });
+        }
+      }
+    }
+    this.wireTemplateIdSync();
+    this.protocolTemplateFormGroup?.updateValueAndValidity({ emitEvent: true });
+  }
+
   private createHexFieldGroup(f?: TcpHexFieldDefinition): UntypedFormGroup {
     const fromFrame = f?.byteLengthFromByteOffset != null && f.byteLengthFromByteOffset >= 0;
     return this.fb.group({
       key: [f?.key ?? '', [Validators.maxLength(255)]],
       byteOffset: [f?.byteOffset ?? 0, [Validators.required, Validators.min(0)]],
       valueType: [f?.valueType ?? TcpHexValueType.UINT8, Validators.required],
+      /** 上行 原始值 × scale，下行 填写值 ÷ scale；留空/0 视为 1 */
+      scale: [f?.scale ?? null],
       hexFieldLengthMode: [fromFrame ? 'fromFrame' : 'fixed'],
       byteLength: [f?.byteLength ?? null, [Validators.min(1)]],
       byteLengthFromByteOffset: [f?.byteLengthFromByteOffset ?? null, [Validators.min(0)]],
@@ -189,6 +244,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       : 'NONE';
     return this.fb.group({
       id: [t?.id ?? '', [Validators.required, Validators.maxLength(255)]],
+      name: [t?.name ?? '', [Validators.maxLength(255)]],
       commandByteOffset: [t?.commandByteOffset ?? 12, [Validators.required, Validators.min(0)]],
       commandMatchWidth: [t?.commandMatchWidth === 1 ? 1 : 4],
       checksumType: [csType],
@@ -296,8 +352,10 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     while (arr.length) {
       arr.removeAt(0, { emitEvent: false });
     }
-    const t = templates?.length ? templates[0] : undefined;
-    arr.push(this.createProtocolTemplateGroup(t), { emitEvent: false });
+    const list = templates?.length ? templates : [undefined];
+    for (const t of list) {
+      arr.push(this.createProtocolTemplateGroup(t as ProtocolTemplateDefinition | undefined), { emitEvent: false });
+    }
     this.wireTemplateIdSync();
     this.syncCommandTemplateIdsFromFirstTemplate();
     this.protocolTemplateFormGroup?.updateValueAndValidity({ emitEvent: true });
@@ -324,21 +382,49 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     this.protocolTemplateFormGroup?.updateValueAndValidity({ emitEvent: true });
   }
 
+  /**
+   * 单模板：模板 ID 变化时把命令的 templateId 一并改掉（归属唯一，无歧义）。
+   * 多模板：只把原本指向旧 ID 的命令改到新 ID，避免改名后命令悬空。
+   */
   private wireTemplateIdSync(): void {
-    this.templateIdSubscription?.unsubscribe();
-    const idCtrl = this.protocolTemplatesArray?.at(0)?.get('id');
-    if (!idCtrl) {
+    this.templateIdSubscriptions.forEach(s => s.unsubscribe());
+    this.templateIdSubscriptions = [];
+    const arr = this.protocolTemplatesArray;
+    if (!arr) {
       return;
     }
-    this.templateIdSubscription = idCtrl.valueChanges.subscribe(v => {
-      const tid = String(v ?? '').trim();
-      if (!tid) {
-        return;
+    const single = arr.length <= 1;
+    for (let i = 0; i < arr.length; i++) {
+      const idCtrl = (arr.at(i) as UntypedFormGroup).get('id');
+      if (!idCtrl) {
+        continue;
       }
-      for (let i = 0; i < this.protocolCommandsArray.length; i++) {
-        (this.protocolCommandsArray.at(i) as UntypedFormGroup).get('templateId')?.patchValue(tid, { emitEvent: false });
+      let previous = String(idCtrl.value ?? '').trim();
+      this.templateIdSubscriptions.push(idCtrl.valueChanges.subscribe(v => {
+        const next = String(v ?? '').trim();
+        if (!next || next === previous) {
+          return;
+        }
+        if (single) {
+          this.assignCommandTemplateId(() => true, next);
+        } else if (previous) {
+          this.assignCommandTemplateId(tid => tid === previous, next);
+        }
+        previous = next;
+      }));
+    }
+  }
+
+  private assignCommandTemplateId(match: (tid: string) => boolean, value: string): void {
+    for (let c = 0; c < this.protocolCommandsArray.length; c++) {
+      const ctl = (this.protocolCommandsArray.at(c) as UntypedFormGroup).get('templateId');
+      if (!ctl) {
+        continue;
       }
-    });
+      if (match(String(ctl.value ?? '').trim())) {
+        ctl.patchValue(value, { emitEvent: false });
+      }
+    }
   }
 
   /** 与帧模板「固定线值整型」一致：从模型载入时用十进制回显，避免把 201 显示成 0xc9。 */
@@ -353,8 +439,16 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
     if (!tid) {
       return;
     }
+    // 多模板时只给「还没归属」的命令补默认值，不覆盖已有归属
+    const overwriteAll = (this.protocolTemplatesArray?.length ?? 0) <= 1;
     for (let i = 0; i < this.protocolCommandsArray.length; i++) {
-      (this.protocolCommandsArray.at(i) as UntypedFormGroup).get('templateId')?.patchValue(tid, { emitEvent: false });
+      const ctl = (this.protocolCommandsArray.at(i) as UntypedFormGroup).get('templateId');
+      if (!ctl) {
+        continue;
+      }
+      if (overwriteAll || !String(ctl.value ?? '').trim()) {
+        ctl.patchValue(tid, { emitEvent: false });
+      }
     }
   }
 }

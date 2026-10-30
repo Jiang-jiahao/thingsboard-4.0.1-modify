@@ -125,6 +125,8 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     return Math.min(Math.max(0, i), max);
   }
 
+  @Output() addTemplate = new EventEmitter<void>();
+  @Output() removeTemplate = new EventEmitter<number>();
   @Output() addTemplateField = new EventEmitter<number>();
   @Output() removeTemplateField = new EventEmitter<{ templateIndex: number; fieldIndex: number }>();
   @Output() addTemplateLtvMapping = new EventEmitter<number>();
