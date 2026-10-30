@@ -228,6 +228,11 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
 - **Redis 用官方 `redis:7-alpine`**（TB 侧本来就没配密码）。**`redis-cluster` / `redis-sentinel` 两个变体仍是 bitnami**，要用它们得先在能拉 bitnami 的网络里拉镜像或同样换掉。
 - **内存配额必须算够（这是本栈最容易踩的坑）**：整套实测约 **9G**（34 个容器，见 §0 表），Docker VM 默认只分到宿主一半 —— 不够时的表现很有迷惑性：**内核 OOM 杀掉 JVM，但容器日志里没有任何错误、`docker inspect` 的 `OOMKilled` 也是 false**，只会看到 core/rule-engine 反复重启、`RestartCount` 一直涨，用户侧表现为**登录接口间歇 502**。判断方法：`docker stats` 看总量是否顶到 `docker info` 里的 MemTotal。**解法是给 VM 加内存（或调小各服务堆），不是停掉多实例副本** —— transport 的 `*1/*2`、core 的 `*1/*2` 都是刻意的多实例部署。堆参数现状：core/rule-engine `-Xmx768M`、transport `JAVA_OPTS_TRANSPORT=-Xmx256M`、Kafka `KAFKA_HEAP_OPTS=-Xmx512M`（Kafka 不设堆上限会默认吃掉 VM 内存的 1/4）。
 - `js-executor` 是 JS 规则节点的执行器，compose 里写的是 `deploy.replicas: 10`（这套拓扑里 10 个实例实测约占 0.5G，是刻意的多实例，不是冗余）。
+- **UDP transport 走 host 网络**（`jnks-iot-udp-transport1/2` 均为 `network_mode: host`，不再发布端口；网关也不再代理任何 UDP 端口）。原因是 bridge 网络下会出现 **conntrack 五元组冲突**：设备持续上报会在宿主机留下 `设备:设备端口 → 容器:监听端口` 的连接记录，平台下发恰好复用**监听端口**作源端口，五元组与这条记录的反向完全一致，内核按“回包”处理并跳过 MASQUERADE，包带着容器私网地址（如 `172.20.0.28`）发出去，设备因来源不是配置的服务器而丢弃——表现就是“平台上显示已发送、设备侧抓不到或收到不执行”。TCP 不受影响（回包走已有连接）。
+  - 两个实例靠 `transport.udp.reuse_port=true`（SO_REUSEPORT）共享同一组 UDP 端口，内核按四元组哈希分派，同一设备稳定落在一个实例；管理端口必须错开（`HTTP_BIND_PORT` 18088 / 18089，8088 已被网关的 `127.0.0.1:8088:4200` 占用）。
+  - host 网络下容器仍用自己的 `/etc/hosts`：Kafka 广播地址是 `kafka:9092`，所以两个服务都加了 `extra_hosts: kafka:127.0.0.1`；ZooKeeper / Redis 改为直连 `127.0.0.1`（因此 `zookeeper` 的宿主端口固定为 `2181:2181`，起栈前确认宿主 2181 未被占用）。
+  - **设备侧**：服务器地址统一填宿主机 IP + 原端口，不能再指向 `172.20.0.x` 这类容器地址。
+  - 验证：`ss -lunp | grep -E '6333[34]|59990|10101'` 应看到两个 java 进程绑同一端口；设备上报期间 `cat /proc/net/nf_conntrack | grep <设备IP>` 不应再出现 `172.20.0.x`；在 eth0 上抓平台下发，源应是 `宿主IP:端口`。
 
 ## 8. 单体（全在一个 JVM 里）
 
