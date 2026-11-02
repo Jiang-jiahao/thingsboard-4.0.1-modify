@@ -5,12 +5,17 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.common.data.StringUtils;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,9 +27,48 @@ public class HttpPullHttpClient {
     private final HttpClient httpClient;
 
     public HttpPullHttpClient(int connectTimeoutMs) {
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofMillis(Math.max(connectTimeoutMs, 1000)))
-                .build();
+        this(connectTimeoutMs, false);
+    }
+
+    /**
+     * @param insecureSsl true 时跳过证书链校验，仅用于内网自签证书的设备
+     *                    （由 {@code transport.http.pull.ssl.insecure} 控制，默认 false）
+     */
+    public HttpPullHttpClient(int connectTimeoutMs, boolean insecureSsl) {
+        HttpClient.Builder builder = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofMillis(Math.max(connectTimeoutMs, 1000)));
+        if (insecureSsl) {
+            // 自签证书的 CN/SAN 常与设备 IP 不一致，关闭主机名校验需在 JVM 启动时传
+            // -Djdk.internal.httpclient.disableHostnameVerification=true；这里尽力设置，已有连接不受影响。
+            System.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true");
+            builder.sslContext(insecureSslContext());
+            log.warn("HTTP pull TLS certificate verification is disabled (transport.http.pull.ssl.insecure=true)");
+        }
+        this.httpClient = builder.build();
+    }
+
+    private static SSLContext insecureSslContext() {
+        try {
+            TrustManager[] trustAll = new TrustManager[]{new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(X509Certificate[] chain, String authType) {
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType) {
+                }
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
+                }
+            }};
+            SSLContext context = SSLContext.getInstance("TLS");
+            context.init(null, trustAll, new SecureRandom());
+            return context;
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to build insecure SSL context for HTTP pull", e);
+        }
     }
 
     public HttpPullResponse execute(HttpPullRequest request) throws Exception {

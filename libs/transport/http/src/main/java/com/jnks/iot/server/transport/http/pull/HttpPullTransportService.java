@@ -46,11 +46,14 @@ public class HttpPullTransportService {
     @Value("${transport.http.pull.scheduler_thread_pool_size:4}")
     private int schedulerThreadPoolSize;
 
+    @Value("${transport.http.pull.ssl.insecure:false}")
+    private boolean insecureSsl;
+
     @PostConstruct
     public void init() {
         scheduler = MoreExecutors.listeningDecorator(
                 JnksIotExecutors.newScheduledThreadPool(schedulerThreadPoolSize, "http-pull-querying"));
-        httpClient = new HttpPullHttpClient(10000);
+        httpClient = new HttpPullHttpClient(10000, insecureSsl);
     }
 
     @PreDestroy

@@ -3,6 +3,7 @@ package com.jnks.iot.server.transport.http.pull;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.StringUtils;
@@ -24,6 +25,10 @@ import java.util.Map;
 public class HttpOutboundRpcExecutor {
 
     private final HttpPullAuthService authService;
+
+    @Value("${transport.http.pull.ssl.insecure:false}")
+    private boolean insecureSsl;
+
     private HttpPullHttpClient httpClient;
 
     void setHttpClient(HttpPullHttpClient httpClient) {
@@ -32,7 +37,7 @@ public class HttpOutboundRpcExecutor {
 
     @PostConstruct
     public void init() {
-        httpClient = new HttpPullHttpClient(10000);
+        httpClient = new HttpPullHttpClient(10000, insecureSsl);
     }
 
     public OutboundHttpResult execute(DeviceId authDeviceId,

@@ -2,9 +2,11 @@ package com.jnks.iot.server.transport.http.pull;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import jakarta.annotation.PostConstruct;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.jnks.iot.server.common.data.StringUtils;
 import com.jnks.iot.server.common.data.id.DeviceId;
@@ -23,8 +25,16 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class HttpPullAuthService {
 
-    private final HttpPullHttpClient sharedHttpClient = new HttpPullHttpClient(10000);
+    @Value("${transport.http.pull.ssl.insecure:false}")
+    private boolean insecureSsl;
+
+    private HttpPullHttpClient sharedHttpClient;
     private final Map<DeviceId, TokenState> tokenCache = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    void initHttpClient() {
+        this.sharedHttpClient = new HttpPullHttpClient(10000, insecureSsl);
+    }
 
     public AuthRequestContext prepareAuth(DeviceId collectorId, HttpPullAuthConfiguration auth, String pollUrl,
                                           boolean requiresAuth) throws Exception {
