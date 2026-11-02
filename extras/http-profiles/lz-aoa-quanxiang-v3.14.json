@@ -1,0 +1,192 @@
+{
+  "name": "历正科技 AOA 融合汇控（全向侦测反制）",
+  "description": "《历正科技应用接口说明 v3.14》。平台作为 HTTP 客户端先 POST /login 获取令牌（admin/lzno1，凭证取自响应 $.token，按 Bearer 头携带），再定时 POST /rf/graphql：每 60 秒取 {devices{id class state config}}（遥测键 lzAoaPayload），每 1 秒取 {drone{...}} 无人机列表（遥测键 lzDronePayload）。下行通过 HTTP_OUTBOUND 调用 wideband_attack 宽频干扰 mutation：迫降覆盖 1.4G/1.5G/2.4G/5.8G，驱离覆盖 2.4G/5.8G，与旧接入代码一致。档案里登录与拉取 URL 写完整协议/端口/路径（host 用占位即可），每台设备只在「设备传输配置 → 设备 IP 覆盖」里填自己的 IP，平台只替换 host；同一档案可服务多台设备。设备需至少成功拉取一次后 RPC 通道才生效。",
+  "type": "DEFAULT",
+  "transportType": "HTTP_PULL",
+  "provisionType": "DISABLED",
+  "defaultDashboardId": null,
+  "defaultQueueName": null,
+  "provisionDeviceKey": null,
+  "firmwareId": null,
+  "softwareId": null,
+  "default": false,
+  "profileData": {
+    "configuration": {
+      "type": "DEFAULT"
+    },
+    "transportConfiguration": {
+      "type": "HTTP_PULL",
+      "httpTransportMode": "PULL",
+      "timeoutMs": 10000,
+      "readTimeoutMs": 10000,
+      "queryingFrequencyMs": 60000,
+      "pollRequests": [
+        {
+          "id": "lz-aoa-devices",
+          "name": "查询设备列表与状态（GraphQL devices）",
+          "enabled": true,
+          "pollUrl": "https://lz-device/rf/graphql",
+          "pollMethod": "POST",
+          "pollBody": "{\"query\":\"{devices{id class state config}}\"}",
+          "pollHeaders": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          "queryingFrequencyMs": 60000,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "lzAoaPayload",
+          "requiresAuth": true
+        },
+        {
+          "id": "lz-aoa-drones",
+          "name": "查询无人机列表（GraphQL drone）",
+          "enabled": true,
+          "pollUrl": "https://lz-device/rf/graphql",
+          "pollMethod": "POST",
+          "pollBody": "{\"query\":\"{drone{id created_time distance speed direction height longitude latitude seen_sensor{detected_freq_khz sensor_id signal_dbm} name}}\"}",
+          "pollHeaders": {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          "queryingFrequencyMs": 1000,
+          "dataType": "TELEMETRY",
+          "telemetryPayloadKey": "lzDronePayload",
+          "requiresAuth": true
+        }
+      ],
+      "auth": {
+        "authType": "LOGIN_TOKEN",
+        "loginUrl": "https://lz-device/login",
+        "loginMethod": "POST",
+        "loginBody": "{\"username\":\"admin\",\"password\":\"lzno1\"}",
+        "loginHeaders": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "accessTokenJsonPath": "$.token",
+        "tokenHeader": "Authorization",
+        "tokenPrefix": "Bearer ",
+        "defaultTokenTtlSec": 8640000
+      }
+    },
+    "provisionConfiguration": {
+      "type": "DISABLED",
+      "provisionDeviceSecret": null
+    },
+    "alarms": [],
+    "rpcMethods": [
+      {
+        "id": "landingOn",
+        "displayName": "迫降开启（1.4G/1.5G/2.4G/5.8G）",
+        "oneWay": true,
+        "timeoutMs": 10000,
+        "scheduleEnabled": null,
+        "scheduleIntervalMs": null,
+        "scheduleParamsJson": null,
+        "bindingType": "HTTP_OUTBOUND",
+        "templateCommandName": null,
+        "commandValue": null,
+        "templateId": null,
+        "paramMap": null,
+        "deviceMethod": null,
+        "paramsTemplateJson": null,
+        "httpUrl": "https://lz-device/rf/graphql",
+        "httpMethod": "POST",
+        "httpBody": "{\"query\":\"mutation { b14: wideband_attack(band:\\\"band14\\\", wb_status:true){band14} b15: wideband_attack(band:\\\"band15\\\", wb_status:true){band15} b24: wideband_attack(band:\\\"band24\\\", wb_status:true){band24} b58: wideband_attack(band:\\\"band58\\\", wb_status:true){band58} }\"}",
+        "httpHeaders": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "requiresAuth": true,
+        "mqttRequestTopic": null,
+        "mqttResponseTopic": null,
+        "mqttPayloadTemplate": null,
+        "mqttQos": null
+      },
+      {
+        "id": "landingOff",
+        "displayName": "迫降关闭（1.4G/1.5G/2.4G/5.8G）",
+        "oneWay": true,
+        "timeoutMs": 10000,
+        "scheduleEnabled": null,
+        "scheduleIntervalMs": null,
+        "scheduleParamsJson": null,
+        "bindingType": "HTTP_OUTBOUND",
+        "templateCommandName": null,
+        "commandValue": null,
+        "templateId": null,
+        "paramMap": null,
+        "deviceMethod": null,
+        "paramsTemplateJson": null,
+        "httpUrl": "https://lz-device/rf/graphql",
+        "httpMethod": "POST",
+        "httpBody": "{\"query\":\"mutation { b14: wideband_attack(band:\\\"band14\\\", wb_status:false){band14} b15: wideband_attack(band:\\\"band15\\\", wb_status:false){band15} b24: wideband_attack(band:\\\"band24\\\", wb_status:false){band24} b58: wideband_attack(band:\\\"band58\\\", wb_status:false){band58} }\"}",
+        "httpHeaders": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "requiresAuth": true,
+        "mqttRequestTopic": null,
+        "mqttResponseTopic": null,
+        "mqttPayloadTemplate": null,
+        "mqttQos": null
+      },
+      {
+        "id": "expelOn",
+        "displayName": "驱离开启（2.4G/5.8G）",
+        "oneWay": true,
+        "timeoutMs": 10000,
+        "scheduleEnabled": null,
+        "scheduleIntervalMs": null,
+        "scheduleParamsJson": null,
+        "bindingType": "HTTP_OUTBOUND",
+        "templateCommandName": null,
+        "commandValue": null,
+        "templateId": null,
+        "paramMap": null,
+        "deviceMethod": null,
+        "paramsTemplateJson": null,
+        "httpUrl": "https://lz-device/rf/graphql",
+        "httpMethod": "POST",
+        "httpBody": "{\"query\":\"mutation { b24: wideband_attack(band:\\\"band24\\\", wb_status:true){band24} b58: wideband_attack(band:\\\"band58\\\", wb_status:true){band58} }\"}",
+        "httpHeaders": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "requiresAuth": true,
+        "mqttRequestTopic": null,
+        "mqttResponseTopic": null,
+        "mqttPayloadTemplate": null,
+        "mqttQos": null
+      },
+      {
+        "id": "expelOff",
+        "displayName": "驱离关闭（2.4G/5.8G）",
+        "oneWay": true,
+        "timeoutMs": 10000,
+        "scheduleEnabled": null,
+        "scheduleIntervalMs": null,
+        "scheduleParamsJson": null,
+        "bindingType": "HTTP_OUTBOUND",
+        "templateCommandName": null,
+        "commandValue": null,
+        "templateId": null,
+        "paramMap": null,
+        "deviceMethod": null,
+        "paramsTemplateJson": null,
+        "httpUrl": "https://lz-device/rf/graphql",
+        "httpMethod": "POST",
+        "httpBody": "{\"query\":\"mutation { b24: wideband_attack(band:\\\"band24\\\", wb_status:false){band24} b58: wideband_attack(band:\\\"band58\\\", wb_status:false){band58} }\"}",
+        "httpHeaders": {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        "requiresAuth": true,
+        "mqttRequestTopic": null,
+        "mqttResponseTopic": null,
+        "mqttPayloadTemplate": null,
+        "mqttQos": null
+      }
+    ]
+  }
+}

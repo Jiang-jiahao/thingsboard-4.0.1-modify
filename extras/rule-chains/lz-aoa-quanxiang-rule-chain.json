@@ -1,0 +1,340 @@
+{
+  "ruleChain": {
+    "additionalInfo": {
+      "description": "历正科技 AOA 全向融合汇控（接口文档 v3.14）。遥测只保存原始数据：devices 分支直接把拉取整包（lzAoaPayload）写入遥测；drone 分支先保存原始整包（lzDronePayload），再分成 AOA 与便携两类，换算频点与方向，持续时长固定 6、距离取设备上报值，分批（每批 9 条）POST 到 9802 的 AOA 与便携无人机上报接口，不维护跨轮状态。RPC 分支为直接下发：规则链收到服务端 RPC 后原样转发给设备，不做延时或自动关闭。设备需配置服务端属性 devId、stationId。"
+    },
+    "name": "历正科技 AOA 全向融合汇控规则链",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "externalId": null
+  },
+  "metadata": {
+    "firstNodeIndex": 0,
+    "nodes": [
+      {
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotMsgTypeSwitchNode",
+        "name": "消息类型分流",
+        "configurationVersion": 0,
+        "configuration": {
+          "version": 0
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 400,
+          "layoutY": 260
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotJsSwitchNode",
+        "name": "遥测来源",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "if (msg.lzDronePayload !== undefined && msg.lzDronePayload !== null) { return ['drones']; }\nif (msg.lzAoaPayload !== undefined && msg.lzAoaPayload !== null) { return ['devices']; }\nreturn [];\n",
+          "tbelScript": null
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 660,
+          "layoutY": 120
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode",
+        "name": "保存原始遥测",
+        "configurationVersion": 0,
+        "configuration": {
+          "defaultTTL": 0,
+          "useServerTs": false,
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          }
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 920,
+          "layoutY": 60
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.telemetry.JnksIotMsgTimeseriesNode",
+        "name": "保存原始无人机遥测",
+        "configurationVersion": 0,
+        "configuration": {
+          "defaultTTL": 0,
+          "useServerTs": false,
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          }
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 920,
+          "layoutY": 180
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.metadata.JnksIotGetAttributesNode",
+        "name": "读取设备属性",
+        "configurationVersion": 0,
+        "configuration": {
+          "tellFailureIfAbsent": false,
+          "fetchTo": "DATA",
+          "clientAttributeNames": [],
+          "sharedAttributeNames": [],
+          "serverAttributeNames": [
+            "devId",
+            "stationId"
+          ],
+          "latestTsKeyNames": [],
+          "getLatestValueWithTs": false
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 1180,
+          "layoutY": 180
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.transform.JnksIotTransformMsgNode",
+        "name": "计算无人机上报数据",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "// 输入：无人机整包落在 lzDronePayload；设备属性 devId、stationId；距离取设备上报的 distance，持续时长固定 6，不维护跨轮状态\nvar raw = msg.lzDronePayload;\nif (typeof raw === 'string') {\n  try { raw = JSON.parse(raw); } catch (e) { raw = null; }\n}\nvar drones = (raw && raw.data && raw.data.drone) ? raw.data.drone : [];\nvar nowMs = Date.now();\nvar nowSec = Math.floor(nowMs / 1000);\n\nfunction num(v) { var n = parseFloat(v); return isNaN(n) ? 0 : n; }\nfunction pad(n, len) { var s = '' + n; while (s.length < len) { s = '0' + s; } return s; }\nfunction fmtLocal(ms) {\n  var d = new Date(ms);\n  return '' + d.getFullYear() + pad(d.getMonth() + 1, 2) + pad(d.getDate(), 2) +\n    pad(d.getHours(), 2) + pad(d.getMinutes(), 2) + pad(d.getSeconds(), 2) + pad(d.getMilliseconds(), 3);\n}\nfunction parseIsoSec(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2}):(\\d{2})(?:\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})?/.exec(String(s || ''));\n  if (!m) { return nowSec; }\n  var ms = Date.UTC(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10),\n    parseInt(m[4], 10), parseInt(m[5], 10), parseInt(m[6], 10));\n  var tz = m[7];\n  if (tz && tz !== 'Z') {\n    var sign = tz.charAt(0) === '-' ? -1 : 1;\n    var hm = tz.substring(1).split(':');\n    ms -= sign * (parseInt(hm[0], 10) * 60 + parseInt(hm[1], 10)) * 60000;\n  }\n  return Math.floor(ms / 1000);\n}\nvar devId = msg.devId != null ? String(msg.devId) : '';\nvar stationId = msg.stationId != null ? String(msg.stationId) : '';\n\nvar aoa = [];\nvar portable = [];\nfor (var i = 0; i < drones.length; i++) {\n  var d = drones[i] || {};\n  var id = d.id != null ? String(d.id) : '';\n  var lng = num(d.longitude);\n  var lat = num(d.latitude);\n  if (lng === 0 || lat === 0) { continue; }\n\n  var sensor = null;\n  var ss = d.seen_sensor;\n  if (ss) {\n    if (typeof ss === 'string') {\n      try { ss = JSON.parse(ss); } catch (e) { ss = null; }\n    }\n    if (ss && ss.length > 0) { sensor = ss[0]; }\n  }\n  var channel = 0;\n  if (sensor && sensor.detected_freq_khz != null) {\n    var freq = String(sensor.detected_freq_khz);\n    if (freq.charAt(0) === '2' || freq.charAt(0) === '5') {\n      channel = parseFloat(freq.charAt(0) + '.' + freq.substring(1));\n    } else {\n      channel = parseFloat(freq);\n    }\n    if (isNaN(channel)) { channel = 0; }\n  }\n\n  var direction = num(d.direction);\n  var reportedDistance = num(d.distance);\n\n  if (direction >= 0 && reportedDistance >= 0 && id.length <= 15 && /[a-z]/.test(id)) {\n    var dir = direction % 360;\n    aoa.push({\n      devId: devId,\n      batchno: String(parseIsoSec(d.created_time)),\n      distance: reportedDistance,\n      lasting_time: 6,\n      direction: dir < 0 ? 360 - dir : dir,\n      channel: channel,\n      model: d.name != null ? String(d.name) : ''\n    });\n  } else if (lat > 0 && lng > 0 && id.length > 10 && /[A-Z]/.test(id)) {\n    var intrusionStart = fmtLocal(nowMs);\n    var model = d.name != null ? String(d.name) : '';\n    portable.push({\n      scanID: [{ id: devId }],\n      detect_type: 1,\n      intrusion_start_time: intrusionStart,\n      batch_num: intrusionStart + '00',\n      longitude: lng,\n      latitude: lat,\n      height: num(d.height),\n      distance: reportedDistance,\n      frequency: channel,\n      bandwidth: 0,\n      speed: num(d.speed),\n      model: model,\n      type: model.indexOf('rc') >= 0 ? 0 : 1,\n      lasting_time: 6,\n      drone_uuid: id\n    });\n  }\n}\n\nreturn {\n  msg: {\n    aoa: aoa,\n    portable: portable,\n    stationId: stationId,\n    droneCount: drones.length,\n    aoaCount: aoa.length,\n    portableCount: portable.length\n  },\n  metadata: metadata,\n  msgType: msgType\n};\n",
+          "tbelScript": null
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 1180,
+          "layoutY": 180
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.filter.JnksIotJsSwitchNode",
+        "name": "无人机推送分流",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var rel = [];\nif (msg.aoa && msg.aoa.length > 0) { rel.push('aoa'); }\nif (msg.portable && msg.portable.length > 0) { rel.push('portable'); }\nreturn rel;\n",
+          "tbelScript": null
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 1440,
+          "layoutY": 180
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.transform.JnksIotTransformMsgNode",
+        "name": "构造 AOA 批次",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var list = msg.aoa || [];\nvar batch = [];\nfor (var i = 0; i < list.length; i += 9) {\n  batch.push({ msg: { drone: list.slice(i, i + 9) }, metadata: metadata, msgType: msgType });\n}\nreturn batch;\n",
+          "tbelScript": null
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 1700,
+          "layoutY": 80
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.rest.JnksIotRestApiCallNode",
+        "name": "推送 AOA 无人机",
+        "configurationVersion": 0,
+        "configuration": {
+          "restEndpointUrlPattern": "http://192.168.222.100:9802/sys/aoa/drone/report/old",
+          "requestMethod": "POST",
+          "useSimpleClientHttpFactory": false,
+          "parseToPlainText": true,
+          "ignoreRequestBody": false,
+          "enableProxy": false,
+          "useSystemProxyProperties": false,
+          "proxyScheme": "",
+          "proxyHost": "",
+          "proxyPort": 0,
+          "proxyUser": "",
+          "proxyPassword": "",
+          "readTimeoutMs": 5000,
+          "maxParallelRequestsCount": 0,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "credentials": {
+            "type": "anonymous"
+          },
+          "maxInMemoryBufferSizeInKb": 256
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 1960,
+          "layoutY": 80
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.transform.JnksIotTransformMsgNode",
+        "name": "构造 Portable 批次",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var list = msg.portable || [];\nvar batch = [];\nfor (var i = 0; i < list.length; i += 9) {\n  batch.push({ msg: { drone: list.slice(i, i + 9), station_id: msg.stationId }, metadata: metadata, msgType: msgType });\n}\nreturn batch;\n",
+          "tbelScript": null
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 1700,
+          "layoutY": 200
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.rest.JnksIotRestApiCallNode",
+        "name": "推送 Portable 无人机",
+        "configurationVersion": 0,
+        "configuration": {
+          "restEndpointUrlPattern": "http://192.168.222.100:9802/sys/portable/drone/report",
+          "requestMethod": "POST",
+          "useSimpleClientHttpFactory": false,
+          "parseToPlainText": true,
+          "ignoreRequestBody": false,
+          "enableProxy": false,
+          "useSystemProxyProperties": false,
+          "proxyScheme": "",
+          "proxyHost": "",
+          "proxyPort": 0,
+          "proxyUser": "",
+          "proxyPassword": "",
+          "readTimeoutMs": 5000,
+          "maxParallelRequestsCount": 0,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "credentials": {
+            "type": "anonymous"
+          },
+          "maxInMemoryBufferSizeInKb": 256
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 1960,
+          "layoutY": 200
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.rpc.JnksIotSendRPCRequestNode",
+        "name": "RPC 请求调用",
+        "configurationVersion": 0,
+        "configuration": {
+          "timeoutInSeconds": 60
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 660,
+          "layoutY": 420
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
+        "name": "记录设备 RPC",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
+          "tbelScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 660,
+          "layoutY": 500
+        }
+      },
+      {
+        "type": "com.jnks.iot.rule.engine.action.JnksIotLogNode",
+        "name": "记录其它消息",
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "TBEL",
+          "jsScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
+          "tbelScript": "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 660,
+          "layoutY": 580
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 1,
+        "type": "Post telemetry"
+      },
+      {
+        "fromIndex": 0,
+        "toIndex": 11,
+        "type": "RPC Request to Device"
+      },
+      {
+        "fromIndex": 0,
+        "toIndex": 12,
+        "type": "RPC Request from Device"
+      },
+      {
+        "fromIndex": 0,
+        "toIndex": 13,
+        "type": "Other"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 2,
+        "type": "devices"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 3,
+        "type": "drones"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 4,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 5,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 6,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 7,
+        "type": "aoa"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 9,
+        "type": "portable"
+      },
+      {
+        "fromIndex": 7,
+        "toIndex": 8,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 9,
+        "toIndex": 10,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}
