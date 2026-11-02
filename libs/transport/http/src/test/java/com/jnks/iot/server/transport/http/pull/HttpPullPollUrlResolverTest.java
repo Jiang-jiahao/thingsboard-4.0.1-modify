@@ -45,6 +45,22 @@ class HttpPullPollUrlResolverTest {
     }
 
     @Test
+    void ipOverrideReplacesHostOnly() {
+        assertThat(HttpPullPollUrlResolver.resolveWithIp("https://lz-device/login", "192.168.2.38"))
+                .isEqualTo("https://192.168.2.38/login");
+        assertThat(HttpPullPollUrlResolver.resolveWithIp("http://lz-device:3200/graphql", "192.168.2.38"))
+                .isEqualTo("http://192.168.2.38:3200/graphql");
+    }
+
+    @Test
+    void blankIpOverrideKeepsUrl() {
+        assertThat(HttpPullPollUrlResolver.resolveWithIp("https://lz-device/login", null))
+                .isEqualTo("https://lz-device/login");
+        assertThat(HttpPullPollUrlResolver.resolveWithIp("https://lz-device/login", " "))
+                .isEqualTo("https://lz-device/login");
+    }
+
+    @Test
     void isAbsoluteRejectsRelativeOrHostlessUrls() {
         assertThat(HttpPullPollUrlResolver.isAbsolute("http://10.0.0.8:8080/api/data")).isTrue();
         assertThat(HttpPullPollUrlResolver.isAbsolute("https://api.example.com/api/data")).isTrue();

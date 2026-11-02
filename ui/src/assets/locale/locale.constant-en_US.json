@@ -1984,6 +1984,8 @@
             "poll-url-override": "Poll URL override",
             "single-device-device-hint": "This device polls the external HTTP API using the profile settings and writes incoming data to its own telemetry.",
             "poll-url-override-single-hint": "Optional. Empty uses profile URL. Host:port only picks up profile path when profile changes; full URL overrides profile completely.",
+            "ip-override": "Device IP override",
+            "ip-override-single-hint": "Optional. Replaces only the host in login and poll URLs; scheme, port and path come from the profile.",
             "profile-poll-url": "Profile pull URL",
             "effective-poll-url": "Effective pull URL"
         },

@@ -84,18 +84,22 @@ public class HttpPullTransportService {
         }
         try {
             HttpPullDeviceProfileTransportConfiguration profile = sessionContext.getProfileTransportConfiguration();
-            String pollUrl = resolvePollUrl(sessionContext, pollRequest);
             String urlOverride = resolvePollUrlOverride(sessionContext);
+            String ipOverride = resolveIpOverride(sessionContext);
+            String pollUrl = HttpPullPollUrlResolver.resolveWithIp(
+                    resolvePollUrl(sessionContext, pollRequest), ipOverride);
             boolean requiresAuth = pollRequest.isRequiresAuth(profile.getAuth());
             HttpPullAuthService.AuthRequestContext authCtx = authService.prepareAuth(
-                    sessionContext.getDeviceId(), profile.getAuth(), pollUrl, requiresAuth, urlOverride);
+                    sessionContext.getDeviceId(), profile.getAuth(), pollUrl, requiresAuth, urlOverride,
+                    ipOverride, null);
 
             HttpPullHttpClient.HttpPullResponse response = executeHttpRequest(sessionContext, pollRequest, profile, authCtx);
 
             if (response.getStatusCode() == 401 && requiresAuth) {
                 log.info("[{}] HTTP pull [{}] 401, refreshing login token", sessionContext.getDeviceId(), pollRequest.getName());
                 authService.invalidate(sessionContext.getDeviceId());
-                authCtx = authService.prepareAuth(sessionContext.getDeviceId(), profile.getAuth(), pollUrl, true, urlOverride);
+                authCtx = authService.prepareAuth(sessionContext.getDeviceId(), profile.getAuth(), pollUrl, true,
+                        urlOverride, ipOverride, null);
                 response = executeHttpRequest(sessionContext, pollRequest, profile, authCtx);
             }
 
@@ -240,6 +244,11 @@ public class HttpPullTransportService {
     private String resolvePollUrlOverride(HttpPullCollectorSessionContext ctx) {
         return ctx.getDeviceTransportConfiguration() != null
                 ? ctx.getDeviceTransportConfiguration().getPollUrlOverride() : null;
+    }
+
+    private String resolveIpOverride(HttpPullCollectorSessionContext ctx) {
+        return ctx.getDeviceTransportConfiguration() != null
+                ? ctx.getDeviceTransportConfiguration().getIpOverride() : null;
     }
 
     private static String truncate(String s) {

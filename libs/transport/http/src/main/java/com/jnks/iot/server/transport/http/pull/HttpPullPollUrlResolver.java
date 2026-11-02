@@ -30,6 +30,29 @@ public final class HttpPullPollUrlResolver {
     }
 
     /**
+     * 设备 IP 覆盖：只替换 URL 的 host，保留协议、端口、路径与查询串。
+     * <p>
+     * 用于同一档案服务多台设备（端口/路径固定、IP 不同）。传入 {@code IP:端口} 或完整 URL 时
+     * 按 {@link #resolve(String, String)} 处理，兼容既有的覆盖地址写法。
+     */
+    public static String resolveWithIp(String url, String ipOverride) {
+        if (StringUtils.isBlank(url) || StringUtils.isBlank(ipOverride)) {
+            return url;
+        }
+        String trimmed = ipOverride.trim();
+        if (trimmed.contains("://") || trimmed.contains(":")) {
+            return resolve(url, trimmed);
+        }
+        try {
+            URI uri = new URI(url);
+            return new URI(uri.getScheme(), uri.getUserInfo(), trimmed, uri.getPort(),
+                    uri.getPath(), uri.getQuery(), uri.getFragment()).toString();
+        } catch (URISyntaxException e) {
+            return url;
+        }
+    }
+
+    /**
      * 解析后的 URL 能否真正发起请求：必须有 scheme 与 host。
      * 档案只配路径又没配设备 host:port 时，拼出来的是相对路径，逐次轮询都会失败。
      */

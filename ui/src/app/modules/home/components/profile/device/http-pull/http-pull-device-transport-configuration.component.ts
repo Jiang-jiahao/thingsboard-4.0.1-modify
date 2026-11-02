@@ -60,7 +60,8 @@ export class HttpPullDeviceTransportConfigurationComponent implements OnInit, On
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      pollUrlOverride: ['']
+      pollUrlOverride: [''],
+      ipOverride: ['']
     });
     this.form.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
       if (this.valueReady) {
@@ -109,7 +110,8 @@ export class HttpPullDeviceTransportConfigurationComponent implements OnInit, On
     const cfg = value as HttpPullDeviceTransportConfiguration;
     this.pendingValue = {
       ...cfg,
-      pollUrlOverride: cfg.pollUrlOverride
+      pollUrlOverride: cfg.pollUrlOverride,
+      ipOverride: cfg.ipOverride
     };
     this.applyPendingValue();
   }
@@ -137,7 +139,8 @@ export class HttpPullDeviceTransportConfigurationComponent implements OnInit, On
       pollUrlOverride: formatHttpPullPollUrlOverrideForDisplay(
         this.pendingValue.pollUrlOverride,
         this.httpPullProfilePollUrl
-      )
+      ),
+      ipOverride: this.pendingValue.ipOverride || ''
     }, { emitEvent: false });
     this.valueReady = true;
     this.updateModel();
@@ -147,8 +150,10 @@ export class HttpPullDeviceTransportConfigurationComponent implements OnInit, On
   private updateModel(): void {
     const v = this.form.getRawValue();
     const pollOverrideRaw = (v.pollUrlOverride || '').trim();
+    const ipOverrideRaw = (v.ipOverride || '').trim();
     this.propagateChange({
       pollUrlOverride: pollOverrideRaw || undefined,
+      ipOverride: ipOverrideRaw || undefined,
       type: DeviceTransportType.HTTP_PULL
     });
   }

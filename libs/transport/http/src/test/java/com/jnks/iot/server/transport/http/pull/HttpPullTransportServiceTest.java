@@ -127,7 +127,8 @@ class HttpPullTransportServiceTest {
         request.setPollUrl("http://192.168.1.10/api/data");
         request.setPollMethod("GET");
         ctx.getProfileTransportConfiguration().setPollRequests(List.of(request));
-        when(authService.prepareAuth(any(), any(), anyString(), anyBoolean(), nullable(String.class)))
+        when(authService.prepareAuth(any(), any(), anyString(), anyBoolean(), nullable(String.class),
+                nullable(String.class), nullable(Integer.class)))
                 .thenReturn(HttpPullAuthService.AuthRequestContext.builder()
                         .url("http://192.168.1.10/api/data")
                         .build());
@@ -148,7 +149,8 @@ class HttpPullTransportServiceTest {
         request.setPollUrl("http://192.168.1.10/api/data");
         request.setPollMethod("GET");
         ctx.getProfileTransportConfiguration().setPollRequests(List.of(request));
-        when(authService.prepareAuth(any(), any(), anyString(), anyBoolean(), nullable(String.class)))
+        when(authService.prepareAuth(any(), any(), anyString(), anyBoolean(), nullable(String.class),
+                nullable(String.class), nullable(Integer.class)))
                 .thenReturn(HttpPullAuthService.AuthRequestContext.builder()
                         .url("http://192.168.1.10/api/data")
                         .build());
@@ -165,6 +167,7 @@ class HttpPullTransportServiceTest {
 
     private static HttpPullPollRequest telemetryRequest(String key) {
         HttpPullPollRequest request = new HttpPullPollRequest();
+        request.setId("poll-1");
         request.setName("poll-1");
         request.setDataType(HttpPullPollDataType.TELEMETRY);
         request.setTelemetryPayloadKey(key);

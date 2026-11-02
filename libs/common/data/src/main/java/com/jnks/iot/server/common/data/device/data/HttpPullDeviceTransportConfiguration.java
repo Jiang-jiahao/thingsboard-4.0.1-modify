@@ -16,6 +16,14 @@ public class HttpPullDeviceTransportConfiguration implements DeviceTransportConf
      */
     private String pollUrlOverride;
 
+    /**
+     * 可选：设备 IP（或主机）覆盖，只替换档案 URL 中的 host。
+     * <p>
+     * 协议、端口与路径全部沿用档案配置，登录地址与所有拉取地址共用该 IP；
+     * 同一档案即可服务多台同款设备（端口/路径相同、IP 不同）。
+     */
+    private String ipOverride;
+
     @Override
     public DeviceTransportType getType() {
         return DeviceTransportType.HTTP_PULL;

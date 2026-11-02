@@ -1998,6 +1998,8 @@
             "poll-url-override": "覆盖拉取 URL",
             "single-device-device-hint": "本设备将按设备档案轮询外部 HTTP 接口，收到的数据直接写入本设备遥测。",
             "poll-url-override-single-hint": "可选。留空使用档案拉取 URL；仅填 IP:端口 时路径随档案更新；填完整 URL 则完全覆盖档案。",
+            "ip-override": "设备 IP 覆盖",
+            "ip-override-single-hint": "可选。只替换登录与拉取地址中的 IP，协议、端口和路径沿用设备档案；留空使用档案里的地址。",
             "profile-poll-url": "档案拉取 URL",
             "effective-poll-url": "实际拉取地址"
         },

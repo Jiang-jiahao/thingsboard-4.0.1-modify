@@ -47,13 +47,15 @@ public class HttpOutboundRpcExecutor {
         String url = HttpPullPollUrlResolver.resolve(rpcMethod.getHttpUrl(), urlOverride);
         url = HttpPullTemplateResolver.resolve(url, targetDevice, targetDeviceCfg, paramsJson,
                 requestId, rpcMethod.getId());
+        String ipOverride = targetDeviceCfg != null ? targetDeviceCfg.getIpOverride() : null;
+        url = HttpPullPollUrlResolver.resolveWithIp(url, ipOverride);
 
         boolean requiresAuth = rpcMethod.getRequiresAuth() != null
                 ? rpcMethod.getRequiresAuth()
                 : auth != null && auth.getAuthType() != null && auth.getAuthType() != HttpPullAuthType.NONE;
 
         HttpPullAuthService.AuthRequestContext authCtx = authService.prepareAuth(
-                authDeviceId, auth, url, requiresAuth, urlOverride, readTimeoutMs);
+                authDeviceId, auth, url, requiresAuth, urlOverride, ipOverride, readTimeoutMs);
 
         Map<String, String> headers = buildResolvedHeaders(rpcMethod, targetDevice, targetDeviceCfg, paramsJson,
                 requestId, authCtx);
@@ -72,7 +74,7 @@ public class HttpOutboundRpcExecutor {
             log.info("[{}] HTTP outbound RPC [{}] 401, refreshing login token",
                     authDeviceId, rpcMethod.getId());
             authService.invalidate(authDeviceId);
-            authCtx = authService.prepareAuth(authDeviceId, auth, url, true, urlOverride, readTimeoutMs);
+            authCtx = authService.prepareAuth(authDeviceId, auth, url, true, urlOverride, ipOverride, readTimeoutMs);
             headers = buildResolvedHeaders(rpcMethod, targetDevice, targetDeviceCfg, paramsJson, requestId, authCtx);
             if (!headers.containsKey("Content-Type") && StringUtils.isNotBlank(body)) {
                 headers.put("Content-Type", "application/json");

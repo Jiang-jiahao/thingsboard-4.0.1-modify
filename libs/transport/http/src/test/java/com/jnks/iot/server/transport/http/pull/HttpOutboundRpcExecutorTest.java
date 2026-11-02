@@ -40,7 +40,8 @@ class HttpOutboundRpcExecutorTest {
 
     @Test
     void executeWithoutProfileAuthPostsResolvedBody() throws Exception {
-        when(authService.prepareAuth(any(), any(), anyString(), anyBoolean(), nullable(String.class), anyInt()))
+        when(authService.prepareAuth(any(), any(), anyString(), anyBoolean(), nullable(String.class),
+                nullable(String.class), nullable(Integer.class)))
                 .thenReturn(HttpPullAuthService.AuthRequestContext.builder()
                         .url("http://127.0.0.1:19090/rpc")
                         .build());

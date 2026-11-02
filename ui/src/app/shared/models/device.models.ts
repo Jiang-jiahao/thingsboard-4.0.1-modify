@@ -630,6 +630,7 @@ export interface HttpPullDeviceProfileTransportConfiguration {
 
 export interface HttpPullDeviceTransportConfiguration {
   pollUrlOverride?: string;
+  ipOverride?: string;
 }
 
 /** 根据字段形态判断是否为 HTTP 主动拉取设备传输配置（与 Default 被动上报区分） */
