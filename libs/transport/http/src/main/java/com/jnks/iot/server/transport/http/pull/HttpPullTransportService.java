@@ -46,7 +46,7 @@ public class HttpPullTransportService {
     @Value("${transport.http.pull.scheduler_thread_pool_size:4}")
     private int schedulerThreadPoolSize;
 
-    @Value("${transport.http.pull.ssl.insecure:false}")
+    @Value("${transport.http.pull.ssl.insecure:true}")
     private boolean insecureSsl;
 
     @PostConstruct

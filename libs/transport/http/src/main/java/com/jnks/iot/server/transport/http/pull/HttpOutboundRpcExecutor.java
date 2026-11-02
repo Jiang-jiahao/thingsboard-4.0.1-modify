@@ -26,7 +26,7 @@ public class HttpOutboundRpcExecutor {
 
     private final HttpPullAuthService authService;
 
-    @Value("${transport.http.pull.ssl.insecure:false}")
+    @Value("${transport.http.pull.ssl.insecure:true}")
     private boolean insecureSsl;
 
     private HttpPullHttpClient httpClient;

@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class HttpPullAuthService {
 
-    @Value("${transport.http.pull.ssl.insecure:false}")
+    @Value("${transport.http.pull.ssl.insecure:true}")
     private boolean insecureSsl;
 
     private HttpPullHttpClient sharedHttpClient;

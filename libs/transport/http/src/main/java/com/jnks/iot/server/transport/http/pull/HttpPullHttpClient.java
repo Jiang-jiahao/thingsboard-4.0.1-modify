@@ -31,8 +31,8 @@ public class HttpPullHttpClient {
     }
 
     /**
-     * @param insecureSsl true 时跳过证书链校验，仅用于内网自签证书的设备
-     *                    （由 {@code transport.http.pull.ssl.insecure} 控制，默认 false）
+     * @param insecureSsl true 时跳过证书链校验，用于内网自签证书的设备
+     *                    （由 {@code transport.http.pull.ssl.insecure} 控制，默认 true）
      */
     public HttpPullHttpClient(int connectTimeoutMs, boolean insecureSsl) {
         HttpClient.Builder builder = HttpClient.newBuilder()
