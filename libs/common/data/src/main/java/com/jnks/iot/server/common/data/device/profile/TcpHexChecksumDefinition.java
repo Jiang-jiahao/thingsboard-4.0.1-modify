@@ -12,7 +12,8 @@ import java.io.Serializable;
 public class TcpHexChecksumDefinition implements Serializable {
 
     /**
-     * NONE / SUM8 / CRC16_MODBUS / CRC16_CCITT / CRC32（大小写不敏感）。
+     * NONE / SUM8 / CRC16_MODBUS / CRC16_IBM / CRC16_CCITT / CRC32（大小写不敏感）。
+     * CRC16_IBM 与 CRC16_MODBUS 同为反射多项式 0xA001，仅初值不同（0x0000），2 字节小端写入。
      */
     private String type;
 

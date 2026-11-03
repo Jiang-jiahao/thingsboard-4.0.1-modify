@@ -39,7 +39,7 @@ import java.util.Optional;
                 "标量 / 切片类型：UINT8、UINT16_LE/BE、UINT32_LE/BE、FLOAT32/64 LE/BE、HEX_SLICE、HEX_SLICE_LEN_U16LE、BOOL_BIT。 " +
                 "可组合类型：STRUCT（嵌套 <code>nestedFields</code>，偏移量相对于结构体起始位置）、TLV_LIST（UI 标签 LIST）、UNIT_LIST， " +
                 "GENERIC_LIST（区域 + 计数模式 FIXED | FROM_FIELD | UNTIL_END，条目长度为 FIXED 或 PREFIX_UINT8/UINT16/UINT32，<code>listItemFields</code> 作为每个元素的子协议）。 " +
-                "校验和：SUM8、CRC16_MODBUS、CRC16_CCITT、CRC32、NONE。<br/><br/>" +
+                "校验和：SUM8、CRC16_MODBUS、CRC16_IBM、CRC16_CCITT、CRC32、NONE。<br/><br/>" +
                 "输出：<code>Success</code> / <code>Failure</code>。",
         configDirective = "jnksIotTransformationNodeHexProtocolParserConfig",
         icon = "developer_board"

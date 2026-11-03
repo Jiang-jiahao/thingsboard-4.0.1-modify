@@ -1,0 +1,1073 @@
+{
+  "name": "灵信主从模块通讯协议 V1.1.5（0x7E 定界）",
+  "description": "灵信《主从模块通讯协议》V1.1.5（无人机干扰器，RS485 主从）。帧：0x7E + 目的地址(1) + 长度(1，=地址+长度+命令+数据) + 命令(1) + 数据 + CRC16 低字节在前(2) + 0x7E。上行 9 条回复按偏移解析；下行 17 条命令按「参长自动 + 命令级 CRC-16/IBM + 帧尾 0x7E」组帧（需平台支持 CRC16_IBM）。设备直接以 TCP 接入（平台作客户端），回复帧目的地址恒为 0x00。",
+  "protocolTemplates": [
+    {
+      "id": "lingxin_master_slave_7e",
+      "name": "主从模块帧-上行（0x7E 定界）",
+      "commandByteOffset": 3,
+      "commandMatchWidth": 1,
+      "checksum": {
+        "type": "NONE"
+      },
+      "hexProtocolFields": [
+        {
+          "key": "frameStart",
+          "byteOffset": 0,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        },
+        {
+          "key": "destAddress",
+          "byteOffset": 1,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 2,
+          "valueType": "UINT8"
+        }
+      ]
+    },
+    {
+      "id": "lingxin_master_slave_7e_dl",
+      "name": "主从模块帧-下行（0x7E 定界）",
+      "commandByteOffset": 3,
+      "commandMatchWidth": 1,
+      "checksum": {
+        "type": "NONE"
+      },
+      "hexProtocolFields": [
+        {
+          "key": "frameStart",
+          "byteOffset": 0,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        },
+        {
+          "key": "destAddress",
+          "byteOffset": 1,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameLength",
+          "byteOffset": 2,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "cmdSlot",
+          "byteOffset": 3,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        }
+      ]
+    }
+  ],
+  "protocolCommands": [
+    {
+      "templateId": "lingxin_master_slave_7e",
+      "name": "0x22 设备状态/参数回复",
+      "commandValue": 34,
+      "matchValueType": "UINT8",
+      "direction": "UPLINK",
+      "fields": [
+        {
+          "key": "moduleTemp",
+          "byteOffset": 4,
+          "valueType": "INT8"
+        },
+        {
+          "key": "shieldLevel",
+          "byteOffset": 5,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "deviceEnabled",
+          "byteOffset": 6,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "shieldAdc",
+          "byteOffset": 7,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "frequency",
+          "byteOffset": 11,
+          "valueType": "UINT16_LE"
+        }
+      ]
+    },
+    {
+      "templateId": "lingxin_master_slave_7e",
+      "name": "0x25 设备重置回复",
+      "commandValue": 37,
+      "matchValueType": "UINT8",
+      "direction": "UPLINK",
+      "fields": []
+    },
+    {
+      "templateId": "lingxin_master_slave_7e",
+      "name": "0x26 设备重启回复",
+      "commandValue": 38,
+      "matchValueType": "UINT8",
+      "direction": "UPLINK",
+      "fields": []
+    },
+    {
+      "templateId": "lingxin_master_slave_7e",
+      "name": "0x27 设备地址查询回复",
+      "commandValue": 39,
+      "matchValueType": "UINT8",
+      "direction": "UPLINK",
+      "fields": [
+        {
+          "key": "replyDataLength",
+          "byteOffset": 4,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "bandBits",
+          "byteOffset": 5,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "moduleAddress",
+          "byteOffset": 6,
+          "valueType": "UINT8"
+        }
+      ]
+    },
+    {
+      "templateId": "lingxin_master_slave_7e",
+      "name": "0x28 设备地址设置回复",
+      "commandValue": 40,
+      "matchValueType": "UINT8",
+      "direction": "UPLINK",
+      "fields": [
+        {
+          "key": "setAddress",
+          "byteOffset": 4,
+          "valueType": "UINT8"
+        }
+      ]
+    },
+    {
+      "templateId": "lingxin_master_slave_7e",
+      "name": "0x29 等级功放设置回复",
+      "commandValue": 41,
+      "matchValueType": "UINT8",
+      "direction": "UPLINK",
+      "fields": [
+        {
+          "key": "powerLevel",
+          "byteOffset": 4,
+          "valueType": "UINT8"
+        },
+        {
+          "key": "powerValue",
+          "byteOffset": 5,
+          "valueType": "UINT16_LE"
+        }
+      ]
+    },
+    {
+      "templateId": "lingxin_master_slave_7e",
+      "name": "0x30 波特率设置回复",
+      "commandValue": 48,
+      "matchValueType": "UINT8",
+      "direction": "UPLINK",
+      "fields": [
+        {
+          "key": "baudCode",
+          "byteOffset": 4,
+          "valueType": "UINT8"
+        }
+      ]
+    },
+    {
+      "templateId": "lingxin_master_slave_7e",
+      "name": "0x50 R值查询回复",
+      "commandValue": 80,
+      "matchValueType": "UINT8",
+      "direction": "UPLINK",
+      "fields": [
+        {
+          "key": "rValue0",
+          "byteOffset": 5,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue1",
+          "byteOffset": 8,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue2",
+          "byteOffset": 11,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue3",
+          "byteOffset": 14,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue4",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue5",
+          "byteOffset": 20,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue6",
+          "byteOffset": 23,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue7",
+          "byteOffset": 26,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue8",
+          "byteOffset": 29,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue9",
+          "byteOffset": 32,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue10",
+          "byteOffset": 35,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue11",
+          "byteOffset": 38,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue12",
+          "byteOffset": 41,
+          "valueType": "UINT16_LE"
+        }
+      ]
+    },
+    {
+      "templateId": "lingxin_master_slave_7e",
+      "name": "0x51 R值设置回复",
+      "commandValue": 81,
+      "matchValueType": "UINT8",
+      "direction": "UPLINK",
+      "fields": [
+        {
+          "key": "rValue0",
+          "byteOffset": 5,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue1",
+          "byteOffset": 8,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue2",
+          "byteOffset": 11,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue3",
+          "byteOffset": 14,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue4",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue5",
+          "byteOffset": 20,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue6",
+          "byteOffset": 23,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue7",
+          "byteOffset": 26,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue8",
+          "byteOffset": 29,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue9",
+          "byteOffset": 32,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue10",
+          "byteOffset": 35,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue11",
+          "byteOffset": 38,
+          "valueType": "UINT16_LE"
+        },
+        {
+          "key": "rValue12",
+          "byteOffset": 41,
+          "valueType": "UINT16_LE"
+        }
+      ]
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x21 设备状态查询",
+      "commandValue": 33,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "frameEnd",
+          "byteOffset": 6,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 4,
+        "checksumByteIndex": 4
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x23 设置屏蔽使能",
+      "commandValue": 35,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "subCommandLength",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 4,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "subCommandId",
+          "byteOffset": 5,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 32,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "enableBits",
+          "byteOffset": 6,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "enableAddress",
+          "byteOffset": 7,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 10,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 8,
+        "checksumByteIndex": 8
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x23 设置屏蔽等级",
+      "commandValue": 35,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "subCommandLength",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 3,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "subCommandId",
+          "byteOffset": 5,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 33,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "shieldLevel",
+          "byteOffset": 6,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 9,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 7,
+        "checksumByteIndex": 7
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x23 屏蔽ADC加",
+      "commandValue": 35,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "subCommandLength",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 3,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "subCommandId",
+          "byteOffset": 5,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 34,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "subCommandData",
+          "byteOffset": 6,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 1,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 9,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 7,
+        "checksumByteIndex": 7
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x23 屏蔽ADC减",
+      "commandValue": 35,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "subCommandLength",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 3,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "subCommandId",
+          "byteOffset": 5,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 35,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "subCommandData",
+          "byteOffset": 6,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 1,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 9,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 7,
+        "checksumByteIndex": 7
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x23 频率调整加",
+      "commandValue": 35,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "subCommandLength",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 3,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "subCommandId",
+          "byteOffset": 5,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 36,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "subCommandData",
+          "byteOffset": 6,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 1,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 9,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 7,
+        "checksumByteIndex": 7
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x23 频率调整减",
+      "commandValue": 35,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "subCommandLength",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 3,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "subCommandId",
+          "byteOffset": 5,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 37,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "subCommandData",
+          "byteOffset": 6,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 1,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 9,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 7,
+        "checksumByteIndex": 7
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x25 设备重置",
+      "commandValue": 37,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "frameEnd",
+          "byteOffset": 6,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 4,
+        "checksumByteIndex": 4
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x25 设备地址重置",
+      "commandValue": 37,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "resetFlag",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 1,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 7,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 5,
+        "checksumByteIndex": 5
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x26 设备重启",
+      "commandValue": 38,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "frameEnd",
+          "byteOffset": 6,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 4,
+        "checksumByteIndex": 4
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x27 设备地址查询",
+      "commandValue": 39,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "frameEnd",
+          "byteOffset": 6,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        },
+        {
+          "key": "destAddress",
+          "byteOffset": 1,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 255,
+          "includeInDownlinkPayloadLength": true
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 4,
+        "checksumByteIndex": 4
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x28 设备地址设置",
+      "commandValue": 40,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "newAddress",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 7,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 5,
+        "checksumByteIndex": 5
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x29 等级功放设置",
+      "commandValue": 41,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "powerLevel",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "powerValue",
+          "byteOffset": 5,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 9,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 7,
+        "checksumByteIndex": 7
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x30 波特率设置",
+      "commandValue": 48,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "baudCode",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 7,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 5,
+        "checksumByteIndex": 5
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x31 LED控制",
+      "commandValue": 49,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "ledEnable",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 7,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 5,
+        "checksumByteIndex": 5
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x50 R值查询",
+      "commandValue": 80,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "frameEnd",
+          "byteOffset": 6,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 4,
+        "checksumByteIndex": 4
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    },
+    {
+      "templateId": "lingxin_master_slave_7e_dl",
+      "name": "0x51 R值设置",
+      "commandValue": 81,
+      "matchValueType": "UINT8",
+      "direction": "DOWNLINK",
+      "fields": [
+        {
+          "key": "rId0",
+          "byteOffset": 4,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 0,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue0",
+          "byteOffset": 5,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId1",
+          "byteOffset": 7,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 1,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue1",
+          "byteOffset": 8,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId2",
+          "byteOffset": 10,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 2,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue2",
+          "byteOffset": 11,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId3",
+          "byteOffset": 13,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 3,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue3",
+          "byteOffset": 14,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId4",
+          "byteOffset": 16,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 4,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue4",
+          "byteOffset": 17,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId5",
+          "byteOffset": 19,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 5,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue5",
+          "byteOffset": 20,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId6",
+          "byteOffset": 22,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 6,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue6",
+          "byteOffset": 23,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId7",
+          "byteOffset": 25,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 7,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue7",
+          "byteOffset": 26,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId8",
+          "byteOffset": 28,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 8,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue8",
+          "byteOffset": 29,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId9",
+          "byteOffset": 31,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 9,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue9",
+          "byteOffset": 32,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId10",
+          "byteOffset": 34,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 10,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue10",
+          "byteOffset": 35,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId11",
+          "byteOffset": 37,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 11,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue11",
+          "byteOffset": 38,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rId12",
+          "byteOffset": 40,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 12,
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "rValue12",
+          "byteOffset": 41,
+          "valueType": "UINT16_LE",
+          "includeInDownlinkPayloadLength": true
+        },
+        {
+          "key": "frameEnd",
+          "byteOffset": 45,
+          "valueType": "UINT8",
+          "fixedWireIntegralValue": 126
+        }
+      ],
+      "innerChecksum": {
+        "type": "CRC16_IBM",
+        "fromByte": 1,
+        "toExclusive": 43,
+        "checksumByteIndex": 43
+      },
+      "downlinkPayloadLengthAuto": true,
+      "downlinkPayloadLengthFieldKey": "frameLength"
+    }
+  ]
+}

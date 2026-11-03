@@ -10,6 +10,7 @@ public class HexChecksumDefinition {
 
     /**
      * SUM8: sum bytes in [fromByte, toExclusive) masked to 8 bits; CRC16_MODBUS: poly 0xA001 init 0xFFFF, 2 bytes LE at index;
+     * CRC16_IBM: poly 0xA001 init 0x0000, 2 bytes LE at index;
      * CRC16_CCITT: CRC-16/CCITT-FALSE poly 0x1021 init 0xFFFF, 2 bytes BE at index.
      */
     private String type;

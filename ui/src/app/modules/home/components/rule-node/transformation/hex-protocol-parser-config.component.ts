@@ -22,7 +22,7 @@ export const HEX_FIELD_TYPES = [
   'GENERIC_LIST'
 ] as const;
 
-export const HEX_CHECKSUM_TYPES = ['NONE', 'SUM8', 'CRC16_MODBUS', 'CRC16_CCITT', 'CRC32'] as const;
+export const HEX_CHECKSUM_TYPES = ['NONE', 'SUM8', 'CRC16_MODBUS', 'CRC16_IBM', 'CRC16_CCITT', 'CRC32'] as const;
 
 export const HEX_GENERIC_LIST_COUNT_MODES = ['UNTIL_END', 'FIXED', 'FROM_FIELD'] as const;
 export const HEX_GENERIC_LIST_LENGTH_MODES = [

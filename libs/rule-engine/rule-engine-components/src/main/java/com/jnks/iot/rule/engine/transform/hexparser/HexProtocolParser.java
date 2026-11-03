@@ -104,6 +104,18 @@ public final class HexProtocolParser {
                     throw new IllegalArgumentException("CRC16_MODBUS mismatch expected " + crc + " got " + actual);
                 }
                 break;
+            case "CRC16_IBM":
+                if (cksAt + 1 >= buf.length) {
+                    throw new IllegalArgumentException("CRC16_IBM: need 2 bytes at checksum index");
+                }
+                int crcIbm = crc16Ibm(buf, from, toEx);
+                int ibmLo = buf[cksAt] & 0xFF;
+                int ibmHi = buf[cksAt + 1] & 0xFF;
+                int ibmActual = ibmLo | (ibmHi << 8);
+                if (crcIbm != ibmActual) {
+                    throw new IllegalArgumentException("CRC16_IBM mismatch expected " + crcIbm + " got " + ibmActual);
+                }
+                break;
             case "CRC16_CCITT":
                 if (cksAt + 1 >= buf.length) {
                     throw new IllegalArgumentException("CRC16_CCITT: need 2 bytes at checksum index");
@@ -184,6 +196,24 @@ public final class HexProtocolParser {
 
     public static int crc16Modbus(byte[] buf, int from, int to) {
         int crc = 0xFFFF;
+        for (int i = from; i < to; i++) {
+            crc ^= (buf[i] & 0xFF);
+            for (int j = 0; j < 8; j++) {
+                if ((crc & 1) != 0) {
+                    crc = (crc >>> 1) ^ 0xA001;
+                } else {
+                    crc = crc >>> 1;
+                }
+            }
+        }
+        return crc & 0xFFFF;
+    }
+
+    /**
+     * CRC-16/IBM: poly 0x8005 reflected (0xA001), init 0x0000; checksum stored little-endian at {@code checksumByteIndex}.
+     */
+    public static int crc16Ibm(byte[] buf, int from, int to) {
+        int crc = 0x0000;
         for (int i = from; i < to; i++) {
             crc ^= (buf[i] & 0xFF);
             for (int j = 0; j < 8; j++) {
