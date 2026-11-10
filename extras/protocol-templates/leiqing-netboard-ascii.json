@@ -1,0 +1,93 @@
+{
+  "name": "雷擎诱骗网控板 ASCII 帧协议",
+  "description": "雷擎诱骗网控板 V1.3（无校验 1Hz）：$+命令字+2位ASCII长度+数据+*。上行解析 D(1Hz状态,22字节)/R(控制回复,21字节)。下行控制不走模板，由设备配置的 hex 参数 RPC 发送原始 ASCII 字节。",
+  "protocolTemplates": [
+    {
+      "id": "lq_netboard",
+      "name": "网控板 ASCII 文本帧",
+      "commandByteOffset": 0,
+      "commandMatchWidth": 1,
+      "checksum": null,
+      "hexProtocolFields": [
+        {
+          "key": "rawText",
+          "byteOffset": 0,
+          "valueType": "BYTES_AS_UTF8",
+          "byteLength": null,
+          "byteLengthFromByteOffset": null,
+          "byteLengthFromValueType": null,
+          "byteLengthFromIntegralSubtract": null,
+          "byteLengthEndTrim": 0,
+          "scale": null,
+          "bitMask": null,
+          "includeInDownlinkPayloadLength": null,
+          "autoDownlinkTotalFrameLength": null,
+          "downlinkTotalFrameLengthExcludesLengthFieldBytes": null,
+          "downlinkPayloadLengthMemberKeys": null,
+          "autoDownlinkPayloadLength": null,
+          "downlinkPayloadStartByteOffset": null,
+          "downlinkPayloadEndExclusiveByteOffset": null,
+          "fixedWireIntegralValue": null,
+          "fixedBytesHex": null
+        }
+      ],
+      "hexLtvRepeating": null
+    }
+  ],
+  "protocolCommands": [
+    {
+      "templateId": "lq_netboard",
+      "name": "ASCII 文本行（$ 开头）",
+      "commandValue": 36,
+      "commandMatchBytesHex": null,
+      "innerChecksum": null,
+      "matchValueType": "UINT8",
+      "secondaryMatchByteOffset": null,
+      "secondaryMatchValueType": null,
+      "secondaryMatchValue": null,
+      "secondaryMatchBytesHex": null,
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [],
+      "ltvRepeating": null,
+      "downlinkPayloadLengthAuto": null,
+      "downlinkPayloadLengthFieldKey": null
+    },
+    {
+      "templateId": "lq_netboard",
+      "name": "ASCII 文本行（G 开头）",
+      "commandValue": 71,
+      "commandMatchBytesHex": null,
+      "innerChecksum": null,
+      "matchValueType": "UINT8",
+      "secondaryMatchByteOffset": null,
+      "secondaryMatchValueType": null,
+      "secondaryMatchValue": null,
+      "secondaryMatchBytesHex": null,
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [],
+      "ltvRepeating": null,
+      "downlinkPayloadLengthAuto": null,
+      "downlinkPayloadLengthFieldKey": null
+    },
+    {
+      "templateId": "lq_netboard",
+      "name": "ASCII 文本行（S 开头）",
+      "commandValue": 83,
+      "commandMatchBytesHex": null,
+      "innerChecksum": null,
+      "matchValueType": "UINT8",
+      "secondaryMatchByteOffset": null,
+      "secondaryMatchValueType": null,
+      "secondaryMatchValue": null,
+      "secondaryMatchBytesHex": null,
+      "direction": "UPLINK",
+      "uplinkDataDestination": "TELEMETRY",
+      "fields": [],
+      "ltvRepeating": null,
+      "downlinkPayloadLengthAuto": null,
+      "downlinkPayloadLengthFieldKey": null
+    }
+  ]
+}
