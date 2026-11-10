@@ -1378,6 +1378,12 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
             if (!hasFrom) {
               return {tcpHexProtocolByteLength: true};
             }
+          } else if (mode === 'toEnd') {
+            const trim = g.get('byteLengthEndTrim')?.value;
+            const hasEndTrim = trim != null && trim !== '' && Number(trim) >= 0;
+            if (!hasEndTrim) {
+              return {tcpHexProtocolByteLength: true};
+            }
           } else {
             const bl = g.get('byteLength')?.value;
             const hasFixed = bl != null && bl !== '' && Number(bl) >= 1;
@@ -1416,6 +1422,12 @@ export class TcpDeviceProfileTransportConfigurationComponent implements OnInit, 
             const fromOff = g.get('byteLengthFromByteOffset')?.value;
             const hasFrom = fromOff != null && fromOff !== '' && Number(fromOff) >= 0;
             if (!hasFrom) {
+              return {tcpHexProtocolByteLength: true};
+            }
+          } else if (mode === 'toEnd') {
+            const trim = g.get('byteLengthEndTrim')?.value;
+            const hasEndTrim = trim != null && trim !== '' && Number(trim) >= 0;
+            if (!hasEndTrim) {
               return {tcpHexProtocolByteLength: true};
             }
           } else {
