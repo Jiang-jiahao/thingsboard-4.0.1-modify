@@ -118,8 +118,13 @@
                           (selectionChange)="onHexFieldLengthModeTemplate(selectedTemplateIndex, fi, $event.value)">
                 <mat-option value="fixed">{{ 'device-profile.udp.hex-field-length-mode-fixed' | translate }}</mat-option>
                 <mat-option value="fromFrame">{{ 'device-profile.udp.hex-field-length-mode-from-frame' | translate }}</mat-option>
+                <mat-option value="toEnd">{{ 'device-profile.udp.hex-field-length-mode-to-end' | translate }}</mat-option>
               </mat-select>
             </mat-form-field>
+<mat-form-field style="width: 150px;" *ngIf="getHexFieldLengthModeTemplate(selectedTemplateIndex, fi) === 'toEnd'">
+  <mat-label translate>device-profile.udp.hex-field-end-trim</mat-label>
+  <input matInput type="number" min="0" formControlName="byteLengthEndTrim">
+</mat-form-field>
             <ng-container *ngIf="getHexFieldLengthModeTemplate(selectedTemplateIndex, fi) === 'fixed'">
               <mat-form-field class="protocol-template-hex-field-compact__byte-len" subscriptSizing="fixed" appearance="outline">
                 <mat-label translate>device-profile.udp.hex-field-byte-length</mat-label>
@@ -534,8 +539,13 @@
                               (selectionChange)="onHexFieldLengthModeOverride(ci, fi, $event.value)">
                     <mat-option value="fixed">{{ 'device-profile.udp.hex-field-length-mode-fixed' | translate }}</mat-option>
                     <mat-option value="fromFrame">{{ 'device-profile.udp.hex-field-length-mode-from-frame' | translate }}</mat-option>
+                    <mat-option value="toEnd">{{ 'device-profile.udp.hex-field-length-mode-to-end' | translate }}</mat-option>
                   </mat-select>
                 </mat-form-field>
+<mat-form-field style="width: 150px;" *ngIf="getHexFieldLengthModeOverride(ci, fi) === 'toEnd'">
+  <mat-label translate>device-profile.udp.hex-field-end-trim</mat-label>
+  <input matInput type="number" min="0" formControlName="byteLengthEndTrim">
+</mat-form-field>
                 <ng-container *ngIf="getHexFieldLengthModeOverride(ci, fi) === 'fixed'">
                   <mat-form-field class="protocol-template-hex-field-compact__byte-len" subscriptSizing="fixed" appearance="outline">
                     <mat-label translate>device-profile.udp.hex-field-byte-length</mat-label>

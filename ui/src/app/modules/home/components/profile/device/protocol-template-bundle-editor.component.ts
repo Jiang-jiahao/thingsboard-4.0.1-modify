@@ -189,6 +189,7 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
   }
 
   private createHexFieldGroup(f?: TcpHexFieldDefinition): UntypedFormGroup {
+    const toEnd = f?.byteLengthEndTrim != null && f.byteLengthEndTrim >= 0;
     const fromFrame = f?.byteLengthFromByteOffset != null && f.byteLengthFromByteOffset >= 0;
     return this.fb.group({
       key: [f?.key ?? '', [Validators.maxLength(255)]],
@@ -196,11 +197,12 @@ export class ProtocolTemplateBundleEditorComponent implements OnDestroy {
       valueType: [f?.valueType ?? TcpHexValueType.UINT8, Validators.required],
       /** 上行 原始值 × scale，下行 填写值 ÷ scale；留空/0 视为 1 */
       scale: [f?.scale ?? null],
-      hexFieldLengthMode: [fromFrame ? 'fromFrame' : 'fixed'],
+      hexFieldLengthMode: [toEnd ? 'toEnd' : (fromFrame ? 'fromFrame' : 'fixed')],
       byteLength: [f?.byteLength ?? null, [Validators.min(1)]],
       byteLengthFromByteOffset: [f?.byteLengthFromByteOffset ?? null, [Validators.min(0)]],
       byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required],
       byteLengthFromIntegralSubtract: [f?.byteLengthFromIntegralSubtract ?? null, [Validators.min(0)]],
+      byteLengthEndTrim: [f?.byteLengthEndTrim ?? null, [Validators.min(0)]],
       includeInDownlinkPayloadLength: [!!f?.includeInDownlinkPayloadLength],
       autoDownlinkTotalFrameLength: [!!f?.autoDownlinkTotalFrameLength],
       downlinkTotalFrameLengthExcludesLengthFieldBytes: [!!f?.downlinkTotalFrameLengthExcludesLengthFieldBytes],

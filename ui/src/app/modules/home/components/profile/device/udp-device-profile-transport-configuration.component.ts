@@ -508,16 +508,18 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
   }
 
   private createHexFieldGroup(f?: TcpHexFieldDefinition): UntypedFormGroup {
+    const toEnd = f?.byteLengthEndTrim != null && f.byteLengthEndTrim >= 0;
     const fromFrame = f?.byteLengthFromByteOffset != null && f.byteLengthFromByteOffset >= 0;
     return this.fb.group({
       key: [f?.key ?? '', [Validators.maxLength(255)]],
       byteOffset: [f?.byteOffset ?? 0, [Validators.required, Validators.min(0)]],
       valueType: [f?.valueType ?? TcpHexValueType.UINT8, Validators.required],
-      hexFieldLengthMode: [fromFrame ? 'fromFrame' : 'fixed'],
+      hexFieldLengthMode: [toEnd ? 'toEnd' : (fromFrame ? 'fromFrame' : 'fixed')],
       byteLength: [f?.byteLength ?? null, [Validators.min(1)]],
       byteLengthFromByteOffset: [f?.byteLengthFromByteOffset ?? null, [Validators.min(0)]],
       byteLengthFromValueType: [f?.byteLengthFromValueType ?? TcpHexValueType.UINT8, Validators.required],
       byteLengthFromIntegralSubtract: [f?.byteLengthFromIntegralSubtract ?? null, [Validators.min(0)]],
+      byteLengthEndTrim: [f?.byteLengthEndTrim ?? null, [Validators.min(0)]],
       fixedWireIntegralValueText: [formatFixedWireIntegralFromModel(f?.fixedWireIntegralValue)],
       fixedBytesHex: [fixedBytesHexModelToFormControl(f)]
     });
@@ -740,41 +742,55 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
     return isTcpHexVariableByteSlice(g.get('valueType')?.value as TcpHexValueType);
   }
 
-  getHexFieldLengthModeDefault(i: number): 'fixed' | 'fromFrame' {
+  getHexFieldLengthModeDefault(i: number): 'fixed' | 'fromFrame' | 'toEnd' {
     return this.hexFieldLengthModeFromGroup(this.hexProtocolFieldsArray.at(i) as UntypedFormGroup);
   }
 
-  onHexFieldLengthModeDefault(i: number, mode: 'fixed' | 'fromFrame'): void {
+  onHexFieldLengthModeDefault(i: number, mode: 'fixed' | 'fromFrame' | 'toEnd'): void {
     this.applyHexFieldLengthMode(this.hexProtocolFieldsArray.at(i) as UntypedFormGroup, mode);
   }
 
-  getHexFieldLengthModeCommand(ci: number, fi: number): 'fixed' | 'fromFrame' {
+  getHexFieldLengthModeCommand(ci: number, fi: number): 'fixed' | 'fromFrame' | 'toEnd' {
     return this.hexFieldLengthModeFromGroup(this.getCommandFieldsArray(ci).at(fi) as UntypedFormGroup);
   }
 
-  onHexFieldLengthModeCommand(ci: number, fi: number, mode: 'fixed' | 'fromFrame'): void {
+  onHexFieldLengthModeCommand(ci: number, fi: number, mode: 'fixed' | 'fromFrame' | 'toEnd'): void {
     this.applyHexFieldLengthMode(this.getCommandFieldsArray(ci).at(fi) as UntypedFormGroup, mode);
   }
 
-  private hexFieldLengthModeFromGroup(g: UntypedFormGroup): 'fixed' | 'fromFrame' {
+  private hexFieldLengthModeFromGroup(g: UntypedFormGroup): 'fixed' | 'fromFrame' | 'toEnd' {
     const m = g.get('hexFieldLengthMode')?.value;
-    if (m === 'fromFrame' || m === 'fixed') {
+    if (m === 'fromFrame' || m === 'fixed' || m === 'toEnd') {
       return m;
+    }
+    const endTrim = g.get('byteLengthEndTrim')?.value;
+    if (endTrim !== null && endTrim !== undefined && endTrim !== '') {
+      return 'toEnd';
     }
     const fromOff = g.get('byteLengthFromByteOffset')?.value;
     return fromOff !== null && fromOff !== undefined && fromOff !== '' ? 'fromFrame' : 'fixed';
   }
 
-  private applyHexFieldLengthMode(g: UntypedFormGroup, mode: 'fixed' | 'fromFrame'): void {
+  private applyHexFieldLengthMode(g: UntypedFormGroup, mode: 'fixed' | 'fromFrame' | 'toEnd'): void {
     g.get('hexFieldLengthMode')?.patchValue(mode, { emitEvent: false });
     if (mode === 'fixed') {
       g.patchValue({
         byteLengthFromByteOffset: null,
         byteLengthFromValueType: TcpHexValueType.UINT8,
-        byteLengthFromIntegralSubtract: null
+        byteLengthFromIntegralSubtract: null,
+        byteLengthEndTrim: null
+      }, { emitEvent: false });
+    } else if (mode === 'toEnd') {
+      g.patchValue({
+        byteLength: null,
+        byteLengthFromByteOffset: null,
+        byteLengthFromValueType: TcpHexValueType.UINT8,
+        byteLengthFromIntegralSubtract: null,
+        byteLengthEndTrim: 0,
+        fixedBytesHex: ''
       }, { emitEvent: false });
     } else {
-      g.patchValue({ byteLength: null, fixedBytesHex: '' }, { emitEvent: false });
+      g.patchValue({ byteLength: null, fixedBytesHex: '', byteLengthEndTrim: null }, { emitEvent: false });
     }
   }
 
@@ -1188,6 +1204,9 @@ export class UdpDeviceProfileTransportConfigurationComponent implements OnInit, 
             if (subLen !== undefined && subLen >= 0) {
               def.byteLengthFromIntegralSubtract = subLen;
             }
+          } else if (mode === 'toEnd') {
+            const endTrim = this.optionalFormNumber(r['byteLengthEndTrim']);
+            def.byteLengthEndTrim = endTrim !== undefined && endTrim >= 0 ? endTrim : 0;
           } else {
             const bl = this.optionalFormNumber(r['byteLength']);
             if (bl !== undefined) {

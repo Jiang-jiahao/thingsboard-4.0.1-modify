@@ -394,6 +394,9 @@ export class ProtocolTemplateBundleDialogComponent implements AfterViewInit, OnD
             if (subLen !== undefined && subLen >= 0) {
               def.byteLengthFromIntegralSubtract = subLen;
             }
+          } else if (mode === 'toEnd') {
+            const endTrim = this.optionalFormNumber(r['byteLengthEndTrim']);
+            def.byteLengthEndTrim = endTrim !== undefined && endTrim >= 0 ? endTrim : 0;
           } else {
             const bl = this.optionalFormNumber(r['byteLength']);
             if (bl !== undefined) {

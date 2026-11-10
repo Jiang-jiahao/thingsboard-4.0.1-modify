@@ -423,41 +423,55 @@ export class ProtocolTemplateTcpDataConfigurationComponent implements OnChanges,
     return this.templatesArray.at(this.selectedTemplateIndex) as UntypedFormGroup;
   }
 
-  getHexFieldLengthModeTemplate(ti: number, fi: number): 'fixed' | 'fromFrame' {
+  getHexFieldLengthModeTemplate(ti: number, fi: number): 'fixed' | 'fromFrame' | 'toEnd' {
     return this.hexFieldLengthModeFromGroup(this.getTemplateFieldsArray(ti).at(fi) as UntypedFormGroup);
   }
 
-  getHexFieldLengthModeOverride(ci: number, fi: number): 'fixed' | 'fromFrame' {
+  getHexFieldLengthModeOverride(ci: number, fi: number): 'fixed' | 'fromFrame' | 'toEnd' {
     return this.hexFieldLengthModeFromGroup(this.getCommandOverrideFieldsArray(ci).at(fi) as UntypedFormGroup);
   }
 
-  private hexFieldLengthModeFromGroup(g: UntypedFormGroup): 'fixed' | 'fromFrame' {
+  private hexFieldLengthModeFromGroup(g: UntypedFormGroup): 'fixed' | 'fromFrame' | 'toEnd' {
     const m = g.get('hexFieldLengthMode')?.value;
-    if (m === 'fromFrame' || m === 'fixed') {
+    if (m === 'fromFrame' || m === 'fixed' || m === 'toEnd') {
       return m;
+    }
+    const endTrim = g.get('byteLengthEndTrim')?.value;
+    if (endTrim !== null && endTrim !== undefined && endTrim !== '') {
+      return 'toEnd';
     }
     const fromOff = g.get('byteLengthFromByteOffset')?.value;
     return fromOff !== null && fromOff !== undefined && fromOff !== '' ? 'fromFrame' : 'fixed';
   }
 
-  onHexFieldLengthModeTemplate(ti: number, fi: number, mode: 'fixed' | 'fromFrame'): void {
+  onHexFieldLengthModeTemplate(ti: number, fi: number, mode: 'fixed' | 'fromFrame' | 'toEnd'): void {
     this.applyHexFieldLengthMode(this.getTemplateFieldsArray(ti).at(fi) as UntypedFormGroup, mode);
   }
 
-  onHexFieldLengthModeOverride(ci: number, fi: number, mode: 'fixed' | 'fromFrame'): void {
+  onHexFieldLengthModeOverride(ci: number, fi: number, mode: 'fixed' | 'fromFrame' | 'toEnd'): void {
     this.applyHexFieldLengthMode(this.getCommandOverrideFieldsArray(ci).at(fi) as UntypedFormGroup, mode);
   }
 
-  private applyHexFieldLengthMode(g: UntypedFormGroup, mode: 'fixed' | 'fromFrame'): void {
+  private applyHexFieldLengthMode(g: UntypedFormGroup, mode: 'fixed' | 'fromFrame' | 'toEnd'): void {
     g.get('hexFieldLengthMode')?.patchValue(mode, { emitEvent: false });
     if (mode === 'fixed') {
       g.patchValue({
         byteLengthFromByteOffset: null,
         byteLengthFromValueType: TcpHexValueType.UINT8,
-        byteLengthFromIntegralSubtract: null
+        byteLengthFromIntegralSubtract: null,
+        byteLengthEndTrim: null
+      }, { emitEvent: false });
+    } else if (mode === 'toEnd') {
+      g.patchValue({
+        byteLength: null,
+        byteLengthFromByteOffset: null,
+        byteLengthFromValueType: TcpHexValueType.UINT8,
+        byteLengthFromIntegralSubtract: null,
+        byteLengthEndTrim: 0,
+        fixedBytesHex: ''
       }, { emitEvent: false });
     } else {
-      g.patchValue({ byteLength: null, fixedBytesHex: '' }, { emitEvent: false });
+      g.patchValue({ byteLength: null, fixedBytesHex: '', byteLengthEndTrim: null }, { emitEvent: false });
     }
   }
 
