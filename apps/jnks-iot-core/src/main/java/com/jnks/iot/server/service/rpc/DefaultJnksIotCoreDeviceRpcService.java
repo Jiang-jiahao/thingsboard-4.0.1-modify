@@ -1,5 +1,6 @@
 package com.jnks.iot.server.service.rpc;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -14,6 +15,7 @@ import com.jnks.iot.server.common.data.DataConstants;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.User;
+import com.jnks.iot.server.common.data.device.profile.DeviceProfileRpcBindingType;
 import com.jnks.iot.server.common.data.device.profile.DeviceProfileRpcMethod;
 import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
 import com.jnks.iot.server.common.data.rpc.RpcError;
@@ -32,6 +34,7 @@ import com.jnks.iot.server.service.protocoltemplate.ProtocolTemplateRpcFramer;
 import com.jnks.iot.server.service.security.model.SecurityUser;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -144,8 +147,29 @@ public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcS
             return request;
         }
         String params = request.getBody().getParams();
-        String framed = protocolTemplateRpcFramer.frameIfNeeded(request.getTenantId(), profile, method, params);
-        if (framed == null ? params == null : framed.equals(params)) {
+        // 原生 RPC：调用方可以只传方法名，参数由档案方法的参数模板 + 设备固定参数补齐，
+        // 与前端 RPC 面板行为一致；调用方显式传入的值优先。
+        if (method.getBindingType() == DeviceProfileRpcBindingType.NATIVE) {
+            String merged = mergeNativeRpcParams(device, method, params);
+            if (merged != null && !merged.equals(params)) {
+                return new ToDeviceRpcRequest(
+                        request.getId(),
+                        request.getTenantId(),
+                        request.getDeviceId(),
+                        request.isOneway(),
+                        request.getExpirationTime(),
+                        new ToDeviceRpcRequestBody(request.getBody().getMethod(), merged),
+                        request.isPersisted(),
+                        request.getRetries(),
+                        request.getAdditionalInfo());
+            }
+            return request;
+        }
+        // 协议模板 RPC：同样补齐设备固定参数，调用方显式传入的值优先；
+        // 调用方已带 hex 时视为自行组帧，不再合并。
+        String templateParams = hasHexParam(params) ? params : mergeRpcParams(device, method, params, false);
+        String framed = protocolTemplateRpcFramer.frameIfNeeded(request.getTenantId(), profile, method, templateParams);
+        if (framed == null ? templateParams == null : framed.equals(templateParams)) {
             return request;
         }
         return new ToDeviceRpcRequest(
@@ -158,6 +182,78 @@ public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcS
                 request.isPersisted(),
                 request.getRetries(),
                 request.getAdditionalInfo());
+    }
+
+    /**
+     * 合并原生 RPC 参数：方法参数模板 → 设备固定参数 → 调用方参数（优先级递增）。
+     * 调用方未传参数时返回合并结果；三者都没有时原样返回。
+     */
+    static String mergeNativeRpcParams(Device device, DeviceProfileRpcMethod method, String callerParams) {
+        return mergeRpcParams(device, method, callerParams, true);
+    }
+
+    /**
+     * 合并 RPC 参数，与前端 RPC 面板一致：设备固定参数 → 调用方参数（调用方优先）。
+     * 原生绑定额外把档案方法上的 {@code paramsTemplateJson} 作为最低优先级；
+     * 协议模板绑定由模板命令本身提供固定字段，不使用该模板。
+     */
+    static String mergeRpcParams(Device device, DeviceProfileRpcMethod method, String callerParams,
+                                 boolean includeMethodTemplate) {
+        ObjectNode merged = JacksonUtil.newObjectNode();
+        boolean any = includeMethodTemplate && mergeJsonObject(merged, method.getParamsTemplateJson());
+        Map<String, Object> defaults = resolveDeviceRpcDefaults(device, method.getId());
+        if (!defaults.isEmpty()) {
+            any |= mergeJsonObject(merged, JacksonUtil.toString(defaults));
+        }
+        any |= mergeJsonObject(merged, callerParams);
+        return any ? JacksonUtil.toString(merged) : callerParams;
+    }
+
+    /** 与前端 {@code resolveMethodRpcDefaults} 一致：按方法配置优先，全局固定参数只在没有任何按方法配置时生效。 */
+    private static Map<String, Object> resolveDeviceRpcDefaults(Device device, String methodId) {
+        if (device == null || device.getDeviceData() == null) {
+            return Map.of();
+        }
+        Map<String, Map<String, Object>> byMethod = device.getDeviceData().getRpcParamDefaultsByMethod();
+        Map<String, Object> perMethod = byMethod != null ? byMethod.get(methodId) : null;
+        if (perMethod != null && !perMethod.isEmpty()) {
+            return perMethod;
+        }
+        if (byMethod == null || byMethod.isEmpty()) {
+            Map<String, Object> legacy = device.getDeviceData().getRpcParamDefaults();
+            if (legacy != null && !legacy.isEmpty()) {
+                return legacy;
+            }
+        }
+        return Map.of();
+    }
+
+    private static boolean hasHexParam(String params) {
+        if (params == null || params.isBlank()) {
+            return false;
+        }
+        try {
+            JsonNode node = JacksonUtil.toJsonNode(params);
+            return node != null && node.isObject() && node.has("hex");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static boolean mergeJsonObject(ObjectNode target, String json) {
+        if (json == null || json.isBlank()) {
+            return false;
+        }
+        try {
+            JsonNode node = JacksonUtil.toJsonNode(json);
+            if (node != null && node.isObject()) {
+                node.fields().forEachRemaining(e -> target.set(e.getKey(), e.getValue()));
+                return true;
+            }
+        } catch (Exception e) {
+            log.debug("Skip RPC params merge (not a JSON object): {}", e.getMessage());
+        }
+        return false;
     }
 
     private static DeviceProfileRpcMethod findRpcMethod(DeviceProfile profile, String methodId) {
