@@ -679,9 +679,11 @@ export function normalizeHttpDeviceTransportConfigurationForSave(
   }
   const raw = configuration as HttpPullDeviceTransportConfiguration;
   const pollUrlOverride = (raw.pollUrlOverride || '').trim() || undefined;
+  const ipOverride = (raw.ipOverride || '').trim() || undefined;
   return {
     type: DeviceTransportType.HTTP_PULL,
-    pollUrlOverride
+    pollUrlOverride,
+    ipOverride
   };
 }
 
