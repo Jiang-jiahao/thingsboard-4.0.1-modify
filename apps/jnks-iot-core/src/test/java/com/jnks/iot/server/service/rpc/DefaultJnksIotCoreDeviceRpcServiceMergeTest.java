@@ -79,4 +79,14 @@ class DefaultJnksIotCoreDeviceRpcServiceMergeTest {
         String fallback = DefaultJnksIotCoreDeviceRpcService.mergeNativeRpcParams(device, other, "{}");
         assertThat(fallback).doesNotContain("legacyOnly");
     }
+
+    @Test
+    void nonObjectCallerParamsArePassedThrough() {
+        Device device = deviceWithDefaults(Map.of("powerOn", Map.of("deviceId", 1)));
+        String stringParams = "plain-string";
+        assertThat(DefaultJnksIotCoreDeviceRpcService.mergeNativeRpcParams(
+                device, method("{\"hex\":\"2443\"}"), stringParams)).isEqualTo(stringParams);
+        assertThat(DefaultJnksIotCoreDeviceRpcService.mergeRpcParams(
+                device, method("{\"hex\":\"2443\"}"), "[1,2]", false)).isEqualTo("[1,2]");
+    }
 }

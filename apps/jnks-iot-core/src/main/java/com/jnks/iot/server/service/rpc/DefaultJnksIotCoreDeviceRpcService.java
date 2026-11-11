@@ -199,6 +199,10 @@ public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcS
      */
     static String mergeRpcParams(Device device, DeviceProfileRpcMethod method, String callerParams,
                                  boolean includeMethodTemplate) {
+        // 非 JSON 对象（字符串、数组等）无法按键合并，保持原样透传，避免把调用方负载丢掉
+        if (callerParams != null && !callerParams.isBlank() && !isJsonObject(callerParams)) {
+            return callerParams;
+        }
         ObjectNode merged = JacksonUtil.newObjectNode();
         boolean any = includeMethodTemplate && mergeJsonObject(merged, method.getParamsTemplateJson());
         Map<String, Object> defaults = resolveDeviceRpcDefaults(device, method.getId());
@@ -235,6 +239,15 @@ public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcS
         try {
             JsonNode node = JacksonUtil.toJsonNode(params);
             return node != null && node.isObject() && node.has("hex");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static boolean isJsonObject(String json) {
+        try {
+            JsonNode node = JacksonUtil.toJsonNode(json);
+            return node != null && node.isObject();
         } catch (Exception e) {
             return false;
         }
