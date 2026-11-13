@@ -165,6 +165,24 @@ public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcS
             }
             return request;
         }
+        // 自定义负载：params 本身就是下发负载。方法带 JSON 形式的默认负载时，
+        // 按对象合并「默认负载 → 设备固定参数 → 调用方参数」；纯文本负载不合并，原样透传。
+        if (method.getBindingType() == DeviceProfileRpcBindingType.CUSTOM_PAYLOAD) {
+            String merged = mergeCustomPayloadParams(device, method, params);
+            if (merged != null && !merged.equals(params)) {
+                return new ToDeviceRpcRequest(
+                        request.getId(),
+                        request.getTenantId(),
+                        request.getDeviceId(),
+                        request.isOneway(),
+                        request.getExpirationTime(),
+                        new ToDeviceRpcRequestBody(request.getBody().getMethod(), merged),
+                        request.isPersisted(),
+                        request.getRetries(),
+                        request.getAdditionalInfo());
+            }
+            return request;
+        }
         // 协议模板 RPC：同样补齐设备固定参数，调用方显式传入的值优先；
         // 调用方已带 hex 时视为自行组帧，不再合并。
         String templateParams = hasHexParam(params) ? params : mergeRpcParams(device, method, params, false);
@@ -189,6 +207,20 @@ public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcS
      * 调用方未传参数时返回合并结果；三者都没有时原样返回。
      */
     static String mergeNativeRpcParams(Device device, DeviceProfileRpcMethod method, String callerParams) {
+        return mergeRpcParams(device, method, callerParams, true);
+    }
+
+    /**
+     * 自定义负载 RPC：params 即负载。只有默认负载是 JSON 对象时才按键合并，
+     * 默认负载或调用方负载是纯文本时原样透传。
+     */
+    static String mergeCustomPayloadParams(Device device, DeviceProfileRpcMethod method, String callerParams) {
+        String template = method.getParamsTemplateJson();
+        if (!isJsonObject(template)) {
+            // 纯文本默认负载无法按键合并：调用方没传时用默认文本，传了就用调用方的
+            boolean callerBlank = callerParams == null || callerParams.isBlank();
+            return callerBlank && template != null && !template.isBlank() ? template : callerParams;
+        }
         return mergeRpcParams(device, method, callerParams, true);
     }
 

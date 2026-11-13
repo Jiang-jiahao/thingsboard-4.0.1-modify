@@ -81,6 +81,35 @@ class DefaultJnksIotCoreDeviceRpcServiceMergeTest {
     }
 
     @Test
+    void customPayloadMergesTemplateAndDeviceDefaults() {
+        DeviceProfileRpcMethod query = method("{\"msgtype\":\"query\",\"eid\":\"0\"}");
+        query.setId("query");
+        Device device = deviceWithDefaults(Map.of("query", Map.of("eid", 0, "msgtype", "query")));
+        String merged = DefaultJnksIotCoreDeviceRpcService.mergeCustomPayloadParams(device, query, "{}");
+        assertThat(merged).contains("\"msgtype\":\"query\"").contains("\"eid\":0");
+    }
+
+    @Test
+    void customPayloadCallerOverridesDeviceDefaults() {
+        DeviceProfileRpcMethod query = method("{\"msgtype\":\"query\",\"eid\":\"0\"}");
+        query.setId("query");
+        Device device = deviceWithDefaults(Map.of("query", Map.of("eid", 0)));
+        String merged = DefaultJnksIotCoreDeviceRpcService.mergeCustomPayloadParams(device, query, "{\"eid\":\"150101001\"}");
+        assertThat(merged).contains("\"eid\":\"150101001\"");
+    }
+
+    @Test
+    void customPayloadRawTextTemplateFallsBackToTemplate() {
+        DeviceProfileRpcMethod raw = method("$C1100000001000*");
+        raw.setId("powerOn");
+        Device device = deviceWithDefaults(null);
+        assertThat(DefaultJnksIotCoreDeviceRpcService.mergeCustomPayloadParams(device, raw, null))
+                .isEqualTo("$C1100000001000*");
+        assertThat(DefaultJnksIotCoreDeviceRpcService.mergeCustomPayloadParams(device, raw, "$C2*"))
+                .isEqualTo("$C2*");
+    }
+
+    @Test
     void nonObjectCallerParamsArePassedThrough() {
         Device device = deviceWithDefaults(Map.of("powerOn", Map.of("deviceId", 1)));
         String stringParams = "plain-string";
