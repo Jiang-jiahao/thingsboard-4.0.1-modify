@@ -997,6 +997,8 @@ transport:
       # SERVER 入站首帧分帧（鉴权）。鉴权成功后切换为设备配置文件中的 tcpTransportFramingMode。
       auth_framing_mode: "${TCP_SERVER_AUTH_FRAMING_MODE:LINE}"
       auth_fixed_frame_length: "${TCP_SERVER_AUTH_FIXED_FRAME_LENGTH:512}"
+      # 严格模式：入站连接一律以 PROXY protocol 头开始（入口网关 proxy_protocol on）。
+      proxy_protocol_enabled: "${TCP_SERVER_PROXY_PROTOCOL_ENABLED:false}"
     # 监听端口由各设备档案的 tcpProfileServerBindPort 声明，平台没有共享默认端口。
     bind_address: "${TCP_BIND_ADDRESS:0.0.0.0}"
     reuse_port: "${TCP_REUSE_PORT:true}"

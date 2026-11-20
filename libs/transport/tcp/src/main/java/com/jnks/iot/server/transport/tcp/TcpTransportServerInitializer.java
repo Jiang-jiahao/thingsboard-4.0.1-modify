@@ -1,9 +1,11 @@
 package com.jnks.iot.server.transport.tcp;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
 import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.device.profile.TcpTransportFramingMode;
 import com.jnks.iot.server.transport.tcp.netty.TcpPipelineBuilder;
+import com.jnks.iot.server.transport.tcp.netty.TcpProxyProtocolHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,11 +45,17 @@ public class TcpTransportServerInitializer extends ChannelInitializer<SocketChan
         }
         session.setInboundPipelineFramingMode(framingMode);
         session.setInboundPipelineFixedFrameLength(fixedLen);
+        // 严格模式：PROXY 头必须先于分帧被消费，否则网关写的那行头会被当成业务帧解析。
+        boolean proxyProtocol = tcpTransportService.isProxyProtocolEnabled();
+        if (proxyProtocol) {
+            ch.pipeline().addLast(TcpPipelineBuilder.PROXY_PROTOCOL_DECODER_NAME, new HAProxyMessageDecoder());
+            ch.pipeline().addLast(TcpPipelineBuilder.PROXY_PROTOCOL_HANDLER_NAME, new TcpProxyProtocolHandler());
+        }
         TcpPipelineBuilder.addFramingFirst(ch.pipeline(),
                 framingMode,
                 tcpTransportService.getMaxFrameLength(),
                 fixedLen);
         ch.pipeline().addLast(TcpPipelineBuilder.INBOUND_HANDLER_NAME,
-                new TcpInboundHandler(tcpTransportContext, session, false));
+                new TcpInboundHandler(tcpTransportContext, session, false, proxyProtocol));
     }
 }

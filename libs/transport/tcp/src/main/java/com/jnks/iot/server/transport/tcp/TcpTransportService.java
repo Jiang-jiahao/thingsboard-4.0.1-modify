@@ -58,6 +58,13 @@ public class TcpTransportService implements JnksIotTransportService {
      */
     @Value("${transport.tcp.server.auth_fixed_frame_length:512}")
     private int serverAuthFixedFrameLength;
+    /**
+     * 严格模式：入站连接一律以 PROXY protocol 头开始，真实源地址由入口网关的
+     * {@code proxy_protocol on} 提供。开启后 transport 只接受来自网关的连接。
+     */
+    @Value("${transport.tcp.server.proxy_protocol_enabled:false}")
+    @Getter
+    private boolean proxyProtocolEnabled;
 
     @Autowired
     @Lazy

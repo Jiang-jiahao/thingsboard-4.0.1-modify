@@ -205,14 +205,14 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
 | `https://<host>/` | 同上走 443；证书来自 `docker/services/nginx/certs/`（默认是自签，浏览器会提示不受信任 —— 要正式证书就换成真实证书或接 certbot） |
 | `<host>:18883` | MQTT 设备接入（转给 jnks-iot-mqtt-transport1/2，容器内仍是 1883） |
 | `<host>:5683` | TCP 设备接入（转给 jnks-iot-tcp-transport1/2） |
-| `<host>:1000` | TCP 设备接入（档案监听端口 1000，透传给 jnks-iot-tcp-transport1/2 的 1000） |
+| `<host>:1026` | TCP 设备接入（转给 jnks-iot-tcp-transport1/2 的 1026）。transport 以非 root 运行，档案监听端口也填 1026 |
 | `<host>:5684/udp` | UDP 设备接入（转给 jnks-iot-udp-transport1/2） |
 
 默认账号：`sysadmin@jnks-iot.org` / `sysadmin`。
 
 **注意 UI 必须和 API 同源**：界面里的请求打到同源的 `/api/...`，而 web-ui 镜像只发静态文件、不转发 `/api`（原来 Node 版有个可选的代理开关，现在由入口网关承担）。所以入口只能走网关（或其它把 `/` 与 `/api` 收在同一端口的反向代理）—— 直接把 web-ui 容器的端口当入口用是不行的，那样页面能打开但登录和所有数据都会 404。
 
-设备接入端口：`18883`(MQTT)、`5683`(TCP)、`1000`(TCP，档案监听端口 1000)、`5684/udp`(UDP)，以及 4200/443（管理界面与设备 HTTP 都走这两个）。
+设备接入端口：`18883`(MQTT)、`5683`(TCP)、`1026`(TCP)、`5684/udp`(UDP)，以及 4200/443（管理界面与设备 HTTP 都走这两个）。
 **防火墙/安全组要把这些放开**（5684 是 UDP，别只开 TCP）。
 
 ## 7. 已知限制与坑
@@ -234,6 +234,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -X POST http://<host>/api/auth/login \
   - host 网络下容器仍用自己的 `/etc/hosts`：Kafka 广播地址是 `kafka:9092`，所以两个服务都加了 `extra_hosts: kafka:127.0.0.1`；ZooKeeper / Redis 改为直连 `127.0.0.1`（因此 `zookeeper` 的宿主端口固定为 `2181:2181`，起栈前确认宿主 2181 未被占用）。
   - **设备侧**：服务器地址统一填宿主机 IP + 原端口，不能再指向 `172.20.0.x` 这类容器地址。
   - 验证：`ss -lunp | grep -E '6333[34]|59990|10101'` 应看到两个 java 进程绑同一端口；设备上报期间 `cat /proc/net/nf_conntrack | grep <设备IP>` 不应再出现 `172.20.0.x`；在 eth0 上抓平台下发，源应是 `宿主IP:端口`。
+- **TCP 经网关时靠 PROXY protocol 取真实源 IP**：网关 `stream` 段是 L4 反代，会终结设备连接、自己新建到 transport 的连接，transport 的 `remoteAddress()` 只会是网关地址。这与"Docker Desktop 在 macOS 上改写发布端口源 IP"是两个不同的问题——后者 Linux 原生引擎不存在，前者 Linux 上一样发生。所以 nginx 的两个 TCP 转发都开了 `proxy_protocol on`，transport 侧 `TCP_SERVER_PROXY_PROTOCOL_ENABLED=true`（严格模式）负责解析。**两边必须同时开/同时关**：只开 nginx 不开 transport，那行头会被当业务帧解析；只开 transport 不开 nginx，直连连接会被当坏帧关闭。开启后 transport 只接受来自网关的连接，排查时不要直连它的监听端口。**上线顺序**：先重建 transport 镜像并重建两个实例，再 `docker restart jnks-iot-gateway`（`nginx.conf` 是单文件 bind mount，宿主文件被重写后容器里会悬空，`nginx -s reload` 不生效）。反过来先动网关，设备会在"网关 → transport"这一跳被当成坏帧关掉。
 
 ## 8. 单体（全在一个 JVM 里）
 

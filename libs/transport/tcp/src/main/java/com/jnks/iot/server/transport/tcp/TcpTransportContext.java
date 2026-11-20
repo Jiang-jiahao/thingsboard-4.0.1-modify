@@ -10,6 +10,7 @@ import com.jnks.iot.server.transport.tcp.netty.TcpNettyTransport;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.transport.tcp.netty.TcpPipelineBuilder;
+import com.jnks.iot.server.transport.tcp.netty.TcpProxyProtocolHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -302,7 +303,7 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
                                 tcpTransportService.getMaxFrameLength(),
                                 session.getTcpFixedFrameLengthForFraming());
                         ch.pipeline().addLast(TcpPipelineBuilder.INBOUND_HANDLER_NAME,
-                                new TcpInboundHandler(TcpTransportContext.this, session, true));
+                                new TcpInboundHandler(TcpTransportContext.this, session, true, false));
                     }
                 });
         b.connect(host, port).addListener((ChannelFutureListener) future -> {
@@ -684,7 +685,7 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
         if (bound != null && wireAuthModeOf(bound) != TcpWireAuthenticationMode.NONE) {
             return false;
         }
-        var deviceIdOpt = tcpSourceBindingService.findDeviceIdForRemoteAddress(ctx.channel().remoteAddress());
+        var deviceIdOpt = tcpSourceBindingService.findDeviceIdForRemoteAddress(TcpProxyProtocolHandler.resolve(ctx.channel()));
         if (deviceIdOpt.isEmpty()) {
             return false;
         }
@@ -697,7 +698,7 @@ public class TcpTransportContext extends com.jnks.iot.server.common.transport.Tr
         if (bound != null && (profile == null || !bound.getId().equals(profile.getId()))) {
             return false;
         }
-        if (!sourceHostMatchesIfRequired(device, ctx.channel().remoteAddress())) {
+        if (!sourceHostMatchesIfRequired(device, TcpProxyProtocolHandler.resolve(ctx.channel()))) {
             log.warn("[{}] TCP NONE: sourceHost mismatch, closing", device.getId());
             ctx.close();
             return true;

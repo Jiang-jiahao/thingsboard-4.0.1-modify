@@ -19,6 +19,8 @@ public final class TcpPipelineBuilder {
     public static final String FRAMING_HANDLER_NAME = "tcpFraming";
     public static final String INBOUND_HANDLER_NAME = "tcpInbound";
     public static final String READ_IDLE_HANDLER_NAME = "tcpReadIdle";
+    public static final String PROXY_PROTOCOL_DECODER_NAME = "tcpProxyProtocolDecoder";
+    public static final String PROXY_PROTOCOL_HANDLER_NAME = "tcpProxyProtocol";
 
     private TcpPipelineBuilder() {
     }

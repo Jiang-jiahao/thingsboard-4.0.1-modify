@@ -230,6 +230,10 @@ transport:
       # 仅当连接落在未知端口（理论上不会发生）时才用这里的全局值。
       auth_framing_mode: "${TCP_SERVER_AUTH_FRAMING_MODE:LINE}"
       auth_fixed_frame_length: "${TCP_SERVER_AUTH_FIXED_FRAME_LENGTH:512}"
+      # 严格模式：入站连接一律以 PROXY protocol 头开始，真实源地址取自入口网关的
+      # `proxy_protocol on`。开启后只接受来自网关的连接（直连会因缺少头而解析失败），
+      # 必须与 nginx 的 proxy_protocol 同时开/同时关。
+      proxy_protocol_enabled: "${TCP_SERVER_PROXY_PROTOCOL_ENABLED:false}"
     # 监听端口**不是**这里配的：每个设备档案用自己的 tcpProfileServerBindPort 声明入站端口，
     # 平台没有共享默认端口。所有 TCP transport 实例都监听全部档案端口；
     # 多实例由前置 LB 分派连接，同主机多实例则靠 reuse_port（SO_REUSEPORT，需要 epoll/kqueue 原生传输）共享同一 IP:端口。

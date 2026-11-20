@@ -9,6 +9,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.jnks.iot.server.common.data.DeviceProfile;
+import com.jnks.iot.server.transport.tcp.netty.TcpProxyProtocolHandler;
 import com.jnks.iot.server.transport.tcp.session.TcpDeviceSession;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -22,8 +23,16 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
      * true：平台主动连接设备（CLIENT）；false：设备连入平台（SERVER）。
      */
     private final boolean outboundClient;
+    /**
+     * 入站连接以 PROXY protocol 头开始（严格模式）。此时连接期鉴权必须等头解析完才能开始。
+     */
+    private final boolean proxyProtocolEnabled;
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+        if (evt instanceof TcpProxyProtocolHandler.AddressResolved) {
+            beginServerAuth(ctx);
+            return;
+        }
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent e = (IdleStateEvent) evt;
             if (e.state() == IdleState.READER_IDLE) {
@@ -47,11 +56,25 @@ public class TcpInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
         if (outboundClient && session.getDeviceId() != null) {
             tcpTransportContext.resetClientReconnectFailureCount(session.getDeviceId());
         }
-        if (!outboundClient) {
-            ctx.channel().config().setAutoRead(false);
-            if (!tcpTransportContext.startServerWireAuth(ctx, session)) {
-                ctx.channel().config().setAutoRead(true);
-            }
+        if (!outboundClient && !proxyProtocolEnabled) {
+            beginServerAuth(ctx);
+        }
+    }
+
+    /**
+     * 连接期鉴权：先停读，避免鉴权在途的帧被读走；认领失败再恢复。
+     * 严格模式下要在 PROXY 头解析完之后才调用（见 {@link TcpProxyProtocolHandler.AddressResolved}）。
+     */
+    private void beginServerAuth(ChannelHandlerContext ctx) {
+        // 必须先在途互斥：严格模式下 PROXY 头解析完就开始鉴权，紧随其后的业务帧会在鉴权往返期间
+        // 到达，channelRead0 的重试路径会再发起一次鉴权 —— Core 侧就会看到两条 STARTED。
+        if (!session.tryBeginServerAuth()) {
+            return;
+        }
+        ctx.channel().config().setAutoRead(false);
+        if (!tcpTransportContext.startServerWireAuth(ctx, session)) {
+            ctx.channel().config().setAutoRead(true);
+            session.endServerAuth();
         }
     }
     @Override
