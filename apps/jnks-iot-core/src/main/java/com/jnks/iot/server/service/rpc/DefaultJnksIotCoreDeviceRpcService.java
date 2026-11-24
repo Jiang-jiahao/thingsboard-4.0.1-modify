@@ -11,12 +11,15 @@ import com.jnks.iot.common.util.JacksonUtil;
 import com.jnks.iot.common.util.JnksIotExecutors;
 import com.jnks.iot.server.actors.ActorSystemContext;
 import com.jnks.iot.server.cluster.JnksIotClusterService;
+import com.jnks.iot.server.common.data.AttributeScope;
 import com.jnks.iot.server.common.data.DataConstants;
 import com.jnks.iot.server.common.data.Device;
 import com.jnks.iot.server.common.data.DeviceProfile;
 import com.jnks.iot.server.common.data.User;
 import com.jnks.iot.server.common.data.device.profile.DeviceProfileRpcBindingType;
 import com.jnks.iot.server.common.data.device.profile.DeviceProfileRpcMethod;
+import com.jnks.iot.server.common.data.id.TenantId;
+import com.jnks.iot.server.common.data.kv.AttributeKvEntry;
 import com.jnks.iot.server.common.data.msg.JnksIotMsgType;
 import com.jnks.iot.server.common.data.rpc.RpcError;
 import com.jnks.iot.server.common.data.rpc.ToDeviceRpcRequestBody;
@@ -27,21 +30,28 @@ import com.jnks.iot.server.common.msg.rpc.FromDeviceRpcResponse;
 import com.jnks.iot.server.common.msg.rpc.RemoveRpcActorMsg;
 import com.jnks.iot.server.common.msg.rpc.ToDeviceRpcRequest;
 import com.jnks.iot.server.common.msg.rpc.ToDeviceRpcRequestActorMsg;
+import com.jnks.iot.server.dao.attributes.AttributesService;
 import com.jnks.iot.server.dao.device.DeviceProfileService;
 import com.jnks.iot.server.dao.device.DeviceService;
 import com.jnks.iot.server.queue.discovery.JnksIotServiceInfoProvider;
 import com.jnks.iot.server.service.protocoltemplate.ProtocolTemplateRpcFramer;
 import com.jnks.iot.server.service.security.model.SecurityUser;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Core 侧设备 RPC 编排服务。
@@ -56,8 +66,12 @@ import java.util.function.Consumer;
 @Slf4j
 public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcService {
 
+    private static final Pattern PARAMS_PLACEHOLDER = Pattern.compile("\\$\\{params\\.([A-Za-z0-9_]+)}");
+    private static final long ATTRIBUTE_FILL_TIMEOUT_SECONDS = 3;
+
     private final DeviceService deviceService;
     private final DeviceProfileService deviceProfileService;
+    private final AttributesService attributesService;
     private final JnksIotClusterService clusterService;
     private final JnksIotServiceInfoProvider serviceInfoProvider;
     private final ActorSystemContext actorContext;
@@ -71,10 +85,12 @@ public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcS
     private String serviceId;
 
     public DefaultJnksIotCoreDeviceRpcService(DeviceService deviceService, DeviceProfileService deviceProfileService,
+                                         AttributesService attributesService,
                                          JnksIotClusterService clusterService, JnksIotServiceInfoProvider serviceInfoProvider,
                                          ActorSystemContext actorContext, ProtocolTemplateRpcFramer protocolTemplateRpcFramer) {
         this.deviceService = deviceService;
         this.deviceProfileService = deviceProfileService;
+        this.attributesService = attributesService;
         this.clusterService = clusterService;
         this.serviceInfoProvider = serviceInfoProvider;
         this.actorContext = actorContext;
@@ -183,6 +199,24 @@ public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcS
             }
             return request;
         }
+        // MQTT 自定义主题：模板里声明但调用方没给的参数（如 sn），用设备服务端属性补齐，
+        // 这样第三方不用重复下发设备标识；调用方显式传入的值优先。
+        if (method.getBindingType() == DeviceProfileRpcBindingType.MQTT_CUSTOM) {
+            String merged = mergeMqttCustomParamsFromServerAttributes(request.getTenantId(), device, method, params);
+            if (merged != null && !merged.equals(params)) {
+                return new ToDeviceRpcRequest(
+                        request.getId(),
+                        request.getTenantId(),
+                        request.getDeviceId(),
+                        request.isOneway(),
+                        request.getExpirationTime(),
+                        new ToDeviceRpcRequestBody(request.getBody().getMethod(), merged),
+                        request.isPersisted(),
+                        request.getRetries(),
+                        request.getAdditionalInfo());
+            }
+            return request;
+        }
         // 协议模板 RPC：同样补齐设备固定参数，调用方显式传入的值优先；
         // 调用方已带 hex 时视为自行组帧，不再合并。
         String templateParams = hasHexParam(params) ? params : mergeRpcParams(device, method, params, false);
@@ -222,6 +256,111 @@ public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcS
             return callerBlank && template != null && !template.isBlank() ? template : callerParams;
         }
         return mergeRpcParams(device, method, callerParams, true);
+    }
+
+    /**
+     * MQTT 自定义主题 RPC：模板里声明（{@code ${params.xxx}}）而调用方没给的参数，
+     * 用设备服务端属性补齐；调用方显式传入（含空字符串）的值保持不动。
+     */
+    String mergeMqttCustomParamsFromServerAttributes(TenantId tenantId, Device device,
+                                                     DeviceProfileRpcMethod method, String params) {
+        if (device == null) {
+            return params;
+        }
+        Set<String> keys = mqttTemplateParamKeys(method);
+        if (keys.isEmpty()) {
+            return params;
+        }
+        List<String> missing = missingParamKeys(params, keys);
+        if (missing.isEmpty()) {
+            return params;
+        }
+        Map<String, Object> values = new HashMap<>();
+        try {
+            List<AttributeKvEntry> entries = attributesService
+                    .find(tenantId, device.getId(), AttributeScope.SERVER_SCOPE, missing)
+                    .get(ATTRIBUTE_FILL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            for (AttributeKvEntry entry : entries) {
+                Object value = entry.getValue();
+                if (value != null) {
+                    values.put(entry.getKey(), value);
+                }
+            }
+        } catch (Exception e) {
+            log.debug("[{}] Failed to fill MQTT RPC params from device server attributes: {}",
+                    device.getId(), e.getMessage());
+        }
+        return fillMissingParams(params, values);
+    }
+
+    /**
+     * 从 MQTT 主题与载荷模板里提取声明过的 {@code ${params.xxx}} 键。
+     */
+    static Set<String> mqttTemplateParamKeys(DeviceProfileRpcMethod method) {
+        Set<String> keys = new LinkedHashSet<>();
+        collectParamKeys(method.getMqttRequestTopic(), keys);
+        collectParamKeys(method.getMqttResponseTopic(), keys);
+        collectParamKeys(method.getMqttPayloadTemplate(), keys);
+        return keys;
+    }
+
+    private static void collectParamKeys(String template, Set<String> keys) {
+        if (template == null || template.isBlank()) {
+            return;
+        }
+        Matcher matcher = PARAMS_PLACEHOLDER.matcher(template);
+        while (matcher.find()) {
+            keys.add(matcher.group(1));
+        }
+    }
+
+    /**
+     * 调用方参数里缺失（或不存在的 null）的键；参数不是 JSON 对象时不做补齐。
+     */
+    static List<String> missingParamKeys(String params, Set<String> keys) {
+        ObjectNode node = paramsObject(params);
+        if (node == null) {
+            return List.of();
+        }
+        List<String> missing = new ArrayList<>();
+        for (String key : keys) {
+            JsonNode value = node.get(key);
+            if (value == null || value.isNull()) {
+                missing.add(key);
+            }
+        }
+        return missing;
+    }
+
+    static String fillMissingParams(String params, Map<String, Object> values) {
+        if (values == null || values.isEmpty()) {
+            return params;
+        }
+        ObjectNode node = paramsObject(params);
+        if (node == null) {
+            return params;
+        }
+        boolean changed = false;
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
+            JsonNode existing = node.get(entry.getKey());
+            if (existing == null || existing.isNull()) {
+                node.set(entry.getKey(), JacksonUtil.valueToTree(entry.getValue()));
+                changed = true;
+            }
+        }
+        return changed ? JacksonUtil.toString(node) : params;
+    }
+
+    private static ObjectNode paramsObject(String params) {
+        if (params == null || params.isBlank()) {
+            return JacksonUtil.newObjectNode();
+        }
+        try {
+            JsonNode node = JacksonUtil.toJsonNode(params);
+            return node != null && node.isObject() ? (ObjectNode) node : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
