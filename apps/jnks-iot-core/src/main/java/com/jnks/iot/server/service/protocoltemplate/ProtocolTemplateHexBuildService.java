@@ -287,7 +287,7 @@ public class ProtocolTemplateHexBuildService {
             return 0;
         }
         return switch (cs.getType().toUpperCase()) {
-            case "SUM8" -> 1;
+            case "SUM8", "SUM8_NEG" -> 1;
             case "CRC16_MODBUS", "CRC16_CCITT", "CRC16_IBM" -> 2;
             case "CRC32" -> 4;
             default -> throw new IllegalArgumentException("Unknown checksum type: " + cs.getType());

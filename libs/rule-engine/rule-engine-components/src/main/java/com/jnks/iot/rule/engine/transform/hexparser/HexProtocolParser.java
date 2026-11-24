@@ -92,6 +92,15 @@ public final class HexProtocolParser {
                     throw new IllegalArgumentException("SUM8 mismatch");
                 }
                 break;
+            case "SUM8_NEG":
+                int sumNeg = 0;
+                for (int i = from; i < toEx; i++) {
+                    sumNeg = (sumNeg + (buf[i] & 0xFF)) & 0xFF;
+                }
+                if (((0x100 - sumNeg) & 0xFF) != (buf[cksAt] & 0xFF)) {
+                    throw new IllegalArgumentException("SUM8_NEG mismatch");
+                }
+                break;
             case "CRC16_MODBUS":
                 if (cksAt + 1 >= buf.length) {
                     throw new IllegalArgumentException("CRC16_MODBUS: need 2 bytes at checksum index");

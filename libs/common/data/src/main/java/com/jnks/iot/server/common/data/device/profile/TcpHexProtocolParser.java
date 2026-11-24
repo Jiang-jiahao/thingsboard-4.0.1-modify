@@ -864,6 +864,17 @@ public final class TcpHexProtocolParser {
                 }
                 break;
             }
+            case "SUM8_NEG": {
+                int sum = 0;
+                for (int i = from; i < toEx; i++) {
+                    sum = (sum + (buf[i] & 0xFF)) & 0xFF;
+                }
+                int expected = (0x100 - sum) & 0xFF;
+                if (expected != (buf[cksAt] & 0xFF)) {
+                    throw new IllegalArgumentException("SUM8_NEG mismatch");
+                }
+                break;
+            }
             case "CRC16_MODBUS":
                 if (cksAt + 1 >= buf.length) {
                     throw new IllegalArgumentException("CRC16_MODBUS: need 2 bytes at checksum index");
@@ -1103,6 +1114,14 @@ public final class TcpHexProtocolParser {
                     sum = (sum + (buf[i] & 0xFF)) & 0xFF;
                 }
                 buf[cksAt] = (byte) sum;
+                break;
+            }
+            case "SUM8_NEG": {
+                int sum = 0;
+                for (int i = from; i < toEx; i++) {
+                    sum = (sum + (buf[i] & 0xFF)) & 0xFF;
+                }
+                buf[cksAt] = (byte) ((0x100 - sum) & 0xFF);
                 break;
             }
             case "CRC16_MODBUS":
