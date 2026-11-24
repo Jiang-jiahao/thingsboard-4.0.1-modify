@@ -30,8 +30,10 @@ import com.jnks.iot.server.service.security.AccessValidator;
 import com.jnks.iot.server.service.security.model.SecurityUser;
 import com.jnks.iot.server.service.security.permission.Operation;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 服务端 RPC 的公共实现基类，供 {@code RpcV1Controller} / {@code RpcV2Controller} 复用。
@@ -101,7 +103,13 @@ public abstract class AbstractRpcController extends BaseController {
                             retries,
                             additionalInfo
                     );
-                    deviceRpcService.processRestApiRpcRequest(rpcRequest, fromDeviceRpcResponse -> reply(new LocalRequestMetaData(rpcRequest, currentUser, result), fromDeviceRpcResponse, timeoutStatus, noActiveConnectionStatus), currentUser);
+                    // 合并/组帧后的实际下发请求要等调用返回才拿到；同步失败路径回调先于赋值，
+                    // 此时仍是原请求，审计记录的就是调用方入参，符合预期。
+                    AtomicReference<ToDeviceRpcRequest> actualRequest = new AtomicReference<>(rpcRequest);
+                    ToDeviceRpcRequest actual = deviceRpcService.processRestApiRpcRequest(rpcRequest,
+                            fromDeviceRpcResponse -> reply(new LocalRequestMetaData(rpcRequest, actualRequest.get(), currentUser, result),
+                                    fromDeviceRpcResponse, timeoutStatus, noActiveConnectionStatus), currentUser);
+                    actualRequest.set(actual != null ? actual : rpcRequest);
                 }
 
                 @Override
@@ -112,7 +120,7 @@ public abstract class AbstractRpcController extends BaseController {
                     } else {
                         entity = new ResponseEntity(HttpStatus.UNAUTHORIZED);
                     }
-                    logRpcCall(currentUser, deviceId, body, oneWay, Optional.empty(), e);
+                    logRpcCall(currentUser, deviceId, body, body, oneWay, Optional.empty(), e);
                     response.setResult(entity);
                 }
             }));
@@ -157,17 +165,24 @@ public abstract class AbstractRpcController extends BaseController {
     }
 
     private void logRpcCall(LocalRequestMetaData rpcRequest, Optional<RpcError> rpcError, Throwable e) {
-        logRpcCall(rpcRequest.getUser(), rpcRequest.getRequest().getDeviceId(), rpcRequest.getRequest().getBody(), rpcRequest.getRequest().isOneway(), rpcError, null);
+        ToDeviceRpcRequest original = rpcRequest.getRequest();
+        ToDeviceRpcRequest actual = rpcRequest.getActualRequest() != null ? rpcRequest.getActualRequest() : original;
+        logRpcCall(rpcRequest.getUser(), original.getDeviceId(), actual.getBody(), original.getBody(),
+                original.isOneway(), rpcError, null);
     }
 
 
-    private void logRpcCall(SecurityUser user, EntityId entityId, ToDeviceRpcRequestBody body, boolean oneWay, Optional<RpcError> rpcError, Throwable e) {
+    private void logRpcCall(SecurityUser user, EntityId entityId, ToDeviceRpcRequestBody body,
+                            ToDeviceRpcRequestBody originalBody, boolean oneWay, Optional<RpcError> rpcError, Throwable e) {
         String rpcErrorStr = "";
         if (rpcError.isPresent()) {
             rpcErrorStr = "RPC Error: " + rpcError.get().name();
         }
         String method = body.getMethod();
         String params = body.getParams();
+        // 审计的 params 记实际下发内容；与调用方入参不同时再记一份原始值
+        String originalParams = originalBody != null && !Objects.equals(originalBody.getParams(), params)
+                ? originalBody.getParams() : null;
 
         auditLogService.logEntityAction(
                 user.getTenantId(),
@@ -181,7 +196,8 @@ public abstract class AbstractRpcController extends BaseController {
                 rpcErrorStr,
                 oneWay,
                 method,
-                params);
+                params,
+                originalParams);
     }
 
 

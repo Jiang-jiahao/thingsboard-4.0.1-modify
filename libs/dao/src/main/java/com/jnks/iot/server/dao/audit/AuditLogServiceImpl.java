@@ -233,9 +233,13 @@ public class AuditLogServiceImpl implements AuditLogService {
                 Boolean oneWay = extractParameter(Boolean.class, 1, additionalInfo);
                 String method = extractParameter(String.class, 2, additionalInfo);
                 String params = extractParameter(String.class, 3, additionalInfo);
+                String originalParams = extractParameter(String.class, 4, additionalInfo);
                 actionData.put("oneWay", oneWay);
                 actionData.put("method", method);
                 actionData.put("params", params);
+                if (originalParams != null && !originalParams.equals(params)) {
+                    actionData.put("originalParams", originalParams);
+                }
                 break;
             case CREDENTIALS_UPDATED:
                 actionData.put("entityId", entityId.toString());

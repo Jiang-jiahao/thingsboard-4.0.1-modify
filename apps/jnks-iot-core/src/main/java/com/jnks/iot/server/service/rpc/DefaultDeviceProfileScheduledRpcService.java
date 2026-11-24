@@ -53,6 +53,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -309,7 +310,7 @@ public class DefaultDeviceProfileScheduledRpcService extends JnksIotApplicationE
         } catch (IllegalArgumentException e) {
             log.warn("[{}] Scheduled RPC [{}] cannot build protocol template frame: {}",
                     deviceId, method.getId(), e.getMessage());
-            logScheduledAudit(tenantId, customerId, deviceId, deviceName, oneWay, rpcMethodName, params,
+            logScheduledAudit(tenantId, customerId, deviceId, deviceName, oneWay, rpcMethodName, params, params,
                     Optional.of(RpcError.INTERNAL));
             return;
         }
@@ -328,7 +329,9 @@ public class DefaultDeviceProfileScheduledRpcService extends JnksIotApplicationE
                     null,
                     "{\"source\":\"deviceSchedule\"}"
             );
-            deviceRpcService.processRestApiRpcRequest(request, response -> {
+            // 合并设备固定参数发生在 processRestApiRpcRequest 内部，审计要记合并后的实际下发内容
+            AtomicReference<ToDeviceRpcRequest> actualRequest = new AtomicReference<>(request);
+            ToDeviceRpcRequest actual = deviceRpcService.processRestApiRpcRequest(request, response -> {
                 Optional<RpcError> error = response.getError();
                 if (error.isPresent()) {
                     log.debug("[{}] Scheduled RPC [{}] finished with {}",
@@ -336,17 +339,20 @@ public class DefaultDeviceProfileScheduledRpcService extends JnksIotApplicationE
                 } else {
                     log.trace("[{}] Scheduled RPC [{}] delivered", deviceId, method.getId());
                 }
-                logScheduledAudit(tenantId, customerId, deviceId, deviceName, oneWay, rpcMethodName, params, error);
+                logScheduledAudit(tenantId, customerId, deviceId, deviceName, oneWay, rpcMethodName,
+                        actualRequest.get().getBody().getParams(), params, error);
             }, null);
+            actualRequest.set(actual != null ? actual : request);
         } catch (Exception e) {
             log.warn("[{}] Scheduled RPC [{}] failed to submit", deviceId, method.getId(), e);
-            logScheduledAudit(tenantId, customerId, deviceId, deviceName, oneWay, rpcMethodName, params,
+            logScheduledAudit(tenantId, customerId, deviceId, deviceName, oneWay, rpcMethodName, params, params,
                     Optional.of(RpcError.INTERNAL));
         }
     }
 
     private void logScheduledAudit(TenantId tenantId, CustomerId customerId, DeviceId deviceId, String deviceName,
-                                   boolean oneWay, String methodId, String params, Optional<RpcError> error) {
+                                   boolean oneWay, String methodId, String actualParams, String originalParams,
+                                   Optional<RpcError> error) {
         try {
             String rpcErrorStr = error.map(e -> "RPC Error: " + e.name()).orElse("");
             Device named = new Device();
@@ -366,7 +372,8 @@ public class DefaultDeviceProfileScheduledRpcService extends JnksIotApplicationE
                     rpcErrorStr,
                     oneWay,
                     methodId,
-                    params
+                    actualParams,
+                    originalParams
             );
         } catch (Exception e) {
             log.debug("[{}] Failed to write scheduled RPC audit log [{}]", deviceId, methodId, e);

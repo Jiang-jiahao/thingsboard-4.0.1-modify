@@ -19,8 +19,9 @@ public interface JnksIotCoreDeviceRpcService {
      *  @param request          the RPC request
      * @param responseConsumer the consumer of the RPC response
      * @param currentUser
+     * @return 实际下发的请求：已合并默认负载/设备固定参数，协议模板已组帧；组帧失败时为原请求
      */
-    void processRestApiRpcRequest(ToDeviceRpcRequest request, Consumer<FromDeviceRpcResponse> responseConsumer, SecurityUser currentUser);
+    ToDeviceRpcRequest processRestApiRpcRequest(ToDeviceRpcRequest request, Consumer<FromDeviceRpcResponse> responseConsumer, SecurityUser currentUser);
 
     /**
      * Handles the RPC response from the Rule Engine.

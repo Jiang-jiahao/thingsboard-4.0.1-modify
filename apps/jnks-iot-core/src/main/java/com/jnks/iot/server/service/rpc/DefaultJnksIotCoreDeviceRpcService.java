@@ -126,9 +126,11 @@ public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcS
 
     /**
      * 处理 REST API 发起的设备 RPC：登记回调、推入规则引擎并调度超时。
+     *
+     * @return 实际下发的请求，供调用方写审计；组帧失败时返回原请求
      */
     @Override
-    public void processRestApiRpcRequest(ToDeviceRpcRequest request, Consumer<FromDeviceRpcResponse> responseConsumer, SecurityUser currentUser) {
+    public ToDeviceRpcRequest processRestApiRpcRequest(ToDeviceRpcRequest request, Consumer<FromDeviceRpcResponse> responseConsumer, SecurityUser currentUser) {
         log.trace("[{}][{}] Processing REST API call to rule engine [{}]", request.getTenantId(), request.getId(), request.getDeviceId());
         UUID requestId = request.getId();
         Device device = deviceService.findDeviceById(request.getTenantId(), request.getDeviceId());
@@ -139,11 +141,12 @@ public class DefaultJnksIotCoreDeviceRpcService implements JnksIotCoreDeviceRpcS
             log.warn("[{}][{}] Failed to build protocol template frame for device [{}]: {}",
                     request.getTenantId(), requestId, request.getDeviceId(), e.getMessage());
             responseConsumer.accept(new FromDeviceRpcResponse(requestId, null, RpcError.INTERNAL));
-            return;
+            return request;
         }
         localToRuleEngineRpcRequests.put(requestId, responseConsumer);
         sendRpcRequestToRuleEngine(effective, currentUser, device);
         scheduleToRuleEngineTimeout(effective, requestId);
+        return effective;
     }
 
     /**
