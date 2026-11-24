@@ -4,6 +4,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.FixedRecvByteBufAllocator;
 import com.jnks.iot.server.transport.udp.netty.UdpNettyTransport;
 import io.netty.util.ResourceLeakDetector;
 import jakarta.annotation.PostConstruct;
@@ -138,6 +139,9 @@ public class UdpTransportService implements JnksIotTransportService {
         b.group(workerGroup)
                 .channel(UdpNettyTransport.datagramChannelClass())
                 .option(ChannelOption.SO_BROADCAST, false)
+                // Netty 数据报通道默认接收缓冲只有 2048 字节（Netty 会把发送方地址也写进缓冲，
+                // 净荷只剩 2040），超过的报文会被静默截断。按最大报文长度分配，避免整包解析失败。
+                .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(maxDatagramLength))
                 .handler(new UdpTransportServerInitializer(context, this));
         UdpNettyTransport.applyReusePort(b, reusePort);
         return b.bind(host, bindPort).sync().channel();
