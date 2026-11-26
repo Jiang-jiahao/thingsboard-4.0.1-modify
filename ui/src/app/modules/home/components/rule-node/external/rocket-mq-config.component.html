@@ -1,0 +1,75 @@
+<section [formGroup]="rocketMqConfigForm" class="flex flex-col">
+  <mat-form-field class="mat-block" subscriptSizing="dynamic">
+    <mat-label translate>rule-node-config.topic-pattern</mat-label>
+    <input required matInput formControlName="topicPattern">
+    <mat-error *ngIf="rocketMqConfigForm.get('topicPattern').hasError('required')">
+      {{ 'rule-node-config.topic-pattern-required' | translate }}
+    </mat-error>
+    <mat-hint translate>rule-node-config.general-pattern-hint</mat-hint>
+  </mat-form-field>
+  <mat-form-field class="mat-block" subscriptSizing="dynamic">
+    <mat-label translate>rule-node-config.key-pattern</mat-label>
+    <input matInput formControlName="keyPattern">
+    <mat-hint translate>rule-node-config.general-pattern-hint</mat-hint>
+  </mat-form-field>
+  <div class="jnks-iot-hint" translate>rule-node-config.rocketmq-key-pattern-hint</div>
+  <mat-form-field class="mat-block" subscriptSizing="dynamic">
+    <mat-label translate>rule-node-config.rocketmq-tag-pattern</mat-label>
+    <input matInput formControlName="tagPattern">
+    <mat-hint translate>rule-node-config.general-pattern-hint</mat-hint>
+  </mat-form-field>
+  <mat-form-field class="mat-block">
+    <mat-label translate>rule-node-config.rocketmq-name-server-address</mat-label>
+    <input required matInput formControlName="nameServerAddress">
+    <mat-error *ngIf="rocketMqConfigForm.get('nameServerAddress').hasError('required')">
+      {{ 'rule-node-config.rocketmq-name-server-address-required' | translate }}
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field class="mat-block">
+    <mat-label translate>rule-node-config.rocketmq-producer-group</mat-label>
+    <input required matInput formControlName="producerGroup">
+    <mat-error *ngIf="rocketMqConfigForm.get('producerGroup').hasError('required')">
+      {{ 'rule-node-config.rocketmq-producer-group-required' | translate }}
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field class="mat-block">
+    <mat-label translate>rule-node-config.rocketmq-send-mode</mat-label>
+    <mat-select formControlName="sendMode" required>
+      <mat-option *ngFor="let sendMode of sendModes" [value]="sendMode">
+        {{ ('rule-node-config.rocketmq-send-mode-' + sendMode.toLowerCase()) | translate }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <div class="jnks-iot-hint" translate>rule-node-config.rocketmq-send-mode-hint</div>
+  <mat-form-field class="mat-block">
+    <mat-label translate>rule-node-config.rocketmq-send-msg-timeout-ms</mat-label>
+    <input type="number" step="1" min="1" matInput formControlName="sendMsgTimeout">
+    <mat-error *ngIf="rocketMqConfigForm.get('sendMsgTimeout').hasError('min')">
+      {{ 'rule-node-config.rocketmq-min-send-msg-timeout-message' | translate }}
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field class="mat-block">
+    <mat-label translate>rule-node-config.retries</mat-label>
+    <input type="number" step="1" min="0" matInput formControlName="retryTimes">
+    <mat-error *ngIf="rocketMqConfigForm.get('retryTimes').hasError('min')">
+      {{ 'rule-node-config.min-retries-message' | translate }}
+    </mat-error>
+  </mat-form-field>
+  <mat-form-field class="mat-block">
+    <mat-label translate>rule-node-config.rocketmq-namespace</mat-label>
+    <input matInput formControlName="namespace">
+  </mat-form-field>
+  <mat-form-field class="mat-block">
+    <mat-label translate>rule-node-config.rocketmq-access-key</mat-label>
+    <input matInput formControlName="accessKey">
+  </mat-form-field>
+  <mat-form-field class="mat-block">
+    <mat-label translate>rule-node-config.rocketmq-secret-key</mat-label>
+    <input matInput formControlName="secretKey">
+  </mat-form-field>
+  <div class="jnks-iot-hint" translate>rule-node-config.rocketmq-acl-hint</div>
+  <mat-checkbox class="flex-1" formControlName="addMetadataKeyValuesAsProperties">
+    {{ 'rule-node-config.add-metadata-key-values-as-rocketmq-properties' | translate }}
+  </mat-checkbox>
+  <div class="jnks-iot-hint" translate>rule-node-config.add-metadata-key-values-as-rocketmq-properties-hint</div>
+</section>

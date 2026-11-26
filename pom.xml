@@ -95,6 +95,7 @@
         org.apache.kafka.common.network.NetworkReceive class in the application module. It addresses the issue https://issues.apache.org/jira/browse/KAFKA-4090.
         Here is the source to track https://github.com/apache/kafka/tree/trunk/clients/src/main/java/org/apache/kafka/common/network -->
         <kafka.version>3.7.1</kafka.version>
+        <rocketmq.version>5.3.2</rocketmq.version>
         <bucket4j.version>8.10.1</bucket4j.version>
         <antlr.version>3.5.3</antlr.version>
         <snakeyaml.version>2.2</snakeyaml.version>
@@ -1216,6 +1217,16 @@
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
                 <version>${kafka.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client</artifactId>
+                <version>${rocketmq.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-acl</artifactId>
+                <version>${rocketmq.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.postgresql</groupId>

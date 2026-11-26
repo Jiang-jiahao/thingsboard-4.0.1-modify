@@ -3,6 +3,7 @@ import { SnsConfigComponent } from './sns-config.component';
 import { SqsConfigComponent } from './sqs-config.component';
 import { PubSubConfigComponent } from './pubsub-config.component';
 import { KafkaConfigComponent } from './kafka-config.component';
+import { RocketMqConfigComponent } from './rocket-mq-config.component';
 import { MqttConfigComponent } from './mqtt-config.component';
 import { NotificationConfigComponent } from './notification-config.component';
 import { RabbitMqConfigComponent } from './rabbit-mq-config.component';
@@ -24,6 +25,7 @@ import { LambdaConfigComponent } from './lambda-config.component';
     LambdaConfigComponent,
     PubSubConfigComponent,
     KafkaConfigComponent,
+    RocketMqConfigComponent,
     MqttConfigComponent,
     NotificationConfigComponent,
     RabbitMqConfigComponent,
@@ -45,6 +47,7 @@ import { LambdaConfigComponent } from './lambda-config.component';
     LambdaConfigComponent,
     PubSubConfigComponent,
     KafkaConfigComponent,
+    RocketMqConfigComponent,
     MqttConfigComponent,
     NotificationConfigComponent,
     RabbitMqConfigComponent,
